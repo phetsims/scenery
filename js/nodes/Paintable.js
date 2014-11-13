@@ -15,10 +15,16 @@ define( function( require ) {
   var inherit = require( 'PHET_CORE/inherit' );
   var extend = require( 'PHET_CORE/extend' );
   var platform = require( 'PHET_CORE/platform' );
+  var arrayRemove = require( 'PHET_CORE/arrayRemove' );
 
   var isSafari5 = platform.safari5;
   var isIE9 = platform.ie9;
 
+  /*
+   * Applies the mix-in to a subtype of Node.
+   *
+   * @param {constructor} type - A constructor that inherits from Node
+   */
   scenery.Paintable = function Paintable( type ) {
     var proto = type.prototype;
 
@@ -29,8 +35,7 @@ define( function( require ) {
         this._stroke = null;
         this._fillPickable = true;
         this._strokePickable = false;
-        this._fillKept = false; // whether to keep SVG defs for gradients/fills around to improve performance
-        this._strokeKept = false; // whether the SVG stroke should be kept (makes gradients/patterns stay in memory!)
+        this._cachedPaints = [];
         this._lineDrawingStyles = new LineStyles();
 
         var that = this;
@@ -87,18 +92,6 @@ define( function( require ) {
           // TODO: better way of indicating that only the node under pointers could have changed, but no paint change is needed?
           this.invalidateFill();
         }
-        return this;
-      },
-
-      isFillKept: function() {
-        return this._fillKept;
-      },
-
-      setFillKept: function( kept ) {
-        assert && assert( typeof kept === 'boolean' );
-
-        this._fillKept = kept;
-
         return this;
       },
 
@@ -241,18 +234,6 @@ define( function( require ) {
         return this;
       },
 
-      isStrokeKept: function() {
-        return this._strokeKept;
-      },
-
-      setStrokeKept: function( kept ) {
-        assert && assert( typeof kept === 'boolean' );
-
-        this._strokeKept = kept;
-
-        return this;
-      },
-
       setLineStyles: function( lineStyles ) {
 
         this._lineDrawingStyles = lineStyles;
@@ -292,6 +273,49 @@ define( function( require ) {
           }
         }
         return this;
+      },
+
+      getCachedPaints: function() {
+        return this._cachedPaints;
+      },
+
+      /*
+       * Sets the cached paints to the input array (a defensive copy).
+       *
+       * @param {Paint[]} paints
+       */
+      setCachedPaints: function( paints ) {
+        this._cachedPaints = paints.slice();
+
+        var stateLen = this._drawables.length;
+        for ( var i = 0; i < stateLen; i++ ) {
+          this._drawables[i].markDirtyCachedPaints();
+        }
+
+        return this;
+      },
+
+      addCachedPaint: function( paint ) {
+        assert && assert( paint.isPaint );
+
+        this._cachedPaints.push( paint );
+
+        var stateLen = this._drawables.length;
+        for ( var i = 0; i < stateLen; i++ ) {
+          this._drawables[i].markDirtyCachedPaints();
+        }
+      },
+
+      removeCachedPaint: function( paint ) {
+        assert && assert( paint.isPaint );
+        assert && assert( _.contains( this._cachedPaints, paint ) );
+
+        arrayRemove( this._cachedPaints, paint );
+
+        var stateLen = this._drawables.length;
+        for ( var i = 0; i < stateLen; i++ ) {
+          this._drawables[i].markDirtyCachedPaints();
+        }
       },
 
       firstInstanceAdded: function() {
@@ -479,13 +503,12 @@ define( function( require ) {
 
     // on mutation, set the stroke parameters first since they may affect the bounds (and thus later operations)
     proto._mutatorKeys = [
-      'fill', 'fillPickable', 'fillKept', 'stroke', 'lineWidth', 'lineCap', 'lineJoin', 'miterLimit', 'lineDash',
-      'lineDashOffset', 'strokePickable', 'strokeKept'
+      'fill', 'fillPickable', 'stroke', 'lineWidth', 'lineCap', 'lineJoin', 'miterLimit', 'lineDash',
+      'lineDashOffset', 'strokePickable', 'cachedPaints'
     ].concat( proto._mutatorKeys );
 
     Object.defineProperty( proto, 'fill', { set: proto.setFill, get: proto.getFill } );
     Object.defineProperty( proto, 'fillPickable', { set: proto.setFillPickable, get: proto.isFillPickable } );
-    Object.defineProperty( proto, 'fillKept', { set: proto.setFillKept, get: proto.isFillKept } );
     Object.defineProperty( proto, 'stroke', { set: proto.setStroke, get: proto.getStroke } );
     Object.defineProperty( proto, 'lineWidth', { set: proto.setLineWidth, get: proto.getLineWidth } );
     Object.defineProperty( proto, 'lineCap', { set: proto.setLineCap, get: proto.getLineCap } );
@@ -494,7 +517,7 @@ define( function( require ) {
     Object.defineProperty( proto, 'lineDash', { set: proto.setLineDash, get: proto.getLineDash } );
     Object.defineProperty( proto, 'lineDashOffset', { set: proto.setLineDashOffset, get: proto.getLineDashOffset } );
     Object.defineProperty( proto, 'strokePickable', { set: proto.setStrokePickable, get: proto.isStrokePickable } );
-    Object.defineProperty( proto, 'strokeKept', { set: proto.setStrokeKept, get: proto.isStrokeKept } );
+    Object.defineProperty( proto, 'cachedPaints', { set: proto.setCachedPaints, get: proto.getCachedPaints } );
 
     if ( proto.invalidateFill ) {
       var oldInvalidateFill = proto.invalidateFill;
@@ -537,6 +560,8 @@ define( function( require ) {
       this.dirtyStroke = true;
       this.dirtyLineWidth = true;
       this.dirtyLineOptions = true; // e.g. cap, join, dash, dashoffset, miterlimit
+      this.dirtyCachedPaints = true;
+      this.lastCachedPaints = [];
     };
 
     proto.cleanPaintableState = function() {
@@ -546,6 +571,7 @@ define( function( require ) {
       this.dirtyStroke = false;
       this.dirtyLineWidth = false;
       this.dirtyLineOptions = false;
+      this.dirtyCachedPaints = false;
       this.lastStroke = this.node.getStroke();
     };
 
@@ -566,6 +592,11 @@ define( function( require ) {
 
     proto.markDirtyLineOptions = function() {
       this.dirtyLineOptions = true;
+      this.markPaintDirty();
+    };
+
+    proto.markDirtyCachedPaints = function() {
+      this.dirtyCachedPaints = true;
       this.markPaintDirty();
     };
   };
@@ -589,24 +620,28 @@ define( function( require ) {
     proto.markDirtyLineOptions = function() {
       this.markPaintDirty();
     };
-  };
 
-  var fillableSVGIdCounter = 0;
-  var strokableSVGIdCounter = 0;
+    proto.markDirtyCachedPaints = function() {
+      this.markPaintDirty();
+    };
+  };
 
   // handles SVG defs and fill/stroke style for SVG elements (by composition, not a mix-in or for inheritance)
   Paintable.PaintSVGState = function PaintSVGState() {
-    this.fillId = 'svgfill' + ( fillableSVGIdCounter++ );
-    this.strokeId = 'svgstroke' + ( strokableSVGIdCounter++ );
-
     this.initialize();
   };
   inherit( Object, Paintable.PaintSVGState, {
     initialize: function() {
+      this.svgBlock = null; // {SVGBlock | null}
+
+      // copies of the last fill and stroke that were used
       this.fill = null;
       this.stroke = null;
-      this.fillDef = null;
-      this.strokeDef = null;
+
+      // current reference-counted fill/stroke paints (gradients and fills) that will need to be released on changes
+      // or disposal
+      this.fillPaint = null;
+      this.strokePaint = null;
 
       // these are used by the actual SVG element
       this.baseStyle = this.computeStyle(); // the main style CSS
@@ -617,45 +652,49 @@ define( function( require ) {
       // be cautious, release references
       this.fill = null;
       this.stroke = null;
-      this.releaseFillDef();
-      this.releaseStrokeDef();
+      this.releaseFillPaint();
+      this.releaseStrokePaint();
     },
 
-    releaseFillDef: function() {
-      if ( this.fillDef ) {
-        this.fillDef.parentNode.removeChild( this.fillDef );
-        this.fillDef = null;
+    releaseFillPaint: function() {
+      if ( this.fillPaint ) {
+        this.svgBlock.decrementPaint( this.fillPaint );
+        this.fillPaint = null;
       }
     },
 
-    releaseStrokeDef: function() {
-      if ( this.strokeDef ) {
-        this.strokeDef.parentNode.removeChild( this.strokeDef );
-        this.strokeDef = null;
+    releaseStrokePaint: function() {
+      if ( this.strokePaint ) {
+        this.svgBlock.decrementPaint( this.strokePaint );
+        this.strokePaint = null;
       }
     },
 
     // called when the fill needs to be updated, with the latest defs SVG block
     updateFill: function( svgBlock, fill ) {
+      assert && assert( this.svgBlock === svgBlock );
+
       if ( fill !== this.fill ) {
-        this.releaseFillDef();
+        this.releaseFillPaint();
         this.fill = fill;
         this.baseStyle = this.computeStyle();
-        if ( this.fill && this.fill.getSVGDefinition ) {
-          this.fillDef = this.fill.getSVGDefinition( this.fillId );
-          svgBlock.defs.appendChild( this.fillDef );
+        if ( this.fill && this.fill.isPaint ) {
+          this.fillPaint = this.fill;
+          svgBlock.incrementPaint( this.fill );
         }
       }
     },
 
     updateStroke: function( svgBlock, stroke ) {
+      assert && assert( this.svgBlock === svgBlock );
+
       if ( stroke !== this.stroke ) {
-        this.releaseStrokeDef();
+        this.releaseStrokePaint();
         this.stroke = stroke;
         this.baseStyle = this.computeStyle();
-        if ( this.stroke && this.stroke.getSVGDefinition ) {
-          this.strokeDef = this.stroke.getSVGDefinition( this.strokeId );
-          svgBlock.defs.appendChild( this.strokeDef );
+        if ( this.stroke && this.stroke.isPaint ) {
+          this.strokePaint = this.stroke;
+          svgBlock.incrementPaint( this.stroke );
         }
       }
     },
@@ -691,25 +730,25 @@ define( function( require ) {
 
     // called when the defs SVG block is switched (our SVG element was moved to another SVG top-level context)
     updateSVGBlock: function( svgBlock ) {
-      if ( this.fillDef ) {
-        if ( svgBlock.defs ) {
-          // adding to the DOM here removes it from its previous location
-          svgBlock.defs.appendChild( this.fillDef );
+      // remove paints from the old svgBlock
+      var oldSvgBlock = this.svgBlock;
+      if ( oldSvgBlock ) {
+        if ( this.fillPaint ) {
+          oldSvgBlock.decrementPaint( this.fillPaint );
         }
-        else if ( this.fillDef.parentNode ) {
-          //OHTWO TODO: does this parentNode access cause reflows?
-          this.fillDef.parentNode.removeChild( this.fillDef );
+        if ( this.strokePaint ) {
+          oldSvgBlock.decrementPaint( this.strokePaint );
         }
       }
-      if ( this.strokeDef ) {
-        if ( svgBlock.defs ) {
-          // adding to the DOM here removes it from its previous location
-          svgBlock.defs.appendChild( this.strokeDef );
-        }
-        else if ( this.strokeDef.parentNode ) {
-          //OHTWO TODO: does this parentNode access cause reflows?
-          this.strokeDef.parentNode.removeChild( this.strokeDef );
-        }
+
+      this.svgBlock = svgBlock;
+
+      // add paints to the new svgBlock
+      if ( this.fillPaint ) {
+        svgBlock.incrementPaint( this.fillPaint );
+      }
+      if ( this.strokePaint ) {
+        svgBlock.incrementPaint( this.strokePaint );
       }
     },
 
@@ -723,9 +762,9 @@ define( function( require ) {
         // Color object fill
         style += this.fill.toCSS() + ';';
       }
-      else if ( this.fill.getSVGDefinition ) {
+      else if ( this.fill.isPaint ) {
         // reference the SVG definition with a URL
-        style += 'url(#' + this.fillId + ');';
+        style += 'url(#' + this.fill.id + ');';
       }
       else {
         // plain CSS color
@@ -741,9 +780,9 @@ define( function( require ) {
           // Color object stroke
           style += this.stroke.toCSS() + ';';
         }
-        else if ( this.stroke.getSVGDefinition ) {
+        else if ( this.stroke.isPaint ) {
           // reference the SVG definition with a URL
-          style += 'url(#' + this.strokeId + ');';
+          style += 'url(#' + this.stroke.id + ');';
         }
         else {
           // plain CSS color

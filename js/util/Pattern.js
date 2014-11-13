@@ -14,38 +14,30 @@ define( function( require ) {
 
   var inherit = require( 'PHET_CORE/inherit' );
   var scenery = require( 'SCENERY/scenery' );
-
-  var globalId = 1;
+  var Paint = require( 'SCENERY/util/Paint' );
 
   // TODO: support scene or other various content (SVG is flexible, can backport to canvas)
   // TODO: investigate options to support repeat-x, repeat-y or no-repeat in SVG (available repeat options from Canvas)
   scenery.Pattern = function Pattern( image ) {
-    this.id = 'gradient' + globalId++;
+    Paint.call( this );
 
     this.image = image;
 
     // use the global scratch canvas instead of creating a new Canvas
     this.canvasPattern = scenery.scratchContext.createPattern( image, 'repeat' );
-
-    this.transformMatrix = null;
   };
   var Pattern = scenery.Pattern;
 
-  inherit( Object, Pattern, {
+  inherit( Paint, Pattern, {
     isPattern: true,
-
-    setTransformMatrix: function( transformMatrix ) {
-      this.transformMatrix = transformMatrix;
-      return this;
-    },
 
     getCanvasStyle: function() {
       return this.canvasPattern;
     },
 
-    getSVGDefinition: function( id ) {
+    getSVGDefinition: function() {
       var definition = document.createElementNS( scenery.svgns, 'pattern' );
-      definition.setAttribute( 'id', id );
+      definition.setAttribute( 'id', this.id );
       definition.setAttribute( 'patternUnits', 'userSpaceOnUse' ); // so we don't depend on the bounds of the object being drawn with the gradient
       definition.setAttribute( 'patternContentUnits', 'userSpaceOnUse' ); // TODO: is this needed?
       definition.setAttribute( 'x', 0 );

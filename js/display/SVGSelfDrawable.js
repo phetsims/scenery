@@ -135,12 +135,63 @@ define( function( require ) {
           updateSVGSelf.call( this, this.node, this.svgElement );
         }
 
+        // sync the differences between the previously-recorded list of cached paints and the new list
+        if ( usesPaint && this.dirtyCachedPaints ) {
+          var newCachedPaints = this.node._cachedPaints.slice(); // defensive copy for now
+          var i, j;
+          // scan for new cached paints (not in the old list)
+          for ( i = 0; i < newCachedPaints.length; i++ ) {
+            var newPaint = newCachedPaints[i];
+            var isNew = true;
+            for ( j = 0; j < this.lastCachedPaints.length; j++ ) {
+              if ( newPaint === this.lastCachedPaints[j] ) {
+                isNew = false;
+                break;
+              }
+            }
+            if ( isNew ) {
+              this.svgBlock.incrementPaint( newPaint );
+            }
+          }
+          // scan for removed cached paints (not in the new list)
+          for ( i = 0; i < this.lastCachedPaints.length; i++ ) {
+            var oldPaint = this.lastCachedPaints[i];
+            var isRemoved = true;
+            for ( j = 0; j < newCachedPaints.length; j++ ) {
+              if ( oldPaint === newCachedPaints[j] ) {
+                isRemoved = false;
+                break;
+              }
+            }
+            if ( isRemoved ) {
+              this.svgBlock.decrementPaint( oldPaint );
+            }
+          }
+
+          this.lastCachedPaints = newCachedPaints;
+        }
+
         // clear all of the dirty flags
         this.setToClean();
       },
 
       updateSVGBlock: function( svgBlock ) {
+        // remove cached paint references from the old svgBlock
+        var oldSvgBlock = this.svgBlock;
+        if ( usesPaint && oldSvgBlock ) {
+          for ( var i = 0; i < this.lastCachedPaints.length; i++ ) {
+            oldSvgBlock.decrementPaint( this.lastCachedPaints[i] );
+          }
+        }
+
         this.svgBlock = svgBlock;
+
+        // add cached paint references from the new svgBlock
+        if ( usesPaint ) {
+          for ( var j = 0; j < this.lastCachedPaints.length; j++ ) {
+            svgBlock.incrementPaint( this.lastCachedPaints[j] );
+          }
+        }
 
         updateDefsSelf && updateDefsSelf.call( this, svgBlock );
 

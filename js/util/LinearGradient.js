@@ -39,7 +39,7 @@ define( function( require ) {
 
     // seems we need the defs: http://stackoverflow.com/questions/7614209/linear-gradients-in-svg-without-defs
     // SVG: spreadMethod 'pad' 'reflect' 'repeat' - find Canvas usage
-    getSVGDefinition: function( id ) {
+    getSVGDefinition: function() {
       /* Approximate example of what we are creating:
        <linearGradient id="grad2" x1="0" y1="0" x2="100" y2="0" gradientUnits="userSpaceOnUse">
        <stop offset="0" style="stop-color:rgb(255,255,0);stop-opacity:1" />
@@ -48,7 +48,7 @@ define( function( require ) {
        </linearGradient>
        */
       var definition = document.createElementNS( scenery.svgns, 'linearGradient' );
-      definition.setAttribute( 'id', id );
+      definition.setAttribute( 'id', this.id );
       definition.setAttribute( 'gradientUnits', 'userSpaceOnUse' ); // so we don't depend on the bounds of the object being drawn with the gradient
       definition.setAttribute( 'x1', this.start.x );
       definition.setAttribute( 'y1', this.start.y );

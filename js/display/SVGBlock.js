@@ -31,6 +31,7 @@ define( function( require ) {
 
       this.dirtyGroups = cleanArray( this.dirtyGroups );
       this.dirtyDrawables = cleanArray( this.dirtyDrawables );
+      this.paintMap = {}; // maps {string} paint.id => { count: {number}, paint: {Paint}, def: {SVGElement} }
 
       if ( !this.domElement ) {
         // main SVG element
@@ -67,6 +68,58 @@ define( function( require ) {
       sceneryLog && sceneryLog.SVGBlock && sceneryLog.SVGBlock( 'initialized #' + this.id );
 
       return this;
+    },
+
+    /*
+     * Increases our reference count for the specified {Paint}. If it didn't exist before, we'll add the SVG def to the
+     * paint can be referenced by SVG id.
+     *
+     * @param {Paint} paint
+     */
+    incrementPaint: function( paint ) {
+      assert && assert( paint.isPaint );
+
+      sceneryLog && sceneryLog.Paints && sceneryLog.Paints( 'incrementPaint ' + this.toString() + ' ' + paint.id );
+
+      if ( this.paintMap.hasOwnProperty( paint.id ) ) {
+        this.paintMap[paint.id].count++;
+      } else {
+        var def = paint.getSVGDefinition();
+
+        // TODO: reduce allocations?
+        this.paintMap[paint.id] = {
+          count: 1,
+          paint: paint,
+          def: def
+        };
+
+        this.defs.appendChild( def );
+      }
+    },
+
+    /*
+     * Decreases our reference count for the specified {Paint}. If this was the last reference, we'll remove the SVG def
+     * from our SVG tree to prevent memory leaks, etc.
+     *
+     * @param {Paint} paint
+     */
+    decrementPaint: function( paint ) {
+      assert && assert( paint.isPaint );
+
+      sceneryLog && sceneryLog.Paints && sceneryLog.Paints( 'decrementPaint ' + this.toString() + ' ' + paint.id );
+
+      // since the block may have been disposed (yikes!), we have a defensive set-up here
+      if ( this.paintMap.hasOwnProperty( paint.id ) ) {
+        var entry = this.paintMap[paint.id];
+        assert && assert( entry.count >= 1 );
+
+        if ( entry.count === 1 ) {
+          this.defs.removeChild( entry.def );
+          delete this.paintMap[paint.id]; // delete, so we don't memory leak if we run through MANY paints
+        } else {
+          entry.count--;
+        }
+      }
     },
 
     markDirtyGroup: function( block ) {
@@ -140,10 +193,16 @@ define( function( require ) {
       this.filterRootInstance = null;
       cleanArray( this.dirtyGroups );
       cleanArray( this.dirtyDrawables );
+      this.paintMap = {};
 
       this.baseTransformGroup.removeChild( this.rootGroup.svgGroup );
       this.rootGroup.dispose();
       this.rootGroup = null;
+
+      // since we may not properly remove all defs yet
+      while ( this.defs.children.length ) {
+        this.defs.removeChild( this.defs.children[0] );
+      }
 
       FittedBlock.prototype.dispose.call( this );
     },
