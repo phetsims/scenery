@@ -4,6 +4,10 @@
   module( 'Scenery: Display' );
 
   test( 'Drawables (Rectangle)', function() {
+
+    // The stubDisplay It's a hack that implements the subset of the Display API needed where called. It will definitely
+    // be removed. The reason it stores the frame ID is because much of Scenery 0.2 uses ID comparison to determine
+    // dirty state. That allows us to not have to set dirty states back to "clean" afterwards.  See #296
     var stubDisplay = { _frameId: 5 };
 
     var canvas = document.createElement( 'canvas' );
