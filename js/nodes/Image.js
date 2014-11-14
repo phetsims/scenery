@@ -362,19 +362,13 @@ define( function( require ) {
     ] );
   }, {
     initializeContext: function( gl ) {
+      this.gl = gl;
+
       // cleanup old buffer, if applicable
       this.disposeWebGLBuffers();
 
-      this.gl = gl;
       this.vertexBuffer = gl.createBuffer();
       this.updateImage();
-    },
-
-    // methods for forwarding dirty messages
-    canvasSelfDirty: function() {
-      // we pass this method and it is only called with blah.call( ... ), where the 'this' reference is set. ignore jshint
-      /* jshint -W040 */
-      this.markDirty();
     },
 
     //Nothing necessary since everything currently handled in the uModelViewMatrix below
@@ -387,73 +381,76 @@ define( function( require ) {
       //TODO: Once we are lazily handling the full matrix, we may benefit from DYNAMIC draw here, and updating the vertices themselves
       gl.bufferData( gl.ARRAY_BUFFER, this.vertexCoordinates, gl.STATIC_DRAW );
 
-      // TODO: What to do when image changed and marked as dirty?  Where does that happen?
-
       if ( this.texture !== null ) {
         gl.deleteTexture( this.texture );
       }
 
-      var canvas = document.createElement( 'canvas' );
-      var context = canvas.getContext( '2d' );
+      if ( this.node._image ) {
+        // TODO: only create once instance of this Canvas for reuse
+        var canvas = document.createElement( 'canvas' );
+        var context = canvas.getContext( '2d' );
 
-      var imageNode = this.node;
-      this.canvasWidth = canvas.width = Util.toPowerOf2( imageNode.getImageWidth() );
-      this.canvasHeight = canvas.height = Util.toPowerOf2( imageNode.getImageHeight() );
-      context.drawImage( imageNode._image, 0, 0 );
 
-      var texture = this.texture = gl.createTexture();
-      gl.bindTexture( gl.TEXTURE_2D, texture );
-      gl.texParameteri( gl.TEXTURE_2D, gl.TEXTURE_WRAP_S, gl.CLAMP_TO_EDGE );
-      gl.texParameteri( gl.TEXTURE_2D, gl.TEXTURE_WRAP_T, gl.CLAMP_TO_EDGE );
+        this.canvasWidth = canvas.width = Util.toPowerOf2( this.node.getImageWidth() );
+        this.canvasHeight = canvas.height = Util.toPowerOf2( this.node.getImageHeight() );
+        context.drawImage( this.node._image, 0, 0 );
 
-      gl.pixelStorei( gl.UNPACK_FLIP_Y_WEBGL, true );
-      gl.texImage2D( gl.TEXTURE_2D, 0, gl.RGBA, gl.RGBA, gl.UNSIGNED_BYTE, canvas );
+        var texture = this.texture = gl.createTexture();
+        gl.bindTexture( gl.TEXTURE_2D, texture );
+        gl.texParameteri( gl.TEXTURE_2D, gl.TEXTURE_WRAP_S, gl.CLAMP_TO_EDGE );
+        gl.texParameteri( gl.TEXTURE_2D, gl.TEXTURE_WRAP_T, gl.CLAMP_TO_EDGE );
 
-      // Texture filtering, see http://learningwebgl.com/blog/?p=571
-      gl.texParameteri( gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, gl.LINEAR );
-      gl.texParameteri( gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.LINEAR_MIPMAP_NEAREST );
-      gl.generateMipmap( gl.TEXTURE_2D );
+        gl.pixelStorei( gl.UNPACK_FLIP_Y_WEBGL, true );
+        gl.texImage2D( gl.TEXTURE_2D, 0, gl.RGBA, gl.RGBA, gl.UNSIGNED_BYTE, canvas );
 
-      gl.bindTexture( gl.TEXTURE_2D, null );
+        // Texture filtering, see http://learningwebgl.com/blog/?p=571
+        gl.texParameteri( gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, gl.LINEAR );
+        gl.texParameteri( gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.LINEAR_MIPMAP_NEAREST );
+        gl.generateMipmap( gl.TEXTURE_2D );
+
+        gl.bindTexture( gl.TEXTURE_2D, null );
+      }
     },
 
     render: function( shaderProgram ) {
-      var gl = this.gl;
+      if ( this.node._image ) {
+        var gl = this.gl;
 
-      //TODO: what if image is null?
+        //TODO: what if image is null?
 
-      //OHTWO TODO: optimize
-      //TODO: This looks like an expense we don't want to incur at every render.  How about moving it to the GPU?
-      var viewMatrix = this.instance.relativeMatrix.toAffineMatrix4().timesMatrix( Matrix4.scaling( this.canvasWidth, -this.canvasHeight, 1 ).timesMatrix( Matrix4.translation( 0, -1 ) ) );
+        //OHTWO TODO: optimize
+        //TODO: This looks like an expense we don't want to incur at every render.  How about moving it to the GPU?
+        var viewMatrix = this.instance.relativeMatrix.toAffineMatrix4().timesMatrix( Matrix4.scaling( this.canvasWidth, -this.canvasHeight, 1 ).timesMatrix( Matrix4.translation( 0, -1 ) ) );
 
-      // combine image matrix (to scale aspect ratios), the trail's matrix, and the matrix to device coordinates
-      gl.uniformMatrix4fv( shaderProgram.uniformLocations.uModelViewMatrix, false, viewMatrix.entries );
+        // combine image matrix (to scale aspect ratios), the trail's matrix, and the matrix to device coordinates
+        gl.uniformMatrix4fv( shaderProgram.uniformLocations.uModelViewMatrix, false, viewMatrix.entries );
 
-      gl.uniform1i( shaderProgram.uniformLocations.uTexture, 0 ); // TEXTURE0 slot
+        gl.uniform1i( shaderProgram.uniformLocations.uTexture, 0 ); // TEXTURE0 slot
 
-      //Indicate the branch of logic to use in the ubershader.  In this case, a texture should be used for the image
-      gl.uniform1i( shaderProgram.uniformLocations.uFragmentType, WebGLBlock.fragmentTypeTexture );
+        //Indicate the branch of logic to use in the ubershader.  In this case, a texture should be used for the image
+        gl.uniform1i( shaderProgram.uniformLocations.uFragmentType, WebGLBlock.fragmentTypeTexture );
 
-      gl.activeTexture( gl.TEXTURE0 );
-      gl.bindTexture( gl.TEXTURE_2D, this.texture );
-      gl.bindBuffer( gl.ARRAY_BUFFER, this.vertexBuffer );
+        gl.activeTexture( gl.TEXTURE0 );
+        gl.bindTexture( gl.TEXTURE_2D, this.texture );
+        gl.bindBuffer( gl.ARRAY_BUFFER, this.vertexBuffer );
 
-      gl.vertexAttribPointer( shaderProgram.attributeLocations.aVertex, 2, gl.FLOAT, false, 0, 0 );
-      gl.drawArrays( gl.TRIANGLE_STRIP, 0, 4 );
+        gl.vertexAttribPointer( shaderProgram.attributeLocations.aVertex, 2, gl.FLOAT, false, 0, 0 );
+        gl.drawArrays( gl.TRIANGLE_STRIP, 0, 4 );
+      }
     },
 
     dispose: function() {
+      this.disposeWebGLBuffers();
+
       // super
       WebGLSelfDrawable.prototype.dispose.call( this );
 
-      this.disposeWebGLBuffers();
+      this.gl = null;
     },
 
     disposeWebGLBuffers: function() {
-      if ( this.gl ) {
-        this.gl.deleteBuffer( this.vertexBuffer );
-        this.gl.deleteTexture( this.texture );
-      }
+      this.gl.deleteBuffer( this.vertexBuffer );
+      this.gl.deleteTexture( this.texture );
     },
 
     markDirtyRectangle: function() {
@@ -475,13 +472,13 @@ define( function( require ) {
     },
 
     update: function() {
-      this.dirty = false;
-
-      if ( this.paintDirty ) {
+      if ( this.dirtyImage ) {
         this.updateImage();
 
         this.setToCleanState();
       }
+
+      this.dirty = false;
     }
   } );
 

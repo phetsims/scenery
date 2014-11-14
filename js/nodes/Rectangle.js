@@ -865,11 +865,12 @@ define( function( require ) {
     ] );
   }, {
     initializeContext: function( gl ) {
-      // cleanup old buffer, if applicable
+      this.gl = gl;
+
+      // cleanup old vertexBuffer, if applicable
       this.disposeWebGLBuffers();
 
-      this.gl = gl;
-      this.buffer = gl.createBuffer();
+      this.vertexBuffer = gl.createBuffer();
       this.initializePaintableState();
       this.updateRectangle();
     },
@@ -893,7 +894,7 @@ define( function( require ) {
       this.vertexCoordinates[6] = rect._rectX + rect._rectWidth;
       this.vertexCoordinates[7] = rect._rectY + rect._rectHeight;
 
-      gl.bindBuffer( gl.ARRAY_BUFFER, this.buffer );
+      gl.bindBuffer( gl.ARRAY_BUFFER, this.vertexBuffer );
       gl.bufferData(
         gl.ARRAY_BUFFER,
 
@@ -926,22 +927,24 @@ define( function( require ) {
         gl.uniform1i( shaderProgram.uniformLocations.uFragmentType, WebGLBlock.fragmentTypeFill );
         gl.uniform4f( shaderProgram.uniformLocations.uColor, this.color.r / 255, this.color.g / 255, this.color.b / 255, this.color.a );
 
-        gl.bindBuffer( gl.ARRAY_BUFFER, this.buffer );
+        gl.bindBuffer( gl.ARRAY_BUFFER, this.vertexBuffer );
         gl.vertexAttribPointer( shaderProgram.attributeLocations.aVertex, 2, gl.FLOAT, false, 0, 0 );
         gl.drawArrays( gl.TRIANGLE_STRIP, 0, 4 );
       }
     },
 
     dispose: function() {
+      this.disposeWebGLBuffers();
+
       // super
       WebGLSelfDrawable.prototype.dispose.call( this );
 
-      this.disposeWebGLBuffers();
+      this.gl = null;
     },
 
     disposeWebGLBuffers: function() {
       if ( this.gl ) {
-        this.gl.deleteBuffer( this.buffer );
+        this.gl.deleteBuffer( this.vertexBuffer );
       }
     },
 
