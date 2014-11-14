@@ -95,6 +95,20 @@
         renderers: [ 'canvas', 'svg', 'webgl', 'dom' ]
       },
       {
+        name: 'simple-images',
+        width: 200,
+        height: 200,
+        draw: function( scene, display ) {
+          var thumbnail = document.createElement( 'img' );
+          thumbnail.addEventListener( 'load', function() {
+            scene.addChild( new scenery.Image( thumbnail ) );
+            display.updateDisplay();
+          } );
+          thumbnail.src = 'http://phet.colorado.edu/images/phet-logo-yellow.png';
+        },
+        renderers: [ 'canvas', 'svg', 'dom', 'webgl' ]
+      },
+      {
         name: 'Rectangle',
         width: 128,
         height: 64,
