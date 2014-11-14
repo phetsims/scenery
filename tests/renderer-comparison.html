@@ -92,7 +92,7 @@
             fill: 'blue'
           } ) );
         },
-        renderers: [ 'canvas', 'svg', 'webgl' ]
+        renderers: [ 'canvas', 'svg', 'webgl', 'dom' ]
       },
       {
         name: 'Rectangle',
@@ -661,6 +661,7 @@
         }
         return result;
       }
+      return array;
     };
 
     // Select the renderers to be compared (for tests that declare support for them).
