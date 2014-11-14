@@ -104,7 +104,9 @@
             scene.addChild( new scenery.Image( thumbnail ) );
             display.updateDisplay();
           } );
-          thumbnail.src = 'http://phet.colorado.edu/images/phet-logo-yellow.png';
+
+          // TODO: Fix this url so others can use it.
+          thumbnail.src = 'http://localhost:8080/acid-base-solutions/images/light-bulb-off.png';
         },
         renderers: [ 'canvas', 'svg', 'dom', 'webgl' ]
       },
@@ -336,11 +338,13 @@
               } ) );
               display.updateDisplay();
             } );
-            logo.src = 'http://phet.colorado.edu/images/phet-logo-yellow.png';
+            // TODO: Fix this url so others can use it.
+            logo.src = 'http://localhost:8080/balancing-act/images/fire-extinguisher.png';
           } );
-          thumbnail.src = 'http://phet.colorado.edu/sims/molecule-polarity/molecule-polarity-thumbnail.png';
+          // TODO: Fix this url so others can use it.
+          thumbnail.src = 'http://localhost:8080/acid-base-solutions/images/light-bulb-off.png';
         },
-        renderers: [ 'canvas', 'svg', 'dom' ]
+        renderers: [ 'canvas', 'svg', 'dom', 'webgl' ]
       },
       {
         name: 'Patterns',

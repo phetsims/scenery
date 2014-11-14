@@ -28,6 +28,8 @@ define( function( require ) {
   var SelfDrawable = require( 'SCENERY/display/SelfDrawable' );
   var WebGLSelfDrawable = require( 'SCENERY/display/WebGLSelfDrawable' );
   var WebGLBlock = require( 'SCENERY/display/WebGLBlock' );
+  var Util = require( 'SCENERY/util/Util' );
+  var Matrix4 = require( 'DOT/Matrix4' );
 
   // TODO: change this based on memory and performance characteristics of the platform
   var keepDOMImageElements = true; // whether we should pool DOM elements for the DOM rendering states, or whether we should free them when possible for memory
@@ -365,7 +367,6 @@ define( function( require ) {
 
       this.gl = gl;
       this.buffer = gl.createBuffer();
-//      this.initializePaintableState();
       this.updateRectangle();
     },
 
@@ -381,24 +382,6 @@ define( function( require ) {
     updateRectangle: function() {
       var gl = this.gl;
 
-      var rect = this.node;
-      rect._rectX = 10;
-      rect._rectY = 10;
-      rect._rectWidth = 10;
-      rect._rectHeight = 10;
-
-      this.vertexCoordinates[0] = rect._rectX;
-      this.vertexCoordinates[1] = rect._rectY;
-
-      this.vertexCoordinates[2] = rect._rectX + rect._rectWidth;
-      this.vertexCoordinates[3] = rect._rectY;
-
-      this.vertexCoordinates[4] = rect._rectX;
-      this.vertexCoordinates[5] = rect._rectY + rect._rectHeight;
-
-      this.vertexCoordinates[6] = rect._rectX + rect._rectWidth;
-      this.vertexCoordinates[7] = rect._rectY + rect._rectHeight;
-
       gl.bindBuffer( gl.ARRAY_BUFFER, this.buffer );
       gl.bufferData(
         gl.ARRAY_BUFFER,
@@ -412,26 +395,55 @@ define( function( require ) {
       if ( this.dirtyFill || true ) {
 //        this.cleanPaintableState();
       }
+
+      if ( this.texture !== null ) {
+        gl.deleteTexture( this.texture );
+      }
+
+      var canvas = document.createElement( 'canvas' );
+      var context = canvas.getContext( '2d' );
+
+      var imageNode = this.node;
+      this.canvasWidth = canvas.width = Util.toPowerOf2( imageNode.getImageWidth() );
+      this.canvasHeight = canvas.height = Util.toPowerOf2( imageNode.getImageHeight() );
+      context.drawImage( imageNode._image, 0, 0 );
+
+      var texture = this.texture = gl.createTexture();
+      gl.bindTexture( gl.TEXTURE_2D, texture );
+      gl.texParameteri( gl.TEXTURE_2D, gl.TEXTURE_WRAP_S, gl.CLAMP_TO_EDGE );
+      gl.texParameteri( gl.TEXTURE_2D, gl.TEXTURE_WRAP_T, gl.CLAMP_TO_EDGE );
+
+      gl.pixelStorei( gl.UNPACK_FLIP_Y_WEBGL, true );
+      gl.texImage2D( gl.TEXTURE_2D, 0, gl.RGBA, gl.RGBA, gl.UNSIGNED_BYTE, canvas );
+
+      // Texture filtering, see http://learningwebgl.com/blog/?p=571
+      gl.texParameteri( gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, gl.LINEAR );
+      gl.texParameteri( gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.LINEAR_MIPMAP_NEAREST );
+      gl.generateMipmap( gl.TEXTURE_2D );
+
+      gl.bindTexture( gl.TEXTURE_2D, null );
     },
 
     render: function( shaderProgram ) {
-      debugger;
       var gl = this.gl;
 
-      // TODO: Handle rounded rectangles, please!
-      // use the standard version if it's a rounded rectangle, since there is no WebGL-optimized version for that
-      // TODO: how to handle fill/stroke delay optimizations here?
-      //OHTWO TODO: optimize
-
       //TODO: what if image is null?
-      var viewMatrix = this.instance.relativeMatrix.toAffineMatrix4();
+
+      //OHTWO TODO: optimize
+      //TODO: This looks like an expense we don't want to incur at every render.  How about moving it to the GPU?
+      var viewMatrix = this.instance.relativeMatrix.toAffineMatrix4().timesMatrix( Matrix4.scaling( this.canvasWidth, -this.canvasHeight, 1 ).timesMatrix( Matrix4.translation( 0, -1 ) ) );
 
       // combine image matrix (to scale aspect ratios), the trail's matrix, and the matrix to device coordinates
       gl.uniformMatrix4fv( shaderProgram.uniformLocations.uModelViewMatrix, false, viewMatrix.entries );
 
+      gl.uniform1i( shaderProgram.uniformLocations.uTexture, 0 ); // TEXTURE0 slot
+
       //Indicate the branch of logic to use in the ubershader.  In this case, a texture should be used for the image
-      gl.uniform1i( shaderProgram.uniformLocations.uFragmentType, WebGLBlock.fragmentTypeFill );
-      gl.uniform4f( shaderProgram.uniformLocations.uColor, 1, 0, 0, 1 );
+      gl.uniform1i( shaderProgram.uniformLocations.uFragmentType, WebGLBlock.fragmentTypeTexture );
+
+      gl.activeTexture( gl.TEXTURE0 );
+      gl.bindTexture( gl.TEXTURE_2D, this.texture );
+      gl.bindBuffer( gl.ARRAY_BUFFER, this.vertexBuffer );
 
       gl.bindBuffer( gl.ARRAY_BUFFER, this.buffer );
       gl.vertexAttribPointer( shaderProgram.attributeLocations.aVertex, 2, gl.FLOAT, false, 0, 0 );
