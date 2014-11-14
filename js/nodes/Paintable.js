@@ -462,18 +462,20 @@ define( function( require ) {
         bitmask |= scenery.bitmaskBoundsValid;
 
         if ( !this._fill ) {
-          // if there is no fill, it is supported by DOM
+          // if there is no fill, it is supported by DOM and WebGL
           bitmask |= scenery.bitmaskSupportsDOM;
+          bitmask |= scenery.bitmaskWebGL;
         }
         else if ( this._fill.isPattern ) {
-          // no pattern support for DOM (for now!)
+          // no pattern support for DOM or WebGL (for now!)
         }
         else if ( this._fill.isGradient ) {
-          // no gradient support for DOM (for now!)
+          // no gradient support for DOM or WebGL (for now!)
         }
         else {
-          // solid fills always supported for DOM
+          // solid fills always supported for DOM and WebGL
           bitmask |= scenery.bitmaskSupportsDOM;
+          bitmask |= scenery.bitmaskSupportsWebGL;
         }
 
         return bitmask;
@@ -774,7 +776,8 @@ define( function( require ) {
       if ( !this.stroke ) {
         // no stroke
         style += ' stroke: none;';
-      } else {
+      }
+      else {
         style += ' stroke: ';
         if ( this.stroke.toCSS ) {
           // Color object stroke

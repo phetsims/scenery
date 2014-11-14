@@ -178,9 +178,11 @@ define( function( require ) {
     else if ( Renderer.isDOM( selfRenderer ) ) {
       return node.createDOMDrawable( selfRenderer, instance );
     }
+    else if ( Renderer.isWebGL( selfRenderer ) ) {
+      return node.createWebGLDrawable( selfRenderer, instance );
+    }
     else {
-      // assert so that it doesn't compile down to a throw (we want this function to be optimized)
-      assert && assert( 'Unrecognized renderer, maybe we don\'t support WebGL yet?: ' + selfRenderer );
+      throw new Error( 'Unrecognized renderer, maybe we don\'t support WebGL yet?: ' + selfRenderer );
     }
   };
 

@@ -36,6 +36,8 @@ define( [
   'SCENERY/display/SVGBlock',
   'SCENERY/display/SVGGroup',
   'SCENERY/display/SVGSelfDrawable',
+  'SCENERY/display/WebGLBlock',
+  'SCENERY/display/WebGLSelfDrawable',
 
   'SCENERY/input/BatchedDOMEvent',
   'SCENERY/input/ButtonListener',

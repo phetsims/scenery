@@ -365,6 +365,9 @@ define( function( require ) {
       else if ( Renderer.isDOM( renderer ) ) {
         block = DOMBlock.createFromPool( backbone.display, drawable );
       }
+      else if ( Renderer.isWebGL( renderer ) ) {
+        block = WebGLBlock.createFromPool( backbone.display, renderer, backbone.transformRootInstance, backbone.backboneInstance );
+      }
       else {
         throw new Error( 'unsupported renderer for createBlock: ' + renderer );
       }

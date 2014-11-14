@@ -74,6 +74,7 @@ define( function( require ) {
       transformSystem: { name: 'transform', style: 'color: #606;' },
       BackboneDrawable: { name: 'Backbone', style: 'color: #a00;' },
       CanvasBlock: { name: 'Canvas', style: 'color: #000;' },
+      WebGLBlock: { name: 'WebGL', style: 'color: #000;' },
       Display: { name: 'Display', style: 'color: #000;' },
       DOMBlock: { name: 'DOM', style: 'color: #000;' },
       Drawable: { name: '', style: 'color: #000;' },

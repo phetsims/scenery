@@ -23,6 +23,7 @@ define( function( require ) {
   var DOMSelfDrawable = require( 'SCENERY/display/DOMSelfDrawable' );
   var SVGSelfDrawable = require( 'SCENERY/display/SVGSelfDrawable' );
   var CanvasSelfDrawable = require( 'SCENERY/display/CanvasSelfDrawable' );
+  var WebGLSelfDrawable = require( 'SCENERY/display/WebGLSelfDrawable' );
   var SelfDrawable = require( 'SCENERY/display/SelfDrawable' );
 
   // TODO: change this based on memory and performance characteristics of the platform
@@ -121,6 +122,11 @@ define( function( require ) {
           bitmask |= scenery.bitmaskSupportsDOM;
         }
       }
+
+      //TODO: Refine the rules for when WebGL can be used
+      if ( !this.hasStroke() ) {
+        bitmask |= scenery.bitmaskSupportsWebGL;
+      }
       return bitmask;
     },
 
@@ -136,6 +142,12 @@ define( function( require ) {
            ( !this.isRounded() || ( Features.borderRadius && this._rectArcWidth === this._rectArcHeight ) ) &&
            this._rectArcHeight <= maximumArcSize && this._rectArcWidth <= maximumArcSize ) {
         bitmask |= scenery.bitmaskSupportsDOM;
+      }
+
+      //only support WebGL if it's NOT rounded (for now) AND if it's either not stroked, or stroke has lineJoin !== round
+      //TODO: Refine the rules for when WebGL can be used
+      if ( !this.isRounded() && (!this.hasStroke() || this.getLineJoin() !== 'round') ) {
+        bitmask |= scenery.bitmaskSupportsWebGL;
       }
 
       return bitmask;
@@ -341,6 +353,10 @@ define( function( require ) {
 
     createCanvasDrawable: function( renderer, instance ) {
       return Rectangle.RectangleCanvasDrawable.createFromPool( renderer, instance );
+    },
+
+    createWebGLDrawable: function( renderer, instance ) {
+      return Rectangle.RectangleWebGLDrawable.createFromPool( renderer, instance );
     },
 
     /*---------------------------------------------------------------------------*
@@ -825,6 +841,29 @@ define( function( require ) {
           context.strokeRect( node._rectX, node._rectY, node._rectWidth, node._rectHeight );
           node.afterCanvasStroke( wrapper ); // defined in Paintable
         }
+      }
+    },
+    usesPaint: true,
+    dirtyMethods: ['markDirtyRectangle']
+  } );
+
+
+  /*---------------------------------------------------------------------------*
+   * WebGL rendering
+   *----------------------------------------------------------------------------*/
+
+  Rectangle.RectangleWebGLDrawable = WebGLSelfDrawable.createDrawable( {
+    type: function RectangleWebGLDrawable( renderer, instance ) { this.initialize( renderer, instance ); },
+    paintWebGL: function paintWebGLRectangle( wrapper, node ) {
+      var context = wrapper.context;
+
+      // TODO: Handle rounded rectangles, please!
+      // use the standard version if it's a rounded rectangle, since there is no WebGL-optimized version for that
+      // TODO: how to handle fill/stroke delay optimizations here?
+      if ( node._fill ) {
+        node.beforeWebGLFill( wrapper ); // defined in Paintable
+        context.fillRect( node._rectX, node._rectY, node._rectWidth, node._rectHeight );
+        node.afterWebGLFill( wrapper ); // defined in Paintable
       }
     },
     usesPaint: true,
