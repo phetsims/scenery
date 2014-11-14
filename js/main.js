@@ -65,6 +65,7 @@ define( [
   'SCENERY/nodes/Rectangle',
   'SCENERY/nodes/Text',
   'SCENERY/nodes/VBox',
+  'SCENERY/nodes/WebGLNode',
 
   'SCENERY/overlays/CanvasNodeBoundsOverlay',
   'SCENERY/overlays/PointerAreaOverlay',

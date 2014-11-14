@@ -111,6 +111,73 @@
         renderers: [ 'canvas', 'svg', 'dom', 'webgl' ]
       },
       {
+        name: 'CanvasNode',
+        width: 200,
+        height: 200,
+        draw: function( scene, display ) {
+
+          //TODO: Make it so we can pass in the paintCanvas call to the CanvasNode constructor.
+          var canvasNode = new scenery.CanvasNode( {canvasBounds: new dot.Bounds2( 0, 0, 100, 100 )} );
+          canvasNode.paintCanvas = function( wrapper ) {
+            var context = wrapper.context;
+
+            context.fillStyle = 'red';
+            context.fillRect( 0, 0, 100, 20 );
+          };
+          scene.addChild( canvasNode );
+        },
+        renderers: [ 'canvas', 'svg' ]
+      },
+      {
+        name: 'WebGLNode',
+        width: 200,
+        height: 200,
+        draw: function( scene, display ) {
+
+          //TODO: Make it so we can pass in the paintCanvas call to the CanvasNode constructor.
+          var canvasNode = new scenery.WebGLNode( {canvasBounds: new dot.Bounds2( 0, 0, 100, 100 )} );
+          canvasNode.initialize = function( gl ) {
+            console.log( 'init' );
+
+            //Small triangle strip that creates a square, which will be transformed into the right rectangle shape
+            this.vertexCoordinates = new Float32Array( [
+              0, 0,
+              100, 0,
+              0, 100,
+              100, 100
+            ] );
+            this.buffer = gl.createBuffer();
+
+            gl.bindBuffer( gl.ARRAY_BUFFER, this.buffer );
+            gl.bufferData( gl.ARRAY_BUFFER, this.vertexCoordinates, gl.STATIC_DRAW );
+          };
+          canvasNode.render = function( gl, shaderProgram ) {
+            console.log( 'hello webglnode' );
+
+            //OHTWO TODO: optimize
+            var viewMatrix = this.instances[0].relativeMatrix.toAffineMatrix4();
+
+            // combine image matrix (to scale aspect ratios), the trail's matrix, and the matrix to device coordinates
+            gl.uniformMatrix4fv( shaderProgram.uniformLocations.uModelViewMatrix, false, viewMatrix.entries );
+
+            //Indicate the branch of logic to use in the ubershader.  In this case, a texture should be used for the image
+            gl.uniform1i( shaderProgram.uniformLocations.uFragmentType, scenery.WebGLBlock.fragmentTypeFill );
+            gl.uniform4f( shaderProgram.uniformLocations.uColor, 1, 0, 1, 1 );
+
+            gl.bindBuffer( gl.ARRAY_BUFFER, this.buffer );
+            gl.vertexAttribPointer( shaderProgram.attributeLocations.aVertex, 2, gl.FLOAT, false, 0, 0 );
+            gl.drawArrays( gl.TRIANGLE_STRIP, 0, 4 );
+
+          };
+          canvasNode.dispose = function() {
+            console.log( 'hello goodbye' );
+            this.gl.deleteBuffer( this.buffer );
+          };
+          scene.addChild( canvasNode );
+        },
+        renderers: [ 'webgl' ]
+      },
+      {
         name: 'Rectangle',
         width: 128,
         height: 64,
