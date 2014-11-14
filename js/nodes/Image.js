@@ -26,6 +26,8 @@ define( function( require ) {
   var SVGSelfDrawable = require( 'SCENERY/display/SVGSelfDrawable' );
   var CanvasSelfDrawable = require( 'SCENERY/display/CanvasSelfDrawable' );
   var SelfDrawable = require( 'SCENERY/display/SelfDrawable' );
+  var WebGLSelfDrawable = require( 'SCENERY/display/WebGLSelfDrawable' );
+  var WebGLBlock = require( 'SCENERY/display/WebGLBlock' );
 
   // TODO: change this based on memory and performance characteristics of the platform
   var keepDOMImageElements = true; // whether we should pool DOM elements for the DOM rendering states, or whether we should free them when possible for memory
@@ -87,11 +89,11 @@ define( function( require ) {
 
     invalidateSupportedRenderers: function() {
       if ( this._image instanceof HTMLCanvasElement ) {
-        this.setRendererBitmask( scenery.bitmaskBoundsValid | scenery.bitmaskSupportsCanvas );
+        this.setRendererBitmask( scenery.bitmaskBoundsValid | scenery.bitmaskSupportsCanvas | scenery.bitmaskSupportsWebGL );
       }
       else {
         // assumes HTMLImageElement
-        this.setRendererBitmask( scenery.bitmaskBoundsValid | scenery.bitmaskSupportsCanvas | scenery.bitmaskSupportsSVG | scenery.bitmaskSupportsDOM );
+        this.setRendererBitmask( scenery.bitmaskBoundsValid | scenery.bitmaskSupportsCanvas | scenery.bitmaskSupportsSVG | scenery.bitmaskSupportsDOM | scenery.bitmaskSupportsWebGL );
       }
     },
 
@@ -162,6 +164,10 @@ define( function( require ) {
 
     createCanvasDrawable: function( renderer, instance ) {
       return Image.ImageCanvasDrawable.createFromPool( renderer, instance );
+    },
+
+    createWebGLDrawable: function( renderer, instance ) {
+      return Image.ImageWebGLDrawable.createFromPool( renderer, instance );
     },
 
     set image( value ) { this.setImage( value ); },
@@ -336,6 +342,147 @@ define( function( require ) {
     usesPaint: false,
     dirtyMethods: ['markDirtyImage']
   } );
+
+
+  /*---------------------------------------------------------------------------*
+   * WebGL rendering
+   *----------------------------------------------------------------------------*/
+
+  Image.ImageWebGLDrawable = inherit( WebGLSelfDrawable, function ImageWebGLDrawable( renderer, instance ) {
+    this.initializeWebGLSelfDrawable( renderer, instance );
+
+    //Small triangle strip that creates a square, which will be transformed into the right rectangle shape
+    this.vertexCoordinates = new Float32Array( [
+      0, 0,
+      1, 0,
+      0, 1,
+      1, 1
+    ] );
+  }, {
+    initializeContext: function( gl ) {
+      // cleanup old buffer, if applicable
+      this.disposeWebGLBuffers();
+
+      this.gl = gl;
+      this.buffer = gl.createBuffer();
+//      this.initializePaintableState();
+      this.updateRectangle();
+    },
+
+    // methods for forwarding dirty messages
+    canvasSelfDirty: function() {
+      // we pass this method and it is only called with blah.call( ... ), where the 'this' reference is set. ignore jshint
+      /* jshint -W040 */
+      this.markDirty();
+    },
+
+    //Nothing necessary since everything currently handled in the uModelViewMatrix below
+    //However, we may switch to dynamic draw, and handle the matrix change only where necessary in the future?
+    updateRectangle: function() {
+      var gl = this.gl;
+
+      var rect = this.node;
+      rect._rectX = 10;
+      rect._rectY = 10;
+      rect._rectWidth = 10;
+      rect._rectHeight = 10;
+
+      this.vertexCoordinates[0] = rect._rectX;
+      this.vertexCoordinates[1] = rect._rectY;
+
+      this.vertexCoordinates[2] = rect._rectX + rect._rectWidth;
+      this.vertexCoordinates[3] = rect._rectY;
+
+      this.vertexCoordinates[4] = rect._rectX;
+      this.vertexCoordinates[5] = rect._rectY + rect._rectHeight;
+
+      this.vertexCoordinates[6] = rect._rectX + rect._rectWidth;
+      this.vertexCoordinates[7] = rect._rectY + rect._rectHeight;
+
+      gl.bindBuffer( gl.ARRAY_BUFFER, this.buffer );
+      gl.bufferData(
+        gl.ARRAY_BUFFER,
+
+        this.vertexCoordinates,
+
+        //TODO: Once we are lazily handling the full matrix, we may benefit from DYNAMIC draw here, and updating the vertices themselves
+        gl.STATIC_DRAW );
+
+      // TODO: What to do when image changed and marked as dirty?  Where does that happen?
+      if ( this.dirtyFill || true ) {
+//        this.cleanPaintableState();
+      }
+    },
+
+    render: function( shaderProgram ) {
+      debugger;
+      var gl = this.gl;
+
+      // TODO: Handle rounded rectangles, please!
+      // use the standard version if it's a rounded rectangle, since there is no WebGL-optimized version for that
+      // TODO: how to handle fill/stroke delay optimizations here?
+      //OHTWO TODO: optimize
+
+      //TODO: what if image is null?
+      var viewMatrix = this.instance.relativeMatrix.toAffineMatrix4();
+
+      // combine image matrix (to scale aspect ratios), the trail's matrix, and the matrix to device coordinates
+      gl.uniformMatrix4fv( shaderProgram.uniformLocations.uModelViewMatrix, false, viewMatrix.entries );
+
+      //Indicate the branch of logic to use in the ubershader.  In this case, a texture should be used for the image
+      gl.uniform1i( shaderProgram.uniformLocations.uFragmentType, WebGLBlock.fragmentTypeFill );
+      gl.uniform4f( shaderProgram.uniformLocations.uColor, 1, 0, 0, 1 );
+
+      gl.bindBuffer( gl.ARRAY_BUFFER, this.buffer );
+      gl.vertexAttribPointer( shaderProgram.attributeLocations.aVertex, 2, gl.FLOAT, false, 0, 0 );
+      gl.drawArrays( gl.TRIANGLE_STRIP, 0, 4 );
+    },
+
+    dispose: function() {
+      // super
+      WebGLSelfDrawable.prototype.dispose.call( this );
+
+      this.disposeWebGLBuffers();
+    },
+
+    disposeWebGLBuffers: function() {
+      if ( this.gl ) {
+        this.gl.deleteBuffer( this.buffer );
+      }
+    },
+
+    markDirtyRectangle: function() {
+      this.markDirty();
+    },
+
+    // general flag set on the state, which we forward directly to the drawable's paint flag
+    markPaintDirty: function() {
+      this.markDirty();
+    },
+
+    onAttach: function( node ) {
+
+    },
+
+    // release the drawable
+    onDetach: function( node ) {
+      //OHTWO TODO: are we missing the disposal?
+    },
+
+    update: function() {
+      this.dirty = false;
+
+      if ( this.paintDirty ) {
+        this.updateRectangle();
+
+        this.setToCleanState();
+      }
+    }
+  } );
+
+  // set up pooling
+  /* jshint -W064 */
+  SelfDrawable.Poolable( Image.ImageWebGLDrawable );
 
   return Image;
 } );
