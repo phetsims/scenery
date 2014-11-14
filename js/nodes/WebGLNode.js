@@ -81,8 +81,13 @@ define( function( require ) {
   WebGLNode.prototype._mutatorKeys = [ 'canvasBounds' ].concat( Node.prototype._mutatorKeys );
 
   WebGLNode.WebGLNodeDrawable = inherit( WebGLSelfDrawable, function WebGLNodeDrawable( renderer, instance ) {
-    this.initializeWebGLSelfDrawable( renderer, instance );
+    this.initialize( renderer, instance );
   }, {
+    // called either from the constructor, or from pooling
+    initialize: function( renderer, instance ) {
+      this.initializeWebGLSelfDrawable( renderer, instance );
+    },
+
     initializeContext: function( gl ) {
       this.gl = gl;
 
@@ -94,12 +99,14 @@ define( function( require ) {
     },
 
     dispose: function() {
-      this.node.dispose();
+      if ( this.gl ) {
+        this.node.dispose();
+        this.gl = null;
+      }
 
       // super
       WebGLSelfDrawable.prototype.dispose.call( this );
 
-      this.gl = null;
     },
 
     // general flag set on the state, which we forward directly to the drawable's paint flag

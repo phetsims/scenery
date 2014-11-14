@@ -350,19 +350,26 @@ define( function( require ) {
    *----------------------------------------------------------------------------*/
 
   Image.ImageWebGLDrawable = inherit( WebGLSelfDrawable, function ImageWebGLDrawable( renderer, instance ) {
-    this.initializeWebGLSelfDrawable( renderer, instance );
-
-    //Small triangle strip that creates a square, which will be transformed into the right rectangle shape
-    this.vertexCoordinates = new Float32Array( 8 );
-
-    this.textureCoordinates = new Float32Array( [
-      0, 0,
-      1, 0,
-      0, 1,
-      1, 1
-    ] );
+    this.initialize( renderer, instance );
   }, {
+    // called from the constructor OR from pooling
+    initialize: function( renderer, instance ) {
+      this.initializeWebGLSelfDrawable( renderer, instance );
+
+      //Small triangle strip that creates a square, which will be transformed into the right rectangle shape
+      this.vertexCoordinates = this.vertexCoordinates || new Float32Array( 8 );
+
+      this.textureCoordinates = this.textureCoordinates || new Float32Array( [
+        0, 0,
+        1, 0,
+        0, 1,
+        1, 1
+      ] );
+    },
+
     initializeContext: function( gl ) {
+      assert && assert( gl );
+
       this.gl = gl;
 
       // cleanup old buffer, if applicable
@@ -477,12 +484,15 @@ define( function( require ) {
     ],
 
     dispose: function() {
-      this.disposeWebGLBuffers();
+      // we may have been disposed without initializeContext being called (never attached to a block)
+      if ( this.gl ) {
+        this.disposeWebGLBuffers();
+        this.gl = null;
+      }
 
       // super
       WebGLSelfDrawable.prototype.dispose.call( this );
 
-      this.gl = null;
     },
 
     disposeWebGLBuffers: function() {

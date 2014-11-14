@@ -135,7 +135,10 @@
         draw: function( scene, display ) {
 
           //TODO: Make it so we can pass in the paintCanvas call to the CanvasNode constructor.
-          var canvasNode = new scenery.WebGLNode( {canvasBounds: new dot.Bounds2( 0, 0, 100, 100 )} );
+          var canvasNode = new scenery.WebGLNode( {
+            canvasBounds: new dot.Bounds2( 0, 0, 100, 100 ),
+            x: 50
+          } );
           canvasNode.initialize = function( gl ) {
             console.log( 'init' );
 
@@ -173,7 +176,9 @@
           canvasNode.shaderAttributes = ['aVertex'];
           canvasNode.dispose = function() {
             console.log( 'hello goodbye' );
-            this.gl.deleteBuffer( this.buffer );
+            if ( this.gl ) {
+              this.gl.deleteBuffer( this.buffer );
+            }
           };
           scene.addChild( canvasNode );
         },
