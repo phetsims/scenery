@@ -117,8 +117,6 @@ define( function( require ) {
       Util.prepareForTransform( this.canvas, this.forceAcceleration );
       Util.unsetTransform( this.canvas ); // clear out any transforms that could have been previously applied
 
-      this.canvasDrawOffset = new Vector2();
-
       // store our backing scale so we don't have to look it up while fitting
       this.backingScale = ( renderer & Renderer.bitmaskWebGLLowResolution ) ? 1 : scenery.Util.backingScale( this.gl );
 
@@ -206,27 +204,26 @@ define( function( require ) {
       this.canvas.height = size.height * this.backingScale;
       this.canvas.style.width = size.width + 'px';
       this.canvas.style.height = size.height + 'px';
-      this.updateWebGLDimension( size.width, size.height );
+      this.updateWebGLDimension( 0, 0, size.width, size.height );
     },
 
     setSizeFitBounds: function() {
       var x = this.fitBounds.minX;
       var y = this.fitBounds.minY;
-      this.canvasDrawOffset.setXY( -x, -y ); // subtract off so we have a tight fit
       //OHTWO TODO PERFORMANCE: see if we can get a speedup by putting the backing scale in our transform instead of with CSS?
       Util.setTransform( 'matrix(1,0,0,1,' + x + ',' + y + ')', this.canvas, this.forceAcceleration ); // reapply the translation as a CSS transform
       this.canvas.width = this.fitBounds.width * this.backingScale;
       this.canvas.height = this.fitBounds.height * this.backingScale;
       this.canvas.style.width = this.fitBounds.width + 'px';
       this.canvas.style.height = this.fitBounds.height + 'px';
-      this.updateWebGLDimension( this.fitBounds.width, this.fitBounds.width );
+      this.updateWebGLDimension( -x, -y, this.fitBounds.width, this.fitBounds.width );
     },
 
-    updateWebGLDimension: function( width, height ) {
+    updateWebGLDimension: function( x, y, width, height ) {
       this.gl.viewport( 0, 0, width, height );
 
       // (0,height) => (0, -2) => ( 1, -1 )
-      this.projectionMatrix.set( Matrix4.translation( -1, 1, 0 ).timesMatrix( Matrix4.scaling( 2 / width, -2 / height, 1 ) ) );
+      this.projectionMatrix.set( Matrix4.translation( -1, 1, 0 ).timesMatrix( Matrix4.scaling( 2 / width, -2 / height, 1 ).timesMatrix( Matrix4.translation( x, y, 0 ) ) ) );
     },
 
     update: function() {
