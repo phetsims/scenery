@@ -166,9 +166,11 @@
 
             gl.bindBuffer( gl.ARRAY_BUFFER, this.buffer );
             gl.vertexAttribPointer( shaderProgram.attributeLocations.aVertex, 2, gl.FLOAT, false, 0, 0 );
+
             gl.drawArrays( gl.TRIANGLE_STRIP, 0, 4 );
 
           };
+          canvasNode.shaderAttributes = ['aVertex'];
           canvasNode.dispose = function() {
             console.log( 'hello goodbye' );
             this.gl.deleteBuffer( this.buffer );

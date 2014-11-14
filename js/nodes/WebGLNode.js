@@ -116,6 +116,11 @@ define( function( require ) {
       //OHTWO TODO: are we missing the disposal?
     },
 
+    // forward call to the WebGLNode
+    get shaderAttributes() {
+      return this.node.shaderAttributes;
+    },
+
     update: function() {
       this.dirty = false;
 

@@ -142,8 +142,12 @@ define( function( require ) {
         /********** Vertex Shader **********/
 
           'precision mediump float;\n' +
+
           //The vertex to be transformed
           'attribute vec3 aVertex;\n' +
+
+          // The texture coordinate
+          'attribute vec2 aTexCoord;\n' +
 
           // The projection matrix
           'uniform mat4 uProjectionMatrix;\n' +
@@ -162,7 +166,7 @@ define( function( require ) {
 
           //This texture is not needed for rectangles, but we (JO/SR) don't expect it to be expensive, so we leave
           //it for simplicity
-          '  texCoord = aVertex.xy;\n' +
+          '  texCoord = aTexCoord;\n' +
           '  gl_Position = uProjectionMatrix * uModelViewMatrix * vec4( aVertex, 1 );\n' +
           '}',
 
@@ -190,9 +194,12 @@ define( function( require ) {
           '  }\n' +
           '}',
 
-        ['aVertex'], // attribute names
+        ['aVertex', 'aTexCoord'], // attribute names
         ['uTexture', 'uProjectionMatrix', 'uModelViewMatrix', 'uColor', 'uFragmentType'] // uniform names
       );
+
+      this.shaderProgram.deactivateAttribute( 'aVertex' );
+      this.shaderProgram.deactivateAttribute( 'aTexCoord' );
 
       this.shaderProgram.use();
     },
@@ -251,6 +258,19 @@ define( function( require ) {
 
         //OHTWO TODO: PERFORMANCE: create an array for faster drawable iteration (this is probably a hellish memory access pattern)
         for ( var drawable = this.firstDrawable; drawable !== null; drawable = drawable.nextDrawable ) {
+          //OHTWO TODO: Performance for this lookup?
+          // enable and required attributes, and disable the rest, since if we leave an attribute enabled and our
+          // code doesn't use vertexAttribPointer to set it, WebGL will crash.
+          for ( var i = 0; i < this.shaderProgram.attributeNames.length; i++ ) {
+            var attributeName = this.shaderProgram.attributeNames[i];
+            if ( _.contains( drawable.shaderAttributes, attributeName ) ) {
+              this.shaderProgram.activateAttribute( attributeName );
+            }
+            else {
+              this.shaderProgram.deactivateAttribute( attributeName );
+            }
+          }
+
           drawable.render( this.shaderProgram );
 
           if ( drawable === this.lastDrawable ) { break; }

@@ -29,7 +29,6 @@ define( function( require ) {
   var WebGLSelfDrawable = require( 'SCENERY/display/WebGLSelfDrawable' );
   var WebGLBlock = require( 'SCENERY/display/WebGLBlock' );
   var Util = require( 'SCENERY/util/Util' );
-  var Matrix4 = require( 'DOT/Matrix4' );
 
   // TODO: change this based on memory and performance characteristics of the platform
   var keepDOMImageElements = true; // whether we should pool DOM elements for the DOM rendering states, or whether we should free them when possible for memory
@@ -354,7 +353,9 @@ define( function( require ) {
     this.initializeWebGLSelfDrawable( renderer, instance );
 
     //Small triangle strip that creates a square, which will be transformed into the right rectangle shape
-    this.vertexCoordinates = new Float32Array( [
+    this.vertexCoordinates = new Float32Array( 8 );
+
+    this.textureCoordinates = new Float32Array( [
       0, 0,
       1, 0,
       0, 1,
@@ -367,19 +368,27 @@ define( function( require ) {
       // cleanup old buffer, if applicable
       this.disposeWebGLBuffers();
 
+      // holds vertex coordinates
       this.vertexBuffer = gl.createBuffer();
+
+      // holds texture U,V coordinate pairs pointing into our texture coordinate space
+      this.textureBuffer = gl.createBuffer();
+
       this.updateImage();
+    },
+
+    transformVertexCoordinateX: function( x ) {
+      return x * this.canvasWidth;
+    },
+
+    transformVertexCoordinateY: function( y ) {
+      return ( 1 - y ) * this.canvasHeight;
     },
 
     //Nothing necessary since everything currently handled in the uModelViewMatrix below
     //However, we may switch to dynamic draw, and handle the matrix change only where necessary in the future?
     updateImage: function() {
       var gl = this.gl;
-
-      gl.bindBuffer( gl.ARRAY_BUFFER, this.vertexBuffer );
-
-      //TODO: Once we are lazily handling the full matrix, we may benefit from DYNAMIC draw here, and updating the vertices themselves
-      gl.bufferData( gl.ARRAY_BUFFER, this.vertexCoordinates, gl.STATIC_DRAW );
 
       if ( this.texture !== null ) {
         gl.deleteTexture( this.texture );
@@ -389,7 +398,6 @@ define( function( require ) {
         // TODO: only create once instance of this Canvas for reuse
         var canvas = document.createElement( 'canvas' );
         var context = canvas.getContext( '2d' );
-
 
         this.canvasWidth = canvas.width = Util.toPowerOf2( this.node.getImageWidth() );
         this.canvasHeight = canvas.height = Util.toPowerOf2( this.node.getImageHeight() );
@@ -409,6 +417,26 @@ define( function( require ) {
         gl.generateMipmap( gl.TEXTURE_2D );
 
         gl.bindTexture( gl.TEXTURE_2D, null );
+
+        this.vertexCoordinates[0] = this.transformVertexCoordinateX( 0 );
+        this.vertexCoordinates[1] = this.transformVertexCoordinateY( 0 );
+
+        this.vertexCoordinates[2] = this.transformVertexCoordinateX( 1 );
+        this.vertexCoordinates[3] = this.transformVertexCoordinateY( 0 );
+
+        this.vertexCoordinates[4] = this.transformVertexCoordinateX( 0 );
+        this.vertexCoordinates[5] = this.transformVertexCoordinateY( 1 );
+
+        this.vertexCoordinates[6] = this.transformVertexCoordinateX( 1 );
+        this.vertexCoordinates[7] = this.transformVertexCoordinateY( 1 );
+
+        gl.bindBuffer( gl.ARRAY_BUFFER, this.vertexBuffer );
+
+        //TODO: Once we are lazily handling the full matrix, we may benefit from DYNAMIC draw here, and updating the vertices themselves
+        gl.bufferData( gl.ARRAY_BUFFER, this.vertexCoordinates, gl.STATIC_DRAW );
+
+        gl.bindBuffer( gl.ARRAY_BUFFER, this.textureBuffer );
+        gl.bufferData( gl.ARRAY_BUFFER, this.textureCoordinates, gl.STATIC_DRAW );
       }
     },
 
@@ -420,7 +448,7 @@ define( function( require ) {
 
         //OHTWO TODO: optimize
         //TODO: This looks like an expense we don't want to incur at every render.  How about moving it to the GPU?
-        var viewMatrix = this.instance.relativeMatrix.toAffineMatrix4().timesMatrix( Matrix4.scaling( this.canvasWidth, -this.canvasHeight, 1 ).timesMatrix( Matrix4.translation( 0, -1 ) ) );
+        var viewMatrix = this.instance.relativeMatrix.toAffineMatrix4();
 
         // combine image matrix (to scale aspect ratios), the trail's matrix, and the matrix to device coordinates
         gl.uniformMatrix4fv( shaderProgram.uniformLocations.uModelViewMatrix, false, viewMatrix.entries );
@@ -432,12 +460,21 @@ define( function( require ) {
 
         gl.activeTexture( gl.TEXTURE0 );
         gl.bindTexture( gl.TEXTURE_2D, this.texture );
-        gl.bindBuffer( gl.ARRAY_BUFFER, this.vertexBuffer );
 
+        gl.bindBuffer( gl.ARRAY_BUFFER, this.vertexBuffer );
         gl.vertexAttribPointer( shaderProgram.attributeLocations.aVertex, 2, gl.FLOAT, false, 0, 0 );
+
+        gl.bindBuffer( gl.ARRAY_BUFFER, this.textureBuffer );
+        gl.vertexAttribPointer( shaderProgram.attributeLocations.aTexCoord, 2, gl.FLOAT, false, 0, 0 );
+
         gl.drawArrays( gl.TRIANGLE_STRIP, 0, 4 );
       }
     },
+
+    shaderAttributes: [
+      'aVertex',
+      'aTexCoord'
+    ],
 
     dispose: function() {
       this.disposeWebGLBuffers();
@@ -450,6 +487,7 @@ define( function( require ) {
 
     disposeWebGLBuffers: function() {
       this.gl.deleteBuffer( this.vertexBuffer );
+      this.gl.deleteBuffer( this.textureBuffer );
       this.gl.deleteTexture( this.texture );
     },
 

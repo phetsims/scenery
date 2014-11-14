@@ -929,9 +929,14 @@ define( function( require ) {
 
         gl.bindBuffer( gl.ARRAY_BUFFER, this.vertexBuffer );
         gl.vertexAttribPointer( shaderProgram.attributeLocations.aVertex, 2, gl.FLOAT, false, 0, 0 );
+
         gl.drawArrays( gl.TRIANGLE_STRIP, 0, 4 );
       }
     },
+
+    shaderAttributes: [
+      'aVertex'
+    ],
 
     dispose: function() {
       this.disposeWebGLBuffers();
