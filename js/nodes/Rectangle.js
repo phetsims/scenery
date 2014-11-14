@@ -964,13 +964,11 @@ define( function( require ) {
       //OHTWO TODO: are we missing the disposal?
     },
 
+    //TODO: Make sure all of the dirty flags make sense here.  Should we be using fillDirty, paintDirty, dirty, etc?
     update: function() {
-      this.dirty = false;
-
-      if ( this.paintDirty ) {
+      if ( this.dirty ) {
         this.updateRectangle();
-
-        this.setToCleanState();
+        this.dirty = false;
       }
     }
   } );
