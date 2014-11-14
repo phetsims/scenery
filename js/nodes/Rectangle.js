@@ -893,6 +893,7 @@ define( function( require ) {
       this.vertexCoordinates[6] = rect._rectX + rect._rectWidth;
       this.vertexCoordinates[7] = rect._rectY + rect._rectHeight;
 
+      //TODO: Why is there a bind here and in render()
       gl.bindBuffer( gl.ARRAY_BUFFER, this.buffer );
       gl.bufferData(
         gl.ARRAY_BUFFER,
