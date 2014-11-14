@@ -13,7 +13,6 @@ define( function( require ) {
   var inherit = require( 'PHET_CORE/inherit' );
   var Poolable = require( 'PHET_CORE/Poolable' );
   var cleanArray = require( 'PHET_CORE/cleanArray' );
-  var Vector2 = require( 'DOT/Vector2' );
   var Matrix4 = require( 'DOT/Matrix4' );
   var scenery = require( 'SCENERY/scenery' );
   var FittedBlock = require( 'SCENERY/display/FittedBlock' );
