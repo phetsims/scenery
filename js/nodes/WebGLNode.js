@@ -93,10 +93,10 @@ define( function( require ) {
     },
 
     dispose: function() {
+      this.node.dispose();
+
       // super
       WebGLSelfDrawable.prototype.dispose.call( this );
-
-      this.node.dispose();
     },
 
     // general flag set on the state, which we forward directly to the drawable's paint flag
