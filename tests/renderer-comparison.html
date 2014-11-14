@@ -12,6 +12,9 @@
   <script src="../../sherpa/lodash-2.4.1.min.js"></script>
   <script src="../../sherpa/has.js"></script>
 
+  <!-- Parse query parameters, so we can easily subset the tests.-->
+  <script src="../../phetcommon/js/util/query-parameters.js"></script>
+
   <!-- Our code, in either the concatenated 'with comments' version or the minified version -->
   <script data-main="../js/config.js" src="../../sherpa/require-2.1.11.js"></script>
 
@@ -77,11 +80,11 @@
   requirejs( [ 'main', '../../kite/js/main', '../../dot/js/main' ], function( scenery, kite, dot ) {
     var testCases = [
       {
-        name: 'Rectangle',
-        width: 128,
-        height: 64,
+        name: 'simple-blue-rectangle',
+        width: 200,
+        height: 200,
         draw: function( scene, display ) {
-          scene.addChild( new scenery.Rectangle( 10, 10, 50, 50, {
+          scene.addChild( new scenery.Rectangle( 50, 50, 100, 100, {
             fill: 'blue'
           } ) );
         },
@@ -641,12 +644,33 @@
       }
     ];
 
-    var renderers = [
+    var filterSubset = function( array, queryParameterKey ) {
+      if ( phetcommon.getQueryParameter( queryParameterKey ) ) {
+        var test = phetcommon.getQueryParameter( queryParameterKey );
+        var testIndices = test.split( '.' ).map( function( test ) {
+          return parseInt( test, 10 );
+        } );
+        var result = [];
+        for ( var i = 0; i < testIndices.length; i++ ) {
+          var testIndex = testIndices[i];
+          result.push( array[testIndex] );
+        }
+        return result;
+      }
+    };
+
+    // Select the renderers to be compared (for tests that declare support for them).
+    var renderers = filterSubset( [
       'canvas',
       'svg',
       'dom',
       'webgl'
-    ];
+    ], 'renderer' );
+
+    // Allow selection of the tests by a query parameter ?test=...
+    // For instance, when test=0 is specified, only show the 0th test.
+    // When test=0.1.2 is specified, show tests 0,1,2
+    testCases = filterSubset( testCases, 'test' );
 
     _.each( testCases, function( testCase ) {
       var $testTitle = $( document.createElement( 'h2' ) );
