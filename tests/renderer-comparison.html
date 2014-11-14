@@ -139,7 +139,7 @@
             canvasBounds: new dot.Bounds2( 0, 0, 100, 100 ),
             x: 50
           } );
-          canvasNode.initialize = function( gl ) {
+          canvasNode.initializeContext = function( gl ) {
             console.log( 'init' );
 
             //Small triangle strip that creates a square, which will be transformed into the right rectangle shape
