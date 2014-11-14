@@ -517,7 +517,7 @@ define( function( require ) {
    * Rendering state mixin (DOM/SVG)
    *----------------------------------------------------------------------------*/
 
-  var RectangleRenderState = Rectangle.RectangleRenderState = function( drawableType ) {
+  var RectangleStatefulDrawableMixin = Rectangle.RectangleStatefulDrawableMixin = function( drawableType ) {
     var proto = drawableType.prototype;
 
     // initializes, and resets (so we can support pooled states)
@@ -725,7 +725,7 @@ define( function( require ) {
   } );
 
   /* jshint -W064 */
-  RectangleRenderState( RectangleDOMDrawable );
+  RectangleStatefulDrawableMixin( RectangleDOMDrawable );
 
   /* jshint -W064 */
   SelfDrawable.Poolable( RectangleDOMDrawable );
@@ -736,7 +736,7 @@ define( function( require ) {
 
   Rectangle.RectangleSVGDrawable = SVGSelfDrawable.createDrawable( {
     type: function RectangleSVGDrawable( renderer, instance ) { this.initialize( renderer, instance ); },
-    stateType: RectangleRenderState,
+    stateType: RectangleStatefulDrawableMixin,
     initialize: function( renderer, instance ) {
       this.lastArcW = -1; // invalid on purpose
       this.lastArcH = -1; // invalid on purpose
