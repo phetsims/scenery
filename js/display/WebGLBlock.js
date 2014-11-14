@@ -226,11 +226,12 @@ define( function( require ) {
     },
 
     updateWebGLDimension: function( x, y, width, height ) {
-      this.gl.viewport( 0, 0, width, height );
+      this.gl.viewport( 0, 0, width * this.backingScale, height * this.backingScale );
 
       // (0,width) => (0, -2) => (-1, 1)
       // (0,height) => (0, -2) => ( 1, -1 )
-      this.projectionMatrix.set( Matrix4.translation( -1, 1, 0 ).timesMatrix( Matrix4.scaling( 2 / width, -2 / height, 1 ).timesMatrix( Matrix4.translation( x, y, 0 ) ) ) );
+      this.projectionMatrix.set( Matrix4.translation( -1, 1, 0 ).timesMatrix( Matrix4.scaling( 2 / width, -2 / height, 1 ) )
+                                                                .timesMatrix( Matrix4.translation( x, y, 0 ) ) );
     },
 
     update: function() {
