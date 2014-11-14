@@ -12,7 +12,7 @@ define( function( require ) {
   'use strict';
 
   var inherit = require( 'PHET_CORE/inherit' );
-  var Poolable = require( 'PHET_CORE/Poolable' );
+  var PoolableMixin = require( 'PHET_CORE/PoolableMixin' );
   var scenery = require( 'SCENERY/scenery' );
 
   scenery.BatchedDOMEvent = function BatchedDOMEvent( domEvent, type, callback ) {
@@ -77,7 +77,7 @@ define( function( require ) {
   };
 
   /* jshint -W064 */
-  Poolable( BatchedDOMEvent, {
+  PoolableMixin( BatchedDOMEvent, {
     constructorDuplicateFactory: function( pool ) {
       return function( domEvent, type, callback ) {
         if ( pool.length ) {

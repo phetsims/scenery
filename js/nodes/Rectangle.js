@@ -728,7 +728,7 @@ define( function( require ) {
   RectangleStatefulDrawableMixin( RectangleDOMDrawable );
 
   /* jshint -W064 */
-  SelfDrawable.Poolable( RectangleDOMDrawable );
+  SelfDrawable.PoolableMixin( RectangleDOMDrawable );
 
   /*---------------------------------------------------------------------------*
    * SVG rendering
@@ -994,7 +994,7 @@ define( function( require ) {
 
   // set up pooling
   /* jshint -W064 */
-  SelfDrawable.Poolable( Rectangle.RectangleWebGLDrawable );
+  SelfDrawable.PoolableMixin( Rectangle.RectangleWebGLDrawable );
 
   return Rectangle;
 } );

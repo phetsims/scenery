@@ -658,7 +658,7 @@ define( function( require ) {
   TextRenderState( TextDOMDrawable );
 
   /* jshint -W064 */
-  SelfDrawable.Poolable( TextDOMDrawable );
+  SelfDrawable.PoolableMixin( TextDOMDrawable );
 
   /*---------------------------------------------------------------------------*
    * SVG rendering

@@ -11,7 +11,7 @@ define( function( require ) {
   'use strict';
 
   var inherit = require( 'PHET_CORE/inherit' );
-  var Poolable = require( 'PHET_CORE/Poolable' );
+  var PoolableMixin = require( 'PHET_CORE/PoolableMixin' );
   var cleanArray = require( 'PHET_CORE/cleanArray' );
   var Matrix4 = require( 'DOT/Matrix4' );
   var scenery = require( 'SCENERY/scenery' );
@@ -356,7 +356,7 @@ define( function( require ) {
   } );
 
   /* jshint -W064 */
-  Poolable( WebGLBlock, {
+  PoolableMixin( WebGLBlock, {
     constructorDuplicateFactory: function( pool ) {
       return function( display, renderer, transformRootInstance, filterRootInstance ) {
         if ( pool.length ) {

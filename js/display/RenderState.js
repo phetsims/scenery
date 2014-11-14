@@ -30,7 +30,7 @@ define( function( require ) {
   'use strict';
 
   var inherit = require( 'PHET_CORE/inherit' );
-  var Poolable = require( 'PHET_CORE/Poolable' );
+  var PoolableMixin = require( 'PHET_CORE/PoolableMixin' );
   var scenery = require( 'SCENERY/scenery' );
   require( 'SCENERY/display/Renderer' );
   require( 'SCENERY/util/Trail' );
@@ -270,7 +270,7 @@ define( function( require ) {
   };
 
   /* jshint -W064 */
-  Poolable( RenderState, {
+  PoolableMixin( RenderState, {
     constructorDuplicateFactory: function( pool ) {
       return function( node, preferredRenderers, svgRenderer, canvasRenderer, isUnderCanvasCache, isShared, isDisplayRoot ) {
         if ( pool.length ) {

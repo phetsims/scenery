@@ -2,7 +2,7 @@
 
 
 /**
- * Poolable wrapper for SVG <group> elements. We store state and add listeners directly to the corresponding Node, so that we can set dirty flags and
+ * PoolableMixin wrapper for SVG <group> elements. We store state and add listeners directly to the corresponding Node, so that we can set dirty flags and
  * smartly update only things that have changed. This takes a load off of SVGBlock.
  *
  * @author Jonathan Olson <jonathan.olson@colorado.edu>
@@ -12,7 +12,7 @@ define( function( require ) {
   'use strict';
 
   var inherit = require( 'PHET_CORE/inherit' );
-  var Poolable = require( 'PHET_CORE/Poolable' );
+  var PoolableMixin = require( 'PHET_CORE/PoolableMixin' );
   var cleanArray = require( 'PHET_CORE/cleanArray' );
   var scenery = require( 'SCENERY/scenery' );
 
@@ -401,7 +401,7 @@ define( function( require ) {
   };
 
   /* jshint -W064 */
-  Poolable( SVGGroup, {
+  PoolableMixin( SVGGroup, {
     constructorDuplicateFactory: function( pool ) {
       return function( block, instance, parent ) {
         if ( pool.length ) {

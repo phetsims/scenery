@@ -370,7 +370,7 @@ define( function( require ) {
   CircleRenderState( CircleDOMDrawable );
 
   /* jshint -W064 */
-  SelfDrawable.Poolable( CircleDOMDrawable );
+  SelfDrawable.PoolableMixin( CircleDOMDrawable );
 
   /*---------------------------------------------------------------------------*
    * SVG Rendering

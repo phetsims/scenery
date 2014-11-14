@@ -101,7 +101,7 @@ define( function( require ) {
 
     // set up pooling
     /* jshint -W064 */
-    SelfDrawable.Poolable( type );
+    SelfDrawable.PoolableMixin( type );
 
     if ( options.dirtyMethods ) {
       for ( var i = 0; i < options.dirtyMethods.length; i++ ) {

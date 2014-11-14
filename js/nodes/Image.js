@@ -293,7 +293,7 @@ define( function( require ) {
   ImageRenderState( ImageDOMDrawable );
 
   /* jshint -W064 */
-  SelfDrawable.Poolable( ImageDOMDrawable );
+  SelfDrawable.PoolableMixin( ImageDOMDrawable );
 
   /*---------------------------------------------------------------------------*
    * SVG Rendering
@@ -532,7 +532,7 @@ define( function( require ) {
 
   // set up pooling
   /* jshint -W064 */
-  SelfDrawable.Poolable( Image.ImageWebGLDrawable );
+  SelfDrawable.PoolableMixin( Image.ImageWebGLDrawable );
 
   return Image;
 } );

@@ -22,7 +22,7 @@ define( function( require ) {
   'use strict';
 
   var inherit = require( 'PHET_CORE/inherit' );
-  var Poolable = require( 'PHET_CORE/Poolable' );
+  var PoolableMixin = require( 'PHET_CORE/PoolableMixin' );
   var scenery = require( 'SCENERY/scenery' );
   var Drawable = require( 'SCENERY/display/Drawable' );
 
@@ -60,7 +60,7 @@ define( function( require ) {
       // correct "change nothing".
       this.collapsedEmpty = false;
 
-      // chaining for Poolable
+      // chaining for PoolableMixin
       return this;
     },
 
@@ -148,7 +148,7 @@ define( function( require ) {
   } );
 
   /* jshint -W064 */
-  Poolable( ChangeInterval, {
+  PoolableMixin( ChangeInterval, {
     constructorDuplicateFactory: function( pool ) {
       return function( drawableBefore, drawableAfter ) {
         if ( pool.length ) {

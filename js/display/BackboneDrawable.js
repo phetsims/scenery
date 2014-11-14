@@ -12,7 +12,7 @@ define( function( require ) {
 
   // modules
   var inherit = require( 'PHET_CORE/inherit' );
-  var Poolable = require( 'PHET_CORE/Poolable' );
+  var PoolableMixin = require( 'PHET_CORE/PoolableMixin' );
   var cleanArray = require( 'PHET_CORE/cleanArray' );
   var scenery = require( 'SCENERY/scenery' );
   var Drawable = require( 'SCENERY/display/Drawable' );
@@ -430,7 +430,7 @@ define( function( require ) {
   };
 
   /* jshint -W064 */
-  Poolable( BackboneDrawable, {
+  PoolableMixin( BackboneDrawable, {
     constructorDuplicateFactory: function( pool ) {
       return function( display, backboneInstance, transformRootInstance, renderer, isDisplayRoot ) {
         if ( pool.length ) {

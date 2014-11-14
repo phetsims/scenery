@@ -99,7 +99,7 @@ define( function( require ) {
   'use strict';
 
   var inherit = require( 'PHET_CORE/inherit' );
-  var Poolable = require( 'PHET_CORE/Poolable' );
+  var PoolableMixin = require( 'PHET_CORE/PoolableMixin' );
   var cleanArray = require( 'PHET_CORE/cleanArray' );
   var Matrix3 = require( 'DOT/Matrix3' );
   var scenery = require( 'SCENERY/scenery' );
@@ -1599,7 +1599,7 @@ define( function( require ) {
 
   // object pooling
   /* jshint -W064 */
-  Poolable( Instance, {
+  PoolableMixin( Instance, {
     constructorDuplicateFactory: function( pool ) {
       return function( display, trail ) {
         if ( pool.length ) {

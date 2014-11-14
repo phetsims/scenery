@@ -3,7 +3,7 @@
 
 /**
  * Something that can be displayed with a specific renderer.
- * NOTE: Drawables are assumed to be pooled with Poolable, as freeToPool() is called.
+ * NOTE: Drawables are assumed to be pooled with PoolableMixin, as freeToPool() is called.
  *
  * A drawable's life-cycle starts with its initialization (calling initializeDrawable once), and ends with its disposal
  * (where it is freed to its own pool).

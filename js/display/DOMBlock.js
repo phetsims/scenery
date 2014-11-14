@@ -12,7 +12,7 @@ define( function( require ) {
   'use strict';
 
   var inherit = require( 'PHET_CORE/inherit' );
-  var Poolable = require( 'PHET_CORE/Poolable' );
+  var PoolableMixin = require( 'PHET_CORE/PoolableMixin' );
   var scenery = require( 'SCENERY/scenery' );
   var Block = require( 'SCENERY/display/Block' );
 
@@ -68,7 +68,7 @@ define( function( require ) {
   } );
 
   /* jshint -W064 */
-  Poolable( DOMBlock, {
+  PoolableMixin( DOMBlock, {
     constructorDuplicateFactory: function( pool ) {
       return function( display, domDrawable ) {
         if ( pool.length ) {

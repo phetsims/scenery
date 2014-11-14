@@ -240,7 +240,7 @@ define( function( require ) {
   } );
 
   /* jshint -W064 */
-  SelfDrawable.Poolable( DOMDrawable );
+  SelfDrawable.PoolableMixin( DOMDrawable );
 
   return DOM;
 } );

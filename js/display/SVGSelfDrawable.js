@@ -227,7 +227,7 @@ define( function( require ) {
 
     // set up pooling
     /* jshint -W064 */
-    SelfDrawable.Poolable( type );
+    SelfDrawable.PoolableMixin( type );
 
     return type;
   };
