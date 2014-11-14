@@ -24,10 +24,6 @@ define( function( require ) {
   scenery.WebGLNode = function WebGLNode( options ) {
     Node.call( this, options );
     this.setRendererBitmask( scenery.bitmaskBoundsValid | scenery.bitmaskSupportsWebGL );
-
-    if ( options && options.canvasBounds ) {
-      this.setCanvasBounds( options.canvasBounds );
-    }
   };
   var WebGLNode = scenery.WebGLNode;
 

@@ -23,10 +23,6 @@ define( function( require ) {
   scenery.CanvasNode = function CanvasNode( options ) {
     Node.call( this, options );
     this.setRendererBitmask( scenery.bitmaskBoundsValid | scenery.bitmaskSupportsCanvas );
-
-    if ( options && options.canvasBounds ) {
-      this.setCanvasBounds( options.canvasBounds );
-    }
   };
   var CanvasNode = scenery.CanvasNode;
 
