@@ -195,7 +195,7 @@ define( function( require ) {
   };
 
   /*---------------------------------------------------------------------------*
-   * Rendering State mixin (DOM/SVG)
+   * Rendering State mixin (DOM/SVG) //TODO: Does this also apply to WebGL?
    *----------------------------------------------------------------------------*/
 
   var ImageRenderState = Image.ImageRenderState = function( drawableType ) {
@@ -366,8 +366,8 @@ define( function( require ) {
       this.disposeWebGLBuffers();
 
       this.gl = gl;
-      this.buffer = gl.createBuffer();
-      this.updateRectangle();
+      this.vertexBuffer = gl.createBuffer();
+      this.updateImage();
     },
 
     // methods for forwarding dirty messages
@@ -379,22 +379,15 @@ define( function( require ) {
 
     //Nothing necessary since everything currently handled in the uModelViewMatrix below
     //However, we may switch to dynamic draw, and handle the matrix change only where necessary in the future?
-    updateRectangle: function() {
+    updateImage: function() {
       var gl = this.gl;
 
-      gl.bindBuffer( gl.ARRAY_BUFFER, this.buffer );
-      gl.bufferData(
-        gl.ARRAY_BUFFER,
+      gl.bindBuffer( gl.ARRAY_BUFFER, this.vertexBuffer );
 
-        this.vertexCoordinates,
-
-        //TODO: Once we are lazily handling the full matrix, we may benefit from DYNAMIC draw here, and updating the vertices themselves
-        gl.STATIC_DRAW );
+      //TODO: Once we are lazily handling the full matrix, we may benefit from DYNAMIC draw here, and updating the vertices themselves
+      gl.bufferData( gl.ARRAY_BUFFER, this.vertexCoordinates, gl.STATIC_DRAW );
 
       // TODO: What to do when image changed and marked as dirty?  Where does that happen?
-      if ( this.dirtyFill || true ) {
-//        this.cleanPaintableState();
-      }
 
       if ( this.texture !== null ) {
         gl.deleteTexture( this.texture );
@@ -445,7 +438,6 @@ define( function( require ) {
       gl.bindTexture( gl.TEXTURE_2D, this.texture );
       gl.bindBuffer( gl.ARRAY_BUFFER, this.vertexBuffer );
 
-      gl.bindBuffer( gl.ARRAY_BUFFER, this.buffer );
       gl.vertexAttribPointer( shaderProgram.attributeLocations.aVertex, 2, gl.FLOAT, false, 0, 0 );
       gl.drawArrays( gl.TRIANGLE_STRIP, 0, 4 );
     },
@@ -459,7 +451,8 @@ define( function( require ) {
 
     disposeWebGLBuffers: function() {
       if ( this.gl ) {
-        this.gl.deleteBuffer( this.buffer );
+        this.gl.deleteBuffer( this.vertexBuffer );
+        this.gl.deleteTexture( this.texture );
       }
     },
 
@@ -485,7 +478,7 @@ define( function( require ) {
       this.dirty = false;
 
       if ( this.paintDirty ) {
-        this.updateRectangle();
+        this.updateImage();
 
         this.setToCleanState();
       }
