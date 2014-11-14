@@ -59,6 +59,10 @@ define( function( require ) {
       // throw new Error( 'WebGLNode needs containsPointSelf implemented' );
     },
 
+    canvasPaintSelf: function( wrapper ) {
+      assert && assert( 'unimplemented: canvasPaintSelf in WebGLNode' );
+    },
+
     createWebGLDrawable: function( renderer, instance ) {
       return WebGLNode.WebGLNodeDrawable.createFromPool( renderer, instance );
     },
