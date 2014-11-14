@@ -114,11 +114,11 @@
 
           window.displayTest = function() {
             setTimeout( function(){
-              window.rect = new scenery.Rectangle( 0, 0, 100, 50, { fill: 'red' } );
+              window.rect = new scenery.Rectangle( 20, 30, 100, 75, { fill: 'red', renderer: 'webgl' } );
 
               scene.addChild( rect );
 
-              rect.renderer = 'webgl';
+              display.updateDisplay();
             } );
           };
 

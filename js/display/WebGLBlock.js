@@ -216,12 +216,13 @@ define( function( require ) {
       this.canvas.height = this.fitBounds.height * this.backingScale;
       this.canvas.style.width = this.fitBounds.width + 'px';
       this.canvas.style.height = this.fitBounds.height + 'px';
-      this.updateWebGLDimension( -x, -y, this.fitBounds.width, this.fitBounds.width );
+      this.updateWebGLDimension( -x, -y, this.fitBounds.width, this.fitBounds.height );
     },
 
     updateWebGLDimension: function( x, y, width, height ) {
       this.gl.viewport( 0, 0, width, height );
 
+      // (0,width) => (0, -2) => (-1, 1)
       // (0,height) => (0, -2) => ( 1, -1 )
       this.projectionMatrix.set( Matrix4.translation( -1, 1, 0 ).timesMatrix( Matrix4.scaling( 2 / width, -2 / height, 1 ).timesMatrix( Matrix4.translation( x, y, 0 ) ) ) );
     },
