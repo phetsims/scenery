@@ -72,7 +72,28 @@ define( function( require ) {
   // flags object used for determining what the cursor should be underneath a mouse
   var isMouseFlags = { isMouse: true };
 
-  // Constructs a Display that will show the rootNode and its subtree in a visual state. Default options provided below
+   /*
+   * Constructs a Display that will show the rootNode and its subtree in a visual state. Default options provided below
+   *
+   * @param {Node} rootNode - Displays this node and all of its descendants
+   *
+   * Valid parameters in the parameter object:
+   * {
+   *   allowSceneOverflow: false,           // usually anything displayed outside of this $main (DOM/CSS3 transformed SVG) is hidden with CSS overflow
+   *   allowCSSHacks: true,                 // applies styling that prevents mobile browser graphical issues
+   *   enablePointerEvents: true,           // allows pointer events / MSPointerEvent to be used on supported platforms.
+   *   width: <current main width>,         // override the main container's width
+   *   height: <current main height>,       // override the main container's height
+   *   allowWebGL: true                     // boolean flag that indicates whether scenery is allowed to use WebGL for rendering
+   *                                        // Makes it possible to disable WebGL for ease of testing on non-WebGL platforms, see #289
+   *   webglMakeLostContextSimulatingCanvas: false   // Flag to indicate whether the WebGLBlocks should wrap the context with the makeLostContextSimulatingCanvas
+   *                                                 // call from the khronos webgl-debug tools (must be in the path). This is done here because it will be important
+   *                                                 // to easily simulate context loss on many devices, and the canvas must be wrapped before the rendering context is
+   *                                                 // retrieved
+   *   webglContextLossIncremental: false   // Flag to indicate whether an incremental webgl context loss should be triggered on the first context loss
+   *                                        // This is because we must test that the code handles context loss between every pair of adjacent gl calls.
+   * }
+   */
   scenery.Display = function Display( rootNode, options ) {
 
     // supertype call to axon.Events (should just initialize a few properties here, notably _eventListeners and _staticEventListeners)
@@ -91,7 +112,11 @@ define( function( require ) {
       //OHTWO TODO: hook up enablePointerEvents
       enablePointerEvents: true, // whether we should specifically listen to pointer events if we detect support
       defaultCursor: 'default',  // what cursor is used when no other cursor is specified
-      backgroundColor: null      // initial background color
+      backgroundColor: null,      // initial background color
+
+      allowWebGL: true,
+      webglMakeLostContextSimulatingCanvas: false,
+      webglContextLossIncremental: false
     }, options );
 
     // The (integral, > 0) dimensions of the Display's DOM element (only updates the DOM element on updateDisplay())

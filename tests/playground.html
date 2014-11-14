@@ -114,28 +114,11 @@
 
           window.displayTest = function() {
             setTimeout( function(){
-              window.node = new scenery.Node( { x: 10 } );
-              // window.node.rendererOptions = { cssTransform: true };
-              window.rect = new scenery.Rectangle( 0, 0, 100, 50, 0, 0, {
-                fill: new scenery.LinearGradient( 0, 0, 100, 0 ).addColorStop( 0, 'red' ).addColorStop( 1, 'blue' )
-              } );
-              node.addChild( rect );
-              scene.addChild( node );
+              window.rect = new scenery.Rectangle( 0, 0, 100, 50, { fill: 'red' } );
 
-              window.circle = new scenery.Circle( 50, { fill: 'black', x: 30, y: 60 } );
-              node.addChild( circle );
+              scene.addChild( rect );
 
-              node.centerX = display.width / 2;
-              node.centerY = display.height / 2;
-
-              circle.addInputListener( new scenery.SimpleDragHandler( {
-                translate: function( data ) {
-                  circle.translate( data.delta );
-                }
-              } ) );
-              circle.cursor = 'pointer';
-
-              display.updateDisplay();
+              rect.renderer = 'webgl';
             } );
           };
 

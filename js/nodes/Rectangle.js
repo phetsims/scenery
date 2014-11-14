@@ -19,12 +19,14 @@ define( function( require ) {
   var Dimension2 = require( 'DOT/Dimension2' );
   var Matrix3 = require( 'DOT/Matrix3' );
   var Features = require( 'SCENERY/util/Features' );
+  var Color = require( 'SCENERY/util/Color' );
   var Paintable = require( 'SCENERY/nodes/Paintable' );
   var DOMSelfDrawable = require( 'SCENERY/display/DOMSelfDrawable' );
   var SVGSelfDrawable = require( 'SCENERY/display/SVGSelfDrawable' );
   var CanvasSelfDrawable = require( 'SCENERY/display/CanvasSelfDrawable' );
   var WebGLSelfDrawable = require( 'SCENERY/display/WebGLSelfDrawable' );
   var SelfDrawable = require( 'SCENERY/display/SelfDrawable' );
+  var WebGLBlock = require( 'SCENERY/display/WebGLBlock' );
 
   // TODO: change this based on memory and performance characteristics of the platform
   var keepDOMRectangleElements = true; // whether we should pool DOM elements for the DOM rendering states, or whether we should free them when possible for memory
@@ -852,23 +854,134 @@ define( function( require ) {
    * WebGL rendering
    *----------------------------------------------------------------------------*/
 
-  Rectangle.RectangleWebGLDrawable = WebGLSelfDrawable.createDrawable( {
-    type: function RectangleWebGLDrawable( renderer, instance ) { this.initialize( renderer, instance ); },
-    paintWebGL: function paintWebGLRectangle( wrapper, node ) {
-      var context = wrapper.context;
+  Rectangle.RectangleWebGLDrawable = inherit( WebGLSelfDrawable, function RectangleWebGLDrawable( renderer, instance ) {
+    this.initializeWebGLSelfDrawable( renderer, instance );
+
+    //Small triangle strip that creates a square, which will be transformed into the right rectangle shape
+    this.vertexCoordinates = new Float32Array( [
+      0, 0,
+      1, 0,
+      0, 1,
+      1, 1
+    ] );
+  }, {
+    initializeContext: function( gl ) {
+      // cleanup old buffer, if applicable
+      this.disposeWebGLBuffers();
+
+      this.gl = gl;
+      this.buffer = gl.createBuffer();
+      this.initializePaintableState();
+      this.updateRectangle();
+    },
+
+    //Nothing necessary since everything currently handled in the uModelViewMatrix below
+    //However, we may switch to dynamic draw, and handle the matrix change only where necessary in the future?
+    updateRectangle: function() {
+      var gl = this.gl;
+
+      var rect = this.node;
+
+      this.vertexCoordinates[0] = rect._rectX;
+      this.vertexCoordinates[1] = rect._rectY;
+
+      this.vertexCoordinates[2] = rect._rectX + rect._rectWidth;
+      this.vertexCoordinates[3] = rect._rectY;
+
+      this.vertexCoordinates[4] = rect._rectX;
+      this.vertexCoordinates[5] = rect._rectY + rect._rectHeight;
+
+      this.vertexCoordinates[6] = rect._rectX + rect._rectWidth;
+      this.vertexCoordinates[7] = rect._rectY + rect._rectHeight;
+
+      gl.bindBuffer( gl.ARRAY_BUFFER, this.buffer );
+      gl.bufferData(
+        gl.ARRAY_BUFFER,
+
+        this.vertexCoordinates,
+
+        //TODO: Once we are lazily handling the full matrix, we may benefit from DYNAMIC draw here, and updating the vertices themselves
+        gl.STATIC_DRAW );
+
+      // TODO: move to PaintableWebGLState???
+      if ( this.dirtyFill ) {
+        this.color = Color.toColor( this.node._fill );
+        this.cleanPaintableState();
+      }
+    },
+
+    render: function( shaderProgram ) {
+      var gl = this.gl;
 
       // TODO: Handle rounded rectangles, please!
       // use the standard version if it's a rounded rectangle, since there is no WebGL-optimized version for that
       // TODO: how to handle fill/stroke delay optimizations here?
-      if ( node._fill ) {
-        node.beforeWebGLFill( wrapper ); // defined in Paintable
-        context.fillRect( node._rectX, node._rectY, node._rectWidth, node._rectHeight );
-        node.afterWebGLFill( wrapper ); // defined in Paintable
+      if ( this.node._fill ) {
+        //OHTWO TODO: optimize
+        var viewMatrix = this.instance.relativeMatrix.toAffineMatrix4();
+
+        // combine image matrix (to scale aspect ratios), the trail's matrix, and the matrix to device coordinates
+        gl.uniformMatrix4fv( shaderProgram.uniformLocations.uModelViewMatrix, false, viewMatrix.entries );
+
+        //Indicate the branch of logic to use in the ubershader.  In this case, a texture should be used for the image
+        gl.uniform1i( shaderProgram.uniformLocations.uFragmentType, WebGLBlock.fragmentTypeFill );
+        gl.uniform4f( shaderProgram.uniformLocations.uColor, this.color.r / 255, this.color.g / 255, this.color.b / 255, this.color.a );
+
+        gl.bindBuffer( gl.ARRAY_BUFFER, this.buffer );
+        gl.vertexAttribPointer( shaderProgram.attributeLocations.aVertex, 2, gl.FLOAT, false, 0, 0 );
+        gl.drawArrays( gl.TRIANGLE_STRIP, 0, 4 );
       }
     },
-    usesPaint: true,
-    dirtyMethods: ['markDirtyRectangle']
+
+    dispose: function() {
+      // super
+      WebGLSelfDrawable.prototype.dispose.call( this );
+
+      this.disposeWebGLBuffers();
+    },
+
+    disposeWebGLBuffers: function() {
+      if ( this.gl ) {
+        this.gl.deleteBuffer( this.buffer );
+      }
+    },
+
+    markDirtyRectangle: function() {
+      this.markDirty();
+    },
+
+    // general flag set on the state, which we forward directly to the drawable's paint flag
+    markPaintDirty: function() {
+      this.markDirty();
+    },
+
+    onAttach: function( node ) {
+
+    },
+
+    // release the drawable
+    onDetach: function( node ) {
+      //OHTWO TODO: are we missing the disposal?
+    },
+
+    update: function() {
+      this.dirty = false;
+
+      if ( this.paintDirty ) {
+        this.updateRectangle();
+
+        this.setToCleanState();
+      }
+    }
   } );
+
+  // include stubs (stateless) for marking dirty stroke and fill (if necessary). we only want one dirty flag, not multiple ones, for WebGL (for now)
+  /* jshint -W064 */
+  Paintable.PaintableState( Rectangle.RectangleWebGLDrawable );
+
+  // set up pooling
+  /* jshint -W064 */
+  SelfDrawable.Poolable( Rectangle.RectangleWebGLDrawable );
 
   return Rectangle;
 } );

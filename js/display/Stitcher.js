@@ -108,6 +108,7 @@ define( function( require ) {
   var CanvasBlock = require( 'SCENERY/display/CanvasBlock' );
   var SVGBlock = require( 'SCENERY/display/SVGBlock' );
   var DOMBlock = require( 'SCENERY/display/DOMBlock' );
+  var WebGLBlock = require( 'SCENERY/display/WebGLBlock' );
 
   scenery.Stitcher = function Stitcher( display, renderer ) {
     throw new Error( 'We are too abstract for that!' );

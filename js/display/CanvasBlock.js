@@ -115,6 +115,7 @@ define( function( require ) {
         }
 
         //OHTWO TODO: PERFORMANCE: create an array for faster drawable iteration (this is probably a hellish memory access pattern)
+        //OHTWO TODO: why is "drawable !== null" check needed
         for ( var drawable = this.firstDrawable; drawable !== null; drawable = drawable.nextDrawable ) {
           this.renderDrawable( drawable );
           if ( drawable === this.lastDrawable ) { break; }
