@@ -43,7 +43,7 @@
 
     .scene.wrong-renderer {
       border: 1px solid red;
-      background-color: rgba(255,0,0,0.1);
+      background-color: rgba(255, 0, 0, 0.1);
     }
 
     .scene.wrong-renderer:before {
@@ -122,6 +122,15 @@
           thumbnail.src = 'http://localhost:8080/acid-base-solutions/images/light-bulb-off.png';
         },
         renderers: [ 'canvas', 'svg', 'dom', 'webgl' ]
+      },
+      {
+        name: 'solid-line',
+        width: 200,
+        height: 200,
+        draw: function( scene, display ) {
+          scene.addChild( new scenery.Line( 10, 10, 190, 190, {stroke: 'black', lineWidth: 4} ) );
+        },
+        renderers: [ 'canvas', 'svg', 'webgl' ]
       },
       {
         name: 'CanvasNode',
@@ -819,7 +828,8 @@
 
           if ( display.getUsedRenderersBitmask() !== scenery.Renderer.fromName( renderer ) ) {
             $container.addClass( 'wrong-renderer' );
-          } else {
+          }
+          else {
             $container.removeClass( 'wrong-renderer' );
           }
         }
