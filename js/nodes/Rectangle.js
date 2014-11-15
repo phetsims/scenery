@@ -591,7 +591,7 @@ define( function( require ) {
     };
 
     /* jshint -W064 */
-    Paintable.PaintableState( drawableType );
+    Paintable.PaintableStatefulDrawableMixin( drawableType );
   };
 
   /*---------------------------------------------------------------------------*
@@ -990,7 +990,7 @@ define( function( require ) {
 
   // include stubs (stateless) for marking dirty stroke and fill (if necessary). we only want one dirty flag, not multiple ones, for WebGL (for now)
   /* jshint -W064 */
-  Paintable.PaintableState( Rectangle.RectangleWebGLDrawable );
+  Paintable.PaintableStatefulDrawableMixin( Rectangle.RectangleWebGLDrawable );
 
   // set up pooling
   /* jshint -W064 */

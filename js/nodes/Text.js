@@ -563,7 +563,7 @@ define( function( require ) {
     };
 
     /* jshint -W064 */
-    Paintable.PaintableState( drawableType );
+    Paintable.PaintableStatefulDrawableMixin( drawableType );
   };
 
   /*---------------------------------------------------------------------------*
