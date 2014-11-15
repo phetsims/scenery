@@ -149,10 +149,6 @@ define( function( require ) {
                     this.trySelfRenderer( node, scenery.Renderer.bitmaskOrderFourth( this.preferredRenderers ), 0 );
         }
 
-        if ( !success ) {
-          console.log( 'Was unable to use preferred renderer.' );
-        }
-
         // fall back to a default order
         success = success ||
                   this.trySelfRenderer( node, scenery.Renderer.bitmaskSVG, this.svgRenderer ) ||

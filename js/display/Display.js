@@ -462,6 +462,27 @@ define( function( require ) {
     },
 
     /*
+     * Returns the bitmask union of all renderers (canvas/svg/dom/webgl) that are used for display, excluding
+     * BackboneDrawables (which would be DOM).
+     */
+    getUsedRenderersBitmask: function() {
+      function renderersUnderBackbone( backbone ) {
+        var bitmask = 0;
+        _.each( backbone.blocks, function( block ) {
+          if ( block instanceof scenery.DOMBlock && block.domDrawable instanceof scenery.BackboneDrawable ) {
+            bitmask = bitmask | renderersUnderBackbone( block.domDrawable );
+          } else {
+            bitmask = bitmask | block.renderer;
+          }
+        } );
+        return bitmask;
+      }
+
+      // only return the renderer-specific portion (no other hints, etc)
+      return renderersUnderBackbone( this._rootBackbone ) & scenery.Renderer.bitmaskRendererArea;
+    },
+
+    /*
      * Called from Instances that will need a transform update (for listeners and precomputation).
      * @param passTransform {Boolean} - Whether we should pass the first transform root when validating transforms (should be true if the instance is transformed)
      */

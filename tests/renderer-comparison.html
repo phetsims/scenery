@@ -41,6 +41,19 @@
       border: 1px solid black;
     }
 
+    .scene.wrong-renderer {
+      border: 1px solid red;
+      background-color: rgba(255,0,0,0.1);
+    }
+
+    .scene.wrong-renderer:before {
+      content: "other renderer!";
+      position: absolute;
+      bottom: 0;
+      right: 2px;
+      color: red;
+    }
+
     .scene.canvas:after {
       content: "Canvas";
       position: absolute;
@@ -87,7 +100,7 @@
         name: 'simple-blue-rectangle',
         width: 200,
         height: 200,
-        draw: function( scene, display ) {
+        draw: function( scene, updateDisplayCallback ) {
           scene.addChild( new scenery.Rectangle( 50, 50, 100, 100, {
             fill: 'blue'
           } ) );
@@ -98,11 +111,11 @@
         name: 'simple-images',
         width: 200,
         height: 200,
-        draw: function( scene, display ) {
+        draw: function( scene, updateDisplayCallback ) {
           var thumbnail = document.createElement( 'img' );
           thumbnail.addEventListener( 'load', function() {
             scene.addChild( new scenery.Image( thumbnail ) );
-            display.updateDisplay();
+            updateDisplayCallback();
           } );
 
           // TODO: Fix this url so others can use it.
@@ -114,7 +127,7 @@
         name: 'CanvasNode',
         width: 200,
         height: 200,
-        draw: function( scene, display ) {
+        draw: function( scene, updateDisplayCallback ) {
 
           //TODO: Make it so we can pass in the paintCanvas call to the CanvasNode constructor.
           var canvasNode = new scenery.CanvasNode( {canvasBounds: new dot.Bounds2( 0, 0, 100, 100 )} );
@@ -132,7 +145,7 @@
         name: 'WebGLNode',
         width: 200,
         height: 200,
-        draw: function( scene, display ) {
+        draw: function( scene, updateDisplayCallback ) {
 
           //TODO: Make it so we can pass in the paintCanvas call to the CanvasNode constructor.
           var canvasNode = new scenery.WebGLNode( {
@@ -188,7 +201,7 @@
         name: 'Rectangle',
         width: 128,
         height: 64,
-        draw: function( scene, display ) {
+        draw: function( scene, updateDisplayCallback ) {
           scene.addChild( new scenery.Rectangle( 10.5, 10.5, 44, 44, {
             fill: '#f00',
             stroke: '#000',
@@ -207,7 +220,7 @@
         name: 'Circle',
         width: 64,
         height: 64,
-        draw: function( scene, display ) {
+        draw: function( scene, updateDisplayCallback ) {
           scene.addChild( new scenery.Circle( 22, {
             x: 32, y: 32,
             fill: '#f00',
@@ -228,7 +241,7 @@
         name: 'Hexagon',
         width: 64,
         height: 64,
-        draw: function( scene, display ) {
+        draw: function( scene, updateDisplayCallback ) {
           scene.addChild( new scenery.Path( kite.Shape.regularPolygon( 6, 22 ), {
             x: 32,
             y: 32,
@@ -243,7 +256,7 @@
         name: 'Quadratic B\u00E9zier',
         width: 64,
         height: 64,
-        draw: function( scene, display ) {
+        draw: function( scene, updateDisplayCallback ) {
           scene.addChild( new scenery.Path( new kite.Shape().moveTo( -20, -20 ).quadraticCurveTo( 20, -20, 20, 20 ).close(), {
             x: 32,
             y: 32,
@@ -258,7 +271,7 @@
         name: 'Cubic B\u00E9zier',
         width: 64,
         height: 64,
-        draw: function( scene, display ) {
+        draw: function( scene, updateDisplayCallback ) {
           scene.addChild( new scenery.Path( new kite.Shape().moveTo( -20, -20 ).cubicCurveTo( -20, 0, 0, 0, 20, 20 ).lineTo( 20, -20 ).close(), {
             x: 32,
             y: 32,
@@ -273,7 +286,7 @@
         name: 'Linear Gradients',
         width: 128,
         height: 64,
-        draw: function( scene, display ) {
+        draw: function( scene, updateDisplayCallback ) {
           var fillGradient = new scenery.LinearGradient( -22, 0, 22, 0 );
           fillGradient.addColorStop( 0.1, '#ff0000' );
           fillGradient.addColorStop( 0.5, '#00ff00' );
@@ -308,7 +321,7 @@
         name: 'Radial Gradients',
         width: 128 + 64,
         height: 64,
-        draw: function( scene, display ) {
+        draw: function( scene, updateDisplayCallback ) {
           var fillGradient = new scenery.RadialGradient( 22, 0, 0, 22, 0, 44 );
           fillGradient.addColorStop( 0.1, '#ff0000' );
           fillGradient.addColorStop( 0.5, '#00ff00' );
@@ -348,7 +361,7 @@
         name: 'RGBA',
         width: 64,
         height: 64,
-        draw: function( scene, display ) {
+        draw: function( scene, updateDisplayCallback ) {
           scene.addChild( new scenery.Path( kite.Shape.rectangle( 32, 0, 32, 64 ), {
             fill: '#000000'
           } ) );
@@ -366,7 +379,7 @@
         name: 'Dashes',
         width: 64,
         height: 64,
-        draw: function( scene, display ) {
+        draw: function( scene, updateDisplayCallback ) {
           scene.addChild( new scenery.Path( kite.Shape.rectangle( 10, 10, 44, 44 ), {
             stroke: '#000',
             lineWidth: 3,
@@ -395,11 +408,11 @@
         name: 'Images',
         width: 220,
         height: 120,
-        draw: function( scene, display ) {
+        draw: function( scene, updateDisplayCallback ) {
           var thumbnail = document.createElement( 'img' );
           thumbnail.addEventListener( 'load', function() {
             scene.addChild( new scenery.Image( thumbnail ) );
-            display.updateDisplay();
+            updateDisplayCallback();
 
             // ugly hack placement for correct z-index
             var logo = document.createElement( 'img' );
@@ -410,7 +423,7 @@
                 x: 130,
                 y: 20
               } ) );
-              display.updateDisplay();
+              updateDisplayCallback();
             } );
             // TODO: Fix this url so others can use it.
             logo.src = 'http://localhost:8080/balancing-act/images/fire-extinguisher.png';
@@ -424,7 +437,7 @@
         name: 'Patterns',
         width: 64,
         height: 64,
-        draw: function( scene, display ) {
+        draw: function( scene, updateDisplayCallback ) {
           var img = document.createElement( 'img' );
           img.addEventListener( 'load', function() {
             var pattern = new scenery.Pattern( img );
@@ -436,7 +449,7 @@
               stroke: '#000000',
               lineWidth: 3
             } ) );
-            display.updateDisplay();
+            updateDisplayCallback();
           } );
           img.src = 'http://phet.colorado.edu/files/archive/images/circleArrow_Icon.gif';
         },
@@ -446,7 +459,7 @@
         name: 'Overlapping and Nested Rotations',
         width: 128,
         height: 128,
-        draw: function( scene, display ) {
+        draw: function( scene, updateDisplayCallback ) {
           var container = new scenery.Node( {
             x: 40,
             rotation: Math.PI / 12
@@ -477,7 +490,7 @@
         name: 'DAG support',
         width: 256,
         height: 128,
-        draw: function( scene, display ) {
+        draw: function( scene, updateDisplayCallback ) {
           var square = new scenery.Path( kite.Shape.rectangle( 0, 0, 50, 50 ), {
             x: 0.5,
             y: 0.5,
@@ -516,7 +529,7 @@
         name: 'Text',
         width: 256,
         height: 128,
-        draw: function( scene, display ) {
+        draw: function( scene, updateDisplayCallback ) {
           scene.addChild( new scenery.Text( 'Is this a test?', {
             fontSize: 60,
             top: 1.5,
@@ -548,7 +561,7 @@
         name: 'HTML Text',
         width: 512,
         height: 128,
-        draw: function( scene, display ) {
+        draw: function( scene, updateDisplayCallback ) {
           scene.addChild( new scenery.HTMLText( '<strong>H<sub>2</sub>O</strong> <em>might</em> contain water, also<br>known as <u>dihydrogen monoxide</u>!', {
             fontSize: 35,
             top: 2,
@@ -562,7 +575,7 @@
         name: 'Circles and Arcs',
         width: 200,
         height: 64,
-        draw: function( scene, display ) {
+        draw: function( scene, updateDisplayCallback ) {
           var x = 32;
           scene.addChild( new scenery.Path( kite.Shape.circle( x, 25, 20 ), {
             fill: '#ff0000',
@@ -601,7 +614,7 @@
         name: 'Ellipses and Elliptical Arcs',
         width: 200,
         height: 64,
-        draw: function( scene, display ) {
+        draw: function( scene, updateDisplayCallback ) {
           var x = 32;
           scene.addChild( new scenery.Path( kite.Shape.ellipse( x, 25, 20, 10 ), {
             fill: '#ff0000',
@@ -640,7 +653,7 @@
         name: 'DOM Elements',
         width: 200,
         height: 200,
-        draw: function( scene, display ) {
+        draw: function( scene, updateDisplayCallback ) {
           var textDiv = document.createElement( 'div' );
           textDiv.innerHTML = 'See our <a href="http://phet.colorado.edu">website</a>!';
           scene.addChild( new scenery.DOM( textDiv, {
@@ -663,7 +676,7 @@
         name: 'Invisible nodes',
         width: 64,
         height: 64,
-        draw: function( scene, display ) {
+        draw: function( scene, updateDisplayCallback ) {
           var shape = kite.Shape.rectangle( 0, 0, 30, 30 );
           var rect = new scenery.Path( shape, {
             fill: '#000',
@@ -692,7 +705,7 @@
         name: 'Simple Clipping',
         width: 64,
         height: 64,
-        draw: function( scene, display ) {
+        draw: function( scene, updateDisplayCallback ) {
           scene.addChild( new scenery.Rectangle( 4, 4, 56, 56, {
             fill: 'black',
             clipArea: kite.Shape.circle( 32, 32, 25 ),
@@ -706,7 +719,7 @@
         name: 'Nested Clipping',
         width: 64,
         height: 64,
-        draw: function( scene, display ) {
+        draw: function( scene, updateDisplayCallback ) {
           var clipShape1 = kite.Shape.regularPolygon( 6, 27 ).transformed( dot.Matrix3.translation( 32, 32 ) );
           var clipShape2 = kite.Shape.regularPolygon( 9, 32 ).transformed( dot.Matrix3.translation( 32, 0 ) );
           var shape = kite.Shape.circle( 32, 32, 25 );
@@ -725,7 +738,7 @@
         name: 'Opacity',
         width: 64,
         height: 64,
-        draw: function( scene, display ) {
+        draw: function( scene, updateDisplayCallback ) {
           scene.addChild( new scenery.Rectangle( 0, 12, 64, 20, { fill: '#000' } ) );
           var circle = kite.Shape.circle( 0, 0, 30 );
           scene.addChild( new scenery.Node( {
@@ -801,15 +814,25 @@
         $container[0].appendChild( display.domElement );
         $( document.body ).append( $container );
 
+        function updateDisplay() {
+          display.updateDisplay();
+
+          if ( display.getUsedRenderersBitmask() !== scenery.Renderer.fromName( renderer ) ) {
+            $container.addClass( 'wrong-renderer' );
+          } else {
+            $container.removeClass( 'wrong-renderer' );
+          }
+        }
+
         // try {
-        testCase.draw( scene, display );
+        testCase.draw( scene, updateDisplay );
         // } catch( e ) {
         //   if ( console.log ) {
         //     console.log( 'error encountered in test ' + testCase.name + ' with ' + layerType.name );
         //   }
         //   throw e;
         // }
-        display.updateDisplay();
+        updateDisplay();
       } );
     } );
   } );

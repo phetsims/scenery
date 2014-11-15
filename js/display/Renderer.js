@@ -81,6 +81,16 @@ define( function( require ) {
     return ( bitmask & Renderer.bitmaskWebGL ) !== 0;
   };
 
+  var rendererMap = {
+    canvas: Renderer.bitmaskCanvas,
+    svg: Renderer.bitmaskSVG,
+    dom: Renderer.bitmaskDOM,
+    webgl: Renderer.bitmaskWebGL
+  };
+  Renderer.fromName = function( name ) {
+    return rendererMap[name];
+  };
+
   // returns the part of the bitmask that should contain only Canvas/SVG/DOM/WebGL flags
   //OHTWO TODO: use this instead of direct access to bitmaskRendererArea
   Renderer.getStrippedBitmask = function( bitmask ) {
