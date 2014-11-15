@@ -44,6 +44,11 @@
  * SVG: {
  *   svgElement: {SVGElement}
  * }
+ * WebGL: {
+ *   initializeContext: function( {WebGLRenderingContext} gl )
+ *   render: function( {ShaderProgram} shaderProgram )
+ *   shaderAttributes: {string[]} - names of vertex attributes to be used
+ * }
  *
  * @author Jonathan Olson <jonathan.olson@colorado.edu>
  */
