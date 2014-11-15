@@ -551,7 +551,7 @@ define( function( require ) {
 
   // mix-in base for DOM and SVG drawables
   // NOTE: requires state.node to be defined
-  Paintable.PaintableState = function PaintableState( drawableType ) {
+  Paintable.PaintableStatefulDrawableMixin = function PaintableStatefulDrawableMixin( drawableType ) {
     var proto = drawableType.prototype;
 
     proto.initializePaintableState = function() {
@@ -604,7 +604,7 @@ define( function( require ) {
   };
 
   // mix-in for Canvas drawables
-  Paintable.PaintableStateless = function PaintableStateless( drawableType ) {
+  Paintable.PaintableStatelessDrawableMixin = function PaintableStatelessDrawableMixin( drawableType ) {
     var proto = drawableType.prototype;
 
     proto.markDirtyFill = function() {
