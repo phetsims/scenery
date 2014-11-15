@@ -197,7 +197,7 @@ define( function( require ) {
    * Rendering State mixin (DOM/SVG) //TODO: Does this also apply to WebGL?
    *----------------------------------------------------------------------------*/
 
-  var ImageRenderState = Image.ImageRenderState = function( drawableType ) {
+  var ImageStatefulDrawableMixin = Image.ImageStatefulDrawableMixin = function( drawableType ) {
     var proto = drawableType.prototype;
 
     // initializes, and resets (so we can support pooled states)
@@ -290,7 +290,7 @@ define( function( require ) {
   } );
 
   /* jshint -W064 */
-  ImageRenderState( ImageDOMDrawable );
+  ImageStatefulDrawableMixin( ImageDOMDrawable );
 
   /* jshint -W064 */
   SelfDrawable.PoolableMixin( ImageDOMDrawable );
@@ -301,7 +301,7 @@ define( function( require ) {
 
   Image.ImageSVGDrawable = SVGSelfDrawable.createDrawable( {
     type: function ImageSVGDrawable( renderer, instance ) { this.initialize( renderer, instance ); },
-    stateType: ImageRenderState,
+    stateType: ImageStatefulDrawableMixin,
     initialize: function( renderer, instance ) {
       if ( !this.svgElement ) {
         this.svgElement = document.createElementNS( scenery.svgns, 'image' );

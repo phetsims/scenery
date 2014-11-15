@@ -209,7 +209,7 @@ define( function( require ) {
    * Rendering State mixin (DOM/SVG)
    *----------------------------------------------------------------------------*/
 
-  var CircleRenderState = Circle.CircleRenderState = function( drawableType ) {
+  var CircleStatefulDrawableMixin = Circle.CircleStatefulDrawableMixin = function( drawableType ) {
     var proto = drawableType.prototype;
 
     // initializes, and resets (so we can support pooled states)
@@ -367,7 +367,7 @@ define( function( require ) {
   } );
 
   /* jshint -W064 */
-  CircleRenderState( CircleDOMDrawable );
+  CircleStatefulDrawableMixin( CircleDOMDrawable );
 
   /* jshint -W064 */
   SelfDrawable.PoolableMixin( CircleDOMDrawable );
@@ -378,7 +378,7 @@ define( function( require ) {
 
   Circle.CircleSVGDrawable = SVGSelfDrawable.createDrawable( {
     type: function CircleSVGDrawable( renderer, instance ) { this.initialize( renderer, instance ); },
-    stateType: CircleRenderState,
+    stateType: CircleStatefulDrawableMixin,
     initialize: function( renderer, instance ) {
       if ( !this.svgElement ) {
         this.svgElement = document.createElementNS( scenery.svgns, 'circle' );

@@ -178,7 +178,7 @@ define( function( require ) {
    * Rendering State mixin (DOM/SVG)
    *----------------------------------------------------------------------------*/
 
-  var PathRenderState = Path.PathRenderState = function( drawableType ) {
+  var PathStatefulDrawableMixin = Path.PathStatefulDrawableMixin = function( drawableType ) {
     var proto = drawableType.prototype;
 
     // initializes, and resets (so we can support pooled states)
@@ -220,7 +220,7 @@ define( function( require ) {
 
   Path.PathSVGDrawable = SVGSelfDrawable.createDrawable( {
     type: function PathSVGDrawable( renderer, instance ) { this.initialize( renderer, instance ); },
-    stateType: PathRenderState,
+    stateType: PathStatefulDrawableMixin,
     initialize: function( renderer, instance ) {
       if ( !this.svgElement ) {
         this.svgElement = document.createElementNS( scenery.svgns, 'path' );

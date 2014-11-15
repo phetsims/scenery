@@ -255,7 +255,7 @@ define( function( require ) {
    * Rendering State mixin (DOM/SVG)
    *----------------------------------------------------------------------------*/
 
-  var LineRenderState = Line.LineRenderState = function( drawableType ) {
+  var LineStatefulDrawableMixin = Line.LineStatefulDrawableMixin = function( drawableType ) {
     var proto = drawableType.prototype;
 
     // initializes, and resets (so we can support pooled states)
@@ -338,7 +338,7 @@ define( function( require ) {
 
   Line.LineSVGDrawable = SVGSelfDrawable.createDrawable( {
     type: function LineSVGDrawable( renderer, instance ) { this.initialize( renderer, instance ); },
-    stateType: LineRenderState,
+    stateType: LineStatefulDrawableMixin,
     initialize: function( renderer, instance ) {
       if ( !this.svgElement ) {
         this.svgElement = document.createElementNS( scenery.svgns, 'line' );

@@ -512,7 +512,7 @@ define( function( require ) {
    * Rendering State mixin (DOM/SVG)
    *----------------------------------------------------------------------------*/
 
-  var TextRenderState = Text.TextRenderState = function( drawableType ) {
+  var TextStatefulDrawableMixin = Text.TextStatefulDrawableMixin = function( drawableType ) {
     var proto = drawableType.prototype;
 
     // initializes, and resets (so we can support pooled states)
@@ -655,7 +655,7 @@ define( function( require ) {
   } );
 
   /* jshint -W064 */
-  TextRenderState( TextDOMDrawable );
+  TextStatefulDrawableMixin( TextDOMDrawable );
 
   /* jshint -W064 */
   SelfDrawable.PoolableMixin( TextDOMDrawable );
@@ -666,7 +666,7 @@ define( function( require ) {
 
   Text.TextSVGDrawable = SVGSelfDrawable.createDrawable( {
     type: function TextSVGDrawable( renderer, instance ) { this.initialize( renderer, instance ); },
-    stateType: TextRenderState,
+    stateType: TextStatefulDrawableMixin,
     initialize: function( renderer, instance ) {
       if ( !this.svgElement ) {
         // NOTE! reference SVG element at top of file copies createSVGElement!
