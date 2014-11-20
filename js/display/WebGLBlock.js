@@ -164,10 +164,14 @@ define( function( require ) {
           'uniform vec4 uColor;\n' +
           'void main() {\n' +
 
+            // Set the position for the fragments
+            // NOTE: The aVertex must be referenced first, since the usage here determines that it will be the 0th attribute
+            // See #310
+          '  gl_Position = uProjectionMatrix * uModelViewMatrix * vec4( aVertex, 1 );\n' +
+
           //This texture is not needed for rectangles, but we (JO/SR) don't expect it to be expensive, so we leave
           //it for simplicity
           '  texCoord = aTexCoord;\n' +
-          '  gl_Position = uProjectionMatrix * uModelViewMatrix * vec4( aVertex, 1 );\n' +
           '}',
 
         /********** Fragment Shader **********/
@@ -231,7 +235,7 @@ define( function( require ) {
       // (0,width) => (0, -2) => (-1, 1)
       // (0,height) => (0, -2) => ( 1, -1 )
       this.projectionMatrix.set( Matrix4.translation( -1, 1, 0 ).timesMatrix( Matrix4.scaling( 2 / width, -2 / height, 1 ) )
-                                                                .timesMatrix( Matrix4.translation( x, y, 0 ) ) );
+        .timesMatrix( Matrix4.translation( x, y, 0 ) ) );
     },
 
     update: function() {
