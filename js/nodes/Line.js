@@ -24,6 +24,12 @@ define( function( require ) {
   var SVGSelfDrawable = require( 'SCENERY/display/SVGSelfDrawable' );
   var CanvasSelfDrawable = require( 'SCENERY/display/CanvasSelfDrawable' );
 
+  var WebGLSelfDrawable = require( 'SCENERY/display/WebGLSelfDrawable' );
+  var SelfDrawable = require( 'SCENERY/display/SelfDrawable' );
+  var WebGLBlock = require( 'SCENERY/display/WebGLBlock' );
+
+  var Color = require( 'SCENERY/util/Color' );
+
   // TODO: change this based on memory and performance characteristics of the platform
   var keepSVGLineElements = true; // whether we should pool SVG elements for the SVG rendering states, or whether we should free them when possible for memory
 
@@ -185,6 +191,10 @@ define( function( require ) {
       return Line.LineCanvasDrawable.createFromPool( renderer, instance );
     },
 
+    createWebGLDrawable: function( renderer, instance ) {
+      return Line.LineWebGLDrawable.createFromPool( renderer, instance );
+    },
+
     getBasicConstructor: function( propLines ) {
       return 'new scenery.Line( ' + this._x1 + ', ' + this._y1 + ', ' + this._x1 + ', ' + this._y1 + ', {' + propLines + '} )';
     },
@@ -208,6 +218,12 @@ define( function( require ) {
 
     hasShape: function() {
       return true;
+    },
+
+    // A line does not render its fill, so it supports all renderers.  Right?
+    // - SR, 2014
+    getFillRendererBitmask: function() {
+      return scenery.bitmaskSupportsCanvas | scenery.bitmaskSupportsSVG | scenery.bitmaskSupportsDOM | scenery.bitmaskSupportsWebGL;
     }
 
   } );
@@ -387,6 +403,169 @@ define( function( require ) {
     usesPaint: true,
     dirtyMethods: ['markDirtyX1', 'markDirtyY1', 'markDirtyX2', 'markDirtyY2']
   } );
+
+
+  /*---------------------------------------------------------------------------*
+   * WebGL rendering
+   *----------------------------------------------------------------------------*/
+
+  Line.LineWebGLDrawable = inherit( WebGLSelfDrawable, function LineWebGLDrawable( renderer, instance ) {
+    this.initialize( renderer, instance );
+  }, {
+    // called either from the constructor or from pooling
+    initialize: function( renderer, instance ) {
+      this.initializeWebGLSelfDrawable( renderer, instance );
+
+      //Small triangle strip that creates a square, which will be transformed into the right rectangle shape
+      this.vertexCoordinates = this.vertexCoordinates || new Float32Array( [
+        0, 0,
+        1, 0,
+        0, 1,
+        1, 1
+      ] );
+    },
+
+    initializeContext: function( gl ) {
+      this.gl = gl;
+
+      // cleanup old vertexBuffer, if applicable
+      this.disposeWebGLBuffers();
+
+      this.vertexBuffer = gl.createBuffer();
+      this.initializePaintableState();
+      this.updateLine();
+    },
+
+    //Nothing necessary since everything currently handled in the uModelViewMatrix below
+    //However, we may switch to dynamic draw, and handle the matrix change only where necessary in the future?
+    updateLine: function() {
+      var gl = this.gl;
+
+      var line = this.node;
+
+      //Model it as a rectangle!  TODO: Reuse code from Rectangle.js efficiently
+
+      var rectWidth = line.lineWidth / 2;
+
+      // CAUTION!  Immutable Math = Muchas allocations!
+      var a = new Vector2( line._x1, line._y1 );
+      var b = new Vector2( line._x2, line._y2 );
+
+      var unitVector = b.minus( a ).normalized();
+      var normalVector = unitVector.perpendicular();
+      var leftTop = a.plus( normalVector.timesScalar( -rectWidth ) );
+      var rightTop = a.plus( normalVector.timesScalar( rectWidth ) );
+      var rightBottom = b.plus( normalVector.timesScalar( rectWidth ) );
+      var leftBottom = b.plus( normalVector.timesScalar( -rectWidth ) );
+
+      // Modeled after the Rectangle.js WebGL triangles
+      this.vertexCoordinates[0] = leftTop.x;//rect._rectX;
+      this.vertexCoordinates[1] = leftTop.y;//rect._rectY;
+
+      this.vertexCoordinates[2] = rightTop.x;//rect._rectX + rect._rectWidth;
+      this.vertexCoordinates[3] = rightTop.y;//rect._rectY;
+
+      this.vertexCoordinates[4] = leftBottom.x;//rect._rectX;
+      this.vertexCoordinates[5] = leftBottom.y;//rect._rectY + rect._rectHeight;
+
+      this.vertexCoordinates[6] = rightBottom.x;//rect._rectX + rect._rectWidth;
+      this.vertexCoordinates[7] = rightBottom.y;//rect._rectY + rect._rectHeight;
+
+      gl.bindBuffer( gl.ARRAY_BUFFER, this.vertexBuffer );
+      gl.bufferData(
+        gl.ARRAY_BUFFER,
+
+        this.vertexCoordinates,
+
+        //TODO: Once we are lazily handling the full matrix, we may benefit from DYNAMIC draw here, and updating the vertices themselves
+        gl.STATIC_DRAW );
+
+      // TODO: move to PaintableWebGLState???
+      if ( this.dirtyFill ) {
+        this.color = Color.toColor( this.node._stroke );
+        this.cleanPaintableState();
+      }
+    },
+
+    render: function( shaderProgram ) {
+      var gl = this.gl;
+
+      // use the standard version if it's a rounded rectangle, since there is no WebGL-optimized version for that
+      // TODO: how to handle fill/stroke delay optimizations here?
+      if ( this.node._stroke ) {
+        //OHTWO TODO: optimize
+        var viewMatrix = this.instance.relativeMatrix.toAffineMatrix4();
+
+        // combine image matrix (to scale aspect ratios), the trail's matrix, and the matrix to device coordinates
+        gl.uniformMatrix4fv( shaderProgram.uniformLocations.uModelViewMatrix, false, viewMatrix.entries );
+
+        //Indicate the branch of logic to use in the ubershader.  In this case, a texture should be used for the image
+        gl.uniform1i( shaderProgram.uniformLocations.uFragmentType, WebGLBlock.fragmentTypeFill );
+        gl.uniform4f( shaderProgram.uniformLocations.uColor, this.color.r / 255, this.color.g / 255, this.color.b / 255, this.color.a );
+
+        gl.bindBuffer( gl.ARRAY_BUFFER, this.vertexBuffer );
+        gl.vertexAttribPointer( shaderProgram.attributeLocations.aVertex, 2, gl.FLOAT, false, 0, 0 );
+
+        gl.drawArrays( gl.TRIANGLE_STRIP, 0, 4 );
+      }
+    },
+
+    shaderAttributes: [
+      'aVertex'
+    ],
+
+    dispose: function() {
+      // we may have been disposed without initializeContext being called (never attached to a block)
+      if ( this.gl ) {
+        this.disposeWebGLBuffers();
+        this.gl = null;
+      }
+
+      // super
+      WebGLSelfDrawable.prototype.dispose.call( this );
+
+    },
+
+    disposeWebGLBuffers: function() {
+      if ( this.gl ) {
+        this.gl.deleteBuffer( this.vertexBuffer );
+      }
+    },
+
+    markDirtyLine: function() {
+      this.markDirty();
+    },
+
+    // general flag set on the state, which we forward directly to the drawable's paint flag
+    markPaintDirty: function() {
+      this.markDirty();
+    },
+
+    onAttach: function( node ) {
+
+    },
+
+    // release the drawable
+    onDetach: function( node ) {
+      //OHTWO TODO: are we missing the disposal?
+    },
+
+    //TODO: Make sure all of the dirty flags make sense here.  Should we be using fillDirty, paintDirty, dirty, etc?
+    update: function() {
+      if ( this.dirty ) {
+        this.updateLine();
+        this.dirty = false;
+      }
+    }
+  } );
+
+  // include stubs (stateless) for marking dirty stroke and fill (if necessary). we only want one dirty flag, not multiple ones, for WebGL (for now)
+  /* jshint -W064 */
+  Paintable.PaintableStatefulDrawableMixin( Line.LineWebGLDrawable );
+
+  // set up pooling
+  /* jshint -W064 */
+  SelfDrawable.PoolableMixin( Line.LineWebGLDrawable );
 
   return Line;
 } );
