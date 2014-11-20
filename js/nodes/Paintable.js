@@ -499,6 +499,9 @@ define( function( require ) {
           bitmask |= scenery.bitmaskSupportsDOM;
         }
 
+        // WebGL can handle stroked lines.
+        bitmask |= scenery.bitmaskSupportsWebGL;
+
         return bitmask;
       }
     } );
