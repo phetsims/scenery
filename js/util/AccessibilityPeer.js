@@ -27,10 +27,12 @@ define( function( require ) {
     this.element = ( typeof element === 'string' ) ? $( element )[0] : element;
 
     if ( options.label ) {
+      var labelId = this.id + '-label';
+      this.element.id = labelId;
       this.peerElement = document.createElement( 'div' );
       var label = document.createElement( 'label' );
       label.appendChild( document.createTextNode( options.label ) );
-      label.setAttribute( 'for', this.id );
+      label.setAttribute( 'for', labelId );
       this.peerElement.appendChild( label );
       this.peerElement.appendChild( this.element );
     }
@@ -61,10 +63,18 @@ define( function( require ) {
       sceneryAccessibilityLog && sceneryAccessibilityLog( 'peer blurred: ' + instance.toString() + ': ' + instance.getNode().constructor.name );
       scene.blurPeer( peer );
     };
-    this.element.addEventListener( 'click', this.clickListener );
+
     this.element.addEventListener( 'focus', this.focusListener );
     this.element.addEventListener( 'blur', this.blurListener );
 
+    // Handle key presses for buttons as well as <div> or <span> with role="button"
+    // See https://developer.mozilla.org/en-US/docs/Web/Accessibility/ARIA/ARIA_Techniques/Using_the_button_role
+    this.element.addEventListener( 'keyup', function handleBtnKeyUp( event ) {
+      event = event || window.event;
+      if ( event.keyCode === 32 || event.keyCode === 13 ) { // check for Space key or enter key (13)
+        peer.clickListener();
+      }
+    } );
     this.keepPeerBoundsInSync = true;
     if ( this.keepPeerBoundsInSync ) {
       this.boundsSyncListener = this.syncBounds.bind( this );
