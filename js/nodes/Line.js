@@ -349,6 +349,57 @@ define( function( require ) {
   };
 
   /*---------------------------------------------------------------------------*
+  * Stateless drawable mixin
+  *----------------------------------------------------------------------------*/
+
+  var LineStatelessDrawableMixin = Line.LineStatelessDrawableMixin = function( drawableType ) {
+    var proto = drawableType.prototype;
+
+    // initializes, and resets (so we can support pooled states)
+    proto.initializeLineStateless = function() {
+      this.paintDirty = true; // flag that is marked if ANY "paint" dirty flag is set (basically everything except for transforms, so we can accelerated the transform-only case)
+      return this; // allow for chaining
+    };
+
+    // catch-all dirty, if anything that isn't a transform is marked as dirty
+    proto.markPaintDirty = function() {
+      this.paintDirty = true;
+      this.markDirty();
+    };
+
+    proto.markDirtyLine = function() {
+      this.markPaintDirty();
+    };
+
+    proto.markDirtyP1 = function() {
+      this.markPaintDirty();
+    };
+
+    proto.markDirtyP2 = function() {
+      this.markPaintDirty();
+    };
+
+    proto.markDirtyX1 = function() {
+      this.markPaintDirty();
+    };
+
+    proto.markDirtyY1 = function() {
+      this.markPaintDirty();
+    };
+
+    proto.markDirtyX2 = function() {
+      this.markPaintDirty();
+    };
+
+    proto.markDirtyY2 = function() {
+      this.markPaintDirty();
+    };
+
+    /* jshint -W064 */
+    Paintable.PaintableStatefulDrawableMixin( drawableType );
+  };
+
+  /*---------------------------------------------------------------------------*
    * SVG Rendering
    *----------------------------------------------------------------------------*/
 
@@ -423,6 +474,10 @@ define( function( require ) {
         0, 1,
         1, 1
       ] );
+
+      this.paintDirty = true;
+      this.initializeLineStateless();
+      this.initializePaintableState();
     },
 
     initializeContext: function( gl ) {
@@ -432,8 +487,10 @@ define( function( require ) {
       this.disposeWebGLBuffers();
 
       this.vertexBuffer = gl.createBuffer();
-      this.initializePaintableState();
+
+      // force update for the line and stroke
       this.updateLine();
+      this.updateLineStroke();
     },
 
     //Nothing necessary since everything currently handled in the uModelViewMatrix below
@@ -479,12 +536,11 @@ define( function( require ) {
 
         //TODO: Once we are lazily handling the full matrix, we may benefit from DYNAMIC draw here, and updating the vertices themselves
         gl.STATIC_DRAW );
+    },
 
+    updateLineStroke: function() {
       // TODO: move to PaintableWebGLState???
-      if ( this.dirtyFill ) {
-        this.color = Color.toColor( this.node._stroke );
-        this.cleanPaintableState();
-      }
+      this.color = Color.toColor( this.node._stroke );
     },
 
     render: function( shaderProgram ) {
@@ -532,15 +588,6 @@ define( function( require ) {
       }
     },
 
-    markDirtyLine: function() {
-      this.markDirty();
-    },
-
-    // general flag set on the state, which we forward directly to the drawable's paint flag
-    markPaintDirty: function() {
-      this.markDirty();
-    },
-
     onAttach: function( node ) {
 
     },
@@ -552,14 +599,23 @@ define( function( require ) {
 
     //TODO: Make sure all of the dirty flags make sense here.  Should we be using fillDirty, paintDirty, dirty, etc?
     update: function() {
-      if ( this.dirty ) {
-        this.updateLine();
-        this.dirty = false;
+      if ( this.dirtyStroke ) {
+        this.updateLineStroke();
+        this.cleanPaintableState();
       }
+      if ( this.paintDirty ) {
+        this.updateLine();
+        this.paintDirty = false;
+      }
+      this.dirty = false;
     }
   } );
 
-  // include stubs (stateless) for marking dirty stroke and fill (if necessary). we only want one dirty flag, not multiple ones, for WebGL (for now)
+  // include stubs for Line API compatibility
+  /* jshint -W064 */
+  LineStatelessDrawableMixin( Line.LineWebGLDrawable );
+
+  // include stubs for marking dirty stroke and fill (if necessary). we only want one dirty flag, not multiple ones, for WebGL (for now)
   /* jshint -W064 */
   Paintable.PaintableStatefulDrawableMixin( Line.LineWebGLDrawable );
 
