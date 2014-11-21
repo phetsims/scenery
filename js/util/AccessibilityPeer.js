@@ -10,11 +10,12 @@ define( function( require ) {
   'use strict';
 
   var scenery = require( 'SCENERY/scenery' );
+  var inherit = require( 'PHET_CORE/inherit' );
 
   var AccessibilityPeer = scenery.AccessibilityPeer = function AccessibilityPeer( instance, element, options ) {
     var peer = this;
 
-    options = options || {};
+    this.options = options = options || {};
 
     //Defaulting to 0 would mean using the document order, which can easily be incorrect for a PhET simulation.
     //For any of the nodes to use a nonzero tabindex, they must all use a nonzero tabindex, see #40
@@ -75,8 +76,14 @@ define( function( require ) {
     }
   };
 
-  AccessibilityPeer.prototype = {
-    constructor: AccessibilityPeer,
+  return inherit( Object, AccessibilityPeer, {
+    onAdded: function( peer ) {
+      this.options.onAdded && this.options.onAdded( peer );
+    },
+
+    onRemoved: function( peer ) {
+      this.options.onRemoved && this.options.onRemoved( peer );
+    },
 
     dispose: function() {
       this.element.removeEventListener( 'click', this.clickListener );
@@ -101,7 +108,5 @@ define( function( require ) {
       this.element.style.width = globalBounds.width + 'px';
       this.element.style.height = globalBounds.height + 'px';
     }
-  };
-
-  return AccessibilityPeer;
+  } );
 } );

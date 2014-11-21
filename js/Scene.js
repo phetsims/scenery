@@ -252,10 +252,12 @@ define( function( require ) {
 
     addPeer: function( peer ) {
       this.accessibilityLayer.appendChild( peer.peerElement );
+      peer.onAdded( peer );
     },
 
     removePeer: function( peer ) {
       this.accessibilityLayer.removeChild( peer.peerElement );
+      peer.onRemoved( peer );
     },
 
     addLiveRegion: function( liveRegion ) {
@@ -720,7 +722,7 @@ define( function( require ) {
     rebuildLayers: function() {
       sceneryLayerLog && sceneryLayerLog( 'Scene: rebuildLayers' );
 
-      // mark the entire scene 
+      // mark the entire scene
       this.markInterval( new scenery.Trail( this ) );
 
       // then stitch with match=true
