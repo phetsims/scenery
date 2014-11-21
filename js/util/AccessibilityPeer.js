@@ -17,6 +17,8 @@ define( function( require ) {
 
     this.options = options = options || {};
 
+    this.id = 'peer-' + instance.trail.getUniqueId();
+
     //Defaulting to 0 would mean using the document order, which can easily be incorrect for a PhET simulation.
     //For any of the nodes to use a nonzero tabindex, they must all use a nonzero tabindex, see #40
     options.tabIndex = options.tabIndex || 1;
@@ -26,16 +28,16 @@ define( function( require ) {
 
     if ( options.label ) {
       this.peerElement = document.createElement( 'div' );
-      this.element.id = 'peer-' + instance.trail.getUniqueId();
       var label = document.createElement( 'label' );
       label.appendChild( document.createTextNode( options.label ) );
-      label.setAttribute( 'for', this.element.id );
+      label.setAttribute( 'for', this.id );
       this.peerElement.appendChild( label );
       this.peerElement.appendChild( this.element );
     }
     else {
       this.peerElement = this.element;
     }
+    this.peerElement.id = this.id;
 
     this.visible = true;
 

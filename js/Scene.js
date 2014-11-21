@@ -138,6 +138,8 @@ define( function( require ) {
 
       this.dirtyVisibilityPeers = [];
 
+      this.accesibilityPeerMap = {}; // {string} accessibility peer ID => {AcessibilityPeer}
+
       this.accessibilityLayer = document.createElement( 'div' );
       this.accessibilityLayer.className = "accessibility-layer";
 
@@ -263,11 +265,13 @@ define( function( require ) {
     addPeer: function( peer ) {
       this.accessibilityLayer.appendChild( peer.peerElement );
       peer.onAdded( peer );
+      this.accesibilityPeerMap[peer.id] = peer;
     },
 
     removePeer: function( peer ) {
       this.accessibilityLayer.removeChild( peer.peerElement );
       peer.onRemoved( peer );
+      delete this.accesibilityPeerMap[peer.id];
     },
 
     addLiveRegion: function( liveRegion ) {
@@ -1271,9 +1275,14 @@ define( function( require ) {
     },
 
     getTrailFromKeyboardFocus: function() {
-      // return the root (scene) trail by default
+      var peer = document.activeElement && this.accesibilityPeerMap[document.activeElement.id];
+      if ( peer ) {
+        return peer.trail;
+      } else {
+        // return the root (scene) trail by default
+        return new scenery.Trail( this );
+      }
       // TODO: fill in with actual keyboard focus
-      return new scenery.Trail( this );
     },
 
     fireBatchedEvents: function() {
