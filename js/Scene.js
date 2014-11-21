@@ -136,6 +136,8 @@ define( function( require ) {
     if ( accessibility ) {
       this.activePeer = null;
 
+      this.dirtyVisibilityPeers = [];
+
       this.accessibilityLayer = document.createElement( 'div' );
       this.accessibilityLayer.className = "accessibility-layer";
 
@@ -203,6 +205,14 @@ define( function( require ) {
 
       if ( this.mouseTouchAreaOverlay ) {
         this.mouseTouchAreaOverlay.update();
+      }
+
+      // updating peer visibility here to avoid off-animation-frame changes, which can cause major frame-rate drops due
+      // to DOM manipulation
+      if ( accessibility ) {
+        while ( this.dirtyVisibilityPeers.length ) {
+          this.dirtyVisibilityPeers.pop().updateVisibility();
+        }
       }
 
       // if ( this.accessibilityLayer ) {

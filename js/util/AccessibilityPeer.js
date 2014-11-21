@@ -37,6 +37,8 @@ define( function( require ) {
       this.peerElement = this.element;
     }
 
+    this.visible = true;
+
     this.instance = instance;
     this.trail = instance.trail;
 
@@ -77,6 +79,19 @@ define( function( require ) {
   };
 
   return inherit( Object, AccessibilityPeer, {
+    updateVisibility: function() {
+      var newVisibility = this.trail.isVisible();
+      if ( newVisibility !== this.visible ) {
+        this.visible = newVisibility;
+        if ( newVisibility ) {
+          this.peerElement.style.display = 'inherit';
+        }
+        else {
+          this.peerElement.style.display = 'none';
+        }
+      }
+    },
+
     onAdded: function( peer ) {
       this.options.onAdded && this.options.onAdded( peer );
     },

@@ -183,6 +183,8 @@ define( function( require ) {
           var peer = new scenery.AccessibilityPeer( this, desc.element, desc.options );
           scene.addPeer( peer );
           this.peers.push( peer );
+
+          scene.dirtyVisibilityPeers.push( peer );
         }
       }
     },
@@ -236,6 +238,23 @@ define( function( require ) {
       var i = affectedLayers.length;
       while ( i-- ) {
         affectedLayers[i].notifyVisibilityChange( this );
+      }
+
+      if ( accessibility ) {
+        this.notifyAncestorVisibilityChange();
+      }
+    },
+
+    notifyAncestorVisibilityChange: function() {
+      var scene = this.trail.rootNode();
+      var i;
+
+      for ( i = 0; i < this.peers.length; i++ ) {
+        scene.dirtyVisibilityPeers.push( this.peers[i] );
+      }
+
+      for ( i = 0; i < this.children.length; i++ ) {
+        this.children[i].notifyAncestorVisibilityChange();
       }
     },
 
