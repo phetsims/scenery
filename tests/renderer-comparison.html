@@ -140,6 +140,25 @@
         renderers: [ 'canvas', 'svg', 'webgl' ]
       },
       {
+        name: 'solid-line-animating',
+        width: 200,
+        height: 200,
+        draw: function( scene, updateDisplay ) {
+          var line = new scenery.Line( 10, 10, 190, 190, {stroke: 'black', lineWidth: 4} );
+          scene.addChild( line );
+
+          var callback = function() {
+            window.requestAnimationFrame( callback );
+            line.y2 = Math.sin( Date.now() / 1000 ) * 100 + 100;
+            line.x1 = Math.sin( Date.now() / 500 ) * 50 + 50;
+            line.y1 = Math.cos( Date.now() / 400 ) * 50 + 50;
+            updateDisplay();
+          };
+          window.requestAnimationFrame( callback );
+        },
+        renderers: [ 'canvas', 'svg', 'webgl' ]
+      },
+      {
         name: 'CanvasNode',
         width: 200,
         height: 200,
