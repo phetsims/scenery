@@ -516,25 +516,43 @@ define( function( require ) {
       var a = new Vector2( line._x1, line._y1 );
       var b = new Vector2( line._x2, line._y2 );
 
-      var unitVector = b.minus( a ).normalized();
-      var normalVector = unitVector.perpendicular();
-      var leftTop = a.plus( normalVector.timesScalar( -rectWidth ) );
-      var rightTop = a.plus( normalVector.timesScalar( rectWidth ) );
-      var rightBottom = b.plus( normalVector.timesScalar( rectWidth ) );
-      var leftBottom = b.plus( normalVector.timesScalar( -rectWidth ) );
+      // This component-wise math computes the corners of the rectangle defined by this stroked line
+      // If you wish, you can refer to the 7 or so lines of Vector2-allocation-heavy code that does the same thing
+      // (see history)
+      var deltaX = b.x - a.x;
+      var deltaY = b.y - a.y;
+      var magnitude = Math.sqrt( deltaX * deltaX + deltaY * deltaY );
+      deltaX /= magnitude;
+      deltaY /= magnitude;
+      var normalVectorX = deltaY;
+      var normalVectorY = -deltaX;
+
+      var edgeX = normalVectorX * rectWidth;
+      var edgeY = normalVectorY * rectWidth;
+      var leftTopX = a.x - edgeX;
+      var leftTopY = a.y - edgeY;
+
+      var rightTopX = a.x + edgeX;
+      var rightTopY = a.y + edgeY;
+
+      var rightBottomX = b.x + edgeX;
+      var rightBottomY = b.y + edgeY;
+
+      var leftBottomX = b.x - edgeX;
+      var leftBottomY = b.y - edgeY;
 
       // Modeled after the Rectangle.js WebGL triangles
-      this.vertexCoordinates[0] = leftTop.x;//rect._rectX;
-      this.vertexCoordinates[1] = leftTop.y;//rect._rectY;
+      this.vertexCoordinates[0] = leftTopX;//rect._rectX;
+      this.vertexCoordinates[1] = leftTopY;//rect._rectY;
 
-      this.vertexCoordinates[2] = rightTop.x;//rect._rectX + rect._rectWidth;
-      this.vertexCoordinates[3] = rightTop.y;//rect._rectY;
+      this.vertexCoordinates[2] = rightTopX;//rect._rectX + rect._rectWidth;
+      this.vertexCoordinates[3] = rightTopY;//rect._rectY;
 
-      this.vertexCoordinates[4] = leftBottom.x;//rect._rectX;
-      this.vertexCoordinates[5] = leftBottom.y;//rect._rectY + rect._rectHeight;
+      this.vertexCoordinates[4] = leftBottomX;//rect._rectX;
+      this.vertexCoordinates[5] = leftBottomY;//rect._rectY + rect._rectHeight;
 
-      this.vertexCoordinates[6] = rightBottom.x;//rect._rectX + rect._rectWidth;
-      this.vertexCoordinates[7] = rightBottom.y;//rect._rectY + rect._rectHeight;
+      this.vertexCoordinates[6] = rightBottomX;//rect._rectX + rect._rectWidth;
+      this.vertexCoordinates[7] = rightBottomY;//rect._rectY + rect._rectHeight;
 
       gl.bindBuffer( gl.ARRAY_BUFFER, this.vertexBuffer );
       gl.bufferData(
