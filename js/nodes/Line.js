@@ -81,6 +81,14 @@ define( function( require ) {
   var Line = scenery.Line;
 
   inherit( Path, Line, {
+
+    /**
+     * Set the geometry of the line, including stand and end point.
+     * @param {number} x1 - the start x coordinate
+     * @param {number} y1 - the start y coordinate
+     * @param {number} x2 - the end x coordinate
+     * @param {number} y2 - the end y coordinate
+     */
     setLine: function( x1, y1, x2, y2 ) {
       assert && assert( x1 !== undefined && y1 !== undefined && x2 !== undefined && y2 !== undefined, 'parameters need to be defined' );
 
@@ -349,10 +357,10 @@ define( function( require ) {
   };
 
   /*---------------------------------------------------------------------------*
-  * Stateless drawable mixin
-  *----------------------------------------------------------------------------*/
+   * Stateless drawable mixin
+   *----------------------------------------------------------------------------*/
 
-  var LineStatelessDrawableMixin = Line.LineStatelessDrawableMixin = function( drawableType ) {
+  Line.LineStatelessDrawableMixin = function( drawableType ) {
     var proto = drawableType.prototype;
 
     // initializes, and resets (so we can support pooled states)
@@ -613,7 +621,7 @@ define( function( require ) {
 
   // include stubs for Line API compatibility
   /* jshint -W064 */
-  LineStatelessDrawableMixin( Line.LineWebGLDrawable );
+  Line.LineStatelessDrawableMixin( Line.LineWebGLDrawable );
 
   // include stubs for marking dirty stroke and fill (if necessary). we only want one dirty flag, not multiple ones, for WebGL (for now)
   /* jshint -W064 */
