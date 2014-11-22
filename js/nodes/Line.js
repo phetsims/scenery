@@ -555,13 +555,9 @@ define( function( require ) {
       this.vertexCoordinates[7] = rightBottomY;//rect._rectY + rect._rectHeight;
 
       gl.bindBuffer( gl.ARRAY_BUFFER, this.vertexBuffer );
-      gl.bufferData(
-        gl.ARRAY_BUFFER,
 
-        this.vertexCoordinates,
-
-        //TODO: Once we are lazily handling the full matrix, we may benefit from DYNAMIC draw here, and updating the vertices themselves
-        gl.STATIC_DRAW );
+      //TODO: Once we are lazily handling the full matrix, we may benefit from DYNAMIC draw here, and updating the vertices themselves
+      gl.bufferData( gl.ARRAY_BUFFER, this.vertexCoordinates, gl.STATIC_DRAW );
     },
 
     updateLineStroke: function() {
