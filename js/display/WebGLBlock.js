@@ -164,9 +164,9 @@ define( function( require ) {
           'uniform vec4 uColor;\n' +
           'void main() {\n' +
 
-            // Set the position for the fragments
-            // NOTE: The aVertex must be referenced first, since the usage here determines that it will be the 0th attribute
-            // See #310
+          // Set the position for the fragments
+          // NOTE: The aVertex must be referenced first, since the usage here determines that it will be the 0th attribute
+          // See #310
           '  gl_Position = uProjectionMatrix * uModelViewMatrix * vec4( aVertex, 1 );\n' +
 
           //This texture is not needed for rectangles, but we (JO/SR) don't expect it to be expensive, so we leave
