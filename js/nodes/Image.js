@@ -534,6 +534,9 @@ define( function( require ) {
   /* jshint -W064 */
   SelfDrawable.PoolableMixin( Image.ImageWebGLDrawable );
 
+  /* jshint -W064 */
+  ImageStatefulDrawableMixin( Image.ImageWebGLDrawable );
+
   return Image;
 } );
 
