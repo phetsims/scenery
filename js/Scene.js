@@ -1275,7 +1275,7 @@ define( function( require ) {
     },
 
     getTrailFromKeyboardFocus: function() {
-      var peer = document.activeElement && this.accesibilityPeerMap[document.activeElement.id];
+      var peer = accessibility && document.activeElement && this.accesibilityPeerMap[document.activeElement.id];
       if ( peer ) {
         return peer.trail;
       } else {
