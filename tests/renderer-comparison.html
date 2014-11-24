@@ -140,6 +140,15 @@
         renderers: [ 'canvas', 'svg', 'webgl' ]
       },
       {
+        name: 'hello-text',
+        width: 200,
+        height: 200,
+        draw: function( scene, display ) {
+          scene.addChild( new scenery.Text( 'hello text!', {left: 10, top: 10} ) );
+        },
+        renderers: [ 'canvas', 'svg', 'dom', 'webgl' ]
+      },
+      {
         name: 'solid-line-animating-position',
         width: 200,
         height: 200,
