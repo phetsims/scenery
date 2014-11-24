@@ -136,6 +136,10 @@ define( function( require ) {
     if ( accessibility ) {
       this.activePeer = null;
 
+      this.dirtyVisibilityPeers = [];
+
+      this.accesibilityPeerMap = {}; // {string} accessibility peer ID => {AcessibilityPeer}
+
       this.accessibilityLayer = document.createElement( 'div' );
       this.accessibilityLayer.className = "accessibility-layer";
 
@@ -205,6 +209,14 @@ define( function( require ) {
         this.mouseTouchAreaOverlay.update();
       }
 
+      // updating peer visibility here to avoid off-animation-frame changes, which can cause major frame-rate drops due
+      // to DOM manipulation
+      if ( accessibility ) {
+        while ( this.dirtyVisibilityPeers.length ) {
+          this.dirtyVisibilityPeers.pop().updateVisibility();
+        }
+      }
+
       // if ( this.accessibilityLayer ) {
       //      for ( var i = 0; i < accessibleNodes.length; i++ ) {
       //        if ( accessibleNodes[i]._element === activeElement ) {
@@ -252,10 +264,14 @@ define( function( require ) {
 
     addPeer: function( peer ) {
       this.accessibilityLayer.appendChild( peer.peerElement );
+      peer.onAdded( peer );
+      this.accesibilityPeerMap[peer.id] = peer;
     },
 
     removePeer: function( peer ) {
       this.accessibilityLayer.removeChild( peer.peerElement );
+      peer.onRemoved( peer );
+      delete this.accesibilityPeerMap[peer.id];
     },
 
     addLiveRegion: function( liveRegion ) {
@@ -720,7 +736,7 @@ define( function( require ) {
     rebuildLayers: function() {
       sceneryLayerLog && sceneryLayerLog( 'Scene: rebuildLayers' );
 
-      // mark the entire scene 
+      // mark the entire scene
       this.markInterval( new scenery.Trail( this ) );
 
       // then stitch with match=true
@@ -1259,9 +1275,14 @@ define( function( require ) {
     },
 
     getTrailFromKeyboardFocus: function() {
-      // return the root (scene) trail by default
+      var peer = accessibility && document.activeElement && this.accesibilityPeerMap[document.activeElement.id];
+      if ( peer ) {
+        return peer.trail;
+      } else {
+        // return the root (scene) trail by default
+        return new scenery.Trail( this );
+      }
       // TODO: fill in with actual keyboard focus
-      return new scenery.Trail( this );
     },
 
     fireBatchedEvents: function() {

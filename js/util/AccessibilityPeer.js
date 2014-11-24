@@ -10,11 +10,14 @@ define( function( require ) {
   'use strict';
 
   var scenery = require( 'SCENERY/scenery' );
+  var inherit = require( 'PHET_CORE/inherit' );
 
   var AccessibilityPeer = scenery.AccessibilityPeer = function AccessibilityPeer( instance, element, options ) {
     var peer = this;
 
-    options = options || {};
+    this.options = options = options || {};
+
+    this.id = 'peer-' + instance.trail.getUniqueId();
 
     //Defaulting to 0 would mean using the document order, which can easily be incorrect for a PhET simulation.
     //For any of the nodes to use a nonzero tabindex, they must all use a nonzero tabindex, see #40
@@ -24,17 +27,21 @@ define( function( require ) {
     this.element = ( typeof element === 'string' ) ? $( element )[0] : element;
 
     if ( options.label ) {
+      var labelId = this.id + '-label';
+      this.element.id = labelId;
       this.peerElement = document.createElement( 'div' );
-      this.element.id = 'peer-' + instance.trail.getUniqueId();
       var label = document.createElement( 'label' );
       label.appendChild( document.createTextNode( options.label ) );
-      label.setAttribute( 'for', this.element.id );
+      label.setAttribute( 'for', labelId );
       this.peerElement.appendChild( label );
       this.peerElement.appendChild( this.element );
     }
     else {
       this.peerElement = this.element;
     }
+    this.peerElement.id = this.id;
+
+    this.visible = true;
 
     this.instance = instance;
     this.trail = instance.trail;
@@ -56,10 +63,18 @@ define( function( require ) {
       sceneryAccessibilityLog && sceneryAccessibilityLog( 'peer blurred: ' + instance.toString() + ': ' + instance.getNode().constructor.name );
       scene.blurPeer( peer );
     };
-    this.element.addEventListener( 'click', this.clickListener );
+
     this.element.addEventListener( 'focus', this.focusListener );
     this.element.addEventListener( 'blur', this.blurListener );
 
+    // Handle key presses for buttons as well as <div> or <span> with role="button"
+    // See https://developer.mozilla.org/en-US/docs/Web/Accessibility/ARIA/ARIA_Techniques/Using_the_button_role
+    this.element.addEventListener( 'keyup', function handleBtnKeyUp( event ) {
+      event = event || window.event;
+      if ( event.keyCode === 32 || event.keyCode === 13 ) { // check for Space key or enter key (13)
+        peer.clickListener();
+      }
+    } );
     this.keepPeerBoundsInSync = true;
     if ( this.keepPeerBoundsInSync ) {
       this.boundsSyncListener = this.syncBounds.bind( this );
@@ -75,8 +90,27 @@ define( function( require ) {
     }
   };
 
-  AccessibilityPeer.prototype = {
-    constructor: AccessibilityPeer,
+  return inherit( Object, AccessibilityPeer, {
+    updateVisibility: function() {
+      var newVisibility = this.trail.isVisible();
+      if ( newVisibility !== this.visible ) {
+        this.visible = newVisibility;
+        if ( newVisibility ) {
+          this.peerElement.style.display = 'inherit';
+        }
+        else {
+          this.peerElement.style.display = 'none';
+        }
+      }
+    },
+
+    onAdded: function( peer ) {
+      this.options.onAdded && this.options.onAdded( peer );
+    },
+
+    onRemoved: function( peer ) {
+      this.options.onRemoved && this.options.onRemoved( peer );
+    },
 
     dispose: function() {
       this.element.removeEventListener( 'click', this.clickListener );
@@ -101,7 +135,5 @@ define( function( require ) {
       this.element.style.width = globalBounds.width + 'px';
       this.element.style.height = globalBounds.height + 'px';
     }
-  };
-
-  return AccessibilityPeer;
+  } );
 } );
