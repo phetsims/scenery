@@ -18,6 +18,10 @@ define( function( require ) {
   var Paintable = require( 'SCENERY/nodes/Paintable' );
   var SVGSelfDrawable = require( 'SCENERY/display/SVGSelfDrawable' );
   var CanvasSelfDrawable = require( 'SCENERY/display/CanvasSelfDrawable' );
+  var SelfDrawable = require( 'SCENERY/display/SelfDrawable' );
+  var WebGLSelfDrawable = require( 'SCENERY/display/WebGLSelfDrawable' );
+  var WebGLBlock = require( 'SCENERY/display/WebGLBlock' );
+  var Util = require( 'SCENERY/util/Util' );
 
   // TODO: change this based on memory and performance characteristics of the platform
   var keepSVGPathElements = true; // whether we should pool SVG elements for the SVG rendering states, or whether we should free them when possible for memory
@@ -116,6 +120,10 @@ define( function( require ) {
 
     createCanvasDrawable: function( renderer, instance ) {
       return Path.PathCanvasDrawable.createFromPool( renderer, instance );
+    },
+
+    createWebGLDrawable: function( renderer, instance ) {
+      return Path.PathWebGLDrawable.createFromPool( renderer, instance );
     },
 
     isPainted: function() {
@@ -276,6 +284,205 @@ define( function( require ) {
     usesPaint: true,
     dirtyMethods: ['markDirtyShape']
   } );
+
+
+  /*---------------------------------------------------------------------------*
+   * WebGL rendering
+   *----------------------------------------------------------------------------*/
+
+  Path.PathWebGLDrawable = inherit( WebGLSelfDrawable, function PathWebGLDrawable( renderer, instance ) {
+    this.initialize( renderer, instance );
+  }, {
+    // called from the constructor OR from pooling
+    initialize: function( renderer, instance ) {
+      this.initializeWebGLSelfDrawable( renderer, instance );
+
+      //Small triangle strip that creates a square, which will be transformed into the right rectangle shape
+      this.vertexCoordinates = this.vertexCoordinates || new Float32Array( 8 );
+
+      this.textureCoordinates = this.textureCoordinates || new Float32Array( [
+        0, 0,
+        1, 0,
+        0, 1,
+        1, 1
+      ] );
+    },
+
+    initializeContext: function( gl ) {
+      assert && assert( gl );
+
+      this.gl = gl;
+
+      // cleanup old buffer, if applicable
+      this.disposeWebGLBuffers();
+
+      // holds vertex coordinates
+      this.vertexBuffer = gl.createBuffer();
+
+      // holds texture U,V coordinate pairs pointing into our texture coordinate space
+      this.textureBuffer = gl.createBuffer();
+
+      this.updateImage();
+    },
+
+    transformVertexCoordinateX: function( x ) {
+      return x * this.canvasWidth + this.cachedBounds.minX;
+    },
+
+    transformVertexCoordinateY: function( y ) {
+      return ( 1 - y ) * this.canvasHeight + this.cachedBounds.minY;
+    },
+
+    //Nothing necessary since everything currently handled in the uModelViewMatrix below
+    //However, we may switch to dynamic draw, and handle the matrix change only where necessary in the future?
+    updateImage: function() {
+      var gl = this.gl;
+
+      if ( this.texture !== null ) {
+        gl.deleteTexture( this.texture );
+      }
+
+      if ( this.node._shape ) {
+        // TODO: only create once instance of this Canvas for reuse
+        var canvas = document.createElement( 'canvas' );
+        var context = canvas.getContext( '2d' );
+
+        this.cachedBounds = this.node.getShape().bounds;
+        console.log( this.cachedBounds );
+
+        // TODO: Account for stroke
+        this.canvasWidth = canvas.width = Util.toPowerOf2( this.cachedBounds.width );
+        this.canvasHeight = canvas.height = Util.toPowerOf2( this.cachedBounds.height );
+        var image = this.node.toCanvasNodeSynchronous().children[0].image;
+        context.drawImage( image, 0, 0 );
+
+        var texture = this.texture = gl.createTexture();
+        gl.bindTexture( gl.TEXTURE_2D, texture );
+        gl.texParameteri( gl.TEXTURE_2D, gl.TEXTURE_WRAP_S, gl.CLAMP_TO_EDGE );
+        gl.texParameteri( gl.TEXTURE_2D, gl.TEXTURE_WRAP_T, gl.CLAMP_TO_EDGE );
+
+        gl.pixelStorei( gl.UNPACK_FLIP_Y_WEBGL, true );
+        gl.texImage2D( gl.TEXTURE_2D, 0, gl.RGBA, gl.RGBA, gl.UNSIGNED_BYTE, canvas );
+
+        // Texture filtering, see http://learningwebgl.com/blog/?p=571
+        gl.texParameteri( gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, gl.LINEAR );
+        gl.texParameteri( gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.LINEAR_MIPMAP_NEAREST );
+        gl.generateMipmap( gl.TEXTURE_2D );
+
+        gl.bindTexture( gl.TEXTURE_2D, null );
+
+        this.vertexCoordinates[0] = this.transformVertexCoordinateX( 0 );
+        this.vertexCoordinates[1] = this.transformVertexCoordinateY( 0 );
+
+        this.vertexCoordinates[2] = this.transformVertexCoordinateX( 1 );
+        this.vertexCoordinates[3] = this.transformVertexCoordinateY( 0 );
+
+        this.vertexCoordinates[4] = this.transformVertexCoordinateX( 0 );
+        this.vertexCoordinates[5] = this.transformVertexCoordinateY( 1 );
+
+        this.vertexCoordinates[6] = this.transformVertexCoordinateX( 1 );
+        this.vertexCoordinates[7] = this.transformVertexCoordinateY( 1 );
+
+        gl.bindBuffer( gl.ARRAY_BUFFER, this.vertexBuffer );
+
+        //TODO: Once we are lazily handling the full matrix, we may benefit from DYNAMIC draw here, and updating the vertices themselves
+        gl.bufferData( gl.ARRAY_BUFFER, this.vertexCoordinates, gl.STATIC_DRAW );
+
+        gl.bindBuffer( gl.ARRAY_BUFFER, this.textureBuffer );
+        gl.bufferData( gl.ARRAY_BUFFER, this.textureCoordinates, gl.STATIC_DRAW );
+      }
+    },
+
+    render: function( shaderProgram ) {
+      if ( this.node._shape ) {
+        var gl = this.gl;
+
+        //TODO: what if image is null?
+
+        //OHTWO TODO: optimize
+        //TODO: This looks like an expense we don't want to incur at every render.  How about moving it to the GPU?
+        var viewMatrix = this.instance.relativeMatrix.toAffineMatrix4();
+
+        // combine image matrix (to scale aspect ratios), the trail's matrix, and the matrix to device coordinates
+        gl.uniformMatrix4fv( shaderProgram.uniformLocations.uModelViewMatrix, false, viewMatrix.entries );
+
+        gl.uniform1i( shaderProgram.uniformLocations.uTexture, 0 ); // TEXTURE0 slot
+
+        //Indicate the branch of logic to use in the ubershader.  In this case, a texture should be used for the image
+        gl.uniform1i( shaderProgram.uniformLocations.uFragmentType, WebGLBlock.fragmentTypeTexture );
+
+        gl.activeTexture( gl.TEXTURE0 );
+        gl.bindTexture( gl.TEXTURE_2D, this.texture );
+
+        gl.bindBuffer( gl.ARRAY_BUFFER, this.vertexBuffer );
+        gl.vertexAttribPointer( shaderProgram.attributeLocations.aVertex, 2, gl.FLOAT, false, 0, 0 );
+
+        gl.bindBuffer( gl.ARRAY_BUFFER, this.textureBuffer );
+        gl.vertexAttribPointer( shaderProgram.attributeLocations.aTexCoord, 2, gl.FLOAT, false, 0, 0 );
+
+        gl.drawArrays( gl.TRIANGLE_STRIP, 0, 4 );
+      }
+    },
+
+    shaderAttributes: [
+      'aVertex',
+      'aTexCoord'
+    ],
+
+    dispose: function() {
+      // we may have been disposed without initializeContext being called (never attached to a block)
+      if ( this.gl ) {
+        this.disposeWebGLBuffers();
+        this.gl = null;
+      }
+
+      // super
+      WebGLSelfDrawable.prototype.dispose.call( this );
+
+    },
+
+    disposeWebGLBuffers: function() {
+      this.gl.deleteBuffer( this.vertexBuffer );
+      this.gl.deleteBuffer( this.textureBuffer );
+      this.gl.deleteTexture( this.texture );
+    },
+
+    markDirtyRectangle: function() {
+      this.markDirty();
+    },
+
+    // general flag set on the state, which we forward directly to the drawable's paint flag
+    markPaintDirty: function() {
+      this.markDirty();
+    },
+
+    onAttach: function( node ) {
+
+    },
+
+    // release the drawable
+    onDetach: function( node ) {
+      //OHTWO TODO: are we missing the disposal?
+    },
+
+    update: function() {
+      if ( this.dirtyShape ) {
+        this.updateImage();
+
+        this.setToCleanState();
+      }
+
+      this.dirty = false;
+    }
+  } );
+
+  // set up pooling
+  /* jshint -W064 */
+  SelfDrawable.PoolableMixin( Path.PathWebGLDrawable );
+
+  /* jshint -W064 */
+  PathStatefulDrawableMixin( Path.PathWebGLDrawable );
+
 
   return Path;
 } );
