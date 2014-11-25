@@ -149,6 +149,24 @@
         renderers: [ 'canvas', 'svg', 'dom', 'webgl' ]
       },
       {
+        name: 'hello-text-animation',
+        width: 200,
+        height: 200,
+        draw: function( scene, updateDisplay ) {
+          var text = new scenery.Text( 'hello text!', {left: 10, top: 10} );
+          scene.addChild( text );
+
+          var callback = function() {
+            window.requestAnimationFrame( callback );
+            text.text = Math.floor( Date.now() / 1000 );
+
+            updateDisplay();
+          };
+          window.requestAnimationFrame( callback );
+        },
+        renderers: [ 'canvas', 'svg', 'dom', 'webgl' ]
+      },
+      {
         name: 'solid-line-animating-position',
         width: 200,
         height: 200,
