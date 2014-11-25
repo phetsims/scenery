@@ -117,7 +117,7 @@
             fill: 'blue'
           } ) );
         },
-        renderers: [ 'canvas', 'svg', 'webgl', 'dom' ]
+        renderers: [ 'canvas', 'svg', 'dom', 'webgl' ]
       },
       {
         name: 'simple-images',
@@ -293,7 +293,7 @@
             lineWidth: 3
           } ) );
         },
-        renderers: [ 'canvas', 'svg' ]
+        renderers: [ 'canvas', 'svg', 'webgl' ]
       },
       {
         name: 'Circle',
@@ -314,7 +314,7 @@
             lineWidth: 3
           } ) );
         },
-        renderers: [ 'canvas', 'svg' ]
+        renderers: [ 'canvas', 'svg', 'webgl' ]
       },
       {
         name: 'Hexagon',
@@ -329,7 +329,7 @@
             lineWidth: 3
           } ) );
         },
-        renderers: [ 'canvas', 'svg' ]
+        renderers: [ 'canvas', 'svg', 'webgl' ]
       },
       {
         name: 'Quadratic B\u00E9zier',
@@ -344,7 +344,7 @@
             lineWidth: 3
           } ) );
         },
-        renderers: [ 'canvas', 'svg' ]
+        renderers: [ 'canvas', 'svg', 'webgl' ]
       },
       {
         name: 'Cubic B\u00E9zier',
@@ -359,7 +359,7 @@
             lineWidth: 3
           } ) );
         },
-        renderers: [ 'canvas', 'svg' ]
+        renderers: [ 'canvas', 'svg', 'webgl' ]
       },
       {
         name: 'Linear Gradients',
@@ -394,7 +394,7 @@
             lineWidth: 3
           } ) );
         },
-        renderers: [ 'canvas', 'svg' ]
+        renderers: [ 'canvas', 'svg', 'webgl' ]
       },
       {
         name: 'Radial Gradients',
@@ -434,7 +434,7 @@
             fill: transformedGradient
           } ) );
         },
-        renderers: [ 'canvas', 'svg' ]
+        renderers: [ 'canvas', 'svg', 'webgl' ]
       },
       {
         name: 'RGBA',
@@ -452,7 +452,7 @@
             lineWidth: 3
           } ) );
         },
-        renderers: [ 'canvas', 'svg' ]
+        renderers: [ 'canvas', 'svg', 'webgl' ]
       },
       {
         name: 'Dashes',
@@ -481,7 +481,7 @@
             y: 32.5
           } ) );
         },
-        renderers: [ 'canvas', 'svg' ]
+        renderers: [ 'canvas', 'svg', 'webgl' ]
       },
       {
         name: 'Images',
@@ -521,7 +521,7 @@
           } );
           img.src = 'http://phet.colorado.edu/files/archive/images/circleArrow_Icon.gif';
         },
-        renderers: [ 'canvas', 'svg' ]
+        renderers: [ 'canvas', 'svg', 'webgl' ]
       },
       {
         name: 'Overlapping and Nested Rotations',
@@ -850,9 +850,9 @@
     // When test=0.1.2 is specified, show tests 0,1,2
     testCases = filterSubset( testCases, 'test' );
 
-    _.each( testCases, function( testCase ) {
+    _.each( testCases, function( testCase, index ) {
       var $testTitle = $( document.createElement( 'h2' ) );
-      $testTitle.text( testCase.name );
+      $testTitle.text( '' + index + ': ' + testCase.name );
       $testTitle.addClass( 'testname' );
       $( document.body ).append( $testTitle );
 
