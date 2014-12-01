@@ -19,7 +19,8 @@ require.config( {
     KITE: '../../kite/js',
     DOT: '../../dot/js',
     PHET_CORE: '../../phet-core/js',
-    AXON: '../../axon/js'
+    AXON: '../../axon/js',
+    text: '../../sherpa/text'
   },
 
   shim: {

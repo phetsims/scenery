@@ -19,6 +19,8 @@ define( function( require ) {
   var Renderer = require( 'SCENERY/display/Renderer' );
   var Util = require( 'SCENERY/util/Util' );
   var ShaderProgram = require( 'SCENERY/util/ShaderProgram' );
+  var uberVertexShaderString = require( 'text!SCENERY/display/shaders/uberVertexShader.txt' );
+  var uberFragmentShaderString = require( 'text!SCENERY/display/shaders/uberFragmentShader.txt' );
 
   scenery.WebGLBlock = function WebGLBlock( display, renderer, transformRootInstance, filterRootInstance ) {
     this.initialize( display, renderer, transformRootInstance, filterRootInstance );
@@ -134,72 +136,15 @@ define( function( require ) {
       gl.enable( gl.BLEND );
       gl.blendFunc( gl.SRC_ALPHA, gl.ONE_MINUS_SRC_ALPHA );
 
-      //This is an ubershader, which handles all of the different vertex/fragment types in a single shader
-      //To reduce overhead of switching programs.
-      //TODO: Perhaps the shader program should be loaded through an external file with a RequireJS plugin
-      this.shaderProgram = new ShaderProgram( gl,
+      // Create the ubershader, which handles all of the different vertex/fragment types in a single shader
+      // to reduce overhead of switching programs.
+      this.shaderProgram = new ShaderProgram( gl, uberVertexShaderString, uberFragmentShaderString,
 
-        /********** Vertex Shader **********/
+        // attribute names
+        ['aVertex', 'aTexCoord'],
 
-          'precision mediump float;\n' +
-
-          //The vertex to be transformed
-          'attribute vec3 aVertex;\n' +
-
-          // The texture coordinate
-          'attribute vec2 aTexCoord;\n' +
-
-          // The projection matrix
-          'uniform mat4 uProjectionMatrix;\n' +
-
-          // The model-view matrix
-          'uniform mat4 uModelViewMatrix;\n' +
-
-          // The texture coordinates (if any)
-          //TODO: Is this needed here in the vertex shader?
-          'varying vec2 texCoord;\n' +
-
-          // The color to render (if any)
-          //TODO: Is this needed here in the vertex shader?
-          'uniform vec4 uColor;\n' +
-          'void main() {\n' +
-
-          // Set the position for the fragments
-          // NOTE: The aVertex must be referenced first, since the usage here determines that it will be the 0th attribute
-          // See #310
-          '  gl_Position = uProjectionMatrix * uModelViewMatrix * vec4( aVertex, 1 );\n' +
-
-          //This texture is not needed for rectangles, but we (JO/SR) don't expect it to be expensive, so we leave
-          //it for simplicity
-          '  texCoord = aTexCoord;\n' +
-          '}',
-
-        /********** Fragment Shader **********/
-
-        //Directive to indicate high precision
-          'precision mediump float;\n' +
-
-          //Texture coordinates (for images)
-          'varying vec2 texCoord;\n' +
-
-          //Color (rgba) for filled items
-          'uniform vec4 uColor;\n' +
-
-          //Fragment type such as fragmentTypeFill or fragmentTypeTexture
-          'uniform int uFragmentType;\n' +
-
-          //Texture (if any)
-          'uniform sampler2D uTexture;\n' +
-          'void main() {\n' +
-          '  if (uFragmentType==' + WebGLBlock.fragmentTypeFill + '){\n' +
-          '    gl_FragColor = uColor;\n' +
-          '  }else if (uFragmentType==' + WebGLBlock.fragmentTypeTexture + '){\n' +
-          '    gl_FragColor = texture2D( uTexture, texCoord );\n' +
-          '  }\n' +
-          '}',
-
-        ['aVertex', 'aTexCoord'], // attribute names
-        ['uTexture', 'uProjectionMatrix', 'uModelViewMatrix', 'uColor', 'uFragmentType'] // uniform names
+        // uniform names
+        ['uTexture', 'uProjectionMatrix', 'uModelViewMatrix', 'uColor', 'uFragmentType']
       );
 
       this.shaderProgram.deactivateAttribute( 'aVertex' );
