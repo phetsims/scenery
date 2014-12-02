@@ -19,8 +19,8 @@ define( function( require ) {
   var Renderer = require( 'SCENERY/display/Renderer' );
   var Util = require( 'SCENERY/util/Util' );
   var ShaderProgram = require( 'SCENERY/util/ShaderProgram' );
-  var uberVertexShaderString = require( 'text!SCENERY/display/shaders/uberVertexShader.txt' );
-  var uberFragmentShaderString = require( 'text!SCENERY/display/shaders/uberFragmentShader.txt' );
+  var uberVertexShaderString = require( 'text!SCENERY/display/shaders/uberShader.vert' );
+  var uberFragmentShaderString = require( 'text!SCENERY/display/shaders/uberShader.frag' );
 
   scenery.WebGLBlock = function WebGLBlock( display, renderer, transformRootInstance, filterRootInstance ) {
     this.initialize( display, renderer, transformRootInstance, filterRootInstance );
