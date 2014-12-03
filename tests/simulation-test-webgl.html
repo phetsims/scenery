@@ -52,7 +52,7 @@
     // Code inspired by http://www.webglacademy.com/#1
     var gl;
     try {
-      gl = canvas.getContext( "experimental-webgl" ); // TODO: {antialias:true?}
+      gl = canvas.getContext( "experimental-webgl", {antialias: true} ); // TODO: {antialias:true?}
     }
     catch( e ) {
       return false;
@@ -103,7 +103,7 @@
       1, 1,  //top right of the viewport
     ];
 
-    var numMovingTriangles = 5000;
+    var numMovingTriangles = 3000;
     for ( var i = 0; i < numMovingTriangles; i++ ) {
       var x = Math.random();
       var y = Math.random();
