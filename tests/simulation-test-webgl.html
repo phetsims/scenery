@@ -100,8 +100,23 @@
     var triangleArray = [
       -1, -1, //first summit -> bottom left of the viewport
       1, -1, //bottom right of the viewport
-      1, 1  //top right of the viewport
+      1, 1,  //top right of the viewport
     ];
+
+    var numMovingTriangles = 5000;
+    for ( var i = 0; i < numMovingTriangles; i++ ) {
+      var x = Math.random();
+      var y = Math.random();
+      triangleArray.push( x, y );
+      triangleArray.push( x, y + 0.1 );
+      triangleArray.push( x + 0.1, y );
+    }
+
+    var originalArray = [];
+    for ( var i = 0; i < triangleArray.length; i++ ) {
+      var element = triangleArray[i];
+      originalArray.push( element );
+    }
 
     var triangleVertexBuffer = gl.createBuffer();
     gl.bindBuffer( gl.ARRAY_BUFFER, triangleVertexBuffer );
@@ -120,9 +135,18 @@
       gl.vertexAttribPointer( positionAttribLocation, 2, gl.FLOAT, false, 4 * 2, 0 );
 
       triangleArray[0] = Math.cos( Date.now() / 1000 );
+
+      //see http://stackoverflow.com/questions/5497722/how-can-i-animate-an-object-in-webgl-modify-specific-vertices-not-full-transfor
       gl.bufferSubData( gl.ARRAY_BUFFER, 0, new Float32Array( triangleArray ) );
 
-      gl.drawArrays( gl.TRIANGLES, 0, 3 );
+      var x = Math.cos( Date.now() / 1000 );
+      for ( var i = 0; i < numMovingTriangles; i++ ) {
+        triangleArray[6 + i * 6] = originalArray[6 + i * 6] + x;
+        triangleArray[8 + i * 6] = originalArray[8 + i * 6] + x;
+        triangleArray[10 + i * 6] = originalArray[10 + i * 6] + x;
+      }
+
+      gl.drawArrays( gl.TRIANGLES, 0, triangleArray.length / 2 );
       gl.flush();
 
       stats.end();
