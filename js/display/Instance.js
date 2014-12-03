@@ -126,7 +126,7 @@ define( function( require ) {
 
       this.id = this.id || globalIdCounter++;
 
-      this.cleanInstance( display, trail, trail.lastNode() );
+      this.cleanInstance( display, trail );
 
       // the actual cached transform to the root
       this.relativeMatrix = this.relativeMatrix || Matrix3.identity();
@@ -201,10 +201,10 @@ define( function( require ) {
 
     // called for initialization of properties (via initialize(), via constructor), or to clean the instance for
     // placement in the pool (don't leak memory)
-    cleanInstance: function( display, trail, node ) {
+    cleanInstance: function( display, trail ) {
       this.display = display;
       this.trail = trail;
-      this.node = node;
+      this.node = trail ? trail.lastNode() : null;
       this.parent = null; // will be set as needed
       this.oldParent = null; // set when removed from us, so that we can easily reattach it when necessary
       // NOTE: reliance on correct order after syncTree by at least SVGBlock/SVGGroup
@@ -1419,7 +1419,7 @@ define( function( require ) {
       }
 
       // clean our variables out to release memory
-      this.cleanInstance( null, null, null );
+      this.cleanInstance( null, null );
 
       this.freeToPool();
     },
