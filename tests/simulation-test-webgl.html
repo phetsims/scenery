@@ -99,11 +99,8 @@
 
     var triangle = [
       -1, -1, //first summit -> bottom left of the viewport
-      0, 0, 1,
       1, -1, //bottom right of the viewport
-      1, 1, 0,
-      1, 1,  //top right of the viewport
-      1, 0, 0
+      1, 1  //top right of the viewport
     ];
 
     var triangleVertexBuffer = gl.createBuffer();
@@ -127,7 +124,7 @@
 
       gl.bindBuffer( gl.ARRAY_BUFFER, triangleVertexBuffer );
 
-      gl.vertexAttribPointer( positionAttribLocation, 2, gl.FLOAT, false, 4 * (2 + 3), 0 );
+      gl.vertexAttribPointer( positionAttribLocation, 2, gl.FLOAT, false, 4 * 2, 0 );
 
       gl.bindBuffer( gl.ELEMENT_ARRAY_BUFFER, triangleFaceBuffer );
       gl.drawElements( gl.TRIANGLES, 3, gl.UNSIGNED_SHORT, 0 );
