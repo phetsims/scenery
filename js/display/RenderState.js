@@ -37,9 +37,6 @@ define( function( require ) {
 
   var emptyObject = {};
 
-  // var defaultPreferredRenderers = Renderer.bitmaskFromRenderers( Renderer.bitmaskWebGL, Renderer.bitmaskSVG, Renderer.bitmaskCanvas, Renderer.bitmaskDOM );
-  // var defaultCanvasPreferredRenderers = Renderer.bitmaskFromRenderers( Renderer.bitmaskCanvas );
-
   /*
    * @param {Node} node                    The node whose instance will have this state (inspect the hints / properties
    *                                       on this node)
