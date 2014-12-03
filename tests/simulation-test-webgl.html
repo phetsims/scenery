@@ -103,30 +103,30 @@
 
     gl.useProgram( shaderProgram );
 
-    var triangleArray = [];
+    var vertexArray = [];
 
     var numMovingTriangles = 5000;
     for ( var i = 0; i < numMovingTriangles; i++ ) {
       var x = Math.random() * 2 - 1;
       var y = Math.random() * 2 - 1;
-      triangleArray.push( x, y );
-      triangleArray.push( x, y + 0.1 );
-      triangleArray.push( x + 0.1, y );
+      vertexArray.push( x, y );
+      vertexArray.push( x, y + 0.1 );
+      vertexArray.push( x + 0.1, y );
     }
 
     var originalArray = [];
-    for ( var i = 0; i < triangleArray.length; i++ ) {
-      var element = triangleArray[i];
+    for ( var i = 0; i < vertexArray.length; i++ ) {
+      var element = vertexArray[i];
       originalArray.push( element );
     }
 
-    var triangleVertexBuffer = gl.createBuffer();
-    gl.bindBuffer( gl.ARRAY_BUFFER, triangleVertexBuffer );
-    gl.bufferData( gl.ARRAY_BUFFER, new Float32Array( triangleArray ), gl.DYNAMIC_DRAW );
+    var vertexBuffer = gl.createBuffer();
+    gl.bindBuffer( gl.ARRAY_BUFFER, vertexBuffer );
+    gl.bufferData( gl.ARRAY_BUFFER, new Float32Array( vertexArray ), gl.DYNAMIC_DRAW );
 
     // Set up different colors for each triangle
-    var triangleVertexColorBuffer = gl.createBuffer();
-    gl.bindBuffer( gl.ARRAY_BUFFER, triangleVertexColorBuffer );
+    var vertexColorBuffer = gl.createBuffer();
+    gl.bindBuffer( gl.ARRAY_BUFFER, vertexColorBuffer );
     var colors = [];
     var colorChoices = [
       [1, 0, 0, 1],
@@ -156,22 +156,22 @@
       gl.vertexAttribPointer( positionAttribLocation, 2, gl.FLOAT, false, 4 * 2, 0 );
 
       // Send the colors to the GPU
-      gl.bindBuffer( gl.ARRAY_BUFFER, triangleVertexColorBuffer );
+      gl.bindBuffer( gl.ARRAY_BUFFER, vertexColorBuffer );
       gl.vertexAttribPointer( colorAttributeLocation, 4, gl.FLOAT, false, 0, 0 );
 
       // Update the vertex locations
       //see http://stackoverflow.com/questions/5497722/how-can-i-animate-an-object-in-webgl-modify-specific-vertices-not-full-transfor
-      gl.bufferSubData( gl.ARRAY_BUFFER, 0, new Float32Array( triangleArray ) );
+      gl.bufferSubData( gl.ARRAY_BUFFER, 0, new Float32Array( vertexArray ) );
 
       // Show one oscillation per second so it is easy to count time
       var x = 0.2 * Math.cos( Date.now() / 1000 * 2 * Math.PI );
       for ( var i = 0; i < numMovingTriangles; i++ ) {
-        triangleArray[0 + i * 6] = originalArray[0 + i * 6] + x;
-        triangleArray[2 + i * 6] = originalArray[2 + i * 6] + x;
-        triangleArray[4 + i * 6] = originalArray[4 + i * 6] + x;
+        vertexArray[0 + i * 6] = originalArray[0 + i * 6] + x;
+        vertexArray[2 + i * 6] = originalArray[2 + i * 6] + x;
+        vertexArray[4 + i * 6] = originalArray[4 + i * 6] + x;
       }
 
-      gl.drawArrays( gl.TRIANGLES, 0, triangleArray.length / 2 );
+      gl.drawArrays( gl.TRIANGLES, 0, vertexArray.length / 2 );
       gl.flush();
 
       stats.end();
