@@ -177,6 +177,9 @@ define( function( require ) {
 
     throw new Error( 'pushOrderBitmask overflow' );
   };
+  Renderer.bitmaskFromRenderers = function() {
+    return _.reduce( Array.prototype.slice.call( arguments ), Renderer.pushOrderBitmask, 0 );
+  };
 
   Renderer.createSelfDrawable = function( instance, node, selfRenderer ) {
     if ( Renderer.isCanvas( selfRenderer ) ) {
