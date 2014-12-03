@@ -28,7 +28,7 @@
 </head>
 
 <body>
-<canvas id="canvas"></canvas>
+<canvas id="canvas" style="position: absolute;top:0px; left:0px"></canvas>
 
 <script>
 
@@ -42,31 +42,110 @@
 
   document.body.appendChild( stats.domElement );
 
-  var canvas = document.getElementById( 'canvas' );
-  var context = canvas.getContext( '2d' );
+  var main = function() {
 
-  //TODO: Update these values on rotation or resize?
-  canvas.width = window.innerWidth;
-  canvas.height = window.innerHeight;
+    var canvas = document.getElementById( "canvas" );
 
-  var fillStyle = 'rgb(200,0,0)';
+    canvas.width = window.innerWidth;
+    canvas.height = window.innerHeight;
 
-  var updateFrame = function() {
-    window.requestAnimationFrame( updateFrame );
-
-    stats.begin();
-    var time = Date.now();
-
-    context.clearRect( 0, 0, canvas.width, canvas.height );
-
-    context.fillStyle = fillStyle;
-    for ( var i = 0; i < 1; i++ ) {
-      context.fillRect( 200, 250 + 200 * Math.sin( time / 1000 * 3 ), 55, 50 );
+    // Code inspired by http://www.webglacademy.com/#1
+    var gl;
+    try {
+      gl = canvas.getContext( "experimental-webgl" ); // TODO: {antialias:true?}
+    }
+    catch( e ) {
+      return false;
     }
 
-    stats.end();
+    var vertexShaderSource = [
+      'attribute vec2 position;',
+      'attribute vec3 color;  //the color of the point',
+      'varying vec3 vColor;',
+      'void main(void) { //pre-built function',
+      '  gl_Position = vec4(position, 0., 1.); //0. is the z, and 1 is w',
+      '  vColor=color;',
+      '}'
+    ].join( '\n' );
+
+    var fragmentShaderSource = [
+      'precision mediump float;',
+      'varying vec3 vColor;',
+      'void main(void) {',
+      '  gl_FragColor = vec4(255,0,0,1);',
+      '}'].join( '\n' );
+
+    var toShader = function( source, type, typeString ) {
+      var shader = gl.createShader( type );
+      gl.shaderSource( shader, source );
+      gl.compileShader( shader );
+      if ( !gl.getShaderParameter( shader, gl.COMPILE_STATUS ) ) {
+        console.log( "ERROR IN " + typeString + " SHADER : " + gl.getShaderInfoLog( shader ) );
+        return false;
+      }
+      return shader;
+    };
+
+    var vertexShader = toShader( vertexShaderSource, gl.VERTEX_SHADER, "VERTEX" );
+    var fragmentShader = toShader( fragmentShaderSource, gl.FRAGMENT_SHADER, "FRAGMENT" );
+
+    var shaderProgram = gl.createProgram();
+    gl.attachShader( shaderProgram, vertexShader );
+    gl.attachShader( shaderProgram, fragmentShader );
+
+    gl.linkProgram( shaderProgram );
+
+    var colorAttribLocation = gl.getAttribLocation( shaderProgram, "color" );
+    var positionAttribLocation = gl.getAttribLocation( shaderProgram, "position" );
+
+    gl.enableVertexAttribArray( colorAttribLocation );
+    gl.enableVertexAttribArray( positionAttribLocation );
+
+    gl.useProgram( shaderProgram );
+
+    var triangle = [
+      -1, -1, //first summit -> bottom left of the viewport
+      0, 0, 1,
+      1, -1, //bottom right of the viewport
+      1, 1, 0,
+      1, 1,  //top right of the viewport
+      1, 0, 0
+    ];
+
+    var triangleVertexBuffer = gl.createBuffer();
+    gl.bindBuffer( gl.ARRAY_BUFFER, triangleVertexBuffer );
+    gl.bufferData( gl.ARRAY_BUFFER, new Float32Array( triangle ), gl.STATIC_DRAW );
+
+    var triangleFaces = [0, 1, 2];
+    var triangleFaceBuffer = gl.createBuffer();
+    gl.bindBuffer( gl.ELEMENT_ARRAY_BUFFER, triangleFaceBuffer );
+    gl.bufferData( gl.ELEMENT_ARRAY_BUFFER, new Uint16Array( triangleFaces ), gl.STATIC_DRAW );
+
+    gl.clearColor( 0.0, 0.0, 0.0, 0.0 );
+
+    var animate = function() {
+      window.requestAnimationFrame( animate );
+
+      stats.begin();
+
+      gl.viewport( 0.0, 0.0, canvas.width, canvas.height );
+      gl.clear( gl.COLOR_BUFFER_BIT );
+
+      gl.bindBuffer( gl.ARRAY_BUFFER, triangleVertexBuffer );
+
+      gl.vertexAttribPointer( positionAttribLocation, 2, gl.FLOAT, false, 4 * (2 + 3), 0 );
+      gl.vertexAttribPointer( colorAttribLocation, 3, gl.FLOAT, false, 4 * (2 + 3), 2 * 4 );
+
+      gl.bindBuffer( gl.ELEMENT_ARRAY_BUFFER, triangleFaceBuffer );
+      gl.drawElements( gl.TRIANGLES, 3, gl.UNSIGNED_SHORT, 0 );
+      gl.flush();
+
+      stats.end();
+    };
+    window.requestAnimationFrame( animate );
   };
-  window.requestAnimationFrame( updateFrame );
+
+  main();
 
 </script>
 
