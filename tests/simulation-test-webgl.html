@@ -60,15 +60,19 @@
 
     var vertexShaderSource = [
       'attribute vec2 position;',
-      'void main(void) { //pre-built function',
-      '  gl_Position = vec4(position, 0., 1.); //0. is the z, and 1 is w',
+      'attribute vec4 aVertexColor;',
+      'varying vec4 vColor;',
+      'void main(void) { ',//pre-built function
+      '  gl_Position = vec4(position, 0., 1.); ',//0. is the z, and 1 is w
+      'vColor = aVertexColor;',
       '}'
     ].join( '\n' );
 
     var fragmentShaderSource = [
       'precision mediump float;',
+      'varying vec4 vColor;',
       'void main(void) {',
-      '  gl_FragColor = vec4(255,0,0,1);',
+      '  gl_FragColor = vColor;',
       '}'].join( '\n' );
 
     var toShader = function( source, type, typeString ) {
@@ -92,8 +96,10 @@
     gl.linkProgram( shaderProgram );
 
     var positionAttribLocation = gl.getAttribLocation( shaderProgram, "position" );
+    var colorAttributeLocation = gl.getAttribLocation( shaderProgram, 'aVertexColor' );
 
     gl.enableVertexAttribArray( positionAttribLocation );
+    gl.enableVertexAttribArray( colorAttributeLocation );
 
     gl.useProgram( shaderProgram );
 
@@ -118,6 +124,25 @@
     gl.bindBuffer( gl.ARRAY_BUFFER, triangleVertexBuffer );
     gl.bufferData( gl.ARRAY_BUFFER, new Float32Array( triangleArray ), gl.DYNAMIC_DRAW );
 
+    // Set up different colors for each triangle
+    var triangleVertexColorBuffer = gl.createBuffer();
+    gl.bindBuffer( gl.ARRAY_BUFFER, triangleVertexColorBuffer );
+    var colors = [];
+    var colorChoices = [
+      [1, 0, 0, 1],
+      [0, 1, 0, 1],
+      [0, 0, 1, 1]
+    ];
+    for ( i = 0; i < numMovingTriangles; i++ ) {
+      var color = colorChoices[i % colorChoices.length];
+      for ( var k = 0; k < 3; k++ ) {
+        for ( var m = 0; m < color.length; m++ ) {
+          colors.push( color[m] );
+        }
+      }
+    }
+    gl.bufferData( gl.ARRAY_BUFFER, new Float32Array( colors ), gl.STATIC_DRAW );
+
     gl.clearColor( 0.0, 0.0, 0.0, 0.0 );
 
     var animate = function() {
@@ -130,8 +155,11 @@
 
       gl.vertexAttribPointer( positionAttribLocation, 2, gl.FLOAT, false, 4 * 2, 0 );
 
-      triangleArray[0] = Math.cos( Date.now() / 1000 );
+      // Send the colors to the GPU
+      gl.bindBuffer( gl.ARRAY_BUFFER, triangleVertexColorBuffer );
+      gl.vertexAttribPointer( colorAttributeLocation, 4, gl.FLOAT, false, 0, 0 );
 
+      // Update the vertex locations
       //see http://stackoverflow.com/questions/5497722/how-can-i-animate-an-object-in-webgl-modify-specific-vertices-not-full-transfor
       gl.bufferSubData( gl.ARRAY_BUFFER, 0, new Float32Array( triangleArray ) );
 
