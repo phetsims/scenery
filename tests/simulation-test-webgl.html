@@ -105,7 +105,7 @@
 
     var triangleArray = [    ];
 
-    var numMovingTriangles = 3000;
+    var numMovingTriangles = 5000;
     for ( var i = 0; i < numMovingTriangles; i++ ) {
       var x = Math.random() * 2 - 1;
       var y = Math.random() * 2 - 1;
@@ -163,7 +163,8 @@
       //see http://stackoverflow.com/questions/5497722/how-can-i-animate-an-object-in-webgl-modify-specific-vertices-not-full-transfor
       gl.bufferSubData( gl.ARRAY_BUFFER, 0, new Float32Array( triangleArray ) );
 
-      var x = Math.cos( Date.now() / 1000 );
+      // Show one oscillation per second so it is easy to count time
+      var x = 0.2 * Math.cos( Date.now() / 1000 * 2 * Math.PI );
       for ( var i = 0; i < numMovingTriangles; i++ ) {
         triangleArray[0 + i * 6] = originalArray[0 + i * 6] + x;
         triangleArray[2 + i * 6] = originalArray[2 + i * 6] + x;
