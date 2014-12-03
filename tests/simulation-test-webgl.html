@@ -60,17 +60,13 @@
 
     var vertexShaderSource = [
       'attribute vec2 position;',
-      'attribute vec3 color;  //the color of the point',
-      'varying vec3 vColor;',
       'void main(void) { //pre-built function',
       '  gl_Position = vec4(position, 0., 1.); //0. is the z, and 1 is w',
-      '  vColor=color;',
       '}'
     ].join( '\n' );
 
     var fragmentShaderSource = [
       'precision mediump float;',
-      'varying vec3 vColor;',
       'void main(void) {',
       '  gl_FragColor = vec4(255,0,0,1);',
       '}'].join( '\n' );
@@ -95,10 +91,8 @@
 
     gl.linkProgram( shaderProgram );
 
-    var colorAttribLocation = gl.getAttribLocation( shaderProgram, "color" );
     var positionAttribLocation = gl.getAttribLocation( shaderProgram, "position" );
 
-    gl.enableVertexAttribArray( colorAttribLocation );
     gl.enableVertexAttribArray( positionAttribLocation );
 
     gl.useProgram( shaderProgram );
@@ -134,7 +128,6 @@
       gl.bindBuffer( gl.ARRAY_BUFFER, triangleVertexBuffer );
 
       gl.vertexAttribPointer( positionAttribLocation, 2, gl.FLOAT, false, 4 * (2 + 3), 0 );
-      gl.vertexAttribPointer( colorAttribLocation, 3, gl.FLOAT, false, 4 * (2 + 3), 2 * 4 );
 
       gl.bindBuffer( gl.ELEMENT_ARRAY_BUFFER, triangleFaceBuffer );
       gl.drawElements( gl.TRIANGLES, 3, gl.UNSIGNED_SHORT, 0 );
