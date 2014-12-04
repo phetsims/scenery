@@ -169,6 +169,60 @@
           }
         };
       };
+
+      this.createStar = function( _x, _y, _innerRadius, _outerRadius, _totalAngle, r, g, b, a ) {
+
+        var index = this.vertexArray.length;
+
+        var points = [];
+        //Create the points for a filled-in star, which will be used to compute the geometry of a partial star.
+        for ( i = 0; i < 10; i++ ) {
+
+          //Start at the top and proceed clockwise
+          var angle = i / 10 * Math.PI * 2 - Math.PI / 2 + _totalAngle;
+          var radius = i % 2 === 0 ? _outerRadius : _innerRadius;
+          var x = radius * Math.cos( angle ) + _x;
+          var y = radius * Math.sin( angle ) + _y;
+          points.push( {x: x, y: y} );
+        }
+
+        trianglesGeometry.vertexArray.push(
+            points[0].x, points[0].y,
+            points[3].x, points[3].y,
+            points[6].x, points[6].y,
+
+            points[8].x, points[8].y,
+            points[2].x, points[2].y,
+            points[5].x, points[5].y,
+
+            points[0].x, points[0].y,
+            points[7].x, points[7].y,
+            points[4].x, points[4].y
+        );
+
+        // Add the same color for all vertices (solid fill star).
+        // TODO: some way to reduce this amount of elements!
+        trianglesGeometry.colors.push(
+            r, g, b, a,
+            r, g, b, a,
+            r, g, b, a,
+
+            r, g, b, a,
+            r, g, b, a,
+            r, g, b, a,
+
+            r, g, b, a,
+            r, g, b, a,
+            r, g, b, a
+        );
+
+        //Track the index so it can delete itself, update itself, etc.
+        return {
+          initialState: {x: _x, y: _y, innerRadius: _innerRadius},
+          index: index
+        };
+      }
+
     };
 
     var trianglesGeometry = new TrianglesGeometry();
@@ -182,6 +236,14 @@
       var x = (Math.random() * 2 - 1) * 0.9;
       var y = (Math.random() * 2 - 1) * 0.9;
       rectangles.push( trianglesGeometry.createRectangle( x, y, 0.02, 0.02, x, y, 1, 1 ) );
+    }
+
+    var numStars = 500;
+    for ( var k = 0; k < numStars; k++ ) {
+      x = (Math.random() * 2 - 1) * 0.9;
+      y = (Math.random() * 2 - 1) * 0.9;
+      var scale = Math.random() * 0.2;
+      trianglesGeometry.createStar( x, y, 0.15 * scale, 0.4 * scale, Math.PI + Math.random() * Math.PI * 2, Math.random(), Math.random(), Math.random(), 1 );
     }
 
     var vertexBuffer = gl.createBuffer();
