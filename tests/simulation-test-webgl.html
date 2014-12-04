@@ -64,7 +64,7 @@
       'varying vec4 vColor;',
       'void main(void) { ',//pre-built function
       '  gl_Position = vec4(position, 0., 1.); ',//0. is the z, and 1 is w
-      'vColor = aVertexColor;',
+      '  vColor = vec4(aVertexColor[0],aVertexColor[1],aVertexColor[2],aVertexColor[3]);',
       '}'
     ].join( '\n' );
 
@@ -122,11 +122,8 @@
 
     var vertexBuffer = gl.createBuffer();
     gl.bindBuffer( gl.ARRAY_BUFFER, vertexBuffer );
-    gl.bufferData( gl.ARRAY_BUFFER, new Float32Array( vertexArray ), gl.DYNAMIC_DRAW );
+    gl.bufferData( gl.ARRAY_BUFFER, new Float32Array( vertexArray ), gl.STATIC_DRAW );
 
-    // Set up different colors for each triangle
-    var vertexColorBuffer = gl.createBuffer();
-    gl.bindBuffer( gl.ARRAY_BUFFER, vertexColorBuffer );
     var colors = [];
     var colorChoices = [
       [1, 0, 0, 1],
@@ -141,6 +138,10 @@
         }
       }
     }
+
+    // Set up different colors for each triangle
+    var vertexColorBuffer = gl.createBuffer();
+    gl.bindBuffer( gl.ARRAY_BUFFER, vertexColorBuffer );
     gl.bufferData( gl.ARRAY_BUFFER, new Float32Array( colors ), gl.STATIC_DRAW );
 
     gl.clearColor( 0.0, 0.0, 0.0, 0.0 );
@@ -153,15 +154,16 @@
       gl.viewport( 0.0, 0.0, canvas.width, canvas.height );
       gl.clear( gl.COLOR_BUFFER_BIT );
 
-      gl.vertexAttribPointer( positionAttribLocation, 2, gl.FLOAT, false, 4 * 2, 0 );
-
-      // Send the colors to the GPU
-      gl.bindBuffer( gl.ARRAY_BUFFER, vertexColorBuffer );
-      gl.vertexAttribPointer( colorAttributeLocation, 4, gl.FLOAT, false, 0, 0 );
+      gl.bindBuffer( gl.ARRAY_BUFFER, vertexBuffer );
 
       // Update the vertex locations
       //see http://stackoverflow.com/questions/5497722/how-can-i-animate-an-object-in-webgl-modify-specific-vertices-not-full-transfor
       gl.bufferSubData( gl.ARRAY_BUFFER, 0, new Float32Array( vertexArray ) );
+      gl.vertexAttribPointer( positionAttribLocation, 2, gl.FLOAT, false, 0, 0 );
+
+      // Send the colors to the GPU
+      gl.bindBuffer( gl.ARRAY_BUFFER, vertexColorBuffer );
+      gl.vertexAttribPointer( colorAttributeLocation, 4, gl.FLOAT, false, 0, 0 );
 
       // Show one oscillation per second so it is easy to count time
       var x = 0.2 * Math.cos( Date.now() / 1000 * 2 * Math.PI );
