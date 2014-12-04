@@ -28,6 +28,7 @@ define( [
   'SCENERY/display/InlineCanvasCacheDrawable',
   'SCENERY/display/Instance',
   'SCENERY/display/RebuildStitcher',
+  'SCENERY/display/RelativeTransform',
   'SCENERY/display/Renderer',
   'SCENERY/display/RenderState',
   'SCENERY/display/SelfDrawable',

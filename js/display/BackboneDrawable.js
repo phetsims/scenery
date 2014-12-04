@@ -71,8 +71,8 @@ define( function( require ) {
 
       this.transformListener = this.transformListener || this.markTransformDirty.bind( this );
       if ( this.willApplyTransform ) {
-        this.backboneInstance.addRelativeTransformListener( this.transformListener ); // when our relative transform changes, notify us in the pre-repaint phase
-        this.backboneInstance.addRelativeTransformPrecompute(); // trigger precomputation of the relative transform, since we will always need it when it is updated
+        this.backboneInstance.relativeTransform.addListener( this.transformListener ); // when our relative transform changes, notify us in the pre-repaint phase
+        this.backboneInstance.relativeTransform.addPrecompute(); // trigger precomputation of the relative transform, since we will always need it when it is updated
       }
 
       this.renderer = renderer;
@@ -146,8 +146,8 @@ define( function( require ) {
       this.markBlocksForDisposal();
 
       if ( this.willApplyTransform ) {
-        this.backboneInstance.removeRelativeTransformListener( this.transformListener );
-        this.backboneInstance.removeRelativeTransformPrecompute();
+        this.backboneInstance.relativeTransform.removeListener( this.transformListener );
+        this.backboneInstance.relativeTransform.removePrecompute();
       }
 
       this.backboneInstance = null;
@@ -198,7 +198,7 @@ define( function( require ) {
       assert && assert( this.willApplyTransform, 'Sanity check for willApplyTransform' );
 
       // relative matrix on backbone instance should be up to date, since we added the compute flags
-      scenery.Util.applyPreparedTransform( this.backboneInstance.relativeMatrix, this.domElement, this.forceAcceleration );
+      scenery.Util.applyPreparedTransform( this.backboneInstance.relativeTransform.matrix, this.domElement, this.forceAcceleration );
     },
 
     markOpacityDirty: function() {

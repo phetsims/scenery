@@ -137,7 +137,7 @@ define( function( require ) {
       if ( instance.node._clipArea ) {
         //OHTWO TODO: reduce duplication here
         this.context.setTransform( this.backingScale, 0, 0, this.backingScale, this.canvasDrawOffset.x * this.backingScale, this.canvasDrawOffset.y * this.backingScale );
-        instance.relativeMatrix.canvasAppendTransform( this.context );
+        instance.relativeTransform.matrix.canvasAppendTransform( this.context );
 
         // do the clipping
         this.context.beginPath();
@@ -148,9 +148,9 @@ define( function( require ) {
 
     renderDrawable: function( drawable ) {
       // we're directly accessing the relative transform below, so we need to ensure that it is up-to-date
-      assert && assert( drawable.instance.isValidationNotNeeded() );
+      assert && assert( drawable.instance.relativeTransform.isValidationNotNeeded() );
 
-      var matrix = drawable.instance.relativeMatrix;
+      var matrix = drawable.instance.relativeTransform.matrix;
 
       // set the correct (relative to the transform root) transform up, instead of walking the hierarchy (for now)
       //OHTWO TODO: should we start premultiplying these matrices to remove this bottleneck?

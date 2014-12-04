@@ -34,8 +34,8 @@ define( function( require ) {
       this.markTransformDirty();
 
       // handle transform changes
-      instance.addRelativeTransformListener( this.transformListener ); // when our relative tranform changes, notify us in the pre-repaint phase
-      instance.addRelativeTransformPrecompute(); // trigger precomputation of the relative transform, since we will always need it when it is updated
+      instance.relativeTransform.addListener( this.transformListener ); // when our relative tranform changes, notify us in the pre-repaint phase
+      instance.relativeTransform.addPrecompute(); // trigger precomputation of the relative transform, since we will always need it when it is updated
 
       return this;
     },
@@ -49,8 +49,8 @@ define( function( require ) {
 
     // called from the Node, probably during updateDOM
     getTransformMatrix: function() {
-      this.instance.validateRelativeTransform();
-      return this.instance.relativeMatrix;
+      this.instance.relativeTransform.validate();
+      return this.instance.relativeTransform.matrix;
     },
 
     // called from elsewhere to update the DOM element
@@ -75,8 +75,8 @@ define( function( require ) {
     },
 
     dispose: function() {
-      this.instance.removeRelativeTransformListener( this.transformListener );
-      this.instance.removeRelativeTransformPrecompute();
+      this.instance.relativeTransform.removeListener( this.transformListener );
+      this.instance.relativeTransform.removePrecompute();
 
       // super call
       SelfDrawable.prototype.dispose.call( this );

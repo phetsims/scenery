@@ -494,10 +494,10 @@ define( function( require ) {
       sceneryLog && sceneryLog.transformSystem && sceneryLog.transformSystem( 'updateDirtyTransformRoots' );
       sceneryLog && sceneryLog.transformSystem && sceneryLog.push();
       while ( this._dirtyTransformRoots.length ) {
-        this._dirtyTransformRoots.pop().updateTransformListenersAndCompute( false, false, this._frameId, true );
+        this._dirtyTransformRoots.pop().relativeTransform.updateTransformListenersAndCompute( false, false, this._frameId, true );
       }
       while ( this._dirtyTransformRootsWithoutPass.length ) {
-        this._dirtyTransformRootsWithoutPass.pop().updateTransformListenersAndCompute( false, false, this._frameId, false );
+        this._dirtyTransformRootsWithoutPass.pop().relativeTransform.updateTransformListenersAndCompute( false, false, this._frameId, false );
       }
       sceneryLog && sceneryLog.transformSystem && sceneryLog.pop();
     },

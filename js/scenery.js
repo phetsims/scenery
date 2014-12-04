@@ -71,7 +71,7 @@ define( function( require ) {
       StitchDrawables: { name: 'Stitch', style: 'color: #000;' },
       GreedyStitcher: { name: 'Greedy', style: 'color: #088;' },
       GreedyVerbose: { name: 'Greedy', style: 'color: #888;' },
-      transformSystem: { name: 'transform', style: 'color: #606;' },
+      RelativeTransform: { name: 'transform', style: 'color: #606;' },
       BackboneDrawable: { name: 'Backbone', style: 'color: #a00;' },
       CanvasBlock: { name: 'Canvas', style: 'color: #000;' },
       WebGLBlock: { name: 'WebGL', style: 'color: #000;' },

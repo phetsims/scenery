@@ -500,7 +500,7 @@ define( function( require ) {
       // TODO: how to handle fill/stroke delay optimizations here?
       if ( this.node._fill ) {
         //OHTWO TODO: optimize
-        var viewMatrix = this.instance.relativeMatrix.toAffineMatrix4();
+        var viewMatrix = this.instance.relativeTransform.matrix.toAffineMatrix4();
 
         // combine image matrix (to scale aspect ratios), the trail's matrix, and the matrix to device coordinates
         gl.uniformMatrix4fv( shaderProgram.uniformLocations.uModelViewMatrix, false, viewMatrix.entries );
