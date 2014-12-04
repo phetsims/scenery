@@ -173,32 +173,9 @@
       this.createStar = function( _x, _y, _innerRadius, _outerRadius, _totalAngle, r, g, b, a ) {
 
         var index = this.vertexArray.length;
-
-        var points = [];
-        //Create the points for a filled-in star, which will be used to compute the geometry of a partial star.
-        for ( i = 0; i < 10; i++ ) {
-
-          //Start at the top and proceed clockwise
-          var angle = i / 10 * Math.PI * 2 - Math.PI / 2 + _totalAngle;
-          var radius = i % 2 === 0 ? _outerRadius : _innerRadius;
-          var x = radius * Math.cos( angle ) + _x;
-          var y = radius * Math.sin( angle ) + _y;
-          points.push( {x: x, y: y} );
+        for ( var i = 0; i < 18; i++ ) {
+          trianglesGeometry.vertexArray.push( 0 );
         }
-
-        trianglesGeometry.vertexArray.push(
-            points[0].x, points[0].y,
-            points[3].x, points[3].y,
-            points[6].x, points[6].y,
-
-            points[8].x, points[8].y,
-            points[2].x, points[2].y,
-            points[5].x, points[5].y,
-
-            points[0].x, points[0].y,
-            points[7].x, points[7].y,
-            points[4].x, points[4].y
-        );
 
         // Add the same color for all vertices (solid fill star).
         // TODO: some way to reduce this amount of elements!
@@ -217,12 +194,49 @@
         );
 
         //Track the index so it can delete itself, update itself, etc.
-        return {
-          initialState: {x: _x, y: _y, innerRadius: _innerRadius},
-          index: index
-        };
-      }
+        var myStar = {
+          initialState: {_x: _x, _y: _y, _innerRadius: _innerRadius, _outerRadius: _outerRadius, _totalAngle: _totalAngle},
+          index: index,
+          setStar: function( _x, _y, _innerRadius, _outerRadius, _totalAngle ) {
 
+            var points = [];
+            //Create the points for a filled-in star, which will be used to compute the geometry of a partial star.
+            for ( i = 0; i < 10; i++ ) {
+
+              //Start at the top and proceed clockwise
+              var angle = i / 10 * Math.PI * 2 - Math.PI / 2 + _totalAngle;
+              var radius = i % 2 === 0 ? _outerRadius : _innerRadius;
+              var x = radius * Math.cos( angle ) + _x;
+              var y = radius * Math.sin( angle ) + _y;
+              points.push( {x: x, y: y} );
+            }
+
+            var index = this.index;
+            trianglesGeometry.vertexArray[index + 0] = points[0].x;
+            trianglesGeometry.vertexArray[index + 1] = points[0].y;
+            trianglesGeometry.vertexArray[index + 2] = points[3].x;
+            trianglesGeometry.vertexArray[index + 3] = points[3].y;
+            trianglesGeometry.vertexArray[index + 4] = points[6].x;
+            trianglesGeometry.vertexArray[index + 5] = points[6].y;
+
+            trianglesGeometry.vertexArray[index + 6] = points[8].x;
+            trianglesGeometry.vertexArray[index + 7] = points[8].y;
+            trianglesGeometry.vertexArray[index + 8] = points[2].x;
+            trianglesGeometry.vertexArray[index + 9] = points[2].y;
+            trianglesGeometry.vertexArray[index + 10] = points[5].x;
+            trianglesGeometry.vertexArray[index + 11] = points[5].y;
+
+            trianglesGeometry.vertexArray[index + 12] = points[0].x;
+            trianglesGeometry.vertexArray[index + 13] = points[0].y;
+            trianglesGeometry.vertexArray[index + 14] = points[7].x;
+            trianglesGeometry.vertexArray[index + 15] = points[7].y;
+            trianglesGeometry.vertexArray[index + 16] = points[4].x;
+            trianglesGeometry.vertexArray[index + 17] = points[4].y;
+          }
+        };
+        myStar.setStar( _x, _y, _innerRadius, _outerRadius, _totalAngle );
+        return myStar;
+      }
     };
 
     var trianglesGeometry = new TrianglesGeometry();
@@ -231,7 +245,7 @@
 
     var rectangles = [];
 
-    var numRectangles = 2500;
+    var numRectangles = 500;
     for ( var i = 0; i < numRectangles; i++ ) {
       var x = (Math.random() * 2 - 1) * 0.9;
       var y = (Math.random() * 2 - 1) * 0.9;
@@ -239,11 +253,13 @@
     }
 
     var numStars = 500;
+    var stars = [];
     for ( var k = 0; k < numStars; k++ ) {
       x = (Math.random() * 2 - 1) * 0.9;
       y = (Math.random() * 2 - 1) * 0.9;
       var scale = Math.random() * 0.2;
-      trianglesGeometry.createStar( x, y, 0.15 * scale, 0.4 * scale, Math.PI + Math.random() * Math.PI * 2, Math.random(), Math.random(), Math.random(), 1 );
+      var star = trianglesGeometry.createStar( x, y, 0.15 * scale, 0.4 * scale, Math.PI + Math.random() * Math.PI * 2, Math.random(), Math.random(), Math.random(), 1 );
+      stars.push( star );
     }
 
     var vertexBuffer = gl.createBuffer();
@@ -281,6 +297,11 @@
       for ( var i = 0; i < rectangles.length; i++ ) {
         var rectangle = rectangles[i];
         rectangle.setXWidth( rectangle.initialState.x + x, rectangle.initialState.width );
+      }
+
+      for ( var mm = 0; mm < stars.length; mm++ ) {
+        var star = stars[mm];
+        star.setStar( star.initialState._x, star.initialState._y, star.initialState._innerRadius, star.initialState._outerRadius, star.initialState._totalAngle + Date.now() / 1000 );
       }
 
       gl.drawArrays( gl.TRIANGLES, 0, vertexArray.length / 2 );
