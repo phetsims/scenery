@@ -59,12 +59,12 @@
     }
 
     var vertexShaderSource = [
-      'attribute vec2 position;',
+      'attribute vec2 aPosition;',
       'attribute vec4 aVertexColor;',
       'varying vec4 vColor;',
       'void main(void) { ',//pre-built function
-      '  gl_Position = vec4(position, 0., 1.); ',//0. is the z, and 1 is w
-      '  vColor = vec4(aVertexColor[0],aVertexColor[1],aVertexColor[2],aVertexColor[3]);',
+      '  gl_Position = vec4(aPosition, 0., 1.); ',//0. is the z, and 1 is w
+      '  vColor = aVertexColor;',
       '}'
     ].join( '\n' );
 
@@ -95,7 +95,7 @@
 
     gl.linkProgram( shaderProgram );
 
-    var positionAttribLocation = gl.getAttribLocation( shaderProgram, "position" );
+    var positionAttribLocation = gl.getAttribLocation( shaderProgram, 'aPosition' );
     var colorAttributeLocation = gl.getAttribLocation( shaderProgram, 'aVertexColor' );
 
     gl.enableVertexAttribArray( positionAttribLocation );
