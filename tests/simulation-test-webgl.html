@@ -46,8 +46,15 @@
 
     var canvas = document.getElementById( "canvas" );
 
-    canvas.width = window.innerWidth;
-    canvas.height = window.innerHeight;
+    // Handle retina displays as described in https://www.khronos.org/webgl/wiki/HandlingHighDPI
+    // First, set the display size of the canvas.
+    canvas.style.width = window.innerWidth + "px";
+    canvas.style.height = window.innerHeight + "px";
+
+    // Next, set the size of the drawingBuffer
+    var devicePixelRatio = window.devicePixelRatio || 1;
+    canvas.width = window.innerWidth * devicePixelRatio;
+    canvas.height = window.innerHeight * devicePixelRatio;
 
     // Code inspired by http://www.webglacademy.com/#1
     var gl;
@@ -299,7 +306,7 @@
         rectangle.setXWidth( rectangle.initialState.x + x, rectangle.initialState.width );
       }
 
-      for ( var mm = 0; mm < stars.length; mm++ ) {
+      for ( var mm = 0; mm < stars.length / 2; mm++ ) {
         var star = stars[mm];
         star.setStar( star.initialState._x, star.initialState._y, star.initialState._innerRadius, star.initialState._outerRadius, star.initialState._totalAngle + Date.now() / 1000 );
       }
