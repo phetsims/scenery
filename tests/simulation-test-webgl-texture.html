@@ -10,24 +10,48 @@
   <title>Simulation Test WebGL - Texture</title>
 </head>
 <body>
-<canvas id="canvas" width="400" height="300"></canvas>
+<canvas id="canvas" style="position: absolute;top:0px; left:0px"></canvas>
 
 <script>
+
+  var devicePixelRatio = window.devicePixelRatio || 1;
 
   // Show a texture using WebGL
   // Based on example code (BSD) available from http://www.html5rocks.com/en/tutorials/webgl/webgl_fundamentals/webgl/webgl-2d-image.html
 
   var textureCanvas = document.createElement( 'canvas' );
-  textureCanvas.width = 128;
-  textureCanvas.height = 128;
+  // Handle retina displays as described in https://www.khronos.org/webgl/wiki/HandlingHighDPI
+  // First, set the display size of the canvas.
+  var textureWidth = 128;
+  var textureHeight = 128;
+
+  // Next, set the size of the drawingBuffer
+  textureCanvas.width = textureWidth * devicePixelRatio;
+  textureCanvas.height = textureHeight * devicePixelRatio;
+
   var context = textureCanvas.getContext( '2d' );
+
+  // Upscale content so it will look good + right size on retina
+  context.scale( devicePixelRatio, devicePixelRatio );
   context.fillStyle = '#ff0000';
-  context.fillRect( 0, 0, 128, 128 );
+  context.fillRect( 0, 0, textureWidth, textureHeight );
   context.fillStyle = '#000000';
   context.fillText( 'Hello WebGL', 50, 50 );
 
   // Get A WebGL context
   var canvas = document.getElementById( "canvas" );
+
+  // Handle retina displays as described in https://www.khronos.org/webgl/wiki/HandlingHighDPI
+  // First, set the display size of the canvas.
+  canvas.style.width = window.innerWidth + "px";
+  canvas.style.height = window.innerHeight + "px";
+
+  // Next, set the size of the drawingBuffer
+  canvas.width = window.innerWidth * devicePixelRatio;
+  canvas.height = window.innerHeight * devicePixelRatio;
+
+  //  document.body.appendChild( textureCanvas );
+
   var gl = canvas.getContext( 'webgl' );
 
   var vertexShaderSource = [
