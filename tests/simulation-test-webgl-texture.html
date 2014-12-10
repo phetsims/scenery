@@ -14,166 +14,177 @@
 
 <script>
 
-  var devicePixelRatio = window.devicePixelRatio || 1;
+  var image = new Image();
+  image.onload = function() {
+    image.width = 512;
+    image.height = 1024;
+    console.log( 'hello' );
 
-  // Show a texture using WebGL
-  // Based on example code (BSD) available from http://www.html5rocks.com/en/tutorials/webgl/webgl_fundamentals/webgl/webgl-2d-image.html
+    var devicePixelRatio = window.devicePixelRatio || 1;
 
-  var textureCanvas = document.createElement( 'canvas' );
-  // Handle retina displays as described in https://www.khronos.org/webgl/wiki/HandlingHighDPI
-  // First, set the display size of the canvas.
-  var textureWidth = 128;
-  var textureHeight = 128;
+    // Show a texture using WebGL
+    // Based on example code (BSD) available from http://www.html5rocks.com/en/tutorials/webgl/webgl_fundamentals/webgl/webgl-2d-image.html
 
-  // Next, set the size of the drawingBuffer
-  textureCanvas.width = textureWidth * devicePixelRatio;
-  textureCanvas.height = textureHeight * devicePixelRatio;
+    var textureCanvas = image;
+    console.log( textureCanvas.width );
 
-  var context = textureCanvas.getContext( '2d' );
+    // Handle retina displays as described in https://www.khronos.org/webgl/wiki/HandlingHighDPI
+    // First, set the display size of the canvas.
+    //  var textureWidth = 128;
+    //  var textureHeight = 128;
+    //
+    //  // Next, set the size of the drawingBuffer
+    //  textureCanvas.width = textureWidth * devicePixelRatio;
+    //  textureCanvas.height = textureHeight * devicePixelRatio;
+    //
+    //  var context = textureCanvas.getContext( '2d' );
+    //
+    //  // Upscale content so it will look good + right size on retina
+    //  context.scale( devicePixelRatio, devicePixelRatio );
+    //  context.fillStyle = '#ff0000';
+    //  context.fillRect( 0, 0, textureWidth, textureHeight );
+    //  context.fillStyle = '#000000';
+    //  context.fillText( 'Hello WebGL', 50, 50 );
 
-  // Upscale content so it will look good + right size on retina
-  context.scale( devicePixelRatio, devicePixelRatio );
-  context.fillStyle = '#ff0000';
-  context.fillRect( 0, 0, textureWidth, textureHeight );
-  context.fillStyle = '#000000';
-  context.fillText( 'Hello WebGL', 50, 50 );
+    // Get A WebGL context
+    var canvas = document.getElementById( "canvas" );
 
-  // Get A WebGL context
-  var canvas = document.getElementById( "canvas" );
+    // Handle retina displays as described in https://www.khronos.org/webgl/wiki/HandlingHighDPI
+    // First, set the display size of the canvas.
+    canvas.style.width = window.innerWidth + "px";
+    canvas.style.height = window.innerHeight + "px";
 
-  // Handle retina displays as described in https://www.khronos.org/webgl/wiki/HandlingHighDPI
-  // First, set the display size of the canvas.
-  canvas.style.width = window.innerWidth + "px";
-  canvas.style.height = window.innerHeight + "px";
+    // Next, set the size of the drawingBuffer
+    canvas.width = window.innerWidth * devicePixelRatio;
+    canvas.height = window.innerHeight * devicePixelRatio;
 
-  // Next, set the size of the drawingBuffer
-  canvas.width = window.innerWidth * devicePixelRatio;
-  canvas.height = window.innerHeight * devicePixelRatio;
+    //  document.body.appendChild( textureCanvas );
 
-  //  document.body.appendChild( textureCanvas );
+    var gl = canvas.getContext( 'webgl' );
 
-  var gl = canvas.getContext( 'webgl' );
+    var vertexShaderSource = [
+          'attribute vec2 aPosition;' +
+          'attribute vec2 aTexCoord;' +
 
-  var vertexShaderSource = [
-        'attribute vec2 aPosition;' +
-        'attribute vec2 aTexCoord;' +
+          'uniform vec2 uResolution;' +
 
-        'uniform vec2 uResolution;' +
+          'varying vec2 vTexCoord;' +
 
-        'varying vec2 vTexCoord;' +
+          'void main() {' +
+        // convert the rectangle from pixels to 0.0 to 1.0
+          'vec2 zeroToOne = aPosition / uResolution;' +
 
-        'void main() {' +
-      // convert the rectangle from pixels to 0.0 to 1.0
-        'vec2 zeroToOne = aPosition / uResolution;' +
+        // convert from 0->1 to 0->2
+          'vec2 zeroToTwo = zeroToOne * 2.0;' +
 
-      // convert from 0->1 to 0->2
-        'vec2 zeroToTwo = zeroToOne * 2.0;' +
+        // convert from 0->2 to -1->+1 (clipspace)
+          'vec2 clipSpace = zeroToTwo - 1.0;' +
 
-      // convert from 0->2 to -1->+1 (clipspace)
-        'vec2 clipSpace = zeroToTwo - 1.0;' +
+          'gl_Position = vec4(clipSpace * vec2(1, -1), 0, 1);' +
 
-        'gl_Position = vec4(clipSpace * vec2(1, -1), 0, 1);' +
+        // pass the texCoord to the fragment shader
+        // The GPU will interpolate this value between points.
+          'vTexCoord = aTexCoord;' +
+          '}'
+    ].join( '\n' );
 
-      // pass the texCoord to the fragment shader
-      // The GPU will interpolate this value between points.
-        'vTexCoord = aTexCoord;' +
-        '}'
-  ].join( '\n' );
+    var fragmentShaderSource = [
+          'precision mediump float;' +
 
-  var fragmentShaderSource = [
-        'precision mediump float;' +
+        // our texture
+          'uniform sampler2D uImage;' +
 
-      // our texture
-        'uniform sampler2D uImage;' +
+        // the texCoords passed in from the vertex shader.
+          'varying vec2 vTexCoord;' +
 
-      // the texCoords passed in from the vertex shader.
-        'varying vec2 vTexCoord;' +
+          'void main() {' +
+          'gl_FragColor = texture2D(uImage, vTexCoord);' +
+          '}'].join( '\n' );
 
-        'void main() {' +
-        'gl_FragColor = texture2D(uImage, vTexCoord);' +
-        '}'].join( '\n' );
+    var toShader = function( source, type, typeString ) {
+      var shader = gl.createShader( type );
+      gl.shaderSource( shader, source );
+      gl.compileShader( shader );
+      if ( !gl.getShaderParameter( shader, gl.COMPILE_STATUS ) ) {
+        console.log( "ERROR IN " + typeString + " SHADER : " + gl.getShaderInfoLog( shader ) );
+        return false;
+      }
+      return shader;
+    };
 
-  var toShader = function( source, type, typeString ) {
-    var shader = gl.createShader( type );
-    gl.shaderSource( shader, source );
-    gl.compileShader( shader );
-    if ( !gl.getShaderParameter( shader, gl.COMPILE_STATUS ) ) {
-      console.log( "ERROR IN " + typeString + " SHADER : " + gl.getShaderInfoLog( shader ) );
-      return false;
-    }
-    return shader;
-  };
+    var vertexShader = toShader( vertexShaderSource, gl.VERTEX_SHADER, "VERTEX" );
+    var fragmentShader = toShader( fragmentShaderSource, gl.FRAGMENT_SHADER, "FRAGMENT" );
 
-  var vertexShader = toShader( vertexShaderSource, gl.VERTEX_SHADER, "VERTEX" );
-  var fragmentShader = toShader( fragmentShaderSource, gl.FRAGMENT_SHADER, "FRAGMENT" );
+    var shaderProgram = gl.createProgram();
+    gl.attachShader( shaderProgram, vertexShader );
+    gl.attachShader( shaderProgram, fragmentShader );
+    gl.linkProgram( shaderProgram );
+    gl.useProgram( shaderProgram );
 
-  var shaderProgram = gl.createProgram();
-  gl.attachShader( shaderProgram, vertexShader );
-  gl.attachShader( shaderProgram, fragmentShader );
-  gl.linkProgram( shaderProgram );
-  gl.useProgram( shaderProgram );
+    // look up where the vertex data needs to go.
+    var positionLocation = gl.getAttribLocation( shaderProgram, "aPosition" );
+    var texCoordLocation = gl.getAttribLocation( shaderProgram, "aTexCoord" );
 
-  // look up where the vertex data needs to go.
-  var positionLocation = gl.getAttribLocation( shaderProgram, "aPosition" );
-  var texCoordLocation = gl.getAttribLocation( shaderProgram, "aTexCoord" );
-
-  // provide texture coordinates for the rectangle.
-  var texCoordBuffer = gl.createBuffer();
-  gl.bindBuffer( gl.ARRAY_BUFFER, texCoordBuffer );
-  gl.bufferData( gl.ARRAY_BUFFER, new Float32Array( [
-    0.0, 0.0,
-    1.0, 0.0,
-    0.0, 1.0,
-    0.0, 1.0,
-    1.0, 0.0,
-    1.0, 1.0] ), gl.STATIC_DRAW );
-  gl.enableVertexAttribArray( texCoordLocation );
-  gl.vertexAttribPointer( texCoordLocation, 2, gl.FLOAT, false, 0, 0 );
-
-  // Create a texture.
-  var texture = gl.createTexture();
-  gl.bindTexture( gl.TEXTURE_2D, texture );
-
-  // Set the parameters so we can render any size image.
-  gl.texParameteri( gl.TEXTURE_2D, gl.TEXTURE_WRAP_S, gl.CLAMP_TO_EDGE );
-  gl.texParameteri( gl.TEXTURE_2D, gl.TEXTURE_WRAP_T, gl.CLAMP_TO_EDGE );
-  gl.texParameteri( gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.NEAREST );
-  gl.texParameteri( gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, gl.NEAREST );
-
-  // Upload the image into the texture.
-  gl.texImage2D( gl.TEXTURE_2D, 0, gl.RGBA, gl.RGBA, gl.UNSIGNED_BYTE, textureCanvas );
-
-  // lookup uniforms
-  var resolutionLocation = gl.getUniformLocation( shaderProgram, "uResolution" );
-
-  // set the resolution
-  gl.uniform2f( resolutionLocation, canvas.width, canvas.height );
-
-  // Create a buffer for the position of the rectangle corners.
-  var buffer = gl.createBuffer();
-  gl.bindBuffer( gl.ARRAY_BUFFER, buffer );
-  gl.enableVertexAttribArray( positionLocation );
-  gl.vertexAttribPointer( positionLocation, 2, gl.FLOAT, false, 0, 0 );
-
-  // Set a rectangle the same size as the image.
-  setRectangle( gl, 0, 0, textureCanvas.width, textureCanvas.height );
-
-  // Draw the rectangle.
-  gl.drawArrays( gl.TRIANGLES, 0, 6 );
-
-  function setRectangle( gl, x, y, width, height ) {
-    var x1 = x;
-    var x2 = x + width;
-    var y1 = y;
-    var y2 = y + height;
+    // provide texture coordinates for the rectangle.
+    var texCoordBuffer = gl.createBuffer();
+    gl.bindBuffer( gl.ARRAY_BUFFER, texCoordBuffer );
     gl.bufferData( gl.ARRAY_BUFFER, new Float32Array( [
-      x1, y1,
-      x2, y1,
-      x1, y2,
-      x1, y2,
-      x2, y1,
-      x2, y2] ), gl.STATIC_DRAW );
-  }
+      0.0, 0.0,
+      1.0, 0.0,
+      0.0, 1.0,
+      0.0, 1.0,
+      1.0, 0.0,
+      1.0, 1.0] ), gl.STATIC_DRAW );
+    gl.enableVertexAttribArray( texCoordLocation );
+    gl.vertexAttribPointer( texCoordLocation, 2, gl.FLOAT, false, 0, 0 );
+
+    // Create a texture.
+    var texture = gl.createTexture();
+    gl.bindTexture( gl.TEXTURE_2D, texture );
+
+    // Set the parameters so we can render any size image.
+    gl.texParameteri( gl.TEXTURE_2D, gl.TEXTURE_WRAP_S, gl.CLAMP_TO_EDGE );
+    gl.texParameteri( gl.TEXTURE_2D, gl.TEXTURE_WRAP_T, gl.CLAMP_TO_EDGE );
+    gl.texParameteri( gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.NEAREST );
+    gl.texParameteri( gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, gl.NEAREST );
+
+    // Upload the image into the texture.
+    gl.texImage2D( gl.TEXTURE_2D, 0, gl.RGBA, gl.RGBA, gl.UNSIGNED_BYTE, textureCanvas );
+
+    // lookup uniforms
+    var resolutionLocation = gl.getUniformLocation( shaderProgram, "uResolution" );
+
+    // set the resolution
+    gl.uniform2f( resolutionLocation, canvas.width, canvas.height );
+
+    // Create a buffer for the position of the rectangle corners.
+    var buffer = gl.createBuffer();
+    gl.bindBuffer( gl.ARRAY_BUFFER, buffer );
+    gl.enableVertexAttribArray( positionLocation );
+    gl.vertexAttribPointer( positionLocation, 2, gl.FLOAT, false, 0, 0 );
+
+    // Set a rectangle the same size as the image.
+    setRectangle( gl, 0, 0, textureCanvas.width, textureCanvas.height );
+
+    // Draw the rectangle.
+    gl.drawArrays( gl.TRIANGLES, 0, 6 );
+
+    function setRectangle( gl, x, y, width, height ) {
+      var x1 = x;
+      var x2 = x + width;
+      var y1 = y;
+      var y2 = y + height;
+      gl.bufferData( gl.ARRAY_BUFFER, new Float32Array( [
+        x1, y1,
+        x2, y1,
+        x1, y2,
+        x1, y2,
+        x2, y1,
+        x2, y2] ), gl.STATIC_DRAW );
+    }
+
+  };
+  image.src = '../../color-vision/images/head.svg';
 </script>
 </body>
 </html>
