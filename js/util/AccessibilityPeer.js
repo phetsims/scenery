@@ -53,15 +53,23 @@ define( function( require ) {
     var scene = instance.getScene();
     this.clickListener = function PeerClickListener( event ) {
       sceneryAccessibilityLog && sceneryAccessibilityLog( 'peer click on ' + instance.toString() + ': ' + instance.getNode().constructor.name );
-      if ( options.click ) { options.click( event ); }
+      if ( options.click ) {
+        options.click( event );
+      }
     };
     this.focusListener = function PeerFocusListener( event ) {
       sceneryAccessibilityLog && sceneryAccessibilityLog( 'peer focused: ' + instance.toString() + ': ' + instance.getNode().constructor.name );
       scene.focusPeer( peer );
+      if ( options.onfocus ) {
+        options.onfocus( event );
+      }
     };
     this.blurListener = function PeerBlurListener( event ) {
       sceneryAccessibilityLog && sceneryAccessibilityLog( 'peer blurred: ' + instance.toString() + ': ' + instance.getNode().constructor.name );
       scene.blurPeer( peer );
+      if ( options.onblur ) {
+        options.onblur( event );
+      }
     };
 
     this.element.addEventListener( 'focus', this.focusListener );
