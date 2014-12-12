@@ -32,294 +32,168 @@
 
 <script>
 
-  var stats = new Stats();
-  stats.setMode( 0 ); // 0: fps, 1: ms
+  require( ["display/webgl/TriangleSystem"], function( TriangleSystem ) {
+    //This function is called when scripts/helper/util.js is loaded.
+    //If util.js calls define(), then this function is not fired until
+    //util's dependencies have loaded, and the util argument will hold
+    //the module value for "helper/util".
 
-  // align top-left
-  stats.domElement.style.position = 'absolute';
-  stats.domElement.style.left = '0px';
-  stats.domElement.style.top = '0px';
+    var stats = new Stats();
+    stats.setMode( 0 ); // 0: fps, 1: ms
 
-  document.body.appendChild( stats.domElement );
+    // align top-left
+    stats.domElement.style.position = 'absolute';
+    stats.domElement.style.left = '0px';
+    stats.domElement.style.top = '0px';
 
-  var main = function() {
+    document.body.appendChild( stats.domElement );
 
-    var canvas = document.getElementById( "canvas" );
+    var main = function() {
 
-    // Handle retina displays as described in https://www.khronos.org/webgl/wiki/HandlingHighDPI
-    // First, set the display size of the canvas.
-    canvas.style.width = window.innerWidth + "px";
-    canvas.style.height = window.innerHeight + "px";
+      var canvas = document.getElementById( "canvas" );
 
-    // Next, set the size of the drawingBuffer
-    var devicePixelRatio = window.devicePixelRatio || 1;
-    canvas.width = window.innerWidth * devicePixelRatio;
-    canvas.height = window.innerHeight * devicePixelRatio;
+      // Handle retina displays as described in https://www.khronos.org/webgl/wiki/HandlingHighDPI
+      // First, set the display size of the canvas.
+      canvas.style.width = window.innerWidth + "px";
+      canvas.style.height = window.innerHeight + "px";
 
-    // Code inspired by http://www.webglacademy.com/#1
-    var gl;
-    try {
-      gl = canvas.getContext( "experimental-webgl", {antialias: true} ); // TODO: {antialias:true?}
-    }
-    catch( e ) {
-      return false;
-    }
+      // Next, set the size of the drawingBuffer
+      var devicePixelRatio = window.devicePixelRatio || 1;
+      canvas.width = window.innerWidth * devicePixelRatio;
+      canvas.height = window.innerHeight * devicePixelRatio;
 
-    var vertexShaderSource = [
-      'attribute vec2 aPosition;',
-      'attribute vec4 aVertexColor;',
-      'varying vec4 vColor;',
-      'void main(void) { ',//pre-built function
-      '  gl_Position = vec4(aPosition, 0., 1.); ',//0. is the z, and 1 is w
-      '  vColor = aVertexColor;',
-      '}'
-    ].join( '\n' );
-
-    var fragmentShaderSource = [
-      'precision mediump float;',
-      'varying vec4 vColor;',
-      'void main(void) {',
-      '  gl_FragColor = vColor;',
-      '}'].join( '\n' );
-
-    var toShader = function( source, type, typeString ) {
-      var shader = gl.createShader( type );
-      gl.shaderSource( shader, source );
-      gl.compileShader( shader );
-      if ( !gl.getShaderParameter( shader, gl.COMPILE_STATUS ) ) {
-        console.log( "ERROR IN " + typeString + " SHADER : " + gl.getShaderInfoLog( shader ) );
+      // Code inspired by http://www.webglacademy.com/#1
+      var gl;
+      try {
+        gl = canvas.getContext( "experimental-webgl", {antialias: true} ); // TODO: {antialias:true?}
+      }
+      catch( e ) {
         return false;
       }
-      return shader;
-    };
 
-    var vertexShader = toShader( vertexShaderSource, gl.VERTEX_SHADER, "VERTEX" );
-    var fragmentShader = toShader( fragmentShaderSource, gl.FRAGMENT_SHADER, "FRAGMENT" );
+      var vertexShaderSource = [
+        'attribute vec2 aPosition;',
+        'attribute vec4 aVertexColor;',
+        'varying vec4 vColor;',
+        'void main(void) { ',//pre-built function
+        '  gl_Position = vec4(aPosition, 0., 1.); ',//0. is the z, and 1 is w
+        '  vColor = aVertexColor;',
+        '}'
+      ].join( '\n' );
 
-    var shaderProgram = gl.createProgram();
-    gl.attachShader( shaderProgram, vertexShader );
-    gl.attachShader( shaderProgram, fragmentShader );
+      var fragmentShaderSource = [
+        'precision mediump float;',
+        'varying vec4 vColor;',
+        'void main(void) {',
+        '  gl_FragColor = vColor;',
+        '}'].join( '\n' );
 
-    gl.linkProgram( shaderProgram );
-
-    var positionAttribLocation = gl.getAttribLocation( shaderProgram, 'aPosition' );
-    var colorAttributeLocation = gl.getAttribLocation( shaderProgram, 'aVertexColor' );
-
-    gl.enableVertexAttribArray( positionAttribLocation );
-    gl.enableVertexAttribArray( colorAttributeLocation );
-
-    gl.useProgram( shaderProgram );
-
-    // Manages the indices within a single array, so that disjoint geometries can be represented easily here.
-    // TODO: Compare this same idea to triangle strips
-    var TrianglesGeometry = function() {
-      var trianglesGeometry = this;
-      this.vertexArray = [];
-      this.colors = [];
-
-      this.createRectangle = function( x, y, width, height, r, g, b, a ) {
-        var index = this.vertexArray.length;
-        trianglesGeometry.vertexArray.push(
-            // Top left
-            x, y,
-            (x + width), y,
-            x, y + height,
-
-            // Bottom right
-            (x + width), y + height,
-            (x + width), y,
-            x, y + height
-        );
-
-        // Add the same color for all vertices (solid fill rectangle).
-        // TODO: some way to reduce this amount of elements!
-        trianglesGeometry.colors.push(
-            r, g, b, a,
-            r, g, b, a,
-            r, g, b, a,
-            r, g, b, a,
-            r, g, b, a,
-            r, g, b, a
-        );
-
-        //Track the index so it can delete itself, update itself, etc.
-        return {
-          initialState: {x: x, y: y, width: width, height: height},
-          index: index,
-          setXWidth: function( x, width ) {
-            trianglesGeometry.vertexArray[index] = x;
-            trianglesGeometry.vertexArray[index + 2] = x + width;
-            trianglesGeometry.vertexArray[index + 4] = x;
-            trianglesGeometry.vertexArray[index + 6] = x + width;
-            trianglesGeometry.vertexArray[index + 8] = x + width;
-            trianglesGeometry.vertexArray[index + 10] = x;
-          },
-          setRect: function( x, y, width, height ) {
-
-            trianglesGeometry.vertexArray[index] = x;
-            trianglesGeometry.vertexArray[index + 1] = y;
-
-            trianglesGeometry.vertexArray[index + 2] = x + width;
-            trianglesGeometry.vertexArray[index + 3] = y;
-
-            trianglesGeometry.vertexArray[index + 4] = x;
-            trianglesGeometry.vertexArray[index + 5] = y + height;
-
-            trianglesGeometry.vertexArray[index + 6] = x + width;
-            trianglesGeometry.vertexArray[index + 7] = y + height;
-
-            trianglesGeometry.vertexArray[index + 8] = x + width;
-            trianglesGeometry.vertexArray[index + 9] = y;
-
-            trianglesGeometry.vertexArray[index + 10] = x;
-            trianglesGeometry.vertexArray[index + 11] = y + height;
-          }
-        };
+      var toShader = function( source, type, typeString ) {
+        var shader = gl.createShader( type );
+        gl.shaderSource( shader, source );
+        gl.compileShader( shader );
+        if ( !gl.getShaderParameter( shader, gl.COMPILE_STATUS ) ) {
+          console.log( "ERROR IN " + typeString + " SHADER : " + gl.getShaderInfoLog( shader ) );
+          return false;
+        }
+        return shader;
       };
 
-      this.createStar = function( _x, _y, _innerRadius, _outerRadius, _totalAngle, r, g, b, a ) {
+      var vertexShader = toShader( vertexShaderSource, gl.VERTEX_SHADER, "VERTEX" );
+      var fragmentShader = toShader( fragmentShaderSource, gl.FRAGMENT_SHADER, "FRAGMENT" );
 
-        var index = this.vertexArray.length;
-        for ( var i = 0; i < 18; i++ ) {
-          trianglesGeometry.vertexArray.push( 0 );
+      var shaderProgram = gl.createProgram();
+      gl.attachShader( shaderProgram, vertexShader );
+      gl.attachShader( shaderProgram, fragmentShader );
+
+      gl.linkProgram( shaderProgram );
+
+      var positionAttribLocation = gl.getAttribLocation( shaderProgram, 'aPosition' );
+      var colorAttributeLocation = gl.getAttribLocation( shaderProgram, 'aVertexColor' );
+
+      gl.enableVertexAttribArray( positionAttribLocation );
+      gl.enableVertexAttribArray( colorAttributeLocation );
+
+      gl.useProgram( shaderProgram );
+
+      // Manages the indices within a single array, so that disjoint geometries can be represented easily here.
+      // TODO: Compare this same idea to triangle strips
+      var trianglesGeometry = new TriangleSystem();
+      var vertexArray = trianglesGeometry.vertexArray;
+      var colors = trianglesGeometry.colors;
+
+      var rectangles = [];
+
+      var numRectangles = 500;
+      for ( var i = 0; i < numRectangles; i++ ) {
+        var x = (Math.random() * 2 - 1) * 0.9;
+        var y = (Math.random() * 2 - 1) * 0.9;
+        rectangles.push( trianglesGeometry.createRectangle( x, y, 0.02, 0.02, x, y, 1, 1 ) );
+      }
+
+      var numStars = 500;
+      var stars = [];
+      for ( var k = 0; k < numStars; k++ ) {
+        x = (Math.random() * 2 - 1) * 0.9;
+        y = (Math.random() * 2 - 1) * 0.9;
+        var scale = Math.random() * 0.2;
+        var star = trianglesGeometry.createStar( x, y, 0.15 * scale, 0.4 * scale, Math.PI + Math.random() * Math.PI * 2, Math.random(), Math.random(), Math.random(), 1 );
+        stars.push( star );
+      }
+
+      var vertexBuffer = gl.createBuffer();
+      gl.bindBuffer( gl.ARRAY_BUFFER, vertexBuffer );
+      gl.bufferData( gl.ARRAY_BUFFER, new Float32Array( vertexArray ), gl.DYNAMIC_DRAW );
+
+      // Set up different colors for each triangle
+      var vertexColorBuffer = gl.createBuffer();
+      gl.bindBuffer( gl.ARRAY_BUFFER, vertexColorBuffer );
+      gl.bufferData( gl.ARRAY_BUFFER, new Float32Array( colors ), gl.STATIC_DRAW );
+
+      gl.clearColor( 0.0, 0.0, 0.0, 0.0 );
+
+      var animate = function() {
+        window.requestAnimationFrame( animate );
+
+        stats.begin();
+
+        gl.viewport( 0.0, 0.0, canvas.width, canvas.height );
+        gl.clear( gl.COLOR_BUFFER_BIT );
+
+        gl.bindBuffer( gl.ARRAY_BUFFER, vertexBuffer );
+
+        // Update the vertex locations
+        //see http://stackoverflow.com/questions/5497722/how-can-i-animate-an-object-in-webgl-modify-specific-vertices-not-full-transfor
+        gl.bufferSubData( gl.ARRAY_BUFFER, 0, new Float32Array( vertexArray ) );
+        gl.vertexAttribPointer( positionAttribLocation, 2, gl.FLOAT, false, 0, 0 );
+
+        // Send the colors to the GPU
+        gl.bindBuffer( gl.ARRAY_BUFFER, vertexColorBuffer );
+        gl.vertexAttribPointer( colorAttributeLocation, 4, gl.FLOAT, false, 0, 0 );
+
+        // Show one oscillation per second so it is easy to count time
+        var x = 0.2 * Math.cos( Date.now() / 1000 * 2 * Math.PI );
+        for ( var i = 0; i < rectangles.length; i++ ) {
+          var rectangle = rectangles[i];
+          rectangle.setXWidth( rectangle.initialState.x + x, rectangle.initialState.width );
         }
 
-        // Add the same color for all vertices (solid fill star).
-        // TODO: some way to reduce this amount of elements!
-        trianglesGeometry.colors.push(
-            r, g, b, a,
-            r, g, b, a,
-            r, g, b, a,
+        for ( var mm = 0; mm < stars.length / 2; mm++ ) {
+          var star = stars[mm];
+          star.setStar( star.initialState._x, star.initialState._y, star.initialState._innerRadius, star.initialState._outerRadius, star.initialState._totalAngle + Date.now() / 1000 );
+        }
 
-            r, g, b, a,
-            r, g, b, a,
-            r, g, b, a,
+        gl.drawArrays( gl.TRIANGLES, 0, vertexArray.length / 2 );
+        gl.flush();
 
-            r, g, b, a,
-            r, g, b, a,
-            r, g, b, a
-        );
-
-        //Track the index so it can delete itself, update itself, etc.
-        var myStar = {
-          initialState: {_x: _x, _y: _y, _innerRadius: _innerRadius, _outerRadius: _outerRadius, _totalAngle: _totalAngle},
-          index: index,
-          setStar: function( _x, _y, _innerRadius, _outerRadius, _totalAngle ) {
-
-            var points = [];
-            //Create the points for a filled-in star, which will be used to compute the geometry of a partial star.
-            for ( i = 0; i < 10; i++ ) {
-
-              //Start at the top and proceed clockwise
-              var angle = i / 10 * Math.PI * 2 - Math.PI / 2 + _totalAngle;
-              var radius = i % 2 === 0 ? _outerRadius : _innerRadius;
-              var x = radius * Math.cos( angle ) + _x;
-              var y = radius * Math.sin( angle ) + _y;
-              points.push( {x: x, y: y} );
-            }
-
-            var index = this.index;
-            trianglesGeometry.vertexArray[index + 0] = points[0].x;
-            trianglesGeometry.vertexArray[index + 1] = points[0].y;
-            trianglesGeometry.vertexArray[index + 2] = points[3].x;
-            trianglesGeometry.vertexArray[index + 3] = points[3].y;
-            trianglesGeometry.vertexArray[index + 4] = points[6].x;
-            trianglesGeometry.vertexArray[index + 5] = points[6].y;
-
-            trianglesGeometry.vertexArray[index + 6] = points[8].x;
-            trianglesGeometry.vertexArray[index + 7] = points[8].y;
-            trianglesGeometry.vertexArray[index + 8] = points[2].x;
-            trianglesGeometry.vertexArray[index + 9] = points[2].y;
-            trianglesGeometry.vertexArray[index + 10] = points[5].x;
-            trianglesGeometry.vertexArray[index + 11] = points[5].y;
-
-            trianglesGeometry.vertexArray[index + 12] = points[0].x;
-            trianglesGeometry.vertexArray[index + 13] = points[0].y;
-            trianglesGeometry.vertexArray[index + 14] = points[7].x;
-            trianglesGeometry.vertexArray[index + 15] = points[7].y;
-            trianglesGeometry.vertexArray[index + 16] = points[4].x;
-            trianglesGeometry.vertexArray[index + 17] = points[4].y;
-          }
-        };
-        myStar.setStar( _x, _y, _innerRadius, _outerRadius, _totalAngle );
-        return myStar;
-      }
-    };
-
-    var trianglesGeometry = new TrianglesGeometry();
-    var vertexArray = trianglesGeometry.vertexArray;
-    var colors = trianglesGeometry.colors;
-
-    var rectangles = [];
-
-    var numRectangles = 500;
-    for ( var i = 0; i < numRectangles; i++ ) {
-      var x = (Math.random() * 2 - 1) * 0.9;
-      var y = (Math.random() * 2 - 1) * 0.9;
-      rectangles.push( trianglesGeometry.createRectangle( x, y, 0.02, 0.02, x, y, 1, 1 ) );
-    }
-
-    var numStars = 500;
-    var stars = [];
-    for ( var k = 0; k < numStars; k++ ) {
-      x = (Math.random() * 2 - 1) * 0.9;
-      y = (Math.random() * 2 - 1) * 0.9;
-      var scale = Math.random() * 0.2;
-      var star = trianglesGeometry.createStar( x, y, 0.15 * scale, 0.4 * scale, Math.PI + Math.random() * Math.PI * 2, Math.random(), Math.random(), Math.random(), 1 );
-      stars.push( star );
-    }
-
-    var vertexBuffer = gl.createBuffer();
-    gl.bindBuffer( gl.ARRAY_BUFFER, vertexBuffer );
-    gl.bufferData( gl.ARRAY_BUFFER, new Float32Array( vertexArray ), gl.DYNAMIC_DRAW );
-
-    // Set up different colors for each triangle
-    var vertexColorBuffer = gl.createBuffer();
-    gl.bindBuffer( gl.ARRAY_BUFFER, vertexColorBuffer );
-    gl.bufferData( gl.ARRAY_BUFFER, new Float32Array( colors ), gl.STATIC_DRAW );
-
-    gl.clearColor( 0.0, 0.0, 0.0, 0.0 );
-
-    var animate = function() {
+        stats.end();
+      };
       window.requestAnimationFrame( animate );
-
-      stats.begin();
-
-      gl.viewport( 0.0, 0.0, canvas.width, canvas.height );
-      gl.clear( gl.COLOR_BUFFER_BIT );
-
-      gl.bindBuffer( gl.ARRAY_BUFFER, vertexBuffer );
-
-      // Update the vertex locations
-      //see http://stackoverflow.com/questions/5497722/how-can-i-animate-an-object-in-webgl-modify-specific-vertices-not-full-transfor
-      gl.bufferSubData( gl.ARRAY_BUFFER, 0, new Float32Array( vertexArray ) );
-      gl.vertexAttribPointer( positionAttribLocation, 2, gl.FLOAT, false, 0, 0 );
-
-      // Send the colors to the GPU
-      gl.bindBuffer( gl.ARRAY_BUFFER, vertexColorBuffer );
-      gl.vertexAttribPointer( colorAttributeLocation, 4, gl.FLOAT, false, 0, 0 );
-
-      // Show one oscillation per second so it is easy to count time
-      var x = 0.2 * Math.cos( Date.now() / 1000 * 2 * Math.PI );
-      for ( var i = 0; i < rectangles.length; i++ ) {
-        var rectangle = rectangles[i];
-        rectangle.setXWidth( rectangle.initialState.x + x, rectangle.initialState.width );
-      }
-
-      for ( var mm = 0; mm < stars.length / 2; mm++ ) {
-        var star = stars[mm];
-        star.setStar( star.initialState._x, star.initialState._y, star.initialState._innerRadius, star.initialState._outerRadius, star.initialState._totalAngle + Date.now() / 1000 );
-      }
-
-      gl.drawArrays( gl.TRIANGLES, 0, vertexArray.length / 2 );
-      gl.flush();
-
-      stats.end();
     };
-    window.requestAnimationFrame( animate );
-  };
 
-  main();
+    main();
+
+  } );
 
 </script>
 
