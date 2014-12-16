@@ -76,28 +76,26 @@ define( function( require ) {
 
     // Manages the indices within a single array, so that disjoint geometries can be represented easily here.
     // TODO: Compare this same idea to triangle strips
-    var trianglesGeometry = new TriangleSystem();
-    var vertexArray = trianglesGeometry.vertexArray;
-    var colors = trianglesGeometry.colors;
+    this.trianglesGeometry = new TriangleSystem();
+    var vertexArray = this.trianglesGeometry.vertexArray;
+    var colors = this.trianglesGeometry.colors;
 
     this.rectangles = [];
 
     var numRectangles = 500;
     for ( var i = 0; i < numRectangles; i++ ) {
-      var x = (Math.random() * 2 - 1) * 0.9;
-      var y = (Math.random() * 2 - 1) * 0.9;
-      this.rectangles.push( trianglesGeometry.createRectangle( x, y, 0.02, 0.02, x, y, 1, 1 ) );
+      this.addRectangle();
     }
 
     var numStars = 500;
     this.stars = [];
     for ( var k = 0; k < numStars; k++ ) {
-      x = (Math.random() * 2 - 1) * 0.9;
-      y = (Math.random() * 2 - 1) * 0.9;
-      var scale = Math.random() * 0.2;
-      var star = trianglesGeometry.createStar( x, y, 0.15 * scale, 0.4 * scale, Math.PI + Math.random() * Math.PI * 2, Math.random(), Math.random(), Math.random(), 1 );
-      this.stars.push( star );
+      this.addStar();
     }
+
+    document.getElementById( 'add-rectangle' ).onclick = function() {
+      testWebGL.addRectangle();
+    };
 
     this.vertexBuffer = gl.createBuffer();
     gl.bindBuffer( gl.ARRAY_BUFFER, this.vertexBuffer );
@@ -177,6 +175,20 @@ define( function( require ) {
       gl.flush();
 
       this.stats.end();
+    },
+
+    addRectangle: function() {
+      var x = (Math.random() * 2 - 1) * 0.9;
+      var y = (Math.random() * 2 - 1) * 0.9;
+      this.rectangles.push( this.trianglesGeometry.createRectangle( x, y, 0.02, 0.02, x, y, 1, 1 ) );
+    },
+
+    addStar: function() {
+      var x = (Math.random() * 2 - 1) * 0.9;
+      var y = (Math.random() * 2 - 1) * 0.9;
+      var scale = Math.random() * 0.2;
+      var star = this.trianglesGeometry.createStar( x, y, 0.15 * scale, 0.4 * scale, Math.PI + Math.random() * Math.PI * 2, Math.random(), Math.random(), Math.random(), 1 );
+      this.stars.push( star );
     }
   } );
 } );
