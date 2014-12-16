@@ -22,8 +22,8 @@ define( function( require ) {
 
     var testWebGL = this;
 
-    var stats = this.createStats();
-    document.body.appendChild( stats.domElement );
+    this.stats = this.createStats();
+    document.body.appendChild( this.stats.domElement );
 
     var canvas = document.getElementById( "canvas" );
 
@@ -66,11 +66,11 @@ define( function( require ) {
 
     gl.linkProgram( shaderProgram );
 
-    var positionAttribLocation = gl.getAttribLocation( shaderProgram, 'aPosition' );
-    var colorAttributeLocation = gl.getAttribLocation( shaderProgram, 'aVertexColor' );
+    this.positionAttribLocation = gl.getAttribLocation( shaderProgram, 'aPosition' );
+    this.colorAttributeLocation = gl.getAttribLocation( shaderProgram, 'aVertexColor' );
 
-    gl.enableVertexAttribArray( positionAttribLocation );
-    gl.enableVertexAttribArray( colorAttributeLocation );
+    gl.enableVertexAttribArray( this.positionAttribLocation );
+    gl.enableVertexAttribArray( this.colorAttributeLocation );
 
     gl.useProgram( shaderProgram );
 
@@ -80,72 +80,40 @@ define( function( require ) {
     var vertexArray = trianglesGeometry.vertexArray;
     var colors = trianglesGeometry.colors;
 
-    var rectangles = [];
+    this.rectangles = [];
 
     var numRectangles = 500;
     for ( var i = 0; i < numRectangles; i++ ) {
       var x = (Math.random() * 2 - 1) * 0.9;
       var y = (Math.random() * 2 - 1) * 0.9;
-      rectangles.push( trianglesGeometry.createRectangle( x, y, 0.02, 0.02, x, y, 1, 1 ) );
+      this.rectangles.push( trianglesGeometry.createRectangle( x, y, 0.02, 0.02, x, y, 1, 1 ) );
     }
 
     var numStars = 500;
-    var stars = [];
+    this.stars = [];
     for ( var k = 0; k < numStars; k++ ) {
       x = (Math.random() * 2 - 1) * 0.9;
       y = (Math.random() * 2 - 1) * 0.9;
       var scale = Math.random() * 0.2;
       var star = trianglesGeometry.createStar( x, y, 0.15 * scale, 0.4 * scale, Math.PI + Math.random() * Math.PI * 2, Math.random(), Math.random(), Math.random(), 1 );
-      stars.push( star );
+      this.stars.push( star );
     }
 
-    var vertexBuffer = gl.createBuffer();
-    gl.bindBuffer( gl.ARRAY_BUFFER, vertexBuffer );
+    this.vertexBuffer = gl.createBuffer();
+    gl.bindBuffer( gl.ARRAY_BUFFER, this.vertexBuffer );
     gl.bufferData( gl.ARRAY_BUFFER, new Float32Array( vertexArray ), gl.DYNAMIC_DRAW );
 
     // Set up different colors for each triangle
-    var vertexColorBuffer = gl.createBuffer();
-    gl.bindBuffer( gl.ARRAY_BUFFER, vertexColorBuffer );
+    this.vertexColorBuffer = gl.createBuffer();
+    gl.bindBuffer( gl.ARRAY_BUFFER, this.vertexColorBuffer );
     gl.bufferData( gl.ARRAY_BUFFER, new Float32Array( colors ), gl.STATIC_DRAW );
 
     gl.clearColor( 0.0, 0.0, 0.0, 0.0 );
 
-    this.animate = function() {
-      window.requestAnimationFrame( testWebGL.animate );
+    this.gl = gl;
+    this.boundAnimate = this.animate.bind( this );
 
-      stats.begin();
-
-      gl.viewport( 0.0, 0.0, canvas.width, canvas.height );
-      gl.clear( gl.COLOR_BUFFER_BIT );
-
-      gl.bindBuffer( gl.ARRAY_BUFFER, vertexBuffer );
-
-      // Update the vertex locations
-      //see http://stackoverflow.com/questions/5497722/how-can-i-animate-an-object-in-webgl-modify-specific-vertices-not-full-transfor
-      gl.bufferSubData( gl.ARRAY_BUFFER, 0, new Float32Array( vertexArray ) );
-      gl.vertexAttribPointer( positionAttribLocation, 2, gl.FLOAT, false, 0, 0 );
-
-      // Send the colors to the GPU
-      gl.bindBuffer( gl.ARRAY_BUFFER, vertexColorBuffer );
-      gl.vertexAttribPointer( colorAttributeLocation, 4, gl.FLOAT, false, 0, 0 );
-
-      // Show one oscillation per second so it is easy to count time
-      var x = 0.2 * Math.cos( Date.now() / 1000 * 2 * Math.PI );
-      for ( var i = 0; i < rectangles.length; i++ ) {
-        var rectangle = rectangles[i];
-        rectangle.setXWidth( rectangle.initialState.x + x, rectangle.initialState.width );
-      }
-
-      for ( var mm = 0; mm < stars.length / 2; mm++ ) {
-        var star = stars[mm];
-        star.setStar( star.initialState._x, star.initialState._y, star.initialState._innerRadius, star.initialState._outerRadius, star.initialState._totalAngle + Date.now() / 1000 );
-      }
-
-      gl.drawArrays( gl.TRIANGLES, 0, vertexArray.length / 2 );
-      gl.flush();
-
-      stats.end();
-    };
+    this.vertexArray = vertexArray;
   }
 
   return inherit( Object, TestWebGL, {
@@ -170,7 +138,45 @@ define( function( require ) {
      * Initialize the simulation and start it animating.
      */
     start: function() {
-      window.requestAnimationFrame( this.animate );
+      window.requestAnimationFrame( this.boundAnimate );
+    },
+
+    animate: function() {
+      window.requestAnimationFrame( this.boundAnimate );
+      var gl = this.gl;
+
+      this.stats.begin();
+
+      gl.viewport( 0.0, 0.0, canvas.width, canvas.height );
+      gl.clear( gl.COLOR_BUFFER_BIT );
+
+      gl.bindBuffer( gl.ARRAY_BUFFER, this.vertexBuffer );
+
+      // Update the vertex locations
+      //see http://stackoverflow.com/questions/5497722/how-can-i-animate-an-object-in-webgl-modify-specific-vertices-not-full-transfor
+      gl.bufferSubData( gl.ARRAY_BUFFER, 0, new Float32Array( this.vertexArray ) );
+      gl.vertexAttribPointer( this.positionAttribLocation, 2, gl.FLOAT, false, 0, 0 );
+
+      // Send the colors to the GPU
+      gl.bindBuffer( gl.ARRAY_BUFFER, this.vertexColorBuffer );
+      gl.vertexAttribPointer( this.colorAttributeLocation, 4, gl.FLOAT, false, 0, 0 );
+
+      // Show one oscillation per second so it is easy to count time
+      var x = 0.2 * Math.cos( Date.now() / 1000 * 2 * Math.PI );
+      for ( var i = 0; i < this.rectangles.length; i++ ) {
+        var rectangle = this.rectangles[i];
+        rectangle.setXWidth( rectangle.initialState.x + x, rectangle.initialState.width );
+      }
+
+      for ( var mm = 0; mm < this.stars.length / 2; mm++ ) {
+        var star = this.stars[mm];
+        star.setStar( star.initialState._x, star.initialState._y, star.initialState._innerRadius, star.initialState._outerRadius, star.initialState._totalAngle + Date.now() / 1000 );
+      }
+
+      gl.drawArrays( gl.TRIANGLES, 0, this.vertexArray.length / 2 );
+      gl.flush();
+
+      this.stats.end();
     }
   } );
 } );
