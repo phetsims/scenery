@@ -11,6 +11,8 @@ define( function( require ) {
   // modules
   var inherit = require( 'PHET_CORE/inherit' );
   var TriangleSystem = require( 'SCENERY/display/webgl/TriangleSystem' );
+  var vertexShaderSource = require( 'text!SCENERY/display/webgl/color2d.vert' );
+  var fragmentShaderSource = require( 'text!SCENERY/display/webgl/color2d.frag' );
 
   /**
    *
@@ -64,23 +66,6 @@ define( function( require ) {
       catch( e ) {
         return false;
       }
-
-      var vertexShaderSource = [
-        'attribute vec2 aPosition;',
-        'attribute vec4 aVertexColor;',
-        'varying vec4 vColor;',
-        'void main(void) { ',//pre-built function
-        '  gl_Position = vec4(aPosition, 0., 1.); ',//0. is the z, and 1 is w
-        '  vColor = aVertexColor;',
-        '}'
-      ].join( '\n' );
-
-      var fragmentShaderSource = [
-        'precision mediump float;',
-        'varying vec4 vColor;',
-        'void main(void) {',
-        '  gl_FragColor = vColor;',
-        '}'].join( '\n' );
 
       var toShader = function( source, type, typeString ) {
         var shader = gl.createShader( type );
