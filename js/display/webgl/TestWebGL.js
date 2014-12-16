@@ -45,6 +45,7 @@ define( function( require ) {
     catch( e ) {
       return false;
     }
+    this.gl = gl;
 
     var toShader = function( source, type, typeString ) {
       var shader = gl.createShader( type );
@@ -77,8 +78,6 @@ define( function( require ) {
     // Manages the indices within a single array, so that disjoint geometries can be represented easily here.
     // TODO: Compare this same idea to triangle strips
     this.trianglesGeometry = new TriangleSystem();
-    var vertexArray = this.trianglesGeometry.vertexArray;
-    var colors = this.trianglesGeometry.colors;
 
     this.rectangles = [];
 
@@ -94,24 +93,23 @@ define( function( require ) {
     }
 
     document.getElementById( 'add-rectangle' ).onclick = function() {
-      testWebGL.addRectangle();
+      for ( var i = 0; i < 1; i++ ) {
+        testWebGL.addRectangle();
+      }
+      testWebGL.bindVertexBuffer();
+      testWebGL.bindColorBuffer();
     };
 
     this.vertexBuffer = gl.createBuffer();
-    gl.bindBuffer( gl.ARRAY_BUFFER, this.vertexBuffer );
-    gl.bufferData( gl.ARRAY_BUFFER, new Float32Array( vertexArray ), gl.DYNAMIC_DRAW );
+    this.bindVertexBuffer();
 
     // Set up different colors for each triangle
     this.vertexColorBuffer = gl.createBuffer();
-    gl.bindBuffer( gl.ARRAY_BUFFER, this.vertexColorBuffer );
-    gl.bufferData( gl.ARRAY_BUFFER, new Float32Array( colors ), gl.STATIC_DRAW );
+    this.bindColorBuffer();
 
     gl.clearColor( 0.0, 0.0, 0.0, 0.0 );
 
-    this.gl = gl;
     this.boundAnimate = this.animate.bind( this );
-
-    this.vertexArray = vertexArray;
   }
 
   return inherit( Object, TestWebGL, {
@@ -152,7 +150,7 @@ define( function( require ) {
 
       // Update the vertex locations
       //see http://stackoverflow.com/questions/5497722/how-can-i-animate-an-object-in-webgl-modify-specific-vertices-not-full-transfor
-      gl.bufferSubData( gl.ARRAY_BUFFER, 0, new Float32Array( this.vertexArray ) );
+      gl.bufferSubData( gl.ARRAY_BUFFER, 0, new Float32Array( this.trianglesGeometry.vertexArray ) );
       gl.vertexAttribPointer( this.positionAttribLocation, 2, gl.FLOAT, false, 0, 0 );
 
       // Send the colors to the GPU
@@ -171,7 +169,7 @@ define( function( require ) {
         star.setStar( star.initialState._x, star.initialState._y, star.initialState._innerRadius, star.initialState._outerRadius, star.initialState._totalAngle + Date.now() / 1000 );
       }
 
-      gl.drawArrays( gl.TRIANGLES, 0, this.vertexArray.length / 2 );
+      gl.drawArrays( gl.TRIANGLES, 0, this.trianglesGeometry.vertexArray.length / 2 );
       gl.flush();
 
       this.stats.end();
@@ -189,6 +187,19 @@ define( function( require ) {
       var scale = Math.random() * 0.2;
       var star = this.trianglesGeometry.createStar( x, y, 0.15 * scale, 0.4 * scale, Math.PI + Math.random() * Math.PI * 2, Math.random(), Math.random(), Math.random(), 1 );
       this.stars.push( star );
+    },
+
+    bindVertexBuffer: function() {
+      var gl = this.gl;
+      gl.bindBuffer( gl.ARRAY_BUFFER, this.vertexBuffer );
+      gl.bufferData( gl.ARRAY_BUFFER, new Float32Array( this.trianglesGeometry.vertexArray ), gl.DYNAMIC_DRAW );
+    },
+
+    bindColorBuffer: function() {
+      var gl = this.gl;
+      gl.bindBuffer( gl.ARRAY_BUFFER, this.vertexColorBuffer );
+      gl.bufferData( gl.ARRAY_BUFFER, new Float32Array( this.trianglesGeometry.colors ), gl.STATIC_DRAW );
     }
+
   } );
 } );
