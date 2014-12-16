@@ -9,21 +9,21 @@
   <title>Simulation Test WebGL</title>
 
   <!-- jQuery and LoDash are dependencies -->
-  <script src="../../assert/js/assert.js"></script>
-  <script src="../../sherpa/jquery-2.1.0.min.js"></script>
-  <script src="../../sherpa/lodash-2.4.1.min.js"></script>
-  <script src="../../sherpa/has.js"></script>
-  <script src="../../sherpa/stats-r12.js"></script>
+  <script src="../../../assert/js/assert.js"></script>
+  <script src="../../../sherpa/jquery-2.1.0.min.js"></script>
+  <script src="../../../sherpa/lodash-2.4.1.min.js"></script>
+  <script src="../../../sherpa/has.js"></script>
+  <script src="../../../sherpa/stats-r12.js"></script>
 
   <!-- Parse query parameters, so we can easily subset the tests.-->
-  <script src="../../phetcommon/js/util/query-parameters.js"></script>
+  <script src="../../../phetcommon/js/util/query-parameters.js"></script>
 
   <script type="text/javascript">
     window.assertions.enableAssert();
   </script>
 
   <!-- Our code, in either the concatenated 'with comments' version or the minified version -->
-  <script data-main="../js/config.js" src="../../sherpa/require-2.1.11.js"></script>
+  <script data-main="../../js/config.js" src="../../../sherpa/require-2.1.11.js"></script>
 
 </head>
 
@@ -32,7 +32,7 @@
 
 <script>
 
-  require( ["display/webgl/TriangleSystem"], function( TriangleSystem ) {
+  require( ["../js/display/webgl/TriangleSystem"], function( TriangleSystem ) {
     //This function is called when scripts/helper/util.js is loaded.
     //If util.js calls define(), then this function is not fired until
     //util's dependencies have loaded, and the util argument will hold
