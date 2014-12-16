@@ -28,9 +28,9 @@ define( function( require ) {
 
   return inherit( Object, TriangleSystem, {
     createRectangle: function( x, y, width, height, r, g, b, a ) {
-      var trianglesGeometry = this;
+      var triangleSystem = this;
       var index = this.vertexArray.length;
-      trianglesGeometry.vertexArray.push(
+      triangleSystem.vertexArray.push(
         // Top left
         x, y,
         (x + width), y,
@@ -44,7 +44,7 @@ define( function( require ) {
 
       // Add the same color for all vertices (solid fill rectangle).
       // TODO: some way to reduce this amount of elements!
-      trianglesGeometry.colors.push(
+      triangleSystem.colors.push(
         r, g, b, a,
         r, g, b, a,
         r, g, b, a,
@@ -59,46 +59,46 @@ define( function( require ) {
         initialState: {x: x, y: y, width: width, height: height},
         index: index,
         setXWidth: function( x, width ) {
-          trianglesGeometry.vertexArray[index] = x;
-          trianglesGeometry.vertexArray[index + 2] = x + width;
-          trianglesGeometry.vertexArray[index + 4] = x;
-          trianglesGeometry.vertexArray[index + 6] = x + width;
-          trianglesGeometry.vertexArray[index + 8] = x + width;
-          trianglesGeometry.vertexArray[index + 10] = x;
+          triangleSystem.vertexArray[index] = x;
+          triangleSystem.vertexArray[index + 2] = x + width;
+          triangleSystem.vertexArray[index + 4] = x;
+          triangleSystem.vertexArray[index + 6] = x + width;
+          triangleSystem.vertexArray[index + 8] = x + width;
+          triangleSystem.vertexArray[index + 10] = x;
         },
         setRect: function( x, y, width, height ) {
 
-          trianglesGeometry.vertexArray[index] = x;
-          trianglesGeometry.vertexArray[index + 1] = y;
+          triangleSystem.vertexArray[index] = x;
+          triangleSystem.vertexArray[index + 1] = y;
 
-          trianglesGeometry.vertexArray[index + 2] = x + width;
-          trianglesGeometry.vertexArray[index + 3] = y;
+          triangleSystem.vertexArray[index + 2] = x + width;
+          triangleSystem.vertexArray[index + 3] = y;
 
-          trianglesGeometry.vertexArray[index + 4] = x;
-          trianglesGeometry.vertexArray[index + 5] = y + height;
+          triangleSystem.vertexArray[index + 4] = x;
+          triangleSystem.vertexArray[index + 5] = y + height;
 
-          trianglesGeometry.vertexArray[index + 6] = x + width;
-          trianglesGeometry.vertexArray[index + 7] = y + height;
+          triangleSystem.vertexArray[index + 6] = x + width;
+          triangleSystem.vertexArray[index + 7] = y + height;
 
-          trianglesGeometry.vertexArray[index + 8] = x + width;
-          trianglesGeometry.vertexArray[index + 9] = y;
+          triangleSystem.vertexArray[index + 8] = x + width;
+          triangleSystem.vertexArray[index + 9] = y;
 
-          trianglesGeometry.vertexArray[index + 10] = x;
-          trianglesGeometry.vertexArray[index + 11] = y + height;
+          triangleSystem.vertexArray[index + 10] = x;
+          triangleSystem.vertexArray[index + 11] = y + height;
         }
       };
     },
 
     createStar: function( _x, _y, _innerRadius, _outerRadius, _totalAngle, r, g, b, a ) {
-      var trianglesGeometry = this;
+      var triangleSystem = this;
       var index = this.vertexArray.length;
       for ( var i = 0; i < 18; i++ ) {
-        trianglesGeometry.vertexArray.push( 0 );
+        triangleSystem.vertexArray.push( 0 );
       }
 
       // Add the same color for all vertices (solid fill star).
       // TODO: some way to reduce this amount of elements!
-      trianglesGeometry.colors.push(
+      triangleSystem.colors.push(
         r, g, b, a,
         r, g, b, a,
         r, g, b, a,
@@ -131,26 +131,26 @@ define( function( require ) {
           }
 
           var index = this.index;
-          trianglesGeometry.vertexArray[index + 0] = points[0].x;
-          trianglesGeometry.vertexArray[index + 1] = points[0].y;
-          trianglesGeometry.vertexArray[index + 2] = points[3].x;
-          trianglesGeometry.vertexArray[index + 3] = points[3].y;
-          trianglesGeometry.vertexArray[index + 4] = points[6].x;
-          trianglesGeometry.vertexArray[index + 5] = points[6].y;
+          triangleSystem.vertexArray[index + 0] = points[0].x;
+          triangleSystem.vertexArray[index + 1] = points[0].y;
+          triangleSystem.vertexArray[index + 2] = points[3].x;
+          triangleSystem.vertexArray[index + 3] = points[3].y;
+          triangleSystem.vertexArray[index + 4] = points[6].x;
+          triangleSystem.vertexArray[index + 5] = points[6].y;
 
-          trianglesGeometry.vertexArray[index + 6] = points[8].x;
-          trianglesGeometry.vertexArray[index + 7] = points[8].y;
-          trianglesGeometry.vertexArray[index + 8] = points[2].x;
-          trianglesGeometry.vertexArray[index + 9] = points[2].y;
-          trianglesGeometry.vertexArray[index + 10] = points[5].x;
-          trianglesGeometry.vertexArray[index + 11] = points[5].y;
+          triangleSystem.vertexArray[index + 6] = points[8].x;
+          triangleSystem.vertexArray[index + 7] = points[8].y;
+          triangleSystem.vertexArray[index + 8] = points[2].x;
+          triangleSystem.vertexArray[index + 9] = points[2].y;
+          triangleSystem.vertexArray[index + 10] = points[5].x;
+          triangleSystem.vertexArray[index + 11] = points[5].y;
 
-          trianglesGeometry.vertexArray[index + 12] = points[0].x;
-          trianglesGeometry.vertexArray[index + 13] = points[0].y;
-          trianglesGeometry.vertexArray[index + 14] = points[7].x;
-          trianglesGeometry.vertexArray[index + 15] = points[7].y;
-          trianglesGeometry.vertexArray[index + 16] = points[4].x;
-          trianglesGeometry.vertexArray[index + 17] = points[4].y;
+          triangleSystem.vertexArray[index + 12] = points[0].x;
+          triangleSystem.vertexArray[index + 13] = points[0].y;
+          triangleSystem.vertexArray[index + 14] = points[7].x;
+          triangleSystem.vertexArray[index + 15] = points[7].y;
+          triangleSystem.vertexArray[index + 16] = points[4].x;
+          triangleSystem.vertexArray[index + 17] = points[4].y;
         }
       };
       myStar.setStar( _x, _y, _innerRadius, _outerRadius, _totalAngle );
