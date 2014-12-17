@@ -36,6 +36,19 @@
   document.onready = function() {
     require( ["../js/display/webgl/TestWebGL"], function( TestWebGL ) {
       var testWebGL = new TestWebGL();
+      testWebGL.events.on( 'step', function() {
+        // Show one oscillation per second so it is easy to count time
+        var x = 0.2 * Math.cos( Date.now() / 1000 * 2 * Math.PI );
+        for ( var i = 0; i < testWebGL.rectangles.length; i++ ) {
+          var rectangle = testWebGL.rectangles[i];
+          rectangle.setXWidth( rectangle.initialState.x + x, rectangle.initialState.width );
+        }
+
+        for ( var mm = 0; mm < testWebGL.stars.length / 2; mm++ ) {
+          var star = testWebGL.stars[mm];
+          star.setStar( star.initialState._x, star.initialState._y, star.initialState._innerRadius, star.initialState._outerRadius, star.initialState._totalAngle + Date.now() / 1000 );
+        }
+      } );
       testWebGL.start();
 
       document.getElementById( 'add-rectangle' ).onclick = function() {

@@ -11,6 +11,9 @@ define( function( require ) {
   // modules
   var inherit = require( 'PHET_CORE/inherit' );
   var TriangleSystem = require( 'SCENERY/display/webgl/TriangleSystem' );
+  var Events = require( 'AXON/Events' );
+
+  // shaders
   var vertexShaderSource = require( 'text!SCENERY/display/webgl/color2d.vert' );
   var fragmentShaderSource = require( 'text!SCENERY/display/webgl/color2d.frag' );
 
@@ -20,6 +23,7 @@ define( function( require ) {
    */
   function TestWebGL() {
 
+    this.events = new Events();
     this.rectangles = [];
     this.stars = [];
 
@@ -120,6 +124,7 @@ define( function( require ) {
     animate: function() {
 
       this.stats.begin();
+      this.events.trigger( 'step' );
 
       window.requestAnimationFrame( this.boundAnimate );
       var gl = this.gl;
@@ -131,24 +136,13 @@ define( function( require ) {
 
       // Update the vertex locations
       //see http://stackoverflow.com/questions/5497722/how-can-i-animate-an-object-in-webgl-modify-specific-vertices-not-full-transfor
+      //TODO: Use a buffer view to only update the changed vertices
       gl.bufferSubData( gl.ARRAY_BUFFER, 0, new Float32Array( this.trianglesGeometry.vertexArray ) );
       gl.vertexAttribPointer( this.positionAttribLocation, 2, gl.FLOAT, false, 0, 0 );
 
       // Send the colors to the GPU
       gl.bindBuffer( gl.ARRAY_BUFFER, this.vertexColorBuffer );
       gl.vertexAttribPointer( this.colorAttributeLocation, 4, gl.FLOAT, false, 0, 0 );
-
-      // Show one oscillation per second so it is easy to count time
-      var x = 0.2 * Math.cos( Date.now() / 1000 * 2 * Math.PI );
-      for ( var i = 0; i < this.rectangles.length; i++ ) {
-        var rectangle = this.rectangles[i];
-        rectangle.setXWidth( rectangle.initialState.x + x, rectangle.initialState.width );
-      }
-
-      for ( var mm = 0; mm < this.stars.length / 2; mm++ ) {
-        var star = this.stars[mm];
-        star.setStar( star.initialState._x, star.initialState._y, star.initialState._innerRadius, star.initialState._outerRadius, star.initialState._totalAngle + Date.now() / 1000 );
-      }
 
       gl.drawArrays( gl.TRIANGLES, 0, this.trianglesGeometry.vertexArray.length / 2 );
       gl.flush();
