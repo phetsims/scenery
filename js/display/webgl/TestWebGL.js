@@ -20,7 +20,8 @@ define( function( require ) {
    */
   function TestWebGL() {
 
-    var testWebGL = this;
+    this.rectangles = [];
+    this.stars = [];
 
     this.stats = this.createStats();
     document.body.appendChild( this.stats.domElement );
@@ -78,27 +79,6 @@ define( function( require ) {
     // Manages the indices within a single array, so that disjoint geometries can be represented easily here.
     // TODO: Compare this same idea to triangle strips
     this.trianglesGeometry = new TriangleSystem();
-
-    this.rectangles = [];
-
-    var numRectangles = 500;
-    for ( var i = 0; i < numRectangles; i++ ) {
-      this.addRectangle();
-    }
-
-    var numStars = 500;
-    this.stars = [];
-    for ( var k = 0; k < numStars; k++ ) {
-      this.addStar();
-    }
-
-    document.getElementById( 'add-rectangle' ).onclick = function() {
-      for ( var i = 0; i < 1; i++ ) {
-        testWebGL.addRectangle();
-      }
-      testWebGL.bindVertexBuffer();
-      testWebGL.bindColorBuffer();
-    };
 
     this.vertexBuffer = gl.createBuffer();
     this.bindVertexBuffer();

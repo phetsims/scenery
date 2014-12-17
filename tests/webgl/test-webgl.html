@@ -33,9 +33,33 @@
 
 <script>
 
-  require( ["../js/display/webgl/TestWebGL"], function( TestWebGL ) {
-    new TestWebGL().start();
-  } );
+  document.onready = function() {
+    require( ["../js/display/webgl/TestWebGL"], function( TestWebGL ) {
+      var testWebGL = new TestWebGL();
+      testWebGL.start();
+
+      document.getElementById( 'add-rectangle' ).onclick = function() {
+        for ( var i = 0; i < 1; i++ ) {
+          testWebGL.addRectangle();
+        }
+        testWebGL.bindVertexBuffer();
+        testWebGL.bindColorBuffer();
+      };
+
+      var numRectangles = 500;
+      for ( var i = 0; i < numRectangles; i++ ) {
+        testWebGL.addRectangle();
+      }
+
+      var numStars = 500;
+      for ( var k = 0; k < numStars; k++ ) {
+        testWebGL.addStar();
+      }
+
+      testWebGL.bindVertexBuffer();
+      testWebGL.bindColorBuffer();
+    } );
+  };
 
 </script>
 
