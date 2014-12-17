@@ -122,11 +122,11 @@ define( function( require ) {
     },
 
     animate: function() {
-
       this.stats.begin();
+      window.requestAnimationFrame( this.boundAnimate );
+
       this.events.trigger( 'step' );
 
-      window.requestAnimationFrame( this.boundAnimate );
       var gl = this.gl;
 
       gl.viewport( 0.0, 0.0, canvas.width, canvas.height );
