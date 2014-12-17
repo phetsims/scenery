@@ -24,8 +24,6 @@ define( function( require ) {
   function TestWebGL() {
 
     this.events = new Events();
-    this.rectangles = [];
-    this.stars = [];
 
     this.stats = this.createStats();
     document.body.appendChild( this.stats.domElement );
@@ -148,20 +146,6 @@ define( function( require ) {
       gl.flush();
 
       this.stats.end();
-    },
-
-    addRectangle: function() {
-      var x = (Math.random() * 2 - 1) * 0.9;
-      var y = (Math.random() * 2 - 1) * 0.9;
-      this.rectangles.push( this.trianglesGeometry.createRectangle( x, y, 0.02, 0.02, x, y, 1, 1 ) );
-    },
-
-    addStar: function() {
-      var x = (Math.random() * 2 - 1) * 0.9;
-      var y = (Math.random() * 2 - 1) * 0.9;
-      var scale = Math.random() * 0.2;
-      var star = this.trianglesGeometry.createStar( x, y, 0.15 * scale, 0.4 * scale, Math.PI + Math.random() * Math.PI * 2, Math.random(), Math.random(), Math.random(), 1 );
-      this.stars.push( star );
     },
 
     bindVertexBuffer: function() {
