@@ -138,10 +138,11 @@ define( function( require ) {
     },
 
     animate: function() {
-      window.requestAnimationFrame( this.boundAnimate );
-      var gl = this.gl;
 
       this.stats.begin();
+
+      window.requestAnimationFrame( this.boundAnimate );
+      var gl = this.gl;
 
       gl.viewport( 0.0, 0.0, canvas.width, canvas.height );
       gl.clear( gl.COLOR_BUFFER_BIT );
