@@ -3,6 +3,8 @@
 /**
  * Simplified isolated test harness for a webgl renderer.
  *
+ * TODO: Array of structures for interleaved vertex data (color + texture coordinates)
+ *
  * @author Sam Reid (PhET Interactive Simulations)
  */
 define( function( require ) {
