@@ -257,7 +257,7 @@ define( function( require ) {
     };
 
     proto.getStrokeId = function() {
-      return 'stroke-' + this._stroke.id + '-' + this.getId();
+      return 'stroke-' + ( this._stroke ? this._stroke.id : null ) + '-' + this.getId();
     };
 
     // if we have to apply a transform workaround for https://github.com/phetsims/scenery/issues/196 (only when we have a pattern or gradient)
@@ -288,7 +288,7 @@ define( function( require ) {
     };
 
     proto.removeSVGStrokeDef = function( svg, defs ) {
-      var strokeId = 'stroke' + this.getId();
+      var strokeId = this.getStrokeId();
 
       // wipe away any old definition
       var oldStrokeDef = svg.getElementById( strokeId );

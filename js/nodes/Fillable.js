@@ -143,7 +143,7 @@ define( function( require ) {
     };
 
     proto.getFillId = function() {
-      return this._fill.id + '-' + this.getId();
+      return ( this._fill ? this._fill.id : null ) + '-' + this.getId();
     };
 
     proto.getCSSFill = function() {
@@ -163,7 +163,7 @@ define( function( require ) {
     };
 
     proto.removeSVGFillDef = function( svg, defs ) {
-      var fillId = 'fill' + this.getId();
+      var fillId = this.getFillId();
 
       // wipe away any old definition
       var oldFillDef = svg.getElementById( fillId );
