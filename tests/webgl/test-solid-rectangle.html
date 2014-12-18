@@ -40,6 +40,7 @@ Simplified test that just draws a rectangle.
     require( ["../js/display/webgl/TestWebGL"], function( TestWebGL ) {
       var testWebGL = new TestWebGL();
 
+      // TODO: Add a uniform matrix4 for transforming vertices to the -1,-1,1,1 rectangle
       testWebGL.trianglesGeometry.createRectangle( -0.8, -0.8, 0.8 * 2, 0.8 * 2, 1, 0, 0, 1 );
 
       testWebGL.bindVertexBuffer();
