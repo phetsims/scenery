@@ -120,11 +120,23 @@ define( function( require ) {
     },
 
     animate: function() {
+
+      // Keep track of the time for profiling
       this.stats.begin();
+
+      // Queue the next animation frame
       window.requestAnimationFrame( this.boundAnimate );
 
+      // Let listeners update their state
       this.events.trigger( 'step' );
 
+      // Render everything
+      this.draw();
+
+      // Record the timing for @mrdoob stats profiler
+      this.stats.end();
+    },
+    draw: function() {
       var gl = this.gl;
 
       gl.viewport( 0.0, 0.0, canvas.width, canvas.height );
@@ -144,8 +156,6 @@ define( function( require ) {
 
       gl.drawArrays( gl.TRIANGLES, 0, this.trianglesGeometry.vertexArray.length / 2 );
       gl.flush();
-
-      this.stats.end();
     },
 
     bindVertexBuffer: function() {
