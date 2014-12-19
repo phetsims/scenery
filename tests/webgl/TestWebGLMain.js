@@ -49,7 +49,7 @@ define( function( require ) {
     testWebGL.start();
 
     testWebGL.events.on( 'step', function() {
-      var rectX = Math.cos( Date.now() / 1000.0 ) * 300 + 300;
+      var rectX = Math.cos( Date.now() / 1000.0 * 2 * Math.PI / 2 ) * 100 + 300;
       rectangleGeometry.setXWidth( rectX, 100 );
     } );
 

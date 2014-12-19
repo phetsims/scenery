@@ -22,7 +22,7 @@ define( function( require ) {
    */
   function TriangleSystem() {
 
-    //TODO: Use Float32Array
+    //TODO: Use Float32Array -- though we will have to account for the fact that they have a fixed size
     this.vertexArray = [];
     this.colors = [];
   }
