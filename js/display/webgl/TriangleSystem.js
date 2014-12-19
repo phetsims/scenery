@@ -14,6 +14,7 @@ define( function( require ) {
 
   // modules
   var inherit = require( 'PHET_CORE/inherit' );
+  var Color = require( 'SCENERY/util/Color' );
 
   /**
    *
@@ -27,6 +28,58 @@ define( function( require ) {
   }
 
   return inherit( Object, TriangleSystem, {
+
+    /**
+     * Add geometry and color for a scenery path using sampling + triangulation.
+     * Uses poly2tri for triangulation
+     * @param path
+     */
+    createFromPath: function( path ) {
+      var shape = path.shape;
+      var color = new Color( path.fill );
+      var linear = shape.toPiecewiseLinear( {} );
+      var subpaths = linear.subpaths;
+
+      // Output to a string for ease of debugging within http://r3mi.github.io/poly2tri.js/
+      var string = '';
+
+      // Output the contour to an array of poly2tri.Point
+      var contour = [];
+
+      for ( var i = 0; i < subpaths.length; i++ ) {
+        var subpath = subpaths[i];
+        for ( var k = 0; k < subpath.points.length; k++ ) {
+
+          string = string + '' + subpath.points[k].x + ' ' + subpath.points[k].y + '\n';
+
+          //Add the points into the contour, but don't duplicate the last point.
+          //TODO: how to handle closed vs open shapes
+          if ( k < subpath.points.length - 1 ) {
+            contour.push( new poly2tri.Point( subpath.points[k].x, subpath.points[k].y ) );
+          }
+        }
+      }
+
+      // Triangulate using poly2tri
+      var triangles = new poly2tri.SweepContext( contour ).triangulate().getTriangles();
+
+      // Add the triangulated geometry into the array buffer.
+      for ( var z = 0; z < triangles.length; z++ ) {
+        var triangle = triangles[z];
+        for ( var zz = 0; zz < triangle.points_.length; zz++ ) {
+          var pt = triangle.points_[zz];
+
+          // Mutate the vertices a bit to see what is going on.  Or not.
+          var randFactor = 0;
+          this.vertexArray.push( pt.x + Math.random() * randFactor, pt.y + Math.random() * randFactor );
+          this.colors.push( color.red / 255, color.green / 255, color.blue / 255, color.alpha );
+        }
+      }
+    },
+    createFromRectangle: function( rectangle ) {
+      var color = new Color( rectangle.fill );
+      return this.createRectangle( rectangle.rectX, rectangle.rectY, rectangle.rectWidth, rectangle.rectHeight, color.red / 255, color.green / 255, color.blue / 255, color.alpha );
+    },
     createRectangle: function( x, y, width, height, r, g, b, a ) {
       var triangleSystem = this;
       var index = this.vertexArray.length;

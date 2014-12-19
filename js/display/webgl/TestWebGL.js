@@ -30,22 +30,22 @@ define( function( require ) {
     this.stats = this.createStats();
     document.body.appendChild( this.stats.domElement );
 
-    var canvas = document.getElementById( "canvas" );
+    this.canvas = document.getElementById( "canvas" );
 
     // Handle retina displays as described in https://www.khronos.org/webgl/wiki/HandlingHighDPI
     // First, set the display size of the canvas.
-    canvas.style.width = window.innerWidth + "px";
-    canvas.style.height = window.innerHeight + "px";
+    this.canvas.style.width = window.innerWidth + "px";
+    this.canvas.style.height = window.innerHeight + "px";
 
     // Next, set the size of the drawingBuffer
     var devicePixelRatio = window.devicePixelRatio || 1;
-    canvas.width = window.innerWidth * devicePixelRatio;
-    canvas.height = window.innerHeight * devicePixelRatio;
+    this.canvas.width = window.innerWidth * devicePixelRatio;
+    this.canvas.height = window.innerHeight * devicePixelRatio;
 
     // Code inspired by http://www.webglacademy.com/#1
     var gl;
     try {
-      gl = canvas.getContext( "experimental-webgl", {antialias: true} ); // TODO: {antialias:true?}
+      gl = this.canvas.getContext( "experimental-webgl", {antialias: true} ); // TODO: {antialias:true?}
     }
     catch( e ) {
       return false;
@@ -79,6 +79,11 @@ define( function( require ) {
     gl.enableVertexAttribArray( this.colorAttributeLocation );
 
     gl.useProgram( shaderProgram );
+
+    // set the resolution
+    var resolutionLocation = gl.getUniformLocation( shaderProgram, 'uResolution' );
+//    gl.uniform2f( resolutionLocation, canvas.width * devicePixelRatio, canvas.height * devicePixelRatio );
+    gl.uniform2f( resolutionLocation, this.canvas.width * 4, this.canvas.height * 4 );
 
     // Manages the indices within a single array, so that disjoint geometries can be represented easily here.
     // TODO: Compare this same idea to triangle strips
@@ -141,7 +146,7 @@ define( function( require ) {
     draw: function() {
       var gl = this.gl;
 
-      gl.viewport( 0.0, 0.0, canvas.width, canvas.height );
+      gl.viewport( 0.0, 0.0, this.canvas.width, this.canvas.height );
       gl.clear( gl.COLOR_BUFFER_BIT );
 
       gl.bindBuffer( gl.ARRAY_BUFFER, this.vertexBuffer );
