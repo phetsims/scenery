@@ -45,8 +45,8 @@ define( function( require ) {
     testWebGL.bindVertexBuffer();
     testWebGL.bindColorBuffer();
 
-//      testWebGL.draw();
-
     testWebGL.start();
+
+    console.log( 'total triangles', testWebGL.trianglesGeometry.vertexArray.length / 3 );
   }};
 } );

@@ -61,7 +61,15 @@ define( function( require ) {
       }
 
       // Triangulate using poly2tri
-      var triangles = new poly2tri.SweepContext( contour ).triangulate().getTriangles();
+      // Circle linearization is creating some duplicated points, so bail on those for now.
+      var triangles;
+      try {
+        triangles = new poly2tri.SweepContext( contour ).triangulate().getTriangles();
+      }
+      catch( error ) {
+        console.log( 'error in triangulation', error );
+        triangles = [];
+      }
 
       // Add the triangulated geometry into the array buffer.
       for ( var z = 0; z < triangles.length; z++ ) {
