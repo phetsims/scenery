@@ -14,6 +14,7 @@ define( function( require ) {
   var inherit = require( 'PHET_CORE/inherit' );
   var TriangleSystem = require( 'SCENERY/display/webgl/TriangleSystem' );
   var Events = require( 'AXON/Events' );
+  var Util = require( 'SCENERY/util/Util' );
 
   // shaders
   var vertexShaderSource = require( 'text!SCENERY/display/webgl/color2d.vert' );
@@ -28,19 +29,16 @@ define( function( require ) {
     this.events = new Events();
 
     this.stats = this.createStats();
+
+
+    this.canvas = document.createElement( "canvas" );
+    this.canvas.style.position = 'absolute';
+    this.canvas.style.left = '0';
+    this.canvas.style.top = '0';
+    this.canvas.style.pointerEvents = 'none';
+
+    document.body.appendChild( this.canvas );
     document.body.appendChild( this.stats.domElement );
-
-    this.canvas = document.getElementById( "canvas" );
-
-    // Handle retina displays as described in https://www.khronos.org/webgl/wiki/HandlingHighDPI
-    // First, set the display size of the canvas.
-    this.canvas.style.width = window.innerWidth + "px";
-    this.canvas.style.height = window.innerHeight + "px";
-
-    // Next, set the size of the drawingBuffer
-    var devicePixelRatio = window.devicePixelRatio || 1;
-    this.canvas.width = window.innerWidth * devicePixelRatio;
-    this.canvas.height = window.innerHeight * devicePixelRatio;
 
     // Code inspired by http://www.webglacademy.com/#1
     var gl;
@@ -51,6 +49,17 @@ define( function( require ) {
       return false;
     }
     this.gl = gl;
+
+    // Handle retina displays as described in https://www.khronos.org/webgl/wiki/HandlingHighDPI
+    // First, set the display size of the canvas.
+    this.canvas.style.width = window.innerWidth + "px";
+    this.canvas.style.height = window.innerHeight + "px";
+
+    // Next, set the size of the drawingBuffer
+    var backingScale = Util.backingScale( this.gl );
+    var devicePixelRatio = window.devicePixelRatio || 1;
+    this.canvas.width = window.innerWidth * devicePixelRatio;
+    this.canvas.height = window.innerHeight * devicePixelRatio;
 
     var toShader = function( source, type, typeString ) {
       var shader = gl.createShader( type );
@@ -82,8 +91,10 @@ define( function( require ) {
 
     // set the resolution
     var resolutionLocation = gl.getUniformLocation( shaderProgram, 'uResolution' );
-//    gl.uniform2f( resolutionLocation, canvas.width * devicePixelRatio, canvas.height * devicePixelRatio );
-    gl.uniform2f( resolutionLocation, this.canvas.width * 4, this.canvas.height * 4 );
+
+    //TODO: This backing scale multiply seems very buggy and contradicts everything we know!
+    // Still, it gives the right behavior on iPad3 and OSX (non-retina).  Should be discussed and investigated.
+    gl.uniform2f( resolutionLocation, this.canvas.width / backingScale, this.canvas.height / backingScale );
 
     // Manages the indices within a single array, so that disjoint geometries can be represented easily here.
     // TODO: Compare this same idea to triangle strips

@@ -11,7 +11,7 @@ void main(void) { //pre-built function
   //TODO: Should be converted to matrix multiply, probably faster.
 
   // convert the rectangle from pixels to 0.0 to 1.0
-  vec2 zeroToOne = aPosition / uResolution * 2.0;
+  vec2 zeroToOne = aPosition / uResolution;
 
   // convert from 0->1 to 0->2
   vec2 zeroToTwo = zeroToOne * 2.0;

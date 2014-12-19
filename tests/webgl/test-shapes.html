@@ -10,6 +10,11 @@ Simplified test that just draws a rectangle.
   <meta name="viewport" content="initial-scale=1,user-scalable=no,maximum-scale=1"/>
   <meta name="apple-mobile-web-app-capable" content="yes">
   <meta name="phet-sim-level" content="production">
+
+  <!--<meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate" />-->
+  <!--<meta http-equiv="Pragma" content="no-cache" />-->
+  <!--<meta http-equiv="Expires" content="0" />-->
+
   <title>Simulation Test WebGL</title>
 
   <!-- jQuery and LoDash are dependencies -->
@@ -33,7 +38,6 @@ Simplified test that just draws a rectangle.
 </head>
 
 <body>
-<canvas id="canvas" style="position: absolute;top:0px; left:0px"></canvas>
 
 <script>
 
@@ -49,14 +53,14 @@ Simplified test that just draws a rectangle.
       var testWebGL = new TestWebGL();
 
       // TODO: Add a uniform matrix4 for transforming vertices to the -1,-1,1,1 rectangle
-      testWebGL.trianglesGeometry.createFromRectangle( new Rectangle( 0, 0, 100, 100, {fill: 'red'} ) );
+      testWebGL.trianglesGeometry.createFromRectangle( new Rectangle( 0, 0, 1024, 100, {fill: 'red'} ) );
       testWebGL.trianglesGeometry.createFromRectangle( new Rectangle( 100, 0, 100, 100, {fill: 'green'} ) );
       testWebGL.trianglesGeometry.createFromRectangle( new Rectangle( 200, 0, 100, 100, {fill: 'blue'} ) );
       testWebGL.trianglesGeometry.createFromPath( new Rectangle( 100, 100, 100, 100, 20, 20, {fill: 'blue'} ) );
-//      testWebGL.trianglesGeometry.createFromPath( new Path( Shape.circle( 300, 300, 50 ), {fill: 'blue'} ) );
-//      testWebGL.trianglesGeometry.createFromPath( new Path( Shape.circle( 600, 600, 200 ), {fill: 'red'} ) );
+      testWebGL.trianglesGeometry.createFromPath( new Path( Shape.circle( 300, 300, 50 ), {fill: 'blue'} ) );
+      testWebGL.trianglesGeometry.createFromPath( new Path( Shape.circle( 600, 600, 200 ), {fill: 'red'} ) );
 
-      for ( var i = 0; i < 1; i++ ) {
+      for ( var i = 0; i < 20; i++ ) {
         testWebGL.trianglesGeometry.createFromPath( new Path( Shape.circle( 600 * Math.random(), 600 * Math.random(), 200 * Math.random() ), {fill: 'red'} ) );
       }
       testWebGL.bindVertexBuffer();
