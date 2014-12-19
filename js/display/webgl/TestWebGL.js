@@ -165,7 +165,7 @@ define( function( require ) {
       // Update the vertex locations
       //see http://stackoverflow.com/questions/5497722/how-can-i-animate-an-object-in-webgl-modify-specific-vertices-not-full-transfor
       //TODO: Use a buffer view to only update the changed vertices
-//      gl.bufferSubData( gl.ARRAY_BUFFER, 0, new Float32Array( this.trianglesGeometry.vertexArray ) );
+      gl.bufferSubData( gl.ARRAY_BUFFER, 0, new Float32Array( this.trianglesGeometry.vertexArray ) );
       gl.vertexAttribPointer( this.positionAttribLocation, 2, gl.FLOAT, false, 0, 0 );
 
       // Send the colors to the GPU
