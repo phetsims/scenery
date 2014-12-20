@@ -29,20 +29,20 @@ define( function( require ) {
 
     // TODO: Add a uniform matrix4 for transforming vertices to the -1,-1,1,1 rectangle
     testWebGL.trianglesGeometry.createFromRectangle( new Rectangle( 0, 0, 1024 / 2, 100, {fill: 'red'} ) );
-    testWebGL.trianglesGeometry.createFromRectangle( new Rectangle( 100, 0, 100, 100, {fill: 'green'} ) );
-    var rectangle = new Rectangle( 200, 0, 100, 100, {fill: 'blue'} );
+//    testWebGL.trianglesGeometry.createFromRectangle( new Rectangle( 100, 0, 100, 100, {fill: 'green'} ) );
+    var rectangle = new Rectangle( 200, 300, 100, 100, {fill: 'blue'} );
     var rectangleGeometry = testWebGL.trianglesGeometry.createFromRectangle( rectangle );
-    testWebGL.trianglesGeometry.createFromPath( new Rectangle( 100, 100, 100, 100, 20, 20, {fill: 'blue'} ) );
-    testWebGL.trianglesGeometry.createFromPath( new Path( Shape.circle( 300, 300, 50 ), {fill: 'blue'} ) );
-    testWebGL.trianglesGeometry.createFromPath( new Path( Shape.circle( 600, 600, 200 ), {fill: 'red'} ) );
+//    testWebGL.trianglesGeometry.createFromPath( new Rectangle( 100, 100, 100, 100, 20, 20, {fill: 'blue'} ) );
+//    testWebGL.trianglesGeometry.createFromPath( new Path( Shape.circle( 300, 300, 50 ), {fill: 'blue'} ) );
+//    testWebGL.trianglesGeometry.createFromPath( new Path( Shape.circle( 600, 600, 200 ), {fill: 'red'} ) );
 
-    for ( var i = 0; i < 50; i++ ) {
-      var circle = Shape.circle( 600 * Math.random(), 600 * Math.random(), 50 * Math.random() );
-      var path = new Path( circle, {
-        fill: new Color( Math.random() * 255, Math.random() * 255, Math.random() * 255, 1 )
-      } );
-      testWebGL.trianglesGeometry.createFromPath( path );
-    }
+//    for ( var i = 0; i < 50; i++ ) {
+//      var circle = Shape.circle( 600 * Math.random(), 600 * Math.random(), 50 * Math.random() );
+//      var path = new Path( circle, {
+//        fill: new Color( Math.random() * 255, Math.random() * 255, Math.random() * 255, 1 )
+//      } );
+//      testWebGL.trianglesGeometry.createFromPath( path );
+//    }
     testWebGL.bindVertexBuffer();
     testWebGL.bindColorBuffer();
 
@@ -50,7 +50,10 @@ define( function( require ) {
 
     testWebGL.events.on( 'step', function() {
       var rectX = Math.cos( Date.now() / 1000.0 * 2 * Math.PI / 2 ) * 100 + 300;
+
       rectangleGeometry.setXWidth( rectX, 100 );
+
+      testWebGL.updateTriangleBuffer( rectangleGeometry );
     } );
 
     console.log( 'total triangles', testWebGL.trianglesGeometry.vertexArray.length / 3 );

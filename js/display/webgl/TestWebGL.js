@@ -161,12 +161,6 @@ define( function( require ) {
       gl.clear( gl.COLOR_BUFFER_BIT );
 
       gl.bindBuffer( gl.ARRAY_BUFFER, this.vertexBuffer );
-
-      // Update the vertex locations
-      //see http://stackoverflow.com/questions/5497722/how-can-i-animate-an-object-in-webgl-modify-specific-vertices-not-full-transfor
-      //TODO: Use a buffer view to only update the changed vertices
-      //perhaps like //see http://stackoverflow.com/questions/19892022/webgl-optimizing-a-vertex-buffer-that-changes-values-vertex-count-every-frame
-      gl.bufferSubData( gl.ARRAY_BUFFER, 0, new Float32Array( this.trianglesGeometry.vertexArray ) );
       gl.vertexAttribPointer( this.positionAttribLocation, 2, gl.FLOAT, false, 0, 0 );
 
       // Send the colors to the GPU
@@ -177,10 +171,60 @@ define( function( require ) {
       gl.flush();
     },
 
+    /**
+     * Update all of the vertices in the entire triangles geometry.  Probably just faster
+     * to update the changed vertices.  Use this if many things changed, though.
+     * @private
+     */
+//    bufferSubData: function() {
+//      var gl = this.gl;
+//
+//      // Update the vertex locations
+//      //see http://stackoverflow.com/questions/5497722/how-can-i-animate-an-object-in-webgl-modify-specific-vertices-not-full-transfor
+//      //TODO: Use a buffer view to only update the changed vertices
+//      //perhaps like //see http://stackoverflow.com/questions/19892022/webgl-optimizing-a-vertex-buffer-that-changes-values-vertex-count-every-frame
+//      gl.bindBuffer( gl.ARRAY_BUFFER, this.vertexBuffer );
+//      gl.bufferSubData( gl.ARRAY_BUFFER, 0, new Float32Array( this.trianglesGeometry.vertexArray ) );
+//    },
+
+    updateTriangleBuffer: function( geometry ) {
+      var gl = this.gl;
+
+      // Update the vertex locations
+      // Use a buffer view to only update the changed vertices
+      // like //see http://stackoverflow.com/questions/19892022/webgl-optimizing-a-vertex-buffer-that-changes-values-vertex-count-every-frame
+      // See also http://stackoverflow.com/questions/5497722/how-can-i-animate-an-object-in-webgl-modify-specific-vertices-not-full-transfor
+      gl.bindBuffer( gl.ARRAY_BUFFER, this.vertexBuffer );
+
+      //Update the Float32Array values
+      for ( var i = geometry.index; i < geometry.endIndex; i++ ) {
+        this.vertexArray[i] = this.trianglesGeometry.vertexArray[i];
+      }
+
+      // Isolate the subarray of changed values
+//      var subArray = this.vertexArray.subarray( geometry.index, geometry.endIndex );
+      var subArray = this.vertexArray.subarray( 0 );
+
+      // Send new values to the GPU
+      // See https://www.khronos.org/webgl/public-mailing-list/archives/1201/msg00110.html
+      gl.bufferSubData( gl.ARRAY_BUFFER, 0, subArray );
+      console.log(
+        'vertex array length', this.trianglesGeometry.vertexArray.length,
+        'va.length', this.vertexArray.length,
+        'geometry index', geometry.index,
+        'geometry end index', geometry.endIndex,
+        'updated size', subArray.length );
+
+      debugger;
+    },
+
     bindVertexBuffer: function() {
       var gl = this.gl;
       gl.bindBuffer( gl.ARRAY_BUFFER, this.vertexBuffer );
-      gl.bufferData( gl.ARRAY_BUFFER, new Float32Array( this.trianglesGeometry.vertexArray ), gl.DYNAMIC_DRAW );
+
+      // Keep track of the vertexArray for updating sublists of it
+      this.vertexArray = new Float32Array( this.trianglesGeometry.vertexArray );
+      gl.bufferData( gl.ARRAY_BUFFER, this.vertexArray, gl.DYNAMIC_DRAW );
     },
 
     bindColorBuffer: function() {

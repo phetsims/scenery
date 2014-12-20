@@ -119,6 +119,7 @@ define( function( require ) {
       return {
         initialState: {x: x, y: y, width: width, height: height},
         index: index,
+        endIndex: triangleSystem.vertexArray.length,
         setXWidth: function( x, width ) {
           triangleSystem.vertexArray[index] = x;
           triangleSystem.vertexArray[index + 2] = x + width;
