@@ -207,7 +207,8 @@ define( function( require ) {
 
       // Send new values to the GPU
       // See https://www.khronos.org/webgl/public-mailing-list/archives/1201/msg00110.html
-      gl.bufferSubData( gl.ARRAY_BUFFER, geometry.index, subArray );
+      // The the offset is the index times the bytes per value
+      gl.bufferSubData( gl.ARRAY_BUFFER, geometry.index * 4, subArray );
 //      gl.bufferSubData( gl.ARRAY_BUFFER, 0, subArray );
       console.log(
         'vertex array length', this.trianglesGeometry.vertexArray.length,
