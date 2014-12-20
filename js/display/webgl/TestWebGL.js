@@ -202,12 +202,13 @@ define( function( require ) {
       }
 
       // Isolate the subarray of changed values
-//      var subArray = this.vertexArray.subarray( geometry.index, geometry.endIndex );
-      var subArray = this.vertexArray.subarray( 0 );
+      var subArray = this.vertexArray.subarray( geometry.index, geometry.endIndex );
+//      var subArray = this.vertexArray.subarray( 0 );
 
       // Send new values to the GPU
       // See https://www.khronos.org/webgl/public-mailing-list/archives/1201/msg00110.html
-      gl.bufferSubData( gl.ARRAY_BUFFER, 0, subArray );
+      gl.bufferSubData( gl.ARRAY_BUFFER, geometry.index, subArray );
+//      gl.bufferSubData( gl.ARRAY_BUFFER, 0, subArray );
       console.log(
         'vertex array length', this.trianglesGeometry.vertexArray.length,
         'va.length', this.vertexArray.length,

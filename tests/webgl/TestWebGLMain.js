@@ -28,10 +28,10 @@ define( function( require ) {
     var testWebGL = new TestWebGL();
 
     // TODO: Add a uniform matrix4 for transforming vertices to the -1,-1,1,1 rectangle
-    testWebGL.trianglesGeometry.createFromRectangle( new Rectangle( 0, 0, 1024 / 2, 100, {fill: 'red'} ) );
+//    testWebGL.trianglesGeometry.createFromRectangle( new Rectangle( 0, 0, 1024 / 2, 100, {fill: 'red'} ) );
 //    testWebGL.trianglesGeometry.createFromRectangle( new Rectangle( 100, 0, 100, 100, {fill: 'green'} ) );
-    var rectangle = new Rectangle( 200, 300, 100, 100, {fill: 'blue'} );
-    var rectangleGeometry = testWebGL.trianglesGeometry.createFromRectangle( rectangle );
+//    var rectangle = new Rectangle( 200, 300, 100, 100, {fill: 'blue'} );
+//    var rectangleGeometry = testWebGL.trianglesGeometry.createFromRectangle( rectangle );
 //    testWebGL.trianglesGeometry.createFromPath( new Rectangle( 100, 100, 100, 100, 20, 20, {fill: 'blue'} ) );
 //    testWebGL.trianglesGeometry.createFromPath( new Path( Shape.circle( 300, 300, 50 ), {fill: 'blue'} ) );
 //    testWebGL.trianglesGeometry.createFromPath( new Path( Shape.circle( 600, 600, 200 ), {fill: 'red'} ) );
@@ -43,6 +43,10 @@ define( function( require ) {
 //      } );
 //      testWebGL.trianglesGeometry.createFromPath( path );
 //    }
+
+    var t1 = testWebGL.trianglesGeometry.createFromTriangle( 100, 100, 200, 100, 150, 200 );
+    var t2 = testWebGL.trianglesGeometry.createFromTriangle( 100, 100, 200, 100, 150, 200 );
+//    var t3 = testWebGL.trianglesGeometry.createFromTriangle( 100, 200, 200, 200, 150, 300 );
     testWebGL.bindVertexBuffer();
     testWebGL.bindColorBuffer();
 
@@ -50,10 +54,11 @@ define( function( require ) {
 
     testWebGL.events.on( 'step', function() {
       var rectX = Math.cos( Date.now() / 1000.0 * 2 * Math.PI / 2 ) * 100 + 300;
-
-      rectangleGeometry.setXWidth( rectX, 100 );
-
-      testWebGL.updateTriangleBuffer( rectangleGeometry );
+//
+//      rectangleGeometry.setXWidth( rectX, 100 );
+//
+      t2.setTriangle( 100 + rectX, 100, 200 + rectX, 100, 150 + rectX, 200 );
+      testWebGL.updateTriangleBuffer( t2 );
     } );
 
     console.log( 'total triangles', testWebGL.trianglesGeometry.vertexArray.length / 3 );

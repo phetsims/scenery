@@ -84,6 +84,46 @@ define( function( require ) {
         }
       }
     },
+    createFromTriangle: function( x1, y1, x2, y2, x3, y3, color ) {
+
+      color = new Color( color );
+      var r = color.red / 255;
+      var g = color.green / 255;
+      var b = color.blue / 255;
+      var a = color.alpha;
+
+      var triangleSystem = this;
+      var index = this.vertexArray.length;
+      triangleSystem.vertexArray.push(
+        // Top left
+        x1, y1,
+        x2, y2,
+        x3, y3
+      );
+
+      // Add the same color for all vertices (solid fill rectangle).
+      // TODO: some way to reduce this amount of elements!
+      triangleSystem.colors.push(
+        r, g, b, a,
+        r, g, b, a,
+        r, g, b, a
+      );
+
+      //Track the index so it can delete itself, update itself, etc.
+      //TODO: Move to a separate class.
+      return {
+        index: index,
+        endIndex: triangleSystem.vertexArray.length,
+        setTriangle: function( x1, y1, x2, y2, x3, y3 ) {
+          triangleSystem.vertexArray[index + 0] = x1;
+          triangleSystem.vertexArray[index + 1] = y1;
+          triangleSystem.vertexArray[index + 2] = x2;
+          triangleSystem.vertexArray[index + 3] = y2;
+          triangleSystem.vertexArray[index + 4] = x3;
+          triangleSystem.vertexArray[index + 5] = y3;
+        }
+      };
+    },
     createFromRectangle: function( rectangle ) {
       var color = new Color( rectangle.fill );
       return this.createRectangle( rectangle.rectX, rectangle.rectY, rectangle.rectWidth, rectangle.rectHeight, color.red / 255, color.green / 255, color.blue / 255, color.alpha );
