@@ -203,21 +203,19 @@ define( function( require ) {
 
       // Isolate the subarray of changed values
       var subArray = this.vertexArray.subarray( geometry.index, geometry.endIndex );
-//      var subArray = this.vertexArray.subarray( 0 );
 
       // Send new values to the GPU
       // See https://www.khronos.org/webgl/public-mailing-list/archives/1201/msg00110.html
       // The the offset is the index times the bytes per value
       gl.bufferSubData( gl.ARRAY_BUFFER, geometry.index * 4, subArray );
-//      gl.bufferSubData( gl.ARRAY_BUFFER, 0, subArray );
-      console.log(
-        'vertex array length', this.trianglesGeometry.vertexArray.length,
-        'va.length', this.vertexArray.length,
-        'geometry index', geometry.index,
-        'geometry end index', geometry.endIndex,
-        'updated size', subArray.length );
 
-      debugger;
+//      console.log(
+//        'vertex array length', this.trianglesGeometry.vertexArray.length,
+//        'va.length', this.vertexArray.length,
+//        'geometry index', geometry.index,
+//        'geometry end index', geometry.endIndex,
+//        'updated size', subArray.length );
+
     },
 
     bindVertexBuffer: function() {
