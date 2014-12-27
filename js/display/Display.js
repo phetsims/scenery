@@ -1130,6 +1130,8 @@ define( function( require ) {
 
   // Detect focus change events, the TAB key and SHIFT-TAB
   // Add this once per document, even if multiple displays, since this is handled statically.
+  // TODO: Make sure this strategy plays nicely with Scenery's handling of key events through the Input.js system
+  // TODO: (if there is one?)
   document.onkeydown = function( event ) {
 
     var code = event.which;
