@@ -46,6 +46,7 @@ define( function( require ) {
   var inherit = require( 'PHET_CORE/inherit' );
   var extend = require( 'PHET_CORE/extend' );
   var Events = require( 'AXON/Events' );
+  var Property = require( 'AXON/Property' );
   var Dimension2 = require( 'DOT/Dimension2' );
   var Vector2 = require( 'DOT/Vector2' );
   var Matrix3 = require( 'DOT/Matrix3' );
@@ -72,7 +73,7 @@ define( function( require ) {
   // flags object used for determining what the cursor should be underneath a mouse
   var isMouseFlags = { isMouse: true };
 
-   /*
+  /*
    * Constructs a Display that will show the rootNode and its subtree in a visual state. Default options provided below
    *
    * @param {Node} rootNode - Displays this node and all of its descendants
@@ -95,6 +96,8 @@ define( function( require ) {
    * }
    */
   scenery.Display = function Display( rootNode, options ) {
+
+    Display.displays.push( this );
 
     // supertype call to axon.Events (should just initialize a few properties here, notably _eventListeners and _staticEventListeners)
     Events.call( this );
@@ -184,6 +187,9 @@ define( function( require ) {
 
     // global reference if we have a Display (useful)
     this.scenery = scenery;
+
+    var accessibilityLayer = createAccessibilityDiv();
+    this._domElement.appendChild( accessibilityLayer );
   };
   var Display = scenery.Display;
 
@@ -471,7 +477,8 @@ define( function( require ) {
         _.each( backbone.blocks, function( block ) {
           if ( block instanceof scenery.DOMBlock && block.domDrawable instanceof scenery.BackboneDrawable ) {
             bitmask = bitmask | renderersUnderBackbone( block.domDrawable );
-          } else {
+          }
+          else {
             bitmask = bitmask | block.renderer;
           }
         } );
@@ -1027,6 +1034,138 @@ define( function( require ) {
   Display.customCursors = {
     'scenery-grab-pointer': ['grab', '-moz-grab', '-webkit-grab', 'pointer'],
     'scenery-grabbing-pointer': ['grabbing', '-moz-grabbing', '-webkit-grabbing', 'pointer']
+  };
+
+  // Creates the div that will contain the accessibiity-related DOM elements.
+  var createAccessibilityDiv = function() {
+    var div = document.createElement( 'div' );
+    div.setAttribute( 'id', 'accessibility' );
+    div.style.position = 'absolute';
+    div.style.left = '0';
+    div.style.top = '0';
+    div.style.width = '0';
+    div.style.height = '0';
+
+    // Create some fake children for now so that tabbing doesn't take you out of the HTML content.
+    // TODO: this should eventually be replaced by actual peers, or at least the appropriate count of children (to match
+    // TODO: the number of focusable nodes)
+    for ( var i = 0; i < 100; i++ ) {
+      var child = document.createElement( 'div' );
+      child.setAttribute( 'tabindex', 0 );
+      div.appendChild( child );
+    }
+
+    return div;
+  };
+
+  // Since only one element can have focus, Scenery uses a static element to track node focus.  That is, even
+  // if there are multiple Displays, only one Node (across all displays) will have focus in this frame.
+  Display.focusedInstanceProperty = new Property( null );
+
+  /**
+   * Adds the entire list of instances from the parent instance into the list.  List is modified, and returned.
+   * This is very expensive (linear in the size of the scene graph), so use sparingly.  Currently used for focus
+   * traversal.
+   * @param instance
+   * @param list
+   * @param predicate
+   */
+  var flattenInstances = function( instance, list, predicate ) {
+    if ( predicate( instance ) ) {
+      list.push( instance );
+    }
+    for ( var i = 0; i < instance.children.length; i++ ) {
+      flattenInstances( instance.children[i], list, predicate );
+    }
+    return list;
+  };
+
+  // Static list of all known displays that have been instantiated.
+  // TODO: support for deletion of Displays.
+  Display.displays = [];
+
+  // Move the focus to the next focusable element.  Called by AccessibilityLayer.
+  Display.moveFocus = function( deltaIndex ) {
+
+    var focusableInstances = [];
+    var focusable = function( instance ) {
+      return instance.node.focusable === true;
+    };
+
+    for ( var i = 0; i < Display.displays.length; i++ ) {
+      var display = Display.displays[i];
+
+      // Add to the list of all focusable items across Displays
+      if ( display._baseInstance ) {
+        flattenInstances( display._baseInstance, focusableInstances, focusable );
+      }
+    }
+
+    //If the focused instance was null, find the first focusable element.
+    if ( Display.focusedInstanceProperty.value === null ) {
+
+      Display.focusedInstanceProperty.value = focusableInstances[0];
+    }
+    else {
+      //Find the index of the currently focused instance, and look for the next focusable instance.
+      //TODO: this will fail horribly if the old node was removed, for instance.
+      //TODO: Will need to be generalized, etc.
+
+      var newIndex = focusableInstances.indexOf( Display.focusedInstanceProperty.value ) + deltaIndex;
+
+      //TODO: These loops probably not too smart here, may be better as math.
+      while ( newIndex < 0 ) {
+        newIndex += focusableInstances.length;
+      }
+      while ( newIndex >= focusableInstances.length ) {
+        newIndex -= focusableInstances.length;
+      }
+
+      Display.focusedInstanceProperty.value = focusableInstances[newIndex];
+    }
+  };
+
+  // Keep track of which keys are currently pressed so we know whether the shift key is down for accessibility
+  var pressedKeys = [];
+
+  // Detect focus change events, the TAB key and SHIFT-TAB
+  // Add this once per document, even if multiple displays, since this is handled statically.
+  document.onkeydown = function( event ) {
+
+    var code = event.which;
+
+    if ( pressedKeys.indexOf( code ) === -1 ) {
+      pressedKeys.push( code );
+    }
+
+    // Handle TAB key (9) or 't' key temporarily for debugging
+    var shiftPressed = pressedKeys.indexOf( 16 ) >= 0;
+    if ( code === 9 || code === 84 ) {
+
+      // Move the focus to the next item
+      // TODO: More general focus order strategy
+      var deltaIndex = shiftPressed ? -1 : +1;
+      Display.moveFocus( deltaIndex );
+    }
+  };
+
+  // Detect focus change events, the TAB key and SHIFT-TAB
+  // Add this once per document, even if multiple displays, since this is handled statically.
+  document.onkeyup = function( event ) {
+
+    var code = event.which;
+
+    // Better remove all occurences, just in case!
+    while ( true ) {
+      var index = pressedKeys.indexOf( code );
+
+      if ( index > -1 ) {
+        pressedKeys.splice( index, 1 );
+      }
+      else {
+        break;
+      }
+    }
   };
 
   return Display;
