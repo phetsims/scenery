@@ -15,6 +15,11 @@ define( function( require ) {
   var Node = require( 'SCENERY/nodes/Node' );
   var Rectangle = require( 'SCENERY/nodes/Rectangle' );
   var Display = require( 'SCENERY/display/Display' );
+  var Path = require( 'SCENERY/nodes/Path' );
+  var Shape = require( 'KITE/Shape' );
+
+  // constants
+  var cursorWidth = 20;
 
   /**
    * @constructor
@@ -27,8 +32,9 @@ define( function( require ) {
 
       lineWidth: 2
     } );
+    this.focusTriangle = new Path( new Shape().moveTo( 0, 0 ).lineTo( cursorWidth, 0 ).lineTo( cursorWidth / 2, cursorWidth / 10 * 8 ).close(), {fill: 'blue', stroke: 'black', lineWidth: 1} );
 
-    Node.call( this, {children: [this.focusRectangle]} );
+    Node.call( this, {children: [this.focusRectangle, this.focusTriangle]} );
 
     var expand = 5;
 
@@ -38,7 +44,17 @@ define( function( require ) {
       if ( focusedInstance && previousFocusedInstance ) {
         var node = focusedInstance.node;
 
+        var bounds = node.getGlobalBounds();
+
         accessibilityLayer.focusRectangle.visible = true;
+        accessibilityLayer.focusTriangle.visible = true;
+
+        var targetBounds = {
+          x: bounds.left - expand,
+          y: bounds.top - expand,
+          width: bounds.width + expand * 2,
+          height: bounds.height + expand * 2
+        };
 
         // For accessibility animation, scenery requires the TWEEN.js library
         new TWEEN.Tween( {
@@ -46,28 +62,40 @@ define( function( require ) {
           y: accessibilityLayer.focusRectangle.getRectY(),
           width: accessibilityLayer.focusRectangle.getRectWidth(),
           height: accessibilityLayer.focusRectangle.getRectHeight()
-        } ).to( {
-            x: node.left - expand,
-            y: node.top - expand,
-            width: node.width + expand * 2,
-            height: node.height + expand * 2
-          }, 300 ).
+        } ).to( targetBounds, 300 ).
           easing( TWEEN.Easing.Cubic.InOut ).
           onUpdate( function() {
             accessibilityLayer.focusRectangle.setRect( this.x, this.y, this.width, this.height, 10, 10 );
+            accessibilityLayer.focusTriangle.bottom = this.y;
+            accessibilityLayer.focusTriangle.centerX = this.x + this.width / 2;
           } ).
           start();
       }
 
       // Show the focus, when there was no focus node before.
       else if ( focusedInstance ) {
+
+        var b = focusedInstance.node.getGlobalBounds();
+
+        var newTargetBounds = {
+          x: b.left - expand,
+          y: b.top - expand,
+          width: b.width + expand * 2,
+          height: b.height + expand * 2
+        };
+
         accessibilityLayer.focusRectangle.visible = true;
-        accessibilityLayer.focusRectangle.setRect( focusedInstance.node.left - expand, focusedInstance.node.top - expand, focusedInstance.node.width + expand * 2, focusedInstance.node.height + expand * 2, 10, 10 );
+        accessibilityLayer.focusTriangle.visible = true;
+        accessibilityLayer.focusRectangle.setRect( newTargetBounds.x, newTargetBounds.y, newTargetBounds.width, newTargetBounds.height, 10, 10 );
+
+        accessibilityLayer.focusTriangle.bottom = newTargetBounds.y;
+        accessibilityLayer.focusTriangle.centerX = newTargetBounds.x + newTargetBounds.width / 2;
       }
 
       // No focused node.
       else {
         accessibilityLayer.focusRectangle.visible = false;
+        accessibilityLayer.focusTriangle.visible = false;
       }
     } );
   }

@@ -78,6 +78,7 @@ define( function( require ) {
    * touchArea:        Shape (in local coordinate frame) that overrides the 'hit area' for touch input.
    * clipArea:         Shape (in local coordinate frame) that causes any graphics outside of the shape to be invisible (for the node and any children).
    * transformBounds:  Whether to compute tighter parent bounding boxes for rotated bounding boxes, or to just use the bounding box of the rotated bounding box.
+   * focusable:        True if the node should be able to receive keyboard focus.
    */
   scenery.Node = function Node( options ) {
     var self = this;
@@ -2444,7 +2445,7 @@ define( function( require ) {
     'children', 'cursor', 'visible', 'pickable', 'opacity', 'matrix', 'translation', 'x', 'y', 'rotation', 'scale',
     'leftTop', 'centerTop', 'rightTop', 'leftCenter', 'center', 'rightCenter', 'leftBottom', 'centerBottom', 'rightBottom',
     'left', 'right', 'top', 'bottom', 'centerX', 'centerY', 'renderer', 'rendererOptions',
-    'layerSplit', 'usesOpacity', 'mouseArea', 'touchArea', 'clipArea', 'transformBounds'
+    'layerSplit', 'usesOpacity', 'mouseArea', 'touchArea', 'clipArea', 'transformBounds', 'focusable'
   ];
 
   return Node;
