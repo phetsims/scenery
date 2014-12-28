@@ -46,7 +46,6 @@ define( function( require ) {
   var inherit = require( 'PHET_CORE/inherit' );
   var extend = require( 'PHET_CORE/extend' );
   var Events = require( 'AXON/Events' );
-  var Property = require( 'AXON/Property' );
   var Dimension2 = require( 'DOT/Dimension2' );
   var Vector2 = require( 'DOT/Vector2' );
   var Matrix3 = require( 'DOT/Matrix3' );
@@ -1058,117 +1057,9 @@ define( function( require ) {
     return div;
   };
 
-  // Since only one element can have focus, Scenery uses a static element to track node focus.  That is, even
-  // if there are multiple Displays, only one Node (across all displays) will have focus in this frame.
-  Display.focusedInstanceProperty = new Property( null );
-
-  /**
-   * Adds the entire list of instances from the parent instance into the list.  List is modified, and returned.
-   * This is very expensive (linear in the size of the scene graph), so use sparingly.  Currently used for focus
-   * traversal.
-   * @param instance
-   * @param list
-   * @param predicate
-   */
-  var flattenInstances = function( instance, list, predicate ) {
-    if ( predicate( instance ) ) {
-      list.push( instance );
-    }
-    for ( var i = 0; i < instance.children.length; i++ ) {
-      flattenInstances( instance.children[i], list, predicate );
-    }
-    return list;
-  };
-
   // Static list of all known displays that have been instantiated.
   // TODO: support for deletion of Displays.
   Display.displays = [];
-
-  // Move the focus to the next focusable element.  Called by AccessibilityLayer.
-  Display.moveFocus = function( deltaIndex ) {
-
-    var focusableInstances = [];
-    var focusable = function( instance ) {
-      return instance.node.focusable === true;
-    };
-
-    for ( var i = 0; i < Display.displays.length; i++ ) {
-      var display = Display.displays[i];
-
-      // Add to the list of all focusable items across Displays
-      if ( display._baseInstance ) {
-        flattenInstances( display._baseInstance, focusableInstances, focusable );
-      }
-    }
-
-    //If the focused instance was null, find the first focusable element.
-    if ( Display.focusedInstanceProperty.value === null ) {
-
-      Display.focusedInstanceProperty.value = focusableInstances[0];
-    }
-    else {
-      //Find the index of the currently focused instance, and look for the next focusable instance.
-      //TODO: this will fail horribly if the old node was removed, for instance.
-      //TODO: Will need to be generalized, etc.
-
-      var newIndex = focusableInstances.indexOf( Display.focusedInstanceProperty.value ) + deltaIndex;
-
-      //TODO: These loops probably not too smart here, may be better as math.
-      while ( newIndex < 0 ) {
-        newIndex += focusableInstances.length;
-      }
-      while ( newIndex >= focusableInstances.length ) {
-        newIndex -= focusableInstances.length;
-      }
-
-      Display.focusedInstanceProperty.value = focusableInstances[newIndex];
-    }
-  };
-
-  // Keep track of which keys are currently pressed so we know whether the shift key is down for accessibility
-  var pressedKeys = [];
-
-  // Detect focus change events, the TAB key and SHIFT-TAB
-  // Add this once per document, even if multiple displays, since this is handled statically.
-  // TODO: Make sure this strategy plays nicely with Scenery's handling of key events through the Input.js system
-  // TODO: (if there is one?)
-  document.onkeydown = function( event ) {
-
-    var code = event.which;
-
-    if ( pressedKeys.indexOf( code ) === -1 ) {
-      pressedKeys.push( code );
-    }
-
-    // Handle TAB key (9) or 't' key temporarily for debugging
-    var shiftPressed = pressedKeys.indexOf( 16 ) >= 0;
-    if ( code === 9 || code === 84 ) {
-
-      // Move the focus to the next item
-      // TODO: More general focus order strategy
-      var deltaIndex = shiftPressed ? -1 : +1;
-      Display.moveFocus( deltaIndex );
-    }
-  };
-
-  // Detect focus change events, the TAB key and SHIFT-TAB
-  // Add this once per document, even if multiple displays, since this is handled statically.
-  document.onkeyup = function( event ) {
-
-    var code = event.which;
-
-    // Better remove all occurences, just in case!
-    while ( true ) {
-      var index = pressedKeys.indexOf( code );
-
-      if ( index > -1 ) {
-        pressedKeys.splice( index, 1 );
-      }
-      else {
-        break;
-      }
-    }
-  };
 
   return Display;
 } );

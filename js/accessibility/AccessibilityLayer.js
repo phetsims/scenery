@@ -14,7 +14,7 @@ define( function( require ) {
   var inherit = require( 'PHET_CORE/inherit' );
   var Node = require( 'SCENERY/nodes/Node' );
   var Rectangle = require( 'SCENERY/nodes/Rectangle' );
-  var Display = require( 'SCENERY/display/Display' );
+  var Input = require( 'SCENERY/input/Input' );
   var Path = require( 'SCENERY/nodes/Path' );
   var Shape = require( 'KITE/Shape' );
 
@@ -38,7 +38,7 @@ define( function( require ) {
 
     var expand = 5;
 
-    Display.focusedInstanceProperty.link( function( focusedInstance, previousFocusedInstance ) {
+    Input.focusedInstanceProperty.link( function( focusedInstance, previousFocusedInstance ) {
 
       // Animate the focus to a new node
       if ( focusedInstance && previousFocusedInstance ) {

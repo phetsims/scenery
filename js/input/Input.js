@@ -34,6 +34,7 @@ define( function( require ) {
   require( 'SCENERY/input/Event' );
   require( 'SCENERY/input/Key' );
   var BatchedDOMEvent = require( 'SCENERY/input/BatchedDOMEvent' );
+  var Property = require( 'AXON/Property' );
 
   // listenerTarget is the DOM node (window/document/element) to which DOM event listeners will be attached
   scenery.Input = function Input( rootNode, listenerTarget, batchDOMEvents, enablePointerEvents, pointFromEvent ) {
@@ -311,7 +312,7 @@ define( function( require ) {
       var key = new scenery.Key( event );
       this.addPointer( key );
 
-      var focusedInstance = scenery.Display.focusedInstanceProperty.value;
+      var focusedInstance = scenery.Input.focusedInstanceProperty.value;
       if ( focusedInstance ) {
         var trail = focusedInstance.node.getUniqueTrail();//TODO: Is this right?
 
@@ -325,7 +326,7 @@ define( function( require ) {
       var key = this.findKeyByEvent( event );
       if ( key ) {
         this.removePointer( key );
-        var focusedInstance = scenery.Display.focusedInstanceProperty.value;
+        var focusedInstance = scenery.Input.focusedInstanceProperty.value;
         if ( focusedInstance ) {
           var trail = focusedInstance.node.getUniqueTrail();//TODO: Is this right?
           this.dispatchEvent( trail, 'up', key, event, true );
@@ -806,6 +807,115 @@ define( function( require ) {
     }
     else {
       return evt.pointerType; // hope for the best
+    }
+  };
+
+  // Since only one element can have focus, Scenery uses a static element to track node focus.  That is, even
+  // if there are multiple Displays, only one Node (across all displays) will have focus in this frame.
+  Input.focusedInstanceProperty = new Property( null );
+
+  /**
+   * Adds the entire list of instances from the parent instance into the list.  List is modified, and returned.
+   * This is very expensive (linear in the size of the scene graph), so use sparingly.  Currently used for focus
+   * traversal.
+   * @param instance
+   * @param list
+   * @param predicate
+   */
+  var flattenInstances = function( instance, list, predicate ) {
+    if ( predicate( instance ) ) {
+      list.push( instance );
+    }
+    for ( var i = 0; i < instance.children.length; i++ ) {
+      flattenInstances( instance.children[i], list, predicate );
+    }
+    return list;
+  };
+
+  // Move the focus to the next focusable element.  Called by AccessibilityLayer.
+  Input.moveFocus = function( deltaIndex ) {
+
+    var focusableInstances = [];
+    var focusable = function( instance ) {
+      return instance.node.focusable === true;
+    };
+
+    var Display = scenery.Display;//TODO: move to a traditional require statement (though may be cyclic)
+    for ( var i = 0; i < Display.displays.length; i++ ) {
+      var display = Display.displays[i];
+
+      // Add to the list of all focusable items across Displays
+      if ( display._baseInstance ) {
+        flattenInstances( display._baseInstance, focusableInstances, focusable );
+      }
+    }
+
+    //If the focused instance was null, find the first focusable element.
+    if ( Input.focusedInstanceProperty.value === null ) {
+
+      Input.focusedInstanceProperty.value = focusableInstances[0];
+    }
+    else {
+      //Find the index of the currently focused instance, and look for the next focusable instance.
+      //TODO: this will fail horribly if the old node was removed, for instance.
+      //TODO: Will need to be generalized, etc.
+
+      var newIndex = focusableInstances.indexOf( Input.focusedInstanceProperty.value ) + deltaIndex;
+
+      //TODO: These loops probably not too smart here, may be better as math.
+      while ( newIndex < 0 ) {
+        newIndex += focusableInstances.length;
+      }
+      while ( newIndex >= focusableInstances.length ) {
+        newIndex -= focusableInstances.length;
+      }
+
+      Input.focusedInstanceProperty.value = focusableInstances[newIndex];
+    }
+  };
+
+  // Keep track of which keys are currently pressed so we know whether the shift key is down for accessibility
+  var pressedKeys = [];
+
+  // Detect focus change events, the TAB key and SHIFT-TAB
+  // Add this once per document, even if multiple displays, since this is handled statically.
+  // TODO: Make sure this strategy plays nicely with Scenery's handling of key events through the Input.js system
+  // TODO: (if there is one?)
+  document.onkeydown = function( event ) {
+
+    var code = event.which;
+
+    if ( pressedKeys.indexOf( code ) === -1 ) {
+      pressedKeys.push( code );
+    }
+
+    // Handle TAB key (9) or 't' key temporarily for debugging
+    var shiftPressed = pressedKeys.indexOf( 16 ) >= 0;
+    if ( code === 9 || code === 84 ) {
+
+      // Move the focus to the next item
+      // TODO: More general focus order strategy
+      var deltaIndex = shiftPressed ? -1 : +1;
+      Input.moveFocus( deltaIndex );
+    }
+  };
+
+  // Detect focus change events, the TAB key and SHIFT-TAB
+  // Add this once per document, even if multiple displays, since this is handled statically.
+  document.onkeyup = function( event ) {
+
+    var code = event.which;
+
+    // Better remove all occurences, just in case!
+    while ( true ) {
+      var index = pressedKeys.indexOf( code );
+
+      if ( index > -1 ) {
+        pressedKeys.splice( index, 1 );
+      }
+      else {
+        break;
+      }
     }
   };
 
