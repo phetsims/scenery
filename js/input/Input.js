@@ -32,6 +32,7 @@ define( function( require ) {
   require( 'SCENERY/input/Touch' );
   require( 'SCENERY/input/Pen' );
   require( 'SCENERY/input/Event' );
+  require( 'SCENERY/input/Key' );
   var BatchedDOMEvent = require( 'SCENERY/input/BatchedDOMEvent' );
 
   // listenerTarget is the DOM node (window/document/element) to which DOM event listeners will be attached
@@ -84,6 +85,8 @@ define( function( require ) {
     this.onmousemove = function onmousemove( domEvent ) { input.batchEvent( domEvent, BatchedDOMEvent.MOUSE_TYPE, input.mouseMove, false ); };
     this.onmouseover = function onmouseover( domEvent ) { input.batchEvent( domEvent, BatchedDOMEvent.MOUSE_TYPE, input.mouseOver, false ); };
     this.onmouseout = function onmouseout( domEvent ) { input.batchEvent( domEvent, BatchedDOMEvent.MOUSE_TYPE, input.mouseOut, false ); };
+    this.onkeydown = function onkeydown( domEvent ) { input.batchEvent( domEvent, BatchedDOMEvent.KEY_TYPE, input.keyDown, false ); };
+    this.onkeyup = function onkeyup( domEvent ) { input.batchEvent( domEvent, BatchedDOMEvent.KEY_TYPE, input.keyUp, false ); };
     this.uselessListener = function uselessListener( domEvent ) {};
   };
   var Input = scenery.Input;
@@ -124,6 +127,7 @@ define( function( require ) {
     msPointerListenerTypes: [ 'MSPointerDown', 'MSPointerUp', 'MSPointerMove', 'MSPointerOver', 'MSPointerOut', 'MSPointerCancel' ],
     touchListenerTypes: [ 'touchstart', 'touchend', 'touchmove', 'touchcancel' ],
     mouseListenerTypes: [ 'mousedown', 'mouseup', 'mousemove', 'mouseover', 'mouseout' ],
+    keyListenerTypes: [ 'keydown', 'keyup' ],
 
     // W3C spec for pointer events
     canUsePointerEvents: function() {
@@ -154,6 +158,8 @@ define( function( require ) {
 
         eventTypes = this.touchListenerTypes.concat( this.mouseListenerTypes );
       }
+
+      eventTypes = eventTypes.concat( this.keyListenerTypes );
 
       return eventTypes;
     },
@@ -297,6 +303,34 @@ define( function( require ) {
       if ( !this.mouse ) { this.initMouse(); }
       this.mouse.out( point, event );
       // TODO: how to handle mouse-out (and log it)
+    },
+
+    keyDown: function( event ) {
+      sceneryLog && sceneryLog.Input && sceneryLog.Input( 'keyDown(' + Input.debugKeyEvent( event ) + ');' );
+      if ( this.logEvents ) { this.eventLog.push( 'keyDown(' + Input.serializeDomEvent( event ) + ');' ); }
+      var key = new scenery.Key( event );
+      this.addPointer( key );
+
+      var focusedInstance = scenery.Display.focusedInstanceProperty.value;
+      if ( focusedInstance ) {
+        var trail = focusedInstance.node.getUniqueTrail();//TODO: Is this right?
+
+        this.dispatchEvent( trail, 'down', key, event, true );
+      }
+    },
+
+    keyUp: function( event ) {
+      sceneryLog && sceneryLog.Input && sceneryLog.Input( 'keyUp(' + Input.debugKeyEvent( event ) + ');' );
+      if ( this.logEvents ) { this.eventLog.push( 'keyUp(' + Input.serializeDomEvent( event ) + ');' ); }
+      var key = this.findKeyByEvent( event );
+      if ( key ) {
+        this.removePointer( key );
+        var focusedInstance = scenery.Display.focusedInstanceProperty.value;
+        if ( focusedInstance ) {
+          var trail = focusedInstance.node.getUniqueTrail();//TODO: Is this right?
+          this.dispatchEvent( trail, 'up', key, event, true );
+        }
+      }
     },
 
     // called for each touch point
@@ -749,6 +783,10 @@ define( function( require ) {
 
   Input.serializeVector2 = function( vector ) {
     return 'dot(' + vector.x + ',' + vector.y + ')';
+  };
+
+  Input.debugKeyEvent = function( domEvent ) {
+    return domEvent.timeStamp + ' ' + domEvent.type;
   };
 
   Input.debugText = function( vector, domEvent ) {
