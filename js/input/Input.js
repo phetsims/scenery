@@ -309,6 +309,26 @@ define( function( require ) {
     keyDown: function( event ) {
       sceneryLog && sceneryLog.Input && sceneryLog.Input( 'keyDown(' + Input.debugKeyEvent( event ) + ');' );
       if ( this.logEvents ) { this.eventLog.push( 'keyDown(' + Input.serializeDomEvent( event ) + ');' ); }
+
+      var code = event.which;
+
+      if ( pressedKeys.indexOf( code ) === -1 ) {
+        pressedKeys.push( code );
+      }
+
+      // Handle TAB key (9) or 't' key temporarily for debugging
+      var shiftPressed = pressedKeys.indexOf( 16 ) >= 0;
+      if ( code === 9 || code === 84 ) {
+
+        // Move the focus to the next item
+        // TODO: More general focus order strategy
+        var deltaIndex = shiftPressed ? -1 : +1;
+        Input.moveFocus( deltaIndex );
+
+        //TODO: Moving focus first then dispatching to focused node means newly focused node gets a fresh TAB event
+        //TODO: That is probably undesirable
+      }
+
       var key = new scenery.Key( event );
       this.addPointer( key );
 
@@ -323,6 +343,21 @@ define( function( require ) {
     keyUp: function( event ) {
       sceneryLog && sceneryLog.Input && sceneryLog.Input( 'keyUp(' + Input.debugKeyEvent( event ) + ');' );
       if ( this.logEvents ) { this.eventLog.push( 'keyUp(' + Input.serializeDomEvent( event ) + ');' ); }
+
+      var code = event.which;
+
+      // Better remove all occurences, just in case!
+      while ( true ) {
+        var index = pressedKeys.indexOf( code );
+
+        if ( index > -1 ) {
+          pressedKeys.splice( index, 1 );
+        }
+        else {
+          break;
+        }
+      }
+
       var key = this.findKeyByEvent( event );
       if ( key ) {
         this.removePointer( key );
@@ -875,49 +910,9 @@ define( function( require ) {
   };
 
   // Keep track of which keys are currently pressed so we know whether the shift key is down for accessibility
+  // TODO: this effort is duplicated with this.pointers (which also covers different things)
+  // TODO: Should they be coalesced?
   var pressedKeys = [];
-
-  // Detect focus change events, the TAB key and SHIFT-TAB
-  // Add this once per document, even if multiple displays, since this is handled statically.
-  // TODO: Make sure this strategy plays nicely with Scenery's handling of key events through the Input.js system
-  // TODO: (if there is one?)
-  document.onkeydown = function( event ) {
-
-    var code = event.which;
-
-    if ( pressedKeys.indexOf( code ) === -1 ) {
-      pressedKeys.push( code );
-    }
-
-    // Handle TAB key (9) or 't' key temporarily for debugging
-    var shiftPressed = pressedKeys.indexOf( 16 ) >= 0;
-    if ( code === 9 || code === 84 ) {
-
-      // Move the focus to the next item
-      // TODO: More general focus order strategy
-      var deltaIndex = shiftPressed ? -1 : +1;
-      Input.moveFocus( deltaIndex );
-    }
-  };
-
-  // Detect focus change events, the TAB key and SHIFT-TAB
-  // Add this once per document, even if multiple displays, since this is handled statically.
-  document.onkeyup = function( event ) {
-
-    var code = event.which;
-
-    // Better remove all occurences, just in case!
-    while ( true ) {
-      var index = pressedKeys.indexOf( code );
-
-      if ( index > -1 ) {
-        pressedKeys.splice( index, 1 );
-      }
-      else {
-        break;
-      }
-    }
-  };
 
   return Input;
 } );
