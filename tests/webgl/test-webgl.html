@@ -34,8 +34,8 @@
 <script>
 
   document.onready = function() {
-    require( ["../js/display/webgl/TestWebGL"], function( TestWebGL ) {
-      var testWebGL = new TestWebGL();
+    require( ["../js/display/webgl/WebGLRenderer"], function( WebGLRenderer ) {
+      var webGLRenderer = new WebGLRenderer();
 
       var rectangles = [];
       var stars = [];
@@ -43,18 +43,18 @@
       var addRectangle = function() {
         var x = (Math.random() * 2 - 1) * 0.9;
         var y = (Math.random() * 2 - 1) * 0.9;
-        rectangles.push( testWebGL.triangleSystem.createRectangle( x, y, 0.02, 0.02, x, y, 1, 1 ) );
+        rectangles.push( webGLRenderer.triangleSystem.createRectangle( x, y, 0.02, 0.02, x, y, 1, 1 ) );
       };
 
       var addStar = function() {
         var x = (Math.random() * 2 - 1) * 0.9;
         var y = (Math.random() * 2 - 1) * 0.9;
         var scale = Math.random() * 0.2;
-        var star = testWebGL.triangleSystem.createStar( x, y, 0.15 * scale, 0.4 * scale, Math.PI + Math.random() * Math.PI * 2, Math.random(), Math.random(), Math.random(), 1 );
+        var star = webGLRenderer.triangleSystem.createStar( x, y, 0.15 * scale, 0.4 * scale, Math.PI + Math.random() * Math.PI * 2, Math.random(), Math.random(), Math.random(), 1 );
         stars.push( star );
       };
 
-      testWebGL.events.on( 'step', function() {
+      webGLRenderer.events.on( 'step', function() {
 
         // Show one oscillation per second so it is easy to count time
         var x = 0.2 * Math.cos( Date.now() / 1000 * 2 * Math.PI );
@@ -68,7 +68,7 @@
           star.setStar( star.initialState._x, star.initialState._y, star.initialState._innerRadius, star.initialState._outerRadius, star.initialState._totalAngle + Date.now() / 1000 );
         }
       } );
-      testWebGL.start();
+      webGLRenderer.start();
 
       document.getElementById( 'add-rectangle' ).onclick = function() {
         for ( var i = 0; i < 1; i++ ) {
@@ -76,8 +76,8 @@
         }
 
         // When the number of vertices changes, rebind the buffer.
-        testWebGL.bindVertexBuffer();
-        testWebGL.bindColorBuffer();
+        webGLRenderer.bindVertexBuffer();
+        webGLRenderer.bindColorBuffer();
       };
 
       var numRectangles = 500;
@@ -90,8 +90,8 @@
         addStar();
       }
 
-      testWebGL.bindVertexBuffer();
-      testWebGL.bindColorBuffer();
+      webGLRenderer.bindVertexBuffer();
+      webGLRenderer.bindColorBuffer();
     } );
   };
 

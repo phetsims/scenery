@@ -24,7 +24,7 @@ define( function( require ) {
    *
    * @constructor
    */
-  function TestWebGL() {
+  function WebGLRenderer() {
 
     this.events = new Events();
 
@@ -112,7 +112,7 @@ define( function( require ) {
     this.boundAnimate = this.animate.bind( this );
   }
 
-  return inherit( Object, TestWebGL, {
+  return inherit( Object, WebGLRenderer, {
 
     /**
      * Create a mrdoob stats instance which can be used to profile the simulation.
