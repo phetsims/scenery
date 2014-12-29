@@ -19,7 +19,7 @@ define( function( require ) {
    *
    * @constructor
    */
-  function ColorModule( gl, backingScale, canvas ) {
+  function TextureModule( gl, backingScale, canvas ) {
     this.gl = gl;
     this.canvas = canvas;
 
@@ -38,24 +38,25 @@ define( function( require ) {
       return shader;
     };
 
-    this.colorShaderProgram = gl.createProgram();
-    gl.attachShader( this.colorShaderProgram, toShader( colorVertexShader, gl.VERTEX_SHADER, "VERTEX" ) );
-    gl.attachShader( this.colorShaderProgram, toShader( colorFragmentShader, gl.FRAGMENT_SHADER, "FRAGMENT" ) );
-    gl.linkProgram( this.colorShaderProgram );
+    var colorShaderProgram = gl.createProgram();
+    gl.attachShader( colorShaderProgram, toShader( colorVertexShader, gl.VERTEX_SHADER, "VERTEX" ) );
+    gl.attachShader( colorShaderProgram, toShader( colorFragmentShader, gl.FRAGMENT_SHADER, "FRAGMENT" ) );
+    gl.linkProgram( colorShaderProgram );
 
-    this.positionAttribLocation = gl.getAttribLocation( this.colorShaderProgram, 'aPosition' );
-    this.colorAttributeLocation = gl.getAttribLocation( this.colorShaderProgram, 'aVertexColor' );
+    this.positionAttribLocation = gl.getAttribLocation( colorShaderProgram, 'aPosition' );
+    this.colorAttributeLocation = gl.getAttribLocation( colorShaderProgram, 'aVertexColor' );
 
     gl.enableVertexAttribArray( this.positionAttribLocation );
     gl.enableVertexAttribArray( this.colorAttributeLocation );
-    gl.useProgram( this.colorShaderProgram );
+    gl.useProgram( colorShaderProgram );
 
     // set the resolution
-    var resolutionLocation = gl.getUniformLocation( this.colorShaderProgram, 'uResolution' );
+    var resolutionLocation = gl.getUniformLocation( colorShaderProgram, 'uResolution' );
 
     //TODO: This backing scale multiply seems very buggy and contradicts everything we know!
     // Still, it gives the right behavior on iPad3 and OSX (non-retina).  Should be discussed and investigated.
     gl.uniform2f( resolutionLocation, canvas.width / backingScale, canvas.height / backingScale );
+
 
     this.vertexBuffer = gl.createBuffer();
     this.bindVertexBuffer();
@@ -67,7 +68,7 @@ define( function( require ) {
     gl.clearColor( 0.0, 0.0, 0.0, 0.0 );
   }
 
-  return inherit( Object, ColorModule, {
+  return inherit( Object, TextureModule, {
     draw: function() {
 
       var gl = this.gl;

@@ -15,6 +15,7 @@ define( function( require ) {
   var Events = require( 'AXON/Events' );
   var Util = require( 'SCENERY/util/Util' );
   var ColorModule = require( 'SCENERY/display/webgl/ColorModule' );
+  var TextureModule = require( 'SCENERY/display/webgl/TextureModule' );
 
   /**
    *
@@ -58,6 +59,7 @@ define( function( require ) {
     this.canvas.height = window.innerHeight * devicePixelRatio;
 
     this.colorModule = new ColorModule( gl, backingScale, this.canvas );
+    this.textureModule = new TextureModule( gl, backingScale, this.canvas );
 
     this.boundAnimate = this.animate.bind( this );
   }
@@ -105,12 +107,17 @@ define( function( require ) {
       this.stats.end();
     },
     draw: function() {
+      var gl = this.gl;
+
+      gl.viewport( 0.0, 0.0, this.canvas.width, this.canvas.height );
+      gl.clear( gl.COLOR_BUFFER_BIT );
+
       //Render program by program.
       this.colorModule.draw();
+      this.textureModule.draw();
 
-      //...
-
-      this.gl.flush();
+      //Flush after rendering complete.
+      gl.flush();
     }
   } );
 } );
