@@ -17,8 +17,10 @@ define( function( require ) {
   var Util = require( 'SCENERY/util/Util' );
 
   // shaders
-  var vertexShaderSource = require( 'text!SCENERY/display/webgl/color2d.vert' );
-  var fragmentShaderSource = require( 'text!SCENERY/display/webgl/color2d.frag' );
+  var colorVertexShader = require( 'text!SCENERY/display/webgl/color2d.vert' );
+  var colorFragmentShader = require( 'text!SCENERY/display/webgl/color2d.frag' );
+  var textureVertexShader = require( 'text!SCENERY/display/webgl/texture.vert' );
+  var textureFragmentShader = require( 'text!SCENERY/display/webgl/texture.frag' );
 
   /**
    *
@@ -72,25 +74,20 @@ define( function( require ) {
       return shader;
     };
 
-    var vertexShader = toShader( vertexShaderSource, gl.VERTEX_SHADER, "VERTEX" );
-    var fragmentShader = toShader( fragmentShaderSource, gl.FRAGMENT_SHADER, "FRAGMENT" );
+    var colorShaderProgram = gl.createProgram();
+    gl.attachShader( colorShaderProgram, toShader( colorVertexShader, gl.VERTEX_SHADER, "VERTEX" ) );
+    gl.attachShader( colorShaderProgram, toShader( colorFragmentShader, gl.FRAGMENT_SHADER, "FRAGMENT" ) );
+    gl.linkProgram( colorShaderProgram );
 
-    var shaderProgram = gl.createProgram();
-    gl.attachShader( shaderProgram, vertexShader );
-    gl.attachShader( shaderProgram, fragmentShader );
-
-    gl.linkProgram( shaderProgram );
-
-    this.positionAttribLocation = gl.getAttribLocation( shaderProgram, 'aPosition' );
-    this.colorAttributeLocation = gl.getAttribLocation( shaderProgram, 'aVertexColor' );
+    this.positionAttribLocation = gl.getAttribLocation( colorShaderProgram, 'aPosition' );
+    this.colorAttributeLocation = gl.getAttribLocation( colorShaderProgram, 'aVertexColor' );
 
     gl.enableVertexAttribArray( this.positionAttribLocation );
     gl.enableVertexAttribArray( this.colorAttributeLocation );
-
-    gl.useProgram( shaderProgram );
+    gl.useProgram( colorShaderProgram );
 
     // set the resolution
-    var resolutionLocation = gl.getUniformLocation( shaderProgram, 'uResolution' );
+    var resolutionLocation = gl.getUniformLocation( colorShaderProgram, 'uResolution' );
 
     //TODO: This backing scale multiply seems very buggy and contradicts everything we know!
     // Still, it gives the right behavior on iPad3 and OSX (non-retina).  Should be discussed and investigated.
