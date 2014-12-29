@@ -41,6 +41,12 @@ define( function( require ) {
       var t1 = webGLRenderer.colorModule.triangleSystem.createFromTriangle( 100, 100, 200, 100, 150, 200 );
       var t2 = webGLRenderer.colorModule.triangleSystem.createFromTriangle( 100, 100, 200, 100, 150, 200 );
       var t3 = webGLRenderer.colorModule.triangleSystem.createFromTriangle( 100, 200, 200, 200, 150, 300 );
+
+      //Show something from another module
+      webGLRenderer.textureModule.triangleSystem.createFromRectangle( new Rectangle( 0, 0, 1024 / 2, 1024 / 2, {fill: 'black'} ) );
+      webGLRenderer.textureModule.bindVertexBuffer();
+      webGLRenderer.textureModule.bindColorBuffer();
+
       webGLRenderer.colorModule.bindVertexBuffer();
       webGLRenderer.colorModule.bindColorBuffer();
 
@@ -57,6 +63,7 @@ define( function( require ) {
         webGLRenderer.colorModule.updateTriangleBuffer( t2 );
         webGLRenderer.colorModule.updateTriangleBuffer( rectangleGeometry );
       } );
+
 
       console.log( 'total triangles', webGLRenderer.colorModule.triangleSystem.vertexArray.length / 3 );
 
