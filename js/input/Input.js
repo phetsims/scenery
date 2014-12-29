@@ -39,6 +39,7 @@ define( function( require ) {
   // constants
   var KEY_COMMAND = 91;
   var KEY_R = 82;
+  var KEY_F5 = 116;
 
   // listenerTarget is the DOM node (window/document/element) to which DOM event listeners will be attached
   scenery.Input = function Input( rootNode, listenerTarget, batchDOMEvents, enablePointerEvents, pointFromEvent ) {
@@ -106,11 +107,14 @@ define( function( require ) {
         //OHTWO TODO: update the display
       }
 
-//      console.log( domEvent.which, pressedKeys );
+      console.log( domEvent.which, pressedKeys );
 
       //Check for CMD+R for refresh
       if ( isPressed( KEY_COMMAND ) && domEvent.which === KEY_R ) {
         // Suppress preventDefault, so that CMD+R refresh command will propagate to the browser, see #332
+      }
+      else if ( domEvent.which === KEY_F5 ) {
+        // Allow F5 refresh to go to the browser
       }
       else {
         domEvent.preventDefault();
