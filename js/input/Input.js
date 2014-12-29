@@ -941,5 +941,9 @@ define( function( require ) {
     return pressedKeys.indexOf( keyCode ) >= 0;
   };
 
+  // Export some key codes for reuse in listeners.
+  Input.KEY_SPACE = 32;
+  Input.KEY_ENTER = 13;
+
   return Input;
 } );
