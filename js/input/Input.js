@@ -883,9 +883,9 @@ define( function( require ) {
     return list;
   };
 
-  // Move the focus to the next focusable element.  Called by AccessibilityLayer.
-  Input.moveFocus = function( deltaIndex ) {
+  Input.focusableInstances = [];
 
+  Input.getAllFocusableInstances = function() {
     var focusableInstances = [];
     var focusable = function( instance ) {
       return instance.node.focusable === true;
@@ -900,6 +900,13 @@ define( function( require ) {
         flattenInstances( display._baseInstance, focusableInstances, focusable );
       }
     }
+    return focusableInstances;
+  };
+
+  // Move the focus to the next focusable element.  Called by AccessibilityLayer.
+  Input.moveFocus = function( deltaIndex ) {
+
+    var focusableInstances = Input.focusableInstances || [];
 
     //If the focused instance was null, find the first focusable element.
     if ( Input.focusedInstanceProperty.value === null ) {
@@ -911,7 +918,9 @@ define( function( require ) {
       //TODO: this will fail horribly if the old node was removed, for instance.
       //TODO: Will need to be generalized, etc.
 
-      var newIndex = focusableInstances.indexOf( Input.focusedInstanceProperty.value ) + deltaIndex;
+      var currentlyFocusedInstance = focusableInstances.indexOf( Input.focusedInstanceProperty.value );
+      var newIndex = currentlyFocusedInstance + deltaIndex;
+//      console.log( currentlyFocusedInstance, deltaIndex, newIndex, focusableInstances );
 
       //TODO: These loops probably not too smart here, may be better as math.
       while ( newIndex < 0 ) {
@@ -922,6 +931,9 @@ define( function( require ) {
       }
 
       Input.focusedInstanceProperty.value = focusableInstances[newIndex];
+
+      var computedIndex = focusableInstances.indexOf( Input.focusedInstanceProperty.value );
+      console.log( 'computed', computedIndex );
     }
   };
 
