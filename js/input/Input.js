@@ -36,6 +36,10 @@ define( function( require ) {
   var BatchedDOMEvent = require( 'SCENERY/input/BatchedDOMEvent' );
   var Property = require( 'AXON/Property' );
 
+  // constants
+  var KEY_COMMAND = 91;
+  var KEY_R = 82;
+
   // listenerTarget is the DOM node (window/document/element) to which DOM event listeners will be attached
   scenery.Input = function Input( rootNode, listenerTarget, batchDOMEvents, enablePointerEvents, pointFromEvent ) {
     this.rootNode = rootNode;
@@ -102,7 +106,15 @@ define( function( require ) {
         //OHTWO TODO: update the display
       }
 
-      domEvent.preventDefault();
+//      console.log( domEvent.which, pressedKeys );
+
+      //Check for CMD+R for refresh
+      if ( isPressed( KEY_COMMAND ) && domEvent.which === KEY_R ) {
+        // Suppress preventDefault, so that CMD+R refresh command will propagate to the browser, see #332
+      }
+      else {
+        domEvent.preventDefault();
+      }
     },
 
     fireBatchedEvents: function() {
@@ -913,6 +925,15 @@ define( function( require ) {
   // TODO: this effort is duplicated with this.pointers (which also covers different things)
   // TODO: Should they be coalesced?
   var pressedKeys = [];
+
+  /**
+   * Check to see if the specified key code is currently pressed.
+   * @param keyCode
+   * @returns {boolean}
+   */
+  var isPressed = function( keyCode ) {
+    return pressedKeys.indexOf( keyCode ) >= 0;
+  };
 
   return Input;
 } );
