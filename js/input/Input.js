@@ -36,11 +36,6 @@ define( function( require ) {
   var BatchedDOMEvent = require( 'SCENERY/input/BatchedDOMEvent' );
   var Property = require( 'AXON/Property' );
 
-  // constants
-  var KEY_COMMAND = 91;
-  var KEY_R = 82;
-  var KEY_F5 = 116;
-
   // listenerTarget is the DOM node (window/document/element) to which DOM event listeners will be attached
   scenery.Input = function Input( rootNode, listenerTarget, batchDOMEvents, enablePointerEvents, pointFromEvent ) {
     this.rootNode = rootNode;
@@ -931,15 +926,6 @@ define( function( require ) {
   // TODO: this effort is duplicated with this.pointers (which also covers different things)
   // TODO: Should they be coalesced?
   var pressedKeys = [];
-
-  /**
-   * Check to see if the specified key code is currently pressed.
-   * @param keyCode
-   * @returns {boolean}
-   */
-  var isPressed = function( keyCode ) {
-    return pressedKeys.indexOf( keyCode ) >= 0;
-  };
 
   // Export some key codes for reuse in listeners.
   Input.KEY_SPACE = 32;
