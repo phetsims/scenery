@@ -107,16 +107,9 @@ define( function( require ) {
         //OHTWO TODO: update the display
       }
 
-//      console.log( domEvent.which, pressedKeys );
-
-      //Check for CMD+R for refresh
-      if ( isPressed( KEY_COMMAND ) && domEvent.which === KEY_R ) {
-        // Suppress preventDefault, so that CMD+R refresh command will propagate to the browser, see #332
-      }
-      else if ( domEvent.which === KEY_F5 ) {
-        // Allow F5 refresh to go to the browser
-      }
-      else {
+      // Don't preventDefault for key events, which often need to be handled by the browser
+      // (such as F5, CMD+R, CMD+OPTION+J, etc), see #332
+      if ( batchType !== BatchedDOMEvent.KEY_TYPE ) {
         domEvent.preventDefault();
       }
     },
@@ -931,9 +924,6 @@ define( function( require ) {
       }
 
       Input.focusedInstanceProperty.value = focusableInstances[newIndex];
-
-      var computedIndex = focusableInstances.indexOf( Input.focusedInstanceProperty.value );
-      console.log( 'computed', computedIndex );
     }
   };
 
