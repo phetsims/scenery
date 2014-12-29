@@ -107,7 +107,7 @@ define( function( require ) {
         //OHTWO TODO: update the display
       }
 
-      console.log( domEvent.which, pressedKeys );
+//      console.log( domEvent.which, pressedKeys );
 
       //Check for CMD+R for refresh
       if ( isPressed( KEY_COMMAND ) && domEvent.which === KEY_R ) {
