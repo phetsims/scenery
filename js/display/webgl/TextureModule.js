@@ -38,25 +38,24 @@ define( function( require ) {
       return shader;
     };
 
-    var colorShaderProgram = gl.createProgram();
-    gl.attachShader( colorShaderProgram, toShader( colorVertexShader, gl.VERTEX_SHADER, "VERTEX" ) );
-    gl.attachShader( colorShaderProgram, toShader( colorFragmentShader, gl.FRAGMENT_SHADER, "FRAGMENT" ) );
-    gl.linkProgram( colorShaderProgram );
+    this.colorShaderProgram = gl.createProgram();
+    gl.attachShader( this.colorShaderProgram, toShader( colorVertexShader, gl.VERTEX_SHADER, "VERTEX" ) );
+    gl.attachShader( this.colorShaderProgram, toShader( colorFragmentShader, gl.FRAGMENT_SHADER, "FRAGMENT" ) );
+    gl.linkProgram( this.colorShaderProgram );
 
-    this.positionAttribLocation = gl.getAttribLocation( colorShaderProgram, 'aPosition' );
-    this.colorAttributeLocation = gl.getAttribLocation( colorShaderProgram, 'aVertexColor' );
+    this.positionAttribLocation = gl.getAttribLocation( this.colorShaderProgram, 'aPosition' );
+    this.colorAttributeLocation = gl.getAttribLocation( this.colorShaderProgram, 'aVertexColor' );
 
     gl.enableVertexAttribArray( this.positionAttribLocation );
     gl.enableVertexAttribArray( this.colorAttributeLocation );
-    gl.useProgram( colorShaderProgram );
+    gl.useProgram( this.colorShaderProgram );
 
     // set the resolution
-    var resolutionLocation = gl.getUniformLocation( colorShaderProgram, 'uResolution' );
+    var resolutionLocation = gl.getUniformLocation( this.colorShaderProgram, 'uResolution' );
 
     //TODO: This backing scale multiply seems very buggy and contradicts everything we know!
     // Still, it gives the right behavior on iPad3 and OSX (non-retina).  Should be discussed and investigated.
     gl.uniform2f( resolutionLocation, canvas.width / backingScale, canvas.height / backingScale );
-
 
     this.vertexBuffer = gl.createBuffer();
     this.bindVertexBuffer();
@@ -70,8 +69,11 @@ define( function( require ) {
 
   return inherit( Object, TextureModule, {
     draw: function() {
-
       var gl = this.gl;
+
+      gl.enableVertexAttribArray( this.positionAttribLocation );
+      gl.enableVertexAttribArray( this.colorAttributeLocation );
+      gl.useProgram( this.colorShaderProgram );
 
       gl.bindBuffer( gl.ARRAY_BUFFER, this.vertexBuffer );
       gl.vertexAttribPointer( this.positionAttribLocation, 2, gl.FLOAT, false, 0, 0 );
@@ -81,6 +83,9 @@ define( function( require ) {
       gl.vertexAttribPointer( this.colorAttributeLocation, 4, gl.FLOAT, false, 0, 0 );
 
       gl.drawArrays( gl.TRIANGLES, 0, this.triangleSystem.vertexArray.length / 2 );
+
+      gl.disableVertexAttribArray( this.positionAttribLocation );
+      gl.disableVertexAttribArray( this.colorAttributeLocation );
     },
     bindVertexBuffer: function() {
       var gl = this.gl;

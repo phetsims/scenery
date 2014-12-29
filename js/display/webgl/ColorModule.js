@@ -69,8 +69,11 @@ define( function( require ) {
 
   return inherit( Object, ColorModule, {
     draw: function() {
-
       var gl = this.gl;
+
+      gl.enableVertexAttribArray( this.positionAttribLocation );
+      gl.enableVertexAttribArray( this.colorAttributeLocation );
+      gl.useProgram( this.colorShaderProgram );
 
       gl.bindBuffer( gl.ARRAY_BUFFER, this.vertexBuffer );
       gl.vertexAttribPointer( this.positionAttribLocation, 2, gl.FLOAT, false, 0, 0 );
@@ -80,6 +83,9 @@ define( function( require ) {
       gl.vertexAttribPointer( this.colorAttributeLocation, 4, gl.FLOAT, false, 0, 0 );
 
       gl.drawArrays( gl.TRIANGLES, 0, this.triangleSystem.vertexArray.length / 2 );
+
+      gl.disableVertexAttribArray( this.positionAttribLocation );
+      gl.disableVertexAttribArray( this.colorAttributeLocation );
     },
     bindVertexBuffer: function() {
       var gl = this.gl;
