@@ -22,27 +22,27 @@ define( function( require ) {
       var webGLRenderer = new WebGLRenderer();
 
       // TODO: Add a uniform matrix4 for transforming vertices to the -1,-1,1,1 rectangle
-      webGLRenderer.triangleSystem.createFromRectangle( new Rectangle( 0, 0, 1024 / 2, 100, {fill: 'red'} ) );
-      webGLRenderer.triangleSystem.createFromRectangle( new Rectangle( 100, 0, 100, 100, {fill: 'green'} ) );
+      webGLRenderer.colorModule.triangleSystem.createFromRectangle( new Rectangle( 0, 0, 1024 / 2, 100, {fill: 'red'} ) );
+      webGLRenderer.colorModule.triangleSystem.createFromRectangle( new Rectangle( 100, 0, 100, 100, {fill: 'green'} ) );
       var rectangle = new Rectangle( 200, 300, 100, 100, {fill: 'blue'} );
-      var rectangleGeometry = webGLRenderer.triangleSystem.createFromRectangle( rectangle );
-      webGLRenderer.triangleSystem.createFromPath( new Rectangle( 100, 100, 100, 100, 20, 20, {fill: 'blue'} ) );
-      webGLRenderer.triangleSystem.createFromPath( new Path( Shape.circle( 300, 300, 50 ), {fill: 'blue'} ) );
-      webGLRenderer.triangleSystem.createFromPath( new Path( Shape.circle( 600, 600, 200 ), {fill: 'red'} ) );
+      var rectangleGeometry = webGLRenderer.colorModule.triangleSystem.createFromRectangle( rectangle );
+      webGLRenderer.colorModule.triangleSystem.createFromPath( new Rectangle( 100, 100, 100, 100, 20, 20, {fill: 'blue'} ) );
+      webGLRenderer.colorModule.triangleSystem.createFromPath( new Path( Shape.circle( 300, 300, 50 ), {fill: 'blue'} ) );
+      webGLRenderer.colorModule.triangleSystem.createFromPath( new Path( Shape.circle( 600, 600, 200 ), {fill: 'red'} ) );
 
       for ( var i = 0; i < 50; i++ ) {
         var circle = Shape.circle( 600 * Math.random(), 600 * Math.random(), 50 * Math.random() );
         var path = new Path( circle, {
           fill: new Color( Math.random() * 255, Math.random() * 255, Math.random() * 255, 1 )
         } );
-        webGLRenderer.triangleSystem.createFromPath( path );
+        webGLRenderer.colorModule.triangleSystem.createFromPath( path );
       }
 
-      var t1 = webGLRenderer.triangleSystem.createFromTriangle( 100, 100, 200, 100, 150, 200 );
-      var t2 = webGLRenderer.triangleSystem.createFromTriangle( 100, 100, 200, 100, 150, 200 );
-      var t3 = webGLRenderer.triangleSystem.createFromTriangle( 100, 200, 200, 200, 150, 300 );
-      webGLRenderer.bindVertexBuffer();
-      webGLRenderer.bindColorBuffer();
+      var t1 = webGLRenderer.colorModule.triangleSystem.createFromTriangle( 100, 100, 200, 100, 150, 200 );
+      var t2 = webGLRenderer.colorModule.triangleSystem.createFromTriangle( 100, 100, 200, 100, 150, 200 );
+      var t3 = webGLRenderer.colorModule.triangleSystem.createFromTriangle( 100, 200, 200, 200, 150, 300 );
+      webGLRenderer.colorModule.bindVertexBuffer();
+      webGLRenderer.colorModule.bindColorBuffer();
 
       webGLRenderer.start();
 
@@ -54,11 +54,11 @@ define( function( require ) {
 //
         t2.setTriangle( 100 + rectX, 100, 200 + rectX, 100, 150 + rectX, 200 );
 
-        webGLRenderer.updateTriangleBuffer( t2 );
-        webGLRenderer.updateTriangleBuffer( rectangleGeometry );
+        webGLRenderer.colorModule.updateTriangleBuffer( t2 );
+        webGLRenderer.colorModule.updateTriangleBuffer( rectangleGeometry );
       } );
 
-      console.log( 'total triangles', webGLRenderer.triangleSystem.vertexArray.length / 3 );
+      console.log( 'total triangles', webGLRenderer.colorModule.triangleSystem.vertexArray.length / 3 );
 
       var image = new Image();
       image.src = "http://localhost:8080/energy-skate-park-basics/images/mountains.png";  // MUST BE SAME DOMAIN!!!
