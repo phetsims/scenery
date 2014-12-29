@@ -1,7 +1,8 @@
 //  Copyright 2002-2014, University of Colorado Boulder
 
 /**
- *
+ * ColorModule manages the program & attributes & drawing for rendering indepdent triangles.  Geometry +data provided
+ * by TriangleSystem.
  *
  * @author Sam Reid (PhET Interactive Simulations)
  */

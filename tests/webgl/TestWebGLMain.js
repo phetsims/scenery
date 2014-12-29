@@ -64,13 +64,6 @@ define( function( require ) {
         webGLRenderer.colorModule.updateTriangleBuffer( rectangleGeometry );
       } );
 
-
       console.log( 'total triangles', webGLRenderer.colorModule.triangleSystem.vertexArray.length / 3 );
-
-      var image = new Image();
-      image.src = "http://localhost:8080/energy-skate-park-basics/images/mountains.png";  // MUST BE SAME DOMAIN!!!
-      image.onload = function() {
-        console.log( 'loaded image', image.width );
-      }
     }};
 } );

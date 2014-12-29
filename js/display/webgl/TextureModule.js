@@ -12,14 +12,29 @@ define( function( require ) {
   var inherit = require( 'PHET_CORE/inherit' );
   var TriangleSystem = require( 'SCENERY/display/webgl/TriangleSystem' );
 
-  var colorVertexShader = require( 'text!SCENERY/display/webgl/color2d.vert' );
-  var colorFragmentShader = require( 'text!SCENERY/display/webgl/color2d.frag' );
+  var colorVertexShader = require( 'text!SCENERY/display/webgl/texture.vert' );
+  var colorFragmentShader = require( 'text!SCENERY/display/webgl/texture.frag' );
+
+  function setRectangle( gl, x, y, width, height ) {
+    var x1 = x;
+    var x2 = x + width;
+    var y1 = y;
+    var y2 = y + height;
+    gl.bufferData( gl.ARRAY_BUFFER, new Float32Array( [
+      x1, y1,
+      x2, y1,
+      x1, y2,
+      x1, y2,
+      x2, y1,
+      x2, y2] ), gl.STATIC_DRAW );
+  }
 
   /**
    *
    * @constructor
    */
   function TextureModule( gl, backingScale, canvas ) {
+    var textureModule = this;
     this.gl = gl;
     this.canvas = canvas;
 
@@ -39,53 +54,85 @@ define( function( require ) {
     };
 
     this.colorShaderProgram = gl.createProgram();
+    var program = this.colorShaderProgram;
     gl.attachShader( this.colorShaderProgram, toShader( colorVertexShader, gl.VERTEX_SHADER, "VERTEX" ) );
     gl.attachShader( this.colorShaderProgram, toShader( colorFragmentShader, gl.FRAGMENT_SHADER, "FRAGMENT" ) );
     gl.linkProgram( this.colorShaderProgram );
 
-    this.positionAttribLocation = gl.getAttribLocation( this.colorShaderProgram, 'aPosition' );
-    this.colorAttributeLocation = gl.getAttribLocation( this.colorShaderProgram, 'aVertexColor' );
+    // look up where the vertex data needs to go.
+    this.positionLocation = gl.getAttribLocation( program, "a_position" );
+    this.texCoordLocation = gl.getAttribLocation( program, "a_texCoord" );
 
-    gl.enableVertexAttribArray( this.positionAttribLocation );
-    gl.enableVertexAttribArray( this.colorAttributeLocation );
-    gl.useProgram( this.colorShaderProgram );
+    // provide texture coordinates for the rectangle.
+    this.texCoordBuffer = gl.createBuffer();
+    gl.bindBuffer( gl.ARRAY_BUFFER, this.texCoordBuffer );
+    gl.bufferData( gl.ARRAY_BUFFER, new Float32Array( [
+      0.0, 0.0,
+      1.0, 0.0,
+      0.0, 1.0,
+      0.0, 1.0,
+      1.0, 0.0,
+      1.0, 1.0] ), gl.STATIC_DRAW );
+    gl.enableVertexAttribArray( this.texCoordLocation );
+    gl.vertexAttribPointer( this.texCoordLocation, 2, gl.FLOAT, false, 0, 0 );
+
+    // Create a texture.
+    this.texture = gl.createTexture();
+
+    // lookup uniforms
+    this.resolutionLocation = gl.getUniformLocation( program, "u_resolution" );
 
     // set the resolution
-    var resolutionLocation = gl.getUniformLocation( this.colorShaderProgram, 'uResolution' );
+    gl.uniform2f( this.resolutionLocation, this.canvas.width, this.canvas.height );
 
-    //TODO: This backing scale multiply seems very buggy and contradicts everything we know!
-    // Still, it gives the right behavior on iPad3 and OSX (non-retina).  Should be discussed and investigated.
-    gl.uniform2f( resolutionLocation, canvas.width / backingScale, canvas.height / backingScale );
+    // Create a buffer for the position of the rectangle corners.
+    this.buffer = gl.createBuffer();
+    gl.bindBuffer( gl.ARRAY_BUFFER, this.buffer );
+    gl.enableVertexAttribArray( this.positionLocation );
+    gl.vertexAttribPointer( this.positionLocation, 2, gl.FLOAT, false, 0, 0 );
 
-    this.vertexBuffer = gl.createBuffer();
-    this.bindVertexBuffer();
-
-    // Set up different colors for each triangle
-    this.vertexColorBuffer = gl.createBuffer();
-    this.bindColorBuffer();
-
-    gl.clearColor( 0.0, 0.0, 0.0, 0.0 );
+    this.image = new Image();
+    this.image.src = "http://localhost:8080/energy-skate-park-basics/images/mountains.png";  // MUST BE SAME DOMAIN!!!
+    this.image.onload = function() {
+      // Set a rectangle the same size as the image.
+      setRectangle( gl, 0, 0, textureModule.image.width, textureModule.image.height );
+    };
   }
 
   return inherit( Object, TextureModule, {
     draw: function() {
       var gl = this.gl;
 
-      gl.enableVertexAttribArray( this.positionAttribLocation );
-      gl.enableVertexAttribArray( this.colorAttributeLocation );
       gl.useProgram( this.colorShaderProgram );
+      gl.enableVertexAttribArray( this.texCoordLocation );
+      gl.enableVertexAttribArray( this.positionLocation );
 
-      gl.bindBuffer( gl.ARRAY_BUFFER, this.vertexBuffer );
-      gl.vertexAttribPointer( this.positionAttribLocation, 2, gl.FLOAT, false, 0, 0 );
+      // provide texture coordinates for the rectangle.
+      gl.bindBuffer( gl.ARRAY_BUFFER, this.texCoordBuffer );
+      gl.vertexAttribPointer( this.texCoordLocation, 2, gl.FLOAT, false, 0, 0 );
 
-      // Send the colors to the GPU
-      gl.bindBuffer( gl.ARRAY_BUFFER, this.vertexColorBuffer );
-      gl.vertexAttribPointer( this.colorAttributeLocation, 4, gl.FLOAT, false, 0, 0 );
+      // Create a texture.
+      gl.bindTexture( gl.TEXTURE_2D, this.texture );
 
-      gl.drawArrays( gl.TRIANGLES, 0, this.triangleSystem.vertexArray.length / 2 );
+      // Set the parameters so we can render any size image.
+      gl.texParameteri( gl.TEXTURE_2D, gl.TEXTURE_WRAP_S, gl.CLAMP_TO_EDGE );
+      gl.texParameteri( gl.TEXTURE_2D, gl.TEXTURE_WRAP_T, gl.CLAMP_TO_EDGE );
+      gl.texParameteri( gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.NEAREST );
+      gl.texParameteri( gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, gl.NEAREST );
 
-      gl.disableVertexAttribArray( this.positionAttribLocation );
-      gl.disableVertexAttribArray( this.colorAttributeLocation );
+      // Upload the image into the texture.
+      gl.texImage2D( gl.TEXTURE_2D, 0, gl.RGBA, gl.RGBA, gl.UNSIGNED_BYTE, this.image );
+
+      // set the resolution
+      gl.uniform2f( this.resolutionLocation, this.canvas.width, this.canvas.height );
+
+      gl.bindBuffer( gl.ARRAY_BUFFER, this.buffer );
+
+      gl.vertexAttribPointer( this.positionLocation, 2, gl.FLOAT, false, 0, 0 );
+
+      // Draw the rectangle.
+      gl.drawArrays( gl.TRIANGLES, 0, 6 );
+
     },
     bindVertexBuffer: function() {
       var gl = this.gl;
