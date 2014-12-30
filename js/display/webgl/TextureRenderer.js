@@ -16,6 +16,8 @@ define( function( require ) {
   var colorVertexShader = require( 'text!SCENERY/display/webgl/texture.vert' );
   var colorFragmentShader = require( 'text!SCENERY/display/webgl/texture.frag' );
 
+  var mountains = require( 'image!SCENERY/mountains.png' );
+
   function setRectangle( gl, x, y, width, height ) {
     var x1 = x;
     var x2 = x + width;
@@ -38,6 +40,7 @@ define( function( require ) {
     var textureRenderer = this;
     this.gl = gl;
     this.canvas = canvas;
+    this.backingScale = backingScale;
 
     // Manages the indices within a single array, so that disjoint geometries can be represented easily here.
     // TODO: Compare this same idea to triangle strips
@@ -100,14 +103,10 @@ define( function( require ) {
     this.image.height = 256;
     var context = this.image.getContext( '2d' );
 
-    var loadedImage = new Image();
-    loadedImage.src = "http://localhost:8080/energy-skate-park-basics/images/mountains.png";  // MUST BE SAME DOMAIN!!!
-    loadedImage.onload = function() {
-      context.drawImage( loadedImage, 0, 0 );
+    context.drawImage( mountains, 0, 0 );
 
-      // Set a rectangle the same size as the image.
-      setRectangle( gl, 0, 0, textureRenderer.image.width, textureRenderer.image.height );
-    };
+    // Set a rectangle the same size as the image.
+    setRectangle( gl, 0, 0, textureRenderer.image.width, textureRenderer.image.height );
   }
 
   return inherit( Object, TextureRenderer, {
@@ -131,14 +130,18 @@ define( function( require ) {
       // Set the parameters so we can render any size image.
       gl.texParameteri( gl.TEXTURE_2D, gl.TEXTURE_WRAP_S, gl.CLAMP_TO_EDGE );
       gl.texParameteri( gl.TEXTURE_2D, gl.TEXTURE_WRAP_T, gl.CLAMP_TO_EDGE );
-      gl.texParameteri( gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.NEAREST );
-      gl.texParameteri( gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, gl.NEAREST );
+      gl.texParameteri( gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.LINEAR );
+      gl.texParameteri( gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, gl.LINEAR_MIPMAP_LINEAR );
 
       // Upload the image into the texture.
       gl.texImage2D( gl.TEXTURE_2D, 0, gl.RGBA, gl.RGBA, gl.UNSIGNED_BYTE, this.image );
 
+      gl.generateMipmap( gl.TEXTURE_2D );
+
       // set the resolution
-      gl.uniform2f( this.resolutionLocation, this.canvas.width, this.canvas.height );
+      //TODO: This backing scale multiply seems very buggy and contradicts everything we know!
+      // Still, it gives the right behavior on iPad3 and OSX (non-retina).  Should be discussed and investigated.
+      gl.uniform2f( this.resolutionLocation, this.canvas.width / this.backingScale, this.canvas.height / this.backingScale );
 
       gl.bindBuffer( gl.ARRAY_BUFFER, this.buffer );
 
