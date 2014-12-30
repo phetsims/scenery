@@ -14,8 +14,8 @@ define( function( require ) {
   var inherit = require( 'PHET_CORE/inherit' );
   var Events = require( 'AXON/Events' );
   var Util = require( 'SCENERY/util/Util' );
-  var ColorModule = require( 'SCENERY/display/webgl/ColorModule' );
-  var TextureModule = require( 'SCENERY/display/webgl/TextureModule' );
+  var ColorTriangleRenderer = require( 'SCENERY/display/webgl/ColorTriangleRenderer' );
+  var TextureRenderer = require( 'SCENERY/display/webgl/TextureRenderer' );
 
   /**
    *
@@ -58,8 +58,8 @@ define( function( require ) {
     this.canvas.width = window.innerWidth * devicePixelRatio;
     this.canvas.height = window.innerHeight * devicePixelRatio;
 
-    this.colorModule = new ColorModule( gl, backingScale, this.canvas );
-    this.textureModule = new TextureModule( gl, backingScale, this.canvas );
+    this.ColorTriangleRenderer = new ColorTriangleRenderer( gl, backingScale, this.canvas );
+    this.TextureRenderer = new TextureRenderer( gl, backingScale, this.canvas );
 
     this.boundAnimate = this.animate.bind( this );
   }
@@ -113,8 +113,8 @@ define( function( require ) {
       gl.clear( gl.COLOR_BUFFER_BIT );
 
       //Render program by program.
-      this.colorModule.draw();
-      this.textureModule.draw();
+      this.ColorTriangleRenderer.draw();
+      this.TextureRenderer.draw();
 
       //Flush after rendering complete.
       gl.flush();

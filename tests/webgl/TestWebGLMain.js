@@ -22,33 +22,33 @@ define( function( require ) {
       var webGLRenderer = new WebGLRenderer();
 
       // TODO: Add a uniform matrix4 for transforming vertices to the -1,-1,1,1 rectangle
-      webGLRenderer.colorModule.triangleSystem.createFromRectangle( new Rectangle( 0, 0, 1024 / 2, 100, {fill: 'red'} ) );
-      webGLRenderer.colorModule.triangleSystem.createFromRectangle( new Rectangle( 100, 0, 100, 100, {fill: 'green'} ) );
+      webGLRenderer.ColorTriangleRenderer.ColorTriangleBufferData.createFromRectangle( new Rectangle( 0, 0, 1024 / 2, 100, {fill: 'red'} ) );
+      webGLRenderer.ColorTriangleRenderer.ColorTriangleBufferData.createFromRectangle( new Rectangle( 100, 0, 100, 100, {fill: 'green'} ) );
       var rectangle = new Rectangle( 200, 300, 100, 100, {fill: 'blue'} );
-      var rectangleGeometry = webGLRenderer.colorModule.triangleSystem.createFromRectangle( rectangle );
-      webGLRenderer.colorModule.triangleSystem.createFromPath( new Rectangle( 100, 100, 100, 100, 20, 20, {fill: 'blue'} ) );
-      webGLRenderer.colorModule.triangleSystem.createFromPath( new Path( Shape.circle( 300, 300, 50 ), {fill: 'blue'} ) );
-      webGLRenderer.colorModule.triangleSystem.createFromPath( new Path( Shape.circle( 600, 600, 200 ), {fill: 'red'} ) );
+      var rectangleGeometry = webGLRenderer.ColorTriangleRenderer.ColorTriangleBufferData.createFromRectangle( rectangle );
+      webGLRenderer.ColorTriangleRenderer.ColorTriangleBufferData.createFromPath( new Rectangle( 100, 100, 100, 100, 20, 20, {fill: 'blue'} ) );
+      webGLRenderer.ColorTriangleRenderer.ColorTriangleBufferData.createFromPath( new Path( Shape.circle( 300, 300, 50 ), {fill: 'blue'} ) );
+      webGLRenderer.ColorTriangleRenderer.ColorTriangleBufferData.createFromPath( new Path( Shape.circle( 600, 600, 200 ), {fill: 'red'} ) );
 
       for ( var i = 0; i < 50; i++ ) {
         var circle = Shape.circle( 600 * Math.random(), 600 * Math.random(), 50 * Math.random() );
         var path = new Path( circle, {
           fill: new Color( Math.random() * 255, Math.random() * 255, Math.random() * 255, 1 )
         } );
-        webGLRenderer.colorModule.triangleSystem.createFromPath( path );
+        webGLRenderer.ColorTriangleRenderer.ColorTriangleBufferData.createFromPath( path );
       }
 
-      var t1 = webGLRenderer.colorModule.triangleSystem.createFromTriangle( 100, 100, 200, 100, 150, 200 );
-      var t2 = webGLRenderer.colorModule.triangleSystem.createFromTriangle( 100, 100, 200, 100, 150, 200 );
-      var t3 = webGLRenderer.colorModule.triangleSystem.createFromTriangle( 100, 200, 200, 200, 150, 300 );
+      var t1 = webGLRenderer.ColorTriangleRenderer.ColorTriangleBufferData.createFromTriangle( 100, 100, 200, 100, 150, 200 );
+      var t2 = webGLRenderer.ColorTriangleRenderer.ColorTriangleBufferData.createFromTriangle( 100, 100, 200, 100, 150, 200 );
+      var t3 = webGLRenderer.ColorTriangleRenderer.ColorTriangleBufferData.createFromTriangle( 100, 200, 200, 200, 150, 300 );
 
       //Show something from another module
-      webGLRenderer.textureModule.triangleSystem.createFromRectangle( new Rectangle( 0, 0, 1024 / 2, 1024 / 2, {fill: 'black'} ) );
-      webGLRenderer.textureModule.bindVertexBuffer();
-      webGLRenderer.textureModule.bindColorBuffer();
+      webGLRenderer.TextureRenderer.ColorTriangleBufferData.createFromRectangle( new Rectangle( 0, 0, 1024 / 2, 1024 / 2, {fill: 'black'} ) );
+      webGLRenderer.TextureRenderer.bindVertexBuffer();
+      webGLRenderer.TextureRenderer.bindColorBuffer();
 
-      webGLRenderer.colorModule.bindVertexBuffer();
-      webGLRenderer.colorModule.bindColorBuffer();
+      webGLRenderer.ColorTriangleRenderer.bindVertexBuffer();
+      webGLRenderer.ColorTriangleRenderer.bindColorBuffer();
 
       webGLRenderer.start();
 
@@ -60,10 +60,10 @@ define( function( require ) {
 //
         t2.setTriangle( 100 + rectX, 100, 200 + rectX, 100, 150 + rectX, 200 );
 
-        webGLRenderer.colorModule.updateTriangleBuffer( t2 );
-        webGLRenderer.colorModule.updateTriangleBuffer( rectangleGeometry );
+        webGLRenderer.ColorTriangleRenderer.updateTriangleBuffer( t2 );
+        webGLRenderer.ColorTriangleRenderer.updateTriangleBuffer( rectangleGeometry );
       } );
 
-      console.log( 'total triangles', webGLRenderer.colorModule.triangleSystem.vertexArray.length / 3 );
+      console.log( 'total triangles', webGLRenderer.ColorTriangleRenderer.ColorTriangleBufferData.vertexArray.length / 3 );
     }};
 } );

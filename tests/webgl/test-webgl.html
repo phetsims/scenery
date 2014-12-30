@@ -43,14 +43,14 @@
       var addRectangle = function() {
         var x = (Math.random() * 2 - 1) * 0.9;
         var y = (Math.random() * 2 - 1) * 0.9;
-        rectangles.push( webGLRenderer.triangleSystem.createRectangle( x, y, 0.02, 0.02, x, y, 1, 1 ) );
+        rectangles.push( webGLRenderer.ColorTriangleBufferData.createRectangle( x, y, 0.02, 0.02, x, y, 1, 1 ) );
       };
 
       var addStar = function() {
         var x = (Math.random() * 2 - 1) * 0.9;
         var y = (Math.random() * 2 - 1) * 0.9;
         var scale = Math.random() * 0.2;
-        var star = webGLRenderer.triangleSystem.createStar( x, y, 0.15 * scale, 0.4 * scale, Math.PI + Math.random() * Math.PI * 2, Math.random(), Math.random(), Math.random(), 1 );
+        var star = webGLRenderer.ColorTriangleBufferData.createStar( x, y, 0.15 * scale, 0.4 * scale, Math.PI + Math.random() * Math.PI * 2, Math.random(), Math.random(), Math.random(), 1 );
         stars.push( star );
       };
 

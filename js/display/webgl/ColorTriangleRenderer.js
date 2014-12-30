@@ -1,8 +1,8 @@
 //  Copyright 2002-2014, University of Colorado Boulder
 
 /**
- * ColorModule manages the program & attributes & drawing for rendering indepdent triangles.  Geometry +data provided
- * by TriangleSystem.
+ * ColorTriangleRenderer manages the program & attributes & drawing for rendering indepdent triangles.  Geometry +data provided
+ * by ColorTriangleBufferData.
  *
  * @author Sam Reid (PhET Interactive Simulations)
  */
@@ -11,7 +11,7 @@ define( function( require ) {
 
   // modules
   var inherit = require( 'PHET_CORE/inherit' );
-  var TriangleSystem = require( 'SCENERY/display/webgl/TriangleSystem' );
+  var ColorTriangleBufferData = require( 'SCENERY/display/webgl/ColorTriangleBufferData' );
 
   var colorVertexShader = require( 'text!SCENERY/display/webgl/color2d.vert' );
   var colorFragmentShader = require( 'text!SCENERY/display/webgl/color2d.frag' );
@@ -20,13 +20,13 @@ define( function( require ) {
    *
    * @constructor
    */
-  function ColorModule( gl, backingScale, canvas ) {
+  function ColorTriangleRenderer( gl, backingScale, canvas ) {
     this.gl = gl;
     this.canvas = canvas;
 
     // Manages the indices within a single array, so that disjoint geometries can be represented easily here.
     // TODO: Compare this same idea to triangle strips
-    this.triangleSystem = new TriangleSystem();
+    this.ColorTriangleBufferData = new ColorTriangleBufferData();
 
     var toShader = function( source, type, typeString ) {
       var shader = gl.createShader( type );
@@ -68,7 +68,7 @@ define( function( require ) {
     gl.clearColor( 0.0, 0.0, 0.0, 0.0 );
   }
 
-  return inherit( Object, ColorModule, {
+  return inherit( Object, ColorTriangleRenderer, {
     draw: function() {
       var gl = this.gl;
 
@@ -83,7 +83,7 @@ define( function( require ) {
       gl.bindBuffer( gl.ARRAY_BUFFER, this.vertexColorBuffer );
       gl.vertexAttribPointer( this.colorAttributeLocation, 4, gl.FLOAT, false, 0, 0 );
 
-      gl.drawArrays( gl.TRIANGLES, 0, this.triangleSystem.vertexArray.length / 2 );
+      gl.drawArrays( gl.TRIANGLES, 0, this.ColorTriangleBufferData.vertexArray.length / 2 );
 
       gl.disableVertexAttribArray( this.positionAttribLocation );
       gl.disableVertexAttribArray( this.colorAttributeLocation );
@@ -93,14 +93,14 @@ define( function( require ) {
       gl.bindBuffer( gl.ARRAY_BUFFER, this.vertexBuffer );
 
       // Keep track of the vertexArray for updating sublists of it
-      this.vertexArray = new Float32Array( this.triangleSystem.vertexArray );
+      this.vertexArray = new Float32Array( this.ColorTriangleBufferData.vertexArray );
       gl.bufferData( gl.ARRAY_BUFFER, this.vertexArray, gl.DYNAMIC_DRAW );
     },
 
     bindColorBuffer: function() {
       var gl = this.gl;
       gl.bindBuffer( gl.ARRAY_BUFFER, this.vertexColorBuffer );
-      gl.bufferData( gl.ARRAY_BUFFER, new Float32Array( this.triangleSystem.colors ), gl.STATIC_DRAW );
+      gl.bufferData( gl.ARRAY_BUFFER, new Float32Array( this.ColorTriangleBufferData.colors ), gl.STATIC_DRAW );
     },
     updateTriangleBuffer: function( geometry ) {
       var gl = this.gl;
@@ -113,7 +113,7 @@ define( function( require ) {
 
       //Update the Float32Array values
       for ( var i = geometry.index; i < geometry.endIndex; i++ ) {
-        this.vertexArray[i] = this.triangleSystem.vertexArray[i];
+        this.vertexArray[i] = this.ColorTriangleBufferData.vertexArray[i];
       }
 
       // Isolate the subarray of changed values
@@ -125,7 +125,7 @@ define( function( require ) {
       gl.bufferSubData( gl.ARRAY_BUFFER, geometry.index * 4, subArray );
 
 //      console.log(
-//        'vertex array length', this.triangleSystem.vertexArray.length,
+//        'vertex array length', this.ColorTriangleBufferData.vertexArray.length,
 //        'va.length', this.vertexArray.length,
 //        'geometry index', geometry.index,
 //        'geometry end index', geometry.endIndex,
@@ -147,7 +147,7 @@ define( function( require ) {
 //      //TODO: Use a buffer view to only update the changed vertices
 //      //perhaps like //see http://stackoverflow.com/questions/19892022/webgl-optimizing-a-vertex-buffer-that-changes-values-vertex-count-every-frame
 //      gl.bindBuffer( gl.ARRAY_BUFFER, this.vertexBuffer );
-//      gl.bufferSubData( gl.ARRAY_BUFFER, 0, new Float32Array( this.triangleSystem.vertexArray ) );
+//      gl.bufferSubData( gl.ARRAY_BUFFER, 0, new Float32Array( this.ColorTriangleBufferData.vertexArray ) );
 //    },
 
   } );

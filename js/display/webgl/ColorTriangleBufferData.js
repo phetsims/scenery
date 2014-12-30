@@ -20,14 +20,14 @@ define( function( require ) {
    *
    * @constructor
    */
-  function TriangleSystem() {
+  function ColorTriangleBufferData() {
 
     //TODO: Use Float32Array -- though we will have to account for the fact that they have a fixed size
     this.vertexArray = [];
     this.colors = [];
   }
 
-  return inherit( Object, TriangleSystem, {
+  return inherit( Object, ColorTriangleBufferData, {
 
     /**
      * Add geometry and color for a scenery path using sampling + triangulation.
@@ -92,9 +92,9 @@ define( function( require ) {
       var b = color.blue / 255;
       var a = color.alpha;
 
-      var triangleSystem = this;
+      var ColorTriangleBufferData = this;
       var index = this.vertexArray.length;
-      triangleSystem.vertexArray.push(
+      ColorTriangleBufferData.vertexArray.push(
         // Top left
         x1, y1,
         x2, y2,
@@ -103,7 +103,7 @@ define( function( require ) {
 
       // Add the same color for all vertices (solid fill rectangle).
       // TODO: some way to reduce this amount of elements!
-      triangleSystem.colors.push(
+      ColorTriangleBufferData.colors.push(
         r, g, b, a,
         r, g, b, a,
         r, g, b, a
@@ -113,14 +113,14 @@ define( function( require ) {
       //TODO: Move to a separate class.
       return {
         index: index,
-        endIndex: triangleSystem.vertexArray.length,
+        endIndex: ColorTriangleBufferData.vertexArray.length,
         setTriangle: function( x1, y1, x2, y2, x3, y3 ) {
-          triangleSystem.vertexArray[index + 0] = x1;
-          triangleSystem.vertexArray[index + 1] = y1;
-          triangleSystem.vertexArray[index + 2] = x2;
-          triangleSystem.vertexArray[index + 3] = y2;
-          triangleSystem.vertexArray[index + 4] = x3;
-          triangleSystem.vertexArray[index + 5] = y3;
+          ColorTriangleBufferData.vertexArray[index + 0] = x1;
+          ColorTriangleBufferData.vertexArray[index + 1] = y1;
+          ColorTriangleBufferData.vertexArray[index + 2] = x2;
+          ColorTriangleBufferData.vertexArray[index + 3] = y2;
+          ColorTriangleBufferData.vertexArray[index + 4] = x3;
+          ColorTriangleBufferData.vertexArray[index + 5] = y3;
         }
       };
     },
@@ -129,9 +129,9 @@ define( function( require ) {
       return this.createRectangle( rectangle.rectX, rectangle.rectY, rectangle.rectWidth, rectangle.rectHeight, color.red / 255, color.green / 255, color.blue / 255, color.alpha );
     },
     createRectangle: function( x, y, width, height, r, g, b, a ) {
-      var triangleSystem = this;
+      var ColorTriangleBufferData = this;
       var index = this.vertexArray.length;
-      triangleSystem.vertexArray.push(
+      ColorTriangleBufferData.vertexArray.push(
         // Top left
         x, y,
         (x + width), y,
@@ -145,7 +145,7 @@ define( function( require ) {
 
       // Add the same color for all vertices (solid fill rectangle).
       // TODO: some way to reduce this amount of elements!
-      triangleSystem.colors.push(
+      ColorTriangleBufferData.colors.push(
         r, g, b, a,
         r, g, b, a,
         r, g, b, a,
@@ -159,48 +159,48 @@ define( function( require ) {
       return {
         initialState: {x: x, y: y, width: width, height: height},
         index: index,
-        endIndex: triangleSystem.vertexArray.length,
+        endIndex: ColorTriangleBufferData.vertexArray.length,
         setXWidth: function( x, width ) {
-          triangleSystem.vertexArray[index] = x;
-          triangleSystem.vertexArray[index + 2] = x + width;
-          triangleSystem.vertexArray[index + 4] = x;
-          triangleSystem.vertexArray[index + 6] = x + width;
-          triangleSystem.vertexArray[index + 8] = x + width;
-          triangleSystem.vertexArray[index + 10] = x;
+          ColorTriangleBufferData.vertexArray[index] = x;
+          ColorTriangleBufferData.vertexArray[index + 2] = x + width;
+          ColorTriangleBufferData.vertexArray[index + 4] = x;
+          ColorTriangleBufferData.vertexArray[index + 6] = x + width;
+          ColorTriangleBufferData.vertexArray[index + 8] = x + width;
+          ColorTriangleBufferData.vertexArray[index + 10] = x;
         },
         setRect: function( x, y, width, height ) {
 
-          triangleSystem.vertexArray[index] = x;
-          triangleSystem.vertexArray[index + 1] = y;
+          ColorTriangleBufferData.vertexArray[index] = x;
+          ColorTriangleBufferData.vertexArray[index + 1] = y;
 
-          triangleSystem.vertexArray[index + 2] = x + width;
-          triangleSystem.vertexArray[index + 3] = y;
+          ColorTriangleBufferData.vertexArray[index + 2] = x + width;
+          ColorTriangleBufferData.vertexArray[index + 3] = y;
 
-          triangleSystem.vertexArray[index + 4] = x;
-          triangleSystem.vertexArray[index + 5] = y + height;
+          ColorTriangleBufferData.vertexArray[index + 4] = x;
+          ColorTriangleBufferData.vertexArray[index + 5] = y + height;
 
-          triangleSystem.vertexArray[index + 6] = x + width;
-          triangleSystem.vertexArray[index + 7] = y + height;
+          ColorTriangleBufferData.vertexArray[index + 6] = x + width;
+          ColorTriangleBufferData.vertexArray[index + 7] = y + height;
 
-          triangleSystem.vertexArray[index + 8] = x + width;
-          triangleSystem.vertexArray[index + 9] = y;
+          ColorTriangleBufferData.vertexArray[index + 8] = x + width;
+          ColorTriangleBufferData.vertexArray[index + 9] = y;
 
-          triangleSystem.vertexArray[index + 10] = x;
-          triangleSystem.vertexArray[index + 11] = y + height;
+          ColorTriangleBufferData.vertexArray[index + 10] = x;
+          ColorTriangleBufferData.vertexArray[index + 11] = y + height;
         }
       };
     },
 
     createStar: function( _x, _y, _innerRadius, _outerRadius, _totalAngle, r, g, b, a ) {
-      var triangleSystem = this;
+      var ColorTriangleBufferData = this;
       var index = this.vertexArray.length;
       for ( var i = 0; i < 18; i++ ) {
-        triangleSystem.vertexArray.push( 0 );
+        ColorTriangleBufferData.vertexArray.push( 0 );
       }
 
       // Add the same color for all vertices (solid fill star).
       // TODO: some way to reduce this amount of elements!
-      triangleSystem.colors.push(
+      ColorTriangleBufferData.colors.push(
         r, g, b, a,
         r, g, b, a,
         r, g, b, a,
@@ -233,26 +233,26 @@ define( function( require ) {
           }
 
           var index = this.index;
-          triangleSystem.vertexArray[index + 0] = points[0].x;
-          triangleSystem.vertexArray[index + 1] = points[0].y;
-          triangleSystem.vertexArray[index + 2] = points[3].x;
-          triangleSystem.vertexArray[index + 3] = points[3].y;
-          triangleSystem.vertexArray[index + 4] = points[6].x;
-          triangleSystem.vertexArray[index + 5] = points[6].y;
+          ColorTriangleBufferData.vertexArray[index + 0] = points[0].x;
+          ColorTriangleBufferData.vertexArray[index + 1] = points[0].y;
+          ColorTriangleBufferData.vertexArray[index + 2] = points[3].x;
+          ColorTriangleBufferData.vertexArray[index + 3] = points[3].y;
+          ColorTriangleBufferData.vertexArray[index + 4] = points[6].x;
+          ColorTriangleBufferData.vertexArray[index + 5] = points[6].y;
 
-          triangleSystem.vertexArray[index + 6] = points[8].x;
-          triangleSystem.vertexArray[index + 7] = points[8].y;
-          triangleSystem.vertexArray[index + 8] = points[2].x;
-          triangleSystem.vertexArray[index + 9] = points[2].y;
-          triangleSystem.vertexArray[index + 10] = points[5].x;
-          triangleSystem.vertexArray[index + 11] = points[5].y;
+          ColorTriangleBufferData.vertexArray[index + 6] = points[8].x;
+          ColorTriangleBufferData.vertexArray[index + 7] = points[8].y;
+          ColorTriangleBufferData.vertexArray[index + 8] = points[2].x;
+          ColorTriangleBufferData.vertexArray[index + 9] = points[2].y;
+          ColorTriangleBufferData.vertexArray[index + 10] = points[5].x;
+          ColorTriangleBufferData.vertexArray[index + 11] = points[5].y;
 
-          triangleSystem.vertexArray[index + 12] = points[0].x;
-          triangleSystem.vertexArray[index + 13] = points[0].y;
-          triangleSystem.vertexArray[index + 14] = points[7].x;
-          triangleSystem.vertexArray[index + 15] = points[7].y;
-          triangleSystem.vertexArray[index + 16] = points[4].x;
-          triangleSystem.vertexArray[index + 17] = points[4].y;
+          ColorTriangleBufferData.vertexArray[index + 12] = points[0].x;
+          ColorTriangleBufferData.vertexArray[index + 13] = points[0].y;
+          ColorTriangleBufferData.vertexArray[index + 14] = points[7].x;
+          ColorTriangleBufferData.vertexArray[index + 15] = points[7].y;
+          ColorTriangleBufferData.vertexArray[index + 16] = points[4].x;
+          ColorTriangleBufferData.vertexArray[index + 17] = points[4].y;
         }
       };
       myStar.setStar( _x, _y, _innerRadius, _outerRadius, _totalAngle );
