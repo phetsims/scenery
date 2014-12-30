@@ -1,11 +1,18 @@
 //This shader assumes 2d vertices that have a specified color.
 
+// Position
 attribute vec2 aPosition;
+
+// Color for the vertex
 attribute vec4 aVertexColor;
+
+// Output to the fragment shader
 varying vec4 vColor;
+
+// (x,y) size of the viewport
 uniform vec2 uResolution;
 
-void main(void) { //pre-built function
+void main(void) {
 
   //This transform code is based on http://www.html5rocks.com/en/tutorials/webgl/webgl_fundamentals/
   //TODO: Should be converted to matrix multiply, probably faster.

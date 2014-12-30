@@ -1,8 +1,8 @@
 //  Copyright 2002-2014, University of Colorado Boulder
 
 /**
- * This component of the scenery WebGL renderer maintains state (vertex locations in a buffer) to represent geometry
- * for drawing.  See simulation-test-webgl.html for an example usage.
+ * This WebGL renderer is used to draw colored triangles.  Vertices are allocated for geometry + colors, and can be updated
+ * dynamically.
  * TODO: Can this same pattern be used for interleaved texture coordinates? (Or other interleaved data?)
  * TODO: Work in progress, much to be done here!
  * TODO: Add this file to the list of scenery files (for jshint, etc.)

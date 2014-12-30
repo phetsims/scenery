@@ -13,6 +13,7 @@ define( function( require ) {
   var inherit = require( 'PHET_CORE/inherit' );
   var ColorTriangleBufferData = require( 'SCENERY/display/webgl/colorTriangleBufferData' );
 
+  // shaders
   var colorVertexShader = require( 'text!SCENERY/display/webgl/color2d.vert' );
   var colorFragmentShader = require( 'text!SCENERY/display/webgl/color2d.frag' );
 
