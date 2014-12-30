@@ -16,34 +16,38 @@ define( function( require ) {
   var Color = require( 'SCENERY/util/Color' );
   var WebGLRenderer = require( 'SCENERY/display/webgl/WebGLRenderer' );
 
+  // images
+  var mountains = require( 'image!ENERGY_SKATE_PARK_BASICS/mountains.png' );
+
   return {
     start: function() {
 
       var webGLRenderer = new WebGLRenderer();
 
       // TODO: Add a uniform matrix4 for transforming vertices to the -1,-1,1,1 rectangle
-      webGLRenderer.colorTriangleRenderer.colorTriangleBufferData.createFromRectangle( new Rectangle( 0, 0, 1024 / 2, 100, {fill: 'red'} ) );
-      webGLRenderer.colorTriangleRenderer.colorTriangleBufferData.createFromRectangle( new Rectangle( 100, 0, 100, 100, {fill: 'green'} ) );
+      var colorTriangleBufferData = webGLRenderer.colorTriangleRenderer.colorTriangleBufferData;
+      colorTriangleBufferData.createFromRectangle( new Rectangle( 0, 0, 1024 / 2, 100, {fill: 'red'} ) );
+      colorTriangleBufferData.createFromRectangle( new Rectangle( 100, 0, 100, 100, {fill: 'green'} ) );
       var rectangle = new Rectangle( 200, 300, 100, 100, {fill: 'blue'} );
-      var rectangleGeometry = webGLRenderer.colorTriangleRenderer.colorTriangleBufferData.createFromRectangle( rectangle );
-      webGLRenderer.colorTriangleRenderer.colorTriangleBufferData.createFromPath( new Rectangle( 100, 100, 100, 100, 20, 20, {fill: 'blue'} ) );
-      webGLRenderer.colorTriangleRenderer.colorTriangleBufferData.createFromPath( new Path( Shape.circle( 300, 300, 50 ), {fill: 'blue'} ) );
-      webGLRenderer.colorTriangleRenderer.colorTriangleBufferData.createFromPath( new Path( Shape.circle( 600, 600, 200 ), {fill: 'red'} ) );
+      var rectangleGeometry = colorTriangleBufferData.createFromRectangle( rectangle );
+      colorTriangleBufferData.createFromPath( new Rectangle( 100, 100, 100, 100, 20, 20, {fill: 'blue'} ) );
+      colorTriangleBufferData.createFromPath( new Path( Shape.circle( 300, 300, 50 ), {fill: 'blue'} ) );
+      colorTriangleBufferData.createFromPath( new Path( Shape.circle( 600, 600, 200 ), {fill: 'red'} ) );
 
       for ( var i = 0; i < 50; i++ ) {
         var circle = Shape.circle( 600 * Math.random(), 600 * Math.random(), 50 * Math.random() );
         var path = new Path( circle, {
           fill: new Color( Math.random() * 255, Math.random() * 255, Math.random() * 255, 1 )
         } );
-        webGLRenderer.colorTriangleRenderer.colorTriangleBufferData.createFromPath( path );
+        colorTriangleBufferData.createFromPath( path );
       }
 
-      var t1 = webGLRenderer.colorTriangleRenderer.colorTriangleBufferData.createFromTriangle( 100, 100, 200, 100, 150, 200 );
-      var t2 = webGLRenderer.colorTriangleRenderer.colorTriangleBufferData.createFromTriangle( 100, 100, 200, 100, 150, 200 );
-      var t3 = webGLRenderer.colorTriangleRenderer.colorTriangleBufferData.createFromTriangle( 100, 200, 200, 200, 150, 300 );
+      var t1 = colorTriangleBufferData.createFromTriangle( 100, 100, 200, 100, 150, 200 );
+      var t2 = colorTriangleBufferData.createFromTriangle( 100, 100, 200, 100, 150, 200 );
+      var t3 = colorTriangleBufferData.createFromTriangle( 100, 200, 200, 200, 150, 300 );
 
       //Show something from another module
-      webGLRenderer.textureRenderer.colorTriangleBufferData.createFromRectangle( new Rectangle( 0, 0, 1024 / 2, 1024 / 2, {fill: 'black'} ) );
+      webGLRenderer.textureRenderer.textureBufferData.createFromImage( new Rectangle( 0, 0, 100, 100, mountains ) );
       webGLRenderer.textureRenderer.bindVertexBuffer();
       webGLRenderer.textureRenderer.bindColorBuffer();
 
@@ -64,6 +68,6 @@ define( function( require ) {
         webGLRenderer.colorTriangleRenderer.updateTriangleBuffer( rectangleGeometry );
       } );
 
-      console.log( 'total triangles', webGLRenderer.colorTriangleRenderer.colorTriangleBufferData.vertexArray.length / 3 );
+      console.log( 'total triangles', colorTriangleBufferData.vertexArray.length / 3 );
     }};
 } );
