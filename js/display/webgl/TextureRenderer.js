@@ -70,13 +70,6 @@ define( function( require ) {
     // provide texture coordinates for the rectangle.
     this.texCoordBuffer = gl.createBuffer();
     gl.bindBuffer( gl.ARRAY_BUFFER, this.texCoordBuffer );
-    gl.bufferData( gl.ARRAY_BUFFER, new Float32Array( [
-      0.0, 0.0,
-      1.0, 0.0,
-      0.0, 1.0,
-      0.0, 1.0,
-      1.0, 0.0,
-      1.0, 1.0] ), gl.STATIC_DRAW );
     gl.enableVertexAttribArray( this.texCoordLocation );
     gl.vertexAttribPointer( this.texCoordLocation, 2, gl.FLOAT, false, 0, 0 );
 
@@ -90,8 +83,8 @@ define( function( require ) {
 //    gl.uniform2f( this.resolutionLocation, this.canvas.width, this.canvas.height );
 
     // Create a buffer for the position of the rectangle corners.
-    this.buffer = gl.createBuffer();
-    gl.bindBuffer( gl.ARRAY_BUFFER, this.buffer );
+    this.vertexBuffer = gl.createBuffer();
+    gl.bindBuffer( gl.ARRAY_BUFFER, this.vertexBuffer );
     gl.enableVertexAttribArray( this.positionLocation );
     gl.vertexAttribPointer( this.positionLocation, 2, gl.FLOAT, false, 0, 0 );
 
@@ -143,7 +136,7 @@ define( function( require ) {
       // Still, it gives the right behavior on iPad3 and OSX (non-retina).  Should be discussed and investigated.
       gl.uniform2f( this.resolutionLocation, this.canvas.width / this.backingScale, this.canvas.height / this.backingScale );
 
-      gl.bindBuffer( gl.ARRAY_BUFFER, this.buffer );
+      gl.bindBuffer( gl.ARRAY_BUFFER, this.vertexBuffer );
 
       gl.vertexAttribPointer( this.positionLocation, 2, gl.FLOAT, false, 0, 0 );
 
@@ -155,19 +148,20 @@ define( function( require ) {
 
     },
     bindVertexBuffer: function() {
-//      var gl = this.gl;
-//      gl.bindBuffer( gl.ARRAY_BUFFER, this.vertexBuffer );
-//
-//      // Keep track of the vertexArray for updating sublists of it
-//      this.vertexArray = new Float32Array( this.textureBufferData.vertexArray );
-//      gl.bufferData( gl.ARRAY_BUFFER, this.vertexArray, gl.DYNAMIC_DRAW );
+      var gl = this.gl;
+      gl.bindBuffer( gl.ARRAY_BUFFER, this.vertexBuffer );
+
+      // Keep track of the vertexArray for updating sublists of it
+      this.vertexArray = new Float32Array( this.textureBufferData.vertexArray );
+      gl.bufferData( gl.ARRAY_BUFFER, this.vertexArray, gl.DYNAMIC_DRAW );
     },
 
-    bindColorBuffer: function() {
-//      var gl = this.gl;
-//      gl.bindBuffer( gl.ARRAY_BUFFER, this.vertexColorBuffer );
-//      gl.bufferData( gl.ARRAY_BUFFER, new Float32Array( this.textureBufferData.colors ), gl.STATIC_DRAW );
+    bindTextureBuffer: function() {
+      var gl = this.gl;
+      gl.bindBuffer( gl.ARRAY_BUFFER, this.texCoordBuffer );
+      gl.bufferData( gl.ARRAY_BUFFER, new Float32Array( this.textureBufferData.textureCoordinates ), gl.STATIC_DRAW );
     },
+
     updateTriangleBuffer: function( geometry ) {
       var gl = this.gl;
 
@@ -189,32 +183,6 @@ define( function( require ) {
       // See https://www.khronos.org/webgl/public-mailing-list/archives/1201/msg00110.html
       // The the offset is the index times the bytes per value
       gl.bufferSubData( gl.ARRAY_BUFFER, geometry.index * 4, subArray );
-
-//      console.log(
-//        'vertex array length', this.textureBufferData.vertexArray.length,
-//        'va.length', this.vertexArray.length,
-//        'geometry index', geometry.index,
-//        'geometry end index', geometry.endIndex,
-//        'updated size', subArray.length );
-
     }
-
-
-    /**
-     * Update all of the vertices in the entire triangles geometry.  Probably just faster
-     * to update the changed vertices.  Use this if many things changed, though.
-     * @private
-     */
-//    bufferSubData: function() {
-//      var gl = this.gl;
-//
-//      // Update the vertex locations
-//      //see http://stackoverflow.com/questions/5497722/how-can-i-animate-an-object-in-webgl-modify-specific-vertices-not-full-transfor
-//      //TODO: Use a buffer view to only update the changed vertices
-//      //perhaps like //see http://stackoverflow.com/questions/19892022/webgl-optimizing-a-vertex-buffer-that-changes-values-vertex-count-every-frame
-//      gl.bindBuffer( gl.ARRAY_BUFFER, this.vertexBuffer );
-//      gl.bufferSubData( gl.ARRAY_BUFFER, 0, new Float32Array( this.textureBufferData.vertexArray ) );
-//    },
-
   } );
 } );

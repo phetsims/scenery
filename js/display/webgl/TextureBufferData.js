@@ -31,21 +31,24 @@ define( function( require ) {
     createFromImage: function( x, y, width, height, image ) {
       var textureBufferData = this;
       var index = this.vertexArray.length;
-      textureBufferData.vertexArray.push(
-        // Top left
-        x, y,
-        (x + width), y,
-        x, y + height,
 
-        // Bottom right
-        (x + width), y + height,
-        (x + width), y,
-        x, y + height
+      var x1 = x;
+      var x2 = x + width;
+      var y1 = y;
+      var y2 = y + height;
+      
+      this.vertexArray.push(
+        x1, y1,
+        x2, y1,
+        x1, y2,
+        x1, y2,
+        x2, y1,
+        x2, y2
       );
 
       // Add the same color for all vertices (solid fill rectangle).
       // TODO: some way to reduce this amount of elements!
-      textureBufferData.textureCoordinates.push(
+      this.textureCoordinates.push(
         0.0, 0.0,
         1.0, 0.0,
         0.0, 1.0,
