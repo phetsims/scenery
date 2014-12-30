@@ -117,6 +117,9 @@ define( function( require ) {
       gl.enableVertexAttribArray( this.texCoordLocation );
       gl.enableVertexAttribArray( this.positionLocation );
 
+      gl.blendFunc( gl.SRC_ALPHA, gl.ONE_MINUS_SRC_ALPHA );
+      this.gl.enable( this.gl.BLEND );
+
       // provide texture coordinates for the rectangle.
       gl.bindBuffer( gl.ARRAY_BUFFER, this.texCoordBuffer );
       gl.vertexAttribPointer( this.texCoordLocation, 2, gl.FLOAT, false, 0, 0 );
