@@ -70,6 +70,7 @@ define( function( require ) {
   }
 
   return inherit( Object, ColorTriangleRenderer, {
+
     draw: function() {
       var gl = this.gl;
 
@@ -89,6 +90,7 @@ define( function( require ) {
       gl.disableVertexAttribArray( this.positionAttribLocation );
       gl.disableVertexAttribArray( this.colorAttributeLocation );
     },
+
     bindVertexBuffer: function() {
       var gl = this.gl;
       gl.bindBuffer( gl.ARRAY_BUFFER, this.vertexBuffer );
@@ -103,6 +105,7 @@ define( function( require ) {
       gl.bindBuffer( gl.ARRAY_BUFFER, this.vertexColorBuffer );
       gl.bufferData( gl.ARRAY_BUFFER, new Float32Array( this.colorTriangleBufferData.colors ), gl.STATIC_DRAW );
     },
+
     updateTriangleBuffer: function( geometry ) {
       var gl = this.gl;
 
@@ -124,32 +127,6 @@ define( function( require ) {
       // See https://www.khronos.org/webgl/public-mailing-list/archives/1201/msg00110.html
       // The the offset is the index times the bytes per value
       gl.bufferSubData( gl.ARRAY_BUFFER, geometry.index * 4, subArray );
-
-//      console.log(
-//        'vertex array length', this.colorTriangleBufferData.vertexArray.length,
-//        'va.length', this.vertexArray.length,
-//        'geometry index', geometry.index,
-//        'geometry end index', geometry.endIndex,
-//        'updated size', subArray.length );
-
     }
-
-
-    /**
-     * Update all of the vertices in the entire triangles geometry.  Probably just faster
-     * to update the changed vertices.  Use this if many things changed, though.
-     * @private
-     */
-//    bufferSubData: function() {
-//      var gl = this.gl;
-//
-//      // Update the vertex locations
-//      //see http://stackoverflow.com/questions/5497722/how-can-i-animate-an-object-in-webgl-modify-specific-vertices-not-full-transfor
-//      //TODO: Use a buffer view to only update the changed vertices
-//      //perhaps like //see http://stackoverflow.com/questions/19892022/webgl-optimizing-a-vertex-buffer-that-changes-values-vertex-count-every-frame
-//      gl.bindBuffer( gl.ARRAY_BUFFER, this.vertexBuffer );
-//      gl.bufferSubData( gl.ARRAY_BUFFER, 0, new Float32Array( this.colorTriangleBufferData.vertexArray ) );
-//    },
-
   } );
 } );

@@ -141,7 +141,7 @@ define( function( require ) {
       gl.vertexAttribPointer( this.positionLocation, 2, gl.FLOAT, false, 0, 0 );
 
       // Draw the rectangle.
-      gl.drawArrays( gl.TRIANGLES, 0, 6 );
+      gl.drawArrays( gl.TRIANGLES, 0, this.textureBufferData.vertexArray.length / 2 );
 
       gl.disableVertexAttribArray( this.texCoordLocation );
       gl.disableVertexAttribArray( this.positionLocation );

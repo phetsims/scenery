@@ -47,7 +47,9 @@ define( function( require ) {
       var t3 = colorTriangleBufferData.createFromTriangle( 100, 200, 200, 200, 150, 300 );
 
       //Show something from another module
-      webGLRenderer.textureRenderer.textureBufferData.createFromImage( 0, 0, 256, 256, mountains );
+      for ( var i = 0; i < 100; i++ ) {
+        webGLRenderer.textureRenderer.textureBufferData.createFromImage( Math.random() * 256, 0, 256, 256, mountains );
+      }
       webGLRenderer.textureRenderer.bindVertexBuffer();
       webGLRenderer.textureRenderer.bindTextureBuffer();
 
