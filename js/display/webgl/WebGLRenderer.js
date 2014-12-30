@@ -58,8 +58,8 @@ define( function( require ) {
     this.canvas.width = window.innerWidth * devicePixelRatio;
     this.canvas.height = window.innerHeight * devicePixelRatio;
 
-    this.ColorTriangleRenderer = new ColorTriangleRenderer( gl, backingScale, this.canvas );
-    this.TextureRenderer = new TextureRenderer( gl, backingScale, this.canvas );
+    this.colorTriangleRenderer = new ColorTriangleRenderer( gl, backingScale, this.canvas );
+    this.textureRenderer = new TextureRenderer( gl, backingScale, this.canvas );
 
     this.boundAnimate = this.animate.bind( this );
   }
@@ -113,8 +113,8 @@ define( function( require ) {
       gl.clear( gl.COLOR_BUFFER_BIT );
 
       //Render program by program.
-      this.ColorTriangleRenderer.draw();
-      this.TextureRenderer.draw();
+      this.colorTriangleRenderer.draw();
+      this.textureRenderer.draw();
 
       //Flush after rendering complete.
       gl.flush();
