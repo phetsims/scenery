@@ -16,7 +16,7 @@ define( function( require ) {
   var colorVertexShader = require( 'text!SCENERY/display/webgl/texture.vert' );
   var colorFragmentShader = require( 'text!SCENERY/display/webgl/texture.frag' );
 
-  var mountains = require( 'image!SCENERY/mountains.png' );
+  var mountains = require( 'image!ENERGY_SKATE_PARK_BASICS/mountains.png' );
 
   function setRectangle( gl, x, y, width, height ) {
     var x1 = x;
