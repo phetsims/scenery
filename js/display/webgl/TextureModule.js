@@ -83,7 +83,7 @@ define( function( require ) {
     this.resolutionLocation = gl.getUniformLocation( program, "u_resolution" );
 
     // set the resolution
-    gl.uniform2f( this.resolutionLocation, this.canvas.width, this.canvas.height );
+//    gl.uniform2f( this.resolutionLocation, this.canvas.width, this.canvas.height );
 
     // Create a buffer for the position of the rectangle corners.
     this.buffer = gl.createBuffer();
@@ -91,9 +91,19 @@ define( function( require ) {
     gl.enableVertexAttribArray( this.positionLocation );
     gl.vertexAttribPointer( this.positionLocation, 2, gl.FLOAT, false, 0, 0 );
 
-    this.image = new Image();
-    this.image.src = "http://localhost:8080/energy-skate-park-basics/images/mountains.png";  // MUST BE SAME DOMAIN!!!
-    this.image.onload = function() {
+    setRectangle( gl, 0, 0, 256, 256 );
+
+    // TODO: only create once instance of this Canvas for reuse
+    this.image = document.createElement( 'canvas' );
+    this.image.width = 256;
+    this.image.height = 256;
+    var context = this.image.getContext( '2d' );
+
+    var loadedImage = new Image();
+    loadedImage.src = "http://localhost:8080/energy-skate-park-basics/images/mountains.png";  // MUST BE SAME DOMAIN!!!
+    loadedImage.onload = function() {
+      context.drawImage( loadedImage, 0, 0 );
+
       // Set a rectangle the same size as the image.
       setRectangle( gl, 0, 0, textureModule.image.width, textureModule.image.height );
     };
@@ -133,20 +143,23 @@ define( function( require ) {
       // Draw the rectangle.
       gl.drawArrays( gl.TRIANGLES, 0, 6 );
 
+      gl.disableVertexAttribArray( this.texCoordLocation );
+      gl.disableVertexAttribArray( this.positionLocation );
+
     },
     bindVertexBuffer: function() {
-      var gl = this.gl;
-      gl.bindBuffer( gl.ARRAY_BUFFER, this.vertexBuffer );
-
-      // Keep track of the vertexArray for updating sublists of it
-      this.vertexArray = new Float32Array( this.triangleSystem.vertexArray );
-      gl.bufferData( gl.ARRAY_BUFFER, this.vertexArray, gl.DYNAMIC_DRAW );
+//      var gl = this.gl;
+//      gl.bindBuffer( gl.ARRAY_BUFFER, this.vertexBuffer );
+//
+//      // Keep track of the vertexArray for updating sublists of it
+//      this.vertexArray = new Float32Array( this.triangleSystem.vertexArray );
+//      gl.bufferData( gl.ARRAY_BUFFER, this.vertexArray, gl.DYNAMIC_DRAW );
     },
 
     bindColorBuffer: function() {
-      var gl = this.gl;
-      gl.bindBuffer( gl.ARRAY_BUFFER, this.vertexColorBuffer );
-      gl.bufferData( gl.ARRAY_BUFFER, new Float32Array( this.triangleSystem.colors ), gl.STATIC_DRAW );
+//      var gl = this.gl;
+//      gl.bindBuffer( gl.ARRAY_BUFFER, this.vertexColorBuffer );
+//      gl.bufferData( gl.ARRAY_BUFFER, new Float32Array( this.triangleSystem.colors ), gl.STATIC_DRAW );
     },
     updateTriangleBuffer: function( geometry ) {
       var gl = this.gl;
