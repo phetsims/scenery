@@ -34,7 +34,7 @@ define( function( require ) {
    * @constructor
    */
   function TextureRenderer( gl, backingScale, canvas ) {
-    var TextureRenderer = this;
+    var textureRenderer = this;
     this.gl = gl;
     this.canvas = canvas;
 
@@ -105,7 +105,7 @@ define( function( require ) {
       context.drawImage( loadedImage, 0, 0 );
 
       // Set a rectangle the same size as the image.
-      setRectangle( gl, 0, 0, TextureRenderer.image.width, TextureRenderer.image.height );
+      setRectangle( gl, 0, 0, textureRenderer.image.width, textureRenderer.image.height );
     };
   }
 
