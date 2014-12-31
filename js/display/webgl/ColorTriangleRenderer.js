@@ -62,11 +62,15 @@ define( function( require ) {
     this.vertexBuffer = gl.createBuffer();
     this.bindVertexBuffer();
 
+    this.depthBuffer = gl.createBuffer();
+    this.bindDepthBuffer();
+
     // Set up different colors for each triangle
     this.vertexColorBuffer = gl.createBuffer();
     this.bindColorBuffer();
 
     gl.clearColor( 0.0, 0.0, 0.0, 0.0 );
+    gl.enable( gl.DEPTH_TEST );
   }
 
   return inherit( Object, ColorTriangleRenderer, {
@@ -78,12 +82,14 @@ define( function( require ) {
       gl.enableVertexAttribArray( this.colorAttributeLocation );
       gl.useProgram( this.colorShaderProgram );
 
+
       gl.bindBuffer( gl.ARRAY_BUFFER, this.vertexBuffer );
       gl.vertexAttribPointer( this.positionAttribLocation, 2, gl.FLOAT, false, 0, 0 );
 
       // Send the colors to the GPU
       gl.bindBuffer( gl.ARRAY_BUFFER, this.vertexColorBuffer );
       gl.vertexAttribPointer( this.colorAttributeLocation, 4, gl.FLOAT, false, 0, 0 );
+
 
       gl.drawArrays( gl.TRIANGLES, 0, this.colorTriangleBufferData.vertexArray.length / 2 );
 
@@ -104,6 +110,13 @@ define( function( require ) {
       var gl = this.gl;
       gl.bindBuffer( gl.ARRAY_BUFFER, this.vertexColorBuffer );
       gl.bufferData( gl.ARRAY_BUFFER, new Float32Array( this.colorTriangleBufferData.colors ), gl.STATIC_DRAW );
+    },
+
+    bindDepthBuffer: function() {
+      var gl = this.gl;
+      gl.bindBuffer( gl.ARRAY_BUFFER, this.depthBuffer );
+      this.depthArray = new Float32Array( this.colorTriangleBufferData.depthBufferArray );
+      gl.bufferData( gl.ARRAY_BUFFER, this.depthArray, gl.STATIC_DRAW );
     },
 
     updateTriangleBuffer: function( geometry ) {

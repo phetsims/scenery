@@ -13,7 +13,7 @@ define( function( require ) {
 
   // modules
   var inherit = require( 'PHET_CORE/inherit' );
-  var Color = require( 'SCENERY/util/Color' );
+
 
   /**
    *
@@ -36,7 +36,7 @@ define( function( require ) {
       var x2 = x + width;
       var y1 = y;
       var y2 = y + height;
-      
+
       this.vertexArray.push(
         x1, y1,
         x2, y1,

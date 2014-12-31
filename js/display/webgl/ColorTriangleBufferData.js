@@ -17,13 +17,14 @@ define( function( require ) {
   var Color = require( 'SCENERY/util/Color' );
 
   /**
-   *
+   * TODO - Merge all these individual array into a single structure to improve performance
    * @constructor
    */
   function ColorTriangleBufferData() {
 
     //TODO: Use Float32Array -- though we will have to account for the fact that they have a fixed size
     this.vertexArray = [];
+    this.depthBufferArray = [];
     this.colors = [];
   }
 
@@ -84,7 +85,7 @@ define( function( require ) {
         }
       }
     },
-    createFromTriangle: function( x1, y1, x2, y2, x3, y3, color ) {
+    createFromTriangle: function( x1, y1, x2, y2, x3, y3, color, depth ) {
 
       color = new Color( color );
       var r = color.red / 255;
@@ -109,6 +110,10 @@ define( function( require ) {
         r, g, b, a
       );
 
+      ColorTriangleBufferData.depthBufferArray.push(
+        depth, depth, depth
+      );
+
       //Track the index so it can delete itself, update itself, etc.
       //TODO: Move to a separate class.
       return {
@@ -124,11 +129,11 @@ define( function( require ) {
         }
       };
     },
-    createFromRectangle: function( rectangle ) {
+    createFromRectangle: function( rectangle, depth ) {
       var color = new Color( rectangle.fill );
       return this.createRectangle( rectangle.rectX, rectangle.rectY, rectangle.rectWidth, rectangle.rectHeight, color.red / 255, color.green / 255, color.blue / 255, color.alpha );
     },
-    createRectangle: function( x, y, width, height, r, g, b, a ) {
+    createRectangle: function( x, y, width, height, r, g, b, a, depth ) {
       var ColorTriangleBufferData = this;
       var index = this.vertexArray.length;
       ColorTriangleBufferData.vertexArray.push(
@@ -152,6 +157,10 @@ define( function( require ) {
         r, g, b, a,
         r, g, b, a,
         r, g, b, a
+      );
+
+      ColorTriangleBufferData.depthBufferArray.push(
+        depth, depth, depth, depth, depth, depth
       );
 
       //Track the index so it can delete itself, update itself, etc.
