@@ -92,9 +92,9 @@ define( function( require ) {
       var b = color.blue / 255;
       var a = color.alpha;
 
-      var ColorTriangleBufferData = this;
+      var colorTriangleBufferData = this;
       var index = this.vertexArray.length;
-      ColorTriangleBufferData.vertexArray.push(
+      colorTriangleBufferData.vertexArray.push(
         // Top left
         x1, y1, depth,
         x2, y2, depth,
@@ -103,7 +103,7 @@ define( function( require ) {
 
       // Add the same color for all vertices (solid fill rectangle).
       // TODO: some way to reduce this amount of elements!
-      ColorTriangleBufferData.colors.push(
+      colorTriangleBufferData.colors.push(
         r, g, b, a,
         r, g, b, a,
         r, g, b, a
@@ -113,14 +113,19 @@ define( function( require ) {
       //TODO: Move to a separate class.
       return {
         index: index,
-        endIndex: ColorTriangleBufferData.vertexArray.length,
+        endIndex: colorTriangleBufferData.vertexArray.length,
         setTriangle: function( x1, y1, x2, y2, x3, y3 ) {
-          ColorTriangleBufferData.vertexArray[index + 0] = x1;
-          ColorTriangleBufferData.vertexArray[index + 1] = y1;
-          ColorTriangleBufferData.vertexArray[index + 2] = x2;
-          ColorTriangleBufferData.vertexArray[index + 3] = y2;
-          ColorTriangleBufferData.vertexArray[index + 4] = x3;
-          ColorTriangleBufferData.vertexArray[index + 5] = y3;
+          colorTriangleBufferData.vertexArray[index + 0] = x1;
+          colorTriangleBufferData.vertexArray[index + 1] = y1;
+          colorTriangleBufferData.vertexArray[index + 2] = x2;
+          colorTriangleBufferData.vertexArray[index + 3] = y2;
+          colorTriangleBufferData.vertexArray[index + 4] = x3;
+          colorTriangleBufferData.vertexArray[index + 5] = y3;
+        },
+        setDepth: function( depth ) {
+          colorTriangleBufferData.vertexArray[index + 2] = depth;
+          colorTriangleBufferData.vertexArray[index + 5] = depth;
+          colorTriangleBufferData.vertexArray[index + 8] = depth;
         }
       };
     },
