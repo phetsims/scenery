@@ -24,7 +24,6 @@ define( function( require ) {
 
     //TODO: Use Float32Array -- though we will have to account for the fact that they have a fixed size
     this.vertexArray = [];
-    this.depthBufferArray = [];
     this.colors = [];
   }
 
@@ -97,9 +96,9 @@ define( function( require ) {
       var index = this.vertexArray.length;
       ColorTriangleBufferData.vertexArray.push(
         // Top left
-        x1, y1,
-        x2, y2,
-        x3, y3
+        x1, y1, depth,
+        x2, y2, depth,
+        x3, y3, depth
       );
 
       // Add the same color for all vertices (solid fill rectangle).
@@ -108,10 +107,6 @@ define( function( require ) {
         r, g, b, a,
         r, g, b, a,
         r, g, b, a
-      );
-
-      ColorTriangleBufferData.depthBufferArray.push(
-        depth, depth, depth
       );
 
       //Track the index so it can delete itself, update itself, etc.
@@ -131,21 +126,21 @@ define( function( require ) {
     },
     createFromRectangle: function( rectangle, depth ) {
       var color = new Color( rectangle.fill );
-      return this.createRectangle( rectangle.rectX, rectangle.rectY, rectangle.rectWidth, rectangle.rectHeight, color.red / 255, color.green / 255, color.blue / 255, color.alpha );
+      return this.createRectangle( rectangle.rectX, rectangle.rectY, rectangle.rectWidth, rectangle.rectHeight, color.red / 255, color.green / 255, color.blue / 255, color.alpha, depth );
     },
     createRectangle: function( x, y, width, height, r, g, b, a, depth ) {
       var ColorTriangleBufferData = this;
       var index = this.vertexArray.length;
       ColorTriangleBufferData.vertexArray.push(
         // Top left
-        x, y,
-        (x + width), y,
-        x, y + height,
+        x, y, depth,
+        (x + width), y, depth,
+        x, y + height, depth,
 
         // Bottom right
-        (x + width), y + height,
-        (x + width), y,
-        x, y + height
+        (x + width), y + height, depth,
+        (x + width), y, depth,
+        x, y + height, depth
       );
 
       // Add the same color for all vertices (solid fill rectangle).
@@ -157,10 +152,6 @@ define( function( require ) {
         r, g, b, a,
         r, g, b, a,
         r, g, b, a
-      );
-
-      ColorTriangleBufferData.depthBufferArray.push(
-        depth, depth, depth, depth, depth, depth
       );
 
       //Track the index so it can delete itself, update itself, etc.

@@ -1,7 +1,7 @@
 //This shader assumes 2d vertices that have a specified color.
 
 // Position
-attribute vec2 aPosition;
+attribute vec3 aPosition;
 
 // Color for the vertex
 attribute vec4 aVertexColor;
@@ -18,7 +18,7 @@ void main(void) {
   //TODO: Should be converted to matrix multiply, probably faster.
 
   // convert the rectangle from pixels to 0.0 to 1.0
-  vec2 zeroToOne = aPosition / uResolution;
+  vec2 zeroToOne = vec2(aPosition.x / uResolution.x,aPosition.y/uResolution.y);
 
   // convert from 0->1 to 0->2
   vec2 zeroToTwo = zeroToOne * 2.0;
@@ -26,6 +26,6 @@ void main(void) {
   // convert from 0->2 to -1->+1 (clipspace)
   vec2 clipSpace = zeroToTwo - 1.0;
 
-  gl_Position = vec4(clipSpace * vec2(1, -1), 0., 1.); //0. is the z, and 1 is w
+  gl_Position = vec4(clipSpace * vec2(1, -1), aPosition.z, 1.); //0. is the z, and 1 is w
   vColor = aVertexColor;
 }

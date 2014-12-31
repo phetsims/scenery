@@ -84,14 +84,14 @@ define( function( require ) {
 
 
       gl.bindBuffer( gl.ARRAY_BUFFER, this.vertexBuffer );
-      gl.vertexAttribPointer( this.positionAttribLocation, 2, gl.FLOAT, false, 0, 0 );
+      gl.vertexAttribPointer( this.positionAttribLocation, 3, gl.FLOAT, false, 0, 0 );
 
       // Send the colors to the GPU
       gl.bindBuffer( gl.ARRAY_BUFFER, this.vertexColorBuffer );
       gl.vertexAttribPointer( this.colorAttributeLocation, 4, gl.FLOAT, false, 0, 0 );
 
 
-      gl.drawArrays( gl.TRIANGLES, 0, this.colorTriangleBufferData.vertexArray.length / 2 );
+      gl.drawArrays( gl.TRIANGLES, 0, this.colorTriangleBufferData.vertexArray.length / 3 );
 
       gl.disableVertexAttribArray( this.positionAttribLocation );
       gl.disableVertexAttribArray( this.colorAttributeLocation );

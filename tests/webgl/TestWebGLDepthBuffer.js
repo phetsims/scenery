@@ -26,8 +26,8 @@ define( function( require ) {
 
       // TODO: Add a uniform matrix4 for transforming vertices to the -1,-1,1,1 rectangle
       var colorTriangleBufferData = webGLRenderer.colorTriangleRenderer.colorTriangleBufferData;
-      colorTriangleBufferData.createFromRectangle( new Rectangle( 150, 200, 1024 / 2, 100, {fill: 'red'} ),2 );
-      var t3 = colorTriangleBufferData.createFromTriangle( 100, 200, 300, 300, 550, 300,1 );
+      colorTriangleBufferData.createFromRectangle( new Rectangle( 150, 200, 1024 / 2, 100, {fill: 'red'} ), 0.5 );
+      colorTriangleBufferData.createFromTriangle( 100, 200, 300, 300, 550, 300, 'blue', 0.4 );
 
       webGLRenderer.colorTriangleRenderer.bindVertexBuffer();
       webGLRenderer.colorTriangleRenderer.bindColorBuffer();
