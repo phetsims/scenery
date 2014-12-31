@@ -28,8 +28,8 @@ define( function( require ) {
 
       this.transformRootInstance = transformRootInstance;
 
-      assert && assert( typeof transformRootInstance.state.isDisplayRoot === 'boolean' );
-      // var canBeFullDisplay = transformRootInstance.state.isDisplayRoot;
+      assert && assert( typeof transformRootInstance.isDisplayRoot === 'boolean' );
+      // var canBeFullDisplay = transformRootInstance.isDisplayRoot;
 
       //OHTWO TODO: change fit based on renderer flags or extra parameters
       // this.fit = canBeFullDisplay ? FittedBlock.FULL_DISPLAY : FittedBlock.COMMON_ANCESTOR;

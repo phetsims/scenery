@@ -230,7 +230,7 @@ define( function( require ) {
       // from code below without triggering side effects (we assume that we are not reentrant).
       this._rootNode.validateWatchedBounds();
 
-      this._baseInstance = this._baseInstance || scenery.Instance.createFromPool( this, new scenery.Trail( this._rootNode ) );
+      this._baseInstance = this._baseInstance || scenery.Instance.createFromPool( this, new scenery.Trail( this._rootNode ), true, false );
       this._baseInstance.baseSyncTree();
       if ( firstRun ) {
         this.markTransformRootDirty( this._baseInstance, this._baseInstance.isTransformed ); // marks the transform root as dirty (since it is)

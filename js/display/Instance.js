@@ -26,19 +26,26 @@ define( function( require ) {
   var Drawable = require( 'SCENERY/display/Drawable' );
   var Renderer = require( 'SCENERY/display/Renderer' );
   var RelativeTransform = require( 'SCENERY/display/RelativeTransform' );
-  require( 'SCENERY/display/RenderState' );
 
   var globalIdCounter = 1;
 
-  scenery.Instance = function Instance( display, trail ) {
+  var emptyHintsObject = {}; // an object with no properties that we can use as an empty "hints" object
+
+  // preferences top to bottom in general
+  var defaultPreferredRenderers = Renderer.createOrderBitmask( Renderer.bitmaskSVG,
+                                                               Renderer.bitmaskCanvas,
+                                                               Renderer.bitmaskDOM,
+                                                               Renderer.bitmaskWebGL );
+
+  scenery.Instance = function Instance( display, trail, isDisplayRoot, isSharedCanvasCacheRoot ) {
     this.active = false;
 
-    this.initialize( display, trail );
+    this.initialize( display, trail, isDisplayRoot, isSharedCanvasCacheRoot );
   };
   var Instance = scenery.Instance;
 
   inherit( Object, Instance, {
-    initialize: function( display, trail ) {
+    initialize: function( display, trail, isDisplayRoot, isSharedCanvasCacheRoot ) {
       assert && assert( !this.active, 'We should never try to initialize an already active object' );
 
       // prevent the trail passed in from being mutated after this point (we want a consistent trail)
@@ -73,6 +80,7 @@ define( function( require ) {
       this.childInsertedListener = this.childInsertedListener || this.onChildInserted.bind( this );
       this.childRemovedListener = this.childRemovedListener || this.onChildRemoved.bind( this );
       this.visibilityListener = this.visibilityListener || this.onVisibilityChange.bind( this );
+      this.markRenderStateDirtyListener = this.markRenderStateDirtyListener || this.markRenderStateDirty.bind( this );
 
       this.cleanInstance( display, trail );
 
@@ -85,6 +93,28 @@ define( function( require ) {
 
       // Whether we have been instantiated. false if we are in a pool waiting to be instantiated.
       this.active = true;
+
+      this.stateless = true; // {boolean} - Whether we have had our state initialized yet
+
+      // internal render state handling for the instance tree
+      this.isDisplayRoot = isDisplayRoot; // {boolean} - Whether we are the root instance for a Display
+      this.isSharedCanvasCacheRoot = isSharedCanvasCacheRoot; // {boolean} - Whether we are the root of a Canvas cache
+      this.preferredRenderers = 0; // {number} - Packed renderer order bitmask (what our renderer preferences are)
+      this.isUnderCanvasCache = isSharedCanvasCacheRoot; // {boolean} - Whether we are beneath a Canvas cache (Canvas required)
+
+      // render state exports for this instance
+      this.isBackbone = false; // {boolean} - Whether we will have a BackboneDrawable group drawable
+      this.isTransformed = false;  // {boolean} - Whether this instance creates a new "root" for the relative trail transforms
+      this.isInstanceCanvasCache = false; // {boolean} - Whether we have a Canvas cache specific to this instance's position
+      this.isSharedCanvasCachePlaceholder = false; // {boolean}
+      this.isSharedCanvasCacheSelf = isSharedCanvasCacheRoot; // {boolean}
+      this.selfRenderer = 0; // {number} Renderer bitmask for the 'self' drawable (if our Node is painted)
+      this.groupRenderer = 0; // {number} Renderer bitmask for the 'group' drawable (if applicable)
+      this.sharedCacheRenderer = 0; // {number} Renderer bitmask for the cache drawable (if applicable)
+
+      // pruning flags (whether we need to be visited, whether updateState is required, and whether to visit children)
+      this.renderStateDirtyFrame = display._frameId; // {number} - When equal to the current frame it is considered "dirty"
+      this.skipPruningFrame = display._frameId; // {number} - When equal to the current frame we can't prune at this instance
 
       sceneryLog && sceneryLog.Instance && sceneryLog.Instance( 'initialized ' + this.toString() );
 
@@ -119,14 +149,6 @@ define( function( require ) {
       this.firstInnerDrawable = null;
       this.lastInnerDrawable = null;
 
-      // references that will be filled in with syncTree
-      if ( this.state ) {
-        // NOTE: assumes that we aren't reusing states across instances
-        this.state.freeToPool();
-      }
-      this.state = null;
-      this.isTransformed = false; // whether this instance creates a new "root" for the relative trail transforms
-
       this.svgGroups = []; // list of SVG groups associated with this display instance
 
       this.cleanSyncTreeResults();
@@ -152,21 +174,191 @@ define( function( require ) {
 
       // {ChangeInterval}, last change interval
       this.lastChangeInterval = null;
+
+      // render state change flags, all set in updateState()
+      this.incompatibleStateChange = false; // {boolean} - Whether we need to recreate the instance tree
+      this.groupChanged = false; // {boolean} - Whether we need to force a rebuild of the group drawable
+      this.cascadingStateChange = false; // {boolean} - Whether we had a render state change that requires visiting all children
+      this.anyStateChange = false; // {boolean} - Whether there was any change of rendering state with the last updateState()
+    },
+
+    /*
+     * Updates the rendering state variables, and returns a {boolean} flag of whether it was successful if we were
+     * already stateful
+     *
+     * Node changes that can cause a potential state change (using Node event listeners):
+     * - hints
+     * - opacity
+     * - clipArea
+     * - _rendererSummary.bitmask
+     * - _rendererBitmask
+     *
+     * State changes that can cause cascading state changes in descendants:
+     * - isUnderCanvasCache
+     * - preferredRenderers
+     */
+    updateState: function() {
+      sceneryLog && sceneryLog.Instance && sceneryLog.Instance( 'updateState ' + this.toString() +
+                                                                ( this.stateless ? ' (stateless)' : '' ) );
+      sceneryLog && sceneryLog.Instance && sceneryLog.push();
+
+      sceneryLog && sceneryLog.Instance && sceneryLog.Instance( 'old: ' + this.getStateString() );
+
+      // old state information, so we can compare what was changed
+      var wasBackbone = this.isBackbone;
+      var wasTransformed = this.isTransformed;
+      var wasInstanceCanvasCache = this.isInstanceCanvasCache;
+      var wasSharedCanvasCacheSelf = this.isSharedCanvasCacheSelf;
+      var wasSharedCanvasCachePlaceholder = this.isSharedCanvasCachePlaceholder;
+      var wasUnderCanvasCache = this.isUnderCanvasCache;
+      var oldSelfRenderer = this.selfRenderer;
+      var oldGroupRenderer = this.groupRenderer;
+      var oldSharedCacheRenderer = this.sharedCacheRenderer;
+      var oldPreferredRenderers = this.preferredRenderers;
+
+      // default values to set (makes the logic much simpler)
+      this.isBackbone = false;
+      this.isTransformed = false;
+      this.isInstanceCanvasCache = false;
+      this.isSharedCanvasCacheSelf = false;
+      this.isSharedCanvasCachePlaceholder = false;
+      this.selfRenderer = 0;
+      this.groupRenderer = 0;
+      this.sharedCacheRenderer = 0;
+
+      var combinedBitmask = this.node._rendererSummary.bitmask;
+      var hints = this.node._hints || emptyHintsObject;
+
+      //OHTWO TODO: Don't force a backbone for transparency
+      var hasTransparency = this.node._opacity !== 1 || hints.usesOpacity;
+      var hasClip = this.node._clipArea !== null;
+
+      this.isUnderCanvasCache = this.isSharedCanvasCacheRoot ||
+                                ( this.parent ? ( this.parent.isUnderCanvasCache || this.parent.isInstanceCanvasCache || this.parent.isSharedCanvasCacheSelf ) : false );
+
+
+      // check if we need a backbone or cache
+      // if we are under a canvas cache, we will NEVER have a backbone
+      // splits are accomplished just by having a backbone
+      if ( this.isDisplayRoot || ( !this.isUnderCanvasCache && ( hasTransparency || hasClip || hints.requireElement || hints.cssTransform || hints.split ) ) ) {
+        this.isBackbone = true;
+        this.isTransformed = this.isDisplayRoot || !!hints.cssTransform; // for now, only trigger CSS transform if we have the specific hint
+        //OHTWO TODO: check whether the force acceleration hint is being used
+        this.groupRenderer = Renderer.bitmaskDOM | ( hints.forceAcceleration ? Renderer.bitmaskForceAcceleration : 0 ); // probably won't be used
+      }
+      else if ( hasTransparency || hasClip || hints.canvasCache ) {
+        // everything underneath needs to be renderable with Canvas, otherwise we cannot cache
+        assert && assert( ( combinedBitmask & Renderer.bitmaskCanvas ) !== 0, 'hints.canvasCache provided, but not all node contents can be rendered with Canvas under ' + this.node.constructor.name );
+
+        if ( hints.singleCache ) {
+          // TODO: scale options - fixed size, match highest resolution (adaptive), or mipmapped
+          if ( this.isSharedCanvasCacheRoot ) {
+            this.isSharedCanvasCacheSelf = true;
+
+            this.sharedCacheRenderer = Renderer.bitmaskCanvas;
+          }
+          else {
+            // everything underneath needs to guarantee that its bounds are valid
+            //OHTWO TODO: We'll probably remove this if we go with the "safe bounds" approach
+            assert && assert( ( combinedBitmask & scenery.bitmaskBoundsValid ) !== 0, 'hints.singleCache provided, but not all node contents have valid bounds under ' + this.node.constructor.name );
+
+            this.isSharedCanvasCachePlaceholder = true;
+          }
+        }
+        else {
+          this.isInstanceCanvasCache = true;
+          this.isUnderCanvasCache = true;
+          this.groupRenderer = Renderer.bitmaskCanvas; // disallowing SVG here, so we don't have to break up our SVG group structure
+        }
+      }
+
+      // set up our preferred renderer list (generally based on the parent)
+      this.preferredRenderers = this.parent ? this.parent.preferredRenderers : defaultPreferredRenderers;
+      // allow the node to modify its preferred renderers (and those of its descendants)
+      if ( hints.renderer ) {
+        this.preferredRenderers = Renderer.pushOrderBitmask( this.preferredRenderers, hints.renderer );
+      }
+
+      if ( this.node.isPainted() ) {
+        if ( this.isUnderCanvasCache ) {
+          this.selfRenderer = Renderer.bitmaskCanvas;
+        }
+        else {
+          var nodeBitmask = this.node._rendererBitmask;
+
+          //OHTWO TODO: How specifically to handle hi-resolution varieties? Not in the renderer?
+          // use the preferred rendering order if specified, otherwise use the default
+          this.selfRenderer = ( nodeBitmask & Renderer.bitmaskOrderFirst( this.preferredRenderers ) ) ||
+                              ( nodeBitmask & Renderer.bitmaskOrderSecond( this.preferredRenderers ) ) ||
+                              ( nodeBitmask & Renderer.bitmaskOrderThird( this.preferredRenderers ) ) ||
+                              ( nodeBitmask & Renderer.bitmaskOrderFourth( this.preferredRenderers ) ) ||
+                              ( nodeBitmask & Renderer.bitmaskSVG ) ||
+                              ( nodeBitmask & Renderer.bitmaskCanvas ) ||
+                              ( nodeBitmask & Renderer.bitmaskDOM ) ||
+                              ( nodeBitmask & Renderer.bitmaskWebGL ) ||
+                              0;
+
+          assert && assert( this.selfRenderer, 'setSelfRenderer failure?' );
+        }
+      }
+
+      // whether we need to force rebuilding the group drawable
+      this.groupChanged = ( wasBackbone !== this.isBackbone ) ||
+                          ( wasInstanceCanvasCache !== this.isInstanceCanvasCache ) ||
+                          ( wasSharedCanvasCacheSelf !== this.isSharedCanvasCacheSelf );
+
+      // whether any of our render state changes can change descendant render states
+      this.cascadingStateChange = ( wasUnderCanvasCache !== this.isUnderCanvasCache ) ||
+                                  ( oldPreferredRenderers !== this.preferredRenderers );
+
+      /*
+       * Whether we can just update the state on an Instance when changing from this state => otherState.
+       * This is generally not possible if there is a change in whether the instance should be a transform root
+       * (e.g. backbone/single-cache), so we will have to recreate the instance and its subtree if that is the case.
+       *
+       * Only relevant if we were previously stateful, so it can be ignored if this is our first updateState()
+       */
+      this.incompatibleStateChange = ( this.isTransformed !== wasTransformed ) ||
+                                     ( this.isSharedCanvasCachePlaceholder !== wasSharedCanvasCachePlaceholder );
+
+      // whether there was any render state change
+      this.anyStateChange = this.groupChanged || this.cascadingStateChange || this.incompatibleStateChange ||
+                            ( oldSelfRenderer !== this.selfRenderer ) ||
+                            ( oldGroupRenderer !== this.groupRenderer ) ||
+                            ( oldSharedCacheRenderer !== this.sharedCacheRenderer );
+
+      sceneryLog && sceneryLog.Instance && sceneryLog.Instance( 'new: ' + this.getStateString() );
+
+      sceneryLog && sceneryLog.Instance && sceneryLog.pop();
+    },
+
+    getStateString: function() {
+      var result = 'S[ ' +
+             ( this.isDisplayRoot ? 'displayRoot ' : '' ) +
+             ( this.isBackbone ? 'backbone ' : '' ) +
+             ( this.isInstanceCanvasCache ? 'instanceCache ' : '' ) +
+             ( this.isSharedCanvasCachePlaceholder ? 'sharedCachePlaceholder ' : '' ) +
+             ( this.isSharedCanvasCacheSelf ? 'sharedCacheSelf ' : '' ) +
+             ( this.isTransformed ? 'TR ' : '' ) +
+             ( this.selfRenderer ? this.selfRenderer.toString( 16 ) : '-' ) + ',' +
+             ( this.groupRenderer ? this.groupRenderer.toString( 16 ) : '-' ) + ',' +
+             ( this.sharedCacheRenderer ? this.sharedCacheRenderer.toString( 16 ) : '-' ) + ' ';
+      return result + ']';
     },
 
     // @public
     baseSyncTree: function() {
       sceneryLog && sceneryLog.Instance && sceneryLog.Instance( '-------- START baseSyncTree ' + this.toString() + ' --------' );
-      this.syncTree( scenery.RenderState.createRootState( this.node ) );
+      this.syncTree();
       sceneryLog && sceneryLog.Instance && sceneryLog.Instance( '-------- END baseSyncTree ' + this.toString() + ' --------' );
       this.cleanSyncTreeResults();
     },
 
-    // updates the internal {RenderState}, and fully synchronizes the instance subtree
+    // updates the internal rendering state, and fully synchronizes the instance subtree
     /*OHTWO TODO:
      * Pruning:
      *   - If children haven't changed, skip instance add/move/remove
-     *   - If RenderState hasn't changed AND there are no render/instance/stitch changes below us, EXIT (whenever we are
+     *   - If render state hasn't changed AND there are no render/instance/stitch changes below us, EXIT (whenever we are
      *     assured children don't need sync)
      * Return linked-list of alternating changed (add/remove) and keep sections of drawables, for processing with
      * backbones/canvas caches.
@@ -180,32 +372,45 @@ define( function( require ) {
      *        Don't flag changes when they won't actually change the "current" render state!!!
      *        Changes in renderer summary (subtree combined) can cause changes in the render state
      *    OK for traversal to return "no change", doesn't specify any drawables changes
+     *
+     *
+     * @returns {boolean} - Whether the sync was possible. If it wasn't, a new instance subtree will need to be created.
      */
-    syncTree: function( state ) {
-      sceneryLog && sceneryLog.Instance && sceneryLog.Instance( 'syncTree ' + this.toString() + ' ' + state.toString() +
-                                                                ( this.isStateless() ? ' (stateless)' : '' ) );
+    syncTree: function() {
+      sceneryLog && sceneryLog.Instance && sceneryLog.Instance( 'syncTree ' + this.toString() + ' ' + this.getStateString() +
+                                                                ( this.stateless ? ' (stateless)' : '' ) );
       sceneryLog && sceneryLog.Instance && sceneryLog.push();
 
       if ( sceneryLog && scenery.isLoggingPerformance() ) {
         this.display.perfSyncTreeCount++;
       }
 
-      assert && assert( state && state.isSharedCanvasCachePlaceholder !== undefined, 'RenderState duck-typing instanceof' );
-
       // may access isTransformed up to root to determine relative trails
-      assert && assert( !this.parent || !this.parent.isStateless(), 'We should not have a stateless parent instance' );
+      assert && assert( !this.parent || !this.parent.stateless, 'We should not have a stateless parent instance' );
 
-      var oldState = this.state;
-      var wasStateless = !oldState;
+      var wasStateless = this.stateless;
+      if ( wasStateless ||
+           ( this.parent && this.parent.cascadingStateChange ) || // if our parent had cascading state changes, we need to recompute
+           ( this.renderStateDirtyFrame === this.display._frameId ) ) { // if our render state is dirty
+        this.updateState();
+      }
+      else {
+        // we can check whether updating state would have made any changes when we skip it (for slow assertions)
+        if ( assertSlow ) {
+          this.updateState();
+          assertSlow( !this.anyStateChange );
+        }
+      }
 
-      assert && assert( wasStateless || oldState.isInstanceCompatibleWith( state ),
-        'Attempt to update to a render state that is not compatible with this instance\'s current state' );
+      if ( !wasStateless && this.incompatibleStateChange ) {
+        sceneryLog && sceneryLog.Instance && sceneryLog.Instance( 'incompatible instance ' + this.toString() + ' ' + this.getStateString() + ', aborting' );
+        sceneryLog && sceneryLog.Instance && sceneryLog.pop();
+        return false;
+      }
+      this.stateless = false;
+
       // no need to overwrite, should always be the same
-      assert && assert( wasStateless || oldState.isTransformed === state.isTransformed );
       assert && assert( !wasStateless || this.children.length === 0, 'We should not have child instances on an instance without state' );
-
-      this.state = state;
-      this.isTransformed = state.isTransformed;
 
       if ( wasStateless ) {
         // If we are a transform root, notify the display that we are dirty. We'll be validated when it's at that phase
@@ -215,23 +420,28 @@ define( function( require ) {
           this.display.markTransformRootDirty( this, true );
         }
 
-        this.onStateCreation();
+        this.attachNodeListeners();
       }
 
-      if ( state.isSharedCanvasCachePlaceholder ) {
-        this.sharedSyncTree( state );
+      //OHTWO TODO: pruning of shared caches
+      if ( this.isSharedCanvasCachePlaceholder ) {
+        this.sharedSyncTree();
       }
-      else {
+      // pruning so that if no changes would affect a subtree it is skipped
+      else if ( wasStateless || this.skipPruningFrame === this.display._frameId || this.anyStateChange ) {
+
         // mark fully-removed instances for disposal, and initialize child instances if we were stateless
-        this.prepareChildInstances( state, oldState );
+        this.prepareChildInstances( wasStateless );
 
         var oldFirstDrawable = this.firstDrawable;
         var oldLastDrawable = this.lastDrawable;
         var oldFirstInnerDrawable = this.firstInnerDrawable;
         var oldLastInnerDrawable = this.lastInnerDrawable;
 
+        var selfChanged = this.updateSelfDrawable();
+
         // properly handle our self and children
-        this.localSyncTree( state, oldState );
+        this.localSyncTree( selfChanged );
 
         if ( assertSlow ) {
           // before and after first/last drawables (inside any potential group drawable)
@@ -239,25 +449,28 @@ define( function( require ) {
         }
 
         // apply any group changes necessary
-        this.groupSyncTree( state, oldState );
+        this.groupSyncTree( wasStateless );
 
         if ( assertSlow ) {
           // before and after first/last drawables (outside of any potential group drawable)
           this.auditChangeIntervals( oldFirstDrawable, oldLastDrawable, this.firstDrawable, this.lastDrawable );
         }
       }
-
-      if ( oldState && oldState !== this.state ) {
-        oldState.freeToPool();
+      else {
+        sceneryLog && sceneryLog.Instance && sceneryLog.Instance( 'pruned' );
       }
 
       sceneryLog && sceneryLog.Instance && sceneryLog.pop();
+
+      return true;
     },
 
-    localSyncTree: function( state, oldState ) {
+    /*
+     * Responsible for syncing children, connecting the drawable linked list as needed, and outputting change intervals
+     * and first/last drawable information.
+     */
+    localSyncTree: function( selfChanged ) {
       var frameId = this.display._frameId;
-
-      var selfChanged = this.updateSelfDrawable( state, oldState );
 
       // local variables, since we can't overwrite our instance properties yet
       var firstDrawable = this.selfDrawable; // possibly null
@@ -272,19 +485,20 @@ define( function( require ) {
         firstChangeInterval = ChangeInterval.newForDisplay( null, null, this.display );
       }
       var currentChangeInterval = firstChangeInterval;
-      var lastUnchangedDrawable = selfChanged ? null : this.selfDrawable;
+      var lastUnchangedDrawable = selfChanged ? null : this.selfDrawable; // possibly null
 
       for ( var i = 0; i < this.children.length; i++ ) {
         var childInstance = this.children[i];
-        var childState = state.getStateForDescendant( childInstance.node );
-        childInstance = this.updateChildInstanceIfIncompatible( childInstance, childState, i );
 
         // grab the first/last drawables before our syncTree
         // var oldChildFirstDrawable = childInstance.firstDrawable;
         // var oldChildLastDrawable = childInstance.lastDrawable;
 
-        // sync the tree
-        childInstance.syncTree( childState );
+        var isCompatible = childInstance.syncTree();
+        if ( !isCompatible ) {
+          childInstance = this.updateIncompatibleChildInstance( childInstance, i );
+          childInstance.syncTree();
+        }
 
         //OHTWO TODO: only strip out invisible Canvas drawables, while leaving SVG (since we can more efficiently hide
         // SVG trees, memory-wise)
@@ -451,10 +665,14 @@ define( function( require ) {
       }
     },
 
-    // returns whether the selfDrawable changed
-    updateSelfDrawable: function( state, oldState ) {
+    /*
+     * If necessary, create/replace/remove our selfDrawable.
+     *
+     * @returns whether the selfDrawable changed
+     */
+    updateSelfDrawable: function() {
       if ( this.node.isPainted() ) {
-        var selfRenderer = state.selfRenderer; // our new self renderer bitmask
+        var selfRenderer = this.selfRenderer; // our new self renderer bitmask
 
         // bitwise trick, since only one of Canvas/SVG/DOM/WebGL/etc. flags will be chosen, and bitmaskRendererArea is
         // the mask for those flags. In English, "Is the current selfDrawable compatible with our selfRenderer (if any),
@@ -480,49 +698,41 @@ define( function( require ) {
     },
 
     // returns the up-to-date instance
-    updateChildInstanceIfIncompatible: function( childInstance, childState, index ) {
-      // see if we need to rebuild the instance tree due to an incompatible render state
-      if ( !childInstance.isStateless() && !childState.isInstanceCompatibleWith( childInstance.state ) ) {
-        if ( sceneryLog && scenery.isLoggingPerformance() ) {
-          var affectedInstanceCount = childInstance.getDescendantCount() + 1; // +1 for itself
+    updateIncompatibleChildInstance: function( childInstance, index ) {
+      if ( sceneryLog && scenery.isLoggingPerformance() ) {
+        var affectedInstanceCount = childInstance.getDescendantCount() + 1; // +1 for itself
 
-          if ( affectedInstanceCount > 100 ) {
-            sceneryLog.PerfCritical && sceneryLog.PerfCritical( 'incompatible instance rebuild at ' + this.trail.toPathString() + ': ' + affectedInstanceCount );
-          }
-          else if ( affectedInstanceCount > 40 ) {
-            sceneryLog.PerfMajor && sceneryLog.PerfMajor( 'incompatible instance rebuild at ' + this.trail.toPathString() + ': ' + affectedInstanceCount );
-          }
-          else if ( affectedInstanceCount > 0 ) {
-            sceneryLog.PerfMinor && sceneryLog.PerfMinor( 'incompatible instance rebuild at ' + this.trail.toPathString() + ': ' + affectedInstanceCount );
-          }
+        if ( affectedInstanceCount > 100 ) {
+          sceneryLog.PerfCritical && sceneryLog.PerfCritical( 'incompatible instance rebuild at ' + this.trail.toPathString() + ': ' + affectedInstanceCount );
         }
-
-        // mark it for disposal
-        this.display.markInstanceRootForDisposal( childInstance );
-
-        // swap in a new instance
-        var replacementInstance = Instance.createFromPool( this.display, this.trail.copy().addDescendant( childInstance.node, index ) );
-        this.replaceInstanceWithIndex( childInstance, replacementInstance, index );
-        return replacementInstance;
+        else if ( affectedInstanceCount > 40 ) {
+          sceneryLog.PerfMajor && sceneryLog.PerfMajor( 'incompatible instance rebuild at ' + this.trail.toPathString() + ': ' + affectedInstanceCount );
+        }
+        else if ( affectedInstanceCount > 0 ) {
+          sceneryLog.PerfMinor && sceneryLog.PerfMinor( 'incompatible instance rebuild at ' + this.trail.toPathString() + ': ' + affectedInstanceCount );
+        }
       }
-      else {
-        return childInstance;
-      }
+
+      // mark it for disposal
+      this.display.markInstanceRootForDisposal( childInstance );
+
+      // swap in a new instance
+      var replacementInstance = Instance.createFromPool( this.display, this.trail.copy().addDescendant( childInstance.node, index ), false, false );
+      this.replaceInstanceWithIndex( childInstance, replacementInstance, index );
+      return replacementInstance;
     },
 
-    groupSyncTree: function( state, oldState ) {
-      var groupRenderer = state.groupRenderer;
-      assert && assert( ( state.isBackbone ? 1 : 0 ) +
-                        ( state.isInstanceCanvasCache ? 1 : 0 ) +
-                        ( state.isSharedCanvasCacheSelf ? 1 : 0 ) === ( groupRenderer ? 1 : 0 ),
+    groupSyncTree: function( wasStateless ) {
+      var groupRenderer = this.groupRenderer;
+      assert && assert( ( this.isBackbone ? 1 : 0 ) +
+                        ( this.isInstanceCanvasCache ? 1 : 0 ) +
+                        ( this.isSharedCanvasCacheSelf ? 1 : 0 ) === ( groupRenderer ? 1 : 0 ),
         'We should have precisely one of these flags set for us to have a groupRenderer' );
 
       // if we switched to/away from a group, our group type changed, or our group renderer changed
       /* jshint -W018 */
-      var groupChanged = !!groupRenderer !== !!this.groupDrawable ||
-                         ( oldState && ( oldState.isBackbone !== state.isBackbone ||
-                                         oldState.isInstanceCanvasCache !== state.isInstanceCanvasCache ||
-                                         oldState.isSharedCanvasCacheSelf !== state.isSharedCanvasCacheSelf ) ) ||
+      var groupChanged = ( !!groupRenderer !== !!this.groupDrawable ) ||
+                         ( !wasStateless && this.groupChanged ) ||
                          ( this.groupDrawable && this.groupDrawable.renderer !== groupRenderer );
 
       // if there is a change, prepare
@@ -541,9 +751,9 @@ define( function( require ) {
         this.firstDrawable && Drawable.disconnectBefore( this.firstDrawable, this.display );
         this.lastDrawable && Drawable.disconnectAfter( this.lastDrawable, this.display );
 
-        if ( state.isBackbone ) {
+        if ( this.isBackbone ) {
           if ( groupChanged ) {
-            this.groupDrawable = scenery.BackboneDrawable.createFromPool( this.display, this, this.getTransformRootInstance(), groupRenderer, state.isDisplayRoot );
+            this.groupDrawable = scenery.BackboneDrawable.createFromPool( this.display, this, this.getTransformRootInstance(), groupRenderer, this.isDisplayRoot );
 
             if ( this.isTransformed ) {
               this.display.markTransformRootDirty( this, true );
@@ -554,7 +764,7 @@ define( function( require ) {
             this.groupDrawable.stitch( this.firstDrawable, this.lastDrawable, this.firstChangeInterval, this.lastChangeInterval );
           }
         }
-        else if ( state.isInstanceCanvasCache ) {
+        else if ( this.isInstanceCanvasCache ) {
           if ( groupChanged ) {
             this.groupDrawable = scenery.InlineCanvasCacheDrawable.createFromPool( groupRenderer, this );
           }
@@ -562,7 +772,7 @@ define( function( require ) {
             this.groupDrawable.stitch( this.firstDrawable, this.lastDrawable, this.firstChangeInterval, this.lastChangeInterval );
           }
         }
-        else if ( state.isSharedCanvasCacheSelf ) {
+        else if ( this.isSharedCanvasCacheSelf ) {
           if ( groupChanged ) {
             this.groupDrawable = scenery.CanvasBlock.createFromPool( groupRenderer, this );
           }
@@ -583,10 +793,12 @@ define( function( require ) {
       }
     },
 
-    sharedSyncTree: function( state ) {
+    sharedSyncTree: function() {
+      //OHTWO TODO: we are probably missing syncTree for shared trees properly with pruning. investigate!!
+
       this.ensureSharedCacheInitialized();
 
-      var sharedCacheRenderer = state.sharedCacheRenderer;
+      var sharedCacheRenderer = this.sharedCacheRenderer;
 
       if ( !this.sharedCacheDrawable || this.sharedCacheDrawable.renderer !== sharedCacheRenderer ) {
         //OHTWO TODO: mark everything as changed (big change interval)
@@ -606,7 +818,7 @@ define( function( require ) {
       }
     },
 
-    prepareChildInstances: function( state, oldState ) {
+    prepareChildInstances: function( wasStateless ) {
       // mark all removed instances to be disposed (along with their subtrees)
       while ( this.instanceRemovalCheckList.length ) {
         var instanceToMark = this.instanceRemovalCheckList.pop();
@@ -616,12 +828,12 @@ define( function( require ) {
         }
       }
 
-      if ( !oldState ) {
+      if ( wasStateless ) {
         // we need to create all of the child instances
         for ( var k = 0; k < this.node.children.length; k++ ) {
           // create a child instance
           var child = this.node.children[k];
-          this.appendInstance( Instance.createFromPool( this.display, this.trail.copy().addDescendant( child, k ) ) );
+          this.appendInstance( Instance.createFromPool( this.display, this.trail.copy().addDescendant( child, k ), false, false ) );
         }
       }
     },
@@ -635,8 +847,8 @@ define( function( require ) {
 
         // TODO: increment reference counting?
         if ( !this.sharedCacheInstance ) {
-          this.sharedCacheInstance = Instance.createFromPool( this.display, new scenery.Trail( this.node ) );
-          this.sharedCacheInstance.syncTree( scenery.RenderState.createSharedCacheState( this.node ) );
+          this.sharedCacheInstance = Instance.createFromPool( this.display, new scenery.Trail( this.node ), false, true );
+          this.sharedCacheInstance.syncTree();
           this.display._sharedCanvasInstances[instanceKey] = this.sharedCacheInstance;
           // TODO: reference counting?
 
@@ -653,12 +865,6 @@ define( function( require ) {
           this.display.markTransformRootDirty( this, true );
         }
       }
-    },
-
-    // whether we don't have an associated RenderState attached. If we are stateless, we won't have children, and won't
-    // have listeners attached to our node yet.
-    isStateless: function() {
-      return !this.state;
     },
 
     // @private, finds the closest drawable (not including the child instance at childIndex) using lastDrawable, or null
@@ -788,7 +994,7 @@ define( function( require ) {
           'inserting child node ' + childNode.constructor.name + '#' + childNode.id + ' into ' + this.toString() );
       sceneryLog && sceneryLog.Instance && sceneryLog.push();
 
-      assert && assert( !this.isStateless(), 'If we are stateless, we should not receive these notifications' );
+      assert && assert( !this.stateless, 'If we are stateless, we should not receive these notifications' );
 
       var instance = this.findChildInstanceOnNode( childNode );
 
@@ -801,11 +1007,14 @@ define( function( require ) {
       else {
         sceneryLog && sceneryLog.Instance && sceneryLog.Instance( 'creating stub instance' );
         sceneryLog && sceneryLog.Instance && sceneryLog.push();
-        instance = Instance.createFromPool( this.display, this.trail.copy().addDescendant( childNode, index ) );
+        instance = Instance.createFromPool( this.display, this.trail.copy().addDescendant( childNode, index ), false, false );
         sceneryLog && sceneryLog.Instance && sceneryLog.pop();
       }
 
       this.insertInstance( instance, index );
+
+      // make sure we are visited for syncTree()
+      this.markSkipPruning();
 
       sceneryLog && sceneryLog.Instance && sceneryLog.pop();
     },
@@ -816,7 +1025,7 @@ define( function( require ) {
           'removing child node ' + childNode.constructor.name + '#' + childNode.id + ' from ' + this.toString() );
       sceneryLog && sceneryLog.Instance && sceneryLog.push();
 
-      assert && assert( !this.isStateless(), 'If we are stateless, we should not receive these notifications' );
+      assert && assert( !this.stateless, 'If we are stateless, we should not receive these notifications' );
       assert && assert( this.children[index].node === childNode, 'Ensure that our instance matches up' );
 
       var instance = this.findChildInstanceOnNode( childNode );
@@ -831,17 +1040,28 @@ define( function( require ) {
 
       this.removeInstanceWithIndex( instance, index );
 
+      // make sure we are visited for syncTree()
+      this.markSkipPruning();
+
       sceneryLog && sceneryLog.Instance && sceneryLog.pop();
     },
 
     // event callback for Node's 'visibility' event, used to notify about stitch changes
     onVisibilityChange: function() {
-      assert && assert( !this.isStateless(), 'If we are stateless, we should not receive these notifications' );
+      assert && assert( !this.stateless, 'If we are stateless, we should not receive these notifications' );
 
       // for now, just mark which frame we were changed for our change interval
       this.stitchChangeFrame = this.display._frameId;
 
-      //OHTWO TODO: mark as needing to not be pruned for syncTree
+      // make sure we aren't pruned in the next syncTree()
+      this.parent && this.parent.markSkipPruning();
+    },
+
+    // event callback for Node's 'opacity' change event
+    onOpacityChange: function() {
+      assert && assert( !this.stateless, 'If we are stateless, we should not receive these notifications' );
+
+      this.markRenderStateDirty();
     },
 
     getDescendantCount: function() {
@@ -883,7 +1103,7 @@ define( function( require ) {
 
     // what instance have filters (opacity/visibility/clip) been applied up to?
     getFilterRootInstance: function() {
-      if ( this.state.isBackbone || this.state.isInstanceCanvasCache || !this.parent ) {
+      if ( this.isBackbone || this.isInstanceCanvasCache || !this.parent ) {
         return this;
       }
       else {
@@ -893,7 +1113,7 @@ define( function( require ) {
 
     // what instance transforms have been applied up to?
     getTransformRootInstance: function() {
-      if ( this.state.isTransformed || !this.parent ) {
+      if ( this.isTransformed || !this.parent ) {
         return this;
       }
       else {
@@ -901,25 +1121,53 @@ define( function( require ) {
       }
     },
 
-    onStateCreation: function() {
+    attachNodeListeners: function() {
       // attach listeners to our node
-      this.relativeTransform.onStateCreation();
+      this.relativeTransform.attachNodeListeners();
 
-      if ( !this.state.isSharedCanvasCachePlaceholder ) {
+      if ( !this.isSharedCanvasCachePlaceholder ) {
         this.node.onStatic( 'childInserted', this.childInsertedListener );
         this.node.onStatic( 'childRemoved', this.childRemovedListener );
         this.node.onStatic( 'visibility', this.visibilityListener );
+
+        this.node.onStatic( 'opacity', this.markRenderStateDirtyListener );
+        this.node.onStatic( 'hint', this.markRenderStateDirtyListener );
+        this.node.onStatic( 'clip', this.markRenderStateDirtyListener );
+        this.node.onStatic( 'rendererBitmask', this.markRenderStateDirtyListener );
+        this.node.onStatic( 'rendererSummary', this.markRenderStateDirtyListener );
       }
     },
 
-    onStateRemoval: function() {
-      this.relativeTransform.onStateRemoval();
+    detachNodeListeners: function() {
+      this.relativeTransform.detachNodeListeners();
 
-      if ( !this.state.isSharedCanvasCachePlaceholder ) {
+      if ( !this.isSharedCanvasCachePlaceholder ) {
         this.node.offStatic( 'childInserted', this.childInsertedListener );
         this.node.offStatic( 'childRemoved', this.childRemovedListener );
         this.node.offStatic( 'visibility', this.visibilityListener );
+
+        this.node.offStatic( 'opacity', this.markRenderStateDirtyListener );
+        this.node.offStatic( 'hint', this.markRenderStateDirtyListener );
+        this.node.offStatic( 'clip', this.markRenderStateDirtyListener );
+        this.node.offStatic( 'rendererBitmask', this.markRenderStateDirtyListener );
+        this.node.offStatic( 'rendererSummary', this.markRenderStateDirtyListener );
       }
+    },
+
+    // ensure that the render state is updated in the next syncTree()
+    markRenderStateDirty: function() {
+      this.renderStateDirtyFrame = this.display._frameId;
+
+      // ensure we aren't pruned (not set on this instance, since we may not need to visit our children)
+      this.parent && this.parent.markSkipPruning();
+    },
+
+    // ensure that this instance and its children will be visited in the next syncTree()
+    markSkipPruning: function() {
+      this.skipPruningFrame = this.display._frameId;
+
+      // walk it up to the root
+      this.parent && this.parent.markSkipPruning();
     },
 
     // clean up listeners and garbage, so that we can be recycled (or pooled)
@@ -935,13 +1183,14 @@ define( function( require ) {
       this.sharedCacheDrawable && this.sharedCacheDrawable.disposeImmediately( this.display );
       this.selfDrawable && this.selfDrawable.disposeImmediately( this.display );
 
-      for ( var i = 0; i < this.children.length; i++ ) {
+      var numChildren = this.children.length;
+      for ( var i = 0; i < numChildren; i++ ) {
         this.children[i].dispose();
       }
 
       // we don't originally add in the listener if we are stateless
-      if ( !this.isStateless() ) {
-        this.onStateRemoval();
+      if ( !this.stateless ) {
+        this.detachNodeListeners();
       }
 
       this.node.removeInstance( this );
@@ -967,25 +1216,25 @@ define( function( require ) {
           frameId = this.display._frameId;
         }
 
-        assertSlow( this.state,
+        assertSlow( !this.stateless,
           'State is required for all display instances' );
 
         assertSlow( ( this.firstDrawable === null ) === ( this.lastDrawable === null ),
           'First/last drawables need to both be null or non-null' );
 
-        assertSlow( ( !this.state.isBackbone && !this.state.isSharedCanvasCachePlaceholder ) || this.groupDrawable,
+        assertSlow( ( !this.isBackbone && !this.isSharedCanvasCachePlaceholder ) || this.groupDrawable,
           'If we are a backbone or shared cache, we need to have a groupDrawable reference' );
 
-        assertSlow( !this.state.isSharedCanvasCachePlaceholder || !this.node.isPainted() || this.selfDrawable,
+        assertSlow( !this.isSharedCanvasCachePlaceholder || !this.node.isPainted() || this.selfDrawable,
           'We need to have a selfDrawable if we are painted and not a shared cache' );
 
-        assertSlow( ( !this.state.isTransformed && !this.state.isCanvasCache ) || this.groupDrawable,
+        assertSlow( ( !this.isTransformed && !this.isCanvasCache ) || this.groupDrawable,
           'We need to have a groupDrawable if we are a backbone or any type of canvas cache' );
 
-        assertSlow( !this.state.isSharedCanvasCachePlaceholder || this.sharedCacheDrawable,
+        assertSlow( !this.isSharedCanvasCachePlaceholder || this.sharedCacheDrawable,
           'We need to have a sharedCacheDrawable if we are a shared cache' );
 
-        assertSlow( this.state.isTransformed === this.isTransformed,
+        assertSlow( this.isTransformed === this.isTransformed,
           'isTransformed should match' );
 
         // validate the subtree
@@ -1088,14 +1337,14 @@ define( function( require ) {
   /* jshint -W064 */
   PoolableMixin( Instance, {
     constructorDuplicateFactory: function( pool ) {
-      return function( display, trail ) {
+      return function( display, trail, isDisplayRoot, isSharedCanvasCacheRoot ) {
         if ( pool.length ) {
           sceneryLog && sceneryLog.Instance && sceneryLog.Instance( 'new from pool' );
-          return pool.pop().initialize( display, trail );
+          return pool.pop().initialize( display, trail, isDisplayRoot, isSharedCanvasCacheRoot );
         }
         else {
           sceneryLog && sceneryLog.Instance && sceneryLog.Instance( 'new from constructor' );
-          return new Instance( display, trail );
+          return new Instance( display, trail, isDisplayRoot, isSharedCanvasCacheRoot );
         }
       };
     }

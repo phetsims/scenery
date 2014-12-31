@@ -1570,6 +1570,8 @@ define( function( require ) {
 
       if ( this._hints.renderer !== newRenderer ) {
         this._hints.renderer = newRenderer;
+
+        this.trigger1( 'hint', 'renderer' );
       }
     },
 
@@ -1600,7 +1602,10 @@ define( function( require ) {
     setRendererOptions: function( options ) {
       // TODO: consider checking options based on the specified 'renderer'?
       // TODO: consider a guard where we check if anything changed
+      //OHTWO TODO: Split out all of the renderer options into individual flag ES5'ed getter/setters
       _.extend( this._hints, options );
+
+      this.trigger0( 'hint' );
     },
 
     getRendererOptions: function() {

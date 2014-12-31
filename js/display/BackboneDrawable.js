@@ -400,8 +400,8 @@ define( function( require ) {
       if ( assertSlow ) {
         Drawable.prototype.audit.call( this, allowPendingBlock, allowPendingList, allowDirty );
 
-        assertSlow && assertSlow( this.backboneInstance.state.isBackbone, 'We should reference an instance that requires a backbone' );
-        assertSlow && assertSlow( this.transformRootInstance.state.isTransformed, 'Transform root should be transformed' );
+        assertSlow && assertSlow( this.backboneInstance.isBackbone, 'We should reference an instance that requires a backbone' );
+        assertSlow && assertSlow( this.transformRootInstance.isTransformed, 'Transform root should be transformed' );
 
         for ( var i = 0; i < this.blocks.length; i++ ) {
           this.blocks[i].audit( allowPendingBlock, allowPendingList, allowDirty );

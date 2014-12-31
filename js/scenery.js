@@ -83,7 +83,6 @@ define( function( require ) {
       Instance: { name: 'Instance', style: 'color: #000;' },
       SVGBlock: { name: 'SVG', style: 'color: #000;' },
       SVGGroup: { name: 'SVGGroup', style: 'color: #000;' },
-      RenderState: { name: 'RenderState', style: 'color: #000;' },
       Paints: { name: 'Paints', style: 'color: #000;' }
     },
     enableIndividualLog: function( name ) {

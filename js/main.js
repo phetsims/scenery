@@ -33,7 +33,6 @@ define( [
   'SCENERY/display/RebuildStitcher',
   'SCENERY/display/RelativeTransform',
   'SCENERY/display/Renderer',
-  'SCENERY/display/RenderState',
   'SCENERY/display/SelfDrawable',
   'SCENERY/display/SharedCanvasCacheDrawable',
   'SCENERY/display/Stitcher',

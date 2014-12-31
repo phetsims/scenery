@@ -149,7 +149,7 @@ define( function( require ) {
 
     // NOTE: different parameter order compared to Node
     insertInstance: function( instance, index ) {
-      if ( instance.isStateless() ) {
+      if ( instance.stateless ) {
         assert && assert( !instance.relativeTransform.hasAncestorListenerNeed(),
           'We only track changes properly if stateless instances do not have needs' );
         assert && assert( !instance.relativeTransform.hasAncestorComputeNeed(),
@@ -181,11 +181,11 @@ define( function( require ) {
       }
     },
 
-    onStateCreation: function() {
+    attachNodeListeners: function() {
       this.node.onStatic( 'transform', this.nodeTransformListener );
     },
 
-    onStateRemoval: function() {
+    detachNodeListeners: function() {
       this.node.offStatic( 'transform', this.nodeTransformListener );
     },
 
