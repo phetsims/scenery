@@ -81,6 +81,8 @@ define( function( require ) {
       FittedBlock: { name: 'FittedBlock', style: 'color: #000;' },
       Input: { name: 'Input', style: 'color: #000;' },
       Instance: { name: 'Instance', style: 'color: #000;' },
+      InstanceTree: { name: 'InstanceTree', style: 'color: #000;' },
+      ChangeInterval: { name: 'ChangeInterval', style: 'color: #0a0;' },
       SVGBlock: { name: 'SVG', style: 'color: #000;' },
       SVGGroup: { name: 'SVGGroup', style: 'color: #000;' },
       Paints: { name: 'Paints', style: 'color: #000;' }

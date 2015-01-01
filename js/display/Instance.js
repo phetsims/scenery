@@ -482,7 +482,10 @@ define( function( require ) {
 
       var firstChangeInterval = null;
       if ( selfChanged ) {
+        sceneryLog && sceneryLog.ChangeInterval && sceneryLog.ChangeInterval( 'self' );
+        sceneryLog && sceneryLog.ChangeInterval && sceneryLog.push();
         firstChangeInterval = ChangeInterval.newForDisplay( null, null, this.display );
+        sceneryLog && sceneryLog.ChangeInterval && sceneryLog.pop();
       }
       var currentChangeInterval = firstChangeInterval;
       var lastUnchangedDrawable = selfChanged ? null : this.selfDrawable; // possibly null
@@ -544,6 +547,9 @@ define( function( require ) {
         // where there were nodes that needed stitch changes that aren't still children, or were moved. We create a
         // "bridge" change interval to span the gap where nodes were removed.
         if ( needsBridge ) {
+          sceneryLog && sceneryLog.ChangeInterval && sceneryLog.ChangeInterval( 'bridge' );
+          sceneryLog && sceneryLog.ChangeInterval && sceneryLog.push();
+
           var bridge = ChangeInterval.newForDisplay( lastUnchangedDrawable, null, this.display );
           if ( currentChangeInterval ) {
             currentChangeInterval.nextChangeInterval = bridge;
@@ -551,6 +557,8 @@ define( function( require ) {
           currentChangeInterval = bridge;
           firstChangeInterval = firstChangeInterval || currentChangeInterval; // store if it is the first
           isBeforeOpen = true;
+
+          sceneryLog && sceneryLog.ChangeInterval && sceneryLog.pop();
         }
 
         // Exclude child instances that are now (and were before) not included. NOTE: We still need to include those in
@@ -910,6 +918,10 @@ define( function( require ) {
           'Instance insertion bounds check for index ' + index + ' with previous children length ' +
           this.children.length );
 
+      sceneryLog && sceneryLog.InstanceTree && sceneryLog.InstanceTree(
+          'inserting ' + instance.toString() + ' into ' + this.toString() );
+      sceneryLog && sceneryLog.InstanceTree && sceneryLog.push();
+
       // mark it as changed during this frame, so that we can properly set the change interval
       instance.stitchChangeFrame = this.display._frameId;
       this.stitchChangeOnChildren = this.display._frameId;
@@ -930,6 +942,8 @@ define( function( require ) {
       }
 
       this.relativeTransform.insertInstance( instance, index );
+
+      sceneryLog && sceneryLog.InstanceTree && sceneryLog.pop();
     },
 
     removeInstance: function( instance ) {
@@ -941,6 +955,10 @@ define( function( require ) {
       assert && assert( index >= 0 && index < this.children.length,
           'Instance removal bounds check for index ' + index + ' with previous children length ' +
           this.children.length );
+
+      sceneryLog && sceneryLog.InstanceTree && sceneryLog.InstanceTree(
+          'removing ' + instance.toString() + ' from ' + this.toString() );
+      sceneryLog && sceneryLog.InstanceTree && sceneryLog.push();
 
       var frameId = this.display._frameId;
 
@@ -972,6 +990,8 @@ define( function( require ) {
       }
 
       this.relativeTransform.removeInstanceWithIndex( instance, index );
+
+      sceneryLog && sceneryLog.InstanceTree && sceneryLog.pop();
     },
 
     replaceInstanceWithIndex: function( childInstance, replacementInstance, index ) {
