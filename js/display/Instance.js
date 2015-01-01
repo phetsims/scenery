@@ -540,6 +540,9 @@ define( function( require ) {
         var isAfterOpen = firstChildChangeInterval && firstChildChangeInterval.drawableBefore === null;
         var needsBridge = childInstance.stitchChangeBefore === frameId && !isBeforeOpen && !isAfterOpen;
 
+        // We need to insert an additional change interval (bridge) when we notice a link in the drawable linked list
+        // where there were nodes that needed stitch changes that aren't still children, or were moved. We create a
+        // "bridge" change interval to span the gap where nodes were removed.
         if ( needsBridge ) {
           var bridge = ChangeInterval.newForDisplay( lastUnchangedDrawable, null, this.display );
           if ( currentChangeInterval ) {
