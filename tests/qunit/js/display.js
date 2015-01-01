@@ -434,4 +434,20 @@
     expect( 0 );
   } );
 
+  test( 'Invisible append', function() {
+    var scene = new scenery.Node();
+    var display = new scenery.Display( scene );
+    display.updateDisplay();
+
+    var a = new scenery.Rectangle( 0, 0, 100, 50, { fill: 'red' } );
+    scene.addChild( a );
+    display.updateDisplay();
+
+    var b = new scenery.Rectangle( 0, 0, 100, 50, { fill: 'red', visible: false } );
+    scene.addChild( b );
+    display.updateDisplay();
+
+    expect( 0 );
+  } );
+
 })();

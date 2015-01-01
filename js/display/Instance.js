@@ -505,6 +505,7 @@ define( function( require ) {
 
         //OHTWO TODO: only strip out invisible Canvas drawables, while leaving SVG (since we can more efficiently hide
         // SVG trees, memory-wise)
+        // here we strip out invisible drawable sections out of the drawable linked list
         if ( childInstance.node.isVisible() ) {
           // if there are any drawables for that child, link them up in our linked list
           if ( childInstance.firstDrawable ) {
@@ -525,14 +526,25 @@ define( function( require ) {
          * Change intervals
          *----------------------------------------------------------------------------*/
 
+        sceneryLog && sceneryLog.ChangeInterval && sceneryLog.ChangeInterval( 'changes for ' + childInstance.toString() +
+                                                                              ' in ' + this.toString() );
+        sceneryLog && sceneryLog.ChangeInterval && sceneryLog.push();
+
         var wasIncluded = childInstance.stitchChangeIncluded;
         var isIncluded = childInstance.node.isVisible();
         childInstance.stitchChangeIncluded = isIncluded;
 
+        sceneryLog && sceneryLog.ChangeInterval && sceneryLog.ChangeInterval( 'included: ' + wasIncluded + ' => ' + isIncluded );
+
         // check for forcing full change-interval on child
         if ( childInstance.stitchChangeFrame === frameId ) {
+          sceneryLog && sceneryLog.ChangeInterval && sceneryLog.ChangeInterval( 'stitchChangeFrame full change interval' );
+          sceneryLog && sceneryLog.ChangeInterval && sceneryLog.push();
+
           // e.g. it was added, moved, or had visibility changes. requires full change interval
           childInstance.firstChangeInterval = childInstance.lastChangeInterval = ChangeInterval.newForDisplay( null, null, this.display );
+
+          sceneryLog && sceneryLog.ChangeInterval && sceneryLog.pop();
         }
         else {
           assert && assert( wasIncluded === isIncluded, 'If we do not have stitchChangeFrame activated, our inclusion should not have changed' );
@@ -627,6 +639,8 @@ define( function( require ) {
         // composite return value)
         //OHTWO TODO: only do this on instances that were actually traversed
         childInstance.cleanSyncTreeResults();
+
+        sceneryLog && sceneryLog.ChangeInterval && sceneryLog.pop();
       }
 
       /* jshint -W018 */ // it's really the easiest way to compare if two things (casted to booleans) are the same?
