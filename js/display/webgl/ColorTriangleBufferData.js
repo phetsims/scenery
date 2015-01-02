@@ -173,32 +173,32 @@ define( function( require ) {
         index: index,
         endIndex: colorTriangleBufferData.vertexArray.length,
         setXWidth: function( x, width ) {
-          colorTriangleBufferData.vertexArray[index] = x;
-          colorTriangleBufferData.vertexArray[index + 2] = x + width;
-          colorTriangleBufferData.vertexArray[index + 4] = x;
-          colorTriangleBufferData.vertexArray[index + 6] = x + width;
-          colorTriangleBufferData.vertexArray[index + 8] = x + width;
-          colorTriangleBufferData.vertexArray[index + 10] = x;
+          colorTriangleBufferData.vertexArray[index + 0] = x;
+          colorTriangleBufferData.vertexArray[index + 3] = x + width;
+          colorTriangleBufferData.vertexArray[index + 6] = x;
+          colorTriangleBufferData.vertexArray[index + 9] = x + width;
+          colorTriangleBufferData.vertexArray[index + 12] = x + width;
+          colorTriangleBufferData.vertexArray[index + 15] = x;
         },
         setRect: function( x, y, width, height ) {
 
-          colorTriangleBufferData.vertexArray[index] = x;
+          colorTriangleBufferData.vertexArray[index + 0] = x;
           colorTriangleBufferData.vertexArray[index + 1] = y;
 
-          colorTriangleBufferData.vertexArray[index + 2] = x + width;
-          colorTriangleBufferData.vertexArray[index + 3] = y;
+          colorTriangleBufferData.vertexArray[index + 3] = x + width;
+          colorTriangleBufferData.vertexArray[index + 4] = y;
 
-          colorTriangleBufferData.vertexArray[index + 4] = x;
-          colorTriangleBufferData.vertexArray[index + 5] = y + height;
-
-          colorTriangleBufferData.vertexArray[index + 6] = x + width;
+          colorTriangleBufferData.vertexArray[index + 6] = x;
           colorTriangleBufferData.vertexArray[index + 7] = y + height;
 
-          colorTriangleBufferData.vertexArray[index + 8] = x + width;
-          colorTriangleBufferData.vertexArray[index + 9] = y;
+          colorTriangleBufferData.vertexArray[index + 9] = x + width;
+          colorTriangleBufferData.vertexArray[index + 10] = y + height;
 
-          colorTriangleBufferData.vertexArray[index + 10] = x;
-          colorTriangleBufferData.vertexArray[index + 11] = y + height;
+          colorTriangleBufferData.vertexArray[index + 12] = x + width;
+          colorTriangleBufferData.vertexArray[index + 13] = y;
+
+          colorTriangleBufferData.vertexArray[index + 15] = x;
+          colorTriangleBufferData.vertexArray[index + 16] = y + height;
         }
       };
     },
