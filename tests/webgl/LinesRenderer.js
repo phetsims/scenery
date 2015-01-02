@@ -12,8 +12,8 @@ define( function( require ) {
   var inherit = require( 'PHET_CORE/inherit' );
 
   // shaders
-  var lineVertexShader = require( 'text!SCENERY/display/webgl/lines.vert' );
-  var lineFragmentShader = require( 'text!SCENERY/display/webgl/lines.frag' );
+  var lineVertexShader = require( 'text!SCENERY/../tests/webgl/lines.vert' );
+  var lineFragmentShader = require( 'text!SCENERY/../tests/webgl/lines.frag' );
 
   /**
    *

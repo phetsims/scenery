@@ -12,6 +12,7 @@ define( function( require ) {
   // modules
   var inherit = require( 'PHET_CORE/inherit' );
   var ColorTriangleBufferData = require( 'SCENERY/display/webgl/colorTriangleBufferData' );
+  var WebGLUtil = require( 'SCENERY/display/webgl/WebGLUtil' );
 
   // shaders
   var colorVertexShader = require( 'text!SCENERY/display/webgl/color2d.vert' );
@@ -29,20 +30,9 @@ define( function( require ) {
     // TODO: Compare this same idea to triangle strips
     this.colorTriangleBufferData = new ColorTriangleBufferData();
 
-    var toShader = function( source, type, typeString ) {
-      var shader = gl.createShader( type );
-      gl.shaderSource( shader, source );
-      gl.compileShader( shader );
-      if ( !gl.getShaderParameter( shader, gl.COMPILE_STATUS ) ) {
-        console.log( 'ERROR IN ' + typeString + ' SHADER : ' + gl.getShaderInfoLog( shader ) );
-        return false;
-      }
-      return shader;
-    };
-
     this.colorShaderProgram = gl.createProgram();
-    gl.attachShader( this.colorShaderProgram, toShader( colorVertexShader, gl.VERTEX_SHADER, 'VERTEX' ) );
-    gl.attachShader( this.colorShaderProgram, toShader( colorFragmentShader, gl.FRAGMENT_SHADER, 'FRAGMENT' ) );
+    gl.attachShader( this.colorShaderProgram, WebGLUtil.toShader( gl, colorVertexShader, gl.VERTEX_SHADER, 'VERTEX' ) );
+    gl.attachShader( this.colorShaderProgram, WebGLUtil.toShader( gl, colorFragmentShader, gl.FRAGMENT_SHADER, 'FRAGMENT' ) );
     gl.linkProgram( this.colorShaderProgram );
 
     this.positionAttribLocation = gl.getAttribLocation( this.colorShaderProgram, 'aPosition' );
