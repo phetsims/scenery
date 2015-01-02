@@ -34,8 +34,8 @@ define( function( require ) {
      * Uses poly2tri for triangulation
      * @param path
      */
-    createFromPath: function( path, depth ) {
-      assert && assert( depth !== undefined );
+    createFromPath: function( path, z ) {
+      assert && assert( z !== undefined );
 
       var shape = path.shape;
       var color = new Color( path.fill );
@@ -74,20 +74,20 @@ define( function( require ) {
       }
 
       // Add the triangulated geometry into the array buffer.
-      for ( var z = 0; z < triangles.length; z++ ) {
-        var triangle = triangles[z];
+      for ( var k = 0; k < triangles.length; k++ ) {
+        var triangle = triangles[k];
         for ( var zz = 0; zz < triangle.points_.length; zz++ ) {
           var pt = triangle.points_[zz];
 
           // Mutate the vertices a bit to see what is going on.  Or not.
           var randFactor = 0;
-          this.vertexArray.push( pt.x + Math.random() * randFactor, pt.y + Math.random() * randFactor, depth );
+          this.vertexArray.push( pt.x + Math.random() * randFactor, pt.y + Math.random() * randFactor, z );
           this.colors.push( color.red / 255, color.green / 255, color.blue / 255, color.alpha );
         }
       }
     },
-    createFromTriangle: function( x1, y1, x2, y2, x3, y3, color, depth ) {
-      assert && assert( depth !== undefined );
+    createFromTriangle: function( x1, y1, x2, y2, x3, y3, color, z ) {
+      assert && assert( z !== undefined );
 
       color = new Color( color );
       var r = color.red / 255;
@@ -99,9 +99,9 @@ define( function( require ) {
       var index = this.vertexArray.length;
       colorTriangleBufferData.vertexArray.push(
         // Top left
-        x1, y1, depth,
-        x2, y2, depth,
-        x3, y3, depth
+        x1, y1, z,
+        x2, y2, z,
+        x3, y3, z
       );
 
       // Add the same color for all vertices (solid fill rectangle).
@@ -125,34 +125,34 @@ define( function( require ) {
           colorTriangleBufferData.vertexArray[index + 6] = x3;
           colorTriangleBufferData.vertexArray[index + 7] = y3;
         },
-        setDepth: function( depth ) {
-          colorTriangleBufferData.vertexArray[index + 2] = depth;
-          colorTriangleBufferData.vertexArray[index + 5] = depth;
-          colorTriangleBufferData.vertexArray[index + 8] = depth;
+        setZ: function( z ) {
+          colorTriangleBufferData.vertexArray[index + 2] = z;
+          colorTriangleBufferData.vertexArray[index + 5] = z;
+          colorTriangleBufferData.vertexArray[index + 8] = z;
         }
       };
     },
-    createFromRectangle: function( rectangle, depth ) {
-      assert && assert( depth !== undefined );
+    createFromRectangle: function( rectangle, z ) {
+      assert && assert( z !== undefined );
 
       var color = new Color( rectangle.fill );
-      return this.createRectangle( rectangle.rectX, rectangle.rectY, rectangle.rectWidth, rectangle.rectHeight, color.red / 255, color.green / 255, color.blue / 255, color.alpha, depth );
+      return this.createRectangle( rectangle.rectX, rectangle.rectY, rectangle.rectWidth, rectangle.rectHeight, color.red / 255, color.green / 255, color.blue / 255, color.alpha, z );
     },
-    createRectangle: function( x, y, width, height, r, g, b, a, depth ) {
-      assert && assert( depth !== undefined );
+    createRectangle: function( x, y, width, height, r, g, b, a, z ) {
+      assert && assert( z !== undefined );
 
       var colorTriangleBufferData = this;
       var index = this.vertexArray.length;
       this.vertexArray.push(
         // Top left
-        x, y, depth,
-        (x + width), y, depth,
-        x, y + height, depth,
+        x, y, z,
+        (x + width), y, z,
+        x, y + height, z,
 
         // Bottom right
-        (x + width), y + height, depth,
-        (x + width), y, depth,
-        x, y + height, depth
+        (x + width), y + height, z,
+        (x + width), y, z,
+        x, y + height, z
       );
 
       // Add the same color for all vertices (solid fill rectangle).
@@ -203,8 +203,8 @@ define( function( require ) {
       };
     },
 
-    createStar: function( _x, _y, _innerRadius, _outerRadius, _totalAngle, r, g, b, a, depth ) {
-      assert && assert( depth !== undefined );
+    createStar: function( _x, _y, _innerRadius, _outerRadius, _totalAngle, r, g, b, a, z ) {
+      assert && assert( z !== undefined );
 
       var colorTriangleBufferData = this;
       var index = this.vertexArray.length;

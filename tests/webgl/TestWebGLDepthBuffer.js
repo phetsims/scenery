@@ -36,7 +36,7 @@ define( function( require ) {
 
       webGLRenderer.events.on( 'step', function() {
         var t = Math.sin( Date.now() / 1000 * 2 * Math.PI ) * 0.1 + 0.5;
-        triangle.setDepth( t );
+        triangle.setZ( t );
         webGLRenderer.colorTriangleRenderer.updateTriangleBuffer( triangle );
 
       } );
