@@ -57,7 +57,7 @@ define( function( require ) {
       webGLRenderer.colorTriangleRenderer.bindVertexBuffer();
       webGLRenderer.colorTriangleRenderer.bindColorBuffer();
 
-      webGLRenderer.addCustomWebGLRenderer( new LinesRenderer( webGLRenderer.gl ) );
+      webGLRenderer.addCustomWebGLRenderer( new LinesRenderer( webGLRenderer.gl, webGLRenderer.backingScale, webGLRenderer.canvas ) );
 
       webGLRenderer.start();
 

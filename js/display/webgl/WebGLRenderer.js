@@ -63,6 +63,7 @@ define( function( require ) {
     this.customWebGLRenderers = [];
 
     this.boundAnimate = this.animate.bind( this );
+    this.backingScale = backingScale;
   }
 
   return inherit( Object, WebGLRenderer, {
