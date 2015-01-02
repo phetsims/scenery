@@ -650,8 +650,7 @@ define( function( require ) {
       // Check to see if we are emptied and marked as changed (but without change intervals). This should imply we have
       // no children (and thus no stitchChangeBefore / stitchChangeAfter to use), so we'll want to create a change
       // interval to cover our entire range.
-      if ( !firstChangeInterval && this.stitchChangeOnChildren === this.display._frameId ) {
-        assert && assert( this.children.length === 0 );
+      if ( !firstChangeInterval && this.stitchChangeOnChildren === this.display._frameId && this.children.length === 0 ) {
         firstChangeInterval = currentChangeInterval = ChangeInterval.newForDisplay( null, null, this.display );
       }
 
