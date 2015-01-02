@@ -60,12 +60,15 @@ define( function( require ) {
 
     this.colorTriangleRenderer = new ColorTriangleRenderer( gl, backingScale, this.canvas );
     this.textureRenderer = new TextureRenderer( gl, backingScale, this.canvas );
+    this.customWebGLRenderers = [];
 
     this.boundAnimate = this.animate.bind( this );
   }
 
   return inherit( Object, WebGLRenderer, {
-
+    addCustomWebGLRenderer: function( customWebGLRenderer ) {
+      this.customWebGLRenderers.push( customWebGLRenderer );
+    },
     /**
      * Create a mrdoob stats instance which can be used to profile the simulation.
      * @returns {Stats}
@@ -115,6 +118,9 @@ define( function( require ) {
       //Render program by program.
       this.colorTriangleRenderer.draw();
       this.textureRenderer.draw();
+      for ( var i = 0; i < this.customWebGLRenderers.length; i++ ) {
+        this.customWebGLRenderers[i].draw();
+      }
 
       //Flush after rendering complete.
       gl.flush();

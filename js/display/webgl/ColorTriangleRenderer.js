@@ -34,15 +34,15 @@ define( function( require ) {
       gl.shaderSource( shader, source );
       gl.compileShader( shader );
       if ( !gl.getShaderParameter( shader, gl.COMPILE_STATUS ) ) {
-        console.log( "ERROR IN " + typeString + " SHADER : " + gl.getShaderInfoLog( shader ) );
+        console.log( 'ERROR IN ' + typeString + ' SHADER : ' + gl.getShaderInfoLog( shader ) );
         return false;
       }
       return shader;
     };
 
     this.colorShaderProgram = gl.createProgram();
-    gl.attachShader( this.colorShaderProgram, toShader( colorVertexShader, gl.VERTEX_SHADER, "VERTEX" ) );
-    gl.attachShader( this.colorShaderProgram, toShader( colorFragmentShader, gl.FRAGMENT_SHADER, "FRAGMENT" ) );
+    gl.attachShader( this.colorShaderProgram, toShader( colorVertexShader, gl.VERTEX_SHADER, 'VERTEX' ) );
+    gl.attachShader( this.colorShaderProgram, toShader( colorFragmentShader, gl.FRAGMENT_SHADER, 'FRAGMENT' ) );
     gl.linkProgram( this.colorShaderProgram );
 
     this.positionAttribLocation = gl.getAttribLocation( this.colorShaderProgram, 'aPosition' );

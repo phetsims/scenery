@@ -15,6 +15,7 @@ define( function( require ) {
   var Shape = require( 'KITE/Shape' );
   var Color = require( 'SCENERY/util/Color' );
   var WebGLRenderer = require( 'SCENERY/display/webgl/WebGLRenderer' );
+  var LinesRenderer = require( 'SCENERY/../tests/webgl/LinesRenderer' );
 
   // images
   var mountains = require( 'image!ENERGY_SKATE_PARK_BASICS/mountains.png' );
@@ -55,6 +56,8 @@ define( function( require ) {
 
       webGLRenderer.colorTriangleRenderer.bindVertexBuffer();
       webGLRenderer.colorTriangleRenderer.bindColorBuffer();
+
+      webGLRenderer.addCustomWebGLRenderer( new LinesRenderer() );
 
       webGLRenderer.start();
 
