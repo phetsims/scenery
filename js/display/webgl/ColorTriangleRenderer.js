@@ -52,10 +52,6 @@ define( function( require ) {
     this.vertexBuffer = gl.createBuffer();
     this.bindVertexBuffer();
 
-    // Set up different colors for each triangle
-    this.vertexColorBuffer = gl.createBuffer();
-    this.bindColorBuffer();
-
     gl.clearColor( 0.0, 0.0, 0.0, 0.0 );
     gl.enable( gl.DEPTH_TEST );
   }
@@ -65,20 +61,19 @@ define( function( require ) {
     draw: function() {
       var gl = this.gl;
 
+      var step = Float32Array.BYTES_PER_ELEMENT;
+      var total = 3 + 4;
+      var stride = step * total;
+
       gl.enableVertexAttribArray( this.positionAttribLocation );
       gl.enableVertexAttribArray( this.colorAttributeLocation );
       gl.useProgram( this.colorShaderProgram );
 
-
       gl.bindBuffer( gl.ARRAY_BUFFER, this.vertexBuffer );
-      gl.vertexAttribPointer( this.positionAttribLocation, 3, gl.FLOAT, false, 0, 0 );
+      gl.vertexAttribPointer( this.positionAttribLocation, 3, gl.FLOAT, false, stride, 0 );
+      gl.vertexAttribPointer( this.colorAttributeLocation, 4, gl.FLOAT, false, stride, step * 3 );
 
-      // Send the colors to the GPU
-      gl.bindBuffer( gl.ARRAY_BUFFER, this.vertexColorBuffer );
-      gl.vertexAttribPointer( this.colorAttributeLocation, 4, gl.FLOAT, false, 0, 0 );
-
-
-      gl.drawArrays( gl.TRIANGLES, 0, this.colorTriangleBufferData.vertexArray.length / 3 );
+      gl.drawArrays( gl.TRIANGLES, 0, this.colorTriangleBufferData.vertexArray.length / 7 );
 
       gl.disableVertexAttribArray( this.positionAttribLocation );
       gl.disableVertexAttribArray( this.colorAttributeLocation );
@@ -91,12 +86,6 @@ define( function( require ) {
       // Keep track of the vertexArray for updating sublists of it
       this.vertexArray = new Float32Array( this.colorTriangleBufferData.vertexArray );
       gl.bufferData( gl.ARRAY_BUFFER, this.vertexArray, gl.DYNAMIC_DRAW );
-    },
-
-    bindColorBuffer: function() {
-      var gl = this.gl;
-      gl.bindBuffer( gl.ARRAY_BUFFER, this.vertexColorBuffer );
-      gl.bufferData( gl.ARRAY_BUFFER, new Float32Array( this.colorTriangleBufferData.colors ), gl.STATIC_DRAW );
     },
 
     updateTriangleBuffer: function( geometry ) {

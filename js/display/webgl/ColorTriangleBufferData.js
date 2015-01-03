@@ -23,8 +23,10 @@ define( function( require ) {
   function ColorTriangleBufferData() {
 
     //TODO: Use Float32Array -- though we will have to account for the fact that they have a fixed size
-    this.vertexArray = [];
-    this.colors = [];
+    this.vertexArray = []; //x,y,z,r,g,b,a
+
+    //TODO: Add these elements to the vertexArray
+    // ,m11,m12,m13,m21,m22,m23
   }
 
   return inherit( Object, ColorTriangleBufferData, {
@@ -81,8 +83,8 @@ define( function( require ) {
 
           // Mutate the vertices a bit to see what is going on.  Or not.
           var randFactor = 0;
-          this.vertexArray.push( pt.x + Math.random() * randFactor, pt.y + Math.random() * randFactor, z );
-          this.colors.push( color.red / 255, color.green / 255, color.blue / 255, color.alpha );
+          this.vertexArray.push( pt.x + Math.random() * randFactor, pt.y + Math.random() * randFactor, z,
+              color.red / 255, color.green / 255, color.blue / 255, color.alpha );
         }
       }
     },
@@ -99,17 +101,9 @@ define( function( require ) {
       var index = this.vertexArray.length;
       colorTriangleBufferData.vertexArray.push(
         // Top left
-        x1, y1, z,
-        x2, y2, z,
-        x3, y3, z
-      );
-
-      // Add the same color for all vertices (solid fill rectangle).
-      // TODO: some way to reduce this amount of elements!
-      colorTriangleBufferData.colors.push(
-        r, g, b, a,
-        r, g, b, a,
-        r, g, b, a
+        x1, y1, z, r, g, b, a,
+        x2, y2, z, r, g, b, a,
+        x3, y3, z, r, g, b, a
       );
 
       //Track the index so it can delete itself, update itself, etc.
@@ -120,10 +114,10 @@ define( function( require ) {
         setTriangle: function( x1, y1, x2, y2, x3, y3 ) {
           colorTriangleBufferData.vertexArray[index + 0] = x1;
           colorTriangleBufferData.vertexArray[index + 1] = y1;
-          colorTriangleBufferData.vertexArray[index + 3] = x2;
-          colorTriangleBufferData.vertexArray[index + 4] = y2;
-          colorTriangleBufferData.vertexArray[index + 6] = x3;
-          colorTriangleBufferData.vertexArray[index + 7] = y3;
+          colorTriangleBufferData.vertexArray[index + 7] = x2;
+          colorTriangleBufferData.vertexArray[index + 8] = y2;
+          colorTriangleBufferData.vertexArray[index + 14] = x3;
+          colorTriangleBufferData.vertexArray[index + 15] = y3;
         },
         setZ: function( z ) {
           colorTriangleBufferData.vertexArray[index + 2] = z;
@@ -145,25 +139,14 @@ define( function( require ) {
       var index = this.vertexArray.length;
       this.vertexArray.push(
         // Top left
-        x, y, z,
-        (x + width), y, z,
-        x, y + height, z,
+        x, y, z, r, g, b, a,
+        (x + width), y, z, r, g, b, a,
+        x, y + height, z, r, g, b, a,
 
         // Bottom right
-        (x + width), y + height, z,
-        (x + width), y, z,
-        x, y + height, z
-      );
-
-      // Add the same color for all vertices (solid fill rectangle).
-      // TODO: some way to reduce this amount of elements!
-      this.colors.push(
-        r, g, b, a,
-        r, g, b, a,
-        r, g, b, a,
-        r, g, b, a,
-        r, g, b, a,
-        r, g, b, a
+        (x + width), y + height, z, r, g, b, a,
+        (x + width), y, z, r, g, b, a,
+        x, y + height, z, r, g, b, a
       );
 
       //Track the index so it can delete itself, update itself, etc.
@@ -174,31 +157,31 @@ define( function( require ) {
         endIndex: colorTriangleBufferData.vertexArray.length,
         setXWidth: function( x, width ) {
           colorTriangleBufferData.vertexArray[index + 0] = x;
-          colorTriangleBufferData.vertexArray[index + 3] = x + width;
-          colorTriangleBufferData.vertexArray[index + 6] = x;
-          colorTriangleBufferData.vertexArray[index + 9] = x + width;
-          colorTriangleBufferData.vertexArray[index + 12] = x + width;
-          colorTriangleBufferData.vertexArray[index + 15] = x;
+          colorTriangleBufferData.vertexArray[index + 7] = x + width;
+          colorTriangleBufferData.vertexArray[index + 14] = x;
+          colorTriangleBufferData.vertexArray[index + 21] = x + width;
+          colorTriangleBufferData.vertexArray[index + 28] = x + width;
+          colorTriangleBufferData.vertexArray[index + 35] = x;
         },
         setRect: function( x, y, width, height ) {
 
           colorTriangleBufferData.vertexArray[index + 0] = x;
           colorTriangleBufferData.vertexArray[index + 1] = y;
 
-          colorTriangleBufferData.vertexArray[index + 3] = x + width;
-          colorTriangleBufferData.vertexArray[index + 4] = y;
+          colorTriangleBufferData.vertexArray[index + 7] = x + width;
+          colorTriangleBufferData.vertexArray[index + 8] = y;
 
-          colorTriangleBufferData.vertexArray[index + 6] = x;
-          colorTriangleBufferData.vertexArray[index + 7] = y + height;
+          colorTriangleBufferData.vertexArray[index + 14] = x;
+          colorTriangleBufferData.vertexArray[index + 15] = y + height;
 
-          colorTriangleBufferData.vertexArray[index + 9] = x + width;
-          colorTriangleBufferData.vertexArray[index + 10] = y + height;
+          colorTriangleBufferData.vertexArray[index + 21] = x + width;
+          colorTriangleBufferData.vertexArray[index + 22] = y + height;
 
-          colorTriangleBufferData.vertexArray[index + 12] = x + width;
-          colorTriangleBufferData.vertexArray[index + 13] = y;
+          colorTriangleBufferData.vertexArray[index + 28] = x + width;
+          colorTriangleBufferData.vertexArray[index + 29] = y;
 
-          colorTriangleBufferData.vertexArray[index + 15] = x;
-          colorTriangleBufferData.vertexArray[index + 16] = y + height;
+          colorTriangleBufferData.vertexArray[index + 35] = x;
+          colorTriangleBufferData.vertexArray[index + 36] = y + height;
         }
       };
     },
@@ -214,19 +197,19 @@ define( function( require ) {
 
       // Add the same color for all vertices (solid fill star).
       // TODO: some way to reduce this amount of elements!
-      this.colors.push(
-        r, g, b, a,
-        r, g, b, a,
-        r, g, b, a,
-
-        r, g, b, a,
-        r, g, b, a,
-        r, g, b, a,
-
-        r, g, b, a,
-        r, g, b, a,
-        r, g, b, a
-      );
+//      this.colors.push(
+//        r, g, b, a,
+//        r, g, b, a,
+//        r, g, b, a,
+//
+//        r, g, b, a,
+//        r, g, b, a,
+//        r, g, b, a,
+//
+//        r, g, b, a,
+//        r, g, b, a,
+//        r, g, b, a
+//      );
 
       //Track the index so it can delete itself, update itself, etc.
       var myStar = {

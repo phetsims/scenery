@@ -55,7 +55,6 @@ define( function( require ) {
       webGLRenderer.textureRenderer.bindTextureBuffer();
 
       webGLRenderer.colorTriangleRenderer.bindVertexBuffer();
-      webGLRenderer.colorTriangleRenderer.bindColorBuffer();
 
       webGLRenderer.addCustomWebGLRenderer( new LinesRenderer( webGLRenderer.gl, webGLRenderer.backingScale, webGLRenderer.canvas ) );
 
