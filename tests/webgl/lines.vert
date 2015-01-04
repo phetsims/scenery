@@ -1,8 +1,8 @@
 // Simple example for custom shader
 
 // Position
-attribute vec4 aPosition;
+attribute vec3 aPosition;
 
 void main(void) {
-  gl_Position=aPosition;
+  gl_Position=vec4(aPosition,1.0);
 }

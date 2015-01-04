@@ -39,39 +39,31 @@ define( function( require ) {
 
     this.vertexBuffer = gl.createBuffer();
     this.bindVertexBuffer();
-
-    gl.clearColor( 0.0, 0.0, 0.0, 0.0 );
-    gl.enable( gl.DEPTH_TEST );
-
   }
 
   return inherit( Object, LinesRenderer, {
     draw: function() {
+      var gl = this.gl;
 
-      //      var gl = this.gl;
-      //
-      //      gl.enableVertexAttribArray( this.positionAttribLocation );
-      //      gl.useProgram( this.lineShaderProgram );
-      //
-      //      gl.bindBuffer( gl.ARRAY_BUFFER, this.vertexBuffer );
-      //      gl.vertexAttribPointer( this.positionAttribLocation, 4, gl.FLOAT, false, 0, 0 );
-      //
-      //      gl.drawArrays( gl.LINE_LOOP, 0, 2 );
-      //
-      //      gl.disableVertexAttribArray( this.positionAttribLocation );
+      gl.enableVertexAttribArray( this.positionAttribLocation );
+      gl.useProgram( this.lineShaderProgram );
+
+      gl.bindBuffer( gl.ARRAY_BUFFER, this.vertexBuffer );
+      gl.vertexAttribPointer( this.positionAttribLocation, 3, gl.FLOAT, false, 0, 0 );
+
+      gl.drawArrays( gl.LINES, 0, 2 );
+
+      gl.disableVertexAttribArray( this.positionAttribLocation );
     },
 
     bindVertexBuffer: function() {
       var gl = this.gl;
       gl.bindBuffer( gl.ARRAY_BUFFER, this.vertexBuffer );
 
-      // Keep track of the vertexArray for updating sublists of it
-      this.vertexArray = new Float32Array( [
-        0, 0, 0.5, 1,
-        0.5, 0.5, 0.5, 1,
-        0.5, 0.0, 0.5, 1
-      ] );
-      gl.bufferData( gl.ARRAY_BUFFER, this.vertexArray, gl.STATIC_DRAW );
+      gl.bufferData( gl.ARRAY_BUFFER, new Float32Array( [
+        0, 0, 0.1,
+        0.5, 0.5, 0.1
+      ] ), gl.STATIC_DRAW );
     },
   } );
 } );
