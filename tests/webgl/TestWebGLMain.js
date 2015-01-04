@@ -16,6 +16,7 @@ define( function( require ) {
   var Color = require( 'SCENERY/util/Color' );
   var WebGLRenderer = require( 'SCENERY/display/webgl/WebGLRenderer' );
   var LinesRenderer = require( 'SCENERY/../tests/webgl/LinesRenderer' );
+  var Matrix4 = require( 'DOT/Matrix4' );
 
   // images
   var mountains = require( 'image!ENERGY_SKATE_PARK_BASICS/mountains.png' );
@@ -52,8 +53,11 @@ define( function( require ) {
       var t3 = colorTriangleBufferData.createFromTriangle( 100, 200, 200, 200, 150, 300, 'blue', 0.5 );
 
       //Show something from another module
+      var images = [];
       for ( var i = 0; i < 100; i++ ) {
-        webGLRenderer.textureRenderer.textureBufferData.createFromImage( Math.random() * 256, 0, 256, 256, mountains );
+        var matrix4 = Matrix4.identity();
+        var image = webGLRenderer.textureRenderer.textureBufferData.createFromImage( i * 2, 0, 256, 256, mountains, matrix4 );
+        images.push( image );
       }
       webGLRenderer.textureRenderer.bindVertexBuffer();
 
@@ -80,6 +84,13 @@ define( function( require ) {
         webGLRenderer.colorTriangleRenderer.updateTriangleBuffer( myRectangle );
         webGLRenderer.colorTriangleRenderer.updateTriangleBuffer( t2 );
         webGLRenderer.colorTriangleRenderer.updateTriangleBuffer( rectangleGeometry );
+
+        for ( var i = 0; i < images.length; i++ ) {
+          var image = images[i];
+          var y = rectX + i * 10;
+          image.setTransform( Matrix4.translation( i * 2, y / i, 0 ) );
+          webGLRenderer.textureRenderer.updateTriangleBuffer( image );
+        }
 
         // Experimental alternative to bufferSubData
 //        webGLRenderer.colorTriangleRenderer.reBufferData();

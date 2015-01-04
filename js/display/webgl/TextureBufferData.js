@@ -26,7 +26,7 @@ define( function( require ) {
 
   return inherit( Object, TextureBufferData, {
 
-    createFromImage: function( x, y, width, height, image ) {
+    createFromImage: function( x, y, width, height, image, matrix4 ) {
       var textureBufferData = this;
       var index = this.vertexArray.length;
 
@@ -36,12 +36,12 @@ define( function( require ) {
       var y2 = y + height;
 
       this.vertexArray.push(
-        x1, y1, 0.0, 0.0,
-        x2, y1, 1.0, 0.0,
-        x1, y2, 0.0, 1.0,
-        x1, y2, 0.0, 1.0,
-        x2, y1, 1.0, 0.0,
-        x2, y2, 1.0, 1.0
+        x1, y1, 0.0, 0.0, matrix4.m00(), matrix4.m01(), matrix4.m02(), matrix4.m10(), matrix4.m11(), matrix4.m12(),
+        x2, y1, 1.0, 0.0, matrix4.m00(), matrix4.m01(), matrix4.m02(), matrix4.m10(), matrix4.m11(), matrix4.m12(),
+        x1, y2, 0.0, 1.0, matrix4.m00(), matrix4.m01(), matrix4.m02(), matrix4.m10(), matrix4.m11(), matrix4.m12(),
+        x1, y2, 0.0, 1.0, matrix4.m00(), matrix4.m01(), matrix4.m02(), matrix4.m10(), matrix4.m11(), matrix4.m12(),
+        x2, y1, 1.0, 0.0, matrix4.m00(), matrix4.m01(), matrix4.m02(), matrix4.m10(), matrix4.m11(), matrix4.m12(),
+        x2, y2, 1.0, 1.0, matrix4.m00(), matrix4.m01(), matrix4.m02(), matrix4.m10(), matrix4.m11(), matrix4.m12()
       );
 
       //Track the index so it can delete itself, update itself, etc.
@@ -50,6 +50,16 @@ define( function( require ) {
         initialState: {x: x, y: y, width: width, height: height},
         index: index,
         endIndex: textureBufferData.vertexArray.length,
+        setTransform: function( matrix4 ) {
+          for ( var i = 0; i < 6; i++ ) {
+            textureBufferData.vertexArray[index + 4 + i * 10] = matrix4.m00();
+            textureBufferData.vertexArray[index + 5 + i * 10] = matrix4.m01();
+            textureBufferData.vertexArray[index + 6 + i * 10] = matrix4.m03();
+            textureBufferData.vertexArray[index + 7 + i * 10] = matrix4.m10();
+            textureBufferData.vertexArray[index + 8 + i * 10] = matrix4.m11();
+            textureBufferData.vertexArray[index + 9 + i * 10] = matrix4.m13();
+          }
+        },
         setXWidth: function( x, width ) {
           textureBufferData.vertexArray[index] = x;
           textureBufferData.vertexArray[index + 2] = x + width;

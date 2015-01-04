@@ -53,6 +53,8 @@ define( function( require ) {
     // look up where the vertex data needs to go.
     this.positionLocation = gl.getAttribLocation( program, "a_position" );
     this.texCoordLocation = gl.getAttribLocation( program, "a_texCoord" );
+    this.transform1AttributeLocation = gl.getAttribLocation( this.colorShaderProgram, 'aTransform1' );
+    this.transform2AttributeLocation = gl.getAttribLocation( this.colorShaderProgram, 'aTransform2' );
 
     // Create a texture.
     this.texture = gl.createTexture();
@@ -96,6 +98,8 @@ define( function( require ) {
       gl.useProgram( this.colorShaderProgram );
       gl.enableVertexAttribArray( this.texCoordLocation );
       gl.enableVertexAttribArray( this.positionLocation );
+      gl.enableVertexAttribArray( this.transform1AttributeLocation );
+      gl.enableVertexAttribArray( this.transform2AttributeLocation );
 
       // Create a texture.
       gl.bindTexture( gl.TEXTURE_2D, this.texture );
@@ -106,18 +110,22 @@ define( function( require ) {
       gl.uniform2f( this.resolutionLocation, this.canvas.width / this.backingScale, this.canvas.height / this.backingScale );
 
       var step = Float32Array.BYTES_PER_ELEMENT;
-      var total = 2 + 2;
+      var total = 2 + 2 + 3 + 3;
       var stride = step * total;
 
       gl.bindBuffer( gl.ARRAY_BUFFER, this.vertexBuffer );
       gl.vertexAttribPointer( this.positionLocation, 2, gl.FLOAT, false, stride, 0 );
       gl.vertexAttribPointer( this.texCoordLocation, 2, gl.FLOAT, false, stride, step * 2 );
+      gl.vertexAttribPointer( this.transform1AttributeLocation, 3, gl.FLOAT, false, stride, step * (2 + 2) );
+      gl.vertexAttribPointer( this.transform2AttributeLocation, 3, gl.FLOAT, false, stride, step * (2 + 2 + 3) );
 
       // Draw the rectangle.
       gl.drawArrays( gl.TRIANGLES, 0, this.textureBufferData.vertexArray.length / total );
 
       gl.disableVertexAttribArray( this.texCoordLocation );
       gl.disableVertexAttribArray( this.positionLocation );
+      gl.disableVertexAttribArray( this.transform1AttributeLocation );
+      gl.disableVertexAttribArray( this.transform2AttributeLocation );
 
       gl.bindTexture( gl.TEXTURE_2D, null );
     },

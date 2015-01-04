@@ -7,9 +7,18 @@ uniform vec2 u_resolution;
 
 varying vec2 v_texCoord;
 
+// Components of the affine transform matrix.  6 float elements, so specified as two vec3
+attribute vec3 aTransform1;
+attribute vec3 aTransform2;
+
 void main() {
+  // Just do the affine transform ourselves.
+  // see http://cs.iupui.edu/~sfang/cs550/cs550-note3.pdf
+  vec2 transformed = vec2( aTransform1.x * a_position.x + aTransform1.y * a_position.y + aTransform1.z,
+                           aTransform2.x * a_position.x + aTransform2.y * a_position.y + aTransform2.z );
+
    // convert the rectangle from pixels to 0.0 to 1.0
-   vec2 zeroToOne = a_position / u_resolution;
+   vec2 zeroToOne = transformed / u_resolution;
 
    // convert from 0->1 to 0->2
    vec2 zeroToTwo = zeroToOne * 2.0;
