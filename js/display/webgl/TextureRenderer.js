@@ -38,7 +38,7 @@ define( function( require ) {
       gl.shaderSource( shader, source );
       gl.compileShader( shader );
       if ( !gl.getShaderParameter( shader, gl.COMPILE_STATUS ) ) {
-        console.log( "ERROR IN " + typeString + " SHADER : " + gl.getShaderInfoLog( shader ) );
+        console.log( 'ERROR IN ' + typeString + ' SHADER : ' + gl.getShaderInfoLog( shader ) );
         return false;
       }
       return shader;
@@ -46,13 +46,13 @@ define( function( require ) {
 
     this.colorShaderProgram = gl.createProgram();
     var program = this.colorShaderProgram;
-    gl.attachShader( this.colorShaderProgram, toShader( colorVertexShader, gl.VERTEX_SHADER, "VERTEX" ) );
-    gl.attachShader( this.colorShaderProgram, toShader( colorFragmentShader, gl.FRAGMENT_SHADER, "FRAGMENT" ) );
+    gl.attachShader( this.colorShaderProgram, toShader( colorVertexShader, gl.VERTEX_SHADER, 'VERTEX' ) );
+    gl.attachShader( this.colorShaderProgram, toShader( colorFragmentShader, gl.FRAGMENT_SHADER, 'FRAGMENT' ) );
     gl.linkProgram( this.colorShaderProgram );
 
     // look up where the vertex data needs to go.
-    this.positionLocation = gl.getAttribLocation( program, "a_position" );
-    this.texCoordLocation = gl.getAttribLocation( program, "a_texCoord" );
+    this.positionLocation = gl.getAttribLocation( program, 'aPosition' );
+    this.texCoordLocation = gl.getAttribLocation( program, 'aTextureCoordinate' );
     this.transform1AttributeLocation = gl.getAttribLocation( this.colorShaderProgram, 'aTransform1' );
     this.transform2AttributeLocation = gl.getAttribLocation( this.colorShaderProgram, 'aTransform2' );
 
@@ -60,7 +60,7 @@ define( function( require ) {
     this.texture = gl.createTexture();
 
     // lookup uniforms
-    this.resolutionLocation = gl.getUniformLocation( program, "u_resolution" );
+    this.resolutionLocation = gl.getUniformLocation( program, 'uResolution' );
 
     // Create a buffer for the position of the rectangle corners.
     this.vertexBuffer = gl.createBuffer();

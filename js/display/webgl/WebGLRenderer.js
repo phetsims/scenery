@@ -28,7 +28,7 @@ define( function( require ) {
     this.stats = this.createStats();
 
 
-    this.canvas = document.createElement( "canvas" );
+    this.canvas = document.createElement( 'canvas' );
     this.canvas.style.position = 'absolute';
     this.canvas.style.left = '0';
     this.canvas.style.top = '0';
@@ -40,7 +40,7 @@ define( function( require ) {
     // Code inspired by http://www.webglacademy.com/#1
     var gl;
     try {
-      gl = this.canvas.getContext( "experimental-webgl", {antialias: true} ); // TODO: {antialias:true?}
+      gl = this.canvas.getContext( 'experimental-webgl', {antialias: true} ); // TODO: {antialias:true?}
     }
     catch( e ) {
       return false;
@@ -49,8 +49,8 @@ define( function( require ) {
 
     // Handle retina displays as described in https://www.khronos.org/webgl/wiki/HandlingHighDPI
     // First, set the display size of the canvas.
-    this.canvas.style.width = window.innerWidth + "px";
-    this.canvas.style.height = window.innerHeight + "px";
+    this.canvas.style.width = window.innerWidth + 'px';
+    this.canvas.style.height = window.innerHeight + 'px';
 
     // Next, set the size of the drawingBuffer
     var backingScale = Util.backingScale( this.gl );

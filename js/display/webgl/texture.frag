@@ -3,11 +3,11 @@
 precision mediump float;
 
 // our texture
-uniform sampler2D u_image;
+uniform sampler2D uImage;
 
 // the texCoords passed in from the vertex shader.
-varying vec2 v_texCoord;
+varying vec2 vTextureCoordinate;
 
 void main() {
-   gl_FragColor = texture2D(u_image, v_texCoord);
+   gl_FragColor = texture2D(uImage, vTextureCoordinate);
 }
