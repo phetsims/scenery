@@ -100,6 +100,20 @@ define( function( require ) {
 
     // Set a rectangle the same size as the image.
     setRectangle( gl, 0, 0, textureRenderer.image.width, textureRenderer.image.height );
+
+    gl.blendFunc( gl.SRC_ALPHA, gl.ONE_MINUS_SRC_ALPHA );
+    gl.enable( this.gl.BLEND );
+
+    // Upload the image into the texture.
+    gl.bindTexture( gl.TEXTURE_2D, this.texture );
+    gl.texParameteri( gl.TEXTURE_2D, gl.TEXTURE_WRAP_S, gl.CLAMP_TO_EDGE );
+    gl.texParameteri( gl.TEXTURE_2D, gl.TEXTURE_WRAP_T, gl.CLAMP_TO_EDGE );
+    gl.texParameteri( gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.LINEAR_MIPMAP_LINEAR );
+    gl.texParameteri( gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, gl.LINEAR );
+    gl.texImage2D( gl.TEXTURE_2D, 0, gl.RGBA, gl.RGBA, gl.UNSIGNED_BYTE, this.image );
+
+    gl.generateMipmap( gl.TEXTURE_2D );
+    gl.bindTexture( gl.TEXTURE_2D, null );
   }
 
   return inherit( Object, TextureRenderer, {
@@ -110,26 +124,12 @@ define( function( require ) {
       gl.enableVertexAttribArray( this.texCoordLocation );
       gl.enableVertexAttribArray( this.positionLocation );
 
-      gl.blendFunc( gl.SRC_ALPHA, gl.ONE_MINUS_SRC_ALPHA );
-      this.gl.enable( this.gl.BLEND );
-
       // provide texture coordinates for the rectangle.
       gl.bindBuffer( gl.ARRAY_BUFFER, this.texCoordBuffer );
       gl.vertexAttribPointer( this.texCoordLocation, 2, gl.FLOAT, false, 0, 0 );
 
       // Create a texture.
       gl.bindTexture( gl.TEXTURE_2D, this.texture );
-
-      // Set the parameters so we can render any size image.
-      gl.texParameteri( gl.TEXTURE_2D, gl.TEXTURE_WRAP_S, gl.CLAMP_TO_EDGE );
-      gl.texParameteri( gl.TEXTURE_2D, gl.TEXTURE_WRAP_T, gl.CLAMP_TO_EDGE );
-      gl.texParameteri( gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.LINEAR_MIPMAP_LINEAR );
-      gl.texParameteri( gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, gl.LINEAR );
-
-      // Upload the image into the texture.
-      gl.texImage2D( gl.TEXTURE_2D, 0, gl.RGBA, gl.RGBA, gl.UNSIGNED_BYTE, this.image );
-
-      gl.generateMipmap( gl.TEXTURE_2D );
 
       // set the resolution
       //TODO: This backing scale multiply seems very buggy and contradicts everything we know!
@@ -145,6 +145,8 @@ define( function( require ) {
 
       gl.disableVertexAttribArray( this.texCoordLocation );
       gl.disableVertexAttribArray( this.positionLocation );
+
+      gl.bindTexture( gl.TEXTURE_2D, null );
 
     },
     bindVertexBuffer: function() {
