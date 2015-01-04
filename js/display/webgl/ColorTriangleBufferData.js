@@ -27,7 +27,7 @@ define( function( require ) {
     this.vertexArray = []; //x,y,z,r,g,b,a
 
     //TODO: Add these elements to the vertexArray
-    // ,m11,m12,m13,m21,m22,m23
+    // ,m11,m13,m13,m21,m22,m23
   }
 
   return inherit( Object, ColorTriangleBufferData, {
@@ -87,7 +87,7 @@ define( function( require ) {
           var randFactor = 0;
           this.vertexArray.push( pt.x + Math.random() * randFactor, pt.y + Math.random() * randFactor, z,
               color.red / 255, color.green / 255, color.blue / 255, color.alpha,
-            matrix4.m00(), matrix4.m01(), matrix4.m02(), matrix4.m10(), matrix4.m11(), matrix4.m12()
+            matrix4.m00(), matrix4.m01(), matrix4.m03(), matrix4.m10(), matrix4.m11(), matrix4.m13()
           );
         }
       }
@@ -106,9 +106,9 @@ define( function( require ) {
       var index = this.vertexArray.length;
       colorTriangleBufferData.vertexArray.push(
         // Top left
-        x1, y1, z, r, g, b, a, matrix4.m00(), matrix4.m01(), matrix4.m02(), matrix4.m10(), matrix4.m11(), matrix4.m12(),
-        x2, y2, z, r, g, b, a, matrix4.m00(), matrix4.m01(), matrix4.m02(), matrix4.m10(), matrix4.m11(), matrix4.m12(),
-        x3, y3, z, r, g, b, a, matrix4.m00(), matrix4.m01(), matrix4.m02(), matrix4.m10(), matrix4.m11(), matrix4.m12()
+        x1, y1, z, r, g, b, a, matrix4.m00(), matrix4.m01(), matrix4.m03(), matrix4.m10(), matrix4.m11(), matrix4.m13(),
+        x2, y2, z, r, g, b, a, matrix4.m00(), matrix4.m01(), matrix4.m03(), matrix4.m10(), matrix4.m11(), matrix4.m13(),
+        x3, y3, z, r, g, b, a, matrix4.m00(), matrix4.m01(), matrix4.m03(), matrix4.m10(), matrix4.m11(), matrix4.m13()
       );
 
       //Track the index so it can delete itself, update itself, etc.
@@ -148,14 +148,14 @@ define( function( require ) {
       this.vertexArray.push(
         // Top left
         //TODO: Maybe should be m03 for last element, see Matrix3.toAffineMatrix4
-        x, y, z, r, g, b, a, /*               */matrix4.m00(), matrix4.m01(), matrix4.m02(), matrix4.m10(), matrix4.m11(), matrix4.m12(),
-        (x + width), y, z, r, g, b, a, /*     */matrix4.m00(), matrix4.m01(), matrix4.m02(), matrix4.m10(), matrix4.m11(), matrix4.m12(),
-        x, y + height, z, r, g, b, a, /*      */matrix4.m00(), matrix4.m01(), matrix4.m02(), matrix4.m10(), matrix4.m11(), matrix4.m12(),
+        x, y, z, r, g, b, a, /*               */matrix4.m00(), matrix4.m01(), matrix4.m03(), matrix4.m10(), matrix4.m11(), matrix4.m13(),
+        (x + width), y, z, r, g, b, a, /*     */matrix4.m00(), matrix4.m01(), matrix4.m03(), matrix4.m10(), matrix4.m11(), matrix4.m13(),
+        x, y + height, z, r, g, b, a, /*      */matrix4.m00(), matrix4.m01(), matrix4.m03(), matrix4.m10(), matrix4.m11(), matrix4.m13(),
 
         // Bottom right
-        (x + width), y + height, z, r, g, b, a, matrix4.m00(), matrix4.m01(), matrix4.m02(), matrix4.m10(), matrix4.m11(), matrix4.m12(),
-        (x + width), y, z, r, g, b, a, /*     */matrix4.m00(), matrix4.m01(), matrix4.m02(), matrix4.m10(), matrix4.m11(), matrix4.m12(),
-        x, y + height, z, r, g, b, a, /*      */matrix4.m00(), matrix4.m01(), matrix4.m02(), matrix4.m10(), matrix4.m11(), matrix4.m12()
+        (x + width), y + height, z, r, g, b, a, matrix4.m00(), matrix4.m01(), matrix4.m03(), matrix4.m10(), matrix4.m11(), matrix4.m13(),
+        (x + width), y, z, r, g, b, a, /*     */matrix4.m00(), matrix4.m01(), matrix4.m03(), matrix4.m10(), matrix4.m11(), matrix4.m13(),
+        x, y + height, z, r, g, b, a, /*      */matrix4.m00(), matrix4.m01(), matrix4.m03(), matrix4.m10(), matrix4.m11(), matrix4.m13()
       );
 
       //Track the index so it can delete itself, update itself, etc.
@@ -168,10 +168,10 @@ define( function( require ) {
           for ( var i = 0; i < 6; i++ ) {
             colorTriangleBufferData.vertexArray[index + 7 + i * 13] = matrix4.m00();
             colorTriangleBufferData.vertexArray[index + 8 + i * 13] = matrix4.m01();
-            colorTriangleBufferData.vertexArray[index + 9 + i * 13] = matrix4.m02();
+            colorTriangleBufferData.vertexArray[index + 9 + i * 13] = matrix4.m03();
             colorTriangleBufferData.vertexArray[index + 10 + i * 13] = matrix4.m10();
             colorTriangleBufferData.vertexArray[index + 11 + i * 13] = matrix4.m11();
-            colorTriangleBufferData.vertexArray[index + 12 + i * 13] = matrix4.m12();
+            colorTriangleBufferData.vertexArray[index + 12 + i * 13] = matrix4.m13();
           }
         },
         setXWidth: function( x, width ) {
