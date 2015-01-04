@@ -37,9 +37,13 @@ define( function( require ) {
 
     this.positionAttribLocation = gl.getAttribLocation( this.colorShaderProgram, 'aPosition' );
     this.colorAttributeLocation = gl.getAttribLocation( this.colorShaderProgram, 'aVertexColor' );
+    this.transform1AttributeLocation = gl.getAttribLocation( this.colorShaderProgram, 'aTransform1' );
+    this.transform2AttributeLocation = gl.getAttribLocation( this.colorShaderProgram, 'aTransform2' );
 
     gl.enableVertexAttribArray( this.positionAttribLocation );
     gl.enableVertexAttribArray( this.colorAttributeLocation );
+    gl.enableVertexAttribArray( this.transform1AttributeLocation );
+    gl.enableVertexAttribArray( this.transform2AttributeLocation );
     gl.useProgram( this.colorShaderProgram );
 
     // set the resolution
@@ -62,21 +66,27 @@ define( function( require ) {
       var gl = this.gl;
 
       var step = Float32Array.BYTES_PER_ELEMENT;
-      var total = 3 + 4;
+      var total = 3 + 4 + 3 + 3;
       var stride = step * total;
 
       gl.enableVertexAttribArray( this.positionAttribLocation );
       gl.enableVertexAttribArray( this.colorAttributeLocation );
+      gl.enableVertexAttribArray( this.transform1AttributeLocation );
+      gl.enableVertexAttribArray( this.transform2AttributeLocation );
       gl.useProgram( this.colorShaderProgram );
 
       gl.bindBuffer( gl.ARRAY_BUFFER, this.vertexBuffer );
       gl.vertexAttribPointer( this.positionAttribLocation, 3, gl.FLOAT, false, stride, 0 );
-      gl.vertexAttribPointer( this.colorAttributeLocation, 4, gl.FLOAT, false, stride, step * 3 );
+      gl.vertexAttribPointer( this.colorAttributeLocation, 4, gl.FLOAT, false, stride, step * (3) );
+      gl.vertexAttribPointer( this.transform1AttributeLocation, 3, gl.FLOAT, false, stride, step * (3 + 4) );
+      gl.vertexAttribPointer( this.transform2AttributeLocation, 3, gl.FLOAT, false, stride, step * (3 + 4 + 3) );
 
-      gl.drawArrays( gl.TRIANGLES, 0, this.colorTriangleBufferData.vertexArray.length / 7 );
+      gl.drawArrays( gl.TRIANGLES, 0, this.colorTriangleBufferData.vertexArray.length / 13 );
 
       gl.disableVertexAttribArray( this.positionAttribLocation );
       gl.disableVertexAttribArray( this.colorAttributeLocation );
+      gl.disableVertexAttribArray( this.transform1AttributeLocation );
+      gl.disableVertexAttribArray( this.transform2AttributeLocation );
     },
 
     bindVertexBuffer: function() {
@@ -85,6 +95,18 @@ define( function( require ) {
 
       // Keep track of the vertexArray for updating sublists of it
       this.vertexArray = new Float32Array( this.colorTriangleBufferData.vertexArray );
+      gl.bufferData( gl.ARRAY_BUFFER, this.vertexArray, gl.DYNAMIC_DRAW );
+    },
+
+    /**
+     * Alternative to calling bufferSubData--just send the entire vertex buffer again.
+     * Not clear when this may be a better alternative than using bufferSubData.
+     */
+    reBufferData: function() {
+      var gl = this.gl;
+      gl.bindBuffer( gl.ARRAY_BUFFER, this.vertexBuffer );
+
+      // Keep track of the vertexArray for updating sublists of it
       gl.bufferData( gl.ARRAY_BUFFER, this.vertexArray, gl.DYNAMIC_DRAW );
     },
 

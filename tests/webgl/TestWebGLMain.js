@@ -35,6 +35,10 @@ define( function( require ) {
       colorTriangleBufferData.createFromPath( new Path( Shape.circle( 300, 300, 50 ), {fill: 'blue'} ), 0.5 );
       colorTriangleBufferData.createFromPath( new Path( Shape.circle( 600, 600, 200 ), {fill: 'red'} ), 0.5 );
 
+      // Sample shape that will rotate
+      var sceneryRectangle = new Rectangle( 150, 200, 1024 / 2, 100, {fill: 'red', rotation: Math.PI / 16} );
+      var myRectangle = colorTriangleBufferData.createFromRectangle( sceneryRectangle, 0.5 );
+
       for ( var i = 0; i < 50; i++ ) {
         var circle = Shape.circle( 600 * Math.random(), 600 * Math.random(), 50 * Math.random() );
         var path = new Path( circle, {
@@ -68,8 +72,18 @@ define( function( require ) {
 //
         t2.setTriangle( 100 + rectX, 100, 200 + rectX, 100, 150 + rectX, 200 );
 
+        // Transform the shape
+        sceneryRectangle.resetTransform();
+        var angle = Date.now() / 1000 * 2 * Math.PI / 10;
+        sceneryRectangle.rotateAround( {x: 600, y: 600}, angle );
+        myRectangle.setTransform( sceneryRectangle.getLocalToGlobalMatrix().toMatrix4() );
+
+        webGLRenderer.colorTriangleRenderer.updateTriangleBuffer( myRectangle );
         webGLRenderer.colorTriangleRenderer.updateTriangleBuffer( t2 );
         webGLRenderer.colorTriangleRenderer.updateTriangleBuffer( rectangleGeometry );
+
+        // Experimental alternative to bufferSubData
+//        webGLRenderer.colorTriangleRenderer.reBufferData();
       } );
 
       console.log( 'total triangles', colorTriangleBufferData.vertexArray.length / 3 );

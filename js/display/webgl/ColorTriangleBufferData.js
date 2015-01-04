@@ -15,6 +15,7 @@ define( function( require ) {
   // modules
   var inherit = require( 'PHET_CORE/inherit' );
   var Color = require( 'SCENERY/util/Color' );
+  var Matrix4 = require( 'DOT/Matrix4' );
 
   /**
    * TODO - Merge all these individual array into a single structure to improve performance
@@ -39,6 +40,7 @@ define( function( require ) {
     createFromPath: function( path, z ) {
       assert && assert( z !== undefined );
 
+      var matrix4 = path.getLocalToGlobalMatrix().toMatrix4();
       var shape = path.shape;
       var color = new Color( path.fill );
       var linear = shape.toPiecewiseLinear( {} );
@@ -84,13 +86,16 @@ define( function( require ) {
           // Mutate the vertices a bit to see what is going on.  Or not.
           var randFactor = 0;
           this.vertexArray.push( pt.x + Math.random() * randFactor, pt.y + Math.random() * randFactor, z,
-              color.red / 255, color.green / 255, color.blue / 255, color.alpha );
+              color.red / 255, color.green / 255, color.blue / 255, color.alpha,
+            matrix4.m00(), matrix4.m01(), matrix4.m02(), matrix4.m10(), matrix4.m11(), matrix4.m12()
+          );
         }
       }
     },
-    createFromTriangle: function( x1, y1, x2, y2, x3, y3, color, z ) {
+    createFromTriangle: function( x1, y1, x2, y2, x3, y3, color, z, matrix4 ) {
       assert && assert( z !== undefined );
 
+      matrix4 = matrix4 || Matrix4.identity();
       color = new Color( color );
       var r = color.red / 255;
       var g = color.green / 255;
@@ -101,9 +106,9 @@ define( function( require ) {
       var index = this.vertexArray.length;
       colorTriangleBufferData.vertexArray.push(
         // Top left
-        x1, y1, z, r, g, b, a,
-        x2, y2, z, r, g, b, a,
-        x3, y3, z, r, g, b, a
+        x1, y1, z, r, g, b, a, matrix4.m00(), matrix4.m01(), matrix4.m02(), matrix4.m10(), matrix4.m11(), matrix4.m12(),
+        x2, y2, z, r, g, b, a, matrix4.m00(), matrix4.m01(), matrix4.m02(), matrix4.m10(), matrix4.m11(), matrix4.m12(),
+        x3, y3, z, r, g, b, a, matrix4.m00(), matrix4.m01(), matrix4.m02(), matrix4.m10(), matrix4.m11(), matrix4.m12()
       );
 
       //Track the index so it can delete itself, update itself, etc.
@@ -112,12 +117,12 @@ define( function( require ) {
         index: index,
         endIndex: colorTriangleBufferData.vertexArray.length,
         setTriangle: function( x1, y1, x2, y2, x3, y3 ) {
-          colorTriangleBufferData.vertexArray[index + 0] = x1;
-          colorTriangleBufferData.vertexArray[index + 1] = y1;
-          colorTriangleBufferData.vertexArray[index + 7] = x2;
-          colorTriangleBufferData.vertexArray[index + 8] = y2;
-          colorTriangleBufferData.vertexArray[index + 14] = x3;
-          colorTriangleBufferData.vertexArray[index + 15] = y3;
+          colorTriangleBufferData.vertexArray[index + 0 + 13 * 0] = x1;
+          colorTriangleBufferData.vertexArray[index + 1 + 13 * 0] = y1;
+          colorTriangleBufferData.vertexArray[index + 0 + 13 * 1] = x2;
+          colorTriangleBufferData.vertexArray[index + 1 + 13 * 1] = y2;
+          colorTriangleBufferData.vertexArray[index + 0 + 13 * 2] = x3;
+          colorTriangleBufferData.vertexArray[index + 1 + 13 * 2] = y3;
         },
         setZ: function( z ) {
           colorTriangleBufferData.vertexArray[index + 2] = z;
@@ -130,23 +135,27 @@ define( function( require ) {
       assert && assert( z !== undefined );
 
       var color = new Color( rectangle.fill );
-      return this.createRectangle( rectangle.rectX, rectangle.rectY, rectangle.rectWidth, rectangle.rectHeight, color.red / 255, color.green / 255, color.blue / 255, color.alpha, z );
+
+      return this.createRectangle( rectangle.rectX, rectangle.rectY, rectangle.rectWidth, rectangle.rectHeight,
+          color.red / 255, color.green / 255, color.blue / 255, color.alpha, z,
+        rectangle.getLocalToGlobalMatrix().toMatrix4() );
     },
-    createRectangle: function( x, y, width, height, r, g, b, a, z ) {
+    createRectangle: function( x, y, width, height, r, g, b, a, z, matrix4 ) {
       assert && assert( z !== undefined );
 
       var colorTriangleBufferData = this;
       var index = this.vertexArray.length;
       this.vertexArray.push(
         // Top left
-        x, y, z, r, g, b, a,
-        (x + width), y, z, r, g, b, a,
-        x, y + height, z, r, g, b, a,
+        //TODO: Maybe should be m03 for last element, see Matrix3.toAffineMatrix4
+        x, y, z, r, g, b, a, /*               */matrix4.m00(), matrix4.m01(), matrix4.m02(), matrix4.m10(), matrix4.m11(), matrix4.m12(),
+        (x + width), y, z, r, g, b, a, /*     */matrix4.m00(), matrix4.m01(), matrix4.m02(), matrix4.m10(), matrix4.m11(), matrix4.m12(),
+        x, y + height, z, r, g, b, a, /*      */matrix4.m00(), matrix4.m01(), matrix4.m02(), matrix4.m10(), matrix4.m11(), matrix4.m12(),
 
         // Bottom right
-        (x + width), y + height, z, r, g, b, a,
-        (x + width), y, z, r, g, b, a,
-        x, y + height, z, r, g, b, a
+        (x + width), y + height, z, r, g, b, a, matrix4.m00(), matrix4.m01(), matrix4.m02(), matrix4.m10(), matrix4.m11(), matrix4.m12(),
+        (x + width), y, z, r, g, b, a, /*     */matrix4.m00(), matrix4.m01(), matrix4.m02(), matrix4.m10(), matrix4.m11(), matrix4.m12(),
+        x, y + height, z, r, g, b, a, /*      */matrix4.m00(), matrix4.m01(), matrix4.m02(), matrix4.m10(), matrix4.m11(), matrix4.m12()
       );
 
       //Track the index so it can delete itself, update itself, etc.
@@ -155,13 +164,23 @@ define( function( require ) {
         initialState: {x: x, y: y, width: width, height: height},
         index: index,
         endIndex: colorTriangleBufferData.vertexArray.length,
+        setTransform: function( matrix4 ) {
+          for ( var i = 0; i < 6; i++ ) {
+            colorTriangleBufferData.vertexArray[index + 7 + i * 13] = matrix4.m00();
+            colorTriangleBufferData.vertexArray[index + 8 + i * 13] = matrix4.m01();
+            colorTriangleBufferData.vertexArray[index + 9 + i * 13] = matrix4.m02();
+            colorTriangleBufferData.vertexArray[index + 10 + i * 13] = matrix4.m10();
+            colorTriangleBufferData.vertexArray[index + 11 + i * 13] = matrix4.m11();
+            colorTriangleBufferData.vertexArray[index + 12 + i * 13] = matrix4.m12();
+          }
+        },
         setXWidth: function( x, width ) {
-          colorTriangleBufferData.vertexArray[index + 0] = x;
-          colorTriangleBufferData.vertexArray[index + 7] = x + width;
-          colorTriangleBufferData.vertexArray[index + 14] = x;
-          colorTriangleBufferData.vertexArray[index + 21] = x + width;
-          colorTriangleBufferData.vertexArray[index + 28] = x + width;
-          colorTriangleBufferData.vertexArray[index + 35] = x;
+          colorTriangleBufferData.vertexArray[index + 13 * 0] = x;
+          colorTriangleBufferData.vertexArray[index + 13 * 1] = x + width;
+          colorTriangleBufferData.vertexArray[index + 13 * 2] = x;
+          colorTriangleBufferData.vertexArray[index + 13 * 3] = x + width;
+          colorTriangleBufferData.vertexArray[index + 13 * 4] = x + width;
+          colorTriangleBufferData.vertexArray[index + 13 * 5] = x;
         },
         setRect: function( x, y, width, height ) {
 
