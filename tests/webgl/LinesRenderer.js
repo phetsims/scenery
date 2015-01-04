@@ -43,12 +43,6 @@ define( function( require ) {
     gl.clearColor( 0.0, 0.0, 0.0, 0.0 );
     gl.enable( gl.DEPTH_TEST );
 
-    this.vertexArray = [
-      0, 0, 0.5, 1,
-      0.5, 0.5, 0.5, 1,
-      0.5, 0.0, 0.5, 1
-    ];
-
   }
 
   return inherit( Object, LinesRenderer, {
@@ -72,7 +66,11 @@ define( function( require ) {
       gl.bindBuffer( gl.ARRAY_BUFFER, this.vertexBuffer );
 
       // Keep track of the vertexArray for updating sublists of it
-      this.vertexArray = new Float32Array( this.vertexArray );
+      this.vertexArray = new Float32Array( [
+        0, 0, 0.5, 1,
+        0.5, 0.5, 0.5, 1,
+        0.5, 0.0, 0.5, 1
+      ] );
       gl.bufferData( gl.ARRAY_BUFFER, this.vertexArray, gl.STATIC_DRAW );
     },
   } );
