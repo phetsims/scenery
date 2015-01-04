@@ -14,7 +14,6 @@ define( function( require ) {
   // modules
   var inherit = require( 'PHET_CORE/inherit' );
 
-
   /**
    *
    * @constructor
@@ -23,7 +22,6 @@ define( function( require ) {
 
     //TODO: Use Float32Array -- though we will have to account for the fact that they have a fixed size
     this.vertexArray = [];
-    this.textureCoordinates = [];
   }
 
   return inherit( Object, TextureBufferData, {
@@ -38,24 +36,12 @@ define( function( require ) {
       var y2 = y + height;
 
       this.vertexArray.push(
-        x1, y1,
-        x2, y1,
-        x1, y2,
-        x1, y2,
-        x2, y1,
-        x2, y2
-      );
-
-      // Add the same color for all vertices (solid fill rectangle).
-      // TODO: some way to reduce this amount of elements!
-      this.textureCoordinates.push(
-        0.0, 0.0,
-        1.0, 0.0,
-        0.0, 1.0,
-
-        0.0, 1.0,
-        1.0, 0.0,
-        1.0, 1.0
+        x1, y1, 0.0, 0.0,
+        x2, y1, 1.0, 0.0,
+        x1, y2, 0.0, 1.0,
+        x1, y2, 0.0, 1.0,
+        x2, y1, 1.0, 0.0,
+        x2, y2, 1.0, 1.0
       );
 
       //Track the index so it can delete itself, update itself, etc.

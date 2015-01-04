@@ -1,7 +1,8 @@
 //  Copyright 2002-2014, University of Colorado Boulder
 
 /**
- *
+ * This renderer shows WebGL textures.  To achieve performance goals, it is important to minimize the number of draw calls.
+ * So we try to add as many sprites into each texture as possible, and render all with a small number of draw calls.
  *
  * @author Sam Reid (PhET Interactive Simulations)
  */
@@ -17,20 +18,6 @@ define( function( require ) {
   var colorFragmentShader = require( 'text!SCENERY/display/webgl/texture.frag' );
 
   var mountains = require( 'image!ENERGY_SKATE_PARK_BASICS/mountains.png' );
-
-  function setRectangle( gl, x, y, width, height ) {
-    var x1 = x;
-    var x2 = x + width;
-    var y1 = y;
-    var y2 = y + height;
-    gl.bufferData( gl.ARRAY_BUFFER, new Float32Array( [
-      x1, y1,
-      x2, y1,
-      x1, y2,
-      x1, y2,
-      x2, y1,
-      x2, y2] ), gl.STATIC_DRAW );
-  }
 
   /**
    *
@@ -67,28 +54,17 @@ define( function( require ) {
     this.positionLocation = gl.getAttribLocation( program, "a_position" );
     this.texCoordLocation = gl.getAttribLocation( program, "a_texCoord" );
 
-    // provide texture coordinates for the rectangle.
-    this.texCoordBuffer = gl.createBuffer();
-    gl.bindBuffer( gl.ARRAY_BUFFER, this.texCoordBuffer );
-    gl.enableVertexAttribArray( this.texCoordLocation );
-    gl.vertexAttribPointer( this.texCoordLocation, 2, gl.FLOAT, false, 0, 0 );
-
     // Create a texture.
     this.texture = gl.createTexture();
 
     // lookup uniforms
     this.resolutionLocation = gl.getUniformLocation( program, "u_resolution" );
 
-    // set the resolution
-//    gl.uniform2f( this.resolutionLocation, this.canvas.width, this.canvas.height );
-
     // Create a buffer for the position of the rectangle corners.
     this.vertexBuffer = gl.createBuffer();
     gl.bindBuffer( gl.ARRAY_BUFFER, this.vertexBuffer );
     gl.enableVertexAttribArray( this.positionLocation );
     gl.vertexAttribPointer( this.positionLocation, 2, gl.FLOAT, false, 0, 0 );
-
-    setRectangle( gl, 0, 0, 256, 256 );
 
     // TODO: only create once instance of this Canvas for reuse
     this.image = document.createElement( 'canvas' );
@@ -97,9 +73,6 @@ define( function( require ) {
     var context = this.image.getContext( '2d' );
 
     context.drawImage( mountains, 0, 0 );
-
-    // Set a rectangle the same size as the image.
-    setRectangle( gl, 0, 0, textureRenderer.image.width, textureRenderer.image.height );
 
     gl.blendFunc( gl.SRC_ALPHA, gl.ONE_MINUS_SRC_ALPHA );
     gl.enable( this.gl.BLEND );
@@ -124,10 +97,6 @@ define( function( require ) {
       gl.enableVertexAttribArray( this.texCoordLocation );
       gl.enableVertexAttribArray( this.positionLocation );
 
-      // provide texture coordinates for the rectangle.
-      gl.bindBuffer( gl.ARRAY_BUFFER, this.texCoordBuffer );
-      gl.vertexAttribPointer( this.texCoordLocation, 2, gl.FLOAT, false, 0, 0 );
-
       // Create a texture.
       gl.bindTexture( gl.TEXTURE_2D, this.texture );
 
@@ -136,19 +105,23 @@ define( function( require ) {
       // Still, it gives the right behavior on iPad3 and OSX (non-retina).  Should be discussed and investigated.
       gl.uniform2f( this.resolutionLocation, this.canvas.width / this.backingScale, this.canvas.height / this.backingScale );
 
-      gl.bindBuffer( gl.ARRAY_BUFFER, this.vertexBuffer );
+      var step = Float32Array.BYTES_PER_ELEMENT;
+      var total = 2 + 2;
+      var stride = step * total;
 
-      gl.vertexAttribPointer( this.positionLocation, 2, gl.FLOAT, false, 0, 0 );
+      gl.bindBuffer( gl.ARRAY_BUFFER, this.vertexBuffer );
+      gl.vertexAttribPointer( this.positionLocation, 2, gl.FLOAT, false, stride, 0 );
+      gl.vertexAttribPointer( this.texCoordLocation, 2, gl.FLOAT, false, stride, step * 2 );
 
       // Draw the rectangle.
-      gl.drawArrays( gl.TRIANGLES, 0, this.textureBufferData.vertexArray.length / 2 );
+      gl.drawArrays( gl.TRIANGLES, 0, this.textureBufferData.vertexArray.length / total );
 
       gl.disableVertexAttribArray( this.texCoordLocation );
       gl.disableVertexAttribArray( this.positionLocation );
 
       gl.bindTexture( gl.TEXTURE_2D, null );
-
     },
+
     bindVertexBuffer: function() {
       var gl = this.gl;
       gl.bindBuffer( gl.ARRAY_BUFFER, this.vertexBuffer );
@@ -156,12 +129,6 @@ define( function( require ) {
       // Keep track of the vertexArray for updating sublists of it
       this.vertexArray = new Float32Array( this.textureBufferData.vertexArray );
       gl.bufferData( gl.ARRAY_BUFFER, this.vertexArray, gl.DYNAMIC_DRAW );
-    },
-
-    bindTextureBuffer: function() {
-      var gl = this.gl;
-      gl.bindBuffer( gl.ARRAY_BUFFER, this.texCoordBuffer );
-      gl.bufferData( gl.ARRAY_BUFFER, new Float32Array( this.textureBufferData.textureCoordinates ), gl.STATIC_DRAW );
     },
 
     updateTriangleBuffer: function( geometry ) {

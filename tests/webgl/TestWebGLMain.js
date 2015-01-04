@@ -56,7 +56,6 @@ define( function( require ) {
         webGLRenderer.textureRenderer.textureBufferData.createFromImage( Math.random() * 256, 0, 256, 256, mountains );
       }
       webGLRenderer.textureRenderer.bindVertexBuffer();
-      webGLRenderer.textureRenderer.bindTextureBuffer();
 
       webGLRenderer.colorTriangleRenderer.bindVertexBuffer();
 
