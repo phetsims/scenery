@@ -86,6 +86,6 @@ define( function( require ) {
 //        webGLRenderer.colorTriangleRenderer.reBufferData();
       } );
 
-      console.log( 'total triangles', colorTriangleBufferData.vertexArray.length / 3 );
+      console.log( 'total triangles', colorTriangleBufferData.vertexArray.length / 13 / 3 );
     }};
 } );
