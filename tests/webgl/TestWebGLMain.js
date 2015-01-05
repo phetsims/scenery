@@ -60,6 +60,7 @@ define( function( require ) {
         images.push( image );
       }
       webGLRenderer.textureRenderer.bindVertexBuffer();
+      webGLRenderer.textureRenderer.bindDirtyTextures();
 
       webGLRenderer.colorTriangleRenderer.bindVertexBuffer();
 

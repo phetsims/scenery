@@ -17,8 +17,6 @@ define( function( require ) {
   var colorVertexShader = require( 'text!SCENERY/display/webgl/texture.vert' );
   var colorFragmentShader = require( 'text!SCENERY/display/webgl/texture.frag' );
 
-  var mountains = require( 'image!ENERGY_SKATE_PARK_BASICS/mountains.png' );
-
   /**
    *
    * @constructor
@@ -68,27 +66,8 @@ define( function( require ) {
     gl.enableVertexAttribArray( this.positionLocation );
     gl.vertexAttribPointer( this.positionLocation, 2, gl.FLOAT, false, 0, 0 );
 
-    // TODO: only create once instance of this Canvas for reuse
-    this.image = document.createElement( 'canvas' );
-    this.image.width = 256;
-    this.image.height = 256;
-    var context = this.image.getContext( '2d' );
-
-    context.drawImage( mountains, 0, 0 );
-
     gl.blendFunc( gl.SRC_ALPHA, gl.ONE_MINUS_SRC_ALPHA );
     gl.enable( this.gl.BLEND );
-
-    // Upload the image into the texture.
-    gl.bindTexture( gl.TEXTURE_2D, this.texture );
-    gl.texParameteri( gl.TEXTURE_2D, gl.TEXTURE_WRAP_S, gl.CLAMP_TO_EDGE );
-    gl.texParameteri( gl.TEXTURE_2D, gl.TEXTURE_WRAP_T, gl.CLAMP_TO_EDGE );
-    gl.texParameteri( gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.LINEAR_MIPMAP_LINEAR );
-    gl.texParameteri( gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, gl.LINEAR );
-    gl.texImage2D( gl.TEXTURE_2D, 0, gl.RGBA, gl.RGBA, gl.UNSIGNED_BYTE, this.image );
-
-    gl.generateMipmap( gl.TEXTURE_2D );
-    gl.bindTexture( gl.TEXTURE_2D, null );
   }
 
   return inherit( Object, TextureRenderer, {
@@ -128,6 +107,30 @@ define( function( require ) {
       gl.disableVertexAttribArray( this.transform2AttributeLocation );
 
       gl.bindTexture( gl.TEXTURE_2D, null );
+    },
+
+    /**
+     * Iterate through all of the sprite sheets and register the dirty ones with the GPU as texture units.
+     */
+    bindDirtyTextures: function() {
+      var gl = this.gl;
+      for ( var i = 0; i < this.textureBufferData.spriteSheets.length; i++ ) {
+        var spriteSheet = this.textureBufferData.spriteSheets[i];
+        if ( spriteSheet.dirty ) {
+          gl.bindTexture( gl.TEXTURE_2D, this.texture );
+
+          gl.texParameteri( gl.TEXTURE_2D, gl.TEXTURE_WRAP_S, gl.CLAMP_TO_EDGE );
+          gl.texParameteri( gl.TEXTURE_2D, gl.TEXTURE_WRAP_T, gl.CLAMP_TO_EDGE );
+          gl.texParameteri( gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.LINEAR_MIPMAP_LINEAR );
+          gl.texParameteri( gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, gl.LINEAR );
+          gl.texImage2D( gl.TEXTURE_2D, 0, gl.RGBA, gl.RGBA, gl.UNSIGNED_BYTE, spriteSheet.image );
+          gl.generateMipmap( gl.TEXTURE_2D );
+
+          gl.bindTexture( gl.TEXTURE_2D, null );
+
+          spriteSheet.dirty = false;
+        }
+      }
     },
 
     bindVertexBuffer: function() {

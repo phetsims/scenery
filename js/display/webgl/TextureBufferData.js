@@ -13,20 +13,23 @@ define( function( require ) {
 
   // modules
   var inherit = require( 'PHET_CORE/inherit' );
+  var SpriteSheet = require( 'SCENERY/display/webgl/SpriteSheet' );
 
   /**
    *
    * @constructor
    */
   function TextureBufferData() {
-
-    //TODO: Use Float32Array -- though we will have to account for the fact that they have a fixed size
     this.vertexArray = [];
+    this.spriteSheets = [new SpriteSheet()];
   }
 
   return inherit( Object, TextureBufferData, {
-
     createFromImage: function( x, y, width, height, image, matrix4 ) {
+      //TODO: Check to see if any of the sprite sheets already contains that image
+      //TODO: If none of the sprite sheets contained that image, then mark the spritesheet as dirty
+      //TODO: and send it to the GPU after updating
+      this.spriteSheets[0].addImage( image );
       var textureBufferData = this;
       var index = this.vertexArray.length;
 
@@ -35,13 +38,18 @@ define( function( require ) {
       var y1 = y;
       var y2 = y + height;
 
+      // TODO: Correct texture coordinates
+      // TODO: Factor out hard-coded dimensions, see SpriteSheet.js
+      var u = image.width / 2048;
+      var v = image.width / 2048;
+
       this.vertexArray.push(
-        x1, y1, 0.0, 0.0, matrix4.m00(), matrix4.m01(), matrix4.m02(), matrix4.m10(), matrix4.m11(), matrix4.m12(),
-        x2, y1, 1.0, 0.0, matrix4.m00(), matrix4.m01(), matrix4.m02(), matrix4.m10(), matrix4.m11(), matrix4.m12(),
-        x1, y2, 0.0, 1.0, matrix4.m00(), matrix4.m01(), matrix4.m02(), matrix4.m10(), matrix4.m11(), matrix4.m12(),
-        x1, y2, 0.0, 1.0, matrix4.m00(), matrix4.m01(), matrix4.m02(), matrix4.m10(), matrix4.m11(), matrix4.m12(),
-        x2, y1, 1.0, 0.0, matrix4.m00(), matrix4.m01(), matrix4.m02(), matrix4.m10(), matrix4.m11(), matrix4.m12(),
-        x2, y2, 1.0, 1.0, matrix4.m00(), matrix4.m01(), matrix4.m02(), matrix4.m10(), matrix4.m11(), matrix4.m12()
+        x1, y1, 0, 0, matrix4.m00(), matrix4.m01(), matrix4.m02(), matrix4.m10(), matrix4.m11(), matrix4.m12(),
+        x2, y1, u, 0, matrix4.m00(), matrix4.m01(), matrix4.m02(), matrix4.m10(), matrix4.m11(), matrix4.m12(),
+        x1, y2, 0, v, matrix4.m00(), matrix4.m01(), matrix4.m02(), matrix4.m10(), matrix4.m11(), matrix4.m12(),
+        x1, y2, 0, v, matrix4.m00(), matrix4.m01(), matrix4.m02(), matrix4.m10(), matrix4.m11(), matrix4.m12(),
+        x2, y1, u, 0, matrix4.m00(), matrix4.m01(), matrix4.m02(), matrix4.m10(), matrix4.m11(), matrix4.m12(),
+        x2, y2, u, v, matrix4.m00(), matrix4.m01(), matrix4.m02(), matrix4.m10(), matrix4.m11(), matrix4.m12()
       );
 
       //Track the index so it can delete itself, update itself, etc.
@@ -50,6 +58,7 @@ define( function( require ) {
         initialState: {x: x, y: y, width: width, height: height},
         index: index,
         endIndex: textureBufferData.vertexArray.length,
+        image: image,
         setTransform: function( matrix4 ) {
           for ( var i = 0; i < 6; i++ ) {
             textureBufferData.vertexArray[index + 4 + i * 10] = matrix4.m00();
