@@ -25,7 +25,7 @@ define( function( require ) {
   }
 
   return inherit( Object, TextureBufferData, {
-    createFromImage: function( x, y, width, height, image, matrix4 ) {
+    createFromImage: function( x, y, z, width, height, image, matrix4 ) {
       //TODO: Check to see if any of the sprite sheets already contains that image
       //TODO: If none of the sprite sheets contained that image, then mark the spritesheet as dirty
       //TODO: and send it to the GPU after updating
@@ -44,12 +44,12 @@ define( function( require ) {
       var v = image.width / 2048;
 
       this.vertexArray.push(
-        x1, y1, 0, 0, matrix4.m00(), matrix4.m01(), matrix4.m02(), matrix4.m10(), matrix4.m11(), matrix4.m12(),
-        x2, y1, u, 0, matrix4.m00(), matrix4.m01(), matrix4.m02(), matrix4.m10(), matrix4.m11(), matrix4.m12(),
-        x1, y2, 0, v, matrix4.m00(), matrix4.m01(), matrix4.m02(), matrix4.m10(), matrix4.m11(), matrix4.m12(),
-        x1, y2, 0, v, matrix4.m00(), matrix4.m01(), matrix4.m02(), matrix4.m10(), matrix4.m11(), matrix4.m12(),
-        x2, y1, u, 0, matrix4.m00(), matrix4.m01(), matrix4.m02(), matrix4.m10(), matrix4.m11(), matrix4.m12(),
-        x2, y2, u, v, matrix4.m00(), matrix4.m01(), matrix4.m02(), matrix4.m10(), matrix4.m11(), matrix4.m12()
+        x1, y1, z, 0, 0, matrix4.m00(), matrix4.m01(), matrix4.m02(), matrix4.m10(), matrix4.m11(), matrix4.m12(),
+        x2, y1, z, u, 0, matrix4.m00(), matrix4.m01(), matrix4.m02(), matrix4.m10(), matrix4.m11(), matrix4.m12(),
+        x1, y2, z, 0, v, matrix4.m00(), matrix4.m01(), matrix4.m02(), matrix4.m10(), matrix4.m11(), matrix4.m12(),
+        x1, y2, z, 0, v, matrix4.m00(), matrix4.m01(), matrix4.m02(), matrix4.m10(), matrix4.m11(), matrix4.m12(),
+        x2, y1, z, u, 0, matrix4.m00(), matrix4.m01(), matrix4.m02(), matrix4.m10(), matrix4.m11(), matrix4.m12(),
+        x2, y2, z, u, v, matrix4.m00(), matrix4.m01(), matrix4.m02(), matrix4.m10(), matrix4.m11(), matrix4.m12()
       );
 
       //Track the index so it can delete itself, update itself, etc.
@@ -61,12 +61,12 @@ define( function( require ) {
         image: image,
         setTransform: function( matrix4 ) {
           for ( var i = 0; i < 6; i++ ) {
-            textureBufferData.vertexArray[index + 4 + i * 10] = matrix4.m00();
-            textureBufferData.vertexArray[index + 5 + i * 10] = matrix4.m01();
-            textureBufferData.vertexArray[index + 6 + i * 10] = matrix4.m03();
-            textureBufferData.vertexArray[index + 7 + i * 10] = matrix4.m10();
-            textureBufferData.vertexArray[index + 8 + i * 10] = matrix4.m11();
-            textureBufferData.vertexArray[index + 9 + i * 10] = matrix4.m13();
+            textureBufferData.vertexArray[index + 5 + i * 11] = matrix4.m00();
+            textureBufferData.vertexArray[index + 6 + i * 11] = matrix4.m01();
+            textureBufferData.vertexArray[index + 7 + i * 11] = matrix4.m03();
+            textureBufferData.vertexArray[index + 8 + i * 11] = matrix4.m10();
+            textureBufferData.vertexArray[index + 9 + i * 11] = matrix4.m11();
+            textureBufferData.vertexArray[index + 10 + i * 11] = matrix4.m13();
           }
         },
         setXWidth: function( x, width ) {

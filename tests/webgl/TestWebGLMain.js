@@ -56,7 +56,7 @@ define( function( require ) {
       var images = [];
       for ( var i = 0; i < 100; i++ ) {
         var matrix4 = Matrix4.identity();
-        var image = webGLRenderer.textureRenderer.textureBufferData.createFromImage( i * 2, 0, 256, 256, mountains, matrix4 );
+        var image = webGLRenderer.textureRenderer.textureBufferData.createFromImage( i * 2, 0, Math.random(), 256, 256, mountains, matrix4 );
         images.push( image );
       }
       webGLRenderer.textureRenderer.bindVertexBuffer();

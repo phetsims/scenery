@@ -89,14 +89,14 @@ define( function( require ) {
       gl.uniform2f( this.resolutionLocation, this.canvas.width / this.backingScale, this.canvas.height / this.backingScale );
 
       var step = Float32Array.BYTES_PER_ELEMENT;
-      var total = 2 + 2 + 3 + 3;
+      var total = 3 + 2 + 3 + 3;
       var stride = step * total;
 
       gl.bindBuffer( gl.ARRAY_BUFFER, this.vertexBuffer );
-      gl.vertexAttribPointer( this.positionLocation, 2, gl.FLOAT, false, stride, 0 );
-      gl.vertexAttribPointer( this.texCoordLocation, 2, gl.FLOAT, false, stride, step * 2 );
-      gl.vertexAttribPointer( this.transform1AttributeLocation, 3, gl.FLOAT, false, stride, step * (2 + 2) );
-      gl.vertexAttribPointer( this.transform2AttributeLocation, 3, gl.FLOAT, false, stride, step * (2 + 2 + 3) );
+      gl.vertexAttribPointer( this.positionLocation, 3, gl.FLOAT, false, stride, 0 );
+      gl.vertexAttribPointer( this.texCoordLocation, 2, gl.FLOAT, false, stride, step * 3 );
+      gl.vertexAttribPointer( this.transform1AttributeLocation, 3, gl.FLOAT, false, stride, step * (3 + 2) );
+      gl.vertexAttribPointer( this.transform2AttributeLocation, 3, gl.FLOAT, false, stride, step * (3 + 2 + 3) );
 
       // Draw the rectangle.
       gl.drawArrays( gl.TRIANGLES, 0, this.textureBufferData.vertexArray.length / total );
