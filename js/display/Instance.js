@@ -12,6 +12,12 @@
  * An Instance is pooled, but when constructed will not automatically create children, drawables, etc.
  * syncTree() is responsible for synchronizing the instance itself and its entire subtree.
  *
+ * Instances are created as 'stateless' instances, but during syncTree the rendering state (properties to determine
+ * how to construct the drawable tree for this instance and its subtree) are set.
+ *
+ * While Instances are considered 'stateful', they will have listeners added to their Node which records actions taken
+ * in-between Display.updateDisplay().
+ *
  * @author Jonathan Olson <jonathan.olson@colorado.edu>
  */
 
@@ -37,6 +43,7 @@ define( function( require ) {
                                                                Renderer.bitmaskDOM,
                                                                Renderer.bitmaskWebGL );
 
+  // see initialize() for documentation
   scenery.Instance = function Instance( display, trail, isDisplayRoot, isSharedCanvasCacheRoot ) {
     this.active = false;
 
@@ -45,14 +52,25 @@ define( function( require ) {
   var Instance = scenery.Instance;
 
   inherit( Object, Instance, {
+    /*
+     * @param {Display} display - Instances are bound to a single display
+     * @param {Trail} trail - The list of ancestors going back up to our root instance (for the display, or for a cache)
+     * @param {boolean} isDisplayRoot - Whether our instance is for the root node provided to the Display.
+     * @param {boolean} isSharedCanvasCacheRoot - Whether our instance is the root for a shared Canvas cache (which can
+     *                                            be used multiple places in the main instance tree)
+     */
     initialize: function( display, trail, isDisplayRoot, isSharedCanvasCacheRoot ) {
-      assert && assert( !this.active, 'We should never try to initialize an already active object' );
+      assert && assert( !this.active,
+        'We should never try to initialize an already active object' );
 
       // prevent the trail passed in from being mutated after this point (we want a consistent trail)
       trail.setImmutable();
 
       this.id = this.id || globalIdCounter++;
 
+      // {RelativeTransform}, provides high-performance access to 'relative' transforms (from our nearest
+      // transform root), and allows for listening to when our relative transform changes (called during
+      // a phase of Display.updateDisplay()).
       this.relativeTransform = ( this.relativeTransform || new RelativeTransform() ).initialize( this, display, trail );
 
       // In the range (-1,0), to help us track insertions and removals of this instance's node to its parent
@@ -96,13 +114,15 @@ define( function( require ) {
 
       this.stateless = true; // {boolean} - Whether we have had our state initialized yet
 
-      // internal render state handling for the instance tree
+      // Rendering state constants (will not change over the life of an instance)
       this.isDisplayRoot = isDisplayRoot; // {boolean} - Whether we are the root instance for a Display
       this.isSharedCanvasCacheRoot = isSharedCanvasCacheRoot; // {boolean} - Whether we are the root of a Canvas cache
+
+      // 'Cascading' render state for the instance tree. These are properties that can affect the entire subtree when set
       this.preferredRenderers = 0; // {number} - Packed renderer order bitmask (what our renderer preferences are)
       this.isUnderCanvasCache = isSharedCanvasCacheRoot; // {boolean} - Whether we are beneath a Canvas cache (Canvas required)
 
-      // render state exports for this instance
+      // Render state exports for this instance.
       this.isBackbone = false; // {boolean} - Whether we will have a BackboneDrawable group drawable
       this.isTransformed = false;  // {boolean} - Whether this instance creates a new "root" for the relative trail transforms
       this.isInstanceCanvasCache = false; // {boolean} - Whether we have a Canvas cache specific to this instance's position
@@ -112,7 +132,7 @@ define( function( require ) {
       this.groupRenderer = 0; // {number} Renderer bitmask for the 'group' drawable (if applicable)
       this.sharedCacheRenderer = 0; // {number} Renderer bitmask for the cache drawable (if applicable)
 
-      // pruning flags (whether we need to be visited, whether updateState is required, and whether to visit children)
+      // pruning flags (whether we need to be visited, whether updateRenderingState is required, and whether to visit children)
       this.renderStateDirtyFrame = display._frameId; // {number} - When equal to the current frame it is considered "dirty"
       this.skipPruningFrame = display._frameId; // {number} - When equal to the current frame we can't prune at this instance
 
@@ -121,8 +141,13 @@ define( function( require ) {
       return this;
     },
 
-    // called for initialization of properties (via initialize(), via constructor), or to clean the instance for
-    // placement in the pool (don't leak memory)
+    /*
+     * Called for initialization of properties (via initialize(), via constructor), and to clean the instance for
+     * placement in the pool (don't leak memory).
+     *
+     * @param {Display} display - Instances are bound to a single display
+     * @param {Trail} trail - The list of ancestors going back up to our root instance (for the display, or for a cache)
+     */
     cleanInstance: function( display, trail ) {
       this.display = display;
       this.trail = trail;
@@ -133,29 +158,39 @@ define( function( require ) {
       this.children = cleanArray( this.children ); // Array[Instance].
       this.sharedCacheInstance = null; // reference to a shared cache instance (different than a child)
 
-      // Child instances are pushed to here when their node is removed from our node. we don't immediately dispose,
-      // since it may be added back.
+      // {Instance[]} - Child instances are pushed to here when their node is removed from our node.
+      // We don't immediately dispose, since it may be added back.
       this.instanceRemovalCheckList = cleanArray( this.instanceRemovalCheckList );
 
+      // {Drawable} - references to our drawables in the drawable tree
       this.selfDrawable = null;
       this.groupDrawable = null; // e.g. backbone or non-shared cache
       this.sharedCacheDrawable = null; // our drawable if we are a shared cache
 
-      // references into the linked list of drawables (null if nothing is drawable under this)
+      // {Drawable} - references into the linked list of drawables (null if nothing is drawable under this)
       this.firstDrawable = null;
       this.lastDrawable = null;
 
-      // references into the linked list of drawables (excludes any group drawables handling)
+      // {Drawable} - references into the linked list of drawables (excludes any group drawables handling)
       this.firstInnerDrawable = null;
       this.lastInnerDrawable = null;
 
-      this.svgGroups = []; // list of SVG groups associated with this display instance
+      // {SVGGroup[]} - List of SVG groups associated with this display instance
+      this.svgGroups = [];
 
       this.cleanSyncTreeResults();
 
       this.relativeTransform.clean();
     },
 
+    /*
+     * Initializes or clears properties that are all set as pseudo 'return values' of the syncTree() method. It is the
+     * responsibility of the caller of syncTree() to afterwards (optionally read these results and) clear the references
+     * using this method to prevent memory leaks.
+     *
+     * TODO: consider a pool of (or a single global) typed return object(s), since setting these values on the instance
+     * generally means hitting the heap, and can slow us down.
+     */
     cleanSyncTreeResults: function() {
       // Tracking bounding indices / drawables for what has changed, so we don't have to over-stitch things.
 
@@ -175,16 +210,21 @@ define( function( require ) {
       // {ChangeInterval}, last change interval
       this.lastChangeInterval = null;
 
-      // render state change flags, all set in updateState()
+      // {boolean} - render state change flags, all set in updateRenderingState()
       this.incompatibleStateChange = false; // {boolean} - Whether we need to recreate the instance tree
       this.groupChanged = false; // {boolean} - Whether we need to force a rebuild of the group drawable
       this.cascadingStateChange = false; // {boolean} - Whether we had a render state change that requires visiting all children
-      this.anyStateChange = false; // {boolean} - Whether there was any change of rendering state with the last updateState()
+      this.anyStateChange = false; // {boolean} - Whether there was any change of rendering state with the last updateRenderingState()
     },
 
     /*
-     * Updates the rendering state variables, and returns a {boolean} flag of whether it was successful if we were
-     * already stateful
+     * Updates the rendering state properties, and returns a {boolean} flag of whether it was successful if we were
+     * already stateful.
+     *
+     * Rendering state properties determine how we construct the drawable tree from our instance tree (e.g. do we
+     * create an SVG or Canvas rectangle, where to place CSS transforms, how to handle opacity, etc.)
+     *
+     * Instances start out as 'stateless' until updateRenderingState() is called the first time.
      *
      * Node changes that can cause a potential state change (using Node event listeners):
      * - hints
@@ -197,8 +237,8 @@ define( function( require ) {
      * - isUnderCanvasCache
      * - preferredRenderers
      */
-    updateState: function() {
-      sceneryLog && sceneryLog.Instance && sceneryLog.Instance( 'updateState ' + this.toString() +
+    updateRenderingState: function() {
+      sceneryLog && sceneryLog.Instance && sceneryLog.Instance( 'updateRenderingState ' + this.toString() +
                                                                 ( this.stateless ? ' (stateless)' : '' ) );
       sceneryLog && sceneryLog.Instance && sceneryLog.push();
 
@@ -243,12 +283,14 @@ define( function( require ) {
       if ( this.isDisplayRoot || ( !this.isUnderCanvasCache && ( hasTransparency || hasClip || hints.requireElement || hints.cssTransform || hints.split ) ) ) {
         this.isBackbone = true;
         this.isTransformed = this.isDisplayRoot || !!hints.cssTransform; // for now, only trigger CSS transform if we have the specific hint
-        //OHTWO TODO: check whether the force acceleration hint is being used
+        //OHTWO TODO: check whether the force acceleration hint is being used by our DOMBlock
         this.groupRenderer = Renderer.bitmaskDOM | ( hints.forceAcceleration ? Renderer.bitmaskForceAcceleration : 0 ); // probably won't be used
       }
       else if ( hasTransparency || hasClip || hints.canvasCache ) {
         // everything underneath needs to be renderable with Canvas, otherwise we cannot cache
-        assert && assert( ( combinedBitmask & Renderer.bitmaskCanvas ) !== 0, 'hints.canvasCache provided, but not all node contents can be rendered with Canvas under ' + this.node.constructor.name );
+        assert && assert( ( combinedBitmask & Renderer.bitmaskCanvas ) !== 0,
+          'hints.canvasCache provided, but not all node contents can be rendered with Canvas under ' +
+          this.node.constructor.name );
 
         if ( hints.singleCache ) {
           // TODO: scale options - fixed size, match highest resolution (adaptive), or mipmapped
@@ -260,7 +302,9 @@ define( function( require ) {
           else {
             // everything underneath needs to guarantee that its bounds are valid
             //OHTWO TODO: We'll probably remove this if we go with the "safe bounds" approach
-            assert && assert( ( combinedBitmask & scenery.bitmaskBoundsValid ) !== 0, 'hints.singleCache provided, but not all node contents have valid bounds under ' + this.node.constructor.name );
+            assert && assert( ( combinedBitmask & scenery.bitmaskBoundsValid ) !== 0,
+              'hints.singleCache provided, but not all node contents have valid bounds under ' +
+              this.node.constructor.name );
 
             this.isSharedCanvasCachePlaceholder = true;
           }
@@ -286,7 +330,6 @@ define( function( require ) {
         else {
           var nodeBitmask = this.node._rendererBitmask;
 
-          //OHTWO TODO: How specifically to handle hi-resolution varieties? Not in the renderer?
           // use the preferred rendering order if specified, otherwise use the default
           this.selfRenderer = ( nodeBitmask & Renderer.bitmaskOrderFirst( this.preferredRenderers ) ) ||
                               ( nodeBitmask & Renderer.bitmaskOrderSecond( this.preferredRenderers ) ) ||
@@ -316,7 +359,7 @@ define( function( require ) {
        * This is generally not possible if there is a change in whether the instance should be a transform root
        * (e.g. backbone/single-cache), so we will have to recreate the instance and its subtree if that is the case.
        *
-       * Only relevant if we were previously stateful, so it can be ignored if this is our first updateState()
+       * Only relevant if we were previously stateful, so it can be ignored if this is our first updateRenderingState()
        */
       this.incompatibleStateChange = ( this.isTransformed !== wasTransformed ) ||
                                      ( this.isSharedCanvasCachePlaceholder !== wasSharedCanvasCachePlaceholder );
@@ -332,6 +375,9 @@ define( function( require ) {
       sceneryLog && sceneryLog.Instance && sceneryLog.pop();
     },
 
+    /*
+     * @returns A short string that contains a summary of the rendering state, for debugging/logging purposes.
+     */
     getStateString: function() {
       var result = 'S[ ' +
              ( this.isDisplayRoot ? 'displayRoot ' : '' ) +
@@ -346,33 +392,26 @@ define( function( require ) {
       return result + ']';
     },
 
-    // @public
+    /*
+     * The main entry point for syncTree(), called on the root instance. See syncTree() for more information.
+     */
     baseSyncTree: function() {
+      assert && assert( this.isDisplayRoot, 'baseSyncTree() should only be called on the root instance' );
+
       sceneryLog && sceneryLog.Instance && sceneryLog.Instance( '-------- START baseSyncTree ' + this.toString() + ' --------' );
       this.syncTree();
       sceneryLog && sceneryLog.Instance && sceneryLog.Instance( '-------- END baseSyncTree ' + this.toString() + ' --------' );
       this.cleanSyncTreeResults();
     },
 
-    // updates the internal rendering state, and fully synchronizes the instance subtree
-    /*OHTWO TODO:
-     * Pruning:
-     *   - If children haven't changed, skip instance add/move/remove
-     *   - If render state hasn't changed AND there are no render/instance/stitch changes below us, EXIT (whenever we are
-     *     assured children don't need sync)
-     * Return linked-list of alternating changed (add/remove) and keep sections of drawables, for processing with
-     * backbones/canvas caches.
+    /*
+     * Updates the rendering state, synchronizes the instance sub-tree (so that our instance tree matches
+     * the Node tree the client provided), and back-propagates {ChangeInterval} information for stitching backbones
+     * and/or caches.
      *
-     * Other notes:
-     *
-     *    Traversal hits every child if parent render state changed. Otherwise, only hits children who have (or has
-     *                            descendants who have) potential render state changes. If we haven't hit a "change" yet
-     *                            from ancestors, don't re-evaluate any render states (UNLESS renderer summary changed!)
-     *      Need recursive flag for "render state needs reevaluation" / "child render state needs reevaluation
-     *        Don't flag changes when they won't actually change the "current" render state!!!
-     *        Changes in renderer summary (subtree combined) can cause changes in the render state
-     *    OK for traversal to return "no change", doesn't specify any drawables changes
-     *
+     * syncTree() also sets a number of pseudo 'return values' (documented in cleanSyncTreeResults()). After calling
+     * syncTree() and optionally reading those results, cleanSyncTreeResults() should be called on the same instance
+     * in order to prevent memory leaks.
      *
      * @returns {boolean} - Whether the sync was possible. If it wasn't, a new instance subtree will need to be created.
      */
@@ -392,12 +431,12 @@ define( function( require ) {
       if ( wasStateless ||
            ( this.parent && this.parent.cascadingStateChange ) || // if our parent had cascading state changes, we need to recompute
            ( this.renderStateDirtyFrame === this.display._frameId ) ) { // if our render state is dirty
-        this.updateState();
+        this.updateRenderingState();
       }
       else {
         // we can check whether updating state would have made any changes when we skip it (for slow assertions)
         if ( assertSlow ) {
-          this.updateState();
+          this.updateRenderingState();
           assertSlow( !this.anyStateChange );
         }
       }
@@ -405,17 +444,19 @@ define( function( require ) {
       if ( !wasStateless && this.incompatibleStateChange ) {
         sceneryLog && sceneryLog.Instance && sceneryLog.Instance( 'incompatible instance ' + this.toString() + ' ' + this.getStateString() + ', aborting' );
         sceneryLog && sceneryLog.Instance && sceneryLog.pop();
+
+        // The false return will signal that a new instance needs to be used. our tree will be disposed soon.
         return false;
       }
       this.stateless = false;
 
       // no need to overwrite, should always be the same
-      assert && assert( !wasStateless || this.children.length === 0, 'We should not have child instances on an instance without state' );
+      assert && assert( !wasStateless || this.children.length === 0,
+        'We should not have child instances on an instance without state' );
 
       if ( wasStateless ) {
         // If we are a transform root, notify the display that we are dirty. We'll be validated when it's at that phase
         // at the next updateDisplay().
-        //OHTWO TODO: when else do we have to call this?
         if ( this.isTransformed ) {
           this.display.markTransformRootDirty( this, true );
         }
@@ -423,7 +464,7 @@ define( function( require ) {
         this.attachNodeListeners();
       }
 
-      //OHTWO TODO: pruning of shared caches
+      // TODO: pruning of shared caches
       if ( this.isSharedCanvasCachePlaceholder ) {
         this.sharedSyncTree();
       }
@@ -440,7 +481,7 @@ define( function( require ) {
 
         var selfChanged = this.updateSelfDrawable();
 
-        // properly handle our self and children
+        // Synchronizes our children and self, with the drawables and change intervals of both combined
         this.localSyncTree( selfChanged );
 
         if ( assertSlow ) {
@@ -448,7 +489,8 @@ define( function( require ) {
           this.auditChangeIntervals( oldFirstInnerDrawable, oldLastInnerDrawable, this.firstInnerDrawable, this.lastInnerDrawable );
         }
 
-        // apply any group changes necessary
+        // If we use a group drawable (backbone, etc.), we'll collapse our drawables and change intervals to reference
+        // the group drawable (as applicable).
         this.groupSyncTree( wasStateless );
 
         if ( assertSlow ) {
@@ -457,6 +499,8 @@ define( function( require ) {
         }
       }
       else {
+        // our sub-tree was not visited, since there were no relevant changes to it (that need instance synchronization
+        // or drawable changes)
         sceneryLog && sceneryLog.Instance && sceneryLog.Instance( 'pruned' );
       }
 
@@ -492,10 +536,6 @@ define( function( require ) {
 
       for ( var i = 0; i < this.children.length; i++ ) {
         var childInstance = this.children[i];
-
-        // grab the first/last drawables before our syncTree
-        // var oldChildFirstDrawable = childInstance.firstDrawable;
-        // var oldChildLastDrawable = childInstance.lastDrawable;
 
         var isCompatible = childInstance.syncTree();
         if ( !isCompatible ) {
@@ -547,7 +587,8 @@ define( function( require ) {
           sceneryLog && sceneryLog.ChangeInterval && sceneryLog.pop();
         }
         else {
-          assert && assert( wasIncluded === isIncluded, 'If we do not have stitchChangeFrame activated, our inclusion should not have changed' );
+          assert && assert( wasIncluded === isIncluded,
+            'If we do not have stitchChangeFrame activated, our inclusion should not have changed' );
         }
 
         var firstChildChangeInterval = childInstance.firstChangeInterval;
