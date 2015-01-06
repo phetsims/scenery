@@ -52,9 +52,10 @@ define( function( require ) {
       // Output the contour to an array of poly2tri.Point
       var contour = [];
 
+      var k;
       for ( var i = 0; i < subpaths.length; i++ ) {
         var subpath = subpaths[i];
-        for ( var k = 0; k < subpath.points.length; k++ ) {
+        for ( k = 0; k < subpath.points.length; k++ ) {
 
           string = string + '' + subpath.points[k].x + ' ' + subpath.points[k].y + '\n';
 
@@ -78,7 +79,7 @@ define( function( require ) {
       }
 
       // Add the triangulated geometry into the array buffer.
-      for ( var k = 0; k < triangles.length; k++ ) {
+      for ( k = 0; k < triangles.length; k++ ) {
         var triangle = triangles[k];
         for ( var zz = 0; zz < triangle.points_.length; zz++ ) {
           var pt = triangle.points_[zz];

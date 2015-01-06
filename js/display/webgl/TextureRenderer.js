@@ -22,7 +22,6 @@ define( function( require ) {
    * @constructor
    */
   function TextureRenderer( gl, backingScale, canvas ) {
-    var textureRenderer = this;
     this.gl = gl;
     this.canvas = canvas;
     this.backingScale = backingScale;
