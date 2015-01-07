@@ -1,4 +1,5 @@
 // Copyright 2002-2014, University of Colorado Boulder
+
 /**
  * Configuration file for development purposes, NOT for production deployments.
  * This configuation file adds some auxiliary phetsims repos such as chipper and energy-skate-park-basics.
@@ -6,9 +7,6 @@
  *
  * @author Jonathan Olson <jonathan.olson@colorado.edu>
  */
-
-// flag is set so we can ensure that the config has executed. This prevents various Require.js dynamic loading timeouts and script errors
-window.loadedSceneryConfig = true;
 
 require.config( {
   // depends on all of Scenery, Kite, and Dot

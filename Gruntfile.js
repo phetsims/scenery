@@ -38,9 +38,9 @@ module.exports = function( grunt ) {
       production: {
         options: {
           almond: true,
-          mainConfigFile: "js/production-config.js",
+          mainConfigFile: "js/config.js",
           out: "build/production/scenery.min.js",
-          name: "production-config",
+          name: "config",
           optimize: 'uglify2',
           generateSourceMaps: true,
           preserveLicenseComments: false,

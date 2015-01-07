@@ -71,10 +71,8 @@
   <script>
     var fuzzStep = false;
 
-    // we need to wait until our config file is loaded before our require statement. apparently this was not guaranteed
-    function check() {
-      if ( window.loadedSceneryConfig ) {
-        requirejs( [ 'main', 'KITE/main', 'DOT/main', 'PHET_CORE/main' ], function( scenery, kite, dot, core ) {
+    require( ['config'], function() {
+        require( [ 'main', 'KITE/main', 'DOT/main', 'PHET_CORE/main' ], function( scenery, kite, dot, core ) {
           window.scenery = scenery;
           window.kite = kite;
           window.dot = dot;
@@ -411,11 +409,7 @@
           //   })();
           // };
         } );
-      } else {
-        setTimeout( check, 4 );
-      }
-    }
-    setTimeout( check, 4 );
+      } );
   </script>
 </body>
 </html>

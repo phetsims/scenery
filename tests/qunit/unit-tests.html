@@ -33,7 +33,6 @@
   <script src="../../../sherpa/canvg-1.3.js"></script>
 
   <script data-main="../../js/config.js" src="../../../sherpa/require-2.1.11.js"></script>
-  <!-- <script src="../../build/development/scenery.js"></script> -->
 
   <script src="unit-tests.js"></script>
   <script src="../../../kite/tests/qunit/unit-tests.js"></script>
@@ -51,27 +50,21 @@
   <!-- this needs to be run after the qunit-fixture is in the DOM, but before the document is loaded because QUnit scans the fixture then -->
   <script src="prepare-fixture.js"></script>
   <script>
-    // we need to wait until our config file is loaded before our require statement. apparently this was not guaranteed
-    function check() {
-      if ( window.loadedSceneryConfig ) {
-        require( [ 'main', 'KITE/main', 'DOT/main', 'AXON/main', 'PHET_CORE/main' ], function( scenery, kite, dot, axon, core ) {
-          window.scenery = scenery;
-          window.kite = kite;
-          window.dot = dot;
-          window.axon = axon;
-          window.core = core;
+    require( ['config'], function() {
+      require( [ 'main', 'KITE/main', 'DOT/main', 'AXON/main', 'PHET_CORE/main' ], function( scenery, kite, dot, axon, core ) {
+        window.scenery = scenery;
+        window.kite = kite;
+        window.dot = dot;
+        window.axon = axon;
+        window.core = core;
 
-          runSceneryTests( '.' );
-          runKiteTests( '../../../kite/tests/qunit' );
-          runDotTests( '../../../dot/tests/qunit' );
-          runAxonTests( '../../../axon/tests/qunit' );
-          runPhetCoreTests( '../../../phet-core/tests/qunit' );
-        } );
-      } else {
-        setTimeout( check, 4 );
-      }
-    }
-    setTimeout( check, 4 );
+        runSceneryTests( '.' );
+        runKiteTests( '../../../kite/tests/qunit' );
+        runDotTests( '../../../dot/tests/qunit' );
+        runAxonTests( '../../../axon/tests/qunit' );
+        runPhetCoreTests( '../../../phet-core/tests/qunit' );
+      } );
+    } );
   </script>
 </body>
 </html>
