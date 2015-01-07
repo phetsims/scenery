@@ -162,6 +162,84 @@
         <img src="../assets/ohtwo-design-notes.svg">
       </p>
 
+      <h2>Batching</h2>
+
+      <p>
+        Scenery (since 0.2) is designed to generally batch all changes to the DOM until Display's
+        <a href="../doc#display-updateDisplay">updateDisplay()</a> is called (where all visual operations are done).
+        Input events are generally not batched (but executed synchronously), allowing writing security-sensitive
+        event handlers directly in up-events.
+      </p>
+
+      <h2>Renderers</h2>
+
+      <p>
+        {Renderer} indicates a specific integer bitmask that includes a flag for DOM/SVG/Canvas/WebGL, and other
+        optional flags. Use strict equality for comparison, or <code>Renderer.isDOM( renderer )</code> and equivalents.
+      </p>
+
+      <h2>Stitching</h2>
+
+      <p>
+        The task of updating blocks in a backbone for a new list of drawables is known as <strong>stitching</strong>.
+        The back-propagation of syncTree() creates a list of {ChangeInterval}s that each conceptually contain a list of
+        removed nodes and a list of added nodes (which are swapped in the list of drawables). Stitching needs to
+        efficiently make changes at each ChangeInterval, inserting, removing and rearranging blocks to minimize the
+        overall cost. See Stitcher.js for in-depth documentation on the constrains and process.
+      </p>
+
+      <h2>Sequence of Operations</h2>
+
+      <ul>
+        <li>
+          external changes<br>
+          TODO
+        </li>
+        <li>
+          input event<br>
+          TODO
+        </li>
+        <li>
+          updateDisplay()<br>
+          <ol>
+            <li>
+              [optional] Validate pointers - fires necessary input events if nodes have moved under pointers
+            </li>
+            <li>
+              Validate bounds under bounds listeners, so validateBounds() afterwards will not
+              trigger any event listeners (updateDisplay is not made to be re-entrant)
+            </li>
+            <li>
+              syncTree traversal (inline instance tree modifications and stitching on back-propagation)
+            </li>
+            <li>
+              Update drawable linked lists (get rid of the last frame's linked list pointers)
+            </li>
+            <li>
+              Dispose change intervals
+            </li>
+            <li>
+              Update drawables' block references
+            </li>
+            <li>
+              Update relative transforms in our instance tree
+            </li>
+            <li>
+              Dispose unused instances
+            </li>
+            <li>
+              Dispose unused drawables
+            </li>
+            <li>
+              Drawable update (repaint) traversal
+            </li>
+            <li>
+              Update cursor / backgroundColor / DOM element dimensions / overlays
+            </li>
+          </ol>
+        </li>
+      </ul>
+
       <h2>Pickability Notes</h2>
 
       <p>
