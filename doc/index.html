@@ -187,18 +187,15 @@
       <a class="sublink" href="#node-rendererOptions">rendererOptions</a><br>
       <a class="sublink" href="#node-layerSplit">layerSplit</a><br>
 
-      <a class="navlink" href="#scene">Scene</a><br>
-      <a class="sublink" href="#scene-options">(options)</a><br>
-      <a class="sublink" href="#scene-updateScene">updateScene</a><br>
-      <a class="sublink" href="#scene-dispose">dispose</a><br>
-      <a class="sublink" href="#scene-renderToCanvas">renderToCanvas</a><br>
-      <a class="sublink" href="#scene-canvasSnapshot">canvasSnapshot</a><br>
-      <a class="sublink" href="#scene-canvasDataURL">canvasDataURL</a><br>
-      <a class="sublink" href="#scene-updateOnRequestAnimationFrame">updateOnRequestAnimationFrame</a><br>
-      <a class="sublink" href="#scene-initializeStandaloneEvents">initializeStandaloneEvents</a><br>
-      <a class="sublink" href="#scene-initializeFullscreenEvents">initializeFullscreenEvents</a><br>
-      <a class="sublink" href="#scene-getDebugHTML">getDebugHTML</a><br>
-      <a class="sublink" href="#scene-popupDebug">popupDebug</a><br>
+      <a class="navlink" href="#display">Display</a><br>
+      <a class="sublink" href="#display-options">(options)</a><br>
+      <a class="sublink" href="#display-domElement">domElement</a><br>
+      <a class="sublink" href="#display-updateDisplay">updateDisplay</a><br>
+      <a class="sublink" href="#display-rootNode">rootNode</a><br>
+      <a class="sublink" href="#display-size">size</a><br>
+      <a class="sublink" href="#display-width">width</a><br>
+      <a class="sublink" href="#display-height">height</a><br>
+      <a class="sublink" href="#display-backgroundColor">backgroundColor</a><br>
 
       <a class="navlink" href="#fillable">Fillable</a><br>
       <a class="sublink" href="#fillable-fill">fill</a><br>
@@ -338,7 +335,7 @@ grunt</pre>
       <ul>
         <li><a href="http://jquery.com/">jQuery</a> for parts of DOM manipulation.</li>
         <li><a href="http://lodash.com/">Lo-Dash</a> for utility functions, as a replacement for <a href="http://underscorejs.org/">Underscore.js</a>.</li>
-        <li>[optional] <a href="https://code.google.com/p/canvg/">Canvg</a>, for supporting SVG &#8594; Canvas operations, like <a href="#scene-renderToCanvas">scene.renderToCanvas</a></li>
+        <li>[optional] <a href="https://code.google.com/p/canvg/">Canvg</a>, for supporting SVG &#8594; Canvas operations, like rendering to Canvas</li>
       </ul>
 
       <strong>Internal</strong> dependencies:
@@ -500,7 +497,7 @@ scene.addChild( new scenery.Node( {
         <a href="../examples/cursors.html">a cursor example page</a> that demos a number of available cursors.
       </p>
       <p>
-        The cursor is updated whenever <a href="#scene-updateCursor">scene.updateCursor</a> or <a href="#scene-updateScene">scene.updateScene</a> is called, and event initialization like <a href="#scene-initializeStandaloneEvents">scene.initializeStandaloneEvents</a> should be added so Scenery can track the mouse input.
+        The cursor is updated whenever <a href="#display-updateDisplay">display.updateDisplay</a> is called, and event initialization like <a href="#display-initializeStandaloneEvents">display.initializeStandaloneEvents</a> should be added so Scenery can track the mouse input.
       </p>
       <p>
         There are some Scenery-specific cursor values that can be set:
@@ -819,111 +816,63 @@ scene.addChild( new scenery.Node( {
         separate layer from this node and its children.
       </p>
 
-
-      <h3 id="scene" class="section">Scene</h3>
+      <h3 id="display" class="section">Display</h3>
       <p>
-        The Scene is the "entry point" of a scene graph. Scene extends Node, so all of its methods and options
-        are inherited, see <a href="#node">Node</a> above.
-        A scene is created with <code>new scenery.Scene( $container, [options] )</code>, where <code>$container</code>
-        is a block-level DOM element (typically a div) wrapped with jQuery that all scene graphics
-        (Canvas, SVG, etc.) are placed within.
-        This element must be a positioned element (non-'static' CSS position, see
-        the <a href="https://developer.mozilla.org/en-US/docs/CSS/position">MDN docs</a>), and should have a set width and height.
+        The Display is responsible for visually displaying a specific root Node and all of its descendants. It is
+        created with <code>new scenery.Display( node, [options] )</code>, where <code>node</code> is the
+        <a href="#node">Node</a> to display, and the options available are documented below. Unlike earlier versions,
+        the Display is NOT a sub-type of Node, and the root node may be referred to as the 'scene'.
       </p>
 
-      <h4 id="scene-options">Scene Options</h4>
-      A Scene has the following options for the parameter object, in addition to all of <a href="#node-options">Node's options</a>:
+      <h4 id="display-options">Display Options</h4>
+      A Display has the following options for the parameter object:
 
       <ul>
-        <li><a href="#scene-allowSceneOverflow">allowSceneOverflow</a> (default false): usually anything displayed outside of this $main (DOM/CSS3 transformed SVG) is hidden with CSS overflow</li>
-        <li><a href="#scene-allowCSSHacks">allowCSSHacks</a> (default true): applies styling that prevents mobile browser graphical issues</li>
-        <li><a href="#scene-allowDevicePixelRatioScaling">allowDevicePixelRatioScaling</a> (default false): allows underlying canvases (Canvas, WebGL) to increase in size to maintain sharpness on high-density displays</li>
-        <li><a href="#scene-enablePointerEvents">enablePointerEvents</a> (default true): allows pointer events / MSPointerEvent to be used on supported platforms.</li>
-        <li><a href="#scene-preferredSceneLayerType">preferredSceneLayerType</a> (default ???): sets the preferred type of layer to be created if there are multiple options.</li>
-        <li><a href="#scene-width">width</a> (default currentWidth): override the main container's width</li>
-        <li><a href="#scene-height">height</a> (default currentHeight): override the main container's height</li>
+        <li><a href="#display-allowSceneOverflow">allowSceneOverflow</a> (default false): usually anything displayed outside of this $main (DOM/CSS3 transformed SVG) is hidden with CSS overflow</li>
+        <li><a href="#display-allowCSSHacks">allowCSSHacks</a> (default true): applies styling that prevents mobile browser graphical issues</li>
+        <li><a href="#display-enablePointerEvents">enablePointerEvents</a> (default true): allows pointer events / MSPointerEvent to be used on supported platforms.</li>
+        <li><a href="#display-allowWebGL">allowWebGL</a> (default true): sets whether WebGL can be used.</li>
+        <li><a href="#display-width">width</a> (default currentWidth): override the main container's width</li>
+        <li><a href="#display-height">height</a> (default currentHeight): override the main container's height</li>
       </ul>
 
-      <h4 id="scene-updateScene">scene.updateScene()</h4>
+      <h4 id="display-domElement">display.domElement</h4>
+      <p>
+        The Display's block-level DOM element that will show all rendered content, to be added to the DOM.
+      </p>
+
+      <h4 id="display-updateDisplay">display.updateDisplay()</h4>
       <p>
         This redraws and/or repositions whatever rendering backends are being used to display the scene.
         It should be called whenever the scene's display should reflect new changes, generally on each
         <a href="https://developer.mozilla.org/en-US/docs/DOM/window.requestAnimationFrame">requestAnimationFrame</a>.
       </p>
 
-      <h4 id="scene-dispose">scene.dispose()</h4>
+      <h4 id="display-rootNode">display.rootNode</h4>
       <p>
-        Disposes of all of the scene's necessary resources and listeners, so that it should be able to be
-        garbage collected if no more references are to the Scene. Call this once you no longer need a scene.
+        <code>display.rootNode</code> or <code>display.getRootNode()</code> will contain the displayed node that was
+        passed in the constructor.
       </p>
 
-      <h4 id="scene-renderToCanvas">scene.renderToCanvas( <span class="args">canvas, context, callback</span> )</h4>
+      <h4 id="display-size">display.size</h4>
       <p>
-        Renders all applicable layers that support Canvas output to the specified <code>canvas</code> (with
-        the specified <code>context</code>). The <code>context</code> is specified in addition to the canvas
-        to support any custom parameters that were given in context creation.
-      </p>
-      <p>
-        <code>callback()</code> is called once the Scene is fully rendered to the canvas. Generally this is
-        immediate (if the layers are canvas/webgl), or delayed (if a layer contains SVG content). Including
-        the <a href="https://code.google.com/p/canvg/">Canvg</a> library is necessary for rendering SVG
-        content to Canvas.
-      </p>
-      <p>
-        DOM content is currently not supported for renderToCanvas.
+        <code>display.size</code> is a getter/setter for <code>display.getSize()</code> and <code>display.setSize( size )</code> which can retrieve or set the size of the display's DOM element (of type
+        <a href="../../dot/doc#dimension2">Dimension2</a>). The size will not change until after the next <a href="#display-updateDisplay">updateDisplay</a> call.
       </p>
 
-      <h4 id="scene-canvasSnapshot">scene.canvasSnapshot( <span class="args">callback</span> )</h4>
+      <h4 id="display-width">display.width</h4>
       <p>
-        Asynchronously draws the scene to a canvas with the same size as the scene
-        (using <a href="#scene-renderToCanvas">renderToCanvas</a>, and calls <code>callback( canvas, imageData )</code>
-        once it is fully written. <code>imageData</code> is of type <a href="http://www.whatwg.org/specs/web-apps/current-work/multipage/the-canvas-element.html#imagedata">ImageData</a>, from the Canvas specification.
-      </p>
-      <p>
-        If any origin-dirty content (like cross-domain images without <a href="http://en.wikipedia.org/wiki/Cross-origin_resource_sharing">CORS</a>) are included in the Scene, this operation will throw a security error.
+        <code>display.width</code> is a getter/setter for <code>display.getWidth()</code> and <code>display.setWidth( width )</code> which can retrieve or set the width of the display's DOM element. The width will not change until after the next <a href="#display-updateDisplay">updateDisplay</a> call.
       </p>
 
-      <h4 id="scene-canvasDataURL">scene.canvasDataURL( <span class="args">callback</span> )</h4>
+      <h4 id="display-height">display.height</h4>
       <p>
-        Asynchronously draws the scene to an image (using <a href="#scene-canvasSnapshot">scene.canvasSnapshot</a>),
-        and calls <code>callback( dataURL )</code> with the
-        <a href="https://developer.mozilla.org/en-US/docs/data_URIs">data URI</a> for the image. Generally
-        this is a PNG. Does not support origin-dirty content (see <a href="#scene-canvasSnapshot">canvasSnapshot</a>)
-        inside the scene.
+        <code>display.height</code> is a getter/setter for <code>display.getHeight()</code> and <code>display.setHeight( height )</code> which can retrieve or set the height of the display's DOM element. The height will not change until after the next <a href="#display-updateDisplay">updateDisplay</a> call.
       </p>
 
-      <h4 id="scene-updateOnRequestAnimationFrame">scene.updateOnRequestAnimationFrame( <span class="args">[element]</span> )</h4>
+      <h4 id="display-backgroundColor">display.backgroundColor</h4>
       <p>
-        A simple way of setting up <a href="#scene-updateScene">scene.updateScene</a> to be called using
-        requestAnimationFrame. More advanced applications will want to handle this themselves.
-      </p>
-
-      <h4 id="scene-initializeStandaloneEvents">scene.initializeStandaloneEvents()</h4>
-      <p>
-        Attaches event listeners onto the scene's containing block-level element, and forwards them to
-        the scene's input event handling system. This or <a href="scene-initializeFullscreenEvents">initializeFullscreenEvents</a> is necessary for cursor handling and input/pointer events.
-      </p>
-
-      <h4 id="scene-initializeFullscreenEvents">scene.initializeFullscreenEvents()</h4>
-      <p>
-        Attaches event listeners onto the containing document, and forwards them to
-        the scene's input event handling system. This or <a href="scene-initializeStandaloneEvents">initializeStandaloneEvents</a> is necessary for cursor handling and input/pointer events.
-      </p>
-      <p>
-        This may call <a href="https://developer.mozilla.org/en-US/docs/DOM/event.preventDefault">preventDefault</a>
-        on events unrelated to the scene, so <a href="scene-initializeFullscreenEvents">initializeFullscreenEvents</a>
-        should only be used when the scene takes up the entire screen.
-      </p>
-
-      <h4 id="scene-getDebugHTML">scene.getDebugHTML()</h4>
-      <p>
-        Returns an HTML string of debugging information that shows all of the nodes (their constructor type
-        names), and all layering information.
-      </p>
-
-      <h4 id="scene-popupDebug">scene.popupDebug()</h4>
-      <p>
-        Pops the information from <a href="#scene-getDebugHTML">getDebugHTML</a> into a new window.
+        <code>display.backgroundColor</code> is a getter/setter for <code>display.getBackgroundColor()</code> and <code>display.setBackgroundColor( backgroundColor )</code> which can retrieve or set the background color (String or <a href="#color">Color</a>) of the display's DOM element (defaults to transparent). The background color will not change until after the next <a href="#display-updateDisplay">updateDisplay</a> call.
       </p>
 
       <h3 id="fillable" class="section">Fillable</h3>
@@ -1403,7 +1352,7 @@ scene.addChild( new scenery.HTMLText( '<strong>bold</strong>, <em>italic</em>', 
       <p>
         DOM is a subtype of <a href="#node">Node</a> that positions a DOM element inside the scene using
         <a href="http://www.w3.org/TR/css3-transforms/">CSS transforms</a>. If the element is attached somewhere
-        else, it will be removed and added into the DOM within the <a href="#scene">scene</a>'s container
+        else, it will be removed and added into the DOM within the <a href="#display">display</a>'s container
         block-level element.
       </p>
       <p>
