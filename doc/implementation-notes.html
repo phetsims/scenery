@@ -41,6 +41,14 @@
       border: 1px solid black;
     }
 
+    .instanceStyle {
+      color: #0a0;
+    }
+
+    .drawableStyle {
+      color: #00c;
+    }
+
   </style>
 
 </head>
@@ -190,10 +198,22 @@
 
       <h2>Sequence of Operations</h2>
 
+      <p>
+        Color-coding of object lifecycles: <span class="instanceStyle">Instance</span>,
+        <span class="drawableStyle">Drawable</span>
+      </p>
+
       <ul>
         <li>
           external changes<br>
-          TODO
+          <ul>
+            <li>
+                <span class="instanceStyle">
+                  Stateless Instance stubs created synchronously when a Node's children are added to a stateful Instance
+                  where there is no child Instance
+                </span>
+            </li>
+          </ul>
         </li>
         <li>
           input event<br>
@@ -210,7 +230,32 @@
               trigger any event listeners (updateDisplay is not made to be re-entrant)
             </li>
             <li>
-              syncTree traversal (inline instance tree modifications and stitching on back-propagation)
+              <span class="instanceStyle">Creates root Instance if it doesn't exist</span>
+            </li>
+            <li>
+              syncTree traversal (inline instance tree modifications and stitching on back-propagation)<br>
+              <ul>
+                <li>
+                  <span class="instanceStyle">
+                    Create descendant instances under stubs, fills in state, and marks removed sub-tree instance roots
+                    for disposal.
+                  </span>
+                </li>
+                <li>
+                  <span class="drawableStyle">
+                    Creates all drawables where necessary. If it replaces a self/group/shared drawable on the instance,
+                    that old drawable is marked for disposal.
+                  </span>
+                </li>
+                <li>
+                  Stitching (when all children of an Instance with a backbone have been syncTree'd)
+                  <ul>
+                    <li>
+                      Changes pending blocks/parents for drawables
+                    </li>
+                  </ul>
+                </li>
+              </ul>
             </li>
             <li>
               Update drawable linked lists (get rid of the last frame's linked list pointers)
@@ -219,16 +264,25 @@
               Dispose change intervals
             </li>
             <li>
-              Update drawables' block references
+              Update drawable block/parent references
             </li>
             <li>
               Update relative transforms in our instance tree
             </li>
             <li>
-              Dispose unused instances
+              <span class="instanceStyle">Dispose unused Instance sub-trees</span><br>
+              <ul>
+                <li>
+                  <span class="drawableStyle">
+                    Any drawables attached to disposed instances are disposed themselves
+                  </span>
+                </li>
+              </ul>
             </li>
             <li>
-              Dispose unused drawables
+              <span class="drawableStyle">
+                Dispose unused drawables that weren't referenced by disposed instances
+              </span>
             </li>
             <li>
               Drawable update (repaint) traversal
