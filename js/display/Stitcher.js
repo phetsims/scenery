@@ -216,6 +216,7 @@ define( function( require ) {
       assert && assert( drawable.renderer === block.renderer );
 
       sceneryLog && sceneryLog.Stitch && sceneryLog.Stitch( 'pending add: ' + drawable.toString() + ' to ' + block.toString() );
+      sceneryLog && sceneryLog.Stitch && sceneryLog.push();
 
       drawable.notePendingAddition( this.backbone.display, block, this.backbone );
 
@@ -225,6 +226,8 @@ define( function( require ) {
           block: block
         } );
       }
+
+      sceneryLog && sceneryLog.Stitch && sceneryLog.pop();
     },
 
     // Records that this {Drawable} drawable should be moved to the {Block} at a later time (called only on external
@@ -234,6 +237,7 @@ define( function( require ) {
       assert && assert( drawable.renderer === block.renderer );
 
       sceneryLog && sceneryLog.Stitch && sceneryLog.Stitch( 'pending move: ' + drawable.toString() + ' to ' + block.toString() );
+      sceneryLog && sceneryLog.Stitch && sceneryLog.push();
 
       drawable.notePendingMove( this.backbone.display, block );
 
@@ -243,11 +247,14 @@ define( function( require ) {
           block: block
         } );
       }
+
+      sceneryLog && sceneryLog.Stitch && sceneryLog.pop();
     },
 
     // Records that this {Drawable} drawable should be removed/moved from the {Block} at a later time
     notePendingRemoval: function( drawable ) {
       sceneryLog && sceneryLog.Stitch && sceneryLog.Stitch( 'pending remove: ' + drawable.toString() );
+      sceneryLog && sceneryLog.Stitch && sceneryLog.push();
 
       drawable.notePendingRemoval( this.backbone.display );
 
@@ -256,12 +263,15 @@ define( function( require ) {
           drawable: drawable
         } );
       }
+
+      sceneryLog && sceneryLog.Stitch && sceneryLog.pop();
     },
 
     // Records that this {Block} block should be disposed at a later time. It should not be in the blocks array at the
     // end of the stitch.
     markBlockForDisposal: function( block ) {
       sceneryLog && sceneryLog.Stitch && sceneryLog.Stitch( 'block for disposal: ' + block.toString() );
+      sceneryLog && sceneryLog.Stitch && sceneryLog.push();
 
       //TODO: PERFORMANCE: does this cause reflows / style calculation
       if ( block.domElement.parentNode === this.backbone.domElement ) {
@@ -275,22 +285,29 @@ define( function( require ) {
           block: block
         } );
       }
+
+      sceneryLog && sceneryLog.Stitch && sceneryLog.pop();
     },
 
     removeAllBlocks: function() {
       sceneryLog && sceneryLog.Stitch && sceneryLog.Stitch( 'marking all blocks for disposal (count ' + this.backbone.blocks.length + ')' );
+      sceneryLog && sceneryLog.Stitch && sceneryLog.push();
+
       while ( this.backbone.blocks.length ) {
         var block = this.backbone.blocks[0];
 
         this.removeBlock( block );
         this.markBlockForDisposal( block );
       }
+
+      sceneryLog && sceneryLog.Stitch && sceneryLog.pop();
     },
 
     // Immediately notify a block of its first/last drawable.
     notifyInterval: function( block, firstDrawable, lastDrawable ) {
       sceneryLog && sceneryLog.Stitch && sceneryLog.Stitch( 'notify interval: ' + block.toString() + ' ' +
                                                             firstDrawable.toString() + ' to ' + lastDrawable.toString() );
+      sceneryLog && sceneryLog.Stitch && sceneryLog.push();
 
       block.notifyInterval( firstDrawable, lastDrawable );
 
@@ -305,6 +322,8 @@ define( function( require ) {
           lastDrawable: lastDrawable
         } );
       }
+
+      sceneryLog && sceneryLog.Stitch && sceneryLog.pop();
     },
 
     // Note a block's tentative first drawable and block before (should be flushed later with updateBlockIntervals())

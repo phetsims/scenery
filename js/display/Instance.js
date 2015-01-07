@@ -746,6 +746,8 @@ define( function( require ) {
         // force-acceleration flag! That's stripped out here.
         if ( !this.selfDrawable || ( ( this.selfDrawable.renderer & selfRenderer & Renderer.bitmaskRendererArea ) === 0 ) ) {
           if ( this.selfDrawable ) {
+            sceneryLog && sceneryLog.Instance && sceneryLog.Instance( 'replacing old drawable ' + this.selfDrawable.toString() + ' with new renderer' );
+
             // scrap the previous selfDrawable, we need to create one with a different renderer.
             this.selfDrawable.markForDisposal( this.display );
           }
@@ -803,6 +805,8 @@ define( function( require ) {
       // if there is a change, prepare
       if ( groupChanged ) {
         if ( this.groupDrawable ) {
+          sceneryLog && sceneryLog.Instance && sceneryLog.Instance( 'replacing group drawable ' + this.groupDrawable.toString() );
+
           this.groupDrawable.markForDisposal( this.display );
           this.groupDrawable = null;
         }
@@ -869,6 +873,8 @@ define( function( require ) {
         //OHTWO TODO: mark everything as changed (big change interval)
 
         if ( this.sharedCacheDrawable ) {
+          sceneryLog && sceneryLog.Instance && sceneryLog.Instance( 'replacing shared cache drawable ' + this.sharedCacheDrawable.toString() );
+
           this.sharedCacheDrawable.markForDisposal( this.display );
         }
 
