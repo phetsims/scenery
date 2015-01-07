@@ -1,0 +1,183 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8"/>
+  <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+  <title>Scenery Implementation Notes</title>
+
+  <link rel="stylesheet" href="../../sherpa/bootstrap-2.2.2.css">
+  <link rel="stylesheet" href="../../sherpa/bootstrap-responsive-2.2.2.css">
+  <link rel="stylesheet" href="../../sherpa/syntaxhighlighter-3.0.83/shCore.css">
+  <link rel="stylesheet" href="../../sherpa/syntaxhighlighter-3.0.83/shThemeDefault.css">
+  <link rel="stylesheet" href="../assets/scenery.css">
+
+  <!-- jQuery and LoDash are dependencies -->
+  <script src="../../sherpa/jquery-2.1.0.min.js"></script>
+  <script src="../../sherpa/lodash-2.4.1.min.js"></script>
+
+  <!-- For the styling -->
+  <script src="../../sherpa/bootstrap-2.2.2.js"></script>
+
+  <script src="../../sherpa/syntaxhighlighter-3.0.83/shCore.js"></script>
+  <script src="../../sherpa/syntaxhighlighter-3.0.83/shBrushJScript.js"></script>
+  <script src="../../sherpa/syntaxhighlighter-3.0.83/shBrushXml.js"></script>
+
+  <!-- MathJax config -->
+  <script type="text/x-mathjax-config">
+  MathJax.Hub.Config({tex2jax: {inlineMath: [['$','$'], ['\\(','\\)']]}});
+  </script>
+  <script type="text/javascript" src="http://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+
+  <!-- Our code, in either the concatenated 'with comments' version or the minified version -->
+  <script src="../build/development/scenery.js"></script>
+  <!-- <script src="../build/standalone/scenery.min.js"></script> -->
+
+  <style type="text/css">
+
+    .exampleScene {
+      margin: 15px auto;
+      border: 1px solid black;
+    }
+
+  </style>
+
+</head>
+
+<body>
+  <div class="navbar navbar-inverse navbar-static-top">
+    <div class="navbar-inner">
+      <a class="brand" href="/scenery">Scenery</a>
+      <ul class="nav">
+        <li><a href="../">Home</a></li>
+        <li class="active"><a href="../doc">Documentation</a></li>
+        <li><a href="../examples">Examples</a></li>
+        <li><a href="../tests">Tests</a></li>
+      </ul>
+    </div>
+  </div>
+
+  <div class="row-fluid">
+    <div class="span3"></div>
+    <div class="span6">
+      <div class="page-header" style="text-align: center;">
+        <h1>Scenery Implementation Notes</h1>
+      </div>
+
+      <h2>Instances</h2>
+
+      <p>
+        Scenery's nodes can form a DAG (<a href="http://en.wikipedia.org/wiki/Directed_acyclic_graph">directed acyclic
+        graph</a>) in any manner. A <a href="../doc#display">Display</a> is attached to a single
+        <em>root</em> <a href="../doc#node">Node</a>, and only displays the sub-graph rooted at that node. Since a
+        node and its sub-graph can be shown in multiple places in the same display (and Scenery usually needs to
+        treat them separately),
+        we internally create an <strong>instance tree</strong>, where an <a href="../doc#instance">Instance</a>
+        refers to a
+        particular copy of a node, with a specific path (sequence of <a href="../doc#node">Nodes</a>) from the root to
+        the node. This sequence of nodes is referred to as a <a href="../doc#trail">Trail</a>. The instance tree is
+        conceptually constructed from a depth-first traversal of the node sub-graph, which essentially duplicates
+        sub-graphs from nodes with multiple parents.
+      </p>
+
+      <p>
+        There is one exception for instance trees: there are cases where we want to duplicate a very commonly used
+        Node, but we render it to an intermediate shared raster (Canvas/WebGL <em>cache</em>),
+        and we don't want its
+        children have the overhead of having many Instances. In this case, we'll have placeholder Instances for
+        everywhere we'll want to show the raster, all pointing to another instance tree responsible for rendering into
+        the raster. These are known as <strong>shared caches</strong>, which are separate from
+        <strong>instance caches</strong>, which have a separate raster for every instance.
+      </p>
+
+      <h2>Drawables</h2>
+
+      <p>
+        <strong>Drawables</strong> are objects that can be displayed with a specific renderer. For example, a
+        <a href="../doc#rectangle">Rectangle</a> can be displayed with a SVG-specific drawable. All
+        drawables for a specific renderer (Canvas, WebGL, SVG, or DOM currently) conform to renderer-specific APIs
+        (for instance, SVG drawables must have an svgElement property holding the actual SVG element, among other things).
+      </p>
+
+      <p>
+        <strong>Painted</strong> nodes (those that display something themselves, typically subtypes of
+        <a href="../doc#path">Path</a>, <a href="../doc#image">Image</a>, <a href="../doc#text">Text</a>, etc.) will
+        always have instances that have <strong>self drawables</strong> that are responsible for rendering that node
+        (not including its children).
+      </p>
+
+      <p>
+        Some instances will also have a <strong>group drawable</strong> that is responsible for combining the drawables
+        of its descendant instances and if available its self drawable.
+      </p>
+
+      <p>
+        Drawables keep a reference to their parent and children (if applicable), creating an implicit
+        <strong>drawable tree</strong>. This tree can be traversed in depth-first order to <em>repaint</em> any changed
+        drawables before repainting their parents.
+      </p>
+
+      <h2>Blocks</h2>
+
+      <p>
+        A <strong>Block</strong> is a DOM-compatible drawable that is responsible for displaying a list of drawables
+        with the same renderer (e.g. SVGBlock is responsible for displaying a bunch of SVG drawables and providing the
+        &lt;svg&gt; element to be put in the DOM). Drawables can be added, removed, or rearranged inside of a block.
+      </p>
+
+      <p>
+        Many types of blocks are <strong>fitted</strong>, indicating that the area they take up on the screen can be
+        reduced to approximately "fit" the content (which can reduce browser memory usage and increase performance).
+      </p>
+
+      <h2>Backbones</h2>
+
+      <p>
+        A <strong>backbone</strong> is a type of DOM drawable that contains blocks as children. It is responsible for
+        taking a list of drawables with (usually) differing renderers, splitting it into chunks that each have
+        drawables with the same renderer, and managing blocks to handle each chunk. In the DOM, a backbone is a
+        &lt;div&gt; that contains the DOM elements of its blocks as children.
+      </p>
+
+      <p>
+        Certain types of instances will contain a backbone as their group drawable. The root instance will always have
+        a backbone, known as the <strong>root backbone</strong>. The Display's
+        <a href="../doc#display-domElement">domElement</a> is the root backbone's DOM element.
+      </p>
+
+      <h2>Visual Example</h2>
+
+      <p>
+        Below shows the transformation of an example node DAG into instance trees, the drawable tree, and final DOM
+        structure. In the example, the CSS transform hint results in the creation of a backbone (a div to transform),
+        and both instance and shared caches are shown ("cache" denoting the instance caches).
+      </p>
+
+      <p style="text-align: center;">
+        <img src="../assets/ohtwo-design-notes.svg">
+      </p>
+
+      <h2>Pickability Notes</h2>
+
+      <p>
+        Below is a worked example showing how the pickable flag, input listeners and visibility affect hit-testing, and
+        also how _subtreePickableCount is used to efficiently maintain information on whether a pickable:true flag or
+        input listener is in a visible descendant.
+      </p>
+
+      <p style="text-align: center;">
+        <img src="../assets/pickability.svg">
+      </p>
+    </div>
+    <div class="span3"></div>
+  </div>
+
+
+
+
+  <script type="text/javascript">
+    SyntaxHighlighter.all();
+  </script>
+</body>
+</html>
