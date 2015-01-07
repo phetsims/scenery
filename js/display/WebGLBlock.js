@@ -1,26 +1,24 @@
 // Copyright 2002-2014, University of Colorado Boulder
 
 /**
- * Handles a visual WebGL layer of drawables.
+ * Handles a visual WebGL layer of drawables.  The WebGL system is designed to be modular, so that testing can
+ * easily be done without scenery.  Hence WebGLBlock delegates most of its work to WebGLRenderer.
  *
  * @author Jonathan Olson <jonathan.olson@colorado.edu>
- * @author Sam Reid
+ * @author Sam Reid (PhET Interactive Simulations)
+ * @author Sharfudeen Ashraf (For Ghent University)
  */
-
 define( function( require ) {
   'use strict';
 
+  // modules
   var inherit = require( 'PHET_CORE/inherit' );
   var PoolableMixin = require( 'PHET_CORE/PoolableMixin' );
   var cleanArray = require( 'PHET_CORE/cleanArray' );
-  var Matrix4 = require( 'DOT/Matrix4' );
   var scenery = require( 'SCENERY/scenery' );
   var FittedBlock = require( 'SCENERY/display/FittedBlock' );
-  var Renderer = require( 'SCENERY/display/Renderer' );
   var Util = require( 'SCENERY/util/Util' );
-  var ShaderProgram = require( 'SCENERY/util/ShaderProgram' );
-  var uberVertexShaderString = require( 'text!SCENERY/display/shaders/uberShader.vert' );
-  var uberFragmentShaderString = require( 'text!SCENERY/display/shaders/uberShader.frag' );
+  var WebGLRenderer = require( 'SCENERY/display/webgl/WebGLRenderer' );
 
   scenery.WebGLBlock = function WebGLBlock( display, renderer, transformRootInstance, filterRootInstance ) {
     this.initialize( display, renderer, transformRootInstance, filterRootInstance );
@@ -29,7 +27,6 @@ define( function( require ) {
 
   inherit( FittedBlock, WebGLBlock, {
     initialize: function( display, renderer, transformRootInstance, filterRootInstance ) {
-      var block = this;
 
       this.initializeFittedBlock( display, renderer, transformRootInstance );
 
@@ -43,89 +40,20 @@ define( function( require ) {
 
       this.dirtyDrawables = cleanArray( this.dirtyDrawables );
 
-      if ( !this.domElement ) {
-        //OHTWO TODO: support tiled WebGL handling (will need to wrap then in a div, or something)
-        this.canvas = document.createElement( 'canvas' );
+      // TODO: Maybe reuse the WebGLRenderer and use an initialize pattern()?
 
-        // If the display was instructed to make a WebGL context that can simulate context loss, wrap it here, see #279
-        if ( this.display.options.webglMakeLostContextSimulatingCanvas ) {
-          this.canvas = window.WebGLDebugUtils.makeLostContextSimulatingCanvas( this.canvas );
-        }
-
-        this.canvas.style.position = 'absolute';
-        this.canvas.style.left = '0';
-        this.canvas.style.top = '0';
-        this.canvas.style.pointerEvents = 'none';
-
-        this.gl = null;
-        try {
-          this.gl = this.canvas.getContext( 'webgl' ) || this.canvas.getContext( 'experimental-webgl' );
-          // TODO: check for required extensions
-        }
-        catch( e ) {
-          // TODO: handle gracefully
-          throw e;
-        }
-        if ( !this.gl ) {
-          throw new Error( 'Unable to load WebGL' );
-        }
-
-        this.domElement = this.canvas;
-
-      }
-
-      this.projectionMatrix = this.projectionMatrix || new Matrix4();
-
-      // Keep track of whether the context is lost, so that we can avoid trying to render while the context is lost.
-      this.webglContextIsLost = false;
-
-      // Callback for context loss, see #279
-      this.canvas.addEventListener( 'webglcontextlost', function( event ) {
-        console.log( 'context lost' );
-
-        // khronos does not explain why we must prevent default in webgl context loss, but we must do so:
-        // http://www.khronos.org/webgl/wiki/HandlingContextLost#Handling_Lost_Context_in_WebGL
-        event.preventDefault();
-        block.webglContextIsLost = true;
-      }, false );
-
-      // Only used when display.options.webglContextLossIncremental is defined
-      var numCallsToLoseContext = 1;
-
-      // Callback for context restore, see #279
-      this.canvas.addEventListener( 'webglcontextrestored', function( event ) {
-        console.log( 'context restored' );
-        block.webglContextIsLost = false;
-
-        // When context is restored, optionally simulate another context loss at an increased number of gl calls
-        // This is because we must test for context loss between every pair of gl calls
-        if ( display.options.webglContextLossIncremental ) {
-          console.log( 'simulating context loss in ', numCallsToLoseContext, 'gl calls.' );
-          block.canvas.loseContextInNCalls( numCallsToLoseContext );
-          numCallsToLoseContext++;
-        }
-
-        // Reinitialize the layer state
-        block.initializeWebGLState();
-
-        // Reinitialize the webgl state for every instance's drawable
-        for ( var drawable = this.firstDrawable; drawable !== null; drawable = drawable.nextDrawable ) {
-          drawable.initializeWebGLState();
-
-          if ( drawable === this.lastDrawable ) { break; }
-        }
-
-        // Mark for repainting
-        block.markDirty();
-      }, false );
-
+      // TODO: Maybe pass through Renderer.bitmaskWebGLLowResolution ) ?
+      // Each WebGL block needs its own canvas, and this is created by the WebGLRenderer.
+      this.webglRenderer = new WebGLRenderer( {stats: false} );
+      this.domElement = this.webglRenderer.canvas;
 
       // reset any fit transforms that were applied
-      Util.prepareForTransform( this.canvas, this.forceAcceleration );
-      Util.unsetTransform( this.canvas ); // clear out any transforms that could have been previously applied
+      // TODO: What is force acceleration?
+      Util.prepareForTransform( this.webglRenderer.canvas, this.forceAcceleration );
+      Util.unsetTransform( this.webglRenderer.canvas ); // clear out any transforms that could have been previously applied
 
       // store our backing scale so we don't have to look it up while fitting
-      this.backingScale = ( renderer & Renderer.bitmaskWebGLLowResolution ) ? 1 : scenery.Util.backingScale( this.gl );
+//      this.backingScale = ( renderer & Renderer.bitmaskWebGLLowResolution ) ? 1 : scenery.Util.backingScale( this.gl );
 
       this.initializeWebGLState();
 
@@ -136,67 +64,34 @@ define( function( require ) {
     },
 
     initializeWebGLState: function() {
-      var gl = this.gl;
-      gl.clearColor( 0.0, 0.0, 0.0, 0.0 );
 
-      gl.enable( gl.BLEND );
-      gl.blendFunc( gl.SRC_ALPHA, gl.ONE_MINUS_SRC_ALPHA );
-
-      // Create the ubershader, which handles all of the different vertex/fragment types in a single shader
-      // to reduce overhead of switching programs.
-      this.shaderProgram = new ShaderProgram( gl, uberVertexShaderString, uberFragmentShaderString,
-
-        // attribute names
-        ['aVertex', 'aTexCoord'],
-
-        // uniform names
-        ['uTexture', 'uProjectionMatrix', 'uModelViewMatrix', 'uColor', 'uFragmentType']
-      );
-
-      this.shaderProgram.deactivateAttribute( 'aVertex' );
-      this.shaderProgram.deactivateAttribute( 'aTexCoord' );
-
-      this.shaderProgram.use();
+      // TODO: Maybe initialize the webglRenderer, if it is reused during pooling?
+//      this.webglRenderer.initialize();
     },
 
     setSizeFullDisplay: function() {
+
+      // TODO: Allow scenery to change the size of the WebGLRenderer.canvas
       var size = this.display.getSize();
-      this.canvas.width = size.width * this.backingScale;
-      this.canvas.height = size.height * this.backingScale;
-      this.canvas.style.width = size.width + 'px';
-      this.canvas.style.height = size.height + 'px';
-      this.updateWebGLDimension( 0, 0, size.width, size.height );
+      this.webglRenderer.setCanvasSize( size.width, size.height );
     },
 
     setSizeFitBounds: function() {
+      // TODO: Allow scenery to change the size of the WebGLRenderer.canvas
+
       var x = this.fitBounds.minX;
       var y = this.fitBounds.minY;
       //OHTWO TODO PERFORMANCE: see if we can get a speedup by putting the backing scale in our transform instead of with CSS?
       Util.setTransform( 'matrix(1,0,0,1,' + x + ',' + y + ')', this.canvas, this.forceAcceleration ); // reapply the translation as a CSS transform
-      this.canvas.width = this.fitBounds.width * this.backingScale;
-      this.canvas.height = this.fitBounds.height * this.backingScale;
-      this.canvas.style.width = this.fitBounds.width + 'px';
-      this.canvas.style.height = this.fitBounds.height + 'px';
-      this.updateWebGLDimension( -x, -y, this.fitBounds.width, this.fitBounds.height );
-    },
+      this.webglRenderer.setCanvasSize( this.fitBounds.width, this.fitBounds.height );
 
-    updateWebGLDimension: function( x, y, width, height ) {
-      this.gl.viewport( 0, 0, width * this.backingScale, height * this.backingScale );
-
-      // (0,width) => (0, -2) => (-1, 1)
-      // (0,height) => (0, -2) => ( 1, -1 )
-      this.projectionMatrix.set( Matrix4.translation( -1, 1, 0 ).timesMatrix( Matrix4.scaling( 2 / width, -2 / height, 1 ) )
-        .timesMatrix( Matrix4.translation( x, y, 0 ) ) );
+      //TODO: How to handle this in WebGLRenderer?
+//      this.updateWebGLDimension( -x, -y, this.fitBounds.width, this.fitBounds.height );
     },
 
     update: function() {
       sceneryLog && sceneryLog.WebGLBlock && sceneryLog.WebGLBlock( 'update #' + this.id );
       sceneryLog && sceneryLog.WebGLBlock && sceneryLog.push();
-
-      if ( this.webglContextIsLost ) {
-        return;
-      }
-      var gl = this.gl;
 
       if ( this.dirty && !this.disposed ) {
         this.dirty = false;
@@ -208,29 +103,7 @@ define( function( require ) {
         // udpate the fit BEFORE drawing, since it may change our offset
         this.updateFit();
 
-        gl.clear( this.gl.COLOR_BUFFER_BIT );
-
-        gl.uniformMatrix4fv( this.shaderProgram.uniformLocations.uProjectionMatrix, false, this.projectionMatrix.entries );
-
-        //OHTWO TODO: PERFORMANCE: create an array for faster drawable iteration (this is probably a hellish memory access pattern)
-        for ( var drawable = this.firstDrawable; drawable !== null; drawable = drawable.nextDrawable ) {
-          //OHTWO TODO: Performance for this lookup?
-          // enable and required attributes, and disable the rest, since if we leave an attribute enabled and our
-          // code doesn't use vertexAttribPointer to set it, WebGL will crash.
-          for ( var i = 0; i < this.shaderProgram.attributeNames.length; i++ ) {
-            var attributeName = this.shaderProgram.attributeNames[i];
-            if ( _.contains( drawable.shaderAttributes, attributeName ) ) {
-              this.shaderProgram.activateAttribute( attributeName );
-            }
-            else {
-              this.shaderProgram.deactivateAttribute( attributeName );
-            }
-          }
-
-          drawable.render( this.shaderProgram );
-
-          if ( drawable === this.lastDrawable ) { break; }
-        }
+        this.webglRenderer.draw();
       }
 
       sceneryLog && sceneryLog.WebGLBlock && sceneryLog.pop();
@@ -239,13 +112,10 @@ define( function( require ) {
     dispose: function() {
       sceneryLog && sceneryLog.WebGLBlock && sceneryLog.WebGLBlock( 'dispose #' + this.id );
 
-      // clear references
-      this.transformRootInstance = null;
-      cleanArray( this.dirtyDrawables );
+      this.webglRenderer.dispose();
 
-      // minimize memory exposure of the backing raster
-      this.canvas.width = 0;
-      this.canvas.height = 0;
+      // clear references
+      cleanArray( this.dirtyDrawables );
 
       FittedBlock.prototype.dispose.call( this );
     },
@@ -265,7 +135,10 @@ define( function( require ) {
 
       FittedBlock.prototype.addDrawable.call( this, drawable );
 
-      drawable.initializeContext( this.gl );
+      drawable.initializeContext( this );
+
+      //TODO: Don't call this every frame!  Consider preallocating a large array in the various buffers.
+      this.webglRenderer.colorTriangleRenderer.bindVertexBuffer();
     },
 
     removeDrawable: function( drawable ) {

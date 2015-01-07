@@ -21,12 +21,17 @@ define( function( require ) {
    *
    * @constructor
    */
-  function WebGLRenderer() {
+  function WebGLRenderer( options ) {
+
+    options = _.extend( {stats: true}, options );
 
     this.events = new Events();
 
-    this.stats = this.createStats();
-
+    // Create the stats and show it, but only for the standalone test cases (not during scenery usage).
+    // TODO: A better design for stats vs no stats
+    if ( options.stats ) {
+      this.stats = this.createStats();
+    }
 
     this.canvas = document.createElement( 'canvas' );
     this.canvas.style.position = 'absolute';
@@ -35,7 +40,9 @@ define( function( require ) {
     this.canvas.style.pointerEvents = 'none';
 
     document.body.appendChild( this.canvas );
-    document.body.appendChild( this.stats.domElement );
+    if ( options.stats ) {
+      document.body.appendChild( this.stats.domElement );
+    }
 
     // Code inspired by http://www.webglacademy.com/#1
     var gl;
@@ -47,23 +54,16 @@ define( function( require ) {
     }
     this.gl = gl;
 
-    // Handle retina displays as described in https://www.khronos.org/webgl/wiki/HandlingHighDPI
-    // First, set the display size of the canvas.
-    this.canvas.style.width = window.innerWidth + 'px';
-    this.canvas.style.height = window.innerHeight + 'px';
+    this.backingScale = Util.backingScale( this.gl );
 
-    // Next, set the size of the drawingBuffer
-    var backingScale = Util.backingScale( this.gl );
-    var devicePixelRatio = window.devicePixelRatio || 1;
-    this.canvas.width = window.innerWidth * devicePixelRatio;
-    this.canvas.height = window.innerHeight * devicePixelRatio;
+    // TODO: When used by scenery, use different initial size (hopefully provided in the constructor args as an option)
+    this.setCanvasSize( window.innerWidth, window.innerHeight );
 
-    this.colorTriangleRenderer = new ColorTriangleRenderer( gl, backingScale, this.canvas );
-    this.textureRenderer = new TextureRenderer( gl, backingScale, this.canvas );
+    this.colorTriangleRenderer = new ColorTriangleRenderer( gl, this.backingScale, this.canvas );
+    this.textureRenderer = new TextureRenderer( gl, this.backingScale, this.canvas );
     this.customWebGLRenderers = [];
 
     this.boundAnimate = this.animate.bind( this );
-    this.backingScale = backingScale;
   }
 
   return inherit( Object, WebGLRenderer, {
@@ -125,6 +125,23 @@ define( function( require ) {
 
       //Flush after rendering complete.
       gl.flush();
+    },
+    setCanvasSize: function( width, height ) {
+
+      // Handle retina displays as described in https://www.khronos.org/webgl/wiki/HandlingHighDPI
+      // First, set the display size of the canvas.
+      this.canvas.style.width = width + 'px';
+      this.canvas.style.height = height + 'px';
+
+      // Next, set the size of the drawingBuffer
+      var devicePixelRatio = window.devicePixelRatio || 1;
+      this.canvas.width = width * devicePixelRatio;
+      this.canvas.height = height * devicePixelRatio;
+    },
+    dispose: function() {
+      //TODO: Dispose of more things!
+      this.canvas.width = 0;
+      this.canvas.height = 0;
     }
   } );
 } );

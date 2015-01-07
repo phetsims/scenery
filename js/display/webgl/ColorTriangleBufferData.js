@@ -18,16 +18,12 @@ define( function( require ) {
   var Matrix4 = require( 'DOT/Matrix4' );
 
   /**
-   * TODO - Merge all these individual array into a single structure to improve performance
    * @constructor
    */
   function ColorTriangleBufferData() {
 
-    //TODO: Use Float32Array -- though we will have to account for the fact that they have a fixed size
-    this.vertexArray = []; //x,y,z,r,g,b,a
-
-    //TODO: Add these elements to the vertexArray
-    // ,m11,m13,m13,m21,m22,m23
+    //TODO: Preallocate a large array so that bufferData only needs to be called once?
+    this.vertexArray = []; //x,y,z,r,g,b,a,m11,m13,m13,m21,m22,m23
   }
 
   return inherit( Object, ColorTriangleBufferData, {
@@ -274,6 +270,9 @@ define( function( require ) {
       };
       myStar.setStar( _x, _y, _innerRadius, _outerRadius, _totalAngle );
       return myStar;
+    },
+    dispose: function( handle ) {
+      //TODO: Dispose it!
     }
   } );
 } );

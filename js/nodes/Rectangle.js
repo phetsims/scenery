@@ -26,7 +26,6 @@ define( function( require ) {
   var CanvasSelfDrawable = require( 'SCENERY/display/CanvasSelfDrawable' );
   var WebGLSelfDrawable = require( 'SCENERY/display/WebGLSelfDrawable' );
   var SelfDrawable = require( 'SCENERY/display/SelfDrawable' );
-  var WebGLBlock = require( 'SCENERY/display/WebGLBlock' );
 
   // TODO: change this based on memory and performance characteristics of the platform
   var keepDOMRectangleElements = true; // whether we should pool DOM elements for the DOM rendering states, or whether we should free them when possible for memory
@@ -859,54 +858,26 @@ define( function( require ) {
     // called either from the constructor or from pooling
     initialize: function( renderer, instance ) {
       this.initializeWebGLSelfDrawable( renderer, instance );
-
-      //Small triangle strip that creates a square, which will be transformed into the right rectangle shape
-      this.vertexCoordinates = this.vertexCoordinates || new Float32Array( [
-        0, 0,
-        1, 0,
-        0, 1,
-        1, 1
-      ] );
     },
 
-    initializeContext: function( gl ) {
-      this.gl = gl;
+    initializeContext: function( webglBlock ) {
+      this.webglBlock = webglBlock;
+      this.rectangleHandle = webglBlock.webglRenderer.colorTriangleRenderer.colorTriangleBufferData.createFromRectangle( this.node, 0.5 );
 
       // cleanup old vertexBuffer, if applicable
       this.disposeWebGLBuffers();
 
-      this.vertexBuffer = gl.createBuffer();
       this.initializePaintableState();
       this.updateRectangle();
+
+      //TODO: Update the state in the buffer arrays
     },
 
     //Nothing necessary since everything currently handled in the uModelViewMatrix below
     //However, we may switch to dynamic draw, and handle the matrix change only where necessary in the future?
     updateRectangle: function() {
-      var gl = this.gl;
 
-      var rect = this.node;
-
-      this.vertexCoordinates[0] = rect._rectX;
-      this.vertexCoordinates[1] = rect._rectY;
-
-      this.vertexCoordinates[2] = rect._rectX + rect._rectWidth;
-      this.vertexCoordinates[3] = rect._rectY;
-
-      this.vertexCoordinates[4] = rect._rectX;
-      this.vertexCoordinates[5] = rect._rectY + rect._rectHeight;
-
-      this.vertexCoordinates[6] = rect._rectX + rect._rectWidth;
-      this.vertexCoordinates[7] = rect._rectY + rect._rectHeight;
-
-      gl.bindBuffer( gl.ARRAY_BUFFER, this.vertexBuffer );
-      gl.bufferData(
-        gl.ARRAY_BUFFER,
-
-        this.vertexCoordinates,
-
-        //TODO: Once we are lazily handling the full matrix, we may benefit from DYNAMIC draw here, and updating the vertices themselves
-        gl.STATIC_DRAW );
+      // TODO: a way to update the ColorTriangleBufferData.
 
       // TODO: move to PaintableWebGLState???
       if ( this.dirtyFill ) {
@@ -916,49 +887,18 @@ define( function( require ) {
     },
 
     render: function( shaderProgram ) {
-      var gl = this.gl;
-
-      // TODO: Handle rounded rectangles, please!
-      // use the standard version if it's a rounded rectangle, since there is no WebGL-optimized version for that
-      // TODO: how to handle fill/stroke delay optimizations here?
-      if ( this.node._fill ) {
-        //OHTWO TODO: optimize
-        var viewMatrix = this.instance.relativeTransform.matrix.toAffineMatrix4();
-
-        // combine image matrix (to scale aspect ratios), the trail's matrix, and the matrix to device coordinates
-        gl.uniformMatrix4fv( shaderProgram.uniformLocations.uModelViewMatrix, false, viewMatrix.entries );
-
-        //Indicate the branch of logic to use in the ubershader.  In this case, a texture should be used for the image
-        gl.uniform1i( shaderProgram.uniformLocations.uFragmentType, WebGLBlock.fragmentTypeFill );
-        gl.uniform4f( shaderProgram.uniformLocations.uColor, this.color.r / 255, this.color.g / 255, this.color.b / 255, this.color.a );
-
-        gl.bindBuffer( gl.ARRAY_BUFFER, this.vertexBuffer );
-        gl.vertexAttribPointer( shaderProgram.attributeLocations.aVertex, 2, gl.FLOAT, false, 0, 0 );
-
-        gl.drawArrays( gl.TRIANGLE_STRIP, 0, 4 );
-      }
+      // This is handled by the ColorTriangleRenderer
     },
 
-    shaderAttributes: [
-      'aVertex'
-    ],
-
     dispose: function() {
-      // we may have been disposed without initializeContext being called (never attached to a block)
-      if ( this.gl ) {
-        this.disposeWebGLBuffers();
-        this.gl = null;
-      }
+      this.disposeWebGLBuffers();
 
       // super
       WebGLSelfDrawable.prototype.dispose.call( this );
-
     },
 
     disposeWebGLBuffers: function() {
-      if ( this.gl ) {
-        this.gl.deleteBuffer( this.vertexBuffer );
-      }
+      this.webglBlock.webglRenderer.colorTriangleRenderer.colorTriangleBufferData.dispose( this.rectangleHandle );
     },
 
     markDirtyRectangle: function() {
