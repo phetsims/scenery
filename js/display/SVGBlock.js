@@ -200,8 +200,8 @@ define( function( require ) {
       this.rootGroup = null;
 
       // since we may not properly remove all defs yet
-      while ( this.defs.children.length ) {
-        this.defs.removeChild( this.defs.children[0] );
+      while ( this.defs.childNodes.length ) {
+        this.defs.removeChild( this.defs.childNodes[0] );
       }
 
       FittedBlock.prototype.dispose.call( this );
