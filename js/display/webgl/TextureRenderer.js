@@ -74,16 +74,18 @@ define( function( require ) {
       var gl = this.gl;
 
       gl.useProgram( this.colorShaderProgram );
-      gl.enableVertexAttribArray( this.texCoordLocation );
       gl.enableVertexAttribArray( this.positionLocation );
+      gl.enableVertexAttribArray( this.texCoordLocation );
       gl.enableVertexAttribArray( this.transform1AttributeLocation );
       gl.enableVertexAttribArray( this.transform2AttributeLocation );
 
       // Create a texture.
+      // TODO: Does this need to be done every frame?
       gl.bindTexture( gl.TEXTURE_2D, this.texture );
 
       // set the resolution
-      //TODO: This backing scale multiply seems very buggy and contradicts everything we know!
+      // TODO: This backing scale multiply seems very buggy and contradicts everything we know!
+      // TODO: Does this need to be done every frame?
       // Still, it gives the right behavior on iPad3 and OSX (non-retina).  Should be discussed and investigated.
       gl.uniform2f( this.resolutionLocation, this.canvas.width / this.backingScale, this.canvas.height / this.backingScale );
 
