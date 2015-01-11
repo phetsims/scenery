@@ -25,6 +25,10 @@ define( function( require ) {
   }
 
   return inherit( Object, TextureBufferData, {
+    createFromImageNode: function( imageNode, z ) {
+      return this.createFromImage( 0, 0, z,
+        imageNode._image.width, imageNode._image.height, imageNode.image, imageNode.getLocalToGlobalMatrix().toMatrix4() );
+    },
     createFromImage: function( x, y, z, width, height, image, matrix4 ) {
       //TODO: Check to see if any of the sprite sheets already contains that image
       //TODO: If none of the sprite sheets contained that image, then mark the spritesheet as dirty
@@ -41,7 +45,7 @@ define( function( require ) {
       // TODO: Correct texture coordinates
       // TODO: Factor out hard-coded dimensions, see SpriteSheet.js
       var u = image.width / 2048;
-      var v = image.width / 2048;
+      var v = image.height / 2048;
 
       this.vertexArray.push(
         x1, y1, z, 0, 0, matrix4.m00(), matrix4.m01(), matrix4.m02(), matrix4.m10(), matrix4.m11(), matrix4.m12(),

@@ -11,6 +11,7 @@ define( function( require ) {
   // modules
   var inherit = require( 'PHET_CORE/inherit' );
   var Rectangle = require( 'SCENERY/nodes/Rectangle' );
+  var Image = require( 'SCENERY/nodes/Image' );
   var Path = require( 'SCENERY/nodes/Path' );
   var Shape = require( 'KITE/Shape' );
   var Color = require( 'SCENERY/util/Color' );
@@ -55,8 +56,8 @@ define( function( require ) {
       //Show something from another module
       var images = [];
       for ( var i = 0; i < 100; i++ ) {
-        var matrix4 = Matrix4.identity();
-        var image = webGLRenderer.textureRenderer.textureBufferData.createFromImage( i * 2, 0, Math.random(), 256, 256, mountains, matrix4 );
+        var imageNode = new Image( mountains, {x: i * 2, y: 0} );
+        var image = webGLRenderer.textureRenderer.textureBufferData.createFromImageNode( imageNode, Math.random() );
         images.push( image );
       }
       webGLRenderer.textureRenderer.bindVertexBuffer();
