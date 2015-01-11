@@ -25,6 +25,7 @@ define( function( require ) {
   function ColorTriangleRenderer( gl, backingScale, canvas ) {
     this.gl = gl;
     this.canvas = canvas;
+    this.backingScale = backingScale;
 
     // Manages the indices within a single array, so that disjoint geometries can be represented easily here.
     // TODO: Compare this same idea to triangle strips
@@ -47,11 +48,7 @@ define( function( require ) {
     gl.useProgram( this.colorShaderProgram );
 
     // set the resolution
-    var resolutionLocation = gl.getUniformLocation( this.colorShaderProgram, 'uResolution' );
-
-    //TODO: This backing scale multiply seems very buggy and contradicts everything we know!
-    // Still, it gives the right behavior on iPad3 and OSX (non-retina).  Should be discussed and investigated.
-    gl.uniform2f( resolutionLocation, canvas.width / backingScale, canvas.height / backingScale );
+    this.resolutionLocation = gl.getUniformLocation( this.colorShaderProgram, 'uResolution' );
 
     this.vertexBuffer = gl.createBuffer();
     this.bindVertexBuffer();
@@ -64,6 +61,11 @@ define( function( require ) {
 
     draw: function() {
       var gl = this.gl;
+
+      //TODO: Only call this when the canvas changes size
+      //TODO: This backing scale multiply seems very buggy and contradicts everything we know!
+      // Still, it gives the right behavior on iPad3 and OSX (non-retina).  Should be discussed and investigated.
+      gl.uniform2f( this.resolutionLocation, this.canvas.width / this.backingScale, this.canvas.height / this.backingScale );
 
       var step = Float32Array.BYTES_PER_ELEMENT;
       var total = 3 + 4 + 3 + 3;
