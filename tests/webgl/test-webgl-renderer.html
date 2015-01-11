@@ -15,7 +15,7 @@ Simplified test that just draws a rectangle.
   <!--<meta http-equiv="Pragma" content="no-cache" />-->
   <!--<meta http-equiv="Expires" content="0" />-->
 
-  <title>Simulation Test WebGL</title>
+  <title>Test WebGLRenderer</title>
 
   <!-- jQuery and LoDash are dependencies -->
   <script src="../../../assert/js/assert.js"></script>
@@ -44,9 +44,9 @@ Simplified test that just draws a rectangle.
   document.onready = function() {
     require( [
       '../js/main',
-      '../tests/webgl/TestWebGLMain'
-    ], function( scenery, TestWebGLMain ) {
-      TestWebGLMain.start();
+      '../tests/webgl/TestWebGLRenderer'
+    ], function( scenery, TestWebGLRenderer ) {
+      TestWebGLRenderer.start();
     } );
   };
 </script>
