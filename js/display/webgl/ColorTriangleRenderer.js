@@ -62,20 +62,20 @@ define( function( require ) {
     draw: function() {
       var gl = this.gl;
 
-      //TODO: Only call this when the canvas changes size
-      //TODO: This backing scale multiply seems very buggy and contradicts everything we know!
-      // Still, it gives the right behavior on iPad3 and OSX (non-retina).  Should be discussed and investigated.
-      gl.uniform2f( this.resolutionLocation, this.canvas.width / this.backingScale, this.canvas.height / this.backingScale );
-
       var step = Float32Array.BYTES_PER_ELEMENT;
       var total = 3 + 4 + 3 + 3;
       var stride = step * total;
 
+      gl.useProgram( this.colorShaderProgram );
       gl.enableVertexAttribArray( this.positionAttribLocation );
       gl.enableVertexAttribArray( this.colorAttributeLocation );
       gl.enableVertexAttribArray( this.transform1AttributeLocation );
       gl.enableVertexAttribArray( this.transform2AttributeLocation );
-      gl.useProgram( this.colorShaderProgram );
+
+      //TODO: Only call this when the canvas changes size
+      //TODO: This backing scale multiply seems very buggy and contradicts everything we know!
+      // Still, it gives the right behavior on iPad3 and OSX (non-retina).  Should be discussed and investigated.
+      gl.uniform2f( this.resolutionLocation, this.canvas.width / this.backingScale, this.canvas.height / this.backingScale );
 
       gl.bindBuffer( gl.ARRAY_BUFFER, this.vertexBuffer );
       gl.vertexAttribPointer( this.positionAttribLocation, 3, gl.FLOAT, false, stride, 0 );
