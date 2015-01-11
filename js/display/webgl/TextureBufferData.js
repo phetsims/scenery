@@ -59,7 +59,6 @@ define( function( require ) {
       //Track the index so it can delete itself, update itself, etc.
       //TODO: Move to a separate class.
       return {
-        initialState: {x: x, y: y, width: width, height: height},
         index: index,
         endIndex: textureBufferData.vertexArray.length,
         image: image,

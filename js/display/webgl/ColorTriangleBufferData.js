@@ -158,7 +158,6 @@ define( function( require ) {
       //Track the index so it can delete itself, update itself, etc.
       //TODO: Move to a separate class.
       return {
-        initialState: {x: x, y: y, width: width, height: height},
         index: index,
         endIndex: colorTriangleBufferData.vertexArray.length,
         setTransform: function( matrix4 ) {
@@ -229,7 +228,6 @@ define( function( require ) {
 
       //Track the index so it can delete itself, update itself, etc.
       var myStar = {
-        initialState: {_x: _x, _y: _y, _innerRadius: _innerRadius, _outerRadius: _outerRadius, _totalAngle: _totalAngle},
         index: index,
         setStar: function( _x, _y, _innerRadius, _outerRadius, _totalAngle ) {
 
