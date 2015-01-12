@@ -59,7 +59,7 @@ define( function( require ) {
       //Track the index so it can delete itself, update itself, etc.
       //TODO: Move to a separate class.
       return {
-        index: index,
+        startIndex: index,
         endIndex: textureBufferData.vertexArray.length,
         image: image,
         setTransform: function( matrix4 ) {

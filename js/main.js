@@ -45,8 +45,10 @@ define( [
   'SCENERY/display/webgl/ColorTriangleBufferData',
   'SCENERY/display/webgl/ColorTriangleRenderer',
   'SCENERY/display/webgl/SpriteSheet',
+  'SCENERY/display/webgl/SquareUnstrokedRectangle',
   'SCENERY/display/webgl/TextureBufferData',
   'SCENERY/display/webgl/TextureRenderer',
+  'SCENERY/display/webgl/WebGLRectangle',
   'SCENERY/display/webgl/WebGLRenderer',
   'SCENERY/display/webgl/WebGLUtil',
 

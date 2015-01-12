@@ -153,17 +153,17 @@ define( function( require ) {
       gl.bindBuffer( gl.ARRAY_BUFFER, this.vertexBuffer );
 
       //Update the Float32Array values
-      for ( var i = geometry.index; i < geometry.endIndex; i++ ) {
+      for ( var i = geometry.startIndex; i < geometry.endIndex; i++ ) {
         this.vertexArray[i] = this.textureBufferData.vertexArray[i];
       }
 
       // Isolate the subarray of changed values
-      var subArray = this.vertexArray.subarray( geometry.index, geometry.endIndex );
+      var subArray = this.vertexArray.subarray( geometry.startIndex, geometry.endIndex );
 
       // Send new values to the GPU
       // See https://www.khronos.org/webgl/public-mailing-list/archives/1201/msg00110.html
       // The the offset is the index times the bytes per value
-      gl.bufferSubData( gl.ARRAY_BUFFER, geometry.index * 4, subArray );
+      gl.bufferSubData( gl.ARRAY_BUFFER, geometry.startIndex * 4, subArray );
     }
   } );
 } );

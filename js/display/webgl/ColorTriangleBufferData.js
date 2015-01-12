@@ -24,10 +24,20 @@ define( function( require ) {
 
     //TODO: Preallocate a large array so that bufferData only needs to be called once?
     this.vertexArray = []; //x,y,z,r,g,b,a,m11,m13,m13,m21,m22,m23
+    this.elementsPerVertex = 13;
   }
 
   return inherit( Object, ColorTriangleBufferData, {
-
+    reserveVertices: function( numVertices ) {
+      var startIndex = this.vertexArray.length;
+      for ( var i = 0; i < numVertices; i++ ) {
+        for ( var k = 0; k < this.elementsPerVertex; k++ ) {
+          this.vertexArray.push( 0 );
+        }
+      }
+      var endIndex = this.vertexArray.length;
+      return {startIndex: startIndex, endIndex: endIndex};
+    },
     /**
      * Add geometry and color for a scenery path using sampling + triangulation.
      * Uses poly2tri for triangulation
@@ -111,7 +121,7 @@ define( function( require ) {
       //Track the index so it can delete itself, update itself, etc.
       //TODO: Move to a separate class.
       return {
-        index: index,
+        startIndex: index,
         endIndex: colorTriangleBufferData.vertexArray.length,
         setTriangle: function( x1, y1, x2, y2, x3, y3 ) {
           colorTriangleBufferData.vertexArray[index + 0 + 13 * 0] = x1;
@@ -125,78 +135,6 @@ define( function( require ) {
           colorTriangleBufferData.vertexArray[index + 2] = z;
           colorTriangleBufferData.vertexArray[index + 5] = z;
           colorTriangleBufferData.vertexArray[index + 8] = z;
-        }
-      };
-    },
-    createFromRectangle: function( rectangle, z ) {
-      assert && assert( z !== undefined );
-
-      var color = new Color( rectangle.fill );
-
-      return this.createRectangle( rectangle.rectX, rectangle.rectY, rectangle.rectWidth, rectangle.rectHeight,
-          color.red / 255, color.green / 255, color.blue / 255, color.alpha, z,
-        rectangle.getLocalToGlobalMatrix().toMatrix4() );
-    },
-    createRectangle: function( x, y, width, height, r, g, b, a, z, matrix4 ) {
-      assert && assert( z !== undefined );
-
-      var colorTriangleBufferData = this;
-      var index = this.vertexArray.length;
-      this.vertexArray.push(
-        // Top left
-        //TODO: Maybe should be m03 for last element, see Matrix3.toAffineMatrix4
-        x, y, z, r, g, b, a, /*               */matrix4.m00(), matrix4.m01(), matrix4.m03(), matrix4.m10(), matrix4.m11(), matrix4.m13(),
-        (x + width), y, z, r, g, b, a, /*     */matrix4.m00(), matrix4.m01(), matrix4.m03(), matrix4.m10(), matrix4.m11(), matrix4.m13(),
-        x, y + height, z, r, g, b, a, /*      */matrix4.m00(), matrix4.m01(), matrix4.m03(), matrix4.m10(), matrix4.m11(), matrix4.m13(),
-
-        // Bottom right
-        (x + width), y + height, z, r, g, b, a, matrix4.m00(), matrix4.m01(), matrix4.m03(), matrix4.m10(), matrix4.m11(), matrix4.m13(),
-        (x + width), y, z, r, g, b, a, /*     */matrix4.m00(), matrix4.m01(), matrix4.m03(), matrix4.m10(), matrix4.m11(), matrix4.m13(),
-        x, y + height, z, r, g, b, a, /*      */matrix4.m00(), matrix4.m01(), matrix4.m03(), matrix4.m10(), matrix4.m11(), matrix4.m13()
-      );
-
-      //Track the index so it can delete itself, update itself, etc.
-      //TODO: Move to a separate class.
-      return {
-        index: index,
-        endIndex: colorTriangleBufferData.vertexArray.length,
-        setTransform: function( matrix4 ) {
-          for ( var i = 0; i < 6; i++ ) {
-            colorTriangleBufferData.vertexArray[index + 7 + i * 13] = matrix4.m00();
-            colorTriangleBufferData.vertexArray[index + 8 + i * 13] = matrix4.m01();
-            colorTriangleBufferData.vertexArray[index + 9 + i * 13] = matrix4.m03();
-            colorTriangleBufferData.vertexArray[index + 10 + i * 13] = matrix4.m10();
-            colorTriangleBufferData.vertexArray[index + 11 + i * 13] = matrix4.m11();
-            colorTriangleBufferData.vertexArray[index + 12 + i * 13] = matrix4.m13();
-          }
-        },
-        setXWidth: function( x, width ) {
-          colorTriangleBufferData.vertexArray[index + 13 * 0] = x;
-          colorTriangleBufferData.vertexArray[index + 13 * 1] = x + width;
-          colorTriangleBufferData.vertexArray[index + 13 * 2] = x;
-          colorTriangleBufferData.vertexArray[index + 13 * 3] = x + width;
-          colorTriangleBufferData.vertexArray[index + 13 * 4] = x + width;
-          colorTriangleBufferData.vertexArray[index + 13 * 5] = x;
-        },
-        setRect: function( x, y, width, height ) {
-
-          colorTriangleBufferData.vertexArray[index + 0] = x;
-          colorTriangleBufferData.vertexArray[index + 1] = y;
-
-          colorTriangleBufferData.vertexArray[index + 7] = x + width;
-          colorTriangleBufferData.vertexArray[index + 8] = y;
-
-          colorTriangleBufferData.vertexArray[index + 14] = x;
-          colorTriangleBufferData.vertexArray[index + 15] = y + height;
-
-          colorTriangleBufferData.vertexArray[index + 21] = x + width;
-          colorTriangleBufferData.vertexArray[index + 22] = y + height;
-
-          colorTriangleBufferData.vertexArray[index + 28] = x + width;
-          colorTriangleBufferData.vertexArray[index + 29] = y;
-
-          colorTriangleBufferData.vertexArray[index + 35] = x;
-          colorTriangleBufferData.vertexArray[index + 36] = y + height;
         }
       };
     },
@@ -228,7 +166,7 @@ define( function( require ) {
 
       //Track the index so it can delete itself, update itself, etc.
       var myStar = {
-        index: index,
+        startIndex: index,
         setStar: function( _x, _y, _innerRadius, _outerRadius, _totalAngle ) {
 
           var points = [];
