@@ -667,4 +667,26 @@
     ok( node.localBounds.equals( new dot.Bounds2( 0, 0, 50, 200 ) ), 'localBounds override on parent' );
     ok( node.bounds.equals( new dot.Bounds2( 0, 5, 50, 205 ) ), 'localBounds override on parent' );
   } );
+
+  test( 'fillColor/strokeColor', function() {
+    var rect = new scenery.Rectangle( 0, 0, 100, 50, { fill: 'red', stroke: 'rgba(0,255,0,0.5)' } );
+    equal( rect.fillColor.red, 255, 'Fill red' );
+    equal( rect.fillColor.green, 0, 'Fill green' );
+    equal( rect.fillColor.blue, 0, 'Fill blue' );
+    equal( rect.fillColor.alpha, 1, 'Fill alpha' );
+    equal( rect.strokeColor.red, 0, 'Stroke red' );
+    equal( rect.strokeColor.green, 255, 'Stroke green' );
+    equal( rect.strokeColor.blue, 0, 'Stroke blue' );
+    equal( rect.strokeColor.alpha, 0.5, 'Stroke alpha' );
+    rect.fill = rect.stroke;
+    equal( rect.fillColor.red, 0, 'Fill red after change' );
+    equal( rect.fillColor.green, 255, 'Fill green after change' );
+    equal( rect.fillColor.blue, 0, 'Fill blue after change' );
+    equal( rect.fillColor.alpha, 0.5, 'Fill alpha after change' );
+    rect.stroke = '#ff0';
+    equal( rect.strokeColor.red, 255, 'Stroke red after change' );
+    equal( rect.strokeColor.green, 255, 'Stroke green after change' );
+    equal( rect.strokeColor.blue, 0, 'Stroke blue after change' );
+    equal( rect.strokeColor.alpha, 1, 'Stroke alpha after change' );
+  } );
 })();

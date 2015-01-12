@@ -10,6 +10,7 @@ define( function( require ) {
   'use strict';
 
   var scenery = require( 'SCENERY/scenery' );
+  var Color = require( 'SCENERY/util/Color' );
   var LineStyles = require( 'KITE/util/LineStyles' );
 
   var inherit = require( 'PHET_CORE/inherit' );
@@ -38,6 +39,11 @@ define( function( require ) {
         this._cachedPaints = [];
         this._lineDrawingStyles = new LineStyles();
 
+        this._fillColor = null;
+        this._fillColorDirty = true;
+        this._strokeColor = null;
+        this._strokeColorDirty = true;
+
         var that = this;
         this._fillListener = function() {
           that.invalidateFill();
@@ -55,8 +61,31 @@ define( function( require ) {
         return this._fill;
       },
 
+      validateFillColor: function() {
+        if ( this._fillColorDirty ) {
+          this._fillColorDirty = false;
+          if ( this._fillColor ) {
+            if ( typeof this._fill === 'string' ) {
+              this._fillColor.setCSS( this._fill );
+            } else {
+              this._fillColor.setRGBA( this._fill.r, this._fill.g, this._fill.b, this._fill.a );
+            }
+          } else {
+            this._fillColor = new Color( this._fill );
+          }
+        }
+      },
+
+      // {Color} [read-only]
+      getFillColor: function() {
+        this.validateFillColor();
+        return this._fillColor;
+      },
+
       setFill: function( fill ) {
-        if ( this.getFill() !== fill ) {
+        if ( this._fill !== fill ) {
+          this._fillColorDirty = true;
+
           //OHTWO TODO: we probably shouldn't be checking this here?
           var hasInstances = this._instances.length > 0;
 
@@ -249,8 +278,30 @@ define( function( require ) {
         return this._stroke;
       },
 
+      validateStrokeColor: function() {
+        if ( this._strokeColorDirty ) {
+          this._strokeColorDirty = false;
+          if ( this._strokeColor ) {
+            if ( typeof this._stroke === 'string' ) {
+              this._strokeColor.setCSS( this._stroke );
+            } else {
+              this._strokeColor.setRGBA( this._stroke.r, this._stroke.g, this._stroke.b, this._stroke.a );
+            }
+          } else {
+            this._strokeColor = new Color( this._stroke );
+          }
+        }
+      },
+
+      // {Color} [read-only]
+      getStrokeColor: function() {
+        this.validateStrokeColor();
+        return this._strokeColor;
+      },
+
       setStroke: function( stroke ) {
-        if ( this.getStroke() !== stroke ) {
+        if ( this._stroke !== stroke ) {
+          this._strokeColorDirty = true;
 
           //OHTWO TODO: probably shouldn't have a reference here
           var hasInstances = this._instances.length > 0;
@@ -513,8 +564,10 @@ define( function( require ) {
     ].concat( proto._mutatorKeys );
 
     Object.defineProperty( proto, 'fill', { set: proto.setFill, get: proto.getFill } );
+    Object.defineProperty( proto, 'fillColor', { set: proto.setFill, get: proto.getFillColor } );
     Object.defineProperty( proto, 'fillPickable', { set: proto.setFillPickable, get: proto.isFillPickable } );
     Object.defineProperty( proto, 'stroke', { set: proto.setStroke, get: proto.getStroke } );
+    Object.defineProperty( proto, 'strokeColor', { set: proto.setStroke, get: proto.getStrokeColor } );
     Object.defineProperty( proto, 'lineWidth', { set: proto.setLineWidth, get: proto.getLineWidth } );
     Object.defineProperty( proto, 'lineCap', { set: proto.setLineCap, get: proto.getLineCap } );
     Object.defineProperty( proto, 'lineJoin', { set: proto.setLineJoin, get: proto.getLineJoin } );

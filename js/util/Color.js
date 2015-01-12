@@ -27,30 +27,7 @@ define( function( require ) {
     this.listeners = [];
 
     if ( typeof r === 'string' ) {
-      var str = r.replace( / /g, '' ).toLowerCase();
-      var success = false;
-
-      // replace colors based on keywords
-      var keywordMatch = Color.colorKeywords[str];
-      if ( keywordMatch ) {
-        str = '#' + keywordMatch;
-      }
-
-      // run through the available text formats
-      for ( var i = 0; i < Color.formatParsers.length; i++ ) {
-        var parser = Color.formatParsers[i];
-
-        var matches = parser.regexp.exec( str );
-        if ( matches ) {
-          parser.apply( this, matches );
-          success = true;
-          break;
-        }
-      }
-
-      if ( !success ) {
-        throw new Error( 'scenery.Color unable to parse color string: ' + r );
-      }
+      this.setCSS( r );
     }
     else if ( r instanceof Color ) {
       this.setRGBA( r.r, r.g, r.b, r.a );
@@ -256,6 +233,35 @@ define( function( require ) {
       assert && assert( this._css === this.computeCSS(), 'CSS cached value is ' + this._css + ', but the computed value appears to be ' + this.computeCSS() );
 
       return this._css;
+    },
+
+    setCSS: function( cssString ) {
+      var str = cssString.replace( / /g, '' ).toLowerCase();
+      var success = false;
+
+      // replace colors based on keywords
+      var keywordMatch = Color.colorKeywords[str];
+      if ( keywordMatch ) {
+        str = '#' + keywordMatch;
+      }
+
+      // run through the available text formats
+      for ( var i = 0; i < Color.formatParsers.length; i++ ) {
+        var parser = Color.formatParsers[i];
+
+        var matches = parser.regexp.exec( str );
+        if ( matches ) {
+          parser.apply( this, matches );
+          success = true;
+          break;
+        }
+      }
+
+      if ( !success ) {
+        throw new Error( 'scenery.Color unable to parse color string: ' + cssString );
+      }
+
+      this.updateColor(); // update the cached value
     },
 
     // e.g. 0xFF00FF
