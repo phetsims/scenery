@@ -27,8 +27,6 @@ define( function( require ) {
   var CanvasSelfDrawable = require( 'SCENERY/display/CanvasSelfDrawable' );
   var SelfDrawable = require( 'SCENERY/display/SelfDrawable' );
   var WebGLSelfDrawable = require( 'SCENERY/display/WebGLSelfDrawable' );
-  var WebGLBlock = require( 'SCENERY/display/WebGLBlock' );
-  var Util = require( 'SCENERY/util/Util' );
 
   // TODO: change this based on memory and performance characteristics of the platform
   var keepDOMImageElements = true; // whether we should pool DOM elements for the DOM rendering states, or whether we should free them when possible for memory

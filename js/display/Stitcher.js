@@ -471,7 +471,7 @@ define( function( require ) {
         assertSlow( stitcher.boundariesRecorded, 'Our stitch API requires recordBackboneBoundaries() to be called before' +
                                                  ' it is finished.' );
 
-        // ensure our indices are up-to-date (reindexed, or didn't change)
+        // ensure our indices are up-to-date (reindexed, or did not change)
         assertSlow( stitcher.reindexed || blocks.length === 0 ||
             // array equality of previousBlocks and blocks
                     ( previousBlocks.length === blocks.length &&
