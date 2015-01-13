@@ -89,7 +89,6 @@ define( function( require ) {
           var y = rectX + i * 10;
           var translateX = i * 2;
           var translateY = y / (i + 1);
-          debugger;
           image.setTransform( Matrix4.translation( translateX, translateY, 0 ) );
           webGLRenderer.textureRenderer.updateTriangleBuffer( image );
         }
