@@ -174,7 +174,7 @@
   } );
 
   var miterMagnitude = 160;
-  var miterAnglesInDegrees = [5, 8, 10, 11.5, 13, 20, 24, 30, 45];
+  var miterAnglesInDegrees = [ 5, 8, 10, 11.5, 13, 20, 24, 30, 45 ];
 
   _.each( miterAnglesInDegrees, function( miterAngle ) {
     var miterAngleRadians = miterAngle * Math.PI / 180;

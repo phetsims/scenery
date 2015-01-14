@@ -2,9 +2,9 @@
 <html lang="en">
 <head>
   <meta charset="utf-8"/>
-  <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+  <meta http-equiv="X-UA-Compatible" content="IE=edge"/>
   <meta name="viewport"
-  content="width=device-width, height=device-height, initial-scale=1.0, maximum-scale=1.0, user-scalable=no"/>
+        content="width=device-width, height=device-height, initial-scale=1.0, maximum-scale=1.0, user-scalable=no"/>
 
   <!-- runs in full-screen mode on iOS devices -->
   <meta name="apple-mobile-web-app-capable" content="yes">
@@ -22,128 +22,131 @@
 
   <style type="text/css">
 
-  html, body {
-    position: relative;
-    width: 100%;
-    height: 100%;
-    margin: 0;
-    padding: 0;
-    background-color: #000;
-    overflow: hidden;
-  }
+    html, body {
+      position: relative;
+      width: 100%;
+      height: 100%;
+      margin: 0;
+      padding: 0;
+      background-color: #000;
+      overflow: hidden;
+    }
 
-  .main {
-    position: absolute;
-    top: 0;
-    left: 0;
-    width: 640px;
-    height: 480px;
-    background-color: #fff;
-  }
+    .main {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 640px;
+      height: 480px;
+      background-color: #fff;
+    }
 
-  #scene {
-    position: absolute;
-    top: 481px;
-    left: 0;
-    width: 640px;
-    height: 100px;
-    background-color: #fff;
-  }
+    #scene {
+      position: absolute;
+      top: 481px;
+      left: 0;
+      width: 640px;
+      height: 100px;
+      background-color: #fff;
+    }
 
-  .layer {
-    position: absolute;
-    top: 0;
-    left: 0;
-  }
+    .layer {
+      position: absolute;
+      top: 0;
+      left: 0;
+    }
 
-  .leaf {
-    position: absolute;
-  }
+    .leaf {
+      position: absolute;
+    }
 
-  .red.leaf {
-    background-color: red;
-    left: 50px;
-    top: 50px;
-    width: 100px;
-    height: 100px;
-  }
+    .red.leaf {
+      background-color: red;
+      left: 50px;
+      top: 50px;
+      width: 100px;
+      height: 100px;
+    }
 
-  .red.leaf:hover {
-    background-color: black;
-  }
+    .red.leaf:hover {
+      background-color: black;
+    }
 
-  .blue.leaf {
-    background-color: blue;
-    left: 350px;
-    top: 250px;
-    width: 100px;
-    height: 100px;
-  }
+    .blue.leaf {
+      background-color: blue;
+      left: 350px;
+      top: 250px;
+      width: 100px;
+      height: 100px;
+    }
 
-  .blue.leaf:hover {
-    background-color: black;
-  }
+    .blue.leaf:hover {
+      background-color: black;
+    }
 
   </style>
 </head>
 
 <body>
 
-  <div class="main">
-    <div class="layer" style="z-index: 0;">
-      <div class="leaf red">
-        <button class="btn" type="button">A button?</button>
-      </div>
-    </div>
-
-    <svg xmlns="http://www.w3.org/2000/svg" version="1.1" class="layer" viewBox="0 0 640 480" preserveAspectRatio="xMidYMid slice" width="640" height="480" style="z-index: 1; pointer-events: none;"><rect width="640" height="480" style="fill: rgba(127, 127, 127, 0.5);"></svg>
-
-    <div class="layer" style="z-index: 2;">
-      <div class="leaf blue">
-        <button class="btn" type="button">Oh no!</button>
-      </div>
+<div class="main">
+  <div class="layer" style="z-index: 0;">
+    <div class="leaf red">
+      <button class="btn" type="button">A button?</button>
     </div>
   </div>
 
-  <div id="scene"></div>
+  <svg xmlns="http://www.w3.org/2000/svg" version="1.1" class="layer" viewBox="0 0 640 480" preserveAspectRatio="xMidYMid slice" width="640"
+       height="480" style="z-index: 1; pointer-events: none;">
+    <rect width="640" height="480" style="fill: rgba(127, 127, 127, 0.5);">
+  </svg>
 
-  <script type="text/javascript">
+  <div class="layer" style="z-index: 2;">
+    <div class="leaf blue">
+      <button class="btn" type="button">Oh no!</button>
+    </div>
+  </div>
+</div>
 
-    $( document ).on( 'click', function( evt ) {
-      if ( console && console.log ) {
-        console.log( evt.target );
-      }
-    } );
+<div id="scene"></div>
 
-    $( 'svg' ).on( 'click', function( evt ) {
-      if ( console && console.log ) {
-        console.log( 'Wow I was actually clicked!' );
-      }
-    } );
+<script type="text/javascript">
 
-    requirejs( [ 'main', '../../kite/js/main', '../../dot/js/main' ], function( scenery, kite, dot ) {
-      var underButton = $( '<button class="btn" type="button">scenery under</button>' );
-      var aboveButton = $( '<button class="btn" type="button">scenery above</button>' );
+  $( document ).on( 'click', function( evt ) {
+    if ( console && console.log ) {
+      console.log( evt.target );
+    }
+  } );
 
-      var scene = new scenery.Scene( $( '#scene' ) );
+  $( 'svg' ).on( 'click', function( evt ) {
+    if ( console && console.log ) {
+      console.log( 'Wow I was actually clicked!' );
+    }
+  } );
 
-      scene.addChild( new scenery.DOM( underButton[0], {
-        centerX: 160, centerY: 50
-      } ) );
+  requirejs( [ 'main', '../../kite/js/main', '../../dot/js/main' ], function( scenery, kite, dot ) {
+    var underButton = $( '<button class="btn" type="button">scenery under</button>' );
+    var aboveButton = $( '<button class="btn" type="button">scenery above</button>' );
 
-      scene.addChild( new scenery.Path( kite.Shape.rectangle( 0, 0, 640, 100 ), {
-        fill: 'rgba(127,127,127,0.5)',
-        renderer: 'svg'
-      } ) );
+    var scene = new scenery.Scene( $( '#scene' ) );
 
-      scene.addChild( new scenery.DOM( aboveButton[0], {
-        centerX: 480, centerY: 50
-      } ) );
+    scene.addChild( new scenery.DOM( underButton[ 0 ], {
+      centerX: 160, centerY: 50
+    } ) );
 
-      scene.updateScene();
-    } );
+    scene.addChild( new scenery.Path( kite.Shape.rectangle( 0, 0, 640, 100 ), {
+      fill: 'rgba(127,127,127,0.5)',
+      renderer: 'svg'
+    } ) );
 
-  </script>
+    scene.addChild( new scenery.DOM( aboveButton[ 0 ], {
+      centerX: 480, centerY: 50
+    } ) );
+
+    scene.updateScene();
+  } );
+
+</script>
 
 </body>
 </html>

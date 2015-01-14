@@ -66,7 +66,7 @@ define( function( require ) {
 
         var stateLen = this._drawables.length;
         for ( var i = 0; i < stateLen; i++ ) {
-          this._drawables[i].markDirtyShape();
+          this._drawables[ i ].markDirtyShape();
         }
       }
       return this;
@@ -282,7 +282,7 @@ define( function( require ) {
       }
     },
     usesPaint: true,
-    dirtyMethods: ['markDirtyShape']
+    dirtyMethods: [ 'markDirtyShape' ]
   } );
 
 
@@ -353,7 +353,7 @@ define( function( require ) {
         // TODO: Account for stroke
         this.canvasWidth = canvas.width = Util.toPowerOf2( this.cachedBounds.width );
         this.canvasHeight = canvas.height = Util.toPowerOf2( this.cachedBounds.height );
-        var image = this.node.toCanvasNodeSynchronous().children[0].image;
+        var image = this.node.toCanvasNodeSynchronous().children[ 0 ].image;
         context.drawImage( image, 0, 0 );
 
         var texture = this.texture = gl.createTexture();
@@ -371,17 +371,17 @@ define( function( require ) {
 
         gl.bindTexture( gl.TEXTURE_2D, null );
 
-        this.vertexCoordinates[0] = this.transformVertexCoordinateX( 0 );
-        this.vertexCoordinates[1] = this.transformVertexCoordinateY( 0 );
+        this.vertexCoordinates[ 0 ] = this.transformVertexCoordinateX( 0 );
+        this.vertexCoordinates[ 1 ] = this.transformVertexCoordinateY( 0 );
 
-        this.vertexCoordinates[2] = this.transformVertexCoordinateX( 1 );
-        this.vertexCoordinates[3] = this.transformVertexCoordinateY( 0 );
+        this.vertexCoordinates[ 2 ] = this.transformVertexCoordinateX( 1 );
+        this.vertexCoordinates[ 3 ] = this.transformVertexCoordinateY( 0 );
 
-        this.vertexCoordinates[4] = this.transformVertexCoordinateX( 0 );
-        this.vertexCoordinates[5] = this.transformVertexCoordinateY( 1 );
+        this.vertexCoordinates[ 4 ] = this.transformVertexCoordinateX( 0 );
+        this.vertexCoordinates[ 5 ] = this.transformVertexCoordinateY( 1 );
 
-        this.vertexCoordinates[6] = this.transformVertexCoordinateX( 1 );
-        this.vertexCoordinates[7] = this.transformVertexCoordinateY( 1 );
+        this.vertexCoordinates[ 6 ] = this.transformVertexCoordinateX( 1 );
+        this.vertexCoordinates[ 7 ] = this.transformVertexCoordinateY( 1 );
 
         gl.bindBuffer( gl.ARRAY_BUFFER, this.vertexBuffer );
 

@@ -97,11 +97,11 @@ module.exports = function( grunt ) {
     exec( 'git log -1 --date=short', function( error, stdout, stderr ) {
       if ( error ) { throw error; }
 
-      var sha = /commit (.*)$/m.exec( stdout )[1];
+      var sha = /commit (.*)$/m.exec( stdout )[ 1 ];
       var date = /Date: *(\d+)-(\d+)-(\d+)$/m.exec( stdout );
-      var year = date[1].slice( 2, 4 );
-      var month = date[2];
-      var day = date[3];
+      var year = date[ 1 ].slice( 2, 4 );
+      var month = date[ 2 ];
+      var day = date[ 3 ];
 
       var suffix = '-' + year + month + day + '-' + sha.slice( 0, 10 ) + '.js';
 

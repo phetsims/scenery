@@ -30,7 +30,7 @@ define( function( require ) {
     this.pointerSVGContainer.style.position = 'absolute';
     this.pointerSVGContainer.style.top = 0;
     this.pointerSVGContainer.style.left = 0;
-    this.pointerSVGContainer.style['pointer-events'] = 'none';
+    this.pointerSVGContainer.style[ 'pointer-events' ] = 'none';
 
     var innerRadius = 10;
     var strokeWidth = 1;
@@ -53,7 +53,7 @@ define( function( require ) {
       svg.style.position = 'absolute';
       svg.style.top = 0;
       svg.style.left = 0;
-      svg.style['pointer-events'] = 'none';
+      svg.style[ 'pointer-events' ] = 'none';
 
       //Fit the size to the display
       svg.setAttribute( 'width', diameter );

@@ -23,7 +23,7 @@ define( function( require ) {
     options.tabIndex = options.tabIndex || 1;
 
     // TODO: if element is a DOM element, verify that no other accessibility peer is using it! (add a flag, and remove on disposal)
-    this.element = ( typeof element === 'string' ) ? $( element )[0] : element;
+    this.element = ( typeof element === 'string' ) ? $( element )[ 0 ] : element;
 
     if ( options.label ) {
       this.peerElement = document.createElement( 'div' );

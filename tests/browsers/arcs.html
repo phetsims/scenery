@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
   <meta charset="utf-8"/>
-  <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+  <meta http-equiv="X-UA-Compatible" content="IE=edge"/>
 
   <title>context.arc</title>
 
@@ -46,16 +46,19 @@
           context.beginPath();
           context.arc( x, y, 5, 0, Math.PI * 2, false );
           context.fill();
-        } else if ( ( !anticlockwise && endAngle - startAngle < -Math.PI * 2 ) || ( anticlockwise && startAngle - endAngle < -Math.PI * 2 ) ) {
+        }
+        else if ( ( !anticlockwise && endAngle - startAngle < -Math.PI * 2 ) || ( anticlockwise && startAngle - endAngle < -Math.PI * 2 ) ) {
           // strictly less than -2pi
           context.fillStyle = '#ff0000';
           context.beginPath();
           context.arc( x, y, 5, 0, Math.PI * 2, false );
           context.fill();
-        } else if ( ( !anticlockwise && endAngle - startAngle === -Math.PI * 2 ) || ( anticlockwise && startAngle - endAngle === -Math.PI * 2 ) ) {
+        }
+        else if ( ( !anticlockwise && endAngle - startAngle === -Math.PI * 2 ) || ( anticlockwise && startAngle - endAngle === -Math.PI * 2 ) ) {
           // strictly equal to -2pi
           context.fillStyle = '#ffaa00';
-        } else {
+        }
+        else {
           context.fillStyle = 'rgba(0,0,0,0)';
         }
         context.beginPath();
@@ -94,7 +97,7 @@
   context.setTransform( 0.5, 0, 0, 0.5, 575, 65 );
   arcMap( true );
 
-  context.setTransform( 0.25, 0, 0, 0.25, 30/4, 130/4 );
+  context.setTransform( 0.25, 0, 0, 0.25, 30 / 4, 130 / 4 );
   context.beginPath();
   context.arc( 0, 0, 100, Math.PI / 4, -Math.PI / 2, true );
   context.lineWidth = 30;

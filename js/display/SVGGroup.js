@@ -88,7 +88,7 @@ define( function( require ) {
 
     addSelfDrawable: function( drawable ) {
       this.selfDrawable = drawable;
-      this.svgGroup.insertBefore( drawable.svgElement, this.children.length ? this.children[0].svgGroup : null );
+      this.svgGroup.insertBefore( drawable.svgElement, this.children.length ? this.children[ 0 ].svgGroup : null );
       this.hasSelfDrawable = true;
     },
 
@@ -271,16 +271,16 @@ define( function( require ) {
         var instanceChildren = this.instance.children;
         // iterate backwards, since DOM's insertBefore makes forward iteration more complicated (no insertAfter)
         for ( var i = instanceChildren.length - 1; i >= 0; i-- ) {
-          var group = instanceChildren[i].lookupSVGGroup( this.block );
+          var group = instanceChildren[ i ].lookupSVGGroup( this.block );
           if ( group ) {
             // ensure that the spot in our array (and in the DOM) at [idx] is correct
-            if ( this.children[idx] !== group ) {
+            if ( this.children[ idx ] !== group ) {
               // out of order, rearrange
               sceneryLog && sceneryLog.SVGGroup && sceneryLog.SVGGroup( 'group out of order: ' + idx + ' for ' + group.toString() );
 
               // in the DOM first (since we reference the children array to know what to insertBefore)
               // see http://stackoverflow.com/questions/9732624/how-to-swap-dom-child-nodes-in-javascript
-              svgGroup.insertBefore( group.svgGroup, idx + 1 >= this.children.length ? null : this.children[idx + 1].svgGroup );
+              svgGroup.insertBefore( group.svgGroup, idx + 1 >= this.children.length ? null : this.children[ idx + 1 ].svgGroup );
 
               // then in our children array
               var oldIndex = _.indexOf( this.children, group );

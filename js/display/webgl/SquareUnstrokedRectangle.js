@@ -66,7 +66,7 @@ define( function( require ) {
         x, y + height, z, r, g, b, a, /*      */matrix4.m00(), matrix4.m01(), matrix4.m03(), matrix4.m10(), matrix4.m11(), matrix4.m13()
       ];
       for ( var i = 0; i < newElements.length; i++ ) {
-        this.colorTriangleBufferData.vertexArray[this.startIndex + i] = newElements[i];
+        this.colorTriangleBufferData.vertexArray[ this.startIndex + i ] = newElements[ i ];
       }
       this.colorTriangleRenderer.updateTriangleBuffer( this );
     }

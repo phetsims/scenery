@@ -2,9 +2,9 @@
 <html lang="en">
 <head>
   <meta charset="utf-8"/>
-  <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+  <meta http-equiv="X-UA-Compatible" content="IE=edge"/>
   <meta name="viewport"
-  content="width=device-width, height=device-height, initial-scale=1.0, maximum-scale=1.0, user-scalable=no"/>
+        content="width=device-width, height=device-height, initial-scale=1.0, maximum-scale=1.0, user-scalable=no"/>
 
   <!-- runs in full-screen mode on iOS devices -->
   <meta name="apple-mobile-web-app-capable" content="yes">
@@ -18,161 +18,161 @@
 
   <style type="text/css">
 
-  html, body {
-    position: relative;
-    width: 100%;
-    height: 100%;
-    margin: 0;
-    padding: 0;
-    background-color: #fff;
-    overflow: hidden;
-  }
+    html, body {
+      position: relative;
+      width: 100%;
+      height: 100%;
+      margin: 0;
+      padding: 0;
+      background-color: #fff;
+      overflow: hidden;
+    }
 
-  canvas {
-    position: absolute;
-    left: 0;
-    top: 0;
-  }
+    canvas {
+      position: absolute;
+      left: 0;
+      top: 0;
+    }
 
   </style>
 </head>
 
 <body>
-  <canvas width="512" height="512" id="checker"></canvas>
-  <canvas width="512" height="512" id="reference"></canvas>
-  <canvas width="512" height="512" id="target"></canvas>
+<canvas width="512" height="512" id="checker"></canvas>
+<canvas width="512" height="512" id="reference"></canvas>
+<canvas width="512" height="512" id="target"></canvas>
 
-  <div style="position: relative; top: 512px; width: 512px;" id="buttons">
-    <p style="text-align: center; font-size: 20px; margin-top: 5px;">
-      (composite operation)
-    </p>
-  </div>
+<div style="position: relative; top: 512px; width: 512px;" id="buttons">
+  <p style="text-align: center; font-size: 20px; margin-top: 5px;">
+    (composite operation)
+  </p>
+</div>
 
-  <script type="text/javascript">
-    var context = $( '#checker' )[0].getContext( '2d' );
-    var chunk = 2;
-    for ( var i = 0; i < 512; i += chunk ) {
-      for ( var j = 0; j < 512; j += chunk ) {
-        context.fillStyle = ( ( ( i + j ) / chunk ) % 2 === 0) ? '#000' : '#fff';
-        context.fillRect( i, j, chunk, chunk );
-      }
+<script type="text/javascript">
+  var context = $( '#checker' )[ 0 ].getContext( '2d' );
+  var chunk = 2;
+  for ( var i = 0; i < 512; i += chunk ) {
+    for ( var j = 0; j < 512; j += chunk ) {
+      context.fillStyle = ( ( ( i + j ) / chunk ) % 2 === 0) ? '#000' : '#fff';
+      context.fillRect( i, j, chunk, chunk );
     }
-  </script>
+  }
+</script>
 
-  <script type="text/javascript">
-    var context = $( '#target' )[0].getContext( '2d' );
-    var referenceContext = $( '#reference' )[0].getContext( '2d' );
+<script type="text/javascript">
+  var context = $( '#target' )[ 0 ].getContext( '2d' );
+  var referenceContext = $( '#reference' )[ 0 ].getContext( '2d' );
 
-    var size = 32;
+  var size = 32;
 
-    var operations = [
-      'source-atop',
-      'source-in',
-      'source-out',
-      'source-over',
-      'destination-atop',
-      'destination-in',
-      'destination-out',
-      'destination-over',
-      'lighter',
-      'copy',
-      'xor',
-    ];
+  var operations = [
+    'source-atop',
+    'source-in',
+    'source-out',
+    'source-over',
+    'destination-atop',
+    'destination-in',
+    'destination-out',
+    'destination-over',
+    'lighter',
+    'copy',
+    'xor',
+  ];
 
-    var black = context.createLinearGradient( 0, 0, size, 0 );
-    black.addColorStop( 0, '#000' );
-    black.addColorStop( 1, '#000' );
+  var black = context.createLinearGradient( 0, 0, size, 0 );
+  black.addColorStop( 0, '#000' );
+  black.addColorStop( 1, '#000' );
 
-    var white = context.createLinearGradient( 0, 0, size, 0 );
-    white.addColorStop( 0, '#fff' );
-    white.addColorStop( 1, '#fff' );
+  var white = context.createLinearGradient( 0, 0, size, 0 );
+  white.addColorStop( 0, '#fff' );
+  white.addColorStop( 1, '#fff' );
 
-    var mono = context.createLinearGradient( 0, 0, size, 0 );
-    mono.addColorStop( 0, '#000' );
-    mono.addColorStop( 1, '#fff' );
+  var mono = context.createLinearGradient( 0, 0, size, 0 );
+  mono.addColorStop( 0, '#000' );
+  mono.addColorStop( 1, '#fff' );
 
-    var blackFade = context.createLinearGradient( 0, 0, size, 0 );
-    blackFade.addColorStop( 0, '#000' );
-    blackFade.addColorStop( 1, 'rgba(0,0,0,0)' );
+  var blackFade = context.createLinearGradient( 0, 0, size, 0 );
+  blackFade.addColorStop( 0, '#000' );
+  blackFade.addColorStop( 1, 'rgba(0,0,0,0)' );
 
-    var whiteFade = context.createLinearGradient( 0, 0, size, 0 );
-    whiteFade.addColorStop( 0, '#fff' );
-    whiteFade.addColorStop( 1, 'rgba(255,255,255,0)' );
+  var whiteFade = context.createLinearGradient( 0, 0, size, 0 );
+  whiteFade.addColorStop( 0, '#fff' );
+  whiteFade.addColorStop( 1, 'rgba(255,255,255,0)' );
 
-    var redFade = context.createLinearGradient( 0, 0, size, 0 );
-    redFade.addColorStop( 0, '#f00' );
-    redFade.addColorStop( 1, 'rgba(255,0,0,0)' );
+  var redFade = context.createLinearGradient( 0, 0, size, 0 );
+  redFade.addColorStop( 0, '#f00' );
+  redFade.addColorStop( 1, 'rgba(255,0,0,0)' );
 
-    var blueFade = context.createLinearGradient( 0, 0, size, 0 );
-    blueFade.addColorStop( 0, '#00f' );
-    blueFade.addColorStop( 1, 'rgba(0,0,255,0)' );
+  var blueFade = context.createLinearGradient( 0, 0, size, 0 );
+  blueFade.addColorStop( 0, '#00f' );
+  blueFade.addColorStop( 1, 'rgba(0,0,255,0)' );
 
-    var blackGreen = context.createLinearGradient( 0, 0, size, 0 );
-    blackGreen.addColorStop( 0, '#000' );
-    blackGreen.addColorStop( 1, '#0f0' );
+  var blackGreen = context.createLinearGradient( 0, 0, size, 0 );
+  blackGreen.addColorStop( 0, '#000' );
+  blackGreen.addColorStop( 1, '#0f0' );
 
-    var gradients = [
-      black,
-      white,
-      mono,
-      blackFade,
-      whiteFade,
-      redFade,
-      blueFade,
-      blackGreen
-    ];
+  var gradients = [
+    black,
+    white,
+    mono,
+    blackFade,
+    whiteFade,
+    redFade,
+    blueFade,
+    blackGreen
+  ];
 
-    function createCanvas() {
-      var result = document.createElement( 'canvas' );
-      result.width = 256;
-      result.height = 256;
-      return result;
-    }
+  function createCanvas() {
+    var result = document.createElement( 'canvas' );
+    result.width = 256;
+    result.height = 256;
+    return result;
+  }
 
-    function draw( op ) {
-      // scratch canvases so we can do a single draw operation
-      var canvasA = createCanvas();
-      var canvasB = createCanvas();
-      var ctxA = canvasA.getContext( '2d' );
-      var ctxB = canvasB.getContext( '2d' );
+  function draw( op ) {
+    // scratch canvases so we can do a single draw operation
+    var canvasA = createCanvas();
+    var canvasB = createCanvas();
+    var ctxA = canvasA.getContext( '2d' );
+    var ctxB = canvasB.getContext( '2d' );
 
-      // top row
-      for ( var i = 0; i < gradients.length; i++ ) {
-        ctxA.fillStyle = gradients[i];
-        ctxA.setTransform( 1, 0, 0, 1, ( i ) * size, 0 );
-        ctxA.fillRect( 0, 0, size, ( gradients.length + 1 ) * size );
-      }
-
-      // left column
-      for ( var i = 0; i < gradients.length; i++ ) {
-        ctxB.fillStyle = gradients[i];
-        ctxB.setTransform( 0, -1, 1, 0, 0, ( i + 1 ) * size );
-        ctxB.fillRect( 0, 0, size, ( gradients.length + 1 ) * size );
-      }
-
-      referenceContext.clearRect( 0, 0, 512, 512 );
-      referenceContext.drawImage( canvasA, 256, 0 );
-      referenceContext.drawImage( canvasB, 0, 256 );
-
-      context.globalCompositeOperation = 'source-over';
-      context.clearRect( 0, 0, 512, 512 );
-      context.drawImage( canvasA, 256, 256 );
-      context.globalCompositeOperation = op;
-      context.drawImage( canvasB, 256, 256 );
+    // top row
+    for ( var i = 0; i < gradients.length; i++ ) {
+      ctxA.fillStyle = gradients[ i ];
+      ctxA.setTransform( 1, 0, 0, 1, ( i ) * size, 0 );
+      ctxA.fillRect( 0, 0, size, ( gradients.length + 1 ) * size );
     }
 
-    for ( var k = 0; k < operations.length; k++ ) {
-      (function(){
-        var op = operations[k];
-        $( '#buttons' ).append(
-          $( '<button class="btn" type="button">' + operations[k] + '</button>' ).click( function() {
+    // left column
+    for ( var i = 0; i < gradients.length; i++ ) {
+      ctxB.fillStyle = gradients[ i ];
+      ctxB.setTransform( 0, -1, 1, 0, 0, ( i + 1 ) * size );
+      ctxB.fillRect( 0, 0, size, ( gradients.length + 1 ) * size );
+    }
+
+    referenceContext.clearRect( 0, 0, 512, 512 );
+    referenceContext.drawImage( canvasA, 256, 0 );
+    referenceContext.drawImage( canvasB, 0, 256 );
+
+    context.globalCompositeOperation = 'source-over';
+    context.clearRect( 0, 0, 512, 512 );
+    context.drawImage( canvasA, 256, 256 );
+    context.globalCompositeOperation = op;
+    context.drawImage( canvasB, 256, 256 );
+  }
+
+  for ( var k = 0; k < operations.length; k++ ) {
+    (function() {
+      var op = operations[ k ];
+      $( '#buttons' ).append(
+          $( '<button class="btn" type="button">' + operations[ k ] + '</button>' ).click( function() {
             $( '#buttons p' ).html( op );
             draw( op );
           } )
-        );
-      })();
-    }
+      );
+    })();
+  }
 
-  </script>
+</script>
 </body>
 </html>

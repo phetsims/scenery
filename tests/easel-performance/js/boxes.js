@@ -132,10 +132,10 @@ phet.tests = phet.tests || {};
     for ( var row = 0; row < resolution; row++ ) {
       for ( var col = 0; col < resolution; col++ ) {
         var rect = new scenery.Rectangle(
-            ( col - ( resolution - 1 ) / 2 ) * size / resolution - boxRadius,
-            ( row - ( resolution - 1 ) / 2 ) * size / resolution - boxRadius,
-            boxRadius * 2,
-            boxRadius * 2,
+          ( col - ( resolution - 1 ) / 2 ) * size / resolution - boxRadius,
+          ( row - ( resolution - 1 ) / 2 ) * size / resolution - boxRadius,
+          boxRadius * 2,
+          boxRadius * 2,
           {
             fill: 'rgba(255,0,0,1)'
           } );
@@ -177,12 +177,12 @@ phet.tests = phet.tests || {};
 
     var matrix = Matrix3.translation( main.width() / 2, main.height() / 2 );
 
-    group[0].transform.baseVal.getItem( 0 ).setMatrix( matrix.toSVGMatrix() );
+    group[ 0 ].transform.baseVal.getItem( 0 ).setMatrix( matrix.toSVGMatrix() );
 
     // return step function
     return function( timeElapsed ) {
       matrix = matrix.timesMatrix( Matrix3.rotation2( timeElapsed ) );
-      group[0].transform.baseVal.getItem( 0 ).setMatrix( matrix.toSVGMatrix() );
+      group[ 0 ].transform.baseVal.getItem( 0 ).setMatrix( matrix.toSVGMatrix() );
     }
   };
 

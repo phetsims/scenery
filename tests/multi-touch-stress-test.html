@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
   <meta charset="utf-8"/>
-  <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+  <meta http-equiv="X-UA-Compatible" content="IE=edge"/>
 
   <meta name="viewport" content="width=device-width, height=device-height, initial-scale=1.0, maximum-scale=1.0, user-scalable=no"/>
 
@@ -53,11 +53,11 @@
 
 <body>
 
-  <!-- our scene graph will be in this div -->
-  <div id="main" >
-  </div>
+<!-- our scene graph will be in this div -->
+<div id="main">
+</div>
 
-  <script>
+<script>
 
   var main = $( '#main' );
 
@@ -84,7 +84,7 @@
   // add #count random hexagons
   for ( var i = 0; i < count; i++ ) {
     // anonymous function so the closure variables aren't shared between iterations
-    (function(){
+    (function() {
       var node = new scenery.Path( kite.Shape.regularPolygon( 6, 22 ), {
         fill: normalColor,
         stroke: '#000000',
@@ -109,8 +109,8 @@
 
 
   /*---------------------------------------------------------------------------*
-  * FPS meter
-  *----------------------------------------------------------------------------*/
+   * FPS meter
+   *----------------------------------------------------------------------------*/
 
   var stats = new Stats();
   stats.setMode( 0 ); // 0: fps, 1: ms
@@ -121,13 +121,13 @@
 
 
   /*---------------------------------------------------------------------------*
-  * main loop
-  *----------------------------------------------------------------------------*/
+   * main loop
+   *----------------------------------------------------------------------------*/
 
   var lastTime = 0;
   var timeElapsed = 0;
   function tick() {
-    window.requestAnimationFrame( tick, main[0] );
+    window.requestAnimationFrame( tick, main[ 0 ] );
 
     var timeNow = new Date().getTime();
     if ( lastTime != 0 ) {
@@ -139,10 +139,10 @@
     scene.updateScene(); // repaints dirty regions. use renderScene() to render everything
     stats.end();
   }
-  window.requestAnimationFrame( tick, main[0] );
+  window.requestAnimationFrame( tick, main[ 0 ] );
 
 
-  </script>
+</script>
 
 </body>
 </html>

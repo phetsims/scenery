@@ -2,7 +2,7 @@
 <html>
 <head>
   <meta charset="utf-8"/>
-  <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+  <meta http-equiv="X-UA-Compatible" content="IE=edge"/>
 
   <title>Unit tests for Scenery</title>
 
@@ -42,29 +42,29 @@
 
 </head>
 <body>
-  <div id="qunit"></div>
-  <div id="qunit-fixture">
-  </div>
-  <div id="display"></div>
+<div id="qunit"></div>
+<div id="qunit-fixture">
+</div>
+<div id="display"></div>
 
-  <!-- this needs to be run after the qunit-fixture is in the DOM, but before the document is loaded because QUnit scans the fixture then -->
-  <script src="prepare-fixture.js"></script>
-  <script>
-    require( ['config'], function() {
-      require( [ 'main', 'KITE/main', 'DOT/main', 'AXON/main', 'PHET_CORE/main' ], function( scenery, kite, dot, axon, core ) {
-        window.scenery = scenery;
-        window.kite = kite;
-        window.dot = dot;
-        window.axon = axon;
-        window.core = core;
+<!-- this needs to be run after the qunit-fixture is in the DOM, but before the document is loaded because QUnit scans the fixture then -->
+<script src="prepare-fixture.js"></script>
+<script>
+  require( [ 'config' ], function() {
+    require( [ 'main', 'KITE/main', 'DOT/main', 'AXON/main', 'PHET_CORE/main' ], function( scenery, kite, dot, axon, core ) {
+      window.scenery = scenery;
+      window.kite = kite;
+      window.dot = dot;
+      window.axon = axon;
+      window.core = core;
 
-        runSceneryTests( '.' );
-        runKiteTests( '../../../kite/tests/qunit' );
-        runDotTests( '../../../dot/tests/qunit' );
-        runAxonTests( '../../../axon/tests/qunit' );
-        runPhetCoreTests( '../../../phet-core/tests/qunit' );
-      } );
+      runSceneryTests( '.' );
+      runKiteTests( '../../../kite/tests/qunit' );
+      runDotTests( '../../../dot/tests/qunit' );
+      runAxonTests( '../../../axon/tests/qunit' );
+      runPhetCoreTests( '../../../phet-core/tests/qunit' );
     } );
-  </script>
+  } );
+</script>
 </body>
 </html>

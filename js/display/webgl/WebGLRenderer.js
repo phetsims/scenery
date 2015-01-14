@@ -23,7 +23,7 @@ define( function( require ) {
    */
   function WebGLRenderer( options ) {
 
-    options = _.extend( {stats: true}, options );
+    options = _.extend( { stats: true }, options );
 
     this.events = new Events();
 
@@ -47,7 +47,7 @@ define( function( require ) {
     // Code inspired by http://www.webglacademy.com/#1
     var gl;
     try {
-      gl = this.canvas.getContext( 'experimental-webgl', {antialias: true} ); // TODO: {antialias:true?}
+      gl = this.canvas.getContext( 'experimental-webgl', { antialias: true } ); // TODO: {antialias:true?}
     }
     catch( e ) {
       return false;
@@ -120,7 +120,7 @@ define( function( require ) {
       this.colorTriangleRenderer.draw();
       this.textureRenderer.draw();
       for ( var i = 0; i < this.customWebGLRenderers.length; i++ ) {
-        this.customWebGLRenderers[i].draw();
+        this.customWebGLRenderers[ i ].draw();
       }
 
       //Flush after rendering complete.

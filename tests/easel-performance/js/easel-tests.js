@@ -628,8 +628,8 @@ $( document ).ready( function() {
 
   // var currentTest = tests[0];
   // var currentType = tests[0].types[0];
-  var currentTest = tests[2];
-  var currentType = tests[2].types[0];
+  var currentTest = tests[ 2 ];
+  var currentType = tests[ 2 ].types[ 0 ];
 
   function createButtonGroup() {
     var result = $( document.createElement( 'span' ) );
@@ -691,7 +691,7 @@ $( document ).ready( function() {
 
     testButton.on( 'click', function( event, ui ) {
       currentTest = test;
-      currentType = test.types[0];
+      currentType = test.types[ 0 ];
 
       updateHighlights();
       changeTest();
@@ -783,7 +783,7 @@ $( document ).ready( function() {
 
     // setting up regular calls for step()
     function tick() {
-      window.requestAnimationFrame( tick, main[0] );
+      window.requestAnimationFrame( tick, main[ 0 ] );
       var timeNow = new Date().getTime();
       if ( lastTime != 0 ) {
         timeElapsed = (timeNow - lastTime) / 1000.0;
@@ -796,7 +796,7 @@ $( document ).ready( function() {
       updateFps();
     }
 
-    window.requestAnimationFrame( tick, main[0] );
+    window.requestAnimationFrame( tick, main[ 0 ] );
   })();
 
   // handle window resizing
@@ -810,8 +810,8 @@ $( document ).ready( function() {
 
 
   /*---------------------------------------------------------------------------*
-  * other miscellaneous functions used for testing
-  *----------------------------------------------------------------------------*/
+   * other miscellaneous functions used for testing
+   *----------------------------------------------------------------------------*/
 
   phet.tests.themeColor = function( alpha, blend ) {
     var scale = Math.floor( 511 * Math.random() ) - 255;

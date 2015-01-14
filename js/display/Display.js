@@ -103,7 +103,7 @@ define( function( require ) {
 
     this.options = _.extend( {
       // initial display width
-      width: ( options && options.container && options.container.clientWidth ) || 640,
+      width:  ( options && options.container && options.container.clientWidth ) || 640,
 
       // initial display height
       height: ( options && options.container && options.container.clientHeight ) || 480,
@@ -308,7 +308,7 @@ define( function( require ) {
         var zIndex = this._rootBackbone.lastZIndex;
         for ( var i = 0; i < this._overlays.length; i++ ) {
           // layer the overlays properly
-          var overlay = this._overlays[i];
+          var overlay = this._overlays[ i ];
           overlay.domElement.style.zIndex = zIndex++;
 
           overlay.update();
@@ -575,7 +575,7 @@ define( function( require ) {
 
         if ( mouseTrail ) {
           for ( var i = mouseTrail.length - 1; i >= 0; i-- ) {
-            var node = mouseTrail.nodes[i];
+            var node = mouseTrail.nodes[ i ];
             var cursor = node.getCursor();
 
             if ( cursor ) {
@@ -595,11 +595,11 @@ define( function( require ) {
     setSceneCursor: function( cursor ) {
       if ( cursor !== this._lastCursor ) {
         this._lastCursor = cursor;
-        var customCursors = Display.customCursors[cursor];
+        var customCursors = Display.customCursors[ cursor ];
         if ( customCursors ) {
           // go backwards, so the most desired cursor sticks
           for ( var i = customCursors.length - 1; i >= 0; i-- ) {
-            this._domElement.style.cursor = customCursors[i];
+            this._domElement.style.cursor = customCursors[ i ];
           }
         }
         else {
@@ -1031,8 +1031,8 @@ define( function( require ) {
   }, Events.prototype ) );
 
   Display.customCursors = {
-    'scenery-grab-pointer': ['grab', '-moz-grab', '-webkit-grab', 'pointer'],
-    'scenery-grabbing-pointer': ['grabbing', '-moz-grabbing', '-webkit-grabbing', 'pointer']
+    'scenery-grab-pointer': [ 'grab', '-moz-grab', '-webkit-grab', 'pointer' ],
+    'scenery-grabbing-pointer': [ 'grabbing', '-moz-grabbing', '-webkit-grabbing', 'pointer' ]
   };
 
   // Creates the div that will contain the accessibiity-related DOM elements.

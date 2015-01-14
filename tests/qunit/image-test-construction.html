@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
   <meta charset="utf-8"/>
-  <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+  <meta http-equiv="X-UA-Compatible" content="IE=edge"/>
 
   <title>Image Test Construction</title>
 
@@ -25,14 +25,16 @@
 
   <style type="text/css">
     html, body {
-      margin: 0; padding: 0; border: none;
+      margin: 0;
+      padding: 0;
+      border: none;
     }
   </style>
 </head>
 
 <body>
 
-  <script>
+<script>
 
   require( [ 'main', '../../kite/js/main', '../../dot/js/main' ], function( scenery, kite, dot ) {
     var width = 32;
@@ -50,7 +52,7 @@
     scene.addChild( rect );
     scene.updateScene();
 
-    (function(){
+    (function() {
       var canvas = document.createElement( 'canvas' );
       canvas.width = width;
       canvas.height = height;
@@ -64,7 +66,7 @@
     })();
   } );
 
-  </script>
+</script>
 
 </body>
 </html>

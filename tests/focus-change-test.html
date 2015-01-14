@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
   <meta charset="utf-8"/>
-  <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+  <meta http-equiv="X-UA-Compatible" content="IE=edge"/>
 
   <title>Text Tests</title>
 
@@ -38,8 +38,8 @@
 
 <body>
 
-  <div id="main" style="width: 800px; height: 512px;" class="scene"></div>
-  <script>
+<div id="main" style="width: 800px; height: 512px;" class="scene"></div>
+<script>
 
   var scene = new scenery.Scene( $( '#main' ) );
 
@@ -50,7 +50,10 @@
   redRect.addInputListener( {
     enter: function( evt ) { console.log( 'red enter' ); },
     exit: function( evt ) { console.log( 'red exit' ); },
-    up: function( evt ) { console.log( 'red up' ); blueRect.visible = true; },
+    up: function( evt ) {
+      console.log( 'red up' );
+      blueRect.visible = true;
+    },
     down: function( evt ) { console.log( 'red down' ); }
   } );
   scene.addChild( redRect );
@@ -59,13 +62,16 @@
   blueRect.addInputListener( {
     enter: function( evt ) { console.log( 'blue enter' ); },
     exit: function( evt ) { console.log( 'blue exit' ); },
-    up: function( evt ) { console.log( 'blue up' ); blueRect.visible = false; },
+    up: function( evt ) {
+      console.log( 'blue up' );
+      blueRect.visible = false;
+    },
     down: function( evt ) { console.log( 'blue down' ); }
   } );
   scene.addChild( blueRect );
   blueRect.visible = false;
 
-  </script>
+</script>
 
 </body>
 </html>

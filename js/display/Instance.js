@@ -38,10 +38,8 @@ define( function( require ) {
   var emptyHintsObject = {}; // an object with no properties that we can use as an empty "hints" object
 
   // preferences top to bottom in general
-  var defaultPreferredRenderers = Renderer.createOrderBitmask( Renderer.bitmaskSVG,
-                                                               Renderer.bitmaskCanvas,
-                                                               Renderer.bitmaskDOM,
-                                                               Renderer.bitmaskWebGL );
+  var defaultPreferredRenderers = Renderer.createOrderBitmask(
+    Renderer.bitmaskSVG, Renderer.bitmaskCanvas, Renderer.bitmaskDOM, Renderer.bitmaskWebGL );
 
   // see initialize() for documentation
   scenery.Instance = function Instance( display, trail, isDisplayRoot, isSharedCanvasCacheRoot ) {
@@ -380,15 +378,15 @@ define( function( require ) {
      */
     getStateString: function() {
       var result = 'S[ ' +
-             ( this.isDisplayRoot ? 'displayRoot ' : '' ) +
-             ( this.isBackbone ? 'backbone ' : '' ) +
-             ( this.isInstanceCanvasCache ? 'instanceCache ' : '' ) +
-             ( this.isSharedCanvasCachePlaceholder ? 'sharedCachePlaceholder ' : '' ) +
-             ( this.isSharedCanvasCacheSelf ? 'sharedCacheSelf ' : '' ) +
-             ( this.isTransformed ? 'TR ' : '' ) +
-             ( this.selfRenderer ? this.selfRenderer.toString( 16 ) : '-' ) + ',' +
-             ( this.groupRenderer ? this.groupRenderer.toString( 16 ) : '-' ) + ',' +
-             ( this.sharedCacheRenderer ? this.sharedCacheRenderer.toString( 16 ) : '-' ) + ' ';
+                   ( this.isDisplayRoot ? 'displayRoot ' : '' ) +
+                   ( this.isBackbone ? 'backbone ' : '' ) +
+                   ( this.isInstanceCanvasCache ? 'instanceCache ' : '' ) +
+                   ( this.isSharedCanvasCachePlaceholder ? 'sharedCachePlaceholder ' : '' ) +
+                   ( this.isSharedCanvasCacheSelf ? 'sharedCacheSelf ' : '' ) +
+                   ( this.isTransformed ? 'TR ' : '' ) +
+                   ( this.selfRenderer ? this.selfRenderer.toString( 16 ) : '-' ) + ',' +
+                   ( this.groupRenderer ? this.groupRenderer.toString( 16 ) : '-' ) + ',' +
+                   ( this.sharedCacheRenderer ? this.sharedCacheRenderer.toString( 16 ) : '-' ) + ' ';
       return result + ']';
     },
 
@@ -535,7 +533,7 @@ define( function( require ) {
       var lastUnchangedDrawable = selfChanged ? null : this.selfDrawable; // possibly null
 
       for ( var i = 0; i < this.children.length; i++ ) {
-        var childInstance = this.children[i];
+        var childInstance = this.children[ i ];
 
         var isCompatible = childInstance.syncTree();
         if ( !isCompatible ) {
@@ -648,8 +646,8 @@ define( function( require ) {
             firstChangeInterval = firstChangeInterval || firstChildChangeInterval; // store if it is the first
             if ( firstChildChangeInterval.drawableBefore === null ) {
               assert && assert( !currentChangeInterval || lastUnchangedDrawable,
-                  'If we have a current change interval, we should be guaranteed a non-null ' +
-                  'lastUnchangedDrawable' );
+                'If we have a current change interval, we should be guaranteed a non-null ' +
+                'lastUnchangedDrawable' );
               firstChildChangeInterval.drawableBefore = lastUnchangedDrawable; // either null or the correct drawable
             }
             if ( currentChangeInterval ) {
@@ -708,8 +706,8 @@ define( function( require ) {
       if ( assertSlow ) {
         var firstDrawableCheck = null;
         for ( var j = 0; j < this.children.length; j++ ) {
-          if ( this.children[j].node.isVisible() && this.children[j].firstDrawable ) {
-            firstDrawableCheck = this.children[j].firstDrawable;
+          if ( this.children[ j ].node.isVisible() && this.children[ j ].firstDrawable ) {
+            firstDrawableCheck = this.children[ j ].firstDrawable;
             break;
           }
         }
@@ -719,8 +717,8 @@ define( function( require ) {
 
         var lastDrawableCheck = this.selfDrawable;
         for ( var k = this.children.length - 1; k >= 0; k-- ) {
-          if ( this.children[k].node.isVisible() && this.children[k].lastDrawable ) {
-            lastDrawableCheck = this.children[k].lastDrawable;
+          if ( this.children[ k ].node.isVisible() && this.children[ k ].lastDrawable ) {
+            lastDrawableCheck = this.children[ k ].lastDrawable;
             break;
           }
         }
@@ -903,7 +901,7 @@ define( function( require ) {
         // we need to create all of the child instances
         for ( var k = 0; k < this.node.children.length; k++ ) {
           // create a child instance
-          var child = this.node.children[k];
+          var child = this.node.children[ k ];
           this.appendInstance( Instance.createFromPool( this.display, this.trail.copy().addDescendant( child, k ), false, false ) );
         }
       }
@@ -914,13 +912,13 @@ define( function( require ) {
       if ( !this.sharedCacheInstance ) {
         var instanceKey = this.node.getId();
         // TODO: have this abstracted away in the Display?
-        this.sharedCacheInstance = this.display._sharedCanvasInstances[instanceKey];
+        this.sharedCacheInstance = this.display._sharedCanvasInstances[ instanceKey ];
 
         // TODO: increment reference counting?
         if ( !this.sharedCacheInstance ) {
           this.sharedCacheInstance = Instance.createFromPool( this.display, new scenery.Trail( this.node ), false, true );
           this.sharedCacheInstance.syncTree();
-          this.display._sharedCanvasInstances[instanceKey] = this.sharedCacheInstance;
+          this.display._sharedCanvasInstances[ instanceKey ] = this.sharedCacheInstance;
           // TODO: reference counting?
 
           // TODO: this.sharedCacheInstance.isTransformed?
@@ -941,7 +939,7 @@ define( function( require ) {
     // @private, finds the closest drawable (not including the child instance at childIndex) using lastDrawable, or null
     findPreviousDrawable: function( childIndex ) {
       for ( var i = childIndex - 1; i >= 0; i-- ) {
-        var option = this.children[i].lastDrawable;
+        var option = this.children[ i ].lastDrawable;
         if ( option !== null ) {
           return option;
         }
@@ -954,7 +952,7 @@ define( function( require ) {
     findNextDrawable: function( childIndex ) {
       var len = this.children.length;
       for ( var i = childIndex + 1; i < len; i++ ) {
-        var option = this.children[i].firstDrawable;
+        var option = this.children[ i ].firstDrawable;
         if ( option !== null ) {
           return option;
         }
@@ -975,11 +973,11 @@ define( function( require ) {
     insertInstance: function( instance, index ) {
       assert && assert( instance instanceof Instance );
       assert && assert( index >= 0 && index <= this.children.length,
-          'Instance insertion bounds check for index ' + index + ' with previous children length ' +
-          this.children.length );
+        'Instance insertion bounds check for index ' + index + ' with previous children length ' +
+        this.children.length );
 
       sceneryLog && sceneryLog.InstanceTree && sceneryLog.InstanceTree(
-          'inserting ' + instance.toString() + ' into ' + this.toString() );
+        'inserting ' + instance.toString() + ' into ' + this.toString() );
       sceneryLog && sceneryLog.InstanceTree && sceneryLog.push();
 
       // mark it as changed during this frame, so that we can properly set the change interval
@@ -1013,11 +1011,11 @@ define( function( require ) {
     removeInstanceWithIndex: function( instance, index ) {
       assert && assert( instance instanceof Instance );
       assert && assert( index >= 0 && index < this.children.length,
-          'Instance removal bounds check for index ' + index + ' with previous children length ' +
-          this.children.length );
+        'Instance removal bounds check for index ' + index + ' with previous children length ' +
+        this.children.length );
 
       sceneryLog && sceneryLog.InstanceTree && sceneryLog.InstanceTree(
-          'removing ' + instance.toString() + ' from ' + this.toString() );
+        'removing ' + instance.toString() + ' from ' + this.toString() );
       sceneryLog && sceneryLog.InstanceTree && sceneryLog.push();
 
       var frameId = this.display._frameId;
@@ -1028,10 +1026,10 @@ define( function( require ) {
 
       // mark neighbors so that we can add a change interval for our removal area
       if ( index - 1 >= 0 ) {
-        this.children[index - 1].stitchChangeAfter = frameId;
+        this.children[ index - 1 ].stitchChangeAfter = frameId;
       }
       if ( index + 1 < this.children.length ) {
-        this.children[index + 1].stitchChangeBefore = frameId;
+        this.children[ index + 1 ].stitchChangeBefore = frameId;
       }
 
       this.children.splice( index, 1 ); // TODO: replace with a 'remove' function call
@@ -1064,8 +1062,8 @@ define( function( require ) {
     findChildInstanceOnNode: function( node ) {
       var instances = node.getInstances();
       for ( var i = 0; i < instances.length; i++ ) {
-        if ( instances[i].oldParent === this ) {
-          return instances[i];
+        if ( instances[ i ].oldParent === this ) {
+          return instances[ i ];
         }
       }
       return null;
@@ -1074,7 +1072,7 @@ define( function( require ) {
     // event callback for Node's 'childInserted' event, used to track children
     onChildInserted: function( childNode, index ) {
       sceneryLog && sceneryLog.Instance && sceneryLog.Instance(
-          'inserting child node ' + childNode.constructor.name + '#' + childNode.id + ' into ' + this.toString() );
+        'inserting child node ' + childNode.constructor.name + '#' + childNode.id + ' into ' + this.toString() );
       sceneryLog && sceneryLog.Instance && sceneryLog.push();
 
       assert && assert( !this.stateless, 'If we are stateless, we should not receive these notifications' );
@@ -1105,11 +1103,11 @@ define( function( require ) {
     // event callback for Node's 'childRemoved' event, used to track children
     onChildRemoved: function( childNode, index ) {
       sceneryLog && sceneryLog.Instance && sceneryLog.Instance(
-          'removing child node ' + childNode.constructor.name + '#' + childNode.id + ' from ' + this.toString() );
+        'removing child node ' + childNode.constructor.name + '#' + childNode.id + ' from ' + this.toString() );
       sceneryLog && sceneryLog.Instance && sceneryLog.push();
 
       assert && assert( !this.stateless, 'If we are stateless, we should not receive these notifications' );
-      assert && assert( this.children[index].node === childNode, 'Ensure that our instance matches up' );
+      assert && assert( this.children[ index ].node === childNode, 'Ensure that our instance matches up' );
 
       var instance = this.findChildInstanceOnNode( childNode );
       assert && assert( instance !== null, 'We should always have a reference to a removed instance' );
@@ -1150,7 +1148,7 @@ define( function( require ) {
     getDescendantCount: function() {
       var count = this.children.length;
       for ( var i = 0; i < this.children.length; i++ ) {
-        count += this.children[i].getDescendantCount();
+        count += this.children[ i ].getDescendantCount();
       }
       return count;
     },
@@ -1176,7 +1174,7 @@ define( function( require ) {
     lookupSVGGroup: function( block ) {
       var len = this.svgGroups.length;
       for ( var i = 0; i < len; i++ ) {
-        var group = this.svgGroups[i];
+        var group = this.svgGroups[ i ];
         if ( group.block === block ) {
           return group;
         }
@@ -1268,7 +1266,7 @@ define( function( require ) {
 
       var numChildren = this.children.length;
       for ( var i = 0; i < numChildren; i++ ) {
-        this.children[i].dispose();
+        this.children[ i ].dispose();
       }
 
       // we don't originally add in the listener if we are stateless
@@ -1282,7 +1280,7 @@ define( function( require ) {
       if ( this.sharedCacheInstance ) {
         this.sharedCacheInstance.externalReferenceCount--;
         if ( this.sharedCacheInstance.externalReferenceCount === 0 ) {
-          delete this.display._sharedCanvasInstances[this.node.getId()];
+          delete this.display._sharedCanvasInstances[ this.node.getId() ];
           this.sharedCacheInstance.dispose();
         }
       }
@@ -1322,7 +1320,7 @@ define( function( require ) {
 
         // validate the subtree
         for ( var i = 0; i < this.children.length; i++ ) {
-          var childInstance = this.children[i];
+          var childInstance = this.children[ i ];
 
           childInstance.audit( frameId, allowValidationNotNeededChecks );
         }

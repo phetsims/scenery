@@ -99,7 +99,7 @@ define( function( require ) {
 
       var stateLen = this._drawables.length;
       for ( var i = 0; i < stateLen; i++ ) {
-        var state = this._drawables[i];
+        var state = this._drawables[ i ];
         state.markDirtyLine();
       }
 
@@ -121,7 +121,7 @@ define( function( require ) {
       }
       var stateLen = this._drawables.length;
       for ( var i = 0; i < stateLen; i++ ) {
-        var state = this._drawables[i];
+        var state = this._drawables[ i ];
         state.markDirtyP1();
       }
       this.invalidateLine();
@@ -144,7 +144,7 @@ define( function( require ) {
       }
       var stateLen = this._drawables.length;
       for ( var i = 0; i < stateLen; i++ ) {
-        var state = this._drawables[i];
+        var state = this._drawables[ i ];
         state.markDirtyP2();
       }
       this.invalidateLine();
@@ -244,17 +244,17 @@ define( function( require ) {
     var privateName = '_' + lowerShort;
     var dirtyMethodName = 'markDirty' + capitalizedShort;
 
-    Line.prototype[getName] = function() {
-      return this[privateName];
+    Line.prototype[ getName ] = function() {
+      return this[ privateName ];
     };
 
-    Line.prototype[setName] = function( value ) {
-      if ( this[privateName] !== value ) {
-        this[privateName] = value;
+    Line.prototype[ setName ] = function( value ) {
+      if ( this[ privateName ] !== value ) {
+        this[ privateName ] = value;
         var stateLen = this._drawables.length;
         for ( var i = 0; i < stateLen; i++ ) {
-          var state = this._drawables[i];
-          state[dirtyMethodName]();
+          var state = this._drawables[ i ];
+          state[ dirtyMethodName ]();
         }
         this.invalidateLine();
       }
@@ -262,8 +262,8 @@ define( function( require ) {
     };
 
     Object.defineProperty( Line.prototype, lowerShort, {
-      set: Line.prototype[setName],
-      get: Line.prototype[getName]
+      set: Line.prototype[ setName ],
+      get: Line.prototype[ getName ]
     } );
   }
 
@@ -460,7 +460,7 @@ define( function( require ) {
       }
     },
     usesPaint: true,
-    dirtyMethods: ['markDirtyX1', 'markDirtyY1', 'markDirtyX2', 'markDirtyY2']
+    dirtyMethods: [ 'markDirtyX1', 'markDirtyY1', 'markDirtyX2', 'markDirtyY2' ]
   } );
 
 
@@ -542,17 +542,17 @@ define( function( require ) {
       var leftBottomY = b.y - edgeY;
 
       // Modeled after the Rectangle.js WebGL triangles
-      this.vertexCoordinates[0] = leftTopX;//rect._rectX;
-      this.vertexCoordinates[1] = leftTopY;//rect._rectY;
+      this.vertexCoordinates[ 0 ] = leftTopX;//rect._rectX;
+      this.vertexCoordinates[ 1 ] = leftTopY;//rect._rectY;
 
-      this.vertexCoordinates[2] = rightTopX;//rect._rectX + rect._rectWidth;
-      this.vertexCoordinates[3] = rightTopY;//rect._rectY;
+      this.vertexCoordinates[ 2 ] = rightTopX;//rect._rectX + rect._rectWidth;
+      this.vertexCoordinates[ 3 ] = rightTopY;//rect._rectY;
 
-      this.vertexCoordinates[4] = leftBottomX;//rect._rectX;
-      this.vertexCoordinates[5] = leftBottomY;//rect._rectY + rect._rectHeight;
+      this.vertexCoordinates[ 4 ] = leftBottomX;//rect._rectX;
+      this.vertexCoordinates[ 5 ] = leftBottomY;//rect._rectY + rect._rectHeight;
 
-      this.vertexCoordinates[6] = rightBottomX;//rect._rectX + rect._rectWidth;
-      this.vertexCoordinates[7] = rightBottomY;//rect._rectY + rect._rectHeight;
+      this.vertexCoordinates[ 6 ] = rightBottomX;//rect._rectX + rect._rectWidth;
+      this.vertexCoordinates[ 7 ] = rightBottomY;//rect._rectY + rect._rectHeight;
 
       gl.bindBuffer( gl.ARRAY_BUFFER, this.vertexBuffer );
 

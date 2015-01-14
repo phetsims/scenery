@@ -105,7 +105,7 @@ define( function( require ) {
 
         var stateLen = this._drawables.length;
         for ( var i = 0; i < stateLen; i++ ) {
-          this._drawables[i].markDirtyText();
+          this._drawables[ i ].markDirtyText();
         }
 
         this.invalidateText();
@@ -130,7 +130,7 @@ define( function( require ) {
 
         var stateLen = this._drawables.length;
         for ( var i = 0; i < stateLen; i++ ) {
-          this._drawables[i].markDirtyBounds();
+          this._drawables[ i ].markDirtyBounds();
         }
 
         this.invalidateText();
@@ -197,7 +197,7 @@ define( function( require ) {
       if ( !this._selfBounds.equals( selfBounds ) ) {
         var stateLen = this._drawables.length;
         for ( var i = 0; i < stateLen; i++ ) {
-          this._drawables[i].markDirtyBounds();
+          this._drawables[ i ].markDirtyBounds();
         }
       }
 
@@ -396,7 +396,7 @@ define( function( require ) {
 
         var stateLen = this._drawables.length;
         for ( var i = 0; i < stateLen; i++ ) {
-          this._drawables[i].markDirtyFont();
+          this._drawables[ i ].markDirtyFont();
         }
 
         this.invalidateText();
@@ -414,7 +414,7 @@ define( function( require ) {
 
       var stateLen = this._drawables.length;
       for ( var i = 0; i < stateLen; i++ ) {
-        this._drawables[i].markDirtyDirection();
+        this._drawables[ i ].markDirtyDirection();
       }
 
       this.invalidateText();
@@ -475,15 +475,15 @@ define( function( require ) {
     var getterName = 'get' + fullCapitalized;
     var setterName = 'set' + fullCapitalized;
 
-    Text.prototype[getterName] = function() {
+    Text.prototype[ getterName ] = function() {
       // use the ES5 getter to retrieve the property. probably somewhat slow.
       return this._font[ shortUncapitalized ];
     };
 
-    Text.prototype[setterName] = function( value ) {
+    Text.prototype[ setterName ] = function( value ) {
       // create a full copy of our font instance
       var ob = {};
-      ob[shortUncapitalized] = value;
+      ob[ shortUncapitalized ] = value;
       var newFont = this._font.copy( ob );
 
       // apply the new Font. this should call invalidateText() as normal
@@ -492,7 +492,7 @@ define( function( require ) {
       return this;
     };
 
-    Object.defineProperty( Text.prototype, propertyName, { set: Text.prototype[setterName], get: Text.prototype[getterName] } );
+    Object.defineProperty( Text.prototype, propertyName, { set: Text.prototype[ setterName ], get: Text.prototype[ getterName ] } );
   }
 
   addFontForwarding( 'fontWeight', 'FontWeight', 'weight' );
@@ -781,7 +781,7 @@ define( function( require ) {
       }
     },
     usesPaint: true,
-    dirtyMethods: ['markDirtyText', 'markDirtyFont', 'markDirtyBounds', 'markDirtyDirection']
+    dirtyMethods: [ 'markDirtyText', 'markDirtyFont', 'markDirtyBounds', 'markDirtyDirection' ]
   } );
 
   initializingHybridTextNode = true;
@@ -878,17 +878,17 @@ define( function( require ) {
 
         gl.bindTexture( gl.TEXTURE_2D, null );
 
-        this.vertexCoordinates[0] = this.transformVertexCoordinateX( 0 );
-        this.vertexCoordinates[1] = this.transformVertexCoordinateY( 0 );
+        this.vertexCoordinates[ 0 ] = this.transformVertexCoordinateX( 0 );
+        this.vertexCoordinates[ 1 ] = this.transformVertexCoordinateY( 0 );
 
-        this.vertexCoordinates[2] = this.transformVertexCoordinateX( 1 );
-        this.vertexCoordinates[3] = this.transformVertexCoordinateY( 0 );
+        this.vertexCoordinates[ 2 ] = this.transformVertexCoordinateX( 1 );
+        this.vertexCoordinates[ 3 ] = this.transformVertexCoordinateY( 0 );
 
-        this.vertexCoordinates[4] = this.transformVertexCoordinateX( 0 );
-        this.vertexCoordinates[5] = this.transformVertexCoordinateY( 1 );
+        this.vertexCoordinates[ 4 ] = this.transformVertexCoordinateX( 0 );
+        this.vertexCoordinates[ 5 ] = this.transformVertexCoordinateY( 1 );
 
-        this.vertexCoordinates[6] = this.transformVertexCoordinateX( 1 );
-        this.vertexCoordinates[7] = this.transformVertexCoordinateY( 1 );
+        this.vertexCoordinates[ 6 ] = this.transformVertexCoordinateX( 1 );
+        this.vertexCoordinates[ 7 ] = this.transformVertexCoordinateY( 1 );
 
         gl.bindBuffer( gl.ARRAY_BUFFER, this.vertexBuffer );
 

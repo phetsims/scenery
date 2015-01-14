@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
   <meta charset="utf-8"/>
-  <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+  <meta http-equiv="X-UA-Compatible" content="IE=edge"/>
 
   <meta name="viewport" content="width=device-width, height=device-height, initial-scale=1.0, maximum-scale=1.0, user-scalable=no"/>
 
@@ -42,26 +42,28 @@
 
 <body>
 
-  <h1>Diagnostics</h1>
+<h1>Diagnostics</h1>
 
-  <p>
-    window.navigator.userAgent: <span id="userAgent"></span><br>
-    window.navigator.platform: <span id="platform"></span><br>
-  </p>
-  <p>
-    window.devicePixelRatio: <span id="devicePixelRatio"></span><br>
-    context.backingStorePixelRatio: <span id="backingStorePixelRatio"></span><br>
-  </p>
-  <p>
-    window.innerWidth: <span id="innerWidth"></span><br>
-    window.innerHeight: <span id="innerHeight"></span><br>
-    window.orientation: <span id="orientationId"></span><br>
-    event.alpha: <span id="alpha"></span><br>
-    event.beta: <span id="beta"></span><br>
-    event.gamma: <span id="gamma"></span><br>
-  </p>
+<p>
+  window.navigator.userAgent: <span id="userAgent"></span><br>
+  window.navigator.platform: <span id="platform"></span><br>
+</p>
 
-  <script>
+<p>
+  window.devicePixelRatio: <span id="devicePixelRatio"></span><br>
+  context.backingStorePixelRatio: <span id="backingStorePixelRatio"></span><br>
+</p>
+
+<p>
+  window.innerWidth: <span id="innerWidth"></span><br>
+  window.innerHeight: <span id="innerHeight"></span><br>
+  window.orientation: <span id="orientationId"></span><br>
+  event.alpha: <span id="alpha"></span><br>
+  event.beta: <span id="beta"></span><br>
+  event.gamma: <span id="gamma"></span><br>
+</p>
+
+<script>
 
   $( '#userAgent' ).text( window.navigator.userAgent );
   $( '#platform' ).text( window.navigator.platform );
@@ -83,7 +85,7 @@
   updateOrientation( {} ); // trigger it at the start
   window.addEventListener( 'deviceorientation', updateOrientation );
 
-  </script>
+</script>
 
 </body>
 </html>

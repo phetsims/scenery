@@ -38,7 +38,7 @@ var marks = marks || {};
         }
       }
 
-      var snapshot = this.snapshots[this.snapshotIndex++];
+      var snapshot = this.snapshots[ this.snapshotIndex++ ];
       this.currentSnapshot = snapshot;
 
       // run library dependencies before running the tests
@@ -72,7 +72,7 @@ var marks = marks || {};
     runMark: function() {
       var that = this;
 
-      var mark = this.findMark( this.markNames[this.markNameIndex] );
+      var mark = this.findMark( this.markNames[ this.markNameIndex ] );
 
       if ( mark ) {
         mark.before && mark.before();
@@ -96,13 +96,13 @@ var marks = marks || {};
             }, 500 );
           }
           else {
-            window.requestAnimationFrame( tick, main[0] );
+            window.requestAnimationFrame( tick, main[ 0 ] );
 
             mark.step && mark.step();
           }
         }
 
-        window.requestAnimationFrame( tick, main[0] );
+        window.requestAnimationFrame( tick, main[ 0 ] );
 
         var startTime = new Date;
       }
@@ -134,14 +134,14 @@ var marks = marks || {};
       this.table.addColumn( 'Benchmark Name' );
 
       _.each( performance.snapshots, function( snapshot ) {
-        that.snapshotColumnMap[snapshot.name] = that.table.numColumns;
+        that.snapshotColumnMap[ snapshot.name ] = that.table.numColumns;
         that.table.addColumn( snapshot.name, 2 );
       } );
 
       _.each( performance.markNames, function( markName ) {
         var rowNumber = that.table.addRow();
-        that.markNameRowMap[markName] = rowNumber;
-        that.table.cells[rowNumber][0].innerHTML = markName;
+        that.markNameRowMap[ markName ] = rowNumber;
+        that.table.cells[ rowNumber ][ 0 ].innerHTML = markName;
       } );
     },
 
@@ -153,24 +153,24 @@ var marks = marks || {};
       if ( !snapshot.times ) {
         snapshot.times = {};
       }
-      if ( !snapshot.times[mark.name] ) {
-        snapshot.times[mark.name] = {
+      if ( !snapshot.times[ mark.name ] ) {
+        snapshot.times[ mark.name ] = {
           total: 0,
           count: 0
         };
       }
 
-      var time = snapshot.times[mark.name];
+      var time = snapshot.times[ mark.name ];
       time.total += ms;
       time.count += 1;
 
       var average = time.total / time.count;
-      this.table.cells[this.markNameRowMap[mark.name]][this.snapshotColumnMap[snapshot.name]].innerHTML = average.toFixed( 1 );
+      this.table.cells[ this.markNameRowMap[ mark.name ] ][ this.snapshotColumnMap[ snapshot.name ] ].innerHTML = average.toFixed( 1 );
       if ( snapshot.name !== 'current' ) {
-        var currentTime = performance.snapshots[0].times[mark.name];
+        var currentTime = performance.snapshots[ 0 ].times[ mark.name ];
         var currentAverage = currentTime.total / currentTime.count;
         var percentageChange = 100 * ( currentAverage - average ) / average;
-        this.table.cells[this.markNameRowMap[mark.name]][this.snapshotColumnMap[snapshot.name] + 1].innerHTML = percentageChange.toFixed( 2 ) + '%';
+        this.table.cells[ this.markNameRowMap[ mark.name ] ][ this.snapshotColumnMap[ snapshot.name ] + 1 ].innerHTML = percentageChange.toFixed( 2 ) + '%';
       }
       // console.log( snapshot.name + ' ' + mark.name + ': ' + average );
     }
@@ -212,7 +212,7 @@ var marks = marks || {};
     // make sure things aren't cached, just in case
     script.src = src + '?random=' + Math.random().toFixed( 10 );
 
-    var other = document.getElementsByTagName( 'script' )[0];
+    var other = document.getElementsByTagName( 'script' )[ 0 ];
     other.parentNode.insertBefore( script, other );
   }
 

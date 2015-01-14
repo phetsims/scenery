@@ -141,7 +141,7 @@ define( function( require ) {
       if ( this.isBefore ) {
         if ( this.trail.lastNode()._children.length > 0 ) {
           // stay as before, just walk to the first child
-          this.trail.addDescendant( this.trail.lastNode()._children[0], 0 );
+          this.trail.addDescendant( this.trail.lastNode()._children[ 0 ], 0 );
         }
         else {
           // stay on the same node, but switch to after
@@ -156,12 +156,12 @@ define( function( require ) {
           return null;
         }
         else {
-          var index = this.trail.indices[this.trail.indices.length - 1];
+          var index = this.trail.indices[ this.trail.indices.length - 1 ];
           this.trail.removeDescendant();
 
           if ( this.trail.lastNode()._children.length > index + 1 ) {
             // more siblings, switch to the beginning of the next one
-            this.trail.addDescendant( this.trail.lastNode()._children[index + 1], index + 1 );
+            this.trail.addDescendant( this.trail.lastNode()._children[ index + 1 ], index + 1 );
             this.setBefore( true );
           }
           else {
@@ -182,12 +182,12 @@ define( function( require ) {
           return null;
         }
         else {
-          var index = this.trail.indices[this.trail.indices.length - 1];
+          var index = this.trail.indices[ this.trail.indices.length - 1 ];
           this.trail.removeDescendant();
 
           if ( index - 1 >= 0 ) {
             // more siblings, switch to the beginning of the previous one and switch to isAfter
-            this.trail.addDescendant( this.trail.lastNode()._children[index - 1], index - 1 );
+            this.trail.addDescendant( this.trail.lastNode()._children[ index - 1 ], index - 1 );
             this.setBefore( false );
           }
           else {
@@ -199,7 +199,7 @@ define( function( require ) {
         if ( this.trail.lastNode()._children.length > 0 ) {
           // stay isAfter, but walk to the last child
           var children = this.trail.lastNode()._children;
-          this.trail.addDescendant( children[children.length - 1], children.length - 1 );
+          this.trail.addDescendant( children[ children.length - 1 ], children.length - 1 );
         }
         else {
           // switch to isBefore, since this is a leaf node

@@ -145,16 +145,16 @@ phet.tests = phet.tests || {};
       context.strokeStyle = '#000000';
 
       for ( var i = 0; i < count; i++ ) {
-        var xOffset = seed[i * 2];
-        var yOffset = seed[i * 2 + 1];
+        var xOffset = seed[ i * 2 ];
+        var yOffset = seed[ i * 2 + 1 ];
 
         context.beginPath();
-        context.moveTo( points[0].x + xOffset, points[0].y + yOffset );
-        context.lineTo( points[1].x + xOffset, points[1].y + yOffset );
-        context.lineTo( points[2].x + xOffset, points[2].y + yOffset );
-        context.lineTo( points[3].x + xOffset, points[3].y + yOffset );
-        context.lineTo( points[4].x + xOffset, points[4].y + yOffset );
-        context.lineTo( points[5].x + xOffset, points[5].y + yOffset );
+        context.moveTo( points[ 0 ].x + xOffset, points[ 0 ].y + yOffset );
+        context.lineTo( points[ 1 ].x + xOffset, points[ 1 ].y + yOffset );
+        context.lineTo( points[ 2 ].x + xOffset, points[ 2 ].y + yOffset );
+        context.lineTo( points[ 3 ].x + xOffset, points[ 3 ].y + yOffset );
+        context.lineTo( points[ 4 ].x + xOffset, points[ 4 ].y + yOffset );
+        context.lineTo( points[ 5 ].x + xOffset, points[ 5 ].y + yOffset );
         context.closePath();
         context.fill();
         context.stroke();

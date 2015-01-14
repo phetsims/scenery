@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
   <meta charset="utf-8"/>
-  <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+  <meta http-equiv="X-UA-Compatible" content="IE=edge"/>
   <meta name="viewport" content="width=device-width, height=device-height, initial-scale=1.0, maximum-scale=1.0, user-scalable=no"/>
   <meta name="apple-mobile-web-app-capable" content="yes">
 
@@ -47,11 +47,11 @@
 
 <body>
 
-  <!-- our scene graph will be in this div -->
-  <div id="main" >
-  </div>
+<!-- our scene graph will be in this div -->
+<div id="main">
+</div>
 
-  <script>
+<script>
 
   // initialize our scene
   var scene = new scenery.Node();
@@ -74,7 +74,7 @@
   // add 100 random hexagons
   for ( var i = 0; i < 100; i++ ) {
     // anonymous function so the closure variables aren't shared between iterations
-    (function(){
+    (function() {
       var node = new scenery.Path( kite.Shape.regularPolygon( 6, 22 ), {
         fill: '#ff0000',
         stroke: '#000000',
@@ -103,12 +103,12 @@
   }
 
   /*---------------------------------------------------------------------------*
-  * main loop
-  *----------------------------------------------------------------------------*/
+   * main loop
+   *----------------------------------------------------------------------------*/
 
   display.updateOnRequestAnimationFrame();
 
-  </script>
+</script>
 
 </body>
 </html>

@@ -259,7 +259,7 @@ define( function( require ) {
 
       var len = this.watchedFilterNodes.length;
       for ( var i = 0; i < len; i++ ) {
-        opacity *= this.watchedFilterNodes[i].getOpacity();
+        opacity *= this.watchedFilterNodes[ i ].getOpacity();
       }
 
       return opacity;
@@ -268,7 +268,7 @@ define( function( require ) {
     getFilterVisibility: function() {
       var len = this.watchedFilterNodes.length;
       for ( var i = 0; i < len; i++ ) {
-        if ( !this.watchedFilterNodes[i].isVisible() ) {
+        if ( !this.watchedFilterNodes[ i ].isVisible() ) {
           return false;
         }
       }
@@ -295,10 +295,10 @@ define( function( require ) {
       // full-pass change for zindex.
       var zIndex = 0; // don't start below 1 (we ensure > in loop)
       for ( var k = 0; k < this.blocks.length; k++ ) {
-        var block = this.blocks[k];
+        var block = this.blocks[ k ];
         if ( block.zIndex <= zIndex ) {
-          var newIndex = ( k + 1 < this.blocks.length && this.blocks[k + 1].zIndex - 1 > zIndex ) ?
-                         Math.ceil( ( zIndex + this.blocks[k + 1].zIndex ) / 2 ) :
+          var newIndex = ( k + 1 < this.blocks.length && this.blocks[ k + 1 ].zIndex - 1 > zIndex ) ?
+                         Math.ceil( ( zIndex + this.blocks[ k + 1 ].zIndex ) / 2 ) :
                          zIndex + 20;
 
           // NOTE: this should give it its own stacking index (which is what we want)
@@ -307,10 +307,10 @@ define( function( require ) {
         zIndex = block.zIndex;
 
         if ( assert ) {
-          assert( this.blocks[k].zIndex % 1 === 0, 'z-indices should be integers' );
-          assert( this.blocks[k].zIndex > 0, 'z-indices should be greater than zero for our needs (see spec)' );
+          assert( this.blocks[ k ].zIndex % 1 === 0, 'z-indices should be integers' );
+          assert( this.blocks[ k ].zIndex > 0, 'z-indices should be greater than zero for our needs (see spec)' );
           if ( k > 0 ) {
-            assert( this.blocks[k - 1].zIndex < this.blocks[k].zIndex, 'z-indices should be strictly increasing' );
+            assert( this.blocks[ k - 1 ].zIndex < this.blocks[ k ].zIndex, 'z-indices should be strictly increasing' );
           }
         }
       }
@@ -404,7 +404,7 @@ define( function( require ) {
         assertSlow && assertSlow( this.transformRootInstance.isTransformed, 'Transform root should be transformed' );
 
         for ( var i = 0; i < this.blocks.length; i++ ) {
-          this.blocks[i].audit( allowPendingBlock, allowPendingList, allowDirty );
+          this.blocks[ i ].audit( allowPendingBlock, allowPendingList, allowDirty );
         }
       }
     }

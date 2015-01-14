@@ -21,7 +21,7 @@ define( function( require ) {
    */
   function TextureBufferData() {
     this.vertexArray = [];
-    this.spriteSheets = [new SpriteSheet()];
+    this.spriteSheets = [ new SpriteSheet() ];
   }
 
   return inherit( Object, TextureBufferData, {
@@ -33,7 +33,7 @@ define( function( require ) {
       //TODO: Check to see if any of the sprite sheets already contains that image
       //TODO: If none of the sprite sheets contained that image, then mark the spritesheet as dirty
       //TODO: and send it to the GPU after updating
-      this.spriteSheets[0].addImage( image );
+      this.spriteSheets[ 0 ].addImage( image );
       var textureBufferData = this;
       var index = this.vertexArray.length;
 
@@ -64,41 +64,41 @@ define( function( require ) {
         image: image,
         setTransform: function( matrix4 ) {
           for ( var i = 0; i < 6; i++ ) {
-            textureBufferData.vertexArray[index + 5 + i * 11] = matrix4.m00();
-            textureBufferData.vertexArray[index + 6 + i * 11] = matrix4.m01();
-            textureBufferData.vertexArray[index + 7 + i * 11] = matrix4.m03();
-            textureBufferData.vertexArray[index + 8 + i * 11] = matrix4.m10();
-            textureBufferData.vertexArray[index + 9 + i * 11] = matrix4.m11();
-            textureBufferData.vertexArray[index + 10 + i * 11] = matrix4.m13();
+            textureBufferData.vertexArray[ index + 5 + i * 11 ] = matrix4.m00();
+            textureBufferData.vertexArray[ index + 6 + i * 11 ] = matrix4.m01();
+            textureBufferData.vertexArray[ index + 7 + i * 11 ] = matrix4.m03();
+            textureBufferData.vertexArray[ index + 8 + i * 11 ] = matrix4.m10();
+            textureBufferData.vertexArray[ index + 9 + i * 11 ] = matrix4.m11();
+            textureBufferData.vertexArray[ index + 10 + i * 11 ] = matrix4.m13();
           }
         },
         setXWidth: function( x, width ) {
-          textureBufferData.vertexArray[index] = x;
-          textureBufferData.vertexArray[index + 2] = x + width;
-          textureBufferData.vertexArray[index + 4] = x;
-          textureBufferData.vertexArray[index + 6] = x + width;
-          textureBufferData.vertexArray[index + 8] = x + width;
-          textureBufferData.vertexArray[index + 10] = x;
+          textureBufferData.vertexArray[ index ] = x;
+          textureBufferData.vertexArray[ index + 2 ] = x + width;
+          textureBufferData.vertexArray[ index + 4 ] = x;
+          textureBufferData.vertexArray[ index + 6 ] = x + width;
+          textureBufferData.vertexArray[ index + 8 ] = x + width;
+          textureBufferData.vertexArray[ index + 10 ] = x;
         },
         setRect: function( x, y, width, height ) {
 
-          textureBufferData.vertexArray[index] = x;
-          textureBufferData.vertexArray[index + 1] = y;
+          textureBufferData.vertexArray[ index ] = x;
+          textureBufferData.vertexArray[ index + 1 ] = y;
 
-          textureBufferData.vertexArray[index + 2] = x + width;
-          textureBufferData.vertexArray[index + 3] = y;
+          textureBufferData.vertexArray[ index + 2 ] = x + width;
+          textureBufferData.vertexArray[ index + 3 ] = y;
 
-          textureBufferData.vertexArray[index + 4] = x;
-          textureBufferData.vertexArray[index + 5] = y + height;
+          textureBufferData.vertexArray[ index + 4 ] = x;
+          textureBufferData.vertexArray[ index + 5 ] = y + height;
 
-          textureBufferData.vertexArray[index + 6] = x + width;
-          textureBufferData.vertexArray[index + 7] = y + height;
+          textureBufferData.vertexArray[ index + 6 ] = x + width;
+          textureBufferData.vertexArray[ index + 7 ] = y + height;
 
-          textureBufferData.vertexArray[index + 8] = x + width;
-          textureBufferData.vertexArray[index + 9] = y;
+          textureBufferData.vertexArray[ index + 8 ] = x + width;
+          textureBufferData.vertexArray[ index + 9 ] = y;
 
-          textureBufferData.vertexArray[index + 10] = x;
-          textureBufferData.vertexArray[index + 11] = y + height;
+          textureBufferData.vertexArray[ index + 10 ] = x;
+          textureBufferData.vertexArray[ index + 11 ] = y + height;
         }
       };
     }

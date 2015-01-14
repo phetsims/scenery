@@ -36,9 +36,9 @@ define( function( require ) {
 
     // initialize all of the defaults
     for ( var i = 0; i < numBits; i++ ) {
-      var bit = bits[i];
+      var bit = bits[ i ];
       // we count the number of 0s
-      this[bit] = ( scenery.bitmaskNodeDefault & bit ) === 0 ? 1 : 0;
+      this[ bit ] = ( scenery.bitmaskNodeDefault & bit ) === 0 ? 1 : 0;
     }
 
     this.bitmask = this.computeBitmask();
@@ -49,10 +49,10 @@ define( function( require ) {
     computeBitmask: function() {
       var bitmask = 0;
       for ( var i = 0; i < numBits; i++ ) {
-        var bit = bits[i];
+        var bit = bits[ i ];
 
         // remember, if the count is zero, the bit is set
-        if ( !this[bit] ) {
+        if ( !this[ bit ] ) {
           bitmask |= bit;
         }
       }
@@ -60,7 +60,7 @@ define( function( require ) {
     },
 
     bitIncrement: function( bit ) {
-      var newCount = ++this[bit];
+      var newCount = ++this[ bit ];
       if ( newCount === 1 ) {
         // if the count goes from 0 to 1, it means our combined bit went from 1 to 0 (reversed)
         this.notifyBitUnset( bit );
@@ -68,7 +68,7 @@ define( function( require ) {
     },
 
     bitDecrement: function( bit ) {
-      var newCount = --this[bit];
+      var newCount = --this[ bit ];
       assert && assert( newCount >= 0, 'bitcount always needs to be above 0' );
       if ( newCount === 0 ) {
         // if the count goes from 1 to 0, it means our combined bit went from 0 to 1 (reversed)
@@ -83,7 +83,7 @@ define( function( require ) {
 
       var len = this.node._parents.length;
       for ( var i = 0; i < len; i++ ) {
-        this.node._parents[i]._rendererSummary.bitDecrement( bit );
+        this.node._parents[ i ]._rendererSummary.bitDecrement( bit );
       }
     },
 
@@ -94,7 +94,7 @@ define( function( require ) {
 
       var len = this.node._parents.length;
       for ( var i = 0; i < len; i++ ) {
-        this.node._parents[i]._rendererSummary.bitIncrement( bit );
+        this.node._parents[ i ]._rendererSummary.bitIncrement( bit );
       }
     },
 
@@ -103,7 +103,7 @@ define( function( require ) {
       var changeBitmask = oldBitmask ^ newBitmask;
 
       for ( var i = 0; i < numBits; i++ ) {
-        var bit = bits[i];
+        var bit = bits[ i ];
         if ( ( bit & changeBitmask ) !== 0 ) {
           var currentValue = bit & newBitmask;
 

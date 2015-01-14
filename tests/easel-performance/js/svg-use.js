@@ -56,8 +56,8 @@ phet.tests = phet.tests || {};
     // return step function
     return function( timeElapsed ) {
       for ( var k = 0; k < basicN; k++ ) {
-        rects[k].setAttribute( 'x', ( Math.random() - 0.5 ) * 400 + main.width() / 2 );
-        rects[k].setAttribute( 'y', ( Math.random() - 0.5 ) * 400 + main.height() / 2 );
+        rects[ k ].setAttribute( 'x', ( Math.random() - 0.5 ) * 400 + main.width() / 2 );
+        rects[ k ].setAttribute( 'y', ( Math.random() - 0.5 ) * 400 + main.height() / 2 );
       }
       // group[0].transform.baseVal.getItem( 0 ).setMatrix( matrix.toSVGMatrix() );
     }
@@ -83,8 +83,8 @@ phet.tests = phet.tests || {};
     // return step function
     return function( timeElapsed ) {
       for ( var k = 0; k < basicN; k++ ) {
-        uses[k].setAttribute( 'x', ( Math.random() - 0.5 ) * 400 + main.width() / 2 );
-        uses[k].setAttribute( 'y', ( Math.random() - 0.5 ) * 400 + main.height() / 2 );
+        uses[ k ].setAttribute( 'x', ( Math.random() - 0.5 ) * 400 + main.width() / 2 );
+        uses[ k ].setAttribute( 'y', ( Math.random() - 0.5 ) * 400 + main.height() / 2 );
       }
       // group[0].transform.baseVal.getItem( 0 ).setMatrix( matrix.toSVGMatrix() );
     }
@@ -111,8 +111,8 @@ phet.tests = phet.tests || {};
     // return step function
     return function( timeElapsed ) {
       for ( var k = 0; k < basicN; k++ ) {
-        uses[k].setAttribute( 'x', ( Math.random() - 0.5 ) * 400 + main.width() / 2 );
-        uses[k].setAttribute( 'y', ( Math.random() - 0.5 ) * 400 + main.height() / 2 );
+        uses[ k ].setAttribute( 'x', ( Math.random() - 0.5 ) * 400 + main.width() / 2 );
+        uses[ k ].setAttribute( 'y', ( Math.random() - 0.5 ) * 400 + main.height() / 2 );
       }
       // group[0].transform.baseVal.getItem( 0 ).setMatrix( matrix.toSVGMatrix() );
     }

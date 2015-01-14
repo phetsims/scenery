@@ -142,16 +142,20 @@ phet.benchmark = phet.benchmark || {};
   benchmarkTimer.add( 'Node mutation with ES5 setters', function() {
     node.x = 5;
     node.y = 10;
-  }, { setup: function() {
-    var node = new scenery.Node();
-  } } );
+  }, {
+    setup: function() {
+      var node = new scenery.Node();
+    }
+  } );
 
   benchmarkTimer.add( 'Node mutation with setters', function() {
     node.setX( 5 );
     node.setY( 10 );
-  }, { setup: function() {
-    var node = new scenery.Node();
-  } } );
+  }, {
+    setup: function() {
+      var node = new scenery.Node();
+    }
+  } );
 
   // benchmarkTimer.add( 'Fast on current version', function() {
 

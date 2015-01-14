@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
   <meta charset="utf-8"/>
-  <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+  <meta http-equiv="X-UA-Compatible" content="IE=edge"/>
 
   <title>Text Bounds Comparison - Scenery</title>
 
@@ -38,9 +38,9 @@
 
 <body>
 
-  <div id="main" class="scene"></div>
+<div id="main" class="scene"></div>
 
-  <script type="text/javascript">
+<script type="text/javascript">
 
   var scene = new scenery.Scene( $( '#main' ) );
   var padding = 2;
@@ -105,7 +105,7 @@
     node.x += padding;
     node.y += padding;
     scene.updateScene();
-    return $main.addClass( 'scene' )[0];
+    return $main.addClass( 'scene' )[ 0 ];
   }
 
   var queue = [];
@@ -120,7 +120,8 @@
       var id = window.setInterval( function() {
         if ( queue.length === 0 ) {
           window.clearInterval( id );
-        } else {
+        }
+        else {
           var ob = queue.shift();
           document.body.appendChild( wrapScene( boundsSnapshot( new scenery.Text( ob.string, ob.options ) ) ) );
         }
@@ -291,7 +292,7 @@
     process( string, { fontSize: 60, direction: 'rtl' } );
   } );
 
-  </script>
+</script>
 
 </body>
 </html>

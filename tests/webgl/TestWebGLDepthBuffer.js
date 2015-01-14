@@ -26,7 +26,7 @@ define( function( require ) {
 
       // TODO: Add a uniform matrix4 for transforming vertices to the -1,-1,1,1 rectangle
       var colorTriangleBufferData = webGLRenderer.colorTriangleRenderer.colorTriangleBufferData;
-      colorTriangleBufferData.createFromRectangle( new Rectangle( 150, 200, 1024 / 2, 100, {fill: 'red'} ), 0.5 );
+      colorTriangleBufferData.createFromRectangle( new Rectangle( 150, 200, 1024 / 2, 100, { fill: 'red' } ), 0.5 );
       var triangle = colorTriangleBufferData.createFromTriangle( 100, 200, 300, 300, 550, 300, 'blue', 0.6 );
 
       webGLRenderer.colorTriangleRenderer.bindVertexBuffer();
@@ -42,5 +42,6 @@ define( function( require ) {
       } );
 
       console.log( 'total triangles', colorTriangleBufferData.vertexArray.length / 3 );
-    }};
+    }
+  };
 } );

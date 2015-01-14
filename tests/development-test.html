@@ -2,7 +2,7 @@
 <html>
 <head>
   <meta charset="utf-8"/>
-  <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+  <meta http-equiv="X-UA-Compatible" content="IE=edge"/>
 
   <title>Development test - Scenery</title>
 
@@ -14,22 +14,22 @@
   <script data-main="../js/config.js" src="../../sherpa/require-2.1.11.js"></script>
 
   <script>
-  requirejs( [ 'main', '../../kite/js/main', '../../dot/js/main' ], function( scenery, kite, dot ) {
-    var scene = new scenery.Scene( $( '#main' ) );
-    scene.addChild( new scenery.Text( 'Dynamic loading test for Require.js', {
-      left: 10,
-      top: 10,
-      fontSize: 30
-    } ) );
+    requirejs( [ 'main', '../../kite/js/main', '../../dot/js/main' ], function( scenery, kite, dot ) {
+      var scene = new scenery.Scene( $( '#main' ) );
+      scene.addChild( new scenery.Text( 'Dynamic loading test for Require.js', {
+        left: 10,
+        top: 10,
+        fontSize: 30
+      } ) );
 
-    scene.updateScene();
+      scene.updateScene();
 
-    console.log( scenery.Util.testAssert() );
-    console.log( scenery.Util.testAssertExtra() );
-  } );
+      console.log( scenery.Util.testAssert() );
+      console.log( scenery.Util.testAssertExtra() );
+    } );
   </script>
 </head>
 <body>
-  <div id="main" style="width: 512px; height: 128px;"></div>
+<div id="main" style="width: 512px; height: 128px;"></div>
 </body>
 </html>

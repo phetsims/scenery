@@ -135,7 +135,7 @@
         width: 200,
         height: 200,
         draw: function( scene, display ) {
-          scene.addChild( new scenery.Line( 10, 10, 190, 190, {stroke: 'black', lineWidth: 4} ) );
+          scene.addChild( new scenery.Line( 10, 10, 190, 190, { stroke: 'black', lineWidth: 4 } ) );
         },
         renderers: [ 'canvas', 'svg', 'webgl' ]
       },
@@ -144,7 +144,7 @@
         width: 200,
         height: 200,
         draw: function( scene, display ) {
-          scene.addChild( new scenery.Circle( 50, {fill: 'green', centerX: 100, centerY: 100} ) );
+          scene.addChild( new scenery.Circle( 50, { fill: 'green', centerX: 100, centerY: 100 } ) );
         },
         renderers: [ 'canvas', 'svg', 'webgl' ]
       },
@@ -153,7 +153,7 @@
         width: 200,
         height: 200,
         draw: function( scene, display ) {
-          scene.addChild( new scenery.Text( 'hello text!', {left: 10, top: 10} ) );
+          scene.addChild( new scenery.Text( 'hello text!', { left: 10, top: 10 } ) );
         },
         renderers: [ 'canvas', 'svg', 'dom', 'webgl' ]
       },
@@ -162,7 +162,7 @@
         width: 200,
         height: 200,
         draw: function( scene, updateDisplay ) {
-          var text = new scenery.Text( 'hello text!', {left: 10, top: 10} );
+          var text = new scenery.Text( 'hello text!', { left: 10, top: 10 } );
           scene.addChild( text );
 
           var callback = function() {
@@ -180,7 +180,7 @@
         width: 200,
         height: 200,
         draw: function( scene, updateDisplay ) {
-          var line = new scenery.Line( 10, 10, 190, 190, {stroke: 'black', lineWidth: 4} );
+          var line = new scenery.Line( 10, 10, 190, 190, { stroke: 'black', lineWidth: 4 } );
           scene.addChild( line );
 
           var callback = function() {
@@ -199,7 +199,7 @@
         width: 200,
         height: 200,
         draw: function( scene, updateDisplay ) {
-          var line = new scenery.Line( 10, 10, 190, 190, {stroke: 'black', lineWidth: 4} );
+          var line = new scenery.Line( 10, 10, 190, 190, { stroke: 'black', lineWidth: 4 } );
           scene.addChild( line );
 
           var callback = function() {
@@ -218,7 +218,7 @@
         draw: function( scene, updateDisplayCallback ) {
 
           //TODO: Make it so we can pass in the paintCanvas call to the CanvasNode constructor.
-          var canvasNode = new scenery.CanvasNode( {canvasBounds: new dot.Bounds2( 0, 0, 100, 100 )} );
+          var canvasNode = new scenery.CanvasNode( { canvasBounds: new dot.Bounds2( 0, 0, 100, 100 ) } );
           canvasNode.paintCanvas = function( wrapper ) {
             var context = wrapper.context;
 
@@ -259,7 +259,7 @@
             console.log( 'hello webglnode' );
 
             //OHTWO TODO: optimize
-            var viewMatrix = this.instances[0].relativeMatrix.toAffineMatrix4();
+            var viewMatrix = this.instances[ 0 ].relativeMatrix.toAffineMatrix4();
 
             // combine image matrix (to scale aspect ratios), the trail's matrix, and the matrix to device coordinates
             gl.uniformMatrix4fv( shaderProgram.uniformLocations.uModelViewMatrix, false, viewMatrix.entries );
@@ -274,7 +274,7 @@
             gl.drawArrays( gl.TRIANGLE_STRIP, 0, 4 );
 
           };
-          canvasNode.shaderAttributes = ['aVertex'];
+          canvasNode.shaderAttributes = [ 'aVertex' ];
           canvasNode.dispose = function() {
             console.log( 'hello goodbye' );
             if ( this.gl ) {
@@ -431,7 +431,7 @@
             fill: mainGradient
           } ) );
           scene.addChild( new scenery.Path( kite.Shape.regularPolygon( 6, 22 ), {
-            x: 32 + 64,
+            x:        32 + 64,
             y: 32,
             rotation: Math.PI / 4,
             fill: fillGradient,
@@ -471,20 +471,20 @@
           scene.addChild( new scenery.Path( kite.Shape.rectangle( 10, 10, 44, 44 ), {
             stroke: '#000',
             lineWidth: 3,
-            lineDash: [7, 2, 3, 2],
+            lineDash: [ 7, 2, 3, 2 ],
             x: 0.5,
             y: 0.5
           } ) );
           scene.addChild( new scenery.Rectangle( 5, 5, 54, 54, {
             stroke: '#000',
             lineWidth: 3,
-            lineDash: [7, 2, 3, 2],
+            lineDash: [ 7, 2, 3, 2 ],
             x: 0.5,
             y: 0.5
           } ) );
           scene.addChild( new scenery.Path( kite.Shape.regularPolygon( 6, 15 ), {
             stroke: '#000',
-            lineDash: [5, 5],
+            lineDash: [ 5, 5 ],
             lineDashOffset: 5,
             x: 32.5,
             y: 32.5
@@ -838,8 +838,8 @@
         } );
         var result = [];
         for ( var i = 0; i < testIndices.length; i++ ) {
-          var testIndex = testIndices[i];
-          result.push( array[testIndex] );
+          var testIndex = testIndices[ i ];
+          result.push( array[ testIndex ] );
         }
         return result;
       }
@@ -888,7 +888,7 @@
         $container.addClass( renderer );
         $container.width( width );
         $container.height( height );
-        $container[0].appendChild( display.domElement );
+        $container[ 0 ].appendChild( display.domElement );
         $( document.body ).append( $container );
 
         function updateDisplay() {

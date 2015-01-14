@@ -339,7 +339,7 @@ define( function( require ) {
     },
 
     createImageData: function( a, b ) {
-      command( 'createImageData', b !== undefined ? [ a, b ] : [a] );
+      command( 'createImageData', b !== undefined ? [ a, b ] : [ a ] );
       return this._context.createImageData( a, b );
     },
 

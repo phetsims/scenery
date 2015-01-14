@@ -8,7 +8,7 @@ function runSceneryTests( pathToTestBase ) {
     // make sure things aren't cached, just in case
     script.src = pathToTestBase + '/' + src + '?random=' + Math.random().toFixed( 10 );
 
-    document.getElementsByTagName( 'head' )[0].appendChild( script );
+    document.getElementsByTagName( 'head' )[ 0 ].appendChild( script );
   }
 
   loadTestFile( 'js/test-utils.js' );

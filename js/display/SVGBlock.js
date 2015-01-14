@@ -41,7 +41,7 @@ define( function( require ) {
         this.svg.style.top = '0';
         //OHTWO TODO: why would we clip the individual layers also? Seems like a potentially useless performance loss
         // this.svg.style.clip = 'rect(0px,' + width + 'px,' + height + 'px,0px)';
-        this.svg.style['pointer-events'] = 'none';
+        this.svg.style[ 'pointer-events' ] = 'none';
 
         // the <defs> block that we will be stuffing gradients and patterns into
         this.defs = document.createElementNS( scenery.svgns, 'defs' );
@@ -82,12 +82,13 @@ define( function( require ) {
       sceneryLog && sceneryLog.Paints && sceneryLog.Paints( 'incrementPaint ' + this.toString() + ' ' + paint.id );
 
       if ( this.paintMap.hasOwnProperty( paint.id ) ) {
-        this.paintMap[paint.id].count++;
-      } else {
+        this.paintMap[ paint.id ].count++;
+      }
+      else {
         var def = paint.getSVGDefinition();
 
         // TODO: reduce allocations?
-        this.paintMap[paint.id] = {
+        this.paintMap[ paint.id ] = {
           count: 1,
           paint: paint,
           def: def
@@ -110,13 +111,14 @@ define( function( require ) {
 
       // since the block may have been disposed (yikes!), we have a defensive set-up here
       if ( this.paintMap.hasOwnProperty( paint.id ) ) {
-        var entry = this.paintMap[paint.id];
+        var entry = this.paintMap[ paint.id ];
         assert && assert( entry.count >= 1 );
 
         if ( entry.count === 1 ) {
           this.defs.removeChild( entry.def );
-          delete this.paintMap[paint.id]; // delete, so we don't memory leak if we run through MANY paints
-        } else {
+          delete this.paintMap[ paint.id ]; // delete, so we don't memory leak if we run through MANY paints
+        }
+        else {
           entry.count--;
         }
       }
@@ -201,7 +203,7 @@ define( function( require ) {
 
       // since we may not properly remove all defs yet
       while ( this.defs.childNodes.length ) {
-        this.defs.removeChild( this.defs.childNodes[0] );
+        this.defs.removeChild( this.defs.childNodes[ 0 ] );
       }
 
       FittedBlock.prototype.dispose.call( this );
@@ -234,7 +236,7 @@ define( function( require ) {
     },
 
     toString: function() {
-      return 'SVGBlock#' + this.id + '-' + FittedBlock.fitString[this.fit];
+      return 'SVGBlock#' + this.id + '-' + FittedBlock.fitString[ this.fit ];
     }
   } );
 

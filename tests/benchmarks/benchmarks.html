@@ -2,7 +2,7 @@
 <html>
 <head>
   <meta charset="utf-8"/>
-  <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+  <meta http-equiv="X-UA-Compatible" content="IE=edge"/>
 
   <title>Benchmarks - Scenery</title>
 
@@ -35,20 +35,24 @@
   </style>
 </head>
 <body>
-  <div id="main" style="position: absolute; left: 0; top: 0; background-color: white; z-index: 0; display: none;">
-  </div>
-  <div id="profiling-results">
-  </div>
-  <script type="text/javascript">
-    $( window ).load( function() {
-      window.benchmarkTimer = new marks.Timer( new marks.TableReport( $( '#profiling-results' )[0] ) );
+<div id="main" style="position: absolute; left: 0; top: 0; background-color: white; z-index: 0; display: none;">
+</div>
+<div id="profiling-results">
+</div>
+<script type="text/javascript">
+  $( window ).load( function() {
+    window.benchmarkTimer = new marks.Timer( new marks.TableReport( $( '#profiling-results' )[ 0 ] ) );
 
-      benchmarkTimer.compareSnapshots( [
-        { name: 'current', libs: [ '../../scenery-min.js' ], tests: [ 'js/current.js' ] },
-        { name: '130202-515bfa9d9a', libs: [ '../../snapshots/scenery-min-130202-515bfa9d9a.js' ], tests: [ '../../snapshots/tests-130202-515bfa9d9a.js' ] },
-        { name: 'control', libs: [ '../../scenery-min.js' ], tests: [ 'js/current.js' ] }
-      ] );
-    } );
-  </script>
+    benchmarkTimer.compareSnapshots( [
+      { name: 'current', libs: [ '../../scenery-min.js' ], tests: [ 'js/current.js' ] },
+      {
+        name: '130202-515bfa9d9a',
+        libs: [ '../../snapshots/scenery-min-130202-515bfa9d9a.js' ],
+        tests: [ '../../snapshots/tests-130202-515bfa9d9a.js' ]
+      },
+      { name: 'control', libs: [ '../../scenery-min.js' ], tests: [ 'js/current.js' ] }
+    ] );
+  } );
+</script>
 </body>
 </html>

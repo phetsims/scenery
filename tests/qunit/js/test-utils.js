@@ -89,20 +89,20 @@ function snapshotEquals( a, b, threshold, message ) {
   var alphaDiffData = document.createElement( 'canvas' ).getContext( '2d' ).createImageData( a.width, a.height );
   if ( isEqual ) {
     for ( var i = 0; i < a.data.length; i++ ) {
-      var diff = Math.abs( a.data[i] - b.data[i] );
+      var diff = Math.abs( a.data[ i ] - b.data[ i ] );
       if ( i % 4 === 3 ) {
-        colorDiffData.data[i] = 255;
-        alphaDiffData.data[i] = 255;
-        alphaDiffData.data[i - 3] = diff; // red
-        alphaDiffData.data[i - 2] = diff; // green
-        alphaDiffData.data[i - 1] = diff; // blue
+        colorDiffData.data[ i ] = 255;
+        alphaDiffData.data[ i ] = 255;
+        alphaDiffData.data[ i - 3 ] = diff; // red
+        alphaDiffData.data[ i - 2 ] = diff; // green
+        alphaDiffData.data[ i - 1 ] = diff; // blue
       }
       else {
-        colorDiffData.data[i] = diff;
+        colorDiffData.data[ i ] = diff;
       }
       var alphaIndex = ( i - ( i % 4 ) + 3 );
       // grab the associated alpha channel and multiply it times the diff
-      var alphaMultipliedDiff = ( i % 4 === 3 ) ? diff : diff * ( a.data[alphaIndex] / 255 ) * ( b.data[alphaIndex] / 255 );
+      var alphaMultipliedDiff = ( i % 4 === 3 ) ? diff : diff * ( a.data[ alphaIndex ] / 255 ) * ( b.data[ alphaIndex ] / 255 );
       if ( alphaMultipliedDiff > threshold ) {
         // console.log( message + ": " + Math.abs( a.data[i] - b.data[i] ) );
         largestDifference = Math.max( largestDifference, alphaMultipliedDiff );
@@ -238,17 +238,17 @@ function createTestNodeTree() {
   node.addChild( new scenery.Node() );
   node.addChild( new scenery.Node() );
 
-  node.children[0].addChild( new scenery.Node() );
-  node.children[0].addChild( new scenery.Node() );
-  node.children[0].addChild( new scenery.Node() );
-  node.children[0].addChild( new scenery.Node() );
-  node.children[0].addChild( new scenery.Node() );
+  node.children[ 0 ].addChild( new scenery.Node() );
+  node.children[ 0 ].addChild( new scenery.Node() );
+  node.children[ 0 ].addChild( new scenery.Node() );
+  node.children[ 0 ].addChild( new scenery.Node() );
+  node.children[ 0 ].addChild( new scenery.Node() );
 
-  node.children[0].children[1].addChild( new scenery.Node() );
-  node.children[0].children[3].addChild( new scenery.Node() );
-  node.children[0].children[3].addChild( new scenery.Node() );
+  node.children[ 0 ].children[ 1 ].addChild( new scenery.Node() );
+  node.children[ 0 ].children[ 3 ].addChild( new scenery.Node() );
+  node.children[ 0 ].children[ 3 ].addChild( new scenery.Node() );
 
-  node.children[0].children[3].children[0].addChild( new scenery.Node() );
+  node.children[ 0 ].children[ 3 ].children[ 0 ].addChild( new scenery.Node() );
 
   return node;
 }

@@ -24,7 +24,7 @@ define( function( require ) {
     svg.className = 'mouseTouchAreaOverlay';
     svg.style.top = 0;
     svg.style.left = 0;
-    svg.style['pointer-events'] = 'none';
+    svg.style[ 'pointer-events' ] = 'none';
 
     function resize( width, height ) {
       svg.setAttribute( 'width', width );
@@ -69,7 +69,7 @@ define( function( require ) {
       var scene = this.scene;
 
       while ( svg.childNodes.length ) {
-        svg.removeChild( svg.childNodes[svg.childNodes.length - 1] );
+        svg.removeChild( svg.childNodes[ svg.childNodes.length - 1 ] );
       }
 
       new scenery.Trail( scene ).eachTrailUnder( function( trail ) {

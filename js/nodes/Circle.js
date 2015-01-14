@@ -139,7 +139,7 @@ define( function( require ) {
 
         var stateLen = this._drawables.length;
         for ( var i = 0; i < stateLen; i++ ) {
-          this._drawables[i].markDirtyRadius();
+          this._drawables[ i ].markDirtyRadius();
         }
       }
       return this;
@@ -302,7 +302,7 @@ define( function( require ) {
         if ( this.dirtyRadius ) {
           fillElement.style.width = ( 2 * node._radius ) + 'px';
           fillElement.style.height = ( 2 * node._radius ) + 'px';
-          fillElement.style[Features.borderRadius] = node._radius + 'px';
+          fillElement.style[ Features.borderRadius ] = node._radius + 'px';
         }
         if ( this.dirtyFill ) {
           fillElement.style.backgroundColor = node.getCSSFill();
@@ -326,7 +326,7 @@ define( function( require ) {
           if ( hadNoStrokeBefore || this.dirtyLineWidth || this.dirtyRadius ) {
             strokeElement.style.width = ( 2 * node._radius - node.getLineWidth() ) + 'px';
             strokeElement.style.height = ( 2 * node._radius - node.getLineWidth() ) + 'px';
-            strokeElement.style[Features.borderRadius] = ( node._radius + node.getLineWidth() / 2 ) + 'px';
+            strokeElement.style[ Features.borderRadius ] = ( node._radius + node.getLineWidth() / 2 ) + 'px';
           }
           if ( hadNoStrokeBefore || this.dirtyLineWidth ) {
             strokeElement.style.left = ( -node.getLineWidth() / 2 ) + 'px';
@@ -427,7 +427,7 @@ define( function( require ) {
       }
     },
     usesPaint: true,
-    dirtyMethods: ['markDirtyRadius']
+    dirtyMethods: [ 'markDirtyRadius' ]
   } );
 
   /*---------------------------------------------------------------------------*
@@ -467,19 +467,19 @@ define( function( require ) {
       var gl = this.gl;
 
       var circle = this.node;
-      var rect = {_rectX: -circle.width / 2, _rectY: -circle.height / 2, _rectWidth: circle.width, _rectHeight: circle.height};
+      var rect = { _rectX: -circle.width / 2, _rectY: -circle.height / 2, _rectWidth: circle.width, _rectHeight: circle.height };
 
-      this.vertexCoordinates[0] = rect._rectX;
-      this.vertexCoordinates[1] = rect._rectY;
+      this.vertexCoordinates[ 0 ] = rect._rectX;
+      this.vertexCoordinates[ 1 ] = rect._rectY;
 
-      this.vertexCoordinates[2] = rect._rectX + rect._rectWidth;
-      this.vertexCoordinates[3] = rect._rectY;
+      this.vertexCoordinates[ 2 ] = rect._rectX + rect._rectWidth;
+      this.vertexCoordinates[ 3 ] = rect._rectY;
 
-      this.vertexCoordinates[4] = rect._rectX;
-      this.vertexCoordinates[5] = rect._rectY + rect._rectHeight;
+      this.vertexCoordinates[ 4 ] = rect._rectX;
+      this.vertexCoordinates[ 5 ] = rect._rectY + rect._rectHeight;
 
-      this.vertexCoordinates[6] = rect._rectX + rect._rectWidth;
-      this.vertexCoordinates[7] = rect._rectY + rect._rectHeight;
+      this.vertexCoordinates[ 6 ] = rect._rectX + rect._rectWidth;
+      this.vertexCoordinates[ 7 ] = rect._rectY + rect._rectHeight;
 
       gl.bindBuffer( gl.ARRAY_BUFFER, this.vertexBuffer );
       //TODO: Once we are lazily handling the full matrix, we may benefit from DYNAMIC draw here, and updating the vertices themselves

@@ -32,8 +32,8 @@ phet.tests = phet.tests || {};
     var metrics = context.measureText( str );
     context.fillStyle = '#ccc';
     context.fillRect(
-        x - metrics.actualBoundingBoxLeft, y - metrics.actualBoundingBoxAscent,
-        x + metrics.actualBoundingBoxRight, y + metrics.actualBoundingBoxDescent );
+      x - metrics.actualBoundingBoxLeft, y - metrics.actualBoundingBoxAscent,
+      x + metrics.actualBoundingBoxRight, y + metrics.actualBoundingBoxDescent );
     context.fillStyle = '#000';
     context.fillText( str, x, y );
 

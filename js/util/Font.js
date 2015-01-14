@@ -70,7 +70,7 @@ define( function( require ) {
 
       // pull tokens out until we reach something that doesn't match. that must be the font size (according to spec)
       for ( var i = 0; i < tokens.length; i++ ) {
-        var token = tokens[i];
+        var token = tokens[ i ];
         if ( token === 'normal' ) {
           // nothing has to be done, everything already normal as default
         }
@@ -93,9 +93,9 @@ define( function( require ) {
         else {
           // not a style/variant/weight/stretch, must be a font size, possibly with an included line-height
           var subtokens = token.split( /\// ); // extract font size from any line-height
-          this._size = subtokens[0];
-          if ( subtokens[1] ) {
-            this._lineHeight = subtokens[1];
+          this._size = subtokens[ 0 ];
+          if ( subtokens[ 1 ] ) {
+            this._lineHeight = subtokens[ 1 ];
           }
           // all future tokens are guaranteed to be part of the font-family if it is given according to spec
           this._family = tokens.slice( i + 1 ).join( ' ' );
@@ -136,7 +136,7 @@ define( function( require ) {
       'Font weight must be one of "normal", "bold", "bolder", "lighter", "100", "200", "300", "400", "500", "600", "700", "800", or "900"' );
     assert && assert( typeof this._stretch === 'string' && _.contains( stretches, this._stretch ),
       'Font stretch must be one of "normal", "ultra-condensed", "extra-condensed", "condensed", "semi-condensed", "semi-expanded", "expanded", "extra-expanded", or "ultra-expanded"' );
-    assert && assert( typeof this._size === 'string' && !_.contains( [ '0', '1', '2', '3', '4', '5', '6', '7', '8', '9' ], this._size[this._size.length - 1] ),
+    assert && assert( typeof this._size === 'string' && !_.contains( [ '0', '1', '2', '3', '4', '5', '6', '7', '8', '9' ], this._size[ this._size.length - 1 ] ),
       'Font size must be either passed as a number (not a string, interpreted as px), or must contain a suffix for percentage, absolute or relative units, or an explicit size constant' );
     assert && assert( typeof this._lineHeight === 'string' );
     assert && assert( typeof this._family === 'string' );

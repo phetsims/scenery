@@ -30,15 +30,18 @@ define( function( require ) {
 
       // TODO: Add a uniform matrix4 for transforming vertices to the -1,-1,1,1 rectangle
       var colorTriangleBufferData = webGLRenderer.colorTriangleRenderer.colorTriangleBufferData;
-      var rect1 = new SquareUnstrokedRectangle( webGLRenderer.colorTriangleRenderer, new Rectangle( 0, 0, 1024 / 2, 100, {fill: 'red'} ), 0.5 );
-      var rect2 = new SquareUnstrokedRectangle( webGLRenderer.colorTriangleRenderer, new Rectangle( 100, 0, 100, 100, {fill: 'green'} ), 0.5 );
-      var blueSquare = new SquareUnstrokedRectangle( webGLRenderer.colorTriangleRenderer, new Rectangle( 200, 300, 100, 100, {fill: 'blue'} ), 0.5 );
-      colorTriangleBufferData.createFromPath( new Rectangle( 100, 100, 100, 100, 20, 20, {fill: 'blue'} ), 0.5 );
-      colorTriangleBufferData.createFromPath( new Path( Shape.circle( 300, 300, 50 ), {fill: 'blue'} ), 0.5 );
-      colorTriangleBufferData.createFromPath( new Path( Shape.circle( 600, 600, 200 ), {fill: 'red'} ), 0.5 );
+      var rect1 = new SquareUnstrokedRectangle( webGLRenderer.colorTriangleRenderer, new Rectangle( 0, 0, 1024 / 2, 100, { fill: 'red' } ), 0.5 );
+      var rect2 = new SquareUnstrokedRectangle( webGLRenderer.colorTriangleRenderer, new Rectangle( 100, 0, 100, 100, { fill: 'green' } ), 0.5 );
+      var blueSquare = new SquareUnstrokedRectangle( webGLRenderer.colorTriangleRenderer, new Rectangle( 200, 300, 100, 100, { fill: 'blue' } ), 0.5 );
+      colorTriangleBufferData.createFromPath( new Rectangle( 100, 100, 100, 100, 20, 20, { fill: 'blue' } ), 0.5 );
+      colorTriangleBufferData.createFromPath( new Path( Shape.circle( 300, 300, 50 ), { fill: 'blue' } ), 0.5 );
+      colorTriangleBufferData.createFromPath( new Path( Shape.circle( 600, 600, 200 ), { fill: 'red' } ), 0.5 );
 
       // Sample shape that will rotate
-      var largeMovingRectangle = new SquareUnstrokedRectangle( webGLRenderer.colorTriangleRenderer, new Rectangle( 150, 200, 1024 / 2, 100, {fill: 'red', rotation: Math.PI / 16} ), 0.5 );
+      var largeMovingRectangle = new SquareUnstrokedRectangle( webGLRenderer.colorTriangleRenderer, new Rectangle( 150, 200, 1024 / 2, 100, {
+        fill: 'red',
+        rotation: Math.PI / 16
+      } ), 0.5 );
 
       for ( var i = 0; i < 50; i++ ) {
         var circle = Shape.circle( 600 * Math.random(), 600 * Math.random(), 50 * Math.random() );
@@ -55,7 +58,7 @@ define( function( require ) {
       //Show something from another module
       var images = [];
       for ( var i = 0; i < 100; i++ ) {
-        var imageNode = new Image( mountains, {x: i * 2, y: 0} );
+        var imageNode = new Image( mountains, { x: i * 2, y: 0 } );
         var image = webGLRenderer.textureRenderer.textureBufferData.createFromImageNode( imageNode, Math.random() );
         images.push( image );
       }
@@ -79,13 +82,13 @@ define( function( require ) {
         // Transform the shape
         largeMovingRectangle.rectangle.resetTransform();
         var angle = Date.now() / 1000 * 2 * Math.PI / 10;
-        largeMovingRectangle.rectangle.rotateAround( {x: 600, y: 600}, angle );
+        largeMovingRectangle.rectangle.rotateAround( { x: 600, y: 600 }, angle );
         largeMovingRectangle.update();
 
         webGLRenderer.colorTriangleRenderer.updateTriangleBuffer( redTriangle );
 
         for ( var i = 0; i < images.length; i++ ) {
-          var image = images[i];
+          var image = images[ i ];
           var y = rectX + i * 10;
           var translateX = i * 2;
           var translateY = y / (i + 1);
@@ -98,5 +101,6 @@ define( function( require ) {
       } );
 
       console.log( 'total triangles', colorTriangleBufferData.vertexArray.length / 13 / 3 );
-    }};
+    }
+  };
 } );

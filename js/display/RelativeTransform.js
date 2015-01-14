@@ -437,7 +437,7 @@ define( function( require ) {
         // if we were called from a child's validate(), they will now need to compute their transform
         var len = this.instance.children.length;
         for ( var i = 0; i < len; i++ ) {
-          this.instance.children[i].relativeTransform.relativeSelfDirty = true;
+          this.instance.children[ i ].relativeTransform.relativeSelfDirty = true;
         }
       }
     },
@@ -446,8 +446,8 @@ define( function( require ) {
     // (b) precompute transforms were desired
     updateTransformListenersAndCompute: function( ancestorWasDirty, ancestorIsDirty, frameId, passTransform ) {
       sceneryLog && sceneryLog.RelativeTransform && sceneryLog.RelativeTransform(
-          'update/compute: ' + this.toString() + ' ' + ancestorWasDirty + ' => ' + ancestorIsDirty +
-          ( passTransform ? ' passTransform' : '' ) );
+        'update/compute: ' + this.toString() + ' ' + ancestorWasDirty + ' => ' + ancestorIsDirty +
+        ( passTransform ? ' passTransform' : '' ) );
       sceneryLog && sceneryLog.RelativeTransform && sceneryLog.push();
 
       var len, i;
@@ -456,7 +456,7 @@ define( function( require ) {
         // if we are passing isTransform, just apply this to the children
         len = this.instance.children.length;
         for ( i = 0; i < len; i++ ) {
-          this.instance.children[i].relativeTransform.updateTransformListenersAndCompute( false, false, frameId, false );
+          this.instance.children[ i ].relativeTransform.updateTransformListenersAndCompute( false, false, frameId, false );
         }
       }
       else {
@@ -502,7 +502,7 @@ define( function( require ) {
           // continue the traversal
           len = this.instance.children.length;
           for ( i = 0; i < len; i++ ) {
-            this.instance.children[i].relativeTransform.updateTransformListenersAndCompute( wasDirty, isDirty, frameId, false );
+            this.instance.children[ i ].relativeTransform.updateTransformListenersAndCompute( wasDirty, isDirty, frameId, false );
           }
         }
       }
@@ -514,7 +514,7 @@ define( function( require ) {
     notifyRelativeTransformListeners: function() {
       var len = this.relativeTransformListeners.length;
       for ( var i = 0; i < len; i++ ) {
-        this.relativeTransformListeners[i]();
+        this.relativeTransformListeners[ i ]();
       }
     },
 
@@ -552,7 +552,7 @@ define( function( require ) {
         var notifyRelativeCount = 0;
         var precomputeRelativeCount = 0;
         for ( var i = 0; i < this.instance.children.length; i++ ) {
-          var childInstance = this.instance.children[i];
+          var childInstance = this.instance.children[ i ];
 
           if ( childInstance.relativeTransform.hasAncestorListenerNeed() ) {
             notifyRelativeCount++;
@@ -568,8 +568,8 @@ define( function( require ) {
 
         assertSlow( !this.parent || this.instance.isTransformed || ( this.relativeChildDirtyFrame !== frameId ) ||
                     ( this.parent.relativeChildDirtyFrame === frameId ),
-            'If we have a parent, we need to hold the invariant ' +
-            'this.relativeChildDirtyFrame => parent.relativeChildDirtyFrame' );
+          'If we have a parent, we need to hold the invariant ' +
+          'this.relativeChildDirtyFrame => parent.relativeChildDirtyFrame' );
 
         if ( !hasRelativeSelfDirty( this ) ) {
           var matrix = currentRelativeMatrix( this );

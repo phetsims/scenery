@@ -16,7 +16,7 @@
       var text = new scenery.Text( 'A', { font: '16px sans-serif' } );
       for ( var i = 0; i < 10000; i++ ) {
         scene.addChild( new scenery.Node( {
-          children: [text],
+          children: [ text ],
           x: i % 759,
           y: ( i * 172 ) % 973
         } ) );
@@ -53,7 +53,7 @@
       } );
       for ( var i = 0; i < 10000; i++ ) {
         scene.addChild( new scenery.Node( {
-          children: [text],
+          children: [ text ],
           x: i % 759,
           y: ( i * 172 ) % 973
         } ) );
@@ -493,7 +493,7 @@
       this.iterationCount++;
       var children = this.scene.getChildren();
       for ( var i = 0; i < children.length; i++ ) {
-        var child = children[i];
+        var child = children[ i ];
         if ( i % 3 ) {
           child.rotate( 0.1 );
         }
@@ -537,7 +537,7 @@
       this.iterationCount++;
       var children = this.scene.getChildren();
       for ( var i = 0; i < children.length; i++ ) {
-        var child = children[i];
+        var child = children[ i ];
         if ( i % 3 ) {
           child.rotate( 0.1 );
         }

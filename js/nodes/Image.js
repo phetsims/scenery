@@ -124,7 +124,7 @@ define( function( require ) {
 
         var stateLen = this._drawables.length;
         for ( var i = 0; i < stateLen; i++ ) {
-          this._drawables[i].markDirtyImage();
+          this._drawables[ i ].markDirtyImage();
         }
 
         this.invalidateImage(); // yes, if we aren't loaded yet this will give us 0x0 bounds
@@ -339,7 +339,7 @@ define( function( require ) {
       }
     },
     usesPaint: false,
-    dirtyMethods: ['markDirtyImage']
+    dirtyMethods: [ 'markDirtyImage' ]
   } );
 
 

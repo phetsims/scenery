@@ -92,12 +92,12 @@ define( function( require ) {
       // switch the direction we apply stops in, so that the ratios always are increasing.
       if ( startIsLarger ) {
         for ( i = this.stops.length - 1; i >= 0; i-- ) {
-          applyStop( this.stops[i] );
+          applyStop( this.stops[ i ] );
         }
       }
       else {
         for ( i = 0; i < this.stops.length; i++ ) {
-          applyStop( this.stops[i] );
+          applyStop( this.stops[ i ] );
         }
       }
 

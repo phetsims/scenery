@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
   <meta charset="utf-8"/>
-  <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+  <meta http-equiv="X-UA-Compatible" content="IE=edge"/>
   <meta name="viewport" content="width=device-width, height=device-height, initial-scale=1.0, maximum-scale=1.0, user-scalable=no"/>
   <meta name="apple-mobile-web-app-capable" content="yes">
 
@@ -45,11 +45,11 @@
 
 <body>
 
-  <!-- our scene graph will be in this div -->
-  <div id="main">
-  </div>
+<!-- our scene graph will be in this div -->
+<div id="main">
+</div>
 
-  <script>
+<script>
 
   // initialize our scene
   var scene = new scenery.Node();
@@ -93,7 +93,7 @@
       padding = 10;
 
   for ( var i = 0; i < cursors.length; i++ ) {
-    var cursor = cursors[i];
+    var cursor = cursors[ i ];
 
     // position things as a table for now
     var x = baseX + ( padding + columnWidth ) * ( i % columns );
@@ -128,12 +128,12 @@
   }
 
   /*---------------------------------------------------------------------------*
-  * main loop
-  *----------------------------------------------------------------------------*/
+   * main loop
+   *----------------------------------------------------------------------------*/
 
   display.updateOnRequestAnimationFrame();
 
-  </script>
+</script>
 
 </body>
 </html>

@@ -179,8 +179,8 @@ define( function( require ) {
       // old block. Note that later we will add the ones that stay on this backbone, so that they only either change
       // blocks, or stay on the same block.
       if ( backbone.blocks.length ) {
-        var veryFirstBlock = backbone.blocks[0];
-        var veryLastBlock = backbone.blocks[backbone.blocks.length - 1];
+        var veryFirstBlock = backbone.blocks[ 0 ];
+        var veryLastBlock = backbone.blocks[ backbone.blocks.length - 1 ];
 
         for ( interval = firstChangeInterval; interval !== null; interval = interval.nextChangeInterval ) {
           assert && assert( !interval.isEmpty(), 'We now guarantee that the intervals are non-empty' );
@@ -205,8 +205,8 @@ define( function( require ) {
 
           // Blocks totally contained within the change interval are marked as reusable (doesn't include end blocks).
           if ( intervalHasOldInternalBlocks( interval, veryFirstBlock, veryLastBlock ) ) {
-            var firstBlock = interval.drawableBefore === null ? backbone.blocks[0] : interval.drawableBefore.parentDrawable.nextBlock;
-            var lastBlock = interval.drawableAfter === null ? backbone.blocks[backbone.blocks.length - 1] : interval.drawableAfter.parentDrawable.previousBlock;
+            var firstBlock = interval.drawableBefore === null ? backbone.blocks[ 0 ] : interval.drawableBefore.parentDrawable.nextBlock;
+            var lastBlock = interval.drawableAfter === null ? backbone.blocks[ backbone.blocks.length - 1 ] : interval.drawableAfter.parentDrawable.previousBlock;
 
             for ( var markedBlock = firstBlock; ; markedBlock = markedBlock.nextBlock ) {
               this.unuseBlock( markedBlock );
@@ -365,8 +365,8 @@ define( function( require ) {
     // firstDrawable and lastDrawable refer to the specific sub-block
     processSubBlock: function( interval, firstDrawable, lastDrawable, matchedBlock, isFirst, isLast ) {
       sceneryLog && sceneryLog.GreedyVerbose && sceneryLog.GreedyVerbose(
-          'sub-block: ' + firstDrawable.toString() + ' to ' + lastDrawable.toString() + ' ' +
-          ( matchedBlock ? 'with matched: ' + matchedBlock.toString() : 'with no match' ) );
+        'sub-block: ' + firstDrawable.toString() + ' to ' + lastDrawable.toString() + ' ' +
+        ( matchedBlock ? 'with matched: ' + matchedBlock.toString() : 'with no match' ) );
       sceneryLog && sceneryLog.GreedyVerbose && sceneryLog.push();
 
       var openBefore = isOpenBefore( firstDrawable );
@@ -439,10 +439,10 @@ define( function( require ) {
         }
 
         sceneryLog && sceneryLog.GreedyVerbose && sceneryLog.GreedyVerbose(
-            'edge case: ' +
-            ( openBefore ? 'open-before ' : '' ) +
-            ( openAfter ? 'open-after ' : '' ) +
-            beforeBlock.toString() + ' to ' + afterBlock.toString() );
+          'edge case: ' +
+          ( openBefore ? 'open-before ' : '' ) +
+          ( openAfter ? 'open-after ' : '' ) +
+          beforeBlock.toString() + ' to ' + afterBlock.toString() );
         sceneryLog && sceneryLog.GreedyVerbose && sceneryLog.push();
 
         // deciding what new block should be used for the external group of drawables after our change interval
@@ -558,7 +558,7 @@ define( function( require ) {
       if ( !Renderer.isDOM( renderer ) ) {
         // backwards scan, hopefully it's faster?
         for ( var i = this.reusableBlocks.length - 1; i >= 0; i-- ) {
-          var tmpBlock = this.reusableBlocks[i];
+          var tmpBlock = this.reusableBlocks[ i ];
           assert && assert( !tmpBlock.used );
           if ( tmpBlock.renderer === renderer ) {
             this.useBlockAtIndex( tmpBlock, i );
@@ -598,7 +598,7 @@ define( function( require ) {
     useBlockAtIndex: function( block, index ) {
       sceneryLog && sceneryLog.GreedyVerbose && sceneryLog.GreedyVerbose( 'using reusable block: ' + block.toString() + ' with renderer: ' + block.renderer );
 
-      assert && assert( index >= 0 && this.reusableBlocks[index] === block, 'bad index for useBlockAtIndex: ' + index );
+      assert && assert( index >= 0 && this.reusableBlocks[ index ] === block, 'bad index for useBlockAtIndex: ' + index );
 
       assert && assert( !block.used, 'Should be called on an unused (reusable) block' );
 

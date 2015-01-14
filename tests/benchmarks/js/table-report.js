@@ -69,8 +69,8 @@ var marks = marks || {};
         // append column to each row
         for ( var i = 0; i < this.numRows; i++ ) {
           var td = document.createElement( 'td' );
-          this.rows[i].appendChild( td );
-          this.cells[i].push( td );
+          this.rows[ i ].appendChild( td );
+          this.cells[ i ].push( td );
         }
       }
 

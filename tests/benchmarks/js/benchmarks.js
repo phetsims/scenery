@@ -56,7 +56,7 @@
         console.log( name + ' (' + version + ') complete' );
         console.log( event );
 
-        data[version][name] = event.target;
+        data[ version ][ name ] = event.target;
 
         currentRunCount = currentRunCount - 1;
 
@@ -94,7 +94,7 @@
     };
     script.src = src + '?random=' + Math.random().toFixed( 10 );
 
-    var other = document.getElementsByTagName( 'script' )[0];
+    var other = document.getElementsByTagName( 'script' )[ 0 ];
     other.parentNode.insertBefore( script, other );
   }
 
@@ -130,7 +130,7 @@
 
       console.log( 'running ' + version.test );
 
-      data[version.name] = {};
+      data[ version.name ] = {};
 
       loadScript( version.lib, function() {
         loadScript( version.test, function() {
@@ -153,10 +153,10 @@
         tr.addClass( 'result' );
         tr.html( '<td class="name">' + name + '</td>' );
 
-        var currentHz = data.current[name].hz;
+        var currentHz = data.current[ name ].hz;
 
         _.each( versionNames, function( versionName ) {
-          var test = data[versionName][name];
+          var test = data[ versionName ][ name ];
           if ( test ) {
             var testHz = test.hz;
             tr.append( progressBar( currentHz, testHz ) );

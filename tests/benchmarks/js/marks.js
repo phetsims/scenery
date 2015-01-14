@@ -62,7 +62,7 @@ var marks = marks || {};
 
     compareSnapshots: function( snapshots ) {
       for ( var i = 0; i < snapshots.length; i++ ) {
-        this.addSnapshot( snapshots[i] );
+        this.addSnapshot( snapshots[ i ] );
       }
 
       if ( !this.running ) {
@@ -264,7 +264,7 @@ var marks = marks || {};
       var html = ms.toFixed( digits ) + ( !showPlusMinus || moe === 0 ? '' : '&#xb1' + moe.toFixed( digits ) ) + units;
 
       if ( snapshot.name !== 'current' ) {
-        var currentMark = this.benchmarks[this.benchmarkRowNumbers[benchmark.name]][this.currentNameColumn];
+        var currentMark = this.benchmarks[ this.benchmarkRowNumbers[ benchmark.name ] ][ this.currentNameColumn ];
 
         var percentChange = ( -100 * ( currentMark.stats.mean - benchmark.stats.mean ) / benchmark.stats.mean ).toFixed( 2 );
         var meanDifference = Math.abs( currentMark.stats.mean - benchmark.stats.mean );
@@ -291,7 +291,7 @@ var marks = marks || {};
     },
 
     addSnapshot: function( snapshot ) {
-      this.snapshotColumnNumbers[snapshot] = this.numColumns;
+      this.snapshotColumnNumbers[ snapshot ] = this.numColumns;
 
       this.addColumn( snapshot.name );
     },
@@ -299,20 +299,20 @@ var marks = marks || {};
     addBenchmark: function( snapshot, benchmark ) {
       if ( !( benchmark.name in this.benchmarkRowNumbers ) ) {
         var rowNumber = this.numRows;
-        this.benchmarkRowNumbers[benchmark.name] = rowNumber;
+        this.benchmarkRowNumbers[ benchmark.name ] = rowNumber;
         this.benchmarks.push( [] );
 
         this.addRow();
 
-        this.cells[rowNumber][this.benchmarkNameColumn].appendChild( document.createTextNode( benchmark.name ) );
+        this.cells[ rowNumber ][ this.benchmarkNameColumn ].appendChild( document.createTextNode( benchmark.name ) );
       }
 
-      var row = this.benchmarkRowNumbers[benchmark.name];
-      var column = this.snapshotColumnNumbers[snapshot];
+      var row = this.benchmarkRowNumbers[ benchmark.name ];
+      var column = this.snapshotColumnNumbers[ snapshot ];
 
-      this.benchmarks[row][column] = benchmark;
+      this.benchmarks[ row ][ column ] = benchmark;
 
-      this.addStats( snapshot, benchmark, this.cells[row][column] );
+      this.addStats( snapshot, benchmark, this.cells[ row ][ column ] );
     },
 
     addRow: function() {
@@ -342,8 +342,8 @@ var marks = marks || {};
       // append column to each row
       for ( var i = 0; i < this.numRows; i++ ) {
         var td = document.createElement( 'td' );
-        this.rows[i].appendChild( td );
-        this.cells[i].push( td );
+        this.rows[ i ].appendChild( td );
+        this.cells[ i ].push( td );
       }
     },
 
@@ -408,7 +408,7 @@ var marks = marks || {};
     // make sure things aren't cached, just in case
     script.src = src + '?random=' + Math.random().toFixed( 10 );
 
-    var other = document.getElementsByTagName( 'script' )[0];
+    var other = document.getElementsByTagName( 'script' )[ 0 ];
     other.parentNode.insertBefore( script, other );
   }
 

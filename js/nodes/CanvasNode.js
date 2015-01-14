@@ -47,7 +47,7 @@ define( function( require ) {
     invalidatePaint: function() {
       var stateLen = this._drawables.length;
       for ( var i = 0; i < stateLen; i++ ) {
-        this._drawables[i].markDirty();
+        this._drawables[ i ].markDirty();
       }
     },
 

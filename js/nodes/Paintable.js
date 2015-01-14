@@ -67,10 +67,12 @@ define( function( require ) {
           if ( this._fillColor ) {
             if ( typeof this._fill === 'string' ) {
               this._fillColor.setCSS( this._fill );
-            } else {
+            }
+            else {
               this._fillColor.setRGBA( this._fill.r, this._fill.g, this._fill.b, this._fill.a );
             }
-          } else {
+          }
+          else {
             this._fillColor = new Color( this._fill );
           }
         }
@@ -103,7 +105,7 @@ define( function( require ) {
 
           var stateLen = this._drawables.length;
           for ( var i = 0; i < stateLen; i++ ) {
-            this._drawables[i].markDirtyFill();
+            this._drawables[ i ].markDirtyFill();
           }
         }
         return this;
@@ -142,7 +144,7 @@ define( function( require ) {
 
           var stateLen = this._drawables.length;
           for ( var i = 0; i < stateLen; i++ ) {
-            this._drawables[i].markDirtyLineWidth();
+            this._drawables[ i ].markDirtyLineWidth();
           }
         }
         return this;
@@ -154,7 +156,7 @@ define( function( require ) {
 
       setLineCap: function( lineCap ) {
         assert && assert( lineCap === 'butt' || lineCap === 'round' || lineCap === 'square',
-            'lineCap should be one of "butt", "round" or "square", not ' + lineCap );
+          'lineCap should be one of "butt", "round" or "square", not ' + lineCap );
 
         if ( this._lineDrawingStyles.lineCap !== lineCap ) {
           this._lineDrawingStyles.lineCap = lineCap;
@@ -162,7 +164,7 @@ define( function( require ) {
 
           var stateLen = this._drawables.length;
           for ( var i = 0; i < stateLen; i++ ) {
-            this._drawables[i].markDirtyLineOptions();
+            this._drawables[ i ].markDirtyLineOptions();
           }
         }
         return this;
@@ -174,7 +176,7 @@ define( function( require ) {
 
       setLineJoin: function( lineJoin ) {
         assert && assert( lineJoin === 'miter' || lineJoin === 'round' || lineJoin === 'bevel',
-            'lineJoin should be one of "miter", "round" or "bevel", not ' + lineJoin );
+          'lineJoin should be one of "miter", "round" or "bevel", not ' + lineJoin );
 
         if ( this._lineDrawingStyles.lineJoin !== lineJoin ) {
           this._lineDrawingStyles.lineJoin = lineJoin;
@@ -182,7 +184,7 @@ define( function( require ) {
 
           var stateLen = this._drawables.length;
           for ( var i = 0; i < stateLen; i++ ) {
-            this._drawables[i].markDirtyLineOptions();
+            this._drawables[ i ].markDirtyLineOptions();
           }
         }
         return this;
@@ -201,7 +203,7 @@ define( function( require ) {
 
           var stateLen = this._drawables.length;
           for ( var i = 0; i < stateLen; i++ ) {
-            this._drawables[i].markDirtyLineOptions();
+            this._drawables[ i ].markDirtyLineOptions();
           }
         }
         return this;
@@ -222,7 +224,7 @@ define( function( require ) {
 
           var stateLen = this._drawables.length;
           for ( var i = 0; i < stateLen; i++ ) {
-            this._drawables[i].markDirtyLineOptions();
+            this._drawables[ i ].markDirtyLineOptions();
           }
         }
         return this;
@@ -241,7 +243,7 @@ define( function( require ) {
 
           var stateLen = this._drawables.length;
           for ( var i = 0; i < stateLen; i++ ) {
-            this._drawables[i].markDirtyLineOptions();
+            this._drawables[ i ].markDirtyLineOptions();
           }
         }
         return this;
@@ -284,10 +286,12 @@ define( function( require ) {
           if ( this._strokeColor ) {
             if ( typeof this._stroke === 'string' ) {
               this._strokeColor.setCSS( this._stroke );
-            } else {
+            }
+            else {
               this._strokeColor.setRGBA( this._stroke.r, this._stroke.g, this._stroke.b, this._stroke.a );
             }
-          } else {
+          }
+          else {
             this._strokeColor = new Color( this._stroke );
           }
         }
@@ -320,7 +324,7 @@ define( function( require ) {
 
           var stateLen = this._drawables.length;
           for ( var i = 0; i < stateLen; i++ ) {
-            this._drawables[i].markDirtyStroke();
+            this._drawables[ i ].markDirtyStroke();
           }
         }
         return this;
@@ -340,7 +344,7 @@ define( function( require ) {
 
         var stateLen = this._drawables.length;
         for ( var i = 0; i < stateLen; i++ ) {
-          this._drawables[i].markDirtyCachedPaints();
+          this._drawables[ i ].markDirtyCachedPaints();
         }
 
         return this;
@@ -353,7 +357,7 @@ define( function( require ) {
 
         var stateLen = this._drawables.length;
         for ( var i = 0; i < stateLen; i++ ) {
-          this._drawables[i].markDirtyCachedPaints();
+          this._drawables[ i ].markDirtyCachedPaints();
         }
       },
 
@@ -365,7 +369,7 @@ define( function( require ) {
 
         var stateLen = this._drawables.length;
         for ( var i = 0; i < stateLen; i++ ) {
-          this._drawables[i].markDirtyCachedPaints();
+          this._drawables[ i ].markDirtyCachedPaints();
         }
       },
 
@@ -485,8 +489,8 @@ define( function( require ) {
           }
 
           _.each( [ 'lineWidth', 'lineCap', 'miterLimit', 'lineJoin', 'lineDashOffset' ], function( prop ) {
-            if ( self[prop] !== defaultStyles[prop] ) {
-              addProp( prop, self[prop] );
+            if ( self[ prop ] !== defaultStyles[ prop ] ) {
+              addProp( prop, self[ prop ] );
             }
           } );
 

@@ -416,19 +416,19 @@
     n.addChild( new scenery.Rectangle( 0, 0, 50, 50, { fill: 'red' } ) );
     d.updateDisplay();
 
-    n.children[1].visible = false;
+    n.children[ 1 ].visible = false;
     d.updateDisplay();
 
-    n.children[1].visible = true;
+    n.children[ 1 ].visible = true;
     d.updateDisplay();
 
-    n.removeChild( n.children[0] );
+    n.removeChild( n.children[ 0 ] );
     d.updateDisplay();
 
-    n.removeChild( n.children[1] );
+    n.removeChild( n.children[ 1 ] );
     d.updateDisplay();
 
-    n.removeChild( n.children[0] );
+    n.removeChild( n.children[ 0 ] );
     d.updateDisplay();
 
     expect( 0 );

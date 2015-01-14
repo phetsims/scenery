@@ -38,7 +38,7 @@
         'resetTransform'
       ];
       _.each( neededMethods, function( method ) {
-        ok( context[method] !== undefined, 'context.' + method );
+        ok( context[ method ] !== undefined, 'context.' + method );
       } );
     } );
 
@@ -51,7 +51,7 @@
       var context = canvas.getContext( '2d' );
       var metrics = context.measureText( 'Hello World' );
       _.each( [ 'actualBoundingBoxLeft', 'actualBoundingBoxRight', 'actualBoundingBoxAscent', 'actualBoundingBoxDescent' ], function( method ) {
-        ok( metrics[method] !== undefined, 'metrics.' + method );
+        ok( metrics[ method ] !== undefined, 'metrics.' + method );
       } );
     } );
   }

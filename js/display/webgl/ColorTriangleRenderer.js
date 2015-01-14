@@ -123,7 +123,7 @@ define( function( require ) {
 
       //Update the Float32Array values
       for ( var i = geometry.startIndex; i < geometry.endIndex; i++ ) {
-        this.vertexArray[i] = this.colorTriangleBufferData.vertexArray[i];
+        this.vertexArray[ i ] = this.colorTriangleBufferData.vertexArray[ i ];
       }
 
       // Isolate the subarray of changed values

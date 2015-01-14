@@ -2,7 +2,7 @@
 <html>
 <head>
   <meta charset="utf-8"/>
-  <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+  <meta http-equiv="X-UA-Compatible" content="IE=edge"/>
 
   <title>Compiled Unit tests for Scenery</title>
 
@@ -37,18 +37,18 @@
 
 </head>
 <body>
-  <div id="qunit"></div>
-  <div id="qunit-fixture">
-  </div>
-  <div id="display"></div>
+<div id="qunit"></div>
+<div id="qunit-fixture">
+</div>
+<div id="display"></div>
 
-  <!-- this needs to be run after the qunit-fixture is in the DOM, but before the document is loaded because QUnit scans the fixture then -->
-  <script src="prepare-fixture.js"></script>
-  <script>
-    runSceneryTests( '.' );
-    runKiteTests( '../../../kite/tests/qunit' );
-    runDotTests( '../../../dot/tests/qunit' );
-    runPhetCoreTests( '../../../phet-core/tests/qunit' );
-  </script>
+<!-- this needs to be run after the qunit-fixture is in the DOM, but before the document is loaded because QUnit scans the fixture then -->
+<script src="prepare-fixture.js"></script>
+<script>
+  runSceneryTests( '.' );
+  runKiteTests( '../../../kite/tests/qunit' );
+  runDotTests( '../../../dot/tests/qunit' );
+  runPhetCoreTests( '../../../phet-core/tests/qunit' );
+</script>
 </body>
 </html>

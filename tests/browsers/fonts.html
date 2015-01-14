@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
   <meta charset="utf-8"/>
-  <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+  <meta http-equiv="X-UA-Compatible" content="IE=edge"/>
   <!-- <meta name="viewport" content="width=device-width, height=device-height, initial-scale=1.0, maximum-scale=1.0, user-scalable=no"/> -->
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <meta name="apple-mobile-web-app-capable" content="yes">
@@ -46,13 +46,13 @@
 </head>
 <body>
 
-  <!-- <h3>CCK's ConstantDensityPropagator.SpeedLimitReached1</h3> -->
+<!-- <h3>CCK's ConstantDensityPropagator.SpeedLimitReached1</h3> -->
 
-  <!-- our scene graph will be in this div -->
-  <div id="main" >
-  </div>
+<!-- our scene graph will be in this div -->
+<div id="main">
+</div>
 
-  <script type="text/javascript">
+<script type="text/javascript">
 
   window.onload = function() {
     var scene = new scenery.Scene( $( '#main' ) );
@@ -123,11 +123,11 @@
     scene.interactive = true;
 
     for ( var i = 0; i < languages.length; i++ ) {
-      scene.addChild( new scenery.Text( languages[i].lang, { font: font, top: i * 30 + offset, interactive: true } ) );
-      scene.addChild( new scenery.Text( languages[i].string, { font: font, top: i * 30 + offset, left: 50, interactive: true } ) );
+      scene.addChild( new scenery.Text( languages[ i ].lang, { font: font, top: i * 30 + offset, interactive: true } ) );
+      scene.addChild( new scenery.Text( languages[ i ].string, { font: font, top: i * 30 + offset, left: 50, interactive: true } ) );
     }
 
-    var textField = $( '<input type="text">' )[0];
+    var textField = $( '<input type="text">' )[ 0 ];
     textField.value = currentFontFamily;
 
     var canvasButton = new scenery.Text( 'Canvas', { fontSize: 20, top: 0, left: 200, cursor: 'pointer' } );
@@ -165,7 +165,7 @@
     } );
   };
 
-  </script>
+</script>
 
 </body>
 </html>

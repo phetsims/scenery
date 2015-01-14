@@ -29,7 +29,7 @@ define( function( require ) {
 
     // unwrap from jQuery if that is passed in, for consistency
     if ( element && element.jquery ) {
-      element = element[0];
+      element = element[ 0 ];
     }
 
     this._container = document.createElement( 'div' );

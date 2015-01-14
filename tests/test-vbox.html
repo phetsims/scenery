@@ -26,14 +26,14 @@
         resize: true,//Try setting this to false
         children: [
           new scenery.Text( 'x' ),
-          new scenery.Text( 'y' )],
+          new scenery.Text( 'y' ) ],
         centerX: 100, centerY: 100
       } );
       vBox.addChild( new scenery.Text( 'a' ) );
       var b = new scenery.Text( 'b' );
       vBox.addChild( b );
       vBox.addChild( new scenery.Text( 'c' ) );
-      var rect = new scenery.Rectangle( 0, 0, 100, 100, {fill: 'blue', stroke: 'black'} );
+      var rect = new scenery.Rectangle( 0, 0, 100, 100, { fill: 'blue', stroke: 'black' } );
       vBox.addChild( rect );
       scene.addChild( vBox );
       scene.updateScene();

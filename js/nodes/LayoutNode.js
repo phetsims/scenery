@@ -130,8 +130,8 @@ define( function( require ) {
     // override
     removeChildWithIndex: function( node, indexOfChild ) {
       Node.prototype.removeChildWithIndex.call( this, node, indexOfChild );
-      if ( this._elementMap[node.id] ) {
-        delete this._elementMap[node.id];
+      if ( this._elementMap[ node.id ] ) {
+        delete this._elementMap[ node.id ];
       }
 
       this.updateLayout();
@@ -155,8 +155,8 @@ define( function( require ) {
       this._activelyLayingOut = true;
       var layoutProperties = this.layoutProperties;
       for ( var i = 0; i < this._elements.length; i++ ) {
-        var element = this._elements[i];
-        element.layoutMethod.layout( element, i, ( i > 0 ? this._elements[i - 1] : null ), layoutProperties );
+        var element = this._elements[ i ];
+        element.layoutMethod.layout( element, i, ( i > 0 ? this._elements[ i - 1 ] : null ), layoutProperties );
       }
 
       // use the invisible background to take up all of our layout areas

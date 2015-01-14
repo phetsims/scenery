@@ -177,7 +177,7 @@ define( function( require ) {
 
       var stateLen = this._drawables.length;
       for ( var i = 0; i < stateLen; i++ ) {
-        this._drawables[i].markDirtyRectangle();
+        this._drawables[ i ].markDirtyRectangle();
       }
       this.invalidateRectangle();
     },
@@ -271,13 +271,13 @@ define( function( require ) {
       assert && assert( isFinite( this._rectX ), 'A rectangle needs to have a finite x (' + this._rectX + ')' );
       assert && assert( isFinite( this._rectY ), 'A rectangle needs to have a finite y (' + this._rectY + ')' );
       assert && assert( this._rectWidth >= 0 && isFinite( this._rectWidth ),
-          'A rectangle needs to have a non-negative finite width (' + this._rectWidth + ')' );
+        'A rectangle needs to have a non-negative finite width (' + this._rectWidth + ')' );
       assert && assert( this._rectHeight >= 0 && isFinite( this._rectHeight ),
-          'A rectangle needs to have a non-negative finite height (' + this._rectHeight + ')' );
+        'A rectangle needs to have a non-negative finite height (' + this._rectHeight + ')' );
       assert && assert( this._rectArcWidth >= 0 && isFinite( this._rectArcWidth ),
-          'A rectangle needs to have a non-negative finite arcWidth (' + this._rectArcWidth + ')' );
+        'A rectangle needs to have a non-negative finite arcWidth (' + this._rectArcWidth + ')' );
       assert && assert( this._rectArcHeight >= 0 && isFinite( this._rectArcHeight ),
-          'A rectangle needs to have a non-negative finite arcHeight (' + this._rectArcHeight + ')' );
+        'A rectangle needs to have a non-negative finite arcHeight (' + this._rectArcHeight + ')' );
       // assert && assert( !this.isRounded() || ( this._rectWidth >= this._rectArcWidth * 2 && this._rectHeight >= this._rectArcHeight * 2 ),
       //                                 'The rounded sections of the rectangle should not intersect (the length of the straight sections shouldn\'t be negative' );
 
@@ -312,7 +312,7 @@ define( function( require ) {
         }
         var miter = this.getLineJoin() === 'miter' && !rounded;
         result = result && Rectangle.intersects( x - halfLine, y - halfLine,
-            width + 2 * halfLine, height + 2 * halfLine,
+          width + 2 * halfLine, height + 2 * halfLine,
           miter ? 0 : ( arcWidth + halfLine ), miter ? 0 : ( arcHeight + halfLine ),
           point );
       }
@@ -329,7 +329,7 @@ define( function( require ) {
         return result && !Rectangle.intersects( x + halfLine, y + halfLine,
             width - 2 * halfLine, height - 2 * halfLine,
             arcWidth - halfLine, arcHeight - halfLine,
-          point );
+            point );
       }
       else {
         return false; // either fill nor stroke is pickable
@@ -404,17 +404,17 @@ define( function( require ) {
     var privateName = '_rect' + capitalizedShort;
     var dirtyMethodName = 'markDirty' + capitalizedShort;
 
-    Rectangle.prototype[getName] = function() {
-      return this[privateName];
+    Rectangle.prototype[ getName ] = function() {
+      return this[ privateName ];
     };
 
-    Rectangle.prototype[setName] = function( value ) {
-      if ( this[privateName] !== value ) {
-        this[privateName] = value;
+    Rectangle.prototype[ setName ] = function( value ) {
+      if ( this[ privateName ] !== value ) {
+        this[ privateName ] = value;
         var stateLen = this._drawables.length;
         for ( var i = 0; i < stateLen; i++ ) {
-          var state = this._drawables[i];
-          state[dirtyMethodName]();
+          var state = this._drawables[ i ];
+          state[ dirtyMethodName ]();
           state.markPaintDirty();
         }
         this.invalidateRectangle();
@@ -423,8 +423,8 @@ define( function( require ) {
     };
 
     Object.defineProperty( Rectangle.prototype, 'rect' + capitalizedShort, {
-      set: Rectangle.prototype[setName],
-      get: Rectangle.prototype[getName]
+      set: Rectangle.prototype[ setName ],
+      get: Rectangle.prototype[ getName ]
     } );
   }
 
@@ -646,7 +646,7 @@ define( function( require ) {
           fillElement.style.height = node._rectHeight + 'px';
         }
         if ( borderRadiusDirty ) {
-          fillElement.style[Features.borderRadius] = borderRadius + 'px'; // if one is zero, we are not rounded, so we do the min here
+          fillElement.style[ Features.borderRadius ] = borderRadius + 'px'; // if one is zero, we are not rounded, so we do the min here
         }
         if ( this.dirtyFill ) {
           fillElement.style.backgroundColor = node.getCSSFill();
@@ -684,7 +684,7 @@ define( function( require ) {
           }
 
           if ( hadNoStrokeBefore || borderRadiusDirty || this.dirtyLineWidth || this.dirtyLineOptions ) {
-            strokeElement.style[Features.borderRadius] = ( node.isRounded() || node.getLineJoin() === 'round' ) ? ( borderRadius + node.getLineWidth() / 2 ) + 'px' : '0';
+            strokeElement.style[ Features.borderRadius ] = ( node.isRounded() || node.getLineJoin() === 'round' ) ? ( borderRadius + node.getLineWidth() / 2 ) + 'px' : '0';
           }
         }
       }
@@ -845,7 +845,7 @@ define( function( require ) {
       }
     },
     usesPaint: true,
-    dirtyMethods: ['markDirtyRectangle']
+    dirtyMethods: [ 'markDirtyRectangle' ]
   } );
 
   /*---------------------------------------------------------------------------*

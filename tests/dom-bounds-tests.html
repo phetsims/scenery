@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
   <meta charset="utf-8"/>
-  <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+  <meta http-equiv="X-UA-Compatible" content="IE=edge"/>
 
   <title>DOM bounds tests</title>
 
@@ -23,15 +23,15 @@
 
 <body>
 
-  <div id="main" width="512" height="512"></div>
+<div id="main" width="512" height="512"></div>
 
-  <script>
+<script>
 
   requirejs( [ 'main', '../../kite/js/main', '../../dot/js/main' ], function( scenery, kite, dot ) {
     var scene = new scenery.Scene( $( '#main' ) );
 
     var $labelElement = $( '<div>' );
-    var labelNode = new scenery.DOM( $labelElement[0] );
+    var labelNode = new scenery.DOM( $labelElement[ 0 ] );
 
     $labelElement.html( '<h1>This is a header, see how I am positioned</h1>' );
     labelNode.invalidateDOM();
@@ -40,7 +40,7 @@
     console.log( "labelNode.bounds = " + labelNode.getBounds().toString() );
   } );
 
-  </script>
+</script>
 
 </body>
 </html>

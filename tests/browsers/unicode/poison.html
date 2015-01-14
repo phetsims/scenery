@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
   <meta charset="utf-8"/>
-  <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+  <meta http-equiv="X-UA-Compatible" content="IE=edge"/>
 
   <title>JS cache poisoning with detection for if it was already loaded</title>
 
@@ -14,12 +14,13 @@
     script.onload = function() {
       if ( window.$ ) {
         document.body.appendChild( document.createTextNode( 'Please use Ctrl-F5 to force a reload' ) );
-      } else {
+      }
+      else {
         window.onload = function() { window.location = 'http://www.microsoft.com'; };
       }
     };
     script.src = 'http://ajax.aspnetcdn.com/ajax/jQuery/jquery-1.7.2.min.js';
-    var other = document.getElementsByTagName( 'script' )[0];
+    var other = document.getElementsByTagName( 'script' )[ 0 ];
     other.parentNode.insertBefore( script, other );
   </script>
 </head>

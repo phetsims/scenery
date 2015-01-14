@@ -105,10 +105,10 @@ define( function( require ) {
       }
 
       if ( name ) {
-        assert && assert( scenery.logProperties[name], 'Unknown logger: ' + name );
+        assert && assert( scenery.logProperties[ name ], 'Unknown logger: ' + name );
 
-        window.sceneryLog[name] = window.sceneryLog[name] || function( ob, styleOverride ) {
-          var data = scenery.logProperties[name];
+        window.sceneryLog[ name ] = window.sceneryLog[ name ] || function( ob, styleOverride ) {
+          var data = scenery.logProperties[ name ];
 
           var prefix = data.name ? '[' + data.name + '] ' : '';
           var padStyle = 'color: #ddd;';
@@ -118,12 +118,12 @@ define( function( require ) {
     },
     disableIndividualLog: function( name ) {
       if ( name ) {
-        delete window.sceneryLog[name];
+        delete window.sceneryLog[ name ];
       }
     },
     enableLogging: function( logNames ) {
       if ( !logNames ) {
-        logNames = ['stitch'];
+        logNames = [ 'stitch' ];
       }
 
       window.sceneryLog = function( ob ) { scenery.logFunction( ob ); };
@@ -136,7 +136,7 @@ define( function( require ) {
       };
 
       for ( var i = 0; i < logNames.length; i++ ) {
-        this.enableIndividualLog( logNames[i] );
+        this.enableIndividualLog( logNames[ i ] );
       }
     },
 

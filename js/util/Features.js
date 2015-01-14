@@ -48,10 +48,10 @@ define( function( require ) {
       try {
         context.drawImage( img, 0, 0 );
         canvas.toDataURL();
-        Features[name] = true;
+        Features[ name ] = true;
       }
       catch( e ) {
-        Features[name] = false;
+        Features[ name ] = false;
       }
     };
     img.onload = loadCall;
@@ -62,7 +62,7 @@ define( function( require ) {
       }
     }
     catch( e ) {
-      Features[name] = false;
+      Features[ name ] = false;
     }
   }
 
@@ -119,7 +119,7 @@ define( function( require ) {
   // e.g. Features.setStyle( domElement, Features.transform, '...' ), and doesn't set it if no 'transform' attribute (prefixed or no) is found
   Features.setStyle = function( domElement, optionalKey, value ) {
     if ( optionalKey !== undefined ) {
-      domElement.style[optionalKey] = value;
+      domElement.style[ optionalKey ] = value;
     }
   };
 

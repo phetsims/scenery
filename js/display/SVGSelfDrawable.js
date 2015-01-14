@@ -141,10 +141,10 @@ define( function( require ) {
           var i, j;
           // scan for new cached paints (not in the old list)
           for ( i = 0; i < newCachedPaints.length; i++ ) {
-            var newPaint = newCachedPaints[i];
+            var newPaint = newCachedPaints[ i ];
             var isNew = true;
             for ( j = 0; j < this.lastCachedPaints.length; j++ ) {
-              if ( newPaint === this.lastCachedPaints[j] ) {
+              if ( newPaint === this.lastCachedPaints[ j ] ) {
                 isNew = false;
                 break;
               }
@@ -155,10 +155,10 @@ define( function( require ) {
           }
           // scan for removed cached paints (not in the new list)
           for ( i = 0; i < this.lastCachedPaints.length; i++ ) {
-            var oldPaint = this.lastCachedPaints[i];
+            var oldPaint = this.lastCachedPaints[ i ];
             var isRemoved = true;
             for ( j = 0; j < newCachedPaints.length; j++ ) {
-              if ( oldPaint === newCachedPaints[j] ) {
+              if ( oldPaint === newCachedPaints[ j ] ) {
                 isRemoved = false;
                 break;
               }
@@ -180,7 +180,7 @@ define( function( require ) {
         var oldSvgBlock = this.svgBlock;
         if ( usesPaint && oldSvgBlock ) {
           for ( var i = 0; i < this.lastCachedPaints.length; i++ ) {
-            oldSvgBlock.decrementPaint( this.lastCachedPaints[i] );
+            oldSvgBlock.decrementPaint( this.lastCachedPaints[ i ] );
           }
         }
 
@@ -189,7 +189,7 @@ define( function( require ) {
         // add cached paint references from the new svgBlock
         if ( usesPaint ) {
           for ( var j = 0; j < this.lastCachedPaints.length; j++ ) {
-            svgBlock.incrementPaint( this.lastCachedPaints[j] );
+            svgBlock.incrementPaint( this.lastCachedPaints[ j ] );
           }
         }
 

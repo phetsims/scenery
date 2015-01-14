@@ -39,9 +39,9 @@ define( function( require ) {
       // bitwise handling if 3 elements aren't defined
       if ( g === undefined || b === undefined ) {
         this.setRGBA(
-            ( r >> 16 ) && 0xFF,
-            ( r >> 8 ) && 0xFF,
-            ( r >> 0 ) && 0xFF,
+          ( r >> 16 ) && 0xFF,
+          ( r >> 8 ) && 0xFF,
+          ( r >> 0 ) && 0xFF,
           alpha );
       }
       else {
@@ -85,9 +85,9 @@ define( function( require ) {
       regexp: /^#(\w{1})(\w{1})(\w{1})$/,
       apply: function( color, matches ) {
         color.setRGBA(
-          parseInt( matches[1] + matches[1], 16 ),
-          parseInt( matches[2] + matches[2], 16 ),
-          parseInt( matches[3] + matches[3], 16 ),
+          parseInt( matches[ 1 ] + matches[ 1 ], 16 ),
+          parseInt( matches[ 2 ] + matches[ 2 ], 16 ),
+          parseInt( matches[ 3 ] + matches[ 3 ], 16 ),
           1 );
       }
     },
@@ -96,9 +96,9 @@ define( function( require ) {
       regexp: /^#(\w{2})(\w{2})(\w{2})$/,
       apply: function( color, matches ) {
         color.setRGBA(
-          parseInt( matches[1], 16 ),
-          parseInt( matches[2], 16 ),
-          parseInt( matches[3], 16 ),
+          parseInt( matches[ 1 ], 16 ),
+          parseInt( matches[ 2 ], 16 ),
+          parseInt( matches[ 3 ], 16 ),
           1 );
       }
     },
@@ -107,9 +107,9 @@ define( function( require ) {
       regexp: new RegExp( '^rgb\\(' + rgbNumber + ',' + rgbNumber + ',' + rgbNumber + '\\)$' ),
       apply: function( color, matches ) {
         color.setRGBA(
-          parseRGBNumber( matches[1] ),
-          parseRGBNumber( matches[2] ),
-          parseRGBNumber( matches[3] ),
+          parseRGBNumber( matches[ 1 ] ),
+          parseRGBNumber( matches[ 2 ] ),
+          parseRGBNumber( matches[ 3 ] ),
           1 );
       }
     },
@@ -118,10 +118,10 @@ define( function( require ) {
       regexp: new RegExp( '^rgba\\(' + rgbNumber + ',' + rgbNumber + ',' + rgbNumber + ',' + aNumber + '\\)$' ),
       apply: function( color, matches ) {
         color.setRGBA(
-          parseRGBNumber( matches[1] ),
-          parseRGBNumber( matches[2] ),
-          parseRGBNumber( matches[3] ),
-          parseFloat( matches[4] ) );
+          parseRGBNumber( matches[ 1 ] ),
+          parseRGBNumber( matches[ 2 ] ),
+          parseRGBNumber( matches[ 3 ] ),
+          parseFloat( matches[ 4 ] ) );
       }
     },
     {
@@ -129,9 +129,9 @@ define( function( require ) {
       regexp: new RegExp( '^hsl\\(' + rawNumber + ',' + rawNumber + '%,' + rawNumber + '%\\)$' ),
       apply: function( color, matches ) {
         color.setHSLA(
-          parseInt( matches[1], 10 ),
-          parseInt( matches[2], 10 ),
-          parseInt( matches[3], 10 ),
+          parseInt( matches[ 1 ], 10 ),
+          parseInt( matches[ 2 ], 10 ),
+          parseInt( matches[ 3 ], 10 ),
           1 );
       }
     },
@@ -140,10 +140,10 @@ define( function( require ) {
       regexp: new RegExp( '^hsla\\(' + rawNumber + ',' + rawNumber + '%,' + rawNumber + '%,' + aNumber + '\\)$' ),
       apply: function( color, matches ) {
         color.setHSLA(
-          parseInt( matches[1], 10 ),
-          parseInt( matches[2], 10 ),
-          parseInt( matches[3], 10 ),
-          parseFloat( matches[4] ) );
+          parseInt( matches[ 1 ], 10 ),
+          parseInt( matches[ 2 ], 10 ),
+          parseInt( matches[ 3 ], 10 ),
+          parseFloat( matches[ 4 ] ) );
       }
     }
   ];
@@ -240,14 +240,14 @@ define( function( require ) {
       var success = false;
 
       // replace colors based on keywords
-      var keywordMatch = Color.colorKeywords[str];
+      var keywordMatch = Color.colorKeywords[ str ];
       if ( keywordMatch ) {
         str = '#' + keywordMatch;
       }
 
       // run through the available text formats
       for ( var i = 0; i < Color.formatParsers.length; i++ ) {
-        var parser = Color.formatParsers[i];
+        var parser = Color.formatParsers[ i ];
 
         var matches = parser.regexp.exec( str );
         if ( matches ) {
@@ -282,7 +282,7 @@ define( function( require ) {
         var length = listeners.length;
 
         for ( var i = 0; i < length; i++ ) {
-          listeners[i]();
+          listeners[ i ]();
         }
       }
     },

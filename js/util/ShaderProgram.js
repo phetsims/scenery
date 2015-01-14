@@ -63,11 +63,11 @@ define( function( require ) {
       this.activeAttributes = {}; // map name => boolean (enabled)
 
       _.each( this.attributeNames, function( attributeName ) {
-        self.attributeLocations[attributeName] = self.gl.getAttribLocation( self.program, attributeName );
-        self.activeAttributes[attributeName] = true; // default to enabled
+        self.attributeLocations[ attributeName ] = self.gl.getAttribLocation( self.program, attributeName );
+        self.activeAttributes[ attributeName ] = true; // default to enabled
       } );
       _.each( this.uniformNames, function( uniformName ) {
-        self.uniformLocations[uniformName] = self.gl.getUniformLocation( self.program, uniformName );
+        self.uniformLocations[ uniformName ] = self.gl.getUniformLocation( self.program, uniformName );
       } );
 
       this.isInitialized = true;
@@ -84,7 +84,7 @@ define( function( require ) {
 
       // enable the active attributes
       _.each( this.attributeNames, function( attributeName ) {
-        if ( self.activeAttributes[attributeName] ) {
+        if ( self.activeAttributes[ attributeName ] ) {
           self.enableVertexAttribArray( attributeName );
         }
       } );
@@ -92,8 +92,8 @@ define( function( require ) {
 
     activateAttribute: function( attributeName ) {
       // guarded so we don't enable twice
-      if ( !this.activeAttributes[attributeName] ) {
-        this.activeAttributes[attributeName] = true;
+      if ( !this.activeAttributes[ attributeName ] ) {
+        this.activeAttributes[ attributeName ] = true;
 
         if ( this.used ) {
           this.enableVertexAttribArray( attributeName );
@@ -102,7 +102,7 @@ define( function( require ) {
     },
 
     enableVertexAttribArray: function( attributeName ) {
-      this.gl.enableVertexAttribArray( this.attributeLocations[attributeName] );
+      this.gl.enableVertexAttribArray( this.attributeLocations[ attributeName ] );
     },
 
     unuse: function() {
@@ -113,20 +113,20 @@ define( function( require ) {
       this.used = false;
 
       _.each( this.attributeNames, function( attributeName ) {
-        if ( self.activeAttributes[attributeName] ) {
+        if ( self.activeAttributes[ attributeName ] ) {
           self.disableVertexAttribArray( attributeName );
         }
       } );
     },
 
     disableVertexAttribArray: function( attributeName ) {
-      this.gl.disableVertexAttribArray( this.attributeLocations[attributeName] );
+      this.gl.disableVertexAttribArray( this.attributeLocations[ attributeName ] );
     },
 
     deactivateAttribute: function( attributeName ) {
       // guarded so we don't disable twice
-      if ( this.activeAttributes[attributeName] ) {
-        this.activeAttributes[attributeName] = false;
+      if ( this.activeAttributes[ attributeName ] ) {
+        this.activeAttributes[ attributeName ] = false;
 
         if ( this.used ) {
           this.disableVertexAttribArray( attributeName );

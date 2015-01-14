@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
   <meta charset="utf-8"/>
-  <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+  <meta http-equiv="X-UA-Compatible" content="IE=edge"/>
   <meta name="viewport" content="width=device-width, height=device-height, initial-scale=1.0, maximum-scale=1.0, user-scalable=no"/>
   <meta name="apple-mobile-web-app-capable" content="yes">
 
@@ -51,11 +51,11 @@
 
 <body>
 
-  <!-- our scene graph will be in this div -->
-  <div id="main" >
-  </div>
+<!-- our scene graph will be in this div -->
+<div id="main">
+</div>
 
-  <script>
+<script>
 
   // initialize our scene
   var scene = new scenery.Node();
@@ -67,16 +67,16 @@
 
   // add a centered container with a rotation and scale, to attempt to mess up the dragging ;)
   var rotatingContainer = new scenery.Node( {
-    x: display.bounds.width * 2 / 3,
+    x:        display.bounds.width * 2 / 3,
     y: display.bounds.centerY,
-    scale: 0.8 / 0.707,
+    scale:    0.8 / 0.707,
     rotation: Math.PI / 4,
     layerSplit: true
   } );
   scene.addChild( rotatingContainer );
 
   var miniContainer = new scenery.Node( {
-    x: display.bounds.width / 3,
+    x:     display.bounds.width / 3,
     y: display.bounds.centerY,
     scale: 0.4 / 0.707,
     layerSplit: true
@@ -113,7 +113,7 @@
   // add 50 random hexagons
   for ( var i = 0; i < count; i++ ) {
     // anonymous function so the closure variables aren't shared between iterations
-    (function(){
+    (function() {
       var node = new scenery.Node( {
         x: ( Math.random() - 0.5 ) * 300,
         y: ( Math.random() - 0.5 ) * 300
@@ -139,51 +139,49 @@
       rendererOptions: {
         fullResolution: false
       }
-    },{
+    }, {
       label: 'Canvas Full',
       renderer: 'canvas',
       rendererOptions: {
         fullResolution: true
       }
-    },{
+    }, {
       label: 'SVG Regular',
       renderer: 'svg',
-      rendererOptions: {
-
-      }
-    },{
+      rendererOptions: {}
+    }, {
       label: 'SVG CSS Full',
       renderer: 'svg',
       rendererOptions: {
         cssTransform: true
       }
-    },{
+    }, {
       label: 'SVG CSS T+R',
       renderer: 'svg',
       rendererOptions: {
         cssTranslation: true,
         cssRotation: true
       }
-    },{
+    }, {
       label: 'SVG CSS T',
       renderer: 'svg',
       rendererOptions: {
         cssTranslation: true
       }
-    },{
+    }, {
       label: 'SVG Batched',
       renderer: 'svg',
       rendererOptions: {
         batchDOMChanges: true
       }
-    },{
+    }, {
       label: 'SVG CSS Full Batched',
       renderer: 'svg',
       rendererOptions: {
         cssTransform: true,
         batchDOMChanges: true
       }
-    },{
+    }, {
       label: 'SVG CSS T+R Batched',
       renderer: 'svg',
       rendererOptions: {
@@ -198,11 +196,11 @@
   var y = 10;
   var buttons = [];
   for ( var i = 0; i < options.length; i++ ) {
-    (function(){
-      var option = options[i];
+    (function() {
+      var option = options[ i ];
       var buttonLabel = new scenery.Text( option.label, {
         left: x + 10,
-        top: y + 10,
+        top:  y + 10,
         fontSize: 15
       } );
       var button = new scenery.Path( kite.Shape.bounds( buttonLabel.getBounds().roundedOut().dilated( 10.5 ) ), {
@@ -234,14 +232,14 @@
   }
 
   /*---------------------------------------------------------------------------*
-  * main loop
-  *----------------------------------------------------------------------------*/
+   * main loop
+   *----------------------------------------------------------------------------*/
 
   display.updateOnRequestAnimationFrame( function( timeElapsed ) {
     rotatingContainer.rotate( timeElapsed * 0.1 );
   } );
 
-  </script>
+</script>
 
 </body>
 </html>

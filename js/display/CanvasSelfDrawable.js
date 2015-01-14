@@ -105,7 +105,7 @@ define( function( require ) {
 
     if ( options.dirtyMethods ) {
       for ( var i = 0; i < options.dirtyMethods.length; i++ ) {
-        type.prototype[options.dirtyMethods[i]] = canvasSelfDirty;
+        type.prototype[ options.dirtyMethods[ i ] ] = canvasSelfDirty;
       }
     }
 

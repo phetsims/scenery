@@ -44,7 +44,7 @@ define( function( require ) {
 
       // TODO: Maybe pass through Renderer.bitmaskWebGLLowResolution ) ?
       // Each WebGL block needs its own canvas, and this is created by the WebGLRenderer.
-      this.webglRenderer = new WebGLRenderer( {stats: false} );
+      this.webglRenderer = new WebGLRenderer( { stats: false } );
       this.domElement = this.webglRenderer.canvas;
 
       // reset any fit transforms that were applied
@@ -175,7 +175,7 @@ define( function( require ) {
     },
 
     toString: function() {
-      return 'WebGLBlock#' + this.id + '-' + FittedBlock.fitString[this.fit];
+      return 'WebGLBlock#' + this.id + '-' + FittedBlock.fitString[ this.fit ];
     }
   }, {
     // Statics

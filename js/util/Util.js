@@ -53,12 +53,12 @@ define( function( require ) {
         transformCSS += ' translateZ(0)';
       }
 
-      element.style[transformProperty] = transformCSS;
-      element.style[transformOriginProperty] = 'top left'; //OHTWO TODO: performance: this only needs to be set once!
+      element.style[ transformProperty ] = transformCSS;
+      element.style[ transformOriginProperty ] = 'top left'; //OHTWO TODO: performance: this only needs to be set once!
     },
 
     prepareForTransform: function( element, forceAcceleration ) {
-      element.style[transformOriginProperty] = 'top left';
+      element.style[ transformOriginProperty ] = 'top left';
       if ( forceAcceleration ) {
         scenery.Util.setTransformAcceleration( element );
       }
@@ -79,17 +79,17 @@ define( function( require ) {
     // is used, and they should use the same parameter value for forceAcceleration
     applyPreparedTransform: function( matrix, element, forceAcceleration ) {
       // NOTE: not applying translateZ, see http://stackoverflow.com/questions/10014461/why-does-enabling-hardware-acceleration-in-css3-slow-down-performance
-      element.style[transformProperty] = matrix.getCSSTransform();
+      element.style[ transformProperty ] = matrix.getCSSTransform();
     },
 
     setTransform: function( transformString, element, forceAcceleration ) {
       assert && assert( typeof transformString === 'string' );
 
-      element.style[transformProperty] = transformString;
+      element.style[ transformProperty ] = transformString;
     },
 
     unsetTransform: function( element ) {
-      element.style[transformProperty] = '';
+      element.style[ transformProperty ] = '';
     },
 
     testAssert: function() {
@@ -108,8 +108,8 @@ define( function( require ) {
       var lastTime = 0;
       var vendors = [ 'ms', 'moz', 'webkit', 'o' ];
       for ( var x = 0; x < vendors.length && !window.requestAnimationFrame; ++x ) {
-        window.requestAnimationFrame = window[vendors[x] + 'RequestAnimationFrame'];
-        window.cancelAnimationFrame = window[vendors[x] + 'CancelAnimationFrame'] || window[vendors[x] + 'CancelRequestAnimationFrame'];
+        window.requestAnimationFrame = window[ vendors[ x ] + 'RequestAnimationFrame' ];
+        window.cancelAnimationFrame = window[ vendors[ x ] + 'CancelAnimationFrame' ] || window[ vendors[ x ] + 'CancelRequestAnimationFrame' ];
       }
 
       if ( !window.requestAnimationFrame ) {
@@ -161,9 +161,9 @@ define( function( require ) {
       for ( var x = 0; x < resolution; x++ ) {
         for ( var y = 0; y < resolution; y++ ) {
           var offset = 4 * ( y * resolution + x );
-          if ( imageData.data[offset] !== 0 || imageData.data[offset + 1] !== 0 || imageData.data[offset + 2] !== 0 || imageData.data[offset + 3] !== 0 ) {
-            dirtyX[x] = true;
-            dirtyY[y] = true;
+          if ( imageData.data[ offset ] !== 0 || imageData.data[ offset + 1 ] !== 0 || imageData.data[ offset + 2 ] !== 0 || imageData.data[ offset + 3 ] !== 0 ) {
+            dirtyX[ x ] = true;
+            dirtyY[ y ] = true;
           }
         }
       }
@@ -369,10 +369,10 @@ define( function( require ) {
       }
 
       var result = new Bounds2(
-          ( minBounds.minX + maxBounds.minX ) / 2,
-          ( minBounds.minY + maxBounds.minY ) / 2,
-          ( minBounds.maxX + maxBounds.maxX ) / 2,
-          ( minBounds.maxY + maxBounds.maxY ) / 2
+        ( minBounds.minX + maxBounds.minX ) / 2,
+        ( minBounds.minY + maxBounds.minY ) / 2,
+        ( minBounds.maxX + maxBounds.maxX ) / 2,
+        ( minBounds.maxY + maxBounds.maxY ) / 2
       );
 
       // extra data about our bounds
@@ -394,7 +394,7 @@ define( function( require ) {
     toPowerOf2: function( n ) {
       var result = 1;
       while ( result < n ) {
-          result *= 2;
+        result *= 2;
       }
       return result;
     },

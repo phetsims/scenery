@@ -46,13 +46,13 @@ phet.tests = phet.tests || {};
     return function( timeElapsed ) {
       if ( moveCount == 0 ) {
         for ( var i = 0; i < itemCount; i++ ) {
-          nodes.children[i].translate( ( Math.random() - 0.5 ) * 50, ( Math.random() - 0.5 ) * 50 );
+          nodes.children[ i ].translate( ( Math.random() - 0.5 ) * 50, ( Math.random() - 0.5 ) * 50 );
         }
       }
       else {
         for ( var j = 0; j < moveCount; j++ ) {
           // tweak a random node
-          var node = nodes.children[_.random( 0, nodes.children.length - 1 )];
+          var node = nodes.children[ _.random( 0, nodes.children.length - 1 ) ];
           node.translate( ( Math.random() - 0.5 ) * 50, ( Math.random() - 0.5 ) * 50 );
         }
       }
@@ -97,14 +97,14 @@ phet.tests = phet.tests || {};
     return function( timeElapsed ) {
       if ( moveCount == 0 ) {
         for ( var i = 0; i < itemCount; i++ ) {
-          var shape = nodes.children[i];
+          var shape = nodes.children[ i ];
           shape.x += ( Math.random() - 0.5 ) * 50;
           shape.y += ( Math.random() - 0.5 ) * 50;
         }
       }
       else {
         for ( var j = 0; j < moveCount; j++ ) {
-          var shape = nodes.children[_.random( 0, nodes.children.length - 1 )];
+          var shape = nodes.children[ _.random( 0, nodes.children.length - 1 ) ];
           shape.x += ( Math.random() - 0.5 ) * 50;
           shape.y += ( Math.random() - 0.5 ) * 50;
         }

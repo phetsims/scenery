@@ -36,7 +36,7 @@ define( function( require ) {
         }
       }
       var endIndex = this.vertexArray.length;
-      return {startIndex: startIndex, endIndex: endIndex};
+      return { startIndex: startIndex, endIndex: endIndex };
     },
     /**
      * Add geometry and color for a scenery path using sampling + triangulation.
@@ -60,15 +60,15 @@ define( function( require ) {
 
       var k;
       for ( var i = 0; i < subpaths.length; i++ ) {
-        var subpath = subpaths[i];
+        var subpath = subpaths[ i ];
         for ( k = 0; k < subpath.points.length; k++ ) {
 
-          string = string + '' + subpath.points[k].x + ' ' + subpath.points[k].y + '\n';
+          string = string + '' + subpath.points[ k ].x + ' ' + subpath.points[ k ].y + '\n';
 
           //Add the points into the contour, but don't duplicate the last point.
           //TODO: how to handle closed vs open shapes
           if ( k < subpath.points.length - 1 ) {
-            contour.push( new poly2tri.Point( subpath.points[k].x, subpath.points[k].y ) );
+            contour.push( new poly2tri.Point( subpath.points[ k ].x, subpath.points[ k ].y ) );
           }
         }
       }
@@ -86,14 +86,14 @@ define( function( require ) {
 
       // Add the triangulated geometry into the array buffer.
       for ( k = 0; k < triangles.length; k++ ) {
-        var triangle = triangles[k];
+        var triangle = triangles[ k ];
         for ( var zz = 0; zz < triangle.points_.length; zz++ ) {
-          var pt = triangle.points_[zz];
+          var pt = triangle.points_[ zz ];
 
           // Mutate the vertices a bit to see what is going on.  Or not.
           var randFactor = 0;
           this.vertexArray.push( pt.x + Math.random() * randFactor, pt.y + Math.random() * randFactor, z,
-              color.red / 255, color.green / 255, color.blue / 255, color.alpha,
+            color.red / 255, color.green / 255, color.blue / 255, color.alpha,
             matrix4.m00(), matrix4.m01(), matrix4.m03(), matrix4.m10(), matrix4.m11(), matrix4.m13()
           );
         }
@@ -124,17 +124,17 @@ define( function( require ) {
         startIndex: index,
         endIndex: colorTriangleBufferData.vertexArray.length,
         setTriangle: function( x1, y1, x2, y2, x3, y3 ) {
-          colorTriangleBufferData.vertexArray[index + 0 + 13 * 0] = x1;
-          colorTriangleBufferData.vertexArray[index + 1 + 13 * 0] = y1;
-          colorTriangleBufferData.vertexArray[index + 0 + 13 * 1] = x2;
-          colorTriangleBufferData.vertexArray[index + 1 + 13 * 1] = y2;
-          colorTriangleBufferData.vertexArray[index + 0 + 13 * 2] = x3;
-          colorTriangleBufferData.vertexArray[index + 1 + 13 * 2] = y3;
+          colorTriangleBufferData.vertexArray[ index + 0 + 13 * 0 ] = x1;
+          colorTriangleBufferData.vertexArray[ index + 1 + 13 * 0 ] = y1;
+          colorTriangleBufferData.vertexArray[ index + 0 + 13 * 1 ] = x2;
+          colorTriangleBufferData.vertexArray[ index + 1 + 13 * 1 ] = y2;
+          colorTriangleBufferData.vertexArray[ index + 0 + 13 * 2 ] = x3;
+          colorTriangleBufferData.vertexArray[ index + 1 + 13 * 2 ] = y3;
         },
         setZ: function( z ) {
-          colorTriangleBufferData.vertexArray[index + 2] = z;
-          colorTriangleBufferData.vertexArray[index + 5] = z;
-          colorTriangleBufferData.vertexArray[index + 8] = z;
+          colorTriangleBufferData.vertexArray[ index + 2 ] = z;
+          colorTriangleBufferData.vertexArray[ index + 5 ] = z;
+          colorTriangleBufferData.vertexArray[ index + 8 ] = z;
         }
       };
     },
@@ -178,30 +178,30 @@ define( function( require ) {
             var radius = i % 2 === 0 ? _outerRadius : _innerRadius;
             var x = radius * Math.cos( angle ) + _x;
             var y = radius * Math.sin( angle ) + _y;
-            points.push( {x: x, y: y} );
+            points.push( { x: x, y: y } );
           }
 
           var index = this.index;
-          colorTriangleBufferData.vertexArray[index + 0] = points[0].x;
-          colorTriangleBufferData.vertexArray[index + 1] = points[0].y;
-          colorTriangleBufferData.vertexArray[index + 2] = points[3].x;
-          colorTriangleBufferData.vertexArray[index + 3] = points[3].y;
-          colorTriangleBufferData.vertexArray[index + 4] = points[6].x;
-          colorTriangleBufferData.vertexArray[index + 5] = points[6].y;
+          colorTriangleBufferData.vertexArray[ index + 0 ] = points[ 0 ].x;
+          colorTriangleBufferData.vertexArray[ index + 1 ] = points[ 0 ].y;
+          colorTriangleBufferData.vertexArray[ index + 2 ] = points[ 3 ].x;
+          colorTriangleBufferData.vertexArray[ index + 3 ] = points[ 3 ].y;
+          colorTriangleBufferData.vertexArray[ index + 4 ] = points[ 6 ].x;
+          colorTriangleBufferData.vertexArray[ index + 5 ] = points[ 6 ].y;
 
-          colorTriangleBufferData.vertexArray[index + 6] = points[8].x;
-          colorTriangleBufferData.vertexArray[index + 7] = points[8].y;
-          colorTriangleBufferData.vertexArray[index + 8] = points[2].x;
-          colorTriangleBufferData.vertexArray[index + 9] = points[2].y;
-          colorTriangleBufferData.vertexArray[index + 10] = points[5].x;
-          colorTriangleBufferData.vertexArray[index + 11] = points[5].y;
+          colorTriangleBufferData.vertexArray[ index + 6 ] = points[ 8 ].x;
+          colorTriangleBufferData.vertexArray[ index + 7 ] = points[ 8 ].y;
+          colorTriangleBufferData.vertexArray[ index + 8 ] = points[ 2 ].x;
+          colorTriangleBufferData.vertexArray[ index + 9 ] = points[ 2 ].y;
+          colorTriangleBufferData.vertexArray[ index + 10 ] = points[ 5 ].x;
+          colorTriangleBufferData.vertexArray[ index + 11 ] = points[ 5 ].y;
 
-          colorTriangleBufferData.vertexArray[index + 12] = points[0].x;
-          colorTriangleBufferData.vertexArray[index + 13] = points[0].y;
-          colorTriangleBufferData.vertexArray[index + 14] = points[7].x;
-          colorTriangleBufferData.vertexArray[index + 15] = points[7].y;
-          colorTriangleBufferData.vertexArray[index + 16] = points[4].x;
-          colorTriangleBufferData.vertexArray[index + 17] = points[4].y;
+          colorTriangleBufferData.vertexArray[ index + 12 ] = points[ 0 ].x;
+          colorTriangleBufferData.vertexArray[ index + 13 ] = points[ 0 ].y;
+          colorTriangleBufferData.vertexArray[ index + 14 ] = points[ 7 ].x;
+          colorTriangleBufferData.vertexArray[ index + 15 ] = points[ 7 ].y;
+          colorTriangleBufferData.vertexArray[ index + 16 ] = points[ 4 ].x;
+          colorTriangleBufferData.vertexArray[ index + 17 ] = points[ 4 ].y;
         }
       };
       myStar.setStar( _x, _y, _innerRadius, _outerRadius, _totalAngle );

@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
   <meta charset="utf-8"/>
-  <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+  <meta http-equiv="X-UA-Compatible" content="IE=edge"/>
 
   <title>Canvas Test Suite</title>
 
@@ -36,7 +36,8 @@
       var dash = [ 0.01, 0.01 ];
       if ( context.setLineDash ) {
         context.setLineDash( dash );
-      } else if ( context.mozDash !== undefined ) {
+      }
+      else if ( context.mozDash !== undefined ) {
         context.mozDash = dash;
       }
     }
@@ -106,7 +107,7 @@
       context.translate( 75, 75 );
       context.scale( 0.125, 0.125 );
       context.moveTo( 102.6, 37.8 );
-      context.bezierCurveTo( 773.0, 708.2, 102.6, 708.2, 773.0,37.8 );
+      context.bezierCurveTo( 773.0, 708.2, 102.6, 708.2, 773.0, 37.8 );
       context.restore();
     } );
 
@@ -260,7 +261,7 @@
       context.font = '20px Arial';
       context.fillStyle = '#ffffff';
       context.translate( i, 200 );
-      context.transform( 1, 50 + i^2, 0, 1, 0, 0 );
+      context.transform( 1, 50 + i ^ 2, 0, 1, 0, 0 );
       context.fillText( 'G', 0, 0 );
       context.fillText( 'G', 0, 0 );
       context.fillText( 'G', 0, 0 );
@@ -284,6 +285,7 @@
       context.fill();
       context.restore();
     }
+
     zig( 50, 220, 10, 100, 1, 10 );
     zig( 60, 220, 10, 100, 1, 5 );
     zig( 70, 220, 10, 100, 2, 5 );
@@ -307,6 +309,7 @@
       context.fill();
       context.restore();
     }
+
     zag( 50, 220, 10, 100, 1, 10 );
     zag( 60, 220, 10, 100, 1, 5 );
     zag( 70, 220, 10, 100, 2, 5 );

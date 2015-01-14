@@ -234,7 +234,7 @@ define( function( require ) {
       assert && assert( index >= 0 );
       assert && assert( index < this._children.length );
 
-      var node = this._children[index];
+      var node = this._children[ index ];
 
       this.removeChildWithIndex( node, index );
     },
@@ -243,7 +243,7 @@ define( function( require ) {
     removeChildWithIndex: function( node, indexOfChild ) {
       assert && assert( node );
       assert && assert( this.isChild( node ) );
-      assert && assert( this._children[indexOfChild] === node );
+      assert && assert( this._children[ indexOfChild ] === node );
 
       // needs to be early to prevent re-entrant children modifications
       this.changePickableCount( -node._subtreePickableCount );
@@ -270,12 +270,12 @@ define( function( require ) {
       if ( this._children !== children ) {
         // remove all children in a way where we don't have to copy the child array for safety
         while ( this._children.length ) {
-          this.removeChild( this._children[this._children.length - 1] );
+          this.removeChild( this._children[ this._children.length - 1 ] );
         }
 
         var len = children.length;
         for ( var i = 0; i < len; i++ ) {
-          this.addChild( children[i] );
+          this.addChild( children[ i ] );
         }
       }
     },
@@ -296,11 +296,11 @@ define( function( require ) {
     // returns a single parent if it exists, otherwise null (no parents), or an assertion failure (multiple parents)
     getParent: function() {
       assert && assert( this._parents.length <= 1, 'Cannot call getParent on a node with multiple parents' );
-      return this._parents.length ? this._parents[0] : null;
+      return this._parents.length ? this._parents[ 0 ] : null;
     },
 
     getChildAt: function( index ) {
-      return this._children[index];
+      return this._children[ index ];
     },
 
     indexOfParent: function( parent ) {
@@ -353,7 +353,7 @@ define( function( require ) {
       assert && assert( this._subtreePickableCount >= 0, 'subtree pickable count should be guaranteed to be >= 0' );
       var len = this._parents.length;
       for ( var i = 0; i < len; i++ ) {
-        this._parents[i].changePickableCount( n );
+        this._parents[ i ].changePickableCount( n );
       }
 
       // changing pickability can affect the mouseBounds/touchBounds used for hit testing
@@ -376,7 +376,7 @@ define( function( require ) {
 
           var len = this._parents.length;
           for ( var i = 0; i < len; i++ ) {
-            this._parents[i].changeBoundsEventCount( parentDelta );
+            this._parents[ i ].changeBoundsEventCount( parentDelta );
           }
         }
       }
@@ -393,7 +393,7 @@ define( function( require ) {
      * @param property any object that has es5 getter for 'value' es5 setter for value, and
      */
     addLiveRegion: function( property, options ) {
-      this._liveRegions.push( {property: property, options: options} );
+      this._liveRegions.push( { property: property, options: options } );
     },
 
     // Ensure that cached bounds stored on this node (and all children) are accurate. Returns true if any sort of dirty flag was set
@@ -410,7 +410,7 @@ define( function( require ) {
         // have each child validate their own bounds
         i = this._children.length;
         while ( i-- ) {
-          this._children[i].validateBounds();
+          this._children[ i ].validateBounds();
         }
 
         var oldChildBounds = this._childBounds;
@@ -420,7 +420,7 @@ define( function( require ) {
 
         i = this._children.length;
         while ( i-- ) {
-          this._childBounds.includeBounds( this._children[i]._bounds );
+          this._childBounds.includeBounds( this._children[ i ]._bounds );
         }
 
         // run this before firing the event
@@ -490,7 +490,7 @@ define( function( require ) {
 
           i = this._parents.length;
           while ( i-- ) {
-            this._parents[i].invalidateBounds();
+            this._parents[ i ].invalidateBounds();
           }
 
           // TODO: consider changing to parameter object (that may be a problem for the GC overhead)
@@ -527,7 +527,7 @@ define( function( require ) {
                                     that._transformBounds ||
                                     that._bounds.equalsEpsilon( fullBounds, epsilon ) ||
                                     that._bounds.equalsEpsilon( fullBounds, epsilon ),
-              'Bounds mismatch after validateBounds: ' + that._bounds.toString() + ', expected: ' + fullBounds.toString() );
+            'Bounds mismatch after validateBounds: ' + that._bounds.toString() + ', expected: ' + fullBounds.toString() );
         })();
       }
 
@@ -543,7 +543,7 @@ define( function( require ) {
 
       var numChildren = this._children.length;
       for ( var i = 0; i < numChildren; i++ ) {
-        var child = this._children[i];
+        var child = this._children[ i ];
 
         matrix.multiplyMatrix( child._transform.getMatrix() );
         child._includeTransformedSubtreeBounds( matrix, bounds );
@@ -575,7 +575,7 @@ define( function( require ) {
         var changed = false;
         var numChildren = this._children.length;
         for ( var i = 0; i < numChildren; i++ ) {
-          changed = this._children[i].watchedBoundsScan() || changed;
+          changed = this._children[ i ].watchedBoundsScan() || changed;
         }
         return changed;
       }
@@ -613,7 +613,7 @@ define( function( require ) {
           // union of all children's mouse bounds
           var i = this._children.length;
           while ( i-- ) {
-            var child = this._children[i];
+            var child = this._children[ i ];
 
             // make sure the child's mouseBounds are up to date
             child.validateMouseBounds( hasListenerEquivalentSelfOrInAncestor );
@@ -669,7 +669,7 @@ define( function( require ) {
           // union of all children's touch bounds
           var i = this._children.length;
           while ( i-- ) {
-            var child = this._children[i];
+            var child = this._children[ i ];
 
             // make sure the child's touchBounds are up to date
             child.validateTouchBounds( hasListenerEquivalentSelfOrInAncestor );
@@ -708,7 +708,7 @@ define( function( require ) {
       // and set flags for all ancestors
       var i = this._parents.length;
       while ( i-- ) {
-        this._parents[i].invalidateChildBounds();
+        this._parents[ i ].invalidateChildBounds();
       }
 
       // TODO: consider calling invalidateMouseTouchBounds from here? it would mean two traversals, but it may bail out sooner. Hard call.
@@ -724,7 +724,7 @@ define( function( require ) {
         this._touchBoundsDirty = true;
         var i = this._parents.length;
         while ( i-- ) {
-          this._parents[i].invalidateChildBounds();
+          this._parents[ i ].invalidateChildBounds();
         }
       }
     },
@@ -738,7 +738,7 @@ define( function( require ) {
         this._touchBoundsDirty = true;
         var i = this._parents.length;
         while ( i-- ) {
-          this._parents[i].invalidateMouseTouchBounds();
+          this._parents[ i ].invalidateMouseTouchBounds();
         }
       }
     },
@@ -860,7 +860,7 @@ define( function( require ) {
 
       var i = this._children.length;
       while ( i-- ) {
-        var child = this._children[i];
+        var child = this._children[ i ];
         if ( child.isVisible() ) {
           bounds.includeBounds( child.getVisibleBounds() );
         }
@@ -960,7 +960,7 @@ define( function( require ) {
       // check children first, since they are rendered later. don't bother checking childBounds, we usually are using mouse/touch.
       // manual iteration here so we can return directly, and so we can iterate backwards (last node is in front)
       for ( var i = this._children.length - 1; i >= 0; i-- ) {
-        var child = this._children[i];
+        var child = this._children[ i ];
 
         sceneryLog && sceneryLog.hitTest && sceneryLog.push();
         var childHit = child.trailUnderPoint( localPoint, options, true, hasListenerEquivalentSelfOrInAncestor );
@@ -1038,7 +1038,7 @@ define( function( require ) {
       callback( this );
       var length = this._children.length;
       for ( var i = 0; i < length; i++ ) {
-        this._children[i].walkDepthFirst( callback );
+        this._children[ i ].walkDepthFirst( callback );
       }
     },
 
@@ -1046,7 +1046,7 @@ define( function( require ) {
       var result = [];
       var length = this._children.length;
       for ( var i = 0; i < length; i++ ) {
-        var child = this._children[i];
+        var child = this._children[ i ];
         if ( !child._bounds.intersection( bounds ).isEmpty() ) {
           result.push( child );
         }
@@ -1654,7 +1654,7 @@ define( function( require ) {
       while ( node ) {
         trail.addAncestor( node );
         assert && assert( node._parents.length <= 1 );
-        node = node._parents[0]; // should be undefined if there aren't any parents
+        node = node._parents[ 0 ]; // should be undefined if there aren't any parents
       }
 
       return trail;
@@ -1681,17 +1681,17 @@ define( function( require ) {
       var l = [];
       var n;
       _.each( this.getConnectedNodes(), function( node ) {
-        edges[node.id] = {};
+        edges[ node.id ] = {};
         _.each( node.children, function( m ) {
-          edges[node.id][m.id] = true;
+          edges[ node.id ][ m.id ] = true;
         } );
         if ( !node.parents.length ) {
           s.push( node );
         }
       } );
       function handleChild( m ) {
-        delete edges[n.id][m.id];
-        if ( _.every( edges, function( children ) { return !children[m.id]; } ) ) {
+        delete edges[ n.id ][ m.id ];
+        if ( _.every( edges, function( children ) { return !children[ m.id ]; } ) ) {
           // there are no more edges to m
           s.push( m );
         }
@@ -1725,18 +1725,18 @@ define( function( require ) {
       var l = [];
       var n;
       _.each( this.getConnectedNodes().concat( child.getConnectedNodes() ), function( node ) {
-        edges[node.id] = {};
+        edges[ node.id ] = {};
         _.each( node.children, function( m ) {
-          edges[node.id][m.id] = true;
+          edges[ node.id ][ m.id ] = true;
         } );
         if ( !node.parents.length && node !== child ) {
           s.push( node );
         }
       } );
-      edges[this.id][child.id] = true; // add in our 'new' edge
+      edges[ this.id ][ child.id ] = true; // add in our 'new' edge
       function handleChild( m ) {
-        delete edges[n.id][m.id];
-        if ( _.every( edges, function( children ) { return !children[m.id]; } ) ) {
+        delete edges[ n.id ][ m.id ];
+        if ( _.every( edges, function( children ) { return !children[ m.id ]; } ) ) {
           // there are no more edges to m
           s.push( m );
         }
@@ -1780,7 +1780,7 @@ define( function( require ) {
 
       this.renderToCanvasSelf( wrapper );
       for ( var i = 0; i < this._children.length; i++ ) {
-        var child = this._children[i];
+        var child = this._children[ i ];
 
         if ( child.isVisible() ) {
           var requiresScratchCanvas = child._opacity !== 1 || child._clipArea;
@@ -1898,9 +1898,11 @@ define( function( require ) {
     // will call callback( node )
     toImageNodeAsynchronous: function( callback, x, y, width, height ) {
       this.toImage( function( image, x, y ) {
-        callback( new scenery.Node( { children: [
-          new scenery.Image( image, { x: -x, y: -y } )
-        ] } ) );
+        callback( new scenery.Node( {
+          children: [
+            new scenery.Image( image, { x: -x, y: -y } )
+          ]
+        } ) );
       }, x, y, width, height );
     },
 
@@ -1908,9 +1910,11 @@ define( function( require ) {
     toCanvasNodeSynchronous: function( x, y, width, height ) {
       var result;
       this.toCanvas( function( canvas, x, y ) {
-        result = new scenery.Node( { children: [
-          new scenery.Image( canvas, { x: -x, y: -y } )
-        ] } );
+        result = new scenery.Node( {
+          children: [
+            new scenery.Image( canvas, { x: -x, y: -y } )
+          ]
+        } );
       }, x, y, width, height );
       assert && assert( result, 'toCanvasNodeSynchronous requires that the node can be rendered only using Canvas' );
       return result;
@@ -1920,9 +1924,11 @@ define( function( require ) {
     toDataURLNodeSynchronous: function( x, y, width, height ) {
       var result;
       this.toDataURL( function( dataURL, x, y ) {
-        result = new scenery.Node( { children: [
-          new scenery.Image( dataURL, { x: -x, y: -y } )
-        ] } );
+        result = new scenery.Node( {
+          children: [
+            new scenery.Image( dataURL, { x: -x, y: -y } )
+          ]
+        } );
       }, x, y, width, height );
       assert && assert( result, 'toDataURLNodeSynchronous requires that the node can be rendered only using Canvas' );
       return result;
@@ -2009,15 +2015,15 @@ define( function( require ) {
       // concatenation like this has been faster than getting a unique trail, getting its transform, and applying it
       while ( node ) {
         matrices.push( node._transform.getMatrix() );
-        assert && assert( node._parents[1] === undefined, 'getLocalToGlobalMatrix unable to work for DAG' );
-        node = node._parents[0];
+        assert && assert( node._parents[ 1 ] === undefined, 'getLocalToGlobalMatrix unable to work for DAG' );
+        node = node._parents[ 0 ];
       }
 
       var matrix = Matrix3.identity(); // will be modified in place
 
       // iterate from the back forwards (from the root node to here)
       for ( var i = matrices.length - 1; i >= 0; i-- ) {
-        matrix.multiplyMatrix( matrices[i] );
+        matrix.multiplyMatrix( matrices[ i ] );
       }
 
       // NOTE: always return a fresh copy, getGlobalToLocalMatrix depends on it to minimize instance usage!
@@ -2041,8 +2047,8 @@ define( function( require ) {
       while ( node ) {
         // in-place multiplication
         node._transform.getMatrix().multiplyVector2( resultPoint );
-        assert && assert( node._parents[1] === undefined, 'localToGlobalPoint unable to work for DAG' );
-        node = node._parents[0];
+        assert && assert( node._parents[ 1 ] === undefined, 'localToGlobalPoint unable to work for DAG' );
+        node = node._parents[ 0 ];
       }
       return resultPoint;
     },
@@ -2055,15 +2061,15 @@ define( function( require ) {
       var transforms = [];
       while ( node ) {
         transforms.push( node._transform );
-        assert && assert( node._parents[1] === undefined, 'globalToLocalPoint unable to work for DAG' );
-        node = node._parents[0];
+        assert && assert( node._parents[ 1 ] === undefined, 'globalToLocalPoint unable to work for DAG' );
+        node = node._parents[ 0 ];
       }
 
       // iterate from the back forwards (from the root node to here)
       var resultPoint = point.copy();
       for ( var i = transforms.length - 1; i >= 0; i-- ) {
         // in-place multiplication
-        transforms[i].getInverse().multiplyVector2( resultPoint );
+        transforms[ i ].getInverse().multiplyVector2( resultPoint );
       }
       return resultPoint;
     },
@@ -2083,23 +2089,23 @@ define( function( require ) {
     // like localToGlobalPoint, but without applying this node's transform
     parentToGlobalPoint: function( point ) {
       assert && assert( this.parents.length <= 1, 'parentToGlobalPoint unable to work for DAG' );
-      return this.parents.length ? this.parents[0].localToGlobalPoint( point ) : point;
+      return this.parents.length ? this.parents[ 0 ].localToGlobalPoint( point ) : point;
     },
 
     // like localToGlobalBounds, but without applying this node's transform
     parentToGlobalBounds: function( bounds ) {
       assert && assert( this.parents.length <= 1, 'parentToGlobalBounds unable to work for DAG' );
-      return this.parents.length ? this.parents[0].localToGlobalBounds( bounds ) : bounds;
+      return this.parents.length ? this.parents[ 0 ].localToGlobalBounds( bounds ) : bounds;
     },
 
     globalToParentPoint: function( point ) {
       assert && assert( this.parents.length <= 1, 'globalToParentPoint unable to work for DAG' );
-      return this.parents.length ? this.parents[0].globalToLocalPoint( point ) : point;
+      return this.parents.length ? this.parents[ 0 ].globalToLocalPoint( point ) : point;
     },
 
     globalToParentBounds: function( bounds ) {
       assert && assert( this.parents.length <= 1, 'globalToParentBounds unable to work for DAG' );
-      return this.parents.length ? this.parents[0].globalToLocalBounds( bounds ) : bounds;
+      return this.parents.length ? this.parents[ 0 ].globalToLocalBounds( bounds ) : bounds;
     },
 
     // get the Bounds2 of this node in the global coordinate frame.  Does not work for DAG.
@@ -2245,25 +2251,25 @@ define( function( require ) {
       }
 
       if ( assert ) {
-        assert && assert( _.filter( ['translation', 'x', 'left', 'right', 'centerX', 'centerTop', 'rightTop', 'leftCenter', 'center', 'rightCenter', 'leftBottom', 'centerBottom', 'rightBottom'], function( key ) { return options[key] !== undefined; } ).length <= 1,
-            'More than one mutation on this Node set the x component, check ' + Object.keys( options ).join( ',' ) );
+        assert && assert( _.filter( [ 'translation', 'x', 'left', 'right', 'centerX', 'centerTop', 'rightTop', 'leftCenter', 'center', 'rightCenter', 'leftBottom', 'centerBottom', 'rightBottom' ], function( key ) { return options[ key ] !== undefined; } ).length <= 1,
+          'More than one mutation on this Node set the x component, check ' + Object.keys( options ).join( ',' ) );
 
-        assert && assert( _.filter( ['translation', 'y', 'top', 'bottom', 'centerY', 'centerTop', 'rightTop', 'leftCenter', 'center', 'rightCenter', 'leftBottom', 'centerBottom', 'rightBottom'], function( key ) { return options[key] !== undefined; } ).length <= 1,
-            'More than one mutation on this Node set the y component, check ' + Object.keys( options ).join( ',' ) );
+        assert && assert( _.filter( [ 'translation', 'y', 'top', 'bottom', 'centerY', 'centerTop', 'rightTop', 'leftCenter', 'center', 'rightCenter', 'leftBottom', 'centerBottom', 'rightBottom' ], function( key ) { return options[ key ] !== undefined; } ).length <= 1,
+          'More than one mutation on this Node set the y component, check ' + Object.keys( options ).join( ',' ) );
       }
 
       var node = this;
 
       _.each( this._mutatorKeys, function( key ) {
-        if ( options[key] !== undefined ) {
+        if ( options[ key ] !== undefined ) {
           var descriptor = Object.getOwnPropertyDescriptor( Node.prototype, key );
 
           // if the key refers to a function that is not ES5 writable, it will execute that function with the single argument
           if ( descriptor && typeof descriptor.value === 'function' ) {
-            node[key]( options[key] );
+            node[ key ]( options[ key ] );
           }
           else {
-            node[key] = options[key];
+            node[ key ] = options[ key ];
           }
         }
       } );
@@ -2411,19 +2417,19 @@ define( function( require ) {
 
   // assumes the getterMethod is the same for Node and Bounds2
   function addBoundsVectorGetterSetter( getterMethod, setterMethod, propertyName ) {
-    Node.prototype[getterMethod] = function() {
-      return this.getBounds()[getterMethod]();
+    Node.prototype[ getterMethod ] = function() {
+      return this.getBounds()[ getterMethod ]();
     };
 
-    Node.prototype[setterMethod] = function( value ) {
+    Node.prototype[ setterMethod ] = function( value ) {
       assert && assert( value instanceof Vector2 );
 
-      this.translate( value.minus( this[getterMethod]() ), true );
+      this.translate( value.minus( this[ getterMethod ]() ), true );
       return this; // allow chaining
     };
 
     // ES5 getter and setter
-    Object.defineProperty( Node.prototype, propertyName, { set: Node.prototype[setterMethod], get: Node.prototype[getterMethod] } );
+    Object.defineProperty( Node.prototype, propertyName, { set: Node.prototype[ setterMethod ], get: Node.prototype[ getterMethod ] } );
   }
 
   // arguments are more explicit so text-searches will hopefully identify this code.

@@ -116,7 +116,7 @@ define( function( require ) {
         // needs to be done in order
         var len = this.batchedEvents.length;
         for ( var i = 0; i < len; i++ ) {
-          var batchedEvent = this.batchedEvents[i];
+          var batchedEvent = this.batchedEvents[ i ];
           batchedEvent.run( this );
           batchedEvent.dispose();
         }
@@ -182,7 +182,7 @@ define( function( require ) {
       var eventTypes = this.getUsedEventTypes();
 
       for ( var i = 0; i < eventTypes.length; i++ ) {
-        var type = eventTypes[i];
+        var type = eventTypes[ i ];
 
         // work around iOS Safari 7 not sending touch events to Scenes contained in an iframe
         if ( this.listenerTarget === window ) {
@@ -194,7 +194,7 @@ define( function( require ) {
           }
         }
 
-        var callback = this['on' + type];
+        var callback = this[ 'on' + type ];
         assert && assert( !!callback );
 
         if ( addOrRemove ) {
@@ -212,7 +212,7 @@ define( function( require ) {
       //Callback for showing pointer events.  Optimized for performance.
       if ( this.pointerAddedListeners.length ) {
         for ( var i = 0; i < this.pointerAddedListeners.length; i++ ) {
-          this.pointerAddedListeners[i]( pointer );
+          this.pointerAddedListeners[ i ]( pointer );
         }
       }
     },
@@ -231,7 +231,7 @@ define( function( require ) {
     removePointer: function( pointer ) {
       // sanity check version, will remove all instances
       for ( var i = this.pointers.length - 1; i >= 0; i-- ) {
-        if ( this.pointers[i] === pointer ) {
+        if ( this.pointers[ i ] === pointer ) {
           this.pointers.splice( i, 1 );
         }
       }
@@ -240,7 +240,7 @@ define( function( require ) {
     findTouchById: function( id ) {
       var i = this.pointers.length;
       while ( i-- ) {
-        var pointer = this.pointers[i];
+        var pointer = this.pointers[ i ];
         if ( pointer.id === id ) {
           return pointer;
         }
@@ -680,7 +680,7 @@ define( function( require ) {
 
       var i = this.pointers.length;
       while ( i-- ) {
-        var pointer = this.pointers[i];
+        var pointer = this.pointers[ i ];
         if ( pointer.point ) {
           var changed = that.branchChangeEvents( pointer, null, false );
           if ( changed ) {
@@ -735,17 +735,17 @@ define( function( require ) {
 
       var pointerListeners = pointer.listeners.slice( 0 ); // defensive copy
       for ( var i = 0; i < pointerListeners.length; i++ ) {
-        var listener = pointerListeners[i];
+        var listener = pointerListeners[ i ];
 
         // if a listener returns true, don't handle any more
         var aborted = false;
 
-        if ( !aborted && listener[specificType] ) {
-          listener[specificType]( inputEvent );
+        if ( !aborted && listener[ specificType ] ) {
+          listener[ specificType ]( inputEvent );
           aborted = inputEvent.aborted;
         }
-        if ( !aborted && listener[type] ) {
-          listener[type]( inputEvent );
+        if ( !aborted && listener[ type ] ) {
+          listener[ type ]( inputEvent );
           aborted = inputEvent.aborted;
         }
 
@@ -764,23 +764,23 @@ define( function( require ) {
       var specificType = pointer.type + type; // e.g. mouseup, touchup
 
       for ( var i = trail.length - 1; i >= 0; bubbles ? i-- : i = -1 ) {
-        var target = trail.nodes[i];
+        var target = trail.nodes[ i ];
         inputEvent.currentTarget = target;
 
         var listeners = target.getInputListeners();
 
         for ( var k = 0; k < listeners.length; k++ ) {
-          var listener = listeners[k];
+          var listener = listeners[ k ];
 
           // if a listener returns true, don't handle any more
           var aborted = false;
 
-          if ( !aborted && listener[specificType] ) {
-            listener[specificType]( inputEvent );
+          if ( !aborted && listener[ specificType ] ) {
+            listener[ specificType ]( inputEvent );
             aborted = inputEvent.aborted;
           }
-          if ( !aborted && listener[type] ) {
-            listener[type]( inputEvent );
+          if ( !aborted && listener[ type ] ) {
+            listener[ type ]( inputEvent );
             aborted = inputEvent.aborted;
           }
 
@@ -805,16 +805,16 @@ define( function( require ) {
         // stringifying dom event object properties can cause circular references, so we avoid that completely
         if ( prop === 'touches' || prop === 'targetTouches' || prop === 'changedTouches' ) {
           var arr = [];
-          for ( var i = 0; i < domEvent[prop].length; i++ ) {
+          for ( var i = 0; i < domEvent[ prop ].length; i++ ) {
             // according to spec (http://www.w3.org/TR/touch-events/), this is not an Array, but a TouchList
-            var touch = domEvent[prop].item( i );
+            var touch = domEvent[ prop ].item( i );
 
             arr.push( serializeDomEvent( touch ) );
           }
           lines.push( prop + ':[' + arr.join( ',' ) + ']' );
         }
         else {
-          lines.push( prop + ':' + ( ( typeof domEvent[prop] === 'object' ) && ( domEvent[prop] !== null ) ? '{}' : JSON.stringify( domEvent[prop] ) ) );
+          lines.push( prop + ':' + ( ( typeof domEvent[ prop ] === 'object' ) && ( domEvent[ prop ] !== null ) ? '{}' : JSON.stringify( domEvent[ prop ] ) ) );
         }
       }
     }
@@ -866,7 +866,7 @@ define( function( require ) {
       list.push( instance );
     }
     for ( var i = 0; i < instance.children.length; i++ ) {
-      flattenInstances( instance.children[i], list, predicate );
+      flattenInstances( instance.children[ i ], list, predicate );
     }
     return list;
   };
@@ -881,7 +881,7 @@ define( function( require ) {
 
     var Display = scenery.Display;//TODO: move to a traditional require statement (though may be cyclic)
     for ( var i = 0; i < Display.displays.length; i++ ) {
-      var display = Display.displays[i];
+      var display = Display.displays[ i ];
 
       // Add to the list of all focusable items across Displays
       if ( display._baseInstance ) {
@@ -899,7 +899,7 @@ define( function( require ) {
     //If the focused instance was null, find the first focusable element.
     if ( Input.focusedInstanceProperty.value === null ) {
 
-      Input.focusedInstanceProperty.value = focusableInstances[0];
+      Input.focusedInstanceProperty.value = focusableInstances[ 0 ];
     }
     else {
       //Find the index of the currently focused instance, and look for the next focusable instance.
@@ -918,7 +918,7 @@ define( function( require ) {
         newIndex -= focusableInstances.length;
       }
 
-      Input.focusedInstanceProperty.value = focusableInstances[newIndex];
+      Input.focusedInstanceProperty.value = focusableInstances[ newIndex ];
     }
   };
 

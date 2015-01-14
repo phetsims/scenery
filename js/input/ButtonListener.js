@@ -70,8 +70,8 @@ define( function( require ) {
 
         this.buttonState = state;
 
-        if ( this._buttonOptions[state] ) {
-          this._buttonOptions[state]( event, oldState );
+        if ( this._buttonOptions[ state ] ) {
+          this._buttonOptions[ state ]( event, oldState );
         }
 
         if ( this._buttonOptions.fire &&

@@ -88,7 +88,7 @@ define( function( require ) {
     webgl: Renderer.bitmaskWebGL
   };
   Renderer.fromName = function( name ) {
-    return rendererMap[name];
+    return rendererMap[ name ];
   };
 
   // returns the part of the bitmask that should contain only Canvas/SVG/DOM/WebGL flags
@@ -98,7 +98,7 @@ define( function( require ) {
   };
 
   Renderer.getFitStrategy = function( bitmask ) {
-    return Renderer.fitStrategies[bitmask & Renderer.bitmaskFitting];
+    return Renderer.fitStrategies[ bitmask & Renderer.bitmaskFitting ];
   };
   Renderer.isAccelerationForced = function( bitmask ) {
     return ( bitmask & Renderer.bitmaskForceAcceleration ) !== 0;
@@ -119,7 +119,7 @@ define( function( require ) {
     return ( bitmask & Renderer.bitmaskCanvasBeforeAfterBounds ) !== 0;
   };
   Renderer.getSVGOptimizations = function( bitmask ) {
-    return Renderer.svgOptimizations[bitmask & Renderer.bitmaskSVGOptimizations];
+    return Renderer.svgOptimizations[ bitmask & Renderer.bitmaskSVGOptimizations ];
   };
 
   Renderer.createOrderBitmask = function( firstRenderer, secondRenderer, thirdRenderer, fourthRenderer ) {

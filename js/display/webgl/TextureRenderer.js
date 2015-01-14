@@ -116,7 +116,7 @@ define( function( require ) {
     bindDirtyTextures: function() {
       var gl = this.gl;
       for ( var i = 0; i < this.textureBufferData.spriteSheets.length; i++ ) {
-        var spriteSheet = this.textureBufferData.spriteSheets[i];
+        var spriteSheet = this.textureBufferData.spriteSheets[ i ];
         if ( spriteSheet.dirty ) {
           gl.bindTexture( gl.TEXTURE_2D, this.texture );
 
@@ -154,7 +154,7 @@ define( function( require ) {
 
       //Update the Float32Array values
       for ( var i = geometry.startIndex; i < geometry.endIndex; i++ ) {
-        this.vertexArray[i] = this.textureBufferData.vertexArray[i];
+        this.vertexArray[ i ] = this.textureBufferData.vertexArray[ i ];
       }
 
       // Isolate the subarray of changed values
