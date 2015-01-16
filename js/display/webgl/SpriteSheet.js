@@ -53,9 +53,7 @@ define( function( require ) {
       var normalizedBounds = null;
       if ( startPosition ) {
         //Draw Image at specific position
-        console.log( "Image Position of  " + image.src + "  " + startPosition );
         this.context.drawImage( image, startPosition.x, startPosition.y );
-
         normalizedBounds = Bounds2.rect( startPosition.x / this.image.width, startPosition.y / this.image.height,
           image.width / this.image.width, image.height / this.image.height );
       }
