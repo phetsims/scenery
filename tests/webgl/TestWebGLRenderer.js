@@ -21,7 +21,16 @@ define( function( require ) {
   var SquareUnstrokedRectangle = require( 'SCENERY/display/webgl/SquareUnstrokedRectangle' );
 
   // images
-  var mountains = require( 'image!ENERGY_SKATE_PARK_BASICS/mountains.png' );
+  var mountainsImage = require( 'image!ENERGY_SKATE_PARK_BASICS/mountains.png' );
+  var attachImage = require( 'image!ENERGY_SKATE_PARK_BASICS/attach.png' );
+  var cementTextureDarkImage = require( 'image!ENERGY_SKATE_PARK_BASICS/cement-texture-dark.jpg' );
+  var detachImage = require( 'image!ENERGY_SKATE_PARK_BASICS/detach.png' );
+  var iconPlaygroundHomescreenImage = require( 'image!ENERGY_SKATE_PARK_BASICS/icon-playground-homescreen.png' );
+  var skaterLeftImage = require( 'image!ENERGY_SKATE_PARK_BASICS/skater-left.png' );
+  var skaterRightImage = require( 'image!ENERGY_SKATE_PARK_BASICS/skater-right.png' );
+  var iconFrictionHomescreenImage = require( 'image!ENERGY_SKATE_PARK_BASICS/icon-friction-homescreen.png' );
+  var iconIntroHomescreenImage = require( 'image!ENERGY_SKATE_PARK_BASICS/icon-intro-homescreen.png' );
+
 
   return {
     start: function() {
@@ -55,11 +64,21 @@ define( function( require ) {
       var redTriangle = colorTriangleBufferData.createFromTriangle( 100, 100, 200, 100, 150, 200, 'red', 0.5 );
       colorTriangleBufferData.createFromTriangle( 100, 200, 200, 200, 150, 300, 'blue', 0.5 );
 
+      var imageImports = [ mountainsImage ];
+
+      /*
+      To see how multiple images are embedded in one or more SpriteSheet,uncomment this line
+      To force the creation of more than one SpriteSheet reduce the SpriteSheet size from 2048 to 1024
+      Despite all these images the Packing algorithm efficiently places them into a single spriteSheet
+      var imageImports = [ mountainsImage, attachImage, cementTextureDarkImage, detachImage,
+        iconPlaygroundHomescreenImage, skaterLeftImage, skaterRightImage,iconFrictionHomescreenImage,iconIntroHomescreenImage ]; */
+
+
       //Show something from another module
       var images = [];
       for ( var i = 0; i < 100; i++ ) {
-        var imageNode = new Image( mountains, { x: i * 2, y: 0 } );
-        var image = webGLRenderer.textureRenderer.textureBufferData.createFromImageNode( imageNode, Math.random() );
+        var imageNode = new Image( imageImports[ Math.floor( Math.random() * imageImports.length ) ], { x: i * 4, y: 0 } );
+        var image = webGLRenderer.textureRenderer.createFromImageNode( imageNode, Math.random() );
         images.push( image );
       }
       webGLRenderer.textureRenderer.bindVertexBuffer();

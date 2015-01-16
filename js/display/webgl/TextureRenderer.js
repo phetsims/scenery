@@ -12,23 +12,19 @@ define( function( require ) {
   // modules
   var inherit = require( 'PHET_CORE/inherit' );
   var TextureBufferData = require( 'SCENERY/display/webgl/TextureBufferData' );
+  var SpriteSheetCollection = require( 'SCENERY/display/webgl/SpriteSheetCollection' );
 
   // shaders
   var colorVertexShader = require( 'text!SCENERY/display/webgl/texture.vert' );
   var colorFragmentShader = require( 'text!SCENERY/display/webgl/texture.frag' );
 
   /**
-   *
    * @constructor
    */
   function TextureRenderer( gl, backingScale, canvas ) {
     this.gl = gl;
     this.canvas = canvas;
     this.backingScale = backingScale;
-
-    // Manages the indices within a single array, so that disjoint geometries can be represented easily here.
-    // TODO: Compare this same idea to triangle strips
-    this.textureBufferData = new TextureBufferData();
 
     var toShader = function( source, type, typeString ) {
       var shader = gl.createShader( type );
@@ -53,24 +49,46 @@ define( function( require ) {
     this.transform1AttributeLocation = gl.getAttribLocation( this.colorShaderProgram, 'aTransform1' );
     this.transform2AttributeLocation = gl.getAttribLocation( this.colorShaderProgram, 'aTransform2' );
 
-    // Create a texture.
-    this.texture = gl.createTexture();
-
     // lookup uniforms
     this.resolutionLocation = gl.getUniformLocation( program, 'uResolution' );
-
-    // Create a buffer for the position of the rectangle corners.
-    this.vertexBuffer = gl.createBuffer();
-    gl.bindBuffer( gl.ARRAY_BUFFER, this.vertexBuffer );
-    gl.enableVertexAttribArray( this.positionLocation );
-    gl.vertexAttribPointer( this.positionLocation, 2, gl.FLOAT, false, 0, 0 );
-
     gl.blendFunc( gl.SRC_ALPHA, gl.ONE_MINUS_SRC_ALPHA );
     gl.enable( this.gl.BLEND );
+
+    this.spriteSheetCollection = new SpriteSheetCollection();
+    // TODO: Compare this same idea to triangle strips
+    //Each textureBufferData manages the indices within a single array, so that disjoint geometries can be represented easily here.
+    this.textureBufferDataArray = [];
+    // Create a buffer for the position of the rectangle corners.
+    this.vertexBufferArray = [];
+    this.textureArray = [];
+    // List of Vertex Array to Keep for updating sublist
+    this.vertexArrayList = [];
   }
 
   return inherit( Object, TextureRenderer, {
+    createFromImageNode: function( imageNode, z ) {
+      var frameRange = this.spriteSheetCollection.addImage( imageNode.image );
+      if ( !this.textureBufferDataArray[ frameRange.spriteSheetIndex ] ) {
+        // if there is no textureBuffer,VertextBuffer,textures entry  for this SpriteSheet so create one
+        this.textureBufferDataArray[ frameRange.spriteSheetIndex ] = new TextureBufferData();
+        this.vertexBufferArray[ frameRange.spriteSheetIndex ] = this.gl.createBuffer();
+        this.textureArray[ frameRange.spriteSheetIndex ] = this.gl.createTexture();
+      }
+      var textureBufferData = this.textureBufferDataArray[ frameRange.spriteSheetIndex ];
+      return textureBufferData.createFromImage( 0, 0, z,
+        imageNode._image.width, imageNode._image.height, imageNode.image, imageNode.getLocalToGlobalMatrix().toMatrix4(), frameRange );
+    },
+
     draw: function() {
+      for ( var i = 0; i < this.textureArray.length; i++ ) {
+        this.doDraw( i );
+      }
+    },
+
+    /**
+     * @private
+     */
+    doDraw: function( activeTextureIndex ) {
       var gl = this.gl;
 
       gl.useProgram( this.colorShaderProgram );
@@ -79,9 +97,11 @@ define( function( require ) {
       gl.enableVertexAttribArray( this.transform1AttributeLocation );
       gl.enableVertexAttribArray( this.transform2AttributeLocation );
 
-      // Create a texture.
+      // bind and activate the correct texture
       // TODO: Does this need to be done every frame?
-      gl.bindTexture( gl.TEXTURE_2D, this.texture );
+      gl.bindTexture( gl.TEXTURE_2D, this.textureArray[ activeTextureIndex ] );
+      // Activate the correct texture
+      gl.activeTexture( gl.TEXTURE0 + activeTextureIndex );
 
       // set the resolution
       // TODO: This backing scale multiply seems very buggy and contradicts everything we know!
@@ -93,14 +113,14 @@ define( function( require ) {
       var total = 3 + 2 + 3 + 3;
       var stride = step * total;
 
-      gl.bindBuffer( gl.ARRAY_BUFFER, this.vertexBuffer );
+      gl.bindBuffer( gl.ARRAY_BUFFER, this.vertexBufferArray[ activeTextureIndex ] );
       gl.vertexAttribPointer( this.positionLocation, 3, gl.FLOAT, false, stride, 0 );
       gl.vertexAttribPointer( this.texCoordLocation, 2, gl.FLOAT, false, stride, step * 3 );
       gl.vertexAttribPointer( this.transform1AttributeLocation, 3, gl.FLOAT, false, stride, step * (3 + 2) );
       gl.vertexAttribPointer( this.transform2AttributeLocation, 3, gl.FLOAT, false, stride, step * (3 + 2 + 3) );
 
       // Draw the rectangle.
-      gl.drawArrays( gl.TRIANGLES, 0, this.textureBufferData.vertexArray.length / total );
+      gl.drawArrays( gl.TRIANGLES, 0, this.textureBufferDataArray[ activeTextureIndex ].vertexArray.length / total );
 
       gl.disableVertexAttribArray( this.texCoordLocation );
       gl.disableVertexAttribArray( this.positionLocation );
@@ -110,16 +130,20 @@ define( function( require ) {
       gl.bindTexture( gl.TEXTURE_2D, null );
     },
 
+    getSpriteSheets: function() {
+      return this.spriteSheetCollection.spriteSheets;
+    },
+
     /**
      * Iterate through all of the sprite sheets and register the dirty ones with the GPU as texture units.
      */
     bindDirtyTextures: function() {
       var gl = this.gl;
-      for ( var i = 0; i < this.textureBufferData.spriteSheets.length; i++ ) {
-        var spriteSheet = this.textureBufferData.spriteSheets[ i ];
+      var spriteSheets = this.getSpriteSheets();
+      for ( var i = 0; i < spriteSheets.length; i++ ) {
+        var spriteSheet = spriteSheets[ i ];
         if ( spriteSheet.dirty ) {
-          gl.bindTexture( gl.TEXTURE_2D, this.texture );
-
+          gl.bindTexture( gl.TEXTURE_2D, this.textureArray[ i ] );
           gl.texParameteri( gl.TEXTURE_2D, gl.TEXTURE_WRAP_S, gl.CLAMP_TO_EDGE );
           gl.texParameteri( gl.TEXTURE_2D, gl.TEXTURE_WRAP_T, gl.CLAMP_TO_EDGE );
           gl.texParameteri( gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.LINEAR_MIPMAP_LINEAR );
@@ -136,34 +160,39 @@ define( function( require ) {
 
     bindVertexBuffer: function() {
       var gl = this.gl;
-      gl.bindBuffer( gl.ARRAY_BUFFER, this.vertexBuffer );
+      var spriteSheets = this.getSpriteSheets();
+      for ( var i = 0; i < spriteSheets.length; i++ ) {
+        gl.bindBuffer( gl.ARRAY_BUFFER, this.vertexBufferArray[ i ] );
+        // Keep track of the vertexArray for updating sublists of it
+        this.vertexArrayList[ i ] = new Float32Array( this.textureBufferDataArray[ i ].vertexArray );
+        gl.bufferData( gl.ARRAY_BUFFER, this.vertexArrayList[ i ], gl.DYNAMIC_DRAW );
+      }
 
-      // Keep track of the vertexArray for updating sublists of it
-      this.vertexArray = new Float32Array( this.textureBufferData.vertexArray );
-      gl.bufferData( gl.ARRAY_BUFFER, this.vertexArray, gl.DYNAMIC_DRAW );
     },
 
     updateTriangleBuffer: function( geometry ) {
       var gl = this.gl;
 
+      var frameRange = geometry.frameRange;
       // Update the vertex locations
       // Use a buffer view to only update the changed vertices
       // like //see http://stackoverflow.com/questions/19892022/webgl-optimizing-a-vertex-buffer-that-changes-values-vertex-count-every-frame
       // See also http://stackoverflow.com/questions/5497722/how-can-i-animate-an-object-in-webgl-modify-specific-vertices-not-full-transfor
-      gl.bindBuffer( gl.ARRAY_BUFFER, this.vertexBuffer );
+      gl.bindBuffer( gl.ARRAY_BUFFER, this.vertexBufferArray[ frameRange.spriteSheetIndex ] );
 
+      var vertexArray = this.vertexArrayList[ frameRange.spriteSheetIndex ];
       //Update the Float32Array values
       for ( var i = geometry.startIndex; i < geometry.endIndex; i++ ) {
-        this.vertexArray[ i ] = this.textureBufferData.vertexArray[ i ];
+        vertexArray[ i ] = this.textureBufferDataArray[ frameRange.spriteSheetIndex ].vertexArray[ i ];
       }
-
       // Isolate the subarray of changed values
-      var subArray = this.vertexArray.subarray( geometry.startIndex, geometry.endIndex );
+      var subArray = vertexArray.subarray( geometry.startIndex, geometry.endIndex );
 
       // Send new values to the GPU
       // See https://www.khronos.org/webgl/public-mailing-list/archives/1201/msg00110.html
       // The the offset is the index times the bytes per value
       gl.bufferSubData( gl.ARRAY_BUFFER, geometry.startIndex * 4, subArray );
     }
+
   } );
 } );

@@ -13,7 +13,6 @@ define( function( require ) {
 
   // modules
   var inherit = require( 'PHET_CORE/inherit' );
-  var SpriteSheet = require( 'SCENERY/display/webgl/SpriteSheet' );
 
   /**
    *
@@ -21,19 +20,18 @@ define( function( require ) {
    */
   function TextureBufferData() {
     this.vertexArray = [];
-    this.spriteSheets = [ new SpriteSheet() ];
   }
 
   return inherit( Object, TextureBufferData, {
-    createFromImageNode: function( imageNode, z ) {
-      return this.createFromImage( 0, 0, z,
-        imageNode._image.width, imageNode._image.height, imageNode.image, imageNode.getLocalToGlobalMatrix().toMatrix4() );
+    createFromImageNode: function( imageNode, z,frameRange ) {
+      return this.createFromImage( imageNode.x, imageNode.y, z,
+        imageNode._image.width, imageNode._image.height, imageNode.image, imageNode.getLocalToGlobalMatrix().toMatrix4(),frameRange );
     },
-    createFromImage: function( x, y, z, width, height, image, matrix4 ) {
+    createFromImage: function( x, y, z, width, height, image, matrix4,frameRange ) {
       //TODO: Check to see if any of the sprite sheets already contains that image
       //TODO: If none of the sprite sheets contained that image, then mark the spritesheet as dirty
       //TODO: and send it to the GPU after updating
-      this.spriteSheets[ 0 ].addImage( image );
+
       var textureBufferData = this;
       var index = this.vertexArray.length;
 
@@ -42,18 +40,18 @@ define( function( require ) {
       var y1 = y;
       var y2 = y + height;
 
-      // TODO: Correct texture coordinates
-      // TODO: Factor out hard-coded dimensions, see SpriteSheet.js
-      var u = image.width / 2048;
-      var v = image.height / 2048;
+      var u1 = frameRange.bounds.minX;
+      var u2 = frameRange.bounds.maxX;
+      var v1 = frameRange.bounds.minY;
+      var v2 = frameRange.bounds.maxY;
 
       this.vertexArray.push(
-        x1, y1, z, 0, 0, matrix4.m00(), matrix4.m01(), matrix4.m02(), matrix4.m10(), matrix4.m11(), matrix4.m12(),
-        x2, y1, z, u, 0, matrix4.m00(), matrix4.m01(), matrix4.m02(), matrix4.m10(), matrix4.m11(), matrix4.m12(),
-        x1, y2, z, 0, v, matrix4.m00(), matrix4.m01(), matrix4.m02(), matrix4.m10(), matrix4.m11(), matrix4.m12(),
-        x1, y2, z, 0, v, matrix4.m00(), matrix4.m01(), matrix4.m02(), matrix4.m10(), matrix4.m11(), matrix4.m12(),
-        x2, y1, z, u, 0, matrix4.m00(), matrix4.m01(), matrix4.m02(), matrix4.m10(), matrix4.m11(), matrix4.m12(),
-        x2, y2, z, u, v, matrix4.m00(), matrix4.m01(), matrix4.m02(), matrix4.m10(), matrix4.m11(), matrix4.m12()
+        x1, y1, z, u1, v1, matrix4.m00(), matrix4.m01(), matrix4.m02(), matrix4.m10(), matrix4.m11(), matrix4.m12(),
+        x2, y1, z, u2, v1, matrix4.m00(), matrix4.m01(), matrix4.m02(), matrix4.m10(), matrix4.m11(), matrix4.m12(),
+        x1, y2, z, u1, v2, matrix4.m00(), matrix4.m01(), matrix4.m02(), matrix4.m10(), matrix4.m11(), matrix4.m12(),
+        x1, y2, z, u1, v2, matrix4.m00(), matrix4.m01(), matrix4.m02(), matrix4.m10(), matrix4.m11(), matrix4.m12(),
+        x2, y1, z, u2, v1, matrix4.m00(), matrix4.m01(), matrix4.m02(), matrix4.m10(), matrix4.m11(), matrix4.m12(),
+        x2, y2, z, u2, v2, matrix4.m00(), matrix4.m01(), matrix4.m02(), matrix4.m10(), matrix4.m11(), matrix4.m12()
       );
 
       //Track the index so it can delete itself, update itself, etc.
@@ -62,6 +60,7 @@ define( function( require ) {
         startIndex: index,
         endIndex: textureBufferData.vertexArray.length,
         image: image,
+        frameRange:frameRange,
         setTransform: function( matrix4 ) {
           for ( var i = 0; i < 6; i++ ) {
             textureBufferData.vertexArray[ index + 5 + i * 11 ] = matrix4.m00();
