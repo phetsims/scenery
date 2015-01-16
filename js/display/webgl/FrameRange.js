@@ -18,6 +18,7 @@ define( function( require ) {
    */
   function FrameRange( bounds, spriteSheetIndex ) {
     this.bounds = bounds;
+    //The link between vertexArray,TextureDataArray and Texture
     this.spriteSheetIndex = spriteSheetIndex;
   }
 

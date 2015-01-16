@@ -40,18 +40,18 @@ define( function( require ) {
       var y1 = y;
       var y2 = y + height;
 
-      var u1 = frameRange.bounds.minX;
-      var u2 = frameRange.bounds.maxX;
-      var v1 = frameRange.bounds.minY;
-      var v2 = frameRange.bounds.maxY;
+      var u0 = frameRange.bounds.minX;
+      var u1 = frameRange.bounds.maxX;
+      var v0 = frameRange.bounds.minY;
+      var v1 = frameRange.bounds.maxY;
 
       this.vertexArray.push(
-        x1, y1, z, u1, v1, matrix4.m00(), matrix4.m01(), matrix4.m02(), matrix4.m10(), matrix4.m11(), matrix4.m12(),
-        x2, y1, z, u2, v1, matrix4.m00(), matrix4.m01(), matrix4.m02(), matrix4.m10(), matrix4.m11(), matrix4.m12(),
-        x1, y2, z, u1, v2, matrix4.m00(), matrix4.m01(), matrix4.m02(), matrix4.m10(), matrix4.m11(), matrix4.m12(),
-        x1, y2, z, u1, v2, matrix4.m00(), matrix4.m01(), matrix4.m02(), matrix4.m10(), matrix4.m11(), matrix4.m12(),
-        x2, y1, z, u2, v1, matrix4.m00(), matrix4.m01(), matrix4.m02(), matrix4.m10(), matrix4.m11(), matrix4.m12(),
-        x2, y2, z, u2, v2, matrix4.m00(), matrix4.m01(), matrix4.m02(), matrix4.m10(), matrix4.m11(), matrix4.m12()
+        x1, y1, z, u0, v0, matrix4.m00(), matrix4.m01(), matrix4.m02(), matrix4.m10(), matrix4.m11(), matrix4.m12(),
+        x2, y1, z, u1, v0, matrix4.m00(), matrix4.m01(), matrix4.m02(), matrix4.m10(), matrix4.m11(), matrix4.m12(),
+        x1, y2, z, u0, v1, matrix4.m00(), matrix4.m01(), matrix4.m02(), matrix4.m10(), matrix4.m11(), matrix4.m12(),
+        x1, y2, z, u0, v1, matrix4.m00(), matrix4.m01(), matrix4.m02(), matrix4.m10(), matrix4.m11(), matrix4.m12(),
+        x2, y1, z, u1, v0, matrix4.m00(), matrix4.m01(), matrix4.m02(), matrix4.m10(), matrix4.m11(), matrix4.m12(),
+        x2, y2, z, u1, v1, matrix4.m00(), matrix4.m01(), matrix4.m02(), matrix4.m10(), matrix4.m11(), matrix4.m12()
       );
 
       //Track the index so it can delete itself, update itself, etc.

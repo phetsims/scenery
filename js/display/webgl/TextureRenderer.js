@@ -4,6 +4,14 @@
  * This renderer shows WebGL textures.  To achieve performance goals, it is important to minimize the number of draw calls.
  * So we try to add as many sprites into each texture as possible, and render all with a small number of draw calls.
  *
+ * Adds as many images into a single SpriteSheet using a bin packing algorithm.A new Sprite will be created If a single
+ * SpriteSheet cannot accommodate them. If there are 3  SpriteSheets, there would be 3 TriangleBuggerData, 3 VertexBuffers,3 Textures
+ * and 3 draw calls.
+ * Before each draw call, the appropriate Texture will be activated and the drawTriangles will pick the right TriangleBufferData
+ * SpriteSheetIndex property of FrameRange is used to associate textures,TriangleBuggerData and VertexBuffers.
+ *
+ * Too many distinct Images with bigger dimensions will result in more than one SpriteSheet.
+ *
  * @author Sam Reid (PhET Interactive Simulations)
  */
 define( function( require ) {
