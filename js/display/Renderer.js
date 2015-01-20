@@ -31,6 +31,7 @@ define( function( require ) {
   assert && assert( scenery.bitmaskSupportsSVG === 0x0000002 );
   assert && assert( scenery.bitmaskSupportsDOM === 0x0000004 );
   assert && assert( scenery.bitmaskSupportsWebGL === 0x0000008 );
+  assert && assert( scenery.bitmaskSupportsPixi === 0x0000010 );
 
   // these will need to be updated if another renderer option is given (modify order bitmasks below also)
   Renderer.bitmaskRendererArea = scenery.bitmaskRendererArea;   // 0x00000FF

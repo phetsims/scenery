@@ -25,6 +25,7 @@ define( function( require ) {
   var SVGSelfDrawable = require( 'SCENERY/display/SVGSelfDrawable' );
   var CanvasSelfDrawable = require( 'SCENERY/display/CanvasSelfDrawable' );
   var WebGLSelfDrawable = require( 'SCENERY/display/WebGLSelfDrawable' );
+  var PixiSelfDrawable = require( 'SCENERY/display/PixiSelfDrawable' );
   var SelfDrawable = require( 'SCENERY/display/SelfDrawable' );
   var SquareUnstrokedRectangle = require( 'SCENERY/display/webgl/SquareUnstrokedRectangle' );
 
@@ -128,6 +129,7 @@ define( function( require ) {
       //TODO: Refine the rules for when WebGL can be used
       if ( !this.hasStroke() ) {
         bitmask |= scenery.bitmaskSupportsWebGL;
+        bitmask |= scenery.bitmaskSupportsPixi;
       }
       return bitmask;
     },
@@ -150,6 +152,7 @@ define( function( require ) {
       //TODO: Refine the rules for when WebGL can be used
       if ( !this.isRounded() && (!this.hasStroke() || this.getLineJoin() !== 'round') ) {
         bitmask |= scenery.bitmaskSupportsWebGL;
+        bitmask |= scenery.bitmaskSupportsPixi;
       }
 
       return bitmask;
@@ -359,6 +362,10 @@ define( function( require ) {
 
     createWebGLDrawable: function( renderer, instance ) {
       return Rectangle.RectangleWebGLDrawable.createFromPool( renderer, instance );
+    },
+
+    createPixiDrawable: function( renderer, instance ) {
+      return Rectangle.RectanglePixiDrawable.createFromPool( renderer, instance );
     },
 
     /*---------------------------------------------------------------------------*
@@ -937,7 +944,92 @@ define( function( require ) {
   /* jshint -W064 */
   SelfDrawable.PoolableMixin( Rectangle.RectangleWebGLDrawable );
 
+  /*---------------------------------------------------------------------------*
+   * Pixi rendering
+   *----------------------------------------------------------------------------*/
+
+  Rectangle.RectanglePixiDrawable = inherit( PixiSelfDrawable, function RectanglePixiDrawable( renderer, instance ) {
+    this.initialize( renderer, instance );
+  }, {
+    // called either from the constructor or from pooling
+    initialize: function( renderer, instance ) {
+      this.initializePixiSelfDrawable( renderer, instance );
+    },
+
+    initializeContext: function( pixiBlock ) {
+      this.pixiBlock = pixiBlock;
+      //
+      //// cleanup old vertexBuffer, if applicable
+      //this.disposePixiBuffers();
+      //
+      //this.initializePaintableState();
+      //this.updateRectangle();
+
+      //TODO: Update the state in the buffer arrays
+    },
+
+    //Nothing necessary since everything currently handled in the uModelViewMatrix below
+    //However, we may switch to dynamic draw, and handle the matrix change only where necessary in the future?
+    updateRectangle: function() {
+
+      // TODO: a way to update the ColorTriangleBufferData.
+
+      // TODO: move to PaintablePixiState???
+      if ( this.dirtyFill ) {
+        this.color = Color.toColor( this.node._fill );
+        this.cleanPaintableState();
+      }
+    },
+
+    render: function( shaderProgram ) {
+      // This is handled by the ColorTriangleRenderer
+    },
+
+    dispose: function() {
+      this.disposePixiBuffers();
+
+      // super
+      PixiSelfDrawable.prototype.dispose.call( this );
+    },
+
+    disposePixiBuffers: function() {
+      this.pixiBlock.PixiRenderer.colorTriangleRenderer.colorTriangleBufferData.dispose( this.rectangleHandle );
+    },
+
+    markDirtyRectangle: function() {
+      this.markDirty();
+    },
+
+    // general flag set on the state, which we forward directly to the drawable's paint flag
+    markPaintDirty: function() {
+      this.markDirty();
+    },
+
+    onAttach: function( node ) {
+
+    },
+
+    // release the drawable
+    onDetach: function( node ) {
+      //OHTWO TODO: are we missing the disposal?
+    },
+
+    //TODO: Make sure all of the dirty flags make sense here.  Should we be using fillDirty, paintDirty, dirty, etc?
+    update: function() {
+      if ( this.dirty ) {
+        this.updateRectangle();
+        this.dirty = false;
+      }
+    }
+  } );
+
+  // include stubs (stateless) for marking dirty stroke and fill (if necessary). we only want one dirty flag, not multiple ones, for Pixi (for now)
+  /* jshint -W064 */
+  Paintable.PaintableStatefulDrawableMixin( Rectangle.RectanglePixiDrawable );
+
+  // set up pooling
+  /* jshint -W064 */
+  SelfDrawable.PoolableMixin( Rectangle.RectanglePixiDrawable );
+
   return Rectangle;
 } );
-
-

@@ -1512,6 +1512,10 @@ define( function( require ) {
       return ( this._rendererBitmask & scenery.bitmaskSupportsWebGL ) !== 0;
     },
 
+    supportsPixi:function(){
+      return ( this._rendererBitmask & scenery.bitmaskSupportsPixi) !== 0;
+    },
+
     supportsRenderer: function( renderer ) {
       return ( this._rendererBitmask & renderer.bitmask ) !== 0;
     },
@@ -1549,8 +1553,8 @@ define( function( require ) {
 
     // provides a rendering hint to use this render whenever possible
     setRenderer: function( renderer ) {
-      assert && assert( renderer === null || renderer === 'canvas' || renderer === 'svg' || renderer === 'dom' || renderer === 'webgl',
-        'Renderer input should be null, or one of: "canvas", "svg", "dom", or "webgl".' );
+      assert && assert( renderer === null || renderer === 'canvas' || renderer === 'svg' || renderer === 'dom' || renderer === 'webgl' || renderer === 'pixi',
+        'Renderer input should be null, or one of: "canvas", "svg", "dom", "webgl" or "pixi".' );
 
       var newRenderer = 0;
       if ( renderer === 'canvas' ) {
@@ -1564,6 +1568,9 @@ define( function( require ) {
       }
       else if ( renderer === 'webgl' ) {
         newRenderer = scenery.Renderer.bitmaskWebGL;
+      }
+      else if ( renderer === 'pixi' ) {
+        newRenderer = scenery.Renderer.bitmaskPixi;
       }
       assert && assert( ( renderer === null ) === ( newRenderer === 0 ),
         'We should only end up with no actual renderer if renderer is null' );
@@ -1590,6 +1597,9 @@ define( function( require ) {
       }
       else if ( this._hints.renderer === scenery.Renderer.bitmaskWebGL ) {
         return 'webgl';
+      }
+      else if ( this._hints.renderer === scenery.Renderer.bitmaskPixi ) {
+        return 'pixi';
       }
       assert && assert( false, 'Seems to be an invalid renderer?' );
       return this._hints.renderer;

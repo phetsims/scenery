@@ -22,6 +22,7 @@ define( function( require ) {
     scenery.bitmaskSupportsSVG,
     scenery.bitmaskSupportsDOM,
     scenery.bitmaskSupportsWebGL,
+    scenery.bitmaskSupportsPixi,
     scenery.bitmaskNotPainted,
     scenery.bitmaskBoundsValid
   ];
