@@ -338,6 +338,7 @@ define( function( require ) {
                               ( nodeBitmask & Renderer.bitmaskCanvas ) ||
                               ( nodeBitmask & Renderer.bitmaskDOM ) ||
                               ( nodeBitmask & Renderer.bitmaskWebGL ) ||
+                                                                      ( nodeBitmask & Renderer.bitmaskPixi ) ||
                               0;
 
           assert && assert( this.selfRenderer, 'setSelfRenderer failure?' );

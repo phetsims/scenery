@@ -1565,6 +1565,9 @@ define( function( require ) {
       else if ( renderer === 'webgl' ) {
         newRenderer = scenery.Renderer.bitmaskWebGL;
       }
+      else if ( renderer === 'pixi' ) {
+        newRenderer = scenery.Renderer.bitmaskPixi;
+      }
       assert && assert( ( renderer === null ) === ( newRenderer === 0 ),
         'We should only end up with no actual renderer if renderer is null' );
 
@@ -1590,6 +1593,9 @@ define( function( require ) {
       }
       else if ( this._hints.renderer === scenery.Renderer.bitmaskWebGL ) {
         return 'webgl';
+      }
+      else if ( this._hints.renderer === scenery.Renderer.bitmaskPixi ) {
+        return 'pixi';
       }
       assert && assert( false, 'Seems to be an invalid renderer?' );
       return this._hints.renderer;
