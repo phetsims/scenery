@@ -73,8 +73,8 @@ module.exports = function( grunt ) {
       scenery: [
         'js/**/*.js'
       ],
-      // reference external JSHint options in jshint-options.js
-      options: require( '../chipper/grunt/jshint-options' )
+      // reference external JSHint options in jshintOptions.js
+      options: require( '../chipper/grunt/jshintOptions' )
     }
   } );
 
