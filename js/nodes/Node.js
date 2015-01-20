@@ -1549,8 +1549,8 @@ define( function( require ) {
 
     // provides a rendering hint to use this render whenever possible
     setRenderer: function( renderer ) {
-      assert && assert( renderer === null || renderer === 'canvas' || renderer === 'svg' || renderer === 'dom' || renderer === 'webgl',
-        'Renderer input should be null, or one of: "canvas", "svg", "dom", or "webgl".' );
+      assert && assert( renderer === null || renderer === 'canvas' || renderer === 'svg' || renderer === 'dom' || renderer === 'webgl' || renderer === 'pixi',
+        'Renderer input should be null, or one of: "canvas", "svg", "dom", "webgl" or "pixi".' );
 
       var newRenderer = 0;
       if ( renderer === 'canvas' ) {
