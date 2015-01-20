@@ -43,13 +43,33 @@ define( function( require ) {
 
       // TODO: Maybe pass through Renderer.bitmaskWebGLLowResolution ) ?
       // Each WebGL block needs its own canvas, and this is created by the WebGLRenderer.
-      this.webglRenderer = null; //TODO: delete this
-      this.domElement = this.webglRenderer.canvas;
+      this.webglRenderer = new PIXI.WebGLRenderer( 800, 600 );
+      this.domElement = this.webglRenderer.view;
+
+      this.stage = new PIXI.Stage();
+
+      var graphics = new PIXI.Graphics();
+
+      // set a fill and line style
+      graphics.beginFill( 0xFF3300 );
+      graphics.lineStyle( 10, 0xffd900, 1 );
+
+      // draw a shape
+      graphics.moveTo( 50, 50 );
+      graphics.lineTo( 250, 50 );
+      graphics.lineTo( 100, 100 );
+      graphics.lineTo( 250, 220 );
+      graphics.lineTo( 50, 220 );
+      graphics.lineTo( 50, 50 );
+      graphics.endFill();
+
+      this.stage.addChild( graphics );
+      this.webglRenderer.render( this.stage );
 
       // reset any fit transforms that were applied
       // TODO: What is force acceleration?
-      Util.prepareForTransform( this.webglRenderer.canvas, this.forceAcceleration );
-      Util.unsetTransform( this.webglRenderer.canvas ); // clear out any transforms that could have been previously applied
+      Util.prepareForTransform( this.webglRenderer.view, this.forceAcceleration );
+      Util.unsetTransform( this.webglRenderer.view ); // clear out any transforms that could have been previously applied
 
       // store our backing scale so we don't have to look it up while fitting
 //      this.backingScale = ( renderer & Renderer.bitmaskWebGLLowResolution ) ? 1 : scenery.Util.backingScale( this.gl );
@@ -70,19 +90,23 @@ define( function( require ) {
 
     setSizeFullDisplay: function() {
 
-      // TODO: Allow scenery to change the size of the WebGLRenderer.canvas
+      // TODO: Allow scenery to change the size of the WebGLRenderer.view
       var size = this.display.getSize();
-      this.webglRenderer.setCanvasSize( size.width, size.height );
+
+      // TODO: Set size
+      //this.webglRenderer.setCanvasSize( size.width, size.height );
     },
 
     setSizeFitBounds: function() {
-      // TODO: Allow scenery to change the size of the WebGLRenderer.canvas
+      // TODO: Allow scenery to change the size of the WebGLRenderer.view
 
       var x = this.fitBounds.minX;
       var y = this.fitBounds.minY;
       //OHTWO TODO PERFORMANCE: see if we can get a speedup by putting the backing scale in our transform instead of with CSS?
-      Util.setTransform( 'matrix(1,0,0,1,' + x + ',' + y + ')', this.canvas, this.forceAcceleration ); // reapply the translation as a CSS transform
-      this.webglRenderer.setCanvasSize( this.fitBounds.width, this.fitBounds.height );
+      Util.setTransform( 'matrix(1,0,0,1,' + x + ',' + y + ')', this.webglRenderer.view, this.forceAcceleration ); // reapply the translation as a CSS transform
+
+      // TODO: Set size
+      //this.webglRenderer.setCanvasSize( this.fitBounds.width, this.fitBounds.height );
 
       //TODO: How to handle this in WebGLRenderer?
 //      this.updateWebGLDimension( -x, -y, this.fitBounds.width, this.fitBounds.height );
@@ -102,7 +126,7 @@ define( function( require ) {
         // udpate the fit BEFORE drawing, since it may change our offset
         this.updateFit();
 
-        this.webglRenderer.draw();
+        this.webglRenderer.render( this.stage );
       }
 
       sceneryLog && sceneryLog.PixiBlock && sceneryLog.pop();
@@ -135,9 +159,6 @@ define( function( require ) {
       FittedBlock.prototype.addDrawable.call( this, drawable );
 
       drawable.initializeContext( this );
-
-      //TODO: Don't call this every frame!  Consider preallocating a large array in the various buffers.
-      this.webglRenderer.colorTriangleRenderer.bindVertexBuffer();
     },
 
     removeDrawable: function( drawable ) {
@@ -170,7 +191,7 @@ define( function( require ) {
     simulateWebGLContextLoss: function() {
       console.log( 'simulating webgl context loss in PixiBlock' );
       assert && assert( this.scene.webglMakeLostContextSimulatingCanvas );
-      this.canvas.loseContextInNCalls( 5 );
+      this.webglRenderer.view.loseContextInNCalls( 5 );
     },
 
     toString: function() {
