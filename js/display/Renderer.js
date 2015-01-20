@@ -33,13 +33,14 @@ define( function( require ) {
   assert && assert( scenery.bitmaskSupportsWebGL === 0x0000008 );
 
   // these will need to be updated if another renderer option is given (modify order bitmasks below also)
-  Renderer.bitmaskRendererArea = scenery.bitmaskRendererArea;   // 0x000000F
+  Renderer.bitmaskRendererArea = scenery.bitmaskRendererArea;   // 0x00000FF
   // one renderer is required
   Renderer.bitmaskCanvas = scenery.bitmaskSupportsCanvas; // 0x0000001
   Renderer.bitmaskSVG = scenery.bitmaskSupportsSVG;       // 0x0000002
   Renderer.bitmaskDOM = scenery.bitmaskSupportsDOM;       // 0x0000004
   Renderer.bitmaskWebGL = scenery.bitmaskSupportsWebGL;   // 0x0000008
-  // 10, 20, 40, 80 reserved for future renderers
+  Renderer.bitmaskPixi = scenery.bitmaskSupportsPixi;   // 0x0000010
+  // 20, 40, 80 reserved for future renderers
 
   // fitting group (2 bits)
   Renderer.bitmaskFitting = 0x0000300;      // bitmask that covers all of the states
@@ -80,12 +81,16 @@ define( function( require ) {
   Renderer.isWebGL = function( bitmask ) {
     return ( bitmask & Renderer.bitmaskWebGL ) !== 0;
   };
+  Renderer.isPixi = function( bitmask ) {
+    return ( bitmask & Renderer.bitmaskPixi ) !== 0;
+  };
 
   var rendererMap = {
     canvas: Renderer.bitmaskCanvas,
     svg: Renderer.bitmaskSVG,
     dom: Renderer.bitmaskDOM,
-    webgl: Renderer.bitmaskWebGL
+    webgl: Renderer.bitmaskWebGL,
+    pixi: Renderer.bitmaskPixi
   };
   Renderer.fromName = function( name ) {
     return rendererMap[ name ];
@@ -122,35 +127,41 @@ define( function( require ) {
     return Renderer.svgOptimizations[ bitmask & Renderer.bitmaskSVGOptimizations ];
   };
 
-  Renderer.createOrderBitmask = function( firstRenderer, secondRenderer, thirdRenderer, fourthRenderer ) {
+  Renderer.createOrderBitmask = function( firstRenderer, secondRenderer, thirdRenderer, fourthRenderer, fifthRenderer ) {
     firstRenderer = firstRenderer || 0;
     secondRenderer = secondRenderer || 0;
     thirdRenderer = thirdRenderer || 0;
     fourthRenderer = fourthRenderer || 0;
+    fifthRenderer = fifthRenderer || 0;
 
+    // uses 25 bits now with 5 renderers
     return firstRenderer |
-           ( secondRenderer << 4 ) |
-           ( thirdRenderer << 8 ) |
-           ( fourthRenderer << 12 );
+           ( secondRenderer << 5 ) |
+           ( thirdRenderer << 10 ) |
+           ( fourthRenderer << 15 ) |
+           ( fifthRenderer << 20 );
   };
   Renderer.bitmaskOrderFirst = function( bitmask ) {
-    return bitmask & 0x000000F;
+    return bitmask & 0x000001F;
   };
   Renderer.bitmaskOrderSecond = function( bitmask ) {
-    return ( bitmask >> 4 ) & 0x000000F;
+    return ( bitmask >> 5 ) & 0x000001F;
   };
   Renderer.bitmaskOrderThird = function( bitmask ) {
-    return ( bitmask >> 8 ) & 0x000000F;
+    return ( bitmask >> 10 ) & 0x000001F;
   };
   Renderer.bitmaskOrderFourth = function( bitmask ) {
-    return ( bitmask >> 12 ) & 0x000000F;
+    return ( bitmask >> 15 ) & 0x000001F;
+  };
+  Renderer.bitmaskOrderFifth = function( bitmask ) {
+    return ( bitmask >> 20 ) & 0x000001F;
   };
   Renderer.pushOrderBitmask = function( bitmask, renderer ) {
     assert && assert( typeof bitmask === 'number' );
     assert && assert( typeof renderer === 'number' );
     var rendererToInsert = renderer;
-    for ( var i = 0; i < 20; i += 4 ) {
-      var currentRenderer = ( bitmask >> i ) & 0x000000F;
+    for ( var i = 0; i < 30; i += 5 ) {
+      var currentRenderer = ( bitmask >> i ) & 0x000001F;
       if ( currentRenderer === rendererToInsert ) {
         return bitmask;
       }
@@ -161,7 +172,7 @@ define( function( require ) {
       }
       else {
         // clear out that slot
-        bitmask = ( bitmask & ~( 0x000000F << i ) );
+        bitmask = ( bitmask & ~( 0x000001F << i ) );
 
         // place in the renderer to insert
         bitmask = bitmask | ( rendererToInsert << i );
@@ -191,8 +202,11 @@ define( function( require ) {
     else if ( Renderer.isWebGL( selfRenderer ) ) {
       return node.createWebGLDrawable( selfRenderer, instance );
     }
+    else if ( Renderer.isPixi( selfRenderer ) ) {
+      return node.createPixiDrawable( selfRenderer, instance );
+    }
     else {
-      throw new Error( 'Unrecognized renderer, maybe we don\'t support WebGL yet?: ' + selfRenderer );
+      throw new Error( 'Unrecognized renderer: ' + selfRenderer );
     }
   };
 

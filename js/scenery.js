@@ -177,7 +177,8 @@ define( function( require ) {
     bitmaskSupportsSVG: 0x0000002,
     bitmaskSupportsDOM: 0x0000004,
     bitmaskSupportsWebGL: 0x0000008,
-    // 10, 20, 40, 80 reserved for future renderers
+    bitmaskSupportsPixi: 0x0000010,
+    // 20, 40, 80 reserved for future renderers
     bitmaskNotPainted: 0x0000100,
     bitmaskBoundsValid: 0x0000200  // i.e. painted area will not spill outside of bounds
     // TODO: what else would we need?

@@ -39,7 +39,7 @@ define( function( require ) {
 
   // preferences top to bottom in general
   var defaultPreferredRenderers = Renderer.createOrderBitmask(
-    Renderer.bitmaskSVG, Renderer.bitmaskCanvas, Renderer.bitmaskDOM, Renderer.bitmaskWebGL );
+    Renderer.bitmaskSVG, Renderer.bitmaskCanvas, Renderer.bitmaskDOM, Renderer.bitmaskWebGL, Renderer.bitmaskPixi );
 
   // see initialize() for documentation
   scenery.Instance = function Instance( display, trail, isDisplayRoot, isSharedCanvasCacheRoot ) {
@@ -333,6 +333,7 @@ define( function( require ) {
                               ( nodeBitmask & Renderer.bitmaskOrderSecond( this.preferredRenderers ) ) ||
                               ( nodeBitmask & Renderer.bitmaskOrderThird( this.preferredRenderers ) ) ||
                               ( nodeBitmask & Renderer.bitmaskOrderFourth( this.preferredRenderers ) ) ||
+                              ( nodeBitmask & Renderer.bitmaskOrderFifth( this.preferredRenderers ) ) ||
                               ( nodeBitmask & Renderer.bitmaskSVG ) ||
                               ( nodeBitmask & Renderer.bitmaskCanvas ) ||
                               ( nodeBitmask & Renderer.bitmaskDOM ) ||
