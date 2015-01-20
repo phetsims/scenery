@@ -1512,6 +1512,10 @@ define( function( require ) {
       return ( this._rendererBitmask & scenery.bitmaskSupportsWebGL ) !== 0;
     },
 
+    supportsPixi:function(){
+      return ( this._rendererBitmask & scenery.bitmaskSupportsPixi) !== 0;
+    },
+
     supportsRenderer: function( renderer ) {
       return ( this._rendererBitmask & renderer.bitmask ) !== 0;
     },

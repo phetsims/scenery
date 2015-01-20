@@ -128,6 +128,7 @@ define( function( require ) {
       //TODO: Refine the rules for when WebGL can be used
       if ( !this.hasStroke() ) {
         bitmask |= scenery.bitmaskSupportsWebGL;
+        bitmask |= scenery.bitmaskSupportsPixi;
       }
       return bitmask;
     },
@@ -150,6 +151,7 @@ define( function( require ) {
       //TODO: Refine the rules for when WebGL can be used
       if ( !this.isRounded() && (!this.hasStroke() || this.getLineJoin() !== 'round') ) {
         bitmask |= scenery.bitmaskSupportsWebGL;
+        bitmask |= scenery.bitmaskSupportsPixi;
       }
 
       return bitmask;
