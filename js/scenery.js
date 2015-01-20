@@ -55,6 +55,7 @@ define( function( require ) {
       scenery.logString += message.replace( /%c/g, '' ) + '\n';
     },
     switchLogToString: function() {
+      window.console && window.console.log( 'switching to string log' );
       scenery.logFunction = scenery.stringLogFunction;
     },
 
