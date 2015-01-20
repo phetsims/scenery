@@ -1,11 +1,12 @@
 // Copyright 2002-2014, University of Colorado Boulder
 
+
 /**
  * A radial gradient that can be passed into the 'fill' or 'stroke' parameters.
  *
  * SVG gradients, see http://www.w3.org/TR/SVG/pservers.html
  *
- * @author Jonathan Olson <olsonsjc@gmail.com>
+ * @author Jonathan Olson <jonathan.olson@colorado.edu>
  */
 
 define( function( require ) {
@@ -44,16 +45,16 @@ define( function( require ) {
 
     isRadialGradient: true,
 
-    getSVGDefinition: function( id ) {
+    getSVGDefinition: function() {
       var startIsLarger = this.startRadius > this.endRadius;
       var largePoint = startIsLarger ? this.start : this.end;
+      // var smallPoint = startIsLarger ? this.end : this.start;
       var maxRadius = Math.max( this.startRadius, this.endRadius );
       var minRadius = Math.min( this.startRadius, this.endRadius );
 
       var definition = document.createElementNS( scenery.svgns, 'radialGradient' );
 
-      // TODO:
-      definition.setAttribute( 'id', id );
+      definition.setAttribute( 'id', this.id );
       definition.setAttribute( 'gradientUnits', 'userSpaceOnUse' ); // so we don't depend on the bounds of the object being drawn with the gradient
       definition.setAttribute( 'cx', largePoint.x );
       definition.setAttribute( 'cy', largePoint.y );
@@ -91,12 +92,12 @@ define( function( require ) {
       // switch the direction we apply stops in, so that the ratios always are increasing.
       if ( startIsLarger ) {
         for ( i = this.stops.length - 1; i >= 0; i-- ) {
-          applyStop( this.stops[i] );
+          applyStop( this.stops[ i ] );
         }
       }
       else {
         for ( i = 0; i < this.stops.length; i++ ) {
-          applyStop( this.stops[i] );
+          applyStop( this.stops[ i ] );
         }
       }
 

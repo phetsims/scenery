@@ -12,6 +12,13 @@
   <script src="../../sherpa/lodash-2.4.1.min.js"></script>
   <script src="../../sherpa/has.js"></script>
 
+  <!-- Parse query parameters, so we can easily subset the tests.-->
+  <script src="../../phetcommon/js/util/query-parameters.js"></script>
+
+  <script type="text/javascript">
+    window.assertions.enableAssert();
+  </script>
+
   <!-- Our code, in either the concatenated 'with comments' version or the minified version -->
   <script data-main="../js/config.js" src="../../sherpa/require-2.1.11.js"></script>
 
@@ -32,6 +39,19 @@
       z-index: 0;
       padding: 0 !important; /* in case we add jQuery Mobile back in */
       border: 1px solid black;
+    }
+
+    .scene.wrong-renderer {
+      border: 1px solid red;
+      background-color: rgba(255, 0, 0, 0.1);
+    }
+
+    .scene.wrong-renderer:before {
+      content: "other renderer!";
+      position: absolute;
+      bottom: 0;
+      right: 2px;
+      color: red;
     }
 
     .scene.canvas:after {
@@ -57,10 +77,30 @@
       left: 2px;
       opacity: 0.3;
     }
+
+    .scene.webgl:after {
+      content: "WebGL";
+      position: absolute;
+      bottom: 0;
+      left: 2px;
+      opacity: 0.3;
+    }
+
+    .preloadedImage {
+      position: absolute;
+      display: none
+    }
   </style>
 </head>
 
 <body>
+
+<!--Light bulb image encoded as base64-->
+<img class="preloadedImage" id="light-bulb-image"
+     src="data:image/png;base64,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"/>
+
+<img class="preloadedImage" id="fire-extinguisher-image"
+     src="data:image/png;base64,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"/>
 
 <h1>Scenery Renderer Comparison</h1>
 
@@ -69,10 +109,187 @@
   requirejs( [ 'main', '../../kite/js/main', '../../dot/js/main' ], function( scenery, kite, dot ) {
     var testCases = [
       {
+        name: 'simple-blue-rectangle',
+        width: 200,
+        height: 200,
+        draw: function( scene, updateDisplayCallback ) {
+          scene.addChild( new scenery.Rectangle( 50, 50, 100, 100, {
+            fill: 'blue'
+          } ) );
+        },
+        renderers: [ 'canvas', 'svg', 'dom', 'webgl' ]
+      },
+      {
+        name: 'simple-images',
+        width: 200,
+        height: 200,
+        draw: function( scene, updateDisplayCallback ) {
+          var thumbnail = document.getElementById( 'light-bulb-image' );
+          scene.addChild( new scenery.Image( thumbnail ) );
+          updateDisplayCallback();
+        },
+        renderers: [ 'canvas', 'svg', 'dom', 'webgl' ]
+      },
+      {
+        name: 'solid-line',
+        width: 200,
+        height: 200,
+        draw: function( scene, display ) {
+          scene.addChild( new scenery.Line( 10, 10, 190, 190, { stroke: 'black', lineWidth: 4 } ) );
+        },
+        renderers: [ 'canvas', 'svg', 'webgl' ]
+      },
+      {
+        name: 'circle',
+        width: 200,
+        height: 200,
+        draw: function( scene, display ) {
+          scene.addChild( new scenery.Circle( 50, { fill: 'green', centerX: 100, centerY: 100 } ) );
+        },
+        renderers: [ 'canvas', 'svg', 'webgl' ]
+      },
+      {
+        name: 'hello-text',
+        width: 200,
+        height: 200,
+        draw: function( scene, display ) {
+          scene.addChild( new scenery.Text( 'hello text!', { left: 10, top: 10 } ) );
+        },
+        renderers: [ 'canvas', 'svg', 'dom', 'webgl' ]
+      },
+      {
+        name: 'hello-text-animation',
+        width: 200,
+        height: 200,
+        draw: function( scene, updateDisplay ) {
+          var text = new scenery.Text( 'hello text!', { left: 10, top: 10 } );
+          scene.addChild( text );
+
+          var callback = function() {
+            window.requestAnimationFrame( callback );
+            text.text = Math.floor( Date.now() / 1000 );
+
+            updateDisplay();
+          };
+          window.requestAnimationFrame( callback );
+        },
+        renderers: [ 'canvas', 'svg', 'dom', 'webgl' ]
+      },
+      {
+        name: 'solid-line-animating-position',
+        width: 200,
+        height: 200,
+        draw: function( scene, updateDisplay ) {
+          var line = new scenery.Line( 10, 10, 190, 190, { stroke: 'black', lineWidth: 4 } );
+          scene.addChild( line );
+
+          var callback = function() {
+            window.requestAnimationFrame( callback );
+            line.y2 = Math.sin( Date.now() / 1000 ) * 100 + 100;
+            line.x1 = Math.sin( Date.now() / 500 ) * 50 + 50;
+            line.y1 = Math.cos( Date.now() / 400 ) * 50 + 50;
+            updateDisplay();
+          };
+          window.requestAnimationFrame( callback );
+        },
+        renderers: [ 'canvas', 'svg', 'webgl' ]
+      },
+      {
+        name: 'solid-line-animating-lineWidth',
+        width: 200,
+        height: 200,
+        draw: function( scene, updateDisplay ) {
+          var line = new scenery.Line( 10, 10, 190, 190, { stroke: 'black', lineWidth: 4 } );
+          scene.addChild( line );
+
+          var callback = function() {
+            window.requestAnimationFrame( callback );
+            line.lineWidth = Math.sin( Date.now() / 1000 ) * 20 + 20;
+            updateDisplay();
+          };
+          window.requestAnimationFrame( callback );
+        },
+        renderers: [ 'canvas', 'svg', 'webgl' ]
+      },
+      {
+        name: 'CanvasNode',
+        width: 200,
+        height: 200,
+        draw: function( scene, updateDisplayCallback ) {
+
+          //TODO: Make it so we can pass in the paintCanvas call to the CanvasNode constructor.
+          var canvasNode = new scenery.CanvasNode( { canvasBounds: new dot.Bounds2( 0, 0, 100, 100 ) } );
+          canvasNode.paintCanvas = function( wrapper ) {
+            var context = wrapper.context;
+
+            context.fillStyle = 'red';
+            context.fillRect( 0, 0, 100, 20 );
+          };
+          scene.addChild( canvasNode );
+        },
+        renderers: [ 'canvas' ]
+      },
+      {
+        name: 'WebGLNode',
+        width: 200,
+        height: 200,
+        draw: function( scene, updateDisplayCallback ) {
+
+          //TODO: Make it so we can pass in the paintCanvas call to the CanvasNode constructor.
+          var canvasNode = new scenery.WebGLNode( {
+            canvasBounds: new dot.Bounds2( 0, 0, 100, 100 ),
+            x: 50
+          } );
+          canvasNode.initializeContext = function( gl ) {
+            console.log( 'init' );
+
+            //Small triangle strip that creates a square, which will be transformed into the right rectangle shape
+            this.vertexCoordinates = new Float32Array( [
+              0, 0,
+              100, 0,
+              0, 100,
+              100, 100
+            ] );
+            this.buffer = gl.createBuffer();
+
+            gl.bindBuffer( gl.ARRAY_BUFFER, this.buffer );
+            gl.bufferData( gl.ARRAY_BUFFER, this.vertexCoordinates, gl.STATIC_DRAW );
+          };
+          canvasNode.render = function( gl, shaderProgram ) {
+            console.log( 'hello webglnode' );
+
+            //OHTWO TODO: optimize
+            var viewMatrix = this.instances[ 0 ].relativeMatrix.toAffineMatrix4();
+
+            // combine image matrix (to scale aspect ratios), the trail's matrix, and the matrix to device coordinates
+            gl.uniformMatrix4fv( shaderProgram.uniformLocations.uModelViewMatrix, false, viewMatrix.entries );
+
+            //Indicate the branch of logic to use in the ubershader.  In this case, a texture should be used for the image
+            gl.uniform1i( shaderProgram.uniformLocations.uFragmentType, scenery.WebGLBlock.fragmentTypeFill );
+            gl.uniform4f( shaderProgram.uniformLocations.uColor, 1, 0, 1, 1 );
+
+            gl.bindBuffer( gl.ARRAY_BUFFER, this.buffer );
+            gl.vertexAttribPointer( shaderProgram.attributeLocations.aVertex, 2, gl.FLOAT, false, 0, 0 );
+
+            gl.drawArrays( gl.TRIANGLE_STRIP, 0, 4 );
+
+          };
+          canvasNode.shaderAttributes = [ 'aVertex' ];
+          canvasNode.dispose = function() {
+            console.log( 'hello goodbye' );
+            if ( this.gl ) {
+              this.gl.deleteBuffer( this.buffer );
+            }
+          };
+          scene.addChild( canvasNode );
+        },
+        renderers: [ 'webgl' ]
+      },
+      {
         name: 'Rectangle',
         width: 128,
         height: 64,
-        draw: function( scene ) {
+        draw: function( scene, updateDisplayCallback ) {
           scene.addChild( new scenery.Rectangle( 10.5, 10.5, 44, 44, {
             fill: '#f00',
             stroke: '#000',
@@ -85,13 +302,13 @@
             lineWidth: 3
           } ) );
         },
-        renderers: [ scenery.Renderer.Canvas, scenery.Renderer.SVG, scenery.Renderer.WebGL ]
+        renderers: [ 'canvas', 'svg', 'webgl' ]
       },
       {
         name: 'Circle',
         width: 64,
         height: 64,
-        draw: function( scene ) {
+        draw: function( scene, updateDisplayCallback ) {
           scene.addChild( new scenery.Circle( 22, {
             x: 32, y: 32,
             fill: '#f00',
@@ -106,13 +323,13 @@
             lineWidth: 3
           } ) );
         },
-        renderers: [ scenery.Renderer.Canvas, scenery.Renderer.SVG ]
+        renderers: [ 'canvas', 'svg', 'webgl' ]
       },
       {
         name: 'Hexagon',
         width: 64,
         height: 64,
-        draw: function( scene ) {
+        draw: function( scene, updateDisplayCallback ) {
           scene.addChild( new scenery.Path( kite.Shape.regularPolygon( 6, 22 ), {
             x: 32,
             y: 32,
@@ -121,13 +338,13 @@
             lineWidth: 3
           } ) );
         },
-        renderers: [ scenery.Renderer.Canvas, scenery.Renderer.SVG ]
+        renderers: [ 'canvas', 'svg', 'webgl' ]
       },
       {
         name: 'Quadratic B\u00E9zier',
         width: 64,
         height: 64,
-        draw: function( scene ) {
+        draw: function( scene, updateDisplayCallback ) {
           scene.addChild( new scenery.Path( new kite.Shape().moveTo( -20, -20 ).quadraticCurveTo( 20, -20, 20, 20 ).close(), {
             x: 32,
             y: 32,
@@ -136,13 +353,13 @@
             lineWidth: 3
           } ) );
         },
-        renderers: [ scenery.Renderer.Canvas, scenery.Renderer.SVG ]
+        renderers: [ 'canvas', 'svg', 'webgl' ]
       },
       {
         name: 'Cubic B\u00E9zier',
         width: 64,
         height: 64,
-        draw: function( scene ) {
+        draw: function( scene, updateDisplayCallback ) {
           scene.addChild( new scenery.Path( new kite.Shape().moveTo( -20, -20 ).cubicCurveTo( -20, 0, 0, 0, 20, 20 ).lineTo( 20, -20 ).close(), {
             x: 32,
             y: 32,
@@ -151,13 +368,13 @@
             lineWidth: 3
           } ) );
         },
-        renderers: [ scenery.Renderer.Canvas, scenery.Renderer.SVG ]
+        renderers: [ 'canvas', 'svg', 'webgl' ]
       },
       {
         name: 'Linear Gradients',
         width: 128,
         height: 64,
-        draw: function( scene ) {
+        draw: function( scene, updateDisplayCallback ) {
           var fillGradient = new scenery.LinearGradient( -22, 0, 22, 0 );
           fillGradient.addColorStop( 0.1, '#ff0000' );
           fillGradient.addColorStop( 0.5, '#00ff00' );
@@ -186,13 +403,13 @@
             lineWidth: 3
           } ) );
         },
-        renderers: [ scenery.Renderer.Canvas, scenery.Renderer.SVG ]
+        renderers: [ 'canvas', 'svg', 'webgl' ]
       },
       {
         name: 'Radial Gradients',
         width: 128 + 64,
         height: 64,
-        draw: function( scene ) {
+        draw: function( scene, updateDisplayCallback ) {
           var fillGradient = new scenery.RadialGradient( 22, 0, 0, 22, 0, 44 );
           fillGradient.addColorStop( 0.1, '#ff0000' );
           fillGradient.addColorStop( 0.5, '#00ff00' );
@@ -214,7 +431,7 @@
             fill: mainGradient
           } ) );
           scene.addChild( new scenery.Path( kite.Shape.regularPolygon( 6, 22 ), {
-            x: 32 + 64,
+            x:        32 + 64,
             y: 32,
             rotation: Math.PI / 4,
             fill: fillGradient,
@@ -226,13 +443,13 @@
             fill: transformedGradient
           } ) );
         },
-        renderers: [ scenery.Renderer.Canvas, scenery.Renderer.SVG ]
+        renderers: [ 'canvas', 'svg', 'webgl' ]
       },
       {
         name: 'RGBA',
         width: 64,
         height: 64,
-        draw: function( scene ) {
+        draw: function( scene, updateDisplayCallback ) {
           scene.addChild( new scenery.Path( kite.Shape.rectangle( 32, 0, 32, 64 ), {
             fill: '#000000'
           } ) );
@@ -244,69 +461,60 @@
             lineWidth: 3
           } ) );
         },
-        renderers: [ scenery.Renderer.Canvas, scenery.Renderer.SVG ]
+        renderers: [ 'canvas', 'svg', 'webgl' ]
       },
       {
         name: 'Dashes',
         width: 64,
         height: 64,
-        draw: function( scene ) {
+        draw: function( scene, updateDisplayCallback ) {
           scene.addChild( new scenery.Path( kite.Shape.rectangle( 10, 10, 44, 44 ), {
             stroke: '#000',
             lineWidth: 3,
-            lineDash: [7, 2, 3, 2],
+            lineDash: [ 7, 2, 3, 2 ],
             x: 0.5,
             y: 0.5
           } ) );
           scene.addChild( new scenery.Rectangle( 5, 5, 54, 54, {
             stroke: '#000',
             lineWidth: 3,
-            lineDash: [7, 2, 3, 2],
+            lineDash: [ 7, 2, 3, 2 ],
             x: 0.5,
             y: 0.5
           } ) );
           scene.addChild( new scenery.Path( kite.Shape.regularPolygon( 6, 15 ), {
             stroke: '#000',
-            lineDash: [5, 5],
+            lineDash: [ 5, 5 ],
             lineDashOffset: 5,
             x: 32.5,
             y: 32.5
           } ) );
         },
-        renderers: [ scenery.Renderer.Canvas, scenery.Renderer.SVG ]
+        renderers: [ 'canvas', 'svg', 'webgl' ]
       },
       {
         name: 'Images',
         width: 220,
         height: 120,
-        draw: function( scene ) {
-          var thumbnail = document.createElement( 'img' );
-          thumbnail.addEventListener( 'load', function() {
-            scene.addChild( new scenery.Image( thumbnail ) );
-            scene.updateScene();
+        draw: function( scene, updateDisplayCallback ) {
+          scene.addChild( new scenery.Image( document.getElementById( 'light-bulb-image' ) ) );
 
-            // ugly hack placement for correct z-index
-            var logo = document.createElement( 'img' );
-            logo.addEventListener( 'load', function() {
-              scene.addChild( new scenery.Image( logo, {
-                scale: 0.5,
-                rotation: Math.PI / 6,
-                x: 130,
-                y: 20
-              } ) );
-              scene.updateScene();
-            } );
-            logo.src = 'http://phet.colorado.edu/images/phet-logo-yellow.png';
-          } );
-          thumbnail.src = 'http://phet.colorado.edu/sims/molecule-polarity/molecule-polarity-thumbnail.png';
+          // ugly hack placement for correct z-index
+          scene.addChild( new scenery.Image( document.getElementById( 'fire-extinguisher-image' ), {
+            scale: 0.5,
+            rotation: Math.PI / 6,
+            x: 130,
+            y: 20
+          } ) );
+          updateDisplayCallback();
         },
-        renderers: [ scenery.Renderer.Canvas, scenery.Renderer.SVG, scenery.Renderer.DOM ]
+        renderers: [ 'canvas', 'svg', 'dom', 'webgl' ]
       },
       {
         name: 'Patterns',
         width: 64,
         height: 64,
-        draw: function( scene ) {
+        draw: function( scene, updateDisplayCallback ) {
           var img = document.createElement( 'img' );
           img.addEventListener( 'load', function() {
             var pattern = new scenery.Pattern( img );
@@ -318,17 +526,17 @@
               stroke: '#000000',
               lineWidth: 3
             } ) );
-            scene.updateScene();
+            updateDisplayCallback();
           } );
           img.src = 'http://phet.colorado.edu/files/archive/images/circleArrow_Icon.gif';
         },
-        renderers: [ scenery.Renderer.Canvas, scenery.Renderer.SVG ]
+        renderers: [ 'canvas', 'svg', 'webgl' ]
       },
       {
         name: 'Overlapping and Nested Rotations',
         width: 128,
         height: 128,
-        draw: function( scene ) {
+        draw: function( scene, updateDisplayCallback ) {
           var container = new scenery.Node( {
             x: 40,
             rotation: Math.PI / 12
@@ -353,13 +561,13 @@
             lineWidth: 10
           } ) );
         },
-        renderers: [ scenery.Renderer.Canvas, scenery.Renderer.SVG ]
+        renderers: [ 'canvas', 'svg' ]
       },
       {
         name: 'DAG support',
         width: 256,
         height: 128,
-        draw: function( scene ) {
+        draw: function( scene, updateDisplayCallback ) {
           var square = new scenery.Path( kite.Shape.rectangle( 0, 0, 50, 50 ), {
             x: 0.5,
             y: 0.5,
@@ -392,13 +600,13 @@
           scene.addChild( b );
           scene.addChild( c );
         },
-        renderers: [ scenery.Renderer.Canvas, scenery.Renderer.SVG ]
+        renderers: [ 'canvas', 'svg' ]
       },
       {
         name: 'Text',
         width: 256,
         height: 128,
-        draw: function( scene ) {
+        draw: function( scene, updateDisplayCallback ) {
           scene.addChild( new scenery.Text( 'Is this a test?', {
             fontSize: 60,
             top: 1.5,
@@ -424,13 +632,13 @@
             lineJoin: 'round'
           } ) );
         },
-        renderers: [ scenery.Renderer.Canvas, scenery.Renderer.SVG ]
+        renderers: [ 'canvas', 'svg' ]
       },
       {
         name: 'HTML Text',
         width: 512,
         height: 128,
-        draw: function( scene ) {
+        draw: function( scene, updateDisplayCallback ) {
           scene.addChild( new scenery.HTMLText( '<strong>H<sub>2</sub>O</strong> <em>might</em> contain water, also<br>known as <u>dihydrogen monoxide</u>!', {
             fontSize: 35,
             top: 2,
@@ -438,13 +646,13 @@
             fill: '#606'
           } ) );
         },
-        renderers: [ scenery.Renderer.DOM ]
+        renderers: [ 'dom' ]
       },
       {
         name: 'Circles and Arcs',
         width: 200,
         height: 64,
-        draw: function( scene ) {
+        draw: function( scene, updateDisplayCallback ) {
           var x = 32;
           scene.addChild( new scenery.Path( kite.Shape.circle( x, 25, 20 ), {
             fill: '#ff0000',
@@ -477,13 +685,13 @@
             lineWidth: 3
           } ) );
         },
-        renderers: [ scenery.Renderer.Canvas, scenery.Renderer.SVG ]
+        renderers: [ 'canvas', 'svg' ]
       },
       {
         name: 'Ellipses and Elliptical Arcs',
         width: 200,
         height: 64,
-        draw: function( scene ) {
+        draw: function( scene, updateDisplayCallback ) {
           var x = 32;
           scene.addChild( new scenery.Path( kite.Shape.ellipse( x, 25, 20, 10 ), {
             fill: '#ff0000',
@@ -516,13 +724,13 @@
             lineWidth: 3
           } ) );
         },
-        renderers: [ scenery.Renderer.Canvas, scenery.Renderer.SVG ]
+        renderers: [ 'canvas', 'svg' ]
       },
       {
         name: 'DOM Elements',
         width: 200,
         height: 200,
-        draw: function( scene ) {
+        draw: function( scene, updateDisplayCallback ) {
           var textDiv = document.createElement( 'div' );
           textDiv.innerHTML = 'See our <a href="http://phet.colorado.edu">website</a>!';
           scene.addChild( new scenery.DOM( textDiv, {
@@ -539,13 +747,13 @@
             rotation: Math.PI / 4
           } ) );
         },
-        renderers: [ scenery.Renderer.DOM ]
+        renderers: [ 'dom' ]
       },
       {
         name: 'Invisible nodes',
         width: 64,
         height: 64,
-        draw: function( scene ) {
+        draw: function( scene, updateDisplayCallback ) {
           var shape = kite.Shape.rectangle( 0, 0, 30, 30 );
           var rect = new scenery.Path( shape, {
             fill: '#000',
@@ -568,13 +776,13 @@
           scene.addChild( third );
           third.visible = false; // delayed, should cause issues with old SVG handling
         },
-        renderers: [ scenery.Renderer.Canvas, scenery.Renderer.SVG ]
+        renderers: [ 'canvas', 'svg' ]
       },
       {
         name: 'Simple Clipping',
         width: 64,
         height: 64,
-        draw: function( scene ) {
+        draw: function( scene, updateDisplayCallback ) {
           scene.addChild( new scenery.Rectangle( 4, 4, 56, 56, {
             fill: 'black',
             clipArea: kite.Shape.circle( 32, 32, 25 ),
@@ -582,13 +790,13 @@
             y: -20
           } ) );
         },
-        renderers: [ scenery.Renderer.Canvas, scenery.Renderer.SVG ]
+        renderers: [ 'canvas', 'svg' ]
       },
       {
         name: 'Nested Clipping',
         width: 64,
         height: 64,
-        draw: function( scene ) {
+        draw: function( scene, updateDisplayCallback ) {
           var clipShape1 = kite.Shape.regularPolygon( 6, 27 ).transformed( dot.Matrix3.translation( 32, 32 ) );
           var clipShape2 = kite.Shape.regularPolygon( 9, 32 ).transformed( dot.Matrix3.translation( 32, 0 ) );
           var shape = kite.Shape.circle( 32, 32, 25 );
@@ -601,13 +809,13 @@
           scene.addChild( circle );
           scene.clipArea = clipShape2;
         },
-        renderers: [ scenery.Renderer.Canvas, scenery.Renderer.SVG ]
+        renderers: [ 'canvas', 'svg' ]
       },
       {
         name: 'Opacity',
         width: 64,
         height: 64,
-        draw: function( scene ) {
+        draw: function( scene, updateDisplayCallback ) {
           scene.addChild( new scenery.Rectangle( 0, 12, 64, 20, { fill: '#000' } ) );
           var circle = kite.Shape.circle( 0, 0, 30 );
           scene.addChild( new scenery.Node( {
@@ -618,20 +826,42 @@
             ]
           } ) );
         },
-        renderers: [ scenery.Renderer.Canvas, scenery.Renderer.SVG ]
+        renderers: [ 'canvas', 'svg' ]
       }
     ];
 
-    var renderers = [
-      scenery.Renderer.Canvas,
-      scenery.Renderer.SVG,
-      scenery.Renderer.DOM,
-      scenery.Renderer.WebGL,
-    ];
+    var filterSubset = function( array, queryParameterKey ) {
+      if ( phetcommon.getQueryParameter( queryParameterKey ) ) {
+        var test = phetcommon.getQueryParameter( queryParameterKey );
+        var testIndices = test.split( '.' ).map( function( test ) {
+          return parseInt( test, 10 );
+        } );
+        var result = [];
+        for ( var i = 0; i < testIndices.length; i++ ) {
+          var testIndex = testIndices[ i ];
+          result.push( array[ testIndex ] );
+        }
+        return result;
+      }
+      return array;
+    };
 
-    _.each( testCases, function( testCase ) {
+    // Select the renderers to be compared (for tests that declare support for them).
+    var renderers = filterSubset( [
+      'canvas',
+      'svg',
+      'dom',
+      'webgl'
+    ], 'renderer' );
+
+    // Allow selection of the tests by a query parameter ?test=...
+    // For instance, when test=0 is specified, only show the 0th test.
+    // When test=0.1.2 is specified, show tests 0,1,2
+    testCases = filterSubset( testCases, 'test' );
+
+    _.each( testCases, function( testCase, index ) {
       var $testTitle = $( document.createElement( 'h2' ) );
-      $testTitle.text( testCase.name );
+      $testTitle.text( '' + index + ': ' + testCase.name );
       $testTitle.addClass( 'testname' );
       $( document.body ).append( $testTitle );
 
@@ -641,27 +871,46 @@
           return;
         }
 
+        var width = testCase.width || 320;
+        var height = testCase.height || 240;
+
+        var scene = new scenery.Node( {
+          renderer: renderer
+        } );
+        var display = new scenery.Display( scene, {
+          width: width,
+          height: height
+        } );
+
         var layerType = renderer.defaultLayerType;
         var $container = $( document.createElement( 'div' ) );
         $container.addClass( 'scene' );
-        $container.addClass( layerType.name );
-        $container.width( testCase.width || 320 );
-        $container.height( testCase.height || 240 );
+        $container.addClass( renderer );
+        $container.width( width );
+        $container.height( height );
+        $container[ 0 ].appendChild( display.domElement );
         $( document.body ).append( $container );
 
-        var scene = new scenery.Scene( $container, {
-          renderer: renderer
-        } );
+        function updateDisplay() {
+          display.updateDisplay();
+
+          if ( display.getUsedRenderersBitmask() !== scenery.Renderer.fromName( renderer ) ) {
+            $container.addClass( 'wrong-renderer' );
+          }
+          else {
+            $container.removeClass( 'wrong-renderer' );
+          }
+        }
 
         // try {
-        testCase.draw( scene );
+        testCase.draw( scene, updateDisplay );
         // } catch( e ) {
         //   if ( console.log ) {
         //     console.log( 'error encountered in test ' + testCase.name + ' with ' + layerType.name );
         //   }
         //   throw e;
         // }
-        scene.updateScene();
+        updateDisplay();
       } );
     } );
   } );

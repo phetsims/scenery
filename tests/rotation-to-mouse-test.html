@@ -1,0 +1,96 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8"/>
+  <meta http-equiv="X-UA-Compatible" content="IE=edge"/>
+  <meta name="viewport" content="width=device-width, height=device-height, initial-scale=1.0, maximum-scale=1.0, user-scalable=no"/>
+  <meta name="apple-mobile-web-app-capable" content="yes">
+
+  <title>Rotation to Mouse Test</title>
+
+  <!-- jQuery and LoDash are dependencies -->
+  <script src="../../sherpa/jquery-2.1.0.min.js"></script>
+  <script src="../../sherpa/lodash-2.4.1.min.js"></script>
+
+  <!-- Our code, in either the concatenated 'with comments' version or the minified version -->
+  <script src="../build/development/scenery.js"></script>
+
+  <style type="text/css">
+    /* Let content go to the edges */
+    html, body {
+      width: 100%;
+      height: 100%;
+      margin: 0;
+      padding: 0;
+      background-color: #ff0;
+      overflow: hidden;
+    }
+
+    /* Have the #main div cover the entire viewport */
+    #main {
+      position: absolute;
+      left: 0;
+      top: 0;
+      background-color: #fff;
+      z-index: 0;
+      padding: none !important; /* in case we add jQuery Mobile back in */
+    }
+
+  </style>
+</head>
+
+<body>
+
+<!-- our scene graph will be in this div -->
+<div id="main">
+</div>
+
+<script>
+
+  // initialize our scene
+  var scene = new scenery.Node();
+  var display = new scenery.Display( scene, {
+    container: document.getElementById( 'main' ),
+    backgroundColor: '#eee'
+  } );
+
+  // sets up listeners on the document with preventDefault(), and forwards those events to our scene
+  display.initializeFullscreenEvents();
+
+  // the scene gets resized to the full screen size
+  display.resizeOnWindowResize();
+
+  // our transformed container, to ensure we properly map coordinate frames.
+  // includes translation, off-axis rotation and asymmetric scaling
+  var container = new scenery.Node( { x: 140, y: 200, scale: dot( 4, 2 ), rotation: Math.PI / 4 } );
+  scene.addChild( container );
+
+  // our line (makes things simpler to assume we rotate around the line's origin, but doesn't need to be a requirement)
+  var line = new scenery.Line( 0, 0, 100, 0, {
+    stroke: 'red'
+  } );
+  container.addChild( line );
+
+  function pointLineToGlobalCoordinates( globalPoint ) {
+    // this only works if we have one instance, otherwise grab the desired Trail and call the same method on it.
+    var parentPoint = line.globalToParentPoint( globalPoint );
+
+    // assumes we have no other transform on the line. apply any translations to a parent of our line
+    line.rotation = parentPoint.angle();
+  }
+
+  // just listen to move events for a mouse (not touches or pen)
+  scene.addInputListener( {
+    mousemove: function( evt ) {
+      // pointer.point is in the global coordinate frame
+      pointLineToGlobalCoordinates( evt.pointer.point );
+    }
+  } );
+
+  // set up an animation loop that updates on every requestAnimationFrame
+  display.updateOnRequestAnimationFrame();
+
+</script>
+
+</body>
+</html>

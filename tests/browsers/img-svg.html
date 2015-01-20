@@ -2,52 +2,56 @@
 <html lang="en">
 <head>
   <meta charset="utf-8"/>
-  <meta http-equiv="X-UA-Compatible" content="IE=edge" />
-  
+  <meta http-equiv="X-UA-Compatible" content="IE=edge"/>
+
   <title>Img SVG testing</title>
-  
+
   <style>
   </style>
 </head>
 <body>
-  
-  <svg xmlns='http://www.w3.org/2000/svg' width='242' height='127'>
-    <linearGradient id='gradient'><stop offset='10%' stop-color='#F00'/><stop offset='90%' stop-color='#fcc'/></linearGradient>
-    <rect fill='url(#gradient)' x='0' y='0' width='100%' height='100%'/>
-  </svg>
-  
-  <svg xmlns='http://www.w3.org/2000/svg' width='64' height='64'>
-    <g transform="translate(10,10)">
-      <path d="M 0 0 L 44 0 L 44 44 L 0 44 Z M 0 0" style="fill: #ff0000;stroke: #000000;stroke-width: 1;stroke-linecap: butt;stroke-linejoin: miter;"></path>
-    </g>
-  </svg>
-  
-  <img id="svg-gradient-image" src="clean.svg" alt="Now with image-src goodness!"/>
-  
-  <svg xmlns='http://www.w3.org/2000/svg' xmlns:xlink='http://www.w3.org/1999/xlink' width='242' height='127'>
-    <image xlink:href='http://phet.colorado.edu/images/phet-logo-yellow.png' x='0' y='0' height='127px' width='242px'/>
-  </svg>
-  
-  <img id="svg-external-image" src="dirty.svg" alt="Now with image-src goodness!"/>
-  
-  <canvas id="canvas" width="242" height="127"></canvas>
-  
-  <script type="text/javascript">
-  
+
+<svg xmlns='http://www.w3.org/2000/svg' width='242' height='127'>
+  <linearGradient id='gradient'>
+    <stop offset='10%' stop-color='#F00'/>
+    <stop offset='90%' stop-color='#fcc'/>
+  </linearGradient>
+  <rect fill='url(#gradient)' x='0' y='0' width='100%' height='100%'/>
+</svg>
+
+<svg xmlns='http://www.w3.org/2000/svg' width='64' height='64'>
+  <g transform="translate(10,10)">
+    <path d="M 0 0 L 44 0 L 44 44 L 0 44 Z M 0 0"
+          style="fill: #ff0000;stroke: #000000;stroke-width: 1;stroke-linecap: butt;stroke-linejoin: miter;"></path>
+  </g>
+</svg>
+
+<img id="svg-gradient-image" src="clean.svg" alt="Now with image-src goodness!"/>
+
+<svg xmlns='http://www.w3.org/2000/svg' xmlns:xlink='http://www.w3.org/1999/xlink' width='242' height='127'>
+  <image xlink:href='http://phet.colorado.edu/images/phet-logo-yellow.png' x='0' y='0' height='127px' width='242px'/>
+</svg>
+
+<img id="svg-external-image" src="dirty.svg" alt="Now with image-src goodness!"/>
+
+<canvas id="canvas" width="242" height="127"></canvas>
+
+<script type="text/javascript">
+
   window.onload = function() {
     var context = document.getElementById( 'canvas' ).getContext( '2d' );
     var image = document.getElementById( 'svg-external-image' );
     // var image = document.getElementById( 'svg-gradient-image' );
-    
+
     context.drawImage( image, 0, 0 );
     // context.fillStyle = context.createPattern( image, 'repeat' );
     // context.fillRect( 0, 0, 50, 50 );
-    
+
     // console.log( context.getImageData( 0, 0, 10, 10 ) );
   };
-  
-  
-  </script>
+
+
+</script>
 
 </body>
 </html>

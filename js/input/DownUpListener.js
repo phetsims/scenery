@@ -1,17 +1,19 @@
 // Copyright 2002-2014, University of Colorado Boulder
 
+
 /**
  * Basic down/up pointer handling for a Node, so that it's easy to handle buttons
  *
  * TODO: test hand handle down, go off screen, up. How to handle that properly?
  * TODO: tests
  *
- * @author Jonathan Olson <olsonsjc@gmail.com>
+ * @author Jonathan Olson <jonathan.olson@colorado.edu>
  */
 
 define( function( require ) {
   'use strict';
 
+  var inherit = require( 'PHET_CORE/inherit' );
   var scenery = require( 'SCENERY/scenery' );
   require( 'SCENERY/util/Trail' );
 
@@ -35,7 +37,7 @@ define( function( require ) {
     var handler = this;
 
     this.options = _.extend( {
-      mouseButton: 0 // allow a different mouse button 
+      mouseButton: 0 // allow a different mouse button
     }, options );
     this.isDown = false;   // public, whether this listener is down
     this.downCurrentTarget = null; // 'up' is handled via a pointer lister, which will have null currentTarget, so save the 'down' currentTarget
@@ -63,9 +65,7 @@ define( function( require ) {
   };
   var DownUpListener = scenery.DownUpListener;
 
-  DownUpListener.prototype = {
-    constructor: DownUpListener,
-
+  inherit( Object, DownUpListener, {
     buttonDown: function( event ) {
       // already down from another pointer, don't do anything
       if ( this.isDown ) { return; }
@@ -114,14 +114,14 @@ define( function( require ) {
     },
 
     /*---------------------------------------------------------------------------*
-    * events called from the node input listener
-    *----------------------------------------------------------------------------*/
+     * events called from the node input listener
+     *----------------------------------------------------------------------------*/
 
     // mouse/touch down on this node
     down: function( event ) {
       this.buttonDown( event );
     }
-  };
+  } );
 
   return DownUpListener;
 } );

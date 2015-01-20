@@ -1,5 +1,6 @@
 // Copyright 2002-2014, University of Colorado Boulder
 
+
 /**
  * Font handling for text drawing
  *
@@ -20,12 +21,13 @@
  * Useful specs:
  * http://www.w3.org/TR/css3-fonts/
  *
- * @author Jonathan Olson <olsonsjc@gmail.com>
+ * @author Jonathan Olson <jonathan.olson@colorado.edu>
  */
 
 define( function( require ) {
   'use strict';
 
+  var inherit = require( 'PHET_CORE/inherit' );
   var scenery = require( 'SCENERY/scenery' );
 
   // constants used for detection (since styles/variants/weights/stretches can be mixed in the preamble of the shorthand string)
@@ -33,6 +35,9 @@ define( function( require ) {
   var variants = [ 'normal', 'small-caps' ];
   var weights = [ 'normal', 'bold', 'bolder', 'lighter', '100', '200', '300', '400', '500', '600', '700', '800', '900' ];
   var stretches = [ 'normal', 'ultra-condensed', 'extra-condensed', 'condensed', 'semi-condensed', 'semi-expanded', 'expanded', 'extra-expanded', 'ultra-expanded' ];
+
+  // size constants used for detection
+  // var sizes = [ 'xx-small', 'x-small', 'small', 'medium', 'large', 'x-large', 'xx-large', 'larger', 'smaller' ];
 
   function castSize( size ) {
     if ( typeof size === 'number' ) {
@@ -65,7 +70,7 @@ define( function( require ) {
 
       // pull tokens out until we reach something that doesn't match. that must be the font size (according to spec)
       for ( var i = 0; i < tokens.length; i++ ) {
-        var token = tokens[i];
+        var token = tokens[ i ];
         if ( token === 'normal' ) {
           // nothing has to be done, everything already normal as default
         }
@@ -88,9 +93,9 @@ define( function( require ) {
         else {
           // not a style/variant/weight/stretch, must be a font size, possibly with an included line-height
           var subtokens = token.split( /\// ); // extract font size from any line-height
-          this._size = subtokens[0];
-          if ( subtokens[1] ) {
-            this._lineHeight = subtokens[1];
+          this._size = subtokens[ 0 ];
+          if ( subtokens[ 1 ] ) {
+            this._lineHeight = subtokens[ 1 ];
           }
           // all future tokens are guaranteed to be part of the font-family if it is given according to spec
           this._family = tokens.slice( i + 1 ).join( ' ' );
@@ -123,19 +128,15 @@ define( function( require ) {
     }
 
     // sanity checks to prevent errors in interpretation or in the font shorthand usage
-    assert && assert( typeof this._style === 'string' &&
-                      _.contains( styles, this._style ),
+    assert && assert( typeof this._style === 'string' && _.contains( styles, this._style ),
       'Font style must be one of "normal", "italic", or "oblique"' );
-    assert && assert( typeof this._variant === 'string' &&
-                      _.contains( variants, this._variant ),
+    assert && assert( typeof this._variant === 'string' && _.contains( variants, this._variant ),
       'Font variant must be "normal" or "small-caps"' );
-    assert && assert( typeof this._weight === 'string' &&
-                      _.contains( weights, this._weight ),
+    assert && assert( typeof this._weight === 'string' && _.contains( weights, this._weight ),
       'Font weight must be one of "normal", "bold", "bolder", "lighter", "100", "200", "300", "400", "500", "600", "700", "800", or "900"' );
-    assert && assert( typeof this._stretch === 'string' &&
-                      _.contains( stretches, this._stretch ),
+    assert && assert( typeof this._stretch === 'string' && _.contains( stretches, this._stretch ),
       'Font stretch must be one of "normal", "ultra-condensed", "extra-condensed", "condensed", "semi-condensed", "semi-expanded", "expanded", "extra-expanded", or "ultra-expanded"' );
-    assert && assert( typeof this._size === 'string' && !_.contains( [ '0', '1', '2', '3', '4', '5', '6', '7', '8', '9' ], this._size[this._size.length - 1] ),
+    assert && assert( typeof this._size === 'string' && !_.contains( [ '0', '1', '2', '3', '4', '5', '6', '7', '8', '9' ], this._size[ this._size.length - 1 ] ),
       'Font size must be either passed as a number (not a string, interpreted as px), or must contain a suffix for percentage, absolute or relative units, or an explicit size constant' );
     assert && assert( typeof this._lineHeight === 'string' );
     assert && assert( typeof this._family === 'string' );
@@ -147,9 +148,7 @@ define( function( require ) {
   };
   var Font = scenery.Font;
 
-  Font.prototype = {
-    constructor: Font,
-
+  inherit( Object, Font, {
     getFont: function() { return this._font; },
     getStyle: function() { return this._style; },
     getVariant: function() { return this._variant; },
@@ -195,7 +194,7 @@ define( function( require ) {
     toCSS: function() {
       return this.getFont();
     }
-  };
+  } );
 
   Font.DEFAULT = new Font();
 

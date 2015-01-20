@@ -3,7 +3,7 @@
 /**
  * HTML Text, with the same interface as Text
  *
- * @author Jonathan Olson <olsonsjc@gmail.com>
+ * @author Jonathan Olson <jonathan.olson@colorado.edu>
  */
 
 define( function( require ) {
@@ -13,6 +13,10 @@ define( function( require ) {
   var scenery = require( 'SCENERY/scenery' );
   var Text = require( 'SCENERY/nodes/Text' ); // inherits from Text
 
+  /**
+   * NOTE: Currently does not properly handle multi-line (<br>) text height, since it expects DOM text that will be an
+   * inline element
+   */
   scenery.HTMLText = function HTMLText( text, options ) {
     // internal flag for Text
     this._isHTML = true;

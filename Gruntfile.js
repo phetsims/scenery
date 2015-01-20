@@ -1,4 +1,3 @@
-
 var exec = require( 'child_process' ).exec;
 var escodegen = require( 'escodegen' );
 var esprima = require( 'esprima' );
@@ -36,13 +35,12 @@ module.exports = function( grunt ) {
         }
       },
 
-      // without has.js
       production: {
         options: {
           almond: true,
-          mainConfigFile: "js/production-config.js",
+          mainConfigFile: "js/config.js",
           out: "build/production/scenery.min.js",
-          name: "production-config",
+          name: "config",
           optimize: 'uglify2',
           generateSourceMaps: true,
           preserveLicenseComments: false,
@@ -55,7 +53,7 @@ module.exports = function( grunt ) {
               global_defs: {
                 assert: false,
                 assertSlow: false,
-                sceneryLayerLog: false,
+                sceneryLog: false,
                 sceneryEventLog: false,
                 sceneryAccessibilityLog: false,
                 phetAllocation: false
@@ -70,13 +68,13 @@ module.exports = function( grunt ) {
 
     jshint: {
       all: [
-        'Gruntfile.js', 'js/**/*.js', '../kite/js/**/*.js', '../dot/js/**/*.js', '../phet-core/js/**/*.js', '../assert/js/**/*.js', '!../kite/js/parser/svgPath.js'
+        'Gruntfile.js', 'js/**/*.js', '../kite/js/**/*.js', '!../kite/js/parser/*.js', '../dot/js/**/*.js', '../phet-core/js/**/*.js', '../assert/js/**/*.js'
       ],
       scenery: [
         'js/**/*.js'
       ],
-      // reference external JSHint options in jshint-options.js
-      options: require( '../chipper/grunt/jshint-options' )
+      // reference external JSHint options in jshintOptions.js
+      options: require( '../chipper/grunt/jshintOptions' )
     }
   } );
 
@@ -99,11 +97,11 @@ module.exports = function( grunt ) {
     exec( 'git log -1 --date=short', function( error, stdout, stderr ) {
       if ( error ) { throw error; }
 
-      var sha = /commit (.*)$/m.exec( stdout )[1];
+      var sha = /commit (.*)$/m.exec( stdout )[ 1 ];
       var date = /Date: *(\d+)-(\d+)-(\d+)$/m.exec( stdout );
-      var year = date[1].slice( 2, 4 );
-      var month = date[2];
-      var day = date[3];
+      var year = date[ 1 ].slice( 2, 4 );
+      var month = date[ 2 ];
+      var day = date[ 3 ];
 
       var suffix = '-' + year + month + day + '-' + sha.slice( 0, 10 ) + '.js';
 

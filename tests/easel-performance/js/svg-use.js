@@ -1,13 +1,12 @@
-
 var phet = phet || {};
 phet.tests = phet.tests || {};
 
-(function(){
+(function() {
   'use strict';
-  
+
   var svgNS = 'http://www.w3.org/2000/svg';
   var xlinkNS = 'http://www.w3.org/1999/xlink';
-  
+
   function buildSVG( main ) {
     var svg = document.createElementNS( svgNS, 'svg' );
     svg.style.position = 'absolute';
@@ -18,58 +17,58 @@ phet.tests = phet.tests || {};
     main.append( svg );
     return svg;
   }
-  
+
   function buildRect() {
     var rect = document.createElementNS( svgNS, 'rect' );
-    
+
     rect.setAttribute( 'x', 0 );
     rect.setAttribute( 'y', 0 );
     rect.setAttribute( 'width', 20 );
     rect.setAttribute( 'height', 20 );
     rect.setAttribute( 'rx', 0 );
     rect.setAttribute( 'ry', 0 );
-    
+
     rect.setAttribute( 'style', 'fill: #f00; stroke: #000;' );
-    
+
     return rect;
   }
-  
+
   function addUse( parent, id ) {
     var use = document.createElementNS( svgNS, 'use' );
     use.setAttributeNS( xlinkNS, 'xlink:href', '#' + id );
     parent.appendChild( use );
   }
-  
+
   // groups (none, basic, complete) / simple (none, complete)
-  
+
   var basicN = 200;
-  
+
   phet.tests.svgUseSimpleNone = function( main ) {
     var svg = buildSVG( main );
-    
+
     var rects = [];
     for ( var i = 0; i < basicN; i++ ) {
       var rect = buildRect();
       rects.push( rect );
       svg.appendChild( rect );
     }
-    
+
     // return step function
     return function( timeElapsed ) {
       for ( var k = 0; k < basicN; k++ ) {
-        rects[k].setAttribute( 'x', ( Math.random() - 0.5 ) * 400 + main.width() / 2 );
-        rects[k].setAttribute( 'y', ( Math.random() - 0.5 ) * 400 + main.height() / 2 );
+        rects[ k ].setAttribute( 'x', ( Math.random() - 0.5 ) * 400 + main.width() / 2 );
+        rects[ k ].setAttribute( 'y', ( Math.random() - 0.5 ) * 400 + main.height() / 2 );
       }
       // group[0].transform.baseVal.getItem( 0 ).setMatrix( matrix.toSVGMatrix() );
     }
   };
-  
+
   phet.tests.svgUseSimpleDuplicated = function( main ) {
     var svg = buildSVG( main );
-    
+
     var defs = document.createElementNS( svgNS, 'defs' );
     svg.appendChild( defs );
-    
+
     var uses = [];
     for ( var i = 0; i < basicN; i++ ) {
       var rect = buildRect();
@@ -80,27 +79,27 @@ phet.tests = phet.tests || {};
       svg.appendChild( use );
       uses.push( use );
     }
-    
+
     // return step function
     return function( timeElapsed ) {
       for ( var k = 0; k < basicN; k++ ) {
-        uses[k].setAttribute( 'x', ( Math.random() - 0.5 ) * 400 + main.width() / 2 );
-        uses[k].setAttribute( 'y', ( Math.random() - 0.5 ) * 400 + main.height() / 2 );
+        uses[ k ].setAttribute( 'x', ( Math.random() - 0.5 ) * 400 + main.width() / 2 );
+        uses[ k ].setAttribute( 'y', ( Math.random() - 0.5 ) * 400 + main.height() / 2 );
       }
       // group[0].transform.baseVal.getItem( 0 ).setMatrix( matrix.toSVGMatrix() );
     }
   };
-  
+
   phet.tests.svgUseSimpleComplete = function( main ) {
     var svg = buildSVG( main );
-    
+
     var defs = document.createElementNS( svgNS, 'defs' );
     svg.appendChild( defs );
-    
+
     var rect = buildRect();
     rect.setAttribute( 'id', 'rr' );
     defs.appendChild( rect );
-    
+
     var uses = [];
     for ( var i = 0; i < basicN; i++ ) {
       var use = document.createElementNS( svgNS, 'use' );
@@ -108,20 +107,20 @@ phet.tests = phet.tests || {};
       svg.appendChild( use );
       uses.push( use );
     }
-    
+
     // return step function
     return function( timeElapsed ) {
       for ( var k = 0; k < basicN; k++ ) {
-        uses[k].setAttribute( 'x', ( Math.random() - 0.5 ) * 400 + main.width() / 2 );
-        uses[k].setAttribute( 'y', ( Math.random() - 0.5 ) * 400 + main.height() / 2 );
+        uses[ k ].setAttribute( 'x', ( Math.random() - 0.5 ) * 400 + main.width() / 2 );
+        uses[ k ].setAttribute( 'y', ( Math.random() - 0.5 ) * 400 + main.height() / 2 );
       }
       // group[0].transform.baseVal.getItem( 0 ).setMatrix( matrix.toSVGMatrix() );
     }
   };
-  
+
   phet.tests.svgUseHeavyNone = function( main ) {
     var svg = buildSVG( main );
-    
+
     var a = document.createElementNS( svgNS, 'g' );
     a.setAttribute( 'transform', dot.Matrix3.translation( main.width() / 2, main.height() / 2 ).getSVGTransform() );
     svg.appendChild( a );
@@ -164,46 +163,46 @@ phet.tests = phet.tests || {};
     r.appendChild( s );
     var t = document.createElementNS( svgNS, 'g' );
     s.appendChild( t );
-    
+
     var u = buildRect();
     u.setAttribute( 'style', 'fill: #00f; stroke: #000;' );
     u.setAttribute( 'x', -200 );
     h.appendChild( u );
-    
+
     var v = buildRect();
     v.setAttribute( 'y', 100 );
     b.appendChild( v );
-    
+
     var w = buildRect();
     w.setAttribute( 'y', 150 );
     c.appendChild( w );
-    
+
     var x = buildRect();
     t.appendChild( x );
-    
+
     var y = buildRect();
     h.appendChild( y );
-    
+
     var z = buildRect();
     z.setAttribute( 'style', 'fill: #0f0; stroke: #000;' );
     l.appendChild( z );
-    
+
     var rotB = 0;
     var rotT = 0;
-    
+
     // return step function
     return function( timeElapsed ) {
       b.setAttribute( 'transform', dot.Matrix3.rotation2( rotB += timeElapsed ).getSVGTransform() );
       t.setAttribute( 'transform', dot.Matrix3.rotation2( rotT += timeElapsed * 2 ).getSVGTransform() );
     }
   };
-  
+
   phet.tests.svgUseHeavyComplete = function( main ) {
     var svg = buildSVG( main );
-    
+
     var defs = document.createElementNS( svgNS, 'defs' );
     svg.appendChild( defs );
-    
+
     var a = document.createElementNS( svgNS, 'g' );
     a.setAttribute( 'id', 'a' );
     a.setAttribute( 'transform', dot.Matrix3.translation( main.width() / 2, main.height() / 2 ).getSVGTransform() );
@@ -285,54 +284,54 @@ phet.tests = phet.tests || {};
     t.setAttribute( 'id', 't' );
     defs.appendChild( t );
     addUse( s, 't' );
-    
+
     var u = buildRect();
     u.setAttribute( 'id', 'u' );
     u.setAttribute( 'style', 'fill: #00f; stroke: #000;' );
     u.setAttribute( 'x', -200 );
     defs.appendChild( u );
     addUse( h, 'u' );
-    
+
     var v = buildRect();
     v.setAttribute( 'id', 'v' );
     v.setAttribute( 'y', 100 );
     defs.appendChild( v );
     addUse( b, 'v' );
-    
+
     var w = buildRect();
     w.setAttribute( 'id', 'w' );
     w.setAttribute( 'y', 150 );
     defs.appendChild( w );
     addUse( c, 'w' );
-    
+
     var x = buildRect();
     x.setAttribute( 'id', 'x' );
     defs.appendChild( x );
     addUse( t, 'x' );
-    
+
     var y = buildRect();
     y.setAttribute( 'id', 'y' );
     defs.appendChild( y );
     addUse( h, 'y' );
-    
+
     var z = buildRect();
     z.setAttribute( 'style', 'fill: #0f0; stroke: #000;' );
     z.setAttribute( 'id', 'z' );
     defs.appendChild( z );
     addUse( l, 'z' );
-    
+
     addUse( svg, 'a' );
-    
+
     var rotB = 0;
     var rotT = 0;
-    
+
     // return step function
     return function( timeElapsed ) {
       b.setAttribute( 'transform', dot.Matrix3.rotation2( rotB += timeElapsed ).getSVGTransform() );
       t.setAttribute( 'transform', dot.Matrix3.rotation2( rotT += timeElapsed * 2 ).getSVGTransform() );
     }
   };
-  
-  
+
+
 })();
 

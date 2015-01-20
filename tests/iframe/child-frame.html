@@ -6,7 +6,7 @@
   <meta charset="utf-8"/>
   <meta http-equiv="X-UA-Compatible" content="IE=edge"/>
   <title>Child Frame</title>
-  
+
   <style type="text/css">
     /* Let content go to the edges */
     html, body {
@@ -17,7 +17,7 @@
       background-color: #000;
       overflow: hidden;
     }
-    
+
     canvas {
       position: absolute;
       left: 0;
@@ -28,98 +28,100 @@
   </style>
 </head>
 <body>
-  <canvas id="canvas" width="256" height="256"/>
-  <script>
-    var usePreventDefault = window.location.hash && ( window.location.hash.indexOf( 'noprevent' ) < 0 );
-    var useCSSFixes = window.location.hash && ( window.location.hash.indexOf( 'nochildfix' ) < 0 );
-    
-    // polyfill requestAnimationFrame
-    (function () {
-      var lastTime = 0;
-      var vendors = [ 'ms', 'moz', 'webkit', 'o' ];
-      for ( var x = 0; x < vendors.length && !window.requestAnimationFrame; ++x ) {
-        window.requestAnimationFrame = window[vendors[x]+'RequestAnimationFrame'];
-        window.cancelAnimationFrame = window[vendors[x]+'CancelAnimationFrame'] || window[vendors[x]+'CancelRequestAnimationFrame'];
+<canvas id="canvas" width="256" height="256"/>
+<script>
+  var usePreventDefault = window.location.hash && ( window.location.hash.indexOf( 'noprevent' ) < 0 );
+  var useCSSFixes = window.location.hash && ( window.location.hash.indexOf( 'nochildfix' ) < 0 );
+
+  // polyfill requestAnimationFrame
+  (function() {
+    var lastTime = 0;
+    var vendors = [ 'ms', 'moz', 'webkit', 'o' ];
+    for ( var x = 0; x < vendors.length && !window.requestAnimationFrame; ++x ) {
+      window.requestAnimationFrame = window[ vendors[ x ] + 'RequestAnimationFrame' ];
+      window.cancelAnimationFrame = window[ vendors[ x ] + 'CancelAnimationFrame' ] || window[ vendors[ x ] + 'CancelRequestAnimationFrame' ];
+    }
+
+    if ( !window.requestAnimationFrame ) {
+      window.requestAnimationFrame = function( callback ) {
+        var currTime = new Date().getTime();
+        var timeToCall = Math.max( 0, 16 - (currTime - lastTime) );
+        var id = window.setTimeout( function() { callback( currTime + timeToCall ); },
+            timeToCall );
+        lastTime = currTime + timeToCall;
+        return id;
+      };
+    }
+
+    if ( !window.cancelAnimationFrame ) {
+      window.cancelAnimationFrame = function( id ) {
+        clearTimeout( id );
+      };
+    }
+  })();
+
+  (function() {
+    var size = 256;
+
+    var canvas = document.getElementById( 'canvas' );
+    var context = canvas.getContext( '2d' );
+
+    // apply prefixed styles to content where we don't want our events getting intercepted by specific behaviors
+    if ( useCSSFixes ) {
+      var styles = {
+        userSelect: 'none',
+        userDrag: 'none',
+        touchAction: 'none',
+        touchCallout: 'none',
+        tapHighlightColor: 'transparent'
+      };
+      for ( var key in styles ) { // assuming people haven't messed with Object prototype, should probably be made more bulletproof
+        [ 'webkit', 'moz', 'ms', 'o', '' ].forEach( function( prefix ) {
+          canvas.style[ prefix + ( prefix ? key.charAt( 0 ).toUpperCase() + key.slice( 1 ) : key ) ] = styles[ key ];
+        } );
       }
-     
-      if ( !window.requestAnimationFrame ) {
-        window.requestAnimationFrame = function(callback) {
-          var currTime = new Date().getTime();
-          var timeToCall = Math.max(0, 16 - (currTime - lastTime));
-          var id = window.setTimeout(function() { callback(currTime + timeToCall); },
-            timeToCall);
-          lastTime = currTime + timeToCall;
-          return id;
-        };
-      }
-     
-      if ( !window.cancelAnimationFrame ) {
-        window.cancelAnimationFrame = function(id) {
-          clearTimeout(id);
-        };
-      }
-    })();
-    
-    (function(){
-      var size = 256;
-      
-      var canvas = document.getElementById( 'canvas' );
-      var context = canvas.getContext( '2d' );
-      
-      // apply prefixed styles to content where we don't want our events getting intercepted by specific behaviors
-      if ( useCSSFixes ) {
-        var styles = {
-          userSelect: 'none',
-          userDrag: 'none',
-          touchAction: 'none',
-          touchCallout: 'none',
-          tapHighlightColor: 'transparent'
-        };
-        for ( var key in styles ) { // assuming people haven't messed with Object prototype, should probably be made more bulletproof
-          ['webkit', 'moz', 'ms', 'o', ''].forEach( function( prefix ) {
-            canvas.style[prefix + ( prefix ? key.charAt( 0 ).toUpperCase() + key.slice( 1 ) : key )] = styles[key];
-          } );
-        }
-      }
-      
-      // pick the types of events we are listening to based on whether pointer events exist
-      var events;
-      if ( window.navigator.pointerEnabled ) {
-        events = ['pointerdown', 'pointerup', 'pointermove', 'pointerover', 'pointerout', 'pointercancel'];
-      } else if ( window.navigator.msPointerEnabled ) {
-        events = ['MSPointerDown', 'MSPointerUp', 'MSPointerMove', 'MSPointerOver', 'MSPointerOut', 'MSPointerCancel'];
-      } else {
-        events = ['mousedown', 'mouseup', 'mousemove', 'mouseover', 'mouseout', 'touchstart', 'touchend', 'touchmove', 'touchcancel']
-      }
-      
-      for ( var i = 0; i < events.length; i++ ) {
-        (function(){ // separate closure variables
-          var index = i;
-          var eventName = events[i];
-          canvas.addEventListener( eventName, function( domEvent ) {
-            context.fillStyle = 'red';
-            context.font = '20px Arial';
-            context.fillText( eventName, 10, ( index + 1 ) * 25 );
-            
-            if ( usePreventDefault ) {
-              context.fillText( 'preventDefault', 10, 256 - 10 );
-              domEvent.preventDefault();
-            }
-          } );
-          
-          
-        })();
-      }
-      
-      var stepCount = 0;
-      (function step() {
-        window.requestAnimationFrame( step );
-        
-        if ( stepCount++ % 3 === 0 ) {
-          context.fillStyle = 'rgba(0,0,0,0.05)';
-          context.fillRect( 0, 0, 256, 256 );
-        }
+    }
+
+    // pick the types of events we are listening to based on whether pointer events exist
+    var events;
+    if ( window.navigator.pointerEnabled ) {
+      events = [ 'pointerdown', 'pointerup', 'pointermove', 'pointerover', 'pointerout', 'pointercancel' ];
+    }
+    else if ( window.navigator.msPointerEnabled ) {
+      events = [ 'MSPointerDown', 'MSPointerUp', 'MSPointerMove', 'MSPointerOver', 'MSPointerOut', 'MSPointerCancel' ];
+    }
+    else {
+      events = [ 'mousedown', 'mouseup', 'mousemove', 'mouseover', 'mouseout', 'touchstart', 'touchend', 'touchmove', 'touchcancel' ]
+    }
+
+    for ( var i = 0; i < events.length; i++ ) {
+      (function() { // separate closure variables
+        var index = i;
+        var eventName = events[ i ];
+        canvas.addEventListener( eventName, function( domEvent ) {
+          context.fillStyle = 'red';
+          context.font = '20px Arial';
+          context.fillText( eventName, 10, ( index + 1 ) * 25 );
+
+          if ( usePreventDefault ) {
+            context.fillText( 'preventDefault', 10, 256 - 10 );
+            domEvent.preventDefault();
+          }
+        } );
+
+
       })();
+    }
+
+    var stepCount = 0;
+    (function step() {
+      window.requestAnimationFrame( step );
+
+      if ( stepCount++ % 3 === 0 ) {
+        context.fillStyle = 'rgba(0,0,0,0.05)';
+        context.fillRect( 0, 0, 256, 256 );
+      }
     })();
-  </script>
+  })();
+</script>
 </body>

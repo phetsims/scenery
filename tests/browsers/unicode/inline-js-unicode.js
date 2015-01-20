@@ -1,11 +1,12 @@
-
-$( window ).ready( function () {
+$( window ).ready( function() {
   var element;
+
   function newElement() {
     element = document.createElement( 'div' );
     $( element ).css( 'float', 'left' );
     document.body.appendChild( element );
   }
+
   function string( str ) {
     element.appendChild( document.createTextNode( str ) );
     element.appendChild( document.createElement( 'div' ) );
@@ -50,7 +51,7 @@ $( window ).ready( function () {
   string( "Å̳̥͓͚͒͞͞" );
   string( "0҉" );
   string( "█" );
-  
+
   // encoded
   newElement();
   string( 'Encoded' );

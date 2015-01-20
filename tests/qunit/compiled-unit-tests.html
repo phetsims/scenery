@@ -2,7 +2,7 @@
 <html>
 <head>
   <meta charset="utf-8"/>
-  <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+  <meta http-equiv="X-UA-Compatible" content="IE=edge"/>
 
   <title>Compiled Unit tests for Scenery</title>
 
@@ -10,7 +10,7 @@
 
   <!-- load JSHint settings first, before window.module can't be overwritten -->
   <script type="text/javascript" src="../../../phet-core/tests/qunit/beforeJSHintOptions.js"></script>
-  <script type="text/javascript" src="../../../chipper/grunt/jshint-options.js"></script>
+  <script type="text/javascript" src="../../../chipper/grunt/jshintOptions.js"></script>
   <script type="text/javascript" src="../../../phet-core/tests/qunit/afterJSHintOptions.js"></script>
 
   <script src="../../../sherpa/jquery-2.1.0.min.js"></script>
@@ -37,18 +37,18 @@
 
 </head>
 <body>
-  <div id="qunit"></div>
-  <div id="qunit-fixture">
-  </div>
-  <div id="display"></div>
+<div id="qunit"></div>
+<div id="qunit-fixture">
+</div>
+<div id="display"></div>
 
-  <!-- this needs to be run after the qunit-fixture is in the DOM, but before the document is loaded because QUnit scans the fixture then -->
-  <script src="prepare-fixture.js"></script>
-  <script>
-    runSceneryTests( '.' );
-    runKiteTests( '../../../kite/tests/qunit' );
-    runDotTests( '../../../dot/tests/qunit' );
-    runPhetCoreTests( '../../../phet-core/tests/qunit' );
-  </script>
+<!-- this needs to be run after the qunit-fixture is in the DOM, but before the document is loaded because QUnit scans the fixture then -->
+<script src="prepare-fixture.js"></script>
+<script>
+  runSceneryTests( '.' );
+  runKiteTests( '../../../kite/tests/qunit' );
+  runDotTests( '../../../dot/tests/qunit' );
+  runPhetCoreTests( '../../../phet-core/tests/qunit' );
+</script>
 </body>
 </html>

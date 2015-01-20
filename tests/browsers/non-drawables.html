@@ -2,10 +2,10 @@
 <html lang="en">
 <head>
   <meta charset="utf-8"/>
-  <meta http-equiv="X-UA-Compatible" content="IE=edge" />
-  
+  <meta http-equiv="X-UA-Compatible" content="IE=edge"/>
+
   <title>Non-drawables (Scenery)</title>
-  
+
   <style>
     canvas {
       border: 1px solid black;
@@ -16,20 +16,20 @@
 
 <canvas id="canvas" width="768" height="848"></canvas>
 
-<script type="text/javascript">  
+<script type="text/javascript">
 
   var context = document.getElementById( 'canvas' ).getContext( '2d' );
-  
+
   var zeroColor = '#000000';
   var offZeroColor = 'rgba(0,255,255,0.5)';
-  
+
   // shared settings
   context.lineWidth = 100;
-  
+
   /*---------------------------------------------------------------------------*
-  * Arc with 0 radius as a 'join'
-  *----------------------------------------------------------------------------*/
-  
+   * Arc with 0 radius as a 'join'
+   *----------------------------------------------------------------------------*/
+
   // exactly 0
   context.beginPath();
   context.moveTo( 0, 128 );
@@ -38,7 +38,7 @@
   context.lineTo( 128, 0 );
   context.strokeStyle = zeroColor;
   context.stroke();
-  
+
   // just off of 0
   context.beginPath();
   context.moveTo( 0, 128 );
@@ -47,11 +47,11 @@
   context.lineTo( 128, 0 );
   context.strokeStyle = offZeroColor;
   context.stroke();
-  
+
   /*---------------------------------------------------------------------------*
-  * Line with 0 length as a 'join'
-  *----------------------------------------------------------------------------*/
-  
+   * Line with 0 length as a 'join'
+   *----------------------------------------------------------------------------*/
+
   // exactly 0
   context.beginPath();
   context.moveTo( 0, 256 );
@@ -60,7 +60,7 @@
   context.lineTo( 256, 0 );
   context.strokeStyle = zeroColor;
   context.stroke();
-  
+
   // just off of 0
   context.beginPath();
   context.moveTo( 0, 256 );
@@ -69,11 +69,11 @@
   context.lineTo( 256, 0 );
   context.strokeStyle = offZeroColor;
   context.stroke();
-  
+
   /*---------------------------------------------------------------------------*
-  * Quadratic with all control points the same
-  *----------------------------------------------------------------------------*/
-  
+   * Quadratic with all control points the same
+   *----------------------------------------------------------------------------*/
+
   // exactly 0
   context.beginPath();
   context.moveTo( 0, 384 );
@@ -82,7 +82,7 @@
   context.lineTo( 384, 0 );
   context.strokeStyle = zeroColor;
   context.stroke();
-  
+
   // just off of 0
   context.beginPath();
   context.moveTo( 0, 384 );
@@ -91,11 +91,11 @@
   context.lineTo( 384, 0 );
   context.strokeStyle = offZeroColor;
   context.stroke();
-  
+
   /*---------------------------------------------------------------------------*
-  * Cubic with all control points the same
-  *----------------------------------------------------------------------------*/
-  
+   * Cubic with all control points the same
+   *----------------------------------------------------------------------------*/
+
   // exactly 0
   context.beginPath();
   context.moveTo( 0, 512 );
@@ -104,7 +104,7 @@
   context.lineTo( 512, 0 );
   context.strokeStyle = zeroColor;
   context.stroke();
-  
+
   // just off of 0
   context.beginPath();
   context.moveTo( 0, 512 );
@@ -113,11 +113,11 @@
   context.lineTo( 512, 0 );
   context.strokeStyle = offZeroColor;
   context.stroke();
-  
+
   /*---------------------------------------------------------------------------*
-  * Arc with same start/end angle
-  *----------------------------------------------------------------------------*/
-  
+   * Arc with same start/end angle
+   *----------------------------------------------------------------------------*/
+
   // exactly 0
   context.beginPath();
   context.moveTo( 0, 640 );
@@ -126,39 +126,39 @@
   context.lineTo( 640, 0 );
   context.strokeStyle = zeroColor;
   context.stroke();
-  
+
   /*---------------------------------------------------------------------------*
-  * Individual (non-joined) zero-length segments that hopefully don't show anything. 
-  *----------------------------------------------------------------------------*/
-  
+   * Individual (non-joined) zero-length segments that hopefully don't show anything.
+   *----------------------------------------------------------------------------*/
+
   // arc
   context.beginPath();
   context.moveTo( 128, 768 );
   context.arc( 128, 768, 0, Math.PI, -Math.PI, true );
   context.strokeStyle = zeroColor;
   context.stroke();
-  
+
   // lineTo
   context.beginPath();
   context.moveTo( 256, 768 );
   context.lineTo( 256, 768 );
   context.strokeStyle = zeroColor;
   context.stroke();
-  
+
   // quadratic
   context.beginPath();
   context.moveTo( 384, 768 );
   context.quadraticCurveTo( 384, 768, 384, 768 );
   context.strokeStyle = zeroColor;
   context.stroke();
-  
+
   // cubic
   context.beginPath();
   context.moveTo( 384, 768 );
   context.bezierCurveTo( 384, 768, 384, 768, 384, 768 );
   context.strokeStyle = zeroColor;
   context.stroke();
-  
+
 </script>
 
 </body>

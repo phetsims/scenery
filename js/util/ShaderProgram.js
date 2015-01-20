@@ -63,11 +63,11 @@ define( function( require ) {
       this.activeAttributes = {}; // map name => boolean (enabled)
 
       _.each( this.attributeNames, function( attributeName ) {
-        self.attributeLocations[attributeName] = self.gl.getAttribLocation( self.program, attributeName );
-        self.activeAttributes[attributeName] = true; // default to enabled
+        self.attributeLocations[ attributeName ] = self.gl.getAttribLocation( self.program, attributeName );
+        self.activeAttributes[ attributeName ] = true; // default to enabled
       } );
       _.each( this.uniformNames, function( uniformName ) {
-        self.uniformLocations[uniformName] = self.gl.getUniformLocation( self.program, uniformName );
+        self.uniformLocations[ uniformName ] = self.gl.getUniformLocation( self.program, uniformName );
       } );
 
       this.isInitialized = true;
@@ -84,10 +84,25 @@ define( function( require ) {
 
       // enable the active attributes
       _.each( this.attributeNames, function( attributeName ) {
-        if ( self.activeAttributes[attributeName] ) {
-          self.gl.enableVertexAttribArray( self.attributeLocations[attributeName] );
+        if ( self.activeAttributes[ attributeName ] ) {
+          self.enableVertexAttribArray( attributeName );
         }
       } );
+    },
+
+    activateAttribute: function( attributeName ) {
+      // guarded so we don't enable twice
+      if ( !this.activeAttributes[ attributeName ] ) {
+        this.activeAttributes[ attributeName ] = true;
+
+        if ( this.used ) {
+          this.enableVertexAttribArray( attributeName );
+        }
+      }
+    },
+
+    enableVertexAttribArray: function( attributeName ) {
+      this.gl.enableVertexAttribArray( this.attributeLocations[ attributeName ] );
     },
 
     unuse: function() {
@@ -98,30 +113,23 @@ define( function( require ) {
       this.used = false;
 
       _.each( this.attributeNames, function( attributeName ) {
-        if ( self.activeAttributes[attributeName] ) {
-          self.gl.disableVertexAttribArray( self.attributeLocations[attributeName] );
+        if ( self.activeAttributes[ attributeName ] ) {
+          self.disableVertexAttribArray( attributeName );
         }
       } );
     },
 
-    activateAttribute: function( name ) {
-      // guarded so we don't enable twice
-      if ( !this.activeAttributes[name] ) {
-        this.activeAttributes[name] = true;
-
-        if ( this.used ) {
-          this.gl.enableVertexAttribArray( this.attributeLocations[name] );
-        }
-      }
+    disableVertexAttribArray: function( attributeName ) {
+      this.gl.disableVertexAttribArray( this.attributeLocations[ attributeName ] );
     },
 
-    deactivateAttribute: function( name ) {
+    deactivateAttribute: function( attributeName ) {
       // guarded so we don't disable twice
-      if ( this.activeAttributes[name] ) {
-        this.activeAttributes[name] = false;
+      if ( this.activeAttributes[ attributeName ] ) {
+        this.activeAttributes[ attributeName ] = false;
 
         if ( this.used ) {
-          this.gl.disableVertexAttribArray( this.attributeLocations[name] );
+          this.disableVertexAttribArray( attributeName );
         }
       }
     },
@@ -131,4 +139,3 @@ define( function( require ) {
     }
   } );
 } );
-

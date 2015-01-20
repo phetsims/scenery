@@ -27,9 +27,5 @@ define( function( require ) {
   };
   var Key = scenery.Key;
 
-  inherit( Pointer, Key, {
-
-  } );
-
-  return Key;
+  return inherit( Pointer, Key );
 } );

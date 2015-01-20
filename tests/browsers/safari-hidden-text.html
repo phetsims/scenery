@@ -7,20 +7,20 @@
   <title>Safari hidden text issue, Joist #111</title>
 </head>
 <body style="padding: 0px; margin: 0px;">
-  <div style="position: absolute; left: 0px; top: 0px; clip: rect(0px 1280px 360px 0px); z-index: 2;">
-    <canvas width="300" height="150" style="position: absolute; left: 210px;" id="canvas"></canvas>
+<div style="position: absolute; left: 0px; top: 0px; clip: rect(0px 1280px 360px 0px); z-index: 2;">
+  <canvas width="300" height="150" style="position: absolute; left: 210px;" id="canvas"></canvas>
+</div>
+<div style="position: absolute; left: 0px; top: 0px; clip: rect(0px 1280px 360px 0px); z-index: 3;">
+  <div style="position: absolute; width: 200px;">
+    <a href="https://github.com/phetsims/joist/issues/111">
+      This is a link that is not visible in Safari 7.0.2 with OS X 10.9.2, but hovering over it gives
+      the "hand/pointer" cursor, and clicking it follows the link.
+    </a>
   </div>
-  <div style="position: absolute; left: 0px; top: 0px; clip: rect(0px 1280px 360px 0px); z-index: 3;">
-    <div style="position: absolute; width: 200px;">
-        <a href="https://github.com/phetsims/joist/issues/111">
-          This is a link that is not visible in Safari 7.0.2 with OS X 10.9.2, but hovering over it gives
-          the "hand/pointer" cursor, and clicking it follows the link.
-        </a>
-    </div>
-  </div>
-  <script type="text/javascript">
-    // doesn't hide the text without this
-    document.getElementById( 'canvas' ).getContext( '2d' ).fillRect( 0, 0, 300, 150 );
-  </script>
+</div>
+<script type="text/javascript">
+  // doesn't hide the text without this
+  document.getElementById( 'canvas' ).getContext( '2d' ).fillRect( 0, 0, 300, 150 );
+</script>
 </body>
 </html>

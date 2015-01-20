@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
   <meta charset="utf-8"/>
-  <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+  <meta http-equiv="X-UA-Compatible" content="IE=edge"/>
 
   <title>Text Tests</title>
 
@@ -16,6 +16,7 @@
 
   <!-- Our code, in either the concatenated 'with comments' version or the minified version -->
   <script src="../build/development/scenery.js"></script>
+  <!-- <script src="../build/standalone/scenery.min.js"></script> -->
 
   <style type="text/css">
     /* Let content go to the edges */
@@ -51,31 +52,36 @@
 
 <body>
 
-  <div id="bounds" class="scene"></div>
+<div id="bounds" class="scene"></div>
 
-  <svg width="1024px" height="1024px" xmlns="http://www.w3.org/2000/svg" version="1.1">
-    <g id="gA">
-      <text x="50" y="50" font-family="Verdana" font-size="25px" fill="blue">
-        QuipTaQiy
-      </text>
-    </g>
-    <g id="gB">
-      <text x="250" y="250" font-family="Verdana" font-size="125px" fill="blue">
-        QuipTaQiy
-      </text>
-    </g>
-  </svg>
+<svg width="1024px" height="1024px" xmlns="http://www.w3.org/2000/svg" version="1.1">
+  <g id="gA">
+    <text x="50" y="50" font-family="Verdana" font-size="25px" fill="blue">
+      QuipTaQiy
+    </text>
+  </g>
+  <g id="gB">
+    <text x="250" y="250" font-family="Verdana" font-size="125px" fill="blue">
+      QuipTaQiy
+    </text>
+  </g>
+</svg>
 
-  <div id="textDiv" class="scene"><span id="textSpan">QuipTaQiy</span></div>
+<div id="textDiv" class="scene"><span id="textSpan">QuipTaQiy</span></div>
 
-  <!-- <div class="scene"><span id="baselineSpan" style="font-family: Verdana; font-size: 25px;">QuipTaQiy</span><img style="vertical-align: baseline;" src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAH0CAYAAAD8PUeXAAAAKUlEQVRIS2P8z8Dwn3GUGA2D0XQwmg1Gi4LRknC0JBwtCUdLwqFUEgIActTmOjA3bkkAAAAASUVORK5CYII="/></div> -->
+<!-- <div class="scene"><span id="baselineSpan" style="font-family: Verdana; font-size: 25px;">QuipTaQiy</span><img style="vertical-align: baseline;" src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAH0CAYAAAD8PUeXAAAAKUlEQVRIS2P8z8Dwn3GUGA2D0XQwmg1Gi4LRknC0JBwtCUdLwqFUEgIActTmOjA3bkkAAAAASUVORK5CYII="/></div> -->
 
-  <div style="position: absolute; left: 0; top: 0; padding: 0 !important; margin: 0 !important;"><span id="baselineSpan" style="font-family: Verdana; font-size: 25px; line-height: 0;">QuipTaQiy</span><div style="vertical-align: top; display: inline-block; width: 10px; height: 500px; margin: 0 important!; padding: 0 important!; background-color: black;"></div></div>
+<div style="position: absolute; left: 0; top: 0; padding: 0 !important; margin: 0 !important;"><span id="baselineSpan"
+                                                                                                     style="font-family: Verdana; font-size: 25px; line-height: 0;">QuipTaQiy</span>
 
-  <!-- our scene graph will be in this div -->
-  <div id="main" class="scene"></div>
+  <div
+      style="vertical-align: top; display: inline-block; width: 10px; height: 500px; margin: 0 important!; padding: 0 important!; background-color: black;"></div>
+</div>
 
-  <script>
+<!-- our scene graph will be in this div -->
+<div id="main" class="scene"></div>
+
+<script>
 
   // var str = 'QuipTaQiy';
   var str = 'QuipTaQiy';
@@ -85,8 +91,8 @@
    */
 
   /*---------------------------------------------------------------------------*
-  * SVG methods
-  *----------------------------------------------------------------------------*/
+   * SVG methods
+   *----------------------------------------------------------------------------*/
 
   var svgText = document.getElementById( 'gA' );
   var svgBox = svgText.getBBox();
@@ -100,8 +106,8 @@
   var main = $( '#main' );
 
   /*---------------------------------------------------------------------------*
-  * Canvas-based (recursively accurate) methods
-  *----------------------------------------------------------------------------*/
+   * Canvas-based (recursively accurate) methods
+   *----------------------------------------------------------------------------*/
 
   // initialize our scene
   var scene = new scenery.Scene( main, {
@@ -121,8 +127,8 @@
   scene.updateScene();
 
   /*---------------------------------------------------------------------------*
-  * Canvas-based width
-  *----------------------------------------------------------------------------*/
+   * Canvas-based width
+   *----------------------------------------------------------------------------*/
 
   var canvas = document.createElement( 'canvas' );
   var context = canvas.getContext( '2d' );
@@ -137,8 +143,8 @@
   console.log( canvas.toDataURL() );
 
   /*---------------------------------------------------------------------------*
-  * DOM-based
-  *----------------------------------------------------------------------------*/
+   * DOM-based
+   *----------------------------------------------------------------------------*/
 
   var span = document.getElementById( 'textSpan' );
   var spanRect = span.getBoundingClientRect();
@@ -160,8 +166,8 @@
   console.log( '...: ' + baselineSpan.offsetTop );
 
   /*---------------------------------------------------------------------------*
-  * Displays of bounds for accuracy
-  *----------------------------------------------------------------------------*/
+   * Displays of bounds for accuracy
+   *----------------------------------------------------------------------------*/
 
   var boundsScene = new scenery.Scene( $( '#bounds' ) );
   boundsScene.addChild( new scenery.Path( kite.Shape.bounds( svgBoundsA ), {
@@ -191,23 +197,28 @@
 
     var textElement = document.createElementNS( 'http://www.w3.org/2000/svg', 'text' );
     textElement.appendChild( document.createTextNode( textNode.text ) );
-    switch ( textNode.textAlign ) {
+    switch( textNode.textAlign ) {
       case 'start':
       case 'end':
-        textElement.setAttribute( 'text-anchor', textNode.textAlign ); break;
+        textElement.setAttribute( 'text-anchor', textNode.textAlign );
+        break;
       case 'left':
-        textElement.setAttribute( 'text-anchor', isRTL ? 'end' : 'start' ); break;
+        textElement.setAttribute( 'text-anchor', isRTL ? 'end' : 'start' );
+        break;
       case 'right':
-        textElement.setAttribute( 'text-anchor', !isRTL ? 'end' : 'start' ); break;
+        textElement.setAttribute( 'text-anchor', !isRTL ? 'end' : 'start' );
+        break;
       case 'center':
-        textElement.setAttribute( 'text-anchor', 'middle' ); break;
+        textElement.setAttribute( 'text-anchor', 'middle' );
+        break;
     }
-    switch ( textNode.textBaseline ) {
+    switch( textNode.textBaseline ) {
       case 'alphabetic':
       case 'ideographic':
       case 'hanging':
       case 'middle':
-        textElement.setAttribute( 'dominant-baseline', textNode.textBaseline ); break;
+        textElement.setAttribute( 'dominant-baseline', textNode.textBaseline );
+        break;
       default:
         throw new Error( 'impossible to get the SVG approximate bounds for textBaseline: ' + textNode.textBaseline );
     }
@@ -266,7 +277,7 @@
     document.body.removeChild( div );
 
     var width = rect.right - rect.left;
-    switch ( textNode.textAlign ) {
+    switch( textNode.textAlign ) {
       case 'start':
         result = result.shiftedX( isRTL ? -width : 0 );
         break;
@@ -295,7 +306,7 @@
   console.log( textNode.approximateDOMBounds() );
 
 
-  </script>
+</script>
 
 </body>
 </html>

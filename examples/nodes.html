@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
   <meta charset="utf-8"/>
-  <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+  <meta http-equiv="X-UA-Compatible" content="IE=edge"/>
   <meta name="viewport" content="width=device-width, height=device-height, initial-scale=1.0, maximum-scale=1.0, user-scalable=no"/>
   <meta name="apple-mobile-web-app-capable" content="yes">
 
@@ -18,10 +18,11 @@
   <script src="../../sherpa/bootstrap-2.2.2.js"></script>
 
   <!-- For the pop-up FPS meter -->
-  <script src="../../sherpa/stats.min.js"></script>
+  <script src="../../sherpa/stats-r12.js"></script>
 
   <!-- Our code, in either the concatenated 'with comments' version or the minified version -->
   <script src="../build/development/scenery.js"></script>
+  <!-- <script src="../build/standalone/scenery.min.js"></script> -->
 
   <style type="text/css">
     /* Let content go to the edges */
@@ -49,11 +50,11 @@
 
 <body>
 
-  <!-- our scene graph will be in this div -->
-  <div id="main" >
-  </div>
+<!-- our scene graph will be in this div -->
+<div id="main">
+</div>
 
-  <script>
+<script>
 
   var main = $( '#main' );
 
@@ -65,8 +66,8 @@
   scene.addChild( container );
 
   /*---------------------------------------------------------------------------*
-  * Text
-  *----------------------------------------------------------------------------*/
+   * Text
+   *----------------------------------------------------------------------------*/
 
   container.addChild( new scenery.Text( 'This is a Text node', {
     x: 20,
@@ -76,8 +77,8 @@
   } ) );
 
   /*---------------------------------------------------------------------------*
-  * Rectangle
-  *----------------------------------------------------------------------------*/
+   * Rectangle
+   *----------------------------------------------------------------------------*/
 
   container.addChild( new scenery.Path( kite.Shape.rectangle( 0, 0, 44, 44 ), {
     x: 20.5,
@@ -87,8 +88,8 @@
   } ) );
 
   /*---------------------------------------------------------------------------*
-  * Custom Shape
-  *----------------------------------------------------------------------------*/
+   * Custom Shape
+   *----------------------------------------------------------------------------*/
 
   var customShape = new kite.Shape();
   customShape.moveTo( 0, 0 );
@@ -106,8 +107,8 @@
   } ) );
 
   /*---------------------------------------------------------------------------*
-  * Image
-  *----------------------------------------------------------------------------*/
+   * Image
+   *----------------------------------------------------------------------------*/
 
   var imageSource = document.createElement( 'img' );
   imageSource.onload = function( e ) {
@@ -119,8 +120,8 @@
   imageSource.src = 'http://phet.colorado.edu/images/phet-logo.gif';
 
   /*---------------------------------------------------------------------------*
-  * DOM
-  *----------------------------------------------------------------------------*/
+   * DOM
+   *----------------------------------------------------------------------------*/
 
   var element = document.createElement( 'div' );
   $( element ).attr( 'class', 'btn-group' );
@@ -132,7 +133,10 @@
     $( actualButton ).on( 'click', onclick );
 
     // for responsive touch handling without 300ms delay
-    $( actualButton ).on( 'touchstart', function( event ) { onclick( event ); event.preventDefault(); } );
+    $( actualButton ).on( 'touchstart', function( event ) {
+      onclick( event );
+      event.preventDefault();
+    } );
 
     element.appendChild( actualButton );
   }
@@ -146,8 +150,8 @@
   } ) );
 
   /*---------------------------------------------------------------------------*
-  * FPS meter
-  *----------------------------------------------------------------------------*/
+   * FPS meter
+   *----------------------------------------------------------------------------*/
 
   var stats = new Stats();
   stats.setMode( 0 ); // 0: fps, 1: ms
@@ -158,13 +162,13 @@
 
 
   /*---------------------------------------------------------------------------*
-  * main loop
-  *----------------------------------------------------------------------------*/
+   * main loop
+   *----------------------------------------------------------------------------*/
 
   var lastTime = 0;
   var timeElapsed = 0;
   function tick() {
-    var id = window.requestAnimationFrame( tick, main[0] );
+    var id = window.requestAnimationFrame( tick, main[ 0 ] );
 
     var timeNow = new Date().getTime();
     if ( lastTime != 0 ) {
@@ -175,16 +179,17 @@
     stats.begin();
     try {
       scene.updateScene(); // repaints dirty regions. use renderScene() to render everything
-    } catch( e ) {
+    }
+    catch( e ) {
       window.cancelAnimationFrame( id );
       throw e;
     }
     stats.end();
   }
-  window.requestAnimationFrame( tick, main[0] );
+  window.requestAnimationFrame( tick, main[ 0 ] );
 
 
-  </script>
+</script>
 
 </body>
 </html>
