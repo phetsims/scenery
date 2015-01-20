@@ -528,9 +528,10 @@ define( function( require ) {
           // no gradient support for DOM or WebGL (for now!)
         }
         else {
-          // solid fills always supported for DOM and WebGL
+          // solid fills always supported for DOM, WebGL and Pixi
           bitmask |= scenery.bitmaskSupportsDOM;
           bitmask |= scenery.bitmaskSupportsWebGL;
+          bitmask |= scenery.bitmaskSupportsPixi;
         }
 
         return bitmask;
