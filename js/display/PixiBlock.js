@@ -46,6 +46,11 @@ define( function( require ) {
       this.pixiRenderer = PIXI.autoDetectRenderer( 400, 300, { transparent: true } );
       this.domElement = this.pixiRenderer.view;
 
+      this.domElement.style.position = 'absolute';
+      this.domElement.style.left = '0';
+      this.domElement.style.top = '0';
+      this.domElement.style.pointerEvents = 'none';
+
       this.stage = new PIXI.Stage();
 
       // reset any fit transforms that were applied

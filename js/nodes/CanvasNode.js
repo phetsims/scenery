@@ -86,6 +86,9 @@ define( function( require ) {
   CanvasNode.CanvasNodeDrawable = CanvasSelfDrawable.createDrawable( {
     type: function CanvasNodeDrawable( renderer, instance ) { this.initialize( renderer, instance ); },
     paintCanvas: function paintCanvasNode( wrapper, node ) {
+      assert && assert( !node._selfBounds.isEmpty(), 'CanvasNode should not be used with an empty canvasBounds. ' +
+        'Please set canvasBounds (or use setCanvasBounds()) on ' + node.constructor.name );
+
       if ( !node._selfBounds.isEmpty() ) {
         node.paintCanvas( wrapper );
       }
