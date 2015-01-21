@@ -455,6 +455,15 @@ define( function( require ) {
       var baseTexture = new PIXI.BaseTexture( this.node._image, PIXI.scaleModes.DEFAULT );
       var texture = new PIXI.Texture( baseTexture );
       this.displayObject = new PIXI.Sprite( texture );
+      this.updateMatrix();
+    },
+
+    updateMatrix: function() {
+      var matrix = this.node.getLocalToGlobalMatrix();
+      this.displayObject.position.x = matrix.getTranslation().x;
+      this.displayObject.position.y = matrix.getTranslation().y;
+
+      //TODO: Scale, shear, etc.
     },
 
     initializeContext: function( pixiBlock ) {
@@ -479,6 +488,13 @@ define( function( require ) {
 
     disposePixiBuffers: function() {
       this.pixiBlock.pixiRenderer.colorTriangleRenderer.colorTriangleBufferData.dispose( this.rectangleHandle );
+    },
+
+    markTransformDirty: function() {
+      PixiSelfDrawable.prototype.markTransformDirty.call( this );
+
+      // TODO: Batch these dirty calls and only update right before render?
+      this.updateMatrix();
     },
 
     markDirtyRectangle: function() {
