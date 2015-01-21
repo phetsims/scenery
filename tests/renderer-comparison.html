@@ -221,6 +221,25 @@
         renderers: [ 'canvas', 'svg', 'webgl' ]
       },
       {
+        name: 'moving-image',
+        width: 200,
+        height: 200,
+        draw: function( scene, updateDisplay ) {
+          var thumbnail = document.getElementById( 'light-bulb-image' );
+          var sceneryImage = new scenery.Image( thumbnail );
+          scene.addChild( sceneryImage );
+
+          var callback = function() {
+            window.requestAnimationFrame( callback );
+            var value = Math.sin( Date.now() / 1000 ) * 20 + 20;
+            sceneryImage.x = value;
+            updateDisplay();
+          };
+          window.requestAnimationFrame( callback );
+        },
+        renderers: [ 'canvas', 'svg', 'dom', 'webgl', 'pixi' ]
+      },
+      {
         name: 'CanvasNode',
         width: 200,
         height: 200,
