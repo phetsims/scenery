@@ -56,6 +56,8 @@
 
   var graphics = new PIXI.Graphics();
 
+  // lightBulb.mask = mask;
+
   // set a fill and line style
   graphics.beginFill( 0xFF0000 );
   graphics.lineStyle( 1, 0x00FF00, 1 );
@@ -68,7 +70,22 @@
   graphics.lineTo( 0, 0 );
   graphics.endFill();
 
-  graphics.alpha = 0.2;
+  graphics.alpha = 0.5;
+
+
+  var mask2 = new PIXI.Graphics();
+  mask2.beginFill( 0xFFFFFF );
+  mask2.drawCircle( 0, 0, 250 );
+  mask2.endFill();
+  stage.addChild( mask2 );
+  lightBulb.mask = mask2;
+
+  var mask = new PIXI.Graphics();
+  mask.beginFill( 0xFFFFFF );
+  mask.drawCircle( 0, 0, 50 );
+  mask.endFill();
+  lightBulb.addChild( mask );
+  graphics.mask = mask;
 
   lightBulb.addChild( graphics );
 
