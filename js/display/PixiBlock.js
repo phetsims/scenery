@@ -42,17 +42,17 @@ define( function( require ) {
 
       // TODO: Maybe reuse the WebGLRenderer and use an initialize pattern()?
 
-      // TODO: Maybe pass through Renderer.bitmaskWebGLLowResolution ) ?
-      // Each WebGL block needs its own canvas, and this is created by the WebGLRenderer.
-      this.webglRenderer = PIXI.autoDetectRenderer( 400, 300, { transparent: true } );
-      this.domElement = this.webglRenderer.view;
+      // Create the Pixi renderer.
+      // Note.  This cannot be called `renderer` or it will interfere with scenery internals
+      this.pixiRenderer = PIXI.autoDetectRenderer( 400, 300, { transparent: true } );
+      this.domElement = this.pixiRenderer.view;
 
       this.stage = new PIXI.Stage();
 
       // reset any fit transforms that were applied
       // TODO: What is force acceleration?
-      Util.prepareForTransform( this.webglRenderer.view, this.forceAcceleration );
-      Util.unsetTransform( this.webglRenderer.view ); // clear out any transforms that could have been previously applied
+      Util.prepareForTransform( this.pixiRenderer.view, this.forceAcceleration );
+      Util.unsetTransform( this.pixiRenderer.view ); // clear out any transforms that could have been previously applied
 
       // store our backing scale so we don't have to look it up while fitting
 //      this.backingScale = ( renderer & Renderer.bitmaskWebGLLowResolution ) ? 1 : scenery.Util.backingScale( this.gl );
@@ -67,8 +67,8 @@ define( function( require ) {
 
     initializeWebGLState: function() {
 
-      // TODO: Maybe initialize the webglRenderer, if it is reused during pooling?
-//      this.webglRenderer.initialize();
+      // TODO: Maybe initialize the pixiRenderer, if it is reused during pooling?
+//      this.pixiRenderer.initialize();
     },
 
     setSizeFullDisplay: function() {
@@ -77,7 +77,7 @@ define( function( require ) {
       var size = this.display.getSize();
 
       // TODO: Set size
-      //this.webglRenderer.setCanvasSize( size.width, size.height );
+      //this.pixiRenderer.setCanvasSize( size.width, size.height );
     },
 
     setSizeFitBounds: function() {
@@ -86,10 +86,10 @@ define( function( require ) {
       var x = this.fitBounds.minX;
       var y = this.fitBounds.minY;
       //OHTWO TODO PERFORMANCE: see if we can get a speedup by putting the backing scale in our transform instead of with CSS?
-      Util.setTransform( 'matrix(1,0,0,1,' + x + ',' + y + ')', this.webglRenderer.view, this.forceAcceleration ); // reapply the translation as a CSS transform
+      Util.setTransform( 'matrix(1,0,0,1,' + x + ',' + y + ')', this.pixiRenderer.view, this.forceAcceleration ); // reapply the translation as a CSS transform
 
       // TODO: Set size
-      //this.webglRenderer.setCanvasSize( this.fitBounds.width, this.fitBounds.height );
+      //this.pixiRenderer.setCanvasSize( this.fitBounds.width, this.fitBounds.height );
 
       //TODO: How to handle this in WebGLRenderer?
 //      this.updateWebGLDimension( -x, -y, this.fitBounds.width, this.fitBounds.height );
@@ -109,7 +109,7 @@ define( function( require ) {
         // udpate the fit BEFORE drawing, since it may change our offset
         this.updateFit();
 
-        this.webglRenderer.render( this.stage );
+        this.pixiRenderer.render( this.stage );
       }
 
       sceneryLog && sceneryLog.PixiBlock && sceneryLog.pop();
@@ -118,7 +118,7 @@ define( function( require ) {
     dispose: function() {
       sceneryLog && sceneryLog.PixiBlock && sceneryLog.PixiBlock( 'dispose #' + this.id );
 
-      this.webglRenderer.dispose();
+      this.pixiRenderer.dispose();
 
       // clear references
       cleanArray( this.dirtyDrawables );
@@ -174,7 +174,7 @@ define( function( require ) {
     simulateWebGLContextLoss: function() {
       console.log( 'simulating webgl context loss in PixiBlock' );
       assert && assert( this.scene.webglMakeLostContextSimulatingCanvas );
-      this.webglRenderer.view.loseContextInNCalls( 5 );
+      this.pixiRenderer.view.loseContextInNCalls( 5 );
     },
 
     toString: function() {
