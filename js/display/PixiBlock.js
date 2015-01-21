@@ -18,7 +18,6 @@ define( function( require ) {
   var scenery = require( 'SCENERY/scenery' );
   var FittedBlock = require( 'SCENERY/display/FittedBlock' );
   var Util = require( 'SCENERY/util/Util' );
-  var Color = require( 'SCENERY/util/Color' );
 
   scenery.PixiBlock = function PixiBlock( display, renderer, transformRootInstance, filterRootInstance ) {
     this.initialize( display, renderer, transformRootInstance, filterRootInstance );
@@ -74,7 +73,7 @@ define( function( require ) {
     setSizeFullDisplay: function() {
 
       // TODO: Allow scenery to change the size of the WebGLRenderer.view
-      var size = this.display.getSize();
+      //var size = this.display.getSize();
 
       // TODO: Set size
       //this.pixiRenderer.setCanvasSize( size.width, size.height );
