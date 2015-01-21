@@ -33,7 +33,7 @@
 
   var stage = new PIXI.Stage( 0xFFFFFF );
 
-  var renderer = PIXI.autoDetectRenderer( 400, 300, { transparent: true } );
+  var renderer = PIXI.autoDetectRenderer( 400, 300, { transparent: true, antialias: true } );
 
   document.body.appendChild( renderer.view );
 
@@ -92,10 +92,18 @@
   var string1 = 'A\u030a\u0352\u0333\u0325\u0353\u035a\u035e\u035e';
   var string2 = '0\u0489';
 
-  var text1 = new PIXI.Text( string1, { font:"50px Arial", fill:"red" } );
+  var text1 = new PIXI.Text( string1, { font:"8px Arial", fill:"red" } );
   text1.position.x = 50;
   text1.position.y = 50;
   stage.addChild( text1 );
+  text1.rotation = 0.1;
+  text1.scale.x = text1.scale.y = 20;
+
+  var text5 = new PIXI.Text( string1, { font:"1000px Arial", fill:"red" } );
+  text5.position.x = 250;
+  text5.position.y = 50;
+  stage.addChild( text5 );
+  text5.scale.x = text5.scale.y = 0.1;
 
   var text2 = new PIXI.Text( string2, { font:"50px Arial", fill:"red" } );
   text2.position.x = 50;
@@ -116,6 +124,8 @@
     window.requestAnimationFrame( step, renderer.view );
 
     lightBulb.rotation += 0.1;
+    text1.scale.x *= 1.001;
+    text1.scale.y *= 1.001;
     renderer.render( stage );
   })();
 
