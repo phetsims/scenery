@@ -18,6 +18,7 @@ define( function( require ) {
   var scenery = require( 'SCENERY/scenery' );
   var FittedBlock = require( 'SCENERY/display/FittedBlock' );
   var Util = require( 'SCENERY/util/Util' );
+  var Color = require( 'SCENERY/util/Color' );
 
   scenery.PixiBlock = function PixiBlock( display, renderer, transformRootInstance, filterRootInstance ) {
     this.initialize( display, renderer, transformRootInstance, filterRootInstance );
@@ -43,28 +44,10 @@ define( function( require ) {
 
       // TODO: Maybe pass through Renderer.bitmaskWebGLLowResolution ) ?
       // Each WebGL block needs its own canvas, and this is created by the WebGLRenderer.
-      this.webglRenderer = new PIXI.WebGLRenderer( 800, 600 );
+      this.webglRenderer = PIXI.autoDetectRenderer( 400, 300, { transparent: true } );
       this.domElement = this.webglRenderer.view;
 
       this.stage = new PIXI.Stage();
-
-      var graphics = new PIXI.Graphics();
-
-      // set a fill and line style
-      graphics.beginFill( 0xFF3300 );
-      graphics.lineStyle( 10, 0xffd900, 1 );
-
-      // draw a shape
-      graphics.moveTo( 50, 50 );
-      graphics.lineTo( 250, 50 );
-      graphics.lineTo( 100, 100 );
-      graphics.lineTo( 250, 220 );
-      graphics.lineTo( 50, 220 );
-      graphics.lineTo( 50, 50 );
-      graphics.endFill();
-
-      this.stage.addChild( graphics );
-      this.webglRenderer.render( this.stage );
 
       // reset any fit transforms that were applied
       // TODO: What is force acceleration?
