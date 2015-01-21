@@ -89,6 +89,29 @@
 
   lightBulb.addChild( graphics );
 
+  var string1 = 'A\u030a\u0352\u0333\u0325\u0353\u035a\u035e\u035e';
+  var string2 = '0\u0489';
+
+  var text1 = new PIXI.Text( string1, { font:"50px Arial", fill:"red" } );
+  text1.position.x = 50;
+  text1.position.y = 50;
+  stage.addChild( text1 );
+
+  var text2 = new PIXI.Text( string2, { font:"50px Arial", fill:"red" } );
+  text2.position.x = 50;
+  text2.position.y = 250;
+  stage.addChild( text2 );
+
+  var text3 = new PIXI.Text( '\u0906', { font:"italic 50px Arial", fill:"red" } );
+  text3.position.x = 150;
+  text3.position.y = 250;
+  stage.addChild( text3 );
+
+  var text4 = new PIXI.Text( '\u0906', { font:"50px Arial", fill:"red" } );
+  text4.position.x = 250;
+  text4.position.y = 250;
+  stage.addChild( text4 );
+
   (function step() {
     window.requestAnimationFrame( step, renderer.view );
 
