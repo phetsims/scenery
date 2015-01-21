@@ -954,10 +954,6 @@ define( function( require ) {
     // called either from the constructor or from pooling
     initialize: function( renderer, instance ) {
       this.initializePixiSelfDrawable( renderer, instance );
-    },
-
-    initializeContext: function( pixiBlock ) {
-      this.pixiBlock = pixiBlock;
 
       var graphics = new PIXI.Graphics();
 
@@ -971,7 +967,11 @@ define( function( require ) {
       graphics.lineTo( this.node._rectX, this.node._rectY + this.node._rectHeight );
       graphics.endFill();
 
-      this.pixiBlock.stage.addChild( graphics );
+      this.displayObject = graphics;
+    },
+
+    initializeContext: function( pixiBlock ) {
+      this.pixiBlock = pixiBlock;
 
       //TODO: Update the state in the buffer arrays
     },

@@ -140,6 +140,9 @@ define( function( require ) {
 
       FittedBlock.prototype.addDrawable.call( this, drawable );
 
+      this.stage.addChild( drawable.displayObject );
+
+      // TODO: Is this necessary?
       drawable.initializeContext( this );
     },
 
@@ -147,6 +150,8 @@ define( function( require ) {
       sceneryLog && sceneryLog.PixiBlock && sceneryLog.PixiBlock( '#' + this.id + '.removeDrawable ' + drawable.toString() );
 
       FittedBlock.prototype.removeDrawable.call( this, drawable );
+
+      this.stage.removeChild( drawable.displayObject );
     },
 
     onIntervalChange: function( firstDrawable, lastDrawable ) {

@@ -451,15 +451,14 @@ define( function( require ) {
     // called either from the constructor or from pooling
     initialize: function( renderer, instance ) {
       this.initializePixiSelfDrawable( renderer, instance );
+
+      var baseTexture = new PIXI.BaseTexture( this.node._image, PIXI.scaleModes.DEFAULT );
+      var texture = new PIXI.Texture( baseTexture );
+      this.displayObject = new PIXI.Sprite( texture );
     },
 
     initializeContext: function( pixiBlock ) {
       this.pixiBlock = pixiBlock;
-
-      var baseTexture = new PIXI.BaseTexture( this.node._image, PIXI.scaleModes.DEFAULT );
-      var texture = new PIXI.Texture( baseTexture );
-      var bunny = new PIXI.Sprite( texture );
-      pixiBlock.stage.addChild( bunny );
     },
 
     //Nothing necessary since everything currently handled in the uModelViewMatrix below
