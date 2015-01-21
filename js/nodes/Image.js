@@ -27,6 +27,7 @@ define( function( require ) {
   var CanvasSelfDrawable = require( 'SCENERY/display/CanvasSelfDrawable' );
   var SelfDrawable = require( 'SCENERY/display/SelfDrawable' );
   var WebGLSelfDrawable = require( 'SCENERY/display/WebGLSelfDrawable' );
+  var PixiSelfDrawable = require( 'SCENERY/display/PixiSelfDrawable' );
 
   // TODO: change this based on memory and performance characteristics of the platform
   var keepDOMImageElements = true; // whether we should pool DOM elements for the DOM rendering states, or whether we should free them when possible for memory
@@ -88,11 +89,22 @@ define( function( require ) {
 
     invalidateSupportedRenderers: function() {
       if ( this._image instanceof HTMLCanvasElement ) {
-        this.setRendererBitmask( scenery.bitmaskBoundsValid | scenery.bitmaskSupportsCanvas | scenery.bitmaskSupportsWebGL );
+        this.setRendererBitmask(
+          scenery.bitmaskBoundsValid |
+          scenery.bitmaskSupportsCanvas |
+          scenery.bitmaskSupportsWebGL |
+          scenery.bitmaskSupportsPixi
+        );
       }
       else {
         // assumes HTMLImageElement
-        this.setRendererBitmask( scenery.bitmaskBoundsValid | scenery.bitmaskSupportsCanvas | scenery.bitmaskSupportsSVG | scenery.bitmaskSupportsDOM | scenery.bitmaskSupportsWebGL );
+        this.setRendererBitmask(
+          scenery.bitmaskBoundsValid |
+          scenery.bitmaskSupportsCanvas |
+          scenery.bitmaskSupportsSVG |
+          scenery.bitmaskSupportsDOM |
+          scenery.bitmaskSupportsPixi
+        );
       }
     },
 
@@ -167,6 +179,10 @@ define( function( require ) {
 
     createWebGLDrawable: function( renderer, instance ) {
       return Image.ImageWebGLDrawable.createFromPool( renderer, instance );
+    },
+
+    createPixiDrawable: function( renderer, instance ) {
+      return Image.ImagePixiDrawable.createFromPool( renderer, instance );
     },
 
     set image( value ) { this.setImage( value ); },
@@ -423,6 +439,81 @@ define( function( require ) {
 
   /* jshint -W064 */
   ImageStatefulDrawableMixin( Image.ImageWebGLDrawable );
+
+
+  /*---------------------------------------------------------------------------*
+   * Pixi rendering
+   *----------------------------------------------------------------------------*/
+
+  Image.ImagePixiDrawable = inherit( PixiSelfDrawable, function ImagePixiDrawable( renderer, instance ) {
+    this.initialize( renderer, instance );
+  }, {
+    // called either from the constructor or from pooling
+    initialize: function( renderer, instance ) {
+      this.initializePixiSelfDrawable( renderer, instance );
+
+      var baseTexture = new PIXI.BaseTexture( this.node._image, PIXI.scaleModes.DEFAULT );
+      var texture = new PIXI.Texture( baseTexture );
+      this.displayObject = new PIXI.Sprite( texture );
+    },
+
+    initializeContext: function( pixiBlock ) {
+      this.pixiBlock = pixiBlock;
+    },
+
+    //Nothing necessary since everything currently handled in the uModelViewMatrix below
+    //However, we may switch to dynamic draw, and handle the matrix change only where necessary in the future?
+    updateRectangle: function() {
+    },
+
+    render: function( shaderProgram ) {
+      // This is handled by the ColorTriangleRenderer
+    },
+
+    dispose: function() {
+      this.disposePixiBuffers();
+
+      // super
+      PixiSelfDrawable.prototype.dispose.call( this );
+    },
+
+    disposePixiBuffers: function() {
+      this.pixiBlock.pixiRenderer.colorTriangleRenderer.colorTriangleBufferData.dispose( this.rectangleHandle );
+    },
+
+    markDirtyRectangle: function() {
+      this.markDirty();
+    },
+
+    // general flag set on the state, which we forward directly to the drawable's paint flag
+    markPaintDirty: function() {
+      this.markDirty();
+    },
+
+    onAttach: function( node ) {
+
+    },
+
+    // release the drawable
+    onDetach: function( node ) {
+      //OHTWO TODO: are we missing the disposal?
+    },
+
+    //TODO: Make sure all of the dirty flags make sense here.  Should we be using fillDirty, paintDirty, dirty, etc?
+    update: function() {
+      if ( this.dirty ) {
+        this.updateRectangle();
+        this.dirty = false;
+      }
+    }
+  } );
+
+  // set up pooling
+  /* jshint -W064 */
+  SelfDrawable.PoolableMixin( Image.ImagePixiDrawable );
+
+  /* jshint -W064 */
+  ImageStatefulDrawableMixin( Image.ImagePixiDrawable );
 
   return Image;
 } );

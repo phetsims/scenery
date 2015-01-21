@@ -954,16 +954,24 @@ define( function( require ) {
     // called either from the constructor or from pooling
     initialize: function( renderer, instance ) {
       this.initializePixiSelfDrawable( renderer, instance );
+
+      var graphics = new PIXI.Graphics();
+
+      // set a fill and line style
+      graphics.beginFill( Color.toColor( this.node._fill ).toNumber() );
+
+      // draw a shape
+      graphics.moveTo( this.node._rectX, this.node._rectY );
+      graphics.lineTo( this.node._rectX + this.node._rectWidth, this.node._rectY );
+      graphics.lineTo( this.node._rectX + this.node._rectWidth, this.node._rectY + this.node._rectHeight );
+      graphics.lineTo( this.node._rectX, this.node._rectY + this.node._rectHeight );
+      graphics.endFill();
+
+      this.displayObject = graphics;
     },
 
     initializeContext: function( pixiBlock ) {
       this.pixiBlock = pixiBlock;
-      //
-      //// cleanup old vertexBuffer, if applicable
-      //this.disposePixiBuffers();
-      //
-      //this.initializePaintableState();
-      //this.updateRectangle();
 
       //TODO: Update the state in the buffer arrays
     },

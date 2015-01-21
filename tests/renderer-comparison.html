@@ -87,6 +87,14 @@
       opacity: 0.3;
     }
 
+    .scene.pixi:after {
+      content: "Pixi";
+      position: absolute;
+      bottom: 0;
+      left: 2px;
+      opacity: 0.3;
+    }
+
     .preloadedImage {
       position: absolute;
       display: none
@@ -129,7 +137,7 @@
           scene.addChild( new scenery.Image( thumbnail ) );
           updateDisplayCallback();
         },
-        renderers: [ 'canvas', 'svg', 'dom', 'webgl' ]
+        renderers: [ 'canvas', 'svg', 'dom', 'webgl', 'pixi' ]
       },
       {
         name: 'solid-line',
