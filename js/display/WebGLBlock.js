@@ -47,6 +47,11 @@ define( function( require ) {
       this.webglRenderer = new WebGLRenderer( { stats: false } );
       this.domElement = this.webglRenderer.canvas;
 
+      this.domElement.style.position = 'absolute';
+      this.domElement.style.left = '0';
+      this.domElement.style.top = '0';
+      this.domElement.style.pointerEvents = 'none';
+
       // reset any fit transforms that were applied
       // TODO: What is force acceleration?
       Util.prepareForTransform( this.webglRenderer.canvas, this.forceAcceleration );
