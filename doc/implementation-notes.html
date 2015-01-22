@@ -114,10 +114,11 @@
     </p>
 
     <p>
-      <strong>Painted</strong> nodes (those that display something themselves, typically subtypes of
-      <a href="../doc#path">Path</a>, <a href="../doc#image">Image</a>, <a href="../doc#text">Text</a>, etc.) will
-      always have Instances that have <strong>self drawables</strong> that are responsible for rendering that node
-      (not including its children).
+      A node is called <strong>Painted</strong> if it displays something itself (like <a href="../doc#path">Path</a>,
+      <a href="../doc#image">Image</a>, <a href="../doc#text">Text</a>, etc.). A vanilla <a href="../doc#node">Node</a>
+      is not considered painted, since it doesn't display anything itself (even though its children/descendants may).
+      Painted nodes will always have Instances that have <strong>self drawables</strong> that are responsible for
+      rendering that node (not including any children).
     </p>
 
     <p>
