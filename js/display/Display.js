@@ -813,14 +813,94 @@ define( function( require ) {
       this._input = null;
     },
 
+    /**
+     * Returns an HTML fragment {string} that includes a large amount of debugging information, including a view of the
+     * instance tree and drawable tree.
+     */
     getDebugHTML: function() {
       function str( ob ) {
         return ob ? ob.toString() : ob + '';
       }
 
+      var headerStyle = 'font-weight: bold; font-size: 120%; margin-top: 5px;';
+
       var depth = 0;
 
-      var result = 'Display ' + this._size.toString() + ' frame:' + this._frameId + ' input:' + !!this._input + ' cursor:' + this._lastCursor + '<br>';
+      var result = '';
+
+      result += '<div style="' + headerStyle + '">Display Summary</div>';
+      result += this._size.toString() + ' frame:' + this._frameId + ' input:' + !!this._input + ' cursor:' + this._lastCursor + '<br>';
+
+      function nodeCount( node ) {
+        var count = 1; // for us
+        for ( var i = 0; i < node.children.length; i++ ) {
+          count += nodeCount( node.children[i] );
+        }
+        return count;
+      }
+      result += 'Nodes: ' + nodeCount( this._rootNode ) + '<br>';
+
+      function instanceCount( instance ) {
+        var count = 1; // for us
+        for ( var i = 0; i < instance.children.length; i++ ) {
+          count += instanceCount( instance.children[i] );
+        }
+        return count;
+      }
+      result += 'Instances: ' + instanceCount( this._baseInstance ) + '<br>';
+
+      function drawableCount( drawable ) {
+        var count = 1; // for us
+        if ( drawable.blocks ) {
+          // we're a backbone
+          _.each( drawable.blocks, function( childDrawable ) {
+            count += drawableCount( childDrawable );
+          } );
+        }
+        else if ( drawable.firstDrawable && drawable.lastDrawable ) {
+          // we're a block
+          for ( var childDrawable = drawable.firstDrawable; childDrawable !== drawable.lastDrawable; childDrawable = childDrawable.nextDrawable ) {
+            count += drawableCount( childDrawable );
+          }
+          count += drawableCount( drawable.lastDrawable );
+        }
+        return count;
+      }
+      result += 'Drawables: ' + drawableCount( this._rootBackbone ) + '<br>';
+
+      function blockSummary( block ) {
+        // ensure we are a block
+        if ( !block.firstDrawable || !block.lastDrawable ) {
+          return;
+        }
+
+        var hasBackbone = block.domDrawable && block.domDrawable.blocks;
+
+        var div = '<div style="margin-left: ' + ( depth * 20 ) + 'px">';
+
+        div += block.toString();
+        if ( !hasBackbone ) {
+          div += ' (' + block.drawableCount + ' drawables)';
+        }
+
+        div += '</div>';
+
+        depth += 1;
+        if ( hasBackbone ) {
+          for ( var k = 0; k < block.domDrawable.blocks.length; k++ ) {
+            div += blockSummary ( block.domDrawable.blocks[k] );
+          }
+        }
+        depth -= 1;
+
+        return div;
+      }
+      if ( this._rootBackbone ) {
+        result += '<div style="' + headerStyle + '">Block Summary</div>';
+        for ( var i = 0; i < this._rootBackbone.blocks.length; i++ ) {
+          result += blockSummary( this._rootBackbone.blocks[i] );
+        }
+      }
 
       function instanceSummary( instance ) {
         var iSummary = '';
@@ -927,12 +1007,12 @@ define( function( require ) {
       }
 
       if ( this._baseInstance ) {
-        result += '<div style="font-weight: bold;">Root Instance Tree</div>';
+        result += '<div style="' + headerStyle + '">Root Instance Tree</div>';
         printInstanceSubtree( this._baseInstance );
       }
 
       _.each( this._sharedCanvasInstances, function( instance ) {
-        result += '<div style="font-weight: bold;">Shared Canvas Instance Tree</div>';
+        result += '<div style="' + headerStyle + '">Shared Canvas Instance Tree</div>';
         printInstanceSubtree( instance );
       } );
 
