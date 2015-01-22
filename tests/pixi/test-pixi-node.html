@@ -33,7 +33,7 @@
       height: 100%;
       margin: 0;
       padding: 0;
-      background-color: blue;
+      background-color: white;
     }
 
   </style>
@@ -51,8 +51,6 @@
       window.axon = axon;
       window.core = core;
 
-      console.log( 'hi' );
-
       // Create a Node as the root of our tree (it can contain children)
       var scene = new scenery.Node();
 
@@ -60,12 +58,19 @@
       var display = new scenery.Display( scene );
       document.body.appendChild( display.domElement );
 
-      var path = new scenery.Path( kite.Shape.rectangle( 50, 50, 200, 100 ), {} );
-      // Add our text
-//      scene.addChild( path );
+      var path = new scenery.Path( kite.Shape.rectangle( 0, 0, 200, 100 ), { fill: 'yellow' } );
 
-      var pixiNode = new scenery.PixiNode( path );
-      scene.addChild( pixiNode );
+      path.addChild( new scenery.Text( 'Hello!', {
+        top: 0,
+        left: 0,
+        fill: '#000000',
+        font: '20px sans-serif'
+      } ) );
+      var sceneryRootNode = new scenery.Node( { children: [ path ] } );
+
+      // Choose one or the other of the lines below.
+      scene.addChild( new scenery.PixiNode( sceneryRootNode ) );
+//      scene.addChild( sceneryRootNode );
 
       // Paint any changes (in this case, our text).
       display.updateDisplay();
