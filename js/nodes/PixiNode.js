@@ -27,6 +27,8 @@ define( function( require ) {
     var i;
     if ( sceneryNode instanceof Path ) {
 
+      var segment;
+
       // TODO: Use Pixi.Shape where possible
       var path = sceneryNode;
       var graphics = new PIXI.Graphics();
@@ -37,7 +39,7 @@ define( function( require ) {
       for ( i = 0; i < shape.subpaths.length; i++ ) {
         var subpath = shape.subpaths[ i ];
         for ( var k = 0; k < subpath.segments.length; k++ ) {
-          var segment = subpath.segments[ k ];
+          segment = subpath.segments[ k ];
           if ( i === 0 && k === 0 ) {
             graphics.moveTo( segment.start.x, segment.start.y );
           }
