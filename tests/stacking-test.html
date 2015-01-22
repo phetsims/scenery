@@ -1,146 +1,153 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-	<meta charset="utf-8"/>
-  <meta http-equiv="X-UA-Compatible" content="IE=edge" />
-	<meta name="viewport"
-	content="width=device-width, height=device-height, initial-scale=1.0, maximum-scale=1.0, user-scalable=no"/>
+  <meta charset="utf-8"/>
+  <meta http-equiv="X-UA-Compatible" content="IE=edge"/>
+  <meta name="viewport"
+        content="width=device-width, height=device-height, initial-scale=1.0, maximum-scale=1.0, user-scalable=no"/>
 
-	<!-- runs in full-screen mode on iOS devices -->
-	<meta name="apple-mobile-web-app-capable" content="yes">
+  <!-- runs in full-screen mode on iOS devices -->
+  <meta name="apple-mobile-web-app-capable" content="yes">
 
-	<title>Stacking Test</title>
+  <title>Stacking Test</title>
 
-	<link rel="stylesheet" href="../../sherpa/jquery.mobile-1.2.0.min.css" />
-	<script src="../../sherpa/jquery-2.1.0.min.js"></script>
-	<script src="../../sherpa/jquery.mobile-1.2.0.min.js"></script>
-	
-	<script type="text/javascript">
+  <link rel="stylesheet" href="../../sherpa/jquery.mobile-1.2.0.min.css"/>
+  <script src="../../sherpa/jquery-2.1.0.min.js"></script>
+  <script src="../../sherpa/jquery.mobile-1.2.0.min.js"></script>
 
-	// background
-	$(window).ready( function() {
-		(function(){
-			var backgroundCanvas = $('#backgroundCanvas');
-			var context = backgroundCanvas[0].getContext( '2d' );
-			context.fillStyle = '#888888';
-			context.fillRect( 0, 0, 256, 256 + 128 );	
-		})();
+  <script type="text/javascript">
 
-		(function(){
-			var midCanvas = $('#midCanvas');
-			var context = midCanvas[0].getContext( '2d' );
-			context.fillStyle = 'rgba(255, 255, 0, 0.5)';
-			context.fillRect( 0, 0, 128, 256 );	
-		})();
-		
-		(function(){
-			var dataUrl = $('#midCanvas')[0].toDataURL( 'image/png' );
-			var image = document.getElementById( 'dot' );
-			$( image ).attr( 'width', '128px' );
-			$( image ).attr( 'height', '128px' );
-			$( image ).attr( 'xlink:href', dataUrl );
-		})();
-		
-		window.addEventListener( 'click', function( evt ) {
-			if ( console && console.log ) {
-				console.log( evt.target );
-			}
-		}, true );
-		
-		$( document ).on( 'click', function( evt ) {
-			if ( console && console.log ) {
-            	console.log( evt.target );
-			}
-        } );
-	} );
+    // background
+    $( window ).ready( function() {
+      (function() {
+        var backgroundCanvas = $( '#backgroundCanvas' );
+        var context = backgroundCanvas[ 0 ].getContext( '2d' );
+        context.fillStyle = '#888888';
+        context.fillRect( 0, 0, 256, 256 + 128 );
+      })();
 
-	</script>
+      (function() {
+        var midCanvas = $( '#midCanvas' );
+        var context = midCanvas[ 0 ].getContext( '2d' );
+        context.fillStyle = 'rgba(255, 255, 0, 0.5)';
+        context.fillRect( 0, 0, 128, 256 );
+      })();
 
-	<style type="text/css">
+      (function() {
+        var dataUrl = $( '#midCanvas' )[ 0 ].toDataURL( 'image/png' );
+        var image = document.getElementById( 'dot' );
+        $( image ).attr( 'width', '128px' );
+        $( image ).attr( 'height', '128px' );
+        $( image ).attr( 'xlink:href', dataUrl );
+      })();
 
-	html, body {
-		position: relative;
-		width: 100%;
-		height: 100%;
-		margin: 0;
-		padding: 0;
-		background-color: #000;
-		overflow: hidden;
-	}
+      window.addEventListener( 'click', function( evt ) {
+        if ( console && console.log ) {
+          console.log( evt.target );
+        }
+      }, true );
 
-	canvas, .canvas-div, svg {
-		position: absolute;
-		left: 0;
-		top: 0;
-	}
+      $( document ).on( 'click', function( evt ) {
+        if ( console && console.log ) {
+          console.log( evt.target );
+        }
+      } );
+    } );
 
-	#topright {
-		position: absolute;
-		right: 0;
-		top: 0;
-		color: white;
-		width: 100px;
-		height: 100%;
-		background-color: #000;
-		padding: 0.25em;
-		font-size: 12px;
-		border-left: 1px solid #AAAAFF;
-	}
+  </script>
 
-	</style>
+  <style type="text/css">
+
+    html, body {
+      position: relative;
+      width: 100%;
+      height: 100%;
+      margin: 0;
+      padding: 0;
+      background-color: #000;
+      overflow: hidden;
+    }
+
+    canvas, .canvas-div, svg {
+      position: absolute;
+      left: 0;
+      top: 0;
+    }
+
+    #topright {
+      position: absolute;
+      right: 0;
+      top: 0;
+      color: white;
+      width: 100px;
+      height: 100%;
+      background-color: #000;
+      padding: 0.25em;
+      font-size: 12px;
+      border-left: 1px solid #AAAAFF;
+    }
+
+  </style>
 </head>
 
 <body id="home" data-role="content">
 
-	<canvas id="backgroundCanvas" width="256" height="512" style="z-index:0;">
-		Your browser appears to not support the HTML5 <code>&lt;canvas&gt;</code> element!
-	</canvas>
+<canvas id="backgroundCanvas" width="256" height="512" style="z-index:0;">
+  Your browser appears to not support the HTML5 <code>&lt;canvas&gt;</code> element!
+</canvas>
 
-	<div class="canvas-div" style="width: 256px; height: 123px; background-color: #002244; z-index:1; color: white;">
-		Under Canvas<br/>
-		<form style="text-align: center; padding: 0 10px;">
-			<label for="text-0" style="display: none;">Text</label>
-			<input type="text" id="text-0" data-mini="true"></input><br/>
-			<label for="slider-0" style="display: none;">Slider</label>
-			<input type="range" name="slider" id="slider-0" value="25" min="0" max="50" data-mini="true"/>
-		</form>
-	</div>
+<div class="canvas-div" style="width: 256px; height: 123px; background-color: #002244; z-index:1; color: white;">
+  Under Canvas<br/>
 
-	<div class="canvas-div" style="width: 256px; height: 123px; background-color: #002244; z-index:2; top: 128px; color: white;">
-		Under SVG<br/>
-		<form style="text-align: center; padding: 0 10px;">
-			<label for="text-1" style="display: none;">Text</label>
-			<input type="text" id="text-1" data-mini="true"></input><br/>
-			<label for="slider-1" style="display: none;">Slider</label>
-			<input type="range" name="slider" id="slider-1" value="25" min="0" max="50" data-mini="true"/>
-		</form>
-	</div>
-	
-	<div class="canvas-div" style="width: 256px; height: 123px; background-color: #002244; z-index:3; top: 256px; color: white;">
-		Under Canvas converted to SVG<br/>
-		<form style="text-align: center; padding: 0 10px;">
-			<label for="text-2" style="display: none;">Text</label>
-			<input type="text" id="text-2" data-mini="true"></input><br/>
-			<label for="slider-2" style="display: none;">Slider</label>
-			<input type="range" name="slider" id="slider-2" value="25" min="0" max="50" data-mini="true"/>
-		</form>
-	</div>
+  <form style="text-align: center; padding: 0 10px;">
+    <label for="text-0" style="display: none;">Text</label>
+    <input type="text" id="text-0" data-mini="true"></input><br/>
+    <label for="slider-0" style="display: none;">Slider</label>
+    <input type="range" name="slider" id="slider-0" value="25" min="0" max="50" data-mini="true"/>
+  </form>
+</div>
 
-	<canvas id="midCanvas" width="128" height="128" style="z-index:4; pointer-events: none;">
-		Your browser appears to not support the HTML5 <code>&lt;canvas&gt;</code> element!
-	</canvas>
+<div class="canvas-div" style="width: 256px; height: 123px; background-color: #002244; z-index:2; top: 128px; color: white;">
+  Under SVG<br/>
 
-	<svg xmlns="http://www.w3.org/2000/svg" version="1.1" viewBox="0 0 128 128" preserveAspectRatio="xMidYMid slice" id="midSvg" width="128" height="128" style="top: 128px; z-index:5; pointer-events: none;" pointer-events="none">
-		<polygon points="0,0 0,128 128,128 128,0" style="fill: rgba(255, 255, 0, 0.5);">
-	</svg>
-	
-	<svg xmlns="http://www.w3.org/2000/svg" version="1.1" viewBox="0 0 128 128" preserveAspectRatio="xMidYMid slice" width="128" height="128" style="top: 256px; z-index:6; pointer-events: none;" pointer-events="none" id="generatedSvg">
-		<image xlink:href="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAUAAAAFCAYAAACNbyblAAAAHElEQVQI12P4//8/w38GIAXDIBKE0DHxgljNBAAO9TXL0Y4OHwAAAABJRU5ErkJggg==" x="0" y="0" width="5px" height="5px" id="dot"/>
-	</svg>
+  <form style="text-align: center; padding: 0 10px;">
+    <label for="text-1" style="display: none;">Text</label>
+    <input type="text" id="text-1" data-mini="true"></input><br/>
+    <label for="slider-1" style="display: none;">Slider</label>
+    <input type="range" name="slider" id="slider-1" value="25" min="0" max="50" data-mini="true"/>
+  </form>
+</div>
 
-	<div id="topright">
-		Stacking Test
-	</div>
+<div class="canvas-div" style="width: 256px; height: 123px; background-color: #002244; z-index:3; top: 256px; color: white;">
+  Under Canvas converted to SVG<br/>
+
+  <form style="text-align: center; padding: 0 10px;">
+    <label for="text-2" style="display: none;">Text</label>
+    <input type="text" id="text-2" data-mini="true"></input><br/>
+    <label for="slider-2" style="display: none;">Slider</label>
+    <input type="range" name="slider" id="slider-2" value="25" min="0" max="50" data-mini="true"/>
+  </form>
+</div>
+
+<canvas id="midCanvas" width="128" height="128" style="z-index:4; pointer-events: none;">
+  Your browser appears to not support the HTML5 <code>&lt;canvas&gt;</code> element!
+</canvas>
+
+<svg xmlns="http://www.w3.org/2000/svg" version="1.1" viewBox="0 0 128 128" preserveAspectRatio="xMidYMid slice" id="midSvg" width="128" height="128"
+     style="top: 128px; z-index:5; pointer-events: none;" pointer-events="none">
+  <polygon points="0,0 0,128 128,128 128,0" style="fill: rgba(255, 255, 0, 0.5);">
+</svg>
+
+<svg xmlns="http://www.w3.org/2000/svg" version="1.1" viewBox="0 0 128 128" preserveAspectRatio="xMidYMid slice" width="128" height="128"
+     style="top: 256px; z-index:6; pointer-events: none;" pointer-events="none" id="generatedSvg">
+  <image
+      xlink:href="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAUAAAAFCAYAAACNbyblAAAAHElEQVQI12P4//8/w38GIAXDIBKE0DHxgljNBAAO9TXL0Y4OHwAAAABJRU5ErkJggg=="
+      x="0" y="0" width="5px" height="5px" id="dot"/>
+</svg>
+
+<div id="topright">
+  Stacking Test
+</div>
 
 </body>
 </html>

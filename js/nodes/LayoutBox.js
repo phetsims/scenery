@@ -89,7 +89,7 @@ define( function( require ) {
         //Start at y=0 in the coordinate frame of this node.  Not possible to set this through the spacing option, instead just set it with the {y:number} option.
         var y = 0;
         for ( i = 0; i < this.children.length; i++ ) {
-          child = this.children[i];
+          child = this.children[ i ];
           child.top = y;
 
           //Set the position horizontally
@@ -104,7 +104,7 @@ define( function( require ) {
           }
 
           //Move to the next vertical position.
-          y += child.height + this.options.spacing( child, this.children[i + 1] );
+          y += child.height + this.options.spacing( child, this.children[ i + 1 ] );
         }
       }
       else {
@@ -115,7 +115,7 @@ define( function( require ) {
         //Start at x=0 in the coordinate frame of this node.  Not possible to set this through the spacing option, instead just set it with the {x:number} option.
         var x = 0;
         for ( i = 0; i < this.children.length; i++ ) {
-          child = this.children[i];
+          child = this.children[ i ];
           child.left = x;
 
           //Set the position horizontally
@@ -130,7 +130,7 @@ define( function( require ) {
           }
 
           //Move to the next vertical position.
-          x += child.width + this.options.spacing( child, this.children[i + 1] );
+          x += child.width + this.options.spacing( child, this.children[ i + 1 ] );
         }
       }
     },

@@ -2,7 +2,7 @@
 <html>
 <head>
   <meta charset="utf-8"/>
-  <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+  <meta http-equiv="X-UA-Compatible" content="IE=edge"/>
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
   <title>Scenery Playground</title>
@@ -11,6 +11,11 @@
   <script src="../../sherpa/jquery-2.1.0.js"></script>
   <script src="../../sherpa/lodash-2.4.1.min.js"></script>
   <script src="../../sherpa/has.js"></script>
+
+  <script type="text/javascript">
+    window.assertions.enableAssert();
+    window.assertions.enableAssertSlow();
+  </script>
 
   <script data-main="../js/config.js" src="../../sherpa/require-2.1.11.js"></script>
 
@@ -21,28 +26,27 @@
       padding: 0;
     }
 
-    #scene {
-      position: absolute;
-      width: 512px;
-      height: 256px;
+    #display {
       background-color: #fff;
     }
 
     #debug {
       position: relative;
-      top: 256px;
+      top: 320px;
+      padding: 0.5em;
+      border: 1px solid rgba(0, 0, 255, 0.3);
     }
 
     #serialized {
       position: relative;
-      top: 256px;
-      padding: 15px;
-      border: 1px solid gray;
+      top: 320px;
+      padding: 0.5em;
+      border: 1px solid rgba(0, 0, 0, 0.3);
     }
 
     #controls {
       position: absolute;
-      width: 150px;
+      width: 170px;
       top: 0;
       right: 0;
     }
@@ -51,339 +55,375 @@
 </head>
 <body>
 
-  <div id="controls">
-    <button onclick="scene.updateOnRequestAnimationFrame();">Continuous Update</button>
-    <button onclick="scene.popupDebug();">Popup Debug</button>
-  </div>
+<div id="controls">
+  <button onclick="toggleDebug();">Toggle Debug</button>
+  <br>
+  <button onclick="toggleSerialize();">Toggle Serialization</button>
+  <br>
+  <button onclick="toggleLogging();">Toggle Logging</button>
+  <br>
+  <button onclick="display.setPointerDisplayVisible( !display._pointerOverlay );">Toggle Pointer Overlay</button>
+  <br>
+  <button onclick="display.setPointerAreaDisplayVisible( !display._pointerAreaOverlay );">Toggle Pointer Area Overlay</button>
+  <br>
+  <button onclick="toggleUpdates();">Toggle Update</button>
+  <br>
+  <button onclick="display.initializeStandaloneEvents();">Standalone Events</button>
+  <br>
+  <br>
+  <button onclick="display.updateDisplay();">Update</button>
+  <br>
+  <button onclick="display.popupDebug();">Popup Debug</button>
+  <br>
+</div>
 
-  <div id="scene"></div>
+<script>
+  var fuzzStep = false;
 
-  <div id="debug"></div>
+  require( [ 'config' ], function() {
+    require( [ 'main', 'KITE/main', 'DOT/main', 'PHET_CORE/main' ], function( scenery, kite, dot, core ) {
+      window.scenery = scenery;
+      window.kite = kite;
+      window.dot = dot;
+      window.core = core;
 
-  <pre id="serialized"></pre>
+      console.log( 'loaded' );
 
-  <script>
-    window.assertions.enableAssert();
-    window.assertions.enableAssertSlow();
+      window.scene = new scenery.Node();
 
-    var basicSceneStep = true;
-    var fuzzStep = false;
+      var display = window.display = new scenery.Display( scene, {
+        width: 640,
+        height: 320
+        // any overrides here?
+      } );
+      console.log( 'window.display created' );
 
-    // we need to wait until our config file is loaded before our require statement. apparently this was not guaranteed
-    function check() {
-      if ( window.loadedSceneryConfig ) {
-        requirejs( [ 'main', 'KITE/main', 'DOT/main', 'PHET_CORE/main' ], function( scenery, kite, dot, core ) {
-          window.scenery = scenery;
-          window.kite = kite;
-          window.dot = dot;
-          window.core = core;
+      display._domElement.id = 'display';
+      document.body.insertBefore( display._domElement, document.body.firstChild );
 
-          console.log( 'loaded' );
+      core.loadScript( {
+        src: 'qunit/js/test-utils.js',
+        callback: function() {
+          console.log( 'loaded test-utils.js' );
+        }
+      } );
 
-          scenery.enableLayerLogging();
-          scenery.enableEventLogging();
+      scenery.Util.polyfillRequestAnimationFrame();
 
-          window.scene = new scenery.Scene( $( '#scene' ) );
-          console.log( 'window.scene created' );
+      // convenience function for IE stack trackes
+      window.twrap = function( f ) {
+        try {
+          f();
+        }
+        catch( e ) {
+          console.log( e.stack );
+        }
+      };
 
-          window.shape = kite.Shape.rectangle( 0, 0, 50, 40 );
+      window.displayTest = function() {
+        setTimeout( function() {
+          window.rect = new scenery.Rectangle( 20, 30, 100, 75, { fill: 'red', renderer: 'webgl' } );
 
-          core.loadScript( {
-            src: 'qunit/js/test-utils.js',
-            callback: function() {
-              console.log( 'loaded test-utils.js' );
-            }
-          } );
+          scene.addChild( rect );
 
-          scenery.Util.polyfillRequestAnimationFrame();
-
-          (function step(){
-            if ( basicSceneStep ) {
-              window.requestAnimationFrame( step, document.getElementById( 'scene' ) );
-            }
-
-            $( '#debug' ).html( scene.getDebugHTML() );
-
-            $( '#serialized' ).html( scene.toStringWithChildren( true ) );
-          })();
-
-          window.twrap = function( f ) {
-            try {
-              f();
-            } catch( e ) {
-              console.log( e.stack );
-            }
-          };
-
-          window.setupTest = function() {
-            var n1 = new scenery.Node();
-            var n2 = new scenery.Node();
-            var n3 = new scenery.Node();
-            var n4 = new scenery.Node();
-            var n5 = new scenery.Node();
-            var n6 = new scenery.Node();
-            var n7 = new scenery.Node();
-            var n8 = new scenery.Node();
-            var n9 = new scenery.Node();
-            n1.addChild( n2 );
-            n2.addChild( n3 );
-            n3.addChild( n4 );
-            n4.addChild( n5 );
-            n5.addChild( n6 );
-            n6.addChild( n7 );
-            n7.addChild( n8 );
-            n8.addChild( n9 );
-            scene.addChild( n1 );
-            window.trail = n9.getUniqueTrail();
-            window.bounds = new dot.Bounds2( 1, 2, 5, 6 );
-          };
-
-          window.setupTranslation = function() {
-            var n = scene;
-            while ( n ) {
-              n.translate( 5, 0 );
-              n = n.children[0];
-            }
-          };
-
-          window.setupRotation = function() {
-            var n = scene;
-            while ( n ) {
-              n.rotate( 0.2 );
-              n = n.children[0];
-            }
-          };
-
-          window.setupDownUp = function() {
-            var node = new scenery.Node();
-            node.x = 50;
-            var rect = new scenery.Rectangle( 0, 0, 100, 50, { fill: '#f00' } );
-            rect.y = 50;
-            scene.addChild( node );
-            node.addChild( rect );
-            scene.updateOnRequestAnimationFrame();
-            scene.initializeStandaloneEvents();
-            node.addInputListener( new scenery.DownUpListener( {
-              down: function() { rect.fill = '#00f'; },
-              up: function() { rect.fill = '#f00'; },
-              upInside: function() { rect.stroke = '#000'; },
-              upOutside: function() { rect.stroke = null; }
-            } ) );
-          };
-
-          window.setupRoundRect = function() {
-            var rect = new scenery.Rectangle( 100, 50, 300, 150, 150, 50, { fill: 'red', cursor: 'pointer' } );
-            scene.addChild( rect );
-            scene.updateOnRequestAnimationFrame();
-            scene.initializeStandaloneEvents();
-
-            rect.containsPointSelf( dot( 111, 118 ) ); // 111,118
-          };
-
-          window.setupButton = function() {
-            var rect = new scenery.Rectangle( 50, 50, 100, 50, { fill: '#f00' } );
-            scene.addChild( rect );
-            scene.initializeStandaloneEvents();
-            scenery.disableLayerLogging();
-            scenery.disableEventLogging();
-            rect.cursor = 'pointer';
-            rect.addInputListener( new scenery.ButtonListener( {
-              up: function( event, old ) { console.log( 'up from ' + old ); rect.fill = '#f00'; },
-              over: function( event, old ) { console.log( 'over from ' + old ); rect.fill = '#00f'; },
-              down: function( event, old ) { console.log( 'down from ' + old ); rect.fill = '#0f0'; },
-              fire: function( event ) { console.log( 'fire' ); }
-            } ) );
-          };
-
-          window.setupDomRect = function() {
-            window.r = new scenery.Rectangle( 0, 0, 100, 50, { fill: 'red' } );
-            window.a = new scenery.Node( { renderer: 'svg' } );
-            window.b = new scenery.Node( { renderer: 'dom' } );
-            window.c = new scenery.Node( { renderer: 'canvas' } );
-            scene.addChild( window.a );
-            scene.addChild( window.b );
-            scene.addChild( window.c );
-            window.b.y = 100;
-            window.c.x = 250;
-            a.addChild( window.r );
-            b.addChild( window.r );
-            c.addChild( window.r );
-          };
-
-          window.setupDomCircle = function() {
-            window.r = new scenery.Circle( 50, { fill: 'red' } );
-            window.a = new scenery.Node( { renderer: 'svg' } );
-            window.b = new scenery.Node( { renderer: 'dom' } );
-            window.c = new scenery.Node( { renderer: 'canvas' } );
-            scene.addChild( window.a );
-            scene.addChild( window.b );
-            scene.addChild( window.c );
-            window.b.x = 125;
-            window.b.y = 100;
-            window.c.x = 250;
-            a.addChild( window.r );
-            b.addChild( window.r );
-            c.addChild( window.r );
-            scene.x = 50;
-            scene.y = 50;
-            window.r.stroke = 'black';
-          };
-
-          window.setupT = function() {
-            setTimeout( function() {
-              window.img = new Image();
-              img.src = 'data:image/png;base64,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';
-            } );
-          };
-
-          window.setupU = function() {
-            setTimeout( function() {
-              window.image = new scenery.Image( img, { renderer: 'webgl' } );
-              scene.addChild( image );
-            } );
-          };
-
-          window.testNodeBounds = function( trail ) {
-            var a = performance.now();
-            for ( var i = 0; i < 100000; i++ ) { trail.lastNode().localToGlobalBounds( bounds ); };
-            console.log( performance.now() - a );
-            console.log( trail.lastNode().localToGlobalBounds( bounds ) );
-          };
-
-          window.testTrailBounds = function( trail ) {
-            var a = performance.now();
-            for ( var i = 0; i < 100000; i++ ) { trail.localToGlobalBounds( bounds ); };
-            console.log( performance.now() - a );
-          console.log( trail.localToGlobalBounds( bounds ) );
-          };
-
-          window.fuzzLayers = function() {
-            // disable the regular step
-            basicSceneStep = false;
-            fuzzStep = true;
-
-            // disable the layer logging, or we'll spam ourselves to death
-            scenery.disableLayerLogging();
-            scenery.disableEventLogging();
-
-            var lines = [];
-            window.lines = lines;
-
-            var nodes = [];
-            var scene = new scenery.Scene( $( '<div>' ), { width: 640, height: 480 } );
-            nodes.push( scene );
-
-            _.times( 5, function() { nodes.push( new scenery.Node() ); } );
-            _.times( 10, function() { nodes.push( new scenery.Path() ); } );
-            // _.times( 5, function() { nodes.push( new scenery.DOM( document.createElement( 'div' ) ) ); } );
-
-            function name( node ) {
-              return node === scene ? 'scene' : node.constructor.name.toLowerCase() + node.id;
-            }
-
-            _.each( nodes, function( node ) {
-              if ( node !== scene ) {
-                lines.push( 'var ' + name( node ) + ' = ' + node.toString() + ';' );
-              }
-            } );
-
-            (function fuzz(){
-              // abort if desired
-              if ( !fuzzStep ) {
-                return;
-              }
-
-              var nodeMutators = [
-                {
-                  weight: 1.0,
-                  f: function( node ) { node.renderer = 'canvas'; },
-                  mess: 'canvas renderer',
-                  line: function( node ) { return name( node ) + '.renderer = \'canvas\';' }
-                },
-                {
-                  weight: 1.0,
-                  f: function( node ) { node.renderer = 'svg'; },
-                  mess: 'svg renderer',
-                  line: function( node ) { return name( node ) + '.renderer = \'svg\';' }
-                },
-                {
-                  weight: 2.0,
-                  f: function( node ) { node.renderer = null; },
-                  mess: 'null renderer',
-                  line: function( node ) { return name( node ) + '.renderer = null;' }
-                },
-                {
-                  weight: 0.3,
-                  f: function( node ) { node.layerSplit = true; },
-                  mess: 'layerSplit true',
-                  line: function( node ) { return name( node ) + '.layerSplit = true;' }
-                },
-                {
-                  weight: 1.0,
-                  f: function( node ) { node.layerSplit = false; },
-                  mess: 'layerSplit false',
-                  line: function( node ) { return name( node ) + '.layerSplit = false;' }
-                }
-              ];
-
-              var totalWeight = _.reduce( _.pluck( nodeMutators, 'weight' ), function( memo, num ) { return memo + num; }, 0 );
-
-              _.times( 20, function() {
-                window.beforeFuzzDebug = scene.getDebugHTML();
-                window.beforeFuzzSerialization = scene.toStringWithChildren( true );
-
-                var r = Math.random();
-
-                // pick two different nodes at random
-                var a = nodes[_.random( 0, nodes.length - 1 )];
-                var b = nodes[_.random( 0, nodes.length - 1 )];
-
-                if ( r < 0.333 ) {
-                  // attempt to add a node to another one
-                  if ( a.canAddChild( b ) ) {
-                    // insert it into a random place
-                    var index = _.random( 0, a.children.length );
-                    window.fuzzMessage = 'inserting child ' + b.id + ' into ' + a.id + ' at index ' + index;
-                    lines.push( name( a ) + '.insertChild( ' + index + ', ' + name( b ) + ' );' );
-                    a.insertChild( index, b );
-                  }
-                } else if( r < 0.666 ) {
-                  if ( a.children.length ) {
-                    var child = a.children[_.random( 0, a.children.length - 1 )];
-                    window.fuzzMessage = 'removing child ' + child.id + ' to ' + a.id;
-                    lines.push( name( a ) + '.removeChild( ' + name( child ) + ' );' );
-                    a.removeChild( child );
-                  }
-                } else {
-                  // pick a random modification from the weighted list
-                  var rr = Math.random() * totalWeight;
-                  for ( var i = 0; i < nodeMutators.length; i++ ) {
-                    var mutator = nodeMutators[i];
-                    rr -= mutator.weight;
-                    if ( rr <= 0 ) {
-                      window.fuzzMessage = 'mutating node ' + a.id + ' with ' + mutator.mess;
-                      lines.push( mutator.line( a ) );
-                      mutator.f( a );
-                      break;
-                    }
-                  }
-                }
-
-                scene.layerAudit();
-
-              } );
-              $( '#debug' ).html( scene.getDebugHTML() );
-
-              // an error above will prevent this from running
-              window.requestAnimationFrame( fuzz );
-            })();
-          };
+          display.updateDisplay();
         } );
-      } else {
-        setTimeout( check, 4 );
+      };
+
+      window.displayErr = function() {
+        setTimeout( function() {
+          window.n = new scenery.Node( { opacity: 0.5 } );
+          scene.addChild( n );
+          n.addChild( new scenery.Rectangle( 0, 0, 50, 50, { fill: 'red' } ) );
+          n.addChild( new scenery.Rectangle( 10, 10, 50, 50, { fill: 'green' } ) );
+          n.addChild( new scenery.Rectangle( 20, 20, 50, 50, { fill: 'blue' } ) );
+          n.addChild( new scenery.Rectangle( 30, 30, 50, 50, { fill: 'magenta' } ) );
+          n.addChild( new scenery.Rectangle( 40, 40, 50, 50, { fill: 'cyan' } ) );
+          display.updateDisplay();
+
+          n.renderer = 'canvas';
+          display.updateDisplay();
+
+          var c = n.children[ 1 ];
+          n.removeChild( c );
+          n.insertChild( 2, c );
+          display.updateDisplay();
+        } );
+      };
+
+      window.cssTest = function() {
+        window.assertSlow = window.assert;
+        setTimeout( function() {
+          window.back = new scenery.Rectangle( 0, 0, 100, 100, 0, 0, {
+            fill: '#000'
+          } );
+          window.rect = new scenery.Rectangle( 0, 0, 100, 50, 0, 0, {
+            y: 50,
+            fill: new scenery.LinearGradient( 0, 0, 100, 0 ).addColorStop( 0, 'red' ).addColorStop( 1, 'blue' )
+          } );
+          window.a = new scenery.Node( {} );
+          window.b = new scenery.Node( { y: 100 } );
+          b._hints.cssTransform = true;
+          // window.node.rendererOptions = { cssTransform: true };
+          a.addChild( back );
+          a.addChild( rect );
+          b.addChild( back );
+          b.addChild( rect );
+          scene.addChild( a );
+          scene.addChild( b );
+
+          display.updateDisplay();
+
+          scene.renderer = 'canvas';
+
+          display.updateDisplay();
+        } );
+      };
+
+      window.transformTest = function() {
+        window.n = new scenery.Node();
+        n.addChild( new scenery.Rectangle( 0, 50, 100, 50, { fill: '#aaa' } ) );
+        n.addChild( new scenery.Rectangle( 50, 0, 50, 50, { fill: '#aaf' } ) );
+        scene.addChild( n );
+        n.x = 50;
+        n.y = 50;
+        n.rotation = Math.PI / 4;
+        n.left = 50;
+        scene.addChild( scenery.Rectangle.bounds( n.bounds, { stroke: 'red' } ) );
+        n.transformBounds = true;
+        scene.addChild( scenery.Rectangle.bounds( n.bounds, { stroke: 'blue' } ) );
+
+        display.updateDisplay();
+      };
+
+      /*---------------------------------------------------------------------------*
+       * Debug
+       *----------------------------------------------------------------------------*/
+
+      var playgroundDebugging = false;
+      var playgroundDebuggingRequestID = 0;
+
+      var debug = document.createElement( 'div' );
+      debug.id = 'debug';
+      debug.style.display = 'none';
+      document.body.appendChild( debug );
+
+      function debugStep() {
+        playgroundDebuggingRequestID = window.requestAnimationFrame( debugStep, debug );
+
+        debug.style.display = '';
+        debug.innerHTML = display.getDebugHTML();
       }
-    }
-    setTimeout( check, 4 );
-  </script>
+
+      window.toggleDebug = function() {
+        if ( playgroundDebugging ) {
+          window.cancelAnimationFrame( playgroundDebuggingRequestID );
+          debug.style.display = 'none';
+        }
+        else {
+          debugStep();
+        }
+
+        playgroundDebugging = !playgroundDebugging;
+      };
+
+      /*---------------------------------------------------------------------------*
+       * Serialization
+       *----------------------------------------------------------------------------*/
+
+      var playgroundSerializing = false;
+      var playgroundSerializingRequestID = 0;
+
+      var serialized = document.createElement( 'pre' );
+      serialized.id = 'serialized';
+      serialized.style.display = 'none';
+      document.body.appendChild( serialized );
+
+      function serializeStep() {
+        playgroundSerializingRequestID = window.requestAnimationFrame( serializeStep, serialized );
+
+        serialized.style.display = '';
+        serialized.innerHTML = display.toStringWithChildren( true, 'scene' );
+      }
+
+      window.toggleSerialize = function() {
+        if ( playgroundSerializing ) {
+          window.cancelAnimationFrame( playgroundSerializingRequestID );
+          serialized.style.display = 'none';
+        }
+        else {
+          serializeStep();
+        }
+
+        playgroundSerializing = !playgroundSerializing;
+      };
+
+      /*---------------------------------------------------------------------------*
+       * Updates
+       *----------------------------------------------------------------------------*/
+
+      var playgroundUpdating = false;
+
+      window.toggleUpdates = function() {
+        if ( playgroundUpdating ) {
+          display.cancelUpdateOnRequestAnimationFrame();
+        }
+        else {
+          display.updateOnRequestAnimationFrame();
+        }
+
+        playgroundUpdating = !playgroundUpdating;
+      };
+
+      /*---------------------------------------------------------------------------*
+       * Logging
+       *----------------------------------------------------------------------------*/
+
+      var logging = false;
+
+      window.toggleLogging = function() {
+        if ( logging ) {
+          scenery.disableLogging();
+          // scenery.disableEventLogging();
+        }
+        else {
+          scenery.enableLogging( [
+            'stitch',
+            'perf'
+          ] );
+          // scenery.enableEventLogging();
+        }
+
+        logging = !logging;
+      };
+
+      /*---------------------------------------------------------------------------*
+       * Miscellaneous
+       *----------------------------------------------------------------------------*/
+
+      // window.fuzzLayers = function() {
+      //   // disable the regular step
+      //   basicSceneStep = false;
+      //   fuzzStep = true;
+
+      //   // disable the layer logging, or we'll spam ourselves to death
+      //   scenery.disableLayerLogging();
+      //   scenery.disableEventLogging();
+
+      //   var lines = [];
+      //   window.lines = lines;
+
+      //   var nodes = [];
+      //   var scene = new scenery.Scene( $( '<div>' ), { width: 640, height: 320 } );
+      //   nodes.push( scene );
+
+      //   _.times( 5, function() { nodes.push( new scenery.Node() ); } );
+      //   _.times( 10, function() { nodes.push( new scenery.Path() ); } );
+      //   // _.times( 5, function() { nodes.push( new scenery.DOM( document.createElement( 'div' ) ) ); } );
+
+      //   function name( node ) {
+      //     return node === scene ? 'scene' : node.constructor.name.toLowerCase() + node.id;
+      //   }
+
+      //   _.each( nodes, function( node ) {
+      //     if ( node !== scene ) {
+      //       lines.push( 'var ' + name( node ) + ' = ' + node.toString() + ';' );
+      //     }
+      //   } );
+
+      //   (function fuzz(){
+      //     // abort if desired
+      //     if ( !fuzzStep ) {
+      //       return;
+      //     }
+
+      //     var nodeMutators = [
+      //       {
+      //         weight: 1.0,
+      //         f: function( node ) { node.renderer = 'canvas'; },
+      //         mess: 'canvas renderer',
+      //         line: function( node ) { return name( node ) + '.renderer = \'canvas\';' }
+      //       },
+      //       {
+      //         weight: 1.0,
+      //         f: function( node ) { node.renderer = 'svg'; },
+      //         mess: 'svg renderer',
+      //         line: function( node ) { return name( node ) + '.renderer = \'svg\';' }
+      //       },
+      //       {
+      //         weight: 2.0,
+      //         f: function( node ) { node.renderer = null; },
+      //         mess: 'null renderer',
+      //         line: function( node ) { return name( node ) + '.renderer = null;' }
+      //       },
+      //       {
+      //         weight: 0.3,
+      //         f: function( node ) { node.layerSplit = true; },
+      //         mess: 'layerSplit true',
+      //         line: function( node ) { return name( node ) + '.layerSplit = true;' }
+      //       },
+      //       {
+      //         weight: 1.0,
+      //         f: function( node ) { node.layerSplit = false; },
+      //         mess: 'layerSplit false',
+      //         line: function( node ) { return name( node ) + '.layerSplit = false;' }
+      //       }
+      //     ];
+
+      //     var totalWeight = _.reduce( _.pluck( nodeMutators, 'weight' ), function( memo, num ) { return memo + num; }, 0 );
+
+      //     _.times( 20, function() {
+      //       window.beforeFuzzDebug = scene.getDebugHTML();
+      //       window.beforeFuzzSerialization = scene.toStringWithChildren( true );
+
+      //       var r = Math.random();
+
+      //       // pick two different nodes at random
+      //       var a = nodes[_.random( 0, nodes.length - 1 )];
+      //       var b = nodes[_.random( 0, nodes.length - 1 )];
+
+      //       if ( r < 0.333 ) {
+      //         // attempt to add a node to another one
+      //         if ( a.canAddChild( b ) ) {
+      //           // insert it into a random place
+      //           var index = _.random( 0, a.children.length );
+      //           window.fuzzMessage = 'inserting child ' + b.id + ' into ' + a.id + ' at index ' + index;
+      //           lines.push( name( a ) + '.insertChild( ' + index + ', ' + name( b ) + ' );' );
+      //           a.insertChild( index, b );
+      //         }
+      //       } else if( r < 0.666 ) {
+      //         if ( a.children.length ) {
+      //           var child = a.children[_.random( 0, a.children.length - 1 )];
+      //           window.fuzzMessage = 'removing child ' + child.id + ' to ' + a.id;
+      //           lines.push( name( a ) + '.removeChild( ' + name( child ) + ' );' );
+      //           a.removeChild( child );
+      //         }
+      //       } else {
+      //         // pick a random modification from the weighted list
+      //         var rr = Math.random() * totalWeight;
+      //         for ( var i = 0; i < nodeMutators.length; i++ ) {
+      //           var mutator = nodeMutators[i];
+      //           rr -= mutator.weight;
+      //           if ( rr <= 0 ) {
+      //             window.fuzzMessage = 'mutating node ' + a.id + ' with ' + mutator.mess;
+      //             lines.push( mutator.line( a ) );
+      //             mutator.f( a );
+      //             break;
+      //           }
+      //         }
+      //       }
+
+      //       scene.layerAudit();
+
+      //     } );
+      //     $( '#debug' ).html( scene.getDebugHTML() );
+
+      //     // an error above will prevent this from running
+      //     window.requestAnimationFrame( fuzz );
+      //   })();
+      // };
+    } );
+  } );
+</script>
 </body>
 </html>

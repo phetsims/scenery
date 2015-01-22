@@ -2,10 +2,10 @@
 <html lang="en">
 <head>
   <meta charset="utf-8"/>
-  <meta http-equiv="X-UA-Compatible" content="IE=edge" />
-  
+  <meta http-equiv="X-UA-Compatible" content="IE=edge"/>
+
   <title>context.arc</title>
-  
+
   <style>
     canvas {
       border: 1px solid black;
@@ -16,16 +16,16 @@
 
 <canvas id="canvas" width="1024" height="525"></canvas>
 
-<script type="text/javascript">  
+<script type="text/javascript">
 
   var context = document.getElementById( 'canvas' ).getContext( '2d' );
-  
+
   function arcMap( anticlockwise ) {
     for ( var start = -4; start <= 4; start += 0.5 ) {
       var x = ( start + 4 ) * 100;
       for ( var end = -4; end <= 4; end += 0.5 ) {
         var y = ( end + 4 ) * 100;
-        
+
         // draw and fill the actual path
         context.strokeStyle = '#000000';
         context.fillStyle = '#eeeeee';
@@ -38,7 +38,7 @@
         context.lineTo( x + extraMag * Math.cos( endAngle ), y + extraMag * Math.sin( endAngle, 0 ) );
         context.fill();
         context.stroke();
-        
+
         // draw a styled dot in the center to indicate status
         if ( ( !anticlockwise && endAngle - startAngle >= Math.PI * 2 ) || ( anticlockwise && startAngle - endAngle >= Math.PI * 2 ) ) {
           // noted by the HTML5 spec to be the full perimeter
@@ -46,22 +46,25 @@
           context.beginPath();
           context.arc( x, y, 5, 0, Math.PI * 2, false );
           context.fill();
-        } else if ( ( !anticlockwise && endAngle - startAngle < -Math.PI * 2 ) || ( anticlockwise && startAngle - endAngle < -Math.PI * 2 ) ) {
+        }
+        else if ( ( !anticlockwise && endAngle - startAngle < -Math.PI * 2 ) || ( anticlockwise && startAngle - endAngle < -Math.PI * 2 ) ) {
           // strictly less than -2pi
           context.fillStyle = '#ff0000';
           context.beginPath();
           context.arc( x, y, 5, 0, Math.PI * 2, false );
           context.fill();
-        } else if ( ( !anticlockwise && endAngle - startAngle === -Math.PI * 2 ) || ( anticlockwise && startAngle - endAngle === -Math.PI * 2 ) ) {
+        }
+        else if ( ( !anticlockwise && endAngle - startAngle === -Math.PI * 2 ) || ( anticlockwise && startAngle - endAngle === -Math.PI * 2 ) ) {
           // strictly equal to -2pi
           context.fillStyle = '#ffaa00';
-        } else {
+        }
+        else {
           context.fillStyle = 'rgba(0,0,0,0)';
         }
         context.beginPath();
         context.arc( x, y, 5, 0, Math.PI * 2, false );
         context.fill();
-        
+
         if ( start === 0 ) {
           context.fillStyle = '#000000';
           context.font = '20px sans-serif';
@@ -70,38 +73,38 @@
           context.fillText( label, -30 - context.measureText( label ).width, y );
         }
       }
-      
+
       context.fillStyle = '#000000';
       context.font = '20px sans-serif';
       context.textBaseline = 'bottom';
       var label = start + '\u03c0';
       context.fillText( label, x - context.measureText( label ).width / 2, -30 );
     }
-    
+
     context.textBaseline = 'bottom';
     context.font = '30px sans-serif';
     context.fillText( 'startAngle', 350, -60 );
     context.fillText( 'anticlockwise: ' + anticlockwise, 300, 875 );
-    
+
     context.save();
     context.transform( 0, -1, 1, 0, 0, 0 );
     context.fillText( 'endAngle', -450, -90 );
     context.restore();
   }
-  
+
   context.setTransform( 0.5, 0, 0, 0.5, 75, 65 );
   arcMap( false );
   context.setTransform( 0.5, 0, 0, 0.5, 575, 65 );
   arcMap( true );
-  
-  context.setTransform( 0.25, 0, 0, 0.25, 30/4, 130/4 );
+
+  context.setTransform( 0.25, 0, 0, 0.25, 30 / 4, 130 / 4 );
   context.beginPath();
   context.arc( 0, 0, 100, Math.PI / 4, -Math.PI / 2, true );
   context.lineWidth = 30;
   context.lineCap = 'butt';
   context.strokeStyle = 'rgba(0,0,0,0.5)';
   context.stroke();
-  
+
 </script>
 
 </body>

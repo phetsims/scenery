@@ -2,8 +2,8 @@
 <html lang="en">
 <head>
   <meta charset="utf-8"/>
-  <meta http-equiv="X-UA-Compatible" content="IE=edge" />
-  
+  <meta http-equiv="X-UA-Compatible" content="IE=edge"/>
+
   <title>Chrome Miter Limit Test Case</title>
 </head>
 <body>
@@ -17,39 +17,39 @@
 </svg> -->
 
 <script type="text/javascript">
-var context = document.getElementById( 'canvas' ).getContext( '2d' );
+  var context = document.getElementById( 'canvas' ).getContext( '2d' );
 
-function drawAngle( degrees, strokeStyle ) {
-  var angle = degrees * Math.PI / 180;
-  context.lineWidth = 30;
-  context.strokeStyle = strokeStyle;
-  context.moveTo( 40, 100 );
-  context.lineTo( 200, 100 );
-  context.lineTo( 200 - Math.cos( angle ) * 160, 100 - Math.sin( angle ) * 160 );
-  context.stroke();
-}
+  function drawAngle( degrees, strokeStyle ) {
+    var angle = degrees * Math.PI / 180;
+    context.lineWidth = 30;
+    context.strokeStyle = strokeStyle;
+    context.moveTo( 40, 100 );
+    context.lineTo( 200, 100 );
+    context.lineTo( 200 - Math.cos( angle ) * 160, 100 - Math.sin( angle ) * 160 );
+    context.stroke();
+  }
 
-// According to the miterLimit handling (at least in the SVG spec), we skip drawing the mitered joint (and fall back to bevel)
-// if the angle > 1 / Math.sin( miterAngleRadians / 2 ). For a 25-degree angle, this means the mitered joint will be rendered
-// if the miterLimit is greater than ~4.62022631534529.
-var miterAngleInDegrees = 25;
+  // According to the miterLimit handling (at least in the SVG spec), we skip drawing the mitered joint (and fall back to bevel)
+  // if the angle > 1 / Math.sin( miterAngleRadians / 2 ). For a 25-degree angle, this means the mitered joint will be rendered
+  // if the miterLimit is greater than ~4.62022631534529.
+  var miterAngleInDegrees = 25;
 
-// context starts with miterLimit === 10 as specified at
-// http://www.whatwg.org/specs/web-apps/current-work/multipage/the-canvas-element.html#dom-context-2d-miterlimit
-// correctly specified at CanvasRenderingContext2D::State::State() as m_miterLimit(10)
+  // context starts with miterLimit === 10 as specified at
+  // http://www.whatwg.org/specs/web-apps/current-work/multipage/the-canvas-element.html#dom-context-2d-miterlimit
+  // correctly specified at CanvasRenderingContext2D::State::State() as m_miterLimit(10)
 
-// black angle on Chrome is missing the miter here, since Skia's GraphicsContext is initialized with the SVG-based default miterLimit of 4
-drawAngle( miterAngleInDegrees, '#000000' );
+  // black angle on Chrome is missing the miter here, since Skia's GraphicsContext is initialized with the SVG-based default miterLimit of 4
+  drawAngle( miterAngleInDegrees, '#000000' );
 
-// and also missing here in green, since this doesn't get put through to the GraphicsContext
-context.miterLimit = 10; // CanvasRenderingContext2D::setMiterLimit has if (state().m_miterLimit == limit) return;
-drawAngle( miterAngleInDegrees, 'rgba(0,255,0,0.5)' );
+  // and also missing here in green, since this doesn't get put through to the GraphicsContext
+  context.miterLimit = 10; // CanvasRenderingContext2D::setMiterLimit has if (state().m_miterLimit == limit) return;
+  drawAngle( miterAngleInDegrees, 'rgba(0,255,0,0.5)' );
 
-// but this red angle will correctly show the miter, as the GraphicsContext finally is updated with the correct value
-// to trigger setMiterLimit's modification of the GraphicsContext, we need to set it to an intermediate value first
-context.miterLimit = 20;
-context.miterLimit = 10;
-drawAngle( miterAngleInDegrees, 'rgba(255,0,0,0.5)' );
+  // but this red angle will correctly show the miter, as the GraphicsContext finally is updated with the correct value
+  // to trigger setMiterLimit's modification of the GraphicsContext, we need to set it to an intermediate value first
+  context.miterLimit = 20;
+  context.miterLimit = 10;
+  drawAngle( miterAngleInDegrees, 'rgba(255,0,0,0.5)' );
 </script>
 
 </body>

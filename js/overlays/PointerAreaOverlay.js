@@ -1,27 +1,30 @@
-// Copyright 2002-2014, University of Colorado Boulder Boulder
+// Copyright 2002-2014, University of Colorado Boulder
 
 /**
  * Displays mouse and touch areas when they are customized. Expensive to display!
  *
- * @author Jonathan Olson <olsonsjc@gmail.com>
+ * @author Jonathan Olson <jonathan.olson@colorado.edu>
  */
 
 define( function( require ) {
   'use strict';
 
+  var inherit = require( 'PHET_CORE/inherit' );
   var Shape = require( 'KITE/Shape' );
 
   var scenery = require( 'SCENERY/scenery' );
   require( 'SCENERY/util/Trail' );
 
-  scenery.PointerAreaOverlay = function PointerAreaOverlay( scene ) {
+  scenery.PointerAreaOverlay = function PointerAreaOverlay( display, scene ) {
+    this.display = display;
     this.scene = scene;
 
     var svg = this.svg = document.createElementNS( scenery.svgns, 'svg' );
     svg.style.position = 'absolute';
+    svg.className = 'mouseTouchAreaOverlay';
     svg.style.top = 0;
     svg.style.left = 0;
-    svg.style['pointer-events'] = 'none';
+    svg.style[ 'pointer-events' ] = 'none';
 
     function resize( width, height ) {
       svg.setAttribute( 'width', width );
@@ -29,26 +32,16 @@ define( function( require ) {
       svg.style.clip = 'rect(0px,' + width + 'px,' + height + 'px,0px)';
     }
 
-    scene.addEventListener( 'resize', function( args ) {
-      resize( args.width, args.height );
+    display.onStatic( 'displaySize', function( dimension ) {
+      resize( dimension.width, dimension.height );
     } );
-    resize( scene.getSceneWidth(), scene.getSceneHeight() );
+    resize( display.width, display.height );
 
-    scene.$main[0].appendChild( svg );
-
-    scene.reindexLayers();
+    this.domElement = svg;
   };
   var PointerAreaOverlay = scenery.PointerAreaOverlay;
 
-  PointerAreaOverlay.prototype = {
-    dispose: function() {
-      this.scene.$main[0].removeChild( this.svg );
-    },
-
-    reindex: function( index ) {
-      this.svg.style.zIndex = index;
-    },
-
+  inherit( Object, PointerAreaOverlay, {
     addShape: function( shape, color, isOffset ) {
       var path = document.createElementNS( scenery.svgns, 'path' );
       var svgPath = shape.getSVGPath();
@@ -76,7 +69,7 @@ define( function( require ) {
       var scene = this.scene;
 
       while ( svg.childNodes.length ) {
-        svg.removeChild( svg.childNodes[svg.childNodes.length - 1] );
+        svg.removeChild( svg.childNodes[ svg.childNodes.length - 1 ] );
       }
 
       new scenery.Trail( scene ).eachTrailUnder( function( trail ) {
@@ -96,8 +89,12 @@ define( function( require ) {
           }
         }
       } );
+    },
+
+    dispose: function() {
+
     }
-  };
+  } );
 
   return PointerAreaOverlay;
 } );

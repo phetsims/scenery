@@ -1,17 +1,19 @@
 // Copyright 2002-2014, University of Colorado Boulder
 
+
 /*
  * An event in Scenery that has similar event-handling characteristics to DOM events.
  * The original DOM event (if any) is available as event.domEvent.
  *
  * Multiple events can be triggered by a single domEvent, so don't assume it is unique.
  *
- * @author Jonathan Olson <olsonsjc@gmail.com>
+ * @author Jonathan Olson <jonathan.olson@colorado.edu>
  */
 
 define( function( require ) {
   'use strict';
 
+  var inherit = require( 'PHET_CORE/inherit' );
   var scenery = require( 'SCENERY/scenery' );
 
   scenery.Event = function Event( args ) {
@@ -46,9 +48,7 @@ define( function( require ) {
   };
   var Event = scenery.Event;
 
-  Event.prototype = {
-    constructor: Event,
-
+  inherit( Object, Event, {
     // like DOM Event.stopPropagation(), but named differently to indicate it doesn't fire that behavior on the underlying DOM event
     handle: function() {
       this.handled = true;
@@ -59,7 +59,7 @@ define( function( require ) {
       this.handled = true;
       this.aborted = true;
     }
-  };
+  } );
 
   return Event;
 } );

@@ -1,7 +1,7 @@
 // Copyright 2002-2014, University of Colorado Boulder
 
 /**
- * EXPERIMENTAL: USE AT YOUR OWN CAUTION
+ * DEPRECATED EXPERIMENTAL: USE AT YOUR OWN CAUTION
  *
  * A container that allows flexible layout generation based on layout methods that can be composed together.
  *
@@ -17,7 +17,7 @@
  *   n.addChild( new scenery.Text( 'Pad from right' ), { layoutMethod: scenery.LayoutNode.Vertical.and( scenery.LayoutNode.AlignRight ), padRight: 10 } );
  *   n.children[2].text += ' and it updates!';
  *
- * @author Jonathan Olson <olsonsjc@gmail.com>
+ * @author Jonathan Olson <jonathan.olson@colorado.edu>
  */
 
 define( function( require ) {
@@ -27,8 +27,12 @@ define( function( require ) {
   var extend = require( 'PHET_CORE/extend' );
   var scenery = require( 'SCENERY/scenery' );
   var Node = require( 'SCENERY/nodes/Node' );
+  // var Rectangle = require( 'SCENERY/nodes/Rectangle' );
   var Bounds2 = require( 'DOT/Bounds2' );
 
+  // var debug = false;
+
+  // @deprecated
   scenery.LayoutNode = function LayoutNode( defaultMethod, options ) {
     var layoutNode = this;
 
@@ -56,6 +60,8 @@ define( function( require ) {
     // this.addChild( this._invisibleBackground );
 
     this.updateLayout();
+
+    throw new Error( 'Deprecated, please do not use (replacement for overrideBounds has not been provided)' );
   };
   var LayoutNode = scenery.LayoutNode;
 
@@ -100,6 +106,7 @@ define( function( require ) {
         padTop: 0,
         padBottom: 0
       }, options );
+      // var baseBoundsFunc = ( options.useVisibleBounds ? node.getVisibleBounds : node.getBounds ).bind( node );
 
       Node.prototype.insertChild.call( this, index, node );
 
@@ -123,8 +130,8 @@ define( function( require ) {
     // override
     removeChildWithIndex: function( node, indexOfChild ) {
       Node.prototype.removeChildWithIndex.call( this, node, indexOfChild );
-      if ( this._elementMap[node.id] ) {
-        delete this._elementMap[node.id];
+      if ( this._elementMap[ node.id ] ) {
+        delete this._elementMap[ node.id ];
       }
 
       this.updateLayout();
@@ -140,11 +147,6 @@ define( function( require ) {
       element.node.removeEventListener( 'bounds', this._boundsListener );
     },
 
-    // overrides the Node's bounds computation in a strictly increasing way (for Canvas support)
-    overrideBounds: function( computedBounds ) {
-      return this.layoutBounds;
-    },
-
     updateLayout: function() {
       if ( this._activelyLayingOut ) {
         // don't start another layout while one is going on!
@@ -153,8 +155,8 @@ define( function( require ) {
       this._activelyLayingOut = true;
       var layoutProperties = this.layoutProperties;
       for ( var i = 0; i < this._elements.length; i++ ) {
-        var element = this._elements[i];
-        element.layoutMethod.layout( element, i, ( i > 0 ? this._elements[i - 1] : null ), layoutProperties );
+        var element = this._elements[ i ];
+        element.layoutMethod.layout( element, i, ( i > 0 ? this._elements[ i - 1 ] : null ), layoutProperties );
       }
 
       // use the invisible background to take up all of our layout areas
@@ -187,9 +189,7 @@ define( function( require ) {
       this.layout = layout;
     }
   };
-  LayoutMethod.prototype = {
-    constructor: LayoutMethod,
-
+  inherit( Object, LayoutMethod, {
     and: function( otherLayoutMethod ) {
       var thisLayoutMethod = this;
 
@@ -198,11 +198,11 @@ define( function( require ) {
         otherLayoutMethod.layout( element, index, previousElement, layoutProperties );
       } );
     }
-  };
+  } );
 
   /*---------------------------------------------------------------------------*
-  * Layout Methods
-  *----------------------------------------------------------------------------*/
+   * Layout Methods
+   *----------------------------------------------------------------------------*/
 
   LayoutNode.Vertical = new LayoutMethod( function verticalLayout( element, index, previousElement, layoutProperties ) {
     element.layoutTop = previousElement ? previousElement.layoutBounds.bottom : 0;
@@ -237,8 +237,8 @@ define( function( require ) {
   } );
 
   /*---------------------------------------------------------------------------*
-  * Internals
-  *----------------------------------------------------------------------------*/
+   * Internals
+   *----------------------------------------------------------------------------*/
 
   var LayoutProperties = LayoutNode.LayoutProperties = function LayoutProperties( elements ) {
     var largestWidth = 0;
@@ -258,7 +258,7 @@ define( function( require ) {
     this.layoutMethodGetter = layoutMethodGetter;
     this.boundsMethod = boundsMethod;
   };
-  LayoutElement.prototype = {
+  inherit( Object, LayoutElement, {
     get bounds() { return this.node.bounds; },
     get layoutBounds() { return this.boundsMethod( this.bounds ); },
     get layoutMethod() { return this.layoutMethodGetter(); },
@@ -274,7 +274,7 @@ define( function( require ) {
       var padding = this.bounds.left - this.layoutBounds.left;
       this.node.left = x + padding;
     }
-  };
+  } );
 
   LayoutNode.prototype._mutatorKeys = [ 'defaultMethod', 'updateOnBounds' ].concat( Node.prototype._mutatorKeys );
 

@@ -1,14 +1,16 @@
 // Copyright 2002-2014, University of Colorado Boulder
 
+
 /**
  * Basic dragging for a node.
  *
- * @author Jonathan Olson <olsonsjc@gmail.com>
+ * @author Jonathan Olson <jonathan.olson@colorado.edu>
  */
 
 define( function( require ) {
   'use strict';
 
+  var inherit = require( 'PHET_CORE/inherit' );
   var scenery = require( 'SCENERY/scenery' );
 
   /*
@@ -32,14 +34,14 @@ define( function( require ) {
       dragCursor: 'pointer'
     }, options );
 
-    this.dragging = false;     // whether a node is being dragged with this handler
-    this.pointer = null;      // the pointer doing the current dragging
-    this.trail = null;      // stores the path to the node that is being dragged
-    this.transform = null;      // transform of the trail to our node (but not including our node, so we can prepend the deltas)
-    this.node = null;      // the node that we are handling the drag for
-    this.lastDragPoint = null;      // the location of the drag at the previous event (so we can calculate a delta)
-    this.startTransformMatrix = null;      // the node's transform at the start of the drag, so we can reset on a touch cancel
-    this.mouseButton = undefined; // tracks which mouse button was pressed, so we can handle that specifically
+    this.dragging = false;            // whether a node is being dragged with this handler
+    this.pointer = null;              // the pointer doing the current dragging
+    this.trail = null;                // stores the path to the node that is being dragged
+    this.transform = null;            // transform of the trail to our node (but not including our node, so we can prepend the deltas)
+    this.node = null;                 // the node that we are handling the drag for
+    this.lastDragPoint = null;        // the location of the drag at the previous event (so we can calculate a delta)
+    this.startTransformMatrix = null; // the node's transform at the start of the drag, so we can reset on a touch cancel
+    this.mouseButton = undefined;     // tracks which mouse button was pressed, so we can handle that specifically
     // TODO: consider mouse buttons as separate pointers?
 
     // if an ancestor is transformed, pin our node
@@ -126,12 +128,10 @@ define( function( require ) {
   };
   var SimpleDragHandler = scenery.SimpleDragHandler;
 
-  SimpleDragHandler.prototype = {
-    constructor: SimpleDragHandler,
-
+  inherit( Object, SimpleDragHandler, {
     startDrag: function( event ) {
       // set a flag on the pointer so it won't pick up other nodes
-      event.pointer.active = true;
+      event.pointer.dragging = true;
       event.pointer.cursor = this.options.dragCursor;
       event.pointer.addInputListener( this.dragListener );
       // event.trail.rootNode().addEventListener( this.transformListener ); // TODO: replace with new parent transform listening solution
@@ -153,7 +153,7 @@ define( function( require ) {
     },
 
     endDrag: function( event ) {
-      this.pointer.active = false;
+      this.pointer.dragging = false;
       this.pointer.cursor = null;
       this.pointer.removeInputListener( this.dragListener );
       // this.trail.rootNode().removeEventListener( this.transformListener ); // TODO: replace with new parent transform listening solution
@@ -162,6 +162,9 @@ define( function( require ) {
       if ( this.options.end ) {
         this.options.end( event, this.trail );
       }
+
+      // release our reference
+      this.pointer = null;
     },
 
     tryToSnag: function( event ) {
@@ -171,7 +174,7 @@ define( function( require ) {
       }
 
       // only start dragging if the pointer isn't dragging anything, we aren't being dragged, and if it's a mouse it's button is down
-      if ( !this.dragging && !event.pointer.active ) {
+      if ( !this.dragging && !event.pointer.dragging ) {
         this.startDrag( event );
       }
     },
@@ -184,12 +187,17 @@ define( function( require ) {
     },
 
     /*---------------------------------------------------------------------------*
-    * events called from the node input listener
-    *----------------------------------------------------------------------------*/
+     * events called from the node input listener
+     *----------------------------------------------------------------------------*/
 
     // mouse/touch down on this node
     down: function( event ) {
-      this.tryToSnag( event );
+      if ( event && event.pointer && event.pointer.isKey ) {
+        //Key down cannot start a drag, see #333
+      }
+      else {
+        this.tryToSnag( event );
+      }
     },
 
     // touch enters this node
@@ -201,7 +209,7 @@ define( function( require ) {
     touchmove: function( event ) {
       this.tryTouchToSnag( event );
     }
-  };
+  } );
 
   return SimpleDragHandler;
 } );

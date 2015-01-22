@@ -1,9 +1,10 @@
 // Copyright 2002-2014, University of Colorado Boulder
 
+
 /**
  * General utility functions for Scenery
  *
- * @author Jonathan Olson <olsonsjc@gmail.com>
+ * @author Jonathan Olson <jonathan.olson@colorado.edu>
  */
 
 define( function( require ) {
@@ -29,21 +30,6 @@ define( function( require ) {
   var transformProperty = Features.transform;
   var transformOriginProperty = Features.transformOrigin || 'transformOrigin'; // fallback, so we don't try to set an empty string property later
 
-  var checkWebGLSupport = function() {
-    var canvas = document.createElement( 'canvas' );
-    var args = { failIfMajorPerformanceCaveat: true };
-    try {
-      var gl =
-        !!window.WebGLRenderingContext &&
-        (canvas.getContext( 'webgl', args ) || canvas.getContext( 'experimental-webgl', args ));
-      return !!gl;
-      // TODO: check for required extensions
-    }
-    catch( e ) {
-      return false;
-    }
-  };
-
   scenery.Util = {
     // like _.extend, but with hardcoded support for https://github.com/documentcloud/underscore/pull/986
     extend: function( obj ) {
@@ -57,17 +43,7 @@ define( function( require ) {
       return obj;
     },
 
-    // Object.create polyfill
-    objectCreate: Object.create || function( o ) {
-      if ( arguments.length > 1 ) {
-        throw new Error( 'Object.create implementation only accepts the first parameter.' );
-      }
-      function F() {}
-
-      F.prototype = o;
-      return new F();
-    },
-
+    // @deprecated (bad performance since it is setting multiple properties). see applyPreparedTransform
     applyCSSTransform: function( matrix, element, forceAcceleration ) {
       var transformCSS = matrix.getCSSTransform();
       // notes on triggering hardware acceleration: http://creativejs.com/2011/12/day-2-gpu-accelerate-your-dom-elements/
@@ -77,8 +53,43 @@ define( function( require ) {
         transformCSS += ' translateZ(0)';
       }
 
-      element.style[transformProperty] = transformCSS;
-      element.style[transformOriginProperty] = 'top left'; // TODO: performance: this only needs to be set once!
+      element.style[ transformProperty ] = transformCSS;
+      element.style[ transformOriginProperty ] = 'top left'; //OHTWO TODO: performance: this only needs to be set once!
+    },
+
+    prepareForTransform: function( element, forceAcceleration ) {
+      element.style[ transformOriginProperty ] = 'top left';
+      if ( forceAcceleration ) {
+        scenery.Util.setTransformAcceleration( element );
+      }
+      else {
+        scenery.Util.unsetTransformAcceleration( element );
+      }
+    },
+
+    setTransformAcceleration: function( element ) {
+      element.style.webkitBackfaceVisibility = 'hidden';
+    },
+
+    unsetTransformAcceleration: function( element ) {
+      element.style.webkitBackfaceVisibility = '';
+    },
+
+    // applies the CSS transform of the {Matrix3} matrix to the element, with optional forcing of acceleration. prepareForTransform should be called before this method
+    // is used, and they should use the same parameter value for forceAcceleration
+    applyPreparedTransform: function( matrix, element, forceAcceleration ) {
+      // NOTE: not applying translateZ, see http://stackoverflow.com/questions/10014461/why-does-enabling-hardware-acceleration-in-css3-slow-down-performance
+      element.style[ transformProperty ] = matrix.getCSSTransform();
+    },
+
+    setTransform: function( transformString, element, forceAcceleration ) {
+      assert && assert( typeof transformString === 'string' );
+
+      element.style[ transformProperty ] = transformString;
+    },
+
+    unsetTransform: function( element ) {
+      element.style[ transformProperty ] = '';
     },
 
     testAssert: function() {
@@ -97,8 +108,8 @@ define( function( require ) {
       var lastTime = 0;
       var vendors = [ 'ms', 'moz', 'webkit', 'o' ];
       for ( var x = 0; x < vendors.length && !window.requestAnimationFrame; ++x ) {
-        window.requestAnimationFrame = window[vendors[x] + 'RequestAnimationFrame'];
-        window.cancelAnimationFrame = window[vendors[x] + 'CancelAnimationFrame'] || window[vendors[x] + 'CancelRequestAnimationFrame'];
+        window.requestAnimationFrame = window[ vendors[ x ] + 'RequestAnimationFrame' ];
+        window.cancelAnimationFrame = window[ vendors[ x ] + 'CancelAnimationFrame' ] || window[ vendors[ x ] + 'CancelRequestAnimationFrame' ];
       }
 
       if ( !window.requestAnimationFrame ) {
@@ -150,9 +161,9 @@ define( function( require ) {
       for ( var x = 0; x < resolution; x++ ) {
         for ( var y = 0; y < resolution; y++ ) {
           var offset = 4 * ( y * resolution + x );
-          if ( imageData.data[offset] !== 0 || imageData.data[offset + 1] !== 0 || imageData.data[offset + 2] !== 0 || imageData.data[offset + 3] !== 0 ) {
-            dirtyX[x] = true;
-            dirtyY[y] = true;
+          if ( imageData.data[ offset ] !== 0 || imageData.data[ offset + 1 ] !== 0 || imageData.data[ offset + 2 ] !== 0 || imageData.data[ offset + 3 ] !== 0 ) {
+            dirtyX[ x ] = true;
+            dirtyY[ y ] = true;
           }
         }
       }
@@ -190,7 +201,7 @@ define( function( require ) {
 
       // at 1/16x default, we want to be able to get the bounds accurately for something as large as 16x our initial resolution
       // divisible by 2 so hopefully we avoid more quirks from Canvas rendering engines
-      var initialScale = ( options && options.initialScale ) ? options.initialScale : (1 / 16);
+      var initialScale = ( options && options.initialScale ) ? options.initialScale : ( 1 / 16 );
 
       var minBounds = Bounds2.NOTHING;
       var maxBounds = Bounds2.EVERYTHING;
@@ -358,10 +369,10 @@ define( function( require ) {
       }
 
       var result = new Bounds2(
-          ( minBounds.minX + maxBounds.minX ) / 2,
-          ( minBounds.minY + maxBounds.minY ) / 2,
-          ( minBounds.maxX + maxBounds.maxX ) / 2,
-          ( minBounds.maxY + maxBounds.maxY ) / 2
+        ( minBounds.minX + maxBounds.minX ) / 2,
+        ( minBounds.minY + maxBounds.minY ) / 2,
+        ( minBounds.maxX + maxBounds.maxX ) / 2,
+        ( minBounds.maxY + maxBounds.maxY ) / 2
       );
 
       // extra data about our bounds
@@ -411,7 +422,21 @@ define( function( require ) {
     },
 
     //Check to see whether webgl is supported, using the same strategy as mrdoob and pixi.js
-    isWebGLSupported: checkWebGLSupport()
+    isWebGLSupported: function() {
+      var canvas = document.createElement( 'canvas' );
+
+      var args = { failIfMajorPerformanceCaveat: true };
+      try {
+        var gl =
+          !!window.WebGLRenderingContext &&
+          (canvas.getContext( 'webgl', args ) || canvas.getContext( 'experimental-webgl', args ));
+        return !!gl;
+        // TODO: check for required extensions
+      }
+      catch( e ) {
+        return false;
+      }
+    }
   };
   var Util = scenery.Util;
 

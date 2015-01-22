@@ -1,14 +1,16 @@
 // Copyright 2002-2014, University of Colorado Boulder
 
+
 /**
  * Feature detection
  *
- * @author Jonathan Olson <olsonsjc@gmail.com>
+ * @author Jonathan Olson <jonathan.olson@colorado.edu>
  */
 
 define( function( require ) {
   'use strict';
 
+  var detectPrefix = require( 'PHET_CORE/detectPrefix' );
   var scenery = require( 'SCENERY/scenery' );
 
   var Features = scenery.Features = {};
@@ -24,6 +26,7 @@ define( function( require ) {
       var url = canvas.toDataURL( [ format ] );
 
       var target = 'data:' + format;
+      // var pngFallback = 'data:image/png';
 
       return url.slice( 0, target.length ) === target;
     }
@@ -45,10 +48,10 @@ define( function( require ) {
       try {
         context.drawImage( img, 0, 0 );
         canvas.toDataURL();
-        Features[name] = true;
+        Features[ name ] = true;
       }
       catch( e ) {
-        Features[name] = false;
+        Features[ name ] = false;
       }
     };
     img.onload = loadCall;
@@ -59,34 +62,8 @@ define( function( require ) {
       }
     }
     catch( e ) {
-      Features[name] = false;
+      Features[ name ] = false;
     }
-  }
-
-  function prefixed( name ) {
-    var result = [];
-    result.push( name );
-
-    // prepare for camel case
-    name = name.charAt( 0 ).toUpperCase() + name.slice( 1 );
-
-    // Chrome planning to not introduce prefixes in the future, hopefully we will be safe
-    result.push( 'moz' + name );
-    result.push( 'Moz' + name ); // some prefixes seem to have all-caps?
-    result.push( 'webkit' + name );
-    result.push( 'ms' + name );
-    result.push( 'o' + name );
-
-    return result;
-  }
-
-  function detect( obj, names ) {
-    for ( var i = 0; i < names.length; i++ ) {
-      if ( obj[names[i]] !== undefined ) {
-        return names[i];
-      }
-    }
-    return undefined;
   }
 
   Features.canvasPNGOutput = supportsDataURLFormatOutput( 'image/png' );
@@ -116,22 +93,35 @@ define( function( require ) {
   // canvas prefixed names
   var canvas = document.createElement( 'canvas' );
   var ctx = canvas.getContext( '2d' );
-  Features.toDataURLHD = detect( canvas, prefixed( 'toDataURLHD' ) );
-  Features.createImageDataHD = detect( ctx, prefixed( 'createImageDataHD' ) );
-  Features.getImageDataHD = detect( ctx, prefixed( 'getImageDataHD' ) );
-  Features.putImageDataHD = detect( ctx, prefixed( 'putImageDataHD' ) );
-  Features.currentTransform = detect( ctx, prefixed( 'currentTransform' ) );
+  Features.toDataURLHD = detectPrefix( canvas, 'toDataURLHD' );
+  Features.createImageDataHD = detectPrefix( ctx, 'createImageDataHD' );
+  Features.getImageDataHD = detectPrefix( ctx, 'getImageDataHD' );
+  Features.putImageDataHD = detectPrefix( ctx, 'putImageDataHD' );
+  Features.currentTransform = detectPrefix( ctx, 'currentTransform' );
 
   var span = document.createElement( 'span' );
   var div = document.createElement( 'div' );
-  Features.textStroke = detect( span.style, prefixed( 'textStroke' ) );
-  Features.textStrokeColor = detect( span.style, prefixed( 'textStrokeColor' ) );
-  Features.textStrokeWidth = detect( span.style, prefixed( 'textStrokeWidth' ) );
+  Features.textStroke = detectPrefix( span.style, 'textStroke' );
+  Features.textStrokeColor = detectPrefix( span.style, 'textStrokeColor' );
+  Features.textStrokeWidth = detectPrefix( span.style, 'textStrokeWidth' );
 
-  Features.transform = detect( div.style, prefixed( 'transform' ) );
-  Features.transformOrigin = detect( div.style, prefixed( 'transformOrigin' ) );
-  Features.backfaceVisibility = detect( div.style, prefixed( 'backfaceVisibility' ) );
-  Features.borderRadius = detect( div.style, prefixed( 'borderRadius' ) );
+  Features.transform = detectPrefix( div.style, 'transform' );
+  Features.transformOrigin = detectPrefix( div.style, 'transformOrigin' );
+  Features.backfaceVisibility = detectPrefix( div.style, 'backfaceVisibility' );
+  Features.borderRadius = detectPrefix( div.style, 'borderRadius' );
+
+  Features.userSelect = detectPrefix( div.style, 'userSelect' );
+  Features.touchAction = detectPrefix( div.style, 'touchAction' );
+  Features.touchCallout = detectPrefix( div.style, 'touchCallout' );
+  Features.userDrag = detectPrefix( div.style, 'userDrag' );
+  Features.tapHighlightColor = detectPrefix( div.style, 'tapHighlightColor' );
+
+  // e.g. Features.setStyle( domElement, Features.transform, '...' ), and doesn't set it if no 'transform' attribute (prefixed or no) is found
+  Features.setStyle = function( domElement, optionalKey, value ) {
+    if ( optionalKey !== undefined ) {
+      domElement.style[ optionalKey ] = value;
+    }
+  };
 
   return Features;
 } );

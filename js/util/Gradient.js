@@ -1,37 +1,33 @@
 // Copyright 2002-2014, University of Colorado Boulder
 
+
 /**
  * Gradient base type for LinearGradient and RadialGradient. Will not function on its own
  *
- * @author Jonathan Olson <olsonsjc@gmail.com>
+ * @author Jonathan Olson <jonathan.olson@colorado.edu>
  */
 
 define( function( require ) {
   'use strict';
 
   require( 'SCENERY/util/Color' );
+  var inherit = require( 'PHET_CORE/inherit' );
   var scenery = require( 'SCENERY/scenery' );
-
-  var globalId = 1;
+  var Paint = require( 'SCENERY/util/Paint' );
 
   // TODO: add the ability to specify the color-stops inline. possibly [ [0,color1], [0.5,color2], [1,color3] ]
   scenery.Gradient = function Gradient( canvasGradient ) {
     assert && assert( this.constructor.name !== 'Gradient', 'Please create a LinearGradient or RadialGradient. Do not directly use the supertype Gradient.' );
-
-    this.id = 'gradient' + globalId++;
+    Paint.call( this );
 
     this.stops = [];
     this.lastStopRatio = 0;
 
     this.canvasGradient = canvasGradient;
-
-    this.transformMatrix = null;
   };
   var Gradient = scenery.Gradient;
 
-  Gradient.prototype = {
-    constructor: Gradient,
-
+  inherit( Paint, Gradient, {
     isGradient: true,
 
     /**
@@ -63,18 +59,10 @@ define( function( require ) {
       return this;
     },
 
-    setTransformMatrix: function( transformMatrix ) {
-      // TODO: invalidate the gradient?
-      if ( this.transformMatrix !== transformMatrix ) {
-        this.transformMatrix = transformMatrix;
-      }
-      return this;
-    },
-
     getCanvasStyle: function() {
       return this.canvasGradient;
     }
-  };
+  } );
 
   return Gradient;
 } );

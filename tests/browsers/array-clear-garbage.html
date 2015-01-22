@@ -1,0 +1,64 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8"/>
+  <meta http-equiv="X-UA-Compatible" content="IE=edge"/>
+
+  <title>Array Clearing Garbage Collection Test</title>
+</head>
+<body>
+
+<script type="text/javascript">
+  // polyfill
+  (function() {
+    var lastTime = 0;
+    var vendors = [ 'ms', 'moz', 'webkit', 'o' ];
+    for ( var x = 0; x < vendors.length && !window.requestAnimationFrame; ++x ) {
+      window.requestAnimationFrame = window[ vendors[ x ] + 'RequestAnimationFrame' ];
+      window.cancelAnimationFrame = window[ vendors[ x ] + 'CancelAnimationFrame' ] || window[ vendors[ x ] + 'CancelRequestAnimationFrame' ];
+    }
+
+    if ( !window.requestAnimationFrame ) {
+      window.requestAnimationFrame = function( callback ) {
+        var currTime = new Date().getTime();
+        var timeToCall = Math.max( 0, 16 - (currTime - lastTime) );
+        var id = window.setTimeout( function() { callback( currTime + timeToCall ); },
+            timeToCall );
+        lastTime = currTime + timeToCall;
+        return id;
+      };
+    }
+
+    if ( !window.cancelAnimationFrame ) {
+      window.cancelAnimationFrame = function( id ) {
+        clearTimeout( id );
+      };
+    }
+  })();
+
+  var objects = [];
+  var arr = [];
+  var n = 100000;
+  console.log( n );
+
+  for ( var i = 0; i < n; i++ ) {
+    objects.push( { x: i } );
+  }
+
+  function tick() {
+    window.requestAnimationFrame( tick );
+
+    for ( var j = 0; j < n; j++ ) {
+      arr.push( objects[ j ] );
+    }
+
+    while ( arr.length ) {
+      arr.pop();
+    }
+  }
+  window.requestAnimationFrame( tick );
+
+</script>
+
+</body>
+</html>

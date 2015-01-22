@@ -1,5 +1,6 @@
 // Copyright 2002-2014, University of Colorado Boulder
 
+
 /**
  * API for handling mouse / touch / keyboard events.
  *
@@ -16,28 +17,38 @@
  * Touch events spec: http://www.w3.org/TR/touch-events/
  * Pointer events spec draft: https://dvcs.w3.org/hg/pointerevents/raw-file/tip/pointerEvents.html
  *
- * @author Jonathan Olson <olsonsjc@gmail.com>
+ * @author Jonathan Olson <jonathan.olson@colorado.edu>
  */
 
 define( function( require ) {
   'use strict';
 
+  var inherit = require( 'PHET_CORE/inherit' );
+  var cleanArray = require( 'PHET_CORE/cleanArray' );
   var scenery = require( 'SCENERY/scenery' );
 
   require( 'SCENERY/util/Trail' );
   require( 'SCENERY/input/Mouse' );
   require( 'SCENERY/input/Touch' );
   require( 'SCENERY/input/Pen' );
-  require( 'SCENERY/input/Key' );
   require( 'SCENERY/input/Event' );
+  require( 'SCENERY/input/Key' );
+  var BatchedDOMEvent = require( 'SCENERY/input/BatchedDOMEvent' );
+  var Property = require( 'AXON/Property' );
 
   // listenerTarget is the DOM node (window/document/element) to which DOM event listeners will be attached
-  scenery.Input = function Input( scene, listenerTarget, batchDOMEvents ) {
-    this.scene = scene;
+  scenery.Input = function Input( rootNode, listenerTarget, batchDOMEvents, enablePointerEvents, pointFromEvent ) {
+    this.rootNode = rootNode;
     this.listenerTarget = listenerTarget;
     this.batchDOMEvents = batchDOMEvents;
+    this.enablePointerEvents = enablePointerEvents;
+    this.pointFromEvent = pointFromEvent;
+    this.displayUpdateOnEvent = false;
 
+    //OHTWO @deprecated
     this.batchedCallbacks = []; // cleared every frame
+
+    this.batchedEvents = [];
 
     //Pointer for mouse, only created lazily on first mouse event, so no mouse is allocated on tablets
     this.mouse = null;
@@ -46,15 +57,154 @@ define( function( require ) {
 
     this.listenerReferences = [];
 
-    this.eventLog = [];     // written when recording event input. can be overwritten to the empty array to reset. Strings relative to this class (prefix "scene.input.")
+    this.eventLog = [];     // written when recording event input. can be overwritten to the empty array to reset. Strings relative to this class (prefix "rootNode.input.")
     this.logEvents = false; // can be set to true to cause Scenery to record all input calls to eventLog
 
     this.pointerAddedListeners = [];
+
+    var input = this;
+
+    // unique to this input instance
+    this.onpointerdown = function onpointerdown( domEvent ) { input.batchEvent( domEvent, BatchedDOMEvent.POINTER_TYPE, input.pointerDown, false ); };
+    this.onpointerup = function onpointerup( domEvent ) { input.batchEvent( domEvent, BatchedDOMEvent.POINTER_TYPE, input.pointerUp, true ); };
+    this.onpointermove = function onpointermove( domEvent ) { input.batchEvent( domEvent, BatchedDOMEvent.POINTER_TYPE, input.pointerMove, false ); };
+    this.onpointerover = function onpointerover( domEvent ) { input.batchEvent( domEvent, BatchedDOMEvent.POINTER_TYPE, input.pointerOver, false ); };
+    this.onpointerout = function onpointerout( domEvent ) { input.batchEvent( domEvent, BatchedDOMEvent.POINTER_TYPE, input.pointerOut, false ); };
+    this.onpointercancel = function onpointercancel( domEvent ) { input.batchEvent( domEvent, BatchedDOMEvent.POINTER_TYPE, input.pointerCancel, false ); };
+    this.onMSPointerDown = function onMSPointerDown( domEvent ) { input.batchEvent( domEvent, BatchedDOMEvent.MS_POINTER_TYPE, input.pointerDown, false ); };
+    this.onMSPointerUp = function onMSPointerUp( domEvent ) { input.batchEvent( domEvent, BatchedDOMEvent.MS_POINTER_TYPE, input.pointerUp, true ); };
+    this.onMSPointerMove = function onMSPointerMove( domEvent ) { input.batchEvent( domEvent, BatchedDOMEvent.MS_POINTER_TYPE, input.pointerMove, false ); };
+    this.onMSPointerOver = function onMSPointerOver( domEvent ) { input.batchEvent( domEvent, BatchedDOMEvent.MS_POINTER_TYPE, input.pointerOver, false ); };
+    this.onMSPointerOut = function onMSPointerOut( domEvent ) { input.batchEvent( domEvent, BatchedDOMEvent.MS_POINTER_TYPE, input.pointerOut, false ); };
+    this.onMSPointerCancel = function onMSPointerCancel( domEvent ) { input.batchEvent( domEvent, BatchedDOMEvent.MS_POINTER_TYPE, input.pointerCancel, false ); };
+    this.ontouchstart = function ontouchstart( domEvent ) { input.batchEvent( domEvent, BatchedDOMEvent.TOUCH_TYPE, input.touchStart, false ); };
+    this.ontouchend = function ontouchend( domEvent ) { input.batchEvent( domEvent, BatchedDOMEvent.TOUCH_TYPE, input.touchEnd, true ); };
+    this.ontouchmove = function ontouchmove( domEvent ) { input.batchEvent( domEvent, BatchedDOMEvent.TOUCH_TYPE, input.touchMove, false ); };
+    this.ontouchcancel = function ontouchcancel( domEvent ) { input.batchEvent( domEvent, BatchedDOMEvent.TOUCH_TYPE, input.touchCancel, false ); };
+    this.onmousedown = function onmousedown( domEvent ) { input.batchEvent( domEvent, BatchedDOMEvent.MOUSE_TYPE, input.mouseDown, false ); };
+    this.onmouseup = function onmouseup( domEvent ) { input.batchEvent( domEvent, BatchedDOMEvent.MOUSE_TYPE, input.mouseUp, true ); };
+    this.onmousemove = function onmousemove( domEvent ) { input.batchEvent( domEvent, BatchedDOMEvent.MOUSE_TYPE, input.mouseMove, false ); };
+    this.onmouseover = function onmouseover( domEvent ) { input.batchEvent( domEvent, BatchedDOMEvent.MOUSE_TYPE, input.mouseOver, false ); };
+    this.onmouseout = function onmouseout( domEvent ) { input.batchEvent( domEvent, BatchedDOMEvent.MOUSE_TYPE, input.mouseOut, false ); };
+    this.onkeydown = function onkeydown( domEvent ) { input.batchEvent( domEvent, BatchedDOMEvent.KEY_TYPE, input.keyDown, false ); };
+    this.onkeyup = function onkeyup( domEvent ) { input.batchEvent( domEvent, BatchedDOMEvent.KEY_TYPE, input.keyUp, false ); };
+    this.uselessListener = function uselessListener( domEvent ) {};
   };
   var Input = scenery.Input;
 
-  Input.prototype = {
-    constructor: Input,
+  inherit( Object, Input, {
+    batchEvent: function( domEvent, batchType, callback, triggerImmediate ) {
+      this.batchedEvents.push( BatchedDOMEvent.createFromPool( domEvent, batchType, callback ) );
+      if ( triggerImmediate || !this.batchDOMEvents ) {
+        this.fireBatchedEvents();
+      }
+      if ( this.displayUpdateOnEvent ) {
+        //OHTWO TODO: update the display
+      }
+
+      // Don't preventDefault for key events, which often need to be handled by the browser
+      // (such as F5, CMD+R, CMD+OPTION+J, etc), see #332
+      if ( batchType !== BatchedDOMEvent.KEY_TYPE ) {
+        domEvent.preventDefault();
+      }
+    },
+
+    fireBatchedEvents: function() {
+      if ( this.batchedEvents.length ) {
+        sceneryEventLog && sceneryEventLog( 'Input.fireBatchedEvents length:' + this.batchedEvents.length );
+
+        // needs to be done in order
+        var len = this.batchedEvents.length;
+        for ( var i = 0; i < len; i++ ) {
+          var batchedEvent = this.batchedEvents[ i ];
+          batchedEvent.run( this );
+          batchedEvent.dispose();
+        }
+        cleanArray( this.batchedEvents );
+      }
+    },
+
+    clearBatchedEvents: function() {
+      this.batchedEvents.length = 0;
+    },
+
+    pointerListenerTypes: [ 'pointerdown', 'pointerup', 'pointermove', 'pointerover', 'pointerout', 'pointercancel' ],
+    msPointerListenerTypes: [ 'MSPointerDown', 'MSPointerUp', 'MSPointerMove', 'MSPointerOver', 'MSPointerOut', 'MSPointerCancel' ],
+    touchListenerTypes: [ 'touchstart', 'touchend', 'touchmove', 'touchcancel' ],
+    mouseListenerTypes: [ 'mousedown', 'mouseup', 'mousemove', 'mouseover', 'mouseout' ],
+    keyListenerTypes: [ 'keydown', 'keyup' ],
+
+    // W3C spec for pointer events
+    canUsePointerEvents: function() {
+      return window.navigator && window.navigator.pointerEnabled && this.enablePointerEvents;
+    },
+
+    // MS spec for pointer event
+    canUseMSPointerEvents: function() {
+      return window.navigator && window.navigator.msPointerEnabled && this.enablePointerEvents;
+    },
+
+    getUsedEventTypes: function() {
+      var eventTypes;
+
+      if ( this.canUsePointerEvents() ) {
+        // accepts pointer events corresponding to the spec at http://www.w3.org/TR/pointerevents/
+        sceneryLog && sceneryLog.Input && sceneryLog.Input( 'Detected pointer events support, using that instead of mouse/touch events' );
+
+        eventTypes = this.pointerListenerTypes;
+      }
+      else if ( this.canUseMSPointerEvents() ) {
+        sceneryLog && sceneryLog.Input && sceneryLog.Input( 'Detected MS pointer events support, using that instead of mouse/touch events' );
+
+        eventTypes = this.msPointerListenerTypes;
+      }
+      else {
+        sceneryLog && sceneryLog.Input && sceneryLog.Input( 'No pointer events support detected, using mouse/touch events' );
+
+        eventTypes = this.touchListenerTypes.concat( this.mouseListenerTypes );
+      }
+
+      eventTypes = eventTypes.concat( this.keyListenerTypes );
+
+      return eventTypes;
+    },
+
+    connectListeners: function() {
+      this.processListeners( true );
+    },
+
+    disconnectListeners: function() {
+      this.processListeners( false );
+    },
+
+    // @param addOrRemove: true if adding, false if removing
+    processListeners: function( addOrRemove ) {
+      var eventTypes = this.getUsedEventTypes();
+
+      for ( var i = 0; i < eventTypes.length; i++ ) {
+        var type = eventTypes[ i ];
+
+        // work around iOS Safari 7 not sending touch events to Scenes contained in an iframe
+        if ( this.listenerTarget === window ) {
+          if ( addOrRemove ) {
+            document.addEventListener( type, this.uselessListener );
+          }
+          else {
+            document.removeEventListener( type, this.uselessListener );
+          }
+        }
+
+        var callback = this[ 'on' + type ];
+        assert && assert( !!callback );
+
+        if ( addOrRemove ) {
+          this.listenerTarget.addEventListener( type, callback, false ); // don't use capture for now
+        }
+        else {
+          this.listenerTarget.removeEventListener( type, callback, false ); // don't use capture for now
+        }
+      }
+    },
 
     addPointer: function( pointer ) {
       this.pointers.push( pointer );
@@ -62,7 +212,7 @@ define( function( require ) {
       //Callback for showing pointer events.  Optimized for performance.
       if ( this.pointerAddedListeners.length ) {
         for ( var i = 0; i < this.pointerAddedListeners.length; i++ ) {
-          this.pointerAddedListeners[i]( pointer );
+          this.pointerAddedListeners[ i ]( pointer );
         }
       }
     },
@@ -81,7 +231,7 @@ define( function( require ) {
     removePointer: function( pointer ) {
       // sanity check version, will remove all instances
       for ( var i = this.pointers.length - 1; i >= 0; i-- ) {
-        if ( this.pointers[i] === pointer ) {
+        if ( this.pointers[ i ] === pointer ) {
           this.pointers.splice( i, 1 );
         }
       }
@@ -90,7 +240,7 @@ define( function( require ) {
     findTouchById: function( id ) {
       var i = this.pointers.length;
       while ( i-- ) {
-        var pointer = this.pointers[i];
+        var pointer = this.pointers[ i ];
         if ( pointer.id === id ) {
           return pointer;
         }
@@ -102,7 +252,7 @@ define( function( require ) {
       assert && assert( event.hasOwnProperty( 'keyCode' ) && event.hasOwnProperty( 'charCode' ), 'Assumes the KeyboardEvent has keyCode and charCode properties' );
       var result = _.find( this.pointers, function( pointer ) {
         // TODO: also check location (if that exists), so we don't mix up left and right shift, etc.
-        return pointer.keyCode === event.keyCode && pointer.charCode === event.charCode;
+        return pointer.event && pointer.event.keyCode === event.keyCode && pointer.event.charCode === event.charCode;
       } );
       // assert && assert( result, 'No key found for the combination of key:' + event.key + ' and location:' + event.location );
       return result;
@@ -115,6 +265,7 @@ define( function( require ) {
     },
 
     mouseDown: function( point, event ) {
+      sceneryLog && sceneryLog.Input && sceneryLog.Input( 'mouseDown(' + Input.debugText( point, event ) + ');' );
       if ( this.logEvents ) { this.eventLog.push( 'mouseDown(' + Input.serializeVector2( point ) + ',' + Input.serializeDomEvent( event ) + ');' ); }
       if ( !this.mouse ) { this.initMouse(); }
       var pointChanged = this.mouse.down( point, event );
@@ -125,6 +276,7 @@ define( function( require ) {
     },
 
     mouseUp: function( point, event ) {
+      sceneryLog && sceneryLog.Input && sceneryLog.Input( 'mouseUp(' + Input.debugText( point, event ) + ');' );
       if ( this.logEvents ) { this.eventLog.push( 'mouseUp(' + Input.serializeVector2( point ) + ',' + Input.serializeDomEvent( event ) + ');' ); }
       if ( !this.mouse ) { this.initMouse(); }
       var pointChanged = this.mouse.up( point, event );
@@ -134,16 +286,8 @@ define( function( require ) {
       this.upEvent( this.mouse, event );
     },
 
-    mouseUpImmediate: function( point, event ) {
-      if ( this.logEvents ) { this.eventLog.push( 'mouseUpImmediate(' + Input.serializeVector2( point ) + ',' + Input.serializeDomEvent( event ) + ');' ); }
-      if ( !this.mouse ) { this.initMouse(); }
-      if ( this.mouse.point ) {
-        // if the pointer's point hasn't been initialized yet, ignore the immediate up
-        this.upImmediateEvent( this.mouse, event );
-      }
-    },
-
     mouseMove: function( point, event ) {
+      sceneryLog && sceneryLog.Input && sceneryLog.Input( 'mouseMove(' + Input.debugText( point, event ) + ');' );
       if ( this.logEvents ) { this.eventLog.push( 'mouseMove(' + Input.serializeVector2( point ) + ',' + Input.serializeDomEvent( event ) + ');' ); }
       if ( !this.mouse ) { this.initMouse(); }
       this.mouse.move( point, event );
@@ -151,6 +295,7 @@ define( function( require ) {
     },
 
     mouseOver: function( point, event ) {
+      sceneryLog && sceneryLog.Input && sceneryLog.Input( 'mouseOver(' + Input.debugText( point, event ) + ');' );
       if ( this.logEvents ) { this.eventLog.push( 'mouseOver(' + Input.serializeVector2( point ) + ',' + Input.serializeDomEvent( event ) + ');' ); }
       if ( !this.mouse ) { this.initMouse(); }
       this.mouse.over( point, event );
@@ -158,6 +303,7 @@ define( function( require ) {
     },
 
     mouseOut: function( point, event ) {
+      sceneryLog && sceneryLog.Input && sceneryLog.Input( 'mouseOut(' + Input.debugText( point, event ) + ');' );
       if ( this.logEvents ) { this.eventLog.push( 'mouseOut(' + Input.serializeVector2( point ) + ',' + Input.serializeDomEvent( event ) + ');' ); }
       if ( !this.mouse ) { this.initMouse(); }
       this.mouse.out( point, event );
@@ -165,32 +311,71 @@ define( function( require ) {
     },
 
     keyDown: function( event ) {
+      sceneryLog && sceneryLog.Input && sceneryLog.Input( 'keyDown(' + Input.debugKeyEvent( event ) + ');' );
       if ( this.logEvents ) { this.eventLog.push( 'keyDown(' + Input.serializeDomEvent( event ) + ');' ); }
+
+      var code = event.which;
+
+      if ( pressedKeys.indexOf( code ) === -1 ) {
+        pressedKeys.push( code );
+      }
+
+      // Handle TAB key (9) or 't' key temporarily for debugging
+      var shiftPressed = pressedKeys.indexOf( 16 ) >= 0;
+      if ( code === 9 || code === 84 ) {
+
+        // Move the focus to the next item
+        // TODO: More general focus order strategy
+        var deltaIndex = shiftPressed ? -1 : +1;
+        Input.moveFocus( deltaIndex );
+
+        //TODO: Moving focus first then dispatching to focused node means newly focused node gets a fresh TAB event
+        //TODO: That is probably undesirable
+      }
+
       var key = new scenery.Key( event );
       this.addPointer( key );
 
-      var trail = this.scene.getTrailFromKeyboardFocus();
-      this.dispatchEvent( trail, 'keyDown', key, event, true );
-    },
+      var focusedInstance = scenery.Input.focusedInstanceProperty.value;
+      if ( focusedInstance ) {
+        var trail = focusedInstance.node.getUniqueTrail();//TODO: Is this right?
 
-    keyUp: function( event ) {
-      if ( this.logEvents ) { this.eventLog.push( 'keyUp(' + Input.serializeDomEvent( event ) + ');' ); }
-      var key = this.findKeyByEvent( event );
-      if ( key ) {
-        this.removePointer( key );
-
-        var trail = this.scene.getTrailFromKeyboardFocus();
-        this.dispatchEvent( trail, 'keyUp', key, event, true );
+        this.dispatchEvent( trail, 'down', key, event, true );
       }
     },
 
-    keyPress: function( event ) {
-      if ( this.logEvents ) { this.eventLog.push( 'keyPress(' + Input.serializeDomEvent( event ) + ');' ); }
-      // NOTE: do we even need keyPress?
+    keyUp: function( event ) {
+      sceneryLog && sceneryLog.Input && sceneryLog.Input( 'keyUp(' + Input.debugKeyEvent( event ) + ');' );
+      if ( this.logEvents ) { this.eventLog.push( 'keyUp(' + Input.serializeDomEvent( event ) + ');' ); }
+
+      var code = event.which;
+
+      // Better remove all occurences, just in case!
+      while ( true ) {
+        var index = pressedKeys.indexOf( code );
+
+        if ( index > -1 ) {
+          pressedKeys.splice( index, 1 );
+        }
+        else {
+          break;
+        }
+      }
+
+      var key = this.findKeyByEvent( event );
+      if ( key ) {
+        this.removePointer( key );
+        var focusedInstance = scenery.Input.focusedInstanceProperty.value;
+        if ( focusedInstance ) {
+          var trail = focusedInstance.node.getUniqueTrail();//TODO: Is this right?
+          this.dispatchEvent( trail, 'up', key, event, true );
+        }
+      }
     },
 
     // called for each touch point
     touchStart: function( id, point, event ) {
+      sceneryLog && sceneryLog.Input && sceneryLog.Input( 'touchStart(\'' + id + '\',' + Input.debugText( point, event ) + ');' );
       if ( this.logEvents ) { this.eventLog.push( 'touchStart(\'' + id + '\',' + Input.serializeVector2( point ) + ',' + Input.serializeDomEvent( event ) + ');' ); }
       var touch = new scenery.Touch( id, point, event );
       this.addPointer( touch );
@@ -198,6 +383,7 @@ define( function( require ) {
     },
 
     touchEnd: function( id, point, event ) {
+      sceneryLog && sceneryLog.Input && sceneryLog.Input( 'touchEnd(\'' + id + '\',' + Input.debugText( point, event ) + ');' );
       if ( this.logEvents ) { this.eventLog.push( 'touchEnd(\'' + id + '\',' + Input.serializeVector2( point ) + ',' + Input.serializeDomEvent( event ) + ');' ); }
       var touch = this.findTouchById( id );
       if ( touch ) {
@@ -213,18 +399,8 @@ define( function( require ) {
       }
     },
 
-    touchEndImmediate: function( id, point, event ) {
-      if ( this.logEvents ) { this.eventLog.push( 'touchEndImmediate(\'' + id + '\',' + Input.serializeVector2( point ) + ',' + Input.serializeDomEvent( event ) + ');' ); }
-      var touch = this.findTouchById( id );
-      if ( touch ) {
-        this.upImmediateEvent( touch, event );
-      }
-      else {
-        assert && assert( false, 'Touch not found for touchEndImmediate: ' + id );
-      }
-    },
-
     touchMove: function( id, point, event ) {
+      sceneryLog && sceneryLog.Input && sceneryLog.Input( 'touchMove(\'' + id + '\',' + Input.debugText( point, event ) + ');' );
       if ( this.logEvents ) { this.eventLog.push( 'touchMove(\'' + id + '\',' + Input.serializeVector2( point ) + ',' + Input.serializeDomEvent( event ) + ');' ); }
       var touch = this.findTouchById( id );
       if ( touch ) {
@@ -237,6 +413,7 @@ define( function( require ) {
     },
 
     touchCancel: function( id, point, event ) {
+      sceneryLog && sceneryLog.Input && sceneryLog.Input( 'touchCancel(\'' + id + '\',' + Input.debugText( point, event ) + ');' );
       if ( this.logEvents ) { this.eventLog.push( 'touchCancel(\'' + id + '\',' + Input.serializeVector2( point ) + ',' + Input.serializeDomEvent( event ) + ');' ); }
       var touch = this.findTouchById( id );
       if ( touch ) {
@@ -254,6 +431,7 @@ define( function( require ) {
 
     // called for each touch point
     penStart: function( id, point, event ) {
+      sceneryLog && sceneryLog.Input && sceneryLog.Input( 'penStart(\'' + id + '\',' + Input.debugText( point, event ) + ');' );
       if ( this.logEvents ) { this.eventLog.push( 'penStart(\'' + id + '\',' + Input.serializeVector2( point ) + ',' + Input.serializeDomEvent( event ) + ');' ); }
       var pen = new scenery.Pen( id, point, event );
       this.addPointer( pen );
@@ -261,6 +439,7 @@ define( function( require ) {
     },
 
     penEnd: function( id, point, event ) {
+      sceneryLog && sceneryLog.Input && sceneryLog.Input( 'penEnd(\'' + id + '\',' + Input.debugText( point, event ) + ');' );
       if ( this.logEvents ) { this.eventLog.push( 'penEnd(\'' + id + '\',' + Input.serializeVector2( point ) + ',' + Input.serializeDomEvent( event ) + ');' ); }
       var pen = this.findTouchById( id );
       if ( pen ) {
@@ -276,18 +455,8 @@ define( function( require ) {
       }
     },
 
-    penEndImmediate: function( id, point, event ) {
-      if ( this.logEvents ) { this.eventLog.push( 'penEndImmediate(\'' + id + '\',' + Input.serializeVector2( point ) + ',' + Input.serializeDomEvent( event ) + ');' ); }
-      var pen = this.findTouchById( id );
-      if ( pen ) {
-        this.upImmediateEvent( pen, event );
-      }
-      else {
-        assert && assert( false, 'Pen not found for penEndImmediate: ' + id );
-      }
-    },
-
     penMove: function( id, point, event ) {
+      sceneryLog && sceneryLog.Input && sceneryLog.Input( 'penMove(\'' + id + '\',' + Input.debugText( point, event ) + ');' );
       if ( this.logEvents ) { this.eventLog.push( 'penMove(\'' + id + '\',' + Input.serializeVector2( point ) + ',' + Input.serializeDomEvent( event ) + ');' ); }
       var pen = this.findTouchById( id );
       if ( pen ) {
@@ -300,6 +469,7 @@ define( function( require ) {
     },
 
     penCancel: function( id, point, event ) {
+      sceneryLog && sceneryLog.Input && sceneryLog.Input( 'penCancel(\'' + id + '\',' + Input.debugText( point, event ) + ');' );
       if ( this.logEvents ) { this.eventLog.push( 'penCancel(\'' + id + '\',' + Input.serializeVector2( point ) + ',' + Input.serializeDomEvent( event ) + ');' ); }
       var pen = this.findTouchById( id );
       if ( pen ) {
@@ -343,24 +513,6 @@ define( function( require ) {
           break;
         case 'pen':
           this.penEnd( id, point, event );
-          break;
-        default:
-          if ( console.log ) {
-            console.log( 'Unknown pointer type: ' + type );
-          }
-      }
-    },
-
-    pointerUpImmediate: function( id, type, point, event ) {
-      switch( type ) {
-        case 'mouse':
-          this.mouseUpImmediate( point, event );
-          break;
-        case 'touch':
-          this.touchEndImmediate( id, point, event );
-          break;
-        case 'pen':
-          this.penEndImmediate( id, point, event );
           break;
         default:
           if ( console.log ) {
@@ -424,7 +576,7 @@ define( function( require ) {
     },
 
     upEvent: function( pointer, event ) {
-      var trail = this.scene.trailUnderPointer( pointer ) || new scenery.Trail( this.scene );
+      var trail = this.rootNode.trailUnderPointer( pointer ) || new scenery.Trail( this.rootNode );
 
       this.dispatchEvent( trail, 'up', pointer, event, true );
 
@@ -436,14 +588,8 @@ define( function( require ) {
       pointer.trail = trail;
     },
 
-    upImmediateEvent: function( pointer, event ) {
-      var trail = this.scene.trailUnderPointer( pointer ) || new scenery.Trail( this.scene );
-
-      this.dispatchEvent( trail, 'upImmediate', pointer, event, true );
-    },
-
     downEvent: function( pointer, event ) {
-      var trail = this.scene.trailUnderPointer( pointer ) || new scenery.Trail( this.scene );
+      var trail = this.rootNode.trailUnderPointer( pointer ) || new scenery.Trail( this.rootNode );
 
       // touch pointers are transient, so fire enter/over to the trail first
       if ( pointer.isTouch ) {
@@ -463,7 +609,7 @@ define( function( require ) {
     },
 
     cancelEvent: function( pointer, event ) {
-      var trail = this.scene.trailUnderPointer( pointer ) || new scenery.Trail( this.scene );
+      var trail = this.rootNode.trailUnderPointer( pointer ) || new scenery.Trail( this.rootNode );
 
       this.dispatchEvent( trail, 'cancel', pointer, event, true );
 
@@ -477,9 +623,9 @@ define( function( require ) {
 
     // return whether there was a change
     branchChangeEvents: function( pointer, event, isMove ) {
-      var trail = this.scene.trailUnderPointer( pointer ) || new scenery.Trail( this.scene );
+      var trail = this.rootNode.trailUnderPointer( pointer ) || new scenery.Trail( this.rootNode );
       sceneryEventLog && sceneryEventLog( 'checking branch change: ' + trail.toString() + ' at ' + pointer.point.toString() );
-      var oldTrail = pointer.trail || new scenery.Trail( this.scene ); // TODO: consider a static trail reference
+      var oldTrail = pointer.trail || new scenery.Trail( this.rootNode ); // TODO: consider a static trail reference
 
       var lastNodeChanged = oldTrail.lastNode() !== trail.lastNode();
       if ( !lastNodeChanged && !isMove ) {
@@ -534,7 +680,7 @@ define( function( require ) {
 
       var i = this.pointers.length;
       while ( i-- ) {
-        var pointer = this.pointers[i];
+        var pointer = this.pointers[ i ];
         if ( pointer.point ) {
           var changed = that.branchChangeEvents( pointer, null, false );
           if ( changed ) {
@@ -585,21 +731,21 @@ define( function( require ) {
         return;
       }
 
-      var specificType = pointer.type + type; // e.g. mouseup, touchup, keyup
+      var specificType = pointer.type + type; // e.g. mouseup, touchup
 
       var pointerListeners = pointer.listeners.slice( 0 ); // defensive copy
       for ( var i = 0; i < pointerListeners.length; i++ ) {
-        var listener = pointerListeners[i];
+        var listener = pointerListeners[ i ];
 
         // if a listener returns true, don't handle any more
         var aborted = false;
 
-        if ( !aborted && listener[specificType] ) {
-          listener[specificType]( inputEvent );
+        if ( !aborted && listener[ specificType ] ) {
+          listener[ specificType ]( inputEvent );
           aborted = inputEvent.aborted;
         }
-        if ( !aborted && listener[type] ) {
-          listener[type]( inputEvent );
+        if ( !aborted && listener[ type ] ) {
+          listener[ type ]( inputEvent );
           aborted = inputEvent.aborted;
         }
 
@@ -615,26 +761,26 @@ define( function( require ) {
         return;
       }
 
-      var specificType = pointer.type + type; // e.g. mouseup, touchup, keyup
+      var specificType = pointer.type + type; // e.g. mouseup, touchup
 
       for ( var i = trail.length - 1; i >= 0; bubbles ? i-- : i = -1 ) {
-        var target = trail.nodes[i];
+        var target = trail.nodes[ i ];
         inputEvent.currentTarget = target;
 
         var listeners = target.getInputListeners();
 
         for ( var k = 0; k < listeners.length; k++ ) {
-          var listener = listeners[k];
+          var listener = listeners[ k ];
 
           // if a listener returns true, don't handle any more
           var aborted = false;
 
-          if ( !aborted && listener[specificType] ) {
-            listener[specificType]( inputEvent );
+          if ( !aborted && listener[ specificType ] ) {
+            listener[ specificType ]( inputEvent );
             aborted = inputEvent.aborted;
           }
-          if ( !aborted && listener[type] ) {
-            listener[type]( inputEvent );
+          if ( !aborted && listener[ type ] ) {
+            listener[ type ]( inputEvent );
             aborted = inputEvent.aborted;
           }
 
@@ -649,89 +795,8 @@ define( function( require ) {
           return;
         }
       }
-    },
-
-    addListener: function( type, callback, useCapture ) {
-      var input = this;
-
-      //Cancel propagation of mouse events but not key events.  Key Events need to propagate for tab navigability
-      var usePreventDefault = type !== 'keydown' && type !== 'keyup' && type !== 'keypress';
-
-      // work around iOS Safari 7 not sending touch events to Scenes contained in an iframe
-      if ( this.listenerTarget === window ) {
-        document.addEventListener( type, function( domEvent ) {} );
-      }
-
-      if ( this.batchDOMEvents ) {
-        var batchedCallback = function batchedEvent( domEvent ) {
-          sceneryEventLog && sceneryEventLog( 'Batching event for ' + type );
-
-          if ( usePreventDefault ) {
-            domEvent.preventDefault(); // TODO: should we batch the events in a different place so we don't preventDefault on something bad?
-          }
-          input.batchedCallbacks.push( function batchedEventCallback() {
-            // process whether anything under the pointers changed before running additional input events
-            sceneryEventLog && sceneryEventLog( 'validatePointers from batched event' );
-            input.validatePointers();
-            if ( input.logEvents ) { input.eventLog.push( 'validatePointers();' ); }
-
-            callback( domEvent );
-          } );
-        };
-        this.listenerTarget.addEventListener( type, batchedCallback, useCapture );
-        this.listenerReferences.push( { type: type, callback: batchedCallback, useCapture: useCapture } );
-      }
-      else {
-        this.listenerTarget.addEventListener( type, callback, useCapture );
-        this.listenerReferences.push( { type: type, callback: function synchronousEvent( domEvent ) {
-          sceneryEventLog && sceneryEventLog( 'Running event for ' + type );
-
-          // process whether anything under the pointers changed before running additional input events
-          sceneryEventLog && sceneryEventLog( 'validatePointers from non-batched event' );
-          input.validatePointers();
-          if ( input.logEvents ) { input.eventLog.push( 'validatePointers();' ); }
-
-          callback( domEvent );
-        }, useCapture: useCapture } );
-      }
-    },
-
-    // temporary, for mouse events
-    addImmediateListener: function( type, callback, useCapture ) {
-      this.listenerTarget.addEventListener( type, callback, useCapture );
-      this.listenerReferences.push( { type: type, callback: function immediateEvent( domEvent ) {
-        sceneryEventLog && sceneryEventLog( 'Running immediate event for ' + type );
-
-        // process whether anything under the pointers changed before running additional input events
-        // input.validatePointers();
-        // if ( input.logEvents ) { input.eventLog.push( 'validatePointers();' ); }
-
-        callback( domEvent );
-      }, useCapture: useCapture } );
-    },
-
-    disposeListeners: function() {
-      var input = this;
-      _.each( this.listenerReferences, function( ref ) {
-        input.listenerTarget.removeEventListener( ref.type, ref.callback, ref.useCapture );
-      } );
-    },
-
-    fireBatchedEvents: function() {
-      if ( this.batchedCallbacks.length ) {
-        sceneryEventLog && sceneryEventLog( 'Input.fireBatchedEvents length:' + this.batchedCallbacks.length );
-        var len = this.batchedCallbacks.length;
-        for ( var i = 0; i < len; i++ ) {
-          this.batchedCallbacks[i]();
-        }
-        this.batchedCallbacks.length = 0;
-      }
-    },
-
-    clearBatchedEvents: function() {
-      this.batchedCallbacks.length = 0;
     }
-  };
+  } );
 
   Input.serializeDomEvent = function serializeDomEvent( domEvent ) {
     var lines = [];
@@ -740,16 +805,16 @@ define( function( require ) {
         // stringifying dom event object properties can cause circular references, so we avoid that completely
         if ( prop === 'touches' || prop === 'targetTouches' || prop === 'changedTouches' ) {
           var arr = [];
-          for ( var i = 0; i < domEvent[prop].length; i++ ) {
+          for ( var i = 0; i < domEvent[ prop ].length; i++ ) {
             // according to spec (http://www.w3.org/TR/touch-events/), this is not an Array, but a TouchList
-            var touch = domEvent[prop].item( i );
+            var touch = domEvent[ prop ].item( i );
 
             arr.push( serializeDomEvent( touch ) );
           }
           lines.push( prop + ':[' + arr.join( ',' ) + ']' );
         }
         else {
-          lines.push( prop + ':' + ( ( typeof domEvent[prop] === 'object' ) && ( domEvent[prop] !== null ) ? '{}' : JSON.stringify( domEvent[prop] ) ) );
+          lines.push( prop + ':' + ( ( typeof domEvent[ prop ] === 'object' ) && ( domEvent[ prop ] !== null ) ? '{}' : JSON.stringify( domEvent[ prop ] ) ) );
         }
       }
     }
@@ -759,6 +824,112 @@ define( function( require ) {
   Input.serializeVector2 = function( vector ) {
     return 'dot(' + vector.x + ',' + vector.y + ')';
   };
+
+  Input.debugKeyEvent = function( domEvent ) {
+    return domEvent.timeStamp + ' ' + domEvent.type;
+  };
+
+  Input.debugText = function( vector, domEvent ) {
+    return vector.x + ',' + vector.y + ' ' + domEvent.timeStamp + ' ' + domEvent.type;
+  };
+
+  // maps the current MS pointer types onto the pointer spec
+  Input.msPointerType = function( evt ) {
+    if ( evt.pointerType === window.MSPointerEvent.MSPOINTER_TYPE_TOUCH ) {
+      return 'touch';
+    }
+    else if ( evt.pointerType === window.MSPointerEvent.MSPOINTER_TYPE_PEN ) {
+      return 'pen';
+    }
+    else if ( evt.pointerType === window.MSPointerEvent.MSPOINTER_TYPE_MOUSE ) {
+      return 'mouse';
+    }
+    else {
+      return evt.pointerType; // hope for the best
+    }
+  };
+
+  // Since only one element can have focus, Scenery uses a static element to track node focus.  That is, even
+  // if there are multiple Displays, only one Node (across all displays) will have focus in this frame.
+  Input.focusedInstanceProperty = new Property( null );
+
+  /**
+   * Adds the entire list of instances from the parent instance into the list.  List is modified, and returned.
+   * This is very expensive (linear in the size of the scene graph), so use sparingly.  Currently used for focus
+   * traversal.
+   * @param instance
+   * @param list
+   * @param predicate
+   */
+  var flattenInstances = function( instance, list, predicate ) {
+    if ( predicate( instance ) ) {
+      list.push( instance );
+    }
+    for ( var i = 0; i < instance.children.length; i++ ) {
+      flattenInstances( instance.children[ i ], list, predicate );
+    }
+    return list;
+  };
+
+  Input.focusableInstances = [];
+
+  Input.getAllFocusableInstances = function() {
+    var focusableInstances = [];
+    var focusable = function( instance ) {
+      return instance.node.focusable === true;
+    };
+
+    var Display = scenery.Display;//TODO: move to a traditional require statement (though may be cyclic)
+    for ( var i = 0; i < Display.displays.length; i++ ) {
+      var display = Display.displays[ i ];
+
+      // Add to the list of all focusable items across Displays
+      if ( display._baseInstance ) {
+        flattenInstances( display._baseInstance, focusableInstances, focusable );
+      }
+    }
+    return focusableInstances;
+  };
+
+  // Move the focus to the next focusable element.  Called by AccessibilityLayer.
+  Input.moveFocus = function( deltaIndex ) {
+
+    var focusableInstances = Input.focusableInstances || [];
+
+    //If the focused instance was null, find the first focusable element.
+    if ( Input.focusedInstanceProperty.value === null ) {
+
+      Input.focusedInstanceProperty.value = focusableInstances[ 0 ];
+    }
+    else {
+      //Find the index of the currently focused instance, and look for the next focusable instance.
+      //TODO: this will fail horribly if the old node was removed, for instance.
+      //TODO: Will need to be generalized, etc.
+
+      var currentlyFocusedInstance = focusableInstances.indexOf( Input.focusedInstanceProperty.value );
+      var newIndex = currentlyFocusedInstance + deltaIndex;
+//      console.log( currentlyFocusedInstance, deltaIndex, newIndex, focusableInstances );
+
+      //TODO: These loops probably not too smart here, may be better as math.
+      while ( newIndex < 0 ) {
+        newIndex += focusableInstances.length;
+      }
+      while ( newIndex >= focusableInstances.length ) {
+        newIndex -= focusableInstances.length;
+      }
+
+      Input.focusedInstanceProperty.value = focusableInstances[ newIndex ];
+    }
+  };
+
+  // Keep track of which keys are currently pressed so we know whether the shift key is down for accessibility
+  // TODO: this effort is duplicated with this.pointers (which also covers different things)
+  // TODO: Should they be coalesced?
+  var pressedKeys = [];
+
+  // Export some key codes for reuse in listeners.
+  Input.KEY_SPACE = 32;
+  Input.KEY_ENTER = 13;
 
   return Input;
 } );

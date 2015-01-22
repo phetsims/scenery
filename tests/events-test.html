@@ -2,17 +2,17 @@
 <html lang="en">
 <head>
   <meta charset="utf-8"/>
-  <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+  <meta http-equiv="X-UA-Compatible" content="IE=edge"/>
   <meta name="viewport"
-      content="width=device-width, height=device-height, initial-scale=1.0, maximum-scale=1.0, user-scalable=no"/>
+        content="width=device-width, height=device-height, initial-scale=1.0, maximum-scale=1.0, user-scalable=no"/>
 
   <!-- runs in full-screen mode on iOS devices -->
   <meta name="apple-mobile-web-app-capable" content="yes">
 
   <title>Events Tests</title>
-  
+
   <link rel="stylesheet" href="../../sherpa/bootstrap-2.2.2.css">
-  
+
   <script src="../../sherpa/jquery-2.1.0.min.js"></script>
   <script src="../../sherpa/lodash-2.4.1.min.js"></script>
   <script src="../../sherpa/bootstrap-2.2.2.js"></script>
@@ -29,7 +29,7 @@
       background-color: #ff0;
       overflow: hidden;
     }
-    
+
     #main {
       position: absolute;
       left: 0;
@@ -47,17 +47,17 @@
       font-size: 12px;
       z-index: 1;
     }
-    
+
     #layers, #ui {
       position: absolute;
       left: 0;
       top: 0;
     }
-    
+
     #layers {
       z-index: 0;
     }
-    
+
     #ui {
       z-index: 1;
     }
@@ -68,7 +68,7 @@
 <body id="home">
 
 <div>
-  <div id="main" >
+  <div id="main">
     <div id="layers">
       <div id="thinkOfThisLikeALayer" style="width: 100px; height: 100px; background-color: red;"></div>
     </div>
@@ -94,81 +94,82 @@
 
 <script>
 
-var main = $( '#main' );
+  var main = $( '#main' );
 
 
-// some css hacks (from https://github.com/EightMedia/hammer.js/blob/master/hammer.js)
-(function() {
-  var prefixes = [ '-webkit-', '-moz-', '-ms-', '-o-', '' ];
-  var properties = {
-    userSelect: 'none',
-    touchCallout: 'none',
-    touchAction: 'none',
-    userDrag: 'none',
-    tapHighlightColor: 'rgba(0,0,0,0)'
-  };
-  
-  _.each( prefixes, function( prefix ) {
-    _.each( properties, function( propertyValue, propertyName ) {
-      main.css( prefix + propertyName, propertyValue );
+  // some css hacks (from https://github.com/EightMedia/hammer.js/blob/master/hammer.js)
+  (function() {
+    var prefixes = [ '-webkit-', '-moz-', '-ms-', '-o-', '' ];
+    var properties = {
+      userSelect: 'none',
+      touchCallout: 'none',
+      touchAction: 'none',
+      userDrag: 'none',
+      tapHighlightColor: 'rgba(0,0,0,0)'
+    };
+
+    _.each( prefixes, function( prefix ) {
+      _.each( properties, function( propertyValue, propertyName ) {
+        main.css( prefix + propertyName, propertyValue );
+      } );
     } );
+  })();
+
+  function log( msg ) {
+    var logElement = $( '#topleft' )[ 0 ];
+    while ( logElement.children.length > 25 * 2 ) {
+      logElement.removeChild( logElement.children[ 0 ] );
+    }
+    $( logElement ).append( '<span>' + msg + '</span><br>' );
+  }
+
+  function parentId( element ) {
+    if ( element.id ) {
+      return element.id;
+    }
+    else if ( element.parentNode ) {
+      return parentId( element.parentNode );
+    }
+    else {
+      return null;
+    }
+  }
+
+  // consider using document.elementFromPoint to determine if it needs to prevent default, etc.
+  // document.ontouchmove = function(e){ e.preventDefault(); }
+
+  $( '#main' ).on( 'touchstart', function( evt ) {
+    log( 'touchstart ' + parentId( evt.target ) );
+    _.each( evt, function( value, key ) {
+      log( key + ': ' + value );
+    } );
+    evt.preventDefault();
+    return false;
   } );
-})();
-
-function log( msg ) {
-  var logElement = $( '#topleft' )[0];
-  while ( logElement.children.length > 25 * 2 ) {
-    logElement.removeChild( logElement.children[0] );
-  }
-  $( logElement ).append( '<span>' + msg + '</span><br>' );
-}
-
-function parentId( element ) {
-  if ( element.id ) {
-    return element.id;
-  } else if ( element.parentNode ) {
-    return parentId( element.parentNode );
-  }
-  else {
-    return null;
-  }
-}
-
-// consider using document.elementFromPoint to determine if it needs to prevent default, etc.
-// document.ontouchmove = function(e){ e.preventDefault(); }
-
-$( '#main' ).on( 'touchstart', function( evt ) {
-  log( 'touchstart ' + parentId( evt.target ) );
-  _.each( evt, function( value, key ) {
-    log( key + ': ' + value );
+  $( '#main' ).on( 'touchend', function( evt ) {
+    log( 'touchend' + parentId( evt.target ) );
+    evt.preventDefault();
+    return false;
   } );
-  evt.preventDefault();
-  return false;
-} );
-$( '#main' ).on( 'touchend', function( evt ) {
-  log( 'touchend' + parentId( evt.target ) );
-  evt.preventDefault();
-  return false;
-} );
-$( '#main' ).on( 'touchmove', function( evt ) {
-  log( 'touchmove' + parentId( evt.target ) );
-  evt.preventDefault();
-  return false;
-} );
-$( '#main' ).on( 'touchcancel', function( evt ) {
-  log( 'touchcancel' + parentId( evt.target ) );
-  // evt.preventDefault();
-  return false;
-} );
+  $( '#main' ).on( 'touchmove', function( evt ) {
+    log( 'touchmove' + parentId( evt.target ) );
+    evt.preventDefault();
+    return false;
+  } );
+  $( '#main' ).on( 'touchcancel', function( evt ) {
+    log( 'touchcancel' + parentId( evt.target ) );
+    // evt.preventDefault();
+    return false;
+  } );
 
 
-// handle window resizing
-var resizer = function () {
-  main.width( window.innerWidth );
-  main.height( window.innerHeight );
-};
-$( window ).resize( resizer );
-resizer();
+  // handle window resizing
+  var resizer = function() {
+    main.width( window.innerWidth );
+    main.height( window.innerHeight );
+  };
+  $( window ).resize( resizer );
+  resizer();
 
 
 </script>

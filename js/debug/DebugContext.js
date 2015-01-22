@@ -10,12 +10,13 @@
  * Shortcut to create:
  *    var context = new scenery.DebugContext( document.createElement( 'canvas' ).getContext( '2d' ) );
  *
- * @author Jonathan Olson <olsonsjc@gmail.com>
+ * @author Jonathan Olson <jonathan.olson@colorado.edu>
  */
 
 define( function( require ) {
   'use strict';
 
+  var inherit = require( 'PHET_CORE/inherit' );
   var scenery = require( 'SCENERY/scenery' );
 
   // used to serialize arguments so that it displays exactly like the call would be executed
@@ -61,9 +62,7 @@ define( function( require ) {
   };
   var DebugContext = scenery.DebugContext;
 
-  DebugContext.prototype = {
-    constructor: DebugContext,
-
+  inherit( Object, DebugContext, {
     get canvas() {
       attributeGet( 'canvas' );
       return this._context.canvas;
@@ -340,7 +339,7 @@ define( function( require ) {
     },
 
     createImageData: function( a, b ) {
-      command( 'createImageData', b !== undefined ? [ a, b ] : [a] );
+      command( 'createImageData', b !== undefined ? [ a, b ] : [ a ] );
       return this._context.createImageData( a, b );
     },
 
@@ -370,8 +369,8 @@ define( function( require ) {
     },
 
     /*---------------------------------------------------------------------------*
-    * CanvasDrawingStyles
-    *----------------------------------------------------------------------------*/
+     * CanvasDrawingStyles
+     *----------------------------------------------------------------------------*/
 
     get lineWidth() {
       attributeGet( 'lineWidth' );
@@ -474,8 +473,8 @@ define( function( require ) {
     },
 
     /*---------------------------------------------------------------------------*
-    * CanvasPathMethods
-    *----------------------------------------------------------------------------*/
+     * CanvasPathMethods
+     *----------------------------------------------------------------------------*/
 
     closePath: function() {
       command( 'closePath' );
@@ -521,7 +520,7 @@ define( function( require ) {
       command( 'ellipse', [ x, y, radiusX, radiusY, rotation, startAngle, endAngle, anticlockwise ] );
       this._context.ellipse( x, y, radiusX, radiusY, rotation, startAngle, endAngle, anticlockwise );
     }
-  };
+  } );
 
   return DebugContext;
 } );

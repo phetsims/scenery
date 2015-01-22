@@ -1,15 +1,14 @@
+(function() {
 
-(function(){
-  
   var textNodeInstances = {
     name: 'Text node instances',
     count: 20,
     before: function() {
       this.width = 1024;
       this.height = 768;
-      
+
       this.i = 0;
-      
+
       var main = $( '#main' );
       main.width( this.width );
       main.height( this.height );
@@ -17,12 +16,12 @@
       var text = new scenery.Text( 'A', { font: '16px sans-serif' } );
       for ( var i = 0; i < 10000; i++ ) {
         scene.addChild( new scenery.Node( {
-          children: [text],
+          children: [ text ],
           x: i % 759,
           y: ( i * 172 ) % 973
         } ) );
       }
-      
+
       this.main = main;
       this.scene = scene;
     },
@@ -34,32 +33,32 @@
       this.main.empty();
     }
   };
-  
+
   var textPathInstances = {
     name: 'Text path instances',
     count: 20,
     before: function() {
       this.width = 1024;
       this.height = 768;
-      
+
       this.i = 0;
-      
+
       var main = $( '#main' );
       main.width( this.width );
       main.height( this.height );
       var scene = new scenery.Scene( main );
-      var text = new scenery.Path( new kite.Shape( 'M108 385.875 L82.6875 385.875 L82.6875 224.5781 Q63.7031 242.5781 31.9219 255.0938 L31.9219 230.625 Q75.6562 209.6719 91.5469 178.7344 L108 178.7344 L108 385.875 Z' ),{
+      var text = new scenery.Path( new kite.Shape( 'M108 385.875 L82.6875 385.875 L82.6875 224.5781 Q63.7031 242.5781 31.9219 255.0938 L31.9219 230.625 Q75.6562 209.6719 91.5469 178.7344 L108 178.7344 L108 385.875 Z' ), {
         fill: '#000',
         scale: 0.1
       } );
       for ( var i = 0; i < 10000; i++ ) {
         scene.addChild( new scenery.Node( {
-          children: [text],
+          children: [ text ],
           x: i % 759,
           y: ( i * 172 ) % 973
         } ) );
       }
-      
+
       this.main = main;
       this.scene = scene;
     },
@@ -78,9 +77,9 @@
     before: function() {
       this.width = 1024;
       this.height = 768;
-      
+
       this.i = 0;
-      
+
       var main = $( '#main' );
       main.width( this.width );
       main.height( this.height );
@@ -91,7 +90,7 @@
         font: '40px Arial, sans-serif'
       } );
       scene.addChild( this.text );
-      
+
       this.main = main;
       this.scene = scene;
     },
@@ -106,21 +105,21 @@
       this.main.empty();
     }
   };
-  
+
   var fuzzRecordAddRemoveRender = {
     name: 'Fuzz record (add/remove/renderer)',
     count: 20,
     before: function() {
       this.width = 1024;
       this.height = 768;
-      
+
       this.i = 0;
-      
+
       var main = $( '#main' );
       main.width( this.width );
       main.height( this.height );
       var scene = new scenery.Scene( main );
-      
+
       this.main = main;
       this.scene = scene;
     },
@@ -128,7 +127,7 @@
       var scene = this.scene;
       scene.renderer = null;
       _.each( scene.children.slice( 0 ), function( child ) { scene.removeChild( child ); } );
-      
+
       var node3 = new scenery.Node( {} );
       var node4 = new scenery.Node( {} );
       var node5 = new scenery.Node( {} );
@@ -368,25 +367,25 @@
       this.main.empty();
     }
   };
-  
+
   var rotatedSquaresHardcodedXY = {
     name: 'Rotated group of squares with hardcoded xy',
     count: 20,
     before: function() {
       this.width = 1024;
       this.height = 768;
-      
+
       var main = $( '#main' );
       main.width( this.width );
       main.height( this.height );
       var scene = new scenery.Scene( main );
-      for( var i = 0; i < 4000; i++ ) {
+      for ( var i = 0; i < 4000; i++ ) {
         scene.addChild( new scenery.Rectangle( ( Math.PI * i ) % this.width, ( 27 * i ) % this.height, 20, 20, {
           fill: 'rgba(255,0,0,0.3)',
           stroke: '#000000'
         } ) );
       }
-      
+
       this.main = main;
       this.scene = scene;
     },
@@ -398,19 +397,19 @@
       this.main.empty();
     }
   };
-  
+
   var rotatedSquaresTransformXY = {
     name: 'Rotated group of squares with transform xy',
     count: 20,
     before: function() {
       this.width = 1024;
       this.height = 768;
-      
+
       var main = $( '#main' );
       main.width( this.width );
       main.height( this.height );
       var scene = new scenery.Scene( main );
-      for( var i = 0; i < 4000; i++ ) {
+      for ( var i = 0; i < 4000; i++ ) {
         scene.addChild( new scenery.Rectangle( 0, 0, 20, 20, {
           fill: 'rgba(0,0,255,0.3)',
           stroke: '#000000',
@@ -418,7 +417,7 @@
           y: ( 27 * i ) % this.height
         } ) );
       }
-      
+
       this.main = main;
       this.scene = scene;
     },
@@ -430,19 +429,19 @@
       this.main.empty();
     }
   };
-  
+
   var rotatedSquaresIndividual = {
     name: 'Individually Rotated Squares',
     count: 20,
     before: function() {
       this.width = 1024;
       this.height = 768;
-      
+
       var main = $( '#main' );
       main.width( this.width );
       main.height( this.height );
       var scene = new scenery.Scene( main );
-      for( var i = 0; i < 4000; i++ ) {
+      for ( var i = 0; i < 4000; i++ ) {
         scene.addChild( new scenery.Rectangle( 0, 0, 20, 20, {
           fill: 'rgba(0,255,0,0.3)',
           stroke: '#000000',
@@ -450,7 +449,7 @@
           y: ( 27 * i ) % this.height
         } ) );
       }
-      
+
       this.main = main;
       this.scene = scene;
     },
@@ -464,19 +463,19 @@
       this.main.empty();
     }
   };
-  
+
   var fastSquaresCanvas = {
     name: 'Fast Squares Canvas',
     count: 20,
     before: function() {
       this.width = 1024;
       this.height = 768;
-      
+
       var main = $( '#main' );
       main.width( this.width );
       main.height( this.height );
       var scene = new scenery.Scene( main );
-      for( var i = 0; i < 1000; i++ ) {
+      for ( var i = 0; i < 1000; i++ ) {
         scene.addChild( new scenery.Rectangle( 0, 0, 20, 20, {
           fill: 'rgba(0,255,0,0.3)',
           stroke: '#000000',
@@ -484,20 +483,21 @@
           y: ( 27 * i ) % this.height
         } ) );
       }
-      
+
       this.main = main;
       this.scene = scene;
-      
+
       this.iterationCount = 0;
     },
     step: function() {
       this.iterationCount++;
       var children = this.scene.getChildren();
       for ( var i = 0; i < children.length; i++ ) {
-        var child = children[i];
+        var child = children[ i ];
         if ( i % 3 ) {
           child.rotate( 0.1 );
-        } else {
+        }
+        else {
           child.fill = ( this.iterationCount + i ) % 2 === 0 ? 'rgba(0,255,0,0.3)' : 'rgba(0,0,255,0.3)';
         }
       }
@@ -507,19 +507,19 @@
       this.main.empty();
     }
   };
-  
+
   var fastSquaresSVG = {
     name: 'Fast Squares SVG',
     count: 20,
     before: function() {
       this.width = 1024;
       this.height = 768;
-      
+
       var main = $( '#main' );
       main.width( this.width );
       main.height( this.height );
       var scene = new scenery.Scene( main, { renderer: 'svg' } );
-      for( var i = 0; i < 500; i++ ) {
+      for ( var i = 0; i < 500; i++ ) {
         scene.addChild( new scenery.Rectangle( 0, 0, 20, 20, {
           fill: 'rgba(0,255,0,0.3)',
           stroke: '#000000',
@@ -527,20 +527,21 @@
           y: ( 27 * i ) % this.height
         } ) );
       }
-      
+
       this.main = main;
       this.scene = scene;
-      
+
       this.iterationCount = 0;
     },
     step: function() {
       this.iterationCount++;
       var children = this.scene.getChildren();
       for ( var i = 0; i < children.length; i++ ) {
-        var child = children[i];
+        var child = children[ i ];
         if ( i % 3 ) {
           child.rotate( 0.1 );
-        } else {
+        }
+        else {
           child.fill = ( this.iterationCount + i ) % 2 === 0 ? 'rgba(0,255,0,0.3)' : 'rgba(0,0,255,0.3)';
         }
       }
@@ -550,28 +551,28 @@
       this.main.empty();
     }
   };
-  
+
   var addingHexagons = {
     name: 'Adding Hexagons',
     count: 20,
     before: function() {
       this.width = 1024;
       this.height = 768;
-      
+
       this.x = 0;
       this.y = 0;
-      
+
       var main = $( '#main' );
       main.width( this.width );
       main.height( this.height );
       var scene = new scenery.Scene( main );
-      
+
       this.main = main;
       this.scene = scene;
     },
     step: function() {
       for ( var i = 0; i < 200; i++ ) {
-        this.scene.addChild( new scenery.Path( kite.Shape.regularPolygon( 6, 22 ),{
+        this.scene.addChild( new scenery.Path( kite.Shape.regularPolygon( 6, 22 ), {
           fill: 'rgba(255,0,255,0.3)',
           stroke: '#000000',
           x: this.x,
@@ -586,7 +587,7 @@
       this.main.empty();
     }
   };
-  
+
   marks.currentMarks = [
     // textNodeInstances,
     // textPathInstances,
@@ -602,5 +603,5 @@
     //   name: 'Empty Loop'
     // }
   ];
-  
+
 })();

@@ -1,31 +1,29 @@
 // Copyright 2002-2014, University of Colorado Boulder
 
+
 /*
  * A pointer is an abstraction that includes a mouse and touch points (and possibly keys).
  *
  * TODO: add state tracking (dragging/panning/etc.) to pointer for convenience
  * TODO: consider an 'active' flag?
  *
- * @author Jonathan Olson <olsonsjc@gmail.com>
+ * @author Jonathan Olson <jonathan.olson@colorado.edu>
  */
 
 define( function( require ) {
   'use strict';
 
+  var inherit = require( 'PHET_CORE/inherit' );
   var scenery = require( 'SCENERY/scenery' );
 
   scenery.Pointer = function Pointer() {
     this.listeners = [];
 
     phetAllocation && phetAllocation( 'Pointer' );
-
-    this.active = false; // whether a control is being actively manipulated by this pointer
   };
   var Pointer = scenery.Pointer;
 
-  Pointer.prototype = {
-    constructor: Pointer,
-
+  inherit( Object, Pointer, {
     addInputListener: function( listener ) {
       assert && assert( !_.contains( this.listeners, listener ) );
 
@@ -43,7 +41,7 @@ define( function( require ) {
     hasPointChanged: function( point ) {
       return this.point !== point && ( !point || !this.point || !this.point.equals( point ) );
     }
-  };
+  } );
 
   return Pointer;
 } );

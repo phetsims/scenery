@@ -1,11 +1,12 @@
 // Copyright 2002-2014, University of Colorado Boulder
 
+
 /**
  * A linear gradient that can be passed into the 'fill' or 'stroke' parameters.
  *
  * SVG gradients, see http://www.w3.org/TR/SVG/pservers.html
  *
- * @author Jonathan Olson <olsonsjc@gmail.com>
+ * @author Jonathan Olson <jonathan.olson@colorado.edu>
  */
 
 define( function( require ) {
@@ -38,16 +39,16 @@ define( function( require ) {
 
     // seems we need the defs: http://stackoverflow.com/questions/7614209/linear-gradients-in-svg-without-defs
     // SVG: spreadMethod 'pad' 'reflect' 'repeat' - find Canvas usage
-    getSVGDefinition: function( id ) {
+    getSVGDefinition: function() {
       /* Approximate example of what we are creating:
-      <linearGradient id="grad2" x1="0" y1="0" x2="100" y2="0" gradientUnits="userSpaceOnUse">
-        <stop offset="0" style="stop-color:rgb(255,255,0);stop-opacity:1" />
-        <stop offset="0.5" style="stop-color:rgba(255,255,0,0);stop-opacity:0" />
-        <stop offset="1" style="stop-color:rgb(255,0,0);stop-opacity:1" />
-      </linearGradient>
-      */
+       <linearGradient id="grad2" x1="0" y1="0" x2="100" y2="0" gradientUnits="userSpaceOnUse">
+       <stop offset="0" style="stop-color:rgb(255,255,0);stop-opacity:1" />
+       <stop offset="0.5" style="stop-color:rgba(255,255,0,0);stop-opacity:0" />
+       <stop offset="1" style="stop-color:rgb(255,0,0);stop-opacity:1" />
+       </linearGradient>
+       */
       var definition = document.createElementNS( scenery.svgns, 'linearGradient' );
-      definition.setAttribute( 'id', id );
+      definition.setAttribute( 'id', this.id );
       definition.setAttribute( 'gradientUnits', 'userSpaceOnUse' ); // so we don't depend on the bounds of the object being drawn with the gradient
       definition.setAttribute( 'x1', this.start.x );
       definition.setAttribute( 'y1', this.start.y );
@@ -71,7 +72,7 @@ define( function( require ) {
       var result = 'new scenery.LinearGradient( ' + this.start.x + ', ' + this.start.y + ', ' + this.end.x + ', ' + this.end.y + ' )';
 
       _.each( this.stops, function( stop ) {
-        result += '.addColorStop( ' + stop.ratio + ', \'' + stop.color.toString() + '\' )';
+        result += '.addColorStop( ' + stop.ratio + ', \'' + ( stop.color.toCSS ? stop.color.toCSS() : stop.color.toString() ) + '\' )';
       } );
 
       return result;

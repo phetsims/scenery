@@ -1,17 +1,19 @@
 // Copyright 2002-2014, University of Colorado Boulder
 
+
 /**
  * Wraps the context and contains a reference to the canvas, so that we can absorb unnecessary state changes,
  * and possibly combine certain fill operations.
  *
  * TODO: performance analysis, possibly axe this and use direct modification.
  *
- * @author Jonathan Olson <olsonsjc@gmail.com>
+ * @author Jonathan Olson <jonathan.olson@colorado.edu>
  */
 
 define( function( require ) {
   'use strict';
 
+  var inherit = require( 'PHET_CORE/inherit' );
   var scenery = require( 'SCENERY/scenery' );
 
   scenery.CanvasContextWrapper = function CanvasContextWrapper( canvas, context ) {
@@ -24,9 +26,7 @@ define( function( require ) {
   };
   var CanvasContextWrapper = scenery.CanvasContextWrapper;
 
-  CanvasContextWrapper.prototype = {
-    constructor: CanvasContextWrapper,
-
+  inherit( Object, CanvasContextWrapper, {
     // set local styles to undefined, so that they will be invalidated later
     resetStyles: function() {
       this.fillStyle = undefined; // null
@@ -97,6 +97,14 @@ define( function( require ) {
       }
     },
 
+    setMiterLimit: function( miterLimit ) {
+      assert && assert( typeof miterLimit === 'number' );
+      if ( this.miterLimit !== miterLimit ) {
+        this.miterLimit = miterLimit;
+        this.context.miterLimit = miterLimit;
+      }
+    },
+
     setLineDash: function( dash ) {
       assert && assert( dash !== undefined, 'undefined line dash would cause hard-to-trace errors' );
       if ( this.lineDash !== dash ) {
@@ -144,7 +152,7 @@ define( function( require ) {
         this.context.direction = direction;
       }
     }
-  };
+  } );
 
   return CanvasContextWrapper;
 } );

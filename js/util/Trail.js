@@ -1,5 +1,6 @@
 // Copyright 2002-2014, University of Colorado Boulder
 
+
 /**
  * Represents a trail (path in the graph) from a 'root' node down to a descendant node.
  * In a DAG, or with different views, there can be more than one trail up from a node,
@@ -12,16 +13,19 @@
  * can have their indices updated with reindex(). It's designed to be as fast as possible
  * on Trails that are already indexed accurately.
  *
- * @author Jonathan Olson <olsonsjc@gmail.com>
+ * @author Jonathan Olson <jonathan.olson@colorado.edu>
  */
 
 define( function( require ) {
   'use strict';
 
+  var inherit = require( 'PHET_CORE/inherit' );
   var Matrix3 = require( 'DOT/Matrix3' );
   var Transform3 = require( 'DOT/Transform3' );
 
   var scenery = require( 'SCENERY/scenery' );
+
+  require( 'SCENERY/util/TrailPointer' );
 
   require( 'SCENERY/nodes/Node' );
   // require( 'SCENERY/util/TrailPointer' );
@@ -67,7 +71,7 @@ define( function( require ) {
         // process it as an array
         var len = nodes.length;
         for ( var i = 0; i < len; i++ ) {
-          trail.addDescendant( nodes[i] );
+          trail.addDescendant( nodes[ i ] );
         }
       }
     }
@@ -76,9 +80,7 @@ define( function( require ) {
   };
   var Trail = scenery.Trail;
 
-  Trail.prototype = {
-    constructor: Trail,
-
+  inherit( Object, Trail, {
     copy: function() {
       return new Trail( this );
     },
@@ -92,7 +94,7 @@ define( function( require ) {
     isVisible: function() {
       var i = this.nodes.length;
       while ( i-- ) {
-        if ( !this.nodes[i].isVisible() ) {
+        if ( !this.nodes[ i ].isVisible() ) {
           return false;
         }
       }
@@ -103,7 +105,7 @@ define( function( require ) {
       var opacity = 1;
       var i = this.nodes.length;
       while ( i-- ) {
-        opacity *= this.nodes[i].getOpacity();
+        opacity *= this.nodes[ i ].getOpacity();
       }
       return opacity;
     },
@@ -126,11 +128,11 @@ define( function( require ) {
 
     get: function( index ) {
       if ( index >= 0 ) {
-        return this.nodes[index];
+        return this.nodes[ index ];
       }
       else {
         // negative index goes from the end of the array
-        return this.nodes[this.nodes.length + index];
+        return this.nodes[ this.nodes.length + index ];
       }
     },
 
@@ -146,10 +148,6 @@ define( function( require ) {
       return this.nodes.length === 0;
     },
 
-    getInstance: function() {
-      return this.lastNode().getInstanceFromTrail( this );
-    },
-
     // from local to global
     getMatrix: function() {
       // TODO: performance: can we cache this ever? would need the scene to not really change in between
@@ -160,7 +158,7 @@ define( function( require ) {
       var nodes = this.nodes;
       var length = nodes.length;
       for ( var i = 0; i < length; i++ ) {
-        matrix.multiplyMatrix( nodes[i]._transform.getMatrix() );
+        matrix.multiplyMatrix( nodes[ i ]._transform.getMatrix() );
       }
       return matrix;
     },
@@ -174,7 +172,7 @@ define( function( require ) {
       var nodes = this.nodes;
       var length = nodes.length;
       for ( var i = 0; i < length - 1; i++ ) {
-        matrix.multiplyMatrix( nodes[i]._transform.getMatrix() );
+        matrix.multiplyMatrix( nodes[ i ]._transform.getMatrix() );
       }
       return matrix;
     },
@@ -195,7 +193,7 @@ define( function( require ) {
 
 
       if ( this.nodes.length ) {
-        var oldRoot = this.nodes[0];
+        var oldRoot = this.nodes[ 0 ];
         this.indices.unshift( index === undefined ? _.indexOf( node._children, oldRoot ) : index );
       }
       this.nodes.unshift( node );
@@ -256,11 +254,11 @@ define( function( require ) {
       var length = this.length;
       for ( var i = 1; i < length; i++ ) {
         // only replace indices where they have changed (this was a performance hotspot)
-        var currentIndex = this.indices[i - 1];
-        var baseNode = this.nodes[i - 1];
+        var currentIndex = this.indices[ i - 1 ];
+        var baseNode = this.nodes[ i - 1 ];
 
-        if ( baseNode._children[currentIndex] !== this.nodes[i] ) {
-          this.indices[i - 1] = _.indexOf( baseNode._children, this.nodes[i] );
+        if ( baseNode._children[ currentIndex ] !== this.nodes[ i ] ) {
+          this.indices[ i - 1 ] = _.indexOf( baseNode._children, this.nodes[ i ] );
         }
       }
     },
@@ -289,8 +287,8 @@ define( function( require ) {
 
     areIndicesValid: function() {
       for ( var i = 1; i < this.length; i++ ) {
-        var currentIndex = this.indices[i - 1];
-        if ( this.nodes[i - 1]._children[currentIndex] !== this.nodes[i] ) {
+        var currentIndex = this.indices[ i - 1 ];
+        if ( this.nodes[ i - 1 ]._children[ currentIndex ] !== this.nodes[ i ] ) {
           return false;
         }
       }
@@ -303,7 +301,7 @@ define( function( require ) {
       }
 
       for ( var i = 0; i < this.nodes.length; i++ ) {
-        if ( this.nodes[i] !== other.nodes[i] ) {
+        if ( this.nodes[ i ] !== other.nodes[ i ] ) {
           return false;
         }
       }
@@ -328,7 +326,7 @@ define( function( require ) {
       }
 
       for ( var i = 0; i < other.nodes.length; i++ ) {
-        if ( this.nodes[i] !== other.nodes[i] ) {
+        if ( this.nodes[ i ] !== other.nodes[ i ] ) {
           return false;
         }
       }
@@ -353,12 +351,12 @@ define( function( require ) {
 
       // walk our transform down, prepending
       for ( idx = this.length - 1; idx >= branchIndex; idx-- ) {
-        matrix = this.nodes[idx].getTransform().getMatrix().timesMatrix( matrix );
+        matrix = this.nodes[ idx ].getTransform().getMatrix().timesMatrix( matrix );
       }
 
       // walk our transform up, prepending inverses
       for ( idx = branchIndex; idx < otherTrail.length; idx++ ) {
-        matrix = otherTrail.nodes[idx].getTransform().getInverse().timesMatrix( matrix );
+        matrix = otherTrail.nodes[ idx ].getTransform().getInverse().timesMatrix( matrix );
       }
 
       return matrix;
@@ -366,12 +364,12 @@ define( function( require ) {
 
     // the first index that is different between this trail and the other trail
     getBranchIndexTo: function( otherTrail ) {
-      assert && assert( this.nodes[0] === otherTrail.nodes[0], 'To get a branch index, the trails must have the same root' );
+      assert && assert( this.nodes[ 0 ] === otherTrail.nodes[ 0 ], 'To get a branch index, the trails must have the same root' );
 
       var branchIndex;
 
       for ( branchIndex = 0; branchIndex < Math.min( this.length, otherTrail.length ); branchIndex++ ) {
-        if ( this.nodes[branchIndex] !== otherTrail.nodes[branchIndex] ) {
+        if ( this.nodes[ branchIndex ] !== otherTrail.nodes[ branchIndex ] ) {
           break;
         }
       }
@@ -381,7 +379,7 @@ define( function( require ) {
 
     // TODO: phase out in favor of get()
     nodeFromTop: function( offset ) {
-      return this.nodes[this.length - 1 - offset];
+      return this.nodes[ this.length - 1 - offset ];
     },
 
     lastNode: function() {
@@ -389,7 +387,7 @@ define( function( require ) {
     },
 
     rootNode: function() {
-      return this.nodes[0];
+      return this.nodes[ 0 ];
     },
 
     // returns the previous graph trail in the order of self-rendering
@@ -410,12 +408,12 @@ define( function( require ) {
       }
       else {
         // previous child
-        arr.push( parent._children[parentIndex - 1] );
+        arr.push( parent._children[ parentIndex - 1 ] );
 
         // and find its last terminal
-        while ( arr[arr.length - 1]._children.length !== 0 ) {
-          var last = arr[arr.length - 1];
-          arr.push( last._children[last._children.length - 1] );
+        while ( arr[ arr.length - 1 ]._children.length !== 0 ) {
+          var last = arr[ arr.length - 1 ];
+          arr.push( last._children[ last._children.length - 1 ] );
         }
 
         return new Trail( arr );
@@ -438,7 +436,7 @@ define( function( require ) {
       var top = this.nodeFromTop( 0 );
       if ( top._children.length > 0 ) {
         // if we have children, return the first child
-        arr.push( top._children[0] );
+        arr.push( top._children[ 0 ] );
         return new Trail( arr );
       }
       else {
@@ -446,15 +444,15 @@ define( function( require ) {
         var depth = this.nodes.length - 1;
 
         while ( depth > 0 ) {
-          var node = this.nodes[depth];
-          var parent = this.nodes[depth - 1];
+          var node = this.nodes[ depth ];
+          var parent = this.nodes[ depth - 1 ];
 
           arr.pop(); // take off the node so we can add the next sibling if it exists
 
           var index = _.indexOf( parent._children, node );
           if ( index !== parent._children.length - 1 ) {
             // there is another (later) sibling. use that!
-            arr.push( parent._children[index + 1] );
+            arr.push( parent._children[ index + 1 ] );
             return new Trail( arr );
           }
           else {
@@ -494,14 +492,14 @@ define( function( require ) {
     compare: function( other ) {
       assert && assert( !this.isEmpty(), 'cannot compare with an empty trail' );
       assert && assert( !other.isEmpty(), 'cannot compare with an empty trail' );
-      assert && assert( this.nodes[0] === other.nodes[0], 'for Trail comparison, trails must have the same root node' );
+      assert && assert( this.nodes[ 0 ] === other.nodes[ 0 ], 'for Trail comparison, trails must have the same root node' );
       assertSlow && assertSlow( this.areIndicesValid(), 'Trail.compare this.areIndicesValid() failed on ' + this.toString() );
       assertSlow && assertSlow( other.areIndicesValid(), 'Trail.compare other.areIndicesValid() failed on ' + other.toString() );
 
       var minNodeIndex = Math.min( this.indices.length, other.indices.length );
       for ( var i = 0; i < minNodeIndex; i++ ) {
-        if ( this.indices[i] !== other.indices[i] ) {
-          if ( this.indices[i] < other.indices[i] ) {
+        if ( this.indices[ i ] !== other.indices[ i ] ) {
+          if ( this.indices[ i ] < other.indices[ i ] ) {
             return -1;
           }
           else {
@@ -569,10 +567,10 @@ define( function( require ) {
       var result = '';
       var len = this.nodes.length;
       if ( len > 0 ) {
-        result += this.nodes[0]._id;
+        result += this.nodes[ 0 ]._id;
       }
       for ( var i = 1; i < len; i++ ) {
-        result += '-' + this.nodes[i]._id;
+        result += '-' + this.nodes[ i ]._id;
       }
       this.uniqueId = result;
       // this.uniqueId = _.map( this.nodes, function( node ) { return node.getId(); } ).join( '-' );
@@ -595,8 +593,14 @@ define( function( require ) {
         return 'Empty Trail';
       }
       return '[Trail ' + this.indices.join( '.' ) + ' ' + this.getUniqueId() + ']';
+    },
+
+    // not optimized by any means, meant for debugging.
+    toPathString: function() {
+      var specialNodes = _.filter( this.nodes, function( n ) { return n.constructor.name !== 'Node'; } );
+      return _.map( specialNodes, function( n ) { return n.constructor.name; } ).join( '/' );
     }
-  };
+  } );
 
   // like eachTrailBetween, but only fires for painted trails. If callback returns true, subtree will be skipped
   Trail.eachPaintedTrailBetween = function( a, b, callback, excludeEndTrails, scene ) {
@@ -632,11 +636,11 @@ define( function( require ) {
 
   // The index at which the two trails diverge. If a.length === b.length === branchIndex, the trails are identical
   Trail.branchIndex = function( a, b ) {
-    assert && assert( a.nodes[0] === b.nodes[0], 'Branch changes require roots to be the same' );
+    assert && assert( a.nodes[ 0 ] === b.nodes[ 0 ], 'Branch changes require roots to be the same' );
     var branchIndex;
     var shortestLength = Math.min( a.length, b.length );
     for ( branchIndex = 0; branchIndex < shortestLength; branchIndex++ ) {
-      if ( a.nodes[branchIndex] !== b.nodes[branchIndex] ) {
+      if ( a.nodes[ branchIndex ] !== b.nodes[ branchIndex ] ) {
         break;
       }
     }
@@ -654,7 +658,7 @@ define( function( require ) {
    * We try to consolidate these as much as possible.
    *
    * "a" and "b" are treated like self painted trails in the rendering order
-   * 
+   *
    *
    * Example tree:
    *   a

@@ -1,11 +1,12 @@
 // Copyright 2002-2014, University of Colorado Boulder
 
+
 /**
  * Tracks a single touch point
  *
  * IE guidelines for Touch-friendly sites: http://blogs.msdn.com/b/ie/archive/2012/04/20/guidelines-for-building-touch-friendly-sites.aspx
  *
- * @author Jonathan Olson <olsonsjc@gmail.com>
+ * @author Jonathan Olson <jonathan.olson@colorado.edu>
  */
 
 define( function( require ) {

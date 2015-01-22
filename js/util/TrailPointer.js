@@ -1,5 +1,6 @@
 // Copyright 2002-2014, University of Colorado Boulder
 
+
 /**
  * Points to a specific node (with a trail), and whether it is conceptually before or after the node.
  *
@@ -9,19 +10,19 @@
  *
  * TODO: more seamless handling of the orders. or just exclusively use the nesting order
  *
- * @author Jonathan Olson <olsonsjc@gmail.com>
+ * @author Jonathan Olson <jonathan.olson@colorado.edu>
  */
 
 define( function( require ) {
   'use strict';
 
+  var inherit = require( 'PHET_CORE/inherit' );
   var scenery = require( 'SCENERY/scenery' );
-
-  require( 'SCENERY/util/Trail' );
 
   /*
    * isBefore: whether this points to before the node (and its children) have been rendered, or after
    */
+  //@deprecated
   scenery.TrailPointer = function TrailPointer( trail, isBefore ) {
     assert && assert( trail instanceof scenery.Trail, 'trail is not a trail' );
     this.trail = trail;
@@ -32,9 +33,7 @@ define( function( require ) {
   };
   var TrailPointer = scenery.TrailPointer;
 
-  TrailPointer.prototype = {
-    constructor: TrailPointer,
-
+  inherit( Object, TrailPointer, {
     copy: function() {
       return new TrailPointer( this.trail.copy(), this.isBefore );
     },
@@ -142,7 +141,7 @@ define( function( require ) {
       if ( this.isBefore ) {
         if ( this.trail.lastNode()._children.length > 0 ) {
           // stay as before, just walk to the first child
-          this.trail.addDescendant( this.trail.lastNode()._children[0], 0 );
+          this.trail.addDescendant( this.trail.lastNode()._children[ 0 ], 0 );
         }
         else {
           // stay on the same node, but switch to after
@@ -157,12 +156,12 @@ define( function( require ) {
           return null;
         }
         else {
-          var index = this.trail.indices[this.trail.indices.length - 1];
+          var index = this.trail.indices[ this.trail.indices.length - 1 ];
           this.trail.removeDescendant();
 
           if ( this.trail.lastNode()._children.length > index + 1 ) {
             // more siblings, switch to the beginning of the next one
-            this.trail.addDescendant( this.trail.lastNode()._children[index + 1], index + 1 );
+            this.trail.addDescendant( this.trail.lastNode()._children[ index + 1 ], index + 1 );
             this.setBefore( true );
           }
           else {
@@ -183,12 +182,12 @@ define( function( require ) {
           return null;
         }
         else {
-          var index = this.trail.indices[this.trail.indices.length - 1];
+          var index = this.trail.indices[ this.trail.indices.length - 1 ];
           this.trail.removeDescendant();
 
           if ( index - 1 >= 0 ) {
             // more siblings, switch to the beginning of the previous one and switch to isAfter
-            this.trail.addDescendant( this.trail.lastNode()._children[index - 1], index - 1 );
+            this.trail.addDescendant( this.trail.lastNode()._children[ index - 1 ], index - 1 );
             this.setBefore( false );
           }
           else {
@@ -200,7 +199,7 @@ define( function( require ) {
         if ( this.trail.lastNode()._children.length > 0 ) {
           // stay isAfter, but walk to the last child
           var children = this.trail.lastNode()._children;
-          this.trail.addDescendant( children[children.length - 1], children.length - 1 );
+          this.trail.addDescendant( children[ children.length - 1 ], children.length - 1 );
         }
         else {
           // switch to isBefore, since this is a leaf node
@@ -294,7 +293,7 @@ define( function( require ) {
     toString: function() {
       return '[' + ( this.isBefore ? 'before' : 'after' ) + ' ' + this.trail.toString().slice( 1 );
     }
-  };
+  } );
 
   // same as new TrailPointer( trailA, isBeforeA ).compareNested( new TrailPointer( trailB, isBeforeB ) )
   TrailPointer.compareNested = function( trailA, isBeforeA, trailB, isBeforeB ) {

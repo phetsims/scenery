@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
   <meta charset="utf-8"/>
-  <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+  <meta http-equiv="X-UA-Compatible" content="IE=edge"/>
   <meta name="viewport" content="width=device-width, height=device-height, initial-scale=1.0, maximum-scale=1.0, user-scalable=no"/>
   <meta name="apple-mobile-web-app-capable" content="yes">
 
@@ -20,11 +20,10 @@
   <!-- Bootstrap not necessarily needed -->
   <script src="../../sherpa/bootstrap-2.2.2.js"></script>
 
-  <!-- For the pop-up FPS meter -->
-  <script src="../../sherpa/stats.min.js"></script>
-
   <!-- Our code, in either the concatenated 'with comments' version or the minified version -->
   <script src="../build/development/scenery.js"></script>
+  <!-- <script src="../build/standalone/scenery.js"></script> -->
+  <!-- <script src="../build/standalone/scenery.min.js"></script> -->
 
   <style type="text/css">
     /* Let content go to the edges */
@@ -52,34 +51,33 @@
 
 <body>
 
-  <!-- our scene graph will be in this div -->
-  <div id="main" >
-  </div>
+<!-- our scene graph will be in this div -->
+<div id="main">
+</div>
 
-  <script>
-
-  var main = $( '#main' );
+<script>
 
   // initialize our scene
-  var scene = new scenery.Scene( main, {
-    // preferredSceneLayerType: scenery.SVGDefaultLayerType
+  var scene = new scenery.Node();
+  var display = new scenery.Display( scene, {
+    container: document.getElementById( 'main' )
   } );
-  scene.initializeFullscreenEvents(); // sets up listeners on the document with preventDefault(), and forwards those events to our scene
-  scene.resizeOnWindowResize(); // the scene gets resized to the full screen size
+  display.initializeFullscreenEvents(); // sets up listeners on the document with preventDefault(), and forwards those events to our scene
+  display.resizeOnWindowResize(); // the scene gets resized to the full screen size
 
   // add a centered container with a rotation and scale, to attempt to mess up the dragging ;)
   var rotatingContainer = new scenery.Node( {
-    x: scene.sceneBounds.width * 2 / 3,
-    y: scene.sceneBounds.centerY,
-    scale: 0.8 / 0.707,
+    x:        display.bounds.width * 2 / 3,
+    y: display.bounds.centerY,
+    scale:    0.8 / 0.707,
     rotation: Math.PI / 4,
     layerSplit: true
   } );
   scene.addChild( rotatingContainer );
 
   var miniContainer = new scenery.Node( {
-    x: scene.sceneBounds.width / 3,
-    y: scene.sceneBounds.centerY,
+    x:     display.bounds.width / 3,
+    y: display.bounds.centerY,
     scale: 0.4 / 0.707,
     layerSplit: true
   } );
@@ -91,11 +89,11 @@
 
   // keep the container centered
   function layout() {
-    rotatingContainer.x = scene.sceneBounds.width * 2 / 3;
-    rotatingContainer.y = scene.sceneBounds.centerY;
+    rotatingContainer.x = display.bounds.width * 2 / 3;
+    rotatingContainer.y = display.bounds.centerY;
 
-    miniContainer.x = scene.sceneBounds.width / 3;
-    miniContainer.y = scene.sceneBounds.centerY;
+    miniContainer.x = display.bounds.width / 3;
+    miniContainer.y = display.bounds.centerY;
   }
   $( window ).resize( layout );
 
@@ -115,7 +113,7 @@
   // add 50 random hexagons
   for ( var i = 0; i < count; i++ ) {
     // anonymous function so the closure variables aren't shared between iterations
-    (function(){
+    (function() {
       var node = new scenery.Node( {
         x: ( Math.random() - 0.5 ) * 300,
         y: ( Math.random() - 0.5 ) * 300
@@ -141,51 +139,49 @@
       rendererOptions: {
         fullResolution: false
       }
-    },{
+    }, {
       label: 'Canvas Full',
       renderer: 'canvas',
       rendererOptions: {
         fullResolution: true
       }
-    },{
+    }, {
       label: 'SVG Regular',
       renderer: 'svg',
-      rendererOptions: {
-
-      }
-    },{
+      rendererOptions: {}
+    }, {
       label: 'SVG CSS Full',
       renderer: 'svg',
       rendererOptions: {
         cssTransform: true
       }
-    },{
+    }, {
       label: 'SVG CSS T+R',
       renderer: 'svg',
       rendererOptions: {
         cssTranslation: true,
         cssRotation: true
       }
-    },{
+    }, {
       label: 'SVG CSS T',
       renderer: 'svg',
       rendererOptions: {
         cssTranslation: true
       }
-    },{
+    }, {
       label: 'SVG Batched',
       renderer: 'svg',
       rendererOptions: {
         batchDOMChanges: true
       }
-    },{
+    }, {
       label: 'SVG CSS Full Batched',
       renderer: 'svg',
       rendererOptions: {
         cssTransform: true,
         batchDOMChanges: true
       }
-    },{
+    }, {
       label: 'SVG CSS T+R Batched',
       renderer: 'svg',
       rendererOptions: {
@@ -200,11 +196,11 @@
   var y = 10;
   var buttons = [];
   for ( var i = 0; i < options.length; i++ ) {
-    (function(){
-      var option = options[i];
+    (function() {
+      var option = options[ i ];
       var buttonLabel = new scenery.Text( option.label, {
         left: x + 10,
-        top: y + 10,
+        top:  y + 10,
         fontSize: 15
       } );
       var button = new scenery.Path( kite.Shape.bounds( buttonLabel.getBounds().roundedOut().dilated( 10.5 ) ), {
@@ -235,43 +231,15 @@
     })();
   }
 
-
-
   /*---------------------------------------------------------------------------*
-  * FPS meter
-  *----------------------------------------------------------------------------*/
+   * main loop
+   *----------------------------------------------------------------------------*/
 
-  var stats = new Stats();
-  stats.setMode( 0 ); // 0: fps, 1: ms
-  stats.domElement.style.position = 'absolute';
-  stats.domElement.style.right = '0';
-  stats.domElement.style.top = '0';
-  document.body.appendChild( stats.domElement );
-
-
-  /*---------------------------------------------------------------------------*
-  * main loop
-  *----------------------------------------------------------------------------*/
-
-  var lastTime = 0;
-  var timeElapsed = 0;
-  function tick() {
-    window.requestAnimationFrame( tick, main[0] );
-
-    var timeNow = new Date().getTime();
-    if ( lastTime != 0 ) {
-      timeElapsed = (timeNow - lastTime) / 1000.0;
-    }
-    lastTime = timeNow;
-
-    stats.begin();
+  display.updateOnRequestAnimationFrame( function( timeElapsed ) {
     rotatingContainer.rotate( timeElapsed * 0.1 );
-    scene.updateScene(); // repaints dirty regions. use renderScene() to render everything
-    stats.end();
-  }
-  window.requestAnimationFrame( tick, main[0] );
+  } );
 
-  </script>
+</script>
 
 </body>
 </html>

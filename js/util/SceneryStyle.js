@@ -1,9 +1,10 @@
 // Copyright 2002-2014, University of Colorado Boulder
 
+
 /**
  * Creates and references a stylesheet that can be built up while Scenery is loading.
  *
- * @author Jonathan Olson <olsonsjc@gmail.com>
+ * @author Jonathan Olson <jonathan.olson@colorado.edu>
  */
 
 define( function( require ) {
@@ -15,7 +16,7 @@ define( function( require ) {
   styleElement.type = 'text/css';
   document.head.appendChild( styleElement );
 
-  var stylesheet = document.styleSheets[document.styleSheets.length - 1];
+  var stylesheet = document.styleSheets[ document.styleSheets.length - 1 ];
   assert && assert( stylesheet.disabled === false );
   assert && assert( stylesheet.cssRules.length === 0 );
 

@@ -1,5 +1,6 @@
 // Copyright 2002-2014, University of Colorado Boulder
 
+
 /**
  * Encapsulates common color information and transformations.
  *
@@ -7,14 +8,15 @@
  *
  * TODO: make a getHue, getSaturation, getLightness. we can then expose them via ES5!
  *
- * @author Jonathan Olson <olsonsjc@gmail.com>
+ * @author Jonathan Olson <jonathan.olson@colorado.edu>
  */
 
 define( function( require ) {
   'use strict';
 
-  // modules
+  var inherit = require( 'PHET_CORE/inherit' );
   var scenery = require( 'SCENERY/scenery' );
+
   var clamp = require( 'DOT/Util' ).clamp;
   var linear = require( 'DOT/Util' ).linear;
 
@@ -25,30 +27,7 @@ define( function( require ) {
     this.listeners = [];
 
     if ( typeof r === 'string' ) {
-      var str = r.replace( / /g, '' ).toLowerCase();
-      var success = false;
-
-      // replace colors based on keywords
-      var keywordMatch = Color.colorKeywords[str];
-      if ( keywordMatch ) {
-        str = '#' + keywordMatch;
-      }
-
-      // run through the available text formats
-      for ( var i = 0; i < Color.formatParsers.length; i++ ) {
-        var parser = Color.formatParsers[i];
-
-        var matches = parser.regexp.exec( str );
-        if ( matches ) {
-          parser.apply( this, matches );
-          success = true;
-          break;
-        }
-      }
-
-      if ( !success ) {
-        throw new Error( 'scenery.Color unable to parse color string: ' + r );
-      }
+      this.setCSS( r );
     }
     else if ( r instanceof Color ) {
       this.setRGBA( r.r, r.g, r.b, r.a );
@@ -59,9 +38,10 @@ define( function( require ) {
 
       // bitwise handling if 3 elements aren't defined
       if ( g === undefined || b === undefined ) {
-        this.setRGBA( ( r >> 16 ) && 0xFF,
-            ( r >> 8 ) && 0xFF,
-            ( r >> 0 ) && 0xFF,
+        this.setRGBA(
+          ( r >> 16 ) && 0xFF,
+          ( r >> 8 ) && 0xFF,
+          ( r >> 0 ) && 0xFF,
           alpha );
       }
       else {
@@ -104,9 +84,10 @@ define( function( require ) {
       // short hex form, a la '#fff'
       regexp: /^#(\w{1})(\w{1})(\w{1})$/,
       apply: function( color, matches ) {
-        color.setRGBA( parseInt( matches[1] + matches[1], 16 ),
-          parseInt( matches[2] + matches[2], 16 ),
-          parseInt( matches[3] + matches[3], 16 ),
+        color.setRGBA(
+          parseInt( matches[ 1 ] + matches[ 1 ], 16 ),
+          parseInt( matches[ 2 ] + matches[ 2 ], 16 ),
+          parseInt( matches[ 3 ] + matches[ 3 ], 16 ),
           1 );
       }
     },
@@ -114,9 +95,10 @@ define( function( require ) {
       // long hex form, a la '#ffffff'
       regexp: /^#(\w{2})(\w{2})(\w{2})$/,
       apply: function( color, matches ) {
-        color.setRGBA( parseInt( matches[1], 16 ),
-          parseInt( matches[2], 16 ),
-          parseInt( matches[3], 16 ),
+        color.setRGBA(
+          parseInt( matches[ 1 ], 16 ),
+          parseInt( matches[ 2 ], 16 ),
+          parseInt( matches[ 3 ], 16 ),
           1 );
       }
     },
@@ -124,9 +106,10 @@ define( function( require ) {
       // rgb(...)
       regexp: new RegExp( '^rgb\\(' + rgbNumber + ',' + rgbNumber + ',' + rgbNumber + '\\)$' ),
       apply: function( color, matches ) {
-        color.setRGBA( parseRGBNumber( matches[1] ),
-          parseRGBNumber( matches[2] ),
-          parseRGBNumber( matches[3] ),
+        color.setRGBA(
+          parseRGBNumber( matches[ 1 ] ),
+          parseRGBNumber( matches[ 2 ] ),
+          parseRGBNumber( matches[ 3 ] ),
           1 );
       }
     },
@@ -134,19 +117,21 @@ define( function( require ) {
       // rgba(...)
       regexp: new RegExp( '^rgba\\(' + rgbNumber + ',' + rgbNumber + ',' + rgbNumber + ',' + aNumber + '\\)$' ),
       apply: function( color, matches ) {
-        color.setRGBA( parseRGBNumber( matches[1] ),
-          parseRGBNumber( matches[2] ),
-          parseRGBNumber( matches[3] ),
-          parseFloat( matches[4] ) );
+        color.setRGBA(
+          parseRGBNumber( matches[ 1 ] ),
+          parseRGBNumber( matches[ 2 ] ),
+          parseRGBNumber( matches[ 3 ] ),
+          parseFloat( matches[ 4 ] ) );
       }
     },
     {
       // hsl(...)
       regexp: new RegExp( '^hsl\\(' + rawNumber + ',' + rawNumber + '%,' + rawNumber + '%\\)$' ),
       apply: function( color, matches ) {
-        color.setHSLA( parseInt( matches[1], 10 ),
-          parseInt( matches[2], 10 ),
-          parseInt( matches[3], 10 ),
+        color.setHSLA(
+          parseInt( matches[ 1 ], 10 ),
+          parseInt( matches[ 2 ], 10 ),
+          parseInt( matches[ 3 ], 10 ),
           1 );
       }
     },
@@ -154,10 +139,11 @@ define( function( require ) {
       // hsla(...)
       regexp: new RegExp( '^hsla\\(' + rawNumber + ',' + rawNumber + '%,' + rawNumber + '%,' + aNumber + '\\)$' ),
       apply: function( color, matches ) {
-        color.setHSLA( parseInt( matches[1], 10 ),
-          parseInt( matches[2], 10 ),
-          parseInt( matches[3], 10 ),
-          parseFloat( matches[4] ) );
+        color.setHSLA(
+          parseInt( matches[ 1 ], 10 ),
+          parseInt( matches[ 2 ], 10 ),
+          parseInt( matches[ 3 ], 10 ),
+          parseFloat( matches[ 4 ] ) );
       }
     }
   ];
@@ -191,9 +177,7 @@ define( function( require ) {
     return colorSpec instanceof Color ? colorSpec : new Color( colorSpec );
   };
 
-  Color.prototype = {
-    constructor: Color,
-
+  inherit( Object, Color, {
     copy: function() {
       return new Color( this.r, this.g, this.b, this.a );
     },
@@ -251,6 +235,35 @@ define( function( require ) {
       return this._css;
     },
 
+    setCSS: function( cssString ) {
+      var str = cssString.replace( / /g, '' ).toLowerCase();
+      var success = false;
+
+      // replace colors based on keywords
+      var keywordMatch = Color.colorKeywords[ str ];
+      if ( keywordMatch ) {
+        str = '#' + keywordMatch;
+      }
+
+      // run through the available text formats
+      for ( var i = 0; i < Color.formatParsers.length; i++ ) {
+        var parser = Color.formatParsers[ i ];
+
+        var matches = parser.regexp.exec( str );
+        if ( matches ) {
+          parser.apply( this, matches );
+          success = true;
+          break;
+        }
+      }
+
+      if ( !success ) {
+        throw new Error( 'scenery.Color unable to parse color string: ' + cssString );
+      }
+
+      this.updateColor(); // update the cached value
+    },
+
     // e.g. 0xFF00FF
     toNumber: function() {
       return ( this.r << 16 ) + ( this.g << 8 ) + this.b;
@@ -269,7 +282,7 @@ define( function( require ) {
         var length = listeners.length;
 
         for ( var i = 0; i < length; i++ ) {
-          listeners[i]();
+          listeners[ i ]();
         }
       }
     },
@@ -418,7 +431,7 @@ define( function( require ) {
     toString: function() {
       return this.constructor.name + "[r:" + this.r + " g:" + this.g + " b:" + this.b + " a:" + this.a + "]";
     }
-  };
+  } );
 
   Color.basicColorKeywords = {
     aqua: '00ffff',

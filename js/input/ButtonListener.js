@@ -1,5 +1,6 @@
 // Copyright 2002-2014, University of Colorado Boulder
 
+
 /**
  * Basic button handling.
  *
@@ -12,7 +13,7 @@
  * TODO: offscreen handling
  * TODO: fix enter/exit edge cases for moving nodes or add/remove child, and when touches are created
  *
- * @author Jonathan Olson <olsonsjc@gmail.com>
+ * @author Jonathan Olson <jonathan.olson@colorado.edu>
  */
 
 define( function( require ) {
@@ -69,8 +70,8 @@ define( function( require ) {
 
         this.buttonState = state;
 
-        if ( this._buttonOptions[state] ) {
-          this._buttonOptions[state]( event, oldState );
+        if ( this._buttonOptions[ state ] ) {
+          this._buttonOptions[ state ]( event, oldState );
         }
 
         if ( this._buttonOptions.fire &&

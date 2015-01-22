@@ -1,5 +1,6 @@
 // Copyright 2002-2014, University of Colorado Boulder
 
+
 /**
  * Accessibility peer, which is added to the dom for focus and keyboard navigation.
  *
@@ -9,6 +10,7 @@
 define( function( require ) {
   'use strict';
 
+  var inherit = require( 'PHET_CORE/inherit' );
   var scenery = require( 'SCENERY/scenery' );
 
   var AccessibilityPeer = scenery.AccessibilityPeer = function AccessibilityPeer( instance, element, options ) {
@@ -21,7 +23,7 @@ define( function( require ) {
     options.tabIndex = options.tabIndex || 1;
 
     // TODO: if element is a DOM element, verify that no other accessibility peer is using it! (add a flag, and remove on disposal)
-    this.element = ( typeof element === 'string' ) ? $( element )[0] : element;
+    this.element = ( typeof element === 'string' ) ? $( element )[ 0 ] : element;
 
     if ( options.label ) {
       this.peerElement = document.createElement( 'div' );
@@ -75,9 +77,7 @@ define( function( require ) {
     }
   };
 
-  AccessibilityPeer.prototype = {
-    constructor: AccessibilityPeer,
-
+  inherit( Object, AccessibilityPeer, {
     dispose: function() {
       this.element.removeEventListener( 'click', this.clickListener );
       this.element.removeEventListener( 'focus', this.focusListener );
@@ -101,7 +101,7 @@ define( function( require ) {
       this.element.style.width = globalBounds.width + 'px';
       this.element.style.height = globalBounds.height + 'px';
     }
-  };
+  } );
 
   return AccessibilityPeer;
 } );

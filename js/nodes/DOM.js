@@ -3,7 +3,7 @@
 /**
  * DOM nodes. Currently lightweight handling
  *
- * @author Jonathan Olson <olsonsjc@gmail.com>
+ * @author Jonathan Olson <jonathan.olson@colorado.edu>
  */
 
 define( function( require ) {
@@ -16,8 +16,11 @@ define( function( require ) {
   var scenery = require( 'SCENERY/scenery' );
 
   var Node = require( 'SCENERY/nodes/Node' ); // DOM inherits from Node
-  require( 'SCENERY/layers/Renderer' );
+  require( 'SCENERY/display/Renderer' );
   require( 'SCENERY/util/Util' );
+
+  var DOMSelfDrawable = require( 'SCENERY/display/DOMSelfDrawable' );
+  var SelfDrawable = require( 'SCENERY/display/SelfDrawable' );
 
   scenery.DOM = function DOM( element, options ) {
     options = options || {};
@@ -26,7 +29,7 @@ define( function( require ) {
 
     // unwrap from jQuery if that is passed in, for consistency
     if ( element && element.jquery ) {
-      element = element[0];
+      element = element[ 0 ];
     }
 
     this._container = document.createElement( 'div' );
@@ -37,12 +40,15 @@ define( function( require ) {
 
     this.invalidateDOMLock = false;
 
+    // don't let Scenery apply a transform directly (the DOM element will take care of that)
+    this._preventTransform = false;
+
     // so that the mutator will call setElement()
     options.element = element;
 
     // will set the element after initializing
     Node.call( this, options );
-    this.setRendererBitmask( scenery.bitmaskSupportsDOM );
+    this.setRendererBitmask( scenery.bitmaskBoundsValid | scenery.bitmaskSupportsDOM );
   };
   var DOM = scenery.DOM;
 
@@ -106,13 +112,8 @@ define( function( require ) {
       return this._container;
     },
 
-    updateDOMElement: function( container ) {
-      // nothing needed, since we are just displaying a single DOM element
-    },
-
-    updateCSSTransform: function( transform, element ) {
-      // faster to use our jQuery reference instead of wrapping element
-      scenery.Util.applyCSSTransform( transform.getMatrix(), this._container );
+    createDOMDrawable: function( renderer, instance ) {
+      return DOM.DOMDrawable.createFromPool( renderer, instance );
     },
 
     isPainted: function() {
@@ -120,6 +121,8 @@ define( function( require ) {
     },
 
     setElement: function( element ) {
+      assert && assert( !this._element, 'We should only ever attach one DOMElement to a DOM node' );
+
       if ( this._element !== element ) {
         if ( this._element ) {
           this._container.removeChild( this._element );
@@ -153,11 +156,28 @@ define( function( require ) {
       return this._interactive;
     },
 
+    setPreventTransform: function( preventTransform ) {
+      assert && assert( typeof preventTransform === 'boolean' );
+
+      if ( this._preventTransform !== preventTransform ) {
+        this._preventTransform = preventTransform;
+
+        // TODO: anything needed here?
+      }
+    },
+
+    isTransformPrevented: function() {
+      return this._preventTransform;
+    },
+
     set element( value ) { this.setElement( value ); },
     get element() { return this.getElement(); },
 
     set interactive( value ) { this.setInteractive( value ); },
     get interactive() { return this.isInteractive(); },
+
+    set preventTransform( value ) { this.setPreventTransform( value ); },
+    get preventTransform() { return this.isTransformPrevented(); },
 
     getBasicConstructor: function( propLines ) {
       return 'new scenery.DOM( $( \'' + escapeHTML( this._container.innerHTML.replace( /'/g, '\\\'' ) ) + '\' ), {' + propLines + '} )';
@@ -175,7 +195,52 @@ define( function( require ) {
     }
   } );
 
-  DOM.prototype._mutatorKeys = [ 'element', 'interactive' ].concat( Node.prototype._mutatorKeys );
+  DOM.prototype._mutatorKeys = [ 'element', 'interactive', 'preventTransform' ].concat( Node.prototype._mutatorKeys );
+
+  /*---------------------------------------------------------------------------*
+   * DOM rendering
+   *----------------------------------------------------------------------------*/
+
+  var DOMDrawable = DOM.DOMDrawable = inherit( DOMSelfDrawable, function DOMDrawable( renderer, instance ) {
+    this.initialize( renderer, instance );
+  }, {
+    // initializes, and resets (so we can support pooled states)
+    initialize: function( renderer, instance ) {
+      this.initializeDOMSelfDrawable( renderer, instance );
+
+      this.domElement = this.node._container;
+
+      scenery.Util.prepareForTransform( this.domElement, this.forceAcceleration );
+
+      return this; // allow for chaining
+    },
+
+    updateDOM: function() {
+      if ( this.transformDirty && !this.node._preventTransform ) {
+        scenery.Util.applyPreparedTransform( this.getTransformMatrix(), this.domElement, this.forceAcceleration );
+      }
+
+      // clear all of the dirty flags
+      this.setToClean();
+    },
+
+    onAttach: function( node ) {
+
+    },
+
+    // release the DOM elements from the poolable visual state so they aren't kept in memory. May not be done on platforms where we have enough memory to pool these
+    onDetach: function( node ) {
+      // clear the references
+      this.domElement = null;
+    },
+
+    setToClean: function() {
+      this.transformDirty = false;
+    }
+  } );
+
+  /* jshint -W064 */
+  SelfDrawable.PoolableMixin( DOMDrawable );
 
   return DOM;
 } );
