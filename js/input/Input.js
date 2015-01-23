@@ -849,12 +849,16 @@ define( function( require ) {
     }
   };
 
+  /*---------------------------------------------------------------------------*
+   * Accessibility Support (TODO: Should this move to another file?)
+   *----------------------------------------------------------------------------*/
+
   // Since only one element can have focus, Scenery uses a static element to track node focus.  That is, even
   // if there are multiple Displays, only one Node (across all displays) will have focus in this frame.
   Input.focusedInstanceProperty = new Property( null );
 
   /**
-   * Adds the entire list of instances from the parent instance into the list.  List is modified, and returned.
+   * Adds the entire list of instances from the parent instance into the list.  List is modified in-place and returned.
    * This is very expensive (linear in the size of the scene graph), so use sparingly.  Currently used for focus
    * traversal.
    * @param instance
