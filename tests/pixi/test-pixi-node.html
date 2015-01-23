@@ -77,7 +77,7 @@
         font: '20px sans-serif'
       } ) );
       var skaters = [];
-      for ( var i = 0; i < 200; i++ ) {
+      for ( var i = 0; i < 50; i++ ) {
         skaters.push( new scenery.Image( skaterImage, { x: i * 2, y: i * 2 } ) );
       }
       var skatersParent = new scenery.Node( {
@@ -93,9 +93,9 @@
       } );
 
       // Choose one or the other of the lines below.
-//      var pixiNode = new scenery.PixiNode( sceneryRootNode );
-//      scene.addChild( pixiNode );
-      scene.addChild( sceneryRootNode );
+      var pixiNode = new scenery.PixiNode( sceneryRootNode );
+      scene.addChild( pixiNode );
+//      scene.addChild( sceneryRootNode );
 
       // Paint any changes (in this case, our text).
       display.updateDisplay();
