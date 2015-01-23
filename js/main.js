@@ -85,7 +85,6 @@ define( [
   'SCENERY/overlays/PointerAreaOverlay',
   'SCENERY/overlays/PointerOverlay',
 
-  'SCENERY/util/AccessibilityPeer',
   'SCENERY/util/CanvasContextWrapper',
   'SCENERY/util/Color',
   'SCENERY/util/Features',
