@@ -20,6 +20,7 @@ define( function( require ) {
   var Node = require( 'SCENERY/nodes/Node' );
   var Text = require( 'SCENERY/nodes/Text' );
 
+  var dirty = false;
   /**
    * Convert a single scenery node to a pixi node (without the children, which are handled in toPixi)
    */
@@ -82,6 +83,18 @@ define( function( require ) {
    */
   var toPixi = function toPixi( sceneryNode ) {
     var pixiNode = toPixiWithoutChildren( sceneryNode );
+
+    var listener = {
+      before: function() {
+      },
+      after: function() {
+        pixiNode.position.x = sceneryNode.x;
+        pixiNode.position.y = sceneryNode.y;
+        dirty = true;
+      }
+    };
+    sceneryNode.getTransform().addTransformListener( listener );
+
     for ( var i = 0; i < sceneryNode.children.length; i++ ) {
       pixiNode.addChild( toPixi( sceneryNode.children[ i ] ) );
     }
@@ -98,20 +111,27 @@ define( function( require ) {
   scenery.PixiNode = function PixiNode( sceneryRootNode, options ) {
 
     // Create the Pixi Stage
-    var stage = new PIXI.Stage( 0xFFFFFF );
+    this.stage = new PIXI.Stage( 0xFFFFFF );
 
     // Convert the scenery node to Pixi and add it to the stage
-    stage.addChild( toPixi( sceneryRootNode ) );
+    this.stage.addChild( toPixi( sceneryRootNode ) );
 
     // Create the renderer and view
-    var renderer = PIXI.autoDetectRenderer( 400, 300, { transparent: true } );
+    this.pixiRenderer = PIXI.autoDetectRenderer( 400, 300, { transparent: true } );
 
     // Initial draw
-    renderer.render( stage );
+    this.pixiRenderer.render( this.stage );
 
     // Show the canvas in the DOM
-    DOM.call( this, renderer.view, options );
+    DOM.call( this, this.pixiRenderer.view, options );
   };
 
-  return inherit( DOM, scenery.PixiNode );
+  return inherit( DOM, scenery.PixiNode, {
+    render: function() {
+      if ( dirty ) {
+        this.pixiRenderer.render( this.stage );
+        dirty = false;
+      }
+    }
+  } );
 } );

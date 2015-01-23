@@ -18,6 +18,7 @@
   <script src="../../../sherpa/lodash-2.4.1.min.js"></script>
   <script src="../../../sherpa/has.js"></script>
   <script src="../../../assert/js/assert.js"></script>
+  <script src="../../../sherpa/rAF.js"></script>
 
   <!--Turn these assertions on!-->
   <!--<script type="text/javascript">-->
@@ -43,6 +44,8 @@
 
 
 <script>
+
+
   require( [ 'config' ], function() {
     require( [ 'main', 'KITE/main', 'DOT/main', 'AXON/main', 'PHET_CORE/main' ], function( scenery, kite, dot, axon, core ) {
       window.scenery = scenery;
@@ -69,11 +72,20 @@
       var sceneryRootNode = new scenery.Node( { children: [ path ] } );
 
       // Choose one or the other of the lines below.
-      scene.addChild( new scenery.PixiNode( sceneryRootNode ) );
+      var pixiNode = new scenery.PixiNode( sceneryRootNode );
+      scene.addChild( pixiNode );
 //      scene.addChild( sceneryRootNode );
 
       // Paint any changes (in this case, our text).
       display.updateDisplay();
+
+      var update = function update() {
+        window.requestAnimationFrame( update );
+        path.x = Math.sin( Date.now() / 1000 ) * 100 + 100;
+        display.updateDisplay();
+        pixiNode.render();
+      };
+      window.requestAnimationFrame( update );
     } );
   } );
 </script>
