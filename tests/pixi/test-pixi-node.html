@@ -76,12 +76,26 @@
         fill: '#000000',
         font: '20px sans-serif'
       } ) );
-      var sceneryRootNode = new scenery.Node( { children: [ path, new scenery.Image( skaterImage ) ] } );
+      var skaters = [];
+      for ( var i = 0; i < 200; i++ ) {
+        skaters.push( new scenery.Image( skaterImage, { x: i * 2, y: i * 2 } ) );
+      }
+      var skatersParent = new scenery.Node( {
+        children: skaters
+      } );
+
+      var sceneryRootNode = new scenery.Node( {
+        children: [
+          path,
+          new scenery.Image( skaterImage ),
+          skatersParent
+        ]
+      } );
 
       // Choose one or the other of the lines below.
-      var pixiNode = new scenery.PixiNode( sceneryRootNode );
-      scene.addChild( pixiNode );
-//      scene.addChild( sceneryRootNode );
+//      var pixiNode = new scenery.PixiNode( sceneryRootNode );
+//      scene.addChild( pixiNode );
+      scene.addChild( sceneryRootNode );
 
       // Paint any changes (in this case, our text).
       display.updateDisplay();
@@ -90,7 +104,13 @@
         window.requestAnimationFrame( update );
         path.x = Math.sin( Date.now() / 1000 ) * 100 + 100;
         display.updateDisplay();
-        pixiNode.render();
+        if ( typeof(pixiNode) !== 'undefined' ) {
+          pixiNode.render();
+        }
+
+        for ( var i = 0; i < skatersParent.children.length; i++ ) {
+          skatersParent.children[ i ].y = Math.cos( Date.now() / 1000 + i / 10 ) * 100 + 200;
+        }
       };
       window.requestAnimationFrame( update );
     } );

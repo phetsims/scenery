@@ -100,6 +100,9 @@ define( function( require ) {
     };
     sceneryNode.getTransform().addTransformListener( listener );
 
+    // Get the correct initial values
+    listener.after();
+
     for ( var i = 0; i < sceneryNode.children.length; i++ ) {
       pixiNode.addChild( toPixi( sceneryNode.children[ i ] ) );
     }
@@ -122,7 +125,7 @@ define( function( require ) {
     this.stage.addChild( toPixi( sceneryRootNode ) );
 
     // Create the renderer and view
-    this.pixiRenderer = PIXI.autoDetectRenderer( 400, 300, { transparent: true } );
+    this.pixiRenderer = PIXI.autoDetectRenderer( 1024, 768, { transparent: true } );
 
     // Initial draw
     this.pixiRenderer.render( this.stage );
