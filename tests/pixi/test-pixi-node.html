@@ -47,7 +47,14 @@
 
 
   require( [ 'config' ], function() {
-    require( [ 'main', 'KITE/main', 'DOT/main', 'AXON/main', 'PHET_CORE/main' ], function( scenery, kite, dot, axon, core ) {
+    require( [
+      'main',
+      'KITE/main',
+      'DOT/main',
+      'AXON/main',
+      'PHET_CORE/main',
+      'image!ENERGY_SKATE_PARK_BASICS/skater-icon.png'
+    ], function( scenery, kite, dot, axon, core, skaterImage ) {
       window.scenery = scenery;
       window.kite = kite;
       window.dot = dot;
@@ -69,7 +76,7 @@
         fill: '#000000',
         font: '20px sans-serif'
       } ) );
-      var sceneryRootNode = new scenery.Node( { children: [ path ] } );
+      var sceneryRootNode = new scenery.Node( { children: [ path, new scenery.Image( skaterImage ) ] } );
 
       // Choose one or the other of the lines below.
       var pixiNode = new scenery.PixiNode( sceneryRootNode );

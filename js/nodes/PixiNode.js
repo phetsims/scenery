@@ -19,6 +19,7 @@ define( function( require ) {
   var scenery = require( 'SCENERY/scenery' );
   var Node = require( 'SCENERY/nodes/Node' );
   var Text = require( 'SCENERY/nodes/Text' );
+  var Image = require( 'SCENERY/nodes/Image' );
 
   var dirty = false;
   /**
@@ -65,6 +66,10 @@ define( function( require ) {
     }
     else if ( sceneryNode instanceof Text ) {
       return new PIXI.Text( sceneryNode.text );
+    }
+    else if ( sceneryNode instanceof Image ) {
+      var texture = PIXI.Texture.fromCanvas( sceneryNode.image );
+      return new PIXI.Sprite( texture );
     }
     else if ( sceneryNode instanceof Node ) {
 
