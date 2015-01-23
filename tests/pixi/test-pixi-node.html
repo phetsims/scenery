@@ -13,7 +13,7 @@
 
   <!-- jQuery and LoDash are dependencies -->
   <script src="../../../sherpa/pixi-2.2.3-dev.js"></script>
-
+  <script src="../../../sherpa/stats-r12.js"></script>
   <script src="../../../sherpa/jquery-2.1.0.js"></script>
   <script src="../../../sherpa/lodash-2.4.1.min.js"></script>
   <script src="../../../sherpa/has.js"></script>
@@ -100,8 +100,18 @@
       // Paint any changes (in this case, our text).
       display.updateDisplay();
 
+      var stats = new Stats();
+      stats.setMode( 0 ); // 0: fps, 1: ms
+
+      // align top-left
+      stats.domElement.style.position = 'absolute';
+      stats.domElement.style.left = '0px';
+      stats.domElement.style.top = '0px';
+      stats.domElement.style.zIndex = '99';
+
       var update = function update() {
         window.requestAnimationFrame( update );
+        stats.begin();
         path.x = Math.sin( Date.now() / 1000 ) * 100 + 100;
         display.updateDisplay();
         if ( typeof(pixiNode) !== 'undefined' ) {
@@ -111,8 +121,10 @@
         for ( var i = 0; i < skatersParent.children.length; i++ ) {
           skatersParent.children[ i ].y = Math.cos( Date.now() / 1000 + i / 10 ) * 100 + 200;
         }
+        stats.end();
       };
       window.requestAnimationFrame( update );
+      document.body.appendChild( stats.domElement );
     } );
   } );
 </script>
