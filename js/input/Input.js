@@ -320,9 +320,10 @@ define( function( require ) {
         pressedKeys.push( code );
       }
 
-      // Handle TAB key (9) or 't' key temporarily for debugging
-      var shiftPressed = pressedKeys.indexOf( 16 ) >= 0;
-      if ( code === 9 || code === 84 ) {
+      // Handle TAB key
+      var shiftPressed = pressedKeys.indexOf( Input.KEY_SHIFT ) >= 0;
+
+      if ( code === Input.KEY_TAB ) {
 
         // Move the focus to the next item
         // TODO: More general focus order strategy
@@ -895,15 +896,13 @@ define( function( require ) {
     return focusableInstances;
   };
 
-  // Move the focus to the next focusable element.  Called by AccessibilityLayer.
-  Input.moveFocus = function( deltaIndex ) {
-
+  Input.getNextFocusableInstance = function( deltaIndex ) {
     var focusableInstances = Input.focusableInstances || [];
 
     //If the focused instance was null, find the first focusable element.
     if ( Input.focusedInstanceProperty.value === null ) {
 
-      Input.focusedInstanceProperty.value = focusableInstances[ 0 ];
+      return focusableInstances[ 0 ];
     }
     else {
       //Find the index of the currently focused instance, and look for the next focusable instance.
@@ -912,7 +911,6 @@ define( function( require ) {
 
       var currentlyFocusedInstance = focusableInstances.indexOf( Input.focusedInstanceProperty.value );
       var newIndex = currentlyFocusedInstance + deltaIndex;
-//      console.log( currentlyFocusedInstance, deltaIndex, newIndex, focusableInstances );
 
       //TODO: These loops probably not too smart here, may be better as math.
       while ( newIndex < 0 ) {
@@ -922,8 +920,13 @@ define( function( require ) {
         newIndex -= focusableInstances.length;
       }
 
-      Input.focusedInstanceProperty.value = focusableInstances[ newIndex ];
+      return focusableInstances[ newIndex ];
     }
+  };
+
+  // Move the focus to the next focusable element.  Called by AccessibilityLayer.
+  Input.moveFocus = function( deltaIndex ) {
+    Input.focusedInstanceProperty.value = Input.getNextFocusableInstance( deltaIndex );
   };
 
   // Keep track of which keys are currently pressed so we know whether the shift key is down for accessibility
@@ -934,6 +937,10 @@ define( function( require ) {
   // Export some key codes for reuse in listeners.
   Input.KEY_SPACE = 32;
   Input.KEY_ENTER = 13;
+  Input.KEY_TAB = 9;
+  Input.KEY_RIGHT_ARROW = 39;
+  Input.KEY_LEFT_ARROW = 37;
+  Input.KEY_SHIFT = 16;
 
   return Input;
 } );
