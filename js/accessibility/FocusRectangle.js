@@ -17,34 +17,19 @@ define( function( require ) {
    *
    * @constructor
    */
-  function FocusRectangle( focusedBoundsProperty, focusIndicatorProperty, events ) {
+  function FocusRectangle( focusedBoundsProperty, focusIndicatorProperty ) {
     var focusRectangle = this;
 
-    Rectangle.call( this, 0, 0, 100, 100, 10, 10, {
+    Rectangle.call( this, 0, 0, 0, 0, 0, 0, {
       stroke: 'blue',
       visible: false,
       lineWidth: 2
     } );
-    focusedBoundsProperty.link( function( targetBounds, previousBounds ) {
-      if ( targetBounds && previousBounds ) {
-        // For accessibility animation, scenery requires the TWEEN.js library
-        new TWEEN.Tween( {
-          x: focusRectangle.getRectX(),
-          y: focusRectangle.getRectY(),
-          width: focusRectangle.getRectWidth(),
-          height: focusRectangle.getRectHeight()
-        } ).to( targetBounds, 300 ).
-          easing( TWEEN.Easing.Cubic.InOut ).
-          onUpdate( function() {
-            focusRectangle.setRect( this.x, this.y, this.width, this.height, 10, 10 );
-          } ).
-          start();
-      }
-      else if ( targetBounds && previousBounds === null ) {
-        focusRectangle.setRect( targetBounds.x, targetBounds.y, targetBounds.width, targetBounds.height, 10, 10 );
-      }
-      else {
-        //should be invisible, nothing else to do here
+
+    var expand = 2.5;
+    focusedBoundsProperty.link( function( targetBounds ) {
+      if ( targetBounds ) {
+        focusRectangle.setRect( targetBounds.x - expand, targetBounds.y - expand, targetBounds.width + expand * 2, targetBounds.height + expand * 2, 6, 6 );
       }
     } );
 
@@ -53,10 +38,6 @@ define( function( require ) {
       focusRectangle.visible = visible;
     } );
 
-
-    events.on( 'transformChanged', function( targetBounds ) {
-      focusRectangle.setRect( targetBounds.x, targetBounds.y, targetBounds.width, targetBounds.height, 10, 10 );
-    } );
   }
 
   return inherit( Rectangle, FocusRectangle );

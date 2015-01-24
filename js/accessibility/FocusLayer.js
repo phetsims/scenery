@@ -25,31 +25,46 @@ define( function( require ) {
    */
   function FocusLayer() {
 
-    var expand = 5;
+    // Return an object optimal for TWEEN
+    var boundsToObject = function( bounds ) {
+      return { x: bounds.x, y: bounds.y, width: bounds.width, height: bounds.height };
+    };
 
-    //Dummy property to get DerivedProperty to play nice.
-    // TODO: We either need a better API for this or a new pattern (could be event.trigger)
-    var transformProperty = new Property( 0 );
-    var events = new Events();
+    var tween = null;
 
-    var focusedBoundsProperty = new DerivedProperty( [ Input.focusedInstanceProperty, transformProperty ], function( focusedInstance, transform ) {
-      if ( focusedInstance ) {
-        var b = focusedInstance.node.getGlobalBounds();
+    // Animates when focused instance changes.  Jumps (discrete) when target object transform changes.
+    var focusedBoundsProperty = new Property();
+    Input.focusedInstanceProperty.link( function( focusedInstance, previousFocusedInstance ) {
+      if ( focusedInstance && previousFocusedInstance ) {
 
-        // TODO: A real live dot.Rectangle
-        // TODO: Move expand to component classes
-        return {
-          x:      b.left - expand,
-          y:      b.top - expand,
-          width:  b.width + expand * 2,
-          height: b.height + expand * 2
-        };
+        var focusRectangle = focusedInstance.node.getGlobalBounds();
+        var previousFocusRectangle = previousFocusedInstance.node.getGlobalBounds();
+
+        if ( tween ) {
+          tween.stop();
+          tween = null;
+        }
+        // For accessibility animation, scenery requires the TWEEN.js library
+        tween = new TWEEN.Tween( boundsToObject( previousFocusRectangle ) ).
+          to( boundsToObject( focusRectangle ), 300 ).
+          easing( TWEEN.Easing.Cubic.InOut ).
+          onUpdate( function() {
+            focusedBoundsProperty.set( { x: this.x, y: this.y, width: this.width, height: this.height } );
+          } ).
+          onComplete( function() {
+            tween = null;
+          } ).
+          start();
+      }
+      else if ( focusedInstance && previousFocusedInstance === null ) {
+        focusedBoundsProperty.value = focusedInstance.node.getGlobalBounds();
       }
       else {
-        return null;
+        focusedBoundsProperty.value = null;
       }
     } );
 
+    // There is a spurious transform listener callback when registering a listener (perhaps?)
     var firstOne = true;
     var transformListener = function() {
       //transformProperty.value = transformProperty.value + 1;
@@ -57,32 +72,25 @@ define( function( require ) {
         firstOne = false;
       }
       else {
-
-        var b = Input.focusedInstanceProperty.value.node.getGlobalBounds();
-
-        // TODO: A real live dot.Rectangle
-        // TODO: Move expand to component classes
-        var c = {
-          x:      b.left - expand,
-          y:      b.top - expand,
-          width:  b.width + expand * 2,
-          height: b.height + expand * 2
-        };
-
-
-        events.trigger( 'transformChanged', c );
-        console.log( 'transformchanged' );
+        if ( tween ) {
+          tween.stop();
+          tween = null;
+        }
+        focusedBoundsProperty.value = Input.focusedInstanceProperty.value.node.getGlobalBounds();
       }
     };
 
-
-    Input.focusedInstanceProperty.link( function( focusedInstance ) {
+    Input.focusedInstanceProperty.link( function( focusedInstance, previousFocusedInstance ) {
+      if ( previousFocusedInstance ) {
+        previousFocusedInstance.relativeTransform.removeListener( transformListener );
+        previousFocusedInstance.relativeTransform.removePrecompute();
+      }
       if ( focusedInstance ) {
         focusedInstance.relativeTransform.addListener( transformListener ); // when our relative transform changes, notify us in the pre-repaint phase
-        console.log( 'addprecompute' );
         focusedInstance.relativeTransform.addPrecompute(); // trigger precomputation of the relative transform, since we will always need it when it is updated
-        console.log( '/addprecompute' );
         firstOne = true;
+
+        // TODO: What if parent(s) transforms change?
       }
     } );
 
@@ -95,8 +103,8 @@ define( function( require ) {
       }
     } );
 
-    this.focusRectangle = new FocusRectangle( focusedBoundsProperty, focusIndicatorProperty, events );
-    this.focusCursor = new FocusCursor( focusedBoundsProperty, focusIndicatorProperty, events );
+    this.focusRectangle = new FocusRectangle( focusedBoundsProperty, focusIndicatorProperty );
+    this.focusCursor = new FocusCursor( focusedBoundsProperty, focusIndicatorProperty );
 
     Node.call( this, { children: [ this.focusRectangle, this.focusCursor ] } );
   }

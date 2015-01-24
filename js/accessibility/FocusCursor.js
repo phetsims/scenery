@@ -21,7 +21,7 @@ define( function( require ) {
    *
    * @constructor
    */
-  function FocusCursor( focusedBoundsProperty, focusIndicatorProperty, events ) {
+  function FocusCursor( focusedBoundsProperty, focusIndicatorProperty ) {
     var focusCursor = this;
 
     Path.call( this, new Shape().moveTo( 0, 0 ).lineTo( cursorWidth, 0 ).lineTo( cursorWidth / 2, cursorWidth / 10 * 8 ).close(), {
@@ -30,34 +30,11 @@ define( function( require ) {
       lineWidth: 1
     } );
 
-    events.on( 'transformChanged', function( targetBounds ) {
-      focusCursor.bottom = targetBounds.y;
-      focusCursor.centerX = targetBounds.x + targetBounds.width / 2;
-    } );
     // TODO: Don't update when invisible
-    focusedBoundsProperty.link( function( targetBounds, previousBounds ) {
-      focusCursor.visible = (targetBounds !== null);
-      if ( targetBounds && previousBounds ) {
-        // For accessibility animation, scenery requires the TWEEN.js library
-        new TWEEN.Tween( {
-          x: previousBounds.x,
-          y: previousBounds.y,
-          width: previousBounds.width,
-          height: previousBounds.height
-        } ).to( targetBounds, 300 ).
-          easing( TWEEN.Easing.Cubic.InOut ).
-          onUpdate( function() {
-            focusCursor.bottom = this.y;
-            focusCursor.centerX = this.x + this.width / 2;
-          } ).
-          start();
-      }
-      else if ( targetBounds && previousBounds === null ) {
-        focusCursor.bottom = targetBounds.y;
-        focusCursor.centerX = targetBounds.x + targetBounds.width / 2;
-      }
-      else {
-        //should be invisible, nothing else to do here
+    focusedBoundsProperty.link( function( focusedBounds ) {
+      if ( focusedBounds ) {
+        focusCursor.bottom = focusedBounds.y;
+        focusCursor.centerX = focusedBounds.x + focusedBounds.width / 2;
       }
     } );
 
