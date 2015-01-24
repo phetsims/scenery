@@ -65,6 +65,8 @@ define( function( require ) {
     } );
 
     // There is a spurious transform listener callback when registering a listener (perhaps?)
+    // TODO: This spurious event needs to be discussed and reviewed with Jon Olson to make sure
+    // TODO: it is not a long term maintenance issue
     var firstOne = true;
     var transformListener = function() {
       //transformProperty.value = transformProperty.value + 1;
