@@ -41,8 +41,17 @@ define( function( require ) {
       }
     } );
 
-    this.focusRectangle = new FocusRectangle( focusedBoundsProperty );
-    this.focusCursor = new FocusCursor( focusedBoundsProperty );
+    var focusIndicatorProperty = new DerivedProperty( [ Input.focusedInstanceProperty ], function( focusedInstance ) {
+      if ( focusedInstance ) {
+        return focusedInstance.node.focusIndicator || 'rectangle';
+      }
+      else {
+        return null;
+      }
+    } );
+
+    this.focusRectangle = new FocusRectangle( focusedBoundsProperty, focusIndicatorProperty );
+    this.focusCursor = new FocusCursor( focusedBoundsProperty, focusIndicatorProperty );
 
     Node.call( this, { children: [ this.focusRectangle, this.focusCursor ] } );
   }

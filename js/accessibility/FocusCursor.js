@@ -12,6 +12,7 @@ define( function( require ) {
   var inherit = require( 'PHET_CORE/inherit' );
   var Path = require( 'SCENERY/nodes/Path' );
   var Shape = require( 'KITE/Shape' );
+  var Property = require( 'AXON/Property' );
 
   // constants
   var cursorWidth = 20;
@@ -20,7 +21,7 @@ define( function( require ) {
    *
    * @constructor
    */
-  function FocusCursor( focusedBoundsProperty ) {
+  function FocusCursor( focusedBoundsProperty, focusIndicatorProperty ) {
     var focusCursor = this;
 
     Path.call( this, new Shape().moveTo( 0, 0 ).lineTo( cursorWidth, 0 ).lineTo( cursorWidth / 2, cursorWidth / 10 * 8 ).close(), {
@@ -53,6 +54,11 @@ define( function( require ) {
       else {
         //should be invisible, nothing else to do here
       }
+    } );
+
+    Property.multilink( [ focusedBoundsProperty, focusIndicatorProperty ], function( focusedBounds, focusIndicator ) {
+      var visible = focusedBounds !== null && focusIndicator === 'cursor';
+      focusCursor.visible = visible;
     } );
   }
 

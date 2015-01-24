@@ -11,12 +11,13 @@ define( function( require ) {
   // modules
   var inherit = require( 'PHET_CORE/inherit' );
   var Rectangle = require( 'SCENERY/nodes/Rectangle' );
+  var Property = require( 'AXON/Property' );
 
   /**
    *
    * @constructor
    */
-  function FocusRectangle( focusedBoundsProperty ) {
+  function FocusRectangle( focusedBoundsProperty, focusIndicatorProperty ) {
     var focusRectangle = this;
 
     Rectangle.call( this, 0, 0, 100, 100, 10, 10, {
@@ -25,7 +26,6 @@ define( function( require ) {
       lineWidth: 2
     } );
     focusedBoundsProperty.link( function( targetBounds, previousBounds ) {
-      focusRectangle.visible = (targetBounds !== null);
       if ( targetBounds && previousBounds ) {
         // For accessibility animation, scenery requires the TWEEN.js library
         new TWEEN.Tween( {
@@ -46,6 +46,11 @@ define( function( require ) {
       else {
         //should be invisible, nothing else to do here
       }
+    } );
+
+    Property.multilink( [ focusedBoundsProperty, focusIndicatorProperty ], function( focusedBounds, focusIndicator ) {
+      var visible = focusedBounds !== null && focusIndicator === 'rectangle';
+      focusRectangle.visible = visible;
     } );
   }
 
