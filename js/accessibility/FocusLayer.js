@@ -1,7 +1,7 @@
 //  Copyright 2002-2014, University of Colorado Boulder
 
 /**
- * The AccessibilityLayer contains any focus highlights that are shown *outside* of particular nodes, such as
+ * The FocusLayer contains any focus highlights that are shown *outside* of particular nodes, such as
  * a focus rectangle, or graphical cursors.  Examples of highlights shown *within* nodes could be highlighting changes
  * or animation.
  *
@@ -21,7 +21,7 @@ define( function( require ) {
   /**
    * @constructor
    */
-  function AccessibilityLayer() {
+  function FocusLayer() {
 
     var expand = 5;
     var focusedBoundsProperty = new DerivedProperty( [ Input.focusedInstanceProperty ], function( focusedInstance ) {
@@ -56,5 +56,5 @@ define( function( require ) {
     Node.call( this, { children: [ this.focusRectangle, this.focusCursor ] } );
   }
 
-  return inherit( Node, AccessibilityLayer );
+  return inherit( Node, FocusLayer );
 } );
