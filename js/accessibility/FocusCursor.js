@@ -21,7 +21,7 @@ define( function( require ) {
    *
    * @constructor
    */
-  function FocusCursor( focusedBoundsProperty, focusIndicatorProperty ) {
+  function FocusCursor( focusedBoundsProperty, focusIndicatorProperty, events ) {
     var focusCursor = this;
 
     Path.call( this, new Shape().moveTo( 0, 0 ).lineTo( cursorWidth, 0 ).lineTo( cursorWidth / 2, cursorWidth / 10 * 8 ).close(), {
@@ -30,6 +30,11 @@ define( function( require ) {
       lineWidth: 1
     } );
 
+    events.on( 'transformChanged', function( targetBounds ) {
+      focusCursor.bottom = targetBounds.y;
+      focusCursor.centerX = targetBounds.x + targetBounds.width / 2;
+    } );
+    // TODO: Don't update when invisible
     focusedBoundsProperty.link( function( targetBounds, previousBounds ) {
       focusCursor.visible = (targetBounds !== null);
       if ( targetBounds && previousBounds ) {

@@ -17,7 +17,7 @@ define( function( require ) {
    *
    * @constructor
    */
-  function FocusRectangle( focusedBoundsProperty, focusIndicatorProperty ) {
+  function FocusRectangle( focusedBoundsProperty, focusIndicatorProperty, events ) {
     var focusRectangle = this;
 
     Rectangle.call( this, 0, 0, 100, 100, 10, 10, {
@@ -51,6 +51,11 @@ define( function( require ) {
     Property.multilink( [ focusedBoundsProperty, focusIndicatorProperty ], function( focusedBounds, focusIndicator ) {
       var visible = focusedBounds !== null && focusIndicator === 'rectangle';
       focusRectangle.visible = visible;
+    } );
+
+
+    events.on( 'transformChanged', function( targetBounds ) {
+      focusRectangle.setRect( targetBounds.x, targetBounds.y, targetBounds.width, targetBounds.height, 10, 10 );
     } );
   }
 
