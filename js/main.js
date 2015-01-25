@@ -13,7 +13,7 @@
 define( [
   'SCENERY/scenery',
 
-  'SCENERY/accessibility/AccessibilityLayer',
+  'SCENERY/accessibility/FocusLayer',
 
   'SCENERY/debug/DebugContext',
 
