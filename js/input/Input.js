@@ -897,7 +897,14 @@ define( function( require ) {
   };
 
   Input.getNextFocusableInstance = function( deltaIndex ) {
-    var focusableInstances = Input.focusableInstances || [];
+    //var focusableInstances = Input.focusableInstances || [];
+
+    // TODO: Should we persist this list across frames and do deltas for performance?
+    // TODO: We used to, but it was difficult to handle instances added/removed
+    // TODO: And on OSX/Chrome this seems to have good enough performance (didn't notice any qualitative slowdown)
+    // TODO: Perhaps test on Mobile Safari?
+    // TODO: Also, using a pattern like this could make it difficult to customize the focus traversal regions.
+    var focusableInstances = Input.getAllFocusableInstances();
 
     //If the focused instance was null, find the first focusable element.
     if ( Input.focusedInstanceProperty.value === null ) {
@@ -911,6 +918,7 @@ define( function( require ) {
 
       var currentlyFocusedInstance = focusableInstances.indexOf( Input.focusedInstanceProperty.value );
       var newIndex = currentlyFocusedInstance + deltaIndex;
+      //console.log( focusableInstances.length, currentlyFocusedInstance, newIndex );
 
       //TODO: These loops probably not too smart here, may be better as math.
       while ( newIndex < 0 ) {
