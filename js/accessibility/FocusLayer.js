@@ -87,7 +87,7 @@ define( function( require ) {
           tween.stop();
           tween = null;
         }
-        focusedBoundsProperty.value = Input.focusedInstanceProperty.value.node.getGlobalBounds();
+        focusedBoundsProperty.value = Input.focusedInstance.node.getGlobalBounds();
       }
     };
 

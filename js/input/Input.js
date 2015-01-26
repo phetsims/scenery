@@ -337,7 +337,7 @@ define( function( require ) {
         var key = new scenery.Key( event );
         this.addPointer( key );
 
-        var focusedInstance = scenery.Input.focusedInstanceProperty.value;
+        var focusedInstance = Input.focusedInstance;
         if ( focusedInstance && focusedInstance.node ) {
           var trail = focusedInstance.node.getUniqueTrail();//TODO: Is this right?
 
@@ -366,7 +366,7 @@ define( function( require ) {
         var key = this.findKeyByEvent( event );
         if ( key ) {
           this.removePointer( key );
-          var focusedInstance = scenery.Input.focusedInstanceProperty.value;
+          var focusedInstance = Input.focusedInstance;
           if ( focusedInstance && focusedInstance.node ) {
             var trail = focusedInstance.node.getUniqueTrail();//TODO: Is this right?
             this.dispatchEvent( trail, 'up', key, event, true );
@@ -862,6 +862,15 @@ define( function( require ) {
       // if there are multiple Displays, only one Node (across all displays) will have focus in this frame.
       focusedInstanceProperty: new Property( null ),
 
+      // ES5 getter and setter for axon-style convenience (reportedly at a performance cost)
+      get focusedInstance() {
+        return Input.focusedInstanceProperty.get();
+      },
+
+      set focusedInstance( instance ) {
+        Input.focusedInstanceProperty.set( instance );
+      },
+
       /**
        * Adds the entire list of instances from the parent instance into the list.  List is modified in-place and returned.
        * This is very expensive (linear in the size of the scene graph), so use sparingly.  Currently used for focus
@@ -917,7 +926,7 @@ define( function( require ) {
         var focusableInstances = Input.getAllFocusableInstances();
 
         //If the focused instance was null, find the first focusable element.
-        if ( Input.focusedInstanceProperty.value === null ) {
+        if ( Input.focusedInstance === null ) {
 
           return focusableInstances[ 0 ];
         }
@@ -926,7 +935,7 @@ define( function( require ) {
           //TODO: this will fail horribly if the old node was removed, for instance.
           //TODO: Will need to be generalized, etc.
 
-          var currentlyFocusedInstance = focusableInstances.indexOf( Input.focusedInstanceProperty.value );
+          var currentlyFocusedInstance = focusableInstances.indexOf( Input.focusedInstance );
           var newIndex = currentlyFocusedInstance + deltaIndex;
           //console.log( focusableInstances.length, currentlyFocusedInstance, newIndex );
 
@@ -944,7 +953,7 @@ define( function( require ) {
 
       // Move the focus to the next focusable element.  Called by AccessibilityLayer.
       moveFocus: function( deltaIndex ) {
-        Input.focusedInstanceProperty.value = Input.getNextFocusableInstance( deltaIndex );
+        Input.focusedInstance = Input.getNextFocusableInstance( deltaIndex );
       },
 
       // A focusContext is a node that focus is restricted to.  If the list is empty, then anything in the application
@@ -957,13 +966,13 @@ define( function( require ) {
       pushFocusContext: function( instance ) {
         Input.focusContexts.push( {
           instance: instance,
-          previousFocusedNode: Input.focusedInstanceProperty.value
+          previousFocusedNode: Input.focusedInstance
         } );
 
         // Move focus to the 1st element in the new context, but only if the focus subsystem is enabled
         // Simulation do not show focus regions unless the user has pressed tab once
-        if ( Input.focusedInstanceProperty.value ) {
-          Input.focusedInstanceProperty.value = Input.getAllFocusableInstances()[ 0 ];
+        if ( Input.focusedInstance ) {
+          Input.focusedInstance = Input.getAllFocusableInstances()[ 0 ];
         }
       },
 
@@ -977,8 +986,8 @@ define( function( require ) {
 
         // Restore focus to the node that had focus before the popup was shown (if it still exists), but only if the
         // focus subsystem is enabled.  Simulation do not show focus regions unless the user has pressed tab once
-        if ( Input.focusedInstanceProperty.value ) {
-          Input.focusedInstanceProperty.value = top.previousFocusedNode;
+        if ( Input.focusedInstance ) {
+          Input.focusedInstance = top.previousFocusedNode;
         }
       },
 
