@@ -34,7 +34,7 @@ define( function( require ) {
     // Animates when focused instance changes.  Jumps (discrete) when target object transform changes.
     var focusedBoundsProperty = new Property();
     Input.focusedInstanceProperty.link( function( focusedInstance, previousFocusedInstance ) {
-      if ( focusedInstance && previousFocusedInstance ) {
+      if ( focusedInstance && previousFocusedInstance && focusedInstance.node ) {
 
         var focusRectangle = focusedInstance.node.getGlobalBounds();
         var previousFocusRectangle;

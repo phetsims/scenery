@@ -338,7 +338,7 @@ define( function( require ) {
       this.addPointer( key );
 
       var focusedInstance = scenery.Input.focusedInstanceProperty.value;
-      if ( focusedInstance ) {
+      if ( focusedInstance && focusedInstance.node) {
         var trail = focusedInstance.node.getUniqueTrail();//TODO: Is this right?
 
         this.dispatchEvent( trail, 'down', key, event, true );
@@ -367,7 +367,7 @@ define( function( require ) {
       if ( key ) {
         this.removePointer( key );
         var focusedInstance = scenery.Input.focusedInstanceProperty.value;
-        if ( focusedInstance ) {
+        if ( focusedInstance && focusedInstance.node) {
           var trail = focusedInstance.node.getUniqueTrail();//TODO: Is this right?
           this.dispatchEvent( trail, 'up', key, event, true );
         }
@@ -881,7 +881,7 @@ define( function( require ) {
   Input.getAllFocusableInstances = function() {
     var focusableInstances = [];
     var focusable = function( instance ) {
-      return instance.node.focusable === true;
+      return instance.node && instance.node.focusable === true;
     };
 
     // If a focus context (such as a popup) has been added, restrict the search to that instances and its children.
