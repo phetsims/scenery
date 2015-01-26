@@ -955,10 +955,16 @@ define( function( require ) {
       focusContexts: [],
 
       pushFocusContext: function( instance ) {
-        Input.focusContexts.push( { instance: instance, previousFocusedNode: Input.focusedInstanceProperty.value } );
+        Input.focusContexts.push( {
+          instance: instance,
+          previousFocusedNode: Input.focusedInstanceProperty.value
+        } );
 
-        // Move focus to the 1st element in the new context
-        Input.focusedInstanceProperty.value = Input.getAllFocusableInstances()[ 0 ];
+        // Move focus to the 1st element in the new context, but only if the focus subsystem is enabled
+        // Simulation do not show focus regions unless the user has pressed tab once
+        if ( Input.focusedInstanceProperty.value ) {
+          Input.focusedInstanceProperty.value = Input.getAllFocusableInstances()[ 0 ];
+        }
       },
 
       /**
@@ -969,8 +975,11 @@ define( function( require ) {
         var top = Input.focusContexts.pop();
         assert && assert( top.instance === instance );
 
-        // Restore focus to the node that had focus before the popup was shown (if it still exists)
-        Input.focusedInstanceProperty.value = top.previousFocusedNode;
+        // Restore focus to the node that had focus before the popup was shown (if it still exists), but only if the
+        // focus subsystem is enabled.  Simulation do not show focus regions unless the user has pressed tab once
+        if ( Input.focusedInstanceProperty.value ) {
+          Input.focusedInstanceProperty.value = top.previousFocusedNode;
+        }
       },
 
       // Keep track of which keys are currently pressed so we know whether the shift key is down for accessibility
