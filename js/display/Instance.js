@@ -176,6 +176,9 @@ define( function( require ) {
       // {SVGGroup[]} - List of SVG groups associated with this display instance
       this.svgGroups = [];
 
+      // {PixiDisplayObject[]}
+      this.pixiDisplayObjects = [];
+
       this.cleanSyncTreeResults();
 
       this.relativeTransform.clean();
@@ -1178,6 +1181,31 @@ define( function( require ) {
       for ( var i = 0; i < len; i++ ) {
         var group = this.svgGroups[ i ];
         if ( group.block === block ) {
+          return group;
+        }
+      }
+      return null;
+    },
+
+    // add a reference for an SVG group (fastest way to track them)
+    addPixiDisplayObject: function( pixiDisplayObject ) {
+      this.pixiDisplayObjects.push( pixiDisplayObject );
+    },
+
+    // remove a reference for an SVG group (fastest way to track them)
+    removePixiDisplayObject: function( pixiDisplayObject ) {
+      var index = _.indexOf( this.pixiDisplayObjects, pixiDisplayObject );
+      assert && assert( index >= 0, 'Tried to remove an PixiDisplayObject from an Instance when it did not exist' );
+
+      this.pixiDisplayObjects.splice( index, 1 ); // TODO: remove function
+    },
+
+    // returns null when a lookup fails (which is legitimate)
+    lookupPixiDisplayObject: function( pixiBlock ) {
+      var len = this.pixiDisplayObjects.length;
+      for ( var i = 0; i < len; i++ ) {
+        var group = this.pixiDisplayObjects[ i ];
+        if ( group.block === pixiBlock ) {
           return group;
         }
       }

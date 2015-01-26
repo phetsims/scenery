@@ -320,9 +320,10 @@ define( function( require ) {
         pressedKeys.push( code );
       }
 
-      // Handle TAB key (9) or 't' key temporarily for debugging
-      var shiftPressed = pressedKeys.indexOf( 16 ) >= 0;
-      if ( code === 9 || code === 84 ) {
+      // Handle TAB key
+      var shiftPressed = pressedKeys.indexOf( Input.KEY_SHIFT ) >= 0;
+
+      if ( code === Input.KEY_TAB ) {
 
         // Move the focus to the next item
         // TODO: More general focus order strategy
@@ -849,12 +850,16 @@ define( function( require ) {
     }
   };
 
+  /*---------------------------------------------------------------------------*
+   * Accessibility Support (TODO: Should this move to another file?)
+   *----------------------------------------------------------------------------*/
+
   // Since only one element can have focus, Scenery uses a static element to track node focus.  That is, even
   // if there are multiple Displays, only one Node (across all displays) will have focus in this frame.
   Input.focusedInstanceProperty = new Property( null );
 
   /**
-   * Adds the entire list of instances from the parent instance into the list.  List is modified, and returned.
+   * Adds the entire list of instances from the parent instance into the list.  List is modified in-place and returned.
    * This is very expensive (linear in the size of the scene graph), so use sparingly.  Currently used for focus
    * traversal.
    * @param instance
@@ -891,15 +896,20 @@ define( function( require ) {
     return focusableInstances;
   };
 
-  // Move the focus to the next focusable element.  Called by AccessibilityLayer.
-  Input.moveFocus = function( deltaIndex ) {
+  Input.getNextFocusableInstance = function( deltaIndex ) {
+    //var focusableInstances = Input.focusableInstances || [];
 
-    var focusableInstances = Input.focusableInstances || [];
+    // TODO: Should we persist this list across frames and do deltas for performance?
+    // TODO: We used to, but it was difficult to handle instances added/removed
+    // TODO: And on OSX/Chrome this seems to have good enough performance (didn't notice any qualitative slowdown)
+    // TODO: Perhaps test on Mobile Safari?
+    // TODO: Also, using a pattern like this could make it difficult to customize the focus traversal regions.
+    var focusableInstances = Input.getAllFocusableInstances();
 
     //If the focused instance was null, find the first focusable element.
     if ( Input.focusedInstanceProperty.value === null ) {
 
-      Input.focusedInstanceProperty.value = focusableInstances[ 0 ];
+      return focusableInstances[ 0 ];
     }
     else {
       //Find the index of the currently focused instance, and look for the next focusable instance.
@@ -908,7 +918,7 @@ define( function( require ) {
 
       var currentlyFocusedInstance = focusableInstances.indexOf( Input.focusedInstanceProperty.value );
       var newIndex = currentlyFocusedInstance + deltaIndex;
-//      console.log( currentlyFocusedInstance, deltaIndex, newIndex, focusableInstances );
+      //console.log( focusableInstances.length, currentlyFocusedInstance, newIndex );
 
       //TODO: These loops probably not too smart here, may be better as math.
       while ( newIndex < 0 ) {
@@ -918,8 +928,13 @@ define( function( require ) {
         newIndex -= focusableInstances.length;
       }
 
-      Input.focusedInstanceProperty.value = focusableInstances[ newIndex ];
+      return focusableInstances[ newIndex ];
     }
+  };
+
+  // Move the focus to the next focusable element.  Called by AccessibilityLayer.
+  Input.moveFocus = function( deltaIndex ) {
+    Input.focusedInstanceProperty.value = Input.getNextFocusableInstance( deltaIndex );
   };
 
   // Keep track of which keys are currently pressed so we know whether the shift key is down for accessibility
@@ -930,6 +945,10 @@ define( function( require ) {
   // Export some key codes for reuse in listeners.
   Input.KEY_SPACE = 32;
   Input.KEY_ENTER = 13;
+  Input.KEY_TAB = 9;
+  Input.KEY_RIGHT_ARROW = 39;
+  Input.KEY_LEFT_ARROW = 37;
+  Input.KEY_SHIFT = 16;
 
   return Input;
 } );

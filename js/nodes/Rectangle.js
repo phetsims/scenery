@@ -948,96 +948,58 @@ define( function( require ) {
    * Pixi rendering
    *----------------------------------------------------------------------------*/
 
-  Rectangle.RectanglePixiDrawable = inherit( PixiSelfDrawable, function RectanglePixiDrawable( renderer, instance ) {
-    this.initialize( renderer, instance );
-  }, {
-    // called either from the constructor or from pooling
+  Rectangle.RectanglePixiDrawable = PixiSelfDrawable.createDrawable( {
+    type: function RectanglePixiDrawable( renderer, instance ) {
+      this.initialize( renderer, instance );
+    },
+    stateType: RectangleStatefulDrawableMixin,
     initialize: function( renderer, instance ) {
-      this.initializePixiSelfDrawable( renderer, instance );
+      this.lastArcW = -1; // invalid on purpose
+      this.lastArcH = -1; // invalid on purpose
 
-      var graphics = new PIXI.Graphics();
-
-      // set a fill and line style
-      graphics.beginFill( Color.toColor( this.node._fill ).toNumber() );
-
-      // draw a shape
-      graphics.moveTo( this.node._rectX, this.node._rectY );
-      graphics.lineTo( this.node._rectX + this.node._rectWidth, this.node._rectY );
-      graphics.lineTo( this.node._rectX + this.node._rectWidth, this.node._rectY + this.node._rectHeight );
-      graphics.lineTo( this.node._rectX, this.node._rectY + this.node._rectHeight );
-      graphics.endFill();
-
-      this.displayObject = graphics;
-    },
-
-    initializeContext: function( pixiBlock ) {
-      this.pixiBlock = pixiBlock;
-
-      //TODO: Update the state in the buffer arrays
-    },
-
-    //Nothing necessary since everything currently handled in the uModelViewMatrix below
-    //However, we may switch to dynamic draw, and handle the matrix change only where necessary in the future?
-    updateRectangle: function() {
-
-      // TODO: a way to update the ColorTriangleBufferData.
-
-      // TODO: move to PaintablePixiState???
-      if ( this.dirtyFill ) {
-        this.color = Color.toColor( this.node._fill );
-        this.cleanPaintableState();
+      if ( !this.pixiDisplayObject ) {
+        this.pixiDisplayObject = document.createElementNS( scenery.svgns, 'rect' );
       }
     },
-
-    render: function( shaderProgram ) {
-      // This is handled by the ColorTriangleRenderer
-    },
-
-    dispose: function() {
-      this.disposePixiBuffers();
-
-      // super
-      PixiSelfDrawable.prototype.dispose.call( this );
-    },
-
-    disposePixiBuffers: function() {
-      this.pixiBlock.PixiRenderer.colorTriangleRenderer.colorTriangleBufferData.dispose( this.rectangleHandle );
-    },
-
-    markDirtyRectangle: function() {
-      this.markDirty();
-    },
-
-    // general flag set on the state, which we forward directly to the drawable's paint flag
-    markPaintDirty: function() {
-      this.markDirty();
-    },
-
-    onAttach: function( node ) {
-
-    },
-
-    // release the drawable
-    onDetach: function( node ) {
-      //OHTWO TODO: are we missing the disposal?
-    },
-
-    //TODO: Make sure all of the dirty flags make sense here.  Should we be using fillDirty, paintDirty, dirty, etc?
-    update: function() {
-      if ( this.dirty ) {
-        this.updateRectangle();
-        this.dirty = false;
+    updatePixi: function( node, rect ) {
+      if ( this.dirtyX ) {
+        rect.setAttribute( 'x', node._rectX );
       }
-    }
+      if ( this.dirtyY ) {
+        rect.setAttribute( 'y', node._rectY );
+      }
+      if ( this.dirtyWidth ) {
+        rect.setAttribute( 'width', node._rectWidth );
+      }
+      if ( this.dirtyHeight ) {
+        rect.setAttribute( 'height', node._rectHeight );
+      }
+      if ( this.dirtyArcWidth || this.dirtyArcHeight || this.dirtyWidth || this.dirtyHeight ) {
+        var arcw = 0;
+        var arch = 0;
+
+        // workaround for various browsers if rx=20, ry=0 (behavior is inconsistent, either identical to rx=20,ry=20, rx=0,ry=0. We'll treat it as rx=0,ry=0)
+        // see https://github.com/phetsims/scenery/issues/183
+        if ( node.isRounded() ) {
+          var maximumArcSize = node.getMaximumArcSize();
+          arcw = Math.min( node._rectArcWidth, maximumArcSize );
+          arch = Math.min( node._rectArcHeight, maximumArcSize );
+        }
+        if ( arcw !== this.lastArcW ) {
+          this.lastArcW = arcw;
+          rect.setAttribute( 'rx', arcw );
+        }
+        if ( arch !== this.lastArcH ) {
+          this.lastArcH = arch;
+          rect.setAttribute( 'ry', arch );
+        }
+      }
+
+      this.updateFillStrokeStyle( rect );
+    },
+    usesPaint: true,
+    keepElements: keepSVGRectangleElements
   } );
-
-  // include stubs (stateless) for marking dirty stroke and fill (if necessary). we only want one dirty flag, not multiple ones, for Pixi (for now)
-  /* jshint -W064 */
-  Paintable.PaintableStatefulDrawableMixin( Rectangle.RectanglePixiDrawable );
-
-  // set up pooling
-  /* jshint -W064 */
-  SelfDrawable.PoolableMixin( Rectangle.RectanglePixiDrawable );
 
   return Rectangle;
 } );

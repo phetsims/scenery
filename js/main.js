@@ -13,7 +13,7 @@
 define( [
   'SCENERY/scenery',
 
-  'SCENERY/accessibility/AccessibilityLayer',
+  'SCENERY/accessibility/FocusLayer',
 
   'SCENERY/debug/DebugContext',
 
@@ -74,6 +74,7 @@ define( [
   'SCENERY/nodes/Node',
   'SCENERY/nodes/Paintable',
   'SCENERY/nodes/Path',
+  'SCENERY/nodes/PixiNode',
   'SCENERY/nodes/Plane',
   'SCENERY/nodes/Rectangle',
   'SCENERY/nodes/Text',
@@ -84,7 +85,6 @@ define( [
   'SCENERY/overlays/PointerAreaOverlay',
   'SCENERY/overlays/PointerOverlay',
 
-  'SCENERY/util/AccessibilityPeer',
   'SCENERY/util/CanvasContextWrapper',
   'SCENERY/util/Color',
   'SCENERY/util/Features',

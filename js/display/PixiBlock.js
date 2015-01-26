@@ -1,22 +1,21 @@
 // Copyright 2002-2014, University of Colorado Boulder
 
+
 /**
- * Handles a visual WebGL layer of drawables.  The WebGL system is designed to be modular, so that testing can
- * easily be done without scenery.  Hence WebGLBlock delegates most of its work to WebGLRenderer.
+ * Handles a visual SVG layer of drawables.
  *
  * @author Jonathan Olson <jonathan.olson@colorado.edu>
- * @author Sam Reid (PhET Interactive Simulations)
- * @author Sharfudeen Ashraf (For Ghent University)
  */
+
 define( function( require ) {
   'use strict';
 
-  // modules
   var inherit = require( 'PHET_CORE/inherit' );
   var PoolableMixin = require( 'PHET_CORE/PoolableMixin' );
   var cleanArray = require( 'PHET_CORE/cleanArray' );
   var scenery = require( 'SCENERY/scenery' );
   var FittedBlock = require( 'SCENERY/display/FittedBlock' );
+  var PixiDisplayObject = require( 'SCENERY/display/PixiDisplayObject' );
   var Util = require( 'SCENERY/util/Util' );
 
   scenery.PixiBlock = function PixiBlock( display, renderer, transformRootInstance, filterRootInstance ) {
@@ -26,118 +25,188 @@ define( function( require ) {
 
   inherit( FittedBlock, PixiBlock, {
     initialize: function( display, renderer, transformRootInstance, filterRootInstance ) {
-
       this.initializeFittedBlock( display, renderer, transformRootInstance );
-
-      // PixiBlocks are hard-coded to take the full display size (as opposed to svg and canvas)
-      // Since we saw some jitter on iPad, see #318 and generally expect WebGL layers to span the entire display
-      // In the future, it would be good to understand what was causing the problem and make webgl consistent
-      // with svg and canvas again.
-      this.fit = FittedBlock.FULL_DISPLAY;
 
       this.filterRootInstance = filterRootInstance;
 
+      this.dirtyGroups = cleanArray( this.dirtyGroups );
       this.dirtyDrawables = cleanArray( this.dirtyDrawables );
+      this.paintMap = {}; // maps {string} paint.id => { count: {number}, paint: {Paint}, def: {SVGElement} }
 
-      // TODO: Maybe reuse the WebGLRenderer and use an initialize pattern()?
+      if ( !this.domElement ) {
+        // main SVG element
+        this.pixiDisplayObject = document.createElementNS( scenery.svgns, 'svg' );
+        this.pixiDisplayObject.style.position = 'absolute';
+        this.pixiDisplayObject.style.left = '0';
+        this.pixiDisplayObject.style.top = '0';
+        //OHTWO TODO: why would we clip the individual layers also? Seems like a potentially useless performance loss
+        // this.pixiDisplayObject.style.clip = 'rect(0px,' + width + 'px,' + height + 'px,0px)';
+        this.pixiDisplayObject.style[ 'pointer-events' ] = 'none';
 
-      // Create the Pixi renderer.
-      // Note.  This cannot be called `renderer` or it will interfere with scenery internals
-      this.pixiRenderer = PIXI.autoDetectRenderer( 400, 300, { transparent: true } );
-      this.domElement = this.pixiRenderer.view;
+        // the <defs> block that we will be stuffing gradients and patterns into
+        this.defs = document.createElementNS( scenery.svgns, 'defs' );
+        this.pixiDisplayObject.appendChild( this.defs );
 
-      this.domElement.style.position = 'absolute';
-      this.domElement.style.left = '0';
-      this.domElement.style.top = '0';
-      this.domElement.style.pointerEvents = 'none';
+        this.baseTransformGroup = document.createElementNS( scenery.svgns, 'g' );
+        this.pixiDisplayObject.appendChild( this.baseTransformGroup );
 
-      this.stage = new PIXI.Stage();
+        this.domElement = this.pixiDisplayObject;
+      }
 
-      // reset any fit transforms that were applied
-      // TODO: What is force acceleration?
-      Util.prepareForTransform( this.pixiRenderer.view, this.forceAcceleration );
-      Util.unsetTransform( this.pixiRenderer.view ); // clear out any transforms that could have been previously applied
+      // reset what layer fitting can do (this.forceAcceleration set in fitted block initialization)
+      Util.prepareForTransform( this.pixiDisplayObject, this.forceAcceleration );
+      Util.unsetTransform( this.pixiDisplayObject ); // clear out any transforms that could have been previously applied
+      this.baseTransformGroup.setAttribute( 'transform', '' ); // no base transform
 
-      // store our backing scale so we don't have to look it up while fitting
-//      this.backingScale = ( renderer & Renderer.bitmaskWebGLLowResolution ) ? 1 : scenery.Util.backingScale( this.gl );
+      var instanceClosestToRoot = transformRootInstance.trail.nodes.length > filterRootInstance.trail.nodes.length ? filterRootInstance : transformRootInstance;
 
-      this.initializeWebGLState();
+      this.rootGroup = PixiDisplayObject.createFromPool( this, instanceClosestToRoot, null );
+      this.baseTransformGroup.appendChild( this.rootGroup.pixiDisplayObject );
+
+      // TODO: dirty list of nodes (each should go dirty only once, easier than scanning all?)
 
       sceneryLog && sceneryLog.PixiBlock && sceneryLog.PixiBlock( 'initialized #' + this.id );
-      // TODO: dirty list of nodes (each should go dirty only once, easier than scanning all?)
 
       return this;
     },
 
-    initializeWebGLState: function() {
+    /*
+     * Increases our reference count for the specified {Paint}. If it didn't exist before, we'll add the SVG def to the
+     * paint can be referenced by SVG id.
+     *
+     * @param {Paint} paint
+     */
+    incrementPaint: function( paint ) {
+      assert && assert( paint.isPaint );
 
-      // TODO: Maybe initialize the pixiRenderer, if it is reused during pooling?
-//      this.pixiRenderer.initialize();
+      sceneryLog && sceneryLog.Paints && sceneryLog.Paints( 'incrementPaint ' + this.toString() + ' ' + paint.id );
+
+      if ( this.paintMap.hasOwnProperty( paint.id ) ) {
+        this.paintMap[ paint.id ].count++;
+      }
+      else {
+        var def = paint.getSVGDefinition();
+
+        // TODO: reduce allocations?
+        this.paintMap[ paint.id ] = {
+          count: 1,
+          paint: paint,
+          def: def
+        };
+
+        this.defs.appendChild( def );
+      }
+    },
+
+    /*
+     * Decreases our reference count for the specified {Paint}. If this was the last reference, we'll remove the SVG def
+     * from our SVG tree to prevent memory leaks, etc.
+     *
+     * @param {Paint} paint
+     */
+    decrementPaint: function( paint ) {
+      assert && assert( paint.isPaint );
+
+      sceneryLog && sceneryLog.Paints && sceneryLog.Paints( 'decrementPaint ' + this.toString() + ' ' + paint.id );
+
+      // since the block may have been disposed (yikes!), we have a defensive set-up here
+      if ( this.paintMap.hasOwnProperty( paint.id ) ) {
+        var entry = this.paintMap[ paint.id ];
+        assert && assert( entry.count >= 1 );
+
+        if ( entry.count === 1 ) {
+          this.defs.removeChild( entry.def );
+          delete this.paintMap[ paint.id ]; // delete, so we don't memory leak if we run through MANY paints
+        }
+        else {
+          entry.count--;
+        }
+      }
+    },
+
+    markDirtyGroup: function( block ) {
+      this.dirtyGroups.push( block );
+      this.markDirty();
+    },
+
+    markDirtyDrawable: function( drawable ) {
+      sceneryLog && sceneryLog.dirty && sceneryLog.dirty( 'markDirtyDrawable on PixiBlock#' + this.id + ' with ' + drawable.toString() );
+      this.dirtyDrawables.push( drawable );
+      this.markDirty();
     },
 
     setSizeFullDisplay: function() {
+      sceneryLog && sceneryLog.PixiBlock && sceneryLog.PixiBlock( 'setSizeFullDisplay #' + this.id );
 
-      // TODO: Allow scenery to change the size of the WebGLRenderer.view
-      //var size = this.display.getSize();
-
-      // TODO: Set size
-      //this.pixiRenderer.setCanvasSize( size.width, size.height );
+      var size = this.display.getSize();
+      this.pixiDisplayObject.setAttribute( 'width', size.width );
+      this.pixiDisplayObject.setAttribute( 'height', size.height );
     },
 
     setSizeFitBounds: function() {
-      // TODO: Allow scenery to change the size of the WebGLRenderer.view
+      sceneryLog && sceneryLog.PixiBlock && sceneryLog.PixiBlock( 'setSizeFitBounds #' + this.id + ' with ' + this.fitBounds.toString() );
 
       var x = this.fitBounds.minX;
       var y = this.fitBounds.minY;
-      //OHTWO TODO PERFORMANCE: see if we can get a speedup by putting the backing scale in our transform instead of with CSS?
-      Util.setTransform( 'matrix(1,0,0,1,' + x + ',' + y + ')', this.pixiRenderer.view, this.forceAcceleration ); // reapply the translation as a CSS transform
 
-      // TODO: Set size
-      //this.pixiRenderer.setCanvasSize( this.fitBounds.width, this.fitBounds.height );
-
-      //TODO: How to handle this in WebGLRenderer?
-//      this.updateWebGLDimension( -x, -y, this.fitBounds.width, this.fitBounds.height );
+      this.baseTransformGroup.setAttribute( 'transform', 'translate(' + (-x) + ',' + (-y) + ')' ); // subtract off so we have a tight fit
+      Util.setTransform( 'matrix(1,0,0,1,' + x + ',' + y + ')', this.pixiDisplayObject, this.forceAcceleration ); // reapply the translation as a CSS transform
+      this.pixiDisplayObject.setAttribute( 'width', this.fitBounds.width );
+      this.pixiDisplayObject.setAttribute( 'height', this.fitBounds.height );
     },
 
     update: function() {
       sceneryLog && sceneryLog.PixiBlock && sceneryLog.PixiBlock( 'update #' + this.id );
-      sceneryLog && sceneryLog.PixiBlock && sceneryLog.push();
 
       if ( this.dirty && !this.disposed ) {
         this.dirty = false;
 
+        //OHTWO TODO: call here!
+        while ( this.dirtyGroups.length ) {
+          var group = this.dirtyGroups.pop();
+
+          // if this group has been disposed or moved to another block, don't mess with it
+          if ( group.block === this ) {
+            group.update();
+          }
+        }
         while ( this.dirtyDrawables.length ) {
-          this.dirtyDrawables.pop().update();
+          var drawable = this.dirtyDrawables.pop();
+
+          // if this drawable has been disposed or moved to another block, don't mess with it
+          if ( drawable.parentDrawable === this ) {
+            drawable.update();
+          }
         }
 
-        // udpate the fit BEFORE drawing, since it may change our offset
+        // checks will be done in updateFit() to see whether it is needed
         this.updateFit();
-
-        this.pixiRenderer.render( this.stage );
       }
-
-      sceneryLog && sceneryLog.PixiBlock && sceneryLog.pop();
     },
 
     dispose: function() {
       sceneryLog && sceneryLog.PixiBlock && sceneryLog.PixiBlock( 'dispose #' + this.id );
 
-      this.pixiRenderer.dispose();
+      // make it take up zero area, so that we don't use up excess memory
+      this.pixiDisplayObject.setAttribute( 'width', 0 );
+      this.pixiDisplayObject.setAttribute( 'height', 0 );
 
       // clear references
+      this.filterRootInstance = null;
+      cleanArray( this.dirtyGroups );
       cleanArray( this.dirtyDrawables );
+      this.paintMap = {};
+
+      this.baseTransformGroup.removeChild( this.rootGroup.PixiDisplayObject );
+      this.rootGroup.dispose();
+      this.rootGroup = null;
+
+      // since we may not properly remove all defs yet
+      while ( this.defs.childNodes.length ) {
+        this.defs.removeChild( this.defs.childNodes[ 0 ] );
+      }
 
       FittedBlock.prototype.dispose.call( this );
-    },
-
-    markDirtyDrawable: function( drawable ) {
-      sceneryLog && sceneryLog.dirty && sceneryLog.dirty( 'markDirtyDrawable on PixiBlock#' + this.id + ' with ' + drawable.toString() );
-
-      assert && assert( drawable );
-
-      // TODO: instance check to see if it is a canvas cache (usually we don't need to call update on our drawables)
-      this.dirtyDrawables.push( drawable );
-      this.markDirty();
     },
 
     addDrawable: function( drawable ) {
@@ -145,18 +214,19 @@ define( function( require ) {
 
       FittedBlock.prototype.addDrawable.call( this, drawable );
 
-      this.stage.addChild( drawable.displayObject );
-
-      // TODO: Is this necessary?
-      drawable.initializeContext( this );
+      PixiDisplayObject.addDrawable( this, drawable );
+      drawable.updatePixiBlock( this );
     },
 
     removeDrawable: function( drawable ) {
       sceneryLog && sceneryLog.PixiBlock && sceneryLog.PixiBlock( '#' + this.id + '.removeDrawable ' + drawable.toString() );
 
+      PixiDisplayObject.removeDrawable( this, drawable );
+
       FittedBlock.prototype.removeDrawable.call( this, drawable );
 
-      this.stage.removeChild( drawable.displayObject );
+      // NOTE: we don't unset the drawable's defs here, since it will either be disposed (will clear it)
+      // or will be added to another PixiBlock (which will overwrite it)
     },
 
     onIntervalChange: function( firstDrawable, lastDrawable ) {
@@ -165,34 +235,9 @@ define( function( require ) {
       FittedBlock.prototype.onIntervalChange.call( this, firstDrawable, lastDrawable );
     },
 
-    onPotentiallyMovedDrawable: function( drawable ) {
-      sceneryLog && sceneryLog.PixiBlock && sceneryLog.PixiBlock( '#' + this.id + '.onPotentiallyMovedDrawable ' + drawable.toString() );
-      sceneryLog && sceneryLog.PixiBlock && sceneryLog.push();
-
-      assert && assert( drawable.parentDrawable === this );
-
-      // For now, mark it as dirty so that we redraw anything containing it. In the future, we could have more advanced
-      // behavior that figures out the intersection-region for what was moved and what it was moved past, but that's
-      // a harder problem.
-      drawable.markDirty();
-
-      sceneryLog && sceneryLog.PixiBlock && sceneryLog.pop();
-    },
-
-    // This method can be called to simulate context loss using the khronos webgl-debug context loss simulator, see #279
-    simulateWebGLContextLoss: function() {
-      console.log( 'simulating webgl context loss in PixiBlock' );
-      assert && assert( this.scene.webglMakeLostContextSimulatingCanvas );
-      this.pixiRenderer.view.loseContextInNCalls( 5 );
-    },
-
     toString: function() {
       return 'PixiBlock#' + this.id + '-' + FittedBlock.fitString[ this.fit ];
     }
-  }, {
-    // Statics
-    fragmentTypeFill: 0,
-    fragmentTypeTexture: 1
   } );
 
   /* jshint -W064 */
