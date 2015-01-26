@@ -884,13 +884,21 @@ define( function( require ) {
       return instance.node.focusable === true;
     };
 
-    var Display = scenery.Display;//TODO: move to a traditional require statement (though may be cyclic)
-    for ( var i = 0; i < Display.displays.length; i++ ) {
-      var display = Display.displays[ i ];
+    // If a focus context (such as a popup) has been added, restrict the search to that instances and its children.
+    if ( Input.focusContexts.length ) {
+      flattenInstances( Input.focusContexts[ Input.focusContexts.length - 1 ].instance, focusableInstances, focusable );
+    }
+    else {
 
-      // Add to the list of all focusable items across Displays
-      if ( display._baseInstance ) {
-        flattenInstances( display._baseInstance, focusableInstances, focusable );
+      // Search all displays and all of their instances
+      var Display = scenery.Display;//TODO: move to a traditional require statement (though may be cyclic)
+      for ( var i = 0; i < Display.displays.length; i++ ) {
+        var display = Display.displays[ i ];
+
+        // Add to the list of all focusable items across Displays
+        if ( display._baseInstance ) {
+          flattenInstances( display._baseInstance, focusableInstances, focusable );
+        }
       }
     }
     return focusableInstances;
@@ -937,18 +945,46 @@ define( function( require ) {
     Input.focusedInstanceProperty.value = Input.getNextFocusableInstance( deltaIndex );
   };
 
+  // A focusContext is a node that focus is restricted to.  If the list is empty, then anything in the application
+  // can be focused.  This is used when showing dialogs that will restrict focus.  The reason this is a stack is that
+  // dialogs can spawn other dialogs.  When a dialog is dismissed, focus should return to the component that had focus
+  // before the dialog was shown.
+  // @private Could be a private closure var, but left public for ease of debugging.
+  Input.focusContexts = [];
+
+  Input.pushFocusContext = function( instance ) {
+    Input.focusContexts.push( { instance: instance, previousFocusedNode: Input.focusedInstanceProperty.value } );
+
+    // Move focus to the 1st element in the new context
+    Input.focusedInstanceProperty.value = Input.getAllFocusableInstances()[ 0 ];
+  };
+
+  /**
+   * Removes the last focus context, such as when a dialog is dismissed.  The dialog's instance is required as an argument
+   * so it can be verified that it was the top element on the stack.
+   */
+  Input.popFocusContext = function( instance ) {
+    var top = Input.focusContexts.pop();
+    assert && assert( top.instance === instance );
+
+    // Restore focus to the node that had focus before the popup was shown (if it still exists)
+    Input.focusedInstanceProperty.value = top.previousFocusedNode;
+  };
+
   // Keep track of which keys are currently pressed so we know whether the shift key is down for accessibility
   // TODO: this effort is duplicated with this.pointers (which also covers different things)
   // TODO: Should they be coalesced?
   var pressedKeys = [];
 
   // Export some key codes for reuse in listeners.
+  // TODO: See if these can be replaced by DOM/Browser API support
   Input.KEY_SPACE = 32;
   Input.KEY_ENTER = 13;
   Input.KEY_TAB = 9;
   Input.KEY_RIGHT_ARROW = 39;
   Input.KEY_LEFT_ARROW = 37;
   Input.KEY_SHIFT = 16;
+  Input.KEY_ESCAPE = 27;
 
   return Input;
 } );

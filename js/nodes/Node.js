@@ -2253,6 +2253,8 @@ define( function( require ) {
     get globalBounds() { return this.getGlobalBounds(); },
     get visibleBounds() { return this.getVisibleBounds(); },
     get id() { return this.getId(); },
+
+    // getInstances is marked as @private.  TODO: Perhaps this should be too?
     get instances() { return this.getInstances(); },
 
     mutate: function( options ) {

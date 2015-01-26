@@ -18,7 +18,6 @@ define( function( require ) {
   var FocusCursor = require( 'SCENERY/accessibility/FocusCursor' );
   var DerivedProperty = require( 'AXON/DerivedProperty' );
   var Property = require( 'AXON/Property' );
-  var Events = require( 'AXON/Events' );
 
   /**
    * @constructor
@@ -38,7 +37,17 @@ define( function( require ) {
       if ( focusedInstance && previousFocusedInstance ) {
 
         var focusRectangle = focusedInstance.node.getGlobalBounds();
-        var previousFocusRectangle = previousFocusedInstance.node.getGlobalBounds();
+        var previousFocusRectangle;
+
+        // Use the bounds of the previous node for starting animation point.
+        // However, that node may have been removed from the scene graph.
+        if ( previousFocusedInstance.node ) {
+          previousFocusRectangle = previousFocusedInstance.node.getGlobalBounds();
+        }
+        else {
+          // TODO: Could replace this with storing the previous bounds from the last callback
+          previousFocusRectangle = focusedInstance.node.getGlobalBounds();
+        }
 
         if ( tween ) {
           tween.stop();
@@ -97,7 +106,9 @@ define( function( require ) {
     } );
 
     var focusIndicatorProperty = new DerivedProperty( [ Input.focusedInstanceProperty ], function( focusedInstance ) {
-      if ( focusedInstance ) {
+
+      // the check for node existence seems necessary for handling appearing/disappearing popups
+      if ( focusedInstance && focusedInstance.node ) {
         return focusedInstance.node.focusIndicator || 'rectangle';
       }
       else {
