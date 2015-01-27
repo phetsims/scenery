@@ -86,7 +86,6 @@ define( function( require ) {
     // TODO: it is not a long term maintenance issue
     var firstOne = true;
     var transformListener = function() {
-      //transformProperty.value = transformProperty.value + 1;
       if ( firstOne ) {
         firstOne = false;
       }
