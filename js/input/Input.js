@@ -884,7 +884,9 @@ define( function( require ) {
           list.push( instance );
         }
         for ( var i = 0; i < instance.children.length; i++ ) {
-          Input.flattenInstances( instance.children[ i ], list, predicate );
+          if ( instance.node.visible ) {
+            Input.flattenInstances( instance.children[ i ], list, predicate );
+          }
         }
         return list;
       },
@@ -892,7 +894,7 @@ define( function( require ) {
       getAllFocusableInstances: function() {
         var focusableInstances = [];
         var focusable = function( instance ) {
-          return instance.node && instance.node.focusable === true;
+          return instance.node && instance.node.focusable === true && instance.node.visible === true;
         };
 
         // If a focus context (such as a popup) has been added, restrict the search to that instances and its children.
