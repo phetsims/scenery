@@ -20,9 +20,11 @@ define( function( require ) {
   var Property = require( 'AXON/Property' );
 
   /**
+   * @param {boolean} useTween - whether or not the focus rectangles should be animated using sole/TWEEN
+   *                           - TWEEN must also be available as a global for this to work.
    * @constructor
    */
-  function FocusLayer() {
+  function FocusLayer( useTween ) {
 
     // Return an object optimal for TWEEN
     var boundsToObject = function( bounds ) {
@@ -54,16 +56,22 @@ define( function( require ) {
           tween = null;
         }
         // For accessibility animation, scenery requires the TWEEN.js library
-        tween = new TWEEN.Tween( boundsToObject( previousFocusRectangle ) ).
-          to( boundsToObject( focusRectangle ), 300 ).
-          easing( TWEEN.Easing.Cubic.InOut ).
-          onUpdate( function() {
-            focusedBoundsProperty.set( { x: this.x, y: this.y, width: this.width, height: this.height } );
-          } ).
-          onComplete( function() {
-            tween = null;
-          } ).
-          start();
+        if ( useTween && TWEEN ) {
+          tween = new TWEEN.Tween( boundsToObject( previousFocusRectangle ) ).
+            to( boundsToObject( focusRectangle ), 300 ).
+            easing( TWEEN.Easing.Cubic.InOut ).
+            onUpdate( function() {
+              console.log( 'ou' );
+              focusedBoundsProperty.set( { x: this.x, y: this.y, width: this.width, height: this.height } );
+            } ).
+            onComplete( function() {
+              tween = null;
+            } ).
+            start();
+        }
+        else {
+          focusedBoundsProperty.set( focusRectangle );
+        }
       }
       else if ( focusedInstance && previousFocusedInstance === null ) {
         focusedBoundsProperty.value = focusedInstance.node.getGlobalBounds();
