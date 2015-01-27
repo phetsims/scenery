@@ -56,7 +56,7 @@ define( function( require ) {
           tween = null;
         }
         // For accessibility animation, scenery requires the TWEEN.js library
-        if ( useTween && TWEEN ) {
+        if ( useTween && typeof( TWEEN ) !== 'undefined' ) {
           tween = new TWEEN.Tween( boundsToObject( previousFocusRectangle ) ).
             to( boundsToObject( focusRectangle ), 300 ).
             easing( TWEEN.Easing.Cubic.InOut ).
