@@ -171,7 +171,6 @@ define( function( require ) {
       // To properly handle glue/unglue situations with external blocks (ones that aren't reusable after phase 1),
       // we need some extra tracking for our inner sub-block edge case loop.
       this.blockWasAdded = false; // we need to know if a previously-existing block was added, and remove it otherwise.
-      this.firstEdgeCase = true; // the first processEdgeCases call needs to not remove the very-first block
 
       var interval;
 
@@ -434,15 +433,11 @@ define( function( require ) {
                              interval.nextChangeInterval.drawableAfter.pendingParentDrawable :
                              null;
 
-        if ( this.firstEdgeCase ) {
-          this.firstEdgeCase = false;
-
-          // Since we want to remove any afterBlock at the end of its run if we don't have blockWasAdded set, this check
-          // is necessary to check on the first processEdgeCases to see if we have already used this specific block.
-          // Otherwise, we would remove our (potentially very-first) block when it has already been used externally.
-          if ( beforeBlock === afterBlock ) {
-            this.blockWasAdded = true;
-          }
+        // Since we want to remove any afterBlock at the end of its run if we don't have blockWasAdded set, this check
+        // is necessary to see if we have already used this specific block.
+        // Otherwise, we would remove our (potentially very-first) block when it has already been used externally.
+        if ( beforeBlock === afterBlock ) {
+          this.blockWasAdded = true;
         }
 
         sceneryLog && sceneryLog.GreedyVerbose && sceneryLog.GreedyVerbose(
