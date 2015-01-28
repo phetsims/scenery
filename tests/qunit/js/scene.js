@@ -689,4 +689,94 @@
     equal( rect.strokeColor.blue, 0, 'Stroke blue after change' );
     equal( rect.strokeColor.alpha, 1, 'Stroke alpha after change' );
   } );
+
+  test( 'getTrails/getUniqueTrail', function() {
+    var a = new scenery.Node();
+    var b = new scenery.Node();
+    var c = new scenery.Node();
+    var d = new scenery.Node();
+    var e = new scenery.Node();
+
+    // DAG-like structure
+    a.addChild( b );
+    a.addChild( c );
+    b.addChild( d );
+    c.addChild( d );
+    c.addChild( e );
+
+    function compareTrailArrays( a, b ) {
+      // defensive copies
+      a = a.slice();
+      b = b.slice();
+
+      for ( var i = 0; i < a.length; i++ ) {
+        // for each A, remove the first matching one in B
+        for ( var j = 0; j < b.length; j++ ) {
+          if ( a[i].equals( b[j] ) ) {
+            b.splice( j, 1 );
+            break;
+          }
+        }
+      }
+
+      // now B should be empty
+      return b.length === 0;
+    }
+
+    // getUniqueTrail()
+    throws( function() { d.getUniqueTrail(); }, 'D has no unique trail, since there are two' );
+    ok( a.getUniqueTrail().equals( new scenery.Trail( [ a ] ) ), 'a.getUniqueTrail()' );
+    ok( b.getUniqueTrail().equals( new scenery.Trail( [ a, b ] ) ), 'b.getUniqueTrail()' );
+    ok( c.getUniqueTrail().equals( new scenery.Trail( [ a, c ] ) ), 'c.getUniqueTrail()' );
+    ok( e.getUniqueTrail().equals( new scenery.Trail( [ a, c, e ] ) ), 'e.getUniqueTrail()' );
+
+    // getTrails()
+    var trails;
+    trails = a.getTrails();
+    ok( trails.length === 1 && trails[0].equals( new scenery.Trail( [ a ] ) ), 'a.getTrails()' );
+    trails = b.getTrails();
+    ok( trails.length === 1 && trails[0].equals( new scenery.Trail( [ a, b ] ) ), 'b.getTrails()' );
+    trails = c.getTrails();
+    ok( trails.length === 1 && trails[0].equals( new scenery.Trail( [ a, c ] ) ), 'c.getTrails()' );
+    trails = d.getTrails();
+    ok( trails.length === 2 && compareTrailArrays( trails, [ new scenery.Trail( [ a, b, d ] ), new scenery.Trail( [ a, c, d ] ) ]), 'd.getTrails()' );
+    trails = e.getTrails();
+    ok( trails.length === 1 && trails[0].equals( new scenery.Trail( [ a, c, e ] ) ), 'e.getTrails()' );
+
+    // getUniqueTrail( predicate )
+    throws( function() { e.getUniqueTrail( function( node ) { return false; } ); }, 'Fails on false predicate' );
+    throws( function() { e.getUniqueTrail( function( node ) { return false; } ); }, 'Fails on false predicate' );
+    ok( e.getUniqueTrail( function( node ) { return node === a; } ).equals( new scenery.Trail( [ a, c, e ] ) ) );
+    ok( e.getUniqueTrail( function( node ) { return node === c; } ).equals( new scenery.Trail( [ c, e ] ) ) );
+    ok( e.getUniqueTrail( function( node ) { return node === e; } ).equals( new scenery.Trail( [ e ] ) ) );
+    ok( d.getUniqueTrail( function( node ) { return node === b; } ).equals( new scenery.Trail( [ b, d ] ) ) );
+    ok( d.getUniqueTrail( function( node ) { return node === c; } ).equals( new scenery.Trail( [ c, d ] ) ) );
+    ok( d.getUniqueTrail( function( node ) { return node === d; } ).equals( new scenery.Trail( [ d ] ) ) );
+
+    // getTrails( predicate )
+    trails = d.getTrails( function( node ) { return false; } );
+    ok( trails.length === 0 );
+    trails = d.getTrails( function( node ) { return true; } );
+    ok( compareTrailArrays( trails, [
+      new scenery.Trail( [ a, b, d ] ),
+      new scenery.Trail( [ b, d ] ),
+      new scenery.Trail( [ a, c, d ] ),
+      new scenery.Trail( [ c, d ] ),
+      new scenery.Trail( [ d ] )
+    ] ) );
+    trails = d.getTrails( function( node ) { return node === a; } );
+    ok( compareTrailArrays( trails, [
+      new scenery.Trail( [ a, b, d ] ),
+      new scenery.Trail( [ a, c, d ] )
+    ] ) );
+    trails = d.getTrails( function( node ) { return node === b; } );
+    ok( compareTrailArrays( trails, [
+      new scenery.Trail( [ b, d ] )
+    ] ) );
+    trails = d.getTrails( function( node ) { return node.parents.length === 1; } );
+    ok( compareTrailArrays( trails, [
+      new scenery.Trail( [ b, d ] ),
+      new scenery.Trail( [ c, d ] )
+    ] ) );
+  } );
 })();

@@ -42,6 +42,10 @@ define( function( require ) {
 
   var trailUnderPointerOptions = {};
 
+  function defaultTrailPredicate( node ) {
+    return node._parents.length === 0;
+  }
+
   /*
    * Available keys for use in the options parameter object for a vanilla Node (not inherited), in the order they are executed in:
    *
@@ -1656,18 +1660,55 @@ define( function( require ) {
      * Trail operations
      *----------------------------------------------------------------------------*/
 
-    // returns a unique trail (if it exists) where each node in the ancestor chain has 0 or 1 parents
-    getUniqueTrail: function() {
-      var trail = new scenery.Trail();
-      var node = this;
+    /**
+     * @returns {Trail} - Returns the one Trail that starts from a node with no parents (or if the predicate is present,
+     *                    a node that satisfies it), and ends at this node. If more than one Trail would satisfy these
+     *                    conditions, an assertion is thrown (please use getTrails() for those cases).
+     * @param {function( node ) : boolean} [predicate] - If supplied, we will only return
+     */
+    getUniqueTrail: function( predicate ) {
 
-      while ( node ) {
-        trail.addAncestor( node );
-        assert && assert( node._parents.length <= 1 );
-        node = node._parents[ 0 ]; // should be undefined if there aren't any parents
+      // Without a predicate, we'll be able to bail out the instant we hit a node with 2+ parents, and it makes the
+      // logic easier.
+      if ( !predicate ) {
+        var trail = new scenery.Trail();
+        var node = this;
+
+        while ( node ) {
+          assert && assert( node._parents.length <= 1,
+            'getUniqueTrail found a node with ' + node._parents.length + ' parents.' );
+
+          trail.addAncestor( node );
+          node = node._parents[ 0 ]; // should be undefined if there aren't any parents
+        }
+
+        return trail;
       }
+      // With a predicate, we need to explore multiple parents (since the predicate may filter out all but one)
+      else {
+        var trails = this.getTrails( predicate );
 
-      return trail;
+        assert && assert( trails.length === 1,
+          'getUniqueTrail found ' + trails.length + ' matching trails for the predicate' );
+
+        return trails[0];
+      }
+    },
+
+    /**
+     * @returns {Trail[]} - An array of all Trails that start from nodes with no parent (or if a predicate is present,
+     *                      those that satisfy the predicate), and ends at this node.
+     * @param {function( node ) : boolean} [predicate] - If supplied, we will only return Trails rooted at nodes that
+     *                                                   satisfy predicate( node ) == true.
+     */
+    getTrails: function( predicate ) {
+      predicate = predicate || defaultTrailPredicate;
+
+      var trails = [];
+      var trail = new scenery.Trail( this );
+      scenery.Trail.appendAncestorTrailsWithPredicate( trails, trail, predicate );
+
+      return trails;
     },
 
     // all nodes in the connected component, returned in an arbitrary order
