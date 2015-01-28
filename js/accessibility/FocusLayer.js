@@ -26,6 +26,34 @@ define( function( require ) {
    */
   function FocusLayer( useTween ) {
 
+    var TWEEN = window.TWEEN;
+
+    // Build an adapter that has the same interface as TWEEN to make it possible to show focus regions
+    // animating instantly, without TWEEN.js support
+    if ( !TWEEN ) {
+      TWEEN = {
+        Easing: { Cubic: { InOut: true } },
+        Tween: function( object ) {
+          return {
+            to: function( finalState ) {
+              focusedBoundsProperty.set( {
+                x: finalState.x,
+                y: finalState.y,
+                width: finalState.width,
+                height: finalState.height
+              } );
+              return this;
+            },
+            easing: function() {return this;},
+            onUpdate: function( callback ) {return this;},
+            onComplete: function() {return this;},
+            start: function() {},
+            stop: function() {}
+          };
+        }
+      };
+    }
+
     // Return an object optimal for TWEEN
     var boundsToObject = function( bounds ) {
       return { x: bounds.x, y: bounds.y, width: bounds.width, height: bounds.height };
@@ -56,22 +84,16 @@ define( function( require ) {
           tween = null;
         }
         // For accessibility animation, scenery requires the TWEEN.js library
-        if ( useTween && typeof( TWEEN ) !== 'undefined' ) {
-          tween = new TWEEN.Tween( boundsToObject( previousFocusRectangle ) ).
-            to( boundsToObject( focusRectangle ), 300 ).
-            easing( TWEEN.Easing.Cubic.InOut ).
-            onUpdate( function() {
-              console.log( 'ou' );
-              focusedBoundsProperty.set( { x: this.x, y: this.y, width: this.width, height: this.height } );
-            } ).
-            onComplete( function() {
-              tween = null;
-            } ).
-            start();
-        }
-        else {
-          focusedBoundsProperty.set( focusRectangle );
-        }
+        tween = new TWEEN.Tween( boundsToObject( previousFocusRectangle ) ).
+          to( boundsToObject( focusRectangle ), 300 ).
+          easing( TWEEN.Easing.Cubic.InOut ).
+          onUpdate( function() {
+            focusedBoundsProperty.set( { x: this.x, y: this.y, width: this.width, height: this.height } );
+          } ).
+          onComplete( function() {
+            tween = null;
+          } ).
+          start();
       }
       else if ( focusedInstance && previousFocusedInstance === null ) {
         focusedBoundsProperty.value = focusedInstance.node.getGlobalBounds();
