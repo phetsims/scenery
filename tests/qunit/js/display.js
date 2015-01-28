@@ -477,4 +477,32 @@
     expect( 0 );
   } );
 
+  test( 'Stitching problem A (GitHub Issue #339)', function() {
+    var scene = new scenery.Node();
+    var display = new scenery.Display( scene );
+
+    var a = new scenery.Rectangle( 0, 0, 100, 50, { fill: 'red' } );
+    var b = new scenery.Rectangle( 0, 0, 50, 50, { fill: 'blue' } );
+    var c = new scenery.DOM( document.createElement( 'div' ) );
+    var d = new scenery.Rectangle( 100, 0, 100, 50, { fill: 'red' } );
+    var e = new scenery.Rectangle( 100, 0, 50, 50, { fill: 'blue' } );
+
+    var f = new scenery.Rectangle( 0, 50, 100, 50, { fill: 'green' } );
+    var g = new scenery.DOM( document.createElement( 'div' ) );
+
+    scene.addChild( a );
+    scene.addChild( f );
+    scene.addChild( b );
+    scene.addChild( c );
+    scene.addChild( d );
+    scene.addChild( e );
+    display.updateDisplay();
+
+    scene.removeChild( f );
+    scene.insertChild( 4, g );
+    display.updateDisplay();
+
+    expect( 0 );
+  } );
+
 })();

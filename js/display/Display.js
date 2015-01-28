@@ -847,7 +847,7 @@ define( function( require ) {
         }
         return count;
       }
-      result += 'Instances: ' + instanceCount( this._baseInstance ) + '<br>';
+      result += this._baseInstance ? ( 'Instances: ' + instanceCount( this._baseInstance ) + '<br>' ) : '';
 
       function drawableCount( drawable ) {
         var count = 1; // for us
@@ -866,7 +866,7 @@ define( function( require ) {
         }
         return count;
       }
-      result += 'Drawables: ' + drawableCount( this._rootBackbone ) + '<br>';
+      result += this._rootBackbone ? ( 'Drawables: ' + drawableCount( this._rootBackbone ) + '<br>' ) : '';
 
       function blockSummary( block ) {
         // ensure we are a block

@@ -18,12 +18,31 @@ define( function( require ) {
   var SVGGroup = require( 'SCENERY/display/SVGGroup' );
   var Util = require( 'SCENERY/util/Util' );
 
+  /**
+   * Main constructor for SVGBlock.
+   *
+   * @param {Display} display - the scenery Display this SVGBlock will appear in
+   * @param {number} renderer - the bitmask for the renderer, see Renderer.js
+   * @param {Instance} transformRootInstance - TODO: Documentation
+   * @param {Instance} filterRootInstance - TODO: Documentation
+   * @constructor
+   */
   scenery.SVGBlock = function SVGBlock( display, renderer, transformRootInstance, filterRootInstance ) {
     this.initialize( display, renderer, transformRootInstance, filterRootInstance );
   };
   var SVGBlock = scenery.SVGBlock;
 
   inherit( FittedBlock, SVGBlock, {
+
+    /**
+     * Initialize function, which is required since SVGBlock instances are pooled by scenery.
+     *
+     * @param {Display} display - the scenery Display this SVGBlock will appear in
+     * @param {number} renderer - the bitmask for the renderer, see Renderer.js
+     * @param {Instance} transformRootInstance - TODO: Documentation
+     * @param {Instance} filterRootInstance - TODO: Documentation
+     * @returns {FittedBlock}
+     */
     initialize: function( display, renderer, transformRootInstance, filterRootInstance ) {
       this.initializeFittedBlock( display, renderer, transformRootInstance );
 
@@ -31,14 +50,21 @@ define( function( require ) {
 
       this.dirtyGroups = cleanArray( this.dirtyGroups );
       this.dirtyDrawables = cleanArray( this.dirtyDrawables );
-      this.paintMap = {}; // maps {string} paint.id => { count: {number}, paint: {Paint}, def: {SVGElement} }
+
+      // Keep track of how many times each Paint is used in this SVGBlock so that when all usages have been eliminated
+      // we can remove the SVG def from our SVG tree to prevent memory leaks, etc.
+      // maps {string} paint.id => { count: {number}, paint: {Paint}, def: {SVGElement} }
+      // @private
+      this.paintMap = {};
 
       if ( !this.domElement ) {
+
         // main SVG element
         this.svg = document.createElementNS( scenery.svgns, 'svg' );
         this.svg.style.position = 'absolute';
         this.svg.style.left = '0';
         this.svg.style.top = '0';
+
         //OHTWO TODO: why would we clip the individual layers also? Seems like a potentially useless performance loss
         // this.svg.style.clip = 'rect(0px,' + width + 'px,' + height + 'px,0px)';
         this.svg.style[ 'pointer-events' ] = 'none';
@@ -55,10 +81,13 @@ define( function( require ) {
 
       // reset what layer fitting can do (this.forceAcceleration set in fitted block initialization)
       Util.prepareForTransform( this.svg, this.forceAcceleration );
+
+      // TODO: Why are there such different ways of clearing the transform for this.svg vs this.baseTransformGroup?
       Util.unsetTransform( this.svg ); // clear out any transforms that could have been previously applied
       this.baseTransformGroup.setAttribute( 'transform', '' ); // no base transform
 
-      var instanceClosestToRoot = transformRootInstance.trail.nodes.length > filterRootInstance.trail.nodes.length ? filterRootInstance : transformRootInstance;
+      var instanceClosestToRoot = transformRootInstance.trail.nodes.length > filterRootInstance.trail.nodes.length ?
+                                  filterRootInstance : transformRootInstance;
 
       this.rootGroup = SVGGroup.createFromPool( this, instanceClosestToRoot, null );
       this.baseTransformGroup.appendChild( this.rootGroup.svgGroup );
@@ -155,13 +184,18 @@ define( function( require ) {
       this.svg.setAttribute( 'height', this.fitBounds.height );
     },
 
+    /**
+     * Update the SVGBlock as part of a render step.  Called from Display.updateDisplay => BackboneDrawable.updateDisplay
+     */
     update: function() {
       sceneryLog && sceneryLog.SVGBlock && sceneryLog.SVGBlock( 'update #' + this.id );
 
+      // TODO: Shouldn't calling update on a disposed SVGBlock be an assertion error?
       if ( this.dirty && !this.disposed ) {
         this.dirty = false;
 
         //OHTWO TODO: call here!
+        // TODO: What does the above TODO mean?
         while ( this.dirtyGroups.length ) {
           var group = this.dirtyGroups.pop();
 
@@ -174,6 +208,7 @@ define( function( require ) {
           var drawable = this.dirtyDrawables.pop();
 
           // if this drawable has been disposed or moved to another block, don't mess with it
+          // TODO: If it was moved to another block, why might it still appear in our list?  Shouldn't that be an assertion check?
           if ( drawable.parentDrawable === this ) {
             drawable.update();
           }

@@ -1512,7 +1512,7 @@ define( function( require ) {
       return ( this._rendererBitmask & scenery.bitmaskSupportsWebGL ) !== 0;
     },
 
-    supportsPixi:function(){
+    supportsPixi: function() {
       return ( this._rendererBitmask & scenery.bitmaskSupportsPixi) !== 0;
     },
 
@@ -2253,6 +2253,8 @@ define( function( require ) {
     get globalBounds() { return this.getGlobalBounds(); },
     get visibleBounds() { return this.getVisibleBounds(); },
     get id() { return this.getId(); },
+
+    // getInstances is marked as @private.  TODO: Perhaps this should be too?
     get instances() { return this.getInstances(); },
 
     mutate: function( options ) {
@@ -2439,7 +2441,10 @@ define( function( require ) {
     };
 
     // ES5 getter and setter
-    Object.defineProperty( Node.prototype, propertyName, { set: Node.prototype[ setterMethod ], get: Node.prototype[ getterMethod ] } );
+    Object.defineProperty( Node.prototype, propertyName, {
+      set: Node.prototype[ setterMethod ],
+      get: Node.prototype[ getterMethod ]
+    } );
   }
 
   // arguments are more explicit so text-searches will hopefully identify this code.
@@ -2466,7 +2471,8 @@ define( function( require ) {
     'children', 'cursor', 'visible', 'pickable', 'opacity', 'matrix', 'translation', 'x', 'y', 'rotation', 'scale',
     'leftTop', 'centerTop', 'rightTop', 'leftCenter', 'center', 'rightCenter', 'leftBottom', 'centerBottom', 'rightBottom',
     'left', 'right', 'top', 'bottom', 'centerX', 'centerY', 'renderer', 'rendererOptions',
-    'layerSplit', 'usesOpacity', 'mouseArea', 'touchArea', 'clipArea', 'transformBounds', 'focusable', 'focusIndicator'
+    'layerSplit', 'usesOpacity', 'mouseArea', 'touchArea', 'clipArea', 'transformBounds', 'focusable', 'focusIndicator',
+    'textDescription'
   ];
 
   return Node;

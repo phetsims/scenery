@@ -42,6 +42,7 @@ define( function( require ) {
       this.oldFitBounds = Bounds2.NOTHING.copy(); // copy for storage
       this.fitOffset = new Vector2();
 
+      // TODO: I can't find documentation about forceAcceleration anywhere.  How is this used?  What is it for?  How does it work?
       this.forceAcceleration = ( renderer & Renderer.bitmaskForceAcceleration ) !== 0;
 
       if ( this.fit === FittedBlock.FULL_DISPLAY ) {
