@@ -1512,7 +1512,7 @@ define( function( require ) {
       return ( this._rendererBitmask & scenery.bitmaskSupportsWebGL ) !== 0;
     },
 
-    supportsPixi:function(){
+    supportsPixi: function() {
       return ( this._rendererBitmask & scenery.bitmaskSupportsPixi) !== 0;
     },
 
@@ -2441,7 +2441,10 @@ define( function( require ) {
     };
 
     // ES5 getter and setter
-    Object.defineProperty( Node.prototype, propertyName, { set: Node.prototype[ setterMethod ], get: Node.prototype[ getterMethod ] } );
+    Object.defineProperty( Node.prototype, propertyName, {
+      set: Node.prototype[ setterMethod ],
+      get: Node.prototype[ getterMethod ]
+    } );
   }
 
   // arguments are more explicit so text-searches will hopefully identify this code.
