@@ -12,7 +12,7 @@ define( function( require ) {
   var inherit = require( 'PHET_CORE/inherit' );
   var Input = require( 'SCENERY/input/Input' );
 
-  function AriaSpeech() {};
+  function AriaSpeech() {}
 
   var ariaSpeechDiv = null;
 
