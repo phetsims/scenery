@@ -18,12 +18,31 @@ define( function( require ) {
   var SVGGroup = require( 'SCENERY/display/SVGGroup' );
   var Util = require( 'SCENERY/util/Util' );
 
+  /**
+   * Main constructor for SVGBlock.
+   *
+   * @param {Display} display - the scenery Display this SVGBlock will appear in
+   * @param {number} renderer - the bitmask for the renderer, see Renderer.js
+   * @param {Instance} transformRootInstance - TODO: Documentation
+   * @param {Instance} filterRootInstance - TODO: Documentation
+   * @constructor
+   */
   scenery.SVGBlock = function SVGBlock( display, renderer, transformRootInstance, filterRootInstance ) {
     this.initialize( display, renderer, transformRootInstance, filterRootInstance );
   };
   var SVGBlock = scenery.SVGBlock;
 
   inherit( FittedBlock, SVGBlock, {
+
+    /**
+     * Initialize function, which is required since SVGBlock instances are pooled by scenery.
+     *
+     * @param {Display} display - the scenery Display this SVGBlock will appear in
+     * @param {number} renderer - the bitmask for the renderer, see Renderer.js
+     * @param {Instance} transformRootInstance - TODO: Documentation
+     * @param {Instance} filterRootInstance - TODO: Documentation
+     * @returns {FittedBlock}
+     */
     initialize: function( display, renderer, transformRootInstance, filterRootInstance ) {
       this.initializeFittedBlock( display, renderer, transformRootInstance );
 
@@ -34,11 +53,13 @@ define( function( require ) {
       this.paintMap = {}; // maps {string} paint.id => { count: {number}, paint: {Paint}, def: {SVGElement} }
 
       if ( !this.domElement ) {
+
         // main SVG element
         this.svg = document.createElementNS( scenery.svgns, 'svg' );
         this.svg.style.position = 'absolute';
         this.svg.style.left = '0';
         this.svg.style.top = '0';
+
         //OHTWO TODO: why would we clip the individual layers also? Seems like a potentially useless performance loss
         // this.svg.style.clip = 'rect(0px,' + width + 'px,' + height + 'px,0px)';
         this.svg.style[ 'pointer-events' ] = 'none';
@@ -55,10 +76,13 @@ define( function( require ) {
 
       // reset what layer fitting can do (this.forceAcceleration set in fitted block initialization)
       Util.prepareForTransform( this.svg, this.forceAcceleration );
+
+      // TODO: Why are there such different ways of clearing the transform for this.svg vs this.baseTransformGroup?
       Util.unsetTransform( this.svg ); // clear out any transforms that could have been previously applied
       this.baseTransformGroup.setAttribute( 'transform', '' ); // no base transform
 
-      var instanceClosestToRoot = transformRootInstance.trail.nodes.length > filterRootInstance.trail.nodes.length ? filterRootInstance : transformRootInstance;
+      var instanceClosestToRoot = transformRootInstance.trail.nodes.length > filterRootInstance.trail.nodes.length ?
+                                  filterRootInstance : transformRootInstance;
 
       this.rootGroup = SVGGroup.createFromPool( this, instanceClosestToRoot, null );
       this.baseTransformGroup.appendChild( this.rootGroup.svgGroup );
