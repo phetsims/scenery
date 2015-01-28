@@ -50,7 +50,12 @@ define( function( require ) {
 
       this.dirtyGroups = cleanArray( this.dirtyGroups );
       this.dirtyDrawables = cleanArray( this.dirtyDrawables );
-      this.paintMap = {}; // maps {string} paint.id => { count: {number}, paint: {Paint}, def: {SVGElement} }
+
+      // Keep track of how many times each Paint is used in this SVGBlock so that when all usages have been eliminated
+      // we can remove the SVG def from our SVG tree to prevent memory leaks, etc.
+      // maps {string} paint.id => { count: {number}, paint: {Paint}, def: {SVGElement} }
+      // @private
+      this.paintMap = {};
 
       if ( !this.domElement ) {
 
@@ -179,13 +184,18 @@ define( function( require ) {
       this.svg.setAttribute( 'height', this.fitBounds.height );
     },
 
+    /**
+     * Update the SVGBlock as part of a render step.  Called from Display.updateDisplay => BackboneDrawable.updateDisplay
+     */
     update: function() {
       sceneryLog && sceneryLog.SVGBlock && sceneryLog.SVGBlock( 'update #' + this.id );
 
+      // TODO: Shouldn't calling update on a disposed SVGBlock be an assertion error?
       if ( this.dirty && !this.disposed ) {
         this.dirty = false;
 
         //OHTWO TODO: call here!
+        // TODO: What does the above TODO mean?
         while ( this.dirtyGroups.length ) {
           var group = this.dirtyGroups.pop();
 
@@ -198,6 +208,7 @@ define( function( require ) {
           var drawable = this.dirtyDrawables.pop();
 
           // if this drawable has been disposed or moved to another block, don't mess with it
+          // TODO: If it was moved to another block, why might it still appear in our list?  Shouldn't that be an assertion check?
           if ( drawable.parentDrawable === this ) {
             drawable.update();
           }
