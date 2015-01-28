@@ -20,39 +20,15 @@ define( function( require ) {
   var Property = require( 'AXON/Property' );
 
   /**
-   * @param {boolean} useTween - whether or not the focus rectangles should be animated using sole/TWEEN
-   *                           - TWEEN must also be available as a global for this to work.
+   * @param {object} [tweenFactory] - optional tween library that will be used to update the location of the focus region
+   *                                - this object must conform to the TWEEN API as used here (somewhat complex)
+   *                                - if not provided, the default (instant) tween factory will be used
+   *                                - To show animated focus regions, pass in an instance of sole/TWEEN
    * @constructor
    */
-  function FocusLayer( useTween ) {
+  function FocusLayer( tweenFactory ) {
 
-    var TWEEN = window.TWEEN;
-
-    // Build an adapter that has the same interface as TWEEN to make it possible to show focus regions
-    // animating instantly, without TWEEN.js support
-    if ( !TWEEN ) {
-      TWEEN = {
-        Easing: { Cubic: { InOut: true } },
-        Tween: function( object ) {
-          return {
-            to: function( finalState ) {
-              focusedBoundsProperty.set( {
-                x: finalState.x,
-                y: finalState.y,
-                width: finalState.width,
-                height: finalState.height
-              } );
-              return this;
-            },
-            easing: function() {return this;},
-            onUpdate: function( callback ) {return this;},
-            onComplete: function() {return this;},
-            start: function() {},
-            stop: function() {}
-          };
-        }
-      };
-    }
+    tweenFactory = tweenFactory || FocusLayer.INSTANT_TWEEN_FACTORY;
 
     // Return an object optimal for TWEEN
     var boundsToObject = function( bounds ) {
@@ -84,9 +60,9 @@ define( function( require ) {
           tween = null;
         }
         // For accessibility animation, scenery requires the TWEEN.js library
-        tween = new TWEEN.Tween( boundsToObject( previousFocusRectangle ) ).
+        tween = new tweenFactory.Tween( boundsToObject( previousFocusRectangle ) ).
           to( boundsToObject( focusRectangle ), 300 ).
-          easing( TWEEN.Easing.Cubic.InOut ).
+          easing( tweenFactory.Easing.Cubic.InOut ).
           onUpdate( function() {
             focusedBoundsProperty.set( { x: this.x, y: this.y, width: this.width, height: this.height } );
           } ).
@@ -151,5 +127,30 @@ define( function( require ) {
     Node.call( this, { children: [ this.focusRectangle, this.focusCursor ] } );
   }
 
-  return inherit( Node, FocusLayer );
+  return inherit( Node, FocusLayer, {}, {
+
+    // An implementation of the tween factory interface that shows instantly-moving focus regions without TWEEN.js support
+    INSTANT_TWEEN_FACTORY: {
+      Easing: { Cubic: { InOut: true } },
+      Tween: function() {
+        var instance = {
+          to: function( finalState ) {
+            this.finalState = finalState;
+            return this;
+          },
+          easing: function() {return this;},
+          onUpdate: function( callback ) {
+            this.callback = callback;
+            return this;
+          },
+          onComplete: function() {return this;},
+          start: function() {
+            this.callback.call( this.finalState );
+          },
+          stop: function() {}
+        };
+        return instance;
+      }
+    }
+  } );
 } );
