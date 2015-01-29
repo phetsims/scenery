@@ -31,6 +31,7 @@
 
   <script src="../../build/production/scenery.min.js"></script>
 
+  <!-- Loads the code needed to run unit tests for each particular library/codebase -->
   <script src="unit-tests.js"></script>
   <script src="../../../kite/tests/qunit/unit-tests.js"></script>
   <script src="../../../dot/tests/qunit/unit-tests.js"></script>
@@ -38,7 +39,9 @@
 
 </head>
 <body>
+<!-- Where test results HTML is placed -->
 <div id="qunit"></div>
+<!-- Div for holding temporary HTML content needed by tests, which is reset by QUnit before every test -->
 <div id="qunit-fixture">
 </div>
 <div id="display"></div>
