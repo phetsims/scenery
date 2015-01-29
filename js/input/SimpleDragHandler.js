@@ -192,12 +192,7 @@ define( function( require ) {
 
     // mouse/touch down on this node
     down: function( event ) {
-      if ( event && event.pointer && event.pointer.isKey ) {
-        //Key down cannot start a drag, see #333
-      }
-      else {
-        this.tryToSnag( event );
-      }
+      this.tryToSnag( event );
     },
 
     // touch enters this node
