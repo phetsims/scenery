@@ -81,6 +81,11 @@ define( function( require ) {
       else {
         this.invalidateSelf( Bounds2.NOTHING );
       }
+
+      var stateLen = this._drawables.length;
+      for ( var i = 0; i < stateLen; i++ ) {
+        this._drawables[ i ].markDirtyImage();
+      }
     },
 
     getImage: function() {
@@ -133,11 +138,6 @@ define( function( require ) {
         this.invalidateSupportedRenderers();
 
         this._image = image;
-
-        var stateLen = this._drawables.length;
-        for ( var i = 0; i < stateLen; i++ ) {
-          this._drawables[ i ].markDirtyImage();
-        }
 
         this.invalidateImage(); // yes, if we aren't loaded yet this will give us 0x0 bounds
       }
