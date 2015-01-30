@@ -652,6 +652,22 @@ define( function( require ) {
     return a.slice( 0, Trail.branchIndex( a, b ) );
   };
 
+  Trail.appendAncestorTrailsWithPredicate = function( trailResults, trail, predicate ) {
+    if ( predicate( trail.rootNode() ) ) {
+      trailResults.push( trail.copy() );
+    }
+
+    var root = trail.rootNode();
+    var parentCount = root._parents.length;
+    for ( var i = 0; i < parentCount; i++ ) {
+      var parent = root._parents[i];
+
+      trail.addAncestor( parent );
+      Trail.appendAncestorTrailsWithPredicate( trailResults, trail, predicate );
+      trail.removeAncestor();
+    }
+  };
+
   /*
    * Fires subtree(trail) or self(trail) on the callbacks to create disjoint subtrees (trails) that cover exactly the nodes
    * inclusively between a and b in rendering order.

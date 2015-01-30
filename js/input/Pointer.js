@@ -24,6 +24,8 @@ define( function( require ) {
   var Pointer = scenery.Pointer;
 
   inherit( Object, Pointer, {
+    firesGenericEvent: true, // e.g. fires 'down' in addition to something like 'keydown'
+
     addInputListener: function( listener ) {
       assert && assert( !_.contains( this.listeners, listener ) );
 

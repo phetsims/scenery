@@ -339,9 +339,7 @@ define( function( require ) {
 
         var focusedInstance = Input.focusedInstance;
         if ( focusedInstance && focusedInstance.node ) {
-          var trail = focusedInstance.node.getUniqueTrail();//TODO: Is this right?
-
-          this.dispatchEvent( trail, 'down', key, event, true );
+          this.dispatchEvent( focusedInstance.trail, 'down', key, event, true );
         }
       },
 
@@ -368,8 +366,7 @@ define( function( require ) {
           this.removePointer( key );
           var focusedInstance = Input.focusedInstance;
           if ( focusedInstance && focusedInstance.node ) {
-            var trail = focusedInstance.node.getUniqueTrail();//TODO: Is this right?
-            this.dispatchEvent( trail, 'up', key, event, true );
+            this.dispatchEvent( focusedInstance.trail, 'up', key, event, true );
           }
         }
       },
@@ -745,7 +742,7 @@ define( function( require ) {
             listener[ specificType ]( inputEvent );
             aborted = inputEvent.aborted;
           }
-          if ( !aborted && listener[ type ] ) {
+          if ( pointer.firesGenericEvent && !aborted && listener[ type ] ) {
             listener[ type ]( inputEvent );
             aborted = inputEvent.aborted;
           }
@@ -780,7 +777,7 @@ define( function( require ) {
               listener[ specificType ]( inputEvent );
               aborted = inputEvent.aborted;
             }
-            if ( !aborted && listener[ type ] ) {
+            if ( pointer.firesGenericEvent && !aborted && listener[ type ] ) {
               listener[ type ]( inputEvent );
               aborted = inputEvent.aborted;
             }
