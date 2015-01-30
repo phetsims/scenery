@@ -859,8 +859,8 @@
     ];
 
     var filterSubset = function( array, queryParameterKey ) {
-      if ( phetcommon.getQueryParameter( queryParameterKey ) ) {
-        var test = phetcommon.getQueryParameter( queryParameterKey );
+      if ( phet.phetcommon.getQueryParameter( queryParameterKey ) ) {
+        var test = phet.phetcommon.getQueryParameter( queryParameterKey );
         var testIndices = test.split( '.' ).map( function( test ) {
           return parseInt( test, 10 );
         } );
