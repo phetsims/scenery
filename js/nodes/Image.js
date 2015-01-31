@@ -211,32 +211,34 @@ define( function( require ) {
    * Rendering State mixin (DOM/SVG) //TODO: Does this also apply to WebGL?
    *----------------------------------------------------------------------------*/
 
-  var ImageStatefulDrawableMixin = Image.ImageStatefulDrawableMixin = function( drawableType ) {
-    var proto = drawableType.prototype;
+  Image.ImageStatefulDrawable = {
+    mixin: function( drawableType ) {
+      var proto = drawableType.prototype;
 
-    // initializes, and resets (so we can support pooled states)
-    proto.initializeState = function() {
-      this.paintDirty = true; // flag that is marked if ANY "paint" dirty flag is set (basically everything except for transforms, so we can accelerated the transform-only case)
-      this.dirtyImage = true;
+      // initializes, and resets (so we can support pooled states)
+      proto.initializeState = function() {
+        this.paintDirty = true; // flag that is marked if ANY "paint" dirty flag is set (basically everything except for transforms, so we can accelerated the transform-only case)
+        this.dirtyImage = true;
 
-      return this; // allow for chaining
-    };
+        return this; // allow for chaining
+      };
 
-    // catch-all dirty, if anything that isn't a transform is marked as dirty
-    proto.markPaintDirty = function() {
-      this.paintDirty = true;
-      this.markDirty();
-    };
+      // catch-all dirty, if anything that isn't a transform is marked as dirty
+      proto.markPaintDirty = function() {
+        this.paintDirty = true;
+        this.markDirty();
+      };
 
-    proto.markDirtyImage = function() {
-      this.dirtyImage = true;
-      this.markPaintDirty();
-    };
+      proto.markDirtyImage = function() {
+        this.dirtyImage = true;
+        this.markPaintDirty();
+      };
 
-    proto.setToCleanState = function() {
-      this.paintDirty = false;
-      this.dirtyImage = false;
-    };
+      proto.setToCleanState = function() {
+        this.paintDirty = false;
+        this.dirtyImage = false;
+      };
+    }
   };
 
   /*---------------------------------------------------------------------------*
@@ -303,11 +305,9 @@ define( function( require ) {
     }
   } );
 
-  /* jshint -W064 */
-  ImageStatefulDrawableMixin( ImageDOMDrawable );
+  Image.ImageStatefulDrawable.mixin( ImageDOMDrawable );
 
-  /* jshint -W064 */
-  SelfDrawable.PoolableMixin( ImageDOMDrawable );
+  SelfDrawable.Poolable.mixin( ImageDOMDrawable );
 
   /*---------------------------------------------------------------------------*
    * SVG Rendering
@@ -315,7 +315,7 @@ define( function( require ) {
 
   Image.ImageSVGDrawable = SVGSelfDrawable.createDrawable( {
     type: function ImageSVGDrawable( renderer, instance ) { this.initialize( renderer, instance ); },
-    stateType: ImageStatefulDrawableMixin,
+    stateType: Image.ImageStatefulDrawable.mixin,
     initialize: function( renderer, instance ) {
       if ( !this.svgElement ) {
         this.svgElement = document.createElementNS( scenery.svgns, 'image' );
@@ -434,11 +434,9 @@ define( function( require ) {
   } );
 
   // set up pooling
-  /* jshint -W064 */
-  SelfDrawable.PoolableMixin( Image.ImageWebGLDrawable );
+  SelfDrawable.Poolable.mixin( Image.ImageWebGLDrawable );
 
-  /* jshint -W064 */
-  ImageStatefulDrawableMixin( Image.ImageWebGLDrawable );
+  Image.ImageStatefulDrawable.mixin( Image.ImageWebGLDrawable );
 
 
   /*---------------------------------------------------------------------------*
@@ -525,11 +523,9 @@ define( function( require ) {
   } );
 
   // set up pooling
-  /* jshint -W064 */
-  SelfDrawable.PoolableMixin( Image.ImagePixiDrawable );
+  SelfDrawable.Poolable.mixin( Image.ImagePixiDrawable );
 
-  /* jshint -W064 */
-  ImageStatefulDrawableMixin( Image.ImagePixiDrawable );
+  Image.ImageStatefulDrawable.mixin( Image.ImagePixiDrawable );
 
   return Image;
 } );

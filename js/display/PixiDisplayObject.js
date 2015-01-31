@@ -12,7 +12,7 @@ define( function( require ) {
   'use strict';
 
   var inherit = require( 'PHET_CORE/inherit' );
-  var PoolableMixin = require( 'PHET_CORE/PoolableMixin' );
+  var Poolable = require( 'PHET_CORE/Poolable' );
   var cleanArray = require( 'PHET_CORE/cleanArray' );
   var scenery = require( 'SCENERY/scenery' );
 
@@ -400,8 +400,7 @@ define( function( require ) {
     }
   };
 
-  /* jshint -W064 */
-  PoolableMixin( PixiDisplayObject, {
+  Poolable.mixin( PixiDisplayObject, {
     constructorDuplicateFactory: function( pool ) {
       return function( block, instance, parent ) {
         if ( pool.length ) {

@@ -226,8 +226,7 @@ define( function( require ) {
     stateType( type );
 
     // set up pooling
-    /* jshint -W064 */
-    SelfDrawable.PoolableMixin( type );
+    SelfDrawable.Poolable.mixin( type );
 
     return type;
   };

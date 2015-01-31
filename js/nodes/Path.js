@@ -179,47 +179,47 @@ define( function( require ) {
 
   // mix in fill/stroke handling code. for now, this is done after 'shape' is added to the mutatorKeys so that stroke parameters
   // get set first
-  /* jshint -W064 */
-  Paintable( Path );
+  Paintable.mixin( Path );
 
   /*---------------------------------------------------------------------------*
    * Rendering State mixin (DOM/SVG)
    *----------------------------------------------------------------------------*/
 
-  var PathStatefulDrawableMixin = Path.PathStatefulDrawableMixin = function( drawableType ) {
-    var proto = drawableType.prototype;
+  Path.PathStatefulDrawable = {
+    mixin: function( drawableType ) {
+      var proto = drawableType.prototype;
 
-    // initializes, and resets (so we can support pooled states)
-    proto.initializeState = function() {
-      this.paintDirty = true; // flag that is marked if ANY "paint" dirty flag is set (basically everything except for transforms, so we can accelerated the transform-only case)
-      this.dirtyShape = true;
+      // initializes, and resets (so we can support pooled states)
+      proto.initializeState = function() {
+        this.paintDirty = true; // flag that is marked if ANY "paint" dirty flag is set (basically everything except for transforms, so we can accelerated the transform-only case)
+        this.dirtyShape = true;
 
-      // adds fill/stroke-specific flags and state
-      this.initializePaintableState();
+        // adds fill/stroke-specific flags and state
+        this.initializePaintableState();
 
-      return this; // allow for chaining
-    };
+        return this; // allow for chaining
+      };
 
-    // catch-all dirty, if anything that isn't a transform is marked as dirty
-    proto.markPaintDirty = function() {
-      this.paintDirty = true;
-      this.markDirty();
-    };
+      // catch-all dirty, if anything that isn't a transform is marked as dirty
+      proto.markPaintDirty = function() {
+        this.paintDirty = true;
+        this.markDirty();
+      };
 
-    proto.markDirtyShape = function() {
-      this.dirtyShape = true;
-      this.markPaintDirty();
-    };
+      proto.markDirtyShape = function() {
+        this.dirtyShape = true;
+        this.markPaintDirty();
+      };
 
-    proto.setToCleanState = function() {
-      this.paintDirty = false;
-      this.dirtyShape = false;
+      proto.setToCleanState = function() {
+        this.paintDirty = false;
+        this.dirtyShape = false;
 
-      this.cleanPaintableState();
-    };
+        this.cleanPaintableState();
+      };
 
-    /* jshint -W064 */
-    Paintable.PaintableStatefulDrawableMixin( drawableType );
+      Paintable.PaintableStatefulDrawable.mixin( drawableType );
+    }
   };
 
   /*---------------------------------------------------------------------------*
@@ -228,7 +228,7 @@ define( function( require ) {
 
   Path.PathSVGDrawable = SVGSelfDrawable.createDrawable( {
     type: function PathSVGDrawable( renderer, instance ) { this.initialize( renderer, instance ); },
-    stateType: PathStatefulDrawableMixin,
+    stateType: Path.PathStatefulDrawable.mixin,
     initialize: function( renderer, instance ) {
       if ( !this.svgElement ) {
         this.svgElement = document.createElementNS( scenery.svgns, 'path' );
@@ -477,11 +477,9 @@ define( function( require ) {
   } );
 
   // set up pooling
-  /* jshint -W064 */
-  SelfDrawable.PoolableMixin( Path.PathWebGLDrawable );
+  SelfDrawable.Poolable.mixin( Path.PathWebGLDrawable );
 
-  /* jshint -W064 */
-  PathStatefulDrawableMixin( Path.PathWebGLDrawable );
+  Path.PathStatefulDrawable.mixin( Path.PathWebGLDrawable );
 
 
   return Path;

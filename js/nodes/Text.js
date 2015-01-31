@@ -513,65 +513,65 @@ define( function( require ) {
   Object.defineProperty( Text.prototype, 'boundsMethod', { set: Text.prototype.setBoundsMethod, get: Text.prototype.getBoundsMethod } );
 
   // mix in support for fills and strokes
-  /* jshint -W064 */
-  Paintable( Text );
+  Paintable.mixin( Text );
 
   /*---------------------------------------------------------------------------*
    * Rendering State mixin (DOM/SVG)
    *----------------------------------------------------------------------------*/
 
-  var TextStatefulDrawableMixin = Text.TextStatefulDrawableMixin = function( drawableType ) {
-    var proto = drawableType.prototype;
+  Text.TextStatefulDrawable = {
+    mixin: function( drawableType ) {
+      var proto = drawableType.prototype;
 
-    // initializes, and resets (so we can support pooled states)
-    proto.initializeState = function() {
-      this.paintDirty = true; // flag that is marked if ANY "paint" dirty flag is set (basically everything except for transforms, so we can accelerated the transform-only case)
-      this.dirtyText = true;
-      this.dirtyFont = true;
-      this.dirtyBounds = true;
-      this.dirtyDirection = true;
+      // initializes, and resets (so we can support pooled states)
+      proto.initializeState = function() {
+        this.paintDirty = true; // flag that is marked if ANY "paint" dirty flag is set (basically everything except for transforms, so we can accelerated the transform-only case)
+        this.dirtyText = true;
+        this.dirtyFont = true;
+        this.dirtyBounds = true;
+        this.dirtyDirection = true;
 
-      // adds fill/stroke-specific flags and state
-      this.initializePaintableState();
+        // adds fill/stroke-specific flags and state
+        this.initializePaintableState();
 
-      return this; // allow for chaining
-    };
+        return this; // allow for chaining
+      };
 
-    // catch-all dirty, if anything that isn't a transform is marked as dirty
-    proto.markPaintDirty = function() {
-      this.paintDirty = true;
-      this.markDirty();
-    };
+      // catch-all dirty, if anything that isn't a transform is marked as dirty
+      proto.markPaintDirty = function() {
+        this.paintDirty = true;
+        this.markDirty();
+      };
 
-    proto.markDirtyText = function() {
-      this.dirtyText = true;
-      this.markPaintDirty();
-    };
-    proto.markDirtyFont = function() {
-      this.dirtyFont = true;
-      this.markPaintDirty();
-    };
-    proto.markDirtyBounds = function() {
-      this.dirtyBounds = true;
-      this.markPaintDirty();
-    };
-    proto.markDirtyDirection = function() {
-      this.dirtyDirection = true;
-      this.markPaintDirty();
-    };
+      proto.markDirtyText = function() {
+        this.dirtyText = true;
+        this.markPaintDirty();
+      };
+      proto.markDirtyFont = function() {
+        this.dirtyFont = true;
+        this.markPaintDirty();
+      };
+      proto.markDirtyBounds = function() {
+        this.dirtyBounds = true;
+        this.markPaintDirty();
+      };
+      proto.markDirtyDirection = function() {
+        this.dirtyDirection = true;
+        this.markPaintDirty();
+      };
 
-    proto.setToCleanState = function() {
-      this.paintDirty = false;
-      this.dirtyText = false;
-      this.dirtyFont = false;
-      this.dirtyBounds = false;
-      this.dirtyDirection = false;
+      proto.setToCleanState = function() {
+        this.paintDirty = false;
+        this.dirtyText = false;
+        this.dirtyFont = false;
+        this.dirtyBounds = false;
+        this.dirtyDirection = false;
 
-      this.cleanPaintableState();
-    };
+        this.cleanPaintableState();
+      };
 
-    /* jshint -W064 */
-    Paintable.PaintableStatefulDrawableMixin( drawableType );
+      Paintable.PaintableStatefulDrawable.mixin( drawableType );
+    }
   };
 
   /*---------------------------------------------------------------------------*
@@ -662,11 +662,9 @@ define( function( require ) {
     }
   } );
 
-  /* jshint -W064 */
-  TextStatefulDrawableMixin( TextDOMDrawable );
+  Text.TextStatefulDrawable.mixin( TextDOMDrawable );
 
-  /* jshint -W064 */
-  SelfDrawable.PoolableMixin( TextDOMDrawable );
+  SelfDrawable.Poolable.mixin( TextDOMDrawable );
 
   /*---------------------------------------------------------------------------*
    * SVG rendering
@@ -674,7 +672,7 @@ define( function( require ) {
 
   Text.TextSVGDrawable = SVGSelfDrawable.createDrawable( {
     type: function TextSVGDrawable( renderer, instance ) { this.initialize( renderer, instance ); },
-    stateType: TextStatefulDrawableMixin,
+    stateType: Text.TextStatefulDrawable.mixin,
     initialize: function( renderer, instance ) {
       if ( !this.svgElement ) {
         // NOTE! reference SVG element at top of file copies createSVGElement!
@@ -984,11 +982,9 @@ define( function( require ) {
   } );
 
   // set up pooling
-  /* jshint -W064 */
-  SelfDrawable.PoolableMixin( Text.TextWebGLDrawable );
+  SelfDrawable.Poolable.mixin( Text.TextWebGLDrawable );
 
-  /* jshint -W064 */
-  TextStatefulDrawableMixin( Text.TextWebGLDrawable );
+  Text.TextStatefulDrawable.mixin( Text.TextWebGLDrawable );
 
   return Text;
 } );
