@@ -122,6 +122,7 @@ define( function( require ) {
     } );
 
     // This property indicates which kind of focus region is being shown.  For instance, 'cursor' or 'rectangle'
+    // TODO: Make it possible to add new focus types here on a simulation-by-simulation basis
     var focusIndicatorProperty = new DerivedProperty( [ Input.focusedInstanceProperty ], function( focusedInstance ) {
 
       // the check for node existence seems necessary for handling appearing/disappearing popups
