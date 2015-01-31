@@ -20,17 +20,23 @@ define( function( require ) {
   var Property = require( 'AXON/Property' );
 
   /**
-   * @param {object} [tweenFactory] - optional tween library that will be used to update the location of the focus region
-   *                                - this object must conform to the TWEEN API as used here (somewhat complex)
-   *                                - if not provided, the default (instant) tween factory will be used
-   *                                - To show animated focus regions, pass in an instance of sole/TWEEN
+   * @param {Object} [options] - optional configuration, see constructor
+   *
+   * optional tween factory that will be used to update the location of the focus region
+   *                           - this object must conform to the API as used here (somewhat complex)
+   *                           - if not provided, the default (instant) tween factory will be used
+   *                           - To show animated focus regions, pass in an instance of sole/TWEEN
    * @constructor
    */
-  function FocusLayer( tweenFactory ) {
+  function FocusLayer( options ) {
 
-    tweenFactory = tweenFactory || FocusLayer.INSTANT_TWEEN_FACTORY;
+    options = _.extend( {
+      tweenFactory: FocusLayer.INSTANT_TWEEN_FACTORY
+    }, options );
 
-    // Return an object optimal for TWEEN
+    // Return an object optimal for TWEEN, containing only the required attributes for animation
+    // This is important because TWEEN.js calls all fields + getters to determine initial state
+    // So we must create a minimal pruned object of only the values we wish to animate.
     var boundsToObject = function( bounds ) {
       return { x: bounds.x, y: bounds.y, width: bounds.width, height: bounds.height };
     };
@@ -59,10 +65,12 @@ define( function( require ) {
           tween.stop();
           tween = null;
         }
+
         // For accessibility animation, scenery requires the TWEEN.js library
-        tween = new tweenFactory.Tween( boundsToObject( previousFocusRectangle ) ).
+        // If this API usage is changed, the INSTANT_TWEEN_FACTORY must also be changed correspondingly.
+        tween = new options.tweenFactory.Tween( boundsToObject( previousFocusRectangle ) ).
           to( boundsToObject( focusRectangle ), 300 ).
-          easing( tweenFactory.Easing.Cubic.InOut ).
+          easing( options.tweenFactory.Easing.Cubic.InOut ).
           onUpdate( function() {
             focusedBoundsProperty.set( { x: this.x, y: this.y, width: this.width, height: this.height } );
           } ).
@@ -96,6 +104,8 @@ define( function( require ) {
       }
     };
 
+    // TODO: I (SR) do not understand the relativeTransform/addListener/removePrecompute/etc
+    // It should be discussed with JO
     Input.focusedInstanceProperty.link( function( focusedInstance, previousFocusedInstance ) {
       if ( previousFocusedInstance ) {
         previousFocusedInstance.relativeTransform.removeListener( transformListener );
@@ -110,6 +120,7 @@ define( function( require ) {
       }
     } );
 
+    // This property indicates which kind of focus region is being shown.  For instance, 'cursor' or 'rectangle'
     var focusIndicatorProperty = new DerivedProperty( [ Input.focusedInstanceProperty ], function( focusedInstance ) {
 
       // the check for node existence seems necessary for handling appearing/disappearing popups
@@ -133,7 +144,7 @@ define( function( require ) {
     INSTANT_TWEEN_FACTORY: {
       Easing: { Cubic: { InOut: true } },
       Tween: function() {
-        var instance = {
+        return {
           to: function( finalState ) {
             this.finalState = finalState;
             return this;
@@ -149,7 +160,6 @@ define( function( require ) {
           },
           stop: function() {}
         };
-        return instance;
       }
     }
   } );
