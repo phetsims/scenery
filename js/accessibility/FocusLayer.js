@@ -21,16 +21,17 @@ define( function( require ) {
 
   /**
    * @param {Object} [options] - optional configuration, see constructor
-   *
-   * optional tween factory that will be used to update the location of the focus region
-   *                           - this object must conform to the API as used here (somewhat complex)
-   *                           - if not provided, the default (instant) tween factory will be used
-   *                           - To show animated focus regions, pass in an instance of sole/TWEEN
    * @constructor
    */
   function FocusLayer( options ) {
 
     options = _.extend( {
+
+      /**
+       * tweenFactory - optional tween factory that will be used to update the location of the focus region. This object
+       * must conform to the API as used here (somewhat complex). If not provided, the default (instant) tween factory
+       * will be used. To show animated focus regions, pass in an instance of sole/TWEEN (as done in JOIST/Sim.js)
+       */
       tweenFactory: FocusLayer.INSTANT_TWEEN_FACTORY
     }, options );
 
