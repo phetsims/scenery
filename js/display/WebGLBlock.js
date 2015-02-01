@@ -172,13 +172,6 @@ define( function( require ) {
       sceneryLog && sceneryLog.WebGLBlock && sceneryLog.pop();
     },
 
-    // This method can be called to simulate context loss using the khronos webgl-debug context loss simulator, see #279
-    simulateWebGLContextLoss: function() {
-      console.log( 'simulating webgl context loss in WebGLBlock' );
-      assert && assert( this.scene.webglMakeLostContextSimulatingCanvas );
-      this.canvas.loseContextInNCalls( 5 );
-    },
-
     toString: function() {
       return 'WebGLBlock#' + this.id + '-' + FittedBlock.fitString[ this.fit ];
     }

@@ -86,13 +86,6 @@ define( function( require ) {
    *   height: <current main height>,       // override the main container's height
    *   allowWebGL: true                     // boolean flag that indicates whether scenery is allowed to use WebGL for rendering
    *                                        // Makes it possible to disable WebGL for ease of testing on non-WebGL platforms, see #289
-   *   webglMakeLostContextSimulatingCanvas: false   // Flag to indicate whether the WebGLBlocks should wrap the context with the makeLostContextSimulatingCanvas
-   *                                                 // call from the khronos webgl-debug tools (must be in the path). This is done here because it will be important
-   *                                                 // to easily simulate context loss on many devices, and the canvas must be wrapped before the rendering context is
-   *                                                 // retrieved
-   *   webglContextLossIncremental: false   // Flag to indicate whether an incremental webgl context loss should be triggered on the first context loss
-   *                                        // This is because we must test that the code handles context loss between every pair of adjacent gl calls.
-   * }
    */
   scenery.Display = function Display( rootNode, options ) {
 
@@ -116,9 +109,7 @@ define( function( require ) {
       defaultCursor: 'default',  // what cursor is used when no other cursor is specified
       backgroundColor: null,      // initial background color
 
-      allowWebGL: true,
-      webglMakeLostContextSimulatingCanvas: false,
-      webglContextLossIncremental: false
+      allowWebGL: true
     }, options );
 
     // The (integral, > 0) dimensions of the Display's DOM element (only updates the DOM element on updateDisplay())
