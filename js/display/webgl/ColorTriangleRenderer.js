@@ -15,8 +15,8 @@ define( function( require ) {
   var WebGLUtil = require( 'SCENERY/display/webgl/WebGLUtil' );
 
   // shaders
-  var colorVertexShader = require( 'text!SCENERY/display/webgl/color2d.vert' );
-  var colorFragmentShader = require( 'text!SCENERY/display/webgl/color2d.frag' );
+  var colorVertexShader = require( 'text!SCENERY/display/webgl/colorTriangle.vert' );
+  var colorFragmentShader = require( 'text!SCENERY/display/webgl/colorTriangle.frag' );
 
   /**
    *
