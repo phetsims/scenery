@@ -18,6 +18,7 @@
  * Pointer events spec draft: https://dvcs.w3.org/hg/pointerevents/raw-file/tip/pointerEvents.html
  *
  * @author Jonathan Olson <jonathan.olson@colorado.edu>
+ * @author Sam Reid (PhET Interactive Simulations)
  */
 
 define( function( require ) {
@@ -35,6 +36,22 @@ define( function( require ) {
   require( 'SCENERY/input/Key' );
   var BatchedDOMEvent = require( 'SCENERY/input/BatchedDOMEvent' );
   var Property = require( 'AXON/Property' );
+
+  /**
+   * Find the index of the first occurrence of an element within an array, using equals() comparison.
+   * @param array
+   * @param element
+   * @returns {number}
+   */
+  var indexOfUsingEquality = function( array, element ) {
+    for ( var i = 0; i < array.length; i++ ) {
+      var item = array[ i ];
+      if ( item.equals( element ) ) {
+        return i;
+      }
+    }
+    return -1;
+  };
 
   // listenerTarget is the DOM node (window/document/element) to which DOM event listeners will be attached
   scenery.Input = function Input( rootNode, listenerTarget, batchDOMEvents, enablePointerEvents, pointFromEvent ) {
@@ -337,9 +354,9 @@ define( function( require ) {
         var key = new scenery.Key( event );
         this.addPointer( key );
 
-        var focusedInstance = Input.focusedInstance;
-        if ( focusedInstance && focusedInstance.node ) {
-          this.dispatchEvent( focusedInstance.trail, 'down', key, event, true );
+        var focusedTrail = Input.focusedTrail;
+        if ( focusedTrail ) {
+          this.dispatchEvent( focusedTrail, 'down', key, event, true );
         }
       },
 
@@ -364,9 +381,9 @@ define( function( require ) {
         var key = this.findKeyByEvent( event );
         if ( key ) {
           this.removePointer( key );
-          var focusedInstance = Input.focusedInstance;
-          if ( focusedInstance && focusedInstance.node ) {
-            this.dispatchEvent( focusedInstance.trail, 'up', key, event, true );
+          var focusedTrail = Input.focusedTrail;
+          if ( focusedTrail ) {
+            this.dispatchEvent( focusedTrail, 'up', key, event, true );
           }
         }
       },
@@ -857,46 +874,43 @@ define( function( require ) {
 
       // Since only one element can have focus, Scenery uses a static element to track node focus.  That is, even
       // if there are multiple Displays, only one Node (across all displays) will have focus in this frame.
-      focusedInstanceProperty: new Property( null ),
+      focusedTrailProperty: new Property( null ),
 
       // ES5 getter and setter for axon-style convenience (reportedly at a performance cost)
-      get focusedInstance() {
-        return Input.focusedInstanceProperty.get();
+      get focusedTrail() {
+        return Input.focusedTrailProperty.get();
       },
 
-      set focusedInstance( instance ) {
-        Input.focusedInstanceProperty.set( instance );
+      set focusedTrail( trail ) {
+        Input.focusedTrailProperty.set( trail );
       },
 
       /**
-       * Adds the entire list of instances from the parent instance into the list.  List is modified in-place and returned.
+       * Adds the entire list of trails from the parent instance into the list.  List is modified in-place and returned.
        * This is very expensive (linear in the size of the scene graph), so use sparingly.  Currently used for focus
        * traversal.
-       * @param instance
+       * @param trail
        * @param list
        * @param predicate
        */
-      flattenInstances: function( instance, list, predicate ) {
-        if ( predicate( instance ) ) {
-          list.push( instance );
-        }
-        for ( var i = 0; i < instance.children.length; i++ ) {
-          if ( instance.node.visible ) {
-            Input.flattenInstances( instance.children[ i ], list, predicate );
+      flattenTrails: function( trail, list, predicate ) {
+        while ( trail !== null ) {
+          if ( predicate( trail ) ) {
+            list.push( trail );
           }
+          trail = trail.next();
         }
-        return list;
       },
 
-      getAllFocusableInstances: function() {
-        var focusableInstances = [];
-        var focusable = function( instance ) {
-          return instance.node && instance.node.focusable === true && instance.node.visible === true;
+      getAllFocusableTrails: function() {
+        var focusableTrails = [];
+        var focusable = function( trail ) {
+          return trail.isFocusable() && trail.isVisible();
         };
 
         // If a focus context (such as a popup) has been added, restrict the search to that instances and its children.
         if ( Input.focusContexts.length ) {
-          Input.flattenInstances( Input.focusContexts[ Input.focusContexts.length - 1 ].instance, focusableInstances, focusable );
+          Input.flattenTrails( Input.focusContexts[ Input.focusContexts.length - 1 ].trail, focusableTrails, focusable );
         }
         else {
 
@@ -905,54 +919,58 @@ define( function( require ) {
           for ( var i = 0; i < Display.displays.length; i++ ) {
             var display = Display.displays[ i ];
 
-            // Add to the list of all focusable items across Displays
-            if ( display._baseInstance ) {
-              Input.flattenInstances( display._baseInstance, focusableInstances, focusable );
+            var rootNode = display.rootNode;
+            var trails = rootNode.getTrails();
+
+            for ( var k = 0; k < trails.length; k++ ) {
+              var trail = trails[ k ];
+
+              // Add to the list of all focusable items across Displays & Trails
+              Input.flattenTrails( trail, focusableTrails, focusable );
             }
           }
         }
-        return focusableInstances;
+        return focusableTrails;
       },
 
-      getNextFocusableInstance: function( deltaIndex ) {
-        //var focusableInstances = Input.focusableInstances || [];
+      getNextFocusableTrail: function( deltaIndex ) {
 
         // TODO: Should we persist this list across frames and do deltas for performance?
         // TODO: We used to, but it was difficult to handle instances added/removed
         // TODO: And on OSX/Chrome this seems to have good enough performance (didn't notice any qualitative slowdown)
         // TODO: Perhaps test on Mobile Safari?
         // TODO: Also, using a pattern like this could make it difficult to customize the focus traversal regions.
-        var focusableInstances = Input.getAllFocusableInstances();
+        var focusableTrails = Input.getAllFocusableTrails();
 
         //If the focused instance was null, find the first focusable element.
-        if ( Input.focusedInstance === null ) {
+        if ( Input.focusedTrail === null ) {
 
-          return focusableInstances[ 0 ];
+          return focusableTrails[ 0 ];
         }
         else {
           //Find the index of the currently focused instance, and look for the next focusable instance.
           //TODO: this will fail horribly if the old node was removed, for instance.
           //TODO: Will need to be generalized, etc.
 
-          var currentlyFocusedInstance = focusableInstances.indexOf( Input.focusedInstance );
-          var newIndex = currentlyFocusedInstance + deltaIndex;
+          var currentlyFocusedTrail = indexOfUsingEquality( focusableTrails, Input.focusedTrail );
+          var newIndex = currentlyFocusedTrail + deltaIndex;
           //console.log( focusableInstances.length, currentlyFocusedInstance, newIndex );
 
           //TODO: These loops probably not too smart here, may be better as math.
           while ( newIndex < 0 ) {
-            newIndex += focusableInstances.length;
+            newIndex += focusableTrails.length;
           }
-          while ( newIndex >= focusableInstances.length ) {
-            newIndex -= focusableInstances.length;
+          while ( newIndex >= focusableTrails.length ) {
+            newIndex -= focusableTrails.length;
           }
 
-          return focusableInstances[ newIndex ];
+          return focusableTrails[ newIndex ];
         }
       },
 
       // Move the focus to the next focusable element.  Called by AccessibilityLayer.
       moveFocus: function( deltaIndex ) {
-        Input.focusedInstance = Input.getNextFocusableInstance( deltaIndex );
+        Input.focusedTrail = Input.getNextFocusableTrail( deltaIndex );
       },
 
       // A focusContext is a node that focus is restricted to.  If the list is empty, then anything in the application
@@ -962,16 +980,16 @@ define( function( require ) {
       // @private Could be a private closure var, but left public for ease of debugging.
       focusContexts: [],
 
-      pushFocusContext: function( instance ) {
+      pushFocusContext: function( trail ) {
         Input.focusContexts.push( {
-          instance: instance,
-          previousFocusedNode: Input.focusedInstance
+          trail: trail,
+          previousFocusedNode: Input.focusedTrail
         } );
 
         // Move focus to the 1st element in the new context, but only if the focus subsystem is enabled
         // Simulation do not show focus regions unless the user has pressed tab once
-        if ( Input.focusedInstance ) {
-          Input.focusedInstance = Input.getAllFocusableInstances()[ 0 ];
+        if ( Input.focusedTrail ) {
+          Input.focusedTrail = Input.getAllFocusableTrails()[ 0 ];
         }
       },
 
@@ -979,14 +997,14 @@ define( function( require ) {
        * Removes the last focus context, such as when a dialog is dismissed.  The dialog's instance is required as an argument
        * so it can be verified that it was the top element on the stack.
        */
-      popFocusContext: function( instance ) {
+      popFocusContext: function( trail ) {
         var top = Input.focusContexts.pop();
-        assert && assert( top.instance === instance );
+        assert && assert( top.trail === trail );
 
         // Restore focus to the node that had focus before the popup was shown (if it still exists), but only if the
         // focus subsystem is enabled.  Simulation do not show focus regions unless the user has pressed tab once
-        if ( Input.focusedInstance ) {
-          Input.focusedInstance = top.previousFocusedNode;
+        if ( Input.focusedTrail ) {
+          Input.focusedTrail = top.previousFocusedNode;
         }
       },
 

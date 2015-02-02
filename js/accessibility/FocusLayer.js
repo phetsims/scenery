@@ -19,6 +19,10 @@ define( function( require ) {
   var DerivedProperty = require( 'AXON/DerivedProperty' );
   var Property = require( 'AXON/Property' );
 
+  var trailToGlobalBounds = function( trail ) {
+    return trail.parentToGlobalBounds( trail.lastNode().bounds );
+  };
+
   /**
    * @param {Object} [options] - optional configuration, see constructor
    * @constructor
@@ -46,20 +50,20 @@ define( function( require ) {
 
     // Animates when focused instance changes.  Jumps (discrete) when target object transform changes.
     var focusedBoundsProperty = new Property();
-    Input.focusedInstanceProperty.link( function( focusedInstance, previousFocusedInstance ) {
-      if ( focusedInstance && previousFocusedInstance && focusedInstance.node ) {
+    Input.focusedTrailProperty.link( function( focusedTrail, previousFocusedTrail ) {
+      if ( focusedTrail && previousFocusedTrail ) {
 
-        var focusRectangle = focusedInstance.node.getGlobalBounds();
+        var focusRectangle = trailToGlobalBounds( focusedTrail );
         var previousFocusRectangle;
 
         // Use the bounds of the previous node for starting animation point.
         // However, that node may have been removed from the scene graph.
-        if ( previousFocusedInstance.node ) {
-          previousFocusRectangle = previousFocusedInstance.node.getGlobalBounds();
+        if ( previousFocusedTrail ) {
+          previousFocusRectangle = trailToGlobalBounds( previousFocusedTrail );
         }
         else {
           // TODO: Could replace this with storing the previous bounds from the last callback
-          previousFocusRectangle = focusedInstance.node.getGlobalBounds();
+          previousFocusRectangle = trailToGlobalBounds( focusedTrail );
         }
 
         if ( tween ) {
@@ -80,8 +84,8 @@ define( function( require ) {
           } ).
           start();
       }
-      else if ( focusedInstance && previousFocusedInstance === null ) {
-        focusedBoundsProperty.value = focusedInstance.node.getGlobalBounds();
+      else if ( focusedTrail && previousFocusedTrail === null ) {
+        focusedBoundsProperty.value = trailToGlobalBounds( focusedTrail );
       }
       else {
         focusedBoundsProperty.value = null;
@@ -91,43 +95,50 @@ define( function( require ) {
     // There is a spurious transform listener callback when registering a listener (perhaps?)
     // TODO: This spurious event needs to be discussed and reviewed with Jon Olson to make sure
     // TODO: it is not a long term maintenance issue
-    var firstOne = true;
-    var transformListener = function() {
-      if ( firstOne ) {
-        firstOne = false;
-      }
-      else {
-        if ( tween ) {
-          tween.stop();
-          tween = null;
-        }
-        focusedBoundsProperty.value = Input.focusedInstance.node.getGlobalBounds();
-      }
-    };
+    //var firstOne = true;
+    //var transformListener = function() {
+    //  if ( firstOne ) {
+    //    firstOne = false;
+    //  }
+    //  else {
+    //    if ( tween ) {
+    //      tween.stop();
+    //      tween = null;
+    //    }
+    //    focusedBoundsProperty.value = Input.focusedTrail.node.getGlobalBounds();
+    //  }
+    //};
 
     // TODO: I (SR) do not understand the relativeTransform/addListener/removePrecompute/etc
     // It should be discussed with JO
-    Input.focusedInstanceProperty.link( function( focusedInstance, previousFocusedInstance ) {
-      if ( previousFocusedInstance ) {
-        previousFocusedInstance.relativeTransform.removeListener( transformListener );
-        previousFocusedInstance.relativeTransform.removePrecompute();
-      }
-      if ( focusedInstance ) {
-        focusedInstance.relativeTransform.addListener( transformListener ); // when our relative transform changes, notify us in the pre-repaint phase
-        focusedInstance.relativeTransform.addPrecompute(); // trigger precomputation of the relative transform, since we will always need it when it is updated
-        firstOne = true;
+    Input.focusedTrailProperty.link( function( focusedTrail, previousFocusedTrail ) {
 
-        // TODO: What if parent(s) transforms change?
-      }
+      //Something like this?
+      //if ( focusedTrail ) {
+      //  focusedBoundsProperty.value = focusedTrail.localToGlobalBounds( focusedTrail.lastNode().bounds );
+      //}
+
+
+      //if ( previousFocusedTrail ) {
+      //  previousFocusedTrail.relativeTransform.removeListener( transformListener );
+      //  previousFocusedTrail.relativeTransform.removePrecompute();
+      //}
+      //if ( focusedTrail ) {
+      //  focusedTrail.relativeTransform.addListener( transformListener ); // when our relative transform changes, notify us in the pre-repaint phase
+      //  focusedTrail.relativeTransform.addPrecompute(); // trigger precomputation of the relative transform, since we will always need it when it is updated
+      //  firstOne = true;
+      //
+      //  // TODO: What if parent(s) transforms change?
+      //}
     } );
 
     // This property indicates which kind of focus region is being shown.  For instance, 'cursor' or 'rectangle'
     // TODO: Make it possible to add new focus types here on a simulation-by-simulation basis
-    var focusIndicatorProperty = new DerivedProperty( [ Input.focusedInstanceProperty ], function( focusedInstance ) {
+    var focusIndicatorProperty = new DerivedProperty( [ Input.focusedTrailProperty ], function( focusedTrail ) {
 
       // the check for node existence seems necessary for handling appearing/disappearing popups
-      if ( focusedInstance && focusedInstance.node ) {
-        return focusedInstance.node.focusIndicator || 'rectangle';
+      if ( focusedTrail ) {
+        return focusedTrail.lastNode().focusIndicator || 'rectangle';
       }
       else {
         return null;

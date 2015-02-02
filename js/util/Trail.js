@@ -101,6 +101,10 @@ define( function( require ) {
       return true;
     },
 
+    isFocusable: function() {
+      return this.isVisible() && this.lastNode().focusable === true;
+    },
+
     getOpacity: function() {
       var opacity = 1;
       var i = this.nodes.length;
@@ -660,7 +664,7 @@ define( function( require ) {
     var root = trail.rootNode();
     var parentCount = root._parents.length;
     for ( var i = 0; i < parentCount; i++ ) {
-      var parent = root._parents[i];
+      var parent = root._parents[ i ];
 
       trail.addAncestor( parent );
       Trail.appendAncestorTrailsWithPredicate( trailResults, trail, predicate );
