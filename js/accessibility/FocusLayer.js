@@ -23,6 +23,8 @@ define( function( require ) {
     return trail.parentToGlobalBounds( trail.lastNode().bounds );
   };
 
+  var cleanup = [];
+
   /**
    * @param {Object} [options] - optional configuration, see constructor
    * @constructor
@@ -90,47 +92,47 @@ define( function( require ) {
       else {
         focusedBoundsProperty.value = null;
       }
+
+      // Detach listeners from the previous trail
+      for ( var i = 0; i < cleanup.length; i++ ) {
+        cleanup[ i ]();
+      }
+      cleanup.length = 0;
+
+      // Attach listeners up the tree of the focused node so that when the bounds change we can update the focus rectangle
+      if ( focusedTrail ) {
+
+        // A function that will update the focus bounds based on the focusedTrail
+        var updateFocusBounds = function() {
+
+          // If the node was still animating, cancel the animation or it would animate to the wrong place.
+          if ( tween ) {
+            tween.stop();
+            tween = null;
+          }
+          focusedBoundsProperty.value = trailToGlobalBounds( focusedTrail );
+        };
+
+        // For each node in the focused trail, add a listener for transform changes.
+        focusedTrail.nodes.forEach( function( node ) {
+          node.on( 'transform', updateFocusBounds );
+
+          cleanup.push( function() {
+            node.off( 'transform', updateFocusBounds );
+          } );
+        } );
+
+        // When the node's bounds change, update the focus rectangle
+        var lastNode = focusedTrail.lastNode();
+        lastNode.on( 'bounds', updateFocusBounds );
+        cleanup.push( function() {
+          lastNode.off( 'bounds', updateFocusBounds );
+        } );
+
+        // TODO: When the node's visibility changes, we need a new focus trail.
+      }
     } );
 
-    // There is a spurious transform listener callback when registering a listener (perhaps?)
-    // TODO: This spurious event needs to be discussed and reviewed with Jon Olson to make sure
-    // TODO: it is not a long term maintenance issue
-    //var firstOne = true;
-    //var transformListener = function() {
-    //  if ( firstOne ) {
-    //    firstOne = false;
-    //  }
-    //  else {
-    //    if ( tween ) {
-    //      tween.stop();
-    //      tween = null;
-    //    }
-    //    focusedBoundsProperty.value = Input.focusedTrail.node.getGlobalBounds();
-    //  }
-    //};
-
-    // TODO: I (SR) do not understand the relativeTransform/addListener/removePrecompute/etc
-    // It should be discussed with JO
-    Input.focusedTrailProperty.link( function( focusedTrail, previousFocusedTrail ) {
-
-      //Something like this?
-      //if ( focusedTrail ) {
-      //  focusedBoundsProperty.value = focusedTrail.localToGlobalBounds( focusedTrail.lastNode().bounds );
-      //}
-
-
-      //if ( previousFocusedTrail ) {
-      //  previousFocusedTrail.relativeTransform.removeListener( transformListener );
-      //  previousFocusedTrail.relativeTransform.removePrecompute();
-      //}
-      //if ( focusedTrail ) {
-      //  focusedTrail.relativeTransform.addListener( transformListener ); // when our relative transform changes, notify us in the pre-repaint phase
-      //  focusedTrail.relativeTransform.addPrecompute(); // trigger precomputation of the relative transform, since we will always need it when it is updated
-      //  firstOne = true;
-      //
-      //  // TODO: What if parent(s) transforms change?
-      //}
-    } );
 
     // This property indicates which kind of focus region is being shown.  For instance, 'cursor' or 'rectangle'
     // TODO: Make it possible to add new focus types here on a simulation-by-simulation basis
