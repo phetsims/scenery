@@ -57,6 +57,13 @@ define( function( require ) {
       options.image = image;
     }
 
+    // When non-zero, overrides the Image's natural width/height (in the local coordinate frame) while the Image's
+    // dimensions can't be detected yet (i.e. it reports 0x0 like Safari does for an image that isn't fully loaded).
+    // This allows for faster display of dynamically-created images if the dimensions are known ahead-of-time.
+    // If the intitial dimensions don't match the image's dimensions after it is loaded, an assertion will be fired.
+    this._initialWidth = 0;
+    this._initialHeight = 0;
+
     var self = this;
     // allows us to invalidate our bounds whenever an image is loaded
     this.loadListener = function( event ) {
@@ -144,12 +151,48 @@ define( function( require ) {
       return this;
     },
 
+    getInitialWidth: function() {
+      return this._initialWidth;
+    },
+
+    setInitialWidth: function( width ) {
+      this._initialWidth = width;
+
+      this.invalidateImage();
+    },
+
+    getInitialHeight: function() {
+      return this._initialHeight;
+    },
+
+    setInitialHeight: function( height ) {
+      this._initialHeight = height;
+
+      this.invalidateImage();
+    },
+
     getImageWidth: function() {
-      return this._image.naturalWidth || this._image.width;
+      var detectedWidth = this._image.naturalWidth || this._image.width;
+      if ( detectedWidth === 0 ) {
+        return this._initialWidth; // either 0 (default), or the overridden value
+      }
+      else {
+        assert && assert( this._initialWidth === 0 || this._initialWidth === detectedWidth, 'Bad Image.initialWidth' );
+
+        return detectedWidth;
+      }
     },
 
     getImageHeight: function() {
-      return this._image.naturalHeight || this._image.height;
+      var detectedHeight = this._image.naturalHeight || this._image.height;
+      if ( detectedHeight === 0 ) {
+        return this._initialHeight; // either 0 (default), or the overridden value
+      }
+      else {
+        assert && assert( this._initialHeight === 0 || this._initialHeight === detectedHeight, 'Bad Image.initialHeight' );
+
+        return detectedHeight;
+      }
     },
 
     getImageURL: function() {
@@ -188,12 +231,18 @@ define( function( require ) {
     set image( value ) { this.setImage( value ); },
     get image() { return this.getImage(); },
 
+    set initialWidth( value ) { this.setInitialWidth( value ); },
+    get initialWidth() { return this.getInitialWidth(); },
+
+    set initialHeight( value ) { this.setInitialHeight( value ); },
+    get initialHeight() { return this.getInitialHeight(); },
+
     getBasicConstructor: function( propLines ) {
       return 'new scenery.Image( \'' + ( this._image.src ? this._image.src.replace( /'/g, '\\\'' ) : 'other' ) + '\', {' + propLines + '} )';
     }
   } );
 
-  Image.prototype._mutatorKeys = [ 'image' ].concat( Node.prototype._mutatorKeys );
+  Image.prototype._mutatorKeys = [ 'image', 'initialWidth', 'initialHeight' ].concat( Node.prototype._mutatorKeys );
 
   // utility for others
   Image.createSVGImage = function( url, width, height ) {
