@@ -999,7 +999,7 @@ define( function( require ) {
        */
       popFocusContext: function( trail ) {
         var top = Input.focusContexts.pop();
-        assert && assert( top.trail === trail );
+        assert && assert( top.trail.equals( trail ) );
 
         // Restore focus to the node that had focus before the popup was shown (if it still exists), but only if the
         // focus subsystem is enabled.  Simulation do not show focus regions unless the user has pressed tab once
