@@ -115,6 +115,7 @@ define( function( require ) {
       }
       else {
         var def = paint.getSVGDefinition();
+        def.setAttribute( 'id', paint.id + '-' + this.id );
 
         // TODO: reduce allocations?
         this.paintMap[ paint.id ] = {

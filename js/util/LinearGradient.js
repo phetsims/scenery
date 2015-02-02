@@ -48,7 +48,6 @@ define( function( require ) {
        </linearGradient>
        */
       var definition = document.createElementNS( scenery.svgns, 'linearGradient' );
-      definition.setAttribute( 'id', this.id );
       definition.setAttribute( 'gradientUnits', 'userSpaceOnUse' ); // so we don't depend on the bounds of the object being drawn with the gradient
       definition.setAttribute( 'x1', this.start.x );
       definition.setAttribute( 'y1', this.start.y );

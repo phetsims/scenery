@@ -728,6 +728,7 @@ define( function( require ) {
   inherit( Object, Paintable.PaintSVGState, {
     initialize: function() {
       this.svgBlock = null; // {SVGBlock | null}
+      this.blockChanged = true; // if our SVGBlock changes, make sure to update everything whose ID changes based on block
 
       // copies of the last fill and stroke that were used
       this.fill = null;
@@ -769,7 +770,8 @@ define( function( require ) {
     updateFill: function( svgBlock, fill ) {
       assert && assert( this.svgBlock === svgBlock );
 
-      if ( fill !== this.fill ) {
+      if ( fill !== this.fill || this.blockChanged ) {
+        this.blockChanged = false;
         this.releaseFillPaint();
         this.fill = fill;
         this.baseStyle = this.computeStyle();
@@ -783,7 +785,8 @@ define( function( require ) {
     updateStroke: function( svgBlock, stroke ) {
       assert && assert( this.svgBlock === svgBlock );
 
-      if ( stroke !== this.stroke ) {
+      if ( stroke !== this.stroke || this.blockChanged ) {
+        this.blockChanged = false;
         this.releaseStrokePaint();
         this.stroke = stroke;
         this.baseStyle = this.computeStyle();
@@ -845,6 +848,8 @@ define( function( require ) {
       if ( this.strokePaint ) {
         svgBlock.incrementPaint( this.strokePaint );
       }
+
+      this.blockChanged = true;
     },
 
     computeStyle: function() {
@@ -859,7 +864,7 @@ define( function( require ) {
       }
       else if ( this.fill.isPaint ) {
         // reference the SVG definition with a URL
-        style += 'url(#' + this.fill.id + ');';
+        style += 'url(#' + this.fill.id + '-' + ( this.svgBlock ? this.svgBlock.id : 'noblock' ) + ');';
       }
       else {
         // plain CSS color
@@ -878,7 +883,7 @@ define( function( require ) {
         }
         else if ( this.stroke.isPaint ) {
           // reference the SVG definition with a URL
-          style += 'url(#' + this.stroke.id + ');';
+          style += 'url(#' + this.stroke.id + '-' + ( this.svgBlock ? this.svgBlock.id : 'noblock' ) + ');';
         }
         else {
           // plain CSS color
