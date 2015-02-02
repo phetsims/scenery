@@ -21,6 +21,48 @@
     equal( f0c.toCSS(), 'rgb(255,0,204)', 'f0c css' );
   } );
 
+  test( 'RGB Hex direct', function() {
+    var ff00cc = new Color( 0xff00cc );
+    equal( ff00cc.r, 0xff, 'ff00cc red' );
+    equal( ff00cc.g, 0, 'ff00cc green' );
+    equal( ff00cc.b, 0xcc, 'ff00cc blue' );
+    equal( ff00cc.a, 1, 'ff00cc alpha' );
+    equal( ff00cc.toCSS(), 'rgb(255,0,204)', 'ff00cc css' );
+
+    var ff00ccHalf = new Color( 0xff00cc, 0.5 );
+    equal( ff00ccHalf.r, 0xff, 'ff00ccHalf red' );
+    equal( ff00ccHalf.g, 0, 'ff00ccHalf green' );
+    equal( ff00ccHalf.b, 0xcc, 'ff00ccHalf blue' );
+    equal( ff00ccHalf.a, 0.5, 'ff00ccHalf alpha' );
+    equal( ff00ccHalf.toCSS(), 'rgba(255,0,204,0.5)', 'ff00ccHalf css' );
+  } );
+
+  test( 'RGB/A direct', function() {
+    var ff00cc = new Color( 0xff, 0x00, 0xcc );
+    equal( ff00cc.r, 0xff, 'ff00cc red' );
+    equal( ff00cc.g, 0, 'ff00cc green' );
+    equal( ff00cc.b, 0xcc, 'ff00cc blue' );
+    equal( ff00cc.a, 1, 'ff00cc alpha' );
+    equal( ff00cc.toCSS(), 'rgb(255,0,204)', 'ff00cc css' );
+
+    var ff00ccHalf = new Color( 0xff, 0x00, 0xcc, 0.5 );
+    equal( ff00ccHalf.r, 0xff, 'ff00ccHalf red' );
+    equal( ff00ccHalf.g, 0, 'ff00ccHalf green' );
+    equal( ff00ccHalf.b, 0xcc, 'ff00ccHalf blue' );
+    equal( ff00ccHalf.a, 0.5, 'ff00ccHalf alpha' );
+    equal( ff00ccHalf.toCSS(), 'rgba(255,0,204,0.5)', 'ff00ccHalf css' );
+  } );
+
+  test( 'Copy Constructor', function() {
+    var ff00cc = new Color( 0xff, 0x00, 0xcc );
+    var copy = new Color( ff00cc );
+
+    equal( ff00cc.r, copy.r );
+    equal( ff00cc.g, copy.g );
+    equal( ff00cc.b, copy.b );
+    equal( ff00cc.a, copy.a );
+  } );
+
   test( 'Keywords', function() {
     var yellow = new Color( 'yellow' );
     equal( yellow.r, 0xff, 'yellow red' );

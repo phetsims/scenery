@@ -34,9 +34,11 @@ define( function( require ) {
         // this should be called in the constructor to initialize
         initializePaintable: function() {
           this._fill = null;
-          this._stroke = null;
           this._fillPickable = true;
+
+          this._stroke = null;
           this._strokePickable = false;
+
           this._cachedPaints = [];
           this._lineDrawingStyles = new LineStyles();
 
@@ -65,24 +67,36 @@ define( function( require ) {
         validateFillColor: function() {
           if ( this._fillColorDirty ) {
             this._fillColorDirty = false;
-            if ( this._fillColor ) {
-              if ( typeof this._fill === 'string' ) {
-                this._fillColor.setCSS( this._fill );
+
+            if ( typeof this._fill === 'string' || this._fill instanceof Color ) {
+              if ( this._fillColor ) {
+                this._fillColor.set( this._fill );
               }
+              // lazily create a Color when necessary, instead of pre-allocating
               else {
-                this._fillColor.setRGBA( this._fill.r, this._fill.g, this._fill.b, this._fill.a );
+                this._fillColor = new Color( this._fill );
               }
-            }
-            else {
-              this._fillColor = new Color( this._fill );
             }
           }
         },
 
-        // {Color} [read-only]
+        /**
+         * If the current fill is a solid color (string or scenery.Color), getFillColor() will return a scenery.Color
+         * reference. This reference should be considered immutable (should not be modified)
+         *
+         * @returns {Color | null} [read-only]
+         */
         getFillColor: function() {
           this.validateFillColor();
-          return this._fillColor;
+
+          // types of fills where we can return a single color
+          if ( typeof this._fill === 'string' || this._fill instanceof Color ) {
+            return this._fillColor;
+          }
+          // no fill, or a pattern/gradient (we can't return a single fill)
+          else {
+            return null;
+          }
         },
 
         setFill: function( fill ) {
@@ -284,24 +298,36 @@ define( function( require ) {
         validateStrokeColor: function() {
           if ( this._strokeColorDirty ) {
             this._strokeColorDirty = false;
-            if ( this._strokeColor ) {
-              if ( typeof this._stroke === 'string' ) {
-                this._strokeColor.setCSS( this._stroke );
+
+            if ( typeof this._stroke === 'string' || this._stroke instanceof Color ) {
+              if ( this._strokeColor ) {
+                this._strokeColor.set( this._stroke );
               }
+              // lazily create a Color when necessary, instead of pre-allocating
               else {
-                this._strokeColor.setRGBA( this._stroke.r, this._stroke.g, this._stroke.b, this._stroke.a );
+                this._strokeColor = new Color( this._stroke );
               }
-            }
-            else {
-              this._strokeColor = new Color( this._stroke );
             }
           }
         },
 
-        // {Color} [read-only]
+        /**
+         * If the current stroke is a solid color (string or scenery.Color), getStrokeColor() will return a scenery.Color
+         * reference. This reference should be considered immutable (should not be modified)
+         *
+         * @returns {Color | null} [read-only]
+         */
         getStrokeColor: function() {
           this.validateStrokeColor();
-          return this._strokeColor;
+
+          // types of strokes where we can return a single color
+          if ( typeof this._stroke === 'string' || this._stroke instanceof Color ) {
+            return this._strokeColor;
+          }
+          // no stroke, or a pattern/gradient (we can't return a single stroke)
+          else {
+            return null;
+          }
         },
 
         setStroke: function( stroke ) {

@@ -202,18 +202,22 @@
     <a class="sublink" href="#display-height">height</a><br>
     <a class="sublink" href="#display-backgroundColor">backgroundColor</a><br>
 
-    <a class="navlink" href="#fillable">Fillable</a><br>
-    <a class="sublink" href="#fillable-fill">fill</a><br>
-    <a class="sublink" href="#fillable-fillPickable">fillPickable</a><br>
-
-    <a class="navlink" href="#strokable">Strokable</a><br>
-    <a class="sublink" href="#strokable-stroke">stroke</a><br>
-    <a class="sublink" href="#strokable-lineWidth">lineWidth</a><br>
-    <a class="sublink" href="#strokable-lineCap">lineCap</a><br>
-    <a class="sublink" href="#strokable-lineJoin">lineJoin</a><br>
-    <a class="sublink" href="#strokable-lineDash">lineDash</a><br>
-    <a class="sublink" href="#strokable-lineDashOffset">lineDashOffset</a><br>
-    <a class="sublink" href="#strokable-strokePickable">strokePickable</a><br>
+    <a class="navlink" href="#paintable">Paintable</a><br>
+    <a class="sublink" href="#paintable-fill">fill</a><br>
+    <a class="sublink" href="#paintable-fillPickable">fillPickable</a><br>
+    <a class="sublink" href="#paintable-fillColor">fillColor</a><br>
+    <a class="sublink" href="#paintable-stroke">stroke</a><br>
+    <a class="sublink" href="#paintable-strokePickable">strokePickable</a><br>
+    <a class="sublink" href="#paintable-strokeColor">strokeColor</a><br>
+    <a class="sublink" href="#paintable-lineWidth">lineWidth</a><br>
+    <a class="sublink" href="#paintable-lineCap">lineCap</a><br>
+    <a class="sublink" href="#paintable-lineJoin">lineJoin</a><br>
+    <a class="sublink" href="#paintable-lineDash">lineDash</a><br>
+    <a class="sublink" href="#paintable-lineDashOffset">lineDashOffset</a><br>
+    <a class="sublink" href="#paintable-strokePickable">strokePickable</a><br>
+    <a class="sublink" href="#paintable-cachedPaints">cachedPaints</a><br>
+    <a class="sublink" href="#paintable-addCachedPaint">addCachedPaint</a><br>
+    <a class="sublink" href="#paintable-removeCachedPaint">removeCachedPaint</a><br>
 
     <a class="navlink" href="#path">Path</a><br>
     <a class="sublink" href="#path-shape">shape</a><br>
@@ -1038,16 +1042,17 @@ window.assertions.disableAssertSlow();
       (defaults to transparent). The background color will not change until after the next <a href="#display-updateDisplay">updateDisplay</a> call.
     </p>
 
-    <h3 id="fillable" class="section">Fillable</h3>
+
+    <h3 id="paintable" class="section">Paintable</h3>
 
     <p>
-      A mix-in for <a href="#node">Node</a> subtypes that can be filled with a color/gradient/pattern.
+      A mix-in for <a href="#node">Node</a> subtypes that can be filled and/or stroked with a color/gradient/pattern.
     </p>
 
-    <h4 id="fillable-fill">fill</h4>
+    <h4 id="paintable-fill">fill</h4>
 
     <p>
-      <a href="#fillable">Fillable</a> nodes provide a single <code>node.fill</code> getter and setter
+      <a href="#paintable">Paintable</a> nodes provide a single <code>node.fill</code> getter and setter
       that uses <code>node.getFill()</code> and <code>node.setFill( fill )</code>. <code>node.hasFill()</code>
       is also available as a quick check, and a null fill is interpreted as not having a fill.
     </p>
@@ -1063,11 +1068,18 @@ window.assertions.disableAssertSlow();
       If a <a href="#color">Color</a> object is used for a fill, any changes to the Color object will update this node.
     </p>
 
-    <h4 id="fillable-fillPickable">fillPickable</h4>
+    <h4 id="paintable-fillColor">fillColor</h4>
+
+    <p>
+      <code>node.fillColor</code> is a getter linked to <code>node.getFillColor()</code>. It will always return a
+      <a href="#color">Color</a> if there is a <a href="#paintable-fill">fill</a> on the node, or null otherwise.
+    </p>
+
+    <h4 id="paintable-fillPickable">fillPickable</h4>
 
     <p>
       <code>node.fillPickable</code> is a getter/setter linked to <code>node.isFillPickable()</code> and <code>node.setFillPickable( boolean )</code>.
-      <a href="#path">Paths</a> or other <a href="#fillable">Fillable</a> objects will be considered to be under a <a href="#pointer">Pointer</a> when
+      <a href="#path">Paths</a> or other <a href="#paintable">Paintable</a> objects will be considered to be under a <a href="#pointer">Pointer</a> when
       it is over the region where the fill is painted. This defaults to true.
     </p>
 
@@ -1077,13 +1089,7 @@ window.assertions.disableAssertSlow();
       or outside of a Text node's painted region.
     </p>
 
-    <h3 id="strokable" class="section">Strokable</h3>
-
-    <p>
-      A mix-in for <a href="#node">Node</a> subtypes that can be stroked (outlined) along a border with a color/gradient/pattern.
-    </p>
-
-    <h4 id="strokable-stroke">stroke</h4>
+    <h4 id="paintable-stroke">stroke</h4>
 
     <p>
       <code>node.stroke</code> is a getter and setter
@@ -1099,17 +1105,40 @@ window.assertions.disableAssertSlow();
     </p>
 
     <p>
-      If a <a href="#color">Color</a> object is used for a stroke, any changes to the Color object will update this node.
+      If a <a href="#color">Color</a> object is used for a stroke, any changes to the Color object will update this
+      node.
     </p>
 
-    <h4 id="strokable-lineWidth">lineWidth</h4>
+    <h4 id="paintable-strokeColor">strokeColor</h4>
+
+    <p>
+      <code>node.strokeColor</code> is a getter linked to <code>node.getStrokeColor()</code>. It will always return a
+      <a href="#color">Color</a> if there is a <a href="#paintable-stroke">stroke</a> on the node, or null otherwise.
+    </p>
+
+    <h4 id="paintable-strokePickable">strokePickable</h4>
+
+    <p>
+      <code>node.strokePickable</code> is a getter/setter linked to <code>node.isStrokePickable()</code> and
+      <code>node.setStrokePickable( boolean )</code>. <a href="#path">Paths</a> or other
+      <a href="#paintable">Paintable</a> objects will be considered to be under a <a href="#pointer">Pointer</a>
+      when it is over the region where the stroke is painted. This defaults to false, as it is generally more
+      computationally expensive, and Scenery did not support this initially.
+    </p>
+
+    <p>
+      NOTE: <a href="#text">Text</a> nodes currently do not respect this setting, since there is no easy/fast way of
+      determining whether a point is inside or outside of a Text node's painted region.
+    </p>
+
+    <h4 id="paintable-lineWidth">lineWidth</h4>
 
     <p>
       <code>node.lineWidth</code> (<code>node.getLineWidth()</code>, <code>node.setLineWidth( lineWidth )</code>)
       controls the thickness of the stroke.
     </p>
 
-    <h4 id="strokable-lineCap">lineCap</h4>
+    <h4 id="paintable-lineCap">lineCap</h4>
 
     <p>
       <code>node.lineCap</code> (<code>node.getLineCap()</code>, <code>node.setLineCap( lineCap )</code>)
@@ -1174,7 +1203,7 @@ window.assertions.disableAssertSlow();
       } );
     </script>
 
-    <h4 id="strokable-lineJoin">lineJoin</h4>
+    <h4 id="paintable-lineJoin">lineJoin</h4>
 
     <p>
       <code>node.lineJoin</code> (<code>node.getLineJoin()</code>, <code>node.setLineJoin( lineJoin )</code>)
@@ -1239,7 +1268,7 @@ window.assertions.disableAssertSlow();
       } );
     </script>
 
-    <h4 id="strokable-lineDash">lineDash</h4>
+    <h4 id="paintable-lineDash">lineDash</h4>
 
     <p>
       <code>node.lineDash</code> (<code>node.getLineDash()</code>, <code>node.setLineDash( lineDash )</code>)
@@ -1263,11 +1292,11 @@ window.assertions.disableAssertSlow();
       } );
     </script>
 
-    <h4 id="strokable-lineDashOffset">lineDashOffset</h4>
+    <h4 id="paintable-lineDashOffset">lineDashOffset</h4>
 
     <p>
       <code>node.lineDashOffset</code> (<code>node.getLineDashOffset()</code>, <code>node.setLineDashOffset( lineDashOffset )</code>)
-      controls the how far the dash pattern in <a href="#strokable-lineDash">lineDash</a> is offset from the start,
+      controls the how far the dash pattern in <a href="#paintable-lineDash">lineDash</a> is offset from the start,
       same as the <a href="http://www.whatwg.org/specs/web-apps/current-work/multipage/the-canvas-element.html#dom-context-2d-linedashoffset">Canvas
       lineDashOffset</a>.
     </p>
@@ -1306,31 +1335,29 @@ window.assertions.disableAssertSlow();
       } );
     </script>
 
-    <h4 id="strokable-strokePickable">strokePickable</h4>
+    <h4 id="paintable-cachedPaints">cachedPaints</h4>
 
     <p>
-      <code>node.strokePickable</code> is a getter/setter linked to <code>node.isStrokePickable()</code> and <code>node.setStrokePickable( boolean
-      )</code>.
-      <a href="#path">Paths</a> or other <a href="#strokable">Strokable</a> objects will be considered to be under a <a href="#pointer">Pointer</a>
-      when
-      it is over the region where the stroke is painted. This defaults to false, as it is generally more computationally expensive, and Scenery did
-      not
-      support this initially.
+      <code>node.cachedPaints</code> (<code>node.getCachedPaints()</code>, <code>node.setCachedPaints( paints )</code>)
+      controls an array of paints (<a href="#linearGradient">LinearGradient</a>s,
+      <a href="#radialGradient">RadialGradient</a>s, and <a href="#pattern">Pattern</a>s) that will be kept in-memory
+      when the node is being displayed. This allows for much faster performance switching to/from these paints. For
+      instance, in SVG the gradients will be kept in the &lt;defs&gt; section even while not being used, so they don't
+      have to be recreated when switched to (where we have seen major performance drops in the past).
     </p>
 
     <p>
-      NOTE: <a href="#text">Text</a> nodes currently do not respect this setting, since there is no easy/fast way of determining whether a point is
-      inside
-      or outside of a Text node's painted region.
+      Additionally, <code>node.addCachedPaint( paint )</code> and <code>node.removeCachedPaint( paint )</code> exist to
+      be able to manipulate the cached paints without redoing all of them.
     </p>
 
     <h3 id="path" class="section">Path</h3>
 
     <p>
-      Path is a <a href="#node">Node</a> subtype that includes the <a href="#fillable">Fillable</a> and
-      <a href="#strokable">Strokable</a> mixins. The main displayed behavior is controlled by its single
-      additional option <a href="#path-shape">shape</a> along with the <a href="#fillable-fill">fill</a>
-      and <a href="#strokable-stroke">stroke</a> options.
+      Path is a <a href="#node">Node</a> subtype that includes the <a href="#paintable">Paintable</a> mixin.
+      The main displayed behavior is controlled by its single
+      additional option <a href="#path-shape">shape</a> along with the <a href="#paintable-fill">fill</a>
+      and <a href="#paintable-stroke">stroke</a> options.
     </p>
 
     <p>
@@ -1396,8 +1423,8 @@ window.assertions.disableAssertSlow();
     <p>
       Text is a <a href="#node">Node</a> subtype that (currently) displays a single line of text
       in Canvas or SVG. DOM and multiline support is planned. It also mixes in
-      <a href="#fillable">Fillable</a>, and <a href="#strokable">Strokable</a>,
-      so it should support fills and strokes with colors, gradients and patterns.
+      <a href="#paintable">Paintable</a>,
+      so it supports fills and strokes with colors, gradients and patterns.
       The default fill is <code>'#000'</code>, so text is black by default, with no stroke, so
       to JUST stroke text, set fill to null.
     </p>
@@ -1424,7 +1451,7 @@ window.assertions.disableAssertSlow();
 
     <p>
       A <a href="#text">Text</a> node has the following parameter object options, in addition to
-      the ones from <a href="#fillable">Fillable</a> and <a href="#strokable">Strokable</a>.
+      the ones from <a href="#paintable">Paintable</a>.
     </p>
     <ul>
       <li><a href="#text-text">text</a></li>
@@ -1618,8 +1645,8 @@ window.assertions.disableAssertSlow();
     <h3 id="linearGradient" class="section">LinearGradient</h3>
 
     <p>
-      A LinearGradient can be used in place of a color for any <a href="#fillable-fill">fill</a> or
-      <a href="#strokable-stroke">stroke</a>, but is usually done for <a href="#path">Paths</a>.
+      A LinearGradient can be used in place of a color for any <a href="#paintable-fill">fill</a> or
+      <a href="#paintable-stroke">stroke</a>, but is usually done for <a href="#path">Paths</a>.
     </p>
 
     <p>
@@ -1673,8 +1700,8 @@ window.assertions.disableAssertSlow();
     <h3 id="radialGradient" class="section">RadialGradient</h3>
 
     <p>
-      A RadialGradient can be used in place of a color for any <a href="#fillable-fill">fill</a> or
-      <a href="#strokable-stroke">stroke</a>, but is usually done for <a href="#path">Paths</a>.
+      A RadialGradient can be used in place of a color for any <a href="#paintable-fill">fill</a> or
+      <a href="#paintable-stroke">stroke</a>, but is usually done for <a href="#path">Paths</a>.
     </p>
 
     <p>
@@ -1744,8 +1771,8 @@ window.assertions.disableAssertSlow();
     <h3 id="pattern" class="section">Pattern</h3>
 
     <p>
-      A Pattern can be used in place of a color for any <a href="#fillable-fill">fill</a> or
-      <a href="#strokable-stroke">stroke</a>, but is usually done for <a href="#path">Paths</a>.
+      A Pattern can be used in place of a color for any <a href="#paintable-fill">fill</a> or
+      <a href="#paintable-stroke">stroke</a>, but is usually done for <a href="#path">Paths</a>.
     </p>
 
     <p>
