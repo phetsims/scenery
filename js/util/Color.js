@@ -1,8 +1,7 @@
 // Copyright 2002-2014, University of Colorado Boulder
 
-
 /**
- * Encapsulates common color information and transformations.
+ * A color with RGBA values, assuming the sRGB color space is used.
  *
  * See http://www.w3.org/TR/css3-color/
  *
@@ -20,35 +19,25 @@ define( function( require ) {
   var clamp = require( 'DOT/Util' ).clamp;
   var linear = require( 'DOT/Util' ).linear;
 
-  // r,g,b integers 0-255, 'a' float 0-1
+  /**
+   * Creates a Color with an initial value. Multiple different types of parameters are supported:
+   * - new Color( color ) is a copy constructor, for a {Color}
+   * - new Color( string ) will parse the string assuming it's a CSS-compatible color, e.g. set( 'red' )
+   * - new Color( r, g, b ) is equivalent to setRGBA( r, g, b, 1 ), e.g. set( 255, 0, 128 )
+   * - new Color( r, g, b, a ) is equivalent to setRGBA( r, g, b, a ), e.g. set( 255, 0, 128, 0.5 )
+   * - new Color( hex ) will set RGB with alpha=1, e.g. set( 0xFF0000 )
+   * - new Color( hex, a ) will set RGBA, e.g. set( 0xFF0000, 1 )
+   *
+   * The 'r', 'g', and 'b' values stand for red, green and blue respectively, and will be clamped to integers in 0-255.
+   * The 'a' value stands for alpha, and will be clamped to 0-1 (floating point)
+   * 'hex' indicates a 6-decimal-digit format hex number, for example 0xFFAA00 is equivalent to r=255, g=170, b=0.
+   */
   scenery.Color = function Color( r, g, b, a ) {
 
     // allow listeners to be notified on any changes. called with listener()
     this.listeners = [];
 
-    if ( typeof r === 'string' ) {
-      this.setCSS( r );
-    }
-    else if ( r instanceof Color ) {
-      this.setRGBA( r.r, r.g, r.b, r.a );
-    }
-    else {
-      // alpha
-      var alpha = a === undefined ? 1 : a;
-
-      // bitwise handling if 3 elements aren't defined
-      if ( g === undefined || b === undefined ) {
-        this.setRGBA(
-          ( r >> 16 ) && 0xFF,
-          ( r >> 8 ) && 0xFF,
-          ( r >> 0 ) && 0xFF,
-          alpha );
-      }
-      else {
-        // otherwise, copy them over
-        this.setRGBA( r, g, b, alpha );
-      }
-    }
+    this.set( r, g, b, a );
 
     phetAllocation && phetAllocation( 'Color' );
   };
@@ -182,6 +171,45 @@ define( function( require ) {
       return new Color( this.r, this.g, this.b, this.a );
     },
 
+    /**
+     * Sets the values of this Color. Supported styles:
+     * - set( color ) is a copy constructor
+     * - set( string ) will parse the string assuming it's a CSS-compatible color, e.g. set( 'red' )
+     * - set( r, g, b ) is equivalent to setRGBA( r, g, b, 1 ), e.g. set( 255, 0, 128 )
+     * - set( r, g, b, a ) is equivalent to setRGBA( r, g, b, a ), e.g. set( 255, 0, 128, 0.5 )
+     * - set( hex ) will set RGB with alpha=1, e.g. set( 0xFF0000 )
+     * - set( hex, alpha ) will set RGBA, e.g. set( 0xFF0000, 1 )
+     */
+    set: function( r, g, b, a ) {
+      // support for set( string )
+      if ( typeof r === 'string' ) {
+        this.setCSS( r );
+      }
+      // support for set( color )
+      else if ( r instanceof Color ) {
+        this.setRGBA( r.r, r.g, r.b, r.a );
+      }
+      // support for set( hex ) and set( hex, alpha )
+      else if ( b === undefined ) {
+        assert && assert( typeof r === 'number' );
+        assert && assert( g === undefined || typeof g === 'number' );
+
+        var red = ( r >> 16 ) & 0xFF;
+        var green = ( r >> 8 ) & 0xFF;
+        var blue = ( r >> 0 ) & 0xFF;
+        var alpha = ( g === undefined ) ? 1 : g;
+        this.setRGBA( red, green, blue, alpha );
+      }
+      // support for set( r, g, b ) and set( r, g, b, a )
+      else {
+        assert && assert( typeof r === 'number' );
+        assert && assert( typeof g === 'number' );
+        assert && assert( typeof b === 'number' );
+        assert && assert( a === undefined || typeof a === 'number' );
+        this.setRGBA( r, g, b, ( a === undefined ) ? 1 : a );
+      }
+    },
+
     // red, integral 0-255
     getRed: function() { return this.r; },
     setRed: function( value ) { return this.setRGBA( value, this.g, this.b, this.a ); },
@@ -223,7 +251,13 @@ define( function( require ) {
         return 'rgb(' + this.r + ',' + this.g + ',' + this.b + ')';
       }
       else {
-        var alphaString = this.a === 0 || this.a === 1 ? this.a : this.a.toFixed( 20 ); // toFixed prevents scientific notation
+        // toFixed prevents scientific notation, but we need to strip off the trailing zeros
+        var alpha = this.a.toFixed( 20 );
+        while ( alpha.length >= 2 && alpha[alpha.length - 1] === '0' && alpha[alpha.length - 2] !== '.' ) {
+          alpha = alpha.slice( 0, alpha.length - 1 );
+        }
+
+        var alphaString = this.a === 0 || this.a === 1 ? this.a : alpha;
         return 'rgba(' + this.r + ',' + this.g + ',' + this.b + ',' + alphaString + ')';
       }
     },

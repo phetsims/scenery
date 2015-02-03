@@ -139,8 +139,7 @@ define( function( require ) {
   } );
 
   // set up pooling
-  /* jshint -W064 */
-  SelfDrawable.PoolableMixin( WebGLNode.WebGLNodeDrawable );
+  SelfDrawable.Poolable.mixin( WebGLNode.WebGLNodeDrawable );
 
   return WebGLNode;
 } );

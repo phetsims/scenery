@@ -28,9 +28,9 @@ define( function( require ) {
         //Display:none and visibility:hidden both cause aria TTS to fail (no text comes out) on VoiceOver
         document.body.appendChild( ariaSpeechDiv );
 
-        Input.focusedInstanceProperty.link( function( focusedInstance ) {
-          if ( focusedInstance && focusedInstance.node && focusedInstance.node.textDescription ) {
-            AriaSpeech.setText( focusedInstance.node.textDescription );
+        Input.focusedTrailProperty.link( function( focusedTrail ) {
+          if ( focusedTrail && focusedTrail.lastNode().textDescription ) {
+            AriaSpeech.setText( focusedTrail.lastNode().textDescription );
           }
         } );
         initialized = true;

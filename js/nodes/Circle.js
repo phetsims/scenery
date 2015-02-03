@@ -216,40 +216,41 @@ define( function( require ) {
    * Rendering State mixin (DOM/SVG)
    *----------------------------------------------------------------------------*/
 
-  var CircleStatefulDrawableMixin = Circle.CircleStatefulDrawableMixin = function( drawableType ) {
-    var proto = drawableType.prototype;
+  Circle.CircleStatefulDrawable = {
+    mixin: function( drawableType ) {
+      var proto = drawableType.prototype;
 
-    // initializes, and resets (so we can support pooled states)
-    proto.initializeState = function() {
-      this.paintDirty = true; // flag that is marked if ANY "paint" dirty flag is set (basically everything except for transforms, so we can accelerated the transform-only case)
-      this.dirtyRadius = true;
+      // initializes, and resets (so we can support pooled states)
+      proto.initializeState = function() {
+        this.paintDirty = true; // flag that is marked if ANY "paint" dirty flag is set (basically everything except for transforms, so we can accelerated the transform-only case)
+        this.dirtyRadius = true;
 
-      // adds fill/stroke-specific flags and state
-      this.initializePaintableState();
+        // adds fill/stroke-specific flags and state
+        this.initializePaintableState();
 
-      return this; // allow for chaining
-    };
+        return this; // allow for chaining
+      };
 
-    // catch-all dirty, if anything that isn't a transform is marked as dirty
-    proto.markPaintDirty = function() {
-      this.paintDirty = true;
-      this.markDirty();
-    };
+      // catch-all dirty, if anything that isn't a transform is marked as dirty
+      proto.markPaintDirty = function() {
+        this.paintDirty = true;
+        this.markDirty();
+      };
 
-    proto.markDirtyRadius = function() {
-      this.dirtyRadius = true;
-      this.markPaintDirty();
-    };
+      proto.markDirtyRadius = function() {
+        this.dirtyRadius = true;
+        this.markPaintDirty();
+      };
 
-    proto.setToCleanState = function() {
-      this.paintDirty = false;
-      this.dirtyRadius = false;
+      proto.setToCleanState = function() {
+        this.paintDirty = false;
+        this.dirtyRadius = false;
 
-      this.cleanPaintableState();
-    };
+        this.cleanPaintableState();
+      };
 
-    /* jshint -W064 */
-    Paintable.PaintableStatefulDrawableMixin( drawableType );
+      Paintable.PaintableStatefulDrawable.mixin( drawableType );
+    }
   };
 
   /*---------------------------------------------------------------------------*
@@ -374,10 +375,10 @@ define( function( require ) {
   } );
 
   /* jshint -W064 */
-  CircleStatefulDrawableMixin( CircleDOMDrawable );
+  Circle.CircleStatefulDrawable.mixin( CircleDOMDrawable );
 
   /* jshint -W064 */
-  SelfDrawable.PoolableMixin( CircleDOMDrawable );
+  SelfDrawable.Poolable.mixin( CircleDOMDrawable );
 
   /*---------------------------------------------------------------------------*
    * SVG Rendering
@@ -385,7 +386,7 @@ define( function( require ) {
 
   Circle.CircleSVGDrawable = SVGSelfDrawable.createDrawable( {
     type: function CircleSVGDrawable( renderer, instance ) { this.initialize( renderer, instance ); },
-    stateType: CircleStatefulDrawableMixin,
+    stateType: Circle.CircleStatefulDrawable.mixin,
     initialize: function( renderer, instance ) {
       if ( !this.svgElement ) {
         this.svgElement = document.createElementNS( scenery.svgns, 'circle' );
@@ -569,12 +570,10 @@ define( function( require ) {
   } );
 
   // include stubs (stateless) for marking dirty stroke and fill (if necessary). we only want one dirty flag, not multiple ones, for WebGL (for now)
-  /* jshint -W064 */
-  Paintable.PaintableStatefulDrawableMixin( Circle.CircleWebGLDrawable );
+  Paintable.PaintableStatefulDrawable.mixin( Circle.CircleWebGLDrawable );
 
   // set up pooling
-  /* jshint -W064 */
-  SelfDrawable.PoolableMixin( Circle.CircleWebGLDrawable );
+  SelfDrawable.Poolable.mixin( Circle.CircleWebGLDrawable );
 
   return Circle;
 } );

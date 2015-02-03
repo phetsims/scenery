@@ -57,6 +57,13 @@ define( function( require ) {
       options.image = image;
     }
 
+    // When non-zero, overrides the Image's natural width/height (in the local coordinate frame) while the Image's
+    // dimensions can't be detected yet (i.e. it reports 0x0 like Safari does for an image that isn't fully loaded).
+    // This allows for faster display of dynamically-created images if the dimensions are known ahead-of-time.
+    // If the intitial dimensions don't match the image's dimensions after it is loaded, an assertion will be fired.
+    this._initialWidth = 0;
+    this._initialHeight = 0;
+
     var self = this;
     // allows us to invalidate our bounds whenever an image is loaded
     this.loadListener = function( event ) {
@@ -144,12 +151,48 @@ define( function( require ) {
       return this;
     },
 
+    getInitialWidth: function() {
+      return this._initialWidth;
+    },
+
+    setInitialWidth: function( width ) {
+      this._initialWidth = width;
+
+      this.invalidateImage();
+    },
+
+    getInitialHeight: function() {
+      return this._initialHeight;
+    },
+
+    setInitialHeight: function( height ) {
+      this._initialHeight = height;
+
+      this.invalidateImage();
+    },
+
     getImageWidth: function() {
-      return this._image.naturalWidth || this._image.width;
+      var detectedWidth = this._image.naturalWidth || this._image.width;
+      if ( detectedWidth === 0 ) {
+        return this._initialWidth; // either 0 (default), or the overridden value
+      }
+      else {
+        assert && assert( this._initialWidth === 0 || this._initialWidth === detectedWidth, 'Bad Image.initialWidth' );
+
+        return detectedWidth;
+      }
     },
 
     getImageHeight: function() {
-      return this._image.naturalHeight || this._image.height;
+      var detectedHeight = this._image.naturalHeight || this._image.height;
+      if ( detectedHeight === 0 ) {
+        return this._initialHeight; // either 0 (default), or the overridden value
+      }
+      else {
+        assert && assert( this._initialHeight === 0 || this._initialHeight === detectedHeight, 'Bad Image.initialHeight' );
+
+        return detectedHeight;
+      }
     },
 
     getImageURL: function() {
@@ -188,12 +231,18 @@ define( function( require ) {
     set image( value ) { this.setImage( value ); },
     get image() { return this.getImage(); },
 
+    set initialWidth( value ) { this.setInitialWidth( value ); },
+    get initialWidth() { return this.getInitialWidth(); },
+
+    set initialHeight( value ) { this.setInitialHeight( value ); },
+    get initialHeight() { return this.getInitialHeight(); },
+
     getBasicConstructor: function( propLines ) {
       return 'new scenery.Image( \'' + ( this._image.src ? this._image.src.replace( /'/g, '\\\'' ) : 'other' ) + '\', {' + propLines + '} )';
     }
   } );
 
-  Image.prototype._mutatorKeys = [ 'image' ].concat( Node.prototype._mutatorKeys );
+  Image.prototype._mutatorKeys = [ 'image', 'initialWidth', 'initialHeight' ].concat( Node.prototype._mutatorKeys );
 
   // utility for others
   Image.createSVGImage = function( url, width, height ) {
@@ -211,32 +260,34 @@ define( function( require ) {
    * Rendering State mixin (DOM/SVG) //TODO: Does this also apply to WebGL?
    *----------------------------------------------------------------------------*/
 
-  var ImageStatefulDrawableMixin = Image.ImageStatefulDrawableMixin = function( drawableType ) {
-    var proto = drawableType.prototype;
+  Image.ImageStatefulDrawable = {
+    mixin: function( drawableType ) {
+      var proto = drawableType.prototype;
 
-    // initializes, and resets (so we can support pooled states)
-    proto.initializeState = function() {
-      this.paintDirty = true; // flag that is marked if ANY "paint" dirty flag is set (basically everything except for transforms, so we can accelerated the transform-only case)
-      this.dirtyImage = true;
+      // initializes, and resets (so we can support pooled states)
+      proto.initializeState = function() {
+        this.paintDirty = true; // flag that is marked if ANY "paint" dirty flag is set (basically everything except for transforms, so we can accelerated the transform-only case)
+        this.dirtyImage = true;
 
-      return this; // allow for chaining
-    };
+        return this; // allow for chaining
+      };
 
-    // catch-all dirty, if anything that isn't a transform is marked as dirty
-    proto.markPaintDirty = function() {
-      this.paintDirty = true;
-      this.markDirty();
-    };
+      // catch-all dirty, if anything that isn't a transform is marked as dirty
+      proto.markPaintDirty = function() {
+        this.paintDirty = true;
+        this.markDirty();
+      };
 
-    proto.markDirtyImage = function() {
-      this.dirtyImage = true;
-      this.markPaintDirty();
-    };
+      proto.markDirtyImage = function() {
+        this.dirtyImage = true;
+        this.markPaintDirty();
+      };
 
-    proto.setToCleanState = function() {
-      this.paintDirty = false;
-      this.dirtyImage = false;
-    };
+      proto.setToCleanState = function() {
+        this.paintDirty = false;
+        this.dirtyImage = false;
+      };
+    }
   };
 
   /*---------------------------------------------------------------------------*
@@ -303,11 +354,9 @@ define( function( require ) {
     }
   } );
 
-  /* jshint -W064 */
-  ImageStatefulDrawableMixin( ImageDOMDrawable );
+  Image.ImageStatefulDrawable.mixin( ImageDOMDrawable );
 
-  /* jshint -W064 */
-  SelfDrawable.PoolableMixin( ImageDOMDrawable );
+  SelfDrawable.Poolable.mixin( ImageDOMDrawable );
 
   /*---------------------------------------------------------------------------*
    * SVG Rendering
@@ -315,7 +364,7 @@ define( function( require ) {
 
   Image.ImageSVGDrawable = SVGSelfDrawable.createDrawable( {
     type: function ImageSVGDrawable( renderer, instance ) { this.initialize( renderer, instance ); },
-    stateType: ImageStatefulDrawableMixin,
+    stateType: Image.ImageStatefulDrawable.mixin,
     initialize: function( renderer, instance ) {
       if ( !this.svgElement ) {
         this.svgElement = document.createElementNS( scenery.svgns, 'image' );
@@ -434,11 +483,9 @@ define( function( require ) {
   } );
 
   // set up pooling
-  /* jshint -W064 */
-  SelfDrawable.PoolableMixin( Image.ImageWebGLDrawable );
+  SelfDrawable.Poolable.mixin( Image.ImageWebGLDrawable );
 
-  /* jshint -W064 */
-  ImageStatefulDrawableMixin( Image.ImageWebGLDrawable );
+  Image.ImageStatefulDrawable.mixin( Image.ImageWebGLDrawable );
 
 
   /*---------------------------------------------------------------------------*
@@ -525,11 +572,9 @@ define( function( require ) {
   } );
 
   // set up pooling
-  /* jshint -W064 */
-  SelfDrawable.PoolableMixin( Image.ImagePixiDrawable );
+  SelfDrawable.Poolable.mixin( Image.ImagePixiDrawable );
 
-  /* jshint -W064 */
-  ImageStatefulDrawableMixin( Image.ImagePixiDrawable );
+  Image.ImageStatefulDrawable.mixin( Image.ImagePixiDrawable );
 
   return Image;
 } );

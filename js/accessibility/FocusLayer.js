@@ -19,18 +19,31 @@ define( function( require ) {
   var DerivedProperty = require( 'AXON/DerivedProperty' );
   var Property = require( 'AXON/Property' );
 
+  var trailToGlobalBounds = function( trail ) {
+    return trail.parentToGlobalBounds( trail.lastNode().bounds );
+  };
+
+  var cleanup = [];
+
   /**
-   * @param {object} [tweenFactory] - optional tween library that will be used to update the location of the focus region
-   *                                - this object must conform to the TWEEN API as used here (somewhat complex)
-   *                                - if not provided, the default (instant) tween factory will be used
-   *                                - To show animated focus regions, pass in an instance of sole/TWEEN
+   * @param {Object} [options] - optional configuration, see constructor
    * @constructor
    */
-  function FocusLayer( tweenFactory ) {
+  function FocusLayer( options ) {
 
-    tweenFactory = tweenFactory || FocusLayer.INSTANT_TWEEN_FACTORY;
+    options = _.extend( {
 
-    // Return an object optimal for TWEEN
+      /**
+       * tweenFactory - optional tween factory that will be used to update the location of the focus region. This object
+       * must conform to the API as used here (somewhat complex). If not provided, the default (instant) tween factory
+       * will be used. To show animated focus regions, pass in an instance of sole/TWEEN (as done in JOIST/Sim.js)
+       */
+      tweenFactory: FocusLayer.INSTANT_TWEEN_FACTORY
+    }, options );
+
+    // Return an object optimal for TWEEN, containing only the required attributes for animation
+    // This is important because TWEEN.js calls all fields + getters to determine initial state
+    // So we must create a minimal pruned object of only the values we wish to animate.
     var boundsToObject = function( bounds ) {
       return { x: bounds.x, y: bounds.y, width: bounds.width, height: bounds.height };
     };
@@ -39,30 +52,32 @@ define( function( require ) {
 
     // Animates when focused instance changes.  Jumps (discrete) when target object transform changes.
     var focusedBoundsProperty = new Property();
-    Input.focusedInstanceProperty.link( function( focusedInstance, previousFocusedInstance ) {
-      if ( focusedInstance && previousFocusedInstance && focusedInstance.node ) {
+    Input.focusedTrailProperty.link( function( focusedTrail, previousFocusedTrail ) {
+      if ( focusedTrail && previousFocusedTrail ) {
 
-        var focusRectangle = focusedInstance.node.getGlobalBounds();
+        var focusRectangle = trailToGlobalBounds( focusedTrail );
         var previousFocusRectangle;
 
         // Use the bounds of the previous node for starting animation point.
         // However, that node may have been removed from the scene graph.
-        if ( previousFocusedInstance.node ) {
-          previousFocusRectangle = previousFocusedInstance.node.getGlobalBounds();
+        if ( previousFocusedTrail ) {
+          previousFocusRectangle = trailToGlobalBounds( previousFocusedTrail );
         }
         else {
           // TODO: Could replace this with storing the previous bounds from the last callback
-          previousFocusRectangle = focusedInstance.node.getGlobalBounds();
+          previousFocusRectangle = trailToGlobalBounds( focusedTrail );
         }
 
         if ( tween ) {
           tween.stop();
           tween = null;
         }
+
         // For accessibility animation, scenery requires the TWEEN.js library
-        tween = new tweenFactory.Tween( boundsToObject( previousFocusRectangle ) ).
+        // If this API usage is changed, the INSTANT_TWEEN_FACTORY must also be changed correspondingly.
+        tween = new options.tweenFactory.Tween( boundsToObject( previousFocusRectangle ) ).
           to( boundsToObject( focusRectangle ), 300 ).
-          easing( tweenFactory.Easing.Cubic.InOut ).
+          easing( options.tweenFactory.Easing.Cubic.InOut ).
           onUpdate( function() {
             focusedBoundsProperty.set( { x: this.x, y: this.y, width: this.width, height: this.height } );
           } ).
@@ -71,50 +86,61 @@ define( function( require ) {
           } ).
           start();
       }
-      else if ( focusedInstance && previousFocusedInstance === null ) {
-        focusedBoundsProperty.value = focusedInstance.node.getGlobalBounds();
+      else if ( focusedTrail && previousFocusedTrail === null ) {
+        focusedBoundsProperty.value = trailToGlobalBounds( focusedTrail );
       }
       else {
         focusedBoundsProperty.value = null;
       }
+
+      // Detach listeners from the previous trail
+      for ( var i = 0; i < cleanup.length; i++ ) {
+        cleanup[ i ]();
+      }
+      cleanup.length = 0;
+
+      // Attach listeners up the tree of the focused node so that when the bounds change we can update the focus rectangle
+      if ( focusedTrail ) {
+
+        // A function that will update the focus bounds based on the focusedTrail
+        var updateFocusBounds = function() {
+
+          // If the node was still animating, cancel the animation or it would animate to the wrong place.
+          if ( tween ) {
+            tween.stop();
+            tween = null;
+          }
+          focusedBoundsProperty.value = trailToGlobalBounds( focusedTrail );
+        };
+
+        // For each node in the focused trail, add a listener for transform changes.
+        focusedTrail.nodes.forEach( function( node ) {
+          node.on( 'transform', updateFocusBounds );
+
+          cleanup.push( function() {
+            node.off( 'transform', updateFocusBounds );
+          } );
+        } );
+
+        // When the node's bounds change, update the focus rectangle
+        var lastNode = focusedTrail.lastNode();
+        lastNode.on( 'bounds', updateFocusBounds );
+        cleanup.push( function() {
+          lastNode.off( 'bounds', updateFocusBounds );
+        } );
+
+        // TODO: When the node's visibility changes, we need a new focus trail.
+      }
     } );
 
-    // There is a spurious transform listener callback when registering a listener (perhaps?)
-    // TODO: This spurious event needs to be discussed and reviewed with Jon Olson to make sure
-    // TODO: it is not a long term maintenance issue
-    var firstOne = true;
-    var transformListener = function() {
-      if ( firstOne ) {
-        firstOne = false;
-      }
-      else {
-        if ( tween ) {
-          tween.stop();
-          tween = null;
-        }
-        focusedBoundsProperty.value = Input.focusedInstance.node.getGlobalBounds();
-      }
-    };
 
-    Input.focusedInstanceProperty.link( function( focusedInstance, previousFocusedInstance ) {
-      if ( previousFocusedInstance ) {
-        previousFocusedInstance.relativeTransform.removeListener( transformListener );
-        previousFocusedInstance.relativeTransform.removePrecompute();
-      }
-      if ( focusedInstance ) {
-        focusedInstance.relativeTransform.addListener( transformListener ); // when our relative transform changes, notify us in the pre-repaint phase
-        focusedInstance.relativeTransform.addPrecompute(); // trigger precomputation of the relative transform, since we will always need it when it is updated
-        firstOne = true;
-
-        // TODO: What if parent(s) transforms change?
-      }
-    } );
-
-    var focusIndicatorProperty = new DerivedProperty( [ Input.focusedInstanceProperty ], function( focusedInstance ) {
+    // This property indicates which kind of focus region is being shown.  For instance, 'cursor' or 'rectangle'
+    // TODO: Make it possible to add new focus types here on a simulation-by-simulation basis
+    var focusIndicatorProperty = new DerivedProperty( [ Input.focusedTrailProperty ], function( focusedTrail ) {
 
       // the check for node existence seems necessary for handling appearing/disappearing popups
-      if ( focusedInstance && focusedInstance.node ) {
-        return focusedInstance.node.focusIndicator || 'rectangle';
+      if ( focusedTrail ) {
+        return focusedTrail.lastNode().focusIndicator || 'rectangle';
       }
       else {
         return null;
@@ -133,7 +159,7 @@ define( function( require ) {
     INSTANT_TWEEN_FACTORY: {
       Easing: { Cubic: { InOut: true } },
       Tween: function() {
-        var instance = {
+        return {
           to: function( finalState ) {
             this.finalState = finalState;
             return this;
@@ -149,7 +175,6 @@ define( function( require ) {
           },
           stop: function() {}
         };
-        return instance;
       }
     }
   } );

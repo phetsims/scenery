@@ -11,7 +11,7 @@ define( function( require ) {
   'use strict';
 
   var inherit = require( 'PHET_CORE/inherit' );
-  var PoolableMixin = require( 'PHET_CORE/PoolableMixin' );
+  var Poolable = require( 'PHET_CORE/Poolable' );
   var cleanArray = require( 'PHET_CORE/cleanArray' );
   var scenery = require( 'SCENERY/scenery' );
   var FittedBlock = require( 'SCENERY/display/FittedBlock' );
@@ -115,6 +115,7 @@ define( function( require ) {
       }
       else {
         var def = paint.getSVGDefinition();
+        def.setAttribute( 'id', paint.id + '-' + this.id );
 
         // TODO: reduce allocations?
         this.paintMap[ paint.id ] = {
@@ -275,8 +276,7 @@ define( function( require ) {
     }
   } );
 
-  /* jshint -W064 */
-  PoolableMixin( SVGBlock, {
+  Poolable.mixin( SVGBlock, {
     constructorDuplicateFactory: function( pool ) {
       return function( display, renderer, transformRootInstance, filterRootInstance ) {
         if ( pool.length ) {

@@ -279,132 +279,134 @@ define( function( require ) {
    * Rendering State mixin (DOM/SVG)
    *----------------------------------------------------------------------------*/
 
-  var LineStatefulDrawableMixin = Line.LineStatefulDrawableMixin = function( drawableType ) {
-    var proto = drawableType.prototype;
+  Line.LineStatefulDrawable = {
+    mixin: function( drawableType ) {
+      var proto = drawableType.prototype;
 
-    // initializes, and resets (so we can support pooled states)
-    proto.initializeState = function() {
-      this.paintDirty = true; // flag that is marked if ANY "paint" dirty flag is set (basically everything except for transforms, so we can accelerated the transform-only case)
-      this.dirtyX1 = true;
-      this.dirtyY1 = true;
-      this.dirtyX2 = true;
-      this.dirtyY2 = true;
+      // initializes, and resets (so we can support pooled states)
+      proto.initializeState = function() {
+        this.paintDirty = true; // flag that is marked if ANY "paint" dirty flag is set (basically everything except for transforms, so we can accelerated the transform-only case)
+        this.dirtyX1 = true;
+        this.dirtyY1 = true;
+        this.dirtyX2 = true;
+        this.dirtyY2 = true;
 
-      // adds fill/stroke-specific flags and state
-      this.initializePaintableState();
+        // adds fill/stroke-specific flags and state
+        this.initializePaintableState();
 
-      return this; // allow for chaining
-    };
+        return this; // allow for chaining
+      };
 
-    // catch-all dirty, if anything that isn't a transform is marked as dirty
-    proto.markPaintDirty = function() {
-      this.paintDirty = true;
-      this.markDirty();
-    };
+      // catch-all dirty, if anything that isn't a transform is marked as dirty
+      proto.markPaintDirty = function() {
+        this.paintDirty = true;
+        this.markDirty();
+      };
 
-    proto.markDirtyLine = function() {
-      this.dirtyX1 = true;
-      this.dirtyY1 = true;
-      this.dirtyX2 = true;
-      this.dirtyY2 = true;
-      this.markPaintDirty();
-    };
+      proto.markDirtyLine = function() {
+        this.dirtyX1 = true;
+        this.dirtyY1 = true;
+        this.dirtyX2 = true;
+        this.dirtyY2 = true;
+        this.markPaintDirty();
+      };
 
-    proto.markDirtyP1 = function() {
-      this.dirtyX1 = true;
-      this.dirtyY1 = true;
-      this.markPaintDirty();
-    };
+      proto.markDirtyP1 = function() {
+        this.dirtyX1 = true;
+        this.dirtyY1 = true;
+        this.markPaintDirty();
+      };
 
-    proto.markDirtyP2 = function() {
-      this.dirtyX2 = true;
-      this.dirtyY2 = true;
-      this.markPaintDirty();
-    };
+      proto.markDirtyP2 = function() {
+        this.dirtyX2 = true;
+        this.dirtyY2 = true;
+        this.markPaintDirty();
+      };
 
-    proto.markDirtyX1 = function() {
-      this.dirtyX1 = true;
-      this.markPaintDirty();
-    };
+      proto.markDirtyX1 = function() {
+        this.dirtyX1 = true;
+        this.markPaintDirty();
+      };
 
-    proto.markDirtyY1 = function() {
-      this.dirtyY1 = true;
-      this.markPaintDirty();
-    };
+      proto.markDirtyY1 = function() {
+        this.dirtyY1 = true;
+        this.markPaintDirty();
+      };
 
-    proto.markDirtyX2 = function() {
-      this.dirtyX2 = true;
-      this.markPaintDirty();
-    };
+      proto.markDirtyX2 = function() {
+        this.dirtyX2 = true;
+        this.markPaintDirty();
+      };
 
-    proto.markDirtyY2 = function() {
-      this.dirtyY2 = true;
-      this.markPaintDirty();
-    };
+      proto.markDirtyY2 = function() {
+        this.dirtyY2 = true;
+        this.markPaintDirty();
+      };
 
-    proto.setToCleanState = function() {
-      this.paintDirty = false;
-      this.dirtyX1 = false;
-      this.dirtyY1 = false;
-      this.dirtyX2 = false;
-      this.dirtyY2 = false;
+      proto.setToCleanState = function() {
+        this.paintDirty = false;
+        this.dirtyX1 = false;
+        this.dirtyY1 = false;
+        this.dirtyX2 = false;
+        this.dirtyY2 = false;
 
-      this.cleanPaintableState();
-    };
+        this.cleanPaintableState();
+      };
 
-    /* jshint -W064 */
-    Paintable.PaintableStatefulDrawableMixin( drawableType );
+      Paintable.PaintableStatefulDrawable.mixin( drawableType );
+    }
   };
 
   /*---------------------------------------------------------------------------*
    * Stateless drawable mixin
    *----------------------------------------------------------------------------*/
 
-  Line.LineStatelessDrawableMixin = function( drawableType ) {
-    var proto = drawableType.prototype;
+  Line.LineStatelessDrawable = {
+    mixin: function( drawableType ) {
+      var proto = drawableType.prototype;
 
-    // initializes, and resets (so we can support pooled states)
-    proto.initializeLineStateless = function() {
-      this.paintDirty = true; // flag that is marked if ANY "paint" dirty flag is set (basically everything except for transforms, so we can accelerated the transform-only case)
-      return this; // allow for chaining
-    };
+      // initializes, and resets (so we can support pooled states)
+      proto.initializeLineStateless = function() {
+        this.paintDirty = true; // flag that is marked if ANY "paint" dirty flag is set (basically everything except for transforms, so we can accelerated the transform-only case)
+        return this; // allow for chaining
+      };
 
-    // catch-all dirty, if anything that isn't a transform is marked as dirty
-    proto.markPaintDirty = function() {
-      this.paintDirty = true;
-      this.markDirty();
-    };
+      // catch-all dirty, if anything that isn't a transform is marked as dirty
+      proto.markPaintDirty = function() {
+        this.paintDirty = true;
+        this.markDirty();
+      };
 
-    proto.markDirtyLine = function() {
-      this.markPaintDirty();
-    };
+      proto.markDirtyLine = function() {
+        this.markPaintDirty();
+      };
 
-    proto.markDirtyP1 = function() {
-      this.markPaintDirty();
-    };
+      proto.markDirtyP1 = function() {
+        this.markPaintDirty();
+      };
 
-    proto.markDirtyP2 = function() {
-      this.markPaintDirty();
-    };
+      proto.markDirtyP2 = function() {
+        this.markPaintDirty();
+      };
 
-    proto.markDirtyX1 = function() {
-      this.markPaintDirty();
-    };
+      proto.markDirtyX1 = function() {
+        this.markPaintDirty();
+      };
 
-    proto.markDirtyY1 = function() {
-      this.markPaintDirty();
-    };
+      proto.markDirtyY1 = function() {
+        this.markPaintDirty();
+      };
 
-    proto.markDirtyX2 = function() {
-      this.markPaintDirty();
-    };
+      proto.markDirtyX2 = function() {
+        this.markPaintDirty();
+      };
 
-    proto.markDirtyY2 = function() {
-      this.markPaintDirty();
-    };
+      proto.markDirtyY2 = function() {
+        this.markPaintDirty();
+      };
 
-    /* jshint -W064 */
-    Paintable.PaintableStatefulDrawableMixin( drawableType );
+      Paintable.PaintableStatefulDrawable.mixin( drawableType );
+    }
   };
 
   /*---------------------------------------------------------------------------*
@@ -413,7 +415,7 @@ define( function( require ) {
 
   Line.LineSVGDrawable = SVGSelfDrawable.createDrawable( {
     type: function LineSVGDrawable( renderer, instance ) { this.initialize( renderer, instance ); },
-    stateType: LineStatefulDrawableMixin,
+    stateType: Line.LineStatefulDrawable.mixin,
     initialize: function( renderer, instance ) {
       if ( !this.svgElement ) {
         this.svgElement = document.createElementNS( scenery.svgns, 'line' );
@@ -634,16 +636,13 @@ define( function( require ) {
   } );
 
   // include stubs for Line API compatibility
-  /* jshint -W064 */
-  Line.LineStatelessDrawableMixin( Line.LineWebGLDrawable );
+  Line.LineStatelessDrawable.mixin( Line.LineWebGLDrawable );
 
   // include stubs for marking dirty stroke and fill (if necessary). we only want one dirty flag, not multiple ones, for WebGL (for now)
-  /* jshint -W064 */
-  Paintable.PaintableStatefulDrawableMixin( Line.LineWebGLDrawable );
+  Paintable.PaintableStatefulDrawable.mixin( Line.LineWebGLDrawable );
 
   // set up pooling
-  /* jshint -W064 */
-  SelfDrawable.PoolableMixin( Line.LineWebGLDrawable );
+  SelfDrawable.Poolable.mixin( Line.LineWebGLDrawable );
 
   return Line;
 } );

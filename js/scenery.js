@@ -106,7 +106,8 @@ define( function( require ) {
       }
 
       if ( name ) {
-        assert && assert( scenery.logProperties[ name ], 'Unknown logger: ' + name );
+        assert && assert( scenery.logProperties[ name ],
+          'Unknown logger: ' + name + ', please use periods (.) to separate different log names' );
 
         window.sceneryLog[ name ] = window.sceneryLog[ name ] || function( ob, styleOverride ) {
           var data = scenery.logProperties[ name ];

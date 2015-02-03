@@ -16,6 +16,7 @@ define( function( require ) {
   var inherit = require( 'PHET_CORE/inherit' );
   var scenery = require( 'SCENERY/scenery' );
   require( 'SCENERY/util/Trail' );
+  var Input = require( 'SCENERY/input/Input' );
 
   /*
    * The 'trail' parameter passed to down/upInside/upOutside will end with the node to which this DownUpListener has been added.
@@ -60,6 +61,15 @@ define( function( require ) {
         sceneryEventLog && sceneryEventLog( 'DownUpListener (pointer) cancel for ' + handler.downTrail.toString() );
         assert && assert( event.pointer === handler.pointer );
         handler.buttonUp( event );
+      },
+
+      // When the enter or space key is released, trigger an up event
+      // TODO: Only trigger this if the enter/space key went down for this node
+      keyup: function( event ) {
+        var keyCode = event.domEvent.keyCode;
+        if ( keyCode === Input.KEY_ENTER || keyCode === Input.KEY_SPACE ) {
+          handler.buttonUp( event );
+        }
       }
     };
   };
@@ -120,10 +130,16 @@ define( function( require ) {
     // mouse/touch down on this node
     down: function( event ) {
       this.buttonDown( event );
+    },
+
+    // When enter/space pressed for this node, trigger a button down
+    keydown: function( event ) {
+      var keyCode = event.domEvent.keyCode;
+      if ( keyCode === Input.KEY_ENTER || keyCode === Input.KEY_SPACE ) {
+        this.buttonDown( event );
+      }
     }
   } );
 
   return DownUpListener;
 } );
-
-

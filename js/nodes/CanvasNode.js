@@ -39,7 +39,10 @@ define( function( require ) {
       return true;
     },
 
-    // override paintCanvas with a faster version, since fillRect and drawRect don't affect the current default path
+    /**
+     * Override paintCanvas with a faster version, since fillRect and drawRect don't affect the current default path.
+     * @param {CanvasContextWrapper} wrapper
+     */
     paintCanvas: function( wrapper ) {
       throw new Error( 'CanvasNode needs paintCanvas implemented' );
     },
