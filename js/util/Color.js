@@ -181,6 +181,8 @@ define( function( require ) {
      * - set( hex, alpha ) will set RGBA, e.g. set( 0xFF0000, 1 )
      */
     set: function( r, g, b, a ) {
+      assert && assert( r !== undefined, 'Can\'t call Color.set( undefined )' );
+
       // support for set( string )
       if ( typeof r === 'string' ) {
         this.setCSS( r );
