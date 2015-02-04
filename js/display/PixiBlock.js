@@ -130,9 +130,8 @@ define( function( require ) {
 
         // checks will be done in updateFit() to see whether it is needed
         this.updateFit();
-
+        this.pixiRenderer.render( this.stage );
       }
-      this.pixiRenderer.render( this.stage );
     },
 
     dispose: function() {
