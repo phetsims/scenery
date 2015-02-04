@@ -499,16 +499,49 @@ define( function( require ) {
       }
     },
     updatePixi: function( node, path ) {
-
       if ( this.dirtyShape ) {
         var graphics = this.displayObject;
         this.displayObject.clear();
 
+        var shape = node.shape;
+        var i = 0;
+        var segment;
+        if ( shape !== null ) {
+          if ( node.getStrokeColor() ) {
+            graphics.lineStyle( 5, node.getStrokeColor().toNumber() );
+          }
+          if ( node.getFillColor() ) {
+            graphics.beginFill( path.getFillColor().toNumber() );
+          }
+          for ( i = 0; i < shape.subpaths.length; i++ ) {
+            var subpath = shape.subpaths[ i ];
+            for ( var k = 0; k < subpath.segments.length; k++ ) {
+              segment = subpath.segments[ k ];
+              if ( i === 0 && k === 0 ) {
+                graphics.moveTo( segment.start.x, segment.start.y );
+              }
+              else {
+                graphics.lineTo( segment.start.x, segment.start.y );
+              }
+
+              if ( k === subpath.segments.length - 1 ) {
+                graphics.lineTo( segment.end.x, segment.end.y );
+              }
+            }
+
+            if ( subpath.isClosed() ) {
+              segment = subpath.segments[ 0 ];
+              graphics.lineTo( segment.start.x, segment.start.y );
+            }
+          }
+
+          graphics.endFill();
+        }
         // TODO: geometry
-        graphics.lineStyle( 5, node.getStrokeColor().toNumber() );
-        graphics.moveTo( 0, 0 );
-        graphics.lineTo( 100, 100 );
-        graphics.endFill();
+
+        //graphics.moveTo( 0, 0 );
+        //graphics.lineTo( 100, 100 );
+        //graphics.endFill();
       }
 
       this.updateFillStrokeStyle( path );
