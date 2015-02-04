@@ -27,6 +27,7 @@ define( function( require ) {
   var WebGLSelfDrawable = require( 'SCENERY/display/WebGLSelfDrawable' );
   var SelfDrawable = require( 'SCENERY/display/SelfDrawable' );
   var WebGLBlock = require( 'SCENERY/display/WebGLBlock' );
+  var PixiSelfDrawable = require( 'SCENERY/display/PixiSelfDrawable' );
 
   var Color = require( 'SCENERY/util/Color' );
 
@@ -201,6 +202,10 @@ define( function( require ) {
 
     createWebGLDrawable: function( renderer, instance ) {
       return Line.LineWebGLDrawable.createFromPool( renderer, instance );
+    },
+
+    createPixiDrawable: function( renderer, instance ) {
+      return Line.LinePixiDrawable.createFromPool( renderer, instance );
     },
 
     getBasicConstructor: function( propLines ) {
@@ -643,6 +648,34 @@ define( function( require ) {
 
   // set up pooling
   SelfDrawable.Poolable.mixin( Line.LineWebGLDrawable );
+
+
+  /*---------------------------------------------------------------------------*
+   * Pixi Rendering
+   *----------------------------------------------------------------------------*/
+
+  Line.LinePixiDrawable = PixiSelfDrawable.createDrawable( {
+    type: function LinePixiDrawable( renderer, instance ) { this.initialize( renderer, instance ); },
+    stateType: Line.LineStatefulDrawable.mixin,
+    initialize: function( renderer, instance ) {
+      if ( !this.displayObject ) {
+        this.displayObject = new PIXI.Graphics();
+      }
+    },
+    updatePixi: function( node, line ) {
+      if ( this.dirtyX1 || this.dirtyY1 || this.dirtyX2 || this.dirtyY2 ) {
+        var graphics = this.displayObject;
+        this.displayObject.clear();
+        graphics.lineStyle( node.lineWidth, node.getStrokeColor().toNumber() );
+        graphics.moveTo( node._x1, node._y1 );
+        graphics.lineTo( node._x2, node._y2 );
+        graphics.endFill();
+      }
+      this.updateFillStrokeStyle( line );
+    },
+    usesPaint: true,
+    keepElements: keepSVGLineElements
+  } );
 
   return Line;
 } );
