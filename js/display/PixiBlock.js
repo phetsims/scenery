@@ -62,7 +62,7 @@ define( function( require ) {
       var instanceClosestToRoot = transformRootInstance.trail.nodes.length > filterRootInstance.trail.nodes.length ? filterRootInstance : transformRootInstance;
 
       this.rootGroup = PixiDisplayObject.createFromPool( this, instanceClosestToRoot, null );
-      this.baseTransformGroup.addChild( this.rootGroup.pixiCanvas );
+      this.baseTransformGroup.addChild( this.rootGroup.displayObject );
 
       // TODO: dirty list of nodes (each should go dirty only once, easier than scanning all?)
 

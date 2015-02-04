@@ -954,23 +954,18 @@ define( function( require ) {
       this.lastArcW = -1; // invalid on purpose
       this.lastArcH = -1; // invalid on purpose
 
-      if ( !this.pixiCanvas ) {
-        var graphics = new PIXI.Graphics();
-        graphics.beginFill( instance.node.getFillColor().toNumber() );
-        //graphics.drawRect( instance.node.rectX, instance.node.rectY,instance.node.rectWidth,instance.node.rectHeight );
-        graphics.drawRect( -1000,-1000,2000,2000 );
-        graphics.endFill();
-        this.pixiCanvas = graphics;
+      if ( !this.displayObject ) {
+        this.displayObject = new PIXI.Graphics();
       }
     },
     updatePixi: function( node, rect ) {
       if ( this.dirtyX || this.dirtyY || this.dirtyWidth || this.dirtyHeight ||
            this.dirtyArcWidth || this.dirtyArcHeight || this.dirtyWidth || this.dirtyHeight ) {
-        this.pixiCanvas.clear();
-        var graphics = this.pixiCanvas;
+        var graphics = this.displayObject;
+        this.displayObject.clear();
         graphics.beginFill( node.getFillColor().toNumber() );
         //graphics.drawRect( node.rectX, node.rectY,node.rectWidth,node.rectHeight );
-        graphics.drawRect( -1000,-1000,2000,2000 );
+        graphics.drawRect( 50, 50, 800, 800 );
         graphics.endFill();
       }
       this.updateFillStrokeStyle( rect );

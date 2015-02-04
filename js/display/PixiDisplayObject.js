@@ -75,8 +75,8 @@ define( function( require ) {
       this.node.onStatic( 'childInserted', this.orderDirtyListener );
       this.node.onStatic( 'childRemoved', this.orderDirtyListener );
 
-      if ( !this.pixiCanvas ) {
-        this.pixiCanvas = new PIXI.DisplayObjectContainer();
+      if ( !this.displayObject ) {
+        this.displayObject = new PIXI.DisplayObjectContainer();
       }
 
       this.instance.addPixiDisplayObject( this );
@@ -88,14 +88,14 @@ define( function( require ) {
 
     addSelfDrawable: function( drawable ) {
       this.selfDrawable = drawable;
-      var index = this.children.length ? this.pixiCanvas.getChildIndex( this.children[ 0 ].pixiCanvas ) : 0;
-      this.pixiCanvas.addChildAt( drawable.pixiCanvas, index );
+      var index = this.children.length ? this.displayObject.getChildIndex( this.children[ 0 ].displayObject ) : 0;
+      this.displayObject.addChildAt( drawable.displayObject, index );
       this.hasSelfDrawable = true;
     },
 
     removeSelfDrawable: function( drawable ) {
       this.hasSelfDrawable = false;
-      this.pixiCanvas.removeChild( drawable.pixiCanvas );
+      this.displayObject.removeChild( drawable.displayObject );
       this.selfDrawable = null;
     },
 
@@ -104,7 +104,7 @@ define( function( require ) {
 
       group.parent = this;
       this.children.push( group );
-      this.pixiCanvas.addChild( group.pixiCanvas );
+      this.displayObject.addChild( group.displayObject );
     },
 
     removeChildGroup: function( group ) {
@@ -112,7 +112,7 @@ define( function( require ) {
 
       group.parent = null;
       this.children.splice( _.indexOf( this.children, group ), 1 );
-      this.pixiCanvas.removeChild( group.PixiDisplayObject );
+      this.displayObject.removeChild( group.PixiDisplayObject );
     },
 
     markDirty: function() {
@@ -172,7 +172,7 @@ define( function( require ) {
 
       sceneryLog && sceneryLog.PixiDisplayObject && sceneryLog.push();
 
-      var pixiDisplayObject = this.pixiCanvas;
+      var pixiDisplayObject = this.displayObject;
 
       this.dirty = false;
 
@@ -332,7 +332,7 @@ define( function( require ) {
 
       // remove clipping, since it is defs-based (and we want to keep our defs block clean - could be another layer!)
       if ( this.clipDefinition ) {
-        this.pixiCanvas.removeAttribute( 'clip-path' );
+        this.displayObject.removeAttribute( 'clip-path' );
         this.block.defs.removeChild( this.clipDefinition );
         this.clipDefinition = null;
         this.clipPath = null;
