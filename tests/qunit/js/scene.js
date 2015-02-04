@@ -724,7 +724,7 @@
     }
 
     // getUniqueTrail()
-    throws( function() { d.getUniqueTrail(); }, 'D has no unique trail, since there are two' );
+    window.assert && throws( function() { d.getUniqueTrail(); }, 'D has no unique trail, since there are two' );
     ok( a.getUniqueTrail().equals( new scenery.Trail( [ a ] ) ), 'a.getUniqueTrail()' );
     ok( b.getUniqueTrail().equals( new scenery.Trail( [ a, b ] ) ), 'b.getUniqueTrail()' );
     ok( c.getUniqueTrail().equals( new scenery.Trail( [ a, c ] ) ), 'c.getUniqueTrail()' );
@@ -744,8 +744,8 @@
     ok( trails.length === 1 && trails[0].equals( new scenery.Trail( [ a, c, e ] ) ), 'e.getTrails()' );
 
     // getUniqueTrail( predicate )
-    throws( function() { e.getUniqueTrail( function( node ) { return false; } ); }, 'Fails on false predicate' );
-    throws( function() { e.getUniqueTrail( function( node ) { return false; } ); }, 'Fails on false predicate' );
+    window.assert && throwsthrows( function() { e.getUniqueTrail( function( node ) { return false; } ); }, 'Fails on false predicate' );
+    window.assert && throwsthrows( function() { e.getUniqueTrail( function( node ) { return false; } ); }, 'Fails on false predicate' );
     ok( e.getUniqueTrail( function( node ) { return node === a; } ).equals( new scenery.Trail( [ a, c, e ] ) ) );
     ok( e.getUniqueTrail( function( node ) { return node === c; } ).equals( new scenery.Trail( [ c, e ] ) ) );
     ok( e.getUniqueTrail( function( node ) { return node === e; } ).equals( new scenery.Trail( [ e ] ) ) );
