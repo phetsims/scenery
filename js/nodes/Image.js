@@ -489,86 +489,34 @@ define( function( require ) {
 
 
   /*---------------------------------------------------------------------------*
-   * Pixi rendering
+   * Pixi Rendering
    *----------------------------------------------------------------------------*/
 
-  Image.ImagePixiDrawable = inherit( PixiSelfDrawable, function ImagePixiDrawable( renderer, instance ) {
-    this.initialize( renderer, instance );
-  }, {
-    // called either from the constructor or from pooling
+  Image.ImagePixiDrawable = PixiSelfDrawable.createDrawable( {
+    type: function ImagePixiDrawable( renderer, instance ) { this.initialize( renderer, instance ); },
+    stateType: Image.ImageStatefulDrawable.mixin,
     initialize: function( renderer, instance ) {
-      this.initializePixiSelfDrawable( renderer, instance );
-
-      var baseTexture = new PIXI.BaseTexture( this.node._image, PIXI.scaleModes.DEFAULT );
-      var texture = new PIXI.Texture( baseTexture );
-      this.displayObject = new PIXI.Sprite( texture );
-      this.updateMatrix();
-    },
-
-    updateMatrix: function() {
-      var matrix = this.node.getLocalToGlobalMatrix();
-      this.displayObject.position.x = matrix.getTranslation().x;
-      this.displayObject.position.y = matrix.getTranslation().y;
-
-      //TODO: Scale, shear, etc.
-    },
-
-    initializeContext: function( pixiBlock ) {
-      this.pixiBlock = pixiBlock;
-    },
-
-    //Nothing necessary since everything currently handled in the uModelViewMatrix below
-    //However, we may switch to dynamic draw, and handle the matrix change only where necessary in the future?
-    updateRectangle: function() {
-    },
-
-    render: function( shaderProgram ) {
-      // This is handled by the ColorTriangleRenderer
-    },
-
-    dispose: function() {
-      this.disposePixiBuffers();
-
-      // super
-      PixiSelfDrawable.prototype.dispose.call( this );
-    },
-
-    disposePixiBuffers: function() {
-      this.pixiBlock.pixiRenderer.colorTriangleRenderer.colorTriangleBufferData.dispose( this.rectangleHandle );
-    },
-
-    markTransformDirty: function() {
-      PixiSelfDrawable.prototype.markTransformDirty.call( this );
-
-      // TODO: Batch these dirty calls and only update right before render?
-      this.updateMatrix();
-    },
-
-    markDirtyRectangle: function() {
-      this.markDirty();
-    },
-
-    // general flag set on the state, which we forward directly to the drawable's paint flag
-    markPaintDirty: function() {
-      this.markDirty();
-    },
-
-    onAttach: function( node ) {
-
-    },
-
-    // release the drawable
-    onDetach: function( node ) {
-      //OHTWO TODO: are we missing the disposal?
-    },
-
-    //TODO: Make sure all of the dirty flags make sense here.  Should we be using fillDirty, paintDirty, dirty, etc?
-    update: function() {
-      if ( this.dirty ) {
-        this.updateRectangle();
-        this.dirty = false;
+      if ( !this.displayObject ) {
+        var baseTexture = new PIXI.BaseTexture( this.node._image, PIXI.scaleModes.DEFAULT );
+        var texture = new PIXI.Texture( baseTexture );
+        this.displayObject = new PIXI.Sprite( texture );
       }
-    }
+    },
+    updatePixi: function( node, image ) {
+      //OHTWO TODO: performance: consider using <use> with <defs> for our image element. This could be a significant speedup!
+      if ( this.dirtyImage ) {
+        if ( node._image ) {
+          var baseTexture = new PIXI.BaseTexture( this.node._image, PIXI.scaleModes.DEFAULT );
+          var texture = new PIXI.Texture( baseTexture );
+          this.displayObject.setTexture( texture );
+        }
+        else {
+          this.displayObject.setTexture( null );
+        }
+      }
+    },
+    usesPaint: false,
+    keepElements: keepSVGImageElements
   } );
 
   // set up pooling
