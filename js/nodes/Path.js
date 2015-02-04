@@ -21,6 +21,7 @@ define( function( require ) {
   var SelfDrawable = require( 'SCENERY/display/SelfDrawable' );
   var WebGLSelfDrawable = require( 'SCENERY/display/WebGLSelfDrawable' );
   var WebGLBlock = require( 'SCENERY/display/WebGLBlock' );
+  var PixiSelfDrawable = require( 'SCENERY/display/PixiSelfDrawable' );
   var Util = require( 'SCENERY/util/Util' );
 
   // TODO: change this based on memory and performance characteristics of the platform
@@ -124,6 +125,10 @@ define( function( require ) {
 
     createWebGLDrawable: function( renderer, instance ) {
       return Path.PathWebGLDrawable.createFromPool( renderer, instance );
+    },
+
+    createPixiDrawable: function( renderer, instance ) {
+      return Path.PathPixiDrawable.createFromPool( renderer, instance );
     },
 
     isPainted: function() {
@@ -481,6 +486,36 @@ define( function( require ) {
 
   Path.PathStatefulDrawable.mixin( Path.PathWebGLDrawable );
 
+  /*---------------------------------------------------------------------------*
+   * Pixi Rendering
+   *----------------------------------------------------------------------------*/
+
+  Path.PathPixiDrawable = PixiSelfDrawable.createDrawable( {
+    type: function PathPixiDrawable( renderer, instance ) { this.initialize( renderer, instance ); },
+    stateType: Path.PathStatefulDrawable.mixin,
+    initialize: function( renderer, instance ) {
+      if ( !this.displayObject ) {
+        this.displayObject = new PIXI.Graphics();
+      }
+    },
+    updatePixi: function( node, path ) {
+
+      if ( this.dirtyShape ) {
+        var graphics = this.displayObject;
+        this.displayObject.clear();
+
+        // TODO: geometry
+        graphics.lineStyle( 5, node.getStrokeColor().toNumber() );
+        graphics.moveTo( 0, 0 );
+        graphics.lineTo( 100, 100 );
+        graphics.endFill();
+      }
+
+      this.updateFillStrokeStyle( path );
+    },
+    usesPaint: true,
+    keepElements: false
+  } );
 
   return Path;
 } );
