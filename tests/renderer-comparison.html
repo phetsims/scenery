@@ -155,7 +155,7 @@
         draw: function( scene, display ) {
           scene.addChild( new scenery.Circle( 50, { fill: 'green', centerX: 100, centerY: 100 } ) );
         },
-        renderers: [ 'canvas', 'svg', 'webgl' ]
+        renderers: [ 'canvas', 'svg', 'dom', 'webgl', 'pixi' ]
       },
       {
         name: 'hello-text',
@@ -164,7 +164,7 @@
         draw: function( scene, display ) {
           scene.addChild( new scenery.Text( 'hello text!', { left: 10, top: 10 } ) );
         },
-        renderers: [ 'canvas', 'svg', 'dom', 'webgl' ]
+        renderers: [ 'canvas', 'svg', 'dom', 'webgl', 'pixi' ]
       },
       {
         name: 'hello-text-animation',
@@ -182,7 +182,7 @@
           };
           window.requestAnimationFrame( callback );
         },
-        renderers: [ 'canvas', 'svg', 'dom', 'webgl' ]
+        renderers: [ 'canvas', 'svg', 'dom', 'webgl', 'pixi' ]
       },
       {
         name: 'solid-line-animating-position',
@@ -201,7 +201,7 @@
           };
           window.requestAnimationFrame( callback );
         },
-        renderers: [ 'canvas', 'svg', 'webgl' ]
+        renderers: [ 'canvas', 'svg', 'dom', 'webgl', 'pixi' ]
       },
       {
         name: 'solid-line-animating-lineWidth',
@@ -218,7 +218,7 @@
           };
           window.requestAnimationFrame( callback );
         },
-        renderers: [ 'canvas', 'svg', 'webgl' ]
+        renderers: [ 'canvas', 'svg', 'dom', 'webgl', 'pixi' ]
       },
       {
         name: 'moving-image',
