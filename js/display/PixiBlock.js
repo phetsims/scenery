@@ -36,10 +36,11 @@ define( function( require ) {
       if ( !this.domElement ) {
 
         // Create the Pixi Stage
-        this.stage = new PIXI.Stage( 0xFF0000 );
+        this.stage = new PIXI.Stage();
 
         // Create the renderer and view
-        this.pixiRenderer = PIXI.autoDetectRenderer( 1024, 768, { transparent: false } );
+        // Size will be set in update
+        this.pixiRenderer = PIXI.autoDetectRenderer( 0, 0, { transparent: true } );
 
         // main DOM element
         this.pixiCanvas = this.pixiRenderer.view;
@@ -83,6 +84,7 @@ define( function( require ) {
     },
 
     setSizeFullDisplay: function() {
+      console.log( 'who is calling this code?' );
       sceneryLog && sceneryLog.PixiBlock && sceneryLog.PixiBlock( 'setSizeFullDisplay #' + this.id );
 
       var size = this.display.getSize();
@@ -100,8 +102,7 @@ define( function( require ) {
       this.baseTransformGroup.x = (-x);
       this.baseTransformGroup.y = (-y);
       Util.setTransform( 'matrix(1,0,0,1,' + x + ',' + y + ')', this.pixiCanvas, this.forceAcceleration ); // reapply the translation as a CSS transform
-      this.pixiCanvas.setAttribute( 'width', this.fitBounds.width );
-      this.pixiCanvas.setAttribute( 'height', this.fitBounds.height );
+      this.pixiRenderer.resize( this.fitBounds.width, this.fitBounds.height );
     },
 
     update: function() {

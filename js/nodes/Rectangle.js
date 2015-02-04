@@ -964,7 +964,7 @@ define( function( require ) {
         var graphics = this.displayObject;
         this.displayObject.clear();
         graphics.beginFill( node.getFillColor().toNumber() );
-        graphics.drawRect( node.rectX, node.rectY + 660, node.rectWidth, node.rectHeight );
+        graphics.drawRect( node.rectX, node.rectY, node.rectWidth, node.rectHeight );
         graphics.endFill();
       }
       this.updateFillStrokeStyle( rect );
