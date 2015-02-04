@@ -955,43 +955,22 @@ define( function( require ) {
       this.lastArcH = -1; // invalid on purpose
 
       if ( !this.pixiDisplayObject ) {
-        this.pixiDisplayObject = document.createElementNS( scenery.svgns, 'rect' );
+        var graphics = new PIXI.Graphics();
+        graphics.beginFill( 0xFFFF00 );
+        graphics.drawRect( 0, 0, 100, 100 );
+        graphics.endFill();
+        this.pixiDisplayObject = graphics;
       }
     },
     updatePixi: function( node, rect ) {
-      if ( this.dirtyX ) {
-        rect.setAttribute( 'x', node._rectX );
+      if ( this.dirtyX || this.dirtyY || this.dirtyWidth || this.dirtyHeight ||
+           this.dirtyArcWidth || this.dirtyArcHeight || this.dirtyWidth || this.dirtyHeight ) {
+        this.pixiDisplayObject.clear();
+        var graphics = this.pixiDisplayObject;
+        graphics.beginFill( 0xFFFF00 );
+        graphics.drawRect( 0, 0, 100, 100 );
+        graphics.endFill();
       }
-      if ( this.dirtyY ) {
-        rect.setAttribute( 'y', node._rectY );
-      }
-      if ( this.dirtyWidth ) {
-        rect.setAttribute( 'width', node._rectWidth );
-      }
-      if ( this.dirtyHeight ) {
-        rect.setAttribute( 'height', node._rectHeight );
-      }
-      if ( this.dirtyArcWidth || this.dirtyArcHeight || this.dirtyWidth || this.dirtyHeight ) {
-        var arcw = 0;
-        var arch = 0;
-
-        // workaround for various browsers if rx=20, ry=0 (behavior is inconsistent, either identical to rx=20,ry=20, rx=0,ry=0. We'll treat it as rx=0,ry=0)
-        // see https://github.com/phetsims/scenery/issues/183
-        if ( node.isRounded() ) {
-          var maximumArcSize = node.getMaximumArcSize();
-          arcw = Math.min( node._rectArcWidth, maximumArcSize );
-          arch = Math.min( node._rectArcHeight, maximumArcSize );
-        }
-        if ( arcw !== this.lastArcW ) {
-          this.lastArcW = arcw;
-          rect.setAttribute( 'rx', arcw );
-        }
-        if ( arch !== this.lastArcH ) {
-          this.lastArcH = arch;
-          rect.setAttribute( 'ry', arch );
-        }
-      }
-
       this.updateFillStrokeStyle( rect );
     },
     usesPaint: true,

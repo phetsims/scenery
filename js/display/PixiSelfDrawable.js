@@ -126,7 +126,8 @@ define( function( require ) {
           this.paintState.updateStrokeParameters( this.node );
         }
         if ( this.dirtyFill || this.dirtyStroke || strokeParameterDirty ) {
-          element.setAttribute( 'style', this.paintState.baseStyle + this.paintState.extraStyle );
+          //element.setAttribute( 'style', this.paintState.baseStyle + this.paintState.extraStyle );
+          console.log( '//TODO: how do we recreate the graphics with the new colors???' );
         }
       },
 
