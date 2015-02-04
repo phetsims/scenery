@@ -188,5 +188,10 @@ define( function( require ) {
     // TODO: what else would we need?
   };
 
+  // store a reference on the PhET namespace if it exists
+  if ( window.phet ) {
+    window.phet.scenery = scenery;
+  }
+
   return scenery;
 } );
