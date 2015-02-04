@@ -27,7 +27,7 @@ define( function( require ) {
       // super initialization
       this.initializeSelfDrawable( renderer, instance );
 
-      this.pixiDisplayObject = null; // should be filled in by subtype
+      this.pixiCanvas = null; // should be filled in by subtype
       this.pixiBlock = null; // will be updated by updateSVGBlock()
 
       return this;
@@ -133,7 +133,7 @@ define( function( require ) {
 
       updatePixi: function() {
         if ( this.paintDirty ) {
-          updatePixiSelf.call( this, this.node, this.pixiDisplayObject );
+          updatePixiSelf.call( this, this.node, this.pixiCanvas );
         }
 
         // sync the differences between the previously-recorded list of cached paints and the new list
@@ -208,7 +208,7 @@ define( function( require ) {
         //OHTWO TODO: are we missing the disposal?
         if ( !keepElements ) {
           // clear the references
-          this.pixiDisplayObject = null;
+          this.pixiCanvas = null;
         }
 
         // release any defs, and dispose composed state objects

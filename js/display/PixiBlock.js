@@ -39,30 +39,30 @@ define( function( require ) {
         this.stage = new PIXI.Stage( 0xFF0000 );
 
         // Create the renderer and view
-        this.pixiRenderer = PIXI.autoDetectRenderer( 1024, 768, { transparent: true } );
+        this.pixiRenderer = PIXI.autoDetectRenderer( 1024, 768, { transparent: false } );
 
         // main DOM element
-        this.pixiDisplayObject = this.pixiRenderer.view;
-        this.pixiDisplayObject.style.position = 'absolute';
-        this.pixiDisplayObject.style.left = '0';
-        this.pixiDisplayObject.style.top = '0';
+        this.pixiCanvas = this.pixiRenderer.view;
+        this.pixiCanvas.style.position = 'absolute';
+        this.pixiCanvas.style.left = '0';
+        this.pixiCanvas.style.top = '0';
         //OHTWO TODO: why would we clip the individual layers also? Seems like a potentially useless performance loss
         // this.pixiDisplayObject.style.clip = 'rect(0px,' + width + 'px,' + height + 'px,0px)';
-        this.pixiDisplayObject.style[ 'pointer-events' ] = 'none';
+        this.pixiCanvas.style[ 'pointer-events' ] = 'none';
 
         this.baseTransformGroup = new PIXI.DisplayObjectContainer();
-
-        this.domElement = this.pixiDisplayObject;
+        this.stage.addChild( this.baseTransformGroup );
+        this.domElement = this.pixiCanvas;
       }
 
       // reset what layer fitting can do (this.forceAcceleration set in fitted block initialization)
-      Util.prepareForTransform( this.pixiDisplayObject, this.forceAcceleration );
-      Util.unsetTransform( this.pixiDisplayObject ); // clear out any transforms that could have been previously applied
+      Util.prepareForTransform( this.pixiCanvas, this.forceAcceleration );
+      Util.unsetTransform( this.pixiCanvas ); // clear out any transforms that could have been previously applied
 
       var instanceClosestToRoot = transformRootInstance.trail.nodes.length > filterRootInstance.trail.nodes.length ? filterRootInstance : transformRootInstance;
 
       this.rootGroup = PixiDisplayObject.createFromPool( this, instanceClosestToRoot, null );
-      this.baseTransformGroup.addChild( this.rootGroup.pixiDisplayObject );
+      this.baseTransformGroup.addChild( this.rootGroup.pixiCanvas );
 
       // TODO: dirty list of nodes (each should go dirty only once, easier than scanning all?)
 
@@ -86,8 +86,8 @@ define( function( require ) {
       sceneryLog && sceneryLog.PixiBlock && sceneryLog.PixiBlock( 'setSizeFullDisplay #' + this.id );
 
       var size = this.display.getSize();
-      this.pixiDisplayObject.setAttribute( 'width', size.width );
-      this.pixiDisplayObject.setAttribute( 'height', size.height );
+      this.pixiCanvas.setAttribute( 'width', size.width );
+      this.pixiCanvas.setAttribute( 'height', size.height );
     },
 
     setSizeFitBounds: function() {
@@ -99,9 +99,9 @@ define( function( require ) {
       // subtract off so we have a tight fit
       this.baseTransformGroup.x = (-x);
       this.baseTransformGroup.y = (-y);
-      Util.setTransform( 'matrix(1,0,0,1,' + x + ',' + y + ')', this.pixiDisplayObject, this.forceAcceleration ); // reapply the translation as a CSS transform
-      this.pixiDisplayObject.setAttribute( 'width', this.fitBounds.width );
-      this.pixiDisplayObject.setAttribute( 'height', this.fitBounds.height );
+      Util.setTransform( 'matrix(1,0,0,1,' + x + ',' + y + ')', this.pixiCanvas, this.forceAcceleration ); // reapply the translation as a CSS transform
+      this.pixiCanvas.setAttribute( 'width', this.fitBounds.width );
+      this.pixiCanvas.setAttribute( 'height', this.fitBounds.height );
     },
 
     update: function() {
@@ -130,15 +130,17 @@ define( function( require ) {
 
         // checks will be done in updateFit() to see whether it is needed
         this.updateFit();
+
       }
+      this.pixiRenderer.render( this.stage );
     },
 
     dispose: function() {
       sceneryLog && sceneryLog.PixiBlock && sceneryLog.PixiBlock( 'dispose #' + this.id );
 
       // make it take up zero area, so that we don't use up excess memory
-      this.pixiDisplayObject.setAttribute( 'width', 0 );
-      this.pixiDisplayObject.setAttribute( 'height', 0 );
+      this.pixiCanvas.setAttribute( 'width', 0 );
+      this.pixiCanvas.setAttribute( 'height', 0 );
 
       // clear references
       this.filterRootInstance = null;
