@@ -639,19 +639,19 @@ define( function( require ) {
   };
 
   // Java compatibility
-  Color.BLACK = new Color( 0, 0, 0 ).setImmutable();
-  Color.BLUE = new Color( 0, 0, 255 ).setImmutable();
-  Color.CYAN = new Color( 0, 255, 255 ).setImmutable();
-  Color.DARK_GRAY = new Color( 64, 64, 64 ).setImmutable();
-  Color.GRAY = new Color( 128, 128, 128 ).setImmutable();
-  Color.GREEN = new Color( 0, 255, 0 ).setImmutable();
-  Color.LIGHT_GRAY = new Color( 192, 192, 192 ).setImmutable();
-  Color.MAGENTA = new Color( 255, 0, 255 ).setImmutable();
-  Color.ORANGE = new Color( 255, 200, 0 ).setImmutable();
-  Color.PINK = new Color( 255, 175, 175 ).setImmutable();
-  Color.RED = new Color( 255, 0, 0 ).setImmutable();
-  Color.WHITE = new Color( 255, 255, 255 ).setImmutable();
-  Color.YELLOW = new Color( 255, 255, 0 ).setImmutable();
+  Color.BLACK = Color.black = new Color( 0, 0, 0 ).setImmutable();
+  Color.BLUE = Color.blue = new Color( 0, 0, 255 ).setImmutable();
+  Color.CYAN = Color.cyan = new Color( 0, 255, 255 ).setImmutable();
+  Color.DARK_GRAY = Color.darkGray = new Color( 64, 64, 64 ).setImmutable();
+  Color.GRAY = Color.gray = new Color( 128, 128, 128 ).setImmutable();
+  Color.GREEN = Color.green = new Color( 0, 255, 0 ).setImmutable();
+  Color.LIGHT_GRAY = Color.lightGray = new Color( 192, 192, 192 ).setImmutable();
+  Color.MAGENTA = Color.magenta = new Color( 255, 0, 255 ).setImmutable();
+  Color.ORANGE = Color.orange = new Color( 255, 200, 0 ).setImmutable();
+  Color.PINK = Color.pink = new Color( 255, 175, 175 ).setImmutable();
+  Color.RED = Color.red = new Color( 255, 0, 0 ).setImmutable();
+  Color.WHITE = Color.white = new Color( 255, 255, 255 ).setImmutable();
+  Color.YELLOW = Color.yellow = new Color( 255, 255, 0 ).setImmutable();
 
   /**
    * Interpolates between 2 colors in RGBA space. When distance is 0, color1
