@@ -191,16 +191,14 @@ define( function( require ) {
             pixiDisplayObject.position.x = matrix.m02();
             pixiDisplayObject.position.y = matrix.m12();
             pixiDisplayObject.rotation = matrix.rotation;
-            //pixiDisplayObject.scale = matrix.getScaleVector().x;//TODO: y???
-            //debugger;
-            //pixiDisplayObject.setAttribute( 'transform', this.node.transform.getMatrix().getSVGTransform() );
+            pixiDisplayObject.scale = new PIXI.Point( matrix.getScaleVector().x, matrix.getScaleVector().y );//Math.abs(matrix.getScaleVector().x)+0.5;//TODO: y???
           }
           else if ( this.hasTransform ) {
             this.hasTransform = false;
             pixiDisplayObject.position.x = 0;
             pixiDisplayObject.position.y = 0;
             pixiDisplayObject.rotation = 0;
-            pixiDisplayObject.scale = 1;
+            pixiDisplayObject.scale = new PIXI.Point( 1, 1 );
           }
         }
         else {
@@ -210,7 +208,7 @@ define( function( require ) {
             pixiDisplayObject.position.x = 0;
             pixiDisplayObject.position.y = 0;
             pixiDisplayObject.rotation = 0;
-            pixiDisplayObject.scale = 1;
+            pixiDisplayObject.scale = new PIXI.Point( 1, 1 );
           }
         }
       }
