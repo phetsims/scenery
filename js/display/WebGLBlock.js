@@ -44,6 +44,7 @@ define( function( require ) {
 
       // TODO: Maybe pass through Renderer.bitmaskWebGLLowResolution ) ?
       // Each WebGL block needs its own canvas, and this is created by the WebGLRenderer.
+      debugger;
       this.webglRenderer = new WebGLRenderer( { stats: false } );
       this.domElement = this.webglRenderer.canvas;
 
