@@ -10,6 +10,7 @@
 define( function( require ) {
   'use strict';
 
+  var count = 0;
   var inherit = require( 'PHET_CORE/inherit' );
   var Poolable = require( 'PHET_CORE/Poolable' );
   var cleanArray = require( 'PHET_CORE/cleanArray' );
@@ -104,6 +105,8 @@ define( function( require ) {
       Util.setTransform( 'matrix(1,0,0,1,' + x + ',' + y + ')', this.pixiCanvas, this.forceAcceleration ); // reapply the translation as a CSS transform
       this.pixiRenderer.resize( this.fitBounds.width, this.fitBounds.height );
     },
+    incrementPaint: function() {},
+    decrementPaint: function() {},
 
     update: function() {
       sceneryLog && sceneryLog.PixiBlock && sceneryLog.PixiBlock( 'update #' + this.id );
@@ -130,7 +133,11 @@ define( function( require ) {
         }
 
         // checks will be done in updateFit() to see whether it is needed
-        this.updateFit();
+        // hack to prevent updateFit() from calling all the time and destroying performance
+        if ( count % 1000 === 0 ) {
+          this.updateFit();
+        }
+        count++;
         this.pixiRenderer.render( this.stage );
       }
     },

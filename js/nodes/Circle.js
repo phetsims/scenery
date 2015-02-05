@@ -27,6 +27,7 @@ define( function( require ) {
   require( 'SCENERY/util/Util' );
   var WebGLSelfDrawable = require( 'SCENERY/display/WebGLSelfDrawable' );
   var WebGLBlock = require( 'SCENERY/display/WebGLBlock' );
+  var PixiSelfDrawable = require( 'SCENERY/display/PixiSelfDrawable' );
 
   // TODO: change this based on memory and performance characteristics of the platform
   var keepDOMCircleElements = true; // whether we should pool DOM elements for the DOM rendering states, or whether we should free them when possible for memory
@@ -58,11 +59,12 @@ define( function( require ) {
       if ( this.hasStroke() && !this.getStroke().isGradient && !this.getStroke().isPattern && this.getLineWidth() <= this.getRadius() ) {
         bitmask |= scenery.bitmaskSupportsDOM;
       }
+      bitmask |= scenery.bitmaskSupportsPixi;
       return bitmask;
     },
 
     getPathRendererBitmask: function() {
-      return scenery.bitmaskSupportsCanvas | scenery.bitmaskSupportsSVG | scenery.bitmaskBoundsValid | ( Features.borderRadius ? scenery.bitmaskSupportsDOM : 0 );
+      return scenery.bitmaskSupportsCanvas | scenery.bitmaskSupportsSVG | scenery.bitmaskBoundsValid | scenery.bitmaskSupportsPixi | ( Features.borderRadius ? scenery.bitmaskSupportsDOM : 0 );
     },
 
     invalidateCircle: function() {
@@ -468,7 +470,12 @@ define( function( require ) {
       var gl = this.gl;
 
       var circle = this.node;
-      var rect = { _rectX: -circle.width / 2, _rectY: -circle.height / 2, _rectWidth: circle.width, _rectHeight: circle.height };
+      var rect = {
+        _rectX: -circle.width / 2,
+        _rectY: -circle.height / 2,
+        _rectWidth: circle.width,
+        _rectHeight: circle.height
+      };
 
       this.vertexCoordinates[ 0 ] = rect._rectX;
       this.vertexCoordinates[ 1 ] = rect._rectY;
@@ -574,6 +581,41 @@ define( function( require ) {
 
   // set up pooling
   SelfDrawable.Poolable.mixin( Circle.CircleWebGLDrawable );
+
+
+  /*---------------------------------------------------------------------------*
+   * Pixi Rendering
+   *----------------------------------------------------------------------------*/
+
+  Circle.CirclePixiDrawable = PixiSelfDrawable.createDrawable( {
+    type: function CirclePixiDrawable( renderer, instance ) { this.initialize( renderer, instance ); },
+    stateType: Circle.CircleStatefulDrawable.mixin,
+    initialize: function( renderer, instance ) {
+      if ( !this.displayObject ) {
+        this.displayObject = new PIXI.Graphics();
+      }
+    },
+    updatePixi: function( node, circle ) {
+      if ( this.dirtyRadius ) {
+        var graphics = this.displayObject;
+        this.displayObject.clear();
+        if ( node.getFillColor() ) {
+          graphics.beginFill( node.getFillColor().toNumber() );
+        }
+        if ( node.getStrokeColor() ) {
+          graphics.lineStyle( 5, node.getStrokeColor().toNumber() );
+        }
+        graphics.drawRect( node.rectX, node.rectY, node.rectWidth, node.rectHeight );
+        if ( node.getFillColor() ) {
+          graphics.endFill();
+        }
+      }
+
+      this.updateFillStrokeStyle( circle );
+    },
+    usesPaint: true,
+    keepElements: keepSVGCircleElements
+  } );
 
   return Circle;
 } );

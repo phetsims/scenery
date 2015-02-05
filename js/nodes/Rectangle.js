@@ -129,8 +129,8 @@ define( function( require ) {
       //TODO: Refine the rules for when WebGL can be used
       if ( !this.hasStroke() ) {
         bitmask |= scenery.bitmaskSupportsWebGL;
-        bitmask |= scenery.bitmaskSupportsPixi;
       }
+      bitmask |= scenery.bitmaskSupportsPixi;
       return bitmask;
     },
 
@@ -152,8 +152,8 @@ define( function( require ) {
       //TODO: Refine the rules for when WebGL can be used
       if ( !this.isRounded() && (!this.hasStroke() || this.getLineJoin() !== 'round') ) {
         bitmask |= scenery.bitmaskSupportsWebGL;
-        bitmask |= scenery.bitmaskSupportsPixi;
       }
+      bitmask |= scenery.bitmaskSupportsPixi;
 
       return bitmask;
     },
@@ -963,9 +963,16 @@ define( function( require ) {
            this.dirtyArcWidth || this.dirtyArcHeight || this.dirtyWidth || this.dirtyHeight ) {
         var graphics = this.displayObject;
         this.displayObject.clear();
-        graphics.beginFill( node.getFillColor().toNumber() );
+        if ( node.getFillColor() ) {
+          graphics.beginFill( node.getFillColor().toNumber() );
+        }
+        if ( node.getStrokeColor() ) {
+          graphics.lineStyle( 5, node.getStrokeColor().toNumber() );
+        }
         graphics.drawRect( node.rectX, node.rectY, node.rectWidth, node.rectHeight );
-        graphics.endFill();
+        if ( node.getFillColor() ) {
+          graphics.endFill();
+        }
       }
       this.updateFillStrokeStyle( rect );
     },

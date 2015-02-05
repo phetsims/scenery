@@ -37,6 +37,7 @@ define( function( require ) {
   var WebGLSelfDrawable = require( 'SCENERY/display/WebGLSelfDrawable' );
   var WebGLBlock = require( 'SCENERY/display/WebGLBlock' );
   var Util = require( 'SCENERY/util/Util' );
+  var PixiSelfDrawable = require( 'SCENERY/display/PixiSelfDrawable' );
 
   // TODO: change this based on memory and performance characteristics of the platform
   var keepDOMTextElements = true; // whether we should pool DOM elements for the DOM rendering states, or whether we should free them when possible for memory
@@ -160,6 +161,7 @@ define( function( require ) {
       // fill and stroke will determine whether we have DOM text support
       bitmask |= scenery.bitmaskSupportsDOM;
       bitmask |= scenery.bitmaskSupportsWebGL;
+      bitmask |= scenery.bitmaskSupportsPixi;
 
       return bitmask;
     },
@@ -237,6 +239,10 @@ define( function( require ) {
 
     createWebGLDrawable: function( renderer, instance ) {
       return Text.TextWebGLDrawable.createFromPool( renderer, instance );
+    },
+
+    createPixiDrawable: function( renderer, instance ) {
+      return Text.TextPixiDrawable.createFromPool( renderer, instance );
     },
 
     // a DOM node (not a Scenery DOM node, but an actual DOM node) with the text
@@ -492,7 +498,10 @@ define( function( require ) {
       return this;
     };
 
-    Object.defineProperty( Text.prototype, propertyName, { set: Text.prototype[ setterName ], get: Text.prototype[ getterName ] } );
+    Object.defineProperty( Text.prototype, propertyName, {
+      set: Text.prototype[ setterName ],
+      get: Text.prototype[ getterName ]
+    } );
   }
 
   addFontForwarding( 'fontWeight', 'FontWeight', 'weight' );
@@ -509,8 +518,14 @@ define( function( require ) {
   // font-specific ES5 setters and getters are defined using addFontForwarding above
   Object.defineProperty( Text.prototype, 'font', { set: Text.prototype.setFont, get: Text.prototype.getFont } );
   Object.defineProperty( Text.prototype, 'text', { set: Text.prototype.setText, get: Text.prototype.getText } );
-  Object.defineProperty( Text.prototype, 'direction', { set: Text.prototype.setDirection, get: Text.prototype.getDirection } );
-  Object.defineProperty( Text.prototype, 'boundsMethod', { set: Text.prototype.setBoundsMethod, get: Text.prototype.getBoundsMethod } );
+  Object.defineProperty( Text.prototype, 'direction', {
+    set: Text.prototype.setDirection,
+    get: Text.prototype.getDirection
+  } );
+  Object.defineProperty( Text.prototype, 'boundsMethod', {
+    set: Text.prototype.setBoundsMethod,
+    get: Text.prototype.getBoundsMethod
+  } );
 
   // mix in support for fills and strokes
   Paintable.mixin( Text );
@@ -985,6 +1000,46 @@ define( function( require ) {
   SelfDrawable.Poolable.mixin( Text.TextWebGLDrawable );
 
   Text.TextStatefulDrawable.mixin( Text.TextWebGLDrawable );
+
+  /*---------------------------------------------------------------------------*
+   * Pixi rendering
+   *----------------------------------------------------------------------------*/
+
+  Text.TextPixiDrawable = PixiSelfDrawable.createDrawable( {
+    type: function TextPixiDrawable( renderer, instance ) { this.initialize( renderer, instance ); },
+    stateType: Text.TextStatefulDrawable.mixin,
+    initialize: function( renderer, instance ) {
+      if ( !this.displayObject ) {
+        this.displayObject = new PIXI.Text( '' );
+      }
+    },
+    updatePixi: function( node, text ) {
+
+      // set all of the font attributes, since we can't use the combined one
+      if ( this.dirtyFont ) {
+        //TODO: Change font
+        //text.setAttribute( 'font-family', node._font.getFamily() );
+        //text.setAttribute( 'font-size', node._font.getSize() );
+        //text.setAttribute( 'font-style', node._font.getStyle() );
+        //text.setAttribute( 'font-weight', node._font.getWeight() );
+        //text.setAttribute( 'font-stretch', node._font.getStretch() );
+      }
+
+      // update the text-node's value
+      if ( this.dirtyText ) {
+        this.displayObject.setText( node.getNonBreakingText() );
+      }
+
+      // text length correction, tested with scenery/tests/text-quality-test.html to determine how to match Canvas/Pixi rendering (and overall length)
+      if ( this.dirtyBounds && isFinite( node._selfBounds.width ) ) {
+        //text.setAttribute( 'textLength', node._selfBounds.width );
+      }
+
+      this.updateFillStrokeStyle( text );
+    },
+    usesPaint: true,
+    keepElements: keepSVGTextElements
+  } );
 
   return Text;
 } );

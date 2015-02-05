@@ -187,18 +187,30 @@ define( function( require ) {
 
           if ( !isIdentity ) {
             this.hasTransform = true;
-            pixiDisplayObject.setAttribute( 'transform', this.node.transform.getMatrix().getSVGTransform() );
+            var matrix = this.node.transform.getMatrix();
+            pixiDisplayObject.position.x = matrix.m02();
+            pixiDisplayObject.position.y = matrix.m12();
+            pixiDisplayObject.rotation = matrix.rotation;
+            //pixiDisplayObject.scale = matrix.getScaleVector().x;//TODO: y???
+            //debugger;
+            //pixiDisplayObject.setAttribute( 'transform', this.node.transform.getMatrix().getSVGTransform() );
           }
           else if ( this.hasTransform ) {
             this.hasTransform = false;
-            pixiDisplayObject.removeAttribute( 'transform' );
+            pixiDisplayObject.position.x = 0;
+            pixiDisplayObject.position.y = 0;
+            pixiDisplayObject.rotation = 0;
+            pixiDisplayObject.scale = 1;
           }
         }
         else {
           // we want no transforms if we won't be applying transforms
           if ( this.hasTransform ) {
             this.hasTransform = false;
-            pixiDisplayObject.removeAttribute( 'transform' );
+            pixiDisplayObject.position.x = 0;
+            pixiDisplayObject.position.y = 0;
+            pixiDisplayObject.rotation = 0;
+            pixiDisplayObject.scale = 1;
           }
         }
       }
@@ -282,7 +294,9 @@ define( function( require ) {
 
               // in the DOM first (since we reference the children array to know what to insertBefore)
               // see http://stackoverflow.com/questions/9732624/how-to-swap-dom-child-nodes-in-javascript
-              pixiDisplayObject.insertBefore( group.PixiDisplayObject, idx + 1 >= this.children.length ? null : this.children[ idx + 1 ].PixiDisplayObject );
+              var previousDisplayObject = idx + 1 >= this.children.length ? null : this.children[ idx + 1 ].displayObject;
+              var index = previousDisplayObject ? pixiDisplayObject.getChildIndex( previousDisplayObject ) : 0;
+              pixiDisplayObject.addChild( group.displayObject, index );
 
               // then in our children array
               var oldIndex = _.indexOf( this.children, group );

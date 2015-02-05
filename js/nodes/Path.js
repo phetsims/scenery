@@ -511,7 +511,7 @@ define( function( require ) {
             graphics.lineStyle( 5, node.getStrokeColor().toNumber() );
           }
           if ( node.getFillColor() ) {
-            graphics.beginFill( path.getFillColor().toNumber() );
+            graphics.beginFill( node.getFillColor().toNumber() );
           }
           for ( i = 0; i < shape.subpaths.length; i++ ) {
             var subpath = shape.subpaths[ i ];
