@@ -964,10 +964,10 @@ define( function( require ) {
         var graphics = this.displayObject;
         this.displayObject.clear();
         if ( node.getFillColor() ) {
-          graphics.beginFill( node.getFillColor().toNumber() );
+          graphics.beginFill( node.getFillColor().toNumber(), node.opacity * node.getFillColor().alpha );
         }
         if ( node.getStrokeColor() ) {
-          graphics.lineStyle( 5, node.getStrokeColor().toNumber() );
+          graphics.lineStyle( 5, node.getStrokeColor().toNumber(), node.opacity * node.getStrokeColor().alpha );
         }
         graphics.drawRect( node.rectX, node.rectY, node.rectWidth, node.rectHeight );
         if ( node.getFillColor() ) {

@@ -666,10 +666,11 @@ define( function( require ) {
       if ( this.dirtyX1 || this.dirtyY1 || this.dirtyX2 || this.dirtyY2 ) {
         var graphics = this.displayObject;
         this.displayObject.clear();
-        graphics.lineStyle( node.lineWidth, node.getStrokeColor().toNumber() );
+        if ( node.getStrokeColor() ) {
+          graphics.lineStyle( node.lineWidth, node.getStrokeColor().toNumber() );
+        }
         graphics.moveTo( node._x1, node._y1 );
         graphics.lineTo( node._x2, node._y2 );
-        graphics.endFill();
       }
       this.updateFillStrokeStyle( line );
     },
