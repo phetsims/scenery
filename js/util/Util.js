@@ -30,23 +30,6 @@ define( function( require ) {
   var transformProperty = Features.transform;
   var transformOriginProperty = Features.transformOrigin || 'transformOrigin'; // fallback, so we don't try to set an empty string property later
 
-  //Check to see whether webgl is supported, using the same strategy as mrdoob and pixi.js
-  var checkWebGLSupport = function() {
-    var canvas = document.createElement( 'canvas' );
-
-    var args = { failIfMajorPerformanceCaveat: true };
-    try {
-      var gl =
-        !!window.WebGLRenderingContext &&
-        (canvas.getContext( 'webgl', args ) || canvas.getContext( 'experimental-webgl', args ));
-      return !!gl;
-      // TODO: check for required extensions
-    }
-    catch( e ) {
-      return false;
-    }
-  };
-
   scenery.Util = {
     // like _.extend, but with hardcoded support for https://github.com/documentcloud/underscore/pull/986
     extend: function( obj ) {
@@ -438,8 +421,46 @@ define( function( require ) {
       return shader;
     },
 
+    /**
+     * Check to see whether webgl is supported, using the same strategy as mrdoob and pixi.js
+     *
+     * @param {Array.<string>} [extensions] - A list of WebGL extensions that need to be supported
+     */
+    checkWebGLSupport: function( extensions ) {
+      var canvas = document.createElement( 'canvas' );
+
+      var args = { failIfMajorPerformanceCaveat: true };
+      try {
+        var gl =
+          !!window.WebGLRenderingContext &&
+          (canvas.getContext( 'webgl', args ) || canvas.getContext( 'experimental-webgl', args ));
+
+        if ( !gl ) {
+          return false;
+        }
+
+        if ( extensions ) {
+          for ( var i = 0; i < extensions.length; i++ ) {
+            if ( gl.getExtension( extensions[i] ) === null ) {
+              return false;
+            }
+          }
+        }
+
+        return true;
+      }
+      catch( e ) {
+        return false;
+      }
+    },
+
     // Whether WebGL (with decent performance) is supported by the platform
-    isWebGLSupported: checkWebGLSupport()
+    get isWebGLSupported() {
+      if ( this._extensionlessWebGLSupport === undefined ) {
+        this._extensionlessWebGLSupport = scenery.Util.checkWebGLSupport();
+      }
+      return this._extensionlessWebGLSupport;
+    }
   };
   var Util = scenery.Util;
 
