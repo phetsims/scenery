@@ -1017,12 +1017,8 @@ define( function( require ) {
 
       // set all of the font attributes, since we can't use the combined one
       if ( this.dirtyFont ) {
-        //TODO: Change font
-        //text.setAttribute( 'font-family', node._font.getFamily() );
-        //text.setAttribute( 'font-size', node._font.getSize() );
-        //text.setAttribute( 'font-style', node._font.getStyle() );
-        //text.setAttribute( 'font-weight', node._font.getWeight() );
-        //text.setAttribute( 'font-stretch', node._font.getStretch() );
+        text.setStyle( { font: node.font, fill: node.getFillColor().toCSS() } );
+        this.displayObject.position.y = -this.displayObject.height / 2;
       }
 
       // update the text-node's value
@@ -1032,7 +1028,6 @@ define( function( require ) {
 
       // text length correction, tested with scenery/tests/text-quality-test.html to determine how to match Canvas/Pixi rendering (and overall length)
       if ( this.dirtyBounds && isFinite( node._selfBounds.width ) ) {
-        //text.setAttribute( 'textLength', node._selfBounds.width );
       }
 
       this.updateFillStrokeStyle( text );
