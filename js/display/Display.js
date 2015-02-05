@@ -263,20 +263,21 @@ define( function( require ) {
 
       if ( assertSlow ) { this._baseInstance.audit( this._frameId, true ); }
 
-      sceneryLog && sceneryLog.Display && sceneryLog.Display( 'disposal phase' );
+      sceneryLog && sceneryLog.Display && sceneryLog.Display( 'instance root disposal phase' );
       sceneryLog && sceneryLog.Display && sceneryLog.push();
-
       // dispose all of our instances. disposing the root will cause all descendants to also be disposed.
       // will also dispose attached drawables (self/group/etc.)
       while ( this._instanceRootsToDispose.length ) {
         this._instanceRootsToDispose.pop().dispose();
       }
+      sceneryLog && sceneryLog.Display && sceneryLog.pop();
 
+      sceneryLog && sceneryLog.Display && sceneryLog.Display( 'drawable disposal phase' );
+      sceneryLog && sceneryLog.Display && sceneryLog.push();
       // dispose all of our other drawables.
       while ( this._drawablesToDispose.length ) {
         this._drawablesToDispose.pop().dispose();
       }
-
       sceneryLog && sceneryLog.Display && sceneryLog.pop();
 
       if ( assertSlow ) { this._baseInstance.audit( this._frameId ); }

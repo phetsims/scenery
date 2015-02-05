@@ -174,10 +174,10 @@ define( function( require ) {
       this.lastInnerDrawable = null;
 
       // {SVGGroup[]} - List of SVG groups associated with this display instance
-      this.svgGroups = [];
+      this.svgGroups = cleanArray( this.svgGroups );
 
       // {PixiDisplayObject[]}
-      this.pixiDisplayObjects = [];
+      this.pixiDisplayObjects = cleanArray( this.pixiDisplayObjects );
 
       this.cleanSyncTreeResults();
 
@@ -1284,6 +1284,7 @@ define( function( require ) {
     // clean up listeners and garbage, so that we can be recycled (or pooled)
     dispose: function() {
       sceneryLog && sceneryLog.Instance && sceneryLog.Instance( 'dispose ' + this.toString() );
+      sceneryLog && sceneryLog.Instance && sceneryLog.push();
 
       assert && assert( this.active, 'Seems like we tried to dispose this Instance twice, it is not active' );
 
@@ -1319,6 +1320,8 @@ define( function( require ) {
       this.cleanInstance( null, null );
 
       this.freeToPool();
+
+      sceneryLog && sceneryLog.Instance && sceneryLog.pop();
     },
 
     audit: function( frameId, allowValidationNotNeededChecks ) {

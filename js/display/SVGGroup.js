@@ -310,6 +310,7 @@ define( function( require ) {
 
     dispose: function() {
       sceneryLog && sceneryLog.SVGGroup && sceneryLog.SVGGroup( 'dispose ' + this.toString() );
+      sceneryLog && sceneryLog.SVGGroup && sceneryLog.push();
 
       assert && assert( this.children.length === 0, 'Should be empty by now' );
 
@@ -346,6 +347,8 @@ define( function( require ) {
 
       // for now
       this.freeToPool();
+
+      sceneryLog && sceneryLog.SVGGroup && sceneryLog.pop();
     },
 
     toString: function() {
