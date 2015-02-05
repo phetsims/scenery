@@ -558,8 +558,8 @@ define( function( require ) {
             // solid fills always supported for DOM, WebGL and Pixi
             bitmask |= scenery.bitmaskSupportsDOM;
             bitmask |= scenery.bitmaskSupportsWebGL;
-            bitmask |= scenery.bitmaskSupportsPixi;
           }
+          bitmask |= scenery.bitmaskSupportsPixi;
 
           return bitmask;
         },
