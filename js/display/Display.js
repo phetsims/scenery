@@ -171,6 +171,11 @@ define( function( require ) {
     this._pointerAreaOverlay = null;
     this._canvasAreaBoundsOverlay = null;
 
+    // properties for fuzzMouseEvents, so that we can track the status of a persistent mouse pointer
+    this._fuzzMouseIsDown = false;
+    this._fuzzMousePosition = new Vector2(); // start at 0,0
+    this._fuzzMouseLastMoved = false; // whether the last mouse event was a move (we skew probabilities based on this)
+
     this.applyCSSHacks();
 
     this.setBackgroundColor( this.options.backgroundColor );
@@ -803,6 +808,67 @@ define( function( require ) {
 
       this._input.disconnectListeners();
       this._input = null;
+    },
+
+    /**
+     * Sends a number of random mouse events through the input system
+     *
+     * @param {number} averageEventQuantity - The average number of mouse events
+     */
+    fuzzMouseEvents: function( averageEventQuantity ) {
+      var chance;
+
+      // run a variable number of events, with a certain chance of bailing out (so no events are possible)
+      // models a geometric distribution of events
+      while ( ( chance = Math.random() ) < 1 - 1 / averageEventQuantity ) {
+        var domEvent;
+        if ( chance < ( this._fuzzMouseLastMoved ? 0.7 : 0.4 ) ) {
+          // toggle up/down
+          domEvent = document.createEvent( 'MouseEvent' ); // not 'MouseEvents' according to DOM Level 3 spec
+
+          // technically deprecated, but DOM4 event constructors not out yet. people on #whatwg said to use it
+          domEvent.initMouseEvent( this._fuzzMouseIsDown ? 'mouseup' : 'mousedown', true, true, window, 1, // click count
+            this._fuzzMousePosition.x, this._fuzzMousePosition.y, this._fuzzMousePosition.x, this._fuzzMousePosition.y,
+            false, false, false, false,
+            0, // button
+            null );
+
+          this._input.validatePointers();
+
+          if ( this._fuzzMouseIsDown ) {
+            this._input.mouseUp( this._fuzzMousePosition, domEvent );
+            this._fuzzMouseIsDown = false;
+          }
+          else {
+            this._input.mouseDown( this._fuzzMousePosition, domEvent );
+            this._fuzzMouseIsDown = true;
+          }
+
+          this._fuzzMouseLastMoved = false;
+        }
+        else {
+          // change the mouse position
+          this._fuzzMousePosition = new Vector2(
+            Math.floor( Math.random() * this.width ),
+            Math.floor( Math.random() * this.height )
+          );
+
+          // our move event
+          domEvent = document.createEvent( 'MouseEvent' ); // not 'MouseEvents' according to DOM Level 3 spec
+
+          // technically deprecated, but DOM4 event constructors not out yet. people on #whatwg said to use it
+          domEvent.initMouseEvent( 'mousemove', true, true, window, 0, // click count
+            this._fuzzMousePosition.x, this._fuzzMousePosition.y, this._fuzzMousePosition.x, this._fuzzMousePosition.y,
+            false, false, false, false,
+            0, // button
+            null );
+
+          this._input.validatePointers();
+          this._input.mouseMove( this._fuzzMousePosition, domEvent );
+
+          this._fuzzMouseLastMoved = true;
+        }
+      }
     },
 
     /**
