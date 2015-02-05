@@ -133,31 +133,5 @@ define( function( require ) {
     }
   } );
 
-  //TODO delete this after work is completed on sun.Button and scenery.ButtonListener
-  ButtonListener.TEST_LISTENER = new ButtonListener( {
-
-    up: function( event, oldState ) {
-      console.log( "ButtonListener.up oldState=" + oldState );
-    },
-
-    over: function( event, oldState ) {
-      console.log( "ButtonListener.over oldState=" + oldState );
-    },
-
-    down: function( event, oldState ) {
-      console.log( "ButtonListener.down oldState=" + oldState );
-    },
-
-    out: function( event, oldState ) {
-      console.log( "ButtonListener.out oldState=" + oldState );
-    },
-
-    fire: function( event ) {
-      console.log( "ButtonListener.fire" );
-    }
-  } );
-
   return ButtonListener;
 } );
-
-
