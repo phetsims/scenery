@@ -96,7 +96,9 @@ define( function( require ) {
     animate: function() {
 
       // Keep track of the time for profiling
-      this.stats.begin();
+      if ( this.stats ) {
+        this.stats.begin();
+      }
 
       // Queue the next animation frame
       window.requestAnimationFrame( this.boundAnimate );
@@ -108,7 +110,9 @@ define( function( require ) {
       this.draw();
 
       // Record the timing for @mrdoob stats profiler
-      this.stats.end();
+      if ( this.stats ) {
+        this.stats.end();
+      }
     },
     draw: function() {
       var gl = this.gl;
