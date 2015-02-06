@@ -115,6 +115,7 @@ define( function( require ) {
           scenery.bitmaskSupportsCanvas |
           scenery.bitmaskSupportsSVG |
           scenery.bitmaskSupportsDOM |
+                                     scenery.bitmaskSupportsWebGL |
           scenery.bitmaskSupportsPixi
         );
       }
@@ -422,7 +423,7 @@ define( function( require ) {
 
     initializeContext: function( webglBlock ) {
       this.webglBlock = webglBlock;
-      this.rectangleHandle = webglBlock.webglRenderer.textureRenderer.textureBufferData.createFromImageNode( this.node, 0.5 );
+      this.rectangleHandle = webglBlock.webglRenderer.textureRenderer.createFromImageNode( this.node, 0.5 );
 
       // TODO: Don't call this each time a new item is added.
       webglBlock.webglRenderer.textureRenderer.bindVertexBuffer();
@@ -438,6 +439,9 @@ define( function( require ) {
     //Nothing necessary since everything currently handled in the uModelViewMatrix below
     //However, we may switch to dynamic draw, and handle the matrix change only where necessary in the future?
     updateRectangle: function() {
+      var t = this.node.getTranslation();
+      this.rectangleHandle.setRect( t.x, t.y, 50, 50 );
+      this.webglBlock.webglRenderer.textureRenderer.updateTriangleBuffer( this.rectangleHandle );
     },
 
     render: function( shaderProgram ) {
