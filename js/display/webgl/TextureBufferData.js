@@ -23,11 +23,11 @@ define( function( require ) {
   }
 
   return inherit( Object, TextureBufferData, {
-    createFromImageNode: function( imageNode, z,frameRange ) {
+    createFromImageNode: function( imageNode, z, frameRange ) {
       return this.createFromImage( imageNode.x, imageNode.y, z,
-        imageNode._image.width, imageNode._image.height, imageNode.image, imageNode.getLocalToGlobalMatrix().toMatrix4(),frameRange );
+        imageNode._image.width, imageNode._image.height, imageNode.image, imageNode.getLocalToGlobalMatrix().toMatrix4(), frameRange );
     },
-    createFromImage: function( x, y, z, width, height, image, matrix4,frameRange ) {
+    createFromImage: function( x, y, z, width, height, image, matrix4, frameRange ) {
       //TODO: Check to see if any of the sprite sheets already contains that image
       //TODO: If none of the sprite sheets contained that image, then mark the spritesheet as dirty
       //TODO: and send it to the GPU after updating
@@ -60,7 +60,7 @@ define( function( require ) {
         startIndex: index,
         endIndex: textureBufferData.vertexArray.length,
         image: image,
-        frameRange:frameRange,
+        frameRange: frameRange,
         setTransform: function( matrix4 ) {
           for ( var i = 0; i < 6; i++ ) {
             textureBufferData.vertexArray[ index + 5 + i * 11 ] = matrix4.m00();
@@ -71,33 +71,30 @@ define( function( require ) {
             textureBufferData.vertexArray[ index + 10 + i * 11 ] = matrix4.m13();
           }
         },
-        setXWidth: function( x, width ) {
-          textureBufferData.vertexArray[ index ] = x;
-          textureBufferData.vertexArray[ index + 2 ] = x + width;
-          textureBufferData.vertexArray[ index + 4 ] = x;
-          textureBufferData.vertexArray[ index + 6 ] = x + width;
-          textureBufferData.vertexArray[ index + 8 ] = x + width;
-          textureBufferData.vertexArray[ index + 10 ] = x;
-        },
         setRect: function( x, y, width, height ) {
 
-          textureBufferData.vertexArray[ index ] = x;
-          textureBufferData.vertexArray[ index + 1 ] = y;
+          var x1 = x;
+          var y1 = y;
+          var x2 = x1 + width;
+          var y2 = y1 + height;
+          textureBufferData.vertexArray[ index + 0 ] = x1;
+          textureBufferData.vertexArray[ index + 1 ] = y1;
 
-          textureBufferData.vertexArray[ index + 2 ] = x + width;
-          textureBufferData.vertexArray[ index + 3 ] = y;
+          textureBufferData.vertexArray[ index + 11 ] = x2;
+          textureBufferData.vertexArray[ index + 12 ] = y1;
 
-          textureBufferData.vertexArray[ index + 4 ] = x;
-          textureBufferData.vertexArray[ index + 5 ] = y + height;
+          textureBufferData.vertexArray[ index + 22 ] = x1;
+          textureBufferData.vertexArray[ index + 23 ] = y2;
 
-          textureBufferData.vertexArray[ index + 6 ] = x + width;
-          textureBufferData.vertexArray[ index + 7 ] = y + height;
+          textureBufferData.vertexArray[ index + 33 ] = x1;
+          textureBufferData.vertexArray[ index + 34 ] = y2;
 
-          textureBufferData.vertexArray[ index + 8 ] = x + width;
-          textureBufferData.vertexArray[ index + 9 ] = y;
+          textureBufferData.vertexArray[ index + 44 ] = x2;
+          textureBufferData.vertexArray[ index + 45 ] = y1;
 
-          textureBufferData.vertexArray[ index + 10 ] = x;
-          textureBufferData.vertexArray[ index + 11 ] = y + height;
+          textureBufferData.vertexArray[ index + 55 ] = x2;
+          textureBufferData.vertexArray[ index + 56 ] = y2;
+
         }
       };
     }
