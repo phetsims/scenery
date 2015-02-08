@@ -240,6 +240,32 @@
         renderers: [ 'canvas', 'svg', 'dom', 'webgl', 'pixi' ]
       },
       {
+        name: '1000-moving-images',
+        width: 200,
+        height: 200,
+        draw: function( scene, updateDisplay ) {
+          var thumbnail = document.getElementById( 'light-bulb-image' );
+          var initialPositions = [];
+          for ( var i = 0; i < 1000; i++ ) {
+            var position = { x: Math.random() * 100, y: Math.random() * 100 };
+            initialPositions.push( position );
+            scene.addChild( new scenery.Image( thumbnail, { x: position.x, y: position.y } ) );
+          }
+
+          var callback = function() {
+            window.requestAnimationFrame( callback );
+            var children = scene.children;
+            for ( var i = 0; i < children.length; i++ ) {
+              var child = children[ i ];
+              child.x = initialPositions[ i ].x + Math.sin( Date.now() / 1000 ) * 20 + 20;
+            }
+            updateDisplay();
+          };
+          window.requestAnimationFrame( callback );
+        },
+        renderers: [ 'canvas', 'svg', 'dom', 'webgl', 'pixi' ]
+      },
+      {
         name: 'CanvasNode',
         width: 200,
         height: 200,
