@@ -423,7 +423,7 @@ define( function( require ) {
 
     initializeContext: function( webglBlock ) {
       this.webglBlock = webglBlock;
-      this.rectangleHandle = webglBlock.webglRenderer.textureRenderer.createFromImageNode( this.node, 0.5 );
+      this.rectangleHandle = webglBlock.webglRenderer.textureRenderer.createFromImageNode( this.node, 0.4 );
 
       // TODO: Don't call this each time a new item is added.
       webglBlock.webglRenderer.textureRenderer.bindVertexBuffer();
@@ -439,8 +439,8 @@ define( function( require ) {
     //Nothing necessary since everything currently handled in the uModelViewMatrix below
     //However, we may switch to dynamic draw, and handle the matrix change only where necessary in the future?
     updateRectangle: function() {
-      var t = this.node.getTranslation();
-      this.rectangleHandle.setRect( t.x, t.y, 50, 50 );
+      var translation = this.node.getTranslation();
+      this.rectangleHandle.setRect( translation.x, translation.y, this.node._image.width, this.node._image.height );
       this.webglBlock.webglRenderer.textureRenderer.updateTriangleBuffer( this.rectangleHandle );
     },
 
@@ -497,7 +497,9 @@ define( function( require ) {
    *----------------------------------------------------------------------------*/
 
   Image.ImagePixiDrawable = PixiSelfDrawable.createDrawable( {
-    type: function ImagePixiDrawable( renderer, instance ) { this.initialize( renderer, instance ); },
+    type: function ImagePixiDrawable( renderer, instance ) {
+      this.initialize( renderer, instance );
+    },
     stateType: Image.ImageStatefulDrawable.mixin,
     initialize: function( renderer, instance ) {
       if ( !this.displayObject ) {

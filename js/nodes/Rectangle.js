@@ -126,10 +126,7 @@ define( function( require ) {
         }
       }
 
-      //TODO: Refine the rules for when WebGL can be used
-      if ( !this.hasStroke() ) {
-        bitmask |= scenery.bitmaskSupportsWebGL;
-      }
+      bitmask |= scenery.bitmaskSupportsWebGL;
       bitmask |= scenery.bitmaskSupportsPixi;
       return bitmask;
     },
@@ -148,11 +145,7 @@ define( function( require ) {
         bitmask |= scenery.bitmaskSupportsDOM;
       }
 
-      //only support WebGL if it's NOT rounded (for now) AND if it's either not stroked, or stroke has lineJoin !== round
-      //TODO: Refine the rules for when WebGL can be used
-      if ( !this.isRounded() && (!this.hasStroke() || this.getLineJoin() !== 'round') ) {
-        bitmask |= scenery.bitmaskSupportsWebGL;
-      }
+      bitmask |= scenery.bitmaskSupportsWebGL;
       bitmask |= scenery.bitmaskSupportsPixi;
 
       return bitmask;
@@ -891,6 +884,10 @@ define( function( require ) {
         this.color = Color.toColor( this.node._fill );
         this.cleanPaintableState();
       }
+      this.rectangleHandle.update();
+
+      // TODO: Batch these updates?
+      this.webglBlock.webglRenderer.colorTriangleRenderer.updateTriangleBuffer( this.rectangleHandle );
     },
 
     render: function( shaderProgram ) {
