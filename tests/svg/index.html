@@ -1,0 +1,109 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8"/>
+  <meta http-equiv="X-UA-Compatible" content="IE=edge"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+  <title>Scenery</title>
+
+  <style type="text/css">
+    .test {
+      margin-top: 5px;
+    }
+  </style>
+
+</head>
+
+<body>
+<div>
+  <div class="test">Inline SVG in HTML</div>
+  <svg xmlns='http://www.w3.org/2000/svg' width='64' height='64'><linearGradient id='gradient'><stop offset='0%' stop-color='#F00'/><stop offset='100%' stop-color='#00F'/></linearGradient><rect fill='url(#gradient)' x='0' y='0' width='64' height='64'/></svg>
+
+  <div class="test">Inline SVG with innerHTML</div>
+  <div id="innerHTML"></div>
+  <script type="text/javascript">
+    (function(){
+      document.getElementById( 'innerHTML' ).innerHTML = "<svg xmlns='http://www.w3.org/2000/svg' width='64' height='64'><linearGradient id='gradient'><stop offset='0%' stop-color='#F00'/><stop offset='100%' stop-color='#00F'/></linearGradient><rect fill='url(#gradient)' x='0' y='0' width='64' height='64'/></svg>";
+    })();
+  </script>
+
+  <div class="test">&lt;img&gt; from .svg URL</div>
+  <img id="img-svg-url" src="simple-gradient.svg">
+
+  <div class="test">&lt;img&gt; from base64 Data URL</div>
+  <img id="img-base64-url" src="data:image/svg+xml;base64,PHN2ZyB4bWxucz0naHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmcnIHdpZHRoPSc2NCcgaGVpZ2h0PSc2NCc+PGxpbmVhckdyYWRpZW50IGlkPSdncmFkaWVudCc+PHN0b3Agb2Zmc2V0PScwJScgc3RvcC1jb2xvcj0nI0YwMCcvPjxzdG9wIG9mZnNldD0nMTAwJScgc3RvcC1jb2xvcj0nIzAwRicvPjwvbGluZWFyR3JhZGllbnQ+PHJlY3QgZmlsbD0ndXJsKCNncmFkaWVudCknIHg9JzAnIHk9JzAnIHdpZHRoPSc2NCcgaGVpZ2h0PSc2NCcvPjwvc3ZnPg==">
+
+  <div class="test">&lt;img&gt; from utf8 Data URL</div>
+  <img id="img-utf8-url" src="data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='64' height='64'><linearGradient id='gradient'><stop offset='0%' stop-color='#F00'/><stop offset='100%' stop-color='#00F'/></linearGradient><rect fill='url(#gradient)' x='0' y='0' width='64' height='64'/></svg>">
+
+  <div class="test">Canvas from &lt;img&gt; from .svg URL</div>
+  <canvas id="canvas-svg-url" width="64" height="64"></canvas>
+
+  <div class="test">Canvas from &lt;img&gt; from base64 Data URL</div>
+  <canvas id="canvas-base64-url" width="64" height="64"></canvas>
+
+  <div class="test">Canvas from &lt;img&gt; from utf8 Data URL</div>
+  <canvas id="canvas-utf8-url" width="64" height="64"></canvas>
+
+  <div class="test">Read from Canvas from &lt;img&gt; from .svg URL (should be purple)</div>
+  <canvas id="canvas-read-svg-url" width="64" height="64"></canvas>
+
+  <div class="test">Read from Canvas from &lt;img&gt; from base64 Data URL (should be purple)</div>
+  <canvas id="canvas-read-base64-url" width="64" height="64"></canvas>
+
+  <div class="test">Read from Canvas from &lt;img&gt; from utf8 Data URL (should be purple)</div>
+  <canvas id="canvas-read-utf8-url" width="64" height="64"></canvas>
+
+  <script type="text/javascript">
+    var contextSVGURL = document.getElementById( 'canvas-svg-url' ).getContext( '2d' );
+    var contextBase64URL = document.getElementById( 'canvas-base64-url' ).getContext( '2d' );
+    var contextUTF8URL = document.getElementById( 'canvas-utf8-url' ).getContext( '2d' );
+    var contextReadSVGURL = document.getElementById( 'canvas-read-svg-url' ).getContext( '2d' );
+    var contextReadBase64URL = document.getElementById( 'canvas-read-base64-url' ).getContext( '2d' );
+    var contextReadUTF8URL = document.getElementById( 'canvas-read-utf8-url' ).getContext( '2d' );
+
+    // images should be loaded when we run
+    window.onload = function() {
+      try {
+        contextSVGURL.drawImage( document.getElementById( 'img-svg-url' ), 0, 0 );
+      }
+      catch ( e ) {}
+
+      try {
+        contextBase64URL.drawImage( document.getElementById( 'img-base64-url' ), 0, 0 );
+      }
+      catch ( e ) {}
+
+      try {
+        contextUTF8URL.drawImage( document.getElementById( 'img-utf8-url' ), 0, 0 );
+      }
+      catch ( e ) {}
+
+
+      try {
+        var imageData = contextSVGURL.getImageData( 32, 0, 1, 1 );
+        contextReadSVGURL.fillStyle = 'rgb(' + imageData.data[0] + ',' + imageData.data[1] + ',' + imageData.data[2] + ')';
+        contextReadSVGURL.fillRect( 0, 0, 64, 64 );
+      }
+      catch ( e ) {}
+
+      try {
+        var imageData = contextBase64URL.getImageData( 32, 0, 1, 1 );
+        contextReadBase64URL.fillStyle = 'rgb(' + imageData.data[0] + ',' + imageData.data[1] + ',' + imageData.data[2] + ')';
+        contextReadBase64URL.fillRect( 0, 0, 64, 64 );
+      }
+      catch ( e ) {}
+
+      try {
+        var imageData = contextUTF8URL.getImageData( 32, 0, 1, 1 );
+        contextReadUTF8URL.fillStyle = 'rgb(' + imageData.data[0] + ',' + imageData.data[1] + ',' + imageData.data[2] + ')';
+        contextReadUTF8URL.fillRect( 0, 0, 64, 64 );
+      }
+      catch ( e ) {}
+
+    };
+  </script>
+</div>
+</body>
+</html>
