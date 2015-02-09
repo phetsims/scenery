@@ -311,16 +311,15 @@
                       // Position
                       'attribute vec3 aPosition;',
                       'uniform mat3 modelViewMatrix;',
-                      'uniform float screenWidth;',
-                      'uniform float screenHeight;',
+                      'uniform mat3 projectionMatrix;',
 
                       'void main( void ) {',
-                      // homogeneous transformation
-                      '  vec2 xy = ( modelViewMatrix * vec3( aPosition.x, aPosition.y, 1 ) ).xy;',
-                      // scale to normalized device coordinates (reversing y)
-                      '  vec2 ndc = vec2( xy.x / screenWidth, 1.0 - xy.y / screenHeight ) * 2.0 - 1.0;',
+                      // homogeneous model-view transformation
+                      '  vec3 view = modelViewMatrix * vec3( aPosition.xy, 1 );',
+                      // homogeneous map to to normalized device coordinates
+                      '  vec3 ndc = projectionMatrix * vec3( view.xy, 1 );',
                       // combine with the z coordinate specified
-                      '  gl_Position = vec4( ndc, aPosition.z, 1.0 );',
+                      '  gl_Position = vec4( ndc.xy, aPosition.z, 1.0 );',
                       '}'
                     ].join( '\n' )
 
@@ -334,7 +333,7 @@
                       '}'
                     ].join( '\n' )
 
-                    drawable.shaderProgram = new ShaderProgram( gl, lineVertexShaderSouce, lineFragmentShaderSource, [ 'aPosition' ], [ 'modelViewMatrix', 'screenWidth', 'screenHeight' ] );
+                    drawable.shaderProgram = new ShaderProgram( gl, lineVertexShaderSouce, lineFragmentShaderSource, [ 'aPosition' ], [ 'modelViewMatrix', 'projectionMatrix' ] );
 
                     drawable.vertexBuffer = gl.createBuffer();
 
@@ -350,9 +349,8 @@
 
                     drawable.shaderProgram.use();
 
-                    gl.uniform1f( drawable.shaderProgram.uniformLocations.screenWidth, drawable.webGLBlock.display.width );
-                    gl.uniform1f( drawable.shaderProgram.uniformLocations.screenHeight, drawable.webGLBlock.display.height );
                     gl.uniformMatrix3fv( drawable.shaderProgram.uniformLocations.modelViewMatrix, false, new Float32Array( matrix.entries ) );
+                    gl.uniformMatrix3fv( drawable.shaderProgram.uniformLocations.projectionMatrix, false, drawable.webGLBlock.projectionMatrixArray );
 
                     gl.bindBuffer( gl.ARRAY_BUFFER, drawable.vertexBuffer );
                     gl.vertexAttribPointer( drawable.shaderProgram.attributeLocations.aPosition, 3, gl.FLOAT, false, 0, 0 );

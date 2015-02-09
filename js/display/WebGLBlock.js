@@ -59,7 +59,10 @@ define( function( require ) {
       Util.unsetTransform( this.webGLRenderer.canvas ); // clear out any transforms that could have been previously applied
 
       // store our backing scale so we don't have to look it up while fitting
-//      this.backingScale = ( renderer & Renderer.bitmaskWebGLLowResolution ) ? 1 : scenery.Util.backingScale( this.gl );
+      // this.backingScale = ( renderer & Renderer.bitmaskWebGLLowResolution ) ? 1 : scenery.Util.backingScale( this.gl );
+
+      // a column-major 3x3 array specifying our projection matrix for 2D points (homogenized to (x,y,1))
+      this.projectionMatrixArray = new Float32Array( 9 );
 
       this.initializeWebGLState();
 
@@ -108,6 +111,19 @@ define( function( require ) {
 
         // udpate the fit BEFORE drawing, since it may change our offset
         this.updateFit();
+
+        // finalX = 2 * x / display.width - 1
+        // finalY = 1 - 2 * y / display.height
+        // result = matrix * ( x, y, 1 )
+        this.projectionMatrixArray[0] = 2 / this.display.width;
+        this.projectionMatrixArray[1] = 0;
+        this.projectionMatrixArray[2] = 0;
+        this.projectionMatrixArray[3] = 0;
+        this.projectionMatrixArray[4] = -2 / this.display.height;
+        this.projectionMatrixArray[5] = 0;
+        this.projectionMatrixArray[6] = -1;
+        this.projectionMatrixArray[7] = 1;
+        this.projectionMatrixArray[8] = 1;
 
         this.webGLRenderer.draw();
       }
