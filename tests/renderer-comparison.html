@@ -333,7 +333,10 @@
                       '}'
                     ].join( '\n' )
 
-                    drawable.shaderProgram = new ShaderProgram( gl, lineVertexShaderSouce, lineFragmentShaderSource, [ 'aPosition' ], [ 'modelViewMatrix', 'projectionMatrix' ] );
+                    drawable.shaderProgram = new ShaderProgram( gl, lineVertexShaderSouce, lineFragmentShaderSource, {
+                      attributes: [ 'aPosition' ],
+                      uniforms: [ 'modelViewMatrix', 'projectionMatrix' ]
+                    } );
 
                     drawable.vertexBuffer = gl.createBuffer();
 
