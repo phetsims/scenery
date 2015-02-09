@@ -108,6 +108,8 @@ define( function( require ) {
     doDraw: function( activeTextureIndex ) {
       var gl = this.gl;
 
+      //TODO: If no vertices, bail out!
+
       gl.useProgram( this.colorShaderProgram );
       gl.enableVertexAttribArray( this.positionLocation );
       gl.enableVertexAttribArray( this.texCoordLocation );

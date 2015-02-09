@@ -91,7 +91,7 @@ define( function( require ) {
     initializeContext: function( gl ) {
       this.gl = gl;
 
-      this.node.initializeContext( gl );//TODO: Rename call to initializeContext?  Breaks with 0.1 but should be done for consistency.
+      //this.node.initializeContext( gl );//TODO: Rename call to initializeContext?  Breaks with 0.1 but should be done for consistency.
     },
 
     render: function( shaderProgram ) {

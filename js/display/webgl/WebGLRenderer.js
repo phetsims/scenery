@@ -68,6 +68,7 @@ define( function( require ) {
 
   return inherit( Object, WebGLRenderer, {
     addCustomWebGLRenderer: function( customWebGLRenderer ) {
+      customWebGLRenderer.init( this.gl, this.backingScale, this.canvas );
       this.customWebGLRenderers.push( customWebGLRenderer );
     },
     /**
