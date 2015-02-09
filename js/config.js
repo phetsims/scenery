@@ -31,5 +31,5 @@ require.config( {
   },
 
   // optional cache buster to make browser refresh load all included scripts, can be disabled with ?cacheBuster=false
-  urlArgs: phet.phetcommon.getCacheBusterArgs()
+  urlArgs: Date.now()
 } );
