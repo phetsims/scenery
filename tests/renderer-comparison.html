@@ -305,7 +305,7 @@
                     var gl = drawable.gl;
 
                     // Simple example for custom shader
-                    var lineVertexShaderSouce = [
+                    var lineVertexShaderSource = [
                       // Position
                       'attribute vec3 aPosition;',
                       'uniform mat3 uModelViewMatrix;',
@@ -331,7 +331,7 @@
                       '}'
                     ].join( '\n' );
 
-                    drawable.shaderProgram = new ShaderProgram( gl, lineVertexShaderSouce, lineFragmentShaderSource, {
+                    drawable.shaderProgram = new ShaderProgram( gl, lineVertexShaderSource, lineFragmentShaderSource, {
                       attributes: [ 'aPosition' ],
                       uniforms: [ 'uModelViewMatrix', 'uProjectionMatrix' ]
                     } );
