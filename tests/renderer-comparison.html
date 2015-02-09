@@ -303,21 +303,19 @@
                 var LinesNode = phetcore.inherit( scenery.WebGLNode, LinesNode, {
                   initializeWebGLDrawable: function( drawable ) {
                     var gl = drawable.gl;
-                    // Manages the indices within a single array, so that disjoint geometries can be represented easily here.
-                    // TODO: Compare this same idea to triangle strips
 
                     // Simple example for custom shader
                     var lineVertexShaderSouce = [
                       // Position
                       'attribute vec3 aPosition;',
-                      'uniform mat3 modelViewMatrix;',
-                      'uniform mat3 projectionMatrix;',
+                      'uniform mat3 uModelViewMatrix;',
+                      'uniform mat3 uProjectionMatrix;',
 
                       'void main( void ) {',
                       // homogeneous model-view transformation
-                      '  vec3 view = modelViewMatrix * vec3( aPosition.xy, 1 );',
+                      '  vec3 view = uModelViewMatrix * vec3( aPosition.xy, 1 );',
                       // homogeneous map to to normalized device coordinates
-                      '  vec3 ndc = projectionMatrix * vec3( view.xy, 1 );',
+                      '  vec3 ndc = uProjectionMatrix * vec3( view.xy, 1 );',
                       // combine with the z coordinate specified
                       '  gl_Position = vec4( ndc.xy, aPosition.z, 1.0 );',
                       '}'
@@ -335,7 +333,7 @@
 
                     drawable.shaderProgram = new ShaderProgram( gl, lineVertexShaderSouce, lineFragmentShaderSource, {
                       attributes: [ 'aPosition' ],
-                      uniforms: [ 'modelViewMatrix', 'projectionMatrix' ]
+                      uniforms: [ 'uModelViewMatrix', 'uProjectionMatrix' ]
                     } );
 
                     drawable.vertexBuffer = gl.createBuffer();
@@ -349,18 +347,19 @@
 
                   paintWebGLDrawable: function( drawable, matrix ) {
                     var gl = drawable.gl;
+                    var shaderProgram = drawable.shaderProgram;
 
-                    drawable.shaderProgram.use();
+                    shaderProgram.use();
 
-                    gl.uniformMatrix3fv( drawable.shaderProgram.uniformLocations.modelViewMatrix, false, new Float32Array( matrix.entries ) );
-                    gl.uniformMatrix3fv( drawable.shaderProgram.uniformLocations.projectionMatrix, false, drawable.webGLBlock.projectionMatrixArray );
+                    gl.uniformMatrix3fv( shaderProgram.uniformLocations.uModelViewMatrix, false, new Float32Array( matrix.entries ) );
+                    gl.uniformMatrix3fv( shaderProgram.uniformLocations.uProjectionMatrix, false, drawable.webGLBlock.projectionMatrixArray );
 
                     gl.bindBuffer( gl.ARRAY_BUFFER, drawable.vertexBuffer );
-                    gl.vertexAttribPointer( drawable.shaderProgram.attributeLocations.aPosition, 3, gl.FLOAT, false, 0, 0 );
+                    gl.vertexAttribPointer( shaderProgram.attributeLocations.aPosition, 3, gl.FLOAT, false, 0, 0 );
 
                     gl.drawArrays( gl.LINES, 0, 2 );
 
-                    drawable.shaderProgram.unuse();
+                    shaderProgram.unuse();
                   },
 
                   disposeWebGLDrawable: function( drawable ) {
