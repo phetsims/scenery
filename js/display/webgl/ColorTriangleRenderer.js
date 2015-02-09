@@ -41,12 +41,6 @@ define( function( require ) {
     this.transform1AttributeLocation = gl.getAttribLocation( this.colorShaderProgram, 'aTransform1' );
     this.transform2AttributeLocation = gl.getAttribLocation( this.colorShaderProgram, 'aTransform2' );
 
-    gl.enableVertexAttribArray( this.positionAttribLocation );
-    gl.enableVertexAttribArray( this.colorAttributeLocation );
-    gl.enableVertexAttribArray( this.transform1AttributeLocation );
-    gl.enableVertexAttribArray( this.transform2AttributeLocation );
-    gl.useProgram( this.colorShaderProgram );
-
     // set the resolution
     this.resolutionLocation = gl.getUniformLocation( this.colorShaderProgram, 'uResolution' );
 
