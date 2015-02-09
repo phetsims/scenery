@@ -60,8 +60,10 @@ define( function( require ) {
   return inherit( Object, ColorTriangleRenderer, {
 
     draw: function() {
-      
-      //TODO: If no vertices, bail out!
+
+      if ( this.colorTriangleBufferData.isEmpty() ) {
+        return;
+      }
       var gl = this.gl;
 
       var step = Float32Array.BYTES_PER_ELEMENT;
