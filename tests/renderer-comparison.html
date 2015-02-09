@@ -319,7 +319,7 @@
                       // combine with the z coordinate specified
                       '  gl_Position = vec4( ndc.xy, aPosition.z, 1.0 );',
                       '}'
-                    ].join( '\n' )
+                    ].join( '\n' );
 
                     // Simple demo for custom shader
                     var lineFragmentShaderSource = [
@@ -329,7 +329,7 @@
                       'void main( void ) {',
                       '  gl_FragColor = vec4( 1.0, 0.0, 0.0, 1.0 );',
                       '}'
-                    ].join( '\n' )
+                    ].join( '\n' );
 
                     drawable.shaderProgram = new ShaderProgram( gl, lineVertexShaderSouce, lineFragmentShaderSource, {
                       attributes: [ 'aPosition' ],
