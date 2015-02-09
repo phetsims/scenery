@@ -862,7 +862,7 @@ define( function( require ) {
 
     initializeContext: function( webglBlock ) {
       this.webglBlock = webglBlock;
-      this.rectangleHandle = new SquareUnstrokedRectangle( webglBlock.webglRenderer.colorTriangleRenderer, this.node, 0.5 );
+      this.rectangleHandle = new SquareUnstrokedRectangle( webglBlock.webGLRenderer.colorTriangleRenderer, this.node, 0.5 );
 
       // cleanup old vertexBuffer, if applicable
       this.disposeWebGLBuffers();
@@ -887,7 +887,7 @@ define( function( require ) {
       this.rectangleHandle.update();
 
       // TODO: Batch these updates?
-      this.webglBlock.webglRenderer.colorTriangleRenderer.updateTriangleBuffer( this.rectangleHandle );
+      this.webglBlock.webGLRenderer.colorTriangleRenderer.updateTriangleBuffer( this.rectangleHandle );
     },
 
     render: function( shaderProgram ) {
@@ -902,7 +902,7 @@ define( function( require ) {
     },
 
     disposeWebGLBuffers: function() {
-      this.webglBlock.webglRenderer.colorTriangleRenderer.colorTriangleBufferData.dispose( this.rectangleHandle );
+      this.webglBlock.webGLRenderer.colorTriangleRenderer.colorTriangleBufferData.dispose( this.rectangleHandle );
     },
 
     markDirtyRectangle: function() {

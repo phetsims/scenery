@@ -423,11 +423,11 @@ define( function( require ) {
 
     initializeContext: function( webglBlock ) {
       this.webglBlock = webglBlock;
-      this.rectangleHandle = webglBlock.webglRenderer.textureRenderer.createFromImageNode( this.node, 0.4 );
+      this.rectangleHandle = webglBlock.webGLRenderer.textureRenderer.createFromImageNode( this.node, 0.4 );
 
       // TODO: Don't call this each time a new item is added.
-      webglBlock.webglRenderer.textureRenderer.bindVertexBuffer();
-      webglBlock.webglRenderer.textureRenderer.bindDirtyTextures();
+      webglBlock.webGLRenderer.textureRenderer.bindVertexBuffer();
+      webglBlock.webGLRenderer.textureRenderer.bindDirtyTextures();
       // cleanup old vertexBuffer, if applicable
 //      this.disposeWebGLBuffers();
 
@@ -441,7 +441,7 @@ define( function( require ) {
     updateRectangle: function() {
       var translation = this.node.getTranslation();
       this.rectangleHandle.setRect( translation.x, translation.y, this.node._image.width, this.node._image.height );
-      this.webglBlock.webglRenderer.textureRenderer.updateTriangleBuffer( this.rectangleHandle );
+      this.webglBlock.webGLRenderer.textureRenderer.updateTriangleBuffer( this.rectangleHandle );
     },
 
     render: function( shaderProgram ) {
@@ -456,7 +456,7 @@ define( function( require ) {
     },
 
     disposeWebGLBuffers: function() {
-      this.webglBlock.webglRenderer.colorTriangleRenderer.colorTriangleBufferData.dispose( this.rectangleHandle );
+      this.webglBlock.webGLRenderer.colorTriangleRenderer.colorTriangleBufferData.dispose( this.rectangleHandle );
     },
 
     markDirtyRectangle: function() {

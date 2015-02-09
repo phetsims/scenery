@@ -123,6 +123,8 @@
           'text!SCENERY/../tests/webgl/lines.frag'
         ],
         function( scenery, kite, dot, phetcore, lineVertexShader, lineFragmentShader ) {
+          var ShaderProgram = require( 'SCENERY/util/ShaderProgram' );
+
           var testCases = [
             {
               name: 'simple-blue-rectangle',
@@ -301,49 +303,41 @@
                 }
 
                 var LinesNode = phetcore.inherit( scenery.WebGLNode, LinesNode, {
-                  init: function( gl, backingScale, canvas ) {
-                    debugger;
-                    this.gl = gl;
-                    this.canvas = canvas;
-
+                  initializeWebGLDrawable: function( drawable ) {
+                    var gl = drawable.gl;
                     // Manages the indices within a single array, so that disjoint geometries can be represented easily here.
                     // TODO: Compare this same idea to triangle strips
 
-                    this.lineShaderProgram = gl.createProgram();
-                    gl.attachShader( this.lineShaderProgram, scenery.WebGLUtil.toShader( gl, lineVertexShader, gl.VERTEX_SHADER, 'VERTEX' ) );
-                    gl.attachShader( this.lineShaderProgram, scenery.WebGLUtil.toShader( gl, lineFragmentShader, gl.FRAGMENT_SHADER, 'FRAGMENT' ) );
-                    gl.linkProgram( this.lineShaderProgram );
+                    drawable.shaderProgram = new ShaderProgram( gl, lineVertexShader, lineFragmentShader, [ 'aPosition' ], [] );
 
-                    this.positionAttribLocation = gl.getAttribLocation( this.lineShaderProgram, 'aPosition' );
+                    drawable.vertexBuffer = gl.createBuffer();
 
-                    gl.enableVertexAttribArray( this.positionAttribLocation );
-                    gl.useProgram( this.lineShaderProgram );
-
-                    this.vertexBuffer = gl.createBuffer();
-                    this.bindVertexBuffer();
-                  },
-                  draw: function() {
-                    debugger;
-                    var gl = this.gl;
-
-                    gl.enableVertexAttribArray( this.positionAttribLocation );
-                    gl.useProgram( this.lineShaderProgram );
-
-                    gl.bindBuffer( gl.ARRAY_BUFFER, this.vertexBuffer );
-                    gl.vertexAttribPointer( this.positionAttribLocation, 3, gl.FLOAT, false, 0, 0 );
-
-                    gl.drawArrays( gl.LINES, 0, 2 );
-
-                    gl.disableVertexAttribArray( this.positionAttribLocation );
-                  },
-                  bindVertexBuffer: function() {
-                    var gl = this.gl;
-                    gl.bindBuffer( gl.ARRAY_BUFFER, this.vertexBuffer );
+                    gl.bindBuffer( gl.ARRAY_BUFFER, drawable.vertexBuffer );
 
                     gl.bufferData( gl.ARRAY_BUFFER, new Float32Array( [
                       0, 0, 0.1,
                       0.5, 0.5, 0.1
                     ] ), gl.STATIC_DRAW );
+                  },
+
+                  paintWebGLDrawable: function( drawable, matrix ) {
+                    var gl = drawable.gl;
+
+                    drawable.shaderProgram.use();
+
+                    gl.bindBuffer( gl.ARRAY_BUFFER, drawable.vertexBuffer );
+                    gl.vertexAttribPointer( drawable.shaderProgram.attributeLocations.aPosition, 3, gl.FLOAT, false, 0, 0 );
+
+                    gl.drawArrays( gl.LINES, 0, 2 );
+
+                    drawable.shaderProgram.unuse();
+                  },
+
+                  disposeWebGLDrawable: function( drawable ) {
+                    drawable.shaderProgram.dispose();
+                    drawable.gl.deleteBuffer( drawable.vertexBuffer );
+
+                    drawable.shaderProgram = null;
                   }
                 } );
 
