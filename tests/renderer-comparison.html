@@ -118,11 +118,9 @@
   //
   require( [ 'config' ], function() {
     require( [
-          'main', 'KITE/main', 'DOT/main', 'PHET_CORE/main',
-          'text!SCENERY/../tests/webgl/lines.vert',
-          'text!SCENERY/../tests/webgl/lines.frag'
+          'main', 'KITE/main', 'DOT/main', 'PHET_CORE/main'
         ],
-        function( scenery, kite, dot, phetcore, lineVertexShader, lineFragmentShader ) {
+        function( scenery, kite, dot, phetcore ) {
           var ShaderProgram = require( 'SCENERY/util/ShaderProgram' );
 
           var testCases = [
@@ -308,15 +306,42 @@
                     // Manages the indices within a single array, so that disjoint geometries can be represented easily here.
                     // TODO: Compare this same idea to triangle strips
 
-                    drawable.shaderProgram = new ShaderProgram( gl, lineVertexShader, lineFragmentShader, [ 'aPosition' ], [] );
+                    // Simple example for custom shader
+                    var lineVertexShaderSouce = [
+                      // Position
+                      'attribute vec3 aPosition;',
+                      'uniform mat3 modelViewMatrix;',
+                      'uniform float screenWidth;',
+                      'uniform float screenHeight;',
+
+                      'void main( void ) {',
+                      // homogeneous transformation
+                      '  vec2 xy = ( modelViewMatrix * vec3( aPosition.x, aPosition.y, 1 ) ).xy;',
+                      // scale to normalized device coordinates (reversing y)
+                      '  vec2 ndc = vec2( xy.x / screenWidth, 1.0 - xy.y / screenHeight ) * 2.0 - 1.0;',
+                      // combine with the z coordinate specified
+                      '  gl_Position = vec4( ndc, aPosition.z, 1.0 );',
+                      '}'
+                    ].join( '\n' )
+
+                    // Simple demo for custom shader
+                    var lineFragmentShaderSource = [
+                      'precision mediump float;',
+
+                      // Returns the color from the vertex shader
+                      'void main( void ) {',
+                      '  gl_FragColor = vec4( 1.0, 0.0, 0.0, 1.0 );',
+                      '}'
+                    ].join( '\n' )
+
+                    drawable.shaderProgram = new ShaderProgram( gl, lineVertexShaderSouce, lineFragmentShaderSource, [ 'aPosition' ], [ 'modelViewMatrix', 'screenWidth', 'screenHeight' ] );
 
                     drawable.vertexBuffer = gl.createBuffer();
 
                     gl.bindBuffer( gl.ARRAY_BUFFER, drawable.vertexBuffer );
-
                     gl.bufferData( gl.ARRAY_BUFFER, new Float32Array( [
                       0, 0, 0.1,
-                      0.5, 0.5, 0.1
+                      50, 30, 0.1
                     ] ), gl.STATIC_DRAW );
                   },
 
@@ -324,6 +349,10 @@
                     var gl = drawable.gl;
 
                     drawable.shaderProgram.use();
+
+                    gl.uniform1f( drawable.shaderProgram.uniformLocations.screenWidth, drawable.webGLBlock.display.width );
+                    gl.uniform1f( drawable.shaderProgram.uniformLocations.screenHeight, drawable.webGLBlock.display.height );
+                    gl.uniformMatrix3fv( drawable.shaderProgram.uniformLocations.modelViewMatrix, false, new Float32Array( matrix.entries ) );
 
                     gl.bindBuffer( gl.ARRAY_BUFFER, drawable.vertexBuffer );
                     gl.vertexAttribPointer( drawable.shaderProgram.attributeLocations.aPosition, 3, gl.FLOAT, false, 0, 0 );
@@ -343,7 +372,9 @@
 
                 //TODO: Make it so we can pass in the paintCanvas call to the CanvasNode constructor.
                 var linesNode = new LinesNode( {
-                  canvasBounds: new dot.Bounds2( 0, 0, 100, 100 )
+                  canvasBounds: new dot.Bounds2( 0, 0, 100, 100 ),
+                  y: 50,
+                  scale: 2
                 } );
                 scene.addChild( linesNode );
               },
