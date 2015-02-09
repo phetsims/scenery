@@ -17,6 +17,7 @@
 
 <body>
 <div>
+  <h1>Permissions Tests</h1>
   <div class="test">Inline SVG in HTML</div>
   <svg xmlns='http://www.w3.org/2000/svg' width='64' height='64'><linearGradient id='gradient'><stop offset='0%' stop-color='#F00'/><stop offset='100%' stop-color='#00F'/></linearGradient><rect fill='url(#gradient)' x='0' y='0' width='64' height='64'/></svg>
 
@@ -45,6 +46,15 @@
 
   <div class="test">Canvas from &lt;img&gt; from utf8 Data URL</div>
   <canvas id="canvas-utf8-url" width="64" height="64"></canvas>
+
+  <div class="test">&lt;img&gt; from Canvas from &lt;img&gt; from .svg URL</div>
+  <img id="img-canvas-read-svg-url">
+
+  <div class="test">&lt;img&gt; from Canvas from &lt;img&gt; from base64 Data URL</div>
+  <img id="img-canvas-read-base64-url">
+
+  <div class="test">&lt;img&gt; from Canvas from &lt;img&gt; from utf8 Data URL</div>
+  <img id="img-canvas-read-utf8-url">
 
   <div class="test">Read from Canvas from &lt;img&gt; from .svg URL (should be purple)</div>
   <canvas id="canvas-read-svg-url" width="64" height="64"></canvas>
@@ -82,6 +92,22 @@
 
 
       try {
+        document.getElementById( 'img-canvas-read-svg-url' ).src = document.getElementById( 'canvas-svg-url' ).toDataURL();
+      }
+      catch ( e ) {}
+
+      try {
+        document.getElementById( 'img-canvas-read-base64-url' ).src = document.getElementById( 'canvas-base64-url' ).toDataURL();
+      }
+      catch ( e ) {}
+
+      try {
+        document.getElementById( 'img-canvas-read-utf8-url' ).src = document.getElementById( 'canvas-utf8-url' ).toDataURL();
+      }
+      catch ( e ) {}
+
+
+      try {
         var imageData = contextSVGURL.getImageData( 32, 0, 1, 1 );
         contextReadSVGURL.fillStyle = 'rgb(' + imageData.data[0] + ',' + imageData.data[1] + ',' + imageData.data[2] + ')';
         contextReadSVGURL.fillRect( 0, 0, 64, 64 );
@@ -101,7 +127,6 @@
         contextReadUTF8URL.fillRect( 0, 0, 64, 64 );
       }
       catch ( e ) {}
-
     };
   </script>
 </div>
