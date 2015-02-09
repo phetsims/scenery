@@ -46,7 +46,7 @@
       var gl = drawable.gl;
 
       // Simple example for custom shader
-      var lineVertexShaderSouce = [
+      var vertexShaderSource = [
         // Position
         'attribute vec3 aPosition;',
         'attribute vec3 aColor;',
@@ -63,10 +63,10 @@
         // combine with the z coordinate specified
         '  gl_Position = vec4( ndc.xy, aPosition.z, 1.0 );',
         '}'
-      ].join( '\n' )
+      ].join( '\n' );
 
       // Simple demo for custom shader
-      var lineFragmentShaderSource = [
+      var fragmentShaderSource = [
         'precision mediump float;',
         'varying vec3 vColor;',
 
@@ -74,9 +74,9 @@
         'void main( void ) {',
         '  gl_FragColor = vec4( vColor, 1.0 );',
         '}'
-      ].join( '\n' )
+      ].join( '\n' );
 
-      drawable.shaderProgram = new scenery.ShaderProgram( gl, lineVertexShaderSouce, lineFragmentShaderSource, {
+      drawable.shaderProgram = new scenery.ShaderProgram( gl, vertexShaderSource, fragmentShaderSource, {
         attributes: [ 'aPosition', 'aColor' ],
         uniforms: [ 'uModelViewMatrix', 'uProjectionMatrix' ]
       } );
