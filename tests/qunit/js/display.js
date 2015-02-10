@@ -505,4 +505,49 @@
     expect( 0 );
   } );
 
+  test( 'SVG group disposal issue (GitHub Issue #354) A', function() {
+    var scene = new scenery.Node();
+    var display = new scenery.Display( scene );
+
+    var node = new scenery.Node( {
+      renderer: 'svg',
+      rendererOptions: {
+        cssTransform: true
+      }
+    } );
+    var rect = new scenery.Rectangle( 0, 0, 100, 50, { fill: 'red' } );
+
+    scene.addChild( node );
+    node.addChild( rect );
+    display.updateDisplay();
+
+    scene.removeChild( node );
+    display.updateDisplay();
+
+    expect( 0 );
+  } );
+
+  test( 'SVG group disposal issue (GitHub Issue #354) B', function() {
+    var scene = new scenery.Node();
+    var display = new scenery.Display( scene );
+
+    var node = new scenery.Node();
+    var rect = new scenery.Rectangle( 0, 0, 100, 50, {
+      fill: 'red',
+      renderer: 'svg',
+      rendererOptions: {
+        cssTransform: true
+      }
+    } );
+
+    scene.addChild( node );
+    node.addChild( rect );
+    display.updateDisplay();
+
+    scene.removeChild( node );
+    display.updateDisplay();
+
+    expect( 0 );
+  } );
+
 })();

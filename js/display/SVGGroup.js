@@ -310,6 +310,7 @@ define( function( require ) {
 
     dispose: function() {
       sceneryLog && sceneryLog.SVGGroup && sceneryLog.SVGGroup( 'dispose ' + this.toString() );
+      sceneryLog && sceneryLog.SVGGroup && sceneryLog.push();
 
       assert && assert( this.children.length === 0, 'Should be empty by now' );
 
@@ -326,7 +327,10 @@ define( function( require ) {
       this.node.offStatic( 'childInserted', this.orderDirtyListener );
       this.node.offStatic( 'childRemoved', this.orderDirtyListener );
 
-      this.instance.removeSVGGroup( this );
+      // if our Instance has been disposed, it has already had the reference removed
+      if ( this.instance.active ) {
+        this.instance.removeSVGGroup( this );
+      }
 
       // remove clipping, since it is defs-based (and we want to keep our defs block clean - could be another layer!)
       if ( this.clipDefinition ) {
@@ -346,6 +350,8 @@ define( function( require ) {
 
       // for now
       this.freeToPool();
+
+      sceneryLog && sceneryLog.SVGGroup && sceneryLog.pop();
     },
 
     toString: function() {

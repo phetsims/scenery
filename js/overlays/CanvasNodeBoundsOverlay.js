@@ -17,9 +17,9 @@ define( function( require ) {
   var scenery = require( 'SCENERY/scenery' );
   require( 'SCENERY/util/Trail' );
 
-  scenery.CanvasNodeBoundsOverlay = function CanvasNodeBoundsOverlay( display, scene ) {
+  scenery.CanvasNodeBoundsOverlay = function CanvasNodeBoundsOverlay( display, rootNode ) {
     this.display = display;
-    this.scene = scene;
+    this.rootNode = rootNode;
 
     var svg = this.svg = document.createElementNS( scenery.svgns, 'svg' );
     svg.style.position = 'absolute';
@@ -68,13 +68,13 @@ define( function( require ) {
     update: function() {
       var that = this;
       var svg = this.svg;
-      var scene = this.scene;
+      var rootNode = this.rootNode;
 
       while ( svg.childNodes.length ) {
         svg.removeChild( svg.childNodes[ svg.childNodes.length - 1 ] );
       }
 
-      new scenery.Trail( scene ).eachTrailUnder( function( trail ) {
+      new scenery.Trail( rootNode ).eachTrailUnder( function( trail ) {
         var node = trail.lastNode();
         if ( !node.isVisible() ) {
           // skip this subtree if the node is invisible

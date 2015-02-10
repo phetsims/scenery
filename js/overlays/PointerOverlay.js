@@ -20,10 +20,10 @@ define( function( require ) {
 
   var Util = require( 'SCENERY/util/Util' );
 
-  scenery.PointerOverlay = function PointerOverlay( display, scene ) {
+  scenery.PointerOverlay = function PointerOverlay( display, rootNode ) {
     var pointerOverlay = this;
     this.display = display;
-    this.scene = scene;
+    this.rootNode = rootNode;
 
     // add element to show the pointers
     this.pointerSVGContainer = document.createElement( 'div' );
@@ -37,7 +37,7 @@ define( function( require ) {
     var diameter = (innerRadius + strokeWidth / 2) * 2;
     var radius = diameter / 2;
 
-    //Resize the parent div when the scene is resized
+    //Resize the parent div when the rootNode is resized
     display.onStatic( 'displaySize', function( dimension ) {
       pointerOverlay.pointerSVGContainer.setAttribute( 'width', dimension.width );
       pointerOverlay.pointerSVGContainer.setAttribute( 'height', dimension.height );

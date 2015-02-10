@@ -1,0 +1,306 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8"/>
+  <meta http-equiv="X-UA-Compatible" content="IE=edge"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+  <title>Scenery</title>
+
+  <style type="text/css">
+    .test {
+      margin-top: 5px;
+    }
+  </style>
+
+  <script type="text/javascript" src="../../../sherpa/rgbcolor.js"></script>
+  <script type="text/javascript" src="../../../sherpa/canvg-1.3.js"></script>
+
+</head>
+
+<body>
+<div>
+  <h1>Permissions Tests</h1>
+  <div class="test">Inline SVG in HTML</div>
+  <svg xmlns='http://www.w3.org/2000/svg' width='64' height='64'><linearGradient id='gradient'><stop offset='0%' stop-color='#F00'/><stop offset='100%' stop-color='#00F'/></linearGradient><rect fill='url(#gradient)' x='0' y='0' width='64' height='64'/></svg>
+
+  <div class="test">Inline SVG with innerHTML</div>
+  <div id="innerHTML"></div>
+  <script type="text/javascript">
+    (function(){
+      document.getElementById( 'innerHTML' ).innerHTML = "<svg xmlns='http://www.w3.org/2000/svg' width='64' height='64'><linearGradient id='gradient'><stop offset='0%' stop-color='#F00'/><stop offset='100%' stop-color='#00F'/></linearGradient><rect fill='url(#gradient)' x='0' y='0' width='64' height='64'/></svg>";
+    })();
+  </script>
+
+  <div class="test">&lt;img&gt; from .svg URL</div>
+  <img id="img-svg-url" src="simple-gradient.svg">
+
+  <div class="test">&lt;img&gt; from base64 Data URL</div>
+  <img id="img-base64-url" src="data:image/svg+xml;base64,PHN2ZyB4bWxucz0naHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmcnIHdpZHRoPSc2NCcgaGVpZ2h0PSc2NCc+PGxpbmVhckdyYWRpZW50IGlkPSdncmFkaWVudCc+PHN0b3Agb2Zmc2V0PScwJScgc3RvcC1jb2xvcj0nI0YwMCcvPjxzdG9wIG9mZnNldD0nMTAwJScgc3RvcC1jb2xvcj0nIzAwRicvPjwvbGluZWFyR3JhZGllbnQ+PHJlY3QgZmlsbD0ndXJsKCNncmFkaWVudCknIHg9JzAnIHk9JzAnIHdpZHRoPSc2NCcgaGVpZ2h0PSc2NCcvPjwvc3ZnPg==">
+
+  <div class="test">&lt;img&gt; from utf8 Data URL</div>
+  <img id="img-utf8-url" src="data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='64' height='64'><linearGradient id='gradient'><stop offset='0%' stop-color='#F00'/><stop offset='100%' stop-color='#00F'/></linearGradient><rect fill='url(#gradient)' x='0' y='0' width='64' height='64'/></svg>">
+
+  <div class="test">Canvas from &lt;img&gt; from .svg URL</div>
+  <canvas id="canvas-svg-url" width="64" height="64"></canvas>
+
+  <div class="test">Canvas from &lt;img&gt; from base64 Data URL</div>
+  <canvas id="canvas-base64-url" width="64" height="64"></canvas>
+
+  <div class="test">Canvas from &lt;img&gt; from utf8 Data URL</div>
+  <canvas id="canvas-utf8-url" width="64" height="64"></canvas>
+
+  <div class="test">&lt;img&gt; from Canvas from &lt;img&gt; from .svg URL</div>
+  <img id="img-canvas-read-svg-url">
+
+  <div class="test">&lt;img&gt; from Canvas from &lt;img&gt; from base64 Data URL</div>
+  <img id="img-canvas-read-base64-url">
+
+  <div class="test">&lt;img&gt; from Canvas from &lt;img&gt; from utf8 Data URL</div>
+  <img id="img-canvas-read-utf8-url">
+
+  <div class="test">Read from Canvas from &lt;img&gt; from .svg URL (should be purple)</div>
+  <canvas id="canvas-read-svg-url" width="64" height="64"></canvas>
+
+  <div class="test">Read from Canvas from &lt;img&gt; from base64 Data URL (should be purple)</div>
+  <canvas id="canvas-read-base64-url" width="64" height="64"></canvas>
+
+  <div class="test">Read from Canvas from &lt;img&gt; from utf8 Data URL (should be purple)</div>
+  <canvas id="canvas-read-utf8-url" width="64" height="64"></canvas>
+
+  <div class="test">Wrench (should be 60x209)</div>
+  <img id="wrench-svg" src="wrench.svg">
+
+  <div class="test">Wrench base64 (should be 60x209)</div>
+  <img id="wrench-base64" src="data:image/svg+xml;base64,PD94bWwgdmVyc2lvbj0iMS4wIiBlbmNvZGluZz0idXRmLTgiPz4NCjwhLS0gR2VuZXJhdG9yOiBBZG9iZSBJbGx1c3RyYXRvciAxNi4wLjMsIFNWRyBFeHBvcnQgUGx1Zy1JbiAuIFNWRyBWZXJzaW9uOiA2LjAwIEJ1aWxkIDApICAtLT4NCjwhRE9DVFlQRSBzdmcgUFVCTElDICItLy9XM0MvL0RURCBTVkcgMS4xLy9FTiIgImh0dHA6Ly93d3cudzMub3JnL0dyYXBoaWNzL1NWRy8xLjEvRFREL3N2ZzExLmR0ZCI+DQo8c3ZnIHZlcnNpb249IjEuMSIgaWQ9IkxheWVyXzEiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyIgeG1sbnM6eGxpbms9Imh0dHA6Ly93d3cudzMub3JnLzE5OTkveGxpbmsiIHg9IjBweCIgeT0iMHB4Ig0KICAgd2lkdGg9IjU5LjAzNnB4IiBoZWlnaHQ9IjIwOC4zMjlweCIgdmlld0JveD0iMCAwIDU5LjAzNiAyMDguMzI5IiBlbmFibGUtYmFja2dyb3VuZD0ibmV3IDAgMCA1OS4wMzYgMjA4LjMyOSINCiAgIHhtbDpzcGFjZT0icHJlc2VydmUiPg0KPGxpbmVhckdyYWRpZW50IGlkPSJTVkdJRF8xXyIgZ3JhZGllbnRVbml0cz0idXNlclNwYWNlT25Vc2UiIHgxPSIyMi4zMzQ1IiB5MT0iMzUuNjYyNiIgeDI9IjI2LjAwMTUiIHkyPSIzNS42NjI2IiBncmFkaWVudFRyYW5zZm9ybT0ibWF0cml4KDEuMjA0NiAwIDAgMSA1LjMzMzkgMCkiPg0KICA8c3RvcCAgb2Zmc2V0PSIwIiBzdHlsZT0ic3RvcC1jb2xvcjojOTYxQzFGIi8+DQogIDxzdG9wICBvZmZzZXQ9IjAuNSIgc3R5bGU9InN0b3AtY29sb3I6I0IwNjA1RCIvPg0KICA8c3RvcCAgb2Zmc2V0PSIwLjU2MjMiIHN0eWxlPSJzdG9wLWNvbG9yOiNBMDUyNEUiLz4NCiAgPHN0b3AgIG9mZnNldD0iMC42OTk0IiBzdHlsZT0ic3RvcC1jb2xvcjojODIzODM1Ii8+DQogIDxzdG9wICBvZmZzZXQ9IjAuODIyOSIgc3R5bGU9InN0b3AtY29sb3I6IzZGMjcyNSIvPg0KICA8c3RvcCAgb2Zmc2V0PSIwLjkyNzMiIHN0eWxlPSJzdG9wLWNvbG9yOiM2NDFEMUQiLz4NCiAgPHN0b3AgIG9mZnNldD0iMSIgc3R5bGU9InN0b3AtY29sb3I6IzYxMTkxQiIvPg0KPC9saW5lYXJHcmFkaWVudD4NCjxlbGxpcHNlIGZpbGw9InVybCgjU1ZHSURfMV8pIiBzdHJva2U9IiMwMTAxMDEiIHN0cm9rZS13aWR0aD0iMC41ODkiIHN0cm9rZS1taXRlcmxpbWl0PSIxMCIgY3g9IjM0LjQ0NyIgY3k9IjM1LjY2MyIgcng9IjIuMjA4IiByeT0iMS44MzMiLz4NCjxsaW5lYXJHcmFkaWVudCBpZD0iU1ZHSURfMl8iIGdyYWRpZW50VW5pdHM9InVzZXJTcGFjZU9uVXNlIiB4MT0iMjYuMDAxNSIgeTE9IjM1LjY2MjYiIHgyPSIyOS42NjgiIHkyPSIzNS42NjI2IiBncmFkaWVudFRyYW5zZm9ybT0ibWF0cml4KDEuMjA0NiAwIDAgMSA1LjMzMzkgMCkiPg0KICA8c3RvcCAgb2Zmc2V0PSIwIiBzdHlsZT0ic3RvcC1jb2xvcjojOTYxQzFGIi8+DQogIDxzdG9wICBvZmZzZXQ9IjAuNSIgc3R5bGU9InN0b3AtY29sb3I6I0IwNjA1RCIvPg0KICA8c3RvcCAgb2Zmc2V0PSIwLjU2MjMiIHN0eWxlPSJzdG9wLWNvbG9yOiNBMDUyNEUiLz4NCiAgPHN0b3AgIG9mZnNldD0iMC42OTk0IiBzdHlsZT0ic3RvcC1jb2xvcjojODIzODM1Ii8+DQogIDxzdG9wICBvZmZzZXQ9IjAuODIyOSIgc3R5bGU9InN0b3AtY29sb3I6IzZGMjcyNSIvPg0KICA8c3RvcCAgb2Zmc2V0PSIwLjkyNzMiIHN0eWxlPSJzdG9wLWNvbG9yOiM2NDFEMUQiLz4NCiAgPHN0b3AgIG9mZnNldD0iMSIgc3R5bGU9InN0b3AtY29sb3I6IzYxMTkxQiIvPg0KPC9saW5lYXJHcmFkaWVudD4NCjxlbGxpcHNlIGZpbGw9InVybCgjU1ZHSURfMl8pIiBzdHJva2U9IiMwMTAxMDEiIHN0cm9rZS13aWR0aD0iMC41ODkiIHN0cm9rZS1taXRlcmxpbWl0PSIxMCIgY3g9IjM4Ljg2NCIgY3k9IjM1LjY2MyIgcng9IjIuMjA4IiByeT0iMS44MzMiLz4NCjxsaW5lYXJHcmFkaWVudCBpZD0iU1ZHSURfM18iIGdyYWRpZW50VW5pdHM9InVzZXJTcGFjZU9uVXNlIiB4MT0iMjkuNjY4IiB5MT0iMzUuNjYyNiIgeDI9IjMzLjMzNTQiIHkyPSIzNS42NjI2IiBncmFkaWVudFRyYW5zZm9ybT0ibWF0cml4KDEuMjA0NiAwIDAgMSA1LjMzMzkgMCkiPg0KICA8c3RvcCAgb2Zmc2V0PSIwIiBzdHlsZT0ic3RvcC1jb2xvcjojOTYxQzFGIi8+DQogIDxzdG9wICBvZmZzZXQ9IjAuNSIgc3R5bGU9InN0b3AtY29sb3I6I0IwNjA1RCIvPg0KICA8c3RvcCAgb2Zmc2V0PSIwLjU2MjMiIHN0eWxlPSJzdG9wLWNvbG9yOiNBMDUyNEUiLz4NCiAgPHN0b3AgIG9mZnNldD0iMC42OTk0IiBzdHlsZT0ic3RvcC1jb2xvcjojODIzODM1Ii8+DQogIDxzdG9wICBvZmZzZXQ9IjAuODIyOSIgc3R5bGU9InN0b3AtY29sb3I6IzZGMjcyNSIvPg0KICA8c3RvcCAgb2Zmc2V0PSIwLjkyNzMiIHN0eWxlPSJzdG9wLWNvbG9yOiM2NDFEMUQiLz4NCiAgPHN0b3AgIG9mZnNldD0iMSIgc3R5bGU9InN0b3AtY29sb3I6IzYxMTkxQiIvPg0KPC9saW5lYXJHcmFkaWVudD4NCjxlbGxpcHNlIGZpbGw9InVybCgjU1ZHSURfM18pIiBzdHJva2U9IiMwMTAxMDEiIHN0cm9rZS13aWR0aD0iMC41ODkiIHN0cm9rZS1taXRlcmxpbWl0PSIxMCIgY3g9IjQzLjI4MSIgY3k9IjM1LjY2MyIgcng9IjIuMjA4IiByeT0iMS44MzMiLz4NCjxsaW5lYXJHcmFkaWVudCBpZD0iU1ZHSURfNF8iIGdyYWRpZW50VW5pdHM9InVzZXJTcGFjZU9uVXNlIiB4MT0iMzMuMzM1NCIgeTE9IjM1LjY2MjYiIHgyPSIzNy4wMDE1IiB5Mj0iMzUuNjYyNiIgZ3JhZGllbnRUcmFuc2Zvcm09Im1hdHJpeCgxLjIwNDYgMCAwIDEgNS4zMzM5IDApIj4NCiAgPHN0b3AgIG9mZnNldD0iMCIgc3R5bGU9InN0b3AtY29sb3I6Izk2MUMxRiIvPg0KICA8c3RvcCAgb2Zmc2V0PSIwLjUiIHN0eWxlPSJzdG9wLWNvbG9yOiNCMDYwNUQiLz4NCiAgPHN0b3AgIG9mZnNldD0iMC41NjIzIiBzdHlsZT0ic3RvcC1jb2xvcjojQTA1MjRFIi8+DQogIDxzdG9wICBvZmZzZXQ9IjAuNjk5NCIgc3R5bGU9InN0b3AtY29sb3I6IzgyMzgzNSIvPg0KICA8c3RvcCAgb2Zmc2V0PSIwLjgyMjkiIHN0eWxlPSJzdG9wLWNvbG9yOiM2RjI3MjUiLz4NCiAgPHN0b3AgIG9mZnNldD0iMC45MjczIiBzdHlsZT0ic3RvcC1jb2xvcjojNjQxRDFEIi8+DQogIDxzdG9wICBvZmZzZXQ9IjEiIHN0eWxlPSJzdG9wLWNvbG9yOiM2MTE5MUIiLz4NCjwvbGluZWFyR3JhZGllbnQ+DQo8ZWxsaXBzZSBmaWxsPSJ1cmwoI1NWR0lEXzRfKSIgc3Ryb2tlPSIjMDEwMTAxIiBzdHJva2Utd2lkdGg9IjAuNTg5IiBzdHJva2UtbWl0ZXJsaW1pdD0iMTAiIGN4PSI0Ny42OTgiIGN5PSIzNS42NjMiIHJ4PSIyLjIwOCIgcnk9IjEuODMzIi8+DQo8cmFkaWFsR3JhZGllbnQgaWQ9IlNWR0lEXzVfIiBjeD0iMjIuNDQ4NyIgY3k9IjYxLjkxMjYiIHI9IjIwLjc5NDQiIGdyYWRpZW50VW5pdHM9InVzZXJTcGFjZU9uVXNlIj4NCiAgPHN0b3AgIG9mZnNldD0iMC4wMDU2IiBzdHlsZT0ic3RvcC1jb2xvcjojQzVDNkM4Ii8+DQogIDxzdG9wICBvZmZzZXQ9IjAuMjk3OCIgc3R5bGU9InN0b3AtY29sb3I6I0JEQkVDMCIvPg0KICA8c3RvcCAgb2Zmc2V0PSIwLjY1NzMiIHN0eWxlPSJzdG9wLWNvbG9yOiNBOEFBQUQiLz4NCiAgPHN0b3AgIG9mZnNldD0iMC45OTY5IiBzdHlsZT0ic3RvcC1jb2xvcjojOUI5REEwIi8+DQogIDxzdG9wICBvZmZzZXQ9IjEiIHN0eWxlPSJzdG9wLWNvbG9yOiM5QjlEQTAiLz4NCjwvcmFkaWFsR3JhZGllbnQ+DQo8cGF0aCBmaWxsPSJ1cmwoI1NWR0lEXzVfKSIgc3Ryb2tlPSIjMDEwMTAxIiBzdHJva2UtbWl0ZXJsaW1pdD0iMTAiIGQ9Ik0yOS42OTksODIuOTEzYzAsNC4xNDItMy4yNDYsNy41LTcuMjUsNy41bDAsMA0KICBjLTQuMDA0LDAtNy4yNS0zLjM1OC03LjI1LTcuNXYtNDJjMC00LjE0MiwzLjI0Ni03LjUsNy4yNS03LjVsMCwwYzQuMDA0LDAsNy4yNSwzLjM1OCw3LjI1LDcuNVY4Mi45MTN6Ii8+DQo8cGF0aCBmaWxsPSIjOUI5REEwIiBzdHJva2U9IiMwMTAxMDEiIHN0cm9rZS13aWR0aD0iMS4wMDI3IiBzdHJva2UtbWl0ZXJsaW1pdD0iMTAiIGQ9Ik0yMS4xOTksNjUuOTkxDQogIGMwLDQuODU4LTIuNSw3LjcwNS03LjMzMyw3LjcwNWwtMC42NTQsMC4wNDJjLTAuNzg2LDAtMC43NjMsMC43NTktMi4wMzUsMC43NWMtMy44NjQtMC4wMjgtNy40NzgtNC40MjgtNy40NzgtOC40OTdWNTIuMDg0DQogIGMwLTMuOTQxLDIuNTc5LTcuMjc3LDYuMTMyLTguMzk1YzEuMDU4LTAuMzMzLDEuMjY1LDAuNTk5LDIuNjE4LDAuNTk5bDAsMGM0LjgzMywwLDguNzUsMi45MzgsOC43NSw3Ljc5NlY2NS45OTF6Ii8+DQo8bGluZWFyR3JhZGllbnQgaWQ9IlNWR0lEXzZfIiBncmFkaWVudFVuaXRzPSJ1c2VyU3BhY2VPblVzZSIgeDE9IjI1LjIxNTgiIHkxPSIxMjEuMTc2MyIgeDI9IjU0LjczMzkiIHkyPSIxMjEuMTc2MyI+DQogIDxzdG9wICBvZmZzZXQ9IjAiIHN0eWxlPSJzdG9wLWNvbG9yOiM5NjFDMUYiLz4NCiAgPHN0b3AgIG9mZnNldD0iMC41IiBzdHlsZT0ic3RvcC1jb2xvcjojQjA2MDVEIi8+DQogIDxzdG9wICBvZmZzZXQ9IjAuNTYyMyIgc3R5bGU9InN0b3AtY29sb3I6I0EwNTI0RSIvPg0KICA8c3RvcCAgb2Zmc2V0PSIwLjY5OTQiIHN0eWxlPSJzdG9wLWNvbG9yOiM4MjM4MzUiLz4NCiAgPHN0b3AgIG9mZnNldD0iMC44MjI5IiBzdHlsZT0ic3RvcC1jb2xvcjojNkYyNzI1Ii8+DQogIDxzdG9wICBvZmZzZXQ9IjAuOTI3MyIgc3R5bGU9InN0b3AtY29sb3I6IzY0MUQxRCIvPg0KICA8c3RvcCAgb2Zmc2V0PSIxIiBzdHlsZT0ic3RvcC1jb2xvcjojNjExOTFCIi8+DQo8L2xpbmVhckdyYWRpZW50Pg0KPHBhdGggZmlsbD0idXJsKCNTVkdJRF82XykiIHN0cm9rZT0iIzAxMDEwMSIgc3Ryb2tlLXdpZHRoPSIwLjk2MTgiIHN0cm9rZS1taXRlcmxpbWl0PSIxMCIgZD0iTTUxLjQ0MiwxNjMuMDg0DQogIGMtMS4zNjktMTMuMjkyLTEuNjI4LTI2LjY2Ny0xLjkwNC00MC4wMThjLTAuNDc5LTIzLjEzNC0wLjg3OS00Ni4yNy0xLjMyNy02OS40MDRjMC0xLjE0Ny0wLjE5My00LjI4NywxLjM2NC02LjU2Mg0KICBjMS4zODItMi4wMTcsNC41MzYtMy4xNDEsNC41NDItNC43NzVjMC4wMTUtNC41MTEtNi4wODYtNi42NjMtOC42ODItNi42NjNIMzMuNDA5Yy00LjU5OSwwLTEuODUxLDEzLjAyOS0xLjg1MSwxOA0KICBjMCwyLjIyOC0wLjA4Nyw0LjQ1OS0wLjEzMSw2LjY4N2MtMC40MDIsMjAuNDkzLDAuMjIsNDAuOTg2LTAuMTg4LDYxLjQ3OWMtMC4wNTIsMi41ODYtMC4yNDIsNS4xODEtMC40MjIsNy43Ng0KICBjLTAuNTQxLDcuNzI4LTEuMjEyLDE1LjQ0My0xLjg0NiwyMy4xNjRjLTAuNzU2LDkuMjA1LTIuNTA0LDE4LjMwOC0zLjE5NCwyNy41MDljLTAuMzE2LDQuMjExLTAuODI5LDguNDA5LTAuMzk0LDEyLjYzMg0KICBjMC40NjQsNC41MDcsMC41NjIsOC42NDcsNC4xMzQsMTEuNDEzYzMuOTUsMy4wNTgsMTEuNzAzLDIuNzI0LDE2LjQ1NCwxLjQ4YzMuMjk3LTAuODYyLDUuNDAxLTIuODkxLDYuNjk1LTUuNTIxDQogIGMxLjYwMy0zLjI1OCwyLjA3NS02LjkzNSwyLjA2Ny0xMC41MjhDNTQuNzE3LDE4MC44NDksNTIuMzUsMTcxLjkwOCw1MS40NDIsMTYzLjA4NHogTTM5LjE5OCwxOTcuNjYzDQogIGMtMi44OTksMC01LjI1LTIuMzUxLTUuMjUtNS4yNXMyLjM1MS01LjI1LDUuMjUtNS4yNXM1LjI1LDIuMzUxLDUuMjUsNS4yNVM0Mi4wOTcsMTk3LjY2MywzOS4xOTgsMTk3LjY2M3oiLz4NCjxyYWRpYWxHcmFkaWVudCBpZD0iU1ZHSURfN18iIGN4PSIzMS44MjM3IiBjeT0iNTkuMDM3NiIgcj0iMTguOTc4OCIgZ3JhZGllbnRVbml0cz0idXNlclNwYWNlT25Vc2UiPg0KICA8c3RvcCAgb2Zmc2V0PSIwLjAwNTYiIHN0eWxlPSJzdG9wLWNvbG9yOiNDNUM2QzgiLz4NCiAgPHN0b3AgIG9mZnNldD0iMC4yOTc4IiBzdHlsZT0ic3RvcC1jb2xvcjojQkRCRUMwIi8+DQogIDxzdG9wICBvZmZzZXQ9IjAuNjU3MyIgc3R5bGU9InN0b3AtY29sb3I6I0E4QUFBRCIvPg0KICA8c3RvcCAgb2Zmc2V0PSIwLjk5NjkiIHN0eWxlPSJzdG9wLWNvbG9yOiM5QjlEQTAiLz4NCiAgPHN0b3AgIG9mZnNldD0iMSIgc3R5bGU9InN0b3AtY29sb3I6IzlCOURBMCIvPg0KPC9yYWRpYWxHcmFkaWVudD4NCjxwb2x5bGluZSBmaWxsPSJ1cmwoI1NWR0lEXzdfKSIgc3Ryb2tlPSIjMDEwMTAxIiBzdHJva2UtbWl0ZXJsaW1pdD0iMTAiIHBvaW50cz0iMTAuMTk5LDc0LjQxMyA1My44MjQsNzQuNDEzIDUzLjgyNCw3Mi4wMzgNCiAgNTMuODI0LDY5LjE2MyA1My44MjQsNjYuNTM4IDUxLjU3NCw2NS40MTMgNDguODI0LDYzLjUzOCA0Ni4zMjQsNjAuNjYzIDQ1LjE5OSw1Ny45MTMgNDUuMDc0LDU0LjY2MyA0NC42OTksNTEuMjg4IDQ0LjQ0OSw0Ny42NjMNCiAgNDMuNDQ5LDQ1LjY2MyA0Mi4wNzQsNDQuNjYzIDM5LjMyNCw0My42NjMgOS44MjQsNDMuNjYzICIvPg0KPHBhdGggZmlsbD0iIzI2MjYyNiIgZD0iTTQyLjAxMiwxMzAuMzg3YzAsMTUuOTA2LDEuMzksMjkuOTcsMC42ODUsMzguNDg3Yy0wLjQ0Niw1LjQtMi44NDIsMTAuMjg4LTMuNDMsMTAuMjg4DQogIGMtMC41NzksMC0yLjk2Ni00Ljc4Mi0zLjQwNy0xMC4wMTljLTAuNzE5LTguNDksMC42NjItMjIuNjgyLDAuNjYyLTM4Ljc1N2MwLTE0Ljg1NC0xLjQ0OS0yNy4yNDItMC44MjMtMzUuODY2DQogIGMwLjQ3MS02LjQ2NiwyLjkxOC0xMS4xOTIsMy41NjgtMTEuMTkyYzAuNjU4LDAsMy4xMTEsNC44MjYsMy41ODQsMTEuNDQyQzQzLjQ2OCwxMDMuNDAxLDQyLjAxMiwxMTUuNjc3LDQyLjAxMiwxMzAuMzg3eiIvPg0KPHJhZGlhbEdyYWRpZW50IGlkPSJTVkdJRF84XyIgY3g9IjI5LjY5ODciIGN5PSI1NS4wNjAxIiByPSIzLjk5MjIiIGdyYWRpZW50VW5pdHM9InVzZXJTcGFjZU9uVXNlIj4NCiAgPHN0b3AgIG9mZnNldD0iMCIgc3R5bGU9InN0b3AtY29sb3I6I0ZGRjNEQyIvPg0KICA8c3RvcCAgb2Zmc2V0PSIwLjMwOSIgc3R5bGU9InN0b3AtY29sb3I6I0Q3QjE4QSIvPg0KICA8c3RvcCAgb2Zmc2V0PSIwLjY3OTEiIHN0eWxlPSJzdG9wLWNvbG9yOiM5QzYzMzgiLz4NCiAgPHN0b3AgIG9mZnNldD0iMC43ODA5IiBzdHlsZT0ic3RvcC1jb2xvcjojOEU1MTI3Ii8+DQogIDxzdG9wICBvZmZzZXQ9IjEiIHN0eWxlPSJzdG9wLWNvbG9yOiM1NDE4MTYiLz4NCjwvcmFkaWFsR3JhZGllbnQ+DQo8Y2lyY2xlIGZpbGw9InVybCgjU1ZHSURfOF8pIiBzdHJva2U9IiMwMTAxMDEiIHN0cm9rZS1taXRlcmxpbWl0PSIxMCIgY3g9IjI5LjY5OSIgY3k9IjU1LjA2IiByPSIzLjk5MiIvPg0KPHBhdGggZmlsbD0iIzQ4NDg0OCIgZD0iTTM4Ljc3MSwxODUuOTEzYy0zLjMyLDAtNi4wMTQsMi45MTEtNi4wMTQsNi41czIuNjkzLDYuNSw2LjAxNCw2LjVjMy4zMjEsMCw2LjE3OC0yLjc4Niw2LjE3OC02LjM3NQ0KICBTNDIuMDkyLDE4NS45MTMsMzguNzcxLDE4NS45MTN6IE0zOS4yMjYsMTk3LjA0OGMtMi41NzgsMC00LjY2OS0yLjI2LTQuNjY5LTUuMDQ3YzAtMi43ODYsMi40NTQtNC4yMTQsNC41MTctNC4yMTQNCiAgYzEuOTM4LDAsNC44MjEsMS40MjgsNC44MjEsNC4yMTRDNDMuODk1LDE5NC43ODksNDEuODAzLDE5Ny4wNDgsMzkuMjI2LDE5Ny4wNDh6Ii8+DQo8cmFkaWFsR3JhZGllbnQgaWQ9IlNWR0lEXzlfIiBjeD0iMjIuMDU5MSIgY3k9IjE4LjEwMDEiIHI9IjEuODMzMyIgZ3JhZGllbnRUcmFuc2Zvcm09Im1hdHJpeCgxLjIwNDYgMCAwIDEgNS4zMzM5IDApIiBncmFkaWVudFVuaXRzPSJ1c2VyU3BhY2VPblVzZSI+DQogIDxzdG9wICBvZmZzZXQ9IjAuMDA1NiIgc3R5bGU9InN0b3AtY29sb3I6I0M1QzZDOCIvPg0KICA8c3RvcCAgb2Zmc2V0PSIwLjI5NzgiIHN0eWxlPSJzdG9wLWNvbG9yOiNCREJFQzAiLz4NCiAgPHN0b3AgIG9mZnNldD0iMC42NTczIiBzdHlsZT0ic3RvcC1jb2xvcjojQThBQUFEIi8+DQogIDxzdG9wICBvZmZzZXQ9IjAuOTk2OSIgc3R5bGU9InN0b3AtY29sb3I6IzlCOURBMCIvPg0KICA8c3RvcCAgb2Zmc2V0PSIxIiBzdHlsZT0ic3RvcC1jb2xvcjojOUI5REEwIi8+DQo8L3JhZGlhbEdyYWRpZW50Pg0KPGVsbGlwc2UgZmlsbD0idXJsKCNTVkdJRF85XykiIHN0cm9rZT0iIzAxMDEwMSIgc3Ryb2tlLXdpZHRoPSIwLjU4OSIgc3Ryb2tlLW1pdGVybGltaXQ9IjEwIiBjeD0iMzEuOTA3IiBjeT0iMTguMSIgcng9IjIuMjA4IiByeT0iMS44MzMiLz4NCjxyYWRpYWxHcmFkaWVudCBpZD0iU1ZHSURfMTBfIiBjeD0iMjUuNzI1NiIgY3k9IjE4LjEwMDEiIHI9IjEuODMzIiBncmFkaWVudFRyYW5zZm9ybT0ibWF0cml4KDEuMjA0NiAwIDAgMSA1LjMzMzkgMCkiIGdyYWRpZW50VW5pdHM9InVzZXJTcGFjZU9uVXNlIj4NCiAgPHN0b3AgIG9mZnNldD0iMC4wMDU2IiBzdHlsZT0ic3RvcC1jb2xvcjojQzVDNkM4Ii8+DQogIDxzdG9wICBvZmZzZXQ9IjAuMjk3OCIgc3R5bGU9InN0b3AtY29sb3I6I0JEQkVDMCIvPg0KICA8c3RvcCAgb2Zmc2V0PSIwLjY1NzMiIHN0eWxlPSJzdG9wLWNvbG9yOiNBOEFBQUQiLz4NCiAgPHN0b3AgIG9mZnNldD0iMC45OTY5IiBzdHlsZT0ic3RvcC1jb2xvcjojOUI5REEwIi8+DQogIDxzdG9wICBvZmZzZXQ9IjEiIHN0eWxlPSJzdG9wLWNvbG9yOiM5QjlEQTAiLz4NCjwvcmFkaWFsR3JhZGllbnQ+DQo8ZWxsaXBzZSBmaWxsPSJ1cmwoI1NWR0lEXzEwXykiIHN0cm9rZT0iIzAxMDEwMSIgc3Ryb2tlLXdpZHRoPSIwLjU4OSIgc3Ryb2tlLW1pdGVybGltaXQ9IjEwIiBjeD0iMzYuMzI0IiBjeT0iMTguMSIgcng9IjIuMjA4IiByeT0iMS44MzMiLz4NCjxyYWRpYWxHcmFkaWVudCBpZD0iU1ZHSURfMTFfIiBjeD0iMjkuMzkyMSIgY3k9IjE4LjEwMDEiIHI9IjEuODMzNSIgZ3JhZGllbnRUcmFuc2Zvcm09Im1hdHJpeCgxLjIwNDYgMCAwIDEgNS4zMzM5IDApIiBncmFkaWVudFVuaXRzPSJ1c2VyU3BhY2VPblVzZSI+DQogIDxzdG9wICBvZmZzZXQ9IjAuMDA1NiIgc3R5bGU9InN0b3AtY29sb3I6I0M1QzZDOCIvPg0KICA8c3RvcCAgb2Zmc2V0PSIwLjI5NzgiIHN0eWxlPSJzdG9wLWNvbG9yOiNCREJFQzAiLz4NCiAgPHN0b3AgIG9mZnNldD0iMC42NTczIiBzdHlsZT0ic3RvcC1jb2xvcjojQThBQUFEIi8+DQogIDxzdG9wICBvZmZzZXQ9IjAuOTk2OSIgc3R5bGU9InN0b3AtY29sb3I6IzlCOURBMCIvPg0KICA8c3RvcCAgb2Zmc2V0PSIxIiBzdHlsZT0ic3RvcC1jb2xvcjojOUI5REEwIi8+DQo8L3JhZGlhbEdyYWRpZW50Pg0KPGVsbGlwc2UgZmlsbD0idXJsKCNTVkdJRF8xMV8pIiBzdHJva2U9IiMwMTAxMDEiIHN0cm9rZS13aWR0aD0iMC41ODkiIHN0cm9rZS1taXRlcmxpbWl0PSIxMCIgY3g9IjQwLjc0IiBjeT0iMTguMSIgcng9IjIuMjA4IiByeT0iMS44MzMiLz4NCjxyYWRpYWxHcmFkaWVudCBpZD0iU1ZHSURfMTJfIiBjeD0iMzMuMDU5MSIgY3k9IjE4LjEwMDEiIHI9IjEuODMzIiBncmFkaWVudFRyYW5zZm9ybT0ibWF0cml4KDEuMjA0NiAwIDAgMSA1LjMzMzkgMCkiIGdyYWRpZW50VW5pdHM9InVzZXJTcGFjZU9uVXNlIj4NCiAgPHN0b3AgIG9mZnNldD0iMC4wMDU2IiBzdHlsZT0ic3RvcC1jb2xvcjojQzVDNkM4Ii8+DQogIDxzdG9wICBvZmZzZXQ9IjAuMjk3OCIgc3R5bGU9InN0b3AtY29sb3I6I0JEQkVDMCIvPg0KICA8c3RvcCAgb2Zmc2V0PSIwLjY1NzMiIHN0eWxlPSJzdG9wLWNvbG9yOiNBOEFBQUQiLz4NCiAgPHN0b3AgIG9mZnNldD0iMC45OTY5IiBzdHlsZT0ic3RvcC1jb2xvcjojOUI5REEwIi8+DQogIDxzdG9wICBvZmZzZXQ9IjEiIHN0eWxlPSJzdG9wLWNvbG9yOiM5QjlEQTAiLz4NCjwvcmFkaWFsR3JhZGllbnQ+DQo8ZWxsaXBzZSBmaWxsPSJ1cmwoI1NWR0lEXzEyXykiIHN0cm9rZT0iIzAxMDEwMSIgc3Ryb2tlLXdpZHRoPSIwLjU4OSIgc3Ryb2tlLW1pdGVybGltaXQ9IjEwIiBjeD0iNDUuMTU3IiBjeT0iMTguMSIgcng9IjIuMjA4IiByeT0iMS44MzMiLz4NCjxyYWRpYWxHcmFkaWVudCBpZD0iU1ZHSURfMTNfIiBjeD0iMzYuNzI1MSIgY3k9IjE4LjEwMDEiIHI9IjEuODMzIiBncmFkaWVudFRyYW5zZm9ybT0ibWF0cml4KDEuMjA0NiAwIDAgMSA1LjMzMzkgMCkiIGdyYWRpZW50VW5pdHM9InVzZXJTcGFjZU9uVXNlIj4NCiAgPHN0b3AgIG9mZnNldD0iMC4wMDU2IiBzdHlsZT0ic3RvcC1jb2xvcjojQzVDNkM4Ii8+DQogIDxzdG9wICBvZmZzZXQ9IjAuMjk3OCIgc3R5bGU9InN0b3AtY29sb3I6I0JEQkVDMCIvPg0KICA8c3RvcCAgb2Zmc2V0PSIwLjY1NzMiIHN0eWxlPSJzdG9wLWNvbG9yOiNBOEFBQUQiLz4NCiAgPHN0b3AgIG9mZnNldD0iMC45OTY5IiBzdHlsZT0ic3RvcC1jb2xvcjojOUI5REEwIi8+DQogIDxzdG9wICBvZmZzZXQ9IjEiIHN0eWxlPSJzdG9wLWNvbG9yOiM5QjlEQTAiLz4NCjwvcmFkaWFsR3JhZGllbnQ+DQo8ZWxsaXBzZSBmaWxsPSJ1cmwoI1NWR0lEXzEzXykiIHN0cm9rZT0iIzAxMDEwMSIgc3Ryb2tlLXdpZHRoPSIwLjU4OSIgc3Ryb2tlLW1pdGVybGltaXQ9IjEwIiBjeD0iNDkuNTc0IiBjeT0iMTguMSIgcng9IjIuMjA4IiByeT0iMS44MzMiLz4NCjxyYWRpYWxHcmFkaWVudCBpZD0iU1ZHSURfMTRfIiBjeD0iNDAuMzkyMSIgY3k9IjE4LjEwMDEiIHI9IjEuODMzIiBncmFkaWVudFRyYW5zZm9ybT0ibWF0cml4KDEuMjA0NiAwIDAgMSA1LjMzMzkgMCkiIGdyYWRpZW50VW5pdHM9InVzZXJTcGFjZU9uVXNlIj4NCiAgPHN0b3AgIG9mZnNldD0iMC4wMDU2IiBzdHlsZT0ic3RvcC1jb2xvcjojQzVDNkM4Ii8+DQogIDxzdG9wICBvZmZzZXQ9IjAuMjk3OCIgc3R5bGU9InN0b3AtY29sb3I6I0JEQkVDMCIvPg0KICA8c3RvcCAgb2Zmc2V0PSIwLjY1NzMiIHN0eWxlPSJzdG9wLWNvbG9yOiNBOEFBQUQiLz4NCiAgPHN0b3AgIG9mZnNldD0iMC45OTY5IiBzdHlsZT0ic3RvcC1jb2xvcjojOUI5REEwIi8+DQogIDxzdG9wICBvZmZzZXQ9IjEiIHN0eWxlPSJzdG9wLWNvbG9yOiM5QjlEQTAiLz4NCjwvcmFkaWFsR3JhZGllbnQ+DQo8ZWxsaXBzZSBmaWxsPSJ1cmwoI1NWR0lEXzE0XykiIHN0cm9rZT0iIzAxMDEwMSIgc3Ryb2tlLXdpZHRoPSIwLjU4OSIgc3Ryb2tlLW1pdGVybGltaXQ9IjEwIiBjeD0iNTMuOTkiIGN5PSIxOC4xIiByeD0iMi4yMDgiIHJ5PSIxLjgzMyIvPg0KPHJhZGlhbEdyYWRpZW50IGlkPSJTVkdJRF8xNV8iIGN4PSIzNS42OTg3IiBjeT0iMjIuNjQ5NCIgcj0iMjAuNzU4MiIgZ3JhZGllbnRVbml0cz0idXNlclNwYWNlT25Vc2UiPg0KICA8c3RvcCAgb2Zmc2V0PSIwLjAwNTYiIHN0eWxlPSJzdG9wLWNvbG9yOiNDNUM2QzgiLz4NCiAgPHN0b3AgIG9mZnNldD0iMC4yOTc4IiBzdHlsZT0ic3RvcC1jb2xvcjojQkRCRUMwIi8+DQogIDxzdG9wICBvZmZzZXQ9IjAuNjU3MyIgc3R5bGU9InN0b3AtY29sb3I6I0E4QUFBRCIvPg0KICA8c3RvcCAgb2Zmc2V0PSIwLjk5NjkiIHN0eWxlPSJzdG9wLWNvbG9yOiM5QjlEQTAiLz4NCiAgPHN0b3AgIG9mZnNldD0iMSIgc3R5bGU9InN0b3AtY29sb3I6IzlCOURBMCIvPg0KPC9yYWRpYWxHcmFkaWVudD4NCjxwYXRoIGZpbGw9InVybCgjU1ZHSURfMTVfKSIgc3Ryb2tlPSIjMDEwMTAxIiBzdHJva2UtbWl0ZXJsaW1pdD0iMTAiIGQ9Ik0xNS4xOTksNDMuNjYzdi0xNnYtN2MwLDAsMC02Ljk3OCwwLTcNCiAgYzAtOC4yOTEsOS4xNTgtMTIuMDc0LDE2LjE5Ny0xMi4wMjZDMzcuNzQsMS42OCw0NS4xMTUsMS4yMzYsNTAuMzYzLDUuNTJjNC4yNTgsMy40NzYsNS44MzYsNy4yNzEsNS44MzYsMTIuNjQzaC0yLjVoLTIuNWgtNGgtNA0KICBoLTMuNWgtNGgtMy41aC0yLjV2MjUuNUgxNS4xOTl6Ii8+DQo8L3N2Zz4=">
+
+  <script type="text/javascript">
+    var wrenchSVG = document.getElementById( 'wrench-svg' );
+    wrenchSVG.onload = function() {
+      var initialDiv = document.createElement( 'div' );
+      initialDiv.innerHTML = 'initial: ' + wrenchSVG.naturalWidth + 'x' + wrenchSVG.naturalHeight;
+      wrenchSVG.parentNode.insertBefore( initialDiv, wrenchSVG );
+      setTimeout( function() {
+        var delayedDiv = document.createElement( 'div' );
+        delayedDiv.innerHTML = 'delayed: ' + wrenchSVG.naturalWidth + 'x' + wrenchSVG.naturalHeight;
+        wrenchSVG.parentNode.insertBefore( delayedDiv, wrenchSVG );
+      }, 5000 );
+    };
+
+    var wrenchBase64 = document.getElementById( 'wrench-base64' );
+    wrenchBase64.onload = function() {
+      var initialDiv = document.createElement( 'div' );
+      initialDiv.innerHTML = 'initial: ' + wrenchBase64.naturalWidth + 'x' + wrenchBase64.naturalHeight;
+      wrenchBase64.parentNode.insertBefore( initialDiv, wrenchBase64 );
+      setTimeout( function() {
+        var delayedDiv = document.createElement( 'div' );
+        delayedDiv.innerHTML = 'delayed: ' + wrenchBase64.naturalWidth + 'x' + wrenchBase64.naturalHeight;
+        wrenchBase64.parentNode.insertBefore( delayedDiv, wrenchBase64 );
+      }, 5000 );
+    };
+
+    var contextSVGURL = document.getElementById( 'canvas-svg-url' ).getContext( '2d' );
+    var contextBase64URL = document.getElementById( 'canvas-base64-url' ).getContext( '2d' );
+    var contextUTF8URL = document.getElementById( 'canvas-utf8-url' ).getContext( '2d' );
+    var contextReadSVGURL = document.getElementById( 'canvas-read-svg-url' ).getContext( '2d' );
+    var contextReadBase64URL = document.getElementById( 'canvas-read-base64-url' ).getContext( '2d' );
+    var contextReadUTF8URL = document.getElementById( 'canvas-read-utf8-url' ).getContext( '2d' );
+
+    // images should be loaded when we run
+    window.onload = function() {
+      try {
+        contextSVGURL.drawImage( document.getElementById( 'img-svg-url' ), 0, 0 );
+      }
+      catch ( e ) {}
+
+      try {
+        contextBase64URL.drawImage( document.getElementById( 'img-base64-url' ), 0, 0 );
+      }
+      catch ( e ) {}
+
+      try {
+        contextUTF8URL.drawImage( document.getElementById( 'img-utf8-url' ), 0, 0 );
+      }
+      catch ( e ) {}
+
+
+      try {
+        document.getElementById( 'img-canvas-read-svg-url' ).src = document.getElementById( 'canvas-svg-url' ).toDataURL();
+      }
+      catch ( e ) {}
+
+      try {
+        document.getElementById( 'img-canvas-read-base64-url' ).src = document.getElementById( 'canvas-base64-url' ).toDataURL();
+      }
+      catch ( e ) {}
+
+      try {
+        document.getElementById( 'img-canvas-read-utf8-url' ).src = document.getElementById( 'canvas-utf8-url' ).toDataURL();
+      }
+      catch ( e ) {}
+
+
+      try {
+        var imageData = contextSVGURL.getImageData( 32, 0, 1, 1 );
+        contextReadSVGURL.fillStyle = 'rgb(' + imageData.data[0] + ',' + imageData.data[1] + ',' + imageData.data[2] + ')';
+        contextReadSVGURL.fillRect( 0, 0, 64, 64 );
+      }
+      catch ( e ) {}
+
+      try {
+        var imageData = contextBase64URL.getImageData( 32, 0, 1, 1 );
+        contextReadBase64URL.fillStyle = 'rgb(' + imageData.data[0] + ',' + imageData.data[1] + ',' + imageData.data[2] + ')';
+        contextReadBase64URL.fillRect( 0, 0, 64, 64 );
+      }
+      catch ( e ) {}
+
+      try {
+        var imageData = contextUTF8URL.getImageData( 32, 0, 1, 1 );
+        contextReadUTF8URL.fillStyle = 'rgb(' + imageData.data[0] + ',' + imageData.data[1] + ',' + imageData.data[2] + ')';
+        contextReadUTF8URL.fillRect( 0, 0, 64, 64 );
+      }
+      catch ( e ) {}
+    };
+  </script>
+
+  <div class="test">Should have black mark appear in IE</div>
+  <img src="shows-in-IE.svg">
+
+  <div class="test">Should have black mark appear in non-IE</div>
+  <img src="shows-in-others.svg">
+
+  <div class="test">Pattern test (sweater should have a pattern through the body, base and neckline)</div>
+  <img src="sweater.svg">
+
+  <div class="test">Canvg simple .svg URL</div>
+  <canvas id="canvg-svg-url"></canvas>
+
+  <div class="test">Canvg simple base64 URL</div>
+  <canvas id="canvg-base64-url"></canvas>
+
+  <div class="test">Canvg simple literal string</div>
+  <canvas id="canvg-string"></canvas>
+
+  <div class="test">Immediate data URL read &lt;img&gt; from Canvg simple .svg URL</div>
+  <img id="canvg-read-immediate-svg-url">
+
+  <div class="test">Immediate data URL read &lt;img&gt; from Canvg simple base64 URL</div>
+  <img id="canvg-read-immediate-base64-url">
+
+  <div class="test">Immediate data URL read &lt;img&gt; from Canvg simple literal string</div>
+  <img id="canvg-read-immediate-string">
+
+  <div class="test">Callback data URL read &lt;img&gt; from Canvg simple .svg URL</div>
+  <img id="canvg-read-callback-svg-url">
+
+  <div class="test">Callback data URL read &lt;img&gt; from Canvg simple base64 URL</div>
+  <img id="canvg-read-callback-base64-url">
+
+  <div class="test">Callback data URL read &lt;img&gt; from Canvg simple literal string</div>
+  <img id="canvg-read-callback-string">
+
+  <script type="text/javascript">
+    try {
+      canvg( document.getElementById( 'canvg-svg-url' ), 'simple-gradient.svg', {
+        ignoreMouse: true,
+        ignoreAnimation: true,
+        useCORS: true,
+        renderCallback: function() {
+          document.getElementById( 'canvg-read-callback-svg-url' ).src = document.getElementById( 'canvg-svg-url' ).toDataURL();
+        }
+      } );
+    } catch ( e ) {}
+    try {
+      canvg( document.getElementById( 'canvg-base64-url' ), 'data:image/svg+xml;base64,PHN2ZyB4bWxucz0naHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmcnIHdpZHRoPSc2NCcgaGVpZ2h0PSc2NCc+PGxpbmVhckdyYWRpZW50IGlkPSdncmFkaWVudCc+PHN0b3Agb2Zmc2V0PScwJScgc3RvcC1jb2xvcj0nI0YwMCcvPjxzdG9wIG9mZnNldD0nMTAwJScgc3RvcC1jb2xvcj0nIzAwRicvPjwvbGluZWFyR3JhZGllbnQ+PHJlY3QgZmlsbD0ndXJsKCNncmFkaWVudCknIHg9JzAnIHk9JzAnIHdpZHRoPSc2NCcgaGVpZ2h0PSc2NCcvPjwvc3ZnPg==', {
+        ignoreMouse: true,
+        ignoreAnimation: true,
+        useCORS: true,
+        renderCallback: function() {
+          document.getElementById( 'canvg-read-callback-base64-url' ).src = document.getElementById( 'canvg-base64-url' ).toDataURL();
+        }
+      } );
+    } catch ( e ) {}
+    try {
+      canvg( document.getElementById( 'canvg-string' ), "<svg xmlns='http://www.w3.org/2000/svg' width='64' height='64'><linearGradient id='gradient'><stop offset='0%' stop-color='#F00'/><stop offset='100%' stop-color='#00F'/></linearGradient><rect fill='url(#gradient)' x='0' y='0' width='64' height='64'/></svg>", {
+        ignoreMouse: true,
+        ignoreAnimation: true,
+        useCORS: true,
+        renderCallback: function() {
+          document.getElementById( 'canvg-read-callback-string' ).src = document.getElementById( 'canvg-string' ).toDataURL();
+        }
+      } );
+    } catch ( e ) {}
+
+    try {
+      document.getElementById( 'canvg-read-immediate-svg-url' ).src = document.getElementById( 'canvg-svg-url' ).toDataURL();
+    } catch ( e ) {}
+    try {
+      document.getElementById( 'canvg-read-immediate-base64-url' ).src = document.getElementById( 'canvg-base64-url' ).toDataURL();
+    } catch ( e ) {}
+    try {
+      document.getElementById( 'canvg-read-immediate-string' ).src = document.getElementById( 'canvg-string' ).toDataURL();
+    } catch ( e ) {}
+  </script>
+
+  <div class="test">Canvg wrench</div>
+  <canvas id="canvg-wrench"></canvas>
+
+  <div class="test">Canvg immediate read wrench</div>
+  <img id="canvg-immediate-wrench">
+
+  <div class="test">Canvg sweater</div>
+  <canvas id="canvg-sweater"></canvas>
+
+  <div class="test">Canvg immediate read sweater</div>
+  <img id="canvg-immediate-sweater">
+
+  <div class="test">Canvg pattern-IE</div>
+  <canvas id="canvg-pattern-IE"></canvas>
+
+  <div class="test">Canvg immediate read pattern-IE</div>
+  <img id="canvg-immediate-pattern-IE">
+
+  <div class="test">Canvg pattern-other</div>
+  <canvas id="canvg-pattern-other"></canvas>
+
+  <div class="test">Canvg immediate read pattern-other</div>
+  <img id="canvg-immediate-pattern-other">
+
+  <div class="test">Canvg head</div>
+  <canvas id="canvg-head"></canvas>
+
+  <div class="test">Canvg immediate read head</div>
+  <img id="canvg-immediate-head">
+
+  <script type="text/javascript">
+    (function(){
+      var a, b;
+      var keys = [ 'wrench', 'sweater', 'pattern-IE', 'pattern-other', 'head' ];
+      var urls = {
+        wrench: 'wrench.svg',
+        sweater: 'sweater.svg',
+        'pattern-IE': 'shows-in-IE.svg',
+        'pattern-other': 'shows-in-others.svg',
+        'head': '../../../color-vision/images/head.svg'
+      }
+      keys.forEach( function( key ) {
+        var url = urls[key];
+        try {
+          a = Date.now();
+          canvg( document.getElementById( 'canvg-' + key ), url, {
+            ignoreMouse: true,
+            ignoreAnimation: true,
+            useCORS: true
+          } );
+          b = Date.now();
+          console.log( key + ': ' + ( b - a ) );
+        } catch ( e ) {}
+        try {
+          document.getElementById( 'canvg-immediate-' + key ).src = document.getElementById( 'canvg-' + key ).toDataURL();
+        } catch ( e ) {}
+      } );
+    })();
+  </script>
+</div>
+</body>
+</html>

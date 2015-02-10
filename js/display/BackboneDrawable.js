@@ -126,6 +126,7 @@ define( function( require ) {
 
     dispose: function() {
       sceneryLog && sceneryLog.BackboneDrawable && sceneryLog.BackboneDrawable( 'dispose ' + this.toString() );
+      sceneryLog && sceneryLog.BackboneDrawable && sceneryLog.push();
 
       while ( this.watchedFilterNodes.length ) {
         var node = this.watchedFilterNodes.pop();
@@ -161,6 +162,8 @@ define( function( require ) {
       this.previousLastDrawable = null;
 
       Drawable.prototype.dispose.call( this );
+
+      sceneryLog && sceneryLog.BackboneDrawable && sceneryLog.pop();
     },
 
     // dispose all of the blocks while clearing our references to them

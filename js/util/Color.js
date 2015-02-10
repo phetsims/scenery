@@ -181,6 +181,8 @@ define( function( require ) {
      * - set( hex, alpha ) will set RGBA, e.g. set( 0xFF0000, 1 )
      */
     set: function( r, g, b, a ) {
+      assert && assert( r !== undefined, 'Can\'t call Color.set( undefined )' );
+
       // support for set( string )
       if ( typeof r === 'string' ) {
         this.setCSS( r );
@@ -513,6 +515,7 @@ define( function( require ) {
     darkgoldenrod: 'b8860b',
     darkgray: 'a9a9a9',
     darkgreen: '006400',
+    darkgrey: 'a9a9a9',
     darkkhaki: 'bdb76b',
     darkmagenta: '8b008b',
     darkolivegreen: '556b2f',
@@ -523,13 +526,14 @@ define( function( require ) {
     darkseagreen: '8fbc8f',
     darkslateblue: '483d8b',
     darkslategray: '2f4f4f',
+    darkslategrey: '2f4f4f',
     darkturquoise: '00ced1',
     darkviolet: '9400d3',
     deeppink: 'ff1493',
     deepskyblue: '00bfff',
     dimgray: '696969',
+    dimgrey: '696969',
     dodgerblue: '1e90ff',
-    feldspar: 'd19275',
     firebrick: 'b22222',
     floralwhite: 'fffaf0',
     forestgreen: '228b22',
@@ -541,6 +545,7 @@ define( function( require ) {
     gray: '808080',
     green: '008000',
     greenyellow: 'adff2f',
+    grey: '808080',
     honeydew: 'f0fff0',
     hotpink: 'ff69b4',
     indianred: 'cd5c5c',
@@ -555,14 +560,15 @@ define( function( require ) {
     lightcoral: 'f08080',
     lightcyan: 'e0ffff',
     lightgoldenrodyellow: 'fafad2',
-    lightgrey: 'd3d3d3',
+    lightgray: 'd3d3d3',
     lightgreen: '90ee90',
+    lightgrey: 'd3d3d3',
     lightpink: 'ffb6c1',
     lightsalmon: 'ffa07a',
     lightseagreen: '20b2aa',
     lightskyblue: '87cefa',
-    lightslateblue: '8470ff',
     lightslategray: '778899',
+    lightslategrey: '778899',
     lightsteelblue: 'b0c4de',
     lightyellow: 'ffffe0',
     lime: '00ff00',
@@ -573,7 +579,7 @@ define( function( require ) {
     mediumaquamarine: '66cdaa',
     mediumblue: '0000cd',
     mediumorchid: 'ba55d3',
-    mediumpurple: '9370d8',
+    mediumpurple: '9370db',
     mediumseagreen: '3cb371',
     mediumslateblue: '7b68ee',
     mediumspringgreen: '00fa9a',
@@ -594,7 +600,7 @@ define( function( require ) {
     palegoldenrod: 'eee8aa',
     palegreen: '98fb98',
     paleturquoise: 'afeeee',
-    palevioletred: 'd87093',
+    palevioletred: 'db7093',
     papayawhip: 'ffefd5',
     peachpuff: 'ffdab9',
     peru: 'cd853f',
@@ -615,6 +621,7 @@ define( function( require ) {
     skyblue: '87ceeb',
     slateblue: '6a5acd',
     slategray: '708090',
+    slategrey: '708090',
     snow: 'fffafa',
     springgreen: '00ff7f',
     steelblue: '4682b4',
@@ -624,7 +631,6 @@ define( function( require ) {
     tomato: 'ff6347',
     turquoise: '40e0d0',
     violet: 'ee82ee',
-    violetred: 'd02090',
     wheat: 'f5deb3',
     white: 'ffffff',
     whitesmoke: 'f5f5f5',
@@ -633,19 +639,19 @@ define( function( require ) {
   };
 
   // Java compatibility
-  Color.BLACK = new Color( 0, 0, 0 ).setImmutable();
-  Color.BLUE = new Color( 0, 0, 255 ).setImmutable();
-  Color.CYAN = new Color( 0, 255, 255 ).setImmutable();
-  Color.DARK_GRAY = new Color( 64, 64, 64 ).setImmutable();
-  Color.GRAY = new Color( 128, 128, 128 ).setImmutable();
-  Color.GREEN = new Color( 0, 255, 0 ).setImmutable();
-  Color.LIGHT_GRAY = new Color( 192, 192, 192 ).setImmutable();
-  Color.MAGENTA = new Color( 255, 0, 255 ).setImmutable();
-  Color.ORANGE = new Color( 255, 200, 0 ).setImmutable();
-  Color.PINK = new Color( 255, 175, 175 ).setImmutable();
-  Color.RED = new Color( 255, 0, 0 ).setImmutable();
-  Color.WHITE = new Color( 255, 255, 255 ).setImmutable();
-  Color.YELLOW = new Color( 255, 255, 0 ).setImmutable();
+  Color.BLACK = Color.black = new Color( 0, 0, 0 ).setImmutable();
+  Color.BLUE = Color.blue = new Color( 0, 0, 255 ).setImmutable();
+  Color.CYAN = Color.cyan = new Color( 0, 255, 255 ).setImmutable();
+  Color.DARK_GRAY = Color.darkGray = new Color( 64, 64, 64 ).setImmutable();
+  Color.GRAY = Color.gray = new Color( 128, 128, 128 ).setImmutable();
+  Color.GREEN = Color.green = new Color( 0, 255, 0 ).setImmutable();
+  Color.LIGHT_GRAY = Color.lightGray = new Color( 192, 192, 192 ).setImmutable();
+  Color.MAGENTA = Color.magenta = new Color( 255, 0, 255 ).setImmutable();
+  Color.ORANGE = Color.orange = new Color( 255, 200, 0 ).setImmutable();
+  Color.PINK = Color.pink = new Color( 255, 175, 175 ).setImmutable();
+  Color.RED = Color.red = new Color( 255, 0, 0 ).setImmutable();
+  Color.WHITE = Color.white = new Color( 255, 255, 255 ).setImmutable();
+  Color.YELLOW = Color.yellow = new Color( 255, 255, 0 ).setImmutable();
 
   /**
    * Interpolates between 2 colors in RGBA space. When distance is 0, color1

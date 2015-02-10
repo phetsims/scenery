@@ -63,12 +63,15 @@ define( function( require ) {
     gl.enable( this.gl.BLEND );
 
     this.spriteSheetCollection = new SpriteSheetCollection();
+
     // TODO: Compare this same idea to triangle strips
     //Each textureBufferData manages the indices within a single array, so that disjoint geometries can be represented easily here.
     this.textureBufferDataArray = [];
+
     // Create a buffer for the position of the rectangle corners.
     this.vertexBufferArray = [];
     this.textureArray = [];
+
     // List of Vertex Array to Keep for updating sublist
     this.vertexArrayList = [];
   }
@@ -76,15 +79,21 @@ define( function( require ) {
   return inherit( Object, TextureRenderer, {
     createFromImageNode: function( imageNode, z ) {
       var frameRange = this.spriteSheetCollection.addImage( imageNode.image );
+
+      // If there is no textureBuffer/VertexBuffer/textures entry for this SpriteSheet so create one
       if ( !this.textureBufferDataArray[ frameRange.spriteSheetIndex ] ) {
-        // if there is no textureBuffer,VertextBuffer,textures entry  for this SpriteSheet so create one
+
         this.textureBufferDataArray[ frameRange.spriteSheetIndex ] = new TextureBufferData();
         this.vertexBufferArray[ frameRange.spriteSheetIndex ] = this.gl.createBuffer();
         this.textureArray[ frameRange.spriteSheetIndex ] = this.gl.createTexture();
       }
       var textureBufferData = this.textureBufferDataArray[ frameRange.spriteSheetIndex ];
       return textureBufferData.createFromImage( 0, 0, z,
-        imageNode._image.width, imageNode._image.height, imageNode.image, imageNode.getLocalToGlobalMatrix().toMatrix4(), frameRange );
+        imageNode._image.width,
+        imageNode._image.height,
+        imageNode.image,
+        imageNode.getLocalToGlobalMatrix().toMatrix4(),
+        frameRange );
     },
 
     draw: function() {
@@ -98,6 +107,8 @@ define( function( require ) {
      */
     doDraw: function( activeTextureIndex ) {
       var gl = this.gl;
+
+      //TODO: If no vertices, bail out!
 
       gl.useProgram( this.colorShaderProgram );
       gl.enableVertexAttribArray( this.positionLocation );

@@ -35,8 +35,9 @@ define( function( require ) {
   var CanvasSelfDrawable = require( 'SCENERY/display/CanvasSelfDrawable' );
   var SelfDrawable = require( 'SCENERY/display/SelfDrawable' );
   var WebGLSelfDrawable = require( 'SCENERY/display/WebGLSelfDrawable' );
-  var WebGLBlock = require( 'SCENERY/display/WebGLBlock' );
-  var Util = require( 'SCENERY/util/Util' );
+  var PixiSelfDrawable = require( 'SCENERY/display/PixiSelfDrawable' );
+  var SquareUnstrokedRectangle = require( 'SCENERY/display/webgl/SquareUnstrokedRectangle' );
+  var Color = require( 'SCENERY/util/Color' );
 
   // TODO: change this based on memory and performance characteristics of the platform
   var keepDOMTextElements = true; // whether we should pool DOM elements for the DOM rendering states, or whether we should free them when possible for memory
@@ -160,6 +161,7 @@ define( function( require ) {
       // fill and stroke will determine whether we have DOM text support
       bitmask |= scenery.bitmaskSupportsDOM;
       bitmask |= scenery.bitmaskSupportsWebGL;
+      bitmask |= scenery.bitmaskSupportsPixi;
 
       return bitmask;
     },
@@ -237,6 +239,10 @@ define( function( require ) {
 
     createWebGLDrawable: function( renderer, instance ) {
       return Text.TextWebGLDrawable.createFromPool( renderer, instance );
+    },
+
+    createPixiDrawable: function( renderer, instance ) {
+      return Text.TextPixiDrawable.createFromPool( renderer, instance );
     },
 
     // a DOM node (not a Scenery DOM node, but an actual DOM node) with the text
@@ -492,7 +498,10 @@ define( function( require ) {
       return this;
     };
 
-    Object.defineProperty( Text.prototype, propertyName, { set: Text.prototype[ setterName ], get: Text.prototype[ getterName ] } );
+    Object.defineProperty( Text.prototype, propertyName, {
+      set: Text.prototype[ setterName ],
+      get: Text.prototype[ getterName ]
+    } );
   }
 
   addFontForwarding( 'fontWeight', 'FontWeight', 'weight' );
@@ -509,8 +518,14 @@ define( function( require ) {
   // font-specific ES5 setters and getters are defined using addFontForwarding above
   Object.defineProperty( Text.prototype, 'font', { set: Text.prototype.setFont, get: Text.prototype.getFont } );
   Object.defineProperty( Text.prototype, 'text', { set: Text.prototype.setText, get: Text.prototype.getText } );
-  Object.defineProperty( Text.prototype, 'direction', { set: Text.prototype.setDirection, get: Text.prototype.getDirection } );
-  Object.defineProperty( Text.prototype, 'boundsMethod', { set: Text.prototype.setBoundsMethod, get: Text.prototype.getBoundsMethod } );
+  Object.defineProperty( Text.prototype, 'direction', {
+    set: Text.prototype.setDirection,
+    get: Text.prototype.getDirection
+  } );
+  Object.defineProperty( Text.prototype, 'boundsMethod', {
+    set: Text.prototype.setBoundsMethod,
+    get: Text.prototype.getBoundsMethod
+  } );
 
   // mix in support for fills and strokes
   Paintable.mixin( Text );
@@ -786,7 +801,6 @@ define( function( require ) {
   hybridTextNode = new Text( 'm', { boundsMethod: 'fast' } );
   initializingHybridTextNode = false;
 
-
   /*---------------------------------------------------------------------------*
    * WebGL rendering
    *----------------------------------------------------------------------------*/
@@ -794,165 +808,57 @@ define( function( require ) {
   Text.TextWebGLDrawable = inherit( WebGLSelfDrawable, function TextWebGLDrawable( renderer, instance ) {
     this.initialize( renderer, instance );
   }, {
-    // called from the constructor OR from pooling
+    // called either from the constructor or from pooling
     initialize: function( renderer, instance ) {
       this.initializeWebGLSelfDrawable( renderer, instance );
-
-      //Small triangle strip that creates a square, which will be transformed into the right rectangle shape
-      this.vertexCoordinates = this.vertexCoordinates || new Float32Array( 8 );
-
-      this.textureCoordinates = this.textureCoordinates || new Float32Array( [
-        0, 0,
-        1, 0,
-        0, 1,
-        1, 1
-      ] );
     },
 
-    initializeContext: function( gl ) {
-      assert && assert( gl );
+    initializeContext: function( webglBlock ) {
+      this.webglBlock = webglBlock;
+      this.rectangleHandle = new SquareUnstrokedRectangle( webglBlock.webGLRenderer.colorTriangleRenderer, this.node, 0.5 );
 
-      this.gl = gl;
-
-      // cleanup old buffer, if applicable
+      // cleanup old vertexBuffer, if applicable
       this.disposeWebGLBuffers();
 
-      // holds vertex coordinates
-      this.vertexBuffer = gl.createBuffer();
+      this.initializePaintableState();
+      this.updateText();
 
-      // holds texture U,V coordinate pairs pointing into our texture coordinate space
-      this.textureBuffer = gl.createBuffer();
-
-      this.updateImage();
-    },
-
-    transformVertexCoordinateX: function( x ) {
-      return x * this.canvasWidth;
-    },
-
-    transformVertexCoordinateY: function( y ) {
-      return ( 1 - y ) * this.canvasHeight + this.dim.minY;
+      //TODO: Update the state in the buffer arrays
     },
 
     //Nothing necessary since everything currently handled in the uModelViewMatrix below
     //However, we may switch to dynamic draw, and handle the matrix change only where necessary in the future?
-    updateImage: function() {
-      var gl = this.gl;
+    updateText: function() {
 
-      if ( this.texture !== null ) {
-        gl.deleteTexture( this.texture );
-      }
+      // TODO: a way to update the ColorTriangleBufferData.
 
-      if ( this.node._text ) {
-        // TODO: only create once instance of this Canvas for reuse
-        var canvas = document.createElement( 'canvas' );
-        var context = canvas.getContext( '2d' );
-
-        var dim = this.node.approximateSVGBounds();
-
-        this.dim = dim;
-        this.canvasWidth = canvas.width = Util.toPowerOf2( dim.width );
-        this.canvasHeight = canvas.height = Util.toPowerOf2( dim.height );
-
-        // For debugging, show the bounds of the canvas
-//        context.fillStyle = 'rgba(0,0,0,0.5)';
-//        context.fillRect( 0, 0, this.canvasWidth, this.canvasHeight );
-
-        context.fillStyle = 'black';
-        context.fillText( this.node._text, 0, -dim.minY );
-
-        var texture = this.texture = gl.createTexture();
-        gl.bindTexture( gl.TEXTURE_2D, texture );
-        gl.texParameteri( gl.TEXTURE_2D, gl.TEXTURE_WRAP_S, gl.CLAMP_TO_EDGE );
-        gl.texParameteri( gl.TEXTURE_2D, gl.TEXTURE_WRAP_T, gl.CLAMP_TO_EDGE );
-
-        gl.pixelStorei( gl.UNPACK_FLIP_Y_WEBGL, true );
-        gl.texImage2D( gl.TEXTURE_2D, 0, gl.RGBA, gl.RGBA, gl.UNSIGNED_BYTE, canvas );
-
-        // Texture filtering, see http://learningwebgl.com/blog/?p=571
-        gl.texParameteri( gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, gl.LINEAR );
-        gl.texParameteri( gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.LINEAR_MIPMAP_NEAREST );
-        gl.generateMipmap( gl.TEXTURE_2D );
-
-        gl.bindTexture( gl.TEXTURE_2D, null );
-
-        this.vertexCoordinates[ 0 ] = this.transformVertexCoordinateX( 0 );
-        this.vertexCoordinates[ 1 ] = this.transformVertexCoordinateY( 0 );
-
-        this.vertexCoordinates[ 2 ] = this.transformVertexCoordinateX( 1 );
-        this.vertexCoordinates[ 3 ] = this.transformVertexCoordinateY( 0 );
-
-        this.vertexCoordinates[ 4 ] = this.transformVertexCoordinateX( 0 );
-        this.vertexCoordinates[ 5 ] = this.transformVertexCoordinateY( 1 );
-
-        this.vertexCoordinates[ 6 ] = this.transformVertexCoordinateX( 1 );
-        this.vertexCoordinates[ 7 ] = this.transformVertexCoordinateY( 1 );
-
-        gl.bindBuffer( gl.ARRAY_BUFFER, this.vertexBuffer );
-
-        //TODO: Once we are lazily handling the full matrix, we may benefit from DYNAMIC draw here, and updating the vertices themselves
-        gl.bufferData( gl.ARRAY_BUFFER, this.vertexCoordinates, gl.STATIC_DRAW );
-
-        gl.bindBuffer( gl.ARRAY_BUFFER, this.textureBuffer );
-        gl.bufferData( gl.ARRAY_BUFFER, this.textureCoordinates, gl.STATIC_DRAW );
+      // TODO: move to PaintableWebGLState???
+      if ( this.dirtyFill ) {
+        this.color = Color.toColor( 'red' );
+        this.cleanPaintableState();
       }
     },
 
     render: function( shaderProgram ) {
-      if ( this.node._text ) {
-        var gl = this.gl;
-
-        //TODO: what if image is null?
-
-        //OHTWO TODO: optimize
-        //TODO: This looks like an expense we don't want to incur at every render.  How about moving it to the GPU?
-        var viewMatrix = this.instance.relativeTransform.matrix.toAffineMatrix4();
-
-        // combine image matrix (to scale aspect ratios), the trail's matrix, and the matrix to device coordinates
-        gl.uniformMatrix4fv( shaderProgram.uniformLocations.uModelViewMatrix, false, viewMatrix.entries );
-
-        gl.uniform1i( shaderProgram.uniformLocations.uTexture, 0 ); // TEXTURE0 slot
-
-        //Indicate the branch of logic to use in the ubershader.  In this case, a texture should be used for the image
-        gl.uniform1i( shaderProgram.uniformLocations.uFragmentType, WebGLBlock.fragmentTypeTexture );
-
-        gl.activeTexture( gl.TEXTURE0 );
-        gl.bindTexture( gl.TEXTURE_2D, this.texture );
-
-        gl.bindBuffer( gl.ARRAY_BUFFER, this.vertexBuffer );
-        gl.vertexAttribPointer( shaderProgram.attributeLocations.aVertex, 2, gl.FLOAT, false, 0, 0 );
-
-        gl.bindBuffer( gl.ARRAY_BUFFER, this.textureBuffer );
-        gl.vertexAttribPointer( shaderProgram.attributeLocations.aTexCoord, 2, gl.FLOAT, false, 0, 0 );
-
-        gl.drawArrays( gl.TRIANGLE_STRIP, 0, 4 );
-      }
+      // This is handled by the ColorTriangleRenderer
     },
 
-    shaderAttributes: [
-      'aVertex',
-      'aTexCoord'
-    ],
-
     dispose: function() {
-      // we may have been disposed without initializeContext being called (never attached to a block)
-      if ( this.gl ) {
-        this.disposeWebGLBuffers();
-        this.gl = null;
-      }
+      this.disposeWebGLBuffers();
 
       // super
       WebGLSelfDrawable.prototype.dispose.call( this );
-
     },
 
     disposeWebGLBuffers: function() {
-      this.gl.deleteBuffer( this.vertexBuffer );
-      this.gl.deleteBuffer( this.textureBuffer );
-      this.gl.deleteTexture( this.texture );
+      this.webglBlock.webGLRenderer.colorTriangleRenderer.colorTriangleBufferData.dispose( this.rectangleHandle );
     },
 
-    markDirtyRectangle: function() {
+    markDirtyText: function() {
+      this.markDirty();
+    },
+
+    markDirtyBounds: function() {
       this.markDirty();
     },
 
@@ -970,21 +876,55 @@ define( function( require ) {
       //OHTWO TODO: are we missing the disposal?
     },
 
+    //TODO: Make sure all of the dirty flags make sense here.  Should we be using fillDirty, paintDirty, dirty, etc?
     update: function() {
-      if ( this.dirtyText || this.dirtyFont || this.dirtyBounds || this.dirtyDirection ) {
-        this.updateImage();
-
-        this.setToCleanState();
+      if ( this.dirty ) {
+        this.updateText();
+        this.dirty = false;
       }
-
-      this.dirty = false;
     }
   } );
+
+  // include stubs (stateless) for marking dirty stroke and fill (if necessary). we only want one dirty flag, not multiple ones, for WebGL (for now)
+  Paintable.PaintableStatefulDrawable.mixin( Text.TextWebGLDrawable );
 
   // set up pooling
   SelfDrawable.Poolable.mixin( Text.TextWebGLDrawable );
 
-  Text.TextStatefulDrawable.mixin( Text.TextWebGLDrawable );
+  /*---------------------------------------------------------------------------*
+   * Pixi rendering
+   *----------------------------------------------------------------------------*/
+
+  Text.TextPixiDrawable = PixiSelfDrawable.createDrawable( {
+    type: function TextPixiDrawable( renderer, instance ) { this.initialize( renderer, instance ); },
+    stateType: Text.TextStatefulDrawable.mixin,
+    initialize: function( renderer, instance ) {
+      if ( !this.displayObject ) {
+        this.displayObject = new PIXI.Text( '' );
+      }
+    },
+    updatePixi: function( node, text ) {
+
+      // set all of the font attributes, since we can't use the combined one
+      if ( this.dirtyFont ) {
+        text.setStyle( { font: node.font, fill: node.getFillColor().toCSS() } );
+        this.displayObject.position.y = -this.displayObject.height / 2;
+      }
+
+      // update the text-node's value
+      if ( this.dirtyText ) {
+        this.displayObject.setText( node.getNonBreakingText() );
+      }
+
+      // text length correction, tested with scenery/tests/text-quality-test.html to determine how to match Canvas/Pixi rendering (and overall length)
+      if ( this.dirtyBounds && isFinite( node._selfBounds.width ) ) {
+      }
+
+      this.updateFillStrokeStyle( text );
+    },
+    usesPaint: true,
+    keepElements: keepSVGTextElements
+  } );
 
   return Text;
 } );

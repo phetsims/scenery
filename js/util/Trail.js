@@ -154,7 +154,7 @@ define( function( require ) {
 
     // from local to global
     getMatrix: function() {
-      // TODO: performance: can we cache this ever? would need the scene to not really change in between
+      // TODO: performance: can we cache this ever? would need the rootNode to not really change in between
       // this matrix will be modified in place, so always start fresh
       var matrix = Matrix3.identity();
 
@@ -607,18 +607,18 @@ define( function( require ) {
   } );
 
   // like eachTrailBetween, but only fires for painted trails. If callback returns true, subtree will be skipped
-  Trail.eachPaintedTrailBetween = function( a, b, callback, excludeEndTrails, scene ) {
+  Trail.eachPaintedTrailBetween = function( a, b, callback, excludeEndTrails, rootNode ) {
     Trail.eachTrailBetween( a, b, function( trail ) {
       if ( trail && trail.isPainted() ) {
         return callback( trail );
       }
-    }, excludeEndTrails, scene );
+    }, excludeEndTrails, rootNode );
   };
 
   // global way of iterating across trails. when callback returns true, subtree will be skipped
-  Trail.eachTrailBetween = function( a, b, callback, excludeEndTrails, scene ) {
-    var aPointer = a ? new scenery.TrailPointer( a.copy(), true ) : new scenery.TrailPointer( new scenery.Trail( scene ), true );
-    var bPointer = b ? new scenery.TrailPointer( b.copy(), true ) : new scenery.TrailPointer( new scenery.Trail( scene ), false );
+  Trail.eachTrailBetween = function( a, b, callback, excludeEndTrails, rootNode ) {
+    var aPointer = a ? new scenery.TrailPointer( a.copy(), true ) : new scenery.TrailPointer( new scenery.Trail( rootNode ), true );
+    var bPointer = b ? new scenery.TrailPointer( b.copy(), true ) : new scenery.TrailPointer( new scenery.Trail( rootNode ), false );
 
     // if we are excluding endpoints, just bump the pointers towards each other by one step
     if ( excludeEndTrails ) {

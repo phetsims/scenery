@@ -75,8 +75,8 @@ define( function( require ) {
       this.node.onStatic( 'childInserted', this.orderDirtyListener );
       this.node.onStatic( 'childRemoved', this.orderDirtyListener );
 
-      if ( !this.pixiDisplayObject ) {
-        this.pixiDisplayObject = document.createElementNS( scenery.svgns, 'g' );
+      if ( !this.displayObject ) {
+        this.displayObject = new PIXI.DisplayObjectContainer();
       }
 
       this.instance.addPixiDisplayObject( this );
@@ -88,13 +88,14 @@ define( function( require ) {
 
     addSelfDrawable: function( drawable ) {
       this.selfDrawable = drawable;
-      this.pixiDisplayObject.insertBefore( drawable.pixiDisplayObject, this.children.length ? this.children[ 0 ].pixiDisplayObject : null );
+      var index = this.children.length ? this.displayObject.getChildIndex( this.children[ 0 ].displayObject ) : 0;
+      this.displayObject.addChildAt( drawable.displayObject, index );
       this.hasSelfDrawable = true;
     },
 
     removeSelfDrawable: function( drawable ) {
       this.hasSelfDrawable = false;
-      this.pixiDisplayObject.removeChild( drawable.pixiDisplayObject );
+      this.displayObject.removeChild( drawable.displayObject );
       this.selfDrawable = null;
     },
 
@@ -103,7 +104,7 @@ define( function( require ) {
 
       group.parent = this;
       this.children.push( group );
-      this.pixiDisplayObject.appendChild( group.pixiDisplayObject );
+      this.displayObject.addChild( group.displayObject );
     },
 
     removeChildGroup: function( group ) {
@@ -111,7 +112,7 @@ define( function( require ) {
 
       group.parent = null;
       this.children.splice( _.indexOf( this.children, group ), 1 );
-      this.pixiDisplayObject.removeChild( group.PixiDisplayObject );
+      this.displayObject.removeChild( group.PixiDisplayObject );
     },
 
     markDirty: function() {
@@ -171,7 +172,7 @@ define( function( require ) {
 
       sceneryLog && sceneryLog.PixiDisplayObject && sceneryLog.push();
 
-      var PixiDisplayObject = this.pixiDisplayObject;
+      var pixiDisplayObject = this.displayObject;
 
       this.dirty = false;
 
@@ -186,18 +187,28 @@ define( function( require ) {
 
           if ( !isIdentity ) {
             this.hasTransform = true;
-            PixiDisplayObject.setAttribute( 'transform', this.node.transform.getMatrix().getSVGTransform() );
+            var matrix = this.node.transform.getMatrix();
+            pixiDisplayObject.position.x = matrix.m02();
+            pixiDisplayObject.position.y = matrix.m12();
+            pixiDisplayObject.rotation = matrix.rotation;
+            pixiDisplayObject.scale = new PIXI.Point( matrix.getScaleVector().x, matrix.getScaleVector().y );//Math.abs(matrix.getScaleVector().x)+0.5;//TODO: y???
           }
           else if ( this.hasTransform ) {
             this.hasTransform = false;
-            PixiDisplayObject.removeAttribute( 'transform' );
+            pixiDisplayObject.position.x = 0;
+            pixiDisplayObject.position.y = 0;
+            pixiDisplayObject.rotation = 0;
+            pixiDisplayObject.scale = new PIXI.Point( 1, 1 );
           }
         }
         else {
           // we want no transforms if we won't be applying transforms
           if ( this.hasTransform ) {
             this.hasTransform = false;
-            PixiDisplayObject.removeAttribute( 'transform' );
+            pixiDisplayObject.position.x = 0;
+            pixiDisplayObject.position.y = 0;
+            pixiDisplayObject.rotation = 0;
+            pixiDisplayObject.scale = new PIXI.Point( 1, 1 );
           }
         }
       }
@@ -207,7 +218,8 @@ define( function( require ) {
 
         sceneryLog && sceneryLog.PixiDisplayObject && sceneryLog.PixiDisplayObject( 'visibility update: ' + this.toString() );
 
-        PixiDisplayObject.style.display = ( this.willApplyFilters && !this.node.isVisible() ) ? 'none' : '';
+        var shouldBeInvisible = this.willApplyFilters && !this.node.isVisible();
+        pixiDisplayObject.visible = !shouldBeInvisible;
       }
 
 
@@ -218,11 +230,11 @@ define( function( require ) {
 
         if ( this.willApplyFilters && this.node.opacity !== 1 ) {
           this.hasOpacity = true;
-          PixiDisplayObject.setAttribute( 'opacity', this.node.opacity );
+          pixiDisplayObject.setAttribute( 'opacity', this.node.opacity );
         }
         else if ( this.hasOpacity ) {
           this.hasOpacity = false;
-          PixiDisplayObject.removeAttribute( 'opacity' );
+          pixiDisplayObject.removeAttribute( 'opacity' );
         }
       }
 
@@ -245,13 +257,13 @@ define( function( require ) {
             this.clipPath = document.createElementNS( scenery.svgns, 'path' );
             this.clipDefinition.appendChild( this.clipPath );
 
-            PixiDisplayObject.setAttribute( 'clip-path', 'url(#' + clipId + ')' );
+            pixiDisplayObject.setAttribute( 'clip-path', 'url(#' + clipId + ')' );
           }
 
           this.clipPath.setAttribute( 'd', this.node._clipArea.getSVGPath() );
         }
         else if ( this.clipDefinition ) {
-          PixiDisplayObject.removeAttribute( 'clip-path' );
+          pixiDisplayObject.removeAttribute( 'clip-path' );
           this.block.defs.removeChild( this.clipDefinition ); // TODO: method? evaluate with future usage of defs (not done yet)
 
           // TODO: consider pooling these?
@@ -280,7 +292,9 @@ define( function( require ) {
 
               // in the DOM first (since we reference the children array to know what to insertBefore)
               // see http://stackoverflow.com/questions/9732624/how-to-swap-dom-child-nodes-in-javascript
-              PixiDisplayObject.insertBefore( group.PixiDisplayObject, idx + 1 >= this.children.length ? null : this.children[ idx + 1 ].PixiDisplayObject );
+              var previousDisplayObject = idx + 1 >= this.children.length ? null : this.children[ idx + 1 ].displayObject;
+              var index = previousDisplayObject ? pixiDisplayObject.getChildIndex( previousDisplayObject ) : 0;
+              pixiDisplayObject.addChild( group.displayObject, index );
 
               // then in our children array
               var oldIndex = _.indexOf( this.children, group );
@@ -330,7 +344,7 @@ define( function( require ) {
 
       // remove clipping, since it is defs-based (and we want to keep our defs block clean - could be another layer!)
       if ( this.clipDefinition ) {
-        this.pixiDisplayObject.removeAttribute( 'clip-path' );
+        this.displayObject.removeAttribute( 'clip-path' );
         this.block.defs.removeChild( this.clipDefinition );
         this.clipDefinition = null;
         this.clipPath = null;

@@ -21,27 +21,30 @@ define( function( require ) {
    * @constructor
    */
   function LinesRenderer( gl, backingScale, canvas ) {
-    this.gl = gl;
-    this.canvas = canvas;
-
-    // Manages the indices within a single array, so that disjoint geometries can be represented easily here.
-    // TODO: Compare this same idea to triangle strips
-
-    this.lineShaderProgram = gl.createProgram();
-    gl.attachShader( this.lineShaderProgram, WebGLUtil.toShader( gl, lineVertexShader, gl.VERTEX_SHADER, 'VERTEX' ) );
-    gl.attachShader( this.lineShaderProgram, WebGLUtil.toShader( gl, lineFragmentShader, gl.FRAGMENT_SHADER, 'FRAGMENT' ) );
-    gl.linkProgram( this.lineShaderProgram );
-
-    this.positionAttribLocation = gl.getAttribLocation( this.lineShaderProgram, 'aPosition' );
-
-    gl.enableVertexAttribArray( this.positionAttribLocation );
-    gl.useProgram( this.lineShaderProgram );
-
-    this.vertexBuffer = gl.createBuffer();
-    this.bindVertexBuffer();
   }
 
   return inherit( Object, LinesRenderer, {
+    //webGLRenderer.gl, webGLRenderer.backingScale, webGLRenderer.canvas 
+    init: function( gl, backingScale, canvas ) {
+      this.gl = gl;
+      this.canvas = canvas;
+
+      // Manages the indices within a single array, so that disjoint geometries can be represented easily here.
+      // TODO: Compare this same idea to triangle strips
+
+      this.lineShaderProgram = gl.createProgram();
+      gl.attachShader( this.lineShaderProgram, WebGLUtil.toShader( gl, lineVertexShader, gl.VERTEX_SHADER, 'VERTEX' ) );
+      gl.attachShader( this.lineShaderProgram, WebGLUtil.toShader( gl, lineFragmentShader, gl.FRAGMENT_SHADER, 'FRAGMENT' ) );
+      gl.linkProgram( this.lineShaderProgram );
+
+      this.positionAttribLocation = gl.getAttribLocation( this.lineShaderProgram, 'aPosition' );
+
+      gl.enableVertexAttribArray( this.positionAttribLocation );
+      gl.useProgram( this.lineShaderProgram );
+
+      this.vertexBuffer = gl.createBuffer();
+      this.bindVertexBuffer();
+    },
     draw: function() {
       var gl = this.gl;
 

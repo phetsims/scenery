@@ -41,25 +41,20 @@ define( function( require ) {
     this.transform1AttributeLocation = gl.getAttribLocation( this.colorShaderProgram, 'aTransform1' );
     this.transform2AttributeLocation = gl.getAttribLocation( this.colorShaderProgram, 'aTransform2' );
 
-    gl.enableVertexAttribArray( this.positionAttribLocation );
-    gl.enableVertexAttribArray( this.colorAttributeLocation );
-    gl.enableVertexAttribArray( this.transform1AttributeLocation );
-    gl.enableVertexAttribArray( this.transform2AttributeLocation );
-    gl.useProgram( this.colorShaderProgram );
-
     // set the resolution
     this.resolutionLocation = gl.getUniformLocation( this.colorShaderProgram, 'uResolution' );
 
     this.vertexBuffer = gl.createBuffer();
     this.bindVertexBuffer();
-
-    gl.clearColor( 0.0, 0.0, 0.0, 0.0 );
-    gl.enable( gl.DEPTH_TEST );
   }
 
   return inherit( Object, ColorTriangleRenderer, {
 
     draw: function() {
+
+      if ( this.colorTriangleBufferData.isEmpty() ) {
+        return;
+      }
       var gl = this.gl;
 
       var step = Float32Array.BYTES_PER_ELEMENT;

@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Generator: Adobe Illustrator 15.0.0, SVG Export Plug-In . SVG Version: 6.00 Build 0)  -->
+<!DOCTYPE svg PUBLIC "-//W3C//DTD SVG 1.1//EN" "http://www.w3.org/Graphics/SVG/1.1/DTD/svg11.dtd">
+<svg version="1.1" id="Layer_1" xmlns="http://www.w3.org/2000/svg" width="360px" height="360px">
+  <pattern  width="71.999" height="72" patternUnits="userSpaceOnUse" id="Diagonal_Lines" viewBox="28.856 -76.621 71.999 72" overflow="visible">
+    <g>
+        <line fill="none" stroke="#000000" stroke-width="5" stroke-linejoin="round" x1="21.372" y1="66.105" x2="39.371" y2="84.105"/>
+    </g>
+  </pattern>
+  <path opacity="0.74" fill="url(#Diagonal_Lines)" d="M0 0 L300 0 300 300 0 300z"/>
+</svg>

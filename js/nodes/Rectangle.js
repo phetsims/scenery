@@ -126,11 +126,8 @@ define( function( require ) {
         }
       }
 
-      //TODO: Refine the rules for when WebGL can be used
-      if ( !this.hasStroke() ) {
-        bitmask |= scenery.bitmaskSupportsWebGL;
-        bitmask |= scenery.bitmaskSupportsPixi;
-      }
+      bitmask |= scenery.bitmaskSupportsWebGL;
+      bitmask |= scenery.bitmaskSupportsPixi;
       return bitmask;
     },
 
@@ -148,12 +145,8 @@ define( function( require ) {
         bitmask |= scenery.bitmaskSupportsDOM;
       }
 
-      //only support WebGL if it's NOT rounded (for now) AND if it's either not stroked, or stroke has lineJoin !== round
-      //TODO: Refine the rules for when WebGL can be used
-      if ( !this.isRounded() && (!this.hasStroke() || this.getLineJoin() !== 'round') ) {
-        bitmask |= scenery.bitmaskSupportsWebGL;
-        bitmask |= scenery.bitmaskSupportsPixi;
-      }
+      bitmask |= scenery.bitmaskSupportsWebGL;
+      bitmask |= scenery.bitmaskSupportsPixi;
 
       return bitmask;
     },
@@ -869,7 +862,7 @@ define( function( require ) {
 
     initializeContext: function( webglBlock ) {
       this.webglBlock = webglBlock;
-      this.rectangleHandle = new SquareUnstrokedRectangle( webglBlock.webglRenderer.colorTriangleRenderer, this.node, 0.5 );
+      this.rectangleHandle = new SquareUnstrokedRectangle( webglBlock.webGLRenderer.colorTriangleRenderer, this.node, 0.5 );
 
       // cleanup old vertexBuffer, if applicable
       this.disposeWebGLBuffers();
@@ -891,6 +884,10 @@ define( function( require ) {
         this.color = Color.toColor( this.node._fill );
         this.cleanPaintableState();
       }
+      this.rectangleHandle.update();
+
+      // TODO: Batch these updates?
+      this.webglBlock.webGLRenderer.colorTriangleRenderer.updateTriangleBuffer( this.rectangleHandle );
     },
 
     render: function( shaderProgram ) {
@@ -905,7 +902,7 @@ define( function( require ) {
     },
 
     disposeWebGLBuffers: function() {
-      this.webglBlock.webglRenderer.colorTriangleRenderer.colorTriangleBufferData.dispose( this.rectangleHandle );
+      this.webglBlock.webGLRenderer.colorTriangleRenderer.colorTriangleBufferData.dispose( this.rectangleHandle );
     },
 
     markDirtyRectangle: function() {
@@ -954,44 +951,26 @@ define( function( require ) {
       this.lastArcW = -1; // invalid on purpose
       this.lastArcH = -1; // invalid on purpose
 
-      if ( !this.pixiDisplayObject ) {
-        this.pixiDisplayObject = document.createElementNS( scenery.svgns, 'rect' );
+      if ( !this.displayObject ) {
+        this.displayObject = new PIXI.Graphics();
       }
     },
     updatePixi: function( node, rect ) {
-      if ( this.dirtyX ) {
-        rect.setAttribute( 'x', node._rectX );
-      }
-      if ( this.dirtyY ) {
-        rect.setAttribute( 'y', node._rectY );
-      }
-      if ( this.dirtyWidth ) {
-        rect.setAttribute( 'width', node._rectWidth );
-      }
-      if ( this.dirtyHeight ) {
-        rect.setAttribute( 'height', node._rectHeight );
-      }
-      if ( this.dirtyArcWidth || this.dirtyArcHeight || this.dirtyWidth || this.dirtyHeight ) {
-        var arcw = 0;
-        var arch = 0;
-
-        // workaround for various browsers if rx=20, ry=0 (behavior is inconsistent, either identical to rx=20,ry=20, rx=0,ry=0. We'll treat it as rx=0,ry=0)
-        // see https://github.com/phetsims/scenery/issues/183
-        if ( node.isRounded() ) {
-          var maximumArcSize = node.getMaximumArcSize();
-          arcw = Math.min( node._rectArcWidth, maximumArcSize );
-          arch = Math.min( node._rectArcHeight, maximumArcSize );
+      if ( this.dirtyX || this.dirtyY || this.dirtyWidth || this.dirtyHeight ||
+           this.dirtyArcWidth || this.dirtyArcHeight || this.dirtyWidth || this.dirtyHeight ) {
+        var graphics = this.displayObject;
+        this.displayObject.clear();
+        if ( node.getFillColor() ) {
+          graphics.beginFill( node.getFillColor().toNumber(), node.opacity * node.getFillColor().alpha );
         }
-        if ( arcw !== this.lastArcW ) {
-          this.lastArcW = arcw;
-          rect.setAttribute( 'rx', arcw );
+        if ( node.getStrokeColor() ) {
+          graphics.lineStyle( 5, node.getStrokeColor().toNumber(), node.opacity * node.getStrokeColor().alpha );
         }
-        if ( arch !== this.lastArcH ) {
-          this.lastArcH = arch;
-          rect.setAttribute( 'ry', arch );
+        graphics.drawRect( node.rectX, node.rectY, node.rectWidth, node.rectHeight );
+        if ( node.getFillColor() ) {
+          graphics.endFill();
         }
       }
-
       this.updateFillStrokeStyle( rect );
     },
     usesPaint: true,

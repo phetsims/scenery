@@ -27,7 +27,7 @@ define( function( require ) {
       // super initialization
       this.initializeSelfDrawable( renderer, instance );
 
-      this.pixiDisplayObject = null; // should be filled in by subtype
+      this.displayObject = null; // should be filled in by subtype
       this.pixiBlock = null; // will be updated by updateSVGBlock()
 
       return this;
@@ -126,13 +126,14 @@ define( function( require ) {
           this.paintState.updateStrokeParameters( this.node );
         }
         if ( this.dirtyFill || this.dirtyStroke || strokeParameterDirty ) {
-          element.setAttribute( 'style', this.paintState.baseStyle + this.paintState.extraStyle );
+          //element.setAttribute( 'style', this.paintState.baseStyle + this.paintState.extraStyle );
+          console.log( '//TODO: how do we recreate the graphics with the new colors???' );
         }
       },
 
       updatePixi: function() {
         if ( this.paintDirty ) {
-          updatePixiSelf.call( this, this.node, this.pixiDisplayObject );
+          updatePixiSelf.call( this, this.node, this.displayObject );
         }
 
         // sync the differences between the previously-recorded list of cached paints and the new list
@@ -207,7 +208,7 @@ define( function( require ) {
         //OHTWO TODO: are we missing the disposal?
         if ( !keepElements ) {
           // clear the references
-          this.pixiDisplayObject = null;
+          this.displayObject = null;
         }
 
         // release any defs, and dispose composed state objects

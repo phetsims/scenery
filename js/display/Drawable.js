@@ -277,12 +277,15 @@ define( function( require ) {
       assert && assert( !this.disposed, 'We should not re-dispose drawables' );
 
       sceneryLog && sceneryLog.Drawable && sceneryLog.Drawable( '[' + this.constructor.name + '*] dispose ' + this.toString() );
+      sceneryLog && sceneryLog.Drawable && sceneryLog.push();
 
       this.cleanDrawable();
       this.disposed = true;
 
       // for now
       this.freeToPool();
+
+      sceneryLog && sceneryLog.Drawable && sceneryLog.pop();
     },
 
     audit: function( allowPendingBlock, allowPendingList, allowDirty ) {

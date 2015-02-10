@@ -10,6 +10,7 @@
 define( function( require ) {
   'use strict';
 
+  var count = 0;
   var inherit = require( 'PHET_CORE/inherit' );
   var Poolable = require( 'PHET_CORE/Poolable' );
   var cleanArray = require( 'PHET_CORE/cleanArray' );
@@ -34,95 +35,42 @@ define( function( require ) {
       this.paintMap = {}; // maps {string} paint.id => { count: {number}, paint: {Paint}, def: {SVGElement} }
 
       if ( !this.domElement ) {
-        // main SVG element
-        this.pixiDisplayObject = document.createElementNS( scenery.svgns, 'svg' );
-        this.pixiDisplayObject.style.position = 'absolute';
-        this.pixiDisplayObject.style.left = '0';
-        this.pixiDisplayObject.style.top = '0';
+
+        // Create the Pixi Stage
+        this.stage = new PIXI.Stage();
+
+        // Create the renderer and view
+        // Size will be set in update
+        this.pixiRenderer = PIXI.autoDetectRenderer( 0, 0, { transparent: true } );
+
+        // main DOM element
+        this.pixiCanvas = this.pixiRenderer.view;
+        this.pixiCanvas.style.position = 'absolute';
+        this.pixiCanvas.style.left = '0';
+        this.pixiCanvas.style.top = '0';
         //OHTWO TODO: why would we clip the individual layers also? Seems like a potentially useless performance loss
         // this.pixiDisplayObject.style.clip = 'rect(0px,' + width + 'px,' + height + 'px,0px)';
-        this.pixiDisplayObject.style[ 'pointer-events' ] = 'none';
+        this.pixiCanvas.style[ 'pointer-events' ] = 'none';
 
-        // the <defs> block that we will be stuffing gradients and patterns into
-        this.defs = document.createElementNS( scenery.svgns, 'defs' );
-        this.pixiDisplayObject.appendChild( this.defs );
-
-        this.baseTransformGroup = document.createElementNS( scenery.svgns, 'g' );
-        this.pixiDisplayObject.appendChild( this.baseTransformGroup );
-
-        this.domElement = this.pixiDisplayObject;
+        this.baseTransformGroup = new PIXI.DisplayObjectContainer();
+        this.stage.addChild( this.baseTransformGroup );
+        this.domElement = this.pixiCanvas;
       }
 
       // reset what layer fitting can do (this.forceAcceleration set in fitted block initialization)
-      Util.prepareForTransform( this.pixiDisplayObject, this.forceAcceleration );
-      Util.unsetTransform( this.pixiDisplayObject ); // clear out any transforms that could have been previously applied
-      this.baseTransformGroup.setAttribute( 'transform', '' ); // no base transform
+      Util.prepareForTransform( this.pixiCanvas, this.forceAcceleration );
+      Util.unsetTransform( this.pixiCanvas ); // clear out any transforms that could have been previously applied
 
       var instanceClosestToRoot = transformRootInstance.trail.nodes.length > filterRootInstance.trail.nodes.length ? filterRootInstance : transformRootInstance;
 
       this.rootGroup = PixiDisplayObject.createFromPool( this, instanceClosestToRoot, null );
-      this.baseTransformGroup.appendChild( this.rootGroup.pixiDisplayObject );
+      this.baseTransformGroup.addChild( this.rootGroup.displayObject );
 
       // TODO: dirty list of nodes (each should go dirty only once, easier than scanning all?)
 
       sceneryLog && sceneryLog.PixiBlock && sceneryLog.PixiBlock( 'initialized #' + this.id );
 
       return this;
-    },
-
-    /*
-     * Increases our reference count for the specified {Paint}. If it didn't exist before, we'll add the SVG def to the
-     * paint can be referenced by SVG id.
-     *
-     * @param {Paint} paint
-     */
-    incrementPaint: function( paint ) {
-      assert && assert( paint.isPaint );
-
-      sceneryLog && sceneryLog.Paints && sceneryLog.Paints( 'incrementPaint ' + this.toString() + ' ' + paint.id );
-
-      if ( this.paintMap.hasOwnProperty( paint.id ) ) {
-        this.paintMap[ paint.id ].count++;
-      }
-      else {
-        var def = paint.getSVGDefinition();
-        def.setAttribute( 'id', paint.id + '-' + this.id );
-
-        // TODO: reduce allocations?
-        this.paintMap[ paint.id ] = {
-          count: 1,
-          paint: paint,
-          def: def
-        };
-
-        this.defs.appendChild( def );
-      }
-    },
-
-    /*
-     * Decreases our reference count for the specified {Paint}. If this was the last reference, we'll remove the SVG def
-     * from our SVG tree to prevent memory leaks, etc.
-     *
-     * @param {Paint} paint
-     */
-    decrementPaint: function( paint ) {
-      assert && assert( paint.isPaint );
-
-      sceneryLog && sceneryLog.Paints && sceneryLog.Paints( 'decrementPaint ' + this.toString() + ' ' + paint.id );
-
-      // since the block may have been disposed (yikes!), we have a defensive set-up here
-      if ( this.paintMap.hasOwnProperty( paint.id ) ) {
-        var entry = this.paintMap[ paint.id ];
-        assert && assert( entry.count >= 1 );
-
-        if ( entry.count === 1 ) {
-          this.defs.removeChild( entry.def );
-          delete this.paintMap[ paint.id ]; // delete, so we don't memory leak if we run through MANY paints
-        }
-        else {
-          entry.count--;
-        }
-      }
     },
 
     markDirtyGroup: function( block ) {
@@ -137,11 +85,12 @@ define( function( require ) {
     },
 
     setSizeFullDisplay: function() {
+      console.log( 'who is calling this code?' );
       sceneryLog && sceneryLog.PixiBlock && sceneryLog.PixiBlock( 'setSizeFullDisplay #' + this.id );
 
       var size = this.display.getSize();
-      this.pixiDisplayObject.setAttribute( 'width', size.width );
-      this.pixiDisplayObject.setAttribute( 'height', size.height );
+      this.pixiCanvas.setAttribute( 'width', size.width );
+      this.pixiCanvas.setAttribute( 'height', size.height );
     },
 
     setSizeFitBounds: function() {
@@ -150,11 +99,14 @@ define( function( require ) {
       var x = this.fitBounds.minX;
       var y = this.fitBounds.minY;
 
-      this.baseTransformGroup.setAttribute( 'transform', 'translate(' + (-x) + ',' + (-y) + ')' ); // subtract off so we have a tight fit
-      Util.setTransform( 'matrix(1,0,0,1,' + x + ',' + y + ')', this.pixiDisplayObject, this.forceAcceleration ); // reapply the translation as a CSS transform
-      this.pixiDisplayObject.setAttribute( 'width', this.fitBounds.width );
-      this.pixiDisplayObject.setAttribute( 'height', this.fitBounds.height );
+      // subtract off so we have a tight fit
+      this.baseTransformGroup.x = (-x);
+      this.baseTransformGroup.y = (-y);
+      Util.setTransform( 'matrix(1,0,0,1,' + x + ',' + y + ')', this.pixiCanvas, this.forceAcceleration ); // reapply the translation as a CSS transform
+      this.pixiRenderer.resize( this.fitBounds.width, this.fitBounds.height );
     },
+    incrementPaint: function() {},
+    decrementPaint: function() {},
 
     update: function() {
       sceneryLog && sceneryLog.PixiBlock && sceneryLog.PixiBlock( 'update #' + this.id );
@@ -181,7 +133,12 @@ define( function( require ) {
         }
 
         // checks will be done in updateFit() to see whether it is needed
-        this.updateFit();
+        // hack to prevent updateFit() from calling all the time and destroying performance
+        if ( count % 1000 === 0 ) {
+          this.updateFit();
+        }
+        count++;
+        this.pixiRenderer.render( this.stage );
       }
     },
 
@@ -189,8 +146,8 @@ define( function( require ) {
       sceneryLog && sceneryLog.PixiBlock && sceneryLog.PixiBlock( 'dispose #' + this.id );
 
       // make it take up zero area, so that we don't use up excess memory
-      this.pixiDisplayObject.setAttribute( 'width', 0 );
-      this.pixiDisplayObject.setAttribute( 'height', 0 );
+      this.pixiCanvas.setAttribute( 'width', 0 );
+      this.pixiCanvas.setAttribute( 'height', 0 );
 
       // clear references
       this.filterRootInstance = null;
@@ -201,11 +158,6 @@ define( function( require ) {
       this.baseTransformGroup.removeChild( this.rootGroup.PixiDisplayObject );
       this.rootGroup.dispose();
       this.rootGroup = null;
-
-      // since we may not properly remove all defs yet
-      while ( this.defs.childNodes.length ) {
-        this.defs.removeChild( this.defs.childNodes[ 0 ] );
-      }
 
       FittedBlock.prototype.dispose.call( this );
     },
