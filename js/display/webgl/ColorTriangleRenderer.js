@@ -46,9 +46,6 @@ define( function( require ) {
 
     this.vertexBuffer = gl.createBuffer();
     this.bindVertexBuffer();
-
-    gl.clearColor( 0.0, 0.0, 0.0, 0.0 );
-    gl.enable( gl.DEPTH_TEST );
   }
 
   return inherit( Object, ColorTriangleRenderer, {

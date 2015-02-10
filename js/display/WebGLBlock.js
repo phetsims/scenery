@@ -110,7 +110,9 @@ define( function( require ) {
         }
 
         // udpate the fit BEFORE drawing, since it may change our offset
-        this.updateFit();
+        if ( this.dirtyFit ) {
+          this.updateFit();
+        }
 
         // finalX = 2 * x / display.width - 1
         // finalY = 1 - 2 * y / display.height
