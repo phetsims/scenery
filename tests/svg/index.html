@@ -266,63 +266,40 @@
   <div class="test">Canvg immediate read pattern-other</div>
   <img id="canvg-immediate-pattern-other">
 
+  <div class="test">Canvg head</div>
+  <canvas id="canvg-head"></canvas>
+
+  <div class="test">Canvg immediate read head</div>
+  <img id="canvg-immediate-head">
+
   <script type="text/javascript">
-    var a, b;
-    try {
-      a = Date.now();
-      canvg( document.getElementById( 'canvg-wrench' ), 'wrench.svg', {
-        ignoreMouse: true,
-        ignoreAnimation: true,
-        useCORS: true
+    (function(){
+      var a, b;
+      var keys = [ 'wrench', 'sweater', 'pattern-IE', 'pattern-other', 'head' ];
+      var urls = {
+        wrench: 'wrench.svg',
+        sweater: 'sweater.svg',
+        'pattern-IE': 'shows-in-IE.svg',
+        'pattern-other': 'shows-in-others.svg',
+        'head': '../../../color-vision/images/head.svg'
+      }
+      keys.forEach( function( key ) {
+        var url = urls[key];
+        try {
+          a = Date.now();
+          canvg( document.getElementById( 'canvg-' + key ), url, {
+            ignoreMouse: true,
+            ignoreAnimation: true,
+            useCORS: true
+          } );
+          b = Date.now();
+          console.log( key + ': ' + ( b - a ) );
+        } catch ( e ) {}
+        try {
+          document.getElementById( 'canvg-immediate-' + key ).src = document.getElementById( 'canvg-' + key ).toDataURL();
+        } catch ( e ) {}
       } );
-      b = Date.now();
-      console.log( 'wrench: ' + ( b - a ) );
-    } catch ( e ) {}
-    try {
-      document.getElementById( 'canvg-immediate-wrench' ).src = document.getElementById( 'canvg-wrench' ).toDataURL();
-    } catch ( e ) {}
-
-    try {
-      a = Date.now();
-      canvg( document.getElementById( 'canvg-sweater' ), 'sweater.svg', {
-        ignoreMouse: true,
-        ignoreAnimation: true,
-        useCORS: true
-      } );
-      b = Date.now();
-      console.log( 'sweater: ' + ( b - a ) );
-    } catch ( e ) {}
-    try {
-      document.getElementById( 'canvg-immediate-sweater' ).src = document.getElementById( 'canvg-sweater' ).toDataURL();
-    } catch ( e ) {}
-
-    try {
-      a = Date.now();
-      canvg( document.getElementById( 'canvg-pattern-IE' ), 'shows-in-IE.svg', {
-        ignoreMouse: true,
-        ignoreAnimation: true,
-        useCORS: true
-      } );
-      b = Date.now();
-      console.log( 'pattern-IE: ' + ( b - a ) );
-    } catch ( e ) {}
-    try {
-      document.getElementById( 'canvg-immediate-pattern-IE' ).src = document.getElementById( 'canvg-pattern-IE' ).toDataURL();
-    } catch ( e ) {}
-
-    try {
-      a = Date.now();
-      canvg( document.getElementById( 'canvg-pattern-other' ), 'shows-in-others.svg', {
-        ignoreMouse: true,
-        ignoreAnimation: true,
-        useCORS: true
-      } );
-      b = Date.now();
-      console.log( 'pattern-other: ' + ( b - a ) );
-    } catch ( e ) {}
-    try {
-      document.getElementById( 'canvg-immediate-pattern-other' ).src = document.getElementById( 'canvg-pattern-other' ).toDataURL();
-    } catch ( e ) {}
+    })();
   </script>
 </div>
 </body>
