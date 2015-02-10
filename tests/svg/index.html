@@ -241,6 +241,76 @@
       document.getElementById( 'canvg-read-immediate-string' ).src = document.getElementById( 'canvg-string' ).toDataURL();
     } catch ( e ) {}
   </script>
+
+  <div class="test">Canvg wrench</div>
+  <canvas id="canvg-wrench"></canvas>
+
+  <div class="test">Canvg immediate read wrench</div>
+  <img id="canvg-immediate-wrench">
+
+  <div class="test">Canvg sweater</div>
+  <canvas id="canvg-sweater"></canvas>
+
+  <div class="test">Canvg immediate read sweater</div>
+  <img id="canvg-immediate-sweater">
+
+  <div class="test">Canvg pattern-IE</div>
+  <canvas id="canvg-pattern-IE"></canvas>
+
+  <div class="test">Canvg immediate read pattern-IE</div>
+  <img id="canvg-immediate-pattern-IE">
+
+  <div class="test">Canvg pattern-other</div>
+  <canvas id="canvg-pattern-other"></canvas>
+
+  <div class="test">Canvg immediate read pattern-other</div>
+  <img id="canvg-immediate-pattern-other">
+
+  <script type="text/javascript">
+    try {
+      canvg( document.getElementById( 'canvg-wrench' ), 'wrench.svg', {
+        ignoreMouse: true,
+        ignoreAnimation: true,
+        useCORS: true
+      } );
+    } catch ( e ) {}
+    try {
+      document.getElementById( 'canvg-immediate-wrench' ).src = document.getElementById( 'canvg-wrench' ).toDataURL();
+    } catch ( e ) {}
+
+    try {
+      canvg( document.getElementById( 'canvg-sweater' ), 'sweater.svg', {
+        ignoreMouse: true,
+        ignoreAnimation: true,
+        useCORS: true
+      } );
+    } catch ( e ) {}
+    try {
+      document.getElementById( 'canvg-immediate-sweater' ).src = document.getElementById( 'canvg-sweater' ).toDataURL();
+    } catch ( e ) {}
+
+    try {
+      canvg( document.getElementById( 'canvg-pattern-IE' ), 'shows-in-IE.svg', {
+        ignoreMouse: true,
+        ignoreAnimation: true,
+        useCORS: true
+      } );
+    } catch ( e ) {}
+    try {
+      document.getElementById( 'canvg-immediate-pattern-IE' ).src = document.getElementById( 'canvg-pattern-IE' ).toDataURL();
+    } catch ( e ) {}
+
+    try {
+      canvg( document.getElementById( 'canvg-pattern-other' ), 'shows-in-others.svg', {
+        ignoreMouse: true,
+        ignoreAnimation: true,
+        useCORS: true
+      } );
+    } catch ( e ) {}
+    try {
+      document.getElementById( 'canvg-immediate-pattern-other' ).src = document.getElementById( 'canvg-pattern-other' ).toDataURL();
+    } catch ( e ) {}
+  </script>
 </div>
 </body>
 </html>
