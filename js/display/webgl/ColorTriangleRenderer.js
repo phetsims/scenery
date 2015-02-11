@@ -12,7 +12,6 @@ define( function( require ) {
   // modules
   var inherit = require( 'PHET_CORE/inherit' );
   var ColorTriangleBufferData = require( 'SCENERY/display/webgl/colorTriangleBufferData' );
-  var WebGLUtil = require( 'SCENERY/display/webgl/WebGLUtil' );
   var ShaderProgram = require( 'SCENERY/util/ShaderProgram' );
 
   // shaders
