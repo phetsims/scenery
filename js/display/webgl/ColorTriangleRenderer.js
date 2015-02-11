@@ -16,8 +16,8 @@ define( function( require ) {
   var ShaderProgram = require( 'SCENERY/util/ShaderProgram' );
 
   // shaders
-  var colorVertexShader = require( 'text!SCENERY/display/webgl/colorTriangle.vert' );
-  var colorFragmentShader = require( 'text!SCENERY/display/webgl/colorTriangle.frag' );
+  var colorVertexShaderSource = require( 'text!SCENERY/display/webgl/colorTriangle.vert' );
+  var colorFragmentShaderSource = require( 'text!SCENERY/display/webgl/colorTriangle.frag' );
 
   /**
    *
@@ -32,7 +32,7 @@ define( function( require ) {
     // TODO: Compare this same idea to triangle strips
     this.colorTriangleBufferData = new ColorTriangleBufferData();
 
-    this.shaderProgram = new ShaderProgram( gl, colorVertexShader, colorFragmentShader, {
+    this.shaderProgram = new ShaderProgram( gl, colorVertexShaderSource, colorFragmentShaderSource, {
       attributes: [ 'aPosition', 'aVertexColor', 'aTransform1', 'aTransform2' ],
       uniforms: [ 'uResolution' ]
     } );

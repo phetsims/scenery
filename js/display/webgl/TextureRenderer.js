@@ -21,10 +21,11 @@ define( function( require ) {
   var inherit = require( 'PHET_CORE/inherit' );
   var TextureBufferData = require( 'SCENERY/display/webgl/TextureBufferData' );
   var SpriteSheetCollection = require( 'SCENERY/display/webgl/SpriteSheetCollection' );
+  var ShaderProgram = require( 'SCENERY/util/ShaderProgram' );
 
   // shaders
-  var colorVertexShader = require( 'text!SCENERY/display/webgl/texture.vert' );
-  var colorFragmentShader = require( 'text!SCENERY/display/webgl/texture.frag' );
+  var textureVertexShaderSource = require( 'text!SCENERY/display/webgl/texture.vert' );
+  var textureFragmentShaderSource = require( 'text!SCENERY/display/webgl/texture.frag' );
 
   /**
    * @constructor
@@ -34,33 +35,10 @@ define( function( require ) {
     this.canvas = canvas;
     this.backingScale = backingScale;
 
-    var toShader = function( source, type, typeString ) {
-      var shader = gl.createShader( type );
-      gl.shaderSource( shader, source );
-      gl.compileShader( shader );
-      if ( !gl.getShaderParameter( shader, gl.COMPILE_STATUS ) ) {
-        console.log( 'ERROR IN ' + typeString + ' SHADER : ' + gl.getShaderInfoLog( shader ) );
-        return false;
-      }
-      return shader;
-    };
-
-    this.colorShaderProgram = gl.createProgram();
-    var program = this.colorShaderProgram;
-    gl.attachShader( this.colorShaderProgram, toShader( colorVertexShader, gl.VERTEX_SHADER, 'VERTEX' ) );
-    gl.attachShader( this.colorShaderProgram, toShader( colorFragmentShader, gl.FRAGMENT_SHADER, 'FRAGMENT' ) );
-    gl.linkProgram( this.colorShaderProgram );
-
-    // look up where the vertex data needs to go.
-    this.positionLocation = gl.getAttribLocation( program, 'aPosition' );
-    this.texCoordLocation = gl.getAttribLocation( program, 'aTextureCoordinate' );
-    this.transform1AttributeLocation = gl.getAttribLocation( this.colorShaderProgram, 'aTransform1' );
-    this.transform2AttributeLocation = gl.getAttribLocation( this.colorShaderProgram, 'aTransform2' );
-
-    // lookup uniforms
-    this.resolutionLocation = gl.getUniformLocation( program, 'uResolution' );
-    gl.blendFunc( gl.SRC_ALPHA, gl.ONE_MINUS_SRC_ALPHA );
-    gl.enable( this.gl.BLEND );
+    this.shaderProgram = new ShaderProgram( gl, textureVertexShaderSource, textureFragmentShaderSource, {
+      attributes: [ 'aPosition', 'aTextureCoordinate', 'aTransform1', 'aTransform2' ],
+      uniforms: [ 'uResolution' ]
+    } );
 
     this.spriteSheetCollection = new SpriteSheetCollection();
 
@@ -108,13 +86,7 @@ define( function( require ) {
     doDraw: function( activeTextureIndex ) {
       var gl = this.gl;
 
-      //TODO: If no vertices, bail out!
-
-      gl.useProgram( this.colorShaderProgram );
-      gl.enableVertexAttribArray( this.positionLocation );
-      gl.enableVertexAttribArray( this.texCoordLocation );
-      gl.enableVertexAttribArray( this.transform1AttributeLocation );
-      gl.enableVertexAttribArray( this.transform2AttributeLocation );
+      this.shaderProgram.use();
 
       // bind and activate the correct texture
       // TODO: Does this need to be done every frame?
@@ -126,27 +98,23 @@ define( function( require ) {
       // TODO: This backing scale multiply seems very buggy and contradicts everything we know!
       // TODO: Does this need to be done every frame?
       // Still, it gives the right behavior on iPad3 and OSX (non-retina).  Should be discussed and investigated.
-      gl.uniform2f( this.resolutionLocation, this.canvas.width / this.backingScale, this.canvas.height / this.backingScale );
+      gl.uniform2f( this.shaderProgram.uniformLocations.uResolution, this.canvas.width / this.backingScale, this.canvas.height / this.backingScale );
 
       var step = Float32Array.BYTES_PER_ELEMENT;
       var total = 3 + 2 + 3 + 3;
       var stride = step * total;
 
       gl.bindBuffer( gl.ARRAY_BUFFER, this.vertexBufferArray[ activeTextureIndex ] );
-      gl.vertexAttribPointer( this.positionLocation, 3, gl.FLOAT, false, stride, 0 );
-      gl.vertexAttribPointer( this.texCoordLocation, 2, gl.FLOAT, false, stride, step * 3 );
-      gl.vertexAttribPointer( this.transform1AttributeLocation, 3, gl.FLOAT, false, stride, step * (3 + 2) );
-      gl.vertexAttribPointer( this.transform2AttributeLocation, 3, gl.FLOAT, false, stride, step * (3 + 2 + 3) );
+      gl.vertexAttribPointer( this.shaderProgram.attributeLocations.aPosition, 3, gl.FLOAT, false, stride, 0 );
+      gl.vertexAttribPointer( this.shaderProgram.attributeLocations.aTextureCoordinate, 2, gl.FLOAT, false, stride, step * 3 );
+      gl.vertexAttribPointer( this.shaderProgram.attributeLocations.aTransform1, 3, gl.FLOAT, false, stride, step * (3 + 2) );
+      gl.vertexAttribPointer( this.shaderProgram.attributeLocations.aTransform2, 3, gl.FLOAT, false, stride, step * (3 + 2 + 3) );
 
       // Draw the rectangle.
       gl.drawArrays( gl.TRIANGLES, 0, this.textureBufferDataArray[ activeTextureIndex ].vertexArray.length / total );
 
-      gl.disableVertexAttribArray( this.texCoordLocation );
-      gl.disableVertexAttribArray( this.positionLocation );
-      gl.disableVertexAttribArray( this.transform1AttributeLocation );
-      gl.disableVertexAttribArray( this.transform2AttributeLocation );
-
       gl.bindTexture( gl.TEXTURE_2D, null );
+      this.shaderProgram.unuse();
     },
 
     getSpriteSheets: function() {
