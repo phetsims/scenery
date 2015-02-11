@@ -19,9 +19,9 @@ define( function( require ) {
 
   // modules
   var inherit = require( 'PHET_CORE/inherit' );
-  var TextureBufferData = require( 'SCENERY/display/webgl/TextureBufferData' );
   var SpriteSheetCollection = require( 'SCENERY/display/webgl/SpriteSheetCollection' );
   var ShaderProgram = require( 'SCENERY/util/ShaderProgram' );
+  var ImageHandle = require( 'SCENERY/display/webgl/ImageHandle' );
 
   // shaders
   var textureVertexShaderSource = require( 'text!SCENERY/display/webgl/texture.vert' );
@@ -56,22 +56,7 @@ define( function( require ) {
 
   return inherit( Object, TextureRenderer, {
     createFromImageNode: function( imageNode, z ) {
-      var frameRange = this.spriteSheetCollection.addImage( imageNode.image );
-
-      // If there is no textureBuffer/VertexBuffer/textures entry for this SpriteSheet so create one
-      if ( !this.textureBufferDataArray[ frameRange.spriteSheetIndex ] ) {
-
-        this.textureBufferDataArray[ frameRange.spriteSheetIndex ] = new TextureBufferData();
-        this.vertexBufferArray[ frameRange.spriteSheetIndex ] = this.gl.createBuffer();
-        this.textureArray[ frameRange.spriteSheetIndex ] = this.gl.createTexture();
-      }
-      var textureBufferData = this.textureBufferDataArray[ frameRange.spriteSheetIndex ];
-      return textureBufferData.createFromImage( 0, 0, z,
-        imageNode._image.width,
-        imageNode._image.height,
-        imageNode.image,
-        imageNode.getLocalToGlobalMatrix().toMatrix4(),
-        frameRange );
+      return new ImageHandle( this, imageNode, z );
     },
 
     draw: function() {
