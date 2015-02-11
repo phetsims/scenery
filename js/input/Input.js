@@ -1033,6 +1033,8 @@ define( function( require ) {
       KEY_TAB: 9,
       KEY_RIGHT_ARROW: 39,
       KEY_LEFT_ARROW: 37,
+      KEY_UP_ARROW: 38,
+      KEY_DOWN_ARROW: 40,
       KEY_SHIFT: 16,
       KEY_ESCAPE: 27
     } );
