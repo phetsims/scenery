@@ -13,6 +13,7 @@ define( function( require ) {
   var inherit = require( 'PHET_CORE/inherit' );
   var scenery = require( 'SCENERY/scenery' );
 
+  var Vector3 = require( 'DOT/Vector3' );
   var Pointer = require( 'SCENERY/input/Pointer' ); // inherits from Pointer
 
   scenery.Mouse = function Mouse() {
@@ -29,6 +30,10 @@ define( function( require ) {
     this.trail = null;
 
     this.isDown = false;
+
+    // mouse wheel delta and mode for the last event, see https://developer.mozilla.org/en-US/docs/Web/Events/wheel
+    this.wheelDelta = new Vector3();
+    this.wheelDeltaMode = 0; // 0: pixels, 1: lines, 2: pages
 
     // overrides the cursor of whatever is under it when set
     this._cursor = null;
@@ -113,6 +118,11 @@ define( function( require ) {
       // TODO: how to handle the mouse out-of-bounds
       this.point = null;
       return pointChanged;
+    },
+
+    wheel: function( event ) {
+      this.wheelDelta.setXYZ( event.deltaX, event.deltaY, event.deltaZ );
+      this.wheelDeltaMode = event.deltaMode;
     },
 
     toString: function() {

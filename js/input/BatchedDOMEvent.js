@@ -31,6 +31,7 @@ define( function( require ) {
   BatchedDOMEvent.TOUCH_TYPE = 3;
   BatchedDOMEvent.MOUSE_TYPE = 4;
   BatchedDOMEvent.KEY_TYPE = 5; //TODO: Or are Keys Pointers, as they were in previous sceneries?
+  BatchedDOMEvent.WHEEL_TYPE = 6;
 
   inherit( Object, BatchedDOMEvent, {
     run: function( input ) {
@@ -61,6 +62,9 @@ define( function( require ) {
         callback.call( input, input.pointFromEvent( domEvent ), domEvent );
       }
       else if ( this.type === BatchedDOMEvent.KEY_TYPE ) { //TODO: or should keys be handled with the other Pointers?
+        callback.call( input, domEvent );
+      }
+      else if ( this.type === BatchedDOMEvent.WHEEL_TYPE ) {
         callback.call( input, domEvent );
       }
       else {
