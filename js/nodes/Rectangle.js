@@ -908,6 +908,12 @@ define( function( require ) {
     markDirtyRectangle: function() {
       this.markDirty();
     },
+    markDirtyWidth: function() {
+      this.markDirty();
+    },
+    markDirtyHeight: function() {
+      this.markDirty();
+    },
 
     // general flag set on the state, which we forward directly to the drawable's paint flag
     markPaintDirty: function() {
