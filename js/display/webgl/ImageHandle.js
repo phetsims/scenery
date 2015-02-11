@@ -46,9 +46,6 @@ define( function( require ) {
 
     this.textureBufferData = textureBufferData;
     this.update();
-
-    //Track the index so it can delete itself, update itself, etc.
-    //TODO: Move to a separate class.
   }
 
   return inherit( Object, ImageHandle, {
@@ -79,8 +76,6 @@ define( function( require ) {
       var v1 = frameRange.bounds.maxY;
 
       //Track the index so it can delete itself, update itself, etc.
-      //TODO: Move to a separate class.
-
       var newElements = [
         x1, y1, z, u0, v0, matrix4.m00(), matrix4.m01(), matrix4.m03(), matrix4.m10(), matrix4.m11(), matrix4.m13(),
         x2, y1, z, u1, v0, matrix4.m00(), matrix4.m01(), matrix4.m03(), matrix4.m10(), matrix4.m11(), matrix4.m13(),
@@ -105,33 +100,6 @@ define( function( require ) {
         textureBufferData.vertexArray[ index + 9 + i * 11 ] = matrix4.m11();
         textureBufferData.vertexArray[ index + 10 + i * 11 ] = matrix4.m13();
       }
-    },
-    setRect: function( x, y, width, height ) {
-      var index = this.startIndex;
-      var textureBufferData = this.textureBufferData;
-      var x1 = x;
-      var y1 = y;
-      var x2 = x1 + width;
-      var y2 = y1 + height;
-      textureBufferData.vertexArray[ index + 0 ] = x1;
-      textureBufferData.vertexArray[ index + 1 ] = y1;
-
-      textureBufferData.vertexArray[ index + 11 ] = x2;
-      textureBufferData.vertexArray[ index + 12 ] = y1;
-
-      textureBufferData.vertexArray[ index + 22 ] = x1;
-      textureBufferData.vertexArray[ index + 23 ] = y2;
-
-      textureBufferData.vertexArray[ index + 33 ] = x1;
-      textureBufferData.vertexArray[ index + 34 ] = y2;
-
-      textureBufferData.vertexArray[ index + 44 ] = x2;
-      textureBufferData.vertexArray[ index + 45 ] = y1;
-
-      textureBufferData.vertexArray[ index + 55 ] = x2;
-      textureBufferData.vertexArray[ index + 56 ] = y2;
-
     }
-
   } );
 } );
