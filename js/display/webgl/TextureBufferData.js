@@ -20,9 +20,20 @@ define( function( require ) {
    */
   function TextureBufferData() {
     this.vertexArray = [];
+    this.elementsPerVertex = 11;
   }
 
   return inherit( Object, TextureBufferData, {
+    reserveVertices: function( numVertices ) {
+      var startIndex = this.vertexArray.length;
+      for ( var i = 0; i < numVertices; i++ ) {
+        for ( var k = 0; k < this.elementsPerVertex; k++ ) {
+          this.vertexArray.push( 0 );
+        }
+      }
+      var endIndex = this.vertexArray.length;
+      return { startIndex: startIndex, endIndex: endIndex };
+    }
     //createFromImageNode: function( imageNode, z, frameRange ) {
     //  return this.createFromImage( imageNode.x, imageNode.y, z,
     //    imageNode._image.width, imageNode._image.height, imageNode.image, imageNode.getLocalToGlobalMatrix().toMatrix4(), frameRange );

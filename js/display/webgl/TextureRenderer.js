@@ -143,6 +143,12 @@ define( function( require ) {
     },
 
     updateTriangleBuffer: function( geometry ) {
+
+      //TODO: This hack will cause problems, we need a more principled way to know when to rebind the buffer.
+      if ( this.vertexArrayList.length === 0 ) {
+        this.bindVertexBuffer();
+      }
+      
       var gl = this.gl;
 
       var frameRange = geometry.frameRange;
