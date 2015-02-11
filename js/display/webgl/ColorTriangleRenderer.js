@@ -13,6 +13,7 @@ define( function( require ) {
   var inherit = require( 'PHET_CORE/inherit' );
   var ColorTriangleBufferData = require( 'SCENERY/display/webgl/colorTriangleBufferData' );
   var WebGLUtil = require( 'SCENERY/display/webgl/WebGLUtil' );
+  var ShaderProgram = require( 'SCENERY/util/ShaderProgram' );
 
   // shaders
   var colorVertexShader = require( 'text!SCENERY/display/webgl/colorTriangle.vert' );
@@ -31,18 +32,10 @@ define( function( require ) {
     // TODO: Compare this same idea to triangle strips
     this.colorTriangleBufferData = new ColorTriangleBufferData();
 
-    this.colorShaderProgram = gl.createProgram();
-    gl.attachShader( this.colorShaderProgram, WebGLUtil.toShader( gl, colorVertexShader, gl.VERTEX_SHADER, 'VERTEX' ) );
-    gl.attachShader( this.colorShaderProgram, WebGLUtil.toShader( gl, colorFragmentShader, gl.FRAGMENT_SHADER, 'FRAGMENT' ) );
-    gl.linkProgram( this.colorShaderProgram );
-
-    this.positionAttribLocation = gl.getAttribLocation( this.colorShaderProgram, 'aPosition' );
-    this.colorAttributeLocation = gl.getAttribLocation( this.colorShaderProgram, 'aVertexColor' );
-    this.transform1AttributeLocation = gl.getAttribLocation( this.colorShaderProgram, 'aTransform1' );
-    this.transform2AttributeLocation = gl.getAttribLocation( this.colorShaderProgram, 'aTransform2' );
-
-    // set the resolution
-    this.resolutionLocation = gl.getUniformLocation( this.colorShaderProgram, 'uResolution' );
+    this.shaderProgram = new ShaderProgram( gl, colorVertexShader, colorFragmentShader, {
+      attributes: [ 'aPosition', 'aVertexColor', 'aTransform1', 'aTransform2' ],
+      uniforms: [ 'uResolution' ]
+    } );
 
     this.vertexBuffer = gl.createBuffer();
     this.bindVertexBuffer();
@@ -61,29 +54,22 @@ define( function( require ) {
       var total = 3 + 4 + 3 + 3;
       var stride = step * total;
 
-      gl.useProgram( this.colorShaderProgram );
-      gl.enableVertexAttribArray( this.positionAttribLocation );
-      gl.enableVertexAttribArray( this.colorAttributeLocation );
-      gl.enableVertexAttribArray( this.transform1AttributeLocation );
-      gl.enableVertexAttribArray( this.transform2AttributeLocation );
+      this.shaderProgram.use();
 
       //TODO: Only call this when the canvas changes size
       //TODO: This backing scale multiply seems very buggy and contradicts everything we know!
       // Still, it gives the right behavior on iPad3 and OSX (non-retina).  Should be discussed and investigated.
-      gl.uniform2f( this.resolutionLocation, this.canvas.width / this.backingScale, this.canvas.height / this.backingScale );
+      gl.uniform2f( this.shaderProgram.uniformLocations.uResolution, this.canvas.width / this.backingScale, this.canvas.height / this.backingScale );
 
       gl.bindBuffer( gl.ARRAY_BUFFER, this.vertexBuffer );
-      gl.vertexAttribPointer( this.positionAttribLocation, 3, gl.FLOAT, false, stride, 0 );
-      gl.vertexAttribPointer( this.colorAttributeLocation, 4, gl.FLOAT, false, stride, step * (3) );
-      gl.vertexAttribPointer( this.transform1AttributeLocation, 3, gl.FLOAT, false, stride, step * (3 + 4) );
-      gl.vertexAttribPointer( this.transform2AttributeLocation, 3, gl.FLOAT, false, stride, step * (3 + 4 + 3) );
+      gl.vertexAttribPointer( this.shaderProgram.attributeLocations.aPosition, 3, gl.FLOAT, false, stride, 0 );
+      gl.vertexAttribPointer( this.shaderProgram.attributeLocations.aVertexColor, 4, gl.FLOAT, false, stride, step * (3) );
+      gl.vertexAttribPointer( this.shaderProgram.attributeLocations.aTransform1, 3, gl.FLOAT, false, stride, step * (3 + 4) );
+      gl.vertexAttribPointer( this.shaderProgram.attributeLocations.aTransform2, 3, gl.FLOAT, false, stride, step * (3 + 4 + 3) );
 
       gl.drawArrays( gl.TRIANGLES, 0, this.colorTriangleBufferData.vertexArray.length / 13 );
 
-      gl.disableVertexAttribArray( this.positionAttribLocation );
-      gl.disableVertexAttribArray( this.colorAttributeLocation );
-      gl.disableVertexAttribArray( this.transform1AttributeLocation );
-      gl.disableVertexAttribArray( this.transform2AttributeLocation );
+      this.shaderProgram.unuse();
     },
 
     bindVertexBuffer: function() {
