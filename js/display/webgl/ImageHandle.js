@@ -59,7 +59,7 @@ define( function( require ) {
       var frameRange = this.frameRange;
       var width = imageNode._image.width;
       var height = imageNode._image.height;
-      var matrix4 = imageNode.getLocalToGlobalMatrix().toMatrix4();
+      var matrix4 = imageNode.getLocalToGlobalMatrix().toAffineMatrix4();
 
       //TODO: Check to see if any of the sprite sheets already contains that image
       //TODO: If none of the sprite sheets contained that image, then mark the spritesheet as dirty
@@ -88,18 +88,6 @@ define( function( require ) {
         this.textureBufferData.vertexArray[ this.startIndex + i ] = newElements[ i ];
       }
       this.textureRenderer.updateTriangleBuffer( this );
-    },
-    setTransform: function( matrix4 ) {
-      var textureBufferData = this.textureBufferData;
-      var index = this.startIndex;
-      for ( var i = 0; i < 6; i++ ) {
-        textureBufferData.vertexArray[ index + 5 + i * 11 ] = matrix4.m00();
-        textureBufferData.vertexArray[ index + 6 + i * 11 ] = matrix4.m01();
-        textureBufferData.vertexArray[ index + 7 + i * 11 ] = matrix4.m03();
-        textureBufferData.vertexArray[ index + 8 + i * 11 ] = matrix4.m10();
-        textureBufferData.vertexArray[ index + 9 + i * 11 ] = matrix4.m11();
-        textureBufferData.vertexArray[ index + 10 + i * 11 ] = matrix4.m13();
-      }
     }
   } );
 } );

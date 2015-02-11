@@ -423,7 +423,7 @@ define( function( require ) {
 
     initializeContext: function( webglBlock ) {
       this.webglBlock = webglBlock;
-      this.rectangleHandle = webglBlock.webGLRenderer.textureRenderer.createFromImageNode( this.node, 0.4 );
+      this.imageHandle = webglBlock.webGLRenderer.textureRenderer.createFromImageNode( this.node, 0.4 );
 
       // TODO: Don't call this each time a new item is added.
       webglBlock.webGLRenderer.textureRenderer.bindVertexBuffer();
@@ -439,9 +439,7 @@ define( function( require ) {
     //Nothing necessary since everything currently handled in the uModelViewMatrix below
     //However, we may switch to dynamic draw, and handle the matrix change only where necessary in the future?
     updateRectangle: function() {
-      var translation = this.node.getTranslation();
-      this.rectangleHandle.setRect( translation.x, translation.y, this.node._image.width, this.node._image.height );
-      this.webglBlock.webGLRenderer.textureRenderer.updateTriangleBuffer( this.rectangleHandle );
+      this.imageHandle.update();
     },
 
     render: function( shaderProgram ) {
@@ -456,7 +454,7 @@ define( function( require ) {
     },
 
     disposeWebGLBuffers: function() {
-      this.webglBlock.webGLRenderer.colorTriangleRenderer.colorTriangleBufferData.dispose( this.rectangleHandle );
+      this.webglBlock.webGLRenderer.colorTriangleRenderer.colorTriangleBufferData.dispose( this.imageHandle );
     },
 
     markDirtyRectangle: function() {

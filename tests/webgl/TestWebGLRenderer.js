@@ -115,12 +115,8 @@ define( function( require ) {
           var translateX = i * 2;
           var translateY = y / (i + 1);
 
-          // TODO: Get these next 2 lines of code working 
-          //imageHandle.imageNode.setTranslation( translateX, translateY );
-          //imageHandle.update();
-          
-          imageHandle.setTransform( Matrix4.translation( translateX, translateY, 0 ) );
-          webGLRenderer.textureRenderer.updateTriangleBuffer( imageHandle );
+          imageHandle.imageNode.setTranslation( translateX, translateY );
+          imageHandle.update( translateX, translateY );
         }
 
         // Experimental alternative to bufferSubData
