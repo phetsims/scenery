@@ -23,7 +23,7 @@ require.config( {
     ENERGY_SKATE_PARK_BASICS: '../../energy-skate-park-basics/js',
     text: '../../sherpa/text',
 
-    image: '../../chipper/requirejs-plugins/image'
+    image: '../../chipper/js/requirejs-plugins/image'
   },
 
   shim: {

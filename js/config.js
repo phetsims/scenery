@@ -13,7 +13,7 @@ require.config( {
   paths: {
 
     // plugins
-    image: '../../chipper/requirejs-plugins/image',
+    image: '../../chipper/js/requirejs-plugins/image',
     text: '../../sherpa/text',
 
     underscore: '../../sherpa/lodash-2.4.1',
