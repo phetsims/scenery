@@ -23,7 +23,7 @@ require.config( {
     ENERGY_SKATE_PARK_BASICS: '../../energy-skate-park-basics/js',
     text: '../../sherpa/text',
 
-    image: '../../chipper/requirejs-plugins/image'
+    image: '../../chipper/js/requirejs-plugins/image'
   },
 
   shim: {
@@ -32,5 +32,5 @@ require.config( {
   },
 
   // optional cache buster to make browser refresh load all included scripts, can be disabled with ?cacheBuster=false
-  urlArgs: phet.phetcommon.getCacheBusterArgs()
+  urlArgs: phet.chipper.getCacheBusterArgs()
 } );

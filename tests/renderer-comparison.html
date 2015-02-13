@@ -14,7 +14,7 @@
   <script src="../../sherpa/has.js"></script>
 
   <!-- Parse query parameters, so we can easily subset the tests.-->
-  <script src="../../phetcommon/js/util/query-parameters.js"></script>
+  <script type="text/javascript" src="../chipper/js/initialize-globals.js"></script>
 
   <script type="text/javascript">
     window.assertions.enableAssert();
@@ -925,8 +925,8 @@
           ];
 
           var filterSubset = function( array, queryParameterKey ) {
-            if ( phet.phetcommon.getQueryParameter( queryParameterKey ) ) {
-              var test = phet.phetcommon.getQueryParameter( queryParameterKey );
+            if ( phet.chipper.getQueryParameter( queryParameterKey ) ) {
+              var test = phet.chipper.getQueryParameter( queryParameterKey );
               var testIndices = test.split( '.' ).map( function( test ) {
                 return parseInt( test, 10 );
               } );

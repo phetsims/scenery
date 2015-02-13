@@ -105,6 +105,7 @@ define( function( require ) {
     this.onmouseout = function onmouseout( domEvent ) { input.batchEvent( domEvent, BatchedDOMEvent.MOUSE_TYPE, input.mouseOut, false ); };
     this.onkeydown = function onkeydown( domEvent ) { input.batchEvent( domEvent, BatchedDOMEvent.KEY_TYPE, input.keyDown, false ); };
     this.onkeyup = function onkeyup( domEvent ) { input.batchEvent( domEvent, BatchedDOMEvent.KEY_TYPE, input.keyUp, false ); };
+    this.onwheel = function onwheel( domEvent ) { input.batchEvent( domEvent, BatchedDOMEvent.WHEEL_TYPE, input.wheel, false ); };
     this.uselessListener = function uselessListener( domEvent ) {};
   };
   var Input = scenery.Input;
@@ -150,6 +151,7 @@ define( function( require ) {
       touchListenerTypes: [ 'touchstart', 'touchend', 'touchmove', 'touchcancel' ],
       mouseListenerTypes: [ 'mousedown', 'mouseup', 'mousemove', 'mouseover', 'mouseout' ],
       keyListenerTypes: [ 'keydown', 'keyup' ],
+      wheelListenerTypes: [ 'wheel' ],
 
       // W3C spec for pointer events
       canUsePointerEvents: function() {
@@ -182,6 +184,7 @@ define( function( require ) {
         }
 
         eventTypes = eventTypes.concat( this.keyListenerTypes );
+        eventTypes = eventTypes.concat( this.wheelListenerTypes );
 
         return eventTypes;
       },
@@ -386,6 +389,16 @@ define( function( require ) {
             this.dispatchEvent( focusedTrail, 'up', key, event, true );
           }
         }
+      },
+
+      // called on mouse wheels
+      wheel: function( event ) {
+        sceneryLog && sceneryLog.Input && sceneryLog.Input( 'wheel(' + Input.debugKeyEvent( event ) + ');' );
+        if ( this.logEvents ) { this.eventLog.push( 'wheel(' + Input.serializeDomEvent( event ) + ');' ); }
+        if ( !this.mouse ) { this.initMouse(); }
+        this.mouse.wheel( event );
+        var trail = this.rootNode.trailUnderPointer( this.mouse ) || new scenery.Trail( this.rootNode );
+        this.dispatchEvent( trail, 'wheel', this.mouse, event, true );
       },
 
       // called for each touch point
@@ -1020,6 +1033,8 @@ define( function( require ) {
       KEY_TAB: 9,
       KEY_RIGHT_ARROW: 39,
       KEY_LEFT_ARROW: 37,
+      KEY_UP_ARROW: 38,
+      KEY_DOWN_ARROW: 40,
       KEY_SHIFT: 16,
       KEY_ESCAPE: 27
     } );

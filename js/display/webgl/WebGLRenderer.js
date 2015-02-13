@@ -64,6 +64,9 @@ define( function( require ) {
     gl.clear( gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT );
     gl.enable( gl.DEPTH_TEST );
 
+    gl.blendFunc( gl.SRC_ALPHA, gl.ONE_MINUS_SRC_ALPHA );
+    gl.enable( gl.BLEND );
+
     this.colorTriangleRenderer = new ColorTriangleRenderer( gl, this.backingScale, this.canvas );
     this.textureRenderer = new TextureRenderer( gl, this.backingScale, this.canvas );
     this.customWebGLRenderers = [];
