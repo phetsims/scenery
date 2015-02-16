@@ -1,4 +1,4 @@
-//  Copyright 2002-2014, University of Colorado Boculder
+//  Copyright 2002-2014, University of Colorado Boulder
 
 /**
  * LayoutBox lays out its children in a row, either horizontally or vertically (based on an optional parameter).
