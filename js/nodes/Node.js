@@ -46,6 +46,10 @@ define( function( require ) {
     return node._parents.length === 0;
   }
 
+  function defaultLeafTrailPredicate( node ) {
+    return node._children.length === 0;
+  }
+
   /*
    * Available keys for use in the options parameter object for a vanilla Node (not inherited), in the order they are executed in:
    *
@@ -121,6 +125,15 @@ define( function( require ) {
 
     // the CSS cursor to be displayed over this node. null should be the default (inherit) value
     this._cursor = null;
+
+    // {bool} Whether this Node should be accessible via tab ordering. Defaults to false
+    this._focusable = false;
+    // {string} - 'cursor' or 'rectangle' at the moment. WARNING: in active development!
+    this._focusIndicator = 'rectangle';
+    // {Array.<Node> | null} - If provided, it will override the focus order between children (and optionally descendants).
+    // If not provided, the focus order will default to the rendering order (first children first, last children last)
+    // determined by the children array.
+    this._focusOrder = null;
 
     this._children = []; // ordered
     this._parents = []; // unordered
@@ -1500,6 +1513,44 @@ define( function( require ) {
       return this._clipArea !== null;
     },
 
+    setFocusable: function( focusable ) {
+      if ( this._focusable !== focusable ) {
+        this._focusable = focusable;
+
+        this.trigger0( 'focusable' );
+      }
+    },
+
+    getFocusable: function() {
+      return this._focusable;
+    },
+
+    setFocusIndicator: function( focusIndicator ) {
+      if ( this._focusIndicator !== focusIndicator ) {
+        this._focusIndicator = focusIndicator;
+
+        this.trigger0( 'focusIndicator' );
+      }
+    },
+
+    getFocusIndicator: function() {
+      return this._focusIndicator;
+    },
+
+    setFocusOrder: function( focusOrder ) {
+      assert && assert( focusOrder === null || focusOrder instanceof Array );
+
+      if ( this._focusOrder !== focusOrder ) {
+        this._focusOrder = focusOrder;
+
+        this.trigger0( 'focusOrder' );
+      }
+    },
+
+    getFocusOrder: function() {
+      return this._focusOrder;
+    },
+
     supportsCanvas: function() {
       return ( this._rendererBitmask & scenery.bitmaskSupportsCanvas ) !== 0;
     },
@@ -1664,7 +1715,9 @@ define( function( require ) {
      * @returns {Trail} - Returns the one Trail that starts from a node with no parents (or if the predicate is present,
      *                    a node that satisfies it), and ends at this node. If more than one Trail would satisfy these
      *                    conditions, an assertion is thrown (please use getTrails() for those cases).
-     * @param {function( node ) : boolean} [predicate] - If supplied, we will only return
+     * @param {function( node ) : boolean} [predicate] - If supplied, we will only return trails rooted at a node that
+     *                                                   satisfies predicate( node ) == true
+     * @public
      */
     getUniqueTrail: function( predicate ) {
 
@@ -1696,10 +1749,23 @@ define( function( require ) {
     },
 
     /**
+     * @returns {Trail} - Returns a Trail rooted at rootNode and ends at this node. Throws an assertion if the number of
+     *                    trails that match this condition isn't exactly 1.
+     * @param {Node} rootNode
+     * @public
+     */
+    getUniqueTrailTo: function( rootNode ) {
+      return this.getUniqueTrail( function( node ) {
+        return rootNode === node;
+      } );
+    },
+
+    /**
      * @returns {Trail[]} - An array of all Trails that start from nodes with no parent (or if a predicate is present,
      *                      those that satisfy the predicate), and ends at this node.
      * @param {function( node ) : boolean} [predicate] - If supplied, we will only return Trails rooted at nodes that
      *                                                   satisfy predicate( node ) == true.
+     * @public
      */
     getTrails: function( predicate ) {
       predicate = predicate || defaultTrailPredicate;
@@ -1711,7 +1777,79 @@ define( function( require ) {
       return trails;
     },
 
-    // all nodes in the connected component, returned in an arbitrary order
+    /**
+     * @returns {Trail[]} - An array of all Trails rooted at rootNode and end at this node.
+     * @param {Node} rootNode
+     * @public
+     */
+    getTrailsTo: function( rootNode ) {
+      return this.getTrails( function( node ) {
+        return node === rootNode;
+      } );
+    },
+
+    /**
+     * @returns {Trail[]} - An array of all Trails rooted at this node and end with nodes with no children (or if a
+     *                      predicate is present, those that satisfy the predicate).
+     * @param {function( node ) : boolean} [predicate] - If supplied, we will only return Trails ending at nodes that
+     *                                                   satisfy predicate( node ) == true.
+     * @public
+     */
+    getLeafTrails: function( predicate ) {
+      predicate = predicate || defaultLeafTrailPredicate;
+
+      var trails = [];
+      var trail = new scenery.Trail( this );
+      scenery.Trail.appendDescendantTrailsWithPredicate( trails, trail, predicate );
+
+      return trails;
+    },
+
+    /**
+     * @returns {Trail[]} - An array of all Trails rooted at this node and end with leafNode.
+     * @param {Node} leafNode
+     * @public
+     */
+    getLeafTrailsTo: function( leafNode ) {
+      return this.getLeafTrails( function( node ) {
+        return node === leafNode;
+      } );
+    },
+
+    /**
+     * @returns {Trail} - Returns a Trail rooted at this node and ending at a node that has no children (or if a
+     *                    predicate is provided, a node that satisfies the predicate). If more than one trail matches
+     *                    this description, an assertion will be fired.
+     * @param {function( node ) : boolean} [predicate] - If supplied, we will return a Trail that ends with a node that
+     *                                                   satisfies predicate( node ) == true
+     * @public
+     */
+    getUniqueLeafTrail: function( predicate ) {
+      var trails = this.getLeafTrails( predicate );
+
+      assert && assert( trails.length === 1,
+        'getUniqueLeafTrail found ' + trails.length + ' matching trails for the predicate' );
+
+      return trails[0];
+    },
+
+    /**
+     * @returns {Trail} - Returns a Trail rooted at this node and ending at leafNode. If more than one trail matches
+     *                    this description, an assertion will be fired.
+     * @param {Node} leafNode
+     * @public
+     */
+    getUniqueLeafTrailTo: function( leafNode ) {
+      return this.getUniqueLeafTrail( function( node ) {
+        return node === leafNode;
+      } );
+    },
+
+    /*
+     * @returns {Array.<Node>} All nodes in the connected component, returned in an arbitrary order, including
+     *                         nodes that are ancestors of this node.
+     * @public
+     */
     getConnectedNodes: function() {
       var result = [];
       var fresh = this._children.concat( this._parents ).concat( this );
@@ -1725,6 +1863,90 @@ define( function( require ) {
       return result;
     },
 
+    /**
+     * Returns {Array.<Trail>} trails for all visible focusable trails rooted at the {Node} node passed in.
+     *
+     * @param {Node} node - The root node used for the focus order
+     * @public
+     */
+    getSerializedFocusOrder: function() {
+      var trails = []; // to be appended to and returned
+      var currentTrail = new scenery.Trail( this );
+      var pruneStack = []; // {Array.<Node>} - A list of nodes to prune
+
+      function addTrailsForNode( node, overridePruning ) {
+        // We skip invisible subtrees (including the root!)
+        if ( !node.isVisible() ) {
+          return;
+        }
+
+        // If subtrees were specified with focusOrder, they should be skipped from the ordering of ancestor subtrees,
+        // otherwise we could end up having multiple references to the same trail (which should be disallowed).
+        var pruneCount = 0;
+        var pruneStackLength = pruneStack.length;
+        // count the number of times our node appears in the pruneStack
+        for ( var m = 0; m < pruneStackLength; m++ ) {
+          if ( node === pruneStack[m] ) {
+            pruneCount++;
+          }
+        }
+        // If overridePruning is set, we ignore one reference to our node in the prune stack. If there are two copies,
+        // however, it means a node was specified in a focusOrder that already needs to be pruned (so we skip it instead
+        // of creating duplicate references in the tab order).
+        if ( pruneCount > 1 || ( pruneCount === 1 && !overridePruning ) ) {
+          return;
+        }
+
+        if ( node.focusable ) {
+          trails.push( currentTrail.copy() );
+        }
+
+        if ( node._focusOrder ) {
+          var numFocusNodes = node._focusOrder.length;
+
+          // push specific focused nodes to the stack
+          for ( var l = 0; l < numFocusNodes; l++ ) {
+            pruneStack.push( node._focusOrder[l] );
+          }
+
+          for ( var j = 0; j < numFocusNodes; j++ ) {
+            var descendant = node._focusOrder[j];
+
+            // Find all descendant references to the node. We only want one reference, however.
+            // TODO: for production performance, don't do a full scan. Check children first, then scan only if necessary
+            var descendantTrail = node.getUniqueLeafTrailTo( descendant );
+            descendantTrail.removeAncestor(); // strip off 'node', so that we handle only children
+
+            // same as the normal order, but adding a full trail (since we may be referencing a descendant node)
+            currentTrail.addDescendantTrail( descendantTrail );
+            addTrailsForNode( descendant, true ); // 'true' overrides one reference in the prune stack (added above)
+            currentTrail.removeDescendantTrail( descendantTrail );
+          }
+
+          // pop focused nodes from the stack (that were added above)
+          for ( var k = 0; k < numFocusNodes; k++ ) {
+            pruneStack.pop();
+          }
+        }
+        // with no focusOrder, all children are scanned in the rendering order
+        else {
+          var numChildren = node.children.length;
+          for ( var i = 0; i < numChildren; i++ ) {
+            var child = node.children[i];
+
+            currentTrail.addDescendant( child, i );
+            addTrailsForNode( child, false );
+            currentTrail.removeDescendant();
+          }
+        }
+      }
+
+      addTrailsForNode( this, false );
+
+      return trails;
+    },
+
+    // @public {Array.<Node>} all connected nodes sorted in topological order.
     getTopologicallySortedNodes: function() {
       // see http://en.wikipedia.org/wiki/Topological_sorting
       var edges = {};
@@ -2232,6 +2454,15 @@ define( function( require ) {
     set clipArea( value ) { this.setClipArea( value ); },
     get clipArea() { return this.getClipArea(); },
 
+    set focusable( value ) { this.setFocusable( value ); },
+    get focusable() { return this.getFocusable(); },
+
+    set focusIndicator( value ) { this.setFocusIndicator( value ); },
+    get focusIndicator() { return this.getFocusIndicator(); },
+
+    set focusOrder( value ) { this.setFocusOrder( value ); },
+    get focusOrder() { return this.getFocusOrder(); },
+
     set visible( value ) { this.setVisible( value ); },
     get visible() { return this.isVisible(); },
 
@@ -2513,7 +2744,7 @@ define( function( require ) {
     'leftTop', 'centerTop', 'rightTop', 'leftCenter', 'center', 'rightCenter', 'leftBottom', 'centerBottom', 'rightBottom',
     'left', 'right', 'top', 'bottom', 'centerX', 'centerY', 'renderer', 'rendererOptions',
     'layerSplit', 'usesOpacity', 'mouseArea', 'touchArea', 'clipArea', 'transformBounds', 'focusable', 'focusIndicator',
-    'textDescription'
+    'focusOrder', 'textDescription'
   ];
 
   return Node;

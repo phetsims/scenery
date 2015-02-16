@@ -690,6 +690,25 @@
     equal( rect.strokeColor.alpha, 1, 'Stroke alpha after change' );
   } );
 
+  function compareTrailArrays( a, b ) {
+    // defensive copies
+    a = a.slice();
+    b = b.slice();
+
+    for ( var i = 0; i < a.length; i++ ) {
+      // for each A, remove the first matching one in B
+      for ( var j = 0; j < b.length; j++ ) {
+        if ( a[i].equals( b[j] ) ) {
+          b.splice( j, 1 );
+          break;
+        }
+      }
+    }
+
+    // now B should be empty
+    return b.length === 0;
+  }
+
   test( 'getTrails/getUniqueTrail', function() {
     var a = new scenery.Node();
     var b = new scenery.Node();
@@ -703,25 +722,6 @@
     b.addChild( d );
     c.addChild( d );
     c.addChild( e );
-
-    function compareTrailArrays( a, b ) {
-      // defensive copies
-      a = a.slice();
-      b = b.slice();
-
-      for ( var i = 0; i < a.length; i++ ) {
-        // for each A, remove the first matching one in B
-        for ( var j = 0; j < b.length; j++ ) {
-          if ( a[i].equals( b[j] ) ) {
-            b.splice( j, 1 );
-            break;
-          }
-        }
-      }
-
-      // now B should be empty
-      return b.length === 0;
-    }
 
     // getUniqueTrail()
     window.assert && throws( function() { d.getUniqueTrail(); }, 'D has no unique trail, since there are two' );
@@ -777,6 +777,72 @@
     ok( compareTrailArrays( trails, [
       new scenery.Trail( [ b, d ] ),
       new scenery.Trail( [ c, d ] )
+    ] ) );
+  } );
+
+  test( 'getLeafTrails', function() {
+    var a = new scenery.Node();
+    var b = new scenery.Node();
+    var c = new scenery.Node();
+    var d = new scenery.Node();
+    var e = new scenery.Node();
+
+    // DAG-like structure
+    a.addChild( b );
+    a.addChild( c );
+    b.addChild( d );
+    c.addChild( d );
+    c.addChild( e );
+
+    // getUniqueLeafTrail()
+    window.assert && throws( function() { a.getUniqueLeafTrail(); }, 'A has no unique leaf trail, since there are three' );
+    ok( b.getUniqueLeafTrail().equals( new scenery.Trail( [ b, d ] ) ), 'a.getUniqueLeafTrail()' );
+    ok( d.getUniqueLeafTrail().equals( new scenery.Trail( [ d ] ) ), 'b.getUniqueLeafTrail()' );
+    ok( e.getUniqueLeafTrail().equals( new scenery.Trail( [ e ] ) ), 'c.getUniqueLeafTrail()' );
+
+    // getLeafTrails()
+    var trails;
+    trails = a.getLeafTrails();
+    ok( trails.length === 3 && compareTrailArrays( trails, [
+      new scenery.Trail( [ a, b, d ] ),
+      new scenery.Trail( [ a, c, d ] ),
+      new scenery.Trail( [ a, c, e ] )
+    ] ), 'a.getLeafTrails()' );
+    trails = b.getLeafTrails();
+    ok( trails.length === 1 && trails[0].equals( new scenery.Trail( [ b, d ] ) ), 'b.getLeafTrails()' );
+    trails = c.getLeafTrails();
+    ok( trails.length === 2 && compareTrailArrays( trails, [
+      new scenery.Trail( [ c, d ] ),
+      new scenery.Trail( [ c, e ] )
+    ] ), 'c.getLeafTrails()' );
+    trails = d.getLeafTrails();
+    ok( trails.length === 1 && trails[0].equals( new scenery.Trail( [ d ] ) ), 'd.getLeafTrails()' );
+    trails = e.getLeafTrails();
+    ok( trails.length === 1 && trails[0].equals( new scenery.Trail( [ e ] ) ), 'e.getLeafTrails()' );
+
+    // getUniqueLeafTrail( predicate )
+    window.assert && throws( function() { e.getUniqueLeafTrail( function( node ) { return false; } ); }, 'Fails on false predicate' );
+    window.assert && throws( function() { a.getUniqueLeafTrail( function( node ) { return true; } ); }, 'Fails on multiples' );
+    ok( a.getUniqueLeafTrail( function( node ) { return node === e; } ).equals( new scenery.Trail( [ a, c, e ] ) ) );
+
+    // getLeafTrails( predicate )
+    trails = a.getLeafTrails( function( node ) { return false; } );
+    ok( trails.length === 0 );
+    trails = a.getLeafTrails( function( node ) { return true; } );
+    ok( compareTrailArrays( trails, [
+      new scenery.Trail( [ a ] ),
+      new scenery.Trail( [ a, b ] ),
+      new scenery.Trail( [ a, b, d ] ),
+      new scenery.Trail( [ a, c ] ),
+      new scenery.Trail( [ a, c, d ] ),
+      new scenery.Trail( [ a, c, e ] )
+    ] ) );
+
+    // getLeafTrailsTo( node )
+    trails = a.getLeafTrailsTo( d );
+    ok( compareTrailArrays( trails, [
+      new scenery.Trail( [ a, b, d ] ),
+      new scenery.Trail( [ a, c, d ] )
     ] ) );
   } );
 })();

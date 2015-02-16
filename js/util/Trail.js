@@ -56,7 +56,7 @@ define( function( require ) {
     this.length = 0;
     this.uniqueId = '';
 
-    // indices[x] stores the index of nodes[x] in nodes[x-1]'s children
+    // indices[x] stores the index of nodes[x] in nodes[x-1]'s children, e.g. nodes[i].children[ indices[i] ] === nodes[i+1]
     this.indices = [];
 
     var trail = this;
@@ -251,6 +251,25 @@ define( function( require ) {
       this.length--;
       this.updateUniqueId();
       return this;
+    },
+
+    addDescendantTrail: function( trail ) {
+      var length = trail.length;
+      if ( length ) {
+        this.addDescendant( trail.nodes[0] );
+      }
+      for ( var i = 1; i < length; i++ ) {
+        this.addDescendant( trail.nodes[i], this.indices[i-1] );
+      }
+    },
+
+    removeDescendantTrail: function( trail ) {
+      var length = trail.length;
+      for ( var i = length - 1; i >= 0; i-- ) {
+        assert && assert( this.lastNode() === trail.nodes[i] );
+
+        this.removeDescendant();
+      }
     },
 
     // refreshes the internal index references (important if any children arrays were modified!)
@@ -657,11 +676,12 @@ define( function( require ) {
   };
 
   Trail.appendAncestorTrailsWithPredicate = function( trailResults, trail, predicate ) {
-    if ( predicate( trail.rootNode() ) ) {
+    var root = trail.rootNode();
+
+    if ( predicate( root ) ) {
       trailResults.push( trail.copy() );
     }
 
-    var root = trail.rootNode();
     var parentCount = root._parents.length;
     for ( var i = 0; i < parentCount; i++ ) {
       var parent = root._parents[ i ];
@@ -669,6 +689,23 @@ define( function( require ) {
       trail.addAncestor( parent );
       Trail.appendAncestorTrailsWithPredicate( trailResults, trail, predicate );
       trail.removeAncestor();
+    }
+  };
+
+  Trail.appendDescendantTrailsWithPredicate = function( trailResults, trail, predicate ) {
+    var lastNode = trail.lastNode();
+
+    if ( predicate( lastNode ) ) {
+      trailResults.push( trail.copy() );
+    }
+
+    var childCount = lastNode._children.length;
+    for ( var i = 0; i < childCount; i++ ) {
+      var child = lastNode._children[ i ];
+
+      trail.addDescendant( child, i );
+      Trail.appendDescendantTrailsWithPredicate( trailResults, trail, predicate );
+      trail.removeDescendant();
     }
   };
 

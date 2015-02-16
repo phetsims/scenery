@@ -21,4 +21,5 @@ function runSceneryTests( pathToTestBase ) {
   loadTestFile( 'js/miscellaneous.js' );
   loadTestFile( 'js/linting.js' );
   loadTestFile( 'js/display.js' );
+  loadTestFile( 'js/focus.js' );
 };
