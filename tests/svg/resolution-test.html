@@ -53,6 +53,9 @@
 <label for="renderer">
   <input autocomplete="off" type="radio" name="renderer" id="mipmap-webgl">Mipmap (WebGL)</input>
 </label>
+<label for="renderer">
+  <input autocomplete="off" type="radio" name="renderer" id="mipmap-levels-webgl">Levels Mipmap (WebGL)</input>
+</label>
 
 <div id="container">
 </div>
@@ -96,309 +99,455 @@
     var base64URL = 'data:image/svg+xml;base64,PD94bWwgdmVyc2lvbj0iMS4wIiBlbmNvZGluZz0idXRmLTgiPz4NCjwhLS0gR2VuZXJhdG9yOiBBZG9iZSBJbGx1c3RyYXRvciAxNi4wLjMsIFNWRyBFeHBvcnQgUGx1Zy1JbiAuIFNWRyBWZXJzaW9uOiA2LjAwIEJ1aWxkIDApICAtLT4NCjwhRE9DVFlQRSBzdmcgUFVCTElDICItLy9XM0MvL0RURCBTVkcgMS4xLy9FTiIgImh0dHA6Ly93d3cudzMub3JnL0dyYXBoaWNzL1NWRy8xLjEvRFREL3N2ZzExLmR0ZCI+DQo8c3ZnIHZlcnNpb249IjEuMSIgaWQ9IkxheWVyXzEiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyIgeG1sbnM6eGxpbms9Imh0dHA6Ly93d3cudzMub3JnLzE5OTkveGxpbmsiIHg9IjBweCIgeT0iMHB4Ig0KICAgd2lkdGg9IjU5LjAzNnB4IiBoZWlnaHQ9IjIwOC4zMjlweCIgdmlld0JveD0iMCAwIDU5LjAzNiAyMDguMzI5IiBlbmFibGUtYmFja2dyb3VuZD0ibmV3IDAgMCA1OS4wMzYgMjA4LjMyOSINCiAgIHhtbDpzcGFjZT0icHJlc2VydmUiPg0KPGxpbmVhckdyYWRpZW50IGlkPSJTVkdJRF8xXyIgZ3JhZGllbnRVbml0cz0idXNlclNwYWNlT25Vc2UiIHgxPSIyMi4zMzQ1IiB5MT0iMzUuNjYyNiIgeDI9IjI2LjAwMTUiIHkyPSIzNS42NjI2IiBncmFkaWVudFRyYW5zZm9ybT0ibWF0cml4KDEuMjA0NiAwIDAgMSA1LjMzMzkgMCkiPg0KICA8c3RvcCAgb2Zmc2V0PSIwIiBzdHlsZT0ic3RvcC1jb2xvcjojOTYxQzFGIi8+DQogIDxzdG9wICBvZmZzZXQ9IjAuNSIgc3R5bGU9InN0b3AtY29sb3I6I0IwNjA1RCIvPg0KICA8c3RvcCAgb2Zmc2V0PSIwLjU2MjMiIHN0eWxlPSJzdG9wLWNvbG9yOiNBMDUyNEUiLz4NCiAgPHN0b3AgIG9mZnNldD0iMC42OTk0IiBzdHlsZT0ic3RvcC1jb2xvcjojODIzODM1Ii8+DQogIDxzdG9wICBvZmZzZXQ9IjAuODIyOSIgc3R5bGU9InN0b3AtY29sb3I6IzZGMjcyNSIvPg0KICA8c3RvcCAgb2Zmc2V0PSIwLjkyNzMiIHN0eWxlPSJzdG9wLWNvbG9yOiM2NDFEMUQiLz4NCiAgPHN0b3AgIG9mZnNldD0iMSIgc3R5bGU9InN0b3AtY29sb3I6IzYxMTkxQiIvPg0KPC9saW5lYXJHcmFkaWVudD4NCjxlbGxpcHNlIGZpbGw9InVybCgjU1ZHSURfMV8pIiBzdHJva2U9IiMwMTAxMDEiIHN0cm9rZS13aWR0aD0iMC41ODkiIHN0cm9rZS1taXRlcmxpbWl0PSIxMCIgY3g9IjM0LjQ0NyIgY3k9IjM1LjY2MyIgcng9IjIuMjA4IiByeT0iMS44MzMiLz4NCjxsaW5lYXJHcmFkaWVudCBpZD0iU1ZHSURfMl8iIGdyYWRpZW50VW5pdHM9InVzZXJTcGFjZU9uVXNlIiB4MT0iMjYuMDAxNSIgeTE9IjM1LjY2MjYiIHgyPSIyOS42NjgiIHkyPSIzNS42NjI2IiBncmFkaWVudFRyYW5zZm9ybT0ibWF0cml4KDEuMjA0NiAwIDAgMSA1LjMzMzkgMCkiPg0KICA8c3RvcCAgb2Zmc2V0PSIwIiBzdHlsZT0ic3RvcC1jb2xvcjojOTYxQzFGIi8+DQogIDxzdG9wICBvZmZzZXQ9IjAuNSIgc3R5bGU9InN0b3AtY29sb3I6I0IwNjA1RCIvPg0KICA8c3RvcCAgb2Zmc2V0PSIwLjU2MjMiIHN0eWxlPSJzdG9wLWNvbG9yOiNBMDUyNEUiLz4NCiAgPHN0b3AgIG9mZnNldD0iMC42OTk0IiBzdHlsZT0ic3RvcC1jb2xvcjojODIzODM1Ii8+DQogIDxzdG9wICBvZmZzZXQ9IjAuODIyOSIgc3R5bGU9InN0b3AtY29sb3I6IzZGMjcyNSIvPg0KICA8c3RvcCAgb2Zmc2V0PSIwLjkyNzMiIHN0eWxlPSJzdG9wLWNvbG9yOiM2NDFEMUQiLz4NCiAgPHN0b3AgIG9mZnNldD0iMSIgc3R5bGU9InN0b3AtY29sb3I6IzYxMTkxQiIvPg0KPC9saW5lYXJHcmFkaWVudD4NCjxlbGxpcHNlIGZpbGw9InVybCgjU1ZHSURfMl8pIiBzdHJva2U9IiMwMTAxMDEiIHN0cm9rZS13aWR0aD0iMC41ODkiIHN0cm9rZS1taXRlcmxpbWl0PSIxMCIgY3g9IjM4Ljg2NCIgY3k9IjM1LjY2MyIgcng9IjIuMjA4IiByeT0iMS44MzMiLz4NCjxsaW5lYXJHcmFkaWVudCBpZD0iU1ZHSURfM18iIGdyYWRpZW50VW5pdHM9InVzZXJTcGFjZU9uVXNlIiB4MT0iMjkuNjY4IiB5MT0iMzUuNjYyNiIgeDI9IjMzLjMzNTQiIHkyPSIzNS42NjI2IiBncmFkaWVudFRyYW5zZm9ybT0ibWF0cml4KDEuMjA0NiAwIDAgMSA1LjMzMzkgMCkiPg0KICA8c3RvcCAgb2Zmc2V0PSIwIiBzdHlsZT0ic3RvcC1jb2xvcjojOTYxQzFGIi8+DQogIDxzdG9wICBvZmZzZXQ9IjAuNSIgc3R5bGU9InN0b3AtY29sb3I6I0IwNjA1RCIvPg0KICA8c3RvcCAgb2Zmc2V0PSIwLjU2MjMiIHN0eWxlPSJzdG9wLWNvbG9yOiNBMDUyNEUiLz4NCiAgPHN0b3AgIG9mZnNldD0iMC42OTk0IiBzdHlsZT0ic3RvcC1jb2xvcjojODIzODM1Ii8+DQogIDxzdG9wICBvZmZzZXQ9IjAuODIyOSIgc3R5bGU9InN0b3AtY29sb3I6IzZGMjcyNSIvPg0KICA8c3RvcCAgb2Zmc2V0PSIwLjkyNzMiIHN0eWxlPSJzdG9wLWNvbG9yOiM2NDFEMUQiLz4NCiAgPHN0b3AgIG9mZnNldD0iMSIgc3R5bGU9InN0b3AtY29sb3I6IzYxMTkxQiIvPg0KPC9saW5lYXJHcmFkaWVudD4NCjxlbGxpcHNlIGZpbGw9InVybCgjU1ZHSURfM18pIiBzdHJva2U9IiMwMTAxMDEiIHN0cm9rZS13aWR0aD0iMC41ODkiIHN0cm9rZS1taXRlcmxpbWl0PSIxMCIgY3g9IjQzLjI4MSIgY3k9IjM1LjY2MyIgcng9IjIuMjA4IiByeT0iMS44MzMiLz4NCjxsaW5lYXJHcmFkaWVudCBpZD0iU1ZHSURfNF8iIGdyYWRpZW50VW5pdHM9InVzZXJTcGFjZU9uVXNlIiB4MT0iMzMuMzM1NCIgeTE9IjM1LjY2MjYiIHgyPSIzNy4wMDE1IiB5Mj0iMzUuNjYyNiIgZ3JhZGllbnRUcmFuc2Zvcm09Im1hdHJpeCgxLjIwNDYgMCAwIDEgNS4zMzM5IDApIj4NCiAgPHN0b3AgIG9mZnNldD0iMCIgc3R5bGU9InN0b3AtY29sb3I6Izk2MUMxRiIvPg0KICA8c3RvcCAgb2Zmc2V0PSIwLjUiIHN0eWxlPSJzdG9wLWNvbG9yOiNCMDYwNUQiLz4NCiAgPHN0b3AgIG9mZnNldD0iMC41NjIzIiBzdHlsZT0ic3RvcC1jb2xvcjojQTA1MjRFIi8+DQogIDxzdG9wICBvZmZzZXQ9IjAuNjk5NCIgc3R5bGU9InN0b3AtY29sb3I6IzgyMzgzNSIvPg0KICA8c3RvcCAgb2Zmc2V0PSIwLjgyMjkiIHN0eWxlPSJzdG9wLWNvbG9yOiM2RjI3MjUiLz4NCiAgPHN0b3AgIG9mZnNldD0iMC45MjczIiBzdHlsZT0ic3RvcC1jb2xvcjojNjQxRDFEIi8+DQogIDxzdG9wICBvZmZzZXQ9IjEiIHN0eWxlPSJzdG9wLWNvbG9yOiM2MTE5MUIiLz4NCjwvbGluZWFyR3JhZGllbnQ+DQo8ZWxsaXBzZSBmaWxsPSJ1cmwoI1NWR0lEXzRfKSIgc3Ryb2tlPSIjMDEwMTAxIiBzdHJva2Utd2lkdGg9IjAuNTg5IiBzdHJva2UtbWl0ZXJsaW1pdD0iMTAiIGN4PSI0Ny42OTgiIGN5PSIzNS42NjMiIHJ4PSIyLjIwOCIgcnk9IjEuODMzIi8+DQo8cmFkaWFsR3JhZGllbnQgaWQ9IlNWR0lEXzVfIiBjeD0iMjIuNDQ4NyIgY3k9IjYxLjkxMjYiIHI9IjIwLjc5NDQiIGdyYWRpZW50VW5pdHM9InVzZXJTcGFjZU9uVXNlIj4NCiAgPHN0b3AgIG9mZnNldD0iMC4wMDU2IiBzdHlsZT0ic3RvcC1jb2xvcjojQzVDNkM4Ii8+DQogIDxzdG9wICBvZmZzZXQ9IjAuMjk3OCIgc3R5bGU9InN0b3AtY29sb3I6I0JEQkVDMCIvPg0KICA8c3RvcCAgb2Zmc2V0PSIwLjY1NzMiIHN0eWxlPSJzdG9wLWNvbG9yOiNBOEFBQUQiLz4NCiAgPHN0b3AgIG9mZnNldD0iMC45OTY5IiBzdHlsZT0ic3RvcC1jb2xvcjojOUI5REEwIi8+DQogIDxzdG9wICBvZmZzZXQ9IjEiIHN0eWxlPSJzdG9wLWNvbG9yOiM5QjlEQTAiLz4NCjwvcmFkaWFsR3JhZGllbnQ+DQo8cGF0aCBmaWxsPSJ1cmwoI1NWR0lEXzVfKSIgc3Ryb2tlPSIjMDEwMTAxIiBzdHJva2UtbWl0ZXJsaW1pdD0iMTAiIGQ9Ik0yOS42OTksODIuOTEzYzAsNC4xNDItMy4yNDYsNy41LTcuMjUsNy41bDAsMA0KICBjLTQuMDA0LDAtNy4yNS0zLjM1OC03LjI1LTcuNXYtNDJjMC00LjE0MiwzLjI0Ni03LjUsNy4yNS03LjVsMCwwYzQuMDA0LDAsNy4yNSwzLjM1OCw3LjI1LDcuNVY4Mi45MTN6Ii8+DQo8cGF0aCBmaWxsPSIjOUI5REEwIiBzdHJva2U9IiMwMTAxMDEiIHN0cm9rZS13aWR0aD0iMS4wMDI3IiBzdHJva2UtbWl0ZXJsaW1pdD0iMTAiIGQ9Ik0yMS4xOTksNjUuOTkxDQogIGMwLDQuODU4LTIuNSw3LjcwNS03LjMzMyw3LjcwNWwtMC42NTQsMC4wNDJjLTAuNzg2LDAtMC43NjMsMC43NTktMi4wMzUsMC43NWMtMy44NjQtMC4wMjgtNy40NzgtNC40MjgtNy40NzgtOC40OTdWNTIuMDg0DQogIGMwLTMuOTQxLDIuNTc5LTcuMjc3LDYuMTMyLTguMzk1YzEuMDU4LTAuMzMzLDEuMjY1LDAuNTk5LDIuNjE4LDAuNTk5bDAsMGM0LjgzMywwLDguNzUsMi45MzgsOC43NSw3Ljc5NlY2NS45OTF6Ii8+DQo8bGluZWFyR3JhZGllbnQgaWQ9IlNWR0lEXzZfIiBncmFkaWVudFVuaXRzPSJ1c2VyU3BhY2VPblVzZSIgeDE9IjI1LjIxNTgiIHkxPSIxMjEuMTc2MyIgeDI9IjU0LjczMzkiIHkyPSIxMjEuMTc2MyI+DQogIDxzdG9wICBvZmZzZXQ9IjAiIHN0eWxlPSJzdG9wLWNvbG9yOiM5NjFDMUYiLz4NCiAgPHN0b3AgIG9mZnNldD0iMC41IiBzdHlsZT0ic3RvcC1jb2xvcjojQjA2MDVEIi8+DQogIDxzdG9wICBvZmZzZXQ9IjAuNTYyMyIgc3R5bGU9InN0b3AtY29sb3I6I0EwNTI0RSIvPg0KICA8c3RvcCAgb2Zmc2V0PSIwLjY5OTQiIHN0eWxlPSJzdG9wLWNvbG9yOiM4MjM4MzUiLz4NCiAgPHN0b3AgIG9mZnNldD0iMC44MjI5IiBzdHlsZT0ic3RvcC1jb2xvcjojNkYyNzI1Ii8+DQogIDxzdG9wICBvZmZzZXQ9IjAuOTI3MyIgc3R5bGU9InN0b3AtY29sb3I6IzY0MUQxRCIvPg0KICA8c3RvcCAgb2Zmc2V0PSIxIiBzdHlsZT0ic3RvcC1jb2xvcjojNjExOTFCIi8+DQo8L2xpbmVhckdyYWRpZW50Pg0KPHBhdGggZmlsbD0idXJsKCNTVkdJRF82XykiIHN0cm9rZT0iIzAxMDEwMSIgc3Ryb2tlLXdpZHRoPSIwLjk2MTgiIHN0cm9rZS1taXRlcmxpbWl0PSIxMCIgZD0iTTUxLjQ0MiwxNjMuMDg0DQogIGMtMS4zNjktMTMuMjkyLTEuNjI4LTI2LjY2Ny0xLjkwNC00MC4wMThjLTAuNDc5LTIzLjEzNC0wLjg3OS00Ni4yNy0xLjMyNy02OS40MDRjMC0xLjE0Ny0wLjE5My00LjI4NywxLjM2NC02LjU2Mg0KICBjMS4zODItMi4wMTcsNC41MzYtMy4xNDEsNC41NDItNC43NzVjMC4wMTUtNC41MTEtNi4wODYtNi42NjMtOC42ODItNi42NjNIMzMuNDA5Yy00LjU5OSwwLTEuODUxLDEzLjAyOS0xLjg1MSwxOA0KICBjMCwyLjIyOC0wLjA4Nyw0LjQ1OS0wLjEzMSw2LjY4N2MtMC40MDIsMjAuNDkzLDAuMjIsNDAuOTg2LTAuMTg4LDYxLjQ3OWMtMC4wNTIsMi41ODYtMC4yNDIsNS4xODEtMC40MjIsNy43Ng0KICBjLTAuNTQxLDcuNzI4LTEuMjEyLDE1LjQ0My0xLjg0NiwyMy4xNjRjLTAuNzU2LDkuMjA1LTIuNTA0LDE4LjMwOC0zLjE5NCwyNy41MDljLTAuMzE2LDQuMjExLTAuODI5LDguNDA5LTAuMzk0LDEyLjYzMg0KICBjMC40NjQsNC41MDcsMC41NjIsOC42NDcsNC4xMzQsMTEuNDEzYzMuOTUsMy4wNTgsMTEuNzAzLDIuNzI0LDE2LjQ1NCwxLjQ4YzMuMjk3LTAuODYyLDUuNDAxLTIuODkxLDYuNjk1LTUuNTIxDQogIGMxLjYwMy0zLjI1OCwyLjA3NS02LjkzNSwyLjA2Ny0xMC41MjhDNTQuNzE3LDE4MC44NDksNTIuMzUsMTcxLjkwOCw1MS40NDIsMTYzLjA4NHogTTM5LjE5OCwxOTcuNjYzDQogIGMtMi44OTksMC01LjI1LTIuMzUxLTUuMjUtNS4yNXMyLjM1MS01LjI1LDUuMjUtNS4yNXM1LjI1LDIuMzUxLDUuMjUsNS4yNVM0Mi4wOTcsMTk3LjY2MywzOS4xOTgsMTk3LjY2M3oiLz4NCjxyYWRpYWxHcmFkaWVudCBpZD0iU1ZHSURfN18iIGN4PSIzMS44MjM3IiBjeT0iNTkuMDM3NiIgcj0iMTguOTc4OCIgZ3JhZGllbnRVbml0cz0idXNlclNwYWNlT25Vc2UiPg0KICA8c3RvcCAgb2Zmc2V0PSIwLjAwNTYiIHN0eWxlPSJzdG9wLWNvbG9yOiNDNUM2QzgiLz4NCiAgPHN0b3AgIG9mZnNldD0iMC4yOTc4IiBzdHlsZT0ic3RvcC1jb2xvcjojQkRCRUMwIi8+DQogIDxzdG9wICBvZmZzZXQ9IjAuNjU3MyIgc3R5bGU9InN0b3AtY29sb3I6I0E4QUFBRCIvPg0KICA8c3RvcCAgb2Zmc2V0PSIwLjk5NjkiIHN0eWxlPSJzdG9wLWNvbG9yOiM5QjlEQTAiLz4NCiAgPHN0b3AgIG9mZnNldD0iMSIgc3R5bGU9InN0b3AtY29sb3I6IzlCOURBMCIvPg0KPC9yYWRpYWxHcmFkaWVudD4NCjxwb2x5bGluZSBmaWxsPSJ1cmwoI1NWR0lEXzdfKSIgc3Ryb2tlPSIjMDEwMTAxIiBzdHJva2UtbWl0ZXJsaW1pdD0iMTAiIHBvaW50cz0iMTAuMTk5LDc0LjQxMyA1My44MjQsNzQuNDEzIDUzLjgyNCw3Mi4wMzgNCiAgNTMuODI0LDY5LjE2MyA1My44MjQsNjYuNTM4IDUxLjU3NCw2NS40MTMgNDguODI0LDYzLjUzOCA0Ni4zMjQsNjAuNjYzIDQ1LjE5OSw1Ny45MTMgNDUuMDc0LDU0LjY2MyA0NC42OTksNTEuMjg4IDQ0LjQ0OSw0Ny42NjMNCiAgNDMuNDQ5LDQ1LjY2MyA0Mi4wNzQsNDQuNjYzIDM5LjMyNCw0My42NjMgOS44MjQsNDMuNjYzICIvPg0KPHBhdGggZmlsbD0iIzI2MjYyNiIgZD0iTTQyLjAxMiwxMzAuMzg3YzAsMTUuOTA2LDEuMzksMjkuOTcsMC42ODUsMzguNDg3Yy0wLjQ0Niw1LjQtMi44NDIsMTAuMjg4LTMuNDMsMTAuMjg4DQogIGMtMC41NzksMC0yLjk2Ni00Ljc4Mi0zLjQwNy0xMC4wMTljLTAuNzE5LTguNDksMC42NjItMjIuNjgyLDAuNjYyLTM4Ljc1N2MwLTE0Ljg1NC0xLjQ0OS0yNy4yNDItMC44MjMtMzUuODY2DQogIGMwLjQ3MS02LjQ2NiwyLjkxOC0xMS4xOTIsMy41NjgtMTEuMTkyYzAuNjU4LDAsMy4xMTEsNC44MjYsMy41ODQsMTEuNDQyQzQzLjQ2OCwxMDMuNDAxLDQyLjAxMiwxMTUuNjc3LDQyLjAxMiwxMzAuMzg3eiIvPg0KPHJhZGlhbEdyYWRpZW50IGlkPSJTVkdJRF84XyIgY3g9IjI5LjY5ODciIGN5PSI1NS4wNjAxIiByPSIzLjk5MjIiIGdyYWRpZW50VW5pdHM9InVzZXJTcGFjZU9uVXNlIj4NCiAgPHN0b3AgIG9mZnNldD0iMCIgc3R5bGU9InN0b3AtY29sb3I6I0ZGRjNEQyIvPg0KICA8c3RvcCAgb2Zmc2V0PSIwLjMwOSIgc3R5bGU9InN0b3AtY29sb3I6I0Q3QjE4QSIvPg0KICA8c3RvcCAgb2Zmc2V0PSIwLjY3OTEiIHN0eWxlPSJzdG9wLWNvbG9yOiM5QzYzMzgiLz4NCiAgPHN0b3AgIG9mZnNldD0iMC43ODA5IiBzdHlsZT0ic3RvcC1jb2xvcjojOEU1MTI3Ii8+DQogIDxzdG9wICBvZmZzZXQ9IjEiIHN0eWxlPSJzdG9wLWNvbG9yOiM1NDE4MTYiLz4NCjwvcmFkaWFsR3JhZGllbnQ+DQo8Y2lyY2xlIGZpbGw9InVybCgjU1ZHSURfOF8pIiBzdHJva2U9IiMwMTAxMDEiIHN0cm9rZS1taXRlcmxpbWl0PSIxMCIgY3g9IjI5LjY5OSIgY3k9IjU1LjA2IiByPSIzLjk5MiIvPg0KPHBhdGggZmlsbD0iIzQ4NDg0OCIgZD0iTTM4Ljc3MSwxODUuOTEzYy0zLjMyLDAtNi4wMTQsMi45MTEtNi4wMTQsNi41czIuNjkzLDYuNSw2LjAxNCw2LjVjMy4zMjEsMCw2LjE3OC0yLjc4Niw2LjE3OC02LjM3NQ0KICBTNDIuMDkyLDE4NS45MTMsMzguNzcxLDE4NS45MTN6IE0zOS4yMjYsMTk3LjA0OGMtMi41NzgsMC00LjY2OS0yLjI2LTQuNjY5LTUuMDQ3YzAtMi43ODYsMi40NTQtNC4yMTQsNC41MTctNC4yMTQNCiAgYzEuOTM4LDAsNC44MjEsMS40MjgsNC44MjEsNC4yMTRDNDMuODk1LDE5NC43ODksNDEuODAzLDE5Ny4wNDgsMzkuMjI2LDE5Ny4wNDh6Ii8+DQo8cmFkaWFsR3JhZGllbnQgaWQ9IlNWR0lEXzlfIiBjeD0iMjIuMDU5MSIgY3k9IjE4LjEwMDEiIHI9IjEuODMzMyIgZ3JhZGllbnRUcmFuc2Zvcm09Im1hdHJpeCgxLjIwNDYgMCAwIDEgNS4zMzM5IDApIiBncmFkaWVudFVuaXRzPSJ1c2VyU3BhY2VPblVzZSI+DQogIDxzdG9wICBvZmZzZXQ9IjAuMDA1NiIgc3R5bGU9InN0b3AtY29sb3I6I0M1QzZDOCIvPg0KICA8c3RvcCAgb2Zmc2V0PSIwLjI5NzgiIHN0eWxlPSJzdG9wLWNvbG9yOiNCREJFQzAiLz4NCiAgPHN0b3AgIG9mZnNldD0iMC42NTczIiBzdHlsZT0ic3RvcC1jb2xvcjojQThBQUFEIi8+DQogIDxzdG9wICBvZmZzZXQ9IjAuOTk2OSIgc3R5bGU9InN0b3AtY29sb3I6IzlCOURBMCIvPg0KICA8c3RvcCAgb2Zmc2V0PSIxIiBzdHlsZT0ic3RvcC1jb2xvcjojOUI5REEwIi8+DQo8L3JhZGlhbEdyYWRpZW50Pg0KPGVsbGlwc2UgZmlsbD0idXJsKCNTVkdJRF85XykiIHN0cm9rZT0iIzAxMDEwMSIgc3Ryb2tlLXdpZHRoPSIwLjU4OSIgc3Ryb2tlLW1pdGVybGltaXQ9IjEwIiBjeD0iMzEuOTA3IiBjeT0iMTguMSIgcng9IjIuMjA4IiByeT0iMS44MzMiLz4NCjxyYWRpYWxHcmFkaWVudCBpZD0iU1ZHSURfMTBfIiBjeD0iMjUuNzI1NiIgY3k9IjE4LjEwMDEiIHI9IjEuODMzIiBncmFkaWVudFRyYW5zZm9ybT0ibWF0cml4KDEuMjA0NiAwIDAgMSA1LjMzMzkgMCkiIGdyYWRpZW50VW5pdHM9InVzZXJTcGFjZU9uVXNlIj4NCiAgPHN0b3AgIG9mZnNldD0iMC4wMDU2IiBzdHlsZT0ic3RvcC1jb2xvcjojQzVDNkM4Ii8+DQogIDxzdG9wICBvZmZzZXQ9IjAuMjk3OCIgc3R5bGU9InN0b3AtY29sb3I6I0JEQkVDMCIvPg0KICA8c3RvcCAgb2Zmc2V0PSIwLjY1NzMiIHN0eWxlPSJzdG9wLWNvbG9yOiNBOEFBQUQiLz4NCiAgPHN0b3AgIG9mZnNldD0iMC45OTY5IiBzdHlsZT0ic3RvcC1jb2xvcjojOUI5REEwIi8+DQogIDxzdG9wICBvZmZzZXQ9IjEiIHN0eWxlPSJzdG9wLWNvbG9yOiM5QjlEQTAiLz4NCjwvcmFkaWFsR3JhZGllbnQ+DQo8ZWxsaXBzZSBmaWxsPSJ1cmwoI1NWR0lEXzEwXykiIHN0cm9rZT0iIzAxMDEwMSIgc3Ryb2tlLXdpZHRoPSIwLjU4OSIgc3Ryb2tlLW1pdGVybGltaXQ9IjEwIiBjeD0iMzYuMzI0IiBjeT0iMTguMSIgcng9IjIuMjA4IiByeT0iMS44MzMiLz4NCjxyYWRpYWxHcmFkaWVudCBpZD0iU1ZHSURfMTFfIiBjeD0iMjkuMzkyMSIgY3k9IjE4LjEwMDEiIHI9IjEuODMzNSIgZ3JhZGllbnRUcmFuc2Zvcm09Im1hdHJpeCgxLjIwNDYgMCAwIDEgNS4zMzM5IDApIiBncmFkaWVudFVuaXRzPSJ1c2VyU3BhY2VPblVzZSI+DQogIDxzdG9wICBvZmZzZXQ9IjAuMDA1NiIgc3R5bGU9InN0b3AtY29sb3I6I0M1QzZDOCIvPg0KICA8c3RvcCAgb2Zmc2V0PSIwLjI5NzgiIHN0eWxlPSJzdG9wLWNvbG9yOiNCREJFQzAiLz4NCiAgPHN0b3AgIG9mZnNldD0iMC42NTczIiBzdHlsZT0ic3RvcC1jb2xvcjojQThBQUFEIi8+DQogIDxzdG9wICBvZmZzZXQ9IjAuOTk2OSIgc3R5bGU9InN0b3AtY29sb3I6IzlCOURBMCIvPg0KICA8c3RvcCAgb2Zmc2V0PSIxIiBzdHlsZT0ic3RvcC1jb2xvcjojOUI5REEwIi8+DQo8L3JhZGlhbEdyYWRpZW50Pg0KPGVsbGlwc2UgZmlsbD0idXJsKCNTVkdJRF8xMV8pIiBzdHJva2U9IiMwMTAxMDEiIHN0cm9rZS13aWR0aD0iMC41ODkiIHN0cm9rZS1taXRlcmxpbWl0PSIxMCIgY3g9IjQwLjc0IiBjeT0iMTguMSIgcng9IjIuMjA4IiByeT0iMS44MzMiLz4NCjxyYWRpYWxHcmFkaWVudCBpZD0iU1ZHSURfMTJfIiBjeD0iMzMuMDU5MSIgY3k9IjE4LjEwMDEiIHI9IjEuODMzIiBncmFkaWVudFRyYW5zZm9ybT0ibWF0cml4KDEuMjA0NiAwIDAgMSA1LjMzMzkgMCkiIGdyYWRpZW50VW5pdHM9InVzZXJTcGFjZU9uVXNlIj4NCiAgPHN0b3AgIG9mZnNldD0iMC4wMDU2IiBzdHlsZT0ic3RvcC1jb2xvcjojQzVDNkM4Ii8+DQogIDxzdG9wICBvZmZzZXQ9IjAuMjk3OCIgc3R5bGU9InN0b3AtY29sb3I6I0JEQkVDMCIvPg0KICA8c3RvcCAgb2Zmc2V0PSIwLjY1NzMiIHN0eWxlPSJzdG9wLWNvbG9yOiNBOEFBQUQiLz4NCiAgPHN0b3AgIG9mZnNldD0iMC45OTY5IiBzdHlsZT0ic3RvcC1jb2xvcjojOUI5REEwIi8+DQogIDxzdG9wICBvZmZzZXQ9IjEiIHN0eWxlPSJzdG9wLWNvbG9yOiM5QjlEQTAiLz4NCjwvcmFkaWFsR3JhZGllbnQ+DQo8ZWxsaXBzZSBmaWxsPSJ1cmwoI1NWR0lEXzEyXykiIHN0cm9rZT0iIzAxMDEwMSIgc3Ryb2tlLXdpZHRoPSIwLjU4OSIgc3Ryb2tlLW1pdGVybGltaXQ9IjEwIiBjeD0iNDUuMTU3IiBjeT0iMTguMSIgcng9IjIuMjA4IiByeT0iMS44MzMiLz4NCjxyYWRpYWxHcmFkaWVudCBpZD0iU1ZHSURfMTNfIiBjeD0iMzYuNzI1MSIgY3k9IjE4LjEwMDEiIHI9IjEuODMzIiBncmFkaWVudFRyYW5zZm9ybT0ibWF0cml4KDEuMjA0NiAwIDAgMSA1LjMzMzkgMCkiIGdyYWRpZW50VW5pdHM9InVzZXJTcGFjZU9uVXNlIj4NCiAgPHN0b3AgIG9mZnNldD0iMC4wMDU2IiBzdHlsZT0ic3RvcC1jb2xvcjojQzVDNkM4Ii8+DQogIDxzdG9wICBvZmZzZXQ9IjAuMjk3OCIgc3R5bGU9InN0b3AtY29sb3I6I0JEQkVDMCIvPg0KICA8c3RvcCAgb2Zmc2V0PSIwLjY1NzMiIHN0eWxlPSJzdG9wLWNvbG9yOiNBOEFBQUQiLz4NCiAgPHN0b3AgIG9mZnNldD0iMC45OTY5IiBzdHlsZT0ic3RvcC1jb2xvcjojOUI5REEwIi8+DQogIDxzdG9wICBvZmZzZXQ9IjEiIHN0eWxlPSJzdG9wLWNvbG9yOiM5QjlEQTAiLz4NCjwvcmFkaWFsR3JhZGllbnQ+DQo8ZWxsaXBzZSBmaWxsPSJ1cmwoI1NWR0lEXzEzXykiIHN0cm9rZT0iIzAxMDEwMSIgc3Ryb2tlLXdpZHRoPSIwLjU4OSIgc3Ryb2tlLW1pdGVybGltaXQ9IjEwIiBjeD0iNDkuNTc0IiBjeT0iMTguMSIgcng9IjIuMjA4IiByeT0iMS44MzMiLz4NCjxyYWRpYWxHcmFkaWVudCBpZD0iU1ZHSURfMTRfIiBjeD0iNDAuMzkyMSIgY3k9IjE4LjEwMDEiIHI9IjEuODMzIiBncmFkaWVudFRyYW5zZm9ybT0ibWF0cml4KDEuMjA0NiAwIDAgMSA1LjMzMzkgMCkiIGdyYWRpZW50VW5pdHM9InVzZXJTcGFjZU9uVXNlIj4NCiAgPHN0b3AgIG9mZnNldD0iMC4wMDU2IiBzdHlsZT0ic3RvcC1jb2xvcjojQzVDNkM4Ii8+DQogIDxzdG9wICBvZmZzZXQ9IjAuMjk3OCIgc3R5bGU9InN0b3AtY29sb3I6I0JEQkVDMCIvPg0KICA8c3RvcCAgb2Zmc2V0PSIwLjY1NzMiIHN0eWxlPSJzdG9wLWNvbG9yOiNBOEFBQUQiLz4NCiAgPHN0b3AgIG9mZnNldD0iMC45OTY5IiBzdHlsZT0ic3RvcC1jb2xvcjojOUI5REEwIi8+DQogIDxzdG9wICBvZmZzZXQ9IjEiIHN0eWxlPSJzdG9wLWNvbG9yOiM5QjlEQTAiLz4NCjwvcmFkaWFsR3JhZGllbnQ+DQo8ZWxsaXBzZSBmaWxsPSJ1cmwoI1NWR0lEXzE0XykiIHN0cm9rZT0iIzAxMDEwMSIgc3Ryb2tlLXdpZHRoPSIwLjU4OSIgc3Ryb2tlLW1pdGVybGltaXQ9IjEwIiBjeD0iNTMuOTkiIGN5PSIxOC4xIiByeD0iMi4yMDgiIHJ5PSIxLjgzMyIvPg0KPHJhZGlhbEdyYWRpZW50IGlkPSJTVkdJRF8xNV8iIGN4PSIzNS42OTg3IiBjeT0iMjIuNjQ5NCIgcj0iMjAuNzU4MiIgZ3JhZGllbnRVbml0cz0idXNlclNwYWNlT25Vc2UiPg0KICA8c3RvcCAgb2Zmc2V0PSIwLjAwNTYiIHN0eWxlPSJzdG9wLWNvbG9yOiNDNUM2QzgiLz4NCiAgPHN0b3AgIG9mZnNldD0iMC4yOTc4IiBzdHlsZT0ic3RvcC1jb2xvcjojQkRCRUMwIi8+DQogIDxzdG9wICBvZmZzZXQ9IjAuNjU3MyIgc3R5bGU9InN0b3AtY29sb3I6I0E4QUFBRCIvPg0KICA8c3RvcCAgb2Zmc2V0PSIwLjk5NjkiIHN0eWxlPSJzdG9wLWNvbG9yOiM5QjlEQTAiLz4NCiAgPHN0b3AgIG9mZnNldD0iMSIgc3R5bGU9InN0b3AtY29sb3I6IzlCOURBMCIvPg0KPC9yYWRpYWxHcmFkaWVudD4NCjxwYXRoIGZpbGw9InVybCgjU1ZHSURfMTVfKSIgc3Ryb2tlPSIjMDEwMTAxIiBzdHJva2UtbWl0ZXJsaW1pdD0iMTAiIGQ9Ik0xNS4xOTksNDMuNjYzdi0xNnYtN2MwLDAsMC02Ljk3OCwwLTcNCiAgYzAtOC4yOTEsOS4xNTgtMTIuMDc0LDE2LjE5Ny0xMi4wMjZDMzcuNzQsMS42OCw0NS4xMTUsMS4yMzYsNTAuMzYzLDUuNTJjNC4yNTgsMy40NzYsNS44MzYsNy4yNzEsNS44MzYsMTIuNjQzaC0yLjVoLTIuNWgtNGgtNA0KICBoLTMuNWgtNGgtMy41aC0yLjV2MjUuNUgxNS4xOTl6Ii8+DQo8L3N2Zz4=';
     var rawSVGString = atob( base64URL.slice( base64URL.indexOf( ',' ) + 1 ) );
 
-    var mipmapLevels = [
-      1 / 32,
-      1 / 16,
-      1 / 8,
-      1 / 4,
-      1 / 2,
-      1,
-      2,
-      4,
-      8,
-      16,
-      32
-    ];
-    var mipmapCanvases = {};
-    var mipmapURLs = {};
-    var mipmapImages = {};
-    mipmapLevels.forEach( function( level ) {
-      var canvas = document.createElement( 'canvas' );
-      canvg( canvas, rawSVGString, {
-        ignoreMouse: true,
-        ignoreAnimation: true,
-        // scaleWidth: level,
-        // scaleHeight: level
-        // TODO: scale viewbox in SVG string instead of this
+    var originalImage = document.createElement( 'img' );
+    originalImage.onload = function() {
+      console.log( 'loaded' );
+
+      initialize();
+    };
+    originalImage.src = 'wrench-8x.png';
+
+    // returns the smallest power of 2 that is greater than or equal
+    function toPowerOf2( n ) {
+      var result = 1;
+      while ( result < n ) {
+        result *= 2;
+      }
+      return result;
+    }
+
+    function drawHalfScaleCanvas( width, height, context, biggerCanvas, biggerContext ) {
+      context.setTransform( 1/2, 0, 0, 1/2, 0, 0 );
+      context.drawImage( biggerCanvas, 0, 0 );
+    }
+
+    function blend( r1, r2, r3, r4, a1, a2, a3, a4, aSum ) {
+      if ( aSum === 0 ) {
+        return 0;
+      }
+      else {
+        // return ( r1 * a1 + r2 * a2 + r3 * a3 + r4 * a4 ) / aSum;
+        var gamma = 2.2;
+        return 255 * Math.pow( ( Math.pow( r1 / 255, 2.2 ) * a1 + Math.pow( r2 / 255, gamma ) * a2 + Math.pow( r3 / 255, gamma ) * a3 + Math.pow( r4 / 255, gamma ) * a4 ) / aSum, 1 / gamma );
+      }
+    }
+
+    function drawHalfScaleHQCanvas( width, height, context, biggerCanvas, biggerContext ) {
+      // see http://en.wikipedia.org/wiki/Alpha_compositing#Alpha_blending, this uses non-premultiplied colors
+      // outAlpha = srcAlpha + dstAlpha * ( 1 - srcAlpha )
+      // outColor = ( srcColor * srcAlpha + dstColor * dstAlpha ( 1 - srcAlpha ) ) / outAlpha
+      // if ( outAlpha = 0 ) { outColor = 0 }
+      // sRGB gamma 2.2
+      // average the alphas?
+
+      var biggerData = biggerContext.getImageData( 0, 0, width * 2, height * 2 );
+      var data = context.createImageData( width, height );
+
+      for ( var row = 0; row < height; row++ ) {
+        for ( var col = 0; col < width; col++ ) {
+          var dataIndex = ( row * width + col ) * 4;
+          var biggerDataIndex1 = ( ( 2 * row ) * ( 2 * width ) + 2 * col ) * 4;
+          var biggerDataIndex2 = ( ( 2 * row + 1 ) * ( 2 * width ) + 2 * col ) * 4;
+          var biggerDataIndex3 = ( ( 2 * row ) * ( 2 * width ) + 2 * col + 1 ) * 4;
+          var biggerDataIndex4 = ( ( 2 * row + 1 ) * ( 2 * width ) + 2 * col + 1 ) * 4;
+
+          var a1 = biggerData.data[biggerDataIndex1 + 3];
+          var a2 = biggerData.data[biggerDataIndex2 + 3];
+          var a3 = biggerData.data[biggerDataIndex3 + 3];
+          var a4 = biggerData.data[biggerDataIndex4 + 3];
+          var aSum = a1 + a2 + a3 + a4;
+
+          // red
+          data.data[dataIndex + 0] = blend( biggerData.data[biggerDataIndex1 + 0],
+                                            biggerData.data[biggerDataIndex2 + 0],
+                                            biggerData.data[biggerDataIndex3 + 0],
+                                            biggerData.data[biggerDataIndex4 + 0],
+                                            a1, a2, a3, a4, aSum );
+          // green
+          data.data[dataIndex + 1] = blend( biggerData.data[biggerDataIndex1 + 1],
+                                            biggerData.data[biggerDataIndex2 + 1],
+                                            biggerData.data[biggerDataIndex3 + 1],
+                                            biggerData.data[biggerDataIndex4 + 1],
+                                            a1, a2, a3, a4, aSum );
+          // blue
+          data.data[dataIndex + 2] = blend( biggerData.data[biggerDataIndex1 + 2],
+                                            biggerData.data[biggerDataIndex2 + 2],
+                                            biggerData.data[biggerDataIndex3 + 2],
+                                            biggerData.data[biggerDataIndex4 + 2],
+                                            a1, a2, a3, a4, aSum );
+          // alpha
+          data.data[dataIndex + 3] = aSum / 4;
+        }
+      }
+
+      context.putImageData( data, 0, 0 );
+
+      // context.setTransform( 1/2, 0, 0, 1/2, 0, 0 );
+      // context.drawImage( biggerCanvas, 0, 0 );
+    }
+
+    function initialize() {
+      var mipmapLevels = [
+        8,
+        4,
+        2,
+        1,
+        1 / 2,
+        1 / 4,
+        1 / 8,
+        1 / 16,
+        1 / 32,
+        1 / 64,
+        1 / 128,
+        1 / 256
+      ];
+      var mipmapCanvases = {};
+      var mipmapPowerOf2Canvases = {};
+      var mipmapURLs = {};
+      var mipmapImages = {};
+
+      // set up the initial canvas
+      var currentTarget = document.createElement( 'canvas' );
+      currentTarget.width = originalImage.width;
+      currentTarget.height = originalImage.height;
+      var currentContext = currentTarget.getContext( '2d' );
+      currentContext.drawImage( originalImage, 0, 0 );
+
+      var currentPowerOf2Target = document.createElement( 'canvas' );
+      // TODO: support non-square mipmapping
+      currentPowerOf2Target.width = Math.max( toPowerOf2( originalImage.width ), toPowerOf2( originalImage.height ) );
+      currentPowerOf2Target.height = Math.max( toPowerOf2( originalImage.width ), toPowerOf2( originalImage.height ) );
+      var currentPowerOf2Context = currentPowerOf2Target.getContext( '2d' );
+      currentPowerOf2Context.drawImage( originalImage, 0, 0 );
+
+      mipmapLevels.forEach( function( level ) {
+        var scaleFromOriginalImage = level / 8; // our original image is 8x
+        var levelWidth = Math.ceil( originalImage.width * scaleFromOriginalImage );
+        var levelHeight = Math.ceil( originalImage.height * scaleFromOriginalImage );
+        // TODO: support non-square mipmapping
+        var powerOf2Size = toPowerOf2( Math.max( originalImage.width, originalImage.height ) ) * scaleFromOriginalImage
+        var powerOf2Width = powerOf2Size;
+        var powerOf2Height = powerOf2Size;
+        var canvasScale = scaleFromOriginalImage === 1 ? 1 : 1/2;
+
+        var canvas = document.createElement( 'canvas' );
+        canvas.width = levelWidth;
+        canvas.height = levelHeight;
+        var context = canvas.getContext( '2d' );
+
+        var powerOf2Canvas = document.createElement( 'canvas' );
+        powerOf2Canvas.width = powerOf2Width;
+        powerOf2Canvas.height = powerOf2Height;
+        var powerOf2Context = powerOf2Canvas.getContext( '2d' );
+
+        if ( scaleFromOriginalImage !== 1 ) {
+          // draw into a fitted image
+          // drawHalfScaleHQCanvas( levelWidth, levelHeight, context, currentTarget, currentContext );
+          drawHalfScaleCanvas( levelWidth, levelHeight, context, currentTarget, currentContext );
+
+          // draw into a fitted but expanded-to-closest-power-of-2 image
+          // drawHalfScaleHQCanvas( levelWidth, levelHeight, powerOf2Context, currentTarget, currentContext );
+          drawHalfScaleCanvas( powerOf2Width, powerOf2Height, powerOf2Context, currentPowerOf2Target, currentPowerOf2Context );
+        }
+        else {
+          context.drawImage( currentTarget, 0, 0 );
+          powerOf2Context.drawImage( currentTarget, 0, 0 );
+        }
+
+        currentTarget = canvas;
+        currentContext = context;
+        currentPowerOf2Target = powerOf2Canvas;
+        currentPowerOf2Context = powerOf2Context;
+
+        mipmapCanvases[level] = canvas;
+        mipmapPowerOf2Canvases[level] = powerOf2Canvas;
+        mipmapURLs[level] = canvas.toDataURL();
+
+        var img = document.createElement( 'img' );
+        img.src = mipmapURLs[level];
+        mipmapImages[level] = img;
+        console.log( 'level ' + level );
+        console.log( canvas.toDataURL() );
+        console.log( powerOf2Canvas.toDataURL() );
       } );
-      mipmapCanvases[level] = canvas;
-      mipmapURLs[level] = canvas.toDataURL();
-      var img = document.createElement( 'img' );
-      img.src = mipmapURLs[level];
-      mipmapImages[level] = img;
-      console.log( 'level ' + level );
-      console.log( img.src );
-    } );
 
-    var imageWidth = mipmapCanvases[1].width;
-    var imageHeight = mipmapCanvases[1].height;
-    var imageURL = mipmapCanvases[1].toDataURL();
-    var vectorImg = document.createElement( 'img' );
-    vectorImg.src = base64URL;
+      var imageWidth = mipmapCanvases[1].width;
+      var imageHeight = mipmapCanvases[1].height;
+      var imageURL = mipmapCanvases[1].toDataURL();
+      var vectorImg = document.createElement( 'img' );
+      vectorImg.src = base64URL;
 
-    var demoWidth = 1024;
-    var demoHeight = 1024;
-    var rotation = 0;
-    var scale = 1;
-    var currentTest = null;
+      var demoWidth = 1024;
+      var demoHeight = 1024;
+      var rotation = 0;
+      var scale = 1;
+      var currentTest = null;
 
-    function clearContainer() {
-      document.getElementById( 'container' ).innerHTML = '';
-    }
-    function getBackingScale( context ) {
-      if ( 'devicePixelRatio' in window ) {
-        var backingStoreRatio = context.webkitBackingStorePixelRatio ||
-                                context.mozBackingStorePixelRatio ||
-                                context.msBackingStorePixelRatio ||
-                                context.oBackingStorePixelRatio ||
-                                context.backingStorePixelRatio || 1
-
-        return window.devicePixelRatio / backingStoreRatio;
+      function clearContainer() {
+        document.getElementById( 'container' ).innerHTML = '';
       }
-      return 1;
-    }
+      function getBackingScale( context ) {
+        if ( 'devicePixelRatio' in window ) {
+          var backingStoreRatio = context.webkitBackingStorePixelRatio ||
+                                  context.mozBackingStorePixelRatio ||
+                                  context.msBackingStorePixelRatio ||
+                                  context.oBackingStorePixelRatio ||
+                                  context.backingStorePixelRatio || 1
 
-    function vectorSVG( url ) {
-      var svg = document.createElementNS( 'http://www.w3.org/2000/svg', 'svg' );
-      svg.setAttribute( 'width', demoWidth );
-      svg.setAttribute( 'height', demoHeight );
-      var g = document.createElementNS( 'http://www.w3.org/2000/svg', 'g' );
-      svg.appendChild( g );
-      document.getElementById( 'container' ).appendChild( svg );
-
-      var image = document.createElementNS( 'http://www.w3.org/2000/svg', 'image' );
-      image.setAttribute( 'x', -imageWidth / 2 );
-      image.setAttribute( 'y', -imageHeight / 2 );
-      image.setAttribute( 'width', imageWidth + 'px' );
-      image.setAttribute( 'height', imageHeight + 'px' );
-      image.setAttributeNS( 'http://www.w3.org/1999/xlink', 'xlink:href', url );
-      g.appendChild( image );
-
-      currentTest = {
-        update: function( rotation, scale ) {
-          var cos = scale * Math.cos( rotation );
-          var sin = scale * Math.sin( rotation );
-          var matrixString = 'matrix( ' + cos.toFixed( 20 ) + ', ' + (-sin).toFixed( 20 ) + ', ' + sin.toFixed( 20 ) + ', ' + cos.toFixed( 20 ) + ', ' + ( demoWidth / 2 ) + ', ' + ( demoHeight / 2 ) + ' )';
-          g.setAttribute( 'transform', matrixString );
+          return window.devicePixelRatio / backingStoreRatio;
         }
-      };
-      currentTest.update( rotation, scale );
-    }
-    document.getElementById( 'vector-svg' ).addEventListener( 'click', function() {
-      clearContainer();
-      vectorSVG( base64URL );
-    } );
-    document.getElementById( 'raster-svg' ).addEventListener( 'click', function() {
-      clearContainer();
-      vectorSVG( imageURL );
-    } );
-
-    function vectorCanvas( img ) {
-      var canvas = document.createElement( 'canvas' );
-      var context = canvas.getContext( '2d' );
-      var backingScale = getBackingScale( context );
-
-      canvas.width = demoWidth * backingScale;
-      canvas.height = demoHeight * backingScale;
-      canvas.style.width = demoWidth + 'px';
-      canvas.style.height = demoHeight + 'px';
-
-      document.getElementById( 'container' ).appendChild( canvas );
-
-      currentTest = {
-        update: function( rotation, scale ) {
-          var cos = scale * Math.cos( rotation );
-          var sin = scale * Math.sin( rotation );
-          context.setTransform( 1, 0, 0, 1, 0, 0 );
-          context.clearRect( 0, 0, canvas.width, canvas.height );
-          context.setTransform( cos, -sin, sin, cos, demoWidth / 2, demoHeight / 2 );
-          context.translate( -imageWidth / 2, -imageHeight / 2 );
-          context.drawImage( img, 0, 0 );
-        }
-      };
-      currentTest.update( rotation, scale );
-    }
-    document.getElementById( 'vector-canvas' ).addEventListener( 'click', function() {
-      clearContainer();
-      vectorCanvas( vectorImg );
-    } );
-
-    document.getElementById( 'raster-canvas' ).addEventListener( 'click', function() {
-      clearContainer();
-      vectorCanvas( mipmapImages[1] );
-    } );
-
-    function webgl( useMipmaps ) {
-      function createShader( source, type ) {
-        var shader = gl.createShader( type );
-        gl.shaderSource( shader, source );
-        gl.compileShader( shader );
-
-        if( !gl.getShaderParameter( shader, gl.COMPILE_STATUS ) ) {
-          console.log( gl.getShaderInfoLog( shader ) );
-          console.log( source );
-          throw new Error( 'GLSL compile error: ' + gl.getShaderInfoLog( shader ) );
-        }
-
-        return shader;
+        return 1;
       }
 
-      // returns the smallest power of 2 that is greater than or equal
-      function toPowerOf2( n ) {
-        var result = 1;
-        while ( result < n ) {
-          result *= 2;
-        }
-        return result;
-      }
+      function vectorSVG( url ) {
+        var svg = document.createElementNS( 'http://www.w3.org/2000/svg', 'svg' );
+        svg.setAttribute( 'width', demoWidth );
+        svg.setAttribute( 'height', demoHeight );
+        var g = document.createElementNS( 'http://www.w3.org/2000/svg', 'g' );
+        svg.appendChild( g );
+        document.getElementById( 'container' ).appendChild( svg );
 
-      var imageCanvas = document.createElement( 'canvas' );
-      var context = imageCanvas.getContext( '2d' );
-      imageCanvas.width = toPowerOf2( imageWidth );
-      imageCanvas.height = toPowerOf2( imageHeight );
-      context.drawImage( mipmapImages[1], 0, 0 );
-      console.log( imageCanvas.toDataURL() );
+        var image = document.createElementNS( 'http://www.w3.org/2000/svg', 'image' );
+        image.setAttribute( 'x', -imageWidth / 2 );
+        image.setAttribute( 'y', -imageHeight / 2 );
+        image.setAttribute( 'width', imageWidth + 'px' );
+        image.setAttribute( 'height', imageHeight + 'px' );
+        image.setAttributeNS( 'http://www.w3.org/1999/xlink', 'xlink:href', url );
+        g.appendChild( image );
 
-      var canvas = document.createElement( 'canvas' );
-      var options = { antialias: true };
-      var gl = canvas.getContext( 'webgl', options ) || canvas.getContext( 'experimental-webgl', options );
-      var backingScale = getBackingScale( gl );
-
-      canvas.width = demoWidth * backingScale;
-      canvas.height = demoHeight * backingScale;
-      canvas.style.width = demoWidth + 'px';
-      canvas.style.height = demoHeight + 'px';
-
-      document.getElementById( 'container' ).appendChild( canvas );
-
-      var program = gl.createProgram();
-
-      var vertexShader = createShader(
-        'attribute vec2 aVertex;\n' +
-        'uniform float uDemoWidth;\n' +
-        'uniform float uDemoHeight;\n' +
-        'uniform float uCanvasWidth;\n' +
-        'uniform float uCanvasHeight;\n' +
-        'uniform float uImageWidth;\n' +
-        'uniform float uImageHeight;\n' +
-        'uniform float uRotation;\n' +
-        'uniform float uScale;\n' +
-        'varying vec2 texCoord;\n' +
-        'void main() {\n' +
-        '  texCoord = ( vec2( aVertex.x, -aVertex.y ) * 0.5 + 0.5 ) * vec2( uImageWidth / uCanvasWidth, uImageHeight / uCanvasHeight );\n' +
-        '  vec2 position = vec2( aVertex.x * uImageWidth / uDemoWidth, aVertex.y * uImageHeight / uDemoHeight );\n' +
-        '  mat2 transform = mat2( cos( uRotation ) , sin( uRotation ), -sin( uRotation ), cos( uRotation ) ) * uScale;\n' +
-        '  gl_Position = vec4( transform * position, 0.0, 1.0 );\n' +
-        '}', gl.VERTEX_SHADER );
-      var fragmentShader = createShader(
-        'precision highp float;\n' +
-        'varying vec2 texCoord;\n' +
-        'uniform sampler2D uTexture;\n' +
-        'void main() {\n' +
-        // '  gl_FragColor = vec4( 1.0, 0.0, 0.0, 1.0 );\n' +
-        '  gl_FragColor = texture2D( uTexture, texCoord );\n' +
-        '}', gl.FRAGMENT_SHADER );
-
-      gl.attachShader( program, vertexShader );
-      gl.attachShader( program, fragmentShader );
-
-      gl.linkProgram( program );
-
-      if( !gl.getProgramParameter( program, gl.LINK_STATUS ) ) {
-        console.log( gl.getProgramInfoLog( program ) );
-        throw new Error( 'GLSL link error: ' + gl.getProgramInfoLog( program ) );
-      }
-
-      gl.deleteShader( vertexShader );
-      gl.deleteShader( fragmentShader );
-
-      var aVertex = gl.getAttribLocation( program, 'aVertex' );
-      var uTexture = gl.getUniformLocation( program, 'uTexture' );
-      var uRotation = gl.getUniformLocation( program, 'uRotation' );
-      var uScale = gl.getUniformLocation( program, 'uScale' );
-      var uDemoWidth = gl.getUniformLocation( program, 'uDemoWidth' );
-      var uDemoHeight = gl.getUniformLocation( program, 'uDemoHeight' );
-      var uImageWidth = gl.getUniformLocation( program, 'uImageWidth' );
-      var uImageHeight = gl.getUniformLocation( program, 'uImageHeight' );
-      var uCanvasWidth = gl.getUniformLocation( program, 'uCanvasWidth' );
-      var uCanvasHeight = gl.getUniformLocation( program, 'uCanvasHeight' );
-
-      var vertexBuffer = gl.createBuffer();
-      gl.bindBuffer( gl.ARRAY_BUFFER, vertexBuffer );
-      gl.bufferData( gl.ARRAY_BUFFER, new Float32Array( [
-        -1, -1,
-        -1, +1,
-        +1, -1,
-        +1, +1
-      ] ), gl.STATIC_DRAW );
-
-      var texture = gl.createTexture();
-      gl.bindTexture( gl.TEXTURE_2D, texture );
-      gl.texParameteri( gl.TEXTURE_2D, gl.TEXTURE_WRAP_S, gl.CLAMP_TO_EDGE );
-      gl.texParameteri( gl.TEXTURE_2D, gl.TEXTURE_WRAP_T, gl.CLAMP_TO_EDGE );
-      gl.texParameteri( gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, useMipmaps ? gl.LINEAR_MIPMAP_NEAREST : gl.LINEAR );
-      gl.texParameteri( gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, gl.LINEAR );
-      gl.pixelStorei( gl.UNPACK_FLIP_Y_WEBGL, false );
-      gl.texImage2D( gl.TEXTURE_2D, 0, gl.RGBA, gl.RGBA, gl.UNSIGNED_BYTE, imageCanvas );
-      gl.generateMipmap(gl.TEXTURE_2D);
-      gl.bindTexture( gl.TEXTURE_2D, null );
-
-      gl.viewport( 0, 0, demoWidth, demoHeight );
-      gl.clearColor( 0, 0, 0, 0 );
-      gl.useProgram( program );
-
-      gl.enableVertexAttribArray( aVertex );
-
-      currentTest = {
-        update: function( rotation, scale ) {
-          // TODO: uniform rotation
-
-          gl.uniform1f( uRotation, rotation );
-          gl.uniform1f( uScale, scale );
-          gl.uniform1f( uDemoWidth, demoWidth );
-          gl.uniform1f( uDemoHeight, demoHeight );
-          gl.uniform1f( uImageWidth, imageWidth );
-          gl.uniform1f( uImageHeight, imageHeight );
-          gl.uniform1f( uCanvasWidth, imageCanvas.width );
-          gl.uniform1f( uCanvasHeight, imageCanvas.height );
-
-          gl.activeTexture( gl.TEXTURE0 );
-          gl.bindTexture( gl.TEXTURE_2D, texture );
-          gl.uniform1i( uTexture, 0 );
-
-          gl.bindBuffer( gl.ARRAY_BUFFER, vertexBuffer );
-          gl.vertexAttribPointer( aVertex, 2, gl.FLOAT, false, 0, 0 );
-
-          gl.drawArrays( gl.TRIANGLE_STRIP, 0, 4 );
-
-          gl.bindTexture( gl.TEXTURE_2D, null );
-        }
-      };
-      currentTest.update( rotation, scale );
-    }
-    document.getElementById( 'raster-webgl' ).addEventListener( 'click', function() {
-      clearContainer();
-      webgl( false );
-    } );
-
-    document.getElementById( 'mipmap-webgl' ).addEventListener( 'click', function() {
-      clearContainer();
-      webgl( true );
-    } );
-
-    // default
-    vectorSVG( base64URL );
-
-    ( function step() {
-      requestAnimationFrame( step, document.getElementById( 'container' ) );
-
-      if ( !pausedCheckBox.checked ) {
-        rotation = rotationRadioButton.checked ? ( ( Date.now() / 1000 ) % ( 2 * Math.PI ) ) : 0;
-        scale = scalingRadioButton.checked ? ( Math.pow( 10, Math.cos( Date.now() / 1770 ) ) ) : 1;
-
+        currentTest = {
+          update: function( rotation, scale ) {
+            var cos = scale * Math.cos( rotation );
+            var sin = scale * Math.sin( rotation );
+            var matrixString = 'matrix( ' + cos.toFixed( 20 ) + ', ' + (-sin).toFixed( 20 ) + ', ' + sin.toFixed( 20 ) + ', ' + cos.toFixed( 20 ) + ', ' + ( demoWidth / 2 ) + ', ' + ( demoHeight / 2 ) + ' )';
+            g.setAttribute( 'transform', matrixString );
+          }
+        };
         currentTest.update( rotation, scale );
       }
-    } )();
+      document.getElementById( 'vector-svg' ).addEventListener( 'click', function() {
+        clearContainer();
+        vectorSVG( base64URL );
+      } );
+      document.getElementById( 'raster-svg' ).addEventListener( 'click', function() {
+        clearContainer();
+        vectorSVG( imageURL );
+      } );
+
+      function vectorCanvas( img ) {
+        var canvas = document.createElement( 'canvas' );
+        var context = canvas.getContext( '2d' );
+        var backingScale = getBackingScale( context );
+
+        canvas.width = demoWidth * backingScale;
+        canvas.height = demoHeight * backingScale;
+        canvas.style.width = demoWidth + 'px';
+        canvas.style.height = demoHeight + 'px';
+
+        document.getElementById( 'container' ).appendChild( canvas );
+
+        currentTest = {
+          update: function( rotation, scale ) {
+            var cos = scale * Math.cos( rotation );
+            var sin = scale * Math.sin( rotation );
+            context.setTransform( 1, 0, 0, 1, 0, 0 );
+            context.clearRect( 0, 0, canvas.width, canvas.height );
+            context.setTransform( cos, -sin, sin, cos, demoWidth / 2, demoHeight / 2 );
+            context.translate( -imageWidth / 2, -imageHeight / 2 );
+            context.drawImage( img, 0, 0 );
+          }
+        };
+        currentTest.update( rotation, scale );
+      }
+      document.getElementById( 'vector-canvas' ).addEventListener( 'click', function() {
+        clearContainer();
+        vectorCanvas( vectorImg );
+      } );
+
+      document.getElementById( 'raster-canvas' ).addEventListener( 'click', function() {
+        clearContainer();
+        vectorCanvas( mipmapImages[1] );
+      } );
+
+      function webgl( useMipmaps, useLevelsMipmaps ) {
+        function createShader( source, type ) {
+          var shader = gl.createShader( type );
+          gl.shaderSource( shader, source );
+          gl.compileShader( shader );
+
+          if( !gl.getShaderParameter( shader, gl.COMPILE_STATUS ) ) {
+            console.log( gl.getShaderInfoLog( shader ) );
+            console.log( source );
+            throw new Error( 'GLSL compile error: ' + gl.getShaderInfoLog( shader ) );
+          }
+
+          return shader;
+        }
+
+        var canvas = document.createElement( 'canvas' );
+        var options = { antialias: true };
+        var gl = canvas.getContext( 'webgl', options ) || canvas.getContext( 'experimental-webgl', options );
+        var backingScale = getBackingScale( gl );
+
+        canvas.width = demoWidth * backingScale;
+        canvas.height = demoHeight * backingScale;
+        canvas.style.width = demoWidth + 'px';
+        canvas.style.height = demoHeight + 'px';
+
+        document.getElementById( 'container' ).appendChild( canvas );
+
+        var program = gl.createProgram();
+
+        var vertexShader = createShader(
+          'attribute vec2 aVertex;\n' +
+          'uniform float uDemoWidth;\n' +
+          'uniform float uDemoHeight;\n' +
+          'uniform float uCanvasWidth;\n' +
+          'uniform float uCanvasHeight;\n' +
+          'uniform float uImageWidth;\n' +
+          'uniform float uImageHeight;\n' +
+          'uniform float uRotation;\n' +
+          'uniform float uScale;\n' +
+          'varying vec2 texCoord;\n' +
+          'void main() {\n' +
+          '  texCoord = ( vec2( aVertex.x, -aVertex.y ) * 0.5 + 0.5 ) * vec2( uImageWidth / uCanvasWidth, uImageHeight / uCanvasHeight );\n' +
+          '  vec2 position = vec2( aVertex.x * uImageWidth / uDemoWidth, aVertex.y * uImageHeight / uDemoHeight );\n' +
+          '  mat2 transform = mat2( cos( uRotation ) , sin( uRotation ), -sin( uRotation ), cos( uRotation ) ) * uScale;\n' +
+          '  gl_Position = vec4( transform * position, 0.0, 1.0 );\n' +
+          '}', gl.VERTEX_SHADER );
+        var fragmentShader = createShader(
+          'precision highp float;\n' +
+          'varying vec2 texCoord;\n' +
+          'uniform sampler2D uTexture;\n' +
+          'void main() {\n' +
+          // '  gl_FragColor = vec4( 1.0, 0.0, 0.0, 1.0 );\n' +
+          '  gl_FragColor = texture2D( uTexture, texCoord );\n' +
+          '}', gl.FRAGMENT_SHADER );
+
+        gl.attachShader( program, vertexShader );
+        gl.attachShader( program, fragmentShader );
+
+        gl.linkProgram( program );
+
+        if( !gl.getProgramParameter( program, gl.LINK_STATUS ) ) {
+          console.log( gl.getProgramInfoLog( program ) );
+          throw new Error( 'GLSL link error: ' + gl.getProgramInfoLog( program ) );
+        }
+
+        gl.deleteShader( vertexShader );
+        gl.deleteShader( fragmentShader );
+
+        var aVertex = gl.getAttribLocation( program, 'aVertex' );
+        var uTexture = gl.getUniformLocation( program, 'uTexture' );
+        var uRotation = gl.getUniformLocation( program, 'uRotation' );
+        var uScale = gl.getUniformLocation( program, 'uScale' );
+        var uDemoWidth = gl.getUniformLocation( program, 'uDemoWidth' );
+        var uDemoHeight = gl.getUniformLocation( program, 'uDemoHeight' );
+        var uImageWidth = gl.getUniformLocation( program, 'uImageWidth' );
+        var uImageHeight = gl.getUniformLocation( program, 'uImageHeight' );
+        var uCanvasWidth = gl.getUniformLocation( program, 'uCanvasWidth' );
+        var uCanvasHeight = gl.getUniformLocation( program, 'uCanvasHeight' );
+
+        var vertexBuffer = gl.createBuffer();
+        gl.bindBuffer( gl.ARRAY_BUFFER, vertexBuffer );
+        gl.bufferData( gl.ARRAY_BUFFER, new Float32Array( [
+          -1, -1,
+          -1, +1,
+          +1, -1,
+          +1, +1
+        ] ), gl.STATIC_DRAW );
+
+        var texture = gl.createTexture();
+        gl.bindTexture( gl.TEXTURE_2D, texture );
+        gl.texParameteri( gl.TEXTURE_2D, gl.TEXTURE_WRAP_S, gl.CLAMP_TO_EDGE );
+        gl.texParameteri( gl.TEXTURE_2D, gl.TEXTURE_WRAP_T, gl.CLAMP_TO_EDGE );
+        gl.texParameteri( gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, useMipmaps ? gl.LINEAR_MIPMAP_LINEAR : gl.LINEAR );
+        gl.texParameteri( gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, gl.LINEAR );
+        gl.pixelStorei( gl.UNPACK_FLIP_Y_WEBGL, false );
+        gl.texImage2D( gl.TEXTURE_2D, 0, gl.RGBA, gl.RGBA, gl.UNSIGNED_BYTE, mipmapPowerOf2Canvases[ useMipmaps ? 8 : 1 ] );
+        if ( useMipmaps ) {
+          if ( useLevelsMipmaps ) {
+            gl.texImage2D( gl.TEXTURE_2D, 1, gl.RGBA, gl.RGBA, gl.UNSIGNED_BYTE, mipmapPowerOf2Canvases[4] );
+            gl.texImage2D( gl.TEXTURE_2D, 2, gl.RGBA, gl.RGBA, gl.UNSIGNED_BYTE, mipmapPowerOf2Canvases[2] );
+            gl.texImage2D( gl.TEXTURE_2D, 3, gl.RGBA, gl.RGBA, gl.UNSIGNED_BYTE, mipmapPowerOf2Canvases[1] );
+            gl.texImage2D( gl.TEXTURE_2D, 4, gl.RGBA, gl.RGBA, gl.UNSIGNED_BYTE, mipmapPowerOf2Canvases[1/2] );
+            gl.texImage2D( gl.TEXTURE_2D, 5, gl.RGBA, gl.RGBA, gl.UNSIGNED_BYTE, mipmapPowerOf2Canvases[1/4] );
+            gl.texImage2D( gl.TEXTURE_2D, 6, gl.RGBA, gl.RGBA, gl.UNSIGNED_BYTE, mipmapPowerOf2Canvases[1/8] );
+            gl.texImage2D( gl.TEXTURE_2D, 7, gl.RGBA, gl.RGBA, gl.UNSIGNED_BYTE, mipmapPowerOf2Canvases[1/16] );
+            gl.texImage2D( gl.TEXTURE_2D, 8, gl.RGBA, gl.RGBA, gl.UNSIGNED_BYTE, mipmapPowerOf2Canvases[1/32] );
+            gl.texImage2D( gl.TEXTURE_2D, 9, gl.RGBA, gl.RGBA, gl.UNSIGNED_BYTE, mipmapPowerOf2Canvases[1/64] );
+            gl.texImage2D( gl.TEXTURE_2D, 10, gl.RGBA, gl.RGBA, gl.UNSIGNED_BYTE, mipmapPowerOf2Canvases[1/128] );
+            gl.texImage2D( gl.TEXTURE_2D, 11, gl.RGBA, gl.RGBA, gl.UNSIGNED_BYTE, mipmapPowerOf2Canvases[1/256] );
+          }
+          else {
+            gl.hint( gl.GENERATE_MIPMAP_HINT, gl.NICEST );
+            gl.generateMipmap( gl.TEXTURE_2D );
+          }
+        }
+        gl.bindTexture( gl.TEXTURE_2D, null );
+
+        gl.viewport( 0, 0, demoWidth, demoHeight );
+        gl.clearColor( 0, 0, 0, 0 );
+        gl.useProgram( program );
+
+        gl.enableVertexAttribArray( aVertex );
+
+        currentTest = {
+          update: function( rotation, scale ) {
+            // TODO: uniform rotation
+
+            gl.uniform1f( uRotation, rotation );
+            gl.uniform1f( uScale, scale );
+            gl.uniform1f( uDemoWidth, demoWidth );
+            gl.uniform1f( uDemoHeight, demoHeight );
+            gl.uniform1f( uImageWidth, imageWidth );
+            gl.uniform1f( uImageHeight, imageHeight );
+            gl.uniform1f( uCanvasWidth, mipmapPowerOf2Canvases[1].width );
+            gl.uniform1f( uCanvasHeight, mipmapPowerOf2Canvases[1].height );
+
+            gl.activeTexture( gl.TEXTURE0 );
+            gl.bindTexture( gl.TEXTURE_2D, texture );
+            gl.uniform1i( uTexture, 0 );
+
+            gl.bindBuffer( gl.ARRAY_BUFFER, vertexBuffer );
+            gl.vertexAttribPointer( aVertex, 2, gl.FLOAT, false, 0, 0 );
+
+            gl.drawArrays( gl.TRIANGLE_STRIP, 0, 4 );
+
+            gl.bindTexture( gl.TEXTURE_2D, null );
+          }
+        };
+        currentTest.update( rotation, scale );
+      }
+      document.getElementById( 'raster-webgl' ).addEventListener( 'click', function() {
+        clearContainer();
+        webgl( false, false );
+      } );
+
+      document.getElementById( 'mipmap-webgl' ).addEventListener( 'click', function() {
+        clearContainer();
+        webgl( true, false );
+      } );
+
+      document.getElementById( 'mipmap-levels-webgl' ).addEventListener( 'click', function() {
+        clearContainer();
+        webgl( true, true );
+      } );
+
+      // default
+      vectorSVG( base64URL );
+
+      ( function step() {
+        requestAnimationFrame( step, document.getElementById( 'container' ) );
+
+        if ( !pausedCheckBox.checked ) {
+          rotation = rotationRadioButton.checked ? ( ( Date.now() / 1000 ) % ( 2 * Math.PI ) ) : 0;
+          scale = scalingRadioButton.checked ? ( Math.pow( 10, Math.cos( Date.now() / 1770 ) ) ) : 1;
+
+          currentTest.update( rotation, scale );
+        }
+      } )();
+    }
   </script>
 </div>
 </body>
