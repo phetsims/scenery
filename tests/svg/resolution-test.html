@@ -228,6 +228,164 @@
       vectorCanvas( mipmapImages[1] );
     } );
 
+    function webgl( useMipmaps ) {
+      function createShader( source, type ) {
+        var shader = gl.createShader( type );
+        gl.shaderSource( shader, source );
+        gl.compileShader( shader );
+
+        if( !gl.getShaderParameter( shader, gl.COMPILE_STATUS ) ) {
+          console.log( gl.getShaderInfoLog( shader ) );
+          console.log( source );
+          throw new Error( 'GLSL compile error: ' + gl.getShaderInfoLog( shader ) );
+        }
+
+        return shader;
+      }
+
+      // returns the smallest power of 2 that is greater than or equal
+      function toPowerOf2( n ) {
+        var result = 1;
+        while ( result < n ) {
+          result *= 2;
+        }
+        return result;
+      }
+
+      var imageCanvas = document.createElement( 'canvas' );
+      var context = imageCanvas.getContext( '2d' );
+      imageCanvas.width = toPowerOf2( imageWidth );
+      imageCanvas.height = toPowerOf2( imageHeight );
+      context.drawImage( mipmapImages[1], 0, 0 );
+      console.log( imageCanvas.toDataURL() );
+
+      var canvas = document.createElement( 'canvas' );
+      var options = { antialias: true };
+      var gl = canvas.getContext( 'webgl', options ) || canvas.getContext( 'experimental-webgl', options );
+      var backingScale = getBackingScale( gl );
+
+      canvas.width = demoWidth * backingScale;
+      canvas.height = demoHeight * backingScale;
+      canvas.style.width = demoWidth + 'px';
+      canvas.style.height = demoHeight + 'px';
+
+      document.getElementById( 'container' ).appendChild( canvas );
+
+      var program = gl.createProgram();
+
+      var vertexShader = createShader(
+        'attribute vec2 aVertex;\n' +
+        'uniform float uDemoWidth;\n' +
+        'uniform float uDemoHeight;\n' +
+        'uniform float uCanvasWidth;\n' +
+        'uniform float uCanvasHeight;\n' +
+        'uniform float uImageWidth;\n' +
+        'uniform float uImageHeight;\n' +
+        'uniform float uRotation;\n' +
+        'uniform float uScale;\n' +
+        'varying vec2 texCoord;\n' +
+        'void main() {\n' +
+        '  texCoord = ( vec2( aVertex.x, -aVertex.y ) * 0.5 + 0.5 ) * vec2( uImageWidth / uCanvasWidth, uImageHeight / uCanvasHeight );\n' +
+        '  vec2 position = vec2( aVertex.x * uImageWidth / uDemoWidth, aVertex.y * uImageHeight / uDemoHeight );\n' +
+        '  mat2 transform = mat2( cos( uRotation ) , sin( uRotation ), -sin( uRotation ), cos( uRotation ) ) * uScale;\n' +
+        '  gl_Position = vec4( transform * position, 0.0, 1.0 );\n' +
+        '}', gl.VERTEX_SHADER );
+      var fragmentShader = createShader(
+        'precision highp float;\n' +
+        'varying vec2 texCoord;\n' +
+        'uniform sampler2D uTexture;\n' +
+        'void main() {\n' +
+        // '  gl_FragColor = vec4( 1.0, 0.0, 0.0, 1.0 );\n' +
+        '  gl_FragColor = texture2D( uTexture, texCoord );\n' +
+        '}', gl.FRAGMENT_SHADER );
+
+      gl.attachShader( program, vertexShader );
+      gl.attachShader( program, fragmentShader );
+
+      gl.linkProgram( program );
+
+      if( !gl.getProgramParameter( program, gl.LINK_STATUS ) ) {
+        console.log( gl.getProgramInfoLog( program ) );
+        throw new Error( 'GLSL link error: ' + gl.getProgramInfoLog( program ) );
+      }
+
+      gl.deleteShader( vertexShader );
+      gl.deleteShader( fragmentShader );
+
+      var aVertex = gl.getAttribLocation( program, 'aVertex' );
+      var uTexture = gl.getUniformLocation( program, 'uTexture' );
+      var uRotation = gl.getUniformLocation( program, 'uRotation' );
+      var uScale = gl.getUniformLocation( program, 'uScale' );
+      var uDemoWidth = gl.getUniformLocation( program, 'uDemoWidth' );
+      var uDemoHeight = gl.getUniformLocation( program, 'uDemoHeight' );
+      var uImageWidth = gl.getUniformLocation( program, 'uImageWidth' );
+      var uImageHeight = gl.getUniformLocation( program, 'uImageHeight' );
+      var uCanvasWidth = gl.getUniformLocation( program, 'uCanvasWidth' );
+      var uCanvasHeight = gl.getUniformLocation( program, 'uCanvasHeight' );
+
+      var vertexBuffer = gl.createBuffer();
+      gl.bindBuffer( gl.ARRAY_BUFFER, vertexBuffer );
+      gl.bufferData( gl.ARRAY_BUFFER, new Float32Array( [
+        -1, -1,
+        -1, +1,
+        +1, -1,
+        +1, +1
+      ] ), gl.STATIC_DRAW );
+
+      var texture = gl.createTexture();
+      gl.bindTexture( gl.TEXTURE_2D, texture );
+      gl.texParameteri( gl.TEXTURE_2D, gl.TEXTURE_WRAP_S, gl.CLAMP_TO_EDGE );
+      gl.texParameteri( gl.TEXTURE_2D, gl.TEXTURE_WRAP_T, gl.CLAMP_TO_EDGE );
+      gl.texParameteri( gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, useMipmaps ? gl.LINEAR_MIPMAP_NEAREST : gl.LINEAR );
+      gl.texParameteri( gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, gl.LINEAR );
+      gl.pixelStorei( gl.UNPACK_FLIP_Y_WEBGL, false );
+      gl.texImage2D( gl.TEXTURE_2D, 0, gl.RGBA, gl.RGBA, gl.UNSIGNED_BYTE, imageCanvas );
+      gl.generateMipmap(gl.TEXTURE_2D);
+      gl.bindTexture( gl.TEXTURE_2D, null );
+
+      gl.viewport( 0, 0, demoWidth, demoHeight );
+      gl.clearColor( 0, 0, 0, 0 );
+      gl.useProgram( program );
+
+      gl.enableVertexAttribArray( aVertex );
+
+      currentTest = {
+        update: function( rotation, scale ) {
+          // TODO: uniform rotation
+
+          gl.uniform1f( uRotation, rotation );
+          gl.uniform1f( uScale, scale );
+          gl.uniform1f( uDemoWidth, demoWidth );
+          gl.uniform1f( uDemoHeight, demoHeight );
+          gl.uniform1f( uImageWidth, imageWidth );
+          gl.uniform1f( uImageHeight, imageHeight );
+          gl.uniform1f( uCanvasWidth, imageCanvas.width );
+          gl.uniform1f( uCanvasHeight, imageCanvas.height );
+
+          gl.activeTexture( gl.TEXTURE0 );
+          gl.bindTexture( gl.TEXTURE_2D, texture );
+          gl.uniform1i( uTexture, 0 );
+
+          gl.bindBuffer( gl.ARRAY_BUFFER, vertexBuffer );
+          gl.vertexAttribPointer( aVertex, 2, gl.FLOAT, false, 0, 0 );
+
+          gl.drawArrays( gl.TRIANGLE_STRIP, 0, 4 );
+
+          gl.bindTexture( gl.TEXTURE_2D, null );
+        }
+      };
+      currentTest.update( rotation, scale );
+    }
+    document.getElementById( 'raster-webgl' ).addEventListener( 'click', function() {
+      clearContainer();
+      webgl( false );
+    } );
+
+    document.getElementById( 'mipmap-webgl' ).addEventListener( 'click', function() {
+      clearContainer();
+      webgl( true );
+    } );
+
     // default
     vectorSVG( base64URL );
 
