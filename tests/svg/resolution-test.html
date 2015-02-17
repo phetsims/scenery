@@ -204,6 +204,7 @@
         1 / 128,
         1 / 256
       ];
+      var maxLevel = 256;
       var mipmapCanvases = {};
       var mipmapPowerOf2Canvases = {};
       var mipmapURLs = {};
@@ -370,6 +371,45 @@
       document.getElementById( 'raster-canvas' ).addEventListener( 'click', function() {
         clearContainer();
         vectorCanvas( mipmapImages[1] );
+      } );
+
+      function mipmapCanvas() {
+        var canvas = document.createElement( 'canvas' );
+        var context = canvas.getContext( '2d' );
+        var backingScale = getBackingScale( context );
+
+        canvas.width = demoWidth * backingScale;
+        canvas.height = demoHeight * backingScale;
+        canvas.style.width = demoWidth + 'px';
+        canvas.style.height = demoHeight + 'px';
+
+        document.getElementById( 'container' ).appendChild( canvas );
+
+        currentTest = {
+          update: function( rotation, scale ) {
+            var mipmapLevel = toPowerOf2( scale * maxLevel * 1.2 ) / maxLevel; // same bias as WebGL
+            if ( mipmapLevel < 1 / maxLevel ) {
+              mipmapLevel = 1 / maxLevel;
+            }
+            if ( mipmapLevel > 8 ) {
+              mipmapLevel = 8;
+            }
+
+            var cos = scale * Math.cos( rotation );
+            var sin = scale * Math.sin( rotation );
+            context.setTransform( 1, 0, 0, 1, 0, 0 );
+            context.clearRect( 0, 0, canvas.width, canvas.height );
+            context.setTransform( cos, -sin, sin, cos, demoWidth / 2, demoHeight / 2 );
+            context.translate( -imageWidth / 2, -imageHeight / 2 );
+            context.scale( 1 / mipmapLevel, 1 / mipmapLevel );
+            context.drawImage( mipmapCanvases[mipmapLevel], 0, 0 );
+          }
+        };
+        currentTest.update( rotation, scale );
+      }
+      document.getElementById( 'mipmap-canvas' ).addEventListener( 'click', function() {
+        clearContainer();
+        mipmapCanvas();
       } );
 
       function webgl( useMipmaps, useLevelsMipmaps, biasString ) {
