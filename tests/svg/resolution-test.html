@@ -56,6 +56,9 @@
 <label for="renderer">
   <input autocomplete="off" type="radio" name="renderer" id="mipmap-levels-webgl">Levels Mipmap (WebGL)</input>
 </label>
+<label for="renderer">
+  <input autocomplete="off" type="radio" name="renderer" id="mipmap-bias-levels-webgl">Bias Levels Mipmap (WebGL)</input>
+</label>
 
 <div id="container">
 </div>
@@ -369,7 +372,7 @@
         vectorCanvas( mipmapImages[1] );
       } );
 
-      function webgl( useMipmaps, useLevelsMipmaps ) {
+      function webgl( useMipmaps, useLevelsMipmaps, biasString ) {
         function createShader( source, type ) {
           var shader = gl.createShader( type );
           gl.shaderSource( shader, source );
@@ -421,7 +424,7 @@
           'uniform sampler2D uTexture;\n' +
           'void main() {\n' +
           // '  gl_FragColor = vec4( 1.0, 0.0, 0.0, 1.0 );\n' +
-          '  gl_FragColor = texture2D( uTexture, texCoord );\n' +
+          '  gl_FragColor = texture2D( uTexture, texCoord, ' + biasString + ' );\n' +
           '}', gl.FRAGMENT_SHADER );
 
         gl.attachShader( program, vertexShader );
@@ -521,17 +524,22 @@
       }
       document.getElementById( 'raster-webgl' ).addEventListener( 'click', function() {
         clearContainer();
-        webgl( false, false );
+        webgl( false, false, '0.0' );
       } );
 
       document.getElementById( 'mipmap-webgl' ).addEventListener( 'click', function() {
         clearContainer();
-        webgl( true, false );
+        webgl( true, false, '0.0' );
       } );
 
       document.getElementById( 'mipmap-levels-webgl' ).addEventListener( 'click', function() {
         clearContainer();
-        webgl( true, true );
+        webgl( true, true, '0.0' );
+      } );
+
+      document.getElementById( 'mipmap-bias-levels-webgl' ).addEventListener( 'click', function() {
+        clearContainer();
+        webgl( true, true, '-0.7' );
       } );
 
       // default
