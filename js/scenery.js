@@ -89,6 +89,7 @@ define( function( require ) {
       ChangeInterval: { name: 'ChangeInterval', style: 'color: #0a0;' },
       SVGBlock: { name: 'SVG', style: 'color: #000;' },
       SVGGroup: { name: 'SVGGroup', style: 'color: #000;' },
+      ImageSVGDrawable: { name: 'ImageSVGDrawable', style: 'color: #000;' },
       Paints: { name: 'Paints', style: 'color: #000;' }
     },
     enableIndividualLog: function( name ) {

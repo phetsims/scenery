@@ -278,7 +278,7 @@ define( function( require ) {
       cleanArray( this._mipmapCanvases );
       cleanArray( this._mipmapImages );
 
-      if ( this._image ) {
+      if ( this._image && this._mipmap ) {
         var baseCanvas = document.createElement( 'canvas' );
         baseCanvas.width = this.getImageWidth();
         baseCanvas.height = this.getImageHeight();
@@ -295,6 +295,11 @@ define( function( require ) {
           while( ++level < this._mipmapInitialLevel ) {
             this.constructNextMipmap();
           }
+        }
+
+        var stateLen = this._drawables.length;
+        for ( var i = 0; i < stateLen; i++ ) {
+          this._drawables[ i ].markDirtyMipmap();
         }
       }
 
@@ -423,6 +428,18 @@ define( function( require ) {
     set initialHeight( value ) { this.setInitialHeight( value ); },
     get initialHeight() { return this.getInitialHeight(); },
 
+    set mipmap( value ) { this.setMipmap( value ); },
+    get mipmap() { return this.isMipmap(); },
+
+    set mipmapBias( value ) { this.setMipmapBias( value ); },
+    get mipmapBias() { return this.getMipmapBias(); },
+
+    set mipmapInitialLevel( value ) { this.setMipmapInitialLevel( value ); },
+    get mipmapInitialLevel() { return this.getMipmapInitialLevel(); },
+
+    set mipmapMaxLevel( value ) { this.setMipmapMaxLevel( value ); },
+    get mipmapMaxLevel() { return this.getMipmapMaxLevel(); },
+
     getBasicConstructor: function( propLines ) {
       return 'new scenery.Image( \'' + ( this._image.src ? this._image.src.replace( /'/g, '\\\'' ) : 'other' ) + '\', {' + propLines + '} )';
     }
@@ -454,6 +471,7 @@ define( function( require ) {
       proto.initializeState = function() {
         this.paintDirty = true; // flag that is marked if ANY "paint" dirty flag is set (basically everything except for transforms, so we can accelerated the transform-only case)
         this.dirtyImage = true;
+        this.dirtyMipmap = true;
 
         return this; // allow for chaining
       };
@@ -469,9 +487,15 @@ define( function( require ) {
         this.markPaintDirty();
       };
 
+      proto.markDirtyMipmap = function() {
+        this.dirtyMipmap = true;
+        this.markPaintDirty();
+      };
+
       proto.setToCleanState = function() {
         this.paintDirty = false;
         this.dirtyImage = false;
+        this.dirtyMipmap = false;
       };
     }
   };
@@ -548,24 +572,48 @@ define( function( require ) {
    * SVG Rendering
    *----------------------------------------------------------------------------*/
 
+  function ImageSVGDrawable( renderer, instance ) { this.initialize( renderer, instance ); }
   Image.ImageSVGDrawable = SVGSelfDrawable.createDrawable( {
-    type: function ImageSVGDrawable( renderer, instance ) { this.initialize( renderer, instance ); },
+    type: ImageSVGDrawable,
     stateType: Image.ImageStatefulDrawable.mixin,
+
     initialize: function( renderer, instance ) {
+      sceneryLog && sceneryLog.ImageSVGDrawable && sceneryLog.ImageSVGDrawable( this.id + ' initialized for ' + instance.toString() );
+      var self = this;
+
       if ( !this.svgElement ) {
         this.svgElement = document.createElementNS( scenery.svgns, 'image' );
         this.svgElement.setAttribute( 'x', 0 );
         this.svgElement.setAttribute( 'y', 0 );
       }
+
+      this._usingMipmap = false;
+      this._mipmapLevel = -1; // will always be invalidated
+
+      // if mipmaps are enabled, this listener will be added to when our relative transform changes
+      this._mipmapTransformListener = this._mipmapTransformListener || function() {
+        sceneryLog && sceneryLog.ImageSVGDrawable && sceneryLog.ImageSVGDrawable( self.id + ' Transform dirties mipmap' );
+        self.markDirtyMipmap();
+      };
+
+      this._mipmapListener = this._mipmapListener || function() {
+        // sanity check
+        self.markDirtyMipmap();
+
+        // update our mipmap usage status
+        self.updateMipmapStatus( self.node._mipmap );
+      };
+      this.node.on( 'mipmap', this._mipmapListener );
+      this.updateMipmapStatus( instance.node._mipmap );
     },
+
     updateSVG: function( node, image ) {
       //OHTWO TODO: performance: consider using <use> with <defs> for our image element. This could be a significant speedup!
       if ( this.dirtyImage ) {
+        sceneryLog && sceneryLog.ImageSVGDrawable && sceneryLog.ImageSVGDrawable( this.id + ' Updating dirty image' );
         if ( node._image ) {
           // like <image xlink:href='http://phet.colorado.edu/images/phet-logo-yellow.png' x='0' y='0' height='127px' width='242px'/>
-          image.setAttribute( 'width', node.getImageWidth() + 'px' );
-          image.setAttribute( 'height', node.getImageHeight() + 'px' );
-          image.setAttributeNS( scenery.xlinkns, 'xlink:href', node.getImageURL() );
+          this.updateURL( image, true );
         }
         else {
           image.setAttribute( 'width', '0' );
@@ -573,10 +621,84 @@ define( function( require ) {
           image.setAttributeNS( scenery.xlinkns, 'xlink:href', '//:0' ); // see http://stackoverflow.com/questions/5775469/whats-the-valid-way-to-include-an-image-with-no-src
         }
       }
+      else if ( this.dirtyMipmap && node._image ) {
+        sceneryLog && sceneryLog.ImageSVGDrawable && sceneryLog.ImageSVGDrawable( this.id + ' Updating dirty mipmap' );
+        this.updateURL( image, false );
+      }
     },
+
     usesPaint: false,
     keepElements: keepSVGImageElements
   } );
+  // TODO: improve SVGSelfDrawable setup, so these can be declared inline with the other methods
+  ImageSVGDrawable.prototype.updateURL = function( image, forced ) {
+    // determine our mipmap level, if any is used
+    var level = -1; // signals a default of "we are not using mipmapping"
+    if ( this.node._mipmap ) {
+      var matrix = this.instance.relativeTransform.matrix;
+      // a sense of "average" scale, which should be exact if there is no asymmetric scale/shear applied
+      var approximateScale = ( Math.sqrt( matrix.m00() * matrix.m00() + matrix.m10() * matrix.m10() ) +
+                               Math.sqrt( matrix.m01() * matrix.m01() + matrix.m11() * matrix.m11() ) ) / 2;
+      level = this.node.getMipmapLevel( approximateScale );
+      sceneryLog && sceneryLog.ImageSVGDrawable && sceneryLog.ImageSVGDrawable( this.id + ' Mipmap level: ' + level );
+    }
+
+    // bail out if we would use the currently-used mipmap level (or none) and there was no image change
+    if ( !forced && level === this._mipmapLevel ) {
+      return;
+    }
+
+    // if we are switching to having no mipmap
+    if ( this._mipmapLevel >= 0 && level === -1 ) {
+      image.removeAttribute( 'transform' );
+    }
+    this._mipmapLevel = level;
+
+    if ( this.node._mipmap ) {
+      sceneryLog && sceneryLog.ImageSVGDrawable && sceneryLog.ImageSVGDrawable( this.id + ' Setting image URL to mipmap level ' + level );
+      var img = this.node.getMipmapImage( level );
+      image.setAttribute( 'width', img.naturalWidth + 'px' );
+      image.setAttribute( 'height', img.naturalHeight + 'px' );
+      image.setAttribute( 'transform', 'scale(' + Math.pow( 2, level ).toFixed() + ')' );
+      image.setAttributeNS( scenery.xlinkns, 'xlink:href', img.src );
+    }
+    else {
+      sceneryLog && sceneryLog.ImageSVGDrawable && sceneryLog.ImageSVGDrawable( this.id + ' Setting image URL' );
+      image.setAttribute( 'width', this.node.getImageWidth() + 'px' );
+      image.setAttribute( 'height', this.node.getImageHeight() + 'px' );
+      image.setAttributeNS( scenery.xlinkns, 'xlink:href', this.node.getImageURL() );
+    }
+  };
+
+  ImageSVGDrawable.prototype.updateMipmapStatus = function( usingMipmap ) {
+    if ( this._usingMipmap !== usingMipmap ) {
+      this._usingMipmap = usingMipmap;
+
+      if ( usingMipmap ) {
+        sceneryLog && sceneryLog.ImageSVGDrawable && sceneryLog.ImageSVGDrawable( this.id + ' Adding mipmap compute/listener needs' );
+        this.instance.relativeTransform.addListener( this._mipmapTransformListener ); // when our relative tranform changes, notify us in the pre-repaint phase
+        this.instance.relativeTransform.addPrecompute(); // trigger precomputation of the relative transform, since we will always need it when it is updated
+      }
+      else {
+        sceneryLog && sceneryLog.ImageSVGDrawable && sceneryLog.ImageSVGDrawable( this.id + ' Removing mipmap compute/listener needs' );
+        this.instance.relativeTransform.removeListener( this._mipmapTransformListener );
+        this.instance.relativeTransform.removePrecompute();
+      }
+
+      // sanity check
+      this.markDirtyMipmap();
+    }
+  };
+
+  ImageSVGDrawable.prototype.dispose = function() {
+    sceneryLog && sceneryLog.ImageSVGDrawable && sceneryLog.ImageSVGDrawable( this.id + ' disposing' );
+
+    // clean up mipmap listeners and compute needs
+    this.updateMipmapStatus( false );
+    this.node.off( 'mipmap', this._mipmapListener );
+
+    SVGSelfDrawable.prototype.dispose.call( this );
+  };
 
   /*---------------------------------------------------------------------------*
    * Canvas rendering
@@ -590,7 +712,7 @@ define( function( require ) {
       }
     },
     usesPaint: false,
-    dirtyMethods: [ 'markDirtyImage' ]
+    dirtyMethods: [ 'markDirtyImage', 'markDirtyMipmap' ]
   } );
 
 

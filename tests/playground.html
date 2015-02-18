@@ -126,9 +126,10 @@ an UI and Display made for visual testing and debugging.
 
       window.displayTest = function() {
         setTimeout( function() {
-          window.rect = new scenery.Rectangle( 20, 30, 100, 75, { fill: 'red', renderer: 'webgl' } );
+          window.image = new scenery.Image( 'svg/wrench.svg', { mipmap: true } );
+          scenery.enableIndividualLog( 'ImageSVGDrawable' );
 
-          scene.addChild( rect );
+          scene.addChild( image );
 
           display.updateDisplay();
         } );
