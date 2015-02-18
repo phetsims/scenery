@@ -4,7 +4,6 @@
  * Images
  *
  * TODO: allow multiple DOM instances (create new HTMLImageElement elements)
- * TODO: support rendering a Canvas to DOM (single instance)
  *
  * @author Jonathan Olson <jonathan.olson@colorado.edu>
  */
