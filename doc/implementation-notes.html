@@ -86,22 +86,22 @@
       <em>root</em> <a href="../doc#node">Node</a>, and only displays the sub-graph rooted at that node. Since a
       node and its sub-graph can be shown in multiple places in the same display (and Scenery usually needs to
       treat them separately),
-      we internally create an <strong>instance tree</strong>, where an <a href="../doc#instance">Instance</a>
+      we internally create an <strong>Instance tree</strong>, where an <a href="../doc#instance">Instance</a>
       refers to a
       particular copy of a node, with a specific path (sequence of <a href="../doc#node">Nodes</a>) from the root to
-      the node. This sequence of nodes is referred to as a <a href="../doc#trail">Trail</a>. The instance tree is
+      the node. This sequence of nodes is referred to as a <a href="../doc#trail">Trail</a>. The Instance tree is
       conceptually constructed from a depth-first traversal of the node sub-graph, which essentially duplicates
       sub-graphs from nodes with multiple parents.
     </p>
 
     <p>
-      There is one exception for instance trees: there are cases where we want to duplicate a very commonly used
+      There is one exception for Instance trees: there are cases where we want to duplicate a very commonly used
       Node, but we render it to an intermediate shared raster (Canvas/WebGL <em>cache</em>),
       and we don't want its
       children have the overhead of having many Instances. In this case, we'll have placeholder Instances for
-      everywhere we'll want to show the raster, all pointing to another instance tree responsible for rendering into
+      everywhere we'll want to show the raster, all pointing to another Instance tree responsible for rendering into
       the raster. These are known as <strong>shared caches</strong>, which are separate from
-      <strong>instance caches</strong>, which have a separate raster for every instance.
+      <strong>Instance caches</strong>, which have a separate raster for every Instance.
     </p>
 
     <h2>Drawables</h2>
@@ -114,15 +114,16 @@
     </p>
 
     <p>
-      <strong>Painted</strong> nodes (those that display something themselves, typically subtypes of
-      <a href="../doc#path">Path</a>, <a href="../doc#image">Image</a>, <a href="../doc#text">Text</a>, etc.) will
-      always have instances that have <strong>self drawables</strong> that are responsible for rendering that node
-      (not including its children).
+      A node is called <strong>Painted</strong> if it displays something itself (like <a href="../doc#path">Path</a>,
+      <a href="../doc#image">Image</a>, <a href="../doc#text">Text</a>, etc.). A vanilla <a href="../doc#node">Node</a>
+      is not considered painted, since it doesn't display anything itself (even though its children/descendants may).
+      Painted nodes will always have Instances that have <strong>self drawables</strong> that are responsible for
+      rendering that node (not including any children).
     </p>
 
     <p>
-      Some instances will also have a <strong>group drawable</strong> that is responsible for combining the drawables
-      of its descendant instances and if available its self drawable.
+      Some Instances will also have a <strong>group drawable</strong> that is responsible for combining the drawables
+      of its descendant Instances and if available its self drawable.
     </p>
 
     <p>
@@ -154,7 +155,7 @@
     </p>
 
     <p>
-      Certain types of instances will contain a backbone as their group drawable. The root instance will always have
+      Certain types of Instances will contain a backbone as their group drawable. The root Instance will always have
       a backbone, known as the <strong>root backbone</strong>. The Display's
       <a href="../doc#display-domElement">domElement</a> is the root backbone's DOM element.
     </p>
@@ -162,9 +163,9 @@
     <h2>Visual Example</h2>
 
     <p>
-      Below shows the transformation of an example node DAG into instance trees, the drawable tree, and final DOM
+      Below shows the transformation of an example node DAG into Instance trees, the drawable tree, and final DOM
       structure. In the example, the CSS transform hint results in the creation of a backbone (a div to transform),
-      and both instance and shared caches are shown ("cache" denoting the instance caches).
+      and both Instance and shared caches are shown ("cache" denoting the Instance caches).
     </p>
 
     <p style="text-align: center;">
@@ -195,6 +196,10 @@
       removed nodes and a list of added nodes (which are swapped in the list of drawables). Stitching needs to
       efficiently make changes at each ChangeInterval, inserting, removing and rearranging blocks to minimize the
       overall cost. See Stitcher.js for in-depth documentation on the constrains and process.
+    </p>
+
+    <p style="text-align: center;">
+      <img src="../assets/stitch.svg">
     </p>
 
     <h2>Sequence of Operations</h2>
@@ -234,17 +239,17 @@
             <span class="instanceStyle">Creates root Instance if it doesn't exist</span>
           </li>
           <li>
-            syncTree traversal (inline instance tree modifications and stitching on back-propagation)<br>
+            syncTree traversal (inline Instance tree modifications and stitching on back-propagation)<br>
             <ul>
               <li>
                   <span class="instanceStyle">
-                    Create descendant instances under stubs, fills in state, and marks removed sub-tree instance roots
+                    Create descendant Instances under stubs, fills in state, and marks removed sub-tree Instance roots
                     for disposal.
                   </span>
               </li>
               <li>
                   <span class="drawableStyle">
-                    Creates all drawables where necessary. If it replaces a self/group/shared drawable on the instance,
+                    Creates all drawables where necessary. If it replaces a self/group/shared drawable on the Instance,
                     that old drawable is marked for disposal.
                   </span>
               </li>
@@ -268,21 +273,21 @@
             Update drawable block/parent references
           </li>
           <li>
-            Update relative transforms in our instance tree
+            Update relative transforms in our Instance tree
           </li>
           <li>
             <span class="instanceStyle">Dispose unused Instance sub-trees</span><br>
             <ul>
               <li>
                   <span class="drawableStyle">
-                    Any drawables attached to disposed instances are disposed themselves
+                    Any drawables attached to disposed Instances are disposed themselves
                   </span>
               </li>
             </ul>
           </li>
           <li>
               <span class="drawableStyle">
-                Dispose unused drawables that weren't referenced by disposed instances
+                Dispose unused drawables that weren't referenced by disposed Instances
               </span>
           </li>
           <li>

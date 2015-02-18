@@ -54,7 +54,6 @@ define( function( require ) {
 
       var definition = document.createElementNS( scenery.svgns, 'radialGradient' );
 
-      definition.setAttribute( 'id', this.id );
       definition.setAttribute( 'gradientUnits', 'userSpaceOnUse' ); // so we don't depend on the bounds of the object being drawn with the gradient
       definition.setAttribute( 'cx', largePoint.x );
       definition.setAttribute( 'cy', largePoint.y );

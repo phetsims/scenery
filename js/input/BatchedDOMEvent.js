@@ -12,7 +12,7 @@ define( function( require ) {
   'use strict';
 
   var inherit = require( 'PHET_CORE/inherit' );
-  var PoolableMixin = require( 'PHET_CORE/PoolableMixin' );
+  var Poolable = require( 'PHET_CORE/Poolable' );
   var scenery = require( 'SCENERY/scenery' );
 
   scenery.BatchedDOMEvent = function BatchedDOMEvent( domEvent, type, callback ) {
@@ -31,6 +31,7 @@ define( function( require ) {
   BatchedDOMEvent.TOUCH_TYPE = 3;
   BatchedDOMEvent.MOUSE_TYPE = 4;
   BatchedDOMEvent.KEY_TYPE = 5; //TODO: Or are Keys Pointers, as they were in previous sceneries?
+  BatchedDOMEvent.WHEEL_TYPE = 6;
 
   inherit( Object, BatchedDOMEvent, {
     run: function( input ) {
@@ -63,6 +64,9 @@ define( function( require ) {
       else if ( this.type === BatchedDOMEvent.KEY_TYPE ) { //TODO: or should keys be handled with the other Pointers?
         callback.call( input, domEvent );
       }
+      else if ( this.type === BatchedDOMEvent.WHEEL_TYPE ) {
+        callback.call( input, domEvent );
+      }
       else {
         throw new Error( 'bad type value: ' + this.type );
       }
@@ -80,8 +84,7 @@ define( function( require ) {
     return BatchedDOMEvent.createFromPool( domEvent, pointFromEvent( domEvent ), domEvent.pointerId );
   };
 
-  /* jshint -W064 */
-  PoolableMixin( BatchedDOMEvent, {
+  Poolable.mixin( BatchedDOMEvent, {
     constructorDuplicateFactory: function( pool ) {
       return function( domEvent, type, callback ) {
         if ( pool.length ) {

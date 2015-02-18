@@ -12,7 +12,7 @@ define( function( require ) {
 
   // modules
   var inherit = require( 'PHET_CORE/inherit' );
-  var PoolableMixin = require( 'PHET_CORE/PoolableMixin' );
+  var Poolable = require( 'PHET_CORE/Poolable' );
   var cleanArray = require( 'PHET_CORE/cleanArray' );
   var scenery = require( 'SCENERY/scenery' );
   var Drawable = require( 'SCENERY/display/Drawable' );
@@ -126,6 +126,7 @@ define( function( require ) {
 
     dispose: function() {
       sceneryLog && sceneryLog.BackboneDrawable && sceneryLog.BackboneDrawable( 'dispose ' + this.toString() );
+      sceneryLog && sceneryLog.BackboneDrawable && sceneryLog.push();
 
       while ( this.watchedFilterNodes.length ) {
         var node = this.watchedFilterNodes.pop();
@@ -161,6 +162,8 @@ define( function( require ) {
       this.previousLastDrawable = null;
 
       Drawable.prototype.dispose.call( this );
+
+      sceneryLog && sceneryLog.BackboneDrawable && sceneryLog.pop();
     },
 
     // dispose all of the blocks while clearing our references to them
@@ -429,8 +432,7 @@ define( function( require ) {
     return element;
   };
 
-  /* jshint -W064 */
-  PoolableMixin( BackboneDrawable, {
+  Poolable.mixin( BackboneDrawable, {
     constructorDuplicateFactory: function( pool ) {
       return function( display, backboneInstance, transformRootInstance, renderer, isDisplayRoot ) {
         if ( pool.length ) {

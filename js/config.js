@@ -11,14 +11,18 @@ require.config( {
   deps: [ 'main', 'KITE/main', 'DOT/main', 'PHET_CORE/main' ],
 
   paths: {
+
+    // plugins
+    image: '../../chipper/js/requirejs-plugins/image',
+    text: '../../sherpa/text',
+
     underscore: '../../sherpa/lodash-2.4.1',
     jquery: '../../sherpa/jquery-2.1.0',
     SCENERY: '.',
     KITE: '../../kite/js',
     DOT: '../../dot/js',
     PHET_CORE: '../../phet-core/js',
-    AXON: '../../axon/js',
-    text: '../../sherpa/text'
+    AXON: '../../axon/js'
   },
 
   shim: {
@@ -26,5 +30,6 @@ require.config( {
     jquery: { exports: '$' }
   },
 
-  urlArgs: new Date().getTime() // add cache buster query string to make browser refresh actually reload everything
+  // optional cache buster to make browser refresh load all included scripts, can be disabled with ?cacheBuster=false
+  urlArgs: Date.now()
 } );

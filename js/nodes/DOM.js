@@ -239,8 +239,7 @@ define( function( require ) {
     }
   } );
 
-  /* jshint -W064 */
-  SelfDrawable.PoolableMixin( DOMDrawable );
+  SelfDrawable.Poolable.mixin( DOMDrawable );
 
   return DOM;
 } );

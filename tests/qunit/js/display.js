@@ -477,4 +477,77 @@
     expect( 0 );
   } );
 
+  test( 'Stitching problem A (GitHub Issue #339)', function() {
+    var scene = new scenery.Node();
+    var display = new scenery.Display( scene );
+
+    var a = new scenery.Rectangle( 0, 0, 100, 50, { fill: 'red' } );
+    var b = new scenery.Rectangle( 0, 0, 50, 50, { fill: 'blue' } );
+    var c = new scenery.DOM( document.createElement( 'div' ) );
+    var d = new scenery.Rectangle( 100, 0, 100, 50, { fill: 'red' } );
+    var e = new scenery.Rectangle( 100, 0, 50, 50, { fill: 'blue' } );
+
+    var f = new scenery.Rectangle( 0, 50, 100, 50, { fill: 'green' } );
+    var g = new scenery.DOM( document.createElement( 'div' ) );
+
+    scene.addChild( a );
+    scene.addChild( f );
+    scene.addChild( b );
+    scene.addChild( c );
+    scene.addChild( d );
+    scene.addChild( e );
+    display.updateDisplay();
+
+    scene.removeChild( f );
+    scene.insertChild( 4, g );
+    display.updateDisplay();
+
+    expect( 0 );
+  } );
+
+  test( 'SVG group disposal issue (GitHub Issue #354) A', function() {
+    var scene = new scenery.Node();
+    var display = new scenery.Display( scene );
+
+    var node = new scenery.Node( {
+      renderer: 'svg',
+      rendererOptions: {
+        cssTransform: true
+      }
+    } );
+    var rect = new scenery.Rectangle( 0, 0, 100, 50, { fill: 'red' } );
+
+    scene.addChild( node );
+    node.addChild( rect );
+    display.updateDisplay();
+
+    scene.removeChild( node );
+    display.updateDisplay();
+
+    expect( 0 );
+  } );
+
+  test( 'SVG group disposal issue (GitHub Issue #354) B', function() {
+    var scene = new scenery.Node();
+    var display = new scenery.Display( scene );
+
+    var node = new scenery.Node();
+    var rect = new scenery.Rectangle( 0, 0, 100, 50, {
+      fill: 'red',
+      renderer: 'svg',
+      rendererOptions: {
+        cssTransform: true
+      }
+    } );
+
+    scene.addChild( node );
+    node.addChild( rect );
+    display.updateDisplay();
+
+    scene.removeChild( node );
+    display.updateDisplay();
+
+    expect( 0 );
+  } );
+
 })();

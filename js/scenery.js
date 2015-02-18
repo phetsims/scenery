@@ -20,6 +20,9 @@ define( function( require ) {
   // object allocation tracking
   window.phetAllocation = require( 'PHET_CORE/phetAllocation' );
 
+  // workaround for Axon, since it needs window.arch to be defined
+  window.arch = window.arch || null;
+
   var scratchCanvas = document.createElement( 'canvas' );
   var scratchContext = scratchCanvas.getContext( '2d' );
 
@@ -86,6 +89,7 @@ define( function( require ) {
       ChangeInterval: { name: 'ChangeInterval', style: 'color: #0a0;' },
       SVGBlock: { name: 'SVG', style: 'color: #000;' },
       SVGGroup: { name: 'SVGGroup', style: 'color: #000;' },
+      ImageSVGDrawable: { name: 'ImageSVGDrawable', style: 'color: #000;' },
       Paints: { name: 'Paints', style: 'color: #000;' }
     },
     enableIndividualLog: function( name ) {
@@ -106,7 +110,8 @@ define( function( require ) {
       }
 
       if ( name ) {
-        assert && assert( scenery.logProperties[ name ], 'Unknown logger: ' + name );
+        assert && assert( scenery.logProperties[ name ],
+          'Unknown logger: ' + name + ', please use periods (.) to separate different log names' );
 
         window.sceneryLog[ name ] = window.sceneryLog[ name ] || function( ob, styleOverride ) {
           var data = scenery.logProperties[ name ];
@@ -183,6 +188,11 @@ define( function( require ) {
     bitmaskBoundsValid: 0x0000200  // i.e. painted area will not spill outside of bounds
     // TODO: what else would we need?
   };
+
+  // store a reference on the PhET namespace if it exists
+  if ( window.phet ) {
+    window.phet.scenery = scenery;
+  }
 
   return scenery;
 } );

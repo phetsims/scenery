@@ -47,6 +47,7 @@ define( function( require ) {
     // Code inspired by http://www.webglacademy.com/#1
     var gl;
     try {
+      // NOTE: If we add preserveDrawingBuffer, please add a clear() every frame
       gl = this.canvas.getContext( 'experimental-webgl', { antialias: true } ); // TODO: {antialias:true?}
     }
     catch( e ) {
@@ -56,8 +57,15 @@ define( function( require ) {
 
     this.backingScale = Util.backingScale( this.gl );
 
-    // TODO: When used by scenery, use different initial size (hopefully provided in the constructor args as an option)
+  // TODO: When used by scenery, use different initial size (hopefully provided in the constructor args as an option)
     this.setCanvasSize( window.innerWidth, window.innerHeight );
+
+    gl.clearColor( 0, 0, 0, 0 );
+    gl.clear( gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT );
+    gl.enable( gl.DEPTH_TEST );
+
+    gl.blendFunc( gl.SRC_ALPHA, gl.ONE_MINUS_SRC_ALPHA );
+    gl.enable( gl.BLEND );
 
     this.colorTriangleRenderer = new ColorTriangleRenderer( gl, this.backingScale, this.canvas );
     this.textureRenderer = new TextureRenderer( gl, this.backingScale, this.canvas );
@@ -68,6 +76,7 @@ define( function( require ) {
 
   return inherit( Object, WebGLRenderer, {
     addCustomWebGLRenderer: function( customWebGLRenderer ) {
+      customWebGLRenderer.init( this.gl, this.backingScale, this.canvas );
       this.customWebGLRenderers.push( customWebGLRenderer );
     },
     /**
@@ -96,7 +105,9 @@ define( function( require ) {
     animate: function() {
 
       // Keep track of the time for profiling
-      this.stats.begin();
+      if ( this.stats ) {
+        this.stats.begin();
+      }
 
       // Queue the next animation frame
       window.requestAnimationFrame( this.boundAnimate );
@@ -108,13 +119,14 @@ define( function( require ) {
       this.draw();
 
       // Record the timing for @mrdoob stats profiler
-      this.stats.end();
+      if ( this.stats ) {
+        this.stats.end();
+      }
     },
     draw: function() {
       var gl = this.gl;
 
       gl.viewport( 0.0, 0.0, this.canvas.width, this.canvas.height );
-      gl.clear( gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT );
 
       //Render program by program.
       this.colorTriangleRenderer.draw();
@@ -127,7 +139,6 @@ define( function( require ) {
       gl.flush();
     },
     setCanvasSize: function( width, height ) {
-
       // Handle retina displays as described in https://www.khronos.org/webgl/wiki/HandlingHighDPI
       // First, set the display size of the canvas.
       this.canvas.style.width = width + 'px';

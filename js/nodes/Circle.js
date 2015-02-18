@@ -26,7 +26,8 @@ define( function( require ) {
   var SelfDrawable = require( 'SCENERY/display/SelfDrawable' );
   require( 'SCENERY/util/Util' );
   var WebGLSelfDrawable = require( 'SCENERY/display/WebGLSelfDrawable' );
-  var WebGLBlock = require( 'SCENERY/display/WebGLBlock' );
+  var PixiSelfDrawable = require( 'SCENERY/display/PixiSelfDrawable' );
+  var SquareUnstrokedRectangle = require( 'SCENERY/display/webgl/SquareUnstrokedRectangle' );
 
   // TODO: change this based on memory and performance characteristics of the platform
   var keepDOMCircleElements = true; // whether we should pool DOM elements for the DOM rendering states, or whether we should free them when possible for memory
@@ -58,11 +59,13 @@ define( function( require ) {
       if ( this.hasStroke() && !this.getStroke().isGradient && !this.getStroke().isPattern && this.getLineWidth() <= this.getRadius() ) {
         bitmask |= scenery.bitmaskSupportsDOM;
       }
+      bitmask |= scenery.bitmaskSupportsPixi;
+      bitmask |= scenery.bitmaskSupportsWebGL;
       return bitmask;
     },
 
     getPathRendererBitmask: function() {
-      return scenery.bitmaskSupportsCanvas | scenery.bitmaskSupportsSVG | scenery.bitmaskBoundsValid | ( Features.borderRadius ? scenery.bitmaskSupportsDOM : 0 );
+      return scenery.bitmaskSupportsCanvas | scenery.bitmaskSupportsSVG | scenery.bitmaskBoundsValid | scenery.bitmaskSupportsWebGL | scenery.bitmaskSupportsPixi | ( Features.borderRadius ? scenery.bitmaskSupportsDOM : 0 );
     },
 
     invalidateCircle: function() {
@@ -216,40 +219,41 @@ define( function( require ) {
    * Rendering State mixin (DOM/SVG)
    *----------------------------------------------------------------------------*/
 
-  var CircleStatefulDrawableMixin = Circle.CircleStatefulDrawableMixin = function( drawableType ) {
-    var proto = drawableType.prototype;
+  Circle.CircleStatefulDrawable = {
+    mixin: function( drawableType ) {
+      var proto = drawableType.prototype;
 
-    // initializes, and resets (so we can support pooled states)
-    proto.initializeState = function() {
-      this.paintDirty = true; // flag that is marked if ANY "paint" dirty flag is set (basically everything except for transforms, so we can accelerated the transform-only case)
-      this.dirtyRadius = true;
+      // initializes, and resets (so we can support pooled states)
+      proto.initializeState = function() {
+        this.paintDirty = true; // flag that is marked if ANY "paint" dirty flag is set (basically everything except for transforms, so we can accelerated the transform-only case)
+        this.dirtyRadius = true;
 
-      // adds fill/stroke-specific flags and state
-      this.initializePaintableState();
+        // adds fill/stroke-specific flags and state
+        this.initializePaintableState();
 
-      return this; // allow for chaining
-    };
+        return this; // allow for chaining
+      };
 
-    // catch-all dirty, if anything that isn't a transform is marked as dirty
-    proto.markPaintDirty = function() {
-      this.paintDirty = true;
-      this.markDirty();
-    };
+      // catch-all dirty, if anything that isn't a transform is marked as dirty
+      proto.markPaintDirty = function() {
+        this.paintDirty = true;
+        this.markDirty();
+      };
 
-    proto.markDirtyRadius = function() {
-      this.dirtyRadius = true;
-      this.markPaintDirty();
-    };
+      proto.markDirtyRadius = function() {
+        this.dirtyRadius = true;
+        this.markPaintDirty();
+      };
 
-    proto.setToCleanState = function() {
-      this.paintDirty = false;
-      this.dirtyRadius = false;
+      proto.setToCleanState = function() {
+        this.paintDirty = false;
+        this.dirtyRadius = false;
 
-      this.cleanPaintableState();
-    };
+        this.cleanPaintableState();
+      };
 
-    /* jshint -W064 */
-    Paintable.PaintableStatefulDrawableMixin( drawableType );
+      Paintable.PaintableStatefulDrawable.mixin( drawableType );
+    }
   };
 
   /*---------------------------------------------------------------------------*
@@ -374,10 +378,10 @@ define( function( require ) {
   } );
 
   /* jshint -W064 */
-  CircleStatefulDrawableMixin( CircleDOMDrawable );
+  Circle.CircleStatefulDrawable.mixin( CircleDOMDrawable );
 
   /* jshint -W064 */
-  SelfDrawable.PoolableMixin( CircleDOMDrawable );
+  SelfDrawable.Poolable.mixin( CircleDOMDrawable );
 
   /*---------------------------------------------------------------------------*
    * SVG Rendering
@@ -385,7 +389,7 @@ define( function( require ) {
 
   Circle.CircleSVGDrawable = SVGSelfDrawable.createDrawable( {
     type: function CircleSVGDrawable( renderer, instance ) { this.initialize( renderer, instance ); },
-    stateType: CircleStatefulDrawableMixin,
+    stateType: Circle.CircleStatefulDrawable.mixin,
     initialize: function( renderer, instance ) {
       if ( !this.svgElement ) {
         this.svgElement = document.createElementNS( scenery.svgns, 'circle' );
@@ -429,7 +433,6 @@ define( function( require ) {
     usesPaint: true,
     dirtyMethods: [ 'markDirtyRadius' ]
   } );
-
   /*---------------------------------------------------------------------------*
    * WebGL rendering
    *----------------------------------------------------------------------------*/
@@ -440,50 +443,26 @@ define( function( require ) {
     // called either from the constructor or from pooling
     initialize: function( renderer, instance ) {
       this.initializeWebGLSelfDrawable( renderer, instance );
-
-      //Small triangle strip that creates a square, which will be transformed into the right circle shape
-      this.vertexCoordinates = this.vertexCoordinates || new Float32Array( [
-        0, 0,
-        1, 0,
-        0, 1,
-        1, 1
-      ] );
     },
 
-    initializeContext: function( gl ) {
-      this.gl = gl;
+    initializeContext: function( webglBlock ) {
+      this.webglBlock = webglBlock;
+      this.rectangleHandle = new SquareUnstrokedRectangle( webglBlock.webGLRenderer.colorTriangleRenderer, this.node, 0.5 );
 
       // cleanup old vertexBuffer, if applicable
       this.disposeWebGLBuffers();
 
-      this.vertexBuffer = gl.createBuffer();
       this.initializePaintableState();
       this.updateCircle();
+
+      //TODO: Update the state in the buffer arrays
     },
 
     //Nothing necessary since everything currently handled in the uModelViewMatrix below
     //However, we may switch to dynamic draw, and handle the matrix change only where necessary in the future?
     updateCircle: function() {
-      var gl = this.gl;
 
-      var circle = this.node;
-      var rect = { _rectX: -circle.width / 2, _rectY: -circle.height / 2, _rectWidth: circle.width, _rectHeight: circle.height };
-
-      this.vertexCoordinates[ 0 ] = rect._rectX;
-      this.vertexCoordinates[ 1 ] = rect._rectY;
-
-      this.vertexCoordinates[ 2 ] = rect._rectX + rect._rectWidth;
-      this.vertexCoordinates[ 3 ] = rect._rectY;
-
-      this.vertexCoordinates[ 4 ] = rect._rectX;
-      this.vertexCoordinates[ 5 ] = rect._rectY + rect._rectHeight;
-
-      this.vertexCoordinates[ 6 ] = rect._rectX + rect._rectWidth;
-      this.vertexCoordinates[ 7 ] = rect._rectY + rect._rectHeight;
-
-      gl.bindBuffer( gl.ARRAY_BUFFER, this.vertexBuffer );
-      //TODO: Once we are lazily handling the full matrix, we may benefit from DYNAMIC draw here, and updating the vertices themselves
-      gl.bufferData( gl.ARRAY_BUFFER, this.vertexCoordinates, gl.STATIC_DRAW );
+      // TODO: a way to update the ColorTriangleBufferData.
 
       // TODO: move to PaintableWebGLState???
       if ( this.dirtyFill ) {
@@ -493,52 +472,18 @@ define( function( require ) {
     },
 
     render: function( shaderProgram ) {
-      var gl = this.gl;
-
-      // TODO: Handle rounded circles, please!
-      // use the standard version if it's a rounded circle, since there is no WebGL-optimized version for that
-      // TODO: how to handle fill/stroke delay optimizations here?
-      if ( this.node._fill ) {
-        //OHTWO TODO: optimize
-        var viewMatrix = this.instance.relativeTransform.matrix.toAffineMatrix4();
-
-        // combine image matrix (to scale aspect ratios), the trail's matrix, and the matrix to device coordinates
-        gl.uniformMatrix4fv( shaderProgram.uniformLocations.uModelViewMatrix, false, viewMatrix.entries );
-
-        //Indicate the branch of logic to use in the ubershader.  In this case, a texture should be used for the image
-        gl.uniform1i( shaderProgram.uniformLocations.uFragmentType, WebGLBlock.fragmentTypeFill );
-        gl.uniform4f( shaderProgram.uniformLocations.uColor, this.color.r / 255, this.color.g / 255, this.color.b / 255, this.color.a );
-
-        gl.bindBuffer( gl.ARRAY_BUFFER, this.vertexBuffer );
-        gl.vertexAttribPointer( shaderProgram.attributeLocations.aVertex, 2, gl.FLOAT, false, 0, 0 );
-
-
-        phetAllocation && phetAllocation( 'drawArrays' );
-        phetAllocation && phetAllocation( 'Circle.drawArrays' );
-        gl.drawArrays( gl.TRIANGLE_STRIP, 0, 4 );
-      }
+      // This is handled by the ColorTriangleRenderer
     },
 
-    shaderAttributes: [
-      'aVertex'
-    ],
-
     dispose: function() {
-      // we may have been disposed without initializeContext being called (never attached to a block)
-      if ( this.gl ) {
-        this.disposeWebGLBuffers();
-        this.gl = null;
-      }
+      this.disposeWebGLBuffers();
 
       // super
       WebGLSelfDrawable.prototype.dispose.call( this );
-
     },
 
     disposeWebGLBuffers: function() {
-      if ( this.gl ) {
-        this.gl.deleteBuffer( this.vertexBuffer );
-      }
+      this.webglBlock.webGLRenderer.colorTriangleRenderer.colorTriangleBufferData.dispose( this.rectangleHandle );
     },
 
     markDirtyCircle: function() {
@@ -569,12 +514,44 @@ define( function( require ) {
   } );
 
   // include stubs (stateless) for marking dirty stroke and fill (if necessary). we only want one dirty flag, not multiple ones, for WebGL (for now)
-  /* jshint -W064 */
-  Paintable.PaintableStatefulDrawableMixin( Circle.CircleWebGLDrawable );
+  Paintable.PaintableStatefulDrawable.mixin( Circle.CircleWebGLDrawable );
 
   // set up pooling
-  /* jshint -W064 */
-  SelfDrawable.PoolableMixin( Circle.CircleWebGLDrawable );
+  SelfDrawable.Poolable.mixin( Circle.CircleWebGLDrawable );
+
+  /*---------------------------------------------------------------------------*
+   * Pixi Rendering
+   *----------------------------------------------------------------------------*/
+
+  Circle.CirclePixiDrawable = PixiSelfDrawable.createDrawable( {
+    type: function CirclePixiDrawable( renderer, instance ) { this.initialize( renderer, instance ); },
+    stateType: Circle.CircleStatefulDrawable.mixin,
+    initialize: function( renderer, instance ) {
+      if ( !this.displayObject ) {
+        this.displayObject = new PIXI.Graphics();
+      }
+    },
+    updatePixi: function( node, circle ) {
+      if ( this.dirtyRadius ) {
+        var graphics = this.displayObject;
+        this.displayObject.clear();
+        if ( node.getFillColor() ) {
+          graphics.beginFill( node.getFillColor().toNumber() );
+        }
+        if ( node.getStrokeColor() ) {
+          graphics.lineStyle( 5, node.getStrokeColor().toNumber() );
+        }
+        graphics.drawRect( node.rectX, node.rectY, node.rectWidth, node.rectHeight );
+        if ( node.getFillColor() ) {
+          graphics.endFill();
+        }
+      }
+
+      this.updateFillStrokeStyle( circle );
+    },
+    usesPaint: true,
+    keepElements: keepSVGCircleElements
+  } );
 
   return Circle;
 } );

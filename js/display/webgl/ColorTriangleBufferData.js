@@ -28,6 +28,9 @@ define( function( require ) {
   }
 
   return inherit( Object, ColorTriangleBufferData, {
+    isEmpty: function() {
+      return this.vertexArray.length === 0;
+    },
     reserveVertices: function( numVertices ) {
       var startIndex = this.vertexArray.length;
       for ( var i = 0; i < numVertices; i++ ) {

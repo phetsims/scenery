@@ -10,6 +10,7 @@ define( function( require ) {
 
   // modules
   var inherit = require( 'PHET_CORE/inherit' );
+  var Color = require( 'SCENERY/util/Color' );
 
   /**
    *
@@ -42,6 +43,10 @@ define( function( require ) {
       //TODO: Use this
       var color = this.rectangle.fillColor;//read only reference
 
+      // Create a random color if the color wasn't found.
+      // TODO: Remove this when this geometry no longer used for debugging
+      color = color || new Color( Math.round( Math.random() * 255 ), Math.round( Math.random() * 255 ), Math.round( Math.random() * 255 ), 1 );
+      
       // TODO: maybe better to update in fragment shader?  It depends how often we update()
       var r = color.red / 255;
       var g = color.green / 255;

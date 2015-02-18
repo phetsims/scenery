@@ -25,7 +25,7 @@ define( function( require ) {
   'use strict';
 
   var inherit = require( 'PHET_CORE/inherit' );
-  var PoolableMixin = require( 'PHET_CORE/PoolableMixin' );
+  var Poolable = require( 'PHET_CORE/Poolable' );
   var cleanArray = require( 'PHET_CORE/cleanArray' );
   var scenery = require( 'SCENERY/scenery' );
   var ChangeInterval = require( 'SCENERY/display/ChangeInterval' );
@@ -174,7 +174,10 @@ define( function( require ) {
       this.lastInnerDrawable = null;
 
       // {SVGGroup[]} - List of SVG groups associated with this display instance
-      this.svgGroups = [];
+      this.svgGroups = cleanArray( this.svgGroups );
+
+      // {PixiDisplayObject[]}
+      this.pixiDisplayObjects = cleanArray( this.pixiDisplayObjects );
 
       this.cleanSyncTreeResults();
 
@@ -1184,6 +1187,31 @@ define( function( require ) {
       return null;
     },
 
+    // add a reference for an SVG group (fastest way to track them)
+    addPixiDisplayObject: function( pixiDisplayObject ) {
+      this.pixiDisplayObjects.push( pixiDisplayObject );
+    },
+
+    // remove a reference for an SVG group (fastest way to track them)
+    removePixiDisplayObject: function( pixiDisplayObject ) {
+      var index = _.indexOf( this.pixiDisplayObjects, pixiDisplayObject );
+      assert && assert( index >= 0, 'Tried to remove an PixiDisplayObject from an Instance when it did not exist' );
+
+      this.pixiDisplayObjects.splice( index, 1 ); // TODO: remove function
+    },
+
+    // returns null when a lookup fails (which is legitimate)
+    lookupPixiDisplayObject: function( pixiBlock ) {
+      var len = this.pixiDisplayObjects.length;
+      for ( var i = 0; i < len; i++ ) {
+        var group = this.pixiDisplayObjects[ i ];
+        if ( group.block === pixiBlock ) {
+          return group;
+        }
+      }
+      return null;
+    },
+
     // what instance have filters (opacity/visibility/clip) been applied up to?
     getFilterRootInstance: function() {
       if ( this.isBackbone || this.isInstanceCanvasCache || !this.parent ) {
@@ -1256,6 +1284,7 @@ define( function( require ) {
     // clean up listeners and garbage, so that we can be recycled (or pooled)
     dispose: function() {
       sceneryLog && sceneryLog.Instance && sceneryLog.Instance( 'dispose ' + this.toString() );
+      sceneryLog && sceneryLog.Instance && sceneryLog.push();
 
       assert && assert( this.active, 'Seems like we tried to dispose this Instance twice, it is not active' );
 
@@ -1291,6 +1320,8 @@ define( function( require ) {
       this.cleanInstance( null, null );
 
       this.freeToPool();
+
+      sceneryLog && sceneryLog.Instance && sceneryLog.pop();
     },
 
     audit: function( frameId, allowValidationNotNeededChecks ) {
@@ -1417,8 +1448,7 @@ define( function( require ) {
   } );
 
   // object pooling
-  /* jshint -W064 */
-  PoolableMixin( Instance, {
+  Poolable.mixin( Instance, {
     constructorDuplicateFactory: function( pool ) {
       return function( display, trail, isDisplayRoot, isSharedCanvasCacheRoot ) {
         if ( pool.length ) {

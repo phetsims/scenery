@@ -4,8 +4,6 @@
  * Images
  *
  * TODO: allow multiple DOM instances (create new HTMLImageElement elements)
- * TODO: SVG support
- * TODO: support rendering a Canvas to DOM (single instance)
  *
  * @author Jonathan Olson <jonathan.olson@colorado.edu>
  */
@@ -14,6 +12,7 @@ define( function( require ) {
   'use strict';
 
   var inherit = require( 'PHET_CORE/inherit' );
+  var cleanArray = require( 'PHET_CORE/cleanArray' );
   var Bounds2 = require( 'DOT/Bounds2' );
 
   var scenery = require( 'SCENERY/scenery' );
@@ -32,6 +31,16 @@ define( function( require ) {
   // TODO: change this based on memory and performance characteristics of the platform
   var keepDOMImageElements = true; // whether we should pool DOM elements for the DOM rendering states, or whether we should free them when possible for memory
   var keepSVGImageElements = true; // whether we should pool SVG elements for the SVG rendering states, or whether we should free them when possible for memory
+
+  var defaultMipmapBias = -0.7;
+  var defaultMipmapInitialLevel = 4; // by default, precompute all levels that will be used (so we don't hit this during animation)
+  var defaultMipmapMaxLevel = 4;
+
+  function canvasToImage( canvas ) {
+    var img = document.createElement( 'img' );
+    img.src = canvas.toDataURL();
+    return img;
+  }
 
   /*
    * Canvas renderer supports the following as 'image':
@@ -57,6 +66,23 @@ define( function( require ) {
       options.image = image;
     }
 
+    // When non-zero, overrides the Image's natural width/height (in the local coordinate frame) while the Image's
+    // dimensions can't be detected yet (i.e. it reports 0x0 like Safari does for an image that isn't fully loaded).
+    // This allows for faster display of dynamically-created images if the dimensions are known ahead-of-time.
+    // If the intitial dimensions don't match the image's dimensions after it is loaded, an assertion will be fired.
+    this._initialWidth = 0;
+    this._initialHeight = 0;
+
+    // Mipmap client values
+    this._mipmap = false; // {bool} - Whether mipmapping is enabled
+    this._mipmapBias = defaultMipmapBias; // {number} - Amount of level-of-detail adjustment added to everything.
+    this._mipmapInitialLevel = defaultMipmapInitialLevel; // {number} - Quantity of mipmap levels to initially compute
+    this._mipmapMaxLevel = defaultMipmapMaxLevel; // {number} - Maximum mipmap levels to compute (lazily if > initial)
+
+    // Mipmap internal handling
+    this._mipmapCanvases = []; // TODO: power-of-2 handling for WebGL if helpful
+    this._mipmapImages = [];
+
     var self = this;
     // allows us to invalidate our bounds whenever an image is loaded
     this.loadListener = function( event ) {
@@ -81,11 +107,19 @@ define( function( require ) {
       else {
         this.invalidateSelf( Bounds2.NOTHING );
       }
+
+      var stateLen = this._drawables.length;
+      for ( var i = 0; i < stateLen; i++ ) {
+        this._drawables[ i ].markDirtyImage();
+      }
+
+      this.invalidateMipmaps();
     },
 
     getImage: function() {
       return this._image;
     },
+    get image() { return this.getImage(); },
 
     invalidateSupportedRenderers: function() {
       if ( this._image instanceof HTMLCanvasElement ) {
@@ -103,6 +137,7 @@ define( function( require ) {
           scenery.bitmaskSupportsCanvas |
           scenery.bitmaskSupportsSVG |
           scenery.bitmaskSupportsDOM |
+          scenery.bitmaskSupportsWebGL |
           scenery.bitmaskSupportsPixi
         );
       }
@@ -134,23 +169,237 @@ define( function( require ) {
 
         this._image = image;
 
-        var stateLen = this._drawables.length;
-        for ( var i = 0; i < stateLen; i++ ) {
-          this._drawables[ i ].markDirtyImage();
-        }
-
         this.invalidateImage(); // yes, if we aren't loaded yet this will give us 0x0 bounds
       }
       return this;
     },
+    set image( value ) { this.setImage( value ); },
+
+    getInitialWidth: function() {
+      return this._initialWidth;
+    },
+    get initialWidth() { return this.getInitialWidth(); },
+
+    setInitialWidth: function( width ) {
+      this._initialWidth = width;
+
+      this.invalidateImage();
+    },
+    set initialWidth( value ) { this.setInitialWidth( value ); },
+
+    getInitialHeight: function() {
+      return this._initialHeight;
+    },
+    get initialHeight() { return this.getInitialHeight(); },
+
+    setInitialHeight: function( height ) {
+      this._initialHeight = height;
+
+      this.invalidateImage();
+    },
+    set initialHeight( value ) { this.setInitialHeight( value ); },
+
+    isMipmap: function() {
+      return this._mipmap;
+    },
+    get mipmap() { return this.isMipmap(); },
+
+    setMipmap: function( mipmap ) {
+      assert && assert( typeof mipmap === 'boolean' );
+
+      if ( this._mipmap !== mipmap ) {
+        this._mipmap =  mipmap;
+
+        this.invalidateMipmaps();
+      }
+    },
+    set mipmap( value ) { this.setMipmap( value ); },
+
+    getMipmapBias: function() {
+      return this._mipmapBias;
+    },
+    get mipmapBias() { return this.getMipmapBias(); },
+
+    setMipmapBias: function( bias ) {
+      assert && assert( typeof bias === 'number' );
+
+      if ( this._mipmapBias !== bias ) {
+        this._mipmapBias = bias;
+
+        this.invalidateMipmaps();
+      }
+    },
+    set mipmapBias( value ) { this.setMipmapBias( value ); },
+
+    getMipmapInitialLevel: function() {
+      return this._mipmapInitialLevel;
+    },
+    get mipmapInitialLevel() { return this.getMipmapInitialLevel(); },
+
+    setMipmapInitialLevel: function( level ) {
+      assert && assert( typeof level === 'number' );
+
+      if ( this._mipmapInitialLevel !== level ) {
+        this._mipmapInitialLevel = level;
+
+        this.invalidateMipmaps();
+      }
+    },
+    set mipmapInitialLevel( value ) { this.setMipmapInitialLevel( value ); },
+
+    getMipmapMaxLevel: function() {
+      return this._mipmapMaxLevel;
+    },
+    get mipmapMaxLevel() { return this.getMipmapMaxLevel(); },
+
+    setMipmapMaxLevel: function( level ) {
+      assert && assert( typeof level === 'number' );
+
+      if ( this._mipmapMaxLevel !== level ) {
+        this._mipmapMaxLevel = level;
+
+        this.invalidateMipmaps();
+      }
+    },
+    set mipmapMaxLevel( value ) { this.setMipmapMaxLevel( value ); },
+
+    // @private
+    constructNextMipmap: function() {
+      var level = this._mipmapCanvases.length;
+      var biggerCanvas = this._mipmapCanvases[level-1];
+
+      // ignore any 1x1 canvases (or smaller?!?)
+      if ( biggerCanvas.width * biggerCanvas.height > 2 ) {
+        var canvas = document.createElement( 'canvas' );
+        canvas.width = Math.ceil( biggerCanvas.width / 2 );
+        canvas.height = Math.ceil( biggerCanvas.height / 2 );
+
+        // sanity check
+        if ( canvas.width > 0 && canvas.height > 0 ) {
+          var context = canvas.getContext( '2d' );
+          context.scale( 0.5, 0.5 );
+          context.drawImage( biggerCanvas, 0, 0 );
+
+          this._mipmapCanvases.push( canvas );
+          this._mipmapImages.push( canvasToImage( canvas ) );
+        }
+      }
+    },
+
+    // @public
+    invalidateMipmaps: function() {
+      cleanArray( this._mipmapCanvases );
+      cleanArray( this._mipmapImages );
+
+      if ( this._image && this._mipmap ) {
+        var baseCanvas = document.createElement( 'canvas' );
+        baseCanvas.width = this.getImageWidth();
+        baseCanvas.height = this.getImageHeight();
+
+        // if we are not loaded yet, just ignore
+        if ( baseCanvas.width && baseCanvas.height ) {
+          var baseContext = baseCanvas.getContext( '2d' );
+          baseContext.drawImage( this._image, 0, 0 );
+
+          this._mipmapCanvases.push( baseCanvas );
+          this._mipmapImages.push( canvasToImage( baseCanvas ) );
+
+          var level = 0;
+          while( ++level < this._mipmapInitialLevel ) {
+            this.constructNextMipmap();
+          }
+        }
+
+        var stateLen = this._drawables.length;
+        for ( var i = 0; i < stateLen; i++ ) {
+          this._drawables[ i ].markDirtyMipmap();
+        }
+      }
+
+      this.trigger0( 'mipmap' );
+    },
+
+    /**
+     * Returns the desired mipmap level (0-indexed) that should be used for the particular scale.
+     *
+     * @param {number} scale
+     */
+    getMipmapLevel: function( scale ) {
+      assert && assert( scale > 0 );
+
+      // If we are shown larger than scale, ALWAYS choose the highest resolution
+      if ( scale >= 1 ) {
+        return 0;
+      }
+
+      var level = Math.log2( 1 / scale ); // our approximate level of detail
+      level = Math.round( level + this._mipmapBias ); // convert to an integer level
+
+      if ( level < 0 ) {
+        level = 0;
+      }
+      if ( level > this._mipmapMaxLevel ) {
+        level = this._mipmapMaxLevel;
+      }
+
+      // If necessary, do lazy construction of the mipmap level
+      if ( this.mipmap && !this._mipmapCanvases[level] ) {
+        var currentLevel = this._mipmapCanvases.length - 1;
+        while ( ++currentLevel <= level ) {
+          this.constructNextMipmap();
+        }
+        // Sanity check, since constructNextMipmap() may have had to bail out. We had to compute some, so use the last
+        return Math.min( level, this._mipmapCanvases.length - 1 );
+      }
+      // Should already be constructed, or isn't needed
+      else {
+        return level;
+      }
+    },
+
+    /**
+     * @returns {HTMLCanvasElement} - Matching <canvas> for the level of detail
+     */
+    getMipmapCanvas: function( level ) {
+      assert && assert( level >= 0 && level < this._mipmapCanvases.length && ( level % 1 ) === 0 );
+
+      return this._mipmapCanvases[level];
+    },
+
+    /**
+     * @returns {HTMLImageElement} - Matching <img> for the level of detail
+     */
+    getMipmapImage: function( level ) {
+      assert && assert( level >= 0 && level < this._mipmapCanvases.length && ( level % 1 ) === 0 );
+
+      return this._mipmapImages[level];
+    },
 
     getImageWidth: function() {
-      return this._image.naturalWidth || this._image.width;
+      var detectedWidth = this._image.naturalWidth || this._image.width;
+      if ( detectedWidth === 0 ) {
+        return this._initialWidth; // either 0 (default), or the overridden value
+      }
+      else {
+        assert && assert( this._initialWidth === 0 || this._initialWidth === detectedWidth, 'Bad Image.initialWidth' );
+
+        return detectedWidth;
+      }
     },
+    get imageWidth() { return this.getImageWidth(); },
 
     getImageHeight: function() {
-      return this._image.naturalHeight || this._image.height;
+      var detectedHeight = this._image.naturalHeight || this._image.height;
+      if ( detectedHeight === 0 ) {
+        return this._initialHeight; // either 0 (default), or the overridden value
+      }
+      else {
+        assert && assert( this._initialHeight === 0 || this._initialHeight === detectedHeight, 'Bad Image.initialHeight' );
+
+        return detectedHeight;
+      }
     },
+    get imageHeight() { return this.getImageHeight(); },
 
     getImageURL: function() {
       return this._image.src;
@@ -185,15 +434,12 @@ define( function( require ) {
       return Image.ImagePixiDrawable.createFromPool( renderer, instance );
     },
 
-    set image( value ) { this.setImage( value ); },
-    get image() { return this.getImage(); },
-
     getBasicConstructor: function( propLines ) {
       return 'new scenery.Image( \'' + ( this._image.src ? this._image.src.replace( /'/g, '\\\'' ) : 'other' ) + '\', {' + propLines + '} )';
     }
   } );
 
-  Image.prototype._mutatorKeys = [ 'image' ].concat( Node.prototype._mutatorKeys );
+  Image.prototype._mutatorKeys = [ 'image', 'initialWidth', 'initialHeight', 'mipmap', 'mipmapBias', 'mipmapInitialLevel', 'mipmapMaxLevel' ].concat( Node.prototype._mutatorKeys );
 
   // utility for others
   Image.createSVGImage = function( url, width, height ) {
@@ -211,32 +457,41 @@ define( function( require ) {
    * Rendering State mixin (DOM/SVG) //TODO: Does this also apply to WebGL?
    *----------------------------------------------------------------------------*/
 
-  var ImageStatefulDrawableMixin = Image.ImageStatefulDrawableMixin = function( drawableType ) {
-    var proto = drawableType.prototype;
+  Image.ImageStatefulDrawable = {
+    mixin: function( drawableType ) {
+      var proto = drawableType.prototype;
 
-    // initializes, and resets (so we can support pooled states)
-    proto.initializeState = function() {
-      this.paintDirty = true; // flag that is marked if ANY "paint" dirty flag is set (basically everything except for transforms, so we can accelerated the transform-only case)
-      this.dirtyImage = true;
+      // initializes, and resets (so we can support pooled states)
+      proto.initializeState = function() {
+        this.paintDirty = true; // flag that is marked if ANY "paint" dirty flag is set (basically everything except for transforms, so we can accelerated the transform-only case)
+        this.dirtyImage = true;
+        this.dirtyMipmap = true;
 
-      return this; // allow for chaining
-    };
+        return this; // allow for chaining
+      };
 
-    // catch-all dirty, if anything that isn't a transform is marked as dirty
-    proto.markPaintDirty = function() {
-      this.paintDirty = true;
-      this.markDirty();
-    };
+      // catch-all dirty, if anything that isn't a transform is marked as dirty
+      proto.markPaintDirty = function() {
+        this.paintDirty = true;
+        this.markDirty();
+      };
 
-    proto.markDirtyImage = function() {
-      this.dirtyImage = true;
-      this.markPaintDirty();
-    };
+      proto.markDirtyImage = function() {
+        this.dirtyImage = true;
+        this.markPaintDirty();
+      };
 
-    proto.setToCleanState = function() {
-      this.paintDirty = false;
-      this.dirtyImage = false;
-    };
+      proto.markDirtyMipmap = function() {
+        this.dirtyMipmap = true;
+        this.markPaintDirty();
+      };
+
+      proto.setToCleanState = function() {
+        this.paintDirty = false;
+        this.dirtyImage = false;
+        this.dirtyMipmap = false;
+      };
+    }
   };
 
   /*---------------------------------------------------------------------------*
@@ -303,34 +558,56 @@ define( function( require ) {
     }
   } );
 
-  /* jshint -W064 */
-  ImageStatefulDrawableMixin( ImageDOMDrawable );
+  Image.ImageStatefulDrawable.mixin( ImageDOMDrawable );
 
-  /* jshint -W064 */
-  SelfDrawable.PoolableMixin( ImageDOMDrawable );
+  SelfDrawable.Poolable.mixin( ImageDOMDrawable );
 
   /*---------------------------------------------------------------------------*
    * SVG Rendering
    *----------------------------------------------------------------------------*/
 
+  function ImageSVGDrawable( renderer, instance ) { this.initialize( renderer, instance ); }
   Image.ImageSVGDrawable = SVGSelfDrawable.createDrawable( {
-    type: function ImageSVGDrawable( renderer, instance ) { this.initialize( renderer, instance ); },
-    stateType: ImageStatefulDrawableMixin,
+    type: ImageSVGDrawable,
+    stateType: Image.ImageStatefulDrawable.mixin,
+
     initialize: function( renderer, instance ) {
+      sceneryLog && sceneryLog.ImageSVGDrawable && sceneryLog.ImageSVGDrawable( this.id + ' initialized for ' + instance.toString() );
+      var self = this;
+
       if ( !this.svgElement ) {
         this.svgElement = document.createElementNS( scenery.svgns, 'image' );
         this.svgElement.setAttribute( 'x', 0 );
         this.svgElement.setAttribute( 'y', 0 );
       }
+
+      this._usingMipmap = false;
+      this._mipmapLevel = -1; // will always be invalidated
+
+      // if mipmaps are enabled, this listener will be added to when our relative transform changes
+      this._mipmapTransformListener = this._mipmapTransformListener || function() {
+        sceneryLog && sceneryLog.ImageSVGDrawable && sceneryLog.ImageSVGDrawable( self.id + ' Transform dirties mipmap' );
+        self.markDirtyMipmap();
+      };
+
+      this._mipmapListener = this._mipmapListener || function() {
+        // sanity check
+        self.markDirtyMipmap();
+
+        // update our mipmap usage status
+        self.updateMipmapStatus( self.node._mipmap );
+      };
+      this.node.on( 'mipmap', this._mipmapListener );
+      this.updateMipmapStatus( instance.node._mipmap );
     },
+
     updateSVG: function( node, image ) {
       //OHTWO TODO: performance: consider using <use> with <defs> for our image element. This could be a significant speedup!
       if ( this.dirtyImage ) {
+        sceneryLog && sceneryLog.ImageSVGDrawable && sceneryLog.ImageSVGDrawable( this.id + ' Updating dirty image' );
         if ( node._image ) {
           // like <image xlink:href='http://phet.colorado.edu/images/phet-logo-yellow.png' x='0' y='0' height='127px' width='242px'/>
-          image.setAttribute( 'width', node.getImageWidth() + 'px' );
-          image.setAttribute( 'height', node.getImageHeight() + 'px' );
-          image.setAttributeNS( scenery.xlinkns, 'xlink:href', node.getImageURL() );
+          this.updateURL( image, true );
         }
         else {
           image.setAttribute( 'width', '0' );
@@ -338,10 +615,84 @@ define( function( require ) {
           image.setAttributeNS( scenery.xlinkns, 'xlink:href', '//:0' ); // see http://stackoverflow.com/questions/5775469/whats-the-valid-way-to-include-an-image-with-no-src
         }
       }
+      else if ( this.dirtyMipmap && node._image ) {
+        sceneryLog && sceneryLog.ImageSVGDrawable && sceneryLog.ImageSVGDrawable( this.id + ' Updating dirty mipmap' );
+        this.updateURL( image, false );
+      }
     },
+
     usesPaint: false,
     keepElements: keepSVGImageElements
   } );
+  // TODO: improve SVGSelfDrawable setup, so these can be declared inline with the other methods
+  ImageSVGDrawable.prototype.updateURL = function( image, forced ) {
+    // determine our mipmap level, if any is used
+    var level = -1; // signals a default of "we are not using mipmapping"
+    if ( this.node._mipmap ) {
+      var matrix = this.instance.relativeTransform.matrix;
+      // a sense of "average" scale, which should be exact if there is no asymmetric scale/shear applied
+      var approximateScale = ( Math.sqrt( matrix.m00() * matrix.m00() + matrix.m10() * matrix.m10() ) +
+                               Math.sqrt( matrix.m01() * matrix.m01() + matrix.m11() * matrix.m11() ) ) / 2;
+      level = this.node.getMipmapLevel( approximateScale );
+      sceneryLog && sceneryLog.ImageSVGDrawable && sceneryLog.ImageSVGDrawable( this.id + ' Mipmap level: ' + level );
+    }
+
+    // bail out if we would use the currently-used mipmap level (or none) and there was no image change
+    if ( !forced && level === this._mipmapLevel ) {
+      return;
+    }
+
+    // if we are switching to having no mipmap
+    if ( this._mipmapLevel >= 0 && level === -1 ) {
+      image.removeAttribute( 'transform' );
+    }
+    this._mipmapLevel = level;
+
+    if ( this.node._mipmap ) {
+      sceneryLog && sceneryLog.ImageSVGDrawable && sceneryLog.ImageSVGDrawable( this.id + ' Setting image URL to mipmap level ' + level );
+      var img = this.node.getMipmapImage( level );
+      image.setAttribute( 'width', img.naturalWidth + 'px' );
+      image.setAttribute( 'height', img.naturalHeight + 'px' );
+      image.setAttribute( 'transform', 'scale(' + Math.pow( 2, level ).toFixed() + ')' );
+      image.setAttributeNS( scenery.xlinkns, 'xlink:href', img.src );
+    }
+    else {
+      sceneryLog && sceneryLog.ImageSVGDrawable && sceneryLog.ImageSVGDrawable( this.id + ' Setting image URL' );
+      image.setAttribute( 'width', this.node.getImageWidth() + 'px' );
+      image.setAttribute( 'height', this.node.getImageHeight() + 'px' );
+      image.setAttributeNS( scenery.xlinkns, 'xlink:href', this.node.getImageURL() );
+    }
+  };
+
+  ImageSVGDrawable.prototype.updateMipmapStatus = function( usingMipmap ) {
+    if ( this._usingMipmap !== usingMipmap ) {
+      this._usingMipmap = usingMipmap;
+
+      if ( usingMipmap ) {
+        sceneryLog && sceneryLog.ImageSVGDrawable && sceneryLog.ImageSVGDrawable( this.id + ' Adding mipmap compute/listener needs' );
+        this.instance.relativeTransform.addListener( this._mipmapTransformListener ); // when our relative tranform changes, notify us in the pre-repaint phase
+        this.instance.relativeTransform.addPrecompute(); // trigger precomputation of the relative transform, since we will always need it when it is updated
+      }
+      else {
+        sceneryLog && sceneryLog.ImageSVGDrawable && sceneryLog.ImageSVGDrawable( this.id + ' Removing mipmap compute/listener needs' );
+        this.instance.relativeTransform.removeListener( this._mipmapTransformListener );
+        this.instance.relativeTransform.removePrecompute();
+      }
+
+      // sanity check
+      this.markDirtyMipmap();
+    }
+  };
+
+  ImageSVGDrawable.prototype.dispose = function() {
+    sceneryLog && sceneryLog.ImageSVGDrawable && sceneryLog.ImageSVGDrawable( this.id + ' disposing' );
+
+    // clean up mipmap listeners and compute needs
+    this.updateMipmapStatus( false );
+    this.node.off( 'mipmap', this._mipmapListener );
+
+    SVGSelfDrawable.prototype.dispose.call( this );
+  };
 
   /*---------------------------------------------------------------------------*
    * Canvas rendering
@@ -355,7 +706,7 @@ define( function( require ) {
       }
     },
     usesPaint: false,
-    dirtyMethods: [ 'markDirtyImage' ]
+    dirtyMethods: [ 'markDirtyImage', 'markDirtyMipmap' ]
   } );
 
 
@@ -373,11 +724,11 @@ define( function( require ) {
 
     initializeContext: function( webglBlock ) {
       this.webglBlock = webglBlock;
-      this.rectangleHandle = webglBlock.webglRenderer.textureRenderer.textureBufferData.createFromImageNode( this.node, 0.5 );
+      this.imageHandle = webglBlock.webGLRenderer.textureRenderer.createFromImageNode( this.node, 0.4 );
 
       // TODO: Don't call this each time a new item is added.
-      webglBlock.webglRenderer.textureRenderer.bindVertexBuffer();
-      webglBlock.webglRenderer.textureRenderer.bindDirtyTextures();
+      webglBlock.webGLRenderer.textureRenderer.bindVertexBuffer();
+      webglBlock.webGLRenderer.textureRenderer.bindDirtyTextures();
       // cleanup old vertexBuffer, if applicable
 //      this.disposeWebGLBuffers();
 
@@ -389,6 +740,7 @@ define( function( require ) {
     //Nothing necessary since everything currently handled in the uModelViewMatrix below
     //However, we may switch to dynamic draw, and handle the matrix change only where necessary in the future?
     updateRectangle: function() {
+      this.imageHandle.update();
     },
 
     render: function( shaderProgram ) {
@@ -403,7 +755,7 @@ define( function( require ) {
     },
 
     disposeWebGLBuffers: function() {
-      this.webglBlock.webglRenderer.colorTriangleRenderer.colorTriangleBufferData.dispose( this.rectangleHandle );
+      this.webglBlock.webGLRenderer.colorTriangleRenderer.colorTriangleBufferData.dispose( this.imageHandle );
     },
 
     markDirtyRectangle: function() {
@@ -434,102 +786,48 @@ define( function( require ) {
   } );
 
   // set up pooling
-  /* jshint -W064 */
-  SelfDrawable.PoolableMixin( Image.ImageWebGLDrawable );
+  SelfDrawable.Poolable.mixin( Image.ImageWebGLDrawable );
 
-  /* jshint -W064 */
-  ImageStatefulDrawableMixin( Image.ImageWebGLDrawable );
+  Image.ImageStatefulDrawable.mixin( Image.ImageWebGLDrawable );
 
 
   /*---------------------------------------------------------------------------*
-   * Pixi rendering
+   * Pixi Rendering
    *----------------------------------------------------------------------------*/
 
-  Image.ImagePixiDrawable = inherit( PixiSelfDrawable, function ImagePixiDrawable( renderer, instance ) {
-    this.initialize( renderer, instance );
-  }, {
-    // called either from the constructor or from pooling
+  Image.ImagePixiDrawable = PixiSelfDrawable.createDrawable( {
+    type: function ImagePixiDrawable( renderer, instance ) {
+      this.initialize( renderer, instance );
+    },
+    stateType: Image.ImageStatefulDrawable.mixin,
     initialize: function( renderer, instance ) {
-      this.initializePixiSelfDrawable( renderer, instance );
-
-      var baseTexture = new PIXI.BaseTexture( this.node._image, PIXI.scaleModes.DEFAULT );
-      var texture = new PIXI.Texture( baseTexture );
-      this.displayObject = new PIXI.Sprite( texture );
-      this.updateMatrix();
-    },
-
-    updateMatrix: function() {
-      var matrix = this.node.getLocalToGlobalMatrix();
-      this.displayObject.position.x = matrix.getTranslation().x;
-      this.displayObject.position.y = matrix.getTranslation().y;
-
-      //TODO: Scale, shear, etc.
-    },
-
-    initializeContext: function( pixiBlock ) {
-      this.pixiBlock = pixiBlock;
-    },
-
-    //Nothing necessary since everything currently handled in the uModelViewMatrix below
-    //However, we may switch to dynamic draw, and handle the matrix change only where necessary in the future?
-    updateRectangle: function() {
-    },
-
-    render: function( shaderProgram ) {
-      // This is handled by the ColorTriangleRenderer
-    },
-
-    dispose: function() {
-      this.disposePixiBuffers();
-
-      // super
-      PixiSelfDrawable.prototype.dispose.call( this );
-    },
-
-    disposePixiBuffers: function() {
-      this.pixiBlock.pixiRenderer.colorTriangleRenderer.colorTriangleBufferData.dispose( this.rectangleHandle );
-    },
-
-    markTransformDirty: function() {
-      PixiSelfDrawable.prototype.markTransformDirty.call( this );
-
-      // TODO: Batch these dirty calls and only update right before render?
-      this.updateMatrix();
-    },
-
-    markDirtyRectangle: function() {
-      this.markDirty();
-    },
-
-    // general flag set on the state, which we forward directly to the drawable's paint flag
-    markPaintDirty: function() {
-      this.markDirty();
-    },
-
-    onAttach: function( node ) {
-
-    },
-
-    // release the drawable
-    onDetach: function( node ) {
-      //OHTWO TODO: are we missing the disposal?
-    },
-
-    //TODO: Make sure all of the dirty flags make sense here.  Should we be using fillDirty, paintDirty, dirty, etc?
-    update: function() {
-      if ( this.dirty ) {
-        this.updateRectangle();
-        this.dirty = false;
+      if ( !this.displayObject ) {
+        var baseTexture = new PIXI.BaseTexture( this.node._image, PIXI.scaleModes.DEFAULT );
+        var texture = new PIXI.Texture( baseTexture );
+        this.displayObject = new PIXI.Sprite( texture );
       }
-    }
+    },
+    updatePixi: function( node, image ) {
+      //OHTWO TODO: performance: consider using <use> with <defs> for our image element. This could be a significant speedup!
+      if ( this.dirtyImage ) {
+        if ( node._image ) {
+          var baseTexture = new PIXI.BaseTexture( this.node._image, PIXI.scaleModes.DEFAULT );
+          var texture = new PIXI.Texture( baseTexture );
+          this.displayObject.setTexture( texture );
+        }
+        else {
+          this.displayObject.setTexture( null );
+        }
+      }
+    },
+    usesPaint: false,
+    keepElements: keepSVGImageElements
   } );
 
   // set up pooling
-  /* jshint -W064 */
-  SelfDrawable.PoolableMixin( Image.ImagePixiDrawable );
+  SelfDrawable.Poolable.mixin( Image.ImagePixiDrawable );
 
-  /* jshint -W064 */
-  ImageStatefulDrawableMixin( Image.ImagePixiDrawable );
+  Image.ImageStatefulDrawable.mixin( Image.ImagePixiDrawable );
 
   return Image;
 } );

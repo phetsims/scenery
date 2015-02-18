@@ -37,7 +37,6 @@ define( function( require ) {
 
     getSVGDefinition: function() {
       var definition = document.createElementNS( scenery.svgns, 'pattern' );
-      definition.setAttribute( 'id', this.id );
       definition.setAttribute( 'patternUnits', 'userSpaceOnUse' ); // so we don't depend on the bounds of the object being drawn with the gradient
       definition.setAttribute( 'patternContentUnits', 'userSpaceOnUse' ); // TODO: is this needed?
       definition.setAttribute( 'x', 0 );

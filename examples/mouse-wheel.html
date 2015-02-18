@@ -1,0 +1,107 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8"/>
+  <meta http-equiv="X-UA-Compatible" content="IE=edge"/>
+  <meta name="viewport" content="width=device-width, height=device-height, initial-scale=1.0, maximum-scale=1.0, user-scalable=no"/>
+  <meta name="apple-mobile-web-app-capable" content="yes">
+
+  <title>Mouse Wheel - Scenery Example</title>
+
+  <link rel="stylesheet" href="../../sherpa/bootstrap-2.2.2.css">
+
+  <!-- jQuery and LoDash are dependencies -->
+  <script src="../../sherpa/jquery-2.1.0.min.js"></script>
+  <script src="../../sherpa/lodash-2.4.1.min.js"></script>
+
+  <!-- Our code, in either the concatenated 'with comments' version or the minified version -->
+  <script src="../build/development/scenery.js"></script>
+  <!-- <script src="../build/standalone/scenery.min.js"></script> -->
+
+  <style type="text/css">
+    /* Let content go to the edges */
+    html, body {
+      width: 100%;
+      height: 100%;
+      margin: 0;
+      padding: 0;
+      background-color: #ff0;
+      overflow: hidden;
+    }
+
+    /* Have the #main div cover the entire viewport */
+    #main {
+      position: absolute; /* position !== inherit is required so that Scenery's absolutely-positioned children are placed correctly */
+      left: 0;
+      top: 0;
+      background-color: #fff;
+    }
+
+  </style>
+</head>
+
+<body>
+
+<!-- our scene graph will be in this div -->
+<div id="main">
+</div>
+
+<script>
+
+  // initialize our scene
+  var scene = new scenery.Node();
+  var display = new scenery.Display( scene, {
+    container: document.getElementById( 'main' )
+  } );
+  display.initializeFullscreenEvents(); // sets up listeners on the document with preventDefault(), and forwards those events to our scene
+  display.resizeOnWindowResize(); // the scene gets resized to the full screen size
+
+  // explanatory text
+  scene.addChild( new scenery.Text( 'Use the mouse wheel (up and down) over the rectangles', {
+    x: 20,
+    y: 30,
+    fill: '#000000',
+    font: '20px sans-serif'
+  } ) );
+
+  function createRectangle( x, y ) {
+    var rect = new scenery.Rectangle( x, y, 50, 50 );
+
+    // store a 3-dimensional offset on each rectangle
+    rect.wheelOffset = new dot.Vector3();
+
+    function updateFill() {
+      // pay attention only to the vertical scroll offset
+      var isPositive = rect.wheelOffset.y > 0;
+      var value = Math.ceil( Math.abs( Math.atan( rect.wheelOffset.y / 50 ) / ( Math.PI / 2 ) * 255 ) );
+      rect.fill = 'rgb(' + ( isPositive ? 0 : value ) + ',0,' + ( isPositive ? value : 0 ) + ')';
+    }
+    updateFill();
+
+    scene.addChild( rect );
+
+    rect.addInputListener( {
+      wheel: function( event, trail ) {
+        // add the 3-dimensional delta to our accumulated offset, and update visually
+        rect.wheelOffset.add( event.pointer.wheelDelta );
+        updateFill();
+      }
+    } );
+  }
+
+  for ( var i = 20; i < 520; i += 51 ) {
+    for ( var j = 50; j < 550; j += 51 ) {
+      createRectangle( i, j );
+    }
+  }
+
+  /*---------------------------------------------------------------------------*
+   * main loop
+   *----------------------------------------------------------------------------*/
+
+  display.updateOnRequestAnimationFrame();
+
+</script>
+
+</body>
+</html>

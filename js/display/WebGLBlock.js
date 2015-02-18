@@ -13,8 +13,9 @@ define( function( require ) {
 
   // modules
   var inherit = require( 'PHET_CORE/inherit' );
-  var PoolableMixin = require( 'PHET_CORE/PoolableMixin' );
+  var Poolable = require( 'PHET_CORE/Poolable' );
   var cleanArray = require( 'PHET_CORE/cleanArray' );
+  var arrayRemove = require( 'PHET_CORE/arrayRemove' );
   var scenery = require( 'SCENERY/scenery' );
   var FittedBlock = require( 'SCENERY/display/FittedBlock' );
   var Util = require( 'SCENERY/util/Util' );
@@ -44,8 +45,8 @@ define( function( require ) {
 
       // TODO: Maybe pass through Renderer.bitmaskWebGLLowResolution ) ?
       // Each WebGL block needs its own canvas, and this is created by the WebGLRenderer.
-      this.webglRenderer = new WebGLRenderer( { stats: false } );
-      this.domElement = this.webglRenderer.canvas;
+      this.webGLRenderer = new WebGLRenderer( { stats: false } );
+      this.domElement = this.webGLRenderer.canvas;
 
       this.domElement.style.position = 'absolute';
       this.domElement.style.left = '0';
@@ -54,11 +55,14 @@ define( function( require ) {
 
       // reset any fit transforms that were applied
       // TODO: What is force acceleration?
-      Util.prepareForTransform( this.webglRenderer.canvas, this.forceAcceleration );
-      Util.unsetTransform( this.webglRenderer.canvas ); // clear out any transforms that could have been previously applied
+      Util.prepareForTransform( this.webGLRenderer.canvas, this.forceAcceleration );
+      Util.unsetTransform( this.webGLRenderer.canvas ); // clear out any transforms that could have been previously applied
 
       // store our backing scale so we don't have to look it up while fitting
-//      this.backingScale = ( renderer & Renderer.bitmaskWebGLLowResolution ) ? 1 : scenery.Util.backingScale( this.gl );
+      // this.backingScale = ( renderer & Renderer.bitmaskWebGLLowResolution ) ? 1 : scenery.Util.backingScale( this.gl );
+
+      // a column-major 3x3 array specifying our projection matrix for 2D points (homogenized to (x,y,1))
+      this.projectionMatrixArray = new Float32Array( 9 );
 
       this.initializeWebGLState();
 
@@ -70,15 +74,15 @@ define( function( require ) {
 
     initializeWebGLState: function() {
 
-      // TODO: Maybe initialize the webglRenderer, if it is reused during pooling?
-//      this.webglRenderer.initialize();
+      // TODO: Maybe initialize the webGLRenderer, if it is reused during pooling?
+//      this.webGLRenderer.initialize();
     },
 
     setSizeFullDisplay: function() {
 
       // TODO: Allow scenery to change the size of the WebGLRenderer.canvas
       var size = this.display.getSize();
-      this.webglRenderer.setCanvasSize( size.width, size.height );
+      this.webGLRenderer.setCanvasSize( size.width, size.height );
     },
 
     setSizeFitBounds: function() {
@@ -88,7 +92,7 @@ define( function( require ) {
       var y = this.fitBounds.minY;
       //OHTWO TODO PERFORMANCE: see if we can get a speedup by putting the backing scale in our transform instead of with CSS?
       Util.setTransform( 'matrix(1,0,0,1,' + x + ',' + y + ')', this.canvas, this.forceAcceleration ); // reapply the translation as a CSS transform
-      this.webglRenderer.setCanvasSize( this.fitBounds.width, this.fitBounds.height );
+      this.webGLRenderer.setCanvasSize( this.fitBounds.width, this.fitBounds.height );
 
       //TODO: How to handle this in WebGLRenderer?
 //      this.updateWebGLDimension( -x, -y, this.fitBounds.width, this.fitBounds.height );
@@ -106,9 +110,24 @@ define( function( require ) {
         }
 
         // udpate the fit BEFORE drawing, since it may change our offset
-        this.updateFit();
+        if ( this.dirtyFit ) {
+          this.updateFit();
+        }
 
-        this.webglRenderer.draw();
+        // finalX = 2 * x / display.width - 1
+        // finalY = 1 - 2 * y / display.height
+        // result = matrix * ( x, y, 1 )
+        this.projectionMatrixArray[0] = 2 / this.display.width;
+        this.projectionMatrixArray[1] = 0;
+        this.projectionMatrixArray[2] = 0;
+        this.projectionMatrixArray[3] = 0;
+        this.projectionMatrixArray[4] = -2 / this.display.height;
+        this.projectionMatrixArray[5] = 0;
+        this.projectionMatrixArray[6] = -1;
+        this.projectionMatrixArray[7] = 1;
+        this.projectionMatrixArray[8] = 1;
+
+        this.webGLRenderer.draw();
       }
 
       sceneryLog && sceneryLog.WebGLBlock && sceneryLog.pop();
@@ -117,7 +136,7 @@ define( function( require ) {
     dispose: function() {
       sceneryLog && sceneryLog.WebGLBlock && sceneryLog.WebGLBlock( 'dispose #' + this.id );
 
-      this.webglRenderer.dispose();
+      this.webGLRenderer.dispose();
 
       // clear references
       cleanArray( this.dirtyDrawables );
@@ -143,13 +162,21 @@ define( function( require ) {
       drawable.initializeContext( this );
 
       //TODO: Don't call this every frame!  Consider preallocating a large array in the various buffers.
-      this.webglRenderer.colorTriangleRenderer.bindVertexBuffer();
+      this.webGLRenderer.colorTriangleRenderer.bindVertexBuffer();
+
+      if ( drawable.isCustomWebGLRenderer ) {
+        this.webGLRenderer.customWebGLRenderers.push( drawable );
+      }
     },
 
     removeDrawable: function( drawable ) {
       sceneryLog && sceneryLog.WebGLBlock && sceneryLog.WebGLBlock( '#' + this.id + '.removeDrawable ' + drawable.toString() );
 
       FittedBlock.prototype.removeDrawable.call( this, drawable );
+
+      if ( drawable.isCustomWebGLRenderer ) {
+        arrayRemove( this.webGLRenderer.customWebGLRenderers, drawable );
+      }
     },
 
     onIntervalChange: function( firstDrawable, lastDrawable ) {
@@ -172,13 +199,6 @@ define( function( require ) {
       sceneryLog && sceneryLog.WebGLBlock && sceneryLog.pop();
     },
 
-    // This method can be called to simulate context loss using the khronos webgl-debug context loss simulator, see #279
-    simulateWebGLContextLoss: function() {
-      console.log( 'simulating webgl context loss in WebGLBlock' );
-      assert && assert( this.scene.webglMakeLostContextSimulatingCanvas );
-      this.canvas.loseContextInNCalls( 5 );
-    },
-
     toString: function() {
       return 'WebGLBlock#' + this.id + '-' + FittedBlock.fitString[ this.fit ];
     }
@@ -188,8 +208,7 @@ define( function( require ) {
     fragmentTypeTexture: 1
   } );
 
-  /* jshint -W064 */
-  PoolableMixin( WebGLBlock, {
+  Poolable.mixin( WebGLBlock, {
     constructorDuplicateFactory: function( pool ) {
       return function( display, renderer, transformRootInstance, filterRootInstance ) {
         if ( pool.length ) {

@@ -13,7 +13,10 @@
 define( [
   'SCENERY/scenery',
 
-  'SCENERY/accessibility/AccessibilityLayer',
+  'SCENERY/accessibility/AriaSpeech',
+  'SCENERY/accessibility/FocusCursor',
+  'SCENERY/accessibility/FocusLayer',
+  'SCENERY/accessibility/FocusRectangle',
 
   'SCENERY/debug/DebugContext',
 
@@ -85,7 +88,6 @@ define( [
   'SCENERY/overlays/PointerAreaOverlay',
   'SCENERY/overlays/PointerOverlay',
 
-  'SCENERY/util/AccessibilityPeer',
   'SCENERY/util/CanvasContextWrapper',
   'SCENERY/util/Color',
   'SCENERY/util/Features',

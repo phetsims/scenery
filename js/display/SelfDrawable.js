@@ -11,7 +11,7 @@ define( function( require ) {
   'use strict';
 
   var inherit = require( 'PHET_CORE/inherit' );
-  var PoolableMixin = require( 'PHET_CORE/PoolableMixin' );
+  var Poolable = require( 'PHET_CORE/Poolable' );
   var scenery = require( 'SCENERY/scenery' );
   var Drawable = require( 'SCENERY/display/Drawable' );
 
@@ -48,26 +48,27 @@ define( function( require ) {
     }
   } );
 
-  SelfDrawable.PoolableMixin = function( selfDrawableType ) {
-    // for pooling, allow <SelfDrawableType>.createFromPool( renderer, instance ) and drawable.freeToPool(). Creation will initialize the drawable to an initial state
-    /* jshint -W064 */
-    PoolableMixin( selfDrawableType, {
-      defaultFactory: function() {
-        /* jshint -W055 */
-        return new selfDrawableType();
-      },
-      constructorDuplicateFactory: function( pool ) {
-        return function( renderer, instance ) {
-          if ( pool.length ) {
-            return pool.pop().initialize( renderer, instance );
-          }
-          else {
-            /* jshint -W055 */
-            return new selfDrawableType( renderer, instance );
-          }
-        };
-      }
-    } );
+  SelfDrawable.Poolable = {
+    mixin: function( selfDrawableType ) {
+      // for pooling, allow <SelfDrawableType>.createFromPool( renderer, instance ) and drawable.freeToPool(). Creation will initialize the drawable to an initial state
+      Poolable.mixin( selfDrawableType, {
+        defaultFactory: function() {
+          /* jshint -W055 */
+          return new selfDrawableType();
+        },
+        constructorDuplicateFactory: function( pool ) {
+          return function( renderer, instance ) {
+            if ( pool.length ) {
+              return pool.pop().initialize( renderer, instance );
+            }
+            else {
+              /* jshint -W055 */
+              return new selfDrawableType( renderer, instance );
+            }
+          };
+        }
+      } );
+    }
   };
 
   return SelfDrawable;

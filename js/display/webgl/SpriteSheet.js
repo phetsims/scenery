@@ -35,11 +35,6 @@ define( function( require ) {
   }
 
   return inherit( Object, SpriteSheet, {
-    addImage: function( image ) {
-      this.context.drawImage( image, 0, 0 );
-      this.dirty = true;
-    },
-
     /**
      * Draws the given image at a position calculated by the packer and returns the normalized bounded region
      * reserved for the image within this SpriteSheet. returns null if the image cannot be drawn, upon which a
@@ -51,6 +46,7 @@ define( function( require ) {
     reserveImageSpace: function( image ) {
       var startPosition = this.packer.reserveSpace( image.width, image.height );
       var normalizedBounds = null;
+      this.dirty = true;
       if ( startPosition ) {
         //Draw Image at specific position
         this.context.drawImage( image, startPosition.x, startPosition.y );

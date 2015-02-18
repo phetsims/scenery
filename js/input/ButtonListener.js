@@ -24,6 +24,7 @@ define( function( require ) {
   var inherit = require( 'PHET_CORE/inherit' );
 
   var DownUpListener = require( 'SCENERY/input/DownUpListener' );
+  var Input = require( 'SCENERY/input/Input' );
 
   /**
    * Options for the ButtonListener:
@@ -41,6 +42,7 @@ define( function( require ) {
     this.buttonState = 'up'; // public: 'up', 'over', 'down' or 'out'
 
     this._overCount = 0; // how many pointers are over us (track a count, so we can handle multiple pointers gracefully)
+    this._enterOrSpaceKeyDown = false; // If an action key has pressed the button
 
     this._buttonOptions = options; // store the options object so we can call the callbacks
 
@@ -97,34 +99,39 @@ define( function( require ) {
       if ( this._overCount === 0 ) {
         this.setButtonState( event, this.isDown ? 'out' : 'up' );
       }
-    }
-  } );
-
-  //TODO delete this after work is completed on sun.Button and scenery.ButtonListener
-  ButtonListener.TEST_LISTENER = new ButtonListener( {
-
-    up: function( event, oldState ) {
-      console.log( "ButtonListener.up oldState=" + oldState );
+    },
+    /**
+     * When enter or space is pressed, make a note of it and increment the over count.
+     * @param event
+     */
+    keydown: function( event ) {
+      DownUpListener.prototype.keydown.call( this, event );
+      var keyCode = event.domEvent.keyCode;
+      if ( keyCode === Input.KEY_ENTER || keyCode === Input.KEY_SPACE ) {
+        if ( !this._enterOrSpaceKeyDown ) {
+          this._overCount++;
+          this._enterOrSpaceKeyDown = true;
+        }
+      }
     },
 
-    over: function( event, oldState ) {
-      console.log( "ButtonListener.over oldState=" + oldState );
-    },
+    /**
+     * When the enter or space key comes up, decrement the over count.
+     * TODO: What if the enter key went down and the space key went up???
+     * @param event
+     */
+    keyup: function( event ) {
 
-    down: function( event, oldState ) {
-      console.log( "ButtonListener.down oldState=" + oldState );
-    },
-
-    out: function( event, oldState ) {
-      console.log( "ButtonListener.out oldState=" + oldState );
-    },
-
-    fire: function( event ) {
-      console.log( "ButtonListener.fire" );
+      //TODO: Anything to call in DownUpListener?
+      var keyCode = event.domEvent.keyCode;
+      if ( keyCode === Input.KEY_ENTER || keyCode === Input.KEY_SPACE ) {
+        if ( this._enterOrSpaceKeyDown ) {
+          this._overCount--;
+          this._enterOrSpaceKeyDown = false;
+        }
+      }
     }
   } );
 
   return ButtonListener;
 } );
-
-

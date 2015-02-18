@@ -42,6 +42,14 @@ define( function( require ) {
 
   var trailUnderPointerOptions = {};
 
+  function defaultTrailPredicate( node ) {
+    return node._parents.length === 0;
+  }
+
+  function defaultLeafTrailPredicate( node ) {
+    return node._children.length === 0;
+  }
+
   /*
    * Available keys for use in the options parameter object for a vanilla Node (not inherited), in the order they are executed in:
    *
@@ -117,6 +125,15 @@ define( function( require ) {
 
     // the CSS cursor to be displayed over this node. null should be the default (inherit) value
     this._cursor = null;
+
+    // {bool} Whether this Node should be accessible via tab ordering. Defaults to false
+    this._focusable = false;
+    // {string} - 'cursor' or 'rectangle' at the moment. WARNING: in active development!
+    this._focusIndicator = 'rectangle';
+    // {Array.<Node> | null} - If provided, it will override the focus order between children (and optionally descendants).
+    // If not provided, the focus order will default to the rendering order (first children first, last children last)
+    // determined by the children array.
+    this._focusOrder = null;
 
     this._children = []; // ordered
     this._parents = []; // unordered
@@ -279,11 +296,13 @@ define( function( require ) {
         }
       }
     },
+    set children( value ) { this.setChildren( value ); },
 
     getChildren: function() {
       // TODO: ensure we are not triggering this in Scenery code when not necessary!
       return this._children.slice( 0 ); // create a defensive copy
     },
+    get children() { return this.getChildren(); },
 
     getChildrenCount: function() {
       return this._children.length;
@@ -292,6 +311,7 @@ define( function( require ) {
     getParents: function() {
       return this._parents.slice( 0 ); // create a defensive copy
     },
+    get parents() { return this.getParents(); },
 
     // returns a single parent if it exists, otherwise null (no parents), or an assertion failure (multiple parents)
     getParent: function() {
@@ -511,7 +531,7 @@ define( function( require ) {
           var epsilon = 0.000001;
 
           var childBounds = Bounds2.NOTHING.copy();
-          _.each( that.children, function( child ) { childBounds.includeBounds( child._bounds ); } );
+          _.each( that._children, function( child ) { childBounds.includeBounds( child._bounds ); } );
 
           var localBounds = that._selfBounds.union( childBounds );
 
@@ -773,6 +793,7 @@ define( function( require ) {
     getSelfBounds: function() {
       return this._selfBounds;
     },
+    get selfBounds() { return this.getSelfBounds(); },
 
     // returns a bounding box that should contain all self content in the local coordinate frame (our normal self bounds aren't guaranteed this for Text, etc.)
     getSafeSelfBounds: function() {
@@ -784,12 +805,14 @@ define( function( require ) {
       this.validateBounds();
       return this._childBounds;
     },
+    get childBounds() { return this.getChildBounds(); },
 
     // local coordinate frame bounds
     getLocalBounds: function() {
       this.validateBounds();
       return this._localBounds;
     },
+    get localBounds() { return this.getLocalBounds(); },
 
     // {Bounds2 | null} to override the localBounds. Once this is called, it will always be used for localBounds until this is called again.
     // To revert to having Scenery compute the localBounds, set this to null.
@@ -824,6 +847,7 @@ define( function( require ) {
 
       return this; // allow chaining
     },
+    set localBounds( value ) { return this.setLocalBounds( value ); },
 
     // @public, meant to be overridden in sub-types that have more accurate bounds determination (e.g. non-rectangular)
     getTransformedSelfBounds: function( matrix ) {
@@ -841,17 +865,20 @@ define( function( require ) {
         this.invalidateBounds();
       }
     },
+    set transformBounds( value ) { return this.setTransformBounds( value ); },
 
     // getter for whether we will transform bounds with rotations and shears when computing bounds
     getTransformBounds: function() {
       return this._transformBounds;
     },
+    get transformBounds() { return this.getTransformBounds(); },
 
     // the bounds for content in render(), in "parent" coordinates
     getBounds: function() {
       this.validateBounds();
       return this._bounds;
     },
+    get bounds() { return this.getBounds(); },
 
     // like getBounds() in the "parent" coordinate frame, but includes only visible nodes
     getVisibleBounds: function() {
@@ -869,6 +896,7 @@ define( function( require ) {
       assert && assert( bounds.isFinite() || bounds.isEmpty(), 'Visible bounds should not be infinite' );
       return this.localToParentBounds( bounds );
     },
+    get visibleBounds() { return this.getVisibleBounds(); },
 
     // whether this node effectively behaves as if it has an input listener
     hasInputListenerEquivalent: function() {
@@ -1143,20 +1171,18 @@ define( function( require ) {
       this.prependMatrix( matrix );
     },
 
-    getX: function() {
-      return this._transform.getMatrix().m02();
-    },
-
     setX: function( x ) {
       assert && assert( typeof x === 'number' );
 
       this.translate( x - this.getX(), 0, true );
       return this;
     },
+    set x( value ) { this.setX( value ); },
 
-    getY: function() {
-      return this._transform.getMatrix().m12();
+    getX: function() {
+      return this._transform.getMatrix().m02();
     },
+    get x() { return this.getX(); },
 
     setY: function( y ) {
       assert && assert( typeof y === 'number' );
@@ -1164,11 +1190,12 @@ define( function( require ) {
       this.translate( 0, y - this.getY(), true );
       return this;
     },
+    set y( value ) { this.setY( value ); },
 
-    // returns a vector with an entry for each axis, e.g. (5,2) for an Affine-style matrix with rows ((5,0,0),(0,2,0),(0,0,1))
-    getScaleVector: function() {
-      return this._transform.getMatrix().getScaleVector();
+    getY: function() {
+      return this._transform.getMatrix().m12();
     },
+    get y() { return this.getY(); },
 
     // supports setScaleMagnitude( 5 ) for both dimensions, setScaleMagnitude( 5, 3 ) for each dimension separately, or setScaleMagnitude( new Vector2( x, y ) )
     setScaleMagnitude: function( a, b ) {
@@ -1189,8 +1216,9 @@ define( function( require ) {
       return this;
     },
 
-    getRotation: function() {
-      return this._transform.getMatrix().getRotation();
+    // returns a vector with an entry for each axis, e.g. (5,2) for an Affine-style matrix with rows ((5,0,0),(0,2,0),(0,0,1))
+    getScaleVector: function() {
+      return this._transform.getMatrix().getScaleVector();
     },
 
     setRotation: function( rotation ) {
@@ -1199,6 +1227,12 @@ define( function( require ) {
       this.appendMatrix( Matrix3.rotation2( rotation - this.getRotation() ) );
       return this;
     },
+    set rotation( value ) { this.setRotation( value ); },
+
+    getRotation: function() {
+      return this._transform.getMatrix().getRotation();
+    },
+    get rotation() { return this.getRotation(); },
 
     // supports setTranslation( x, y ) or setTranslation( new Vector2( x, y ) ) .. or technically setTranslation( { x: x, y: y } )
     setTranslation: function( a, b ) {
@@ -1221,11 +1255,13 @@ define( function( require ) {
 
       return this;
     },
+    set translation( value ) { this.setTranslation( value ); },
 
     getTranslation: function() {
       var matrix = this._transform.getMatrix();
       return new Vector2( matrix.m02(), matrix.m12() );
     },
+    get translation() { return this.getTranslation(); },
 
     // append a transformation matrix to our local transform
     appendMatrix: function( matrix ) {
@@ -1245,10 +1281,12 @@ define( function( require ) {
     setMatrix: function( matrix ) {
       this._transform.setMatrix( matrix );
     },
+    set matrix( value ) { this.setMatrix( value ); },
 
     getMatrix: function() {
       return this._transform.getMatrix();
     },
+    get matrix() { return this.getMatrix(); },
 
     // change the actual transform reference (not just the actual transform)
     setTransform: function( transform ) {
@@ -1266,11 +1304,13 @@ define( function( require ) {
         this.afterTransformChange();
       }
     },
+    set transform( value ) { this.setTransform( value ); },
 
     getTransform: function() {
       // for now, return an actual copy. we can consider listening to changes in the future
       return this._transform;
     },
+    get transform() { return this.getTransform(); },
 
     resetTransform: function() {
       this.setMatrix( Matrix3.IDENTITY );
@@ -1289,11 +1329,6 @@ define( function( require ) {
       this.trigger0( 'transform' );
     },
 
-    // the left bound of this node, in the parent coordinate frame
-    getLeft: function() {
-      return this.getBounds().minX;
-    },
-
     // shifts this node horizontally so that its left bound (in the parent coordinate frame) is 'left'
     setLeft: function( left ) {
       assert && assert( typeof left === 'number' );
@@ -1301,11 +1336,13 @@ define( function( require ) {
       this.translate( left - this.getLeft(), 0, true );
       return this; // allow chaining
     },
+    set left( value ) { this.setLeft( value ); },
 
-    // the right bound of this node, in the parent coordinate frame
-    getRight: function() {
-      return this.getBounds().maxX;
+    // the left bound of this node, in the parent coordinate frame
+    getLeft: function() {
+      return this.getBounds().minX;
     },
+    get left() { return this.getLeft(); },
 
     // shifts this node horizontally so that its right bound (in the parent coordinate frame) is 'right'
     setRight: function( right ) {
@@ -1314,10 +1351,13 @@ define( function( require ) {
       this.translate( right - this.getRight(), 0, true );
       return this; // allow chaining
     },
+    set right( value ) { this.setRight( value ); },
 
-    getCenterX: function() {
-      return this.getBounds().getCenterX();
+    // the right bound of this node, in the parent coordinate frame
+    getRight: function() {
+      return this.getBounds().maxX;
     },
+    get right() { return this.getRight(); },
 
     setCenterX: function( x ) {
       assert && assert( typeof x === 'number' );
@@ -1325,10 +1365,12 @@ define( function( require ) {
       this.translate( x - this.getCenterX(), 0, true );
       return this; // allow chaining
     },
+    set centerX( value ) { this.setCenterX( value ); },
 
-    getCenterY: function() {
-      return this.getBounds().getCenterY();
+    getCenterX: function() {
+      return this.getBounds().getCenterX();
     },
+    get centerX() { return this.getCenterX(); },
 
     setCenterY: function( y ) {
       assert && assert( typeof y === 'number' );
@@ -1336,11 +1378,12 @@ define( function( require ) {
       this.translate( 0, y - this.getCenterY(), true );
       return this; // allow chaining
     },
+    set centerY( value ) { this.setCenterY( value ); },
 
-    // the top bound of this node, in the parent coordinate frame
-    getTop: function() {
-      return this.getBounds().minY;
+    getCenterY: function() {
+      return this.getBounds().getCenterY();
     },
+    get centerY() { return this.getCenterY(); },
 
     // shifts this node vertically so that its top bound (in the parent coordinate frame) is 'top'
     setTop: function( top ) {
@@ -1349,11 +1392,13 @@ define( function( require ) {
       this.translate( 0, top - this.getTop(), true );
       return this; // allow chaining
     },
+    set top( value ) { this.setTop( value ); },
 
-    // the bottom bound of this node, in the parent coordinate frame
-    getBottom: function() {
-      return this.getBounds().maxY;
+    // the top bound of this node, in the parent coordinate frame
+    getTop: function() {
+      return this.getBounds().minY;
     },
+    get top() { return this.getTop(); },
 
     // shifts this node vertically so that its bottom bound (in the parent coordinate frame) is 'bottom'
     setBottom: function( bottom ) {
@@ -1362,22 +1407,28 @@ define( function( require ) {
       this.translate( 0, bottom - this.getBottom(), true );
       return this; // allow chaining
     },
+    set bottom( value ) { this.setBottom( value ); },
+
+    // the bottom bound of this node, in the parent coordinate frame
+    getBottom: function() {
+      return this.getBounds().maxY;
+    },
+    get bottom() { return this.getBottom(); },
 
     getWidth: function() {
       return this.getBounds().getWidth();
     },
+    get width() { return this.getWidth(); },
 
     getHeight: function() {
       return this.getBounds().getHeight();
     },
+    get height() { return this.getHeight(); },
 
     getId: function() {
       return this._id;
     },
-
-    isVisible: function() {
-      return this._visible;
-    },
+    get id() { return this.getId(); },
 
     setVisible: function( visible ) {
       assert && assert( typeof visible === 'boolean' );
@@ -1392,10 +1443,12 @@ define( function( require ) {
       }
       return this;
     },
+    set visible( value ) { this.setVisible( value ); },
 
-    getOpacity: function() {
-      return this._opacity;
+    isVisible: function() {
+      return this._visible;
     },
+    get visible() { return this.isVisible(); },
 
     setOpacity: function( opacity ) {
       assert && assert( typeof opacity === 'number' );
@@ -1407,10 +1460,12 @@ define( function( require ) {
         this.trigger0( 'opacity' );
       }
     },
+    set opacity( value ) { this.setOpacity( value ); },
 
-    isPickable: function() {
-      return this._pickable;
+    getOpacity: function() {
+      return this._opacity;
     },
+    get opacity() { return this.getOpacity(); },
 
     setPickable: function( pickable ) {
       assert && assert( pickable === null || typeof pickable === 'boolean' );
@@ -1429,6 +1484,12 @@ define( function( require ) {
         // TODO: invalidate the cursor somehow? #150
       }
     },
+    set pickable( value ) { this.setPickable( value ); },
+
+    isPickable: function() {
+      return this._pickable;
+    },
+    get pickable() { return this.isPickable(); },
 
     setCursor: function( cursor ) {
       assert && assert( typeof cursor === 'string' || cursor === null );
@@ -1443,10 +1504,12 @@ define( function( require ) {
       // allow the 'auto' cursor type to let the ancestors or scene pick the cursor type
       this._cursor = cursor === "auto" ? null : cursor;
     },
+    set cursor( value ) { this.setCursor( value ); },
 
     getCursor: function() {
       return this._cursor;
     },
+    get cursor() { return this.getCursor(); },
 
     setMouseArea: function( area ) {
       assert && assert( area === null || area instanceof Shape || area instanceof Bounds2, 'mouseArea needs to be a kite.Shape, dot.Bounds2, or null' );
@@ -1457,10 +1520,12 @@ define( function( require ) {
         this.invalidateMouseTouchBounds();
       }
     },
+    set mouseArea( value ) { this.setMouseArea( value ); },
 
     getMouseArea: function() {
       return this._mouseArea;
     },
+    get mouseArea() { return this.getMouseArea(); },
 
     setTouchArea: function( area ) {
       assert && assert( area === null || area instanceof Shape || area instanceof Bounds2, 'touchArea needs to be a kite.Shape, dot.Bounds2, or null' );
@@ -1471,10 +1536,12 @@ define( function( require ) {
         this.invalidateMouseTouchBounds();
       }
     },
+    set touchArea( value ) { this.setTouchArea( value ); },
 
     getTouchArea: function() {
       return this._touchArea;
     },
+    get touchArea() { return this.getTouchArea(); },
 
     setClipArea: function( shape ) {
       assert && assert( shape === null || shape instanceof Shape, 'clipArea needs to be a kite.Shape, or null' );
@@ -1487,14 +1554,60 @@ define( function( require ) {
         this.invalidateBounds();
       }
     },
+    set clipArea( value ) { this.setClipArea( value ); },
 
     getClipArea: function() {
       return this._clipArea;
     },
+    get clipArea() { return this.getClipArea(); },
 
     hasClipArea: function() {
       return this._clipArea !== null;
     },
+
+    setFocusable: function( focusable ) {
+      if ( this._focusable !== focusable ) {
+        this._focusable = focusable;
+
+        this.trigger0( 'focusable' );
+      }
+    },
+    set focusable( value ) { this.setFocusable( value ); },
+
+    getFocusable: function() {
+      return this._focusable;
+    },
+    get focusable() { return this.getFocusable(); },
+
+    setFocusIndicator: function( focusIndicator ) {
+      if ( this._focusIndicator !== focusIndicator ) {
+        this._focusIndicator = focusIndicator;
+
+        this.trigger0( 'focusIndicator' );
+      }
+    },
+    set focusIndicator( value ) { this.setFocusIndicator( value ); },
+
+    getFocusIndicator: function() {
+      return this._focusIndicator;
+    },
+    get focusIndicator() { return this.getFocusIndicator(); },
+
+    setFocusOrder: function( focusOrder ) {
+      assert && assert( focusOrder === null || focusOrder instanceof Array );
+
+      if ( this._focusOrder !== focusOrder ) {
+        this._focusOrder = focusOrder;
+
+        this.trigger0( 'focusOrder' );
+      }
+    },
+    set focusOrder( value ) { this.setFocusOrder( value ); },
+
+    getFocusOrder: function() {
+      return this._focusOrder;
+    },
+    get focusOrder() { return this.getFocusOrder(); },
 
     supportsCanvas: function() {
       return ( this._rendererBitmask & scenery.bitmaskSupportsCanvas ) !== 0;
@@ -1512,7 +1625,7 @@ define( function( require ) {
       return ( this._rendererBitmask & scenery.bitmaskSupportsWebGL ) !== 0;
     },
 
-    supportsPixi:function(){
+    supportsPixi: function() {
       return ( this._rendererBitmask & scenery.bitmaskSupportsPixi) !== 0;
     },
 
@@ -1581,6 +1694,7 @@ define( function( require ) {
         this.trigger1( 'hint', 'renderer' );
       }
     },
+    set renderer( value ) { this.setRenderer( value ); },
 
     getRenderer: function() {
       if ( this._hints.renderer === 0 ) {
@@ -1604,6 +1718,7 @@ define( function( require ) {
       assert && assert( false, 'Seems to be an invalid renderer?' );
       return this._hints.renderer;
     },
+    get renderer() { return this.getRenderer(); },
 
     hasRenderer: function() {
       return !!this._hints.renderer;
@@ -1617,10 +1732,12 @@ define( function( require ) {
 
       this.trigger0( 'hint' );
     },
+    set rendererOptions( value ) { this.setRendererOptions( value ); },
 
     getRendererOptions: function() {
       return this._hints;
     },
+    get rendererOptions() { return this.getRendererOptions(); },
 
     hasRendererOptions: function() {
       return !!( this._hints.cssTransform || this._hints.fullResolution );
@@ -1634,10 +1751,12 @@ define( function( require ) {
         this.trigger1( 'hint', 'layerSplit' );
       }
     },
+    set layerSplit( value ) { this.setLayerSplit( value ); },
 
     isLayerSplit: function() {
       return this._hints.layerSplit;
     },
+    get layerSplit() { return this.isLayerSplit(); },
 
     setUsesOpacity: function( usesOpacity ) {
       assert && assert( typeof usesOpacity === 'boolean' );
@@ -1647,30 +1766,156 @@ define( function( require ) {
         this.trigger1( 'hint', 'usesOpacity' );
       }
     },
+    set usesOpacity( value ) { this.setUsesOpacity( value ); },
 
     getUsesOpacity: function() {
       return this._hints.usesOpacity;
     },
+    get usesOpacity() { return this.getUsesOpacity(); },
 
     /*---------------------------------------------------------------------------*
      * Trail operations
      *----------------------------------------------------------------------------*/
 
-    // returns a unique trail (if it exists) where each node in the ancestor chain has 0 or 1 parents
-    getUniqueTrail: function() {
-      var trail = new scenery.Trail();
-      var node = this;
+    /**
+     * @returns {Trail} - Returns the one Trail that starts from a node with no parents (or if the predicate is present,
+     *                    a node that satisfies it), and ends at this node. If more than one Trail would satisfy these
+     *                    conditions, an assertion is thrown (please use getTrails() for those cases).
+     * @param {function( node ) : boolean} [predicate] - If supplied, we will only return trails rooted at a node that
+     *                                                   satisfies predicate( node ) == true
+     * @public
+     */
+    getUniqueTrail: function( predicate ) {
 
-      while ( node ) {
-        trail.addAncestor( node );
-        assert && assert( node._parents.length <= 1 );
-        node = node._parents[ 0 ]; // should be undefined if there aren't any parents
+      // Without a predicate, we'll be able to bail out the instant we hit a node with 2+ parents, and it makes the
+      // logic easier.
+      if ( !predicate ) {
+        var trail = new scenery.Trail();
+        var node = this;
+
+        while ( node ) {
+          assert && assert( node._parents.length <= 1,
+            'getUniqueTrail found a node with ' + node._parents.length + ' parents.' );
+
+          trail.addAncestor( node );
+          node = node._parents[ 0 ]; // should be undefined if there aren't any parents
+        }
+
+        return trail;
       }
+      // With a predicate, we need to explore multiple parents (since the predicate may filter out all but one)
+      else {
+        var trails = this.getTrails( predicate );
 
-      return trail;
+        assert && assert( trails.length === 1,
+          'getUniqueTrail found ' + trails.length + ' matching trails for the predicate' );
+
+        return trails[0];
+      }
     },
 
-    // all nodes in the connected component, returned in an arbitrary order
+    /**
+     * @returns {Trail} - Returns a Trail rooted at rootNode and ends at this node. Throws an assertion if the number of
+     *                    trails that match this condition isn't exactly 1.
+     * @param {Node} rootNode
+     * @public
+     */
+    getUniqueTrailTo: function( rootNode ) {
+      return this.getUniqueTrail( function( node ) {
+        return rootNode === node;
+      } );
+    },
+
+    /**
+     * @returns {Trail[]} - An array of all Trails that start from nodes with no parent (or if a predicate is present,
+     *                      those that satisfy the predicate), and ends at this node.
+     * @param {function( node ) : boolean} [predicate] - If supplied, we will only return Trails rooted at nodes that
+     *                                                   satisfy predicate( node ) == true.
+     * @public
+     */
+    getTrails: function( predicate ) {
+      predicate = predicate || defaultTrailPredicate;
+
+      var trails = [];
+      var trail = new scenery.Trail( this );
+      scenery.Trail.appendAncestorTrailsWithPredicate( trails, trail, predicate );
+
+      return trails;
+    },
+
+    /**
+     * @returns {Trail[]} - An array of all Trails rooted at rootNode and end at this node.
+     * @param {Node} rootNode
+     * @public
+     */
+    getTrailsTo: function( rootNode ) {
+      return this.getTrails( function( node ) {
+        return node === rootNode;
+      } );
+    },
+
+    /**
+     * @returns {Trail[]} - An array of all Trails rooted at this node and end with nodes with no children (or if a
+     *                      predicate is present, those that satisfy the predicate).
+     * @param {function( node ) : boolean} [predicate] - If supplied, we will only return Trails ending at nodes that
+     *                                                   satisfy predicate( node ) == true.
+     * @public
+     */
+    getLeafTrails: function( predicate ) {
+      predicate = predicate || defaultLeafTrailPredicate;
+
+      var trails = [];
+      var trail = new scenery.Trail( this );
+      scenery.Trail.appendDescendantTrailsWithPredicate( trails, trail, predicate );
+
+      return trails;
+    },
+
+    /**
+     * @returns {Trail[]} - An array of all Trails rooted at this node and end with leafNode.
+     * @param {Node} leafNode
+     * @public
+     */
+    getLeafTrailsTo: function( leafNode ) {
+      return this.getLeafTrails( function( node ) {
+        return node === leafNode;
+      } );
+    },
+
+    /**
+     * @returns {Trail} - Returns a Trail rooted at this node and ending at a node that has no children (or if a
+     *                    predicate is provided, a node that satisfies the predicate). If more than one trail matches
+     *                    this description, an assertion will be fired.
+     * @param {function( node ) : boolean} [predicate] - If supplied, we will return a Trail that ends with a node that
+     *                                                   satisfies predicate( node ) == true
+     * @public
+     */
+    getUniqueLeafTrail: function( predicate ) {
+      var trails = this.getLeafTrails( predicate );
+
+      assert && assert( trails.length === 1,
+        'getUniqueLeafTrail found ' + trails.length + ' matching trails for the predicate' );
+
+      return trails[0];
+    },
+
+    /**
+     * @returns {Trail} - Returns a Trail rooted at this node and ending at leafNode. If more than one trail matches
+     *                    this description, an assertion will be fired.
+     * @param {Node} leafNode
+     * @public
+     */
+    getUniqueLeafTrailTo: function( leafNode ) {
+      return this.getUniqueLeafTrail( function( node ) {
+        return node === leafNode;
+      } );
+    },
+
+    /*
+     * @returns {Array.<Node>} All nodes in the connected component, returned in an arbitrary order, including
+     *                         nodes that are ancestors of this node.
+     * @public
+     */
     getConnectedNodes: function() {
       var result = [];
       var fresh = this._children.concat( this._parents ).concat( this );
@@ -1684,6 +1929,90 @@ define( function( require ) {
       return result;
     },
 
+    /**
+     * Returns {Array.<Trail>} trails for all visible focusable trails rooted at the {Node} node passed in.
+     *
+     * @param {Node} node - The root node used for the focus order
+     * @public
+     */
+    getSerializedFocusOrder: function() {
+      var trails = []; // to be appended to and returned
+      var currentTrail = new scenery.Trail( this );
+      var pruneStack = []; // {Array.<Node>} - A list of nodes to prune
+
+      function addTrailsForNode( node, overridePruning ) {
+        // We skip invisible subtrees (including the root!)
+        if ( !node.isVisible() ) {
+          return;
+        }
+
+        // If subtrees were specified with focusOrder, they should be skipped from the ordering of ancestor subtrees,
+        // otherwise we could end up having multiple references to the same trail (which should be disallowed).
+        var pruneCount = 0;
+        var pruneStackLength = pruneStack.length;
+        // count the number of times our node appears in the pruneStack
+        for ( var m = 0; m < pruneStackLength; m++ ) {
+          if ( node === pruneStack[m] ) {
+            pruneCount++;
+          }
+        }
+        // If overridePruning is set, we ignore one reference to our node in the prune stack. If there are two copies,
+        // however, it means a node was specified in a focusOrder that already needs to be pruned (so we skip it instead
+        // of creating duplicate references in the tab order).
+        if ( pruneCount > 1 || ( pruneCount === 1 && !overridePruning ) ) {
+          return;
+        }
+
+        if ( node.focusable ) {
+          trails.push( currentTrail.copy() );
+        }
+
+        if ( node._focusOrder ) {
+          var numFocusNodes = node._focusOrder.length;
+
+          // push specific focused nodes to the stack
+          for ( var l = 0; l < numFocusNodes; l++ ) {
+            pruneStack.push( node._focusOrder[l] );
+          }
+
+          for ( var j = 0; j < numFocusNodes; j++ ) {
+            var descendant = node._focusOrder[j];
+
+            // Find all descendant references to the node. We only want one reference, however.
+            // TODO: for production performance, don't do a full scan. Check children first, then scan only if necessary
+            var descendantTrail = node.getUniqueLeafTrailTo( descendant );
+            descendantTrail.removeAncestor(); // strip off 'node', so that we handle only children
+
+            // same as the normal order, but adding a full trail (since we may be referencing a descendant node)
+            currentTrail.addDescendantTrail( descendantTrail );
+            addTrailsForNode( descendant, true ); // 'true' overrides one reference in the prune stack (added above)
+            currentTrail.removeDescendantTrail( descendantTrail );
+          }
+
+          // pop focused nodes from the stack (that were added above)
+          for ( var k = 0; k < numFocusNodes; k++ ) {
+            pruneStack.pop();
+          }
+        }
+        // with no focusOrder, all children are scanned in the rendering order
+        else {
+          var numChildren = node._children.length;
+          for ( var i = 0; i < numChildren; i++ ) {
+            var child = node._children[i];
+
+            currentTrail.addDescendant( child, i );
+            addTrailsForNode( child, false );
+            currentTrail.removeDescendant();
+          }
+        }
+      }
+
+      addTrailsForNode( this, false );
+
+      return trails;
+    },
+
+    // @public {Array.<Node>} all connected nodes sorted in topological order.
     getTopologicallySortedNodes: function() {
       // see http://en.wikipedia.org/wiki/Topological_sorting
       var edges = {};
@@ -1692,7 +2021,7 @@ define( function( require ) {
       var n;
       _.each( this.getConnectedNodes(), function( node ) {
         edges[ node.id ] = {};
-        _.each( node.children, function( m ) {
+        _.each( node._children, function( m ) {
           edges[ node.id ][ m.id ] = true;
         } );
         if ( !node.parents.length ) {
@@ -1711,7 +2040,7 @@ define( function( require ) {
         n = s.pop();
         l.push( n );
 
-        _.each( n.children, handleChild );
+        _.each( n._children, handleChild );
       }
 
       // ensure that there are no edges left, since then it would contain a circular reference
@@ -1724,7 +2053,7 @@ define( function( require ) {
 
     // verify that this.addChild( child ) it wouldn't cause circular references
     canAddChild: function( child ) {
-      if ( this === child || _.contains( this.children, child ) ) {
+      if ( this === child || _.contains( this._children, child ) ) {
         return false;
       }
 
@@ -1736,7 +2065,7 @@ define( function( require ) {
       var n;
       _.each( this.getConnectedNodes().concat( child.getConnectedNodes() ), function( node ) {
         edges[ node.id ] = {};
-        _.each( node.children, function( m ) {
+        _.each( node._children, function( m ) {
           edges[ node.id ][ m.id ] = true;
         } );
         if ( !node.parents.length && node !== child ) {
@@ -1756,7 +2085,7 @@ define( function( require ) {
         n = s.pop();
         l.push( n );
 
-        _.each( n.children, handleChild );
+        _.each( n._children, handleChild );
 
         // handle our new edge
         if ( n === this ) {
@@ -1952,6 +2281,7 @@ define( function( require ) {
     getInstances: function() {
       return this._instances;
     },
+    get instances() { return this.getInstances(); },
 
     // @private
     addInstance: function( instance ) {
@@ -2123,6 +2453,7 @@ define( function( require ) {
       assert && assert( this.parents.length <= 1, 'globalBounds unable to work for DAG' );
       return this.parentToGlobalBounds( this.getBounds() );
     },
+    get globalBounds() { return this.getGlobalBounds(); },
 
     // get the Bounds2 of any other node by converting to the global coordinate frame.  Does not work for DAG.
     boundsOf: function( node ) {
@@ -2156,104 +2487,8 @@ define( function( require ) {
       return this;
     },
 
-    /*---------------------------------------------------------------------------*
-     * Flags
-     *----------------------------------------------------------------------------*/
-
     // whether for layer fitting we should use "safe" bounds, instead of the bounds used for layout
     requiresSafeBounds: false,
-
-    /*---------------------------------------------------------------------------*
-     * ES5 get/set
-     *----------------------------------------------------------------------------*/
-
-    set layerSplit( value ) { this.setLayerSplit( value ); },
-    get layerSplit() { return this.isLayerSplit(); },
-
-    set renderer( value ) { this.setRenderer( value ); },
-    get renderer() { return this.getRenderer(); },
-
-    set rendererOptions( value ) { this.setRendererOptions( value ); },
-    get rendererOptions() { return this.getRendererOptions(); },
-
-    set usesOpacity( value ) { this.setUsesOpacity( value ); },
-    get usesOpacity() { return this.getUsesOpacity(); },
-
-    set cursor( value ) { this.setCursor( value ); },
-    get cursor() { return this.getCursor(); },
-
-    set mouseArea( value ) { this.setMouseArea( value ); },
-    get mouseArea() { return this.getMouseArea(); },
-
-    set touchArea( value ) { this.setTouchArea( value ); },
-    get touchArea() { return this.getTouchArea(); },
-
-    set clipArea( value ) { this.setClipArea( value ); },
-    get clipArea() { return this.getClipArea(); },
-
-    set visible( value ) { this.setVisible( value ); },
-    get visible() { return this.isVisible(); },
-
-    set opacity( value ) { this.setOpacity( value ); },
-    get opacity() { return this.getOpacity(); },
-
-    set pickable( value ) { this.setPickable( value ); },
-    get pickable() { return this.isPickable(); },
-
-    set transform( value ) { this.setTransform( value ); },
-    get transform() { return this.getTransform(); },
-
-    set matrix( value ) { this.setMatrix( value ); },
-    get matrix() { return this.getMatrix(); },
-
-    set translation( value ) { this.setTranslation( value ); },
-    get translation() { return this.getTranslation(); },
-
-    set rotation( value ) { this.setRotation( value ); },
-    get rotation() { return this.getRotation(); },
-
-    set x( value ) { this.setX( value ); },
-    get x() { return this.getX(); },
-
-    set y( value ) { this.setY( value ); },
-    get y() { return this.getY(); },
-
-    set left( value ) { this.setLeft( value ); },
-    get left() { return this.getLeft(); },
-
-    set right( value ) { this.setRight( value ); },
-    get right() { return this.getRight(); },
-
-    set top( value ) { this.setTop( value ); },
-    get top() { return this.getTop(); },
-
-    set bottom( value ) { this.setBottom( value ); },
-    get bottom() { return this.getBottom(); },
-
-    set centerX( value ) { this.setCenterX( value ); },
-    get centerX() { return this.getCenterX(); },
-
-    set centerY( value ) { this.setCenterY( value ); },
-    get centerY() { return this.getCenterY(); },
-
-    set children( value ) { this.setChildren( value ); },
-    get children() { return this.getChildren(); },
-
-    get parents() { return this.getParents(); },
-
-    get width() { return this.getWidth(); },
-    get height() { return this.getHeight(); },
-    get bounds() { return this.getBounds(); },
-    get selfBounds() { return this.getSelfBounds(); },
-    get childBounds() { return this.getChildBounds(); },
-    get localBounds() { return this.getLocalBounds(); },
-    set localBounds( value ) { return this.setLocalBounds( value ); },
-    set transformBounds( value ) { return this.setTransformBounds( value ); },
-    get transformBounds() { return this.getTransformBounds(); },
-    get globalBounds() { return this.getGlobalBounds(); },
-    get visibleBounds() { return this.getVisibleBounds(); },
-    get id() { return this.getId(); },
-    get instances() { return this.getInstances(); },
 
     mutate: function( options ) {
       if ( !options ) {
@@ -2439,7 +2674,10 @@ define( function( require ) {
     };
 
     // ES5 getter and setter
-    Object.defineProperty( Node.prototype, propertyName, { set: Node.prototype[ setterMethod ], get: Node.prototype[ getterMethod ] } );
+    Object.defineProperty( Node.prototype, propertyName, {
+      set: Node.prototype[ setterMethod ],
+      get: Node.prototype[ getterMethod ]
+    } );
   }
 
   // arguments are more explicit so text-searches will hopefully identify this code.
@@ -2466,7 +2704,8 @@ define( function( require ) {
     'children', 'cursor', 'visible', 'pickable', 'opacity', 'matrix', 'translation', 'x', 'y', 'rotation', 'scale',
     'leftTop', 'centerTop', 'rightTop', 'leftCenter', 'center', 'rightCenter', 'leftBottom', 'centerBottom', 'rightBottom',
     'left', 'right', 'top', 'bottom', 'centerX', 'centerY', 'renderer', 'rendererOptions',
-    'layerSplit', 'usesOpacity', 'mouseArea', 'touchArea', 'clipArea', 'transformBounds', 'focusable'
+    'layerSplit', 'usesOpacity', 'mouseArea', 'touchArea', 'clipArea', 'transformBounds', 'focusable', 'focusIndicator',
+    'focusOrder', 'textDescription'
   ];
 
   return Node;

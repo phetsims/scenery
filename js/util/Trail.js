@@ -56,7 +56,7 @@ define( function( require ) {
     this.length = 0;
     this.uniqueId = '';
 
-    // indices[x] stores the index of nodes[x] in nodes[x-1]'s children
+    // indices[x] stores the index of nodes[x] in nodes[x-1]'s children, e.g. nodes[i].children[ indices[i] ] === nodes[i+1]
     this.indices = [];
 
     var trail = this;
@@ -99,6 +99,10 @@ define( function( require ) {
         }
       }
       return true;
+    },
+
+    isFocusable: function() {
+      return this.isVisible() && this.lastNode().focusable === true;
     },
 
     getOpacity: function() {
@@ -150,7 +154,7 @@ define( function( require ) {
 
     // from local to global
     getMatrix: function() {
-      // TODO: performance: can we cache this ever? would need the scene to not really change in between
+      // TODO: performance: can we cache this ever? would need the rootNode to not really change in between
       // this matrix will be modified in place, so always start fresh
       var matrix = Matrix3.identity();
 
@@ -247,6 +251,25 @@ define( function( require ) {
       this.length--;
       this.updateUniqueId();
       return this;
+    },
+
+    addDescendantTrail: function( trail ) {
+      var length = trail.length;
+      if ( length ) {
+        this.addDescendant( trail.nodes[0] );
+      }
+      for ( var i = 1; i < length; i++ ) {
+        this.addDescendant( trail.nodes[i], this.indices[i-1] );
+      }
+    },
+
+    removeDescendantTrail: function( trail ) {
+      var length = trail.length;
+      for ( var i = length - 1; i >= 0; i-- ) {
+        assert && assert( this.lastNode() === trail.nodes[i] );
+
+        this.removeDescendant();
+      }
     },
 
     // refreshes the internal index references (important if any children arrays were modified!)
@@ -603,18 +626,18 @@ define( function( require ) {
   } );
 
   // like eachTrailBetween, but only fires for painted trails. If callback returns true, subtree will be skipped
-  Trail.eachPaintedTrailBetween = function( a, b, callback, excludeEndTrails, scene ) {
+  Trail.eachPaintedTrailBetween = function( a, b, callback, excludeEndTrails, rootNode ) {
     Trail.eachTrailBetween( a, b, function( trail ) {
       if ( trail && trail.isPainted() ) {
         return callback( trail );
       }
-    }, excludeEndTrails, scene );
+    }, excludeEndTrails, rootNode );
   };
 
   // global way of iterating across trails. when callback returns true, subtree will be skipped
-  Trail.eachTrailBetween = function( a, b, callback, excludeEndTrails, scene ) {
-    var aPointer = a ? new scenery.TrailPointer( a.copy(), true ) : new scenery.TrailPointer( new scenery.Trail( scene ), true );
-    var bPointer = b ? new scenery.TrailPointer( b.copy(), true ) : new scenery.TrailPointer( new scenery.Trail( scene ), false );
+  Trail.eachTrailBetween = function( a, b, callback, excludeEndTrails, rootNode ) {
+    var aPointer = a ? new scenery.TrailPointer( a.copy(), true ) : new scenery.TrailPointer( new scenery.Trail( rootNode ), true );
+    var bPointer = b ? new scenery.TrailPointer( b.copy(), true ) : new scenery.TrailPointer( new scenery.Trail( rootNode ), false );
 
     // if we are excluding endpoints, just bump the pointers towards each other by one step
     if ( excludeEndTrails ) {
@@ -650,6 +673,40 @@ define( function( require ) {
   // The subtrail from the root that both trails share
   Trail.sharedTrail = function( a, b ) {
     return a.slice( 0, Trail.branchIndex( a, b ) );
+  };
+
+  Trail.appendAncestorTrailsWithPredicate = function( trailResults, trail, predicate ) {
+    var root = trail.rootNode();
+
+    if ( predicate( root ) ) {
+      trailResults.push( trail.copy() );
+    }
+
+    var parentCount = root._parents.length;
+    for ( var i = 0; i < parentCount; i++ ) {
+      var parent = root._parents[ i ];
+
+      trail.addAncestor( parent );
+      Trail.appendAncestorTrailsWithPredicate( trailResults, trail, predicate );
+      trail.removeAncestor();
+    }
+  };
+
+  Trail.appendDescendantTrailsWithPredicate = function( trailResults, trail, predicate ) {
+    var lastNode = trail.lastNode();
+
+    if ( predicate( lastNode ) ) {
+      trailResults.push( trail.copy() );
+    }
+
+    var childCount = lastNode._children.length;
+    for ( var i = 0; i < childCount; i++ ) {
+      var child = lastNode._children[ i ];
+
+      trail.addDescendant( child, i );
+      Trail.appendDescendantTrailsWithPredicate( trailResults, trail, predicate );
+      trail.removeDescendant();
+    }
   };
 
   /*

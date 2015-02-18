@@ -86,13 +86,6 @@ define( function( require ) {
    *   height: <current main height>,       // override the main container's height
    *   allowWebGL: true                     // boolean flag that indicates whether scenery is allowed to use WebGL for rendering
    *                                        // Makes it possible to disable WebGL for ease of testing on non-WebGL platforms, see #289
-   *   webglMakeLostContextSimulatingCanvas: false   // Flag to indicate whether the WebGLBlocks should wrap the context with the makeLostContextSimulatingCanvas
-   *                                                 // call from the khronos webgl-debug tools (must be in the path). This is done here because it will be important
-   *                                                 // to easily simulate context loss on many devices, and the canvas must be wrapped before the rendering context is
-   *                                                 // retrieved
-   *   webglContextLossIncremental: false   // Flag to indicate whether an incremental webgl context loss should be triggered on the first context loss
-   *                                        // This is because we must test that the code handles context loss between every pair of adjacent gl calls.
-   * }
    */
   scenery.Display = function Display( rootNode, options ) {
 
@@ -116,9 +109,7 @@ define( function( require ) {
       defaultCursor: 'default',  // what cursor is used when no other cursor is specified
       backgroundColor: null,      // initial background color
 
-      allowWebGL: true,
-      webglMakeLostContextSimulatingCanvas: false,
-      webglContextLossIncremental: false
+      allowWebGL: true
     }, options );
 
     // The (integral, > 0) dimensions of the Display's DOM element (only updates the DOM element on updateDisplay())
@@ -179,6 +170,11 @@ define( function( require ) {
     this._pointerOverlay = null;
     this._pointerAreaOverlay = null;
     this._canvasAreaBoundsOverlay = null;
+
+    // properties for fuzzMouseEvents, so that we can track the status of a persistent mouse pointer
+    this._fuzzMouseIsDown = false;
+    this._fuzzMousePosition = new Vector2(); // start at 0,0
+    this._fuzzMouseLastMoved = false; // whether the last mouse event was a move (we skew probabilities based on this)
 
     this.applyCSSHacks();
 
@@ -272,20 +268,21 @@ define( function( require ) {
 
       if ( assertSlow ) { this._baseInstance.audit( this._frameId, true ); }
 
-      sceneryLog && sceneryLog.Display && sceneryLog.Display( 'disposal phase' );
+      sceneryLog && sceneryLog.Display && sceneryLog.Display( 'instance root disposal phase' );
       sceneryLog && sceneryLog.Display && sceneryLog.push();
-
       // dispose all of our instances. disposing the root will cause all descendants to also be disposed.
       // will also dispose attached drawables (self/group/etc.)
       while ( this._instanceRootsToDispose.length ) {
         this._instanceRootsToDispose.pop().dispose();
       }
+      sceneryLog && sceneryLog.Display && sceneryLog.pop();
 
+      sceneryLog && sceneryLog.Display && sceneryLog.Display( 'drawable disposal phase' );
+      sceneryLog && sceneryLog.Display && sceneryLog.push();
       // dispose all of our other drawables.
       while ( this._drawablesToDispose.length ) {
         this._drawablesToDispose.pop().dispose();
       }
-
       sceneryLog && sceneryLog.Display && sceneryLog.pop();
 
       if ( assertSlow ) { this._baseInstance.audit( this._frameId ); }
@@ -813,14 +810,155 @@ define( function( require ) {
       this._input = null;
     },
 
+    /**
+     * Sends a number of random mouse events through the input system
+     *
+     * @param {number} averageEventQuantity - The average number of mouse events
+     */
+    fuzzMouseEvents: function( averageEventQuantity ) {
+      var chance;
+
+      // run a variable number of events, with a certain chance of bailing out (so no events are possible)
+      // models a geometric distribution of events
+      while ( ( chance = Math.random() ) < 1 - 1 / averageEventQuantity ) {
+        var domEvent;
+        if ( chance < ( this._fuzzMouseLastMoved ? 0.7 : 0.4 ) ) {
+          // toggle up/down
+          domEvent = document.createEvent( 'MouseEvent' ); // not 'MouseEvents' according to DOM Level 3 spec
+
+          // technically deprecated, but DOM4 event constructors not out yet. people on #whatwg said to use it
+          domEvent.initMouseEvent( this._fuzzMouseIsDown ? 'mouseup' : 'mousedown', true, true, window, 1, // click count
+            this._fuzzMousePosition.x, this._fuzzMousePosition.y, this._fuzzMousePosition.x, this._fuzzMousePosition.y,
+            false, false, false, false,
+            0, // button
+            null );
+
+          this._input.validatePointers();
+
+          if ( this._fuzzMouseIsDown ) {
+            this._input.mouseUp( this._fuzzMousePosition, domEvent );
+            this._fuzzMouseIsDown = false;
+          }
+          else {
+            this._input.mouseDown( this._fuzzMousePosition, domEvent );
+            this._fuzzMouseIsDown = true;
+          }
+
+          this._fuzzMouseLastMoved = false;
+        }
+        else {
+          // change the mouse position
+          this._fuzzMousePosition = new Vector2(
+            Math.floor( Math.random() * this.width ),
+            Math.floor( Math.random() * this.height )
+          );
+
+          // our move event
+          domEvent = document.createEvent( 'MouseEvent' ); // not 'MouseEvents' according to DOM Level 3 spec
+
+          // technically deprecated, but DOM4 event constructors not out yet. people on #whatwg said to use it
+          domEvent.initMouseEvent( 'mousemove', true, true, window, 0, // click count
+            this._fuzzMousePosition.x, this._fuzzMousePosition.y, this._fuzzMousePosition.x, this._fuzzMousePosition.y,
+            false, false, false, false,
+            0, // button
+            null );
+
+          this._input.validatePointers();
+          this._input.mouseMove( this._fuzzMousePosition, domEvent );
+
+          this._fuzzMouseLastMoved = true;
+        }
+      }
+    },
+
+    /**
+     * Returns an HTML fragment {string} that includes a large amount of debugging information, including a view of the
+     * instance tree and drawable tree.
+     */
     getDebugHTML: function() {
       function str( ob ) {
         return ob ? ob.toString() : ob + '';
       }
 
+      var headerStyle = 'font-weight: bold; font-size: 120%; margin-top: 5px;';
+
       var depth = 0;
 
-      var result = 'Display ' + this._size.toString() + ' frame:' + this._frameId + ' input:' + !!this._input + ' cursor:' + this._lastCursor + '<br>';
+      var result = '';
+
+      result += '<div style="' + headerStyle + '">Display Summary</div>';
+      result += this._size.toString() + ' frame:' + this._frameId + ' input:' + !!this._input + ' cursor:' + this._lastCursor + '<br>';
+
+      function nodeCount( node ) {
+        var count = 1; // for us
+        for ( var i = 0; i < node._children.length; i++ ) {
+          count += nodeCount( node._children[i] );
+        }
+        return count;
+      }
+      result += 'Nodes: ' + nodeCount( this._rootNode ) + '<br>';
+
+      function instanceCount( instance ) {
+        var count = 1; // for us
+        for ( var i = 0; i < instance.children.length; i++ ) {
+          count += instanceCount( instance.children[i] );
+        }
+        return count;
+      }
+      result += this._baseInstance ? ( 'Instances: ' + instanceCount( this._baseInstance ) + '<br>' ) : '';
+
+      function drawableCount( drawable ) {
+        var count = 1; // for us
+        if ( drawable.blocks ) {
+          // we're a backbone
+          _.each( drawable.blocks, function( childDrawable ) {
+            count += drawableCount( childDrawable );
+          } );
+        }
+        else if ( drawable.firstDrawable && drawable.lastDrawable ) {
+          // we're a block
+          for ( var childDrawable = drawable.firstDrawable; childDrawable !== drawable.lastDrawable; childDrawable = childDrawable.nextDrawable ) {
+            count += drawableCount( childDrawable );
+          }
+          count += drawableCount( drawable.lastDrawable );
+        }
+        return count;
+      }
+      result += this._rootBackbone ? ( 'Drawables: ' + drawableCount( this._rootBackbone ) + '<br>' ) : '';
+
+      function blockSummary( block ) {
+        // ensure we are a block
+        if ( !block.firstDrawable || !block.lastDrawable ) {
+          return;
+        }
+
+        var hasBackbone = block.domDrawable && block.domDrawable.blocks;
+
+        var div = '<div style="margin-left: ' + ( depth * 20 ) + 'px">';
+
+        div += block.toString();
+        if ( !hasBackbone ) {
+          div += ' (' + block.drawableCount + ' drawables)';
+        }
+
+        div += '</div>';
+
+        depth += 1;
+        if ( hasBackbone ) {
+          for ( var k = 0; k < block.domDrawable.blocks.length; k++ ) {
+            div += blockSummary ( block.domDrawable.blocks[k] );
+          }
+        }
+        depth -= 1;
+
+        return div;
+      }
+      if ( this._rootBackbone ) {
+        result += '<div style="' + headerStyle + '">Block Summary</div>';
+        for ( var i = 0; i < this._rootBackbone.blocks.length; i++ ) {
+          result += blockSummary( this._rootBackbone.blocks[i] );
+        }
+      }
 
       function instanceSummary( instance ) {
         var iSummary = '';
@@ -927,12 +1065,12 @@ define( function( require ) {
       }
 
       if ( this._baseInstance ) {
-        result += '<div style="font-weight: bold;">Root Instance Tree</div>';
+        result += '<div style="' + headerStyle + '">Root Instance Tree</div>';
         printInstanceSubtree( this._baseInstance );
       }
 
       _.each( this._sharedCanvasInstances, function( instance ) {
-        result += '<div style="font-weight: bold;">Shared Canvas Instance Tree</div>';
+        result += '<div style="' + headerStyle + '">Shared Canvas Instance Tree</div>';
         printInstanceSubtree( instance );
       } );
 
@@ -1021,7 +1159,7 @@ define( function( require ) {
           result += 'var ' + name( node ) + ' = ' + node.toString( '', false );
         }
 
-        _.each( node.children, function( child ) {
+        _.each( node._children, function( child ) {
           result += '\n' + name( node ) + '.addChild( ' + name( child ) + ' );';
         } );
       } );

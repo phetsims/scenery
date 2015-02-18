@@ -83,25 +83,33 @@ define( function( require ) {
   WebGLNode.WebGLNodeDrawable = inherit( WebGLSelfDrawable, function WebGLNodeDrawable( renderer, instance ) {
     this.initialize( renderer, instance );
   }, {
+    isCustomWebGLRenderer: true,
+
     // called either from the constructor, or from pooling
     initialize: function( renderer, instance ) {
       this.initializeWebGLSelfDrawable( renderer, instance );
     },
 
-    initializeContext: function( gl ) {
-      this.gl = gl;
+    initializeContext: function( webGLBlock ) {
+      this.webGLBlock = webGLBlock;
+      this.backingScale = this.webGLBlock.webGLRenderer.backingScale;
+      this.gl = this.webGLBlock.webGLRenderer.gl;
 
-      this.node.initializeContext( gl );//TODO: Rename call to initializeContext?  Breaks with 0.1 but should be done for consistency.
+      this.node.initializeWebGLDrawable( this );
     },
 
-    render: function( shaderProgram ) {
-      this.node.render( this.gl, shaderProgram );
+    draw: function() {
+      // we have a precompute need
+      var matrix = this.instance.relativeTransform.matrix;
+
+      this.node.paintWebGLDrawable( this, matrix );
     },
 
     dispose: function() {
-      if ( this.gl ) {
-        this.node.dispose();
-        this.gl = null;
+      this.node.disposeWebGLDrawable( this );
+
+      if ( this.webGLBlock ) {
+        this.webGLBlock = null;
       }
 
       // super
@@ -129,18 +137,11 @@ define( function( require ) {
 
     update: function() {
       this.dirty = false;
-
-      if ( this.paintDirty ) {
-        this.updateRectangle();
-
-        this.setToCleanState();
-      }
     }
   } );
 
   // set up pooling
-  /* jshint -W064 */
-  SelfDrawable.PoolableMixin( WebGLNode.WebGLNodeDrawable );
+  SelfDrawable.Poolable.mixin( WebGLNode.WebGLNodeDrawable );
 
   return WebGLNode;
 } );

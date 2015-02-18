@@ -13,12 +13,17 @@ define( function( require ) {
   var scenery = require( 'SCENERY/scenery' );
   var Util = require( 'SCENERY/util/Util' );
 
-  var ShaderProgram = scenery.ShaderProgram = function ShaderProgram( gl, vertexSource, fragmentSource, attributeNames, uniformNames ) {
+  var ShaderProgram = scenery.ShaderProgram = function ShaderProgram( gl, vertexSource, fragmentSource, options ) {
+    options = _.extend( {
+      attributes: [], // {Array.<string>} (vertex) attribute names in the shader source
+      uniforms: [] // {Array.<string>} uniform names in the shader source
+    }, options );
+
     // store parameters so that we can recreate the shader program on context loss
     this.vertexSource = vertexSource;
     this.fragmentSource = fragmentSource;
-    this.attributeNames = attributeNames;
-    this.uniformNames = uniformNames;
+    this.attributeNames = options.attributes;
+    this.uniformNames = options.uniforms;
 
     this.initialize( gl );
   };

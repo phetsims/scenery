@@ -18,8 +18,8 @@ define( function( require ) {
    *
    * @constructor
    */
-  function WebGLRectangle( webglRenderer, rectangle ) {
-    this.webglRenderer = webglRenderer;
+  function WebGLRectangle( webGLRenderer, rectangle ) {
+    this.webGLRenderer = webGLRenderer;
     this.rectangle = rectangle;
     this.update( rectangle );
   }

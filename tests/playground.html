@@ -1,5 +1,9 @@
 <!DOCTYPE html>
 <html>
+<!--
+When run in the browser, this will load code into the global namespace so that it can be tested via the developer console. Additionally, it provides
+an UI and Display made for visual testing and debugging.
+-->
 <head>
   <meta charset="utf-8"/>
   <meta http-equiv="X-UA-Compatible" content="IE=edge"/>
@@ -122,9 +126,10 @@
 
       window.displayTest = function() {
         setTimeout( function() {
-          window.rect = new scenery.Rectangle( 20, 30, 100, 75, { fill: 'red', renderer: 'webgl' } );
+          window.image = new scenery.Image( 'svg/wrench.svg', { mipmap: true } );
+          scenery.enableIndividualLog( 'ImageSVGDrawable' );
 
-          scene.addChild( rect );
+          scene.addChild( image );
 
           display.updateDisplay();
         } );

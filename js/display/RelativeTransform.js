@@ -156,13 +156,11 @@ define( function( require ) {
           'We only track changes properly if stateless instances do not have needs' );
       }
       else {
-        if ( !instance.isTransformed ) {
-          if ( instance.relativeTransform.hasAncestorListenerNeed() ) {
-            this.incrementTransformListenerChildren();
-          }
-          if ( instance.relativeTransform.hasAncestorComputeNeed() ) {
-            this.incrementTransformPrecomputeChildren();
-          }
+        if ( instance.relativeTransform.hasAncestorListenerNeed() ) {
+          this.incrementTransformListenerChildren();
+        }
+        if ( instance.relativeTransform.hasAncestorComputeNeed() ) {
+          this.incrementTransformPrecomputeChildren();
         }
       }
 
@@ -171,13 +169,11 @@ define( function( require ) {
     },
 
     removeInstanceWithIndex: function( instance, index ) {
-      if ( !instance.isTransformed ) {
-        if ( instance.relativeTransform.hasAncestorListenerNeed() ) {
-          this.decrementTransformListenerChildren();
-        }
-        if ( instance.relativeTransform.hasAncestorComputeNeed() ) {
-          this.decrementTransformPrecomputeChildren();
-        }
+      if ( instance.relativeTransform.hasAncestorListenerNeed() ) {
+        this.decrementTransformListenerChildren();
+      }
+      if ( instance.relativeTransform.hasAncestorComputeNeed() ) {
+        this.decrementTransformPrecomputeChildren();
       }
     },
 

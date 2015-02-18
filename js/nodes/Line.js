@@ -26,8 +26,8 @@ define( function( require ) {
 
   var WebGLSelfDrawable = require( 'SCENERY/display/WebGLSelfDrawable' );
   var SelfDrawable = require( 'SCENERY/display/SelfDrawable' );
-  var WebGLBlock = require( 'SCENERY/display/WebGLBlock' );
-
+  var PixiSelfDrawable = require( 'SCENERY/display/PixiSelfDrawable' );
+  var SquareUnstrokedRectangle = require( 'SCENERY/display/webgl/SquareUnstrokedRectangle' );
   var Color = require( 'SCENERY/util/Color' );
 
   // TODO: change this based on memory and performance characteristics of the platform
@@ -203,6 +203,10 @@ define( function( require ) {
       return Line.LineWebGLDrawable.createFromPool( renderer, instance );
     },
 
+    createPixiDrawable: function( renderer, instance ) {
+      return Line.LinePixiDrawable.createFromPool( renderer, instance );
+    },
+
     getBasicConstructor: function( propLines ) {
       return 'new scenery.Line( ' + this._x1 + ', ' + this._y1 + ', ' + this._x1 + ', ' + this._y1 + ', {' + propLines + '} )';
     },
@@ -231,7 +235,7 @@ define( function( require ) {
     // A line does not render its fill, so it supports all renderers.  Right?
     // - SR, 2014
     getFillRendererBitmask: function() {
-      return scenery.bitmaskSupportsCanvas | scenery.bitmaskSupportsSVG | scenery.bitmaskSupportsDOM | scenery.bitmaskSupportsWebGL;
+      return scenery.bitmaskSupportsCanvas | scenery.bitmaskSupportsSVG | scenery.bitmaskSupportsDOM | scenery.bitmaskSupportsWebGL | scenery.bitmaskSupportsPixi;
     }
 
   } );
@@ -279,132 +283,134 @@ define( function( require ) {
    * Rendering State mixin (DOM/SVG)
    *----------------------------------------------------------------------------*/
 
-  var LineStatefulDrawableMixin = Line.LineStatefulDrawableMixin = function( drawableType ) {
-    var proto = drawableType.prototype;
+  Line.LineStatefulDrawable = {
+    mixin: function( drawableType ) {
+      var proto = drawableType.prototype;
 
-    // initializes, and resets (so we can support pooled states)
-    proto.initializeState = function() {
-      this.paintDirty = true; // flag that is marked if ANY "paint" dirty flag is set (basically everything except for transforms, so we can accelerated the transform-only case)
-      this.dirtyX1 = true;
-      this.dirtyY1 = true;
-      this.dirtyX2 = true;
-      this.dirtyY2 = true;
+      // initializes, and resets (so we can support pooled states)
+      proto.initializeState = function() {
+        this.paintDirty = true; // flag that is marked if ANY "paint" dirty flag is set (basically everything except for transforms, so we can accelerated the transform-only case)
+        this.dirtyX1 = true;
+        this.dirtyY1 = true;
+        this.dirtyX2 = true;
+        this.dirtyY2 = true;
 
-      // adds fill/stroke-specific flags and state
-      this.initializePaintableState();
+        // adds fill/stroke-specific flags and state
+        this.initializePaintableState();
 
-      return this; // allow for chaining
-    };
+        return this; // allow for chaining
+      };
 
-    // catch-all dirty, if anything that isn't a transform is marked as dirty
-    proto.markPaintDirty = function() {
-      this.paintDirty = true;
-      this.markDirty();
-    };
+      // catch-all dirty, if anything that isn't a transform is marked as dirty
+      proto.markPaintDirty = function() {
+        this.paintDirty = true;
+        this.markDirty();
+      };
 
-    proto.markDirtyLine = function() {
-      this.dirtyX1 = true;
-      this.dirtyY1 = true;
-      this.dirtyX2 = true;
-      this.dirtyY2 = true;
-      this.markPaintDirty();
-    };
+      proto.markDirtyLine = function() {
+        this.dirtyX1 = true;
+        this.dirtyY1 = true;
+        this.dirtyX2 = true;
+        this.dirtyY2 = true;
+        this.markPaintDirty();
+      };
 
-    proto.markDirtyP1 = function() {
-      this.dirtyX1 = true;
-      this.dirtyY1 = true;
-      this.markPaintDirty();
-    };
+      proto.markDirtyP1 = function() {
+        this.dirtyX1 = true;
+        this.dirtyY1 = true;
+        this.markPaintDirty();
+      };
 
-    proto.markDirtyP2 = function() {
-      this.dirtyX2 = true;
-      this.dirtyY2 = true;
-      this.markPaintDirty();
-    };
+      proto.markDirtyP2 = function() {
+        this.dirtyX2 = true;
+        this.dirtyY2 = true;
+        this.markPaintDirty();
+      };
 
-    proto.markDirtyX1 = function() {
-      this.dirtyX1 = true;
-      this.markPaintDirty();
-    };
+      proto.markDirtyX1 = function() {
+        this.dirtyX1 = true;
+        this.markPaintDirty();
+      };
 
-    proto.markDirtyY1 = function() {
-      this.dirtyY1 = true;
-      this.markPaintDirty();
-    };
+      proto.markDirtyY1 = function() {
+        this.dirtyY1 = true;
+        this.markPaintDirty();
+      };
 
-    proto.markDirtyX2 = function() {
-      this.dirtyX2 = true;
-      this.markPaintDirty();
-    };
+      proto.markDirtyX2 = function() {
+        this.dirtyX2 = true;
+        this.markPaintDirty();
+      };
 
-    proto.markDirtyY2 = function() {
-      this.dirtyY2 = true;
-      this.markPaintDirty();
-    };
+      proto.markDirtyY2 = function() {
+        this.dirtyY2 = true;
+        this.markPaintDirty();
+      };
 
-    proto.setToCleanState = function() {
-      this.paintDirty = false;
-      this.dirtyX1 = false;
-      this.dirtyY1 = false;
-      this.dirtyX2 = false;
-      this.dirtyY2 = false;
+      proto.setToCleanState = function() {
+        this.paintDirty = false;
+        this.dirtyX1 = false;
+        this.dirtyY1 = false;
+        this.dirtyX2 = false;
+        this.dirtyY2 = false;
 
-      this.cleanPaintableState();
-    };
+        this.cleanPaintableState();
+      };
 
-    /* jshint -W064 */
-    Paintable.PaintableStatefulDrawableMixin( drawableType );
+      Paintable.PaintableStatefulDrawable.mixin( drawableType );
+    }
   };
 
   /*---------------------------------------------------------------------------*
    * Stateless drawable mixin
    *----------------------------------------------------------------------------*/
 
-  Line.LineStatelessDrawableMixin = function( drawableType ) {
-    var proto = drawableType.prototype;
+  Line.LineStatelessDrawable = {
+    mixin: function( drawableType ) {
+      var proto = drawableType.prototype;
 
-    // initializes, and resets (so we can support pooled states)
-    proto.initializeLineStateless = function() {
-      this.paintDirty = true; // flag that is marked if ANY "paint" dirty flag is set (basically everything except for transforms, so we can accelerated the transform-only case)
-      return this; // allow for chaining
-    };
+      // initializes, and resets (so we can support pooled states)
+      proto.initializeLineStateless = function() {
+        this.paintDirty = true; // flag that is marked if ANY "paint" dirty flag is set (basically everything except for transforms, so we can accelerated the transform-only case)
+        return this; // allow for chaining
+      };
 
-    // catch-all dirty, if anything that isn't a transform is marked as dirty
-    proto.markPaintDirty = function() {
-      this.paintDirty = true;
-      this.markDirty();
-    };
+      // catch-all dirty, if anything that isn't a transform is marked as dirty
+      proto.markPaintDirty = function() {
+        this.paintDirty = true;
+        this.markDirty();
+      };
 
-    proto.markDirtyLine = function() {
-      this.markPaintDirty();
-    };
+      proto.markDirtyLine = function() {
+        this.markPaintDirty();
+      };
 
-    proto.markDirtyP1 = function() {
-      this.markPaintDirty();
-    };
+      proto.markDirtyP1 = function() {
+        this.markPaintDirty();
+      };
 
-    proto.markDirtyP2 = function() {
-      this.markPaintDirty();
-    };
+      proto.markDirtyP2 = function() {
+        this.markPaintDirty();
+      };
 
-    proto.markDirtyX1 = function() {
-      this.markPaintDirty();
-    };
+      proto.markDirtyX1 = function() {
+        this.markPaintDirty();
+      };
 
-    proto.markDirtyY1 = function() {
-      this.markPaintDirty();
-    };
+      proto.markDirtyY1 = function() {
+        this.markPaintDirty();
+      };
 
-    proto.markDirtyX2 = function() {
-      this.markPaintDirty();
-    };
+      proto.markDirtyX2 = function() {
+        this.markPaintDirty();
+      };
 
-    proto.markDirtyY2 = function() {
-      this.markPaintDirty();
-    };
+      proto.markDirtyY2 = function() {
+        this.markPaintDirty();
+      };
 
-    /* jshint -W064 */
-    Paintable.PaintableStatefulDrawableMixin( drawableType );
+      Paintable.PaintableStatefulDrawable.mixin( drawableType );
+    }
   };
 
   /*---------------------------------------------------------------------------*
@@ -413,7 +419,7 @@ define( function( require ) {
 
   Line.LineSVGDrawable = SVGSelfDrawable.createDrawable( {
     type: function LineSVGDrawable( renderer, instance ) { this.initialize( renderer, instance ); },
-    stateType: LineStatefulDrawableMixin,
+    stateType: Line.LineStatefulDrawable.mixin,
     initialize: function( renderer, instance ) {
       if ( !this.svgElement ) {
         this.svgElement = document.createElementNS( scenery.svgns, 'line' );
@@ -474,140 +480,73 @@ define( function( require ) {
     // called either from the constructor or from pooling
     initialize: function( renderer, instance ) {
       this.initializeWebGLSelfDrawable( renderer, instance );
-
-      //Small triangle strip that creates a square, which will be transformed into the right rectangle shape
-      this.vertexCoordinates = this.vertexCoordinates || new Float32Array( [
-        0, 0,
-        1, 0,
-        0, 1,
-        1, 1
-      ] );
-
-      this.paintDirty = true;
-      this.initializeLineStateless();
-      this.initializePaintableState();
     },
 
-    initializeContext: function( gl ) {
-      this.gl = gl;
+    initializeContext: function( webglBlock ) {
+      this.webglBlock = webglBlock;
+      this.rectangleHandle = new SquareUnstrokedRectangle( webglBlock.webGLRenderer.colorTriangleRenderer, this.node, 0.5 );
 
       // cleanup old vertexBuffer, if applicable
       this.disposeWebGLBuffers();
 
-      this.vertexBuffer = gl.createBuffer();
-
-      // force update for the line and stroke
+      this.initializePaintableState();
       this.updateLine();
-      this.updateLineStroke();
+
+      //TODO: Update the state in the buffer arrays
     },
 
     //Nothing necessary since everything currently handled in the uModelViewMatrix below
     //However, we may switch to dynamic draw, and handle the matrix change only where necessary in the future?
     updateLine: function() {
-      var gl = this.gl;
 
-      var line = this.node;
+      // TODO: a way to update the ColorTriangleBufferData.
 
-      //Model it as a rectangle!  TODO: Reuse code from Rectangle.js efficiently
-
-      var rectWidth = line.lineWidth / 2;
-
-      // CAUTION!  Immutable Math = Muchas allocations!
-      var a = new Vector2( line._x1, line._y1 );
-      var b = new Vector2( line._x2, line._y2 );
-
-      // This component-wise math computes the corners of the rectangle defined by this stroked line
-      // If you wish, you can refer to the 7 or so lines of Vector2-allocation-heavy code that does the same thing
-      // (see history)
-      var deltaX = b.x - a.x;
-      var deltaY = b.y - a.y;
-      var magnitude = Math.sqrt( deltaX * deltaX + deltaY * deltaY );
-      deltaX /= magnitude;
-      deltaY /= magnitude;
-      var normalVectorX = deltaY;
-      var normalVectorY = -deltaX;
-
-      var edgeX = normalVectorX * rectWidth;
-      var edgeY = normalVectorY * rectWidth;
-      var leftTopX = a.x - edgeX;
-      var leftTopY = a.y - edgeY;
-
-      var rightTopX = a.x + edgeX;
-      var rightTopY = a.y + edgeY;
-
-      var rightBottomX = b.x + edgeX;
-      var rightBottomY = b.y + edgeY;
-
-      var leftBottomX = b.x - edgeX;
-      var leftBottomY = b.y - edgeY;
-
-      // Modeled after the Rectangle.js WebGL triangles
-      this.vertexCoordinates[ 0 ] = leftTopX;//rect._rectX;
-      this.vertexCoordinates[ 1 ] = leftTopY;//rect._rectY;
-
-      this.vertexCoordinates[ 2 ] = rightTopX;//rect._rectX + rect._rectWidth;
-      this.vertexCoordinates[ 3 ] = rightTopY;//rect._rectY;
-
-      this.vertexCoordinates[ 4 ] = leftBottomX;//rect._rectX;
-      this.vertexCoordinates[ 5 ] = leftBottomY;//rect._rectY + rect._rectHeight;
-
-      this.vertexCoordinates[ 6 ] = rightBottomX;//rect._rectX + rect._rectWidth;
-      this.vertexCoordinates[ 7 ] = rightBottomY;//rect._rectY + rect._rectHeight;
-
-      gl.bindBuffer( gl.ARRAY_BUFFER, this.vertexBuffer );
-
-      //TODO: Once we are lazily handling the full matrix, we may benefit from DYNAMIC draw here, and updating the vertices themselves
-      gl.bufferData( gl.ARRAY_BUFFER, this.vertexCoordinates, gl.STATIC_DRAW );
-    },
-
-    updateLineStroke: function() {
       // TODO: move to PaintableWebGLState???
-      this.color = Color.toColor( this.node._stroke );
+      if ( this.dirtyFill ) {
+        this.color = Color.toColor( this.node._fill || 'red' );
+        this.cleanPaintableState();
+      }
+      this.rectangleHandle.update();
+
+      // TODO: Batch these updates?
+      this.webglBlock.webGLRenderer.colorTriangleRenderer.updateTriangleBuffer( this.rectangleHandle );
     },
 
     render: function( shaderProgram ) {
-      var gl = this.gl;
-
-      // use the standard version if it's a rounded rectangle, since there is no WebGL-optimized version for that
-      // TODO: how to handle fill/stroke delay optimizations here?
-      if ( this.node._stroke ) {
-        //OHTWO TODO: optimize
-        var viewMatrix = this.instance.relativeTransform.matrix.toAffineMatrix4();
-
-        // combine image matrix (to scale aspect ratios), the trail's matrix, and the matrix to device coordinates
-        gl.uniformMatrix4fv( shaderProgram.uniformLocations.uModelViewMatrix, false, viewMatrix.entries );
-
-        //Indicate the branch of logic to use in the ubershader.  In this case, a texture should be used for the image
-        gl.uniform1i( shaderProgram.uniformLocations.uFragmentType, WebGLBlock.fragmentTypeFill );
-        gl.uniform4f( shaderProgram.uniformLocations.uColor, this.color.r / 255, this.color.g / 255, this.color.b / 255, this.color.a );
-
-        gl.bindBuffer( gl.ARRAY_BUFFER, this.vertexBuffer );
-        gl.vertexAttribPointer( shaderProgram.attributeLocations.aVertex, 2, gl.FLOAT, false, 0, 0 );
-
-        gl.drawArrays( gl.TRIANGLE_STRIP, 0, 4 );
-      }
+      // This is handled by the ColorTriangleRenderer
     },
 
-    shaderAttributes: [
-      'aVertex'
-    ],
-
     dispose: function() {
-      // we may have been disposed without initializeContext being called (never attached to a block)
-      if ( this.gl ) {
-        this.disposeWebGLBuffers();
-        this.gl = null;
-      }
+      this.disposeWebGLBuffers();
 
       // super
       WebGLSelfDrawable.prototype.dispose.call( this );
-
     },
 
     disposeWebGLBuffers: function() {
-      if ( this.gl ) {
-        this.gl.deleteBuffer( this.vertexBuffer );
-      }
+      this.webglBlock.webGLRenderer.colorTriangleRenderer.colorTriangleBufferData.dispose( this.rectangleHandle );
+    },
+
+    markDirtyLine: function() {
+      this.markDirty();
+    },
+
+    markDirtyX1: function() {
+      this.markDirty();
+    },
+    markDirtyY1: function() {
+      this.markDirty();
+    },
+    markDirtyX2: function() {
+      this.markDirty();
+    },
+    markDirtyY2: function() {
+      this.markDirty();
+    },
+
+    // general flag set on the state, which we forward directly to the drawable's paint flag
+    markPaintDirty: function() {
+      this.markDirty();
     },
 
     onAttach: function( node ) {
@@ -621,29 +560,46 @@ define( function( require ) {
 
     //TODO: Make sure all of the dirty flags make sense here.  Should we be using fillDirty, paintDirty, dirty, etc?
     update: function() {
-      if ( this.dirtyStroke ) {
-        this.updateLineStroke();
-        this.cleanPaintableState();
-      }
-      if ( this.paintDirty ) {
+      if ( this.dirty ) {
         this.updateLine();
-        this.paintDirty = false;
+        this.dirty = false;
       }
-      this.dirty = false;
     }
   } );
 
-  // include stubs for Line API compatibility
-  /* jshint -W064 */
-  Line.LineStatelessDrawableMixin( Line.LineWebGLDrawable );
-
-  // include stubs for marking dirty stroke and fill (if necessary). we only want one dirty flag, not multiple ones, for WebGL (for now)
-  /* jshint -W064 */
-  Paintable.PaintableStatefulDrawableMixin( Line.LineWebGLDrawable );
+  // include stubs (stateless) for marking dirty stroke and fill (if necessary). we only want one dirty flag, not multiple ones, for WebGL (for now)
+  Paintable.PaintableStatefulDrawable.mixin( Line.LineWebGLDrawable );
 
   // set up pooling
-  /* jshint -W064 */
-  SelfDrawable.PoolableMixin( Line.LineWebGLDrawable );
+  SelfDrawable.Poolable.mixin( Line.LineWebGLDrawable );
+
+  /*---------------------------------------------------------------------------*
+   * Pixi Rendering
+   *----------------------------------------------------------------------------*/
+
+  Line.LinePixiDrawable = PixiSelfDrawable.createDrawable( {
+    type: function LinePixiDrawable( renderer, instance ) { this.initialize( renderer, instance ); },
+    stateType: Line.LineStatefulDrawable.mixin,
+    initialize: function( renderer, instance ) {
+      if ( !this.displayObject ) {
+        this.displayObject = new PIXI.Graphics();
+      }
+    },
+    updatePixi: function( node, line ) {
+      if ( this.dirtyX1 || this.dirtyY1 || this.dirtyX2 || this.dirtyY2 ) {
+        var graphics = this.displayObject;
+        this.displayObject.clear();
+        if ( node.getStrokeColor() ) {
+          graphics.lineStyle( node.lineWidth, node.getStrokeColor().toNumber() );
+        }
+        graphics.moveTo( node._x1, node._y1 );
+        graphics.lineTo( node._x2, node._y2 );
+      }
+      this.updateFillStrokeStyle( line );
+    },
+    usesPaint: true,
+    keepElements: keepSVGLineElements
+  } );
 
   return Line;
 } );

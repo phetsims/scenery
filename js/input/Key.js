@@ -27,5 +27,7 @@ define( function( require ) {
   };
   var Key = scenery.Key;
 
-  return inherit( Pointer, Key );
+  return inherit( Pointer, Key, {
+    firesGenericEvent: false // don't fire 'down', 'up' and the other generic events
+  } );
 } );

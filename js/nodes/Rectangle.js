@@ -126,11 +126,8 @@ define( function( require ) {
         }
       }
 
-      //TODO: Refine the rules for when WebGL can be used
-      if ( !this.hasStroke() ) {
-        bitmask |= scenery.bitmaskSupportsWebGL;
-        bitmask |= scenery.bitmaskSupportsPixi;
-      }
+      bitmask |= scenery.bitmaskSupportsWebGL;
+      bitmask |= scenery.bitmaskSupportsPixi;
       return bitmask;
     },
 
@@ -148,12 +145,8 @@ define( function( require ) {
         bitmask |= scenery.bitmaskSupportsDOM;
       }
 
-      //only support WebGL if it's NOT rounded (for now) AND if it's either not stroked, or stroke has lineJoin !== round
-      //TODO: Refine the rules for when WebGL can be used
-      if ( !this.isRounded() && (!this.hasStroke() || this.getLineJoin() !== 'round') ) {
-        bitmask |= scenery.bitmaskSupportsWebGL;
-        bitmask |= scenery.bitmaskSupportsPixi;
-      }
+      bitmask |= scenery.bitmaskSupportsWebGL;
+      bitmask |= scenery.bitmaskSupportsPixi;
 
       return bitmask;
     },
@@ -524,81 +517,82 @@ define( function( require ) {
    * Rendering state mixin (DOM/SVG)
    *----------------------------------------------------------------------------*/
 
-  var RectangleStatefulDrawableMixin = Rectangle.RectangleStatefulDrawableMixin = function( drawableType ) {
-    var proto = drawableType.prototype;
+  Rectangle.RectangleStatefulDrawable = {
+    mixin: function( drawableType ) {
+      var proto = drawableType.prototype;
 
-    // initializes, and resets (so we can support pooled states)
-    proto.initializeState = function() {
-      this.paintDirty = true; // flag that is marked if ANY "paint" dirty flag is set (basically everything except for transforms, so we can accelerated the transform-only case)
-      this.dirtyX = true;
-      this.dirtyY = true;
-      this.dirtyWidth = true;
-      this.dirtyHeight = true;
-      this.dirtyArcWidth = true;
-      this.dirtyArcHeight = true;
+      // initializes, and resets (so we can support pooled states)
+      proto.initializeState = function() {
+        this.paintDirty = true; // flag that is marked if ANY "paint" dirty flag is set (basically everything except for transforms, so we can accelerated the transform-only case)
+        this.dirtyX = true;
+        this.dirtyY = true;
+        this.dirtyWidth = true;
+        this.dirtyHeight = true;
+        this.dirtyArcWidth = true;
+        this.dirtyArcHeight = true;
 
-      // adds fill/stroke-specific flags and state
-      this.initializePaintableState();
+        // adds fill/stroke-specific flags and state
+        this.initializePaintableState();
 
-      return this; // allow for chaining
-    };
+        return this; // allow for chaining
+      };
 
-    // catch-all dirty, if anything that isn't a transform is marked as dirty
-    proto.markPaintDirty = function() {
-      this.paintDirty = true;
-      this.markDirty();
-    };
+      // catch-all dirty, if anything that isn't a transform is marked as dirty
+      proto.markPaintDirty = function() {
+        this.paintDirty = true;
+        this.markDirty();
+      };
 
-    proto.markDirtyRectangle = function() {
-      // TODO: consider bitmask instead?
-      this.dirtyX = true;
-      this.dirtyY = true;
-      this.dirtyWidth = true;
-      this.dirtyHeight = true;
-      this.dirtyArcWidth = true;
-      this.dirtyArcHeight = true;
-      this.markPaintDirty();
-    };
+      proto.markDirtyRectangle = function() {
+        // TODO: consider bitmask instead?
+        this.dirtyX = true;
+        this.dirtyY = true;
+        this.dirtyWidth = true;
+        this.dirtyHeight = true;
+        this.dirtyArcWidth = true;
+        this.dirtyArcHeight = true;
+        this.markPaintDirty();
+      };
 
-    proto.markDirtyX = function() {
-      this.dirtyX = true;
-      this.markPaintDirty();
-    };
-    proto.markDirtyY = function() {
-      this.dirtyY = true;
-      this.markPaintDirty();
-    };
-    proto.markDirtyWidth = function() {
-      this.dirtyWidth = true;
-      this.markPaintDirty();
-    };
-    proto.markDirtyHeight = function() {
-      this.dirtyHeight = true;
-      this.markPaintDirty();
-    };
-    proto.markDirtyArcWidth = function() {
-      this.dirtyArcWidth = true;
-      this.markPaintDirty();
-    };
-    proto.markDirtyArcHeight = function() {
-      this.dirtyArcHeight = true;
-      this.markPaintDirty();
-    };
+      proto.markDirtyX = function() {
+        this.dirtyX = true;
+        this.markPaintDirty();
+      };
+      proto.markDirtyY = function() {
+        this.dirtyY = true;
+        this.markPaintDirty();
+      };
+      proto.markDirtyWidth = function() {
+        this.dirtyWidth = true;
+        this.markPaintDirty();
+      };
+      proto.markDirtyHeight = function() {
+        this.dirtyHeight = true;
+        this.markPaintDirty();
+      };
+      proto.markDirtyArcWidth = function() {
+        this.dirtyArcWidth = true;
+        this.markPaintDirty();
+      };
+      proto.markDirtyArcHeight = function() {
+        this.dirtyArcHeight = true;
+        this.markPaintDirty();
+      };
 
-    proto.setToCleanState = function() {
-      this.paintDirty = false;
-      this.dirtyX = false;
-      this.dirtyY = false;
-      this.dirtyWidth = false;
-      this.dirtyHeight = false;
-      this.dirtyArcWidth = false;
-      this.dirtyArcHeight = false;
+      proto.setToCleanState = function() {
+        this.paintDirty = false;
+        this.dirtyX = false;
+        this.dirtyY = false;
+        this.dirtyWidth = false;
+        this.dirtyHeight = false;
+        this.dirtyArcWidth = false;
+        this.dirtyArcHeight = false;
 
-      this.cleanPaintableState();
-    };
+        this.cleanPaintableState();
+      };
 
-    /* jshint -W064 */
-    Paintable.PaintableStatefulDrawableMixin( drawableType );
+      Paintable.PaintableStatefulDrawable.mixin( drawableType );
+    }
   };
 
   /*---------------------------------------------------------------------------*
@@ -731,11 +725,9 @@ define( function( require ) {
     }
   } );
 
-  /* jshint -W064 */
-  RectangleStatefulDrawableMixin( RectangleDOMDrawable );
+  Rectangle.RectangleStatefulDrawable.mixin( RectangleDOMDrawable );
 
-  /* jshint -W064 */
-  SelfDrawable.PoolableMixin( RectangleDOMDrawable );
+  SelfDrawable.Poolable.mixin( RectangleDOMDrawable );
 
   /*---------------------------------------------------------------------------*
    * SVG rendering
@@ -743,7 +735,7 @@ define( function( require ) {
 
   Rectangle.RectangleSVGDrawable = SVGSelfDrawable.createDrawable( {
     type: function RectangleSVGDrawable( renderer, instance ) { this.initialize( renderer, instance ); },
-    stateType: RectangleStatefulDrawableMixin,
+    stateType: Rectangle.RectangleStatefulDrawable.mixin,
     initialize: function( renderer, instance ) {
       this.lastArcW = -1; // invalid on purpose
       this.lastArcH = -1; // invalid on purpose
@@ -870,7 +862,7 @@ define( function( require ) {
 
     initializeContext: function( webglBlock ) {
       this.webglBlock = webglBlock;
-      this.rectangleHandle = new SquareUnstrokedRectangle( webglBlock.webglRenderer.colorTriangleRenderer, this.node, 0.5 );
+      this.rectangleHandle = new SquareUnstrokedRectangle( webglBlock.webGLRenderer.colorTriangleRenderer, this.node, 0.5 );
 
       // cleanup old vertexBuffer, if applicable
       this.disposeWebGLBuffers();
@@ -892,6 +884,10 @@ define( function( require ) {
         this.color = Color.toColor( this.node._fill );
         this.cleanPaintableState();
       }
+      this.rectangleHandle.update();
+
+      // TODO: Batch these updates?
+      this.webglBlock.webGLRenderer.colorTriangleRenderer.updateTriangleBuffer( this.rectangleHandle );
     },
 
     render: function( shaderProgram ) {
@@ -906,10 +902,16 @@ define( function( require ) {
     },
 
     disposeWebGLBuffers: function() {
-      this.webglBlock.webglRenderer.colorTriangleRenderer.colorTriangleBufferData.dispose( this.rectangleHandle );
+      this.webglBlock.webGLRenderer.colorTriangleRenderer.colorTriangleBufferData.dispose( this.rectangleHandle );
     },
 
     markDirtyRectangle: function() {
+      this.markDirty();
+    },
+    markDirtyWidth: function() {
+      this.markDirty();
+    },
+    markDirtyHeight: function() {
       this.markDirty();
     },
 
@@ -937,107 +939,49 @@ define( function( require ) {
   } );
 
   // include stubs (stateless) for marking dirty stroke and fill (if necessary). we only want one dirty flag, not multiple ones, for WebGL (for now)
-  /* jshint -W064 */
-  Paintable.PaintableStatefulDrawableMixin( Rectangle.RectangleWebGLDrawable );
+  Paintable.PaintableStatefulDrawable.mixin( Rectangle.RectangleWebGLDrawable );
 
   // set up pooling
-  /* jshint -W064 */
-  SelfDrawable.PoolableMixin( Rectangle.RectangleWebGLDrawable );
+  SelfDrawable.Poolable.mixin( Rectangle.RectangleWebGLDrawable );
 
   /*---------------------------------------------------------------------------*
    * Pixi rendering
    *----------------------------------------------------------------------------*/
 
-  Rectangle.RectanglePixiDrawable = inherit( PixiSelfDrawable, function RectanglePixiDrawable( renderer, instance ) {
-    this.initialize( renderer, instance );
-  }, {
-    // called either from the constructor or from pooling
+  Rectangle.RectanglePixiDrawable = PixiSelfDrawable.createDrawable( {
+    type: function RectanglePixiDrawable( renderer, instance ) {
+      this.initialize( renderer, instance );
+    },
+    stateType: Rectangle.RectangleStatefulDrawable.mixin,
     initialize: function( renderer, instance ) {
-      this.initializePixiSelfDrawable( renderer, instance );
+      this.lastArcW = -1; // invalid on purpose
+      this.lastArcH = -1; // invalid on purpose
 
-      var graphics = new PIXI.Graphics();
-
-      // set a fill and line style
-      graphics.beginFill( Color.toColor( this.node._fill ).toNumber() );
-
-      // draw a shape
-      graphics.moveTo( this.node._rectX, this.node._rectY );
-      graphics.lineTo( this.node._rectX + this.node._rectWidth, this.node._rectY );
-      graphics.lineTo( this.node._rectX + this.node._rectWidth, this.node._rectY + this.node._rectHeight );
-      graphics.lineTo( this.node._rectX, this.node._rectY + this.node._rectHeight );
-      graphics.endFill();
-
-      this.displayObject = graphics;
-    },
-
-    initializeContext: function( pixiBlock ) {
-      this.pixiBlock = pixiBlock;
-
-      //TODO: Update the state in the buffer arrays
-    },
-
-    //Nothing necessary since everything currently handled in the uModelViewMatrix below
-    //However, we may switch to dynamic draw, and handle the matrix change only where necessary in the future?
-    updateRectangle: function() {
-
-      // TODO: a way to update the ColorTriangleBufferData.
-
-      // TODO: move to PaintablePixiState???
-      if ( this.dirtyFill ) {
-        this.color = Color.toColor( this.node._fill );
-        this.cleanPaintableState();
+      if ( !this.displayObject ) {
+        this.displayObject = new PIXI.Graphics();
       }
     },
-
-    render: function( shaderProgram ) {
-      // This is handled by the ColorTriangleRenderer
-    },
-
-    dispose: function() {
-      this.disposePixiBuffers();
-
-      // super
-      PixiSelfDrawable.prototype.dispose.call( this );
-    },
-
-    disposePixiBuffers: function() {
-      this.pixiBlock.PixiRenderer.colorTriangleRenderer.colorTriangleBufferData.dispose( this.rectangleHandle );
-    },
-
-    markDirtyRectangle: function() {
-      this.markDirty();
-    },
-
-    // general flag set on the state, which we forward directly to the drawable's paint flag
-    markPaintDirty: function() {
-      this.markDirty();
-    },
-
-    onAttach: function( node ) {
-
-    },
-
-    // release the drawable
-    onDetach: function( node ) {
-      //OHTWO TODO: are we missing the disposal?
-    },
-
-    //TODO: Make sure all of the dirty flags make sense here.  Should we be using fillDirty, paintDirty, dirty, etc?
-    update: function() {
-      if ( this.dirty ) {
-        this.updateRectangle();
-        this.dirty = false;
+    updatePixi: function( node, rect ) {
+      if ( this.dirtyX || this.dirtyY || this.dirtyWidth || this.dirtyHeight ||
+           this.dirtyArcWidth || this.dirtyArcHeight || this.dirtyWidth || this.dirtyHeight ) {
+        var graphics = this.displayObject;
+        this.displayObject.clear();
+        if ( node.getFillColor() ) {
+          graphics.beginFill( node.getFillColor().toNumber(), node.opacity * node.getFillColor().alpha );
+        }
+        if ( node.getStrokeColor() ) {
+          graphics.lineStyle( 5, node.getStrokeColor().toNumber(), node.opacity * node.getStrokeColor().alpha );
+        }
+        graphics.drawRect( node.rectX, node.rectY, node.rectWidth, node.rectHeight );
+        if ( node.getFillColor() ) {
+          graphics.endFill();
+        }
       }
-    }
+      this.updateFillStrokeStyle( rect );
+    },
+    usesPaint: true,
+    keepElements: keepSVGRectangleElements
   } );
-
-  // include stubs (stateless) for marking dirty stroke and fill (if necessary). we only want one dirty flag, not multiple ones, for Pixi (for now)
-  /* jshint -W064 */
-  Paintable.PaintableStatefulDrawableMixin( Rectangle.RectanglePixiDrawable );
-
-  // set up pooling
-  /* jshint -W064 */
-  SelfDrawable.PoolableMixin( Rectangle.RectanglePixiDrawable );
 
   return Rectangle;
 } );

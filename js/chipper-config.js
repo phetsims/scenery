@@ -23,7 +23,7 @@ require.config( {
     ENERGY_SKATE_PARK_BASICS: '../../energy-skate-park-basics/js',
     text: '../../sherpa/text',
 
-    image: '../../chipper/requirejs-plugins/image'
+    image: '../../chipper/js/requirejs-plugins/image'
   },
 
   shim: {
@@ -31,5 +31,6 @@ require.config( {
     jquery: { exports: '$' }
   },
 
-  urlArgs: new Date().getTime() // add cache buster query string to make browser refresh actually reload everything
+  // optional cache buster to make browser refresh load all included scripts, can be disabled with ?cacheBuster=false
+  urlArgs: phet.chipper.getCacheBusterArgs()
 } );

@@ -44,21 +44,22 @@ define( function( require ) {
   var Renderer = require( 'SCENERY/display/Renderer' );
   var Stitcher = require( 'SCENERY/display/Stitcher' );
 
-  // returns whether the consecutive {Drawable}s 'a' and 'b' should be put into separate blocks
+  // Returns whether the consecutive {Drawable}s 'a' and 'b' should be put into separate blocks
   function hasGapBetweenDrawables( a, b ) {
     return a.renderer !== b.renderer || Renderer.isDOM( a.renderer ) || Renderer.isDOM( b.renderer );
   }
 
-  // whether the drawable and its (possible) previous sibling should be in the same block
+  // Whether the drawable and its previous sibling should be in the same block. Will be false if there is no sibling
   function isOpenBefore( drawable ) {
     return drawable.previousDrawable !== null && !hasGapBetweenDrawables( drawable.previousDrawable, drawable );
   }
 
-  // whether the drawable and its (possible) next sibling should be in the same block
+  // Whether the drawable and its next sibling should be in the same block. Will be false if there is no sibling
   function isOpenAfter( drawable ) {
     return drawable.nextDrawable !== null && !hasGapBetweenDrawables( drawable, drawable.nextDrawable );
   }
 
+  // If the change interval will contain any new (added) drawables
   function intervalHasNewInternalDrawables( interval, firstStitchDrawable, lastStitchDrawable ) {
     if ( interval.drawableBefore ) {
       return interval.drawableBefore.nextDrawable !== interval.drawableAfter; // OK for after to be null
@@ -71,6 +72,7 @@ define( function( require ) {
     }
   }
 
+  // If the change interval contained any drawables that are to be removed
   function intervalHasOldInternalDrawables( interval, oldFirstStitchDrawable, oldLastStitchDrawable ) {
     if ( interval.drawableBefore ) {
       return interval.drawableBefore.oldNextDrawable !== interval.drawableAfter; // OK for after to be null
@@ -83,7 +85,7 @@ define( function( require ) {
     }
   }
 
-  // whether there are blocks that consist of drawables that are ALL internal to the {ChangeInterval} interval.
+  // Whether there are blocks that consist of drawables that are ALL internal to the {ChangeInterval} interval.
   function intervalHasOldInternalBlocks( interval, firstStitchBlock, lastStitchBlock ) {
     var beforeBlock = interval.drawableBefore ? interval.drawableBefore.parentDrawable : null;
     var afterBlock = interval.drawableAfter ? interval.drawableAfter.parentDrawable : null;
@@ -103,13 +105,18 @@ define( function( require ) {
     }
   }
 
+  /**
+   * Finds the furthest external drawable that:
+   * (a) Before the next change interval (if we have a next change interval)
+   * (b) Has the same renderer as the interval's drawableAfter
+   */
   function getLastCompatibleExternalDrawable( interval ) {
     var firstDrawable = interval.drawableAfter;
 
     if ( firstDrawable ) {
       var renderer = firstDrawable.renderer;
 
-      // we stop our search when we reach this (null is acceptable)
+      // we stop our search before we reach this (null is acceptable), ensuring we don't go into the next change interval
       var cutoffDrawable = interval.nextChangeInterval ? interval.nextChangeInterval.drawableBefore.nextDrawable : null;
 
       var drawable = firstDrawable;
@@ -129,7 +136,7 @@ define( function( require ) {
       return drawable;
     }
     else {
-      return null; // with no drawableAfter, we don't have
+      return null; // with no drawableAfter, we don't have any external drawables after our interval
     }
   }
 
@@ -164,7 +171,6 @@ define( function( require ) {
       // To properly handle glue/unglue situations with external blocks (ones that aren't reusable after phase 1),
       // we need some extra tracking for our inner sub-block edge case loop.
       this.blockWasAdded = false; // we need to know if a previously-existing block was added, and remove it otherwise.
-      this.firstEdgeCase = true; // the first processEdgeCases call needs to not remove the very-first block
 
       var interval;
 
@@ -427,15 +433,11 @@ define( function( require ) {
                              interval.nextChangeInterval.drawableAfter.pendingParentDrawable :
                              null;
 
-        if ( this.firstEdgeCase ) {
-          this.firstEdgeCase = false;
-
-          // Since we want to remove any afterBlock at the end of its run if we don't have blockWasAdded set, this check
-          // is necessary to check on the first processEdgeCases to see if we have already used this specific block.
-          // Otherwise, we would remove our (potentially very-first) block when it has already been used externally.
-          if ( beforeBlock === afterBlock ) {
-            this.blockWasAdded = true;
-          }
+        // Since we want to remove any afterBlock at the end of its run if we don't have blockWasAdded set, this check
+        // is necessary to see if we have already used this specific block.
+        // Otherwise, we would remove our (potentially very-first) block when it has already been used externally.
+        if ( beforeBlock === afterBlock ) {
+          this.blockWasAdded = true;
         }
 
         sceneryLog && sceneryLog.GreedyVerbose && sceneryLog.GreedyVerbose(

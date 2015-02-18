@@ -1,8 +1,7 @@
 // Copyright 2002-2014, University of Colorado Boulder
 
-
 /**
- * Encapsulates common color information and transformations.
+ * A color with RGBA values, assuming the sRGB color space is used.
  *
  * See http://www.w3.org/TR/css3-color/
  *
@@ -20,35 +19,25 @@ define( function( require ) {
   var clamp = require( 'DOT/Util' ).clamp;
   var linear = require( 'DOT/Util' ).linear;
 
-  // r,g,b integers 0-255, 'a' float 0-1
+  /**
+   * Creates a Color with an initial value. Multiple different types of parameters are supported:
+   * - new Color( color ) is a copy constructor, for a {Color}
+   * - new Color( string ) will parse the string assuming it's a CSS-compatible color, e.g. set( 'red' )
+   * - new Color( r, g, b ) is equivalent to setRGBA( r, g, b, 1 ), e.g. set( 255, 0, 128 )
+   * - new Color( r, g, b, a ) is equivalent to setRGBA( r, g, b, a ), e.g. set( 255, 0, 128, 0.5 )
+   * - new Color( hex ) will set RGB with alpha=1, e.g. set( 0xFF0000 )
+   * - new Color( hex, a ) will set RGBA, e.g. set( 0xFF0000, 1 )
+   *
+   * The 'r', 'g', and 'b' values stand for red, green and blue respectively, and will be clamped to integers in 0-255.
+   * The 'a' value stands for alpha, and will be clamped to 0-1 (floating point)
+   * 'hex' indicates a 6-decimal-digit format hex number, for example 0xFFAA00 is equivalent to r=255, g=170, b=0.
+   */
   scenery.Color = function Color( r, g, b, a ) {
 
     // allow listeners to be notified on any changes. called with listener()
     this.listeners = [];
 
-    if ( typeof r === 'string' ) {
-      this.setCSS( r );
-    }
-    else if ( r instanceof Color ) {
-      this.setRGBA( r.r, r.g, r.b, r.a );
-    }
-    else {
-      // alpha
-      var alpha = a === undefined ? 1 : a;
-
-      // bitwise handling if 3 elements aren't defined
-      if ( g === undefined || b === undefined ) {
-        this.setRGBA(
-          ( r >> 16 ) && 0xFF,
-          ( r >> 8 ) && 0xFF,
-          ( r >> 0 ) && 0xFF,
-          alpha );
-      }
-      else {
-        // otherwise, copy them over
-        this.setRGBA( r, g, b, alpha );
-      }
-    }
+    this.set( r, g, b, a );
 
     phetAllocation && phetAllocation( 'Color' );
   };
@@ -182,6 +171,47 @@ define( function( require ) {
       return new Color( this.r, this.g, this.b, this.a );
     },
 
+    /**
+     * Sets the values of this Color. Supported styles:
+     * - set( color ) is a copy constructor
+     * - set( string ) will parse the string assuming it's a CSS-compatible color, e.g. set( 'red' )
+     * - set( r, g, b ) is equivalent to setRGBA( r, g, b, 1 ), e.g. set( 255, 0, 128 )
+     * - set( r, g, b, a ) is equivalent to setRGBA( r, g, b, a ), e.g. set( 255, 0, 128, 0.5 )
+     * - set( hex ) will set RGB with alpha=1, e.g. set( 0xFF0000 )
+     * - set( hex, alpha ) will set RGBA, e.g. set( 0xFF0000, 1 )
+     */
+    set: function( r, g, b, a ) {
+      assert && assert( r !== undefined, 'Can\'t call Color.set( undefined )' );
+
+      // support for set( string )
+      if ( typeof r === 'string' ) {
+        this.setCSS( r );
+      }
+      // support for set( color )
+      else if ( r instanceof Color ) {
+        this.setRGBA( r.r, r.g, r.b, r.a );
+      }
+      // support for set( hex ) and set( hex, alpha )
+      else if ( b === undefined ) {
+        assert && assert( typeof r === 'number' );
+        assert && assert( g === undefined || typeof g === 'number' );
+
+        var red = ( r >> 16 ) & 0xFF;
+        var green = ( r >> 8 ) & 0xFF;
+        var blue = ( r >> 0 ) & 0xFF;
+        var alpha = ( g === undefined ) ? 1 : g;
+        this.setRGBA( red, green, blue, alpha );
+      }
+      // support for set( r, g, b ) and set( r, g, b, a )
+      else {
+        assert && assert( typeof r === 'number' );
+        assert && assert( typeof g === 'number' );
+        assert && assert( typeof b === 'number' );
+        assert && assert( a === undefined || typeof a === 'number' );
+        this.setRGBA( r, g, b, ( a === undefined ) ? 1 : a );
+      }
+    },
+
     // red, integral 0-255
     getRed: function() { return this.r; },
     setRed: function( value ) { return this.setRGBA( value, this.g, this.b, this.a ); },
@@ -223,7 +253,13 @@ define( function( require ) {
         return 'rgb(' + this.r + ',' + this.g + ',' + this.b + ')';
       }
       else {
-        var alphaString = this.a === 0 || this.a === 1 ? this.a : this.a.toFixed( 20 ); // toFixed prevents scientific notation
+        // toFixed prevents scientific notation, but we need to strip off the trailing zeros
+        var alpha = this.a.toFixed( 20 );
+        while ( alpha.length >= 2 && alpha[alpha.length - 1] === '0' && alpha[alpha.length - 2] !== '.' ) {
+          alpha = alpha.slice( 0, alpha.length - 1 );
+        }
+
+        var alphaString = this.a === 0 || this.a === 1 ? this.a : alpha;
         return 'rgba(' + this.r + ',' + this.g + ',' + this.b + ',' + alphaString + ')';
       }
     },
@@ -479,6 +515,7 @@ define( function( require ) {
     darkgoldenrod: 'b8860b',
     darkgray: 'a9a9a9',
     darkgreen: '006400',
+    darkgrey: 'a9a9a9',
     darkkhaki: 'bdb76b',
     darkmagenta: '8b008b',
     darkolivegreen: '556b2f',
@@ -489,13 +526,14 @@ define( function( require ) {
     darkseagreen: '8fbc8f',
     darkslateblue: '483d8b',
     darkslategray: '2f4f4f',
+    darkslategrey: '2f4f4f',
     darkturquoise: '00ced1',
     darkviolet: '9400d3',
     deeppink: 'ff1493',
     deepskyblue: '00bfff',
     dimgray: '696969',
+    dimgrey: '696969',
     dodgerblue: '1e90ff',
-    feldspar: 'd19275',
     firebrick: 'b22222',
     floralwhite: 'fffaf0',
     forestgreen: '228b22',
@@ -507,6 +545,7 @@ define( function( require ) {
     gray: '808080',
     green: '008000',
     greenyellow: 'adff2f',
+    grey: '808080',
     honeydew: 'f0fff0',
     hotpink: 'ff69b4',
     indianred: 'cd5c5c',
@@ -521,14 +560,15 @@ define( function( require ) {
     lightcoral: 'f08080',
     lightcyan: 'e0ffff',
     lightgoldenrodyellow: 'fafad2',
-    lightgrey: 'd3d3d3',
+    lightgray: 'd3d3d3',
     lightgreen: '90ee90',
+    lightgrey: 'd3d3d3',
     lightpink: 'ffb6c1',
     lightsalmon: 'ffa07a',
     lightseagreen: '20b2aa',
     lightskyblue: '87cefa',
-    lightslateblue: '8470ff',
     lightslategray: '778899',
+    lightslategrey: '778899',
     lightsteelblue: 'b0c4de',
     lightyellow: 'ffffe0',
     lime: '00ff00',
@@ -539,7 +579,7 @@ define( function( require ) {
     mediumaquamarine: '66cdaa',
     mediumblue: '0000cd',
     mediumorchid: 'ba55d3',
-    mediumpurple: '9370d8',
+    mediumpurple: '9370db',
     mediumseagreen: '3cb371',
     mediumslateblue: '7b68ee',
     mediumspringgreen: '00fa9a',
@@ -560,7 +600,7 @@ define( function( require ) {
     palegoldenrod: 'eee8aa',
     palegreen: '98fb98',
     paleturquoise: 'afeeee',
-    palevioletred: 'd87093',
+    palevioletred: 'db7093',
     papayawhip: 'ffefd5',
     peachpuff: 'ffdab9',
     peru: 'cd853f',
@@ -581,6 +621,7 @@ define( function( require ) {
     skyblue: '87ceeb',
     slateblue: '6a5acd',
     slategray: '708090',
+    slategrey: '708090',
     snow: 'fffafa',
     springgreen: '00ff7f',
     steelblue: '4682b4',
@@ -590,7 +631,6 @@ define( function( require ) {
     tomato: 'ff6347',
     turquoise: '40e0d0',
     violet: 'ee82ee',
-    violetred: 'd02090',
     wheat: 'f5deb3',
     white: 'ffffff',
     whitesmoke: 'f5f5f5',
@@ -599,19 +639,19 @@ define( function( require ) {
   };
 
   // Java compatibility
-  Color.BLACK = new Color( 0, 0, 0 ).setImmutable();
-  Color.BLUE = new Color( 0, 0, 255 ).setImmutable();
-  Color.CYAN = new Color( 0, 255, 255 ).setImmutable();
-  Color.DARK_GRAY = new Color( 64, 64, 64 ).setImmutable();
-  Color.GRAY = new Color( 128, 128, 128 ).setImmutable();
-  Color.GREEN = new Color( 0, 255, 0 ).setImmutable();
-  Color.LIGHT_GRAY = new Color( 192, 192, 192 ).setImmutable();
-  Color.MAGENTA = new Color( 255, 0, 255 ).setImmutable();
-  Color.ORANGE = new Color( 255, 200, 0 ).setImmutable();
-  Color.PINK = new Color( 255, 175, 175 ).setImmutable();
-  Color.RED = new Color( 255, 0, 0 ).setImmutable();
-  Color.WHITE = new Color( 255, 255, 255 ).setImmutable();
-  Color.YELLOW = new Color( 255, 255, 0 ).setImmutable();
+  Color.BLACK = Color.black = new Color( 0, 0, 0 ).setImmutable();
+  Color.BLUE = Color.blue = new Color( 0, 0, 255 ).setImmutable();
+  Color.CYAN = Color.cyan = new Color( 0, 255, 255 ).setImmutable();
+  Color.DARK_GRAY = Color.darkGray = new Color( 64, 64, 64 ).setImmutable();
+  Color.GRAY = Color.gray = new Color( 128, 128, 128 ).setImmutable();
+  Color.GREEN = Color.green = new Color( 0, 255, 0 ).setImmutable();
+  Color.LIGHT_GRAY = Color.lightGray = new Color( 192, 192, 192 ).setImmutable();
+  Color.MAGENTA = Color.magenta = new Color( 255, 0, 255 ).setImmutable();
+  Color.ORANGE = Color.orange = new Color( 255, 200, 0 ).setImmutable();
+  Color.PINK = Color.pink = new Color( 255, 175, 175 ).setImmutable();
+  Color.RED = Color.red = new Color( 255, 0, 0 ).setImmutable();
+  Color.WHITE = Color.white = new Color( 255, 255, 255 ).setImmutable();
+  Color.YELLOW = Color.yellow = new Color( 255, 255, 0 ).setImmutable();
 
   /**
    * Interpolates between 2 colors in RGBA space. When distance is 0, color1

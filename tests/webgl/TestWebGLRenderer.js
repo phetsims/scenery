@@ -67,26 +67,29 @@ define( function( require ) {
       var imageImports = [ mountainsImage ];
 
       /*
-      To see how multiple images are embedded in one or more SpriteSheet,uncomment this line
-      To force the creation of more than one SpriteSheet reduce the SpriteSheet size from 2048 to 1024
-      Despite all these images the Packing algorithm efficiently places them into a single spriteSheet
-      var imageImports = [ mountainsImage, attachImage, cementTextureDarkImage, detachImage,
-        iconPlaygroundHomescreenImage, skaterLeftImage, skaterRightImage,iconFrictionHomescreenImage,iconIntroHomescreenImage ]; */
+       To see how multiple images are embedded in one or more SpriteSheet,uncomment this line
+       To force the creation of more than one SpriteSheet reduce the SpriteSheet size from 2048 to 1024
+       Despite all these images the Packing algorithm efficiently places them into a single spriteSheet
+       var imageImports = [ mountainsImage, attachImage, cementTextureDarkImage, detachImage,
+       iconPlaygroundHomescreenImage, skaterLeftImage, skaterRightImage,iconFrictionHomescreenImage,iconIntroHomescreenImage ]; */
 
 
       //Show something from another module
-      var images = [];
+      var imageHandles = [];
       for ( var i = 0; i < 100; i++ ) {
-        var imageNode = new Image( imageImports[ Math.floor( Math.random() * imageImports.length ) ], { x: i * 4, y: 0 } );
-        var image = webGLRenderer.textureRenderer.createFromImageNode( imageNode, Math.random() );
-        images.push( image );
+        var imageNode = new Image( imageImports[ Math.floor( Math.random() * imageImports.length ) ], {
+          x: i * 4,
+          y: 0
+        } );
+        var imageHandle = webGLRenderer.textureRenderer.createFromImageNode( imageNode, Math.random() );
+        imageHandles.push( imageHandle );
       }
       webGLRenderer.textureRenderer.bindVertexBuffer();
       webGLRenderer.textureRenderer.bindDirtyTextures();
 
       webGLRenderer.colorTriangleRenderer.bindVertexBuffer();
 
-      webGLRenderer.addCustomWebGLRenderer( new LinesRenderer( webGLRenderer.gl, webGLRenderer.backingScale, webGLRenderer.canvas ) );
+      webGLRenderer.addCustomWebGLRenderer( new LinesRenderer() );
 
       webGLRenderer.start();
 
@@ -106,13 +109,14 @@ define( function( require ) {
 
         webGLRenderer.colorTriangleRenderer.updateTriangleBuffer( redTriangle );
 
-        for ( var i = 0; i < images.length; i++ ) {
-          var image = images[ i ];
+        for ( var i = 0; i < imageHandles.length; i++ ) {
+          var imageHandle = imageHandles[ i ];
           var y = rectX + i * 10;
           var translateX = i * 2;
           var translateY = y / (i + 1);
-          image.setTransform( Matrix4.translation( translateX, translateY, 0 ) );
-          webGLRenderer.textureRenderer.updateTriangleBuffer( image );
+
+          imageHandle.imageNode.setTranslation( translateX, translateY );
+          imageHandle.update( translateX, translateY );
         }
 
         // Experimental alternative to bufferSubData

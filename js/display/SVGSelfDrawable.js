@@ -196,6 +196,10 @@ define( function( require ) {
         updateDefsSelf && updateDefsSelf.call( this, svgBlock );
 
         usesPaint && this.paintState.updateSVGBlock( svgBlock );
+
+        // since fill/stroke IDs may be block-specific, we need to mark them dirty so they will be updated
+        usesPaint && this.markDirtyFill();
+        usesPaint && this.markDirtyStroke();
       },
 
       onAttach: function( node ) {
@@ -226,8 +230,7 @@ define( function( require ) {
     stateType( type );
 
     // set up pooling
-    /* jshint -W064 */
-    SelfDrawable.PoolableMixin( type );
+    SelfDrawable.Poolable.mixin( type );
 
     return type;
   };
