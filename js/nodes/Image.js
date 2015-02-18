@@ -4,7 +4,6 @@
  * Images
  *
  * TODO: allow multiple DOM instances (create new HTMLImageElement elements)
- * TODO: SVG support
  * TODO: support rendering a Canvas to DOM (single instance)
  *
  * @author Jonathan Olson <jonathan.olson@colorado.edu>
@@ -14,6 +13,7 @@ define( function( require ) {
   'use strict';
 
   var inherit = require( 'PHET_CORE/inherit' );
+  var cleanArray = require( 'PHET_CORE/cleanArray' );
   var Bounds2 = require( 'DOT/Bounds2' );
 
   var scenery = require( 'SCENERY/scenery' );
@@ -32,6 +32,16 @@ define( function( require ) {
   // TODO: change this based on memory and performance characteristics of the platform
   var keepDOMImageElements = true; // whether we should pool DOM elements for the DOM rendering states, or whether we should free them when possible for memory
   var keepSVGImageElements = true; // whether we should pool SVG elements for the SVG rendering states, or whether we should free them when possible for memory
+
+  var defaultMipmapBias = -0.7;
+  var defaultMipmapInitialLevel = 4; // by default, precompute all levels that will be used (so we don't hit this during animation)
+  var defaultMipmapMaxLevel = 4;
+
+  function canvasToImage( canvas ) {
+    var img = document.createElement( 'img' );
+    img.src = canvas.toDataURL();
+    return img;
+  }
 
   /*
    * Canvas renderer supports the following as 'image':
@@ -64,6 +74,16 @@ define( function( require ) {
     this._initialWidth = 0;
     this._initialHeight = 0;
 
+    // Mipmap client values
+    this._mipmap = false; // {bool} - Whether mipmapping is enabled
+    this._mipmapBias = defaultMipmapBias; // {number} - Amount of level-of-detail adjustment added to everything.
+    this._mipmapInitialLevel = defaultMipmapInitialLevel; // {number} - Quantity of mipmap levels to initially compute
+    this._mipmapMaxLevel = defaultMipmapMaxLevel; // {number} - Maximum mipmap levels to compute (lazily if > initial)
+
+    // Mipmap internal handling
+    this._mipmapCanvases = []; // TODO: power-of-2 handling for WebGL if helpful
+    this._mipmapImages = [];
+
     var self = this;
     // allows us to invalidate our bounds whenever an image is loaded
     this.loadListener = function( event ) {
@@ -93,6 +113,8 @@ define( function( require ) {
       for ( var i = 0; i < stateLen; i++ ) {
         this._drawables[ i ].markDirtyImage();
       }
+
+      this.invalidateMipmaps();
     },
 
     getImage: function() {
@@ -115,7 +137,7 @@ define( function( require ) {
           scenery.bitmaskSupportsCanvas |
           scenery.bitmaskSupportsSVG |
           scenery.bitmaskSupportsDOM |
-                                     scenery.bitmaskSupportsWebGL |
+          scenery.bitmaskSupportsWebGL |
           scenery.bitmaskSupportsPixi
         );
       }
@@ -170,6 +192,169 @@ define( function( require ) {
       this._initialHeight = height;
 
       this.invalidateImage();
+    },
+
+    isMipmap: function() {
+      return this._mipmap;
+    },
+
+    setMipmap: function( mipmap ) {
+      assert && assert( typeof mipmap === 'boolean' );
+
+      if ( this._mipmap !== mipmap ) {
+        this._mipmap =  mipmap;
+
+        this.invalidateMipmaps();
+      }
+    },
+
+    getMipmapBias: function() {
+      return this._mipmapBias;
+    },
+
+    setMipmapBias: function( bias ) {
+      assert && assert( typeof bias === 'number' );
+
+      if ( this._mipmapBias !== bias ) {
+        this._mipmapBias = bias;
+
+        this.invalidateMipmaps();
+      }
+    },
+
+    getMipmapInitialLevel: function() {
+      return this._mipmapInitialLevel;
+    },
+
+    setMipmapInitialLevel: function( level ) {
+      assert && assert( typeof level === 'number' );
+
+      if ( this._mipmapInitialLevel !== level ) {
+        this._mipmapInitialLevel = level;
+
+        this.invalidateMipmaps();
+      }
+    },
+
+    getMipmapMaxLevel: function() {
+      return this._mipmapMaxLevel;
+    },
+
+    setMipmapMaxLevel: function( level ) {
+      assert && assert( typeof level === 'number' );
+
+      if ( this._mipmapMaxLevel !== level ) {
+        this._mipmapMaxLevel = level;
+
+        this.invalidateMipmaps();
+      }
+    },
+
+    // @private
+    constructNextMipmap: function() {
+      var level = this._mipmapCanvases.length;
+      var biggerCanvas = this._mipmapCanvases[level-1];
+
+      // ignore any 1x1 canvases (or smaller?!?)
+      if ( biggerCanvas.width * biggerCanvas.height > 2 ) {
+        var canvas = document.createElement( 'canvas' );
+        canvas.width = Math.ceil( biggerCanvas.width / 2 );
+        canvas.height = Math.ceil( biggerCanvas.height / 2 );
+
+        // sanity check
+        if ( canvas.width > 0 && canvas.height > 0 ) {
+          var context = canvas.getContext( '2d' );
+          context.scale( 0.5, 0.5 );
+          context.drawImage( biggerCanvas, 0, 0 );
+
+          this._mipmapCanvases.push( canvas );
+          this._mipmapImages.push( canvasToImage( canvas ) );
+        }
+      }
+    },
+
+    // @public
+    invalidateMipmaps: function() {
+      cleanArray( this._mipmapCanvases );
+      cleanArray( this._mipmapImages );
+
+      if ( this._image ) {
+        var baseCanvas = document.createElement( 'canvas' );
+        baseCanvas.width = this.getImageWidth();
+        baseCanvas.height = this.getImageHeight();
+
+        // if we are not loaded yet, just ignore
+        if ( baseCanvas.width && baseCanvas.height ) {
+          var baseContext = baseCanvas.getContext( '2d' );
+          baseContext.drawImage( this._image, 0, 0 );
+
+          this._mipmapCanvases.push( baseCanvas );
+          this._mipmapImages.push( canvasToImage( baseCanvas ) );
+
+          var level = 0;
+          while( ++level < this._mipmapInitialLevel ) {
+            this.constructNextMipmap();
+          }
+        }
+      }
+
+      this.trigger0( 'mipmap' );
+    },
+
+    /**
+     * Returns the desired mipmap level (0-indexed) that should be used for the particular scale.
+     *
+     * @param {number} scale
+     */
+    getMipmapLevel: function( scale ) {
+      assert && assert( scale > 0 );
+
+      // If we are shown larger than scale, ALWAYS choose the highest resolution
+      if ( scale >= 1 ) {
+        return 0;
+      }
+
+      var level = Math.log2( 1 / scale ); // our approximate level of detail
+      level = Math.round( level + this._mipmapBias ); // convert to an integer level
+
+      if ( level < 0 ) {
+        level = 0;
+      }
+      if ( level > this._mipmapMaxLevel ) {
+        level = this._mipmapMaxLevel;
+      }
+
+      // If necessary, do lazy construction of the mipmap level
+      if ( this.mipmap && !this._mipmapCanvases[level] ) {
+        var currentLevel = this._mipmapCanvases.length - 1;
+        while ( ++currentLevel <= level ) {
+          this.constructNextMipmap();
+        }
+        // Sanity check, since constructNextMipmap() may have had to bail out. We had to compute some, so use the last
+        return Math.min( level, this._mipmapCanvases.length - 1 );
+      }
+      // Should already be constructed, or isn't needed
+      else {
+        return level;
+      }
+    },
+
+    /**
+     * @returns {HTMLCanvasElement} - Matching <canvas> for the level of detail
+     */
+    getMipmapCanvas: function( level ) {
+      assert && assert( level >= 0 && level < this._mipmapCanvases.length && ( level % 1 ) === 0 );
+
+      return this._mipmapCanvases[level];
+    },
+
+    /**
+     * @returns {HTMLImageElement} - Matching <img> for the level of detail
+     */
+    getMipmapImage: function( level ) {
+      assert && assert( level >= 0 && level < this._mipmapCanvases.length && ( level % 1 ) === 0 );
+
+      return this._mipmapImages[level];
     },
 
     getImageWidth: function() {
@@ -243,7 +428,7 @@ define( function( require ) {
     }
   } );
 
-  Image.prototype._mutatorKeys = [ 'image', 'initialWidth', 'initialHeight' ].concat( Node.prototype._mutatorKeys );
+  Image.prototype._mutatorKeys = [ 'image', 'initialWidth', 'initialHeight', 'mipmap', 'mipmapBias', 'mipmapInitialLevel', 'mipmapMaxLevel' ].concat( Node.prototype._mutatorKeys );
 
   // utility for others
   Image.createSVGImage = function( url, width, height ) {
