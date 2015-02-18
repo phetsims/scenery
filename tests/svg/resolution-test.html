@@ -10,6 +10,7 @@
   <style type="text/css">
     #container {
       padding: 0;
+      background-color: #eee;
     }
   </style>
 
@@ -287,6 +288,9 @@
       var scale = 1;
       var currentTest = null;
 
+      document.getElementById( 'container' ).style.width = demoWidth + 'px';
+      document.getElementById( 'container' ).style.height = demoHeight + 'px';
+
       function clearContainer() {
         document.getElementById( 'container' ).innerHTML = '';
       }
@@ -336,6 +340,54 @@
       document.getElementById( 'raster-svg' ).addEventListener( 'click', function() {
         clearContainer();
         vectorSVG( imageURL );
+      } );
+
+      function mipmapSVG() {
+        var svg = document.createElementNS( 'http://www.w3.org/2000/svg', 'svg' );
+        svg.setAttribute( 'width', demoWidth );
+        svg.setAttribute( 'height', demoHeight );
+        var g = document.createElementNS( 'http://www.w3.org/2000/svg', 'g' );
+        svg.appendChild( g );
+        document.getElementById( 'container' ).appendChild( svg );
+
+        var image = document.createElementNS( 'http://www.w3.org/2000/svg', 'image' );
+        image.setAttribute( 'x', -imageWidth / 2 );
+        image.setAttribute( 'y', -imageHeight / 2 );
+        image.setAttribute( 'width', imageWidth + 'px' );
+        image.setAttribute( 'height', imageHeight + 'px' );
+        image.setAttributeNS( 'http://www.w3.org/1999/xlink', 'xlink:href', mipmapURLs[1] );
+        g.appendChild( image );
+
+        currentTest = {
+          mipmapLevel: 1,
+
+          update: function( rotation, scale ) {
+            var mipmapLevel = toPowerOf2( scale * maxLevel * 1.2 ) / maxLevel; // same bias as WebGL
+            if ( mipmapLevel < 1 / maxLevel ) {
+              mipmapLevel = 1 / maxLevel;
+            }
+            if ( mipmapLevel > 8 ) {
+              mipmapLevel = 8;
+            }
+
+            if ( this.mipmapLevel !== mipmapLevel ) {
+              this.mipmapLevel = mipmapLevel;
+              image.setAttributeNS( 'http://www.w3.org/1999/xlink', 'xlink:href', mipmapURLs[mipmapLevel] );
+            }
+
+            var cos = scale * Math.cos( rotation );
+            var sin = scale * Math.sin( rotation );
+            // NOTE: this is column-major affine, NOT row-major full description
+            g.setAttribute( 'transform', 'matrix( ' + cos.toFixed( 20 ) + ', ' + (-sin).toFixed( 20 ) + ', ' +
+                                                      sin.toFixed( 20 ) + ', ' + cos.toFixed( 20 ) + ', ' +
+                                                      ( demoWidth / 2 ).toFixed( 20 ) + ', ' + ( demoHeight / 2 ).toFixed( 20 ) + ' )' );
+          }
+        };
+        currentTest.update( rotation, scale );
+      }
+      document.getElementById( 'mipmap-svg' ).addEventListener( 'click', function() {
+        clearContainer();
+        mipmapSVG();
       } );
 
       function vectorCanvas( img ) {
