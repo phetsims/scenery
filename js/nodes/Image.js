@@ -120,6 +120,7 @@ define( function( require ) {
     getImage: function() {
       return this._image;
     },
+    get image() { return this.getImage(); },
 
     invalidateSupportedRenderers: function() {
       if ( this._image instanceof HTMLCanvasElement ) {
@@ -173,30 +174,36 @@ define( function( require ) {
       }
       return this;
     },
+    set image( value ) { this.setImage( value ); },
 
     getInitialWidth: function() {
       return this._initialWidth;
     },
+    get initialWidth() { return this.getInitialWidth(); },
 
     setInitialWidth: function( width ) {
       this._initialWidth = width;
 
       this.invalidateImage();
     },
+    set initialWidth( value ) { this.setInitialWidth( value ); },
 
     getInitialHeight: function() {
       return this._initialHeight;
     },
+    get initialHeight() { return this.getInitialHeight(); },
 
     setInitialHeight: function( height ) {
       this._initialHeight = height;
 
       this.invalidateImage();
     },
+    set initialHeight( value ) { this.setInitialHeight( value ); },
 
     isMipmap: function() {
       return this._mipmap;
     },
+    get mipmap() { return this.isMipmap(); },
 
     setMipmap: function( mipmap ) {
       assert && assert( typeof mipmap === 'boolean' );
@@ -207,10 +214,12 @@ define( function( require ) {
         this.invalidateMipmaps();
       }
     },
+    set mipmap( value ) { this.setMipmap( value ); },
 
     getMipmapBias: function() {
       return this._mipmapBias;
     },
+    get mipmapBias() { return this.getMipmapBias(); },
 
     setMipmapBias: function( bias ) {
       assert && assert( typeof bias === 'number' );
@@ -221,10 +230,12 @@ define( function( require ) {
         this.invalidateMipmaps();
       }
     },
+    set mipmapBias( value ) { this.setMipmapBias( value ); },
 
     getMipmapInitialLevel: function() {
       return this._mipmapInitialLevel;
     },
+    get mipmapInitialLevel() { return this.getMipmapInitialLevel(); },
 
     setMipmapInitialLevel: function( level ) {
       assert && assert( typeof level === 'number' );
@@ -235,10 +246,12 @@ define( function( require ) {
         this.invalidateMipmaps();
       }
     },
+    set mipmapInitialLevel( value ) { this.setMipmapInitialLevel( value ); },
 
     getMipmapMaxLevel: function() {
       return this._mipmapMaxLevel;
     },
+    get mipmapMaxLevel() { return this.getMipmapMaxLevel(); },
 
     setMipmapMaxLevel: function( level ) {
       assert && assert( typeof level === 'number' );
@@ -249,6 +262,7 @@ define( function( require ) {
         this.invalidateMipmaps();
       }
     },
+    set mipmapMaxLevel( value ) { this.setMipmapMaxLevel( value ); },
 
     // @private
     constructNextMipmap: function() {
@@ -373,6 +387,7 @@ define( function( require ) {
         return detectedWidth;
       }
     },
+    get imageWidth() { return this.getImageWidth(); },
 
     getImageHeight: function() {
       var detectedHeight = this._image.naturalHeight || this._image.height;
@@ -385,6 +400,7 @@ define( function( require ) {
         return detectedHeight;
       }
     },
+    get imageHeight() { return this.getImageHeight(); },
 
     getImageURL: function() {
       return this._image.src;
@@ -418,27 +434,6 @@ define( function( require ) {
     createPixiDrawable: function( renderer, instance ) {
       return Image.ImagePixiDrawable.createFromPool( renderer, instance );
     },
-
-    set image( value ) { this.setImage( value ); },
-    get image() { return this.getImage(); },
-
-    set initialWidth( value ) { this.setInitialWidth( value ); },
-    get initialWidth() { return this.getInitialWidth(); },
-
-    set initialHeight( value ) { this.setInitialHeight( value ); },
-    get initialHeight() { return this.getInitialHeight(); },
-
-    set mipmap( value ) { this.setMipmap( value ); },
-    get mipmap() { return this.isMipmap(); },
-
-    set mipmapBias( value ) { this.setMipmapBias( value ); },
-    get mipmapBias() { return this.getMipmapBias(); },
-
-    set mipmapInitialLevel( value ) { this.setMipmapInitialLevel( value ); },
-    get mipmapInitialLevel() { return this.getMipmapInitialLevel(); },
-
-    set mipmapMaxLevel( value ) { this.setMipmapMaxLevel( value ); },
-    get mipmapMaxLevel() { return this.getMipmapMaxLevel(); },
 
     getBasicConstructor: function( propLines ) {
       return 'new scenery.Image( \'' + ( this._image.src ? this._image.src.replace( /'/g, '\\\'' ) : 'other' ) + '\', {' + propLines + '} )';
