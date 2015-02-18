@@ -906,9 +906,9 @@ define( function( require ) {
        * @param list
        * @param predicate
        */
-      flattenTrails: function( trail, list, predicate ) {
+      flattenTrails: function( parentTrail, trail, list, predicate ) {
         while ( trail !== null ) {
-          if ( predicate( trail ) ) {
+          if ( predicate( trail ) && trail.isExtensionOf( parentTrail, true ) ) {
             list.push( trail );
           }
           trail = trail.next();
@@ -923,7 +923,7 @@ define( function( require ) {
 
         // If a focus context (such as a popup) has been added, restrict the search to that instances and its children.
         if ( Input.focusContexts.length ) {
-          Input.flattenTrails( Input.focusContexts[ Input.focusContexts.length - 1 ].trail, focusableTrails, focusable );
+          Input.flattenTrails( Input.focusContexts[ Input.focusContexts.length - 1 ].trail, Input.focusContexts[ Input.focusContexts.length - 1 ].trail, focusableTrails, focusable );
         }
         else {
 
@@ -939,7 +939,7 @@ define( function( require ) {
               var trail = trails[ k ];
 
               // Add to the list of all focusable items across Displays & Trails
-              Input.flattenTrails( trail, focusableTrails, focusable );
+              Input.flattenTrails( trail, trail, focusableTrails, focusable );
             }
           }
         }
