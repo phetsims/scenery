@@ -269,7 +269,7 @@ define( function( require ) {
       },
 
       findKeyByEvent: function( event ) {
-        assert && assert( event.hasOwnProperty( 'keyCode' ) && event.hasOwnProperty( 'charCode' ), 'Assumes the KeyboardEvent has keyCode and charCode properties' );
+        assert && assert( event.keyCode !== undefined && event.charCode !== undefined, 'Assumes the KeyboardEvent has keyCode and charCode properties' );
         var result = _.find( this.pointers, function( pointer ) {
           // TODO: also check location (if that exists), so we don't mix up left and right shift, etc.
           return pointer.event && pointer.event.keyCode === event.keyCode && pointer.event.charCode === event.charCode;
