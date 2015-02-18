@@ -21,7 +21,7 @@ define( function( require ) {
     var focusRectangle = this;
 
     Rectangle.call( this, 0, 0, 0, 0, 0, 0, {
-      stroke: 'rgb(213,73,154)',
+      stroke: 'rgb(178,35,154)',
       visible: false,
       lineWidth: 3
     } );
