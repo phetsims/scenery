@@ -104,8 +104,8 @@ define( function( require ) {
     // Get the correct initial values
     listener.after();
 
-    for ( var i = 0; i < sceneryNode.children.length; i++ ) {
-      pixiNode.addChild( toPixi( sceneryNode.children[ i ] ) );
+    for ( var i = 0; i < sceneryNode._children.length; i++ ) {
+      pixiNode.addChild( toPixi( sceneryNode._children[ i ] ) );
     }
     return pixiNode;
   };

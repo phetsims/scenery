@@ -891,8 +891,8 @@ define( function( require ) {
 
       function nodeCount( node ) {
         var count = 1; // for us
-        for ( var i = 0; i < node.children.length; i++ ) {
-          count += nodeCount( node.children[i] );
+        for ( var i = 0; i < node._children.length; i++ ) {
+          count += nodeCount( node._children[i] );
         }
         return count;
       }
@@ -1159,7 +1159,7 @@ define( function( require ) {
           result += 'var ' + name( node ) + ' = ' + node.toString( '', false );
         }
 
-        _.each( node.children, function( child ) {
+        _.each( node._children, function( child ) {
           result += '\n' + name( node ) + '.addChild( ' + name( child ) + ' );';
         } );
       } );

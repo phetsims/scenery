@@ -531,7 +531,7 @@ define( function( require ) {
           var epsilon = 0.000001;
 
           var childBounds = Bounds2.NOTHING.copy();
-          _.each( that.children, function( child ) { childBounds.includeBounds( child._bounds ); } );
+          _.each( that._children, function( child ) { childBounds.includeBounds( child._bounds ); } );
 
           var localBounds = that._selfBounds.union( childBounds );
 
@@ -1996,9 +1996,9 @@ define( function( require ) {
         }
         // with no focusOrder, all children are scanned in the rendering order
         else {
-          var numChildren = node.children.length;
+          var numChildren = node._children.length;
           for ( var i = 0; i < numChildren; i++ ) {
-            var child = node.children[i];
+            var child = node._children[i];
 
             currentTrail.addDescendant( child, i );
             addTrailsForNode( child, false );
@@ -2021,7 +2021,7 @@ define( function( require ) {
       var n;
       _.each( this.getConnectedNodes(), function( node ) {
         edges[ node.id ] = {};
-        _.each( node.children, function( m ) {
+        _.each( node._children, function( m ) {
           edges[ node.id ][ m.id ] = true;
         } );
         if ( !node.parents.length ) {
@@ -2040,7 +2040,7 @@ define( function( require ) {
         n = s.pop();
         l.push( n );
 
-        _.each( n.children, handleChild );
+        _.each( n._children, handleChild );
       }
 
       // ensure that there are no edges left, since then it would contain a circular reference
@@ -2053,7 +2053,7 @@ define( function( require ) {
 
     // verify that this.addChild( child ) it wouldn't cause circular references
     canAddChild: function( child ) {
-      if ( this === child || _.contains( this.children, child ) ) {
+      if ( this === child || _.contains( this._children, child ) ) {
         return false;
       }
 
@@ -2065,7 +2065,7 @@ define( function( require ) {
       var n;
       _.each( this.getConnectedNodes().concat( child.getConnectedNodes() ), function( node ) {
         edges[ node.id ] = {};
-        _.each( node.children, function( m ) {
+        _.each( node._children, function( m ) {
           edges[ node.id ][ m.id ] = true;
         } );
         if ( !node.parents.length && node !== child ) {
@@ -2085,7 +2085,7 @@ define( function( require ) {
         n = s.pop();
         l.push( n );
 
-        _.each( n.children, handleChild );
+        _.each( n._children, handleChild );
 
         // handle our new edge
         if ( n === this ) {
