@@ -21,9 +21,9 @@ define( function( require ) {
     var focusRectangle = this;
 
     Rectangle.call( this, 0, 0, 0, 0, 0, 0, {
-      stroke: 'blue',
+      stroke: 'rgb(213,73,154)',
       visible: false,
-      lineWidth: 2
+      lineWidth: 3
     } );
 
     var expand = 2.5;
