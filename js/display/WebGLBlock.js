@@ -35,7 +35,7 @@ define( function( require ) {
       // Since we saw some jitter on iPad, see #318 and generally expect WebGL layers to span the entire display
       // In the future, it would be good to understand what was causing the problem and make webgl consistent
       // with svg and canvas again.
-      this.fit = FittedBlock.FULL_DISPLAY;
+      this.setFit( FittedBlock.FULL_DISPLAY );
 
       this.filterRootInstance = filterRootInstance;
 
@@ -110,9 +110,7 @@ define( function( require ) {
         }
 
         // udpate the fit BEFORE drawing, since it may change our offset
-        if ( this.dirtyFit ) {
-          this.updateFit();
-        }
+        this.updateFit();
 
         // finalX = 2 * x / display.width - 1
         // finalY = 1 - 2 * y / display.height

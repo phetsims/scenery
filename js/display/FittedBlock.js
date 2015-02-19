@@ -32,6 +32,8 @@ define( function( require ) {
       // var canBeFullDisplay = transformRootInstance.isDisplayRoot;
 
       //OHTWO TODO: change fit based on renderer flags or extra parameters
+      // NOTE: to change, use setFit() below. Ideally we should encapsulate private information better!
+      // NOTE: if FULL_DISPLAY, we need to have listeners hooked up properly
       // this.fit = canBeFullDisplay ? FittedBlock.FULL_DISPLAY : FittedBlock.COMMON_ANCESTOR;
       this.fit = FittedBlock.COMMON_ANCESTOR;
 
@@ -45,12 +47,23 @@ define( function( require ) {
       // TODO: I can't find documentation about forceAcceleration anywhere.  How is this used?  What is it for?  How does it work?
       this.forceAcceleration = ( renderer & Renderer.bitmaskForceAcceleration ) !== 0;
 
-      if ( this.fit === FittedBlock.FULL_DISPLAY ) {
-        this.display.onStatic( 'displaySize', this.dirtyFitListener );
-      }
-
       // TODO: add count of boundsless objects?
       return this;
+    },
+
+    setFit: function( fit ) {
+      if ( this.fit !== fit ) {
+        if ( this.fit === FittedBlock.FULL_DISPLAY ) {
+          this.display.offStatic( 'displaySize', this.dirtyFitListener );
+        }
+        if ( fit === FittedBlock.FULL_DISPLAY ) {
+          this.display.onStatic( 'displaySize', this.dirtyFitListener );
+        }
+
+        this.fit = fit;
+
+        this.markDirtyFit();
+      }
     },
 
     markDirtyFit: function() {
@@ -59,7 +72,9 @@ define( function( require ) {
       this.markDirty();
     },
 
-    // should be called from update() whenever this block is dirty
+    /*
+     * Should be called from update() whenever this block is dirty
+     */
     updateFit: function() {
       assert && assert( this.fit === FittedBlock.FULL_DISPLAY || this.fit === FittedBlock.COMMON_ANCESTOR,
         'Unsupported fit' );
