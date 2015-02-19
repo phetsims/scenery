@@ -36,12 +36,6 @@ define( function( require ) {
   var defaultMipmapInitialLevel = 4; // by default, precompute all levels that will be used (so we don't hit this during animation)
   var defaultMipmapMaxLevel = 4;
 
-  function canvasToImage( canvas ) {
-    var img = document.createElement( 'img' );
-    img.src = canvas.toDataURL();
-    return img;
-  }
-
   /*
    * Canvas renderer supports the following as 'image':
    *     URL (string)             // works, but does NOT support bounds-based parameter object keys like 'left', 'centerX', etc.
@@ -74,14 +68,14 @@ define( function( require ) {
     this._initialHeight = 0;
 
     // Mipmap client values
-    this._mipmap = false; // {bool} - Whether mipmapping is enabled
+    this._mipmap = true; // {bool} - Whether mipmapping is enabled
     this._mipmapBias = defaultMipmapBias; // {number} - Amount of level-of-detail adjustment added to everything.
     this._mipmapInitialLevel = defaultMipmapInitialLevel; // {number} - Quantity of mipmap levels to initially compute
     this._mipmapMaxLevel = defaultMipmapMaxLevel; // {number} - Maximum mipmap levels to compute (lazily if > initial)
 
     // Mipmap internal handling
     this._mipmapCanvases = []; // TODO: power-of-2 handling for WebGL if helpful
-    this._mipmapImages = [];
+    this._mipmapURLs = [];
 
     var self = this;
     // allows us to invalidate our bounds whenever an image is loaded
@@ -281,7 +275,7 @@ define( function( require ) {
           context.drawImage( biggerCanvas, 0, 0 );
 
           this._mipmapCanvases.push( canvas );
-          this._mipmapImages.push( canvasToImage( canvas ) );
+          this._mipmapURLs.push( canvas.toDataURL() );
         }
       }
     },
@@ -289,7 +283,7 @@ define( function( require ) {
     // @public
     invalidateMipmaps: function() {
       cleanArray( this._mipmapCanvases );
-      cleanArray( this._mipmapImages );
+      cleanArray( this._mipmapURLs );
 
       if ( this._image && this._mipmap ) {
         var baseCanvas = document.createElement( 'canvas' );
@@ -302,7 +296,7 @@ define( function( require ) {
           baseContext.drawImage( this._image, 0, 0 );
 
           this._mipmapCanvases.push( baseCanvas );
-          this._mipmapImages.push( canvasToImage( baseCanvas ) );
+          this._mipmapURLs.push( baseCanvas.toDataURL() );
 
           var level = 0;
           while( ++level < this._mipmapInitialLevel ) {
@@ -367,12 +361,12 @@ define( function( require ) {
     },
 
     /**
-     * @returns {HTMLImageElement} - Matching <img> for the level of detail
+     * @returns {string} - Matching data URL for the level of detail
      */
-    getMipmapImage: function( level ) {
+    getMipmapURL: function( level ) {
       assert && assert( level >= 0 && level < this._mipmapCanvases.length && ( level % 1 ) === 0 );
 
-      return this._mipmapImages[level];
+      return this._mipmapURLs[level];
     },
 
     getImageWidth: function() {
@@ -650,11 +644,12 @@ define( function( require ) {
 
     if ( this.node._mipmap ) {
       sceneryLog && sceneryLog.ImageSVGDrawable && sceneryLog.ImageSVGDrawable( this.id + ' Setting image URL to mipmap level ' + level );
-      var img = this.node.getMipmapImage( level );
-      image.setAttribute( 'width', img.naturalWidth + 'px' );
-      image.setAttribute( 'height', img.naturalHeight + 'px' );
+      var url = this.node.getMipmapURL( level );
+      var canvas = this.node.getMipmapCanvas( level );
+      image.setAttribute( 'width', canvas.width + 'px' );
+      image.setAttribute( 'height', canvas.height + 'px' );
       image.setAttribute( 'transform', 'scale(' + Math.pow( 2, level ).toFixed() + ')' );
-      image.setAttributeNS( scenery.xlinkns, 'xlink:href', img.src );
+      image.setAttributeNS( scenery.xlinkns, 'xlink:href', url );
     }
     else {
       sceneryLog && sceneryLog.ImageSVGDrawable && sceneryLog.ImageSVGDrawable( this.id + ' Setting image URL' );
