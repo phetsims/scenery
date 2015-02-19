@@ -36,6 +36,10 @@ define( function( require ) {
   var defaultMipmapInitialLevel = 4; // by default, precompute all levels that will be used (so we don't hit this during animation)
   var defaultMipmapMaxLevel = 4;
 
+  var log2 = Math.log2 || function( x ) {
+    return Math.log( x ) / Math.LN2;
+  };
+
   /*
    * Canvas renderer supports the following as 'image':
    *     URL (string)             // works, but does NOT support bounds-based parameter object keys like 'left', 'centerX', etc.
@@ -326,7 +330,7 @@ define( function( require ) {
         return 0;
       }
 
-      var level = Math.log2( 1 / scale ); // our approximate level of detail
+      var level = log2( 1 / scale ); // our approximate level of detail
       level = Math.round( level + this._mipmapBias ); // convert to an integer level
 
       if ( level < 0 ) {
