@@ -108,7 +108,7 @@
     b.scale( 2 );
     c.y = 10;
 
-    var trailMatrix = c.getUniqueTrail().getTransform().getMatrix();
+    var trailMatrix = c.getUniqueTrail().getMatrix();
     var nodeMatrix = c.getUniqueTransform().getMatrix();
     ok( trailMatrix.equalsEpsilon( nodeMatrix, epsilon ), 'Trail and Node transform equivalence' );
   } );

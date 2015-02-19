@@ -374,7 +374,7 @@ define( function( require ) {
 
       // walk our transform down, prepending
       for ( idx = this.length - 1; idx >= branchIndex; idx-- ) {
-        matrix = this.nodes[ idx ].getTransform().getMatrix().timesMatrix( matrix );
+        matrix = this.nodes[ idx ].getMatrix().timesMatrix( matrix );
       }
 
       // walk our transform up, prepending inverses

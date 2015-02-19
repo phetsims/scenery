@@ -51,7 +51,7 @@ define( function( require ) {
           return;
         }
 
-        var newMatrix = args.trail.getTransform().getMatrix();
+        var newMatrix = args.trail.getMatrix();
         var oldMatrix = handler.transform.getMatrix();
 
         // if A was the trail's old transform, B is the trail's new transform, we need to apply (B^-1 A) to our node
@@ -106,7 +106,7 @@ define( function( require ) {
         // move by the delta between the previous point, using the precomputed transform
         // prepend the translation on the node, so we can ignore whatever other transform state the node has
         if ( handler.options.translate ) {
-          var translation = handler.node.getTransform().getMatrix().getTranslation();
+          var translation = handler.node.getMatrix().getTranslation();
           handler.options.translate( {
             delta: delta,
             oldPosition: translation,

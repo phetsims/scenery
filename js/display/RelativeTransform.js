@@ -383,7 +383,7 @@ define( function( require ) {
 
     // @private, updates our matrix based on any parents, and the node's current transform
     computeRelativeTransform: function() {
-      var nodeMatrix = this.node.getTransform().getMatrix();
+      var nodeMatrix = this.node.getMatrix();
 
       if ( this.instance.parent && !this.instance.parent.isTransformed ) {
         // mutable form of parentMatrix * nodeMatrix
@@ -519,7 +519,7 @@ define( function( require ) {
       // state is consistent
       function currentRelativeMatrix( instance ) {
         var resultMatrix = Matrix3.dirtyFromPool();
-        var nodeMatrix = instance.node.getTransform().getMatrix();
+        var nodeMatrix = instance.node.getMatrix();
 
         if ( instance.parent && !instance.parent.isTransformed ) {
           // mutable form of parentMatrix * nodeMatrix
