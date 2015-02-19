@@ -89,8 +89,6 @@ define( function( require ) {
    * focusable:        True if the node should be able to receive keyboard focus.
    */
   scenery.Node = function Node( options ) {
-    var self = this;
-
     // supertype call to axon.Events (should just initialize a few properties here, notably _eventListeners and _staticEventListeners)
     Events.call( this );
 
@@ -146,16 +144,11 @@ define( function( require ) {
 
     /*
      * Set up the transform reference. we add a listener so that the transform itself can be modified directly
-     * by reference, or node.transform = <transform> / node.setTransform() can be used to change the transform reference.
-     * Both should trigger the necessary event notifications for Scenery to keep track internally.
+     * by reference, triggering the event notifications for Scenery The reference to the Transform3 will never change.
      */
     this._transform = new Transform3();
-    this._transformListener = {
-      // TODO: performance handling so we don't need to do two recursions!
-      before: function() { self.beforeTransformChange(); },
-      after: function() { self.afterTransformChange(); }
-    };
-    this._transform.addTransformListener( this._transformListener );
+    this._transformListener = this.onTransformChange.bind( this );
+    this._transform.on( 'change', this._transformListener );
 
     this._inputListeners = []; // for user input handling (mouse/touch)
 
@@ -1288,24 +1281,6 @@ define( function( require ) {
     },
     get matrix() { return this.getMatrix(); },
 
-    // change the actual transform reference (not just the actual transform)
-    setTransform: function( transform ) {
-      assert && assert( transform.isFinite(), 'Transform should not have infinite/NaN values' );
-
-      if ( this._transform !== transform ) {
-        // since our referenced transform doesn't change, we need to trigger the before/after ourselves
-        this.beforeTransformChange();
-
-        // swap the transform and move the listener to the new one
-        this._transform.removeTransformListener( this._transformListener ); // don't leak memory!
-        this._transform = transform;
-        this._transform.prependTransformListener( this._transformListener );
-
-        this.afterTransformChange();
-      }
-    },
-    set transform( value ) { this.setTransform( value ); },
-
     getTransform: function() {
       // for now, return an actual copy. we can consider listening to changes in the future
       return this._transform;
@@ -1316,13 +1291,8 @@ define( function( require ) {
       this.setMatrix( Matrix3.IDENTITY );
     },
 
-    // called before our transform is changed
-    beforeTransformChange: function() {
-      //OHTWO TODO: @deprecated, remove
-    },
-
     // called after our transform is changed
-    afterTransformChange: function() {
+    onTransformChange: function() {
       // NOTE: why is local bounds invalidation needed here?
       this.invalidateBounds();
 

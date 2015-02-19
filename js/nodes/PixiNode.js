@@ -90,19 +90,15 @@ define( function( require ) {
   var toPixi = function toPixi( sceneryNode ) {
     var pixiNode = toPixiWithoutChildren( sceneryNode );
 
-    var listener = {
-      before: function() {
-      },
-      after: function() {
-        pixiNode.position.x = sceneryNode.x;
-        pixiNode.position.y = sceneryNode.y;
-        dirty = true;
-      }
+    var listener = function() {
+      pixiNode.position.x = sceneryNode.x;
+      pixiNode.position.y = sceneryNode.y;
+      dirty = true;
     };
-    sceneryNode.getTransform().addTransformListener( listener );
+    sceneryNode.on( 'transform', listener );
 
     // Get the correct initial values
-    listener.after();
+    listener();
 
     for ( var i = 0; i < sceneryNode._children.length; i++ ) {
       pixiNode.addChild( toPixi( sceneryNode._children[ i ] ) );

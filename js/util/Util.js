@@ -219,6 +219,7 @@ define( function( require ) {
         } );
       }
 
+      // TODO: Don't use Transform3 unless it is necessary
       function scan( transform ) {
         // save/restore, in case the render tries to do any funny stuff like clipping, etc.
         context.save();
