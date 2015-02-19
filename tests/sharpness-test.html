@@ -1,0 +1,33 @@
+<!DOCTYPE html>
+<html>
+<!-- To run these tests, please launch this HTML file in a browser. It will use require.js to dynamically load the required files -->
+<head>
+  <meta charset="utf-8"/>
+  <meta http-equiv="X-UA-Compatible" content="IE=edge"/>
+
+  <title>Sharpness tests for Scenery</title>
+
+  <script src="../../sherpa/jquery-2.1.0.js"></script>
+  <script src="../../sherpa/lodash-2.4.1.min.js"></script>
+  <script src="../../sherpa/has.js"></script>
+  <script src="../../assert/js/assert.js"></script>
+
+  <script data-main="../js/config.js" src="../../sherpa/require-2.1.11.js"></script>
+</head>
+<body>
+
+<script>
+  require( [ 'config' ], function() {
+    require( [ 'main', 'KITE/main', 'DOT/main', 'AXON/main', 'PHET_CORE/main' ], function( scenery, kite, dot, axon, core ) {
+      window.scenery = scenery;
+      window.kite = kite;
+      window.dot = dot;
+      window.axon = axon;
+      window.core = core;
+
+      console.log( 'boo' );
+    } );
+  } );
+</script>
+</body>
+</html>
