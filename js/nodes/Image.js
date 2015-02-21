@@ -373,6 +373,10 @@ define( function( require ) {
       return this._mipmapURLs[level];
     },
 
+    hasMipmaps: function() {
+      return this._mipmapCanvases.length > 0;
+    },
+
     getImageWidth: function() {
       var detectedWidth = this._image.naturalWidth || this._image.width;
       if ( detectedWidth === 0 ) {
@@ -646,7 +650,7 @@ define( function( require ) {
     }
     this._mipmapLevel = level;
 
-    if ( this.node._mipmap ) {
+    if ( this.node._mipmap && this.node.hasMipmaps() ) {
       sceneryLog && sceneryLog.ImageSVGDrawable && sceneryLog.ImageSVGDrawable( this.id + ' Setting image URL to mipmap level ' + level );
       var url = this.node.getMipmapURL( level );
       var canvas = this.node.getMipmapCanvas( level );

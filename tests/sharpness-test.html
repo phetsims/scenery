@@ -16,6 +16,12 @@
 </head>
 <body>
 
+<label for="scale">Scale</label>
+<input autocomplete="off" id="scaleSlider" name="scale" type="range" min="-50" max="0" value="0" step="0.1" style="width: 900px;" />
+<br>
+<label for="mipmap">Mipmap</label>
+<input type="checkbox" autocomplete="off" id="mipmapCheckbox" name="mipmap" checked></input>
+
 <script>
   require( [ 'config' ], function() {
     require( [ 'main', 'KITE/main', 'DOT/main', 'AXON/main', 'PHET_CORE/main' ], function( scenery, kite, dot, axon, core ) {
@@ -25,7 +31,34 @@
       window.axon = axon;
       window.core = core;
 
-      console.log( 'boo' );
+      var scene = new scenery.Node();
+      var display = new scenery.Display( scene, {
+        width: 1024,
+        height: 1024,
+        backgroundColor: '#eee'
+      } );
+
+      document.body.appendChild( display.domElement );
+      display.domElement.style.position = 'relative';
+
+      var image = new scenery.Image( '../assets/sharpness-test-pattern.png', {
+        mipmap: true,
+        initialLevel: 7,
+        maxLevel: 7
+      } );
+      scene.addChild( image );
+
+      display.updateDisplay();
+
+      function updateMipmap() {
+        image.mipmap = document.getElementById( 'mipmapCheckbox' ).checked;
+      }
+      document.getElementById( 'mipmapCheckbox' ).addEventListener( 'click', updateMipmap );
+
+      display.updateOnRequestAnimationFrame( function() {
+        image.setScaleMagnitude( Math.pow( 2, parseFloat( document.getElementById( 'scaleSlider' ).value ) / 10 ) );
+        display.updateDisplay();
+      } );
     } );
   } );
 </script>
