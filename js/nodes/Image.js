@@ -72,7 +72,7 @@ define( function( require ) {
     this._initialHeight = 0;
 
     // Mipmap client values
-    this._mipmap = true; // {bool} - Whether mipmapping is enabled
+    this._mipmap = false; // {bool} - Whether mipmapping is enabled
     this._mipmapBias = defaultMipmapBias; // {number} - Amount of level-of-detail adjustment added to everything.
     this._mipmapInitialLevel = defaultMipmapInitialLevel; // {number} - Quantity of mipmap levels to initially compute
     this._mipmapMaxLevel = defaultMipmapMaxLevel; // {number} - Maximum mipmap levels to compute (lazily if > initial)
