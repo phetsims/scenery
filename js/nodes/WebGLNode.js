@@ -15,6 +15,7 @@ define( function( require ) {
   var inherit = require( 'PHET_CORE/inherit' );
   var scenery = require( 'SCENERY/scenery' );
 
+  var Matrix3 = require( 'DOT/Matrix3' );
   var Node = require( 'SCENERY/nodes/Node' );
   require( 'SCENERY/display/Renderer' );
   var WebGLSelfDrawable = require( 'SCENERY/display/WebGLSelfDrawable' );
@@ -80,6 +81,8 @@ define( function( require ) {
 
   WebGLNode.prototype._mutatorKeys = [ 'canvasBounds' ].concat( Node.prototype._mutatorKeys );
 
+  var modelViewMatrix = new Matrix3().setTo32Bit();
+
   WebGLNode.WebGLNodeDrawable = inherit( WebGLSelfDrawable, function WebGLNodeDrawable( renderer, instance ) {
     this.initialize( renderer, instance );
   }, {
@@ -102,7 +105,9 @@ define( function( require ) {
       // we have a precompute need
       var matrix = this.instance.relativeTransform.matrix;
 
-      this.node.paintWebGLDrawable( this, matrix );
+      modelViewMatrix.set( matrix );
+
+      this.node.paintWebGLDrawable( this, modelViewMatrix );
     },
 
     dispose: function() {

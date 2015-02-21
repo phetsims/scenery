@@ -351,7 +351,7 @@
 
                     shaderProgram.use();
 
-                    gl.uniformMatrix3fv( shaderProgram.uniformLocations.uModelViewMatrix, false, new Float32Array( matrix.entries ) );
+                    gl.uniformMatrix3fv( shaderProgram.uniformLocations.uModelViewMatrix, false, matrix.entries );
                     gl.uniformMatrix3fv( shaderProgram.uniformLocations.uProjectionMatrix, false, drawable.webGLBlock.projectionMatrixArray );
 
                     gl.bindBuffer( gl.ARRAY_BUFFER, drawable.vertexBuffer );
