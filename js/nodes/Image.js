@@ -34,7 +34,7 @@ define( function( require ) {
 
   var defaultMipmapBias = -0.7;
   var defaultMipmapInitialLevel = 4; // by default, precompute all levels that will be used (so we don't hit this during animation)
-  var defaultMipmapMaxLevel = 4;
+  var defaultMipmapMaxLevel = 5;
 
   var log2 = Math.log2 || function( x ) {
     return Math.log( x ) / Math.LN2;
@@ -635,6 +635,7 @@ define( function( require ) {
       // a sense of "average" scale, which should be exact if there is no asymmetric scale/shear applied
       var approximateScale = ( Math.sqrt( matrix.m00() * matrix.m00() + matrix.m10() * matrix.m10() ) +
                                Math.sqrt( matrix.m01() * matrix.m01() + matrix.m11() * matrix.m11() ) ) / 2;
+      approximateScale *= ( window.devicePixelRatio || 1 ); // for retina-like devices
       level = this.node.getMipmapLevel( approximateScale );
       sceneryLog && sceneryLog.ImageSVGDrawable && sceneryLog.ImageSVGDrawable( this.id + ' Mipmap level: ' + level );
     }
