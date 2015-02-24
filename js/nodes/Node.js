@@ -4,6 +4,8 @@
  * A node for the Scenery scene graph. Supports general directed acyclic graphics (DAGs).
  * Handles multiple layers with assorted types (Canvas 2D, SVG, DOM, WebGL, etc.).
  *
+ * See http://phetsims.github.io/scenery/doc/#node
+ *
  * @author Jonathan Olson <jonathan.olson@colorado.edu>
  */
 
@@ -51,6 +53,8 @@ define( function( require ) {
   }
 
   /*
+   * See http://phetsims.github.io/scenery/doc/#node-options
+   *
    * Available keys for use in the options parameter object for a vanilla Node (not inherited), in the order they are executed in:
    *
    * children:         A list of children to add (in order)
@@ -208,6 +212,12 @@ define( function( require ) {
   var Node = scenery.Node;
 
   inherit( Object, Node, extend( {
+    /**
+     * Inserts a child node at a specific index, ee http://phetsims.github.io/scenery/doc/#node-insertChild
+     *
+     * @param {number} index
+     * @param {Node} node
+     */
     insertChild: function( index, node ) {
       assert && assert( node !== null && node !== undefined, 'insertChild cannot insert a null/undefined child' );
       assert && assert( !_.contains( this._children, node ), 'Parent already contains child' );
@@ -227,10 +237,21 @@ define( function( require ) {
       this.trigger2( 'childInserted', node, index );
     },
 
+    /**
+     * Appends a child node to our list of children, see http://phetsims.github.io/scenery/doc/#node-addChild
+     *
+     * @param {Node} node
+     */
     addChild: function( node ) {
       this.insertChild( this._children.length, node );
     },
 
+    /**
+     * Removes a child node from our list of children, see http://phetsims.github.io/scenery/doc/#node-removeChild
+     * Will fail an assertion if the node is not currently one of our children
+     *
+     * @param {Node} node
+     */
     removeChild: function( node ) {
       assert && assert( node );
       assert && assert( this.isChild( node ) );
@@ -240,6 +261,7 @@ define( function( require ) {
       this.removeChildWithIndex( node, indexOfChild );
     },
 
+    // TODO: document in doc/index.html
     removeChildAt: function( index ) {
       assert && assert( index >= 0 );
       assert && assert( index < this._children.length );
@@ -249,7 +271,7 @@ define( function( require ) {
       this.removeChildWithIndex( node, index );
     },
 
-    // meant for internal use
+    // @private
     removeChildWithIndex: function( node, indexOfChild ) {
       assert && assert( node );
       assert && assert( this.isChild( node ) );
@@ -271,6 +293,7 @@ define( function( require ) {
       this.trigger2( 'childRemoved', node, indexOfChild );
     },
 
+    // TODO: document in doc/index.html
     removeAllChildren: function() {
       this.setChildren( [] );
     },
@@ -312,6 +335,7 @@ define( function( require ) {
       return this._parents.length ? this._parents[ 0 ] : null;
     },
 
+    // TODO: document in doc/index.html
     getChildAt: function( index ) {
       return this._children[ index ];
     },
