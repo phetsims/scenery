@@ -14,23 +14,19 @@ define( function( require ) {
 
   var inherit = require( 'PHET_CORE/inherit' );
   var extend = require( 'PHET_CORE/extend' );
-
   var Events = require( 'AXON/Events' );
-
   var Bounds2 = require( 'DOT/Bounds2' );
   var Transform3 = require( 'DOT/Transform3' );
   var Matrix3 = require( 'DOT/Matrix3' );
   var Vector2 = require( 'DOT/Vector2' );
   var clamp = require( 'DOT/Util' ).clamp;
-
   var Shape = require( 'KITE/Shape' );
 
   var scenery = require( 'SCENERY/scenery' );
   require( 'SCENERY/util/RendererSummary' );
   require( 'SCENERY/util/CanvasContextWrapper' );
-  // require( 'SCENERY/display/Renderer' ); // commented out so Require.js doesn't balk at the circular dependency
-
-  // TODO: FIXME: Why do I have to comment out this dependency?
+  // commented out so Require.js doesn't balk at the circular dependency
+  // require( 'SCENERY/display/Renderer' );
   // require( 'SCENERY/util/Trail' );
   // require( 'SCENERY/util/TrailPointer' );
 
@@ -51,6 +47,9 @@ define( function( require ) {
   function defaultLeafTrailPredicate( node ) {
     return node._children.length === 0;
   }
+
+  var scratchBounds2 = Bounds2.NOTHING.copy(); // mutable {Bounds2} used temporarily in methods
+  var scratchMatrix3 = new Matrix3();
 
   /*
    * See http://phetsims.github.io/scenery/doc/#node-options
@@ -157,14 +156,22 @@ define( function( require ) {
     this._inputListeners = []; // for user input handling (mouse/touch)
 
     // bounds handling
-    this._bounds = Bounds2.NOTHING;      // for this node and its children, in "parent" coordinates
-    this._localBounds = Bounds2.NOTHING; // for this node and its children, in "local" coordinates
-    this._selfBounds = Bounds2.NOTHING;  // just for this node, in "local" coordinates
-    this._childBounds = Bounds2.NOTHING; // just for children, in "local" coordinates
+    this._bounds = Bounds2.NOTHING.copy(); // for this node and its children, in "parent" coordinates (mutable!)
+    this._localBounds = Bounds2.NOTHING.copy(); // for this node and its children, in "local" coordinates (mutable!)
+    this._selfBounds = Bounds2.NOTHING.copy(); // just for this node, in "local" coordinates (mutable!)
+    this._childBounds = Bounds2.NOTHING.copy(); // just for children, in "local" coordinates (mutable!)
     this._localBoundsOverridden = false; // whether our localBounds have been set (with the ES5 setter / setLocalBounds()) to a custom value
     this._boundsDirty = true;
     this._localBoundsDirty = true;
     this._childBoundsDirty = true;
+
+    if ( assert ) {
+      // for assertions later to ensure that we are using the same Bounds2 copies as before
+      this._originalBounds = this._bounds;
+      this._originalLocalBounds = this._localBounds;
+      this._originalSelfBounds = this._selfBounds;
+      this._originalChildBounds = this._childBounds;
+    }
 
     // Similar to bounds, but includes any mouse/touch areas respectively, and excludes areas that would be pruned in hit-testing.
     // They are validated separately (independent from normal bounds validation), but should now always be non-null (since we now properly handle pruning)
@@ -450,10 +457,9 @@ define( function( require ) {
           this._children[ i ].validateBounds();
         }
 
-        var oldChildBounds = this._childBounds;
-
         // and recompute our _childBounds
-        this._childBounds = Bounds2.NOTHING.copy();
+        var oldChildBounds = scratchBounds2.set( this._childBounds ); // store old value in a temporary Bounds2
+        this._childBounds.set( Bounds2.NOTHING ); // initialize to a value that can be unioned with includeBounds()
 
         i = this._children.length;
         while ( i-- ) {
@@ -463,9 +469,8 @@ define( function( require ) {
         // run this before firing the event
         this._childBoundsDirty = false;
 
-        // TODO: don't execute this "if" comparison if there are no listeners?
         if ( !this._childBounds.equals( oldChildBounds ) ) {
-          // TODO: consider changing to parameter object (that may be a problem for the GC overhead)
+          // notifies only on an actual change
           this.trigger0( 'childBounds' );
         }
       }
@@ -475,15 +480,16 @@ define( function( require ) {
 
         this._localBoundsDirty = false; // we only need this to set local bounds as dirty
 
-        var oldLocalBounds = this._localBounds;
-        this._localBounds = this._selfBounds.union( this._childBounds ); // TODO: remove allocation
+        var oldLocalBounds = scratchBounds2.set( this._localBounds ); // store old value in a temporary Bounds2
+
+        // local bounds are a union between our self bounds and child bounds
+        this._localBounds.set( this._selfBounds ).includeBounds( this._childBounds );
 
         // apply clipping to the bounds if we have a clip area (all done in the local coordinate frame)
         if ( this.hasClipArea() ) {
           this._localBounds.constrainBounds( this._clipArea.bounds );
         }
 
-        // TODO: don't execute this "if" comparison if there are no listeners?
         if ( !this._localBounds.equals( oldLocalBounds ) ) {
           this.trigger0( 'localBounds' );
 
@@ -500,31 +506,31 @@ define( function( require ) {
         // run this before firing the event
         this._boundsDirty = false;
 
-        var oldBounds = this._bounds;
+        var oldBounds = scratchBounds2.set( this._bounds ); // store old value in a temporary Bounds2
 
-        var newBounds;
         // no need to do the more expensive bounds transformation if we are still axis-aligned
         if ( this._transformBounds && !this._transform.getMatrix().isAxisAligned() ) {
           // mutates the matrix and bounds during recursion
-          var matrix = this._transform.getMatrix().copy();
-          newBounds = Bounds2.NOTHING.copy();
+
+          var matrix = scratchMatrix3.set( this.getMatrix() ); // calls below mutate this matrix
+          this._bounds.set( Bounds2.NOTHING );
           // Include each painted self individually, transformed with the exact transform matrix.
           // This is expensive, as we have to do 2 matrix transforms for every descendant.
-          this._includeTransformedSubtreeBounds( matrix, newBounds ); // self and children
+          this._includeTransformedSubtreeBounds( matrix, this._bounds ); // self and children
 
           if ( this.hasClipArea() ) {
-            newBounds.constrainBounds( this._clipArea.getBoundsWithTransform( matrix ) );
+            this._bounds.constrainBounds( this._clipArea.getBoundsWithTransform( matrix ) );
           }
         }
         else {
-          // converts local to parent bounds. mutable methods used to minimize number of created bounds instances (we create one so we don't change references to the old one)
-          newBounds = this.localToParentBounds( this._localBounds ); // TODO: reduce allocation? fully mutable?
+          // converts local to parent bounds. mutable methods used to minimize number of created bounds instances
+          // (we create one so we don't change references to the old one)
+          this._bounds.set( this._localBounds );
+          this.transformBoundsFromLocalToParent( this._bounds );
         }
-        var changed = !newBounds.equals( oldBounds );
 
-        if ( changed ) {
-          this._bounds = newBounds;
-
+        if ( !this._bounds.equals( oldBounds ) ) {
+          // if we have a bounds change, we need to invalidate our parents so they can be recomputed
           i = this._parents.length;
           while ( i-- ) {
             this._parents[ i ].invalidateBounds();
@@ -539,6 +545,13 @@ define( function( require ) {
       if ( this._childBoundsDirty || this._boundsDirty ) {
         // TODO: if there are side-effects in listeners, this could overflow the stack. we should report an error instead of locking up
         this.validateBounds();
+      }
+
+      if ( assert ) {
+        assert( this._originalBounds === this._bounds, 'Reference for _bounds changed!' );
+        assert( this._originalLocalBounds === this._localBounds, 'Reference for _localBounds changed!' );
+        assert( this._originalSelfBounds === this._selfBounds, 'Reference for _selfBounds changed!' );
+        assert( this._originalChildBounds === this._childBounds, 'Reference for _childBounds changed!' );
       }
 
       // double-check that all of our bounds handling has been accurate
@@ -791,7 +804,7 @@ define( function( require ) {
         this.invalidateBounds();
 
         // record the new bounds
-        this._selfBounds = newBounds;
+        this._selfBounds.set( newBounds );
 
         // fire the event immediately
         this.trigger0( 'selfBounds' );
@@ -846,10 +859,10 @@ define( function( require ) {
       }
       else {
         // just an instance check for now. consider equals() in the future depending on cost
-        var changed = localBounds !== this._localBounds || !this._localBoundsOverridden;
+        var changed = !localBounds.equals( this._localBounds ) || !this._localBoundsOverridden;
 
         if ( changed ) {
-          this._localBounds = localBounds;
+          this._localBounds.set( localBounds );
         }
 
         if ( !this._localBoundsOverridden ) {
@@ -897,8 +910,10 @@ define( function( require ) {
     },
     get bounds() { return this.getBounds(); },
 
-    // like getBounds() in the "parent" coordinate frame, but includes only visible nodes
-    getVisibleBounds: function() {
+    /**
+     * Like getLocalBounds() in the "local" coordinate frame, but includes only visible nodes
+     */
+    getVisibleLocalBounds: function() {
       // defensive copy, since we use mutable modifications below
       var bounds = this._selfBounds.copy();
 
@@ -911,7 +926,14 @@ define( function( require ) {
       }
 
       assert && assert( bounds.isFinite() || bounds.isEmpty(), 'Visible bounds should not be infinite' );
-      return this.localToParentBounds( bounds );
+      return bounds;
+    },
+
+    /**
+     * Like getBounds() in the "parent" coordinate frame, but includes only visible nodes
+     */
+    getVisibleBounds: function() {
+      return this.getVisibleLocalBounds().transform( this.getMatrix() );
     },
     get visibleBounds() { return this.getVisibleBounds(); },
 
@@ -2480,9 +2502,6 @@ define( function( require ) {
       this._drawables.splice( index, 1 ); // TODO: replace with a remove() function
       return this;
     },
-
-    // whether for layer fitting we should use "safe" bounds, instead of the bounds used for layout
-    requiresSafeBounds: false,
 
     mutate: function( options ) {
       if ( !options ) {
