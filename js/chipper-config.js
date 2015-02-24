@@ -13,8 +13,6 @@ require.config( {
   deps: [ 'main', 'KITE/main', 'DOT/main', 'PHET_CORE/main' ],
 
   paths: {
-    underscore: '../../sherpa/lodash-2.4.1',
-    jquery: '../../sherpa/jquery-2.1.0',
     SCENERY: '.',
     KITE: '../../kite/js',
     DOT: '../../dot/js',
@@ -24,11 +22,6 @@ require.config( {
     text: '../../sherpa/text',
 
     image: '../../chipper/js/requirejs-plugins/image'
-  },
-
-  shim: {
-    underscore: { exports: '_' },
-    jquery: { exports: '$' }
   },
 
   // optional cache buster to make browser refresh load all included scripts, can be disabled with ?cacheBuster=false
