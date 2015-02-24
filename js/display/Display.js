@@ -84,8 +84,9 @@ define( function( require ) {
    *   enablePointerEvents: true,           // allows pointer events / MSPointerEvent to be used on supported platforms.
    *   width: <current main width>,         // override the main container's width
    *   height: <current main height>,       // override the main container's height
-   *   allowWebGL: true                     // boolean flag that indicates whether scenery is allowed to use WebGL for rendering
+   *   allowWebGL: true,                    // boolean flag that indicates whether scenery is allowed to use WebGL for rendering
    *                                        // Makes it possible to disable WebGL for ease of testing on non-WebGL platforms, see #289
+   *   accessibility: true                  // Whether accessibility enhancements is enabled
    */
   scenery.Display = function Display( rootNode, options ) {
 
@@ -108,8 +109,8 @@ define( function( require ) {
       enablePointerEvents: true, // whether we should specifically listen to pointer events if we detect support
       defaultCursor: 'default',  // what cursor is used when no other cursor is specified
       backgroundColor: null,      // initial background color
-
-      allowWebGL: true
+      allowWebGL: true,
+      accessibility: true
     }, options );
 
     // The (integral, > 0) dimensions of the Display's DOM element (only updates the DOM element on updateDisplay())
@@ -183,8 +184,10 @@ define( function( require ) {
     // global reference if we have a Display (useful)
     this.scenery = scenery;
 
-    var accessibilityLayer = createAccessibilityDiv();
-    this._domElement.appendChild( accessibilityLayer );
+    if ( this.options.accessibility ) {
+      var accessibilityLayer = createAccessibilityDiv();
+      this._domElement.appendChild( accessibilityLayer );
+    }
   };
   var Display = scenery.Display;
 
@@ -797,7 +800,7 @@ define( function( require ) {
       var listenerTarget = parameters.listenerTarget;
       var batchDOMEvents = parameters.batchDOMEvents; //OHTWO TODO: hybrid batching (option to batch until an event like 'up' that might be needed for security issues)
 
-      var input = new scenery.Input( this._rootNode, listenerTarget, !!batchDOMEvents, this.options.enablePointerEvents, pointFromEvent );
+      var input = new scenery.Input( this, listenerTarget, !!batchDOMEvents, this.options.enablePointerEvents, pointFromEvent );
       this._input = input;
 
       input.connectListeners();

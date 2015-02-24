@@ -54,8 +54,9 @@ define( function( require ) {
   };
 
   // listenerTarget is the DOM node (window/document/element) to which DOM event listeners will be attached
-  scenery.Input = function Input( rootNode, listenerTarget, batchDOMEvents, enablePointerEvents, pointFromEvent ) {
-    this.rootNode = rootNode;
+  scenery.Input = function Input( display, listenerTarget, batchDOMEvents, enablePointerEvents, pointFromEvent ) {
+    this.display = display;
+    this.rootNode = display.rootNode;
     this.listenerTarget = listenerTarget;
     this.batchDOMEvents = batchDOMEvents;
     this.enablePointerEvents = enablePointerEvents;
@@ -334,6 +335,11 @@ define( function( require ) {
         sceneryLog && sceneryLog.Input && sceneryLog.Input( 'keyDown(' + Input.debugKeyEvent( event ) + ');' );
         if ( this.logEvents ) { this.eventLog.push( 'keyDown(' + Input.serializeDomEvent( event ) + ');' ); }
 
+        // temporary disabling
+        if ( !this.display.options.accessibility ) {
+          return;
+        }
+
         var code = event.which;
 
         if ( Input.pressedKeys.indexOf( code ) === -1 ) {
@@ -366,6 +372,11 @@ define( function( require ) {
       keyUp: function( event ) {
         sceneryLog && sceneryLog.Input && sceneryLog.Input( 'keyUp(' + Input.debugKeyEvent( event ) + ');' );
         if ( this.logEvents ) { this.eventLog.push( 'keyUp(' + Input.serializeDomEvent( event ) + ');' ); }
+
+        // temporary disabling
+        if ( !this.display.options.accessibility ) {
+          return;
+        }
 
         var code = event.which;
 
