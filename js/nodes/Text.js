@@ -323,7 +323,7 @@ define( function( require ) {
 
       if ( this._font._cachedSVGBounds === undefined ) {
         hybridTextNode.setFont( this._font );
-        this._font._cachedSVGBounds = hybridTextNode.getBounds();
+        this._font._cachedSVGBounds = hybridTextNode.getBounds().copy();
       }
 
       var canvasWidth = this.approximateCanvasWidth();
