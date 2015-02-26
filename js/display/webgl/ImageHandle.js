@@ -57,8 +57,8 @@ define( function( require ) {
       var imageNode = this.imageNode;
 
       var frameRange = this.frameRange;
-      var width = imageNode._image.width;
-      var height = imageNode._image.height;
+      var width = imageNode.getImageWidth();
+      var height = imageNode.getImageHeight();
       var matrix4 = imageNode.getLocalToGlobalMatrix().toAffineMatrix4();
 
       //TODO: Check to see if any of the sprite sheets already contains that image
