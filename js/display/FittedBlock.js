@@ -17,6 +17,8 @@ define( function( require ) {
   var Block = require( 'SCENERY/display/Block' );
   var Renderer = require( 'SCENERY/display/Renderer' );
 
+  var scratchBounds2 = Bounds2.NOTHING.copy();
+
   scenery.FittedBlock = function FittedBlock( display, renderer, transformRootInstance ) {
     this.initialize( display, renderer, transformRootInstance );
   };
@@ -114,6 +116,10 @@ define( function( require ) {
 
           this.fitBounds.roundOut();
           this.fitBounds.dilate( 4 ); // for safety, modify in the future
+
+          // ensure that our fitted bounds don't go outside of our display's bounds (see https://github.com/phetsims/scenery/issues/390)
+          scratchBounds2.setMinMax( 0, 0, this.display.width, this.display.height );
+          this.fitBounds.constrainBounds( scratchBounds2 );
 
           this.setSizeFitBounds();
         }
