@@ -80,6 +80,7 @@ define( function( require ) {
     // Mipmap internal handling
     this._mipmapCanvases = []; // TODO: power-of-2 handling for WebGL if helpful
     this._mipmapURLs = [];
+    this._mipmapData = null; // if mipmap data is passed into our Image, it will be stored here for processing
 
     var self = this;
     // allows us to invalidate our bounds whenever an image is loaded
@@ -142,11 +143,14 @@ define( function( require ) {
     },
 
     setImage: function( image ) {
-      if ( this._image !== image && ( typeof image !== 'string' || !this._image || image !== this._image.src ) ) {
+      if ( this._image !== image && ( typeof image !== 'string' || !this._image || ( image !== this._image.src && image !== this._mipmapData ) ) ) {
         // don't leak memory by referencing old images
         if ( this._image ) {
           this._image.removeEventListener( 'load', this.loadListener );
         }
+
+        // clear old mipmap data references
+        this._mipmapData = null;
 
         if ( typeof image === 'string' ) {
           // create an image with the assumed URL
@@ -160,6 +164,15 @@ define( function( require ) {
           if ( !image.width || !image.height ) {
             image.addEventListener( 'load', this.loadListener );
           }
+        }
+        else if ( image instanceof Array ) {
+          // mipmap data!
+          this._mipmapData = image;
+          image = image[0].img; // presumes we are already loaded
+
+          // force initialization of mipmapping parameters, since invalidateMipmaps() is guaranteed to run below
+          this._mipmapInitialLevel = this._mipmapMaxLevel = this._mipmapData.length;
+          this._mipmap = true;
         }
 
         // swap supported renderers if necessary
@@ -290,27 +303,42 @@ define( function( require ) {
       cleanArray( this._mipmapURLs );
 
       if ( this._image && this._mipmap ) {
-        var baseCanvas = document.createElement( 'canvas' );
-        baseCanvas.width = this.getImageWidth();
-        baseCanvas.height = this.getImageHeight();
-
-        // if we are not loaded yet, just ignore
-        if ( baseCanvas.width && baseCanvas.height ) {
-          var baseContext = baseCanvas.getContext( '2d' );
-          baseContext.drawImage( this._image, 0, 0 );
-
-          this._mipmapCanvases.push( baseCanvas );
-          this._mipmapURLs.push( baseCanvas.toDataURL() );
-
-          var level = 0;
-          while( ++level < this._mipmapInitialLevel ) {
-            this.constructNextMipmap();
+        if ( this._mipmapData ) {
+          for ( var k = 0; k < this._mipmapData.length; k++ ) {
+            var url = this._mipmapData[k].url;
+            this._mipmapURLs.push( url );
+            // TODO: baseCanvas only upon demand?
+            var canvas = document.createElement( 'canvas' );
+            canvas.width = this._mipmapData[k].width;
+            canvas.height = this._mipmapData[k].height;
+            var context = canvas.getContext( '2d' );
+            context.drawImage( this._mipmapData[k].img, 0, 0 );
+            this._mipmapCanvases.push( canvas );
           }
         }
+        else {
+          var baseCanvas = document.createElement( 'canvas' );
+          baseCanvas.width = this.getImageWidth();
+          baseCanvas.height = this.getImageHeight();
 
-        var stateLen = this._drawables.length;
-        for ( var i = 0; i < stateLen; i++ ) {
-          this._drawables[ i ].markDirtyMipmap();
+          // if we are not loaded yet, just ignore
+          if ( baseCanvas.width && baseCanvas.height ) {
+            var baseContext = baseCanvas.getContext( '2d' );
+            baseContext.drawImage( this._image, 0, 0 );
+
+            this._mipmapCanvases.push( baseCanvas );
+            this._mipmapURLs.push( baseCanvas.toDataURL() );
+
+            var level = 0;
+            while( ++level < this._mipmapInitialLevel ) {
+              this.constructNextMipmap();
+            }
+          }
+
+          var stateLen = this._drawables.length;
+          for ( var i = 0; i < stateLen; i++ ) {
+            this._drawables[ i ].markDirtyMipmap();
+          }
         }
       }
 
