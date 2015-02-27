@@ -83,29 +83,6 @@ define( function( require ) {
 
       this.block.markDirtyGroup( this ); // so we are marked and updated properly
 
-      if ( this.node.focusable ) {
-        this.svgGroup.setAttribute( 'aria-label', this.node.textDescription || '' );
-        this.svgGroup.setAttribute( 'role', 'button' );
-        this.svgGroup.setAttribute( 'tabindex', '0' );
-
-        var self = this;
-
-        // TODO: Replace with Input.keydown or something like that.
-        this.keyUpListener = function( e ) {
-          self.instance.display._input.dispatchEvent( self.instance.trail, 'up', new scenery.Key( e ), e, true );
-        };
-        this.keyDownListener = function( e ) {
-          self.instance.display._input.dispatchEvent( self.instance.trail, 'down', new scenery.Key( e ), e, true );
-        };
-        this.svgGroup.addEventListener( 'keyup', this.keyUpListener );
-        this.svgGroup.addEventListener( 'keydown', this.keyDownListener );
-      }
-      else {
-        this.svgGroup.removeAttribute( 'aria-label' );
-        this.svgGroup.removeAttribute( 'role' );
-        this.svgGroup.removeAttribute( 'tabindex' );
-      }
-
       return this;
     },
 
@@ -364,9 +341,6 @@ define( function( require ) {
       }
 
       // clear references
-      this.svgGroup.removeEventListener( 'keyup', this.keyUpListener );
-      this.svgGroup.removeEventListener( 'keydown', this.keyDownListener );
-
       this.parent = null;
       this.block = null;
       this.instance = null;
