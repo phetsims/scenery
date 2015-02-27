@@ -40,7 +40,7 @@ define( function( require ) {
       if ( !initialized ) {
         AriaSpeech.init();
       }
-      ariaSpeechDiv.innerHTML = text;
+      //ariaSpeechDiv.innerHTML = text;
     }
   } );
 } );
