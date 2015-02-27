@@ -121,8 +121,7 @@ define( function( require ) {
      * @param event
      */
     keyup: function( event ) {
-
-      //TODO: Anything to call in DownUpListener?
+      this.downListener.keyup( event );
       var keyCode = event.domEvent.keyCode;
       if ( keyCode === Input.KEY_ENTER || keyCode === Input.KEY_SPACE ) {
         if ( this._enterOrSpaceKeyDown ) {
