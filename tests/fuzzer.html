@@ -42,7 +42,7 @@ that any error can be reproduced.
   var MAX_WIDTH = 1024;
   var MAX_HEIGHT = 768;
 
-  var fuzzing = false;
+  var fuzzing = true;
 
   require( [ 'config' ], function() {
     require( [ 'main', 'KITE/main', 'DOT/main', 'PHET_CORE/main' ], function( scenery, kite, dot, core ) {
@@ -173,7 +173,7 @@ that any error can be reproduced.
         else {
           var rotation = Math.random() * Math.PI * 2;
           matrix = dot.Matrix3.rotation2( rotation );
-          matrixString = 'dot.Matrix3.rotation( ' + rotation + ' )';
+          matrixString = 'dot.Matrix3.rotation2( ' + rotation + ' )';
         }
 
         if ( b < 0.333 ) {
