@@ -550,4 +550,14 @@
     expect( 0 );
   } );
 
+  test( 'Empty path display test', function() {
+    var scene = new scenery.Node();
+    var display = new scenery.Display( scene );
+
+    scene.addChild( new scenery.Path() );
+    display.updateDisplay();
+
+    expect( 0 );
+  } );
+
 })();

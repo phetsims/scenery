@@ -109,6 +109,10 @@ define( function( require ) {
           instance = instance.parent;
         }
 
+        if ( !this.fitBounds.isValid() ) {
+          this.fitBounds.setMinMax( 0, 0, 0, 0 );
+        }
+
         //OHTWO TODO: change only when necessary
         if ( !this.fitBounds.equals( this.oldFitBounds ) ) {
           // store our copy for future checks (and do it before we modify this.fitBounds)
