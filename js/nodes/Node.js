@@ -260,8 +260,8 @@ define( function( require ) {
      * @param {Node} node
      */
     removeChild: function( node ) {
-      assert && assert( node );
-      assert && assert( this.isChild( node ) );
+      assert && assert( node && node instanceof Node, 'Need to call node.removeChild() with a Node.' );
+      assert && assert( this.isChild( node ), 'Attempted to removeChild with a node that was not a child.' );
 
       var indexOfChild = _.indexOf( this._children, node );
 
@@ -280,9 +280,9 @@ define( function( require ) {
 
     // @private
     removeChildWithIndex: function( node, indexOfChild ) {
-      assert && assert( node );
-      assert && assert( this.isChild( node ) );
-      assert && assert( this._children[ indexOfChild ] === node );
+      assert && assert( node && node instanceof Node, 'Need to call node.removeChildWithIndex() with a Node.' );
+      assert && assert( this.isChild( node ), 'Attempted to removeChild with a node that was not a child.' );
+      assert && assert( this._children[ indexOfChild ] === node, 'Incorrect index for removeChildWithIndex' );
 
       // needs to be early to prevent re-entrant children modifications
       this.changePickableCount( -node._subtreePickableCount );
