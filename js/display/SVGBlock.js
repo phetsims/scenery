@@ -179,6 +179,8 @@ define( function( require ) {
       var x = this.fitBounds.minX;
       var y = this.fitBounds.minY;
 
+      assert && assert( isFinite( x ) && isFinite( y ), 'Invalid SVG transform for SVGBlock' );
+
       this.baseTransformGroup.setAttribute( 'transform', 'translate(' + (-x) + ',' + (-y) + ')' ); // subtract off so we have a tight fit
       Util.setTransform( 'matrix(1,0,0,1,' + x + ',' + y + ')', this.svg, this.forceAcceleration ); // reapply the translation as a CSS transform
       this.svg.setAttribute( 'width', this.fitBounds.width );
