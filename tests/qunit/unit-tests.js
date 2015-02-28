@@ -22,4 +22,5 @@ function runSceneryTests( pathToTestBase ) {
   loadTestFile( 'js/linting.js' );
   loadTestFile( 'js/display.js' );
   loadTestFile( 'js/focus.js' );
+  loadTestFile( 'js/from-fuzzer.js' );
 };
