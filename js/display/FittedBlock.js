@@ -109,10 +109,6 @@ define( function( require ) {
           instance = instance.parent;
         }
 
-        if ( !this.fitBounds.isValid() ) {
-          this.fitBounds.setMinMax( 0, 0, 0, 0 );
-        }
-
         //OHTWO TODO: change only when necessary
         if ( !this.fitBounds.equals( this.oldFitBounds ) ) {
           // store our copy for future checks (and do it before we modify this.fitBounds)
@@ -124,6 +120,10 @@ define( function( require ) {
           // ensure that our fitted bounds don't go outside of our display's bounds (see https://github.com/phetsims/scenery/issues/390)
           scratchBounds2.setMinMax( 0, 0, this.display.width, this.display.height );
           this.fitBounds.constrainBounds( scratchBounds2 );
+
+          if ( !this.fitBounds.isValid() ) {
+            this.fitBounds.setMinMax( 0, 0, 0, 0 );
+          }
 
           this.setSizeFitBounds();
         }
