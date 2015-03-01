@@ -261,7 +261,7 @@ Will copy it to the console so it can be copy-pasted to reproduce elsewhere.
         var type = Math.random() < 0.7 ? 'fill' : 'stroke';
 
         if ( paintable[type] !== paint ) {
-          fuzzLog.push( nameOf( paintable ) + '.' + type + ' = ' + ( typeof paint === 'string' ? paint : nameOf( paint, paints ) ) + ';' );
+          fuzzLog.push( nameOf( paintable ) + '.' + type + ' = ' + ( typeof paint === 'string' ? JSON.stringify( paint ) : nameOf( paint, paints ) ) + ';' );
           paintable[type] = paint;
         }
       }
