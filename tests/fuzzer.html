@@ -74,6 +74,7 @@ Will copy it to the console so it can be copy-pasted to reproduce elsewhere.
       var texts = window.texts = {};
       var shapes = window.shapes = {};
       var paintables = window.paintables = {};
+      var paints = window.paints = {};
 
       fuzzLog.push( 'var scene = new scenery.Node();' );
       nodes.scene = new scenery.Node();
@@ -118,6 +119,19 @@ Will copy it to the console so it can be copy-pasted to reproduce elsewhere.
       fuzzLog.push( 'var shape3 = kite.Shape.lineSegment( 0, 0, 50, 100 );' );
       shapes.shape3 = kite.Shape.lineSegment( 0, 0, 50, 100 );
 
+      fuzzLog.push( 'var paint0 = null;' );
+      paints.paint0 = null;
+      fuzzLog.push( 'var paint1 = \'red\';' );
+      paints.paint1 = 'red';
+      fuzzLog.push( 'var paint2 = \'#00ff00\';' );
+      paints.paint2 = '#00ff00';
+      fuzzLog.push( 'var paint3 = new scenery.Color( 0, 0, 255, 0.8 );' );
+      paints.paint3 = new scenery.Color( 0, 0, 255, 0.8 );
+      fuzzLog.push( 'var paint4 = new scenery.LinearGradient( -50, 0, 50, 0 ).addColorStop( 0, \'white\' ).addColorStop( 1, \'black\' );' );
+      paints.paint4 = new scenery.LinearGradient( -50, 0, 50, 0 ).addColorStop( 0, 'white' ).addColorStop( 1, 'black' );
+      fuzzLog.push( 'var paint5 = new scenery.RadialGradient( 0, 0, 0, 0, 0, 50 ).addColorStop( 0, \'red\' ).addColorStop( 1, \'black\' );' );
+      paints.paint5 = new scenery.RadialGradient( 0, 0, 0, 0, 0, 50 ).addColorStop( 0, 'red' ).addColorStop( 1, 'black' );
+
       function randomName( names ) {
         return names[ _.random( 0, names.length - 1 ) ];
       }
@@ -148,6 +162,9 @@ Will copy it to the console so it can be copy-pasted to reproduce elsewhere.
       }
       function randomPaintable() {
         return randomFromType( paintables );
+      }
+      function randomPaint() {
+        return randomFromType( paints );
       }
       function randomShape() {
         return randomFromType( shapes );
@@ -220,6 +237,18 @@ Will copy it to the console so it can be copy-pasted to reproduce elsewhere.
         }
       }
 
+      function paintChange() {
+        var paintable = randomPaintable();
+        var paint = randomPaint();
+
+        var type = Math.random() < 0.7 ? 'fill' : 'stroke';
+
+        if ( paintable[type] !== paint ) {
+          fuzzLog.push( nameOf( paintable ) + '.' + type + ' = ' + nameOf( paint, paints ) + ';' );
+          paintable[type] = paint;
+        }
+      }
+
       function directTransformChange() {
         var node = randomNode();
 
@@ -276,6 +305,9 @@ Will copy it to the console so it can be copy-pasted to reproduce elsewhere.
             }
             else if ( r < 0.75 ) {
               shapeChange();
+            }
+            else if ( r < 0.85 ) {
+              paintChange();
             }
             else {
               rendererChange();
