@@ -46,7 +46,7 @@ Will copy it to the console so it can be copy-pasted to reproduce elsewhere.
   var MAX_WIDTH = 1024;
   var MAX_HEIGHT = 768;
 
-  var NODE_COUNT_MULTIPLIER = 1; // scales how many nodes are manipulated
+  var NODE_COUNT_MULTIPLIER = 6; // scales how many nodes are manipulated
 
   var fuzzing = true;
 
@@ -125,8 +125,8 @@ Will copy it to the console so it can be copy-pasted to reproduce elsewhere.
       paints.paint0 = null;
       fuzzLog.push( 'var paint1 = \'red\';' );
       paints.paint1 = 'red';
-      fuzzLog.push( 'var paint2 = \'#00ff00\';' );
-      paints.paint2 = '#00ff00';
+      fuzzLog.push( 'var paint2 = \'#aa00ee\';' );
+      paints.paint2 = '#aa00ee';
       fuzzLog.push( 'var paint3 = new scenery.Color( 0, 0, 255, 0.8 );' );
       paints.paint3 = new scenery.Color( 0, 0, 255, 0.8 );
       fuzzLog.push( 'var paint4 = new scenery.LinearGradient( -50, 0, 50, 0 ).addColorStop( 0, \'white\' ).addColorStop( 1, \'black\' );' );
@@ -179,6 +179,11 @@ Will copy it to the console so it can be copy-pasted to reproduce elsewhere.
 
         if ( r < 0.5 ) {
           var b = randomNode();
+
+          // have the scene not be the leaf as often
+          if ( b === nodes.scene && Math.random() < 0.8 ) {
+            return;
+          }
 
           // attempt to add a node to another one
           if ( a.canAddChild( b ) ) {
@@ -241,12 +246,15 @@ Will copy it to the console so it can be copy-pasted to reproduce elsewhere.
 
       function paintChange() {
         var paintable = randomPaintable();
-        var paint = randomPaint();
+        var g = Math.floor( Math.random() * 256 );
+        var r = Math.floor( g + ( 255 - g ) * Math.random() );
+        var b = Math.floor( g + ( 255 - g ) * Math.random() );
+        var paint = Math.random() < 0.5 ? randomPaint() : 'rgba(' + r + ',' + g + ',' + b + ',' + Math.random() + ')';
 
         var type = Math.random() < 0.7 ? 'fill' : 'stroke';
 
         if ( paintable[type] !== paint ) {
-          fuzzLog.push( nameOf( paintable ) + '.' + type + ' = ' + nameOf( paint, paints ) + ';' );
+          fuzzLog.push( nameOf( paintable ) + '.' + type + ' = ' + ( typeof paint === 'string' ? paint : nameOf( paint, paints ) ) + ';' );
           paintable[type] = paint;
         }
       }
