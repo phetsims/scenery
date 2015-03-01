@@ -164,6 +164,16 @@ define( function( require ) {
     set shape( value ) { this.setShape( value ); },
     get shape() { return this.getShape(); },
 
+    // if we have to apply a transform workaround for https://github.com/phetsims/scenery/issues/196 (only when we have a pattern or gradient)
+    requiresSVGBoundsWorkaround: function() {
+      if ( !this._stroke || !this._stroke.getSVGDefinition || !this.hasShape() ) {
+        return false;
+      }
+
+      var bounds = this.computeShapeBounds( false ); // without stroke
+      return bounds.x * bounds.y === 0; // at least one of them was zero, so the bounding box has no area
+    },
+
     getDebugHTMLExtras: function() {
       return this._shape ? ' (<span style="color: #88f" onclick="window.open( \'data:text/plain;charset=utf-8,\' + encodeURIComponent( \'' + this._shape.getSVGPath() + '\' ) );">path</span>)' : '';
     },
