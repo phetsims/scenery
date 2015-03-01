@@ -154,6 +154,7 @@
 
     <a class="navlink" href="#node">Node</a><br>
     <a class="sublink" href="#node-options">(options)</a><br>
+    <a class="sublink" href="#node-events">(events)</a><br>
     <a class="sublink" href="#node-children">children</a><br>
     <a class="sublink" href="#node-parents">parents</a><br>
     <a class="sublink" href="#node-addChild">addChild</a><br>
@@ -457,6 +458,33 @@ window.assertions.disableAssertSlow();
       <li><a href="#node-clipArea">clipArea</a>: Shape (in local coordinate frame) that causes any graphics outside of the shape to be invisible (for
         the node and any children).
       </li>
+    </ul>
+
+    <h4 id="node-events">Node Events</h4>
+    A Node (and Node subtypes) extend <a href="https://github.com/phetsims/axon">Axon</a>'s Events type, which exposes
+    the following types of events (fired when they either occur or change):
+
+    <ul>
+      <li>childInserted: <code>function( childNode, index )</code> Called when a child is <a href="node-addChild">added</a>
+        or <a href="node-insertChild">inserted</a>, and includes the new index into the <a href="node-children">children</a>.</li>
+      <li>childRemoved: <code>function( childNode, index )</code> Called when a child is <a href="node-removeChild">removed</a>
+        and includes the old index into the <a href="node-children">children</a>.</li>
+      <li>bounds: <code>function()</code> Called when the bounds in the parent coordinate frame changes.
+        See <a href="node-bounds">bounds</a>.</li>
+      <li>localBounds: <code>function()</code> Called when the bounds in the local coordinate frame changes.
+        See <a href="node-localBounds">localBounds</a>.</li>
+      <li>childBounds: <code>function()</code> Called when the bounds of all children in the local coordinate
+        frame changes. See <a href="node-childBounds">childBounds</a>.</li>
+      <li>selfBounds: <code>function()</code> Called when the self bounds change.
+        See <a href="node-selfBounds">selfBounds</a>.</li>
+      <li>transform: <code>function()</code> Called when the transform changes.</li>
+      <li>visibility: <code>function()</code> Called when the <a href="node-visible">visibility</a> changes.</li>
+      <li>opacity: <code>function()</code> Called when the <a href="node-opacity">opacity</a> changes.</li>
+      <li>clip: <code>function()</code> Called when the <a href="node-clipArea">clipArea</a> changes.</li>
+      <!-- <li>rendererBitmask: <code>function()</code></li> -->
+      <!-- <li>rendererSummary: <code>function()</code></li> -->
+      <!-- <li>hint: <code>function( [hintName] )</code></li> -->
+      <!-- <li>localBoundsOverride: <code>function( isOverridden )</code></li> -->
     </ul>
 
     <h4 id="node-children">node.children</h4>
