@@ -234,6 +234,13 @@ Will copy it to the console so it can be copy-pasted to reproduce elsewhere.
         }
       }
 
+      function sizeChange() {
+        var width = Math.floor( MIN_WIDTH + ( MAX_WIDTH - MIN_WIDTH ) * Math.random() );
+        var height = Math.floor( MIN_HEIGHT + ( MAX_HEIGHT - MIN_HEIGHT ) * Math.random() );
+
+        display.setWidthHeight( width, height );
+      }
+
       function shapeChange() {
         var path = randomPath();
         var shape = randomShape();
@@ -326,7 +333,10 @@ Will copy it to the console so it can be copy-pasted to reproduce elsewhere.
           while ( Math.random() < 0.9 ) {
             var r = Math.random();
 
-            if ( r < 0.5 ) {
+            if ( r < 0.01 ) {
+              sizeChange();
+            }
+            else if ( r < 0.5 ) {
               childChange();
             }
             else if ( r < 0.7 ) {
