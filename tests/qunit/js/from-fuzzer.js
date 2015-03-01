@@ -498,7 +498,6 @@
     var scene = new scenery.Node();
     var display = new scenery.Display( scene, { width: 640, height: 480, backgroundColor: '#eee' } );
     display.updateDisplay();
-    document.body.appendChild( display.domElement );
     var node0 = new scenery.Node();
     var node1 = new scenery.Node();
     var node2 = new scenery.Node();
