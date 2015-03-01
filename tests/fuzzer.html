@@ -57,7 +57,7 @@ Will copy it to the console so it can be copy-pasted to reproduce elsewhere.
 
       console.log( 'loaded' );
 
-      function randomText() {
+      function randomString() {
         var result = '';
 
         while ( Math.random() > 0.1 ) {
@@ -249,6 +249,25 @@ Will copy it to the console so it can be copy-pasted to reproduce elsewhere.
         }
       }
 
+      function textChange() {
+        var text = randomText();
+        var string = randomString();
+
+        fuzzLog.push( nameOf( text ) + '.text = ' + JSON.stringify( string ) + ';' );
+        text.text = string;
+      }
+
+      function opacityChange() {
+        var node = randomNode();
+        var r = Math.random();
+
+        var opacity = r > 0.1 ? 1 : r * 10; // 90% chance =1, 10% chance uniform from 0 to 1.
+        if ( node.opacity !== opacity ) {
+          fuzzLog.push( nameOf( node ) + '.opacity = ' + opacity + ';' );
+          node.opacity = opacity;
+        }
+      }
+
       function directTransformChange() {
         var node = randomNode();
 
@@ -308,6 +327,12 @@ Will copy it to the console so it can be copy-pasted to reproduce elsewhere.
             }
             else if ( r < 0.85 ) {
               paintChange();
+            }
+            else if ( r < 0.90 ) {
+              textChange();
+            }
+            else if ( r < 0.95 ) {
+              opacityChange();
             }
             else {
               rendererChange();
