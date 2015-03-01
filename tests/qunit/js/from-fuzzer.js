@@ -1,3 +1,10 @@
+
+
+/**
+ * Should contain test cases created from fuzzing, which are usually quite verbose, and contain a reference to the
+ * issue if applicable.
+ */
+
 (function() {
   'use strict';
 
