@@ -137,72 +137,18 @@ an UI and Display made for visual testing and debugging.
 
       window.displayErr = function() {
         setTimeout( function() {
-          // var scene = new scenery.Node();
-          // var display = new scenery.Display( scene, { width: 640, height: 480, backgroundColor: '#eee' } );
-          display.updateDisplay();
-          // document.body.appendChild( display.domElement );
           var node0 = new scenery.Node();
-          var node1 = new scenery.Node();
-          var node2 = new scenery.Node();
-          var node3 = new scenery.Node();
           var node4 = new scenery.Node();
-          var node5 = new scenery.Node();
-          var node6 = new scenery.Node();
-          var path0 = new scenery.Path();
           var path1 = new scenery.Path();
-          var path2 = new scenery.Path();
           var path3 = new scenery.Path();
-          var text0 = new scenery.Text( '0!' );
-          var text1 = new scenery.Text( '1!' );
-          var text2 = new scenery.Text( '2!' );
-          path1.transform.setMatrix( dot.Matrix3.translation( -32.44505035690963, -98.1668230611831 ) );
-          node6.transform.append( dot.Matrix3.scaling( 1.168576366151143 ) );
+
           path1.insertChild( 0, node4 );
-          display.updateDisplay();
-          node6.insertChild( 0, node1 );
-          display.updateDisplay();
-          node2.transform.append( dot.Matrix3.scaling( 0.9290467124659758 ) );
-          node0.insertChild( 0, path2 );
-          path0.transform.prepend( dot.Matrix3.rotation2( 3.792262027666663 ) );
-          node2.insertChild( 0, path1 );
-          scene.transform.setMatrix( dot.Matrix3.scaling( 1.0652395860519448 ) );
-          node5.insertChild( 0, scene );
-          display.updateDisplay();
-          node0.insertChild( 0, node5 );
-          scene.transform.prepend( dot.Matrix3.translation( -60.56225313805044, -54.93031018413603 ) );
-          display.updateDisplay();
-          path0.insertChild( 0, scene );
-          display.updateDisplay();
           node4.insertChild( 0, path3 );
-          node5.removeChild( scene );
-          display.updateDisplay();
-          node1.insertChild( 0, path3 );
-          path1.transform.append( dot.Matrix3.translation( -44.1397812217474, 98.97929755970836 ) );
-          display.updateDisplay();
-          node1.removeChild( path3 );
-          scene.transform.append( dot.Matrix3.scaling( 1.5586118499044517 ) );
           scene.insertChild( 0, node0 );
-          node0.removeChild( path2 );
-          node0.renderer = "dom";
-          display.updateDisplay();
-          node0.insertChild( 1, path1 );
+          node0.insertChild( 0, path1 );
+          scene.transform.append( dot.Matrix3.scaling( 1.5586118499044517 ) );
           node0.renderer = "canvas";
-          node4.transform.append( dot.Matrix3.translation( 4.2561776004731655, 50.60155764222145 ) );
-          path0.insertChild( 0, path1 );
-          path3.renderer = "svg";
-          path1.transform.append( dot.Matrix3.scaling( 1.2222473953146675 ) );
-          path3.renderer = null;
           display.updateDisplay();
-
-          // node 0,4,5
-          // path 1,3
-
-          // node5(8)
-          // scene(2) > node0(3) > path1(11) > node4(7) > path3(13)
-
-          // Bad matrix on path3 (id 13)
-          // 2,3,8,11,7,13
-          //
         } );
       };
 
