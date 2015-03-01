@@ -49,19 +49,15 @@ define( function( require ) {
       // TODO: I can't find documentation about forceAcceleration anywhere.  How is this used?  What is it for?  How does it work?
       this.forceAcceleration = ( renderer & Renderer.bitmaskForceAcceleration ) !== 0;
 
+      // now we always add a listener to the display size to invalidate our fit
+      this.display.onStatic( 'displaySize', this.dirtyFitListener );
+
       // TODO: add count of boundsless objects?
       return this;
     },
 
     setFit: function( fit ) {
       if ( this.fit !== fit ) {
-        if ( this.fit === FittedBlock.FULL_DISPLAY ) {
-          this.display.offStatic( 'displaySize', this.dirtyFitListener );
-        }
-        if ( fit === FittedBlock.FULL_DISPLAY ) {
-          this.display.onStatic( 'displaySize', this.dirtyFitListener );
-        }
-
         this.fit = fit;
 
         this.markDirtyFit();
@@ -109,21 +105,21 @@ define( function( require ) {
           instance = instance.parent;
         }
 
+        this.fitBounds.roundOut();
+        this.fitBounds.dilate( 4 ); // for safety, modify in the future
+
+        // ensure that our fitted bounds don't go outside of our display's bounds (see https://github.com/phetsims/scenery/issues/390)
+        scratchBounds2.setMinMax( 0, 0, this.display.width, this.display.height );
+        this.fitBounds.constrainBounds( scratchBounds2 );
+
+        if ( !this.fitBounds.isValid() ) {
+          this.fitBounds.setMinMax( 0, 0, 0, 0 );
+        }
+
         //OHTWO TODO: change only when necessary
         if ( !this.fitBounds.equals( this.oldFitBounds ) ) {
           // store our copy for future checks (and do it before we modify this.fitBounds)
           this.oldFitBounds.set( this.fitBounds );
-
-          this.fitBounds.roundOut();
-          this.fitBounds.dilate( 4 ); // for safety, modify in the future
-
-          // ensure that our fitted bounds don't go outside of our display's bounds (see https://github.com/phetsims/scenery/issues/390)
-          scratchBounds2.setMinMax( 0, 0, this.display.width, this.display.height );
-          this.fitBounds.constrainBounds( scratchBounds2 );
-
-          if ( !this.fitBounds.isValid() ) {
-            this.fitBounds.setMinMax( 0, 0, 0, 0 );
-          }
 
           this.setSizeFitBounds();
         }
@@ -144,9 +140,7 @@ define( function( require ) {
     dispose: function() {
       sceneryLog && sceneryLog.FittedBlock && sceneryLog.FittedBlock( 'dispose #' + this.id );
 
-      if ( this.fit === FittedBlock.FULL_DISPLAY ) {
-        this.display.offStatic( 'displaySize', this.dirtyFitListener );
-      }
+      this.display.offStatic( 'displaySize', this.dirtyFitListener );
 
       // clear references
       this.transformRootInstance = null;
