@@ -46,6 +46,8 @@ Will copy it to the console so it can be copy-pasted to reproduce elsewhere.
   var MAX_WIDTH = 1024;
   var MAX_HEIGHT = 768;
 
+  var NODE_COUNT_MULTIPLIER = 1; // scales how many nodes are manipulated
+
   var fuzzing = true;
 
   require( [ 'config' ], function() {
@@ -97,15 +99,15 @@ Will copy it to the console so it can be copy-pasted to reproduce elsewhere.
       document.body.appendChild( display.domElement );
 
       var i;
-      for ( i = 0; i < 7; i++ ) {
+      for ( i = 0; i < Math.ceil( 2 * NODE_COUNT_MULTIPLIER ); i++ ) {
         fuzzLog.push( 'var node' + i + ' = new scenery.Node();' );
         nodes[ 'node' + i ] = new scenery.Node();
       }
-      for ( i = 0; i < 4; i++ ) {
+      for ( i = 0; i < Math.ceil( 6 * NODE_COUNT_MULTIPLIER ); i++ ) {
         fuzzLog.push( 'var path' + i + ' = new scenery.Path();' );
         paths[ 'path' + i ] = paintables[ 'path' + i ] = nodes[ 'path' + i ] = new scenery.Path();
       }
-      for ( i = 0; i < 3; i++ ) {
+      for ( i = 0; i < Math.ceil( 4 * NODE_COUNT_MULTIPLIER ); i++ ) {
         fuzzLog.push( 'var text' + i + ' = new scenery.Text( \'' + i + '!\' );' );
         texts[ 'text' + i ] = paintables[ 'text' + i ] = nodes[ 'text' + i ] = new scenery.Text( i + '!' );
       }
