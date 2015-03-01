@@ -347,18 +347,18 @@ define( function( require ) {
         }
 
         // Handle TAB key
-        var shiftPressed = Input.pressedKeys.indexOf( Input.KEY_SHIFT ) >= 0;
+        //var shiftPressed = Input.pressedKeys.indexOf( Input.KEY_SHIFT ) >= 0;
 
-        if ( code === Input.KEY_TAB ) {
-
-          // Move the focus to the next item
-          // TODO: More general focus order strategy
-          var deltaIndex = shiftPressed ? -1 : +1;
-          Input.moveFocus( deltaIndex );
-
-          //TODO: Moving focus first then dispatching to focused node means newly focused node gets a fresh TAB event
-          //TODO: That is probably undesirable
-        }
+        //if ( code === Input.KEY_TAB ) {
+        //
+        //  // Move the focus to the next item
+        //  // TODO: More general focus order strategy
+        //  var deltaIndex = shiftPressed ? -1 : +1;
+        //  Input.moveFocus( deltaIndex );
+        //
+        //  //TODO: Moving focus first then dispatching to focused node means newly focused node gets a fresh TAB event
+        //  //TODO: That is probably undesirable
+        //}
 
         var key = new scenery.Key( event );
         this.addPointer( key );

@@ -184,10 +184,10 @@ define( function( require ) {
     // global reference if we have a Display (useful)
     this.scenery = scenery;
 
-    if ( this.options.accessibility ) {
-      var accessibilityLayer = createAccessibilityDiv();
-      this._domElement.appendChild( accessibilityLayer );
-    }
+    //if ( this.options.accessibility ) {
+    //  var accessibilityLayer = createAccessibilityDiv();
+    //  this._domElement.appendChild( accessibilityLayer );
+    //}
   };
   var Display = scenery.Display;
 
