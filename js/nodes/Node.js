@@ -2603,6 +2603,30 @@ define( function( require ) {
       return result;
     },
 
+    /**
+     * Performs checks to see if the internal state of Instance references is correct at a certain point in/after the
+     * Display's updateDisplay().
+     *
+     * @private
+     */
+    auditInstanceSubtreeForDisplay: function( display ) {
+      if ( assertSlow ) {
+        var numInstances = this._instances.length;
+        for ( var i = 0; i < numInstances; i++ ) {
+          var instance = this._instances[i];
+          if ( instance.display === display ) {
+            assertSlow( instance.trail.isValid(),
+              'Invalid trail on Instance: ' + instance.toString() + ' with trail ' + instance.trail.toString() );
+          }
+        }
+
+        // audit all of the children
+        this.children.forEach( function( child ) {
+          child.auditInstanceSubtreeForDisplay( display );
+        } );
+      }
+    },
+
     /*---------------------------------------------------------------------------*
      * Compatibility with old events API (now using axon.Events)
      *----------------------------------------------------------------------------*/

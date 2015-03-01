@@ -236,6 +236,8 @@ define( function( require ) {
         this.markTransformRootDirty( this._baseInstance, this._baseInstance.isTransformed ); // marks the transform root as dirty (since it is)
       }
 
+      if ( assertSlow ) { this._rootNode.auditInstanceSubtreeForDisplay( this ); } // make sure trails are valid
+
       // update our drawable's linked lists where necessary
       while ( this._drawablesToUpdateLinks.length ) {
         this._drawablesToUpdateLinks.pop().updateLinks();

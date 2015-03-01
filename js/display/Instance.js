@@ -1351,6 +1351,9 @@ define( function( require ) {
         assertSlow( this.isTransformed === this.isTransformed,
           'isTransformed should match' );
 
+        assertSlow( this.addRemoveCounter === 0,
+          'Our addRemoveCounter should always be 0 at the end of syncTree' );
+
         // validate the subtree
         for ( var i = 0; i < this.children.length; i++ ) {
           var childInstance = this.children[ i ];

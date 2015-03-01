@@ -560,4 +560,26 @@
     expect( 0 );
   } );
 
+  test( 'Double remove related to #392', function() {
+    var scene = new scenery.Node();
+    var display = new scenery.Display( scene );
+
+    display.updateDisplay();
+
+    var n1 = new scenery.Node();
+    var n2 = new scenery.Node();
+    scene.addChild( n1 );
+    n1.addChild( n2 );
+    scene.addChild( n2 ); // so the tree has a reference to the Node that we can trigger the failure on
+
+    display.updateDisplay();
+
+    scene.removeChild( n1 );
+    n1.removeChild( n2 );
+
+    display.updateDisplay();
+
+    expect( 0 );
+  } );
+
 })();

@@ -90,6 +90,20 @@ define( function( require ) {
       return this.lastNode().isPainted();
     },
 
+    // @returns whether all nodes in the trail are still connected from the trail's root to its leaf
+    isValid: function() {
+      this.reindex();
+
+      var indexLength = this.indices.length;
+      for ( var i = 0; i < indexLength; i++ ) {
+        if ( this.indices[i] < 0 ) {
+          return false;
+        }
+      }
+
+      return true;
+    },
+
     // this trail is visible only if all nodes on it are marked as visible
     isVisible: function() {
       var i = this.nodes.length;
