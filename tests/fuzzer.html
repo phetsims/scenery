@@ -69,15 +69,15 @@ that any error can be reproduced.
       var paths = window.paths = {};
       var texts = window.texts = {};
 
-      fuzzLog.push( 'var root = new scenery.Node();' );
-      nodes.root = new scenery.Node();
+      fuzzLog.push( 'var scene = new scenery.Node();' );
+      nodes.scene = new scenery.Node();
 
-      fuzzLog.push( 'var display = new scenery.Display( root, { ' +
+      fuzzLog.push( 'var display = new scenery.Display( scene, { ' +
         'width: ' + INITIAL_WIDTH + ', ' +
         'height: ' + INITIAL_HEIGHT + ', '+
         'backgroundColor: \'' + INITIAL_BACKGROUND_COLOR + '\'' +
         ' } );' );
-      var display = window.display = new scenery.Display( nodes.root, {
+      var display = window.display = new scenery.Display( nodes.scene, {
         width: INITIAL_WIDTH,
         height: INITIAL_HEIGHT,
         backgroundColor: INITIAL_BACKGROUND_COLOR
