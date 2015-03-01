@@ -1295,9 +1295,20 @@ define( function( require ) {
       this.sharedCacheDrawable && this.sharedCacheDrawable.disposeImmediately( this.display );
       this.selfDrawable && this.selfDrawable.disposeImmediately( this.display );
 
+      // Dispose the rest of our subtree
       var numChildren = this.children.length;
       for ( var i = 0; i < numChildren; i++ ) {
         this.children[ i ].dispose();
+      }
+      // Check for child instances that were removed (we are still responsible for disposing them, since we didn't get
+      // synctree to happen for them).
+      while ( this.instanceRemovalCheckList.length ) {
+        var child = this.instanceRemovalCheckList.pop();
+
+        // they could have already been disposed, so we need a guard here
+        if ( child.active ) {
+          child.dispose();
+        }
       }
 
       // we don't originally add in the listener if we are stateless
