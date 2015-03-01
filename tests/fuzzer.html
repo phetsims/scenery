@@ -5,6 +5,10 @@ When run in the browser, this will run many random changes to a Scenery Node tre
 to find any underlying bugs in the implementation. It requires many checks to make sure we are only doing supported
 operations, so that any error discovered while running this is a bug. Additionally, we store the sequence of actions so
 that any error can be reproduced.
+
+Use: open, and when an error/assertion failure is encountered, in the console:
+copy( fuzzLog )
+Will copy it to the console so it can be copy-pasted to reproduce elsewhere.
 -->
 <head>
   <meta charset="utf-8"/>
@@ -149,6 +153,38 @@ that any error can be reproduced.
         }
       }
 
+      function rendererChange() {
+        var a = randomNode();
+
+        var r = Math.random();
+
+        var renderer;
+
+        if ( r < 0.75 ) {
+          renderer = null;
+        }
+        else if ( r < 0.80 ) {
+          renderer = 'svg';
+        }
+        else if ( r < 0.85 ) {
+          renderer = 'canvas';
+        }
+        else if ( r < 0.90 ) {
+          renderer = 'dom';
+        }
+        else if ( r < 0.95 ) {
+          renderer = null; // TODO: WebGL fuzzing
+        }
+        else {
+          renderer = null; // TODO: Pixi fuzzing
+        }
+
+        if ( a.renderer !== renderer ) {
+          fuzzLog.push( nameOf( a ) + '.renderer = ' + JSON.stringify( renderer ) + ';' );
+          a.renderer = renderer;
+        }
+      }
+
       function directTransformChange() {
         var node = randomNode();
 
@@ -197,11 +233,14 @@ that any error can be reproduced.
           while ( Math.random() < 0.9 ) {
             var r = Math.random();
 
-            if ( r < 0.6 ) {
+            if ( r < 0.5 ) {
               childChange();
             }
-            else {
+            else if ( r < 0.7 ) {
               directTransformChange();
+            }
+            else {
+              rendererChange();
             }
           }
 
