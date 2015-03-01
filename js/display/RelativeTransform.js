@@ -521,7 +521,11 @@ define( function( require ) {
         var resultMatrix = Matrix3.dirtyFromPool();
         var nodeMatrix = instance.node.getMatrix();
 
-        if ( instance.parent && !instance.parent.isTransformed ) {
+        if ( !instance.parent ) {
+          // if our instance has no parent, ignore its transform
+          resultMatrix.set( Matrix3.IDENTITY );
+        }
+        else if ( !instance.parent.isTransformed ) {
           // mutable form of parentMatrix * nodeMatrix
           resultMatrix.set( currentRelativeMatrix( instance.parent ) );
           resultMatrix.multiplyMatrix( nodeMatrix );
