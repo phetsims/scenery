@@ -1,3 +1,5 @@
+// Copyright 2002-2014, University of Colorado Boulder
+
 (function() {
   // add elements to the QUnit fixture for our Scenery-specific tests
   var $fixture = $( '#qunit-fixture' );

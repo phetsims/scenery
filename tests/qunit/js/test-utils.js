@@ -1,3 +1,5 @@
+// Copyright 2002-2014, University of Colorado Boulder
+
 var canvasWidth = 320;
 var canvasHeight = 240;
 

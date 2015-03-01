@@ -1,4 +1,4 @@
-
+// Copyright 2002-2014, University of Colorado Boulder
 
 /**
  * Should contain test cases created from fuzzing, which are usually quite verbose, and contain a reference to the

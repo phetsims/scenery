@@ -1,3 +1,5 @@
+// Copyright 2002-2014, University of Colorado Boulder
+
 // path to test base, without a slash, e.g. '../../../scenery/tests/qunit'
 function runSceneryTests( pathToTestBase ) {
   function loadTestFile( src ) {

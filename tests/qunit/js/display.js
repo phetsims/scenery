@@ -1,3 +1,9 @@
+// Copyright 2002-2014, University of Colorado Boulder
+
+/**
+ * Unit tests dealing with Scenery's Display or general graphical display tests.
+ */
+
 (function() {
   'use strict';
 
