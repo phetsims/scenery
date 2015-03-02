@@ -791,6 +791,7 @@ define( function( require ) {
       this.webglBlock.webGLRenderer.colorTriangleRenderer.colorTriangleBufferData.dispose( this.imageHandle );
     },
 
+    // TODO: JO: Why is markDirtyRectangle in our Image drawable?!?
     markDirtyRectangle: function() {
       this.markDirty();
     },
@@ -828,39 +829,38 @@ define( function( require ) {
    * Pixi Rendering
    *----------------------------------------------------------------------------*/
 
-  Image.ImagePixiDrawable = PixiSelfDrawable.createDrawable( {
-    type: function ImagePixiDrawable( renderer, instance ) {
-      this.initialize( renderer, instance );
-    },
-    stateType: Image.ImageStatefulDrawable.mixin,
+  Image.ImagePixiDrawable = function ImagePixiDrawable( renderer, instance ) {
+    this.initialize( renderer, instance );
+  };
+  inherit( PixiSelfDrawable, Image.ImagePixiDrawable, {
     initialize: function( renderer, instance ) {
+      this.initializePixiSelfDrawable( renderer, instance, keepPixiImageElements );
+
       if ( !this.displayObject ) {
         var baseTexture = new PIXI.BaseTexture( this.node._image, PIXI.scaleModes.DEFAULT );
         var texture = new PIXI.Texture( baseTexture );
         this.displayObject = new PIXI.Sprite( texture );
       }
+
+      return this;
     },
-    updatePixi: function( node, image ) {
-      //OHTWO TODO: performance: consider using <use> with <defs> for our image element. This could be a significant speedup!
-      if ( this.dirtyImage ) {
-        if ( node._image ) {
-          var baseTexture = new PIXI.BaseTexture( this.node._image, PIXI.scaleModes.DEFAULT );
-          var texture = new PIXI.Texture( baseTexture );
-          this.displayObject.setTexture( texture );
-        }
-        else {
-          this.displayObject.setTexture( null );
-        }
+
+    updatePixiSelf: function( node, image ) {
+      if ( node._image ) {
+        var baseTexture = new PIXI.BaseTexture( this.node._image, PIXI.scaleModes.DEFAULT );
+        var texture = new PIXI.Texture( baseTexture );
+        this.displayObject.setTexture( texture );
+      }
+      else {
+        this.displayObject.setTexture( null );
       }
     },
-    usesPaint: false,
-    keepElements: keepPixiImageElements
+
+    // stateless dirty methods:
+    markDirtyImage: function() { this.markPaintDirty(); },
+    markDirtyMipmap: function() { this.markPaintDirty(); }
   } );
-
-  // set up pooling
   SelfDrawable.Poolable.mixin( Image.ImagePixiDrawable );
-
-  Image.ImageStatefulDrawable.mixin( Image.ImagePixiDrawable );
 
   return Image;
 } );

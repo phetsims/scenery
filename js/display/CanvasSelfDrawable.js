@@ -89,6 +89,7 @@ define( function( require ) {
       },
 
       update: function() {
+        // no action directly needed for the self-drawable case, as we will be repainted in the block
         this.dirty = false;
       }
     } );

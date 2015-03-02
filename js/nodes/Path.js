@@ -397,63 +397,68 @@ define( function( require ) {
    * Pixi Rendering
    *----------------------------------------------------------------------------*/
 
-  Path.PathPixiDrawable = PixiSelfDrawable.createDrawable( {
-    type: function PathPixiDrawable( renderer, instance ) { this.initialize( renderer, instance ); },
-    stateType: Path.PathStatefulDrawable.mixin,
+  Path.PathPixiDrawable = function PathPixiDrawable( renderer, instance ) {
+    this.initialize( renderer, instance );
+  };
+  inherit( PixiSelfDrawable, Path.PathPixiDrawable, {
     initialize: function( renderer, instance ) {
+      this.initializePixiSelfDrawable( renderer, instance, false ); // never keep paths
+
       if ( !this.displayObject ) {
         this.displayObject = new PIXI.Graphics();
       }
+
+      return this;
     },
-    updatePixi: function( node, path ) {
-      if ( this.dirtyShape ) {
-        var graphics = this.displayObject;
-        this.displayObject.clear();
 
-        var shape = node.shape;
-        var i = 0;
-        var segment;
-        if ( shape !== null ) {
-          if ( node.getStrokeColor() ) {
-            graphics.lineStyle( 5, node.getStrokeColor().toNumber() );
-          }
-          if ( node.getFillColor() ) {
-            graphics.beginFill( node.getFillColor().toNumber() );
-          }
-          for ( i = 0; i < shape.subpaths.length; i++ ) {
-            var subpath = shape.subpaths[ i ];
-            for ( var k = 0; k < subpath.segments.length; k++ ) {
-              segment = subpath.segments[ k ];
-              if ( i === 0 && k === 0 ) {
-                graphics.moveTo( segment.start.x, segment.start.y );
-              }
-              else {
-                graphics.lineTo( segment.start.x, segment.start.y );
-              }
+    updatePixiSelf: function( node, graphics ) {
+      graphics.clear();
 
-              if ( k === subpath.segments.length - 1 ) {
-                graphics.lineTo( segment.end.x, segment.end.y );
-              }
+      var shape = node.shape;
+      var i = 0;
+      var segment;
+      if ( shape !== null ) {
+        if ( node.getStrokeColor() ) {
+          graphics.lineStyle( 5, node.getStrokeColor().toNumber() );
+        }
+        if ( node.getFillColor() ) {
+          graphics.beginFill( node.getFillColor().toNumber() );
+        }
+        for ( i = 0; i < shape.subpaths.length; i++ ) {
+          var subpath = shape.subpaths[ i ];
+          for ( var k = 0; k < subpath.segments.length; k++ ) {
+            segment = subpath.segments[ k ];
+            if ( i === 0 && k === 0 ) {
+              graphics.moveTo( segment.start.x, segment.start.y );
             }
-
-            if ( subpath.isClosed() ) {
-              segment = subpath.segments[ 0 ];
+            else {
               graphics.lineTo( segment.start.x, segment.start.y );
             }
+
+            if ( k === subpath.segments.length - 1 ) {
+              graphics.lineTo( segment.end.x, segment.end.y );
+            }
           }
 
-          graphics.endFill();
+          if ( subpath.isClosed() ) {
+            segment = subpath.segments[ 0 ];
+            graphics.lineTo( segment.start.x, segment.start.y );
+          }
         }
-        // TODO: geometry
 
-        //graphics.moveTo( 0, 0 );
-        //graphics.lineTo( 100, 100 );
-        //graphics.endFill();
+        graphics.endFill();
       }
+      // TODO: geometry
+
+      //graphics.moveTo( 0, 0 );
+      //graphics.lineTo( 100, 100 );
+      //graphics.endFill();
     },
-    usesPaint: true,
-    keepElements: false
+
+    // stateless dirty methods:
+    markDirtyShape: function() { this.markPaintDirty(); }
   } );
+  SelfDrawable.Poolable.mixin( Path.PathPixiDrawable );
 
   return Path;
 } );

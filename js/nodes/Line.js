@@ -473,7 +473,12 @@ define( function( require ) {
       }
     },
     usesPaint: true,
-    dirtyMethods: [ 'markDirtyX1', 'markDirtyY1', 'markDirtyX2', 'markDirtyY2' ]
+    dirtyMethods: [
+      'markDirtyLine',
+      'markDirtyP1', 'markDirtyP1',
+      'markDirtyX1', 'markDirtyY1',
+      'markDirtyX2', 'markDirtyY2'
+    ]
   } );
 
 
@@ -584,28 +589,39 @@ define( function( require ) {
    * Pixi Rendering
    *----------------------------------------------------------------------------*/
 
-  Line.LinePixiDrawable = PixiSelfDrawable.createDrawable( {
-    type: function LinePixiDrawable( renderer, instance ) { this.initialize( renderer, instance ); },
-    stateType: Line.LineStatefulDrawable.mixin,
+  Line.LinePixiDrawable = function LinePixiDrawable( renderer, instance ) {
+    this.initialize( renderer, instance );
+  };
+  inherit( PixiSelfDrawable, Line.LinePixiDrawable, {
     initialize: function( renderer, instance ) {
+      this.initializePixiSelfDrawable( renderer, instance, keepPixiLineElements );
+
       if ( !this.displayObject ) {
         this.displayObject = new PIXI.Graphics();
       }
+
+      return this;
     },
-    updatePixi: function( node, line ) {
-      if ( this.dirtyX1 || this.dirtyY1 || this.dirtyX2 || this.dirtyY2 ) {
-        var graphics = this.displayObject;
-        this.displayObject.clear();
-        if ( node.getStrokeColor() ) {
-          graphics.lineStyle( node.lineWidth, node.getStrokeColor().toNumber() );
-        }
-        graphics.moveTo( node._x1, node._y1 );
-        graphics.lineTo( node._x2, node._y2 );
+
+    updatePixiSelf: function( node, graphics ) {
+      this.displayObject.clear();
+      if ( node.getStrokeColor() ) {
+        graphics.lineStyle( node.lineWidth, node.getStrokeColor().toNumber() );
       }
+      graphics.moveTo( node._x1, node._y1 );
+      graphics.lineTo( node._x2, node._y2 );
     },
-    usesPaint: true,
-    keepElements: keepPixiLineElements
+
+    // stateless dirty methods:
+    markDirtyLine: function() { this.markPaintDirty(); },
+    markDirtyP1: function() { this.markPaintDirty(); },
+    markDirtyP2: function() { this.markPaintDirty(); },
+    markDirtyX1: function() { this.markPaintDirty(); },
+    markDirtyY1: function() { this.markPaintDirty(); },
+    markDirtyX2: function() { this.markPaintDirty(); },
+    markDirtyY2: function() { this.markPaintDirty(); }
   } );
+  SelfDrawable.Poolable.mixin( Line.LinePixiDrawable );
 
   return Line;
 } );

@@ -900,16 +900,24 @@ define( function( require ) {
    * Pixi rendering
    *----------------------------------------------------------------------------*/
 
-  Text.TextPixiDrawable = PixiSelfDrawable.createDrawable( {
-    type: function TextPixiDrawable( renderer, instance ) { this.initialize( renderer, instance ); },
-    stateType: Text.TextStatefulDrawable.mixin,
+  Text.TextPixiDrawable = function TextPixiDrawable( renderer, instance ) {
+    this.initialize( renderer, instance );
+  };
+  inherit( PixiSelfDrawable, Text.TextPixiDrawable, {
     initialize: function( renderer, instance ) {
+      this.initializePixiSelfDrawable( renderer, instance, keepPixiTextElements );
+
+      // since we are relying on stateful handling, we need to initialize it
+      this.initializeState();
+
       if ( !this.displayObject ) {
         this.displayObject = new PIXI.Text( '' );
       }
-    },
-    updatePixi: function( node, text ) {
 
+      return this;
+    },
+
+    updatePixiSelf: function( node, text ) {
       // set all of the font attributes, since we can't use the combined one
       if ( this.dirtyFont ) {
         text.setStyle( { font: node.font, fill: node.getFillColor().toCSS() } );
@@ -925,10 +933,12 @@ define( function( require ) {
       // TODO: JO: Why is this here?
       if ( this.dirtyBounds && isFinite( node._selfBounds.width ) ) {
       }
-    },
-    usesPaint: true,
-    keepElements: keepPixiTextElements
+
+      this.setToCleanState();
+    }
   } );
+  Text.TextStatefulDrawable.mixin( Text.TextSVGDrawable );
+  SelfDrawable.Poolable.mixin( Text.TextPixiDrawable );
 
   return Text;
 } );

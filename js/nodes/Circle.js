@@ -530,15 +530,21 @@ define( function( require ) {
    * Pixi Rendering
    *----------------------------------------------------------------------------*/
 
-  Circle.CirclePixiDrawable = PixiSelfDrawable.createDrawable( {
-    type: function CirclePixiDrawable( renderer, instance ) { this.initialize( renderer, instance ); },
-    stateType: Circle.CircleStatefulDrawable.mixin,
+  Circle.CirclePixiDrawable = function CirclePixiDrawable( renderer, instance ) {
+    this.initialize( renderer, instance );
+  };
+  inherit( PixiSelfDrawable, Circle.CirclePixiDrawable, {
     initialize: function( renderer, instance ) {
+      this.initializePixiSelfDrawable( renderer, instance, keepPixiCircleElements );
+
       if ( !this.displayObject ) {
         this.displayObject = new PIXI.Graphics();
       }
+
+      return this;
     },
-    updatePixi: function( node, graphics ) {
+
+    updatePixiSelf: function( node, graphics ) {
       this.displayObject.clear();
       if ( node.getFillColor() ) {
         graphics.beginFill( node.getFillColor().toNumber() );
@@ -551,9 +557,11 @@ define( function( require ) {
         graphics.endFill();
       }
     },
-    usesPaint: true,
-    keepElements: keepPixiCircleElements
+
+    // stateless dirty methods:
+    markDirtyRadius: function() { this.markPaintDirty(); }
   } );
+  SelfDrawable.Poolable.mixin( Circle.CirclePixiDrawable );
 
   return Circle;
 } );

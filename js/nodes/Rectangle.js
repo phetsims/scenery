@@ -955,39 +955,38 @@ define( function( require ) {
    * Pixi rendering
    *----------------------------------------------------------------------------*/
 
-  Rectangle.RectanglePixiDrawable = PixiSelfDrawable.createDrawable( {
-    type: function RectanglePixiDrawable( renderer, instance ) {
-      this.initialize( renderer, instance );
-    },
-    stateType: Rectangle.RectangleStatefulDrawable.mixin,
+  Rectangle.RectanglePixiDrawable = function RectanglePixiDrawable( renderer, instance ) {
+    this.initialize( renderer, instance );
+  };
+  inherit( PixiSelfDrawable, Rectangle.RectanglePixiDrawable, {
     initialize: function( renderer, instance ) {
-      this.lastArcW = -1; // invalid on purpose
-      this.lastArcH = -1; // invalid on purpose
+      this.initializePixiSelfDrawable( renderer, instance, keepPixiRectangleElements );
 
       if ( !this.displayObject ) {
         this.displayObject = new PIXI.Graphics();
       }
+
+      return this;
     },
-    updatePixi: function( node, rect ) {
-      if ( this.dirtyX || this.dirtyY || this.dirtyWidth || this.dirtyHeight ||
-           this.dirtyArcWidth || this.dirtyArcHeight || this.dirtyWidth || this.dirtyHeight ) {
-        var graphics = this.displayObject;
-        this.displayObject.clear();
-        if ( node.getFillColor() ) {
-          graphics.beginFill( node.getFillColor().toNumber(), node.opacity * node.getFillColor().alpha );
-        }
-        if ( node.getStrokeColor() ) {
-          graphics.lineStyle( 5, node.getStrokeColor().toNumber(), node.opacity * node.getStrokeColor().alpha );
-        }
-        graphics.drawRect( node.rectX, node.rectY, node.rectWidth, node.rectHeight );
-        if ( node.getFillColor() ) {
-          graphics.endFill();
-        }
+
+    updatePixiSelf: function( node, graphics ) {
+      graphics.clear();
+      if ( node.getFillColor() ) {
+        graphics.beginFill( node.getFillColor().toNumber(), node.opacity * node.getFillColor().alpha );
+      }
+      if ( node.getStrokeColor() ) {
+        graphics.lineStyle( 5, node.getStrokeColor().toNumber(), node.opacity * node.getStrokeColor().alpha );
+      }
+      graphics.drawRect( node.rectX, node.rectY, node.rectWidth, node.rectHeight );
+      if ( node.getFillColor() ) {
+        graphics.endFill();
       }
     },
-    usesPaint: true,
-    keepElements: keepPixiRectangleElements
+
+    // stateless dirty methods:
+    markDirtyRadius: function() { this.markPaintDirty(); }
   } );
+  SelfDrawable.Poolable.mixin( Rectangle.RectanglePixiDrawable );
 
   return Rectangle;
 } );

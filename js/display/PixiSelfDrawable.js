@@ -22,11 +22,14 @@ define( function( require ) {
   var PixiSelfDrawable = scenery.PixiSelfDrawable;
 
   inherit( SelfDrawable, PixiSelfDrawable, {
-    initializePixiSelfDrawable: function( renderer, instance ) {
+    initializePixiSelfDrawable: function( renderer, instance, keepElements ) {
       // super initialization
       this.initializeSelfDrawable( renderer, instance );
 
+      this.keepElements = keepElements;
+
       this.displayObject = null; // should be filled in by subtype
+      this.paintDirty = true;
 
       return this;
     },
@@ -35,89 +38,34 @@ define( function( require ) {
     update: function() {
       if ( this.dirty ) {
         this.dirty = false;
+
         this.updatePixi();
       }
     },
 
+    // general flag set on the state, which we forward directly to the drawable's paint flag
+    markPaintDirty: function() {
+      this.markDirty();
+    },
+
     // @protected: called to update the visual appearance of our svgElement
     updatePixi: function() {
-      // should generally be overridden by drawable subtypes to implement the update
+      if ( this.paintDirty ) {
+        this.paintDirty = false;
+
+        this.updatePixiSelf.call( this, this.node, this.displayObject );
+      }
     },
 
     dispose: function() {
+      if ( !this.keepElements ) {
+        // clear the references
+        this.displayObject = null;
+      }
+
       SelfDrawable.prototype.dispose.call( this );
     }
   } );
-
-  /*
-   * Options contains:
-   *   type - the constructor, should be of the form: function SomethingSVGDrawable( renderer, instance ) { this.initialize( renderer, instance ); }.
-   *          Used for debugging constructor name.
-   *   stateType - function to apply to mix-in the state (TODO docs)
-   *   initialize( renderer, instance ) - should initialize this.svgElement if it doesn't already exist, and set up any other initial state properties
-   *   updateSVG() - updates the svgElement to the latest state recorded
-   *   updateSVGBlock( svgBlock ) - called when the SVGBlock object needs to be switched (or initialized)
-   *   usesPaint - whether we include paintable (fill/stroke) state & defs
-   *   keepElements - when disposing a drawable (not used anymore), should we keep a reference to the SVG element so we don't have to recreate it when reinitialized?
-   */
-  PixiSelfDrawable.createDrawable = function( options ) {
-    var type = options.type;
-    var stateType = options.stateType;
-    var initializeSelf = options.initialize;
-    var updatePixiSelf = options.updatePixi;
-    var usesPaint = options.usesPaint;
-    var keepElements = options.keepElements;
-
-    assert && assert( typeof type === 'function' );
-    assert && assert( typeof stateType === 'function' );
-    assert && assert( typeof initializeSelf === 'function' );
-    assert && assert( typeof updatePixiSelf === 'function' );
-    assert && assert( typeof usesPaint === 'boolean' );
-    assert && assert( typeof keepElements === 'boolean' );
-
-    inherit( PixiSelfDrawable, type, {
-      initialize: function( renderer, instance ) {
-        this.initializePixiSelfDrawable( renderer, instance );
-
-        initializeSelf.call( this, renderer, instance );
-
-        return this; // allow for chaining
-      },
-
-      updatePixi: function() {
-        if ( this.paintDirty ) {
-          updatePixiSelf.call( this, this.node, this.displayObject );
-        }
-
-        // clear all of the dirty flags
-        this.setToClean();
-      },
-
-      onAttach: function( node ) {
-
-      },
-
-      // release the SVG elements from the poolable visual state so they aren't kept in memory. May not be done on platforms where we have enough memory to pool these
-      onDetach: function( node ) {
-        if ( !keepElements ) {
-          // clear the references
-          this.displayObject = null;
-        }
-      },
-
-      setToClean: function() {
-        this.setToCleanState();
-      }
-    } );
-
-    // mix-in
-    stateType( type );
-
-    // set up pooling
-    SelfDrawable.Poolable.mixin( type );
-
-    return type;
-  };
 
   return PixiSelfDrawable;
 } );
