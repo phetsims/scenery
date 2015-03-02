@@ -2,8 +2,9 @@
 
 
 /**
- * Handles a visual SVG layer of drawables.
+ * Handles a visual Pixi layer of drawables.
  *
+ * @author Sam Reid
  * @author Jonathan Olson <jonathan.olson@colorado.edu>
  */
 
