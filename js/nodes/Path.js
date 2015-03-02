@@ -243,7 +243,6 @@ define( function( require ) {
 
   Path.PathSVGDrawable = SVGSelfDrawable.createDrawable( {
     type: function PathSVGDrawable( renderer, instance ) { this.initialize( renderer, instance ); },
-    stateType: Path.PathStatefulDrawable.mixin,
     initialize: function( renderer, instance ) {
       if ( !this.svgElement ) {
         this.svgElement = document.createElementNS( scenery.svgns, 'path' );
@@ -269,6 +268,7 @@ define( function( require ) {
     usesPaint: true,
     keepElements: keepSVGPathElements
   } );
+  Path.PathStatefulDrawable.mixin( Path.PathSVGDrawable );
 
   /*---------------------------------------------------------------------------*
    * Canvas rendering

@@ -63,7 +63,6 @@ define( function( require ) {
    * Options contains:
    *   type - the constructor, should be of the form: function SomethingSVGDrawable( renderer, instance ) { this.initialize( renderer, instance ); }.
    *          Used for debugging constructor name.
-   *   stateType - function to apply to mix-in the state (TODO docs)
    *   initialize( renderer, instance ) - should initialize this.svgElement if it doesn't already exist, and set up any other initial state properties
    *   updateSVG() - updates the svgElement to the latest state recorded
    *   updateSVGBlock( svgBlock ) - called when the SVGBlock object needs to be switched (or initialized)
@@ -72,7 +71,6 @@ define( function( require ) {
    */
   SVGSelfDrawable.createDrawable = function( options ) {
     var type = options.type;
-    var stateType = options.stateType;
     var initializeSelf = options.initialize;
     var updateSVGSelf = options.updateSVG;
     var updateDefsSelf = options.updateDefs;
@@ -80,7 +78,6 @@ define( function( require ) {
     var keepElements = options.keepElements;
 
     assert && assert( typeof type === 'function' );
-    assert && assert( typeof stateType === 'function' );
     assert && assert( typeof initializeSelf === 'function' );
     assert && assert( typeof updateSVGSelf === 'function' );
     assert && assert( !updateDefsSelf || ( typeof updateDefsSelf === 'function' ) );
@@ -225,9 +222,6 @@ define( function( require ) {
         this.setToCleanState();
       }
     } );
-
-    // mix-in
-    stateType( type );
 
     // set up pooling
     SelfDrawable.Poolable.mixin( type );

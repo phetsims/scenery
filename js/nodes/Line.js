@@ -419,7 +419,6 @@ define( function( require ) {
 
   Line.LineSVGDrawable = SVGSelfDrawable.createDrawable( {
     type: function LineSVGDrawable( renderer, instance ) { this.initialize( renderer, instance ); },
-    stateType: Line.LineStatefulDrawable.mixin,
     initialize: function( renderer, instance ) {
       if ( !this.svgElement ) {
         this.svgElement = document.createElementNS( scenery.svgns, 'line' );
@@ -444,6 +443,7 @@ define( function( require ) {
     usesPaint: true,
     keepElements: keepSVGLineElements
   } );
+  Line.LineStatefulDrawable.mixin( Line.LineSVGDrawable );
 
   /*---------------------------------------------------------------------------*
    * Canvas rendering

@@ -389,7 +389,6 @@ define( function( require ) {
 
   Circle.CircleSVGDrawable = SVGSelfDrawable.createDrawable( {
     type: function CircleSVGDrawable( renderer, instance ) { this.initialize( renderer, instance ); },
-    stateType: Circle.CircleStatefulDrawable.mixin,
     initialize: function( renderer, instance ) {
       if ( !this.svgElement ) {
         this.svgElement = document.createElementNS( scenery.svgns, 'circle' );
@@ -405,6 +404,7 @@ define( function( require ) {
     usesPaint: true,
     keepElements: keepSVGCircleElements
   } );
+  Circle.CircleStatefulDrawable.mixin( Circle.CircleSVGDrawable );
 
   /*---------------------------------------------------------------------------*
    * Canvas rendering

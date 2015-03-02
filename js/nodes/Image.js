@@ -599,8 +599,6 @@ define( function( require ) {
   function ImageSVGDrawable( renderer, instance ) { this.initialize( renderer, instance ); }
   Image.ImageSVGDrawable = SVGSelfDrawable.createDrawable( {
     type: ImageSVGDrawable,
-    stateType: Image.ImageStatefulDrawable.mixin,
-
     initialize: function( renderer, instance ) {
       sceneryLog && sceneryLog.ImageSVGDrawable && sceneryLog.ImageSVGDrawable( this.id + ' initialized for ' + instance.toString() );
       var self = this;
@@ -654,6 +652,7 @@ define( function( require ) {
     usesPaint: false,
     keepElements: keepSVGImageElements
   } );
+  Image.ImageStatefulDrawable.mixin( ImageSVGDrawable );
   // TODO: improve SVGSelfDrawable setup, so these can be declared inline with the other methods
   ImageSVGDrawable.prototype.updateURL = function( image, forced ) {
     // determine our mipmap level, if any is used

@@ -685,7 +685,6 @@ define( function( require ) {
 
   Text.TextSVGDrawable = SVGSelfDrawable.createDrawable( {
     type: function TextSVGDrawable( renderer, instance ) { this.initialize( renderer, instance ); },
-    stateType: Text.TextStatefulDrawable.mixin,
     initialize: function( renderer, instance ) {
       if ( !this.svgElement ) {
         // NOTE! reference SVG element at top of file copies createSVGElement!
@@ -728,6 +727,7 @@ define( function( require ) {
     usesPaint: true,
     keepElements: keepSVGTextElements
   } );
+  Text.TextStatefulDrawable.mixin( Text.TextSVGDrawable );
 
   function createSVGTextToMeasure() {
     var text = document.createElementNS( scenery.svgns, 'text' );

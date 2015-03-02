@@ -735,7 +735,6 @@ define( function( require ) {
 
   Rectangle.RectangleSVGDrawable = SVGSelfDrawable.createDrawable( {
     type: function RectangleSVGDrawable( renderer, instance ) { this.initialize( renderer, instance ); },
-    stateType: Rectangle.RectangleStatefulDrawable.mixin,
     initialize: function( renderer, instance ) {
       this.lastArcW = -1; // invalid on purpose
       this.lastArcH = -1; // invalid on purpose
@@ -783,6 +782,7 @@ define( function( require ) {
     usesPaint: true,
     keepElements: keepSVGRectangleElements
   } );
+  Rectangle.RectangleStatefulDrawable.mixin( Rectangle.RectangleSVGDrawable );
 
   /*---------------------------------------------------------------------------*
    * Canvas rendering
