@@ -23,12 +23,17 @@ define( function( require ) {
   var SVGSelfDrawable = scenery.SVGSelfDrawable;
 
   inherit( SelfDrawable, SVGSelfDrawable, {
-    initializeSVGSelfDrawable: function( renderer, instance ) {
+    initializeSVGSelfDrawable: function( renderer, instance, usesPaint, keepElements ) {
       // super initialization
       this.initializeSelfDrawable( renderer, instance );
 
+      this.usesPaint = usesPaint;
+      this.keepElements = keepElements;
+
       this.svgElement = null; // should be filled in by subtype
       this.svgBlock = null; // will be updated by updateSVGBlock()
+
+      this.initializeState(); // assumes we have a state mixin
 
       return this;
     },
@@ -71,30 +76,24 @@ define( function( require ) {
    */
   SVGSelfDrawable.createDrawable = function( options ) {
     var type = options.type;
-    var initializeSelf = options.initialize;
-    var updateSVGSelf = options.updateSVG;
-    var updateDefsSelf = options.updateDefs;
-    var usesPaint = options.usesPaint;
-    var keepElements = options.keepElements;
+    var initializeSelf = options.initialize; // replace with initialize( renderer, instance )
+    var updateSVGSelf = options.updateSVG; // reaplce with updateSVGSelf( node, element )
+    var updateDefsSelf = options.updateDefs; // replace with updateDefsSelf( block )
 
     assert && assert( typeof type === 'function' );
     assert && assert( typeof initializeSelf === 'function' );
     assert && assert( typeof updateSVGSelf === 'function' );
     assert && assert( !updateDefsSelf || ( typeof updateDefsSelf === 'function' ) );
-    assert && assert( typeof usesPaint === 'boolean' );
-    assert && assert( typeof keepElements === 'boolean' );
 
     inherit( SVGSelfDrawable, type, {
       initialize: function( renderer, instance ) {
-        this.initializeSVGSelfDrawable( renderer, instance );
-        this.initializeState(); // assumes we have a state mixin
-
+        this.initializeSVGSelfDrawable( renderer, instance, options.usesPaint, options.keepElements );
         initializeSelf.call( this, renderer, instance );
 
         // tracks our current svgBlock object, so we can update our fill/stroke/etc. on our own
         this.svgBlock = null;
 
-        if ( usesPaint ) {
+        if ( this.usesPaint ) {
           if ( !this.paintState ) {
             this.paintState = new Paintable.PaintSVGState();
           }
@@ -108,7 +107,7 @@ define( function( require ) {
 
       // to be used by our passed in options.updateSVG
       updateFillStrokeStyle: function( element ) {
-        if ( !usesPaint ) {
+        if ( !this.usesPaint ) {
           return;
         }
 
@@ -133,7 +132,7 @@ define( function( require ) {
         }
 
         // sync the differences between the previously-recorded list of cached paints and the new list
-        if ( usesPaint && this.dirtyCachedPaints ) {
+        if ( this.usesPaint && this.dirtyCachedPaints ) {
           var newCachedPaints = this.node._cachedPaints.slice(); // defensive copy for now
           var i, j;
           // scan for new cached paints (not in the old list)
@@ -175,7 +174,7 @@ define( function( require ) {
       updateSVGBlock: function( svgBlock ) {
         // remove cached paint references from the old svgBlock
         var oldSvgBlock = this.svgBlock;
-        if ( usesPaint && oldSvgBlock ) {
+        if ( this.usesPaint && oldSvgBlock ) {
           for ( var i = 0; i < this.lastCachedPaints.length; i++ ) {
             oldSvgBlock.decrementPaint( this.lastCachedPaints[ i ] );
           }
@@ -184,7 +183,7 @@ define( function( require ) {
         this.svgBlock = svgBlock;
 
         // add cached paint references from the new svgBlock
-        if ( usesPaint ) {
+        if ( this.usesPaint ) {
           for ( var j = 0; j < this.lastCachedPaints.length; j++ ) {
             svgBlock.incrementPaint( this.lastCachedPaints[ j ] );
           }
@@ -192,11 +191,11 @@ define( function( require ) {
 
         updateDefsSelf && updateDefsSelf.call( this, svgBlock );
 
-        usesPaint && this.paintState.updateSVGBlock( svgBlock );
+        this.usesPaint && this.paintState.updateSVGBlock( svgBlock );
 
         // since fill/stroke IDs may be block-specific, we need to mark them dirty so they will be updated
-        usesPaint && this.markDirtyFill();
-        usesPaint && this.markDirtyStroke();
+        this.usesPaint && this.markDirtyFill();
+        this.usesPaint && this.markDirtyStroke();
       },
 
       onAttach: function( node ) {
@@ -206,14 +205,14 @@ define( function( require ) {
       // release the SVG elements from the poolable visual state so they aren't kept in memory. May not be done on platforms where we have enough memory to pool these
       onDetach: function( node ) {
         //OHTWO TODO: are we missing the disposal?
-        if ( !keepElements ) {
+        if ( !this.keepElements ) {
           // clear the references
           this.svgElement = null;
         }
 
         // release any defs, and dispose composed state objects
         updateDefsSelf && updateDefsSelf.call( this, null );
-        usesPaint && this.paintState.dispose();
+        this.usesPaint && this.paintState.dispose();
 
         this.defs = null;
       },
