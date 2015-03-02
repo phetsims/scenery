@@ -90,9 +90,6 @@ define( function( require ) {
         this.initializeSVGSelfDrawable( renderer, instance, options.usesPaint, options.keepElements );
         initializeSelf.call( this, renderer, instance );
 
-        // tracks our current svgBlock object, so we can update our fill/stroke/etc. on our own
-        this.svgBlock = null;
-
         if ( this.usesPaint ) {
           if ( !this.paintState ) {
             this.paintState = new Paintable.PaintSVGState();
