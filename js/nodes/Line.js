@@ -417,14 +417,21 @@ define( function( require ) {
    * SVG Rendering
    *----------------------------------------------------------------------------*/
 
-  Line.LineSVGDrawable = SVGSelfDrawable.createDrawable( {
-    type: function LineSVGDrawable( renderer, instance ) { this.initialize( renderer, instance ); },
+  Line.LineSVGDrawable = function LineSVGDrawable( renderer, instance ) {
+    this.initialize( renderer, instance );
+  };
+  inherit( SVGSelfDrawable, Line.LineSVGDrawable, {
     initialize: function( renderer, instance ) {
+      this.initializeSVGSelfDrawable( renderer, instance, true, keepSVGLineElements ); // usesPaint: true
+
       if ( !this.svgElement ) {
         this.svgElement = document.createElementNS( scenery.svgns, 'line' );
       }
+
+      return this;
     },
-    updateSVG: function( node, line ) {
+
+    updateSVGSelf: function( node, line ) {
       if ( this.dirtyX1 ) {
         line.setAttribute( 'x1', node._x1 );
       }
@@ -439,11 +446,10 @@ define( function( require ) {
       }
 
       this.updateFillStrokeStyle( line );
-    },
-    usesPaint: true,
-    keepElements: keepSVGLineElements
+    }
   } );
   Line.LineStatefulDrawable.mixin( Line.LineSVGDrawable );
+  SelfDrawable.Poolable.mixin( Line.LineSVGDrawable );
 
   /*---------------------------------------------------------------------------*
    * Canvas rendering

@@ -387,24 +387,29 @@ define( function( require ) {
    * SVG Rendering
    *----------------------------------------------------------------------------*/
 
-  Circle.CircleSVGDrawable = SVGSelfDrawable.createDrawable( {
-    type: function CircleSVGDrawable( renderer, instance ) { this.initialize( renderer, instance ); },
+  Circle.CircleSVGDrawable = function CircleSVGDrawable( renderer, instance ) {
+    this.initialize( renderer, instance );
+  };
+  inherit( SVGSelfDrawable, Circle.CircleSVGDrawable, {
     initialize: function( renderer, instance ) {
+      this.initializeSVGSelfDrawable( renderer, instance, true, keepSVGCircleElements ); // usesPaint: true
+
       if ( !this.svgElement ) {
         this.svgElement = document.createElementNS( scenery.svgns, 'circle' );
       }
+
+      return this;
     },
-    updateSVG: function( node, circle ) {
+    updateSVGSelf: function( node, circle ) {
       if ( this.dirtyRadius ) {
         circle.setAttribute( 'r', node._radius );
       }
 
       this.updateFillStrokeStyle( circle );
-    },
-    usesPaint: true,
-    keepElements: keepSVGCircleElements
+    }
   } );
   Circle.CircleStatefulDrawable.mixin( Circle.CircleSVGDrawable );
+  SelfDrawable.Poolable.mixin( Circle.CircleSVGDrawable );
 
   /*---------------------------------------------------------------------------*
    * Canvas rendering

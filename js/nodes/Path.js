@@ -241,15 +241,23 @@ define( function( require ) {
    * SVG Rendering
    *----------------------------------------------------------------------------*/
 
-  Path.PathSVGDrawable = SVGSelfDrawable.createDrawable( {
-    type: function PathSVGDrawable( renderer, instance ) { this.initialize( renderer, instance ); },
+  Path.PathSVGDrawable = function PathSVGDrawable( renderer, instance ) {
+    this.initialize( renderer, instance );
+  };
+  inherit( SVGSelfDrawable, Path.PathSVGDrawable, {
     initialize: function( renderer, instance ) {
+      this.initializeSVGSelfDrawable( renderer, instance, true, keepSVGPathElements ); // usesPaint: true
+
       if ( !this.svgElement ) {
         this.svgElement = document.createElementNS( scenery.svgns, 'path' );
       }
+
+      return this;
     },
-    updateSVG: function( node, path ) {
-      assert && assert( !node.requiresSVGBoundsWorkaround(), 'No workaround for https://github.com/phetsims/scenery/issues/196 is provided at this time, please add an epsilon' );
+
+    updateSVGSelf: function( node, path ) {
+      assert && assert( !node.requiresSVGBoundsWorkaround(),
+        'No workaround for https://github.com/phetsims/scenery/issues/196 is provided at this time, please add an epsilon' );
 
       if ( this.dirtyShape ) {
         var svgPath = node.hasShape() ? node._shape.getSVGPath() : '';
@@ -264,11 +272,10 @@ define( function( require ) {
       }
 
       this.updateFillStrokeStyle( path );
-    },
-    usesPaint: true,
-    keepElements: keepSVGPathElements
+    }
   } );
   Path.PathStatefulDrawable.mixin( Path.PathSVGDrawable );
+  SelfDrawable.Poolable.mixin( Path.PathSVGDrawable );
 
   /*---------------------------------------------------------------------------*
    * Canvas rendering

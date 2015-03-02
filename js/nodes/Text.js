@@ -683,9 +683,13 @@ define( function( require ) {
    * SVG rendering
    *----------------------------------------------------------------------------*/
 
-  Text.TextSVGDrawable = SVGSelfDrawable.createDrawable( {
-    type: function TextSVGDrawable( renderer, instance ) { this.initialize( renderer, instance ); },
+  Text.TextSVGDrawable = function TextSVGDrawable( renderer, instance ) {
+    this.initialize( renderer, instance );
+  };
+  inherit( SVGSelfDrawable, Text.TextSVGDrawable, {
     initialize: function( renderer, instance ) {
+      this.initializeSVGSelfDrawable( renderer, instance, true, keepSVGTextElements ); // usesPaint: true
+
       if ( !this.svgElement ) {
         // NOTE! reference SVG element at top of file copies createSVGElement!
         var text = this.svgElement = document.createElementNS( scenery.svgns, 'text' );
@@ -697,8 +701,11 @@ define( function( require ) {
         text.setAttribute( 'lengthAdjust', 'spacingAndGlyphs' );
         text.setAttributeNS( 'http://www.w3.org/XML/1998/namespace', 'xml:space', 'preserve' );
       }
+
+      return this;
     },
-    updateSVG: function( node, text ) {
+
+    updateSVGSelf: function( node, text ) {
       if ( this.dirtyDirection ) {
         text.setAttribute( 'direction', node._direction );
       }
@@ -723,11 +730,10 @@ define( function( require ) {
       }
 
       this.updateFillStrokeStyle( text );
-    },
-    usesPaint: true,
-    keepElements: keepSVGTextElements
+    }
   } );
   Text.TextStatefulDrawable.mixin( Text.TextSVGDrawable );
+  SelfDrawable.Poolable.mixin( Text.TextSVGDrawable );
 
   function createSVGTextToMeasure() {
     var text = document.createElementNS( scenery.svgns, 'text' );

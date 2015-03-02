@@ -733,17 +733,24 @@ define( function( require ) {
    * SVG rendering
    *----------------------------------------------------------------------------*/
 
-  Rectangle.RectangleSVGDrawable = SVGSelfDrawable.createDrawable( {
-    type: function RectangleSVGDrawable( renderer, instance ) { this.initialize( renderer, instance ); },
+  Rectangle.RectangleSVGDrawable = function RectangleSVGDrawable( renderer, instance ) {
+    this.initialize( renderer, instance );
+  };
+  inherit( SVGSelfDrawable, Rectangle.RectangleSVGDrawable, {
     initialize: function( renderer, instance ) {
+      this.initializeSVGSelfDrawable( renderer, instance, true, keepSVGRectangleElements ); // usesPaint: true
+
       this.lastArcW = -1; // invalid on purpose
       this.lastArcH = -1; // invalid on purpose
 
       if ( !this.svgElement ) {
         this.svgElement = document.createElementNS( scenery.svgns, 'rect' );
       }
+
+      return this;
     },
-    updateSVG: function( node, rect ) {
+
+    updateSVGSelf: function( node, rect ) {
       if ( this.dirtyX ) {
         rect.setAttribute( 'x', node._rectX );
       }
@@ -778,11 +785,10 @@ define( function( require ) {
       }
 
       this.updateFillStrokeStyle( rect );
-    },
-    usesPaint: true,
-    keepElements: keepSVGRectangleElements
+    }
   } );
   Rectangle.RectangleStatefulDrawable.mixin( Rectangle.RectangleSVGDrawable );
+  SelfDrawable.Poolable.mixin( Rectangle.RectangleSVGDrawable );
 
   /*---------------------------------------------------------------------------*
    * Canvas rendering
