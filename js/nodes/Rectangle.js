@@ -795,9 +795,15 @@ define( function( require ) {
    * Canvas rendering
    *----------------------------------------------------------------------------*/
 
-  Rectangle.RectangleCanvasDrawable = CanvasSelfDrawable.createDrawable( {
-    type: function RectangleCanvasDrawable( renderer, instance ) { this.initialize( renderer, instance ); },
-    paintCanvas: function paintCanvasRectangle( wrapper, node ) {
+  Rectangle.RectangleCanvasDrawable = function RectangleCanvasDrawable( renderer, instance ) {
+    this.initialize( renderer, instance );
+  };
+  inherit( CanvasSelfDrawable, Rectangle.RectangleCanvasDrawable, {
+    initialize: function( renderer, instance ) {
+      return this.initializeCanvasSelfDrawable( renderer, instance );
+    },
+
+    paintCanvas: function( wrapper, node ) {
       var context = wrapper.context;
 
       // use the standard version if it's a rounded rectangle, since there is no Canvas-optimized version for that
@@ -851,9 +857,12 @@ define( function( require ) {
         }
       }
     },
-    usesPaint: true,
-    dirtyMethods: [ 'markDirtyRectangle' ]
+
+    // stateless dirty functions
+    markDirtyRectangle: function() { this.markPaintDirty(); }
   } );
+  Paintable.PaintableStatelessDrawable.mixin( Rectangle.RectangleCanvasDrawable );
+  SelfDrawable.Poolable.mixin( Rectangle.RectangleCanvasDrawable );
 
   /*---------------------------------------------------------------------------*
    * WebGL rendering

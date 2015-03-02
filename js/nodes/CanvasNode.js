@@ -18,6 +18,7 @@ define( function( require ) {
   var Node = require( 'SCENERY/nodes/Node' );
   require( 'SCENERY/display/Renderer' );
   var CanvasSelfDrawable = require( 'SCENERY/display/CanvasSelfDrawable' );
+  var SelfDrawable = require( 'SCENERY/display/SelfDrawable' );
 
   // pass a canvasBounds option if you want to specify the self bounds
   scenery.CanvasNode = function CanvasNode( options ) {
@@ -86,18 +87,24 @@ define( function( require ) {
    * Canvas rendering
    *----------------------------------------------------------------------------*/
 
-  CanvasNode.CanvasNodeDrawable = CanvasSelfDrawable.createDrawable( {
-    type: function CanvasNodeDrawable( renderer, instance ) { this.initialize( renderer, instance ); },
-    paintCanvas: function paintCanvasNode( wrapper, node ) {
+  CanvasNode.CanvasNodeDrawable = function CanvasNodeDrawable( renderer, instance ) {
+    this.initialize( renderer, instance );
+  };
+  inherit( CanvasSelfDrawable, CanvasNode.CanvasNodeDrawable, {
+    initialize: function( renderer, instance ) {
+      return this.initializeCanvasSelfDrawable( renderer, instance );
+    },
+
+    paintCanvas: function( wrapper, node ) {
       assert && assert( !node._selfBounds.isEmpty(), 'CanvasNode should not be used with an empty canvasBounds. ' +
         'Please set canvasBounds (or use setCanvasBounds()) on ' + node.constructor.name );
 
       if ( !node._selfBounds.isEmpty() ) {
         node.paintCanvas( wrapper );
       }
-    },
-    usesPaint: false
+    }
   } );
+  SelfDrawable.Poolable.mixin( CanvasNode.CanvasNodeDrawable );
 
   return CanvasNode;
 } );

@@ -776,9 +776,15 @@ define( function( require ) {
    * Canvas rendering
    *----------------------------------------------------------------------------*/
 
-  Text.TextCanvasDrawable = CanvasSelfDrawable.createDrawable( {
-    type: function TextCanvasDrawable( renderer, instance ) { this.initialize( renderer, instance ); },
-    paintCanvas: function paintCanvasText( wrapper, node ) {
+  Text.TextCanvasDrawable = function TextCanvasDrawable( renderer, instance ) {
+    this.initialize( renderer, instance );
+  };
+  inherit( CanvasSelfDrawable, Text.TextCanvasDrawable, {
+    initialize: function( renderer, instance ) {
+      return this.initializeCanvasSelfDrawable( renderer, instance );
+    },
+
+    paintCanvas: function( wrapper, node ) {
       var context = wrapper.context;
 
       // extra parameters we need to set, but should avoid setting if we aren't drawing anything
@@ -798,13 +804,15 @@ define( function( require ) {
         node.afterCanvasStroke( wrapper ); // defined in Paintable
       }
     },
-    usesPaint: true,
-    dirtyMethods: [ 'markDirtyText', 'markDirtyFont', 'markDirtyBounds', 'markDirtyDirection' ]
-  } );
 
-  initializingHybridTextNode = true;
-  hybridTextNode = new Text( 'm', { boundsMethod: 'fast' } );
-  initializingHybridTextNode = false;
+    // stateless dirty functions
+    markDirtyText: function() { this.markPaintDirty(); },
+    markDirtyFont: function() { this.markPaintDirty(); },
+    markDirtyBounds: function() { this.markPaintDirty(); },
+    markDirtyDirection: function() { this.markPaintDirty(); }
+  } );
+  Paintable.PaintableStatelessDrawable.mixin( Text.TextCanvasDrawable );
+  SelfDrawable.Poolable.mixin( Text.TextCanvasDrawable );
 
   /*---------------------------------------------------------------------------*
    * WebGL rendering
@@ -939,6 +947,14 @@ define( function( require ) {
   } );
   Text.TextStatefulDrawable.mixin( Text.TextSVGDrawable );
   SelfDrawable.Poolable.mixin( Text.TextPixiDrawable );
+
+  /*---------------------------------------------------------------------------*
+  * Hybrid text setup (for bounds testing)
+  *----------------------------------------------------------------------------*/
+
+  initializingHybridTextNode = true;
+  hybridTextNode = new Text( 'm', { boundsMethod: 'fast' } );
+  initializingHybridTextNode = false;
 
   return Text;
 } );

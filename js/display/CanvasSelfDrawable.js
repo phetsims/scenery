@@ -40,6 +40,23 @@ define( function( require ) {
       this.markDirty();
     },
 
+    // general flag set on the state, which we forward directly to the drawable's paint flag
+    markPaintDirty: function() {
+      this.markDirty();
+    },
+
+    update: function() {
+      this.dirty = false;
+    },
+
+    // @deprecated
+    onAttach: function( node ) {
+    },
+
+    // @deprecated
+    onDetach: function( node ) {
+    },
+
     dispose: function() {
       this.instance.relativeTransform.removeListener( this.transformListener );
       this.instance.relativeTransform.removePrecompute();
@@ -72,21 +89,7 @@ define( function( require ) {
         return this; // allow for chaining
       },
 
-      // general flag set on the state, which we forward directly to the drawable's paint flag
-      markPaintDirty: function() {
-        this.markDirty();
-      },
-
       paintCanvas: paintCanvas,
-
-      onAttach: function( node ) {
-
-      },
-
-      // release the drawable
-      onDetach: function( node ) {
-        //OHTWO TODO: are we missing the disposal?
-      },
 
       update: function() {
         // no action directly needed for the self-drawable case, as we will be repainted in the block

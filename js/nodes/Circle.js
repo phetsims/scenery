@@ -416,9 +416,15 @@ define( function( require ) {
    * Canvas rendering
    *----------------------------------------------------------------------------*/
 
-  Circle.CircleCanvasDrawable = CanvasSelfDrawable.createDrawable( {
-    type: function CircleCanvasDrawable( renderer, instance ) { this.initialize( renderer, instance ); },
-    paintCanvas: function paintCanvasCircle( wrapper, node ) {
+  Circle.CircleCanvasDrawable = function CircleCanvasDrawable( renderer, instance ) {
+    this.initialize( renderer, instance );
+  };
+  inherit( CanvasSelfDrawable, Circle.CircleCanvasDrawable, {
+    initialize: function( renderer, instance ) {
+      return this.initializeCanvasSelfDrawable( renderer, instance );
+    },
+
+    paintCanvas: function( wrapper, node ) {
       var context = wrapper.context;
 
       context.beginPath();
@@ -436,9 +442,12 @@ define( function( require ) {
         node.afterCanvasStroke( wrapper ); // defined in Paintable
       }
     },
-    usesPaint: true,
-    dirtyMethods: [ 'markDirtyRadius' ]
+
+    // stateless dirty functions
+    markDirtyRadius: function() { this.markPaintDirty(); }
   } );
+  Paintable.PaintableStatelessDrawable.mixin( Circle.CircleCanvasDrawable );
+  SelfDrawable.Poolable.mixin( Circle.CircleCanvasDrawable );
 
   /*---------------------------------------------------------------------------*
    * WebGL rendering
@@ -493,6 +502,7 @@ define( function( require ) {
       this.webglBlock.webGLRenderer.colorTriangleRenderer.colorTriangleBufferData.dispose( this.rectangleHandle );
     },
 
+    // TODO: this doesn't seem to be used?
     markDirtyCircle: function() {
       this.markDirty();
     },

@@ -281,9 +281,15 @@ define( function( require ) {
    * Canvas rendering
    *----------------------------------------------------------------------------*/
 
-  Path.PathCanvasDrawable = CanvasSelfDrawable.createDrawable( {
-    type: function PathCanvasDrawable( renderer, instance ) { this.initialize( renderer, instance ); },
-    paintCanvas: function paintCanvasPath( wrapper, node ) {
+  Path.PathCanvasDrawable = function PathCanvasDrawable( renderer, instance ) {
+    this.initialize( renderer, instance );
+  };
+  inherit( CanvasSelfDrawable, Path.PathCanvasDrawable, {
+    initialize: function( renderer, instance ) {
+      return this.initializeCanvasSelfDrawable( renderer, instance );
+    },
+
+    paintCanvas: function( wrapper, node ) {
       var context = wrapper.context;
 
       if ( node.hasShape() ) {
@@ -303,9 +309,12 @@ define( function( require ) {
         }
       }
     },
-    usesPaint: true,
-    dirtyMethods: [ 'markDirtyShape' ]
+
+    // stateless dirty functions
+    markDirtyShape: function() { this.markPaintDirty(); }
   } );
+  Paintable.PaintableStatelessDrawable.mixin( Path.PathCanvasDrawable );
+  SelfDrawable.Poolable.mixin( Path.PathCanvasDrawable );
 
   /*---------------------------------------------------------------------------*
    * WebGL rendering

@@ -731,17 +731,25 @@ define( function( require ) {
    * Canvas rendering
    *----------------------------------------------------------------------------*/
 
-  Image.ImageCanvasDrawable = CanvasSelfDrawable.createDrawable( {
-    type: function ImageCanvasDrawable( renderer, instance ) { this.initialize( renderer, instance ); },
-    paintCanvas: function paintCanvasImage( wrapper, node ) {
+  Image.ImageCanvasDrawable = function ImageCanvasDrawable( renderer, instance ) {
+    this.initialize( renderer, instance );
+  };
+  inherit( CanvasSelfDrawable, Image.ImageCanvasDrawable, {
+    initialize: function( renderer, instance ) {
+      return this.initializeCanvasSelfDrawable( renderer, instance );
+    },
+
+    paintCanvas: function( wrapper, node ) {
       if ( node._image ) {
         wrapper.context.drawImage( node._image, 0, 0 );
       }
     },
-    usesPaint: false,
-    dirtyMethods: [ 'markDirtyImage', 'markDirtyMipmap' ]
-  } );
 
+    // stateless dirty functions
+    markDirtyImage: function() { this.markPaintDirty(); },
+    markDirtyMipmap: function() { this.markPaintDirty(); }
+  } );
+  SelfDrawable.Poolable.mixin( Image.ImageCanvasDrawable );
 
   /*---------------------------------------------------------------------------*
    * WebGL rendering

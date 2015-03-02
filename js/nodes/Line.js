@@ -456,9 +456,15 @@ define( function( require ) {
    * Canvas rendering
    *----------------------------------------------------------------------------*/
 
-  Line.LineCanvasDrawable = CanvasSelfDrawable.createDrawable( {
-    type: function LineCanvasDrawable( renderer, instance ) { this.initialize( renderer, instance ); },
-    paintCanvas: function paintCanvasLine( wrapper, node ) {
+  Line.LineCanvasDrawable = function LineCanvasDrawable( renderer, instance ) {
+    this.initialize( renderer, instance );
+  };
+  inherit( CanvasSelfDrawable, Line.LineCanvasDrawable, {
+    initialize: function( renderer, instance ) {
+      return this.initializeCanvasSelfDrawable( renderer, instance );
+    },
+
+    paintCanvas: function( wrapper, node ) {
       var context = wrapper.context;
 
       context.beginPath();
@@ -472,15 +478,18 @@ define( function( require ) {
         node.afterCanvasStroke( wrapper ); // defined in Paintable
       }
     },
-    usesPaint: true,
-    dirtyMethods: [
-      'markDirtyLine',
-      'markDirtyP1', 'markDirtyP1',
-      'markDirtyX1', 'markDirtyY1',
-      'markDirtyX2', 'markDirtyY2'
-    ]
-  } );
 
+    // stateless dirty methods:
+    markDirtyLine: function() { this.markPaintDirty(); },
+    markDirtyP1: function() { this.markPaintDirty(); },
+    markDirtyP2: function() { this.markPaintDirty(); },
+    markDirtyX1: function() { this.markPaintDirty(); },
+    markDirtyY1: function() { this.markPaintDirty(); },
+    markDirtyX2: function() { this.markPaintDirty(); },
+    markDirtyY2: function() { this.markPaintDirty(); }
+  } );
+  Paintable.PaintableStatelessDrawable.mixin( Line.LineCanvasDrawable );
+  SelfDrawable.Poolable.mixin( Line.LineCanvasDrawable );
 
   /*---------------------------------------------------------------------------*
    * WebGL rendering
