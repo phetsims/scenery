@@ -39,6 +39,14 @@ define( function( require ) {
       this.markDirty();
     },
 
+    onAttach: function( node ) {
+
+    },
+
+    onDetach: function( node ) {
+
+    },
+
     dispose: function() {
       this.instance.relativeTransform.removeListener( this.transformListener );
       this.instance.relativeTransform.removePrecompute();

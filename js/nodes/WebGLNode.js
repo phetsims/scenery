@@ -126,15 +126,6 @@ define( function( require ) {
       this.markDirty();
     },
 
-    onAttach: function( node ) {
-
-    },
-
-    // release the drawable
-    onDetach: function( node ) {
-      //OHTWO TODO: are we missing the disposal?
-    },
-
     // forward call to the WebGLNode
     get shaderAttributes() {
       return this.node.shaderAttributes;
