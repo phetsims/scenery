@@ -2,7 +2,7 @@
   "name": "scenery",
   "version": "0.0.0",
   "license": "MIT",
-  "phetLibs": "sherpa chipper axon assert phet-core dot kite scenery",
+  "phetLibs": "scenery axon assert chipper dot kite phet-core sherpa",
   "repository": {
     "type": "git",
     "url": "https://github.com/phetsims/scenery.git"
