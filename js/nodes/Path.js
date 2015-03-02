@@ -450,8 +450,6 @@ define( function( require ) {
         //graphics.lineTo( 100, 100 );
         //graphics.endFill();
       }
-
-      this.updateFillStrokeStyle( path );
     },
     usesPaint: true,
     keepElements: false

@@ -32,6 +32,7 @@ define( function( require ) {
 
   // TODO: change this based on memory and performance characteristics of the platform
   var keepSVGLineElements = true; // whether we should pool SVG elements for the SVG rendering states, or whether we should free them when possible for memory
+  var keepPixiLineElements = true; // whether we should pool Pixi elements for the SVG rendering states, or whether we should free them when possible for memory
 
   /**
    * Currently, all numerical parameters should be finite.
@@ -601,10 +602,9 @@ define( function( require ) {
         graphics.moveTo( node._x1, node._y1 );
         graphics.lineTo( node._x2, node._y2 );
       }
-      this.updateFillStrokeStyle( line );
     },
     usesPaint: true,
-    keepElements: keepSVGLineElements
+    keepElements: keepPixiLineElements
   } );
 
   return Line;

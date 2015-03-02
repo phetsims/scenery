@@ -42,6 +42,7 @@ define( function( require ) {
   // TODO: change this based on memory and performance characteristics of the platform
   var keepDOMTextElements = true; // whether we should pool DOM elements for the DOM rendering states, or whether we should free them when possible for memory
   var keepSVGTextElements = true; // whether we should pool SVG elements for the SVG rendering states, or whether we should free them when possible for memory
+  var keepPixiTextElements = true; // whether we should pool Pixi elements for the SVG rendering states, or whether we should free them when possible for memory
 
   // scratch matrix used in DOM rendering
   var scratchMatrix = Matrix3.dirtyFromPool();
@@ -921,13 +922,12 @@ define( function( require ) {
       }
 
       // text length correction, tested with scenery/tests/text-quality-test.html to determine how to match Canvas/Pixi rendering (and overall length)
+      // TODO: JO: Why is this here?
       if ( this.dirtyBounds && isFinite( node._selfBounds.width ) ) {
       }
-
-      this.updateFillStrokeStyle( text );
     },
     usesPaint: true,
-    keepElements: keepSVGTextElements
+    keepElements: keepPixiTextElements
   } );
 
   return Text;

@@ -32,6 +32,7 @@ define( function( require ) {
   // TODO: change this based on memory and performance characteristics of the platform
   var keepDOMRectangleElements = true; // whether we should pool DOM elements for the DOM rendering states, or whether we should free them when possible for memory
   var keepSVGRectangleElements = true; // whether we should pool SVG elements for the SVG rendering states, or whether we should free them when possible for memory
+  var keepPixiRectangleElements = true; // whether we should pool Pixi elements for the SVG rendering states, or whether we should free them when possible for memory
 
   // scratch matrix used in DOM rendering
   var scratchMatrix = Matrix3.dirtyFromPool();
@@ -983,10 +984,9 @@ define( function( require ) {
           graphics.endFill();
         }
       }
-      this.updateFillStrokeStyle( rect );
     },
     usesPaint: true,
-    keepElements: keepSVGRectangleElements
+    keepElements: keepPixiRectangleElements
   } );
 
   return Rectangle;

@@ -31,6 +31,7 @@ define( function( require ) {
   // TODO: change this based on memory and performance characteristics of the platform
   var keepDOMImageElements = true; // whether we should pool DOM elements for the DOM rendering states, or whether we should free them when possible for memory
   var keepSVGImageElements = true; // whether we should pool SVG elements for the SVG rendering states, or whether we should free them when possible for memory
+  var keepPixiImageElements = true; // whether we should pool Pixi elements for the SVG rendering states, or whether we should free them when possible for memory
 
   var defaultMipmapBias = -0.7;
   var defaultMipmapInitialLevel = 4; // by default, precompute all levels that will be used (so we don't hit this during animation)
@@ -853,7 +854,7 @@ define( function( require ) {
       }
     },
     usesPaint: false,
-    keepElements: keepSVGImageElements
+    keepElements: keepPixiImageElements
   } );
 
   // set up pooling

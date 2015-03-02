@@ -32,6 +32,7 @@ define( function( require ) {
   // TODO: change this based on memory and performance characteristics of the platform
   var keepDOMCircleElements = true; // whether we should pool DOM elements for the DOM rendering states, or whether we should free them when possible for memory
   var keepSVGCircleElements = true; // whether we should pool SVG elements for the SVG rendering states, or whether we should free them when possible for memory
+  var keepPixiCircleElements = true; // whether we should pool Pixi elements for the Pixi rendering states, or whether we should free them when possible for memory
 
   scenery.Circle = function Circle( radius, options ) {
     if ( typeof radius === 'object' ) {
@@ -438,6 +439,7 @@ define( function( require ) {
     usesPaint: true,
     dirtyMethods: [ 'markDirtyRadius' ]
   } );
+
   /*---------------------------------------------------------------------------*
    * WebGL rendering
    *----------------------------------------------------------------------------*/
@@ -536,26 +538,21 @@ define( function( require ) {
         this.displayObject = new PIXI.Graphics();
       }
     },
-    updatePixi: function( node, circle ) {
-      if ( this.dirtyRadius ) {
-        var graphics = this.displayObject;
-        this.displayObject.clear();
-        if ( node.getFillColor() ) {
-          graphics.beginFill( node.getFillColor().toNumber() );
-        }
-        if ( node.getStrokeColor() ) {
-          graphics.lineStyle( 5, node.getStrokeColor().toNumber() );
-        }
-        graphics.drawRect( node.rectX, node.rectY, node.rectWidth, node.rectHeight );
-        if ( node.getFillColor() ) {
-          graphics.endFill();
-        }
+    updatePixi: function( node, graphics ) {
+      this.displayObject.clear();
+      if ( node.getFillColor() ) {
+        graphics.beginFill( node.getFillColor().toNumber() );
       }
-
-      this.updateFillStrokeStyle( circle );
+      if ( node.getStrokeColor() ) {
+        graphics.lineStyle( 5, node.getStrokeColor().toNumber() );
+      }
+      graphics.drawRect( node.rectX, node.rectY, node.rectWidth, node.rectHeight );
+      if ( node.getFillColor() ) {
+        graphics.endFill();
+      }
     },
     usesPaint: true,
-    keepElements: keepSVGCircleElements
+    keepElements: keepPixiCircleElements
   } );
 
   return Circle;

@@ -1204,9 +1204,9 @@ define( function( require ) {
     lookupPixiDisplayObject: function( pixiBlock ) {
       var len = this.pixiDisplayObjects.length;
       for ( var i = 0; i < len; i++ ) {
-        var group = this.pixiDisplayObjects[ i ];
-        if ( group.block === pixiBlock ) {
-          return group;
+        var pixiDisplayObject = this.pixiDisplayObjects[ i ];
+        if ( pixiDisplayObject.block === pixiBlock ) {
+          return pixiDisplayObject;
         }
       }
       return null;

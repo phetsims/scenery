@@ -105,8 +105,6 @@ define( function( require ) {
       Util.setTransform( 'matrix(1,0,0,1,' + x + ',' + y + ')', this.pixiCanvas, this.forceAcceleration ); // reapply the translation as a CSS transform
       this.pixiRenderer.resize( this.fitBounds.width, this.fitBounds.height );
     },
-    incrementPaint: function() {},
-    decrementPaint: function() {},
 
     update: function() {
       sceneryLog && sceneryLog.PixiBlock && sceneryLog.PixiBlock( 'update #' + this.id );
@@ -168,7 +166,6 @@ define( function( require ) {
       FittedBlock.prototype.addDrawable.call( this, drawable );
 
       PixiDisplayObject.addDrawable( this, drawable );
-      drawable.updatePixiBlock( this );
     },
 
     removeDrawable: function( drawable ) {
