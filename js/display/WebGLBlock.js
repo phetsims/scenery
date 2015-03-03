@@ -52,6 +52,7 @@ define( function( require ) {
       this.domElement.style.left = '0';
       this.domElement.style.top = '0';
       this.domElement.style.pointerEvents = 'none';
+      this.canvasId = this.domElement.id = 'scenery-webgl' + this.id;
 
       // reset any fit transforms that were applied
       // TODO: What is force acceleration?

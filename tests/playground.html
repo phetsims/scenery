@@ -127,12 +127,12 @@ an UI and Display made for visual testing and debugging.
 
       window.displayTest = function() {
         setTimeout( function() {
-          window.image = new scenery.Image( 'svg/wrench.svg', { mipmap: true } );
-          scenery.enableIndividualLog( 'ImageSVGDrawable' );
-
-          scene.addChild( image );
-
+          var rect = window.rect = new scenery.Rectangle( 0, 0, 100, 50, { fill: 'red', x: 100, rotation: 0.4 } );
+          scene.addChild( rect );
+          scene.renderer = 'canvas';
+          display.backgroundColor = '#aaa';
           display.updateDisplay();
+          display.foreignObjectRasterization( function( url ) { console.log( url ); } );
         } );
       };
 

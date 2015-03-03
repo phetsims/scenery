@@ -1,6 +1,5 @@
 // Copyright 2002-2014, University of Colorado Boulder
 
-
 /**
  * A persistent display of a specific Node and its descendants, which is updated at discrete points in time.
  * Unlike Scenery's old Scene type, a Display is not itself a Node.
@@ -1177,18 +1176,67 @@ define( function( require ) {
      * used for internal testing. Will call-back null if there was an error
      *
      * Only tested on recent Chrome and Firefox, not recommended for general use. Guaranteed not to work for IE <= 10.
+     *
+     * See https://github.com/phetsims/scenery/issues/394 for some details.
      */
     foreignObjectRasterization: function( callback ) {
+      // Scan our drawable tree for Canvases. We'll rasterize them here (to data URLs) so we can replace them later in
+      // the HTML tree (with images) before putting that in the foreignObject. That way, we can actually display
+      // things rendered in Canvas in our rasterization.
+      var canvasUrlMap = {};
+      function scanForCanvases( drawable ) {
+        if ( drawable.blocks ) {
+          // we're a backbone
+          _.each( drawable.blocks, function( childDrawable ) {
+            scanForCanvases( childDrawable );
+          } );
+        }
+        else if ( drawable.firstDrawable && drawable.lastDrawable ) {
+          // we're a block
+          for ( var childDrawable = drawable.firstDrawable; childDrawable !== drawable.lastDrawable; childDrawable = childDrawable.nextDrawable ) {
+            scanForCanvases( childDrawable );
+          }
+          scanForCanvases( drawable.lastDrawable ); // wasn't hit in our simplified (and safer) loop
+
+          if ( drawable.domElement && drawable.domElement instanceof window.HTMLCanvasElement ) {
+            canvasUrlMap[drawable.canvasId] = drawable.domElement.toDataURL();
+          }
+        }
+      }
+      scanForCanvases( this._rootBackbone );
+
       var canvas = document.createElement( 'canvas' );
       var context = canvas.getContext( '2d' );
       canvas.width = this.width;
       canvas.height = this.height;
 
-      var doc = document.implementation.createHTMLDocument( "" );
+      // Create a new document, so that we can (1) serialize it to XHTML, and (2) manipulate it independently.
+      // Inspired by http://cburgmer.github.io/rasterizeHTML.js/
+      var doc = document.implementation.createHTMLDocument( '' );
       doc.documentElement.innerHTML = this.domElement.outerHTML;
       doc.documentElement.setAttribute( 'xmlns', doc.documentElement.namespaceURI );
+
+      // Replace each <canvas> with an <img> that has src=canvas.toDataURL() and the same style
+      var displayCanvases = doc.documentElement.getElementsByTagName( 'canvas' );
+      for ( var i = 0; i < displayCanvases.length; i++ ) {
+        var displayCanvas = displayCanvases[i];
+
+        var cssText = displayCanvas.style.cssText;
+
+        var displayImg = doc.createElement( 'img' );
+        var src = canvasUrlMap[displayCanvas.id];
+        assert && assert( src, 'Must have missed a toDataURL() on a Canvas' );
+
+        displayImg.src = src;
+        displayImg.setAttribute( 'style', cssText );
+
+        displayCanvas.parentNode.replaceChild( displayImg, displayCanvas );
+      }
+
+      // Serialize it to XHTML that can be used in foreignObject (HTML can't be)
       var xhtml = new window.XMLSerializer().serializeToString( doc.documentElement );
 
+      // Create an SVG container with a foreignObject.
       var data = '<svg xmlns="http://www.w3.org/2000/svg" width="' + this.width + '" height="' + this.height + '">' +
                  '<foreignObject width="100%" height="100%">' +
                  '<div xmlns="http://www.w3.org/1999/xhtml">' +
@@ -1197,17 +1245,16 @@ define( function( require ) {
                  '</foreignObject>' +
                  '</svg>';
 
+      // Load an <img> with the SVG data URL, and when loaded draw it into our Canvas
       var img = new Image();
-
       img.onload = function() {
         context.drawImage( img, 0, 0 );
-        callback( canvas.toDataURL() );
+        callback( canvas.toDataURL() ); // Endpoint here
       };
       img.onerror = function() {
         callback( null );
       };
-
-      // TODO: search for Canvas instances, and replace with their toDataURLs().
+      // turn it to base64 and wrap it in the data URL format
       img.src = 'data:image/svg+xml;base64,' + window.btoa( data );
     }
   }, Events.prototype ) );

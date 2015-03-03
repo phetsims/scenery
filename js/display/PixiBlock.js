@@ -52,6 +52,7 @@ define( function( require ) {
         //OHTWO TODO: why would we clip the individual layers also? Seems like a potentially useless performance loss
         // this.pixiDisplayObject.style.clip = 'rect(0px,' + width + 'px,' + height + 'px,0px)';
         this.pixiCanvas.style[ 'pointer-events' ] = 'none';
+        this.canvasId = this.pixiCanvas.id = 'scenery-pixi' + this.id;
 
         this.baseTransformGroup = new PIXI.DisplayObjectContainer();
         this.stage.addChild( this.baseTransformGroup );
