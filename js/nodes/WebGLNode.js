@@ -135,9 +135,7 @@ define( function( require ) {
       this.dirty = false;
     }
   } );
-
-  // set up pooling
-  SelfDrawable.Poolable.mixin( WebGLNode.WebGLNodeDrawable );
+  SelfDrawable.Poolable.mixin( WebGLNode.WebGLNodeDrawable ); // pooling
 
   return WebGLNode;
 } );

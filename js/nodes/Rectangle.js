@@ -705,29 +705,32 @@ define( function( require ) {
       this.setToClean();
     },
 
+    // @deprecated
     onAttach: function( node ) {
-
     },
 
-    // release the DOM elements from the poolable visual state so they aren't kept in memory. May not be done on platforms where we have enough memory to pool these
+    // @deprecated
     onDetach: function( node ) {
-      if ( !keepDOMRectangleElements ) {
-        // clear the references
-        this.fillElement = null;
-        this.strokeElement = null;
-        this.domElement = null;
-      }
     },
 
     setToClean: function() {
       this.setToCleanState();
 
       this.transformDirty = false;
+    },
+
+    dispose: function() {
+      if ( !keepDOMRectangleElements ) {
+        // clear the references
+        this.fillElement = null;
+        this.strokeElement = null;
+        this.domElement = null;
+      }
+
+      DOMSelfDrawable.prototype.dispose.call( this );
     }
   } );
-
   Rectangle.RectangleStatefulDrawable.mixin( RectangleDOMDrawable );
-
   SelfDrawable.Poolable.mixin( RectangleDOMDrawable );
 
   /*---------------------------------------------------------------------------*
@@ -936,13 +939,12 @@ define( function( require ) {
       this.markDirty();
     },
 
+    // @deprecated
     onAttach: function( node ) {
-
     },
 
-    // release the drawable
+    // @deprecated
     onDetach: function( node ) {
-      //OHTWO TODO: are we missing the disposal?
     },
 
     //TODO: Make sure all of the dirty flags make sense here.  Should we be using fillDirty, paintDirty, dirty, etc?

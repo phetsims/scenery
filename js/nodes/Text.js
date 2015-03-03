@@ -657,27 +657,30 @@ define( function( require ) {
       this.setToClean();
     },
 
+    // @deprecated
     onAttach: function( node ) {
-
     },
 
-    // release the DOM elements from the poolable visual state so they aren't kept in memory. May not be done on platforms where we have enough memory to pool these
+    // @deprecated
     onDetach: function( node ) {
-      if ( !keepDOMTextElements ) {
-        // clear the references
-        this.domElement = null;
-      }
     },
 
     setToClean: function() {
       this.setToCleanState();
 
       this.transformDirty = false;
+    },
+
+    dispose: function() {
+      if ( !keepDOMTextElements ) {
+        // clear the references
+        this.domElement = null;
+      }
+
+      DOMSelfDrawable.prototype.dispose.call( this );
     }
   } );
-
   Text.TextStatefulDrawable.mixin( TextDOMDrawable );
-
   SelfDrawable.Poolable.mixin( TextDOMDrawable );
 
   /*---------------------------------------------------------------------------*
@@ -735,42 +738,6 @@ define( function( require ) {
   } );
   Text.TextStatefulDrawable.mixin( Text.TextSVGDrawable );
   SelfDrawable.Poolable.mixin( Text.TextSVGDrawable );
-
-  function createSVGTextToMeasure() {
-    var text = document.createElementNS( scenery.svgns, 'text' );
-    text.appendChild( document.createTextNode( '' ) );
-
-    // TODO: flag adjustment for SVG qualities
-    text.setAttribute( 'dominant-baseline', 'alphabetic' ); // to match Canvas right now
-    text.setAttribute( 'text-rendering', 'geometricPrecision' );
-    text.setAttributeNS( 'http://www.w3.org/XML/1998/namespace', 'xml:space', 'preserve' );
-    return text;
-  }
-
-  function updateSVGTextToMeasure( textElement, textNode ) {
-    textElement.setAttribute( 'direction', textNode._direction );
-    textElement.setAttribute( 'font-family', textNode._font.getFamily() );
-    textElement.setAttribute( 'font-size', textNode._font.getSize() );
-    textElement.setAttribute( 'font-style', textNode._font.getStyle() );
-    textElement.setAttribute( 'font-weight', textNode._font.getWeight() );
-    textElement.setAttribute( 'font-stretch', textNode._font.getStretch() );
-    textElement.lastChild.nodeValue = textNode.getNonBreakingText();
-  }
-
-  if ( !svgTextSizeContainer ) {
-    // set up the container and text for testing text bounds quickly (using approximateSVGBounds)
-    svgTextSizeContainer = document.createElementNS( scenery.svgns, 'svg' );
-    svgTextSizeContainer.setAttribute( 'width', '2' );
-    svgTextSizeContainer.setAttribute( 'height', '2' );
-    svgTextSizeContainer.setAttribute( 'id', textSizeContainerId );
-    svgTextSizeContainer.setAttribute( 'style', 'visibility: hidden; pointer-events: none; position: absolute; left: -65535; right: -65535;' ); // so we don't flash it in a visible way to the user
-  }
-  // NOTE! copies createSVGElement
-  if ( !svgTextSizeElement ) {
-    svgTextSizeElement = createSVGTextToMeasure();
-    svgTextSizeElement.setAttribute( 'id', textSizeElementId );
-    svgTextSizeContainer.appendChild( svgTextSizeElement );
-  }
 
   /*---------------------------------------------------------------------------*
    * Canvas rendering
@@ -951,6 +918,42 @@ define( function( require ) {
   /*---------------------------------------------------------------------------*
   * Hybrid text setup (for bounds testing)
   *----------------------------------------------------------------------------*/
+
+  function createSVGTextToMeasure() {
+    var text = document.createElementNS( scenery.svgns, 'text' );
+    text.appendChild( document.createTextNode( '' ) );
+
+    // TODO: flag adjustment for SVG qualities
+    text.setAttribute( 'dominant-baseline', 'alphabetic' ); // to match Canvas right now
+    text.setAttribute( 'text-rendering', 'geometricPrecision' );
+    text.setAttributeNS( 'http://www.w3.org/XML/1998/namespace', 'xml:space', 'preserve' );
+    return text;
+  }
+
+  function updateSVGTextToMeasure( textElement, textNode ) {
+    textElement.setAttribute( 'direction', textNode._direction );
+    textElement.setAttribute( 'font-family', textNode._font.getFamily() );
+    textElement.setAttribute( 'font-size', textNode._font.getSize() );
+    textElement.setAttribute( 'font-style', textNode._font.getStyle() );
+    textElement.setAttribute( 'font-weight', textNode._font.getWeight() );
+    textElement.setAttribute( 'font-stretch', textNode._font.getStretch() );
+    textElement.lastChild.nodeValue = textNode.getNonBreakingText();
+  }
+
+  if ( !svgTextSizeContainer ) {
+    // set up the container and text for testing text bounds quickly (using approximateSVGBounds)
+    svgTextSizeContainer = document.createElementNS( scenery.svgns, 'svg' );
+    svgTextSizeContainer.setAttribute( 'width', '2' );
+    svgTextSizeContainer.setAttribute( 'height', '2' );
+    svgTextSizeContainer.setAttribute( 'id', textSizeContainerId );
+    svgTextSizeContainer.setAttribute( 'style', 'visibility: hidden; pointer-events: none; position: absolute; left: -65535; right: -65535;' ); // so we don't flash it in a visible way to the user
+  }
+  // NOTE! copies createSVGElement
+  if ( !svgTextSizeElement ) {
+    svgTextSizeElement = createSVGTextToMeasure();
+    svgTextSizeElement.setAttribute( 'id', textSizeElementId );
+    svgTextSizeContainer.appendChild( svgTextSizeElement );
+  }
 
   initializingHybridTextNode = true;
   hybridTextNode = new Text( 'm', { boundsMethod: 'fast' } );

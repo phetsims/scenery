@@ -529,7 +529,7 @@ define( function( require ) {
    * DOM rendering
    *----------------------------------------------------------------------------*/
 
-  var ImageDOMDrawable = Image.ImageDOMDrawable = inherit( DOMSelfDrawable, function ImageDOMDrawable( renderer, instance ) {
+  Image.ImageDOMDrawable = inherit( DOMSelfDrawable, function ImageDOMDrawable( renderer, instance ) {
     this.initialize( renderer, instance );
   }, {
     // initializes, and resets (so we can support pooled states)
@@ -570,27 +570,30 @@ define( function( require ) {
       this.setToClean();
     },
 
+    // @deprecated
     onAttach: function( node ) {
-
     },
 
-    // release the DOM elements from the poolable visual state so they aren't kept in memory. May not be done on platforms where we have enough memory to pool these
+    // @deprecated
     onDetach: function( node ) {
-      if ( !keepDOMImageElements ) {
-        // clear the references
-        this.domElement = null;
-      }
     },
 
     setToClean: function() {
       this.setToCleanState();
 
       this.transformDirty = false;
+    },
+
+    dispose: function() {
+      if ( !keepDOMImageElements ) {
+        this.domElement = null; // clear our DOM reference if we want to toss it
+      }
+
+      DOMSelfDrawable.prototype.dispose.call( this );
     }
   } );
-
-  Image.ImageStatefulDrawable.mixin( ImageDOMDrawable );
-  SelfDrawable.Poolable.mixin( ImageDOMDrawable );
+  Image.ImageStatefulDrawable.mixin( Image.ImageDOMDrawable );
+  SelfDrawable.Poolable.mixin( Image.ImageDOMDrawable );
 
   /*---------------------------------------------------------------------------*
    * SVG Rendering
@@ -809,13 +812,12 @@ define( function( require ) {
       this.markDirty();
     },
 
+    // @deprecated
     onAttach: function( node ) {
-
     },
 
-    // release the drawable
+    // @deprecated
     onDetach: function( node ) {
-      //OHTWO TODO: are we missing the disposal?
     },
 
     //TODO: Make sure all of the dirty flags make sense here.  Should we be using fillDirty, paintDirty, dirty, etc?
@@ -826,12 +828,8 @@ define( function( require ) {
       }
     }
   } );
-
-  // set up pooling
-  SelfDrawable.Poolable.mixin( Image.ImageWebGLDrawable );
-
   Image.ImageStatefulDrawable.mixin( Image.ImageWebGLDrawable );
-
+  SelfDrawable.Poolable.mixin( Image.ImageWebGLDrawable ); // pooling
 
   /*---------------------------------------------------------------------------*
    * Pixi Rendering

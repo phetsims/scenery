@@ -201,7 +201,7 @@ define( function( require ) {
    * DOM rendering
    *----------------------------------------------------------------------------*/
 
-  var DOMDrawable = DOM.DOMDrawable = inherit( DOMSelfDrawable, function DOMDrawable( renderer, instance ) {
+  DOM.DOMDrawable = inherit( DOMSelfDrawable, function DOMDrawable( renderer, instance ) {
     this.initialize( renderer, instance );
   }, {
     // initializes, and resets (so we can support pooled states)
@@ -224,22 +224,26 @@ define( function( require ) {
       this.setToClean();
     },
 
+    // @deprecated
     onAttach: function( node ) {
-
     },
 
-    // release the DOM elements from the poolable visual state so they aren't kept in memory. May not be done on platforms where we have enough memory to pool these
+    // @deprecated
     onDetach: function( node ) {
-      // clear the references
-      this.domElement = null;
     },
 
     setToClean: function() {
       this.transformDirty = false;
+    },
+
+    dispose: function() {
+      DOMSelfDrawable.prototype.dispose.call( this );
+
+      this.domElement = null;
     }
   } );
 
-  SelfDrawable.Poolable.mixin( DOMDrawable );
+  SelfDrawable.Poolable.mixin( DOM.DOMDrawable );
 
   return DOM;
 } );

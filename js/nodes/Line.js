@@ -570,13 +570,13 @@ define( function( require ) {
       this.markDirty();
     },
 
+    // @deprecated
     onAttach: function( node ) {
 
     },
 
-    // release the drawable
+    // @deprecated
     onDetach: function( node ) {
-      //OHTWO TODO: are we missing the disposal?
     },
 
     //TODO: Make sure all of the dirty flags make sense here.  Should we be using fillDirty, paintDirty, dirty, etc?
@@ -587,12 +587,9 @@ define( function( require ) {
       }
     }
   } );
-
   // include stubs (stateless) for marking dirty stroke and fill (if necessary). we only want one dirty flag, not multiple ones, for WebGL (for now)
   Paintable.PaintableStatefulDrawable.mixin( Line.LineWebGLDrawable );
-
-  // set up pooling
-  SelfDrawable.Poolable.mixin( Line.LineWebGLDrawable );
+  SelfDrawable.Poolable.mixin( Line.LineWebGLDrawable ); // pooling
 
   /*---------------------------------------------------------------------------*
    * Pixi Rendering

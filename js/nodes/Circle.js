@@ -261,9 +261,10 @@ define( function( require ) {
    * DOM rendering
    *----------------------------------------------------------------------------*/
 
-  var CircleDOMDrawable = Circle.CircleDOMDrawable = inherit( DOMSelfDrawable, function CircleDOMDrawable( renderer, instance ) {
+  Circle.CircleDOMDrawable = function CircleDOMDrawable( renderer, instance ) {
     this.initialize( renderer, instance );
-  }, {
+  };
+  inherit( DOMSelfDrawable, Circle.CircleDOMDrawable, {
     // initializes, and resets (so we can support pooled states)
     initialize: function( renderer, instance ) {
       this.initializeDOMSelfDrawable( renderer, instance );
@@ -357,32 +358,34 @@ define( function( require ) {
       this.setToClean();
     },
 
+    // @deprecated
     onAttach: function( node ) {
-
     },
 
-    // release the DOM elements from the poolable visual state so they aren't kept in memory. May not be done on platforms where we have enough memory to pool these
+    // @deprecated
     onDetach: function( node ) {
-      if ( !keepDOMCircleElements ) {
-        // clear the references
-        this.fillElement = null;
-        this.strokeElement = null;
-        this.domElement = null;
-      }
     },
 
     setToClean: function() {
       this.setToCleanState();
 
       this.transformDirty = false;
+    },
+
+    dispose: function() {
+      // Release the DOM elements from the poolable visual state so they aren't kept in memory.
+      // May not be done on platforms where we have enough memory to pool these
+      if ( !keepDOMCircleElements ) {
+        // clear the references
+        this.fillElement = null;
+        this.strokeElement = null;
+        this.domElement = null;
+      }
+      DOMSelfDrawable.prototype.dispose.call( this );
     }
   } );
-
-  /* jshint -W064 */
-  Circle.CircleStatefulDrawable.mixin( CircleDOMDrawable );
-
-  /* jshint -W064 */
-  SelfDrawable.Poolable.mixin( CircleDOMDrawable );
+  Circle.CircleStatefulDrawable.mixin( Circle.CircleDOMDrawable );
+  SelfDrawable.Poolable.mixin( Circle.CircleDOMDrawable );
 
   /*---------------------------------------------------------------------------*
    * SVG Rendering
@@ -512,13 +515,12 @@ define( function( require ) {
       this.markDirty();
     },
 
+    // @deprecated
     onAttach: function( node ) {
-
     },
 
-    // release the drawable
+    // @deprecated
     onDetach: function( node ) {
-      //OHTWO TODO: are we missing the disposal?
     },
 
     //TODO: Make sure all of the dirty flags make sense here.  Should we be using fillDirty, paintDirty, dirty, etc?
@@ -529,12 +531,9 @@ define( function( require ) {
       }
     }
   } );
-
   // include stubs (stateless) for marking dirty stroke and fill (if necessary). we only want one dirty flag, not multiple ones, for WebGL (for now)
   Paintable.PaintableStatefulDrawable.mixin( Circle.CircleWebGLDrawable );
-
-  // set up pooling
-  SelfDrawable.Poolable.mixin( Circle.CircleWebGLDrawable );
+  SelfDrawable.Poolable.mixin( Circle.CircleWebGLDrawable ); // set up pooling
 
   /*---------------------------------------------------------------------------*
    * Pixi Rendering
