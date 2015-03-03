@@ -13,6 +13,7 @@ define( function( require ) {
 
   var inherit = require( 'PHET_CORE/inherit' );
   var cleanArray = require( 'PHET_CORE/cleanArray' );
+  var platform = require( 'PHET_CORE/platform' );
   var Bounds2 = require( 'DOT/Bounds2' );
 
   var scenery = require( 'SCENERY/scenery' );
@@ -668,7 +669,8 @@ define( function( require ) {
 
       // if we are switching to having no mipmap
       if ( this._mipmapLevel >= 0 && level === -1 ) {
-        image.removeAttribute( 'transform' );
+        // IE guard needed since removeAttribute fails, see https://github.com/phetsims/scenery/issues/395
+        ( platform.ie9 || platform.ie10 ) ? image.setAttribute( 'transform', '' ) : image.removeAttribute( 'transform' );
       }
       this._mipmapLevel = level;
 

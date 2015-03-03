@@ -14,6 +14,7 @@ define( function( require ) {
   var inherit = require( 'PHET_CORE/inherit' );
   var Poolable = require( 'PHET_CORE/Poolable' );
   var cleanArray = require( 'PHET_CORE/cleanArray' );
+  var platform = require( 'PHET_CORE/platform' );
   var scenery = require( 'SCENERY/scenery' );
 
   scenery.SVGGroup = function SVGGroup( block, instance, parent ) {
@@ -190,14 +191,16 @@ define( function( require ) {
           }
           else if ( this.hasTransform ) {
             this.hasTransform = false;
-            svgGroup.removeAttribute( 'transform' );
+            // IE guard needed since removeAttribute fails, see https://github.com/phetsims/scenery/issues/395
+            ( platform.ie9 || platform.ie10 ) ? svgGroup.setAttribute( 'transform', '' ) : svgGroup.removeAttribute( 'transform' );
           }
         }
         else {
           // we want no transforms if we won't be applying transforms
           if ( this.hasTransform ) {
             this.hasTransform = false;
-            svgGroup.removeAttribute( 'transform' );
+            // IE guard needed since removeAttribute fails, see https://github.com/phetsims/scenery/issues/395
+            ( platform.ie9 || platform.ie10 ) ? svgGroup.setAttribute( 'transform', '' ) : svgGroup.removeAttribute( 'transform' );
           }
         }
       }
