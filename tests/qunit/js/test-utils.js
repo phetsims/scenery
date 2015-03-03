@@ -83,7 +83,7 @@ function snapshotFromDataURL( dataURL, callback ) {
   } );
 }
 
-// compares two pixel snapshots and uses the qunit's assert to verify they are the same
+// compares two pixel snapshots {ImageData} and uses the qunit's assert to verify they are the same
 function snapshotEquals( a, b, threshold, message ) {
   var isEqual = a.width == b.width && a.height == b.height;
   var largestDifference = 0;

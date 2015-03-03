@@ -1259,6 +1259,10 @@ define( function( require ) {
       };
       // turn it to base64 and wrap it in the data URL format
       img.src = 'data:image/svg+xml;base64,' + window.btoa( data );
+    },
+
+    popupRasterization: function() {
+      this.foreignObjectRasterization( window.open );
     }
   }, Events.prototype ) );
 

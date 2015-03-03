@@ -455,6 +455,7 @@ define( function( require ) {
     // stateless dirty methods:
     markDirtyShape: function() { this.markPaintDirty(); }
   } );
+  Paintable.PaintableStatelessDrawable.mixin( Path.PathPixiDrawable );
   SelfDrawable.Poolable.mixin( Path.PathPixiDrawable );
 
   return Path;

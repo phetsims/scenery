@@ -18,11 +18,11 @@ function runSceneryTests( pathToTestBase ) {
   loadTestFile( 'js/shapes.js' );
   loadTestFile( 'js/color.js' );
   loadTestFile( 'js/input.js' );
-  loadTestFile( 'js/pixel-perfect.js' );
   loadTestFile( 'js/transforms.js' );
   loadTestFile( 'js/miscellaneous.js' );
   loadTestFile( 'js/linting.js' );
   loadTestFile( 'js/display.js' );
   loadTestFile( 'js/focus.js' );
   loadTestFile( 'js/from-fuzzer.js' );
+  loadTestFile( 'js/pixel-comparison.js' );
 };
