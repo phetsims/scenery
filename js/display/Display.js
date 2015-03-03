@@ -78,12 +78,14 @@ define( function( require ) {
    *
    * Valid parameters in the parameter object:
    * {
-   *   allowSceneOverflow: false,           // usually anything displayed outside of this $main (DOM/CSS3 transformed SVG) is hidden with CSS overflow
-   *   allowCSSHacks: true,                 // applies styling that prevents mobile browser graphical issues
-   *   enablePointerEvents: true,           // allows pointer events / MSPointerEvent to be used on supported platforms.
-   *   width: <current main width>,         // override the main container's width
-   *   height: <current main height>,       // override the main container's height
-   *   allowWebGL: true,                    // boolean flag that indicates whether scenery is allowed to use WebGL for rendering
+   *   allowSceneOverflow: false,           // Usually anything displayed outside of this $main (DOM/CSS3 transformed SVG) is hidden with CSS overflow
+   *   allowCSSHacks: true,                 // Applies styling that prevents mobile browser graphical issues
+   *   enablePointerEvents: true,           // Allows pointer events / MSPointerEvent to be used on supported platforms.
+   *   width: <current main width>,         // Override the main container's width
+   *   height: <current main height>,       // Override the main container's height
+   *   preserveDrawingBuffer: false,        // Whether WebGL Canvases should preserve their drawing buffer.
+   *                                        //   WARNING!: This can significantly reduce performance if set to true.
+   *   allowWebGL: true,                    // Boolean flag that indicates whether scenery is allowed to use WebGL for rendering
    *                                        // Makes it possible to disable WebGL for ease of testing on non-WebGL platforms, see #289
    *   accessibility: true                  // Whether accessibility enhancements is enabled
    */
@@ -108,6 +110,7 @@ define( function( require ) {
       enablePointerEvents: true, // whether we should specifically listen to pointer events if we detect support
       defaultCursor: 'default',  // what cursor is used when no other cursor is specified
       backgroundColor: null,      // initial background color
+      preserveDrawingBuffer: false,
       allowWebGL: true,
       accessibility: true
     }, options );

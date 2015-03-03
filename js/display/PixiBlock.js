@@ -42,7 +42,10 @@ define( function( require ) {
 
         // Create the renderer and view
         // Size will be set in update
-        this.pixiRenderer = PIXI.autoDetectRenderer( 0, 0, { transparent: true } );
+        this.pixiRenderer = PIXI.autoDetectRenderer( 0, 0, {
+          transparent: true,
+          preserveDrawingBuffer: this.display.options.preserveDrawingBuffer // major performance hit if true
+        } );
 
         // main DOM element
         this.pixiCanvas = this.pixiRenderer.view;

@@ -45,7 +45,10 @@ define( function( require ) {
 
       // TODO: Maybe pass through Renderer.bitmaskWebGLLowResolution ) ?
       // Each WebGL block needs its own canvas, and this is created by the WebGLRenderer.
-      this.webGLRenderer = new WebGLRenderer( { stats: false } );
+      this.webGLRenderer = new WebGLRenderer( {
+        stats: false,
+        preserveDrawingBuffer: display.options.preserveDrawingBuffer
+      } );
       this.domElement = this.webGLRenderer.canvas;
 
       this.domElement.style.position = 'absolute';

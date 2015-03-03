@@ -22,14 +22,17 @@ define( function( require ) {
    * @constructor
    */
   function WebGLRenderer( options ) {
-
-    options = _.extend( { stats: true }, options );
+    // defaults
+    this.options = _.extend( {
+      stats: true,
+      preserveDrawingBuffer: false
+    }, options );
 
     this.events = new Events();
 
     // Create the stats and show it, but only for the standalone test cases (not during scenery usage).
     // TODO: A better design for stats vs no stats
-    if ( options.stats ) {
+    if ( this.options.stats ) {
       this.stats = this.createStats();
     }
 
@@ -40,7 +43,7 @@ define( function( require ) {
     this.canvas.style.pointerEvents = 'none';
 
     document.body.appendChild( this.canvas );
-    if ( options.stats ) {
+    if ( this.options.stats ) {
       document.body.appendChild( this.stats.domElement );
     }
 
@@ -48,7 +51,10 @@ define( function( require ) {
     var gl;
     try {
       // NOTE: If we add preserveDrawingBuffer, please add a clear() every frame
-      gl = this.canvas.getContext( 'experimental-webgl', { antialias: true } ); // TODO: {antialias:true?}
+      gl = this.canvas.getContext( 'experimental-webgl', {
+        antialias: true,
+        preserveDrawingBuffer: this.options.preserveDrawingBuffer // major performance hit if true
+      } );
     }
     catch( e ) {
       return false;
@@ -125,6 +131,11 @@ define( function( require ) {
     },
     draw: function() {
       var gl = this.gl;
+
+      // clearing the buffer is only needed if we gave the flag to preserve it
+      if ( this.options.preserveDrawingBuffer ) {
+        gl.clear( gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT );
+      }
 
       gl.viewport( 0.0, 0.0, this.canvas.width, this.canvas.height );
 
