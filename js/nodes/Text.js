@@ -142,7 +142,6 @@ define( function( require ) {
       return this._boundsMethod;
     },
 
-    // allow more specific path types (Rectangle, Line) to override what restrictions we have
     getTextRendererBitmask: function() {
       var bitmask = 0;
 
