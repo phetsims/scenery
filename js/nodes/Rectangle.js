@@ -981,6 +981,7 @@ define( function( require ) {
     // stateless dirty methods:
     markDirtyRadius: function() { this.markPaintDirty(); }
   } );
+  Paintable.PaintableStatelessDrawable.mixin( Rectangle.RectanglePixiDrawable );
   SelfDrawable.Poolable.mixin( Rectangle.RectanglePixiDrawable );
 
   return Rectangle;

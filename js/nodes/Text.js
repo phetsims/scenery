@@ -895,6 +895,7 @@ define( function( require ) {
     }
   } );
   Text.TextStatefulDrawable.mixin( Text.TextSVGDrawable );
+  Paintable.PaintableStatelessDrawable.mixin( Text.TextPixiDrawable );
   SelfDrawable.Poolable.mixin( Text.TextPixiDrawable );
 
   /*---------------------------------------------------------------------------*

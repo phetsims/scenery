@@ -93,14 +93,10 @@
     function( scene, display ) {
       display.width = 40;
       display.height = 40;
-      scene.addChild( new scenery.Path( kite.Shape.rectangle( 6, 6, 28, 28 ), {
+      scene.addChild( new scenery.Rectangle( 6, 6, 28, 28, {
         fill: '#000000'
       } ) );
       display.updateDisplay();
-
-      if ( scene.renderer === 'webgl' ) {
-        debugger;
-      }
     }, simpleRectangleDataURL,
     0, [ 'canvas', 'svg', 'dom', 'webgl', 'pixi' ]
   );
@@ -109,7 +105,7 @@
     function( scene, display ) {
       display.width = 40;
       display.height = 40;
-      scene.addChild( new scenery.Path( kite.Shape.rectangle( 0, 0, 28, 28 ), {
+      scene.addChild( new scenery.Rectangle( 0, 0, 28, 28, {
         fill: '#000000',
         x: 6,
         y: 6
@@ -123,15 +119,15 @@
     function( scene, display ) {
       display.width = 40;
       display.height = 40;
-      var path = new scenery.Path( kite.Shape.rectangle( 0, 0, 28, 28 ), {
+      var rect = new scenery.Rectangle( 0, 0, 28, 28, {
         fill: '#000000',
         x: 10,
         y: -10
       } );
-      scene.addChild( path );
+      scene.addChild( rect );
       display.updateDisplay();
-      path.x = 6;
-      path.y = 6;
+      rect.x = 6;
+      rect.y = 6;
       display.updateDisplay();
     }, simpleRectangleDataURL,
     0, [ 'canvas', 'svg', 'dom', 'webgl', 'pixi' ]
@@ -141,12 +137,12 @@
     function( scene, display ) {
       display.width = 40;
       display.height = 40;
-      var path = new scenery.Path( kite.Shape.rectangle( 6, 6, 28, 28 ), {
+      var rect = new scenery.Rectangle( 6, 6, 28, 28, {
         fill: 'green'
       } );
-      scene.addChild( path );
+      scene.addChild( rect );
       display.updateDisplay();
-      path.fill = 'black';
+      rect.fill = 'black';
       display.updateDisplay();
     }, simpleRectangleDataURL,
     0, [ 'canvas', 'svg', 'dom', 'webgl', 'pixi' ]

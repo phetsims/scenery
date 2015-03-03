@@ -618,6 +618,7 @@ define( function( require ) {
     markDirtyX2: function() { this.markPaintDirty(); },
     markDirtyY2: function() { this.markPaintDirty(); }
   } );
+Paintable.PaintableStatelessDrawable.mixin( Line.LinePixiDrawable );
   SelfDrawable.Poolable.mixin( Line.LinePixiDrawable );
 
   return Line;
