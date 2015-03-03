@@ -66,14 +66,6 @@ define( function( require ) {
       // should generally be overridden by drawable subtypes to implement the update
     },
 
-    onAttach: function( node ) {
-
-    },
-
-    onDetach: function( node ) {
-      //OHTWO TODO: are we missing the disposal?
-    },
-
     dispose: function() {
       this.instance.relativeTransform.removeListener( this.transformListener );
       this.instance.relativeTransform.removePrecompute();

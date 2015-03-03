@@ -2488,13 +2488,11 @@ define( function( require ) {
     // will notify the drawable of visual state changes while it is attached
     attachDrawable: function( drawable ) {
       this._drawables.push( drawable );
-      drawable.onAttach( this );
       return this; // allow chaining
     },
 
     // will not notify the drawable of visual state changes after it is detached
     detachDrawable: function( drawable ) {
-      drawable.onDetach( this );
       var index = _.indexOf( this._drawables, drawable );
 
       assert && assert( index >= 0, 'Invalid operation: trying to detach a non-referenced drawable' );

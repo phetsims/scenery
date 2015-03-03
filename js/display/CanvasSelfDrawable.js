@@ -49,14 +49,6 @@ define( function( require ) {
       this.dirty = false;
     },
 
-    // @deprecated
-    onAttach: function( node ) {
-    },
-
-    // @deprecated
-    onDetach: function( node ) {
-    },
-
     dispose: function() {
       this.instance.relativeTransform.removeListener( this.transformListener );
       this.instance.relativeTransform.removePrecompute();

@@ -224,14 +224,6 @@ define( function( require ) {
       this.setToClean();
     },
 
-    // @deprecated
-    onAttach: function( node ) {
-    },
-
-    // @deprecated
-    onDetach: function( node ) {
-    },
-
     setToClean: function() {
       this.transformDirty = false;
     },

@@ -58,14 +58,6 @@ define( function( require ) {
       }
     },
 
-    // @deprecated
-    onAttach: function( node ) {
-    },
-
-    // @deprecated
-    onDetach: function( node ) {
-    },
-
     dispose: function() {
       if ( !this.keepElements ) {
         // clear the references

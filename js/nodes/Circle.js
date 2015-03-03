@@ -358,14 +358,6 @@ define( function( require ) {
       this.setToClean();
     },
 
-    // @deprecated
-    onAttach: function( node ) {
-    },
-
-    // @deprecated
-    onDetach: function( node ) {
-    },
-
     setToClean: function() {
       this.setToCleanState();
 
@@ -513,14 +505,6 @@ define( function( require ) {
     // general flag set on the state, which we forward directly to the drawable's paint flag
     markPaintDirty: function() {
       this.markDirty();
-    },
-
-    // @deprecated
-    onAttach: function( node ) {
-    },
-
-    // @deprecated
-    onDetach: function( node ) {
     },
 
     //TODO: Make sure all of the dirty flags make sense here.  Should we be using fillDirty, paintDirty, dirty, etc?

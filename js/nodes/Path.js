@@ -378,15 +378,6 @@ define( function( require ) {
       this.markDirty();
     },
 
-    // @deprecated
-    onAttach: function( node ) {
-
-    },
-
-    // @deprecated
-    onDetach: function( node ) {
-    },
-
     //TODO: Make sure all of the dirty flags make sense here.  Should we be using fillDirty, paintDirty, dirty, etc?
     update: function() {
       if ( this.dirty ) {
