@@ -40,22 +40,13 @@ define( function( require ) {
       if ( this.dirty ) {
         this.dirty = false;
 
-        this.updatePixi();
+        this.updatePixiSelf.call( this, this.node, this.displayObject );
       }
     },
 
     // general flag set on the state, which we forward directly to the drawable's paint flag
     markPaintDirty: function() {
       this.markDirty();
-    },
-
-    // @protected: called to update the visual appearance of our svgElement
-    updatePixi: function() {
-      if ( this.paintDirty ) {
-        this.paintDirty = false;
-
-        this.updatePixiSelf.call( this, this.node, this.displayObject );
-      }
     },
 
     dispose: function() {
