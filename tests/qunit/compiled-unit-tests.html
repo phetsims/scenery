@@ -54,7 +54,10 @@
   runDotTests( '../../../dot/tests/qunit' );
   runPhetCoreTests( '../../../phet-core/tests/qunit' );
 
-  $( '#qunit-filter-pass' ).click();
+  var $checkbox = $( '#qunit-filter-pass' );
+  if ( !$checkbox[0].checked ) {
+    $checkbox.click();
+  }
 </script>
 </body>
 </html>

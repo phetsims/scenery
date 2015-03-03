@@ -16,6 +16,7 @@
 
   <script src="../../../sherpa/jquery-2.1.0.js"></script>
   <script src="../../../sherpa/lodash-2.4.1.min.js"></script>
+  <script src="../../../sherpa/pixi-2.2.3-dev.js"></script>
   <script src="../../../sherpa/has.js"></script>
   <script src="../../../assert/js/assert.js"></script>
   <script type="text/javascript">
@@ -68,9 +69,14 @@
       runAxonTests( '../../../axon/tests/qunit' );
       runPhetCoreTests( '../../../phet-core/tests/qunit' );
 
-      $( '#qunit-filter-pass' ).click();
+      var $checkbox = $( '#qunit-filter-pass' );
+      if ( !$checkbox[0].checked ) {
+        $checkbox.click();
+      }
     } );
   } );
+
+
 </script>
 </body>
 </html>
