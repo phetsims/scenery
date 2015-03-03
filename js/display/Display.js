@@ -91,8 +91,6 @@ define( function( require ) {
    */
   scenery.Display = function Display( rootNode, options ) {
 
-    Display.displays.push( this );
-
     // supertype call to axon.Events (should just initialize a few properties here, notably _eventListeners and _staticEventListeners)
     Events.call( this );
 
@@ -1292,10 +1290,6 @@ define( function( require ) {
 
     return div;
   };
-
-  // Static list of all known displays that have been instantiated.
-  // TODO: support for deletion of Displays.
-  Display.displays = [];
 
   return Display;
 } );

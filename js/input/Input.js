@@ -937,21 +937,16 @@ define( function( require ) {
           Input.flattenTrails( Input.focusContexts[ Input.focusContexts.length - 1 ].trail, Input.focusContexts[ Input.focusContexts.length - 1 ].trail, focusableTrails, focusable );
         }
         else {
+          var display = this.display;
 
-          // Search all displays and all of their instances
-          var Display = scenery.Display;//TODO: move to a traditional require statement (though may be cyclic)
-          for ( var i = 0; i < Display.displays.length; i++ ) {
-            var display = Display.displays[ i ];
+          var rootNode = display.rootNode;
+          var trails = rootNode.getTrails();
 
-            var rootNode = display.rootNode;
-            var trails = rootNode.getTrails();
+          for ( var k = 0; k < trails.length; k++ ) {
+            var trail = trails[ k ];
 
-            for ( var k = 0; k < trails.length; k++ ) {
-              var trail = trails[ k ];
-
-              // Add to the list of all focusable items across Displays & Trails
-              Input.flattenTrails( trail, trail, focusableTrails, focusable );
-            }
+            // Add to the list of all focusable items across Displays & Trails
+            Input.flattenTrails( trail, trail, focusableTrails, focusable );
           }
         }
         return focusableTrails;
