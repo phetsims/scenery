@@ -64,7 +64,7 @@
     console.log( canvas.toDataURL() );
   }
 
-  img.src = 'data:image/svg+xml;utf8,' + data;
+  img.src = 'data:image/svg+xml;base64,' + btoa( data );
 </script>
 </body>
 </html>

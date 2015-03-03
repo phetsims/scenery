@@ -1170,8 +1170,46 @@ define( function( require ) {
       } );
 
       return result;
-    }
+    },
 
+    /**
+     * Will attempt to call callback( {string} dataURI ) with the rasterization of the entire Display's DOM structure,
+     * used for internal testing. Will call-back null if there was an error
+     *
+     * Only tested on recent Chrome and Firefox, not recommended for general use. Guaranteed not to work for IE <= 10.
+     */
+    foreignObjectRasterization: function( callback ) {
+      var canvas = document.createElement( 'canvas' );
+      var context = canvas.getContext( '2d' );
+      canvas.width = this.width;
+      canvas.height = this.height;
+
+      var doc = document.implementation.createHTMLDocument( "" );
+      doc.documentElement.innerHTML = this.domElement.outerHTML;
+      doc.documentElement.setAttribute( 'xmlns', doc.documentElement.namespaceURI );
+      var xhtml = new window.XMLSerializer().serializeToString( doc.documentElement );
+
+      var data = '<svg xmlns="http://www.w3.org/2000/svg" width="' + this.width + '" height="' + this.height + '">' +
+                 '<foreignObject width="100%" height="100%">' +
+                 '<div xmlns="http://www.w3.org/1999/xhtml">' +
+                 xhtml +
+                 '</div>' +
+                 '</foreignObject>' +
+                 '</svg>';
+
+      var img = new Image();
+
+      img.onload = function() {
+        context.drawImage( img, 0, 0 );
+        callback( canvas.toDataURL() );
+      };
+      img.onerror = function() {
+        callback( null );
+      };
+
+      // TODO: search for Canvas instances, and replace with their toDataURLs().
+      img.src = 'data:image/svg+xml;base64,' + window.btoa( data );
+    }
   }, Events.prototype ) );
 
   Display.customCursors = {

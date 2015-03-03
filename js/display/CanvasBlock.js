@@ -40,6 +40,7 @@ define( function( require ) {
         this.canvas.style.left = '0';
         this.canvas.style.top = '0';
         this.canvas.style.pointerEvents = 'none';
+        this.canvas.id = 'scenery-canvas' + this.id;
 
         this.context = this.canvas.getContext( '2d' );
 
