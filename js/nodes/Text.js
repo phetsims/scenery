@@ -864,9 +864,6 @@ define( function( require ) {
     initialize: function( renderer, instance ) {
       this.initializePixiSelfDrawable( renderer, instance, keepPixiTextElements );
 
-      // since we are relying on stateful handling, we need to initialize it
-      this.initializeState();
-
       if ( !this.displayObject ) {
         this.displayObject = new PIXI.Text( '' );
       }
@@ -890,8 +887,6 @@ define( function( require ) {
       // TODO: JO: Why is this here?
       if ( this.dirtyBounds && isFinite( node._selfBounds.width ) ) {
       }
-
-      this.setToCleanState();
     }
   } );
   Text.TextStatefulDrawable.mixin( Text.TextSVGDrawable );
