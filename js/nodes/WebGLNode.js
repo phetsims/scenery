@@ -1,7 +1,7 @@
 // Copyright 2002-2014, University of Colorado Boulder
 
 /**
- * A node that can be custom-drawn with WebGL calls. Manual handling of dirty region repainting.  Analogous to WebGLNode
+ * A node that can be custom-drawn with WebGL calls. Manual handling of dirty region repainting.  Analogous to CanvasNode
  *
  * setCanvasBounds (or the mutator canvasBounds) should be used to set the area that is drawn to (otherwise nothing
  * will show up)
@@ -12,9 +12,9 @@
 define( function( require ) {
   'use strict';
 
+  // modules
   var inherit = require( 'PHET_CORE/inherit' );
   var scenery = require( 'SCENERY/scenery' );
-
   var Matrix3 = require( 'DOT/Matrix3' );
   var Node = require( 'SCENERY/nodes/Node' );
   require( 'SCENERY/display/Renderer' );
