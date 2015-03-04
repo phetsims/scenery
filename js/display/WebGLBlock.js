@@ -20,6 +20,7 @@
  * 2. Context loss is not handled
  * 3. Path is just rendering as SquareUnstrokedRectangle and not showing up
  * 4. Text is not showing up
+ * 5. Alpha transparency is incorrect, see #397
  *
  * @author Jonathan Olson <jonathan.olson@colorado.edu>
  * @author Sam Reid (PhET Interactive Simulations)
