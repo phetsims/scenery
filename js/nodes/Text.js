@@ -36,8 +36,6 @@ define( function( require ) {
   var SelfDrawable = require( 'SCENERY/display/SelfDrawable' );
   var WebGLSelfDrawable = require( 'SCENERY/display/WebGLSelfDrawable' );
   var PixiSelfDrawable = require( 'SCENERY/display/PixiSelfDrawable' );
-  var SquareUnstrokedRectangle = require( 'SCENERY/display/webgl/SquareUnstrokedRectangle' );
-  var Color = require( 'SCENERY/util/Color' );
 
   // TODO: change this based on memory and performance characteristics of the platform
   var keepDOMTextElements = true; // whether we should pool DOM elements for the DOM rendering states, or whether we should free them when possible for memory
@@ -785,14 +783,21 @@ define( function( require ) {
     },
 
     initializeContext: function( webglBlock ) {
+      var self = this;
       this.webglBlock = webglBlock;
-      this.rectangleHandle = new SquareUnstrokedRectangle( webglBlock.webGLRenderer.colorTriangleRenderer, this.node, 0.5 );
 
-      // cleanup old vertexBuffer, if applicable
-      this.disposeWebGLBuffers();
+      this.node.toImage( function( image ) {
+        self.imageHandle = webglBlock.webGLRenderer.textureRenderer.createFromImageNode( new scenery.Image( image, {
+          // TODO: fix coordinates
+          x: 100,
+          y: 100
+        } ), 0.4 );
 
-      this.initializePaintableState();
-      this.updateText();
+        webglBlock.webGLRenderer.textureRenderer.bindVertexBuffer();
+        webglBlock.webGLRenderer.textureRenderer.bindDirtyTextures();
+
+        self.updateText();
+      } );
 
       //TODO: Update the state in the buffer arrays
     },
@@ -800,13 +805,8 @@ define( function( require ) {
     //Nothing necessary since everything currently handled in the uModelViewMatrix below
     //However, we may switch to dynamic draw, and handle the matrix change only where necessary in the future?
     updateText: function() {
-
-      // TODO: a way to update the ColorTriangleBufferData.
-
-      // TODO: move to PaintableWebGLState???
-      if ( this.dirtyFill ) {
-        this.color = Color.toColor( 'red' );
-        this.cleanPaintableState();
+      if ( this.imageHandle ) {
+        this.imageHandle.update();
       }
     },
 
@@ -840,10 +840,10 @@ define( function( require ) {
 
     //TODO: Make sure all of the dirty flags make sense here.  Should we be using fillDirty, paintDirty, dirty, etc?
     update: function() {
-      if ( this.dirty ) {
+      //if ( this.dirty ) {
         this.updateText();
         this.dirty = false;
-      }
+      //}
     }
   } );
 
@@ -894,8 +894,8 @@ define( function( require ) {
   SelfDrawable.Poolable.mixin( Text.TextPixiDrawable );
 
   /*---------------------------------------------------------------------------*
-  * Hybrid text setup (for bounds testing)
-  *----------------------------------------------------------------------------*/
+   * Hybrid text setup (for bounds testing)
+   *----------------------------------------------------------------------------*/
 
   function createSVGTextToMeasure() {
     var text = document.createElementNS( scenery.svgns, 'text' );
