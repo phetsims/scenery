@@ -760,6 +760,29 @@
     1, testedRenderers
   );
 
+  multipleRendererTest( 'Image shifted',
+    function( scene, display, asyncCallback ) {
+      var img = document.createElement( 'img' );
+      img.onload = function() {
+        display.width = 40;
+        display.height = 40;
+        var image = new scenery.Image( img );
+        scene.addChild( image );
+        display.updateDisplay();
+        image.x = 10;
+        image.y = 5;
+        display.updateDisplay();
+
+        asyncCallback();
+      };
+      img.error = function() {
+        asyncCallback();
+      }
+      img.src = simpleRectangleDataURL;
+    }, 'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAACgAAAAoCAYAAACM/rhtAAAAb0lEQVRYR+3VQQrAIAwEQP3/o1sKvVYWtwcP4zmBOMZkjsPPPLy+ocD2hQgSbAXafD1IMBC4gpjtkD96UIHb/G8iQYKNgF/c6D25BAkGAgZ1gLQMIUiwETCoGz2rrtUjSDAUsOpCqM+w4wXbCy7zb6TwHA3a1+y0AAAAAElFTkSuQmCC',
+    0, testedRenderers, true // asynchronous
+  );
+
 
 
 })();
