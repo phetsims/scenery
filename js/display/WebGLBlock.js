@@ -4,6 +4,23 @@
  * Handles a visual WebGL layer of drawables.  The WebGL system is designed to be modular, so that testing can
  * easily be done without scenery.  Hence WebGLBlock delegates most of its work to WebGLRenderer.
  *
+ * STATUS REPORT
+ * March 4 2015
+ * WebGLBlock is in bad condition--it is a collection of prototypes and not ready for production code.  The best way to
+ * see the status of WebGLBlock is to launch:
+ * http://localhost/forces-and-motion-basics/forces-and-motion-basics_en.html?rootRenderer=webgl&screens=1
+ *
+ * Completed in this version of forces and motion: basics, with pixi
+ * 1. Images are rendering, and are in the correct position
+ * 2. 60fps while dragging on iPad3 (note that this could go down as we add other features like transparency, clipping, etc)
+ * 3. Resizing is handled
+ *
+ * Issues in this version of forces and motion: basics, with pixi
+ * 1. Z-ordering is incorrect
+ * 2. Context loss is not handled
+ * 3. Path is just rendering as SquareUnstrokedRectangle and not showing up
+ * 4. Text is not showing up
+ *
  * @author Jonathan Olson <jonathan.olson@colorado.edu>
  * @author Sam Reid (PhET Interactive Simulations)
  * @author Sharfudeen Ashraf (For Ghent University)
@@ -119,15 +136,15 @@ define( function( require ) {
         // finalX = 2 * x / display.width - 1
         // finalY = 1 - 2 * y / display.height
         // result = matrix * ( x, y, 1 )
-        this.projectionMatrixArray[0] = 2 / this.display.width;
-        this.projectionMatrixArray[1] = 0;
-        this.projectionMatrixArray[2] = 0;
-        this.projectionMatrixArray[3] = 0;
-        this.projectionMatrixArray[4] = -2 / this.display.height;
-        this.projectionMatrixArray[5] = 0;
-        this.projectionMatrixArray[6] = -1;
-        this.projectionMatrixArray[7] = 1;
-        this.projectionMatrixArray[8] = 1;
+        this.projectionMatrixArray[ 0 ] = 2 / this.display.width;
+        this.projectionMatrixArray[ 1 ] = 0;
+        this.projectionMatrixArray[ 2 ] = 0;
+        this.projectionMatrixArray[ 3 ] = 0;
+        this.projectionMatrixArray[ 4 ] = -2 / this.display.height;
+        this.projectionMatrixArray[ 5 ] = 0;
+        this.projectionMatrixArray[ 6 ] = -1;
+        this.projectionMatrixArray[ 7 ] = 1;
+        this.projectionMatrixArray[ 8 ] = 1;
 
         this.webGLRenderer.draw();
       }
