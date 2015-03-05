@@ -432,18 +432,20 @@ define( function( require ) {
       return this;
     },
 
-    updateSVGSelf: function( node, line ) {
+    updateSVGSelf: function() {
+      var line = this.svgElement;
+
       if ( this.dirtyX1 ) {
-        line.setAttribute( 'x1', node._x1 );
+        line.setAttribute( 'x1', this.node._x1 );
       }
       if ( this.dirtyY1 ) {
-        line.setAttribute( 'y1', node._y1 );
+        line.setAttribute( 'y1', this.node._y1 );
       }
       if ( this.dirtyX2 ) {
-        line.setAttribute( 'x2', node._x2 );
+        line.setAttribute( 'x2', this.node._x2 );
       }
       if ( this.dirtyY2 ) {
-        line.setAttribute( 'y2', node._y2 );
+        line.setAttribute( 'y2', this.node._y2 );
       }
 
       this.updateFillStrokeStyle( line );

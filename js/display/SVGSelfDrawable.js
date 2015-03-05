@@ -5,7 +5,7 @@
  * any changes at a later time.
  *
  * Abstract methods to implement for concrete implementations:
- *   updateSVGSelf( node, element ) - Given the node specified, update the SVG element's state
+ *   updateSVGSelf() - Update the SVG element's state to what the Node's self should display
  *   updateDefsSelf( block ) - Update defs on the given block (or if block === null, remove)
  *
  * @author Jonathan Olson <jonathan.olson@colorado.edu>

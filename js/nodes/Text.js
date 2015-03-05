@@ -698,28 +698,30 @@ define( function( require ) {
       return this;
     },
 
-    updateSVGSelf: function( node, text ) {
+    updateSVGSelf: function() {
+      var text = this.svgElement;
+
       if ( this.dirtyDirection ) {
-        text.setAttribute( 'direction', node._direction );
+        text.setAttribute( 'direction', this.node._direction );
       }
 
       // set all of the font attributes, since we can't use the combined one
       if ( this.dirtyFont ) {
-        text.setAttribute( 'font-family', node._font.getFamily() );
-        text.setAttribute( 'font-size', node._font.getSize() );
-        text.setAttribute( 'font-style', node._font.getStyle() );
-        text.setAttribute( 'font-weight', node._font.getWeight() );
-        text.setAttribute( 'font-stretch', node._font.getStretch() );
+        text.setAttribute( 'font-family', this.node._font.getFamily() );
+        text.setAttribute( 'font-size', this.node._font.getSize() );
+        text.setAttribute( 'font-style', this.node._font.getStyle() );
+        text.setAttribute( 'font-weight', this.node._font.getWeight() );
+        text.setAttribute( 'font-stretch', this.node._font.getStretch() );
       }
 
       // update the text-node's value
       if ( this.dirtyText ) {
-        text.lastChild.nodeValue = node.getNonBreakingText();
+        text.lastChild.nodeValue = this.node.getNonBreakingText();
       }
 
       // text length correction, tested with scenery/tests/text-quality-test.html to determine how to match Canvas/SVG rendering (and overall length)
-      if ( this.dirtyBounds && isFinite( node._selfBounds.width ) ) {
-        text.setAttribute( 'textLength', node._selfBounds.width );
+      if ( this.dirtyBounds && isFinite( this.node._selfBounds.width ) ) {
+        text.setAttribute( 'textLength', this.node._selfBounds.width );
       }
 
       this.updateFillStrokeStyle( text );

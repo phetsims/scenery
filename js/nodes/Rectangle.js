@@ -746,18 +746,20 @@ define( function( require ) {
       return this;
     },
 
-    updateSVGSelf: function( node, rect ) {
+    updateSVGSelf: function() {
+      var rect = this.svgElement;
+
       if ( this.dirtyX ) {
-        rect.setAttribute( 'x', node._rectX );
+        rect.setAttribute( 'x', this.node._rectX );
       }
       if ( this.dirtyY ) {
-        rect.setAttribute( 'y', node._rectY );
+        rect.setAttribute( 'y', this.node._rectY );
       }
       if ( this.dirtyWidth ) {
-        rect.setAttribute( 'width', node._rectWidth );
+        rect.setAttribute( 'width', this.node._rectWidth );
       }
       if ( this.dirtyHeight ) {
-        rect.setAttribute( 'height', node._rectHeight );
+        rect.setAttribute( 'height', this.node._rectHeight );
       }
       if ( this.dirtyArcWidth || this.dirtyArcHeight || this.dirtyWidth || this.dirtyHeight ) {
         var arcw = 0;
@@ -765,10 +767,10 @@ define( function( require ) {
 
         // workaround for various browsers if rx=20, ry=0 (behavior is inconsistent, either identical to rx=20,ry=20, rx=0,ry=0. We'll treat it as rx=0,ry=0)
         // see https://github.com/phetsims/scenery/issues/183
-        if ( node.isRounded() ) {
-          var maximumArcSize = node.getMaximumArcSize();
-          arcw = Math.min( node._rectArcWidth, maximumArcSize );
-          arch = Math.min( node._rectArcHeight, maximumArcSize );
+        if ( this.node.isRounded() ) {
+          var maximumArcSize = this.node.getMaximumArcSize();
+          arcw = Math.min( this.node._rectArcWidth, maximumArcSize );
+          arch = Math.min( this.node._rectArcHeight, maximumArcSize );
         }
         if ( arcw !== this.lastArcW ) {
           this.lastArcW = arcw;
