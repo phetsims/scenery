@@ -2588,7 +2588,7 @@ define( function( require ) {
       }
 
       if ( this.renderer ) {
-        addProp( 'renderer', this.renderer.name );
+        addProp( 'renderer', this.renderer );
         if ( this.rendererOptions ) {
           // addProp( 'rendererOptions', JSON.stringify( this.rendererOptions ), true );
         }
