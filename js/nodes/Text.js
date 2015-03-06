@@ -36,8 +36,7 @@ define( function( require ) {
   var SelfDrawable = require( 'SCENERY/display/SelfDrawable' );
   var WebGLSelfDrawable = require( 'SCENERY/display/WebGLSelfDrawable' );
   var PixiSelfDrawable = require( 'SCENERY/display/PixiSelfDrawable' );
-  var SquareUnstrokedRectangle = require( 'SCENERY/display/webgl/SquareUnstrokedRectangle' );
-  var Color = require( 'SCENERY/util/Color' );
+
 
   // TODO: change this based on memory and performance characteristics of the platform
   var keepDOMTextElements = true; // whether we should pool DOM elements for the DOM rendering states, or whether we should free them when possible for memory
@@ -785,14 +784,18 @@ define( function( require ) {
     },
 
     initializeContext: function( webglBlock ) {
-      this.webglBlock = webglBlock;
-      this.rectangleHandle = new SquareUnstrokedRectangle( webglBlock.webGLRenderer.colorTriangleRenderer, this.node, 0.5 );
 
-      // cleanup old vertexBuffer, if applicable
-      this.disposeWebGLBuffers();
+      var self = this;
+      this.node.toImageNodeAsynchronous( function( imageNodeContainer ) {
+        //toImageNode returns a containerNode with its first child set as ImageNode
+        var imageNode = imageNodeContainer.children[ 0 ];
+        self.textHandle = webglBlock.webGLRenderer.textureRenderer.createFromImageNode( imageNode, 0.4 );
 
-      this.initializePaintableState();
-      this.updateText();
+        // TODO: Don't call this each time a new item is added.
+        webglBlock.webGLRenderer.textureRenderer.bindVertexBuffer();
+        webglBlock.webGLRenderer.textureRenderer.bindDirtyTextures();
+      } );
+
 
       //TODO: Update the state in the buffer arrays
     },
@@ -800,13 +803,8 @@ define( function( require ) {
     //Nothing necessary since everything currently handled in the uModelViewMatrix below
     //However, we may switch to dynamic draw, and handle the matrix change only where necessary in the future?
     updateText: function() {
-
-      // TODO: a way to update the ColorTriangleBufferData.
-
-      // TODO: move to PaintableWebGLState???
-      if ( this.dirtyFill ) {
-        this.color = Color.toColor( 'red' );
-        this.cleanPaintableState();
+      if ( this.textHandle ) {
+        this.textHandle.update();
       }
     },
 
@@ -899,8 +897,8 @@ define( function( require ) {
   SelfDrawable.Poolable.mixin( Text.TextPixiDrawable );
 
   /*---------------------------------------------------------------------------*
-  * Hybrid text setup (for bounds testing)
-  *----------------------------------------------------------------------------*/
+   * Hybrid text setup (for bounds testing)
+   *----------------------------------------------------------------------------*/
 
   function createSVGTextToMeasure() {
     var text = document.createElementNS( scenery.svgns, 'text' );
