@@ -630,10 +630,12 @@ define( function( require ) {
       return this;
     },
 
-    updateSVGSelf: function( node, image ) {
+    updateSVGSelf: function() {
+      var image = this.svgElement;
+
       if ( this.dirtyImage ) {
         sceneryLog && sceneryLog.ImageSVGDrawable && sceneryLog.ImageSVGDrawable( this.id + ' Updating dirty image' );
-        if ( node._image ) {
+        if ( this.node._image ) {
           // like <image xlink:href='http://phet.colorado.edu/images/phet-logo-yellow.png' x='0' y='0' height='127px' width='242px'/>
           this.updateURL( image, true );
         }
@@ -643,7 +645,7 @@ define( function( require ) {
           image.setAttributeNS( scenery.xlinkns, 'xlink:href', '//:0' ); // see http://stackoverflow.com/questions/5775469/whats-the-valid-way-to-include-an-image-with-no-src
         }
       }
-      else if ( this.dirtyMipmap && node._image ) {
+      else if ( this.dirtyMipmap && this.node._image ) {
         sceneryLog && sceneryLog.ImageSVGDrawable && sceneryLog.ImageSVGDrawable( this.id + ' Updating dirty mipmap' );
         this.updateURL( image, false );
       }

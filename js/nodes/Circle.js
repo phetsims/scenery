@@ -396,9 +396,11 @@ define( function( require ) {
 
       return this;
     },
-    updateSVGSelf: function( node, circle ) {
+    updateSVGSelf: function() {
+      var circle = this.svgElement;
+
       if ( this.dirtyRadius ) {
-        circle.setAttribute( 'r', node._radius );
+        circle.setAttribute( 'r', this.node._radius );
       }
 
       this.updateFillStrokeStyle( circle );

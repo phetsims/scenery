@@ -4,6 +4,24 @@
 /**
  * Handles a visual Pixi layer of drawables.
  *
+ * STATUS REPORT
+ * March 4 2015
+ * PixiBlock is in bad condition--it is a collection of prototypes and not ready for production code.  The best way to
+ * see the status of PixiBlock is to launch:
+ * http://localhost/forces-and-motion-basics/forces-and-motion-basics_en.html?rootRenderer=pixi&screens=1
+ *
+ * Completed in this version of forces and motion: basics, with pixi
+ * 1. Images are rendering, and are in the correct position
+ *
+ * Issues in this version of forces and motion: basics, with pixi
+ * 1. Z-ordering is incorrect.  When dragging a (hidden) puller, the z-order of many things changes.
+ * 2. When dropping a puller, there is an exception that crashes the simulation
+ * 3. Resizing is not handled
+ * 4. Context loss is not handled
+ * 5. Path is not generalized--just doing moveTo/lineTo
+ * 6. Getting 30 fps when dragging a puller on iPad3. (Also note that transparency, curves, etc will slow this down further)
+ *      Though we could take steps to optimize for pixi, such as batching images together
+ *
  * @author Sam Reid
  * @author Jonathan Olson <jonathan.olson@colorado.edu>
  */
