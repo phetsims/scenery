@@ -764,7 +764,8 @@ define( function( require ) {
 
     initializeContext: function( webglBlock ) {
       this.webglBlock = webglBlock;
-      this.imageHandle = webglBlock.webGLRenderer.textureRenderer.createFromImageNode( this.node, 0.4 );
+      //this.imageHandle = webglBlock.webGLRenderer.textureRenderer.createFromImageNode( this.node, 0.4 );
+      this.imageHandle = webglBlock.webGLRenderer.textureRenderer.createFromImageNode( this.node, Math.random() );
 
       // TODO: Don't call this each time a new item is added.
       webglBlock.webGLRenderer.textureRenderer.bindVertexBuffer();
