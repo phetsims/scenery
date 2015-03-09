@@ -37,6 +37,7 @@ define( function( require ) {
   var WebGLSelfDrawable = require( 'SCENERY/display/WebGLSelfDrawable' );
   var PixiSelfDrawable = require( 'SCENERY/display/PixiSelfDrawable' );
 
+
   // TODO: change this based on memory and performance characteristics of the platform
   var keepDOMTextElements = true; // whether we should pool DOM elements for the DOM rendering states, or whether we should free them when possible for memory
   var keepSVGTextElements = true; // whether we should pool SVG elements for the SVG rendering states, or whether we should free them when possible for memory
@@ -786,18 +787,14 @@ define( function( require ) {
 
     initializeContext: function( webglBlock ) {
       var self = this;
-      this.webglBlock = webglBlock;
+      this.node.toImageNodeAsynchronous( function( imageNodeContainer ) {
+        //toImageNode returns a containerNode with its first child set as ImageNode
+        var imageNode = imageNodeContainer.children[ 0 ];
+        self.textHandle = webglBlock.webGLRenderer.textureRenderer.createFromImageNode( imageNode, 0.4 );
 
-      this.node.toImage( function( image ) {
-        self.imageHandle = webglBlock.webGLRenderer.textureRenderer.createFromImageNode( new scenery.Image( image, {
-          // TODO: fix coordinates
-          x: 100,
-          y: 100
-        } ), 0.4 );
-
+        // TODO: Don't call this each time a new item is added.
         webglBlock.webGLRenderer.textureRenderer.bindVertexBuffer();
         webglBlock.webGLRenderer.textureRenderer.bindDirtyTextures();
-
         self.updateText();
       } );
 
@@ -807,8 +804,8 @@ define( function( require ) {
     //Nothing necessary since everything currently handled in the uModelViewMatrix below
     //However, we may switch to dynamic draw, and handle the matrix change only where necessary in the future?
     updateText: function() {
-      if ( this.imageHandle ) {
-        this.imageHandle.update();
+      if ( this.textHandle ) {
+        this.textHandle.update();
       }
     },
 
@@ -818,7 +815,6 @@ define( function( require ) {
 
     dispose: function() {
       this.disposeWebGLBuffers();
-
       // super
       WebGLSelfDrawable.prototype.dispose.call( this );
     },
@@ -843,8 +839,8 @@ define( function( require ) {
     //TODO: Make sure all of the dirty flags make sense here.  Should we be using fillDirty, paintDirty, dirty, etc?
     update: function() {
       //if ( this.dirty ) {
-        this.updateText();
-        this.dirty = false;
+      this.updateText();
+      this.dirty = false;
       //}
     }
   } );
