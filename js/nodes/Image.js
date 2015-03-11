@@ -832,7 +832,7 @@ define( function( require ) {
       this.initializePixiSelfDrawable( renderer, instance, keepPixiImageElements );
 
       if ( !this.displayObject ) {
-        var baseTexture = new PIXI.BaseTexture( this.node._image, PIXI.scaleModes.DEFAULT );
+        var baseTexture = new PIXI.BaseTexture( this.node._image );
         var texture = new PIXI.Texture( baseTexture );
         this.displayObject = new PIXI.Sprite( texture );
       }
@@ -842,7 +842,7 @@ define( function( require ) {
 
     updatePixiSelf: function( node, image ) {
       if ( node._image ) {
-        var baseTexture = new PIXI.BaseTexture( this.node._image, PIXI.scaleModes.DEFAULT );
+        var baseTexture = new PIXI.BaseTexture( this.node._image );
         var texture = new PIXI.Texture( baseTexture );
         this.displayObject.setTexture( texture );
       }

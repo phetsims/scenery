@@ -189,7 +189,7 @@ define( function( require ) {
             pixiDisplayObject.position.x = matrix.m02();
             pixiDisplayObject.position.y = matrix.m12();
             pixiDisplayObject.rotation = matrix.rotation;
-            pixiDisplayObject.scale = new PIXI.Point( matrix.getScaleVector().x, matrix.getScaleVector().y );//Math.abs(matrix.getScaleVector().x)+0.5;//TODO: y???
+            pixiDisplayObject.scale = new PIXI.math.Point( matrix.getScaleVector().x, matrix.getScaleVector().y );//Math.abs(matrix.getScaleVector().x)+0.5;//TODO: y???
           }
           else if ( this.hasTransform ) {
             this.hasTransform = false;
