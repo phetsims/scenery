@@ -1144,7 +1144,6 @@ define( function( require ) {
       return this._inputListeners.slice( 0 ); // defensive copy
     },
 
-    // TODO: consider renaming to translateBy to match scaleBy
     translate: function( x, y, prependInstead ) {
       if ( typeof x === 'number' ) {
         // translate( x, y, prependInstead )
@@ -1314,6 +1313,13 @@ define( function( require ) {
 
     // prepend an x,y translation to our local transform without allocating a matrix for it, see #119
     prependTranslation: function( x, y ) {
+      assert && assert( typeof x === 'number', 'x not a number' );
+      assert && assert( typeof y === 'number', 'y not a number' );
+      assert && assert( isFinite( x ), 'x not finite' );
+      assert && assert( isFinite( y ), 'y not finite' );
+
+      if ( !x && !y ) { return; } // bail out if both are zero
+
       this._transform.prependTranslation( x, y );
     },
 
