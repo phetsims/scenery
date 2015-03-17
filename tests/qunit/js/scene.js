@@ -847,4 +847,48 @@
       new scenery.Trail( [ a, c, d ] )
     ] ) );
   } );
+
+  test( 'Line stroked bounds', function() {
+    var line = new scenery.Line( 0, 0, 50, 0, { stroke: 'red', lineWidth: 5 } );
+
+    var positions = [
+      { x1: 50, y1: 0, x2: 0, y2: 0 },
+      { x1: 0, y1: 50, x2: 0, y2: 0 },
+      { x1: 0, y1: 0, x2: 50, y2: 0 },
+      { x1: 0, y1: 0, x2: 0, y2: 50 },
+      { x1: 50, y1: 10, x2: 0, y2: 0 },
+      { x1: 10, y1: 50, x2: 0, y2: 0 },
+      { x1: 0, y1: 0, x2: 50, y2: 10 },
+      { x1: 0, y1: 0, x2: 10, y2: 50 },
+      { x1: 50, y1: -10, x2: 0, y2: 0 },
+      { x1: -10, y1: 50, x2: 0, y2: 0 },
+      { x1: 0, y1: 0, x2: 50, y2: -10 },
+      { x1: 0, y1: 0, x2: -10, y2: 50 },
+      { x1: 50, y1: 0, x2: 0, y2: 10 },
+      { x1: 0, y1: 50, x2: 10, y2: 0 },
+      { x1: 0, y1: 10, x2: 50, y2: 0 },
+      { x1: 10, y1: 0, x2: 0, y2: 50 },
+      { x1: 50, y1: 0, x2: 0, y2: -10 },
+      { x1: 0, y1: 50, x2: -10, y2: 0 },
+      { x1: 0, y1: -10, x2: 50, y2: 0 },
+      { x1: -10, y1: 0, x2: 0, y2: 50 }
+    ];
+
+    var caps = [
+      'round',
+      'butt',
+      'square'
+    ];
+
+    _.each( positions, function( position ) {
+      line.mutate( position );
+      // line.setLine( position.x1, position.y1, position.x2, position.y2 );
+      _.each( caps, function( cap ) {
+        line.lineCap = cap;
+
+        ok( line.bounds.equalsEpsilon( line.getShape().getStrokedShape( line.getLineStyles() ).bounds, 0.0001 ),
+          'Line stroked bounds with ' + JSON.stringify( position ) + ' and ' + cap + ' ' + line.bounds.toString() );
+      } );
+    } );
+  } );
 })();

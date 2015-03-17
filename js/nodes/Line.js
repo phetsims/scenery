@@ -18,6 +18,7 @@ define( function( require ) {
 
   var Path = require( 'SCENERY/nodes/Path' );
   var Shape = require( 'KITE/Shape' );
+  var Bounds2 = require( 'DOT/Bounds2' );
   var Vector2 = require( 'DOT/Vector2' );
 
   var Paintable = require( 'SCENERY/nodes/Paintable' );
@@ -189,7 +190,52 @@ define( function( require ) {
     },
 
     computeShapeBounds: function() {
-      return Path.prototype.computeShapeBounds.call( this );
+      // optimized form for a single line segment (no joins, just two caps)
+      if ( this._stroke ) {
+        var lineCap = this.getLineCap();
+        var halfLineWidth = this.getLineWidth() / 2;
+        if ( lineCap === 'round' ) {
+          // we can simply dilate by half the line width
+          return new Bounds2( Math.min( this._x1, this._x2 ) - halfLineWidth, Math.min( this._y1, this._y2 ) - halfLineWidth,
+                              Math.max( this._x1, this._x2 ) + halfLineWidth, Math.max( this._y1, this._y2 ) + halfLineWidth );
+        }
+        else {
+          // (dx,dy) is a vector p2-p1
+          var dx = this._x2 - this._x1;
+          var dy = this._y2 - this._y1;
+          var magnitude = Math.sqrt( dx * dx + dy * dy );
+          if ( magnitude === 0 ) {
+            // if our line is a point, just dilate by halfLineWidth
+            return new Bounds2( this._x1 - halfLineWidth, this._y1 - halfLineWidth, this._x2 + halfLineWidth, this._y2 + halfLineWidth );
+          }
+          // (sx,sy) is a vector with a magnitude of halfLineWidth pointed in the direction of (dx,dy)
+          var sx = halfLineWidth * dx / magnitude;
+          var sy = halfLineWidth * dy / magnitude;
+          var bounds = Bounds2.NOTHING.copy();
+
+          if ( lineCap === 'butt' ) {
+            // four points just using the perpendicular stroked offsets (sy,-sx) and (-sy,sx)
+            bounds.addCoordinates( this._x1 - sy, this._y1 + sx );
+            bounds.addCoordinates( this._x1 + sy, this._y1 - sx );
+            bounds.addCoordinates( this._x2 - sy, this._y2 + sx );
+            bounds.addCoordinates( this._x2 + sy, this._y2 - sx );
+          }
+          else {
+            assert && assert( lineCap === 'square' );
+
+            // four points just using the perpendicular stroked offsets (sy,-sx) and (-sy,sx) and parallel stroked offsets
+            bounds.addCoordinates( this._x1 - sx - sy, this._y1 - sy + sx );
+            bounds.addCoordinates( this._x1 - sx + sy, this._y1 - sy - sx );
+            bounds.addCoordinates( this._x2 + sx - sy, this._y2 + sy + sx );
+            bounds.addCoordinates( this._x2 + sx + sy, this._y2 + sy - sx );
+          }
+          return bounds;
+        }
+      }
+      else {
+        // it might have a fill?
+        return Path.prototype.computeShapeBounds.call( this );
+      }
     },
 
     createSVGDrawable: function( renderer, instance ) {
