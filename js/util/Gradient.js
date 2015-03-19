@@ -14,6 +14,7 @@ define( function( require ) {
   var inherit = require( 'PHET_CORE/inherit' );
   var scenery = require( 'SCENERY/scenery' );
   var Paint = require( 'SCENERY/util/Paint' );
+  var Color = require( 'SCENERY/util/Color' );
 
   // TODO: add the ability to specify the color-stops inline. possibly [ [0,color1], [0.5,color2], [1,color3] ]
   scenery.Gradient = function Gradient( canvasGradient ) {
@@ -35,6 +36,11 @@ define( function( require ) {
      * @param {Color|String} color  Color for the stop, either a scenery.Color or CSS color string
      */
     addColorStop: function( ratio, color ) {
+      assert && assert( typeof ratio === 'number', 'Ratio needs to be a number' );
+      assert && assert( ratio >= 0 && ratio <= 1, 'Ratio needs to be between 0,1 inclusively' );
+      assert && assert( typeof color === 'string' || color instanceof Color,
+        'Color should be a string or a {Color} object' );
+
       // TODO: invalidate the gradient?
       if ( this.lastStopRatio > ratio ) {
         // fail out, since browser quirks go crazy for this case
