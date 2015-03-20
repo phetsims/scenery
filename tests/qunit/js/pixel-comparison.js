@@ -180,6 +180,38 @@
     0, testedRenderers, true // asynchronous
   );
 
+  multipleRendererTest( 'Color change after display',
+    function( scene, display ) {
+      display.width = 40;
+      display.height = 40;
+      var color = new scenery.Color( 'red' );
+      scene.addChild( new scenery.Rectangle( 6, 6, 28, 28, {
+        fill: color
+      } ) );
+      display.updateDisplay();
+      color.setRGBA( 0, 0, 0, 1 );
+      display.updateDisplay();
+    }, simpleRectangleDataURL,
+    0, testedRenderers
+  );
+
+  multipleRendererTest( 'Color change before display',
+    function( scene, display ) {
+      display.width = 40;
+      display.height = 40;
+      var color = new scenery.Color( 'red' );
+      var rect = new scenery.Rectangle( 6, 6, 28, 28, {
+        fill: '#00ff00'
+      } );
+      scene.addChild( rect );
+      display.updateDisplay();
+      rect.fill = color;
+      color.setRGBA( 0, 0, 0, 1 );
+      display.updateDisplay();
+    }, simpleRectangleDataURL,
+    0, testedRenderers
+  );
+
   multipleRendererTest( 'Invisible node with rectangles (paths) above and below',
     function( scene, display ) {
       display.width = 32;

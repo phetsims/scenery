@@ -117,12 +117,12 @@ define( function( require ) {
       if ( this.dirtyStroke ) {
         this.paintState.updateStroke( this.svgBlock, this.node._stroke );
       }
-      var strokeParameterDirty = this.dirtyLineWidth || this.dirtyLineOptions;
-      if ( strokeParameterDirty ) {
-        this.paintState.updateStrokeParameters( this.node );
+      var strokeDetailDirty = this.dirtyLineWidth || this.dirtyLineOptions;
+      if ( strokeDetailDirty ) {
+        this.paintState.updateStrokeDetailStyle( this.node );
       }
-      if ( this.dirtyFill || this.dirtyStroke || strokeParameterDirty ) {
-        element.setAttribute( 'style', this.paintState.baseStyle + this.paintState.extraStyle );
+      if ( this.dirtyFill || this.dirtyStroke || strokeDetailDirty ) {
+        element.setAttribute( 'style', this.paintState.baseStyle + this.paintState.strokeDetailStyle );
       }
     },
 

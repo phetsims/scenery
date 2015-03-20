@@ -100,6 +100,9 @@ define( function( require ) {
         },
 
         setFill: function( fill ) {
+          // Instance equality used here since it would be more expensive to parse all CSS
+          // colors and compare every time the fill changes. Right now, usually we don't have
+          // to parse CSS colors. See https://github.com/phetsims/scenery/issues/255
           if ( this._fill !== fill ) {
             this._fillColorDirty = true;
 
@@ -117,11 +120,6 @@ define( function( require ) {
             }
 
             this.invalidateFill();
-
-            var stateLen = this._drawables.length;
-            for ( var i = 0; i < stateLen; i++ ) {
-              this._drawables[ i ].markDirtyFill();
-            }
           }
           return this;
         },
@@ -348,11 +346,6 @@ define( function( require ) {
             }
 
             this.invalidateStroke();
-
-            var stateLen = this._drawables.length;
-            for ( var i = 0; i < stateLen; i++ ) {
-              this._drawables[ i ].markDirtyStroke();
-            }
           }
           return this;
         },
@@ -601,30 +594,49 @@ define( function( require ) {
       Object.defineProperty( proto, 'strokePickable', { set: proto.setStrokePickable, get: proto.isStrokePickable } );
       Object.defineProperty( proto, 'cachedPaints', { set: proto.setCachedPaints, get: proto.getCachedPaints } );
 
+      // Paintable's version of invalidateFill()
+      function invalidateFill() {
+        /*jshint -W040 */
+        this.invalidateSupportedRenderers();
+
+        var stateLen = this._drawables.length;
+        for ( var i = 0; i < stateLen; i++ ) {
+          this._drawables[ i ].markDirtyFill();
+        }
+        /*jshint +W040 */
+      }
+      // Patch in a sub-type call if it already exists on the prototype
       if ( proto.invalidateFill ) {
-        var oldInvalidateFill = proto.invalidateFill;
+        var subtypeInvalidateFill = proto.invalidateFill;
         proto.invalidateFill = function() {
-          this.invalidateSupportedRenderers();
-          oldInvalidateFill.call( this );
+          subtypeInvalidateFill.call( this );
+          invalidateFill.call( this );
         };
       }
       else {
-        proto.invalidateFill = function() {
-          this.invalidateSupportedRenderers();
-        };
+        proto.invalidateFill = invalidateFill;
       }
 
+      // Paintable's version of invalidateStroke()
+      function invalidateStroke() {
+        /*jshint -W040 */
+        this.invalidateSupportedRenderers();
+
+        var stateLen = this._drawables.length;
+        for ( var i = 0; i < stateLen; i++ ) {
+          this._drawables[ i ].markDirtyStroke();
+        }
+        /*jshint +W040 */
+      }
       if ( proto.invalidateStroke ) {
-        var oldInvalidateStroke = proto.invalidateStroke;
+        var subtypeInvalidateStroke = proto.invalidateStroke;
         proto.invalidateStroke = function() {
-          this.invalidateSupportedRenderers();
-          oldInvalidateStroke.call( this );
+          subtypeInvalidateStroke.call( this );
+          invalidateStroke.call( this );
         };
       }
       else {
-        proto.invalidateStroke = function() {
-          this.invalidateSupportedRenderers();
-        };
+        proto.invalidateStroke = invalidateStroke;
       }
     }
   };
@@ -713,6 +725,25 @@ define( function( require ) {
     }
   };
 
+  function paintToSVGStyle( paint, svgBlock ) {
+    if ( !paint ) {
+      // no paint
+      return 'none';
+    }
+    else if ( paint.toCSS ) {
+      // Color object paint
+      return paint.toCSS();
+    }
+    else if ( paint.isPaint ) {
+      // reference the SVG definition with a URL
+      return 'url(#' + paint.id + '-' + ( svgBlock ? svgBlock.id : 'noblock' ) + ')';
+    }
+    else {
+      // plain CSS color
+      return paint;
+    }
+  }
+
   // handles SVG defs and fill/stroke style for SVG elements (by composition, not a mix-in or for inheritance)
   Paintable.PaintSVGState = function PaintSVGState() {
     this.initialize();
@@ -720,11 +751,10 @@ define( function( require ) {
   inherit( Object, Paintable.PaintSVGState, {
     initialize: function() {
       this.svgBlock = null; // {SVGBlock | null}
-      this.blockChanged = true; // if our SVGBlock changes, make sure to update everything whose ID changes based on block
 
-      // copies of the last fill and stroke that were used
-      this.fill = null;
-      this.stroke = null;
+      // {string} fill/stroke style fragments that are currently used
+      this.fillStyle = 'none';
+      this.strokeStyle = 'none';
 
       // current reference-counted fill/stroke paints (gradients and fills) that will need to be released on changes
       // or disposal
@@ -732,14 +762,12 @@ define( function( require ) {
       this.strokePaint = null;
 
       // these are used by the actual SVG element
-      this.baseStyle = this.computeStyle(); // the main style CSS
-      this.extraStyle = '';                 // width/dash/cap/join CSS
+      this.updateBaseStyle(); // the main style CSS
+      this.strokeDetailStyle = ''; // width/dash/cap/join CSS
     },
 
     dispose: function() {
       // be cautious, release references
-      this.fill = null;
-      this.stroke = null;
       this.releaseFillPaint();
       this.releaseStrokePaint();
     },
@@ -762,60 +790,84 @@ define( function( require ) {
     updateFill: function( svgBlock, fill ) {
       assert && assert( this.svgBlock === svgBlock );
 
-      if ( fill !== this.fill || this.blockChanged ) {
-        this.blockChanged = false;
+      // NOTE: If fill.isPaint === true, this should be different if we switched to a different SVG block.
+      var fillStyle = paintToSVGStyle( fill, svgBlock );
+
+      // If our fill paint reference changed
+      if ( fill !== this.fillPaint ) {
+        // release the old reference
         this.releaseFillPaint();
-        this.fill = fill;
-        this.baseStyle = this.computeStyle();
-        if ( this.fill && this.fill.isPaint ) {
-          this.fillPaint = this.fill;
-          svgBlock.incrementPaint( this.fill );
+
+        // only store a new reference if our new fill is a paint
+        if ( fill && fill.isPaint ) {
+          this.fillPaint = fill;
+          svgBlock.incrementPaint( fill );
         }
+      }
+
+      // If we need to update the SVG style of our fill
+      if ( fillStyle !== this.fillStyle ) {
+        this.fillStyle = fillStyle;
+        this.updateBaseStyle();
       }
     },
 
     updateStroke: function( svgBlock, stroke ) {
       assert && assert( this.svgBlock === svgBlock );
 
-      if ( stroke !== this.stroke || this.blockChanged ) {
-        this.blockChanged = false;
+      // NOTE: If stroke.isPaint === true, this should be different if we switched to a different SVG block.
+      var strokeStyle = paintToSVGStyle( stroke, svgBlock );
+
+      // If our stroke paint reference changed
+      if ( stroke !== this.strokePaint ) {
+        // release the old reference
         this.releaseStrokePaint();
-        this.stroke = stroke;
-        this.baseStyle = this.computeStyle();
-        if ( this.stroke && this.stroke.isPaint ) {
-          this.strokePaint = this.stroke;
-          svgBlock.incrementPaint( this.stroke );
+
+        // only store a new reference if our new stroke is a paint
+        if ( stroke && stroke.isPaint ) {
+          this.strokePaint = stroke;
+          svgBlock.incrementPaint( stroke );
         }
+      }
+
+      // If we need to update the SVG style of our stroke
+      if ( strokeStyle !== this.strokeStyle ) {
+        this.strokeStyle = strokeStyle;
+        this.updateBaseStyle();
       }
     },
 
-    updateStrokeParameters: function( node ) {
-      var extraStyle = '';
+    updateBaseStyle: function() {
+      this.baseStyle = 'fill: ' + this.fillStyle + '; stroke: ' + this.strokeStyle + ';';
+    },
+
+    updateStrokeDetailStyle: function( node ) {
+      var strokeDetailStyle = '';
 
       var lineWidth = node.getLineWidth();
       if ( lineWidth !== 1 ) {
-        extraStyle += 'stroke-width: ' + lineWidth + ';';
+        strokeDetailStyle += 'stroke-width: ' + lineWidth + ';';
       }
 
       var lineCap = node.getLineCap();
       if ( lineCap !== 'butt' ) {
-        extraStyle += 'stroke-linecap: ' + lineCap + ';';
+        strokeDetailStyle += 'stroke-linecap: ' + lineCap + ';';
       }
 
       var lineJoin = node.getLineJoin();
       if ( lineJoin !== 'miter' ) {
-        extraStyle += 'stroke-linejoin: ' + lineJoin + ';';
+        strokeDetailStyle += 'stroke-linejoin: ' + lineJoin + ';';
       }
 
       var miterLimit = node.getMiterLimit();
-      extraStyle += 'stroke-miterlimit: ' + miterLimit + ';';
+      strokeDetailStyle += 'stroke-miterlimit: ' + miterLimit + ';';
 
       if ( node.hasLineDash() ) {
-        extraStyle += 'stroke-dasharray: ' + node.getLineDash().join( ',' ) + ';';
-        extraStyle += 'stroke-dashoffset: ' + node.getLineDashOffset() + ';';
+        strokeDetailStyle += 'stroke-dasharray: ' + node.getLineDash().join( ',' ) + ';';
+        strokeDetailStyle += 'stroke-dashoffset: ' + node.getLineDashOffset() + ';';
       }
 
-      this.extraStyle = extraStyle;
+      this.strokeDetailStyle = strokeDetailStyle;
     },
 
     // called when the defs SVG block is switched (our SVG element was moved to another SVG top-level context)
@@ -840,50 +892,6 @@ define( function( require ) {
       if ( this.strokePaint ) {
         svgBlock.incrementPaint( this.strokePaint );
       }
-
-      this.blockChanged = true;
-    },
-
-    computeStyle: function() {
-      var style = 'fill: ';
-      if ( !this.fill ) {
-        // no fill
-        style += 'none;';
-      }
-      else if ( this.fill.toCSS ) {
-        // Color object fill
-        style += this.fill.toCSS() + ';';
-      }
-      else if ( this.fill.isPaint ) {
-        // reference the SVG definition with a URL
-        style += 'url(#' + this.fill.id + '-' + ( this.svgBlock ? this.svgBlock.id : 'noblock' ) + ');';
-      }
-      else {
-        // plain CSS color
-        style += this.fill + ';';
-      }
-
-      if ( !this.stroke ) {
-        // no stroke
-        style += ' stroke: none;';
-      }
-      else {
-        style += ' stroke: ';
-        if ( this.stroke.toCSS ) {
-          // Color object stroke
-          style += this.stroke.toCSS() + ';';
-        }
-        else if ( this.stroke.isPaint ) {
-          // reference the SVG definition with a URL
-          style += 'url(#' + this.stroke.id + '-' + ( this.svgBlock ? this.svgBlock.id : 'noblock' ) + ');';
-        }
-        else {
-          // plain CSS color
-          style += this.stroke + ';';
-        }
-      }
-
-      return style;
     }
   } );
 

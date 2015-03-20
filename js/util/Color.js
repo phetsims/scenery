@@ -464,6 +464,10 @@ define( function( require ) {
       this.listeners.splice( _.indexOf( this.listeners, listener ), 1 );
     },
 
+    getListenerCount: function() {
+      return this.listeners.length;
+    },
+
     toString: function() {
       return this.constructor.name + "[r:" + this.r + " g:" + this.g + " b:" + this.b + " a:" + this.a + "]";
     }

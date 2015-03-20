@@ -59,20 +59,30 @@ define( function( require ) {
     },
 
     setFillStyle: function( style ) {
+      // turn {Color}s into strings when necessary
+      if ( style && style.getCanvasStyle ) {
+        style = style.getCanvasStyle();
+      }
+
       if ( this.fillStyle !== style ) {
         this.fillStyle = style;
 
         // allow gradients / patterns
-        this.context.fillStyle = ( style && style.getCanvasStyle ) ? style.getCanvasStyle() : style;
+        this.context.fillStyle = style;
       }
     },
 
     setStrokeStyle: function( style ) {
+      // turn {Color}s into strings when necessary
+      if ( style && style.getCanvasStyle ) {
+        style = style.getCanvasStyle();
+      }
+
       if ( this.strokeStyle !== style ) {
         this.strokeStyle = style;
 
         // allow gradients / patterns
-        this.context.strokeStyle = ( style && style.getCanvasStyle ) ? style.getCanvasStyle() : style;
+        this.context.strokeStyle = style;
       }
     },
 

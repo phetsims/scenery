@@ -128,12 +128,17 @@ an UI and Display made for visual testing and debugging.
 
       window.displayTest = function() {
         setTimeout( function() {
-          var rect = window.rect = new scenery.Rectangle( 0, 0, 100, 50, { fill: 'red', x: 100, rotation: 0.4 } );
+          window.color = new scenery.Color( 'green' );
+          window.rect = new scenery.Rectangle( 0, 0, 100, 50, { fill: color, renderer: 'canvas', stroke: color } );
           scene.addChild( rect );
-          scene.renderer = 'canvas';
-          display.backgroundColor = '#aaa';
           display.updateDisplay();
-          display.foreignObjectRasterization( function( url ) { console.log( url ); } );
+
+          // rect.fill = color;
+          // rect.stroke = color;
+          display.updateDisplay();
+
+          color.setRGBA( 0, 0, 255, 1 );
+          // display.updateDisplay();
         } );
       };
 

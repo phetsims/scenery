@@ -891,4 +891,39 @@
       } );
     } );
   } );
+
+  test( 'Color listener non-memory-leak-ness', function() {
+    var scene = new scenery.Node();
+    var display = new scenery.Display( scene, { width: 20, height: 20 } );
+    display.updateDisplay();
+    var node = new scenery.Node();
+    scene.addChild( node );
+
+    var color = new scenery.Color( 255, 255, 0 );
+    console.log( color.getListenerCount() );
+    equal( color.getListenerCount(), 0, 'Initial colors should have no listeners' );
+
+    var rect = new scenery.Rectangle( 0, 0, 50, 50, { fill: color } );
+    node.addChild( rect );
+    equal( color.getListenerCount(), 0, 'Still no listeners until updateDisplay' );
+
+    display.updateDisplay();
+    equal( color.getListenerCount(), 1, 'One listener for the rectangle' );
+
+    var circle = new scenery.Circle( 40, { fill: color, stroke: color } );
+    node.addChild( circle );
+    display.updateDisplay();
+    equal( color.getListenerCount(), 3, 'One listener for the rectangle, two for the circle (stroke/fill)' );
+
+    circle.stroke = null;
+    equal( color.getListenerCount(), 2, 'One listener for the rectangle, one for the circle (fill)' );
+
+    rect.addChild( circle );
+    display.updateDisplay();
+    equal( color.getListenerCount(), 2, 'One listener for the rectangle, one for the circle (even though two instances)' );
+
+    node.removeAllChildren();
+    display.updateDisplay();
+    equal( color.getListenerCount(), 0, 'Nothing else attached' );
+  } );
 })();
