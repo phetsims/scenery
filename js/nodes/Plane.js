@@ -19,7 +19,7 @@ define( function( require ) {
   var Rectangle = require( 'SCENERY/nodes/Rectangle' );
 
   /**
-   * @param options Any options for the plane, typically fill/opacity (many others such as scale, translation, rotation should have no effect)
+   * @param {Object} [options] Any options for the plane, typically fill/opacity (many others such as scale, translation, rotation should have no effect)
    * @constructor
    */
   scenery.Plane = function Plane( options ) {

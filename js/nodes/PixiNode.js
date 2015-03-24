@@ -110,7 +110,7 @@ define( function( require ) {
    * Iterate over the full dag and turn into pixi displayObjects
    * additionally observe all elements in the dag and update this node when they change.
    * @param sceneryRootNode
-   * @param options
+   * @param {Object} [options]
    * @constructor
    */
   scenery.PixiNode = function PixiNode( sceneryRootNode, options ) {
