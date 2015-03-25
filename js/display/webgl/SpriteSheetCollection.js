@@ -42,8 +42,16 @@ define( function( require ) {
       var frameRange = new FrameRange( bounds, this.spriteSheets.length - 1 );
       this.imageFrameRangeCache[ image.src ] = frameRange;
       return frameRange;
+    },
+
+    /**
+     * Checks to see whether an image is already present in the SpriteSheetCollection.  If so, it will
+     * return the frame range, otherwise returns null.
+     * @param {HTMLImage} image
+     * @returns {FrameRange | null}
+     */
+    getFrameRange: function( image ) {
+      return this.imageFrameRangeCache[ image.src ] || null;
     }
-
   } );
-
 } );

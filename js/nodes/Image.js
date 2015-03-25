@@ -39,8 +39,8 @@ define( function( require ) {
   var defaultMipmapMaxLevel = 5;
 
   var log2 = Math.log2 || function( x ) {
-    return Math.log( x ) / Math.LN2;
-  };
+      return Math.log( x ) / Math.LN2;
+    };
 
   /*
    * Canvas renderer supports the following as 'image':
@@ -170,7 +170,7 @@ define( function( require ) {
         else if ( image instanceof Array ) {
           // mipmap data!
           this._mipmapData = image;
-          image = image[0].img; // presumes we are already loaded
+          image = image[ 0 ].img; // presumes we are already loaded
 
           // force initialization of mipmapping parameters, since invalidateMipmaps() is guaranteed to run below
           this._mipmapInitialLevel = this._mipmapMaxLevel = this._mipmapData.length;
@@ -221,7 +221,7 @@ define( function( require ) {
       assert && assert( typeof mipmap === 'boolean' );
 
       if ( this._mipmap !== mipmap ) {
-        this._mipmap =  mipmap;
+        this._mipmap = mipmap;
 
         this.invalidateMipmaps();
       }
@@ -279,7 +279,7 @@ define( function( require ) {
     // @private
     constructNextMipmap: function() {
       var level = this._mipmapCanvases.length;
-      var biggerCanvas = this._mipmapCanvases[level-1];
+      var biggerCanvas = this._mipmapCanvases[ level - 1 ];
 
       // ignore any 1x1 canvases (or smaller?!?)
       if ( biggerCanvas.width * biggerCanvas.height > 2 ) {
@@ -307,14 +307,14 @@ define( function( require ) {
       if ( this._image && this._mipmap ) {
         if ( this._mipmapData ) {
           for ( var k = 0; k < this._mipmapData.length; k++ ) {
-            var url = this._mipmapData[k].url;
+            var url = this._mipmapData[ k ].url;
             this._mipmapURLs.push( url );
             // TODO: baseCanvas only upon demand?
             var canvas = document.createElement( 'canvas' );
-            canvas.width = this._mipmapData[k].width;
-            canvas.height = this._mipmapData[k].height;
+            canvas.width = this._mipmapData[ k ].width;
+            canvas.height = this._mipmapData[ k ].height;
             var context = canvas.getContext( '2d' );
-            context.drawImage( this._mipmapData[k].img, 0, 0 );
+            context.drawImage( this._mipmapData[ k ].img, 0, 0 );
             this._mipmapCanvases.push( canvas );
           }
         }
@@ -332,7 +332,7 @@ define( function( require ) {
             this._mipmapURLs.push( baseCanvas.toDataURL() );
 
             var level = 0;
-            while( ++level < this._mipmapInitialLevel ) {
+            while ( ++level < this._mipmapInitialLevel ) {
               this.constructNextMipmap();
             }
           }
@@ -371,7 +371,7 @@ define( function( require ) {
       }
 
       // If necessary, do lazy construction of the mipmap level
-      if ( this.mipmap && !this._mipmapCanvases[level] ) {
+      if ( this.mipmap && !this._mipmapCanvases[ level ] ) {
         var currentLevel = this._mipmapCanvases.length - 1;
         while ( ++currentLevel <= level ) {
           this.constructNextMipmap();
@@ -391,7 +391,7 @@ define( function( require ) {
     getMipmapCanvas: function( level ) {
       assert && assert( level >= 0 && level < this._mipmapCanvases.length && ( level % 1 ) === 0 );
 
-      return this._mipmapCanvases[level];
+      return this._mipmapCanvases[ level ];
     },
 
     /**
@@ -400,7 +400,7 @@ define( function( require ) {
     getMipmapURL: function( level ) {
       assert && assert( level >= 0 && level < this._mipmapCanvases.length && ( level % 1 ) === 0 );
 
-      return this._mipmapURLs[level];
+      return this._mipmapURLs[ level ];
     },
 
     hasMipmaps: function() {
@@ -773,15 +773,19 @@ define( function( require ) {
       // cleanup old vertexBuffer, if applicable
 //      this.disposeWebGLBuffers();
 
-      this.updateRectangle();
+      this.updateImage();
 
       //TODO: Update the state in the buffer arrays
     },
 
     //Nothing necessary since everything currently handled in the uModelViewMatrix below
     //However, we may switch to dynamic draw, and handle the matrix change only where necessary in the future?
-    updateRectangle: function() {
+    updateImage: function() {
       this.imageHandle.update();
+
+      // If none of the sprite sheets contained that image, then mark the spritesheet as dirty
+      // and send it to the GPU after updating
+      this.webglBlock.webGLRenderer.textureRenderer.bindDirtyTextures();
     },
 
     render: function( shaderProgram ) {
@@ -812,7 +816,7 @@ define( function( require ) {
     //TODO: Make sure all of the dirty flags make sense here.  Should we be using fillDirty, paintDirty, dirty, etc?
     update: function() {
       if ( this.dirty ) {
-        this.updateRectangle();
+        this.updateImage();
         this.dirty = false;
       }
     }

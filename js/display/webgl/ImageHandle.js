@@ -1,9 +1,11 @@
 //  Copyright 2002-2014, University of Colorado Boulder
 
 /**
- *
+ * ImageHandle is created when using the WebGL renderer, it corresponds to a single scenery Image
+ * and coordinates with SpriteSheetCollection to create an (updateable) image texture for rendering.
  *
  * @author Sam Reid (PhET Interactive Simulations)
+ * @autor Sharf Ashraf
  */
 define( function( require ) {
   'use strict';
@@ -20,31 +22,25 @@ define( function( require ) {
     this.imageNode = imageNode;
     this.z = z;
     this.textureRenderer = textureRenderer;
-    var frameRange = textureRenderer.spriteSheetCollection.addImage( imageNode.image );
+    this.frameRange = textureRenderer.spriteSheetCollection.addImage( imageNode.image );
 
     // If there is no textureBuffer/VertexBuffer/textures entry for this SpriteSheet so create one
-    if ( !textureRenderer.textureBufferDataArray[ frameRange.spriteSheetIndex ] ) {
+    if ( !textureRenderer.textureBufferDataArray[ this.frameRange.spriteSheetIndex ] ) {
 
-      textureRenderer.textureBufferDataArray[ frameRange.spriteSheetIndex ] = new TextureBufferData();
-      textureRenderer.vertexBufferArray[ frameRange.spriteSheetIndex ] = textureRenderer.gl.createBuffer();
-      textureRenderer.textureArray[ frameRange.spriteSheetIndex ] = textureRenderer.gl.createTexture();
+      textureRenderer.textureBufferDataArray[ this.frameRange.spriteSheetIndex ] = new TextureBufferData();
+      textureRenderer.vertexBufferArray[ this.frameRange.spriteSheetIndex ] = textureRenderer.gl.createBuffer();
+      textureRenderer.textureArray[ this.frameRange.spriteSheetIndex ] = textureRenderer.gl.createTexture();
     }
-    var textureBufferData = textureRenderer.textureBufferDataArray[ frameRange.spriteSheetIndex ];
-
-    var image = imageNode.image;
+    this.textureBufferData = textureRenderer.textureBufferDataArray[ this.frameRange.spriteSheetIndex ];
 
     //TODO: Check to see if any of the sprite sheets already contains that image
     //TODO: If none of the sprite sheets contained that image, then mark the spritesheet as dirty
     //TODO: and send it to the GPU after updating
 
-    var range = textureBufferData.reserveVertices( 6 );
+    var range = this.textureBufferData.reserveVertices( 6 );
     this.startIndex = range.startIndex;
     this.endIndex = range.endIndex;
-    this.frameRange = frameRange;
 
-    this.image = image;
-
-    this.textureBufferData = textureBufferData;
     this.update();
   }
 
@@ -54,26 +50,29 @@ define( function( require ) {
       var x = 0;
       var y = 0;
       var z = this.z;
+
       var imageNode = this.imageNode;
 
-      var frameRange = this.frameRange;
+      // Check to see if any of the sprite sheets already contains that image
+      this.frameRange = this.textureRenderer.spriteSheetCollection.getFrameRange( imageNode.image );
+
+      if ( !this.frameRange ) {
+        this.frameRange = this.textureRenderer.spriteSheetCollection.addImage( imageNode.image );
+      }
+
       var width = imageNode.getImageWidth();
       var height = imageNode.getImageHeight();
       var matrix4 = imageNode.getLocalToGlobalMatrix().toAffineMatrix4();
-
-      //TODO: Check to see if any of the sprite sheets already contains that image
-      //TODO: If none of the sprite sheets contained that image, then mark the spritesheet as dirty
-      //TODO: and send it to the GPU after updating
 
       var x1 = x;
       var x2 = x + width;
       var y1 = y;
       var y2 = y + height;
 
-      var u0 = frameRange.bounds.minX;
-      var u1 = frameRange.bounds.maxX;
-      var v0 = frameRange.bounds.minY;
-      var v1 = frameRange.bounds.maxY;
+      var u0 = this.frameRange.bounds.minX;
+      var u1 = this.frameRange.bounds.maxX;
+      var v0 = this.frameRange.bounds.minY;
+      var v1 = this.frameRange.bounds.maxY;
 
       //Track the index so it can delete itself, update itself, etc.
       var newElements = [
