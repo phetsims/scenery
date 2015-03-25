@@ -3,7 +3,8 @@
 <head>
   <meta charset="utf-8"/>
   <meta http-equiv="X-UA-Compatible" content="IE=edge"/>
-  <meta name="viewport" content="width=device-width, height=device-height, initial-scale=1.0, maximum-scale=1.0, user-scalable=no"/>
+  <meta name="viewport"
+        content="width=device-width, height=device-height, initial-scale=1.0, maximum-scale=1.0, user-scalable=no"/>
   <meta name="apple-mobile-web-app-capable" content="yes">
 
   <title>Hello World - Scenery Example</title>
@@ -83,12 +84,12 @@
 
       drawable.vertexBuffer = gl.createBuffer();
 
-      var points = this.shape.subpaths[0].points;
+      var points = this.shape.subpaths[ 0 ].points;
       gl.bindBuffer( gl.ARRAY_BUFFER, drawable.vertexBuffer );
       gl.bufferData( gl.ARRAY_BUFFER, new Float32Array( [
-        points[0].x, points[0].y, 0.2,
-        points[1].x, points[1].y, 0.2,
-        points[2].x, points[2].y, 0.2
+        points[ 0 ].x, points[ 0 ].y, 0.2,
+        points[ 1 ].x, points[ 1 ].y, 0.2,
+        points[ 2 ].x, points[ 2 ].y, 0.2
       ] ), gl.STATIC_DRAW );
 
       drawable.colorBuffer = gl.createBuffer();
@@ -107,8 +108,8 @@
 
       shaderProgram.use();
 
-      gl.uniformMatrix3fv( shaderProgram.uniformLocations.uModelViewMatrix, false, new Float32Array( matrix.entries ) );
-      gl.uniformMatrix3fv( shaderProgram.uniformLocations.uProjectionMatrix, false, new Float32Array( drawable.webGLBlock.projectionMatrixArray ) );
+      gl.uniformMatrix3fv( shaderProgram.uniformLocations.uModelViewMatrix, false, matrix.entries );
+      gl.uniformMatrix3fv( shaderProgram.uniformLocations.uProjectionMatrix, false, drawable.webGLBlock.projectionMatrixArray );
 
       gl.bindBuffer( gl.ARRAY_BUFFER, drawable.vertexBuffer );
       gl.vertexAttribPointer( shaderProgram.attributeLocations.aPosition, 3, gl.FLOAT, false, 0, 0 );
