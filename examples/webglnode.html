@@ -107,8 +107,8 @@
 
       shaderProgram.use();
 
-      gl.uniformMatrix3fv( shaderProgram.uniformLocations.uModelViewMatrix, false, matrix.entries );
-      gl.uniformMatrix3fv( shaderProgram.uniformLocations.uProjectionMatrix, false, drawable.webGLBlock.projectionMatrixArray );
+      gl.uniformMatrix3fv( shaderProgram.uniformLocations.uModelViewMatrix, false, new Float32Array( matrix.entries ) );
+      gl.uniformMatrix3fv( shaderProgram.uniformLocations.uProjectionMatrix, false, new Float32Array( drawable.webGLBlock.projectionMatrixArray ) );
 
       gl.bindBuffer( gl.ARRAY_BUFFER, drawable.vertexBuffer );
       gl.vertexAttribPointer( shaderProgram.attributeLocations.aPosition, 3, gl.FLOAT, false, 0, 0 );
