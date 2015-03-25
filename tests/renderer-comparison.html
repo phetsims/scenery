@@ -121,7 +121,7 @@
     require( [
           'main', 'KITE/main', 'DOT/main', 'PHET_CORE/main'
         ],
-        function( scenery, kite, dot, phetcore ) {
+        function( scenery, kite, dot, phetCore ) {
           var ShaderProgram = require( 'SCENERY/util/ShaderProgram' );
 
           var testCases = [
@@ -301,7 +301,7 @@
                   scenery.WebGLNode.call( this, options );
                 }
 
-                var LinesNode = phetcore.inherit( scenery.WebGLNode, LinesNode, {
+                var LinesNode = phetCore.inherit( scenery.WebGLNode, LinesNode, {
                   initializeWebGLDrawable: function( drawable ) {
                     var gl = drawable.gl;
 

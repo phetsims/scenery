@@ -51,11 +51,11 @@ Will copy it to the console so it can be copy-pasted to reproduce elsewhere.
   var fuzzing = true;
 
   require( [ 'config' ], function() {
-    require( [ 'main', 'KITE/main', 'DOT/main', 'PHET_CORE/main' ], function( scenery, kite, dot, core ) {
+    require( [ 'main', 'KITE/main', 'DOT/main', 'PHET_CORE/main' ], function( scenery, kite, dot, phetCore ) {
       window.scenery = scenery;
       window.kite = kite;
       window.dot = dot;
-      window.core = core;
+      window.phetCore = phetCore;
 
       console.log( 'loaded' );
 
@@ -371,7 +371,7 @@ Will copy it to the console so it can be copy-pasted to reproduce elsewhere.
         fuzzing = false;
       };
 
-      core.extend( window, {
+      phetCore.extend( window, {
         get fuzzLog() {
           return this._fuzzLog.join( '\n' );
         }

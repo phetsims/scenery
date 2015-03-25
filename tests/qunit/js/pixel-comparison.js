@@ -12,7 +12,7 @@
   var testedRenderers = [ 'canvas', 'svg', 'dom' ];
 
   // We can only guarantee comparisons for Firefox and Chrome
-  if ( !core.platform.firefox && !core.platform.chromium ) {
+  if ( !phetCore.platform.firefox && !phetCore.platform.chromium ) {
     window.console && window.console.log && window.console.log( 'Not running pixel-comparison tests' );
     return;
   }

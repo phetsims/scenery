@@ -24,12 +24,12 @@
 
 <script>
   require( [ 'config' ], function() {
-    require( [ 'main', 'KITE/main', 'DOT/main', 'AXON/main', 'PHET_CORE/main' ], function( scenery, kite, dot, axon, core ) {
+    require( [ 'main', 'KITE/main', 'DOT/main', 'AXON/main', 'PHET_CORE/main' ], function( scenery, kite, dot, axon, phetCore ) {
       window.scenery = scenery;
       window.kite = kite;
       window.dot = dot;
       window.axon = axon;
-      window.core = core;
+      window.phetCore = phetCore;
 
       var scene = new scenery.Node();
       var display = new scenery.Display( scene, {

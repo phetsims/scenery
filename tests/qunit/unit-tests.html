@@ -56,12 +56,12 @@
 <script src="prepare-fixture.js"></script>
 <script>
   require( [ 'config' ], function() {
-    require( [ 'main', 'KITE/main', 'DOT/main', 'AXON/main', 'PHET_CORE/main' ], function( scenery, kite, dot, axon, core ) {
+    require( [ 'main', 'KITE/main', 'DOT/main', 'AXON/main', 'PHET_CORE/main' ], function( scenery, kite, dot, axon, phetCore ) {
       window.scenery = scenery;
       window.kite = kite;
       window.dot = dot;
       window.axon = axon;
-      window.core = core;
+      window.phetCore = phetCore;
 
       runSceneryTests( '.' );
       runKiteTests( '../../../kite/tests/qunit' );

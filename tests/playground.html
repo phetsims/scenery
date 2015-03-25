@@ -86,11 +86,11 @@ an UI and Display made for visual testing and debugging.
   var fuzzStep = false;
 
   require( [ 'config' ], function() {
-    require( [ 'main', 'KITE/main', 'DOT/main', 'PHET_CORE/main' ], function( scenery, kite, dot, core ) {
+    require( [ 'main', 'KITE/main', 'DOT/main', 'PHET_CORE/main' ], function( scenery, kite, dot, phetCore ) {
       window.scenery = scenery;
       window.kite = kite;
       window.dot = dot;
-      window.core = core;
+      window.phetCore = phetCore;
 
       console.log( 'loaded' );
 
@@ -107,7 +107,7 @@ an UI and Display made for visual testing and debugging.
       display._domElement.id = 'display';
       document.body.insertBefore( display._domElement, document.body.firstChild );
 
-      core.loadScript( {
+      phetCore.loadScript( {
         src: 'qunit/js/test-utils.js',
         callback: function() {
           console.log( 'loaded test-utils.js' );

@@ -54,12 +54,12 @@
       'AXON/main',
       'PHET_CORE/main',
       'image!ENERGY_SKATE_PARK_BASICS/skater-icon.png'
-    ], function( scenery, kite, dot, axon, core, skaterImage ) {
+    ], function( scenery, kite, dot, axon, phetCore, skaterImage ) {
       window.scenery = scenery;
       window.kite = kite;
       window.dot = dot;
       window.axon = axon;
-      window.core = core;
+      window.phetCore = phetCore;
 
       // Create a Node as the root of our tree (it can contain children)
       var scene = new scenery.Node();
