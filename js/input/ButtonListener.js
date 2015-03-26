@@ -24,7 +24,6 @@ define( function( require ) {
   var inherit = require( 'PHET_CORE/inherit' );
 
   var DownUpListener = require( 'SCENERY/input/DownUpListener' );
-  var Input = require( 'SCENERY/input/Input' );
 
   /**
    * Options for the ButtonListener:
@@ -38,11 +37,11 @@ define( function( require ) {
    * fire: null        // Called on a state change to/from 'down' (depending on fireOnDown), as fire( event ). Called after the triggering up/over/down event.
    */
   scenery.ButtonListener = function ButtonListener( options ) {
+    var self = this;
 
     this.buttonState = 'up'; // public: 'up', 'over', 'down' or 'out'
 
     this._overCount = 0; // how many pointers are over us (track a count, so we can handle multiple pointers gracefully)
-    this._enterOrSpaceKeyDown = false; // If an action key has pressed the button
 
     this._buttonOptions = options; // store the options object so we can call the callbacks
 
@@ -51,12 +50,20 @@ define( function( require ) {
 
       mouseButton: options.mouseButton || 0, // forward the mouse button, default to 0 (LMB)
 
+      // parameter to DownUpListener, NOT an input listener itself
       down: function( event, trail ) {
+        if ( event.pointer.isKey ) {
+          self.enter( event );
+        }
         buttonListener.setButtonState( event, 'down' );
       },
 
+      // parameter to DownUpListener, NOT an input listener itself
       up: function( event, trail ) {
         buttonListener.setButtonState( event, buttonListener._overCount > 0 ? 'over' : 'up' );
+        if ( event.pointer.isKey ) {
+          self.exit( event );
+        }
       }
     } );
   };
@@ -98,36 +105,6 @@ define( function( require ) {
       this._overCount--;
       if ( this._overCount === 0 ) {
         this.setButtonState( event, this.isDown ? 'out' : 'up' );
-      }
-    },
-    /**
-     * When enter or space is pressed, make a note of it and increment the over count.
-     * @param event
-     */
-    keydown: function( event ) {
-      DownUpListener.prototype.keydown.call( this, event );
-      var keyCode = event.domEvent.keyCode;
-      if ( keyCode === Input.KEY_ENTER || keyCode === Input.KEY_SPACE ) {
-        if ( !this._enterOrSpaceKeyDown ) {
-          this._overCount++;
-          this._enterOrSpaceKeyDown = true;
-        }
-      }
-    },
-
-    /**
-     * When the enter or space key comes up, decrement the over count.
-     * TODO: What if the enter key went down and the space key went up???
-     * @param event
-     */
-    keyup: function( event ) {
-      this.downListener.keyup( event );
-      var keyCode = event.domEvent.keyCode;
-      if ( keyCode === Input.KEY_ENTER || keyCode === Input.KEY_SPACE ) {
-        if ( this._enterOrSpaceKeyDown ) {
-          this._overCount--;
-          this._enterOrSpaceKeyDown = false;
-        }
       }
     }
   } );

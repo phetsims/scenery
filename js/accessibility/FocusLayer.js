@@ -12,6 +12,7 @@ define( function( require ) {
 
   // modules
   var inherit = require( 'PHET_CORE/inherit' );
+  var scenery = require( 'SCENERY/scenery' );
   var Node = require( 'SCENERY/nodes/Node' );
   var Input = require( 'SCENERY/input/Input' );
   var FocusRectangle = require( 'SCENERY/accessibility/FocusRectangle' );
@@ -29,7 +30,7 @@ define( function( require ) {
    * @param {Object} [options] - optional configuration, see constructor
    * @constructor
    */
-  function FocusLayer( options ) {
+  scenery.FocusLayer = function FocusLayer( options ) {
 
     options = _.extend( {
 
@@ -151,9 +152,9 @@ define( function( require ) {
     this.focusCursor = new FocusCursor( focusedBoundsProperty, focusIndicatorProperty );
 
     Node.call( this, { children: [ this.focusRectangle, this.focusCursor ] } );
-  }
+  };
 
-  return inherit( Node, FocusLayer, {}, {
+  return inherit( Node, scenery.FocusLayer, {}, {
 
     // An implementation of the tween factory interface that shows instantly-moving focus regions without TWEEN.js support
     INSTANT_TWEEN_FACTORY: {

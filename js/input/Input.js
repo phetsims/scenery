@@ -53,6 +53,8 @@ define( function( require ) {
     return -1;
   };
 
+  var globalDisplay = null;
+
   // listenerTarget is the DOM node (window/document/element) to which DOM event listeners will be attached
   scenery.Input = function Input( display, listenerTarget, batchDOMEvents, enablePointerEvents, pointFromEvent ) {
     this.display = display;
@@ -62,6 +64,7 @@ define( function( require ) {
     this.enablePointerEvents = enablePointerEvents;
     this.pointFromEvent = pointFromEvent;
     this.displayUpdateOnEvent = false;
+    globalDisplay = display;
 
     //OHTWO @deprecated
     this.batchedCallbacks = []; // cleared every frame
@@ -937,7 +940,7 @@ define( function( require ) {
           Input.flattenTrails( Input.focusContexts[ Input.focusContexts.length - 1 ].trail, Input.focusContexts[ Input.focusContexts.length - 1 ].trail, focusableTrails, focusable );
         }
         else {
-          var display = this.display;
+          var display = globalDisplay;
 
           var rootNode = display.rootNode;
           var trails = rootNode.getTrails();
