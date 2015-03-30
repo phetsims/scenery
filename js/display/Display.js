@@ -88,6 +88,7 @@ define( function( require ) {
    *   allowWebGL: true,                    // Boolean flag that indicates whether scenery is allowed to use WebGL for rendering
    *                                        // Makes it possible to disable WebGL for ease of testing on non-WebGL platforms, see #289
    *   accessibility: true                  // Whether accessibility enhancements is enabled
+   *   interactive: true                    // Whether mouse/touch/keyboard inputs are enabled (if input has been added)
    */
   scenery.Display = function Display( rootNode, options ) {
 
@@ -110,7 +111,8 @@ define( function( require ) {
       backgroundColor: null,      // initial background color
       preserveDrawingBuffer: false,
       allowWebGL: true,
-      accessibility: true
+      accessibility: true,
+      interactive: true
     }, options );
 
     // The (integral, > 0) dimensions of the Display's DOM element (only updates the DOM element on updateDisplay())
@@ -162,6 +164,7 @@ define( function( require ) {
 
     // will be filled in with a scenery.Input if event handling is enabled
     this._input = null;
+    this._interactive = this.options.interactive;
 
     // overlays currently being displayed.
     // API expected:
@@ -458,6 +461,14 @@ define( function( require ) {
       return this._backgroundColor;
     },
     get backgroundColor() { return this.getBackgroundColor(); },
+
+    get interactive() { return this._interactive; },
+    set interactive( value ) {
+      this._interactive = value;
+      if ( !this._interactive && this._input ) {
+        this._input.clearBatchedEvents();
+      }
+    },
 
     addOverlay: function( overlay ) {
       this._overlays.push( overlay );

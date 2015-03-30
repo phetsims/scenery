@@ -116,12 +116,15 @@ define( function( require ) {
 
   return inherit( Object, Input, {
       batchEvent: function( domEvent, batchType, callback, triggerImmediate ) {
-        this.batchedEvents.push( BatchedDOMEvent.createFromPool( domEvent, batchType, callback ) );
-        if ( triggerImmediate || !this.batchDOMEvents ) {
-          this.fireBatchedEvents();
-        }
-        if ( this.displayUpdateOnEvent ) {
-          //OHTWO TODO: update the display
+        // If our display is not interactive, do not respond to any events (but still prevent default)
+        if ( this.display.interactive ) {
+          this.batchedEvents.push( BatchedDOMEvent.createFromPool( domEvent, batchType, callback ) );
+          if ( triggerImmediate || !this.batchDOMEvents ) {
+            this.fireBatchedEvents();
+          }
+          if ( this.displayUpdateOnEvent ) {
+            //OHTWO TODO: update the display
+          }
         }
 
         // Don't preventDefault for key events, which often need to be handled by the browser
