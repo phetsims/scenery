@@ -1,6 +1,5 @@
 // Copyright 2002-2014, University of Colorado Boulder
 
-
 /**
  * PoolableMixin wrapper for SVG <group> elements. We store state and add listeners directly to the corresponding Node, so that we can set dirty flags and
  * smartly update only things that have changed. This takes a load off of SVGBlock.
@@ -63,9 +62,9 @@ define( function( require ) {
       this.opacityDirtyListener = this.opacityDirtyListener || this.markOpacityDirty.bind( this );
       this.visibilityDirtyListener = this.visibilityDirtyListener || this.markVisibilityDirty.bind( this );
       this.clipDirtyListener = this.clipDirtyListener || this.markClipDirty.bind( this );
+      this.node.onStatic( 'visibility', this.visibilityDirtyListener );
       if ( this.willApplyFilters ) {
         this.node.onStatic( 'opacity', this.opacityDirtyListener );
-        this.node.onStatic( 'visibility', this.visibilityDirtyListener );
       }
       //OHTWO TODO: remove clip workaround
       this.node.onStatic( 'clip', this.clipDirtyListener );
@@ -210,7 +209,7 @@ define( function( require ) {
 
         sceneryLog && sceneryLog.SVGGroup && sceneryLog.SVGGroup( 'visibility update: ' + this.toString() );
 
-        svgGroup.style.display = ( this.willApplyFilters && !this.node.isVisible() ) ? 'none' : '';
+        svgGroup.style.display = this.node.isVisible() ? '' : 'none';
       }
 
 
@@ -320,9 +319,9 @@ define( function( require ) {
       if ( this.willApplyTransforms ) {
         this.node.offStatic( 'transform', this.transformDirtyListener );
       }
+      this.node.offStatic( 'visibility', this.visibilityDirtyListener );
       if ( this.willApplyFilters ) {
         this.node.offStatic( 'opacity', this.opacityDirtyListener );
-        this.node.offStatic( 'visibility', this.visibilityDirtyListener );
       }
       //OHTWO TODO: remove clip workaround
       this.node.offStatic( 'clip', this.clipDirtyListener );

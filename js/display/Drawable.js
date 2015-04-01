@@ -1,6 +1,5 @@
 // Copyright 2002-2014, University of Colorado Boulder
 
-
 /**
  * Something that can be displayed with a specific renderer.
  * NOTE: Drawables are assumed to be pooled with PoolableMixin, as freeToPool() is called.
@@ -57,6 +56,7 @@ define( function( require ) {
   'use strict';
 
   var inherit = require( 'PHET_CORE/inherit' );
+  var Events = require( 'AXON/Events' );
   var scenery = require( 'SCENERY/scenery' );
   var Renderer = require( 'SCENERY/display/Renderer' );
 
@@ -67,8 +67,10 @@ define( function( require ) {
   };
   var Drawable = scenery.Drawable;
 
-  inherit( Object, Drawable, {
+  inherit( Events, Drawable, {
     initializeDrawable: function( renderer ) {
+      Events.call( this );
+
       assert && assert( !this.id || this.disposed, 'If we previously existed, we need to have been disposed' );
 
       // unique ID for drawables
@@ -84,6 +86,8 @@ define( function( require ) {
       this.disposed = false;
 
       this.linksDirty = false;
+
+      this._visible = true; // {boolean}, ES5 getter/setter provided
 
       return this;
     },
@@ -108,7 +112,22 @@ define( function( require ) {
       // similar but without recent changes, so that we can traverse both orders at the same time for stitching
       this.oldPreviousDrawable = null;
       this.oldNextDrawable = null;
+
+      this.removeAllEventListeners();
     },
+
+    setVisible: function( visible ) {
+      if ( this._visible !== visible ) {
+        this._visible = visible;
+        this.trigger0( 'visibility' );
+      }
+    },
+    set visible( value ) { this.setVisible( value ); },
+
+    isVisible: function() {
+      return this._visible;
+    },
+    get visible() { return this.isVisible(); },
 
     // called to add a block (us) as a child of a backbone
     setBlockBackbone: function( backboneInstance ) {

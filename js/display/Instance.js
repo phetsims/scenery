@@ -32,6 +32,7 @@ define( function( require ) {
   var Drawable = require( 'SCENERY/display/Drawable' );
   var Renderer = require( 'SCENERY/display/Renderer' );
   var RelativeTransform = require( 'SCENERY/display/RelativeTransform' );
+  var Events = require( 'AXON/Events' );
 
   var globalIdCounter = 1;
 
@@ -43,13 +44,15 @@ define( function( require ) {
 
   // see initialize() for documentation
   scenery.Instance = function Instance( display, trail, isDisplayRoot, isSharedCanvasCacheRoot ) {
+    Events.call( this );
+
     this.active = false;
 
     this.initialize( display, trail, isDisplayRoot, isSharedCanvasCacheRoot );
   };
   var Instance = scenery.Instance;
 
-  inherit( Object, Instance, {
+  inherit( Events, Instance, {
     /*
      * @param {Display} display - Instances are bound to a single display
      * @param {Trail} trail - The list of ancestors going back up to our root instance (for the display, or for a cache)
@@ -74,6 +77,7 @@ define( function( require ) {
       // Tracking of visibility {boolean} and associated boolean flags.
       this.visible = true; // global visibility (whether this instance will end up appearing on the display)
       this.relativeVisible = true; // relative visibility (ignores the closest ancestral visibility root and below)
+      this.selfVisible = true; // like relative visibility, but is always true if we are a visibility root
       this.visibilityDirty = true; // entire subtree of visibility will need to be updated
       this.childVisibilityDirty = true; // an ancestor needs its visibility updated
 
@@ -1192,8 +1196,12 @@ define( function( require ) {
 
       // calculate our visibilities
       var nodeVisible = this.node.isVisible();
+      var wasVisible = this.visible;
+      var wasRelativeVisible = this.relativeVisible;
+      var wasSelfVisible = this.selfVisible;
       this.visible = parentGloballyVisible && nodeVisible;
       this.relativeVisible = parentRelativelyVisible && nodeVisible;
+      this.selfVisible = this.isVisibilityApplied ? true : this.relativeVisible;
 
       var len = this.children.length;
       for ( var i = 0; i < len; i++ ) {
@@ -1207,6 +1215,17 @@ define( function( require ) {
 
       this.visibilityDirty = false;
       this.childVisibilityDirty = false;
+
+      // trigger changes after we do the full visibility update
+      if ( this.visible !== wasVisible ) {
+        this.trigger0( 'visibility' );
+      }
+      if ( this.relativeVisible !== wasRelativeVisible ) {
+        this.trigger0( 'relativeVisibility' );
+      }
+      if ( this.selfVisible !== wasSelfVisible ) {
+        this.trigger0( 'selfVisibility' );
+      }
     },
 
     getDescendantCount: function() {
@@ -1397,6 +1416,8 @@ define( function( require ) {
 
       // clean our variables out to release memory
       this.cleanInstance( null, null );
+
+      this.removeAllEventListeners();
 
       this.freeToPool();
 

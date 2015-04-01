@@ -22,6 +22,8 @@ define( function( require ) {
 
   inherit( scenery.Drawable, SelfDrawable, {
     initializeSelfDrawable: function( renderer, instance ) {
+      this.drawableVisibilityListener = this.drawableVisibilityListener || this.updateSelfVisibility.bind( this );
+
       // super initialization
       this.initializeDrawable( renderer );
 
@@ -29,11 +31,17 @@ define( function( require ) {
       this.node = instance.trail.lastNode();
       this.node.attachDrawable( this );
 
+      this.instance.on( 'selfVisibility', this.drawableVisibilityListener );
+
+      this.updateSelfVisibility();
+
       return this;
     },
 
     // @public
     dispose: function() {
+      this.instance.off( 'selfVisibility', this.drawableVisibilityListener );
+
       this.node.detachDrawable( this );
 
       // free references
@@ -41,6 +49,11 @@ define( function( require ) {
       this.node = null;
 
       Drawable.prototype.dispose.call( this );
+    },
+
+    updateSelfVisibility: function() {
+      // hide our drawable if it is not relatively visible
+      this.visible = this.instance.selfVisible;
     },
 
     toDetailedString: function() {

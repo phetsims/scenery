@@ -148,6 +148,11 @@ define( function( require ) {
     },
 
     renderDrawable: function( drawable ) {
+      // do not paint invisible drawables
+      if ( !drawable.visible ) {
+        return;
+      }
+
       // we're directly accessing the relative transform below, so we need to ensure that it is up-to-date
       assert && assert( drawable.instance.relativeTransform.isValidationNotNeeded() );
 
