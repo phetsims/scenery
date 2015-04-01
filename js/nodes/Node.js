@@ -1795,6 +1795,21 @@ define( function( require ) {
     },
     get usesOpacity() { return this.getUsesOpacity(); },
 
+    setCSSTransform: function( cssTransform ) {
+      assert && assert( typeof cssTransform === 'boolean' );
+
+      if ( cssTransform !== this._hints.cssTransform ) {
+        this._hints.cssTransform = cssTransform;
+        this.trigger1( 'hint', 'cssTransform' );
+      }
+    },
+    set cssTransform( value ) { this.setCSSTransform( value ); },
+
+    isCSSTransformed: function() {
+      return this._hints.cssTransform;
+    },
+    get cssTransform() { return this._hints.cssTransform; },
+
     /*---------------------------------------------------------------------------*
      * Trail operations
      *----------------------------------------------------------------------------*/
@@ -2745,8 +2760,8 @@ define( function( require ) {
     'children', 'cursor', 'visible', 'pickable', 'opacity', 'matrix', 'translation', 'x', 'y', 'rotation', 'scale',
     'leftTop', 'centerTop', 'rightTop', 'leftCenter', 'center', 'rightCenter', 'leftBottom', 'centerBottom', 'rightBottom',
     'left', 'right', 'top', 'bottom', 'centerX', 'centerY', 'renderer', 'rendererOptions',
-    'layerSplit', 'usesOpacity', 'mouseArea', 'touchArea', 'clipArea', 'transformBounds', 'focusable', 'focusIndicator',
-    'focusOrder', 'textDescription'
+    'layerSplit', 'usesOpacity', 'cssTransform', 'mouseArea', 'touchArea', 'clipArea', 'transformBounds',
+    'focusable', 'focusIndicator', 'focusOrder', 'textDescription'
   ];
 
   return Node;

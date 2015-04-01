@@ -71,6 +71,12 @@ define( function( require ) {
       // a phase of Display.updateDisplay()).
       this.relativeTransform = ( this.relativeTransform || new RelativeTransform() ).initialize( this, display, trail );
 
+      // Tracking of visibility {boolean} and associated boolean flags.
+      this.visible = true; // global visibility (whether this instance will end up appearing on the display)
+      this.relativeVisible = true; // relative visibility (ignores the closest ancestral visibility root and below)
+      this.visibilityDirty = true; // entire subtree of visibility will need to be updated
+      this.childVisibilityDirty = true; // an ancestor needs its visibility updated
+
       // In the range (-1,0), to help us track insertions and removals of this instance's node to its parent
       // (did we get removed but added back?).
       // If it's -1 at its parent's syncTree, we'll end up removing our reference to it.
@@ -123,6 +129,7 @@ define( function( require ) {
       // Render state exports for this instance.
       this.isBackbone = false; // {boolean} - Whether we will have a BackboneDrawable group drawable
       this.isTransformed = false;  // {boolean} - Whether this instance creates a new "root" for the relative trail transforms
+      this.isVisibilityApplied = false; // {boolean} - Whether this instance handles visibility with a group drawable
       this.isInstanceCanvasCache = false; // {boolean} - Whether we have a Canvas cache specific to this instance's position
       this.isSharedCanvasCachePlaceholder = false; // {boolean}
       this.isSharedCanvasCacheSelf = isSharedCanvasCacheRoot; // {boolean}
@@ -248,6 +255,7 @@ define( function( require ) {
       // old state information, so we can compare what was changed
       var wasBackbone = this.isBackbone;
       var wasTransformed = this.isTransformed;
+      var wasVisibilityApplied = this.isVisibilityApplied;
       var wasInstanceCanvasCache = this.isInstanceCanvasCache;
       var wasSharedCanvasCacheSelf = this.isSharedCanvasCacheSelf;
       var wasSharedCanvasCachePlaceholder = this.isSharedCanvasCachePlaceholder;
@@ -260,6 +268,7 @@ define( function( require ) {
       // default values to set (makes the logic much simpler)
       this.isBackbone = false;
       this.isTransformed = false;
+      this.isVisibilityApplied = false;
       this.isInstanceCanvasCache = false;
       this.isSharedCanvasCacheSelf = false;
       this.isSharedCanvasCachePlaceholder = false;
@@ -283,6 +292,7 @@ define( function( require ) {
       // splits are accomplished just by having a backbone
       if ( this.isDisplayRoot || ( !this.isUnderCanvasCache && ( hasTransparency || hasClip || hints.requireElement || hints.cssTransform || hints.split ) ) ) {
         this.isBackbone = true;
+        this.isVisibilityApplied = true;
         this.isTransformed = this.isDisplayRoot || !!hints.cssTransform; // for now, only trigger CSS transform if we have the specific hint
         //OHTWO TODO: check whether the force acceleration hint is being used by our DOMBlock
         this.groupRenderer = Renderer.bitmaskDOM | ( hints.forceAcceleration ? Renderer.bitmaskForceAcceleration : 0 ); // probably won't be used
@@ -373,8 +383,13 @@ define( function( require ) {
                             ( oldGroupRenderer !== this.groupRenderer ) ||
                             ( oldSharedCacheRenderer !== this.sharedCacheRenderer );
 
-      sceneryLog && sceneryLog.Instance && sceneryLog.Instance( 'new: ' + this.getStateString() );
+      // if our visibility applications changed, update the entire subtree
+      if ( wasVisibilityApplied !== this.isVisibilityApplied ) {
+        this.visibilityDirty = true;
+        this.parent && this.parent.markChildVisibilityDirty();
+      }
 
+      sceneryLog && sceneryLog.Instance && sceneryLog.Instance( 'new: ' + this.getStateString() );
       sceneryLog && sceneryLog.Instance && sceneryLog.pop();
     },
 
@@ -389,6 +404,7 @@ define( function( require ) {
                    ( this.isSharedCanvasCachePlaceholder ? 'sharedCachePlaceholder ' : '' ) +
                    ( this.isSharedCanvasCacheSelf ? 'sharedCacheSelf ' : '' ) +
                    ( this.isTransformed ? 'TR ' : '' ) +
+                   ( this.isVisibilityApplied ? 'VIS ' : '' ) +
                    ( this.selfRenderer ? this.selfRenderer.toString( 16 ) : '-' ) + ',' +
                    ( this.groupRenderer ? this.groupRenderer.toString( 16 ) : '-' ) + ',' +
                    ( this.sharedCacheRenderer ? this.sharedCacheRenderer.toString( 16 ) : '-' ) + ' ';
@@ -1141,6 +1157,10 @@ define( function( require ) {
 
       // make sure we aren't pruned in the next syncTree()
       this.parent && this.parent.markSkipPruning();
+
+      // mark visibility changes
+      this.visibilityDirty = true;
+      this.parent && this.parent.markChildVisibilityDirty();
     },
 
     // event callback for Node's 'opacity' change event
@@ -1148,6 +1168,45 @@ define( function( require ) {
       assert && assert( !this.stateless, 'If we are stateless, we should not receive these notifications' );
 
       this.markRenderStateDirty();
+    },
+
+    markChildVisibilityDirty: function() {
+      if ( !this.childVisibilityDirty ) {
+        this.childVisibilityDirty = true;
+        this.parent && this.parent.markChildVisibilityDirty();
+      }
+    },
+
+    /**
+     * Updates the visible/relativeVisible flags on the Instance and its entire subtree.
+     *
+     * @param {boolean} parentGloballyVisible - Whether our parent (if any) is globally visible
+     * @param {boolean} parentRelativelyVisible - Whether our parent (if any) is relatively visible
+     * @param {boolean} updateFullSubtree - If true, we will visit the entire subtree to ensure visibility is correct.
+     */
+    updateVisibility: function( parentGloballyVisible, parentRelativelyVisible, updateFullSubtree ) {
+      // If our visibility flag for ourself is dirty, we need to update our entire subtree
+      if ( this.visibilityDirty ) {
+        updateFullSubtree = true;
+      }
+
+      // calculate our visibilities
+      var nodeVisible = this.node.isVisible();
+      this.visible = parentGloballyVisible && nodeVisible;
+      this.relativeVisible = parentRelativelyVisible && nodeVisible;
+
+      var len = this.children.length;
+      for ( var i = 0; i < len; i++ ) {
+        var child = this.children[i];
+
+        if ( updateFullSubtree || child.visibilityDirty || child.childVisibilityDirty ) {
+          // if we are a visibility root (isVisibilityApplied===true), disregard ancestor visibility
+          child.updateVisibility( this.visible, this.isVisibilityApplied ? true : this.relativeVisible, updateFullSubtree );
+        }
+      }
+
+      this.visibilityDirty = false;
+      this.childVisibilityDirty = false;
     },
 
     getDescendantCount: function() {
@@ -1229,6 +1288,15 @@ define( function( require ) {
       }
       else {
         return this.parent.getTransformRootInstance();
+      }
+    },
+
+    getVisibilityRootInstance: function() {
+      if ( this.isVisibilityApplied || !this.parent ) {
+        return this;
+      }
+      else {
+        return this.parent.getVisibilityRootInstance();
       }
     },
 
@@ -1358,9 +1426,6 @@ define( function( require ) {
 
         assertSlow( !this.isSharedCanvasCachePlaceholder || this.sharedCacheDrawable,
           'We need to have a sharedCacheDrawable if we are a shared cache' );
-
-        assertSlow( this.isTransformed === this.isTransformed,
-          'isTransformed should match' );
 
         assertSlow( this.addRemoveCounter === 0,
           'Our addRemoveCounter should always be 0 at the end of syncTree' );
