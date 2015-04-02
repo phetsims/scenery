@@ -566,10 +566,12 @@ define( function( require ) {
           childInstance.syncTree();
         }
 
+        var includeChildDrawables = childInstance.shouldIncludeInParentDrawables();
+
         //OHTWO TODO: only strip out invisible Canvas drawables, while leaving SVG (since we can more efficiently hide
         // SVG trees, memory-wise)
         // here we strip out invisible drawable sections out of the drawable linked list
-        if ( childInstance.node.isVisible() ) {
+        if ( includeChildDrawables ) {
           // if there are any drawables for that child, link them up in our linked list
           if ( childInstance.firstDrawable ) {
             if ( currentDrawable ) {
@@ -594,7 +596,7 @@ define( function( require ) {
         sceneryLog && sceneryLog.ChangeInterval && sceneryLog.push();
 
         var wasIncluded = childInstance.stitchChangeIncluded;
-        var isIncluded = childInstance.node.isVisible();
+        var isIncluded = includeChildDrawables;
         childInstance.stitchChangeIncluded = isIncluded;
 
         sceneryLog && sceneryLog.ChangeInterval && sceneryLog.ChangeInterval( 'included: ' + wasIncluded + ' => ' + isIncluded );
@@ -727,11 +729,11 @@ define( function( require ) {
       this.firstDrawable = this.firstInnerDrawable = firstDrawable;
       this.lastDrawable = this.lastInnerDrawable = currentDrawable; // either null, or the drawable itself
 
-      // drawable range checks
+      // ensure that our firstDrawable and lastDrawable are correct
       if ( assertSlow ) {
         var firstDrawableCheck = null;
         for ( var j = 0; j < this.children.length; j++ ) {
-          if ( this.children[ j ].node.isVisible() && this.children[ j ].firstDrawable ) {
+          if ( this.children[ j ].shouldIncludeInParentDrawables() && this.children[ j ].firstDrawable ) {
             firstDrawableCheck = this.children[ j ].firstDrawable;
             break;
           }
@@ -742,7 +744,7 @@ define( function( require ) {
 
         var lastDrawableCheck = this.selfDrawable;
         for ( var k = this.children.length - 1; k >= 0; k-- ) {
-          if ( this.children[ k ].node.isVisible() && this.children[ k ].lastDrawable ) {
+          if ( this.children[ k ].shouldIncludeInParentDrawables() && this.children[ k ].lastDrawable ) {
             lastDrawableCheck = this.children[ k ].lastDrawable;
             break;
           }
@@ -959,6 +961,11 @@ define( function( require ) {
           this.display.markTransformRootDirty( this, true );
         }
       }
+    },
+
+    // @private, whether out drawables (from firstDrawable to lastDrawable) should be included in our parent's drawables
+    shouldIncludeInParentDrawables: function() {
+      return this.node.isVisible() || !this.node.isExcludeInvisible();
     },
 
     // @private, finds the closest drawable (not including the child instance at childIndex) using lastDrawable, or null

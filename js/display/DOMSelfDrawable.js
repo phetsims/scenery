@@ -33,6 +33,8 @@ define( function( require ) {
       this.forceAcceleration = ( renderer & scenery.Renderer.bitmaskForceAcceleration ) !== 0;
       this.markTransformDirty();
 
+      this.visibilityDirty = true;
+
       // handle transform changes
       instance.relativeTransform.addListener( this.transformListener ); // when our relative tranform changes, notify us in the pre-repaint phase
       instance.relativeTransform.addPrecompute(); // trigger precomputation of the relative transform, since we will always need it when it is updated
@@ -58,12 +60,28 @@ define( function( require ) {
       if ( this.dirty ) {
         this.dirty = false;
         this.updateDOM();
+
+        if ( this.visibilityDirty ) {
+          this.visibilityDirty = false;
+
+          this.domElement.style.visibility = this.visible ? '' : 'hidden';
+        }
       }
     },
 
     // @protected: called to update the visual appearance of our domElement
     updateDOM: function() {
       // should generally be overridden by drawable subtypes to implement the update
+    },
+
+    // @override
+    updateSelfVisibility: function() {
+      SelfDrawable.prototype.updateSelfVisibility.call( this );
+
+      if ( !this.visibilityDirty ) {
+        this.visibilityDirty = true;
+        this.markDirty();
+      }
     },
 
     dispose: function() {

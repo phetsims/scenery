@@ -49,6 +49,14 @@ define( function( require ) {
       this.dirty = false;
     },
 
+    // @override
+    updateSelfVisibility: function() {
+      SelfDrawable.prototype.updateSelfVisibility.call( this );
+
+      // mark us as dirty when our self visibility changes
+      this.markDirty();
+    },
+
     dispose: function() {
       this.instance.relativeTransform.removeListener( this.transformListener );
       this.instance.relativeTransform.removePrecompute();

@@ -182,13 +182,29 @@ define( function( require ) {
     this._mouseBoundsHadListener = false; // since we only walk the dirty flags up ancestors, we need a way to re-evaluate descendants when the existence of effective listeners changes
     this._touchBoundsHadListener = false; // since we only walk the dirty flags up ancestors, we need a way to re-evaluate descendants when the existence of effective listeners changes
 
-    // where rendering-specific settings are stored
+    // Where rendering-specific settings are stored. They are generally modified internally (@private)
     this._hints = {
-      renderer: 0,          // what type of renderer should be forced for this node.
-      usesOpacity: false,   // whether it is ancitipated that opacity will be switched on
-      layerSplit: false,    // whether layers should be split before and after this node
-      cssTransform: false,  // whether this node and its subtree should handle transforms by using a CSS transform of a div
-      fullResolution: false // when rendered as Canvas, whether we should use full (device) resolution on retina-like devices
+      // {number} What type of renderer should be forced for this node. Uses the internal bitmask structure declared
+      // in scenery.js and Renderer.js.
+      renderer: 0,
+
+      // {boolean} Whether it is ancitipated that opacity will be switched on. If so, having this set to true will make
+      // switching back-and-forth between opacity:1 and other opacities much faster.
+      usesOpacity: false,
+
+      // {boolean} Whether layers should be split before and after this node.
+      layerSplit: false,
+
+      // {boolean} Whether this node and its subtree should handle transforms by using a CSS transform of a div.
+      cssTransform: false,
+
+      // {boolean} When rendered as Canvas, whether we should use full (device) resolution on retina-like devices.
+      // TODO: ensure that this is working? 0.2 may have caused a regression.
+      fullResolution: false,
+
+      // {boolean} Whether SVG (or other) content should be excluded from the DOM tree when invisible
+      // (instead of just being hidden)
+      excludeInvisible: false
     };
 
     // the subtree pickable count is #pickable:true + #inputListeners, since we can prune subtrees with a pickable count of 0
@@ -1761,10 +1777,6 @@ define( function( require ) {
     },
     get rendererOptions() { return this.getRendererOptions(); },
 
-    hasRendererOptions: function() {
-      return !!( this._hints.cssTransform || this._hints.fullResolution );
-    },
-
     setLayerSplit: function( split ) {
       assert && assert( typeof split === 'boolean' );
 
@@ -1809,6 +1821,20 @@ define( function( require ) {
       return this._hints.cssTransform;
     },
     get cssTransform() { return this._hints.cssTransform; },
+
+    setExcludeInvisible: function( excludeInvisible ) {
+      assert && assert( typeof excludeInvisible === 'boolean' );
+
+      if ( excludeInvisible !== this._hints.excludeInvisible ) {
+        this._hints.excludeInvisible = excludeInvisible;
+      }
+    },
+    set excludeInvisible( value ) { this.setExcludeInvisible( value ); },
+
+    isExcludeInvisible: function() {
+      return this._hints.excludeInvisible;
+    },
+    get excludeInvisible() { return this.isExcludeInvisible(); },
 
     /*---------------------------------------------------------------------------*
      * Trail operations
@@ -2760,7 +2786,7 @@ define( function( require ) {
     'children', 'cursor', 'visible', 'pickable', 'opacity', 'matrix', 'translation', 'x', 'y', 'rotation', 'scale',
     'leftTop', 'centerTop', 'rightTop', 'leftCenter', 'center', 'rightCenter', 'leftBottom', 'centerBottom', 'rightBottom',
     'left', 'right', 'top', 'bottom', 'centerX', 'centerY', 'renderer', 'rendererOptions',
-    'layerSplit', 'usesOpacity', 'cssTransform', 'mouseArea', 'touchArea', 'clipArea', 'transformBounds',
+    'layerSplit', 'usesOpacity', 'cssTransform', 'excludeInvisible', 'mouseArea', 'touchArea', 'clipArea', 'transformBounds',
     'focusable', 'focusIndicator', 'focusOrder', 'textDescription'
   ];
 
