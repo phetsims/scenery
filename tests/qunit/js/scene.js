@@ -900,7 +900,6 @@
     scene.addChild( node );
 
     var color = new scenery.Color( 255, 255, 0 );
-    console.log( color.getListenerCount() );
     equal( color.getListenerCount(), 0, 'Initial colors should have no listeners' );
 
     var rect = new scenery.Rectangle( 0, 0, 50, 50, { fill: color } );
