@@ -251,5 +251,11 @@ define( function( require ) {
     image: 'optimizeQuality'
   };
 
+  /*---------------------------------------------------------------------------*
+  * WebGL Renderer type enumeration
+  *----------------------------------------------------------------------------*/
+  Renderer.webglCustom = 0x1;
+  Renderer.webglTexturedQuad = 0x2;
+
   return Renderer;
 } );

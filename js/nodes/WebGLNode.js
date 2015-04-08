@@ -17,7 +17,7 @@ define( function( require ) {
   var scenery = require( 'SCENERY/scenery' );
   var Matrix3 = require( 'DOT/Matrix3' );
   var Node = require( 'SCENERY/nodes/Node' );
-  require( 'SCENERY/display/Renderer' );
+  var Renderer = require( 'SCENERY/display/Renderer' );
   var WebGLSelfDrawable = require( 'SCENERY/display/WebGLSelfDrawable' );
   var SelfDrawable = require( 'SCENERY/display/SelfDrawable' );
 
@@ -86,7 +86,7 @@ define( function( require ) {
   WebGLNode.WebGLNodeDrawable = inherit( WebGLSelfDrawable, function WebGLNodeDrawable( renderer, instance ) {
     this.initialize( renderer, instance );
   }, {
-    isCustomWebGLRenderer: true,
+    webglRenderer: Renderer.webglCustom,
 
     // called either from the constructor, or from pooling
     initialize: function( renderer, instance ) {
@@ -95,8 +95,8 @@ define( function( require ) {
 
     initializeContext: function( webGLBlock ) {
       this.webGLBlock = webGLBlock;
-      this.backingScale = this.webGLBlock.webGLRenderer.backingScale;
-      this.gl = this.webGLBlock.webGLRenderer.gl;
+      this.backingScale = this.webGLBlock.backingScale;
+      this.gl = this.webGLBlock.gl;
 
       this.node.initializeWebGLDrawable( this );
     },
