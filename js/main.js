@@ -47,7 +47,6 @@ define( [
 
   'SCENERY/display/webgl/ColorTriangleBufferData',
   'SCENERY/display/webgl/ColorTriangleRenderer',
-  'SCENERY/display/webgl/SpriteSheet',
   'SCENERY/display/webgl/SquareUnstrokedRectangle',
   'SCENERY/display/webgl/TextureBufferData',
   'SCENERY/display/webgl/TextureRenderer',
@@ -101,6 +100,7 @@ define( [
   'SCENERY/util/SceneImage',
   'SCENERY/util/SceneryStyle',
   'SCENERY/util/ShaderProgram',
+  'SCENERY/util/SpriteSheet',
   'SCENERY/util/Trail',
   'SCENERY/util/TrailPointer',
   'SCENERY/util/Util'

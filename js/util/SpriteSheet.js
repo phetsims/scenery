@@ -5,8 +5,11 @@
  * can be used in one draw call to render multiple different images by providing UV coordinates to each quad for each
  * image to be drawn.
  *
- * TODO: How to use custom mipmap levels?
+ * Note that the WebGL texture part is not required to be run - the Canvas-only part can be used functionally without
+ * any WebGL dependencies.
+ *
  * TODO: Add padding around sprites, otherwise interpolation could cause issues!
+ * TODO: How to use custom mipmap levels?
  *
  * @author Sam Reid (PhET Interactive Simulations)
  * @author Jonathan Olson <jonathan.olson@colorado.edu>
@@ -22,6 +25,9 @@ define( function( require ) {
 
   /**
    * @constructor
+   *
+   * @param {boolean} useMipmaps - Whether built-in WebGL mipmapping should be used. Higher quality, but may be slower
+   *                               to add images (since mipmaps need to be updated).
    */
   scenery.SpriteSheet = function SpriteSheet( useMipmaps ) {
     this.useMipmaps = useMipmaps;
@@ -49,10 +55,18 @@ define( function( require ) {
   };
 
   inherit( Object, scenery.SpriteSheet, {
+    /**
+     * Initialize (or reinitialize) ourself with a new GL context. Should be called at least once before updateTexture()
+     */
     initializeContext: function( gl ) {
       this.gl = gl;
+
+      this.createTexture();
     },
 
+    /**
+     * Allocates and creates a GL texture, configures it, and initializes it with our current Canvas.
+     */
     createTexture: function() {
       var gl = this.gl;
 
@@ -73,7 +87,12 @@ define( function( require ) {
       this.dirty = false;
     },
 
+    /**
+     * Updates a pre-existing texture with our current Canvas.
+     */
     updateTexture: function() {
+      assert && assert( this.gl, 'SpriteSheet needs context to updateTexture()' );
+
       if ( this.dirty ) {
         this.dirty = false;
 
@@ -114,6 +133,7 @@ define( function( require ) {
         var unusedSprite = this.unusedSprites[i];
         if ( unusedSprite.image === image ) {
           unusedSprite.count++;
+          assert && assert( unusedSprite.count === 1, 'Count should be exactly 1 after coming back from being unused' );
           this.unusedSprites.splice( i, 1 ); // remove it from the unused array
           this.usedSprites.push( unusedSprite ); // add it to the used array
           return unusedSprite;
@@ -141,7 +161,7 @@ define( function( require ) {
         // WebGL will want UV coordinates in the [0,1] range
         var uvBounds = new Bounds2( bin.bounds.minX / this.width, bin.bounds.minY / this.height,
                                     bin.bounds.maxX / this.width, bin.bounds.maxY / this.height );
-        var sprite = new scenery.SpriteSheet.Sprite( bin, uvBounds, image, 1 );
+        var sprite = new scenery.SpriteSheet.Sprite( this, bin, uvBounds, image, 1 );
         this.context.drawImage( image, bin.bounds.x, bin.bounds.y );
         this.dirty = true;
         this.usedSprites.push( sprite );
@@ -153,14 +173,75 @@ define( function( require ) {
     },
 
     removeImage: function( image ) {
+      // find the used sprite (and its index)
+      var usedSprite;
+      var i;
+      for ( i = 0; i < this.usedSprites.length; i++ ) {
+        if ( this.usedSprites[i].image === image ) {
+          usedSprite = this.usedSprites[i];
+          break;
+        }
+      }
+      assert && assert( usedSprite, 'Sprite not found for removeImage' );
 
+      // if we have no more references to the image/sprite
+      if ( --usedSprite.count <= 0 ) {
+        this.usedSprites.splice( i, 1 ); // remove it from the used list
+        this.unusedSprites.push( usedSprite ); // add it to the unused list
+      }
+
+      // NOTE: no modification to the Canvas/texture is made, since we can leave it drawn there and unreferenced.
+      // If addImage( image ) is called for the same image, we can 'resurrect' it without any further Canvas/texture
+      // changes being made.
+    },
+
+    /**
+     * Whether the sprite for the specified image is handled by this spritesheet. It can be either used or unused, but
+     * addImage() calls with the specified image should be extremely fast (no need to modify the Canvas or texture).
+     *
+     * @returns {boolean}
+     */
+    containsImage: function( image ) {
+      var i;
+
+      // check used cache
+      for ( i = 0; i < this.usedSprites.length; i++ ) {
+        if ( this.usedSprites[i].image === image ) {
+          return true;
+        }
+      }
+
+      // check unused cache
+      for ( i = 0; i < this.unusedSprites.length; i++ ) {
+        if ( this.unusedSprites[i].image === image ) {
+          return true;
+        }
+      }
+
+      return false;
     }
   } );
 
-  scenery.SpriteSheet.Sprite = function( bin, uvBounds, image, initialCount ) {
+  /**
+   * A reference to a specific part of the texture that can be used.
+   *
+   * @constructor
+   */
+  scenery.SpriteSheet.Sprite = function( spriteSheet, bin, uvBounds, image, initialCount ) {
+    // @public [read-only] {SpriteSheet} - The containing SpriteSheet
+    this.spriteSheet = spriteSheet;
+
+    // @private [read-only] {BinPacker.Bin} - Contains the actual image bounds in our Canvas, and is used to deallocate.
     this.bin = bin;
+
+    // @public [read-only] {Bounds2} - Normalized bounds between [0,1] for the full texture (for GLSL texture lookups).
     this.uvBounds = uvBounds;
+
+    // @private [read-only] {HTMLCanvasElement | HTMLImageElement} - Image element used.
     this.image = image;
+
+    // @private [read-write] {number} - Reference count for number of addChild() calls minus removeChild() calls. If
+    // the count is 0, it should be in the 'unusedSprites' array, otherwise it should be in the 'usedSprites' array.
     this.count = initialCount;
   };
 
