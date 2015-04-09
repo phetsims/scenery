@@ -541,7 +541,6 @@ define( function( require ) {
             // solid fills always supported for DOM, WebGL and Pixi
             bitmask |= scenery.bitmaskSupportsDOM;
           }
-          bitmask |= scenery.bitmaskSupportsWebGL;
           bitmask |= scenery.bitmaskSupportsPixi;
 
           return bitmask;
@@ -564,9 +563,6 @@ define( function( require ) {
             // allow DOM support if there is no stroke
             bitmask |= scenery.bitmaskSupportsDOM;
           }
-
-          // WebGL can handle stroked lines.
-          bitmask |= scenery.bitmaskSupportsWebGL;
 
           bitmask |= scenery.bitmaskSupportsPixi;
 
