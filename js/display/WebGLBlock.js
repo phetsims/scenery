@@ -20,6 +20,7 @@ define( function( require ) {
   var Renderer = require( 'SCENERY/display/Renderer' );
   var Util = require( 'SCENERY/util/Util' );
   var SpriteSheet = require( 'SCENERY/util/SpriteSheet' );
+  var ShaderProgram = require( 'SCENERY/util/ShaderProgram' );
 
   scenery.WebGLBlock = function WebGLBlock( display, renderer, transformRootInstance, filterRootInstance ) {
     this.initialize( display, renderer, transformRootInstance, filterRootInstance );
@@ -74,6 +75,9 @@ define( function( require ) {
         gl.enable( gl.BLEND );
 
         this.domElement = this.canvas;
+
+        this.customProcessor = new WebGLBlock.CustomProcessor( this );
+        this.texturedQuadProcessor = new WebGLBlock.TexturedQuadProcessor( this );
       }
 
       // reset any fit transforms that were applied
@@ -137,15 +141,39 @@ define( function( require ) {
 
         gl.viewport( 0.0, 0.0, this.canvas.width, this.canvas.height );
 
+        var currentProcessor = null;
+
         //OHTWO TODO: PERFORMANCE: create an array for faster drawable iteration (this is probably a hellish memory access pattern)
         for ( var drawable = this.firstDrawable; drawable !== null; drawable = drawable.nextDrawable ) {
-          // NOTE: only handles custom webgl drawables
-          if ( drawable.webglRenderer === Renderer.webglCustom ) {
-            drawable.draw();
+          // select our desired processor
+          var desiredProcessor = null;
+          if ( drawable.webglRenderer === Renderer.webglTexturedQuad ) {
+            desiredProcessor = this.texturedQuadProcessor;
           }
+          else if ( drawable.webglRenderer === Renderer.webglCustom ) {
+            desiredProcessor = this.customProcessor;
+          }
+          assert && assert( desiredProcessor );
+
+          // swap processors if necessary
+          if ( desiredProcessor !== currentProcessor ) {
+            // deactivate any old processors
+            if ( currentProcessor ) {
+              currentProcessor.deactivate();
+            }
+            // activate the new processor
+            currentProcessor = desiredProcessor;
+            currentProcessor.activate();
+          }
+
+          // process our current drawable with the current processor
+          currentProcessor.processDrawable( drawable );
 
           // exit loop end case
           if ( drawable === this.lastDrawable ) { break; }
+        }
+        if ( currentProcessor ) {
+          currentProcessor.deactivate();
         }
 
         gl.flush();
@@ -250,6 +278,147 @@ define( function( require ) {
       return 'WebGLBlock#' + this.id + '-' + FittedBlock.fitString[ this.fit ];
     }
   } );
+
+  /*---------------------------------------------------------------------------*
+  * Processors rely on the following lifecycle:
+  * 1. activate()
+  * 2. processDrawable() - 0 or more times
+  * 3. deactivate()
+  * Once deactivated, they should have executed all of the draw calls they need to make.
+  *----------------------------------------------------------------------------*/
+
+
+  WebGLBlock.CustomProcessor = function( webglBlock ) {
+    this.webglBlock = webglBlock;
+
+    this.drawable = null;
+  };
+  inherit( Object, WebGLBlock.CustomProcessor, {
+    activate: function() {
+      // drawable responsible for shader program
+    },
+
+    processDrawable: function( drawable ) {
+      assert && assert( drawable.webglRenderer === Renderer.webglCustom );
+
+      this.draw();
+      this.drawable = drawable;
+    },
+
+    deactivate: function() {
+      // drawable responsible for shader program
+
+      this.draw();
+    },
+
+    // @private
+    draw: function() {
+      if ( this.drawable ) {
+        this.drawable.draw();
+      }
+    }
+  } );
+
+  WebGLBlock.TexturedQuadProcessor = function( webglBlock ) {
+    this.webglBlock = webglBlock;
+    var gl = this.gl = webglBlock.gl;
+
+    assert && assert( webglBlock.gl );
+    this.shaderProgram = new ShaderProgram( gl, [
+      // vertex shader
+      'attribute vec2 aVertex;',
+      'attribute vec2 aTextureCoord;',
+      'varying vec2 vTextureCoord;',
+      'uniform mat3 uProjectionMatrix;',
+
+      'void main() {',
+      '  vTextureCoord = aTextureCoord;',
+      '  vec3 ndc = uProjectionMatrix * vec3( aVertex, 1.0 );', // homogeneous map to to normalized device coordinates
+      '  gl_Position = vec4( ndc.xy, 0.0, 1.0 );',
+      '}'
+    ].join( '\n' ), [
+      // fragment shader
+      'precision mediump float;',
+      'varying vec2 vTextureCoord;',
+      'uniform sampler2D uTexture;',
+
+      'void main() {',
+      '  gl_FragColor = texture2D( uTexture, vTextureCoord, -0.7 );', // mipmap LOD bias of -0.7 (for now)
+      '}'
+    ].join( '\n' ), {
+      attributes: [ 'aVertex', 'aTextureCoord' ],
+      uniforms: [ 'uTexture', 'uProjectionMatrix' ]
+    } );
+
+    this.vertexBuffer = gl.createBuffer();
+    this.vertexArray = new Float32Array( 128 );
+
+    gl.bindBuffer( gl.ARRAY_BUFFER, this.vertexBuffer );
+    gl.bufferData( gl.ARRAY_BUFFER, this.vertexArray, gl.DYNAMIC_DRAW ); // fully buffer at the start
+  };
+  inherit( Object, WebGLBlock.TexturedQuadProcessor, {
+    activate: function() {
+      this.shaderProgram.use();
+
+      this.currentSpriteSheet = null;
+      this.vertexArrayIndex = 0;
+    },
+
+    processDrawable: function( drawable ) {
+      assert && assert( drawable.webglRenderer === Renderer.webglTexturedQuad );
+      if ( this.currentSpriteSheet && drawable.sprite.spriteSheet !== this.currentSpriteSheet ) {
+        this.draw();
+      }
+      this.currentSpriteSheet = drawable.sprite.spriteSheet;
+
+      var vertexData = drawable.vertexArray;
+
+      // if our vertex data won't fit, keep doubling the size until it fits
+      while ( vertexData.length + this.vertexArrayIndex > this.vertexArray.length ) {
+        var newVertexArray = new Float32Array( this.vertexArray.length * 2 );
+        newVertexArray.set( this.vertexArray );
+        this.vertexArray = newVertexArray;
+      }
+
+      // copy our vertex data into the main array
+      this.vertexArray.set( vertexData, this.vertexArrayIndex );
+      this.vertexArrayIndex += vertexData.length;
+    },
+
+    deactivate: function() {
+      if ( this.currentSpriteSheet ) {
+        this.draw();
+      }
+
+      this.shaderProgram.unuse();
+    },
+
+    // @private
+    draw: function() {
+      assert && assert( this.currentSpriteSheet );
+      var gl = this.gl;
+
+      // (uniform) projection transform into normalized device coordinates
+      gl.uniformMatrix3fv( this.shaderProgram.uniformLocations.uProjectionMatrix, false, this.webglBlock.projectionMatrixArray );
+
+      gl.bindBuffer( gl.ARRAY_BUFFER, this.vertexBuffer );
+      gl.bufferSubData( gl.ARRAY_BUFFER, 0, this.vertexArray.subarray( 0, this.vertexArrayIndex ) );
+      gl.vertexAttribPointer( this.shaderProgram.attributes.aVertex, 2, gl.FLOAT, false, 4, 0 );
+      gl.vertexAttribPointer( this.shaderProgram.attributes.aTextureCoord, 2, gl.FLOAT, false, 4, 2 );
+
+      gl.activeTexture( gl.TEXTURE0 );
+      gl.bindTexture( gl.TEXTURE_2D, this.currentSpriteSheet.texture );
+      gl.uniform1i( this.shaderProgram.uniforms.uTexture, 0 );
+
+      gl.drawArrays( gl.TRIANGLES, 0, this.vertexArrayIndex / 4 );
+
+      gl.bindTexture( gl.TEXTURE_2D, null );
+
+      this.currentSpriteSheet = null;
+      this.vertexArrayIndex = 0;
+    }
+  } );
+
 
   Poolable.mixin( WebGLBlock, {
     constructorDuplicateFactory: function( pool ) {
