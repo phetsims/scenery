@@ -242,7 +242,7 @@ define( function( require ) {
       var numSpriteSheets = this.spriteSheets.length;
       for ( var i = 0; i < numSpriteSheets; i++ ) {
         var spriteSheet = this.spriteSheets[i];
-        sprite = spriteSheet.addImage( image );
+        sprite = spriteSheet.addImage( image, width, height );
         if ( sprite ) {
           break;
         }

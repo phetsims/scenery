@@ -11,8 +11,8 @@
  * TODO: Add padding around sprites, otherwise interpolation could cause issues!
  * TODO: How to use custom mipmap levels?
  *
- * @author Sam Reid (PhET Interactive Simulations)
  * @author Jonathan Olson <jonathan.olson@colorado.edu>
+ * @author Sam Reid (PhET Interactive Simulations)
  */
 define( function( require ) {
   'use strict';
