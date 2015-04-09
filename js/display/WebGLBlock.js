@@ -147,6 +147,7 @@ define( function( require ) {
         gl.viewport( 0.0, 0.0, this.canvas.width, this.canvas.height );
 
         var currentProcessor = null;
+        var cumulativeDrawCount = 0;
 
         //OHTWO TODO: PERFORMANCE: create an array for faster drawable iteration (this is probably a hellish memory access pattern)
         for ( var drawable = this.firstDrawable; drawable !== null; drawable = drawable.nextDrawable ) {
@@ -165,7 +166,7 @@ define( function( require ) {
             if ( desiredProcessor !== currentProcessor ) {
               // deactivate any old processors
               if ( currentProcessor ) {
-                currentProcessor.deactivate();
+                cumulativeDrawCount += currentProcessor.deactivate();
               }
               // activate the new processor
               currentProcessor = desiredProcessor;
@@ -180,7 +181,10 @@ define( function( require ) {
           if ( drawable === this.lastDrawable ) { break; }
         }
         if ( currentProcessor ) {
-          currentProcessor.deactivate();
+          cumulativeDrawCount += currentProcessor.deactivate();
+        }
+        if ( cumulativeDrawCount === 0 ) {
+          gl.clear( gl.COLOR_BUFFER_BIT );
         }
 
         gl.flush();
@@ -301,6 +305,7 @@ define( function( require ) {
   * Once deactivated, they should have executed all of the draw calls they need to make.
   *----------------------------------------------------------------------------*/
 
+  // TODO: Processor super-type?
 
   WebGLBlock.CustomProcessor = function( webglBlock ) {
     this.webglBlock = webglBlock;
@@ -310,6 +315,7 @@ define( function( require ) {
   inherit( Object, WebGLBlock.CustomProcessor, {
     activate: function() {
       // drawable responsible for shader program
+      this.drawCount = 0;
     },
 
     processDrawable: function( drawable ) {
@@ -323,12 +329,15 @@ define( function( require ) {
       // drawable responsible for shader program
 
       this.draw();
+
+      return this.drawCount;
     },
 
     // @private
     draw: function() {
       if ( this.drawable ) {
         this.drawable.draw();
+        this.drawCount++;
       }
     }
   } );
@@ -378,6 +387,7 @@ define( function( require ) {
 
       this.currentSpriteSheet = null;
       this.vertexArrayIndex = 0;
+      this.drawCount = 0;
     },
 
     processDrawable: function( drawable ) {
@@ -407,6 +417,8 @@ define( function( require ) {
       }
 
       this.shaderProgram.unuse();
+
+      return this.drawCount;
     },
 
     // @private
@@ -439,6 +451,8 @@ define( function( require ) {
       gl.drawArrays( gl.TRIANGLES, 0, this.vertexArrayIndex / 4 );
 
       gl.bindTexture( gl.TEXTURE_2D, null );
+
+      this.drawCount++;
 
       this.currentSpriteSheet = null;
       this.vertexArrayIndex = 0;
