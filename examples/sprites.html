@@ -74,15 +74,15 @@
       display.initializeFullscreenEvents(); // sets up listeners on the document with preventDefault(), and forwards those events to our scene
       display.resizeOnWindowResize(); // the scene gets resized to the full screen size
 
-      var image1 = new scenery.Image( document.getElementById( 'example-image-1' ), { scale: 0.5 } );
-      var image2 = new scenery.Image( document.getElementById( 'example-image-2' ), { scale: 0.5 } );
+      var image1 = new scenery.Image( document.getElementById( 'example-image-1' ) );
+      var image2 = new scenery.Image( document.getElementById( 'example-image-2' ) );
 
       for ( var i = 0; i < spriteCount; i++ ) {
         var node = new scenery.Node( {
           children: [ Math.random() > 0.5 ? image1 : image2 ],
           x: Math.random() * 512,
           y: Math.random() * 512,
-          scale: Math.random() + 0.2
+          scale: ( Math.random() + 0.2 ) * 0.5
         } );
         node.xVelocity = 10 * ( Math.random() - 0.5 );
         node.yVelocity = 10 * ( Math.random() - 0.5 );
