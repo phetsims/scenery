@@ -19,6 +19,7 @@ define( function( require ) {
   var FittedBlock = require( 'SCENERY/display/FittedBlock' );
   var Renderer = require( 'SCENERY/display/Renderer' );
   var Util = require( 'SCENERY/util/Util' );
+  var SpriteSheet = require( 'SCENERY/util/SpriteSheet' );
 
   scenery.WebGLBlock = function WebGLBlock( display, renderer, transformRootInstance, filterRootInstance ) {
     this.initialize( display, renderer, transformRootInstance, filterRootInstance );
@@ -41,7 +42,11 @@ define( function( require ) {
       // TODO: This block can be shared across displays, so we need to handle preserveDrawingBuffer separately?
       this.preserveDrawingBuffer = display.options.preserveDrawingBuffer;
 
+      // list of {Drawable}s that need to be updated before we update
       this.dirtyDrawables = cleanArray( this.dirtyDrawables );
+
+      // {Array.<SpriteSheet>}, permanent list of spritesheets for this block
+      this.spriteSheets = this.spriteSheets || [];
 
       if ( !this.domElement ) {
         this.canvas = document.createElement( 'canvas' );
@@ -109,6 +114,12 @@ define( function( require ) {
           this.dirtyDrawables.pop().update();
         }
 
+        // ensure sprite sheet textures are up-to-date
+        var numSpriteSheets = this.spriteSheets.length;
+        for ( var i = 0; i < numSpriteSheets; i++ ) {
+          this.spriteSheets[i].updateTexture();
+        }
+
         // udpate the fit BEFORE drawing, since it may change our offset
         this.updateFit();
 
@@ -170,12 +181,50 @@ define( function( require ) {
       FittedBlock.prototype.addDrawable.call( this, drawable );
 
       drawable.initializeContext( this );
+
+      // see if we need to allocate a texture within our sprite sheets
+      if ( drawable.webglRenderer === Renderer.webglTexturedQuad ) {
+        // TODO: how to change images seamlessly?
+        assert && assert( drawable.image, 'Drawable with webglTexturedQuad should have an image' );
+        var sprite = this.addSpriteSheetImage( drawable.image );
+        drawable.sprite = sprite;
+      }
     },
 
     removeDrawable: function( drawable ) {
       sceneryLog && sceneryLog.WebGLBlock && sceneryLog.WebGLBlock( '#' + this.id + '.removeDrawable ' + drawable.toString() );
 
       FittedBlock.prototype.removeDrawable.call( this, drawable );
+
+      if ( drawable.webglRenderer === Renderer.webglTexturedQuad ) {
+        this.removeSpriteSheetImage( drawable.sprite );
+        drawable.sprite = null;
+      }
+    },
+
+    addSpriteSheetImage: function( image ) {
+      var sprite = null;
+      var numSpriteSheets = this.spriteSheets.length;
+      for ( var i = 0; i < numSpriteSheets; i++ ) {
+        var spriteSheet = this.spriteSheets[i];
+        sprite = spriteSheet.addImage( image );
+        if ( sprite ) {
+          break;
+        }
+      }
+      if ( !sprite ) {
+        var newSpriteSheet = new SpriteSheet( true ); // use mipmaps for now?
+        sprite = newSpriteSheet.addImage( image );
+        if ( !sprite ) {
+          // TODO: renderer flags should change for very large images
+          throw new Error( 'Attempt to load image that is too large for sprite sheets' );
+        }
+      }
+      return sprite;
+    },
+
+    removeSpriteSheetImage: function( sprite ) {
+      sprite.spriteSheet.removeImage( sprite.image );
     },
 
     onIntervalChange: function( firstDrawable, lastDrawable ) {

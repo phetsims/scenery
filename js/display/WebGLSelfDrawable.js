@@ -29,8 +29,11 @@ define( function( require ) {
       // this is the same across lifecycles
       this.transformListener = this.transformListener || this.markTransformDirty.bind( this );
 
-      instance.relativeTransform.addListener( this.transformListener ); // when our relative transform changes, notify us in the pre-repaint phase
-      instance.relativeTransform.addPrecompute(); // trigger precomputation of the relative transform, since we will always need it when it is updated
+      // when our relative transform changes, notify us in the pre-repaint phase
+      instance.relativeTransform.addListener( this.transformListener );
+
+      // trigger precomputation of the relative transform, since we will always need it when it is updated
+      instance.relativeTransform.addPrecompute();
 
       return this;
     },

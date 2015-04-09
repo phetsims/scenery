@@ -15,6 +15,7 @@ define( function( require ) {
   var cleanArray = require( 'PHET_CORE/cleanArray' );
   var platform = require( 'PHET_CORE/platform' );
   var Bounds2 = require( 'DOT/Bounds2' );
+  var Vector2 = require( 'DOT/Vector2' );
 
   var scenery = require( 'SCENERY/scenery' );
 
@@ -760,36 +761,108 @@ define( function( require ) {
     // called either from the constructor or from pooling
     initialize: function( renderer, instance ) {
       this.initializeWebGLSelfDrawable( renderer, instance );
+      this.sprite = null; // {SpriteSheet.Sprite}, will be filled in by our WebGLBlock
+
+      if ( !this.vertexArray ) {
+        // format [X Y U V] for 6 vertices
+        this.vertexArray = new Float32Array( 4 * 6 ); // 4-length components for 6 vertices (2 tris).
+      }
+
+      // corner vertices in the relative transform root coordinate space
+      this.upperLeft = new Vector2();
+      this.lowerLeft = new Vector2();
+      this.upperRight = new Vector2();
+      this.lowerRight = new Vector2();
+
+      this.xyDirty = true; // is our vertex position information out of date?
+      this.uvDirty = true; // is our UV information out of date?
     },
 
     initializeContext: function( webglBlock ) {
-      this.webglBlock = webglBlock;
-      //this.imageHandle = webglBlock.webGLRenderer.textureRenderer.createFromImageNode( this.node, 0.4 );
-      this.imageHandle = webglBlock.webGLRenderer.textureRenderer.createFromImageNode( this.node, Math.random() );
-
-      // TODO: Don't call this each time a new item is added.
-      webglBlock.webGLRenderer.textureRenderer.bindVertexBuffer();
-      webglBlock.webGLRenderer.textureRenderer.bindDirtyTextures();
-      // cleanup old vertexBuffer, if applicable
-//      this.disposeWebGLBuffers();
-
-      this.updateImage();
-
-      //TODO: Update the state in the buffer arrays
+      this.webglBlock = webglBlock; // TODO: do we need this reference?
+      this.markDirty();
     },
 
-    //Nothing necessary since everything currently handled in the uModelViewMatrix below
-    //However, we may switch to dynamic draw, and handle the matrix change only where necessary in the future?
-    updateImage: function() {
-      this.imageHandle.update();
+    // @override
+    markTransformDirty: function() {
+      this.xyDirty = true;
 
-      // If none of the sprite sheets contained that image, then mark the spritesheet as dirty
-      // and send it to the GPU after updating
-      this.webglBlock.webGLRenderer.textureRenderer.bindDirtyTextures();
+      WebGLSelfDrawable.prototype.markTransformDirty.call( this );
     },
 
-    render: function( shaderProgram ) {
-      // This is handled by the ColorTriangleRenderer
+    // called when something about the Image's image itself changes (not transform, etc.)
+    markPaintDirty: function() {
+      this.xyDirty = true; // vertex positions can depend on image width/height
+      this.uvDirty = true;
+
+      this.markDirty();
+    },
+
+    update: function() {
+      if ( this.dirty ) {
+        this.dirty = false;
+
+        if ( this.sprite.image !== this.node._image ) {
+          this.webglBlock.removeSpriteSheetImage( this.sprite );
+          this.sprite = this.webglBlock.addSpriteSheetImage( this.node._image );
+          // full updates on everything if our sprite changes
+          this.xyDirty = true;
+          this.uvDirty = true;
+        }
+
+        if ( this.uvDirty ) {
+          this.uvDirty = false;
+
+          var uvBounds = this.sprite.uvBounds;
+
+          // TODO: consider reversal of minY and maxY usage here for vertical inverse
+
+          // first triangle UVs
+          this.vertexArray[2] = uvBounds.minX; // upper left U
+          this.vertexArray[3] = uvBounds.minY; // upper left V
+          this.vertexArray[6] = uvBounds.minX; // lower left U
+          this.vertexArray[7] = uvBounds.maxY; // lower left V
+          this.vertexArray[10] = uvBounds.maxX; // upper right U
+          this.vertexArray[11] = uvBounds.minY; // upper right V
+
+          // second triangle UVs
+          this.vertexArray[14] = uvBounds.maxX; // upper right U
+          this.vertexArray[15] = uvBounds.minY; // upper right V
+          this.vertexArray[18] = uvBounds.minX; // lower left U
+          this.vertexArray[19] = uvBounds.maxY; // lower left V
+          this.vertexArray[22] = uvBounds.maxX; // lower right U
+          this.vertexArray[23] = uvBounds.maxY; // lower right V
+        }
+
+        if ( this.xyDirty ) {
+          this.xyDirty = false;
+
+          var width = this.node.getImageWidth();
+          var height = this.node.getImageHeight();
+
+          var transformMatrix = this.instance.relativeTransform.matrix; // with compute need, should always be accurate
+          transformMatrix.multiplyVector2( this.upperLeft.setXY( 0, 0 ) );
+          transformMatrix.multiplyVector2( this.lowerLeft.setXY( 0, -height ) );
+          transformMatrix.multiplyVector2( this.upperRight.setXY( width, 0 ) );
+          transformMatrix.multiplyVector2( this.lowerRight.setXY( width, -height ) );
+
+          // first triangle XYs
+          this.vertexArray[0] = this.upperLeft.x;
+          this.vertexArray[1] = this.upperLeft.y;
+          this.vertexArray[4] = this.lowerLeft.x;
+          this.vertexArray[5] = this.lowerLeft.y;
+          this.vertexArray[8] = this.upperRight.x;
+          this.vertexArray[9] = this.upperRight.y;
+
+          // second triangle XYs
+          this.vertexArray[12] = this.upperRight.x;
+          this.vertexArray[13] = this.upperRight.y;
+          this.vertexArray[16] = this.lowerLeft.x;
+          this.vertexArray[17] = this.lowerLeft.y;
+          this.vertexArray[20] = this.lowerRight.x;
+          this.vertexArray[21] = this.lowerRight.y;
+        }
+      }
     },
 
     dispose: function() {
@@ -797,28 +870,6 @@ define( function( require ) {
 
       // super
       WebGLSelfDrawable.prototype.dispose.call( this );
-    },
-
-    disposeWebGLBuffers: function() {
-      this.webglBlock.webGLRenderer.colorTriangleRenderer.colorTriangleBufferData.dispose( this.imageHandle );
-    },
-
-    // TODO: JO: Why is markDirtyRectangle in our Image drawable?!?
-    markDirtyRectangle: function() {
-      this.markDirty();
-    },
-
-    // general flag set on the state, which we forward directly to the drawable's paint flag
-    markPaintDirty: function() {
-      this.markDirty();
-    },
-
-    //TODO: Make sure all of the dirty flags make sense here.  Should we be using fillDirty, paintDirty, dirty, etc?
-    update: function() {
-      if ( this.dirty ) {
-        this.updateImage();
-        this.dirty = false;
-      }
     }
   } );
   Image.ImageStatefulDrawable.mixin( Image.ImageWebGLDrawable );
