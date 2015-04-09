@@ -40,6 +40,9 @@ define( function( require ) {
 
       this.filterRootInstance = filterRootInstance;
 
+      // {boolean} - Whether we pass this flag to the WebGL Context. It will store the contents displayed on the screen,
+      // so that canvas.toDataURL() will work. It also requires clearing the context manually ever frame. Both incur
+      // performance costs, so it should be false by default.
       // TODO: This block can be shared across displays, so we need to handle preserveDrawingBuffer separately?
       this.preserveDrawingBuffer = display.options.preserveDrawingBuffer;
 
@@ -55,11 +58,13 @@ define( function( require ) {
         this.canvas.style.left = '0';
         this.canvas.style.top = '0';
         this.canvas.style.pointerEvents = 'none';
+
+        // unique ID so that we can support rasterization with Display.foreignObjectRasterization
         this.canvasId = this.canvas.id = 'scenery-webgl' + this.id;
 
         var contextOptions = {
           antialias: true,
-          preserveDrawingBuffer: this.preserveDrawingBuffer // true: need to clear buffer and is slower
+          preserveDrawingBuffer: this.preserveDrawingBuffer
         };
 
         // we've already committed to using a WebGLBlock, so no use in a try-catch around our context attempt
@@ -67,8 +72,11 @@ define( function( require ) {
         assert && assert( this.gl, 'We should have a context by now' );
         var gl = this.gl;
 
+        // {number} - How much larger our Canvas will be compared to the CSS pixel dimensions, so that our Canvas maps
+        // one of its pixels to a physical pixel (for Retina devices, etc.).
         this.backingScale = Util.backingScale( gl );
 
+        // What color gets set when we call gl.clear()
         gl.clearColor( 0, 0, 0, 0 );
 
         // NOTE: not using gl.blendFunc( gl.SRC_ALPHA, gl.ONE_MINUS_SRC_ALPHA ) since that is for non-premultiplied alpha
@@ -78,8 +86,11 @@ define( function( require ) {
 
         this.domElement = this.canvas;
 
+        // processor for custom WebGL drawables (e.g. WebGLNode)
         this.customProcessor = new WebGLBlock.CustomProcessor( this );
-        this.texturedQuadProcessor = new WebGLBlock.TexturedQuadProcessor( this );
+
+        // processor for drawing textured triangles (e.g. Image)
+        this.texturedTrianglesProcessor = new WebGLBlock.TexturedTrianglesProcessor( this );
       }
 
       // clear buffers when we are reinitialized
@@ -89,6 +100,8 @@ define( function( require ) {
       Util.prepareForTransform( this.canvas, false );
       Util.unsetTransform( this.canvas ); // clear out any transforms that could have been previously applied
 
+      // Projection {Matrix3} that maps from Scenery's global coordinate frame to normalized device coordinates,
+      // where x,y are both in the range [-1,1] from one side of the Canvas to the other.
       this.projectionMatrix = this.projectionMatrix || new Matrix3().setTo32Bit();
       // a column-major 3x3 array specifying our projection matrix for 2D points (homogenized to (x,y,1))
       this.projectionMatrixArray = this.projectionMatrix.entries;
@@ -119,6 +132,7 @@ define( function( require ) {
       if ( this.dirty && !this.disposed ) {
         this.dirty = false;
 
+        // update drawables, so that they have vertex arrays up to date, etc.
         while ( this.dirtyDrawables.length ) {
           this.dirtyDrawables.pop().update();
         }
@@ -146,16 +160,23 @@ define( function( require ) {
 
         gl.viewport( 0.0, 0.0, this.canvas.width, this.canvas.height );
 
+        // We switch between processors for drawables based on each drawable's webglRenderer property. Each processor
+        // will be activated, will process a certain number of adjacent drawables with that processor's webglRenderer,
+        // and then will be deactivated. This allows us to switch back-and-forth between different shader programs,
+        // and allows us to trigger draw calls for each grouping of drawables in an efficient way.
         var currentProcessor = null;
+        // How many draw calls have been executed. If no draw calls are executed while updating, it means nothing should
+        // be drawn, and we'll have to manually clear the Canvas if we are not preserving the drawing buffer.
         var cumulativeDrawCount = 0;
-
+        // Iterate through all of our drawables (linked list)
         //OHTWO TODO: PERFORMANCE: create an array for faster drawable iteration (this is probably a hellish memory access pattern)
         for ( var drawable = this.firstDrawable; drawable !== null; drawable = drawable.nextDrawable ) {
+          // ignore invisible drawables
           if ( drawable.visible ) {
             // select our desired processor
             var desiredProcessor = null;
             if ( drawable.webglRenderer === Renderer.webglTexturedTriangles ) {
-              desiredProcessor = this.texturedQuadProcessor;
+              desiredProcessor = this.texturedTrianglesProcessor;
             }
             else if ( drawable.webglRenderer === Renderer.webglCustom ) {
               desiredProcessor = this.customProcessor;
@@ -180,10 +201,14 @@ define( function( require ) {
           // exit loop end case
           if ( drawable === this.lastDrawable ) { break; }
         }
+        // deactivate any processor that still has drawables that need to be handled
         if ( currentProcessor ) {
           cumulativeDrawCount += currentProcessor.deactivate();
         }
-        if ( cumulativeDrawCount === 0 ) {
+
+        // If we executed no draw calls AND we aren't preserving the drawing buffer, we'll need to manually clear the
+        // drawing buffer ourself.
+        if ( cumulativeDrawCount === 0 && !this.preserveDrawingBuffer ) {
           gl.clear( gl.COLOR_BUFFER_BIT );
         }
 
@@ -240,14 +265,27 @@ define( function( require ) {
       FittedBlock.prototype.removeDrawable.call( this, drawable );
 
       if ( drawable.webglRenderer === Renderer.webglTexturedTriangles ) {
+        // mark our sprite as unused
         this.removeSpriteSheetImage( drawable.sprite );
         drawable.sprite = null;
       }
     },
 
+    /**
+     * Ensures we have an allocated part of a SpriteSheet for this image. If a SpriteSheet already contains this image,
+     * we'll just increase the reference count. Otherwise, we'll attempt to add it into one of our SpriteSheets. If
+     * it doesn't fit, we'll add a new SpriteSheet and add the image to it.
+     *
+     * @param {HTMLImageElement | HTMLCanvasElement} image
+     * @param {number} width
+     * @param {number} height
+     *
+     * @returns {Sprite} - Throws an error if we can't accommodate the image
+     */
     addSpriteSheetImage: function( image, width, height ) {
       var sprite = null;
       var numSpriteSheets = this.spriteSheets.length;
+      // TODO: check for SpriteSheet containment first?
       for ( var i = 0; i < numSpriteSheets; i++ ) {
         var spriteSheet = this.spriteSheets[i];
         sprite = spriteSheet.addImage( image, width, height );
@@ -269,6 +307,11 @@ define( function( require ) {
       return sprite;
     },
 
+    /**
+     * Removes the reference to the sprite in our spritesheets.
+     *
+     * @param {Sprite} sprite
+     */
     removeSpriteSheetImage: function( sprite ) {
       sprite.spriteSheet.removeImage( sprite.image );
     },
@@ -342,7 +385,7 @@ define( function( require ) {
     }
   } );
 
-  WebGLBlock.TexturedQuadProcessor = function( webglBlock ) {
+  WebGLBlock.TexturedTrianglesProcessor = function( webglBlock ) {
     this.webglBlock = webglBlock;
     var gl = this.gl = webglBlock.gl;
 
@@ -381,7 +424,7 @@ define( function( require ) {
     gl.bindBuffer( gl.ARRAY_BUFFER, this.vertexBuffer );
     gl.bufferData( gl.ARRAY_BUFFER, this.vertexArray, gl.DYNAMIC_DRAW ); // fully buffer at the start
   };
-  inherit( Object, WebGLBlock.TexturedQuadProcessor, {
+  inherit( Object, WebGLBlock.TexturedTrianglesProcessor, {
     activate: function() {
       this.shaderProgram.use();
 
