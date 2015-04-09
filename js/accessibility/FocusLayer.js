@@ -1,4 +1,4 @@
-//  Copyright 2002-2014, University of Colorado Boulder
+// Copyright 2002-2014, University of Colorado Boulder
 
 /**
  * The FocusLayer contains any focus highlights that are shown *outside* of particular nodes, such as

@@ -1,4 +1,4 @@
-//  Copyright 2002-2014, University of Colorado Boulder
+// Copyright 2002-2014, University of Colorado Boulder
 
 /**
  * This renderer shows WebGL textures.  To achieve performance goals, it is important to minimize the number of draw calls.

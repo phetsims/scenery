@@ -1,4 +1,4 @@
-//  Copyright 2002-2014, University of Colorado Boulder
+// Copyright 2002-2014, University of Colorado Boulder
 
 /**
  * This WebGL renderer is used to draw colored triangles.  Vertices are allocated for geometry + colors, and can be updated

@@ -1,4 +1,4 @@
-//  Copyright 2002-2014, University of Colorado Boulder
+// Copyright 2002-2014, University of Colorado Boulder
 
 /**
  * Demonstration of a custom WebGL renderer (like CanvasNode), in this case which draws lines.

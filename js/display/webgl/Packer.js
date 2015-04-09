@@ -1,4 +1,4 @@
-//  Copyright 2002-2014, University of Colorado Boulder
+// Copyright 2002-2014, University of Colorado Boulder
 
 /**
  * Modified version of https://github.com/jakesgordon/bin-packing/blob/master/js/packer.js

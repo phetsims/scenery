@@ -1,4 +1,4 @@
-//  Copyright 2002-2014, University of Colorado Boulder
+// Copyright 2002-2014, University of Colorado Boulder
 
 /**
  * Maintains a collection of SpriteSheets. Different regions are reserved for images based on a simple bin packing algorithm
