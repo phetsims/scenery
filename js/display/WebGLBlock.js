@@ -148,29 +148,31 @@ define( function( require ) {
 
         //OHTWO TODO: PERFORMANCE: create an array for faster drawable iteration (this is probably a hellish memory access pattern)
         for ( var drawable = this.firstDrawable; drawable !== null; drawable = drawable.nextDrawable ) {
-          // select our desired processor
-          var desiredProcessor = null;
-          if ( drawable.webglRenderer === Renderer.webglTexturedQuad ) {
-            desiredProcessor = this.texturedQuadProcessor;
-          }
-          else if ( drawable.webglRenderer === Renderer.webglCustom ) {
-            desiredProcessor = this.customProcessor;
-          }
-          assert && assert( desiredProcessor );
-
-          // swap processors if necessary
-          if ( desiredProcessor !== currentProcessor ) {
-            // deactivate any old processors
-            if ( currentProcessor ) {
-              currentProcessor.deactivate();
+          if ( drawable.visible ) {
+            // select our desired processor
+            var desiredProcessor = null;
+            if ( drawable.webglRenderer === Renderer.webglTexturedQuad ) {
+              desiredProcessor = this.texturedQuadProcessor;
             }
-            // activate the new processor
-            currentProcessor = desiredProcessor;
-            currentProcessor.activate();
-          }
+            else if ( drawable.webglRenderer === Renderer.webglCustom ) {
+              desiredProcessor = this.customProcessor;
+            }
+            assert && assert( desiredProcessor );
 
-          // process our current drawable with the current processor
-          currentProcessor.processDrawable( drawable );
+            // swap processors if necessary
+            if ( desiredProcessor !== currentProcessor ) {
+              // deactivate any old processors
+              if ( currentProcessor ) {
+                currentProcessor.deactivate();
+              }
+              // activate the new processor
+              currentProcessor = desiredProcessor;
+              currentProcessor.activate();
+            }
+
+            // process our current drawable with the current processor
+            currentProcessor.processDrawable( drawable );
+          }
 
           // exit loop end case
           if ( drawable === this.lastDrawable ) { break; }
