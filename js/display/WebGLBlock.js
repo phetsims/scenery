@@ -252,6 +252,7 @@ define( function( require ) {
         sprite = newSpriteSheet.addImage( image, width, height );
         newSpriteSheet.initializeContext( this.gl );
         newSpriteSheet.createTexture();
+        this.spriteSheets.push( newSpriteSheet );
         if ( !sprite ) {
           // TODO: renderer flags should change for very large images
           throw new Error( 'Attempt to load image that is too large for sprite sheets' );
@@ -361,7 +362,8 @@ define( function( require ) {
     } );
 
     this.vertexBuffer = gl.createBuffer();
-    this.vertexArray = new Float32Array( 128 );
+    this.lastArrayLength = 128; // initial vertex buffer array length
+    this.vertexArray = new Float32Array( this.lastArrayLength );
 
     gl.bindBuffer( gl.ARRAY_BUFFER, this.vertexBuffer );
     gl.bufferData( gl.ARRAY_BUFFER, this.vertexArray, gl.DYNAMIC_DRAW ); // fully buffer at the start
@@ -412,8 +414,16 @@ define( function( require ) {
       gl.uniformMatrix3fv( this.shaderProgram.uniformLocations.uProjectionMatrix, false, this.webglBlock.projectionMatrixArray );
 
       gl.bindBuffer( gl.ARRAY_BUFFER, this.vertexBuffer );
-      gl.bufferSubData( gl.ARRAY_BUFFER, 0, this.vertexArray.subarray( 0, this.vertexArrayIndex ) );
+      // if we increased in length, we need to do a full bufferData to resize it on the GPU side
+      if ( this.vertexArray.length > this.lastArrayLength ) {
+        gl.bufferData( gl.ARRAY_BUFFER, this.vertexArray, gl.DYNAMIC_DRAW ); // fully buffer at the start
+      }
+      // otherwise do a more efficient update that only sends part of the array over
+      else {
+        gl.bufferSubData( gl.ARRAY_BUFFER, 0, this.vertexArray.subarray( 0, this.vertexArrayIndex ) );
+      }
       gl.vertexAttribPointer( this.shaderProgram.attributeLocations.aVertex, 4, gl.FLOAT, false, 0, 0 );
+      // TODO: test striping
       // var sizeOfFloat = 4;
       // gl.vertexAttribPointer( this.shaderProgram.attributeLocations.aVertex, 2, gl.FLOAT, false, 4 * sizeOfFloat, 0 * sizeOfFloat );
       // gl.vertexAttribPointer( this.shaderProgram.attributeLocations.aTextureCoord, 2, gl.FLOAT, false, 4 * sizeOfFloat, 2 * sizeOfFloat );
