@@ -165,6 +165,7 @@ define( function( require ) {
         this.context.drawImage( image, bin.bounds.x, bin.bounds.y );
         this.dirty = true;
         this.usedSprites.push( sprite );
+        return sprite;
       }
       // no space, even after clearing out our unused sprites
       else {

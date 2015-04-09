@@ -71,7 +71,7 @@ define( function( require ) {
 
         gl.clearColor( 0, 0, 0, 0 );
         gl.clear( gl.COLOR_BUFFER_BIT );
-        gl.blendFunc( gl.SRC_ALPHA, gl.ONE_MINUS_SRC_ALPHA );
+        // gl.blendFunc( gl.SRC_ALPHA, gl.ONE_MINUS_SRC_ALPHA );
         gl.enable( gl.BLEND );
 
         this.domElement = this.canvas;
@@ -214,7 +214,11 @@ define( function( require ) {
       if ( drawable.webglRenderer === Renderer.webglTexturedQuad ) {
         // TODO: how to change images seamlessly?
         assert && assert( drawable.image, 'Drawable with webglTexturedQuad should have an image' );
-        var sprite = this.addSpriteSheetImage( drawable.image );
+
+        // if the width/height isn't loaded yet, we can still use the desired value
+        var width = ( drawable.node && drawable.node.getImageWidth ) ? drawable.node.getImageWidth() : drawable.image.width;
+        var height = ( drawable.node && drawable.node.getImageHeight ) ? drawable.node.getImageHeight() : drawable.image.height;
+        var sprite = this.addSpriteSheetImage( drawable.image, width, height );
         drawable.sprite = sprite;
       }
     },
@@ -230,7 +234,7 @@ define( function( require ) {
       }
     },
 
-    addSpriteSheetImage: function( image ) {
+    addSpriteSheetImage: function( image, width, height ) {
       var sprite = null;
       var numSpriteSheets = this.spriteSheets.length;
       for ( var i = 0; i < numSpriteSheets; i++ ) {
@@ -242,7 +246,9 @@ define( function( require ) {
       }
       if ( !sprite ) {
         var newSpriteSheet = new SpriteSheet( true ); // use mipmaps for now?
-        sprite = newSpriteSheet.addImage( image );
+        sprite = newSpriteSheet.addImage( image, width, height );
+        newSpriteSheet.initializeContext( this.gl );
+        newSpriteSheet.createTexture();
         if ( !sprite ) {
           // TODO: renderer flags should change for very large images
           throw new Error( 'Attempt to load image that is too large for sprite sheets' );
@@ -326,14 +332,14 @@ define( function( require ) {
     assert && assert( webglBlock.gl );
     this.shaderProgram = new ShaderProgram( gl, [
       // vertex shader
-      'attribute vec2 aVertex;',
-      'attribute vec2 aTextureCoord;',
+      'attribute vec4 aVertex;',
+      // 'attribute vec2 aTextureCoord;',
       'varying vec2 vTextureCoord;',
       'uniform mat3 uProjectionMatrix;',
 
       'void main() {',
-      '  vTextureCoord = aTextureCoord;',
-      '  vec3 ndc = uProjectionMatrix * vec3( aVertex, 1.0 );', // homogeneous map to to normalized device coordinates
+      '  vTextureCoord = aVertex.zw;',
+      '  vec3 ndc = uProjectionMatrix * vec3( aVertex.xy, 1.0 );', // homogeneous map to to normalized device coordinates
       '  gl_Position = vec4( ndc.xy, 0.0, 1.0 );',
       '}'
     ].join( '\n' ), [
@@ -346,7 +352,8 @@ define( function( require ) {
       '  gl_FragColor = texture2D( uTexture, vTextureCoord, -0.7 );', // mipmap LOD bias of -0.7 (for now)
       '}'
     ].join( '\n' ), {
-      attributes: [ 'aVertex', 'aTextureCoord' ],
+      // attributes: [ 'aVertex', 'aTextureCoord' ],
+      attributes: [ 'aVertex' ],
       uniforms: [ 'uTexture', 'uProjectionMatrix' ]
     } );
 
@@ -403,12 +410,14 @@ define( function( require ) {
 
       gl.bindBuffer( gl.ARRAY_BUFFER, this.vertexBuffer );
       gl.bufferSubData( gl.ARRAY_BUFFER, 0, this.vertexArray.subarray( 0, this.vertexArrayIndex ) );
-      gl.vertexAttribPointer( this.shaderProgram.attributes.aVertex, 2, gl.FLOAT, false, 4, 0 );
-      gl.vertexAttribPointer( this.shaderProgram.attributes.aTextureCoord, 2, gl.FLOAT, false, 4, 2 );
+      gl.vertexAttribPointer( this.shaderProgram.attributeLocations.aVertex, 4, gl.FLOAT, false, 0, 0 );
+      // var sizeOfFloat = 4;
+      // gl.vertexAttribPointer( this.shaderProgram.attributeLocations.aVertex, 2, gl.FLOAT, false, 4 * sizeOfFloat, 0 * sizeOfFloat );
+      // gl.vertexAttribPointer( this.shaderProgram.attributeLocations.aTextureCoord, 2, gl.FLOAT, false, 4 * sizeOfFloat, 2 * sizeOfFloat );
 
       gl.activeTexture( gl.TEXTURE0 );
       gl.bindTexture( gl.TEXTURE_2D, this.currentSpriteSheet.texture );
-      gl.uniform1i( this.shaderProgram.uniforms.uTexture, 0 );
+      gl.uniform1i( this.shaderProgram.uniformLocations.uTexture, 0 );
 
       gl.drawArrays( gl.TRIANGLES, 0, this.vertexArrayIndex / 4 );
 

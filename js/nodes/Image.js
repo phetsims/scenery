@@ -20,7 +20,7 @@ define( function( require ) {
   var scenery = require( 'SCENERY/scenery' );
 
   var Node = require( 'SCENERY/nodes/Node' ); // Image inherits from Node
-  require( 'SCENERY/display/Renderer' ); // we need to specify the Renderer in the prototype
+  var Renderer = require( 'SCENERY/display/Renderer' ); // we need to specify the Renderer in the prototype
   require( 'SCENERY/util/Util' );
 
   var DOMSelfDrawable = require( 'SCENERY/display/DOMSelfDrawable' );
@@ -758,6 +758,8 @@ define( function( require ) {
   Image.ImageWebGLDrawable = inherit( WebGLSelfDrawable, function ImageWebGLDrawable( renderer, instance ) {
     this.initialize( renderer, instance );
   }, {
+    webglRenderer: Renderer.webglTexturedQuad,
+
     // called either from the constructor or from pooling
     initialize: function( renderer, instance ) {
       this.initializeWebGLSelfDrawable( renderer, instance );
@@ -776,6 +778,9 @@ define( function( require ) {
 
       this.xyDirty = true; // is our vertex position information out of date?
       this.uvDirty = true; // is our UV information out of date?
+
+      // exported for WebGLBlock
+      this.image = this.node._image;
     },
 
     initializeContext: function( webglBlock ) {
@@ -804,7 +809,7 @@ define( function( require ) {
 
         if ( this.sprite.image !== this.node._image ) {
           this.webglBlock.removeSpriteSheetImage( this.sprite );
-          this.sprite = this.webglBlock.addSpriteSheetImage( this.node._image );
+          this.sprite = this.webglBlock.addSpriteSheetImage( this.node._image, this.node.getImageWidth(), this.node.getImageHeight() );
           // full updates on everything if our sprite changes
           this.xyDirty = true;
           this.uvDirty = true;
@@ -842,9 +847,9 @@ define( function( require ) {
 
           var transformMatrix = this.instance.relativeTransform.matrix; // with compute need, should always be accurate
           transformMatrix.multiplyVector2( this.upperLeft.setXY( 0, 0 ) );
-          transformMatrix.multiplyVector2( this.lowerLeft.setXY( 0, -height ) );
+          transformMatrix.multiplyVector2( this.lowerLeft.setXY( 0, height ) );
           transformMatrix.multiplyVector2( this.upperRight.setXY( width, 0 ) );
-          transformMatrix.multiplyVector2( this.lowerRight.setXY( width, -height ) );
+          transformMatrix.multiplyVector2( this.lowerRight.setXY( width, height ) );
 
           // first triangle XYs
           this.vertexArray[0] = this.upperLeft.x;
@@ -866,7 +871,7 @@ define( function( require ) {
     },
 
     dispose: function() {
-      this.disposeWebGLBuffers();
+      // TODO: disposal of buffers?
 
       // super
       WebGLSelfDrawable.prototype.dispose.call( this );
