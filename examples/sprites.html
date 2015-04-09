@@ -63,7 +63,7 @@
 
   <script>
 
-    var spriteCount = 100;
+    var spriteCount = 200;
 
     window.onload = function() {
       var scene = new scenery.Node( { renderer: 'webgl' } );
@@ -98,7 +98,7 @@
         for ( var i = 0; i < children.length; i++ ) {
           var child = children[i];
 
-          child.translate( timeElapsed * child.xVelocity, timeElapsed * child.yVelocity );
+          child.translate( timeElapsed * child.xVelocity, timeElapsed * child.yVelocity, true );
           child.xVelocity += 15 * ( Math.random() - 0.5 );
           child.yVelocity += 15 * ( Math.random() - 0.5 );
         }
