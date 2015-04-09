@@ -151,7 +151,7 @@ define( function( require ) {
           if ( drawable.visible ) {
             // select our desired processor
             var desiredProcessor = null;
-            if ( drawable.webglRenderer === Renderer.webglTexturedQuad ) {
+            if ( drawable.webglRenderer === Renderer.webglTexturedTriangles ) {
               desiredProcessor = this.texturedQuadProcessor;
             }
             else if ( drawable.webglRenderer === Renderer.webglCustom ) {
@@ -216,9 +216,9 @@ define( function( require ) {
       drawable.initializeContext( this );
 
       // see if we need to allocate a texture within our sprite sheets
-      if ( drawable.webglRenderer === Renderer.webglTexturedQuad ) {
+      if ( drawable.webglRenderer === Renderer.webglTexturedTriangles ) {
         // TODO: how to change images seamlessly?
-        assert && assert( drawable.image, 'Drawable with webglTexturedQuad should have an image' );
+        assert && assert( drawable.image, 'Drawable with webglTexturedTriangles should have an image' );
 
         // if the width/height isn't loaded yet, we can still use the desired value
         var width = ( drawable.node && drawable.node.getImageWidth ) ? drawable.node.getImageWidth() : drawable.image.width;
@@ -233,7 +233,7 @@ define( function( require ) {
 
       FittedBlock.prototype.removeDrawable.call( this, drawable );
 
-      if ( drawable.webglRenderer === Renderer.webglTexturedQuad ) {
+      if ( drawable.webglRenderer === Renderer.webglTexturedTriangles ) {
         this.removeSpriteSheetImage( drawable.sprite );
         drawable.sprite = null;
       }
@@ -379,7 +379,7 @@ define( function( require ) {
     },
 
     processDrawable: function( drawable ) {
-      assert && assert( drawable.webglRenderer === Renderer.webglTexturedQuad );
+      assert && assert( drawable.webglRenderer === Renderer.webglTexturedTriangles );
       if ( this.currentSpriteSheet && drawable.sprite.spriteSheet !== this.currentSpriteSheet ) {
         this.draw();
       }

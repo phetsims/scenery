@@ -758,7 +758,7 @@ define( function( require ) {
   Image.ImageWebGLDrawable = inherit( WebGLSelfDrawable, function ImageWebGLDrawable( renderer, instance ) {
     this.initialize( renderer, instance );
   }, {
-    webglRenderer: Renderer.webglTexturedQuad,
+    webglRenderer: Renderer.webglTexturedTriangles,
 
     // called either from the constructor or from pooling
     initialize: function( renderer, instance ) {

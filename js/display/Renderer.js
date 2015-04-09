@@ -255,7 +255,7 @@ define( function( require ) {
   * WebGL Renderer type enumeration
   *----------------------------------------------------------------------------*/
   Renderer.webglCustom = 0x1;
-  Renderer.webglTexturedQuad = 0x2;
+  Renderer.webglTexturedTriangles = 0x2;
 
   return Renderer;
 } );
