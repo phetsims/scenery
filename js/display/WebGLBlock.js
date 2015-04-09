@@ -83,7 +83,7 @@ define( function( require ) {
       }
 
       // clear buffers when we are reinitialized
-      gl.clear( gl.COLOR_BUFFER_BIT );
+      this.gl.clear( this.gl.COLOR_BUFFER_BIT );
 
       // reset any fit transforms that were applied
       Util.prepareForTransform( this.canvas, false );
