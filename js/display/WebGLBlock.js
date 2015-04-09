@@ -70,7 +70,6 @@ define( function( require ) {
         this.backingScale = Util.backingScale( gl );
 
         gl.clearColor( 0, 0, 0, 0 );
-        gl.clear( gl.COLOR_BUFFER_BIT );
 
         // NOTE: not using gl.blendFunc( gl.SRC_ALPHA, gl.ONE_MINUS_SRC_ALPHA ) since that is for non-premultiplied alpha
         // see http://webglfundamentals.org/webgl/lessons/webgl-and-alpha.html
@@ -82,6 +81,9 @@ define( function( require ) {
         this.customProcessor = new WebGLBlock.CustomProcessor( this );
         this.texturedQuadProcessor = new WebGLBlock.TexturedQuadProcessor( this );
       }
+
+      // clear buffers when we are reinitialized
+      gl.clear( gl.COLOR_BUFFER_BIT );
 
       // reset any fit transforms that were applied
       Util.prepareForTransform( this.canvas, false );

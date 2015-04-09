@@ -127,7 +127,6 @@ define( function( require ) {
         }
       }
 
-      bitmask |= scenery.bitmaskSupportsWebGL;
       bitmask |= scenery.bitmaskSupportsPixi;
       return bitmask;
     },
@@ -146,7 +145,6 @@ define( function( require ) {
         bitmask |= scenery.bitmaskSupportsDOM;
       }
 
-      bitmask |= scenery.bitmaskSupportsWebGL;
       bitmask |= scenery.bitmaskSupportsPixi;
 
       return bitmask;

@@ -282,7 +282,7 @@ define( function( require ) {
     // A line does not render its fill, so it supports all renderers.  Right?
     // - SR, 2014
     getFillRendererBitmask: function() {
-      return scenery.bitmaskSupportsCanvas | scenery.bitmaskSupportsSVG | scenery.bitmaskSupportsDOM | scenery.bitmaskSupportsWebGL | scenery.bitmaskSupportsPixi;
+      return scenery.bitmaskSupportsCanvas | scenery.bitmaskSupportsSVG | scenery.bitmaskSupportsDOM | scenery.bitmaskSupportsPixi;
     }
 
   } );

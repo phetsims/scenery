@@ -157,7 +157,6 @@ define( function( require ) {
 
       // fill and stroke will determine whether we have DOM text support
       bitmask |= scenery.bitmaskSupportsDOM;
-      bitmask |= scenery.bitmaskSupportsWebGL;
       bitmask |= scenery.bitmaskSupportsPixi;
 
       return bitmask;

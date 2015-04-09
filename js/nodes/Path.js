@@ -48,7 +48,7 @@ define( function( require ) {
   inherit( Node, Path, {
     // allow more specific path types (Rectangle, Line) to override what restrictions we have
     getPathRendererBitmask: function() {
-      return scenery.bitmaskBoundsValid | scenery.bitmaskSupportsCanvas | scenery.bitmaskSupportsSVG | scenery.bitmaskSupportsWebGL | scenery.bitmaskSupportsPixi;
+      return scenery.bitmaskBoundsValid | scenery.bitmaskSupportsCanvas | scenery.bitmaskSupportsSVG | scenery.bitmaskSupportsPixi;
     },
 
     invalidateSupportedRenderers: function() {
