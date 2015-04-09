@@ -77,6 +77,7 @@ define( function( require ) {
       gl.texParameteri( gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, this.useMipmaps ? gl.LINEAR_MIPMAP_LINEAR : gl.LINEAR );
       gl.texParameteri( gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, gl.LINEAR );
       gl.pixelStorei( gl.UNPACK_FLIP_Y_WEBGL, false );
+      gl.pixelStorei( gl.UNPACK_PREMULTIPLY_ALPHA_WEBGL, true ); // work with premultiplied numbers
       gl.texImage2D( gl.TEXTURE_2D, 0, gl.RGBA, gl.RGBA, gl.UNSIGNED_BYTE, this.canvas );
       if ( this.useMipmaps ) {
         gl.hint( gl.GENERATE_MIPMAP_HINT, gl.NICEST );

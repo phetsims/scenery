@@ -71,7 +71,10 @@ define( function( require ) {
 
         gl.clearColor( 0, 0, 0, 0 );
         gl.clear( gl.COLOR_BUFFER_BIT );
-        // gl.blendFunc( gl.SRC_ALPHA, gl.ONE_MINUS_SRC_ALPHA );
+
+        // NOTE: not using gl.blendFunc( gl.SRC_ALPHA, gl.ONE_MINUS_SRC_ALPHA ) since that is for non-premultiplied alpha
+        // see http://webglfundamentals.org/webgl/lessons/webgl-and-alpha.html
+        gl.blendFunc( gl.ONE, gl.ONE_MINUS_SRC_ALPHA );
         gl.enable( gl.BLEND );
 
         this.domElement = this.canvas;
