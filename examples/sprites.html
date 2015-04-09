@@ -81,7 +81,8 @@
         var node = new scenery.Node( {
           children: [ Math.random() > 0.5 ? image1 : image2 ],
           x: Math.random() * 512,
-          y: Math.random() * 512
+          y: Math.random() * 512,
+          scale: Math.random() + 0.2
         } );
         node.xVelocity = 10 * ( Math.random() - 0.5 );
         node.yVelocity = 10 * ( Math.random() - 0.5 );
