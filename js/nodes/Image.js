@@ -781,6 +781,8 @@ define( function( require ) {
 
       // exported for WebGLBlock
       this.image = this.node._image;
+
+      return this;
     },
 
     initializeContext: function( webglBlock ) {
