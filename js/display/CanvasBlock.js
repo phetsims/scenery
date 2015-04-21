@@ -40,6 +40,8 @@ define( function( require ) {
         this.canvas.style.left = '0';
         this.canvas.style.top = '0';
         this.canvas.style.pointerEvents = 'none';
+
+        // unique ID so that we can support rasterization with Display.foreignObjectRasterization
         this.canvasId = this.canvas.id = 'scenery-canvas' + this.id;
 
         this.context = this.canvas.getContext( '2d' );

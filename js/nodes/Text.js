@@ -157,7 +157,6 @@ define( function( require ) {
 
       // fill and stroke will determine whether we have DOM text support
       bitmask |= scenery.bitmaskSupportsDOM;
-      bitmask |= scenery.bitmaskSupportsWebGL;
       bitmask |= scenery.bitmaskSupportsPixi;
 
       return bitmask;
@@ -785,7 +784,7 @@ define( function( require ) {
       this.initializeWebGLSelfDrawable( renderer, instance );
     },
 
-    initializeContext: function( webglBlock ) {
+    onAddToBlock: function( webglBlock ) {
       var self = this;
       this.node.toImageNodeAsynchronous( function( imageNodeContainer ) {
         //toImageNode returns a containerNode with its first child set as ImageNode
@@ -799,6 +798,10 @@ define( function( require ) {
       } );
 
       //TODO: Update the state in the buffer arrays
+    },
+
+    onRemoveFromBlock: function( webglBlock ) {
+
     },
 
     //Nothing necessary since everything currently handled in the uModelViewMatrix below

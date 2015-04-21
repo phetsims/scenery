@@ -44,7 +44,8 @@
  *   svgElement: {SVGElement}
  * }
  * WebGL: {
- *   initializeContext: function( {WebGLRenderingContext} gl )
+ *   onAddToBlock: function( {WebGLBlock} block )
+ *   onRemoveFromBlock: function( {WebGLBlock} block )
  *   render: function( {ShaderProgram} shaderProgram )
  *   shaderAttributes: {string[]} - names of vertex attributes to be used
  * }

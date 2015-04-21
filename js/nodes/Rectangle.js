@@ -127,7 +127,6 @@ define( function( require ) {
         }
       }
 
-      bitmask |= scenery.bitmaskSupportsWebGL;
       bitmask |= scenery.bitmaskSupportsPixi;
       return bitmask;
     },
@@ -146,7 +145,6 @@ define( function( require ) {
         bitmask |= scenery.bitmaskSupportsDOM;
       }
 
-      bitmask |= scenery.bitmaskSupportsWebGL;
       bitmask |= scenery.bitmaskSupportsPixi;
 
       return bitmask;
@@ -873,7 +871,7 @@ define( function( require ) {
       this.initializeWebGLSelfDrawable( renderer, instance );
     },
 
-    initializeContext: function( webglBlock ) {
+    onAddToBlock: function( webglBlock ) {
       this.webglBlock = webglBlock;
       this.rectangleHandle = new SquareUnstrokedRectangle( webglBlock.webGLRenderer.colorTriangleRenderer, this.node, 0.5 );
 
@@ -884,6 +882,10 @@ define( function( require ) {
       this.updateRectangle();
 
       //TODO: Update the state in the buffer arrays
+    },
+
+    onRemoveFromBlock: function( webglBlock ) {
+
     },
 
     //Nothing necessary since everything currently handled in the uModelViewMatrix below

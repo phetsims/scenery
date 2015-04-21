@@ -778,6 +778,7 @@ define( function( require ) {
           }
 
           this.selfDrawable = Renderer.createSelfDrawable( this, this.node, selfRenderer );
+          assert && assert( this.selfDrawable );
 
           return true;
         }

@@ -282,7 +282,7 @@ define( function( require ) {
     // A line does not render its fill, so it supports all renderers.  Right?
     // - SR, 2014
     getFillRendererBitmask: function() {
-      return scenery.bitmaskSupportsCanvas | scenery.bitmaskSupportsSVG | scenery.bitmaskSupportsDOM | scenery.bitmaskSupportsWebGL | scenery.bitmaskSupportsPixi;
+      return scenery.bitmaskSupportsCanvas | scenery.bitmaskSupportsSVG | scenery.bitmaskSupportsDOM | scenery.bitmaskSupportsPixi;
     }
 
   } );
@@ -551,7 +551,7 @@ define( function( require ) {
       this.initializeWebGLSelfDrawable( renderer, instance );
     },
 
-    initializeContext: function( webglBlock ) {
+    onAddToBlock: function( webglBlock ) {
       this.webglBlock = webglBlock;
       this.rectangleHandle = new SquareUnstrokedRectangle( webglBlock.webGLRenderer.colorTriangleRenderer, this.node, 0.5 );
 
@@ -562,6 +562,10 @@ define( function( require ) {
       this.updateLine();
 
       //TODO: Update the state in the buffer arrays
+    },
+
+    onRemoveFromBlock: function( webglBlock ) {
+
     },
 
     //Nothing necessary since everything currently handled in the uModelViewMatrix below

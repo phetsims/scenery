@@ -48,7 +48,7 @@ define( function( require ) {
   inherit( Node, Path, {
     // allow more specific path types (Rectangle, Line) to override what restrictions we have
     getPathRendererBitmask: function() {
-      return scenery.bitmaskBoundsValid | scenery.bitmaskSupportsCanvas | scenery.bitmaskSupportsSVG | scenery.bitmaskSupportsWebGL | scenery.bitmaskSupportsPixi;
+      return scenery.bitmaskBoundsValid | scenery.bitmaskSupportsCanvas | scenery.bitmaskSupportsSVG | scenery.bitmaskSupportsPixi;
     },
 
     invalidateSupportedRenderers: function() {
@@ -329,7 +329,7 @@ define( function( require ) {
       this.initializeWebGLSelfDrawable( renderer, instance );
     },
 
-    initializeContext: function( webglBlock ) {
+    onAddToBlock: function( webglBlock ) {
       this.webglBlock = webglBlock;
       this.rectangleHandle = new SquareUnstrokedRectangle( webglBlock.webGLRenderer.colorTriangleRenderer, this.node, 0.5 );
 
@@ -340,6 +340,10 @@ define( function( require ) {
       this.updatePath();
 
       //TODO: Update the state in the buffer arrays
+    },
+
+    onRemoveFromBlock: function( webglBlock ) {
+
     },
 
     //Nothing necessary since everything currently handled in the uModelViewMatrix below
