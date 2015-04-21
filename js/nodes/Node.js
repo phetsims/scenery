@@ -204,7 +204,10 @@ define( function( require ) {
 
       // {boolean} Whether SVG (or other) content should be excluded from the DOM tree when invisible
       // (instead of just being hidden)
-      excludeInvisible: false
+      excludeInvisible: false,
+
+      // {number | null} If non-null, a multiplier to the detected pixel-to-pixel scaling of the WebGL Canvas
+      webglScale: null
     };
 
     // the subtree pickable count is #pickable:true + #inputListeners, since we can prune subtrees with a pickable count of 0
@@ -1827,6 +1830,7 @@ define( function( require ) {
 
       if ( excludeInvisible !== this._hints.excludeInvisible ) {
         this._hints.excludeInvisible = excludeInvisible;
+        this.trigger1( 'hint', 'excludeInvisible' );
       }
     },
     set excludeInvisible( value ) { this.setExcludeInvisible( value ); },
@@ -1835,6 +1839,21 @@ define( function( require ) {
       return this._hints.excludeInvisible;
     },
     get excludeInvisible() { return this.isExcludeInvisible(); },
+
+    setWebGLScale: function( webglScale ) {
+      assert && assert( webglScale === null && typeof webglScale === 'number' );
+
+      if ( webglScale !== this._hints.webglScale ) {
+        this._hints.webglScale = webglScale;
+        this.trigger1( 'hint', 'webglScale' );
+      }
+    },
+    set webglScale( value ) { this.setWebGLScale( value ); },
+
+    getWebGLScale: function() {
+      return this._hints.webglScale;
+    },
+    get webglScale() { return this.getWebGLScale(); },
 
     /*---------------------------------------------------------------------------*
      * Trail operations
@@ -2786,8 +2805,8 @@ define( function( require ) {
     'children', 'cursor', 'visible', 'pickable', 'opacity', 'matrix', 'translation', 'x', 'y', 'rotation', 'scale',
     'leftTop', 'centerTop', 'rightTop', 'leftCenter', 'center', 'rightCenter', 'leftBottom', 'centerBottom', 'rightBottom',
     'left', 'right', 'top', 'bottom', 'centerX', 'centerY', 'renderer', 'rendererOptions',
-    'layerSplit', 'usesOpacity', 'cssTransform', 'excludeInvisible', 'mouseArea', 'touchArea', 'clipArea', 'transformBounds',
-    'focusable', 'focusIndicator', 'focusOrder', 'textDescription'
+    'layerSplit', 'usesOpacity', 'cssTransform', 'excludeInvisible', 'webglScale', 'mouseArea', 'touchArea', 'clipArea',
+    'transformBounds', 'focusable', 'focusIndicator', 'focusOrder', 'textDescription'
   ];
 
   return Node;

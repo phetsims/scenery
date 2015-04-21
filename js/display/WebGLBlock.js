@@ -74,7 +74,7 @@ define( function( require ) {
 
         // {number} - How much larger our Canvas will be compared to the CSS pixel dimensions, so that our Canvas maps
         // one of its pixels to a physical pixel (for Retina devices, etc.).
-        this.backingScale = Util.backingScale( gl );
+        this.backingScale = this.originalBackingScale = Util.backingScale( gl );
 
         // What color gets set when we call gl.clear()
         gl.clearColor( 0, 0, 0, 0 );
@@ -113,8 +113,8 @@ define( function( require ) {
 
     setSizeFullDisplay: function() {
       var size = this.display.getSize();
-      this.canvas.width = size.width * this.backingScale;
-      this.canvas.height = size.height * this.backingScale;
+      this.canvas.width = Math.ceil( size.width * this.backingScale );
+      this.canvas.height = Math.ceil( size.height * this.backingScale );
       this.canvas.style.width = size.width + 'px';
       this.canvas.style.height = size.height + 'px';
     },
@@ -141,6 +141,16 @@ define( function( require ) {
         var numSpriteSheets = this.spriteSheets.length;
         for ( var i = 0; i < numSpriteSheets; i++ ) {
           this.spriteSheets[i].updateTexture();
+        }
+
+        // temporary hack for supporting webglScale
+        if ( this.firstDrawable &&
+             this.firstDrawable === this.lastDrawable &&
+             this.firstDrawable.node &&
+             this.firstDrawable.node._hints.webglScale !== null &&
+             this.backingScale !== this.originalBackingScale * this.firstDrawable.node._hints.webglScale ) {
+          this.backingScale = this.originalBackingScale * this.firstDrawable.node._hints.webglScale;
+          this.dirtyFit = true;
         }
 
         // udpate the fit BEFORE drawing, since it may change our offset
