@@ -32,11 +32,14 @@ define( function( require ) {
   var Drawable = require( 'SCENERY/display/Drawable' );
   var Renderer = require( 'SCENERY/display/Renderer' );
   var RelativeTransform = require( 'SCENERY/display/RelativeTransform' );
+  var Util = require( 'SCENERY/util/Util' );
   var Events = require( 'AXON/Events' );
 
   var globalIdCounter = 1;
 
   var emptyHintsObject = {}; // an object with no properties that we can use as an empty "hints" object
+
+  var isWebGLSupported = Util.isWebGLSupported;
 
   // preferences top to bottom in general
   var defaultPreferredRenderers = Renderer.createOrderBitmask(
@@ -343,19 +346,23 @@ define( function( require ) {
           this.selfRenderer = Renderer.bitmaskCanvas;
         }
         else {
-          var nodeBitmask = this.node._rendererBitmask;
+          var supportedNodeBitmask = this.node._rendererBitmask;
+          if ( !isWebGLSupported ) {
+            var invalidBitmasks = Renderer.bitmaskWebGL | Renderer.bitmaskPixi;
+            supportedNodeBitmask = supportedNodeBitmask ^ ( supportedNodeBitmask & invalidBitmasks );
+          }
 
           // use the preferred rendering order if specified, otherwise use the default
-          this.selfRenderer = ( nodeBitmask & Renderer.bitmaskOrderFirst( this.preferredRenderers ) ) ||
-                              ( nodeBitmask & Renderer.bitmaskOrderSecond( this.preferredRenderers ) ) ||
-                              ( nodeBitmask & Renderer.bitmaskOrderThird( this.preferredRenderers ) ) ||
-                              ( nodeBitmask & Renderer.bitmaskOrderFourth( this.preferredRenderers ) ) ||
-                              ( nodeBitmask & Renderer.bitmaskOrderFifth( this.preferredRenderers ) ) ||
-                              ( nodeBitmask & Renderer.bitmaskSVG ) ||
-                              ( nodeBitmask & Renderer.bitmaskCanvas ) ||
-                              ( nodeBitmask & Renderer.bitmaskDOM ) ||
-                              ( nodeBitmask & Renderer.bitmaskWebGL ) ||
-                              ( nodeBitmask & Renderer.bitmaskPixi ) ||
+          this.selfRenderer = ( supportedNodeBitmask & Renderer.bitmaskOrderFirst( this.preferredRenderers ) ) ||
+                              ( supportedNodeBitmask & Renderer.bitmaskOrderSecond( this.preferredRenderers ) ) ||
+                              ( supportedNodeBitmask & Renderer.bitmaskOrderThird( this.preferredRenderers ) ) ||
+                              ( supportedNodeBitmask & Renderer.bitmaskOrderFourth( this.preferredRenderers ) ) ||
+                              ( supportedNodeBitmask & Renderer.bitmaskOrderFifth( this.preferredRenderers ) ) ||
+                              ( supportedNodeBitmask & Renderer.bitmaskSVG ) ||
+                              ( supportedNodeBitmask & Renderer.bitmaskCanvas ) ||
+                              ( supportedNodeBitmask & Renderer.bitmaskDOM ) ||
+                              ( supportedNodeBitmask & Renderer.bitmaskWebGL ) ||
+                              ( supportedNodeBitmask & Renderer.bitmaskPixi ) ||
                               0;
 
           assert && assert( this.selfRenderer, 'setSelfRenderer failure?' );

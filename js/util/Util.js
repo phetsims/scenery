@@ -432,9 +432,8 @@ define( function( require ) {
 
       var args = { failIfMajorPerformanceCaveat: true };
       try {
-        var gl =
-          !!window.WebGLRenderingContext &&
-          (canvas.getContext( 'webgl', args ) || canvas.getContext( 'experimental-webgl', args ));
+        var gl = !!window.WebGLRenderingContext &&
+                 ( canvas.getContext( 'webgl', args ) || canvas.getContext( 'experimental-webgl', args ) );
 
         if ( !gl ) {
           return false;
