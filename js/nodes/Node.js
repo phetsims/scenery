@@ -1841,7 +1841,7 @@ define( function( require ) {
     get excludeInvisible() { return this.isExcludeInvisible(); },
 
     setWebGLScale: function( webglScale ) {
-      assert && assert( webglScale === null && typeof webglScale === 'number' );
+      assert && assert( webglScale === null || typeof webglScale === 'number' );
 
       if ( webglScale !== this._hints.webglScale ) {
         this._hints.webglScale = webglScale;
