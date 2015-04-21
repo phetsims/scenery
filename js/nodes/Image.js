@@ -763,7 +763,6 @@ define( function( require ) {
     // called either from the constructor or from pooling
     initialize: function( renderer, instance ) {
       this.initializeWebGLSelfDrawable( renderer, instance );
-      this.sprite = null; // {SpriteSheet.Sprite}, will be filled in by our WebGLBlock
 
       if ( !this.vertexArray ) {
         // format [X Y U V] for 6 vertices
@@ -779,15 +778,52 @@ define( function( require ) {
       this.xyDirty = true; // is our vertex position information out of date?
       this.uvDirty = true; // is our UV information out of date?
 
-      // exported for WebGLBlock
-      this.image = this.node._image;
+      // {SpriteSheet.Sprite} exported for WebGLBlock's rendering loop
+      this.sprite = null;
 
       return this;
     },
 
-    initializeContext: function( webglBlock ) {
+    onAddToBlock: function( webglBlock ) {
       this.webglBlock = webglBlock; // TODO: do we need this reference?
       this.markDirty();
+
+      this.reserveSprite();
+    },
+
+    onRemoveFromBlock: function( webglBlock ) {
+      this.unreserveSprite();
+    },
+
+    reserveSprite: function() {
+      if ( this.sprite ) {
+        // if we already reserved a sprite for the image, bail out
+        if ( this.sprite.image === this.node._image ) {
+          return;
+        }
+        // otherwise we need to ditch our last reservation before reserving a new sprite
+        else {
+          this.unreserveSprite();
+        }
+      }
+
+      // if the width/height isn't loaded yet, we can still use the desired value
+      var width = this.node._image.naturalWidth;
+      var height = this.node._image.naturalHeight;
+
+      // if we have a width/height, we'll load a sprite
+      this.sprite = ( width > 0 && height > 0 ) ? this.webglBlock.addSpriteSheetImage( this.node._image, width, height ) : null;
+
+      // full updates on everything if our sprite changes
+      this.xyDirty = true;
+      this.uvDirty = true;
+    },
+
+    unreserveSprite: function() {
+      if ( this.sprite ) {
+        this.webglBlock.removeSpriteSheetImage( this.sprite );
+      }
+      this.sprite = null;
     },
 
     // @override
@@ -809,12 +845,12 @@ define( function( require ) {
       if ( this.dirty ) {
         this.dirty = false;
 
-        if ( this.sprite.image !== this.node._image ) {
-          this.webglBlock.removeSpriteSheetImage( this.sprite );
-          this.sprite = this.webglBlock.addSpriteSheetImage( this.node._image, this.node.getImageWidth(), this.node.getImageHeight() );
-          // full updates on everything if our sprite changes
-          this.xyDirty = true;
-          this.uvDirty = true;
+        // ensure that we have a reserved sprite (part of the spritesheet)
+        this.reserveSprite();
+
+        // if we don't have a sprite (we don't have a loaded image yet), just bail
+        if ( !this.sprite ) {
+          return;
         }
 
         if ( this.uvDirty ) {

@@ -93,12 +93,16 @@ define( function( require ) {
       this.initializeWebGLSelfDrawable( renderer, instance );
     },
 
-    initializeContext: function( webGLBlock ) {
+    onAddToBlock: function( webGLBlock ) {
       this.webGLBlock = webGLBlock;
       this.backingScale = this.webGLBlock.backingScale;
       this.gl = this.webGLBlock.gl;
 
       this.node.initializeWebGLDrawable( this );
+    },
+
+    onRemoveFromBlock: function( webGLBlock ) {
+
     },
 
     draw: function() {

@@ -254,31 +254,17 @@ define( function( require ) {
 
       FittedBlock.prototype.addDrawable.call( this, drawable );
 
-      drawable.initializeContext( this );
-
-      // see if we need to allocate a texture within our sprite sheets
-      if ( drawable.webglRenderer === Renderer.webglTexturedTriangles ) {
-        // TODO: how to change images seamlessly?
-        assert && assert( drawable.image, 'Drawable with webglTexturedTriangles should have an image' );
-
-        // if the width/height isn't loaded yet, we can still use the desired value
-        var width = ( drawable.node && drawable.node.getImageWidth ) ? drawable.node.getImageWidth() : drawable.image.width;
-        var height = ( drawable.node && drawable.node.getImageHeight ) ? drawable.node.getImageHeight() : drawable.image.height;
-        var sprite = this.addSpriteSheetImage( drawable.image, width, height );
-        drawable.sprite = sprite;
-      }
+      // will trigger changes to the spritesheets for images, or initialization for others
+      drawable.onAddToBlock( this );
     },
 
     removeDrawable: function( drawable ) {
       sceneryLog && sceneryLog.WebGLBlock && sceneryLog.WebGLBlock( '#' + this.id + '.removeDrawable ' + drawable.toString() );
 
-      FittedBlock.prototype.removeDrawable.call( this, drawable );
+      // wil trigger removal from spritesheets
+      drawable.onRemoveFromBlock( this );
 
-      if ( drawable.webglRenderer === Renderer.webglTexturedTriangles ) {
-        // mark our sprite as unused
-        this.removeSpriteSheetImage( drawable.sprite );
-        drawable.sprite = null;
-      }
+      FittedBlock.prototype.removeDrawable.call( this, drawable );
     },
 
     /**
@@ -444,6 +430,11 @@ define( function( require ) {
     },
 
     processDrawable: function( drawable ) {
+      // skip unloaded images or sprites
+      if ( !drawable.sprite ) {
+        return;
+      }
+
       assert && assert( drawable.webglRenderer === Renderer.webglTexturedTriangles );
       if ( this.currentSpriteSheet && drawable.sprite.spriteSheet !== this.currentSpriteSheet ) {
         this.draw();
