@@ -19,7 +19,7 @@ require.config( {
     PHET_CORE: '../../phet-core/js',
     AXON: '../../axon/js',
     ENERGY_SKATE_PARK_BASICS: '../../energy-skate-park-basics/js',
-    text: '../../sherpa/text',
+    text: '../../sherpa/text-2.0.12',
 
     image: '../../chipper/js/requirejs-plugins/image'
   },

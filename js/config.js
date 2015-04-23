@@ -14,7 +14,7 @@ require.config( {
 
     // plugins
     image: '../../chipper/js/requirejs-plugins/image',
-    text: '../../sherpa/text',
+    text: '../../sherpa/text-2.0.12',
 
     SCENERY: '.',
     KITE: '../../kite/js',
