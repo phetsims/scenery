@@ -305,7 +305,7 @@ define( function( require ) {
       return ( this.r << 16 ) + ( this.g << 8 ) + this.b;
     },
 
-    // called to update the interally cached CSS value
+    // called to update the internally cached CSS value
     updateColor: function() {
       assert && assert( !this.immutable, 'Cannot modify an immutable color' );
 
@@ -470,6 +470,15 @@ define( function( require ) {
 
     toString: function() {
       return this.constructor.name + "[r:" + this.r + " g:" + this.g + " b:" + this.b + " a:" + this.a + "]";
+    },
+
+    toJSON: function(){
+      return {
+        r: this.r,
+        g: this.g,
+        b: this.b,
+        a: this.a
+      }
     }
   } );
 
@@ -677,6 +686,10 @@ define( function( require ) {
     var b = Math.floor( linear( 0, 1, color1.b, color2.b, distance ) );
     var a = linear( 0, 1, color1.a, color2.a, distance );
     return new Color( r, g, b, a );
+  };
+
+  Color.fromJSON = function( json ){
+    return new Color( json.r, json.g, json.b, json.a );
   };
 
   return Color;
