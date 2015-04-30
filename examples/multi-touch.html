@@ -97,6 +97,10 @@
         // called when a drag ends
         end: function() {
           node.setFill( '#ff0000' );
+        },
+
+        translate: function( data ) {
+          node.translate( data.delta );
         }
       } ) );
     })();
