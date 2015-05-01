@@ -478,7 +478,7 @@ define( function( require ) {
         g: this.g,
         b: this.b,
         a: this.a
-      }
+      };
     }
   } );
 
