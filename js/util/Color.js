@@ -472,7 +472,7 @@ define( function( require ) {
       return this.constructor.name + "[r:" + this.r + " g:" + this.g + " b:" + this.b + " a:" + this.a + "]";
     },
 
-    toJSON: function(){
+    toStateObject: function() {
       return {
         r: this.r,
         g: this.g,
@@ -688,7 +688,7 @@ define( function( require ) {
     return new Color( r, g, b, a );
   };
 
-  Color.fromJSON = function( json ){
+  Color.fromStateObject = function( json ) {
     return new Color( json.r, json.g, json.b, json.a );
   };
 
