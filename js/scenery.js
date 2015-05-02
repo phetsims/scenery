@@ -20,9 +20,6 @@ define( function( require ) {
   // object allocation tracking
   window.phetAllocation = require( 'PHET_CORE/phetAllocation' );
 
-  // workaround for Axon, since it needs window.arch to be defined
-  window.arch = window.arch || null;
-
   var scratchCanvas = document.createElement( 'canvas' );
   var scratchContext = scratchCanvas.getContext( '2d' );
 
