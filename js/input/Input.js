@@ -415,6 +415,8 @@ define( function( require ) {
         if ( !this.mouse ) { this.initMouse(); }
         this.mouse.wheel( event );
 
+        // don't send mouse-wheel events if we don't yet have a mouse location!
+        // TODO: Can we set the mouse location based on the wheel event?
         if ( this.mouse.point ) {
           var trail = this.rootNode.trailUnderPointer( this.mouse ) || new scenery.Trail( this.rootNode );
           this.dispatchEvent( trail, 'wheel', this.mouse, event, true );
