@@ -414,8 +414,11 @@ define( function( require ) {
         if ( this.logEvents ) { this.eventLog.push( 'wheel(' + Input.serializeDomEvent( event ) + ');' ); }
         if ( !this.mouse ) { this.initMouse(); }
         this.mouse.wheel( event );
-        var trail = this.rootNode.trailUnderPointer( this.mouse ) || new scenery.Trail( this.rootNode );
-        this.dispatchEvent( trail, 'wheel', this.mouse, event, true );
+
+        if ( this.mouse.point ) {
+          var trail = this.rootNode.trailUnderPointer( this.mouse ) || new scenery.Trail( this.rootNode );
+          this.dispatchEvent( trail, 'wheel', this.mouse, event, true );
+        }
       },
 
       // called for each touch point
