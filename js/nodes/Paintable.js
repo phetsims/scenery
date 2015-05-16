@@ -12,6 +12,7 @@ define( function( require ) {
   var scenery = require( 'SCENERY/scenery' );
   var Color = require( 'SCENERY/util/Color' );
   var LineStyles = require( 'KITE/util/LineStyles' );
+  var Renderer = require( 'SCENERY/display/Renderer' );
 
   var inherit = require( 'PHET_CORE/inherit' );
   var extend = require( 'PHET_CORE/extend' );
@@ -517,19 +518,16 @@ define( function( require ) {
 
           // Safari 5 has buggy issues with SVG gradients
           if ( !( isSafari5 && this._fill && this._fill.isGradient ) ) {
-            bitmask |= scenery.bitmaskSupportsSVG;
+            bitmask |= Renderer.bitmaskSVG;
           }
 
           // we always have Canvas support?
-          bitmask |= scenery.bitmaskSupportsCanvas;
-
-          // nothing in the fill can change whether its bounds are valid
-          bitmask |= scenery.bitmaskBoundsValid;
+          bitmask |= Renderer.bitmaskCanvas;
 
           if ( !this._fill ) {
             // if there is no fill, it is supported by DOM and WebGL
-            bitmask |= scenery.bitmaskSupportsDOM;
-            bitmask |= scenery.bitmaskWebGL;
+            bitmask |= Renderer.bitmaskDOM;
+            bitmask |= Renderer.bitmaskWebGL;
           }
           else if ( this._fill.isPattern ) {
             // no pattern support for DOM or WebGL (for now!)
@@ -539,9 +537,9 @@ define( function( require ) {
           }
           else {
             // solid fills always supported for DOM, WebGL and Pixi
-            bitmask |= scenery.bitmaskSupportsDOM;
+            bitmask |= Renderer.bitmaskDOM;
           }
-          bitmask |= scenery.bitmaskSupportsPixi;
+          bitmask |= Renderer.bitmaskPixi;
 
           return bitmask;
         },
@@ -550,21 +548,18 @@ define( function( require ) {
           var bitmask = 0;
 
           if ( !( isIE9 && this.hasStroke() && this.hasLineDash() ) ) {
-            bitmask |= scenery.bitmaskSupportsCanvas;
+            bitmask |= Renderer.bitmaskCanvas;
           }
 
           // always have SVG support (for now?)
-          bitmask |= scenery.bitmaskSupportsSVG;
-
-          // for now, nothing about the stroke prevents us from having valid bounds (we compute these offsets)
-          bitmask |= scenery.bitmaskBoundsValid;
+          bitmask |= Renderer.bitmaskSVG;
 
           if ( !this.hasStroke() ) {
             // allow DOM support if there is no stroke
-            bitmask |= scenery.bitmaskSupportsDOM;
+            bitmask |= Renderer.bitmaskDOM;
           }
 
-          bitmask |= scenery.bitmaskSupportsPixi;
+          bitmask |= Renderer.bitmaskPixi;
 
           return bitmask;
         }
