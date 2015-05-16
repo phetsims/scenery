@@ -14,7 +14,7 @@ define( function( require ) {
 
   var scenery = require( 'SCENERY/scenery' );
   var Node = require( 'SCENERY/nodes/Node' );
-  require( 'SCENERY/display/Renderer' );
+  var Renderer = require( 'SCENERY/display/Renderer' );
   var Paintable = require( 'SCENERY/nodes/Paintable' );
   var SVGSelfDrawable = require( 'SCENERY/display/SVGSelfDrawable' );
   var CanvasSelfDrawable = require( 'SCENERY/display/CanvasSelfDrawable' );
@@ -48,7 +48,7 @@ define( function( require ) {
   inherit( Node, Path, {
     // allow more specific path types (Rectangle, Line) to override what restrictions we have
     getPathRendererBitmask: function() {
-      return scenery.bitmaskBoundsValid | scenery.bitmaskSupportsCanvas | scenery.bitmaskSupportsSVG | scenery.bitmaskSupportsPixi;
+      return Renderer.bitmaskCanvas | Renderer.bitmaskSVG | Renderer.bitmaskPixi;
     },
 
     invalidateSupportedRenderers: function() {

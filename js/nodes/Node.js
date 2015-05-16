@@ -23,10 +23,10 @@ define( function( require ) {
   var Shape = require( 'KITE/Shape' );
 
   var scenery = require( 'SCENERY/scenery' );
-  require( 'SCENERY/util/RendererSummary' );
+  var Renderer = require( 'SCENERY/display/Renderer' );
+  var RendererSummary = require( 'SCENERY/util/RendererSummary' );
   require( 'SCENERY/util/CanvasContextWrapper' );
   // commented out so Require.js doesn't balk at the circular dependency
-  // require( 'SCENERY/display/Renderer' );
   // require( 'SCENERY/util/Trail' );
   // require( 'SCENERY/util/TrailPointer' );
 
@@ -214,10 +214,10 @@ define( function( require ) {
     this._subtreePickableCount = 0;
 
     // a bitmask which specifies which renderers this node (and only this node, not its subtree) supports.
-    this._rendererBitmask = scenery.bitmaskNodeDefault;
+    this._rendererBitmask = Renderer.bitmaskNodeDefault;
 
     // a bitmask-like summary of what renderers and options are supported by this node and all of its descendants
-    this._rendererSummary = new scenery.RendererSummary( this );
+    this._rendererSummary = new RendererSummary( this );
 
     // So we can traverse only the subtrees that require bounds validation for events firing.
     // This is a sum of the number of events requiring bounds validation on this Node, plus the number of children whose count is non-zero.
@@ -252,7 +252,7 @@ define( function( require ) {
       // needs to be early to prevent re-entrant children modifications
       this.changePickableCount( node._subtreePickableCount );
       this.changeBoundsEventCount( node._boundsEventCount > 0 ? 1 : 0 );
-      this._rendererSummary.bitmaskChange( scenery.bitmaskAll, node._rendererSummary.bitmask );
+      this._rendererSummary.summaryChange( RendererSummary.bitmaskAll, node._rendererSummary.bitmask );
 
       node._parents.push( this );
       this._children.splice( index, 0, node );
@@ -306,7 +306,7 @@ define( function( require ) {
       // needs to be early to prevent re-entrant children modifications
       this.changePickableCount( -node._subtreePickableCount );
       this.changeBoundsEventCount( node._boundsEventCount > 0 ? -1 : 0 );
-      this._rendererSummary.bitmaskChange( node._rendererSummary.bitmask, scenery.bitmaskAll );
+      this._rendererSummary.summaryChange( node._rendererSummary.bitmask, RendererSummary.bitmaskAll );
 
       var indexOfParent = _.indexOf( node._parents, this );
 
@@ -1112,6 +1112,10 @@ define( function( require ) {
       return false;
     },
 
+    areSelfBoundsValid: function() {
+      return true;
+    },
+
     hasParent: function() {
       return this._parents.length !== 0;
     },
@@ -1651,47 +1655,34 @@ define( function( require ) {
     get focusOrder() { return this.getFocusOrder(); },
 
     supportsCanvas: function() {
-      return ( this._rendererBitmask & scenery.bitmaskSupportsCanvas ) !== 0;
+      return ( this._rendererBitmask & Renderer.bitmaskCanvas ) !== 0;
     },
 
     supportsSVG: function() {
-      return ( this._rendererBitmask & scenery.bitmaskSupportsSVG ) !== 0;
+      return ( this._rendererBitmask & Renderer.bitmaskSVG ) !== 0;
     },
 
     supportsDOM: function() {
-      return ( this._rendererBitmask & scenery.bitmaskSupportsDOM ) !== 0;
+      return ( this._rendererBitmask & Renderer.bitmaskDOM ) !== 0;
     },
 
     supportsWebGL: function() {
-      return ( this._rendererBitmask & scenery.bitmaskSupportsWebGL ) !== 0;
+      return ( this._rendererBitmask & Renderer.bitmaskWebGL ) !== 0;
     },
 
     supportsPixi: function() {
-      return ( this._rendererBitmask & scenery.bitmaskSupportsPixi) !== 0;
+      return ( this._rendererBitmask & Renderer.bitmaskPixi) !== 0;
     },
 
     supportsRenderer: function( renderer ) {
       return ( this._rendererBitmask & renderer.bitmask ) !== 0;
     },
 
-    // return a supported renderer (fallback case, not called often)
-    pickARenderer: function() {
-      if ( this.supportsCanvas() ) {
-        return scenery.Renderer.Canvas;
-      }
-      else if ( this.supportsSVG() ) {
-        return scenery.Renderer.SVG;
-      }
-      else if ( this.supportsDOM() ) {
-        return scenery.Renderer.DOM;
-      }
-      // oi!
-    },
-
     setRendererBitmask: function( bitmask ) {
       if ( bitmask !== this._rendererBitmask ) {
-        this._rendererSummary.bitmaskChange( this._rendererBitmask, bitmask );
         this._rendererBitmask = bitmask;
+
+        this._rendererSummary.selfChange();
         this.trigger0( 'rendererBitmask' );
       }
     },
@@ -1712,19 +1703,19 @@ define( function( require ) {
 
       var newRenderer = 0;
       if ( renderer === 'canvas' ) {
-        newRenderer = scenery.Renderer.bitmaskCanvas;
+        newRenderer = Renderer.bitmaskCanvas;
       }
       else if ( renderer === 'svg' ) {
-        newRenderer = scenery.Renderer.bitmaskSVG;
+        newRenderer = Renderer.bitmaskSVG;
       }
       else if ( renderer === 'dom' ) {
-        newRenderer = scenery.Renderer.bitmaskDOM;
+        newRenderer = Renderer.bitmaskDOM;
       }
       else if ( renderer === 'webgl' ) {
-        newRenderer = scenery.Renderer.bitmaskWebGL;
+        newRenderer = Renderer.bitmaskWebGL;
       }
       else if ( renderer === 'pixi' ) {
-        newRenderer = scenery.Renderer.bitmaskPixi;
+        newRenderer = Renderer.bitmaskPixi;
       }
       assert && assert( ( renderer === null ) === ( newRenderer === 0 ),
         'We should only end up with no actual renderer if renderer is null' );
@@ -1741,19 +1732,19 @@ define( function( require ) {
       if ( this._hints.renderer === 0 ) {
         return null;
       }
-      else if ( this._hints.renderer === scenery.Renderer.bitmaskCanvas ) {
+      else if ( this._hints.renderer === Renderer.bitmaskCanvas ) {
         return 'canvas';
       }
-      else if ( this._hints.renderer === scenery.Renderer.bitmaskSVG ) {
+      else if ( this._hints.renderer === Renderer.bitmaskSVG ) {
         return 'svg';
       }
-      else if ( this._hints.renderer === scenery.Renderer.bitmaskDOM ) {
+      else if ( this._hints.renderer === Renderer.bitmaskDOM ) {
         return 'dom';
       }
-      else if ( this._hints.renderer === scenery.Renderer.bitmaskWebGL ) {
+      else if ( this._hints.renderer === Renderer.bitmaskWebGL ) {
         return 'webgl';
       }
-      else if ( this._hints.renderer === scenery.Renderer.bitmaskPixi ) {
+      else if ( this._hints.renderer === Renderer.bitmaskPixi ) {
         return 'pixi';
       }
       assert && assert( false, 'Seems to be an invalid renderer?' );
@@ -2188,7 +2179,7 @@ define( function( require ) {
 
     // @public: Render the self into the canvas wrapper with its local coordinates
     renderToCanvasSelf: function( wrapper ) {
-      if ( this.isPainted() && ( this._rendererBitmask & scenery.Renderer.bitmaskCanvas ) ) {
+      if ( this.isPainted() && ( this._rendererBitmask & Renderer.bitmaskCanvas ) ) {
         this.canvasPaintSelf( wrapper );
       }
     },

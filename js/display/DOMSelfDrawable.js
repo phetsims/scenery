@@ -30,7 +30,7 @@ define( function( require ) {
       // super initialization
       this.initializeSelfDrawable( renderer, instance );
 
-      this.forceAcceleration = ( renderer & scenery.Renderer.bitmaskForceAcceleration ) !== 0;
+      this.forceAcceleration = false; // TODO: for now, check to see if this is used and how to use it
       this.markTransformDirty();
 
       this.visibilityDirty = true;

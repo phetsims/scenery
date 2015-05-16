@@ -24,7 +24,7 @@ define( function( require ) {
   // pass a canvasBounds option if you want to specify the self bounds
   scenery.WebGLNode = function WebGLNode( options ) {
     Node.call( this, options );
-    this.setRendererBitmask( scenery.bitmaskBoundsValid | scenery.bitmaskSupportsWebGL );
+    this.setRendererBitmask( Renderer.bitmaskWebGL );
   };
   var WebGLNode = scenery.WebGLNode;
 

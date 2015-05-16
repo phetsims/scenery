@@ -16,7 +16,6 @@ define( function( require ) {
   var cleanArray = require( 'PHET_CORE/cleanArray' );
   var scenery = require( 'SCENERY/scenery' );
   var Drawable = require( 'SCENERY/display/Drawable' );
-  var Renderer = require( 'SCENERY/display/Renderer' );
   var Stitcher = require( 'SCENERY/display/Stitcher' );
   var GreedyStitcher = require( 'SCENERY/display/GreedyStitcher' );
   var RebuildStitcher = require( 'SCENERY/display/RebuildStitcher' );
@@ -52,7 +51,7 @@ define( function( require ) {
 
       this.display = display;
 
-      this.forceAcceleration = Renderer.isAccelerationForced( this.renderer );
+      this.forceAcceleration = false;
 
       // reference to the instance that controls this backbone
       this.backboneInstance = backboneInstance;

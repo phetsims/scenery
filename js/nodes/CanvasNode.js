@@ -16,14 +16,14 @@ define( function( require ) {
   var scenery = require( 'SCENERY/scenery' );
 
   var Node = require( 'SCENERY/nodes/Node' );
-  require( 'SCENERY/display/Renderer' );
+  var Renderer = require( 'SCENERY/display/Renderer' );
   var CanvasSelfDrawable = require( 'SCENERY/display/CanvasSelfDrawable' );
   var SelfDrawable = require( 'SCENERY/display/SelfDrawable' );
 
   // pass a canvasBounds option if you want to specify the self bounds
   scenery.CanvasNode = function CanvasNode( options ) {
     Node.call( this, options );
-    this.setRendererBitmask( scenery.bitmaskBoundsValid | scenery.bitmaskSupportsCanvas );
+    this.setRendererBitmask( Renderer.bitmaskCanvas );
   };
   var CanvasNode = scenery.CanvasNode;
 

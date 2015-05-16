@@ -16,7 +16,7 @@ define( function( require ) {
   var scenery = require( 'SCENERY/scenery' );
 
   var Node = require( 'SCENERY/nodes/Node' ); // DOM inherits from Node
-  require( 'SCENERY/display/Renderer' );
+  var Renderer = require( 'SCENERY/display/Renderer' );
   require( 'SCENERY/util/Util' );
 
   var DOMSelfDrawable = require( 'SCENERY/display/DOMSelfDrawable' );
@@ -48,7 +48,7 @@ define( function( require ) {
 
     // will set the element after initializing
     Node.call( this, options );
-    this.setRendererBitmask( scenery.bitmaskBoundsValid | scenery.bitmaskSupportsDOM );
+    this.setRendererBitmask( Renderer.bitmaskDOM );
   };
   var DOM = scenery.DOM;
 

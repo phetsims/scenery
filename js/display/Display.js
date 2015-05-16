@@ -59,7 +59,7 @@ define( function( require ) {
   var Drawable = require( 'SCENERY/display/Drawable' );
   var Instance = require( 'SCENERY/display/Instance' );
   require( 'SCENERY/display/InlineCanvasCacheDrawable' );
-  require( 'SCENERY/display/Renderer' );
+  var Renderer = require( 'SCENERY/display/Renderer' );
   require( 'SCENERY/display/SharedCanvasCacheDrawable' );
   require( 'SCENERY/display/SVGSelfDrawable' );
   require( 'SCENERY/input/Input' );
@@ -501,7 +501,7 @@ define( function( require ) {
       }
 
       // only return the renderer-specific portion (no other hints, etc)
-      return renderersUnderBackbone( this._rootBackbone ) & scenery.Renderer.bitmaskRendererArea;
+      return renderersUnderBackbone( this._rootBackbone ) & Renderer.bitmaskRendererArea;
     },
 
     /*
@@ -1050,7 +1050,7 @@ define( function( require ) {
 
         iSummary += ' <span style="color: #888">[Trail ' + instance.trail.indices.join( '.' ) + ']</span>';
         iSummary += ' <span style="color: #c88">' + str( instance.state ) + '</span>';
-        iSummary += ' <span style="color: #8c8">' + node._rendererSummary.bitmask.toString( 16 ) + ( node._rendererBitmask !== scenery.bitmaskNodeDefault ? ' (' + node._rendererBitmask.toString( 16 ) + ')' : '' ) + '</span>';
+        iSummary += ' <span style="color: #8c8">' + node._rendererSummary.bitmask.toString( 16 ) + ( node._rendererBitmask !== Renderer.bitmaskNodeDefault ? ' (' + node._rendererBitmask.toString( 16 ) + ')' : '' ) + '</span>';
 
         return iSummary;
       }

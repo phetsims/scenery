@@ -28,6 +28,7 @@ define( function( require ) {
   var WebGLSelfDrawable = require( 'SCENERY/display/WebGLSelfDrawable' );
   var SelfDrawable = require( 'SCENERY/display/SelfDrawable' );
   var PixiSelfDrawable = require( 'SCENERY/display/PixiSelfDrawable' );
+  var Renderer = require( 'SCENERY/display/Renderer' );
   var SquareUnstrokedRectangle = require( 'SCENERY/display/webgl/SquareUnstrokedRectangle' );
   var Color = require( 'SCENERY/util/Color' );
 
@@ -282,7 +283,7 @@ define( function( require ) {
     // A line does not render its fill, so it supports all renderers.  Right?
     // - SR, 2014
     getFillRendererBitmask: function() {
-      return scenery.bitmaskSupportsCanvas | scenery.bitmaskSupportsSVG | scenery.bitmaskSupportsDOM | scenery.bitmaskSupportsPixi;
+      return Renderer.bitmaskCanvas | Renderer.bitmaskSVG | Renderer.bitmaskDOM | Renderer.bitmaskPixi;
     }
 
   } );

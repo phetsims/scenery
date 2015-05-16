@@ -283,7 +283,6 @@ define( function( require ) {
       this.groupRenderer = 0;
       this.sharedCacheRenderer = 0;
 
-      var combinedBitmask = this.node._rendererSummary.bitmask;
       var hints = this.node._hints || emptyHintsObject;
 
       //OHTWO TODO: Don't force a backbone for transparency
@@ -297,16 +296,17 @@ define( function( require ) {
       // check if we need a backbone or cache
       // if we are under a canvas cache, we will NEVER have a backbone
       // splits are accomplished just by having a backbone
-      if ( this.isDisplayRoot || ( !this.isUnderCanvasCache && ( hasTransparency || hasClip || hints.requireElement || hints.cssTransform || hints.split ) ) ) {
+      // NOTE: If changing, check RendererSummary.summaryBitmaskForNodeSelf
+      if ( this.isDisplayRoot || ( !this.isUnderCanvasCache && ( hasTransparency || hasClip || hints.requireElement || hints.cssTransform || hints.layerSplit ) ) ) {
         this.isBackbone = true;
         this.isVisibilityApplied = true;
         this.isTransformed = this.isDisplayRoot || !!hints.cssTransform; // for now, only trigger CSS transform if we have the specific hint
         //OHTWO TODO: check whether the force acceleration hint is being used by our DOMBlock
-        this.groupRenderer = Renderer.bitmaskDOM | ( hints.forceAcceleration ? Renderer.bitmaskForceAcceleration : 0 ); // probably won't be used
+        this.groupRenderer = Renderer.bitmaskDOM; // probably won't be used
       }
       else if ( hasTransparency || hasClip || hints.canvasCache ) {
         // everything underneath needs to be renderable with Canvas, otherwise we cannot cache
-        assert && assert( ( combinedBitmask & Renderer.bitmaskCanvas ) !== 0,
+        assert && assert( this.node._rendererSummary.isSingleCanvasSupported(),
           'hints.canvasCache provided, but not all node contents can be rendered with Canvas under ' +
           this.node.constructor.name );
 
@@ -320,7 +320,7 @@ define( function( require ) {
           else {
             // everything underneath needs to guarantee that its bounds are valid
             //OHTWO TODO: We'll probably remove this if we go with the "safe bounds" approach
-            assert && assert( ( combinedBitmask & scenery.bitmaskBoundsValid ) !== 0,
+            assert && assert( this.node._rendererSummary.areBoundsValid(),
               'hints.singleCache provided, but not all node contents have valid bounds under ' +
               this.node.constructor.name );
 

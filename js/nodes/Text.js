@@ -25,7 +25,7 @@ define( function( require ) {
   var scenery = require( 'SCENERY/scenery' );
 
   var Node = require( 'SCENERY/nodes/Node' ); // inherits from Node
-  require( 'SCENERY/display/Renderer' );
+  var Renderer = require( 'SCENERY/display/Renderer' );
   var Paintable = require( 'SCENERY/nodes/Paintable' );
   require( 'SCENERY/util/Font' );
   require( 'SCENERY/util/Util' ); // for canvasAccurateBounds and CSS transforms
@@ -133,6 +133,10 @@ define( function( require ) {
         }
 
         this.invalidateText();
+
+        this.trigger0( 'boundsMethod' );
+
+        this.trigger0( 'selfBoundsValid' ); // whether our self bounds are valid may have changed
       }
       return this;
     },
@@ -146,18 +150,15 @@ define( function( require ) {
 
       // canvas support (fast bounds may leak out of dirty rectangles)
       if ( this._boundsMethod !== 'fast' && !this._isHTML ) {
-        bitmask |= scenery.bitmaskSupportsCanvas;
+        bitmask |= Renderer.bitmaskCanvas;
       }
       if ( !this._isHTML ) {
-        bitmask |= scenery.bitmaskSupportsSVG;
-      }
-      if ( this._boundsMethod === 'accurate' ) {
-        bitmask |= scenery.bitmaskBoundsValid;
+        bitmask |= Renderer.bitmaskSVG;
       }
 
       // fill and stroke will determine whether we have DOM text support
-      bitmask |= scenery.bitmaskSupportsDOM;
-      bitmask |= scenery.bitmaskSupportsPixi;
+      bitmask |= Renderer.bitmaskDOM;
+      bitmask |= Renderer.bitmaskPixi;
 
       return bitmask;
     },
@@ -429,6 +430,10 @@ define( function( require ) {
 
     isPainted: function() {
       return true;
+    },
+
+    areSelfBoundsValid: function() {
+      return this._boundsMethod === 'accurate';
     },
 
     getDebugHTMLExtras: function() {

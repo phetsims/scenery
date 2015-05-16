@@ -15,7 +15,6 @@ define( function( require ) {
   var Vector2 = require( 'DOT/Vector2' );
   var scenery = require( 'SCENERY/scenery' );
   var Block = require( 'SCENERY/display/Block' );
-  var Renderer = require( 'SCENERY/display/Renderer' );
 
   var scratchBounds2 = Bounds2.NOTHING.copy();
 
@@ -46,8 +45,8 @@ define( function( require ) {
       this.oldFitBounds = Bounds2.NOTHING.copy(); // copy for storage
       this.fitOffset = new Vector2();
 
-      // TODO: I can't find documentation about forceAcceleration anywhere.  How is this used?  What is it for?  How does it work?
-      this.forceAcceleration = ( renderer & Renderer.bitmaskForceAcceleration ) !== 0;
+      // TODO: improve how we handle graphical acceleration with transforms
+      this.forceAcceleration = false;
 
       // now we always add a listener to the display size to invalidate our fit
       this.display.onStatic( 'displaySize', this.dirtyFitListener );

@@ -27,6 +27,7 @@ define( function( require ) {
   var WebGLSelfDrawable = require( 'SCENERY/display/WebGLSelfDrawable' );
   var PixiSelfDrawable = require( 'SCENERY/display/PixiSelfDrawable' );
   var SelfDrawable = require( 'SCENERY/display/SelfDrawable' );
+  var Renderer = require( 'SCENERY/display/Renderer' );
   var SquareUnstrokedRectangle = require( 'SCENERY/display/webgl/SquareUnstrokedRectangle' );
 
   // TODO: change this based on memory and performance characteristics of the platform
@@ -123,16 +124,16 @@ define( function( require ) {
       if ( this.hasStroke() && !this.getStroke().isGradient && !this.getStroke().isPattern && !this.hasLineDash() ) {
         // we can't support the bevel line-join with our current DOM rectangle display
         if ( this.getLineJoin() === 'miter' || ( this.getLineJoin() === 'round' && Features.borderRadius ) ) {
-          bitmask |= scenery.bitmaskSupportsDOM;
+          bitmask |= Renderer.bitmaskDOM;
         }
       }
 
-      bitmask |= scenery.bitmaskSupportsPixi;
+      bitmask |= Renderer.bitmaskPixi;
       return bitmask;
     },
 
     getPathRendererBitmask: function() {
-      var bitmask = scenery.bitmaskSupportsCanvas | scenery.bitmaskSupportsSVG | scenery.bitmaskBoundsValid;
+      var bitmask = Renderer.bitmaskCanvas | Renderer.bitmaskSVG;
 
       var maximumArcSize = this.getMaximumArcSize();
 
@@ -142,10 +143,10 @@ define( function( require ) {
       if ( ( !this.hasStroke() || ( this.getLineWidth() <= this._rectHeight && this.getLineWidth() <= this._rectWidth ) ) &&
            ( !this.isRounded() || ( Features.borderRadius && this._rectArcWidth === this._rectArcHeight ) ) &&
            this._rectArcHeight <= maximumArcSize && this._rectArcWidth <= maximumArcSize ) {
-        bitmask |= scenery.bitmaskSupportsDOM;
+        bitmask |= Renderer.bitmaskDOM;
       }
 
-      bitmask |= scenery.bitmaskSupportsPixi;
+      bitmask |= Renderer.bitmaskPixi;
 
       return bitmask;
     },

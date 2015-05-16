@@ -24,6 +24,7 @@ define( function( require ) {
   var SVGSelfDrawable = require( 'SCENERY/display/SVGSelfDrawable' );
   var CanvasSelfDrawable = require( 'SCENERY/display/CanvasSelfDrawable' );
   var SelfDrawable = require( 'SCENERY/display/SelfDrawable' );
+  var Renderer = require( 'SCENERY/display/Renderer' );
   require( 'SCENERY/util/Util' );
   var WebGLSelfDrawable = require( 'SCENERY/display/WebGLSelfDrawable' );
   var PixiSelfDrawable = require( 'SCENERY/display/PixiSelfDrawable' );
@@ -58,14 +59,14 @@ define( function( require ) {
     getStrokeRendererBitmask: function() {
       var bitmask = Path.prototype.getStrokeRendererBitmask.call( this );
       if ( this.hasStroke() && !this.getStroke().isGradient && !this.getStroke().isPattern && this.getLineWidth() <= this.getRadius() ) {
-        bitmask |= scenery.bitmaskSupportsDOM;
+        bitmask |= Renderer.bitmaskDOM;
       }
-      bitmask |= scenery.bitmaskSupportsPixi;
+      bitmask |= Renderer.bitmaskPixi;
       return bitmask;
     },
 
     getPathRendererBitmask: function() {
-      return scenery.bitmaskSupportsCanvas | scenery.bitmaskSupportsSVG | scenery.bitmaskBoundsValid | scenery.bitmaskSupportsPixi | ( Features.borderRadius ? scenery.bitmaskSupportsDOM : 0 );
+      return Renderer.bitmaskCanvas | Renderer.bitmaskSVG | Renderer.bitmaskPixi | ( Features.borderRadius ? Renderer.bitmaskDOM : 0 );
     },
 
     invalidateCircle: function() {

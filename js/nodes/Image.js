@@ -40,8 +40,8 @@ define( function( require ) {
   var defaultMipmapMaxLevel = 5;
 
   var log2 = Math.log2 || function( x ) {
-      return Math.log( x ) / Math.LN2;
-    };
+    return Math.log( x ) / Math.LN2;
+  };
 
   /*
    * Canvas renderer supports the following as 'image':
@@ -126,21 +126,21 @@ define( function( require ) {
     invalidateSupportedRenderers: function() {
       if ( this._image instanceof HTMLCanvasElement ) {
         this.setRendererBitmask(
-          scenery.bitmaskBoundsValid |
-          scenery.bitmaskSupportsCanvas |
-          scenery.bitmaskSupportsWebGL |
-          scenery.bitmaskSupportsPixi
+          Renderer.bitmaskCanvas |
+          Renderer.bitmaskCanvas |
+          Renderer.bitmaskWebGL |
+          Renderer.bitmaskPixi
         );
       }
       else {
         // assumes HTMLImageElement
         this.setRendererBitmask(
-          scenery.bitmaskBoundsValid |
-          scenery.bitmaskSupportsCanvas |
-          scenery.bitmaskSupportsSVG |
-          scenery.bitmaskSupportsDOM |
-          scenery.bitmaskSupportsWebGL |
-          scenery.bitmaskSupportsPixi
+          Renderer.bitmaskCanvas |
+          Renderer.bitmaskCanvas |
+          Renderer.bitmaskSVG |
+          Renderer.bitmaskDOM |
+          Renderer.bitmaskWebGL |
+          Renderer.bitmaskPixi
         );
       }
     },
