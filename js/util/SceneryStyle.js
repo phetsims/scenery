@@ -18,7 +18,6 @@ define( function( require ) {
 
   var stylesheet = document.styleSheets[ document.styleSheets.length - 1 ];
   assert && assert( stylesheet.disabled === false );
-  assert && assert( stylesheet.cssRules.length === 0 );
 
   return {
     stylesheet: stylesheet,
