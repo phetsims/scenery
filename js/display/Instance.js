@@ -315,7 +315,7 @@ define( function( require ) {
           if ( this.isSharedCanvasCacheRoot ) {
             this.isSharedCanvasCacheSelf = true;
 
-            this.sharedCacheRenderer = Renderer.bitmaskCanvas;
+            this.sharedCacheRenderer = isWebGLSupported ? Renderer.bitmaskWebGL : Renderer.bitmaskCanvas;
           }
           else {
             // everything underneath needs to guarantee that its bounds are valid
@@ -330,7 +330,7 @@ define( function( require ) {
         else {
           this.isInstanceCanvasCache = true;
           this.isUnderCanvasCache = true;
-          this.groupRenderer = Renderer.bitmaskCanvas; // disallowing SVG here, so we don't have to break up our SVG group structure
+          this.groupRenderer = isWebGLSupported ? Renderer.bitmaskWebGL : Renderer.bitmaskCanvas;
         }
       }
 
