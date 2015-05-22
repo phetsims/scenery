@@ -100,6 +100,13 @@ define( function( require ) {
           }
         },
 
+        /**
+         * Sets the fill color for the node.
+         *
+         * Please use null for indicating "no fill" (that is the default).
+         *
+         * @param {string | Color | LinearGradient | RadialGradient | Pattern | null} fill
+         */
         setFill: function( fill ) {
           // Instance equality used here since it would be more expensive to parse all CSS
           // colors and compare every time the fill changes. Right now, usually we don't have
@@ -329,6 +336,13 @@ define( function( require ) {
           }
         },
 
+        /**
+         * Sets the fill color for the node.
+         *
+         * Please use null for indicating "no fill" (that is the default).
+         *
+         * @param {string | Color | LinearGradient | RadialGradient | Pattern | null} fill
+         */
         setStroke: function( stroke ) {
           if ( this._stroke !== stroke ) {
             this._strokeColorDirty = true;
@@ -355,10 +369,17 @@ define( function( require ) {
           return this._cachedPaints;
         },
 
-        /*
-         * Sets the cached paints to the input array (a defensive copy).
+        /**
+         * Sets the cached paints to the input array (a defensive copy). Note that it also filters out fills that are
+         * not considered paints (e.g. strings, Colors, etc.).
          *
-         * @param {Paint[]} paints
+         * When this node is displayed in SVG, it will force the presence of the cached paint to be stored in the SVG's
+         * <defs> element, so that we can switch quickly to use the given paint (instead of having to create it on the
+         * SVG-side whenever the switch is made).
+         *
+         * Also note that duplicate paints are acceptible, and don't need to be filtered out before-hand.
+         *
+         * @param {Array.<string | Color | LinearGradient | RadialGradient | Pattern | null>} paints
          */
         setCachedPaints: function( paints ) {
           this._cachedPaints = paints.filter( function( paint ) { return paint && paint.isPaint; } );
@@ -371,6 +392,18 @@ define( function( require ) {
           return this;
         },
 
+        /**
+         * Adds a cached paint. Does nothing if paint is just a normal fill (string, Color), but for gradients and
+         * patterns, it will be made faster to switch to.
+         *
+         * When this node is displayed in SVG, it will force the presence of the cached paint to be stored in the SVG's
+         * <defs> element, so that we can switch quickly to use the given paint (instead of having to create it on the
+         * SVG-side whenever the switch is made).
+         *
+         * Also note that duplicate paints are acceptible, and don't need to be filtered out before-hand.
+         *
+         * @param {string | Color | LinearGradient | RadialGradient | Pattern | null} paint
+         */
         addCachedPaint: function( paint ) {
           if ( paint && paint.isPaint ) {
             this._cachedPaints.push( paint );
@@ -382,6 +415,17 @@ define( function( require ) {
           }
         },
 
+        /**
+         * Removes a cached paint. Does nothing if paint is just a normal fill (string, Color), but for gradients and
+         * patterns it will remove any existing cached paint. If it was added more than once, it will need to be removed
+         * more than once.
+         *
+         * When this node is displayed in SVG, it will force the presence of the cached paint to be stored in the SVG's
+         * <defs> element, so that we can switch quickly to use the given paint (instead of having to create it on the
+         * SVG-side whenever the switch is made).
+         *
+         * @param {string | Color | LinearGradient | RadialGradient | Pattern | null} paint
+         */
         removeCachedPaint: function( paint ) {
           if ( paint && paint.isPaint ) {
             assert && assert( _.contains( this._cachedPaints, paint ) );
