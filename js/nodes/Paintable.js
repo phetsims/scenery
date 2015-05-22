@@ -361,7 +361,7 @@ define( function( require ) {
          * @param {Paint[]} paints
          */
         setCachedPaints: function( paints ) {
-          this._cachedPaints = paints.slice();
+          this._cachedPaints = paints.filter( function( paint ) { return paint && paint.isPaint; } );
 
           var stateLen = this._drawables.length;
           for ( var i = 0; i < stateLen; i++ ) {
@@ -372,25 +372,26 @@ define( function( require ) {
         },
 
         addCachedPaint: function( paint ) {
-          assert && assert( paint.isPaint );
+          if ( paint && paint.isPaint ) {
+            this._cachedPaints.push( paint );
 
-          this._cachedPaints.push( paint );
-
-          var stateLen = this._drawables.length;
-          for ( var i = 0; i < stateLen; i++ ) {
-            this._drawables[ i ].markDirtyCachedPaints();
+            var stateLen = this._drawables.length;
+            for ( var i = 0; i < stateLen; i++ ) {
+              this._drawables[ i ].markDirtyCachedPaints();
+            }
           }
         },
 
         removeCachedPaint: function( paint ) {
-          assert && assert( paint.isPaint );
-          assert && assert( _.contains( this._cachedPaints, paint ) );
+          if ( paint && paint.isPaint ) {
+            assert && assert( _.contains( this._cachedPaints, paint ) );
 
-          arrayRemove( this._cachedPaints, paint );
+            arrayRemove( this._cachedPaints, paint );
 
-          var stateLen = this._drawables.length;
-          for ( var i = 0; i < stateLen; i++ ) {
-            this._drawables[ i ].markDirtyCachedPaints();
+            var stateLen = this._drawables.length;
+            for ( var i = 0; i < stateLen; i++ ) {
+              this._drawables[ i ].markDirtyCachedPaints();
+            }
           }
         },
 
