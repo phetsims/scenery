@@ -633,6 +633,9 @@ define( function( require ) {
       // forward all pointer events
       this._domElement.style.msTouchAction = 'none';
 
+      // don't allow browser to switch between font smoothing methods for text (see https://github.com/phetsims/scenery/issues/431)
+      Features.setStyle( this._domElement, Features.fontSmoothing, 'antialiased' );
+
       if ( this.options.allowCSSHacks ) {
         // some css hacks (inspired from https://github.com/EightMedia/hammer.js/blob/master/hammer.js).
         // modified to only apply the proper prefixed version instead of spamming all of them, and doesn't use jQuery.

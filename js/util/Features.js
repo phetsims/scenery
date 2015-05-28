@@ -116,6 +116,8 @@ define( function( require ) {
   Features.userDrag = detectPrefix( div.style, 'userDrag' );
   Features.tapHighlightColor = detectPrefix( div.style, 'tapHighlightColor' );
 
+  Features.fontSmoothing = detectPrefix( div.style, 'fontSmoothing' );
+
   // e.g. Features.setStyle( domElement, Features.transform, '...' ), and doesn't set it if no 'transform' attribute (prefixed or no) is found
   Features.setStyle = function( domElement, optionalKey, value ) {
     if ( optionalKey !== undefined ) {
