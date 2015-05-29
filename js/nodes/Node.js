@@ -153,6 +153,29 @@ define( function( require ) {
     this._transformListener = this.onTransformChange.bind( this );
     this._transform.on( 'change', this._transformListener );
 
+    /*
+     * Maxmimum dimensions for the node's local bounds before a corrective scaling factor is applied to maintain size.
+     * The maximum dimensions are always compared to local bounds, and applied "before" the node's transform.
+     * Whenever the local bounds or maximum dimensions of this Node change and it has at least one maximum dimension
+     * (width or height), an ideal scale is computed (either the smallest scale for our local bounds to fit the
+     * dimension constraints, OR 1, whichever is lower). Then the Node's transform will be scaled (prepended) with
+     * a scale adjustment of ( idealScale / alreadyAppliedScaleFactor ).
+     * In the simpe case where the Node isn't otherwise transformed, this will apply and update the Node's scale so that
+     * the node matches the maximum dimensions, while never scaling over 1. Note that manually applying transforms to
+     * the Node is fine, but may make the node's width greater than the maximum width.
+     * NOTE: If a dimension constraint is null, no resizing will occur due to it. If both maxWidth and maxHeight are null,
+     * no scale adjustment will be applied.
+     *
+     * Also note that setting maxWidth/maxHeight is like adding a local bounds listener (will trigger validation of
+     * bounds during the updateDisplay step). NOTE: this means updates to the transform (on a local bounds change) will
+     * happen when bounds are validated (validateBounds()), which does not happen synchronously on a child's size
+     * change. It does happen at least once in updateDisplay() before rendering, and calling validateBounds() can force
+     * a re-check and transform.
+     */
+    this._maxWidth = null; // {number | null}
+    this._maxHeight = null; // {number | null}
+    this._appliedScaleFactor = 1; // {number} - How much scale has been applied due to the maximum dimension constraints.
+
     this._inputListeners = []; // for user input handling (mouse/touch)
 
     // bounds handling
@@ -219,13 +242,17 @@ define( function( require ) {
     // a bitmask-like summary of what renderers and options are supported by this node and all of its descendants
     this._rendererSummary = new RendererSummary( this );
 
-    // So we can traverse only the subtrees that require bounds validation for events firing.
-    // This is a sum of the number of events requiring bounds validation on this Node, plus the number of children whose count is non-zero.
-    // NOTE: this means that if A has a child B, and B has a boundsEventCount of 5, it only contributes 1 to A's count. This allows us to
-    // have changes localized (increasing B's count won't change A or any of A's ancestors), and guarantees that we will know whether a subtree
-    // has bounds listeners. Also important: decreasing B's boundsEventCount down to 0 will allow A to decrease its count by 1, without having
-    // to check its other children (if we were just using a boolean value, this operation would require A to check if any OTHER children besides
-    // B had bounds listeners)
+    /*
+     * So we can traverse only the subtrees that require bounds validation for events firing.
+     * This is a sum of the number of events requiring bounds validation on this Node, plus the number of children whose
+     * count is non-zero.
+     * NOTE: this means that if A has a child B, and B has a boundsEventCount of 5, it only contributes 1 to A's count.
+     * This allows us to have changes localized (increasing B's count won't change A or any of A's ancestors), and
+     * guarantees that we will know whether a subtree has bounds listeners. Also important: decreasing B's
+     * boundsEventCount down to 0 will allow A to decrease its count by 1, without having to check its other children
+     * (if we were just using a boolean value, this operation would require A to check if any OTHER children besides
+     * B had bounds listeners)
+     */
     this._boundsEventCount = 0;
     this._boundsEventSelfCount = 0; // this signals that we can validateBounds() on this subtree and we don't have to traverse further
 
@@ -514,6 +541,11 @@ define( function( require ) {
 
           // sanity check
           this._boundsDirty = true;
+        }
+
+        // adjust our transform to match maximum bounds if necessary on a local bounds change
+        if ( this._maxWidth !== null || this._maxHeight !== null ) {
+          this.updateMaxDimension( this._localBounds );
         }
       }
 
@@ -1373,6 +1405,95 @@ define( function( require ) {
 
       this.trigger0( 'transform' );
     },
+
+    /**
+     * Updates our node's scale and applied scale factor if we need to change our scale to fit within the maximum
+     * dimensions (maxWidth and maxHeight). See documentation in constructor for detailed behavior.
+     */
+    updateMaxDimension: function( localBounds ) {
+      var currentScale = this._appliedScaleFactor;
+      var idealScale = 1;
+
+      if ( this._maxWidth !== null ) {
+        var width = localBounds.width;
+        if ( width > this._maxWidth ) {
+          idealScale = Math.min( idealScale, this._maxWidth / width );
+        }
+      }
+
+      if ( this._maxHeight !== null ) {
+        var height = localBounds.height;
+        if ( height > this._maxHeight ) {
+          idealScale = Math.min( idealScale, this._maxHeight / height );
+        }
+      }
+
+      var scaleAdjustment = idealScale / currentScale;
+      if ( scaleAdjustment !== 1 ) {
+        this.scale( scaleAdjustment );
+
+        this._appliedScaleFactor = idealScale;
+      }
+    },
+
+    /**
+     * Increments/decrements bounds "listener" count based on the values of maxWidth/maxHeight before and after.
+     * null is like no listener, non-null is like having a listener, so we increment for null => non-null, and
+     * decrement for non-null => null.
+     *
+     * @param {null | number} beforeMaxLength
+     * @param {null | number} afterMaxLength
+     */
+    onMaxDimensionChange: function( beforeMaxLength, afterMaxLength ) {
+      if ( beforeMaxLength === null && afterMaxLength !== null ) {
+        this.changeBoundsEventCount( 1 );
+        this._boundsEventSelfCount++;
+      }
+      else if ( beforeMaxLength !== null && afterMaxLength === null ) {
+        this.changeBoundsEventCount( -1 );
+        this._boundsEventSelfCount--;
+      }
+    },
+
+    setMaxWidth: function( maxWidth ) {
+      assert && assert( maxWidth === null || typeof maxWidth === 'number',
+        'maxWidth should be null (no constraint) or a number' );
+
+      if ( this._maxWidth !== maxWidth ) {
+        // update synthetic bounds listener count (to ensure our bounds are validated at the start of updateDisplay)
+        this.onMaxDimensionChange( this._maxWidth, maxWidth );
+
+        this._maxWidth = maxWidth;
+
+        this.updateMaxDimension( this._localBounds );
+      }
+    },
+    set maxWidth( value ) { this.setMaxWidth( value ); },
+
+    getMaxWidth: function() {
+      return this._maxWidth;
+    },
+    get maxWidth() { return this.getMaxWidth(); },
+
+    setMaxHeight: function( maxHeight ) {
+      assert && assert( maxHeight === null || typeof maxHeight === 'number',
+        'maxHeight should be null (no constraint) or a number' );
+
+      if ( this._maxHeight !== maxHeight ) {
+        // update synthetic bounds listener count (to ensure our bounds are validated at the start of updateDisplay)
+        this.onMaxDimensionChange( this._maxHeight, maxHeight );
+
+        this._maxHeight = maxHeight;
+
+        this.updateMaxDimension( this._localBounds );
+      }
+    },
+    set maxHeight( value ) { this.setMaxHeight( value ); },
+
+    getMaxHeight: function() {
+      return this._maxHeight;
+    },
+    get maxHeight() { return this.getMaxHeight(); },
 
     // shifts this node horizontally so that its left bound (in the parent coordinate frame) is 'left'
     setLeft: function( left ) {
@@ -2795,7 +2916,7 @@ define( function( require ) {
   Node.prototype._mutatorKeys = [
     'children', 'cursor', 'visible', 'pickable', 'opacity', 'matrix', 'translation', 'x', 'y', 'rotation', 'scale',
     'leftTop', 'centerTop', 'rightTop', 'leftCenter', 'center', 'rightCenter', 'leftBottom', 'centerBottom', 'rightBottom',
-    'left', 'right', 'top', 'bottom', 'centerX', 'centerY', 'renderer', 'rendererOptions',
+    'left', 'right', 'top', 'bottom', 'centerX', 'centerY', 'maxWidth', 'maxHeight', 'renderer', 'rendererOptions',
     'layerSplit', 'usesOpacity', 'cssTransform', 'excludeInvisible', 'webglScale', 'mouseArea', 'touchArea', 'clipArea',
     'transformBounds', 'focusable', 'focusIndicator', 'focusOrder', 'textDescription'
   ];
