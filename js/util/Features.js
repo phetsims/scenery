@@ -118,6 +118,9 @@ define( function( require ) {
 
   Features.fontSmoothing = detectPrefix( div.style, 'fontSmoothing' );
 
+  Features.requestAnimationFrame = detectPrefix( window, 'requestAnimationFrame' );
+  Features.cancelAnimationFrame = detectPrefix( window, 'cancelAnimationFrame' );
+
   // e.g. Features.setStyle( domElement, Features.transform, '...' ), and doesn't set it if no 'transform' attribute (prefixed or no) is found
   Features.setStyle = function( domElement, optionalKey, value ) {
     if ( optionalKey !== undefined ) {
