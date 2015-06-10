@@ -119,8 +119,8 @@ define( function( require ) {
         }
         // Fill in the non-prefixed names with the prefixed versions
         else {
-          window.requestAnimationFrame = Features.requestAnimationFrame;
-          window.cancelAnimationFrame = Features.cancelAnimationFrame;
+          window.requestAnimationFrame = window[ Features.requestAnimationFrame ];
+          window.cancelAnimationFrame = window[ Features.cancelAnimationFrame ];
         }
       }
     },
