@@ -351,8 +351,7 @@ grunt</pre>
 
     <strong>Internal</strong> dependencies:
     <ul>
-      <li><a href="https://github.com/phetsims/assert">assert</a> for assertion handling. If you want assertions different from the defaults, include
-        <a href="https://github.com/phiggins42/has.js/">has.js</a>.
+      <li><a href="https://github.com/phetsims/assert">assert</a> for assertion handling.
       </li>
       <li><a href="https://github.com/phetsims/phet-core">phet-core</a> for other utility functions.</li>
       <li><a href="../../dot">Dot</a> for math.</li>
@@ -361,13 +360,6 @@ grunt</pre>
 
     <h2 id="debugging">Debugging</h2>
 
-    <p>
-      If has.js is included, Scenery assertions can be enabled or disabled. Performance can be significantly decreased if all assertions are enabled.
-    </p>
-
-    <p>
-      To enable all assertions for debugging, run the following (assuming has.js has been loaded):
-    </p>
       <pre class="brush: js">
 window.assertions.enableAssert();
 window.assertions.enableAssertSlow();
