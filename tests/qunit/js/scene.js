@@ -925,4 +925,60 @@
     display.updateDisplay();
     equal( color.getListenerCount(), 0, 'Nothing else attached' );
   } );
+
+  test( 'maxWidth/maxHeight for Node', function() {
+    var rect = new scenery.Rectangle( 0, 0, 100, 50, { fill: 'red' } );
+    var node = new scenery.Node( { children: [ rect ] } );
+
+    ok( node.bounds.equals( new dot.Bounds2( 0, 0, 100, 50 ) ), 'Initial bounds' );
+
+    node.maxWidth = 50;
+
+    ok( node.bounds.equals( new dot.Bounds2( 0, 0, 50, 25 ) ), 'Halved transform after max width of half' );
+
+    node.maxWidth = 120;
+
+    ok( node.bounds.equals( new dot.Bounds2( 0, 0, 100, 50 ) ), 'Back to normal after a big max width' );
+
+    node.scale( 2 );
+
+    ok( node.bounds.equals( new dot.Bounds2( 0, 0, 200, 100 ) ), 'Scale up should be unaffected' );
+
+    node.maxWidth = 25;
+
+    ok( node.bounds.equals( new dot.Bounds2( 0, 0, 50, 25 ) ), 'Scaled back down with both applied' );
+
+    node.maxWidth = null;
+
+    ok( node.bounds.equals( new dot.Bounds2( 0, 0, 200, 100 ) ), 'Without maxWidth' );
+
+    node.scale( 0.5 );
+
+    ok( node.bounds.equals( new dot.Bounds2( 0, 0, 100, 50 ) ), 'Back to normal' );
+
+    node.left = 50;
+
+    ok( node.bounds.equals( new dot.Bounds2( 50, 0, 150, 50 ) ), 'After a translation' );
+
+    node.maxWidth = 50;
+
+    ok( node.bounds.equals( new dot.Bounds2( 50, 0, 100, 25 ) ), 'maxWidth being applied after a translation, in local frame' );
+
+    rect.rectWidth = 200;
+
+    ok( node.bounds.equals( new dot.Bounds2( 50, 0, 100, 12.5 ) ), 'Now with a bigger rectangle' );
+
+    rect.rectWidth = 100;
+    node.maxWidth = null;
+
+    ok( node.bounds.equals( new dot.Bounds2( 50, 0, 150, 50 ) ), 'Back to a translation' );
+
+    rect.maxWidth = 50;
+
+    ok( node.bounds.equals( new dot.Bounds2( 50, 0, 100, 25 ) ), 'After maxWidth A' );
+
+    rect.maxHeight = 12.5;
+
+    ok( node.bounds.equals( new dot.Bounds2( 50, 0, 75, 12.5 ) ), 'After maxHeight A' );
+  } );
 })();
