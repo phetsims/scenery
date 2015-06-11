@@ -84,7 +84,7 @@ function snapshotFromDataURL( dataURL, callback ) {
 }
 
 // compares two pixel snapshots {ImageData} and uses the qunit's assert to verify they are the same
-function snapshotEquals( a, b, threshold, message ) {
+function snapshotEquals( a, b, threshold, message, extraDom ) {
   var isEqual = a.width == b.width && a.height == b.height;
   var largestDifference = 0;
   var totalDifference = 0;
@@ -131,6 +131,10 @@ function snapshotEquals( a, b, threshold, message ) {
     display.append( snapshotToCanvas( b ) );
     display.append( snapshotToCanvas( colorDiffData ) );
     display.append( snapshotToCanvas( alphaDiffData ) );
+
+    if ( extraDom ) {
+      display.append( extraDom );
+    }
 
     // for a line-break
     display.append( document.createElement( 'div' ) );

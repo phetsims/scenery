@@ -10,6 +10,7 @@
 
   // var testedRenderers = [ 'canvas', 'svg', 'dom', 'webgl', 'pixi' ];
   var testedRenderers = [ 'canvas', 'svg', 'dom', 'webgl' ];
+  var nonDomTestedRenderers = testedRenderers.filter( function( renderer ) { return renderer !== 'dom'; } );
 
   // We can only guarantee comparisons for Firefox and Chrome
   if ( !phetCore.platform.firefox && !phetCore.platform.chromium ) {
@@ -41,8 +42,11 @@
           var referenceSnapshot = snapshotFromImage( referenceImage );
           var freshSnapshot = snapshotFromImage( freshImage );
 
+          display.domElement.style.position = 'relative'; // don't have it be absolutely positioned
+          display.domElement.style.border = '1px solid black'; // border
+
           // the actual comparison statement
-          snapshotEquals( freshSnapshot, referenceSnapshot, threshold, name );
+          snapshotEquals( freshSnapshot, referenceSnapshot, threshold, name, display.domElement );
 
           // tell qunit that we're done? (that's what the old version did, seems potentially wrong but working?)
           start();
@@ -408,7 +412,7 @@
       } ) );
       display.updateDisplay();
     }, 'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAACAAAAAgCAYAAABzenr0AAAAzElEQVRYR+2WUQ0CMRBE3zngJOAACeDgcIAEcAAOzgIOkIAEJIADUACZhA9CQm7atOkH29/bdmffTDbXkX6expUVcDbq6JyirxpHwBHYOG/XEnAH+pYC1NuyoRYBCdgB4xSFmgIOwP6vBayBU0sCTUP4AGZT0+t7rRA2X0Rz4NqKgD19DQtuwALQKrZOyQwoeEvgYnV+F5USoMmH1OalLJDn2xTsn4RyCQi3tpx2vZX2X7bkCJDP1t+Ok4UcAc67dk0ICAJBIAgEgSDwAkQfKyGvxnQiAAAAAElFTkSuQmCC',
-    1, testedRenderers
+    1, nonDomTestedRenderers
   );
 
   multipleRendererTest( 'Nested clipping and background',

@@ -1235,6 +1235,7 @@ define( function( require ) {
 
       // Replace each <canvas> with an <img> that has src=canvas.toDataURL() and the same style
       var displayCanvases = doc.documentElement.getElementsByTagName( 'canvas' );
+      displayCanvases = Array.prototype.slice.call( displayCanvases ); // don't use a live HTMLCollection copy!
       for ( var i = 0; i < displayCanvases.length; i++ ) {
         var displayCanvas = displayCanvases[i];
 
