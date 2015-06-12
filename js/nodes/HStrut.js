@@ -16,7 +16,7 @@ define( function( require ) {
   var Spacer = require( 'SCENERY/nodes/Spacer' );
 
   /**
-   * Creates a strut with x in the range [0,width] and y=0. Use x/y in options to control its position.
+   * Creates a strut with x in the range [0,width] and y=0.
    */
   scenery.HStrut = function HStrut( width, options ) {
     Spacer.call( this, width, 0, options );
