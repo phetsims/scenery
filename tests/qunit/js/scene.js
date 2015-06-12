@@ -981,4 +981,27 @@
 
     ok( node.bounds.equals( new dot.Bounds2( 50, 0, 75, 12.5 ) ), 'After maxHeight A' );
   } );
+
+  test( 'Spacers', function() {
+    var spacer = new scenery.Spacer( 100, 50, { x: 50 } );
+    ok( spacer.bounds.equals( new dot.Bounds2( 50, 0, 150, 50 ) ), 'Spacer bounds with translation' );
+
+    var hstrut = new scenery.HStrut( 100, { y: 50 } );
+    ok( hstrut.bounds.equals( new dot.Bounds2( 0, 50, 100, 50 ) ), 'HStrut bounds with translation' );
+
+    var vstrut = new scenery.VStrut( 100, { x: 50 } );
+    ok( vstrut.bounds.equals( new dot.Bounds2( 50, 0, 50, 100 ) ), 'VStrut bounds with translation' );
+
+    throws( function() {
+      spacer.addChild( new scenery.Node() );
+    }, 'No way to add children to Spacer' );
+
+    throws( function() {
+      hstrut.addChild( new scenery.Node() );
+    }, 'No way to add children to HStrut' );
+
+    throws( function() {
+      vstrut.addChild( new scenery.Node() );
+    }, 'No way to add children to VStrut' );
+  } );
 })();

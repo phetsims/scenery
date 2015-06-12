@@ -267,6 +267,9 @@ define( function( require ) {
   inherit( Object, Node, extend( {
     /**
      * Inserts a child node at a specific index, ee http://phetsims.github.io/scenery/doc/#node-insertChild
+     * @public
+     *
+     * NOTE: overridden by Leaf for some subtypes
      *
      * @param {number} index
      * @param {Node} node
@@ -292,6 +295,7 @@ define( function( require ) {
 
     /**
      * Appends a child node to our list of children, see http://phetsims.github.io/scenery/doc/#node-addChild
+     * @public
      *
      * @param {Node} node
      */
@@ -302,6 +306,7 @@ define( function( require ) {
     /**
      * Removes a child node from our list of children, see http://phetsims.github.io/scenery/doc/#node-removeChild
      * Will fail an assertion if the node is not currently one of our children
+     * @public
      *
      * @param {Node} node
      */
@@ -324,7 +329,14 @@ define( function( require ) {
       this.removeChildWithIndex( node, index );
     },
 
-    // @private
+    /**
+     * @private
+     *
+     * NOTE: overridden by Leaf for some subtypes
+     *
+     * @param {Node} node - The child node to remove from this node (it's parent)
+     * @param {number} indexOfChild - Should satisfy this.children[ indexOfChild ] === node
+     */
     removeChildWithIndex: function( node, indexOfChild ) {
       assert && assert( node && node instanceof Node, 'Need to call node.removeChildWithIndex() with a Node.' );
       assert && assert( this.isChild( node ), 'Attempted to removeChild with a node that was not a child.' );
