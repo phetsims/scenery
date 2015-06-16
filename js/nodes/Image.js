@@ -127,7 +127,6 @@ define( function( require ) {
       if ( this._image instanceof HTMLCanvasElement ) {
         this.setRendererBitmask(
           Renderer.bitmaskCanvas |
-          Renderer.bitmaskCanvas |
           Renderer.bitmaskWebGL |
           Renderer.bitmaskPixi
         );
@@ -135,7 +134,6 @@ define( function( require ) {
       else {
         // assumes HTMLImageElement
         this.setRendererBitmask(
-          Renderer.bitmaskCanvas |
           Renderer.bitmaskCanvas |
           Renderer.bitmaskSVG |
           Renderer.bitmaskDOM |
