@@ -947,6 +947,41 @@ define( function( require ) {
       }
       result += this._rootBackbone ? ( 'Drawables: ' + drawableCount( this._rootBackbone ) + '<br>' ) : '';
 
+      var drawableCountMap = {}; // {string} drawable constructor name => {number} count of seen
+      // increment the count in our map
+      function countRetainedDrawable( drawable ) {
+        var name = drawable.constructor.name;
+        if ( drawableCountMap[ name ] ) {
+          drawableCountMap[ name ]++;
+        }
+        else {
+          drawableCountMap[ name ] = 1;
+        }
+      }
+      function retainedDrawableCount( instance ) {
+        var count = 0;
+        if ( instance.selfDrawable ) {
+          countRetainedDrawable( instance.selfDrawable );
+          count++;
+        }
+        if ( instance.groupDrawable ) {
+          countRetainedDrawable( instance.groupDrawable );
+          count++;
+        }
+        if ( instance.sharedCacheDrawable ) {
+          countRetainedDrawable( instance.sharedCacheDrawable );
+          count++;
+        }
+        for ( var i = 0; i < instance.children.length; i++ ) {
+          count += retainedDrawableCount( instance.children[i] );
+        }
+        return count;
+      }
+      result += this._baseInstance ? ( 'Retained Drawables: ' + retainedDrawableCount( this._baseInstance ) + '<br>' ) : '';
+      for ( var drawableName in drawableCountMap ) {
+        result += '&nbsp;&nbsp;&nbsp;&nbsp;' + drawableName + ': ' + drawableCountMap[ drawableName ] + '<br>';
+      }
+
       function blockSummary( block ) {
         // ensure we are a block
         if ( !block.firstDrawable || !block.lastDrawable ) {
