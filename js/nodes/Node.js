@@ -2926,9 +2926,9 @@ define( function( require ) {
    * NOTE: left/right/top/bottom/centerX/centerY are at the end, since they rely potentially on rotation / scaling changes of bounds that may happen beforehand
    */
   Node.prototype._mutatorKeys = [
-    'children', 'cursor', 'visible', 'pickable', 'opacity', 'matrix', 'translation', 'x', 'y', 'rotation', 'scale',
+    'children', 'cursor', 'visible', 'pickable', 'opacity', 'matrix', 'translation', 'x', 'y', 'rotation', 'scale', 'maxWidth',
     'leftTop', 'centerTop', 'rightTop', 'leftCenter', 'center', 'rightCenter', 'leftBottom', 'centerBottom', 'rightBottom',
-    'left', 'right', 'top', 'bottom', 'centerX', 'centerY', 'maxWidth', 'maxHeight', 'renderer', 'rendererOptions',
+    'left', 'right', 'top', 'bottom', 'centerX', 'centerY', 'maxHeight', 'renderer', 'rendererOptions',
     'layerSplit', 'usesOpacity', 'cssTransform', 'excludeInvisible', 'webglScale', 'mouseArea', 'touchArea', 'clipArea',
     'transformBounds', 'focusable', 'focusIndicator', 'focusOrder', 'textDescription'
   ];
