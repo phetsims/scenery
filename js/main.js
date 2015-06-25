@@ -13,7 +13,6 @@
 define( [
   'SCENERY/scenery',
 
-  'SCENERY/accessibility/AriaSpeech',
   'SCENERY/accessibility/FocusCursor',
   'SCENERY/accessibility/FocusLayer',
   'SCENERY/accessibility/FocusRectangle',
