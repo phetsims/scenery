@@ -23,7 +23,7 @@ define( function( require ) {
 
     var svg = this.svg = document.createElementNS( scenery.svgns, 'svg' );
     svg.style.position = 'absolute';
-    svg.className = 'canvasNodeBoundsOverlay';
+    svg.setAttribute( 'class', 'canvasNodeBoundsOverlay' );
     svg.style.top = 0;
     svg.style.left = 0;
     svg.style[ 'pointer-events' ] = 'none';
