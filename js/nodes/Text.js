@@ -930,7 +930,7 @@ define( function( require ) {
     svgTextSizeContainer.setAttribute( 'width', '2' );
     svgTextSizeContainer.setAttribute( 'height', '2' );
     svgTextSizeContainer.setAttribute( 'id', textSizeContainerId );
-    svgTextSizeContainer.setAttribute( 'style', 'visibility: hidden; pointer-events: none; position: absolute; left: -65535; right: -65535;' ); // so we don't flash it in a visible way to the user
+    svgTextSizeContainer.setAttribute( 'style', 'visibility: hidden; pointer-events: none; position: absolute; left: -65535px; right: -65535px;' ); // so we don't flash it in a visible way to the user
   }
   // NOTE! copies createSVGElement
   if ( !svgTextSizeElement ) {
