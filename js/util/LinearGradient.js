@@ -60,6 +60,10 @@ define( function( require ) {
       _.each( this.stops, function( stop ) {
         var stopElement = document.createElementNS( scenery.svgns, 'stop' );
         stopElement.setAttribute( 'offset', stop.ratio );
+        // Since SVG doesn't support parsing scientific notation (e.g. 7e5), we need to output fixed decimal-point strings.
+        // Since this needs to be done quickly, and we don't particularly care about slight rounding differences (it's
+        // being used for display purposes only, and is never shown to the user), we use the built-in JS toFixed instead of
+        // Dot's version of toFixed. See https://github.com/phetsims/kite/issues/50
         stopElement.setAttribute( 'style', 'stop-color: ' + stop.color.withAlpha( 1 ).toCSS() + '; stop-opacity: ' + stop.color.a.toFixed( 20 ) + ';' );
         definition.appendChild( stopElement );
       } );

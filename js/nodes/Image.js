@@ -681,7 +681,11 @@ define( function( require ) {
         var canvas = this.node.getMipmapCanvas( level );
         image.setAttribute( 'width', canvas.width + 'px' );
         image.setAttribute( 'height', canvas.height + 'px' );
-        image.setAttribute( 'transform', 'scale(' + Math.pow( 2, level ).toFixed() + ')' );
+        // Since SVG doesn't support parsing scientific notation (e.g. 7e5), we need to output fixed decimal-point strings.
+        // Since this needs to be done quickly, and we don't particularly care about slight rounding differences (it's
+        // being used for display purposes only, and is never shown to the user), we use the built-in JS toFixed instead of
+        // Dot's version of toFixed. See https://github.com/phetsims/kite/issues/50
+        image.setAttribute( 'transform', 'scale(' + Math.pow( 2, level ).toFixed( 20 ) + ')' );
         image.setAttributeNS( scenery.xlinkns, 'xlink:href', url );
       }
       else {
