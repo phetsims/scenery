@@ -63,7 +63,7 @@ define( function( require ) {
     // required listeners to update our summary based on painted/non-painted information
     var listener = this.selfChange.bind( this );
     this.node.on( 'opacity', listener );
-    this.node.on( 'hint', listener );
+    this.node.on( 'hint', listener ); // should fire on things like node.renderer being changed
     this.node.on( 'clip', listener );
     this.node.on( 'selfBoundsValid', listener ); // e.g. Text, may change based on boundsMethod
   };
@@ -201,17 +201,40 @@ define( function( require ) {
   }, {
     bitmaskAll: bitmaskAll,
 
-    // TODO: have 'self' and 'group' summary bitmasks for use? We can't canvas-cache an opaque node even if its children
-    // all would benefit.
+    /**
+     * Determines which of the summary bits can be set for a specific Node (ignoring children/ancestors).
+     * For instance, for bitmaskSingleSVG, we only don't include the flag if THIS node prevents its usage
+     * (even though child nodes may prevent it in the renderer summary itself).
+     *
+     * @param {Node} node
+     */
     summaryBitmaskForNodeSelf: function( node ) {
       var bitmask = node._rendererBitmask;
 
       // NOTE: If changing, see Instance.updateRenderingState
-      if ( node.opacity === 1 && !node._hints.usesOpacity && node._clipArea === null && !node._hints.requireElement &&
-           !node._hints.cssTransform && !node._hints.layerSplit ) {
-        bitmask |= Renderer.bitmaskSingleCanvas;
+      var requiresSplit = node._hints.requireElement || node._hints.cssTransform || node._hints.layerSplit;
+      var mightUseOpacity = node.opacity !== 1 || node._hints.usesOpacity;
+      var mightUseClip = node._clipArea !== null;
+      var rendererHint = node._hints.renderer;
+
+      // Whether this subtree will be able to support a single SVG element
+      // NOTE: If changing, see Instance.updateRenderingState
+      if ( !requiresSplit && // Can't have a single SVG element if we are split
+           Renderer.isSVG( node._rendererBitmask ) && // If our node doesn't support SVG, can't do it
+           ( !rendererHint || Renderer.isSVG( rendererHint ) ) ) { // Can't if a renderer hint is set to something else
         bitmask |= Renderer.bitmaskSingleSVG;
       }
+
+      // Whether this subtree will be able to support a single Canvas element
+      // NOTE: If changing, see Instance.updateRenderingState
+      if ( !requiresSplit && // Can't have a single SVG element if we are split
+           !mightUseOpacity && // Opacity not supported for Canvas blocks yet
+           !mightUseClip && // Clipping not supported for Canvas blocks yet
+           Renderer.isCanvas( node._rendererBitmask ) && // If our node doesn't support Canvas, can't do it
+           ( !rendererHint || Renderer.isCanvas( rendererHint ) ) ) { // Can't if a renderer hint is set to something else
+        bitmask |= Renderer.bitmaskSingleCanvas;
+      }
+
       if ( !node.isPainted() ) {
         bitmask |= Renderer.bitmaskNotPainted;
       }

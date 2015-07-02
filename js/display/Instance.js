@@ -292,12 +292,15 @@ define( function( require ) {
       this.isUnderCanvasCache = this.isSharedCanvasCacheRoot ||
                                 ( this.parent ? ( this.parent.isUnderCanvasCache || this.parent.isInstanceCanvasCache || this.parent.isSharedCanvasCacheSelf ) : false );
 
+      // Options that will require a split/backbone.
+      var requiresSplit = hints.requireElement || hints.cssTransform || hints.layerSplit;
 
       // check if we need a backbone or cache
       // if we are under a canvas cache, we will NEVER have a backbone
       // splits are accomplished just by having a backbone
       // NOTE: If changing, check RendererSummary.summaryBitmaskForNodeSelf
-      if ( this.isDisplayRoot || ( !this.isUnderCanvasCache && ( hasTransparency || hasClip || hints.requireElement || hints.cssTransform || hints.layerSplit ) ) ) {
+      //OHTWO TODO: Update this to properly identify when backbones are necessary/and-or when we forward opacity/clipping
+      if ( this.isDisplayRoot || ( !this.isUnderCanvasCache && ( hasTransparency || hasClip || requiresSplit ) ) ) {
         this.isBackbone = true;
         this.isVisibilityApplied = true;
         this.isTransformed = this.isDisplayRoot || !!hints.cssTransform; // for now, only trigger CSS transform if we have the specific hint
