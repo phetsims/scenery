@@ -21,10 +21,12 @@ define( function( require ) {
    * its position.
    */
   scenery.Spacer = function Spacer( width, height, options ) {
-    Node.call( this, options );
+    Node.call( this );
 
     // override the local bounds to our area
     this.localBounds = new Bounds2( 0, 0, width, height );
+
+    this.mutate( options );
   };
   var Spacer = scenery.Spacer;
 
