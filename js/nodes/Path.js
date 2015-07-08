@@ -94,7 +94,7 @@ define( function( require ) {
 
     // separated out, so that we can override this with a faster version in subtypes. includes the Stroke, if any
     computeShapeBounds: function() {
-      return this._stroke ? this.getStrokedShape().bounds : this.getShape().bounds;
+      return ( this._stroke && this.getLineWidth() !== 0 ) ? this.getStrokedShape().bounds : this.getShape().bounds;
     },
 
     // @override
