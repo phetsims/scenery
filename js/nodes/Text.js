@@ -432,6 +432,7 @@ define( function( require ) {
       return true;
     },
 
+    // @override
     areSelfBoundsValid: function() {
       return this._boundsMethod === 'accurate';
     },

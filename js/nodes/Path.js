@@ -11,6 +11,7 @@ define( function( require ) {
 
   var inherit = require( 'PHET_CORE/inherit' );
   var Shape = require( 'KITE/Shape' );
+  var Bounds2 = require( 'DOT/Bounds2' );
 
   var scenery = require( 'SCENERY/scenery' );
   var Node = require( 'SCENERY/nodes/Node' );
@@ -32,6 +33,17 @@ define( function( require ) {
     // NOTE: _shape can be lazily constructed, in the case of types like Rectangle where they have their own drawing code
     this._shape = null;
     this._strokedShape = null; // a stroked copy of the shape, lazily computed
+
+    // boundsMethod determines how our (self) bounds are computed, and can particularly determine how expensive
+    // to compute our bounds are if we are stroked. There are the following options:
+    // 'accurate' - Always uses the most accurate way of getting bounds
+    // 'unstroked' - Ignores any stroke, just gives the filled bounds.
+    //               If there is a stroke, the bounds will be marked as inaccurate
+    // 'tightPadding' - Pads the filled bounds by enough to cover everything except mitered joints.
+    //                   If there is a stroke, the bounds wil be marked as inaccurate.
+    // 'safePadding' - Pads the filled bounds by enough to cover all line joins/caps.
+    // 'none' - Returns Bounds2.NOTHING. The bounds will be marked as inaccurate.
+    this._boundsMethod = 'accurate'; // 'accurate', 'unstroked', 'tightPadding', 'safePadding', 'none'
 
     // ensure we have a parameter object
     options = options || {};
@@ -72,10 +84,12 @@ define( function( require ) {
       }
       return this;
     },
+    set shape( value ) { this.setShape( value ); },
 
     getShape: function() {
       return this._shape;
     },
+    get shape() { return this.getShape(); },
 
     getStrokedShape: function() {
       if ( !this._strokedShape ) {
@@ -92,9 +106,78 @@ define( function( require ) {
       }
     },
 
+    setBoundsMethod: function( boundsMethod ) {
+      assert && assert( boundsMethod === 'accurate' ||
+                        boundsMethod === 'unstroked' ||
+                        boundsMethod === 'tightPadding' ||
+                        boundsMethod === 'safePadding' ||
+                        boundsMethod === 'none' );
+      if ( this._boundsMethod !== boundsMethod ) {
+        this._boundsMethod = boundsMethod;
+        this.invalidateShape();
+
+        this.trigger0( 'boundsMethod' );
+
+        this.trigger0( 'selfBoundsValid' ); // whether our self bounds are valid may have changed
+      }
+      return this;
+    },
+    set boundsMethod( value ) { return this.setBoundsMethod( value ); },
+
+    getBoundsMethod: function() {
+      return this._boundsMethod;
+    },
+    get boundsMethod() { return this.getBoundsMethod(); },
+
     // separated out, so that we can override this with a faster version in subtypes. includes the Stroke, if any
     computeShapeBounds: function() {
-      return ( this._stroke && this.getLineWidth() !== 0 ) ? this.getStrokedShape().bounds : this.getShape().bounds;
+      // boundsMethod: 'none' will return no bounds
+      if ( this._boundsMethod === 'none' ) {
+        return Bounds2.NOTHING;
+      }
+      else {
+        // boundsMethod: 'unstroked', or anything without a stroke will then just use the normal shape bounds
+        if ( !this.hasStroke() || this.getLineWidth() === 0 || this._boundsMethod === 'unstroked' ) {
+          return this.getShape().bounds;
+        }
+        else {
+          // 'accurate' will always require computing the full stroked shape, and taking its bounds
+          if ( this._boundsMethod === 'accurate' ) {
+            return this.getStrokedShape().bounds;
+          }
+          // Otherwise we compute bounds based on 'tightPadding' and 'safePadding', the one difference being that
+          // 'safePadding' will include whatever bounds necessary to include miters. Square line-cap requires a
+          // slightly extended bounds in either case.
+          else {
+            var factor;
+            // If miterLength (inside corner to outside corner) exceeds miterLimit * strokeWidth, it will get turned to
+            // a bevel, so our factor will be based just on the miterLimit.
+            if ( this._boundsMethod === 'safePadding' && this.getLineJoin() === 'miter' ) {
+              factor = this.getMiterLimit();
+            }
+            else if ( this.getLineCap() === 'square' ) {
+              factor = Math.SQRT2;
+            }
+            else {
+              factor = 1;
+            }
+            return this.getShape().bounds.dilated( factor * this.getLineWidth() / 2 );
+          }
+        }
+      }
+    },
+
+    // @override
+    areSelfBoundsValid: function() {
+      if ( this._boundsMethod === 'accurate' || this._boundsMethod === 'safePadding' ) {
+        return true;
+      }
+      else if ( this._boundsMethod === 'none' ) {
+        return false;
+      }
+      else {
+        return !this.hasStroke(); // 'tightPadding' and 'unstroked' options
+      }
     },
 
     // @override
@@ -105,6 +188,7 @@ define( function( require ) {
     // hook stroke mixin changes to invalidation
     invalidateStroke: function() {
       this.invalidateShape();
+      this.trigger0( 'selfBoundsValid' ); // Stroke changing could have changed our self-bounds-validitity (unstroked/etc)
     },
 
     hasShape: function() {
@@ -161,9 +245,6 @@ define( function( require ) {
       return this.hasShape() ? this._shape.intersectsBounds( bounds ) : false;
     },
 
-    set shape( value ) { this.setShape( value ); },
-    get shape() { return this.getShape(); },
-
     // if we have to apply a transform workaround for https://github.com/phetsims/scenery/issues/196 (only when we have a pattern or gradient)
     requiresSVGBoundsWorkaround: function() {
       if ( !this._stroke || !this._stroke.getSVGDefinition || !this.hasShape() ) {
@@ -190,7 +271,7 @@ define( function( require ) {
     }
   } );
 
-  Path.prototype._mutatorKeys = [ 'shape' ].concat( Node.prototype._mutatorKeys );
+  Path.prototype._mutatorKeys = [ 'shape', 'boundsMethod' ].concat( Node.prototype._mutatorKeys );
 
   // mix in fill/stroke handling code. for now, this is done after 'shape' is added to the mutatorKeys so that stroke parameters
   // get set first

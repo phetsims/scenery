@@ -1156,6 +1156,7 @@ define( function( require ) {
       return false;
     },
 
+    // Whether our self bounds are guaranteed to bounds the rendered output of this node.
     areSelfBoundsValid: function() {
       return true;
     },
