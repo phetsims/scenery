@@ -26,6 +26,7 @@ define( function( require ) {
    * Renderer bitmask flags
    *----------------------------------------------------------------------------*/
 
+  Renderer.numActiveRenderers = 5;
   Renderer.bitmaskRendererArea = 0x00000FF;
   Renderer.bitmaskCurrentRendererArea = 0x000001F;
   Renderer.bitmaskLacksOffset = 0x10000;
@@ -37,7 +38,7 @@ define( function( require ) {
   Renderer.bitmaskDOM = 0x0000004;
   Renderer.bitmaskWebGL = 0x0000008;
   Renderer.bitmaskPixi = 0x0000010;
-  // 20, 40, 80 reserved for future renderers NOTE: update bitmaskCurrentRendererArea if they are added/removed
+  // 20, 40, 80 reserved for future renderers NOTE: update bitmaskCurrentRendererArea/numActiveRenderers if they are added/removed
 
   // summary bits (for RendererSummary):
   Renderer.bitmaskSingleCanvas = 0x100;
@@ -100,27 +101,31 @@ define( function( require ) {
            ( fourthRenderer << 15 ) |
            ( fifthRenderer << 20 );
   };
+  // bitmaskOrderN with n=0 is bitmaskOrderFirst, n=1 is bitmaskOrderSecond, etc.
+  Renderer.bitmaskOrder = function( bitmask, n ) {
+    return ( bitmask >> ( 5 * n ) ) & Renderer.bitmaskCurrentRendererArea;
+  };
   Renderer.bitmaskOrderFirst = function( bitmask ) {
-    return bitmask & 0x000001F;
+    return bitmask & Renderer.bitmaskCurrentRendererArea;
   };
   Renderer.bitmaskOrderSecond = function( bitmask ) {
-    return ( bitmask >> 5 ) & 0x000001F;
+    return ( bitmask >> 5 ) & Renderer.bitmaskCurrentRendererArea;
   };
   Renderer.bitmaskOrderThird = function( bitmask ) {
-    return ( bitmask >> 10 ) & 0x000001F;
+    return ( bitmask >> 10 ) & Renderer.bitmaskCurrentRendererArea;
   };
   Renderer.bitmaskOrderFourth = function( bitmask ) {
-    return ( bitmask >> 15 ) & 0x000001F;
+    return ( bitmask >> 15 ) & Renderer.bitmaskCurrentRendererArea;
   };
   Renderer.bitmaskOrderFifth = function( bitmask ) {
-    return ( bitmask >> 20 ) & 0x000001F;
+    return ( bitmask >> 20 ) & Renderer.bitmaskCurrentRendererArea;
   };
   Renderer.pushOrderBitmask = function( bitmask, renderer ) {
     assert && assert( typeof bitmask === 'number' );
     assert && assert( typeof renderer === 'number' );
     var rendererToInsert = renderer;
     for ( var i = 0; i < 30; i += 5 ) {
-      var currentRenderer = ( bitmask >> i ) & 0x000001F;
+      var currentRenderer = ( bitmask >> i ) & Renderer.bitmaskCurrentRendererArea;
       if ( currentRenderer === rendererToInsert ) {
         return bitmask;
       }
@@ -131,7 +136,7 @@ define( function( require ) {
       }
       else {
         // clear out that slot
-        bitmask = ( bitmask & ~( 0x000001F << i ) );
+        bitmask = ( bitmask & ~( Renderer.bitmaskCurrentRendererArea << i ) );
 
         // place in the renderer to insert
         bitmask = bitmask | ( rendererToInsert << i );

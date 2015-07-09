@@ -200,6 +200,37 @@ define( function( require ) {
       return !!( Renderer.bitmaskBoundsValid & this.bitmask );
     },
 
+    /**
+     * Given a bitmask representing a list of ordered preferred renderers, we check to see if all of our nodes can be
+     * displayed in a single SVG block, AND that given the preferred renderers, that it will actually happen in our
+     * rendering process.
+     */
+    isSubtreeRenderedExclusivelySVG: function( preferredRenderers ) {
+      // Check if we have anything that would PREVENT us from having a single SVG block
+      if ( !this.isSingleSVGSupported() ) {
+        return false;
+      }
+
+      // Check for any renderer preferences that would CAUSE us to choose not to display with a single SVG block
+      for ( var i = 0; i < Renderer.numActiveRenderers; i++ ) {
+        // Grab the next-most preferred renderer
+        var renderer = Renderer.bitmaskOrder( preferredRenderers, i );
+
+        // If it's SVG, congrats! Everything will render in SVG (since SVG is supported, as noted above)
+        if ( Renderer.bitmaskSVG & renderer ) {
+          return true;
+        }
+
+        // Since it's not SVG, if there's a single painted node that supports this renderer (which is preferred over SVG),
+        // then it will be rendered with this renderer, NOT SVG.
+        if ( this.isSubtreeContainingCompatible( renderer ) ) {
+          return false;
+        }
+      }
+
+      return false; // sanity check
+    },
+
     // for debugging purposes
     audit: function() {
       if ( assert ) {

@@ -312,108 +312,108 @@
 
     // init test
     var mask = Renderer.createOrderBitmask( Renderer.bitmaskCanvas, Renderer.bitmaskSVG, Renderer.bitmaskDOM, Renderer.bitmaskWebGL, Renderer.bitmaskPixi );
-    equal( Renderer.bitmaskOrderFirst( mask ), Renderer.bitmaskCanvas );
-    equal( Renderer.bitmaskOrderSecond( mask ), Renderer.bitmaskSVG );
-    equal( Renderer.bitmaskOrderThird( mask ), Renderer.bitmaskDOM );
-    equal( Renderer.bitmaskOrderFourth( mask ), Renderer.bitmaskWebGL );
-    equal( Renderer.bitmaskOrderFifth( mask ), Renderer.bitmaskPixi );
+    equal( Renderer.bitmaskOrder( mask, 0 ), Renderer.bitmaskCanvas );
+    equal( Renderer.bitmaskOrder( mask, 1 ), Renderer.bitmaskSVG );
+    equal( Renderer.bitmaskOrder( mask, 2 ), Renderer.bitmaskDOM );
+    equal( Renderer.bitmaskOrder( mask, 3 ), Renderer.bitmaskWebGL );
+    equal( Renderer.bitmaskOrder( mask, 4 ), Renderer.bitmaskPixi );
 
     // empty test
     mask = Renderer.createOrderBitmask();
-    equal( Renderer.bitmaskOrderFirst( mask ), 0 );
-    equal( Renderer.bitmaskOrderSecond( mask ), 0 );
-    equal( Renderer.bitmaskOrderThird( mask ), 0 );
-    equal( Renderer.bitmaskOrderFourth( mask ), 0 );
-    equal( Renderer.bitmaskOrderFifth( mask ), 0 );
+    equal( Renderer.bitmaskOrder( mask, 0 ), 0 );
+    equal( Renderer.bitmaskOrder( mask, 1 ), 0 );
+    equal( Renderer.bitmaskOrder( mask, 2 ), 0 );
+    equal( Renderer.bitmaskOrder( mask, 3 ), 0 );
+    equal( Renderer.bitmaskOrder( mask, 4 ), 0 );
 
     // pushing single renderer should work
     mask = Renderer.pushOrderBitmask( mask, Renderer.bitmaskSVG );
-    equal( Renderer.bitmaskOrderFirst( mask ), Renderer.bitmaskSVG );
-    equal( Renderer.bitmaskOrderSecond( mask ), 0 );
-    equal( Renderer.bitmaskOrderThird( mask ), 0 );
-    equal( Renderer.bitmaskOrderFourth( mask ), 0 );
-    equal( Renderer.bitmaskOrderFifth( mask ), 0 );
+    equal( Renderer.bitmaskOrder( mask, 0 ), Renderer.bitmaskSVG );
+    equal( Renderer.bitmaskOrder( mask, 1 ), 0 );
+    equal( Renderer.bitmaskOrder( mask, 2 ), 0 );
+    equal( Renderer.bitmaskOrder( mask, 3 ), 0 );
+    equal( Renderer.bitmaskOrder( mask, 4 ), 0 );
 
     // pushing again should have no change
     mask = Renderer.pushOrderBitmask( mask, Renderer.bitmaskSVG );
-    equal( Renderer.bitmaskOrderFirst( mask ), Renderer.bitmaskSVG );
-    equal( Renderer.bitmaskOrderSecond( mask ), 0 );
-    equal( Renderer.bitmaskOrderThird( mask ), 0 );
-    equal( Renderer.bitmaskOrderFourth( mask ), 0 );
-    equal( Renderer.bitmaskOrderFifth( mask ), 0 );
+    equal( Renderer.bitmaskOrder( mask, 0 ), Renderer.bitmaskSVG );
+    equal( Renderer.bitmaskOrder( mask, 1 ), 0 );
+    equal( Renderer.bitmaskOrder( mask, 2 ), 0 );
+    equal( Renderer.bitmaskOrder( mask, 3 ), 0 );
+    equal( Renderer.bitmaskOrder( mask, 4 ), 0 );
 
     // pushing Canvas will put it first, SVG second
     mask = Renderer.pushOrderBitmask( mask, Renderer.bitmaskCanvas );
-    equal( Renderer.bitmaskOrderFirst( mask ), Renderer.bitmaskCanvas );
-    equal( Renderer.bitmaskOrderSecond( mask ), Renderer.bitmaskSVG );
-    equal( Renderer.bitmaskOrderThird( mask ), 0 );
-    equal( Renderer.bitmaskOrderFourth( mask ), 0 );
-    equal( Renderer.bitmaskOrderFifth( mask ), 0 );
+    equal( Renderer.bitmaskOrder( mask, 0 ), Renderer.bitmaskCanvas );
+    equal( Renderer.bitmaskOrder( mask, 1 ), Renderer.bitmaskSVG );
+    equal( Renderer.bitmaskOrder( mask, 2 ), 0 );
+    equal( Renderer.bitmaskOrder( mask, 3 ), 0 );
+    equal( Renderer.bitmaskOrder( mask, 4 ), 0 );
 
     // pushing SVG will reverse the two
     mask = Renderer.pushOrderBitmask( mask, Renderer.bitmaskSVG );
-    equal( Renderer.bitmaskOrderFirst( mask ), Renderer.bitmaskSVG );
-    equal( Renderer.bitmaskOrderSecond( mask ), Renderer.bitmaskCanvas );
-    equal( Renderer.bitmaskOrderThird( mask ), 0 );
-    equal( Renderer.bitmaskOrderFourth( mask ), 0 );
-    equal( Renderer.bitmaskOrderFifth( mask ), 0 );
+    equal( Renderer.bitmaskOrder( mask, 0 ), Renderer.bitmaskSVG );
+    equal( Renderer.bitmaskOrder( mask, 1 ), Renderer.bitmaskCanvas );
+    equal( Renderer.bitmaskOrder( mask, 2 ), 0 );
+    equal( Renderer.bitmaskOrder( mask, 3 ), 0 );
+    equal( Renderer.bitmaskOrder( mask, 4 ), 0 );
 
     // pushing DOM shifts the other two down
     mask = Renderer.pushOrderBitmask( mask, Renderer.bitmaskDOM );
-    equal( Renderer.bitmaskOrderFirst( mask ), Renderer.bitmaskDOM );
-    equal( Renderer.bitmaskOrderSecond( mask ), Renderer.bitmaskSVG );
-    equal( Renderer.bitmaskOrderThird( mask ), Renderer.bitmaskCanvas );
-    equal( Renderer.bitmaskOrderFourth( mask ), 0 );
-    equal( Renderer.bitmaskOrderFifth( mask ), 0 );
+    equal( Renderer.bitmaskOrder( mask, 0 ), Renderer.bitmaskDOM );
+    equal( Renderer.bitmaskOrder( mask, 1 ), Renderer.bitmaskSVG );
+    equal( Renderer.bitmaskOrder( mask, 2 ), Renderer.bitmaskCanvas );
+    equal( Renderer.bitmaskOrder( mask, 3 ), 0 );
+    equal( Renderer.bitmaskOrder( mask, 4 ), 0 );
 
     // pushing DOM results in no change
     mask = Renderer.pushOrderBitmask( mask, Renderer.bitmaskDOM );
-    equal( Renderer.bitmaskOrderFirst( mask ), Renderer.bitmaskDOM );
-    equal( Renderer.bitmaskOrderSecond( mask ), Renderer.bitmaskSVG );
-    equal( Renderer.bitmaskOrderThird( mask ), Renderer.bitmaskCanvas );
-    equal( Renderer.bitmaskOrderFourth( mask ), 0 );
-    equal( Renderer.bitmaskOrderFifth( mask ), 0 );
+    equal( Renderer.bitmaskOrder( mask, 0 ), Renderer.bitmaskDOM );
+    equal( Renderer.bitmaskOrder( mask, 1 ), Renderer.bitmaskSVG );
+    equal( Renderer.bitmaskOrder( mask, 2 ), Renderer.bitmaskCanvas );
+    equal( Renderer.bitmaskOrder( mask, 3 ), 0 );
+    equal( Renderer.bitmaskOrder( mask, 4 ), 0 );
 
     // pushing Canvas moves it to the front
     mask = Renderer.pushOrderBitmask( mask, Renderer.bitmaskCanvas );
-    equal( Renderer.bitmaskOrderFirst( mask ), Renderer.bitmaskCanvas );
-    equal( Renderer.bitmaskOrderSecond( mask ), Renderer.bitmaskDOM );
-    equal( Renderer.bitmaskOrderThird( mask ), Renderer.bitmaskSVG );
-    equal( Renderer.bitmaskOrderFourth( mask ), 0 );
-    equal( Renderer.bitmaskOrderFifth( mask ), 0 );
+    equal( Renderer.bitmaskOrder( mask, 0 ), Renderer.bitmaskCanvas );
+    equal( Renderer.bitmaskOrder( mask, 1 ), Renderer.bitmaskDOM );
+    equal( Renderer.bitmaskOrder( mask, 2 ), Renderer.bitmaskSVG );
+    equal( Renderer.bitmaskOrder( mask, 3 ), 0 );
+    equal( Renderer.bitmaskOrder( mask, 4 ), 0 );
 
     // pushing DOM again swaps it with the Canvas
     mask = Renderer.pushOrderBitmask( mask, Renderer.bitmaskDOM );
-    equal( Renderer.bitmaskOrderFirst( mask ), Renderer.bitmaskDOM );
-    equal( Renderer.bitmaskOrderSecond( mask ), Renderer.bitmaskCanvas );
-    equal( Renderer.bitmaskOrderThird( mask ), Renderer.bitmaskSVG );
-    equal( Renderer.bitmaskOrderFourth( mask ), 0 );
-    equal( Renderer.bitmaskOrderFifth( mask ), 0 );
+    equal( Renderer.bitmaskOrder( mask, 0 ), Renderer.bitmaskDOM );
+    equal( Renderer.bitmaskOrder( mask, 1 ), Renderer.bitmaskCanvas );
+    equal( Renderer.bitmaskOrder( mask, 2 ), Renderer.bitmaskSVG );
+    equal( Renderer.bitmaskOrder( mask, 3 ), 0 );
+    equal( Renderer.bitmaskOrder( mask, 4 ), 0 );
     // console.log( mask.toString( 16 ) );
     // pushing WebGL shifts everything
     mask = Renderer.pushOrderBitmask( mask, Renderer.bitmaskWebGL );
-    equal( Renderer.bitmaskOrderFirst( mask ), Renderer.bitmaskWebGL );
-    equal( Renderer.bitmaskOrderSecond( mask ), Renderer.bitmaskDOM );
-    equal( Renderer.bitmaskOrderThird( mask ), Renderer.bitmaskCanvas );
-    equal( Renderer.bitmaskOrderFourth( mask ), Renderer.bitmaskSVG );
-    equal( Renderer.bitmaskOrderFifth( mask ), 0 );
+    equal( Renderer.bitmaskOrder( mask, 0 ), Renderer.bitmaskWebGL );
+    equal( Renderer.bitmaskOrder( mask, 1 ), Renderer.bitmaskDOM );
+    equal( Renderer.bitmaskOrder( mask, 2 ), Renderer.bitmaskCanvas );
+    equal( Renderer.bitmaskOrder( mask, 3 ), Renderer.bitmaskSVG );
+    equal( Renderer.bitmaskOrder( mask, 4 ), 0 );
     // console.log( mask.toString( 16 ) );
 
     // added pixi, should fill everything and shifts to the front
     mask = Renderer.pushOrderBitmask( mask, Renderer.bitmaskPixi );
-    equal( Renderer.bitmaskOrderFirst( mask ), Renderer.bitmaskPixi );
-    equal( Renderer.bitmaskOrderSecond( mask ), Renderer.bitmaskWebGL );
-    equal( Renderer.bitmaskOrderThird( mask ), Renderer.bitmaskDOM );
-    equal( Renderer.bitmaskOrderFourth( mask ), Renderer.bitmaskCanvas );
-    equal( Renderer.bitmaskOrderFifth( mask ), Renderer.bitmaskSVG );
+    equal( Renderer.bitmaskOrder( mask, 0 ), Renderer.bitmaskPixi );
+    equal( Renderer.bitmaskOrder( mask, 1 ), Renderer.bitmaskWebGL );
+    equal( Renderer.bitmaskOrder( mask, 2 ), Renderer.bitmaskDOM );
+    equal( Renderer.bitmaskOrder( mask, 3 ), Renderer.bitmaskCanvas );
+    equal( Renderer.bitmaskOrder( mask, 4 ), Renderer.bitmaskSVG );
 
     // switch SVG to be the main bitmask
     mask = Renderer.pushOrderBitmask( mask, Renderer.bitmaskSVG );
-    equal( Renderer.bitmaskOrderFirst( mask ), Renderer.bitmaskSVG );
-    equal( Renderer.bitmaskOrderSecond( mask ), Renderer.bitmaskPixi );
-    equal( Renderer.bitmaskOrderThird( mask ), Renderer.bitmaskWebGL );
-    equal( Renderer.bitmaskOrderFourth( mask ), Renderer.bitmaskDOM );
-    equal( Renderer.bitmaskOrderFifth( mask ), Renderer.bitmaskCanvas );
+    equal( Renderer.bitmaskOrder( mask, 0 ), Renderer.bitmaskSVG );
+    equal( Renderer.bitmaskOrder( mask, 1 ), Renderer.bitmaskPixi );
+    equal( Renderer.bitmaskOrder( mask, 2 ), Renderer.bitmaskWebGL );
+    equal( Renderer.bitmaskOrder( mask, 3 ), Renderer.bitmaskDOM );
+    equal( Renderer.bitmaskOrder( mask, 4 ), Renderer.bitmaskCanvas );
   } );
 
   test( 'Empty Display usage', function() {

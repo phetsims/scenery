@@ -37,8 +37,6 @@ define( function( require ) {
 
   var globalIdCounter = 1;
 
-  var emptyHintsObject = {}; // an object with no properties that we can use as an empty "hints" object
-
   var isWebGLSupported = Util.isWebGLSupported;
 
   // preferences top to bottom in general
@@ -283,17 +281,22 @@ define( function( require ) {
       this.groupRenderer = 0;
       this.sharedCacheRenderer = 0;
 
-      var hints = this.node._hints || emptyHintsObject;
-
-      //OHTWO TODO: Don't force a backbone for transparency
-      var hasTransparency = this.node._opacity !== 1 || hints.usesOpacity;
-      var hasClip = this.node._clipArea !== null;
+      var hints = this.node._hints;
 
       this.isUnderCanvasCache = this.isSharedCanvasCacheRoot ||
                                 ( this.parent ? ( this.parent.isUnderCanvasCache || this.parent.isInstanceCanvasCache || this.parent.isSharedCanvasCacheSelf ) : false );
 
-      // Options that will require a split/backbone.
-      var requiresSplit = hints.requireElement || hints.cssTransform || hints.layerSplit;
+      // set up our preferred renderer list (generally based on the parent)
+      this.preferredRenderers = this.parent ? this.parent.preferredRenderers : defaultPreferredRenderers;
+      // allow the node to modify its preferred renderers (and those of its descendants)
+      if ( hints.renderer ) {
+        this.preferredRenderers = Renderer.pushOrderBitmask( this.preferredRenderers, hints.renderer );
+      }
+
+      var hasClip = this.node._clipArea !== null;
+      var requiresSplit = hints.requireElement || hints.cssTransform || hints.layerSplit; // options that require split/backbone
+      var hasTransparency = this.node._opacity !== 1 || hints.usesOpacity;
+      var applyTransparencyWithSVG = hasTransparency && this.node._rendererSummary.isSubtreeRenderedExclusivelySVG( this.preferredRenderers );
 
       // check if we need a backbone or cache
       // if we are under a canvas cache, we will NEVER have a backbone
@@ -337,13 +340,6 @@ define( function( require ) {
         }
       }
 
-      // set up our preferred renderer list (generally based on the parent)
-      this.preferredRenderers = this.parent ? this.parent.preferredRenderers : defaultPreferredRenderers;
-      // allow the node to modify its preferred renderers (and those of its descendants)
-      if ( hints.renderer ) {
-        this.preferredRenderers = Renderer.pushOrderBitmask( this.preferredRenderers, hints.renderer );
-      }
-
       if ( this.node.isPainted() ) {
         if ( this.isUnderCanvasCache ) {
           this.selfRenderer = Renderer.bitmaskCanvas;
@@ -356,11 +352,11 @@ define( function( require ) {
           }
 
           // use the preferred rendering order if specified, otherwise use the default
-          this.selfRenderer = ( supportedNodeBitmask & Renderer.bitmaskOrderFirst( this.preferredRenderers ) ) ||
-                              ( supportedNodeBitmask & Renderer.bitmaskOrderSecond( this.preferredRenderers ) ) ||
-                              ( supportedNodeBitmask & Renderer.bitmaskOrderThird( this.preferredRenderers ) ) ||
-                              ( supportedNodeBitmask & Renderer.bitmaskOrderFourth( this.preferredRenderers ) ) ||
-                              ( supportedNodeBitmask & Renderer.bitmaskOrderFifth( this.preferredRenderers ) ) ||
+          this.selfRenderer = ( supportedNodeBitmask & Renderer.bitmaskOrder( this.preferredRenderers, 0 ) ) ||
+                              ( supportedNodeBitmask & Renderer.bitmaskOrder( this.preferredRenderers, 1 ) ) ||
+                              ( supportedNodeBitmask & Renderer.bitmaskOrder( this.preferredRenderers, 2 ) ) ||
+                              ( supportedNodeBitmask & Renderer.bitmaskOrder( this.preferredRenderers, 3 ) ) ||
+                              ( supportedNodeBitmask & Renderer.bitmaskOrder( this.preferredRenderers, 4 ) ) ||
                               ( supportedNodeBitmask & Renderer.bitmaskSVG ) ||
                               ( supportedNodeBitmask & Renderer.bitmaskCanvas ) ||
                               ( supportedNodeBitmask & Renderer.bitmaskDOM ) ||
