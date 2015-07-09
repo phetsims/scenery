@@ -243,7 +243,7 @@ define( function( require ) {
      * - hints
      * - opacity
      * - clipArea
-     * - _rendererSummary.bitmask
+     * - _rendererSummary
      * - _rendererBitmask
      *
      * State changes that can cause cascading state changes in descendants:
