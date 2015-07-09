@@ -1014,8 +1014,8 @@
 
     ok( canvasNode._rendererSummary.isSubtreeFullyCompatible( scenery.Renderer.bitmaskCanvas ), 'CanvasNode fully compatible: Canvas' );
     ok( !canvasNode._rendererSummary.isSubtreeFullyCompatible( scenery.Renderer.bitmaskSVG ), 'CanvasNode not fully compatible: SVG' );
-    ok( canvasNode._rendererSummary.isSubtreePartiallyCompatible( scenery.Renderer.bitmaskCanvas ), 'CanvasNode partially compatible: Canvas' );
-    ok( !canvasNode._rendererSummary.isSubtreePartiallyCompatible( scenery.Renderer.bitmaskSVG ), 'CanvasNode not partially compatible: SVG' );
+    ok( canvasNode._rendererSummary.isSubtreeContainingCompatible( scenery.Renderer.bitmaskCanvas ), 'CanvasNode partially compatible: Canvas' );
+    ok( !canvasNode._rendererSummary.isSubtreeContainingCompatible( scenery.Renderer.bitmaskSVG ), 'CanvasNode not partially compatible: SVG' );
     ok( canvasNode._rendererSummary.isSingleCanvasSupported(), 'CanvasNode supports single Canvas' );
     ok( !canvasNode._rendererSummary.isSingleSVGSupported(), 'CanvasNode does not support single SVG' );
     ok( !canvasNode._rendererSummary.isNotPainted(), 'CanvasNode is painted' );
@@ -1023,8 +1023,8 @@
 
     ok( webglNode._rendererSummary.isSubtreeFullyCompatible( scenery.Renderer.bitmaskWebGL ), 'WebGLNode fully compatible: WebGL' );
     ok( !webglNode._rendererSummary.isSubtreeFullyCompatible( scenery.Renderer.bitmaskSVG ), 'WebGLNode not fully compatible: SVG' );
-    ok( webglNode._rendererSummary.isSubtreePartiallyCompatible( scenery.Renderer.bitmaskWebGL ), 'WebGLNode partially compatible: WebGL' );
-    ok( !webglNode._rendererSummary.isSubtreePartiallyCompatible( scenery.Renderer.bitmaskSVG ), 'WebGLNode not partially compatible: SVG' );
+    ok( webglNode._rendererSummary.isSubtreeContainingCompatible( scenery.Renderer.bitmaskWebGL ), 'WebGLNode partially compatible: WebGL' );
+    ok( !webglNode._rendererSummary.isSubtreeContainingCompatible( scenery.Renderer.bitmaskSVG ), 'WebGLNode not partially compatible: SVG' );
     ok( !webglNode._rendererSummary.isSingleCanvasSupported(), 'WebGLNode does not support single Canvas' );
     ok( !webglNode._rendererSummary.isSingleSVGSupported(), 'WebGLNode does not support single SVG' );
     ok( !webglNode._rendererSummary.isNotPainted(), 'WebGLNode is painted' );
@@ -1032,8 +1032,8 @@
 
     ok( rect._rendererSummary.isSubtreeFullyCompatible( scenery.Renderer.bitmaskCanvas ), 'Rectangle fully compatible: Canvas' );
     ok( rect._rendererSummary.isSubtreeFullyCompatible( scenery.Renderer.bitmaskSVG ), 'Rectangle fully compatible: SVG' );
-    ok( rect._rendererSummary.isSubtreePartiallyCompatible( scenery.Renderer.bitmaskCanvas ), 'Rectangle partially compatible: Canvas' );
-    ok( rect._rendererSummary.isSubtreePartiallyCompatible( scenery.Renderer.bitmaskSVG ), 'Rectangle partially compatible: SVG' );
+    ok( rect._rendererSummary.isSubtreeContainingCompatible( scenery.Renderer.bitmaskCanvas ), 'Rectangle partially compatible: Canvas' );
+    ok( rect._rendererSummary.isSubtreeContainingCompatible( scenery.Renderer.bitmaskSVG ), 'Rectangle partially compatible: SVG' );
     ok( rect._rendererSummary.isSingleCanvasSupported(), 'Rectangle does support single Canvas' );
     ok( rect._rendererSummary.isSingleSVGSupported(), 'Rectangle does support single SVG' );
     ok( !rect._rendererSummary.isNotPainted(), 'Rectangle is painted' );
@@ -1041,8 +1041,8 @@
 
     ok( !node._rendererSummary.isSubtreeFullyCompatible( scenery.Renderer.bitmaskCanvas ), 'Container node fully compatible: Canvas' );
     ok( !node._rendererSummary.isSubtreeFullyCompatible( scenery.Renderer.bitmaskSVG ), 'Container node not fully compatible: SVG' );
-    ok( node._rendererSummary.isSubtreePartiallyCompatible( scenery.Renderer.bitmaskCanvas ), 'Container node partially compatible: Canvas' );
-    ok( node._rendererSummary.isSubtreePartiallyCompatible( scenery.Renderer.bitmaskSVG ), 'Container node partially compatible: SVG' );
+    ok( node._rendererSummary.isSubtreeContainingCompatible( scenery.Renderer.bitmaskCanvas ), 'Container node partially compatible: Canvas' );
+    ok( node._rendererSummary.isSubtreeContainingCompatible( scenery.Renderer.bitmaskSVG ), 'Container node partially compatible: SVG' );
     ok( !node._rendererSummary.isSingleCanvasSupported(), 'Container node does not support single Canvas' );
     ok( !node._rendererSummary.isSingleSVGSupported(), 'Container node does not support single SVG' );
     ok( !node._rendererSummary.isNotPainted(), 'Container node is painted' );
@@ -1050,8 +1050,8 @@
 
     ok( emptyNode._rendererSummary.isSubtreeFullyCompatible( scenery.Renderer.bitmaskCanvas ), 'Empty node fully compatible: Canvas' );
     ok( emptyNode._rendererSummary.isSubtreeFullyCompatible( scenery.Renderer.bitmaskSVG ), 'Empty node fully compatible: SVG' );
-    ok( !emptyNode._rendererSummary.isSubtreePartiallyCompatible( scenery.Renderer.bitmaskCanvas ), 'Empty node partially compatible: Canvas' );
-    ok( !emptyNode._rendererSummary.isSubtreePartiallyCompatible( scenery.Renderer.bitmaskSVG ), 'Empty node partially compatible: SVG' );
+    ok( !emptyNode._rendererSummary.isSubtreeContainingCompatible( scenery.Renderer.bitmaskCanvas ), 'Empty node partially compatible: Canvas' );
+    ok( !emptyNode._rendererSummary.isSubtreeContainingCompatible( scenery.Renderer.bitmaskSVG ), 'Empty node partially compatible: SVG' );
     ok( emptyNode._rendererSummary.isSingleCanvasSupported(), 'Empty node supports single Canvas' );
     ok( emptyNode._rendererSummary.isSingleSVGSupported(), 'Empty node supports single SVG' );
     ok( emptyNode._rendererSummary.isNotPainted(), 'Empty node is not painted' );

@@ -180,7 +180,7 @@ define( function( require ) {
      * @param {number} renderer - Single bit preferred. If multiple bits set, will return if a single painted node is
      *                            compatible with at least one of the bits.
      */
-    isSubtreePartiallyCompatible: function( renderer ) {
+    isSubtreeContainingCompatible: function( renderer ) {
       return !( ( renderer << Renderer.bitmaskLacksShift ) & this.bitmask );
     },
 
