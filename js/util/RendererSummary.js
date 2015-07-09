@@ -18,7 +18,7 @@ define( function( require ) {
   var Renderer = require( 'SCENERY/display/Renderer' );
 
   var summaryBits = [
-    // renderer bits (part of a normal renderer bitmask)
+    // renderer bits ("Is renderer X supported by the entire sub-tree?")
     Renderer.bitmaskCanvas,
     Renderer.bitmaskSVG,
     Renderer.bitmaskDOM,
@@ -29,7 +29,14 @@ define( function( require ) {
     Renderer.bitmaskSingleCanvas,
     Renderer.bitmaskSingleSVG,
     Renderer.bitmaskNotPainted,
-    Renderer.bitmaskBoundsValid
+    Renderer.bitmaskBoundsValid,
+
+    // inverse renderer bits ("Do all painted nodes NOT support renderer X in this sub-tree?")
+    Renderer.bitmaskLacksCanvas,
+    Renderer.bitmaskLacksSVG,
+    Renderer.bitmaskLacksDOM,
+    Renderer.bitmaskLacksWebGL,
+    Renderer.bitmaskLacksPixi
   ];
   var numSummaryBits = summaryBits.length;
 
@@ -154,8 +161,27 @@ define( function( require ) {
       return bitmask;
     },
 
-    isRendererSupported: function( renderer ) {
+    /**
+     * @public
+     * Is the renderer compatible with every single painted node under this subtree?
+     * (Can this entire sub-tree be rendered with just this renderer)
+     *
+     * @param {number} renderer - Single bit preferred. If multiple bits set, requires ALL painted nodes are compatible
+     *                            with ALL of the bits.
+     */
+    isSubtreeFullyCompatible: function( renderer ) {
       return !!( renderer & this.bitmask );
+    },
+
+    /**
+     * @public
+     * Is the renderer compatible with at least one painted node under this subtree?
+     *
+     * @param {number} renderer - Single bit preferred. If multiple bits set, will return if a single painted node is
+     *                            compatible with at least one of the bits.
+     */
+    isSubtreePartiallyCompatible: function( renderer ) {
+      return !( ( renderer << Renderer.bitmaskLacksShift ) & this.bitmask );
     },
 
     isSingleCanvasSupported: function() {
@@ -211,6 +237,13 @@ define( function( require ) {
     summaryBitmaskForNodeSelf: function( node ) {
       var bitmask = node._rendererBitmask;
 
+      if ( node.isPainted() ) {
+        bitmask |= ( ( node._rendererBitmask & Renderer.bitmaskCurrentRendererArea ) ^ Renderer.bitmaskCurrentRendererArea ) << Renderer.bitmaskLacksShift;
+      }
+      else {
+        bitmask |= Renderer.bitmaskCurrentRendererArea << Renderer.bitmaskLacksShift;
+      }
+
       // NOTE: If changing, see Instance.updateRenderingState
       var requiresSplit = node._hints.requireElement || node._hints.cssTransform || node._hints.layerSplit;
       var mightUseOpacity = node.opacity !== 1 || node._hints.usesOpacity;
@@ -247,15 +280,20 @@ define( function( require ) {
 
     // for debugging purposes
     bitToString: function( bit ) {
-      if ( bit === Renderer.bitmaskCanvas ) { return 'C'; }
-      if ( bit === Renderer.bitmaskSVG ) { return 'S'; }
-      if ( bit === Renderer.bitmaskDOM ) { return 'D'; }
-      if ( bit === Renderer.bitmaskWebGL ) { return 'W'; }
-      if ( bit === Renderer.bitmaskPixi ) { return 'P'; }
-      if ( bit === Renderer.bitmaskSingleCanvas ) { return 'c'; }
-      if ( bit === Renderer.bitmaskSingleSVG ) { return 's'; }
-      if ( bit === Renderer.bitmaskNotPainted ) { return 'n'; }
-      if ( bit === Renderer.bitmaskBoundsValid ) { return 'b'; }
+      if ( bit === Renderer.bitmaskCanvas ) { return 'Canvas'; }
+      if ( bit === Renderer.bitmaskSVG ) { return 'SVG'; }
+      if ( bit === Renderer.bitmaskDOM ) { return 'DOM'; }
+      if ( bit === Renderer.bitmaskWebGL ) { return 'WebGL'; }
+      if ( bit === Renderer.bitmaskPixi ) { return 'Pixi'; }
+      if ( bit === Renderer.bitmaskLacksCanvas ) { return '(-Canvas)'; }
+      if ( bit === Renderer.bitmaskLacksSVG ) { return '(-SVG)'; }
+      if ( bit === Renderer.bitmaskLacksDOM ) { return '(-DOM)'; }
+      if ( bit === Renderer.bitmaskLacksWebGL ) { return '(-WebGL)'; }
+      if ( bit === Renderer.bitmaskLacksPixi ) { return '(-Pixi)'; }
+      if ( bit === Renderer.bitmaskSingleCanvas ) { return 'SingleCanvas'; }
+      if ( bit === Renderer.bitmaskSingleSVG ) { return 'SingleSVG'; }
+      if ( bit === Renderer.bitmaskNotPainted ) { return 'NotPainted'; }
+      if ( bit === Renderer.bitmaskBoundsValid ) { return 'BoundsValid'; }
       return '?';
     },
 
@@ -265,7 +303,7 @@ define( function( require ) {
       for ( var i = 0; i < numSummaryBits; i++ ) {
         var bit = summaryBits[ i ];
         if ( bitmask & bit ) {
-          result += RendererSummary.bitToString( bit );
+          result += RendererSummary.bitToString( bit ) + ' ';
         }
       }
       return result;

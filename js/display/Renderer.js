@@ -27,20 +27,31 @@ define( function( require ) {
    *----------------------------------------------------------------------------*/
 
   Renderer.bitmaskRendererArea = 0x00000FF;
+  Renderer.bitmaskCurrentRendererArea = 0x000001F;
+  Renderer.bitmaskLacksOffset = 0x10000;
+  Renderer.bitmaskLacksShift = 16; // number of bits between the main renderer bitmask and the "lacks" variety
   Renderer.bitmaskNodeDefault = Renderer.bitmaskRendererArea;
+
   Renderer.bitmaskCanvas = 0x0000001;
   Renderer.bitmaskSVG = 0x0000002;
   Renderer.bitmaskDOM = 0x0000004;
   Renderer.bitmaskWebGL = 0x0000008;
   Renderer.bitmaskPixi = 0x0000010;
-  // 20, 40, 80 reserved for future renderers
+  // 20, 40, 80 reserved for future renderers NOTE: update bitmaskCurrentRendererArea if they are added/removed
 
   // summary bits (for RendererSummary):
   Renderer.bitmaskSingleCanvas = 0x100;
   Renderer.bitmaskSingleSVG = 0x200;
   // reserved gap 0x400, 0x800, 0x1000, 0x2000, 0x4000, 0x8000 for future renderer-specific single information
-  Renderer.bitmaskNotPainted = 0x10000;
+  Renderer.bitmaskNotPainted = 0x1000;
   Renderer.bitmaskBoundsValid = 0x2000;
+  // summary bits for whether a renderer could be potentially used to display a Node.
+  Renderer.bitmaskLacksCanvas = Renderer.bitmaskCanvas << Renderer.bitmaskLacksShift; // 0x10000
+  Renderer.bitmaskLacksSVG = Renderer.bitmaskSVG << Renderer.bitmaskLacksShift; // 0x20000
+  Renderer.bitmaskLacksDOM = Renderer.bitmaskDOM << Renderer.bitmaskLacksShift; // 0x40000
+  Renderer.bitmaskLacksWebGL = Renderer.bitmaskWebGL << Renderer.bitmaskLacksShift; // 0x80000
+  Renderer.bitmaskLacksPixi = Renderer.bitmaskPixi << Renderer.bitmaskLacksShift; // 0x100000
+  // reserved gap 0x20000, 0x40000, 0x80000 for future renderers
 
   Renderer.isCanvas = function( bitmask ) {
     return ( bitmask & Renderer.bitmaskCanvas ) !== 0;
