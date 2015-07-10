@@ -296,7 +296,6 @@ define( function( require ) {
       var hasClip = this.node._clipArea !== null;
       var requiresSplit = hints.requireElement || hints.cssTransform || hints.layerSplit; // options that require split/backbone
       var hasTransparency = this.node._opacity !== 1 || hints.usesOpacity;
-      var applyTransparencyWithSVG = hasTransparency && this.node._rendererSummary.isSubtreeRenderedExclusivelySVG( this.preferredRenderers );
 
       // check if we need a backbone or cache
       // if we are under a canvas cache, we will NEVER have a backbone
