@@ -214,6 +214,28 @@ define( function( require ) {
           }
         } );
       }
-    }
+    },
+
+    /**
+     * Sets spacing between items in the box.
+     * @param {number|function} spacing
+     */
+    setSpacing: function( spacing ) {
+      if ( typeof spacing === 'number' ) {
+        this.options.spacing = function( child, nextChild ) { return spacing; };
+      }
+      else {
+        this.options.spacing = spacing;
+      }
+      this.updateLayout();
+    },
+    set spacing( value ) { this.setSpacing( value ); },
+
+    /**
+     * Gets the function used to set the spacing between items in the box.
+     * @returns {function}
+     */
+    getSpacing: function() { return this.options.spacing; },
+    get spacing() { return this.getSpacing(); }
   } );
 } );
