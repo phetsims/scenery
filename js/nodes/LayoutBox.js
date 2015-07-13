@@ -33,8 +33,9 @@ define( function( require ) {
       orientation: 'vertical',
 
       // The spacing can be a number or a function.  If a number, then it will be the spacing between each object.
-      // If a function, then the function will have the signature function(a,b){} which returns the spacing between adjacent pairs of items.
-      spacing: function() { return 0; },
+      // If a function, then the function will have the signature function(a,b){} which returns the spacing between the current and next child.
+      // For the last child, nextChild will be undefined.
+      spacing: function( child, nextChild ) { return 0; },
 
       //How to line up the items
       align: 'center',
@@ -58,7 +59,7 @@ define( function( require ) {
 
     if ( typeof this.options.spacing === 'number' ) {
       var spacingConstant = this.options.spacing;
-      this.options.spacing = function() { return spacingConstant; };
+      this.options.spacing = function( child, nextChild ) { return spacingConstant; };
     }
 
     this.updatingLayout = false; // @private flag used to short-circuit updateLayout and prevent stackoverflow
