@@ -61,6 +61,8 @@ define( function( require ) {
       this.options.spacing = function() { return spacingConstant; };
     }
 
+    this.updatingLayout = false; // @private flag used to short-circuit updateLayout and prevent stackoverflow
+
     // Apply the supplied options, including children.
     // The layout calls are triggered if (a) options.resize is set to true or (b) during initialization
     // When true, the this.inited flag signifies that the initial layout is being done.
@@ -99,7 +101,7 @@ define( function( require ) {
           else if ( this.options.align === 'right' ) {
             child.right = maxX;
           }
-          else {//default to center
+          else { // 'center'
             child.centerX = centerX;
           }
 
@@ -129,7 +131,7 @@ define( function( require ) {
             child.centerY = centerY;
           }
 
-          //Move to the next vertical position.
+          //Move to the next horizontal position.
           x += child.width + this.options.spacing( child, this._children[ i + 1 ] );
         }
       }
@@ -138,8 +140,8 @@ define( function( require ) {
     // Update the layout of this VBox. Called automatically during initialization, when children change (if resize is true)
     // or when client wants to call this public method for any reason.
     updateLayout: function() {
+      //Bounds of children are changed in updateLayout, we don't want to stackoverflow, so bail if already updating layout
       if ( !this.updatingLayout ) {
-        //Bounds of children are changed in updateLayout, we don't want to stackoverflow so bail if already updating layout
         this.updatingLayout = true;
         this.layout();
         this.updatingLayout = false;
