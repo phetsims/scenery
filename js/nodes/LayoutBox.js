@@ -90,6 +90,8 @@ define( function( require ) {
     // Lay out the child components on startup, or when the children sizes change or when requested by a call to updateLayout
     // @private, do not call directly, use updateLayout
     layout: function() {
+
+      var children = this.getChildren(); // call this once, since it returns a copy
       var i = 0;
       var child;
 
@@ -97,14 +99,14 @@ define( function( require ) {
       //Aaron and Sam looked at factoring this out, but the result looked less readable since each attribute
       //would have to be abstracted over.
       if ( this.orientation === 'vertical' ) {
-        var minX = _.min( _.map( this._children, function( child ) {return child.left;} ) );
-        var maxX = _.max( _.map( this._children, function( child ) {return child.left + child.width;} ) );
+        var minX = _.min( _.map( children, function( child ) {return child.left;} ) );
+        var maxX = _.max( _.map( children, function( child ) {return child.left + child.width;} ) );
         var centerX = (maxX + minX) / 2;
 
         //Start at y=0 in the coordinate frame of this node.  Not possible to set this through the spacing option, instead just set it with the {y:number} option.
         var y = 0;
-        for ( i = 0; i < this._children.length; i++ ) {
-          child = this._children[ i ];
+        for ( i = 0; i < children.length; i++ ) {
+          child = children[ i ];
           child.top = y;
 
           //Set the position horizontally
@@ -119,18 +121,18 @@ define( function( require ) {
           }
 
           //Move to the next vertical position.
-          y += child.height + this._spacing( child, this._children[ i + 1 ] );
+          y += child.height + this._spacing( child, children[ i + 1 ] );
         }
       }
       else {
-        var minY = _.min( _.map( this._children, function( child ) {return child.top;} ) );
-        var maxY = _.max( _.map( this._children, function( child ) {return child.top + child.height;} ) );
+        var minY = _.min( _.map( children, function( child ) {return child.top;} ) );
+        var maxY = _.max( _.map( children, function( child ) {return child.top + child.height;} ) );
         var centerY = (maxY + minY) / 2;
 
         //Start at x=0 in the coordinate frame of this node.  Not possible to set this through the spacing option, instead just set it with the {x:number} option.
         var x = 0;
-        for ( i = 0; i < this._children.length; i++ ) {
-          child = this._children[ i ];
+        for ( i = 0; i < children.length; i++ ) {
+          child = children[ i ];
           child.left = x;
 
           //Set the position horizontally
@@ -145,7 +147,7 @@ define( function( require ) {
           }
 
           //Move to the next horizontal position.
-          x += child.width + this._spacing( child, this._children[ i + 1 ] );
+          x += child.width + this._spacing( child, children[ i + 1 ] );
         }
       }
     },
@@ -171,7 +173,7 @@ define( function( require ) {
       //Remove event listeners from any nodes (will be added back later if the node was not removed)
       var layoutBox = this;
       if ( this.resize ) {
-        this._children.forEach( function( child ) {
+        this.getChildren().forEach( function( child ) {
           if ( child.containsEventListener( 'bounds', layoutBox.boundsListener ) ) {
             child.removeEventListener( 'bounds', layoutBox.boundsListener );
           }
@@ -188,7 +190,7 @@ define( function( require ) {
 
       //Add event listeners for any current children (if it should be dynamic)
       if ( this.resize ) {
-        this._children.forEach( function( child ) {
+        this.getChildren().forEach( function( child ) {
           if ( !child.containsEventListener( 'bounds', layoutBox.boundsListener ) ) {
             child.addEventListener( 'bounds', layoutBox.boundsListener );
           }
@@ -203,7 +205,7 @@ define( function( require ) {
       //Remove event listeners from any nodes (will be added back later if the node was not removed)
       var layoutBox = this;
       if ( this.resize ) {
-        this._children.forEach( function( child ) {
+        this.getChildren().forEach( function( child ) {
           if ( child.containsEventListener( 'bounds', layoutBox.boundsListener ) ) {
             child.removeEventListener( 'bounds', layoutBox.boundsListener );
           }
@@ -220,7 +222,7 @@ define( function( require ) {
 
       //Add event listeners for any current children (if it should be dynamic)
       if ( this.resize ) {
-        this._children.forEach( function( child ) {
+        this.getChildren().forEach( function( child ) {
           if ( !child.containsEventListener( 'bounds', layoutBox.boundsListener ) ) {
             child.addEventListener( 'bounds', layoutBox.boundsListener );
           }
