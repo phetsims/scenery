@@ -48,6 +48,9 @@ define( function( require ) {
     // ensure we have a parameter object
     options = options || {};
 
+    // Used as a listener to Shapes for when they are invalidated
+    this._invalidShapeListener = this.invalidateShape.bind( this );
+
     this.initializePaintable();
 
     Node.call( this );
@@ -70,16 +73,21 @@ define( function( require ) {
     // sets the shape drawn, or null to remove the shape
     setShape: function( shape ) {
       if ( this._shape !== shape ) {
+        // Remove Shape invalidation listener if applicable
+        if ( this._shape ) {
+          this._shape.offStatic( 'invalidated', this._invalidShapeListener );
+        }
+
         if ( typeof shape === 'string' ) {
           // be content with setShape always invalidating the shape?
           shape = new Shape( shape );
         }
         this._shape = shape;
-        this.invalidatePath();
+        this.invalidateShape();
 
-        var stateLen = this._drawables.length;
-        for ( var i = 0; i < stateLen; i++ ) {
-          this._drawables[ i ].markDirtyShape();
+        // Add Shape invalidation listener if applicable
+        if ( this._shape ) {
+          this._shape.onStatic( 'invalidated', this._invalidShapeListener );
         }
       }
       return this;
@@ -98,6 +106,22 @@ define( function( require ) {
       return this._strokedShape;
     },
 
+    /**
+     * Invalidates the Shape stored itself. Should mainly only be called on Path itself, not subtypes like
+     * Line/Rectangle/Circle/etc. once constructed.
+     */
+    invalidateShape: function() {
+      this.invalidatePath();
+
+      var stateLen = this._drawables.length;
+      for ( var i = 0; i < stateLen; i++ ) {
+        this._drawables[ i ].markDirtyShape(); // subtypes of Path may not have this, but it's called during construction
+      }
+    },
+
+    /**
+     * Invalidates the self-bounds, that could have changed from different things.
+     */
     invalidatePath: function() {
       this._strokedShape = null;
 
