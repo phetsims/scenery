@@ -2,40 +2,53 @@
 
 /**
  * LayoutBox lays out its children in a row, either horizontally or vertically (based on an optional parameter).
- * This approach is preferable to using VBox and HBox (which still exist for backward compatibility)
+ * VBox and HBox are convenience subtypes that specify the orientation.
  * See https://github.com/phetsims/scenery/issues/281
  *
  * @author Sam Reid
  * @author Aaron Davis
+ * @author Chris Malley (PixelZoom, Inc.)
  */
 define( function( require ) {
   'use strict';
 
+  // modules
   var inherit = require( 'PHET_CORE/inherit' );
   var scenery = require( 'SCENERY/scenery' );
   var Node = require( 'SCENERY/nodes/Node' );
 
+  var defaultSpacing = function( child, nextChild ) { return 0; };
+
   /**
-   * Main constructor for LayoutBox.
+   * Promotes spacing to a function.
+   * @param {number|function} spacing
+   * @returns {function}
+   */
+  var spacingValueToFunction = function( spacing ) {
+    assert && assert( typeof spacing === 'number' || typeof spacing === 'function', 'unsupport type for spacing' );
+    if ( typeof spacing === 'number' ) {
+      return function( child, nextChild ) { return spacing; };
+    }
+    else {
+      return spacing;
+    }
+  };
+
+  /**
    * @param {Object} [options] Same as Node.constructor.options with the following additions:
    * @constructor
    */
   scenery.LayoutBox = function LayoutBox( options ) {
 
-    Node.call( this );
-
-    this.boundsListener = this.updateLayout.bind( this ); // @private
-
-    // ensure we have a parameter object
-    this.options = _.extend( {
+    options = _.extend( {
 
       //The default orientation, chosen by popular vote.  At the moment there are around 436 VBox references and 338 HBox references
       orientation: 'vertical',
 
       // The spacing can be a number or a function.  If a number, then it will be the spacing between each object.
-      // If a function, then the function will have the signature function(a,b){} which returns the spacing between the current and next child.
-      // For the last child, nextChild will be undefined.
-      spacing: function( child, nextChild ) { return 0; },
+      // If a function, then the function will have the signature function( child, nextChild ){...} which returns
+      // the spacing between the current and next child. For the last child, nextChild will be undefined.
+      spacing: defaultSpacing,
 
       //How to line up the items
       align: 'center',
@@ -44,31 +57,30 @@ define( function( require ) {
       resize: true
     }, options ); // @private
 
-    // Make sure the orientation is legal.  It's better to check this on the this.options instead of the passed in options
-    // to keep it closer to the check for the alignment option.
-    assert && assert( this.options.orientation === 'vertical' || this.options.orientation === 'horizontal' );
-
-    // Make sure the alignment is allowed, given the orientation.  The check is done here after the final orientation is
-    // decided, to reduce logic before the alignment check.
-    if ( this.options.orientation === 'vertical' ) {
-      assert && assert( this.options.align === 'center' || this.options.align === 'left' || this.options.align === 'right', 'illegal alignment: ' + this.options.align );
+    // validate options
+    assert && assert( options.orientation === 'vertical' || options.orientation === 'horizontal' );
+    if ( options.orientation === 'vertical' ) {
+      assert && assert( options.align === 'center' || options.align === 'left' || options.align === 'right', 'illegal alignment: ' + options.align );
     }
     else {
-      assert && assert( this.options.align === 'center' || this.options.align === 'top' || this.options.align === 'bottom', 'illegal alignment: ' + this.options.align );
+      assert && assert( options.align === 'center' || options.align === 'top' || options.align === 'bottom', 'illegal alignment: ' + options.align );
     }
 
-    if ( typeof this.options.spacing === 'number' ) {
-      var spacingConstant = this.options.spacing;
-      this.options.spacing = function( child, nextChild ) { return spacingConstant; };
-    }
+    this.orientation = options.orientation; // @private
+    this.align = options.align; // @private
+    this.resize = options.resize; // @private
+    this._spacing = spacingValueToFunction( options.spacing ); // @private {function}
 
+    Node.call( this );
+
+    this.boundsListener = this.updateLayout.bind( this ); // @private
     this.updatingLayout = false; // @private flag used to short-circuit updateLayout and prevent stackoverflow
 
     // Apply the supplied options, including children.
     // The layout calls are triggered if (a) options.resize is set to true or (b) during initialization
     // When true, the this.inited flag signifies that the initial layout is being done.
     this.inited = false; // @private
-    this.mutate( this.options );
+    this.mutate( options );
     this.inited = true;
   };
   var LayoutBox = scenery.LayoutBox;
@@ -84,7 +96,7 @@ define( function( require ) {
       //Logic for layout out the components.
       //Aaron and Sam looked at factoring this out, but the result looked less readable since each attribute
       //would have to be abstracted over.
-      if ( this.options.orientation === 'vertical' ) {
+      if ( this.orientation === 'vertical' ) {
         var minX = _.min( _.map( this._children, function( child ) {return child.left;} ) );
         var maxX = _.max( _.map( this._children, function( child ) {return child.left + child.width;} ) );
         var centerX = (maxX + minX) / 2;
@@ -96,10 +108,10 @@ define( function( require ) {
           child.top = y;
 
           //Set the position horizontally
-          if ( this.options.align === 'left' ) {
+          if ( this.align === 'left' ) {
             child.left = minX;
           }
-          else if ( this.options.align === 'right' ) {
+          else if ( this.align === 'right' ) {
             child.right = maxX;
           }
           else { // 'center'
@@ -107,7 +119,7 @@ define( function( require ) {
           }
 
           //Move to the next vertical position.
-          y += child.height + this.options.spacing( child, this._children[ i + 1 ] );
+          y += child.height + this._spacing( child, this._children[ i + 1 ] );
         }
       }
       else {
@@ -122,23 +134,23 @@ define( function( require ) {
           child.left = x;
 
           //Set the position horizontally
-          if ( this.options.align === 'top' ) {
+          if ( this.align === 'top' ) {
             child.top = minY;
           }
-          else if ( this.options.align === 'bottom' ) {
+          else if ( this.align === 'bottom' ) {
             child.bottom = maxY;
           }
-          else {//default to center
+          else { // 'center'
             child.centerY = centerY;
           }
 
           //Move to the next horizontal position.
-          x += child.width + this.options.spacing( child, this._children[ i + 1 ] );
+          x += child.width + this._spacing( child, this._children[ i + 1 ] );
         }
       }
     },
 
-    // Update the layout of this VBox. Called automatically during initialization, when children change (if resize is true)
+    // Update the layout of this LayoutBox. Called automatically during initialization, when children change (if resize is true)
     // or when client wants to call this public method for any reason.
     updateLayout: function() {
       //Bounds of children are changed in updateLayout, we don't want to stackoverflow, so bail if already updating layout
@@ -158,7 +170,7 @@ define( function( require ) {
 
       //Remove event listeners from any nodes (will be added back later if the node was not removed)
       var layoutBox = this;
-      if ( this.options.resize ) {
+      if ( this.resize ) {
         this._children.forEach( function( child ) {
           if ( child.containsEventListener( 'bounds', layoutBox.boundsListener ) ) {
             child.removeEventListener( 'bounds', layoutBox.boundsListener );
@@ -170,12 +182,12 @@ define( function( require ) {
       Node.prototype.insertChild.call( this, index, node );
 
       // Update the layout (a) if it should be dynamic or (b) during initialization
-      if ( this.options.resize || !this.inited ) {
+      if ( this.resize || !this.inited ) {
         this.updateLayout();
       }
 
       //Add event listeners for any current children (if it should be dynamic)
-      if ( this.options.resize ) {
+      if ( this.resize ) {
         this._children.forEach( function( child ) {
           if ( !child.containsEventListener( 'bounds', layoutBox.boundsListener ) ) {
             child.addEventListener( 'bounds', layoutBox.boundsListener );
@@ -190,7 +202,7 @@ define( function( require ) {
 
       //Remove event listeners from any nodes (will be added back later if the node was not removed)
       var layoutBox = this;
-      if ( this.options.resize ) {
+      if ( this.resize ) {
         this._children.forEach( function( child ) {
           if ( child.containsEventListener( 'bounds', layoutBox.boundsListener ) ) {
             child.removeEventListener( 'bounds', layoutBox.boundsListener );
@@ -202,12 +214,12 @@ define( function( require ) {
       Node.prototype.removeChildWithIndex.call( this, node, indexOfChild );
 
       // Update the layout (a) if it should be dynamic or (b) during initialization
-      if ( this.options.resize || !this.inited ) {
+      if ( this.resize || !this.inited ) {
         this.updateLayout();
       }
 
       //Add event listeners for any current children (if it should be dynamic)
-      if ( this.options.resize ) {
+      if ( this.resize ) {
         this._children.forEach( function( child ) {
           if ( !child.containsEventListener( 'bounds', layoutBox.boundsListener ) ) {
             child.addEventListener( 'bounds', layoutBox.boundsListener );
@@ -221,13 +233,10 @@ define( function( require ) {
      * @param {number|function} spacing
      */
     setSpacing: function( spacing ) {
-      if ( typeof spacing === 'number' ) {
-        this.options.spacing = function( child, nextChild ) { return spacing; };
+      if ( this._spacing !== spacing ) {
+        this._spacing = spacingValueToFunction( spacing );
+        this.updateLayout();
       }
-      else {
-        this.options.spacing = spacing;
-      }
-      this.updateLayout();
     },
     set spacing( value ) { this.setSpacing( value ); },
 
@@ -235,7 +244,7 @@ define( function( require ) {
      * Gets the function used to set the spacing between items in the box.
      * @returns {function}
      */
-    getSpacing: function() { return this.options.spacing; },
+    getSpacing: function() { return this._spacing; },
     get spacing() { return this.getSpacing(); }
   } );
 } );
