@@ -75,7 +75,7 @@ define( function( require ) {
           shape = new Shape( shape );
         }
         this._shape = shape;
-        this.invalidateShape();
+        this.invalidatePath();
 
         var stateLen = this._drawables.length;
         for ( var i = 0; i < stateLen; i++ ) {
@@ -98,7 +98,7 @@ define( function( require ) {
       return this._strokedShape;
     },
 
-    invalidateShape: function() {
+    invalidatePath: function() {
       this._strokedShape = null;
 
       if ( this.hasShape() ) {
@@ -114,7 +114,7 @@ define( function( require ) {
                         boundsMethod === 'none' );
       if ( this._boundsMethod !== boundsMethod ) {
         this._boundsMethod = boundsMethod;
-        this.invalidateShape();
+        this.invalidatePath();
 
         this.trigger0( 'boundsMethod' );
 
@@ -187,7 +187,7 @@ define( function( require ) {
 
     // hook stroke mixin changes to invalidation
     invalidateStroke: function() {
-      this.invalidateShape();
+      this.invalidatePath();
       this.trigger0( 'selfBoundsValid' ); // Stroke changing could have changed our self-bounds-validitity (unstroked/etc)
     },
 

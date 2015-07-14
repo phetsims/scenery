@@ -282,7 +282,7 @@ define( function( require ) {
       this._shape = null;
 
       // should invalidate the path and ensure a redraw
-      this.invalidateShape();
+      this.invalidatePath();
 
       // since we changed the rectangle arc width/height, it could make DOM work or not
       this.invalidateSupportedRenderers();
@@ -379,7 +379,7 @@ define( function( require ) {
       }
       else {
         // probably called from the Path constructor
-        this.invalidateShape();
+        this.invalidatePath();
       }
     },
 

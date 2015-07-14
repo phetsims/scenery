@@ -169,7 +169,7 @@ define( function( require ) {
       this._shape = null;
 
       // should invalidate the path and ensure a redraw
-      this.invalidateShape();
+      this.invalidatePath();
     },
 
     containsPointSelf: function( point ) {
@@ -265,7 +265,7 @@ define( function( require ) {
       }
       else {
         // probably called from the Path constructor
-        this.invalidateShape();
+        this.invalidatePath();
       }
     },
 

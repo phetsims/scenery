@@ -76,7 +76,7 @@ define( function( require ) {
       this._shape = null;
 
       // should invalidate the path and ensure a redraw
-      this.invalidateShape();
+      this.invalidatePath();
     },
 
     createCircleShape: function() {
@@ -197,7 +197,7 @@ define( function( require ) {
       }
       else {
         // probably called from the Path constructor
-        this.invalidateShape();
+        this.invalidatePath();
       }
     },
 
