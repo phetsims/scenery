@@ -296,9 +296,11 @@ define( function( require ) {
       var hasClip = this.node.hasClipArea();
       var hasTransparency = this.node._opacity !== 1 || hints.usesOpacity;
       var requiresSplit = hints.requireElement || hints.cssTransform || hints.layerSplit;
-      var backboneRequired = this.isDisplayRoot || ( !this.isUnderCanvasCache && ( hasClip || requiresSplit ) );
-      var applyTransparencyWithSVG = !backboneRequired && hasTransparency && this.node._rendererSummary.isSubtreeRenderedExclusivelySVG( this.preferredRenderers );
-      var useBackbone = applyTransparencyWithSVG ? false : ( backboneRequired || hasTransparency );
+      var backboneRequired = this.isDisplayRoot || ( !this.isUnderCanvasCache && requiresSplit );
+      var applyTransparencyWithSVG = !backboneRequired &&
+                                     ( hasTransparency || hasClip ) &&
+                                     this.node._rendererSummary.isSubtreeRenderedExclusivelySVG( this.preferredRenderers );
+      var useBackbone = applyTransparencyWithSVG ? false : ( backboneRequired || hasTransparency || hasClip );
 
       // check if we need a backbone or cache
       // if we are under a canvas cache, we will NEVER have a backbone

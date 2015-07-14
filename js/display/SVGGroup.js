@@ -234,8 +234,7 @@ define( function( require ) {
         sceneryLog && sceneryLog.SVGGroup && sceneryLog.SVGGroup( 'clip update: ' + this.toString() );
 
         //OHTWO TODO: remove clip workaround (use this.willApplyFilters)
-        var willApplyClip = this.block.filterRootInstance.trail.nodes.length >= this.instance.trail.nodes.length;
-        if ( willApplyClip && this.node._clipArea ) {
+        if ( this.node._clipArea ) {
           if ( !this.clipDefinition ) {
             var clipId = 'clip' + this.node.getId();
 
