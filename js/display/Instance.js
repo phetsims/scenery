@@ -293,23 +293,26 @@ define( function( require ) {
         this.preferredRenderers = Renderer.pushOrderBitmask( this.preferredRenderers, hints.renderer );
       }
 
-      var hasClip = this.node._clipArea !== null;
-      var requiresSplit = hints.requireElement || hints.cssTransform || hints.layerSplit; // options that require split/backbone
+      var hasClip = this.node.hasClipArea();
       var hasTransparency = this.node._opacity !== 1 || hints.usesOpacity;
+      var requiresSplit = hints.requireElement || hints.cssTransform || hints.layerSplit;
+      var backboneRequired = this.isDisplayRoot || ( !this.isUnderCanvasCache && ( hasClip || requiresSplit ) );
+      var applyTransparencyWithSVG = !backboneRequired && hasTransparency && this.node._rendererSummary.isSubtreeRenderedExclusivelySVG( this.preferredRenderers );
+      var useBackbone = applyTransparencyWithSVG ? false : ( backboneRequired || hasTransparency );
 
       // check if we need a backbone or cache
       // if we are under a canvas cache, we will NEVER have a backbone
       // splits are accomplished just by having a backbone
       // NOTE: If changing, check RendererSummary.summaryBitmaskForNodeSelf
       //OHTWO TODO: Update this to properly identify when backbones are necessary/and-or when we forward opacity/clipping
-      if ( this.isDisplayRoot || ( !this.isUnderCanvasCache && ( hasTransparency || hasClip || requiresSplit ) ) ) {
+      if ( useBackbone ) {
         this.isBackbone = true;
         this.isVisibilityApplied = true;
         this.isTransformed = this.isDisplayRoot || !!hints.cssTransform; // for now, only trigger CSS transform if we have the specific hint
         //OHTWO TODO: check whether the force acceleration hint is being used by our DOMBlock
         this.groupRenderer = Renderer.bitmaskDOM; // probably won't be used
       }
-      else if ( hasTransparency || hasClip || hints.canvasCache ) {
+      else if ( !applyTransparencyWithSVG && ( hasTransparency || hasClip || hints.canvasCache ) ) {
         // everything underneath needs to be renderable with Canvas, otherwise we cannot cache
         assert && assert( this.node._rendererSummary.isSingleCanvasSupported(),
           'hints.canvasCache provided, but not all node contents can be rendered with Canvas under ' +
