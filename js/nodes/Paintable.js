@@ -158,6 +158,7 @@ define( function( require ) {
 
         setLineWidth: function( lineWidth ) {
           assert && assert( typeof lineWidth === 'number', 'lineWidth should be a number, not ' + lineWidth );
+          assert && assert( lineWidth >= 0, 'lineWidth should be non-negative instead of ' + lineWidth );
 
           if ( this.getLineWidth() !== lineWidth ) {
             this._lineDrawingStyles.lineWidth = lineWidth;
