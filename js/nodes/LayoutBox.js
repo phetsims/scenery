@@ -103,7 +103,8 @@ define( function( require ) {
         var maxX = _.max( _.map( children, function( child ) {return child.left + child.width;} ) );
         var centerX = (maxX + minX) / 2;
 
-        //Start at y=0 in the coordinate frame of this node.  Not possible to set this through the spacing option, instead just set it with the {y:number} option.
+        // Start at y=0 in the coordinate frame of this node.  Not possible to set this through the spacing option, 
+        // instead just set it with the {y:number} option.
         var y = 0;
         for ( i = 0; i < children.length; i++ ) {
           child = children[ i ];
