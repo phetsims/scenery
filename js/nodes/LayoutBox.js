@@ -17,7 +17,8 @@ define( function( require ) {
   var scenery = require( 'SCENERY/scenery' );
   var Node = require( 'SCENERY/nodes/Node' );
 
-  var defaultSpacing = function( child, nextChild ) { return 0; };
+  // constants
+  var DEFAULT_SPACING = 0;
 
   /**
    * Promotes spacing to a function.
@@ -40,15 +41,17 @@ define( function( require ) {
    */
   scenery.LayoutBox = function LayoutBox( options ) {
 
+    if ( options && options.spacing ) {
+      assert && assert( typeof options.spacing === 'number', 'LayoutBox requires spacing to be a number, if it is provided' );
+    }
+
     options = _.extend( {
 
       //The default orientation, chosen by popular vote.  At the moment there are around 436 VBox references and 338 HBox references
       orientation: 'vertical',
 
-      // The spacing can be a number or a function.  If a number, then it will be the spacing between each object.
-      // If a function, then the function will have the signature function( child, nextChild ){...} which returns
-      // the spacing between the current and next child. For the last child, nextChild will be undefined.
-      spacing: defaultSpacing,
+      // The spacing between each Node (a number)
+      spacing: DEFAULT_SPACING,
 
       //How to line up the items
       align: 'center',
@@ -103,8 +106,7 @@ define( function( require ) {
         var maxX = _.max( _.map( children, function( child ) {return child.left + child.width;} ) );
         var centerX = (maxX + minX) / 2;
 
-        // Start at y=0 in the coordinate frame of this node.  Not possible to set this through the spacing option, 
-        // instead just set it with the {y:number} option.
+        //Start at y=0 in the coordinate frame of this node.  Not possible to set this through the spacing option, instead just set it with the {y:number} option.
         var y = 0;
         for ( i = 0; i < children.length; i++ ) {
           child = children[ i ];
