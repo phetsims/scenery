@@ -21,21 +21,6 @@ define( function( require ) {
   var DEFAULT_SPACING = 0;
 
   /**
-   * Promotes spacing to a function.
-   * @param {number|function} spacing
-   * @returns {function}
-   */
-  var spacingValueToFunction = function( spacing ) {
-    assert && assert( typeof spacing === 'number' || typeof spacing === 'function', 'unsupport type for spacing' );
-    if ( typeof spacing === 'number' ) {
-      return function( child, nextChild ) { return spacing; };
-    }
-    else {
-      return spacing;
-    }
-  };
-
-  /**
    * @param {Object} [options] Same as Node.constructor.options with the following additions:
    * @constructor
    */
@@ -72,7 +57,7 @@ define( function( require ) {
     this.orientation = options.orientation; // @private
     this.align = options.align; // @private
     this.resize = options.resize; // @private
-    this._spacing = spacingValueToFunction( options.spacing ); // @private {function}
+    this._spacing = options.spacing; // @private {number}
 
     Node.call( this );
 
@@ -124,7 +109,7 @@ define( function( require ) {
           }
 
           //Move to the next vertical position.
-          y += child.height + this._spacing( child, children[ i + 1 ] );
+          y += child.height + this._spacing;
         }
       }
       else {
@@ -150,7 +135,7 @@ define( function( require ) {
           }
 
           //Move to the next horizontal position.
-          x += child.width + this._spacing( child, children[ i + 1 ] );
+          x += child.width + this._spacing;
         }
       }
     },
@@ -235,21 +220,33 @@ define( function( require ) {
 
     /**
      * Sets spacing between items in the box.
-     * @param {number|function} spacing
+     *
+     * @param {number} spacing
      */
     setSpacing: function( spacing ) {
+
+      // Make sure the provided spacing is a number (since we previously allowed number | function here
+      assert && assert( typeof options.spacing === 'number', 'spacing must be a number' );
+
       if ( this._spacing !== spacing ) {
-        this._spacing = spacingValueToFunction( spacing );
+        this._spacing = spacing;
         this.updateLayout();
       }
     },
-    set spacing( value ) { this.setSpacing( value ); },
+    set spacing( value ) {
+      this.setSpacing( value );
+    },
 
     /**
-     * Gets the function used to set the spacing between items in the box.
-     * @returns {function}
+     * Gets the spacing between items in the box.
+     *
+     * @returns {number}
      */
-    getSpacing: function() { return this._spacing; },
-    get spacing() { return this.getSpacing(); }
+    getSpacing: function() {
+      return this._spacing;
+    },
+    get spacing() {
+      return this.getSpacing();
+    }
   } );
 } );
