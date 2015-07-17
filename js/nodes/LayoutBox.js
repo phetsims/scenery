@@ -226,7 +226,7 @@ define( function( require ) {
     setSpacing: function( spacing ) {
 
       // Make sure the provided spacing is a number (since we previously allowed number | function here
-      assert && assert( typeof options.spacing === 'number', 'spacing must be a number' );
+      assert && assert( typeof spacing === 'number', 'spacing must be a number' );
 
       if ( this._spacing !== spacing ) {
         this._spacing = spacing;
