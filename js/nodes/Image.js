@@ -55,6 +55,15 @@ define( function( require ) {
    * SVG renderer supports the following as 'image':
    *     URL (string)
    *     HTMLImageElement
+   *
+   * Also available is the mipmap form, where 'image' will be an array of objects of the form:
+   * {
+   *   img: {HTMLImageElement},
+   *   url: {string}, // data URL for the image level
+   *   width: {number},
+   *   height: {number}
+   * }
+   * where image[ 0 ] will be the most detailed mipmap level.
    */
   scenery.Image = function Image( image, options ) {
     assert && assert( image, "image should be available" );
