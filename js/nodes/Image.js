@@ -493,6 +493,47 @@ define( function( require ) {
     return element;
   };
 
+  // Creates an {object} suitable to be passed to Image as a mipmap (from a Canvas)
+  Image.createFastMipmapFromCanvas = function( baseCanvas ) {
+    var mipmaps = [];
+
+    var baseURL = baseCanvas.toDataURL();
+    var baseImage = new window.Image();
+    baseImage.src = baseURL;
+
+    // base level
+    mipmaps.push( {
+      img: baseImage,
+      url: baseURL,
+      width: baseCanvas.width,
+      height: baseCanvas.height
+    } );
+
+    var largeCanvas = baseCanvas;
+    while ( largeCanvas.width >= 2 && largeCanvas.height >= 2 ) {
+      // smaller level
+      var mipmap = {};
+
+      // draw half-size
+      var canvas = document.createElement( 'canvas' );
+      canvas.width = mipmap.width = Math.ceil( largeCanvas.width / 2 );
+      canvas.height = mipmap.height = Math.ceil( largeCanvas.height / 2 );
+      var context = canvas.getContext( '2d' );
+      context.setTransform( 0.5, 0, 0, 0.5, 0, 0 );
+      context.drawImage( largeCanvas, 0, 0 );
+
+      // set up the image and url
+      mipmap.url = canvas.toDataURL();
+      mipmap.img = new window.Image();
+      mipmap.img.src = mipmap.url;
+      largeCanvas = canvas;
+
+      mipmaps.push( mipmap );
+    }
+
+    return mipmaps;
+  };
+
   /*---------------------------------------------------------------------------*
    * Rendering State mixin (DOM/SVG) //TODO: Does this also apply to WebGL?
    *----------------------------------------------------------------------------*/
