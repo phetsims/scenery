@@ -353,22 +353,17 @@ define( function( require ) {
   };
   inherit( Object, WebGLBlock.CustomProcessor, {
     activate: function() {
-      // drawable responsible for shader program
       this.drawCount = 0;
     },
 
     processDrawable: function( drawable ) {
       assert && assert( drawable.webglRenderer === Renderer.webglCustom );
 
-      this.draw();
       this.drawable = drawable;
+      this.draw();
     },
 
     deactivate: function() {
-      // drawable responsible for shader program
-
-      this.draw();
-
       return this.drawCount;
     },
 
@@ -377,6 +372,7 @@ define( function( require ) {
       if ( this.drawable ) {
         this.drawable.draw();
         this.drawCount++;
+        this.drawable = null;
       }
     }
   } );
