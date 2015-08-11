@@ -1,16 +1,64 @@
 <html>
-<head></head>
-<body>
-<img tabindex="0" src="../../forces-and-motion-basics/images/pull_figure_BLUE_0.png">blue puller 1</img>
-<div tabindex="0">blue puller 2</div>
-<div tabindex="0">blue puller 3</div>
-<div tabindex="0">blue puller 4</div>
-<div id="control-panel">
-  <input type="checkbox" tabindex="0" title="Sum of Forces">Sum of Forces</input>
-  <input type="checkbox" tabindex="0" title="Values">Values</input>
-</div>
+<head>
+  <script language="javascript">
+    function actEnter( isField ) {
+      if ( event.keyCode === 13 || event.keyCode === 32 ) {
+        for ( var i = 0; i < isField.children.length; i++ ) {
+          isField.children[ i ].tabIndex = 1;
+        }
+        document.getElementById( isField.id + 1 ).focus();
+      }
+    }
+    function indexReset( isField ) {
+      for ( var i = 0; i < isField.parentElement.children.length; i++ ) {
+        isField.parentElement.children[ i ].tabIndex = -1;
+      }
+    }
+    function toggleMute( isField ) {
+      if ( event.keyCode === 13 || event.keyCode === 32 ) {
+        isField.innerHTML = isField.innerHTML === "Mute" ? "Unmute" : "Mute"
+      }
+    }
+  </script>
+</head>
 
-<button tabindex="0">Go</button>
-<button tabindex="0">Return</button>
+<body>
+<fieldset tabindex="1" id="bluePullers" onkeyup="actEnter(this)">
+  <legend>Blue Pullers</legend>
+  <div tabindex="-1" id="bluePullers1">blue puller 1</div>
+  <div tabindex="-1" id="bluePullers2">blue puller 2</div>
+  <div tabindex="-1" id="bluePullers3">blue puller 3</div>
+  <div tabindex="-1" id="bluePullers4" onkeyup="indexReset(this)">blue puller 4</div>
+</fieldset>
+
+<fieldset tabindex="1" id="redPullers" onkeyup="actEnter(this)">
+  <legend>Red Pullers</legend>
+  <div tabindex="-1" id="redPullers1">red puller 1</div>
+  <div tabindex="-1" id="redPullers2">red puller 2</div>
+  <div tabindex="-1" id="redPullers3">red puller 3</div>
+  <div tabindex="-1" id="redPullers4" onkeyup="indexReset(this)">red puller 4</div>
+</fieldset>
+
+<button tabindex="1">Go</button>
+<button tabindex="1">Return</button>
+
+<form>
+  <input type="checkbox" value="sumOfForcesVisible" tabindex="1" id="control-panel1">Sum of Forces<br>
+  <input type="checkbox" value="valuesVisible" tabindex="1" id="control-panel2">Values<br>
+</form>
+
+
+<button type="reset" tabindex="1">Reset</button>
+<button type="button" tabindex="1" onkeyup="toggleMute(this)">Mute</button>
+
+<fieldset tabindex="1" id="phetMenu" onkeyup="actEnter(this)">
+  <legend>Phet Menu</legend>
+  <a href="http://phet.colorado.edu" id="phetMenu1" tabindex="-1">PhET Website...</a>
+  <a href="http://phet.colorado.edu/files/troubleshooting/?sim=Forces%20and%20Motion%3A%20Basics&version=1.1.5-dev.4&url=http%3A%2F%2Fwww.colorado.edu%2Fphysics%2Fphet%2Fdev%2Fhtml%2Fforces-and-motion-basics%2F1.1.5-dev.4%2Fforces-and-motion-basics_en.html%3Fscreens%3D1"
+     id="phetMenu2" tabindex="-1">Report a Problem...</a>
+
+  <div tabindex="-1" id="phetMenu3" onkeyup="indexReset(this)">About Dialog</div>
+</fieldset>
+
 </body>
 </html>
