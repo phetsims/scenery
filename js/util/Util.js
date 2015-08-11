@@ -444,7 +444,30 @@ define( function( require ) {
 
         return true;
       }
-      catch( e ) {
+      catch ( e ) {
+        return false;
+      }
+    },
+
+    /**
+     * Check to see whether IE11 has proper clearStencil support (required for three.js to work well).
+     */
+    checkIE11StencilSupport: function() {
+      var canvas = document.createElement( 'canvas' );
+
+      try {
+        var gl = !!window.WebGLRenderingContext &&
+                 ( canvas.getContext( 'webgl' ) || canvas.getContext( 'experimental-webgl' ) );
+
+        if ( !gl ) {
+          return false;
+        }
+
+        // Failure for https://github.com/mrdoob/three.js/issues/3600 / https://github.com/phetsims/molecule-shapes/issues/133
+        gl.clearStencil( 0 );
+        return gl.getError() === 0;
+      }
+      catch ( e ) {
         return false;
       }
     },
