@@ -643,7 +643,7 @@ define( function( require ) {
     /**
      * Ensures that cached bounds stored on this node (and all children) are accurate. Returns true if any sort of dirty
      * flag was set before this was called.
-     * @public (but usually not needed)
+     * @public
      *
      * @returns {boolean} - Was something potentially updated?
      */
@@ -829,7 +829,7 @@ define( function( require ) {
      * bounds listeners from being triggered in further validateBounds() calls without other Node changes being done.
      * This is required for Display's atomic (non-reentrant) updateDisplay(), so that we don't accidentally trigger
      * bounds listeners while computing bounds during updateDisplay().
-     * @public
+     * @public (scenery-internal)
      *
      * NOTE: this should pass by (ignore) any overridden localBounds, to trigger listeners below.
      */
@@ -843,7 +843,7 @@ define( function( require ) {
     /**
      * Recursive function for validateWatchedBounds. Returned whether any validateBounds() returned true (means we have
      * to traverse again)
-     * @private
+     * @public (scenery-internal)
      *
      * @returns {boolean} - Whether there could have been any changes.
      */
@@ -872,7 +872,7 @@ define( function( require ) {
      * hit-testing mouse events. Thus it:
      * - includes mouseAreas (normal bounds don't)
      * - does not include subtrees that would be pruned in hit-testing
-     * @public
+     * @public (scenery-internal)
      */
     validateMouseBounds: function( hasListenerEquivalentSelfOrInAncestor ) {
       var that = this;
@@ -929,7 +929,7 @@ define( function( require ) {
      * touch events. Thus it:
      * - includes touchAreas (normal bounds don't)
      * - does not include subtrees that would be pruned in hit-testing
-     * @public
+     * @public (scenery-internal)
      */
     validateTouchBounds: function( hasListenerEquivalentSelfOrInAncestor ) {
       var that = this;
@@ -1003,7 +1003,7 @@ define( function( require ) {
 
     /**
      * Recursively tag all ancestors with _childBoundsDirty
-     * @public (but usually not needed)
+     * @public (scenery-internal)
      */
     invalidateChildBounds: function() {
       // don't bother updating if we've already been tagged
@@ -1022,7 +1022,7 @@ define( function( require ) {
     /**
      * Mark mouse/touch bounds as invalid (can occur from normal bounds invalidation, or from anything that could change
      * pickability).
-     * @public (but usually not needed)
+     * @public (scenery-internal)
      *
      * NOTE: we don't have to touch descendants because we also store the last used "under effective listener" value, so
      * "non-dirty" subtrees will still be investigated (or freshly pruned) if the listener status has changed.
@@ -1273,7 +1273,7 @@ define( function( require ) {
 
     /**
      * Whether this node effectively behaves as if it has an input listener.
-     * @public (Scenery-internal)
+     * @public (scenery-internal)
      *
      * @returns {boolean}
      */
@@ -1284,7 +1284,7 @@ define( function( require ) {
 
     /**
      * Whether hit-testing for events should be pruned at this node (not even considering this node's self).
-     * @public (Scenery-internal)
+     * @public (scenery-internal)
      *
      * @param {boolean} hasListenerEquivalentSelfOrInAncestor - Indicates whether this node (or an ancestor) either has
      *                                                          input listeners, or has pickable set to true (which is
@@ -1456,6 +1456,7 @@ define( function( require ) {
 
     /**
      * Returns whether this node's selfBounds is intersected by the specified bounds.
+     * @public
      *
      * @param {Bounds2} bounds - Bounds to test, assumed to be in the local coordinate frame.
      * @returns {boolean}
