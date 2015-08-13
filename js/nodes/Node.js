@@ -1690,8 +1690,15 @@ define( function( require ) {
       }
     },
 
-    // point should be in the parent coordinate frame
-    // TODO: determine whether this should use the appendMatrix method
+    /**
+     * Rotates the node's transform around a specific point (in the parent coordinate frame) by prepending the transform.
+     * @public
+     *
+     * @param {Vector2} point - In the parent coordinate frame
+     * @param {number} angle - In radians
+     *
+     * TODO: determine whether this should use the appendMatrix method
+     */
     rotateAround: function( point, angle ) {
       var matrix = Matrix3.translation( -point.x, -point.y );
       matrix = Matrix3.rotation2( angle ).timesMatrix( matrix );
@@ -1699,6 +1706,12 @@ define( function( require ) {
       this.prependMatrix( matrix );
     },
 
+    /**
+     * Shifts the x coordinate (in the parent coordinate frame) of where the node's origin is transformed to.
+     * @public
+     *
+     * @param {number} x
+     */
     setX: function( x ) {
       assert && assert( typeof x === 'number' );
 
@@ -1707,11 +1720,23 @@ define( function( require ) {
     },
     set x( value ) { this.setX( value ); },
 
+    /**
+     * Returns the x coordinate (in the parent coorindate frame) of where the node's origin is transformed to.
+     * @public
+     *
+     * @returns {number}
+     */
     getX: function() {
       return this._transform.getMatrix().m02();
     },
     get x() { return this.getX(); },
 
+    /**
+     * Shifts the y coordinate (in the parent coordinate frame) of where the node's origin is transformed to.
+     * @public
+     *
+     * @param {number} y
+     */
     setY: function( y ) {
       assert && assert( typeof y === 'number' );
 
@@ -1720,12 +1745,35 @@ define( function( require ) {
     },
     set y( value ) { this.setY( value ); },
 
+    /**
+     * Returns the y coordinate (in the parent coorindate frame) of where the node's origin is transformed to.
+     * @public
+     *
+     * @returns {number}
+     */
     getY: function() {
       return this._transform.getMatrix().m12();
     },
     get y() { return this.getY(); },
 
-    // supports setScaleMagnitude( 5 ) for both dimensions, setScaleMagnitude( 5, 3 ) for each dimension separately, or setScaleMagnitude( new Vector2( x, y ) )
+    /**
+     * Typically without rotations or negative parameters, this sets the scale for each axis. In its more general form,
+     * it modifies the node's transform so that:
+     * - Transforming (1,0) with our transform will result in a vector with magnitude abs( x-scale-magnitude )
+     * - Transforming (0,1) with our transform will result in a vector with magnitude abs( y-scale-magnitude )
+     * - If parameters are negative, it will flip orientation in that direct.
+     * @public
+     *
+     * Allowed call signatures:
+     * setScaleMagnitude( s )
+     * setScaleMagnitude( sx, sy )
+     * setScaleMagnitude( vector )
+     *
+     * @param {number} s - Scale for both axes
+     * @param {number} sx - Scale for the X axis
+     * @param {number} sy - Scale for the Y axis
+     * @param {Vector2} vector - Scale for the x/y axes in the vector's components.
+     */
     setScaleMagnitude: function( a, b ) {
       var currentScale = this.getScaleVector();
 
@@ -1744,11 +1792,26 @@ define( function( require ) {
       return this;
     },
 
-    // returns a vector with an entry for each axis, e.g. (5,2) for an Affine-style matrix with rows ((5,0,0),(0,2,0),(0,0,1))
+    /**
+     * Returns a vector with an entry for each axis, e.g. (5,2) for an affine matrix with rows ((5,0,0),(0,2,0),(0,0,1)).
+     * @public
+     *
+     * It is equivalent to:
+     * ( T(1,0).magnitude(), T(0,1).magnitude() ) where T() transforms points with our transform.
+     *
+     * @returns {Vector2}
+     */
     getScaleVector: function() {
       return this._transform.getMatrix().getScaleVector();
     },
 
+    /**
+     * Rotates this node's transform so that a unit (1,0) vector would be rotated by this node's transform by the
+     * specified amount.
+     * @public
+     *
+     * @param {number} rotation - In radians
+     */
     setRotation: function( rotation ) {
       assert && assert( typeof rotation === 'number' );
 
@@ -1757,12 +1820,31 @@ define( function( require ) {
     },
     set rotation( value ) { this.setRotation( value ); },
 
+    /**
+     * Returns the rotation (in radians) that would be applied to a unit (1,0) vector when transformed with this Node's
+     * transform.
+     * @public
+     *
+     * @returns {number}
+     */
     getRotation: function() {
       return this._transform.getMatrix().getRotation();
     },
     get rotation() { return this.getRotation(); },
 
-    // supports setTranslation( x, y ) or setTranslation( new Vector2( x, y ) ) .. or technically setTranslation( { x: x, y: y } )
+    /**
+     * Modifies the translation of this Node's transform so that the node's local-coordinate origin will be transformed
+     * to the passed-in x/y.
+     * @public
+     *
+     * Allowed call signatures:
+     * setTranslation( x, y )
+     * setTranslation( vector )
+     *
+     * @param {number} x - X translation
+     * @param {number} y - Y translation
+     * @param {Vector2} vector - Vector with x/y translation in components
+     */
     setTranslation: function( a, b ) {
       var m = this._transform.getMatrix();
       var tx = m.m02();
@@ -1785,23 +1867,48 @@ define( function( require ) {
     },
     set translation( value ) { this.setTranslation( value ); },
 
+    /**
+     * Returns a vector of where this Node's local-coordinate origin will be transformed by it's own transform.
+     * @public
+     *
+     * @returns {Vector2}
+     */
     getTranslation: function() {
       var matrix = this._transform.getMatrix();
       return new Vector2( matrix.m02(), matrix.m12() );
     },
     get translation() { return this.getTranslation(); },
 
-    // append a transformation matrix to our local transform
+    /**
+     * Appends a transformation matrix to this Node's transform. Appending means this transform is conceptually applied
+     * first before the rest of the Node's current transform (i.e. applied in the local coordinate frame).
+     * @public
+     *
+     * @param {Matrix3} matrix
+     */
     appendMatrix: function( matrix ) {
       this._transform.append( matrix );
     },
 
-    // prepend a transformation matrix to our local transform
+    /**
+     * Prepends a transformation matrix to this Node's transform. Prepending means this transform is conceptually applied
+     * after the rest of the Node's current transform (i.e. applied in the parent coordinate frame).
+     * @public
+     *
+     * @param {Matrix3} matrix
+     */
     prependMatrix: function( matrix ) {
       this._transform.prepend( matrix );
     },
 
-    // prepend an x,y translation to our local transform without allocating a matrix for it, see #119
+    /**
+     * Prepends an (x,y) translation to our Node's transform in an efficient manner without allocating a matrix.
+     * see https://github.com/phetsims/scenery/issues/119
+     * @public
+     *
+     * @param {number} x
+     * @param {number} y
+     */
     prependTranslation: function( x, y ) {
       assert && assert( typeof x === 'number', 'x not a number' );
       assert && assert( typeof y === 'number', 'y not a number' );
@@ -1813,27 +1920,54 @@ define( function( require ) {
       this._transform.prependTranslation( x, y );
     },
 
+    /**
+     * Changes this Node's transform to match the passed-in transformation matrix.
+     * @public
+     *
+     * @param {Matrix3} matrix
+     */
     setMatrix: function( matrix ) {
       this._transform.setMatrix( matrix );
     },
     set matrix( value ) { this.setMatrix( value ); },
 
+    /**
+     * Returns a Matrix3 representing our Node's transform.
+     * @public
+     *
+     * NOTE: Do not mutate the returned matrix.
+     *
+     * @returns {Matrix3}
+     */
     getMatrix: function() {
       return this._transform.getMatrix();
     },
     get matrix() { return this.getMatrix(); },
 
+    /**
+     * Returns a reference to our Node's transform
+     * @public
+     *
+     * @returns {Transform3}
+     */
     getTransform: function() {
       // for now, return an actual copy. we can consider listening to changes in the future
       return this._transform;
     },
     get transform() { return this.getTransform(); },
 
+    /**
+     * Resets our Node's transform to an identity transform (i.e. no transform is applied).
+     * @public
+     */
     resetTransform: function() {
       this.setMatrix( Matrix3.IDENTITY );
     },
 
-    // called after our transform is changed
+    /**
+     * Callback function that should be called when our transform is changed.
+     * @private
+     */
     onTransformChange: function() {
       // NOTE: why is local bounds invalidation needed here?
       this.invalidateBounds();
@@ -1844,6 +1978,9 @@ define( function( require ) {
     /**
      * Updates our node's scale and applied scale factor if we need to change our scale to fit within the maximum
      * dimensions (maxWidth and maxHeight). See documentation in constructor for detailed behavior.
+     * @private
+     *
+     * @param {Bounds2} localBounds
      */
     updateMaxDimension: function( localBounds ) {
       var currentScale = this._appliedScaleFactor;
@@ -1875,6 +2012,7 @@ define( function( require ) {
      * Increments/decrements bounds "listener" count based on the values of maxWidth/maxHeight before and after.
      * null is like no listener, non-null is like having a listener, so we increment for null => non-null, and
      * decrement for non-null => null.
+     * @private
      *
      * @param {null | number} beforeMaxLength
      * @param {null | number} afterMaxLength
@@ -1890,6 +2028,12 @@ define( function( require ) {
       }
     },
 
+    /**
+     * Sets the maximum width of the Node (see constructor for documentation on how maximum dimensions work).
+     * @public
+     *
+     * @param {number|null} maxWidth
+     */
     setMaxWidth: function( maxWidth ) {
       assert && assert( maxWidth === null || typeof maxWidth === 'number',
         'maxWidth should be null (no constraint) or a number' );
@@ -1905,11 +2049,23 @@ define( function( require ) {
     },
     set maxWidth( value ) { this.setMaxWidth( value ); },
 
+    /**
+     * Returns the maximum width (if any) of the Node.
+     * @public
+     *
+     * @returns {number|null}
+     */
     getMaxWidth: function() {
       return this._maxWidth;
     },
     get maxWidth() { return this.getMaxWidth(); },
 
+    /**
+     * Sets the maximum height of the Node (see constructor for documentation on how maximum dimensions work).
+     * @public
+     *
+     * @param {number|null} maxHeight
+     */
     setMaxHeight: function( maxHeight ) {
       assert && assert( maxHeight === null || typeof maxHeight === 'number',
         'maxHeight should be null (no constraint) or a number' );
@@ -1925,12 +2081,24 @@ define( function( require ) {
     },
     set maxHeight( value ) { this.setMaxHeight( value ); },
 
+    /**
+     * Returns the maximum height (if any) of the Node.
+     * @public
+     *
+     * @returns {number|null}
+     */
     getMaxHeight: function() {
       return this._maxHeight;
     },
     get maxHeight() { return this.getMaxHeight(); },
 
-    // shifts this node horizontally so that its left bound (in the parent coordinate frame) is 'left'
+    /**
+     * Shifts this node horizontally so that its left bound (in the parent coordinate frame) is equal to the passed-in
+     * 'left' X value.
+     * @public
+     *
+     * @param {number} left
+     */
     setLeft: function( left ) {
       assert && assert( typeof left === 'number' );
 
@@ -1939,13 +2107,24 @@ define( function( require ) {
     },
     set left( value ) { this.setLeft( value ); },
 
-    // the left bound of this node, in the parent coordinate frame
+    /**
+     * Returns the X value of the left side of the bounding box of this node (in the parent coordinate frame).
+     * @public
+     *
+     * @returns {number}
+     */
     getLeft: function() {
       return this.getBounds().minX;
     },
     get left() { return this.getLeft(); },
 
-    // shifts this node horizontally so that its right bound (in the parent coordinate frame) is 'right'
+    /**
+     * Shifts this node horizontally so that its right bound (in the parent coordinate frame) is equal to the passed-in
+     * 'right' X value.
+     * @public
+     *
+     * @param {number} right
+     */
     setRight: function( right ) {
       assert && assert( typeof right === 'number' );
 
@@ -1954,12 +2133,24 @@ define( function( require ) {
     },
     set right( value ) { this.setRight( value ); },
 
-    // the right bound of this node, in the parent coordinate frame
+    /**
+     * Returns the X value of the right side of the bounding box of this node (in the parent coordinate frame).
+     * @public
+     *
+     * @returns {number}
+     */
     getRight: function() {
       return this.getBounds().maxX;
     },
     get right() { return this.getRight(); },
 
+    /**
+     * Shifts this node horizontally so that its horizontal center (in the parent coordinate frame) is equal to the
+     * passed-in center X value.
+     * @public
+     *
+     * @param {number} x
+     */
     setCenterX: function( x ) {
       assert && assert( typeof x === 'number' );
 
@@ -1968,11 +2159,24 @@ define( function( require ) {
     },
     set centerX( value ) { this.setCenterX( value ); },
 
+    /**
+     * Returns the X value of this node's horizontal center (in the parent coordinate frame)
+     * @public
+     *
+     * @returns {number}
+     */
     getCenterX: function() {
       return this.getBounds().getCenterX();
     },
     get centerX() { return this.getCenterX(); },
 
+    /**
+     * Shifts this node vertically so that its vertical center (in the parent coordinate frame) is equal to the
+     * passed-in center Y value.
+     * @public
+     *
+     * @param {number} y
+     */
     setCenterY: function( y ) {
       assert && assert( typeof y === 'number' );
 
@@ -1981,12 +2185,25 @@ define( function( require ) {
     },
     set centerY( value ) { this.setCenterY( value ); },
 
+    /**
+     * Returns the Y value of this node's vertical center (in the parent coordinate frame)
+     * @public
+     *
+     * @returns {number}
+     */
     getCenterY: function() {
       return this.getBounds().getCenterY();
     },
     get centerY() { return this.getCenterY(); },
 
-    // shifts this node vertically so that its top bound (in the parent coordinate frame) is 'top'
+    /**
+     * Shifts this node vertically so that its top (in the parent coordinate frame) is equal to the passed-in Y value.
+     * @public
+     *
+     * NOTE: top is the lowest Y value in our bounds.
+     *
+     * @param {number} top
+     */
     setTop: function( top ) {
       assert && assert( typeof top === 'number' );
 
@@ -1995,13 +2212,25 @@ define( function( require ) {
     },
     set top( value ) { this.setTop( value ); },
 
-    // the top bound of this node, in the parent coordinate frame
+    /**
+     * Returns the lowest Y value of this node's bounding box (in the parent coordinate frame).
+     * @public
+     *
+     * @returns {number}
+     */
     getTop: function() {
       return this.getBounds().minY;
     },
     get top() { return this.getTop(); },
 
-    // shifts this node vertically so that its bottom bound (in the parent coordinate frame) is 'bottom'
+    /**
+     * Shifts this node vertically so that its bottom (in the parent coordinate frame) is equal to the passed-in Y value.
+     * @public
+     *
+     * NOTE: top is the highest Y value in our bounds.
+     *
+     * @param {number} top
+     */
     setBottom: function( bottom ) {
       assert && assert( typeof bottom === 'number' );
 
@@ -2010,27 +2239,56 @@ define( function( require ) {
     },
     set bottom( value ) { this.setBottom( value ); },
 
-    // the bottom bound of this node, in the parent coordinate frame
+    /**
+     * Returns the highest Y value of this node's bounding box (in the parent coordinate frame).
+     * @public
+     *
+     * @returns {number}
+     */
     getBottom: function() {
       return this.getBounds().maxY;
     },
     get bottom() { return this.getBottom(); },
 
+    /**
+     * Returns the width of this node's bounding box (in the parent coordinate frame).
+     * @public
+     *
+     * @returns {number}
+     */
     getWidth: function() {
       return this.getBounds().getWidth();
     },
     get width() { return this.getWidth(); },
 
+    /**
+     * Returns the height of this node's bounding box (in the parent coordinate frame).
+     * @public
+     *
+     * @returns {number}
+     */
     getHeight: function() {
       return this.getBounds().getHeight();
     },
     get height() { return this.getHeight(); },
 
+    /**
+     * Returns the unique integral ID for this node.
+     * @public
+     *
+     * @returns {number}
+     */
     getId: function() {
       return this._id;
     },
     get id() { return this.getId(); },
 
+    /**
+     * Sets whether this node is visible.
+     * @public
+     *
+     * @param {boolean} visible
+     */
     setVisible: function( visible ) {
       assert && assert( typeof visible === 'boolean' );
 
@@ -2046,11 +2304,23 @@ define( function( require ) {
     },
     set visible( value ) { this.setVisible( value ); },
 
+    /**
+     * Returns whether this node is visible.
+     * @public
+     *
+     * @returns {boolean}
+     */
     isVisible: function() {
       return this._visible;
     },
     get visible() { return this.isVisible(); },
 
+    /**
+     * Sets the opacity of this node (and its sub-tree), where 0 is fully transparent, and 1 is fully opaque.
+     * @public
+     *
+     * @param {number} opacity
+     */
     setOpacity: function( opacity ) {
       assert && assert( typeof opacity === 'number' );
 
@@ -2063,11 +2333,23 @@ define( function( require ) {
     },
     set opacity( value ) { this.setOpacity( value ); },
 
+    /**
+     * Returns the opacity of this node.
+     * @public
+     *
+     * @returns {number}
+     */
     getOpacity: function() {
       return this._opacity;
     },
     get opacity() { return this.getOpacity(); },
 
+    /**
+     * Sets the pickability of this node (see the constructor for more detailed documentation).
+     * @public
+     *
+     * @param {boolean|null} pickable
+     */
     setPickable: function( pickable ) {
       assert && assert( pickable === null || typeof pickable === 'boolean' );
 
@@ -2087,11 +2369,24 @@ define( function( require ) {
     },
     set pickable( value ) { this.setPickable( value ); },
 
+    /**
+     * Returns the pickability of this node.
+     * @public
+     *
+     * @returns {boolean|null}
+     */
     isPickable: function() {
       return this._pickable;
     },
     get pickable() { return this.isPickable(); },
 
+    /**
+     * Sets the CSS cursor string that should be used when the mouse is over this node. null is the default, and
+     * indicates that ancestor nodes (or the browser default) should be used.
+     * @public
+     *
+     * @param {string} cursor - A CSS cursor string, like 'pointer', or 'none'
+     */
     setCursor: function( cursor ) {
       assert && assert( typeof cursor === 'string' || cursor === null );
 
@@ -2107,11 +2402,24 @@ define( function( require ) {
     },
     set cursor( value ) { this.setCursor( value ); },
 
+    /**
+     * Returns the CSS cursor string for this node.
+     * @public
+     *
+     * @returns {string}
+     */
     getCursor: function() {
       return this._cursor;
     },
     get cursor() { return this.getCursor(); },
 
+    /**
+     * Sets the hit-tested mouse area for this node (see constructor for more advanced documentation). Use null for the
+     * default behavior.
+     * @public
+     *
+     * @param {Bounds2|Shape|null} area
+     */
     setMouseArea: function( area ) {
       assert && assert( area === null || area instanceof Shape || area instanceof Bounds2, 'mouseArea needs to be a kite.Shape, dot.Bounds2, or null' );
 
@@ -2123,11 +2431,24 @@ define( function( require ) {
     },
     set mouseArea( value ) { this.setMouseArea( value ); },
 
+    /**
+     * Returns the hit-tested mouse area for this node.
+     * @public
+     *
+     * @returns {Bounds2|Shape|null}
+     */
     getMouseArea: function() {
       return this._mouseArea;
     },
     get mouseArea() { return this.getMouseArea(); },
 
+    /**
+     * Sets the hit-tested touch area for this node (see constructor for more advanced documentation). Use null for the
+     * default behavior.
+     * @public
+     *
+     * @param {Bounds2|Shape|null} area
+     */
     setTouchArea: function( area ) {
       assert && assert( area === null || area instanceof Shape || area instanceof Bounds2, 'touchArea needs to be a kite.Shape, dot.Bounds2, or null' );
 
@@ -2139,11 +2460,24 @@ define( function( require ) {
     },
     set touchArea( value ) { this.setTouchArea( value ); },
 
+    /**
+     * Returns the hit-tested touch area for this node.
+     * @public
+     *
+     * @returns {Bounds2|Shape|null}
+     */
     getTouchArea: function() {
       return this._touchArea;
     },
     get touchArea() { return this.getTouchArea(); },
 
+    /**
+     * Sets a clipped shape where only content in our local coordinate frame that is inside the clip area will be shown
+     * (anything outside is fully transparent).
+     * @public
+     *
+     * @param {Shape|null} shape
+     */
     setClipArea: function( shape ) {
       assert && assert( shape === null || shape instanceof Shape, 'clipArea needs to be a kite.Shape, or null' );
 
@@ -2157,15 +2491,33 @@ define( function( require ) {
     },
     set clipArea( value ) { this.setClipArea( value ); },
 
+    /**
+     * Returns the clipped area for this node.
+     * @public
+     *
+     * @returns {Shape|null}
+     */
     getClipArea: function() {
       return this._clipArea;
     },
     get clipArea() { return this.getClipArea(); },
 
+    /**
+     * Returns whether this node has a clip area.
+     * @public
+     *
+     * @returns {boolean}
+     */
     hasClipArea: function() {
       return this._clipArea !== null;
     },
 
+    /**
+     * Sets whether this node should be focusable for keyboard support.
+     * @public
+     *
+     * @param {boolean} focusable
+     */
     setFocusable: function( focusable ) {
       if ( this._focusable !== focusable ) {
         this._focusable = focusable;
@@ -2175,11 +2527,23 @@ define( function( require ) {
     },
     set focusable( value ) { this.setFocusable( value ); },
 
+    /**
+     * Returns whether this node is focusable.
+     * @public
+     *
+     * @returns {boolean}
+     */
     getFocusable: function() {
       return this._focusable;
     },
     get focusable() { return this.getFocusable(); },
 
+    /**
+     * Sets the focus indicator for the node ('rectangle' or 'cursor').
+     * @public
+     *
+     * @param {string} focusIndicator
+     */
     setFocusIndicator: function( focusIndicator ) {
       if ( this._focusIndicator !== focusIndicator ) {
         this._focusIndicator = focusIndicator;
@@ -2189,11 +2553,25 @@ define( function( require ) {
     },
     set focusIndicator( value ) { this.setFocusIndicator( value ); },
 
+    /**
+     * Returns the focus indicator string for this node.
+     * @public
+     *
+     * @returns {string}
+     */
     getFocusIndicator: function() {
       return this._focusIndicator;
     },
     get focusIndicator() { return this.getFocusIndicator(); },
 
+    /**
+     * Sets the focus order for this node. If provided, it will override the focus order between children (and
+     * optionally descendants). If not provided, the focus order will default to the rendering order (first children
+     * first, last children last), determined by the children array.
+     * @public
+     *
+     * @param {Array.<Node>|null} focusOrder
+     */
     setFocusOrder: function( focusOrder ) {
       assert && assert( focusOrder === null || focusOrder instanceof Array );
 
@@ -2205,35 +2583,53 @@ define( function( require ) {
     },
     set focusOrder( value ) { this.setFocusOrder( value ); },
 
+    /**
+     * Returns the focus order for this node.
+     * @public
+     *
+     * @returns {Array.<Node>|null}
+     */
     getFocusOrder: function() {
       return this._focusOrder;
     },
     get focusOrder() { return this.getFocusOrder(); },
 
+    // @deprecated
     supportsCanvas: function() {
       return ( this._rendererBitmask & Renderer.bitmaskCanvas ) !== 0;
     },
 
+    // @deprecated
     supportsSVG: function() {
       return ( this._rendererBitmask & Renderer.bitmaskSVG ) !== 0;
     },
 
+    // @deprecated
     supportsDOM: function() {
       return ( this._rendererBitmask & Renderer.bitmaskDOM ) !== 0;
     },
 
+    // @deprecated
     supportsWebGL: function() {
       return ( this._rendererBitmask & Renderer.bitmaskWebGL ) !== 0;
     },
 
+    // @deprecated
     supportsPixi: function() {
       return ( this._rendererBitmask & Renderer.bitmaskPixi) !== 0;
     },
 
+    // @deprecated
     supportsRenderer: function( renderer ) {
       return ( this._rendererBitmask & renderer.bitmask ) !== 0;
     },
 
+    /**
+     * Sets what self renderers (and other bitmask flags) are supported by this node.
+     * @protected
+     *
+     * @param {number} bitmask
+     */
     setRendererBitmask: function( bitmask ) {
       if ( bitmask !== this._rendererBitmask ) {
         this._rendererBitmask = bitmask;
@@ -2243,7 +2639,10 @@ define( function( require ) {
       }
     },
 
-    // meant to be overridden
+    /**
+     * Meant to be overridden, so that it can be called to ensure that the renderer bitmask will be up-to-date.
+     * @protected
+     */
     invalidateSupportedRenderers: function() {
 
     },
@@ -2252,7 +2651,19 @@ define( function( require ) {
      * Hints
      *----------------------------------------------------------------------------*/
 
-    // provides a rendering hint to use this render whenever possible
+    /**
+     * Sets a preferred renderer for this node and its sub-tree. Scenery will attempt to use this renderer under here
+     * unless it isn't supported, OR another preferred renderer is set as a closer ancestor. Acceptable values are:
+     * - null (default, no preference)
+     * - 'canvas'
+     * - 'svg'
+     * - 'dom'
+     * - 'webgl'
+     * - 'pixi'
+     * @public
+     *
+     * @param {string|null} renderer
+     */
     setRenderer: function( renderer ) {
       assert && assert( renderer === null || renderer === 'canvas' || renderer === 'svg' || renderer === 'dom' || renderer === 'webgl' || renderer === 'pixi',
         'Renderer input should be null, or one of: "canvas", "svg", "dom", "webgl" or "pixi".' );
@@ -2284,6 +2695,12 @@ define( function( require ) {
     },
     set renderer( value ) { this.setRenderer( value ); },
 
+    /**
+     * Returns the preferred renderer (if any) of this node, as a string.
+     * @public
+     *
+     * @returns {string|null}
+     */
     getRenderer: function() {
       if ( this._hints.renderer === 0 ) {
         return null;
@@ -2308,10 +2725,17 @@ define( function( require ) {
     },
     get renderer() { return this.getRenderer(); },
 
+    /**
+     * Returns whether there is a preferred renderer for this node.
+     * @public
+     *
+     * @returns {boolean}
+     */
     hasRenderer: function() {
       return !!this._hints.renderer;
     },
 
+    // @deprecated
     setRendererOptions: function( options ) {
       // TODO: consider checking options based on the specified 'renderer'?
       // TODO: consider a guard where we check if anything changed
@@ -2322,11 +2746,19 @@ define( function( require ) {
     },
     set rendererOptions( value ) { this.setRendererOptions( value ); },
 
+    // @deprecated
     getRendererOptions: function() {
       return this._hints;
     },
     get rendererOptions() { return this.getRendererOptions(); },
 
+    /**
+     * Sets whether or not Scenery will try to put this node (and its descendants) into a separate SVG/Canvas/WebGL/etc.
+     * layer, different from other siblings or other nodes. Can be used for performance purposes.
+     * @public
+     *
+     * @param {boolean} split
+     */
     setLayerSplit: function( split ) {
       assert && assert( typeof split === 'boolean' );
 
@@ -2337,11 +2769,24 @@ define( function( require ) {
     },
     set layerSplit( value ) { this.setLayerSplit( value ); },
 
+    /**
+     * Returns whether the layerSplit performance flag is set.
+     * @public
+     *
+     * @returns {boolean}
+     */
     isLayerSplit: function() {
       return this._hints.layerSplit;
     },
     get layerSplit() { return this.isLayerSplit(); },
 
+    /**
+     * Sets whether or not Scenery will take into account that this Node plans to use opacity. Can have performance
+     * gains if there need to be multiple layers for this node's descendants.
+     * @public
+     *
+     * @param {boolean} usesOpacity
+     */
     setUsesOpacity: function( usesOpacity ) {
       assert && assert( typeof usesOpacity === 'boolean' );
 
@@ -2352,6 +2797,12 @@ define( function( require ) {
     },
     set usesOpacity( value ) { this.setUsesOpacity( value ); },
 
+    /**
+     * Returns whether the usesOpacity performance flag is set.
+     * @public
+     *
+     * @returns {boolean}
+     */
     getUsesOpacity: function() {
       return this._hints.usesOpacity;
     },
