@@ -29,7 +29,11 @@ define( function( require ) {
 
   inherit( Node, CanvasNode, {
 
-    // how to set the bounds of the CanvasNode
+    /**
+     * How to set the bounds of the CanvasNode
+     *
+     * @param {Bounds2} selfBounds
+     */
     setCanvasBounds: function( selfBounds ) {
       this.invalidateSelf( selfBounds );
     },
@@ -97,7 +101,7 @@ define( function( require ) {
 
     paintCanvas: function( wrapper, node ) {
       assert && assert( !node._selfBounds.isEmpty(), 'CanvasNode should not be used with an empty canvasBounds. ' +
-        'Please set canvasBounds (or use setCanvasBounds()) on ' + node.constructor.name );
+                                                     'Please set canvasBounds (or use setCanvasBounds()) on ' + node.constructor.name );
 
       if ( !node._selfBounds.isEmpty() ) {
         node.paintCanvas( wrapper );
