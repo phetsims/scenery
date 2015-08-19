@@ -7,7 +7,7 @@ features such as screen reading and keyboard navigation for Phet sims.
 
 This prototype uses a global tab index order, along with some scripting, to navigate the simulation.  This is one of two
 possible solutions to keyboard navigation, as described by
-http://www.w3.org/TR/2009/WD-wai-aria-practices-20090224/#keyboard
+http://www.w3.org/TR/wai-aria-practices/#keyboard.
 The other solution uses aria-activedescendant profiles to navigate the sim.
 
 The tab index solution is tricky, and highly variable.  It will make scenery responsible for generating a significant
@@ -16,7 +16,7 @@ amount of javascript to program the tab index order and monitor the sim state.
 We will be looking for alternate solutions which use aria-activedescendant.  Hopefully this will reduce the amount of
 required javascript and push responsibility to the client to monitor complex tab orderings and the sim state.
 
-See phetsims/scenery/issue#? and  http://www.w3.org/TR/2009/WD-wai-aria-practices-20090224/#keyboard
+See phetsims/scenery/issue#450  http://www.w3.org/TR/wai-aria-practices/#keyboard.
 for more information.
 
 @author Jesse Greenberg -->
