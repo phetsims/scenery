@@ -19,6 +19,7 @@ define( function( require ) {
 
   var inherit = require( 'PHET_CORE/inherit' );
   var escapeHTML = require( 'PHET_CORE/escapeHTML' );
+  var platform = require( 'PHET_CORE/platform' );
   var Bounds2 = require( 'DOT/Bounds2' );
   var Matrix3 = require( 'DOT/Matrix3' );
 
@@ -59,6 +60,11 @@ define( function( require ) {
 
   var hybridTextNode; // a node that is used to measure SVG text top/height for hybrid caching purposes
   var initializingHybridTextNode = false;
+
+  // Some browsers (IE/Edge) can't handle our UTF-8 embedding marks AND SVG textLength/spacingAndGlyphs. We disable
+  // using these features, because they aren't necessary on these browsers.
+  // See https://github.com/phetsims/scenery/issues/455 for more information.
+  var useSVGTextLengthAdjustments = !platform.ie && !platform.edge;
 
   scenery.Text = function Text( text, options ) {
     this._text = '';                   // filled in with mutator
@@ -697,7 +703,9 @@ define( function( require ) {
         // TODO: flag adjustment for SVG qualities
         text.setAttribute( 'dominant-baseline', 'alphabetic' ); // to match Canvas right now
         text.setAttribute( 'text-rendering', 'geometricPrecision' );
-        text.setAttribute( 'lengthAdjust', 'spacingAndGlyphs' );
+        if ( useSVGTextLengthAdjustments ) {
+          text.setAttribute( 'lengthAdjust', 'spacingAndGlyphs' );
+        }
         text.setAttributeNS( 'http://www.w3.org/XML/1998/namespace', 'xml:space', 'preserve' );
       }
 
@@ -726,7 +734,7 @@ define( function( require ) {
       }
 
       // text length correction, tested with scenery/tests/text-quality-test.html to determine how to match Canvas/SVG rendering (and overall length)
-      if ( this.dirtyBounds && isFinite( this.node._selfBounds.width ) ) {
+      if ( this.dirtyBounds && isFinite( this.node._selfBounds.width ) && useSVGTextLengthAdjustments ) {
         text.setAttribute( 'textLength', this.node._selfBounds.width );
       }
 
