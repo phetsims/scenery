@@ -243,7 +243,7 @@ define( function( require ) {
 
         //OHTWO TODO: remove clip workaround (use this.willApplyFilters)
         var willApplyClip = this.block.filterRootInstance.trail.nodes.length >= this.instance.trail.nodes.length;
-        if ( willApplyClip && this.node._clipArea ) {
+        if ( willApplyClip && this.node.clipArea ) {
           if ( !this.clipDefinition ) {
             var clipId = 'clip' + this.node.getId();
 
@@ -258,7 +258,7 @@ define( function( require ) {
             pixiDisplayObject.setAttribute( 'clip-path', 'url(#' + clipId + ')' );
           }
 
-          this.clipPath.setAttribute( 'd', this.node._clipArea.getSVGPath() );
+          this.clipPath.setAttribute( 'd', this.node.clipArea.getSVGPath() );
         }
         else if ( this.clipDefinition ) {
           pixiDisplayObject.removeAttribute( 'clip-path' );

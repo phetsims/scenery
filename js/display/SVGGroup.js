@@ -234,7 +234,7 @@ define( function( require ) {
         sceneryLog && sceneryLog.SVGGroup && sceneryLog.SVGGroup( 'clip update: ' + this.toString() );
 
         //OHTWO TODO: remove clip workaround (use this.willApplyFilters)
-        if ( this.node._clipArea ) {
+        if ( this.node.clipArea ) {
           if ( !this.clipDefinition ) {
             var clipId = 'clip' + this.node.getId();
 
@@ -249,7 +249,7 @@ define( function( require ) {
             svgGroup.setAttribute( 'clip-path', 'url(#' + clipId + ')' );
           }
 
-          this.clipPath.setAttribute( 'd', this.node._clipArea.getSVGPath() );
+          this.clipPath.setAttribute( 'd', this.node.clipArea.getSVGPath() );
         }
         else if ( this.clipDefinition ) {
           svgGroup.removeAttribute( 'clip-path' );

@@ -249,7 +249,7 @@ define( function( require ) {
 
     // @override, since Path's general function would slow us down (we're a rectangle, our local coordinate frame is perfect for this)
     getTransformedSelfBounds: function( matrix ) {
-      return this._selfBounds.transformed( matrix );
+      return this.selfBounds.transformed( matrix );
     },
 
     createRectangleShape: function() {

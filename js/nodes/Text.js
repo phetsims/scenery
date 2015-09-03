@@ -199,7 +199,7 @@ define( function( require ) {
         selfBounds.dilate( this.getLineWidth() / 2 );
       }
 
-      if ( !this._selfBounds.equals( selfBounds ) ) {
+      if ( !this.selfBounds.equals( selfBounds ) ) {
         var stateLen = this._drawables.length;
         for ( var i = 0; i < stateLen; i++ ) {
           this._drawables[ i ].markDirtyBounds();
@@ -734,8 +734,8 @@ define( function( require ) {
       }
 
       // text length correction, tested with scenery/tests/text-quality-test.html to determine how to match Canvas/SVG rendering (and overall length)
-      if ( this.dirtyBounds && isFinite( this.node._selfBounds.width ) && useSVGTextLengthAdjustments ) {
-        text.setAttribute( 'textLength', this.node._selfBounds.width );
+      if ( this.dirtyBounds && isFinite( this.node.selfBounds.width ) && useSVGTextLengthAdjustments ) {
+        text.setAttribute( 'textLength', this.node.selfBounds.width );
       }
 
       this.updateFillStrokeStyle( text );
@@ -900,7 +900,7 @@ define( function( require ) {
 
       // text length correction, tested with scenery/tests/text-quality-test.html to determine how to match Canvas/Pixi rendering (and overall length)
       // TODO: JO: Why is this here?
-      if ( this.dirtyBounds && isFinite( node._selfBounds.width ) ) {
+      if ( this.dirtyBounds && isFinite( node.selfBounds.width ) ) {
       }
     }
   } );

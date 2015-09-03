@@ -97,64 +97,68 @@ define( function( require ) {
 
     // NOTE: All member properties with names starting with '_' are assumed to be @private!
 
-    // {number} - Assigns a unique ID to this node (allows trails to get a unique list of IDs)
+    // @private {number} - Assigns a unique ID to this node (allows trails to get a unique list of IDs)
     this._id = globalIdCounter++;
 
-    // {Array.<Instance>} - All of the Instances tracking this Node
+    // @protected {Array.<Instance>} - All of the Instances tracking this Node
     this._instances = [];
 
-    // {Array.<Drawable>} - Drawable states that need to be updated on mutations. Generally added by SVG and DOM
-    // elements that need to closely track state (possibly by Canvas to maintain dirty state)
+    // @protected {Array.<Drawable>} - Drawable states that need to be updated on mutations. Generally added by SVG and
+    // DOM elements that need to closely track state (possibly by Canvas to maintain dirty state).
     this._drawables = [];
 
-    // {boolean} - Whether this node (and its children) will be visible when the scene is updated. Visible nodes by
-    // default will not be pickable either
+    // @private {boolean} - Whether this node (and its children) will be visible when the scene is updated. Visible
+    // nodes by default will not be pickable either.
     this._visible = true;
 
-    // {number} - Opacity from 0 to 1
+    // @private {number} - Opacity, in the range from 0 (fully transparent) to 1 (fully opaque).
     this._opacity = 1;
 
-    // Whether this node (and its subtree) will allow hit-testing (and thus user interaction). Notably:
+    // @private Whether this node (and its subtree) will allow hit-testing (and thus user interaction). Notably:
     // pickable: null  - default. Node is only pickable if it (or an ancestor/descendant) has either an input listener or pickable: true set
     // pickable: false - Node (and subtree) is pickable, just like if there is an input listener
     // pickable: true  - Node is unpickable (only has an effect when underneath a node with an input listener / pickable: true set)
     this._pickable = null;
 
-    // This node and all children will be clipped by this shape (in addition to any other clipping shapes).
+    // @private - This node and all children will be clipped by this shape (in addition to any other clipping shapes).
     // {Shape|null} The shape should be in the local coordinate frame.
     this._clipArea = null;
 
-    // areas for hit intersection. if set on a Node, no descendants can handle events
-    this._mouseArea = null; // {Shape|Bounds2} for mouse position          in the local coordinate frame
-    this._touchArea = null; // {Shape|Bounds2} for touch and pen position  in the local coordinate frame
+    // @private - Areas for hit intersection. If set on a Node, no descendants can handle events.
+    this._mouseArea = null; // {Shape|Bounds2} for mouse position in the local coordinate frame
+    this._touchArea = null; // {Shape|Bounds2} for touch and pen position in the local coordinate frame
 
-    // {string} - The CSS cursor to be displayed over this node. null should be the default (inherit) value.
+    // @private {string} - The CSS cursor to be displayed over this node. null should be the default (inherit) value.
     this._cursor = null;
 
-    // {boolean} - Whether this Node should be accessible via tab ordering. Defaults to false.
+    // @private {boolean} - Whether this Node should be accessible via tab ordering. Defaults to false.
     this._focusable = false;
-    // {string} - 'cursor' or 'rectangle' at the moment. WARNING: in active development!
+
+    // @private @deprecated {string} - 'cursor' or 'rectangle' at the moment. WARNING: in active development!
     this._focusIndicator = 'rectangle';
-    // {Array.<Node> | null} - If provided, it will override the focus order between children (and optionally descendants).
-    // If not provided, the focus order will default to the rendering order (first children first, last children last)
-    // determined by the children array.
+
+    // @private {Array.<Node> | null} - If provided, it will override the focus order between children (and optionally
+    // descendants). If not provided, the focus order will default to the rendering order (first children first, last
+    // children last) determined by the children array.
     this._focusOrder = null;
 
+    // @public (scenery-internal) - Not for public use, but used directly internally for performance.
     this._children = []; // {Array.<Node>} - Ordered array of child nodes.
     this._parents = []; // {Array.<Node>} - Unordered array of parent nodes.
 
+    // @private @deprecated
     this._peers = []; // array of peer factories: { element: ..., options: ... }, where element can be an element or a string
     this._liveRegions = []; // array of live region instances
 
-    // {boolean} - Whether we will do more accurate (and tight) bounds computations for rotations and shears.
+    // @private {boolean} - Whether we will do more accurate (and tight) bounds computations for rotations and shears.
     this._transformBounds = false;
 
     /*
      * Set up the transform reference. we add a listener so that the transform itself can be modified directly
      * by reference, triggering the event notifications for Scenery The reference to the Transform3 will never change.
      */
-    this._transform = new Transform3(); // {Transform3}
-    this._transformListener = this.onTransformChange.bind( this );
+    this._transform = new Transform3(); // @private {Transform3}
+    this._transformListener = this.onTransformChange.bind( this ); // @private {Function}
     this._transform.on( 'change', this._transformListener );
 
     /*
@@ -176,32 +180,33 @@ define( function( require ) {
      * change. It does happen at least once in updateDisplay() before rendering, and calling validateBounds() can force
      * a re-check and transform.
      */
-    this._maxWidth = null; // {number|null}
-    this._maxHeight = null; // {number|null}
-    this._appliedScaleFactor = 1; // {number} - How much scale has been applied due to the maximum dimension constraints.
+    this._maxWidth = null; // @private {number|null}
+    this._maxHeight = null; // @private {number|null}
+    this._appliedScaleFactor = 1; // @private {number} - Scale applied due to the maximum dimension constraints.
 
-    this._inputListeners = []; // {Array.<Function>} - For user input handling (mouse/touch)
+    // @private {Array.<Function>} - For user input handling (mouse/touch).
+    this._inputListeners = [];
 
-    // {Bounds2} - [mutable] Bounds for this node and its children in the "parent" coordinate frame.
+    // @private {Bounds2} - [mutable] Bounds for this node and its children in the "parent" coordinate frame.
     this._bounds = Bounds2.NOTHING.copy();
 
-    // {Bounds2} - [mutable] Bounds for this node and its children in the "local" coordinate frame.
+    // @private {Bounds2} - [mutable] Bounds for this node and its children in the "local" coordinate frame.
     this._localBounds = Bounds2.NOTHING.copy();
 
-    // {Bounds2} - [mutable] Bounds just for this node, in the "local" coordinate frame.
+    // @private {Bounds2} - [mutable] Bounds just for this node, in the "local" coordinate frame.
     this._selfBounds = Bounds2.NOTHING.copy();
 
-    // {Bounds2} - [mutable] Bounds just for children of this node (and sub-trees), in the "local" coordinate frame.
+    // @private {Bounds2} - [mutable] Bounds just for children of this node (and sub-trees), in the "local" coordinate frame.
     this._childBounds = Bounds2.NOTHING.copy();
 
-    // {boolean} - Whether our localBounds have been set (with the ES5 setter/setLocalBounds()) to a custom overridden
-    //             value. If true, then localBounds itself will not be updated, but will instead always be the
-    //             overridden value.
+    // @private {boolean} - Whether our localBounds have been set (with the ES5 setter/setLocalBounds()) to a custom
+    // overridden value. If true, then localBounds itself will not be updated, but will instead always be the
+    // overridden value.
     this._localBoundsOverridden = false;
 
-    this._boundsDirty = true; // {boolean} - Whether bounds needs to be recomputed to be valid.
-    this._localBoundsDirty = true; // {boolean} - Whether localBounds needs to be recomputed to be valid.
-    this._childBoundsDirty = true; // {boolean} - Whether childBounds needs to be recomputed to be valid.
+    this._boundsDirty = true; // @private {boolean} - Whether bounds needs to be recomputed to be valid.
+    this._localBoundsDirty = true; // @private {boolean} - Whether localBounds needs to be recomputed to be valid.
+    this._childBoundsDirty = true; // @private {boolean} - Whether childBounds needs to be recomputed to be valid.
 
     if ( assert ) {
       // for assertions later to ensure that we are using the same Bounds2 copies as before
@@ -214,17 +219,17 @@ define( function( require ) {
     // Similar to bounds, but includes any mouse/touch areas respectively, and excludes areas that would be pruned in
     // hit-testing. They are validated separately (independent from normal bounds validation), but should now always be
     // non-null (since we now properly handle pruning).
-    this._mouseBounds = Bounds2.NOTHING.copy(); // {Bounds2} - [mutable] Hit bounds for mouse input
-    this._touchBounds = Bounds2.NOTHING.copy(); // {Bounds2} - [mutable] Hit bounds for touch input
-    this._mouseBoundsDirty = true; // {boolean} - Whether the bounds are marked as dirty
-    this._touchBoundsDirty = true; // {boolean} - Whether the bounds are marked as dirty
+    this._mouseBounds = Bounds2.NOTHING.copy(); // @private {Bounds2} - [mutable] Hit bounds for mouse input
+    this._touchBounds = Bounds2.NOTHING.copy(); // @private {Bounds2} - [mutable] Hit bounds for touch input
+    this._mouseBoundsDirty = true; // @private {boolean} - Whether the bounds are marked as dirty
+    this._touchBoundsDirty = true; // @private {boolean} - Whether the bounds are marked as dirty
     // Dirty flags for mouse/touch bounds. Since we only walk the dirty flags up ancestors, we need a way to
     // re-evaluate descendants when the existence of effective listeners changes.
-    this._mouseBoundsHadListener = false; // {boolean}
-    this._touchBoundsHadListener = false; // {boolean}
+    this._mouseBoundsHadListener = false; // @private {boolean}
+    this._touchBoundsHadListener = false; // @private {boolean}
 
-    // {Object} - Where rendering-specific settings are stored. They are generally modified internally, so there is
-    //            no ES5 setter for hints.
+    // @public (scenery-internal) {Object} - Where rendering-specific settings are stored. They are generally modified
+    // internally, so there is no ES5 setter for hints.
     this._hints = {
       // {number} - What type of renderer should be forced for this node. Uses the internal bitmask structure declared
       //            in scenery.js and Renderer.js.
@@ -252,15 +257,16 @@ define( function( require ) {
       webglScale: null
     };
 
-    // {number} - The subtree pickable count is #pickable:true + #inputListeners, since we can prune subtrees with a
-    // pickable count of 0.
+    // @public (scenery-internal) {number} - The subtree pickable count is #pickable:true + #inputListeners, since we
+    // can prune subtrees with a pickable count of 0.
     this._subtreePickableCount = 0;
 
-    // {number} - A bitmask which specifies which renderers this node (and only this node, not its subtree) supports.
+    // @public (scenery-internal) {number} - A bitmask which specifies which renderers this node (and only this node,
+    // not its subtree) supports.
     this._rendererBitmask = Renderer.bitmaskNodeDefault;
 
-    // {RendererSummary} - a bitmask-like summary of what renderers and options are supported by this node and all of
-    //                     its descendants
+    // @public (scenery-internal) {RendererSummary} - A bitmask-like summary of what renderers and options are supported
+    // by this node and all of its descendants
     this._rendererSummary = new RendererSummary( this );
 
     /*
@@ -274,8 +280,8 @@ define( function( require ) {
      * (if we were just using a boolean value, this operation would require A to check if any OTHER children besides
      * B had bounds listeners)
      */
-    this._boundsEventCount = 0; // {number}
-    // {number} - This signals that we can validateBounds() on this subtree and we don't have to traverse further
+    this._boundsEventCount = 0; // @private {number}
+    // @private {number} - This signals that we can validateBounds() on this subtree and we don't have to traverse further
     this._boundsEventSelfCount = 0;
 
     if ( options ) {

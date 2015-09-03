@@ -83,7 +83,7 @@ define( function( require ) {
         if ( ( node instanceof scenery.CanvasNode ) && trail.isVisible() ) {
           var transform = trail.getTransform();
 
-          that.addShape( transform.transformShape( Shape.bounds( node._selfBounds ) ), 'rgba(0,255,0,0.8)', true );
+          that.addShape( transform.transformShape( Shape.bounds( node.selfBounds ) ), 'rgba(0,255,0,0.8)', true );
         }
       } );
     },

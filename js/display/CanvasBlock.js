@@ -111,7 +111,7 @@ define( function( require ) {
         this.context.clearRect( 0, 0, this.canvas.width, this.canvas.height ); // clear everything
 
         //OHTWO TODO: clipping handling!
-        if ( this.filterRootInstance.node._clipArea ) {
+        if ( this.filterRootInstance.node.clipArea ) {
           this.context.save();
 
           this.temporaryRecursiveClip( this.filterRootInstance );
@@ -124,7 +124,7 @@ define( function( require ) {
           if ( drawable === this.lastDrawable ) { break; }
         }
 
-        if ( this.filterRootInstance.node._clipArea ) {
+        if ( this.filterRootInstance.node.clipArea ) {
           this.context.restore();
         }
       }
@@ -137,14 +137,14 @@ define( function( require ) {
       if ( instance.parent ) {
         this.temporaryRecursiveClip( instance.parent );
       }
-      if ( instance.node._clipArea ) {
+      if ( instance.node.clipArea ) {
         //OHTWO TODO: reduce duplication here
         this.context.setTransform( this.backingScale, 0, 0, this.backingScale, this.canvasDrawOffset.x * this.backingScale, this.canvasDrawOffset.y * this.backingScale );
         instance.relativeTransform.matrix.canvasAppendTransform( this.context );
 
         // do the clipping
         this.context.beginPath();
-        instance.node._clipArea.writeToContext( this.context );
+        instance.node.clipArea.writeToContext( this.context );
         this.context.clip();
       }
     },

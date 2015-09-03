@@ -912,8 +912,8 @@ define( function( require ) {
 
       function nodeCount( node ) {
         var count = 1; // for us
-        for ( var i = 0; i < node._children.length; i++ ) {
-          count += nodeCount( node._children[i] );
+        for ( var i = 0; i < node.children.length; i++ ) {
+          count += nodeCount( node.children[i] );
         }
         return count;
       }
@@ -1030,28 +1030,28 @@ define( function( require ) {
         iSummary += ' <span style="font-weight: ' + ( node.isPainted() ? 'bold' : 'normal' ) + '">' + node.id + '</span>';
         iSummary += node.getDebugHTMLExtras();
 
-        if ( !node._visible ) {
+        if ( !node.visible ) {
           addQualifier( 'invisible' );
         }
-        if ( node._pickable === true ) {
+        if ( node.pickable === true ) {
           addQualifier( 'pickable' );
         }
-        if ( node._pickable === false ) {
+        if ( node.pickable === false ) {
           addQualifier( 'unpickable' );
         }
         if ( instance.trail.isPickable() ) {
           addQualifier( '<span style="color: #808">hits</span>' );
         }
-        if ( node._clipArea ) {
+        if ( node.clipArea ) {
           addQualifier( 'clipArea' );
         }
-        if ( node._mouseArea ) {
+        if ( node.mouseArea ) {
           addQualifier( 'mouseArea' );
         }
-        if ( node._touchArea ) {
+        if ( node.touchArea ) {
           addQualifier( 'touchArea' );
         }
-        if ( node._inputListeners.length ) {
+        if ( node.getInputListeners().length ) {
           addQualifier( 'inputListeners' );
         }
         if ( node.getRenderer() ) {
@@ -1060,8 +1060,8 @@ define( function( require ) {
         if ( node.isLayerSplit() ) {
           addQualifier( 'layerSplit' );
         }
-        if ( node._opacity < 1 ) {
-          addQualifier( 'opacity:' + node._opacity );
+        if ( node.opacity < 1 ) {
+          addQualifier( 'opacity:' + node.opacity );
         }
 
         var transformType = '';
@@ -1215,7 +1215,7 @@ define( function( require ) {
           result += 'var ' + name( node ) + ' = ' + node.toString( '', false );
         }
 
-        _.each( node._children, function( child ) {
+        _.each( node.children, function( child ) {
           result += '\n' + name( node ) + '.addChild( ' + name( child ) + ' );';
         } );
       } );

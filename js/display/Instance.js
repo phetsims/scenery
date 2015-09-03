@@ -294,7 +294,7 @@ define( function( require ) {
       }
 
       var hasClip = this.node.hasClipArea();
-      var hasTransparency = this.node._opacity !== 1 || hints.usesOpacity;
+      var hasTransparency = this.node.opacity !== 1 || hints.usesOpacity;
       var requiresSplit = hints.requireElement || hints.cssTransform || hints.layerSplit;
       var backboneRequired = this.isDisplayRoot || ( !this.isUnderCanvasCache && requiresSplit );
       var applyTransparencyWithSVG = !backboneRequired &&

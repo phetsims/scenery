@@ -289,7 +289,7 @@ define( function( require ) {
       //OHTWO TODO: proper clipping support
       // var len = this.watchedFilterNodes.length;
       // for ( var i = 0; i < len; i++ ) {
-      //   if ( this.watchedFilterNodes[i]._clipArea ) {
+      //   if ( this.watchedFilterNodes[i].clipArea ) {
       //     throw new Error( 'clip-path for backbones unimplemented, and with questionable browser support!' );
       //   }
       // }

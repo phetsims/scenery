@@ -278,7 +278,7 @@ define( function( require ) {
       // NOTE: If changing, see Instance.updateRenderingState
       var requiresSplit = node._hints.requireElement || node._hints.cssTransform || node._hints.layerSplit;
       var mightUseOpacity = node.opacity !== 1 || node._hints.usesOpacity;
-      var mightUseClip = node._clipArea !== null;
+      var mightUseClip = node.clipArea !== null;
       var rendererHint = node._hints.renderer;
 
       // Whether this subtree will be able to support a single SVG element

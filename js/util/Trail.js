@@ -131,10 +131,10 @@ define( function( require ) {
     // essentially whether this node is visited in the hit-testing operation
     isPickable: function() {
       // it won't be if it or any ancestor is pickable: false, or is invisible
-      if ( _.some( this.nodes, function( node ) { return node._pickable === false || node._visible === false; } ) ) { return false; }
+      if ( _.some( this.nodes, function( node ) { return node.pickable === false || node.visible === false; } ) ) { return false; }
 
       // if there is any listener or pickable: true, it will be pickable
-      if ( _.some( this.nodes, function( node ) { return node._pickable === true || node._inputListeners.length > 0; } ) ) { return true; }
+      if ( _.some( this.nodes, function( node ) { return node.hasInputListenerEquivalent(); } ) ) { return true; }
 
       if ( this.lastNode()._subtreePickableCount > 0 ) {
         return true;
@@ -176,7 +176,7 @@ define( function( require ) {
       var nodes = this.nodes;
       var length = nodes.length;
       for ( var i = 0; i < length; i++ ) {
-        matrix.multiplyMatrix( nodes[ i ]._transform.getMatrix() );
+        matrix.multiplyMatrix( nodes[ i ].getMatrix() );
       }
       return matrix;
     },
@@ -190,7 +190,7 @@ define( function( require ) {
       var nodes = this.nodes;
       var length = nodes.length;
       for ( var i = 0; i < length - 1; i++ ) {
-        matrix.multiplyMatrix( nodes[ i ]._transform.getMatrix() );
+        matrix.multiplyMatrix( nodes[ i ].getMatrix() );
       }
       return matrix;
     },
@@ -218,7 +218,7 @@ define( function( require ) {
 
       this.length++;
       // accelerated version of this.updateUniqueId()
-      this.uniqueId = ( this.uniqueId ? node._id + '-' + this.uniqueId : node._id + '' );
+      this.uniqueId = ( this.uniqueId ? node.id + '-' + this.uniqueId : node.id + '' );
       return this;
     },
 
@@ -249,7 +249,7 @@ define( function( require ) {
 
       this.length++;
       // accelerated version of this.updateUniqueId()
-      this.uniqueId = ( this.uniqueId ? this.uniqueId + '-' + node._id : node._id + '' );
+      this.uniqueId = ( this.uniqueId ? this.uniqueId + '-' + node.id : node.id + '' );
       return this;
     },
 

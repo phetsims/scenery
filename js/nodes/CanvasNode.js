@@ -100,10 +100,10 @@ define( function( require ) {
     },
 
     paintCanvas: function( wrapper, node ) {
-      assert && assert( !node._selfBounds.isEmpty(), 'CanvasNode should not be used with an empty canvasBounds. ' +
-                                                     'Please set canvasBounds (or use setCanvasBounds()) on ' + node.constructor.name );
+      assert && assert( !node.selfBounds.isEmpty(), 'CanvasNode should not be used with an empty canvasBounds. ' +
+                                                    'Please set canvasBounds (or use setCanvasBounds()) on ' + node.constructor.name );
 
-      if ( !node._selfBounds.isEmpty() ) {
+      if ( !node.selfBounds.isEmpty() ) {
         node.paintCanvas( wrapper );
       }
     }

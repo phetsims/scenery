@@ -78,14 +78,14 @@ define( function( require ) {
           // skip this subtree if the node is invisible
           return true;
         }
-        if ( ( node._mouseArea || node._touchArea ) && trail.isVisible() ) {
+        if ( ( node.mouseArea || node.touchArea ) && trail.isVisible() ) {
           var transform = trail.getTransform();
 
-          if ( node._mouseArea ) {
-            that.addShape( transform.transformShape( node._mouseArea.isBounds ? Shape.bounds( node._mouseArea ) : node._mouseArea ), 'rgba(0,0,255,0.8)', true );
+          if ( node.mouseArea ) {
+            that.addShape( transform.transformShape( node.mouseArea.isBounds ? Shape.bounds( node.mouseArea ) : node.mouseArea ), 'rgba(0,0,255,0.8)', true );
           }
-          if ( node._touchArea ) {
-            that.addShape( transform.transformShape( node._touchArea.isBounds ? Shape.bounds( node._touchArea ) : node._touchArea ), 'rgba(255,0,0,0.8)', false );
+          if ( node.touchArea ) {
+            that.addShape( transform.transformShape( node.touchArea.isBounds ? Shape.bounds( node.touchArea ) : node.touchArea ), 'rgba(255,0,0,0.8)', false );
           }
         }
       } );
