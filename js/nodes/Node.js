@@ -2815,6 +2815,14 @@ define( function( require ) {
     },
     get usesOpacity() { return this.getUsesOpacity(); },
 
+    /**
+     * Sets a flag for whether whether the contents of this Node and its children should be displayed in a separate
+     * DOM element that is transformed with CSS transforms. It can have potential speedups, since the browser may not
+     * have to rerasterize contents when it is animated.
+     * @public
+     *
+     * @param {boolean} cssTransform
+     */
     setCSSTransform: function( cssTransform ) {
       assert && assert( typeof cssTransform === 'boolean' );
 
@@ -2825,11 +2833,24 @@ define( function( require ) {
     },
     set cssTransform( value ) { this.setCSSTransform( value ); },
 
+    /**
+     * Returns wehther the cssTransform performance flag is set.
+     * @public
+     *
+     * @returns {boolean}
+     */
     isCSSTransformed: function() {
       return this._hints.cssTransform;
     },
     get cssTransform() { return this._hints.cssTransform; },
 
+    /**
+     * Sets a performance flag for whether layers/DOM elements should be excluded (or included) when things are
+     * invisible. The default is false, and invisible content is in the DOM, but hidden.
+     * @public
+     *
+     * @param {boolean} excludeInvisible
+     */
     setExcludeInvisible: function( excludeInvisible ) {
       assert && assert( typeof excludeInvisible === 'boolean' );
 
@@ -2840,11 +2861,23 @@ define( function( require ) {
     },
     set excludeInvisible( value ) { this.setExcludeInvisible( value ); },
 
+    /**
+     * Returns whether the excludeInvisible performance flag is set.
+     * @public
+     *
+     * @returns {boolean}
+     */
     isExcludeInvisible: function() {
       return this._hints.excludeInvisible;
     },
     get excludeInvisible() { return this.isExcludeInvisible(); },
 
+    /**
+     * Sets whether there is a custom WebGL scale applied to the Canvas, and if so what scale.
+     * @public
+     *
+     * @param {number|null} webglScale
+     */
     setWebGLScale: function( webglScale ) {
       assert && assert( webglScale === null || typeof webglScale === 'number' );
 
@@ -2855,6 +2888,12 @@ define( function( require ) {
     },
     set webglScale( value ) { this.setWebGLScale( value ); },
 
+    /**
+     * Returns the value of the webglScale performance flag.
+     * @public
+     *
+     * @returns {number|null}
+     */
     getWebGLScale: function() {
       return this._hints.webglScale;
     },
@@ -2865,12 +2904,14 @@ define( function( require ) {
      *----------------------------------------------------------------------------*/
 
     /**
-     * @returns {Trail} - Returns the one Trail that starts from a node with no parents (or if the predicate is present,
-     *                    a node that satisfies it), and ends at this node. If more than one Trail would satisfy these
-     *                    conditions, an assertion is thrown (please use getTrails() for those cases).
+     * Returns the one Trail that starts from a node with no parents (or if the predicate is present, a node that
+     * satisfies it), and ends at this node. If more than one Trail would satisfy these conditions, an assertion is
+     * thrown (please use getTrails() for those cases).
+     * @public
+     *
      * @param {function( node ) : boolean} [predicate] - If supplied, we will only return trails rooted at a node that
      *                                                   satisfies predicate( node ) == true
-     * @public
+     * @returns {Trail}
      */
     getUniqueTrail: function( predicate ) {
 
@@ -2902,10 +2943,12 @@ define( function( require ) {
     },
 
     /**
-     * @returns {Trail} - Returns a Trail rooted at rootNode and ends at this node. Throws an assertion if the number of
-     *                    trails that match this condition isn't exactly 1.
-     * @param {Node} rootNode
+     * Returns a Trail rooted at rootNode and ends at this node. Throws an assertion if the number of trails that match
+     * this condition isn't exactly 1.
      * @public
+     *
+     * @param {Node} rootNode
+     * @returns {Trail}
      */
     getUniqueTrailTo: function( rootNode ) {
       return this.getUniqueTrail( function( node ) {
@@ -2914,11 +2957,13 @@ define( function( require ) {
     },
 
     /**
-     * @returns {Trail[]} - An array of all Trails that start from nodes with no parent (or if a predicate is present,
-     *                      those that satisfy the predicate), and ends at this node.
+     * Returns an array of all Trails that start from nodes with no parent (or if a predicate is present, those that
+     * satisfy the predicate), and ends at this node.
+     * @public
+     *
      * @param {function( node ) : boolean} [predicate] - If supplied, we will only return Trails rooted at nodes that
      *                                                   satisfy predicate( node ) == true.
-     * @public
+     * @returns {Array.<Trail>}
      */
     getTrails: function( predicate ) {
       predicate = predicate || defaultTrailPredicate;
@@ -2931,9 +2976,11 @@ define( function( require ) {
     },
 
     /**
-     * @returns {Trail[]} - An array of all Trails rooted at rootNode and end at this node.
-     * @param {Node} rootNode
+     * Returns an array of all Trails rooted at rootNode and end at this node.
      * @public
+
+     * @param {Node} rootNode
+     * @returns {Array.<Trail>}
      */
     getTrailsTo: function( rootNode ) {
       return this.getTrails( function( node ) {
@@ -2942,11 +2989,13 @@ define( function( require ) {
     },
 
     /**
-     * @returns {Trail[]} - An array of all Trails rooted at this node and end with nodes with no children (or if a
-     *                      predicate is present, those that satisfy the predicate).
+     * Returns an array of all Trails rooted at this node and end with nodes with no children (or if a predicate is
+     * present, those that satisfy the predicate).
+     * @public
+     *
      * @param {function( node ) : boolean} [predicate] - If supplied, we will only return Trails ending at nodes that
      *                                                   satisfy predicate( node ) == true.
-     * @public
+     * @returns {Array.<Trail>}
      */
     getLeafTrails: function( predicate ) {
       predicate = predicate || defaultLeafTrailPredicate;
@@ -2959,9 +3008,11 @@ define( function( require ) {
     },
 
     /**
-     * @returns {Trail[]} - An array of all Trails rooted at this node and end with leafNode.
-     * @param {Node} leafNode
+     * Returns an array of all Trails rooted at this node and end with leafNode.
      * @public
+     *
+     * @param {Node} leafNode
+     * @returns {Array.<Trail>}
      */
     getLeafTrailsTo: function( leafNode ) {
       return this.getLeafTrails( function( node ) {
@@ -2970,12 +3021,13 @@ define( function( require ) {
     },
 
     /**
-     * @returns {Trail} - Returns a Trail rooted at this node and ending at a node that has no children (or if a
-     *                    predicate is provided, a node that satisfies the predicate). If more than one trail matches
-     *                    this description, an assertion will be fired.
+     * Returns a Trail rooted at this node and ending at a node that has no children (or if a predicate is provided, a
+     * node that satisfies the predicate). If more than one trail matches this description, an assertion will be fired.
+     * @public
+     *
      * @param {function( node ) : boolean} [predicate] - If supplied, we will return a Trail that ends with a node that
      *                                                   satisfies predicate( node ) == true
-     * @public
+     * @returns {Trail}
      */
     getUniqueLeafTrail: function( predicate ) {
       var trails = this.getLeafTrails( predicate );
@@ -2987,10 +3039,12 @@ define( function( require ) {
     },
 
     /**
-     * @returns {Trail} - Returns a Trail rooted at this node and ending at leafNode. If more than one trail matches
-     *                    this description, an assertion will be fired.
-     * @param {Node} leafNode
+     * Returns a Trail rooted at this node and ending at leafNode. If more than one trail matches this description,
+     * an assertion will be fired.
      * @public
+     *
+     * @param {Node} leafNode
+     * @returns {Trail}
      */
     getUniqueLeafTrailTo: function( leafNode ) {
       return this.getUniqueLeafTrail( function( node ) {
@@ -2999,9 +3053,11 @@ define( function( require ) {
     },
 
     /*
-     * @returns {Array.<Node>} All nodes in the connected component, returned in an arbitrary order, including
-     *                         nodes that are ancestors of this node.
+     * Returns all nodes in the connected component, returned in an arbitrary order, including nodes that are ancestors
+     * of this node.
      * @public
+     *
+     * @returns {Array.<Node>}
      */
     getConnectedNodes: function() {
       var result = [];
@@ -3017,10 +3073,11 @@ define( function( require ) {
     },
 
     /**
-     * Returns {Array.<Trail>} trails for all visible focusable trails rooted at the {Node} node passed in.
+     * Returns trails for all visible focusable trails rooted at the {Node} node passed in.
+     * @public
      *
      * @param {Node} node - The root node used for the focus order
-     * @public
+     * @returns {Array.<Trail>}
      */
     getSerializedFocusOrder: function() {
       var trails = []; // to be appended to and returned
@@ -3099,7 +3156,12 @@ define( function( require ) {
       return trails;
     },
 
-    // @public {Array.<Node>} all connected nodes sorted in topological order.
+    /**
+     * Returns all nodes that are connected to this node, sorted in topological order.
+     * @public
+     *
+     * @returns {Array.<Node>}
+     */
     getTopologicallySortedNodes: function() {
       // see http://en.wikipedia.org/wiki/Topological_sorting
       var edges = {};
@@ -3138,7 +3200,13 @@ define( function( require ) {
       return l;
     },
 
-    // verify that this.addChild( child ) it wouldn't cause circular references
+    /**
+     * Returns whether this.addChild( child ) will not cause circular references.
+     * @public
+     *
+     * @param {Node} child
+     * @returns {boolean}
+     */
     canAddChild: function( child ) {
       if ( this === child || _.contains( this._children, child ) ) {
         return false;
@@ -3186,19 +3254,35 @@ define( function( require ) {
       } );
     },
 
-    // @private
+    /**
+     * To be overridden in paintable node types. Should hook into the drawable's prototype (presumably).
+     * @protected
+     *
+     * @param {CanvasContextWrapper} wrapper
+     */
     canvasPaintSelf: function( wrapper ) {
-      // To be overridden in paintable node types. Should hook into the drawable's prototype (presumably).
+
     },
 
-    // @public: Render the self into the canvas wrapper with its local coordinates
+    /**
+     * Renders this Node only (its self) into the Canvas wrapper, in its local coordinate frame.
+     * @public
+     *
+     * @param {CanvasContextWrapper} wrapper
+     */
     renderToCanvasSelf: function( wrapper ) {
       if ( this.isPainted() && ( this._rendererBitmask & Renderer.bitmaskCanvas ) ) {
         this.canvasPaintSelf( wrapper );
       }
     },
 
-    // @public: Render this node and its descendants to the Canvas wrapper. matrix is optional
+    /**
+     * Renders this node and its descendants into the Canvas wrapper.
+     * @public
+     *
+     * @param {CanvasContextWrapper} wrapper
+     * @param {Matrix3} [matrix] - Optional transform to be applied
+     */
     renderToCanvasSubtree: function( wrapper, matrix ) {
       matrix = matrix || Matrix3.identity();
 
@@ -3245,13 +3329,23 @@ define( function( require ) {
       }
     },
 
+    /**
+     * @deprecated
+     * Render this node to the Canvas (clearing it first)
+     * @public
+     *
+     * @param {HTMLCanvasElement} canvas
+     * @param {CanvasRenderingContext2D} context
+     * @param {Function} callback - Called with no arguments
+     * @param {string} [backgroundColor]
+     */
     // @public @deprecated (API compatibility for now): Render this node to the Canvas (clearing it first)
-    renderToCanvas: function( canvas, context, callback, optionalBackgroundColor ) {
+    renderToCanvas: function( canvas, context, callback, backgroundColor ) {
       // should basically reset everything (and clear the Canvas)
       canvas.width = canvas.width;
 
-      if ( optionalBackgroundColor ) {
-        context.fillStyle = optionalBackgroundColor;
+      if ( backgroundColor ) {
+        context.fillStyle = backgroundColor;
         context.fillRect( 0, 0, canvas.width, canvas.height );
       }
 
@@ -3264,9 +3358,14 @@ define( function( require ) {
 
     /*
      * Renders this node to a canvas. If toCanvas( callback ) is used, the canvas will contain the node's
-     * entire bounds.
+     * entire bounds (if no x/y/width/height is provided)
+     * @public
      *
-     * callback( canvas, x, y ) is called, where x and y offsets are computed if not specified.
+     * @param {Function} callback - callback( canvas, x, y ) is called, where x,y are computed if not specified.
+     * @param {number} [x] - The X offset for where the upper-left of the content drawn into the Canvas
+     * @param {number} [y] - The Y offset for where the upper-left of the content drawn into the Canvas
+     * @param {number} [width] - The width of the Canvas output
+     * @param {number} [height] - The height of the Canvas output
      */
     toCanvas: function( callback, x, y, width, height ) {
       var padding = 2; // padding used if x and y are not set
@@ -3297,7 +3396,16 @@ define( function( require ) {
       callback( canvas, x, y ); // we used to be asynchronous
     },
 
-    // gives a data URI, with the same parameter handling as Node.toCanvas()
+    /**
+     * Renders this node to a Canvas, then calls the callback with the data URI from it.
+     * @public
+     *
+     * @param {Function} callback - callback( dataURI {string}, x, y ) is called, where x,y are computed if not specified.
+     * @param {number} [x] - The X offset for where the upper-left of the content drawn into the Canvas
+     * @param {number} [y] - The Y offset for where the upper-left of the content drawn into the Canvas
+     * @param {number} [width] - The width of the Canvas output
+     * @param {number} [height] - The height of the Canvas output
+     */
     toDataURL: function( callback, x, y, width, height ) {
       this.toCanvas( function( canvas, x, y ) {
         // this x and y shadow the outside parameters, and will be different if the outside parameters are undefined
@@ -3305,7 +3413,17 @@ define( function( require ) {
       }, x, y, width, height );
     },
 
-    // gives an HTMLImageElement with the same parameter handling as Node.toCanvas(). guaranteed to be asynchronous
+    /**
+     * Calls the callback with an HTMLImageElement that contains this Node's subtree's visual form.
+     * Will always be asynchronous.
+     * @public
+     *
+     * @param {Function} callback - callback( image {HTMLImageElement}, x, y ) is called
+     * @param {number} [x] - The X offset for where the upper-left of the content drawn into the Canvas
+     * @param {number} [y] - The Y offset for where the upper-left of the content drawn into the Canvas
+     * @param {number} [width] - The width of the Canvas output
+     * @param {number} [height] - The height of the Canvas output
+     */
     toImage: function( callback, x, y, width, height ) {
       this.toDataURL( function( url, x, y ) {
         // this x and y shadow the outside parameters, and will be different if the outside parameters are undefined
@@ -3321,7 +3439,17 @@ define( function( require ) {
       }, x, y, width, height );
     },
 
-    // will call callback( node )
+    /**
+     * Calls the callback with an Image node that contains this Node's subtree's visual form. This is always
+     * asynchronous, but the resulting image node can be used with any back-end (Canvas/WebGL/SVG/etc.)
+     * @public
+     *
+     * @param {Function} callback - callback( imageNode {Image} ) is called
+     * @param {number} [x] - The X offset for where the upper-left of the content drawn into the Canvas
+     * @param {number} [y] - The Y offset for where the upper-left of the content drawn into the Canvas
+     * @param {number} [width] - The width of the Canvas output
+     * @param {number} [height] - The height of the Canvas output
+     */
     toImageNodeAsynchronous: function( callback, x, y, width, height ) {
       this.toImage( function( image, x, y ) {
         callback( new scenery.Node( {
@@ -3332,7 +3460,17 @@ define( function( require ) {
       }, x, y, width, height );
     },
 
-    // fully synchronous, but returns a node that can only be rendered in Canvas
+    /**
+     * Calls the callback with an Image node that contains this Node's subtree's visual form. This is always
+     * synchronous, but the resulting image node can ONLY used with Canvas/WebGL (NOT SVG).
+     * @public
+     *
+     * @param {Function} callback - callback( imageNode {Image} ) is called
+     * @param {number} [x] - The X offset for where the upper-left of the content drawn into the Canvas
+     * @param {number} [y] - The Y offset for where the upper-left of the content drawn into the Canvas
+     * @param {number} [width] - The width of the Canvas output
+     * @param {number} [height] - The height of the Canvas output
+     */
     toCanvasNodeSynchronous: function( x, y, width, height ) {
       var result;
       this.toCanvas( function( canvas, x, y ) {
@@ -3346,7 +3484,19 @@ define( function( require ) {
       return result;
     },
 
-    // synchronous, but Image will not have the correct bounds immediately (that will be asynchronous)
+    /**
+     * Calls the callback with a Node that contains this Node's subtree's visual form. This is always
+     * synchronous, but the resulting node will not have the correct bounds immediately (that will be asynchronous).
+     * @public
+     *
+     * TODO: set initialWidth/initialHeight so that we have the bounds immediately?
+     *
+     * @param {Function} callback - callback( imageNode {Image} ) is called
+     * @param {number} [x] - The X offset for where the upper-left of the content drawn into the Canvas
+     * @param {number} [y] - The Y offset for where the upper-left of the content drawn into the Canvas
+     * @param {number} [width] - The width of the Canvas output
+     * @param {number} [height] - The height of the Canvas output
+     */
     toDataURLNodeSynchronous: function( x, y, width, height ) {
       var result;
       this.toDataURL( function( dataURL, x, y ) {
@@ -3364,13 +3514,23 @@ define( function( require ) {
      * Instance handling
      *----------------------------------------------------------------------------*/
 
-    // @private
+    /**
+     * Returns a reference to the instances array.
+     * @public (scenery-internal)
+     *
+     * @returns {Array.<Instance>}
+     */
     getInstances: function() {
       return this._instances;
     },
     get instances() { return this.getInstances(); },
 
-    // @private
+    /**
+     * Adds an Instance reference to our array.
+     * @public (scenery-internal)
+     *
+     * @param {Instance} instance
+     */
     addInstance: function( instance ) {
       assert && assert( instance instanceof scenery.Instance );
       this._instances.push( instance );
@@ -3379,7 +3539,12 @@ define( function( require ) {
       }
     },
 
-    // @private
+    /**
+     * Removes an Instance reference from our array.
+     * @public (scenery-internal)
+     *
+     * @param {Instance} instance
+     */
     removeInstance: function( instance ) {
       assert && assert( instance instanceof scenery.Instance );
       var index = _.indexOf( this._instances, instance );
@@ -3390,10 +3555,20 @@ define( function( require ) {
       }
     },
 
+    /**
+     * Hook meant to be overridden by Paintable. Called when our first instance is added (we should be actually
+     * displayed).
+     * @protected (scenery-internal)
+     */
     firstInstanceAdded: function() {
       // no-op, meant to be overridden in the prototype chain by Paintable
     },
 
+    /**
+     * Hook meant to be overridden by Paintable. Called when our last instance is removed (we shouldn't be displayed
+     * anymore).
+     * @protected (scenery-internal)
+     */
     lastInstanceRemoved: function() {
       // no-op, meant to be overridden in the prototype chain by Paintable
     },
@@ -3402,37 +3577,90 @@ define( function( require ) {
      * Coordinate transform methods
      *----------------------------------------------------------------------------*/
 
-    // apply this node's transform to the point
+    /**
+     * Returns a point transformed from our local coordinate frame into our parent coordinate frame. Applies our node's
+     * transform to it.
+     * @public
+     *
+     * @param {Vector2} point
+     * @returns {Vector2}
+     */
     localToParentPoint: function( point ) {
       return this._transform.transformPosition2( point );
     },
 
-    // apply this node's transform to the bounds
+    /**
+     * Returns bounds transformed from our local coordinate frame into our parent coordinate frame. If it includes a
+     * rotation, the resulting bounding box will include every point that could have been in the original bounding box
+     * (and it can be expanded).
+     * @public
+     *
+     * @param {Bounds2} bounds
+     * @returns {Bounds2}
+     */
     localToParentBounds: function( bounds ) {
       return this._transform.transformBounds2( bounds );
     },
 
-    // apply the inverse of this node's transform to the point
+    /**
+     * Returns a point transformed from our parent coordinate frame into our local coordinate frame. Applies the inverse
+     * of our node's transform to it.
+     * @public
+     *
+     * @param {Vector2} point
+     * @returns {Vector2}
+     */
     parentToLocalPoint: function( point ) {
       return this._transform.inversePosition2( point );
     },
 
-    // apply the inverse of this node's transform to the bounds
+    /**
+     * Returns bounds transformed from our parent coordinate frame into our local coordinate frame. If it includes a
+     * rotation, the resulting bounding box will include every point that could have been in the original bounding box
+     * (and it can be expanded).
+     * @public
+     *
+     * @param {Bounds2} bounds
+     * @returns {Bounds2}
+     */
     parentToLocalBounds: function( bounds ) {
       return this._transform.inverseBounds2( bounds );
     },
 
-    // mutable optimized form of localToParentBounds
+    /**
+     * A mutable-optimized form of localToParentBounds() that will modify the provided bounds, transforming it from our
+     * local coordinate frame to our parent coordinate frame.
+     * @public
+     *
+     * @param {Bounds2} bounds
+     * @returns {Bounds2} - The same bounds object.
+     */
     transformBoundsFromLocalToParent: function( bounds ) {
       return bounds.transform( this._transform.getMatrix() );
     },
 
-    // mutable optimized form of parentToLocalBounds
+    /**
+     * A mutable-optimized form of parentToLocalBounds() that will modify the provided bounds, transforming it from our
+     * parent coordinate frame to our local coordinate frame.
+     * @public
+     *
+     * @param {Bounds2} bounds
+     * @returns {Bounds2} - The same bounds object.
+     */
     transformBoundsFromParentToLocal: function( bounds ) {
       return bounds.transform( this._transform.getInverse() );
     },
 
-    // returns the matrix (fresh copy) that transforms points from the local coordinate frame into the global coordinate frame
+    /**
+     * Returns a new matrix (fresh copy) that would transform points from our local coordinate frame to the global
+     * coordinate frame.
+     * @public
+     *
+     * NOTE: If there are multiple instances of this node (e.g. this or one ancestor has two parents), it will fail
+     * with an assertion (since the transform wouldn't be uniquely defined).
+     *
+     * @returns {Matrix3}
+     */
     getLocalToGlobalMatrix: function() {
       var node = this;
 
@@ -3457,17 +3685,44 @@ define( function( require ) {
       return matrix;
     },
 
-    // equivalent to getUniqueTrail().getTransform(), but faster.
+    /**
+     * Returns a Transform3 that would transform things from our local coordinate frame to the global coordinate frame.
+     * Equivalent to getUniqueTrail().getTransform(), but faster.
+     * @public
+     *
+     * NOTE: If there are multiple instances of this node (e.g. this or one ancestor has two parents), it will fail
+     * with an assertion (since the transform wouldn't be uniquely defined).
+     *
+     * @returns {Transform3}
+     */
     getUniqueTransform: function() {
       return new Transform3( this.getLocalToGlobalMatrix() );
     },
 
-    // returns the matrix (fresh copy) that transforms points in the global coordinate frame into the local coordinate frame
+    /**
+     * Returns a new matrix (fresh copy) that would transform points from the global coordinate frame to our local
+     * coordinate frame.
+     * @public
+     *
+     * NOTE: If there are multiple instances of this node (e.g. this or one ancestor has two parents), it will fail
+     * with an assertion (since the transform wouldn't be uniquely defined).
+     *
+     * @returns {Matrix3}
+     */
     getGlobalToLocalMatrix: function() {
       return this.getLocalToGlobalMatrix().invert();
     },
 
-    // apply this node's transform (and then all of its parents' transforms) to the point
+    /**
+     * Transforms a point from our local coordinate frame to the global coordinate frame.
+     * @public
+     *
+     * NOTE: If there are multiple instances of this node (e.g. this or one ancestor has two parents), it will fail
+     * with an assertion (since the transform wouldn't be uniquely defined).
+     *
+     * @param {Vector2} point
+     * @returns {Vector2}
+     */
     localToGlobalPoint: function( point ) {
       var node = this;
       var resultPoint = point.copy();
@@ -3480,6 +3735,16 @@ define( function( require ) {
       return resultPoint;
     },
 
+    /**
+     * Transforms a point from the global coordinate frame to our local coordinate frame.
+     * @public
+     *
+     * NOTE: If there are multiple instances of this node (e.g. this or one ancestor has two parents), it will fail
+     * with an assertion (since the transform wouldn't be uniquely defined).
+     *
+     * @param {Vector2} point
+     * @returns {Vector2}
+     */
     globalToLocalPoint: function( point ) {
       var node = this;
       // TODO: performance: test whether it is faster to get a total transform and then invert (won't compute individual inverses)
@@ -3501,53 +3766,146 @@ define( function( require ) {
       return resultPoint;
     },
 
-    // apply this node's transform (and then all of its parents' transforms) to the bounds
+    /**
+     * Transforms bounds from our local coordinate frame to the global coordinate frame. If it includes a
+     * rotation, the resulting bounding box will include every point that could have been in the original bounding box
+     * (and it can be expanded).
+     * @public
+     *
+     * NOTE: If there are multiple instances of this node (e.g. this or one ancestor has two parents), it will fail
+     * with an assertion (since the transform wouldn't be uniquely defined).
+     *
+     * @param {Bounds2} bounds
+     * @returns {Bounds2}
+     */
     localToGlobalBounds: function( bounds ) {
       // apply the bounds transform only once, so we can minimize the expansion encountered from multiple rotations
       // it also seems to be a bit faster this way
       return bounds.transformed( this.getLocalToGlobalMatrix() );
     },
 
+    /**
+     * Transforms bounds from the global coordinate frame to our local coordinate frame. If it includes a
+     * rotation, the resulting bounding box will include every point that could have been in the original bounding box
+     * (and it can be expanded).
+     * @public
+     *
+     * NOTE: If there are multiple instances of this node (e.g. this or one ancestor has two parents), it will fail
+     * with an assertion (since the transform wouldn't be uniquely defined).
+     *
+     * @param {Bounds2} bounds
+     * @returns {Bounds2}
+     */
     globalToLocalBounds: function( bounds ) {
       // apply the bounds transform only once, so we can minimize the expansion encountered from multiple rotations
       return bounds.transformed( this.getGlobalToLocalMatrix() );
     },
 
-    // like localToGlobalPoint, but without applying this node's transform
+    /**
+     * Transforms a point from our parent coordinate frame to the global coordinate frame.
+     * @public
+     *
+     * NOTE: If there are multiple instances of this node (e.g. this or one ancestor has two parents), it will fail
+     * with an assertion (since the transform wouldn't be uniquely defined).
+     *
+     * @param {Vector2} point
+     * @returns {Vector2}
+     */
     parentToGlobalPoint: function( point ) {
       assert && assert( this.parents.length <= 1, 'parentToGlobalPoint unable to work for DAG' );
       return this.parents.length ? this.parents[ 0 ].localToGlobalPoint( point ) : point;
     },
 
-    // like localToGlobalBounds, but without applying this node's transform
+    /**
+     * Transforms bounds from our parent coordinate frame to the global coordinate frame. If it includes a
+     * rotation, the resulting bounding box will include every point that could have been in the original bounding box
+     * (and it can be expanded).
+     * @public
+     *
+     * NOTE: If there are multiple instances of this node (e.g. this or one ancestor has two parents), it will fail
+     * with an assertion (since the transform wouldn't be uniquely defined).
+     *
+     * @param {Bounds2} bounds
+     * @returns {Bounds2}
+     */
     parentToGlobalBounds: function( bounds ) {
       assert && assert( this.parents.length <= 1, 'parentToGlobalBounds unable to work for DAG' );
       return this.parents.length ? this.parents[ 0 ].localToGlobalBounds( bounds ) : bounds;
     },
 
+    /**
+     * Transforms a point from the global coordinate frame to our parent coordinate frame.
+     * @public
+     *
+     * NOTE: If there are multiple instances of this node (e.g. this or one ancestor has two parents), it will fail
+     * with an assertion (since the transform wouldn't be uniquely defined).
+     *
+     * @param {Vector2} point
+     * @returns {Vector2}
+     */
     globalToParentPoint: function( point ) {
       assert && assert( this.parents.length <= 1, 'globalToParentPoint unable to work for DAG' );
       return this.parents.length ? this.parents[ 0 ].globalToLocalPoint( point ) : point;
     },
 
+    /**
+     * Transforms bounds from the global coordinate frame to our parent coordinate frame. If it includes a
+     * rotation, the resulting bounding box will include every point that could have been in the original bounding box
+     * (and it can be expanded).
+     * @public
+     *
+     * NOTE: If there are multiple instances of this node (e.g. this or one ancestor has two parents), it will fail
+     * with an assertion (since the transform wouldn't be uniquely defined).
+     *
+     * @param {Bounds2} bounds
+     * @returns {Bounds2}
+     */
     globalToParentBounds: function( bounds ) {
       assert && assert( this.parents.length <= 1, 'globalToParentBounds unable to work for DAG' );
       return this.parents.length ? this.parents[ 0 ].globalToLocalBounds( bounds ) : bounds;
     },
 
-    // get the Bounds2 of this node in the global coordinate frame.  Does not work for DAG.
+    /**
+     * Returns a bounding box for this Node (and its sub-tree) in the global coordinate frame.
+     * @public
+     *
+     * NOTE: If there are multiple instances of this node (e.g. this or one ancestor has two parents), it will fail
+     * with an assertion (since the transform wouldn't be uniquely defined).
+     *
+     * @returns {Bounds2}
+     */
     getGlobalBounds: function() {
       assert && assert( this.parents.length <= 1, 'globalBounds unable to work for DAG' );
       return this.parentToGlobalBounds( this.getBounds() );
     },
     get globalBounds() { return this.getGlobalBounds(); },
 
-    // get the Bounds2 of any other node by converting to the global coordinate frame.  Does not work for DAG.
+    /**
+     * Returns the bounds of any other node in our local coordinate frame.
+     *
+     * NOTE: If this node or the passed in node have multiple instances (e.g. this or one ancestor has two parents), it will fail
+     * with an assertion.
+     *
+     * TODO: Possible to be well-defined and have multiple instances of each.
+     *
+     * @param {Node} node
+     * @returns {Bounds2}
+     */
     boundsOf: function( node ) {
       return this.globalToLocalBounds( node.getGlobalBounds() );
     },
 
-    // get the Bounds2 of this node in the coordinate frame of the parameter node. Does not work for DAG cases.
+    /**
+     * Returns the bounds of this node in another node's local coordinate frame.
+     *
+     * NOTE: If this node or the passed in node have multiple instances (e.g. this or one ancestor has two parents), it will fail
+     * with an assertion.
+     *
+     * TODO: Possible to be well-defined and have multiple instances of each.
+     *
+     * @param {Node} node
+     * @returns {Bounds2}
+     */
     boundsTo: function( node ) {
       return node.globalToLocalBounds( this.getGlobalBounds() );
     },
@@ -3556,13 +3914,23 @@ define( function( require ) {
      * Drawable handling
      *----------------------------------------------------------------------------*/
 
-    // will notify the drawable of visual state changes while it is attached
+    /**
+     * Adds the drawable to our list of drawables to notify of visual changes.
+     * @public (scenery-internal)
+     *
+     * @param {Drawable} drawable
+     */
     attachDrawable: function( drawable ) {
       this._drawables.push( drawable );
       return this; // allow chaining
     },
 
-    // will not notify the drawable of visual state changes after it is detached
+    /**
+     * Removes the drawable from our list of drawables to notify of visual changes.
+     * @public (scenery-internal)
+     *
+     * @param {Drawable} drawable
+     */
     detachDrawable: function( drawable ) {
       var index = _.indexOf( this._drawables, drawable );
 
@@ -3572,6 +3940,28 @@ define( function( require ) {
       return this;
     },
 
+    /**
+     * Scans the options object for key names that correspond to ES5 setters or other setter functions, and calls those
+     * with the values.
+     * @public
+     *
+     * For example:
+     *
+     * node.mutate( { top: 0, left: 5 } );
+     *
+     * will be equivalent to:
+     *
+     * node.left = 5;
+     * node.top = 0;
+     *
+     * In particular, note that the order is different. Mutators will be applied in the order of _mutatorKeys, which can
+     * be added to by subtypes.
+     *
+     * Additionally, some keys are actually direct function names, like 'scale'. mutate( { scale: 2 } ) will call
+     * node.scale( 2 ) instead of activating an ES5 setter directly.
+     *
+     * @param {Object} [options]
+     */
     mutate: function( options ) {
       if ( !options ) {
         return this;
@@ -3604,20 +3994,44 @@ define( function( require ) {
       return this; // allow chaining
     },
 
+    /**
+     * Override for extra information in the debugging output
+     * @protected (scenery-internal)
+     */
     getDebugHTMLExtras: function() {
-      return ''; // override for extra information in the debugging output
+      return '';
     },
 
+    /**
+     * Returns a debugging string that is an attempted serialization of this node's sub-tree.
+     * @public
+     *
+     * @param {string} spaces - Whitespace to add
+     * @param {boolean} [includeChildren]
+     */
     toString: function( spaces, includeChildren ) {
       spaces = spaces || '';
       var props = this.getPropString( spaces + '  ', includeChildren === undefined ? true : includeChildren );
       return spaces + this.getBasicConstructor( props ? ( '\n' + props + '\n' + spaces ) : '' );
     },
 
+    /**
+     * Returns a constructor template for toString(). Meant to be overridden by subtypes.
+     * @protected (scenery-internal)
+     *
+     * @param {string} propLines - What is included.
+     */
     getBasicConstructor: function( propLines ) {
       return 'new scenery.Node( {' + propLines + '} )';
     },
 
+    /**
+     * Returns the property object string for use with toString(). Meant to be overridden to add subtype-specific types.
+     * @protected (scenery-internal)
+     *
+     * @param {string} spaces - Whitespace to add
+     * @param {boolean} [includeChildren]
+     */
     getPropString: function( spaces, includeChildren ) {
       var result = '';
 
@@ -3675,7 +4089,6 @@ define( function( require ) {
     /**
      * Performs checks to see if the internal state of Instance references is correct at a certain point in/after the
      * Display's updateDisplay().
-     *
      * @private
      */
     auditInstanceSubtreeForDisplay: function( display ) {
@@ -3700,20 +4113,51 @@ define( function( require ) {
      * Compatibility with old events API (now using axon.Events)
      *----------------------------------------------------------------------------*/
 
+    /**
+     * @deprecated, please use node.on( eventName, listener) instead.
+     * Adds a listener for a specific event name.
+     * @public
+     *
+     * @param {string} eventName
+     * @param {Function} listener
+     */
     addEventListener: function( eventName, listener ) {
       // can't guarantee static with old usage
       return this.on( eventName, listener );
     },
 
+    /**
+     * @deprecated, please use node.off( eventName, listener) instead.
+     * Removes a listener for a specific event name.
+     * @public
+     *
+     * @param {string} eventName
+     * @param {Function} listener
+     */
     removeEventListener: function( eventName, listener ) {
       // can't guarantee static with old usage
       return this.off( eventName, listener );
     },
 
+    /**
+     * @deprecated, please use node.hasListener( eventName, listener) instead.
+     * Checks for the presence of a listener for a specific event name.
+     * @public
+     *
+     * @param {string} eventName
+     * @param {Function} listener
+     */
     containsEventListener: function( eventName, listener ) {
       return this.hasListener( eventName, listener );
     },
 
+    /**
+     * Tracks when an event listener is added, so that we can prune hit testing for performance.
+     * @private
+     *
+     * @param {string} eventName
+     * @param {Function} listener
+     */
     onEventListenerAdded: function( eventName, listener ) {
       if ( eventName in eventsRequiringBoundsValidation ) {
         this.changeBoundsEventCount( 1 );
@@ -3721,6 +4165,13 @@ define( function( require ) {
       }
     },
 
+    /**
+     * Tracks when an event listener is removed, so that we can prune hit testing for performance.
+     * @private
+     *
+     * @param {string} eventName
+     * @param {Function} listener
+     */
     onEventListenerRemoved: function( eventName, listener ) {
       if ( eventName in eventsRequiringBoundsValidation ) {
         this.changeBoundsEventCount( -1 );
@@ -3729,16 +4180,38 @@ define( function( require ) {
     }
 
   }, Events.prototype, {
+    /**
+     * Adds a listener for a specific event name. Overridden so we can track specific types of listeners.
+     * @public
+     *
+     * @param {string} eventName
+     * @param {Function} listener
+     */
     on: function onOverride( eventName, listener ) {
       Events.prototype.on.call( this, eventName, listener );
       this.onEventListenerAdded( eventName, listener );
     },
 
+    /**
+     * Adds a listener for a specific event name, that guarantees it won't trigger changes to the listener list when
+     * the listener is called. Overridden so we can track specific types of listeners.
+     * @public
+     *
+     * @param {string} eventName
+     * @param {Function} listener
+     */
     onStatic: function onStaticOverride( eventName, listener ) {
       Events.prototype.onStatic.call( this, eventName, listener );
       this.onEventListenerAdded( eventName, listener );
     },
 
+    /**
+     * Removes a listener for a specific event name. Overridden so we can track specific types of listeners.
+     * @public
+     *
+     * @param {string} eventName
+     * @param {Function} listener
+     */
     off: function offOverride( eventName, listener ) {
       var index = Events.prototype.off.call( this, eventName, listener );
       assert && assert( index >= 0, 'Node.off was called but no listener was removed' );
@@ -3746,6 +4219,14 @@ define( function( require ) {
       return index;
     },
 
+    /**
+     * Removes a listener for a specific event name, that guarantees it won't trigger changes to the listener list when
+     * the listener is called. Overridden so we can track specific types of listeners.
+     * @public
+     *
+     * @param {string} eventName
+     * @param {Function} listener
+     */
     offStatic: function offStaticOverride( eventName, listener ) {
       var index = Events.prototype.offStatic.call( this, eventName, listener );
       assert && assert( index >= 0, 'Node.offStatic was called but no listener was removed' );
@@ -3757,7 +4238,9 @@ define( function( require ) {
 
   /*
    * Convenience locations
-   * upper is in terms of the visual layout in Scenery and other programs, so the minY is the "upper", and minY is the "lower"
+   * @public
+   *
+   * Upper is in terms of the visual layout in Scenery and other programs, so the minY is the "upper", and minY is the "lower"
    *
    *             left (x)     centerX        right
    *          ---------------------------------------
@@ -3786,6 +4269,7 @@ define( function( require ) {
     } );
   }
 
+  // @public
   // arguments are more explicit so text-searches will hopefully identify this code.
   addBoundsVectorGetterSetter( 'getLeftTop', 'setLeftTop', 'leftTop' );
   addBoundsVectorGetterSetter( 'getCenterTop', 'setCenterTop', 'centerTop' );
@@ -3798,13 +4282,18 @@ define( function( require ) {
   addBoundsVectorGetterSetter( 'getRightBottom', 'setRightBottom', 'rightBottom' );
 
   /*
-   * This is an array of property (setter) names for Node.mutate(), which are also used when creating nodes with parameter objects.
+   * This is an array of property (setter) names for Node.mutate(), which are also used when creating nodes with
+   * parameter objects.
+   * @protected
    *
-   * E.g. new scenery.Node( { x: 5, rotation: 20 } ) will create a Path, and apply setters in the order below (node.x = 5; node.rotation = 20)
+   * E.g. new scenery.Node( { x: 5, rotation: 20 } ) will create a Path, and apply setters in the order below
+   * (node.x = 5; node.rotation = 20)
    *
    * The order below is important! Don't change this without knowing the implications.
-   * NOTE: translation-based mutators come before rotation/scale, since typically we think of their operations occuring "after" the rotation / scaling
-   * NOTE: left/right/top/bottom/centerX/centerY are at the end, since they rely potentially on rotation / scaling changes of bounds that may happen beforehand
+   * NOTE: translation-based mutators come before rotation/scale, since typically we think of their operations occuring
+   * "after" the rotation / scaling
+   * NOTE: left/right/top/bottom/centerX/centerY are at the end, since they rely potentially on rotation / scaling
+   * changes of bounds that may happen beforehand
    */
   Node.prototype._mutatorKeys = [
     'children', 'cursor', 'visible', 'pickable', 'opacity', 'matrix', 'translation', 'x', 'y', 'rotation', 'scale', 'maxWidth', 'maxHeight',
