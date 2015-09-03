@@ -1,8 +1,21 @@
 <!DOCTYPE HTML>
+<!--The following is an accessibility prototype for the "Invisible DOM".  This is a DOM tree that organizes, monitors,
+and provides an AT interface, but is an 'invisible' third entity - separate from both the model/view and scenery code.
+
+This is a prototype file.  Eventually, scenery will programmatically generate files like this to implement accessibility
+features such as screen reading and keyboard navigation for Phet sims.
+
+This prototype uses a global tab index order, along with some scripting, to navigate the simulation.  In addition,
+this prototype makes use of aria-activedescendant to make focus of nested elements available to accessible technologies.
+
+See phetsims/scenery/issue#450  http://www.w3.org/TR/wai-aria-practices/#keyboard for more information.
+
+@author Jesse Greenberg -->
 <html>
 
 <head>
-  <!-- styling for the accessibility DOM. Mostly unnecessary as this is a hidden parallel structure. -->
+  <!-- styling for the accessibility DOM. Mostly unnecessary as this is a hidden parallel structure, but it
+  makes testing navigation easier. -->
   <style>
     .hidden {
       visibility: hidden;
@@ -64,7 +77,7 @@
 
   </style>
 
-  <!-- scripting for the prototype.  Mostly critical for handling key strokes. -->
+  <!-- scripting for the prototype.  Handles update of tab indicies and -->
   <script>
 
     /**
