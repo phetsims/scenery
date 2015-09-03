@@ -13,11 +13,12 @@
 define( function( require ) {
   'use strict';
 
+  // @public (scenery-internal)
   window.sceneryLog = null;
   window.sceneryEventLog = null;
   window.sceneryAccessibilityLog = null;
 
-  // object allocation tracking
+  // Initialize object allocation tracking, if it hasn't been already.
   window.phetAllocation = require( 'PHET_CORE/phetAllocation' );
 
   var scratchCanvas = document.createElement( 'canvas' );
@@ -27,38 +28,48 @@ define( function( require ) {
 
   // will be filled in by other modules
   var scenery = {
-    assert: assert,
+    // @public - A Canvas and 2D Canvas context used for convenience functions (think of it as having arbitrary state).
+    scratchCanvas: scratchCanvas,
+    scratchContext: scratchContext,
 
-    scratchCanvas: scratchCanvas,   // a canvas used for convenience functions (think of it as having arbitrary state)
-    scratchContext: scratchContext, // a context used for convenience functions (think of it as having arbitrary state)
+    // @public - SVG namespace, used for document.createElementNS( scenery.svgns, name );
+    svgns: 'http://www.w3.org/2000/svg',
 
-    svgns: 'http://www.w3.org/2000/svg',     // svg namespace
-    xlinkns: 'http://www.w3.org/1999/xlink', // x-link namespace
+    // @public - X-link namespace, used for SVG image URLs (xlink:href)
+    xlinkns: 'http://www.w3.org/1999/xlink',
 
+    // @public - Scenery log string (accumulated if switchLogToString() is used).
     logString: '',
 
+    // @private - Scenery internal log function (switchable implementation, the main reference)
     logFunction: function() {
       // allow for the console to not exist
       window.console && window.console.log && window.console.log.apply( window.console, Array.prototype.slice.call( arguments, 0 ) );
     },
 
-    // so it can be switched
+    // @private - Scenery internal log function to be used to log to the console.
     consoleLogFunction: function() {
       // allow for the console to not exist
       window.console && window.console.log && window.console.log.apply( window.console, Array.prototype.slice.call( arguments, 0 ) );
     },
+
+    // @public - Switches Scenery's logging to print to the developer console.
     switchLogToConsole: function() {
       scenery.logFunction = scenery.consoleLogFunction;
     },
 
+    // @private - Scenery internal log function to be used to log to scenery.logString (does not include color/css)
     stringLogFunction: function( message ) {
       scenery.logString += message.replace( /%c/g, '' ) + '\n';
     },
+
+    // @public - Switches Scenery's logging to append to scenery.logString
     switchLogToString: function() {
       window.console && window.console.log( 'switching to string log' );
       scenery.logFunction = scenery.stringLogFunction;
     },
 
+    // @private - List of Scenery's loggers, with their display name and (if using console) the display style.
     logProperties: {
       dirty: { name: 'dirty', style: 'color: #aaa;' },
       bounds: { name: 'bounds', style: 'color: #aaa;' },
@@ -89,6 +100,8 @@ define( function( require ) {
       ImageSVGDrawable: { name: 'ImageSVGDrawable', style: 'color: #000;' },
       Paints: { name: 'Paints', style: 'color: #000;' }
     },
+
+    // @public - Enables a specific single logger, OR a composite logger ('stitch'/'perf')
     enableIndividualLog: function( name ) {
       if ( name === 'stitch' ) {
         this.enableIndividualLog( 'Stitch' );
@@ -119,11 +132,20 @@ define( function( require ) {
         };
       }
     },
+
+    // @public - Disables a specific log. TODO: handle stitch and perf composite loggers
     disableIndividualLog: function( name ) {
       if ( name ) {
         delete window.sceneryLog[ name ];
       }
     },
+
+    /**
+     * Enables multiple loggers.
+     * @public
+     *
+     * @param {Array.<string>} logNames - keys from scenery.logProperties
+     */
     enableLogging: function( logNames ) {
       if ( !logNames ) {
         logNames = [ 'stitch' ];
@@ -143,27 +165,33 @@ define( function( require ) {
       }
     },
 
+    // @public - Disables Scenery logging
     disableLogging: function() {
       window.sceneryLog = null;
     },
 
+    // @public (scenery-internal) - Whether performance logging is active (may actually reduce performance)
     isLoggingPerformance: function() {
       return window.sceneryLog.PerfCritical || window.sceneryLog.PerfMajor ||
              window.sceneryLog.PerfMinor || window.sceneryLog.PerfVerbose;
     },
 
+    // @public @deprecated (scenery-internal) - Enables logging related to events
     enableEventLogging: function() {
       window.sceneryEventLog = function( ob ) { scenery.logFunction( ob ); };
     },
 
+    // @public @deprecated (scenery-internal) - Disables logging related to events
     disableEventLogging: function() {
       window.sceneryEventLog = null;
     },
 
+    // @public @deprecated (scenery-internal) - Enables logging related to accessibility
     enableAccessibilityLogging: function() {
       window.sceneryAccessibilityLog = function( ob ) { scenery.logFunction( ob ); };
     },
 
+    // @public @deprecated (scenery-internal) - Disables logging related to accessibility
     disableAccessibilityLogging: function() {
       window.sceneryAccessibilityLog = null;
     }
