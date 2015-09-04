@@ -13,10 +13,6 @@
 define( [
   'SCENERY/scenery',
 
-  'SCENERY/accessibility/FocusCursor',
-  'SCENERY/accessibility/FocusLayer',
-  'SCENERY/accessibility/FocusRectangle',
-
   'SCENERY/debug/DebugContext',
 
   'SCENERY/display/BackboneDrawable',

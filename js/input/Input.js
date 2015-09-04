@@ -342,7 +342,8 @@ define( function( require ) {
         if ( this.logEvents ) { this.eventLog.push( 'keyDown(' + Input.serializeDomEvent( event ) + ');' ); }
 
         // temporary disabling
-        if ( !this.display.options.accessibility ) {
+        if ( true ) {
+        // if ( !this.display.options.accessibility ) {
           return;
         }
 
@@ -380,7 +381,8 @@ define( function( require ) {
         if ( this.logEvents ) { this.eventLog.push( 'keyUp(' + Input.serializeDomEvent( event ) + ');' ); }
 
         // temporary disabling
-        if ( !this.display.options.accessibility ) {
+        if ( true ) {
+        // if ( !this.display.options.accessibility ) {
           return;
         }
 

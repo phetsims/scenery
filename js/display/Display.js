@@ -112,6 +112,7 @@ define( function( require ) {
       preserveDrawingBuffer: false,
       allowWebGL: true,
       accessibility: true,
+      isApplication: false,      // adds the aria-role: 'application' when accessibility is enabled
       interactive: true
     }, options );
 
@@ -188,8 +189,39 @@ define( function( require ) {
     this.scenery = scenery;
 
     if ( this.options.accessibility ) {
-      var accessibilityLayer = createAccessibilityDiv();
-      this._domElement.appendChild( accessibilityLayer );
+      var accessibilityDiv = document.createElement( 'div' );
+      accessibilityDiv.className = 'accessibility';
+      accessibilityDiv.style.position = 'absolute';
+      accessibilityDiv.style.left = '0';
+      accessibilityDiv.style.top = '0';
+      accessibilityDiv.style.width = '0';
+      accessibilityDiv.style.height = '0';
+      accessibilityDiv.style.clip = 'rect(0,0,0,0)';
+
+      if ( this.options.isApplication ) {
+        this._domElement.setAttribute( 'aria-role', 'application' );
+      }
+
+      var div = document.createElement( 'div' );
+
+      var resetAllButtonPeer = document.createElement( 'input' );
+      resetAllButtonPeer.value = 'Reset';
+      resetAllButtonPeer.type = 'button';
+      resetAllButtonPeer.tabIndex = 0;
+      resetAllButtonPeer.addEventListener( 'click', function() {
+        console.log( 'clicked' );
+      } );
+      resetAllButtonPeer.addEventListener( 'focus', function() {
+        console.log( 'focus' );
+      } );
+      resetAllButtonPeer.addEventListener( 'blur', function() {
+        console.log( 'blur' );
+      } );
+
+      div.appendChild( resetAllButtonPeer );
+      accessibilityDiv.appendChild( div );
+
+      this._domElement.appendChild( accessibilityDiv );
     }
   };
   var Display = scenery.Display;
@@ -1319,28 +1351,6 @@ define( function( require ) {
   Display.customCursors = {
     'scenery-grab-pointer': [ 'grab', '-moz-grab', '-webkit-grab', 'pointer' ],
     'scenery-grabbing-pointer': [ 'grabbing', '-moz-grabbing', '-webkit-grabbing', 'pointer' ]
-  };
-
-  // Creates the div that will contain the accessibiity-related DOM elements.
-  var createAccessibilityDiv = function() {
-    var div = document.createElement( 'div' );
-    div.setAttribute( 'id', 'accessibility' );
-    div.style.position = 'absolute';
-    div.style.left = '0';
-    div.style.top = '0';
-    div.style.width = '0';
-    div.style.height = '0';
-
-    // Create some fake children for now so that tabbing doesn't take you out of the HTML content.
-    // TODO: this should eventually be replaced by actual peers, or at least the appropriate count of children (to match
-    // TODO: the number of focusable nodes)
-    for ( var i = 0; i < 100; i++ ) {
-      var child = document.createElement( 'div' );
-      child.setAttribute( 'tabindex', 0 );
-      div.appendChild( child );
-    }
-
-    return div;
   };
 
   return Display;
