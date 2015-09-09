@@ -137,6 +137,14 @@ define( function( require ) {
     // @private @deprecated {string} - 'cursor' or 'rectangle' at the moment. WARNING: in active development!
     this._focusIndicator = 'rectangle';
 
+    // @private {null|Object} - If non-null, this node will be represented in the parallel DOM by the accessible content.
+    // The accessibleContent object will be of the form:
+    // {
+    //   createPeer: function( {Trail} ): {AccessiblePeer},
+    //   [focusHighlight]: {Bounds2|Shape}
+    // }
+    this._accessibleContent = null;
+
     // @private {Array.<Node> | null} - If provided, it will override the focus order between children (and optionally
     // descendants). If not provided, the focus order will default to the rendering order (first children first, last
     // children last) determined by the children array.
@@ -2592,7 +2600,7 @@ define( function( require ) {
     set accessibleOrder( value ) { this.setAccessibleOrder( value ); },
 
     /**
-     * Returns the focus order for this node.
+     * Returns the accessible (focus) order for this node.
      * @public
      *
      * @returns {Array.<Node>|null}
@@ -2601,6 +2609,34 @@ define( function( require ) {
       return this._accessibleOrder;
     },
     get accessibleOrder() { return this.getAccessibleOrder(); },
+
+    /**
+     * Sets the accessible content for a Node. See constructor for more information.
+     * @public
+     *
+     * @param {null|Object} accessibleContent
+     */
+    setAccessibleContent: function( accessibleContent ) {
+      assert && assert( accessibleContent === null || accessibleContent instanceof Object );
+
+      if ( this._accessibleContent !== accessibleContent ) {
+        this._accessibleContent = accessibleContent;
+
+        this.trigger0( 'accessibleContent' );
+      }
+    },
+    set accessibleContent( value ) { this.setAccessibleContent( value ); },
+
+    /**
+     * Returns the accessible content for this node.
+     * @public
+     *
+     * @returns {Array.<Node>|null}
+     */
+    getAccessibleContent: function() {
+      return this._accessibleContent;
+    },
+    get accessibleContent() { return this.getAccessibleContent(); },
 
     // @deprecated
     supportsCanvas: function() {
@@ -3112,8 +3148,8 @@ define( function( require ) {
           return;
         }
 
-        // Pushing item and its children array, if focsable
-        if ( node.focusable ) {
+        // Pushing item and its children array, if accessible
+        if ( node.accessibleContent ) {
           var item = {
             trail: currentTrail.copy(),
             children: []
@@ -3160,8 +3196,8 @@ define( function( require ) {
           } );
         }
 
-        // Popping children array if focusable
-        if ( node.focusable ) {
+        // Popping children array if accessible
+        if ( node.accessibleContent ) {
           nestedChildStack.pop();
         }
       }
@@ -4315,7 +4351,7 @@ define( function( require ) {
     'leftTop', 'centerTop', 'rightTop', 'leftCenter', 'center', 'rightCenter', 'leftBottom', 'centerBottom', 'rightBottom',
     'left', 'right', 'top', 'bottom', 'centerX', 'centerY', 'renderer', 'rendererOptions',
     'layerSplit', 'usesOpacity', 'cssTransform', 'excludeInvisible', 'webglScale', 'mouseArea', 'touchArea', 'clipArea',
-    'transformBounds', 'focusable', 'focusIndicator', 'accessibleOrder', 'textDescription'
+    'transformBounds', 'focusable', 'focusIndicator', 'accessibleContent', 'accessibleOrder', 'textDescription'
   ];
 
   return Node;

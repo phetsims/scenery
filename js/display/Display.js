@@ -64,6 +64,7 @@ define( function( require ) {
   require( 'SCENERY/display/SVGSelfDrawable' );
   require( 'SCENERY/input/Input' );
   require( 'SCENERY/util/Trail' );
+  var SceneryStyle = require( 'SCENERY/util/SceneryStyle' );
   var PointerAreaOverlay = require( 'SCENERY/overlays/PointerAreaOverlay' );
   var PointerOverlay = require( 'SCENERY/overlays/PointerOverlay' );
   var CanvasNodeBoundsOverlay = require( 'SCENERY/overlays/CanvasNodeBoundsOverlay' );
@@ -189,39 +190,23 @@ define( function( require ) {
     this.scenery = scenery;
 
     if ( this.options.accessibility ) {
-      var accessibilityDiv = document.createElement( 'div' );
-      accessibilityDiv.className = 'accessibility';
-      accessibilityDiv.style.position = 'absolute';
-      accessibilityDiv.style.left = '0';
-      accessibilityDiv.style.top = '0';
-      accessibilityDiv.style.width = '0';
-      accessibilityDiv.style.height = '0';
-      accessibilityDiv.style.clip = 'rect(0,0,0,0)';
+      var accessibilityContainer = document.createElement( 'div' );
+      this.accessibilityContainer = accessibilityContainer;
+      accessibilityContainer.className = 'accessibility';
+      accessibilityContainer.style.position = 'absolute';
+      accessibilityContainer.style.left = '0';
+      accessibilityContainer.style.top = '0';
+      accessibilityContainer.style.width = '0';
+      accessibilityContainer.style.height = '0';
+      accessibilityContainer.style.clip = 'rect(0,0,0,0)';
 
       if ( this.options.isApplication ) {
         this._domElement.setAttribute( 'aria-role', 'application' );
       }
 
-      var div = document.createElement( 'div' );
+      this._domElement.appendChild( accessibilityContainer );
 
-      var resetAllButtonPeer = document.createElement( 'input' );
-      resetAllButtonPeer.value = 'Reset';
-      resetAllButtonPeer.type = 'button';
-      resetAllButtonPeer.tabIndex = 0;
-      resetAllButtonPeer.addEventListener( 'click', function() {
-        console.log( 'clicked' );
-      } );
-      resetAllButtonPeer.addEventListener( 'focus', function() {
-        console.log( 'focus' );
-      } );
-      resetAllButtonPeer.addEventListener( 'blur', function() {
-        console.log( 'blur' );
-      } );
-
-      div.appendChild( resetAllButtonPeer );
-      accessibilityDiv.appendChild( div );
-
-      this._domElement.appendChild( accessibilityDiv );
+      SceneryStyle.addRule( '.accessibility * { position: absolute; left: 0; top: 0; width: 0; height: 0, clip: rect(0,0,0,0); }' );
     }
   };
   var Display = scenery.Display;
@@ -1345,6 +1330,30 @@ define( function( require ) {
 
     popupRasterization: function() {
       this.foreignObjectRasterization( window.open );
+    },
+
+    // Overwrites the current accessibility container with a static snapshot of the accessibility parallel DOM.
+    overwriteAccessibilityContainer: function() {
+      var nestedOrder = this.rootNode.getNestedAccessibleOrder();
+
+      // Remove all DOM children from the accessibility container
+      while ( this.accessibilityContainer.firstChild ) {
+        this.accessibilityContainer.removeChild( this.accessibilityContainer.firstChild );
+      }
+
+      function addContent( domParent, itemChildren ) {
+        _.each( itemChildren, function( item ) {
+          var node = item.trail.lastNode();
+
+          var peer = node.accessibleContent.createPeer( item.trail );
+
+          domParent.appendChild( peer.domElement );
+
+          addContent( peer.getChildContainerElement(), item.children );
+        } );
+      }
+
+      addContent( this.accessibilityContainer, nestedOrder );
     }
   }, Events.prototype ) );
 

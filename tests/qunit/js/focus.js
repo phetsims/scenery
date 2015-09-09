@@ -17,13 +17,19 @@
     }
   }
 
+  var accessibleContent = {
+    createPeer: function( trail ) {
+      return new scenery.AccessiblePeer( document.createElement( 'div' ) );
+    }
+  };
+
   test( 'Simple Test', function() {
 
-    var a1 = new scenery.Node( { focusable: true } );
-    var a2 = new scenery.Node( { focusable: true } );
+    var a1 = new scenery.Node( { accessibleContent: accessibleContent } );
+    var a2 = new scenery.Node( { accessibleContent: accessibleContent } );
 
-    var b1 = new scenery.Node( { focusable: true } );
-    var b2 = new scenery.Node( { focusable: true } );
+    var b1 = new scenery.Node( { accessibleContent: accessibleContent } );
+    var b2 = new scenery.Node( { accessibleContent: accessibleContent } );
 
     var a = new scenery.Node( { children: [ a1, a2 ] } );
     var b = new scenery.Node( { children: [ b1, b2 ] } );
@@ -42,11 +48,11 @@
 
   test( 'accessibleOrder Simple Test', function() {
 
-    var a1 = new scenery.Node( { focusable: true } );
-    var a2 = new scenery.Node( { focusable: true } );
+    var a1 = new scenery.Node( { accessibleContent: accessibleContent } );
+    var a2 = new scenery.Node( { accessibleContent: accessibleContent } );
 
-    var b1 = new scenery.Node( { focusable: true } );
-    var b2 = new scenery.Node( { focusable: true } );
+    var b1 = new scenery.Node( { accessibleContent: accessibleContent } );
+    var b2 = new scenery.Node( { accessibleContent: accessibleContent } );
 
     var a = new scenery.Node( { children: [ a1, a2 ] } );
     var b = new scenery.Node( { children: [ b1, b2 ] } );
@@ -65,11 +71,11 @@
 
   test( 'accessibleOrder Descendant Test', function() {
 
-    var a1 = new scenery.Node( { focusable: true } );
-    var a2 = new scenery.Node( { focusable: true } );
+    var a1 = new scenery.Node( { accessibleContent: accessibleContent } );
+    var a2 = new scenery.Node( { accessibleContent: accessibleContent } );
 
-    var b1 = new scenery.Node( { focusable: true } );
-    var b2 = new scenery.Node( { focusable: true } );
+    var b1 = new scenery.Node( { accessibleContent: accessibleContent } );
+    var b2 = new scenery.Node( { accessibleContent: accessibleContent } );
 
     var a = new scenery.Node( { children: [ a1, a2 ] } );
     var b = new scenery.Node( { children: [ b1, b2 ] } );
@@ -88,14 +94,14 @@
 
   test( 'accessibleOrder Descendant Pruning Test', function() {
 
-    var a1 = new scenery.Node( { focusable: true } );
-    var a2 = new scenery.Node( { focusable: true } );
+    var a1 = new scenery.Node( { accessibleContent: accessibleContent } );
+    var a2 = new scenery.Node( { accessibleContent: accessibleContent } );
 
-    var b1 = new scenery.Node( { focusable: true } );
-    var b2 = new scenery.Node( { focusable: true } );
+    var b1 = new scenery.Node( { accessibleContent: accessibleContent } );
+    var b2 = new scenery.Node( { accessibleContent: accessibleContent } );
 
-    var c1 = new scenery.Node( { focusable: true } );
-    var c2 = new scenery.Node( { focusable: true } );
+    var c1 = new scenery.Node( { accessibleContent: accessibleContent } );
+    var c2 = new scenery.Node( { accessibleContent: accessibleContent } );
 
     var c = new scenery.Node( { children: [ c1, c2 ] } );
 
@@ -118,11 +124,11 @@
 
   test( 'accessibleOrder Descendant Override', function() {
 
-    var a1 = new scenery.Node( { focusable: true } );
-    var a2 = new scenery.Node( { focusable: true } );
+    var a1 = new scenery.Node( { accessibleContent: accessibleContent } );
+    var a2 = new scenery.Node( { accessibleContent: accessibleContent } );
 
-    var b1 = new scenery.Node( { focusable: true } );
-    var b2 = new scenery.Node( { focusable: true } );
+    var b1 = new scenery.Node( { accessibleContent: accessibleContent } );
+    var b2 = new scenery.Node( { accessibleContent: accessibleContent } );
 
     var a = new scenery.Node( { children: [ a1, a2 ] } );
     var b = new scenery.Node( { children: [ b1, b2 ], accessibleOrder: [ b1, b2 ] } );
@@ -141,11 +147,11 @@
 
   test( 'accessibleOrder Hierarchy', function() {
 
-    var a1 = new scenery.Node( { focusable: true } );
-    var a2 = new scenery.Node( { focusable: true } );
+    var a1 = new scenery.Node( { accessibleContent: accessibleContent } );
+    var a2 = new scenery.Node( { accessibleContent: accessibleContent } );
 
-    var b1 = new scenery.Node( { focusable: true } );
-    var b2 = new scenery.Node( { focusable: true } );
+    var b1 = new scenery.Node( { accessibleContent: accessibleContent } );
+    var b2 = new scenery.Node( { accessibleContent: accessibleContent } );
 
     var a = new scenery.Node( { children: [ a1, a2 ], accessibleOrder: [ a2 ] } );
     var b = new scenery.Node( { children: [ b1, b2 ], accessibleOrder: [ b2, b1 ] } );
@@ -164,8 +170,8 @@
 
   test( 'accessibleOrder DAG test', function() {
 
-    var a1 = new scenery.Node( { focusable: true } );
-    var a2 = new scenery.Node( { focusable: true } );
+    var a1 = new scenery.Node( { accessibleContent: accessibleContent } );
+    var a2 = new scenery.Node( { accessibleContent: accessibleContent } );
 
     var a = new scenery.Node( { children: [ a1, a2 ], accessibleOrder: [ a2, a1 ] } );
     var b = new scenery.Node( { children: [ a1, a2 ], accessibleOrder: [ a1, a2 ] } );
@@ -188,14 +194,14 @@
     var a = new scenery.Node();
     var b = new scenery.Node();
     var c = new scenery.Node();
-    var d = new scenery.Node( { focusable: true } );
+    var d = new scenery.Node( { accessibleContent: accessibleContent } );
     var e = new scenery.Node();
-    var f = new scenery.Node( { focusable: true } );
-    var g = new scenery.Node( { focusable: true } );
-    var h = new scenery.Node( { focusable: true } );
-    var i = new scenery.Node( { focusable: true } );
-    var j = new scenery.Node( { focusable: true } );
-    var k = new scenery.Node( { focusable: true } );
+    var f = new scenery.Node( { accessibleContent: accessibleContent } );
+    var g = new scenery.Node( { accessibleContent: accessibleContent } );
+    var h = new scenery.Node( { accessibleContent: accessibleContent } );
+    var i = new scenery.Node( { accessibleContent: accessibleContent } );
+    var j = new scenery.Node( { accessibleContent: accessibleContent } );
+    var k = new scenery.Node( { accessibleContent: accessibleContent } );
     var l = new scenery.Node();
 
     x.children = [ a ];

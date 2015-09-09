@@ -13,6 +13,8 @@
 define( [
   'SCENERY/scenery',
 
+  'SCENERY/accessibility/AccessiblePeer',
+
   'SCENERY/debug/DebugContext',
 
   'SCENERY/display/BackboneDrawable',
