@@ -140,7 +140,7 @@ define( function( require ) {
     // @private {Array.<Node> | null} - If provided, it will override the focus order between children (and optionally
     // descendants). If not provided, the focus order will default to the rendering order (first children first, last
     // children last) determined by the children array.
-    this._focusOrder = null;
+    this._accessibleOrder = null;
 
     // @public (scenery-internal) - Not for public use, but used directly internally for performance.
     this._children = []; // {Array.<Node>} - Ordered array of child nodes.
@@ -2572,23 +2572,24 @@ define( function( require ) {
     get focusIndicator() { return this.getFocusIndicator(); },
 
     /**
-     * Sets the focus order for this node. If provided, it will override the focus order between children (and
+     * Sets the accessible focus order for this node. This includes not only focussed items, but elements that can be
+     * placed in the parallel DOM. If provided, it will override the focus order between children (and
      * optionally descendants). If not provided, the focus order will default to the rendering order (first children
      * first, last children last), determined by the children array.
      * @public
      *
-     * @param {Array.<Node>|null} focusOrder
+     * @param {Array.<Node>|null} accessibleOrder
      */
-    setFocusOrder: function( focusOrder ) {
-      assert && assert( focusOrder === null || focusOrder instanceof Array );
+    setAccessibleOrder: function( accessibleOrder ) {
+      assert && assert( accessibleOrder === null || accessibleOrder instanceof Array );
 
-      if ( this._focusOrder !== focusOrder ) {
-        this._focusOrder = focusOrder;
+      if ( this._accessibleOrder !== accessibleOrder ) {
+        this._accessibleOrder = accessibleOrder;
 
-        this.trigger0( 'focusOrder' );
+        this.trigger0( 'accessibleOrder' );
       }
     },
-    set focusOrder( value ) { this.setFocusOrder( value ); },
+    set accessibleOrder( value ) { this.setAccessibleOrder( value ); },
 
     /**
      * Returns the focus order for this node.
@@ -2596,10 +2597,10 @@ define( function( require ) {
      *
      * @returns {Array.<Node>|null}
      */
-    getFocusOrder: function() {
-      return this._focusOrder;
+    getAccessibleOrder: function() {
+      return this._accessibleOrder;
     },
-    get focusOrder() { return this.getFocusOrder(); },
+    get accessibleOrder() { return this.getAccessibleOrder(); },
 
     // @deprecated
     supportsCanvas: function() {
@@ -3079,7 +3080,7 @@ define( function( require ) {
      * @param {Node} node - The root node used for the focus order
      * @returns {Array.<Trail>}
      */
-    getSerializedFocusOrder: function() {
+    getSerializedAccessibleOrder: function() {
       var trails = []; // to be appended to and returned
       var currentTrail = new scenery.Trail( this );
       var pruneStack = []; // {Array.<Node>} - A list of nodes to prune
@@ -3090,7 +3091,7 @@ define( function( require ) {
           return;
         }
 
-        // If subtrees were specified with focusOrder, they should be skipped from the ordering of ancestor subtrees,
+        // If subtrees were specified with accessibleOrder, they should be skipped from the ordering of ancestor subtrees,
         // otherwise we could end up having multiple references to the same trail (which should be disallowed).
         var pruneCount = 0;
         var pruneStackLength = pruneStack.length;
@@ -3101,7 +3102,7 @@ define( function( require ) {
           }
         }
         // If overridePruning is set, we ignore one reference to our node in the prune stack. If there are two copies,
-        // however, it means a node was specified in a focusOrder that already needs to be pruned (so we skip it instead
+        // however, it means a node was specified in a accessibleOrder that already needs to be pruned (so we skip it instead
         // of creating duplicate references in the tab order).
         if ( pruneCount > 1 || ( pruneCount === 1 && !overridePruning ) ) {
           return;
@@ -3111,16 +3112,16 @@ define( function( require ) {
           trails.push( currentTrail.copy() );
         }
 
-        if ( node._focusOrder ) {
-          var numFocusNodes = node._focusOrder.length;
+        if ( node._accessibleOrder ) {
+          var numFocusNodes = node._accessibleOrder.length;
 
           // push specific focused nodes to the stack
           for ( var l = 0; l < numFocusNodes; l++ ) {
-            pruneStack.push( node._focusOrder[l] );
+            pruneStack.push( node._accessibleOrder[l] );
           }
 
           for ( var j = 0; j < numFocusNodes; j++ ) {
-            var descendant = node._focusOrder[j];
+            var descendant = node._accessibleOrder[j];
 
             // Find all descendant references to the node. We only want one reference, however.
             // TODO: for production performance, don't do a full scan. Check children first, then scan only if necessary
@@ -3138,7 +3139,7 @@ define( function( require ) {
             pruneStack.pop();
           }
         }
-        // with no focusOrder, all children are scanned in the rendering order
+        // with no accessibleOrder, all children are scanned in the rendering order
         else {
           var numChildren = node._children.length;
           for ( var i = 0; i < numChildren; i++ ) {
@@ -4300,7 +4301,7 @@ define( function( require ) {
     'leftTop', 'centerTop', 'rightTop', 'leftCenter', 'center', 'rightCenter', 'leftBottom', 'centerBottom', 'rightBottom',
     'left', 'right', 'top', 'bottom', 'centerX', 'centerY', 'renderer', 'rendererOptions',
     'layerSplit', 'usesOpacity', 'cssTransform', 'excludeInvisible', 'webglScale', 'mouseArea', 'touchArea', 'clipArea',
-    'transformBounds', 'focusable', 'focusIndicator', 'focusOrder', 'textDescription'
+    'transformBounds', 'focusable', 'focusIndicator', 'accessibleOrder', 'textDescription'
   ];
 
   return Node;
