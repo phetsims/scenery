@@ -3,6 +3,20 @@
 
   module( 'Scenery: Focus' );
 
+  // Arrays of items of the type { trail: {Trail}, children: {Array.<Item>} }
+  function nestedEquality( a, b ) {
+    equal( a.length, b.length );
+
+    for ( var i = 0; i < a.length; i++ ) {
+      var aItem = a[ i ];
+      var bItem = b[ i ];
+
+      ok( aItem.trail.equals( bItem.trail ) );
+
+      nestedEquality( aItem.children, bItem.children );
+    }
+  }
+
   test( 'Simple Test', function() {
 
     var a1 = new scenery.Node( { focusable: true } );
@@ -16,13 +30,14 @@
 
     var root = new scenery.Node( { children: [ a, b ] } );
 
-    var trails = root.getSerializedAccessibleOrder();
+    var nestedOrder = root.getNestedAccessibleOrder();
 
-    ok( trails[0].equals( new scenery.Trail( [ root, a, a1 ] ) ) );
-    ok( trails[1].equals( new scenery.Trail( [ root, a, a2 ] ) ) );
-    ok( trails[2].equals( new scenery.Trail( [ root, b, b1 ] ) ) );
-    ok( trails[3].equals( new scenery.Trail( [ root, b, b2 ] ) ) );
-    equal( trails.length, 4 );
+    nestedEquality( nestedOrder, [
+      { trail: new scenery.Trail( [ root, a, a1 ] ), children: [] },
+      { trail: new scenery.Trail( [ root, a, a2 ] ), children: [] },
+      { trail: new scenery.Trail( [ root, b, b1 ] ), children: [] },
+      { trail: new scenery.Trail( [ root, b, b2 ] ), children: [] }
+    ] );
   } );
 
   test( 'accessibleOrder Simple Test', function() {
@@ -38,13 +53,14 @@
 
     var root = new scenery.Node( { children: [ a, b ], accessibleOrder: [ b, a ] } );
 
-    var trails = root.getSerializedAccessibleOrder();
+    var nestedOrder = root.getNestedAccessibleOrder();
 
-    ok( trails[0].equals( new scenery.Trail( [ root, b, b1 ] ) ) );
-    ok( trails[1].equals( new scenery.Trail( [ root, b, b2 ] ) ) );
-    ok( trails[2].equals( new scenery.Trail( [ root, a, a1 ] ) ) );
-    ok( trails[3].equals( new scenery.Trail( [ root, a, a2 ] ) ) );
-    equal( trails.length, 4 );
+    nestedEquality( nestedOrder, [
+      { trail: new scenery.Trail( [ root, b, b1 ] ), children: [] },
+      { trail: new scenery.Trail( [ root, b, b2 ] ), children: [] },
+      { trail: new scenery.Trail( [ root, a, a1 ] ), children: [] },
+      { trail: new scenery.Trail( [ root, a, a2 ] ), children: [] }
+    ] );
   } );
 
   test( 'accessibleOrder Descendant Test', function() {
@@ -60,13 +76,14 @@
 
     var root = new scenery.Node( { children: [ a, b ], accessibleOrder: [ a1, b1, a2, b2 ] } );
 
-    var trails = root.getSerializedAccessibleOrder();
+    var nestedOrder = root.getNestedAccessibleOrder();
 
-    ok( trails[0].equals( new scenery.Trail( [ root, a, a1 ] ) ) );
-    ok( trails[1].equals( new scenery.Trail( [ root, b, b1 ] ) ) );
-    ok( trails[2].equals( new scenery.Trail( [ root, a, a2 ] ) ) );
-    ok( trails[3].equals( new scenery.Trail( [ root, b, b2 ] ) ) );
-    equal( trails.length, 4 );
+    nestedEquality( nestedOrder, [
+      { trail: new scenery.Trail( [ root, a, a1 ] ), children: [] },
+      { trail: new scenery.Trail( [ root, b, b1 ] ), children: [] },
+      { trail: new scenery.Trail( [ root, a, a2 ] ), children: [] },
+      { trail: new scenery.Trail( [ root, b, b2 ] ), children: [] }
+    ] );
   } );
 
   test( 'accessibleOrder Descendant Pruning Test', function() {
@@ -87,15 +104,16 @@
 
     var root = new scenery.Node( { children: [ a, b ], accessibleOrder: [ c1, a, a2, b2 ] } );
 
-    var trails = root.getSerializedAccessibleOrder();
+    var nestedOrder = root.getNestedAccessibleOrder();
 
-    ok( trails[0].equals( new scenery.Trail( [ root, a, c, c1 ] ) ) );
-    ok( trails[1].equals( new scenery.Trail( [ root, a, a1 ] ) ) );
-    ok( trails[2].equals( new scenery.Trail( [ root, a, c, c2 ] ) ) );
-    ok( trails[3].equals( new scenery.Trail( [ root, a, a2 ] ) ) );
-    ok( trails[4].equals( new scenery.Trail( [ root, b, b2 ] ) ) );
-    ok( trails[5].equals( new scenery.Trail( [ root, b, b1 ] ) ) );
-    equal( trails.length, 6 );
+    nestedEquality( nestedOrder, [
+      { trail: new scenery.Trail( [ root, a, c, c1 ] ), children: [] },
+      { trail: new scenery.Trail( [ root, a, a1 ] ), children: [] },
+      { trail: new scenery.Trail( [ root, a, c, c2 ] ), children: [] },
+      { trail: new scenery.Trail( [ root, a, a2 ] ), children: [] },
+      { trail: new scenery.Trail( [ root, b, b2 ] ), children: [] },
+      { trail: new scenery.Trail( [ root, b, b1 ] ), children: [] }
+    ] );
   } );
 
   test( 'accessibleOrder Descendant Override', function() {
@@ -111,13 +129,14 @@
 
     var root = new scenery.Node( { children: [ a, b ], accessibleOrder: [ b, b1, a ] } );
 
-    var trails = root.getSerializedAccessibleOrder();
+    var nestedOrder = root.getNestedAccessibleOrder();
 
-    ok( trails[0].equals( new scenery.Trail( [ root, b, b2 ] ) ) );
-    ok( trails[1].equals( new scenery.Trail( [ root, b, b1 ] ) ) );
-    ok( trails[2].equals( new scenery.Trail( [ root, a, a1 ] ) ) );
-    ok( trails[3].equals( new scenery.Trail( [ root, a, a2 ] ) ) );
-    equal( trails.length, 4 );
+    nestedEquality( nestedOrder, [
+      { trail: new scenery.Trail( [ root, b, b2 ] ), children: [] },
+      { trail: new scenery.Trail( [ root, b, b1 ] ), children: [] },
+      { trail: new scenery.Trail( [ root, a, a1 ] ), children: [] },
+      { trail: new scenery.Trail( [ root, a, a2 ] ), children: [] }
+    ] );
   } );
 
   test( 'accessibleOrder Hierarchy', function() {
@@ -133,14 +152,14 @@
 
     var root = new scenery.Node( { children: [ a, b ], accessibleOrder: [ b, a ] } );
 
-    var trails = root.getSerializedAccessibleOrder();
+    var nestedOrder = root.getNestedAccessibleOrder();
 
-    ok( trails[0].equals( new scenery.Trail( [ root, b, b2 ] ) ) );
-    ok( trails[1].equals( new scenery.Trail( [ root, b, b1 ] ) ) );
-    ok( trails[2].equals( new scenery.Trail( [ root, a, a2 ] ) ) );
-    ok( trails[3].equals( new scenery.Trail( [ root, a, a1 ] ) ) );
-
-    equal( trails.length, 4 );
+    nestedEquality( nestedOrder, [
+      { trail: new scenery.Trail( [ root, b, b2 ] ), children: [] },
+      { trail: new scenery.Trail( [ root, b, b1 ] ), children: [] },
+      { trail: new scenery.Trail( [ root, a, a2 ] ), children: [] },
+      { trail: new scenery.Trail( [ root, a, a1 ] ), children: [] }
+    ] );
   } );
 
   test( 'accessibleOrder DAG test', function() {
@@ -153,13 +172,14 @@
 
     var root = new scenery.Node( { children: [ a, b ] } );
 
-    var trails = root.getSerializedAccessibleOrder();
+    var nestedOrder = root.getNestedAccessibleOrder();
 
-    ok( trails[0].equals( new scenery.Trail( [ root, a, a2 ] ) ) );
-    ok( trails[1].equals( new scenery.Trail( [ root, a, a1 ] ) ) );
-    ok( trails[2].equals( new scenery.Trail( [ root, b, a1 ] ) ) );
-    ok( trails[3].equals( new scenery.Trail( [ root, b, a2 ] ) ) );
-    equal( trails.length, 4 );
+    nestedEquality( nestedOrder, [
+      { trail: new scenery.Trail( [ root, a, a2 ] ), children: [] },
+      { trail: new scenery.Trail( [ root, a, a1 ] ), children: [] },
+      { trail: new scenery.Trail( [ root, b, a1 ] ), children: [] },
+      { trail: new scenery.Trail( [ root, b, a2 ] ), children: [] }
+    ] );
   } );
 
   test( 'accessibleOrder DAG test', function() {
@@ -189,28 +209,30 @@
     a.accessibleOrder = [ c, b ];
     e.accessibleOrder = [ g, f, j ];
 
-    var trails = x.getSerializedAccessibleOrder();
+    var nestedOrder = x.getNestedAccessibleOrder();
 
-    // x order's F
-    ok( trails[0].equals( new scenery.Trail( [ x, a, b, e, f ] ) ) );
-    ok( trails[1].equals( new scenery.Trail( [ x, a, b, e, f, h ] ) ) );
-    ok( trails[2].equals( new scenery.Trail( [ x, a, b, e, f, i ] ) ) );
-    ok( trails[3].equals( new scenery.Trail( [ x, a, c, e, f ] ) ) );
-    ok( trails[4].equals( new scenery.Trail( [ x, a, c, e, f, h ] ) ) );
-    ok( trails[5].equals( new scenery.Trail( [ x, a, c, e, f, i ] ) ) );
+    nestedEquality( nestedOrder, [
+      // x order's F
+      { trail: new scenery.Trail( [ x, a, b, e, f ] ), children: [
+        { trail: new scenery.Trail( [ x, a, b, e, f, h ] ), children: [] },
+        { trail: new scenery.Trail( [ x, a, b, e, f, i ] ), children: [] },
+      ] },
+      { trail: new scenery.Trail( [ x, a, c, e, f ] ), children: [
+        { trail: new scenery.Trail( [ x, a, c, e, f, h ] ), children: [] },
+        { trail: new scenery.Trail( [ x, a, c, e, f, i ] ), children: [] },
+      ] },
 
-    // X order's C
-    ok( trails[6].equals( new scenery.Trail( [ x, a, c, e, g ] ) ) );
-    ok( trails[7].equals( new scenery.Trail( [ x, a, c, e, j ] ) ) );
+      // X order's C
+      { trail: new scenery.Trail( [ x, a, c, e, g ] ), children: [] },
+      { trail: new scenery.Trail( [ x, a, c, e, j ] ), children: [] },
 
-    // X order's D
-    ok( trails[8].equals( new scenery.Trail( [ x, a, b, d ] ) ) );
+      // X order's D
+      { trail: new scenery.Trail( [ x, a, b, d ] ), children: [] },
 
-    // X everything else
-    ok( trails[9].equals( new scenery.Trail( [ x, a, b, e, g ] ) ) );
-    ok( trails[10].equals( new scenery.Trail( [ x, a, b, e, j ] ) ) );
-    ok( trails[11].equals( new scenery.Trail( [ x, a, k ] ) ) );
-
-    equal( trails.length, 12 );
+      // X everything else
+      { trail: new scenery.Trail( [ x, a, b, e, g ] ), children: [] },
+      { trail: new scenery.Trail( [ x, a, b, e, j ] ), children: [] },
+      { trail: new scenery.Trail( [ x, a, k ] ), children: [] }
+    ] );
   } );
 })();

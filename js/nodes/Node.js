@@ -3074,16 +3074,25 @@ define( function( require ) {
     },
 
     /**
-     * Returns trails for all visible focusable trails rooted at the {Node} node passed in.
+     * Returns a recursive data structure that represents the nested ordering of accessible content for this Node's
+     * subtree. Each "Item" will have the type { trail: {Trail}, children: {Array.<Item>} }, forming a tree-like
+     * structure.
      * @public
      *
-     * @param {Node} node - The root node used for the focus order
-     * @returns {Array.<Trail>}
+     * @returns {Array.<Item>}
      */
-    getSerializedAccessibleOrder: function() {
-      var trails = []; // to be appended to and returned
+    getNestedAccessibleOrder: function() {
       var currentTrail = new scenery.Trail( this );
       var pruneStack = []; // {Array.<Node>} - A list of nodes to prune
+
+      // {Array.<Item>} - The main result we will be returning. It is the top-level array where child items will be
+      // inserted.
+      var result = [];
+
+      // {Array.<Array.<Item>>} A stack of children arrays, where we should be inserting items into the top array.
+      // We will start out with the result, and as nested levels are added, the children arrays of those items will be
+      // pushed and poppped, so that the top array on this stack is where we should insert our next child item.
+      var nestedChildStack = [ result ];
 
       function addTrailsForNode( node, overridePruning ) {
         // If subtrees were specified with accessibleOrder, they should be skipped from the ordering of ancestor subtrees,
@@ -3103,10 +3112,17 @@ define( function( require ) {
           return;
         }
 
+        // Pushing item and its children array, if focsable
         if ( node.focusable ) {
-          trails.push( currentTrail.copy() );
+          var item = {
+            trail: currentTrail.copy(),
+            children: []
+          };
+          nestedChildStack[ nestedChildStack.length - 1 ].push( item );
+          nestedChildStack.push( item.children );
         }
 
+        // Pushing pruned nodes to the stack (if ordered), AND visiting trails to ordered nodes.
         if ( node._accessibleOrder ) {
           // push specific focused nodes to the stack
           pruneStack = pruneStack.concat( node._accessibleOrder );
@@ -3126,6 +3142,7 @@ define( function( require ) {
           } );
         }
 
+        // Visit everything. If there is an accessibleOrder, those trails were already visited, and will be excluded.
         var numChildren = node._children.length;
         for ( var i = 0; i < numChildren; i++ ) {
           var child = node._children[ i ];
@@ -3135,17 +3152,23 @@ define( function( require ) {
           currentTrail.removeDescendant();
         }
 
+        // Popping pruned nodes from the stack (if ordered)
         if ( node._accessibleOrder ) {
           // pop focused nodes from the stack (that were added above)
           _.each( node._accessibleOrder, function( descendant ) {
             pruneStack.pop();
           } );
         }
+
+        // Popping children array if focusable
+        if ( node.focusable ) {
+          nestedChildStack.pop();
+        }
       }
 
       addTrailsForNode( this, false );
 
-      return trails;
+      return result;
     },
 
     /**
