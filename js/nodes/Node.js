@@ -3086,21 +3086,16 @@ define( function( require ) {
       var pruneStack = []; // {Array.<Node>} - A list of nodes to prune
 
       function addTrailsForNode( node, overridePruning ) {
-        // We skip invisible subtrees (including the root!)
-        if ( !node.isVisible() ) {
-          return;
-        }
-
         // If subtrees were specified with accessibleOrder, they should be skipped from the ordering of ancestor subtrees,
         // otherwise we could end up having multiple references to the same trail (which should be disallowed).
         var pruneCount = 0;
-        var pruneStackLength = pruneStack.length;
         // count the number of times our node appears in the pruneStack
-        for ( var m = 0; m < pruneStackLength; m++ ) {
-          if ( node === pruneStack[m] ) {
+        _.each( pruneStack, function( pruneNode ) {
+          if ( node === pruneNode ) {
             pruneCount++;
           }
-        }
+        } );
+
         // If overridePruning is set, we ignore one reference to our node in the prune stack. If there are two copies,
         // however, it means a node was specified in a accessibleOrder that already needs to be pruned (so we skip it instead
         // of creating duplicate references in the tab order).
@@ -3113,42 +3108,38 @@ define( function( require ) {
         }
 
         if ( node._accessibleOrder ) {
-          var numFocusNodes = node._accessibleOrder.length;
-
           // push specific focused nodes to the stack
-          for ( var l = 0; l < numFocusNodes; l++ ) {
-            pruneStack.push( node._accessibleOrder[l] );
-          }
+          pruneStack = pruneStack.concat( node._accessibleOrder );
 
-          for ( var j = 0; j < numFocusNodes; j++ ) {
-            var descendant = node._accessibleOrder[j];
+          _.each( node._accessibleOrder, function( descendant ) {
+            // Find all descendant references to the node.
+            // NOTE: We are not reordering trails (due to descendant constraints) if there is more than one instance for
+            // this descendant node.
+            _.each( node.getLeafTrailsTo( descendant ), function( descendantTrail ) {
+              descendantTrail.removeAncestor(); // strip off 'node', so that we handle only children
 
-            // Find all descendant references to the node. We only want one reference, however.
-            // TODO: for production performance, don't do a full scan. Check children first, then scan only if necessary
-            var descendantTrail = node.getUniqueLeafTrailTo( descendant );
-            descendantTrail.removeAncestor(); // strip off 'node', so that we handle only children
-
-            // same as the normal order, but adding a full trail (since we may be referencing a descendant node)
-            currentTrail.addDescendantTrail( descendantTrail );
-            addTrailsForNode( descendant, true ); // 'true' overrides one reference in the prune stack (added above)
-            currentTrail.removeDescendantTrail( descendantTrail );
-          }
-
-          // pop focused nodes from the stack (that were added above)
-          for ( var k = 0; k < numFocusNodes; k++ ) {
-            pruneStack.pop();
-          }
+              // same as the normal order, but adding a full trail (since we may be referencing a descendant node)
+              currentTrail.addDescendantTrail( descendantTrail );
+              addTrailsForNode( descendant, true ); // 'true' overrides one reference in the prune stack (added above)
+              currentTrail.removeDescendantTrail( descendantTrail );
+            } );
+          } );
         }
-        // with no accessibleOrder, all children are scanned in the rendering order
-        else {
-          var numChildren = node._children.length;
-          for ( var i = 0; i < numChildren; i++ ) {
-            var child = node._children[i];
 
-            currentTrail.addDescendant( child, i );
-            addTrailsForNode( child, false );
-            currentTrail.removeDescendant();
-          }
+        var numChildren = node._children.length;
+        for ( var i = 0; i < numChildren; i++ ) {
+          var child = node._children[ i ];
+
+          currentTrail.addDescendant( child, i );
+          addTrailsForNode( child, false );
+          currentTrail.removeDescendant();
+        }
+
+        if ( node._accessibleOrder ) {
+          // pop focused nodes from the stack (that were added above)
+          _.each( node._accessibleOrder, function( descendant ) {
+            pruneStack.pop();
+          } );
         }
       }
 
