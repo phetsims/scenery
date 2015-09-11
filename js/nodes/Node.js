@@ -140,8 +140,8 @@ define( function( require ) {
     // @private {null|Object} - If non-null, this node will be represented in the parallel DOM by the accessible content.
     // The accessibleContent object will be of the form:
     // {
-    //   createPeer: function( {Trail} ): {AccessiblePeer},
-    //   [focusHighlight]: {Bounds2|Shape}
+    //   createPeer: function( {AccessibleInstance} ): {AccessiblePeer},
+    //   [focusHighlight]: {Bounds2|Shape|Node}
     // }
     this._accessibleContent = null;
 

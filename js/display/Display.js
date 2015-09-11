@@ -45,11 +45,13 @@ define( function( require ) {
   var inherit = require( 'PHET_CORE/inherit' );
   var extend = require( 'PHET_CORE/extend' );
   var Events = require( 'AXON/Events' );
+  var Property = require( 'AXON/Property' );
   var Dimension2 = require( 'DOT/Dimension2' );
   var Vector2 = require( 'DOT/Vector2' );
   var Matrix3 = require( 'DOT/Matrix3' );
 
   var scenery = require( 'SCENERY/scenery' );
+  var Node = require( 'SCENERY/nodes/Node' );
   var Features = require( 'SCENERY/util/Features' );
   require( 'SCENERY/display/BackboneDrawable' );
   require( 'SCENERY/display/CanvasBlock' );
@@ -64,7 +66,9 @@ define( function( require ) {
   require( 'SCENERY/display/SVGSelfDrawable' );
   require( 'SCENERY/input/Input' );
   require( 'SCENERY/util/Trail' );
+  var AccessibleInstance = require( 'SCENERY/accessibility/AccessibleInstance' );
   var SceneryStyle = require( 'SCENERY/util/SceneryStyle' );
+  var FocusOverlay = require( 'SCENERY/overlays/FocusOverlay' );
   var PointerAreaOverlay = require( 'SCENERY/overlays/PointerAreaOverlay' );
   var PointerOverlay = require( 'SCENERY/overlays/PointerOverlay' );
   var CanvasNodeBoundsOverlay = require( 'SCENERY/overlays/CanvasNodeBoundsOverlay' );
@@ -92,6 +96,7 @@ define( function( require ) {
    *   interactive: true                    // Whether mouse/touch/keyboard inputs are enabled (if input has been added)
    */
   scenery.Display = function Display( rootNode, options ) {
+    assert && assert( rootNode, 'rootNode is a required parameter' );
 
     // supertype call to axon.Events (should just initialize a few properties here, notably _eventListeners and _staticEventListeners)
     Events.call( this );
@@ -207,6 +212,10 @@ define( function( require ) {
       this._domElement.appendChild( accessibilityContainer );
 
       SceneryStyle.addRule( '.accessibility * { position: absolute; left: 0; top: 0; width: 0; height: 0, clip: rect(0,0,0,0); }' );
+
+      this._focusRootNode = new Node();
+      this._focusOverlay = new FocusOverlay( this, this._focusRootNode );
+      this.addOverlay( this._focusOverlay );
     }
   };
   var Display = scenery.Display;
@@ -1334,6 +1343,8 @@ define( function( require ) {
 
     // Overwrites the current accessibility container with a static snapshot of the accessibility parallel DOM.
     overwriteAccessibilityContainer: function() {
+      var display = this;
+
       var nestedOrder = this.rootNode.getNestedAccessibleOrder();
 
       // Remove all DOM children from the accessibility container
@@ -1345,7 +1356,7 @@ define( function( require ) {
         _.each( itemChildren, function( item ) {
           var node = item.trail.lastNode();
 
-          var peer = node.accessibleContent.createPeer( item.trail );
+          var peer = node.accessibleContent.createPeer( new AccessibleInstance( display, item.trail ) );
 
           domParent.appendChild( peer.domElement );
 
@@ -1361,6 +1372,8 @@ define( function( require ) {
     'scenery-grab-pointer': [ 'grab', '-moz-grab', '-webkit-grab', 'pointer' ],
     'scenery-grabbing-pointer': [ 'grabbing', '-moz-grabbing', '-webkit-grabbing', 'pointer' ]
   };
+
+  Property.addProperty( Display, 'focus', null ); // { display: {Display}, trail: {Trail} }
 
   return Display;
 } );

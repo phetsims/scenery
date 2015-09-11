@@ -18,8 +18,8 @@
   }
 
   var accessibleContent = {
-    createPeer: function( trail ) {
-      return new scenery.AccessiblePeer( document.createElement( 'div' ) );
+    createPeer: function( accessibleInstance ) {
+      return new scenery.AccessiblePeer( accessibleInstance, document.createElement( 'div' ) );
     }
   };
 

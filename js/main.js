@@ -13,6 +13,7 @@
 define( [
   'SCENERY/scenery',
 
+  'SCENERY/accessibility/AccessibleInstance',
   'SCENERY/accessibility/AccessiblePeer',
 
   'SCENERY/debug/DebugContext',
@@ -83,6 +84,7 @@ define( [
   'SCENERY/nodes/WebGLNode',
 
   'SCENERY/overlays/CanvasNodeBoundsOverlay',
+  'SCENERY/overlays/FocusOverlay',
   'SCENERY/overlays/PointerAreaOverlay',
   'SCENERY/overlays/PointerOverlay',
 

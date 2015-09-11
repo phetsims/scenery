@@ -13,30 +13,54 @@ define( function( require ) {
   var Poolable = require( 'PHET_CORE/Poolable' );
   var Events = require( 'AXON/Events' );
   var scenery = require( 'SCENERY/scenery' );
+  var Display = require( 'SCENERY/display/Display' );
 
   var globalId = 1;
 
-  scenery.AccessiblePeer = function AccessiblePeer( domElement, containerDOMElement ) {
-    this.initializeAccessiblePeer( domElement, containerDOMElement );
+  scenery.AccessiblePeer = function AccessiblePeer( accessibleInstance, domElement, containerDOMElement ) {
+    this.initializeAccessiblePeer( accessibleInstance, domElement, containerDOMElement );
   };
   var AccessiblePeer = scenery.AccessiblePeer;
 
   inherit( Events, AccessiblePeer, {
     /**
-     * @param {DOMElement} [domElement] - If not included here, subtype is responsible for setting it in the constructor.
+     * @param {DOMElement} domElement - The main DOM element used for this peer.
+     * @param {DOMElement} [containerDOMElement] - A container DOM element (usually an ancestor of the domElement) where
+     *                                             nested elements are placed
      */
-    initializeAccessiblePeer: function( domElement, containerDOMElement ) {
+    initializeAccessiblePeer: function( accessibleInstance, domElement, containerDOMElement ) {
+      var peer = this;
+
       Events.call( this ); // TODO: is Events worth mixing in by default? Will we need to listen to events?
 
       assert && assert( !this.id || this.disposed, 'If we previously existed, we need to have been disposed' );
 
-      // unique ID for drawables
+      // unique ID
       this.id = this.id || globalId++;
 
-      this.domElement = domElement ? domElement : ( this.domElement || null );
+      this.accessibleInstance = accessibleInstance;
+      this.display = accessibleInstance.display;
+      this.trail = accessibleInstance.trail;
+
+      this.domElement = domElement;
       this.containerDOMElement = containerDOMElement ? containerDOMElement : ( this.containerDOMElement || null );
 
       this.disposed = false;
+
+      this.domElement.addEventListener( 'focus', function( event ) {
+        if ( event.target === peer.domElement ) {
+          Display.focus = {
+            display: accessibleInstance.display,
+            trail: accessibleInstance.trail
+          };
+        }
+      } );
+
+      this.domElement.addEventListener( 'blur', function( event ) {
+        if ( event.target === peer.domElement ) {
+          Display.focus = null;
+        }
+      } );
 
       return this;
     },
