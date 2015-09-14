@@ -98,7 +98,8 @@ define( function( require ) {
       SVGBlock: { name: 'SVG', style: 'color: #000;' },
       SVGGroup: { name: 'SVGGroup', style: 'color: #000;' },
       ImageSVGDrawable: { name: 'ImageSVGDrawable', style: 'color: #000;' },
-      Paints: { name: 'Paints', style: 'color: #000;' }
+      Paints: { name: 'Paints', style: 'color: #000;' },
+      Accessibility: { name: 'Accessibility', style: 'color: #000;' }
     },
 
     // @public - Enables a specific single logger, OR a composite logger ('stitch'/'perf')

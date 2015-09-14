@@ -265,6 +265,8 @@ define( function( require ) {
       // from code below without triggering side effects (we assume that we are not reentrant).
       this._rootNode.validateWatchedBounds();
 
+      if ( assertSlow ) { this.options.accessibility && this._rootAccessibleInstance.auditRoot(); }
+
       this._baseInstance = this._baseInstance || scenery.Instance.createFromPool( this, new scenery.Trail( this._rootNode ), true, false );
       this._baseInstance.baseSyncTree();
       if ( firstRun ) {
@@ -515,18 +517,14 @@ define( function( require ) {
     },
 
     /**
-     * Called when a subtree with accessible content is added.
+     * Returns the AccessibleInstance which has the longest trail that is an ancestor of the passed in trail. It will
+     * fall back to the root accessible instance if there is no other available one.
      * @private
      *
      * @param {Trail} trail
+     * @returns {AccessibleInstance}
      */
-    addAccessibleTrail: function( trail ) {
-      console.log( 'Adding accessible trail: ' + trail );
-
-      if ( !this.options.accessibility ) {
-        return;
-      }
-
+    getBaseAccessibleInstance: function( trail ) {
       // Search through trail to find longest trail extension where the leafmost node has accessible content, but does
       // not include the node that was just added.
       var i;
@@ -536,10 +534,9 @@ define( function( require ) {
           break;
         }
       }
-      var baseAccessibleInstance;
       // no ancestor of the added node was accessible, so add things directly to root accessible instance.
       if ( i < 0 ) {
-        baseAccessibleInstance = this._rootAccessibleInstance;
+        return this._rootAccessibleInstance;
       }
       // otherwise, we encountered an accessible instance and i points to the leaf most node for the sub trail.
       else {
@@ -549,13 +546,31 @@ define( function( require ) {
         for ( var j = 0; j < accessibleInstances.length; j++ ) {
           var accessibleInstance = accessibleInstances[ j ];
           if ( trail.isExtensionOf( accessibleInstance.trail ) ) {
-            baseAccessibleInstance = accessibleInstance;
-            break;
+            return accessibleInstance;
           }
         }
-        assert && assert( baseAccessibleInstance, 'A base accessible instance must be defined.' );
       }
-      baseAccessibleInstance.addSubtree( trail );
+
+      throw new Error( 'A base accessible instance must be defined.' );
+    },
+
+    /**
+     * Called when a subtree with accessible content is added.
+     * @private
+     *
+     * @param {Trail} trail
+     */
+    addAccessibleTrail: function( trail ) {
+      if ( !this.options.accessibility ) {
+        return;
+      }
+
+      sceneryLog && sceneryLog.Accessibility && sceneryLog.Accessibility( 'Display.addAccessibleTrail ' + trail.toString() );
+      sceneryLog && sceneryLog.Accessibility && sceneryLog.push();
+
+      this.getBaseAccessibleInstance( trail ).addSubtree( trail );
+
+      sceneryLog && sceneryLog.Accessibility && sceneryLog.pop();
     },
 
     /**
@@ -565,10 +580,16 @@ define( function( require ) {
      * @param {Trail} trail
      */
     removeAccessibleTrail: function( trail ) {
-      console.log( 'removing accessible trail: ' + trail );
       if ( !this.options.accessibility ) {
         return;
       }
+
+      sceneryLog && sceneryLog.Accessibility && sceneryLog.Accessibility( 'Display.removeAccessibleTrail ' + trail.toString() );
+      sceneryLog && sceneryLog.Accessibility && sceneryLog.push();
+
+      this.getBaseAccessibleInstance( trail ).removeSubtree( trail );
+
+      sceneryLog && sceneryLog.Accessibility && sceneryLog.pop();
     },
 
     /**
@@ -580,12 +601,20 @@ define( function( require ) {
      * @param {object} newAccessibleContent
      */
     changedAccessibleContent: function( trail, oldAccessibleContent, newAccessibleContent ) {
-      console.log( 'changing accessible content: ' + trail );
-      console.log( 'old accessible content: ' + oldAccessibleContent );
-      console.log( 'old accessible content: ' + newAccessibleContent );
       if ( !this.options.accessibility ) {
         return;
       }
+
+      sceneryLog && sceneryLog.Accessibility && sceneryLog.Accessibility(
+        'Display.changedAccessibleContent ' + trail.toString() +
+        ' old: ' + ( !!oldAccessibleContent ) +
+        ' new: ' + ( !!newAccessibleContent ) );
+      sceneryLog && sceneryLog.Accessibility && sceneryLog.push();
+
+      this.getBaseAccessibleInstance( trail ).removeSubtree( trail );
+      this.getBaseAccessibleInstance( trail ).addSubtree( trail );
+
+      sceneryLog && sceneryLog.Accessibility && sceneryLog.pop();
     },
 
     /**
@@ -595,10 +624,16 @@ define( function( require ) {
      * @param {Trail} trail
      */
     changedAccessibleOrder: function( trail ) {
-      console.log( 'changing accessible order: ' + trail );
       if ( !this.options.accessibility ) {
         return;
       }
+
+      sceneryLog && sceneryLog.Accessibility && sceneryLog.Accessibility( 'Display.changedAccessibleOrder ' + trail.toString() );
+      sceneryLog && sceneryLog.Accessibility && sceneryLog.push();
+
+      // TODO
+
+      sceneryLog && sceneryLog.Accessibility && sceneryLog.pop();
     },
 
     /*

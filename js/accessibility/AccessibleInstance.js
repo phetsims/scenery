@@ -93,11 +93,54 @@ define( function( require ) {
       }
     },
 
+    removeSubtree: function( trail ) {
+      for ( var i = this.children.length - 1; i >= 0; i-- ) {
+        var childInstance = this.children[ i ];
+        if ( childInstance.trail.isExtensionOf( trail, true ) ) {
+          this.children.splice( i, 1 ); // remove it from the children array
+
+          // Dispose the entire subtree of AccessibleInstances
+          childInstance.dispose();
+        }
+      }
+    },
+
+    // Recursive disposal
     dispose: function() {
+      while ( this.children.length ) {
+        this.children.pop().dispose();
+      }
+
       // If we are the root accessible instance, we won't actually have a reference to a node.
       if ( this.node ) {
         this.node.removeAccessibleInstance( this );
       }
+
+      this.display = null;
+      this.trail = null;
+      this.node = null;
+    },
+
+    auditRoot: function() {
+      assert && assert( this.trail.length === 0,
+        'Should only call auditRoot() on the root AccessibleInstance for a display' );
+
+
+      function audit( nestedOrderArray, accessibleInstance ) {
+        assert && assert( nestedOrderArray.length === accessibleInstance.children.length,
+          'Different number of children in accessible instance' );
+
+        _.each( nestedOrderArray, function( nestedChild ) {
+          var instance = _.find( accessibleInstance.children, function( childInstance ) {
+            return childInstance.trail.equals( nestedChild.trail );
+          } );
+          assert && assert( instance, 'Missing child accessible instance' );
+
+          audit( nestedChild.children, instance );
+        } );
+      }
+
+      audit( this.display.rootNode.getNestedAccessibleOrder(), this );
     }
   } );
 
