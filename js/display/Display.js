@@ -523,7 +523,7 @@ define( function( require ) {
     addAccessibleTrail: function( trail ) {
       console.log( 'Adding accessible trail: ' + trail );
 
-      if ( !this.options.accessible ) {
+      if ( !this.options.accessibility ) {
         return;
       }
 
@@ -566,7 +566,7 @@ define( function( require ) {
      */
     removeAccessibleTrail: function( trail ) {
       console.log( 'removing accessible trail: ' + trail );
-      if ( !this.options.accessible ) {
+      if ( !this.options.accessibility ) {
         return;
       }
     },
@@ -583,7 +583,7 @@ define( function( require ) {
       console.log( 'changing accessible content: ' + trail );
       console.log( 'old accessible content: ' + oldAccessibleContent );
       console.log( 'old accessible content: ' + newAccessibleContent );
-      if ( !this.options.accessible ) {
+      if ( !this.options.accessibility ) {
         return;
       }
     },
@@ -596,7 +596,7 @@ define( function( require ) {
      */
     changedAccessibleOrder: function( trail ) {
       console.log( 'changing accessible order: ' + trail );
-      if ( !this.options.accessible ) {
+      if ( !this.options.accessibility ) {
         return;
       }
     },

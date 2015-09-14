@@ -38,7 +38,11 @@ define( function( require ) {
       this.node = trail.lastNode();
 
       this.children = cleanArray( this.children );
-      this.node.addAccessibleInstance( this );
+
+      // If we are the root accessible instance, we won't actually have a reference to a node.
+      if ( this.node ) {
+        this.node.addAccessibleInstance( this );
+      }
 
       return this;
     },
@@ -90,7 +94,10 @@ define( function( require ) {
     },
 
     dispose: function() {
-      this.node.removeAccessibleInstance( this );
+      // If we are the root accessible instance, we won't actually have a reference to a node.
+      if ( this.node ) {
+        this.node.removeAccessibleInstance( this );
+      }
     }
   } );
 
