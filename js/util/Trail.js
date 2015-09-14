@@ -355,9 +355,6 @@ define( function( require ) {
 
     // whether this trail contains the complete 'other' trail, but with added descendants afterwards
     isExtensionOf: function( other, allowSameTrail ) {
-      assertSlow && assertSlow( this.areIndicesValid(), 'Trail.compare this.areIndicesValid() failed' );
-      assertSlow && assertSlow( other.areIndicesValid(), 'Trail.compare other.areIndicesValid() failed' );
-
       if ( this.length <= other.length - ( allowSameTrail ? 1 : 0 ) ) {
         return false;
       }

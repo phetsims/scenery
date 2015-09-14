@@ -103,7 +103,7 @@ define( function( require ) {
 
     this.options = _.extend( {
       // initial display width
-      width:  ( options && options.container && options.container.clientWidth ) || 640,
+      width: ( options && options.container && options.container.clientWidth ) || 640,
 
       // initial display height
       height: ( options && options.container && options.container.clientHeight ) || 480,
@@ -127,6 +127,7 @@ define( function( require ) {
     this._currentSize = new Dimension2( -1, -1 ); // used to check against new size to see what we need to change
 
     this._rootNode = rootNode;
+    this._rootNode.addRootedDisplay( this );
     this._rootBackbone = null; // to be filled in later
     this._domElement = ( options && options.container ) ?
                        scenery.BackboneDrawable.repurposeBackboneContainer( options.container ) :
@@ -216,6 +217,11 @@ define( function( require ) {
       this._focusRootNode = new Node();
       this._focusOverlay = new FocusOverlay( this, this._focusRootNode );
       this.addOverlay( this._focusOverlay );
+
+      this._rootAccessibleInstance = new AccessibleInstance( this, new scenery.Trail() );
+
+      this._rootAccessibleInstance.addSubtree( new scenery.Trail( this._rootNode ) );
+
     }
   };
   var Display = scenery.Display;
@@ -506,6 +512,93 @@ define( function( require ) {
     removeOverlay: function( overlay ) {
       this._domElement.removeChild( overlay.domElement );
       this._overlays.splice( _.indexOf( this._overlays, overlay ), 1 );
+    },
+
+    /**
+     * Called when a subtree with accessible content is added.
+     * @private
+     *
+     * @param {Trail} trail
+     */
+    addAccessibleTrail: function( trail ) {
+      console.log( 'Adding accessible trail: ' + trail );
+
+      if ( !this.options.accessible ) {
+        return;
+      }
+
+      // Search through trail to find longest trail extension where the leafmost node has accessible content, but does
+      // not include the node that was just added.
+      var i;
+      for ( i = trail.length - 2; i >= 0; i-- ) {
+        // break if there is accessible content for nodes along the trail, including root.
+        if ( trail.nodes[ i ].accessibleContent ) {
+          break;
+        }
+      }
+      var baseAccessibleInstance;
+      // no ancestor of the added node was accessible, so add things directly to root accessible instance.
+      if ( i < 0 ) {
+        baseAccessibleInstance = this._rootAccessibleInstance;
+      }
+      // otherwise, we encountered an accessible instance and i points to the leaf most node for the sub trail.
+      else {
+        var leafMostAccessibleNode = trail.nodes[ i ];
+        var accessibleInstances = leafMostAccessibleNode._accessibleInstances;
+        // look up the accessible instance given the leaf most accessible node.
+        for ( var j = 0; j < accessibleInstances.length; j++ ) {
+          var accessibleInstance = accessibleInstances[ j ];
+          if ( trail.isExtensionOf( accessibleInstance.trail ) ) {
+            baseAccessibleInstance = accessibleInstance;
+            break;
+          }
+        }
+        assert && assert( baseAccessibleInstance, 'A base accessible instance must be defined.' );
+      }
+      baseAccessibleInstance.addSubtree( trail );
+    },
+
+    /**
+     * Called when a subtree with accessible content is removed.
+     * @private
+     *
+     * @param {Trail} trail
+     */
+    removeAccessibleTrail: function( trail ) {
+      console.log( 'removing accessible trail: ' + trail );
+      if ( !this.options.accessible ) {
+        return;
+      }
+    },
+
+    /**
+     * Called when an ancestor node's accessible content is changed.
+     * @private
+     *
+     * @param {Trail} trail
+     * @param {object} oldAccessibleContent
+     * @param {object} newAccessibleContent
+     */
+    changedAccessibleContent: function( trail, oldAccessibleContent, newAccessibleContent ) {
+      console.log( 'changing accessible content: ' + trail );
+      console.log( 'old accessible content: ' + oldAccessibleContent );
+      console.log( 'old accessible content: ' + newAccessibleContent );
+      if ( !this.options.accessible ) {
+        return;
+      }
+    },
+
+    /**
+     * Called when an ancestor node's accessible order is changed.
+     * @private
+     *
+     * @param {Trail} trail
+     */
+    changedAccessibleOrder: function( trail ) {
+      console.log( 'changing accessible order: ' + trail );
+      if ( !this.options.accessible ) {
+        return;
+      }
     },
 
     /*
@@ -858,6 +951,16 @@ define( function( require ) {
     },
 
     /**
+     * Dispose function for Display.
+     *
+     * TODO: this dispose function is not complete.
+     * @public
+     */
+    dispose: function() {
+      this._rootNode.removeRootedDisplay( this );
+    },
+
+    /**
      * Sends a number of random mouse events through the input system
      *
      * @param {number} averageEventQuantity - The average number of mouse events
@@ -939,19 +1042,21 @@ define( function( require ) {
       function nodeCount( node ) {
         var count = 1; // for us
         for ( var i = 0; i < node.children.length; i++ ) {
-          count += nodeCount( node.children[i] );
+          count += nodeCount( node.children[ i ] );
         }
         return count;
       }
+
       result += 'Nodes: ' + nodeCount( this._rootNode ) + '<br>';
 
       function instanceCount( instance ) {
         var count = 1; // for us
         for ( var i = 0; i < instance.children.length; i++ ) {
-          count += instanceCount( instance.children[i] );
+          count += instanceCount( instance.children[ i ] );
         }
         return count;
       }
+
       result += this._baseInstance ? ( 'Instances: ' + instanceCount( this._baseInstance ) + '<br>' ) : '';
 
       function drawableCount( drawable ) {
@@ -971,6 +1076,7 @@ define( function( require ) {
         }
         return count;
       }
+
       result += this._rootBackbone ? ( 'Drawables: ' + drawableCount( this._rootBackbone ) + '<br>' ) : '';
 
       var drawableCountMap = {}; // {string} drawable constructor name => {number} count of seen
@@ -984,6 +1090,7 @@ define( function( require ) {
           drawableCountMap[ name ] = 1;
         }
       }
+
       function retainedDrawableCount( instance ) {
         var count = 0;
         if ( instance.selfDrawable ) {
@@ -999,10 +1106,11 @@ define( function( require ) {
           count++;
         }
         for ( var i = 0; i < instance.children.length; i++ ) {
-          count += retainedDrawableCount( instance.children[i] );
+          count += retainedDrawableCount( instance.children[ i ] );
         }
         return count;
       }
+
       result += this._baseInstance ? ( 'Retained Drawables: ' + retainedDrawableCount( this._baseInstance ) + '<br>' ) : '';
       for ( var drawableName in drawableCountMap ) {
         result += '&nbsp;&nbsp;&nbsp;&nbsp;' + drawableName + ': ' + drawableCountMap[ drawableName ] + '<br>';
@@ -1028,17 +1136,18 @@ define( function( require ) {
         depth += 1;
         if ( hasBackbone ) {
           for ( var k = 0; k < block.domDrawable.blocks.length; k++ ) {
-            div += blockSummary ( block.domDrawable.blocks[k] );
+            div += blockSummary( block.domDrawable.blocks[ k ] );
           }
         }
         depth -= 1;
 
         return div;
       }
+
       if ( this._rootBackbone ) {
         result += '<div style="' + headerStyle + '">Block Summary</div>';
         for ( var i = 0; i < this._rootBackbone.blocks.length; i++ ) {
-          result += blockSummary( this._rootBackbone.blocks[i] );
+          result += blockSummary( this._rootBackbone.blocks[ i ] );
         }
       }
 
@@ -1262,6 +1371,7 @@ define( function( require ) {
       // the HTML tree (with images) before putting that in the foreignObject. That way, we can actually display
       // things rendered in Canvas in our rasterization.
       var canvasUrlMap = {};
+
       function scanForCanvases( drawable ) {
         if ( drawable.blocks ) {
           // we're a backbone
@@ -1277,10 +1387,11 @@ define( function( require ) {
           scanForCanvases( drawable.lastDrawable ); // wasn't hit in our simplified (and safer) loop
 
           if ( drawable.domElement && drawable.domElement instanceof window.HTMLCanvasElement ) {
-            canvasUrlMap[drawable.canvasId] = drawable.domElement.toDataURL();
+            canvasUrlMap[ drawable.canvasId ] = drawable.domElement.toDataURL();
           }
         }
       }
+
       scanForCanvases( this._rootBackbone );
 
       var canvas = document.createElement( 'canvas' );
@@ -1298,12 +1409,12 @@ define( function( require ) {
       var displayCanvases = doc.documentElement.getElementsByTagName( 'canvas' );
       displayCanvases = Array.prototype.slice.call( displayCanvases ); // don't use a live HTMLCollection copy!
       for ( var i = 0; i < displayCanvases.length; i++ ) {
-        var displayCanvas = displayCanvases[i];
+        var displayCanvas = displayCanvases[ i ];
 
         var cssText = displayCanvas.style.cssText;
 
         var displayImg = doc.createElement( 'img' );
-        var src = canvasUrlMap[displayCanvas.id];
+        var src = canvasUrlMap[ displayCanvas.id ];
         assert && assert( src, 'Must have missed a toDataURL() on a Canvas' );
 
         displayImg.src = src;
