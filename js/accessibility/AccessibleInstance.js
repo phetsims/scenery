@@ -12,20 +12,23 @@ define( function( require ) {
   var inherit = require( 'PHET_CORE/inherit' );
   var Events = require( 'AXON/Events' );
   var scenery = require( 'SCENERY/scenery' );
+  // var AccessiblePeer = require( 'SCENERY/accessibility/AccessiblePeer' );
   var cleanArray = require( 'PHET_CORE/cleanArray' );
 
   var globalId = 1;
 
-  scenery.AccessibleInstance = function AccessibleInstance( display, trail ) {
-    this.initializeAccessibleInstance( display, trail );
+  scenery.AccessibleInstance = function AccessibleInstance( parent, display, trail ) {
+    this.initializeAccessibleInstance( parent, display, trail );
   };
   var AccessibleInstance = scenery.AccessibleInstance;
 
   inherit( Events, AccessibleInstance, {
     /**
+     * @param {AccessibleInstance|null} parent
+     * @param {Display} display
      * @param {DOMElement} [domElement] - If not included here, subtype is responsible for setting it in the constructor.
      */
-    initializeAccessibleInstance: function( display, trail ) {
+    initializeAccessibleInstance: function( parent, display, trail ) {
       Events.call( this ); // TODO: is Events worth mixing in by default? Will we need to listen to events?
 
       assert && assert( !this.id || this.disposed, 'If we previously existed, we need to have been disposed' );
@@ -33,9 +36,11 @@ define( function( require ) {
       // unique ID
       this.id = this.id || globalId++;
 
+      this.parent = parent;
       this.display = display;
       this.trail = trail;
       this.node = trail.lastNode();
+      this.isRootInstance = this.trail.length === 0;
 
       this.children = cleanArray( this.children );
 
@@ -45,6 +50,22 @@ define( function( require ) {
       }
 
       this.isSorted = true;
+
+      if ( this.isRootInstance ) {
+        var accessibilityContainer = document.createElement( 'div' );
+        accessibilityContainer.className = 'accessibility';
+        accessibilityContainer.style.position = 'absolute';
+        accessibilityContainer.style.left = '0';
+        accessibilityContainer.style.top = '0';
+        accessibilityContainer.style.width = '0';
+        accessibilityContainer.style.height = '0';
+        accessibilityContainer.style.clip = 'rect(0,0,0,0)';
+        this.peer = new scenery.AccessiblePeer( this, accessibilityContainer );
+      }
+      else {
+        this.peer = this.node.accessibleContent.createPeer( this );
+        this.parent.peer.getChildContainerElement().appendChild( this.peer.domElement );
+      }
 
       return this;
     },
@@ -82,7 +103,7 @@ define( function( require ) {
       var node = trail.lastNode();
       var nextInstance = this;
       if ( node.accessibleContent ) {
-        var accessibleInstance = new AccessibleInstance( this.display, trail.copy() ); // TODO: Pooling
+        var accessibleInstance = new AccessibleInstance( this, this.display, trail.copy() ); // TODO: Pooling
         this.children.push( accessibleInstance ); // TODO: Mark us as dirty for performance.
         this.markAsUnsorted();
 
@@ -226,10 +247,17 @@ define( function( require ) {
           throw new Error( 'Two different children have the same child index' );
         }
       } );
+
+      // TODO: order the DOM children like we have the array sorted.
     },
 
     // Recursive disposal
     dispose: function() {
+      // Disconnect DOM
+      if ( !this.isRootInstance ) {
+        this.parent.peer.getChildContainerElement().removeChild( this.peer.domElement );
+      }
+
       while ( this.children.length ) {
         this.children.pop().dispose();
       }
@@ -242,6 +270,7 @@ define( function( require ) {
       this.display = null;
       this.trail = null;
       this.node = null;
+      this.peer = null;
     },
 
     auditRoot: function() {

@@ -196,21 +196,9 @@ define( function( require ) {
     this.scenery = scenery;
 
     if ( this.options.accessibility ) {
-      var accessibilityContainer = document.createElement( 'div' );
-      this.accessibilityContainer = accessibilityContainer;
-      accessibilityContainer.className = 'accessibility';
-      accessibilityContainer.style.position = 'absolute';
-      accessibilityContainer.style.left = '0';
-      accessibilityContainer.style.top = '0';
-      accessibilityContainer.style.width = '0';
-      accessibilityContainer.style.height = '0';
-      accessibilityContainer.style.clip = 'rect(0,0,0,0)';
-
       if ( this.options.isApplication ) {
         this._domElement.setAttribute( 'aria-role', 'application' );
       }
-
-      this._domElement.appendChild( accessibilityContainer );
 
       SceneryStyle.addRule( '.accessibility * { position: absolute; left: 0; top: 0; width: 0; height: 0, clip: rect(0,0,0,0); }' );
 
@@ -218,8 +206,10 @@ define( function( require ) {
       this._focusOverlay = new FocusOverlay( this, this._focusRootNode );
       this.addOverlay( this._focusOverlay );
 
-      this._rootAccessibleInstance = new AccessibleInstance( this, new scenery.Trail() );
+      this._rootAccessibleInstance = new AccessibleInstance( null, this, new scenery.Trail() );
       this._rootAccessibleInstance.addSubtree( new scenery.Trail( this._rootNode ) );
+
+      this._domElement.appendChild( this._rootAccessibleInstance.peer.domElement );
 
       this._unsortedAccessibleInstances = [];
     }
@@ -1503,32 +1493,6 @@ define( function( require ) {
 
     popupRasterization: function() {
       this.foreignObjectRasterization( window.open );
-    },
-
-    // Overwrites the current accessibility container with a static snapshot of the accessibility parallel DOM.
-    overwriteAccessibilityContainer: function() {
-      var display = this;
-
-      var nestedOrder = this.rootNode.getNestedAccessibleOrder();
-
-      // Remove all DOM children from the accessibility container
-      while ( this.accessibilityContainer.firstChild ) {
-        this.accessibilityContainer.removeChild( this.accessibilityContainer.firstChild );
-      }
-
-      function addContent( domParent, itemChildren ) {
-        _.each( itemChildren, function( item ) {
-          var node = item.trail.lastNode();
-
-          var peer = node.accessibleContent.createPeer( new AccessibleInstance( display, item.trail ) );
-
-          domParent.appendChild( peer.domElement );
-
-          addContent( peer.getChildContainerElement(), item.children );
-        } );
-      }
-
-      addContent( this.accessibilityContainer, nestedOrder );
     }
   }, Events.prototype ) );
 
