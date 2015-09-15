@@ -64,7 +64,8 @@ define( function( require ) {
       }
       else {
         this.peer = this.node.accessibleContent.createPeer( this );
-        this.parent.peer.getChildContainerElement().appendChild( this.peer.domElement );
+        var childContainerElement = this.parent.peer.getChildContainerElement();
+        childContainerElement.insertBefore( this.peer.domElement, childContainerElement.childNodes[ 0 ] );
       }
 
       return this;
@@ -248,7 +249,15 @@ define( function( require ) {
         }
       } );
 
-      // TODO: order the DOM children like we have the array sorted.
+      var containerElement = this.peer.getChildContainerElement();
+      for ( var n = this.children.length - 1; n >= 0; n-- ) {
+        var peerDOMElement = this.children[ n ].peer.domElement;
+
+        if ( peerDOMElement === containerElement.childNodes[ n ] ) {
+          continue;
+        }
+        containerElement.insertBefore( peerDOMElement, containerElement.childNodes[ n + 1 ] );
+      }
     },
 
     // Recursive disposal
