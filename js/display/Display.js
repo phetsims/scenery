@@ -219,9 +219,9 @@ define( function( require ) {
       this.addOverlay( this._focusOverlay );
 
       this._rootAccessibleInstance = new AccessibleInstance( this, new scenery.Trail() );
-
       this._rootAccessibleInstance.addSubtree( new scenery.Trail( this._rootNode ) );
 
+      this._unsortedAccessibleInstances = [];
     }
   };
   var Display = scenery.Display;
@@ -554,6 +554,16 @@ define( function( require ) {
       throw new Error( 'A base accessible instance must be defined.' );
     },
 
+    markUnsortedAccessibleInstance: function( accessibleInstance ) {
+      this._unsortedAccessibleInstances.push( accessibleInstance );
+    },
+
+    sortAccessibleInstances: function() {
+      while ( this._unsortedAccessibleInstances.length ) {
+        this._unsortedAccessibleInstances.pop().sortChildren();
+      }
+    },
+
     /**
      * Called when a subtree with accessible content is added.
      * @private
@@ -569,6 +579,8 @@ define( function( require ) {
       sceneryLog && sceneryLog.Accessibility && sceneryLog.push();
 
       this.getBaseAccessibleInstance( trail ).addSubtree( trail );
+
+      this.sortAccessibleInstances();
 
       sceneryLog && sceneryLog.Accessibility && sceneryLog.pop();
     },
@@ -588,6 +600,8 @@ define( function( require ) {
       sceneryLog && sceneryLog.Accessibility && sceneryLog.push();
 
       this.getBaseAccessibleInstance( trail ).removeSubtree( trail );
+
+      this.sortAccessibleInstances();
 
       sceneryLog && sceneryLog.Accessibility && sceneryLog.pop();
     },
@@ -614,6 +628,8 @@ define( function( require ) {
       this.getBaseAccessibleInstance( trail ).removeSubtree( trail );
       this.getBaseAccessibleInstance( trail ).addSubtree( trail );
 
+      this.sortAccessibleInstances();
+
       sceneryLog && sceneryLog.Accessibility && sceneryLog.pop();
     },
 
@@ -631,7 +647,9 @@ define( function( require ) {
       sceneryLog && sceneryLog.Accessibility && sceneryLog.Accessibility( 'Display.changedAccessibleOrder ' + trail.toString() );
       sceneryLog && sceneryLog.Accessibility && sceneryLog.push();
 
-      // TODO
+      this.getBaseAccessibleInstance( trail ).markAsUnsorted();
+
+      this.sortAccessibleInstances();
 
       sceneryLog && sceneryLog.Accessibility && sceneryLog.pop();
     },
