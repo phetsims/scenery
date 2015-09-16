@@ -1,0 +1,75 @@
+<!DOCTYPE html>
+<html>
+<!--
+When run in the browser, this will load code into the global namespace so that it can be tested via the developer console. Additionally, it provides
+an UI and Display made for visual testing and debugging.
+-->
+<head>
+  <meta charset="utf-8"/>
+  <meta http-equiv="X-UA-Compatible" content="IE=edge"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+  <title>Scenery Playground</title>
+
+  <script src="../../assert/js/assert.js"></script>
+  <script src="../../sherpa/lib/jquery-2.1.0.js"></script>
+  <script src="../../sherpa/lib/lodash-2.4.1.min.js"></script>
+
+  <script type="text/javascript">
+    window.assertions.enableAssert();
+    window.assertions.enableAssertSlow();
+  </script>
+
+  <script data-main="../js/config.js" src="../../sherpa/lib/require-2.1.11.js"></script>
+
+  <style>
+    html, body {
+      background-color: #eee;
+      border: 0;
+      padding: 0;
+    }
+  </style>
+
+</head>
+<body>
+
+<script>
+  require( [ 'config' ], function() {
+    require( [ 'main', 'KITE/main', 'DOT/main', 'PHET_CORE/main' ], function( scenery, kite, dot, phetCore ) {
+      window.scenery = scenery;
+      window.kite = kite;
+      window.dot = dot;
+      window.phetCore = phetCore;
+
+      // modules
+      var Node = scenery.Node;
+      var Display = scenery.Display;
+      var Rectangle = scenery.Rectangle;
+
+      window.scene = new Node();
+
+      var display = window.display = new Display( scene, {
+        width: 800,
+        height: 600,
+        preserveDrawingBuffer: true
+      } );
+
+      display._domElement.id = 'display';
+      document.body.insertBefore( display._domElement, document.body.firstChild );
+
+      scenery.Util.polyfillRequestAnimationFrame();
+
+      window.n = new Node();
+      n.addChild( new Rectangle( 0, 0, 100, 100, { x: 10, y: 10, fill: 'blue' } ) );
+      scene.addChild( n );
+
+      (function step() {
+        window.requestAnimationFrame( step );
+        display.updateDisplay();
+      })();
+
+    } );
+  } );
+</script>
+</body>
+</html>
