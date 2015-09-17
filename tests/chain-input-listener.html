@@ -41,8 +41,9 @@
       var Display = scenery.Display;
       var Rectangle = scenery.Rectangle;
       var ChainInputListener = scenery.ChainInputListener;
-      var DragHandler = scenery.DragHandler;
+      var RelativeDragHandler = scenery.RelativeDragHandler;
       var MoveToFrontHandler = scenery.MoveToFrontHandler;
+      var TranslateHandler = scenery.TranslateHandler;
 
       window.scene = new Node();
 
@@ -63,20 +64,22 @@
       } );
       n.addChild( blueRectangle );
 
-      blueRectangle.addInputListener( new ChainInputListener( [
-        new DragHandler( blueRectangle ),
-        new MoveToFrontHandler( blueRectangle )
-      ] ) );
+      var createListener = function( node ) {
+        return new ChainInputListener( [
+          new MoveToFrontHandler( node ),
+          new RelativeDragHandler( node ),
+          new TranslateHandler( node )
+        ] );
+      };
+
+      blueRectangle.addInputListener( createListener( blueRectangle ) );
 
       var redRectangle = new Rectangle( 0, 0, 100, 100, {
         x: 20, y: 100, fill: 'red', cursor: 'pointer'
       } );
       n.addChild( redRectangle );
 
-      redRectangle.addInputListener( new ChainInputListener( [
-        new DragHandler( redRectangle ),
-        new MoveToFrontHandler( redRectangle )
-      ] ) );
+      redRectangle.addInputListener( createListener( redRectangle ) );
 
       scene.addChild( n );
 

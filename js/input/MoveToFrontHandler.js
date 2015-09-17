@@ -30,9 +30,9 @@ define( function( require ) {
   scenery.MoveToFrontHandler = MoveToFrontHandler;
 
   return inherit( Object, MoveToFrontHandler, {
-    start: function( event, trail, chainInputListener ) {
+    start: function( event, trail, chainInputListener, point ) {
       this.node.moveToFront();
-      chainInputListener.nextStart( event, trail );
+      chainInputListener.nextStart( event, trail, point );
     }
   } );
 } );

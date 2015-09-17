@@ -54,7 +54,7 @@ define( [
   'SCENERY/input/ButtonListener',
   'SCENERY/input/ChainInputListener',
   'SCENERY/input/DownUpListener',
-  'SCENERY/input/DragHandler',
+  'SCENERY/input/RelativeDragHandler',
   'SCENERY/input/Event',
   'SCENERY/input/Input',
   'SCENERY/input/Mouse',
@@ -62,6 +62,7 @@ define( [
   'SCENERY/input/Pen',
   'SCENERY/input/Pointer',
   'SCENERY/input/SimpleDragHandler',
+  'SCENERY/input/TranslateHandler',
   'SCENERY/input/Touch',
 
   'SCENERY/nodes/CanvasNode',

@@ -25,25 +25,24 @@ define( function( require ) {
    *
    * @constructor
    */
-  function DragHandler( node ) {
+  function RelativeDragHandler( node ) {
     this.node = node;
   }
 
-  scenery.DragHandler = DragHandler;
+  scenery.RelativeDragHandler = RelativeDragHandler;
 
-  return inherit( Object, DragHandler, {
-    start: function( event, trail, chainInputListener ) {
-      this.startOffset = event.currentTarget.globalToParentPoint( event.pointer.point ).minus( this.node.translation );
-      chainInputListener.nextStart( event, trail );
+  return inherit( Object, RelativeDragHandler, {
+    start: function( event, trail, chainInputListener, point ) {
+      this.startOffset = event.currentTarget.globalToParentPoint( point ).minus( this.node.translation );
+      chainInputListener.nextStart( event, trail, point );
     },
-    drag: function( event, trail, chainInputListener ) {
-      var parentPoint = event.currentTarget.globalToParentPoint( event.pointer.point ).minus( this.startOffset );
-      this.node.translation = parentPoint;
-      chainInputListener.nextDrag( event, trail );
+    drag: function( event, trail, chainInputListener, point ) {
+      point = event.currentTarget.globalToParentPoint( point ).minus( this.startOffset );
+      chainInputListener.nextDrag( event, trail, point );
     },
-    end: function( event, trail, chainInputListener ) {
+    end: function( event, trail, chainInputListener, point ) {
       this.startOffset = null;
-      chainInputListener.nextEnd( event, trail );
+      chainInputListener.nextEnd( event, trail, point );
     }
   } );
 } );

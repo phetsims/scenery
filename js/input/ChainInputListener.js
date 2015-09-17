@@ -42,15 +42,15 @@ define( function( require ) {
     // TODO: mouse/touch/drag on the pointer?
     options.start = function( event, trail ) {
       chainInputListener.currentHandler = 0;
-      chainInputListener.nextStart( event, trail );
+      chainInputListener.nextStart( event, trail, event.pointer.point );
     };
     options.drag = function( event, trail ) {
       chainInputListener.currentHandler = 0;
-      chainInputListener.nextDrag( event, trail );
+      chainInputListener.nextDrag( event, trail, event.pointer.point );
     };
     options.end = function( event, trail ) {
       chainInputListener.currentHandler = 0;
-      chainInputListener.nextEnd( event, trail );
+      chainInputListener.nextEnd( event, trail, event.pointer.point );
     };
 
     SimpleDragHandler.call( this, options );
@@ -59,7 +59,7 @@ define( function( require ) {
   var ChainInputListener = scenery.ChainInputListener;
 
   return inherit( SimpleDragHandler, ChainInputListener, {
-    nextStart: function( event, trail ) {
+    nextStart: function( event, trail, point ) {
       var nextHandler = this.handlers[ this.currentHandler++ ];
 
       // Don't iterate beyond the end of the list
@@ -68,14 +68,14 @@ define( function( require ) {
         // If there is no start function in this listener, then skip to the next one.
         // This allows us to use sparse implementations, which is very convenient in simulation code.
         if ( nextHandler.start ) {
-          nextHandler.start( event, trail, this );
+          nextHandler.start( event, trail, this, point );
         }
         else {
-          this.nextStart( event, trail );
+          this.nextStart( event, trail, point );
         }
       }
     },
-    nextDrag: function( event, trail ) {
+    nextDrag: function( event, trail, point ) {
       var nextHandler = this.handlers[ this.currentHandler++ ];
 
       // Don't iterate beyond the end of the list
@@ -84,14 +84,14 @@ define( function( require ) {
         // If there is no start function in this listener, then skip to the next one.
         // This allows us to use sparse implementations, which is very convenient in simulation code.
         if ( nextHandler.drag ) {
-          nextHandler.drag( event, trail, this );
+          nextHandler.drag( event, trail, this, point );
         }
         else {
-          this.nextDrag( event, trail );
+          this.nextDrag( event, trail, point );
         }
       }
     },
-    nextEnd: function( event, trail ) {
+    nextEnd: function( event, trail, point ) {
       var nextHandler = this.handlers[ this.currentHandler++ ];
 
       // Don't iterate beyond the end of the list
@@ -100,10 +100,10 @@ define( function( require ) {
         // If there is no start function in this listener, then skip to the next one.
         // This allows us to use sparse implementations, which is very convenient in simulation code.
         if ( nextHandler.end ) {
-          nextHandler.end( event, trail, this );
+          nextHandler.end( event, trail, this, point );
         }
         else {
-          this.nextEnd( event, trail );
+          this.nextEnd( event, trail, point );
         }
       }
     }
