@@ -33,12 +33,6 @@ define( function( require ) {
     start: function( event, trail, chainInputListener ) {
       this.node.moveToFront();
       chainInputListener.nextStart( event, trail );
-    },
-    drag: function( event, trail, chainInputListener ) {
-      chainInputListener.nextDrag( event, trail );
-    },
-    end: function( event, trail, chainInputListener ) {
-      chainInputListener.nextEnd( event, trail );
     }
   } );
 } );

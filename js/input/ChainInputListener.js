@@ -61,15 +61,51 @@ define( function( require ) {
   return inherit( SimpleDragHandler, ChainInputListener, {
     nextStart: function( event, trail ) {
       var nextHandler = this.handlers[ this.currentHandler++ ];
-      nextHandler && nextHandler.start( event, trail, this );
+
+      // Don't iterate beyond the end of the list
+      if ( nextHandler ) {
+
+        // If there is no start function in this listener, then skip to the next one.
+        // This allows us to use sparse implementations, which is very convenient in simulation code.
+        if ( nextHandler.start ) {
+          nextHandler.start( event, trail, this );
+        }
+        else {
+          this.nextStart( event, trail );
+        }
+      }
     },
     nextDrag: function( event, trail ) {
       var nextHandler = this.handlers[ this.currentHandler++ ];
-      nextHandler && nextHandler.drag( event, trail, this );
+
+      // Don't iterate beyond the end of the list
+      if ( nextHandler ) {
+
+        // If there is no start function in this listener, then skip to the next one.
+        // This allows us to use sparse implementations, which is very convenient in simulation code.
+        if ( nextHandler.drag ) {
+          nextHandler.drag( event, trail, this );
+        }
+        else {
+          this.nextDrag( event, trail );
+        }
+      }
     },
     nextEnd: function( event, trail ) {
       var nextHandler = this.handlers[ this.currentHandler++ ];
-      nextHandler && nextHandler.end( event, trail, this );
+
+      // Don't iterate beyond the end of the list
+      if ( nextHandler ) {
+
+        // If there is no start function in this listener, then skip to the next one.
+        // This allows us to use sparse implementations, which is very convenient in simulation code.
+        if ( nextHandler.end ) {
+          nextHandler.end( event, trail, this );
+        }
+        else {
+          this.nextEnd( event, trail );
+        }
+      }
     }
   } );
 } );
