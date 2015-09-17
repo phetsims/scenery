@@ -52,10 +52,13 @@ define( [
 
   'SCENERY/input/BatchedDOMEvent',
   'SCENERY/input/ButtonListener',
+  'SCENERY/input/ChainInputListener',
   'SCENERY/input/DownUpListener',
+  'SCENERY/input/DragHandler',
   'SCENERY/input/Event',
   'SCENERY/input/Input',
   'SCENERY/input/Mouse',
+  'SCENERY/input/MoveToFrontHandler',
   'SCENERY/input/Pen',
   'SCENERY/input/Pointer',
   'SCENERY/input/SimpleDragHandler',

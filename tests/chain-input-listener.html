@@ -1,15 +1,11 @@
 <!DOCTYPE html>
 <html>
-<!--
-When run in the browser, this will load code into the global namespace so that it can be tested via the developer console. Additionally, it provides
-an UI and Display made for visual testing and debugging.
--->
 <head>
   <meta charset="utf-8"/>
   <meta http-equiv="X-UA-Compatible" content="IE=edge"/>
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-  <title>Scenery Playground</title>
+  <title>ChainInputListener</title>
 
   <script src="../../assert/js/assert.js"></script>
   <script src="../../sherpa/lib/jquery-2.1.0.js"></script>
@@ -17,14 +13,13 @@ an UI and Display made for visual testing and debugging.
 
   <script type="text/javascript">
     window.assertions.enableAssert();
-    window.assertions.enableAssertSlow();
   </script>
 
   <script data-main="../js/config.js" src="../../sherpa/lib/require-2.1.11.js"></script>
 
   <style>
     html, body {
-      background-color: #eee;
+      background-color: 'white';
       border: 0;
       padding: 0;
     }
@@ -45,6 +40,9 @@ an UI and Display made for visual testing and debugging.
       var Node = scenery.Node;
       var Display = scenery.Display;
       var Rectangle = scenery.Rectangle;
+      var ChainInputListener = scenery.ChainInputListener;
+      var DragHandler = scenery.DragHandler;
+      var MoveToFrontHandler = scenery.MoveToFrontHandler;
 
       window.scene = new Node();
 
@@ -60,11 +58,33 @@ an UI and Display made for visual testing and debugging.
       scenery.Util.polyfillRequestAnimationFrame();
 
       window.n = new Node();
-      n.addChild( new Rectangle( 0, 0, 100, 100, { x: 10, y: 10, fill: 'blue' } ) );
+      var blueRectangle = new Rectangle( 0, 0, 100, 100, {
+        x: 10, y: 10, fill: 'blue', cursor: 'pointer'
+      } );
+      n.addChild( blueRectangle );
+
+      blueRectangle.addInputListener( new ChainInputListener( [
+        new DragHandler( blueRectangle ),
+        new MoveToFrontHandler( blueRectangle )
+      ] ) );
+
+      var redRectangle = new Rectangle( 0, 0, 100, 100, {
+        x: 20, y: 100, fill: 'red', cursor: 'pointer'
+      } );
+      n.addChild( redRectangle );
+
+      redRectangle.addInputListener( new ChainInputListener( [
+        new DragHandler( redRectangle ),
+        new MoveToFrontHandler( redRectangle )
+      ] ) );
+
       scene.addChild( n );
+
+      display.initializeWindowEvents( { batchDOMEvents: false } );
 
       (function step() {
         window.requestAnimationFrame( step );
+        display._input.fireBatchedEvents();
         display.updateDisplay();
       })();
 
