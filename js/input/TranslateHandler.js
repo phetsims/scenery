@@ -34,6 +34,7 @@ define( function( require ) {
   return inherit( Object, TranslateHandler, {
     drag: function( event, trail, chainInputListener, point ) {
       this.node.translation = point;
+      chainInputListener.nextDrag( event, trail, point );
     }
   } );
 } );
