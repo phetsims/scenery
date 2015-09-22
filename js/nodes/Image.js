@@ -416,7 +416,7 @@ define( function( require ) {
     },
 
     getImageWidth: function() {
-      var detectedWidth = this._image.naturalWidth || this._image.width;
+      var detectedWidth = this._mipmapData ? this._mipmapData[ 0 ].width : ( this._image.naturalWidth || this._image.width );
       if ( detectedWidth === 0 ) {
         return this._initialWidth; // either 0 (default), or the overridden value
       }
@@ -429,7 +429,7 @@ define( function( require ) {
     get imageWidth() { return this.getImageWidth(); },
 
     getImageHeight: function() {
-      var detectedHeight = this._image.naturalHeight || this._image.height;
+      var detectedHeight = this._mipmapData ? this._mipmapData[ 0 ].height : ( this._image.naturalHeight || this._image.height );
       if ( detectedHeight === 0 ) {
         return this._initialHeight; // either 0 (default), or the overridden value
       }
