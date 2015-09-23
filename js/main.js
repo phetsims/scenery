@@ -52,7 +52,6 @@ define( [
 
   'SCENERY/input/BatchedDOMEvent',
   'SCENERY/input/ButtonListener',
-  'SCENERY/input/ChainInputListener',
   'SCENERY/input/DownUpListener',
   'SCENERY/input/RelativeDragHandler',
   'SCENERY/input/Event',
