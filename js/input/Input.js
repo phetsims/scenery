@@ -25,6 +25,7 @@ define( function( require ) {
   'use strict';
 
   var inherit = require( 'PHET_CORE/inherit' );
+  var platform = require( 'PHET_CORE/platform' );
   var cleanArray = require( 'PHET_CORE/cleanArray' );
   var scenery = require( 'SCENERY/scenery' );
 
@@ -140,8 +141,10 @@ define( function( require ) {
           if ( isTouch || isWheel ) {
             domEvent.preventDefault();
           }
-          else {
-            // TODO: see https://github.com/phetsims/scenery/issues/464 for mouse handling
+          // IE had some issues with skipping prevent default, see https://github.com/phetsims/scenery/issues/464 for
+          // mouse handling.
+          else if ( platform.ie || platform.edge ) {
+            domEvent.preventDefault();
           }
         }
       },
@@ -552,6 +555,14 @@ define( function( require ) {
       pointerDown: function( id, type, point, event ) {
         switch( type ) {
           case 'mouse':
+            // In IE for pointer down events, we want to make sure than the next interactions off the page are sent to
+            // this element (it will bubble). See https://github.com/phetsims/scenery/issues/464 and
+            // http://news.qooxdoo.org/mouse-capturing.
+            var target = ( this.listenerTarget === window || this.listenerTarget === document ) ? document.body : this.listenerTarget;
+            if ( target.setPointerCapture && event.pointerId ) {
+              target.setPointerCapture( event.pointerId );
+            }
+            // The actual event afterwards
             this.mouseDown( point, event );
             break;
           case 'touch':
