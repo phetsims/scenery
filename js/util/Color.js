@@ -472,7 +472,7 @@ define( function( require ) {
     },
 
     toString: function() {
-      return this.constructor.name + "[r:" + this.r + " g:" + this.g + " b:" + this.b + " a:" + this.a + "]";
+      return this.constructor.name + '[r:' + this.r + ' g:' + this.g + ' b:' + this.b + ' a:' + this.a + ']';
     },
 
     toStateObject: function() {

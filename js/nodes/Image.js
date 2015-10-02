@@ -66,7 +66,7 @@ define( function( require ) {
    * where image[ 0 ] will be the most detailed mipmap level.
    */
   scenery.Image = function Image( image, options ) {
-    assert && assert( image, "image should be available" );
+    assert && assert( image, 'image should be available' );
 
     // allow not passing an options object
     options = options || {};

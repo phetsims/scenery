@@ -2413,7 +2413,7 @@ define( function( require ) {
        */
 
       // allow the 'auto' cursor type to let the ancestors or scene pick the cursor type
-      this._cursor = cursor === "auto" ? null : cursor;
+      this._cursor = cursor === 'auto' ? null : cursor;
     },
     set cursor( value ) { this.setCursor( value ); },
 
