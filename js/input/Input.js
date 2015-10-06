@@ -357,7 +357,7 @@ define( function( require ) {
         if ( this.logEvents ) { this.eventLog.push( 'keyDown(' + Input.serializeDomEvent( event ) + ');' ); }
 
         // temporary disabling
-        if ( true ) {
+        if ( true ) { //eslint-disable-line no-constant-condition
         // if ( !this.display.options.accessibility ) {
           return;
         }
@@ -396,7 +396,7 @@ define( function( require ) {
         if ( this.logEvents ) { this.eventLog.push( 'keyUp(' + Input.serializeDomEvent( event ) + ');' ); }
 
         // temporary disabling
-        if ( true ) {
+        if ( true ) { //eslint-disable-line no-constant-condition
         // if ( !this.display.options.accessibility ) {
           return;
         }
@@ -404,7 +404,7 @@ define( function( require ) {
         var code = event.which;
 
         // Better remove all occurences, just in case!
-        while ( true ) {
+        while ( true ) { //eslint-disable-line no-constant-condition
           var index = Input.pressedKeys.indexOf( code );
 
           if ( index > -1 ) {

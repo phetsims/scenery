@@ -901,6 +901,7 @@ define( function( require ) {
       // text length correction, tested with scenery/tests/text-quality-test.html to determine how to match Canvas/Pixi rendering (and overall length)
       // TODO: JO: Why is this here?
       if ( this.dirtyBounds && isFinite( node.selfBounds.width ) ) {
+        // do nothing
       }
     }
   } );

@@ -851,7 +851,9 @@ define( function( require ) {
       // Since a bounds listener on one of the roots could invalidate bounds on the other, we need to keep running this
       // until they are all clean. Otherwise, side-effects could occur from bounds validations
       // TODO: consider a way to prevent infinite loops here that occur due to bounds listeners triggering cycles
-      while ( this.watchedBoundsScan() ) {}
+      while ( this.watchedBoundsScan() ) {
+        // do nothing
+      }
     },
 
     /**
@@ -3484,7 +3486,9 @@ define( function( require ) {
           try {
             delete img.onload;
           }
-          catch( e ) {} // fails on Safari 5.1
+          catch( e ) {
+            // do nothing
+          } // fails on Safari 5.1
         };
         img.src = url;
       }, x, y, width, height );
