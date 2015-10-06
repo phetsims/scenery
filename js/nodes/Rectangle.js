@@ -40,17 +40,17 @@ define( function( require ) {
 
   /**
    * Currently, all numerical parameters should be finite.
-   * x:         x-position of the upper-left corner (left bound)
-   * y:         y-position of the upper-left corner (top bound)
-   * width:     width of the rectangle to the right of the upper-left corner, required to be >= 0
-   * height:    height of the rectangle below the upper-left corner, required to be >= 0
-   * arcWidth:  positive width of the rounded corner, or 0 to indicate the corner should be sharp
-   * arcHeight: positive height of the rounded corner, or 0 to indicate the corner should be sharp
+   * x:             x-position of the upper-left corner (left bound)
+   * y:             y-position of the upper-left corner (top bound)
+   * width:         width of the rectangle to the right of the upper-left corner, required to be >= 0
+   * height:        height of the rectangle below the upper-left corner, required to be >= 0
+   * cornerXRadius: positive vertical radius (width) of the rounded corner, or 0 to indicate the corner should be sharp
+   * cornerYRadius: positive horizontal radius (height) of the rounded corner, or 0 to indicate the corner should be sharp
    */
-  scenery.Rectangle = function Rectangle( x, y, width, height, arcWidth, arcHeight, options ) {
+  scenery.Rectangle = function Rectangle( x, y, width, height, cornerXRadius, cornerYRadius, options ) {
     if ( typeof x === 'object' ) {
       if ( x instanceof Bounds2 ) {
-        // allow new Rectangle( bounds2, { ... } ) or new Rectangle( bounds2, arcWidth, arcHeight, options )
+        // allow new Rectangle( bounds2, { ... } ) or new Rectangle( bounds2, cornerXRadius, cornerYRadius, options )
         this._rectX = x.minX;
         this._rectY = x.minY;
         this._rectWidth = x.width;
@@ -58,14 +58,14 @@ define( function( require ) {
         if ( arguments.length < 3 ) {
           // Rectangle( bounds2, { ... } )
           options = y;
-          this._rectArcWidth = 0;
-          this._rectArcHeight = 0;
+          this._cornerXRadius = 0;
+          this._cornerYRadius = 0;
         }
         else {
-          // Rectangle( bounds2, arcWidth, arcHeight, { ... } )
+          // Rectangle( bounds2, cornerXRadius, cornerYRadius, { ... } )
           options = height;
-          this._rectArcWidth = y;
-          this._rectArcHeight = width;
+          this._cornerXRadius = y;
+          this._cornerYRadius = width;
         }
       }
       else {
@@ -76,8 +76,8 @@ define( function( require ) {
         this._rectY = options.rectY || 0;
         this._rectWidth = options.rectWidth;
         this._rectHeight = options.rectHeight;
-        this._rectArcWidth = options.rectArcWidth || 0;
-        this._rectArcHeight = options.rectArcHeight || 0;
+        this._cornerXRadius = options.cornerXRadius || 0;
+        this._cornerYRadius = options.cornerYRadius || 0;
       }
     }
     else if ( arguments.length < 6 ) {
@@ -86,21 +86,21 @@ define( function( require ) {
       this._rectY = y;
       this._rectWidth = width;
       this._rectHeight = height;
-      this._rectArcWidth = 0;
-      this._rectArcHeight = 0;
+      this._cornerXRadius = 0;
+      this._cornerYRadius = 0;
 
       // ensure we have a parameter object
-      options = arcWidth || {};
+      options = cornerXRadius || {};
 
     }
     else {
-      // normal case with args (including arcWidth / arcHeight)
+      // normal case with args (including cornerXRadius / cornerYRadius)
       this._rectX = x;
       this._rectY = y;
       this._rectWidth = width;
       this._rectHeight = height;
-      this._rectArcWidth = arcWidth;
-      this._rectArcHeight = arcHeight;
+      this._cornerXRadius = cornerXRadius;
+      this._cornerYRadius = cornerYRadius;
 
       // ensure we have a parameter object
       options = options || {};
@@ -141,8 +141,8 @@ define( function( require ) {
       // Additionally, if we're handling rounded rectangles or a stroke with lineJoin 'round', we'll need borderRadius
       // We also require for DOM that if it's a rounded rectangle, it's rounded with circular arcs (for now, could potentially do a transform trick!)
       if ( ( !this.hasStroke() || ( this.getLineWidth() <= this._rectHeight && this.getLineWidth() <= this._rectWidth ) ) &&
-           ( !this.isRounded() || ( Features.borderRadius && this._rectArcWidth === this._rectArcHeight ) ) &&
-           this._rectArcHeight <= maximumArcSize && this._rectArcWidth <= maximumArcSize ) {
+           ( !this.isRounded() || ( Features.borderRadius && this._cornerXRadius === this._cornerYRadius ) ) &&
+           this._cornerYRadius <= maximumArcSize && this._cornerXRadius <= maximumArcSize ) {
         bitmask |= Renderer.bitmaskDOM;
       }
 
@@ -160,8 +160,8 @@ define( function( require ) {
            this._rectY === y &&
            this._rectWidth === width &&
            this._rectHeight === height &&
-           this._rectArcWidth === arcWidth &&
-           this._rectArcHeight === arcHeight ) {
+           this._cornerXRadius === arcWidth &&
+           this._cornerYRadius === arcHeight ) {
         return;
       }
 
@@ -169,8 +169,8 @@ define( function( require ) {
       this._rectY = y;
       this._rectWidth = width;
       this._rectHeight = height;
-      this._rectArcWidth = arcWidth || 0;
-      this._rectArcHeight = arcHeight || 0;
+      this._cornerXRadius = arcWidth || 0;
+      this._cornerYRadius = arcHeight || 0;
 
       var stateLen = this._drawables.length;
       for ( var i = 0; i < stateLen; i++ ) {
@@ -235,7 +235,7 @@ define( function( require ) {
     get rectHeightFromBottom() { return this.getRectHeight(); }, // because JSHint complains
 
     isRounded: function() {
-      return this._rectArcWidth !== 0 && this._rectArcHeight !== 0;
+      return this._cornerXRadius !== 0 && this._cornerYRadius !== 0;
     },
 
     computeShapeBounds: function() {
@@ -257,7 +257,7 @@ define( function( require ) {
         // copy border-radius CSS behavior in Chrome, where the arcs won't intersect, in cases where the arc segments at full size would intersect each other
         var maximumArcSize = Math.min( this._rectWidth / 2, this._rectHeight / 2 );
         return Shape.roundRectangle( this._rectX, this._rectY, this._rectWidth, this._rectHeight,
-          Math.min( maximumArcSize, this._rectArcWidth ), Math.min( maximumArcSize, this._rectArcHeight ) );
+          Math.min( maximumArcSize, this._cornerXRadius ), Math.min( maximumArcSize, this._cornerYRadius ) );
       }
       else {
         return Shape.rectangle( this._rectX, this._rectY, this._rectWidth, this._rectHeight );
@@ -271,11 +271,11 @@ define( function( require ) {
         'A rectangle needs to have a non-negative finite width (' + this._rectWidth + ')' );
       assert && assert( this._rectHeight >= 0 && isFinite( this._rectHeight ),
         'A rectangle needs to have a non-negative finite height (' + this._rectHeight + ')' );
-      assert && assert( this._rectArcWidth >= 0 && isFinite( this._rectArcWidth ),
-        'A rectangle needs to have a non-negative finite arcWidth (' + this._rectArcWidth + ')' );
-      assert && assert( this._rectArcHeight >= 0 && isFinite( this._rectArcHeight ),
-        'A rectangle needs to have a non-negative finite arcHeight (' + this._rectArcHeight + ')' );
-      // assert && assert( !this.isRounded() || ( this._rectWidth >= this._rectArcWidth * 2 && this._rectHeight >= this._rectArcHeight * 2 ),
+      assert && assert( this._cornerXRadius >= 0 && isFinite( this._cornerXRadius ),
+        'A rectangle needs to have a non-negative finite arcWidth (' + this._cornerXRadius + ')' );
+      assert && assert( this._cornerYRadius >= 0 && isFinite( this._cornerYRadius ),
+        'A rectangle needs to have a non-negative finite arcHeight (' + this._cornerYRadius + ')' );
+      // assert && assert( !this.isRounded() || ( this._rectWidth >= this._cornerXRadius * 2 && this._rectHeight >= this._cornerYRadius * 2 ),
       //                                 'The rounded sections of the rectangle should not intersect (the length of the straight sections shouldn\'t be negative' );
 
       // sets our 'cache' to null, so we don't always have to recompute our shape
@@ -295,8 +295,8 @@ define( function( require ) {
       var y = this._rectY;
       var width = this._rectWidth;
       var height = this._rectHeight;
-      var arcWidth = this._rectArcWidth;
-      var arcHeight = this._rectArcHeight;
+      var arcWidth = this._cornerXRadius;
+      var arcHeight = this._cornerYRadius;
       var halfLine = this.getLineWidth() / 2;
 
       var result = true;
@@ -369,7 +369,7 @@ define( function( require ) {
       return 'new scenery.Rectangle( ' +
              this._rectX + ', ' + this._rectY + ', ' +
              this._rectWidth + ', ' + this._rectHeight + ', ' +
-             this._rectArcWidth + ', ' + this._rectArcHeight +
+             this._cornerXRadius + ', ' + this._cornerYRadius +
              ', {' + propLines + '} )';
     },
 
@@ -392,18 +392,33 @@ define( function( require ) {
 
     hasShape: function() {
       return true;
-    }
+    },
+
+    getCornerRadius: function() {
+      assert && assert( this._cornerXRadius === this._cornerYRadius,
+        'getCornerRadius() invalid if x/y radii are different' );
+
+      return this._cornerXRadius;
+    },
+    get cornerRadius() { return this.getCornerRadius(); },
+
+    setCornerRadius: function( cornerRadius ) {
+      this.setCornerXRadius( cornerRadius );
+      this.setCornerYRadius( cornerRadius );
+      return this;
+    },
+    set cornerRadius( value ) { this.setCornerRadius( value ); }
   } );
 
   /*---------------------------------------------------------------------------*
    * Other Rectangle properties and ES5
    *----------------------------------------------------------------------------*/
 
-  function addRectProp( capitalizedShort ) {
-    var getName = 'getRect' + capitalizedShort;
-    var setName = 'setRect' + capitalizedShort;
-    var privateName = '_rect' + capitalizedShort;
-    var dirtyMethodName = 'markDirty' + capitalizedShort;
+  function addRectProp( name, setGetCapitalized, eventName ) {
+    var getName = 'get' + setGetCapitalized;
+    var setName = 'set' + setGetCapitalized;
+    var privateName = '_' + name;
+    var dirtyMethodName = 'markDirty' + eventName;
 
     Rectangle.prototype[ getName ] = function() {
       return this[ privateName ];
@@ -423,21 +438,21 @@ define( function( require ) {
       return this;
     };
 
-    Object.defineProperty( Rectangle.prototype, 'rect' + capitalizedShort, {
+    Object.defineProperty( Rectangle.prototype, name, {
       set: Rectangle.prototype[ setName ],
       get: Rectangle.prototype[ getName ]
     } );
   }
 
-  addRectProp( 'X' );
-  addRectProp( 'Y' );
-  addRectProp( 'Width' );
-  addRectProp( 'Height' );
-  addRectProp( 'ArcWidth' );
-  addRectProp( 'ArcHeight' );
+  addRectProp( 'rectX', 'RectX', 'X' );
+  addRectProp( 'rectY', 'RectY', 'Y' );
+  addRectProp( 'rectWidth', 'RectWidth', 'Width' );
+  addRectProp( 'rectHeight', 'RectHeight', 'Height' );
+  addRectProp( 'cornerXRadius', 'CornerXRadius', 'CornerXRadius' );
+  addRectProp( 'cornerYRadius', 'CornerYRadius', 'CornerYRadius' );
 
   // not adding mutators for now
-  Rectangle.prototype._mutatorKeys = [ 'rectX', 'rectY', 'rectWidth', 'rectHeight', 'rectArcWidth', 'rectArcHeight' ].concat( Path.prototype._mutatorKeys );
+  Rectangle.prototype._mutatorKeys = [ 'rectX', 'rectY', 'rectWidth', 'rectHeight', 'cornerRadius', 'cornerXRadius', 'cornerYRadius' ].concat( Path.prototype._mutatorKeys );
 
   Rectangle.intersects = function( x, y, width, height, arcWidth, arcHeight, point ) {
     var result = point.x >= x &&
@@ -528,8 +543,8 @@ define( function( require ) {
         this.dirtyY = true;
         this.dirtyWidth = true;
         this.dirtyHeight = true;
-        this.dirtyArcWidth = true;
-        this.dirtyArcHeight = true;
+        this.dirtyCornerXRadius = true;
+        this.dirtyCornerYRadius = true;
 
         // adds fill/stroke-specific flags and state
         this.initializePaintableState();
@@ -549,8 +564,8 @@ define( function( require ) {
         this.dirtyY = true;
         this.dirtyWidth = true;
         this.dirtyHeight = true;
-        this.dirtyArcWidth = true;
-        this.dirtyArcHeight = true;
+        this.dirtyCornerXRadius = true;
+        this.dirtyCornerYRadius = true;
         this.markPaintDirty();
       };
 
@@ -570,12 +585,12 @@ define( function( require ) {
         this.dirtyHeight = true;
         this.markPaintDirty();
       };
-      proto.markDirtyArcWidth = function() {
-        this.dirtyArcWidth = true;
+      proto.markDirtyCornerXRadius = function() {
+        this.dirtyCornerXRadius = true;
         this.markPaintDirty();
       };
-      proto.markDirtyArcHeight = function() {
-        this.dirtyArcHeight = true;
+      proto.markDirtyCornerYRadius = function() {
+        this.dirtyCornerYRadius = true;
         this.markPaintDirty();
       };
 
@@ -585,8 +600,8 @@ define( function( require ) {
         this.dirtyY = false;
         this.dirtyWidth = false;
         this.dirtyHeight = false;
-        this.dirtyArcWidth = false;
-        this.dirtyArcHeight = false;
+        this.dirtyCornerXRadius = false;
+        this.dirtyCornerYRadius = false;
 
         this.cleanPaintableState();
       };
@@ -638,8 +653,8 @@ define( function( require ) {
       var strokeElement = this.strokeElement;
 
       if ( this.paintDirty ) {
-        var borderRadius = Math.min( node._rectArcWidth, node._rectArcHeight );
-        var borderRadiusDirty = this.dirtyArcWidth || this.dirtyArcHeight;
+        var borderRadius = Math.min( node._cornerXRadius, node._cornerYRadius );
+        var borderRadiusDirty = this.dirtyCornerXRadius || this.dirtyCornerYRadius;
 
         if ( this.dirtyWidth ) {
           fillElement.style.width = node._rectWidth + 'px';
@@ -760,7 +775,7 @@ define( function( require ) {
       if ( this.dirtyHeight ) {
         rect.setAttribute( 'height', this.node._rectHeight );
       }
-      if ( this.dirtyArcWidth || this.dirtyArcHeight || this.dirtyWidth || this.dirtyHeight ) {
+      if ( this.dirtyCornerXRadius || this.dirtyCornerYRadius || this.dirtyWidth || this.dirtyHeight ) {
         var arcw = 0;
         var arch = 0;
 
@@ -768,8 +783,8 @@ define( function( require ) {
         // see https://github.com/phetsims/scenery/issues/183
         if ( this.node.isRounded() ) {
           var maximumArcSize = this.node.getMaximumArcSize();
-          arcw = Math.min( this.node._rectArcWidth, maximumArcSize );
-          arch = Math.min( this.node._rectArcHeight, maximumArcSize );
+          arcw = Math.min( this.node._cornerXRadius, maximumArcSize );
+          arch = Math.min( this.node._cornerYRadius, maximumArcSize );
         }
         if ( arcw !== this.lastArcW ) {
           this.lastArcW = arcw;
@@ -806,8 +821,8 @@ define( function( require ) {
       if ( node.isRounded() ) {
         context.beginPath();
         var maximumArcSize = node.getMaximumArcSize();
-        var arcw = Math.min( node._rectArcWidth, maximumArcSize );
-        var arch = Math.min( node._rectArcHeight, maximumArcSize );
+        var arcw = Math.min( node._cornerXRadius, maximumArcSize );
+        var arch = Math.min( node._cornerYRadius, maximumArcSize );
         var lowX = node._rectX + arcw;
         var highX = node._rectX + node._rectWidth - arcw;
         var lowY = node._rectY + arch;

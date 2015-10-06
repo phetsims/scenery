@@ -263,6 +263,9 @@
     <a class="sublink" href="#rectangle-rectY">rectY</a><br>
     <a class="sublink" href="#rectangle-rectWidth">rectWidth</a><br>
     <a class="sublink" href="#rectangle-rectHeight">rectHeight</a><br>
+    <a class="sublink" href="#rectangle-cornerRadius">cornerRadius</a><br>
+    <a class="sublink" href="#rectangle-cornerXRadius">cornerXRadius</a><br>
+    <a class="sublink" href="#rectangle-cornerYRadius">cornerYRadius</a><br>
 
     <a class="navlink" href="#circle">Circle</a><br>
     <a class="sublink" href="#circle-radius">radius</a><br>
@@ -1913,18 +1916,28 @@ window.assertions.disableAssertSlow();
       retrieves or modifies the 'height' parameter of the <a href="#rectangle">Rectangle</a>.
     </p>
 
-    <h4 id="rectangle-rectArcWidth">rectArcWidth</h4>
+    <h4 id="rectangle-cornerRadius">cornerRadius</h4>
 
     <p>
-      <code>node.rectArcWidth</code> (<code>node.getRectArcWidth()</code>, <code>node.setRectArcWidth( arcWidth )</code>)
-      retrieves or modifies the 'width' parameter of the <a href="#rectangle">Rectangle</a>.
+      <code>node.cornerRadius</code> (<code>node.getCornerRadius()</code>, <code>node.setCornerRadius( radius )</code>)
+      retrieves or modifies the 'cornerRadius' parameter of the <a href="#rectangle">Rectangle</a>. This effectively
+      sets both the <a href="#rectangle-cornerXRadus">cornerXRadius</a> and
+      <a href="#rectangle-cornerYRadus">cornerYRadius</a> at the same time. An assertion will fail if the getter is
+      called while the two corner radii are different.
     </p>
 
-    <h4 id="rectangle-rectArcHeight">rectArcHeight</h4>
+    <h4 id="rectangle-cornerXRadius">cornerXRadius</h4>
 
     <p>
-      <code>node.rectArcHeight</code> (<code>node.getRectArcHeight()</code>, <code>node.setRectArcHeight( arcHeight )</code>)
-      retrieves or modifies the 'height' parameter of the <a href="#rectangle">Rectangle</a>.
+      <code>node.cornerXRadius</code> (<code>node.getCornerXRadius()</code>, <code>node.setCornerXRadius( radius )</code>)
+      retrieves or modifies the 'cornerXRadius' parameter of the <a href="#rectangle">Rectangle</a>.
+    </p>
+
+    <h4 id="rectangle-cornerYRadius">cornerYRadius</h4>
+
+    <p>
+      <code>node.cornerYRadius</code> (<code>node.getCornerYRadius()</code>, <code>node.setCornerYRadius( radius )</code>)
+      retrieves or modifies the 'cornerYRadius' parameter of the <a href="#rectangle">Rectangle</a>.
     </p>
 
     <h3 id="circle" class="section">Circle</h3>
