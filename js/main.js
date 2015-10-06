@@ -43,13 +43,6 @@ define( [
   'SCENERY/display/WebGLBlock',
   'SCENERY/display/WebGLSelfDrawable',
 
-  // 'SCENERY/display/webgl/ColorTriangleBufferData',
-  // 'SCENERY/display/webgl/ColorTriangleRenderer',
-  // 'SCENERY/display/webgl/SquareUnstrokedRectangle',
-  // 'SCENERY/display/webgl/TextureBufferData',
-  // 'SCENERY/display/webgl/TextureRenderer',
-  // 'SCENERY/display/webgl/WebGLRectangle',
-
   'SCENERY/input/BatchedDOMEvent',
   'SCENERY/input/ButtonListener',
   'SCENERY/input/DownUpListener',

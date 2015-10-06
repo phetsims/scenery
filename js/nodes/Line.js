@@ -25,12 +25,9 @@ define( function( require ) {
   var SVGSelfDrawable = require( 'SCENERY/display/SVGSelfDrawable' );
   var CanvasSelfDrawable = require( 'SCENERY/display/CanvasSelfDrawable' );
 
-  var WebGLSelfDrawable = require( 'SCENERY/display/WebGLSelfDrawable' );
   var SelfDrawable = require( 'SCENERY/display/SelfDrawable' );
   var PixiSelfDrawable = require( 'SCENERY/display/PixiSelfDrawable' );
   var Renderer = require( 'SCENERY/display/Renderer' );
-  var SquareUnstrokedRectangle = require( 'SCENERY/display/webgl/SquareUnstrokedRectangle' );
-  var Color = require( 'SCENERY/util/Color' );
 
   // TODO: change this based on memory and performance characteristics of the platform
   var keepSVGLineElements = true; // whether we should pool SVG elements for the SVG rendering states, or whether we should free them when possible for memory
@@ -539,101 +536,6 @@ define( function( require ) {
   } );
   Paintable.PaintableStatelessDrawable.mixin( Line.LineCanvasDrawable );
   SelfDrawable.Poolable.mixin( Line.LineCanvasDrawable );
-
-  /*---------------------------------------------------------------------------*
-   * WebGL rendering
-   *----------------------------------------------------------------------------*/
-
-  Line.LineWebGLDrawable = inherit( WebGLSelfDrawable, function LineWebGLDrawable( renderer, instance ) {
-    this.initialize( renderer, instance );
-  }, {
-    // called either from the constructor or from pooling
-    initialize: function( renderer, instance ) {
-      this.initializeWebGLSelfDrawable( renderer, instance );
-    },
-
-    onAddToBlock: function( webglBlock ) {
-      this.webglBlock = webglBlock;
-      this.rectangleHandle = new SquareUnstrokedRectangle( webglBlock.webGLRenderer.colorTriangleRenderer, this.node, 0.5 );
-
-      // cleanup old vertexBuffer, if applicable
-      this.disposeWebGLBuffers();
-
-      this.initializePaintableState();
-      this.updateLine();
-
-      //TODO: Update the state in the buffer arrays
-    },
-
-    onRemoveFromBlock: function( webglBlock ) {
-
-    },
-
-    //Nothing necessary since everything currently handled in the uModelViewMatrix below
-    //However, we may switch to dynamic draw, and handle the matrix change only where necessary in the future?
-    updateLine: function() {
-
-      // TODO: a way to update the ColorTriangleBufferData.
-
-      // TODO: move to PaintableWebGLState???
-      if ( this.dirtyFill ) {
-        this.color = Color.toColor( this.node._fill || 'red' );
-        this.cleanPaintableState();
-      }
-      this.rectangleHandle.update();
-
-      // TODO: Batch these updates?
-      this.webglBlock.webGLRenderer.colorTriangleRenderer.updateTriangleBuffer( this.rectangleHandle );
-    },
-
-    render: function( shaderProgram ) {
-      // This is handled by the ColorTriangleRenderer
-    },
-
-    dispose: function() {
-      this.disposeWebGLBuffers();
-
-      // super
-      WebGLSelfDrawable.prototype.dispose.call( this );
-    },
-
-    disposeWebGLBuffers: function() {
-      this.webglBlock.webGLRenderer.colorTriangleRenderer.colorTriangleBufferData.dispose( this.rectangleHandle );
-    },
-
-    markDirtyLine: function() {
-      this.markDirty();
-    },
-
-    markDirtyX1: function() {
-      this.markDirty();
-    },
-    markDirtyY1: function() {
-      this.markDirty();
-    },
-    markDirtyX2: function() {
-      this.markDirty();
-    },
-    markDirtyY2: function() {
-      this.markDirty();
-    },
-
-    // general flag set on the state, which we forward directly to the drawable's paint flag
-    markPaintDirty: function() {
-      this.markDirty();
-    },
-
-    //TODO: Make sure all of the dirty flags make sense here.  Should we be using fillDirty, paintDirty, dirty, etc?
-    update: function() {
-      if ( this.dirty ) {
-        this.updateLine();
-        this.dirty = false;
-      }
-    }
-  } );
-  // include stubs (stateless) for marking dirty stroke and fill (if necessary). we only want one dirty flag, not multiple ones, for WebGL (for now)
-  Paintable.PaintableStatefulDrawable.mixin( Line.LineWebGLDrawable );
-  SelfDrawable.Poolable.mixin( Line.LineWebGLDrawable ); // pooling
 
   /*---------------------------------------------------------------------------*
    * Pixi Rendering

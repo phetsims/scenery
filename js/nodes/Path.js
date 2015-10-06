@@ -20,10 +20,7 @@ define( function( require ) {
   var SVGSelfDrawable = require( 'SCENERY/display/SVGSelfDrawable' );
   var CanvasSelfDrawable = require( 'SCENERY/display/CanvasSelfDrawable' );
   var SelfDrawable = require( 'SCENERY/display/SelfDrawable' );
-  var WebGLSelfDrawable = require( 'SCENERY/display/WebGLSelfDrawable' );
   var PixiSelfDrawable = require( 'SCENERY/display/PixiSelfDrawable' );
-  var SquareUnstrokedRectangle = require( 'SCENERY/display/webgl/SquareUnstrokedRectangle' );
-  var Color = require( 'SCENERY/util/Color' );
 
   // TODO: change this based on memory and performance characteristics of the platform
   var keepSVGPathElements = true; // whether we should pool SVG elements for the SVG rendering states, or whether we should free them when possible for memory
@@ -421,84 +418,6 @@ define( function( require ) {
   } );
   Paintable.PaintableStatelessDrawable.mixin( Path.PathCanvasDrawable );
   SelfDrawable.Poolable.mixin( Path.PathCanvasDrawable );
-
-  /*---------------------------------------------------------------------------*
-   * WebGL rendering
-   *----------------------------------------------------------------------------*/
-
-  Path.PathWebGLDrawable = inherit( WebGLSelfDrawable, function PathWebGLDrawable( renderer, instance ) {
-    this.initialize( renderer, instance );
-  }, {
-    // called either from the constructor or from pooling
-    initialize: function( renderer, instance ) {
-      this.initializeWebGLSelfDrawable( renderer, instance );
-    },
-
-    onAddToBlock: function( webglBlock ) {
-      this.webglBlock = webglBlock;
-      this.rectangleHandle = new SquareUnstrokedRectangle( webglBlock.webGLRenderer.colorTriangleRenderer, this.node, 0.5 );
-
-      // cleanup old vertexBuffer, if applicable
-      this.disposeWebGLBuffers();
-
-      this.initializePaintableState();
-      this.updatePath();
-
-      //TODO: Update the state in the buffer arrays
-    },
-
-    onRemoveFromBlock: function( webglBlock ) {
-
-    },
-
-    //Nothing necessary since everything currently handled in the uModelViewMatrix below
-    //However, we may switch to dynamic draw, and handle the matrix change only where necessary in the future?
-    updatePath: function() {
-
-      // TODO: a way to update the ColorTriangleBufferData.
-
-      // TODO: move to PaintableWebGLState???
-      if ( this.dirtyFill ) {
-        this.color = Color.toColor( this.node._fill || 'blue' );
-        this.cleanPaintableState();
-      }
-    },
-
-    render: function( shaderProgram ) {
-      // This is handled by the ColorTriangleRenderer
-    },
-
-    dispose: function() {
-      this.disposeWebGLBuffers();
-
-      // super
-      WebGLSelfDrawable.prototype.dispose.call( this );
-    },
-
-    disposeWebGLBuffers: function() {
-      this.webglBlock.webGLRenderer.colorTriangleRenderer.colorTriangleBufferData.dispose( this.rectangleHandle );
-    },
-
-    markDirtyShape: function() {
-      this.markDirty();
-    },
-
-    // general flag set on the state, which we forward directly to the drawable's paint flag
-    markPaintDirty: function() {
-      this.markDirty();
-    },
-
-    //TODO: Make sure all of the dirty flags make sense here.  Should we be using fillDirty, paintDirty, dirty, etc?
-    update: function() {
-      if ( this.dirty ) {
-        this.updatePath();
-        this.dirty = false;
-      }
-    }
-  } );
-  // include stubs (stateless) for marking dirty stroke and fill (if necessary). we only want one dirty flag, not multiple ones, for WebGL (for now)
-  Paintable.PaintableStatefulDrawable.mixin( Path.PathWebGLDrawable );
-  SelfDrawable.Poolable.mixin( Path.PathWebGLDrawable ); // pooling
 
   /*---------------------------------------------------------------------------*
    * Pixi Rendering
