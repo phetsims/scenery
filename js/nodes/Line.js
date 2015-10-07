@@ -14,7 +14,7 @@ define( function( require ) {
 
   var inherit = require( 'PHET_CORE/inherit' );
   var scenery = require( 'SCENERY/scenery' );
-  var KiteLine = require( 'KITE/segments/Line' );
+  var KiteLine = require( 'KITE/segments/Line' ); // eslint-disable-line require-statement-match
 
   var Path = require( 'SCENERY/nodes/Path' );
   var Shape = require( 'KITE/Shape' );
