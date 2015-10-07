@@ -36,13 +36,10 @@ define( function( require ) {
   var CanvasSelfDrawable = require( 'SCENERY/display/CanvasSelfDrawable' );
   var SelfDrawable = require( 'SCENERY/display/SelfDrawable' );
   var WebGLSelfDrawable = require( 'SCENERY/display/WebGLSelfDrawable' );
-  var PixiSelfDrawable = require( 'SCENERY/display/PixiSelfDrawable' );
-
 
   // TODO: change this based on memory and performance characteristics of the platform
   var keepDOMTextElements = true; // whether we should pool DOM elements for the DOM rendering states, or whether we should free them when possible for memory
   var keepSVGTextElements = true; // whether we should pool SVG elements for the SVG rendering states, or whether we should free them when possible for memory
-  var keepPixiTextElements = true; // whether we should pool Pixi elements for the SVG rendering states, or whether we should free them when possible for memory
 
   // scratch matrix used in DOM rendering
   var scratchMatrix = Matrix3.dirtyFromPool();
@@ -164,7 +161,6 @@ define( function( require ) {
 
       // fill and stroke will determine whether we have DOM text support
       bitmask |= Renderer.bitmaskDOM;
-      bitmask |= Renderer.bitmaskPixi;
 
       return bitmask;
     },
@@ -242,10 +238,6 @@ define( function( require ) {
 
     createWebGLDrawable: function( renderer, instance ) {
       return Text.TextWebGLDrawable.createFromPool( renderer, instance );
-    },
-
-    createPixiDrawable: function( renderer, instance ) {
-      return Text.TextPixiDrawable.createFromPool( renderer, instance );
     },
 
     // a DOM node (not a Scenery DOM node, but an actual DOM node) with the text
@@ -547,7 +539,7 @@ define( function( require ) {
       var proto = drawableType.prototype;
 
       // initializes, and resets (so we can support pooled states)
-      proto.initializeState = function() {
+      proto.initializeState = function( renderer, instance ) {
         this.paintDirty = true; // flag that is marked if ANY "paint" dirty flag is set (basically everything except for transforms, so we can accelerated the transform-only case)
         this.dirtyText = true;
         this.dirtyFont = true;
@@ -555,9 +547,13 @@ define( function( require ) {
         this.dirtyDirection = true;
 
         // adds fill/stroke-specific flags and state
-        this.initializePaintableState();
+        this.initializePaintableState( renderer, instance );
 
         return this; // allow for chaining
+      };
+
+      proto.disposeState = function() {
+        this.disposePaintableState();
       };
 
       // catch-all dirty, if anything that isn't a transform is marked as dirty
@@ -589,8 +585,6 @@ define( function( require ) {
         this.dirtyFont = false;
         this.dirtyBounds = false;
         this.dirtyDirection = false;
-
-        this.cleanPaintableState();
       };
 
       Paintable.PaintableStatefulDrawable.mixin( drawableType );
@@ -606,7 +600,7 @@ define( function( require ) {
   }, {
     initialize: function( renderer, instance ) {
       this.initializeDOMSelfDrawable( renderer, instance );
-      this.initializeState();
+      this.initializeState( renderer, instance );
 
       // only create elements if we don't already have them (we pool visual states always, and depending on the platform may also pool the actual elements to minimize
       // allocation and performance costs)
@@ -673,6 +667,8 @@ define( function( require ) {
     },
 
     dispose: function() {
+      this.disposeState();
+
       if ( !keepDOMTextElements ) {
         // clear the references
         this.domElement = null;
@@ -753,7 +749,9 @@ define( function( require ) {
   };
   inherit( CanvasSelfDrawable, Text.TextCanvasDrawable, {
     initialize: function( renderer, instance ) {
-      return this.initializeCanvasSelfDrawable( renderer, instance );
+      this.initializeCanvasSelfDrawable( renderer, instance );
+      this.initializePaintableStateless( renderer, instance );
+      return this;
     },
 
     paintCanvas: function( wrapper, node ) {
@@ -781,7 +779,12 @@ define( function( require ) {
     markDirtyText: function() { this.markPaintDirty(); },
     markDirtyFont: function() { this.markPaintDirty(); },
     markDirtyBounds: function() { this.markPaintDirty(); },
-    markDirtyDirection: function() { this.markPaintDirty(); }
+    markDirtyDirection: function() { this.markPaintDirty(); },
+
+    dispose: function() {
+      CanvasSelfDrawable.prototype.dispose.call( this );
+      this.disposePaintableStateless();
+    }
   } );
   Paintable.PaintableStatelessDrawable.mixin( Text.TextCanvasDrawable );
   SelfDrawable.Poolable.mixin( Text.TextCanvasDrawable );
@@ -867,47 +870,6 @@ define( function( require ) {
 
   // set up pooling
   SelfDrawable.Poolable.mixin( Text.TextWebGLDrawable );
-
-  /*---------------------------------------------------------------------------*
-   * Pixi rendering
-   *----------------------------------------------------------------------------*/
-
-  Text.TextPixiDrawable = function TextPixiDrawable( renderer, instance ) {
-    this.initialize( renderer, instance );
-  };
-  inherit( PixiSelfDrawable, Text.TextPixiDrawable, {
-    initialize: function( renderer, instance ) {
-      this.initializePixiSelfDrawable( renderer, instance, keepPixiTextElements );
-
-      if ( !this.displayObject ) {
-        this.displayObject = new PIXI.Text( '' );
-      }
-
-      return this;
-    },
-
-    updatePixiSelf: function( node, text ) {
-      // set all of the font attributes, since we can't use the combined one
-      if ( this.dirtyFont ) {
-        text.setStyle( { font: node.font, fill: node.getFillColor().toCSS() } );
-        this.displayObject.position.y = -this.displayObject.height / 2;
-      }
-
-      // update the text-node's value
-      if ( this.dirtyText ) {
-        this.displayObject.setText( node.getNonBreakingText() );
-      }
-
-      // text length correction, tested with scenery/tests/text-quality-test.html to determine how to match Canvas/Pixi rendering (and overall length)
-      // TODO: JO: Why is this here?
-      if ( this.dirtyBounds && isFinite( node.selfBounds.width ) ) {
-        // do nothing
-      }
-    }
-  } );
-  Text.TextStatefulDrawable.mixin( Text.TextSVGDrawable );
-  Paintable.PaintableStatelessDrawable.mixin( Text.TextPixiDrawable );
-  SelfDrawable.Poolable.mixin( Text.TextPixiDrawable );
 
   /*---------------------------------------------------------------------------*
    * Hybrid text setup (for bounds testing)

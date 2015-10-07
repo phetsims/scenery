@@ -41,7 +41,7 @@ define( function( require ) {
 
   // preferences top to bottom in general
   var defaultPreferredRenderers = Renderer.createOrderBitmask(
-    Renderer.bitmaskSVG, Renderer.bitmaskCanvas, Renderer.bitmaskDOM, Renderer.bitmaskWebGL, Renderer.bitmaskPixi );
+    Renderer.bitmaskSVG, Renderer.bitmaskCanvas, Renderer.bitmaskDOM, Renderer.bitmaskWebGL );
 
   // see initialize() for documentation
   scenery.Instance = function Instance( display, trail, isDisplayRoot, isSharedCanvasCacheRoot ) {
@@ -187,9 +187,6 @@ define( function( require ) {
 
       // {SVGGroup[]} - List of SVG groups associated with this display instance
       this.svgGroups = cleanArray( this.svgGroups );
-
-      // {PixiDisplayObject[]}
-      this.pixiDisplayObjects = cleanArray( this.pixiDisplayObjects );
 
       this.cleanSyncTreeResults();
 
@@ -351,7 +348,7 @@ define( function( require ) {
         else {
           var supportedNodeBitmask = this.node._rendererBitmask;
           if ( !isWebGLSupported ) {
-            var invalidBitmasks = Renderer.bitmaskWebGL | Renderer.bitmaskPixi;
+            var invalidBitmasks = Renderer.bitmaskWebGL;
             supportedNodeBitmask = supportedNodeBitmask ^ ( supportedNodeBitmask & invalidBitmasks );
           }
 
@@ -360,12 +357,10 @@ define( function( require ) {
                               ( supportedNodeBitmask & Renderer.bitmaskOrder( this.preferredRenderers, 1 ) ) ||
                               ( supportedNodeBitmask & Renderer.bitmaskOrder( this.preferredRenderers, 2 ) ) ||
                               ( supportedNodeBitmask & Renderer.bitmaskOrder( this.preferredRenderers, 3 ) ) ||
-                              ( supportedNodeBitmask & Renderer.bitmaskOrder( this.preferredRenderers, 4 ) ) ||
                               ( supportedNodeBitmask & Renderer.bitmaskSVG ) ||
                               ( supportedNodeBitmask & Renderer.bitmaskCanvas ) ||
                               ( supportedNodeBitmask & Renderer.bitmaskDOM ) ||
                               ( supportedNodeBitmask & Renderer.bitmaskWebGL ) ||
-                              ( supportedNodeBitmask & Renderer.bitmaskPixi ) ||
                               0;
 
           assert && assert( this.selfRenderer, 'setSelfRenderer failure?' );
@@ -1278,31 +1273,6 @@ define( function( require ) {
         var group = this.svgGroups[ i ];
         if ( group.block === block ) {
           return group;
-        }
-      }
-      return null;
-    },
-
-    // add a reference for an SVG group (fastest way to track them)
-    addPixiDisplayObject: function( pixiDisplayObject ) {
-      this.pixiDisplayObjects.push( pixiDisplayObject );
-    },
-
-    // remove a reference for an SVG group (fastest way to track them)
-    removePixiDisplayObject: function( pixiDisplayObject ) {
-      var index = _.indexOf( this.pixiDisplayObjects, pixiDisplayObject );
-      assert && assert( index >= 0, 'Tried to remove an PixiDisplayObject from an Instance when it did not exist' );
-
-      this.pixiDisplayObjects.splice( index, 1 ); // TODO: remove function
-    },
-
-    // returns null when a lookup fails (which is legitimate)
-    lookupPixiDisplayObject: function( pixiBlock ) {
-      var len = this.pixiDisplayObjects.length;
-      for ( var i = 0; i < len; i++ ) {
-        var pixiDisplayObject = this.pixiDisplayObjects[ i ];
-        if ( pixiDisplayObject.block === pixiBlock ) {
-          return pixiDisplayObject;
         }
       }
       return null;

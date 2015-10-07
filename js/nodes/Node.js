@@ -2661,11 +2661,6 @@ define( function( require ) {
     },
 
     // @deprecated
-    supportsPixi: function() {
-      return ( this._rendererBitmask & Renderer.bitmaskPixi) !== 0;
-    },
-
-    // @deprecated
     supportsRenderer: function( renderer ) {
       return ( this._rendererBitmask & renderer.bitmask ) !== 0;
     },
@@ -2705,14 +2700,13 @@ define( function( require ) {
      * - 'svg'
      * - 'dom'
      * - 'webgl'
-     * - 'pixi'
      * @public
      *
      * @param {string|null} renderer
      */
     setRenderer: function( renderer ) {
-      assert && assert( renderer === null || renderer === 'canvas' || renderer === 'svg' || renderer === 'dom' || renderer === 'webgl' || renderer === 'pixi',
-        'Renderer input should be null, or one of: "canvas", "svg", "dom", "webgl" or "pixi".' );
+      assert && assert( renderer === null || renderer === 'canvas' || renderer === 'svg' || renderer === 'dom' || renderer === 'webgl',
+        'Renderer input should be null, or one of: "canvas", "svg", "dom" or "webgl".' );
 
       var newRenderer = 0;
       if ( renderer === 'canvas' ) {
@@ -2726,9 +2720,6 @@ define( function( require ) {
       }
       else if ( renderer === 'webgl' ) {
         newRenderer = Renderer.bitmaskWebGL;
-      }
-      else if ( renderer === 'pixi' ) {
-        newRenderer = Renderer.bitmaskPixi;
       }
       assert && assert( ( renderer === null ) === ( newRenderer === 0 ),
         'We should only end up with no actual renderer if renderer is null' );
@@ -2762,9 +2753,6 @@ define( function( require ) {
       }
       else if ( this._hints.renderer === Renderer.bitmaskWebGL ) {
         return 'webgl';
-      }
-      else if ( this._hints.renderer === Renderer.bitmaskPixi ) {
-        return 'pixi';
       }
       assert && assert( false, 'Seems to be an invalid renderer?' );
       return this._hints.renderer;
@@ -3650,7 +3638,7 @@ define( function( require ) {
      * (and it can be expanded).
      * @public
      *
-     * @param {Bounds2} bounds
+     * @param   unds2} bounds
      * @returns {Bounds2}
      */
     localToParentBounds: function( bounds ) {

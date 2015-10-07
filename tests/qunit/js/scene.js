@@ -919,7 +919,7 @@
 
     rect.addChild( circle );
     display.updateDisplay();
-    equal( color.getListenerCount(), 2, 'One listener for the rectangle, one for the circle (even though two instances)' );
+    equal( color.getListenerCount(), 3, 'One listener for the rectangle, two for the circle (two instances)' );
 
     node.removeAllChildren();
     display.updateDisplay();

@@ -7,6 +7,8 @@
  * Abstract methods to implement for concrete implementations:
  *   updateSVGSelf() - Update the SVG element's state to what the Node's self should display
  *   updateDefsSelf( block ) - Update defs on the given block (or if block === null, remove)
+ *   initializeState( renderer, instance )
+ *   disposeState()
  *
  * @author Jonathan Olson <jonathan.olson@colorado.edu>
  */
@@ -37,7 +39,7 @@ define( function( require ) {
       this.svgElement = null; // should be filled in by subtype
       this.svgBlock = null; // will be updated by updateSVGBlock()
 
-      this.initializeState(); // assumes we have a state mixin
+      this.initializeState( renderer, instance ); // assumes we have a state mixin
 
       if ( this.usesPaint ) {
         if ( !this.paintState ) {
@@ -112,10 +114,10 @@ define( function( require ) {
       }
 
       if ( this.dirtyFill ) {
-        this.paintState.updateFill( this.svgBlock, this.node._fill );
+        this.paintState.updateFill( this.svgBlock, this.node.getFillValue() );
       }
       if ( this.dirtyStroke ) {
-        this.paintState.updateStroke( this.svgBlock, this.node._stroke );
+        this.paintState.updateStroke( this.svgBlock, this.node.getStrokeValue() );
       }
       var strokeDetailDirty = this.dirtyLineWidth || this.dirtyLineOptions;
       if ( strokeDetailDirty ) {
@@ -154,6 +156,8 @@ define( function( require ) {
     },
 
     dispose: function() {
+      this.disposeState(); // assumes subtype existence
+
       if ( !this.keepElements ) {
         // clear the references
         this.svgElement = null;

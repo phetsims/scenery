@@ -23,7 +23,6 @@ define( function( require ) {
     Renderer.bitmaskSVG,
     Renderer.bitmaskDOM,
     Renderer.bitmaskWebGL,
-    Renderer.bitmaskPixi,
 
     // summary bits (added to the renderer bitmask to handle special flags for the summary)
     Renderer.bitmaskSingleCanvas,
@@ -35,8 +34,7 @@ define( function( require ) {
     Renderer.bitmaskLacksCanvas,
     Renderer.bitmaskLacksSVG,
     Renderer.bitmaskLacksDOM,
-    Renderer.bitmaskLacksWebGL,
-    Renderer.bitmaskLacksPixi
+    Renderer.bitmaskLacksWebGL
   ];
   var numSummaryBits = summaryBits.length;
 
@@ -315,12 +313,10 @@ define( function( require ) {
       if ( bit === Renderer.bitmaskSVG ) { return 'SVG'; }
       if ( bit === Renderer.bitmaskDOM ) { return 'DOM'; }
       if ( bit === Renderer.bitmaskWebGL ) { return 'WebGL'; }
-      if ( bit === Renderer.bitmaskPixi ) { return 'Pixi'; }
       if ( bit === Renderer.bitmaskLacksCanvas ) { return '(-Canvas)'; }
       if ( bit === Renderer.bitmaskLacksSVG ) { return '(-SVG)'; }
       if ( bit === Renderer.bitmaskLacksDOM ) { return '(-DOM)'; }
       if ( bit === Renderer.bitmaskLacksWebGL ) { return '(-WebGL)'; }
-      if ( bit === Renderer.bitmaskLacksPixi ) { return '(-Pixi)'; }
       if ( bit === Renderer.bitmaskSingleCanvas ) { return 'SingleCanvas'; }
       if ( bit === Renderer.bitmaskSingleSVG ) { return 'SingleSVG'; }
       if ( bit === Renderer.bitmaskNotPainted ) { return 'NotPainted'; }

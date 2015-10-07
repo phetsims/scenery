@@ -25,12 +25,10 @@ define( function( require ) {
   var SelfDrawable = require( 'SCENERY/display/SelfDrawable' );
   var Renderer = require( 'SCENERY/display/Renderer' );
   require( 'SCENERY/util/Util' );
-  var PixiSelfDrawable = require( 'SCENERY/display/PixiSelfDrawable' );
 
   // TODO: change this based on memory and performance characteristics of the platform
   var keepDOMCircleElements = true; // whether we should pool DOM elements for the DOM rendering states, or whether we should free them when possible for memory
   var keepSVGCircleElements = true; // whether we should pool SVG elements for the SVG rendering states, or whether we should free them when possible for memory
-  var keepPixiCircleElements = true; // whether we should pool Pixi elements for the Pixi rendering states, or whether we should free them when possible for memory
 
   scenery.Circle = function Circle( radius, options ) {
     if ( typeof radius === 'object' ) {
@@ -58,12 +56,11 @@ define( function( require ) {
       if ( this.hasStroke() && !this.getStroke().isGradient && !this.getStroke().isPattern && this.getLineWidth() <= this.getRadius() ) {
         bitmask |= Renderer.bitmaskDOM;
       }
-      bitmask |= Renderer.bitmaskPixi;
       return bitmask;
     },
 
     getPathRendererBitmask: function() {
-      return Renderer.bitmaskCanvas | Renderer.bitmaskSVG | Renderer.bitmaskPixi | ( Features.borderRadius ? Renderer.bitmaskDOM : 0 );
+      return Renderer.bitmaskCanvas | Renderer.bitmaskSVG | ( Features.borderRadius ? Renderer.bitmaskDOM : 0 );
     },
 
     invalidateCircle: function() {
@@ -222,14 +219,18 @@ define( function( require ) {
       var proto = drawableType.prototype;
 
       // initializes, and resets (so we can support pooled states)
-      proto.initializeState = function() {
+      proto.initializeState = function( renderer, instance ) {
         this.paintDirty = true; // flag that is marked if ANY "paint" dirty flag is set (basically everything except for transforms, so we can accelerated the transform-only case)
         this.dirtyRadius = true;
 
         // adds fill/stroke-specific flags and state
-        this.initializePaintableState();
+        this.initializePaintableState( renderer, instance );
 
         return this; // allow for chaining
+      };
+
+      proto.disposeState = function() {
+        this.disposePaintableState();
       };
 
       // catch-all dirty, if anything that isn't a transform is marked as dirty
@@ -246,8 +247,6 @@ define( function( require ) {
       proto.setToCleanState = function() {
         this.paintDirty = false;
         this.dirtyRadius = false;
-
-        this.cleanPaintableState();
       };
 
       Paintable.PaintableStatefulDrawable.mixin( drawableType );
@@ -265,7 +264,7 @@ define( function( require ) {
     // initializes, and resets (so we can support pooled states)
     initialize: function( renderer, instance ) {
       this.initializeDOMSelfDrawable( renderer, instance );
-      this.initializeState();
+      this.initializeState( renderer, instance );
 
       if ( !this.matrix ) {
         this.matrix = Matrix3.dirtyFromPool();
@@ -362,6 +361,8 @@ define( function( require ) {
     },
 
     dispose: function() {
+      this.disposeState();
+
       // Release the DOM elements from the poolable visual state so they aren't kept in memory.
       // May not be done on platforms where we have enough memory to pool these
       if ( !keepDOMCircleElements ) {
@@ -415,7 +416,9 @@ define( function( require ) {
   };
   inherit( CanvasSelfDrawable, Circle.CircleCanvasDrawable, {
     initialize: function( renderer, instance ) {
-      return this.initializeCanvasSelfDrawable( renderer, instance );
+      this.initializeCanvasSelfDrawable( renderer, instance );
+      this.initializePaintableStateless( renderer, instance );
+      return this;
     },
 
     paintCanvas: function( wrapper, node ) {
@@ -425,12 +428,12 @@ define( function( require ) {
       context.arc( 0, 0, node._radius, 0, Math.PI * 2, false );
       context.closePath();
 
-      if ( node._fill ) {
+      if ( node.hasFill() ) {
         node.beforeCanvasFill( wrapper ); // defined in Paintable
         context.fill();
         node.afterCanvasFill( wrapper ); // defined in Paintable
       }
-      if ( node._stroke ) {
+      if ( node.hasStroke() ) {
         node.beforeCanvasStroke( wrapper ); // defined in Paintable
         context.stroke();
         node.afterCanvasStroke( wrapper ); // defined in Paintable
@@ -438,48 +441,15 @@ define( function( require ) {
     },
 
     // stateless dirty functions
-    markDirtyRadius: function() { this.markPaintDirty(); }
+    markDirtyRadius: function() { this.markPaintDirty(); },
+
+    dispose: function() {
+      CanvasSelfDrawable.prototype.dispose.call( this );
+      this.disposePaintableStateless();
+    }
   } );
   Paintable.PaintableStatelessDrawable.mixin( Circle.CircleCanvasDrawable );
   SelfDrawable.Poolable.mixin( Circle.CircleCanvasDrawable );
-
-  /*---------------------------------------------------------------------------*
-   * Pixi Rendering
-   *----------------------------------------------------------------------------*/
-
-  Circle.CirclePixiDrawable = function CirclePixiDrawable( renderer, instance ) {
-    this.initialize( renderer, instance );
-  };
-  inherit( PixiSelfDrawable, Circle.CirclePixiDrawable, {
-    initialize: function( renderer, instance ) {
-      this.initializePixiSelfDrawable( renderer, instance, keepPixiCircleElements );
-
-      if ( !this.displayObject ) {
-        this.displayObject = new PIXI.Graphics();
-      }
-
-      return this;
-    },
-
-    updatePixiSelf: function( node, graphics ) {
-      this.displayObject.clear();
-      if ( node.getFillColor() ) {
-        graphics.beginFill( node.getFillColor().toNumber() );
-      }
-      if ( node.getStrokeColor() ) {
-        graphics.lineStyle( 5, node.getStrokeColor().toNumber() );
-      }
-      graphics.drawRect( node.rectX, node.rectY, node.rectWidth, node.rectHeight );
-      if ( node.getFillColor() ) {
-        graphics.endFill();
-      }
-    },
-
-    // stateless dirty methods:
-    markDirtyRadius: function() { this.markPaintDirty(); }
-  } );
-  Paintable.PaintableStatelessDrawable.mixin( Circle.CirclePixiDrawable );
-  SelfDrawable.Poolable.mixin( Circle.CirclePixiDrawable );
 
   return Circle;
 } );

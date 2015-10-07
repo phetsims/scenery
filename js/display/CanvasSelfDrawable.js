@@ -86,6 +86,10 @@ define( function( require ) {
       initialize: function( renderer, instance ) {
         this.initializeCanvasSelfDrawable( renderer, instance );
 
+        if ( usesPaint ) {
+          this.initializePaintableStateless( renderer, instance );
+        }
+
         return this; // allow for chaining
       },
 
@@ -94,6 +98,14 @@ define( function( require ) {
       update: function() {
         // no action directly needed for the self-drawable case, as we will be repainted in the block
         this.dirty = false;
+      },
+
+      dispose: function() {
+        CanvasSelfDrawable.prototype.dispose.call( this );
+
+        if ( usesPaint ) {
+          this.disposePaintableStateless();
+        }
       }
     } );
 
