@@ -19,11 +19,14 @@ define( function( require ) {
   var platform = require( 'PHET_CORE/platform' );
   var arrayRemove = require( 'PHET_CORE/arrayRemove' );
 
+  var Property = require( 'AXON/Property' );
+
   var isSafari5 = platform.safari5;
   var isIE9 = platform.ie9;
 
   /*
    * Applies the mix-in to a subtype of Node.
+   * @public
    *
    * @param {constructor} type - A constructor that inherits from Node
    */
@@ -32,7 +35,10 @@ define( function( require ) {
       var proto = type.prototype;
 
       extend( proto, {
-        // this should be called in the constructor to initialize
+        /**
+         * This should be called in the constructor to initialize the paint-specific parts of the Node.
+         * @protected
+         */
         initializePaintable: function() {
           this._fill = null;
           this._fillPickable = true;
@@ -47,39 +53,155 @@ define( function( require ) {
           this._fillColorDirty = true;
           this._strokeColor = null;
           this._strokeColorDirty = true;
-
-          var that = this;
-          this._fillListener = function() {
-            that.invalidateFill();
-          };
-          this._strokeListener = function() {
-            that.invalidateStroke();
-          };
         },
 
+        /**
+         * Returns whether there is a fill applied to this Node.
+         * @public
+         *
+         * @returns {boolean}
+         */
         hasFill: function() {
           return this._fill !== null;
         },
 
+        /**
+         * Returns whether there is a stroke applied to this Node.
+         * @public
+         *
+         * @returns {boolean}
+         */
+        hasStroke: function() {
+          return this._stroke !== null;
+        },
+
+        /**
+         * Returns the fill (if any) for this Node.
+         * @public
+         *
+         * @returns {null|string|Color|Property.<string|Color>|LinearGradient|RadialGradient|Pattern}
+         */
         getFill: function() {
           return this._fill;
         },
+        get fill() { return this.getFill(); },
 
-        validateFillColor: function() {
-          if ( this._fillColorDirty ) {
-            this._fillColorDirty = false;
+        /**
+         * Sets the fill color for the node.
+         * @public
+         *
+         * Please use null for indicating "no fill" (that is the default). Strings and Scenery Color objects can be
+         * provided for a single-color flat appearance, and can be wrapped with an Axon Property. Gradients and patterns
+         * can also be provided.
+         *
+         * @param {null|string|Color|Property.<string|Color>|LinearGradient|RadialGradient|Pattern} fill
+         */
+        setFill: function( fill ) {
+          assert && assert( fill === null ||
+                            typeof fill === 'string' ||
+                            fill instanceof Color ||
+                            fill.isPaint ||
+                            ( ( fill instanceof Property ) && (
+                              typeof fill.value === 'string' ||
+                              fill.value instanceof Color
+                            ) ),
+                            'Invalid fill type' );
 
-            if ( typeof this._fill === 'string' || this._fill instanceof Color ) {
-              if ( this._fillColor ) {
-                this._fillColor.set( this._fill );
-              }
-              // lazily create a Color when necessary, instead of pre-allocating
-              else {
-                this._fillColor = new Color( this._fill );
-              }
-            }
+          // Instance equality used here since it would be more expensive to parse all CSS
+          // colors and compare every time the fill changes. Right now, usually we don't have
+          // to parse CSS colors. See https://github.com/phetsims/scenery/issues/255
+          if ( this._fill !== fill ) {
+            this._fillColorDirty = true;
+
+            this._fill = fill;
+
+            this.invalidateFill();
           }
+          return this;
         },
+        set fill( value ) { this.setFill( value ); },
+
+        /**
+         * Returns the stroke (if any) for this Node.
+         * @public
+         *
+         * @returns {null|string|Color|Property.<string|Color>|LinearGradient|RadialGradient|Pattern}
+         */
+        getStroke: function() {
+          return this._stroke;
+        },
+        get stroke() { return this.getStroke(); },
+
+        /**
+         * Sets the stroke color for the node.
+         * @public
+         *
+         * Please use null for indicating "no stroke" (that is the default). Strings and Scenery Color objects can be
+         * provided for a single-color flat appearance, and can be wrapped with an Axon Property. Gradients and patterns
+         * can also be provided.
+         *
+         * @param {null|string|Color|Property.<string|Color>|LinearGradient|RadialGradient|Pattern} stroke
+         */
+        setStroke: function( stroke ) {
+          assert && assert( stroke === null ||
+                            typeof stroke === 'string' ||
+                            stroke instanceof Color ||
+                            stroke.isPaint ||
+                            ( ( stroke instanceof Property ) && (
+                              typeof stroke.value === 'string' ||
+                              stroke.value instanceof Color
+                            ) ),
+                            'Invalid stroke type' );
+
+          // Instance equality used here since it would be more expensive to parse all CSS
+          // colors and compare every time the fill changes. Right now, usually we don't have
+          // to parse CSS colors. See https://github.com/phetsims/scenery/issues/255
+          if ( this._stroke !== stroke ) {
+            this._strokeColorDirty = true;
+
+            this._stroke = stroke;
+
+            this.invalidateStroke();
+          }
+          return this;
+        },
+        set stroke( value ) { this.setStroke( value ); },
+
+        /**
+         * Returns a property-unwrapped fill if applicable.
+         * @public
+         *
+         * @returns {null|string|Color|LinearGradient|RadialGradient|Pattern}
+         */
+        getFillValue: function() {
+          var fill = this.getFill();
+
+          // Property lookup
+          if ( fill instanceof Property ) {
+            fill = fill.get();
+          }
+
+          return fill;
+        },
+        get fillValue() { return this.getFillValue(); },
+
+        /**
+         * Returns a property-unwrapped stroke if applicable.
+         * @public
+         *
+         * @returns {null|string|Color|LinearGradient|RadialGradient|Pattern}
+         */
+        getStrokeValue: function() {
+          var stroke = this.getStroke();
+
+          // Property lookup
+          if ( stroke instanceof Property ) {
+            stroke = stroke.get();
+          }
+
+          return stroke;
+        },
+        get strokeValue() { return this.getStrokeValue(); },
 
         /**
          * If the current fill is a solid color (string or scenery.Color), getFillColor() will return a scenery.Color
@@ -88,10 +210,21 @@ define( function( require ) {
          * @returns {Color | null} [read-only]
          */
         getFillColor: function() {
-          this.validateFillColor();
+          var fillValue = this.getFillValue();
 
-          // types of fills where we can return a single color
-          if ( typeof this._fill === 'string' || this._fill instanceof Color ) {
+          if ( typeof fillValue === 'string' || fillValue instanceof Color ) {
+            // Update the cached value if necessary. If it's a Property, we will always check and update.
+            if ( this._fillColorDirty || this._fill instanceof Property ) {
+              this._fillColorDirty = false;
+
+              if ( this._fillColor ) {
+                this._fillColor.set( fillValue );
+              }
+              // lazily create a Color when necessary, instead of pre-allocating
+              else {
+                this._fillColor = new Color( fillValue );
+              }
+            }
             return this._fillColor;
           }
           // no fill, or a pattern/gradient (we can't return a single fill)
@@ -99,43 +232,56 @@ define( function( require ) {
             return null;
           }
         },
+        get fillColor() { return this.getFillColor(); },
 
         /**
-         * Sets the fill color for the node.
+         * If the current stroke is a solid color (string or scenery.Color), getStrokeColor() will return a scenery.Color
+         * reference. This reference should be considered immutable (should not be modified)
          *
-         * Please use null for indicating "no fill" (that is the default).
-         *
-         * @param {string | Color | LinearGradient | RadialGradient | Pattern | null} fill
+         * @returns {Color | null} [read-only]
          */
-        setFill: function( fill ) {
-          // Instance equality used here since it would be more expensive to parse all CSS
-          // colors and compare every time the fill changes. Right now, usually we don't have
-          // to parse CSS colors. See https://github.com/phetsims/scenery/issues/255
-          if ( this._fill !== fill ) {
-            this._fillColorDirty = true;
+        getStrokeColor: function() {
+          var strokeValue = this.getStrokeValue();
 
-            //OHTWO TODO: we probably shouldn't be checking this here?
-            var hasInstances = this._instances.length > 0;
+          if ( typeof strokeValue === 'string' || strokeValue instanceof Color ) {
+            // Update the cached value if necessary. If it's a Property, we will always check and update.
+            if ( this._strokeColorDirty || this._stroke instanceof Property ) {
+              this._strokeColorDirty = false;
 
-            if ( hasInstances && this._fill && this._fill.removeChangeListener ) {
-              this._fill.removeChangeListener( this._fillListener );
+              if ( this._strokeColor ) {
+                this._strokeColor.set( strokeValue );
+              }
+              // lazily create a Color when necessary, instead of pre-allocating
+              else {
+                this._strokeColor = new Color( strokeValue );
+              }
             }
-
-            this._fill = fill;
-
-            if ( hasInstances && this._fill && this._fill.addChangeListener ) {
-              this._fill.addChangeListener( this._fillListener );
-            }
-
-            this.invalidateFill();
+            return this._strokeColor;
           }
-          return this;
+          // no stroke, or a pattern/gradient (we can't return a single stroke)
+          else {
+            return null;
+          }
         },
+        get strokeColor() { return this.getStrokeColor(); },
 
+        /**
+         * Returns whether the fill is marked as pickable.
+         * @public
+         *
+         * @returns {boolean}
+         */
         isFillPickable: function() {
           return this._fillPickable;
         },
+        get fillPickable() { return this.isFillPickable(); },
 
+        /**
+         * Sets whether the fill is marked as pickable.
+         * @public
+         *
+         * @param {boolean} pickable
+         */
         setFillPickable: function( pickable ) {
           assert && assert( typeof pickable === 'boolean' );
           if ( this._fillPickable !== pickable ) {
@@ -146,16 +292,55 @@ define( function( require ) {
           }
           return this;
         },
+        set fillPickable( value ) { this.setFillPickable( value ); },
 
-        hasStroke: function() {
-          return this._stroke !== null;
+        /**
+         * Returns whether the stroke is marked as pickable.
+         * @public
+         *
+         * @returns {boolean}
+         */
+        isStrokePickable: function() {
+          return this._strokePickable;
         },
+        get strokePickable() { return this.isStrokePickable(); },
 
-        // TODO: setting these properties looks like a good candidate for refactoring to lessen file size
+        /**
+         * Sets whether the stroke is marked as pickable.
+         * @public
+         *
+         * @param {boolean} pickable
+         */
+        setStrokePickable: function( pickable ) {
+          assert && assert( typeof pickable === 'boolean', 'strokePickable should be a boolean, not ' + pickable );
+
+          if ( this._strokePickable !== pickable ) {
+            this._strokePickable = pickable;
+
+            // TODO: better way of indicating that only the node under pointers could have changed, but no paint change is needed?
+            this.invalidateStroke();
+          }
+          return this;
+        },
+        set strokePickable( value ) { this.setStrokePickable( value ); },
+
+        /**
+         * Returns the line width that would be applied to strokes.
+         * @public
+         *
+         * @returns {number}
+         */
         getLineWidth: function() {
           return this._lineDrawingStyles.lineWidth;
         },
+        get lineWidth() { return this.getLineWidth(); },
 
+        /**
+         * Sets the line width that will be applied to strokes on this Node.
+         * @public
+         *
+         * @param {number} lineWidth
+         */
         setLineWidth: function( lineWidth ) {
           assert && assert( typeof lineWidth === 'number', 'lineWidth should be a number, not ' + lineWidth );
           assert && assert( lineWidth >= 0, 'lineWidth should be non-negative instead of ' + lineWidth );
@@ -171,11 +356,28 @@ define( function( require ) {
           }
           return this;
         },
+        set lineWidth( value ) { this.setLineWidth( value ); },
 
+        /**
+         * Returns the line cap style (controls appearance at the start/end of paths)
+         * @public
+         *
+         * @returns {string}
+         */
         getLineCap: function() {
           return this._lineDrawingStyles.lineCap;
         },
+        get lineCap() { return this.getLineCap(); },
 
+        /**
+         * Sets the line cap style. There are three options:
+         * - 'butt' (the default) stops the line at the end point
+         * - 'round' draws a semicircular arc around the end point
+         * - 'square' draws a square outline around the end point (like butt, but extended by 1/2 line width out)
+         * @public
+         *
+         * @param {string} lineCap
+         */
         setLineCap: function( lineCap ) {
           assert && assert( lineCap === 'butt' || lineCap === 'round' || lineCap === 'square',
             'lineCap should be one of "butt", "round" or "square", not ' + lineCap );
@@ -191,11 +393,29 @@ define( function( require ) {
           }
           return this;
         },
+        set lineCap( value ) { this.setLineCap( value ); },
 
+        /**
+         * Returns the current line join style (controls join appearance between drawn segments).
+         * @public
+         *
+         * @returns {string}
+         */
         getLineJoin: function() {
           return this._lineDrawingStyles.lineJoin;
         },
+        get lineJoin() { return this.getLineJoin(); },
 
+        /**
+         * Sets the line join style. There are three options:
+         * - 'miter' (default) joins by extending the segments out in a line until they meet. For very sharp
+         *           corners, they will be chopped off and will act like 'bevel', depending on what the miterLimit is.
+         * - 'round' draws a circular arc to connect the two stroked areas.
+         * - 'bevel' connects with a single line segment.
+         * @public
+         *
+         * @param {string} lineJoin
+         */
         setLineJoin: function( lineJoin ) {
           assert && assert( lineJoin === 'miter' || lineJoin === 'round' || lineJoin === 'bevel',
             'lineJoin should be one of "miter", "round" or "bevel", not ' + lineJoin );
@@ -211,11 +431,26 @@ define( function( require ) {
           }
           return this;
         },
+        set lineJoin( value ) { this.setLineJoin( value ); },
 
+        /**
+         * Returns the miterLimit value.
+         * @public
+         *
+         * @returns {number}
+         */
         getMiterLimit: function() {
           return this._lineDrawingStyles.miterLimit;
         },
+        get miterLimit() { return this.getMiterLimit(); },
 
+        /**
+         * Sets the miterLimit value. This determines how sharp a corner with lineJoin: 'miter' will need to be before
+         * it gets cut off to the 'bevel' behavior.
+         * @public
+         *
+         * @param {number} miterLimit
+         */
         setMiterLimit: function( miterLimit ) {
           assert && assert( typeof miterLimit === 'number' );
 
@@ -230,15 +465,36 @@ define( function( require ) {
           }
           return this;
         },
+        set miterLimit( value ) { this.setMiterLimit( value ); },
 
-        getLineDash: function() {
-          return this._lineDrawingStyles.lineDash;
-        },
-
+        /**
+         * Returns whether the stroke will be dashed.
+         * @public
+         *
+         * @returns {boolean}
+         */
         hasLineDash: function() {
           return !!this._lineDrawingStyles.lineDash.length;
         },
 
+        /**
+         * Gets the line dash pattern. An empty array is the default, indicating no dashing.
+         * @public
+         *
+         * @returns {Array.<number>}
+         */
+        getLineDash: function() {
+          return this._lineDrawingStyles.lineDash;
+        },
+        get lineDash() { return this.getLineDash(); },
+
+        /**
+         * Sets the line dash pattern. Should be an array of numbers "on" and "off" alternating. An empty array
+         * indicates no dashing.
+         * @public
+         *
+         * @param {Array.<number>} lineDash
+         */
         setLineDash: function( lineDash ) {
           if ( this._lineDrawingStyles.lineDash !== lineDash ) {
             this._lineDrawingStyles.lineDash = lineDash || [];
@@ -251,11 +507,25 @@ define( function( require ) {
           }
           return this;
         },
+        set lineDash( value ) { this.setLineDash( value ); },
 
+        /**
+         * Returns the offset of the line dash pattern from the start of the stroke.
+         * @public
+         *
+         * @returns {number}
+         */
         getLineDashOffset: function() {
           return this._lineDrawingStyles.lineDashOffset;
         },
+        get lineDashOffset() { return this.getLineDashOffset(); },
 
+        /**
+         * Sets the offset of the line dash pattern from the start of the stroke. Defaults to 0.
+         * @public
+         *
+         * @param {number} lineDashOffset
+         */
         setLineDashOffset: function( lineDashOffset ) {
           assert && assert( typeof lineDashOffset === 'number', 'lineDashOffset should be a number, not ' + lineDashOffset );
 
@@ -270,109 +540,47 @@ define( function( require ) {
           }
           return this;
         },
+        set lineDashOffset( value ) { this.setLineDashOffset( value ); },
 
-        isStrokePickable: function() {
-          return this._strokePickable;
+        /**
+         * Returns the composite {LineStyles} object, that determines stroke appearance.
+         * @public
+         *
+         * @returns {LineStyles}
+         */
+        getLineStyles: function() {
+          return this._lineDrawingStyles;
         },
+        get lineStyles() { return this.getLineStyles(); },
 
-        setStrokePickable: function( pickable ) {
-          assert && assert( typeof pickable === 'boolean', 'strokePickable should be a boolean, not ' + pickable );
-
-          if ( this._strokePickable !== pickable ) {
-            this._strokePickable = pickable;
-
-            // TODO: better way of indicating that only the node under pointers could have changed, but no paint change is needed?
-            this.invalidateStroke();
-          }
-          return this;
-        },
-
+        /**
+         * Sets the LineStyles object (it determines stroke appearance). The passed-in object will be mutated as needed.
+         * @public
+         *
+         * @param {LineStyles} lineStyles
+         */
         setLineStyles: function( lineStyles ) {
-
           this._lineDrawingStyles = lineStyles;
           this.invalidateStroke();
           return this;
         },
-
-        getLineStyles: function() {
-          return this._lineDrawingStyles;
-        },
-
-        getStroke: function() {
-          return this._stroke;
-        },
-
-        validateStrokeColor: function() {
-          if ( this._strokeColorDirty ) {
-            this._strokeColorDirty = false;
-
-            if ( typeof this._stroke === 'string' || this._stroke instanceof Color ) {
-              if ( this._strokeColor ) {
-                this._strokeColor.set( this._stroke );
-              }
-              // lazily create a Color when necessary, instead of pre-allocating
-              else {
-                this._strokeColor = new Color( this._stroke );
-              }
-            }
-          }
-        },
+        set lineStyles( value ) { this.setLineStyles( value ); },
 
         /**
-         * If the current stroke is a solid color (string or scenery.Color), getStrokeColor() will return a scenery.Color
-         * reference. This reference should be considered immutable (should not be modified)
+         * Returns the cached paints.
+         * @public
          *
-         * @returns {Color | null} [read-only]
+         * @returns {Array.<string|Color|LinearGradient|RadialGradient|Pattern|null}
          */
-        getStrokeColor: function() {
-          this.validateStrokeColor();
-
-          // types of strokes where we can return a single color
-          if ( typeof this._stroke === 'string' || this._stroke instanceof Color ) {
-            return this._strokeColor;
-          }
-          // no stroke, or a pattern/gradient (we can't return a single stroke)
-          else {
-            return null;
-          }
-        },
-
-        /**
-         * Sets the fill color for the node.
-         *
-         * Please use null for indicating "no fill" (that is the default).
-         *
-         * @param {string | Color | LinearGradient | RadialGradient | Pattern | null} fill
-         */
-        setStroke: function( stroke ) {
-          if ( this._stroke !== stroke ) {
-            this._strokeColorDirty = true;
-
-            //OHTWO TODO: probably shouldn't have a reference here
-            var hasInstances = this._instances.length > 0;
-
-            if ( hasInstances && this._stroke && this._stroke.removeChangeListener ) {
-              this._stroke.removeChangeListener( this._strokeListener );
-            }
-
-            this._stroke = stroke;
-
-            if ( hasInstances && this._stroke && this._stroke.addChangeListener ) {
-              this._stroke.addChangeListener( this._strokeListener );
-            }
-
-            this.invalidateStroke();
-          }
-          return this;
-        },
-
         getCachedPaints: function() {
           return this._cachedPaints;
         },
+        get cachedPaints() { return this.getCachedPaints(); },
 
         /**
          * Sets the cached paints to the input array (a defensive copy). Note that it also filters out fills that are
          * not considered paints (e.g. strings, Colors, etc.).
+         * @public
          *
          * When this node is displayed in SVG, it will force the presence of the cached paint to be stored in the SVG's
          * <defs> element, so that we can switch quickly to use the given paint (instead of having to create it on the
@@ -380,7 +588,7 @@ define( function( require ) {
          *
          * Also note that duplicate paints are acceptible, and don't need to be filtered out before-hand.
          *
-         * @param {Array.<string | Color | LinearGradient | RadialGradient | Pattern | null>} paints
+         * @param {Array.<string|Color|Property.<string|Color>|LinearGradient|RadialGradient|Pattern|null>} paints
          */
         setCachedPaints: function( paints ) {
           this._cachedPaints = paints.filter( function( paint ) { return paint && paint.isPaint; } );
@@ -392,6 +600,7 @@ define( function( require ) {
 
           return this;
         },
+        set cachedPaints( value ) { this.setCachedPaints( value ); },
 
         /**
          * Adds a cached paint. Does nothing if paint is just a normal fill (string, Color), but for gradients and
@@ -403,7 +612,7 @@ define( function( require ) {
          *
          * Also note that duplicate paints are acceptible, and don't need to be filtered out before-hand.
          *
-         * @param {string | Color | LinearGradient | RadialGradient | Pattern | null} paint
+         * @param {string|Color|Property.<string|Color>|LinearGradient|RadialGradient|Pattern|null} paint
          */
         addCachedPaint: function( paint ) {
           if ( paint && paint.isPaint ) {
@@ -425,7 +634,7 @@ define( function( require ) {
          * <defs> element, so that we can switch quickly to use the given paint (instead of having to create it on the
          * SVG-side whenever the switch is made).
          *
-         * @param {string | Color | LinearGradient | RadialGradient | Pattern | null} paint
+         * @param {string|Color|Property.<string|Color>|LinearGradient|RadialGradient|Pattern|null} paint
          */
         removeCachedPaint: function( paint ) {
           if ( paint && paint.isPaint ) {
@@ -440,39 +649,45 @@ define( function( require ) {
           }
         },
 
-        firstInstanceAdded: function() {
-          if ( this._fill && this._fill.addChangeListener ) {
-            this._fill.addChangeListener( this._fillListener );
-          }
-          if ( this._stroke && this._stroke.addChangeListener ) {
-            this._stroke.addChangeListener( this._strokeListener );
-          }
-        },
-
-        lastInstanceRemoved: function() {
-          if ( this._fill && this._fill.removeChangeListener ) {
-            this._fill.removeChangeListener( this._fillListener );
-          }
-          if ( this._stroke && this._stroke.removeChangeListener ) {
-            this._stroke.removeChangeListener( this._strokeListener );
-          }
-        },
-
+        /**
+         * Applies the fill to a Canvas context wrapper, before filling.
+         * @public (scenery-internal)
+         *
+         * @param {CanvasContextWrapper} wrapper
+         */
         beforeCanvasFill: function( wrapper ) {
-          wrapper.setFillStyle( this._fill );
-          if ( this._fill.transformMatrix ) {
+          var fillValue = this.getFillValue();
+
+          wrapper.setFillStyle( fillValue );
+          if ( fillValue.transformMatrix ) {
             wrapper.context.save();
-            this._fill.transformMatrix.canvasAppendTransform( wrapper.context );
+            fillValue.transformMatrix.canvasAppendTransform( wrapper.context );
           }
         },
 
+        /**
+         * Unapplies the fill to a Canvas context wrapper, after filling.
+         * @public (scenery-internal)
+         *
+         * @param {CanvasContextWrapper} wrapper
+         */
         afterCanvasFill: function( wrapper ) {
-          if ( this._fill.transformMatrix ) {
+          var fillValue = this.getFillValue();
+
+          if ( fillValue.transformMatrix ) {
             wrapper.context.restore();
           }
         },
 
+        /**
+         * Applies the stroke to a Canvas context wrapper, before stroking.
+         * @public (scenery-internal)
+         *
+         * @param {CanvasContextWrapper} wrapper
+         */
         beforeCanvasStroke: function( wrapper ) {
+          var strokeValue = this.getStrokeValue();
+
           // TODO: is there a better way of not calling so many things on each stroke?
           wrapper.setStrokeStyle( this._stroke );
           wrapper.setLineWidth( this.getLineWidth() );
@@ -481,28 +696,50 @@ define( function( require ) {
           wrapper.setMiterLimit( this.getMiterLimit() );
           wrapper.setLineDash( this.getLineDash() );
           wrapper.setLineDashOffset( this.getLineDashOffset() );
-          if ( this._stroke.transformMatrix ) {
+          if ( strokeValue.transformMatrix ) {
             wrapper.context.save();
-            this._stroke.transformMatrix.canvasAppendTransform( wrapper.context );
+            strokeValue.transformMatrix.canvasAppendTransform( wrapper.context );
           }
         },
 
+        /**
+         * Unapplies the stroke to a Canvas context wrapper, after stroking.
+         * @public (scenery-internal)
+         *
+         * @param {CanvasContextWrapper} wrapper
+         */
         afterCanvasStroke: function( wrapper ) {
-          if ( this._stroke.transformMatrix ) {
+          var strokeValue = this.getStrokeValue();
+
+          if ( strokeValue.transformMatrix ) {
             wrapper.context.restore();
           }
         },
 
+        /**
+         * If applicable, returns the CSS color for the fill.
+         * @public
+         *
+         * @returns {string}
+         */
         getCSSFill: function() {
+          var fillValue = this.getFillValue();
           // if it's a Color object, get the corresponding CSS
           // 'transparent' will make us invisible if the fill is null
-          return this._fill ? ( this._fill.toCSS ? this._fill.toCSS() : this._fill ) : 'transparent';
+          return fillValue ? ( fillValue.toCSS ? fillValue.toCSS() : fillValue ) : 'transparent';
         },
 
+        /**
+         * If applicable, returns the CSS color for the stroke.
+         * @public
+         *
+         * @returns {string}
+         */
         getSimpleCSSStroke: function() {
+          var strokeValue = this.getStrokeValue();
           // if it's a Color object, get the corresponding CSS
           // 'transparent' will make us invisible if the fill is null
-          return this._stroke ? ( this._stroke.toCSS ? this._stroke.toCSS() : this._stroke ) : 'transparent';
+          return strokeValue ? ( strokeValue.toCSS ? strokeValue.toCSS() : strokeValue ) : 'transparent';
         },
 
         appendFillablePropString: function( spaces, result ) {
@@ -510,11 +747,11 @@ define( function( require ) {
             if ( result ) {
               result += ',\n';
             }
-            if ( typeof this._fill === 'string' ) {
-              result += spaces + 'fill: \'' + this._fill + '\'';
+            if ( typeof this.getFillValue() === 'string' ) {
+              result += spaces + 'fill: \'' + this.getFillValue() + '\'';
             }
             else {
-              result += spaces + 'fill: ' + this._fill.toString();
+              result += spaces + 'fill: ' + this.getFillValue().toString();
             }
           }
 
@@ -538,11 +775,11 @@ define( function( require ) {
 
           if ( this._stroke ) {
             var defaultStyles = new LineStyles();
-            if ( typeof this._stroke === 'string' ) {
-              addProp( 'stroke', this._stroke );
+            if ( typeof this.getStrokeValue() === 'string' ) {
+              addProp( 'stroke', this.getStrokeValue() );
             }
             else {
-              addProp( 'stroke', this._stroke.toString(), true );
+              addProp( 'stroke', this.getStrokeValue().toString(), true );
             }
 
             _.each( [ 'lineWidth', 'lineCap', 'miterLimit', 'lineJoin', 'lineDashOffset' ], function( prop ) {
@@ -570,7 +807,7 @@ define( function( require ) {
           // we always have Canvas support?
           bitmask |= Renderer.bitmaskCanvas;
 
-          if ( !this._fill ) {
+          if ( !this.hasFill() ) {
             // if there is no fill, it is supported by DOM and WebGL
             bitmask |= Renderer.bitmaskDOM;
             bitmask |= Renderer.bitmaskWebGL;
@@ -582,10 +819,9 @@ define( function( require ) {
             // no gradient support for DOM or WebGL (for now!)
           }
           else {
-            // solid fills always supported for DOM, WebGL and Pixi
+            // solid fills always supported for DOM and WebGL
             bitmask |= Renderer.bitmaskDOM;
           }
-          bitmask |= Renderer.bitmaskPixi;
 
           return bitmask;
         },
@@ -605,8 +841,6 @@ define( function( require ) {
             bitmask |= Renderer.bitmaskDOM;
           }
 
-          bitmask |= Renderer.bitmaskPixi;
-
           return bitmask;
         }
       } );
@@ -616,20 +850,6 @@ define( function( require ) {
         'fill', 'fillPickable', 'stroke', 'lineWidth', 'lineCap', 'lineJoin', 'miterLimit', 'lineDash',
         'lineDashOffset', 'strokePickable', 'cachedPaints'
       ].concat( proto._mutatorKeys );
-
-      Object.defineProperty( proto, 'fill', { set: proto.setFill, get: proto.getFill } );
-      Object.defineProperty( proto, 'fillColor', { set: proto.setFill, get: proto.getFillColor } );
-      Object.defineProperty( proto, 'fillPickable', { set: proto.setFillPickable, get: proto.isFillPickable } );
-      Object.defineProperty( proto, 'stroke', { set: proto.setStroke, get: proto.getStroke } );
-      Object.defineProperty( proto, 'strokeColor', { set: proto.setStroke, get: proto.getStrokeColor } );
-      Object.defineProperty( proto, 'lineWidth', { set: proto.setLineWidth, get: proto.getLineWidth } );
-      Object.defineProperty( proto, 'lineCap', { set: proto.setLineCap, get: proto.getLineCap } );
-      Object.defineProperty( proto, 'lineJoin', { set: proto.setLineJoin, get: proto.getLineJoin } );
-      Object.defineProperty( proto, 'miterLimit', { set: proto.setMiterLimit, get: proto.getMiterLimit } );
-      Object.defineProperty( proto, 'lineDash', { set: proto.setLineDash, get: proto.getLineDash } );
-      Object.defineProperty( proto, 'lineDashOffset', { set: proto.setLineDashOffset, get: proto.getLineDashOffset } );
-      Object.defineProperty( proto, 'strokePickable', { set: proto.setStrokePickable, get: proto.isStrokePickable } );
-      Object.defineProperty( proto, 'cachedPaints', { set: proto.setCachedPaints, get: proto.getCachedPaints } );
 
       // Paintable's version of invalidateFill()
       function invalidateFill() {
@@ -679,13 +899,93 @@ define( function( require ) {
   };
   var Paintable = scenery.Paintable;
 
+  /**
+   * An observer for a fill or stroke, that will be able to trigger notifications when it changes.
+   */
+  Paintable.PaintObserver = function PaintObserver( type, changeCallback ) {
+    assert && assert( type === 'fill' || type === 'stroke' );
+    this.type = type;
+    this.name = '_' + type;
+    this.changeCallback = changeCallback;
+    this.primary = null;
+    this.secondary = null;
+    this.updateListener = this.update.bind( this );
+  };
+  inherit( Object, Paintable.PaintObserver, {
+    initialize: function( node ) {
+      assert && assert( node !== null );
+      this.node = node;
+
+      this.update();
+    },
+
+    update: function() {
+      var primary = this.node[ this.name ];
+      if ( primary !== this.primary ) {
+        this.detachPrimary( this.primary );
+        this.attachPrimary( primary );
+        this.changeCallback();
+      }
+      else if ( primary instanceof Property ) {
+        var secondary = primary.get();
+        if ( secondary !== this.secondary ) {
+          this.detachSecondary( this.secondary );
+          this.attachSecondary( secondary );
+          this.changeCallback();
+        }
+      }
+    },
+
+    attachPrimary: function( paint ) {
+      this.primary = paint;
+      if ( paint instanceof Property ) {
+        paint.lazyLink( this.updateListener );
+        this.attachSecondary( paint.get() );
+      }
+      else if ( paint instanceof Color ) {
+        paint.addChangeListener( this.changeCallback );
+      }
+    },
+
+    detachPrimary: function( paint ) {
+      if ( paint instanceof Property ) {
+        paint.unlink( this.updateListener );
+        this.detachSecondary( paint.get() );
+        this.secondary = null;
+      }
+      else if ( paint instanceof Color ) {
+        paint.removeChangeListener( this.changeCallback );
+      }
+      this.primary = null;
+    },
+
+    attachSecondary: function( paint ) {
+      this.secondary = paint;
+      if ( paint instanceof Color ) {
+        paint.addChangeListener( this.changeCallback );
+      }
+    },
+
+    detachSecondary: function( paint ) {
+      if ( paint instanceof Color ) {
+        paint.removeChangeListener( this.changeCallback );
+      }
+      this.secondary = null;
+    },
+
+    clean: function() {
+      this.detachPrimary( this.primary );
+      this.node = null;
+    }
+  } );
+
   // mix-in base for DOM and SVG drawables
   // NOTE: requires state.node to be defined
   Paintable.PaintableStatefulDrawable = {
     mixin: function PaintableStatefulDrawable( drawableType ) {
       var proto = drawableType.prototype;
 
-      proto.initializePaintableState = function() {
+      proto.initializePaintableState = function( renderer, instance ) {
         this.lastFill = undefined;
         this.dirtyFill = true;
 
@@ -695,6 +995,16 @@ define( function( require ) {
         this.dirtyLineOptions = true; // e.g. cap, join, dash, dashoffset, miterlimit
         this.dirtyCachedPaints = true;
         this.lastCachedPaints = [];
+
+        this.fillCallback = this.fillCallback || this.markDirtyFill.bind( this );
+        this.strokeCallback = this.strokeCallback || this.markDirtyStroke.bind( this );
+        this.fillObserver = this.fillObserver || new Paintable.PaintObserver( 'fill', this.fillCallback );
+        this.strokeObserver = this.strokeObserver || new Paintable.PaintObserver( 'stroke', this.strokeCallback );
+
+        this.fillObserver.initialize( instance.node );
+        this.strokeObserver.initialize( instance.node );
+
+        return this;
       };
 
       proto.cleanPaintableState = function() {
@@ -708,14 +1018,21 @@ define( function( require ) {
         this.lastStroke = this.node.getStroke();
       };
 
+      proto.disposePaintableState = function() {
+        this.fillObserver.clean();
+        this.strokeObserver.clean();
+      };
+
       proto.markDirtyFill = function() {
         this.dirtyFill = true;
         this.markPaintDirty();
+        this.fillObserver.update(); // TODO: look into having the fillObserver be notified of Node changes as our source
       };
 
       proto.markDirtyStroke = function() {
         this.dirtyStroke = true;
         this.markPaintDirty();
+        this.strokeObserver.update(); // TODO: look into having the strokeObserver be notified of Node changes as our source
       };
 
       proto.markDirtyLineWidth = function() {
@@ -740,12 +1057,31 @@ define( function( require ) {
     mixin: function PaintableStatelessDrawable( drawableType ) {
       var proto = drawableType.prototype;
 
+      proto.initializePaintableStateless = function( renderer, instance ) {
+        this.fillCallback = this.fillCallback || this.markDirtyFill.bind( this );
+        this.strokeCallback = this.strokeCallback || this.markDirtyStroke.bind( this );
+        this.fillObserver = this.fillObserver || new Paintable.PaintObserver( 'fill', this.fillCallback );
+        this.strokeObserver = this.strokeObserver || new Paintable.PaintObserver( 'stroke', this.strokeCallback );
+
+        this.fillObserver.initialize( instance.node );
+        this.strokeObserver.initialize( instance.node );
+
+        return this;
+      };
+
+      proto.disposePaintableStateless = function() {
+        this.fillObserver.clean();
+        this.strokeObserver.clean();
+      };
+
       proto.markDirtyFill = function() {
         this.markPaintDirty();
+        this.fillObserver.update(); // TODO: look into having the fillObserver be notified of Node changes as our source
       };
 
       proto.markDirtyStroke = function() {
         this.markPaintDirty();
+        this.strokeObserver.update(); // TODO: look into having the strokeObserver be notified of Node changes as our source
       };
 
       proto.markDirtyLineWidth = function() {
@@ -762,6 +1098,12 @@ define( function( require ) {
     }
   };
 
+  /**
+   * Returns the SVG style string used to represent a paint.
+   *
+   * @param {null|string|Color|LinearGradient|RadialGradient|Pattern} paint
+   * @param {SVGBlock} svgBlock
+   */
   function paintToSVGStyle( paint, svgBlock ) {
     if ( !paint ) {
       // no paint
@@ -823,7 +1165,13 @@ define( function( require ) {
       }
     },
 
-    // called when the fill needs to be updated, with the latest defs SVG block
+    /**
+     * Called when the fill needs to be updated, with the latest defs SVG block
+     * @public (scenery-internal)
+     *
+     * @param {SVGBlock} svgBlock
+     * @param {null|string|Color|LinearGradient|RadialGradient|Pattern} fill
+     */
     updateFill: function( svgBlock, fill ) {
       assert && assert( this.svgBlock === svgBlock );
 
@@ -849,6 +1197,13 @@ define( function( require ) {
       }
     },
 
+    /**
+     * Called when the stroke needs to be updated, with the latest defs SVG block
+     * @public (scenery-internal)
+     *
+     * @param {SVGBlock} svgBlock
+     * @param {null|string|Color|LinearGradient|RadialGradient|Pattern} fill
+     */
     updateStroke: function( svgBlock, stroke ) {
       assert && assert( this.svgBlock === svgBlock );
 

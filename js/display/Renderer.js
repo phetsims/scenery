@@ -26,9 +26,10 @@ define( function( require ) {
    * Renderer bitmask flags
    *----------------------------------------------------------------------------*/
 
-  Renderer.numActiveRenderers = 5;
+  Renderer.numActiveRenderers = 4;
+  Renderer.bitsPerRenderer = 5;
   Renderer.bitmaskRendererArea = 0x00000FF;
-  Renderer.bitmaskCurrentRendererArea = 0x000001F;
+  Renderer.bitmaskCurrentRendererArea = 0x000000F;
   Renderer.bitmaskLacksOffset = 0x10000;
   Renderer.bitmaskLacksShift = 16; // number of bits between the main renderer bitmask and the "lacks" variety
   Renderer.bitmaskNodeDefault = Renderer.bitmaskRendererArea;
@@ -37,8 +38,7 @@ define( function( require ) {
   Renderer.bitmaskSVG = 0x0000002;
   Renderer.bitmaskDOM = 0x0000004;
   Renderer.bitmaskWebGL = 0x0000008;
-  Renderer.bitmaskPixi = 0x0000010;
-  // 20, 40, 80 reserved for future renderers NOTE: update bitmaskCurrentRendererArea/numActiveRenderers if they are added/removed
+  // 10, 20, 40, 80 reserved for future renderers NOTE: update bitmaskCurrentRendererArea/numActiveRenderers if they are added/removed
 
   // summary bits (for RendererSummary):
   Renderer.bitmaskSingleCanvas = 0x100;
@@ -51,8 +51,7 @@ define( function( require ) {
   Renderer.bitmaskLacksSVG = Renderer.bitmaskSVG << Renderer.bitmaskLacksShift; // 0x20000
   Renderer.bitmaskLacksDOM = Renderer.bitmaskDOM << Renderer.bitmaskLacksShift; // 0x40000
   Renderer.bitmaskLacksWebGL = Renderer.bitmaskWebGL << Renderer.bitmaskLacksShift; // 0x80000
-  Renderer.bitmaskLacksPixi = Renderer.bitmaskPixi << Renderer.bitmaskLacksShift; // 0x100000
-  // reserved gap 0x20000, 0x40000, 0x80000 for future renderers
+  // reserved gap 0x10000, 0x20000, 0x40000, 0x80000 for future renderers
 
   Renderer.isCanvas = function( bitmask ) {
     return ( bitmask & Renderer.bitmaskCanvas ) !== 0;
@@ -66,40 +65,34 @@ define( function( require ) {
   Renderer.isWebGL = function( bitmask ) {
     return ( bitmask & Renderer.bitmaskWebGL ) !== 0;
   };
-  Renderer.isPixi = function( bitmask ) {
-    return ( bitmask & Renderer.bitmaskPixi ) !== 0;
-  };
 
   var rendererMap = {
     canvas: Renderer.bitmaskCanvas,
     svg: Renderer.bitmaskSVG,
     dom: Renderer.bitmaskDOM,
-    webgl: Renderer.bitmaskWebGL,
-    pixi: Renderer.bitmaskPixi
+    webgl: Renderer.bitmaskWebGL
   };
   Renderer.fromName = function( name ) {
     return rendererMap[ name ];
   };
 
-  // returns the part of the bitmask that should contain only Canvas/SVG/DOM/WebGL/Pixi flags
+  // returns the part of the bitmask that should contain only Canvas/SVG/DOM/WebGL flags
   //OHTWO TODO: use this instead of direct access to bitmaskRendererArea
   Renderer.stripBitmask = function( bitmask ) {
     return bitmask & Renderer.bitmaskRendererArea;
   };
 
-  Renderer.createOrderBitmask = function( firstRenderer, secondRenderer, thirdRenderer, fourthRenderer, fifthRenderer ) {
+  Renderer.createOrderBitmask = function( firstRenderer, secondRenderer, thirdRenderer, fourthRenderer ) {
     firstRenderer = firstRenderer || 0;
     secondRenderer = secondRenderer || 0;
     thirdRenderer = thirdRenderer || 0;
     fourthRenderer = fourthRenderer || 0;
-    fifthRenderer = fifthRenderer || 0;
 
-    // uses 25 bits now with 5 renderers
+    // uses 20 bits now with 4 renderers
     return firstRenderer |
            ( secondRenderer << 5 ) |
            ( thirdRenderer << 10 ) |
-           ( fourthRenderer << 15 ) |
-           ( fifthRenderer << 20 );
+           ( fourthRenderer << 15 );
   };
   // bitmaskOrderN with n=0 is bitmaskOrderFirst, n=1 is bitmaskOrderSecond, etc.
   Renderer.bitmaskOrder = function( bitmask, n ) {
@@ -117,14 +110,12 @@ define( function( require ) {
   Renderer.bitmaskOrderFourth = function( bitmask ) {
     return ( bitmask >> 15 ) & Renderer.bitmaskCurrentRendererArea;
   };
-  Renderer.bitmaskOrderFifth = function( bitmask ) {
-    return ( bitmask >> 20 ) & Renderer.bitmaskCurrentRendererArea;
-  };
   Renderer.pushOrderBitmask = function( bitmask, renderer ) {
     assert && assert( typeof bitmask === 'number' );
     assert && assert( typeof renderer === 'number' );
     var rendererToInsert = renderer;
-    for ( var i = 0; i < 30; i += 5 ) {
+    var totalBits = Renderer.bitsPerRenderer * Renderer.numActiveRenderers;
+    for ( var i = 0; i <= totalBits; i += Renderer.bitsPerRenderer ) {
       var currentRenderer = ( bitmask >> i ) & Renderer.bitmaskCurrentRendererArea;
       if ( currentRenderer === rendererToInsert ) {
         return bitmask;
@@ -165,9 +156,6 @@ define( function( require ) {
     }
     else if ( Renderer.isWebGL( selfRenderer ) ) {
       return node.createWebGLDrawable( selfRenderer, instance );
-    }
-    else if ( Renderer.isPixi( selfRenderer ) ) {
-      return node.createPixiDrawable( selfRenderer, instance );
     }
     else {
       throw new Error( 'Unrecognized renderer: ' + selfRenderer );

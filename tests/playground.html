@@ -14,7 +14,6 @@ an UI and Display made for visual testing and debugging.
   <script src="../../assert/js/assert.js"></script>
   <script src="../../sherpa/lib/jquery-2.1.0.js"></script>
   <script src="../../sherpa/lib/lodash-2.4.1.min.js"></script>
-  <script src="../../sherpa/lib/pixi-v3.0.0-rc1-dev.js"></script>
 
   <script type="text/javascript">
     window.assertions.enableAssert();
@@ -85,11 +84,12 @@ an UI and Display made for visual testing and debugging.
   var fuzzStep = false;
 
   require( [ 'config' ], function() {
-    require( [ 'main', 'KITE/main', 'DOT/main', 'PHET_CORE/main' ], function( scenery, kite, dot, phetCore ) {
+    require( [ 'main', 'KITE/main', 'DOT/main', 'PHET_CORE/main', 'AXON/main' ], function( scenery, kite, dot, phetCore, axon ) {
       window.scenery = scenery;
       window.kite = kite;
       window.dot = dot;
       window.phetCore = phetCore;
+      window.axon = axon;
 
       console.log( 'loaded' );
 

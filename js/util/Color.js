@@ -210,6 +210,8 @@ define( function( require ) {
         assert && assert( a === undefined || typeof a === 'number' );
         this.setRGBA( r, g, b, ( a === undefined ) ? 1 : a );
       }
+
+      return this; // support chaining
     },
 
     // red, integral 0-255

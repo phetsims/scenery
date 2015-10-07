@@ -8,7 +8,6 @@
 
   module( 'Scenery: Pixel Comparison' );
 
-  // var testedRenderers = [ 'canvas', 'svg', 'dom', 'webgl', 'pixi' ];
   var testedRenderers = [ 'canvas', 'svg', 'dom', 'webgl' ];
   var nonDomTestedRenderers = testedRenderers.filter( function( renderer ) { return renderer !== 'dom'; } );
 
@@ -191,6 +190,37 @@
       var color = new scenery.Color( 'red' );
       scene.addChild( new scenery.Rectangle( 6, 6, 28, 28, {
         fill: color
+      } ) );
+      display.updateDisplay();
+      color.setRGBA( 0, 0, 0, 1 );
+      display.updateDisplay();
+    }, simpleRectangleDataURL,
+    0, testedRenderers
+  );
+
+  multipleRendererTest( 'Color change from property',
+    function( scene, display ) {
+      display.width = 40;
+      display.height = 40;
+      var colorProperty = new axon.Property( 'red' );
+      scene.addChild( new scenery.Rectangle( 6, 6, 28, 28, {
+        fill: colorProperty
+      } ) );
+      display.updateDisplay();
+      colorProperty.set( 'black' );
+      display.updateDisplay();
+    }, simpleRectangleDataURL,
+    0, testedRenderers
+  );
+
+  multipleRendererTest( 'Color change from property with color',
+    function( scene, display ) {
+      display.width = 40;
+      display.height = 40;
+      var color = new scenery.Color( 'red' );
+      var colorProperty = new axon.Property( color );
+      scene.addChild( new scenery.Rectangle( 6, 6, 28, 28, {
+        fill: colorProperty
       } ) );
       display.updateDisplay();
       color.setRGBA( 0, 0, 0, 1 );

@@ -28,12 +28,10 @@ define( function( require ) {
   var CanvasSelfDrawable = require( 'SCENERY/display/CanvasSelfDrawable' );
   var SelfDrawable = require( 'SCENERY/display/SelfDrawable' );
   var WebGLSelfDrawable = require( 'SCENERY/display/WebGLSelfDrawable' );
-  var PixiSelfDrawable = require( 'SCENERY/display/PixiSelfDrawable' );
 
   // TODO: change this based on memory and performance characteristics of the platform
   var keepDOMImageElements = true; // whether we should pool DOM elements for the DOM rendering states, or whether we should free them when possible for memory
   var keepSVGImageElements = true; // whether we should pool SVG elements for the SVG rendering states, or whether we should free them when possible for memory
-  var keepPixiImageElements = true; // whether we should pool Pixi elements for the SVG rendering states, or whether we should free them when possible for memory
 
   var defaultMipmapBias = -0.7;
   var defaultMipmapInitialLevel = 4; // by default, precompute all levels that will be used (so we don't hit this during animation)
@@ -136,8 +134,7 @@ define( function( require ) {
       if ( this._image instanceof HTMLCanvasElement ) {
         this.setRendererBitmask(
           Renderer.bitmaskCanvas |
-          Renderer.bitmaskWebGL |
-          Renderer.bitmaskPixi
+          Renderer.bitmaskWebGL
         );
       }
       else {
@@ -146,8 +143,7 @@ define( function( require ) {
           Renderer.bitmaskCanvas |
           Renderer.bitmaskSVG |
           Renderer.bitmaskDOM |
-          Renderer.bitmaskWebGL |
-          Renderer.bitmaskPixi
+          Renderer.bitmaskWebGL
         );
       }
     },
@@ -470,10 +466,6 @@ define( function( require ) {
       return Image.ImageWebGLDrawable.createFromPool( renderer, instance );
     },
 
-    createPixiDrawable: function( renderer, instance ) {
-      return Image.ImagePixiDrawable.createFromPool( renderer, instance );
-    },
-
     getBasicConstructor: function( propLines ) {
       return 'new scenery.Image( \'' + ( this._image.src ? this._image.src.replace( /'/g, '\\\'' ) : 'other' ) + '\', {' + propLines + '} )';
     }
@@ -543,12 +535,16 @@ define( function( require ) {
       var proto = drawableType.prototype;
 
       // initializes, and resets (so we can support pooled states)
-      proto.initializeState = function() {
+      proto.initializeState = function( renderer, instance ) {
         this.paintDirty = true; // flag that is marked if ANY "paint" dirty flag is set (basically everything except for transforms, so we can accelerated the transform-only case)
         this.dirtyImage = true;
         this.dirtyMipmap = true;
 
         return this; // allow for chaining
+      };
+
+      proto.disposeState = function() {
+
       };
 
       // catch-all dirty, if anything that isn't a transform is marked as dirty
@@ -585,7 +581,7 @@ define( function( require ) {
     // initializes, and resets (so we can support pooled states)
     initialize: function( renderer, instance ) {
       this.initializeDOMSelfDrawable( renderer, instance );
-      this.initializeState();
+      this.initializeState( renderer, instance );
 
       // only create elements if we don't already have them (we pool visual states always, and depending on the platform may also pool the actual elements to minimize
       // allocation and performance costs)
@@ -627,6 +623,8 @@ define( function( require ) {
     },
 
     dispose: function() {
+      this.disposeState();
+
       if ( !keepDOMImageElements ) {
         this.domElement = null; // clear our DOM reference if we want to toss it
       }
@@ -969,43 +967,6 @@ define( function( require ) {
   } );
   Image.ImageStatefulDrawable.mixin( Image.ImageWebGLDrawable );
   SelfDrawable.Poolable.mixin( Image.ImageWebGLDrawable ); // pooling
-
-  /*---------------------------------------------------------------------------*
-   * Pixi Rendering
-   *----------------------------------------------------------------------------*/
-
-  Image.ImagePixiDrawable = function ImagePixiDrawable( renderer, instance ) {
-    this.initialize( renderer, instance );
-  };
-  inherit( PixiSelfDrawable, Image.ImagePixiDrawable, {
-    initialize: function( renderer, instance ) {
-      this.initializePixiSelfDrawable( renderer, instance, keepPixiImageElements );
-
-      if ( !this.displayObject ) {
-        var baseTexture = new PIXI.BaseTexture( this.node._image );
-        var texture = new PIXI.Texture( baseTexture );
-        this.displayObject = new PIXI.Sprite( texture );
-      }
-
-      return this;
-    },
-
-    updatePixiSelf: function( node, image ) {
-      if ( node._image ) {
-        var baseTexture = new PIXI.BaseTexture( this.node._image );
-        var texture = new PIXI.Texture( baseTexture );
-        this.displayObject.setTexture( texture );
-      }
-      else {
-        this.displayObject.setTexture( null );
-      }
-    },
-
-    // stateless dirty methods:
-    markDirtyImage: function() { this.markPaintDirty(); },
-    markDirtyMipmap: function() { this.markPaintDirty(); }
-  } );
-  SelfDrawable.Poolable.mixin( Image.ImagePixiDrawable );
 
   return Image;
 } );

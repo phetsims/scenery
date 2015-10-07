@@ -10,7 +10,6 @@
   <script src="../../assert/js/assert.js"></script>
   <script src="../../sherpa/lib/jquery-2.1.0.min.js"></script>
   <script src="../../sherpa/lib/lodash-2.4.1.min.js"></script>
-  <script src="../../sherpa/lib/pixi-v3.0.0-rc1-dev.js"></script>
   <script src="../../chipper/js/initialize-globals.js"></script>
 
   <!-- Parse query parameters, so we can easily subset the tests.-->
@@ -87,14 +86,6 @@
       opacity: 0.3;
     }
 
-    .scene.pixi:after {
-      content: "Pixi";
-      position: absolute;
-      bottom: 0;
-      left: 2px;
-      opacity: 0.3;
-    }
-
     .preloadedImage {
       position: absolute;
       display: none
@@ -133,7 +124,7 @@
                   fill: 'blue'
                 } ) );
               },
-              renderers: [ 'canvas', 'svg', 'dom', 'webgl', 'pixi' ]
+              renderers: [ 'canvas', 'svg', 'dom', 'webgl' ]
             },
             {
               name: 'simple-images',
@@ -144,7 +135,7 @@
                 scene.addChild( new scenery.Image( thumbnail ) );
                 updateDisplayCallback();
               },
-              renderers: [ 'canvas', 'svg', 'dom', 'webgl', 'pixi' ]
+              renderers: [ 'canvas', 'svg', 'dom', 'webgl' ]
             },
             {
               name: 'solid-line',
@@ -153,7 +144,7 @@
               draw: function( scene, display ) {
                 scene.addChild( new scenery.Line( 10, 10, 190, 190, { stroke: 'black', lineWidth: 4 } ) );
               },
-              renderers: [ 'canvas', 'svg', 'dom', 'webgl', 'pixi' ]
+              renderers: [ 'canvas', 'svg', 'dom', 'webgl' ]
             },
             {
               name: 'circle',
@@ -162,7 +153,7 @@
               draw: function( scene, display ) {
                 scene.addChild( new scenery.Circle( 50, { fill: 'green', centerX: 100, centerY: 100 } ) );
               },
-              renderers: [ 'canvas', 'svg', 'dom', 'webgl', 'pixi' ]
+              renderers: [ 'canvas', 'svg', 'dom', 'webgl' ]
             },
             {
               name: 'hello-text',
@@ -171,7 +162,7 @@
               draw: function( scene, display ) {
                 scene.addChild( new scenery.Text( 'hello text!', { left: 10, top: 10 } ) );
               },
-              renderers: [ 'canvas', 'svg', 'dom', 'webgl', 'pixi' ]
+              renderers: [ 'canvas', 'svg', 'dom', 'webgl' ]
             },
             {
               name: 'hello-text-animation',
@@ -189,7 +180,7 @@
                 };
                 window.requestAnimationFrame( callback );
               },
-              renderers: [ 'canvas', 'svg', 'dom', 'webgl', 'pixi' ]
+              renderers: [ 'canvas', 'svg', 'dom', 'webgl' ]
             },
             {
               name: 'solid-line-animating-position',
@@ -208,7 +199,7 @@
                 };
                 window.requestAnimationFrame( callback );
               },
-              renderers: [ 'canvas', 'svg', 'dom', 'webgl', 'pixi' ]
+              renderers: [ 'canvas', 'svg', 'dom', 'webgl' ]
             },
             {
               name: 'solid-line-animating-lineWidth',
@@ -225,7 +216,7 @@
                 };
                 window.requestAnimationFrame( callback );
               },
-              renderers: [ 'canvas', 'svg', 'dom', 'webgl', 'pixi' ]
+              renderers: [ 'canvas', 'svg', 'dom', 'webgl' ]
             },
             {
               name: 'moving-image',
@@ -244,7 +235,7 @@
                 };
                 window.requestAnimationFrame( callback );
               },
-              renderers: [ 'canvas', 'svg', 'dom', 'webgl', 'pixi' ]
+              renderers: [ 'canvas', 'svg', 'dom', 'webgl' ]
             },
             {
               name: '1000-moving-images',
@@ -270,7 +261,7 @@
                 };
                 window.requestAnimationFrame( callback );
               },
-              renderers: [ 'canvas', 'svg', 'dom', 'webgl', 'pixi' ]
+              renderers: [ 'canvas', 'svg', 'dom', 'webgl' ]
             },
             {
               name: 'CanvasNode',
@@ -945,8 +936,7 @@
             'canvas',
             'svg',
             'dom',
-            'webgl',
-            'pixi'
+            'webgl'
           ], 'renderer' );
 
           // Allow selection of the tests by a query parameter ?test=...

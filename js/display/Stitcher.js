@@ -109,7 +109,6 @@ define( function( require ) {
   var SVGBlock = require( 'SCENERY/display/SVGBlock' );
   var DOMBlock = require( 'SCENERY/display/DOMBlock' );
   var WebGLBlock = require( 'SCENERY/display/WebGLBlock' );
-  var PixiBlock = require( 'SCENERY/display/PixiBlock' );
 
   scenery.Stitcher = function Stitcher( display, renderer ) {
     throw new Error( 'We are too abstract for that!' );
@@ -388,9 +387,6 @@ define( function( require ) {
       }
       else if ( Renderer.isWebGL( renderer ) ) {
         block = WebGLBlock.createFromPool( backbone.display, renderer, backbone.transformRootInstance, backbone.backboneInstance );
-      }
-      else if ( Renderer.isPixi( renderer ) ) {
-        block = PixiBlock.createFromPool( backbone.display, renderer, backbone.transformRootInstance, backbone.backboneInstance );
       }
       else {
         throw new Error( 'unsupported renderer for createBlock: ' + renderer );

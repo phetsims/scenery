@@ -20,7 +20,6 @@ define( function( require ) {
   var SVGSelfDrawable = require( 'SCENERY/display/SVGSelfDrawable' );
   var CanvasSelfDrawable = require( 'SCENERY/display/CanvasSelfDrawable' );
   var SelfDrawable = require( 'SCENERY/display/SelfDrawable' );
-  var PixiSelfDrawable = require( 'SCENERY/display/PixiSelfDrawable' );
 
   // TODO: change this based on memory and performance characteristics of the platform
   var keepSVGPathElements = true; // whether we should pool SVG elements for the SVG rendering states, or whether we should free them when possible for memory
@@ -60,7 +59,7 @@ define( function( require ) {
   inherit( Node, Path, {
     // allow more specific path types (Rectangle, Line) to override what restrictions we have
     getPathRendererBitmask: function() {
-      return Renderer.bitmaskCanvas | Renderer.bitmaskSVG | Renderer.bitmaskPixi;
+      return Renderer.bitmaskCanvas | Renderer.bitmaskSVG;
     },
 
     invalidateSupportedRenderers: function() {
@@ -232,10 +231,6 @@ define( function( require ) {
       return Path.PathWebGLDrawable.createFromPool( renderer, instance );
     },
 
-    createPixiDrawable: function( renderer, instance ) {
-      return Path.PathPixiDrawable.createFromPool( renderer, instance );
-    },
-
     isPainted: function() {
       return true;
     },
@@ -307,14 +302,18 @@ define( function( require ) {
       var proto = drawableType.prototype;
 
       // initializes, and resets (so we can support pooled states)
-      proto.initializeState = function() {
+      proto.initializeState = function( renderer, instance ) {
         this.paintDirty = true; // flag that is marked if ANY "paint" dirty flag is set (basically everything except for transforms, so we can accelerated the transform-only case)
         this.dirtyShape = true;
 
         // adds fill/stroke-specific flags and state
-        this.initializePaintableState();
+        this.initializePaintableState( renderer, instance );
 
         return this; // allow for chaining
+      };
+
+      proto.disposeState = function() {
+        this.disposePaintableState();
       };
 
       // catch-all dirty, if anything that isn't a transform is marked as dirty
@@ -331,8 +330,6 @@ define( function( require ) {
       proto.setToCleanState = function() {
         this.paintDirty = false;
         this.dirtyShape = false;
-
-        this.cleanPaintableState();
       };
 
       Paintable.PaintableStatefulDrawable.mixin( drawableType );
@@ -389,7 +386,9 @@ define( function( require ) {
   };
   inherit( CanvasSelfDrawable, Path.PathCanvasDrawable, {
     initialize: function( renderer, instance ) {
-      return this.initializeCanvasSelfDrawable( renderer, instance );
+      this.initializeCanvasSelfDrawable( renderer, instance );
+      this.initializePaintableStateless( renderer, instance );
+      return this;
     },
 
     paintCanvas: function( wrapper, node ) {
@@ -400,12 +399,12 @@ define( function( require ) {
         context.beginPath();
         node._shape.writeToContext( context );
 
-        if ( node._fill ) {
+        if ( node.hasFill() ) {
           node.beforeCanvasFill( wrapper ); // defined in Paintable
           context.fill();
           node.afterCanvasFill( wrapper ); // defined in Paintable
         }
-        if ( node._stroke ) {
+        if ( node.hasStroke() ) {
           node.beforeCanvasStroke( wrapper ); // defined in Paintable
           context.stroke();
           node.afterCanvasStroke( wrapper ); // defined in Paintable
@@ -414,78 +413,15 @@ define( function( require ) {
     },
 
     // stateless dirty functions
-    markDirtyShape: function() { this.markPaintDirty(); }
+    markDirtyShape: function() { this.markPaintDirty(); },
+
+    dispose: function() {
+      CanvasSelfDrawable.prototype.dispose.call( this );
+      this.disposePaintableStateless();
+    }
   } );
   Paintable.PaintableStatelessDrawable.mixin( Path.PathCanvasDrawable );
   SelfDrawable.Poolable.mixin( Path.PathCanvasDrawable );
-
-  /*---------------------------------------------------------------------------*
-   * Pixi Rendering
-   *----------------------------------------------------------------------------*/
-
-  Path.PathPixiDrawable = function PathPixiDrawable( renderer, instance ) {
-    this.initialize( renderer, instance );
-  };
-  inherit( PixiSelfDrawable, Path.PathPixiDrawable, {
-    initialize: function( renderer, instance ) {
-      this.initializePixiSelfDrawable( renderer, instance, false ); // never keep paths
-
-      if ( !this.displayObject ) {
-        this.displayObject = new PIXI.Graphics();
-      }
-
-      return this;
-    },
-
-    updatePixiSelf: function( node, graphics ) {
-      graphics.clear();
-
-      var shape = node.shape;
-      var i = 0;
-      var segment;
-      if ( shape !== null ) {
-        if ( node.getStrokeColor() ) {
-          graphics.lineStyle( 5, node.getStrokeColor().toNumber() );
-        }
-        if ( node.getFillColor() ) {
-          graphics.beginFill( node.getFillColor().toNumber() );
-        }
-        for ( i = 0; i < shape.subpaths.length; i++ ) {
-          var subpath = shape.subpaths[ i ];
-          for ( var k = 0; k < subpath.segments.length; k++ ) {
-            segment = subpath.segments[ k ];
-            if ( i === 0 && k === 0 ) {
-              graphics.moveTo( segment.start.x, segment.start.y );
-            }
-            else {
-              graphics.lineTo( segment.start.x, segment.start.y );
-            }
-
-            if ( k === subpath.segments.length - 1 ) {
-              graphics.lineTo( segment.end.x, segment.end.y );
-            }
-          }
-
-          if ( subpath.isClosed() ) {
-            segment = subpath.segments[ 0 ];
-            graphics.lineTo( segment.start.x, segment.start.y );
-          }
-        }
-
-        graphics.endFill();
-      }
-      // TODO: geometry
-
-      //graphics.moveTo( 0, 0 );
-      //graphics.lineTo( 100, 100 );
-      //graphics.endFill();
-    },
-
-    // stateless dirty methods:
-    markDirtyShape: function() { this.markPaintDirty(); }
-  } );
-  Paintable.PaintableStatelessDrawable.mixin( Path.PathPixiDrawable );
-  SelfDrawable.Poolable.mixin( Path.PathPixiDrawable );
 
   return Path;
 } );

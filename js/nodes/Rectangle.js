@@ -23,14 +23,12 @@ define( function( require ) {
   var DOMSelfDrawable = require( 'SCENERY/display/DOMSelfDrawable' );
   var SVGSelfDrawable = require( 'SCENERY/display/SVGSelfDrawable' );
   var CanvasSelfDrawable = require( 'SCENERY/display/CanvasSelfDrawable' );
-  var PixiSelfDrawable = require( 'SCENERY/display/PixiSelfDrawable' );
   var SelfDrawable = require( 'SCENERY/display/SelfDrawable' );
   var Renderer = require( 'SCENERY/display/Renderer' );
 
   // TODO: change this based on memory and performance characteristics of the platform
   var keepDOMRectangleElements = true; // whether we should pool DOM elements for the DOM rendering states, or whether we should free them when possible for memory
   var keepSVGRectangleElements = true; // whether we should pool SVG elements for the SVG rendering states, or whether we should free them when possible for memory
-  var keepPixiRectangleElements = true; // whether we should pool Pixi elements for the SVG rendering states, or whether we should free them when possible for memory
 
   // scratch matrix used in DOM rendering
   var scratchMatrix = Matrix3.dirtyFromPool();
@@ -125,7 +123,6 @@ define( function( require ) {
         }
       }
 
-      bitmask |= Renderer.bitmaskPixi;
       return bitmask;
     },
 
@@ -142,8 +139,6 @@ define( function( require ) {
            this._cornerYRadius <= maximumArcSize && this._cornerXRadius <= maximumArcSize ) {
         bitmask |= Renderer.bitmaskDOM;
       }
-
-      bitmask |= Renderer.bitmaskPixi;
 
       return bitmask;
     },
@@ -354,10 +349,6 @@ define( function( require ) {
       return Rectangle.RectangleWebGLDrawable.createFromPool( renderer, instance );
     },
 
-    createPixiDrawable: function( renderer, instance ) {
-      return Rectangle.RectanglePixiDrawable.createFromPool( renderer, instance );
-    },
-
     /*---------------------------------------------------------------------------*
      * Miscellaneous
      *----------------------------------------------------------------------------*/
@@ -534,7 +525,7 @@ define( function( require ) {
       var proto = drawableType.prototype;
 
       // initializes, and resets (so we can support pooled states)
-      proto.initializeState = function() {
+      proto.initializeState = function( renderer, instance ) {
         this.paintDirty = true; // flag that is marked if ANY "paint" dirty flag is set (basically everything except for transforms, so we can accelerated the transform-only case)
         this.dirtyX = true;
         this.dirtyY = true;
@@ -544,9 +535,13 @@ define( function( require ) {
         this.dirtyCornerYRadius = true;
 
         // adds fill/stroke-specific flags and state
-        this.initializePaintableState();
+        this.initializePaintableState( renderer, instance );
 
         return this; // allow for chaining
+      };
+
+      proto.disposeState = function() {
+        this.disposePaintableState();
       };
 
       // catch-all dirty, if anything that isn't a transform is marked as dirty
@@ -599,8 +594,6 @@ define( function( require ) {
         this.dirtyHeight = false;
         this.dirtyCornerXRadius = false;
         this.dirtyCornerYRadius = false;
-
-        this.cleanPaintableState();
       };
 
       Paintable.PaintableStatefulDrawable.mixin( drawableType );
@@ -616,7 +609,7 @@ define( function( require ) {
   }, {
     initialize: function( renderer, instance ) {
       this.initializeDOMSelfDrawable( renderer, instance );
-      this.initializeState();
+      this.initializeState( renderer, instance );
 
       // only create elements if we don't already have them (we pool visual states always, and depending on the platform may also pool the actual elements to minimize
       // allocation and performance costs)
@@ -723,6 +716,8 @@ define( function( require ) {
     },
 
     dispose: function() {
+      this.disposeState();
+
       if ( !keepDOMRectangleElements ) {
         // clear the references
         this.fillElement = null;
@@ -808,7 +803,9 @@ define( function( require ) {
   };
   inherit( CanvasSelfDrawable, Rectangle.RectangleCanvasDrawable, {
     initialize: function( renderer, instance ) {
-      return this.initializeCanvasSelfDrawable( renderer, instance );
+      this.initializeCanvasSelfDrawable( renderer, instance );
+      this.initializePaintableStateless( renderer, instance );
+      return this;
     },
 
     paintCanvas: function( wrapper, node ) {
@@ -840,12 +837,12 @@ define( function( require ) {
         }
         context.closePath();
 
-        if ( node._fill ) {
+        if ( node.hasFill() ) {
           node.beforeCanvasFill( wrapper ); // defined in Paintable
           context.fill();
           node.afterCanvasFill( wrapper ); // defined in Paintable
         }
-        if ( node._stroke ) {
+        if ( node.hasStroke() ) {
           node.beforeCanvasStroke( wrapper ); // defined in Paintable
           context.stroke();
           node.afterCanvasStroke( wrapper ); // defined in Paintable
@@ -853,12 +850,12 @@ define( function( require ) {
       }
       else {
         // TODO: how to handle fill/stroke delay optimizations here?
-        if ( node._fill ) {
+        if ( node.hasFill() ) {
           node.beforeCanvasFill( wrapper ); // defined in Paintable
           context.fillRect( node._rectX, node._rectY, node._rectWidth, node._rectHeight );
           node.afterCanvasFill( wrapper ); // defined in Paintable
         }
-        if ( node._stroke ) {
+        if ( node.hasStroke() ) {
           node.beforeCanvasStroke( wrapper ); // defined in Paintable
           context.strokeRect( node._rectX, node._rectY, node._rectWidth, node._rectHeight );
           node.afterCanvasStroke( wrapper ); // defined in Paintable
@@ -867,48 +864,15 @@ define( function( require ) {
     },
 
     // stateless dirty functions
-    markDirtyRectangle: function() { this.markPaintDirty(); }
+    markDirtyRectangle: function() { this.markPaintDirty(); },
+
+    dispose: function() {
+      CanvasSelfDrawable.prototype.dispose.call( this );
+      this.disposePaintableStateless();
+    }
   } );
   Paintable.PaintableStatelessDrawable.mixin( Rectangle.RectangleCanvasDrawable );
   SelfDrawable.Poolable.mixin( Rectangle.RectangleCanvasDrawable );
-
-  /*---------------------------------------------------------------------------*
-   * Pixi rendering
-   *----------------------------------------------------------------------------*/
-
-  Rectangle.RectanglePixiDrawable = function RectanglePixiDrawable( renderer, instance ) {
-    this.initialize( renderer, instance );
-  };
-  inherit( PixiSelfDrawable, Rectangle.RectanglePixiDrawable, {
-    initialize: function( renderer, instance ) {
-      this.initializePixiSelfDrawable( renderer, instance, keepPixiRectangleElements );
-
-      if ( !this.displayObject ) {
-        this.displayObject = new PIXI.Graphics();
-      }
-
-      return this;
-    },
-
-    updatePixiSelf: function( node, graphics ) {
-      graphics.clear();
-      if ( node.getFillColor() ) {
-        graphics.beginFill( node.getFillColor().toNumber(), node.opacity * node.getFillColor().alpha );
-      }
-      if ( node.getStrokeColor() ) {
-        graphics.lineStyle( 5, node.getStrokeColor().toNumber(), node.opacity * node.getStrokeColor().alpha );
-      }
-      graphics.drawRect( node.rectX, node.rectY, node.rectWidth, node.rectHeight );
-      if ( node.getFillColor() ) {
-        graphics.endFill();
-      }
-    },
-
-    // stateless dirty methods:
-    markDirtyRadius: function() { this.markPaintDirty(); }
-  } );
-  Paintable.PaintableStatelessDrawable.mixin( Rectangle.RectanglePixiDrawable );
-  SelfDrawable.Poolable.mixin( Rectangle.RectanglePixiDrawable );
 
   return Rectangle;
 } );

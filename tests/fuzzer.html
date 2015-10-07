@@ -220,11 +220,8 @@ Will copy it to the console so it can be copy-pasted to reproduce elsewhere.
         else if ( r < 0.90 ) {
           renderer = 'dom';
         }
-        else if ( r < 0.95 ) {
-          renderer = null; // TODO: WebGL fuzzing
-        }
         else {
-          renderer = null; // TODO: Pixi fuzzing
+          renderer = null; // TODO: WebGL fuzzing
         }
 
         if ( a.renderer !== renderer ) {

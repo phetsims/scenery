@@ -26,12 +26,10 @@ define( function( require ) {
   var CanvasSelfDrawable = require( 'SCENERY/display/CanvasSelfDrawable' );
 
   var SelfDrawable = require( 'SCENERY/display/SelfDrawable' );
-  var PixiSelfDrawable = require( 'SCENERY/display/PixiSelfDrawable' );
   var Renderer = require( 'SCENERY/display/Renderer' );
 
   // TODO: change this based on memory and performance characteristics of the platform
   var keepSVGLineElements = true; // whether we should pool SVG elements for the SVG rendering states, or whether we should free them when possible for memory
-  var keepPixiLineElements = true; // whether we should pool Pixi elements for the SVG rendering states, or whether we should free them when possible for memory
 
   /**
    * Currently, all numerical parameters should be finite.
@@ -248,10 +246,6 @@ define( function( require ) {
       return Line.LineWebGLDrawable.createFromPool( renderer, instance );
     },
 
-    createPixiDrawable: function( renderer, instance ) {
-      return Line.LinePixiDrawable.createFromPool( renderer, instance );
-    },
-
     getBasicConstructor: function( propLines ) {
       return 'new scenery.Line( ' + this._x1 + ', ' + this._y1 + ', ' + this._x1 + ', ' + this._y1 + ', {' + propLines + '} )';
     },
@@ -280,7 +274,7 @@ define( function( require ) {
     // A line does not render its fill, so it supports all renderers.  Right?
     // - SR, 2014
     getFillRendererBitmask: function() {
-      return Renderer.bitmaskCanvas | Renderer.bitmaskSVG | Renderer.bitmaskDOM | Renderer.bitmaskPixi;
+      return Renderer.bitmaskCanvas | Renderer.bitmaskSVG | Renderer.bitmaskDOM;
     }
 
   } );
@@ -333,7 +327,7 @@ define( function( require ) {
       var proto = drawableType.prototype;
 
       // initializes, and resets (so we can support pooled states)
-      proto.initializeState = function() {
+      proto.initializeState = function( renderer, instance ) {
         this.paintDirty = true; // flag that is marked if ANY "paint" dirty flag is set (basically everything except for transforms, so we can accelerated the transform-only case)
         this.dirtyX1 = true;
         this.dirtyY1 = true;
@@ -341,9 +335,13 @@ define( function( require ) {
         this.dirtyY2 = true;
 
         // adds fill/stroke-specific flags and state
-        this.initializePaintableState();
+        this.initializePaintableState( renderer, instance );
 
         return this; // allow for chaining
+      };
+
+      proto.disposeState = function() {
+        this.disposePaintableState();
       };
 
       // catch-all dirty, if anything that isn't a transform is marked as dirty
@@ -398,8 +396,6 @@ define( function( require ) {
         this.dirtyY1 = false;
         this.dirtyX2 = false;
         this.dirtyY2 = false;
-
-        this.cleanPaintableState();
       };
 
       Paintable.PaintableStatefulDrawable.mixin( drawableType );
@@ -507,7 +503,9 @@ define( function( require ) {
   };
   inherit( CanvasSelfDrawable, Line.LineCanvasDrawable, {
     initialize: function( renderer, instance ) {
-      return this.initializeCanvasSelfDrawable( renderer, instance );
+      this.initializeCanvasSelfDrawable( renderer, instance );
+      this.initializePaintableStateless( renderer, instance );
+      return this;
     },
 
     paintCanvas: function( wrapper, node ) {
@@ -532,49 +530,15 @@ define( function( require ) {
     markDirtyX1: function() { this.markPaintDirty(); },
     markDirtyY1: function() { this.markPaintDirty(); },
     markDirtyX2: function() { this.markPaintDirty(); },
-    markDirtyY2: function() { this.markPaintDirty(); }
+    markDirtyY2: function() { this.markPaintDirty(); },
+
+    dispose: function() {
+      CanvasSelfDrawable.prototype.dispose.call( this );
+      this.disposePaintableStateless();
+    }
   } );
   Paintable.PaintableStatelessDrawable.mixin( Line.LineCanvasDrawable );
   SelfDrawable.Poolable.mixin( Line.LineCanvasDrawable );
-
-  /*---------------------------------------------------------------------------*
-   * Pixi Rendering
-   *----------------------------------------------------------------------------*/
-
-  Line.LinePixiDrawable = function LinePixiDrawable( renderer, instance ) {
-    this.initialize( renderer, instance );
-  };
-  inherit( PixiSelfDrawable, Line.LinePixiDrawable, {
-    initialize: function( renderer, instance ) {
-      this.initializePixiSelfDrawable( renderer, instance, keepPixiLineElements );
-
-      if ( !this.displayObject ) {
-        this.displayObject = new PIXI.Graphics();
-      }
-
-      return this;
-    },
-
-    updatePixiSelf: function( node, graphics ) {
-      this.displayObject.clear();
-      if ( node.getStrokeColor() ) {
-        graphics.lineStyle( node.lineWidth, node.getStrokeColor().toNumber() );
-      }
-      graphics.moveTo( node._x1, node._y1 );
-      graphics.lineTo( node._x2, node._y2 );
-    },
-
-    // stateless dirty methods:
-    markDirtyLine: function() { this.markPaintDirty(); },
-    markDirtyP1: function() { this.markPaintDirty(); },
-    markDirtyP2: function() { this.markPaintDirty(); },
-    markDirtyX1: function() { this.markPaintDirty(); },
-    markDirtyY1: function() { this.markPaintDirty(); },
-    markDirtyX2: function() { this.markPaintDirty(); },
-    markDirtyY2: function() { this.markPaintDirty(); }
-  } );
-Paintable.PaintableStatelessDrawable.mixin( Line.LinePixiDrawable );
-  SelfDrawable.Poolable.mixin( Line.LinePixiDrawable );
 
   return Line;
 } );

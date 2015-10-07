@@ -68,7 +68,6 @@ define( [
   'SCENERY/nodes/Node',
   'SCENERY/nodes/Paintable',
   'SCENERY/nodes/Path',
-  'SCENERY/nodes/PixiNode',
   'SCENERY/nodes/Plane',
   'SCENERY/nodes/Rectangle',
   'SCENERY/nodes/Spacer',
