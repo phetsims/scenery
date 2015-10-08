@@ -48,11 +48,6 @@ define( function( require ) {
 
           this._cachedPaints = [];
           this._lineDrawingStyles = new LineStyles();
-
-          this._fillColor = null;
-          this._fillColorDirty = true;
-          this._strokeColor = null;
-          this._strokeColorDirty = true;
         },
 
         /**
@@ -111,8 +106,6 @@ define( function( require ) {
           // colors and compare every time the fill changes. Right now, usually we don't have
           // to parse CSS colors. See https://github.com/phetsims/scenery/issues/255
           if ( this._fill !== fill ) {
-            this._fillColorDirty = true;
-
             this._fill = fill;
 
             this.invalidateFill();
@@ -157,8 +150,6 @@ define( function( require ) {
           // colors and compare every time the fill changes. Right now, usually we don't have
           // to parse CSS colors. See https://github.com/phetsims/scenery/issues/255
           if ( this._stroke !== stroke ) {
-            this._strokeColorDirty = true;
-
             this._stroke = stroke;
 
             this.invalidateStroke();
@@ -202,68 +193,6 @@ define( function( require ) {
           return stroke;
         },
         get strokeValue() { return this.getStrokeValue(); },
-
-        /**
-         * If the current fill is a solid color (string or scenery.Color), getFillColor() will return a scenery.Color
-         * reference. This reference should be considered immutable (should not be modified)
-         *
-         * @returns {Color | null} [read-only]
-         */
-        getFillColor: function() {
-          var fillValue = this.getFillValue();
-
-          if ( typeof fillValue === 'string' || fillValue instanceof Color ) {
-            // Update the cached value if necessary. If it's a Property, we will always check and update.
-            if ( this._fillColorDirty || this._fill instanceof Property ) {
-              this._fillColorDirty = false;
-
-              if ( this._fillColor ) {
-                this._fillColor.set( fillValue );
-              }
-              // lazily create a Color when necessary, instead of pre-allocating
-              else {
-                this._fillColor = new Color( fillValue );
-              }
-            }
-            return this._fillColor;
-          }
-          // no fill, or a pattern/gradient (we can't return a single fill)
-          else {
-            return null;
-          }
-        },
-        get fillColor() { return this.getFillColor(); },
-
-        /**
-         * If the current stroke is a solid color (string or scenery.Color), getStrokeColor() will return a scenery.Color
-         * reference. This reference should be considered immutable (should not be modified)
-         *
-         * @returns {Color | null} [read-only]
-         */
-        getStrokeColor: function() {
-          var strokeValue = this.getStrokeValue();
-
-          if ( typeof strokeValue === 'string' || strokeValue instanceof Color ) {
-            // Update the cached value if necessary. If it's a Property, we will always check and update.
-            if ( this._strokeColorDirty || this._stroke instanceof Property ) {
-              this._strokeColorDirty = false;
-
-              if ( this._strokeColor ) {
-                this._strokeColor.set( strokeValue );
-              }
-              // lazily create a Color when necessary, instead of pre-allocating
-              else {
-                this._strokeColor = new Color( strokeValue );
-              }
-            }
-            return this._strokeColor;
-          }
-          // no stroke, or a pattern/gradient (we can't return a single stroke)
-          else {
-            return null;
-          }
-        },
-        get strokeColor() { return this.getStrokeColor(); },
 
         /**
          * Returns whether the fill is marked as pickable.
