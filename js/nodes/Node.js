@@ -3577,9 +3577,6 @@ define( function( require ) {
     addInstance: function( instance ) {
       assert && assert( instance instanceof scenery.Instance );
       this._instances.push( instance );
-      if ( this._instances.length === 1 ) {
-        this.firstInstanceAdded();
-      }
     },
 
     /**
@@ -3593,27 +3590,6 @@ define( function( require ) {
       var index = _.indexOf( this._instances, instance );
       assert && assert( index !== -1, 'Cannot remove a Instance from a Node if it was not there' );
       this._instances.splice( index, 1 );
-      if ( this._instances.length === 0 ) {
-        this.lastInstanceRemoved();
-      }
-    },
-
-    /**
-     * Hook meant to be overridden by Paintable. Called when our first instance is added (we should be actually
-     * displayed).
-     * @protected (scenery-internal)
-     */
-    firstInstanceAdded: function() {
-      // no-op, meant to be overridden in the prototype chain by Paintable
-    },
-
-    /**
-     * Hook meant to be overridden by Paintable. Called when our last instance is removed (we shouldn't be displayed
-     * anymore).
-     * @protected (scenery-internal)
-     */
-    lastInstanceRemoved: function() {
-      // no-op, meant to be overridden in the prototype chain by Paintable
     },
 
     /*---------------------------------------------------------------------------*
