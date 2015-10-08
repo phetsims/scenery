@@ -208,10 +208,8 @@
     <a class="navlink" href="#paintable">Paintable</a><br>
     <a class="sublink" href="#paintable-fill">fill</a><br>
     <a class="sublink" href="#paintable-fillPickable">fillPickable</a><br>
-    <a class="sublink" href="#paintable-fillColor">fillColor</a><br>
     <a class="sublink" href="#paintable-stroke">stroke</a><br>
     <a class="sublink" href="#paintable-strokePickable">strokePickable</a><br>
-    <a class="sublink" href="#paintable-strokeColor">strokeColor</a><br>
     <a class="sublink" href="#paintable-lineWidth">lineWidth</a><br>
     <a class="sublink" href="#paintable-lineCap">lineCap</a><br>
     <a class="sublink" href="#paintable-lineJoin">lineJoin</a><br>
@@ -1103,13 +1101,6 @@ window.assertions.disableAssertSlow();
       If a <a href="#color">Color</a> object is used for a fill, any changes to the Color object will update this node.
     </p>
 
-    <h4 id="paintable-fillColor">fillColor</h4>
-
-    <p>
-      <code>node.fillColor</code> is a getter linked to <code>node.getFillColor()</code>. It will always return a
-      <a href="#color">Color</a> if there is a <a href="#paintable-fill">fill</a> on the node, or null otherwise.
-    </p>
-
     <h4 id="paintable-fillPickable">fillPickable</h4>
 
     <p>
@@ -1142,13 +1133,6 @@ window.assertions.disableAssertSlow();
     <p>
       If a <a href="#color">Color</a> object is used for a stroke, any changes to the Color object will update this
       node.
-    </p>
-
-    <h4 id="paintable-strokeColor">strokeColor</h4>
-
-    <p>
-      <code>node.strokeColor</code> is a getter linked to <code>node.getStrokeColor()</code>. It will always return a
-      <a href="#color">Color</a> if there is a <a href="#paintable-stroke">stroke</a> on the node, or null otherwise.
     </p>
 
     <h4 id="paintable-strokePickable">strokePickable</h4>
