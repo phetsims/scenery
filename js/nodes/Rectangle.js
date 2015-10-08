@@ -34,13 +34,36 @@ define( function( require ) {
   var scratchMatrix = Matrix3.dirtyFromPool();
 
   /**
-   * Currently, all numerical parameters should be finite.
-   * x:             x-position of the upper-left corner (left bound)
-   * y:             y-position of the upper-left corner (top bound)
-   * width:         width of the rectangle to the right of the upper-left corner, required to be >= 0
-   * height:        height of the rectangle below the upper-left corner, required to be >= 0
-   * cornerXRadius: positive vertical radius (width) of the rounded corner, or 0 to indicate the corner should be sharp
-   * cornerYRadius: positive horizontal radius (height) of the rounded corner, or 0 to indicate the corner should be sharp
+   * @constructor
+   * @public
+   *
+   * Possible constructor signatures, with { ... } representing the optional Scenery-style parameter object.
+   * new Rectangle( x, y, width, height, cornerXRadius, cornerYRadius, { ... } )
+   * new Rectangle( x, y, width, height, { ... } )
+   * new Rectangle( { ... } )
+   * new Rectangle( bounds2, { ... } )
+   * new Rectangle( bounds2, cornerXRadius, cornerYRadius, { ... } )
+   *
+   * Available parameters to the various constructor options:
+   * @param {number} x - x-position of the upper-left corner (left bound)
+   * @param {number} y - y-position of the upper-left corner (top bound)
+   * @param {number} width - width of the rectangle to the right of the upper-left corner, required to be >= 0
+   * @param {number} height - height of the rectangle below the upper-left corner, required to be >= 0
+   * @param {number} cornerXRadius - positive vertical radius (width) of the rounded corner, or 0 to indicate the corner should be sharp
+   * @param {number} cornerYRadius - positive horizontal radius (height) of the rounded corner, or 0 to indicate the corner should be sharp
+   * @param {Object} [options] - Options object for Scenery
+   *
+   * Current available options for the options object (custom for Rectangle, not Path or Node):
+   * rectX - Left edge of the rectangle in the local coordinate frame
+   * rectY - Top edge of the rectangle in the local coordinate frame
+   * rectWidth - Width of the rectangle in the local coordinate frame
+   * rectHeight - Height of the rectangle in the local coordinate frame
+   * cornerXRadius - The x-axis radius for elliptical/circular rounded corners.
+   * cornerYRadius - The y-axis radius for elliptical/circular rounded corners.
+   * cornerRadius - Sets both "X" and "Y" corner radii above.
+   *
+   * NOTE: the X and Y corner radii need to both be greater than zero for rounded corners to appear. If they have the
+   * same non-zero value, circular rounded corners will be used.
    */
   scenery.Rectangle = function Rectangle( x, y, width, height, cornerXRadius, cornerYRadius, options ) {
     if ( typeof x === 'object' ) {
