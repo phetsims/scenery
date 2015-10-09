@@ -48,6 +48,10 @@ define( function( require ) {
     return node._children.length === 0;
   }
 
+  function hasRootedDisplayPredicate( node ) {
+    return node._rootedDisplays.length > 0;
+  }
+
   var scratchBounds2 = Bounds2.NOTHING.copy(); // mutable {Bounds2} used temporarily in methods
   var scratchMatrix3 = new Matrix3();
 
@@ -102,6 +106,12 @@ define( function( require ) {
 
     // @protected {Array.<Instance>} - All of the Instances tracking this Node
     this._instances = [];
+
+    // @protected {Array.<AccessibleInstance>} - Empty unless the node contains some accessible instance.
+    this._accessibleInstances = [];
+
+    // @protected {Array.<Display>} - All displays where this node is the root.
+    this._rootedDisplays = [];
 
     // @protected {Array.<Drawable>} - Drawable states that need to be updated on mutations. Generally added by SVG and
     // DOM elements that need to closely track state (possibly by Canvas to maintain dirty state).
@@ -323,6 +333,17 @@ define( function( require ) {
       node._parents.push( this );
       this._children.splice( index, 0, node );
 
+      if ( !node._rendererSummary.isNotAccessible() ) {
+        var trails = node.getTrails( hasRootedDisplayPredicate );
+        for ( var i = 0; i < trails.length; i++ ) {
+          var trail = trails[ i ];
+          var rootedDisplays = trail.rootNode()._rootedDisplays;
+          for ( var j = 0; j < rootedDisplays.length; j++ ) {
+            rootedDisplays[ j ].addAccessibleTrail( trail );
+          }
+        }
+      }
+
       node.invalidateBounds();
 
       // like calling this.invalidateBounds(), but we already marked all ancestors with dirty child bounds
@@ -401,6 +422,17 @@ define( function( require ) {
       this._rendererSummary.summaryChange( node._rendererSummary.bitmask, RendererSummary.bitmaskAll );
 
       var indexOfParent = _.indexOf( node._parents, this );
+
+      if ( !node._rendererSummary.isNotAccessible() ) {
+        var trails = node.getTrails( hasRootedDisplayPredicate );
+        for ( var i = 0; i < trails.length; i++ ) {
+          var trail = trails[ i ];
+          var rootedDisplays = trail.rootNode()._rootedDisplays;
+          for ( var j = 0; j < rootedDisplays.length; j++ ) {
+            rootedDisplays[ j ].removeAccessibleTrail( trail );
+          }
+        }
+      }
 
       node._parents.splice( indexOfParent, 1 );
       this._children.splice( indexOfChild, 1 );
@@ -2596,6 +2628,15 @@ define( function( require ) {
       if ( this._accessibleOrder !== accessibleOrder ) {
         this._accessibleOrder = accessibleOrder;
 
+        var trails = this.getTrails( hasRootedDisplayPredicate );
+        for ( var i = 0; i < trails.length; i++ ) {
+          var trail = trails[ i ];
+          var rootedDisplays = trail.rootNode()._rootedDisplays;
+          for ( var j = 0; j < rootedDisplays.length; j++ ) {
+            rootedDisplays[ j ].changedAccessibleOrder( trail );
+          }
+        }
+
         this.trigger0( 'accessibleOrder' );
       }
     },
@@ -2622,7 +2663,17 @@ define( function( require ) {
       assert && assert( accessibleContent === null || accessibleContent instanceof Object );
 
       if ( this._accessibleContent !== accessibleContent ) {
+        var oldAccessibleContent = this._accessibleContent;
         this._accessibleContent = accessibleContent;
+
+        var trails = this.getTrails( hasRootedDisplayPredicate );
+        for ( var i = 0; i < trails.length; i++ ) {
+          var trail = trails[ i ];
+          var rootedDisplays = trail.rootNode()._rootedDisplays;
+          for ( var j = 0; j < rootedDisplays.length; j++ ) {
+            rootedDisplays[ j ].changedAccessibleContent( trail, oldAccessibleContent, accessibleContent );
+          }
+        }
 
         this.trigger0( 'accessibleContent' );
       }
@@ -2965,7 +3016,7 @@ define( function( require ) {
         assert && assert( trails.length === 1,
           'getUniqueTrail found ' + trails.length + ' matching trails for the predicate' );
 
-        return trails[0];
+        return trails[ 0 ];
       }
     },
 
@@ -3062,7 +3113,7 @@ define( function( require ) {
       assert && assert( trails.length === 1,
         'getUniqueLeafTrail found ' + trails.length + ' matching trails for the predicate' );
 
-      return trails[0];
+      return trails[ 0 ];
     },
 
     /**
@@ -3593,6 +3644,84 @@ define( function( require ) {
     },
 
     /*---------------------------------------------------------------------------*
+     * Accessible Instance handling
+     *----------------------------------------------------------------------------*/
+
+    /**
+     * Returns a reference to the accessible instances array.
+     * @public (scenery-internal)
+     *
+     * @returns {Array.<AccessibleInstance>}
+     */
+    getAccessibleInstances: function() {
+      return this._accessibleInstances;
+    },
+    get accessibleInstances() { return this.getAccessibleInstances(); },
+
+    /**
+     * Adds an AccessibleInstance reference to our array.
+     * @public (scenery-internal)
+     *
+     * @param {AccessibleInstance} accessibleInstance
+     */
+    addAccessibleInstance: function( accessibleInstance ) {
+      assert && assert( accessibleInstance instanceof scenery.AccessibleInstance );
+      this._accessibleInstances.push( accessibleInstance );
+    },
+
+    /**
+     * Removes an AccessibleInstance reference from our array.
+     * @public (scenery-internal)
+     *
+     * @param {AccessibleInstance} accessibleInstance
+     */
+    removeAccessibleInstance: function( accessibleInstance ) {
+      assert && assert( accessibleInstance instanceof scenery.AccessibleInstance );
+      var index = _.indexOf( this._accessibleInstances, accessibleInstance );
+      assert && assert( index !== -1, 'Cannot remove an AccessibleInstance from a Node if it was not there' );
+      this._accessibleInstances.splice( index, 1 );
+    },
+
+    /*---------------------------------------------------------------------------*
+     * Display handling
+     *----------------------------------------------------------------------------*/
+
+    /**
+     * Returns a reference to the display array.
+     * @public (scenery-internal)
+     *
+     * @returns {Array.<Display>}
+     */
+    getRootedDisplays: function() {
+      return this._rootedDisplays;
+    },
+    get rootedDisplays() { return this.getRootedDisplays(); },
+
+    /**
+     * Adds an display reference to our array.
+     * @public (scenery-internal)
+     *
+     * @param {Display} display
+     */
+    addRootedDisplay: function( display ) {
+      assert && assert( display instanceof scenery.Display );
+      this._rootedDisplays.push( display );
+    },
+
+    /**
+     * Removes a Display reference from our array.
+     * @public (scenery-internal)
+     *
+     * @param {Display} display
+     */
+    removeRootedDisplay: function( display ) {
+      assert && assert( display instanceof scenery.Display );
+      var index = _.indexOf( this._rootedDisplays, display );
+      assert && assert( index !== -1, 'Cannot remove a Display from a Node if it was not there' );
+      this._rootedDisplays.splice( index, 1 );
+    },
+
+    /*---------------------------------------------------------------------------*
      * Coordinate transform methods
      *----------------------------------------------------------------------------*/
 
@@ -4114,7 +4243,7 @@ define( function( require ) {
       if ( assertSlow ) {
         var numInstances = this._instances.length;
         for ( var i = 0; i < numInstances; i++ ) {
-          var instance = this._instances[i];
+          var instance = this._instances[ i ];
           if ( instance.display === display ) {
             assertSlow( instance.trail.isValid(),
               'Invalid trail on Instance: ' + instance.toString() + ' with trail ' + instance.trail.toString() );

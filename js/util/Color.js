@@ -693,8 +693,8 @@ define( function( require ) {
     return new Color( r, g, b, a );
   };
 
-  Color.fromStateObject = function( json ) {
-    return new Color( json.r, json.g, json.b, json.a );
+  Color.fromStateObject = function( stateObject ) {
+    return new Color( stateObject.r, stateObject.g, stateObject.b, stateObject.a );
   };
 
   return Color;

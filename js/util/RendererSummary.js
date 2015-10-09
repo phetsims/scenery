@@ -29,6 +29,7 @@ define( function( require ) {
     Renderer.bitmaskSingleSVG,
     Renderer.bitmaskNotPainted,
     Renderer.bitmaskBoundsValid,
+    Renderer.bitmaskNotAccessible,
 
     // inverse renderer bits ("Do all painted nodes NOT support renderer X in this sub-tree?")
     Renderer.bitmaskLacksCanvas,
@@ -71,6 +72,7 @@ define( function( require ) {
     this.node.on( 'hint', listener ); // should fire on things like node.renderer being changed
     this.node.on( 'clip', listener );
     this.node.on( 'selfBoundsValid', listener ); // e.g. Text, may change based on boundsMethod
+    this.node.on( 'accessibleContent', listener );
   };
   var RendererSummary = scenery.RendererSummary;
 
@@ -194,6 +196,10 @@ define( function( require ) {
       return !!( Renderer.bitmaskNotPainted & this.bitmask );
     },
 
+    isNotAccessible: function() {
+      return !!( Renderer.bitmaskNotAccessible & this.bitmask );
+    },
+
     areBoundsValid: function() {
       return !!( Renderer.bitmaskBoundsValid & this.bitmask );
     },
@@ -303,6 +309,9 @@ define( function( require ) {
       if ( node.areSelfBoundsValid() ) {
         bitmask |= Renderer.bitmaskBoundsValid;
       }
+      if ( !node.accessibleContent ) {
+        bitmask |= Renderer.bitmaskNotAccessible;
+      }
 
       return bitmask;
     },
@@ -321,6 +330,7 @@ define( function( require ) {
       if ( bit === Renderer.bitmaskSingleSVG ) { return 'SingleSVG'; }
       if ( bit === Renderer.bitmaskNotPainted ) { return 'NotPainted'; }
       if ( bit === Renderer.bitmaskBoundsValid ) { return 'BoundsValid'; }
+      if ( bit === Renderer.bitmaskNotAccessible ) { return 'NotAccessible'; }
       return '?';
     },
 

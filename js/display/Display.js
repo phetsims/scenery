@@ -103,7 +103,7 @@ define( function( require ) {
 
     this.options = _.extend( {
       // initial display width
-      width:  ( options && options.container && options.container.clientWidth ) || 640,
+      width: ( options && options.container && options.container.clientWidth ) || 640,
 
       // initial display height
       height: ( options && options.container && options.container.clientHeight ) || 480,
@@ -127,6 +127,7 @@ define( function( require ) {
     this._currentSize = new Dimension2( -1, -1 ); // used to check against new size to see what we need to change
 
     this._rootNode = rootNode;
+    this._rootNode.addRootedDisplay( this );
     this._rootBackbone = null; // to be filled in later
     this._domElement = ( options && options.container ) ?
                        scenery.BackboneDrawable.repurposeBackboneContainer( options.container ) :
@@ -195,27 +196,22 @@ define( function( require ) {
     this.scenery = scenery;
 
     if ( this.options.accessibility ) {
-      var accessibilityContainer = document.createElement( 'div' );
-      this.accessibilityContainer = accessibilityContainer;
-      accessibilityContainer.className = 'accessibility';
-      accessibilityContainer.style.position = 'absolute';
-      accessibilityContainer.style.left = '0';
-      accessibilityContainer.style.top = '0';
-      accessibilityContainer.style.width = '0';
-      accessibilityContainer.style.height = '0';
-      accessibilityContainer.style.clip = 'rect(0,0,0,0)';
-
       if ( this.options.isApplication ) {
         this._domElement.setAttribute( 'aria-role', 'application' );
       }
-
-      this._domElement.appendChild( accessibilityContainer );
 
       SceneryStyle.addRule( '.accessibility * { position: absolute; left: 0; top: 0; width: 0; height: 0, clip: rect(0,0,0,0); }' );
 
       this._focusRootNode = new Node();
       this._focusOverlay = new FocusOverlay( this, this._focusRootNode );
       this.addOverlay( this._focusOverlay );
+
+      this._rootAccessibleInstance = new AccessibleInstance( null, this, new scenery.Trail() );
+      this._rootAccessibleInstance.addSubtree( new scenery.Trail( this._rootNode ) );
+
+      this._domElement.appendChild( this._rootAccessibleInstance.peer.domElement );
+
+      this._unsortedAccessibleInstances = [];
     }
   };
   var Display = scenery.Display;
@@ -258,6 +254,8 @@ define( function( require ) {
       // validate bounds for everywhere that could trigger bounds listeners. we want to flush out any changes, so that we can call validateBounds()
       // from code below without triggering side effects (we assume that we are not reentrant).
       this._rootNode.validateWatchedBounds();
+
+      if ( assertSlow ) { this.options.accessibility && this._rootAccessibleInstance.auditRoot(); }
 
       this._baseInstance = this._baseInstance || scenery.Instance.createFromPool( this, new scenery.Trail( this._rootNode ), true, false );
       this._baseInstance.baseSyncTree();
@@ -506,6 +504,144 @@ define( function( require ) {
     removeOverlay: function( overlay ) {
       this._domElement.removeChild( overlay.domElement );
       this._overlays.splice( _.indexOf( this._overlays, overlay ), 1 );
+    },
+
+    /**
+     * Returns the AccessibleInstance which has the longest trail that is an ancestor of the passed in trail. It will
+     * fall back to the root accessible instance if there is no other available one.
+     * @private
+     *
+     * @param {Trail} trail
+     * @returns {AccessibleInstance}
+     */
+    getBaseAccessibleInstance: function( trail ) {
+      // Search through trail to find longest trail extension where the leafmost node has accessible content, but does
+      // not include the node that was just added.
+      var i;
+      for ( i = trail.length - 2; i >= 0; i-- ) {
+        // break if there is accessible content for nodes along the trail, including root.
+        if ( trail.nodes[ i ].accessibleContent ) {
+          break;
+        }
+      }
+      // no ancestor of the added node was accessible, so add things directly to root accessible instance.
+      if ( i < 0 ) {
+        return this._rootAccessibleInstance;
+      }
+      // otherwise, we encountered an accessible instance and i points to the leaf most node for the sub trail.
+      else {
+        var leafMostAccessibleNode = trail.nodes[ i ];
+        var accessibleInstances = leafMostAccessibleNode._accessibleInstances;
+        // look up the accessible instance given the leaf most accessible node.
+        for ( var j = 0; j < accessibleInstances.length; j++ ) {
+          var accessibleInstance = accessibleInstances[ j ];
+          if ( trail.isExtensionOf( accessibleInstance.trail ) ) {
+            return accessibleInstance;
+          }
+        }
+      }
+
+      throw new Error( 'A base accessible instance must be defined.' );
+    },
+
+    markUnsortedAccessibleInstance: function( accessibleInstance ) {
+      this._unsortedAccessibleInstances.push( accessibleInstance );
+    },
+
+    sortAccessibleInstances: function() {
+      while ( this._unsortedAccessibleInstances.length ) {
+        this._unsortedAccessibleInstances.pop().sortChildren();
+      }
+    },
+
+    /**
+     * Called when a subtree with accessible content is added.
+     * @private
+     *
+     * @param {Trail} trail
+     */
+    addAccessibleTrail: function( trail ) {
+      if ( !this.options.accessibility ) {
+        return;
+      }
+
+      sceneryLog && sceneryLog.Accessibility && sceneryLog.Accessibility( 'Display.addAccessibleTrail ' + trail.toString() );
+      sceneryLog && sceneryLog.Accessibility && sceneryLog.push();
+
+      this.getBaseAccessibleInstance( trail ).addSubtree( trail );
+
+      this.sortAccessibleInstances();
+
+      sceneryLog && sceneryLog.Accessibility && sceneryLog.pop();
+    },
+
+    /**
+     * Called when a subtree with accessible content is removed.
+     * @private
+     *
+     * @param {Trail} trail
+     */
+    removeAccessibleTrail: function( trail ) {
+      if ( !this.options.accessibility ) {
+        return;
+      }
+
+      sceneryLog && sceneryLog.Accessibility && sceneryLog.Accessibility( 'Display.removeAccessibleTrail ' + trail.toString() );
+      sceneryLog && sceneryLog.Accessibility && sceneryLog.push();
+
+      this.getBaseAccessibleInstance( trail ).removeSubtree( trail );
+
+      this.sortAccessibleInstances();
+
+      sceneryLog && sceneryLog.Accessibility && sceneryLog.pop();
+    },
+
+    /**
+     * Called when an ancestor node's accessible content is changed.
+     * @private
+     *
+     * @param {Trail} trail
+     * @param {object} oldAccessibleContent
+     * @param {object} newAccessibleContent
+     */
+    changedAccessibleContent: function( trail, oldAccessibleContent, newAccessibleContent ) {
+      if ( !this.options.accessibility ) {
+        return;
+      }
+
+      sceneryLog && sceneryLog.Accessibility && sceneryLog.Accessibility(
+        'Display.changedAccessibleContent ' + trail.toString() +
+        ' old: ' + ( !!oldAccessibleContent ) +
+        ' new: ' + ( !!newAccessibleContent ) );
+      sceneryLog && sceneryLog.Accessibility && sceneryLog.push();
+
+      this.getBaseAccessibleInstance( trail ).removeSubtree( trail );
+      this.getBaseAccessibleInstance( trail ).addSubtree( trail );
+
+      this.sortAccessibleInstances();
+
+      sceneryLog && sceneryLog.Accessibility && sceneryLog.pop();
+    },
+
+    /**
+     * Called when an ancestor node's accessible order is changed.
+     * @private
+     *
+     * @param {Trail} trail
+     */
+    changedAccessibleOrder: function( trail ) {
+      if ( !this.options.accessibility ) {
+        return;
+      }
+
+      sceneryLog && sceneryLog.Accessibility && sceneryLog.Accessibility( 'Display.changedAccessibleOrder ' + trail.toString() );
+      sceneryLog && sceneryLog.Accessibility && sceneryLog.push();
+
+      this.getBaseAccessibleInstance( trail ).markAsUnsorted();
+
+      this.sortAccessibleInstances();
+
+      sceneryLog && sceneryLog.Accessibility && sceneryLog.pop();
     },
 
     /*
@@ -858,6 +994,16 @@ define( function( require ) {
     },
 
     /**
+     * Dispose function for Display.
+     *
+     * TODO: this dispose function is not complete.
+     * @public
+     */
+    dispose: function() {
+      this._rootNode.removeRootedDisplay( this );
+    },
+
+    /**
      * Sends a number of random mouse events through the input system
      *
      * @param {number} averageEventQuantity - The average number of mouse events
@@ -939,19 +1085,21 @@ define( function( require ) {
       function nodeCount( node ) {
         var count = 1; // for us
         for ( var i = 0; i < node.children.length; i++ ) {
-          count += nodeCount( node.children[i] );
+          count += nodeCount( node.children[ i ] );
         }
         return count;
       }
+
       result += 'Nodes: ' + nodeCount( this._rootNode ) + '<br>';
 
       function instanceCount( instance ) {
         var count = 1; // for us
         for ( var i = 0; i < instance.children.length; i++ ) {
-          count += instanceCount( instance.children[i] );
+          count += instanceCount( instance.children[ i ] );
         }
         return count;
       }
+
       result += this._baseInstance ? ( 'Instances: ' + instanceCount( this._baseInstance ) + '<br>' ) : '';
 
       function drawableCount( drawable ) {
@@ -971,6 +1119,7 @@ define( function( require ) {
         }
         return count;
       }
+
       result += this._rootBackbone ? ( 'Drawables: ' + drawableCount( this._rootBackbone ) + '<br>' ) : '';
 
       var drawableCountMap = {}; // {string} drawable constructor name => {number} count of seen
@@ -984,6 +1133,7 @@ define( function( require ) {
           drawableCountMap[ name ] = 1;
         }
       }
+
       function retainedDrawableCount( instance ) {
         var count = 0;
         if ( instance.selfDrawable ) {
@@ -999,10 +1149,11 @@ define( function( require ) {
           count++;
         }
         for ( var i = 0; i < instance.children.length; i++ ) {
-          count += retainedDrawableCount( instance.children[i] );
+          count += retainedDrawableCount( instance.children[ i ] );
         }
         return count;
       }
+
       result += this._baseInstance ? ( 'Retained Drawables: ' + retainedDrawableCount( this._baseInstance ) + '<br>' ) : '';
       for ( var drawableName in drawableCountMap ) {
         result += '&nbsp;&nbsp;&nbsp;&nbsp;' + drawableName + ': ' + drawableCountMap[ drawableName ] + '<br>';
@@ -1028,17 +1179,18 @@ define( function( require ) {
         depth += 1;
         if ( hasBackbone ) {
           for ( var k = 0; k < block.domDrawable.blocks.length; k++ ) {
-            div += blockSummary ( block.domDrawable.blocks[k] );
+            div += blockSummary( block.domDrawable.blocks[ k ] );
           }
         }
         depth -= 1;
 
         return div;
       }
+
       if ( this._rootBackbone ) {
         result += '<div style="' + headerStyle + '">Block Summary</div>';
         for ( var i = 0; i < this._rootBackbone.blocks.length; i++ ) {
-          result += blockSummary( this._rootBackbone.blocks[i] );
+          result += blockSummary( this._rootBackbone.blocks[ i ] );
         }
       }
 
@@ -1262,6 +1414,7 @@ define( function( require ) {
       // the HTML tree (with images) before putting that in the foreignObject. That way, we can actually display
       // things rendered in Canvas in our rasterization.
       var canvasUrlMap = {};
+
       function scanForCanvases( drawable ) {
         if ( drawable.blocks ) {
           // we're a backbone
@@ -1277,10 +1430,11 @@ define( function( require ) {
           scanForCanvases( drawable.lastDrawable ); // wasn't hit in our simplified (and safer) loop
 
           if ( drawable.domElement && drawable.domElement instanceof window.HTMLCanvasElement ) {
-            canvasUrlMap[drawable.canvasId] = drawable.domElement.toDataURL();
+            canvasUrlMap[ drawable.canvasId ] = drawable.domElement.toDataURL();
           }
         }
       }
+
       scanForCanvases( this._rootBackbone );
 
       var canvas = document.createElement( 'canvas' );
@@ -1298,12 +1452,12 @@ define( function( require ) {
       var displayCanvases = doc.documentElement.getElementsByTagName( 'canvas' );
       displayCanvases = Array.prototype.slice.call( displayCanvases ); // don't use a live HTMLCollection copy!
       for ( var i = 0; i < displayCanvases.length; i++ ) {
-        var displayCanvas = displayCanvases[i];
+        var displayCanvas = displayCanvases[ i ];
 
         var cssText = displayCanvas.style.cssText;
 
         var displayImg = doc.createElement( 'img' );
-        var src = canvasUrlMap[displayCanvas.id];
+        var src = canvasUrlMap[ displayCanvas.id ];
         assert && assert( src, 'Must have missed a toDataURL() on a Canvas' );
 
         displayImg.src = src;
@@ -1339,32 +1493,6 @@ define( function( require ) {
 
     popupRasterization: function() {
       this.foreignObjectRasterization( window.open );
-    },
-
-    // Overwrites the current accessibility container with a static snapshot of the accessibility parallel DOM.
-    overwriteAccessibilityContainer: function() {
-      var display = this;
-
-      var nestedOrder = this.rootNode.getNestedAccessibleOrder();
-
-      // Remove all DOM children from the accessibility container
-      while ( this.accessibilityContainer.firstChild ) {
-        this.accessibilityContainer.removeChild( this.accessibilityContainer.firstChild );
-      }
-
-      function addContent( domParent, itemChildren ) {
-        _.each( itemChildren, function( item ) {
-          var node = item.trail.lastNode();
-
-          var peer = node.accessibleContent.createPeer( new AccessibleInstance( display, item.trail ) );
-
-          domParent.appendChild( peer.domElement );
-
-          addContent( peer.getChildContainerElement(), item.children );
-        } );
-      }
-
-      addContent( this.accessibilityContainer, nestedOrder );
     }
   }, Events.prototype ) );
 
