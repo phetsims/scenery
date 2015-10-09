@@ -97,6 +97,7 @@ define( [
   'SCENERY/util/SpriteSheet',
   'SCENERY/util/Trail',
   'SCENERY/util/TrailPointer',
+  'SCENERY/util/TransformTracker',
   'SCENERY/util/Util'
 ], function( scenery ) {
   'use strict';

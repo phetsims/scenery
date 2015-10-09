@@ -416,13 +416,9 @@ define( function( require ) {
       assert && assert( this.isChild( node ), 'Attempted to removeChild with a node that was not a child.' );
       assert && assert( this._children[ indexOfChild ] === node, 'Incorrect index for removeChildWithIndex' );
 
-      // needs to be early to prevent re-entrant children modifications
-      this.changePickableCount( -node._subtreePickableCount );
-      this.changeBoundsEventCount( node._boundsEventCount > 0 ? -1 : 0 );
-      this._rendererSummary.summaryChange( node._rendererSummary.bitmask, RendererSummary.bitmaskAll );
-
       var indexOfParent = _.indexOf( node._parents, this );
 
+      // NOTE: Potentially removes bounds listeners here!
       if ( !node._rendererSummary.isNotAccessible() ) {
         var trails = node.getTrails( hasRootedDisplayPredicate );
         for ( var i = 0; i < trails.length; i++ ) {
@@ -433,6 +429,11 @@ define( function( require ) {
           }
         }
       }
+
+      // needs to be early to prevent re-entrant children modifications
+      this.changePickableCount( -node._subtreePickableCount );
+      this.changeBoundsEventCount( node._boundsEventCount > 0 ? -1 : 0 );
+      this._rendererSummary.summaryChange( node._rendererSummary.bitmask, RendererSummary.bitmaskAll );
 
       node._parents.splice( indexOfParent, 1 );
       this._children.splice( indexOfChild, 1 );

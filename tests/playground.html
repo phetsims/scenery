@@ -129,19 +129,16 @@ an UI and Display made for visual testing and debugging.
       window.accessibleTest = function() {
         setTimeout( function() {
           window.a = new scenery.Node();
-          window.b = new scenery.Node( { accessibleContent: {} } );
-          window.c = new scenery.Node( { accessibleContent: {} } );
+          window.b = new scenery.Node();
+          window.c = new scenery.Node();
           window.d = new scenery.Node();
-          window.e = new scenery.Node( { accessibleContent: {} } );
-          window.f = new scenery.Node();
-          window.g = new scenery.Node( { accessibleContent: {} } );
-          window.h = new scenery.Node( { accessibleContent: {} } );
 
-          a.addChild( b );
-          b.addChild( c );
-          d.children = [ e, f ];
-          e.addChild( g );
-          f.addChild( h );
+          a.children = [ b ];
+          b.children = [ c ];
+          c.children = [ d ];
+
+          window.trail = d.getUniqueTrail();
+          window.tracker = new scenery.TransformTracker( trail );
         } )
       };
 
