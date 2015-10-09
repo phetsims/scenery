@@ -206,7 +206,7 @@ define( function( require ) {
       this._focusOverlay = new FocusOverlay( this, this._focusRootNode );
       this.addOverlay( this._focusOverlay );
 
-      this._rootAccessibleInstance = new AccessibleInstance( null, this, new scenery.Trail() );
+      this._rootAccessibleInstance = AccessibleInstance.createFromPool( null, this, new scenery.Trail() );
       this._rootAccessibleInstance.addSubtree( new scenery.Trail( this._rootNode ) );
 
       this._domElement.appendChild( this._rootAccessibleInstance.peer.domElement );

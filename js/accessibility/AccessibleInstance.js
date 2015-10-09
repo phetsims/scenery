@@ -10,6 +10,7 @@ define( function( require ) {
   'use strict';
 
   var inherit = require( 'PHET_CORE/inherit' );
+  var Poolable = require( 'PHET_CORE/Poolable' );
   var Events = require( 'AXON/Events' );
   var scenery = require( 'SCENERY/scenery' );
   // var AccessiblePeer = require( 'SCENERY/accessibility/AccessiblePeer' );
@@ -104,7 +105,7 @@ define( function( require ) {
       var node = trail.lastNode();
       var nextInstance = this;
       if ( node.accessibleContent ) {
-        var accessibleInstance = new AccessibleInstance( this, this.display, trail.copy() ); // TODO: Pooling
+        var accessibleInstance = AccessibleInstance.createFromPool( this, this.display, trail.copy() ); // TODO: Pooling
         this.children.push( accessibleInstance ); // TODO: Mark us as dirty for performance.
         this.markAsUnsorted();
 
@@ -280,6 +281,8 @@ define( function( require ) {
       this.trail = null;
       this.node = null;
       this.peer = null;
+
+      this.freeToPool();
     },
 
     auditRoot: function() {
@@ -307,6 +310,19 @@ define( function( require ) {
       }
 
       audit( this.display.rootNode.getNestedAccessibleOrder(), this );
+    }
+  } );
+
+  Poolable.mixin( AccessibleInstance, {
+    constructorDuplicateFactory: function( pool ) {
+      return function( parent, display, trail ) {
+        if ( pool.length ) {
+          return pool.pop().initializeAccessibleInstance( parent, display, trail );
+        }
+        else {
+          return new AccessibleInstance( parent, display, trail );
+        }
+      };
     }
   } );
 
