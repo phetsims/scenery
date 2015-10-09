@@ -37,12 +37,12 @@ define( function( require ) {
    * @constructor
    * @public
    *
-   * Possible constructor signatures, with { ... } representing the optional Scenery-style parameter object.
-   * new Rectangle( x, y, width, height, cornerXRadius, cornerYRadius, { ... } )
-   * new Rectangle( x, y, width, height, { ... } )
-   * new Rectangle( { ... } )
-   * new Rectangle( bounds2, { ... } )
-   * new Rectangle( bounds2, cornerXRadius, cornerYRadius, { ... } )
+   * Possible constructor signatures
+   * new Rectangle( x, y, width, height, cornerXRadius, cornerYRadius, [options] )
+   * new Rectangle( x, y, width, height, [options] )
+   * new Rectangle( [options] )
+   * new Rectangle( bounds2, [options] )
+   * new Rectangle( bounds2, cornerXRadius, cornerYRadius, [options] )
    *
    * Available parameters to the various constructor options:
    * @param {number} x - x-position of the upper-left corner (left bound)
