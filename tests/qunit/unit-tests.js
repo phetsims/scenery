@@ -20,7 +20,6 @@ function runSceneryTests( pathToTestBase ) {
   loadTestFile( 'js/input.js' );
   loadTestFile( 'js/transforms.js' );
   loadTestFile( 'js/miscellaneous.js' );
-  loadTestFile( 'js/linting.js' );
   loadTestFile( 'js/display.js' );
   loadTestFile( 'js/focus.js' );
   loadTestFile( 'js/from-fuzzer.js' );
