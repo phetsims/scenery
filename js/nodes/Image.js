@@ -1,9 +1,8 @@
 // Copyright 2002-2014, University of Colorado Boulder
 
 /**
- * Images
- *
- * TODO: allow multiple DOM instances (create new HTMLImageElement elements)
+ * A node that displays a single image either from an actual HTMLImageElement, a URL, a Canvas element, or a mipmap
+ * data structure described in the constructor.
  *
  * @author Jonathan Olson <jonathan.olson@colorado.edu>
  */
@@ -42,26 +41,84 @@ define( function( require ) {
   };
 
   /*
-   * Canvas renderer supports the following as 'image':
-   *     URL (string)             // works, but does NOT support bounds-based parameter object keys like 'left', 'centerX', etc.
-   *                              // also necessary to force updateScene() after it has loaded
-   *     HTMLImageElement         // works
-   *     HTMLVideoElement         // not tested
-   *     HTMLCanvasElement        // works, and forces the canvas renderer
-   *     CanvasRenderingContext2D // not tested, but bad luck in past
-   *     ImageBitmap              // good luck creating this. currently API for window.createImageBitmap not implemented
-   * SVG renderer supports the following as 'image':
-   *     URL (string)
-   *     HTMLImageElement
+   * Constructs an Image node from a particular source.
+   * @public
    *
-   * Also available is the mipmap form, where 'image' will be an array of objects of the form:
-   * {
-   *   img: {HTMLImageElement},
-   *   url: {string}, // data URL for the image level
-   *   width: {number},
-   *   height: {number}
-   * }
-   * where image[ 0 ] will be the most detailed mipmap level.
+   * We support a few different 'image' parameter types:
+   *
+   * HTMLImageElement - A normal HTML <img>. If it hasn't been fully loaded yet, Scenery will take care of adding a
+   *   listener that will update Scenery with its width/height (and load its data) when the image is fully loaded. NOTE
+   *   that if you just created the <img>, it probably isn't loaded yet, particularly in Safari. If the Image node is
+   *   constructed with an <img> that hasn't fully loaded, it will have a width and height of 0, which may cause issues
+   *   if you are using bounds for layout. Please see initialWidth/initialHeight notes below.
+   *
+   * URL - Provide a {string}, and Scenery will assume it is a URL. This can be a normal URL, or a data URI, both will
+   *   work. Please note that this has the same loading-order issues as using HTMLImageElement, but that it's almost
+   *   always guaranteed to not have a width/height when you create the Image node. Note that data URI support for
+   *   formats depends on the browser - only JPEG and PNG are supported broadly. Please see initialWidth/initialHeight
+   *   notes below.
+   *
+   * HTMLCanvasElement - It's possible to pass an HTML5 Canvas directly into the Image node. It will immediately be
+   *   aware of the width/height (bounds) of the Canvas, but NOTE that the Image node will not listen to Canvas size
+   *   changes. It is assumed that after you pass in a Canvas to an Image node that it will not be modified further.
+   *   Additionally, the Image node will only be rendered using Canvas or WebGL if a Canvas is used as input.
+   *
+   * Mipmap data structure - Image supports a mipmap data structure that provides rasterized mipmap levels. The 'top'
+   *   level (level 0) is the entire full-size image, and every other level is twice as small in every direction
+   *   (~1/4 the pixels), rounding dimensions up. This is useful for browsers that display the image badly if the
+   *   image is too large. Instead, Scenery will dynamically pick the most appropriate size of the image to use,
+   *   which improves the image appearance.
+   *   The passed in 'image' should be an Array of mipmap objects of the format:
+   *   {
+   *     img: {HTMLImageElement}, // preferably preloaded, but it isn't required
+   *     url: {string}, // URL (usually a data URL) for the image level
+   *     width: {number}, // width of the mipmap level, in pixels
+   *     height: {number} // height of the mipmap level, in pixels
+   *   }
+   *   At least one level is required (level 0), and each mipmap level corresponds to the index in the array, e.g.:
+   *   [
+   *     level 0 (full size, e.g. 100x64)
+   *     level 1 (half size, e.g. 50x32)
+   *     level 2 (quarter size, e.g. 25x16)
+   *     level 3 (eighth size, e.g. 13x8 - note the rounding up)
+   *     ...
+   *     level N (single pixel, e.g. 1x1 - this is the smallest level permitted, and there should only be one)
+   *   ]
+   *
+   * -----------------
+   *
+   * Image also supports the following options beyond what Node itself provides:
+   *
+   * image - {see above} Allows changing the underlying input image to a Scenery Image node. Note that if for some
+   *    reason the provided image was mutated somehow, it's recommended to call invalidateImage() instead of changing
+   *    the image reference.
+   *
+   * initialWidth - {number} If the input image hasn't loaded yet, but the (expected) size is known, providing an
+   *    initialWidth will cause the Image node to have the correct bounds (width) before the pixel data has been fully
+   *    loaded. A value of 0 will be ignored.
+   *
+   * initialHeight - {number} If the input image hasn't loaded yet, but the (expected) size is known, providing an
+   *    initialHeight will cause the Image node to have the correct bounds (height) before the pixel data has been fully
+   *    loaded. A value of 0 will be ignored.
+   *
+   * mipmap - {boolean} Whether mipmaps are supported. Defaults to false, but is automatically set to true when a mipmap
+   *    image is provided to it. Setting it to true on non-mipmap images will trigger creation of a medium-quality
+   *    mipmap that will be used. NOTE that this mipmap generation is slow and CPU-intensive. Providing precomputed
+   *    mipmap resources to an Image node will be much faster, and of higher quality.
+   *
+   * mipmapBias - {number} Allows adjustment of how much level-of-detail is displayed. Increasing it will typically
+   *    decrease the displayed resolution, and decreases (going negative) will increase the displayed resolution, such
+   *    that approximately:
+   *        mipmapLevel = Math.round( computedMipmapLevel + mipmapBias )
+   *
+   * mipmapInitialLevel - {number} If relying on Scenery to generate the mipmaps (mipmap:true on a non-mipmap input),
+   *    this will be the number of initial levels to compute.
+   *
+   * mipmapMaxLevel - {number} If relying on Scenery to generate the mipmaps (mipmap:true on a non-mipmap input),
+   *    this will be the maximum (smallest) level that Scenery will compute.
+   *
+   * @param {see above} image
+   * @param {Object} [options]
    */
   scenery.Image = function Image( image, options ) {
     assert && assert( image, 'image should be available' );
