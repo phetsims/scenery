@@ -41,7 +41,7 @@ define( function( require ) {
       // process whether anything under the pointers changed before running additional input events
       sceneryEventLog && sceneryEventLog( 'validatePointers from batched event' );
       input.validatePointers();
-      if ( input.logEvents ) { input.eventLog.push( 'validatePointers();' ); }
+      if ( input.logEvents ) { input.emitter.emit1( 'validatePointers();' );}
 
       //OHTWO TODO: switch?
       if ( this.type === BatchedDOMEvent.POINTER_TYPE ) {

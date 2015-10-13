@@ -37,6 +37,14 @@ define( function( require ) {
   require( 'SCENERY/input/Key' );
   var BatchedDOMEvent = require( 'SCENERY/input/BatchedDOMEvent' );
   var Property = require( 'AXON/Property' );
+  var Emitter = require( 'AXON/Emitter' );
+
+  // Object literal makes it easy to check for the existence of an attribute (compared to [].indexOf()>=0)
+  var domEventPropertiesToSerialize = {
+    button: true, keyCode: true,
+    deltaX: true, deltaY: true, deltaZ: true, deltaMode: true, pointerId: true,
+    pointerType: true, charCode: true, which: true, clientX: true, clientY: true, changedTouches: true
+  };
 
   /**
    * Find the index of the first occurrence of an element within an array, using equals() comparison.
@@ -67,9 +75,6 @@ define( function( require ) {
     this.displayUpdateOnEvent = false;
     globalDisplay = display;
 
-    //OHTWO @deprecated
-    this.batchedCallbacks = []; // cleared every frame
-
     this.batchedEvents = [];
 
     //Pointer for mouse, only created lazily on first mouse event, so no mouse is allocated on tablets
@@ -77,10 +82,8 @@ define( function( require ) {
 
     this.pointers = [];
 
-    this.listenerReferences = [];
-
-    this.eventLog = [];     // written when recording event input. can be overwritten to the empty array to reset. Strings relative to this class (prefix "rootNode.input.")
-    this.logEvents = false; // can be set to true to cause Scenery to record all input calls to eventLog
+    // For PhET-iO
+    this.emitter = new Emitter();
 
     this.pointerAddedListeners = [];
 
@@ -302,7 +305,7 @@ define( function( require ) {
 
       mouseDown: function( point, event ) {
         sceneryLog && sceneryLog.Input && sceneryLog.Input( 'mouseDown(' + Input.debugText( point, event ) + ');' );
-        if ( this.logEvents ) { this.eventLog.push( 'mouseDown(' + Input.serializeVector2( point ) + ',' + Input.serializeDomEvent( event ) + ');' ); }
+        if ( this.emitter.hasListeners() ) { this.emitter.emit1( 'mouseDown(' + Input.serializeVector2( point ) + ',' + Input.serializeDomEvent( event ) + ');' ); }
         if ( !this.mouse ) { this.initMouse(); }
         var pointChanged = this.mouse.down( point, event );
         if ( pointChanged ) {
@@ -313,7 +316,7 @@ define( function( require ) {
 
       mouseUp: function( point, event ) {
         sceneryLog && sceneryLog.Input && sceneryLog.Input( 'mouseUp(' + Input.debugText( point, event ) + ');' );
-        if ( this.logEvents ) { this.eventLog.push( 'mouseUp(' + Input.serializeVector2( point ) + ',' + Input.serializeDomEvent( event ) + ');' ); }
+        if ( this.emitter.hasListeners() ) { this.emitter.emit1( 'mouseUp(' + Input.serializeVector2( point ) + ',' + Input.serializeDomEvent( event ) + ');' ); }
         if ( !this.mouse ) { this.initMouse(); }
         var pointChanged = this.mouse.up( point, event );
         if ( pointChanged ) {
@@ -324,7 +327,7 @@ define( function( require ) {
 
       mouseMove: function( point, event ) {
         sceneryLog && sceneryLog.Input && sceneryLog.Input( 'mouseMove(' + Input.debugText( point, event ) + ');' );
-        if ( this.logEvents ) { this.eventLog.push( 'mouseMove(' + Input.serializeVector2( point ) + ',' + Input.serializeDomEvent( event ) + ');' ); }
+        if ( this.emitter.hasListeners() ) { this.emitter.emit1( 'mouseMove(' + Input.serializeVector2( point ) + ',' + Input.serializeDomEvent( event ) + ');' ); }
         if ( !this.mouse ) { this.initMouse(); }
         this.mouse.move( point, event );
         this.moveEvent( this.mouse, event );
@@ -332,7 +335,7 @@ define( function( require ) {
 
       mouseOver: function( point, event ) {
         sceneryLog && sceneryLog.Input && sceneryLog.Input( 'mouseOver(' + Input.debugText( point, event ) + ');' );
-        if ( this.logEvents ) { this.eventLog.push( 'mouseOver(' + Input.serializeVector2( point ) + ',' + Input.serializeDomEvent( event ) + ');' ); }
+        if ( this.emitter.hasListeners() ) { this.emitter.emit1( 'mouseOver(' + Input.serializeVector2( point ) + ',' + Input.serializeDomEvent( event ) + ');' ); }
         if ( !this.mouse ) { this.initMouse(); }
         this.mouse.over( point, event );
         // TODO: how to handle mouse-over (and log it)
@@ -340,7 +343,7 @@ define( function( require ) {
 
       mouseOut: function( point, event ) {
         sceneryLog && sceneryLog.Input && sceneryLog.Input( 'mouseOut(' + Input.debugText( point, event ) + ');' );
-        if ( this.logEvents ) { this.eventLog.push( 'mouseOut(' + Input.serializeVector2( point ) + ',' + Input.serializeDomEvent( event ) + ');' ); }
+        if ( this.emitter.hasListeners() ) { this.emitter.emit1( 'mouseOut(' + Input.serializeVector2( point ) + ',' + Input.serializeDomEvent( event ) + ');' ); }
         if ( !this.mouse ) { this.initMouse(); }
         this.mouse.out( point, event );
         // TODO: how to handle mouse-out (and log it)
@@ -348,11 +351,11 @@ define( function( require ) {
 
       keyDown: function( event ) {
         sceneryLog && sceneryLog.Input && sceneryLog.Input( 'keyDown(' + Input.debugKeyEvent( event ) + ');' );
-        if ( this.logEvents ) { this.eventLog.push( 'keyDown(' + Input.serializeDomEvent( event ) + ');' ); }
+        if ( this.emitter.hasListeners() ) { this.emitter.emit1( 'keyDown(' + Input.serializeDomEvent( event ) + ');' ); }
 
         // temporary disabling
         if ( true ) { //eslint-disable-line no-constant-condition
-        // if ( !this.display.options.accessibility ) {
+          // if ( !this.display.options.accessibility ) {
           return;
         }
 
@@ -387,11 +390,11 @@ define( function( require ) {
 
       keyUp: function( event ) {
         sceneryLog && sceneryLog.Input && sceneryLog.Input( 'keyUp(' + Input.debugKeyEvent( event ) + ');' );
-        if ( this.logEvents ) { this.eventLog.push( 'keyUp(' + Input.serializeDomEvent( event ) + ');' ); }
+        if ( this.emitter.hasListeners() ) { this.emitter.emit1( 'keyUp(' + Input.serializeDomEvent( event ) + ');' ); }
 
         // temporary disabling
         if ( true ) { //eslint-disable-line no-constant-condition
-        // if ( !this.display.options.accessibility ) {
+          // if ( !this.display.options.accessibility ) {
           return;
         }
 
@@ -422,7 +425,7 @@ define( function( require ) {
       // called on mouse wheels
       wheel: function( event ) {
         sceneryLog && sceneryLog.Input && sceneryLog.Input( 'wheel(' + Input.debugKeyEvent( event ) + ');' );
-        if ( this.logEvents ) { this.eventLog.push( 'wheel(' + Input.serializeDomEvent( event ) + ');' ); }
+        if ( this.emitter.hasListeners() ) { this.emitter.emit1( 'wheel(' + Input.serializeDomEvent( event ) + ');' ); }
         if ( !this.mouse ) { this.initMouse(); }
         this.mouse.wheel( event );
 
@@ -437,7 +440,7 @@ define( function( require ) {
       // called for each touch point
       touchStart: function( id, point, event ) {
         sceneryLog && sceneryLog.Input && sceneryLog.Input( 'touchStart(\'' + id + '\',' + Input.debugText( point, event ) + ');' );
-        if ( this.logEvents ) { this.eventLog.push( 'touchStart(\'' + id + '\',' + Input.serializeVector2( point ) + ',' + Input.serializeDomEvent( event ) + ');' ); }
+        if ( this.emitter.hasListeners() ) { this.emitter.emit1( 'touchStart(\'' + id + '\',' + Input.serializeVector2( point ) + ',' + Input.serializeDomEvent( event ) + ');' ); }
         var touch = new scenery.Touch( id, point, event );
         this.addPointer( touch );
         this.downEvent( touch, event );
@@ -445,7 +448,7 @@ define( function( require ) {
 
       touchEnd: function( id, point, event ) {
         sceneryLog && sceneryLog.Input && sceneryLog.Input( 'touchEnd(\'' + id + '\',' + Input.debugText( point, event ) + ');' );
-        if ( this.logEvents ) { this.eventLog.push( 'touchEnd(\'' + id + '\',' + Input.serializeVector2( point ) + ',' + Input.serializeDomEvent( event ) + ');' ); }
+        if ( this.emitter.hasListeners() ) { this.emitter.emit1( 'touchEnd(\'' + id + '\',' + Input.serializeVector2( point ) + ',' + Input.serializeDomEvent( event ) + ');' ); }
         var touch = this.findTouchById( id );
         if ( touch ) {
           var pointChanged = touch.end( point, event );
@@ -462,7 +465,7 @@ define( function( require ) {
 
       touchMove: function( id, point, event ) {
         sceneryLog && sceneryLog.Input && sceneryLog.Input( 'touchMove(\'' + id + '\',' + Input.debugText( point, event ) + ');' );
-        if ( this.logEvents ) { this.eventLog.push( 'touchMove(\'' + id + '\',' + Input.serializeVector2( point ) + ',' + Input.serializeDomEvent( event ) + ');' ); }
+        if ( this.emitter.hasListeners() ) { this.emitter.emit1( 'touchMove(\'' + id + '\',' + Input.serializeVector2( point ) + ',' + Input.serializeDomEvent( event ) + ');' ); }
         var touch = this.findTouchById( id );
         if ( touch ) {
           touch.move( point, event );
@@ -475,7 +478,7 @@ define( function( require ) {
 
       touchCancel: function( id, point, event ) {
         sceneryLog && sceneryLog.Input && sceneryLog.Input( 'touchCancel(\'' + id + '\',' + Input.debugText( point, event ) + ');' );
-        if ( this.logEvents ) { this.eventLog.push( 'touchCancel(\'' + id + '\',' + Input.serializeVector2( point ) + ',' + Input.serializeDomEvent( event ) + ');' ); }
+        if ( this.emitter.hasListeners() ) { this.emitter.emit1( 'touchCancel(\'' + id + '\',' + Input.serializeVector2( point ) + ',' + Input.serializeDomEvent( event ) + ');' ); }
         var touch = this.findTouchById( id );
         if ( touch ) {
           var pointChanged = touch.cancel( point, event );
@@ -493,7 +496,7 @@ define( function( require ) {
       // called for each touch point
       penStart: function( id, point, event ) {
         sceneryLog && sceneryLog.Input && sceneryLog.Input( 'penStart(\'' + id + '\',' + Input.debugText( point, event ) + ');' );
-        if ( this.logEvents ) { this.eventLog.push( 'penStart(\'' + id + '\',' + Input.serializeVector2( point ) + ',' + Input.serializeDomEvent( event ) + ');' ); }
+        if ( this.emitter.hasListeners() ) { this.emitter.emit1( 'penStart(\'' + id + '\',' + Input.serializeVector2( point ) + ',' + Input.serializeDomEvent( event ) + ');' ); }
         var pen = new scenery.Pen( id, point, event );
         this.addPointer( pen );
         this.downEvent( pen, event );
@@ -501,7 +504,7 @@ define( function( require ) {
 
       penEnd: function( id, point, event ) {
         sceneryLog && sceneryLog.Input && sceneryLog.Input( 'penEnd(\'' + id + '\',' + Input.debugText( point, event ) + ');' );
-        if ( this.logEvents ) { this.eventLog.push( 'penEnd(\'' + id + '\',' + Input.serializeVector2( point ) + ',' + Input.serializeDomEvent( event ) + ');' ); }
+        if ( this.emitter.hasListeners() ) { this.emitter.emit1( 'penEnd(\'' + id + '\',' + Input.serializeVector2( point ) + ',' + Input.serializeDomEvent( event ) + ');' ); }
         var pen = this.findTouchById( id );
         if ( pen ) {
           var pointChanged = pen.end( point, event );
@@ -518,7 +521,7 @@ define( function( require ) {
 
       penMove: function( id, point, event ) {
         sceneryLog && sceneryLog.Input && sceneryLog.Input( 'penMove(\'' + id + '\',' + Input.debugText( point, event ) + ');' );
-        if ( this.logEvents ) { this.eventLog.push( 'penMove(\'' + id + '\',' + Input.serializeVector2( point ) + ',' + Input.serializeDomEvent( event ) + ');' ); }
+        if ( this.emitter.hasListeners() ) { this.emitter.emit1( 'penMove(\'' + id + '\',' + Input.serializeVector2( point ) + ',' + Input.serializeDomEvent( event ) + ');' ); }
         var pen = this.findTouchById( id );
         if ( pen ) {
           pen.move( point, event );
@@ -531,7 +534,7 @@ define( function( require ) {
 
       penCancel: function( id, point, event ) {
         sceneryLog && sceneryLog.Input && sceneryLog.Input( 'penCancel(\'' + id + '\',' + Input.debugText( point, event ) + ');' );
-        if ( this.logEvents ) { this.eventLog.push( 'penCancel(\'' + id + '\',' + Input.serializeVector2( point ) + ',' + Input.serializeDomEvent( event ) + ');' ); }
+        if ( this.emitter.hasListeners() ) { this.emitter.emit1( 'penCancel(\'' + id + '\',' + Input.serializeVector2( point ) + ',' + Input.serializeDomEvent( event ) + ');' ); }
         var pen = this.findTouchById( id );
         if ( pen ) {
           var pointChanged = pen.cancel( point, event );
@@ -869,14 +872,15 @@ define( function( require ) {
       serializeDomEvent: function serializeDomEvent( domEvent ) {
         var lines = [];
         for ( var prop in domEvent ) {
-          if ( domEvent.hasOwnProperty( prop ) ) {
+          if ( domEventPropertiesToSerialize[ prop ] ) {
+
             // stringifying dom event object properties can cause circular references, so we avoid that completely
             if ( prop === 'touches' || prop === 'targetTouches' || prop === 'changedTouches' ) {
               var arr = [];
               for ( var i = 0; i < domEvent[ prop ].length; i++ ) {
+
                 // according to spec (http://www.w3.org/TR/touch-events/), this is not an Array, but a TouchList
                 var touch = domEvent[ prop ].item( i );
-
                 arr.push( serializeDomEvent( touch ) );
               }
               lines.push( prop + ':[' + arr.join( ',' ) + ']' );
@@ -890,7 +894,7 @@ define( function( require ) {
       },
 
       serializeVector2: function( vector ) {
-        return 'dot(' + vector.x + ',' + vector.y + ')';
+        return 'new dot.Vector2(' + vector.x + ',' + vector.y + ')';
       },
 
       debugKeyEvent: function( domEvent ) {
