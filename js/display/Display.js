@@ -792,6 +792,11 @@ define( function( require ) {
         this._domElement.style.overflow = 'hidden';
       }
 
+      // Prevents selection cursor issues in Safari, see https://github.com/phetsims/scenery/issues/476
+      document.onselectstart = function() {
+        return false;
+      };
+
       // forward all pointer events
       this._domElement.style.msTouchAction = 'none';
 
