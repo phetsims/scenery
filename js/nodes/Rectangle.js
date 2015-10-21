@@ -889,6 +889,25 @@ define( function( require ) {
     // stateless dirty functions
     markDirtyRectangle: function() { this.markPaintDirty(); },
 
+    markDirtyX: function() {
+      this.markDirtyRectangle();
+    },
+    markDirtyY: function() {
+      this.markDirtyRectangle();
+    },
+    markDirtyWidth: function() {
+      this.markDirtyRectangle();
+    },
+    markDirtyHeight: function() {
+      this.markDirtyRectangle();
+    },
+    markDirtyCornerXRadius: function() {
+      this.markDirtyRectangle();
+    },
+    markDirtyCornerYRadius: function() {
+      this.markDirtyRectangle();
+    },
+
     dispose: function() {
       CanvasSelfDrawable.prototype.dispose.call( this );
       this.disposePaintableStateless();
