@@ -20,6 +20,8 @@ define( function( require ) {
   var CanvasSelfDrawable = require( 'SCENERY/display/CanvasSelfDrawable' );
   var SelfDrawable = require( 'SCENERY/display/SelfDrawable' );
 
+  var emptyArray = []; // constant
+
   // pass a canvasBounds option if you want to specify the self bounds
   scenery.CanvasNode = function CanvasNode( options ) {
     Node.call( this, options );
@@ -104,7 +106,22 @@ define( function( require ) {
                                                     'Please set canvasBounds (or use setCanvasBounds()) on ' + node.constructor.name );
 
       if ( !node.selfBounds.isEmpty() ) {
-        node.paintCanvas( wrapper );
+        var context = wrapper.context;
+        context.save();
+
+        // set back to Canvas default styles
+        context.fillStyle = 'black';
+        context.strokeStyle = 'black';
+        context.lineWidth = 1;
+        context.lineCap = 'butt';
+        context.lineJoin = 'miter';
+        context.lineDash = emptyArray;
+        context.lineDashOffset = 0;
+        context.miterLimit = 10;
+
+        node.paintCanvas( context );
+
+        context.restore();
       }
     }
   } );

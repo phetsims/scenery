@@ -271,8 +271,7 @@
 
                 //TODO: Make it so we can pass in the paintCanvas call to the CanvasNode constructor.
                 var canvasNode = new scenery.CanvasNode( { canvasBounds: new dot.Bounds2( 0, 0, 100, 100 ) } );
-                canvasNode.paintCanvas = function( wrapper ) {
-                  var context = wrapper.context;
+                canvasNode.paintCanvas = function( context ) {
 
                   context.fillStyle = 'red';
                   context.fillRect( 0, 0, 100, 20 );
