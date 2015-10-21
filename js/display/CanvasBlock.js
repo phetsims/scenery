@@ -126,6 +126,7 @@ define( function( require ) {
 
         if ( this.filterRootInstance.node.clipArea ) {
           this.context.restore();
+          this.wrapper.resetStyles();
         }
       }
 
