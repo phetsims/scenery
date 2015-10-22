@@ -191,6 +191,11 @@ define( function( require ) {
 
       assert && assert( drawable );
 
+      if ( assert ) {
+        // Catch infinite loops
+        this.display.ensureNotPainting();
+      }
+
       // TODO: instance check to see if it is a canvas cache (usually we don't need to call update on our drawables)
       this.dirtyDrawables.push( drawable );
       this.markDirty();

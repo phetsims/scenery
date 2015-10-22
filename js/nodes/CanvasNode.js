@@ -48,9 +48,15 @@ define( function( require ) {
 
     /**
      * Override paintCanvas with a faster version, since fillRect and drawRect don't affect the current default path.
-     * @param {CanvasContextWrapper} wrapper
+     * @public
+     *
+     * IMPORTANT NOTE: This function will be run from inside Scenery's Display.updateDisplay(), so it should not modify
+     * or mutate any Scenery nodes (particularly anything that would cause something to be marked as needing a repaint).
+     * Ideally, this function should have no outside effects other than painting to the Canvas provided.
+     *
+     * @param {CanvasRenderingContext2D} context
      */
-    paintCanvas: function( wrapper ) {
+    paintCanvas: function( context ) {
       throw new Error( 'CanvasNode needs paintCanvas implemented' );
     },
 
@@ -62,7 +68,7 @@ define( function( require ) {
     },
 
     canvasPaintSelf: function( wrapper ) {
-      this.paintCanvas( wrapper );
+      this.paintCanvas( wrapper.context );
     },
 
     // override for computation of whether a point is inside the self content

@@ -188,6 +188,11 @@ define( function( require ) {
     this._fuzzMousePosition = new Vector2(); // start at 0,0
     this._fuzzMouseLastMoved = false; // whether the last mouse event was a move (we skew probabilities based on this)
 
+    if ( assert ) {
+      // @private @assertion-only {boolean} - Whether we are running the paint phase of updateDisplay() for this Display.
+      this._isPainting = false;
+    }
+
     this.applyCSSHacks();
 
     this.setBackgroundColor( this.options.backgroundColor );
@@ -321,12 +326,21 @@ define( function( require ) {
 
       if ( assertSlow ) { this._baseInstance.audit( this._frameId ); }
 
+      if ( assert ) {
+        assert( !this._isPainting, 'Display was already updating paint, may have thrown an error on the last update' );
+        this._isPainting = true;
+      }
+
       // repaint phase
       //OHTWO TODO: can anything be updated more efficiently by tracking at the Display level? Remember, we have recursive updates so things get updated in the right order!
       sceneryLog && sceneryLog.Display && sceneryLog.Display( 'repaint phase' );
       sceneryLog && sceneryLog.Display && sceneryLog.push();
       this._rootBackbone.update();
       sceneryLog && sceneryLog.Display && sceneryLog.pop();
+
+      if ( assert ) {
+        this._isPainting = false;
+      }
 
       if ( assertSlow ) { this._rootBackbone.audit( false, false, false ); } // allow nothing
       if ( assertSlow ) { this._baseInstance.audit( this._frameId ); }
@@ -1006,6 +1020,14 @@ define( function( require ) {
      */
     dispose: function() {
       this._rootNode.removeRootedDisplay( this );
+    },
+
+    ensureNotPainting: function() {
+      assert && assert( !this._isPainting,
+        'This should not be run in the call tree of updateDisplay(). If you see this, it is likely that either the ' +
+        'last updateDisplay() had a thrown error and it is trying to be run again (in which case, investigate that ' +
+        'error), OR code was run/triggered from inside an updateDisplay() that has the potential to cause an infinite ' +
+        'loop, e.g. CanvasNode paintCanvas() call manipulating another Node, or a bounds listener that Scenery missed.' );
     },
 
     /**

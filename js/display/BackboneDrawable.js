@@ -204,6 +204,11 @@ define( function( require ) {
     },
 
     markDirtyDrawable: function( drawable ) {
+      if ( assert ) {
+        // Catch infinite loops
+        this.display.ensureNotPainting();
+      }
+
       this.dirtyDrawables.push( drawable );
       this.markDirty();
     },

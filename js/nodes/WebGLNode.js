@@ -41,9 +41,59 @@ define( function( require ) {
       return true;
     },
 
-    // override paintCanvas with a faster version, since fillRect and drawRect don't affect the current default path
-    paintCanvas: function( wrapper ) {
-      throw new Error( 'WebGLNode needs paintCanvas implemented' );
+    /**
+     * Initializes a WebGL drawable for a displayed instance of this node.
+     * @public
+     *
+     * Meant to be overridden by a concrete sub-type.
+     *
+     * IMPORTANT NOTE: This function will be run from inside Scenery's Display.updateDisplay(), so it should not modify
+     * or mutate any Scenery nodes (particularly anything that would cause something to be marked as needing a repaint).
+     * Ideally, this function should have no outside effects other than painting to the Canvas provided.
+     *
+     * @param {WebGLNode.WebGLNodeDrawable} drawable
+     */
+    initializeWebGLDrawable: function( drawable ) {
+      throw new Error( 'WebGLNode needs initializeWebGLDrawable implemented' );
+    },
+
+    /**
+     * Paints a WebGL drawable for a displayed instance of this node.
+     * @public
+     *
+     * Meant to be overridden by a concrete sub-type.
+     *
+     * IMPORTANT NOTE: This function will be run from inside Scenery's Display.updateDisplay(), so it should not modify
+     * or mutate any Scenery nodes (particularly anything that would cause something to be marked as needing a repaint).
+     * Ideally, this function should have no outside effects other than painting to the Canvas provided.
+     *
+     * For handling transforms, this function provides a matrix with the local-to-global coordinate transform, e.g.:
+     * gl.uniformMatrix3fv( uniforms.uModelViewMatrix, false, matrix.entries );
+     * AND also a recommended projection transform:
+     * gl.uniformMatrix3fv( uniforms.uProjectionMatrix, false, drawable.webGLBlock.projectionMatrixArray );
+     *
+     * @param {WebGLNode.WebGLNodeDrawable} drawable
+     * @param {Matrix3} matrix - The model-view matrix, from this node's local coordinate frame to Scenery's
+     *                           global coordinate frame
+     */
+    paintWebGLDrawable: function( drawable, matrix ) {
+      throw new Error( 'WebGLNode needs paintWebGLDrawable implemented' );
+    },
+
+    /**
+     * Cleans up a WebGL drawable for a displayed instance of this node.
+     * @public
+     *
+     * Meant to be overridden by a concrete sub-type.
+     *
+     * IMPORTANT NOTE: This function will be run from inside Scenery's Display.updateDisplay(), so it should not modify
+     * or mutate any Scenery nodes (particularly anything that would cause something to be marked as needing a repaint).
+     * Ideally, this function should have no outside effects other than painting to the Canvas provided.
+     *
+     * @param {WebGLNode.WebGLNodeDrawable} drawable
+     */
+    disposeWebGLDrawable: function( drawable ) {
+      throw new Error( 'WebGLNode needs disposeWebGLDrawable implemented' );
     },
 
     invalidatePaint: function() {
