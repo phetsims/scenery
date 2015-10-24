@@ -97,7 +97,13 @@ define( function( require ) {
   };
   // bitmaskOrderN with n=0 is bitmaskOrderFirst, n=1 is bitmaskOrderSecond, etc.
   Renderer.bitmaskOrder = function( bitmask, n ) {
-    return ( bitmask >> ( 5 * n ) ) & Renderer.bitmaskCurrentRendererArea;
+    // Normally the condition here shouldn't be needed, but Safari seemed to cause a logic error when this function
+    // gets inlined elsewhere if n=0. See https://github.com/phetsims/scenery/issues/481 and
+    // https://github.com/phetsims/bending-light/issues/259.
+    if ( n > 0 ) {
+      bitmask = bitmask >> ( 5 * n );
+    }
+    return bitmask & Renderer.bitmaskCurrentRendererArea;
   };
   Renderer.bitmaskOrderFirst = function( bitmask ) {
     return bitmask & Renderer.bitmaskCurrentRendererArea;
