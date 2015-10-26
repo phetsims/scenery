@@ -446,7 +446,8 @@ define( function( require ) {
         ( passTransform ? ' passTransform' : '' ) );
       sceneryLog && sceneryLog.RelativeTransform && sceneryLog.push();
 
-      var len, i;
+      var len;
+      var i;
 
       if ( passTransform ) {
         // if we are passing isTransform, just apply this to the children

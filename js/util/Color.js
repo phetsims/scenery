@@ -349,7 +349,8 @@ define( function( require ) {
       lightness = clamp( lightness / 100, 0, 1 );   // percentage
 
       // see http://www.w3.org/TR/css3-color/
-      var m1, m2;
+      var m1;
+      var m2;
       if ( lightness < 0.5 ) {
         m2 = lightness * ( saturation + 1 );
       }

@@ -483,7 +483,9 @@ define( function( require ) {
     // we are rounded and inside the logical rectangle (if it didn't have rounded corners)
 
     // closest corner arc's center (we assume the rounded rectangle's arcs are 90 degrees fully, and don't intersect)
-    var closestCornerX, closestCornerY, guaranteedInside = false;
+    var closestCornerX;
+    var closestCornerY;
+    var guaranteedInside = false;
 
     // if we are to the inside of the closest corner arc's center, we are guaranteed to be in the rounded rectangle (guaranteedInside)
     if ( point.x < x + width / 2 ) {

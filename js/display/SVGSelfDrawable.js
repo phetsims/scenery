@@ -70,7 +70,9 @@ define( function( require ) {
       // sync the differences between the previously-recorded list of cached paints and the new list
       if ( this.usesPaint && this.dirtyCachedPaints ) {
         var newCachedPaints = this.node._cachedPaints.slice(); // defensive copy for now
-        var i, j;
+        var i;
+        var j;
+
         // scan for new cached paints (not in the old list)
         for ( i = 0; i < newCachedPaints.length; i++ ) {
           var newPaint = newCachedPaints[ i ];

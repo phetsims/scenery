@@ -1900,7 +1900,8 @@ define( function( require ) {
       var tx = m.m02();
       var ty = m.m12();
 
-      var dx, dy;
+      var dx;
+      var dy;
 
       if ( typeof a === 'number' ) {
         dx = a - tx;

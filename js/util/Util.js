@@ -271,7 +271,9 @@ define( function( require ) {
       minBounds = minBounds.union( coarseBounds.minBounds );
       maxBounds = maxBounds.intersection( coarseBounds.maxBounds );
 
-      var tempMin, tempMax, refinedBounds;
+      var tempMin;
+      var tempMax;
+      var refinedBounds;
 
       // minX
       tempMin = maxBounds.minY;
