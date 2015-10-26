@@ -25,6 +25,7 @@ define( function( require ) {
   'use strict';
 
   var inherit = require( 'PHET_CORE/inherit' );
+  var platform = require( 'PHET_CORE/platform' );
   var cleanArray = require( 'PHET_CORE/cleanArray' );
   var scenery = require( 'SCENERY/scenery' );
 
@@ -127,10 +128,18 @@ define( function( require ) {
           }
         }
 
+        var isKey = batchType === BatchedDOMEvent.KEY_TYPE;
+
         // Don't preventDefault for key events, which often need to be handled by the browser
         // (such as F5, CMD+R, CMD+OPTION+J, etc), see #332
-        if ( batchType !== BatchedDOMEvent.KEY_TYPE ) {
-          domEvent.preventDefault();
+        if ( !isKey ) {
+          // Always preventDefault on touch events, since we don't want mouse events triggered afterwards. See
+          // http://www.html5rocks.com/en/mobile/touchandmouse/ for more information.
+          // Additionally, IE had some issues with skipping prevent default, see
+          // https://github.com/phetsims/scenery/issues/464 for mouse handling.
+          if ( callback !== this.mouseDown || platform.ie || platform.edge ) {
+            domEvent.preventDefault();
+          }
         }
       },
 
@@ -768,11 +777,6 @@ define( function( require ) {
         // if not yet handled, run through the trail in order to see if one of them will handle the event
         // at the base of the trail should be the scene node, so the scene will be notified last
         this.dispatchToTargets( trail, pointer, type, inputEvent, bubbles );
-
-        // TODO: better interactivity handling?
-        if ( !trail.lastNode().interactive && !pointer.isKey && event && event.preventDefault ) {
-          event.preventDefault();
-        }
       },
 
       // TODO: reduce code sharing between here and dispatchToTargets!
