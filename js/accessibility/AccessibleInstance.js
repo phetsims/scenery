@@ -281,6 +281,7 @@ define( function( require ) {
       this.trail = null;
       this.node = null;
       this.peer = null;
+      this.disposed = true;
 
       this.freeToPool();
     },
