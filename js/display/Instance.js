@@ -1039,6 +1039,8 @@ define( function( require ) {
 
       this.relativeTransform.insertInstance( instance, index );
 
+      this.markChildVisibilityDirty();
+
       sceneryLog && sceneryLog.InstanceTree && sceneryLog.pop();
     },
 
@@ -1447,6 +1449,23 @@ define( function( require ) {
         }
 
         this.relativeTransform.audit( frameId, allowValidationNotNeededChecks );
+      }
+    },
+
+    // @public (scenery-internal) - Applies checks to make sure our visibility tracking is working as expected.
+    auditVisibility: function( parentVisible ) {
+      if ( assertSlow ) {
+        var visible = parentVisible && this.node.isVisible();
+        var trailVisible = this.trail.isVisible();
+        assertSlow( visible === trailVisible, 'Trail visibility failure' );
+        assertSlow( visible === this.visible, 'Visible flag failure' );
+
+        // validate the subtree
+        for ( var i = 0; i < this.children.length; i++ ) {
+          var childInstance = this.children[ i ];
+
+          childInstance.auditVisibility( visible );
+        }
       }
     },
 

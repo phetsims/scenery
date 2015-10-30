@@ -303,6 +303,8 @@ define( function( require ) {
       // pre-repaint phase update visibility information on instances
       this._baseInstance.updateVisibility( true, true, false );
 
+      if ( assertSlow ) { this._baseInstance.auditVisibility( true ); }
+
       if ( assertSlow ) { this._baseInstance.audit( this._frameId, true ); }
 
       sceneryLog && sceneryLog.Display && sceneryLog.Display( 'instance root disposal phase' );
@@ -1236,7 +1238,16 @@ define( function( require ) {
         iSummary += node.getDebugHTMLExtras();
 
         if ( !node.visible ) {
-          addQualifier( 'invisible' );
+          addQualifier( 'invis' );
+        }
+        if ( !instance.visible ) {
+          addQualifier( 'I-invis' );
+        }
+        if ( !instance.relativeVisible ) {
+          addQualifier( 'I-rel-invis' );
+        }
+        if ( !instance.selfVisible ) {
+          addQualifier( 'I-self-invis' );
         }
         if ( node.pickable === true ) {
           addQualifier( 'pickable' );
@@ -1299,7 +1310,11 @@ define( function( require ) {
       }
 
       function drawableSummary( drawable ) {
-        return drawable.toString() + ( drawable.dirty ? ' <span style="color: #c00;">[x]</span>' : '' );
+        var drawableString = drawable.toString();
+        if ( drawable.visible ) {
+          drawableString = '<strong>' + drawableString + '</strong>';
+        }
+        return drawableString + ( drawable.dirty ? ' <span style="color: #c00;">[x]</span>' : '' );
       }
 
       function printInstanceSubtree( instance ) {
