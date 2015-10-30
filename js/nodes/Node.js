@@ -186,7 +186,7 @@ define( function( require ) {
      * (width or height), an ideal scale is computed (either the smallest scale for our local bounds to fit the
      * dimension constraints, OR 1, whichever is lower). Then the Node's transform will be scaled (prepended) with
      * a scale adjustment of ( idealScale / alreadyAppliedScaleFactor ).
-     * In the simpe case where the Node isn't otherwise transformed, this will apply and update the Node's scale so that
+     * In the simple case where the Node isn't otherwise transformed, this will apply and update the Node's scale so that
      * the node matches the maximum dimensions, while never scaling over 1. Note that manually applying transforms to
      * the Node is fine, but may make the node's width greater than the maximum width.
      * NOTE: If a dimension constraint is null, no resizing will occur due to it. If both maxWidth and maxHeight are null,
