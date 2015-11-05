@@ -101,7 +101,7 @@ define( function( require ) {
     // supertype call to axon.Events (should just initialize a few properties here, notably _eventListeners and _staticEventListeners)
     Events.call( this );
 
-    this.options = _.extend( {
+    options = _.extend( {
       // initial display width
       width: ( options && options.container && options.container.clientWidth ) || 640,
 
@@ -121,6 +121,7 @@ define( function( require ) {
       isApplication: false,      // adds the aria-role: 'application' when accessibility is enabled
       interactive: true
     }, options );
+    this.options = options; // @private
 
     // The (integral, > 0) dimensions of the Display's DOM element (only updates the DOM element on updateDisplay())
     this._size = new Dimension2( this.options.width, this.options.height );

@@ -37,9 +37,10 @@ define( function( require ) {
   scenery.DownUpListener = function DownUpListener( options ) {
     var handler = this;
 
-    this.options = _.extend( {
+    options = _.extend( {
       mouseButton: 0 // allow a different mouse button
     }, options );
+    this.options = options; // @private
     this.isDown = false;   // public, whether this listener is down
     this.downCurrentTarget = null; // 'up' is handled via a pointer lister, which will have null currentTarget, so save the 'down' currentTarget
     this.downTrail = null;

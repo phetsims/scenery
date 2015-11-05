@@ -28,11 +28,12 @@ define( function( require ) {
   scenery.SimpleDragHandler = function SimpleDragHandler( options ) {
     var handler = this;
 
-    this.options = _.extend( {
+    options = _.extend( {
       allowTouchSnag: false,
       mouseButton: 0,
       dragCursor: 'pointer'
     }, options );
+    this.options = options; // @private
 
     this.dragging = false;            // whether a node is being dragged with this handler
     this.pointer = null;              // the pointer doing the current dragging
