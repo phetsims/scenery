@@ -204,8 +204,8 @@ define( function( require ) {
       this.focusDisplay.updateDisplay();
     }
   }, {
-    focusColor: new Color( 'rgba(0,100,255,0.5)' ),
-    innerFocusColor: new Color( 'rgba(0,200,255,0.9)' )
+    focusColor: new Color( 'rgba(212,19,106,0.5)' ),
+    innerFocusColor: new Color( 'rgba(250,40,135,0.9)' )
   } );
 
   return FocusOverlay;
