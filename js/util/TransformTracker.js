@@ -1,4 +1,4 @@
-// Copyright 2002-2014, University of Colorado Boulder
+// Copyright 2015, University of Colorado Boulder
 
 /**
  * Used for identifying when any ancestor transform of a node in a trail causes that node's global transform to change.
