@@ -51,7 +51,13 @@ define( function( require ) {
 
     Node.call( this );
     this.invalidateSupportedRenderers();
+
+    // Set up the boundsMethod first before setting the Shape, see https://github.com/phetsims/scenery/issues/489
+    if ( options.boundsMethod ) {
+      this.setBoundsMethod( options.boundsMethod );
+    }
     this.setShape( shape );
+
     this.mutate( options );
   };
   var Path = scenery.Path;
