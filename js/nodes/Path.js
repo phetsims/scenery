@@ -287,7 +287,7 @@ define( function( require ) {
     }
   } );
 
-  Path.prototype._mutatorKeys = [ 'shape', 'boundsMethod' ].concat( Node.prototype._mutatorKeys );
+  Path.prototype._mutatorKeys = [ 'boundsMethod', 'shape' ].concat( Node.prototype._mutatorKeys );
 
   // mix in fill/stroke handling code. for now, this is done after 'shape' is added to the mutatorKeys so that stroke parameters
   // get set first
