@@ -64,7 +64,7 @@ define( function( require ) {
     // @protected: called to update the visual appearance of our svgElement
     updateSVG: function() {
       if ( this.paintDirty ) {
-        this.updateSVGSelf.call( this, this.node, this.svgElement );
+        this.updateSVGSelf( this.node, this.svgElement );
       }
 
       // sync the differences between the previously-recorded list of cached paints and the new list
@@ -148,7 +148,7 @@ define( function( require ) {
         }
       }
 
-      this.updateDefsSelf && this.updateDefsSelf.call( this, svgBlock );
+      this.updateDefsSelf && this.updateDefsSelf( svgBlock );
 
       this.usesPaint && this.paintState.updateSVGBlock( svgBlock );
 
@@ -166,7 +166,7 @@ define( function( require ) {
       }
 
       // release any defs, and dispose composed state objects
-      this.updateDefsSelf && this.updateDefsSelf.call( this, null );
+      this.updateDefsSelf && this.updateDefsSelf( null );
       this.usesPaint && this.paintState.dispose();
 
       this.defs = null;
