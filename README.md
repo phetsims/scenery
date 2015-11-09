@@ -33,7 +33,6 @@ Examples:
 For testing purposes, the following are currently being worked on:
 * [Unit Tests / Linter](http://phetsims.github.io/scenery/tests/qunit/compiled-unit-tests.html)
 * [Renderer Comparison](http://phetsims.github.io/scenery/tests/renderer-comparison.html)
-* [Scene Graph Comparisons and Experiments](http://phetsims.github.io/scenery/tests/easel-performance/easel-tests.html)
 * [Performance Improvement/Regression](http://phetsims.github.io/scenery/tests/benchmarks/performance-tests.html)
 * [Canvas Browser Differences](http://jonathan-olson.com/canvas-diff/canvas-diff.html)
 
