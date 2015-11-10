@@ -31,18 +31,6 @@ define( function( require ) {
   var transformOriginProperty = Features.transformOrigin || 'transformOrigin'; // fallback, so we don't try to set an empty string property later
 
   var Util = {
-    // like _.extend, but with hardcoded support for https://github.com/documentcloud/underscore/pull/986
-    extend: function( obj ) {
-      _.each( Array.prototype.slice.call( arguments, 1 ), function( source ) {
-        if ( source ) {
-          for ( var prop in source ) {
-            Object.defineProperty( obj, prop, Object.getOwnPropertyDescriptor( source, prop ) );
-          }
-        }
-      } );
-      return obj;
-    },
-
     // @deprecated (bad performance since it is setting multiple properties). see applyPreparedTransform
     applyCSSTransform: function( matrix, element, forceAcceleration ) {
       var transformCSS = matrix.getCSSTransform();
