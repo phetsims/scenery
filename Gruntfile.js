@@ -51,7 +51,6 @@ module.exports = function( grunt ) {
                 assert: false,
                 assertSlow: false,
                 sceneryLog: false,
-                sceneryEventLog: false,
                 sceneryAccessibilityLog: false,
                 phetAllocation: false
               },

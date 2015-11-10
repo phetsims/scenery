@@ -11,7 +11,7 @@ define( function( require ) {
 
   var scenery = require( 'SCENERY/scenery' );
 
-  scenery.Leaf = {
+  var Leaf = {
     mixin: function( type ) {
       var proto = type.prototype;
 
@@ -24,6 +24,7 @@ define( function( require ) {
       };
     }
   };
+  scenery.register( 'Leaf', Leaf );
 
   return scenery.Leaf;
 } );

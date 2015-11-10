@@ -19,7 +19,7 @@ define( function( require ) {
   var Gradient = require( 'SCENERY/util/Gradient' );
 
   // TODO: add the ability to specify the color-stops inline. possibly [ [0,color1], [0.5,color2], [1,color3] ]
-  scenery.LinearGradient = function LinearGradient( x0, y0, x1, y1 ) {
+  function LinearGradient( x0, y0, x1, y1 ) {
     assert && assert( isFinite( x0 ) && isFinite( y0 ) && isFinite( x1 ) && isFinite( y1 ) );
     var usesVectors = y1 === undefined;
     if ( usesVectors ) {
@@ -30,8 +30,8 @@ define( function( require ) {
 
     // use the global scratch canvas instead of creating a new Canvas
     Gradient.call( this, scenery.scratchContext.createLinearGradient( x0, y0, x1, y1 ) );
-  };
-  var LinearGradient = scenery.LinearGradient;
+  }
+  scenery.register( 'LinearGradient', LinearGradient );
 
   inherit( Gradient, LinearGradient, {
 

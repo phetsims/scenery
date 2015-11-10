@@ -720,9 +720,10 @@ define( function( require ) {
     }
   };
 
-  var GreedyStitcher = scenery.GreedyStitcher = inherit( Stitcher, function GreedyStitcher() {
+  var GreedyStitcher = inherit( Stitcher, function GreedyStitcher() {
     // nothing done
   }, prototype );
+  scenery.register( 'GreedyStitcher', GreedyStitcher );
 
   GreedyStitcher.stitchPrototype = prototype;
 

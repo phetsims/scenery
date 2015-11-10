@@ -17,8 +17,8 @@ define( function( require ) {
   var scenery = require( 'SCENERY/scenery' );
 
   // now it's a namespace
-  scenery.Renderer = {};
-  var Renderer = scenery.Renderer;
+  var Renderer = {};
+  scenery.register( 'Renderer', Renderer );
 
   //OHTWO TODO: rename to take advantage of lack of deprecated names? (remove bitmask prefix)
 

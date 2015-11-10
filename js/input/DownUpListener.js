@@ -34,7 +34,7 @@ define( function( require ) {
    *                    // same instance is still directly under the pointer)
    * }
    */
-  scenery.DownUpListener = function DownUpListener( options ) {
+  function DownUpListener( options ) {
     var handler = this;
 
     options = _.extend( {
@@ -50,7 +50,7 @@ define( function( require ) {
     this.downListener = {
       // mouse/touch up
       up: function( event ) {
-        sceneryEventLog && sceneryEventLog( 'DownUpListener (pointer) up for ' + handler.downTrail.toString() );
+        sceneryLog && sceneryLog.InputEvent && sceneryLog.InputEvent( 'DownUpListener (pointer) up for ' + handler.downTrail.toString() );
         assert && assert( event.pointer === handler.pointer );
         if ( !event.pointer.isMouse || event.domEvent.button === handler.options.mouseButton ) {
           handler.buttonUp( event );
@@ -59,7 +59,7 @@ define( function( require ) {
 
       // touch cancel
       cancel: function( event ) {
-        sceneryEventLog && sceneryEventLog( 'DownUpListener (pointer) cancel for ' + handler.downTrail.toString() );
+        sceneryLog && sceneryLog.InputEvent && sceneryLog.InputEvent( 'DownUpListener (pointer) cancel for ' + handler.downTrail.toString() );
         assert && assert( event.pointer === handler.pointer );
         handler.buttonUp( event );
       },
@@ -73,8 +73,8 @@ define( function( require ) {
         }
       }
     };
-  };
-  var DownUpListener = scenery.DownUpListener;
+  }
+  scenery.register( 'DownUpListener', DownUpListener );
 
   inherit( Object, DownUpListener, {
     buttonDown: function( event ) {
@@ -92,7 +92,7 @@ define( function( require ) {
       this.downTrail = event.trail.subtrailTo( event.currentTarget, false );
       this.pointer = event.pointer;
 
-      sceneryEventLog && sceneryEventLog( 'DownUpListener buttonDown for ' + this.downTrail.toString() );
+      sceneryLog && sceneryLog.InputEvent && sceneryLog.InputEvent( 'DownUpListener buttonDown for ' + this.downTrail.toString() );
       if ( this.options.down ) {
         this.options.down( event, this.downTrail );
       }
@@ -117,7 +117,7 @@ define( function( require ) {
           this.options.upOutside( event, this.downTrail );
         }
       }
-      sceneryEventLog && sceneryEventLog( 'DownUpListener buttonUp for ' + this.downTrail.toString() );
+      sceneryLog && sceneryLog.InputEvent && sceneryLog.InputEvent( 'DownUpListener buttonUp for ' + this.downTrail.toString() );
       if ( this.options.up ) {
         this.options.up( event, this.downTrail );
       }

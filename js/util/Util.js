@@ -30,7 +30,7 @@ define( function( require ) {
   var transformProperty = Features.transform;
   var transformOriginProperty = Features.transformOrigin || 'transformOrigin'; // fallback, so we don't try to set an empty string property later
 
-  scenery.Util = {
+  var Util = {
     // like _.extend, but with hardcoded support for https://github.com/documentcloud/underscore/pull/986
     extend: function( obj ) {
       _.each( Array.prototype.slice.call( arguments, 1 ), function( source ) {
@@ -482,7 +482,7 @@ define( function( require ) {
       return this._extensionlessWebGLSupport;
     }
   };
-  var Util = scenery.Util;
+  scenery.register( 'Util', Util );
 
   return Util;
 } );

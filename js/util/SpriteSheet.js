@@ -29,7 +29,7 @@ define( function( require ) {
    * @param {boolean} useMipmaps - Whether built-in WebGL mipmapping should be used. Higher quality, but may be slower
    *                               to add images (since mipmaps need to be updated).
    */
-  scenery.SpriteSheet = function SpriteSheet( useMipmaps ) {
+  function SpriteSheet( useMipmaps ) {
     this.useMipmaps = useMipmaps;
 
     this.gl = null; // assume later creation of context for now
@@ -52,9 +52,10 @@ define( function( require ) {
 
     this.usedSprites = [];
     this.unusedSprites = []; // works as a LRU cache for removing items when we need to allocate new space
-  };
+  }
+  scenery.register( 'SpriteSheet', SpriteSheet );
 
-  inherit( Object, scenery.SpriteSheet, {
+  inherit( Object, SpriteSheet, {
     /**
      * Initialize (or reinitialize) ourself with a new GL context. Should be called at least once before updateTexture()
      */
@@ -161,7 +162,7 @@ define( function( require ) {
         // WebGL will want UV coordinates in the [0,1] range
         var uvBounds = new Bounds2( bin.bounds.minX / this.width, bin.bounds.minY / this.height,
                                     bin.bounds.maxX / this.width, bin.bounds.maxY / this.height );
-        var sprite = new scenery.SpriteSheet.Sprite( this, bin, uvBounds, image, 1 );
+        var sprite = new SpriteSheet.Sprite( this, bin, uvBounds, image, 1 );
         this.context.drawImage( image, bin.bounds.x, bin.bounds.y );
         this.dirty = true;
         this.usedSprites.push( sprite );
@@ -228,7 +229,7 @@ define( function( require ) {
    *
    * @constructor
    */
-  scenery.SpriteSheet.Sprite = function( spriteSheet, bin, uvBounds, image, initialCount ) {
+  SpriteSheet.Sprite = function( spriteSheet, bin, uvBounds, image, initialCount ) {
     // @public [read-only] {SpriteSheet} - The containing SpriteSheet
     this.spriteSheet = spriteSheet;
 
@@ -246,5 +247,5 @@ define( function( require ) {
     this.count = initialCount;
   };
 
-  return scenery.SpriteSheet;
+  return SpriteSheet;
 } );

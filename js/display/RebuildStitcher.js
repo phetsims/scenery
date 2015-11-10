@@ -71,9 +71,10 @@ define( function( require ) {
     }
   };
 
-  var RebuildStitcher = scenery.RebuildStitcher = inherit( Stitcher, function RebuildStitcher() {
+  var RebuildStitcher = inherit( Stitcher, function RebuildStitcher() {
     // nothing done
   }, prototype );
+  scenery.register( 'RebuildStitcher', RebuildStitcher );
 
   RebuildStitcher.stitchPrototype = prototype;
 

@@ -30,7 +30,7 @@ define( function( require ) {
   require( 'SCENERY/nodes/Node' );
   // require( 'SCENERY/util/TrailPointer' );
 
-  scenery.Trail = function Trail( nodes ) {
+  function Trail( nodes ) {
     /*
      * Controls the immutability of the trail.
      * If set to true, add/remove descendant/ancestor should fail if assertions are enabled
@@ -77,8 +77,8 @@ define( function( require ) {
     }
 
     phetAllocation && phetAllocation( 'Trail' );
-  };
-  var Trail = scenery.Trail;
+  }
+  scenery.register( 'Trail', Trail );
 
   inherit( Object, Trail, {
     copy: function() {

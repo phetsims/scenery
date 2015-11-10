@@ -26,10 +26,10 @@ define( function( require ) {
   var scenery = require( 'SCENERY/scenery' );
   var Drawable = require( 'SCENERY/display/Drawable' );
 
-  scenery.ChangeInterval = function ChangeInterval( drawableBefore, drawableAfter ) {
+  function ChangeInterval( drawableBefore, drawableAfter ) {
     this.initialize( drawableBefore, drawableAfter );
-  };
-  var ChangeInterval = scenery.ChangeInterval;
+  }
+  scenery.register( 'ChangeInterval', ChangeInterval );
 
   inherit( Object, ChangeInterval, {
     initialize: function( drawableBefore, drawableAfter ) {

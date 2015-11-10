@@ -33,7 +33,7 @@ define( function( require ) {
   // var debug = false;
 
   // @deprecated
-  scenery.LayoutNode = function LayoutNode( defaultMethod, options ) {
+  function LayoutNode( defaultMethod, options ) {
     var layoutNode = this;
 
     assert && assert( defaultMethod instanceof LayoutMethod, 'defaultMethod is required' );
@@ -62,8 +62,8 @@ define( function( require ) {
     this.updateLayout();
 
     throw new Error( 'Deprecated, please do not use (replacement for overrideBounds has not been provided)' );
-  };
-  var LayoutNode = scenery.LayoutNode;
+  }
+  scenery.register( 'LayoutNode', LayoutNode );
 
   inherit( Node, LayoutNode, {
     get layoutProperties() { return new LayoutProperties( this._elements ); },

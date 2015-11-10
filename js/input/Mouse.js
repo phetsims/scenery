@@ -16,7 +16,7 @@ define( function( require ) {
   var Vector3 = require( 'DOT/Vector3' );
   var Pointer = require( 'SCENERY/input/Pointer' ); // inherits from Pointer
 
-  scenery.Mouse = function Mouse() {
+  function Mouse() {
     Pointer.call( this );
 
     this.point = null;
@@ -39,8 +39,8 @@ define( function( require ) {
     this._cursor = null;
 
     this.type = 'mouse';
-  };
-  var Mouse = scenery.Mouse;
+  }
+  scenery.register( 'Mouse', Mouse );
 
   inherit( Pointer, Mouse, {
     set cursor( value ) { return this.setCursor( value ); },
@@ -57,7 +57,7 @@ define( function( require ) {
 
     down: function( point, event ) {
       var pointChanged = this.hasPointChanged( point );
-      sceneryEventLog && point && sceneryEventLog( 'mouse down at ' + point.toString() );
+      point && sceneryLog && sceneryLog.InputEvent && sceneryLog.InputEvent( 'mouse down at ' + point.toString() );
       // if ( this.point ) { this.point.freeToPool(); }
       this.point = point;
       this.isDown = true;
@@ -77,7 +77,7 @@ define( function( require ) {
 
     up: function( point, event ) {
       var pointChanged = this.hasPointChanged( point );
-      sceneryEventLog && point && sceneryEventLog( 'mouse up at ' + point.toString() );
+      point && sceneryLog && sceneryLog.InputEvent && sceneryLog.InputEvent( 'mouse up at ' + point.toString() );
       // if ( this.point ) { this.point.freeToPool(); }
       this.point = point;
       this.isDown = false;
@@ -97,7 +97,7 @@ define( function( require ) {
 
     move: function( point, event ) {
       var pointChanged = this.hasPointChanged( point );
-      sceneryEventLog && point && sceneryEventLog( 'mouse move at ' + point.toString() );
+      point && sceneryLog && sceneryLog.InputEvent && sceneryLog.InputEvent( 'mouse move at ' + point.toString() );
       // if ( this.point ) { this.point.freeToPool(); }
       this.point = point;
       return pointChanged;
@@ -105,7 +105,7 @@ define( function( require ) {
 
     over: function( point, event ) {
       var pointChanged = this.hasPointChanged( point );
-      sceneryEventLog && point && sceneryEventLog( 'mouse over at ' + point.toString() );
+      point && sceneryLog && sceneryLog.InputEvent && sceneryLog.InputEvent( 'mouse over at ' + point.toString() );
       // if ( this.point ) { this.point.freeToPool(); }
       this.point = point;
       return pointChanged;
@@ -113,7 +113,7 @@ define( function( require ) {
 
     out: function( point, event ) {
       var pointChanged = this.hasPointChanged( point );
-      sceneryEventLog && point && sceneryEventLog( 'mouse out at ' + point.toString() );
+      point && sceneryLog && sceneryLog.InputEvent && sceneryLog.InputEvent( 'mouse out at ' + point.toString() );
       // if ( this.point ) { this.point.freeToPool(); }
       // TODO: how to handle the mouse out-of-bounds
       this.point = null;

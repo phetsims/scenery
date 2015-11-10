@@ -23,15 +23,15 @@ define( function( require ) {
    * isBefore: whether this points to before the node (and its children) have been rendered, or after
    */
   //@deprecated
-  scenery.TrailPointer = function TrailPointer( trail, isBefore ) {
+  function TrailPointer( trail, isBefore ) {
     assert && assert( trail instanceof scenery.Trail, 'trail is not a trail' );
     this.trail = trail;
 
     this.setBefore( isBefore );
 
     phetAllocation && phetAllocation( 'TrailPointer' );
-  };
-  var TrailPointer = scenery.TrailPointer;
+  }
+  scenery.register( 'TrailPointer', TrailPointer );
 
   inherit( Object, TrailPointer, {
     copy: function() {

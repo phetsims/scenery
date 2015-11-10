@@ -45,7 +45,7 @@ define( function( require ) {
     bitmaskAll |= summaryBits[ l ];
   }
 
-  scenery.RendererSummary = function RendererSummary( node ) {
+  function RendererSummary( node ) {
     // NOTE: assumes that we are created in the Node constructor
     assert && assert( node._rendererBitmask === Renderer.bitmaskNodeDefault, 'Node must have a default bitmask when creating a RendererSummary' );
     assert && assert( node._children.length === 0, 'Node cannot have children when creating a RendererSummary' );
@@ -73,8 +73,8 @@ define( function( require ) {
     this.node.on( 'clip', listener );
     this.node.on( 'selfBoundsValid', listener ); // e.g. Text, may change based on boundsMethod
     this.node.on( 'accessibleContent', listener );
-  };
-  var RendererSummary = scenery.RendererSummary;
+  }
+  scenery.register( 'RendererSummary', RendererSummary );
 
   inherit( Object, RendererSummary, {
     /*

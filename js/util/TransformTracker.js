@@ -26,7 +26,7 @@ define( function( require ) {
    * @param {Trail} trail
    * @param {Object} [options]
    */
-  scenery.TransformTracker = function TransformTracker( trail, options ) {
+  function TransformTracker( trail, options ) {
     var tracker = this;
 
     options = _.extend( {
@@ -67,8 +67,8 @@ define( function( require ) {
         trail.nodes[ j ].on( 'transform', nodeTransformListener );
       }
     }
-  };
-  var TransformTracker = scenery.TransformTracker;
+  }
+  scenery.register( 'TransformTracker', TransformTracker );
 
   inherit( Object, TransformTracker, {
     /**

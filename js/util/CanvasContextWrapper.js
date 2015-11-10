@@ -16,15 +16,15 @@ define( function( require ) {
   var inherit = require( 'PHET_CORE/inherit' );
   var scenery = require( 'SCENERY/scenery' );
 
-  scenery.CanvasContextWrapper = function CanvasContextWrapper( canvas, context ) {
+  function CanvasContextWrapper( canvas, context ) {
     this.canvas = canvas;
     this.context = context;
 
     this.resetStyles();
 
     phetAllocation && phetAllocation( 'CanvasContextWrapper' );
-  };
-  var CanvasContextWrapper = scenery.CanvasContextWrapper;
+  }
+  scenery.register( 'CanvasContextWrapper', CanvasContextWrapper );
 
   inherit( Object, CanvasContextWrapper, {
     // set local styles to undefined, so that they will be invalidated later

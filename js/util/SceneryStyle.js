@@ -10,7 +10,7 @@
 define( function( require ) {
   'use strict';
 
-  require( 'SCENERY/scenery' );
+  var scenery = require( 'SCENERY/scenery' );
 
   var styleElement = document.createElement( 'style' );
   styleElement.type = 'text/css';
@@ -19,7 +19,7 @@ define( function( require ) {
   var stylesheet = document.styleSheets[ document.styleSheets.length - 1 ];
   assert && assert( stylesheet.disabled === false );
 
-  return {
+  return scenery.register( 'SceneryStyle', {
     stylesheet: stylesheet,
     styleElement: styleElement,
 
@@ -27,5 +27,5 @@ define( function( require ) {
       // using a this reference so it doesn't need to be a closure
       this.stylesheet.insertRule( ruleString, 0 );
     }
-  };
+  } );
 } );

@@ -95,7 +95,7 @@ define( function( require ) {
    * transformBounds:  Whether to compute tighter parent bounding boxes for rotated bounding boxes, or to just use the bounding box of the rotated bounding box.
    * focusable:        True if the node should be able to receive keyboard focus.
    */
-  scenery.Node = function Node( options ) {
+  function Node( options ) {
     // supertype call to axon.Events (should just initialize a few properties here, notably _eventListeners and _staticEventListeners)
     Events.call( this );
 
@@ -307,8 +307,8 @@ define( function( require ) {
     }
 
     phetAllocation && phetAllocation( 'Node' );
-  };
-  var Node = scenery.Node;
+  }
+  scenery.register( 'Node', Node );
 
   inherit( Object, Node, extend( {
     /**

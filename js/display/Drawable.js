@@ -63,10 +63,10 @@ define( function( require ) {
 
   var globalId = 1;
 
-  scenery.Drawable = function Drawable( renderer ) {
+  function Drawable( renderer ) {
     this.initializeDrawable( renderer );
-  };
-  var Drawable = scenery.Drawable;
+  }
+  scenery.register( 'Drawable', Drawable );
 
   inherit( Events, Drawable, {
     initializeDrawable: function( renderer ) {

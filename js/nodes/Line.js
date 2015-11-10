@@ -43,7 +43,7 @@ define( function( require ) {
    * new Line( new Vector2( x1, y1 ), new Vector2( x2, y2 ), { ... } )
    * new Line( { x1: x1, y1: y1, x2: x2, y2: y2,  ... } )
    */
-  scenery.Line = function Line( x1, y1, x2, y2, options ) {
+  function Line( x1, y1, x2, y2, options ) {
     if ( typeof x1 === 'object' ) {
       if ( x1 instanceof Vector2 ) {
         // assumes Line( Vector2, Vector2, options );
@@ -75,8 +75,8 @@ define( function( require ) {
     // fallback for non-canvas or non-svg rendering, and for proper bounds computation
 
     Path.call( this, null, options );
-  };
-  var Line = scenery.Line;
+  }
+  scenery.register( 'Line', Line );
 
   inherit( Path, Line, {
 

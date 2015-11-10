@@ -20,7 +20,7 @@ define( function( require ) {
   var Node = require( 'SCENERY/nodes/Node' );
   var Path = require( 'SCENERY/nodes/Path' );
 
-  scenery.FocusOverlay = function FocusOverlay( display, focusRootNode ) {
+  function FocusOverlay( display, focusRootNode ) {
     this.display = display; // @private {Display}
     this.focusRootNode = focusRootNode; // @private {Node} - The root Node of our child display
 
@@ -72,8 +72,8 @@ define( function( require ) {
     this.focusListener = this.onFocusChange.bind( this );
 
     scenery.Display.focusProperty.link( this.focusListener );
-  };
-  var FocusOverlay = scenery.FocusOverlay;
+  }
+  scenery.register( 'FocusOverlay', FocusOverlay );
 
   inherit( Object, FocusOverlay, {
     dispose: function() {

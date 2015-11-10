@@ -15,10 +15,10 @@ define( function( require ) {
   var scenery = require( 'SCENERY/scenery' );
   var Drawable = require( 'SCENERY/display/Drawable' );
 
-  scenery.SelfDrawable = function SelfDrawable( renderer, instance ) {
+  function SelfDrawable( renderer, instance ) {
     this.initializeSelfDrawable( renderer, instance );
-  };
-  var SelfDrawable = scenery.SelfDrawable;
+  }
+  scenery.register( 'SelfDrawable', SelfDrawable );
 
   inherit( scenery.Drawable, SelfDrawable, {
     initializeSelfDrawable: function( renderer, instance ) {

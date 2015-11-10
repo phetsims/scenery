@@ -22,10 +22,10 @@ define( function( require ) {
    * @param {Object} [options] Any options for the plane, typically fill/opacity (many others such as scale, translation, rotation should have no effect)
    * @constructor
    */
-  scenery.Plane = function Plane( options ) {
+  function Plane( options ) {
     Rectangle.call( this, -2000, -2000, 6000, 6000, options );
-  };
-  var Plane = scenery.Plane;
+  }
+  scenery.register( 'Plane', Plane );
 
   return inherit( Rectangle, Plane );
 } );

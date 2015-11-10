@@ -17,7 +17,7 @@ define( function( require ) {
   var scenery = require( 'SCENERY/scenery' );
   require( 'SCENERY/util/Trail' );
 
-  scenery.CanvasNodeBoundsOverlay = function CanvasNodeBoundsOverlay( display, rootNode ) {
+  function CanvasNodeBoundsOverlay( display, rootNode ) {
     this.display = display;
     this.rootNode = rootNode;
 
@@ -40,8 +40,8 @@ define( function( require ) {
     resize( display.width, display.height );
 
     this.domElement = svg;
-  };
-  var CanvasNodeBoundsOverlay = scenery.CanvasNodeBoundsOverlay;
+  }
+  scenery.register( 'CanvasNodeBoundsOverlay', CanvasNodeBoundsOverlay );
 
   inherit( Object, CanvasNodeBoundsOverlay, {
     addShape: function( shape, color, isOffset ) {

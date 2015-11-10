@@ -15,7 +15,7 @@ define( function( require ) {
   var scenery = require( 'SCENERY/scenery' );
   require( 'SCENERY/util/Trail' );
 
-  scenery.PointerAreaOverlay = function PointerAreaOverlay( display, rootNode ) {
+  function PointerAreaOverlay( display, rootNode ) {
     this.display = display;
     this.rootNode = rootNode;
 
@@ -38,8 +38,8 @@ define( function( require ) {
     resize( display.width, display.height );
 
     this.domElement = svg;
-  };
-  var PointerAreaOverlay = scenery.PointerAreaOverlay;
+  }
+  scenery.register( 'PointerAreaOverlay', PointerAreaOverlay );
 
   inherit( Object, PointerAreaOverlay, {
     addShape: function( shape, color, isOffset ) {

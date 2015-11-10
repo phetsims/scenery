@@ -18,10 +18,10 @@ define( function( require ) {
   /**
    * Creates a strut with x in the range [0,width] and y=0.
    */
-  scenery.HStrut = function HStrut( width, options ) {
+  function HStrut( width, options ) {
     Spacer.call( this, width, 0, options );
-  };
-  var HStrut = scenery.HStrut;
+  }
+  scenery.register( 'HStrut', HStrut );
 
   return inherit( Spacer, HStrut );
 } );

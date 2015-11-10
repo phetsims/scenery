@@ -15,12 +15,12 @@ define( function( require ) {
   var SelfDrawable = require( 'SCENERY/display/SelfDrawable' );
   require( 'SCENERY/display/Renderer' );
 
-  scenery.DOMSelfDrawable = function DOMSelfDrawable( renderer, instance ) {
+  function DOMSelfDrawable( renderer, instance ) {
     this.initializeDOMSelfDrawable( renderer, instance );
 
     throw new Error( 'Should use initialization and pooling' );
-  };
-  var DOMSelfDrawable = scenery.DOMSelfDrawable;
+  }
+  scenery.register( 'DOMSelfDrawable', DOMSelfDrawable );
 
   inherit( SelfDrawable, DOMSelfDrawable, {
     initializeDOMSelfDrawable: function( renderer, instance ) {

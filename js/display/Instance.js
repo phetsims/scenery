@@ -44,14 +44,14 @@ define( function( require ) {
     Renderer.bitmaskSVG, Renderer.bitmaskCanvas, Renderer.bitmaskDOM, Renderer.bitmaskWebGL );
 
   // see initialize() for documentation
-  scenery.Instance = function Instance( display, trail, isDisplayRoot, isSharedCanvasCacheRoot ) {
+  function Instance( display, trail, isDisplayRoot, isSharedCanvasCacheRoot ) {
     Events.call( this );
 
     this.active = false;
 
     this.initialize( display, trail, isDisplayRoot, isSharedCanvasCacheRoot );
-  };
-  var Instance = scenery.Instance;
+  }
+  scenery.register( 'Instance', Instance );
 
   inherit( Events, Instance, {
     /*

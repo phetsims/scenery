@@ -20,15 +20,15 @@ define( function( require ) {
    * Creates a spacer taking up a rectangular area from x: [0,width] and y: [0,height]. Use x/y in options to control
    * its position.
    */
-  scenery.Spacer = function Spacer( width, height, options ) {
+  function Spacer( width, height, options ) {
     Node.call( this );
 
     // override the local bounds to our area
     this.localBounds = new Bounds2( 0, 0, width, height );
 
     this.mutate( options );
-  };
-  var Spacer = scenery.Spacer;
+  }
+  scenery.register( 'Spacer', Spacer );
 
   inherit( Node, Spacer );
   Leaf.mixin( Spacer ); // prevent children from being added, since we're overriding local bounds

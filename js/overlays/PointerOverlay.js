@@ -20,7 +20,7 @@ define( function( require ) {
 
   var Util = require( 'SCENERY/util/Util' );
 
-  scenery.PointerOverlay = function PointerOverlay( display, rootNode ) {
+  function PointerOverlay( display, rootNode ) {
     var pointerOverlay = this;
     this.display = display;
     this.rootNode = rootNode;
@@ -106,8 +106,8 @@ define( function( require ) {
     }
 
     this.domElement = this.pointerSVGContainer;
-  };
-  var PointerOverlay = scenery.PointerOverlay;
+  }
+  scenery.register( 'PointerOverlay', PointerOverlay );
 
   inherit( Object, PointerOverlay, {
     dispose: function() {

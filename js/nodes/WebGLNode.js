@@ -22,11 +22,11 @@ define( function( require ) {
   var SelfDrawable = require( 'SCENERY/display/SelfDrawable' );
 
   // pass a canvasBounds option if you want to specify the self bounds
-  scenery.WebGLNode = function WebGLNode( options ) {
+  function WebGLNode( options ) {
     Node.call( this, options );
     this.setRendererBitmask( Renderer.bitmaskWebGL );
-  };
-  var WebGLNode = scenery.WebGLNode;
+  }
+  scenery.register( 'WebGLNode', WebGLNode );
 
   inherit( Node, WebGLNode, {
 

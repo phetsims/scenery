@@ -24,7 +24,7 @@ define( function( require ) {
    * @param {Object} [options] Same as Node.constructor.options with the following additions:
    * @constructor
    */
-  scenery.LayoutBox = function LayoutBox( options ) {
+  function LayoutBox( options ) {
 
     if ( options && options.spacing ) {
       assert && assert( typeof options.spacing === 'number', 'LayoutBox requires spacing to be a number, if it is provided' );
@@ -70,8 +70,8 @@ define( function( require ) {
     this.inited = false; // @private
     this.mutate( options );
     this.inited = true;
-  };
-  var LayoutBox = scenery.LayoutBox;
+  }
+  scenery.register( 'LayoutBox', LayoutBox );
 
   return inherit( Node, LayoutBox, {
 

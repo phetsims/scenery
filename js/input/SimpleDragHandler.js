@@ -25,7 +25,7 @@ define( function( require ) {
    *    translate:            // if this exists, translate( { delta: _, oldPosition: _, position: _ } ) will be called.
    * }
    */
-  scenery.SimpleDragHandler = function SimpleDragHandler( options ) {
+  function SimpleDragHandler( options ) {
     var handler = this;
 
     options = _.extend( {
@@ -126,8 +126,8 @@ define( function( require ) {
         }
       }
     };
-  };
-  var SimpleDragHandler = scenery.SimpleDragHandler;
+  }
+  scenery.register( 'SimpleDragHandler', SimpleDragHandler );
 
   inherit( Object, SimpleDragHandler, {
     startDrag: function( event ) {

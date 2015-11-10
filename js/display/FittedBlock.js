@@ -18,10 +18,10 @@ define( function( require ) {
 
   var scratchBounds2 = Bounds2.NOTHING.copy();
 
-  scenery.FittedBlock = function FittedBlock( display, renderer, transformRootInstance ) {
+  function FittedBlock( display, renderer, transformRootInstance ) {
     this.initialize( display, renderer, transformRootInstance );
-  };
-  var FittedBlock = scenery.FittedBlock;
+  }
+  scenery.register( 'FittedBlock', FittedBlock );
 
   inherit( Block, FittedBlock, {
     initializeFittedBlock: function( display, renderer, transformRootInstance ) {

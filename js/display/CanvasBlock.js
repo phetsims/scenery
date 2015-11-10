@@ -20,10 +20,10 @@ define( function( require ) {
   var Renderer = require( 'SCENERY/display/Renderer' );
   var Util = require( 'SCENERY/util/Util' );
 
-  scenery.CanvasBlock = function CanvasBlock( display, renderer, transformRootInstance, filterRootInstance ) {
+  function CanvasBlock( display, renderer, transformRootInstance, filterRootInstance ) {
     this.initialize( display, renderer, transformRootInstance, filterRootInstance );
-  };
-  var CanvasBlock = scenery.CanvasBlock;
+  }
+  scenery.register( 'CanvasBlock', CanvasBlock );
 
   inherit( FittedBlock, CanvasBlock, {
     initialize: function( display, renderer, transformRootInstance, filterRootInstance ) {

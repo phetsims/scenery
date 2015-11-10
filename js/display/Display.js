@@ -95,7 +95,7 @@ define( function( require ) {
    *   accessibility: true                  // Whether accessibility enhancements is enabled
    *   interactive: true                    // Whether mouse/touch/keyboard inputs are enabled (if input has been added)
    */
-  scenery.Display = function Display( rootNode, options ) {
+  function Display( rootNode, options ) {
     assert && assert( rootNode, 'rootNode is a required parameter' );
 
     // supertype call to axon.Events (should just initialize a few properties here, notably _eventListeners and _staticEventListeners)
@@ -219,8 +219,8 @@ define( function( require ) {
 
       this._unsortedAccessibleInstances = [];
     }
-  };
-  var Display = scenery.Display;
+  }
+  scenery.register( 'Display', Display );
 
   inherit( Object, Display, extend( {
     // returns the base DOM element that will be displayed by this Display

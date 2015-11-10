@@ -22,7 +22,7 @@ define( function( require ) {
   var DOMSelfDrawable = require( 'SCENERY/display/DOMSelfDrawable' );
   var SelfDrawable = require( 'SCENERY/display/SelfDrawable' );
 
-  scenery.DOM = function DOM( element, options ) {
+  function DOM( element, options ) {
     options = options || {};
 
     this._interactive = false;
@@ -49,8 +49,8 @@ define( function( require ) {
     // will set the element after initializing
     Node.call( this, options );
     this.setRendererBitmask( Renderer.bitmaskDOM );
-  };
-  var DOM = scenery.DOM;
+  }
+  scenery.register( 'DOM', DOM );
 
   inherit( Node, DOM, {
     // we use a single DOM instance, so this flag should indicate that we don't support duplicating it

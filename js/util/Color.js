@@ -32,7 +32,7 @@ define( function( require ) {
    * The 'a' value stands for alpha, and will be clamped to 0-1 (floating point)
    * 'hex' indicates a 6-decimal-digit format hex number, for example 0xFFAA00 is equivalent to r=255, g=170, b=0.
    */
-  scenery.Color = function Color( r, g, b, a ) {
+  function Color( r, g, b, a ) {
 
     // allow listeners to be notified on any changes. called with listener()
     this.listeners = [];
@@ -40,8 +40,8 @@ define( function( require ) {
     this.set( r, g, b, a );
 
     phetAllocation && phetAllocation( 'Color' );
-  };
-  var Color = scenery.Color;
+  }
+  scenery.register( 'Color', Color );
 
   // regex utilities
   var rgbNumber = '(-?\\d{1,3}%?)'; // syntax allows negative integers and percentages

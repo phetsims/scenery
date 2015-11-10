@@ -16,10 +16,10 @@ define( function( require ) {
   var platform = require( 'PHET_CORE/platform' );
   var scenery = require( 'SCENERY/scenery' );
 
-  scenery.SVGGroup = function SVGGroup( block, instance, parent ) {
+  function SVGGroup( block, instance, parent ) {
     this.initialize( block, instance, parent );
-  };
-  var SVGGroup = scenery.SVGGroup;
+  }
+  scenery.register( 'SVGGroup', SVGGroup );
 
   inherit( Object, SVGGroup, {
     initialize: function( block, instance, parent ) {

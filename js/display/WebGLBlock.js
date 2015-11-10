@@ -22,10 +22,10 @@ define( function( require ) {
   var SpriteSheet = require( 'SCENERY/util/SpriteSheet' );
   var ShaderProgram = require( 'SCENERY/util/ShaderProgram' );
 
-  scenery.WebGLBlock = function WebGLBlock( display, renderer, transformRootInstance, filterRootInstance ) {
+  function WebGLBlock( display, renderer, transformRootInstance, filterRootInstance ) {
     this.initialize( display, renderer, transformRootInstance, filterRootInstance );
-  };
-  var WebGLBlock = scenery.WebGLBlock;
+  }
+  scenery.register( 'WebGLBlock', WebGLBlock );
 
   inherit( FittedBlock, WebGLBlock, {
     initialize: function( display, renderer, transformRootInstance, filterRootInstance ) {

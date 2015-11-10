@@ -92,10 +92,9 @@ define( function( require ) {
   var Matrix3 = require( 'DOT/Matrix3' );
   var scenery = require( 'SCENERY/scenery' );
 
-  scenery.RelativeTransform = function RelativeTransform() {
-
-  };
-  var RelativeTransform = scenery.RelativeTransform;
+  function RelativeTransform() {
+  }
+  scenery.register( 'RelativeTransform', RelativeTransform );
 
   inherit( Object, RelativeTransform, {
     initialize: function( instance, display, trail ) {

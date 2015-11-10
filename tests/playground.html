@@ -317,13 +317,11 @@ an UI and Display made for visual testing and debugging.
       window.toggleLogging = function() {
         if ( logging ) {
           scenery.disableLogging();
-          // scenery.disableEventLogging();
         }
         else {
           scenery.enableLogging( [
             'Accessibility'
           ] );
-          // scenery.enableEventLogging();
         }
 
         logging = !logging;

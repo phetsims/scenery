@@ -17,15 +17,15 @@ define( function( require ) {
 
   var Pointer = require( 'SCENERY/input/Pointer' ); // Inherits from Pointer
 
-  scenery.Key = function Key( event ) {
+  function Key( event ) {
     Pointer.call( this );
 
     this.event = event; // event.keyCode event.charCode
     this.isKey = true; // compared to isMouse/isPen/isTouch
     this.trail = null;
     this.type = 'key';
-  };
-  var Key = scenery.Key;
+  }
+  scenery.register( 'Key', Key );
 
   return inherit( Pointer, Key, {
     firesGenericEvent: false // don't fire 'down', 'up' and the other generic events

@@ -17,10 +17,10 @@ define( function( require ) {
   var scenery = require( 'SCENERY/scenery' );
   var Drawable = require( 'SCENERY/display/Drawable' );
 
-  scenery.Block = function Block( display, renderer ) {
+  function Block( display, renderer ) {
     throw new Error( 'Should never be called' );
-  };
-  var Block = scenery.Block;
+  }
+  scenery.register( 'Block', Block );
 
   inherit( Drawable, Block, {
 

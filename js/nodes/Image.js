@@ -120,7 +120,7 @@ define( function( require ) {
    * @param {see above} image
    * @param {Object} [options]
    */
-  scenery.Image = function Image( image, options ) {
+  function Image( image, options ) {
     assert && assert( image, 'image should be available' );
 
     // allow not passing an options object
@@ -160,8 +160,8 @@ define( function( require ) {
 
     Node.call( this, options );
     this.invalidateSupportedRenderers();
-  };
-  var Image = scenery.Image;
+  }
+  scenery.register( 'Image', Image );
 
   inherit( Node, Image, {
     allowsMultipleDOMInstances: false, // TODO: support multiple instances

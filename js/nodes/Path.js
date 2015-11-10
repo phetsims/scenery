@@ -24,7 +24,7 @@ define( function( require ) {
   // TODO: change this based on memory and performance characteristics of the platform
   var keepSVGPathElements = true; // whether we should pool SVG elements for the SVG rendering states, or whether we should free them when possible for memory
 
-  scenery.Path = function Path( shape, options ) {
+  function Path( shape, options ) {
     // TODO: consider directly passing in a shape object (or at least handling that case)
     // NOTE: _shape can be lazily constructed, in the case of types like Rectangle where they have their own drawing code
     this._shape = null;
@@ -59,8 +59,8 @@ define( function( require ) {
     this.setShape( shape );
 
     this.mutate( options );
-  };
-  var Path = scenery.Path;
+  }
+  scenery.register( 'Path', Path );
 
   inherit( Node, Path, {
     // allow more specific path types (Rectangle, Line) to override what restrictions we have

@@ -14,7 +14,7 @@ define( function( require ) {
   var inherit = require( 'PHET_CORE/inherit' );
   var scenery = require( 'SCENERY/scenery' );
 
-  var LiveRegion = scenery.LiveRegion = function LiveRegion( instance, property, options ) {
+  function LiveRegion( instance, property, options ) {
     var liveRegion = this;
     this.property = property;
     options = options || {};
@@ -38,7 +38,8 @@ define( function( require ) {
       liveRegion.element.appendChild( liveRegion.textNode );
     };
     property.link( this.listener );
-  };
+  }
+  scenery.register( 'LiveRegion', LiveRegion );
 
   inherit( Object, LiveRegion, {
     dispose: function() { this.property.unlink( this.listener ); }

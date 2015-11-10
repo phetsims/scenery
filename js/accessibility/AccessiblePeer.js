@@ -17,10 +17,10 @@ define( function( require ) {
 
   var globalId = 1;
 
-  scenery.AccessiblePeer = function AccessiblePeer( accessibleInstance, domElement, containerDOMElement ) {
+  function AccessiblePeer( accessibleInstance, domElement, containerDOMElement ) {
     this.initializeAccessiblePeer( accessibleInstance, domElement, containerDOMElement );
-  };
-  var AccessiblePeer = scenery.AccessiblePeer;
+  }
+  scenery.register( 'AccessiblePeer', AccessiblePeer );
 
   inherit( Events, AccessiblePeer, {
     /**

@@ -19,8 +19,7 @@ define( function( require ) {
   function VBox( options ) {
     LayoutBox.call( this, _.extend( {}, options, { orientation: 'vertical' } ) );
   }
-
-  scenery.VBox = VBox;
+  scenery.register( 'VBox', VBox );
 
   return inherit( LayoutBox, VBox );
 } );

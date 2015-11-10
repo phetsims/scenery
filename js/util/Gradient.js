@@ -17,7 +17,7 @@ define( function( require ) {
   var Color = require( 'SCENERY/util/Color' );
 
   // TODO: add the ability to specify the color-stops inline. possibly [ [0,color1], [0.5,color2], [1,color3] ]
-  scenery.Gradient = function Gradient( canvasGradient ) {
+  function Gradient( canvasGradient ) {
     assert && assert( this.constructor.name !== 'Gradient', 'Please create a LinearGradient or RadialGradient. Do not directly use the supertype Gradient.' );
     Paint.call( this );
 
@@ -25,8 +25,8 @@ define( function( require ) {
     this.lastStopRatio = 0;
 
     this.canvasGradient = canvasGradient;
-  };
-  var Gradient = scenery.Gradient;
+  }
+  scenery.register( 'Gradient', Gradient );
 
   inherit( Paint, Gradient, {
     isGradient: true,

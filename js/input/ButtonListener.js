@@ -36,7 +36,7 @@ define( function( require ) {
    * out: null         // Called on an 'out' state change, as out( event, oldState )
    * fire: null        // Called on a state change to/from 'down' (depending on fireOnDown), as fire( event ). Called after the triggering up/over/down event.
    */
-  scenery.ButtonListener = function ButtonListener( options ) {
+  function ButtonListener( options ) {
     var self = this;
 
     this.buttonState = 'up'; // public: 'up', 'over', 'down' or 'out'
@@ -66,15 +66,15 @@ define( function( require ) {
         }
       }
     } );
-  };
-
-  var ButtonListener = scenery.ButtonListener;
+  }
+  scenery.register( 'ButtonListener', ButtonListener );
 
   inherit( DownUpListener, ButtonListener, {
 
     setButtonState: function( event, state ) {
       if ( state !== this.buttonState ) {
-        sceneryEventLog && sceneryEventLog( 'ButtonListener state change to ' + state + ' from ' + this.buttonState + ' for ' + ( this.downTrail ? this.downTrail.toString() : this.downTrail ) );
+        sceneryLog && sceneryLog.InputEvent && sceneryLog.InputEvent(
+          'ButtonListener state change to ' + state + ' from ' + this.buttonState + ' for ' + ( this.downTrail ? this.downTrail.toString() : this.downTrail ) );
         var oldState = this.buttonState;
 
         this.buttonState = state;
@@ -92,7 +92,8 @@ define( function( require ) {
     },
 
     enter: function( event ) {
-      sceneryEventLog && sceneryEventLog( 'ButtonListener enter for ' + ( this.downTrail ? this.downTrail.toString() : this.downTrail ) );
+      sceneryLog && sceneryLog.InputEvent && sceneryLog.InputEvent(
+        'ButtonListener enter for ' + ( this.downTrail ? this.downTrail.toString() : this.downTrail ) );
       this._overCount++;
       if ( this._overCount === 1 ) {
         this.setButtonState( event, this.isDown ? 'down' : 'over' );
@@ -100,7 +101,8 @@ define( function( require ) {
     },
 
     exit: function( event ) {
-      sceneryEventLog && sceneryEventLog( 'ButtonListener exit for ' + ( this.downTrail ? this.downTrail.toString() : this.downTrail ) );
+      sceneryLog && sceneryLog.InputEvent && sceneryLog.InputEvent(
+        'ButtonListener exit for ' + ( this.downTrail ? this.downTrail.toString() : this.downTrail ) );
       assert && assert( this._overCount > 0, 'Exit events not matched by an enter' );
       this._overCount--;
       if ( this._overCount === 0 ) {

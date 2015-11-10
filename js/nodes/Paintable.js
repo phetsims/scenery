@@ -30,7 +30,7 @@ define( function( require ) {
    *
    * @param {constructor} type - A constructor that inherits from Node
    */
-  scenery.Paintable = {
+  var Paintable = {
     mixin: function( type ) {
       var proto = type.prototype;
 
@@ -826,7 +826,7 @@ define( function( require ) {
       }
     }
   };
-  var Paintable = scenery.Paintable;
+  scenery.register( 'Paintable', Paintable );
 
   /**
    * An observer for a fill or stroke, that will be able to trigger notifications when it changes.

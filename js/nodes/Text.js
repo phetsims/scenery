@@ -63,7 +63,7 @@ define( function( require ) {
   // See https://github.com/phetsims/scenery/issues/455 for more information.
   var useSVGTextLengthAdjustments = !platform.ie && !platform.edge;
 
-  scenery.Text = function Text( text, options ) {
+  function Text( text, options ) {
     this._text = '';                   // filled in with mutator
     this._font = scenery.Font.DEFAULT; // default font, usually 10px sans-serif
     this._direction = 'ltr';           // ltr, rtl, inherit -- consider inherit deprecated, due to how we compute text bounds in an off-screen canvas
@@ -90,8 +90,8 @@ define( function( require ) {
 
     Node.call( this, options );
     this.updateTextFlags(); // takes care of setting up supported renderers
-  };
-  var Text = scenery.Text;
+  }
+  scenery.register( 'Text', Text );
 
   inherit( Node, Text, {
     domUpdateTransformOnRepaint: true, // since we have to integrate the baseline offset into the CSS transform, signal to DOMLayer

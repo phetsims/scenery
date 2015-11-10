@@ -19,8 +19,7 @@ define( function( require ) {
   function HBox( options ) {
     LayoutBox.call( this, _.extend( {}, options, { orientation: 'horizontal' } ) );
   }
-
-  scenery.HBox = HBox;
+  scenery.register( 'HBox', HBox );
 
   return inherit( LayoutBox, HBox );
 } );

@@ -65,7 +65,7 @@ define( function( require ) {
   var globalDisplay = null;
 
   // listenerTarget is the DOM node (window/document/element) to which DOM event listeners will be attached
-  scenery.Input = function Input( display, listenerTarget, batchDOMEvents, enablePointerEvents, pointFromEvent ) {
+  function Input( display, listenerTarget, batchDOMEvents, enablePointerEvents, pointFromEvent ) {
     this.display = display;
     this.rootNode = display.rootNode;
     this.listenerTarget = listenerTarget;
@@ -115,8 +115,8 @@ define( function( require ) {
     this.onkeyup = function onkeyup( domEvent ) { input.batchEvent( domEvent, BatchedDOMEvent.KEY_TYPE, input.keyUp, false ); };
     this.onwheel = function onwheel( domEvent ) { input.batchEvent( domEvent, BatchedDOMEvent.WHEEL_TYPE, input.wheel, false ); };
     this.uselessListener = function uselessListener( domEvent ) {};
-  };
-  var Input = scenery.Input;
+  }
+  scenery.register( 'Input', Input );
 
   return inherit( Object, Input, {
       batchEvent: function( domEvent, batchType, callback, triggerImmediate ) {
@@ -148,7 +148,7 @@ define( function( require ) {
 
       fireBatchedEvents: function() {
         if ( this.batchedEvents.length ) {
-          sceneryEventLog && sceneryEventLog( 'Input.fireBatchedEvents length:' + this.batchedEvents.length );
+          sceneryLog && sceneryLog.InputEvent && sceneryLog.InputEvent( 'Input.fireBatchedEvents length:' + this.batchedEvents.length );
 
           // needs to be done in order
           var len = this.batchedEvents.length;
@@ -676,7 +676,7 @@ define( function( require ) {
       moveEvent: function( pointer, event ) {
         var changed = this.branchChangeEvents( pointer, event, true );
         if ( changed ) {
-          sceneryEventLog && sceneryEventLog( 'branch change due to move event' );
+          sceneryLog && sceneryLog.InputEvent && sceneryLog.InputEvent( 'branch change due to move event' );
         }
       },
 
@@ -696,7 +696,8 @@ define( function( require ) {
       // return whether there was a change
       branchChangeEvents: function( pointer, event, isMove ) {
         var trail = this.rootNode.trailUnderPointer( pointer ) || new scenery.Trail( this.rootNode );
-        sceneryEventLog && sceneryEventLog( 'checking branch change: ' + trail.toString() + ' at ' + pointer.point.toString() );
+        sceneryLog && sceneryLog.InputEvent && sceneryLog.InputEvent(
+          'checking branch change: ' + trail.toString() + ' at ' + pointer.point.toString() );
         var oldTrail = pointer.trail || new scenery.Trail( this.rootNode ); // TODO: consider a static trail reference
 
         var lastNodeChanged = oldTrail.lastNode() !== trail.lastNode();
@@ -707,7 +708,8 @@ define( function( require ) {
 
         var branchIndex = scenery.Trail.branchIndex( trail, oldTrail );
         var isBranchChange = branchIndex !== trail.length || branchIndex !== oldTrail.length;
-        sceneryEventLog && isBranchChange && sceneryEventLog( 'branch change from ' + oldTrail.toString() + ' to ' + trail.toString() );
+        isBranchChange && sceneryLog && sceneryLog.InputEvent && sceneryLog.InputEvent(
+          'branch change from ' + oldTrail.toString() + ' to ' + trail.toString() );
 
         // event order matches http://www.w3.org/TR/DOM-Level-3-Events/#events-mouseevent-event-order
         if ( isMove ) {
@@ -756,14 +758,15 @@ define( function( require ) {
           if ( pointer.point ) {
             var changed = that.branchChangeEvents( pointer, null, false );
             if ( changed ) {
-              sceneryEventLog && sceneryEventLog( 'branch change due validatePointers' );
+              sceneryLog && sceneryLog.InputEvent && sceneryLog.InputEvent( 'branch change due validatePointers' );
             }
           }
         }
       },
 
       dispatchEvent: function( trail, type, pointer, event, bubbles ) {
-        sceneryEventLog && sceneryEventLog( 'Input: ' + type + ' on ' + trail.toString() + ' for pointer ' + pointer.toString() + ' at ' + pointer.point.toString() );
+        sceneryLog && sceneryLog.InputEvent && sceneryLog.InputEvent(
+          'Input: ' + type + ' on ' + trail.toString() + ' for pointer ' + pointer.toString() + ' at ' + pointer.point.toString() );
         if ( !trail ) {
           try {
             throw new Error( 'falsy trail for dispatchEvent' );

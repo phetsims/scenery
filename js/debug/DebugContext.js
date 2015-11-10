@@ -52,15 +52,15 @@ define( function( require ) {
     }
   }
 
-  scenery.DebugContext = function DebugContext( context ) {
+  function DebugContext( context ) {
     this._context = context;
 
     // allow checking of context.ellipse for existence
     if ( context && !context.ellipse ) {
       this.ellipse = context.ellipse;
     }
-  };
-  var DebugContext = scenery.DebugContext;
+  }
+  scenery.register( 'DebugContext', DebugContext );
 
   inherit( Object, DebugContext, {
     get canvas() {

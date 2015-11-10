@@ -32,10 +32,10 @@ define( function( require ) {
    * @param {boolean} isDisplayRoot
    * @constructor
    */
-  scenery.BackboneDrawable = function BackboneDrawable( display, backboneInstance, transformRootInstance, renderer, isDisplayRoot ) {
+  function BackboneDrawable( display, backboneInstance, transformRootInstance, renderer, isDisplayRoot ) {
     this.initialize( display, backboneInstance, transformRootInstance, renderer, isDisplayRoot );
-  };
-  var BackboneDrawable = scenery.BackboneDrawable;
+  }
+  scenery.register( 'BackboneDrawable', BackboneDrawable );
 
   inherit( Drawable, BackboneDrawable, {
 

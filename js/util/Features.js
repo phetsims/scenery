@@ -13,7 +13,8 @@ define( function( require ) {
   var detectPrefix = require( 'PHET_CORE/detectPrefix' );
   var scenery = require( 'SCENERY/scenery' );
 
-  var Features = scenery.Features = {};
+  var Features = {};
+  scenery.register( 'Features', Features );
 
   function supportsDataURLFormatOutput( format ) {
     try {

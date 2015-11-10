@@ -18,10 +18,10 @@ define( function( require ) {
   /**
    * Creates a strut with x=0 and y in the range [0,height].
    */
-  scenery.VStrut = function VStrut( height, options ) {
+  function VStrut( height, options ) {
     Spacer.call( this, 0, height, options );
-  };
-  var VStrut = scenery.VStrut;
+  }
+  scenery.register( 'VStrut', VStrut );
 
   return inherit( Spacer, VStrut );
 } );

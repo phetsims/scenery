@@ -65,7 +65,7 @@ define( function( require ) {
    * NOTE: the X and Y corner radii need to both be greater than zero for rounded corners to appear. If they have the
    * same non-zero value, circular rounded corners will be used.
    */
-  scenery.Rectangle = function Rectangle( x, y, width, height, cornerXRadius, cornerYRadius, options ) {
+  function Rectangle( x, y, width, height, cornerXRadius, cornerYRadius, options ) {
     if ( typeof x === 'object' ) {
       if ( x instanceof Bounds2 ) {
         // allow new Rectangle( bounds2, { ... } ) or new Rectangle( bounds2, cornerXRadius, cornerYRadius, options )
@@ -127,8 +127,8 @@ define( function( require ) {
     // fallback for non-canvas or non-svg rendering, and for proper bounds computation
 
     Path.call( this, null, options );
-  };
-  var Rectangle = scenery.Rectangle;
+  }
+  scenery.register( 'Rectangle', Rectangle );
 
   inherit( Path, Rectangle, {
 

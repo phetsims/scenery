@@ -19,7 +19,7 @@ define( function( require ) {
   var Gradient = require( 'SCENERY/util/Gradient' );
 
   // TODO: support Vector2s for p0 and p1
-  scenery.RadialGradient = function RadialGradient( x0, y0, r0, x1, y1, r1 ) {
+  function RadialGradient( x0, y0, r0, x1, y1, r1 ) {
     this.start = new Vector2( x0, y0 );
     this.end = new Vector2( x1, y1 );
     this.startRadius = r0;
@@ -38,8 +38,8 @@ define( function( require ) {
 
     // use the global scratch canvas instead of creating a new Canvas
     Gradient.call( this, scenery.scratchContext.createRadialGradient( x0, y0, r0, x1, y1, r1 ) );
-  };
-  var RadialGradient = scenery.RadialGradient;
+  }
+  scenery.register( 'RadialGradient', RadialGradient );
 
   inherit( Gradient, RadialGradient, {
 

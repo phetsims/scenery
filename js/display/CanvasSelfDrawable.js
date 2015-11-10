@@ -15,12 +15,12 @@ define( function( require ) {
   var SelfDrawable = require( 'SCENERY/display/SelfDrawable' );
   var Paintable = require( 'SCENERY/nodes/Paintable' );
 
-  scenery.CanvasSelfDrawable = function CanvasSelfDrawable( renderer, instance ) {
+  function CanvasSelfDrawable( renderer, instance ) {
     this.initializeCanvasSelfDrawable( renderer, instance );
 
     throw new Error( 'Should use initialization and pooling' );
-  };
-  var CanvasSelfDrawable = scenery.CanvasSelfDrawable;
+  }
+  scenery.register( 'CanvasSelfDrawable', CanvasSelfDrawable );
 
   inherit( SelfDrawable, CanvasSelfDrawable, {
     initializeCanvasSelfDrawable: function( renderer, instance ) {

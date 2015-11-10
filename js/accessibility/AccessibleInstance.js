@@ -18,10 +18,10 @@ define( function( require ) {
 
   var globalId = 1;
 
-  scenery.AccessibleInstance = function AccessibleInstance( parent, display, trail ) {
+  function AccessibleInstance( parent, display, trail ) {
     this.initializeAccessibleInstance( parent, display, trail );
-  };
-  var AccessibleInstance = scenery.AccessibleInstance;
+  }
+  scenery.register( 'AccessibleInstance', AccessibleInstance );
 
   inherit( Events, AccessibleInstance, {
     /**

@@ -27,10 +27,10 @@ define( function( require ) {
    * @param {Instance} filterRootInstance - TODO: Documentation
    * @constructor
    */
-  scenery.SVGBlock = function SVGBlock( display, renderer, transformRootInstance, filterRootInstance ) {
+  function SVGBlock( display, renderer, transformRootInstance, filterRootInstance ) {
     this.initialize( display, renderer, transformRootInstance, filterRootInstance );
-  };
-  var SVGBlock = scenery.SVGBlock;
+  }
+  scenery.register( 'SVGBlock', SVGBlock );
 
   inherit( FittedBlock, SVGBlock, {
 

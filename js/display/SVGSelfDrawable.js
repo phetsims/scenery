@@ -21,12 +21,12 @@ define( function( require ) {
   var SelfDrawable = require( 'SCENERY/display/SelfDrawable' );
   var Paintable = require( 'SCENERY/nodes/Paintable' );
 
-  scenery.SVGSelfDrawable = function SVGSelfDrawable( renderer, instance ) {
+  function SVGSelfDrawable( renderer, instance ) {
     this.initializeSVGSelfDrawable( renderer, instance );
 
     throw new Error( 'Should use initialization and pooling' );
-  };
-  var SVGSelfDrawable = scenery.SVGSelfDrawable;
+  }
+  scenery.register( 'SVGSelfDrawable', SVGSelfDrawable );
 
   inherit( SelfDrawable, SVGSelfDrawable, {
     initializeSVGSelfDrawable: function( renderer, instance, usesPaint, keepElements ) {

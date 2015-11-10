@@ -30,7 +30,7 @@ define( function( require ) {
   var keepDOMCircleElements = true; // whether we should pool DOM elements for the DOM rendering states, or whether we should free them when possible for memory
   var keepSVGCircleElements = true; // whether we should pool SVG elements for the SVG rendering states, or whether we should free them when possible for memory
 
-  scenery.Circle = function Circle( radius, options ) {
+  function Circle( radius, options ) {
     if ( typeof radius === 'object' ) {
       // allow new Circle( { radius: ... } )
       // the mutators will call invalidateCircle() and properly set the shape
@@ -47,8 +47,8 @@ define( function( require ) {
     // fallback for non-canvas or non-svg rendering, and for proper bounds computation
 
     Path.call( this, null, options );
-  };
-  var Circle = scenery.Circle;
+  }
+  scenery.register( 'Circle', Circle );
 
   inherit( Path, Circle, {
     getStrokeRendererBitmask: function() {

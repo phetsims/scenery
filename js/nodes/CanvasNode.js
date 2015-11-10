@@ -23,11 +23,11 @@ define( function( require ) {
   var emptyArray = []; // constant
 
   // pass a canvasBounds option if you want to specify the self bounds
-  scenery.CanvasNode = function CanvasNode( options ) {
+  function CanvasNode( options ) {
     Node.call( this, options );
     this.setRendererBitmask( Renderer.bitmaskCanvas );
-  };
-  var CanvasNode = scenery.CanvasNode;
+  }
+  scenery.register( 'CanvasNode', CanvasNode );
 
   inherit( Node, CanvasNode, {
 

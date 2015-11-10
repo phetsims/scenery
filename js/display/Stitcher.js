@@ -110,10 +110,10 @@ define( function( require ) {
   var DOMBlock = require( 'SCENERY/display/DOMBlock' );
   var WebGLBlock = require( 'SCENERY/display/WebGLBlock' );
 
-  scenery.Stitcher = function Stitcher( display, renderer ) {
+  function Stitcher( display, renderer ) {
     throw new Error( 'We are too abstract for that!' );
-  };
-  var Stitcher = scenery.Stitcher;
+  }
+  scenery.register( 'Stitcher', Stitcher );
 
   inherit( Object, Stitcher, {
     // Main stitch entry point, called directly from the backbone or cache. We are modifying our backbone's blocks and
