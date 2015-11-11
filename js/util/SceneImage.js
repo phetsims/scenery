@@ -24,6 +24,7 @@ define( function( require ) {
     this.img = document.createElement( 'img' );
     this.update();
   }
+
   scenery.register( 'SceneImage', SceneImage );
 
   inherit( Object, SceneImage, {

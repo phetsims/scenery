@@ -25,6 +25,7 @@ define( function( require ) {
     this.trail = null;
     this.type = 'key';
   }
+
   scenery.register( 'Key', Key );
 
   return inherit( Pointer, Key, {

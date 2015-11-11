@@ -21,6 +21,7 @@ define( function( require ) {
 
     this.transformMatrix = null;
   }
+
   scenery.register( 'Paint', Paint );
 
   inherit( Object, Paint, {

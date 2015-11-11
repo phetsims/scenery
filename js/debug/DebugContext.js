@@ -42,13 +42,13 @@ define( function( require ) {
     }
     else {
       log( name + '( ' + _.reduce( args, function( memo, arg ) {
-        if ( memo.length > 0 ) {
-          return memo + ', ' + s( arg );
-        }
-        else {
-          return s( arg );
-        }
-      }, '' ) + ' )' );
+          if ( memo.length > 0 ) {
+            return memo + ', ' + s( arg );
+          }
+          else {
+            return s( arg );
+          }
+        }, '' ) + ' )' );
     }
   }
 
@@ -60,6 +60,7 @@ define( function( require ) {
       this.ellipse = context.ellipse;
     }
   }
+
   scenery.register( 'DebugContext', DebugContext );
 
   inherit( Object, DebugContext, {

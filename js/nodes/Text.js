@@ -91,6 +91,7 @@ define( function( require ) {
     Node.call( this, options );
     this.updateTextFlags(); // takes care of setting up supported renderers
   }
+
   scenery.register( 'Text', Text );
 
   inherit( Node, Text, {

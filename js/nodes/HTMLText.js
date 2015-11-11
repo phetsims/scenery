@@ -23,6 +23,7 @@ define( function( require ) {
 
     Text.call( this, text, options );
   }
+
   scenery.register( 'HTMLText', HTMLText );
 
   inherit( Text, HTMLText, {} );

@@ -21,6 +21,7 @@ define( function( require ) {
   function AccessibleInstance( parent, display, trail ) {
     this.initializeAccessibleInstance( parent, display, trail );
   }
+
   scenery.register( 'AccessibleInstance', AccessibleInstance );
 
   inherit( Events, AccessibleInstance, {

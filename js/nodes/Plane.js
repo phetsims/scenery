@@ -25,6 +25,7 @@ define( function( require ) {
   function Plane( options ) {
     Rectangle.call( this, -2000, -2000, 6000, 6000, options );
   }
+
   scenery.register( 'Plane', Plane );
 
   return inherit( Rectangle, Plane );

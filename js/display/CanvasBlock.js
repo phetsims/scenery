@@ -23,6 +23,7 @@ define( function( require ) {
   function CanvasBlock( display, renderer, transformRootInstance, filterRootInstance ) {
     this.initialize( display, renderer, transformRootInstance, filterRootInstance );
   }
+
   scenery.register( 'CanvasBlock', CanvasBlock );
 
   inherit( FittedBlock, CanvasBlock, {

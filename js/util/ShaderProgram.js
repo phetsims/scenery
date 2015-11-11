@@ -27,6 +27,7 @@ define( function( require ) {
 
     this.initialize( gl );
   }
+
   scenery.register( 'ShaderProgram', ShaderProgram );
 
   return inherit( Object, ShaderProgram, {

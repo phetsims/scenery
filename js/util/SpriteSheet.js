@@ -53,6 +53,7 @@ define( function( require ) {
     this.usedSprites = [];
     this.unusedSprites = []; // works as a LRU cache for removing items when we need to allocate new space
   }
+
   scenery.register( 'SpriteSheet', SpriteSheet );
 
   inherit( Object, SpriteSheet, {
@@ -122,7 +123,7 @@ define( function( require ) {
 
       // check used cache
       for ( i = 0; i < this.usedSprites.length; i++ ) {
-        var usedSprite = this.usedSprites[i];
+        var usedSprite = this.usedSprites[ i ];
         if ( usedSprite.image === image ) {
           usedSprite.count++;
           return usedSprite;
@@ -131,7 +132,7 @@ define( function( require ) {
 
       // check unused cache
       for ( i = 0; i < this.unusedSprites.length; i++ ) {
-        var unusedSprite = this.unusedSprites[i];
+        var unusedSprite = this.unusedSprites[ i ];
         if ( unusedSprite.image === image ) {
           unusedSprite.count++;
           assert && assert( unusedSprite.count === 1, 'Count should be exactly 1 after coming back from being unused' );
@@ -161,7 +162,7 @@ define( function( require ) {
       if ( bin ) {
         // WebGL will want UV coordinates in the [0,1] range
         var uvBounds = new Bounds2( bin.bounds.minX / this.width, bin.bounds.minY / this.height,
-                                    bin.bounds.maxX / this.width, bin.bounds.maxY / this.height );
+          bin.bounds.maxX / this.width, bin.bounds.maxY / this.height );
         var sprite = new SpriteSheet.Sprite( this, bin, uvBounds, image, 1 );
         this.context.drawImage( image, bin.bounds.x, bin.bounds.y );
         this.dirty = true;
@@ -179,8 +180,8 @@ define( function( require ) {
       var usedSprite;
       var i;
       for ( i = 0; i < this.usedSprites.length; i++ ) {
-        if ( this.usedSprites[i].image === image ) {
-          usedSprite = this.usedSprites[i];
+        if ( this.usedSprites[ i ].image === image ) {
+          usedSprite = this.usedSprites[ i ];
           break;
         }
       }
@@ -208,14 +209,14 @@ define( function( require ) {
 
       // check used cache
       for ( i = 0; i < this.usedSprites.length; i++ ) {
-        if ( this.usedSprites[i].image === image ) {
+        if ( this.usedSprites[ i ].image === image ) {
           return true;
         }
       }
 
       // check unused cache
       for ( i = 0; i < this.unusedSprites.length; i++ ) {
-        if ( this.unusedSprites[i].image === image ) {
+        if ( this.unusedSprites[ i ].image === image ) {
           return true;
         }
       }

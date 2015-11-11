@@ -24,6 +24,7 @@ define( function( require ) {
 
     phetAllocation && phetAllocation( 'CanvasContextWrapper' );
   }
+
   scenery.register( 'CanvasContextWrapper', CanvasContextWrapper );
 
   inherit( Object, CanvasContextWrapper, {

@@ -71,6 +71,7 @@ define( function( require ) {
     this.mutate( options );
     this.inited = true;
   }
+
   scenery.register( 'LayoutBox', LayoutBox );
 
   return inherit( Node, LayoutBox, {

@@ -26,6 +26,7 @@ define( function( require ) {
     // use the global scratch canvas instead of creating a new Canvas
     this.canvasPattern = scenery.scratchContext.createPattern( image, 'repeat' );
   }
+
   scenery.register( 'Pattern', Pattern );
 
   inherit( Paint, Pattern, {

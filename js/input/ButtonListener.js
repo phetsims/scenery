@@ -67,6 +67,7 @@ define( function( require ) {
       }
     } );
   }
+
   scenery.register( 'ButtonListener', ButtonListener );
 
   inherit( DownUpListener, ButtonListener, {

@@ -116,6 +116,7 @@ define( function( require ) {
     this.onwheel = function onwheel( domEvent ) { input.batchEvent( domEvent, BatchedDOMEvent.WHEEL_TYPE, input.wheel, false ); };
     this.uselessListener = function uselessListener( domEvent ) {};
   }
+
   scenery.register( 'Input', Input );
 
   return inherit( Object, Input, {

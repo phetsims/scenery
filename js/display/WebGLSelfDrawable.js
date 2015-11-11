@@ -19,6 +19,7 @@ define( function( require ) {
 
     throw new Error( 'Should use initialization and pooling' );
   }
+
   scenery.register( 'WebGLSelfDrawable', WebGLSelfDrawable );
 
   inherit( SelfDrawable, WebGLSelfDrawable, {

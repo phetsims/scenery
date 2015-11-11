@@ -39,6 +39,7 @@ define( function( require ) {
     };
     property.link( this.listener );
   }
+
   scenery.register( 'LiveRegion', LiveRegion );
 
   inherit( Object, LiveRegion, {

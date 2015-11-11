@@ -41,6 +41,7 @@ define( function( require ) {
 
     phetAllocation && phetAllocation( 'Color' );
   }
+
   scenery.register( 'Color', Color );
 
   // regex utilities
@@ -260,7 +261,7 @@ define( function( require ) {
         // being used for display purposes only, and is never shown to the user), we use the built-in JS toFixed instead of
         // Dot's version of toFixed. See https://github.com/phetsims/kite/issues/50
         var alpha = this.a.toFixed( 20 );
-        while ( alpha.length >= 2 && alpha[alpha.length - 1] === '0' && alpha[alpha.length - 2] !== '.' ) {
+        while ( alpha.length >= 2 && alpha[ alpha.length - 1 ] === '0' && alpha[ alpha.length - 2 ] !== '.' ) {
           alpha = alpha.slice( 0, alpha.length - 1 );
         }
 

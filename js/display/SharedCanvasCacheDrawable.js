@@ -22,6 +22,7 @@ define( function( require ) {
     this.instance = instance; // will need this so we can get bounds for layer fitting
     this.sharedInstance = sharedInstance;
   }
+
   scenery.register( 'SharedCanvasCacheDrawable', SharedCanvasCacheDrawable );
 
   inherit( Drawable, SharedCanvasCacheDrawable, {

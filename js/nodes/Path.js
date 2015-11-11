@@ -60,6 +60,7 @@ define( function( require ) {
 
     this.mutate( options );
   }
+
   scenery.register( 'Path', Path );
 
   inherit( Node, Path, {

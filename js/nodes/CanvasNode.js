@@ -27,6 +27,7 @@ define( function( require ) {
     Node.call( this, options );
     this.setRendererBitmask( Renderer.bitmaskCanvas );
   }
+
   scenery.register( 'CanvasNode', CanvasNode );
 
   inherit( Node, CanvasNode, {

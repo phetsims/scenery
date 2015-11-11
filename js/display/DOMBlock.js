@@ -19,6 +19,7 @@ define( function( require ) {
   function DOMBlock( display, domDrawable ) {
     this.initialize( display, domDrawable );
   }
+
   scenery.register( 'DOMBlock', DOMBlock );
 
   inherit( Block, DOMBlock, {

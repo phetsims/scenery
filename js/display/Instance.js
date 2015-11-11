@@ -51,6 +51,7 @@ define( function( require ) {
 
     this.initialize( display, trail, isDisplayRoot, isSharedCanvasCacheRoot );
   }
+
   scenery.register( 'Instance', Instance );
 
   inherit( Events, Instance, {
@@ -549,7 +550,7 @@ define( function( require ) {
       var currentDrawable = firstDrawable; // possibly null
 
       assert && assert( this.firstChangeInterval === null &&
-                        this.lastChangeInterval === null,
+      this.lastChangeInterval === null,
         'sanity checks that cleanSyncTreeResults were called' );
 
       var firstChangeInterval = null;
@@ -1220,7 +1221,7 @@ define( function( require ) {
 
       var len = this.children.length;
       for ( var i = 0; i < len; i++ ) {
-        var child = this.children[i];
+        var child = this.children[ i ];
 
         if ( updateFullSubtree || child.visibilityDirty || child.childVisibilityDirty ) {
           // if we are a visibility root (isVisibilityApplied===true), disregard ancestor visibility

@@ -30,6 +30,7 @@ define( function( require ) {
   function SVGBlock( display, renderer, transformRootInstance, filterRootInstance ) {
     this.initialize( display, renderer, transformRootInstance, filterRootInstance );
   }
+
   scenery.register( 'SVGBlock', SVGBlock );
 
   inherit( FittedBlock, SVGBlock, {

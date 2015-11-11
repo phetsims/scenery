@@ -66,6 +66,7 @@ define( function( require ) {
   function Drawable( renderer ) {
     this.initializeDrawable( renderer );
   }
+
   scenery.register( 'Drawable', Drawable );
 
   inherit( Events, Drawable, {

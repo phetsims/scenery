@@ -24,6 +24,7 @@ define( function( require ) {
 
     this.instance = instance; // will need this so we can get bounds for layer fitting
   }
+
   scenery.register( 'InlineCanvasCacheDrawable', InlineCanvasCacheDrawable );
 
   inherit( Drawable, InlineCanvasCacheDrawable, {

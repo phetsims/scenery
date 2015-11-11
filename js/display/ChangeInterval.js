@@ -29,6 +29,7 @@ define( function( require ) {
   function ChangeInterval( drawableBefore, drawableAfter ) {
     this.initialize( drawableBefore, drawableAfter );
   }
+
   scenery.register( 'ChangeInterval', ChangeInterval );
 
   inherit( Object, ChangeInterval, {

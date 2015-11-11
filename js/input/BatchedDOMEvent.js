@@ -23,6 +23,7 @@ define( function( require ) {
     this.type = type;
     this.callback = callback;
   }
+
   scenery.register( 'BatchedDOMEvent', BatchedDOMEvent );
 
   // enum for type

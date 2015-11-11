@@ -26,6 +26,7 @@ define( function( require ) {
 
     this.canvasGradient = canvasGradient;
   }
+
   scenery.register( 'Gradient', Gradient );
 
   inherit( Paint, Gradient, {

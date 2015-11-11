@@ -146,6 +146,7 @@ define( function( require ) {
 
     phetAllocation && phetAllocation( 'Font' );
   }
+
   scenery.register( 'Font', Font );
 
   inherit( Object, Font, {

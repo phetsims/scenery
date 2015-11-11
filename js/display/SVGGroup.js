@@ -19,6 +19,7 @@ define( function( require ) {
   function SVGGroup( block, instance, parent ) {
     this.initialize( block, instance, parent );
   }
+
   scenery.register( 'SVGGroup', SVGGroup );
 
   inherit( Object, SVGGroup, {

@@ -21,6 +21,7 @@ define( function( require ) {
   function VStrut( height, options ) {
     Spacer.call( this, 0, height, options );
   }
+
   scenery.register( 'VStrut', VStrut );
 
   return inherit( Spacer, VStrut );

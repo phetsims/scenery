@@ -21,6 +21,7 @@ define( function( require ) {
   function HStrut( width, options ) {
     Spacer.call( this, width, 0, options );
   }
+
   scenery.register( 'HStrut', HStrut );
 
   return inherit( Spacer, HStrut );

@@ -31,8 +31,8 @@ define( function( require ) {
 
   var Util = {
     /*---------------------------------------------------------------------------*
-    * Transformation Utilities (TODO: separate file)
-    *----------------------------------------------------------------------------*/
+     * Transformation Utilities (TODO: separate file)
+     *----------------------------------------------------------------------------*/
 
     /**
      * @deprecated (bad performance since it is setting multiple properties). see applyPreparedTransform
@@ -194,8 +194,8 @@ define( function( require ) {
     },
 
     /*---------------------------------------------------------------------------*
-    * Text bounds utilities (TODO: separate file)
-    *----------------------------------------------------------------------------*/
+     * Text bounds utilities (TODO: separate file)
+     *----------------------------------------------------------------------------*/
 
     /**
      * Given a data snapshot and transform, calculate range on how large / small the bounds can be. It's
@@ -455,8 +455,8 @@ define( function( require ) {
     },
 
     /*---------------------------------------------------------------------------*
-    * WebGL utilities (TODO: separate file)
-    *----------------------------------------------------------------------------*/
+     * WebGL utilities (TODO: separate file)
+     *----------------------------------------------------------------------------*/
 
     /**
      * Finds the smallest power of 2 that is at least as large as n.
@@ -520,7 +520,7 @@ define( function( require ) {
 
         if ( extensions ) {
           for ( var i = 0; i < extensions.length; i++ ) {
-            if ( gl.getExtension( extensions[i] ) === null ) {
+            if ( gl.getExtension( extensions[ i ] ) === null ) {
               return false;
             }
           }
@@ -528,7 +528,7 @@ define( function( require ) {
 
         return true;
       }
-      catch ( e ) {
+      catch( e ) {
         return false;
       }
     },
@@ -554,7 +554,7 @@ define( function( require ) {
         gl.clearStencil( 0 );
         return gl.getError() === 0;
       }
-      catch ( e ) {
+      catch( e ) {
         return false;
       }
     },

@@ -128,6 +128,7 @@ define( function( require ) {
 
     Path.call( this, null, options );
   }
+
   scenery.register( 'Rectangle', Rectangle );
 
   inherit( Path, Rectangle, {
@@ -324,9 +325,9 @@ define( function( require ) {
         }
         var miter = this.getLineJoin() === 'miter' && !rounded;
         result = result && Rectangle.intersects( x - halfLine, y - halfLine,
-          width + 2 * halfLine, height + 2 * halfLine,
-          miter ? 0 : ( arcWidth + halfLine ), miter ? 0 : ( arcHeight + halfLine ),
-          point );
+            width + 2 * halfLine, height + 2 * halfLine,
+            miter ? 0 : ( arcWidth + halfLine ), miter ? 0 : ( arcHeight + halfLine ),
+            point );
       }
 
       if ( this._fillPickable ) {

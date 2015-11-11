@@ -26,6 +26,7 @@ define( function( require ) {
     Node.call( this, options );
     this.setRendererBitmask( Renderer.bitmaskWebGL );
   }
+
   scenery.register( 'WebGLNode', WebGLNode );
 
   inherit( Node, WebGLNode, {

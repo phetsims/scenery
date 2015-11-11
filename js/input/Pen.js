@@ -27,6 +27,7 @@ define( function( require ) {
 
     this.type = 'pen';
   }
+
   scenery.register( 'Pen', Pen );
 
   inherit( Pointer, Pen, {

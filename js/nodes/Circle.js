@@ -48,6 +48,7 @@ define( function( require ) {
 
     Path.call( this, null, options );
   }
+
   scenery.register( 'Circle', Circle );
 
   inherit( Path, Circle, {

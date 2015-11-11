@@ -29,6 +29,7 @@ define( function( require ) {
 
     this.type = 'touch';
   }
+
   scenery.register( 'Touch', Touch );
 
   inherit( Pointer, Touch, {

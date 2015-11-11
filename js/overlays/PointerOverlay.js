@@ -107,6 +107,7 @@ define( function( require ) {
 
     this.domElement = this.pointerSVGContainer;
   }
+
   scenery.register( 'PointerOverlay', PointerOverlay );
 
   inherit( Object, PointerOverlay, {

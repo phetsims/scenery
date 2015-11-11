@@ -39,6 +39,7 @@ define( function( require ) {
     // use the global scratch canvas instead of creating a new Canvas
     Gradient.call( this, scenery.scratchContext.createRadialGradient( x0, y0, r0, x1, y1, r1 ) );
   }
+
   scenery.register( 'RadialGradient', RadialGradient );
 
   inherit( Gradient, RadialGradient, {

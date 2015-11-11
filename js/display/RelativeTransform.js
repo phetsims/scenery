@@ -94,6 +94,7 @@ define( function( require ) {
 
   function RelativeTransform() {
   }
+
   scenery.register( 'RelativeTransform', RelativeTransform );
 
   inherit( Object, RelativeTransform, {

@@ -41,6 +41,7 @@ define( function( require ) {
 
     this.domElement = svg;
   }
+
   scenery.register( 'CanvasNodeBoundsOverlay', CanvasNodeBoundsOverlay );
 
   inherit( Object, CanvasNodeBoundsOverlay, {

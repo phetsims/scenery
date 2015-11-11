@@ -31,6 +31,7 @@ define( function( require ) {
     // use the global scratch canvas instead of creating a new Canvas
     Gradient.call( this, scenery.scratchContext.createLinearGradient( x0, y0, x1, y1 ) );
   }
+
   scenery.register( 'LinearGradient', LinearGradient );
 
   inherit( Gradient, LinearGradient, {

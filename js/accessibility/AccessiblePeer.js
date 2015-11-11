@@ -20,6 +20,7 @@ define( function( require ) {
   function AccessiblePeer( accessibleInstance, domElement, containerDOMElement ) {
     this.initializeAccessiblePeer( accessibleInstance, domElement, containerDOMElement );
   }
+
   scenery.register( 'AccessiblePeer', AccessiblePeer );
 
   inherit( Events, AccessiblePeer, {

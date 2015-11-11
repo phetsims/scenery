@@ -35,6 +35,7 @@ define( function( require ) {
   function BackboneDrawable( display, backboneInstance, transformRootInstance, renderer, isDisplayRoot ) {
     this.initialize( display, backboneInstance, transformRootInstance, renderer, isDisplayRoot );
   }
+
   scenery.register( 'BackboneDrawable', BackboneDrawable );
 
   inherit( Drawable, BackboneDrawable, {

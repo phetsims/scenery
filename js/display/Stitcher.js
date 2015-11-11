@@ -113,6 +113,7 @@ define( function( require ) {
   function Stitcher( display, renderer ) {
     throw new Error( 'We are too abstract for that!' );
   }
+
   scenery.register( 'Stitcher', Stitcher );
 
   inherit( Object, Stitcher, {
@@ -499,11 +500,11 @@ define( function( require ) {
           var block = blockData.block;
           _.each( Drawable.oldListToArray( block.firstDrawable, block.lastDrawable ), function( drawable ) {
             assertSlow( _.some( stitcher.pendingRemovals, function( removalData ) {
-              return removalData.drawable === drawable;
-            } ) || _.some( stitcher.pendingMoves, function( moveData ) {
-              return moveData.drawable === drawable;
-            } ), 'Drawable ' + drawable.toString() + ' originally listed for disposed block ' + block.toString() +
-                 ' does not seem to be marked for pending removal or move!' );
+                return removalData.drawable === drawable;
+              } ) || _.some( stitcher.pendingMoves, function( moveData ) {
+                return moveData.drawable === drawable;
+              } ), 'Drawable ' + drawable.toString() + ' originally listed for disposed block ' + block.toString() +
+                   ' does not seem to be marked for pending removal or move!' );
           } );
         } );
 
@@ -512,11 +513,11 @@ define( function( require ) {
           var block = blockData.block;
           _.each( Drawable.listToArray( block.pendingFirstDrawable, block.pendingLastDrawable ), function( drawable ) {
             assertSlow( _.some( stitcher.pendingAdditions, function( additionData ) {
-              return additionData.drawable === drawable && additionData.block === block;
-            } ) || _.some( stitcher.pendingMoves, function( moveData ) {
-              return moveData.drawable === drawable && moveData.block === block;
-            } ), 'Drawable ' + drawable.toString() + ' now listed for created block ' + block.toString() +
-                 ' does not seem to be marked for pending addition or move!' );
+                return additionData.drawable === drawable && additionData.block === block;
+              } ) || _.some( stitcher.pendingMoves, function( moveData ) {
+                return moveData.drawable === drawable && moveData.block === block;
+              } ), 'Drawable ' + drawable.toString() + ' now listed for created block ' + block.toString() +
+                   ' does not seem to be marked for pending addition or move!' );
           } );
         } );
 

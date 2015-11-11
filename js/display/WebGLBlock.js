@@ -25,6 +25,7 @@ define( function( require ) {
   function WebGLBlock( display, renderer, transformRootInstance, filterRootInstance ) {
     this.initialize( display, renderer, transformRootInstance, filterRootInstance );
   }
+
   scenery.register( 'WebGLBlock', WebGLBlock );
 
   inherit( FittedBlock, WebGLBlock, {
@@ -140,7 +141,7 @@ define( function( require ) {
         // ensure sprite sheet textures are up-to-date
         var numSpriteSheets = this.spriteSheets.length;
         for ( var i = 0; i < numSpriteSheets; i++ ) {
-          this.spriteSheets[i].updateTexture();
+          this.spriteSheets[ i ].updateTexture();
         }
 
         // temporary hack for supporting webglScale
@@ -160,8 +161,8 @@ define( function( require ) {
         // finalY = 1 - 2 * y / display.height
         // result = matrix * ( x, y, 1 )
         this.projectionMatrix.rowMajor( 2 / this.display.width, 0, -1,
-                                        0, -2 / this.display.height, 1,
-                                        0, 0, 1 );
+          0, -2 / this.display.height, 1,
+          0, 0, 1 );
 
         // if we created the context with preserveDrawingBuffer, we need to clear before rendering
         if ( this.preserveDrawingBuffer ) {
@@ -283,7 +284,7 @@ define( function( require ) {
       var numSpriteSheets = this.spriteSheets.length;
       // TODO: check for SpriteSheet containment first?
       for ( var i = 0; i < numSpriteSheets; i++ ) {
-        var spriteSheet = this.spriteSheets[i];
+        var spriteSheet = this.spriteSheets[ i ];
         sprite = spriteSheet.addImage( image, width, height );
         if ( sprite ) {
           break;
@@ -337,12 +338,12 @@ define( function( require ) {
   } );
 
   /*---------------------------------------------------------------------------*
-  * Processors rely on the following lifecycle:
-  * 1. activate()
-  * 2. processDrawable() - 0 or more times
-  * 3. deactivate()
-  * Once deactivated, they should have executed all of the draw calls they need to make.
-  *----------------------------------------------------------------------------*/
+   * Processors rely on the following lifecycle:
+   * 1. activate()
+   * 2. processDrawable() - 0 or more times
+   * 3. deactivate()
+   * Once deactivated, they should have executed all of the draw calls they need to make.
+   *----------------------------------------------------------------------------*/
 
   // TODO: Processor super-type?
 

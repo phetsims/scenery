@@ -74,6 +74,7 @@ define( function( require ) {
     this.node.on( 'selfBoundsValid', listener ); // e.g. Text, may change based on boundsMethod
     this.node.on( 'accessibleContent', listener );
   }
+
   scenery.register( 'RendererSummary', RendererSummary );
 
   inherit( Object, RendererSummary, {

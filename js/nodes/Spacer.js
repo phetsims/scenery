@@ -28,6 +28,7 @@ define( function( require ) {
 
     this.mutate( options );
   }
+
   scenery.register( 'Spacer', Spacer );
 
   inherit( Node, Spacer );

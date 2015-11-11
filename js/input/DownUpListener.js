@@ -74,6 +74,7 @@ define( function( require ) {
       }
     };
   }
+
   scenery.register( 'DownUpListener', DownUpListener );
 
   inherit( Object, DownUpListener, {

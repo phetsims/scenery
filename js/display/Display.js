@@ -220,6 +220,7 @@ define( function( require ) {
       this._unsortedAccessibleInstances = [];
     }
   }
+
   scenery.register( 'Display', Display );
 
   inherit( Object, Display, extend( {

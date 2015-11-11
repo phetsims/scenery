@@ -50,6 +50,7 @@ define( function( require ) {
     Node.call( this, options );
     this.setRendererBitmask( Renderer.bitmaskDOM );
   }
+
   scenery.register( 'DOM', DOM );
 
   inherit( Node, DOM, {

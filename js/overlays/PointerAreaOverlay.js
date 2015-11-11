@@ -39,6 +39,7 @@ define( function( require ) {
 
     this.domElement = svg;
   }
+
   scenery.register( 'PointerAreaOverlay', PointerAreaOverlay );
 
   inherit( Object, PointerAreaOverlay, {

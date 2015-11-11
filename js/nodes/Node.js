@@ -308,6 +308,7 @@ define( function( require ) {
 
     phetAllocation && phetAllocation( 'Node' );
   }
+
   scenery.register( 'Node', Node );
 
   inherit( Object, Node, extend( {

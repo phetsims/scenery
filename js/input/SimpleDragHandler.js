@@ -127,6 +127,7 @@ define( function( require ) {
       }
     };
   }
+
   scenery.register( 'SimpleDragHandler', SimpleDragHandler );
 
   inherit( Object, SimpleDragHandler, {

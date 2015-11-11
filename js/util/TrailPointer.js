@@ -31,6 +31,7 @@ define( function( require ) {
 
     phetAllocation && phetAllocation( 'TrailPointer' );
   }
+
   scenery.register( 'TrailPointer', TrailPointer );
 
   inherit( Object, TrailPointer, {

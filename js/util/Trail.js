@@ -78,6 +78,7 @@ define( function( require ) {
 
     phetAllocation && phetAllocation( 'Trail' );
   }
+
   scenery.register( 'Trail', Trail );
 
   inherit( Object, Trail, {
@@ -96,7 +97,7 @@ define( function( require ) {
 
       var indexLength = this.indices.length;
       for ( var i = 0; i < indexLength; i++ ) {
-        if ( this.indices[i] < 0 ) {
+        if ( this.indices[ i ] < 0 ) {
           return false;
         }
       }
@@ -270,17 +271,17 @@ define( function( require ) {
     addDescendantTrail: function( trail ) {
       var length = trail.length;
       if ( length ) {
-        this.addDescendant( trail.nodes[0] );
+        this.addDescendant( trail.nodes[ 0 ] );
       }
       for ( var i = 1; i < length; i++ ) {
-        this.addDescendant( trail.nodes[i], this.indices[i-1] );
+        this.addDescendant( trail.nodes[ i ], this.indices[ i - 1 ] );
       }
     },
 
     removeDescendantTrail: function( trail ) {
       var length = trail.length;
       for ( var i = length - 1; i >= 0; i-- ) {
-        assert && assert( this.lastNode() === trail.nodes[i] );
+        assert && assert( this.lastNode() === trail.nodes[ i ] );
 
         this.removeDescendant();
       }

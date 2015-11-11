@@ -40,6 +40,7 @@ define( function( require ) {
 
     this.type = 'mouse';
   }
+
   scenery.register( 'Mouse', Mouse );
 
   inherit( Pointer, Mouse, {

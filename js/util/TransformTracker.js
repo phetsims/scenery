@@ -52,11 +52,11 @@ define( function( require ) {
     this._nodeTransformListeners = [];
     for ( var j = 1; j < this.trail.length; j++ ) {
       // Wrapping with closure to prevent changes
-      var nodeTransformListener = ( function( index ) {
+      var nodeTransformListener = (function( index ) {
         return function() {
           tracker.onTransformChange( index );
         };
-      } )( j - 1 );
+      })( j - 1 );
 
       this._nodeTransformListeners.push( nodeTransformListener );
 
@@ -68,6 +68,7 @@ define( function( require ) {
       }
     }
   }
+
   scenery.register( 'TransformTracker', TransformTracker );
 
   inherit( Object, TransformTracker, {

@@ -20,6 +20,7 @@ define( function( require ) {
   function Block( display, renderer ) {
     throw new Error( 'Should never be called' );
   }
+
   scenery.register( 'Block', Block );
 
   inherit( Drawable, Block, {

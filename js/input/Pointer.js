@@ -21,6 +21,7 @@ define( function( require ) {
 
     phetAllocation && phetAllocation( 'Pointer' );
   }
+
   scenery.register( 'Pointer', Pointer );
 
   inherit( Object, Pointer, {

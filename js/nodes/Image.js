@@ -37,8 +37,8 @@ define( function( require ) {
   var defaultMipmapMaxLevel = 5;
 
   var log2 = Math.log2 || function( x ) {
-    return Math.log( x ) / Math.LN2;
-  };
+      return Math.log( x ) / Math.LN2;
+    };
 
   /*
    * Constructs an Image node from a particular source.
@@ -161,6 +161,7 @@ define( function( require ) {
     Node.call( this, options );
     this.invalidateSupportedRenderers();
   }
+
   scenery.register( 'Image', Image );
 
   inherit( Node, Image, {
@@ -717,17 +718,17 @@ define( function( require ) {
 
       // if mipmaps are enabled, this listener will be added to when our relative transform changes
       this._mipmapTransformListener = this._mipmapTransformListener || function() {
-        sceneryLog && sceneryLog.ImageSVGDrawable && sceneryLog.ImageSVGDrawable( self.id + ' Transform dirties mipmap' );
-        self.markDirtyMipmap();
-      };
+          sceneryLog && sceneryLog.ImageSVGDrawable && sceneryLog.ImageSVGDrawable( self.id + ' Transform dirties mipmap' );
+          self.markDirtyMipmap();
+        };
 
       this._mipmapListener = this._mipmapListener || function() {
-        // sanity check
-        self.markDirtyMipmap();
+          // sanity check
+          self.markDirtyMipmap();
 
-        // update our mipmap usage status
-        self.updateMipmapStatus( self.node._mipmap );
-      };
+          // update our mipmap usage status
+          self.updateMipmapStatus( self.node._mipmap );
+        };
       this.node.on( 'mipmap', this._mipmapListener );
       this.updateMipmapStatus( instance.node._mipmap );
 
@@ -968,20 +969,20 @@ define( function( require ) {
           // TODO: consider reversal of minY and maxY usage here for vertical inverse
 
           // first triangle UVs
-          this.vertexArray[2] = uvBounds.minX; // upper left U
-          this.vertexArray[3] = uvBounds.minY; // upper left V
-          this.vertexArray[6] = uvBounds.minX; // lower left U
-          this.vertexArray[7] = uvBounds.maxY; // lower left V
-          this.vertexArray[10] = uvBounds.maxX; // upper right U
-          this.vertexArray[11] = uvBounds.minY; // upper right V
+          this.vertexArray[ 2 ] = uvBounds.minX; // upper left U
+          this.vertexArray[ 3 ] = uvBounds.minY; // upper left V
+          this.vertexArray[ 6 ] = uvBounds.minX; // lower left U
+          this.vertexArray[ 7 ] = uvBounds.maxY; // lower left V
+          this.vertexArray[ 10 ] = uvBounds.maxX; // upper right U
+          this.vertexArray[ 11 ] = uvBounds.minY; // upper right V
 
           // second triangle UVs
-          this.vertexArray[14] = uvBounds.maxX; // upper right U
-          this.vertexArray[15] = uvBounds.minY; // upper right V
-          this.vertexArray[18] = uvBounds.minX; // lower left U
-          this.vertexArray[19] = uvBounds.maxY; // lower left V
-          this.vertexArray[22] = uvBounds.maxX; // lower right U
-          this.vertexArray[23] = uvBounds.maxY; // lower right V
+          this.vertexArray[ 14 ] = uvBounds.maxX; // upper right U
+          this.vertexArray[ 15 ] = uvBounds.minY; // upper right V
+          this.vertexArray[ 18 ] = uvBounds.minX; // lower left U
+          this.vertexArray[ 19 ] = uvBounds.maxY; // lower left V
+          this.vertexArray[ 22 ] = uvBounds.maxX; // lower right U
+          this.vertexArray[ 23 ] = uvBounds.maxY; // lower right V
         }
 
         if ( this.xyDirty ) {
@@ -997,20 +998,20 @@ define( function( require ) {
           transformMatrix.multiplyVector2( this.lowerRight.setXY( width, height ) );
 
           // first triangle XYs
-          this.vertexArray[0] = this.upperLeft.x;
-          this.vertexArray[1] = this.upperLeft.y;
-          this.vertexArray[4] = this.lowerLeft.x;
-          this.vertexArray[5] = this.lowerLeft.y;
-          this.vertexArray[8] = this.upperRight.x;
-          this.vertexArray[9] = this.upperRight.y;
+          this.vertexArray[ 0 ] = this.upperLeft.x;
+          this.vertexArray[ 1 ] = this.upperLeft.y;
+          this.vertexArray[ 4 ] = this.lowerLeft.x;
+          this.vertexArray[ 5 ] = this.lowerLeft.y;
+          this.vertexArray[ 8 ] = this.upperRight.x;
+          this.vertexArray[ 9 ] = this.upperRight.y;
 
           // second triangle XYs
-          this.vertexArray[12] = this.upperRight.x;
-          this.vertexArray[13] = this.upperRight.y;
-          this.vertexArray[16] = this.lowerLeft.x;
-          this.vertexArray[17] = this.lowerLeft.y;
-          this.vertexArray[20] = this.lowerRight.x;
-          this.vertexArray[21] = this.lowerRight.y;
+          this.vertexArray[ 12 ] = this.upperRight.x;
+          this.vertexArray[ 13 ] = this.upperRight.y;
+          this.vertexArray[ 16 ] = this.lowerLeft.x;
+          this.vertexArray[ 17 ] = this.lowerLeft.y;
+          this.vertexArray[ 20 ] = this.lowerRight.x;
+          this.vertexArray[ 21 ] = this.lowerRight.y;
         }
       }
     },

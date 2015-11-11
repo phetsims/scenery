@@ -18,6 +18,7 @@ define( function( require ) {
   function SelfDrawable( renderer, instance ) {
     this.initializeSelfDrawable( renderer, instance );
   }
+
   scenery.register( 'SelfDrawable', SelfDrawable );
 
   inherit( scenery.Drawable, SelfDrawable, {

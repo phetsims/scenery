@@ -63,6 +63,7 @@ define( function( require ) {
 
     throw new Error( 'Deprecated, please do not use (replacement for overrideBounds has not been provided)' );
   }
+
   scenery.register( 'LayoutNode', LayoutNode );
 
   inherit( Node, LayoutNode, {

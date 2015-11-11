@@ -41,9 +41,9 @@ define( function( require ) {
   scenery.register( 'xlinkns', 'http://www.w3.org/1999/xlink' );
 
   /*---------------------------------------------------------------------------*
-  * Logging
-  * TODO: Move this out of scenery.js if possible
-  *----------------------------------------------------------------------------*/
+   * Logging
+   * TODO: Move this out of scenery.js if possible
+   *----------------------------------------------------------------------------*/
 
   // @private - Scenery internal log function to be used to log to scenery.logString (does not include color/css)
   function stringLogFunction( message ) {
@@ -135,12 +135,12 @@ define( function( require ) {
           'Unknown logger: ' + name + ', please use periods (.) to separate different log names' );
 
         window.sceneryLog[ name ] = window.sceneryLog[ name ] || function( ob, styleOverride ) {
-          var data = logProperties[ name ];
+            var data = logProperties[ name ];
 
-          var prefix = data.name ? '[' + data.name + '] ' : '';
-          var padStyle = 'color: #ddd;';
-          scenery.logFunction( '%c' + logPadding + '%c' + prefix + ob, padStyle, styleOverride ? styleOverride : data.style );
-        };
+            var prefix = data.name ? '[' + data.name + '] ' : '';
+            var padStyle = 'color: #ddd;';
+            scenery.logFunction( '%c' + logPadding + '%c' + prefix + ob, padStyle, styleOverride ? styleOverride : data.style );
+          };
       }
     },
 

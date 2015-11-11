@@ -21,6 +21,7 @@ define( function( require ) {
   function FittedBlock( display, renderer, transformRootInstance ) {
     this.initialize( display, renderer, transformRootInstance );
   }
+
   scenery.register( 'FittedBlock', FittedBlock );
 
   inherit( Block, FittedBlock, {

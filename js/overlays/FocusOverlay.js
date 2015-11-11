@@ -73,6 +73,7 @@ define( function( require ) {
 
     scenery.Display.focusProperty.link( this.focusListener );
   }
+
   scenery.register( 'FocusOverlay', FocusOverlay );
 
   inherit( Object, FocusOverlay, {

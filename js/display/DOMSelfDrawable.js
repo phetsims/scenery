@@ -20,6 +20,7 @@ define( function( require ) {
 
     throw new Error( 'Should use initialization and pooling' );
   }
+
   scenery.register( 'DOMSelfDrawable', DOMSelfDrawable );
 
   inherit( SelfDrawable, DOMSelfDrawable, {
