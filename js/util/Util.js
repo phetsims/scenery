@@ -528,7 +528,7 @@ define( function( require ) {
 
         return true;
       }
-      catch ( e ) {
+      catch( e ) {
         return false;
       }
     },
@@ -554,7 +554,7 @@ define( function( require ) {
         gl.clearStencil( 0 );
         return gl.getError() === 0;
       }
-      catch ( e ) {
+      catch( e ) {
         return false;
       }
     },

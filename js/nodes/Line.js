@@ -193,8 +193,9 @@ define( function( require ) {
         var halfLineWidth = this.getLineWidth() / 2;
         if ( lineCap === 'round' ) {
           // we can simply dilate by half the line width
-          return new Bounds2( Math.min( this._x1, this._x2 ) - halfLineWidth, Math.min( this._y1, this._y2 ) - halfLineWidth,
-                              Math.max( this._x1, this._x2 ) + halfLineWidth, Math.max( this._y1, this._y2 ) + halfLineWidth );
+          return new Bounds2(
+            Math.min( this._x1, this._x2 ) - halfLineWidth, Math.min( this._y1, this._y2 ) - halfLineWidth,
+            Math.max( this._x1, this._x2 ) + halfLineWidth, Math.max( this._y1, this._y2 ) + halfLineWidth );
         }
         else {
           // (dx,dy) is a vector p2-p1

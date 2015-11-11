@@ -160,9 +160,10 @@ define( function( require ) {
         // finalX = 2 * x / display.width - 1
         // finalY = 1 - 2 * y / display.height
         // result = matrix * ( x, y, 1 )
-        this.projectionMatrix.rowMajor( 2 / this.display.width, 0, -1,
-                                        0, -2 / this.display.height, 1,
-                                        0, 0, 1 );
+        this.projectionMatrix.rowMajor(
+          2 / this.display.width, 0, -1,
+          0, -2 / this.display.height, 1,
+          0, 0, 1 );
 
         // if we created the context with preserveDrawingBuffer, we need to clear before rendering
         if ( this.preserveDrawingBuffer ) {

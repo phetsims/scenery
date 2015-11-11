@@ -772,7 +772,7 @@ define( function( require ) {
           try {
             throw new Error( 'falsy trail for dispatchEvent' );
           }
-          catch ( e ) {
+          catch( e ) {
             console.log( e.stack );
             throw e;
           }
