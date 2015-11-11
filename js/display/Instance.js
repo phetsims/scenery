@@ -549,8 +549,7 @@ define( function( require ) {
       var firstDrawable = this.selfDrawable; // possibly null
       var currentDrawable = firstDrawable; // possibly null
 
-      assert && assert( this.firstChangeInterval === null &&
-      this.lastChangeInterval === null,
+      assert && assert( this.firstChangeInterval === null && this.lastChangeInterval === null,
         'sanity checks that cleanSyncTreeResults were called' );
 
       var firstChangeInterval = null;

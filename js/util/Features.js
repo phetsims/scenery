@@ -31,7 +31,7 @@ define( function( require ) {
 
       return url.slice( 0, target.length ) === target;
     }
-    catch( e ) {
+    catch ( e ) {
       return false;
     }
   }
@@ -51,7 +51,7 @@ define( function( require ) {
         canvas.toDataURL();
         Features[ name ] = true;
       }
-      catch( e ) {
+      catch ( e ) {
         Features[ name ] = false;
       }
     };
@@ -62,7 +62,7 @@ define( function( require ) {
         loadCall();
       }
     }
-    catch( e ) {
+    catch ( e ) {
       Features[ name ] = false;
     }
   }

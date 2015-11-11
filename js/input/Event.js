@@ -18,10 +18,8 @@ define( function( require ) {
 
   function Event( args ) {
     // ensure that all of the required args are supplied
-    assert && assert( args.trail &&
-    args.type &&
-    args.pointer &&
-    args.target, 'Missing required scenery.Event argument' );
+    assert && assert( args.trail && args.type && args.pointer && args.target,
+      'Missing required scenery.Event argument' );
 
     this.handled = false;
     this.aborted = false;

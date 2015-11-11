@@ -43,7 +43,7 @@ define( function( require ) {
   /*---------------------------------------------------------------------------*
    * Logging
    * TODO: Move this out of scenery.js if possible
-   *----------------------------------------------------------------------------*/
+   *---------------------------------------------------------------------------*/
 
   // @private - Scenery internal log function to be used to log to scenery.logString (does not include color/css)
   function stringLogFunction( message ) {

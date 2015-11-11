@@ -3528,7 +3528,7 @@ define( function( require ) {
           try {
             delete img.onload;
           }
-          catch( e ) {
+          catch ( e ) {
             // do nothing
           } // fails on Safari 5.1
         };
