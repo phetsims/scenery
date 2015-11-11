@@ -100,7 +100,7 @@ define( function( require ) {
                               typeof fill.value === 'string' ||
                               fill.value instanceof Color
                             ) ),
-                            'Invalid fill type' );
+            'Invalid fill type' );
 
           // Instance equality used here since it would be more expensive to parse all CSS
           // colors and compare every time the fill changes. Right now, usually we don't have
@@ -144,7 +144,7 @@ define( function( require ) {
                               typeof stroke.value === 'string' ||
                               stroke.value instanceof Color
                             ) ),
-                            'Invalid stroke type' );
+            'Invalid stroke type' );
 
           // Instance equality used here since it would be more expensive to parse all CSS
           // colors and compare every time the fill changes. Right now, usually we don't have
@@ -791,6 +791,7 @@ define( function( require ) {
         }
         /*jshint +W040 */
       }
+
       // Patch in a sub-type call if it already exists on the prototype
       if ( proto.invalidateFill ) {
         var subtypeInvalidateFill = proto.invalidateFill;
@@ -814,6 +815,7 @@ define( function( require ) {
         }
         /*jshint +W040 */
       }
+
       if ( proto.invalidateStroke ) {
         var subtypeInvalidateStroke = proto.invalidateStroke;
         proto.invalidateStroke = function() {
