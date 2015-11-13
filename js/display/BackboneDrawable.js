@@ -77,6 +77,7 @@ define( function( require ) {
 
       this.backboneVisibilityListener = this.backboneVisibilityListener || this.updateBackboneVisibility.bind( this );
       this.backboneInstance.on( 'relativeVisibility', this.backboneVisibilityListener );
+      this.updateBackboneVisibility();
       this.visibilityDirty = true;
 
       this.renderer = renderer;
