@@ -213,6 +213,8 @@ define( function( require ) {
       this.addOverlay( this._focusOverlay );
 
       this._rootAccessibleInstance = AccessibleInstance.createFromPool( null, this, new scenery.Trail() );
+      sceneryLog && sceneryLog.AccessibleInstance && sceneryLog.AccessibleInstance(
+        'Display root instance: ' + this._rootAccessibleInstance.toString() );
       this._rootAccessibleInstance.addSubtree( new scenery.Trail( this._rootNode ) );
 
       this._domElement.appendChild( this._rootAccessibleInstance.peer.domElement );

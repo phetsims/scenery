@@ -126,19 +126,18 @@ an UI and Display made for visual testing and debugging.
         }
       };
 
+      window.testContent = {
+        createPeer: function( accessibleInstance ) {
+          return new scenery.AccessiblePeer( accessibleInstance, document.createElement( 'div' ) );
+        }
+      };
       window.accessibleTest = function() {
         setTimeout( function() {
-          window.a = new scenery.Node();
+          scenery.enableLogging( [ 'AccessibleInstance' ] )
+          window.a = new scenery.Node( { accessibleContent: testContent } );
+          scene.addChild( a );
           window.b = new scenery.Node();
-          window.c = new scenery.Node();
-          window.d = new scenery.Node();
-
-          a.children = [ b ];
-          b.children = [ c ];
-          c.children = [ d ];
-
-          window.trail = d.getUniqueTrail();
-          window.tracker = new scenery.TransformTracker( trail );
+          b.addChild( a );
         } )
       };
 

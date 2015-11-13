@@ -87,7 +87,8 @@ define( function( require ) {
     SVGGroup: { name: 'SVGGroup', style: 'color: #000;' },
     ImageSVGDrawable: { name: 'ImageSVGDrawable', style: 'color: #000;' },
     Paints: { name: 'Paints', style: 'color: #000;' },
-    Accessibility: { name: 'Accessibility', style: 'color: #000;' }
+    Accessibility: { name: 'Accessibility', style: 'color: #000;' },
+    AccessibleInstance: { name: 'AccessibleInstance', style: 'color: #000;' }
   };
 
   // will be filled in by other modules

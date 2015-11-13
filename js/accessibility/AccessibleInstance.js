@@ -70,6 +70,9 @@ define( function( require ) {
         childContainerElement.insertBefore( this.peer.domElement, childContainerElement.childNodes[ 0 ] );
       }
 
+      sceneryLog && sceneryLog.AccessibleInstance && sceneryLog.AccessibleInstance(
+        'Initialized ' + this.toString() );
+
       return this;
     },
 
@@ -103,10 +106,16 @@ define( function( require ) {
      *       ABC.addSubtree( ABCDFH )
      */
     addSubtree: function( trail ) {
+      sceneryLog && sceneryLog.AccessibleInstance && sceneryLog.AccessibleInstance(
+        'addSubtree on ' + this.toString() + ' with trail ' + trail.toString() );
+      sceneryLog && sceneryLog.AccessibleInstance && sceneryLog.push();
+
       var node = trail.lastNode();
       var nextInstance = this;
       if ( node.accessibleContent ) {
         var accessibleInstance = AccessibleInstance.createFromPool( this, this.display, trail.copy() ); // TODO: Pooling
+        sceneryLog && sceneryLog.AccessibleInstance && sceneryLog.AccessibleInstance(
+          'Insert parent: ' + this.toString() + ', (new) child: ' + accessibleInstance.toString() );
         this.children.push( accessibleInstance ); // TODO: Mark us as dirty for performance.
         this.markAsUnsorted();
 
@@ -118,18 +127,28 @@ define( function( require ) {
         nextInstance.addSubtree( trail );
         trail.removeDescendant();
       }
+
+      sceneryLog && sceneryLog.AccessibleInstance && sceneryLog.pop();
     },
 
     removeSubtree: function( trail ) {
+      sceneryLog && sceneryLog.AccessibleInstance && sceneryLog.AccessibleInstance(
+        'removeSubtree on ' + this.toString() + ' with trail ' + trail.toString() );
+      sceneryLog && sceneryLog.AccessibleInstance && sceneryLog.push();
+
       for ( var i = this.children.length - 1; i >= 0; i-- ) {
         var childInstance = this.children[ i ];
         if ( childInstance.trail.isExtensionOf( trail, true ) ) {
+          sceneryLog && sceneryLog.AccessibleInstance && sceneryLog.AccessibleInstance(
+            'Remove parent: ' + this.toString() + ', child: ' + childInstance.toString() );
           this.children.splice( i, 1 ); // remove it from the children array
 
           // Dispose the entire subtree of AccessibleInstances
           childInstance.dispose();
         }
       }
+
+      sceneryLog && sceneryLog.AccessibleInstance && sceneryLog.pop();
     },
 
     markAsUnsorted: function() {
@@ -264,6 +283,10 @@ define( function( require ) {
 
     // Recursive disposal
     dispose: function() {
+      sceneryLog && sceneryLog.AccessibleInstance && sceneryLog.AccessibleInstance(
+        'Disposing ' + this.toString() );
+      sceneryLog && sceneryLog.AccessibleInstance && sceneryLog.push();
+
       // Disconnect DOM
       if ( !this.isRootInstance ) {
         this.parent.peer.getChildContainerElement().removeChild( this.peer.domElement );
@@ -285,6 +308,12 @@ define( function( require ) {
       this.disposed = true;
 
       this.freeToPool();
+
+      sceneryLog && sceneryLog.AccessibleInstance && sceneryLog.pop();
+    },
+
+    toString: function() {
+      return this.id + '#{' + this.trail.toString() + '}';
     },
 
     auditRoot: function() {

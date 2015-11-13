@@ -334,15 +334,9 @@ define( function( require ) {
       node._parents.push( this );
       this._children.splice( index, 0, node );
 
+      // If this added subtree contains accessible content, we need to notify any relevant displays
       if ( !node._rendererSummary.isNotAccessible() ) {
-        var trails = node.getTrails( hasRootedDisplayPredicate );
-        for ( var i = 0; i < trails.length; i++ ) {
-          var trail = trails[ i ];
-          var rootedDisplays = trail.rootNode()._rootedDisplays;
-          for ( var j = 0; j < rootedDisplays.length; j++ ) {
-            rootedDisplays[ j ].addAccessibleTrail( trail );
-          }
-        }
+        this.onAccessibleAddChild( node );
       }
 
       node.invalidateBounds();
@@ -419,16 +413,10 @@ define( function( require ) {
 
       var indexOfParent = _.indexOf( node._parents, this );
 
+      // If this added subtree contains accessible content, we need to notify any relevant displays
       // NOTE: Potentially removes bounds listeners here!
       if ( !node._rendererSummary.isNotAccessible() ) {
-        var trails = node.getTrails( hasRootedDisplayPredicate );
-        for ( var i = 0; i < trails.length; i++ ) {
-          var trail = trails[ i ];
-          var rootedDisplays = trail.rootNode()._rootedDisplays;
-          for ( var j = 0; j < rootedDisplays.length; j++ ) {
-            rootedDisplays[ j ].removeAccessibleTrail( trail );
-          }
-        }
+        this.onAccessibleRemoveChild( node );
       }
 
       // needs to be early to prevent re-entrant children modifications
@@ -1630,6 +1618,58 @@ define( function( require ) {
      */
     getInputListeners: function() {
       return this._inputListeners.slice( 0 ); // defensive copy
+    },
+
+    /**
+     * Called when the node is added as a child to this node AND the node's subtree contains accessible content.
+     * We need to notify all Displays that can see this change, so that they can update the AccessibleInstance tree.
+     * @private
+     *
+     * @param {Node} node
+     */
+    onAccessibleAddChild: function( node ) {
+      // All trails starting with nodes that have display roots, and ending with the added node.
+      var trails = node.getTrails( hasRootedDisplayPredicate );
+      for ( var i = 0; i < trails.length; i++ ) {
+        var trail = trails[ i ];
+
+        // Ignore trails where this node is not the child node's parent. See https://github.com/phetsims/scenery/issues/491
+        if ( trail.nodeFromTop( 1 ) !== this ) {
+          continue;
+        }
+
+        // Notify each Display of the trail
+        var rootedDisplays = trail.rootNode()._rootedDisplays;
+        for ( var j = 0; j < rootedDisplays.length; j++ ) {
+          rootedDisplays[ j ].addAccessibleTrail( trail );
+        }
+      }
+    },
+
+    /**
+     * Called when the node is removed as a child from this node AND the node's subtree contains accessible content.
+     * We need to notify all Displays that can see this change, so that they can update the AccessibleInstance tree.
+     * @private
+     *
+     * @param {Node} node
+     */
+    onAccessibleRemoveChild: function( node ) {
+      // All trails starting with nodes that have display roots, and ending with the removed node.
+      var trails = node.getTrails( hasRootedDisplayPredicate );
+      for ( var i = 0; i < trails.length; i++ ) {
+        var trail = trails[ i ];
+
+        // Ignore trails where this node is not the child node's parent. See https://github.com/phetsims/scenery/issues/491
+        if ( trail.nodeFromTop( 1 ) !== this ) {
+          continue;
+        }
+
+        // Notify each Display of the trail
+        var rootedDisplays = trail.rootNode()._rootedDisplays;
+        for ( var j = 0; j < rootedDisplays.length; j++ ) {
+          rootedDisplays[ j ].removeAccessibleTrail( trail );
+        }
+      }
     },
 
     /**
