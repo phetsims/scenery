@@ -768,15 +768,7 @@ define( function( require ) {
       dispatchEvent: function( trail, type, pointer, event, bubbles ) {
         sceneryLog && sceneryLog.InputEvent && sceneryLog.InputEvent(
           'Input: ' + type + ' on ' + trail.toString() + ' for pointer ' + pointer.toString() + ' at ' + pointer.point.toString() );
-        if ( !trail ) {
-          try {
-            throw new Error( 'falsy trail for dispatchEvent' );
-          }
-          catch( e ) {
-            console.log( e.stack );
-            throw e;
-          }
-        }
+        assert && assert( trail, 'Falsy trail for dispatchEvent' );
 
         // TODO: is there a way to make this event immutable?
         var inputEvent = new scenery.Event( {
