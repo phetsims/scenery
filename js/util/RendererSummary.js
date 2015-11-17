@@ -68,11 +68,11 @@ define( function( require ) {
 
     // required listeners to update our summary based on painted/non-painted information
     var listener = this.selfChange.bind( this );
-    this.node.on( 'opacity', listener );
-    this.node.on( 'hint', listener ); // should fire on things like node.renderer being changed
-    this.node.on( 'clip', listener );
-    this.node.on( 'selfBoundsValid', listener ); // e.g. Text, may change based on boundsMethod
-    this.node.on( 'accessibleContent', listener );
+    this.node.onStatic( 'opacity', listener );
+    this.node.onStatic( 'hint', listener ); // should fire on things like node.renderer being changed
+    this.node.onStatic( 'clip', listener );
+    this.node.onStatic( 'selfBoundsValid', listener ); // e.g. Text, may change based on boundsMethod
+    this.node.onStatic( 'accessibleContent', listener );
   }
 
   scenery.register( 'RendererSummary', RendererSummary );
