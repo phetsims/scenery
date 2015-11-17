@@ -81,17 +81,16 @@ define( function( require ) {
     layout: function() {
 
       var children = this.getChildren(); // call this once, since it returns a copy
-      var i = 0;
+      var i;
       var child;
+
+      // Get the smallest Bounds2 that contains all of our children (triggers bounds validation for all of them)
+      var childBounds = this.childBounds;
 
       //Logic for layout out the components.
       //Aaron and Sam looked at factoring this out, but the result looked less readable since each attribute
       //would have to be abstracted over.
       if ( this.orientation === 'vertical' ) {
-        var minX = _.min( _.map( children, function( child ) {return child.left;} ) );
-        var maxX = _.max( _.map( children, function( child ) {return child.left + child.width;} ) );
-        var centerX = (maxX + minX) / 2;
-
         //Start at y=0 in the coordinate frame of this node.  Not possible to set this through the spacing option, instead just set it with the {y:number} option.
         var y = 0;
         for ( i = 0; i < children.length; i++ ) {
@@ -100,13 +99,13 @@ define( function( require ) {
 
           //Set the position horizontally
           if ( this.align === 'left' ) {
-            child.left = minX;
+            child.left = childBounds.minX;
           }
           else if ( this.align === 'right' ) {
-            child.right = maxX;
+            child.right = childBounds.maxX;
           }
           else { // 'center'
-            child.centerX = centerX;
+            child.centerX = childBounds.centerX;
           }
 
           //Move to the next vertical position.
@@ -114,10 +113,6 @@ define( function( require ) {
         }
       }
       else {
-        var minY = _.min( _.map( children, function( child ) {return child.top;} ) );
-        var maxY = _.max( _.map( children, function( child ) {return child.top + child.height;} ) );
-        var centerY = (maxY + minY) / 2;
-
         //Start at x=0 in the coordinate frame of this node.  Not possible to set this through the spacing option, instead just set it with the {x:number} option.
         var x = 0;
         for ( i = 0; i < children.length; i++ ) {
@@ -126,13 +121,13 @@ define( function( require ) {
 
           //Set the position horizontally
           if ( this.align === 'top' ) {
-            child.top = minY;
+            child.top = childBounds.minY;
           }
           else if ( this.align === 'bottom' ) {
-            child.bottom = maxY;
+            child.bottom = childBounds.maxY;
           }
           else { // 'center'
-            child.centerY = centerY;
+            child.centerY = childBounds.centerY;
           }
 
           //Move to the next horizontal position.
