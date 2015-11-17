@@ -231,8 +231,11 @@ define( function( require ) {
         }
       }
       else {
-        // it might have a fill?
-        return Path.prototype.computeShapeBounds.call( this );
+        // It might have a fill? Just include the fill bounds for now.
+        var fillBounds = Bounds2.NOTHING.copy();
+        fillBounds.addCoordinates( this._x1, this._y1 );
+        fillBounds.addCoordinates( this._x2, this._y2 );
+        return fillBounds;
       }
     },
 
