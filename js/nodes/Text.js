@@ -63,6 +63,9 @@ define( function( require ) {
   // See https://github.com/phetsims/scenery/issues/455 for more information.
   var useSVGTextLengthAdjustments = !platform.ie && !platform.edge;
 
+  // Maps CSS {string} => {Bounds2}, so that we can cache the vertical font sizes outside of the Font objects themselves.
+  var hybridFontVerticalCache = {};
+
   function Text( text, options ) {
     this._text = '';                   // filled in with mutator
     this._font = scenery.Font.DEFAULT; // default font, usually 10px sans-serif
@@ -319,13 +322,14 @@ define( function( require ) {
         return Bounds2.NOTHING; // we are the hybridTextNode, ignore us
       }
 
-      if ( this._font._cachedSVGBounds === undefined ) {
+      var css = this._font.toCSS();
+      var verticalBounds = hybridFontVerticalCache[ css ];
+      if ( !verticalBounds ) {
         hybridTextNode.setFont( this._font );
-        this._font._cachedSVGBounds = hybridTextNode.getBounds().copy();
+        verticalBounds = hybridFontVerticalCache[ css ] = hybridTextNode.getBounds().copy();
       }
 
       var canvasWidth = this.approximateCanvasWidth();
-      var verticalBounds = this._font._cachedSVGBounds;
 
       // it seems that SVG bounds generally have x=0, so we hard code that here
       return new Bounds2( 0, verticalBounds.minY, canvasWidth, verticalBounds.maxY );
