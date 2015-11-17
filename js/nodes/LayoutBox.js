@@ -76,8 +76,10 @@ define( function( require ) {
 
   return inherit( Node, LayoutBox, {
 
-    // Lay out the child components on startup, or when the children sizes change or when requested by a call to updateLayout
-    // @private, do not call directly, use updateLayout
+    /**
+     * The actual layout logic, typically run from the constructor OR updateLayout().
+     * @private
+     */
     layout: function() {
 
       var children = this.getChildren(); // call this once, since it returns a copy
@@ -87,17 +89,17 @@ define( function( require ) {
       // Get the smallest Bounds2 that contains all of our children (triggers bounds validation for all of them)
       var childBounds = this.childBounds;
 
-      //Logic for layout out the components.
-      //Aaron and Sam looked at factoring this out, but the result looked less readable since each attribute
-      //would have to be abstracted over.
+      // Logic for layout out the components.
+      // Aaron and Sam looked at factoring this out, but the result looked less readable since each attribute
+      // would have to be abstracted over.
       if ( this.orientation === 'vertical' ) {
-        //Start at y=0 in the coordinate frame of this node.  Not possible to set this through the spacing option, instead just set it with the {y:number} option.
+        // Start at y=0 in the coordinate frame of this node.  Not possible to set this through the spacing option, instead just set it with the {y:number} option.
         var y = 0;
         for ( i = 0; i < children.length; i++ ) {
           child = children[ i ];
           child.top = y;
 
-          //Set the position horizontally
+          // Set the position horizontally
           if ( this.align === 'left' ) {
             child.left = childBounds.minX;
           }
@@ -108,18 +110,18 @@ define( function( require ) {
             child.centerX = childBounds.centerX;
           }
 
-          //Move to the next vertical position.
+          // Move to the next vertical position.
           y += child.height + this._spacing;
         }
       }
       else {
-        //Start at x=0 in the coordinate frame of this node.  Not possible to set this through the spacing option, instead just set it with the {x:number} option.
+        // Start at x=0 in the coordinate frame of this node.  Not possible to set this through the spacing option, instead just set it with the {x:number} option.
         var x = 0;
         for ( i = 0; i < children.length; i++ ) {
           child = children[ i ];
           child.left = x;
 
-          //Set the position horizontally
+          // Set the position horizontally
           if ( this.align === 'top' ) {
             child.top = childBounds.minY;
           }
@@ -130,16 +132,19 @@ define( function( require ) {
             child.centerY = childBounds.centerY;
           }
 
-          //Move to the next horizontal position.
+          // Move to the next horizontal position.
           x += child.width + this._spacing;
         }
       }
     },
 
-    // Update the layout of this LayoutBox. Called automatically during initialization, when children change (if resize is true)
-    // or when client wants to call this public method for any reason.
+    /**
+     * Updates the layout of this LayoutBox. Called automatically during initialization, when children change (if
+     * resize is true), or when client wants to call this public method for any reason.
+     * @public
+     */
     updateLayout: function() {
-      //Bounds of children are changed in updateLayout, we don't want to stackoverflow, so bail if already updating layout
+      // Bounds of children are changed in updateLayout, we don't want to stackoverflow, so bail if already updating layout
       if ( !this.updatingLayout ) {
         this.updatingLayout = true;
         this.layout();
@@ -147,24 +152,14 @@ define( function( require ) {
       }
     },
 
-    //Override the child mutators to updateLayout
-    //Have to listen to the child bounds individually because there are a number of possible ways to change the child
-    //bounds without changing the overall bounds.
-    // @override
+    /**
+     * @override - Overrides from Node, so we can listen for bounds changes.
+     * We have to listen to the bounds of each child individually, since individual child bounds changes might not
+     * trigger an overall bounds change.
+     */
     insertChild: function( index, node ) {
-      //Support up to two args for overrides
 
-      //Remove event listeners from any nodes (will be added back later if the node was not removed)
-      var layoutBox = this;
-      if ( this.resize ) {
-        this.getChildren().forEach( function( child ) {
-          if ( child.containsEventListener( 'bounds', layoutBox.boundsListener ) ) {
-            child.removeEventListener( 'bounds', layoutBox.boundsListener );
-          }
-        } );
-      }
-
-      //Super call
+      // Super call
       Node.prototype.insertChild.call( this, index, node );
 
       // Update the layout (a) if it should be dynamic or (b) during initialization
@@ -172,50 +167,35 @@ define( function( require ) {
         this.updateLayout();
       }
 
-      //Add event listeners for any current children (if it should be dynamic)
       if ( this.resize ) {
-        this.getChildren().forEach( function( child ) {
-          if ( !child.containsEventListener( 'bounds', layoutBox.boundsListener ) ) {
-            child.addEventListener( 'bounds', layoutBox.boundsListener );
-          }
-        } );
+        node.onStatic( 'bounds', this.boundsListener );
       }
     },
 
-    //Overrides the version in Node to listen for bounds changes
-    // @override
+    /**
+     * @override - Overrides from Node, so we can listen for bounds changes.
+     *
+     * @param {Node} node
+     * @param {number} indexOfChild
+     */
     removeChildWithIndex: function( node, indexOfChild ) {
 
-      //Remove event listeners from any nodes (will be added back later if the node was not removed)
-      var layoutBox = this;
       if ( this.resize ) {
-        this.getChildren().forEach( function( child ) {
-          if ( child.containsEventListener( 'bounds', layoutBox.boundsListener ) ) {
-            child.removeEventListener( 'bounds', layoutBox.boundsListener );
-          }
-        } );
+        node.offStatic( 'bounds', this.boundsListener );
       }
 
-      //Super call
+      // Super call
       Node.prototype.removeChildWithIndex.call( this, node, indexOfChild );
 
       // Update the layout (a) if it should be dynamic or (b) during initialization
       if ( this.resize || !this.inited ) {
         this.updateLayout();
       }
-
-      //Add event listeners for any current children (if it should be dynamic)
-      if ( this.resize ) {
-        this.getChildren().forEach( function( child ) {
-          if ( !child.containsEventListener( 'bounds', layoutBox.boundsListener ) ) {
-            child.addEventListener( 'bounds', layoutBox.boundsListener );
-          }
-        } );
-      }
     },
 
     /**
      * Sets spacing between items in the box.
+     * @public
      *
      * @param {number} spacing
      */
@@ -226,6 +206,8 @@ define( function( require ) {
 
       if ( this._spacing !== spacing ) {
         this._spacing = spacing;
+
+        // TODO: Do we need to check for if we are resizing?
         this.updateLayout();
       }
     },
@@ -235,6 +217,7 @@ define( function( require ) {
 
     /**
      * Gets the spacing between items in the box.
+     * @public
      *
      * @returns {number}
      */
