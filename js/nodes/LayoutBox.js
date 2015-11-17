@@ -97,6 +97,9 @@ define( function( require ) {
         var y = 0;
         for ( i = 0; i < children.length; i++ ) {
           child = children[ i ];
+          if ( !child.bounds.isValid() ) {
+            continue;
+          }
           child.top = y;
 
           // Set the position horizontally
@@ -119,6 +122,9 @@ define( function( require ) {
         var x = 0;
         for ( i = 0; i < children.length; i++ ) {
           child = children[ i ];
+          if ( !child.bounds.isValid() ) {
+            continue;
+          }
           child.left = x;
 
           // Set the position horizontally
