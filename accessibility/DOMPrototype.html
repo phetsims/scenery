@@ -1,7 +1,7 @@
 <div role="applicaton' aria-labelledby="simTitle">
 	<h1 id='simTitle'>Forces and Motion: Basics</h1>
 	
-	<div aria-labeledby='homeLabel' aria-describedby='homeDescription'>
+	<div hidden aria-labeledby='homeLabel' aria-describedby='homeDescription'>
 		<h2 id='homeLabel'>Home Screen</h2>
 		<p id='homeDescription'>
 			Home screen for Forces and Motion Basics. Navigate to the 
@@ -11,14 +11,56 @@
 		<input type="image" alt="Motion Screen" src="" id='motionId'>
 		<input type="image" alt="Friction Screen" src="" id='frictionId'>
 		<input type="image" alt="Accelleration Screen" src="" id='accellerationId'>
+		<input type="button" alt="Phet Menu" src="" id='phetMenuButton'
 	</div>
 	
-	<h2 hidden>Net Force Screen</h2>
+	<div aria-labeledby='netForceLabel'>Net Force Screen
+		<h2 id='netForceLabel'>Net Force</h2>
+		<p id=netForceDescription>
+			There is a heavily loaded cart on 
+			wheels sitting on a track. Attached to the left side of the cart
+			is a thick rope with 4 knots spaced equally along the rope. Standing
+			near this knotted rope is a group of 4 puller people. On the 
+			opposite side of the cart, a similar rope with 4 knots is attached
+			to the right side of the cart. There is another group of 4 puller
+			people standing near this rope. The centre position of the cart has
+			been marked on the ground.
+		</p>
+		
+		<fieldset tabindex='0' aria-describedby='leftGroupDescription'>
+			<legend>Left pullers</legend>
+			<input type='image' alt='Left group, large puller' draggable='true'>
+			<input type='image' alt='Left group, medium puller' draggable='true'>
+			<input type='image' alt='Left group, small puller' draggable='true'>
+			<input type='image' alt='Left group, small puller' draggable='true'>
+		</fieldset>
+		<p id='leftGroupDescription' aria-live='assertive'>
+			A rope is attached to the left side of the cart. The rope 
+			has 4 knots spaced equally along the rope. A group of four
+			puller people are standing near this rope.
+		</p>
+		
+		<fieldset tabindex='0' aria-describedby='rightGroupDescription'>
+			<legend>Right pullers</legend>
+			<input type='image' alt='Right group, small puller' draggable='true'>
+			<input type='image' alt='Right group, small puller' draggable='true'>
+			<input type='image' alt='Right group, large puller' draggable='true'>
+			<input type='image' alt='Right group, large puller' draggable='true'>
+		</fieldset>
+		<p id='rightGroupDescription' aria-live='assertive'>
+			A rope is attached to the left right of the cart. The rope 
+			has 4 knots spaced equally along the rope. A group of four
+			puller people are standing near this rope.
+		</p>
+		
+	<div>
 	
-	<h2 hidden>Motion Screen</h2>
 	
-	<h2 hidden>Fricion Screen</h2>
 	
-	<h2 hidden>Accelleration Screen</h2>
+	<div hidden>Motion Screen</div>
+	
+	<div hidden>Fricion Screen</div>
+	
+	<div hidden>Accelleration Screen</div>
 </div>
 		
