@@ -1,64 +1,101 @@
-<div role="applicaton' aria-labelledby="simTitle">
-	<h1 id='simTitle'>Forces and Motion: Basics</h1>
-	
-	<div hidden aria-labeledby='homeLabel' aria-describedby='homeDescription'>
-		<h2 id='homeLabel'>Home Screen</h2>
-		<p id='homeDescription'>
-			Home screen for Forces and Motion Basics. Navigate to the 
-			buttons to open the simulation screens.
-		</p>
-		<input type="image" alt="Net Force Screen" src="" id='netForceId'>
-		<input type="image" alt="Motion Screen" src="" id='motionId'>
-		<input type="image" alt="Friction Screen" src="" id='frictionId'>
-		<input type="image" alt="Accelleration Screen" src="" id='accellerationId'>
-		<input type="image" alt="Phet Menu" src="" id='phetMenuButton'>
-	</div>
-	
-	<div aria-labeledby='netForceLabel'>
-		<h2 id='netForceLabel'>Net Force</h2>
-		<p id=netForceDescription>
-			There is a heavily loaded cart on 
-			wheels sitting on a track. Attached to the left side of the cart
-			is a thick rope with 4 knots spaced equally along the rope. Standing
-			near this knotted rope is a group of 4 puller people. On the 
-			opposite side of the cart, a similar rope with 4 knots is attached
-			to the right side of the cart. There is another group of 4 puller
-			people standing near this rope. The centre position of the cart has
-			been marked on the ground.
-		</p>
-		
-		<fieldset tabindex='0' aria-describedby='leftGroupDescription'>
-			<legend>Left pullers</legend>
-			<input type='image' alt='Left group, large puller' draggable='true' hidden>
-			<input type='image' alt='Left group, medium puller' draggable='true' hidden>
-			<input type='image' alt='Left group, small puller' draggable='true' hidden>
-			<input type='image' alt='Left group, small puller' draggable='true' hidden>
-		</fieldset>
-		<p id='leftGroupDescription' aria-live='assertive'>
-			A rope is attached to the left side of the cart. The rope 
-			has 4 knots spaced equally along the rope. A group of four
-			puller people are standing near this rope.
-		</p>
-		
-		<fieldset tabindex='0' aria-describedby='rightGroupDescription'>
-			<legend>Right pullers</legend>
-			<input type='image' alt='Right group, small puller' draggable='true' hidden>
-			<input type='image' alt='Right group, small puller' draggable='true' hidden>
-			<input type='image' alt='Right group, large puller' draggable='true' hidden>
-			<input type='image' alt='Right group, large puller' draggable='true' hidden>
-		</fieldset>
-		<p id='rightGroupDescription' aria-live='assertive'>
-			A rope is attached to the left right of the cart. The rope 
-			has 4 knots spaced equally along the rope. A group of four
-			puller people are standing near this rope.
-		</p>
-		
-	</div>
-	
-	<div hidden>Motion Screen</div>
-	
-	<div hidden>Fricion Screen</div>
-	
-	<div hidden>Accelleration Screen</div>
+<div role='applicaton' aria-labelledby='simTitle'>
+  <h1 id='simTitle'>Forces and Motion: Basics</h1>
+
+  <div hidden aria-labeledby='homeLabel' aria-describedby='homeDescription'>
+    <h2 id='homeLabel'>Home Screen</h2>
+
+    <p id='homeDescription'>
+      Home screen for Forces and Motion Basics. Navigate to the
+      buttons to open the simulation screens.
+    </p>
+    <input type="image" alt="Net Force Screen" src="" id='netForceId'>
+    <input type="image" alt="Motion Screen" src="" id='motionId'>
+    <input type="image" alt="Friction Screen" src="" id='frictionId'>
+    <input type="image" alt="Accelleration Screen" src="" id='accellerationId'>
+    <input type="image" alt="Phet Menu" src="" id='phetMenuButton'>
+  </div>
+
+  <div aria-labeledby='netForceLabel'>
+    <h2 id='netForceLabel'>Net Force</h2>
+
+    <p id=netForceDescription>
+      There is a heavily loaded cart on
+      wheels sitting on a track. Attached to the left side of the cart
+      is a thick rope with 4 knots spaced equally along the rope. Standing
+      near this knotted rope is a group of 4 puller people. On the
+      opposite side of the cart, a similar rope with 4 knots is attached
+      to the right side of the cart. There is another group of 4 puller
+      people standing near this rope. The centre position of the cart has
+      been marked on the ground.
+    </p>
+
+    <fieldset tabindex='0' aria-describedby='leftGroupDescription'>
+      <legend>Left pullers</legend>
+      <input type='image' alt='Left group, large puller' draggable='true' hidden>
+      <input type='image' alt='Left group, medium puller' draggable='true' hidden>
+      <input type='image' alt='Left group, small puller' draggable='true' hidden>
+      <input type='image' alt='Left group, small puller' draggable='true' hidden>
+    </fieldset>
+    <p id='leftGroupDescription' aria-live='assertive'>
+      Left pullers. Select enter to choose and place pullers on the rope.
+    </p>
+
+    <fieldset tabindex='0' aria-describedby='rightGroupDescription'>
+      <legend>Right pullers</legend>
+      <input type='image' alt='Right group, small puller' draggable='true' hidden>
+      <input type='image' alt='Right group, small puller' draggable='true' hidden>
+      <input type='image' alt='Right group, large puller' draggable='true' hidden>
+      <input type='image' alt='Right group, large puller' draggable='true' hidden>
+    </fieldset>
+    <p id='rightGroupDescription' aria-live='assertive'>
+      Right pullers. Select enter to choose and place pullers on the rope.
+    </p>
+
+    <fieldset hidden>
+      <legend>Left knot group</legend>
+      <input type='image' alt='First knot, closest to the cart' draggable='true'>
+      <input type='image' alt='Second knot' draggable='true'>
+      <input type='image' alt='Third knot' draggable='true'>
+      <input type='image' alt='Fourth knot, farthest from the cart' draggable='true'>
+    </fieldset>
+
+    <fieldset hidden>
+      <legend>Right knot group</legend>
+      <input type='image' alt='First knot, closest to the cart'>
+      <input type='image' alt='Second knot'>
+      <input type='image' alt='Third knot'>
+      <input type='image' alt='Fourth knot, farthest from the cart'>
+    </fieldset>
+
+    <input type='button' value='Go' aria-disabled='true' aria-describedby='goButtonDescription'>
+
+    <p id="goButtonDescription">Select to start pullers</p>
+
+    <input type='button' value='Go' aria-disabled='true' aria-describedby='pauseButtonDescription'>
+
+    <p id="pauseButtonDescription">Select to pause pullers</p>
+
+    <fieldset>
+      <legend>Visibility checkboxes</legend>
+      <input type='checkbox' id='sumOfForcesCheckbox'>
+      <label for='sumOfForcesCheckbox'>Sum of Forces</label><br>
+      <input type='checkbox' id='valuesCheckbox'>
+      <label for='valuesCheckbox'>Values</label>
+    </fieldset>
+
+    <input type='reset' value='Reset all' aria-describedby='resetAllDescription'>
+
+    <p id='resetAllDescription'>Select to reset screen</p>
+
+    <input type='button' value='Toggle sound' aria-describedby='toggleSoundDescription'>
+
+    <p id="'toggleSoundDescription">Select to toggle sound</p>
+  </div>
+
+  <div hidden>Motion Screen</div>
+
+  <div hidden>Friction Screen</div>
+
+  <div hidden>Accelleration Screen</div>
 </div>
 		
