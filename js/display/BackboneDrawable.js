@@ -76,7 +76,7 @@ define( function( require ) {
       }
 
       this.backboneVisibilityListener = this.backboneVisibilityListener || this.updateBackboneVisibility.bind( this );
-      this.backboneInstance.on( 'relativeVisibility', this.backboneVisibilityListener );
+      this.backboneInstance.onStatic( 'relativeVisibility', this.backboneVisibilityListener );
       this.updateBackboneVisibility();
       this.visibilityDirty = true;
 
@@ -138,7 +138,7 @@ define( function( require ) {
         node.offStatic( 'clip', this.clipDirtyListener );
       }
 
-      this.backboneInstance.off( 'relativeVisibility', this.backboneVisibilityListener );
+      this.backboneInstance.offStatic( 'relativeVisibility', this.backboneVisibilityListener );
 
       // if we need to remove drawables from the blocks, do so
       if ( !this.removedDrawables ) {

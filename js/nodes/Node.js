@@ -177,7 +177,7 @@ define( function( require ) {
      */
     this._transform = new Transform3(); // @private {Transform3}
     this._transformListener = this.onTransformChange.bind( this ); // @private {Function}
-    this._transform.on( 'change', this._transformListener );
+    this._transform.onStatic( 'change', this._transformListener ); // NOTE: Listener/transform bound to this node.
 
     /*
      * Maxmimum dimensions for the node's local bounds before a corrective scaling factor is applied to maintain size.

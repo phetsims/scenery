@@ -32,7 +32,7 @@ define( function( require ) {
       this.node = instance.trail.lastNode();
       this.node.attachDrawable( this );
 
-      this.instance.on( 'selfVisibility', this.drawableVisibilityListener );
+      this.instance.onStatic( 'selfVisibility', this.drawableVisibilityListener );
 
       this.updateSelfVisibility();
 
@@ -41,7 +41,7 @@ define( function( require ) {
 
     // @public
     dispose: function() {
-      this.instance.off( 'selfVisibility', this.drawableVisibilityListener );
+      this.instance.offStatic( 'selfVisibility', this.drawableVisibilityListener );
 
       this.node.detachDrawable( this );
 

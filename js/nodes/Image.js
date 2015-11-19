@@ -729,7 +729,7 @@ define( function( require ) {
           // update our mipmap usage status
           self.updateMipmapStatus( self.node._mipmap );
         };
-      this.node.on( 'mipmap', this._mipmapListener );
+      this.node.onStatic( 'mipmap', this._mipmapListener );
       this.updateMipmapStatus( instance.node._mipmap );
 
       return this;
@@ -827,7 +827,7 @@ define( function( require ) {
 
       // clean up mipmap listeners and compute needs
       this.updateMipmapStatus( false );
-      this.node.off( 'mipmap', this._mipmapListener );
+      this.node.offStatic( 'mipmap', this._mipmapListener );
 
       SVGSelfDrawable.prototype.dispose.call( this );
     }
