@@ -170,7 +170,7 @@ define( function( require ) {
         else {
           // 'accurate' will always require computing the full stroked shape, and taking its bounds
           if ( this._boundsMethod === 'accurate' ) {
-            return this.getStrokedShape().bounds;
+            return this.getShape().getStrokedBounds( this.getLineStyles() );
           }
           // Otherwise we compute bounds based on 'tightPadding' and 'safePadding', the one difference being that
           // 'safePadding' will include whatever bounds necessary to include miters. Square line-cap requires a
