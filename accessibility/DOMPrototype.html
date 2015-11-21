@@ -1,4 +1,11 @@
-<div role='applicaton' aria-labelledby='simTitle'>
+<html>
+
+<head>
+  <script src="accessibility-script.js"></script>
+  <script type="text/javascript" src="../../sherpa/lib/lodash-2.4.1.min.js"></script>
+</head>
+
+<div aria-labelledby='simTitle'>
   <h1 id='simTitle'>Forces and Motion: Basics</h1>
 
   <div hidden aria-labelledby='homeLabel' aria-describedby='homeDescription'>
@@ -20,47 +27,37 @@
 
     <p id=netForceDescription>
       There is a heavily loaded cart on
-      wheels sitting on a track. Attached to the left side of the cart
-      is a thick rope with 4 knots spaced equally along the rope. Standing
-      near this knotted rope is a group of 4 puller people. On the
-      opposite side of the cart, a similar rope with 4 knots is attached
-      to the right side of the cart. There is another group of 4 puller
-      people standing near this rope. The centre position of the cart has
-      been marked on the ground.
+      wheels sitting on a track...
     </p>
 
-    <fieldset tabindex='0' aria-describedby='leftGroupDescription'>
-      <legend>Left pullers</legend>
-      <input type='image' alt='Left group, large puller' draggable='true' hidden>
+    <fieldset tabindex='0' aria-labelledby='leftGroupDescription' id='leftPullerGroup'>
+      <input type='image' alt='Left group, large puller' draggable='true' id="firstLeftPuller" hidden>
       <input type='image' alt='Left group, medium puller' draggable='true' hidden>
-      <input type='image' alt='Left group, small puller' draggable='true' hidden>
-      <input type='image' alt='Left group, small puller' draggable='true' hidden>
+      <input type='image' alt='Left group, first small puller' draggable='true' hidden>
+      <input type='image' alt='Left group, second small puller' draggable='true' hidden>
     </fieldset>
-    <p id='leftGroupDescription' aria-live='assertive'>
+    <p id='leftGroupDescription'>
       Left pullers. Select enter to choose and place pullers on the rope.
     </p>
 
-    <fieldset tabindex='0' aria-describedby='rightGroupDescription'>
-      <legend>Right pullers</legend>
-      <input type='image' alt='Right group, small puller' draggable='true' hidden>
-      <input type='image' alt='Right group, small puller' draggable='true' hidden>
-      <input type='image' alt='Right group, large puller' draggable='true' hidden>
+    <fieldset tabindex='0' aria-labelledby="rightGroupDescription" id='rightPullerGroup'>
+      <input type='image' alt='Right group, first small puller' draggable='true' hidden id="firstRightPuller">
+      <input type='image' alt='Right group, second small puller' draggable='true' hidden>
+      <input type='image' alt='Right group, medium puller' draggable='true' hidden>
       <input type='image' alt='Right group, large puller' draggable='true' hidden>
     </fieldset>
-    <p id='rightGroupDescription' aria-live='assertive'>
+    <p tabindex="-1" id='rightGroupDescription'>
       Right pullers. Select enter to choose and place pullers on the rope.
     </p>
 
     <fieldset hidden>
-      <legend>Left knot group</legend>
-      <input type='image' alt='First knot, closest to the cart' draggable='true'>
-      <input type='image' alt='Second knot' draggable='true'>
-      <input type='image' alt='Third knot' draggable='true'>
-      <input type='image' alt='Fourth knot, farthest from the cart' draggable='true'>
+      <input type='image' alt='First knot, closest to the cart'>
+      <input type='image' alt='Second knot'>
+      <input type='image' alt='Third knot'>
+      <input type='image' alt='Fourth knot, farthest from the cart'>
     </fieldset>
 
     <fieldset hidden>
-      <legend>Right knot group</legend>
       <input type='image' alt='First knot, closest to the cart'>
       <input type='image' alt='Second knot'>
       <input type='image' alt='Third knot'>
@@ -76,7 +73,7 @@
     <p id='pauseButtonDescription'>Select to pause pullers</p>
 
     <fieldset>
-      <legend>Visibility checkboxes</legend>
+      <legend>Visibility Controls</legend>
       <input type='checkbox' id='sumOfForcesCheckbox'>
       <label for='sumOfForcesCheckbox'>Sum of Forces</label><br>
       <input type='checkbox' id='valuesCheckbox'>
@@ -90,6 +87,11 @@
     <input type='button' value='Toggle sound' aria-describedby='toggleSoundDescription'>
 
     <p id='toggleSoundDescription'>Select to toggle sound</p>
+
+    <!--Element used to alert the user that an action or event has occured in the simulation-->
+    <p><span id="ariaActionElement" role="alert" aria-atomic="true"></span></p>
+    <!--<p id="ariaActionElement" aria-live="polite" aria-atomic="true"></p>-->
+
   </div>
 
   <div hidden>Motion Screen</div>
@@ -98,4 +100,50 @@
 
   <div hidden>Accelleration Screen</div>
 </div>
+
+<script>
+
+
+  // get the puller groups and the first elements in each group.
+  var rightPullerGroup = document.getElementById( 'rightPullerGroup' );
+  var firstRightPuller = document.getElementById( 'firstRightPuller' );
+  var firstLeftPuller = document.getElementById( 'firstLeftPuller' );
+  var leftPullerGroup = document.getElementById( 'leftPullerGroup' );
+
+  rightPullerGroup.addEventListener( 'keydown', function( event ) {
+    // prevent the the event from bubbling.
+    if ( rightPullerGroup !== event.target ) { return; }
+    enterGroup( event, rightPullerGroup, firstRightPuller )
+  } );
+
+  rightPullerGroup.addEventListener( 'keydown', function( event ) {
+    exitGroup( event, rightPullerGroup );
+  } );
+
+  leftPullerGroup.addEventListener( 'keydown', function( event ) {
+    // prevent the the event from bubbling.
+    if ( leftPullerGroup !== event.target ) { return; }
+    enterGroup( event, leftPullerGroup, firstLeftPuller )
+  } );
+
+  leftPullerGroup.addEventListener( 'keydown', function( event ) {
+    exitGroup( event, leftPullerGroup );
+  } );
+
+  _.each( rightPullerGroup.children, function( child ) {
+    child.addEventListener( 'keydown', function( event ) {
+      focusNextElement( event, child );
+      placePullerOnKnot( event, child );
+    } );
+  } );
+
+  _.each( leftPullerGroup.children, function( child ) {
+    child.addEventListener( 'keydown', function( event ) {
+      focusNextElement( event, child );
+      placePullerOnKnot( event, child );
+    } );
+  } );
+
+</script>
+</html>
 		
