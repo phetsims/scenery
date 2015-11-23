@@ -22,47 +22,45 @@
     <input type='image' alt='Phet Menu' src='' id='phetMenuButton'>
   </div>
 
-  <div aria-labelledby='netForceLabel'>
-    <h2 id='netForceLabel'>Net Force</h2>
+  <div aria-labelledby='netForceLabel' role='main'>
+    <h2 id='netForceLabel' aria-describedby='netForceDescription'>Net Force</h2>
 
-    <p id=netForceDescription>
+    <p id='netForceDescription'>
       There is a heavily loaded cart on
       wheels sitting on a track...
     </p>
 
-    <fieldset tabindex='0' aria-labelledby='leftGroupDescription' id='leftPullerGroup'>
-      <input type='image' alt='Left group, large puller' draggable='true' id="firstLeftPuller" hidden>
-      <input type='image' alt='Left group, medium puller' draggable='true' hidden>
-      <input type='image' alt='Left group, first small puller' draggable='true' hidden>
-      <input type='image' alt='Left group, second small puller' draggable='true' hidden>
-    </fieldset>
-    <p id='leftGroupDescription'>
-      Left pullers. Select enter to choose and place pullers on the rope.
-    </p>
+    <label for="leftPullerGroup">Left pullers.  Select a puller to place on the rope.</label>
+    <select id="leftPullerGroup" name="select">
+    <option value="1" id="largeLeftPuller">Left group, large puller standing near rope</option>
+    <option value="2">Left group, medium puller standing near rope</option>
+    <option value="3">Left group, first small puller standing near rope</option>
+    <option value="4">Left group, second small puller standing near rope</option>
+    </select><br>
 
-    <fieldset tabindex='0' aria-labelledby="rightGroupDescription" id='rightPullerGroup'>
-      <input type='image' alt='Right group, first small puller' draggable='true' hidden id="firstRightPuller">
-      <input type='image' alt='Right group, second small puller' draggable='true' hidden>
-      <input type='image' alt='Right group, medium puller' draggable='true' hidden>
-      <input type='image' alt='Right group, large puller' draggable='true' hidden>
-    </fieldset>
-    <p tabindex="-1" id='rightGroupDescription'>
-      Right pullers. Select enter to choose and place pullers on the rope.
-    </p>
+    <label for="rightPullerGroup">Right pullers.  Select a puller to place on the rope.</label>
+    <select id="rightPullerGroup" name="select">
+    <option value="1">Right group, first small puller standing near rope</option>
+    <option value="2">Right group, second small puller standing near rope</option>
+    <option value="3">Right group, medium small puller standing near rope</option>
+    <option value="4">Right group, large small puller standing near rope</option>
+    </select><br>
 
-    <fieldset hidden>
-      <input type='image' alt='First knot, closest to the cart'>
-      <input type='image' alt='Second knot'>
-      <input type='image' alt='Third knot'>
-      <input type='image' alt='Fourth knot, farthest from the cart'>
-    </fieldset>
+    <label for="leftKnotGroup">Left knots. Select a knot for the puller to grab on the rope.</label>
+    <select id="leftKnotGroup" name="select">
+    <option value="1" disabled>First knot, closest to the cart</option>
+    <option value="2" id="secondLeftKnot">second knot</option>
+    <option value="3">third knot</option>
+    <option value="4">fourth knot, farthest from the cart</option>
+    </select><br>   
 
-    <fieldset hidden>
-      <input type='image' alt='First knot, closest to the cart'>
-      <input type='image' alt='Second knot'>
-      <input type='image' alt='Third knot'>
-      <input type='image' alt='Fourth knot, farthest from the cart'>
-    </fieldset>
+    <label for="rightKnotGroup">Right knots. Select a knot for the puller to grab on the rope.</label>
+    <select id="rightKnotGroup" name="select">
+    <option value="1" disabled>First knot, closest to the cart</option>
+    <option value="2">second knot</option>
+    <option value="3">third knot</option>
+    <option value="4">fourth knot, farthest from the cart</option>
+    </select><br>
 
     <input type='button' value='Go' aria-disabled='true' aria-describedby='goButtonDescription'>
 
@@ -72,13 +70,13 @@
 
     <p id='pauseButtonDescription'>Select to pause pullers</p>
 
-    <fieldset>
+    <div>
       <legend>Visibility Controls</legend>
       <input type='checkbox' id='sumOfForcesCheckbox'>
       <label for='sumOfForcesCheckbox'>Sum of Forces</label><br>
       <input type='checkbox' id='valuesCheckbox'>
       <label for='valuesCheckbox'>Values</label>
-    </fieldset>
+    </div>
 
     <input type='reset' value='Reset all' aria-describedby='resetAllDescription'>
 
@@ -103,46 +101,54 @@
 
 <script>
 
-
-  // get the puller groups and the first elements in each group.
-  var rightPullerGroup = document.getElementById( 'rightPullerGroup' );
-  var firstRightPuller = document.getElementById( 'firstRightPuller' );
-  var firstLeftPuller = document.getElementById( 'firstLeftPuller' );
-  var leftPullerGroup = document.getElementById( 'leftPullerGroup' );
-
-  rightPullerGroup.addEventListener( 'keydown', function( event ) {
-    // prevent the the event from bubbling.
-    if ( rightPullerGroup !== event.target ) { return; }
-    enterGroup( event, rightPullerGroup, firstRightPuller )
+  // when a puller is selected, move it to the rope.
+  var largeLeftPuller = document.getElementById('largeLeftPuller');
+  console.log( largeLeftPuller );
+  largeLeftPuller.addEventListener( 'keydown', function(event) {
+    console.log( 'ghere' );
+    // largeLeftPuller.disabled = true;
   } );
 
-  rightPullerGroup.addEventListener( 'keydown', function( event ) {
-    exitGroup( event, rightPullerGroup );
-  } );
 
-  leftPullerGroup.addEventListener( 'keydown', function( event ) {
-    // prevent the the event from bubbling.
-    if ( leftPullerGroup !== event.target ) { return; }
-    enterGroup( event, leftPullerGroup, firstLeftPuller )
-  } );
+  // // get the puller groups and the first elements in each group.
+  // var rightPullerGroup = document.getElementById( 'rightPullerGroup' );
+  // var firstRightPuller = document.getElementById( 'firstRightPuller' );
+  // var firstLeftPuller = document.getElementById( 'firstLeftPuller' );
+  // var leftPullerGroup = document.getElementById( 'leftPullerGroup' );
 
-  leftPullerGroup.addEventListener( 'keydown', function( event ) {
-    exitGroup( event, leftPullerGroup );
-  } );
+  // rightPullerGroup.addEventListener( 'keydown', function( event ) {
+  //   // prevent the the event from bubbling.
+  //   if ( rightPullerGroup !== event.target ) { return; }
+  //   enterGroup( event, rightPullerGroup, firstRightPuller )
+  // } );
 
-  _.each( rightPullerGroup.children, function( child ) {
-    child.addEventListener( 'keydown', function( event ) {
-      focusNextElement( event, child );
-      placePullerOnKnot( event, child );
-    } );
-  } );
+  // rightPullerGroup.addEventListener( 'keydown', function( event ) {
+  //   exitGroup( event, rightPullerGroup );
+  // } );
 
-  _.each( leftPullerGroup.children, function( child ) {
-    child.addEventListener( 'keydown', function( event ) {
-      focusNextElement( event, child );
-      placePullerOnKnot( event, child );
-    } );
-  } );
+  // leftPullerGroup.addEventListener( 'keydown', function( event ) {
+  //   // prevent the the event from bubbling.
+  //   if ( leftPullerGroup !== event.target ) { return; }
+  //   enterGroup( event, leftPullerGroup, firstLeftPuller )
+  // } );
+
+  // leftPullerGroup.addEventListener( 'keydown', function( event ) {
+  //   exitGroup( event, leftPullerGroup );
+  // } );
+
+  // _.each( rightPullerGroup.children, function( child ) {
+  //   child.addEventListener( 'keydown', function( event ) {
+  //     focusNextElement( event, child );
+  //     placePullerOnKnot( event, child );
+  //   } );
+  // } );
+
+  // _.each( leftPullerGroup.children, function( child ) {
+  //   child.addEventListener( 'keydown', function( event ) {
+  //     focusNextElement( event, child );
+  //     placePullerOnKnot( event, child );
+  //   } );
+  // } );
 
 </script>
 </html>
