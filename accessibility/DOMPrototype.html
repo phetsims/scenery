@@ -1,6 +1,7 @@
 <html>
 
 <head>
+  <!-- Pull in heftier accessibility scripting from the file as well as lodash for convenience -->
   <script src="accessibility-script.js"></script>
   <script type="text/javascript" src="../../sherpa/lib/lodash-2.4.1.min.js"></script>
 </head>
@@ -8,6 +9,7 @@
 <div aria-labelledby='simTitle'>
   <h1 id='simTitle'>Forces and Motion: Basics</h1>
 
+  <!-- Accessibility html (unscripted) for the PhET Home Screen -->
   <div hidden aria-labelledby='homeLabel' aria-describedby='homeDescription'>
     <h2 id='homeLabel'>Home Screen</h2>
 
@@ -22,76 +24,88 @@
     <input type='image' alt='Phet Menu' src='' id='phetMenuButton'>
   </div>
 
-  <div aria-labelledby='netForceLabel' role='main'>
-    <h2 id='netForceLabel' aria-describedby='netForceDescription'>Net Force</h2>
+  <!-- Accessibility HTML for the Net Force screen of FAMB -->
+  <div aria-labelledby='netForceLabel'>
 
+    <!-- Title and description for the whole screen -->
+    <h2 id='netForceLabel' aria-describedby='netForceDescription'>Net Force</h2>
     <p id='netForceDescription'>
       There is a heavily loaded cart on
       wheels sitting on a track...
     </p>
 
-    <label for="leftPullerGroup">Left pullers.  Select a puller to place on the rope.</label>
-    <select id="leftPullerGroup" name="select">
-    <option value="1" id="largeLeftPuller">Left group, large puller standing near rope</option>
-    <option value="2">Left group, medium puller standing near rope</option>
-    <option value="3">Left group, first small puller standing near rope</option>
-    <option value="4">Left group, second small puller standing near rope</option>
-    </select><br>
+    <!-- Left puller group.  A button is used to enter the nest so that the user can quickly navigate to this element and understand that
+    this using the button will begin a drag and drop mode. -->
+    <input tabindex="0" type='button' value='Left pullers' aria-labelledby="leftPullerGroupDescription" id="leftPullerGroupButton">
+    <p id="leftPullerGroupDescription">Left pullers standing near rope.  Press enter to select a puller for drag and drop.</p>
+    <ul id="leftPullerGroup" hidden>
+      <li tabindex="0" draggable="true" aria-grabbed="false">Left group, Large puller standing near rope</li>      
+      <li tabindex="0" draggable="true" aria-grabbed="false">Left group, medium puller standing near rope</li>
+      <li tabindex="0" draggable="true" aria-grabbed="false">Left group, first small puller standing near rope</li>
+      <li tabindex="0" draggable="true" aria-grabbed="false">Left group, second small puller standing near rope</li>
+    </ul>
 
-    <label for="rightPullerGroup">Right pullers.  Select a puller to place on the rope.</label>
-    <select id="rightPullerGroup" name="select">
-    <option value="1">Right group, first small puller standing near rope</option>
-    <option value="2">Right group, second small puller standing near rope</option>
-    <option value="3">Right group, medium small puller standing near rope</option>
-    <option value="4">Right group, large small puller standing near rope</option>
-    </select><br>
+    <!-- Right puller group.  A button is used to enter the nest so that the user can quickly navigate to this element and understand that
+    this using the button will begin a drag and drop mode. -->
+    <input tabindex="0" type='button' value='Right Pullers' aria-labelledby="rightPullerGroupDescription" id="rightPullerGroupButton">
+    <p id="rightPullerGroupDescription">Right pullers standing near rope.  Press enter to select a puller for drag and drop.</p>
+    <ul id="rightPullerGroup" hidden>
+      <li tabindex="0" draggable="true" aria-grabbed="false">Right group, first small puller standing near rope</li>
+      <li tabindex="0" draggable="true" aria-grabbed="false">Right group, second small puller standing near rope</li>
+      <li tabindex="0" draggable="true" aria-grabbed="false">Right group, medium puller standing near rope</li>
+      <li tabindex="0" draggable="true" aria-grabbed="false">Right group, large puller standing near rope</li>
+    </ul>
 
-    <label for="leftKnotGroup">Left knots. Select a knot for the puller to grab on the rope.</label>
-    <select id="leftKnotGroup" name="select">
-    <option value="1" disabled>First knot, closest to the cart</option>
-    <option value="2" id="secondLeftKnot">second knot</option>
-    <option value="3">third knot</option>
-    <option value="4">fourth knot, farthest from the cart</option>
-    </select><br>   
+    <!-- List of knots, using the aria-dropeffect to signify that these are potential locations for a puller --> 
+    <h4 id="leftKnotGroupDescription" hidden>Left knots.  Press enter to place selected puller on knot.</h4>
+    <ul tabindex="0" id="leftKnotGroup" aria-labelledby='leftKnotGroupDescription' hidden>
+      <li tabindex="0" aria-dropeffect="move">First knot, closest to the cart</li>
+      <li tabindex="0" aria-dropeffect="move">Second knot</li>
+      <li tabindex="0" aria-dropeffect="move">Third knot</li>
+      <li tabindex="0" aria-dropeffect="move">Fourth knot, farthest from the cart</li>
+    </ul>
 
-    <label for="rightKnotGroup">Right knots. Select a knot for the puller to grab on the rope.</label>
-    <select id="rightKnotGroup" name="select">
-    <option value="1" disabled>First knot, closest to the cart</option>
-    <option value="2">second knot</option>
-    <option value="3">third knot</option>
-    <option value="4">fourth knot, farthest from the cart</option>
-    </select><br>
+    <!-- List of knots, using the aria-dropeffect to signify that these are potential locations for a puller --> 
+    <h4 id="rightKnotGroupDescription" hidden>Right knots.  Press enter to place selected puller on knot.</h4>
+    <ul tabindex="0" id="rightKnotGroup" aria-labelledby='rightKnotGroupDescription' hidden>
+      <li tabindex="0" aria-dropeffect="move">First knot, closest to the cart</li>
+      <li tabindex="0" aria-dropeffect="move">Second knot</li>
+      <li tabindex="0" aria-dropeffect="move">Third knot</li>
+      <li tabindex="0" aria-dropeffect="move">Fourth knot, Farthest</li>
+    </ul>
 
-    <input type='button' value='Go' aria-disabled='true' aria-describedby='goButtonDescription'>
-
+    <!-- GO button with auditory description -->
+    <input tabindex="0" type='button' value='Go' aria-disabled='true' aria-describedby='goButtonDescription'>
     <p id='goButtonDescription'>Select to start pullers</p>
 
-    <input type='button' value='Pause' aria-disabled='true' aria-describedby='pauseButtonDescription'>
-
+    <!-- PAUSE button with auditory description -->
+    <input tabindex="0" type='button' value='Pause' aria-disabled='true' aria-describedby='pauseButtonDescription'>
     <p id='pauseButtonDescription'>Select to pause pullers</p>
 
-    <div>
+    <!-- Accessible visibility checkboxes, nested in a fieldset for some accessibility benefit in legend announcement
+    and implicit arrow key navigation -->
+    <fieldset>
       <legend>Visibility Controls</legend>
       <input type='checkbox' id='sumOfForcesCheckbox'>
       <label for='sumOfForcesCheckbox'>Sum of Forces</label><br>
       <input type='checkbox' id='valuesCheckbox'>
       <label for='valuesCheckbox'>Values</label>
-    </div>
+    </fieldset>
 
+    <!-- Accessible reset all button with an auditory description -->
     <input type='reset' value='Reset all' aria-describedby='resetAllDescription'>
-
     <p id='resetAllDescription'>Select to reset screen</p>
 
+    <!-- Accessible TOGGLE SOUND button with an auditory description -->
     <input type='button' value='Toggle sound' aria-describedby='toggleSoundDescription'>
-
     <p id='toggleSoundDescription'>Select to toggle sound</p>
 
     <!--Element used to alert the user that an action or event has occured in the simulation-->
-    <p><span id="ariaActionElement" role="alert" aria-atomic="true"></span></p>
-    <!--<p id="ariaActionElement" aria-live="polite" aria-atomic="true"></p>-->
-
+    <p><span id="ariaActionElement" aria-live="polite" aria-atomic="true"></span></p>
+  
   </div>
 
+  <!-- Prototype accessibility content for the remaining screens has not been created yet. -->
   <div hidden>Motion Screen</div>
 
   <div hidden>Friction Screen</div>
@@ -99,57 +113,59 @@
   <div hidden>Accelleration Screen</div>
 </div>
 
+<!-- Secondary layer of scripting for event registration.  'document' does not have access to elements in script block above. -->
 <script>
 
-  // when a puller is selected, move it to the rope.
-  var largeLeftPuller = document.getElementById('largeLeftPuller');
-  console.log( largeLeftPuller );
-  largeLeftPuller.addEventListener( 'keydown', function(event) {
-    console.log( 'ghere' );
-    // largeLeftPuller.disabled = true;
+  // get the various groups and buttons for event registration
+  var rightPullerGroup = document.getElementById( 'rightPullerGroup' );
+  var leftPullerGroup = document.getElementById( 'leftPullerGroup' );
+  var rightKnotGroup = document.getElementById( 'rightKnotGroup' );
+  var leftKnotGroup = document.getElementById( 'leftKnotGroup' );
+  var rightPullerGroupButton = document.getElementById( 'rightPullerGroupButton')
+  var leftPullerGroupButton = document.getElementById( 'leftPullerGroupButton')
+
+  // Register the events for the various dynamic control elements  
+  leftPullerGroupButton.addEventListener( 'click', function( event ) {
+    enterGroup( event, leftPullerGroup );
   } );
 
+  rightPullerGroupButton.addEventListener( 'click', function( event ) {
+    enterGroup( event, rightPullerGroup );
+  } );
 
-  // // get the puller groups and the first elements in each group.
-  // var rightPullerGroup = document.getElementById( 'rightPullerGroup' );
-  // var firstRightPuller = document.getElementById( 'firstRightPuller' );
-  // var firstLeftPuller = document.getElementById( 'firstLeftPuller' );
-  // var leftPullerGroup = document.getElementById( 'leftPullerGroup' );
+  rightPullerGroup.addEventListener( 'keydown', function( event ) {
+    exitGroup( event, rightPullerGroup );
+  } );
 
-  // rightPullerGroup.addEventListener( 'keydown', function( event ) {
-  //   // prevent the the event from bubbling.
-  //   if ( rightPullerGroup !== event.target ) { return; }
-  //   enterGroup( event, rightPullerGroup, firstRightPuller )
-  // } );
+  leftPullerGroup.addEventListener( 'keydown', function( event ) {
+    exitGroup( event, leftPullerGroup );
+  } );
 
-  // rightPullerGroup.addEventListener( 'keydown', function( event ) {
-  //   exitGroup( event, rightPullerGroup );
-  // } );
+  _.each( rightPullerGroup.children, function( child ) {
+    child.addEventListener( 'keydown', function( event ) {
+      focusNextElement( event, child );
+      placePullerOnKnot( event, child, rightKnotGroup );
+    } );
+  } );
 
-  // leftPullerGroup.addEventListener( 'keydown', function( event ) {
-  //   // prevent the the event from bubbling.
-  //   if ( leftPullerGroup !== event.target ) { return; }
-  //   enterGroup( event, leftPullerGroup, firstLeftPuller )
-  // } );
+  _.each( leftPullerGroup.children, function( child ) {
+    child.addEventListener( 'keydown', function( event ) {
+      focusNextElement( event, child );
+      placePullerOnKnot( event, child, leftKnotGroup );
+    } );
+  } );
 
-  // leftPullerGroup.addEventListener( 'keydown', function( event ) {
-  //   exitGroup( event, leftPullerGroup );
-  // } );
+  _.each( leftKnotGroup.children, function( child ) {
+    child.addEventListener( 'keydown', function( event ) {
+      focusNextElement( event, child );
+    } );
+  } );
 
-  // _.each( rightPullerGroup.children, function( child ) {
-  //   child.addEventListener( 'keydown', function( event ) {
-  //     focusNextElement( event, child );
-  //     placePullerOnKnot( event, child );
-  //   } );
-  // } );
-
-  // _.each( leftPullerGroup.children, function( child ) {
-  //   child.addEventListener( 'keydown', function( event ) {
-  //     focusNextElement( event, child );
-  //     placePullerOnKnot( event, child );
-  //   } );
-  // } );
+  _.each( rightKnotGroup.children, function( child ) {
+    child.addEventListener( 'keydown', function( event ) {
+      focusNextElement( event, child );
+    } );
+  } );
 
 </script>
 </html>
-		

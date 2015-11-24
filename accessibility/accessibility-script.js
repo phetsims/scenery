@@ -16,17 +16,9 @@
  * @param {event} event
  * @param {domElement} parent
  */
-function enterGroup( event, parent, firstChild ) {
-  // go through all children of the parent we are entering
-  if ( event.keyCode === 13 || event.keyCode === 32 ) {
-    for ( var i = 0; i < parent.children.length; i++ ) {
-      // NOTE: WE ARE NOT CHANGING THE NAVIGATION ORDER FOR THIS PROTOTYPE!
-      // THE HIDDEN ATTRIBUTE IS NOW COVERING THIS FOR US!
-      parent.children[ i ].hidden = false;
-    }
-    // set focus to the first child
-    firstChild.focus();
-  }
+function enterGroup( event, parent ) {
+  parent.hidden = false;
+  parent.children[0].focus();
 }
 
 /**
@@ -38,11 +30,7 @@ function enterGroup( event, parent, firstChild ) {
  */
 function exitGroup( event, parent ) {
   if ( event.keyCode === 27 || event.keyCode === 9 ) {
-    for ( var i = 0; i < parent.children.length; i++ ) {
-      // hide the children!
-      parent.children[ i ].hidden = true;
-    }
-    // set focus back to the parent?
+    parent.hidden = true
     parent.focus();
   }
 }
@@ -95,25 +83,39 @@ function focusNextElement( event, child ) {
  * NOTE: In Chrome + NVDA + Windows 7, it seems that the aria event is ONLY fired if the string changes in some way.
  * Otherwise, nothing is read.  A description string must be unique for it to be read.
  *
- * NOTE: There seems to be no
- *
  * @param event
  * @param puller
  * @param knot
  */
-var global = 0;
-function placePullerOnKnot( event, puller, knot ) {
+function placePullerOnKnot( event, puller, knotGroup ) {
   if ( event.keyCode === 13 ) {
-    var textNode = document.createTextNode( puller.alt + 'selected for drag and drop.' );
+
+    // pick up the object for drag and drop with the aria attribute
+    puller.setAttribute( 'aria-grabbed', 'true');
+
+    // notify the user that the element has been selected for drag and drop by updating the live region.
+    var textNode = document.createTextNode( puller.innerText + 'selected for drag and drop.' );
     var targetNode = document.getElementById( 'ariaActionElement' );
     while ( targetNode.firstChild ) {
       targetNode.removeChild( targetNode.firstChild );
     }
     targetNode.appendChild( textNode );
-    global++;
-    if ( global > 5 ) {
-      global = 0;
-    }
+
+    // =======================================
+    // THE REST HERE IS BE SPECIFIC TO FAMB
+    
+    // Hide the puller in the list.
+    puller.hidden = true;
+
+    // unhide the knot group
+    knotGroup.hidden = false;
+
+    // unhid the aria-description for the group
+    document.getElementById( knotGroup.getAttribute( 'aria-labelledby' ) ).hidden = false;
+
+    // enter the group of knots
+    enterGroup( event, knotGroup, knotGroup.children[0] );
+
   }
 }
 
