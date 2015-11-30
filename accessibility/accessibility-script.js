@@ -119,3 +119,32 @@ function placePullerOnKnot( event, puller, knotGroup ) {
   }
 }
 
+/**
+ * Place a puller on the selected knot, searching through the document for the puller being dragged
+ * with aria-grabbed
+ */ 
+function selectKnot( event, pullerGroup, knot ) {
+
+  if ( event.keyCode === 13 ) {
+
+    // get the puller that is currently being dragged.
+    var pullerChildren = pullerGroup.children;
+    var grabbedChild;
+    for( var i = 0; i < pullerChildren.length; i++ ) {
+      if( pullerChildren[i].getAttribute( 'aria-grabbed' ) ) {
+        grabbedChild = pullerChildren[i];
+        break;
+      }
+    }
+    assert && assert( grabbedChild, "A puller must be grabbed in order to select a knot")
+
+    // drop the puller by setting the aria attribute to false
+    console.log( 'dropping ' + grabbedChild )
+    grabbedChild.setAttribute( 'aria-grabbed', 'false' );
+
+    // the knot is now taken by a puller. hide it from other pullers.
+    // knot.hidden = true;
+
+  } 
+}
+

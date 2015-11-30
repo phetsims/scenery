@@ -1,9 +1,11 @@
+<!DOCTYPE html>
 <html>
 
 <head>
-  <!-- Pull in heftier accessibility scripting from the file as well as lodash for convenience -->
+  <!-- Pull in heftier accessibility scripting from the file as well as lodash for convenience and assertions for sanity -->
   <script src="accessibility-script.js"></script>
   <script type="text/javascript" src="../../sherpa/lib/lodash-2.4.1.min.js"></script>
+  <script type="text/javascript" src="../../assert/js/assert.js"></script>
 </head>
 
 <div aria-labelledby='simTitle'>
@@ -33,7 +35,7 @@
       There is a heavily loaded cart on
       wheels sitting on a track...
     </p>
-
+ 
     <!-- Left puller group.  A button is used to enter the nest so that the user can quickly navigate to this element and understand that
     this using the button will begin a drag and drop mode. -->
     <input tabindex="0" type='button' value='Left pullers' aria-labelledby="leftPullerGroupDescription" id="leftPullerGroupButton">
@@ -158,14 +160,17 @@
   _.each( leftKnotGroup.children, function( child ) {
     child.addEventListener( 'keydown', function( event ) {
       focusNextElement( event, child );
+      selectKnot( event, leftPullerGroup, child );
     } );
   } );
 
   _.each( rightKnotGroup.children, function( child ) {
     child.addEventListener( 'keydown', function( event ) {
       focusNextElement( event, child );
+      selectKnot( event, rightPullerGroup, child );
     } );
   } );
+
 
 </script>
 </html>
