@@ -1284,6 +1284,10 @@ define( function( require ) {
           addQualifier( 'opacity:' + node.opacity );
         }
 
+        if ( node._boundsEventCount > 0 ) {
+          addQualifier( '<span style="color: #800">boundsListen:' + node._boundsEventCount + ':' + node._boundsEventSelfCount + '</span>' );
+        }
+
         var transformType = '';
         switch( node.transform.getMatrix().type ) {
           case Matrix3.Types.IDENTITY:
