@@ -28,7 +28,7 @@ define( function( require ) {
 
   inherit( FittedBlock, CanvasBlock, {
     initialize: function( display, renderer, transformRootInstance, filterRootInstance ) {
-      this.initializeFittedBlock( display, renderer, transformRootInstance );
+      this.initializeFittedBlock( display, renderer, transformRootInstance, FittedBlock.COMMON_ANCESTOR );
 
       this.filterRootInstance = filterRootInstance;
 

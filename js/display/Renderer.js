@@ -151,22 +151,29 @@ define( function( require ) {
     throw new Error( 'pushOrderBitmask overflow' );
   };
 
-  Renderer.createSelfDrawable = function( instance, node, selfRenderer ) {
+  Renderer.createSelfDrawable = function( instance, node, selfRenderer, fittable ) {
+    var drawable;
+
     if ( Renderer.isCanvas( selfRenderer ) ) {
-      return node.createCanvasDrawable( selfRenderer, instance );
+      drawable = node.createCanvasDrawable( selfRenderer, instance );
     }
     else if ( Renderer.isSVG( selfRenderer ) ) {
-      return node.createSVGDrawable( selfRenderer, instance );
+      drawable = node.createSVGDrawable( selfRenderer, instance );
     }
     else if ( Renderer.isDOM( selfRenderer ) ) {
-      return node.createDOMDrawable( selfRenderer, instance );
+      drawable = node.createDOMDrawable( selfRenderer, instance );
     }
     else if ( Renderer.isWebGL( selfRenderer ) ) {
-      return node.createWebGLDrawable( selfRenderer, instance );
+      drawable = node.createWebGLDrawable( selfRenderer, instance );
     }
     else {
       throw new Error( 'Unrecognized renderer: ' + selfRenderer );
     }
+
+    // Initialize its fittable flag
+    drawable.setFittable( fittable );
+
+    return drawable;
   };
 
   /*---------------------------------------------------------------------------*

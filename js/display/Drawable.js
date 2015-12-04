@@ -91,6 +91,9 @@ define( function( require ) {
 
       this._visible = true; // {boolean}, ES5 getter/setter provided
 
+      // {boolean} - If false, will cause our parent block to not be fitted. (ES5 getter/setter provided)
+      this._fittable = true;
+
       return this;
     },
 
@@ -130,6 +133,20 @@ define( function( require ) {
       return this._visible;
     },
     get visible() { return this.isVisible(); },
+
+    // Should be called just after initialization (before being added to blocks) if we aren't fittable.
+    setFittable: function( fittable ) {
+      if ( this._fittable !== fittable ) {
+        this._fittable = fittable;
+        this.trigger1( 'fittability', this );
+      }
+    },
+    set fittable( value ) { this.setFittable( value ); },
+
+    isFittable: function() {
+      return this._fittable;
+    },
+    get fittable() { return this.isFittable(); },
 
     // called to add a block (us) as a child of a backbone
     setBlockBackbone: function( backboneInstance ) {

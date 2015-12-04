@@ -31,13 +31,11 @@ define( function( require ) {
   inherit( FittedBlock, WebGLBlock, {
     initialize: function( display, renderer, transformRootInstance, filterRootInstance ) {
 
-      this.initializeFittedBlock( display, renderer, transformRootInstance );
-
       // WebGLBlocks are hard-coded to take the full display size (as opposed to svg and canvas)
       // Since we saw some jitter on iPad, see #318 and generally expect WebGL layers to span the entire display
       // In the future, it would be good to understand what was causing the problem and make webgl consistent
       // with svg and canvas again.
-      this.setFit( FittedBlock.FULL_DISPLAY );
+      this.initializeFittedBlock( display, renderer, transformRootInstance, FittedBlock.FULL_DISPLAY );
 
       this.filterRootInstance = filterRootInstance;
 

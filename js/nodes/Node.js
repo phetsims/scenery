@@ -272,7 +272,12 @@ define( function( require ) {
       excludeInvisible: false,
 
       // {number|null} - If non-null, a multiplier to the detected pixel-to-pixel scaling of the WebGL Canvas
-      webglScale: null
+      webglScale: null,
+
+      // {boolean} - If true, Scenery will not fit any blocks that contain drawables attached to Nodes underneath this
+      //             node's subtree. This will typically prevent Scenery from triggering bounds computation for this
+      //             sub-tree, and movement of this node or its descendants will never trigger the refitting of a block.
+      preventFit: false
     };
 
     // @public (scenery-internal) {number} - The subtree pickable count is #pickable:true + #inputListeners, since we
@@ -2993,6 +2998,27 @@ define( function( require ) {
     },
     get excludeInvisible() { return this.isExcludeInvisible(); },
 
+    setPreventFit: function( preventFit ) {
+      assert && assert( typeof preventFit === 'boolean' );
+
+      if ( preventFit !== this._hints.preventFit ) {
+        this._hints.preventFit = preventFit;
+        this.trigger1( 'hint', 'preventFit' );
+      }
+    },
+    set preventFit( value ) { this.setPreventFit( value ); },
+
+    /**
+     * Returns whether the preventFit performance flag is set.
+     * @public
+     *
+     * @returns {boolean}
+     */
+    isPreventFit: function() {
+      return this._hints.preventFit;
+    },
+    get preventFit() { return this.isPreventFit(); },
+
     /**
      * Sets whether there is a custom WebGL scale applied to the Canvas, and if so what scale.
      * @public
@@ -4487,11 +4513,12 @@ define( function( require ) {
    * changes of bounds that may happen beforehand
    */
   Node.prototype._mutatorKeys = [
-    'children', 'cursor', 'visible', 'pickable', 'opacity', 'matrix', 'translation', 'x', 'y', 'rotation', 'scale', 'maxWidth', 'maxHeight',
-    'leftTop', 'centerTop', 'rightTop', 'leftCenter', 'center', 'rightCenter', 'leftBottom', 'centerBottom', 'rightBottom',
-    'left', 'right', 'top', 'bottom', 'centerX', 'centerY', 'renderer', 'rendererOptions',
-    'layerSplit', 'usesOpacity', 'cssTransform', 'excludeInvisible', 'webglScale', 'mouseArea', 'touchArea', 'clipArea',
-    'transformBounds', 'focusable', 'focusIndicator', 'accessibleContent', 'accessibleOrder', 'textDescription'
+    'children', 'cursor', 'visible', 'pickable', 'opacity', 'matrix', 'translation', 'x', 'y', 'rotation', 'scale',
+    'maxWidth', 'maxHeight', 'leftTop', 'centerTop', 'rightTop', 'leftCenter', 'center', 'rightCenter', 'leftBottom',
+    'centerBottom', 'rightBottom', 'left', 'right', 'top', 'bottom', 'centerX', 'centerY', 'renderer',
+    'rendererOptions', 'layerSplit', 'usesOpacity', 'cssTransform', 'excludeInvisible', 'webglScale', 'preventFit',
+    'mouseArea', 'touchArea', 'clipArea', 'transformBounds', 'focusable', 'focusIndicator', 'accessibleContent',
+    'accessibleOrder', 'textDescription'
   ];
 
   return Node;

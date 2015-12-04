@@ -1253,6 +1253,12 @@ define( function( require ) {
         if ( !instance.selfVisible ) {
           addQualifier( 'I-self-invis' );
         }
+        if ( !instance.fittable ) {
+          addQualifier( 'nofit' );
+        }
+        if ( !instance.selfFittable ) {
+          addQualifier( 'nofit-self' );
+        }
         if ( node.pickable === true ) {
           addQualifier( 'pickable' );
         }
@@ -1322,7 +1328,13 @@ define( function( require ) {
         if ( drawable.visible ) {
           drawableString = '<strong>' + drawableString + '</strong>';
         }
-        return drawableString + ( drawable.dirty ? ' <span style="color: #c00;">[x]</span>' : '' );
+        if ( drawable.dirty ) {
+          drawableString += ( drawable.dirty ? ' <span style="color: #c00;">[x]</span>' : '' );
+        }
+        if ( !drawable.fittable ) {
+          drawableString += ( drawable.dirty ? ' <span style="color: #0c0;">[no-fit]</span>' : '' );
+        }
+        return drawableString;
       }
 
       function printInstanceSubtree( instance ) {

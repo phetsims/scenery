@@ -1,6 +1,5 @@
 // Copyright 2014, University of Colorado Boulder
 
-
 /**
  * A specialized drawable for a layer of drawables with the same renderer (basically, it's a Canvas element, SVG
  * element, or some type of DOM container). Doesn't strictly have to have its DOM element used directly (Canvas block
