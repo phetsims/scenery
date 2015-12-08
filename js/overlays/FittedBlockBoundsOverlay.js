@@ -38,7 +38,7 @@ define( function( require ) {
       }
 
       function processBlock( block, matrix ) {
-        if ( block.fitBounds ) {
+        if ( block.fitBounds && !block.fitBounds.isEmpty() ) {
           self.addShape( Shape.bounds( block.fitBounds ).transformed( matrix ), 'rgba(255,0,0,0.8)', true );
         }
         if ( block.firstDrawable && block.lastDrawable ) {
