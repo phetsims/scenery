@@ -128,9 +128,21 @@ define( function( require ) {
     invalidatePath: function() {
       this._strokedShape = null;
 
-      if ( this.hasShape() ) {
-        this.invalidateSelf( this.computeShapeBounds() );
+      this.invalidateSelf(); // We don't immediately compute the bounds
+    },
+
+    /**
+     * @override
+     *
+     * @returns {boolean}
+     */
+    updateSelfBounds: function() {
+      var selfBounds = this.hasShape() ? this.computeShapeBounds() : Bounds2.NOTHING;
+      var changed = !selfBounds.equals( this._selfBounds );
+      if ( changed ) {
+        this._selfBounds.set( selfBounds );
       }
+      return changed;
     },
 
     setBoundsMethod: function( boundsMethod ) {

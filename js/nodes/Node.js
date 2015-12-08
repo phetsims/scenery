@@ -224,6 +224,7 @@ define( function( require ) {
 
     this._boundsDirty = true; // @private {boolean} - Whether bounds needs to be recomputed to be valid.
     this._localBoundsDirty = true; // @private {boolean} - Whether localBounds needs to be recomputed to be valid.
+    this._selfBoundsDirty = true; // @private {boolean} - Whether selfBounds needs to be recomputed to be valid.
     this._childBoundsDirty = true; // @private {boolean} - Whether childBounds needs to be recomputed to be valid.
 
     if ( assert ) {
@@ -694,6 +695,21 @@ define( function( require ) {
 
       var wasDirtyBefore = false;
 
+      // validate bounds of ourself if necessary
+      if ( this._selfBoundsDirty ) {
+        wasDirtyBefore = true;
+
+        // Rely on an overloadable method to accomplish computing our self bounds. This should update
+        // this._selfBounds itself, returning whether it was actually changed. If it didn't change, we don't want to
+        // send a 'selfBounds' event.
+        var didSelfBoundsChange = this.updateSelfBounds();
+        this._selfBoundsDirty = false;
+
+        if ( didSelfBoundsChange ) {
+          this.trigger0( 'selfBounds' );
+        }
+      }
+
       // validate bounds of children if necessary
       if ( this._childBoundsDirty ) {
         wasDirtyBefore = true;
@@ -848,7 +864,7 @@ define( function( require ) {
      * @param {Bounds2} bounds
      */
     _includeTransformedSubtreeBounds: function( matrix, bounds ) {
-      if ( !this._selfBounds.isEmpty() ) {
+      if ( !this.selfBounds.isEmpty() ) {
         bounds.includeBounds( this.getTransformedSelfBounds( matrix ) );
       }
 
@@ -934,7 +950,7 @@ define( function( require ) {
         }
         else {
           // start with the self bounds, then add from there
-          this._mouseBounds.set( this._selfBounds );
+          this._mouseBounds.set( this.selfBounds );
 
           // union of all children's mouse bounds
           var i = this._children.length;
@@ -991,7 +1007,7 @@ define( function( require ) {
         }
         else {
           // start with the self bounds, then add from there
-          this._touchBounds.set( this._selfBounds );
+          this._touchBounds.set( this.selfBounds );
 
           // union of all children's touch bounds
           var i = this._children.length;
@@ -1088,20 +1104,42 @@ define( function( require ) {
      * @param {Bounds2} newSelfBounds
      */
     invalidateSelf: function( newSelfBounds ) {
-      assert && assert( newSelfBounds.isEmpty() || newSelfBounds.isFinite(), 'Bounds must be empty or finite in invalidateSelf' );
-
-      // if these bounds are different than current self bounds
-      if ( !this._selfBounds.equals( newSelfBounds ) ) {
-        // set repaint flags
-        this._localBoundsDirty = true;
+      // If no self bounds are provided, rely on the bounds validation to trigger computation (using updateSelfBounds()).
+      if ( !newSelfBounds ) {
+        this._selfBoundsDirty = true;
         this.invalidateBounds();
-
-        // record the new bounds
-        this._selfBounds.set( newSelfBounds );
-
-        // fire the event immediately
-        this.trigger0( 'selfBounds' );
       }
+      // Otherwise, set the self bounds directly
+      else {
+        assert && assert( newSelfBounds.isEmpty() || newSelfBounds.isFinite(), 'Bounds must be empty or finite in invalidateSelf' );
+
+        // Don't recompute the self bounds
+        this._selfBoundsDirty = false;
+
+        // if these bounds are different than current self bounds
+        if ( !this._selfBounds.equals( newSelfBounds ) ) {
+          // set repaint flags
+          this.invalidateBounds();
+
+          // record the new bounds
+          this._selfBounds.set( newSelfBounds );
+
+          // fire the event immediately
+          this.trigger0( 'selfBounds' );
+        }
+      }
+    },
+
+    /**
+     * Meant to be overridden by Node sub-types to compute self bounds (if invalidateSelf() with no argments was called).
+     * @protected
+     *
+     * @returns {boolean} - Whether the self bounds changed.
+     */
+    updateSelfBounds: function() {
+      // The Node implementation (un-overridden) will never change the self bounds (always NOTHING).
+      assert && assert( this._selfBounds.equals( Bounds2.NOTHING ) );
+      return false;
     },
 
     /**
@@ -1129,6 +1167,7 @@ define( function( require ) {
      * @returns {Bounds2}
      */
     getSelfBounds: function() {
+      this.validateBounds(); // TODO: consider more fine-grained validation?
       return this._selfBounds;
     },
     get selfBounds() { return this.getSelfBounds(); },
@@ -1143,6 +1182,7 @@ define( function( require ) {
      * @returns {Bounds2}
      */
     getSafeSelfBounds: function() {
+      this.validateBounds(); // TODO: consider more fine-grained validation?
       return this._selfBounds;
     },
 
@@ -1226,6 +1266,7 @@ define( function( require ) {
      * @returns {Bounds2}
      */
     getTransformedSelfBounds: function( matrix ) {
+      this.validateBounds(); // TODO: consider more fine-grained validation?
       // assume that we take up the entire rectangular bounds.
       return this._selfBounds.transformed( matrix );
     },
@@ -1288,7 +1329,7 @@ define( function( require ) {
      */
     getVisibleLocalBounds: function() {
       // defensive copy, since we use mutable modifications below
-      var bounds = this._selfBounds.copy();
+      var bounds = this.selfBounds.copy();
 
       var i = this._children.length;
       while ( i-- ) {
@@ -1461,7 +1502,7 @@ define( function( require ) {
       }
 
       // didn't hit our children, so check ourself as a last resort. check our selfBounds first, to avoid a potentially more expensive operation
-      if ( this._selfBounds.containsPoint( localPoint ) ) {
+      if ( this.selfBounds.containsPoint( localPoint ) ) {
         if ( this.containsPointSelf( localPoint ) ) {
           localPoint.freeToPool();
           sceneryLog && sceneryLog.hitTest && sceneryLog.hitTest( this.constructor.name + '#' + this.id + ' self hit' );
@@ -1494,7 +1535,7 @@ define( function( require ) {
      */
     containsPointSelf: function( point ) {
       // if self bounds are not null default to checking self bounds
-      return this._selfBounds.containsPoint( point );
+      return this.selfBounds.containsPoint( point );
     },
 
     /**
@@ -1506,7 +1547,7 @@ define( function( require ) {
      */
     intersectsBoundsSelf: function( bounds ) {
       // if self bounds are not null, child should override this
-      return this._selfBounds.intersectsBounds( bounds );
+      return this.selfBounds.intersectsBounds( bounds );
     },
 
     /**

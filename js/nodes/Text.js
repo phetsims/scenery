@@ -178,6 +178,23 @@ define( function( require ) {
     },
 
     invalidateText: function() {
+      // TODO: consider replacing this with a general dirty flag notification, and have DOM update bounds every frame?
+      var stateLen = this._drawables.length;
+      for ( var i = 0; i < stateLen; i++ ) {
+        this._drawables[ i ].markDirtyBounds();
+      }
+
+      // we may have changed renderers if parameters were changed!
+      this.updateTextFlags();
+    },
+
+    /**
+     * @override
+     *
+     * @returns {boolean}
+     */
+    updateSelfBounds: function() {
+      // TODO: don't create another Bounds2 object just for this!
       var selfBounds;
 
       // investigate http://mudcu.be/journal/2011/01/html5-typographic-metrics/
@@ -199,17 +216,11 @@ define( function( require ) {
         selfBounds.dilate( this.getLineWidth() / 2 );
       }
 
-      if ( !this.selfBounds.equals( selfBounds ) ) {
-        var stateLen = this._drawables.length;
-        for ( var i = 0; i < stateLen; i++ ) {
-          this._drawables[ i ].markDirtyBounds();
-        }
+      var changed = !selfBounds.equals( this._selfBounds );
+      if ( changed ) {
+        this._selfBounds.set( selfBounds );
       }
-
-      this.invalidateSelf( selfBounds );
-
-      // we may have changed renderers if parameters were changed!
-      this.updateTextFlags();
+      return changed;
     },
 
     // @override from Paintable
@@ -635,7 +646,7 @@ define( function( require ) {
         if ( this.dirtyStroke ) {
           div.style.color = node.getCSSFill();
         }
-        if ( this.dirtyBounds ) {
+        if ( this.dirtyBounds ) { // TODO: this condition is set on invalidateText, so it's almost always true?
           div.style.width = node.getSelfBounds().width + 'px';
           div.style.height = node.getSelfBounds().height + 'px';
           // TODO: do we require the jQuery versions here, or are they vestigial?
