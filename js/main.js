@@ -77,6 +77,7 @@ define( [
   'SCENERY/nodes/WebGLNode',
 
   'SCENERY/overlays/CanvasNodeBoundsOverlay',
+  'SCENERY/overlays/FittedBlockBoundsOverlay',
   'SCENERY/overlays/FocusOverlay',
   'SCENERY/overlays/PointerAreaOverlay',
   'SCENERY/overlays/PointerOverlay',

@@ -72,6 +72,7 @@ define( function( require ) {
   var PointerAreaOverlay = require( 'SCENERY/overlays/PointerAreaOverlay' );
   var PointerOverlay = require( 'SCENERY/overlays/PointerOverlay' );
   var CanvasNodeBoundsOverlay = require( 'SCENERY/overlays/CanvasNodeBoundsOverlay' );
+  var FittedBlockBoundsOverlay = require( 'SCENERY/overlays/FittedBlockBoundsOverlay' );
 
   // flags object used for determining what the cursor should be underneath a mouse
   var isMouseFlags = { isMouse: true };
@@ -183,6 +184,7 @@ define( function( require ) {
     this._pointerOverlay = null;
     this._pointerAreaOverlay = null;
     this._canvasAreaBoundsOverlay = null;
+    this._fittedBlockBoundsOverlay = null;
 
     // properties for fuzzMouseEvents, so that we can track the status of a persistent mouse pointer
     this._fuzzMouseIsDown = false;
@@ -923,6 +925,30 @@ define( function( require ) {
         else {
           this._canvasAreaBoundsOverlay = new CanvasNodeBoundsOverlay( this, this._rootNode );
           this.addOverlay( this._canvasAreaBoundsOverlay );
+        }
+      }
+    },
+
+    //TODO: reduce code duplication for handling overlays
+    setFittedBlockBoundsVisible: function( visibility ) {
+      // @deprecated, Joist code calls us with undefined first....
+      if ( visibility === undefined ) {
+        return;
+      }
+
+      assert && assert( typeof visibility === 'boolean' );
+
+      var hasOverlay = !!this._fittedBlockBoundsOverlay;
+
+      if ( visibility !== hasOverlay ) {
+        if ( !visibility ) {
+          this.removeOverlay( this._fittedBlockBoundsOverlay );
+          this._fittedBlockBoundsOverlay.dispose();
+          this._fittedBlockBoundsOverlay = null;
+        }
+        else {
+          this._fittedBlockBoundsOverlay = new FittedBlockBoundsOverlay( this, this._rootNode );
+          this.addOverlay( this._fittedBlockBoundsOverlay );
         }
       }
     },
