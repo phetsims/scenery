@@ -178,6 +178,8 @@ define( function( require ) {
     },
 
     invalidateText: function() {
+      this.invalidateSelf();
+
       // TODO: consider replacing this with a general dirty flag notification, and have DOM update bounds every frame?
       var stateLen = this._drawables.length;
       for ( var i = 0; i < stateLen; i++ ) {
