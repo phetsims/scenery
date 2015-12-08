@@ -329,6 +329,9 @@ define( function( require ) {
      */
     insertChild: function( index, node ) {
       assert && assert( node !== null && node !== undefined, 'insertChild cannot insert a null/undefined child' );
+      assert && assert( node instanceof Node,
+        'addChild/insertChild requires the child to be a Node. Constructor: ' +
+        ( node.constructor ? node.constructor.name : 'none' ) );
       assert && assert( !_.contains( this._children, node ), 'Parent already contains child' );
       assert && assert( node !== this, 'Cannot add self as a child' );
 
