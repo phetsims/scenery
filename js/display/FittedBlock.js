@@ -1,7 +1,9 @@
 // Copyright 2014-2015, University of Colorado Boulder
 
 /**
- * A Block that needs to be fitted to either the screen bounds or other local bounds.
+ * A Block that needs to be fitted to either the screen bounds or other local bounds. This potentially reduces memory
+ * usage and can make graphical operations in the browser faster, yet if the fit is rapidly changing could cause
+ * performance degradation.
  *
  * @author Jonathan Olson <jonathan.olson@colorado.edu>
  */
