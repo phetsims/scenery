@@ -30,7 +30,7 @@ define( function( require ) {
       this.transformRootInstance = transformRootInstance;
 
       assert && assert( typeof transformRootInstance.isDisplayRoot === 'boolean' );
-      // var canBeFullDisplay = transformRootInstance.isDisplayRoot;
+      this.canBeFullDisplay = transformRootInstance.isDisplayRoot;
 
       assert && assert( preferredFit === FittedBlock.FULL_DISPLAY || preferredFit === FittedBlock.COMMON_ANCESTOR );
 
@@ -69,6 +69,11 @@ define( function( require ) {
      * @param {FittedBlock.Fit} fit
      */
     setFit: function( fit ) {
+      // We can't allow full-display fits sometimes
+      if ( !this.canBeFullDisplay && fit === FittedBlock.FULL_DISPLAY ) {
+        fit = FittedBlock.COMMON_ANCESTOR;
+      }
+
       if ( this.fit !== fit ) {
         this.fit = fit;
 
@@ -112,7 +117,9 @@ define( function( require ) {
 
       // If our fit WAS common-ancestor and our common fit instance's subtree as something unfittable, switch to
       // full-display fit.
-      if ( this.fit === FittedBlock.COMMON_ANCESTOR && this.commonFitInstance.fittability.subtreeUnfittableCount > 0 ) {
+      if ( this.fit === FittedBlock.COMMON_ANCESTOR &&
+           this.commonFitInstance.fittability.subtreeUnfittableCount > 0 &&
+           this.canBeFullDisplay ) {
         // Reset the oldFitBounds so that any updates that check bounds changes will update it.
         this.oldFitBounds.set( Bounds2.NOTHING );
 
@@ -140,8 +147,12 @@ define( function( require ) {
         this.fitBounds.dilate( 4 ); // for safety, modify in the future
 
         // ensure that our fitted bounds don't go outside of our display's bounds (see https://github.com/phetsims/scenery/issues/390)
-        scratchBounds2.setMinMax( 0, 0, this.display.width, this.display.height );
-        this.fitBounds.constrainBounds( scratchBounds2 );
+        if ( this.transformRootInstance.isDisplayRoot ) {
+          // Only apply this effect if our transform root is the display root. Otherwise we might be transformed, and
+          // this could cause buggy situations. See https://github.com/phetsims/scenery/issues/454
+          scratchBounds2.setMinMax( 0, 0, this.display.width, this.display.height );
+          this.fitBounds.constrainBounds( scratchBounds2 );
+        }
 
         if ( !this.fitBounds.isValid() ) {
           this.fitBounds.setMinMax( 0, 0, 0, 0 );
@@ -271,7 +282,7 @@ define( function( require ) {
      */
     checkFitConstraints: function() {
       // If we have ANY unfittable drawables, take up the full display.
-      if ( this.unfittableDrawableCount > 0 ) {
+      if ( this.unfittableDrawableCount > 0 && this.canBeFullDisplay ) {
         this.setFit( FittedBlock.FULL_DISPLAY );
       }
       // Otherwise fall back to our "default"

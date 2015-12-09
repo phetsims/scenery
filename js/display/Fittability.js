@@ -245,7 +245,7 @@ define( function( require ) {
         assertSlow( this.selfFittable === this.isSelfFitSupported(),
           'selfFittable diverged from isSelfFitSupported()' );
 
-        assertSlow( this.ancestorsFittable === ( this.parent ? this.parent.ancestorsFittable : true ) && this.selfFittable,
+        assertSlow( this.ancestorsFittable === ( ( this.parent ? this.parent.ancestorsFittable : true ) && this.selfFittable ),
           'Our ancestorsFittable should be false if our parent or our self is not fittable.' );
 
         // Our subtree unfittable count should be the sum of children that have a non-zero count, plus 1 if our self
