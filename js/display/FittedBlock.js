@@ -76,6 +76,7 @@ define( function( require ) {
         this.markDirtyFit();
 
         // Reset the oldFitBounds so that any updates that check bounds changes will update it.
+        // TODO: remove duplication here with updateFit()
         this.oldFitBounds.set( Bounds2.NOTHING );
 
         // If we switched to the common-ancestor fit, we need to compute the common-ancestor instance.
@@ -108,6 +109,15 @@ define( function( require ) {
       sceneryLog && sceneryLog.FittedBlock && sceneryLog.FittedBlock( 'updateFit #' + this.id );
 
       this.dirtyFit = false;
+
+      // If our fit WAS common-ancestor and our common fit instance's subtree as something unfittable, switch to
+      // full-display fit.
+      if ( this.fit === FittedBlock.COMMON_ANCESTOR && this.commonFitInstance.subtreeUnfittableCount > 0 ) {
+        // Reset the oldFitBounds so that any updates that check bounds changes will update it.
+        this.oldFitBounds.set( Bounds2.NOTHING );
+
+        this.fit = FittedBlock.FULL_DISPLAY;
+      }
 
       if ( this.fit === FittedBlock.FULL_DISPLAY ) {
         this.setSizeFullDisplay();
@@ -157,14 +167,27 @@ define( function( require ) {
       // override in subtypes, use this.fitBounds
     },
 
+    setCommonFitInstance: function( instance ) {
+      if ( instance !== this.commonFitInstance ) {
+        if ( this.commonFitInstance ) {
+          this.commonFitInstance.offStatic( 'subtreeFittability', this.dirtyFitListener );
+        }
+        this.commonFitInstance = instance;
+        if ( this.commonFitInstance ) {
+          this.commonFitInstance.onStatic( 'subtreeFittability', this.dirtyFitListener );
+        }
+      }
+    },
+
     dispose: function() {
       sceneryLog && sceneryLog.FittedBlock && sceneryLog.FittedBlock( 'dispose #' + this.id );
 
       this.display.offStatic( 'displaySize', this.dirtyFitListener );
 
+      this.setCommonFitInstance( null );
+
       // clear references
       this.transformRootInstance = null;
-      this.commonFitInstance = null;
 
       Block.prototype.dispose.call( this );
     },
@@ -288,7 +311,7 @@ define( function( require ) {
         lastInstance = lastInstance.parent;
       }
 
-      this.commonFitInstance = firstInstance;
+      this.setCommonFitInstance( firstInstance );
       sceneryLog && sceneryLog.FittedBlock && sceneryLog.FittedBlock( '   common fit instance: ' + this.commonFitInstance.toString() );
 
       assert && assert( this.commonFitInstance.trail.length >= this.transformRootInstance.trail.length );

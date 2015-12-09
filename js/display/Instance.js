@@ -149,7 +149,8 @@ define( function( require ) {
 
       // Tracking of fittability and associated flags
       this.selfFittable = this.isSelfFitSupported(); // {boolean} - Whether our node marks itself as fittable
-      this.fittable = this.selfFittable; // {boolean} - Whether this instance's node and ancestors allow block fitting.
+      this.ancestorsFittable = this.selfFittable; // {boolean} - Whether this instance's node and ancestors allow block fitting.
+      this.subtreeUnfittableCount = this.selfFittable ? 0 : 1; // {number} - Number of children (or this) whose subtrees are unfittable
 
       sceneryLog && sceneryLog.Instance && sceneryLog.Instance( 'initialized ' + this.toString() );
 
@@ -793,7 +794,7 @@ define( function( require ) {
             this.selfDrawable.markForDisposal( this.display );
           }
 
-          this.selfDrawable = Renderer.createSelfDrawable( this, this.node, selfRenderer, this.fittable );
+          this.selfDrawable = Renderer.createSelfDrawable( this, this.node, selfRenderer, this.ancestorsFittable );
           assert && assert( this.selfDrawable );
 
           return true;
@@ -890,7 +891,7 @@ define( function( require ) {
           //OHTWO TODO: restitch here??? implement it
         }
         // Update the fittable flag
-        this.groupDrawable.setFittable( this.fittable );
+        this.groupDrawable.setFittable( this.ancestorsFittable );
 
         this.firstDrawable = this.lastDrawable = this.groupDrawable;
       }
@@ -1051,8 +1052,11 @@ define( function( require ) {
       }
 
       // maintain fittable flags
-      if ( !this.fittable ) {
+      if ( !this.ancestorsFittable ) {
         instance.markSubtreeUnfittable();
+      }
+      if ( instance.subtreeUnfittableCount > 0 ) {
+        this.incrementSubtreeUnfittableCount();
       }
 
       this.relativeTransform.insertInstance( instance, index );
@@ -1106,8 +1110,11 @@ define( function( require ) {
       }
 
       // maintain fittable flags
-      if ( !this.fittable ) {
+      if ( !this.ancestorsFittable ) {
         instance.markSubtreeFittable();
+      }
+      if ( instance.subtreeUnfittableCount > 0 ) {
+        this.decrementSubtreeUnfittableCount();
       }
 
       this.relativeTransform.removeInstanceWithIndex( instance, index );
@@ -1229,7 +1236,7 @@ define( function( require ) {
         return;
       }
 
-      this.fittable = true;
+      this.ancestorsFittable = true;
 
       var numChildren = this.children.length;
       for ( var i = 0; i < numChildren; i++ ) {
@@ -1247,11 +1254,11 @@ define( function( require ) {
      */
     markSubtreeUnfittable: function() {
       // Bail if we are already fittable
-      if ( !this.fittable ) {
+      if ( !this.ancestorsFittable ) {
         return;
       }
 
-      this.fittable = false;
+      this.ancestorsFittable = false;
 
       var numChildren = this.children.length;
       for ( var i = 0; i < numChildren; i++ ) {
@@ -1273,11 +1280,40 @@ define( function( require ) {
 
       this.selfFittable = newSelfFittable;
 
-      if ( this.selfFittable && ( !this.parent || this.parent.fittable ) ) {
+      if ( this.selfFittable && ( !this.parent || this.parent.ancestorsFittable ) ) {
         this.markSubtreeFittable();
       }
       else if ( !this.selfFittable ) {
         this.markSubtreeUnfittable();
+      }
+
+      if ( this.selfFittable ) {
+        this.decrementSubtreeUnfittableCount();
+      }
+      else {
+        this.incrementSubtreeUnfittableCount();
+      }
+    },
+
+    incrementSubtreeUnfittableCount: function() {
+      this.subtreeUnfittableCount++;
+
+      // If now something in our subtree can't be fitted, we need to notify our parent
+      if ( this.subtreeUnfittableCount === 1 ) {
+        this.parent && this.parent.incrementSubtreeUnfittableCount();
+
+        this.trigger0( 'subtreeFittability' );
+      }
+    },
+
+    decrementSubtreeUnfittableCount: function() {
+      this.subtreeUnfittableCount--;
+
+      // If now our subtree can all be fitted, we need to notify our parent
+      if ( this.subtreeUnfittableCount === 0 ) {
+        this.parent && this.parent.decrementSubtreeUnfittableCount();
+
+        this.trigger0( 'subtreeFittability' );
       }
     },
 

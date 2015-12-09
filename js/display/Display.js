@@ -1279,8 +1279,8 @@ define( function( require ) {
         if ( !instance.selfVisible ) {
           addQualifier( 'I-self-invis' );
         }
-        if ( !instance.fittable ) {
-          addQualifier( 'nofit' );
+        if ( !instance.ancestorsFittable ) {
+          addQualifier( 'nofit-ancestor' );
         }
         if ( !instance.selfFittable ) {
           addQualifier( 'nofit-self' );
