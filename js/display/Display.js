@@ -1279,10 +1279,10 @@ define( function( require ) {
         if ( !instance.selfVisible ) {
           addQualifier( 'I-self-invis' );
         }
-        if ( !instance.ancestorsFittable ) {
+        if ( !instance.fittability.ancestorsFittable ) {
           addQualifier( 'nofit-ancestor' );
         }
-        if ( !instance.selfFittable ) {
+        if ( !instance.fittability.selfFittable ) {
           addQualifier( 'nofit-self' );
         }
         if ( node.pickable === true ) {

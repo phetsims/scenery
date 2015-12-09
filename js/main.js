@@ -27,6 +27,7 @@ define( [
   'SCENERY/display/DOMBlock',
   'SCENERY/display/DOMSelfDrawable',
   'SCENERY/display/Drawable',
+  'SCENERY/display/Fittability',
   'SCENERY/display/FittedBlock',
   'SCENERY/display/GreedyStitcher',
   'SCENERY/display/InlineCanvasCacheDrawable',

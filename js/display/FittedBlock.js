@@ -112,7 +112,7 @@ define( function( require ) {
 
       // If our fit WAS common-ancestor and our common fit instance's subtree as something unfittable, switch to
       // full-display fit.
-      if ( this.fit === FittedBlock.COMMON_ANCESTOR && this.commonFitInstance.subtreeUnfittableCount > 0 ) {
+      if ( this.fit === FittedBlock.COMMON_ANCESTOR && this.commonFitInstance.fittability.subtreeUnfittableCount > 0 ) {
         // Reset the oldFitBounds so that any updates that check bounds changes will update it.
         this.oldFitBounds.set( Bounds2.NOTHING );
 
@@ -170,11 +170,11 @@ define( function( require ) {
     setCommonFitInstance: function( instance ) {
       if ( instance !== this.commonFitInstance ) {
         if ( this.commonFitInstance ) {
-          this.commonFitInstance.offStatic( 'subtreeFittability', this.dirtyFitListener );
+          this.commonFitInstance.fittability.subtreeFittabilityChange.removeListener( this.dirtyFitListener );
         }
         this.commonFitInstance = instance;
         if ( this.commonFitInstance ) {
-          this.commonFitInstance.onStatic( 'subtreeFittability', this.dirtyFitListener );
+          this.commonFitInstance.fittability.subtreeFittabilityChange.addListener( this.dirtyFitListener );
         }
       }
     },

@@ -32,6 +32,7 @@ define( function( require ) {
   var Drawable = require( 'SCENERY/display/Drawable' );
   var Renderer = require( 'SCENERY/display/Renderer' );
   var RelativeTransform = require( 'SCENERY/display/RelativeTransform' );
+  var Fittability = require( 'SCENERY/display/Fittability' );
   var Util = require( 'SCENERY/util/Util' );
   var Events = require( 'AXON/Events' );
 
@@ -74,7 +75,11 @@ define( function( require ) {
       // {RelativeTransform}, provides high-performance access to 'relative' transforms (from our nearest
       // transform root), and allows for listening to when our relative transform changes (called during
       // a phase of Display.updateDisplay()).
-      this.relativeTransform = ( this.relativeTransform || new RelativeTransform() ).initialize( this, display, trail );
+      this.relativeTransform = ( this.relativeTransform || new RelativeTransform( this ) );
+
+      // {Fittability}, provides logic for whether our drawables (or common-fit ancestors) will support fitting for
+      // FittedBlock subtypes. See https://github.com/phetsims/scenery/issues/406.
+      this.fittability = ( this.fittability || new Fittability( this ) );
 
       // Tracking of visibility {boolean} and associated boolean flags.
       this.visible = true; // global visibility (whether this instance will end up appearing on the display)
@@ -119,9 +124,6 @@ define( function( require ) {
       // Outstanding external references. used for shared cache instances, where multiple instances can point to us.
       this.externalReferenceCount = 0;
 
-      // Whether we have been instantiated. false if we are in a pool waiting to be instantiated.
-      this.active = true;
-
       this.stateless = true; // {boolean} - Whether we have had our state initialized yet
 
       // Rendering state constants (will not change over the life of an instance)
@@ -147,12 +149,10 @@ define( function( require ) {
       this.renderStateDirtyFrame = display._frameId; // {number} - When equal to the current frame it is considered "dirty"
       this.skipPruningFrame = display._frameId; // {number} - When equal to the current frame we can't prune at this instance
 
-      // Tracking of fittability and associated flags
-      this.selfFittable = this.isSelfFitSupported(); // {boolean} - Whether our node marks itself as fittable
-      this.ancestorsFittable = this.selfFittable; // {boolean} - Whether this instance's node and ancestors allow block fitting.
-      this.subtreeUnfittableCount = this.selfFittable ? 0 : 1; // {number} - Number of children (or this) whose subtrees are unfittable
-
       sceneryLog && sceneryLog.Instance && sceneryLog.Instance( 'initialized ' + this.toString() );
+
+      // Whether we have been instantiated. false if we are in a pool waiting to be instantiated.
+      this.active = true;
 
       return this;
     },
@@ -161,8 +161,10 @@ define( function( require ) {
      * Called for initialization of properties (via initialize(), via constructor), and to clean the instance for
      * placement in the pool (don't leak memory).
      *
-     * @param {Display} display - Instances are bound to a single display
-     * @param {Trail} trail - The list of ancestors going back up to our root instance (for the display, or for a cache)
+     * If the parameters are null, we remove all external references so that we don't leak memory.
+     *
+     * @param {Display|null} display - Instances are bound to a single display
+     * @param {Trail|null} trail - The list of ancestors going back up to our root instance (for the display, or for a cache)
      */
     cleanInstance: function( display, trail ) {
       this.display = display;
@@ -173,6 +175,10 @@ define( function( require ) {
       // NOTE: reliance on correct order after syncTree by at least SVGBlock/SVGGroup
       this.children = cleanArray( this.children ); // Array[Instance].
       this.sharedCacheInstance = null; // reference to a shared cache instance (different than a child)
+
+      // initialize/clean sub-components
+      this.relativeTransform.initialize( display, trail );
+      this.fittability.initialize( display, trail );
 
       // {Instance[]} - Child instances are pushed to here when their node is removed from our node.
       // We don't immediately dispose, since it may be added back.
@@ -195,8 +201,6 @@ define( function( require ) {
       this.svgGroups = cleanArray( this.svgGroups );
 
       this.cleanSyncTreeResults();
-
-      this.relativeTransform.clean();
     },
 
     /*
@@ -406,10 +410,7 @@ define( function( require ) {
 
       // If our fittability has changed, propagate those changes. (It's generally a hint change which will trigger an
       // update of rendering state).
-      var newSelfFittable = this.isSelfFitSupported();
-      if ( this.selfFittable !== newSelfFittable ) {
-        this.updateSelfFittable();
-      }
+      this.fittability.checkSelfFittability();
 
       sceneryLog && sceneryLog.Instance && sceneryLog.Instance( 'new: ' + this.getStateString() );
       sceneryLog && sceneryLog.Instance && sceneryLog.pop();
@@ -794,7 +795,7 @@ define( function( require ) {
             this.selfDrawable.markForDisposal( this.display );
           }
 
-          this.selfDrawable = Renderer.createSelfDrawable( this, this.node, selfRenderer, this.ancestorsFittable );
+          this.selfDrawable = Renderer.createSelfDrawable( this, this.node, selfRenderer, this.fittability.ancestorsFittable );
           assert && assert( this.selfDrawable );
 
           return true;
@@ -891,7 +892,7 @@ define( function( require ) {
           //OHTWO TODO: restitch here??? implement it
         }
         // Update the fittable flag
-        this.groupDrawable.setFittable( this.ancestorsFittable );
+        this.groupDrawable.setFittable( this.fittability.ancestorsFittable );
 
         this.firstDrawable = this.lastDrawable = this.groupDrawable;
       }
@@ -1052,12 +1053,7 @@ define( function( require ) {
       }
 
       // maintain fittable flags
-      if ( !this.ancestorsFittable ) {
-        instance.markSubtreeUnfittable();
-      }
-      if ( instance.subtreeUnfittableCount > 0 ) {
-        this.incrementSubtreeUnfittableCount();
-      }
+      this.fittability.onInsert( instance.fittability );
 
       this.relativeTransform.insertInstance( instance, index );
 
@@ -1110,12 +1106,7 @@ define( function( require ) {
       }
 
       // maintain fittable flags
-      if ( !this.ancestorsFittable ) {
-        instance.markSubtreeFittable();
-      }
-      if ( instance.subtreeUnfittableCount > 0 ) {
-        this.decrementSubtreeUnfittableCount();
-      }
+      this.fittability.onRemove( instance.fittability );
 
       this.relativeTransform.removeInstanceWithIndex( instance, index );
 
@@ -1227,104 +1218,15 @@ define( function( require ) {
     },
 
     /**
-     * Called when our parent just became fittable.
-     * @private
-     */
-    markSubtreeFittable: function() {
-      // Bail if we can't be fittable ourselves
-      if ( !this.selfFittable ) {
-        return;
-      }
-
-      this.ancestorsFittable = true;
-
-      var numChildren = this.children.length;
-      for ( var i = 0; i < numChildren; i++ ) {
-        this.children[ numChildren ].markSubtreeFittable();
-      }
-
-      this.selfDrawable && this.selfDrawable.setFittable( true );
-      this.groupDrawable && this.groupDrawable.setFittable( true );
-      // this.sharedCacheDrawable && this.sharedCacheDrawable.setFittable( true );
-    },
-
-    /**
-     * Called when our parent just became unfittable and we are fittable.
-     * @private
-     */
-    markSubtreeUnfittable: function() {
-      // Bail if we are already fittable
-      if ( !this.ancestorsFittable ) {
-        return;
-      }
-
-      this.ancestorsFittable = false;
-
-      var numChildren = this.children.length;
-      for ( var i = 0; i < numChildren; i++ ) {
-        this.children[ numChildren ].markSubtreeUnfittable();
-      }
-
-      this.selfDrawable && this.selfDrawable.setFittable( false );
-      this.groupDrawable && this.groupDrawable.setFittable( false );
-      // this.sharedCacheDrawable && this.sharedCacheDrawable.setFittable( false );
-    },
-
-    /**
-     * Called when our Node's fit-ability has changed.
-     * @private
-     */
-    updateSelfFittable: function() {
-      var newSelfFittable = this.isSelfFitSupported();
-      assert && assert( this.selfFittable !== newSelfFittable );
-
-      this.selfFittable = newSelfFittable;
-
-      if ( this.selfFittable && ( !this.parent || this.parent.ancestorsFittable ) ) {
-        this.markSubtreeFittable();
-      }
-      else if ( !this.selfFittable ) {
-        this.markSubtreeUnfittable();
-      }
-
-      if ( this.selfFittable ) {
-        this.decrementSubtreeUnfittableCount();
-      }
-      else {
-        this.incrementSubtreeUnfittableCount();
-      }
-    },
-
-    incrementSubtreeUnfittableCount: function() {
-      this.subtreeUnfittableCount++;
-
-      // If now something in our subtree can't be fitted, we need to notify our parent
-      if ( this.subtreeUnfittableCount === 1 ) {
-        this.parent && this.parent.incrementSubtreeUnfittableCount();
-
-        this.trigger0( 'subtreeFittability' );
-      }
-    },
-
-    decrementSubtreeUnfittableCount: function() {
-      this.subtreeUnfittableCount--;
-
-      // If now our subtree can all be fitted, we need to notify our parent
-      if ( this.subtreeUnfittableCount === 0 ) {
-        this.parent && this.parent.decrementSubtreeUnfittableCount();
-
-        this.trigger0( 'subtreeFittability' );
-      }
-    },
-
-    /**
-     * Whether our node's performance flags allows the subtree to be fitted.
-     * @private
+     * Updates the currently fittability for all of the drawables attached to this instance.
+     * @public
      *
-     * Any updates to flags (for instance, a 'dynamic' flag perhaps?) should be added here.
+     * @param {boolean} fittable
      */
-    isSelfFitSupported: function() {
-      return !this.node.isPreventFit();
+    updateDrawableFittability: function( fittable ) {
+      this.selfDrawable && this.selfDrawable.setFittable( fittable );
+      this.groupDrawable && this.groupDrawable.setFittable( fittable );
+      // this.sharedCacheDrawable && this.sharedCacheDrawable.setFittable( fittable );
     },
 
     /**
@@ -1580,6 +1482,8 @@ define( function( require ) {
         }
 
         this.relativeTransform.audit( frameId, allowValidationNotNeededChecks );
+
+        this.fittability.audit();
       }
     },
 

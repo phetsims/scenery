@@ -92,17 +92,25 @@ define( function( require ) {
   var Matrix3 = require( 'DOT/Matrix3' );
   var scenery = require( 'SCENERY/scenery' );
 
-  function RelativeTransform() {
+  function RelativeTransform( instance ) {
+    this.instance = instance;
   }
 
   scenery.register( 'RelativeTransform', RelativeTransform );
 
   inherit( Object, RelativeTransform, {
-    initialize: function( instance, display, trail ) {
-      this.instance = instance;
+    /**
+     * Responsible for initialization and cleaning of this. If the parameters are both null, we'll want to clean our
+     * external references (like Instance does).
+     *
+     * @param {Display|null} display
+     * @param {Trail|null} trail
+     * @returns {RelativeTransform} - Returns this, to allow chaining.
+     */
+    initialize: function( display, trail ) {
       this.display = display;
       this.trail = trail;
-      this.node = trail.lastNode();
+      this.node = trail && trail.lastNode();
 
       // properties relevant to the node's direct transform
       this.transformDirty = true; // whether the node's transform has changed (until the pre-repaint phase)
@@ -132,15 +140,13 @@ define( function( require ) {
       // insufficient, since our traversal handling would validate our invariant of
       // this.relativeChildDirtyFrame => parent.relativeChildDirtyFrame). In this case, they are both effectively
       // "false" unless they are the current frame ID, in which case that invariant holds.
-      this.relativeChildDirtyFrame = display._frameId;
+      this.relativeChildDirtyFrame = display ? display._frameId : 0;
 
-      return this; // allow chaining
-    },
-
-    clean: function() {
       // will be notified in pre-repaint phase that our relative transform has changed (but not computed by default)
       //OHTWO TODO: should we rely on listeners removing themselves?
       this.relativeTransformListeners = cleanArray( this.relativeTransformListeners );
+
+      return this; // allow chaining
     },
 
     get parent() {
