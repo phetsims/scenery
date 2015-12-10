@@ -273,6 +273,21 @@ define( function( require ) {
      * Bounds
      *----------------------------------------------------------------------------*/
 
+    getVerticalBounds: function() {
+      if ( !hybridTextNode ) {
+        return Bounds2.NOTHING; // we are the hybridTextNode, ignore us
+      }
+
+      var css = this._font.toCSS();
+      var verticalBounds = hybridFontVerticalCache[ css ];
+      if ( !verticalBounds ) {
+        hybridTextNode.setFont( this._font );
+        verticalBounds = hybridFontVerticalCache[ css ] = hybridTextNode.getBounds().copy();
+      }
+
+      return verticalBounds;
+    },
+
     accurateCanvasBounds: function() {
       var node = this;
       var svgBounds = this.approximateSVGBounds(); // this seems to be slower than expected, mostly due to Font getters
@@ -331,16 +346,7 @@ define( function( require ) {
 
     // NOTE: should return new instance, so that it can be mutated later
     approximateHybridBounds: function() {
-      if ( !hybridTextNode ) {
-        return Bounds2.NOTHING; // we are the hybridTextNode, ignore us
-      }
-
-      var css = this._font.toCSS();
-      var verticalBounds = hybridFontVerticalCache[ css ];
-      if ( !verticalBounds ) {
-        hybridTextNode.setFont( this._font );
-        verticalBounds = hybridFontVerticalCache[ css ] = hybridTextNode.getBounds().copy();
-      }
+      var verticalBounds = this.getVerticalBounds();
 
       var canvasWidth = this.approximateCanvasWidth();
 
@@ -393,6 +399,29 @@ define( function( require ) {
 
       var width = rect.right - rect.left;
       return result.shiftedX( isRTL ? -width : 0 ); // should we even swap here?
+    },
+
+    approximateImprovedDOMBounds: function() {
+      // TODO: reuse this div?
+      var div = document.createElement( 'div' );
+      div.style.display = 'inline-block';
+      div.style.font = this.getFont();
+      div.style.color = 'transparent';
+      div.style.padding = '0 !important';
+      div.style.margin = '0 !important';
+      div.style.position = 'absolute';
+      div.style.left = '0';
+      div.style.top = '0';
+      div.setAttribute( 'direction', this._direction );
+      div.appendChild( this.getDOMTextNode() );
+
+      document.body.appendChild( div );
+      var bounds = new Bounds2( div.offsetLeft, div.offsetTop, div.offsetLeft + div.offsetWidth + 1, div.offsetTop + div.offsetHeight + 1 );
+      document.body.removeChild( div );
+
+      // Compensate for the baseline alignment
+      var verticalBounds = this.getVerticalBounds();
+      return bounds.shiftedY( verticalBounds.minY );
     },
 
     // @override from Node
