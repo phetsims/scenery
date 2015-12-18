@@ -686,6 +686,32 @@ define( function( require ) {
     },
 
     /**
+     * Ensures that the cached _selfBounds of this node is accurate. Returns true if any sort of dirty flag was set
+     * before this was called.
+     * @public
+     *
+     * @returns {boolean} - Was the self-bounds potentially updated?
+     */
+    validateSelfBounds: function() {
+      // validate bounds of ourself if necessary
+      if ( this._selfBoundsDirty ) {
+        // Rely on an overloadable method to accomplish computing our self bounds. This should update
+        // this._selfBounds itself, returning whether it was actually changed. If it didn't change, we don't want to
+        // send a 'selfBounds' event.
+        var didSelfBoundsChange = this.updateSelfBounds();
+        this._selfBoundsDirty = false;
+
+        if ( didSelfBoundsChange ) {
+          this.trigger0( 'selfBounds' );
+        }
+
+        return true;
+      }
+
+      return false;
+    },
+
+    /**
      * Ensures that cached bounds stored on this node (and all children) are accurate. Returns true if any sort of dirty
      * flag was set before this was called.
      * @public
@@ -696,22 +722,7 @@ define( function( require ) {
       var that = this;
       var i;
 
-      var wasDirtyBefore = false;
-
-      // validate bounds of ourself if necessary
-      if ( this._selfBoundsDirty ) {
-        wasDirtyBefore = true;
-
-        // Rely on an overloadable method to accomplish computing our self bounds. This should update
-        // this._selfBounds itself, returning whether it was actually changed. If it didn't change, we don't want to
-        // send a 'selfBounds' event.
-        var didSelfBoundsChange = this.updateSelfBounds();
-        this._selfBoundsDirty = false;
-
-        if ( didSelfBoundsChange ) {
-          this.trigger0( 'selfBounds' );
-        }
-      }
+      var wasDirtyBefore = this.validateSelfBounds();
 
       // validate bounds of children if necessary
       if ( this._childBoundsDirty ) {
@@ -1170,7 +1181,7 @@ define( function( require ) {
      * @returns {Bounds2}
      */
     getSelfBounds: function() {
-      this.validateBounds(); // TODO: consider more fine-grained validation?
+      this.validateSelfBounds();
       return this._selfBounds;
     },
     get selfBounds() { return this.getSelfBounds(); },
@@ -1185,7 +1196,7 @@ define( function( require ) {
      * @returns {Bounds2}
      */
     getSafeSelfBounds: function() {
-      this.validateBounds(); // TODO: consider more fine-grained validation?
+      this.validateSelfBounds();
       return this._selfBounds;
     },
 
@@ -1955,7 +1966,7 @@ define( function( require ) {
     setRotation: function( rotation ) {
       assert && assert( typeof rotation === 'number' );
 
-      this.appendMatrix( Matrix3.rotation2( rotation - this.getRotation() ) );
+      this.appendMatrix( scratchMatrix3.setToRotationZ( rotation - this.getRotation() ) );
       return this;
     },
     set rotation( value ) { this.setRotation( value ); },
