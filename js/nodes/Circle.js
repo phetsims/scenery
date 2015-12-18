@@ -358,6 +358,8 @@ define( function( require ) {
     setToClean: function() {
       this.setToCleanState();
 
+      this.cleanPaintableState();
+
       this.transformDirty = false;
     },
 
