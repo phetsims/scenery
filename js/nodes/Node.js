@@ -379,7 +379,7 @@ define( function( require ) {
      */
     removeChild: function( node ) {
       assert && assert( node && node instanceof Node, 'Need to call node.removeChild() with a Node.' );
-      assert && assert( this.isChild( node ), 'Attempted to removeChild with a node that was not a child.' );
+      assert && assert( this.hasChild( node ), 'Attempted to removeChild with a node that was not a child.' );
 
       var indexOfChild = _.indexOf( this._children, node );
 
@@ -417,7 +417,7 @@ define( function( require ) {
      */
     removeChildWithIndex: function( node, indexOfChild ) {
       assert && assert( node && node instanceof Node, 'Need to call node.removeChildWithIndex() with a Node.' );
-      assert && assert( this.isChild( node ), 'Attempted to removeChild with a node that was not a child.' );
+      assert && assert( this.hasChild( node ), 'Attempted to removeChild with a node that was not a child.' );
       assert && assert( this._children[ indexOfChild ] === node, 'Incorrect index for removeChildWithIndex' );
 
       var indexOfParent = _.indexOf( node._parents, this );
@@ -1163,8 +1163,8 @@ define( function( require ) {
      * @param {Node} potentialChild
      * @returns {boolean} - Whether potentialChild is actually our child.
      */
-    isChild: function( potentialChild ) {
-      assert && assert( potentialChild && ( potentialChild instanceof Node ), 'isChild needs to be called with a Node' );
+    hasChild: function( potentialChild ) {
+      assert && assert( potentialChild && ( potentialChild instanceof Node ), 'hasChild needs to be called with a Node' );
       var ourChild = _.contains( this._children, potentialChild );
       var itsParent = _.contains( potentialChild._parents, this );
       assert && assert( ourChild === itsParent );
