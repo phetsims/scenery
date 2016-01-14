@@ -779,7 +779,7 @@ define( function( require ) {
       }
 
       // text length correction, tested with scenery/tests/text-quality-test.html to determine how to match Canvas/SVG rendering (and overall length)
-      if ( this.dirtyBounds && isFinite( this.node.selfBounds.width ) && useSVGTextLengthAdjustments ) {
+      if ( this.dirtyBounds && useSVGTextLengthAdjustments && isFinite( this.node.selfBounds.width ) ) {
         text.setAttribute( 'textLength', this.node.selfBounds.width );
       }
 
