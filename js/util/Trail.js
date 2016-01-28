@@ -182,6 +182,21 @@ define( function( require ) {
       return matrix;
     },
 
+    // from local to next-to-global (ignores root node matrix)
+    getAncestorMatrix: function() {
+      // TODO: performance: can we cache this ever? would need the rootNode to not really change in between
+      // this matrix will be modified in place, so always start fresh
+      var matrix = Matrix3.identity();
+
+      // from the root up
+      var nodes = this.nodes;
+      var length = nodes.length;
+      for ( var i = 1; i < length; i++ ) {
+        matrix.multiplyMatrix( nodes[ i ].getMatrix() );
+      }
+      return matrix;
+    },
+
     // from parent to global
     getParentMatrix: function() {
       // this matrix will be modified in place, so always start fresh
