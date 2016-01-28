@@ -4569,6 +4569,7 @@ define( function( require ) {
    */
   Node.prototype._mutatorKeys = [
     'children', 'cursor', 'visible', 'pickable', 'opacity', 'matrix', 'translation', 'x', 'y', 'rotation', 'scale',
+    'localBounds',
     'maxWidth', 'maxHeight', 'leftTop', 'centerTop', 'rightTop', 'leftCenter', 'center', 'rightCenter', 'leftBottom',
     'centerBottom', 'rightBottom', 'left', 'right', 'top', 'bottom', 'centerX', 'centerY', 'renderer',
     'rendererOptions', 'layerSplit', 'usesOpacity', 'cssTransform', 'excludeInvisible', 'webglScale', 'preventFit',
