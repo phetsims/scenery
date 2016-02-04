@@ -184,16 +184,19 @@ define( function( require ) {
       this._context.fillStyle = value;
     },
 
+    // TODO: create wrapper
     createLinearGradient: function( x0, y0, x1, y1 ) {
       command( 'createLinearGradient', [ x0, y0, x1, y1 ] );
       return this._context.createLinearGradient( x0, y0, x1, y1 );
     },
 
+    // TODO: create wrapper
     createRadialGradient: function( x0, y0, r0, x1, y1, r1 ) {
       command( 'createRadialGradient', [ x0, y0, r0, x1, y1, r1 ] );
       return this._context.createRadialGradient( x0, y0, r0, x1, y1, r1 );
     },
 
+    // TODO: create wrapper
     createPattern: function( image, repetition ) {
       command( 'createPattern', [ image, repetition ] );
       return this._context.createPattern( image, repetition );
@@ -270,13 +273,25 @@ define( function( require ) {
     },
 
     fill: function( path ) {
-      command( 'fill', path ? [ path ] : undefined );
-      this._context.fill( path );
+      if ( path ) {
+        command( 'fill', [ path ] );
+        this._context.fill( path );
+      }
+      else {
+        command( 'fill' );
+        this._context.fill();
+      }
     },
 
     stroke: function( path ) {
-      command( 'stroke', path ? [ path ] : undefined );
-      this._context.stroke( path );
+      if ( path ) {
+        command( 'stroke', [ path ] );
+        this._context.stroke( path );
+      }
+      else {
+        command( 'stroke' );
+        this._context.stroke();
+      }
     },
 
     drawSystemFocusRing: function( a, b ) {
