@@ -68,8 +68,7 @@ define( function( require ) {
 
   // methods for forwarding dirty messages
   function canvasSelfDirty() {
-    // we pass this method and it is only called with blah.call( ... ), where the 'this' reference is set. ignore jshint
-    /* jshint -W040 */
+    // we pass this method and it is only called with blah.call( ... ), where the 'this' reference is set.
     this.markDirty();
   }
 

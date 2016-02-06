@@ -727,7 +727,7 @@ define( function( require ) {
         sceneryLog && sceneryLog.ChangeInterval && sceneryLog.pop();
       }
 
-      /* jshint -W018 */ // it's really the easiest way to compare if two things (casted to booleans) are the same?
+      // it's really the easiest way to compare if two things (casted to booleans) are the same?
       assert && assert( !!firstChangeInterval === !!currentChangeInterval,
         'Presence of first and current change intervals should be equal' );
 
@@ -841,7 +841,6 @@ define( function( require ) {
         'We should have precisely one of these flags set for us to have a groupRenderer' );
 
       // if we switched to/away from a group, our group type changed, or our group renderer changed
-      /* jshint -W018 */
       var groupChanged = ( !!groupRenderer !== !!this.groupDrawable ) ||
                          ( !wasStateless && this.groupChanged ) ||
                          ( this.groupDrawable && this.groupDrawable.renderer !== groupRenderer );

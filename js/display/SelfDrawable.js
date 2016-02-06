@@ -67,7 +67,6 @@ define( function( require ) {
       // for pooling, allow <SelfDrawableType>.createFromPool( renderer, instance ) and drawable.freeToPool(). Creation will initialize the drawable to an initial state
       Poolable.mixin( selfDrawableType, {
         defaultFactory: function() {
-          /* jshint -W055 */
           return new selfDrawableType();
         },
         constructorDuplicateFactory: function( pool ) {
@@ -76,7 +75,6 @@ define( function( require ) {
               return pool.pop().initialize( renderer, instance );
             }
             else {
-              /* jshint -W055 */
               return new selfDrawableType( renderer, instance );
             }
           };

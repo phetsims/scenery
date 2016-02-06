@@ -782,14 +782,12 @@ define( function( require ) {
 
       // Paintable's version of invalidateFill()
       function invalidateFill() {
-        /*jshint -W040 */
         this.invalidateSupportedRenderers();
 
         var stateLen = this._drawables.length;
         for ( var i = 0; i < stateLen; i++ ) {
           this._drawables[ i ].markDirtyFill();
         }
-        /*jshint +W040 */
       }
 
       // Patch in a sub-type call if it already exists on the prototype
@@ -806,14 +804,12 @@ define( function( require ) {
 
       // Paintable's version of invalidateStroke()
       function invalidateStroke() {
-        /*jshint -W040 */
         this.invalidateSupportedRenderers();
 
         var stateLen = this._drawables.length;
         for ( var i = 0; i < stateLen; i++ ) {
           this._drawables[ i ].markDirtyStroke();
         }
-        /*jshint +W040 */
       }
 
       if ( proto.invalidateStroke ) {

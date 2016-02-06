@@ -85,7 +85,6 @@ define( function( require ) {
       // Creation will initialize the peer to an initial state.
       Poolable.mixin( selfDrawableType, {
         defaultFactory: function() {
-          /* jshint -W055 */
           return new selfDrawableType();
         },
         constructorDuplicateFactory: function( pool ) {
@@ -94,7 +93,6 @@ define( function( require ) {
               return pool.pop().initialize( accessibleInstance );
             }
             else {
-              /* jshint -W055 */
               return new selfDrawableType( accessibleInstance );
             }
           };
