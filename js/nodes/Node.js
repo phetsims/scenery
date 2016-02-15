@@ -141,7 +141,7 @@ define( function( require ) {
     // @private {string} - The CSS cursor to be displayed over this node. null should be the default (inherit) value.
     this._cursor = null;
 
-    // @private {boolean} - Whether this Node should be accessible via tab ordering. Defaults to false.
+    // @private @deprecated {boolean} - Whether this Node should be accessible via tab ordering. Defaults to false.
     this._focusable = false;
 
     // @private @deprecated {string} - 'cursor' or 'rectangle' at the moment. WARNING: in active development!
