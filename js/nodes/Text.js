@@ -107,6 +107,7 @@ define( function( require ) {
       text = '' + text;
 
       if ( text !== this._text ) {
+        var oldText = this._text;
         this._text = text;
 
         var stateLen = this._drawables.length;
@@ -115,6 +116,7 @@ define( function( require ) {
         }
 
         this.invalidateText();
+        this.trigger2( 'text', oldText, text );
       }
       return this;
     },
