@@ -219,7 +219,7 @@ define( function( require ) {
         'Display root instance: ' + this._rootAccessibleInstance.toString() );
       this._rootAccessibleInstance.addSubtree( new scenery.Trail( this._rootNode ) );
 
-      this._domElement.appendChild( this._rootAccessibleInstance.peer.domElement );
+      document.body.appendChild( this._rootAccessibleInstance.peer.domElement );
 
       this._unsortedAccessibleInstances = [];
     }
