@@ -8,7 +8,6 @@
  *
  * @author Sam Reid
  */
-
 define( function( require ) {
   'use strict';
 
@@ -66,6 +65,7 @@ define( function( require ) {
       circle.setAttribute( 'cy', innerRadius + strokeWidth / 2 );
       circle.setAttribute( 'r', innerRadius );
       circle.setAttribute( 'style', 'fill:black;' );
+      circle.setAttribute( 'style', 'stroke:white;' );
       circle.setAttribute( 'opacity', 0.4 );
 
       //Add a move listener to the pointer to update position when it has moved
