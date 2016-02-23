@@ -516,7 +516,6 @@ define( function( require ) {
       context.beginPath();
       context.moveTo( node._x1, node._y1 );
       context.lineTo( node._x2, node._y2 );
-      context.closePath();
 
       if ( node._stroke ) {
         node.beforeCanvasStroke( wrapper ); // defined in Paintable
