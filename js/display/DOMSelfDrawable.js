@@ -67,6 +67,8 @@ define( function( require ) {
 
           this.domElement.style.visibility = this.visible ? '' : 'hidden';
         }
+
+        this.cleanPaintableState && this.cleanPaintableState();
       }
     },
 
