@@ -108,7 +108,7 @@ define( function( require ) {
         // prepend the translation on the node, so we can ignore whatever other transform state the node has
         if ( handler.options.translate ) {
           var translation = handler.node.getMatrix().getTranslation();
-          handler.options.translate( {
+          handler.options.translate.call( null, {
             delta: delta,
             oldPosition: translation,
             position: translation.plus( delta )
@@ -121,7 +121,7 @@ define( function( require ) {
           // TODO: add the position in to the listener
           var saveCurrentTarget = event.currentTarget;
           event.currentTarget = handler.node; // #66: currentTarget on a pointer is null, so set it to the node we're dragging
-          handler.options.drag( event, handler.trail ); // new position (old position?) delta
+          handler.options.drag.call( null, event, handler.trail ); // new position (old position?) delta
           event.currentTarget = saveCurrentTarget; // be polite to other listeners, restore currentTarget
         }
       }
@@ -150,7 +150,7 @@ define( function( require ) {
       this.mouseButton = event.pointer.isMouse ? event.domEvent.button : undefined;
 
       if ( this.options.start ) {
-        this.options.start( event, this.trail );
+        this.options.start.call( null, event, this.trail );
       }
     },
 
@@ -162,7 +162,7 @@ define( function( require ) {
       this.dragging = false;
 
       if ( this.options.end ) {
-        this.options.end( event, this.trail );
+        this.options.end.call( null, event, this.trail );
       }
 
       // release our reference
