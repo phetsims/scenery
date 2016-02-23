@@ -126,6 +126,8 @@ define( function( require ) {
       if ( this.dirtyFill || this.dirtyStroke || strokeDetailDirty ) {
         element.setAttribute( 'style', this.paintState.baseStyle + this.paintState.strokeDetailStyle );
       }
+
+      this.cleanPaintableState();
     },
 
     updateSVGBlock: function( svgBlock ) {
