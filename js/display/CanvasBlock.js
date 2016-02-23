@@ -77,6 +77,8 @@ define( function( require ) {
       this.canvas.style.width = size.width + 'px';
       this.canvas.style.height = size.height + 'px';
       this.wrapper.resetStyles();
+      this.canvasDrawOffset.setXY( 0, 0 );
+      Util.unsetTransform( this.canvas );
     },
 
     setSizeFitBounds: function() {
