@@ -65,6 +65,9 @@ define( function( require ) {
       // store our backing scale so we don't have to look it up while fitting
       this.backingScale = ( renderer & Renderer.bitmaskCanvasLowResolution ) ? 1 : scenery.Util.backingScale( this.context );
 
+      this.clipDirtyListener = this.markDirty.bind( this );
+      this.filterRootInstance.node.onStatic( 'clip', this.clipDirtyListener );
+
       sceneryLog && sceneryLog.CanvasBlock && sceneryLog.CanvasBlock( 'initialized #' + this.id );
       // TODO: dirty list of nodes (each should go dirty only once, easier than scanning all?)
 
@@ -177,6 +180,8 @@ define( function( require ) {
 
     dispose: function() {
       sceneryLog && sceneryLog.CanvasBlock && sceneryLog.CanvasBlock( 'dispose #' + this.id );
+
+      this.filterRootInstance.node.offStatic( 'clip', this.clipDirtyListener );
 
       // clear references
       this.transformRootInstance = null;
