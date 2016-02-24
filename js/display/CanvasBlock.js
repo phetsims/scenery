@@ -66,7 +66,8 @@ define( function( require ) {
       this.backingScale = ( renderer & Renderer.bitmaskCanvasLowResolution ) ? 1 : scenery.Util.backingScale( this.context );
 
       this.clipDirtyListener = this.markDirty.bind( this );
-      this.filterRootInstance.node.onStatic( 'clip', this.clipDirtyListener );
+      this.filterRootNode = this.filterRootInstance.node;
+      this.filterRootNode.onStatic( 'clip', this.clipDirtyListener );
 
       sceneryLog && sceneryLog.CanvasBlock && sceneryLog.CanvasBlock( 'initialized #' + this.id );
       // TODO: dirty list of nodes (each should go dirty only once, easier than scanning all?)
@@ -117,7 +118,7 @@ define( function( require ) {
         this.context.clearRect( 0, 0, this.canvas.width, this.canvas.height ); // clear everything
 
         //OHTWO TODO: clipping handling!
-        if ( this.filterRootInstance.node.clipArea ) {
+        if ( this.filterRootNode.clipArea ) {
           this.context.save();
 
           this.temporaryRecursiveClip( this.filterRootInstance );
@@ -130,7 +131,7 @@ define( function( require ) {
           if ( drawable === this.lastDrawable ) { break; }
         }
 
-        if ( this.filterRootInstance.node.clipArea ) {
+        if ( this.filterRootNode.clipArea ) {
           this.context.restore();
           this.wrapper.resetStyles();
         }
@@ -181,7 +182,8 @@ define( function( require ) {
     dispose: function() {
       sceneryLog && sceneryLog.CanvasBlock && sceneryLog.CanvasBlock( 'dispose #' + this.id );
 
-      this.filterRootInstance.node.offStatic( 'clip', this.clipDirtyListener );
+      this.filterRootNode.offStatic( 'clip', this.clipDirtyListener );
+      this.filterRootNode = null;
 
       // clear references
       this.transformRootInstance = null;
