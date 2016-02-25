@@ -138,6 +138,8 @@ define( function( require ) {
     this._initialWidth = 0;
     this._initialHeight = 0;
 
+    this._imageOpacity = 1;
+
     // Mipmap client values
     this._mipmap = false; // {bool} - Whether mipmapping is enabled
     this._mipmapBias = defaultMipmapBias; // {number} - Amount of level-of-detail adjustment added to everything.
@@ -748,6 +750,10 @@ define( function( require ) {
           image.setAttribute( 'height', '0' );
           image.setAttributeNS( scenery.xlinkns, 'xlink:href', '//:0' ); // see http://stackoverflow.com/questions/5775469/whats-the-valid-way-to-include-an-image-with-no-src
         }
+
+        if ( this.node._imageOpacity !== 1 ) {
+          image.setAttribute( 'opacity', this.node._imageOpacity );
+        }
       }
       else if ( this.dirtyMipmap && this.node._image ) {
         sceneryLog && sceneryLog.ImageSVGDrawable && sceneryLog.ImageSVGDrawable( this.id + ' Updating dirty mipmap' );
@@ -824,6 +830,8 @@ define( function( require ) {
     dispose: function() {
       sceneryLog && sceneryLog.ImageSVGDrawable && sceneryLog.ImageSVGDrawable( this.id + ' disposing' );
 
+      this.svgElement.removeAttribute( 'opacity' );
+
       // clean up mipmap listeners and compute needs
       this.updateMipmapStatus( false );
       this.node.off( 'mipmap', this._mipmapListener );
@@ -847,8 +855,20 @@ define( function( require ) {
     },
 
     paintCanvas: function( wrapper, node ) {
+      var context = wrapper.context;
+      var hasImageOpacity = node._imageOpacity !== 1;
+
+      if ( hasImageOpacity ) {
+        context.save();
+        context.globalAlpha *= node._imageOpacity;
+      }
+
       if ( node._image ) {
-        wrapper.context.drawImage( node._image, 0, 0 );
+        context.drawImage( node._image, 0, 0 );
+      }
+
+      if ( hasImageOpacity ) {
+        context.restore();
       }
     },
 
