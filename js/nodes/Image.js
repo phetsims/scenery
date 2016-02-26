@@ -916,8 +916,8 @@ define( function( require ) {
       }
 
       // if the width/height isn't loaded yet, we can still use the desired value
-      var width = this.node._image.naturalWidth;
-      var height = this.node._image.naturalHeight;
+      var width = this.node.getImageWidth();
+      var height = this.node.getImageHeight();
 
       // if we have a width/height, we'll load a sprite
       this.sprite = ( width > 0 && height > 0 ) ? this.webglBlock.addSpriteSheetImage( this.node._image, width, height ) : null;
