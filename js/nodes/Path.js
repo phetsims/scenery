@@ -423,7 +423,9 @@ define( function( require ) {
           context.fill();
           node.afterCanvasFill( wrapper ); // defined in Paintable
         }
-        if ( node.hasStroke() ) {
+
+        // Do not render strokes in Canvas if the lineWidth is 0, see https://github.com/phetsims/scenery/issues/523
+        if ( node.hasStroke() && node.getLineWidth() > 0 ) {
           node.beforeCanvasStroke( wrapper ); // defined in Paintable
           context.stroke();
           node.afterCanvasStroke( wrapper ); // defined in Paintable
