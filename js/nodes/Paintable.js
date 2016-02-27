@@ -750,6 +750,7 @@ define( function( require ) {
           else {
             // solid fills always supported for DOM and WebGL
             bitmask |= Renderer.bitmaskDOM;
+            bitmask |= Renderer.bitmaskWebGL;
           }
 
           return bitmask;
@@ -768,6 +769,7 @@ define( function( require ) {
           if ( !this.hasStroke() ) {
             // allow DOM support if there is no stroke
             bitmask |= Renderer.bitmaskDOM;
+            bitmask |= Renderer.bitmaskWebGL;
           }
 
           return bitmask;
