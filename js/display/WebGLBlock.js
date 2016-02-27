@@ -88,6 +88,9 @@ define( function( require ) {
         // processor for custom WebGL drawables (e.g. WebGLNode)
         this.customProcessor = new WebGLBlock.CustomProcessor( this );
 
+        // processor for drawing vertex-colored triangles (e.g. Path types)
+        this.vertexColorPolygonsProcessor = new WebGLBlock.VertexColorPolygons( this );
+
         // processor for drawing textured triangles (e.g. Image)
         this.texturedTrianglesProcessor = new WebGLBlock.TexturedTrianglesProcessor( this );
       }
@@ -190,6 +193,9 @@ define( function( require ) {
             }
             else if ( drawable.webglRenderer === Renderer.webglCustom ) {
               desiredProcessor = this.customProcessor;
+            }
+            else if ( drawable.webglRenderer === Renderer.webglVertexColorPolygons ) {
+              desiredProcessor = this.vertexColorPolygonsProcessor;
             }
             assert && assert( desiredProcessor );
 
@@ -374,6 +380,106 @@ define( function( require ) {
         this.drawCount++;
         this.drawable = null;
       }
+    }
+  } );
+
+  WebGLBlock.VertexColorPolygons = function( webglBlock ) {
+    this.webglBlock = webglBlock;
+    var gl = this.gl = webglBlock.gl;
+
+    assert && assert( webglBlock.gl );
+    this.shaderProgram = new ShaderProgram( gl, [
+      // vertex shader
+      'attribute vec2 aVertex;',
+      'attribute vec4 aColor;',
+      'varying vec4 vColor;',
+      'uniform mat3 uProjectionMatrix;',
+
+      'void main() {',
+      '  vColor = aColor;',
+      '  vec3 ndc = uProjectionMatrix * vec3( aVertex, 1.0 );', // homogeneous map to to normalized device coordinates
+      '  gl_Position = vec4( ndc.xy, 0.0, 1.0 );',
+      '}'
+    ].join( '\n' ), [
+      // fragment shader
+      'precision mediump float;',
+      'varying vec4 vColor;',
+
+      'void main() {',
+      // '  gl_FragColor = vec4( 0.0, 1.0, 0.0, 1.0 );',
+      '  gl_FragColor = vColor;',
+      '}'
+    ].join( '\n' ), {
+      attributes: [ 'aVertex', 'aColor' ],
+      uniforms: [ 'uProjectionMatrix' ]
+    } );
+
+    this.vertexBuffer = gl.createBuffer();
+    this.lastArrayLength = 128; // initial vertex buffer array length
+    this.vertexArray = new Float32Array( this.lastArrayLength );
+
+    gl.bindBuffer( gl.ARRAY_BUFFER, this.vertexBuffer );
+    gl.bufferData( gl.ARRAY_BUFFER, this.vertexArray, gl.DYNAMIC_DRAW ); // fully buffer at the start
+  };
+  inherit( Object, WebGLBlock.VertexColorPolygons, {
+    activate: function() {
+      this.shaderProgram.use();
+
+      this.vertexArrayIndex = 0;
+      this.drawCount = 0;
+    },
+
+    processDrawable: function( drawable ) {
+      var vertexData = drawable.vertexArray;
+
+      // if our vertex data won't fit, keep doubling the size until it fits
+      while ( vertexData.length + this.vertexArrayIndex > this.vertexArray.length ) {
+        var newVertexArray = new Float32Array( this.vertexArray.length * 2 );
+        newVertexArray.set( this.vertexArray );
+        this.vertexArray = newVertexArray;
+      }
+
+      // copy our vertex data into the main array
+      this.vertexArray.set( vertexData, this.vertexArrayIndex );
+      this.vertexArrayIndex += vertexData.length;
+
+      this.drawCount++;
+    },
+
+    deactivate: function() {
+      if ( this.drawCount ) {
+        this.draw();
+      }
+
+      this.shaderProgram.unuse();
+
+      return this.drawCount;
+    },
+
+    // @private
+    draw: function() {
+      var gl = this.gl;
+
+      // (uniform) projection transform into normalized device coordinates
+      gl.uniformMatrix3fv( this.shaderProgram.uniformLocations.uProjectionMatrix, false, this.webglBlock.projectionMatrixArray );
+
+      gl.bindBuffer( gl.ARRAY_BUFFER, this.vertexBuffer );
+      // if we increased in length, we need to do a full bufferData to resize it on the GPU side
+      if ( this.vertexArray.length > this.lastArrayLength ) {
+        gl.bufferData( gl.ARRAY_BUFFER, this.vertexArray, gl.DYNAMIC_DRAW ); // fully buffer at the start
+      }
+      // otherwise do a more efficient update that only sends part of the array over
+      else {
+        gl.bufferSubData( gl.ARRAY_BUFFER, 0, this.vertexArray.subarray( 0, this.vertexArrayIndex ) );
+      }
+      var sizeOfFloat = Float32Array.BYTES_PER_ELEMENT;
+      var stride = 6 * sizeOfFloat;
+      gl.vertexAttribPointer( this.shaderProgram.attributeLocations.aVertex, 2, gl.FLOAT, false, stride, 0 * sizeOfFloat );
+      gl.vertexAttribPointer( this.shaderProgram.attributeLocations.aColor, 4, gl.FLOAT, false, stride, 2 * sizeOfFloat );
+
+      gl.drawArrays( gl.TRIANGLES, 0, this.vertexArrayIndex / 6 );
+
+      this.vertexArrayIndex = 0;
     }
   } );
 

@@ -181,6 +181,7 @@ define( function( require ) {
    *----------------------------------------------------------------------------*/
   Renderer.webglCustom = 0x1;
   Renderer.webglTexturedTriangles = 0x2;
+  Renderer.webglVertexColorPolygons = 0x3;
 
   return Renderer;
 } );

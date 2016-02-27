@@ -16,6 +16,7 @@ define( function( require ) {
   var Path = require( 'SCENERY/nodes/Path' );
   var Shape = require( 'KITE/Shape' );
   var Bounds2 = require( 'DOT/Bounds2' );
+  var Vector2 = require( 'DOT/Vector2' );
   var Dimension2 = require( 'DOT/Dimension2' );
   var Matrix3 = require( 'DOT/Matrix3' );
   var Features = require( 'SCENERY/util/Features' );
@@ -23,8 +24,10 @@ define( function( require ) {
   var DOMSelfDrawable = require( 'SCENERY/display/DOMSelfDrawable' );
   var SVGSelfDrawable = require( 'SCENERY/display/SVGSelfDrawable' );
   var CanvasSelfDrawable = require( 'SCENERY/display/CanvasSelfDrawable' );
+  var WebGLSelfDrawable = require( 'SCENERY/display/WebGLSelfDrawable' );
   var SelfDrawable = require( 'SCENERY/display/SelfDrawable' );
   var Renderer = require( 'SCENERY/display/Renderer' );
+  var Color = require( 'SCENERY/util/Color' );
 
   // TODO: change this based on memory and performance characteristics of the platform
   var keepDOMRectangleElements = true; // whether we should pool DOM elements for the DOM rendering states, or whether we should free them when possible for memory
@@ -147,6 +150,10 @@ define( function( require ) {
         }
       }
 
+      if ( !this.hasStroke() ) {
+        bitmask |= Renderer.bitmaskWebGL;
+      }
+
       return bitmask;
     },
 
@@ -162,6 +169,11 @@ define( function( require ) {
            ( !this.isRounded() || ( Features.borderRadius && this._cornerXRadius === this._cornerYRadius ) ) &&
            this._cornerYRadius <= maximumArcSize && this._cornerXRadius <= maximumArcSize ) {
         bitmask |= Renderer.bitmaskDOM;
+      }
+
+      // TODO: why check here, if we also check in the 'stroke' portion?
+      if ( !this.hasStroke() && !this.isRounded() ) {
+        bitmask |= Renderer.bitmaskWebGL;
       }
 
       return bitmask;
@@ -920,6 +932,120 @@ define( function( require ) {
   } );
   Paintable.PaintableStatelessDrawable.mixin( Rectangle.RectangleCanvasDrawable );
   SelfDrawable.Poolable.mixin( Rectangle.RectangleCanvasDrawable );
+
+  /*---------------------------------------------------------------------------*
+   * WebGL rendering
+   *----------------------------------------------------------------------------*/
+
+  var scratchColor = new Color( 'transparent' );
+
+  // NOTE: only currently supports solid fills, no strokes
+  Rectangle.RectangleWebGLDrawable = inherit( WebGLSelfDrawable, function RectangleWebGLDrawable( renderer, instance ) {
+    this.initialize( renderer, instance );
+  }, {
+    webglRenderer: Renderer.webglVertexColorPolygons,
+
+    // called either from the constructor or from pooling
+    initialize: function( renderer, instance ) {
+      this.initializeWebGLSelfDrawable( renderer, instance );
+      this.initializeState( renderer, instance );
+
+      if ( !this.vertexArray ) {
+        // format [X Y R G B A] for all vertices
+        this.vertexArray = new Float32Array( 6 * 6 ); // 6-length components for 6 vertices (2 tris).
+      }
+
+      // corner vertices in the relative transform root coordinate space
+      this.upperLeft = new Vector2();
+      this.lowerLeft = new Vector2();
+      this.upperRight = new Vector2();
+      this.lowerRight = new Vector2();
+
+      this.transformDirty = true;
+
+      return this;
+    },
+
+    onAddToBlock: function( webglBlock ) {
+      this.webglBlock = webglBlock; // TODO: do we need this reference?
+      this.markDirty();
+    },
+
+    onRemoveFromBlock: function( webglBlock ) {
+    },
+
+    // @override
+    markTransformDirty: function() {
+      this.transformDirty = true;
+
+      WebGLSelfDrawable.prototype.markTransformDirty.call( this );
+    },
+
+    update: function() {
+      if ( this.dirty ) {
+        this.dirty = false;
+
+        if ( this.dirtyFill ) {
+          var color = scratchColor.set( this.node.fill );
+          var red = color.red / 255;
+          var green = color.green / 255;
+          var blue = color.blue / 255;
+          var alpha = color.alpha;
+
+          for ( var i = 0; i < 6; i++ ) {
+            var offset = i * 6;
+            this.vertexArray[ 2 + offset ] = red;
+            this.vertexArray[ 3 + offset ] = green;
+            this.vertexArray[ 4 + offset ] = blue;
+            this.vertexArray[ 5 + offset ] = alpha;
+          }
+        }
+
+        if ( this.transformDirty || this.dirtyX || this.dirtyY || this.dirtyWidth || this.dirtyHeight ) {
+          this.transformDirty = false;
+
+          var x = this.node._rectX;
+          var y = this.node._rectY;
+          var width = this.node._rectWidth;
+          var height = this.node._rectHeight;
+
+          var transformMatrix = this.instance.relativeTransform.matrix; // with compute need, should always be accurate
+          transformMatrix.multiplyVector2( this.upperLeft.setXY( x, y ) );
+          transformMatrix.multiplyVector2( this.lowerLeft.setXY( x, y + height ) );
+          transformMatrix.multiplyVector2( this.upperRight.setXY( x + width, y ) );
+          transformMatrix.multiplyVector2( this.lowerRight.setXY( x + width, y + height ) );
+
+          // first triangle XYs
+          this.vertexArray[ 0 ] = this.upperLeft.x;
+          this.vertexArray[ 1 ] = this.upperLeft.y;
+          this.vertexArray[ 6 ] = this.lowerLeft.x;
+          this.vertexArray[ 7 ] = this.lowerLeft.y;
+          this.vertexArray[ 12 ] = this.upperRight.x;
+          this.vertexArray[ 13 ] = this.upperRight.y;
+
+          // second triangle XYs
+          this.vertexArray[ 18 ] = this.upperRight.x;
+          this.vertexArray[ 19 ] = this.upperRight.y;
+          this.vertexArray[ 24 ] = this.lowerLeft.x;
+          this.vertexArray[ 25 ] = this.lowerLeft.y;
+          this.vertexArray[ 30 ] = this.lowerRight.x;
+          this.vertexArray[ 31 ] = this.lowerRight.y;
+        }
+      }
+
+      this.setToCleanState();
+      this.cleanPaintableState();
+    },
+
+    dispose: function() {
+      // TODO: disposal of buffers?
+
+      // super
+      WebGLSelfDrawable.prototype.dispose.call( this );
+    }
+  } );
+  Rectangle.RectangleStatefulDrawable.mixin( Rectangle.RectangleWebGLDrawable );
+  SelfDrawable.Poolable.mixin( Rectangle.RectangleWebGLDrawable ); // pooling
 
   return Rectangle;
 } );
