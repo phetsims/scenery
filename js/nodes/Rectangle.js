@@ -19,6 +19,7 @@ define( function( require ) {
   var Vector2 = require( 'DOT/Vector2' );
   var Dimension2 = require( 'DOT/Dimension2' );
   var Matrix3 = require( 'DOT/Matrix3' );
+  var Property = require( 'AXON/Property' );
   var Features = require( 'SCENERY/util/Features' );
   var Paintable = require( 'SCENERY/nodes/Paintable' );
   var DOMSelfDrawable = require( 'SCENERY/display/DOMSelfDrawable' );
@@ -962,6 +963,7 @@ define( function( require ) {
       this.lowerRight = new Vector2();
 
       this.transformDirty = true;
+      this.includeVertices = true; // used by the processor
 
       return this;
     },
@@ -986,18 +988,23 @@ define( function( require ) {
         this.dirty = false;
 
         if ( this.dirtyFill ) {
-          var color = scratchColor.set( this.node.fill );
-          var red = color.red / 255;
-          var green = color.green / 255;
-          var blue = color.blue / 255;
-          var alpha = color.alpha;
+          this.includeVertices = this.node.hasFill();
 
-          for ( var i = 0; i < 6; i++ ) {
-            var offset = i * 6;
-            this.vertexArray[ 2 + offset ] = red;
-            this.vertexArray[ 3 + offset ] = green;
-            this.vertexArray[ 4 + offset ] = blue;
-            this.vertexArray[ 5 + offset ] = alpha;
+          if ( this.includeVertices ) {
+            var fill = ( this.node.fill instanceof Property ) ? this.node.fill.value : this.node.fill;
+            var color =  scratchColor.set( fill );
+            var red = color.red / 255;
+            var green = color.green / 255;
+            var blue = color.blue / 255;
+            var alpha = color.alpha;
+
+            for ( var i = 0; i < 6; i++ ) {
+              var offset = i * 6;
+              this.vertexArray[ 2 + offset ] = red;
+              this.vertexArray[ 3 + offset ] = green;
+              this.vertexArray[ 4 + offset ] = blue;
+              this.vertexArray[ 5 + offset ] = alpha;
+            }
           }
         }
 

@@ -430,20 +430,22 @@ define( function( require ) {
     },
 
     processDrawable: function( drawable ) {
-      var vertexData = drawable.vertexArray;
+      if ( drawable.includeVertices ) {
+        var vertexData = drawable.vertexArray;
 
-      // if our vertex data won't fit, keep doubling the size until it fits
-      while ( vertexData.length + this.vertexArrayIndex > this.vertexArray.length ) {
-        var newVertexArray = new Float32Array( this.vertexArray.length * 2 );
-        newVertexArray.set( this.vertexArray );
-        this.vertexArray = newVertexArray;
+        // if our vertex data won't fit, keep doubling the size until it fits
+        while ( vertexData.length + this.vertexArrayIndex > this.vertexArray.length ) {
+          var newVertexArray = new Float32Array( this.vertexArray.length * 2 );
+          newVertexArray.set( this.vertexArray );
+          this.vertexArray = newVertexArray;
+        }
+
+        // copy our vertex data into the main array
+        this.vertexArray.set( vertexData, this.vertexArrayIndex );
+        this.vertexArrayIndex += vertexData.length;
+
+        this.drawCount++;
       }
-
-      // copy our vertex data into the main array
-      this.vertexArray.set( vertexData, this.vertexArrayIndex );
-      this.vertexArrayIndex += vertexData.length;
-
-      this.drawCount++;
     },
 
     deactivate: function() {
