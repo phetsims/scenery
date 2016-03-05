@@ -315,6 +315,9 @@ define( function( require ) {
     updateColor: function() {
       assert && assert( !this.immutable, 'Cannot modify an immutable color' );
 
+      assert && assert( isFinite( this.red ) && isFinite( this.green ) && isFinite( this.blue ) && isFinite( this.alpha ),
+        'Ensure color components are finite and not NaN' );
+
       var oldCSS = this._css;
       this._css = this.computeCSS();
 
