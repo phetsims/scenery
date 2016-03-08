@@ -1,4 +1,4 @@
-// Copyright 2002-2014, University of Colorado Boulder Boulder
+// Copyright 2013-2015, University of Colorado Boulder
 
 /**
  * VBox is a convenience specialization of LayoutBox with vertical orientation.
@@ -20,7 +20,7 @@ define( function( require ) {
     LayoutBox.call( this, _.extend( {}, options, { orientation: 'vertical' } ) );
   }
 
-  scenery.VBox = VBox;
+  scenery.register( 'VBox', VBox );
 
   return inherit( LayoutBox, VBox );
 } );

@@ -1,5 +1,4 @@
-// Copyright 2002-2014, University of Colorado Boulder
-
+// Copyright 2013-2015, University of Colorado Boulder
 
 /**
  * Something that can be displayed with a specific renderer.
@@ -45,7 +44,8 @@
  *   svgElement: {SVGElement}
  * }
  * WebGL: {
- *   initializeContext: function( {WebGLRenderingContext} gl )
+ *   onAddToBlock: function( {WebGLBlock} block )
+ *   onRemoveFromBlock: function( {WebGLBlock} block )
  *   render: function( {ShaderProgram} shaderProgram )
  *   shaderAttributes: {string[]} - names of vertex attributes to be used
  * }
@@ -57,18 +57,22 @@ define( function( require ) {
   'use strict';
 
   var inherit = require( 'PHET_CORE/inherit' );
+  var Events = require( 'AXON/Events' );
   var scenery = require( 'SCENERY/scenery' );
   var Renderer = require( 'SCENERY/display/Renderer' );
 
   var globalId = 1;
 
-  scenery.Drawable = function Drawable( renderer ) {
+  function Drawable( renderer ) {
     this.initializeDrawable( renderer );
-  };
-  var Drawable = scenery.Drawable;
+  }
 
-  inherit( Object, Drawable, {
+  scenery.register( 'Drawable', Drawable );
+
+  inherit( Events, Drawable, {
     initializeDrawable: function( renderer ) {
+      Events.call( this );
+
       assert && assert( !this.id || this.disposed, 'If we previously existed, we need to have been disposed' );
 
       // unique ID for drawables
@@ -84,6 +88,11 @@ define( function( require ) {
       this.disposed = false;
 
       this.linksDirty = false;
+
+      this._visible = true; // {boolean}, ES5 getter/setter provided
+
+      // {boolean} - If false, will cause our parent block to not be fitted. (ES5 getter/setter provided)
+      this._fittable = true;
 
       return this;
     },
@@ -108,7 +117,36 @@ define( function( require ) {
       // similar but without recent changes, so that we can traverse both orders at the same time for stitching
       this.oldPreviousDrawable = null;
       this.oldNextDrawable = null;
+
+      this.removeAllEventListeners();
     },
+
+    setVisible: function( visible ) {
+      if ( this._visible !== visible ) {
+        this._visible = visible;
+        this.trigger0( 'visibility' );
+      }
+    },
+    set visible( value ) { this.setVisible( value ); },
+
+    isVisible: function() {
+      return this._visible;
+    },
+    get visible() { return this.isVisible(); },
+
+    // Should be called just after initialization (before being added to blocks) if we aren't fittable.
+    setFittable: function( fittable ) {
+      if ( this._fittable !== fittable ) {
+        this._fittable = fittable;
+        this.trigger1( 'fittability', this );
+      }
+    },
+    set fittable( value ) { this.setFittable( value ); },
+
+    isFittable: function() {
+      return this._fittable;
+    },
+    get fittable() { return this.isFittable(); },
 
     // called to add a block (us) as a child of a backbone
     setBlockBackbone: function( backboneInstance ) {

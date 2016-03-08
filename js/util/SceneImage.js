@@ -1,4 +1,4 @@
-// Copyright 2002-2014, University of Colorado Boulder
+// Copyright 2013-2014, University of Colorado Boulder
 
 
 /*
@@ -14,7 +14,7 @@ define( function( require ) {
   var scenery = require( 'SCENERY/scenery' );
 
   // NOTE: ideally the scene shouldn't use SVG, since rendering that to a canvas takes a callback (and usually requires canvg)
-  scenery.SceneImage = function SceneImage( scene ) {
+  function SceneImage( scene ) {
     this.scene = scene;
 
     // we write the scene to a canvas, get its data URL, and pass that to the image.
@@ -23,8 +23,9 @@ define( function( require ) {
 
     this.img = document.createElement( 'img' );
     this.update();
-  };
-  var SceneImage = scenery.SceneImage;
+  }
+
+  scenery.register( 'SceneImage', SceneImage );
 
   inherit( Object, SceneImage, {
     // NOTE: calling this before the previous update() completes may cause the previous onComplete to not be executed

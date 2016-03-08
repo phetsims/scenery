@@ -1,3 +1,9 @@
+// Copyright 2002-2014, University of Colorado Boulder
+
+/**
+ * Unit tests relating to Scenery's Color
+ */
+
 (function() {
   'use strict';
 

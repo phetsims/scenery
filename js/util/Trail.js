@@ -1,4 +1,4 @@
-// Copyright 2002-2014, University of Colorado Boulder
+// Copyright 2013-2015, University of Colorado Boulder
 
 
 /**
@@ -30,7 +30,7 @@ define( function( require ) {
   require( 'SCENERY/nodes/Node' );
   // require( 'SCENERY/util/TrailPointer' );
 
-  scenery.Trail = function Trail( nodes ) {
+  function Trail( nodes ) {
     /*
      * Controls the immutability of the trail.
      * If set to true, add/remove descendant/ancestor should fail if assertions are enabled
@@ -77,8 +77,9 @@ define( function( require ) {
     }
 
     phetAllocation && phetAllocation( 'Trail' );
-  };
-  var Trail = scenery.Trail;
+  }
+
+  scenery.register( 'Trail', Trail );
 
   inherit( Object, Trail, {
     copy: function() {
@@ -88,6 +89,20 @@ define( function( require ) {
     // convenience function to determine whether this trail will render something
     isPainted: function() {
       return this.lastNode().isPainted();
+    },
+
+    // @returns whether all nodes in the trail are still connected from the trail's root to its leaf
+    isValid: function() {
+      this.reindex();
+
+      var indexLength = this.indices.length;
+      for ( var i = 0; i < indexLength; i++ ) {
+        if ( this.indices[ i ] < 0 ) {
+          return false;
+        }
+      }
+
+      return true;
     },
 
     // this trail is visible only if all nodes on it are marked as visible
@@ -117,10 +132,10 @@ define( function( require ) {
     // essentially whether this node is visited in the hit-testing operation
     isPickable: function() {
       // it won't be if it or any ancestor is pickable: false, or is invisible
-      if ( _.some( this.nodes, function( node ) { return node._pickable === false || node._visible === false; } ) ) { return false; }
+      if ( _.some( this.nodes, function( node ) { return node.pickable === false || node.visible === false; } ) ) { return false; }
 
       // if there is any listener or pickable: true, it will be pickable
-      if ( _.some( this.nodes, function( node ) { return node._pickable === true || node._inputListeners.length > 0; } ) ) { return true; }
+      if ( _.some( this.nodes, function( node ) { return node.hasInputListenerEquivalent(); } ) ) { return true; }
 
       if ( this.lastNode()._subtreePickableCount > 0 ) {
         return true;
@@ -162,7 +177,22 @@ define( function( require ) {
       var nodes = this.nodes;
       var length = nodes.length;
       for ( var i = 0; i < length; i++ ) {
-        matrix.multiplyMatrix( nodes[ i ]._transform.getMatrix() );
+        matrix.multiplyMatrix( nodes[ i ].getMatrix() );
+      }
+      return matrix;
+    },
+
+    // from local to next-to-global (ignores root node matrix)
+    getAncestorMatrix: function() {
+      // TODO: performance: can we cache this ever? would need the rootNode to not really change in between
+      // this matrix will be modified in place, so always start fresh
+      var matrix = Matrix3.identity();
+
+      // from the root up
+      var nodes = this.nodes;
+      var length = nodes.length;
+      for ( var i = 1; i < length; i++ ) {
+        matrix.multiplyMatrix( nodes[ i ].getMatrix() );
       }
       return matrix;
     },
@@ -176,7 +206,7 @@ define( function( require ) {
       var nodes = this.nodes;
       var length = nodes.length;
       for ( var i = 0; i < length - 1; i++ ) {
-        matrix.multiplyMatrix( nodes[ i ]._transform.getMatrix() );
+        matrix.multiplyMatrix( nodes[ i ].getMatrix() );
       }
       return matrix;
     },
@@ -204,7 +234,7 @@ define( function( require ) {
 
       this.length++;
       // accelerated version of this.updateUniqueId()
-      this.uniqueId = ( this.uniqueId ? node._id + '-' + this.uniqueId : node._id + '' );
+      this.uniqueId = ( this.uniqueId ? node.id + '-' + this.uniqueId : node.id + '' );
       return this;
     },
 
@@ -235,7 +265,7 @@ define( function( require ) {
 
       this.length++;
       // accelerated version of this.updateUniqueId()
-      this.uniqueId = ( this.uniqueId ? this.uniqueId + '-' + node._id : node._id + '' );
+      this.uniqueId = ( this.uniqueId ? this.uniqueId + '-' + node.id : node.id + '' );
       return this;
     },
 
@@ -256,17 +286,17 @@ define( function( require ) {
     addDescendantTrail: function( trail ) {
       var length = trail.length;
       if ( length ) {
-        this.addDescendant( trail.nodes[0] );
+        this.addDescendant( trail.nodes[ 0 ] );
       }
       for ( var i = 1; i < length; i++ ) {
-        this.addDescendant( trail.nodes[i], this.indices[i-1] );
+        this.addDescendant( trail.nodes[ i ], this.indices[ i - 1 ] );
       }
     },
 
     removeDescendantTrail: function( trail ) {
       var length = trail.length;
       for ( var i = length - 1; i >= 0; i-- ) {
-        assert && assert( this.lastNode() === trail.nodes[i] );
+        assert && assert( this.lastNode() === trail.nodes[ i ] );
 
         this.removeDescendant();
       }
@@ -341,9 +371,6 @@ define( function( require ) {
 
     // whether this trail contains the complete 'other' trail, but with added descendants afterwards
     isExtensionOf: function( other, allowSameTrail ) {
-      assertSlow && assertSlow( this.areIndicesValid(), 'Trail.compare this.areIndicesValid() failed' );
-      assertSlow && assertSlow( other.areIndicesValid(), 'Trail.compare other.areIndicesValid() failed' );
-
       if ( this.length <= other.length - ( allowSameTrail ? 1 : 0 ) ) {
         return false;
       }
@@ -374,7 +401,7 @@ define( function( require ) {
 
       // walk our transform down, prepending
       for ( idx = this.length - 1; idx >= branchIndex; idx-- ) {
-        matrix = this.nodes[ idx ].getTransform().getMatrix().timesMatrix( matrix );
+        matrix = this.nodes[ idx ].getMatrix().timesMatrix( matrix );
       }
 
       // walk our transform up, prepending inverses

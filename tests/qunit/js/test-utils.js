@@ -1,3 +1,5 @@
+// Copyright 2002-2014, University of Colorado Boulder
+
 var canvasWidth = 320;
 var canvasHeight = 240;
 
@@ -81,10 +83,11 @@ function snapshotFromDataURL( dataURL, callback ) {
   } );
 }
 
-// compares two pixel snapshots and uses the qunit's assert to verify they are the same
-function snapshotEquals( a, b, threshold, message ) {
+// compares two pixel snapshots {ImageData} and uses the qunit's assert to verify they are the same
+function snapshotEquals( a, b, threshold, message, extraDom ) {
   var isEqual = a.width == b.width && a.height == b.height;
   var largestDifference = 0;
+  var totalDifference = 0;
   var colorDiffData = document.createElement( 'canvas' ).getContext( '2d' ).createImageData( a.width, a.height );
   var alphaDiffData = document.createElement( 'canvas' ).getContext( '2d' ).createImageData( a.width, a.height );
   if ( isEqual ) {
@@ -103,22 +106,25 @@ function snapshotEquals( a, b, threshold, message ) {
       var alphaIndex = ( i - ( i % 4 ) + 3 );
       // grab the associated alpha channel and multiply it times the diff
       var alphaMultipliedDiff = ( i % 4 === 3 ) ? diff : diff * ( a.data[ alphaIndex ] / 255 ) * ( b.data[ alphaIndex ] / 255 );
-      if ( alphaMultipliedDiff > threshold ) {
+
+      totalDifference += alphaMultipliedDiff;
+      // if ( alphaMultipliedDiff > threshold ) {
         // console.log( message + ": " + Math.abs( a.data[i] - b.data[i] ) );
-        largestDifference = Math.max( largestDifference, alphaMultipliedDiff );
-        isEqual = false;
+      largestDifference = Math.max( largestDifference, alphaMultipliedDiff );
+        // isEqual = false;
         // break;
-      }
+      // }
     }
   }
-  if ( largestDifference > 0 ) {
+  var averageDifference = totalDifference / ( 4 * a.width * a.height );
+  if ( averageDifference > threshold ) {
     var display = $( '#display' );
     // header
     var note = document.createElement( 'h2' );
     $( note ).text( message );
     display.append( note );
     var differenceDiv = document.createElement( 'div' );
-    $( differenceDiv ).text( 'Largest pixel color-channel difference: ' + largestDifference );
+    $( differenceDiv ).text( '(actual) (expected) (color diff) (alpha diff) Diffs max: ' + largestDifference + ', average: ' + averageDifference );
     display.append( differenceDiv );
 
     display.append( snapshotToCanvas( a ) );
@@ -126,9 +132,14 @@ function snapshotEquals( a, b, threshold, message ) {
     display.append( snapshotToCanvas( colorDiffData ) );
     display.append( snapshotToCanvas( alphaDiffData ) );
 
+    if ( extraDom ) {
+      display.append( extraDom );
+    }
+
     // for a line-break
     display.append( document.createElement( 'div' ) );
 
+    isEqual = false;
   }
   ok( isEqual, message );
   return isEqual;

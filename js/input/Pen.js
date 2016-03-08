@@ -1,4 +1,4 @@
-// Copyright 2002-2014, University of Colorado Boulder
+// Copyright 2013-2014, University of Colorado Boulder
 
 
 /**
@@ -15,7 +15,7 @@ define( function( require ) {
 
   var Pointer = require( 'SCENERY/input/Pointer' ); // extends Pointer
 
-  scenery.Pen = function Pen( id, point, event ) {
+  function Pen( id, point, event ) {
     Pointer.call( this );
 
     this.id = id;
@@ -26,8 +26,9 @@ define( function( require ) {
     this.isDown = true; // pens always start down? TODO: is this true with pointer events?
 
     this.type = 'pen';
-  };
-  var Pen = scenery.Pen;
+  }
+
+  scenery.register( 'Pen', Pen );
 
   inherit( Pointer, Pen, {
     move: function( point, event ) {

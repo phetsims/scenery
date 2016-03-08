@@ -1,4 +1,4 @@
-// Copyright 2002-2014, University of Colorado Boulder
+// Copyright 2013-2014, University of Colorado Boulder
 
 
 /*
@@ -16,12 +16,10 @@ define( function( require ) {
   var inherit = require( 'PHET_CORE/inherit' );
   var scenery = require( 'SCENERY/scenery' );
 
-  scenery.Event = function Event( args ) {
+  function Event( args ) {
     // ensure that all of the required args are supplied
-    assert && assert( args.trail &&
-                      args.type &&
-                      args.pointer &&
-                      args.target, 'Missing required scenery.Event argument' );
+    assert && assert( args.trail && args.type && args.pointer && args.target,
+      'Missing required scenery.Event argument' );
 
     this.handled = false;
     this.aborted = false;
@@ -45,8 +43,9 @@ define( function( require ) {
     this.target = args.target;
 
     // TODO: add extended information based on an event here?
-  };
-  var Event = scenery.Event;
+  }
+
+  scenery.register( 'Event', Event );
 
   inherit( Object, Event, {
     // like DOM Event.stopPropagation(), but named differently to indicate it doesn't fire that behavior on the underlying DOM event

@@ -1,4 +1,4 @@
-// Copyright 2002-2014, University of Colorado Boulder
+// Copyright 2013-2015, University of Colorado Boulder
 
 /**
  * A node that can be custom-drawn with Canvas calls. Manual handling of dirty region repainting.
@@ -16,19 +16,27 @@ define( function( require ) {
   var scenery = require( 'SCENERY/scenery' );
 
   var Node = require( 'SCENERY/nodes/Node' );
-  require( 'SCENERY/display/Renderer' );
+  var Renderer = require( 'SCENERY/display/Renderer' );
   var CanvasSelfDrawable = require( 'SCENERY/display/CanvasSelfDrawable' );
+  var SelfDrawable = require( 'SCENERY/display/SelfDrawable' );
+
+  var emptyArray = []; // constant
 
   // pass a canvasBounds option if you want to specify the self bounds
-  scenery.CanvasNode = function CanvasNode( options ) {
+  function CanvasNode( options ) {
     Node.call( this, options );
-    this.setRendererBitmask( scenery.bitmaskBoundsValid | scenery.bitmaskSupportsCanvas );
-  };
-  var CanvasNode = scenery.CanvasNode;
+    this.setRendererBitmask( Renderer.bitmaskCanvas );
+  }
+
+  scenery.register( 'CanvasNode', CanvasNode );
 
   inherit( Node, CanvasNode, {
 
-    // how to set the bounds of the CanvasNode
+    /**
+     * How to set the bounds of the CanvasNode
+     *
+     * @param {Bounds2} selfBounds
+     */
     setCanvasBounds: function( selfBounds ) {
       this.invalidateSelf( selfBounds );
     },
@@ -41,9 +49,15 @@ define( function( require ) {
 
     /**
      * Override paintCanvas with a faster version, since fillRect and drawRect don't affect the current default path.
-     * @param {CanvasContextWrapper} wrapper
+     * @public
+     *
+     * IMPORTANT NOTE: This function will be run from inside Scenery's Display.updateDisplay(), so it should not modify
+     * or mutate any Scenery nodes (particularly anything that would cause something to be marked as needing a repaint).
+     * Ideally, this function should have no outside effects other than painting to the Canvas provided.
+     *
+     * @param {CanvasRenderingContext2D} context
      */
-    paintCanvas: function( wrapper ) {
+    paintCanvas: function( context ) {
       throw new Error( 'CanvasNode needs paintCanvas implemented' );
     },
 
@@ -55,7 +69,7 @@ define( function( require ) {
     },
 
     canvasPaintSelf: function( wrapper ) {
-      this.paintCanvas( wrapper );
+      this.paintCanvas( wrapper.context );
     },
 
     // override for computation of whether a point is inside the self content
@@ -86,18 +100,39 @@ define( function( require ) {
    * Canvas rendering
    *----------------------------------------------------------------------------*/
 
-  CanvasNode.CanvasNodeDrawable = CanvasSelfDrawable.createDrawable( {
-    type: function CanvasNodeDrawable( renderer, instance ) { this.initialize( renderer, instance ); },
-    paintCanvas: function paintCanvasNode( wrapper, node ) {
-      assert && assert( !node._selfBounds.isEmpty(), 'CanvasNode should not be used with an empty canvasBounds. ' +
-        'Please set canvasBounds (or use setCanvasBounds()) on ' + node.constructor.name );
-
-      if ( !node._selfBounds.isEmpty() ) {
-        node.paintCanvas( wrapper );
-      }
+  CanvasNode.CanvasNodeDrawable = function CanvasNodeDrawable( renderer, instance ) {
+    this.initialize( renderer, instance );
+  };
+  inherit( CanvasSelfDrawable, CanvasNode.CanvasNodeDrawable, {
+    initialize: function( renderer, instance ) {
+      return this.initializeCanvasSelfDrawable( renderer, instance );
     },
-    usesPaint: false
+
+    paintCanvas: function( wrapper, node ) {
+      assert && assert( !node.selfBounds.isEmpty(), 'CanvasNode should not be used with an empty canvasBounds. ' +
+                                                    'Please set canvasBounds (or use setCanvasBounds()) on ' + node.constructor.name );
+
+      if ( !node.selfBounds.isEmpty() ) {
+        var context = wrapper.context;
+        context.save();
+
+        // set back to Canvas default styles
+        context.fillStyle = 'black';
+        context.strokeStyle = 'black';
+        context.lineWidth = 1;
+        context.lineCap = 'butt';
+        context.lineJoin = 'miter';
+        context.lineDash = emptyArray;
+        context.lineDashOffset = 0;
+        context.miterLimit = 10;
+
+        node.paintCanvas( context );
+
+        context.restore();
+      }
+    }
   } );
+  SelfDrawable.Poolable.mixin( CanvasNode.CanvasNodeDrawable );
 
   return CanvasNode;
 } );

@@ -1,4 +1,4 @@
-// Copyright 2002-2014, University of Colorado Boulder
+// Copyright 2013-2015, University of Colorado Boulder
 
 /**
  * The PointerOverlay shows pointer locations in the scene.  This is useful when recording a session for interviews or when a teacher is broadcasting
@@ -8,7 +8,6 @@
  *
  * @author Sam Reid
  */
-
 define( function( require ) {
   'use strict';
 
@@ -20,7 +19,7 @@ define( function( require ) {
 
   var Util = require( 'SCENERY/util/Util' );
 
-  scenery.PointerOverlay = function PointerOverlay( display, rootNode ) {
+  function PointerOverlay( display, rootNode ) {
     var pointerOverlay = this;
     this.display = display;
     this.rootNode = rootNode;
@@ -66,6 +65,7 @@ define( function( require ) {
       circle.setAttribute( 'cy', innerRadius + strokeWidth / 2 );
       circle.setAttribute( 'r', innerRadius );
       circle.setAttribute( 'style', 'fill:black;' );
+      circle.setAttribute( 'style', 'stroke:white;' );
       circle.setAttribute( 'opacity', 0.4 );
 
       //Add a move listener to the pointer to update position when it has moved
@@ -106,8 +106,9 @@ define( function( require ) {
     }
 
     this.domElement = this.pointerSVGContainer;
-  };
-  var PointerOverlay = scenery.PointerOverlay;
+  }
+
+  scenery.register( 'PointerOverlay', PointerOverlay );
 
   inherit( Object, PointerOverlay, {
     dispose: function() {

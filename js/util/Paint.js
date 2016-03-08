@@ -1,4 +1,4 @@
-// Copyright 2002-2014, University of Colorado Boulder
+// Copyright 2014, University of Colorado Boulder
 
 
 /**
@@ -16,12 +16,13 @@ define( function( require ) {
 
   var globalId = 1;
 
-  scenery.Paint = function Paint() {
+  function Paint() {
     this.id = 'paint' + globalId++;
 
     this.transformMatrix = null;
-  };
-  var Paint = scenery.Paint;
+  }
+
+  scenery.register( 'Paint', Paint );
 
   inherit( Object, Paint, {
     // abstract getCanvasStyle: function()

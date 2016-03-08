@@ -1,4 +1,4 @@
-// Copyright 2002-2014, University of Colorado Boulder
+// Copyright 2013-2015, University of Colorado Boulder
 
 
 /**
@@ -10,7 +10,7 @@
 define( function( require ) {
   'use strict';
 
-  require( 'SCENERY/scenery' );
+  var scenery = require( 'SCENERY/scenery' );
 
   var styleElement = document.createElement( 'style' );
   styleElement.type = 'text/css';
@@ -18,9 +18,8 @@ define( function( require ) {
 
   var stylesheet = document.styleSheets[ document.styleSheets.length - 1 ];
   assert && assert( stylesheet.disabled === false );
-  assert && assert( stylesheet.cssRules.length === 0 );
 
-  return {
+  return scenery.register( 'SceneryStyle', {
     stylesheet: stylesheet,
     styleElement: styleElement,
 
@@ -28,5 +27,5 @@ define( function( require ) {
       // using a this reference so it doesn't need to be a closure
       this.stylesheet.insertRule( ruleString, 0 );
     }
-  };
+  } );
 } );

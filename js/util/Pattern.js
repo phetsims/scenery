@@ -1,4 +1,4 @@
-// Copyright 2002-2014, University of Colorado Boulder
+// Copyright 2013-2015, University of Colorado Boulder
 
 
 /**
@@ -18,15 +18,16 @@ define( function( require ) {
 
   // TODO: support scene or other various content (SVG is flexible, can backport to canvas)
   // TODO: investigate options to support repeat-x, repeat-y or no-repeat in SVG (available repeat options from Canvas)
-  scenery.Pattern = function Pattern( image ) {
+  function Pattern( image ) {
     Paint.call( this );
 
     this.image = image;
 
     // use the global scratch canvas instead of creating a new Canvas
     this.canvasPattern = scenery.scratchContext.createPattern( image, 'repeat' );
-  };
-  var Pattern = scenery.Pattern;
+  }
+
+  scenery.register( 'Pattern', Pattern );
 
   inherit( Paint, Pattern, {
     isPattern: true,

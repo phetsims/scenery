@@ -1,4 +1,4 @@
-// Copyright 2002-2014, University of Colorado Boulder
+// Copyright 2013-2015, University of Colorado Boulder
 
 /**
  * TODO docs
@@ -14,12 +14,13 @@ define( function( require ) {
   var scenery = require( 'SCENERY/scenery' );
   var SelfDrawable = require( 'SCENERY/display/SelfDrawable' );
 
-  scenery.WebGLSelfDrawable = function WebGLSelfDrawable( renderer, instance ) {
+  function WebGLSelfDrawable( renderer, instance ) {
     this.initializeWebGLSelfDrawable( renderer, instance );
 
     throw new Error( 'Should use initialization and pooling' );
-  };
-  var WebGLSelfDrawable = scenery.WebGLSelfDrawable;
+  }
+
+  scenery.register( 'WebGLSelfDrawable', WebGLSelfDrawable );
 
   inherit( SelfDrawable, WebGLSelfDrawable, {
     initializeWebGLSelfDrawable: function( renderer, instance ) {
@@ -29,13 +30,24 @@ define( function( require ) {
       // this is the same across lifecycles
       this.transformListener = this.transformListener || this.markTransformDirty.bind( this );
 
-      instance.relativeTransform.addListener( this.transformListener ); // when our relative transform changes, notify us in the pre-repaint phase
-      instance.relativeTransform.addPrecompute(); // trigger precomputation of the relative transform, since we will always need it when it is updated
+      // when our relative transform changes, notify us in the pre-repaint phase
+      instance.relativeTransform.addListener( this.transformListener );
+
+      // trigger precomputation of the relative transform, since we will always need it when it is updated
+      instance.relativeTransform.addPrecompute();
 
       return this;
     },
 
     markTransformDirty: function() {
+      this.markDirty();
+    },
+
+    // @override
+    updateSelfVisibility: function() {
+      SelfDrawable.prototype.updateSelfVisibility.call( this );
+
+      // mark us as dirty when our self visibility changes
       this.markDirty();
     },
 

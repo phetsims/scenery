@@ -1,4 +1,4 @@
-// Copyright 2002-2014, University of Colorado Boulder
+// Copyright 2013-2015, University of Colorado Boulder
 
 
 /**
@@ -25,14 +25,15 @@ define( function( require ) {
    *    translate:            // if this exists, translate( { delta: _, oldPosition: _, position: _ } ) will be called.
    * }
    */
-  scenery.SimpleDragHandler = function SimpleDragHandler( options ) {
+  function SimpleDragHandler( options ) {
     var handler = this;
 
-    this.options = _.extend( {
+    options = _.extend( {
       allowTouchSnag: false,
       mouseButton: 0,
       dragCursor: 'pointer'
     }, options );
+    this.options = options; // @private
 
     this.dragging = false;            // whether a node is being dragged with this handler
     this.pointer = null;              // the pointer doing the current dragging
@@ -51,7 +52,7 @@ define( function( require ) {
           return;
         }
 
-        var newMatrix = args.trail.getTransform().getMatrix();
+        var newMatrix = args.trail.getMatrix();
         var oldMatrix = handler.transform.getMatrix();
 
         // if A was the trail's old transform, B is the trail's new transform, we need to apply (B^-1 A) to our node
@@ -106,8 +107,8 @@ define( function( require ) {
         // move by the delta between the previous point, using the precomputed transform
         // prepend the translation on the node, so we can ignore whatever other transform state the node has
         if ( handler.options.translate ) {
-          var translation = handler.node.getTransform().getMatrix().getTranslation();
-          handler.options.translate( {
+          var translation = handler.node.getMatrix().getTranslation();
+          handler.options.translate.call( null, {
             delta: delta,
             oldPosition: translation,
             position: translation.plus( delta )
@@ -120,13 +121,14 @@ define( function( require ) {
           // TODO: add the position in to the listener
           var saveCurrentTarget = event.currentTarget;
           event.currentTarget = handler.node; // #66: currentTarget on a pointer is null, so set it to the node we're dragging
-          handler.options.drag( event, handler.trail ); // new position (old position?) delta
+          handler.options.drag.call( null, event, handler.trail ); // new position (old position?) delta
           event.currentTarget = saveCurrentTarget; // be polite to other listeners, restore currentTarget
         }
       }
     };
-  };
-  var SimpleDragHandler = scenery.SimpleDragHandler;
+  }
+
+  scenery.register( 'SimpleDragHandler', SimpleDragHandler );
 
   inherit( Object, SimpleDragHandler, {
     startDrag: function( event ) {
@@ -143,12 +145,12 @@ define( function( require ) {
       this.transform = this.trail.getTransform();
       this.node = event.currentTarget;
       this.lastDragPoint = event.pointer.point;
-      this.startTransformMatrix = event.currentTarget.getMatrix();
+      this.startTransformMatrix = event.currentTarget.getMatrix().copy();
       // event.domEvent may not exist if this is touch-to-snag
       this.mouseButton = event.pointer.isMouse ? event.domEvent.button : undefined;
 
       if ( this.options.start ) {
-        this.options.start( event, this.trail );
+        this.options.start.call( null, event, this.trail );
       }
     },
 
@@ -160,7 +162,7 @@ define( function( require ) {
       this.dragging = false;
 
       if ( this.options.end ) {
-        this.options.end( event, this.trail );
+        this.options.end.call( null, event, this.trail );
       }
 
       // release our reference

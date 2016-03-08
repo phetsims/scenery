@@ -1,5 +1,4 @@
-// Copyright 2002-2014, University of Colorado Boulder
-
+// Copyright 2014, University of Colorado Boulder
 
 /**
  * A specialized drawable for a layer of drawables with the same renderer (basically, it's a Canvas element, SVG
@@ -17,10 +16,11 @@ define( function( require ) {
   var scenery = require( 'SCENERY/scenery' );
   var Drawable = require( 'SCENERY/display/Drawable' );
 
-  scenery.Block = function Block( display, renderer ) {
+  function Block( display, renderer ) {
     throw new Error( 'Should never be called' );
-  };
-  var Block = scenery.Block;
+  }
+
+  scenery.register( 'Block', Block );
 
   inherit( Drawable, Block, {
 

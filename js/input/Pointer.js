@@ -1,4 +1,4 @@
-// Copyright 2002-2014, University of Colorado Boulder
+// Copyright 2013-2015, University of Colorado Boulder
 
 
 /*
@@ -16,12 +16,13 @@ define( function( require ) {
   var inherit = require( 'PHET_CORE/inherit' );
   var scenery = require( 'SCENERY/scenery' );
 
-  scenery.Pointer = function Pointer() {
+  function Pointer() {
     this.listeners = [];
 
     phetAllocation && phetAllocation( 'Pointer' );
-  };
-  var Pointer = scenery.Pointer;
+  }
+
+  scenery.register( 'Pointer', Pointer );
 
   inherit( Object, Pointer, {
     firesGenericEvent: true, // e.g. fires 'down' in addition to something like 'keydown'

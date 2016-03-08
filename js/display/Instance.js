@@ -1,4 +1,4 @@
-// Copyright 2002-2014, University of Colorado Boulder
+// Copyright 2013-2015, University of Colorado Boulder
 
 
 /**
@@ -32,24 +32,30 @@ define( function( require ) {
   var Drawable = require( 'SCENERY/display/Drawable' );
   var Renderer = require( 'SCENERY/display/Renderer' );
   var RelativeTransform = require( 'SCENERY/display/RelativeTransform' );
+  var Fittability = require( 'SCENERY/display/Fittability' );
+  var Util = require( 'SCENERY/util/Util' );
+  var Events = require( 'AXON/Events' );
 
   var globalIdCounter = 1;
 
-  var emptyHintsObject = {}; // an object with no properties that we can use as an empty "hints" object
+  var isWebGLSupported = Util.isWebGLSupported;
 
   // preferences top to bottom in general
   var defaultPreferredRenderers = Renderer.createOrderBitmask(
-    Renderer.bitmaskSVG, Renderer.bitmaskCanvas, Renderer.bitmaskDOM, Renderer.bitmaskWebGL, Renderer.bitmaskPixi );
+    Renderer.bitmaskSVG, Renderer.bitmaskCanvas, Renderer.bitmaskDOM, Renderer.bitmaskWebGL );
 
   // see initialize() for documentation
-  scenery.Instance = function Instance( display, trail, isDisplayRoot, isSharedCanvasCacheRoot ) {
+  function Instance( display, trail, isDisplayRoot, isSharedCanvasCacheRoot ) {
+    Events.call( this );
+
     this.active = false;
 
     this.initialize( display, trail, isDisplayRoot, isSharedCanvasCacheRoot );
-  };
-  var Instance = scenery.Instance;
+  }
 
-  inherit( Object, Instance, {
+  scenery.register( 'Instance', Instance );
+
+  inherit( Events, Instance, {
     /*
      * @param {Display} display - Instances are bound to a single display
      * @param {Trail} trail - The list of ancestors going back up to our root instance (for the display, or for a cache)
@@ -69,7 +75,18 @@ define( function( require ) {
       // {RelativeTransform}, provides high-performance access to 'relative' transforms (from our nearest
       // transform root), and allows for listening to when our relative transform changes (called during
       // a phase of Display.updateDisplay()).
-      this.relativeTransform = ( this.relativeTransform || new RelativeTransform() ).initialize( this, display, trail );
+      this.relativeTransform = ( this.relativeTransform || new RelativeTransform( this ) );
+
+      // {Fittability}, provides logic for whether our drawables (or common-fit ancestors) will support fitting for
+      // FittedBlock subtypes. See https://github.com/phetsims/scenery/issues/406.
+      this.fittability = ( this.fittability || new Fittability( this ) );
+
+      // Tracking of visibility {boolean} and associated boolean flags.
+      this.visible = true; // global visibility (whether this instance will end up appearing on the display)
+      this.relativeVisible = true; // relative visibility (ignores the closest ancestral visibility root and below)
+      this.selfVisible = true; // like relative visibility, but is always true if we are a visibility root
+      this.visibilityDirty = true; // entire subtree of visibility will need to be updated
+      this.childVisibilityDirty = true; // an ancestor needs its visibility updated
 
       // In the range (-1,0), to help us track insertions and removals of this instance's node to its parent
       // (did we get removed but added back?).
@@ -107,9 +124,6 @@ define( function( require ) {
       // Outstanding external references. used for shared cache instances, where multiple instances can point to us.
       this.externalReferenceCount = 0;
 
-      // Whether we have been instantiated. false if we are in a pool waiting to be instantiated.
-      this.active = true;
-
       this.stateless = true; // {boolean} - Whether we have had our state initialized yet
 
       // Rendering state constants (will not change over the life of an instance)
@@ -123,6 +137,7 @@ define( function( require ) {
       // Render state exports for this instance.
       this.isBackbone = false; // {boolean} - Whether we will have a BackboneDrawable group drawable
       this.isTransformed = false;  // {boolean} - Whether this instance creates a new "root" for the relative trail transforms
+      this.isVisibilityApplied = false; // {boolean} - Whether this instance handles visibility with a group drawable
       this.isInstanceCanvasCache = false; // {boolean} - Whether we have a Canvas cache specific to this instance's position
       this.isSharedCanvasCachePlaceholder = false; // {boolean}
       this.isSharedCanvasCacheSelf = isSharedCanvasCacheRoot; // {boolean}
@@ -136,6 +151,9 @@ define( function( require ) {
 
       sceneryLog && sceneryLog.Instance && sceneryLog.Instance( 'initialized ' + this.toString() );
 
+      // Whether we have been instantiated. false if we are in a pool waiting to be instantiated.
+      this.active = true;
+
       return this;
     },
 
@@ -143,8 +161,10 @@ define( function( require ) {
      * Called for initialization of properties (via initialize(), via constructor), and to clean the instance for
      * placement in the pool (don't leak memory).
      *
-     * @param {Display} display - Instances are bound to a single display
-     * @param {Trail} trail - The list of ancestors going back up to our root instance (for the display, or for a cache)
+     * If the parameters are null, we remove all external references so that we don't leak memory.
+     *
+     * @param {Display|null} display - Instances are bound to a single display
+     * @param {Trail|null} trail - The list of ancestors going back up to our root instance (for the display, or for a cache)
      */
     cleanInstance: function( display, trail ) {
       this.display = display;
@@ -155,6 +175,10 @@ define( function( require ) {
       // NOTE: reliance on correct order after syncTree by at least SVGBlock/SVGGroup
       this.children = cleanArray( this.children ); // Array[Instance].
       this.sharedCacheInstance = null; // reference to a shared cache instance (different than a child)
+
+      // initialize/clean sub-components
+      this.relativeTransform.initialize( display, trail );
+      this.fittability.initialize( display, trail );
 
       // {Instance[]} - Child instances are pushed to here when their node is removed from our node.
       // We don't immediately dispose, since it may be added back.
@@ -176,12 +200,7 @@ define( function( require ) {
       // {SVGGroup[]} - List of SVG groups associated with this display instance
       this.svgGroups = cleanArray( this.svgGroups );
 
-      // {PixiDisplayObject[]}
-      this.pixiDisplayObjects = cleanArray( this.pixiDisplayObjects );
-
       this.cleanSyncTreeResults();
-
-      this.relativeTransform.clean();
     },
 
     /*
@@ -231,7 +250,7 @@ define( function( require ) {
      * - hints
      * - opacity
      * - clipArea
-     * - _rendererSummary.bitmask
+     * - _rendererSummary
      * - _rendererBitmask
      *
      * State changes that can cause cascading state changes in descendants:
@@ -248,6 +267,7 @@ define( function( require ) {
       // old state information, so we can compare what was changed
       var wasBackbone = this.isBackbone;
       var wasTransformed = this.isTransformed;
+      var wasVisibilityApplied = this.isVisibilityApplied;
       var wasInstanceCanvasCache = this.isInstanceCanvasCache;
       var wasSharedCanvasCacheSelf = this.isSharedCanvasCacheSelf;
       var wasSharedCanvasCachePlaceholder = this.isSharedCanvasCachePlaceholder;
@@ -260,6 +280,7 @@ define( function( require ) {
       // default values to set (makes the logic much simpler)
       this.isBackbone = false;
       this.isTransformed = false;
+      this.isVisibilityApplied = false;
       this.isInstanceCanvasCache = false;
       this.isSharedCanvasCacheSelf = false;
       this.isSharedCanvasCachePlaceholder = false;
@@ -267,29 +288,42 @@ define( function( require ) {
       this.groupRenderer = 0;
       this.sharedCacheRenderer = 0;
 
-      var combinedBitmask = this.node._rendererSummary.bitmask;
-      var hints = this.node._hints || emptyHintsObject;
-
-      //OHTWO TODO: Don't force a backbone for transparency
-      var hasTransparency = this.node._opacity !== 1 || hints.usesOpacity;
-      var hasClip = this.node._clipArea !== null;
+      var hints = this.node._hints;
 
       this.isUnderCanvasCache = this.isSharedCanvasCacheRoot ||
                                 ( this.parent ? ( this.parent.isUnderCanvasCache || this.parent.isInstanceCanvasCache || this.parent.isSharedCanvasCacheSelf ) : false );
 
+      // set up our preferred renderer list (generally based on the parent)
+      this.preferredRenderers = this.parent ? this.parent.preferredRenderers : defaultPreferredRenderers;
+      // allow the node to modify its preferred renderers (and those of its descendants)
+      if ( hints.renderer ) {
+        this.preferredRenderers = Renderer.pushOrderBitmask( this.preferredRenderers, hints.renderer );
+      }
+
+      var hasClip = this.node.hasClipArea();
+      var hasTransparency = this.node.opacity !== 1 || hints.usesOpacity;
+      var requiresSplit = hints.requireElement || hints.cssTransform || hints.layerSplit;
+      var backboneRequired = this.isDisplayRoot || ( !this.isUnderCanvasCache && requiresSplit );
+      var applyTransparencyWithSVG = !backboneRequired &&
+                                     ( hasTransparency || hasClip ) &&
+                                     this.node._rendererSummary.isSubtreeRenderedExclusivelySVG( this.preferredRenderers );
+      var useBackbone = applyTransparencyWithSVG ? false : ( backboneRequired || hasTransparency || hasClip );
 
       // check if we need a backbone or cache
       // if we are under a canvas cache, we will NEVER have a backbone
       // splits are accomplished just by having a backbone
-      if ( this.isDisplayRoot || ( !this.isUnderCanvasCache && ( hasTransparency || hasClip || hints.requireElement || hints.cssTransform || hints.split ) ) ) {
+      // NOTE: If changing, check RendererSummary.summaryBitmaskForNodeSelf
+      //OHTWO TODO: Update this to properly identify when backbones are necessary/and-or when we forward opacity/clipping
+      if ( useBackbone ) {
         this.isBackbone = true;
+        this.isVisibilityApplied = true;
         this.isTransformed = this.isDisplayRoot || !!hints.cssTransform; // for now, only trigger CSS transform if we have the specific hint
         //OHTWO TODO: check whether the force acceleration hint is being used by our DOMBlock
-        this.groupRenderer = Renderer.bitmaskDOM | ( hints.forceAcceleration ? Renderer.bitmaskForceAcceleration : 0 ); // probably won't be used
+        this.groupRenderer = Renderer.bitmaskDOM; // probably won't be used
       }
-      else if ( hasTransparency || hasClip || hints.canvasCache ) {
+      else if ( !applyTransparencyWithSVG && ( hasTransparency || hasClip || hints.canvasCache ) ) {
         // everything underneath needs to be renderable with Canvas, otherwise we cannot cache
-        assert && assert( ( combinedBitmask & Renderer.bitmaskCanvas ) !== 0,
+        assert && assert( this.node._rendererSummary.isSingleCanvasSupported(),
           'hints.canvasCache provided, but not all node contents can be rendered with Canvas under ' +
           this.node.constructor.name );
 
@@ -298,12 +332,12 @@ define( function( require ) {
           if ( this.isSharedCanvasCacheRoot ) {
             this.isSharedCanvasCacheSelf = true;
 
-            this.sharedCacheRenderer = Renderer.bitmaskCanvas;
+            this.sharedCacheRenderer = isWebGLSupported ? Renderer.bitmaskWebGL : Renderer.bitmaskCanvas;
           }
           else {
             // everything underneath needs to guarantee that its bounds are valid
             //OHTWO TODO: We'll probably remove this if we go with the "safe bounds" approach
-            assert && assert( ( combinedBitmask & scenery.bitmaskBoundsValid ) !== 0,
+            assert && assert( this.node._rendererSummary.areBoundsValid(),
               'hints.singleCache provided, but not all node contents have valid bounds under ' +
               this.node.constructor.name );
 
@@ -313,15 +347,8 @@ define( function( require ) {
         else {
           this.isInstanceCanvasCache = true;
           this.isUnderCanvasCache = true;
-          this.groupRenderer = Renderer.bitmaskCanvas; // disallowing SVG here, so we don't have to break up our SVG group structure
+          this.groupRenderer = isWebGLSupported ? Renderer.bitmaskWebGL : Renderer.bitmaskCanvas;
         }
-      }
-
-      // set up our preferred renderer list (generally based on the parent)
-      this.preferredRenderers = this.parent ? this.parent.preferredRenderers : defaultPreferredRenderers;
-      // allow the node to modify its preferred renderers (and those of its descendants)
-      if ( hints.renderer ) {
-        this.preferredRenderers = Renderer.pushOrderBitmask( this.preferredRenderers, hints.renderer );
       }
 
       if ( this.node.isPainted() ) {
@@ -329,19 +356,21 @@ define( function( require ) {
           this.selfRenderer = Renderer.bitmaskCanvas;
         }
         else {
-          var nodeBitmask = this.node._rendererBitmask;
+          var supportedNodeBitmask = this.node._rendererBitmask;
+          if ( !isWebGLSupported ) {
+            var invalidBitmasks = Renderer.bitmaskWebGL;
+            supportedNodeBitmask = supportedNodeBitmask ^ ( supportedNodeBitmask & invalidBitmasks );
+          }
 
           // use the preferred rendering order if specified, otherwise use the default
-          this.selfRenderer = ( nodeBitmask & Renderer.bitmaskOrderFirst( this.preferredRenderers ) ) ||
-                              ( nodeBitmask & Renderer.bitmaskOrderSecond( this.preferredRenderers ) ) ||
-                              ( nodeBitmask & Renderer.bitmaskOrderThird( this.preferredRenderers ) ) ||
-                              ( nodeBitmask & Renderer.bitmaskOrderFourth( this.preferredRenderers ) ) ||
-                              ( nodeBitmask & Renderer.bitmaskOrderFifth( this.preferredRenderers ) ) ||
-                              ( nodeBitmask & Renderer.bitmaskSVG ) ||
-                              ( nodeBitmask & Renderer.bitmaskCanvas ) ||
-                              ( nodeBitmask & Renderer.bitmaskDOM ) ||
-                              ( nodeBitmask & Renderer.bitmaskWebGL ) ||
-                              ( nodeBitmask & Renderer.bitmaskPixi ) ||
+          this.selfRenderer = ( supportedNodeBitmask & Renderer.bitmaskOrder( this.preferredRenderers, 0 ) ) ||
+                              ( supportedNodeBitmask & Renderer.bitmaskOrder( this.preferredRenderers, 1 ) ) ||
+                              ( supportedNodeBitmask & Renderer.bitmaskOrder( this.preferredRenderers, 2 ) ) ||
+                              ( supportedNodeBitmask & Renderer.bitmaskOrder( this.preferredRenderers, 3 ) ) ||
+                              ( supportedNodeBitmask & Renderer.bitmaskSVG ) ||
+                              ( supportedNodeBitmask & Renderer.bitmaskCanvas ) ||
+                              ( supportedNodeBitmask & Renderer.bitmaskDOM ) ||
+                              ( supportedNodeBitmask & Renderer.bitmaskWebGL ) ||
                               0;
 
           assert && assert( this.selfRenderer, 'setSelfRenderer failure?' );
@@ -373,8 +402,17 @@ define( function( require ) {
                             ( oldGroupRenderer !== this.groupRenderer ) ||
                             ( oldSharedCacheRenderer !== this.sharedCacheRenderer );
 
-      sceneryLog && sceneryLog.Instance && sceneryLog.Instance( 'new: ' + this.getStateString() );
+      // if our visibility applications changed, update the entire subtree
+      if ( wasVisibilityApplied !== this.isVisibilityApplied ) {
+        this.visibilityDirty = true;
+        this.parent && this.parent.markChildVisibilityDirty();
+      }
 
+      // If our fittability has changed, propagate those changes. (It's generally a hint change which will trigger an
+      // update of rendering state).
+      this.fittability.checkSelfFittability();
+
+      sceneryLog && sceneryLog.Instance && sceneryLog.Instance( 'new: ' + this.getStateString() );
       sceneryLog && sceneryLog.Instance && sceneryLog.pop();
     },
 
@@ -389,6 +427,7 @@ define( function( require ) {
                    ( this.isSharedCanvasCachePlaceholder ? 'sharedCachePlaceholder ' : '' ) +
                    ( this.isSharedCanvasCacheSelf ? 'sharedCacheSelf ' : '' ) +
                    ( this.isTransformed ? 'TR ' : '' ) +
+                   ( this.isVisibilityApplied ? 'VIS ' : '' ) +
                    ( this.selfRenderer ? this.selfRenderer.toString( 16 ) : '-' ) + ',' +
                    ( this.groupRenderer ? this.groupRenderer.toString( 16 ) : '-' ) + ',' +
                    ( this.sharedCacheRenderer ? this.sharedCacheRenderer.toString( 16 ) : '-' ) + ' ';
@@ -523,8 +562,7 @@ define( function( require ) {
       var firstDrawable = this.selfDrawable; // possibly null
       var currentDrawable = firstDrawable; // possibly null
 
-      assert && assert( this.firstChangeInterval === null &&
-                        this.lastChangeInterval === null,
+      assert && assert( this.firstChangeInterval === null && this.lastChangeInterval === null,
         'sanity checks that cleanSyncTreeResults were called' );
 
       var firstChangeInterval = null;
@@ -546,10 +584,12 @@ define( function( require ) {
           childInstance.syncTree();
         }
 
+        var includeChildDrawables = childInstance.shouldIncludeInParentDrawables();
+
         //OHTWO TODO: only strip out invisible Canvas drawables, while leaving SVG (since we can more efficiently hide
         // SVG trees, memory-wise)
         // here we strip out invisible drawable sections out of the drawable linked list
-        if ( childInstance.node.isVisible() ) {
+        if ( includeChildDrawables ) {
           // if there are any drawables for that child, link them up in our linked list
           if ( childInstance.firstDrawable ) {
             if ( currentDrawable ) {
@@ -574,7 +614,7 @@ define( function( require ) {
         sceneryLog && sceneryLog.ChangeInterval && sceneryLog.push();
 
         var wasIncluded = childInstance.stitchChangeIncluded;
-        var isIncluded = childInstance.node.isVisible();
+        var isIncluded = includeChildDrawables;
         childInstance.stitchChangeIncluded = isIncluded;
 
         sceneryLog && sceneryLog.ChangeInterval && sceneryLog.ChangeInterval( 'included: ' + wasIncluded + ' => ' + isIncluded );
@@ -687,7 +727,7 @@ define( function( require ) {
         sceneryLog && sceneryLog.ChangeInterval && sceneryLog.pop();
       }
 
-      /* jshint -W018 */ // it's really the easiest way to compare if two things (casted to booleans) are the same?
+      // it's really the easiest way to compare if two things (casted to booleans) are the same?
       assert && assert( !!firstChangeInterval === !!currentChangeInterval,
         'Presence of first and current change intervals should be equal' );
 
@@ -707,11 +747,11 @@ define( function( require ) {
       this.firstDrawable = this.firstInnerDrawable = firstDrawable;
       this.lastDrawable = this.lastInnerDrawable = currentDrawable; // either null, or the drawable itself
 
-      // drawable range checks
+      // ensure that our firstDrawable and lastDrawable are correct
       if ( assertSlow ) {
         var firstDrawableCheck = null;
         for ( var j = 0; j < this.children.length; j++ ) {
-          if ( this.children[ j ].node.isVisible() && this.children[ j ].firstDrawable ) {
+          if ( this.children[ j ].shouldIncludeInParentDrawables() && this.children[ j ].firstDrawable ) {
             firstDrawableCheck = this.children[ j ].firstDrawable;
             break;
           }
@@ -722,7 +762,7 @@ define( function( require ) {
 
         var lastDrawableCheck = this.selfDrawable;
         for ( var k = this.children.length - 1; k >= 0; k-- ) {
-          if ( this.children[ k ].node.isVisible() && this.children[ k ].lastDrawable ) {
+          if ( this.children[ k ].shouldIncludeInParentDrawables() && this.children[ k ].lastDrawable ) {
             lastDrawableCheck = this.children[ k ].lastDrawable;
             break;
           }
@@ -755,7 +795,8 @@ define( function( require ) {
             this.selfDrawable.markForDisposal( this.display );
           }
 
-          this.selfDrawable = Renderer.createSelfDrawable( this, this.node, selfRenderer );
+          this.selfDrawable = Renderer.createSelfDrawable( this, this.node, selfRenderer, this.fittability.ancestorsFittable );
+          assert && assert( this.selfDrawable );
 
           return true;
         }
@@ -800,7 +841,6 @@ define( function( require ) {
         'We should have precisely one of these flags set for us to have a groupRenderer' );
 
       // if we switched to/away from a group, our group type changed, or our group renderer changed
-      /* jshint -W018 */
       var groupChanged = ( !!groupRenderer !== !!this.groupDrawable ) ||
                          ( !wasStateless && this.groupChanged ) ||
                          ( this.groupDrawable && this.groupDrawable.renderer !== groupRenderer );
@@ -850,6 +890,8 @@ define( function( require ) {
           }
           //OHTWO TODO: restitch here??? implement it
         }
+        // Update the fittable flag
+        this.groupDrawable.setFittable( this.fittability.ancestorsFittable );
 
         this.firstDrawable = this.lastDrawable = this.groupDrawable;
       }
@@ -941,6 +983,11 @@ define( function( require ) {
       }
     },
 
+    // @private, whether out drawables (from firstDrawable to lastDrawable) should be included in our parent's drawables
+    shouldIncludeInParentDrawables: function() {
+      return this.node.isVisible() || !this.node.isExcludeInvisible();
+    },
+
     // @private, finds the closest drawable (not including the child instance at childIndex) using lastDrawable, or null
     findPreviousDrawable: function( childIndex ) {
       for ( var i = childIndex - 1; i >= 0; i-- ) {
@@ -1004,7 +1051,12 @@ define( function( require ) {
         this.afterStableIndex++;
       }
 
+      // maintain fittable flags
+      this.fittability.onInsert( instance.fittability );
+
       this.relativeTransform.insertInstance( instance, index );
+
+      this.markChildVisibilityDirty();
 
       sceneryLog && sceneryLog.InstanceTree && sceneryLog.pop();
     },
@@ -1051,6 +1103,9 @@ define( function( require ) {
       else {
         this.afterStableIndex--;
       }
+
+      // maintain fittable flags
+      this.fittability.onRemove( instance.fittability );
 
       this.relativeTransform.removeInstanceWithIndex( instance, index );
 
@@ -1141,6 +1196,10 @@ define( function( require ) {
 
       // make sure we aren't pruned in the next syncTree()
       this.parent && this.parent.markSkipPruning();
+
+      // mark visibility changes
+      this.visibilityDirty = true;
+      this.parent && this.parent.markChildVisibilityDirty();
     },
 
     // event callback for Node's 'opacity' change event
@@ -1148,6 +1207,72 @@ define( function( require ) {
       assert && assert( !this.stateless, 'If we are stateless, we should not receive these notifications' );
 
       this.markRenderStateDirty();
+    },
+
+    markChildVisibilityDirty: function() {
+      if ( !this.childVisibilityDirty ) {
+        this.childVisibilityDirty = true;
+        this.parent && this.parent.markChildVisibilityDirty();
+      }
+    },
+
+    /**
+     * Updates the currently fittability for all of the drawables attached to this instance.
+     * @public
+     *
+     * @param {boolean} fittable
+     */
+    updateDrawableFittability: function( fittable ) {
+      this.selfDrawable && this.selfDrawable.setFittable( fittable );
+      this.groupDrawable && this.groupDrawable.setFittable( fittable );
+      // this.sharedCacheDrawable && this.sharedCacheDrawable.setFittable( fittable );
+    },
+
+    /**
+     * Updates the visible/relativeVisible flags on the Instance and its entire subtree.
+     *
+     * @param {boolean} parentGloballyVisible - Whether our parent (if any) is globally visible
+     * @param {boolean} parentRelativelyVisible - Whether our parent (if any) is relatively visible
+     * @param {boolean} updateFullSubtree - If true, we will visit the entire subtree to ensure visibility is correct.
+     */
+    updateVisibility: function( parentGloballyVisible, parentRelativelyVisible, updateFullSubtree ) {
+      // If our visibility flag for ourself is dirty, we need to update our entire subtree
+      if ( this.visibilityDirty ) {
+        updateFullSubtree = true;
+      }
+
+      // calculate our visibilities
+      var nodeVisible = this.node.isVisible();
+      var wasVisible = this.visible;
+      var wasRelativeVisible = this.relativeVisible;
+      var wasSelfVisible = this.selfVisible;
+      this.visible = parentGloballyVisible && nodeVisible;
+      this.relativeVisible = parentRelativelyVisible && nodeVisible;
+      this.selfVisible = this.isVisibilityApplied ? true : this.relativeVisible;
+
+      var len = this.children.length;
+      for ( var i = 0; i < len; i++ ) {
+        var child = this.children[ i ];
+
+        if ( updateFullSubtree || child.visibilityDirty || child.childVisibilityDirty ) {
+          // if we are a visibility root (isVisibilityApplied===true), disregard ancestor visibility
+          child.updateVisibility( this.visible, this.isVisibilityApplied ? true : this.relativeVisible, updateFullSubtree );
+        }
+      }
+
+      this.visibilityDirty = false;
+      this.childVisibilityDirty = false;
+
+      // trigger changes after we do the full visibility update
+      if ( this.visible !== wasVisible ) {
+        this.trigger0( 'visibility' );
+      }
+      if ( this.relativeVisible !== wasRelativeVisible ) {
+        this.trigger0( 'relativeVisibility' );
+      }
+      if ( this.selfVisible !== wasSelfVisible ) {
+        this.trigger0( 'selfVisibility' );
+      }
     },
 
     getDescendantCount: function() {
@@ -1187,31 +1312,6 @@ define( function( require ) {
       return null;
     },
 
-    // add a reference for an SVG group (fastest way to track them)
-    addPixiDisplayObject: function( pixiDisplayObject ) {
-      this.pixiDisplayObjects.push( pixiDisplayObject );
-    },
-
-    // remove a reference for an SVG group (fastest way to track them)
-    removePixiDisplayObject: function( pixiDisplayObject ) {
-      var index = _.indexOf( this.pixiDisplayObjects, pixiDisplayObject );
-      assert && assert( index >= 0, 'Tried to remove an PixiDisplayObject from an Instance when it did not exist' );
-
-      this.pixiDisplayObjects.splice( index, 1 ); // TODO: remove function
-    },
-
-    // returns null when a lookup fails (which is legitimate)
-    lookupPixiDisplayObject: function( pixiBlock ) {
-      var len = this.pixiDisplayObjects.length;
-      for ( var i = 0; i < len; i++ ) {
-        var group = this.pixiDisplayObjects[ i ];
-        if ( group.block === pixiBlock ) {
-          return group;
-        }
-      }
-      return null;
-    },
-
     // what instance have filters (opacity/visibility/clip) been applied up to?
     getFilterRootInstance: function() {
       if ( this.isBackbone || this.isInstanceCanvasCache || !this.parent ) {
@@ -1229,6 +1329,15 @@ define( function( require ) {
       }
       else {
         return this.parent.getTransformRootInstance();
+      }
+    },
+
+    getVisibilityRootInstance: function() {
+      if ( this.isVisibilityApplied || !this.parent ) {
+        return this;
+      }
+      else {
+        return this.parent.getVisibilityRootInstance();
       }
     },
 
@@ -1295,9 +1404,20 @@ define( function( require ) {
       this.sharedCacheDrawable && this.sharedCacheDrawable.disposeImmediately( this.display );
       this.selfDrawable && this.selfDrawable.disposeImmediately( this.display );
 
+      // Dispose the rest of our subtree
       var numChildren = this.children.length;
       for ( var i = 0; i < numChildren; i++ ) {
         this.children[ i ].dispose();
+      }
+      // Check for child instances that were removed (we are still responsible for disposing them, since we didn't get
+      // synctree to happen for them).
+      while ( this.instanceRemovalCheckList.length ) {
+        var child = this.instanceRemovalCheckList.pop();
+
+        // they could have already been disposed, so we need a guard here
+        if ( child.active ) {
+          child.dispose();
+        }
       }
 
       // we don't originally add in the listener if we are stateless
@@ -1318,6 +1438,8 @@ define( function( require ) {
 
       // clean our variables out to release memory
       this.cleanInstance( null, null );
+
+      this.removeAllEventListeners();
 
       this.freeToPool();
 
@@ -1348,8 +1470,8 @@ define( function( require ) {
         assertSlow( !this.isSharedCanvasCachePlaceholder || this.sharedCacheDrawable,
           'We need to have a sharedCacheDrawable if we are a shared cache' );
 
-        assertSlow( this.isTransformed === this.isTransformed,
-          'isTransformed should match' );
+        assertSlow( this.addRemoveCounter === 0,
+          'Our addRemoveCounter should always be 0 at the end of syncTree' );
 
         // validate the subtree
         for ( var i = 0; i < this.children.length; i++ ) {
@@ -1359,6 +1481,25 @@ define( function( require ) {
         }
 
         this.relativeTransform.audit( frameId, allowValidationNotNeededChecks );
+
+        this.fittability.audit();
+      }
+    },
+
+    // @public (scenery-internal) - Applies checks to make sure our visibility tracking is working as expected.
+    auditVisibility: function( parentVisible ) {
+      if ( assertSlow ) {
+        var visible = parentVisible && this.node.isVisible();
+        var trailVisible = this.trail.isVisible();
+        assertSlow( visible === trailVisible, 'Trail visibility failure' );
+        assertSlow( visible === this.visible, 'Visible flag failure' );
+
+        // validate the subtree
+        for ( var i = 0; i < this.children.length; i++ ) {
+          var childInstance = this.children[ i ];
+
+          childInstance.auditVisibility( visible );
+        }
       }
     },
 

@@ -1,4 +1,4 @@
-// Copyright 2002-2014, University of Colorado Boulder
+// Copyright 2014-2015, University of Colorado Boulder
 
 
 /**
@@ -15,13 +15,16 @@ define( function( require ) {
   var scenery = require( 'SCENERY/scenery' );
   var Drawable = require( 'SCENERY/display/Drawable' );
 
-  scenery.SelfDrawable = function SelfDrawable( renderer, instance ) {
+  function SelfDrawable( renderer, instance ) {
     this.initializeSelfDrawable( renderer, instance );
-  };
-  var SelfDrawable = scenery.SelfDrawable;
+  }
+
+  scenery.register( 'SelfDrawable', SelfDrawable );
 
   inherit( scenery.Drawable, SelfDrawable, {
     initializeSelfDrawable: function( renderer, instance ) {
+      this.drawableVisibilityListener = this.drawableVisibilityListener || this.updateSelfVisibility.bind( this );
+
       // super initialization
       this.initializeDrawable( renderer );
 
@@ -29,11 +32,17 @@ define( function( require ) {
       this.node = instance.trail.lastNode();
       this.node.attachDrawable( this );
 
+      this.instance.onStatic( 'selfVisibility', this.drawableVisibilityListener );
+
+      this.updateSelfVisibility();
+
       return this;
     },
 
     // @public
     dispose: function() {
+      this.instance.offStatic( 'selfVisibility', this.drawableVisibilityListener );
+
       this.node.detachDrawable( this );
 
       // free references
@@ -41,6 +50,11 @@ define( function( require ) {
       this.node = null;
 
       Drawable.prototype.dispose.call( this );
+    },
+
+    updateSelfVisibility: function() {
+      // hide our drawable if it is not relatively visible
+      this.visible = this.instance.selfVisible;
     },
 
     toDetailedString: function() {
@@ -53,7 +67,6 @@ define( function( require ) {
       // for pooling, allow <SelfDrawableType>.createFromPool( renderer, instance ) and drawable.freeToPool(). Creation will initialize the drawable to an initial state
       Poolable.mixin( selfDrawableType, {
         defaultFactory: function() {
-          /* jshint -W055 */
           return new selfDrawableType();
         },
         constructorDuplicateFactory: function( pool ) {
@@ -62,7 +75,6 @@ define( function( require ) {
               return pool.pop().initialize( renderer, instance );
             }
             else {
-              /* jshint -W055 */
               return new selfDrawableType( renderer, instance );
             }
           };

@@ -1,4 +1,4 @@
-// Copyright 2002-2014, University of Colorado Boulder
+// Copyright 2013-2015, University of Colorado Boulder
 
 
 /**
@@ -19,7 +19,7 @@ define( function( require ) {
   var Gradient = require( 'SCENERY/util/Gradient' );
 
   // TODO: add the ability to specify the color-stops inline. possibly [ [0,color1], [0.5,color2], [1,color3] ]
-  scenery.LinearGradient = function LinearGradient( x0, y0, x1, y1 ) {
+  function LinearGradient( x0, y0, x1, y1 ) {
     assert && assert( isFinite( x0 ) && isFinite( y0 ) && isFinite( x1 ) && isFinite( y1 ) );
     var usesVectors = y1 === undefined;
     if ( usesVectors ) {
@@ -30,8 +30,9 @@ define( function( require ) {
 
     // use the global scratch canvas instead of creating a new Canvas
     Gradient.call( this, scenery.scratchContext.createLinearGradient( x0, y0, x1, y1 ) );
-  };
-  var LinearGradient = scenery.LinearGradient;
+  }
+
+  scenery.register( 'LinearGradient', LinearGradient );
 
   inherit( Gradient, LinearGradient, {
 
@@ -60,6 +61,10 @@ define( function( require ) {
       _.each( this.stops, function( stop ) {
         var stopElement = document.createElementNS( scenery.svgns, 'stop' );
         stopElement.setAttribute( 'offset', stop.ratio );
+        // Since SVG doesn't support parsing scientific notation (e.g. 7e5), we need to output fixed decimal-point strings.
+        // Since this needs to be done quickly, and we don't particularly care about slight rounding differences (it's
+        // being used for display purposes only, and is never shown to the user), we use the built-in JS toFixed instead of
+        // Dot's version of toFixed. See https://github.com/phetsims/kite/issues/50
         stopElement.setAttribute( 'style', 'stop-color: ' + stop.color.withAlpha( 1 ).toCSS() + '; stop-opacity: ' + stop.color.a.toFixed( 20 ) + ';' );
         definition.appendChild( stopElement );
       } );

@@ -1,4 +1,4 @@
-// Copyright 2002-2014, University of Colorado Boulder
+// Copyright 2014-2015, University of Colorado Boulder
 
 
 /**
@@ -16,10 +16,11 @@ define( function( require ) {
   var scenery = require( 'SCENERY/scenery' );
   var Block = require( 'SCENERY/display/Block' );
 
-  scenery.DOMBlock = function DOMBlock( display, domDrawable ) {
+  function DOMBlock( display, domDrawable ) {
     this.initialize( display, domDrawable );
-  };
-  var DOMBlock = scenery.DOMBlock;
+  }
+
+  scenery.register( 'DOMBlock', DOMBlock );
 
   inherit( Block, DOMBlock, {
     initialize: function( display, domDrawable ) {

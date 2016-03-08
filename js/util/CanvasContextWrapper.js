@@ -1,4 +1,4 @@
-// Copyright 2002-2014, University of Colorado Boulder
+// Copyright 2013-2015, University of Colorado Boulder
 
 
 /**
@@ -16,15 +16,16 @@ define( function( require ) {
   var inherit = require( 'PHET_CORE/inherit' );
   var scenery = require( 'SCENERY/scenery' );
 
-  scenery.CanvasContextWrapper = function CanvasContextWrapper( canvas, context ) {
+  function CanvasContextWrapper( canvas, context ) {
     this.canvas = canvas;
     this.context = context;
 
     this.resetStyles();
 
     phetAllocation && phetAllocation( 'CanvasContextWrapper' );
-  };
-  var CanvasContextWrapper = scenery.CanvasContextWrapper;
+  }
+
+  scenery.register( 'CanvasContextWrapper', CanvasContextWrapper );
 
   inherit( Object, CanvasContextWrapper, {
     // set local styles to undefined, so that they will be invalidated later
@@ -59,20 +60,30 @@ define( function( require ) {
     },
 
     setFillStyle: function( style ) {
+      // turn {Color}s into strings when necessary
+      if ( style && style.getCanvasStyle ) {
+        style = style.getCanvasStyle();
+      }
+
       if ( this.fillStyle !== style ) {
         this.fillStyle = style;
 
         // allow gradients / patterns
-        this.context.fillStyle = ( style && style.getCanvasStyle ) ? style.getCanvasStyle() : style;
+        this.context.fillStyle = style;
       }
     },
 
     setStrokeStyle: function( style ) {
+      // turn {Color}s into strings when necessary
+      if ( style && style.getCanvasStyle ) {
+        style = style.getCanvasStyle();
+      }
+
       if ( this.strokeStyle !== style ) {
         this.strokeStyle = style;
 
         // allow gradients / patterns
-        this.context.strokeStyle = ( style && style.getCanvasStyle ) ? style.getCanvasStyle() : style;
+        this.context.strokeStyle = style;
       }
     },
 

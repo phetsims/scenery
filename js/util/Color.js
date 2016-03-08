@@ -1,4 +1,4 @@
-// Copyright 2002-2014, University of Colorado Boulder
+// Copyright 2012-2015, University of Colorado Boulder
 
 /**
  * A color with RGBA values, assuming the sRGB color space is used.
@@ -32,7 +32,7 @@ define( function( require ) {
    * The 'a' value stands for alpha, and will be clamped to 0-1 (floating point)
    * 'hex' indicates a 6-decimal-digit format hex number, for example 0xFFAA00 is equivalent to r=255, g=170, b=0.
    */
-  scenery.Color = function Color( r, g, b, a ) {
+  function Color( r, g, b, a ) {
 
     // allow listeners to be notified on any changes. called with listener()
     this.listeners = [];
@@ -40,8 +40,9 @@ define( function( require ) {
     this.set( r, g, b, a );
 
     phetAllocation && phetAllocation( 'Color' );
-  };
-  var Color = scenery.Color;
+  }
+
+  scenery.register( 'Color', Color );
 
   // regex utilities
   var rgbNumber = '(-?\\d{1,3}%?)'; // syntax allows negative integers and percentages
@@ -210,6 +211,8 @@ define( function( require ) {
         assert && assert( a === undefined || typeof a === 'number' );
         this.setRGBA( r, g, b, ( a === undefined ) ? 1 : a );
       }
+
+      return this; // support chaining
     },
 
     // red, integral 0-255
@@ -253,9 +256,12 @@ define( function( require ) {
         return 'rgb(' + this.r + ',' + this.g + ',' + this.b + ')';
       }
       else {
-        // toFixed prevents scientific notation, but we need to strip off the trailing zeros
+        // Since SVG doesn't support parsing scientific notation (e.g. 7e5), we need to output fixed decimal-point strings.
+        // Since this needs to be done quickly, and we don't particularly care about slight rounding differences (it's
+        // being used for display purposes only, and is never shown to the user), we use the built-in JS toFixed instead of
+        // Dot's version of toFixed. See https://github.com/phetsims/kite/issues/50
         var alpha = this.a.toFixed( 20 );
-        while ( alpha.length >= 2 && alpha[alpha.length - 1] === '0' && alpha[alpha.length - 2] !== '.' ) {
+        while ( alpha.length >= 2 && alpha[ alpha.length - 1 ] === '0' && alpha[ alpha.length - 2 ] !== '.' ) {
           alpha = alpha.slice( 0, alpha.length - 1 );
         }
 
@@ -305,9 +311,12 @@ define( function( require ) {
       return ( this.r << 16 ) + ( this.g << 8 ) + this.b;
     },
 
-    // called to update the interally cached CSS value
+    // called to update the internally cached CSS value
     updateColor: function() {
       assert && assert( !this.immutable, 'Cannot modify an immutable color' );
+
+      assert && assert( isFinite( this.red ) && isFinite( this.green ) && isFinite( this.blue ) && isFinite( this.alpha ),
+        'Ensure color components are finite and not NaN' );
 
       var oldCSS = this._css;
       this._css = this.computeCSS();
@@ -344,7 +353,8 @@ define( function( require ) {
       lightness = clamp( lightness / 100, 0, 1 );   // percentage
 
       // see http://www.w3.org/TR/css3-color/
-      var m1, m2;
+      var m1;
+      var m2;
       if ( lightness < 0.5 ) {
         m2 = lightness * ( saturation + 1 );
       }
@@ -464,8 +474,21 @@ define( function( require ) {
       this.listeners.splice( _.indexOf( this.listeners, listener ), 1 );
     },
 
+    getListenerCount: function() {
+      return this.listeners.length;
+    },
+
     toString: function() {
-      return this.constructor.name + "[r:" + this.r + " g:" + this.g + " b:" + this.b + " a:" + this.a + "]";
+      return this.constructor.name + '[r:' + this.r + ' g:' + this.g + ' b:' + this.b + ' a:' + this.a + ']';
+    },
+
+    toStateObject: function() {
+      return {
+        r: this.r,
+        g: this.g,
+        b: this.b,
+        a: this.a
+      };
     }
   } );
 
@@ -673,6 +696,10 @@ define( function( require ) {
     var b = Math.floor( linear( 0, 1, color1.b, color2.b, distance ) );
     var a = linear( 0, 1, color1.a, color2.a, distance );
     return new Color( r, g, b, a );
+  };
+
+  Color.fromStateObject = function( stateObject ) {
+    return new Color( stateObject.r, stateObject.g, stateObject.b, stateObject.a );
   };
 
   return Color;

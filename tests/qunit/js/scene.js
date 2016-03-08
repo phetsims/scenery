@@ -1,3 +1,5 @@
+// Copyright 2002-2014, University of Colorado Boulder
+
 (function() {
   'use strict';
 
@@ -668,28 +670,6 @@
     ok( node.bounds.equals( new dot.Bounds2( 0, 5, 50, 205 ) ), 'localBounds override on parent' );
   } );
 
-  test( 'fillColor/strokeColor', function() {
-    var rect = new scenery.Rectangle( 0, 0, 100, 50, { fill: 'red', stroke: 'rgba(0,255,0,0.5)' } );
-    equal( rect.fillColor.red, 255, 'Fill red' );
-    equal( rect.fillColor.green, 0, 'Fill green' );
-    equal( rect.fillColor.blue, 0, 'Fill blue' );
-    equal( rect.fillColor.alpha, 1, 'Fill alpha' );
-    equal( rect.strokeColor.red, 0, 'Stroke red' );
-    equal( rect.strokeColor.green, 255, 'Stroke green' );
-    equal( rect.strokeColor.blue, 0, 'Stroke blue' );
-    equal( rect.strokeColor.alpha, 0.5, 'Stroke alpha' );
-    rect.fill = rect.stroke;
-    equal( rect.fillColor.red, 0, 'Fill red after change' );
-    equal( rect.fillColor.green, 255, 'Fill green after change' );
-    equal( rect.fillColor.blue, 0, 'Fill blue after change' );
-    equal( rect.fillColor.alpha, 0.5, 'Fill alpha after change' );
-    rect.stroke = '#ff0';
-    equal( rect.strokeColor.red, 255, 'Stroke red after change' );
-    equal( rect.strokeColor.green, 255, 'Stroke green after change' );
-    equal( rect.strokeColor.blue, 0, 'Stroke blue after change' );
-    equal( rect.strokeColor.alpha, 1, 'Stroke alpha after change' );
-  } );
-
   function compareTrailArrays( a, b ) {
     // defensive copies
     a = a.slice();
@@ -844,5 +824,215 @@
       new scenery.Trail( [ a, b, d ] ),
       new scenery.Trail( [ a, c, d ] )
     ] ) );
+  } );
+
+  test( 'Line stroked bounds', function() {
+    var line = new scenery.Line( 0, 0, 50, 0, { stroke: 'red', lineWidth: 5 } );
+
+    var positions = [
+      { x1: 50, y1: 0, x2: 0, y2: 0 },
+      { x1: 0, y1: 50, x2: 0, y2: 0 },
+      { x1: 0, y1: 0, x2: 50, y2: 0 },
+      { x1: 0, y1: 0, x2: 0, y2: 50 },
+      { x1: 50, y1: 10, x2: 0, y2: 0 },
+      { x1: 10, y1: 50, x2: 0, y2: 0 },
+      { x1: 0, y1: 0, x2: 50, y2: 10 },
+      { x1: 0, y1: 0, x2: 10, y2: 50 },
+      { x1: 50, y1: -10, x2: 0, y2: 0 },
+      { x1: -10, y1: 50, x2: 0, y2: 0 },
+      { x1: 0, y1: 0, x2: 50, y2: -10 },
+      { x1: 0, y1: 0, x2: -10, y2: 50 },
+      { x1: 50, y1: 0, x2: 0, y2: 10 },
+      { x1: 0, y1: 50, x2: 10, y2: 0 },
+      { x1: 0, y1: 10, x2: 50, y2: 0 },
+      { x1: 10, y1: 0, x2: 0, y2: 50 },
+      { x1: 50, y1: 0, x2: 0, y2: -10 },
+      { x1: 0, y1: 50, x2: -10, y2: 0 },
+      { x1: 0, y1: -10, x2: 50, y2: 0 },
+      { x1: -10, y1: 0, x2: 0, y2: 50 }
+    ];
+
+    var caps = [
+      'round',
+      'butt',
+      'square'
+    ];
+
+    _.each( positions, function( position ) {
+      line.mutate( position );
+      // line.setLine( position.x1, position.y1, position.x2, position.y2 );
+      _.each( caps, function( cap ) {
+        line.lineCap = cap;
+
+        ok( line.bounds.equalsEpsilon( line.getShape().getStrokedShape( line.getLineStyles() ).bounds, 0.0001 ),
+          'Line stroked bounds with ' + JSON.stringify( position ) + ' and ' + cap + ' ' + line.bounds.toString() );
+      } );
+    } );
+  } );
+
+  test( 'Color listener non-memory-leak-ness', function() {
+    var scene = new scenery.Node();
+    var display = new scenery.Display( scene, { width: 20, height: 20 } );
+    display.updateDisplay();
+    var node = new scenery.Node();
+    scene.addChild( node );
+
+    var color = new scenery.Color( 255, 255, 0 );
+    equal( color.getListenerCount(), 0, 'Initial colors should have no listeners' );
+
+    var rect = new scenery.Rectangle( 0, 0, 50, 50, { fill: color } );
+    node.addChild( rect );
+    equal( color.getListenerCount(), 0, 'Still no listeners until updateDisplay' );
+
+    display.updateDisplay();
+    equal( color.getListenerCount(), 1, 'One listener for the rectangle' );
+
+    var circle = new scenery.Circle( 40, { fill: color, stroke: color } );
+    node.addChild( circle );
+    display.updateDisplay();
+    equal( color.getListenerCount(), 3, 'One listener for the rectangle, two for the circle (stroke/fill)' );
+
+    circle.stroke = null;
+    equal( color.getListenerCount(), 2, 'One listener for the rectangle, one for the circle (fill)' );
+
+    rect.addChild( circle );
+    display.updateDisplay();
+    equal( color.getListenerCount(), 3, 'One listener for the rectangle, two for the circle (two instances)' );
+
+    node.removeAllChildren();
+    display.updateDisplay();
+    equal( color.getListenerCount(), 0, 'Nothing else attached' );
+  } );
+
+  test( 'maxWidth/maxHeight for Node', function() {
+    var rect = new scenery.Rectangle( 0, 0, 100, 50, { fill: 'red' } );
+    var node = new scenery.Node( { children: [ rect ] } );
+
+    ok( node.bounds.equals( new dot.Bounds2( 0, 0, 100, 50 ) ), 'Initial bounds' );
+
+    node.maxWidth = 50;
+
+    ok( node.bounds.equals( new dot.Bounds2( 0, 0, 50, 25 ) ), 'Halved transform after max width of half' );
+
+    node.maxWidth = 120;
+
+    ok( node.bounds.equals( new dot.Bounds2( 0, 0, 100, 50 ) ), 'Back to normal after a big max width' );
+
+    node.scale( 2 );
+
+    ok( node.bounds.equals( new dot.Bounds2( 0, 0, 200, 100 ) ), 'Scale up should be unaffected' );
+
+    node.maxWidth = 25;
+
+    ok( node.bounds.equals( new dot.Bounds2( 0, 0, 50, 25 ) ), 'Scaled back down with both applied' );
+
+    node.maxWidth = null;
+
+    ok( node.bounds.equals( new dot.Bounds2( 0, 0, 200, 100 ) ), 'Without maxWidth' );
+
+    node.scale( 0.5 );
+
+    ok( node.bounds.equals( new dot.Bounds2( 0, 0, 100, 50 ) ), 'Back to normal' );
+
+    node.left = 50;
+
+    ok( node.bounds.equals( new dot.Bounds2( 50, 0, 150, 50 ) ), 'After a translation' );
+
+    node.maxWidth = 50;
+
+    ok( node.bounds.equals( new dot.Bounds2( 50, 0, 100, 25 ) ), 'maxWidth being applied after a translation, in local frame' );
+
+    rect.rectWidth = 200;
+
+    ok( node.bounds.equals( new dot.Bounds2( 50, 0, 100, 12.5 ) ), 'Now with a bigger rectangle' );
+
+    rect.rectWidth = 100;
+    node.maxWidth = null;
+
+    ok( node.bounds.equals( new dot.Bounds2( 50, 0, 150, 50 ) ), 'Back to a translation' );
+
+    rect.maxWidth = 50;
+
+    ok( node.bounds.equals( new dot.Bounds2( 50, 0, 100, 25 ) ), 'After maxWidth A' );
+
+    rect.maxHeight = 12.5;
+
+    ok( node.bounds.equals( new dot.Bounds2( 50, 0, 75, 12.5 ) ), 'After maxHeight A' );
+  } );
+
+  test( 'Spacers', function() {
+    var spacer = new scenery.Spacer( 100, 50, { x: 50 } );
+    ok( spacer.bounds.equals( new dot.Bounds2( 50, 0, 150, 50 ) ), 'Spacer bounds with translation' );
+
+    var hstrut = new scenery.HStrut( 100, { y: 50 } );
+    ok( hstrut.bounds.equals( new dot.Bounds2( 0, 50, 100, 50 ) ), 'HStrut bounds with translation' );
+
+    var vstrut = new scenery.VStrut( 100, { x: 50 } );
+    ok( vstrut.bounds.equals( new dot.Bounds2( 50, 0, 50, 100 ) ), 'VStrut bounds with translation' );
+
+    throws( function() {
+      spacer.addChild( new scenery.Node() );
+    }, 'No way to add children to Spacer' );
+
+    throws( function() {
+      hstrut.addChild( new scenery.Node() );
+    }, 'No way to add children to HStrut' );
+
+    throws( function() {
+      vstrut.addChild( new scenery.Node() );
+    }, 'No way to add children to VStrut' );
+  } );
+
+  test( 'Renderer Summary', function() {
+    var canvasNode = new scenery.CanvasNode( { canvasBounds: new dot.Bounds2( 0, 0, 10, 10 ) } );
+    var webglNode = new scenery.WebGLNode( { canvasBounds: new dot.Bounds2( 0, 0, 10, 10 ) } );
+    var rect = new scenery.Rectangle( 0, 0, 100, 50 );
+    var node = new scenery.Node( { children: [ canvasNode, webglNode, rect ] } );
+    var emptyNode = new scenery.Node();
+
+    ok( canvasNode._rendererSummary.isSubtreeFullyCompatible( scenery.Renderer.bitmaskCanvas ), 'CanvasNode fully compatible: Canvas' );
+    ok( !canvasNode._rendererSummary.isSubtreeFullyCompatible( scenery.Renderer.bitmaskSVG ), 'CanvasNode not fully compatible: SVG' );
+    ok( canvasNode._rendererSummary.isSubtreeContainingCompatible( scenery.Renderer.bitmaskCanvas ), 'CanvasNode partially compatible: Canvas' );
+    ok( !canvasNode._rendererSummary.isSubtreeContainingCompatible( scenery.Renderer.bitmaskSVG ), 'CanvasNode not partially compatible: SVG' );
+    ok( canvasNode._rendererSummary.isSingleCanvasSupported(), 'CanvasNode supports single Canvas' );
+    ok( !canvasNode._rendererSummary.isSingleSVGSupported(), 'CanvasNode does not support single SVG' );
+    ok( !canvasNode._rendererSummary.isNotPainted(), 'CanvasNode is painted' );
+    ok( canvasNode._rendererSummary.areBoundsValid(), 'CanvasNode has valid bounds' );
+
+    ok( webglNode._rendererSummary.isSubtreeFullyCompatible( scenery.Renderer.bitmaskWebGL ), 'WebGLNode fully compatible: WebGL' );
+    ok( !webglNode._rendererSummary.isSubtreeFullyCompatible( scenery.Renderer.bitmaskSVG ), 'WebGLNode not fully compatible: SVG' );
+    ok( webglNode._rendererSummary.isSubtreeContainingCompatible( scenery.Renderer.bitmaskWebGL ), 'WebGLNode partially compatible: WebGL' );
+    ok( !webglNode._rendererSummary.isSubtreeContainingCompatible( scenery.Renderer.bitmaskSVG ), 'WebGLNode not partially compatible: SVG' );
+    ok( !webglNode._rendererSummary.isSingleCanvasSupported(), 'WebGLNode does not support single Canvas' );
+    ok( !webglNode._rendererSummary.isSingleSVGSupported(), 'WebGLNode does not support single SVG' );
+    ok( !webglNode._rendererSummary.isNotPainted(), 'WebGLNode is painted' );
+    ok( webglNode._rendererSummary.areBoundsValid(), 'WebGLNode has valid bounds' );
+
+    ok( rect._rendererSummary.isSubtreeFullyCompatible( scenery.Renderer.bitmaskCanvas ), 'Rectangle fully compatible: Canvas' );
+    ok( rect._rendererSummary.isSubtreeFullyCompatible( scenery.Renderer.bitmaskSVG ), 'Rectangle fully compatible: SVG' );
+    ok( rect._rendererSummary.isSubtreeContainingCompatible( scenery.Renderer.bitmaskCanvas ), 'Rectangle partially compatible: Canvas' );
+    ok( rect._rendererSummary.isSubtreeContainingCompatible( scenery.Renderer.bitmaskSVG ), 'Rectangle partially compatible: SVG' );
+    ok( rect._rendererSummary.isSingleCanvasSupported(), 'Rectangle does support single Canvas' );
+    ok( rect._rendererSummary.isSingleSVGSupported(), 'Rectangle does support single SVG' );
+    ok( !rect._rendererSummary.isNotPainted(), 'Rectangle is painted' );
+    ok( rect._rendererSummary.areBoundsValid(), 'Rectangle has valid bounds' );
+
+    ok( !node._rendererSummary.isSubtreeFullyCompatible( scenery.Renderer.bitmaskCanvas ), 'Container node fully compatible: Canvas' );
+    ok( !node._rendererSummary.isSubtreeFullyCompatible( scenery.Renderer.bitmaskSVG ), 'Container node not fully compatible: SVG' );
+    ok( node._rendererSummary.isSubtreeContainingCompatible( scenery.Renderer.bitmaskCanvas ), 'Container node partially compatible: Canvas' );
+    ok( node._rendererSummary.isSubtreeContainingCompatible( scenery.Renderer.bitmaskSVG ), 'Container node partially compatible: SVG' );
+    ok( !node._rendererSummary.isSingleCanvasSupported(), 'Container node does not support single Canvas' );
+    ok( !node._rendererSummary.isSingleSVGSupported(), 'Container node does not support single SVG' );
+    ok( !node._rendererSummary.isNotPainted(), 'Container node is painted' );
+    ok( node._rendererSummary.areBoundsValid(), 'Container node has valid bounds' );
+
+    ok( emptyNode._rendererSummary.isSubtreeFullyCompatible( scenery.Renderer.bitmaskCanvas ), 'Empty node fully compatible: Canvas' );
+    ok( emptyNode._rendererSummary.isSubtreeFullyCompatible( scenery.Renderer.bitmaskSVG ), 'Empty node fully compatible: SVG' );
+    ok( !emptyNode._rendererSummary.isSubtreeContainingCompatible( scenery.Renderer.bitmaskCanvas ), 'Empty node partially compatible: Canvas' );
+    ok( !emptyNode._rendererSummary.isSubtreeContainingCompatible( scenery.Renderer.bitmaskSVG ), 'Empty node partially compatible: SVG' );
+    ok( emptyNode._rendererSummary.isSingleCanvasSupported(), 'Empty node supports single Canvas' );
+    ok( emptyNode._rendererSummary.isSingleSVGSupported(), 'Empty node supports single SVG' );
+    ok( emptyNode._rendererSummary.isNotPainted(), 'Empty node is not painted' );
+    ok( emptyNode._rendererSummary.areBoundsValid(), 'Empty node has valid bounds' );
   } );
 })();

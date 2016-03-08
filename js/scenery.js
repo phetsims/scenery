@@ -1,4 +1,4 @@
-// Copyright 2002-2014, University of Colorado Boulder
+// Copyright 2013-2015, University of Colorado Boulder
 
 /**
  * The main 'scenery' namespace object for the exported (non-Require.js) API. Used internally
@@ -13,85 +13,107 @@
 define( function( require ) {
   'use strict';
 
+  var Namespace = require( 'PHET_CORE/Namespace' );
+  var extend = require( 'PHET_CORE/extend' );
+
+  // @public (scenery-internal)
   window.sceneryLog = null;
-  window.sceneryEventLog = null;
   window.sceneryAccessibilityLog = null;
 
-  // object allocation tracking
+  // Initialize object allocation tracking, if it hasn't been already.
   window.phetAllocation = require( 'PHET_CORE/phetAllocation' );
-
-  // workaround for Axon, since it needs window.arch to be defined
-  window.arch = window.arch || null;
 
   var scratchCanvas = document.createElement( 'canvas' );
   var scratchContext = scratchCanvas.getContext( '2d' );
 
   var logPadding = '';
 
+  var scenery = new Namespace( 'scenery' );
+
+  // @public - A Canvas and 2D Canvas context used for convenience functions (think of it as having arbitrary state).
+  scenery.register( 'scratchCanvas', scratchCanvas );
+  scenery.register( 'scratchContext', scratchContext );
+
+  // @public - SVG namespace, used for document.createElementNS( scenery.svgns, name );
+  scenery.register( 'svgns', 'http://www.w3.org/2000/svg' );
+
+  // @public - X-link namespace, used for SVG image URLs (xlink:href)
+  scenery.register( 'xlinkns', 'http://www.w3.org/1999/xlink' );
+
+  /*---------------------------------------------------------------------------*
+   * Logging
+   * TODO: Move this out of scenery.js if possible
+   *---------------------------------------------------------------------------*/
+
+  // @private - Scenery internal log function to be used to log to scenery.logString (does not include color/css)
+  function stringLogFunction( message ) {
+    scenery.logString += message.replace( /%c/g, '' ) + '\n';
+  }
+
+  // @private - Scenery internal log function to be used to log to the console.
+  function consoleLogFunction() {
+    // allow for the console to not exist
+    window.console && window.console.log && window.console.log.apply( window.console, Array.prototype.slice.call( arguments, 0 ) );
+  }
+
+  // @private - List of Scenery's loggers, with their display name and (if using console) the display style.
+  var logProperties = {
+    dirty: { name: 'dirty', style: 'color: #aaa;' },
+    bounds: { name: 'bounds', style: 'color: #aaa;' },
+    hitTest: { name: 'hitTest', style: 'color: #aaa;' },
+    PerfCritical: { name: 'Perf', style: 'color: #f00;' },
+    PerfMajor: { name: 'Perf', style: 'color: #aa0;' },
+    PerfMinor: { name: 'Perf', style: 'color: #088;' },
+    PerfVerbose: { name: 'Perf', style: 'color: #888;' },
+    Cursor: { name: 'Cursor', style: 'color: #000;' },
+    Stitch: { name: 'Stitch', style: 'color: #000;' },
+    StitchDrawables: { name: 'Stitch', style: 'color: #000;' },
+    GreedyStitcher: { name: 'Greedy', style: 'color: #088;' },
+    GreedyVerbose: { name: 'Greedy', style: 'color: #888;' },
+    RelativeTransform: { name: 'RelativeTransform', style: 'color: #606;' },
+    BackboneDrawable: { name: 'Backbone', style: 'color: #a00;' },
+    CanvasBlock: { name: 'Canvas', style: 'color: #000;' },
+    WebGLBlock: { name: 'WebGL', style: 'color: #000;' },
+    Display: { name: 'Display', style: 'color: #000;' },
+    DOMBlock: { name: 'DOM', style: 'color: #000;' },
+    Drawable: { name: '', style: 'color: #000;' },
+    FittedBlock: { name: 'FittedBlock', style: 'color: #000;' },
+    Input: { name: 'Input', style: 'color: #000;' },
+    InputEvent: { name: 'InputEvent', style: 'color: #000;' },
+    Instance: { name: 'Instance', style: 'color: #000;' },
+    InstanceTree: { name: 'InstanceTree', style: 'color: #000;' },
+    ChangeInterval: { name: 'ChangeInterval', style: 'color: #0a0;' },
+    SVGBlock: { name: 'SVG', style: 'color: #000;' },
+    SVGGroup: { name: 'SVGGroup', style: 'color: #000;' },
+    ImageSVGDrawable: { name: 'ImageSVGDrawable', style: 'color: #000;' },
+    Paints: { name: 'Paints', style: 'color: #000;' },
+    Accessibility: { name: 'Accessibility', style: 'color: #000;' },
+    AccessibleInstance: { name: 'AccessibleInstance', style: 'color: #000;' }
+  };
+
   // will be filled in by other modules
-  var scenery = {
-    assert: assert,
-
-    scratchCanvas: scratchCanvas,   // a canvas used for convenience functions (think of it as having arbitrary state)
-    scratchContext: scratchContext, // a context used for convenience functions (think of it as having arbitrary state)
-
-    svgns: 'http://www.w3.org/2000/svg',     // svg namespace
-    xlinkns: 'http://www.w3.org/1999/xlink', // x-link namespace
-
+  extend( scenery, {
+    // @public - Scenery log string (accumulated if switchLogToString() is used).
     logString: '',
 
+    // @private - Scenery internal log function (switchable implementation, the main reference)
     logFunction: function() {
       // allow for the console to not exist
       window.console && window.console.log && window.console.log.apply( window.console, Array.prototype.slice.call( arguments, 0 ) );
     },
 
-    // so it can be switched
-    consoleLogFunction: function() {
-      // allow for the console to not exist
-      window.console && window.console.log && window.console.log.apply( window.console, Array.prototype.slice.call( arguments, 0 ) );
-    },
+    // @public - Switches Scenery's logging to print to the developer console.
     switchLogToConsole: function() {
-      scenery.logFunction = scenery.consoleLogFunction;
+      scenery.logFunction = consoleLogFunction;
     },
 
-    stringLogFunction: function( message ) {
-      scenery.logString += message.replace( /%c/g, '' ) + '\n';
-    },
+    // @public - Switches Scenery's logging to append to scenery.logString
     switchLogToString: function() {
       window.console && window.console.log( 'switching to string log' );
-      scenery.logFunction = scenery.stringLogFunction;
+      scenery.logFunction = stringLogFunction;
     },
 
-    logProperties: {
-      dirty: { name: 'dirty', style: 'color: #aaa;' },
-      bounds: { name: 'bounds', style: 'color: #aaa;' },
-      hitTest: { name: 'hitTest', style: 'color: #aaa;' },
-      PerfCritical: { name: 'Perf', style: 'color: #f00;' },
-      PerfMajor: { name: 'Perf', style: 'color: #aa0;' },
-      PerfMinor: { name: 'Perf', style: 'color: #088;' },
-      PerfVerbose: { name: 'Perf', style: 'color: #888;' },
-      Cursor: { name: 'Cursor', style: 'color: #000;' },
-      Stitch: { name: 'Stitch', style: 'color: #000;' },
-      StitchDrawables: { name: 'Stitch', style: 'color: #000;' },
-      GreedyStitcher: { name: 'Greedy', style: 'color: #088;' },
-      GreedyVerbose: { name: 'Greedy', style: 'color: #888;' },
-      RelativeTransform: { name: 'transform', style: 'color: #606;' },
-      BackboneDrawable: { name: 'Backbone', style: 'color: #a00;' },
-      CanvasBlock: { name: 'Canvas', style: 'color: #000;' },
-      WebGLBlock: { name: 'WebGL', style: 'color: #000;' },
-      Display: { name: 'Display', style: 'color: #000;' },
-      DOMBlock: { name: 'DOM', style: 'color: #000;' },
-      Drawable: { name: '', style: 'color: #000;' },
-      FittedBlock: { name: 'FittedBlock', style: 'color: #000;' },
-      Input: { name: 'Input', style: 'color: #000;' },
-      Instance: { name: 'Instance', style: 'color: #000;' },
-      InstanceTree: { name: 'InstanceTree', style: 'color: #000;' },
-      ChangeInterval: { name: 'ChangeInterval', style: 'color: #0a0;' },
-      SVGBlock: { name: 'SVG', style: 'color: #000;' },
-      SVGGroup: { name: 'SVGGroup', style: 'color: #000;' },
-      ImageSVGDrawable: { name: 'ImageSVGDrawable', style: 'color: #000;' },
-      Paints: { name: 'Paints', style: 'color: #000;' }
-    },
+    // @public - Enables a specific single logger, OR a composite logger ('stitch'/'perf')
     enableIndividualLog: function( name ) {
       if ( name === 'stitch' ) {
         this.enableIndividualLog( 'Stitch' );
@@ -110,23 +132,32 @@ define( function( require ) {
       }
 
       if ( name ) {
-        assert && assert( scenery.logProperties[ name ],
+        assert && assert( logProperties[ name ],
           'Unknown logger: ' + name + ', please use periods (.) to separate different log names' );
 
         window.sceneryLog[ name ] = window.sceneryLog[ name ] || function( ob, styleOverride ) {
-          var data = scenery.logProperties[ name ];
+            var data = logProperties[ name ];
 
-          var prefix = data.name ? '[' + data.name + '] ' : '';
-          var padStyle = 'color: #ddd;';
-          scenery.logFunction( '%c' + logPadding + '%c' + prefix + ob, padStyle, styleOverride ? styleOverride : data.style );
-        };
+            var prefix = data.name ? '[' + data.name + '] ' : '';
+            var padStyle = 'color: #ddd;';
+            scenery.logFunction( '%c' + logPadding + '%c' + prefix + ob, padStyle, styleOverride ? styleOverride : data.style );
+          };
       }
     },
+
+    // @public - Disables a specific log. TODO: handle stitch and perf composite loggers
     disableIndividualLog: function( name ) {
       if ( name ) {
         delete window.sceneryLog[ name ];
       }
     },
+
+    /**
+     * Enables multiple loggers.
+     * @public
+     *
+     * @param {Array.<string>} logNames - keys from logProperties
+     */
     enableLogging: function( logNames ) {
       if ( !logNames ) {
         logNames = [ 'stitch' ];
@@ -146,53 +177,17 @@ define( function( require ) {
       }
     },
 
+    // @public - Disables Scenery logging
     disableLogging: function() {
       window.sceneryLog = null;
     },
 
+    // @public (scenery-internal) - Whether performance logging is active (may actually reduce performance)
     isLoggingPerformance: function() {
       return window.sceneryLog.PerfCritical || window.sceneryLog.PerfMajor ||
              window.sceneryLog.PerfMinor || window.sceneryLog.PerfVerbose;
-    },
-
-    enableEventLogging: function() {
-      window.sceneryEventLog = function( ob ) { scenery.logFunction( ob ); };
-    },
-
-    disableEventLogging: function() {
-      window.sceneryEventLog = null;
-    },
-
-    enableAccessibilityLogging: function() {
-      window.sceneryAccessibilityLog = function( ob ) { scenery.logFunction( ob ); };
-    },
-
-    disableAccessibilityLogging: function() {
-      window.sceneryAccessibilityLog = null;
-    },
-
-    //OHTWO TODO: remove duplication between here and Renderer?
-    bitmaskAll: 0xFFFFFFF, // 28 bits for now (don't go over 31 bits, or we'll see a 32-bit platform slowdown!)
-    bitmaskNodeDefault: 0x00003FF,
-    bitmaskPaintedDefault: 0x0000200, // bounds valid, no renderer set
-    bitmaskRendererArea: 0x00000FF,
-
-    // NOTE! If these are changed, please examine flags included in Renderer.js to make sure there are no conflicts (we use the same bitmask space)
-    bitmaskSupportsCanvas: 0x0000001,
-    bitmaskSupportsSVG: 0x0000002,
-    bitmaskSupportsDOM: 0x0000004,
-    bitmaskSupportsWebGL: 0x0000008,
-    bitmaskSupportsPixi: 0x0000010,
-    // 20, 40, 80 reserved for future renderers
-    bitmaskNotPainted: 0x0000100,
-    bitmaskBoundsValid: 0x0000200  // i.e. painted area will not spill outside of bounds
-    // TODO: what else would we need?
-  };
-
-  // store a reference on the PhET namespace if it exists
-  if ( window.phet ) {
-    window.phet.scenery = scenery;
-  }
+    }
+  } );
 
   return scenery;
 } );

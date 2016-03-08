@@ -3,14 +3,15 @@
 <head>
   <meta charset="utf-8"/>
   <meta http-equiv="X-UA-Compatible" content="IE=edge"/>
-  <meta name="viewport" content="width=device-width, height=device-height, initial-scale=1.0, maximum-scale=1.0, user-scalable=no"/>
+  <meta name="viewport"
+        content="width=device-width, height=device-height, initial-scale=1.0, maximum-scale=1.0, user-scalable=no"/>
   <meta name="apple-mobile-web-app-capable" content="yes">
 
   <title>Hello World - Scenery Example</title>
 
   <!-- jQuery and lodash are dependencies -->
-  <script src="../../sherpa/jquery-2.1.0.min.js"></script>
-  <script src="../../sherpa/lodash-2.4.1.min.js"></script>
+  <script src="../../sherpa/lib/jquery-2.1.0.min.js"></script>
+  <script src="../../sherpa/lib/lodash-2.4.1.min.js"></script>
 
   <script src="../build/development/scenery.js"></script>
 
@@ -41,7 +42,7 @@
       canvasBounds: this.shape.bounds
     }, options ) );
   }
-  var TriangleNode = core.inherit( scenery.WebGLNode, TriangleNode, {
+  var TriangleNode = phetCore.inherit( scenery.WebGLNode, TriangleNode, {
     initializeWebGLDrawable: function( drawable ) {
       var gl = drawable.gl;
 
@@ -83,12 +84,12 @@
 
       drawable.vertexBuffer = gl.createBuffer();
 
-      var points = this.shape.subpaths[0].points;
+      var points = this.shape.subpaths[ 0 ].points;
       gl.bindBuffer( gl.ARRAY_BUFFER, drawable.vertexBuffer );
       gl.bufferData( gl.ARRAY_BUFFER, new Float32Array( [
-        points[0].x, points[0].y, 0.2,
-        points[1].x, points[1].y, 0.2,
-        points[2].x, points[2].y, 0.2
+        points[ 0 ].x, points[ 0 ].y, 0.2,
+        points[ 1 ].x, points[ 1 ].y, 0.2,
+        points[ 2 ].x, points[ 2 ].y, 0.2
       ] ), gl.STATIC_DRAW );
 
       drawable.colorBuffer = gl.createBuffer();
@@ -107,7 +108,7 @@
 
       shaderProgram.use();
 
-      gl.uniformMatrix3fv( shaderProgram.uniformLocations.uModelViewMatrix, false, new Float32Array( matrix.entries ) );
+      gl.uniformMatrix3fv( shaderProgram.uniformLocations.uModelViewMatrix, false, matrix.entries );
       gl.uniformMatrix3fv( shaderProgram.uniformLocations.uProjectionMatrix, false, drawable.webGLBlock.projectionMatrixArray );
 
       gl.bindBuffer( gl.ARRAY_BUFFER, drawable.vertexBuffer );

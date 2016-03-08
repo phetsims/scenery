@@ -1,0 +1,92 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8"/>
+  <meta http-equiv="X-UA-Compatible" content="IE=edge"/>
+
+  <title>Context caching</title>
+
+  <style>
+    canvas {
+      border: 1px solid black;
+    }
+  </style>
+</head>
+<body>
+
+<canvas id="canvas" width="512" height="512"></canvas>
+
+<div id="div"></div>
+
+<script type="text/javascript">
+
+  var fastCost = 0; // running without ever setting style
+  var checkCost = 0; // running by handling style check on our side
+  var styleCost = 0; // running by always setting style
+
+  var canvas = document.getElementById( 'canvas' );
+  var context = canvas.getContext( '2d' );
+
+  context.fillStyle = 'blue';
+
+  var count = 0;
+
+  var ob = {
+    fillStyle: null
+  };
+
+  (function step(){
+    requestAnimationFrame( step );
+
+    var i = 0;
+
+    if ( count % 3 === 0 ) {
+      var beforeFast = Date.now();
+      for ( i = 0; i < 200000; i++ ) {
+        context.fillRect( 0, 0, 32, 32 );
+      }
+      var afterFast = Date.now();
+
+      if ( count >= 12 ) {
+        fastCost += afterFast - beforeFast;
+      }
+    }
+    else if ( count % 3 === 1 ) {
+      var beforeCheck = Date.now();
+      for ( i = 0; i < 200000; i++ ) {
+        if ( ob.fillStyle !== 'red' ) {
+          ob.fillStyle = 'red';
+          context.fillStyle = 'red';
+        }
+        context.fillRect( 0, 0, 32, 32 );
+      }
+      var afterCheck = Date.now();
+
+      if ( count >= 12 ) {
+        checkCost += afterCheck - beforeCheck;
+      }
+    }
+    else if ( count % 3 === 2 ) {
+      var beforeStyle = Date.now();
+      for ( i = 0; i < 200000; i++ ) {
+        context.fillStyle = 'red';
+        context.fillRect( 0, 0, 32, 32 );
+      }
+      var afterStyle = Date.now();
+
+      if ( count >= 12 ) {
+        styleCost += afterStyle - beforeStyle;
+      }
+
+      document.getElementById( 'div' ).innerHTML =
+        'fast: ' + ( fastCost * 3 / count ).toFixed( 2 ) +
+        ', check: ' + ( checkCost * 3 / count ).toFixed( 2 ) +
+        ', style: ' + ( styleCost * 3 / count ).toFixed( 2 );
+    }
+    count++;
+  })();
+
+</script>
+
+</body>
+</html>

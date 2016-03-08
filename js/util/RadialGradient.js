@@ -1,4 +1,4 @@
-// Copyright 2002-2014, University of Colorado Boulder
+// Copyright 2013-2015, University of Colorado Boulder
 
 
 /**
@@ -19,7 +19,7 @@ define( function( require ) {
   var Gradient = require( 'SCENERY/util/Gradient' );
 
   // TODO: support Vector2s for p0 and p1
-  scenery.RadialGradient = function RadialGradient( x0, y0, r0, x1, y1, r1 ) {
+  function RadialGradient( x0, y0, r0, x1, y1, r1 ) {
     this.start = new Vector2( x0, y0 );
     this.end = new Vector2( x1, y1 );
     this.startRadius = r0;
@@ -38,8 +38,9 @@ define( function( require ) {
 
     // use the global scratch canvas instead of creating a new Canvas
     Gradient.call( this, scenery.scratchContext.createRadialGradient( x0, y0, r0, x1, y1, r1 ) );
-  };
-  var RadialGradient = scenery.RadialGradient;
+  }
+
+  scenery.register( 'RadialGradient', RadialGradient );
 
   inherit( Gradient, RadialGradient, {
 
@@ -83,6 +84,10 @@ define( function( require ) {
         // TODO: store color in our stops array, so we don't have to create additional objects every time?
         var stopElement = document.createElementNS( scenery.svgns, 'stop' );
         stopElement.setAttribute( 'offset', ratio );
+        // Since SVG doesn't support parsing scientific notation (e.g. 7e5), we need to output fixed decimal-point strings.
+        // Since this needs to be done quickly, and we don't particularly care about slight rounding differences (it's
+        // being used for display purposes only, and is never shown to the user), we use the built-in JS toFixed instead of
+        // Dot's version of toFixed. See https://github.com/phetsims/kite/issues/50
         stopElement.setAttribute( 'style', 'stop-color: ' + stop.color.withAlpha( 1 ).toCSS() + '; stop-opacity: ' + stop.color.a.toFixed( 20 ) + ';' );
         definition.appendChild( stopElement );
       }

@@ -1,4 +1,4 @@
-// Copyright 2002-2014, University of Colorado Boulder
+// Copyright 2014-2015, University of Colorado Boulder
 
 
 /**
@@ -121,7 +121,7 @@ define( function( require ) {
 
       var drawable = firstDrawable;
 
-      while ( true ) {
+      while ( true ) { //eslint-disable-line no-constant-condition
         var nextDrawable = drawable.nextDrawable;
 
         // first comparison also does null check when necessary
@@ -322,7 +322,7 @@ define( function( require ) {
         var isFirst = true;
 
         // separate our new-drawable linked-list into sub-blocks that we will process individually
-        while ( true ) {
+        while ( true ) { //eslint-disable-line no-constant-condition
           var nextDrawable = drawable.nextDrawable;
           var isLast = nextDrawable === interval.drawableAfter;
 
@@ -720,9 +720,10 @@ define( function( require ) {
     }
   };
 
-  var GreedyStitcher = scenery.GreedyStitcher = inherit( Stitcher, function GreedyStitcher() {
+  var GreedyStitcher = inherit( Stitcher, function GreedyStitcher() {
     // nothing done
   }, prototype );
+  scenery.register( 'GreedyStitcher', GreedyStitcher );
 
   GreedyStitcher.stitchPrototype = prototype;
 

@@ -1,4 +1,4 @@
-// Copyright 2002-2014, University of Colorado Boulder
+// Copyright 2013-2014, University of Colorado Boulder
 
 
 /**
@@ -17,7 +17,7 @@ define( function( require ) {
 
   var Pointer = require( 'SCENERY/input/Pointer' ); // extends Pointer
 
-  scenery.Touch = function Touch( id, point, event ) {
+  function Touch( id, point, event ) {
     Pointer.call( this );
 
     this.id = id;
@@ -28,8 +28,9 @@ define( function( require ) {
     this.isDown = true; // touches always start down
 
     this.type = 'touch';
-  };
-  var Touch = scenery.Touch;
+  }
+
+  scenery.register( 'Touch', Touch );
 
   inherit( Pointer, Touch, {
     move: function( point, event ) {

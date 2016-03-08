@@ -1,4 +1,4 @@
-// Copyright 2002-2014, University of Colorado Boulder
+// Copyright 2013-2015, University of Colorado Boulder
 
 /**
  * DOM nodes. Currently lightweight handling
@@ -16,13 +16,13 @@ define( function( require ) {
   var scenery = require( 'SCENERY/scenery' );
 
   var Node = require( 'SCENERY/nodes/Node' ); // DOM inherits from Node
-  require( 'SCENERY/display/Renderer' );
+  var Renderer = require( 'SCENERY/display/Renderer' );
   require( 'SCENERY/util/Util' );
 
   var DOMSelfDrawable = require( 'SCENERY/display/DOMSelfDrawable' );
   var SelfDrawable = require( 'SCENERY/display/SelfDrawable' );
 
-  scenery.DOM = function DOM( element, options ) {
+  function DOM( element, options ) {
     options = options || {};
 
     this._interactive = false;
@@ -48,9 +48,10 @@ define( function( require ) {
 
     // will set the element after initializing
     Node.call( this, options );
-    this.setRendererBitmask( scenery.bitmaskBoundsValid | scenery.bitmaskSupportsDOM );
-  };
-  var DOM = scenery.DOM;
+    this.setRendererBitmask( Renderer.bitmaskDOM );
+  }
+
+  scenery.register( 'DOM', DOM );
 
   inherit( Node, DOM, {
     // we use a single DOM instance, so this flag should indicate that we don't support duplicating it
@@ -201,7 +202,7 @@ define( function( require ) {
    * DOM rendering
    *----------------------------------------------------------------------------*/
 
-  var DOMDrawable = DOM.DOMDrawable = inherit( DOMSelfDrawable, function DOMDrawable( renderer, instance ) {
+  DOM.DOMDrawable = inherit( DOMSelfDrawable, function DOMDrawable( renderer, instance ) {
     this.initialize( renderer, instance );
   }, {
     // initializes, and resets (so we can support pooled states)
@@ -224,22 +225,18 @@ define( function( require ) {
       this.setToClean();
     },
 
-    onAttach: function( node ) {
-
-    },
-
-    // release the DOM elements from the poolable visual state so they aren't kept in memory. May not be done on platforms where we have enough memory to pool these
-    onDetach: function( node ) {
-      // clear the references
-      this.domElement = null;
-    },
-
     setToClean: function() {
       this.transformDirty = false;
+    },
+
+    dispose: function() {
+      DOMSelfDrawable.prototype.dispose.call( this );
+
+      this.domElement = null;
     }
   } );
 
-  SelfDrawable.Poolable.mixin( DOMDrawable );
+  SelfDrawable.Poolable.mixin( DOM.DOMDrawable );
 
   return DOM;
 } );

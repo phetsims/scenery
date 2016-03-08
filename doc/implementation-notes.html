@@ -7,22 +7,22 @@
 
   <title>Scenery Implementation Notes</title>
 
-  <link rel="stylesheet" href="../../sherpa/bootstrap-2.2.2.css">
-  <link rel="stylesheet" href="../../sherpa/bootstrap-responsive-2.2.2.css">
-  <link rel="stylesheet" href="../../sherpa/syntaxhighlighter-3.0.83/shCore.css">
-  <link rel="stylesheet" href="../../sherpa/syntaxhighlighter-3.0.83/shThemeDefault.css">
+  <link rel="stylesheet" href="../../sherpa/lib/bootstrap-2.2.2.css">
+  <link rel="stylesheet" href="../../sherpa/lib/bootstrap-responsive-2.2.2.css">
+  <link rel="stylesheet" href="../../sherpa/lib/syntaxhighlighter-3.0.83/shCore.css">
+  <link rel="stylesheet" href="../../sherpa/lib/syntaxhighlighter-3.0.83/shThemeDefault.css">
   <link rel="stylesheet" href="../assets/scenery.css">
 
   <!-- jQuery and LoDash are dependencies -->
-  <script src="../../sherpa/jquery-2.1.0.min.js"></script>
-  <script src="../../sherpa/lodash-2.4.1.min.js"></script>
+  <script src="../../sherpa/lib/jquery-2.1.0.min.js"></script>
+  <script src="../../sherpa/lib/lodash-2.4.1.min.js"></script>
 
   <!-- For the styling -->
-  <script src="../../sherpa/bootstrap-2.2.2.js"></script>
+  <script src="../../sherpa/lib/bootstrap-2.2.2.js"></script>
 
-  <script src="../../sherpa/syntaxhighlighter-3.0.83/shCore.js"></script>
-  <script src="../../sherpa/syntaxhighlighter-3.0.83/shBrushJScript.js"></script>
-  <script src="../../sherpa/syntaxhighlighter-3.0.83/shBrushXml.js"></script>
+  <script src="../../sherpa/lib/syntaxhighlighter-3.0.83/shCore.js"></script>
+  <script src="../../sherpa/lib/syntaxhighlighter-3.0.83/shBrushJScript.js"></script>
+  <script src="../../sherpa/lib/syntaxhighlighter-3.0.83/shBrushXml.js"></script>
 
   <!-- MathJax config -->
   <script type="text/x-mathjax-config">
@@ -200,6 +200,30 @@
 
     <p style="text-align: center;">
       <img src="../assets/stitch.svg">
+    </p>
+
+    <h2>Visibility</h2>
+
+    <p>
+      Node visibility is tracked by Instances. Every frame in the pre-repaint phase (after syncTree/stitching but before
+      SVG updates and Canvas/WebGL repaints) the visibility flags (visible, relativeVisible, selfVisible) are updated
+      for every Instance (lazily, so if a subtree doesn't need updates, it won't be updated). Drawable has a visibility
+      flag for the drawable tree (if false, it and its sub-tree won't be drawn). SelfDrawable takes care of updating
+      the visibility based on the Instance's selfVisibility.
+    </p>
+
+    <p>
+      Drawables with the DOM renderer need to handle their own visibility
+      (DOMSelfDrawable takes care of it with instance.selfVisible). Drawables with the SVG renderer don't have to handle
+      visibility, each SVGGroup takes care of it. Canvas/WebGL rely on the instance/drawable visibility flags for
+      whether to render in each pass.
+    </p>
+
+    <p>
+      The excludeInvisible flag is provided to prevent drawables from an invisible subtree being included in its parent's
+      drawable list. Thus if excludeInvisible === true AND the node itself for that is invisible, its drawables will NOT
+      be included in the backbone or any blocks. If excludeInvisible === false then the drawables will be included, and
+      the above methods for handling visibility for each renderer type will be used instead.
     </p>
 
     <h2>Sequence of Operations</h2>

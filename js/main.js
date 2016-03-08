@@ -1,4 +1,4 @@
-// Copyright 2002-2014, University of Colorado Boulder
+// Copyright 2013-2015, University of Colorado Boulder
 
 /**
  * Module that includes all Scenery dependencies, so that requiring this module will return an object
@@ -13,10 +13,8 @@
 define( [
   'SCENERY/scenery',
 
-  'SCENERY/accessibility/AriaSpeech',
-  'SCENERY/accessibility/FocusCursor',
-  'SCENERY/accessibility/FocusLayer',
-  'SCENERY/accessibility/FocusRectangle',
+  'SCENERY/accessibility/AccessibleInstance',
+  'SCENERY/accessibility/AccessiblePeer',
 
   'SCENERY/debug/DebugContext',
 
@@ -29,6 +27,7 @@ define( [
   'SCENERY/display/DOMBlock',
   'SCENERY/display/DOMSelfDrawable',
   'SCENERY/display/Drawable',
+  'SCENERY/display/Fittability',
   'SCENERY/display/FittedBlock',
   'SCENERY/display/GreedyStitcher',
   'SCENERY/display/InlineCanvasCacheDrawable',
@@ -45,21 +44,12 @@ define( [
   'SCENERY/display/WebGLBlock',
   'SCENERY/display/WebGLSelfDrawable',
 
-  'SCENERY/display/webgl/ColorTriangleBufferData',
-  'SCENERY/display/webgl/ColorTriangleRenderer',
-  'SCENERY/display/webgl/SpriteSheet',
-  'SCENERY/display/webgl/SquareUnstrokedRectangle',
-  'SCENERY/display/webgl/TextureBufferData',
-  'SCENERY/display/webgl/TextureRenderer',
-  'SCENERY/display/webgl/WebGLRectangle',
-  'SCENERY/display/webgl/WebGLRenderer',
-  'SCENERY/display/webgl/WebGLUtil',
-
   'SCENERY/input/BatchedDOMEvent',
   'SCENERY/input/ButtonListener',
   'SCENERY/input/DownUpListener',
   'SCENERY/input/Event',
   'SCENERY/input/Input',
+  'SCENERY/input/Key',
   'SCENERY/input/Mouse',
   'SCENERY/input/Pen',
   'SCENERY/input/Pointer',
@@ -71,20 +61,25 @@ define( [
   'SCENERY/nodes/DOM',
   'SCENERY/nodes/HBox',
   'SCENERY/nodes/HTMLText',
+  'SCENERY/nodes/HStrut',
   'SCENERY/nodes/Image',
   'SCENERY/nodes/LayoutNode',
+  'SCENERY/nodes/Leaf',
   'SCENERY/nodes/Line',
   'SCENERY/nodes/Node',
   'SCENERY/nodes/Paintable',
   'SCENERY/nodes/Path',
-  'SCENERY/nodes/PixiNode',
   'SCENERY/nodes/Plane',
   'SCENERY/nodes/Rectangle',
+  'SCENERY/nodes/Spacer',
   'SCENERY/nodes/Text',
   'SCENERY/nodes/VBox',
+  'SCENERY/nodes/VStrut',
   'SCENERY/nodes/WebGLNode',
 
   'SCENERY/overlays/CanvasNodeBoundsOverlay',
+  'SCENERY/overlays/FittedBlockBoundsOverlay',
+  'SCENERY/overlays/FocusOverlay',
   'SCENERY/overlays/PointerAreaOverlay',
   'SCENERY/overlays/PointerOverlay',
 
@@ -101,8 +96,10 @@ define( [
   'SCENERY/util/SceneImage',
   'SCENERY/util/SceneryStyle',
   'SCENERY/util/ShaderProgram',
+  'SCENERY/util/SpriteSheet',
   'SCENERY/util/Trail',
   'SCENERY/util/TrailPointer',
+  'SCENERY/util/TransformTracker',
   'SCENERY/util/Util'
 ], function( scenery ) {
   'use strict';

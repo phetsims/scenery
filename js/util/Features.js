@@ -1,4 +1,4 @@
-// Copyright 2002-2014, University of Colorado Boulder
+// Copyright 2013-2015, University of Colorado Boulder
 
 
 /**
@@ -13,7 +13,8 @@ define( function( require ) {
   var detectPrefix = require( 'PHET_CORE/detectPrefix' );
   var scenery = require( 'SCENERY/scenery' );
 
-  var Features = scenery.Features = {};
+  var Features = {};
+  scenery.register( 'Features', Features );
 
   function supportsDataURLFormatOutput( format ) {
     try {
@@ -115,6 +116,11 @@ define( function( require ) {
   Features.touchCallout = detectPrefix( div.style, 'touchCallout' );
   Features.userDrag = detectPrefix( div.style, 'userDrag' );
   Features.tapHighlightColor = detectPrefix( div.style, 'tapHighlightColor' );
+
+  Features.fontSmoothing = detectPrefix( div.style, 'fontSmoothing' );
+
+  Features.requestAnimationFrame = detectPrefix( window, 'requestAnimationFrame' );
+  Features.cancelAnimationFrame = detectPrefix( window, 'cancelAnimationFrame' );
 
   // e.g. Features.setStyle( domElement, Features.transform, '...' ), and doesn't set it if no 'transform' attribute (prefixed or no) is found
   Features.setStyle = function( domElement, optionalKey, value ) {

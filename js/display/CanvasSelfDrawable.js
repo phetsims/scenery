@@ -1,4 +1,4 @@
-// Copyright 2002-2014, University of Colorado Boulder
+// Copyright 2013-2015, University of Colorado Boulder
 
 
 /**
@@ -15,12 +15,13 @@ define( function( require ) {
   var SelfDrawable = require( 'SCENERY/display/SelfDrawable' );
   var Paintable = require( 'SCENERY/nodes/Paintable' );
 
-  scenery.CanvasSelfDrawable = function CanvasSelfDrawable( renderer, instance ) {
+  function CanvasSelfDrawable( renderer, instance ) {
     this.initializeCanvasSelfDrawable( renderer, instance );
 
     throw new Error( 'Should use initialization and pooling' );
-  };
-  var CanvasSelfDrawable = scenery.CanvasSelfDrawable;
+  }
+
+  scenery.register( 'CanvasSelfDrawable', CanvasSelfDrawable );
 
   inherit( SelfDrawable, CanvasSelfDrawable, {
     initializeCanvasSelfDrawable: function( renderer, instance ) {
@@ -40,6 +41,23 @@ define( function( require ) {
       this.markDirty();
     },
 
+    // general flag set on the state, which we forward directly to the drawable's paint flag
+    markPaintDirty: function() {
+      this.markDirty();
+    },
+
+    update: function() {
+      this.dirty = false;
+    },
+
+    // @override
+    updateSelfVisibility: function() {
+      SelfDrawable.prototype.updateSelfVisibility.call( this );
+
+      // mark us as dirty when our self visibility changes
+      this.markDirty();
+    },
+
     dispose: function() {
       this.instance.relativeTransform.removeListener( this.transformListener );
       this.instance.relativeTransform.removePrecompute();
@@ -50,8 +68,7 @@ define( function( require ) {
 
   // methods for forwarding dirty messages
   function canvasSelfDirty() {
-    // we pass this method and it is only called with blah.call( ... ), where the 'this' reference is set. ignore jshint
-    /* jshint -W040 */
+    // we pass this method and it is only called with blah.call( ... ), where the 'this' reference is set.
     this.markDirty();
   }
 
@@ -69,27 +86,26 @@ define( function( require ) {
       initialize: function( renderer, instance ) {
         this.initializeCanvasSelfDrawable( renderer, instance );
 
-        return this; // allow for chaining
-      },
+        if ( usesPaint ) {
+          this.initializePaintableStateless( renderer, instance );
+        }
 
-      // general flag set on the state, which we forward directly to the drawable's paint flag
-      markPaintDirty: function() {
-        this.markDirty();
+        return this; // allow for chaining
       },
 
       paintCanvas: paintCanvas,
 
-      onAttach: function( node ) {
-
-      },
-
-      // release the drawable
-      onDetach: function( node ) {
-        //OHTWO TODO: are we missing the disposal?
-      },
-
       update: function() {
+        // no action directly needed for the self-drawable case, as we will be repainted in the block
         this.dirty = false;
+      },
+
+      dispose: function() {
+        CanvasSelfDrawable.prototype.dispose.call( this );
+
+        if ( usesPaint ) {
+          this.disposePaintableStateless();
+        }
       }
     } );
 

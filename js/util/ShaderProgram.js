@@ -1,4 +1,4 @@
-// Copyright 2002-2014, University of Colorado
+// Copyright 2014-2015, University of Colorado Boulder
 
 /**
  * Abstraction over the shader program
@@ -13,7 +13,7 @@ define( function( require ) {
   var scenery = require( 'SCENERY/scenery' );
   var Util = require( 'SCENERY/util/Util' );
 
-  var ShaderProgram = scenery.ShaderProgram = function ShaderProgram( gl, vertexSource, fragmentSource, options ) {
+  function ShaderProgram( gl, vertexSource, fragmentSource, options ) {
     options = _.extend( {
       attributes: [], // {Array.<string>} (vertex) attribute names in the shader source
       uniforms: [] // {Array.<string>} uniform names in the shader source
@@ -26,7 +26,9 @@ define( function( require ) {
     this.uniformNames = options.uniforms;
 
     this.initialize( gl );
-  };
+  }
+
+  scenery.register( 'ShaderProgram', ShaderProgram );
 
   return inherit( Object, ShaderProgram, {
     // initializes (or reinitializes) the WebGL state and uniform/attribute references.

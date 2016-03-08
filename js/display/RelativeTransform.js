@@ -1,4 +1,4 @@
-// Copyright 2002-2014, University of Colorado Boulder
+// Copyright 2014-2015, University of Colorado Boulder
 
 /**
  * RelativeTransform is a component of an Instance. It is responsible for tracking changes to "relative" transforms, and
@@ -92,17 +92,25 @@ define( function( require ) {
   var Matrix3 = require( 'DOT/Matrix3' );
   var scenery = require( 'SCENERY/scenery' );
 
-  scenery.RelativeTransform = function RelativeTransform() {
+  function RelativeTransform( instance ) {
+    this.instance = instance;
+  }
 
-  };
-  var RelativeTransform = scenery.RelativeTransform;
+  scenery.register( 'RelativeTransform', RelativeTransform );
 
   inherit( Object, RelativeTransform, {
-    initialize: function( instance, display, trail ) {
-      this.instance = instance;
+    /**
+     * Responsible for initialization and cleaning of this. If the parameters are both null, we'll want to clean our
+     * external references (like Instance does).
+     *
+     * @param {Display|null} display
+     * @param {Trail|null} trail
+     * @returns {RelativeTransform} - Returns this, to allow chaining.
+     */
+    initialize: function( display, trail ) {
       this.display = display;
       this.trail = trail;
-      this.node = trail.lastNode();
+      this.node = trail && trail.lastNode();
 
       // properties relevant to the node's direct transform
       this.transformDirty = true; // whether the node's transform has changed (until the pre-repaint phase)
@@ -132,15 +140,13 @@ define( function( require ) {
       // insufficient, since our traversal handling would validate our invariant of
       // this.relativeChildDirtyFrame => parent.relativeChildDirtyFrame). In this case, they are both effectively
       // "false" unless they are the current frame ID, in which case that invariant holds.
-      this.relativeChildDirtyFrame = display._frameId;
+      this.relativeChildDirtyFrame = display ? display._frameId : 0;
 
-      return this; // allow chaining
-    },
-
-    clean: function() {
       // will be notified in pre-repaint phase that our relative transform has changed (but not computed by default)
       //OHTWO TODO: should we rely on listeners removing themselves?
       this.relativeTransformListeners = cleanArray( this.relativeTransformListeners );
+
+      return this; // allow chaining
     },
 
     get parent() {
@@ -383,7 +389,7 @@ define( function( require ) {
 
     // @private, updates our matrix based on any parents, and the node's current transform
     computeRelativeTransform: function() {
-      var nodeMatrix = this.node.getTransform().getMatrix();
+      var nodeMatrix = this.node.getMatrix();
 
       if ( this.instance.parent && !this.instance.parent.isTransformed ) {
         // mutable form of parentMatrix * nodeMatrix
@@ -446,7 +452,8 @@ define( function( require ) {
         ( passTransform ? ' passTransform' : '' ) );
       sceneryLog && sceneryLog.RelativeTransform && sceneryLog.push();
 
-      var len, i;
+      var len;
+      var i;
 
       if ( passTransform ) {
         // if we are passing isTransform, just apply this to the children
@@ -519,9 +526,13 @@ define( function( require ) {
       // state is consistent
       function currentRelativeMatrix( instance ) {
         var resultMatrix = Matrix3.dirtyFromPool();
-        var nodeMatrix = instance.node.getTransform().getMatrix();
+        var nodeMatrix = instance.node.getMatrix();
 
-        if ( instance.parent && !instance.parent.isTransformed ) {
+        if ( !instance.parent ) {
+          // if our instance has no parent, ignore its transform
+          resultMatrix.set( Matrix3.IDENTITY );
+        }
+        else if ( !instance.parent.isTransformed ) {
           // mutable form of parentMatrix * nodeMatrix
           resultMatrix.set( currentRelativeMatrix( instance.parent ) );
           resultMatrix.multiplyMatrix( nodeMatrix );

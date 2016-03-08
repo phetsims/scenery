@@ -1,4 +1,4 @@
-// Copyright 2002-2014, University of Colorado Boulder
+// Copyright 2013-2015, University of Colorado Boulder
 
 
 /**
@@ -27,10 +27,11 @@ define( function( require ) {
    * @param {Instance} filterRootInstance - TODO: Documentation
    * @constructor
    */
-  scenery.SVGBlock = function SVGBlock( display, renderer, transformRootInstance, filterRootInstance ) {
+  function SVGBlock( display, renderer, transformRootInstance, filterRootInstance ) {
     this.initialize( display, renderer, transformRootInstance, filterRootInstance );
-  };
-  var SVGBlock = scenery.SVGBlock;
+  }
+
+  scenery.register( 'SVGBlock', SVGBlock );
 
   inherit( FittedBlock, SVGBlock, {
 
@@ -44,7 +45,7 @@ define( function( require ) {
      * @returns {FittedBlock}
      */
     initialize: function( display, renderer, transformRootInstance, filterRootInstance ) {
-      this.initializeFittedBlock( display, renderer, transformRootInstance );
+      this.initializeFittedBlock( display, renderer, transformRootInstance, FittedBlock.COMMON_ANCESTOR );
 
       this.filterRootInstance = filterRootInstance;
 
@@ -82,7 +83,6 @@ define( function( require ) {
       // reset what layer fitting can do (this.forceAcceleration set in fitted block initialization)
       Util.prepareForTransform( this.svg, this.forceAcceleration );
 
-      // TODO: Why are there such different ways of clearing the transform for this.svg vs this.baseTransformGroup?
       Util.unsetTransform( this.svg ); // clear out any transforms that could have been previously applied
       this.baseTransformGroup.setAttribute( 'transform', '' ); // no base transform
 
@@ -178,6 +178,9 @@ define( function( require ) {
 
       var x = this.fitBounds.minX;
       var y = this.fitBounds.minY;
+
+      assert && assert( isFinite( x ) && isFinite( y ), 'Invalid SVG transform for SVGBlock' );
+      assert && assert( this.fitBounds.isValid(), 'Invalid fitBounds' );
 
       this.baseTransformGroup.setAttribute( 'transform', 'translate(' + (-x) + ',' + (-y) + ')' ); // subtract off so we have a tight fit
       Util.setTransform( 'matrix(1,0,0,1,' + x + ',' + y + ')', this.svg, this.forceAcceleration ); // reapply the translation as a CSS transform

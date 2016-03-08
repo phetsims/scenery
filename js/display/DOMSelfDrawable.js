@@ -1,4 +1,4 @@
-// Copyright 2002-2014, University of Colorado Boulder
+// Copyright 2013-2015, University of Colorado Boulder
 
 
 /**
@@ -15,12 +15,13 @@ define( function( require ) {
   var SelfDrawable = require( 'SCENERY/display/SelfDrawable' );
   require( 'SCENERY/display/Renderer' );
 
-  scenery.DOMSelfDrawable = function DOMSelfDrawable( renderer, instance ) {
+  function DOMSelfDrawable( renderer, instance ) {
     this.initializeDOMSelfDrawable( renderer, instance );
 
     throw new Error( 'Should use initialization and pooling' );
-  };
-  var DOMSelfDrawable = scenery.DOMSelfDrawable;
+  }
+
+  scenery.register( 'DOMSelfDrawable', DOMSelfDrawable );
 
   inherit( SelfDrawable, DOMSelfDrawable, {
     initializeDOMSelfDrawable: function( renderer, instance ) {
@@ -30,8 +31,10 @@ define( function( require ) {
       // super initialization
       this.initializeSelfDrawable( renderer, instance );
 
-      this.forceAcceleration = ( renderer & scenery.Renderer.bitmaskForceAcceleration ) !== 0;
+      this.forceAcceleration = false; // TODO: for now, check to see if this is used and how to use it
       this.markTransformDirty();
+
+      this.visibilityDirty = true;
 
       // handle transform changes
       instance.relativeTransform.addListener( this.transformListener ); // when our relative tranform changes, notify us in the pre-repaint phase
@@ -58,6 +61,14 @@ define( function( require ) {
       if ( this.dirty ) {
         this.dirty = false;
         this.updateDOM();
+
+        if ( this.visibilityDirty ) {
+          this.visibilityDirty = false;
+
+          this.domElement.style.visibility = this.visible ? '' : 'hidden';
+        }
+
+        this.cleanPaintableState && this.cleanPaintableState();
       }
     },
 
@@ -66,12 +77,14 @@ define( function( require ) {
       // should generally be overridden by drawable subtypes to implement the update
     },
 
-    onAttach: function( node ) {
+    // @override
+    updateSelfVisibility: function() {
+      SelfDrawable.prototype.updateSelfVisibility.call( this );
 
-    },
-
-    onDetach: function( node ) {
-      //OHTWO TODO: are we missing the disposal?
+      if ( !this.visibilityDirty ) {
+        this.visibilityDirty = true;
+        this.markDirty();
+      }
     },
 
     dispose: function() {

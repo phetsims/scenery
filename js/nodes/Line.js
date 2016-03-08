@@ -1,4 +1,4 @@
-// Copyright 2002-2014, University of Colorado Boulder
+// Copyright 2013-2015, University of Colorado Boulder
 
 /**
  * A line that inherits Path, and allows for optimized drawing,
@@ -14,21 +14,19 @@ define( function( require ) {
 
   var inherit = require( 'PHET_CORE/inherit' );
   var scenery = require( 'SCENERY/scenery' );
-  var KiteLine = require( 'KITE/segments/Line' );
+  var KiteLine = require( 'KITE/segments/Line' ); // eslint-disable-line require-statement-match
 
   var Path = require( 'SCENERY/nodes/Path' );
   var Shape = require( 'KITE/Shape' );
+  var Bounds2 = require( 'DOT/Bounds2' );
   var Vector2 = require( 'DOT/Vector2' );
 
   var Paintable = require( 'SCENERY/nodes/Paintable' );
   var SVGSelfDrawable = require( 'SCENERY/display/SVGSelfDrawable' );
   var CanvasSelfDrawable = require( 'SCENERY/display/CanvasSelfDrawable' );
 
-  var WebGLSelfDrawable = require( 'SCENERY/display/WebGLSelfDrawable' );
   var SelfDrawable = require( 'SCENERY/display/SelfDrawable' );
-  var PixiSelfDrawable = require( 'SCENERY/display/PixiSelfDrawable' );
-  var SquareUnstrokedRectangle = require( 'SCENERY/display/webgl/SquareUnstrokedRectangle' );
-  var Color = require( 'SCENERY/util/Color' );
+  var Renderer = require( 'SCENERY/display/Renderer' );
 
   // TODO: change this based on memory and performance characteristics of the platform
   var keepSVGLineElements = true; // whether we should pool SVG elements for the SVG rendering states, or whether we should free them when possible for memory
@@ -45,7 +43,7 @@ define( function( require ) {
    * new Line( new Vector2( x1, y1 ), new Vector2( x2, y2 ), { ... } )
    * new Line( { x1: x1, y1: y1, x2: x2, y2: y2,  ... } )
    */
-  scenery.Line = function Line( x1, y1, x2, y2, options ) {
+  function Line( x1, y1, x2, y2, options ) {
     if ( typeof x1 === 'object' ) {
       if ( x1 instanceof Vector2 ) {
         // assumes Line( Vector2, Vector2, options );
@@ -77,8 +75,9 @@ define( function( require ) {
     // fallback for non-canvas or non-svg rendering, and for proper bounds computation
 
     Path.call( this, null, options );
-  };
-  var Line = scenery.Line;
+  }
+
+  scenery.register( 'Line', Line );
 
   inherit( Path, Line, {
 
@@ -166,7 +165,7 @@ define( function( require ) {
       this._shape = null;
 
       // should invalidate the path and ensure a redraw
-      this.invalidateShape();
+      this.invalidatePath();
     },
 
     containsPointSelf: function( point ) {
@@ -188,7 +187,56 @@ define( function( require ) {
     },
 
     computeShapeBounds: function() {
-      return Path.prototype.computeShapeBounds.call( this );
+      // optimized form for a single line segment (no joins, just two caps)
+      if ( this._stroke ) {
+        var lineCap = this.getLineCap();
+        var halfLineWidth = this.getLineWidth() / 2;
+        if ( lineCap === 'round' ) {
+          // we can simply dilate by half the line width
+          return new Bounds2(
+            Math.min( this._x1, this._x2 ) - halfLineWidth, Math.min( this._y1, this._y2 ) - halfLineWidth,
+            Math.max( this._x1, this._x2 ) + halfLineWidth, Math.max( this._y1, this._y2 ) + halfLineWidth );
+        }
+        else {
+          // (dx,dy) is a vector p2-p1
+          var dx = this._x2 - this._x1;
+          var dy = this._y2 - this._y1;
+          var magnitude = Math.sqrt( dx * dx + dy * dy );
+          if ( magnitude === 0 ) {
+            // if our line is a point, just dilate by halfLineWidth
+            return new Bounds2( this._x1 - halfLineWidth, this._y1 - halfLineWidth, this._x2 + halfLineWidth, this._y2 + halfLineWidth );
+          }
+          // (sx,sy) is a vector with a magnitude of halfLineWidth pointed in the direction of (dx,dy)
+          var sx = halfLineWidth * dx / magnitude;
+          var sy = halfLineWidth * dy / magnitude;
+          var bounds = Bounds2.NOTHING.copy();
+
+          if ( lineCap === 'butt' ) {
+            // four points just using the perpendicular stroked offsets (sy,-sx) and (-sy,sx)
+            bounds.addCoordinates( this._x1 - sy, this._y1 + sx );
+            bounds.addCoordinates( this._x1 + sy, this._y1 - sx );
+            bounds.addCoordinates( this._x2 - sy, this._y2 + sx );
+            bounds.addCoordinates( this._x2 + sy, this._y2 - sx );
+          }
+          else {
+            assert && assert( lineCap === 'square' );
+
+            // four points just using the perpendicular stroked offsets (sy,-sx) and (-sy,sx) and parallel stroked offsets
+            bounds.addCoordinates( this._x1 - sx - sy, this._y1 - sy + sx );
+            bounds.addCoordinates( this._x1 - sx + sy, this._y1 - sy - sx );
+            bounds.addCoordinates( this._x2 + sx - sy, this._y2 + sy + sx );
+            bounds.addCoordinates( this._x2 + sx + sy, this._y2 + sy - sx );
+          }
+          return bounds;
+        }
+      }
+      else {
+        // It might have a fill? Just include the fill bounds for now.
+        var fillBounds = Bounds2.NOTHING.copy();
+        fillBounds.addCoordinates( this._x1, this._y1 );
+        fillBounds.addCoordinates( this._x2, this._y2 );
+        return fillBounds;
+      }
     },
 
     createSVGDrawable: function( renderer, instance ) {
@@ -203,10 +251,6 @@ define( function( require ) {
       return Line.LineWebGLDrawable.createFromPool( renderer, instance );
     },
 
-    createPixiDrawable: function( renderer, instance ) {
-      return Line.LinePixiDrawable.createFromPool( renderer, instance );
-    },
-
     getBasicConstructor: function( propLines ) {
       return 'new scenery.Line( ' + this._x1 + ', ' + this._y1 + ', ' + this._x1 + ', ' + this._y1 + ', {' + propLines + '} )';
     },
@@ -217,7 +261,7 @@ define( function( require ) {
       }
       else {
         // probably called from the Path constructor
-        this.invalidateShape();
+        this.invalidatePath();
       }
     },
 
@@ -235,7 +279,7 @@ define( function( require ) {
     // A line does not render its fill, so it supports all renderers.  Right?
     // - SR, 2014
     getFillRendererBitmask: function() {
-      return scenery.bitmaskSupportsCanvas | scenery.bitmaskSupportsSVG | scenery.bitmaskSupportsDOM | scenery.bitmaskSupportsWebGL | scenery.bitmaskSupportsPixi;
+      return Renderer.bitmaskCanvas | Renderer.bitmaskSVG | Renderer.bitmaskDOM;
     }
 
   } );
@@ -288,7 +332,7 @@ define( function( require ) {
       var proto = drawableType.prototype;
 
       // initializes, and resets (so we can support pooled states)
-      proto.initializeState = function() {
+      proto.initializeState = function( renderer, instance ) {
         this.paintDirty = true; // flag that is marked if ANY "paint" dirty flag is set (basically everything except for transforms, so we can accelerated the transform-only case)
         this.dirtyX1 = true;
         this.dirtyY1 = true;
@@ -296,9 +340,13 @@ define( function( require ) {
         this.dirtyY2 = true;
 
         // adds fill/stroke-specific flags and state
-        this.initializePaintableState();
+        this.initializePaintableState( renderer, instance );
 
         return this; // allow for chaining
+      };
+
+      proto.disposeState = function() {
+        this.disposePaintableState();
       };
 
       // catch-all dirty, if anything that isn't a transform is marked as dirty
@@ -353,8 +401,6 @@ define( function( require ) {
         this.dirtyY1 = false;
         this.dirtyX2 = false;
         this.dirtyY2 = false;
-
-        this.cleanPaintableState();
       };
 
       Paintable.PaintableStatefulDrawable.mixin( drawableType );
@@ -417,47 +463,62 @@ define( function( require ) {
    * SVG Rendering
    *----------------------------------------------------------------------------*/
 
-  Line.LineSVGDrawable = SVGSelfDrawable.createDrawable( {
-    type: function LineSVGDrawable( renderer, instance ) { this.initialize( renderer, instance ); },
-    stateType: Line.LineStatefulDrawable.mixin,
+  Line.LineSVGDrawable = function LineSVGDrawable( renderer, instance ) {
+    this.initialize( renderer, instance );
+  };
+  inherit( SVGSelfDrawable, Line.LineSVGDrawable, {
     initialize: function( renderer, instance ) {
+      this.initializeSVGSelfDrawable( renderer, instance, true, keepSVGLineElements ); // usesPaint: true
+
       if ( !this.svgElement ) {
         this.svgElement = document.createElementNS( scenery.svgns, 'line' );
       }
+
+      return this;
     },
-    updateSVG: function( node, line ) {
+
+    updateSVGSelf: function() {
+      var line = this.svgElement;
+
       if ( this.dirtyX1 ) {
-        line.setAttribute( 'x1', node._x1 );
+        line.setAttribute( 'x1', this.node._x1 );
       }
       if ( this.dirtyY1 ) {
-        line.setAttribute( 'y1', node._y1 );
+        line.setAttribute( 'y1', this.node._y1 );
       }
       if ( this.dirtyX2 ) {
-        line.setAttribute( 'x2', node._x2 );
+        line.setAttribute( 'x2', this.node._x2 );
       }
       if ( this.dirtyY2 ) {
-        line.setAttribute( 'y2', node._y2 );
+        line.setAttribute( 'y2', this.node._y2 );
       }
 
       this.updateFillStrokeStyle( line );
-    },
-    usesPaint: true,
-    keepElements: keepSVGLineElements
+    }
   } );
+  Line.LineStatefulDrawable.mixin( Line.LineSVGDrawable );
+  SelfDrawable.Poolable.mixin( Line.LineSVGDrawable );
 
   /*---------------------------------------------------------------------------*
    * Canvas rendering
    *----------------------------------------------------------------------------*/
 
-  Line.LineCanvasDrawable = CanvasSelfDrawable.createDrawable( {
-    type: function LineCanvasDrawable( renderer, instance ) { this.initialize( renderer, instance ); },
-    paintCanvas: function paintCanvasLine( wrapper, node ) {
+  Line.LineCanvasDrawable = function LineCanvasDrawable( renderer, instance ) {
+    this.initialize( renderer, instance );
+  };
+  inherit( CanvasSelfDrawable, Line.LineCanvasDrawable, {
+    initialize: function( renderer, instance ) {
+      this.initializeCanvasSelfDrawable( renderer, instance );
+      this.initializePaintableStateless( renderer, instance );
+      return this;
+    },
+
+    paintCanvas: function( wrapper, node ) {
       var context = wrapper.context;
 
       context.beginPath();
       context.moveTo( node._x1, node._y1 );
       context.lineTo( node._x2, node._y2 );
-      context.closePath();
 
       if ( node._stroke ) {
         node.beforeCanvasStroke( wrapper ); // defined in Paintable
@@ -465,141 +526,23 @@ define( function( require ) {
         node.afterCanvasStroke( wrapper ); // defined in Paintable
       }
     },
-    usesPaint: true,
-    dirtyMethods: [ 'markDirtyX1', 'markDirtyY1', 'markDirtyX2', 'markDirtyY2' ]
-  } );
 
-
-  /*---------------------------------------------------------------------------*
-   * WebGL rendering
-   *----------------------------------------------------------------------------*/
-
-  Line.LineWebGLDrawable = inherit( WebGLSelfDrawable, function LineWebGLDrawable( renderer, instance ) {
-    this.initialize( renderer, instance );
-  }, {
-    // called either from the constructor or from pooling
-    initialize: function( renderer, instance ) {
-      this.initializeWebGLSelfDrawable( renderer, instance );
-    },
-
-    initializeContext: function( webglBlock ) {
-      this.webglBlock = webglBlock;
-      this.rectangleHandle = new SquareUnstrokedRectangle( webglBlock.webGLRenderer.colorTriangleRenderer, this.node, 0.5 );
-
-      // cleanup old vertexBuffer, if applicable
-      this.disposeWebGLBuffers();
-
-      this.initializePaintableState();
-      this.updateLine();
-
-      //TODO: Update the state in the buffer arrays
-    },
-
-    //Nothing necessary since everything currently handled in the uModelViewMatrix below
-    //However, we may switch to dynamic draw, and handle the matrix change only where necessary in the future?
-    updateLine: function() {
-
-      // TODO: a way to update the ColorTriangleBufferData.
-
-      // TODO: move to PaintableWebGLState???
-      if ( this.dirtyFill ) {
-        this.color = Color.toColor( this.node._fill || 'red' );
-        this.cleanPaintableState();
-      }
-      this.rectangleHandle.update();
-
-      // TODO: Batch these updates?
-      this.webglBlock.webGLRenderer.colorTriangleRenderer.updateTriangleBuffer( this.rectangleHandle );
-    },
-
-    render: function( shaderProgram ) {
-      // This is handled by the ColorTriangleRenderer
-    },
+    // stateless dirty methods:
+    markDirtyLine: function() { this.markPaintDirty(); },
+    markDirtyP1: function() { this.markPaintDirty(); },
+    markDirtyP2: function() { this.markPaintDirty(); },
+    markDirtyX1: function() { this.markPaintDirty(); },
+    markDirtyY1: function() { this.markPaintDirty(); },
+    markDirtyX2: function() { this.markPaintDirty(); },
+    markDirtyY2: function() { this.markPaintDirty(); },
 
     dispose: function() {
-      this.disposeWebGLBuffers();
-
-      // super
-      WebGLSelfDrawable.prototype.dispose.call( this );
-    },
-
-    disposeWebGLBuffers: function() {
-      this.webglBlock.webGLRenderer.colorTriangleRenderer.colorTriangleBufferData.dispose( this.rectangleHandle );
-    },
-
-    markDirtyLine: function() {
-      this.markDirty();
-    },
-
-    markDirtyX1: function() {
-      this.markDirty();
-    },
-    markDirtyY1: function() {
-      this.markDirty();
-    },
-    markDirtyX2: function() {
-      this.markDirty();
-    },
-    markDirtyY2: function() {
-      this.markDirty();
-    },
-
-    // general flag set on the state, which we forward directly to the drawable's paint flag
-    markPaintDirty: function() {
-      this.markDirty();
-    },
-
-    onAttach: function( node ) {
-
-    },
-
-    // release the drawable
-    onDetach: function( node ) {
-      //OHTWO TODO: are we missing the disposal?
-    },
-
-    //TODO: Make sure all of the dirty flags make sense here.  Should we be using fillDirty, paintDirty, dirty, etc?
-    update: function() {
-      if ( this.dirty ) {
-        this.updateLine();
-        this.dirty = false;
-      }
+      CanvasSelfDrawable.prototype.dispose.call( this );
+      this.disposePaintableStateless();
     }
   } );
-
-  // include stubs (stateless) for marking dirty stroke and fill (if necessary). we only want one dirty flag, not multiple ones, for WebGL (for now)
-  Paintable.PaintableStatefulDrawable.mixin( Line.LineWebGLDrawable );
-
-  // set up pooling
-  SelfDrawable.Poolable.mixin( Line.LineWebGLDrawable );
-
-  /*---------------------------------------------------------------------------*
-   * Pixi Rendering
-   *----------------------------------------------------------------------------*/
-
-  Line.LinePixiDrawable = PixiSelfDrawable.createDrawable( {
-    type: function LinePixiDrawable( renderer, instance ) { this.initialize( renderer, instance ); },
-    stateType: Line.LineStatefulDrawable.mixin,
-    initialize: function( renderer, instance ) {
-      if ( !this.displayObject ) {
-        this.displayObject = new PIXI.Graphics();
-      }
-    },
-    updatePixi: function( node, line ) {
-      if ( this.dirtyX1 || this.dirtyY1 || this.dirtyX2 || this.dirtyY2 ) {
-        var graphics = this.displayObject;
-        this.displayObject.clear();
-        if ( node.getStrokeColor() ) {
-          graphics.lineStyle( node.lineWidth, node.getStrokeColor().toNumber() );
-        }
-        graphics.moveTo( node._x1, node._y1 );
-        graphics.lineTo( node._x2, node._y2 );
-      }
-      this.updateFillStrokeStyle( line );
-    },
-    usesPaint: true,
-    keepElements: keepSVGLineElements
-  } );
+  Paintable.PaintableStatelessDrawable.mixin( Line.LineCanvasDrawable );
+  SelfDrawable.Poolable.mixin( Line.LineCanvasDrawable );
 
   return Line;
 } );

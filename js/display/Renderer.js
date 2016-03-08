@@ -1,4 +1,4 @@
-// Copyright 2002-2014, University of Colorado Boulder
+// Copyright 2013-2015, University of Colorado Boulder
 
 
 /**
@@ -17,58 +17,42 @@ define( function( require ) {
   var scenery = require( 'SCENERY/scenery' );
 
   // now it's a namespace
-  scenery.Renderer = {};
-  var Renderer = scenery.Renderer;
+  var Renderer = {};
+  scenery.register( 'Renderer', Renderer );
 
   //OHTWO TODO: rename to take advantage of lack of deprecated names? (remove bitmask prefix)
 
   /*---------------------------------------------------------------------------*
    * Renderer bitmask flags
-   *----------------------------------------------------------------------------*/
+   *---------------------------------------------------------------------------*/
 
-  // ensure that these bitmasks weren't changed in scenery.js
-  assert && assert( scenery.bitmaskSupportsCanvas === 0x0000001 );
-  assert && assert( scenery.bitmaskSupportsSVG === 0x0000002 );
-  assert && assert( scenery.bitmaskSupportsDOM === 0x0000004 );
-  assert && assert( scenery.bitmaskSupportsWebGL === 0x0000008 );
-  assert && assert( scenery.bitmaskSupportsPixi === 0x0000010 );
+  Renderer.numActiveRenderers = 4;
+  Renderer.bitsPerRenderer = 5;
+  Renderer.bitmaskRendererArea = 0x00000FF;
+  Renderer.bitmaskCurrentRendererArea = 0x000000F;
+  Renderer.bitmaskLacksOffset = 0x10000;
+  Renderer.bitmaskLacksShift = 16; // number of bits between the main renderer bitmask and the "lacks" variety
+  Renderer.bitmaskNodeDefault = Renderer.bitmaskRendererArea;
 
-  // these will need to be updated if another renderer option is given (modify order bitmasks below also)
-  Renderer.bitmaskRendererArea = scenery.bitmaskRendererArea;   // 0x00000FF
-  // one renderer is required
-  Renderer.bitmaskCanvas = scenery.bitmaskSupportsCanvas; // 0x0000001
-  Renderer.bitmaskSVG = scenery.bitmaskSupportsSVG;       // 0x0000002
-  Renderer.bitmaskDOM = scenery.bitmaskSupportsDOM;       // 0x0000004
-  Renderer.bitmaskWebGL = scenery.bitmaskSupportsWebGL;   // 0x0000008
-  Renderer.bitmaskPixi = scenery.bitmaskSupportsPixi;   // 0x0000010
-  // 20, 40, 80 reserved for future renderers
+  Renderer.bitmaskCanvas = 0x0000001;
+  Renderer.bitmaskSVG = 0x0000002;
+  Renderer.bitmaskDOM = 0x0000004;
+  Renderer.bitmaskWebGL = 0x0000008;
+  // 10, 20, 40, 80 reserved for future renderers NOTE: update bitmaskCurrentRendererArea/numActiveRenderers if they are added/removed
 
-  // fitting group (2 bits)
-  Renderer.bitmaskFitting = 0x0000300;      // bitmask that covers all of the states
-  Renderer.bitmaskFitFullScene = 0x0000000; // fit the full scene (invalid in transformed/single-cached situations (how would that work?), required for boundsless objects)
-  Renderer.bitmaskFitLoose = 0x0000100;     // for now, round out to something like 32 or 128 pixel increments?
-  Renderer.bitmaskFitTight = 0x0000200;     // tight fit, updates whenever it is changed
-  Renderer.bitmaskFitHybrid = 0x0000300;    // custom minimization strategy
-
-  // general options
-  Renderer.bitmaskForceAcceleration = 0x0000400;
-  Renderer.bitmaskSkipBounds = 0x0000800; // forces full scene fitting for SVG/Canvas unless there is a guaranteed bounds, so don't use in transformed/single-cached situations unless there is a bounds guarantee
-
-  // canvas options
-  Renderer.bitmaskCanvasLowResolution = 0x0001000;
-  Renderer.bitmaskCanvasNoPruning = 0x0002000;
-  Renderer.bitmaskCanvasNoDirtyBounds = 0x0004000;
-  Renderer.bitmaskCanvasBeforeAfterBounds = 0x0008000;
-
-  // SVG optimizations group (2 bits)
-  Renderer.bitmaskSVGOptimizations = 0x0030000;
-  Renderer.bitmaskSVGOptimizeAuto = 0x0000000;    // auto for text-rendering/shape-rendering/image-rendering
-  Renderer.bitmaskSVGOptimizeSpeed = 0x0010000;   // optimizeSpeed for text-rendering/shape-rendering/image-rendering
-  Renderer.bitmaskSVGOptimizeQuality = 0x0020000; // optimizeQuality for shape-rendering/image-rendering, geometricPrecision for text-rendering
-  Renderer.bitmaskSVGOptimizeCrisp = 0x0030000;   // optimizeQuality for image-rendering, crispEdges for shape-rendering, optimizeLegibility for text-rendering
-
-  // svg options
-  Renderer.bitmaskSVGCollapse = 0x0040000;
+  // summary bits (for RendererSummary):
+  Renderer.bitmaskSingleCanvas = 0x100;
+  Renderer.bitmaskSingleSVG = 0x200;
+  // reserved gap 0x400, 0x800, 0x1000, 0x2000, 0x4000, 0x8000 for future renderer-specific single information
+  Renderer.bitmaskNotPainted = 0x1000;
+  Renderer.bitmaskBoundsValid = 0x2000;
+  Renderer.bitmaskNotAccessible = 0x4000;
+  // summary bits for whether a renderer could be potentially used to display a Node.
+  Renderer.bitmaskLacksCanvas = Renderer.bitmaskCanvas << Renderer.bitmaskLacksShift; // 0x10000
+  Renderer.bitmaskLacksSVG = Renderer.bitmaskSVG << Renderer.bitmaskLacksShift; // 0x20000
+  Renderer.bitmaskLacksDOM = Renderer.bitmaskDOM << Renderer.bitmaskLacksShift; // 0x40000
+  Renderer.bitmaskLacksWebGL = Renderer.bitmaskWebGL << Renderer.bitmaskLacksShift; // 0x80000
+  // reserved gap 0x10000, 0x20000, 0x40000, 0x80000 for future renderers
 
   Renderer.isCanvas = function( bitmask ) {
     return ( bitmask & Renderer.bitmaskCanvas ) !== 0;
@@ -82,16 +66,12 @@ define( function( require ) {
   Renderer.isWebGL = function( bitmask ) {
     return ( bitmask & Renderer.bitmaskWebGL ) !== 0;
   };
-  Renderer.isPixi = function( bitmask ) {
-    return ( bitmask & Renderer.bitmaskPixi ) !== 0;
-  };
 
   var rendererMap = {
     canvas: Renderer.bitmaskCanvas,
     svg: Renderer.bitmaskSVG,
     dom: Renderer.bitmaskDOM,
-    webgl: Renderer.bitmaskWebGL,
-    pixi: Renderer.bitmaskPixi
+    webgl: Renderer.bitmaskWebGL
   };
   Renderer.fromName = function( name ) {
     return rendererMap[ name ];
@@ -99,70 +79,51 @@ define( function( require ) {
 
   // returns the part of the bitmask that should contain only Canvas/SVG/DOM/WebGL flags
   //OHTWO TODO: use this instead of direct access to bitmaskRendererArea
-  Renderer.getStrippedBitmask = function( bitmask ) {
+  Renderer.stripBitmask = function( bitmask ) {
     return bitmask & Renderer.bitmaskRendererArea;
   };
 
-  Renderer.getFitStrategy = function( bitmask ) {
-    return Renderer.fitStrategies[ bitmask & Renderer.bitmaskFitting ];
-  };
-  Renderer.isAccelerationForced = function( bitmask ) {
-    return ( bitmask & Renderer.bitmaskForceAcceleration ) !== 0;
-  };
-  Renderer.isSkipBounds = function( bitmask ) {
-    return ( bitmask & Renderer.bitmaskSkipBounds ) !== 0;
-  };
-  Renderer.isCanvasLowResolution = function( bitmask ) {
-    return ( bitmask & Renderer.bitmaskCanvasLowResolution ) !== 0;
-  };
-  Renderer.isCanvasNoPruning = function( bitmask ) {
-    return ( bitmask & Renderer.bitmaskCanvasNoPruning ) !== 0;
-  };
-  Renderer.isCanvasNoDirtyBounds = function( bitmask ) {
-    return ( bitmask & Renderer.bitmaskCanvasNoDirtyBounds ) !== 0;
-  };
-  Renderer.isCanvasBeforeAfterBounds = function( bitmask ) {
-    return ( bitmask & Renderer.bitmaskCanvasBeforeAfterBounds ) !== 0;
-  };
-  Renderer.getSVGOptimizations = function( bitmask ) {
-    return Renderer.svgOptimizations[ bitmask & Renderer.bitmaskSVGOptimizations ];
-  };
-
-  Renderer.createOrderBitmask = function( firstRenderer, secondRenderer, thirdRenderer, fourthRenderer, fifthRenderer ) {
+  Renderer.createOrderBitmask = function( firstRenderer, secondRenderer, thirdRenderer, fourthRenderer ) {
     firstRenderer = firstRenderer || 0;
     secondRenderer = secondRenderer || 0;
     thirdRenderer = thirdRenderer || 0;
     fourthRenderer = fourthRenderer || 0;
-    fifthRenderer = fifthRenderer || 0;
 
-    // uses 25 bits now with 5 renderers
+    // uses 20 bits now with 4 renderers
     return firstRenderer |
            ( secondRenderer << 5 ) |
            ( thirdRenderer << 10 ) |
-           ( fourthRenderer << 15 ) |
-           ( fifthRenderer << 20 );
+           ( fourthRenderer << 15 );
+  };
+  // bitmaskOrderN with n=0 is bitmaskOrderFirst, n=1 is bitmaskOrderSecond, etc.
+  Renderer.bitmaskOrder = function( bitmask, n ) {
+    // Normally the condition here shouldn't be needed, but Safari seemed to cause a logic error when this function
+    // gets inlined elsewhere if n=0. See https://github.com/phetsims/scenery/issues/481 and
+    // https://github.com/phetsims/bending-light/issues/259.
+    if ( n > 0 ) {
+      bitmask = bitmask >> ( 5 * n );
+    }
+    return bitmask & Renderer.bitmaskCurrentRendererArea;
   };
   Renderer.bitmaskOrderFirst = function( bitmask ) {
-    return bitmask & 0x000001F;
+    return bitmask & Renderer.bitmaskCurrentRendererArea;
   };
   Renderer.bitmaskOrderSecond = function( bitmask ) {
-    return ( bitmask >> 5 ) & 0x000001F;
+    return ( bitmask >> 5 ) & Renderer.bitmaskCurrentRendererArea;
   };
   Renderer.bitmaskOrderThird = function( bitmask ) {
-    return ( bitmask >> 10 ) & 0x000001F;
+    return ( bitmask >> 10 ) & Renderer.bitmaskCurrentRendererArea;
   };
   Renderer.bitmaskOrderFourth = function( bitmask ) {
-    return ( bitmask >> 15 ) & 0x000001F;
-  };
-  Renderer.bitmaskOrderFifth = function( bitmask ) {
-    return ( bitmask >> 20 ) & 0x000001F;
+    return ( bitmask >> 15 ) & Renderer.bitmaskCurrentRendererArea;
   };
   Renderer.pushOrderBitmask = function( bitmask, renderer ) {
     assert && assert( typeof bitmask === 'number' );
     assert && assert( typeof renderer === 'number' );
     var rendererToInsert = renderer;
-    for ( var i = 0; i < 30; i += 5 ) {
-      var currentRenderer = ( bitmask >> i ) & 0x000001F;
+    var totalBits = Renderer.bitsPerRenderer * Renderer.numActiveRenderers;
+    for ( var i = 0; i <= totalBits; i += Renderer.bitsPerRenderer ) {
+      var currentRenderer = ( bitmask >> i ) & Renderer.bitmaskCurrentRendererArea;
       if ( currentRenderer === rendererToInsert ) {
         return bitmask;
       }
@@ -173,7 +134,7 @@ define( function( require ) {
       }
       else {
         // clear out that slot
-        bitmask = ( bitmask & ~( 0x000001F << i ) );
+        bitmask = ( bitmask & ~( Renderer.bitmaskCurrentRendererArea << i ) );
 
         // place in the renderer to insert
         bitmask = bitmask | ( rendererToInsert << i );
@@ -190,66 +151,37 @@ define( function( require ) {
     throw new Error( 'pushOrderBitmask overflow' );
   };
 
-  Renderer.createSelfDrawable = function( instance, node, selfRenderer ) {
+  Renderer.createSelfDrawable = function( instance, node, selfRenderer, fittable ) {
+    var drawable;
+
     if ( Renderer.isCanvas( selfRenderer ) ) {
-      return node.createCanvasDrawable( selfRenderer, instance );
+      drawable = node.createCanvasDrawable( selfRenderer, instance );
     }
     else if ( Renderer.isSVG( selfRenderer ) ) {
-      return node.createSVGDrawable( selfRenderer, instance );
+      drawable = node.createSVGDrawable( selfRenderer, instance );
     }
     else if ( Renderer.isDOM( selfRenderer ) ) {
-      return node.createDOMDrawable( selfRenderer, instance );
+      drawable = node.createDOMDrawable( selfRenderer, instance );
     }
     else if ( Renderer.isWebGL( selfRenderer ) ) {
-      return node.createWebGLDrawable( selfRenderer, instance );
-    }
-    else if ( Renderer.isPixi( selfRenderer ) ) {
-      return node.createPixiDrawable( selfRenderer, instance );
+      drawable = node.createWebGLDrawable( selfRenderer, instance );
     }
     else {
       throw new Error( 'Unrecognized renderer: ' + selfRenderer );
     }
-  };
 
+    // Initialize its fittable flag
+    drawable.setFittable( fittable );
+
+    return drawable;
+  };
 
   /*---------------------------------------------------------------------------*
-   * Fit strategies
+   * WebGL Renderer type enumeration
    *----------------------------------------------------------------------------*/
-
-  // TODO: fill out fit strategies, determine parameters
-  Renderer.fitStrategies = {};
-  Renderer.fitStrategies.bitmaskFitFullScene = function() {};
-  Renderer.fitStrategies.bitmaskFitLoose = function() {};
-  Renderer.fitStrategies.bitmaskFitTight = function() {};
-  Renderer.fitStrategies.bitmaskFitHybrid = function() {};
-
-
-  /*---------------------------------------------------------------------------*
-   * SVG quality settings
-   *----------------------------------------------------------------------------*/
-
-  // SVG qualities for text-rendering, shape-rendering, image-rendering
-  Renderer.svgOptimizations = {};
-  Renderer.svgOptimizations.bitmaskSVGOptimizeAuto = {
-    text: 'auto',
-    shape: 'auto',
-    image: 'auto'
-  };
-  Renderer.svgOptimizations.bitmaskSVGOptimizeSpeed = {
-    text: 'optimizeSpeed',
-    shape: 'optimizeSpeed',
-    image: 'optimizeSpeed'
-  };
-  Renderer.svgOptimizations.bitmaskSVGOptimizeQuality = {
-    text: 'geometricPrecision',
-    shape: 'optimizeQuality',
-    image: 'optimizeQuality'
-  };
-  Renderer.svgOptimizations.bitmaskSVGOptimizeCrisp = {
-    text: 'optimizeLegibility',
-    shape: 'crispEdges',
-    image: 'optimizeQuality'
-  };
+  Renderer.webglCustom = 0x1;
+  Renderer.webglTexturedTriangles = 0x2;
+  Renderer.webglVertexColorPolygons = 0x3;
 
   return Renderer;
 } );

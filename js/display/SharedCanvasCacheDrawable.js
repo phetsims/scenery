@@ -1,4 +1,4 @@
-// Copyright 2002-2014, University of Colorado Boulder
+// Copyright 2013-2014, University of Colorado Boulder
 
 
 /**
@@ -14,15 +14,16 @@ define( function( require ) {
   var scenery = require( 'SCENERY/scenery' );
   var Drawable = require( 'SCENERY/display/Drawable' );
 
-  scenery.SharedCanvasCacheDrawable = function SharedCanvasCacheDrawable( trail, renderer, instance, sharedInstance ) {
+  function SharedCanvasCacheDrawable( trail, renderer, instance, sharedInstance ) {
     Drawable.call( this, renderer );
 
     // TODO: NOTE: may have to separate into separate drawables for separate group renderers
 
     this.instance = instance; // will need this so we can get bounds for layer fitting
     this.sharedInstance = sharedInstance;
-  };
-  var SharedCanvasCacheDrawable = scenery.SharedCanvasCacheDrawable;
+  }
+
+  scenery.register( 'SharedCanvasCacheDrawable', SharedCanvasCacheDrawable );
 
   inherit( Drawable, SharedCanvasCacheDrawable, {
     // TODO: support Canvas/SVG/DOM

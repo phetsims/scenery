@@ -1,4 +1,4 @@
-// Copyright 2002-2014, University of Colorado Boulder
+// Copyright 2013-2014, University of Colorado Boulder
 
 
 /**
@@ -14,7 +14,7 @@ define( function( require ) {
   var scenery = require( 'SCENERY/scenery' );
   var Drawable = require( 'SCENERY/display/Drawable' );
 
-  scenery.InlineCanvasCacheDrawable = function InlineCanvasCacheDrawable( renderer, instance ) {
+  function InlineCanvasCacheDrawable( renderer, instance ) {
     Drawable.call( this, renderer );
 
 
@@ -23,8 +23,9 @@ define( function( require ) {
     // TODO: NOTE: may have to separate into separate drawables for separate group renderers
 
     this.instance = instance; // will need this so we can get bounds for layer fitting
-  };
-  var InlineCanvasCacheDrawable = scenery.InlineCanvasCacheDrawable;
+  }
+
+  scenery.register( 'InlineCanvasCacheDrawable', InlineCanvasCacheDrawable );
 
   inherit( Drawable, InlineCanvasCacheDrawable, {
     // TODO: support Canvas/SVG/DOM

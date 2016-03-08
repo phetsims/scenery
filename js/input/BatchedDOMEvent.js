@@ -1,4 +1,4 @@
-// Copyright 2002-2014, University of Colorado Boulder
+// Copyright 2014-2015, University of Colorado Boulder
 
 
 /**
@@ -15,15 +15,16 @@ define( function( require ) {
   var Poolable = require( 'PHET_CORE/Poolable' );
   var scenery = require( 'SCENERY/scenery' );
 
-  scenery.BatchedDOMEvent = function BatchedDOMEvent( domEvent, type, callback ) {
+  function BatchedDOMEvent( domEvent, type, callback ) {
     assert && assert( domEvent, 'for some reason, there is no DOM event?' );
 
     // called multiple times due to pooling, this should be re-entrant
     this.domEvent = domEvent;
     this.type = type;
     this.callback = callback;
-  };
-  var BatchedDOMEvent = scenery.BatchedDOMEvent;
+  }
+
+  scenery.register( 'BatchedDOMEvent', BatchedDOMEvent );
 
   // enum for type
   BatchedDOMEvent.POINTER_TYPE = 1;
@@ -39,9 +40,9 @@ define( function( require ) {
       var callback = this.callback;
 
       // process whether anything under the pointers changed before running additional input events
-      sceneryEventLog && sceneryEventLog( 'validatePointers from batched event' );
+      sceneryLog && sceneryLog.InputEvent && sceneryLog.InputEvent( 'validatePointers from batched event' );
       input.validatePointers();
-      if ( input.logEvents ) { input.eventLog.push( 'validatePointers();' ); }
+      if ( input.logEvents ) { input.emitter.emit1( 'validatePointers();' );}
 
       //OHTWO TODO: switch?
       if ( this.type === BatchedDOMEvent.POINTER_TYPE ) {

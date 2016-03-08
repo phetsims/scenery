@@ -1,4 +1,4 @@
-// Copyright 2002-2014, University of Colorado Boulder
+// Copyright 2013-2015, University of Colorado Boulder
 
 /**
  * Text
@@ -19,13 +19,14 @@ define( function( require ) {
 
   var inherit = require( 'PHET_CORE/inherit' );
   var escapeHTML = require( 'PHET_CORE/escapeHTML' );
+  var platform = require( 'PHET_CORE/platform' );
   var Bounds2 = require( 'DOT/Bounds2' );
   var Matrix3 = require( 'DOT/Matrix3' );
 
   var scenery = require( 'SCENERY/scenery' );
 
   var Node = require( 'SCENERY/nodes/Node' ); // inherits from Node
-  require( 'SCENERY/display/Renderer' );
+  var Renderer = require( 'SCENERY/display/Renderer' );
   var Paintable = require( 'SCENERY/nodes/Paintable' );
   require( 'SCENERY/util/Font' );
   require( 'SCENERY/util/Util' ); // for canvasAccurateBounds and CSS transforms
@@ -35,9 +36,6 @@ define( function( require ) {
   var CanvasSelfDrawable = require( 'SCENERY/display/CanvasSelfDrawable' );
   var SelfDrawable = require( 'SCENERY/display/SelfDrawable' );
   var WebGLSelfDrawable = require( 'SCENERY/display/WebGLSelfDrawable' );
-  var PixiSelfDrawable = require( 'SCENERY/display/PixiSelfDrawable' );
-  var SquareUnstrokedRectangle = require( 'SCENERY/display/webgl/SquareUnstrokedRectangle' );
-  var Color = require( 'SCENERY/util/Color' );
 
   // TODO: change this based on memory and performance characteristics of the platform
   var keepDOMTextElements = true; // whether we should pool DOM elements for the DOM rendering states, or whether we should free them when possible for memory
@@ -60,7 +58,15 @@ define( function( require ) {
   var hybridTextNode; // a node that is used to measure SVG text top/height for hybrid caching purposes
   var initializingHybridTextNode = false;
 
-  scenery.Text = function Text( text, options ) {
+  // Some browsers (IE/Edge) can't handle our UTF-8 embedding marks AND SVG textLength/spacingAndGlyphs. We disable
+  // using these features, because they aren't necessary on these browsers.
+  // See https://github.com/phetsims/scenery/issues/455 for more information.
+  var useSVGTextLengthAdjustments = !platform.ie && !platform.edge;
+
+  // Maps CSS {string} => {Bounds2}, so that we can cache the vertical font sizes outside of the Font objects themselves.
+  var hybridFontVerticalCache = {};
+
+  function Text( text, options ) {
     this._text = '';                   // filled in with mutator
     this._font = scenery.Font.DEFAULT; // default font, usually 10px sans-serif
     this._direction = 'ltr';           // ltr, rtl, inherit -- consider inherit deprecated, due to how we compute text bounds in an off-screen canvas
@@ -87,13 +93,12 @@ define( function( require ) {
 
     Node.call( this, options );
     this.updateTextFlags(); // takes care of setting up supported renderers
-  };
-  var Text = scenery.Text;
+  }
+
+  scenery.register( 'Text', Text );
 
   inherit( Node, Text, {
     domUpdateTransformOnRepaint: true, // since we have to integrate the baseline offset into the CSS transform, signal to DOMLayer
-
-    requiresSafeBounds: true,
 
     setText: function( text ) {
       assert && assert( text !== null && text !== undefined, 'Text should be defined and non-null. Use the empty string if needed.' );
@@ -102,6 +107,7 @@ define( function( require ) {
       text = '' + text;
 
       if ( text !== this._text ) {
+        var oldText = this._text;
         this._text = text;
 
         var stateLen = this._drawables.length;
@@ -110,6 +116,7 @@ define( function( require ) {
         }
 
         this.invalidateText();
+        this.trigger2( 'text', oldText, text );
       }
       return this;
     },
@@ -135,6 +142,10 @@ define( function( require ) {
         }
 
         this.invalidateText();
+
+        this.trigger0( 'boundsMethod' );
+
+        this.trigger0( 'selfBoundsValid' ); // whether our self bounds are valid may have changed
       }
       return this;
     },
@@ -143,25 +154,19 @@ define( function( require ) {
       return this._boundsMethod;
     },
 
-    // allow more specific path types (Rectangle, Line) to override what restrictions we have
     getTextRendererBitmask: function() {
       var bitmask = 0;
 
       // canvas support (fast bounds may leak out of dirty rectangles)
       if ( this._boundsMethod !== 'fast' && !this._isHTML ) {
-        bitmask |= scenery.bitmaskSupportsCanvas;
+        bitmask |= Renderer.bitmaskCanvas;
       }
       if ( !this._isHTML ) {
-        bitmask |= scenery.bitmaskSupportsSVG;
-      }
-      if ( this._boundsMethod === 'accurate' ) {
-        bitmask |= scenery.bitmaskBoundsValid;
+        bitmask |= Renderer.bitmaskSVG;
       }
 
       // fill and stroke will determine whether we have DOM text support
-      bitmask |= scenery.bitmaskSupportsDOM;
-      bitmask |= scenery.bitmaskSupportsWebGL;
-      bitmask |= scenery.bitmaskSupportsPixi;
+      bitmask |= Renderer.bitmaskDOM;
 
       return bitmask;
     },
@@ -175,6 +180,25 @@ define( function( require ) {
     },
 
     invalidateText: function() {
+      this.invalidateSelf();
+
+      // TODO: consider replacing this with a general dirty flag notification, and have DOM update bounds every frame?
+      var stateLen = this._drawables.length;
+      for ( var i = 0; i < stateLen; i++ ) {
+        this._drawables[ i ].markDirtyBounds();
+      }
+
+      // we may have changed renderers if parameters were changed!
+      this.updateTextFlags();
+    },
+
+    /**
+     * @override
+     *
+     * @returns {boolean}
+     */
+    updateSelfBounds: function() {
+      // TODO: don't create another Bounds2 object just for this!
       var selfBounds;
 
       // investigate http://mudcu.be/journal/2011/01/html5-typographic-metrics/
@@ -196,17 +220,11 @@ define( function( require ) {
         selfBounds.dilate( this.getLineWidth() / 2 );
       }
 
-      if ( !this._selfBounds.equals( selfBounds ) ) {
-        var stateLen = this._drawables.length;
-        for ( var i = 0; i < stateLen; i++ ) {
-          this._drawables[ i ].markDirtyBounds();
-        }
+      var changed = !selfBounds.equals( this._selfBounds );
+      if ( changed ) {
+        this._selfBounds.set( selfBounds );
       }
-
-      this.invalidateSelf( selfBounds );
-
-      // we may have changed renderers if parameters were changed!
-      this.updateTextFlags();
+      return changed;
     },
 
     // @override from Paintable
@@ -241,10 +259,6 @@ define( function( require ) {
       return Text.TextWebGLDrawable.createFromPool( renderer, instance );
     },
 
-    createPixiDrawable: function( renderer, instance ) {
-      return Text.TextPixiDrawable.createFromPool( renderer, instance );
-    },
-
     // a DOM node (not a Scenery DOM node, but an actual DOM node) with the text
     getDOMTextNode: function() {
       if ( this._isHTML ) {
@@ -260,6 +274,21 @@ define( function( require ) {
     /*---------------------------------------------------------------------------*
      * Bounds
      *----------------------------------------------------------------------------*/
+
+    getVerticalBounds: function() {
+      if ( !hybridTextNode ) {
+        return Bounds2.NOTHING; // we are the hybridTextNode, ignore us
+      }
+
+      var css = this._font.toCSS();
+      var verticalBounds = hybridFontVerticalCache[ css ];
+      if ( !verticalBounds ) {
+        hybridTextNode.setFont( this._font );
+        verticalBounds = hybridFontVerticalCache[ css ] = hybridTextNode.getBounds().copy();
+      }
+
+      return verticalBounds;
+    },
 
     accurateCanvasBounds: function() {
       var node = this;
@@ -319,17 +348,9 @@ define( function( require ) {
 
     // NOTE: should return new instance, so that it can be mutated later
     approximateHybridBounds: function() {
-      if ( !hybridTextNode ) {
-        return Bounds2.NOTHING; // we are the hybridTextNode, ignore us
-      }
-
-      if ( this._font._cachedSVGBounds === undefined ) {
-        hybridTextNode.setFont( this._font );
-        this._font._cachedSVGBounds = hybridTextNode.getBounds();
-      }
+      var verticalBounds = this.getVerticalBounds();
 
       var canvasWidth = this.approximateCanvasWidth();
-      var verticalBounds = this._font._cachedSVGBounds;
 
       // it seems that SVG bounds generally have x=0, so we hard code that here
       return new Bounds2( 0, verticalBounds.minY, canvasWidth, verticalBounds.maxY );
@@ -380,6 +401,29 @@ define( function( require ) {
 
       var width = rect.right - rect.left;
       return result.shiftedX( isRTL ? -width : 0 ); // should we even swap here?
+    },
+
+    approximateImprovedDOMBounds: function() {
+      // TODO: reuse this div?
+      var div = document.createElement( 'div' );
+      div.style.display = 'inline-block';
+      div.style.font = this.getFont();
+      div.style.color = 'transparent';
+      div.style.padding = '0 !important';
+      div.style.margin = '0 !important';
+      div.style.position = 'absolute';
+      div.style.left = '0';
+      div.style.top = '0';
+      div.setAttribute( 'direction', this._direction );
+      div.appendChild( this.getDOMTextNode() );
+
+      document.body.appendChild( div );
+      var bounds = new Bounds2( div.offsetLeft, div.offsetTop, div.offsetLeft + div.offsetWidth + 1, div.offsetTop + div.offsetHeight + 1 );
+      document.body.removeChild( div );
+
+      // Compensate for the baseline alignment
+      var verticalBounds = this.getVerticalBounds();
+      return bounds.shiftedY( verticalBounds.minY );
     },
 
     // @override from Node
@@ -433,6 +477,11 @@ define( function( require ) {
 
     isPainted: function() {
       return true;
+    },
+
+    // @override
+    areSelfBoundsValid: function() {
+      return this._boundsMethod === 'accurate';
     },
 
     getDebugHTMLExtras: function() {
@@ -539,7 +588,7 @@ define( function( require ) {
       var proto = drawableType.prototype;
 
       // initializes, and resets (so we can support pooled states)
-      proto.initializeState = function() {
+      proto.initializeState = function( renderer, instance ) {
         this.paintDirty = true; // flag that is marked if ANY "paint" dirty flag is set (basically everything except for transforms, so we can accelerated the transform-only case)
         this.dirtyText = true;
         this.dirtyFont = true;
@@ -547,9 +596,13 @@ define( function( require ) {
         this.dirtyDirection = true;
 
         // adds fill/stroke-specific flags and state
-        this.initializePaintableState();
+        this.initializePaintableState( renderer, instance );
 
         return this; // allow for chaining
+      };
+
+      proto.disposeState = function() {
+        this.disposePaintableState();
       };
 
       // catch-all dirty, if anything that isn't a transform is marked as dirty
@@ -581,8 +634,6 @@ define( function( require ) {
         this.dirtyFont = false;
         this.dirtyBounds = false;
         this.dirtyDirection = false;
-
-        this.cleanPaintableState();
       };
 
       Paintable.PaintableStatefulDrawable.mixin( drawableType );
@@ -598,7 +649,7 @@ define( function( require ) {
   }, {
     initialize: function( renderer, instance ) {
       this.initializeDOMSelfDrawable( renderer, instance );
-      this.initializeState();
+      this.initializeState( renderer, instance );
 
       // only create elements if we don't already have them (we pool visual states always, and depending on the platform may also pool the actual elements to minimize
       // allocation and performance costs)
@@ -628,7 +679,7 @@ define( function( require ) {
         if ( this.dirtyStroke ) {
           div.style.color = node.getCSSFill();
         }
-        if ( this.dirtyBounds ) {
+        if ( this.dirtyBounds ) { // TODO: this condition is set on invalidateText, so it's almost always true?
           div.style.width = node.getSelfBounds().width + 'px';
           div.style.height = node.getSelfBounds().height + 'px';
           // TODO: do we require the jQuery versions here, or are they vestigial?
@@ -658,37 +709,39 @@ define( function( require ) {
       this.setToClean();
     },
 
-    onAttach: function( node ) {
+    setToClean: function() {
+      this.setToCleanState();
 
+      this.cleanPaintableState();
+
+      this.transformDirty = false;
     },
 
-    // release the DOM elements from the poolable visual state so they aren't kept in memory. May not be done on platforms where we have enough memory to pool these
-    onDetach: function( node ) {
+    dispose: function() {
+      this.disposeState();
+
       if ( !keepDOMTextElements ) {
         // clear the references
         this.domElement = null;
       }
-    },
 
-    setToClean: function() {
-      this.setToCleanState();
-
-      this.transformDirty = false;
+      DOMSelfDrawable.prototype.dispose.call( this );
     }
   } );
-
   Text.TextStatefulDrawable.mixin( TextDOMDrawable );
-
   SelfDrawable.Poolable.mixin( TextDOMDrawable );
 
   /*---------------------------------------------------------------------------*
    * SVG rendering
    *----------------------------------------------------------------------------*/
 
-  Text.TextSVGDrawable = SVGSelfDrawable.createDrawable( {
-    type: function TextSVGDrawable( renderer, instance ) { this.initialize( renderer, instance ); },
-    stateType: Text.TextStatefulDrawable.mixin,
+  Text.TextSVGDrawable = function TextSVGDrawable( renderer, instance ) {
+    this.initialize( renderer, instance );
+  };
+  inherit( SVGSelfDrawable, Text.TextSVGDrawable, {
     initialize: function( renderer, instance ) {
+      this.initializeSVGSelfDrawable( renderer, instance, true, keepSVGTextElements ); // usesPaint: true
+
       if ( !this.svgElement ) {
         // NOTE! reference SVG element at top of file copies createSVGElement!
         var text = this.svgElement = document.createElementNS( scenery.svgns, 'text' );
@@ -697,39 +750,181 @@ define( function( require ) {
         // TODO: flag adjustment for SVG qualities
         text.setAttribute( 'dominant-baseline', 'alphabetic' ); // to match Canvas right now
         text.setAttribute( 'text-rendering', 'geometricPrecision' );
-        text.setAttribute( 'lengthAdjust', 'spacingAndGlyphs' );
+        if ( useSVGTextLengthAdjustments ) {
+          text.setAttribute( 'lengthAdjust', 'spacingAndGlyphs' );
+        }
         text.setAttributeNS( 'http://www.w3.org/XML/1998/namespace', 'xml:space', 'preserve' );
       }
+
+      return this;
     },
-    updateSVG: function( node, text ) {
+
+    updateSVGSelf: function() {
+      var text = this.svgElement;
+
       if ( this.dirtyDirection ) {
-        text.setAttribute( 'direction', node._direction );
+        text.setAttribute( 'direction', this.node._direction );
       }
 
       // set all of the font attributes, since we can't use the combined one
       if ( this.dirtyFont ) {
-        text.setAttribute( 'font-family', node._font.getFamily() );
-        text.setAttribute( 'font-size', node._font.getSize() );
-        text.setAttribute( 'font-style', node._font.getStyle() );
-        text.setAttribute( 'font-weight', node._font.getWeight() );
-        text.setAttribute( 'font-stretch', node._font.getStretch() );
+        text.setAttribute( 'font-family', this.node._font.getFamily() );
+        text.setAttribute( 'font-size', this.node._font.getSize() );
+        text.setAttribute( 'font-style', this.node._font.getStyle() );
+        text.setAttribute( 'font-weight', this.node._font.getWeight() );
+        text.setAttribute( 'font-stretch', this.node._font.getStretch() );
       }
 
       // update the text-node's value
       if ( this.dirtyText ) {
-        text.lastChild.nodeValue = node.getNonBreakingText();
+        text.lastChild.nodeValue = this.node.getNonBreakingText();
       }
 
       // text length correction, tested with scenery/tests/text-quality-test.html to determine how to match Canvas/SVG rendering (and overall length)
-      if ( this.dirtyBounds && isFinite( node._selfBounds.width ) ) {
-        text.setAttribute( 'textLength', node._selfBounds.width );
+      if ( this.dirtyBounds && useSVGTextLengthAdjustments && isFinite( this.node.selfBounds.width ) ) {
+        text.setAttribute( 'textLength', this.node.selfBounds.width );
       }
 
       this.updateFillStrokeStyle( text );
-    },
-    usesPaint: true,
-    keepElements: keepSVGTextElements
+    }
   } );
+  Text.TextStatefulDrawable.mixin( Text.TextSVGDrawable );
+  SelfDrawable.Poolable.mixin( Text.TextSVGDrawable );
+
+  /*---------------------------------------------------------------------------*
+   * Canvas rendering
+   *----------------------------------------------------------------------------*/
+
+  Text.TextCanvasDrawable = function TextCanvasDrawable( renderer, instance ) {
+    this.initialize( renderer, instance );
+  };
+  inherit( CanvasSelfDrawable, Text.TextCanvasDrawable, {
+    initialize: function( renderer, instance ) {
+      this.initializeCanvasSelfDrawable( renderer, instance );
+      this.initializePaintableStateless( renderer, instance );
+      return this;
+    },
+
+    paintCanvas: function( wrapper, node ) {
+      var context = wrapper.context;
+
+      // extra parameters we need to set, but should avoid setting if we aren't drawing anything
+      if ( node.hasFill() || node.hasStroke() ) {
+        wrapper.setFont( node._font.getFont() );
+        wrapper.setDirection( node._direction );
+      }
+
+      if ( node.hasFill() ) {
+        node.beforeCanvasFill( wrapper ); // defined in Paintable
+        context.fillText( node._text, 0, 0 );
+        node.afterCanvasFill( wrapper ); // defined in Paintable
+      }
+      if ( node.hasStroke() ) {
+        node.beforeCanvasStroke( wrapper ); // defined in Paintable
+        context.strokeText( node._text, 0, 0 );
+        node.afterCanvasStroke( wrapper ); // defined in Paintable
+      }
+    },
+
+    // stateless dirty functions
+    markDirtyText: function() { this.markPaintDirty(); },
+    markDirtyFont: function() { this.markPaintDirty(); },
+    markDirtyBounds: function() { this.markPaintDirty(); },
+    markDirtyDirection: function() { this.markPaintDirty(); },
+
+    dispose: function() {
+      CanvasSelfDrawable.prototype.dispose.call( this );
+      this.disposePaintableStateless();
+    }
+  } );
+  Paintable.PaintableStatelessDrawable.mixin( Text.TextCanvasDrawable );
+  SelfDrawable.Poolable.mixin( Text.TextCanvasDrawable );
+
+  /*---------------------------------------------------------------------------*
+   * WebGL rendering
+   *----------------------------------------------------------------------------*/
+
+  Text.TextWebGLDrawable = inherit( WebGLSelfDrawable, function TextWebGLDrawable( renderer, instance ) {
+    this.initialize( renderer, instance );
+  }, {
+    // called either from the constructor or from pooling
+    initialize: function( renderer, instance ) {
+      this.initializeWebGLSelfDrawable( renderer, instance );
+    },
+
+    onAddToBlock: function( webglBlock ) {
+      var self = this;
+      this.node.toImageNodeAsynchronous( function( imageNodeContainer ) {
+        //toImageNode returns a containerNode with its first child set as ImageNode
+        var imageNode = imageNodeContainer.children[ 0 ];
+        self.textHandle = webglBlock.webGLRenderer.textureRenderer.createFromImageNode( imageNode, 0.4 );
+
+        // TODO: Don't call this each time a new item is added.
+        webglBlock.webGLRenderer.textureRenderer.bindVertexBuffer();
+        webglBlock.webGLRenderer.textureRenderer.bindDirtyTextures();
+        self.updateText();
+      } );
+
+      //TODO: Update the state in the buffer arrays
+    },
+
+    onRemoveFromBlock: function( webglBlock ) {
+
+    },
+
+    //Nothing necessary since everything currently handled in the uModelViewMatrix below
+    //However, we may switch to dynamic draw, and handle the matrix change only where necessary in the future?
+    updateText: function() {
+      if ( this.textHandle ) {
+        this.textHandle.update();
+      }
+    },
+
+    render: function( shaderProgram ) {
+      // This is handled by the ColorTriangleRenderer
+    },
+
+    dispose: function() {
+      this.disposeWebGLBuffers();
+      // super
+      WebGLSelfDrawable.prototype.dispose.call( this );
+    },
+
+    disposeWebGLBuffers: function() {
+      this.webglBlock.webGLRenderer.colorTriangleRenderer.colorTriangleBufferData.dispose( this.rectangleHandle );
+    },
+
+    markDirtyText: function() {
+      this.markDirty();
+    },
+
+    markDirtyBounds: function() {
+      this.markDirty();
+    },
+
+    // general flag set on the state, which we forward directly to the drawable's paint flag
+    markPaintDirty: function() {
+      this.markDirty();
+    },
+
+    //TODO: Make sure all of the dirty flags make sense here.  Should we be using fillDirty, paintDirty, dirty, etc?
+    update: function() {
+      //if ( this.dirty ) {
+      this.updateText();
+      this.dirty = false;
+      //}
+    }
+  } );
+
+  // include stubs (stateless) for marking dirty stroke and fill (if necessary). we only want one dirty flag, not multiple ones, for WebGL (for now)
+  Paintable.PaintableStatefulDrawable.mixin( Text.TextWebGLDrawable );
+
+  // set up pooling
+  SelfDrawable.Poolable.mixin( Text.TextWebGLDrawable );
+
+  /*---------------------------------------------------------------------------*
+   * Hybrid text setup (for bounds testing)
+   *----------------------------------------------------------------------------*/
 
   function createSVGTextToMeasure() {
     var text = document.createElementNS( scenery.svgns, 'text' );
@@ -758,7 +953,7 @@ define( function( require ) {
     svgTextSizeContainer.setAttribute( 'width', '2' );
     svgTextSizeContainer.setAttribute( 'height', '2' );
     svgTextSizeContainer.setAttribute( 'id', textSizeContainerId );
-    svgTextSizeContainer.setAttribute( 'style', 'visibility: hidden; pointer-events: none; position: absolute; left: -65535; right: -65535;' ); // so we don't flash it in a visible way to the user
+    svgTextSizeContainer.setAttribute( 'style', 'visibility: hidden; pointer-events: none; position: absolute; left: -65535px; right: -65535px;' ); // so we don't flash it in a visible way to the user
   }
   // NOTE! copies createSVGElement
   if ( !svgTextSizeElement ) {
@@ -767,164 +962,9 @@ define( function( require ) {
     svgTextSizeContainer.appendChild( svgTextSizeElement );
   }
 
-  /*---------------------------------------------------------------------------*
-   * Canvas rendering
-   *----------------------------------------------------------------------------*/
-
-  Text.TextCanvasDrawable = CanvasSelfDrawable.createDrawable( {
-    type: function TextCanvasDrawable( renderer, instance ) { this.initialize( renderer, instance ); },
-    paintCanvas: function paintCanvasText( wrapper, node ) {
-      var context = wrapper.context;
-
-      // extra parameters we need to set, but should avoid setting if we aren't drawing anything
-      if ( node.hasFill() || node.hasStroke() ) {
-        wrapper.setFont( node._font.getFont() );
-        wrapper.setDirection( node._direction );
-      }
-
-      if ( node.hasFill() ) {
-        node.beforeCanvasFill( wrapper ); // defined in Paintable
-        context.fillText( node._text, 0, 0 );
-        node.afterCanvasFill( wrapper ); // defined in Paintable
-      }
-      if ( node.hasStroke() ) {
-        node.beforeCanvasStroke( wrapper ); // defined in Paintable
-        context.strokeText( node._text, 0, 0 );
-        node.afterCanvasStroke( wrapper ); // defined in Paintable
-      }
-    },
-    usesPaint: true,
-    dirtyMethods: [ 'markDirtyText', 'markDirtyFont', 'markDirtyBounds', 'markDirtyDirection' ]
-  } );
-
   initializingHybridTextNode = true;
   hybridTextNode = new Text( 'm', { boundsMethod: 'fast' } );
   initializingHybridTextNode = false;
-
-  /*---------------------------------------------------------------------------*
-   * WebGL rendering
-   *----------------------------------------------------------------------------*/
-
-  Text.TextWebGLDrawable = inherit( WebGLSelfDrawable, function TextWebGLDrawable( renderer, instance ) {
-    this.initialize( renderer, instance );
-  }, {
-    // called either from the constructor or from pooling
-    initialize: function( renderer, instance ) {
-      this.initializeWebGLSelfDrawable( renderer, instance );
-    },
-
-    initializeContext: function( webglBlock ) {
-      this.webglBlock = webglBlock;
-      this.rectangleHandle = new SquareUnstrokedRectangle( webglBlock.webGLRenderer.colorTriangleRenderer, this.node, 0.5 );
-
-      // cleanup old vertexBuffer, if applicable
-      this.disposeWebGLBuffers();
-
-      this.initializePaintableState();
-      this.updateText();
-
-      //TODO: Update the state in the buffer arrays
-    },
-
-    //Nothing necessary since everything currently handled in the uModelViewMatrix below
-    //However, we may switch to dynamic draw, and handle the matrix change only where necessary in the future?
-    updateText: function() {
-
-      // TODO: a way to update the ColorTriangleBufferData.
-
-      // TODO: move to PaintableWebGLState???
-      if ( this.dirtyFill ) {
-        this.color = Color.toColor( 'red' );
-        this.cleanPaintableState();
-      }
-    },
-
-    render: function( shaderProgram ) {
-      // This is handled by the ColorTriangleRenderer
-    },
-
-    dispose: function() {
-      this.disposeWebGLBuffers();
-
-      // super
-      WebGLSelfDrawable.prototype.dispose.call( this );
-    },
-
-    disposeWebGLBuffers: function() {
-      this.webglBlock.webGLRenderer.colorTriangleRenderer.colorTriangleBufferData.dispose( this.rectangleHandle );
-    },
-
-    markDirtyText: function() {
-      this.markDirty();
-    },
-
-    markDirtyBounds: function() {
-      this.markDirty();
-    },
-
-    // general flag set on the state, which we forward directly to the drawable's paint flag
-    markPaintDirty: function() {
-      this.markDirty();
-    },
-
-    onAttach: function( node ) {
-
-    },
-
-    // release the drawable
-    onDetach: function( node ) {
-      //OHTWO TODO: are we missing the disposal?
-    },
-
-    //TODO: Make sure all of the dirty flags make sense here.  Should we be using fillDirty, paintDirty, dirty, etc?
-    update: function() {
-      if ( this.dirty ) {
-        this.updateText();
-        this.dirty = false;
-      }
-    }
-  } );
-
-  // include stubs (stateless) for marking dirty stroke and fill (if necessary). we only want one dirty flag, not multiple ones, for WebGL (for now)
-  Paintable.PaintableStatefulDrawable.mixin( Text.TextWebGLDrawable );
-
-  // set up pooling
-  SelfDrawable.Poolable.mixin( Text.TextWebGLDrawable );
-
-  /*---------------------------------------------------------------------------*
-   * Pixi rendering
-   *----------------------------------------------------------------------------*/
-
-  Text.TextPixiDrawable = PixiSelfDrawable.createDrawable( {
-    type: function TextPixiDrawable( renderer, instance ) { this.initialize( renderer, instance ); },
-    stateType: Text.TextStatefulDrawable.mixin,
-    initialize: function( renderer, instance ) {
-      if ( !this.displayObject ) {
-        this.displayObject = new PIXI.Text( '' );
-      }
-    },
-    updatePixi: function( node, text ) {
-
-      // set all of the font attributes, since we can't use the combined one
-      if ( this.dirtyFont ) {
-        text.setStyle( { font: node.font, fill: node.getFillColor().toCSS() } );
-        this.displayObject.position.y = -this.displayObject.height / 2;
-      }
-
-      // update the text-node's value
-      if ( this.dirtyText ) {
-        this.displayObject.setText( node.getNonBreakingText() );
-      }
-
-      // text length correction, tested with scenery/tests/text-quality-test.html to determine how to match Canvas/Pixi rendering (and overall length)
-      if ( this.dirtyBounds && isFinite( node._selfBounds.width ) ) {
-      }
-
-      this.updateFillStrokeStyle( text );
-    },
-    usesPaint: true,
-    keepElements: keepSVGTextElements
-  } );
 
   return Text;
 } );

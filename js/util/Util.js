@@ -1,5 +1,4 @@
-// Copyright 2002-2014, University of Colorado Boulder
-
+// Copyright 2013-2015, University of Colorado Boulder
 
 /**
  * General utility functions for Scenery
@@ -30,20 +29,20 @@ define( function( require ) {
   var transformProperty = Features.transform;
   var transformOriginProperty = Features.transformOrigin || 'transformOrigin'; // fallback, so we don't try to set an empty string property later
 
-  scenery.Util = {
-    // like _.extend, but with hardcoded support for https://github.com/documentcloud/underscore/pull/986
-    extend: function( obj ) {
-      _.each( Array.prototype.slice.call( arguments, 1 ), function( source ) {
-        if ( source ) {
-          for ( var prop in source ) {
-            Object.defineProperty( obj, prop, Object.getOwnPropertyDescriptor( source, prop ) );
-          }
-        }
-      } );
-      return obj;
-    },
+  var Util = {
+    /*---------------------------------------------------------------------------*
+     * Transformation Utilities (TODO: separate file)
+     *---------------------------------------------------------------------------*/
 
-    // @deprecated (bad performance since it is setting multiple properties). see applyPreparedTransform
+    /**
+     * @deprecated (bad performance since it is setting multiple properties). see applyPreparedTransform
+     * Applies the transformation matrix to the passed-in DOM element via a CSS transform.
+     * @public
+     *
+     * @param {Matrix3} matrix - Assumed to be affine
+     * @param {DOMElement} element - Any DOM element
+     * @param {boolean} forceAcceleration - Whether to add flags to force graphical acceleration (can slow things down!)
+     */
     applyCSSTransform: function( matrix, element, forceAcceleration ) {
       var transformCSS = matrix.getCSSTransform();
       // notes on triggering hardware acceleration: http://creativejs.com/2011/12/day-2-gpu-accelerate-your-dom-elements/
@@ -57,6 +56,14 @@ define( function( require ) {
       element.style[ transformOriginProperty ] = 'top left'; //OHTWO TODO: performance: this only needs to be set once!
     },
 
+    /**
+     * Prepares a DOM element for use with applyPreparedTransform(). Applies some CSS styles that are required, but
+     * that we don't want to set while animating.
+     * @public
+     *
+     * @param {DOMElement} element
+     * @param {boolean} forceAcceleration - Whether graphical acceleration should be forced (may slow things down!)
+     */
     prepareForTransform: function( element, forceAcceleration ) {
       element.style[ transformOriginProperty ] = 'top left';
       if ( forceAcceleration ) {
@@ -67,69 +74,99 @@ define( function( require ) {
       }
     },
 
+    /**
+     * Apply CSS styles that will potentially trigger graphical acceleration. Use at your own risk.
+     * @private
+     *
+     * @param {DOMElement} element
+     */
     setTransformAcceleration: function( element ) {
       element.style.webkitBackfaceVisibility = 'hidden';
     },
 
+    /**
+     * Unapply CSS styles (from setTransformAcceleration) that would potentially trigger graphical acceleration.
+     * @private
+     *
+     * @param {DOMElement} element
+     */
     unsetTransformAcceleration: function( element ) {
       element.style.webkitBackfaceVisibility = '';
     },
 
-    // applies the CSS transform of the {Matrix3} matrix to the element, with optional forcing of acceleration. prepareForTransform should be called before this method
-    // is used, and they should use the same parameter value for forceAcceleration
+    /**
+     * Applies the CSS transform of the matrix to the element, with optional forcing of acceleration.
+     * NOTE: prepareForTransform should be called at least once on the element before this method is used.
+     * @public
+     *
+     * @param {Matrix3} matrix
+     * @param {DOMElement} element
+     * @param {boolean} forceAcceleration
+     */
     applyPreparedTransform: function( matrix, element, forceAcceleration ) {
       // NOTE: not applying translateZ, see http://stackoverflow.com/questions/10014461/why-does-enabling-hardware-acceleration-in-css3-slow-down-performance
       element.style[ transformProperty ] = matrix.getCSSTransform();
     },
 
+    /**
+     * Applies a CSS transform value string to a DOM element.
+     * NOTE: prepareForTransform should be called at least once on the element before this method is used.
+     * @public
+     *
+     * @param {string} transformString
+     * @param {DOMElement} element
+     * @param {boolean} forceAcceleration
+     */
     setTransform: function( transformString, element, forceAcceleration ) {
       assert && assert( typeof transformString === 'string' );
 
       element.style[ transformProperty ] = transformString;
     },
 
+    /**
+     * Removes a CSS transform from a DOM element.
+     * @public
+     *
+     * @param {DOMElement} element
+     */
     unsetTransform: function( element ) {
       element.style[ transformProperty ] = '';
     },
 
-    testAssert: function() {
-      return 'assert.basic: ' + ( assert ? 'true' : 'false' );
-    },
-
-    testAssertExtra: function() {
-      return 'assert.slow: ' + ( assertSlow ? 'true' : 'false' );
-    },
-
-    /*---------------------------------------------------------------------------*
-     * window.requestAnimationFrame polyfill, by Erik Moller (http://my.opera.com/emoller/blog/2011/12/20/requestanimationframe-for-smart-er-animating)
-     * referenced by initial Paul Irish article at http://paulirish.com/2011/requestanimationframe-for-smart-animating/
-     *----------------------------------------------------------------------------*/
+    /**
+     * Ensures that window.requestAnimationFrame and window.cancelAnimationFrame use a native implementation if possible,
+     * otherwise using a simple setTimeout internally. See https://github.com/phetsims/scenery/issues/426
+     * @public
+     */
     polyfillRequestAnimationFrame: function() {
-      var lastTime = 0;
-      var vendors = [ 'ms', 'moz', 'webkit', 'o' ];
-      for ( var x = 0; x < vendors.length && !window.requestAnimationFrame; ++x ) {
-        window.requestAnimationFrame = window[ vendors[ x ] + 'RequestAnimationFrame' ];
-        window.cancelAnimationFrame = window[ vendors[ x ] + 'CancelAnimationFrame' ] || window[ vendors[ x ] + 'CancelRequestAnimationFrame' ];
-      }
+      if ( !window.requestAnimationFrame || !window.cancelAnimationFrame ) {
+        // Fallback implementation if no prefixed version is available
+        if ( !Features.requestAnimationFrame || !Features.cancelAnimationFrame ) {
+          window.requestAnimationFrame = function( callback ) {
+            var timeAtStart = Date.now();
 
-      if ( !window.requestAnimationFrame ) {
-        window.requestAnimationFrame = function( callback ) {
-          var currTime = new Date().getTime();
-          var timeToCall = Math.max( 0, 16 - (currTime - lastTime) );
-          var id = window.setTimeout( function() { callback( currTime + timeToCall ); },
-            timeToCall );
-          lastTime = currTime + timeToCall;
-          return id;
-        };
-      }
-
-      if ( !window.cancelAnimationFrame ) {
-        window.cancelAnimationFrame = function( id ) {
-          clearTimeout( id );
-        };
+            return window.setTimeout( function() {
+              callback( Date.now() - timeAtStart );
+            }, 16 );
+          };
+          window.cancelAnimationFrame = clearTimeout;
+        }
+        // Fill in the non-prefixed names with the prefixed versions
+        else {
+          window.requestAnimationFrame = window[ Features.requestAnimationFrame ];
+          window.cancelAnimationFrame = window[ Features.cancelAnimationFrame ];
+        }
       }
     },
 
+    /**
+     * Returns the relative size of the context's backing store compared to the actual Canvas. For example, if it's 2,
+     * the backing store has 2x2 the amount of pixels (4 times total).
+     * @public
+     *
+     * @param {CanvasRenderingContext2D | WebGLRenderingContext} context
+     * @returns {number} The backing store pixel ratio.
+     */
     backingStorePixelRatio: function( context ) {
       return context.webkitBackingStorePixelRatio ||
              context.mozBackingStorePixelRatio ||
@@ -138,8 +175,15 @@ define( function( require ) {
              context.backingStorePixelRatio || 1;
     },
 
-    // see http://developer.apple.com/library/safari/#documentation/AudioVideo/Conceptual/HTML-canvas-guide/SettingUptheCanvas/SettingUptheCanvas.html#//apple_ref/doc/uid/TP40010542-CH2-SW5
-    // and updated based on http://www.html5rocks.com/en/tutorials/canvas/hidpi/
+    /**
+     * Returns the scaling factor that needs to be applied for handling a HiDPI Canvas
+     * See see http://developer.apple.com/library/safari/#documentation/AudioVideo/Conceptual/HTML-canvas-guide/SettingUptheCanvas/SettingUptheCanvas.html#//apple_ref/doc/uid/TP40010542-CH2-SW5
+     * And it's updated based on http://www.html5rocks.com/en/tutorials/canvas/hidpi/
+     * @public
+     *
+     * @param {CanvasRenderingContext2D | WebGLRenderingContext} context
+     * @returns {number}
+     */
     backingScale: function( context ) {
       if ( 'devicePixelRatio' in window ) {
         var backingStoreRatio = Util.backingStorePixelRatio( context );
@@ -149,9 +193,20 @@ define( function( require ) {
       return 1;
     },
 
-    // given a data snapshot and transform, calculate range on how large / small the bounds can be
-    // very conservative, with an effective 1px extra range to allow for differences in anti-aliasing
-    // for performance concerns, this does not support skews / rotations / anything but translation and scaling
+    /*---------------------------------------------------------------------------*
+     * Text bounds utilities (TODO: separate file)
+     *---------------------------------------------------------------------------*/
+
+    /**
+     * Given a data snapshot and transform, calculate range on how large / small the bounds can be. It's
+     * very conservative, with an effective 1px extra range to allow for differences in anti-aliasing
+     * for performance concerns, this does not support skews / rotations / anything but translation and scaling
+     * @public
+     *
+     * @param {ImageData} imageData
+     * @param {number} resolution
+     * @param {Transform3} transform
+     */
     scanBounds: function( imageData, resolution, transform ) {
 
       // entry will be true if any pixel with the given x or y value is non-rgba(0,0,0,0)
@@ -192,6 +247,12 @@ define( function( require ) {
       };
     },
 
+    /**
+     * Measures accurate bounds of a function that draws things to a Canvas.
+     * @public
+     *
+     * @param {function} renderToContext - Called with the Canvas 2D context as a parameter, should draw to it.
+     */
     canvasAccurateBounds: function( renderToContext, options ) {
       // how close to the actual bounds do we need to be?
       var precision = ( options && options.precision ) ? options.precision : 0.001;
@@ -219,6 +280,7 @@ define( function( require ) {
         } );
       }
 
+      // TODO: Don't use Transform3 unless it is necessary
       function scan( transform ) {
         // save/restore, in case the render tries to do any funny stuff like clipping, etc.
         context.save();
@@ -275,7 +337,9 @@ define( function( require ) {
       minBounds = minBounds.union( coarseBounds.minBounds );
       maxBounds = maxBounds.intersection( coarseBounds.maxBounds );
 
-      var tempMin, tempMax, refinedBounds;
+      var tempMin;
+      var tempMax;
+      var refinedBounds;
 
       // minX
       tempMin = maxBounds.minY;
@@ -390,7 +454,17 @@ define( function( require ) {
       return result;
     },
 
-    // returns the smallest power of 2 that is greater than or equal
+    /*---------------------------------------------------------------------------*
+     * WebGL utilities (TODO: separate file)
+     *---------------------------------------------------------------------------*/
+
+    /**
+     * Finds the smallest power of 2 that is at least as large as n.
+     * @public
+     *
+     * @param {number} n
+     * @returns {number} The smallest power of 2 that is greater than or equal n
+     */
     toPowerOf2: function( n ) {
       var result = 1;
       while ( result < n ) {
@@ -400,8 +474,12 @@ define( function( require ) {
     },
 
     /*
-     * @param type should be: gl.VERTEX_SHADER or gl.FRAGMENT_SHADER
-     * @param source {String}, the shader source code.
+     * Creates and compiles a GLSL Shader object in WebGL.
+     * @public
+     *
+     * @param {WebGLRenderingContext} - WebGL Rendering Context
+     * @param {number} type - Should be: gl.VERTEX_SHADER or gl.FRAGMENT_SHADER
+     * @param {tring} source - The shader source code.
      */
     createShader: function( gl, source, type ) {
       var shader = gl.createShader( type );
@@ -423,17 +501,18 @@ define( function( require ) {
 
     /**
      * Check to see whether webgl is supported, using the same strategy as mrdoob and pixi.js
+     * @public
      *
      * @param {Array.<string>} [extensions] - A list of WebGL extensions that need to be supported
+     * @returns {boolean}
      */
     checkWebGLSupport: function( extensions ) {
       var canvas = document.createElement( 'canvas' );
 
       var args = { failIfMajorPerformanceCaveat: true };
       try {
-        var gl =
-          !!window.WebGLRenderingContext &&
-          (canvas.getContext( 'webgl', args ) || canvas.getContext( 'experimental-webgl', args ));
+        var gl = !!window.WebGLRenderingContext &&
+                 ( canvas.getContext( 'webgl', args ) || canvas.getContext( 'experimental-webgl', args ) );
 
         if ( !gl ) {
           return false;
@@ -441,7 +520,7 @@ define( function( require ) {
 
         if ( extensions ) {
           for ( var i = 0; i < extensions.length; i++ ) {
-            if ( gl.getExtension( extensions[i] ) === null ) {
+            if ( gl.getExtension( extensions[ i ] ) === null ) {
               return false;
             }
           }
@@ -454,7 +533,36 @@ define( function( require ) {
       }
     },
 
-    // Whether WebGL (with decent performance) is supported by the platform
+    /**
+     * Check to see whether IE11 has proper clearStencil support (required for three.js to work well).
+     * @public
+     *
+     * @returns {boolean}
+     */
+    checkIE11StencilSupport: function() {
+      var canvas = document.createElement( 'canvas' );
+
+      try {
+        var gl = !!window.WebGLRenderingContext &&
+                 ( canvas.getContext( 'webgl' ) || canvas.getContext( 'experimental-webgl' ) );
+
+        if ( !gl ) {
+          return false;
+        }
+
+        // Failure for https://github.com/mrdoob/three.js/issues/3600 / https://github.com/phetsims/molecule-shapes/issues/133
+        gl.clearStencil( 0 );
+        return gl.getError() === 0;
+      }
+      catch( e ) {
+        return false;
+      }
+    },
+
+    /**
+     * Whether WebGL (with decent performance) is supported by the platform
+     * @public {boolean}
+     */
     get isWebGLSupported() {
       if ( this._extensionlessWebGLSupport === undefined ) {
         this._extensionlessWebGLSupport = scenery.Util.checkWebGLSupport();
@@ -462,7 +570,7 @@ define( function( require ) {
       return this._extensionlessWebGLSupport;
     }
   };
-  var Util = scenery.Util;
+  scenery.register( 'Util', Util );
 
   return Util;
 } );

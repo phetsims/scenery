@@ -1,4 +1,4 @@
-// Copyright 2002-2014, University of Colorado Boulder
+// Copyright 2014-2015, University of Colorado Boulder
 
 
 /**
@@ -109,12 +109,12 @@ define( function( require ) {
   var SVGBlock = require( 'SCENERY/display/SVGBlock' );
   var DOMBlock = require( 'SCENERY/display/DOMBlock' );
   var WebGLBlock = require( 'SCENERY/display/WebGLBlock' );
-  var PixiBlock = require( 'SCENERY/display/PixiBlock' );
 
-  scenery.Stitcher = function Stitcher( display, renderer ) {
+  function Stitcher( display, renderer ) {
     throw new Error( 'We are too abstract for that!' );
-  };
-  var Stitcher = scenery.Stitcher;
+  }
+
+  scenery.register( 'Stitcher', Stitcher );
 
   inherit( Object, Stitcher, {
     // Main stitch entry point, called directly from the backbone or cache. We are modifying our backbone's blocks and
@@ -389,9 +389,6 @@ define( function( require ) {
       else if ( Renderer.isWebGL( renderer ) ) {
         block = WebGLBlock.createFromPool( backbone.display, renderer, backbone.transformRootInstance, backbone.backboneInstance );
       }
-      else if ( Renderer.isPixi( renderer ) ) {
-        block = PixiBlock.createFromPool( backbone.display, renderer, backbone.transformRootInstance, backbone.backboneInstance );
-      }
       else {
         throw new Error( 'unsupported renderer for createBlock: ' + renderer );
       }
@@ -503,11 +500,11 @@ define( function( require ) {
           var block = blockData.block;
           _.each( Drawable.oldListToArray( block.firstDrawable, block.lastDrawable ), function( drawable ) {
             assertSlow( _.some( stitcher.pendingRemovals, function( removalData ) {
-              return removalData.drawable === drawable;
-            } ) || _.some( stitcher.pendingMoves, function( moveData ) {
-              return moveData.drawable === drawable;
-            } ), 'Drawable ' + drawable.toString() + ' originally listed for disposed block ' + block.toString() +
-                 ' does not seem to be marked for pending removal or move!' );
+                return removalData.drawable === drawable;
+              } ) || _.some( stitcher.pendingMoves, function( moveData ) {
+                return moveData.drawable === drawable;
+              } ), 'Drawable ' + drawable.toString() + ' originally listed for disposed block ' + block.toString() +
+                   ' does not seem to be marked for pending removal or move!' );
           } );
         } );
 
@@ -516,11 +513,11 @@ define( function( require ) {
           var block = blockData.block;
           _.each( Drawable.listToArray( block.pendingFirstDrawable, block.pendingLastDrawable ), function( drawable ) {
             assertSlow( _.some( stitcher.pendingAdditions, function( additionData ) {
-              return additionData.drawable === drawable && additionData.block === block;
-            } ) || _.some( stitcher.pendingMoves, function( moveData ) {
-              return moveData.drawable === drawable && moveData.block === block;
-            } ), 'Drawable ' + drawable.toString() + ' now listed for created block ' + block.toString() +
-                 ' does not seem to be marked for pending addition or move!' );
+                return additionData.drawable === drawable && additionData.block === block;
+              } ) || _.some( stitcher.pendingMoves, function( moveData ) {
+                return moveData.drawable === drawable && moveData.block === block;
+              } ), 'Drawable ' + drawable.toString() + ' now listed for created block ' + block.toString() +
+                   ' does not seem to be marked for pending addition or move!' );
           } );
         } );
 

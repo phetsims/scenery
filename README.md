@@ -1,9 +1,12 @@
-
-Scenery
+scenery
 =======
 
-Prototype HTML5 Scene Graph
----------------------------
+Scenery is an HTML5 scene graph.
+
+By PhET Interactive Simulations
+http://phet.colorado.edu/
+
+### Documentation
 
 This is under active prototyping, so please expect any sort of API to change. Comments at this stage are very welcome.
 A [tentative website](http://phetsims.github.io/scenery/) is up for browsing documentation and examples in a more user-friendly way.
@@ -30,18 +33,11 @@ Examples:
 For testing purposes, the following are currently being worked on:
 * [Unit Tests / Linter](http://phetsims.github.io/scenery/tests/qunit/compiled-unit-tests.html)
 * [Renderer Comparison](http://phetsims.github.io/scenery/tests/renderer-comparison.html)
-* [Scene Graph Comparisons and Experiments](http://phetsims.github.io/scenery/tests/easel-performance/easel-tests.html)
 * [Performance Improvement/Regression](http://phetsims.github.io/scenery/tests/benchmarks/performance-tests.html)
 * [Canvas Browser Differences](http://jonathan-olson.com/canvas-diff/canvas-diff.html)
 
-By PhET Interactive Simulations
-http://phet.colorado.edu/
+The [PhET Development Overview](http://bit.ly/phet-development-overview) is the most complete guide to PhET Simulation Development. This guide includes how
+to obtain simulation code and its dependencies, notes about architecture & design, how to test and build the sims, as well as other important information.
 
-NOTE: This repository has dependencies on other repositories. Those repositories
-much be checked out as siblings to this repository in your directory structure.
-
-Third-Party Dependencies
-=============
-
-This repository uses third-party libraries.
-Those libraries and their licenses are available in: https://github.com/phetsims/sherpa.
+### License
+See the [license](LICENSE)

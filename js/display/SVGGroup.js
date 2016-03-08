@@ -1,5 +1,4 @@
-// Copyright 2002-2014, University of Colorado Boulder
-
+// Copyright 2014-2015, University of Colorado Boulder
 
 /**
  * PoolableMixin wrapper for SVG <group> elements. We store state and add listeners directly to the corresponding Node, so that we can set dirty flags and
@@ -14,12 +13,14 @@ define( function( require ) {
   var inherit = require( 'PHET_CORE/inherit' );
   var Poolable = require( 'PHET_CORE/Poolable' );
   var cleanArray = require( 'PHET_CORE/cleanArray' );
+  var platform = require( 'PHET_CORE/platform' );
   var scenery = require( 'SCENERY/scenery' );
 
-  scenery.SVGGroup = function SVGGroup( block, instance, parent ) {
+  function SVGGroup( block, instance, parent ) {
     this.initialize( block, instance, parent );
-  };
-  var SVGGroup = scenery.SVGGroup;
+  }
+
+  scenery.register( 'SVGGroup', SVGGroup );
 
   inherit( Object, SVGGroup, {
     initialize: function( block, instance, parent ) {
@@ -62,9 +63,9 @@ define( function( require ) {
       this.opacityDirtyListener = this.opacityDirtyListener || this.markOpacityDirty.bind( this );
       this.visibilityDirtyListener = this.visibilityDirtyListener || this.markVisibilityDirty.bind( this );
       this.clipDirtyListener = this.clipDirtyListener || this.markClipDirty.bind( this );
+      this.node.onStatic( 'visibility', this.visibilityDirtyListener );
       if ( this.willApplyFilters ) {
         this.node.onStatic( 'opacity', this.opacityDirtyListener );
-        this.node.onStatic( 'visibility', this.visibilityDirtyListener );
       }
       //OHTWO TODO: remove clip workaround
       this.node.onStatic( 'clip', this.clipDirtyListener );
@@ -190,14 +191,16 @@ define( function( require ) {
           }
           else if ( this.hasTransform ) {
             this.hasTransform = false;
-            svgGroup.removeAttribute( 'transform' );
+            // IE guard needed since removeAttribute fails, see https://github.com/phetsims/scenery/issues/395
+            ( platform.ie9 || platform.ie10 ) ? svgGroup.setAttribute( 'transform', '' ) : svgGroup.removeAttribute( 'transform' );
           }
         }
         else {
           // we want no transforms if we won't be applying transforms
           if ( this.hasTransform ) {
             this.hasTransform = false;
-            svgGroup.removeAttribute( 'transform' );
+            // IE guard needed since removeAttribute fails, see https://github.com/phetsims/scenery/issues/395
+            ( platform.ie9 || platform.ie10 ) ? svgGroup.setAttribute( 'transform', '' ) : svgGroup.removeAttribute( 'transform' );
           }
         }
       }
@@ -207,7 +210,7 @@ define( function( require ) {
 
         sceneryLog && sceneryLog.SVGGroup && sceneryLog.SVGGroup( 'visibility update: ' + this.toString() );
 
-        svgGroup.style.display = ( this.willApplyFilters && !this.node.isVisible() ) ? 'none' : '';
+        svgGroup.style.display = this.node.isVisible() ? '' : 'none';
       }
 
 
@@ -232,8 +235,7 @@ define( function( require ) {
         sceneryLog && sceneryLog.SVGGroup && sceneryLog.SVGGroup( 'clip update: ' + this.toString() );
 
         //OHTWO TODO: remove clip workaround (use this.willApplyFilters)
-        var willApplyClip = this.block.filterRootInstance.trail.nodes.length >= this.instance.trail.nodes.length;
-        if ( willApplyClip && this.node._clipArea ) {
+        if ( this.node.clipArea ) {
           if ( !this.clipDefinition ) {
             var clipId = 'clip' + this.node.getId();
 
@@ -248,7 +250,7 @@ define( function( require ) {
             svgGroup.setAttribute( 'clip-path', 'url(#' + clipId + ')' );
           }
 
-          this.clipPath.setAttribute( 'd', this.node._clipArea.getSVGPath() );
+          this.clipPath.setAttribute( 'd', this.node.clipArea.getSVGPath() );
         }
         else if ( this.clipDefinition ) {
           svgGroup.removeAttribute( 'clip-path' );
@@ -317,9 +319,9 @@ define( function( require ) {
       if ( this.willApplyTransforms ) {
         this.node.offStatic( 'transform', this.transformDirtyListener );
       }
+      this.node.offStatic( 'visibility', this.visibilityDirtyListener );
       if ( this.willApplyFilters ) {
         this.node.offStatic( 'opacity', this.opacityDirtyListener );
-        this.node.offStatic( 'visibility', this.visibilityDirtyListener );
       }
       //OHTWO TODO: remove clip workaround
       this.node.offStatic( 'clip', this.clipDirtyListener );

@@ -1,4 +1,4 @@
-// Copyright 2002-2014, University of Colorado Boulder
+// Copyright 2013-2015, University of Colorado Boulder
 
 
 /**
@@ -48,7 +48,7 @@ define( function( require ) {
     }
   }
 
-  scenery.Font = function Font( options ) {
+  function Font( options ) {
     // options from http://www.w3.org/TR/css3-fonts/
     this._style = 'normal';      // normal | italic | oblique
     this._variant = 'normal';    // normal | small-caps
@@ -145,8 +145,9 @@ define( function( require ) {
     this._font = this.computeShorthand();
 
     phetAllocation && phetAllocation( 'Font' );
-  };
-  var Font = scenery.Font;
+  }
+
+  scenery.register( 'Font', Font );
 
   inherit( Object, Font, {
     getFont: function() { return this._font; },

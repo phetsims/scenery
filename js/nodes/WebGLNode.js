@@ -1,7 +1,7 @@
-// Copyright 2002-2014, University of Colorado Boulder
+// Copyright 2014-2015, University of Colorado Boulder
 
 /**
- * A node that can be custom-drawn with WebGL calls. Manual handling of dirty region repainting.  Analogous to WebGLNode
+ * A node that can be custom-drawn with WebGL calls. Manual handling of dirty region repainting.  Analogous to CanvasNode
  *
  * setCanvasBounds (or the mutator canvasBounds) should be used to set the area that is drawn to (otherwise nothing
  * will show up)
@@ -12,20 +12,22 @@
 define( function( require ) {
   'use strict';
 
+  // modules
   var inherit = require( 'PHET_CORE/inherit' );
   var scenery = require( 'SCENERY/scenery' );
-
+  var Matrix3 = require( 'DOT/Matrix3' );
   var Node = require( 'SCENERY/nodes/Node' );
-  require( 'SCENERY/display/Renderer' );
+  var Renderer = require( 'SCENERY/display/Renderer' );
   var WebGLSelfDrawable = require( 'SCENERY/display/WebGLSelfDrawable' );
   var SelfDrawable = require( 'SCENERY/display/SelfDrawable' );
 
   // pass a canvasBounds option if you want to specify the self bounds
-  scenery.WebGLNode = function WebGLNode( options ) {
+  function WebGLNode( options ) {
     Node.call( this, options );
-    this.setRendererBitmask( scenery.bitmaskBoundsValid | scenery.bitmaskSupportsWebGL );
-  };
-  var WebGLNode = scenery.WebGLNode;
+    this.setRendererBitmask( Renderer.bitmaskWebGL );
+  }
+
+  scenery.register( 'WebGLNode', WebGLNode );
 
   inherit( Node, WebGLNode, {
 
@@ -40,9 +42,59 @@ define( function( require ) {
       return true;
     },
 
-    // override paintCanvas with a faster version, since fillRect and drawRect don't affect the current default path
-    paintCanvas: function( wrapper ) {
-      throw new Error( 'WebGLNode needs paintCanvas implemented' );
+    /**
+     * Initializes a WebGL drawable for a displayed instance of this node.
+     * @public
+     *
+     * Meant to be overridden by a concrete sub-type.
+     *
+     * IMPORTANT NOTE: This function will be run from inside Scenery's Display.updateDisplay(), so it should not modify
+     * or mutate any Scenery nodes (particularly anything that would cause something to be marked as needing a repaint).
+     * Ideally, this function should have no outside effects other than painting to the Canvas provided.
+     *
+     * @param {WebGLNode.WebGLNodeDrawable} drawable
+     */
+    initializeWebGLDrawable: function( drawable ) {
+      throw new Error( 'WebGLNode needs initializeWebGLDrawable implemented' );
+    },
+
+    /**
+     * Paints a WebGL drawable for a displayed instance of this node.
+     * @public
+     *
+     * Meant to be overridden by a concrete sub-type.
+     *
+     * IMPORTANT NOTE: This function will be run from inside Scenery's Display.updateDisplay(), so it should not modify
+     * or mutate any Scenery nodes (particularly anything that would cause something to be marked as needing a repaint).
+     * Ideally, this function should have no outside effects other than painting to the Canvas provided.
+     *
+     * For handling transforms, this function provides a matrix with the local-to-global coordinate transform, e.g.:
+     * gl.uniformMatrix3fv( uniforms.uModelViewMatrix, false, matrix.entries );
+     * AND also a recommended projection transform:
+     * gl.uniformMatrix3fv( uniforms.uProjectionMatrix, false, drawable.webGLBlock.projectionMatrixArray );
+     *
+     * @param {WebGLNode.WebGLNodeDrawable} drawable
+     * @param {Matrix3} matrix - The model-view matrix, from this node's local coordinate frame to Scenery's
+     *                           global coordinate frame
+     */
+    paintWebGLDrawable: function( drawable, matrix ) {
+      throw new Error( 'WebGLNode needs paintWebGLDrawable implemented' );
+    },
+
+    /**
+     * Cleans up a WebGL drawable for a displayed instance of this node.
+     * @public
+     *
+     * Meant to be overridden by a concrete sub-type.
+     *
+     * IMPORTANT NOTE: This function will be run from inside Scenery's Display.updateDisplay(), so it should not modify
+     * or mutate any Scenery nodes (particularly anything that would cause something to be marked as needing a repaint).
+     * Ideally, this function should have no outside effects other than painting to the Canvas provided.
+     *
+     * @param {WebGLNode.WebGLNodeDrawable} drawable
+     */
+    disposeWebGLDrawable: function( drawable ) {
+      throw new Error( 'WebGLNode needs disposeWebGLDrawable implemented' );
     },
 
     invalidatePaint: function() {
@@ -80,29 +132,37 @@ define( function( require ) {
 
   WebGLNode.prototype._mutatorKeys = [ 'canvasBounds' ].concat( Node.prototype._mutatorKeys );
 
+  var modelViewMatrix = new Matrix3().setTo32Bit();
+
   WebGLNode.WebGLNodeDrawable = inherit( WebGLSelfDrawable, function WebGLNodeDrawable( renderer, instance ) {
     this.initialize( renderer, instance );
   }, {
-    isCustomWebGLRenderer: true,
+    webglRenderer: Renderer.webglCustom,
 
     // called either from the constructor, or from pooling
     initialize: function( renderer, instance ) {
       this.initializeWebGLSelfDrawable( renderer, instance );
     },
 
-    initializeContext: function( webGLBlock ) {
+    onAddToBlock: function( webGLBlock ) {
       this.webGLBlock = webGLBlock;
-      this.backingScale = this.webGLBlock.webGLRenderer.backingScale;
-      this.gl = this.webGLBlock.webGLRenderer.gl;
+      this.backingScale = this.webGLBlock.backingScale;
+      this.gl = this.webGLBlock.gl;
 
       this.node.initializeWebGLDrawable( this );
+    },
+
+    onRemoveFromBlock: function( webGLBlock ) {
+
     },
 
     draw: function() {
       // we have a precompute need
       var matrix = this.instance.relativeTransform.matrix;
 
-      this.node.paintWebGLDrawable( this, matrix );
+      modelViewMatrix.set( matrix );
+
+      this.node.paintWebGLDrawable( this, modelViewMatrix );
     },
 
     dispose: function() {
@@ -121,15 +181,6 @@ define( function( require ) {
       this.markDirty();
     },
 
-    onAttach: function( node ) {
-
-    },
-
-    // release the drawable
-    onDetach: function( node ) {
-      //OHTWO TODO: are we missing the disposal?
-    },
-
     // forward call to the WebGLNode
     get shaderAttributes() {
       return this.node.shaderAttributes;
@@ -139,9 +190,7 @@ define( function( require ) {
       this.dirty = false;
     }
   } );
-
-  // set up pooling
-  SelfDrawable.Poolable.mixin( WebGLNode.WebGLNodeDrawable );
+  SelfDrawable.Poolable.mixin( WebGLNode.WebGLNodeDrawable ); // pooling
 
   return WebGLNode;
 } );

@@ -1,4 +1,4 @@
-// Copyright 2002-2014, University of Colorado Boulder
+// Copyright 2013-2015, University of Colorado Boulder
 
 /**
  * A DOM drawable (div element) that contains child blocks (and is placed in the main DOM tree when visible). It should
@@ -16,7 +16,6 @@ define( function( require ) {
   var cleanArray = require( 'PHET_CORE/cleanArray' );
   var scenery = require( 'SCENERY/scenery' );
   var Drawable = require( 'SCENERY/display/Drawable' );
-  var Renderer = require( 'SCENERY/display/Renderer' );
   var Stitcher = require( 'SCENERY/display/Stitcher' );
   var GreedyStitcher = require( 'SCENERY/display/GreedyStitcher' );
   var RebuildStitcher = require( 'SCENERY/display/RebuildStitcher' );
@@ -33,10 +32,11 @@ define( function( require ) {
    * @param {boolean} isDisplayRoot
    * @constructor
    */
-  scenery.BackboneDrawable = function BackboneDrawable( display, backboneInstance, transformRootInstance, renderer, isDisplayRoot ) {
+  function BackboneDrawable( display, backboneInstance, transformRootInstance, renderer, isDisplayRoot ) {
     this.initialize( display, backboneInstance, transformRootInstance, renderer, isDisplayRoot );
-  };
-  var BackboneDrawable = scenery.BackboneDrawable;
+  }
+
+  scenery.register( 'BackboneDrawable', BackboneDrawable );
 
   inherit( Drawable, BackboneDrawable, {
 
@@ -52,7 +52,7 @@ define( function( require ) {
 
       this.display = display;
 
-      this.forceAcceleration = Renderer.isAccelerationForced( this.renderer );
+      this.forceAcceleration = false;
 
       // reference to the instance that controls this backbone
       this.backboneInstance = backboneInstance;
@@ -75,6 +75,11 @@ define( function( require ) {
         this.backboneInstance.relativeTransform.addPrecompute(); // trigger precomputation of the relative transform, since we will always need it when it is updated
       }
 
+      this.backboneVisibilityListener = this.backboneVisibilityListener || this.updateBackboneVisibility.bind( this );
+      this.backboneInstance.onStatic( 'relativeVisibility', this.backboneVisibilityListener );
+      this.updateBackboneVisibility();
+      this.visibilityDirty = true;
+
       this.renderer = renderer;
       this.domElement = isDisplayRoot ? display._domElement : BackboneDrawable.createDivBackbone();
       this.isDisplayRoot = isDisplayRoot;
@@ -85,10 +90,8 @@ define( function( require ) {
       // if we need to, watch nodes below us (and including us) and apply their filters (opacity/visibility/clip) to the backbone.
       this.watchedFilterNodes = cleanArray( this.watchedFilterNodes );
       this.opacityDirty = true;
-      this.visibilityDirty = true;
       this.clipDirty = true;
       this.opacityDirtyListener = this.opacityDirtyListener || this.markOpacityDirty.bind( this );
-      this.visibilityDirtyListener = this.visibilityDirtyListener || this.markVisibilityDirty.bind( this );
       this.clipDirtyListener = this.clipDirtyListener || this.markClipDirty.bind( this );
       if ( this.willApplyFilters ) {
         assert && assert( this.filterRootAncestorInstance.trail.nodes.length < this.backboneInstance.trail.nodes.length,
@@ -100,7 +103,6 @@ define( function( require ) {
 
           this.watchedFilterNodes.push( node );
           node.onStatic( 'opacity', this.opacityDirtyListener );
-          node.onStatic( 'visibility', this.visibilityDirtyListener );
           node.onStatic( 'clip', this.clipDirtyListener );
         }
       }
@@ -128,13 +130,15 @@ define( function( require ) {
       sceneryLog && sceneryLog.BackboneDrawable && sceneryLog.BackboneDrawable( 'dispose ' + this.toString() );
       sceneryLog && sceneryLog.BackboneDrawable && sceneryLog.push();
 
+
       while ( this.watchedFilterNodes.length ) {
         var node = this.watchedFilterNodes.pop();
 
         node.offStatic( 'opacity', this.opacityDirtyListener );
-        node.offStatic( 'visibility', this.visibilityDirtyListener );
         node.offStatic( 'clip', this.clipDirtyListener );
       }
+
+      this.backboneInstance.offStatic( 'relativeVisibility', this.backboneVisibilityListener );
 
       // if we need to remove drawables from the blocks, do so
       if ( !this.removedDrawables ) {
@@ -180,6 +184,15 @@ define( function( require ) {
       }
     },
 
+    updateBackboneVisibility: function() {
+      this.visible = this.backboneInstance.relativeVisible;
+
+      if ( !this.visibilityDirty ) {
+        this.visibilityDirty = true;
+        this.markDirty();
+      }
+    },
+
     // should be called during syncTree
     markForDisposal: function( display ) {
       for ( var d = this.previousFirstDrawable; d !== null; d = d.oldNextDrawable ) {
@@ -193,6 +206,11 @@ define( function( require ) {
     },
 
     markDirtyDrawable: function( drawable ) {
+      if ( assert ) {
+        // Catch infinite loops
+        this.display.ensureNotPainting();
+      }
+
       this.dirtyDrawables.push( drawable );
       this.markDirty();
     },
@@ -207,13 +225,6 @@ define( function( require ) {
     markOpacityDirty: function() {
       if ( !this.opacityDirty ) {
         this.opacityDirty = true;
-        this.markDirty();
-      }
-    },
-
-    markVisibilityDirty: function() {
-      if ( !this.visibilityDirty ) {
-        this.visibilityDirty = true;
         this.markDirty();
       }
     },
@@ -243,7 +254,7 @@ define( function( require ) {
         if ( this.visibilityDirty ) {
           this.visibilityDirty = false;
 
-          this.domElement.style.display = ( this.willApplyFilters && !this.getFilterVisibility() ) ? 'none' : '';
+          this.domElement.style.display = this.visible ? '' : 'none';
         }
 
         if ( this.clipDirty ) {
@@ -285,7 +296,7 @@ define( function( require ) {
       //OHTWO TODO: proper clipping support
       // var len = this.watchedFilterNodes.length;
       // for ( var i = 0; i < len; i++ ) {
-      //   if ( this.watchedFilterNodes[i]._clipArea ) {
+      //   if ( this.watchedFilterNodes[i].clipArea ) {
       //     throw new Error( 'clip-path for backbones unimplemented, and with questionable browser support!' );
       //   }
       // }

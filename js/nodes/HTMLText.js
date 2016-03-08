@@ -1,4 +1,4 @@
-// Copyright 2002-2014, University of Colorado Boulder
+// Copyright 2013-2015, University of Colorado Boulder
 
 /**
  * HTML Text, with the same interface as Text
@@ -17,13 +17,14 @@ define( function( require ) {
    * NOTE: Currently does not properly handle multi-line (<br>) text height, since it expects DOM text that will be an
    * inline element
    */
-  scenery.HTMLText = function HTMLText( text, options ) {
+  function HTMLText( text, options ) {
     // internal flag for Text
     this._isHTML = true;
 
     Text.call( this, text, options );
-  };
-  var HTMLText = scenery.HTMLText;
+  }
+
+  scenery.register( 'HTMLText', HTMLText );
 
   inherit( Text, HTMLText, {} );
 

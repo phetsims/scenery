@@ -1,4 +1,4 @@
-// Copyright 2002-2014, University of Colorado Boulder
+// Copyright 2013-2015, University of Colorado Boulder
 
 
 /**
@@ -20,14 +20,15 @@ define( function( require ) {
   var Renderer = require( 'SCENERY/display/Renderer' );
   var Util = require( 'SCENERY/util/Util' );
 
-  scenery.CanvasBlock = function CanvasBlock( display, renderer, transformRootInstance, filterRootInstance ) {
+  function CanvasBlock( display, renderer, transformRootInstance, filterRootInstance ) {
     this.initialize( display, renderer, transformRootInstance, filterRootInstance );
-  };
-  var CanvasBlock = scenery.CanvasBlock;
+  }
+
+  scenery.register( 'CanvasBlock', CanvasBlock );
 
   inherit( FittedBlock, CanvasBlock, {
     initialize: function( display, renderer, transformRootInstance, filterRootInstance ) {
-      this.initializeFittedBlock( display, renderer, transformRootInstance );
+      this.initializeFittedBlock( display, renderer, transformRootInstance, FittedBlock.COMMON_ANCESTOR );
 
       this.filterRootInstance = filterRootInstance;
 
@@ -40,6 +41,9 @@ define( function( require ) {
         this.canvas.style.left = '0';
         this.canvas.style.top = '0';
         this.canvas.style.pointerEvents = 'none';
+
+        // unique ID so that we can support rasterization with Display.foreignObjectRasterization
+        this.canvasId = this.canvas.id = 'scenery-canvas' + this.id;
 
         this.context = this.canvas.getContext( '2d' );
 
@@ -61,6 +65,10 @@ define( function( require ) {
       // store our backing scale so we don't have to look it up while fitting
       this.backingScale = ( renderer & Renderer.bitmaskCanvasLowResolution ) ? 1 : scenery.Util.backingScale( this.context );
 
+      this.clipDirtyListener = this.markDirty.bind( this );
+      this.filterRootNode = this.filterRootInstance.node;
+      this.filterRootNode.onStatic( 'clip', this.clipDirtyListener );
+
       sceneryLog && sceneryLog.CanvasBlock && sceneryLog.CanvasBlock( 'initialized #' + this.id );
       // TODO: dirty list of nodes (each should go dirty only once, easier than scanning all?)
 
@@ -74,6 +82,8 @@ define( function( require ) {
       this.canvas.style.width = size.width + 'px';
       this.canvas.style.height = size.height + 'px';
       this.wrapper.resetStyles();
+      this.canvasDrawOffset.setXY( 0, 0 );
+      Util.unsetTransform( this.canvas );
     },
 
     setSizeFitBounds: function() {
@@ -108,7 +118,7 @@ define( function( require ) {
         this.context.clearRect( 0, 0, this.canvas.width, this.canvas.height ); // clear everything
 
         //OHTWO TODO: clipping handling!
-        if ( this.filterRootInstance.node._clipArea ) {
+        if ( this.filterRootNode.clipArea ) {
           this.context.save();
 
           this.temporaryRecursiveClip( this.filterRootInstance );
@@ -121,8 +131,9 @@ define( function( require ) {
           if ( drawable === this.lastDrawable ) { break; }
         }
 
-        if ( this.filterRootInstance.node._clipArea ) {
+        if ( this.filterRootNode.clipArea ) {
           this.context.restore();
+          this.wrapper.resetStyles();
         }
       }
 
@@ -134,19 +145,24 @@ define( function( require ) {
       if ( instance.parent ) {
         this.temporaryRecursiveClip( instance.parent );
       }
-      if ( instance.node._clipArea ) {
+      if ( instance.node.clipArea ) {
         //OHTWO TODO: reduce duplication here
         this.context.setTransform( this.backingScale, 0, 0, this.backingScale, this.canvasDrawOffset.x * this.backingScale, this.canvasDrawOffset.y * this.backingScale );
         instance.relativeTransform.matrix.canvasAppendTransform( this.context );
 
         // do the clipping
         this.context.beginPath();
-        instance.node._clipArea.writeToContext( this.context );
+        instance.node.clipArea.writeToContext( this.context );
         this.context.clip();
       }
     },
 
     renderDrawable: function( drawable ) {
+      // do not paint invisible drawables
+      if ( !drawable.visible ) {
+        return;
+      }
+
       // we're directly accessing the relative transform below, so we need to ensure that it is up-to-date
       assert && assert( drawable.instance.relativeTransform.isValidationNotNeeded() );
 
@@ -166,6 +182,9 @@ define( function( require ) {
     dispose: function() {
       sceneryLog && sceneryLog.CanvasBlock && sceneryLog.CanvasBlock( 'dispose #' + this.id );
 
+      this.filterRootNode.offStatic( 'clip', this.clipDirtyListener );
+      this.filterRootNode = null;
+
       // clear references
       this.transformRootInstance = null;
       cleanArray( this.dirtyDrawables );
@@ -181,6 +200,11 @@ define( function( require ) {
       sceneryLog && sceneryLog.dirty && sceneryLog.dirty( 'markDirtyDrawable on CanvasBlock#' + this.id + ' with ' + drawable.toString() );
 
       assert && assert( drawable );
+
+      if ( assert ) {
+        // Catch infinite loops
+        this.display.ensureNotPainting();
+      }
 
       // TODO: instance check to see if it is a canvas cache (usually we don't need to call update on our drawables)
       this.dirtyDrawables.push( drawable );

@@ -7,22 +7,22 @@
 
   <title>Documentation - Scenery</title>
 
-  <link rel="stylesheet" href="../../sherpa/bootstrap-2.2.2.css">
-  <link rel="stylesheet" href="../../sherpa/bootstrap-responsive-2.2.2.css">
-  <link rel="stylesheet" href="../../sherpa/syntaxhighlighter-3.0.83/shCore.css">
-  <link rel="stylesheet" href="../../sherpa/syntaxhighlighter-3.0.83/shThemeDefault.css">
+  <link rel="stylesheet" href="../../sherpa/lib/bootstrap-2.2.2.css">
+  <link rel="stylesheet" href="../../sherpa/lib/bootstrap-responsive-2.2.2.css">
+  <link rel="stylesheet" href="../../sherpa/lib/syntaxhighlighter-3.0.83/shCore.css">
+  <link rel="stylesheet" href="../../sherpa/lib/syntaxhighlighter-3.0.83/shThemeDefault.css">
   <link rel="stylesheet" href="../assets/scenery.css">
 
   <!-- jQuery and LoDash are dependencies -->
-  <script src="../../sherpa/jquery-2.1.0.min.js"></script>
-  <script src="../../sherpa/lodash-2.4.1.min.js"></script>
+  <script src="../../sherpa/lib/jquery-2.1.0.min.js"></script>
+  <script src="../../sherpa/lib/lodash-2.4.1.min.js"></script>
 
   <!-- For the styling -->
-  <script src="../../sherpa/bootstrap-2.2.2.js"></script>
+  <script src="../../sherpa/lib/bootstrap-2.2.2.js"></script>
 
-  <script src="../../sherpa/syntaxhighlighter-3.0.83/shCore.js"></script>
-  <script src="../../sherpa/syntaxhighlighter-3.0.83/shBrushJScript.js"></script>
-  <script src="../../sherpa/syntaxhighlighter-3.0.83/shBrushXml.js"></script>
+  <script src="../../sherpa/lib/syntaxhighlighter-3.0.83/shCore.js"></script>
+  <script src="../../sherpa/lib/syntaxhighlighter-3.0.83/shBrushJScript.js"></script>
+  <script src="../../sherpa/lib/syntaxhighlighter-3.0.83/shBrushXml.js"></script>
 
   <!-- MathJax config -->
   <script type="text/x-mathjax-config">
@@ -154,11 +154,14 @@
 
     <a class="navlink" href="#node">Node</a><br>
     <a class="sublink" href="#node-options">(options)</a><br>
+    <a class="sublink" href="#node-events">(events)</a><br>
     <a class="sublink" href="#node-children">children</a><br>
     <a class="sublink" href="#node-parents">parents</a><br>
     <a class="sublink" href="#node-addChild">addChild</a><br>
     <a class="sublink" href="#node-insertChild">insertChild</a><br>
     <a class="sublink" href="#node-removeChild">removeChild</a><br>
+    <a class="sublink" href="#node-removeChildAt">removeChildAt</a><br>
+    <a class="sublink" href="#node-removeAllChildren">removeAllChildren</a><br>
     <a class="sublink" href="#node-addPeer">addPeer</a><br>
     <a class="sublink" href="#node-detach">detach</a><br>
     <a class="sublink" href="#node-cursor">cursor</a><br>
@@ -205,10 +208,8 @@
     <a class="navlink" href="#paintable">Paintable</a><br>
     <a class="sublink" href="#paintable-fill">fill</a><br>
     <a class="sublink" href="#paintable-fillPickable">fillPickable</a><br>
-    <a class="sublink" href="#paintable-fillColor">fillColor</a><br>
     <a class="sublink" href="#paintable-stroke">stroke</a><br>
     <a class="sublink" href="#paintable-strokePickable">strokePickable</a><br>
-    <a class="sublink" href="#paintable-strokeColor">strokeColor</a><br>
     <a class="sublink" href="#paintable-lineWidth">lineWidth</a><br>
     <a class="sublink" href="#paintable-lineCap">lineCap</a><br>
     <a class="sublink" href="#paintable-lineJoin">lineJoin</a><br>
@@ -260,6 +261,9 @@
     <a class="sublink" href="#rectangle-rectY">rectY</a><br>
     <a class="sublink" href="#rectangle-rectWidth">rectWidth</a><br>
     <a class="sublink" href="#rectangle-rectHeight">rectHeight</a><br>
+    <a class="sublink" href="#rectangle-cornerRadius">cornerRadius</a><br>
+    <a class="sublink" href="#rectangle-cornerXRadius">cornerXRadius</a><br>
+    <a class="sublink" href="#rectangle-cornerYRadius">cornerYRadius</a><br>
 
     <a class="navlink" href="#circle">Circle</a><br>
     <a class="sublink" href="#circle-radius">radius</a><br>
@@ -335,7 +339,7 @@ npm install
 grunt</pre>
 
     <p>
-      You will now have the built files under build/
+      You will now have the built files under build/, and all of the documentation/examples should work locally.
     </p>
 
     <h2 id="dependencies">Dependencies</h2>
@@ -350,8 +354,7 @@ grunt</pre>
 
     <strong>Internal</strong> dependencies:
     <ul>
-      <li><a href="https://github.com/phetsims/assert">assert</a> for assertion handling. If you want assertions different from the defaults, include
-        <a href="https://github.com/phiggins42/has.js/">has.js</a>.
+      <li><a href="https://github.com/phetsims/assert">assert</a> for assertion handling.
       </li>
       <li><a href="https://github.com/phetsims/phet-core">phet-core</a> for other utility functions.</li>
       <li><a href="../../dot">Dot</a> for math.</li>
@@ -360,13 +363,6 @@ grunt</pre>
 
     <h2 id="debugging">Debugging</h2>
 
-    <p>
-      If has.js is included, Scenery assertions can be enabled or disabled. Performance can be significantly decreased if all assertions are enabled.
-    </p>
-
-    <p>
-      To enable all assertions for debugging, run the following (assuming has.js has been loaded):
-    </p>
       <pre class="brush: js">
 window.assertions.enableAssert();
 window.assertions.enableAssertSlow();
@@ -459,6 +455,33 @@ window.assertions.disableAssertSlow();
       </li>
     </ul>
 
+    <h4 id="node-events">Node Events</h4>
+    A Node (and Node subtypes) extend <a href="https://github.com/phetsims/axon">Axon</a>'s Events type, which exposes
+    the following types of events (fired when they either occur or change):
+
+    <ul>
+      <li>childInserted: <code>function( childNode, index )</code> Called when a child is <a href="node-addChild">added</a>
+        or <a href="node-insertChild">inserted</a>, and includes the new index into the <a href="node-children">children</a>.</li>
+      <li>childRemoved: <code>function( childNode, index )</code> Called when a child is <a href="node-removeChild">removed</a>
+        and includes the old index into the <a href="node-children">children</a>.</li>
+      <li>bounds: <code>function()</code> Called when the bounds in the parent coordinate frame changes.
+        See <a href="node-bounds">bounds</a>.</li>
+      <li>localBounds: <code>function()</code> Called when the bounds in the local coordinate frame changes.
+        See <a href="node-localBounds">localBounds</a>.</li>
+      <li>childBounds: <code>function()</code> Called when the bounds of all children in the local coordinate
+        frame changes. See <a href="node-childBounds">childBounds</a>.</li>
+      <li>selfBounds: <code>function()</code> Called when the self bounds change.
+        See <a href="node-selfBounds">selfBounds</a>.</li>
+      <li>transform: <code>function()</code> Called when the transform changes.</li>
+      <li>visibility: <code>function()</code> Called when the <a href="node-visible">visibility</a> changes.</li>
+      <li>opacity: <code>function()</code> Called when the <a href="node-opacity">opacity</a> changes.</li>
+      <li>clip: <code>function()</code> Called when the <a href="node-clipArea">clipArea</a> changes.</li>
+      <!-- <li>rendererBitmask: <code>function()</code></li> -->
+      <!-- <li>rendererSummary: <code>function()</code></li> -->
+      <!-- <li>hint: <code>function( [hintName] )</code></li> -->
+      <!-- <li>localBoundsOverride: <code>function( isOverridden )</code></li> -->
+    </ul>
+
     <h4 id="node-children">node.children</h4>
 
     <p>
@@ -521,6 +544,18 @@ window.assertions.disableAssertSlow();
 
     <p>
       Removes childNode from node's children.
+    </p>
+
+    <h4 id="node-removeChildAt">node.removeChildAt( <span class="args">index</span> )</h4>
+
+    <p>
+      Removes the child node <code>node.children[ index ]</code> from node's children.
+    </p>
+
+    <h4 id="node-removeAllChildren">node.removeAllChildren()</h4>
+
+    <p>
+      Removes all of the Node's children.
     </p>
 
     <h4 id="node-addPeer">node.addPeer( <span class="args">element, options</span> )</h4>
@@ -1066,13 +1101,6 @@ window.assertions.disableAssertSlow();
       If a <a href="#color">Color</a> object is used for a fill, any changes to the Color object will update this node.
     </p>
 
-    <h4 id="paintable-fillColor">fillColor</h4>
-
-    <p>
-      <code>node.fillColor</code> is a getter linked to <code>node.getFillColor()</code>. It will always return a
-      <a href="#color">Color</a> if there is a <a href="#paintable-fill">fill</a> on the node, or null otherwise.
-    </p>
-
     <h4 id="paintable-fillPickable">fillPickable</h4>
 
     <p>
@@ -1105,13 +1133,6 @@ window.assertions.disableAssertSlow();
     <p>
       If a <a href="#color">Color</a> object is used for a stroke, any changes to the Color object will update this
       node.
-    </p>
-
-    <h4 id="paintable-strokeColor">strokeColor</h4>
-
-    <p>
-      <code>node.strokeColor</code> is a getter linked to <code>node.getStrokeColor()</code>. It will always return a
-      <a href="#color">Color</a> if there is a <a href="#paintable-stroke">stroke</a> on the node, or null otherwise.
     </p>
 
     <h4 id="paintable-strokePickable">strokePickable</h4>
@@ -1879,18 +1900,28 @@ window.assertions.disableAssertSlow();
       retrieves or modifies the 'height' parameter of the <a href="#rectangle">Rectangle</a>.
     </p>
 
-    <h4 id="rectangle-rectArcWidth">rectArcWidth</h4>
+    <h4 id="rectangle-cornerRadius">cornerRadius</h4>
 
     <p>
-      <code>node.rectArcWidth</code> (<code>node.getRectArcWidth()</code>, <code>node.setRectArcWidth( arcWidth )</code>)
-      retrieves or modifies the 'width' parameter of the <a href="#rectangle">Rectangle</a>.
+      <code>node.cornerRadius</code> (<code>node.getCornerRadius()</code>, <code>node.setCornerRadius( radius )</code>)
+      retrieves or modifies the 'cornerRadius' parameter of the <a href="#rectangle">Rectangle</a>. This effectively
+      sets both the <a href="#rectangle-cornerXRadus">cornerXRadius</a> and
+      <a href="#rectangle-cornerYRadus">cornerYRadius</a> at the same time. An assertion will fail if the getter is
+      called while the two corner radii are different.
     </p>
 
-    <h4 id="rectangle-rectArcHeight">rectArcHeight</h4>
+    <h4 id="rectangle-cornerXRadius">cornerXRadius</h4>
 
     <p>
-      <code>node.rectArcHeight</code> (<code>node.getRectArcHeight()</code>, <code>node.setRectArcHeight( arcHeight )</code>)
-      retrieves or modifies the 'height' parameter of the <a href="#rectangle">Rectangle</a>.
+      <code>node.cornerXRadius</code> (<code>node.getCornerXRadius()</code>, <code>node.setCornerXRadius( radius )</code>)
+      retrieves or modifies the 'cornerXRadius' parameter of the <a href="#rectangle">Rectangle</a>.
+    </p>
+
+    <h4 id="rectangle-cornerYRadius">cornerYRadius</h4>
+
+    <p>
+      <code>node.cornerYRadius</code> (<code>node.getCornerYRadius()</code>, <code>node.setCornerYRadius( radius )</code>)
+      retrieves or modifies the 'cornerYRadius' parameter of the <a href="#rectangle">Rectangle</a>.
     </p>
 
     <h3 id="circle" class="section">Circle</h3>
