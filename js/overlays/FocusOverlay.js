@@ -49,6 +49,7 @@ define( function( require ) {
 
     // @private {DOMElement}
     this.domElement = this.focusDisplay.domElement;
+    this.domElement.style.pointerEvents = 'none';
 
     // @private Bounds highlight
     this.boundsHighlight = new Rectangle( 0, 0, 0, 0, { stroke: FocusOverlay.focusColor, visible: false } );
