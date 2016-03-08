@@ -1499,6 +1499,7 @@ define( 'SCENERY/accessibility/AccessibleInstance',['require','PHET_CORE/inherit
         accessibilityContainer.style.width = '0';
         accessibilityContainer.style.height = '0';
         accessibilityContainer.style.clip = 'rect(0,0,0,0)';
+        accessibilityContainer.style.pointerEvents = 'none';
         this.peer = new scenery.AccessiblePeer( this, accessibilityContainer );
       }
       else {
@@ -37274,6 +37275,7 @@ define( 'SCENERY/overlays/FocusOverlay',['require','PHET_CORE/inherit','SCENERY/
 
     // @private {DOMElement}
     this.domElement = this.focusDisplay.domElement;
+    this.domElement.style.pointerEvents = 'none';
 
     // @private Bounds highlight
     this.boundsHighlight = new Rectangle( 0, 0, 0, 0, { stroke: FocusOverlay.focusColor, visible: false } );
