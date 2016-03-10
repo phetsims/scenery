@@ -1,0 +1,49 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8"/>
+  <meta http-equiv="X-UA-Compatible" content="IE=edge"/>
+
+  <title>Edge Embedding Marks</title>
+
+  <style>
+    canvas {
+    }
+  </style>
+</head>
+<body>
+
+<script type="text/javascript">
+
+(function() {
+  var string = '\u202a\u202a\u2126\u202c\u202acm\u202c\u202c';
+
+  // DOM
+  var div = document.createElement( 'div' );
+  div.style.fontSize = '20px';
+  div.innerHTML = 'DOM: ' + string;
+  document.body.appendChild( div );
+
+  // SVG
+  var svg = document.createElementNS( 'http://www.w3.org/2000/svg', 'svg' );
+  svg.style.display = 'block';
+  svg.setAttribute( 'height', 25 );
+  var svgText = document.createElementNS( 'http://www.w3.org/2000/svg', 'text' );
+  svgText.setAttribute( 'y', 20 );
+  svgText.setAttribute( 'font-size', 20 );
+  svgText.appendChild( document.createTextNode( 'SVG: ' + string ) );
+  svg.appendChild( svgText );
+  document.body.appendChild( svg );
+
+  // Canvas
+  var canvas = document.createElement( 'canvas' );
+  var context = canvas.getContext( '2d' );
+  document.body.appendChild( canvas );
+  context.font = '20px serif';
+  context.fillText( 'Canvas: ' + string, 0, 20 );
+})();
+
+</script>
+
+</body>
+</html>
