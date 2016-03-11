@@ -315,8 +315,20 @@ define( function( require ) {
     updateColor: function() {
       assert && assert( !this.immutable, 'Cannot modify an immutable color' );
 
+      assert && assert( typeof this.red === 'number' &&
+                        typeof this.green === 'number' &&
+                        typeof this.blue === 'number' &&
+                        typeof this.alpha === 'number',
+        'Ensure color components are numeric: ' + this.toString() );
+
       assert && assert( isFinite( this.red ) && isFinite( this.green ) && isFinite( this.blue ) && isFinite( this.alpha ),
         'Ensure color components are finite and not NaN' );
+
+      assert && assert( this.red >= 0 && this.red <= 255 &&
+                        this.green >= 0 && this.green <= 255 &&
+                        this.red >= 0 && this.red <= 255 &&
+                        this.alpha >= 0 && this.alpha <= 1,
+        'Ensure color components are in the proper ranges: ' + this.toString() );
 
       var oldCSS = this._css;
       this._css = this.computeCSS();
