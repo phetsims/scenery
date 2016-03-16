@@ -22,9 +22,23 @@ define( function( require ) {
   var SelfDrawable = require( 'SCENERY/display/SelfDrawable' );
 
   // pass a canvasBounds option if you want to specify the self bounds
-  function WebGLNode( options ) {
+  function WebGLNode( painterType, options ) {
     Node.call( this, options );
     this.setRendererBitmask( Renderer.bitmaskWebGL );
+
+    /**
+     * @private {Function}
+     *
+     * painterType will be called with new painterType( gl, node ). Should contain the following methods:
+     *
+     * paint( modelViewMatrix, projectionMatrix )
+     *   {Matrix3} modelViewMatrix - Transforms from the node's local coordinate frame to Scenery's global coordinate
+     *                               frame.
+     *   {Matrix3} projectionMatrix - Transforms from the global coordinate frame to normalized device coordinates.
+     *
+     * dispose()
+     */
+    this.painterType = painterType;
   }
 
   scenery.register( 'WebGLNode', WebGLNode );
@@ -149,7 +163,8 @@ define( function( require ) {
       this.backingScale = this.webGLBlock.backingScale;
       this.gl = this.webGLBlock.gl;
 
-      this.node.initializeWebGLDrawable( this );
+      var PainterType = this.node.painterType;
+      this.painter = new PainterType( this.gl, this.node );
     },
 
     onRemoveFromBlock: function( webGLBlock ) {
@@ -162,11 +177,11 @@ define( function( require ) {
 
       modelViewMatrix.set( matrix );
 
-      this.node.paintWebGLDrawable( this, modelViewMatrix );
+      this.painter.paint( modelViewMatrix, this.webGLBlock.projectionMatrix );
     },
 
     dispose: function() {
-      this.node.disposeWebGLDrawable( this );
+      this.painter.dispose();
 
       if ( this.webGLBlock ) {
         this.webGLBlock = null;
