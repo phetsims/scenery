@@ -848,7 +848,9 @@ define( function( require ) {
     },
 
     paintCanvas: function( wrapper, node ) {
-      if ( node._image ) {
+      // Ensure that the image has been loaded by checking whether it has a width or height of 0.
+      // See https://github.com/phetsims/scenery/issues/536
+      if ( node._image && node._image.width !== 0 && node._image.height !== 0 ) {
         wrapper.context.drawImage( node._image, 0, 0 );
       }
     },
