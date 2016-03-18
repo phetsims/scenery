@@ -1,10 +1,10 @@
 // Copyright 2014-2015, University of Colorado Boulder
 
 /**
- * A node that can be custom-drawn with WebGL calls. Manual handling of dirty region repainting.  Analogous to CanvasNode
+ * A node that is drawn with custom WebGL calls, specified by the painter type passed in. Responsible for handling its
+ * own bounds and invalidation (via setting canvasBounds and calling invalidatePaint()).
  *
- * setCanvasBounds (or the mutator canvasBounds) should be used to set the area that is drawn to (otherwise nothing
- * will show up)
+ * This is the WebGL equivalent of CanvasNode.
  *
  * @author Jonathan Olson <jonathan.olson@colorado.edu>
  * @author Sam Reid
@@ -21,23 +21,34 @@ define( function( require ) {
   var WebGLSelfDrawable = require( 'SCENERY/display/WebGLSelfDrawable' );
   var SelfDrawable = require( 'SCENERY/display/SelfDrawable' );
 
-  // pass a canvasBounds option if you want to specify the self bounds
+  /**
+   * @constructor
+   *
+   * It is required to pass a canvasBounds option and/or keep canvasBounds such that it will cover the entirety of the
+   * Node. This will also set its self bounds.
+   *
+   * A "Painter" type should be passed to the constructor. It will be responsible for creating individual "painters"
+   * that are used with different WebGL contexts to paint. This is helpful, since each context will need to have its
+   * own buffers/textures/etc.
+   *
+   * painterType will be called with new painterType( gl, node ). Should contain the following methods:
+   *
+   * paint( modelViewMatrix, projectionMatrix )
+   *   {Matrix3} modelViewMatrix - Transforms from the node's local coordinate frame to Scenery's global coordinate
+   *                               frame.
+   *   {Matrix3} projectionMatrix - Transforms from the global coordinate frame to normalized device coordinates.
+   * dispose()
+   *
+   * @param {Function} painterType - The type (constructor) for the painters that will be used for this node.
+   * @param {Object} [options]
+   */
   function WebGLNode( painterType, options ) {
     Node.call( this, options );
+
+    // Only support rendering in WebGL
     this.setRendererBitmask( Renderer.bitmaskWebGL );
 
-    /**
-     * @private {Function}
-     *
-     * painterType will be called with new painterType( gl, node ). Should contain the following methods:
-     *
-     * paint( modelViewMatrix, projectionMatrix )
-     *   {Matrix3} modelViewMatrix - Transforms from the node's local coordinate frame to Scenery's global coordinate
-     *                               frame.
-     *   {Matrix3} projectionMatrix - Transforms from the global coordinate frame to normalized device coordinates.
-     *
-     * dispose()
-     */
+    // @private {Function} - Used to create the painters
     this.painterType = painterType;
   }
 
@@ -45,72 +56,35 @@ define( function( require ) {
 
   inherit( Node, WebGLNode, {
 
-    // how to set the bounds of the WebGLNode
+    /**
+     * Sets the bounds that are used for layout/repainting.
+     * @public
+     *
+     * These bounds should always cover at least the area where the WebGLNode will draw in. If this is violated, this
+     * node may be partially or completely invisible in Scenery's output.
+     *
+     * @param {Bounds2} selfBounds
+     */
     setCanvasBounds: function( selfBounds ) {
       this.invalidateSelf( selfBounds );
     },
     set canvasBounds( value ) { this.setCanvasBounds( value ); },
     get canvasBounds() { return this.getSelfBounds(); },
 
+    /**
+     * @override
+     *
+     * @returns {boolean} - Whether this node is painted (always is!)
+     */
     isPainted: function() {
       return true;
     },
 
     /**
-     * Initializes a WebGL drawable for a displayed instance of this node.
+     * Should be called when this node needs to be repainted. When not called, Scenery assumes that this node does
+     * NOT need to be repainted (although Scenery may repaint it due to other nodes needing to be repainted).
      * @public
-     *
-     * Meant to be overridden by a concrete sub-type.
-     *
-     * IMPORTANT NOTE: This function will be run from inside Scenery's Display.updateDisplay(), so it should not modify
-     * or mutate any Scenery nodes (particularly anything that would cause something to be marked as needing a repaint).
-     * Ideally, this function should have no outside effects other than painting to the Canvas provided.
-     *
-     * @param {WebGLNode.WebGLNodeDrawable} drawable
      */
-    initializeWebGLDrawable: function( drawable ) {
-      throw new Error( 'WebGLNode needs initializeWebGLDrawable implemented' );
-    },
-
-    /**
-     * Paints a WebGL drawable for a displayed instance of this node.
-     * @public
-     *
-     * Meant to be overridden by a concrete sub-type.
-     *
-     * IMPORTANT NOTE: This function will be run from inside Scenery's Display.updateDisplay(), so it should not modify
-     * or mutate any Scenery nodes (particularly anything that would cause something to be marked as needing a repaint).
-     * Ideally, this function should have no outside effects other than painting to the Canvas provided.
-     *
-     * For handling transforms, this function provides a matrix with the local-to-global coordinate transform, e.g.:
-     * gl.uniformMatrix3fv( uniforms.uModelViewMatrix, false, matrix.entries );
-     * AND also a recommended projection transform:
-     * gl.uniformMatrix3fv( uniforms.uProjectionMatrix, false, drawable.webGLBlock.projectionMatrixArray );
-     *
-     * @param {WebGLNode.WebGLNodeDrawable} drawable
-     * @param {Matrix3} matrix - The model-view matrix, from this node's local coordinate frame to Scenery's
-     *                           global coordinate frame
-     */
-    paintWebGLDrawable: function( drawable, matrix ) {
-      throw new Error( 'WebGLNode needs paintWebGLDrawable implemented' );
-    },
-
-    /**
-     * Cleans up a WebGL drawable for a displayed instance of this node.
-     * @public
-     *
-     * Meant to be overridden by a concrete sub-type.
-     *
-     * IMPORTANT NOTE: This function will be run from inside Scenery's Display.updateDisplay(), so it should not modify
-     * or mutate any Scenery nodes (particularly anything that would cause something to be marked as needing a repaint).
-     * Ideally, this function should have no outside effects other than painting to the Canvas provided.
-     *
-     * @param {WebGLNode.WebGLNodeDrawable} drawable
-     */
-    disposeWebGLDrawable: function( drawable ) {
-      throw new Error( 'WebGLNode needs disposeWebGLDrawable implemented' );
-    },
-
     invalidatePaint: function() {
       var stateLen = this._drawables.length;
       for ( var i = 0; i < stateLen; i++ ) {
@@ -118,14 +92,20 @@ define( function( require ) {
       }
     },
 
-    // override for computation of whether a point is inside the self content
-    // point is considered to be in the local coordinate frame
+    /**
+     * Whether a given point is contained inside this node. For WebGLNode, we default to false always (you will need to
+     * override this method if you want your WebGLNode to respond to user input).
+     * @override
+     *
+     * @param {Vector2} point
+     * @returns {boolean}
+     */
     containsPointSelf: function( point ) {
       return false;
-      // throw new Error( 'WebGLNode needs containsPointSelf implemented' );
     },
 
     canvasPaintSelf: function( wrapper ) {
+      // TODO: see https://github.com/phetsims/scenery/issues/308
       assert && assert( 'unimplemented: canvasPaintSelf in WebGLNode' );
     },
 
@@ -133,24 +113,20 @@ define( function( require ) {
       return WebGLNode.WebGLNodeDrawable.createFromPool( renderer, instance );
     },
 
-    // whether this node's self intersects the specified bounds, in the local coordinate frame
-    // intersectsBoundsSelf: function( bounds ) {
-    //   // TODO: implement?
-    // },
-
     getBasicConstructor: function( propLines ) {
       return 'new scenery.WebGLNode( {' + propLines + '} )'; // TODO: no real way to do this nicely?
     }
-
   } );
 
   WebGLNode.prototype._mutatorKeys = [ 'canvasBounds' ].concat( Node.prototype._mutatorKeys );
 
+  // Use a Float32Array-backed matrix, as it's better for usage with WebGL
   var modelViewMatrix = new Matrix3().setTo32Bit();
 
   WebGLNode.WebGLNodeDrawable = inherit( WebGLSelfDrawable, function WebGLNodeDrawable( renderer, instance ) {
     this.initialize( renderer, instance );
   }, {
+    // What type of WebGL renderer/processor should be used.
     webglRenderer: Renderer.webglCustom,
 
     // called either from the constructor, or from pooling
