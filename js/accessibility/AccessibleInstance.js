@@ -288,8 +288,9 @@ define( function( require ) {
         'Disposing ' + this.toString() );
       sceneryLog && sceneryLog.AccessibleInstance && sceneryLog.push();
 
-      // Disconnect DOM
+      // Disconnect DOM and remove listeners
       if ( !this.isRootInstance ) {
+        this.peer.dispose();
         this.parent.peer.getChildContainerElement().removeChild( this.peer.domElement );
       }
 

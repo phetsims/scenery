@@ -48,20 +48,24 @@ define( function( require ) {
 
       this.disposed = false;
 
-      this.domElement.addEventListener( 'focus', function( event ) {
+      // @private - listener for the focus event, to be disposed
+      peer.focusEventListener = function( event ) {
         if ( event.target === peer.domElement ) {
           Display.focus = {
             display: accessibleInstance.display,
             trail: accessibleInstance.trail
           };
         }
-      } );
+      };
+      this.domElement.addEventListener( 'focus', peer.focusEventListener );
 
-      this.domElement.addEventListener( 'blur', function( event ) {
-        if ( event.target === peer.domElement ) {
+      // @private - listener for the blur event, to be disposed
+      peer.blurEventListener = function( event ) {
+        if( event.target === peer.domElement ) {
           Display.focus = null;
         }
-      } );
+      };
+      this.domElement.addEventListener( 'blur', peer.blurEventListener);
 
       return this;
     },
@@ -72,6 +76,9 @@ define( function( require ) {
 
     dispose: function() {
       this.disposed = true;
+
+      this.domElement.removeEventListener( 'blur', this.blurEventListener );
+      this.domElement.removeEventListener( 'focus', this.focusEventListener );
 
       // for now
       this.freeToPool && this.freeToPool();
