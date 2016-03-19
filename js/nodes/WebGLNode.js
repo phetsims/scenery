@@ -153,6 +153,9 @@ define( function( require ) {
     getBasicConstructor: function( propLines ) {
       return 'new scenery.WebGLNode( {' + propLines + '} )'; // TODO: no real way to do this nicely?
     }
+  }, {
+    PAINTED_NOTHING: 0,
+    PAINTED_SOMETHING: 1
   } );
 
   WebGLNode.prototype._mutatorKeys = [ 'canvasBounds' ].concat( Node.prototype._mutatorKeys );
@@ -190,7 +193,13 @@ define( function( require ) {
 
       modelViewMatrix.set( matrix );
 
-      this.painter.paint( modelViewMatrix, this.webGLBlock.projectionMatrix );
+      var painted = this.painter.paint( modelViewMatrix, this.webGLBlock.projectionMatrix );
+
+      assert && assert( painted === WebGLNode.PAINTED_SOMETHING || painted === WebGLNode.PAINTED_NOTHING );
+      assert && assert( WebGLNode.PAINTED_NOTHING === 0 && WebGLNode.PAINTED_SOMETHING === 1,
+        'Ensure we can pass the value through directly to indicate whether draw calls were made' );
+
+      return painted;
     },
 
     dispose: function() {

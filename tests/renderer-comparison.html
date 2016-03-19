@@ -350,6 +350,8 @@
                     gl.drawArrays( gl.LINES, 0, 2 );
 
                     shaderProgram.unuse();
+
+                    return scenery.WebGLNode.PAINTED_SOMETHING;
                   },
 
                   dispose: function() {

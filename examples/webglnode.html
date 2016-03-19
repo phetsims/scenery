@@ -112,6 +112,8 @@
       gl.drawArrays( gl.TRIANGLES, 0, 3 );
 
       this.shaderProgram.unuse();
+
+      return scenery.WebGLNode.PAINTED_SOMETHING;
     },
 
     dispose: function() {

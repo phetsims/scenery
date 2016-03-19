@@ -370,8 +370,9 @@ define( function( require ) {
     // @private
     draw: function() {
       if ( this.drawable ) {
-        this.drawable.draw();
-        this.drawCount++;
+        var count = this.drawable.draw();
+        assert && assert( typeof count === 'number' );
+        this.drawCount += count;
         this.drawable = null;
       }
     }
