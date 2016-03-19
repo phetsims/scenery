@@ -499,6 +499,16 @@ define( function( require ) {
       return shader;
     },
 
+    applyWebGLContextDefaults: function( gl ) {
+      // What color gets set when we call gl.clear()
+      gl.clearColor( 0, 0, 0, 0 );
+
+      // Blending similar to http://localhost/phet/git/webgl-blendfunctions/blendfuncseparate.html
+      gl.enable( gl.BLEND );
+      gl.blendEquationSeparate( gl.FUNC_ADD, gl.FUNC_ADD );
+      gl.blendFuncSeparate( gl.SRC_ALPHA, gl.ONE_MINUS_SRC_ALPHA, gl.ONE, gl.ONE_MINUS_SRC_ALPHA );
+    },
+
     /**
      * Check to see whether webgl is supported, using the same strategy as mrdoob and pixi.js
      * @public

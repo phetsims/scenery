@@ -3485,8 +3485,9 @@ define( function( require ) {
      * @public
      *
      * @param {CanvasContextWrapper} wrapper
+     * @param {Matrix3} matrix - The current transformation matrix associated with the wrapper
      */
-    renderToCanvasSelf: function( wrapper ) {
+    renderToCanvasSelf: function( wrapper, matrix ) {
       if ( this.isPainted() && ( this._rendererBitmask & Renderer.bitmaskCanvas ) ) {
         this.canvasPaintSelf( wrapper );
       }
@@ -3504,7 +3505,7 @@ define( function( require ) {
 
       wrapper.resetStyles();
 
-      this.renderToCanvasSelf( wrapper );
+      this.renderToCanvasSelf( wrapper, matrix );
       for ( var i = 0; i < this._children.length; i++ ) {
         var child = this._children[ i ];
 

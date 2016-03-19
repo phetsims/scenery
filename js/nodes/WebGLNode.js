@@ -20,6 +20,7 @@ define( function( require ) {
   var Renderer = require( 'SCENERY/display/Renderer' );
   var WebGLSelfDrawable = require( 'SCENERY/display/WebGLSelfDrawable' );
   var SelfDrawable = require( 'SCENERY/display/SelfDrawable' );
+  var Util = require( 'SCENERY/util/Util' );
 
   /**
    * @constructor
@@ -109,6 +110,40 @@ define( function( require ) {
     canvasPaintSelf: function( wrapper ) {
       // TODO: see https://github.com/phetsims/scenery/issues/308
       assert && assert( 'unimplemented: canvasPaintSelf in WebGLNode' );
+    },
+
+    renderToCanvasSelf: function( wrapper, matrix ) {
+      var width = wrapper.canvas.width;
+      var height = wrapper.canvas.height;
+
+      var scratchCanvas = document.createElement( 'canvas' );
+      scratchCanvas.width = width;
+      scratchCanvas.height = height;
+      var contextOptions = {
+        antialias: true,
+        preserveDrawingBuffer: true // so we can get the data and render it to the Canvas
+      };
+      var gl = scratchCanvas.getContext( 'webgl', contextOptions ) || scratchCanvas.getContext( 'experimental-webgl', contextOptions );
+      Util.applyWebGLContextDefaults( gl ); // blending, etc.
+
+      var projectionMatrix = new Matrix3().setTo32Bit().rowMajor(
+        2 / width, 0, -1,
+        0, -2 / height, 1,
+        0, 0, 1 );
+      var modelViewMatrix = new Matrix3().setTo32Bit().set( matrix );
+      gl.viewport( 0, 0, width, height );
+
+      var PainterType = this.painterType;
+      var painter = new PainterType( gl, this );
+
+      painter.paint( modelViewMatrix, projectionMatrix );
+      painter.dispose();
+
+      gl.flush();
+
+      wrapper.context.setTransform( 1, 0, 0, 1, 0, 0 ); // identity
+      wrapper.context.drawImage( scratchCanvas, 0, 0 );
+      wrapper.context.restore();
     },
 
     createWebGLDrawable: function( renderer, instance ) {
