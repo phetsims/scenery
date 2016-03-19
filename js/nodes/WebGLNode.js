@@ -45,6 +45,8 @@ define( function( require ) {
   function WebGLNode( painterType, options ) {
     Node.call( this, options );
 
+    assert && assert( typeof painterType === 'function', 'Painter type now required by WebGLNode' );
+
     // Only support rendering in WebGL
     this.setRendererBitmask( Renderer.bitmaskWebGL );
 

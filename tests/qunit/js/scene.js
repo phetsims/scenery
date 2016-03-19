@@ -985,7 +985,7 @@
 
   test( 'Renderer Summary', function() {
     var canvasNode = new scenery.CanvasNode( { canvasBounds: new dot.Bounds2( 0, 0, 10, 10 ) } );
-    var webglNode = new scenery.WebGLNode( { canvasBounds: new dot.Bounds2( 0, 0, 10, 10 ) } );
+    var webglNode = new scenery.WebGLNode( function() {}, { canvasBounds: new dot.Bounds2( 0, 0, 10, 10 ) } );
     var rect = new scenery.Rectangle( 0, 0, 100, 50 );
     var node = new scenery.Node( { children: [ canvasNode, webglNode, rect ] } );
     var emptyNode = new scenery.Node();
