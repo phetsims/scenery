@@ -32,6 +32,9 @@ define( function( require ) {
       if ( element.getAttribute( 'aria-hidden' ) ) {
         return null;
       }
+      if ( element.hidden ) {
+        return null;
+      }
 
       // search for accessibility mark up in the pararllel DOM, these elements have accessible text
       if ( element.getAttribute( 'aria-labelledby' ) ) {
@@ -134,9 +137,8 @@ define( function( require ) {
     // It will be difficult to synchronize the virtual cursor with tab navigation so we are not implementing
     // this for now.
     document.addEventListener( 'keydown', function( k ) {
-      var selectedElement;
+      var selectedElement = null;
       var accessibilityDOMElement = document.body.getElementsByClassName( 'accessibility' )[ 0 ];
-      var textChanged = false;
       if ( k.keyCode === 39 || k.keyCode === 40 ) {
 
         selectedElement = goToNextItem( accessibilityDOMElement, DATA_VISITED );
@@ -145,7 +147,6 @@ define( function( require ) {
           clearVisited( accessibilityDOMElement, DATA_VISITED );
           selectedElement = goToNextItem( accessibilityDOMElement, DATA_VISITED );
         }
-        textChanged = true;
       }
 
       // title h2 longtext somethingElse
@@ -180,10 +181,13 @@ define( function( require ) {
             listOfAccessibleElements[ i ].setAttribute( DATA_VISITED, true );
           }
         }
-        textChanged = true;
       }
 
-      if ( textChanged ) {
+      if ( selectedElement ) {
+        if ( selectedElement.getAttribute( 'tabindex' ) || selectedElement.tagName === 'BUTTON' ) {
+          selectedElement.focus();
+        }
+
         var accessibleText = getAccessibleText( selectedElement );
         parent && parent.updateAccessibilityReadoutText && parent.updateAccessibilityReadoutText( accessibleText );
       }
