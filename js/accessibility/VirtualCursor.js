@@ -15,7 +15,6 @@ define( function( require ) {
   var DATA_VISITED_LINEAR = 'data-visited-linear';
 
   function VirtualCursor() {
-    var selectedElement = null;
 
     /**
      * Get the accessible text for this element.  An element will have accessible text if it contains
@@ -92,20 +91,12 @@ define( function( require ) {
      * @param {DOMElement} element
      * @return {string} visitedFlag - a flag for which 'data-*' attribute to set as we search through the tree
      */
-    var goToNextItem = function( element, visitedFlag  ) {
+    var goToNextItem = function( element, visitedFlag ) {
       if ( getAccessibleText( element ) ) {
-
-
         if ( !element.getAttribute( visitedFlag ) ) {
           element.setAttribute( visitedFlag, true );
           return element;
         }
-        // else if ( element === selectedElement ) {
-
-        //   // Running the first pass depth-first search from the root has found the previously selected item
-        //   // so now we can continue the search and return the next focusable item.
-        //   element.setAttribute( 'data-visited', true );
-        // }
       }
       for ( var i = 0; i < element.children.length; i++ ) {
         var nextElement = goToNextItem( element.children[ i ], visitedFlag );
@@ -117,11 +108,10 @@ define( function( require ) {
     };
 
 
-
     /**
      * Get a 'linear' representation of the DOM, collapsing the accessibility tree into an array that
      * can be traversed.
-     * 
+     *
      * @param {DOMElement} element
      * @return {array<DOMElement>} linearDOM
      */
@@ -132,7 +122,7 @@ define( function( require ) {
       var linearDOM = [];
 
       var nextElement = goToNextItem( element, DATA_VISITED_LINEAR );
-      while( nextElement ) {
+      while ( nextElement ) {
         linearDOM.push( nextElement );
         nextElement = goToNextItem( element, DATA_VISITED_LINEAR );
       }
@@ -144,47 +134,45 @@ define( function( require ) {
     // It will be difficult to synchronize the virtual cursor with tab navigation so we are not implementing
     // this for now.
     document.addEventListener( 'keydown', function( k ) {
-      var accessibleText;
+      var selectedElement;
       var accessibilityDOMElement = document.body.getElementsByClassName( 'accessibility' )[ 0 ];
+      var textChanged = false;
       if ( k.keyCode === 39 || k.keyCode === 40 ) {
 
-        // TODO: access this once?
-        //debugger;
         selectedElement = goToNextItem( accessibilityDOMElement, DATA_VISITED );
 
         if ( !selectedElement ) {
           clearVisited( accessibilityDOMElement, DATA_VISITED );
           selectedElement = goToNextItem( accessibilityDOMElement, DATA_VISITED );
         }
-        accessibleText = getAccessibleText( selectedElement );
-        parent && parent.updateAccessibilityReadoutText && parent.updateAccessibilityReadoutText( accessibleText );
-        console.log( accessibleText );
+        textChanged = true;
       }
-      else if ( k.keyCode === 37 || k.keyCode === 38 ){
+      else if ( k.keyCode === 37 || k.keyCode === 38 ) {
         var listOfAccessibleElements = getLinearDOM( accessibilityDOMElement );
 
         var foundAccessibleText = false;
-        for( var i = listOfAccessibleElements.length - 1; i >= 0; i-- ){
-          if( listOfAccessibleElements[ i ].getAttribute( DATA_VISITED ) ) {
+        for ( var i = listOfAccessibleElements.length - 1; i >= 0; i-- ) {
+          if ( listOfAccessibleElements[ i ].getAttribute( DATA_VISITED ) ) {
             selectedElement = listOfAccessibleElements[ i ];
             selectedElement.removeAttribute( DATA_VISITED );
-
-            accessibleText = getAccessibleText( selectedElement );
-
             foundAccessibleText = true;
             break;
           }
         }
+
+        // Wrap backwards, going from the end of the linearized DOM
         if ( !foundAccessibleText ) {
           selectedElement = listOfAccessibleElements[ listOfAccessibleElements.length - 1 ];
-          accessibleText = getAccessibleText( selectedElement );
 
-          // the 
-          for( i = 0; i < listOfAccessibleElements.length - 1; i++ ) {
+          for ( i = 0; i < listOfAccessibleElements.length - 1; i++ ) {
             listOfAccessibleElements[ i ].setAttribute( DATA_VISITED, true );
           }
         }
-        console.log( accessibleText );
+        textChanged = true;
+      }
+
+      if ( textChanged ) {
+        var accessibleText = getAccessibleText( selectedElement );
         parent && parent.updateAccessibilityReadoutText && parent.updateAccessibilityReadoutText( accessibleText );
       }
     } );
