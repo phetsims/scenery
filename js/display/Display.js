@@ -52,6 +52,7 @@ define( function( require ) {
 
   var scenery = require( 'SCENERY/scenery' );
   var Node = require( 'SCENERY/nodes/Node' );
+  var VirtualCursor = require( 'SCENERY/accessibility/VirtualCursor' );
   var Features = require( 'SCENERY/util/Features' );
   require( 'SCENERY/display/BackboneDrawable' );
   require( 'SCENERY/display/CanvasBlock' );
@@ -94,6 +95,7 @@ define( function( require ) {
    *   allowWebGL: true,                    // Boolean flag that indicates whether scenery is allowed to use WebGL for rendering
    *                                        // Makes it possible to disable WebGL for ease of testing on non-WebGL platforms, see #289
    *   accessibility: true                  // Whether accessibility enhancements is enabled
+   *   virtualCursor: false                 // Whether the accessibility virtual cursor is enabled
    *   interactive: true                    // Whether mouse/touch/keyboard inputs are enabled (if input has been added)
    */
   function Display( rootNode, options ) {
@@ -119,6 +121,7 @@ define( function( require ) {
       preserveDrawingBuffer: false,
       allowWebGL: true,
       accessibility: true,
+      virtualCursor: false,
       isApplication: false,      // adds the aria-role: 'application' when accessibility is enabled
       interactive: true
     }, options );
@@ -222,6 +225,12 @@ define( function( require ) {
       document.body.appendChild( this._rootAccessibleInstance.peer.domElement );
 
       this._unsortedAccessibleInstances = [];
+
+      // A virtual cursor for navigating to non-focusable but accessible instances,
+      // see https://github.com/phetsims/scenery-phet/issues/227
+      if ( options.virtualCursor ) {
+        this._virtualCursor = new VirtualCursor();
+      }
     }
   }
 

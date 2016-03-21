@@ -15,6 +15,7 @@ define( [
 
   'SCENERY/accessibility/AccessibleInstance',
   'SCENERY/accessibility/AccessiblePeer',
+  'SCENERY/accessibility/VirtualCursor',
 
   'SCENERY/debug/DebugContext',
 
