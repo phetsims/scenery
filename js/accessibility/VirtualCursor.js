@@ -53,32 +53,27 @@ define( function( require ) {
     /**
      * Go to next element in the parallel DOM that has accessible text content.  If an element has
      * text content, it is returned.  Otherwise,
-     * @param  {[type]} element [description]
+     * @param element [description]
      * @return {[type]}         [description]
      */
     var goToNextItem = function( element, options ) {
-      for ( var i = 0; i < element.children.length; i++ ) {
-        if ( getAccessibleText( element.children[ i ] ) ) {
+      if ( getAccessibleText( element ) ) {
 
-          if ( options.visited ) {
-            return element.children[ i ];
-          }
-          else if ( element.children[ i ] === selectedElement ) {
-
-            // Running the first pass depth-first search from the root has found the previously selected item
-            // so now we can continue the search and return the next focusable item.
-            options.visited = true;
-          }
+        if ( options.visited ) {
+          return element;
         }
-        else {
-          var nextElement = goToNextItem( element.children[ i ], options );
+        else if ( element === selectedElement ) {
 
-          if ( nextElement === null ) {
-            continue;
-          }
-          else {
-            return nextElement;
-          }
+          // Running the first pass depth-first search from the root has found the previously selected item
+          // so now we can continue the search and return the next focusable item.
+          options.visited = true;
+        }
+      }
+      for ( var i = 0; i < element.children.length; i++ ) {
+        var nextElement = goToNextItem( element.children[ i ], options );
+
+        if ( nextElement ) {
+          return nextElement;
         }
       }
     };
