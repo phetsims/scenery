@@ -12,6 +12,7 @@ define( function( require ) {
   var inherit = require( 'PHET_CORE/inherit' );
 
   var DATA_VISITED = 'data-visited';
+  var DATA_VISITED_LINEAR = 'data-visited-linear';
 
   function VirtualCursor() {
     var selectedElement = null;
@@ -78,25 +79,25 @@ define( function( require ) {
       return null;
     };
 
-    var clearVisited = function( element ) {
-      element.removeAttribute( DATA_VISITED );
+    var clearVisited = function( element, visitedFlag ) {
+      element.removeAttribute( visitedFlag );
       for ( var i = 0; i < element.children.length; i++ ) {
-        clearVisited( element.children[ i ] );
+        clearVisited( element.children[ i ], visitedFlag );
       }
     };
 
     /**
      * Go to next element in the parallel DOM that has accessible text content.  If an element has
      * text content, it is returned.  Otherwise,
-     * @param element [description]
-     * @return {[type]}         [description]
+     * @param {DOMElement} element
+     * @return {string} visitedFlag - a flag for which 'data-*' attribute to set as we search through the tree
      */
-    var goToNextItem = function( element ) {
+    var goToNextItem = function( element, visitedFlag  ) {
       if ( getAccessibleText( element ) ) {
 
 
-        if ( !element.getAttribute( DATA_VISITED ) ) {
-          element.setAttribute( DATA_VISITED, true );
+        if ( !element.getAttribute( visitedFlag ) ) {
+          element.setAttribute( visitedFlag, true );
           return element;
         }
         // else if ( element === selectedElement ) {
@@ -107,7 +108,7 @@ define( function( require ) {
         // }
       }
       for ( var i = 0; i < element.children.length; i++ ) {
-        var nextElement = goToNextItem( element.children[ i ] );
+        var nextElement = goToNextItem( element.children[ i ], visitedFlag );
 
         if ( nextElement ) {
           return nextElement;
@@ -115,24 +116,76 @@ define( function( require ) {
       }
     };
 
+
+
+    /**
+     * Get a 'linear' representation of the DOM, collapsing the accessibility tree into an array that
+     * can be traversed.
+     * 
+     * @param {DOMElement} element
+     * @return {array<DOMElement>} linearDOM
+     */
+    var getLinearDOM = function( element ) {
+
+      clearVisited( element, DATA_VISITED_LINEAR );
+
+      var linearDOM = [];
+
+      var nextElement = goToNextItem( element, DATA_VISITED_LINEAR );
+      while( nextElement ) {
+        linearDOM.push( nextElement );
+        nextElement = goToNextItem( element, DATA_VISITED_LINEAR );
+      }
+
+      return linearDOM;
+    };
+
     // if the user presses right or down, move the cursor to the next dom element with accessibility markup
     // It will be difficult to synchronize the virtual cursor with tab navigation so we are not implementing
     // this for now.
     document.addEventListener( 'keydown', function( k ) {
+      var accessibleText;
+      var accessibilityDOMElement = document.body.getElementsByClassName( 'accessibility' )[ 0 ];
       if ( k.keyCode === 39 || k.keyCode === 40 ) {
 
         // TODO: access this once?
         //debugger;
-        var accessibilityDOMElement = document.body.getElementsByClassName( 'accessibility' )[ 0 ];
-        selectedElement = goToNextItem( accessibilityDOMElement );
+        selectedElement = goToNextItem( accessibilityDOMElement, DATA_VISITED );
 
         if ( !selectedElement ) {
-          clearVisited( accessibilityDOMElement );
-          selectedElement = goToNextItem( accessibilityDOMElement );
+          clearVisited( accessibilityDOMElement, DATA_VISITED );
+          selectedElement = goToNextItem( accessibilityDOMElement, DATA_VISITED );
         }
-        var accessibleText = getAccessibleText( selectedElement );
+        accessibleText = getAccessibleText( selectedElement );
         parent && parent.updateAccessibilityReadoutText && parent.updateAccessibilityReadoutText( accessibleText );
-        //console.log( accessibleText );
+        console.log( accessibleText );
+      }
+      else if ( k.keyCode === 37 || k.keyCode === 38 ){
+        var listOfAccessibleElements = getLinearDOM( accessibilityDOMElement );
+
+        var foundAccessibleText = false;
+        for( var i = listOfAccessibleElements.length - 1; i >= 0; i-- ){
+          if( listOfAccessibleElements[ i ].getAttribute( DATA_VISITED ) ) {
+            selectedElement = listOfAccessibleElements[ i ];
+            selectedElement.removeAttribute( DATA_VISITED );
+
+            accessibleText = getAccessibleText( selectedElement );
+
+            foundAccessibleText = true;
+            break;
+          }
+        }
+        if ( !foundAccessibleText ) {
+          selectedElement = listOfAccessibleElements[ listOfAccessibleElements.length - 1 ];
+          accessibleText = getAccessibleText( selectedElement );
+
+          // the 
+          for( i = 0; i < listOfAccessibleElements.length - 1; i++ ) {
+            listOfAccessibleElements[ i ].setAttribute( DATA_VISITED, true );
+          }
+        }
+        console.log( accessibleText );
+        parent && parent.updateAccessibilityReadoutText && parent.updateAccessibilityReadoutText( accessibleText );
       }
     } );
 
