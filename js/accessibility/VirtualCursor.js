@@ -147,15 +147,27 @@ define( function( require ) {
         }
         textChanged = true;
       }
+
+      // title h2 longtext somethingElse
+      // visited visited visited not-visited
+      //
       else if ( k.keyCode === 37 || k.keyCode === 38 ) {
         var listOfAccessibleElements = getLinearDOM( accessibilityDOMElement );
 
         var foundAccessibleText = false;
         for ( var i = listOfAccessibleElements.length - 1; i >= 0; i-- ) {
           if ( listOfAccessibleElements[ i ].getAttribute( DATA_VISITED ) ) {
-            selectedElement = listOfAccessibleElements[ i ];
-            selectedElement.removeAttribute( DATA_VISITED );
-            foundAccessibleText = true;
+            listOfAccessibleElements[ i ].removeAttribute( DATA_VISITED );
+
+            if ( i !== 0 ) {
+              selectedElement = listOfAccessibleElements[ i - 1 ];
+              foundAccessibleText = true;
+            }
+            else {
+              selectedElement = null;
+              foundAccessibleText = false;
+            }
+
             break;
           }
         }
