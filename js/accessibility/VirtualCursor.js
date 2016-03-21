@@ -11,6 +11,8 @@ define( function( require ) {
   // modules
   var inherit = require( 'PHET_CORE/inherit' );
 
+  var DATA_VISITED = 'data-visited';
+
   function VirtualCursor() {
     var selectedElement = null;
 
@@ -23,8 +25,6 @@ define( function( require ) {
      */
     var getAccessibleText = function( element ) {
 
-      console.log( 'checking', element );
-
       // filter out structural elements that do not have accessible text
       if ( element.getAttribute( 'class' ) === 'ScreenView' ) {
         return null;
@@ -36,7 +36,7 @@ define( function( require ) {
       // search for accessibility mark up in the pararllel DOM, these elements have accessible text
       if ( element.getAttribute( 'aria-labelledby' ) ) {
         var labelElement = document.getElementById( element.getAttribute( 'aria-labelledby' ) );
-        if( !labelElement ) {
+        if ( !labelElement ) {
           console.log( 'Missing labelled element with aria-labelledby id' );
           return null;
         }
@@ -44,7 +44,7 @@ define( function( require ) {
       }
       if ( element.getAttribute( 'aria-describedby' ) ) {
         var descriptionElement = document.getElementById( element.getAttribute( 'aria-describedby' ) );
-        if( !descriptionElement ) {
+        if ( !descriptionElement ) {
           console.log( 'Missing labelled element with aria-describedby id' );
           return null;
         }
@@ -62,14 +62,27 @@ define( function( require ) {
       if ( element.tagName === 'BUTTON' ) {
         return element.textContent + ' button';
       }
-      if ( element.type === 'checkbox' ) {
-        var checkedString = element.checked ? ' checked' : ' not checked';
-        return element.textContent + ' checkbox' + checkedString;
+      if ( element.tagName === 'INPUT' ) {
+        if ( element.type === 'reset' ) {
+          return element.getAttribute( 'value' );
+        }
+        if ( element.type === 'checkbox' ) {
+          var checkedString = element.checked ? ' checked' : ' not checked';
+          return element.textContent + ' checkbox' + checkedString;
+        }
       }
+
 
       // search for elements in the parallel DOM that will have implicit accessible text without markup
 
       return null;
+    };
+
+    var clearVisited = function( element ) {
+      element.removeAttribute( DATA_VISITED );
+      for ( var i = 0; i < element.children.length; i++ ) {
+        clearVisited( element.children[ i ] );
+      }
     };
 
     /**
@@ -81,8 +94,9 @@ define( function( require ) {
     var goToNextItem = function( element ) {
       if ( getAccessibleText( element ) ) {
 
-        if ( !element.getAttribute( 'data-visited' ) ) {
-          element.setAttribute( 'data-visited', true );
+
+        if ( !element.getAttribute( DATA_VISITED ) ) {
+          element.setAttribute( DATA_VISITED, true );
           return element;
         }
         // else if ( element === selectedElement ) {
@@ -106,7 +120,6 @@ define( function( require ) {
     // this for now.
     document.addEventListener( 'keydown', function( k ) {
       if ( k.keyCode === 39 || k.keyCode === 40 ) {
-        console.log( 'moving forward' );
 
         // TODO: access this once?
         //debugger;
@@ -114,10 +127,12 @@ define( function( require ) {
         selectedElement = goToNextItem( accessibilityDOMElement );
 
         if ( !selectedElement ) {
-          selectedElement = null;
+          clearVisited( accessibilityDOMElement );
           selectedElement = goToNextItem( accessibilityDOMElement );
         }
-        console.log( getAccessibleText( selectedElement ) );
+        var accessibleText = getAccessibleText( selectedElement );
+        parent && parent.updateAccessibilityReadoutText && parent.updateAccessibilityReadoutText( accessibleText );
+        //console.log( accessibleText );
       }
     } );
 
