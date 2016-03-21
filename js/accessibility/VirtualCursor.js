@@ -41,6 +41,9 @@ define( function( require ) {
       if ( element.tagName === 'H2' ) {
         return element.textContent;
       }
+      if ( element.tagName === 'H3' ) {
+        return element.textContent;
+      }
 
       // search for elements in the parallel DOM that will have implicit accessible text without markup
 
@@ -53,22 +56,22 @@ define( function( require ) {
      * @param  {[type]} element [description]
      * @return {[type]}         [description]
      */
-    var goToNextItem = function( element, visited ) {
+    var goToNextItem = function( element, options ) {
       for ( var i = 0; i < element.children.length; i++ ) {
         if ( getAccessibleText( element.children[ i ] ) ) {
 
-          if ( visited ) {
+          if ( options.visited ) {
             return element.children[ i ];
           }
           else if ( element.children[ i ] === selectedElement ) {
 
             // Running the first pass depth-first search from the root has found the previously selected item
             // so now we can continue the search and return the next focusable item.
-            visited = true;
+            options.visited = true;
           }
         }
         else {
-          var nextElement = goToNextItem( element.children[ i ], visited );
+          var nextElement = goToNextItem( element.children[ i ], options );
 
           if ( nextElement === null ) {
             continue;
@@ -89,14 +92,16 @@ define( function( require ) {
         //debugger;
         var accessibilityDOMElement = document.body.getElementsByClassName( 'accessibility' )[ 0 ];
         var visited = selectedElement === null;
-        selectedElement = goToNextItem( accessibilityDOMElement, visited );
+        var options = { visited: visited };
+        selectedElement = goToNextItem( accessibilityDOMElement, options );
 
         if ( !selectedElement ) {
           console.log( '--wrapped' );
 
           selectedElement = null;
           visited = selectedElement === null;
-          selectedElement = goToNextItem( accessibilityDOMElement, visited );
+          options = { visited: visited };
+          selectedElement = goToNextItem( accessibilityDOMElement, options );
         }
         console.log( getAccessibleText( selectedElement ) );
       }
