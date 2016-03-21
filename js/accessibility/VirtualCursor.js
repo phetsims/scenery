@@ -29,20 +29,42 @@ define( function( require ) {
       if ( element.getAttribute( 'class' ) === 'ScreenView' ) {
         return null;
       }
+      if ( element.getAttribute( 'aria-hidden' ) ) {
+        return null;
+      }
 
       // search for accessibility mark up in the pararllel DOM, these elements have accessible text
       if ( element.getAttribute( 'aria-labelledby' ) ) {
-        var labelledElement = document.getElementById( element.getAttribute( 'aria-labelledby' ) );
-        return labelledElement.textContent;
+        var labelElement = document.getElementById( element.getAttribute( 'aria-labelledby' ) );
+        if( !labelElement ) {
+          console.log( 'Missing labelled element with aria-labelledby id' );
+          return null;
+        }
+        return labelElement.textContent;
+      }
+      if ( element.getAttribute( 'aria-describedby' ) ) {
+        var descriptionElement = document.getElementById( element.getAttribute( 'aria-describedby' ) );
+        if( !descriptionElement ) {
+          console.log( 'Missing labelled element with aria-describedby id' );
+          return null;
+        }
+        return descriptionElement.textContent;
       }
       if ( element.tagName === 'P' ) {
         return element.textContent;
       }
       if ( element.tagName === 'H2' ) {
-        return element.textContent;
+        return 'heading level 2 ' + element.textContent;
       }
       if ( element.tagName === 'H3' ) {
-        return element.textContent;
+        return 'heading level 3 ' + element.textContent;
+      }
+      if ( element.tagName === 'BUTTON' ) {
+        return element.textContent + ' button';
+      }
+      if ( element.type === 'checkbox' ) {
+        var checkedString = element.checked ? ' checked' : ' not checked';
+        return element.textContent + ' checkbox' + checkedString;
       }
 
       // search for elements in the parallel DOM that will have implicit accessible text without markup
@@ -56,21 +78,22 @@ define( function( require ) {
      * @param element [description]
      * @return {[type]}         [description]
      */
-    var goToNextItem = function( element, options ) {
+    var goToNextItem = function( element ) {
       if ( getAccessibleText( element ) ) {
 
-        if ( options.visited ) {
+        if ( !element.getAttribute( 'data-visited' ) ) {
+          element.setAttribute( 'data-visited', true );
           return element;
         }
-        else if ( element === selectedElement ) {
+        // else if ( element === selectedElement ) {
 
-          // Running the first pass depth-first search from the root has found the previously selected item
-          // so now we can continue the search and return the next focusable item.
-          options.visited = true;
-        }
+        //   // Running the first pass depth-first search from the root has found the previously selected item
+        //   // so now we can continue the search and return the next focusable item.
+        //   element.setAttribute( 'data-visited', true );
+        // }
       }
       for ( var i = 0; i < element.children.length; i++ ) {
-        var nextElement = goToNextItem( element.children[ i ], options );
+        var nextElement = goToNextItem( element.children[ i ] );
 
         if ( nextElement ) {
           return nextElement;
@@ -78,25 +101,21 @@ define( function( require ) {
       }
     };
 
-    // if the user pressed tab, right or down, move the cursor to the next dom element with accessibility markup
+    // if the user presses right or down, move the cursor to the next dom element with accessibility markup
+    // It will be difficult to synchronize the virtual cursor with tab navigation so we are not implementing
+    // this for now.
     document.addEventListener( 'keydown', function( k ) {
-      if ( k.keyCode === 39 || k.keyCode === 40 || k.keyCode === 9 ) {
+      if ( k.keyCode === 39 || k.keyCode === 40 ) {
         console.log( 'moving forward' );
 
         // TODO: access this once?
         //debugger;
         var accessibilityDOMElement = document.body.getElementsByClassName( 'accessibility' )[ 0 ];
-        var visited = selectedElement === null;
-        var options = { visited: visited };
-        selectedElement = goToNextItem( accessibilityDOMElement, options );
+        selectedElement = goToNextItem( accessibilityDOMElement );
 
         if ( !selectedElement ) {
-          console.log( '--wrapped' );
-
           selectedElement = null;
-          visited = selectedElement === null;
-          options = { visited: visited };
-          selectedElement = goToNextItem( accessibilityDOMElement, options );
+          selectedElement = goToNextItem( accessibilityDOMElement );
         }
         console.log( getAccessibleText( selectedElement ) );
       }
