@@ -137,24 +137,24 @@ define( function( require ) {
         return element.textContent;
       }
       if( element.tagName === 'H1' ) {
-        return 'heading level 1 ' + element.textContent;
+        return 'Heading Level 1 ' + element.textContent;
       }
       if ( element.tagName === 'H2' ) {
-        return 'heading level 2 ' + element.textContent;
+        return 'Heading Level 2 ' + element.textContent;
       }
       if ( element.tagName === 'H3' ) {
-        return 'heading level 3 ' + element.textContent;
+        return 'Heading Level 3 ' + element.textContent;
       }
       if ( element.tagName === 'BUTTON' ) {
-        return element.textContent + ' button';
+        return element.textContent + ' Button';
       }
       if ( element.tagName === 'INPUT' ) {
         if ( element.type === 'reset' ) {
-          return element.getAttribute( 'value' );
+          return element.getAttribute( 'value' ) + ' Button';
         }
         if ( element.type === 'checkbox' ) {
-          var checkedString = element.checked ? ' checked' : ' not checked';
-          return element.textContent + ' checkbox' + checkedString;
+          var checkedString = element.checked ? ' Checked' : ' Not Checked';
+          return element.textContent + ' Checkbox' + checkedString;
         }
       }
 
