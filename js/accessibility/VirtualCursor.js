@@ -17,6 +17,102 @@ define( function( require ) {
   function VirtualCursor() {
 
     /**
+     * A timed queue that can be used to queue descriptions to the text output.  Usually used for
+     * 'aria-live' updates.  If multiple updates are fired at once, they are added to the queue
+     * in the order that they occur.
+     * 
+     * @param {number} defaultDelay - default delay for items in the queue
+     */
+    var TimedQueue = function( defaultDelay ) {
+      Object.call( this );
+
+      // @private - track when we are running so we do not try to run the queue while it is already running
+      this.running = false;
+
+      // @private - the queue of items to be read, populated with objects like
+      // { callback: {function}, delay: {number} };
+      this.queue = [];
+
+      // @private - current index in the queue
+      this.index = 0;
+
+      // @private - default delay of five seconds
+      this.defaultDelay = defaultDelay || 5000;
+    };
+
+    inherit( Object, TimedQueue, {
+
+      /**
+       * Add a callback to this queue, with a delay
+       * 
+       * @param {function} callBack - callback fired by this addition
+       * @param {number} [delay]- optional delay for this item
+       */
+      add: function( callBack, delay ) {
+        var thisQueue = this;
+        this.queue.push( {
+          callBack: callBack,
+          delay: delay || thisQueue.defaultDelay
+        } );
+      },
+
+      /**
+       * Run through items in the queue, starting at index
+       * @param  {number} index
+       */
+      run: function( index ) {
+        if ( !this.running ) {
+          this.index = index || 0;
+          this.next();
+        }
+      },
+
+      /**
+       * Remove all items from the queue
+       */
+      clear: function() {
+        this.queue = [];
+      },
+
+      /**
+       * Get the next item in the queue, then delaying after firing callback
+       */
+      next: function() {
+
+        this.running = true;
+        var thisQueue = this;
+        var i = this.index++;
+
+        var active = this.queue[i];
+        var next = this.queue[ this.index ];
+
+        // return and set running flag to false if there are no items in the queue
+        var endRun = function() {
+          thisQueue.running = false;
+          thisQueue.clear();
+        };
+
+        if( !active ) {
+          endRun();
+          return;
+        }
+
+        // fire the callback function
+        active.callBack();
+
+        if( next ) {
+          setTimeout( function() {
+            thisQueue.next();
+          }, active.delay || thisQueue.defaultDelay );
+        }
+        else {
+          endRun();
+          return;
+        }
+      }
+    } );
+
+    /**
      * Get the accessible text for this element.  An element will have accessible text if it contains
      * accessible markup, of is one of many defined elements that implicitly have accessible text.
      *
@@ -110,6 +206,26 @@ define( function( require ) {
       }
     };
 
+    /**
+     * Get all 'element' nodes of the parent element, placing them in an array for easy traversal
+     * Note that this includes all elements, even those that are 'hidden'.
+     *
+     * TODO: Can this replace getLinearDOM and goToNextItem?
+     * 
+     * @param  {DOMElement} element - parent element for which you want an array of all children
+     * @return {array<DOMElement>}
+     */
+    var getLinearDOMElements = function( element ) {
+      // gets all descendent children for the element
+      var children = element.getElementsByTagName( '*' );
+      var linearDOM = [];
+      for( var i = 0; i < children.length; i++ ) {
+        if( children[i].nodeType === Node.ELEMENT_NODE ) {
+          linearDOM[i] = ( children[ i ] );
+        }
+      }
+      return linearDOM;
+    };
 
     /**
      * Get a 'linear' representation of the DOM, collapsing the accessibility tree into an array that
@@ -139,6 +255,8 @@ define( function( require ) {
     document.addEventListener( 'keydown', function( k ) {
       var selectedElement = null;
       var accessibilityDOMElement = document.body.getElementsByClassName( 'accessibility' )[ 0 ];
+
+      // forward traversal
       if ( k.keyCode === 39 || k.keyCode === 40 ) {
 
         selectedElement = goToNextItem( accessibilityDOMElement, DATA_VISITED );
@@ -149,9 +267,7 @@ define( function( require ) {
         }
       }
 
-      // title h2 longtext somethingElse
-      // visited visited visited not-visited
-      //
+      // backwards traversal
       else if ( k.keyCode === 37 || k.keyCode === 38 ) {
         var listOfAccessibleElements = getLinearDOM( accessibilityDOMElement );
 
@@ -188,12 +304,82 @@ define( function( require ) {
           selectedElement.focus();
         }
 
+        // print the output to the iFrame
         var accessibleText = getAccessibleText( selectedElement );
         parent && parent.updateAccessibilityReadoutText && parent.updateAccessibilityReadoutText( accessibleText );
       }
     } );
 
+    // create a queue for aria live textcontent changes
+    // changes to elements with aria-live text content will be added to queue by element mutation observers
+    var ariaLiveQueue = new TimedQueue( 5000 );
+
+    var updateLiveElementList = function() {
+
+      // remove all observers from live elements to prevent a memory leak
+      if( window.liveElementList ) {
+        for( var key in window.liveElementList ) {
+          if( window.liveElementList.hasOwnProperty( key ) ) {
+            window.liveElementList[key].observer.disconnect();
+          }
+        }
+      }
+
+      // clear the list
+      window.liveElementList = {};
+
+      // get a linear representation of the DOM
+      var accessibilityDOMElement = document.body.getElementsByClassName( 'accessibility' )[ 0 ];
+      var linearDOM = getLinearDOMElements( accessibilityDOMElement );
+
+      // search the DOM for elements with 'aria-live' attributes
+      for( var i = 0; i < linearDOM.length; i++ ) {
+        var domElement = linearDOM[ i ];
+        if( domElement.getAttribute( 'aria-live' ) ) {
+
+          // create an observer for this element
+          var observer = new MutationObserver( function( mutations ) {
+            mutations.forEach( function( mutation ) {
+              var updatedText = mutation.addedNodes[0].data;
+              ariaLiveQueue.add( function() {
+                console.log( updatedText );
+                parent &&
+                  parent.updateAccessibilityReadoutText &&
+                    parent.updateAccessibilityReadoutText( updatedText );
+
+              }, 2000 );
+            } );
+          } );
+
+          window.liveElementList[ domElement.id.toString() ] = {
+            'domElement': domElement,
+            'observer': observer 
+          };
+
+          // listen for changes to the subtree in case children of the aria-live parent change their textContent
+          var observerConfig = { childList: true, characterData: true, subtree: true };
+
+          observer.observe( domElement, observerConfig );
+        }        
+      }
+    };
+
+    // look for new live elements and add listeners to them every five seconds
+    // TODO: Is there a better way to search through the DOM for new aria-live elements?
+    var searchForLiveElements = function() {
+      updateLiveElementList();
+      setTimeout( searchForLiveElements, 5000 );
+    };
+    searchForLiveElements();
+
+    // run through the active queue of aria live elements
+    var step = function() {
+      ariaLiveQueue.run();
+      setTimeout( step, 100 );
+    };
+    step();
   }
 
   return inherit( Object, VirtualCursor, {} );
+
 } );
