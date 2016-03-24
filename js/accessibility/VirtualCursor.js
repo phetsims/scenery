@@ -234,14 +234,17 @@ define( function( require ) {
     };
 
     // if the user presses right or down, move the cursor to the next dom element with accessibility markup
-    // It will be difficult to synchronize the virtual cursor with tab navigation so we are not implementing
-    // this for now.
+    // It will be difficult to synchronize the virtual cursor with tab navigation.  For now, tab/shift+tab
+    // will take us to the next/previos description.
     document.addEventListener( 'keydown', function( k ) {
       var selectedElement = null;
       var accessibilityDOMElement = document.body.getElementsByClassName( 'accessibility' )[ 0 ];
 
       // forward traversal
-      if ( k.keyCode === 39 || k.keyCode === 40 ) {
+      if ( k.keyCode === 39 || k.keyCode === 40 || ( k.keyCode === 9 && !k.shiftKey ) ) {
+
+        // we do not want to go to the next forms element if tab (yet)
+        k.preventDefault();
 
         selectedElement = goToNextItem( accessibilityDOMElement, DATA_VISITED );
 
@@ -251,8 +254,12 @@ define( function( require ) {
         }
       }
 
-      // backwards traversal
-      else if ( k.keyCode === 37 || k.keyCode === 38 ) {
+      // backwards traversal on up/left/shift+tab
+      else if ( k.keyCode === 37 || k.keyCode === 38 || ( k.shiftKey && k.keyCode === 9 ) ) {
+
+        // we do not want to go to the next forms element if tab (yet)
+        k.preventDefault();
+
         var listOfAccessibleElements = getLinearDOM( accessibilityDOMElement );
 
         var foundAccessibleText = false;
