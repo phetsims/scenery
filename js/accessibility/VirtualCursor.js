@@ -132,25 +132,12 @@ define( function( require ) {
         return null;
       }
 
-      // search for accessibility mark up in the pararllel DOM, these elements have accessible text
-      if ( element.getAttribute( 'aria-labelledby' ) ) {
-        var labelElement = document.getElementById( element.getAttribute( 'aria-labelledby' ) );
-        if ( !labelElement ) {
-          console.log( 'Missing labelled element with aria-labelledby id' );
-          return null;
-        }
-        return labelElement.textContent;
-      }
-      if ( element.getAttribute( 'aria-describedby' ) ) {
-        var descriptionElement = document.getElementById( element.getAttribute( 'aria-describedby' ) );
-        if ( !descriptionElement ) {
-          console.log( 'Missing labelled element with aria-describedby id' );
-          return null;
-        }
-        return descriptionElement.textContent;
-      }
+      // search for elements that will have content that should be shown
       if ( element.tagName === 'P' ) {
         return element.textContent;
+      }
+      if( element.tagName === 'H1' ) {
+        return 'heading level 1 ' + element.textContent;
       }
       if ( element.tagName === 'H2' ) {
         return 'heading level 2 ' + element.textContent;
@@ -170,9 +157,6 @@ define( function( require ) {
           return element.textContent + ' checkbox' + checkedString;
         }
       }
-
-
-      // search for elements in the parallel DOM that will have implicit accessible text without markup
 
       return null;
     };
