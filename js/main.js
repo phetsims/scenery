@@ -92,6 +92,7 @@ define( [
   'SCENERY/util/LinearGradient',
   'SCENERY/util/LiveRegion',
   'SCENERY/util/Pattern',
+  'SCENERY/util/Picker',
   'SCENERY/util/RadialGradient',
   'SCENERY/util/RendererSummary',
   'SCENERY/util/SceneImage',

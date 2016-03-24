@@ -75,9 +75,6 @@ define( function( require ) {
   var CanvasNodeBoundsOverlay = require( 'SCENERY/overlays/CanvasNodeBoundsOverlay' );
   var FittedBlockBoundsOverlay = require( 'SCENERY/overlays/FittedBlockBoundsOverlay' );
 
-  // flags object used for determining what the cursor should be underneath a mouse
-  var isMouseFlags = { isMouse: true };
-
   /*
    * Constructs a Display that will show the rootNode and its subtree in a visual state. Default options provided below
    *
@@ -276,6 +273,8 @@ define( function( require ) {
       this._rootNode.validateWatchedBounds();
 
       if ( assertSlow ) { this.options.accessibility && this._rootAccessibleInstance.auditRoot(); }
+
+      if ( assertSlow ) { this._rootNode._picker.audit(); }
 
       this._baseInstance = this._baseInstance || scenery.Instance.createFromPool( this, new scenery.Trail( this._rootNode ), true, false );
       this._baseInstance.baseSyncTree();
@@ -780,7 +779,7 @@ define( function( require ) {
         }
 
         //OHTWO TODO: For a display, just return an instance and we can avoid the garbage collection/mutation at the cost of the linked-list traversal instead of an array
-        var mouseTrail = this._rootNode.trailUnderPoint( this._input.mouse.point, isMouseFlags );
+        var mouseTrail = this._rootNode.trailUnderPointer( this._input.mouse );
 
         if ( mouseTrail ) {
           for ( var i = mouseTrail.length - 1; i >= 0; i-- ) {

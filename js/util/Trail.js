@@ -135,9 +135,10 @@ define( function( require ) {
       if ( _.some( this.nodes, function( node ) { return node.pickable === false || node.visible === false; } ) ) { return false; }
 
       // if there is any listener or pickable: true, it will be pickable
-      if ( _.some( this.nodes, function( node ) { return node.hasInputListenerEquivalent(); } ) ) { return true; }
+      if ( _.some( this.nodes, function( node ) { return node._inputListeners.length > 0 || node._pickable === true; } ) ) { return true; }
 
-      if ( this.lastNode()._subtreePickableCount > 0 ) {
+      // TODO: Is this even necessary?
+      if ( this.lastNode().picker._subtreePickableCount > 0 ) {
         return true;
       }
 
