@@ -1761,7 +1761,7 @@ define( function( require ) {
           this.prependTranslation( x, y );
         }
         else {
-          this.appendMatrix( Matrix3.translation( x, y ) );
+          this.appendMatrix( scratchMatrix3.setToTranslation( x, y ) );
         }
       }
       else {
