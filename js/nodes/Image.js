@@ -27,6 +27,7 @@ define( function( require ) {
   var CanvasSelfDrawable = require( 'SCENERY/display/CanvasSelfDrawable' );
   var SelfDrawable = require( 'SCENERY/display/SelfDrawable' );
   var WebGLSelfDrawable = require( 'SCENERY/display/WebGLSelfDrawable' );
+  var SpriteSheet = require( 'SCENERY/util/SpriteSheet' );
 
   // TODO: change this based on memory and performance characteristics of the platform
   var keepDOMImageElements = true; // whether we should pool DOM elements for the DOM rendering states, or whether we should free them when possible for memory
@@ -181,6 +182,7 @@ define( function( require ) {
       }
 
       this.invalidateMipmaps();
+      this.invalidateSupportedRenderers();
     },
 
     getImage: function() {
@@ -189,24 +191,31 @@ define( function( require ) {
     get image() { return this.getImage(); },
 
     invalidateSupportedRenderers: function() {
-      if ( this._image instanceof HTMLCanvasElement ) {
-        this.setRendererBitmask(
-          Renderer.bitmaskCanvas |
-          Renderer.bitmaskWebGL
-        );
+
+      // Canvas is always permitted
+      var r = Renderer.bitmaskCanvas;
+
+      // If it fits within the sprite sheet, then WebGL is also permitted
+      // If the image hasn't loaded, the getImageWidth/Height will be 0 and this rule would pass.  However, this
+      // function will be called again after the image loads, and would correctly invalidate WebGL, if too large to fit
+      // in a SpriteSheet
+      var fitsWithinSpriteSheet = this.getImageWidth() <= SpriteSheet.MAX_DIMENSION.width &&
+                                  this.getImageHeight() <= SpriteSheet.MAX_DIMENSION.height;
+      if ( fitsWithinSpriteSheet ) {
+        r |= Renderer.bitmaskWebGL;
       }
-      else {
+
+      // If it is not a canvas, then it can additionally be rendered in SVG or DOM
+      if ( !( this._image instanceof HTMLCanvasElement ) ) {
         // assumes HTMLImageElement
-        this.setRendererBitmask(
-          Renderer.bitmaskCanvas |
-          Renderer.bitmaskSVG |
-          Renderer.bitmaskDOM |
-          Renderer.bitmaskWebGL
-        );
+        r |= Renderer.bitmaskSVG | Renderer.bitmaskDOM;
       }
+
+      this.setRendererBitmask( r );
     },
 
     setImage: function( image ) {
+      assert && assert( image, 'image should be available' );
       if ( this._image !== image && ( typeof image !== 'string' || !this._image || ( image !== this._image.src && image !== this._mipmapData ) ) ) {
         // don't leak memory by referencing old images
         if ( this._image ) {
@@ -238,9 +247,6 @@ define( function( require ) {
           this._mipmapInitialLevel = this._mipmapMaxLevel = this._mipmapData.length;
           this._mipmap = true;
         }
-
-        // swap supported renderers if necessary
-        this.invalidateSupportedRenderers();
 
         this._image = image;
 
