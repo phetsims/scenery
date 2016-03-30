@@ -138,7 +138,7 @@ define( function( require ) {
       if ( _.some( this.nodes, function( node ) { return node._inputListeners.length > 0 || node._pickable === true; } ) ) { return true; }
 
       // TODO: Is this even necessary?
-      if ( this.lastNode().picker._subtreePickableCount > 0 ) {
+      if ( this.lastNode()._picker._subtreePickableCount > 0 ) {
         return true;
       }
 
