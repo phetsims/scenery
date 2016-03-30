@@ -139,6 +139,9 @@ define( function( require ) {
     this._initialWidth = 0;
     this._initialHeight = 0;
 
+    // {number} - Opacity applied directly to the image itself, without affecting the rendering of children.
+    this._imageOpacity = 1;
+
     // Mipmap client values
     this._mipmap = false; // {bool} - Whether mipmapping is enabled
     this._mipmapBias = defaultMipmapBias; // {number} - Amount of level-of-detail adjustment added to everything.
@@ -255,6 +258,39 @@ define( function( require ) {
       return this;
     },
     set image( value ) { this.setImage( value ); },
+
+    /**
+     * Returns the opacity applied only to this image (not including children).
+     * @public
+     *
+     * @returns {number}
+     */
+    getImageOpacity: function() {
+      return this._imageOpacity;
+    },
+    get imageOpacity() { return this.getImageOpacity(); },
+
+    /**
+     * Sets an opacity that is applied only to this image (will not affect children or the rest of the node's subtree).
+     * @public
+     *
+     * @param {number} imageOpacty - Should be a number between 0 (transparent) and 1 (opaque), just like normal opacity
+     */
+    setImageOpacity: function( imageOpacity ) {
+      assert && assert( typeof imageOpacity === 'number', 'imageOpacity was not a number' );
+      assert && assert( isFinite( imageOpacity ) && imageOpacity >= 0 && imageOpacity <= 1,
+        'imageOpacity out of range: ' + imageOpacity );
+
+      if ( this._imageOpacity !== imageOpacity ) {
+        this._imageOpacity = imageOpacity;
+
+        var stateLen = this._drawables.length;
+        for ( var i = 0; i < stateLen; i++ ) {
+          this._drawables[ i ].markImageOpacityDirty();
+        }
+      }
+    },
+    set imageOpacity( value ) { this.setImageOpacity( value ); },
 
     getInitialWidth: function() {
       return this._initialWidth;
@@ -535,7 +571,8 @@ define( function( require ) {
     }
   } );
 
-  Image.prototype._mutatorKeys = [ 'image', 'initialWidth', 'initialHeight', 'mipmap', 'mipmapBias', 'mipmapInitialLevel', 'mipmapMaxLevel' ].concat( Node.prototype._mutatorKeys );
+  Image.prototype._mutatorKeys = [ 'image', 'imageOpacity', 'initialWidth', 'initialHeight', 'mipmap', 'mipmapBias',
+                                   'mipmapInitialLevel', 'mipmapMaxLevel' ].concat( Node.prototype._mutatorKeys );
 
   // utility for others
   Image.createSVGImage = function( url, width, height ) {
@@ -602,6 +639,7 @@ define( function( require ) {
       proto.initializeState = function( renderer, instance ) {
         this.paintDirty = true; // flag that is marked if ANY "paint" dirty flag is set (basically everything except for transforms, so we can accelerated the transform-only case)
         this.dirtyImage = true;
+        this.dirtyImageOpacity = true;
         this.dirtyMipmap = true;
 
         return this; // allow for chaining
@@ -624,6 +662,11 @@ define( function( require ) {
 
       proto.markDirtyMipmap = function() {
         this.dirtyMipmap = true;
+        this.markPaintDirty();
+      };
+
+      proto.markImageOpacityDirty = function() {
+        this.dirtyImageOpacity = true;
         this.markPaintDirty();
       };
 
@@ -658,6 +701,9 @@ define( function( require ) {
         this.domElement.style.top = '0';
       }
 
+      // Whether we have an opacity attribute specified on the DOM element.
+      this.hasOpacity = false;
+
       scenery.Util.prepareForTransform( this.domElement, this.forceAcceleration );
 
       return this; // allow for chaining
@@ -670,6 +716,19 @@ define( function( require ) {
       if ( this.paintDirty && this.dirtyImage ) {
         // TODO: allow other ways of showing a DOM image?
         img.src = node._image ? node._image.src : '//:0'; // NOTE: for img with no src (but with a string), see http://stackoverflow.com/questions/5775469/whats-the-valid-way-to-include-an-image-with-no-src
+      }
+
+      if ( this.dirtyImageOpacity ) {
+        if ( node._imageOpacity === 1 ) {
+          if ( this.hasOpacity ) {
+            this.hasOpacity = false;
+            img.style.opacity = '';
+          }
+        }
+        else {
+          this.hasOpacity = true;
+          img.style.opacity = node._imageOpacity;
+        }
       }
 
       if ( this.transformDirty ) {
@@ -719,6 +778,9 @@ define( function( require ) {
         this.svgElement.setAttribute( 'y', 0 );
       }
 
+      // Whether we have an opacity attribute specified on the DOM element.
+      this.hasOpacity = false;
+
       this._usingMipmap = false;
       this._mipmapLevel = -1; // will always be invalidated
 
@@ -759,6 +821,19 @@ define( function( require ) {
       else if ( this.dirtyMipmap && this.node._image ) {
         sceneryLog && sceneryLog.ImageSVGDrawable && sceneryLog.ImageSVGDrawable( this.id + ' Updating dirty mipmap' );
         this.updateURL( image, false );
+      }
+
+      if ( this.dirtyImageOpacity ) {
+        if ( this.node._imageOpacity === 1 ) {
+          if ( this.hasOpacity ) {
+            this.hasOpacity = false;
+            image.removeAttribute( 'opacity' );
+          }
+        }
+        else {
+          this.hasOpacity = true;
+          image.setAttribute( 'opacity', this.node._imageOpacity );
+        }
       }
     },
 
@@ -854,16 +929,29 @@ define( function( require ) {
     },
 
     paintCanvas: function( wrapper, node ) {
+      var hasImageOpacity = node._imageOpacity !== 1;
+
       // Ensure that the image has been loaded by checking whether it has a width or height of 0.
       // See https://github.com/phetsims/scenery/issues/536
       if ( node._image && node._image.width !== 0 && node._image.height !== 0 ) {
+        // If we have image opacity, we need to apply the opacity on top of whatever globalAlpha may exist
+        if ( hasImageOpacity ) {
+          wrapper.context.save();
+          wrapper.context.globalAlpha *= node._imageOpacity;
+        }
+
         wrapper.context.drawImage( node._image, 0, 0 );
+
+        if ( hasImageOpacity ) {
+          wrapper.context.restore();
+        }
       }
     },
 
     // stateless dirty functions
     markDirtyImage: function() { this.markPaintDirty(); },
-    markDirtyMipmap: function() { this.markPaintDirty(); }
+    markDirtyMipmap: function() { this.markPaintDirty(); },
+    markImageOpacityDirty: function() { this.markPaintDirty(); }
   } );
   SelfDrawable.Poolable.mixin( Image.ImageCanvasDrawable );
 
