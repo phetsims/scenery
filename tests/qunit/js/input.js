@@ -22,15 +22,15 @@
     ok( node.trailUnderPoint( dot.v2( 90, 10 ) ), 'Node intersection' );
     ok( !node.trailUnderPoint( dot.v2( -10, 10 ) ), 'Node no intersection' );
 
-    ok( node.trailUnderPoint( dot.v2( 10, 10 ), { isTouch: true } ), 'Node intersection (isTouch)' );
-    ok( node.trailUnderPoint( dot.v2( 90, 10 ), { isTouch: true } ), 'Node intersection (isTouch)' );
-    ok( node.trailUnderPoint( dot.v2( -10, 10 ), { isTouch: true } ), 'Node intersection (isTouch)' );
+    ok( node.trailUnderPointer( { isTouch: true, point: dot.v2( 10, 10 ) } ), 'Node intersection (isTouch)' );
+    ok( node.trailUnderPointer( { isTouch: true, point: dot.v2( 90, 10 ) } ), 'Node intersection (isTouch)' );
+    ok( node.trailUnderPointer( { isTouch: true, point: dot.v2( -10, 10 ) } ), 'Node intersection (isTouch)' );
 
     node.clipArea = kite.Shape.rectangle( 0, 0, 50, 50 );
 
     // points outside the clip area shouldn't register as hits
-    ok( node.trailUnderPoint( dot.v2( 10, 10 ), { isTouch: true } ), 'Node intersection (isTouch with clipArea)' );
-    ok( !node.trailUnderPoint( dot.v2( 90, 10 ), { isTouch: true } ), 'Node no intersection (isTouch with clipArea)' );
-    ok( !node.trailUnderPoint( dot.v2( -10, 10 ), { isTouch: true } ), 'Node no intersection (isTouch with clipArea)' );
+    ok( node.trailUnderPointer( { isTouch: true, point: dot.v2( 10, 10 ) } ), 'Node intersection (isTouch with clipArea)' );
+    ok( !node.trailUnderPointer( { isTouch: true, point: dot.v2( 90, 10 ) } ), 'Node no intersection (isTouch with clipArea)' );
+    ok( !node.trailUnderPointer( { isTouch: true, point: dot.v2( -10, 10 ) } ), 'Node no intersection (isTouch with clipArea)' );
   } );
 })();
