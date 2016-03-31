@@ -227,6 +227,11 @@ define( function( require ) {
       sceneryLog && sceneryLog.CanvasBlock && sceneryLog.CanvasBlock( '#' + this.id + '.onIntervalChange ' + firstDrawable.toString() + ' to ' + lastDrawable.toString() );
 
       FittedBlock.prototype.onIntervalChange.call( this, firstDrawable, lastDrawable );
+
+      // If we have an interval change, we'll need to ensure we repaint (even if we're full-display). This was a missed
+      // case for https://github.com/phetsims/scenery/issues/512, where it would only clear if it was a common-ancestor
+      // fitted block.
+      this.markDirty();
     },
 
     onPotentiallyMovedDrawable: function( drawable ) {
