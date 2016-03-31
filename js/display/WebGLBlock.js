@@ -487,28 +487,34 @@ define( function( require ) {
     assert && assert( webglBlock.gl );
     this.shaderProgram = new ShaderProgram( gl, [
       // vertex shader
-      'attribute vec4 aVertex;',
-      // 'attribute vec2 aTextureCoord;',
+      'attribute vec2 aVertex;',
+      'attribute vec2 aTextureCoord;',
+      'attribute float aAlpha;',
       'varying vec2 vTextureCoord;',
+      'varying float vAlpha;',
       'uniform mat3 uProjectionMatrix;',
 
       'void main() {',
-      '  vTextureCoord = aVertex.zw;',
-      '  vec3 ndc = uProjectionMatrix * vec3( aVertex.xy, 1.0 );', // homogeneous map to to normalized device coordinates
+      '  vTextureCoord = aTextureCoord;',
+      '  vAlpha = aAlpha;',
+      '  vec3 ndc = uProjectionMatrix * vec3( aVertex, 1.0 );', // homogeneous map to to normalized device coordinates
       '  gl_Position = vec4( ndc.xy, 0.0, 1.0 );',
       '}'
     ].join( '\n' ), [
       // fragment shader
       'precision mediump float;',
       'varying vec2 vTextureCoord;',
+      'varying float vAlpha;',
       'uniform sampler2D uTexture;',
 
       'void main() {',
-      '  gl_FragColor = texture2D( uTexture, vTextureCoord, -0.7 );', // mipmap LOD bias of -0.7 (for now)
+      '  vec4 color = texture2D( uTexture, vTextureCoord, -0.7 );', // mipmap LOD bias of -0.7 (for now)
+      '  color.a *= vAlpha;',
+      '  gl_FragColor = color;',
       '}'
     ].join( '\n' ), {
       // attributes: [ 'aVertex', 'aTextureCoord' ],
-      attributes: [ 'aVertex' ],
+      attributes: [ 'aVertex', 'aTextureCoord', 'aAlpha' ],
       uniforms: [ 'uTexture', 'uProjectionMatrix' ]
     } );
 
@@ -581,17 +587,19 @@ define( function( require ) {
       else {
         gl.bufferSubData( gl.ARRAY_BUFFER, 0, this.vertexArray.subarray( 0, this.vertexArrayIndex ) );
       }
-      gl.vertexAttribPointer( this.shaderProgram.attributeLocations.aVertex, 4, gl.FLOAT, false, 0, 0 );
-      // TODO: test striping
-      // var sizeOfFloat = 4;
-      // gl.vertexAttribPointer( this.shaderProgram.attributeLocations.aVertex, 2, gl.FLOAT, false, 4 * sizeOfFloat, 0 * sizeOfFloat );
-      // gl.vertexAttribPointer( this.shaderProgram.attributeLocations.aTextureCoord, 2, gl.FLOAT, false, 4 * sizeOfFloat, 2 * sizeOfFloat );
+
+      var numComponents = 5;
+      var sizeOfFloat = Float32Array.BYTES_PER_ELEMENT;
+      var stride = numComponents * sizeOfFloat;
+      gl.vertexAttribPointer( this.shaderProgram.attributeLocations.aVertex, 2, gl.FLOAT, false, stride, 0 * sizeOfFloat );
+      gl.vertexAttribPointer( this.shaderProgram.attributeLocations.aTextureCoord, 2, gl.FLOAT, false, stride, 2 * sizeOfFloat );
+      gl.vertexAttribPointer( this.shaderProgram.attributeLocations.aAlpha, 1, gl.FLOAT, false, stride, 4 * sizeOfFloat );
 
       gl.activeTexture( gl.TEXTURE0 );
       gl.bindTexture( gl.TEXTURE_2D, this.currentSpriteSheet.texture );
       gl.uniform1i( this.shaderProgram.uniformLocations.uTexture, 0 );
 
-      gl.drawArrays( gl.TRIANGLES, 0, this.vertexArrayIndex / 4 );
+      gl.drawArrays( gl.TRIANGLES, 0, this.vertexArrayIndex / numComponents );
 
       gl.bindTexture( gl.TEXTURE_2D, null );
 
