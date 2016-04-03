@@ -36,7 +36,7 @@ define( function( require ) {
 
     // Use the max supported texture size (according to http://codeflow.org/entries/2013/feb/22/how-to-write-portable-webgl/ )
     // TODO: potentially support larger texture sizes based on reported capabilities (could cause fewer draw calls?)
-    this.bounds = new Bounds2( 0, 0, 2048, 2048 );
+    this.bounds = new Bounds2( 0, 0, 1024, 1024 );
     assert && assert( this.bounds.minX === 0 && this.bounds.minY === 0, 'Assumed constraint later on for transforms' );
     this.width = this.bounds.width;
     this.height = this.bounds.height;
