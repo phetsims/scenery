@@ -260,6 +260,19 @@ define( function( require ) {
     set image( value ) { this.setImage( value ); },
 
     /**
+     * Sets the image with specific dimensions.
+     * @param image - see setImage
+     * @param {number} width - width of image
+     * @param {number} height - height of image
+     * @public
+     */
+    setImageWithSize: function( image, width, height ) {
+      this._initialWidth = width;
+      this._initialHeight = height;
+      this.setImage( image );
+    },
+
+    /**
      * Returns the opacity applied only to this image (not including children).
      * @public
      *
