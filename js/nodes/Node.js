@@ -19,7 +19,8 @@ define( function( require ) {
   var Transform3 = require( 'DOT/Transform3' );
   var Matrix3 = require( 'DOT/Matrix3' );
   var Vector2 = require( 'DOT/Vector2' );
-  var clamp = require( 'DOT/Util' ).clamp;
+  var Util = require( 'DOT/Util' );
+
   var Shape = require( 'KITE/Shape' );
 
   var scenery = require( 'SCENERY/scenery' );
@@ -30,6 +31,9 @@ define( function( require ) {
   // commented out so Require.js doesn't balk at the circular dependency
   // require( 'SCENERY/util/Trail' );
   // require( 'SCENERY/util/TrailPointer' );
+
+  // constants
+  var clamp = Util.clamp;
 
   var globalIdCounter = 1;
 

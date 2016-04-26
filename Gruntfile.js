@@ -1,6 +1,7 @@
 // Copyright 2002-2015, University of Colorado Boulder
 
-var exec = require( 'child_process' ).exec;
+var childProcess = require( 'child_process' ); // eslint-disable-line require-statement-match
+var exec = childProcess.exec;
 
 /*global module:false*/
 module.exports = function( grunt ) {

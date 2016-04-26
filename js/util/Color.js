@@ -16,8 +16,11 @@ define( function( require ) {
   var inherit = require( 'PHET_CORE/inherit' );
   var scenery = require( 'SCENERY/scenery' );
 
-  var clamp = require( 'DOT/Util' ).clamp;
-  var linear = require( 'DOT/Util' ).linear;
+  var Util = require( 'DOT/Util' );
+
+  // constants
+  var clamp = Util.clamp;
+  var linear = Util.linear;
 
   /**
    * Creates a Color with an initial value. Multiple different types of parameters are supported:
