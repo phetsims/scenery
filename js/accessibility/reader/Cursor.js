@@ -16,6 +16,7 @@ define( function( require ) {
   // modules
   var inherit = require( 'PHET_CORE/inherit' );
   var Property = require( 'AXON/Property' );
+  var scenery = require( 'SCENERY/scenery' );
 
   // constants
   var SPACE = ' '; // space to insert between words of text content
@@ -165,6 +166,8 @@ define( function( require ) {
     } );
 
   }
+
+  scenery.register( 'Cursor', Cursor );
 
   inherit( Object, Cursor, {
 

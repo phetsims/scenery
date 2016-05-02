@@ -12,6 +12,7 @@ define( function( require ) {
 
   // modules
   var inherit = require( 'PHET_CORE/inherit' );
+  var scenery = require( 'SCENERY/scenery' );
 
   /**
    * @constructor
@@ -63,6 +64,8 @@ define( function( require ) {
     }
 
   }
+
+  scenery.register( 'Reader', Reader );
 
   return inherit( Object, Reader, {} );
 
