@@ -10,6 +10,7 @@ define( function( require ) {
 
   // modules
   var inherit = require( 'PHET_CORE/inherit' );
+  var scenery = require( 'SCENERY/scenery' );
 
   var DATA_VISITED = 'data-visited';
   var DATA_VISITED_LINEAR = 'data-visited-linear';
@@ -370,6 +371,8 @@ define( function( require ) {
     };
     step();
   }
+
+  scenery.register( 'VirtualCursor', VirtualCursor );
 
   return inherit( Object, VirtualCursor, {} );
 
