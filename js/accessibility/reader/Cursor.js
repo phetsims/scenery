@@ -93,26 +93,27 @@ define( function( require ) {
       thisCursor.updateLiveElementList();
 
       // handle all of the various navigation strategies here
-      if ( event.keyCode === 40 ) {
+      if ( thisCursor.keyState[ 40 ] ) {
         // read the next line on 'down arrow'
         outputText = thisCursor.readNextLine();
       }
-      else if ( event.keyCode === 38 && !thisCursor.keyState[ 45 ] ) {
+      else if ( thisCursor.keyState[ 38 ] && !thisCursor.keyState[ 45 ] ) {
         // read the previous line on 'up arrow'
         outputText = thisCursor.readPreviousLine();
       }
-      else if ( event.keyCode === 72 ) {
+      else if ( thisCursor.keyState[ 72 ] ) {
         // read the previous or next headings depending on whether the shift key is pressed
-        outputText = shiftKeyDown ? thisCursor.readPreviousHeading() : thisCursor.readNextHeading();
+        var headingLevels = [ 'H1', 'H2', 'H3', 'H4', 'H5', 'H6' ];
+        outputText = shiftKeyDown ? thisCursor.readPreviousHeading( headingLevels ) : thisCursor.readNextHeading( headingLevels );
       }
-      else if ( event.keyCode === 9 ) {
+      else if ( thisCursor.keyState[ 9 ] ) {
         // let the browser naturally handle 'tab' for forms elements and elements with a tabIndex
       }
       else if ( thisCursor.keyState[ 39 ] && !thisCursor.keyState[ 17 ] ) {
         // read the next character of the active line on 'right arrow'
         outputText = thisCursor.readNextCharacter();
       }
-      else if ( event.keyCode === 37 && !thisCursor.keyState[ 17 ] ) {
+      else if ( thisCursor.keyState[ 37 ] && !thisCursor.keyState[ 17 ] ) {
         // read the previous character on 'left arrow'
         outputText = thisCursor.readPreviousCharacter();
       }
@@ -128,7 +129,40 @@ define( function( require ) {
         // repeat the active line on 'insert + up arrow'
         outputText = thisCursor.readActiveLine(); 
       }
-
+      else if ( thisCursor.keyState[ 49 ] ) {
+        // find the previous/next heading level 1 on '1'
+        var level1 = [ 'H1' ];
+        outputText = shiftKeyDown ? thisCursor.readPreviousHeading( level1 ) : thisCursor.readNextHeading( level1 );
+      }
+      else if ( thisCursor.keyState[ 50 ] ) {
+        // find the previous/next heading level 2 on '2'
+        var level2 = [ 'H2' ];
+        outputText = shiftKeyDown ? thisCursor.readPreviousHeading( level2 ) : thisCursor.readNextHeading( level2 );
+      }
+      else if ( thisCursor.keyState[ 51 ] ) {
+        // find the previous/next heading level 3 on '3'
+        var level3 = [ 'H3' ];
+        outputText = shiftKeyDown ? thisCursor.readPreviousHeading( level3 ) : thisCursor.readNextHeading( level3 );
+      }
+      else if ( thisCursor.keyState[ 52 ] ) {
+        // find the previous/next heading level 4 on '4'
+        var level4 = [ 'H4' ];
+        outputText = shiftKeyDown ? thisCursor.readPreviousHeading( level4 ) : thisCursor.readNextHeading( level4 );
+      }
+      else if ( thisCursor.keyState[ 53 ] ) {
+        // find the previous/next heading level 5 on '5'
+        var level5 = [ 'H5' ];
+        outputText = shiftKeyDown ? thisCursor.readPreviousHeading( level5 ) : thisCursor.readNextHeading( level5 );
+      }
+      else if ( thisCursor.keyState[ 54 ] ) {
+        // find the previous/next heading level 6 on '6'
+        var level6 = [ 'H6' ];
+        outputText = shiftKeyDown ? thisCursor.readPreviousHeading( level6 ) : thisCursor.readNextHeading( level6 );
+      }
+      else if ( thisCursor.keyState[ 70 ] ) {
+        // find the previous/next form element on 'f'
+        outputText = shiftKeyDown ? thisCursor.readPreviousFormElement() : thisCursor.readNextFormElement();
+      }
       else if ( thisCursor.keyState[ 45 ] && thisCursor.keyState[ 40 ] ) {
         // if insert is pressed, handle some extra behavior
         // NOTE: very unlikely that this would be used, insert is assumed to be a key with
@@ -451,7 +485,6 @@ define( function( require ) {
      * @return {DOMElement}
      */
     getPreviousElementWithTagName: function( tagNames ) {
-
       var element = null;
 
       // if there is no active element, start at the beginning of the DOM
@@ -682,18 +715,39 @@ define( function( require ) {
     },
 
     /**
-     * Read the next heading in the DOM, relative to the position of the active element.
-     * 
+     * Read the next heading in the DOM of the level specified in headingLevels, 
+     * relative to the position of the active element.
+     *
+     * @param {Array<string>} headingLevels - array of heading levels to look for
      * @return {string}
      */
-    readNextHeading: function() {
-      // list of possible tags for headings
-      var tagNames = ['H1', 'H2', 'H3', 'H4', 'H5', 'H6' ];
+    readNextHeading: function( headingLevels ) {
 
       // get the next element in the DOM with one of the above tag names
-      var nextElement = this.getNextElementWithTagName( tagNames );
+      var nextElement = this.getNextElementWithTagName( headingLevels );
 
       if ( !nextElement ) {
+        // set the active element to the next element in the DOM to avoid skipping
+        // the last element on backwards traversal
+        this.activeElement = this.getNextElement();
+
+        // let the user know that there are no more headings at the desired level
+        if ( headingLevels.length === 1 ) {
+          var noNextHeadingString = 'No next heading at ';
+
+          var headingLevel = headingLevels[ 0 ];
+          var levelString = headingLevel === 'H1' ? 'Level 1' :
+                            headingLevel === 'H2' ? 'Level 2' :
+                            headingLevel === 'H3' ? 'Level 3' :
+                            headingLevel === 'H4' ? 'Level 4' :
+                            headingLevel === 'H5' ? 'Level 5' :
+                            'Level 6';
+
+
+          return noNextHeadingString + levelString;
+        }
+
+        // otherwise just let the user know that there are no more headings
         return 'No more headings';
       }
       return this.getAccessibleText( nextElement );
@@ -701,21 +755,86 @@ define( function( require ) {
 
     /**
      * Read the previous heading in the parallel DOM, relative to the current heading.
-     * 
-     * @return {} [description]
+     *
+     * @param {Array<string>} headingLevels
+     * @return {string}
      * @private
      */
-    readPreviousHeading: function() {
-      // list of possible tags for headings
-      var tagNames = ['H1', 'H2', 'H3', 'H4', 'H5', 'H6' ];
+    readPreviousHeading: function( headingLevels ) {
 
       // get the next element in the DOM with one of the above tag names
-      var previousElement = this.getPreviousElementWithTagName( tagNames );
+      var previousElement = this.getPreviousElementWithTagName( headingLevels );
 
       if ( !previousElement ) {
+        // set the active element to the next element in the DOM to avoid skipping
+        // the last element on backwards traversal
+        this.activeElement = this.getPreviousElement();
+
+        // let the user know that there are no more headings at the desired level
+        if ( headingLevels.length === 1 ) {
+          var noNextHeadingString = 'No previous heading at ';
+
+          var headingLevel = headingLevels[ 0 ];
+          var levelString = headingLevel === 'H1' ? 'Level 1' :
+                            headingLevel === 'H2' ? 'Level 2' :
+                            headingLevel === 'H3' ? 'Level 3' :
+                            headingLevel === 'H4' ? 'Level 4' :
+                            headingLevel === 'H5' ? 'Level 5' :
+                            'Level 6';
+
+          return noNextHeadingString + levelString;
+        }
         return 'No previous headings';
       }
       return this.getAccessibleText( previousElement );
+    },
+
+    /**
+     * Read the next form element, skipping elements that may be hidden from the user.
+     * 
+     * @return {string} [description]
+     */
+    readNextFormElement: function() {
+      // list of all tag names that could be a form element
+      // TODO: populate with more form elements!
+      var tagNames = [ 'INPUT', 'BUTTON' ];
+
+      var nextElement;
+      var accessibleText;
+      while ( !accessibleText ) {
+        nextElement = this.getNextElementWithTagName( tagNames );
+        accessibleText = this.getAccessibleText( nextElement );
+      }
+
+      if( accessibleText === END_OF_DOCUMENT ) {
+        return 'No next form field';
+      }
+
+      return accessibleText;
+    },
+
+    /**
+     * Read the previous form element skipping elements that may be hidden from the user.
+     * @return {[type]} [description]
+     */
+    readPreviousFormElement: function() {
+
+      // TODO: populate with more elements!
+      var tagNames = [ 'INPUT', 'BUTTON' ];
+
+      var previousElement;
+      var accessibleText;
+      while ( !accessibleText ) {
+        previousElement = this.getPreviousElementWithTagName( tagNames );
+        accessibleText = this.getAccessibleText( previousElement );
+      }
+
+      if ( accessibleText === END_OF_DOCUMENT ) {
+        this.activeElement = this.getPreviousElement();
+        return 'No previous form field';
+      }
+
+      return accessibleText;
     },
 
     /**
