@@ -50,8 +50,12 @@ define( function( require ) {
     // @private
     this.letterPosition = 0;
 
-    // the wordPosition is the position in words marking the end location of the active line
+    // the positionInLine is the position in words marking the end location of the active line
     // this must be tracked to support content and descriptions longer than 15 words
+    // @private
+    this.positionInLine = 0;
+
+    // the position of the word in the active line to support navigation on a word by word basis
     // @private
     this.wordPosition = 0;
 
@@ -93,27 +97,39 @@ define( function( require ) {
         // read the next line on 'down arrow'
         outputText = thisCursor.readNextLine();
       }
-      if ( event.keyCode === 38 ) {
+      else if ( event.keyCode === 38 && !thisCursor.keyState[ 45 ] ) {
         // read the previous line on 'up arrow'
         outputText = thisCursor.readPreviousLine();
       }
-      if ( event.keyCode === 72 ) {
+      else if ( event.keyCode === 72 ) {
         // read the previous or next headings depending on whether the shift key is pressed
         outputText = shiftKeyDown ? thisCursor.readPreviousHeading() : thisCursor.readNextHeading();
       }
-      if ( event.keyCode === 9 ) {
+      else if ( event.keyCode === 9 ) {
         // let the browser naturally handle 'tab' for forms elements and elements with a tabIndex
       }
-      if ( event.keyCode === 39 ) {
+      else if ( thisCursor.keyState[ 39 ] && !thisCursor.keyState[ 17 ] ) {
         // read the next character of the active line on 'right arrow'
         outputText = thisCursor.readNextCharacter();
       }
-      if ( event.keyCode === 37 ) {
+      else if ( event.keyCode === 37 && !thisCursor.keyState[ 17 ] ) {
         // read the previous character on 'left arrow'
         outputText = thisCursor.readPreviousCharacter();
       }
+      else if ( thisCursor.keyState[ 37 ] && thisCursor.keyState[ 17 ] ) {
+        // read the previous word on 'control + left arrow'
+        outputText = thisCursor.readPreviousWord();
+      }
+      else if ( thisCursor.keyState[ 39 ] && thisCursor.keyState[ 17 ] ) {
+        // read the next word on 'control + right arrow'
+        outputText = thisCursor.readNextWord();
+      }
+      else if ( thisCursor.keyState[ 45 ] && thisCursor.keyState[ 38 ] ) {
+        // repeat the active line on 'insert + up arrow'
+        outputText = thisCursor.readActiveLine(); 
+      }
 
-      if ( thisCursor.keyState[ 45 ] && thisCursor.keyState[ 40 ] ) {
+      else if ( thisCursor.keyState[ 45 ] && thisCursor.keyState[ 40 ] ) {
         // if insert is pressed, handle some extra behavior
         // NOTE: very unlikely that this would be used, insert is assumed to be a key with
         // screen-reader specific behavior
@@ -476,6 +492,7 @@ define( function( require ) {
 
       // reset the content letter position because we have a new line
       this.letterPosition = 0;
+      this.wordPosition = 0;
 
       // if there is no active element, set to the next element with accessible
       // content
@@ -487,9 +504,9 @@ define( function( require ) {
       var accessibleContent = this.getAccessibleText( this.activeElement, false ).split( ' ' );
 
       // if the word position is at the length of the accessible content, it is time to find the next element
-      if ( this.wordPosition >= accessibleContent.length ) {
+      if ( this.positionInLine >= accessibleContent.length ) {
         // reset the word position
-        this.wordPosition = 0;
+        this.positionInLine = 0;
 
         // update the active element and set the accessible content from this element
         this.activeElement = this.getNextElementWithAccessibleContent();
@@ -497,11 +514,11 @@ define( function( require ) {
       }
 
       // read the next line of the accessible content
-      var lineLimit = this.wordPosition + LINE_WORD_LENGTH;
-      for( var i = this.wordPosition; i < lineLimit; i++ ) {
+      var lineLimit = this.positionInLine + LINE_WORD_LENGTH;
+      for( var i = this.positionInLine; i < lineLimit; i++ ) {
         if ( accessibleContent[ i ] ) {
           line += accessibleContent[ i ];
-          this.wordPosition += 1;
+          this.positionInLine += 1;
 
           if ( accessibleContent[ i + 1 ] ) {
             line += SPACE;
@@ -529,32 +546,35 @@ define( function( require ) {
 
       // reset the content letter position because we have a new line
       this.letterPosition = 0;
+      this.wordPosition = 0;
 
-      // if there is no active element, set to the next element with accessible
-      // content
+      // if there is no active element, set to the previous element with accessible content
       if ( !this.activeElement ) {
         this.activeElement = this.getPreviousElementWithAccessibleContent();
       }
 
-      // get the accessible content for the active element, without any additional 'application' content
+      // get the accessible content for the active element, without any 'application' content
       var accessibleContent = this.getAccessibleText( this.activeElement, false ).split( ' ' );
 
-      // if the word position is at the length of the accessible content, it is time to find the previous element
-      if ( this.wordPosition >= accessibleContent.length ) {
+      // start at the beginning of the previous line
+      this.positionInLine = this.positionInLine - 2 * LINE_WORD_LENGTH;
+
+      // if there is no content at the word position, find the previous element and start at the beginning
+      if ( !accessibleContent[ this.positionInLine ] ) {
         // reset the word position
-        this.wordPosition = 0;
+        this.positionInLine = 0;
 
         // update the active element and set the accessible content from this element
         this.activeElement = this.getPreviousElementWithAccessibleContent();
         accessibleContent = this.getAccessibleText( this.activeElement, false ).split( ' ' );
       }
 
-      // read the next line of the accessible content
-      var lineLimit = this.wordPosition + LINE_WORD_LENGTH;
-      for( var i = this.wordPosition; i < lineLimit; i++ ) {
+      // read this line of content
+      var lineLimit = this.positionInLine + LINE_WORD_LENGTH;
+      for( var i = this.positionInLine; i < lineLimit; i++ ) {
         if ( accessibleContent[ i ] ) {
           line += accessibleContent[ i ];
-          this.wordPosition += 1;
+          this.positionInLine += 1;
 
           if ( accessibleContent[ i + 1 ] ) {
             line += SPACE;
@@ -568,6 +588,97 @@ define( function( require ) {
 
       this.activeLine = line;
       return line;
+    },
+
+    /**
+     * Read the active line without incrementing the word count.
+     * 
+     * @return {[type]} [description]
+     */
+    readActiveLine: function() {
+
+      var line = '';
+
+      // if there is no active line, find the next one
+      if ( !this.activeLine ) {
+        this.activeLine = this.readNextLine();
+      }
+
+      // split up the active line into an array of words
+      var activeWords = this.activeLine.split( ' ' );
+
+
+      // read this line of content
+      for( var i = 0; i < LINE_WORD_LENGTH; i++ ) {
+        if ( activeWords[ i ] ) {
+          line += activeWords[ i ];
+
+          if ( activeWords[ i + 1 ] ) {
+            line += SPACE;
+          }
+          else { 
+            // we have reached the end of the line, there are no more words
+            break;
+          }
+        }
+      }
+
+      return line;
+    },
+
+    /**
+     * Read the next word in the active line.  Read the first word in the next line if we are at the end
+     * of the active line.
+     * 
+     * @return {string}
+     */
+    readNextWord: function() {
+      // if there is no active line, find the next one
+      if ( !this.activeLine ) {
+        this.activeLine = this.readNextLine();
+      }
+
+      // split the active line into an array of words
+      var activeWords = this.activeLine.split( ' ' );
+
+      // if the we are at the end of the active line, read the next one
+      if ( this.wordPosition === activeWords.length ) {
+        this.activeLine = this.readNextLine();
+      }
+
+      // get the word to read and increment the word position
+      var outputText = activeWords[ this.wordPosition ];
+      this.wordPosition++;
+
+      return outputText;
+    },
+
+    /**
+     * Read the previous word in the active line.  Read the previous line if we are at the beginning of the line.
+     * 
+     * @return {string}
+     */
+    readPreviousWord: function() {
+      // if there is no active line, find the previous one
+      if ( !this.activeLine ) {
+        this.activeLine = this.readPreviousLine();
+      }
+
+      // if we are at the beginning of the line, read the previous one
+      if ( this.wordPosition === 0 ) {
+        this.activeLine = this.readPreviousLine();
+
+        // the active word position should be at the end of the new line
+        this.wordPosition = this.activeLine.split( ' ' ).length - 1;      
+      }
+
+      // split the active line into an array of words
+      var activeWords = this.activeLine.split( ' ' );
+
+      var outputText = activeWords[ this.wordPosition - 2 ];
+      this.wordPosition--;
+
+      return outputText;
     },
 
     /**
