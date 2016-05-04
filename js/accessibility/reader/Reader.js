@@ -13,6 +13,7 @@ define( function( require ) {
   // modules
   var inherit = require( 'PHET_CORE/inherit' );
   var scenery = require( 'SCENERY/scenery' );
+  var Emitter = require( 'AXON/Emitter' );
 
   /**
    * @constructor
@@ -20,6 +21,12 @@ define( function( require ) {
   function Reader( cursor ) {
 
     var thisReader = this;
+
+    // @public, listen only, emits an event when the synth begins speaking the utterance
+    this.speakingStartedEmitter = new Emitter();
+
+    // @public, listen only, emits an event when the synth has finished speaking the utterance
+    this.speakingEndedEmitter = new Emitter();
 
     if ( window.speechSynthesis && SpeechSynthesisUtterance && window.speechSynthesis.speak ) {
       // Web Speech API looks good for synthesis, run wild!
@@ -29,6 +36,14 @@ define( function( require ) {
 
         // create a new utterance
         var utterThis = new SpeechSynthesisUtterance( outputUtterance.text );
+
+        utterThis.onstart = function( event ) {
+          thisReader.speakingStartedEmitter.emit1( outputUtterance );
+        };
+
+        utterThis.onend = function( event ) {
+          thisReader.speakingEndedEmitter.emit1( outputUtterance );
+        };
 
         // set the voice, pitch, and rate for the utterance
         utterThis.voice = thisReader.synth.getVoices()[ 2 ];

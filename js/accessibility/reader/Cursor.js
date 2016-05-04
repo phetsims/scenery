@@ -20,7 +20,7 @@ define( function( require ) {
 
   // constants
   var SPACE = ' '; // space to insert between words of text content
-  var END_OF_DOCUMENT = 'END_OF_DOCUMENT'; // flag thrown when there is no more content
+  var END_OF_DOCUMENT = 'End of Document'; // flag thrown when there is no more content
   var COMMA = ','; // some bits of text content should be separated with a comma for clear synth output
   var LINE_WORD_LENGTH = 15; // number of words read in a single line
 
@@ -93,7 +93,7 @@ define( function( require ) {
       thisCursor.updateLiveElementList();
 
       // handle all of the various navigation strategies here
-      if ( thisCursor.keyState[ 40 ] ) {
+      if ( thisCursor.keyState[ 40 ] && !thisCursor.keyState[ 45 ] ) {
         // read the next line on 'down arrow'
         outputText = thisCursor.readNextLine();
       }
@@ -164,10 +164,8 @@ define( function( require ) {
         outputText = shiftKeyDown ? thisCursor.readPreviousFormElement() : thisCursor.readNextFormElement();
       }
       else if ( thisCursor.keyState[ 45 ] && thisCursor.keyState[ 40 ] ) {
-        // if insert is pressed, handle some extra behavior
-        // NOTE: very unlikely that this would be used, insert is assumed to be a key with
-        // screen-reader specific behavior
-        outputText = thisCursor.readEntireDocument();
+        // read entire document on 'insert + down arrow'
+        thisCursor.readEntireDocument();
       }
 
       // if the active element is focusable, set the focus to it so that the virtual cursor can
@@ -946,12 +944,31 @@ define( function( require ) {
     },
 
     /**
-     * Read continuously from the current active element
+     * Read continuously from the current active element.  Accessible content is read by reader with a 'polite' 
+     * utterance so that new text is added to the queue line by line.
+     *
+     * TODO: If the read is cancelled, the active element should be set appropriately.
      * 
      * @return {string}
      */
     readEntireDocument: function() {
-      return 'Please implement readRemainingDocument';
+
+      var liveRole = 'polite';
+      var outputText = this.getAccessibleText( this.activeElement );
+      var activeElement = this.activeElement;
+
+      while ( outputText !== END_OF_DOCUMENT ) {
+        activeElement = this.activeElement;
+        outputText = this.readNextLine();
+
+        if ( outputText === END_OF_DOCUMENT ) {
+          this.activeElement = activeElement;
+        }
+        // var nextElement = this.getNextElementWithAccessibleContent();
+        // outputText = this.getAccessibleText( nextElement );
+
+        this.outputUtteranceProperty.set( new Utterance( outputText, liveRole ) );
+      }
     },
 
     /**
