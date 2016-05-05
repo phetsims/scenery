@@ -163,6 +163,14 @@ define( function( require ) {
         // find the previous/next form element on 'f'
         outputText = shiftKeyDown ? thisCursor.readPreviousFormElement() : thisCursor.readNextFormElement();
       }
+      else if ( thisCursor.keyState[ 76 ] ) {
+        // find the previous/next list on 'L'
+        outputText = shiftKeyDown ? thisCursor.readPreviousList() : thisCursor.readNextList();
+      }
+      else if ( thisCursor.keyState[ 73 ] ) {
+        // find the previous/next list item on 'I'
+        outputText = shiftKeyDown ? thisCursor.readPreviousListItem() : thisCursor.readNextListItem();
+      }
       else if ( thisCursor.keyState[ 45 ] && thisCursor.keyState[ 40 ] ) {
         // read entire document on 'insert + down arrow'
         thisCursor.readEntireDocument();
@@ -319,6 +327,13 @@ define( function( require ) {
       }
       if ( element.tagName === 'H3' ) {
         textContent += 'Heading Level 3, ' + element.textContent;
+      }
+      if ( element.tagName === 'UL' ) {
+        var listLength = element.children.length;
+        textContent += 'List with ' + listLength + ' items';
+      }
+      if ( element.tagName === 'LI' ) {
+        textContent += 'List Item: ' + element.textContent;
       }
       if ( element.tagName === 'BUTTON' ) {
         textContent += element.textContent + ' Button';
@@ -809,6 +824,166 @@ define( function( require ) {
       }
 
       return accessibleText;
+    },
+
+    /**
+     * Read the next list in the document relative to the current active element, as well as the first list item
+     * under the parent list.
+     * 
+     * @return {string}
+     */
+    readNextList: function() {
+
+      // if the active element is a list item, skip to the last item to begin searching from there
+      if ( this.activeElement && this.activeElement.tagName === 'LI' ) {
+        var listChildren = this.activeElement.parentElement.children;
+        this.activeElement = listChildren[ listChildren.length - 1 ];
+      }
+
+      // get the next list element in the DOM
+      var nextElement = this.getNextElementWithTagName( [ 'UL', 'OL' ] );
+
+      if ( !nextElement ) {
+        // let the user know that there are no more lists and move to the next element
+        this.activeElement = this.getNextElementWithAccessibleContent();
+        return 'No more lists';
+      }
+
+      // get the content of the list element
+      var listText = this.getAccessibleText( nextElement );
+
+      // read the first item under the list
+      var itemText = '';
+      var firstItem = nextElement.children[ 0 ];
+      if( firstItem ) {
+        itemText = this.getAccessibleText( firstItem );
+        this.activeElement = firstItem;
+      }
+
+      return listText + ', ' + itemText;
+    },
+
+    /**
+     * Read the previous list in the document relative to the location of the current active element, as well
+     * as the first list item under the parent list.
+     * 
+     * @return {string}
+     */
+    readPreviousList: function() {
+
+      // if the active element is a list item, step outside to begin searching from the parent
+      if ( this.activeElement && this.activeElement.tagName === 'LI' ) {
+        this.activeElement = this.activeElement.parentElement;
+      }
+
+      // get the previous list element
+      var previousElement = this.getPreviousElementWithTagName( [ 'UL', 'OL' ] );
+
+      if( !previousElement ) {
+        // let the user know that there are no previous lists
+        this.activeElement = this.getPreviousElementWithAccessibleContent();
+        return 'No previous lists';
+      }
+
+      // get the content from the list element
+      var listText = this.getAccessibleText( previousElement );
+
+      // include the content from the first item in the list
+      var itemText = '';
+      var firstItem = previousElement.children[ 0 ];
+      if ( firstItem ) {
+        itemText = this.getAccessibleText( firstItem );
+        this.activeElement = firstItem;
+      }
+
+      return listText + ', ' + itemText;
+    },
+
+    /**
+     * Read the next item or the next list if no list is selected.
+     * 
+     * @return {}
+     */
+    readNextListItem: function() {
+
+      if ( !this.activeElement ) {
+        this.activeElement = this.getNextElementWithAccessibleContent();
+      }
+
+      // if we are not inside of a list or we are at the end of a list, get the next list
+      var listItems = this.activeElement.parentElement.children;
+      if ( this.activeElement.tagName !== 'LI'  || this.activeElement === listItems[ listItems.length - 1 ] ) {
+        var nextList = this.getNextElementWithTagName( [ 'OL', 'UL' ] );
+
+        if( nextList ) {
+          var itemElement = nextList.children[ 0 ];
+          var listContent = this.getAccessibleText( nextList );
+          var itemContent = this.getAccessibleText( itemElement );
+
+          this.activeElement = itemElement;
+
+          return listContent + SPACE + itemContent;
+        }
+        else {
+          // let the user know that there are no more lists and set the active element to the next item
+          this.activeElement = this.getNextElementWithAccessibleContent();
+          return 'No more lists';
+        }
+      }
+      else {
+        // otherwise read content from the next peer
+        var nextElement = this.activeElement.nextSibling;
+        this.activeElement = nextElement;
+        return this.getAccessibleText( nextElement );
+      }
+
+    },
+
+    /**
+     * Read the previous list item in the document.  If the active element is outside of a list, read the previous
+     * list and its first item.
+     * 
+     * @return {string}
+     */
+    readPreviousListItem: function() {
+      console.log( this.activeElement );
+
+      if ( !this.activeElement ) {
+        this.activeElement = this.getNextElementWithAccessibleContent();
+      }
+
+      // if we are not inside of a list or we are at the first list item, get the previous list
+      var listItems = this.activeElement.parentElement.children;
+      if ( this.activeElement.tagName !== 'LI' || this.activeElement === listItems[ 0 ] ) {
+
+        // step out of the current list
+        if ( this.activeElement === listItems[ 0 ] ) {
+          this.activeElement = this.activeElement.parentElement;
+        }
+
+        var previousList = this.getPreviousElementWithTagName( [ 'OL', 'UL' ] );
+
+        if( previousList ) {
+          var itemElement = previousList.children[ 0 ];
+          var listContent = this.getAccessibleText( previousList );
+          var itemContent = this.getAccessibleText( itemElement );
+
+          this.activeElement = itemElement;
+
+          return listContent + SPACE + itemContent;
+        }
+        else {
+          // let the user know that there are no more lists
+          this.activeElement = this.getPreviousElementWithAccessibleContent();
+          return 'No previous lists';
+        }
+      }
+      else {
+        // otherwise, get the previous peer
+        var previousElement = this.activeElement.previousSibling;
+        this.activeElement = previousElement;
+        return this.getAccessibleText( previousElement );
+      }
     },
 
     /**
