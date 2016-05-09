@@ -250,6 +250,29 @@ define( function( require ) {
     },
 
     /**
+     * Get the live role from the DOM element.  If the element is not live, return null.
+     * 
+     * @param  {DOMElement} domElement
+     * @return {string}
+     */
+    getLiveRole: function( domElement ) {
+      var liveRole = null;
+
+      // collection of all roles that can produce 'live region' behavior
+      // see https://developer.mozilla.org/en-US/docs/Web/Accessibility/ARIA/ARIA_Live_Regions
+      var roles = [ 'log', 'status', 'alert', 'progressbar', 'marquee', 'timer', 'assertive', 'polite' ];
+
+      roles.forEach( function( role ) {
+        if ( domElement.getAttribute( 'aria-live' ) === role || domElement.getAttribute( 'role' ) === role ) {
+          liveRole = role;
+          return;
+        }
+      } );
+      
+      return liveRole;      
+    },
+
+    /**
      * Get the next element in the linearized DOM relative to the active element
      * 
      * @return {DOMElement}
@@ -1066,9 +1089,8 @@ define( function( require ) {
 
     /**
      * Update the list of elements, and add Mutation Observers to each one.  MutationObservers
-     * provide a way to listen to changes in the DOM, see
-     * https://developer.mozilla.org/en-US/docs/Web/API/MutationObserver
-     *
+     * provide a way to listen to changes in the DOM,
+     * see https://developer.mozilla.org/en-US/docs/Web/API/MutationObserver
      */
     updateLiveElementList: function() {
 
@@ -1082,38 +1104,42 @@ define( function( require ) {
         }
       }
 
-      // clear the list of elements and observers
-      this.liveElements = [];
+      // clear the list of observers
       this.observers = [];
 
-      // search through the DOM, looking for elements with the 'aria-live' attribute
-      // TODO: additional roles should be added to this list 
-      // such as 'alert' and so on
-      // see https://developer.mozilla.org/en-US/docs/Web/Accessibility/ARIA/ARIA_Live_Regions
+      // search through the DOM, looking for elements with a 'live region' attribute
       for ( i = 0; i < this.linearDOM.length; i++ ) {
         var domElement = this.linearDOM[ i ];
-        var liveRole = domElement.getAttribute( 'aria-live' );
-        if( liveRole ) {
-          thisCursor.liveElements.push( domElement );
-          // scope is doing strangin things in observer callback ???
-          // add to thisCursor until we figure out why
-          thisCursor.liveRole = liveRole;
-          // create a mutation observer for this element
-          var observer = new MutationObserver( function( mutations ) {
+        var liveRole = thisCursor.getLiveRole( domElement );
 
+        if( liveRole ) {
+          var mutationObserverCallback = function( mutations ) {
             mutations.forEach( function( mutation ) {
+              var liveRole;
+              var mutatedElement = mutation.target;
+
+              // look for the type of live role that is associated with this mutation
+              // if the target has no live attribute, search through the element's ancestors to find the attribute
+              while( !liveRole ) {
+                liveRole = thisCursor.getLiveRole( mutatedElement );
+                mutatedElement = mutatedElement.parentElement;
+              }
+
               var updatedText = mutation.addedNodes[ 0 ].data;
-              thisCursor.outputUtteranceProperty.set( new Utterance( updatedText, thisCursor.liveRole ) );
+              thisCursor.outputUtteranceProperty.set( new Utterance( updatedText, liveRole ) );
             } );
+          };
+
+          // create a mutation observer for this live element
+          var observer = new MutationObserver( function( mutations ) {
+            mutationObserverCallback( mutations );
           } );
 
           // listen for changes to the subtree in case children of the aria-live parent change their textContent
           var observerConfig = { childList: true, subtree: true };
 
           observer.observe( domElement, observerConfig );
-
           thisCursor.observers.push( observer );
-
         }
       }
     },
