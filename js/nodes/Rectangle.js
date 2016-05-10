@@ -849,6 +849,15 @@ define( function( require ) {
       return this;
     },
 
+    writeRectangularPath: function( context, node ) {
+      context.beginPath();
+      context.moveTo( node._rectX, node._rectY );
+      context.lineTo( node._rectX + node._rectWidth, node._rectY );
+      context.lineTo( node._rectX + node._rectWidth, node._rectY + node._rectHeight );
+      context.lineTo( node._rectX, node._rectY + node._rectHeight );
+      context.closePath();
+    },
+
     paintCanvas: function( wrapper, node ) {
       var context = wrapper.context;
 
@@ -892,14 +901,34 @@ define( function( require ) {
       else {
         // TODO: how to handle fill/stroke delay optimizations here?
         if ( node.hasFill() ) {
-          node.beforeCanvasFill( wrapper ); // defined in Paintable
-          context.fillRect( node._rectX, node._rectY, node._rectWidth, node._rectHeight );
-          node.afterCanvasFill( wrapper ); // defined in Paintable
+          // If we need the fill pattern/gradient to have a different transformation, we can't use fillRect.
+          // See https://github.com/phetsims/scenery/issues/543
+          if ( node.getFillValue().transformMatrix ) {
+            this.writeRectangularPath( context, node );
+            node.beforeCanvasFill( wrapper ); // defined in Paintable
+            context.fill();
+            node.afterCanvasFill( wrapper ); // defined in Paintable
+          }
+          else {
+            node.beforeCanvasFill( wrapper ); // defined in Paintable
+            context.fillRect( node._rectX, node._rectY, node._rectWidth, node._rectHeight );
+            node.afterCanvasFill( wrapper ); // defined in Paintable
+          }
         }
         if ( node.hasStroke() ) {
-          node.beforeCanvasStroke( wrapper ); // defined in Paintable
-          context.strokeRect( node._rectX, node._rectY, node._rectWidth, node._rectHeight );
-          node.afterCanvasStroke( wrapper ); // defined in Paintable
+          // If we need the fill pattern/gradient to have a different transformation, we can't use fillRect.
+          // See https://github.com/phetsims/scenery/issues/543
+          if ( node.getStrokeValue().transformMatrix ) {
+            this.writeRectangularPath( context, node );
+            node.beforeCanvasStroke( wrapper ); // defined in Paintable
+            context.stroke();
+            node.afterCanvasStroke( wrapper ); // defined in Paintable
+          }
+          else {
+            node.beforeCanvasStroke( wrapper ); // defined in Paintable
+            context.strokeRect( node._rectX, node._rectY, node._rectWidth, node._rectHeight );
+            node.afterCanvasStroke( wrapper ); // defined in Paintable
+          }
         }
       }
     },
