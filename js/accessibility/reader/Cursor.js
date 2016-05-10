@@ -23,6 +23,8 @@ define( function( require ) {
   var END_OF_DOCUMENT = 'End of Document'; // flag thrown when there is no more content
   var COMMA = ','; // some bits of text content should be separated with a comma for clear synth output
   var LINE_WORD_LENGTH = 15; // number of words read in a single line
+  var NEXT = 'NEXT'; // constant that marks the direction of traversal
+  var PREVIOUS = 'PREVIOUS'; // constant that marks the direction of tragersal through the DOM
 
   /**
    * Constructor.
@@ -86,44 +88,54 @@ define( function( require ) {
       // TODO: we can optionally use the keyState object for this
       var shiftKeyDown = event.shiftKey;
 
+      // direction to navigate through the DOM - usually, holding shift indicates the user wants to travers
+      // backwards through the DOM
+      var direction = shiftKeyDown ? PREVIOUS : NEXT;
+
       // the dom can change at any time, make sure that we are reading a copy that is up to date
       thisCursor.linearDOM = thisCursor.getLinearDOMElements( domElement );
 
       // update the list of live elements
       thisCursor.updateLiveElementList();
 
-      // handle all of the various navigation strategies here
+      // if the element has an 'application' like behavior, keyboard should be free for the application
+      // TODO: This may be insufficient if we need the 'arrow' keys to continue to work for an application role
+      if ( thisCursor.activeElement && thisCursor.activeElement.getAttribute( 'role' ) === 'application' ) {
+        return;
+      }
+
+      // otherwise, handle all key events here
       if ( thisCursor.keyState[ 40 ] && !thisCursor.keyState[ 45 ] ) {
         // read the next line on 'down arrow'
-        outputText = thisCursor.readNextLine();
+        outputText = thisCursor.readNextPreviousLine( NEXT );
       }
       else if ( thisCursor.keyState[ 38 ] && !thisCursor.keyState[ 45 ] ) {
         // read the previous line on 'up arrow'
-        outputText = thisCursor.readPreviousLine();
+        outputText = thisCursor.readNextPreviousLine( PREVIOUS );
       }
       else if ( thisCursor.keyState[ 72 ] ) {
         // read the previous or next headings depending on whether the shift key is pressed
         var headingLevels = [ 'H1', 'H2', 'H3', 'H4', 'H5', 'H6' ];
-        outputText = shiftKeyDown ? thisCursor.readPreviousHeading( headingLevels ) : thisCursor.readNextHeading( headingLevels );
+        outputText = thisCursor.readNextPreviousHeading( headingLevels, direction );
       }
       else if ( thisCursor.keyState[ 9 ] ) {
         // let the browser naturally handle 'tab' for forms elements and elements with a tabIndex
       }
       else if ( thisCursor.keyState[ 39 ] && !thisCursor.keyState[ 17 ] ) {
         // read the next character of the active line on 'right arrow'
-        outputText = thisCursor.readNextCharacter();
+        outputText = thisCursor.readNextPreviousCharacter( NEXT );
       }
       else if ( thisCursor.keyState[ 37 ] && !thisCursor.keyState[ 17 ] ) {
         // read the previous character on 'left arrow'
-        outputText = thisCursor.readPreviousCharacter();
+        outputText = thisCursor.readNextPreviousCharacter( PREVIOUS );
       }
       else if ( thisCursor.keyState[ 37 ] && thisCursor.keyState[ 17 ] ) {
         // read the previous word on 'control + left arrow'
-        outputText = thisCursor.readPreviousWord();
+        outputText = thisCursor.readNextPreviousWord( PREVIOUS );
       }
       else if ( thisCursor.keyState[ 39 ] && thisCursor.keyState[ 17 ] ) {
         // read the next word on 'control + right arrow'
-        outputText = thisCursor.readNextWord();
+        outputText = thisCursor.readNextPreviousWord( NEXT );
       }
       else if ( thisCursor.keyState[ 45 ] && thisCursor.keyState[ 38 ] ) {
         // repeat the active line on 'insert + up arrow'
@@ -131,45 +143,39 @@ define( function( require ) {
       }
       else if ( thisCursor.keyState[ 49 ] ) {
         // find the previous/next heading level 1 on '1'
-        var level1 = [ 'H1' ];
-        outputText = shiftKeyDown ? thisCursor.readPreviousHeading( level1 ) : thisCursor.readNextHeading( level1 );
+        outputText = thisCursor.readNextPreviousHeading( [ 'H1' ], direction );
       }
       else if ( thisCursor.keyState[ 50 ] ) {
         // find the previous/next heading level 2 on '2'
-        var level2 = [ 'H2' ];
-        outputText = shiftKeyDown ? thisCursor.readPreviousHeading( level2 ) : thisCursor.readNextHeading( level2 );
+        outputText = thisCursor.readNextPreviousHeading( [ 'H2' ], direction );
       }
       else if ( thisCursor.keyState[ 51 ] ) {
         // find the previous/next heading level 3 on '3'
-        var level3 = [ 'H3' ];
-        outputText = shiftKeyDown ? thisCursor.readPreviousHeading( level3 ) : thisCursor.readNextHeading( level3 );
+        outputText = thisCursor.readNextPreviousHeading( [ 'H3' ], direction );
       }
       else if ( thisCursor.keyState[ 52 ] ) {
         // find the previous/next heading level 4 on '4'
-        var level4 = [ 'H4' ];
-        outputText = shiftKeyDown ? thisCursor.readPreviousHeading( level4 ) : thisCursor.readNextHeading( level4 );
+        outputText = thisCursor.readNextPreviousHeading( [ 'H4' ], direction );
       }
       else if ( thisCursor.keyState[ 53 ] ) {
         // find the previous/next heading level 5 on '5'
-        var level5 = [ 'H5' ];
-        outputText = shiftKeyDown ? thisCursor.readPreviousHeading( level5 ) : thisCursor.readNextHeading( level5 );
+        outputText = thisCursor.readNextPreviousHeading( [ 'H5' ], direction );
       }
       else if ( thisCursor.keyState[ 54 ] ) {
         // find the previous/next heading level 6 on '6'
-        var level6 = [ 'H6' ];
-        outputText = shiftKeyDown ? thisCursor.readPreviousHeading( level6 ) : thisCursor.readNextHeading( level6 );
+        outputText = thisCursor.readNextPreviousHeading( [ 'H6' ], direction );
       }
       else if ( thisCursor.keyState[ 70 ] ) {
         // find the previous/next form element on 'f'
-        outputText = shiftKeyDown ? thisCursor.readPreviousFormElement() : thisCursor.readNextFormElement();
+        outputText = thisCursor.readNextPreviousFormElement( direction );
       }
       else if ( thisCursor.keyState[ 76 ] ) {
         // find the previous/next list on 'L'
-        outputText = shiftKeyDown ? thisCursor.readPreviousList() : thisCursor.readNextList();
+        outputText = thisCursor.readNextPreviousList( direction );
       }
       else if ( thisCursor.keyState[ 73 ] ) {
         // find the previous/next list item on 'I'
-        outputText = shiftKeyDown ? thisCursor.readPreviousListItem() : thisCursor.readNextListItem();
+        outputText = thisCursor.readNextPreviousListItem( direction );
       }
       else if ( thisCursor.keyState[ 45 ] && thisCursor.keyState[ 40 ] ) {
         // read entire document on 'insert + down arrow'
@@ -202,8 +208,8 @@ define( function( require ) {
     } );
 
     // listen for when an element is about to receive focus
-    // we are using focusin and not focus because we want the event to bubble up to the document
-    // this will handle both tab navigation and programatic focus by the simulation
+    // we are using focusin (and not focus) because we want the event to bubble up the document
+    // this will handle both tab navigation AND programatic focus by the simulation
     document.addEventListener( 'focusin', function( event ) {
 
       // anounce the new focus if it is different from the active element
@@ -273,35 +279,21 @@ define( function( require ) {
     },
 
     /**
-     * Get the next element in the linearized DOM relative to the active element
+     * Get the next or previous element in the DOM, depending on the desired direction.
      * 
-     * @return {DOMElement}
+     * @param  {[type]} direction - NEXT || PREVIOUS
+     * @return {DOMElement}    
      */
-    getNextElement: function() {
+    getNextPreviousElement: function( direction ) {
       if ( !this.activeElement ) {
         this.activeElement = this.linearDOM[ 0 ];
       }
 
+      var searchDelta = direction === 'NEXT' ? 1 : -1;
       var activeIndex = this.linearDOM.indexOf( this.activeElement );
-      var nextIndex = activeIndex + 1;
 
+      var nextIndex = activeIndex + searchDelta;
       return this.linearDOM[ nextIndex ];
-    },
-
-    /**
-     * Get the previous element in the linearized DOM relative to the active element
-     * 
-     * @return {DOMElement} 
-     */
-    getPreviousElement: function() {
-      if( !this.activeElement ) {
-        this.activeElement = this.linearDOM[ 0 ];
-      }
-
-      var activeIndex = this.linearDOM.indexOf( this.activeElement );
-      var previousIndex = activeIndex - 1;
-
-      return this.linearDOM[ previousIndex ];
     },
 
     /**
@@ -334,8 +326,14 @@ define( function( require ) {
         // TODO: What do you we do for sections? Read section + aria-labelledby?
         return null;
       }
-      if ( element.getAttribute( 'aria-hidden' ) || element.hidden ) {
-        return null;
+
+      // search up through the ancestors to see if this element should be hidden
+      var childElement = element;
+      while ( childElement.parentElement ) {
+        if ( childElement.getAttribute( 'aria-hidden' ) || childElement.hidden ) {
+          return null;
+        }
+        else { childElement = childElement.parentElement; }
       }
 
       // search for elements that will have content and should be read
@@ -400,14 +398,27 @@ define( function( require ) {
           textContent += SPACE + ariaLabelledByText + COMMA;
         }
 
+        // search up through the ancestors to find if the element has 'application' or 'document' content
+        // TODO: Factor out into a searchUp type of function.
+        childElement = element;
+        var role;
+        while ( childElement.parentElement ) {
+          role = childElement.getAttribute( 'role' );
+          if ( role === 'document' || role === 'application' ) {
+            textContent += SPACE + role + COMMA;
+            break;
+          }
+          else { childElement = childElement.parentElement; }
+        }
+
         // check to see if this element is draggable
         if ( element.draggable ) {
-          textContent += SPACE + 'Draggable' + COMMA;
+          textContent += SPACE + 'draggable' + COMMA;
         }
 
         // look for aria-grabbed markup to let the user know if the element is grabbed
         if ( element.getAttribute( 'aria-grabbed' ) ) {
-          textContent += SPACE + 'Grabbed' + COMMA;
+          textContent += SPACE + 'grabbed' + COMMA;
         }
 
         // look for an element in the DOM that describes this one
@@ -437,215 +448,93 @@ define( function( require ) {
     },
 
     /**
-     * Get the next element in the DOM that has accessible text content, relative to the 
+     * Get the next or previous element in the DOM that has accessible text content, relative to the current
      * active element.
      * 
+     * @param  {string} direction - NEXT || PREVIOUS
      * @return {DOMElement}
      */
-    getNextElementWithAccessibleContent: function() {
-      var accessibleContent;
-      while( !accessibleContent ) {
-        // set the selected element to the next element in the DOM
-        this.activeElement = this.getNextElement();
-        accessibleContent = this.getAccessibleText( this.activeElement, false );
-      }
-
-      // the active element is already set to the next element with accessible content,
-      // but return it for completeness
-      return this.activeElement;
-    },
-
-    /**
-     * Get the previous element in the DOM that has accessible text content, relative to the 
-     * active element.
-     *
-     * @return {DOMElement}
-     */
-    getPreviousElementWithAccessibleContent: function() {
+    getNextPreviousElementWithAccessibleContent: function( direction ) {
       var accessibleContent;
       while ( !accessibleContent ) {
-        // set the selected element to the previous element in the DOM
-        this.activeElement = this.getPreviousElement();
+        // set the selected element to the next element in the DOM
+        this.activeElement = this.getNextPreviousElement( direction );
         accessibleContent = this.getAccessibleText( this.activeElement, false );
       }
 
-      // the active element is already set to the next element with accessible
-      // content, but return it for completeness.
       return this.activeElement;
     },
 
     /**
-     * Get the next element in the DOM with one of the specified tag names, relative to the 
-     * currently active element.
+     * Get the next element in the DOM with on of the desired tagNames.  This does not set the active element, it
+     * only traverses the document looking for elements.
      * 
-     * @param  {Array.<string>} tagNames - HTML tag name
-     * @return {DOMElement}
+     * @param  {Array.<string>} tagNames
+     * @param  {[type]} direction - direction flag for to search through the DOM - NEXT || PREVIOUS
+     * @return {[type]}           [description]
      */
-    getNextElementWithTagName: function( tagNames ) {
+    getNextPreviousElementWithTagName: function( tagNames, direction ) {
 
       var element = null;
+      var searchDelta = ( direction === NEXT ) ? 1 : -1;
 
-      // if there is not an active element, set to the first element in the DOM
+      // if there is not an active element, use the first element in the DOM.
       if ( !this.activeElement ) {
         this.activeElement = this.linearDOM[ 0 ];
       }
 
-      // start search from the next element in the DOM
-      var searchIndex = this.linearDOM.indexOf( this.activeElement ) + 1;
-
-      // search through the remaining DOM for an element with a tagName specified
-      // in tagNames
-      for ( var i = searchIndex; i < this.linearDOM.length; i++ ) {
+      // start search from the next or previous element and set up the traversal conditions
+      var searchIndex = this.linearDOM.indexOf( this.activeElement ) + searchDelta;
+      while ( this.linearDOM[ searchIndex ] ) {
         for ( var j = 0; j < tagNames.length; j++ ) {
-          if ( this.linearDOM[ i ].tagName === tagNames[ j ] ) {
-            element = this.linearDOM[ i ];
-            this.activeElement = element;
+          if ( this.linearDOM[ searchIndex ].tagName === tagNames[ j ] ) {
+            element = this.linearDOM[ searchIndex ];
             break;
           }
         }
         if ( element ) {
-          // go ahead and break out if we found something
+          // we have alread found an element, break out
           break;
         }
+        searchIndex += searchDelta;
       }
 
-      // we have alread set the active element to the element with the tag 
-      // name but return for completeness
-      return element;
+      return element; 
     },
 
-    /**
-     * Get the previous element in the DOM
-     * 
-     * @param  {Array.<string>} tagNames - array of possible tag names
-     * @return {DOMElement}
-     */
-    getPreviousElementWithTagName: function( tagNames ) {
-      var element = null;
-
-      // if there is no active element, start at the beginning of the DOM
-      if ( !this.activeElement ) {
-        this.activeElement = this.linearDOM[ 0 ];
-      }
-
-      // start the search at the previous element in the DOM
-      var searchIndex = this.linearDOM.indexOf( this.activeElement ) - 1;
-
-      // search backwards through the DOM for an element with a tagname
-      for ( var i = searchIndex; i >= 0; i-- ) {
-        for( var j = 0; j < tagNames.length; j++ ) {
-          if ( this.linearDOM[ i ].tagName === tagNames[ j ] ) {
-            element = this.linearDOM[ i ];
-            this.activeElement = element;
-            break;
-          }
-        }
-        if ( element ) {
-          // break if we have found something already
-          break;
-        }
-      }
-
-      return element;
-    },
-
-    /**
-     * Read the next line of content from the DOM.  A line is a string of words with length
-     * limitted by LINE_WORD_LENGTH.
-     * 
-     * @return {string}
-     */
-    readNextLine: function() {
-
+    readNextPreviousLine: function( direction ) {
       var line = '';
 
-      // reset the content letter position because we have a new line
+      // reset the content letter and word positions because we are reading a new line
       this.letterPosition = 0;
       this.wordPosition = 0;
 
-      // if there is no active element, set to the next element with accessible
-      // content
+      // if there is no active element, set to the next element with accessible content
       if ( !this.activeElement ) {
-        this.activeElement = this.getNextElementWithAccessibleContent();
+        this.activeElement = this.getNextPreviousElementWithAccessibleContent( direction );
       }
 
-      // get the accessible content for the active element, without any 'application' content
-      var accessibleContent = this.getAccessibleText( this.activeElement, false ).split( ' ' );
+      // get the accessible content for the active element, without any 'application' content, and split into words
+      var accessibleText = this.getAccessibleText( this.activeElement, false ).split( SPACE );
 
-      // if the word position is at the length of the accessible content, it is time to find the next element
-      if ( this.positionInLine >= accessibleContent.length ) {
-        // reset the word position
+      // if there is no content at the line position, it is time to find the next element
+      if ( !accessibleText[ this.positionInLine ] ) {
+        // reset the position in the line
         this.positionInLine = 0;
 
         // update the active element and set the accessible content from this element
-        this.activeElement = this.getNextElementWithAccessibleContent();
-        accessibleContent = this.getAccessibleText( this.activeElement, false ).split( ' ' );
+        this.activeElement = this.getNextPreviousElementWithAccessibleContent( direction );
+        accessibleText = this.getAccessibleText( this.activeElement, false ).split( ' ' );
       }
 
       // read the next line of the accessible content
       var lineLimit = this.positionInLine + LINE_WORD_LENGTH;
       for( var i = this.positionInLine; i < lineLimit; i++ ) {
-        if ( accessibleContent[ i ] ) {
-          line += accessibleContent[ i ];
+        if ( accessibleText[ i ] ) {
+          line += accessibleText[ i ];
           this.positionInLine += 1;
 
-          if ( accessibleContent[ i + 1 ] ) {
-            line += SPACE;
-          }
-          else { 
-            // we have reached the end of this content, there are no more words
-            break;
-          }
-        }
-      }
-
-      this.activeLine = line;
-      return line;
-    },
-
-    /**
-     * Read the previous line of content from the DOM.  A line is a string of words with length
-     * limitted by LINE_WORD_LENGTH;
-     * 
-     * @return {string}
-     */
-    readPreviousLine: function() {
-
-      var line = '';
-
-      // reset the content letter position because we have a new line
-      this.letterPosition = 0;
-      this.wordPosition = 0;
-
-      // if there is no active element, set to the previous element with accessible content
-      if ( !this.activeElement ) {
-        this.activeElement = this.getPreviousElementWithAccessibleContent();
-      }
-
-      // get the accessible content for the active element, without any 'application' content
-      var accessibleContent = this.getAccessibleText( this.activeElement, false ).split( ' ' );
-
-      // start at the beginning of the previous line
-      this.positionInLine = this.positionInLine - 2 * LINE_WORD_LENGTH;
-
-      // if there is no content at the word position, find the previous element and start at the beginning
-      if ( !accessibleContent[ this.positionInLine ] ) {
-        // reset the word position
-        this.positionInLine = 0;
-
-        // update the active element and set the accessible content from this element
-        this.activeElement = this.getPreviousElementWithAccessibleContent();
-        accessibleContent = this.getAccessibleText( this.activeElement, false ).split( ' ' );
-      }
-
-      // read this line of content
-      var lineLimit = this.positionInLine + LINE_WORD_LENGTH;
-      for( var i = this.positionInLine; i < lineLimit; i++ ) {
-        if ( accessibleContent[ i ] ) {
-          line += accessibleContent[ i ];
-          this.positionInLine += 1;
-
-          if ( accessibleContent[ i + 1 ] ) {
+          if ( accessibleText[ i + 1 ] ) {
             line += SPACE;
           }
           else { 
@@ -670,12 +559,11 @@ define( function( require ) {
 
       // if there is no active line, find the next one
       if ( !this.activeLine ) {
-        this.activeLine = this.readNextLine();
+        this.activeLine = this.readNextPreviousLine( NEXT );
       }
 
       // split up the active line into an array of words
-      var activeWords = this.activeLine.split( ' ' );
-
+      var activeWords = this.activeLine.split( SPACE );
 
       // read this line of content
       for( var i = 0; i < LINE_WORD_LENGTH; i++ ) {
@@ -683,6 +571,7 @@ define( function( require ) {
           line += activeWords[ i ];
 
           if ( activeWords[ i + 1 ] ) {
+            // add space if there are more words
             line += SPACE;
           }
           else { 
@@ -695,81 +584,65 @@ define( function( require ) {
       return line;
     },
 
-    /**
-     * Read the next word in the active line.  Read the first word in the next line if we are at the end
-     * of the active line.
-     * 
-     * @return {string}
-     */
-    readNextWord: function() {
+    readNextPreviousWord: function( direction ) {
       // if there is no active line, find the next one
       if ( !this.activeLine ) {
-        this.activeLine = this.readNextLine();
+        this.activeLine = this.readNextPreviousLine( direction );
       }
 
       // split the active line into an array of words
-      var activeWords = this.activeLine.split( ' ' );
+      var activeWords = this.activeLine.split( SPACE );
 
-      // if the we are at the end of the active line, read the next one
-      if ( this.wordPosition === activeWords.length ) {
-        this.activeLine = this.readNextLine();
+      // direction dependent variables
+      var searchDelta;
+      var contentEnd;
+      if ( direction === NEXT ) {
+        contentEnd = activeWords.length;
+        searchDelta = 1;
+      }
+      else if ( direction === PREVIOUS ) {
+        contentEnd = 0;
+        searchDelta = -2;
       }
 
-      // get the word to read and increment the word position
+      // if there is no more content, read the next/previous line
+      if ( this.wordPosition === contentEnd ) {
+        this.activeLine = this.readNextPreviousLine( direction );
+      }
+
+      // get the word to read update word position
       var outputText = activeWords[ this.wordPosition ];
-      this.wordPosition++;
+      this.wordPosition += searchDelta;
 
       return outputText;
     },
 
     /**
-     * Read the previous word in the active line.  Read the previous line if we are at the beginning of the line.
+     * Read the next or previous heading with one of the levels specified in headingLevels and in the direction
+     * specified by the direction flag.
      * 
+     * @param  {Array.<string>} headingLevels
+     * @param  {[type]} direction - direction of traversal through the DOM - NEXT || PREVIOUS
      * @return {string}
      */
-    readPreviousWord: function() {
-      // if there is no active line, find the previous one
-      if ( !this.activeLine ) {
-        this.activeLine = this.readPreviousLine();
+    readNextPreviousHeading: function( headingLevels, direction ) {
+
+      // get the next element in the DOM with one of the above heading levels which has accessible content
+      // to read
+      var accessibleText;
+      var nextElement;
+
+      while ( !accessibleText ) {
+        nextElement = this.getNextPreviousElementWithTagName( headingLevels, direction );
+        this.activeElement = nextElement;
+        accessibleText = this.getAccessibleText( nextElement );
       }
-
-      // if we are at the beginning of the line, read the previous one
-      if ( this.wordPosition === 0 ) {
-        this.activeLine = this.readPreviousLine();
-
-        // the active word position should be at the end of the new line
-        this.wordPosition = this.activeLine.split( ' ' ).length - 1;      
-      }
-
-      // split the active line into an array of words
-      var activeWords = this.activeLine.split( ' ' );
-
-      var outputText = activeWords[ this.wordPosition - 2 ];
-      this.wordPosition--;
-
-      return outputText;
-    },
-
-    /**
-     * Read the next heading in the DOM of the level specified in headingLevels, 
-     * relative to the position of the active element.
-     *
-     * @param {Array<string>} headingLevels - array of heading levels to look for
-     * @return {string}
-     */
-    readNextHeading: function( headingLevels ) {
-
-      // get the next element in the DOM with one of the above tag names
-      var nextElement = this.getNextElementWithTagName( headingLevels );
 
       if ( !nextElement ) {
-        // set the active element to the next element in the DOM to avoid skipping
-        // the last element on backwards traversal
-        this.activeElement = this.getNextElement();
-
         // let the user know that there are no more headings at the desired level
+        var directionDescriptionString = ( direction === NEXT ) ? 'more' : 'previous';
         if ( headingLevels.length === 1 ) {
-          var noNextHeadingString = 'No next heading at ';
+          var noNextHeadingString = 'No ' + directionDescriptionString + ' headings at ';
 
           var headingLevel = headingLevels[ 0 ];
           var levelString = headingLevel === 'H1' ? 'Level 1' :
@@ -778,142 +651,116 @@ define( function( require ) {
                             headingLevel === 'H4' ? 'Level 4' :
                             headingLevel === 'H5' ? 'Level 5' :
                             'Level 6';
-
-
           return noNextHeadingString + levelString;
         }
-
-        // otherwise just let the user know that there are no more headings
-        return 'No more headings';
+        return 'No ' + directionDescriptionString + ' headings';
       }
-      return this.getAccessibleText( nextElement );
+
+      // set element as the next active element and return the text
+      this.activeElement = nextElement;
+      return accessibleText;
     },
 
-    /**
-     * Read the previous heading in the parallel DOM, relative to the current heading.
-     *
-     * @param {Array<string>} headingLevels
-     * @return {string}
-     * @private
-     */
-    readPreviousHeading: function( headingLevels ) {
-
-      // get the next element in the DOM with one of the above tag names
-      var previousElement = this.getPreviousElementWithTagName( headingLevels );
-
-      if ( !previousElement ) {
-        // set the active element to the next element in the DOM to avoid skipping
-        // the last element on backwards traversal
-        this.activeElement = this.getPreviousElement();
-
-        // let the user know that there are no more headings at the desired level
-        if ( headingLevels.length === 1 ) {
-          var noNextHeadingString = 'No previous heading at ';
-
-          var headingLevel = headingLevels[ 0 ];
-          var levelString = headingLevel === 'H1' ? 'Level 1' :
-                            headingLevel === 'H2' ? 'Level 2' :
-                            headingLevel === 'H3' ? 'Level 3' :
-                            headingLevel === 'H4' ? 'Level 4' :
-                            headingLevel === 'H5' ? 'Level 5' :
-                            'Level 6';
-
-          return noNextHeadingString + levelString;
-        }
-        return 'No previous headings';
-      }
-      return this.getAccessibleText( previousElement );
-    },
-
-    /**
-     * Read the next form element, skipping elements that may be hidden from the user.
-     * 
-     * @return {string} [description]
-     */
-    readNextFormElement: function() {
-      // list of all tag names that could be a form element
-      // TODO: populate with more form elements!
+    readNextPreviousFormElement: function( direction ) {
+      // TODO: support more form elements!
       var tagNames = [ 'INPUT', 'BUTTON' ];
 
       var nextElement;
       var accessibleText;
+
       while ( !accessibleText ) {
-        nextElement = this.getNextElementWithTagName( tagNames );
+        nextElement = this.getNextPreviousElementWithTagName( tagNames, direction );
+        this.activeElement = nextElement;
         accessibleText = this.getAccessibleText( nextElement );
       }
 
-      if( accessibleText === END_OF_DOCUMENT ) {
-        return 'No next form field';
+      if ( accessibleText === END_OF_DOCUMENT ) {
+        var directionDescriptionString = direction === NEXT ? 'next' : 'previous';
+        return 'No ' + directionDescriptionString + ' form field';
+      }
+
+      this.activeElement = nextElement;
+      return accessibleText;
+    },
+
+    readNextPreviousListItem: function( direction ) {
+      if ( !this.activeElement ) {
+        this.activeElement = this.getNextPreviousElementWithAccessibleContent( direction );
+      }
+
+      var accessibleText;
+
+      // if we are inside of a list, get the next peer, or find the next list
+      var parentElement = this.activeElement.parentElement;
+      if ( parentElement.tagName === 'UL' || parentElement.tagName === 'OL' ) {
+
+        var searchDelta = direction === NEXT ? 1 : -1;
+
+        // Array.prototype must be used on the NodeList
+        var searchIndex = Array.prototype.indexOf.call( parentElement.children, this.activeElement ) + searchDelta;
+
+        while ( parentElement.children[ searchIndex ] ) {
+          accessibleText = this.getAccessibleText( parentElement.children[ searchIndex ] );
+          if ( accessibleText ) {
+            this.activeElement = parentElement.children[ searchIndex ];
+            break;
+          }
+          searchIndex += searchDelta;
+        }
+
+        if ( !accessibleText ) {
+          // there was no accessible text in the list items, so read the next / previous list
+          accessibleText = this.readNextPreviousList( direction );
+        }
+      }
+      else {
+        // not inside of a list, so read the next/previous one and its first item
+        accessibleText = this.readNextPreviousList( direction );
+      }
+
+      if ( !accessibleText ) {
+        var directionDescriptionString = ( direction === NEXT ) ? 'more' : 'previous';
+        return 'No ' + directionDescriptionString + ' list items';
       }
 
       return accessibleText;
     },
 
-    /**
-     * Read the next list in the document relative to the current active element, as well as the first list item
-     * under the parent list.
-     * 
-     * @return {string}
-     */
-    readNextList: function() {
-
-      // if the active element is a list item, skip to the last item to begin searching from there
-      if ( this.activeElement && this.activeElement.tagName === 'LI' ) {
-        var listChildren = this.activeElement.parentElement.children;
-        this.activeElement = listChildren[ listChildren.length - 1 ];
+    readNextPreviousList: function( direction ) {
+      if ( !this.activeElement ) {
+        this.activeElement = this.getNextPreviousElementWithAccessibleContent( direction );
       }
 
-      // get the next list element in the DOM
-      var nextElement = this.getNextElementWithTagName( [ 'UL', 'OL' ] );
+      // if we are inside of a list already, step out of it to begin searching there
+      var parentElement = this.activeElement.parentElement;
+      var activeElement;
+      if ( parentElement.tagName === 'UL' || parentElement.tagName === 'OL' ) {
+        // save the previous active element - if there are no more lists, this should not change
+        activeElement = this.activeElement;
 
-      if ( !nextElement ) {
+        this.activeElement = parentElement;
+      }
+
+      var listElement = this.getNextPreviousElementWithTagName( [ 'UL', 'OL' ], direction );
+
+      if ( !listElement ) {
+
+        // restore the previous active element
+        if ( activeElement ) {
+          this.activeElement = activeElement; 
+        }
+
         // let the user know that there are no more lists and move to the next element
-        this.activeElement = this.getNextElementWithAccessibleContent();
-        return 'No more lists';
-      }
-
-      // get the content of the list element
-      var listText = this.getAccessibleText( nextElement );
-
-      // read the first item under the list
-      var itemText = '';
-      var firstItem = nextElement.children[ 0 ];
-      if( firstItem ) {
-        itemText = this.getAccessibleText( firstItem );
-        this.activeElement = firstItem;
-      }
-
-      return listText + ', ' + itemText;
-    },
-
-    /**
-     * Read the previous list in the document relative to the location of the current active element, as well
-     * as the first list item under the parent list.
-     * 
-     * @return {string}
-     */
-    readPreviousList: function() {
-
-      // if the active element is a list item, step outside to begin searching from the parent
-      if ( this.activeElement && this.activeElement.tagName === 'LI' ) {
-        this.activeElement = this.activeElement.parentElement;
-      }
-
-      // get the previous list element
-      var previousElement = this.getPreviousElementWithTagName( [ 'UL', 'OL' ] );
-
-      if( !previousElement ) {
-        // let the user know that there are no previous lists
-        this.activeElement = this.getPreviousElementWithAccessibleContent();
-        return 'No previous lists';
+        var directionDescriptionString = direction === NEXT ? 'more' : 'previous';
+        return 'No ' + directionDescriptionString + ' lists';
       }
 
       // get the content from the list element
-      var listText = this.getAccessibleText( previousElement );
+      var listText = this.getAccessibleText( listElement );
 
       // include the content from the first item in the list
       var itemText = '';
-      var firstItem = previousElement.children[ 0 ];
+      var firstItem = listElement.children[ 0 ];
       if ( firstItem ) {
         itemText = this.getAccessibleText( firstItem );
         this.activeElement = firstItem;
@@ -922,170 +769,35 @@ define( function( require ) {
       return listText + ', ' + itemText;
     },
 
-    /**
-     * Read the next item or the next list if no list is selected.
-     * 
-     * @return {}
-     */
-    readNextListItem: function() {
-
-      if ( !this.activeElement ) {
-        this.activeElement = this.getNextElementWithAccessibleContent();
-      }
-
-      // if we are not inside of a list or we are at the end of a list, get the next list
-      var listItems = this.activeElement.parentElement.children;
-      if ( this.activeElement.tagName !== 'LI'  || this.activeElement === listItems[ listItems.length - 1 ] ) {
-        var nextList = this.getNextElementWithTagName( [ 'OL', 'UL' ] );
-
-        if( nextList ) {
-          var itemElement = nextList.children[ 0 ];
-          var listContent = this.getAccessibleText( nextList );
-          var itemContent = this.getAccessibleText( itemElement );
-
-          this.activeElement = itemElement;
-
-          return listContent + SPACE + itemContent;
-        }
-        else {
-          // let the user know that there are no more lists and set the active element to the next item
-          this.activeElement = this.getNextElementWithAccessibleContent();
-          return 'No more lists';
-        }
-      }
-      else {
-        // otherwise read content from the next peer
-        var nextElement = this.activeElement.nextSibling;
-        this.activeElement = nextElement;
-        return this.getAccessibleText( nextElement );
-      }
-
-    },
-
-    /**
-     * Read the previous list item in the document.  If the active element is outside of a list, read the previous
-     * list and its first item.
-     * 
-     * @return {string}
-     */
-    readPreviousListItem: function() {
-      console.log( this.activeElement );
-
-      if ( !this.activeElement ) {
-        this.activeElement = this.getNextElementWithAccessibleContent();
-      }
-
-      // if we are not inside of a list or we are at the first list item, get the previous list
-      var listItems = this.activeElement.parentElement.children;
-      if ( this.activeElement.tagName !== 'LI' || this.activeElement === listItems[ 0 ] ) {
-
-        // step out of the current list
-        if ( this.activeElement === listItems[ 0 ] ) {
-          this.activeElement = this.activeElement.parentElement;
-        }
-
-        var previousList = this.getPreviousElementWithTagName( [ 'OL', 'UL' ] );
-
-        if( previousList ) {
-          var itemElement = previousList.children[ 0 ];
-          var listContent = this.getAccessibleText( previousList );
-          var itemContent = this.getAccessibleText( itemElement );
-
-          this.activeElement = itemElement;
-
-          return listContent + SPACE + itemContent;
-        }
-        else {
-          // let the user know that there are no more lists
-          this.activeElement = this.getPreviousElementWithAccessibleContent();
-          return 'No previous lists';
-        }
-      }
-      else {
-        // otherwise, get the previous peer
-        var previousElement = this.activeElement.previousSibling;
-        this.activeElement = previousElement;
-        return this.getAccessibleText( previousElement );
-      }
-    },
-
-    /**
-     * Read the previous form element skipping elements that may be hidden from the user.
-     * @return {[type]} [description]
-     */
-    readPreviousFormElement: function() {
-
-      // TODO: populate with more elements!
-      var tagNames = [ 'INPUT', 'BUTTON' ];
-
-      var previousElement;
-      var accessibleText;
-      while ( !accessibleText ) {
-        previousElement = this.getPreviousElementWithTagName( tagNames );
-        accessibleText = this.getAccessibleText( previousElement );
-      }
-
-      if ( accessibleText === END_OF_DOCUMENT ) {
-        this.activeElement = this.getPreviousElement();
-        return 'No previous form field';
-      }
-
-      return accessibleText;
-    },
-
-    /**
-     * Read the next character in the currently active line.
-     * 
-     * @return {string}
-     * @private
-     */
-    readNextCharacter: function() {
-
+    readNextPreviousCharacter: function( direction ) {
       // if there is no active line, find the next one
       if ( !this.activeLine ) {
-        this.activeLine = this.readNextLine();
+        this.activeLine = this.readNextPreviousLine( NEXT );
       }
 
-      // if the we are at the end of the active line, read the next one
-      if ( this.letterPosition === this.activeLine.length ) {
-        this.activeLine = this.readNextLine();
+      // directional dependent variables
+      var contentEnd;
+      var searchDelta;
+      if ( direction === NEXT ) {
+        contentEnd = this.activeLine.length;
+        searchDelta = 1;
+      }
+      else if (direction === PREVIOUS ) {
+        contentEnd = 0;
+        searchDelta = -1;
+      }
+
+      // if we are at the end of the content, read the next/previous line
+      if ( this.letterPosition === contentEnd ) {
+        this.activeLine = this.readNextPreviousLine( direction );
       }
 
       // get the letter to read and increment the letter position
       var outputText = this.activeLine[ this.letterPosition ];
-      this.letterPosition++;
+      this.letterPosition += searchDelta;
 
       return outputText;
     },
-
-    /**
-     * Read the previous character in the active line.
-     * 
-     * @return {string}
-     */
-    readPreviousCharacter: function() {
-
-      // if there is no active line, find the previous one
-      if ( !this.activeLine ) {
-        this.activeLine = this.readPreviousLine();
-      }
-
-      // if we are already at the begining of the line, we should go back to the previous line
-      if ( this.letterPosition === 0 ) {
-        this.activeLine = this.readPreviousLine();
-
-        // since we are moving backwards through the document, we need to set the letter position to the
-        // end of the active line
-        this.letterPosition = this.activeLine.length;
-      }
-
-      // get the letter to read and decrement the letter position
-      var outputText = this.activeLine[ this.letterPosition - 2 ];
-      this.letterPosition--;
-
-      return outputText;
-    },
-
 
     /**
      * Update the list of elements, and add Mutation Observers to each one.  MutationObservers
@@ -1160,14 +872,11 @@ define( function( require ) {
 
       while ( outputText !== END_OF_DOCUMENT ) {
         activeElement = this.activeElement;
-        outputText = this.readNextLine();
+        outputText = this.readNextPreviousLine( NEXT );
 
         if ( outputText === END_OF_DOCUMENT ) {
           this.activeElement = activeElement;
         }
-        // var nextElement = this.getNextElementWithAccessibleContent();
-        // outputText = this.getAccessibleText( nextElement );
-
         this.outputUtteranceProperty.set( new Utterance( outputText, liveRole ) );
       }
     },
