@@ -517,14 +517,28 @@ define( function( require ) {
       // get the accessible content for the active element, without any 'application' content, and split into words
       var accessibleText = this.getAccessibleText( this.activeElement, false ).split( SPACE );
 
+      // if traversing backwards, position in line needs be at the start of previous line
+      if ( direction === PREVIOUS ) {
+        this.positionInLine = this.positionInLine - 2 * LINE_WORD_LENGTH;
+      }
+
       // if there is no content at the line position, it is time to find the next element
       if ( !accessibleText[ this.positionInLine ] ) {
         // reset the position in the line
         this.positionInLine = 0;
 
+        // save the active element in case it needs to be restored
+        var previousElement = this.activeElement;
+
         // update the active element and set the accessible content from this element
         this.activeElement = this.getNextPreviousElementWithAccessibleContent( direction );
+
         accessibleText = this.getAccessibleText( this.activeElement, false ).split( ' ' );
+
+        // restore the previous active element if we are at the end of the document
+        if ( !this.activeElement ) {
+          this.activeElement = previousElement;
+        }
       }
 
       // read the next line of the accessible content
@@ -539,6 +553,8 @@ define( function( require ) {
           }
           else { 
             // we have reached the end of this content, there are no more words
+            // wrap the line position to the end so we can easily read back the previous line
+            this.positionInLine += LINE_WORD_LENGTH - this.positionInLine % LINE_WORD_LENGTH;
             break;
           }
         }
@@ -632,13 +648,19 @@ define( function( require ) {
       var accessibleText;
       var nextElement;
 
+      // track the previous element - if there are no more headings, store it here
+      var previousElement;
+
       while ( !accessibleText ) {
+        previousElement = this.activeElement;
         nextElement = this.getNextPreviousElementWithTagName( headingLevels, direction );
         this.activeElement = nextElement;
         accessibleText = this.getAccessibleText( nextElement );
       }
 
       if ( !nextElement ) {
+        // restore the active element
+        this.activeElement = previousElement;
         // let the user know that there are no more headings at the desired level
         var directionDescriptionString = ( direction === NEXT ) ? 'more' : 'previous';
         if ( headingLevels.length === 1 ) {
@@ -778,22 +800,29 @@ define( function( require ) {
       // directional dependent variables
       var contentEnd;
       var searchDelta;
+      var normalizeDirection;
       if ( direction === NEXT ) {
         contentEnd = this.activeLine.length;
         searchDelta = 1;
+        normalizeDirection = 0;
       }
       else if (direction === PREVIOUS ) {
-        contentEnd = 0;
+        // for backwards traversal, read from two characters behind
+        contentEnd = 2;
         searchDelta = -1;
+        normalizeDirection = -2;
       }
 
       // if we are at the end of the content, read the next/previous line
       if ( this.letterPosition === contentEnd ) {
         this.activeLine = this.readNextPreviousLine( direction );
+
+        // if reading backwards, letter position should be at the end of the active line
+        this.letterPosition = this.activeLine.length;
       }
 
       // get the letter to read and increment the letter position
-      var outputText = this.activeLine[ this.letterPosition ];
+      var outputText = this.activeLine[ this.letterPosition + normalizeDirection ];
       this.letterPosition += searchDelta;
 
       return outputText;
@@ -837,8 +866,11 @@ define( function( require ) {
                 mutatedElement = mutatedElement.parentElement;
               }
 
-              var updatedText = mutation.addedNodes[ 0 ].data;
-              thisCursor.outputUtteranceProperty.set( new Utterance( updatedText, liveRole ) );
+              // we only care about nodes added
+              if ( mutation.addedNodes[ 0 ] ) {
+                var updatedText = mutation.addedNodes[ 0 ].data;
+                thisCursor.outputUtteranceProperty.set( new Utterance( updatedText, liveRole ) );  
+              }
             } );
           };
 
