@@ -28,6 +28,10 @@ define( function( require ) {
     // @public, listen only, emits an event when the synth has finished speaking the utterance
     this.speakingEndedEmitter = new Emitter();
 
+    // windows Chrome needs a temporary workaround to avoid skipping every other utterance
+    // TODO: Use platform.js and revisit once Chrome fixes bug
+    var osWindows = navigator.userAgent.match( /Windows/ );
+
     if ( window.speechSynthesis && SpeechSynthesisUtterance && window.speechSynthesis.speak ) {
       // Web Speech API looks good for synthesis, run wild!
       this.synth = window.speechSynthesis;
@@ -45,10 +49,18 @@ define( function( require ) {
           thisReader.speakingEndedEmitter.emit1( outputUtterance );
         };
 
+        // get the default voice
+        var defaultVoice;
+        thisReader.synth.getVoices().forEach( function( voice ) {
+          if ( voice.default ) {
+            defaultVoice = voice;
+            return;
+          }
+        } );
+
         // set the voice, pitch, and rate for the utterance
-        utterThis.voice = thisReader.synth.getVoices()[ 2 ];
-        utterThis.pitch = 0.8;
-        utterThis.rate = 1.0;
+        utterThis.voice = defaultVoice;
+        utterThis.rate = 1.2;
 
         // TODO: Implement behavior for the various live roles
         // see https://developer.mozilla.org/en-US/docs/Web/Accessibility/ARIA/ARIA_Live_Regions
@@ -60,13 +72,20 @@ define( function( require ) {
           // TODO: This is how most screen readers work, but we will probably want different behavior
           // for sims so multiple assertive updates do not compete.
           
-          // for some reason, the synth must be paused before cancelation, or every other utterance
-          // will be skipped - is this a bug with the API or am I forgetting something?
-          thisReader.synth.pause();
-          thisReader.synth.cancel();
-
-          thisReader.synth.speak( utterThis );
-          thisReader.synth.resume();
+          // On Windows, the synth must be paused before cancelation and resumed after speaking, 
+          // or every other utterance will be skipped.
+          // NOTE: This only seems to happen on Windows for the default voice?
+          if ( osWindows ) {
+            thisReader.synth.pause();
+            thisReader.synth.cancel();
+            thisReader.synth.speak( utterThis );
+            thisReader.synth.resume();
+          }
+          else {
+            thisReader.synth.cancel();
+            thisReader.synth.speak( utterThis );
+          }
+          thisReader.activeUtterance = utterThis;
         }
         else if ( outputUtterance.liveRole === 'polite' ) {
           // if polite, simply add the live update text to the queue of utterances
@@ -82,6 +101,6 @@ define( function( require ) {
 
   scenery.register( 'Reader', Reader );
 
-  return inherit( Object, Reader, {} );
+  return inherit( Object, Reader );
 
 } );
