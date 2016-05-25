@@ -357,7 +357,26 @@ define( function( require ) {
         textContent += 'List Item: ' + element.textContent;
       }
       if ( element.tagName === 'BUTTON' ) {
-        textContent += element.textContent + ' Button';
+        var buttonLabel = ' Button';
+        // check to see if this is a 'toggle' button with the 'aria-pressed' attribute
+        if ( element.getAttribute( 'aria-pressed' ) ) {
+          var toggleLabel = ' toggle';
+          var pressedLabel = ' pressed';
+          var notLabel = ' not';
+
+          // insert a comma for readibility of the synth
+          toggleLabel += buttonLabel + COMMA;
+          if ( element.getAttribute( 'aria-pressed' ) === 'true' ) {
+            toggleLabel += pressedLabel;
+          }
+          else {
+            toggleLabel += notLabel + pressedLabel;
+          }
+          textContent += element.textContent + COMMA + toggleLabel;
+        }
+        else {
+          textContent += element.textContent + buttonLabel;
+        }
       }
       if ( element.tagName === 'INPUT' ) {
         if ( element.type === 'reset' ) {
@@ -411,13 +430,24 @@ define( function( require ) {
           else { childElement = childElement.parentElement; }
         }
 
+        // check to see if this element has an aria-role
+        if ( element.getAttribute( 'role' ) ) {
+          role = element.getAttribute( 'role' );
+          // TODO handle all the different roles!
+          
+          // label if the role is a button
+          if ( role === 'button' ) {
+            textContent += SPACE + 'Button';
+          }
+        }
+
         // check to see if this element is draggable
         if ( element.draggable ) {
           textContent += SPACE + 'draggable' + COMMA;
         }
 
         // look for aria-grabbed markup to let the user know if the element is grabbed
-        if ( element.getAttribute( 'aria-grabbed' ) ) {
+        if ( element.getAttribute( 'aria-grabbed' ) === 'true' ) {
           textContent += SPACE + 'grabbed' + COMMA;
         }
 
