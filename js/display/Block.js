@@ -88,6 +88,7 @@ define( function( require ) {
 
     removeDrawable: function( drawable ) {
       this.drawableCount--;
+      this.markDirty();
 
       if ( assertSlow ) {
         var idx = _.indexOf( this.drawableList, drawable );
