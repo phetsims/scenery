@@ -301,6 +301,26 @@ define( function( require ) {
     },
 
     /**
+     * Get the label for a particular id
+     * @param  {string} id
+     * @return {DOMElement}
+     */
+    getLabel: function( id ) {
+      var labels = document.getElementsByTagName( 'label' );
+
+      // loop through NodeList
+      var labelWithId;
+      Array.prototype.forEach.call( labels, function( label ) {
+        if ( label.getAttribute( 'for' ) ) {
+          labelWithId = label;
+        }
+      } );
+      assert && assert( labelWithId, 'No label found for id' );
+
+      return labelWithId;
+    },
+
+    /**
      * Get the accessible text from the element.  Depending on the navigation strategy,
      * we may or may not want to include all application content text from the markup.
      * 
@@ -387,8 +407,26 @@ define( function( require ) {
           textContent += element.getAttribute( 'value' ) + ' Button';
         }
         if ( element.type === 'checkbox' ) {
-          var checkedString = element.checked ? ' Checked' : ' Not Checked';
-          textContent += element.textContent + ' Checkbox' + checkedString;
+          // the checkbox should have a label - find the correct one
+          var checkBoxLabel = this.getLabel( element.id );
+          var labelContent = checkBoxLabel.textContent;
+
+          // describe as a switch if it has the role
+          if ( element.getAttribute( 'role' ) === 'switch' ) {
+            // required for a checkbox
+            var ariaChecked = element.getAttribute( 'aria-checked' );
+            if ( ariaChecked ) {
+              var switchedString = ( ariaChecked === 'true' ) ? 'On' : 'Off';
+              textContent += labelContent + COMMA + SPACE + 'switch' + COMMA + SPACE + switchedString; 
+            }
+            else {
+              assert && assert ( false, 'checkbox switch must have aria-checked attribute' );
+            }
+          }
+          else {
+            var checkedString = element.checked ? ' Checked' : ' Not Checked';
+            textContent += element.textContent + ' Checkbox' + checkedString;
+          }
         }
       }
 
