@@ -28,12 +28,21 @@ define( function( require ) {
     // @public, listen only, emits an event when the synth has finished speaking the utterance
     this.speakingEndedEmitter = new Emitter();
 
+    // @private, flag for when screen reader is speaking - synth.speaking is unsupported for safari
+    this.speaking = false;
+
+    // @private, keep track of the polite utterances to assist with the safari specific bug, see below
+    thisReader.politeUtterances = [];
+
     // windows Chrome needs a temporary workaround to avoid skipping every other utterance
-    // TODO: Use platform.js and revisit once Chrome fixes bug
-    var osWindows = navigator.userAgent.match( /Windows/ );
+    // TODO: Use platform.js and revisit once platforms fix their bugs
+    var userAgent = navigator.userAgent;
+    var osWindows = userAgent.match( /Windows/ );
+    var platSafari = !!( userAgent.match( /Version\/[5-9]\./ ) && userAgent.match( /Safari\// ) && userAgent.match( /AppleWebKit/ ) );
 
     if ( window.speechSynthesis && SpeechSynthesisUtterance && window.speechSynthesis.speak ) {
-      // Web Speech API looks good for synthesis, run wild!
+
+      // @private - the speech synth
       this.synth = window.speechSynthesis;
 
       cursor.outputUtteranceProperty.lazyLink( function( outputUtterance ) {
@@ -41,13 +50,13 @@ define( function( require ) {
         // create a new utterance
         var utterThis = new SpeechSynthesisUtterance( outputUtterance.text );
 
-        utterThis.onstart = function( event ) {
+        utterThis.addEventListener( 'start', function( event ) {
           thisReader.speakingStartedEmitter.emit1( outputUtterance );
-        };
+        } );
 
-        utterThis.onend = function( event ) {
+        utterThis.addEventListener( 'end', function( event ) {
           thisReader.speakingEndedEmitter.emit1( outputUtterance );
-        };
+        } );
 
         // get the default voice
         var defaultVoice;
@@ -68,6 +77,10 @@ define( function( require ) {
             outputUtterance.liveRole === 'off' ||
             !outputUtterance.liveRole ) {
 
+          // empty the queue of polite utterances
+          thisReader.politeUtterances = [];
+          thisReader.speaking = true;
+
           // if assertive or off, cancel the current active utterance and begin speaking immediately
           // TODO: This is how most screen readers work, but we will probably want different behavior
           // for sims so multiple assertive updates do not compete.
@@ -85,16 +98,50 @@ define( function( require ) {
             thisReader.synth.cancel();
             thisReader.synth.speak( utterThis );
           }
-          thisReader.activeUtterance = utterThis;
         }
         else if ( outputUtterance.liveRole === 'polite' ) {
-          // if polite, simply add the live update text to the queue of utterances
-          thisReader.synth.speak( utterThis );
+
+          // handle the safari specific bug where 'end' and 'start' events are fired on all utterances
+          // after they are added to the queue
+          if ( platSafari ) {
+            thisReader.politeUtterances.push( utterThis );
+
+            var readPolite = function() {
+              thisReader.speaking = true;
+              var nextUtterance = thisReader.politeUtterances.shift();
+              if ( nextUtterance ) {
+                thisReader.synth.speak( nextUtterance );
+              }
+              else {
+                thisReader.speaking = false;
+              }
+            };
+
+            // a small delay will allow the utterance to be read in full, even if
+            // added after cancel().
+            if ( thisReader.speaking ) {
+              setTimeout( function() { readPolite(); }, 2000 );
+            }
+            else {
+              thisReader.synth.speak( utterThis );
+              // remove from queue
+              var index = thisReader.politeUtterances.indexOf( utterThis );
+              if ( index > 0 ) {
+                thisReader.politeUtterances.splice( index, 1 );
+              }
+            }
+          }
+          else {
+            // simply add to the queue
+            thisReader.synth.speak( utterThis );
+          } 
         }
       } );
     }
     else {
-      console.error( 'This browser that does not support the Web Speech API.' );
+      cursor.outputUtteranceProperty.lazyLink( function() {
+        thisReader.speakingStartedEmitter.emit1( { text: 'Sorry! Web Speech API not supported on this platform.' } );
+      } );
     }
 
   }
