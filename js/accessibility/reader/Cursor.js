@@ -169,6 +169,10 @@ define( function( require ) {
         // find the previous/next form element on 'f'
         outputText = thisCursor.readNextPreviousFormElement( direction );
       }
+      else if ( thisCursor.keyState[ 66 ] ) {
+        // find the previous/next button element on 'b'
+        outputText = thisCursor.readNextPreviousButton( direction );
+      }
       else if ( thisCursor.keyState[ 76 ] ) {
         // find the previous/next list on 'L'
         outputText = thisCursor.readNextPreviousList( direction );
@@ -496,14 +500,14 @@ define( function( require ) {
     },
 
     /**
-     * Get the next element in the DOM with on of the desired tagNames.  This does not set the active element, it
+     * Get the next element in the DOM with on of the desired tagNames, types, or roles.  This does not set the active element, it
      * only traverses the document looking for elements.
      * 
-     * @param  {Array.<string>} tagNames
+     * @param  {Array.<string>} roles - list of desired DOM tag names, types, or aria roles
      * @param  {[type]} direction - direction flag for to search through the DOM - NEXT || PREVIOUS
-     * @return {[type]}           [description]
+     * @return {DOMElement}
      */
-    getNextPreviousElementWithTagName: function( tagNames, direction ) {
+    getNextPreviousElementWithRole: function( roles, direction ) {
 
       var element = null;
       var searchDelta = ( direction === NEXT ) ? 1 : -1;
@@ -516,8 +520,12 @@ define( function( require ) {
       // start search from the next or previous element and set up the traversal conditions
       var searchIndex = this.linearDOM.indexOf( this.activeElement ) + searchDelta;
       while ( this.linearDOM[ searchIndex ] ) {
-        for ( var j = 0; j < tagNames.length; j++ ) {
-          if ( this.linearDOM[ searchIndex ].tagName === tagNames[ j ] ) {
+        for ( var j = 0; j < roles.length; j++ ) {
+          var elementTag = this.linearDOM[ searchIndex ].tagName;
+          var elementType = this.linearDOM[ searchIndex ].type;
+          var elementRole = this.linearDOM[ searchIndex ].getAttribute( 'role' );
+          var searchRole = roles[ j ];
+          if ( elementTag === searchRole || elementRole === searchRole || elementType === searchRole ) {
             element = this.linearDOM[ searchIndex ];
             break;
           }
@@ -683,7 +691,7 @@ define( function( require ) {
 
       while ( !accessibleText ) {
         previousElement = this.activeElement;
-        nextElement = this.getNextPreviousElementWithTagName( headingLevels, direction );
+        nextElement = this.getNextPreviousElementWithRole( headingLevels, direction );
         this.activeElement = nextElement;
         accessibleText = this.getAccessibleText( nextElement );
       }
@@ -713,20 +721,62 @@ define( function( require ) {
       return accessibleText;
     },
 
+    /**
+     * Read the next/previous button element.  A button can have the tagname button, have the aria button role, or
+     * or have one of the following types: submit, button, reset
+     * @param  {string}} direction
+     * @return {DOMElement}
+     */
+    readNextPreviousButton: function( direction ) {
+      // the following roles should handle 'role=button', 'type=button', 'tagName=BUTTON'
+      var roles = [ 'button', 'BUTTON', 'submit', 'reset' ];
+
+      var nextElement;
+      var accessibleText;
+      var previousElement;
+
+      while( !accessibleText ) {
+        previousElement = this.activeElement;
+        nextElement = this.getNextPreviousElementWithRole( roles, direction );
+        this.activeElement = nextElement;
+
+        // get the accessible text with application descriptions
+        accessibleText = this.getAccessibleText( nextElement, true );
+      }
+
+      if ( !nextElement ) {
+        this.activeElement = previousElement;
+        var directionDescriptionString = direction === NEXT ? 'more' : 'previous';
+        return 'No ' + directionDescriptionString + ' buttons';
+      }
+
+      this.activeElement = nextElement;
+      return accessibleText;
+    },
+
     readNextPreviousFormElement: function( direction ) {
       // TODO: support more form elements!
       var tagNames = [ 'INPUT', 'BUTTON' ];
+      var ariaRoles = [ 'button' ];
+      var roles = tagNames.concat( ariaRoles );
 
       var nextElement;
       var accessibleText;
 
+      // track the previous element - if there are no more form elements it will need to be restored
+      var previousElement;
+
       while ( !accessibleText ) {
-        nextElement = this.getNextPreviousElementWithTagName( tagNames, direction );
+        previousElement = this.activeElement;
+        nextElement = this.getNextPreviousElementWithRole( roles, direction );
         this.activeElement = nextElement;
-        accessibleText = this.getAccessibleText( nextElement );
+
+        // get the accessible text with aria descriptions
+        accessibleText = this.getAccessibleText( nextElement, true );
       }
 
       if ( accessibleText === END_OF_DOCUMENT ) {
+        this.activeElement = previousElement;
         var directionDescriptionString = direction === NEXT ? 'next' : 'previous';
         return 'No ' + directionDescriptionString + ' form field';
       }
@@ -793,7 +843,7 @@ define( function( require ) {
         this.activeElement = parentElement;
       }
 
-      var listElement = this.getNextPreviousElementWithTagName( [ 'UL', 'OL' ], direction );
+      var listElement = this.getNextPreviousElementWithRole( [ 'UL', 'OL' ], direction );
 
       if ( !listElement ) {
 

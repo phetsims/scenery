@@ -45,7 +45,7 @@ define( function( require ) {
       // @private - the speech synth
       this.synth = window.speechSynthesis;
 
-      cursor.outputUtteranceProperty.lazyLink( function( outputUtterance ) {
+      cursor.outputUtteranceProperty.link( function( outputUtterance ) {
 
         // create a new utterance
         var utterThis = new SpeechSynthesisUtterance( outputUtterance.text );
@@ -139,7 +139,7 @@ define( function( require ) {
       } );
     }
     else {
-      cursor.outputUtteranceProperty.lazyLink( function() {
+      cursor.outputUtteranceProperty.link( function() {
         thisReader.speakingStartedEmitter.emit1( { text: 'Sorry! Web Speech API not supported on this platform.' } );
       } );
     }
