@@ -350,6 +350,10 @@ define( function( require ) {
         // TODO: What do you we do for sections? Read section + aria-labelledby?
         return null;
       }
+      if ( element.tagName === 'LABEL' ) {
+        // label content is added like 'aria-describedby', do not read this yet
+        return null;
+      }
 
       // search up through the ancestors to see if this element should be hidden
       var childElement = element;
