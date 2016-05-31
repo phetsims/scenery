@@ -1032,17 +1032,31 @@ define( function( require ) {
     },
 
     /**
-     * Return true if the element is focusable.  A focusable element has a tab index, or is a 
-     * form element.
+     * Return true if the element is focusable.  A focusable element has a tab index, is a 
+     * form element, or has a role which adds it to the navigation order.
      *
      * TODO: Populate with the rest of the focusable elements.
      * @param  {DOMElement} domElement
      * @return {Boolean}
      */
     isFocusable: function( domElement ) {
-      if ( domElement.getAttribute( 'tabindex' ) || domElement.tagName === 'BUTTON' ) {
-        return true;
-      }
+      // list of attributes and tag names which should be in the navigation order
+      // TODO: more roles!
+      var focusableRoles = [ 'tabindex', 'BUTTON', 'INPUT' ];
+
+      var focusable = false;
+      focusableRoles.forEach( function( role ) {
+
+        if ( domElement.getAttribute( role ) ) {
+          focusable = true;
+          return;
+        }
+        else if ( domElement.tagName === role ) {
+          focusable = true;
+          return;
+        }
+      } );
+      return focusable;
     }
   } );
 
