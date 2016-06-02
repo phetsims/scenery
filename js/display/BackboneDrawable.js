@@ -260,10 +260,10 @@ define( function( require ) {
         if ( this.clipDirty ) {
           this.clipDirty = false;
 
-          var clip = this.willApplyFilters ? this.getFilterClip() : '';
+          // var clip = this.willApplyFilters ? this.getFilterClip() : '';
 
           //OHTWO TODO: CSS clip-path/mask support here. see http://www.html5rocks.com/en/tutorials/masking/adobe/
-          this.domElement.style.clipPath = clip; // yikes! temporary, since we already threw something?
+          // this.domElement.style.clipPath = clip; // yikes! temporary, since we already threw something?
         }
       }
     },
