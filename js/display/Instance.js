@@ -27,6 +27,7 @@ define( function( require ) {
   var inherit = require( 'PHET_CORE/inherit' );
   var Poolable = require( 'PHET_CORE/Poolable' );
   var cleanArray = require( 'PHET_CORE/cleanArray' );
+  var arrayRemove = require( 'PHET_CORE/arrayRemove' );
   var scenery = require( 'SCENERY/scenery' );
   var ChangeInterval = require( 'SCENERY/display/ChangeInterval' );
   var Drawable = require( 'SCENERY/display/Drawable' );
@@ -87,6 +88,12 @@ define( function( require ) {
       this.selfVisible = true; // like relative visibility, but is always true if we are a visibility root
       this.visibilityDirty = true; // entire subtree of visibility will need to be updated
       this.childVisibilityDirty = true; // an ancestor needs its visibility updated
+
+      // Maps Instance.id => branch index (first index where the two trails are different)
+      this.branchIndexMap = {}; // TODO: Can we not recreate an object?
+
+      // {Array.<Instance>} All instances where we have entries in our map
+      this.branchIndexReferences = cleanArray( this.branchIndexReferences );
 
       // In the range (-1,0), to help us track insertions and removals of this instance's node to its parent
       // (did we get removed but added back?).
@@ -1390,6 +1397,21 @@ define( function( require ) {
       this.parent && this.parent.markSkipPruning();
     },
 
+    getBranchIndexTo: function( instance ) {
+      var cachedValue = this.branchIndexMap[ instance.id ];
+      if ( cachedValue !== undefined ) {
+        return cachedValue;
+      }
+
+      var branchIndex = this.trail.getBranchIndexTo( instance.trail );
+      this.branchIndexMap[ instance.id ] = branchIndex;
+      instance.branchIndexMap[ this.id ] = branchIndex;
+      this.branchIndexReferences.push( instance );
+      instance.branchIndexReferences.push( this );
+
+      return branchIndex;
+    },
+
     // clean up listeners and garbage, so that we can be recycled (or pooled)
     dispose: function() {
       sceneryLog && sceneryLog.Instance && sceneryLog.Instance( 'dispose ' + this.toString() );
@@ -1398,6 +1420,14 @@ define( function( require ) {
       assert && assert( this.active, 'Seems like we tried to dispose this Instance twice, it is not active' );
 
       this.active = false;
+
+      // Release branch index references (see getBranchIndexTo)
+      while ( this.branchIndexReferences.length ) {
+        var branchIndexReference = this.branchIndexReferences.pop(); // {Instance}
+        delete this.branchIndexMap[ branchIndexReference.id ];
+        delete branchIndexReference.branchIndexMap[ this.id ];
+        arrayRemove( branchIndexReference.branchIndexReferences, this );
+      }
 
       // order is somewhat important
       this.groupDrawable && this.groupDrawable.disposeImmediately( this.display );

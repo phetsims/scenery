@@ -14,11 +14,14 @@ define( function( require ) {
   var Poolable = require( 'PHET_CORE/Poolable' );
   var cleanArray = require( 'PHET_CORE/cleanArray' );
   var Vector2 = require( 'DOT/Vector2' );
+  var Matrix3 = require( 'DOT/Matrix3' );
   var scenery = require( 'SCENERY/scenery' );
   var FittedBlock = require( 'SCENERY/display/FittedBlock' );
   var CanvasContextWrapper = require( 'SCENERY/util/CanvasContextWrapper' );
   var Renderer = require( 'SCENERY/display/Renderer' );
   var Util = require( 'SCENERY/util/Util' );
+
+  var scratchMatrix = new Matrix3();
 
   function CanvasBlock( display, renderer, transformRootInstance, filterRootInstance ) {
     this.initialize( display, renderer, transformRootInstance, filterRootInstance );
@@ -54,13 +57,20 @@ define( function( require ) {
         this.wrapper = new CanvasContextWrapper( this.canvas, this.context );
 
         this.domElement = this.canvas;
+
+        this.wrapperStack = [ this.canvas ];
       }
+      this.wrapperStackIndex = 0;
 
       // reset any fit transforms that were applied
       Util.prepareForTransform( this.canvas, this.forceAcceleration );
       Util.unsetTransform( this.canvas ); // clear out any transforms that could have been previously applied
 
       this.canvasDrawOffset = new Vector2();
+
+      this.currentDrawable = null;
+      this.clipDirty = true;
+      this.clipCount = 0;
 
       // store our backing scale so we don't have to look it up while fitting
       this.backingScale = ( renderer & Renderer.bitmaskCanvasLowResolution ) ? 1 : scenery.Util.backingScale( this.context );
@@ -126,9 +136,13 @@ define( function( require ) {
 
         //OHTWO TODO: PERFORMANCE: create an array for faster drawable iteration (this is probably a hellish memory access pattern)
         //OHTWO TODO: why is "drawable !== null" check needed
+        this.currentDrawable = null; // we haven't rendered a drawable this frame yet
         for ( var drawable = this.firstDrawable; drawable !== null; drawable = drawable.nextDrawable ) {
           this.renderDrawable( drawable );
           if ( drawable === this.lastDrawable ) { break; }
+        }
+        if ( this.currentDrawable ) {
+          this.walkDown( this.currentDrawable.instance.trail, 0 );
         }
 
         if ( this.filterRootNode.clipArea ) {
@@ -157,10 +171,118 @@ define( function( require ) {
       }
     },
 
+    applyClip: function( drawable ) {
+      this.clipDirty = false;
+
+      // If 0, no clip is needed
+      if ( this.clipCount ) {
+        var wrapper = this.wrapperStack[ this.wrapperStackIndex ];
+        var context = wraper.context;
+        var instance = drawable.instance;
+        var trail = instance.trail;
+
+        // Re-set
+        context.restore();
+        context.save();
+
+        // Inverse of what we'll be applying to the scene, to get back to the root coordinate transform
+        scratchMatrix.rowMajor( this.backingScale, 0, this.canvasDrawOffset.x * this.backingScale,
+                                0, this.backingScale, this.canvasDrawOffset.y * this.backingScale,
+                                0, 0, 1 );
+                     .multiplyMatrix( instance.relativeTransform.matrix )
+                     .invert();
+        scratchMatrix.canvasSetTransform( context );
+
+        for ( var i = 0; i < trail.length; i++ ) {
+          var node = trail.nodes[ i ];
+          node.getMatrix().canvasAppendTransform( context );
+          if ( node.hasClipArea() ) {
+            context.beginPath();
+            node.clipArea.writeToContext( context );
+            context.clip();
+          }
+        }
+      }
+    },
+
+    walkDown: function( trail, branchIndex ) {
+      var filterRootIndex = this.filterRootInstance.trail.length - 1;
+
+      for ( var i = trail.length - 1; i >= branchIndex; i-- ) {
+        var node = trail.nodes[ i ];
+
+        if ( node.hasClipArea() ) {
+          // Pop clip
+          this.clipCount--;
+          this.clipDirty = true;
+          this.wrapperStack[ this.wrapperStackIndex ].context.restore();
+          this.wrapperStack[ this.wrapperStackIndex ].resetStyles();
+        }
+        if ( i >= filterRootIndex && node.getOpacity() !== 1 ) {
+          // Pop opacity
+          var topWrapper = this.wrapperStack[ this.wrapperStackIndex ];
+          var bottomWrapper = this.wrapperStack[ this.wrapperStackIndex - 1 ];
+          this.wrapperStackIndex--;
+          bottomWrapper.context.setTransform( 1, 0, 0, 1, 0, 0 );
+          bottomWrapper.context.globalAlpha = node.getOpacity();
+          bottomWrapper.context.drawImage( topWrapper.canvas, 0, 0 );
+          bottomWrapper.context.globalAlpha = 1;
+        }
+
+      }
+    },
+
+    walkUp: function( trail, branchIndex ) {
+      var filterRootIndex = this.filterRootInstance.trail.length - 1;
+
+      for ( var i = branchIndex; i < trail.length; i++ ) {
+        var node = trail.nodes[ i ];
+
+        if ( i >= filterRootIndex && node.getOpacity() !== 1 ) {
+          // Push opacity
+          this.wrapperStackIndex++;
+          // If we need to push an entirely new Canvas to the stack
+          if ( this.wrapperStackIndex === this.wrapperStack.length ) {
+            var newCanvas = document.createElement( 'canvas' );
+            var newContext = newCanvas.getContext( '2d' );
+            this.wrapperStack.push( new CanvasContextWrapper( newCanvas, newContext ) );
+          }
+          var wrapper = this.wrapperStack[ this.wrapperStackIndex ];
+          var context = wrapper.context;
+
+          // Size and clear our context
+          wrapper.setDimensions( this.canvas.width, this.canvas.height );
+          context.setTransform( 1, 0, 0, 1, 0, 0 ); // identity
+          context.clearRect( 0, 0, this.canvas.width, this.canvas.height ); // clear everything
+        }
+
+        if ( node.hasClipArea() ) {
+          // Push clip
+          this.clipCount++;
+          this.clipDirty = true;
+          this.wrapperStack[ this.wrapperStackIndex ].resetStyles();
+          this.wrapperStack[ this.wrapperStackIndex ].context.save();
+        }
+      }
+    },
+
     renderDrawable: function( drawable ) {
       // do not paint invisible drawables
       if ( !drawable.visible ) {
         return;
+      }
+
+      var branchIndex = this.currentDrawable ? drawable.instance.getBranchIndexTo( this.currentDrawable.instance ) : 0;
+      if ( this.currentDrawable ) {
+        this.walkDown( this.currentDrawable.instance.trail, branchIndex );
+      }
+      this.walkUp( drawable.instance.trail, branchIndex );
+
+      var wrapper = this.wrapperStack[ this.wrapperStackIndex ];
+      var context = wrapper.context;
+
+      if ( this.clipDirty ) {
+        this.applyClip( drawable );
       }
 
       // we're directly accessing the relative transform below, so we need to ensure that it is up-to-date
@@ -170,13 +292,15 @@ define( function( require ) {
 
       // set the correct (relative to the transform root) transform up, instead of walking the hierarchy (for now)
       //OHTWO TODO: should we start premultiplying these matrices to remove this bottleneck?
-      this.context.setTransform( this.backingScale, 0, 0, this.backingScale, this.canvasDrawOffset.x * this.backingScale, this.canvasDrawOffset.y * this.backingScale );
+      context.setTransform( this.backingScale, 0, 0, this.backingScale, this.canvasDrawOffset.x * this.backingScale, this.canvasDrawOffset.y * this.backingScale );
       if ( drawable.instance !== this.transformRootInstance ) {
-        matrix.canvasAppendTransform( this.context );
+        matrix.canvasAppendTransform( context );
       }
 
       // paint using its local coordinate frame
-      drawable.paintCanvas( this.wrapper, drawable.instance.node );
+      drawable.paintCanvas( wrapper, drawable.instance.node );
+
+      this.currentDrawable = drawable;
     },
 
     dispose: function() {
