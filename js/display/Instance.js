@@ -311,10 +311,13 @@ define( function( require ) {
       var hasTransparency = this.node.opacity !== 1 || hints.usesOpacity;
       var requiresSplit = hints.requireElement || hints.cssTransform || hints.layerSplit;
       var backboneRequired = this.isDisplayRoot || ( !this.isUnderCanvasCache && requiresSplit );
-      var applyTransparencyWithSVG = !backboneRequired &&
-                                     ( hasTransparency || hasClip ) &&
-                                     this.node._rendererSummary.isSubtreeRenderedExclusivelySVG( this.preferredRenderers );
-      var useBackbone = applyTransparencyWithSVG ? false : ( backboneRequired || hasTransparency || hasClip );
+
+      // Support either "all Canvas" or "all SVG" opacity/clip
+      var applyTransparencyWithBlock = !backboneRequired &&
+                                       ( hasTransparency || hasClip ) &&
+                                       ( this.node._rendererSummary.isSubtreeRenderedExclusivelySVG( this.preferredRenderers ) ||
+                                         this.node._rendererSummary.isSubtreeRenderedExclusivelyCanvas( this.preferredRenderers ) );
+      var useBackbone = applyTransparencyWithBlock ? false : ( backboneRequired || hasTransparency || hasClip );
 
       // check if we need a backbone or cache
       // if we are under a canvas cache, we will NEVER have a backbone
@@ -328,7 +331,7 @@ define( function( require ) {
         //OHTWO TODO: check whether the force acceleration hint is being used by our DOMBlock
         this.groupRenderer = Renderer.bitmaskDOM; // probably won't be used
       }
-      else if ( !applyTransparencyWithSVG && ( hasTransparency || hasClip || hints.canvasCache ) ) {
+      else if ( !applyTransparencyWithBlock && ( hasTransparency || hasClip || hints.canvasCache ) ) {
         // everything underneath needs to be renderable with Canvas, otherwise we cannot cache
         assert && assert( this.node._rendererSummary.isSingleCanvasSupported(),
           'hints.canvasCache provided, but not all node contents can be rendered with Canvas under ' +

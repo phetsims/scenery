@@ -49,6 +49,7 @@ define( function( require ) {
         this.canvasId = this.canvas.id = 'scenery-canvas' + this.id;
 
         this.context = this.canvas.getContext( '2d' );
+        this.context.save(); // We always immediately save every Canvas so we can restore/save for clipping
 
         // workaround for Chrome (WebKit) miterLimit bug: https://bugs.webkit.org/show_bug.cgi?id=108763
         this.context.miterLimit = 20;
@@ -58,7 +59,7 @@ define( function( require ) {
 
         this.domElement = this.canvas;
 
-        this.wrapperStack = [ this.canvas ];
+        this.wrapperStack = [ this.wrapper ];
       }
       this.wrapperStackIndex = 0;
 
@@ -127,13 +128,6 @@ define( function( require ) {
         this.context.setTransform( 1, 0, 0, 1, 0, 0 ); // identity
         this.context.clearRect( 0, 0, this.canvas.width, this.canvas.height ); // clear everything
 
-        //OHTWO TODO: clipping handling!
-        if ( this.filterRootNode.clipArea ) {
-          this.context.save();
-
-          this.temporaryRecursiveClip( this.filterRootInstance );
-        }
-
         //OHTWO TODO: PERFORMANCE: create an array for faster drawable iteration (this is probably a hellish memory access pattern)
         //OHTWO TODO: why is "drawable !== null" check needed
         this.currentDrawable = null; // we haven't rendered a drawable this frame yet
@@ -144,31 +138,9 @@ define( function( require ) {
         if ( this.currentDrawable ) {
           this.walkDown( this.currentDrawable.instance.trail, 0 );
         }
-
-        if ( this.filterRootNode.clipArea ) {
-          this.context.restore();
-          this.wrapper.resetStyles();
-        }
       }
 
       sceneryLog && sceneryLog.CanvasBlock && sceneryLog.pop();
-    },
-
-    //OHTWO TODO: rework and do proper clipping support
-    temporaryRecursiveClip: function( instance ) {
-      if ( instance.parent ) {
-        this.temporaryRecursiveClip( instance.parent );
-      }
-      if ( instance.node.clipArea ) {
-        //OHTWO TODO: reduce duplication here
-        this.context.setTransform( this.backingScale, 0, 0, this.backingScale, this.canvasDrawOffset.x * this.backingScale, this.canvasDrawOffset.y * this.backingScale );
-        instance.relativeTransform.matrix.canvasAppendTransform( this.context );
-
-        // do the clipping
-        this.context.beginPath();
-        instance.node.clipArea.writeToContext( this.context );
-        this.context.clip();
-      }
     },
 
     applyClip: function( drawable ) {
@@ -177,7 +149,7 @@ define( function( require ) {
       // If 0, no clip is needed
       if ( this.clipCount ) {
         var wrapper = this.wrapperStack[ this.wrapperStackIndex ];
-        var context = wraper.context;
+        var context = wrapper.context;
         var instance = drawable.instance;
         var trail = instance.trail;
 
@@ -188,7 +160,7 @@ define( function( require ) {
         // Inverse of what we'll be applying to the scene, to get back to the root coordinate transform
         scratchMatrix.rowMajor( this.backingScale, 0, this.canvasDrawOffset.x * this.backingScale,
                                 0, this.backingScale, this.canvasDrawOffset.y * this.backingScale,
-                                0, 0, 1 );
+                                0, 0, 1 )
                      .multiplyMatrix( instance.relativeTransform.matrix )
                      .invert();
         scratchMatrix.canvasSetTransform( context );
@@ -215,10 +187,8 @@ define( function( require ) {
           // Pop clip
           this.clipCount--;
           this.clipDirty = true;
-          this.wrapperStack[ this.wrapperStackIndex ].context.restore();
-          this.wrapperStack[ this.wrapperStackIndex ].resetStyles();
         }
-        if ( i >= filterRootIndex && node.getOpacity() !== 1 ) {
+        if ( i > filterRootIndex && node.getOpacity() !== 1 ) {
           // Pop opacity
           var topWrapper = this.wrapperStack[ this.wrapperStackIndex ];
           var bottomWrapper = this.wrapperStack[ this.wrapperStackIndex - 1 ];
@@ -238,13 +208,14 @@ define( function( require ) {
       for ( var i = branchIndex; i < trail.length; i++ ) {
         var node = trail.nodes[ i ];
 
-        if ( i >= filterRootIndex && node.getOpacity() !== 1 ) {
+        if ( i > filterRootIndex && node.getOpacity() !== 1 ) {
           // Push opacity
           this.wrapperStackIndex++;
           // If we need to push an entirely new Canvas to the stack
           if ( this.wrapperStackIndex === this.wrapperStack.length ) {
             var newCanvas = document.createElement( 'canvas' );
             var newContext = newCanvas.getContext( '2d' );
+            newContext.save();
             this.wrapperStack.push( new CanvasContextWrapper( newCanvas, newContext ) );
           }
           var wrapper = this.wrapperStack[ this.wrapperStackIndex ];
@@ -260,8 +231,6 @@ define( function( require ) {
           // Push clip
           this.clipCount++;
           this.clipDirty = true;
-          this.wrapperStack[ this.wrapperStackIndex ].resetStyles();
-          this.wrapperStack[ this.wrapperStackIndex ].context.save();
         }
       }
     },

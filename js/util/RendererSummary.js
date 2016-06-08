@@ -236,6 +236,37 @@ define( function( require ) {
       return false; // sanity check
     },
 
+    /**
+     * Given a bitmask representing a list of ordered preferred renderers, we check to see if all of our nodes can be
+     * displayed in a single Canvas block, AND that given the preferred renderers, that it will actually happen in our
+     * rendering process.
+     */
+    isSubtreeRenderedExclusivelyCanvas: function( preferredRenderers ) {
+      // Check if we have anything that would PREVENT us from having a single Canvas block
+      if ( !this.isSingleCanvasSupported() ) {
+        return false;
+      }
+
+      // Check for any renderer preferences that would CAUSE us to choose not to display with a single Canvas block
+      for ( var i = 0; i < Renderer.numActiveRenderers; i++ ) {
+        // Grab the next-most preferred renderer
+        var renderer = Renderer.bitmaskOrder( preferredRenderers, i );
+
+        // If it's Canvas, congrats! Everything will render in Canvas (since Canvas is supported, as noted above)
+        if ( Renderer.bitmaskCanvas & renderer ) {
+          return true;
+        }
+
+        // Since it's not Canvas, if there's a single painted node that supports this renderer (which is preferred over Canvas),
+        // then it will be rendered with this renderer, NOT Canvas.
+        if ( this.isSubtreeContainingCompatible( renderer ) ) {
+          return false;
+        }
+      }
+
+      return false; // sanity check
+    },
+
     // for debugging purposes
     audit: function() {
       if ( assert ) {
@@ -297,8 +328,9 @@ define( function( require ) {
       // Whether this subtree will be able to support a single Canvas element
       // NOTE: If changing, see Instance.updateRenderingState
       if ( !requiresSplit && // Can't have a single SVG element if we are split
-           !mightUseOpacity && // Opacity not supported for Canvas blocks yet
-           !mightUseClip && // Clipping not supported for Canvas blocks yet
+           // NOTE: now Canvas does support opacity and clipping
+           // !mightUseOpacity && // Opacity not supported for Canvas blocks yet
+           // !mightUseClip && // Clipping not supported for Canvas blocks yet
            Renderer.isCanvas( node._rendererBitmask ) && // If our node doesn't support Canvas, can't do it
            ( !rendererHint || Renderer.isCanvas( rendererHint ) ) ) { // Can't if a renderer hint is set to something else
         bitmask |= Renderer.bitmaskSingleCanvas;
