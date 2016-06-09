@@ -313,8 +313,6 @@ define( function( require ) {
 
       // NOTE: If changing, see Instance.updateRenderingState
       var requiresSplit = node._hints.requireElement || node._hints.cssTransform || node._hints.layerSplit;
-      var mightUseOpacity = node.opacity !== 1 || node._hints.usesOpacity;
-      var mightUseClip = node.clipArea !== null;
       var rendererHint = node._hints.renderer;
 
       // Whether this subtree will be able to support a single SVG element
@@ -328,9 +326,6 @@ define( function( require ) {
       // Whether this subtree will be able to support a single Canvas element
       // NOTE: If changing, see Instance.updateRenderingState
       if ( !requiresSplit && // Can't have a single SVG element if we are split
-           // NOTE: now Canvas does support opacity and clipping
-           // !mightUseOpacity && // Opacity not supported for Canvas blocks yet
-           // !mightUseClip && // Clipping not supported for Canvas blocks yet
            Renderer.isCanvas( node._rendererBitmask ) && // If our node doesn't support Canvas, can't do it
            ( !rendererHint || Renderer.isCanvas( rendererHint ) ) ) { // Can't if a renderer hint is set to something else
         bitmask |= Renderer.bitmaskSingleCanvas;
