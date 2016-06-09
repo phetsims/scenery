@@ -126,8 +126,10 @@ define( function( require ) {
         this.updateFit();
 
         // for now, clear everything!
+        this.context.restore(); // just in case we were clipping/etc.
         this.context.setTransform( 1, 0, 0, 1, 0, 0 ); // identity
         this.context.clearRect( 0, 0, this.canvas.width, this.canvas.height ); // clear everything
+        this.context.save();
 
         //OHTWO TODO: PERFORMANCE: create an array for faster drawable iteration (this is probably a hellish memory access pattern)
         //OHTWO TODO: why is "drawable !== null" check needed
@@ -236,6 +238,7 @@ define( function( require ) {
           wrapper.setDimensions( this.canvas.width, this.canvas.height );
           context.setTransform( 1, 0, 0, 1, 0, 0 ); // identity
           context.clearRect( 0, 0, this.canvas.width, this.canvas.height ); // clear everything
+
         }
 
         if ( node.hasClipArea() ) {
