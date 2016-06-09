@@ -138,6 +138,7 @@ define( function( require ) {
         this.context.setTransform( 1, 0, 0, 1, 0, 0 ); // identity
         this.context.clearRect( 0, 0, this.canvas.width, this.canvas.height ); // clear everything
         this.context.save();
+        this.wrapper.resetStyles();
 
         //OHTWO TODO: PERFORMANCE: create an array for faster drawable iteration (this is probably a hellish memory access pattern)
         //OHTWO TODO: why is "drawable !== null" check needed
