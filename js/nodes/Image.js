@@ -97,10 +97,14 @@ define( function( require ) {
    * initialWidth - {number} If the input image hasn't loaded yet, but the (expected) size is known, providing an
    *    initialWidth will cause the Image node to have the correct bounds (width) before the pixel data has been fully
    *    loaded. A value of 0 will be ignored.
+   *    NOTE: setImage will reset this value to 0 (ingnored), since it's potentially likely the new image has
+   *    different dimensions than the current image.
    *
    * initialHeight - {number} If the input image hasn't loaded yet, but the (expected) size is known, providing an
    *    initialHeight will cause the Image node to have the correct bounds (height) before the pixel data has been fully
    *    loaded. A value of 0 will be ignored.
+   *    NOTE: setImage will reset this value to 0 (ingnored), since it's potentially likely the new image has
+   *    different dimensions than the current image.
    *
    * mipmap - {boolean} Whether mipmaps are supported. Defaults to false, but is automatically set to true when a mipmap
    *    image is provided to it. Setting it to true on non-mipmap images will trigger creation of a medium-quality
@@ -220,6 +224,10 @@ define( function( require ) {
     setImage: function( image ) {
       assert && assert( image, 'image should be available' );
       if ( this._image !== image && ( typeof image !== 'string' || !this._image || ( image !== this._image.src && image !== this._mipmapData ) ) ) {
+        // Reset the initial dimensions, since we have a new image that may have different dimensions.
+        this._initialWidth = 0;
+        this._initialHeight = 0;
+
         // don't leak memory by referencing old images
         if ( this._image ) {
           this._image.removeEventListener( 'load', this.loadListener );
