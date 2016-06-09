@@ -3293,7 +3293,7 @@ define( function( require ) {
      * entire bounds (if no x/y/width/height is provided)
      * @public
      *
-     * @param {Function} callback - callback( canvas, x, y ) is called, where x,y are computed if not specified.
+     * @param {Function} callback - callback( canvas, x, y, width, height ) is called, where x,y are computed if not specified.
      * @param {number} [x] - The X offset for where the upper-left of the content drawn into the Canvas
      * @param {number} [y] - The Y offset for where the upper-left of the content drawn into the Canvas
      * @param {number} [width] - The width of the Canvas output
@@ -3325,23 +3325,23 @@ define( function( require ) {
 
       this.renderToCanvasSubtree( wrapper, Matrix3.translation( x, y ).timesMatrix( this._transform.getMatrix() ) );
 
-      callback( canvas, x, y ); // we used to be asynchronous
+      callback( canvas, x, y, width, height ); // we used to be asynchronous
     },
 
     /**
      * Renders this node to a Canvas, then calls the callback with the data URI from it.
      * @public
      *
-     * @param {Function} callback - callback( dataURI {string}, x, y ) is called, where x,y are computed if not specified.
+     * @param {Function} callback - callback( dataURI {string}, x, y, width, height ) is called, where x,y are computed if not specified.
      * @param {number} [x] - The X offset for where the upper-left of the content drawn into the Canvas
      * @param {number} [y] - The Y offset for where the upper-left of the content drawn into the Canvas
      * @param {number} [width] - The width of the Canvas output
      * @param {number} [height] - The height of the Canvas output
      */
     toDataURL: function( callback, x, y, width, height ) {
-      this.toCanvas( function( canvas, x, y ) {
+      this.toCanvas( function( canvas, x, y , width, height ) {
         // this x and y shadow the outside parameters, and will be different if the outside parameters are undefined
-        callback( canvas.toDataURL(), x, y );
+        callback( canvas.toDataURL(), x, y, width, height );
       }, x, y, width, height );
     },
 
@@ -3433,10 +3433,10 @@ define( function( require ) {
      */
     toDataURLNodeSynchronous: function( x, y, width, height ) {
       var result;
-      this.toDataURL( function( dataURL, x, y ) {
+      this.toDataURL( function( dataURL, x, y, width, height ) {
         result = new scenery.Node( {
           children: [
-            new scenery.Image( dataURL, { x: -x, y: -y } )
+            new scenery.Image( dataURL, { x: -x, y: -y, initialWidth: width, initialHeight: height } )
           ]
         } );
       }, x, y, width, height );
