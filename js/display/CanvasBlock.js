@@ -14,11 +14,15 @@ define( function( require ) {
   var Poolable = require( 'PHET_CORE/Poolable' );
   var cleanArray = require( 'PHET_CORE/cleanArray' );
   var Vector2 = require( 'DOT/Vector2' );
+  var Matrix3 = require( 'DOT/Matrix3' );
   var scenery = require( 'SCENERY/scenery' );
   var FittedBlock = require( 'SCENERY/display/FittedBlock' );
   var CanvasContextWrapper = require( 'SCENERY/util/CanvasContextWrapper' );
   var Renderer = require( 'SCENERY/display/Renderer' );
   var Util = require( 'SCENERY/util/Util' );
+
+  var scratchMatrix = new Matrix3();
+  var scratchMatrix2 = new Matrix3();
 
   function CanvasBlock( display, renderer, transformRootInstance, filterRootInstance ) {
     this.initialize( display, renderer, transformRootInstance, filterRootInstance );
@@ -46,15 +50,26 @@ define( function( require ) {
         this.canvasId = this.canvas.id = 'scenery-canvas' + this.id;
 
         this.context = this.canvas.getContext( '2d' );
+        this.context.save(); // We always immediately save every Canvas so we can restore/save for clipping
 
         // workaround for Chrome (WebKit) miterLimit bug: https://bugs.webkit.org/show_bug.cgi?id=108763
         this.context.miterLimit = 20;
         this.context.miterLimit = 10;
 
+        // Tracks intermediate Canvas context state, so we don't have to send unnecessary Canvas commands
         this.wrapper = new CanvasContextWrapper( this.canvas, this.context );
 
         this.domElement = this.canvas;
+
+        // {Array.<CanvasContextWrapper>} as multiple Canvases are needed to properly render opacity within the block.
+        this.wrapperStack = [ this.wrapper ];
       }
+      // {number} - The index into the wrapperStack array where our current Canvas (that we are drawing to) is.
+      this.wrapperStackIndex = 0;
+
+      // Maps node ID => count of how many listeners we WOULD have attached to it. We only attach at most one listener
+      // to each node. We need to listen to all ancestors up to our filter root, so that we can pick up opacity changes.
+      this.opacityListenerCountMap = this.opacityListenerCountMap || {};
 
       // reset any fit transforms that were applied
       Util.prepareForTransform( this.canvas, this.forceAcceleration );
@@ -62,10 +77,15 @@ define( function( require ) {
 
       this.canvasDrawOffset = new Vector2();
 
+      this.currentDrawable = null;
+      this.clipDirty = true; // Whether we need to re-apply clipping to our current Canvas
+      this.clipCount = 0; // How many clips should be applied
+
       // store our backing scale so we don't have to look it up while fitting
       this.backingScale = ( renderer & Renderer.bitmaskCanvasLowResolution ) ? 1 : scenery.Util.backingScale( this.context );
 
       this.clipDirtyListener = this.markDirty.bind( this );
+      this.opacityDirtyListener = this.markDirty.bind( this );
       this.filterRootNode = this.filterRootInstance.node;
       this.filterRootNode.onStatic( 'clip', this.clipDirtyListener );
 
@@ -114,46 +134,151 @@ define( function( require ) {
         this.updateFit();
 
         // for now, clear everything!
+        this.context.restore(); // just in case we were clipping/etc.
         this.context.setTransform( 1, 0, 0, 1, 0, 0 ); // identity
         this.context.clearRect( 0, 0, this.canvas.width, this.canvas.height ); // clear everything
-
-        //OHTWO TODO: clipping handling!
-        if ( this.filterRootNode.clipArea ) {
-          this.context.save();
-
-          this.temporaryRecursiveClip( this.filterRootInstance );
-        }
+        this.context.save();
+        this.wrapper.resetStyles();
 
         //OHTWO TODO: PERFORMANCE: create an array for faster drawable iteration (this is probably a hellish memory access pattern)
         //OHTWO TODO: why is "drawable !== null" check needed
+        this.currentDrawable = null; // we haven't rendered a drawable this frame yet
         for ( var drawable = this.firstDrawable; drawable !== null; drawable = drawable.nextDrawable ) {
           this.renderDrawable( drawable );
           if ( drawable === this.lastDrawable ) { break; }
         }
-
-        if ( this.filterRootNode.clipArea ) {
-          this.context.restore();
-          this.wrapper.resetStyles();
+        if ( this.currentDrawable ) {
+          this.walkDown( this.currentDrawable.instance.trail, 0 );
         }
       }
 
       sceneryLog && sceneryLog.CanvasBlock && sceneryLog.pop();
     },
 
-    //OHTWO TODO: rework and do proper clipping support
-    temporaryRecursiveClip: function( instance ) {
-      if ( instance.parent ) {
-        this.temporaryRecursiveClip( instance.parent );
-      }
-      if ( instance.node.clipArea ) {
-        //OHTWO TODO: reduce duplication here
-        this.context.setTransform( this.backingScale, 0, 0, this.backingScale, this.canvasDrawOffset.x * this.backingScale, this.canvasDrawOffset.y * this.backingScale );
-        instance.relativeTransform.matrix.canvasAppendTransform( this.context );
+    /**
+     * Reapplies clips to the current context. It's necessary to fully apply every clipping area for every ancestor,
+     * due to how Canvas is set up. Should ideally be called when the clip is dirty.
+     *
+     * @param {CanvasSelfDrawable} Drawable
+     */
+    applyClip: function( drawable ) {
+      this.clipDirty = false;
+      sceneryLog && sceneryLog.CanvasBlock && sceneryLog.CanvasBlock( 'Apply clip ' + drawable.instance.trail.toString() + ' ' + drawable.instance.trail.subtrailTo( node ).toPathString() );
 
-        // do the clipping
-        this.context.beginPath();
-        instance.node.clipArea.writeToContext( this.context );
-        this.context.clip();
+      var wrapper = this.wrapperStack[ this.wrapperStackIndex ];
+      var context = wrapper.context;
+
+      // Re-set (even if no clip is needed, so we get rid of the old clip)
+      context.restore();
+      context.save();
+      wrapper.resetStyles();
+
+      // If 0, no clip is needed
+      if ( this.clipCount ) {
+        var instance = drawable.instance;
+        var trail = instance.trail;
+
+        // Inverse of what we'll be applying to the scene, to get back to the root coordinate transform
+        scratchMatrix.rowMajor( this.backingScale, 0, this.canvasDrawOffset.x * this.backingScale,
+                                0, this.backingScale, this.canvasDrawOffset.y * this.backingScale,
+                                0, 0, 1 );
+        scratchMatrix2.set( this.transformRootInstance.trail.getMatrix() ).invert();
+        scratchMatrix2.multiplyMatrix( scratchMatrix ).canvasSetTransform( context );
+
+        // Recursively apply clips and transforms
+        for ( var i = 0; i < trail.length; i++ ) {
+          var node = trail.nodes[ i ];
+          node.getMatrix().canvasAppendTransform( context );
+          if ( node.hasClipArea() ) {
+            context.beginPath();
+            node.clipArea.writeToContext( context );
+            // TODO: add the ability to show clipping highlights inline?
+                // context.save();
+                // context.strokeStyle = 'red';
+                // context.lineWidth = 2;
+                // context.stroke();
+                // context.restore();
+            context.clip();
+          }
+        }
+      }
+    },
+
+    /**
+     * Walk down towards the root, popping any clip/opacity effects that were needed.
+     *
+     * @param {Trail} trail
+     * @param {number} branchIndex - The first index where our before and after trails have diverged.
+     */
+    walkDown: function( trail, branchIndex ) {
+      var filterRootIndex = this.filterRootInstance.trail.length - 1;
+
+      for ( var i = trail.length - 1; i >= branchIndex; i-- ) {
+        var node = trail.nodes[ i ];
+
+        if ( node.hasClipArea() ) {
+          sceneryLog && sceneryLog.CanvasBlock && sceneryLog.CanvasBlock( 'Pop clip ' + trail.subtrailTo( node ).toString() + ' ' + trail.subtrailTo( node ).toPathString() );
+          // Pop clip
+          this.clipCount--;
+          this.clipDirty = true;
+        }
+        // We should not apply opacity at or below the filter root
+        if ( i > filterRootIndex && node.getOpacity() !== 1 ) {
+          sceneryLog && sceneryLog.CanvasBlock && sceneryLog.CanvasBlock( 'Pop opacity ' + trail.subtrailTo( node ).toString() + ' ' + trail.subtrailTo( node ).toPathString() );
+          // Pop opacity
+          var topWrapper = this.wrapperStack[ this.wrapperStackIndex ];
+          var bottomWrapper = this.wrapperStack[ this.wrapperStackIndex - 1 ];
+          this.wrapperStackIndex--;
+
+          // Draw the transparent content into the next-level Canvas.
+          bottomWrapper.context.setTransform( 1, 0, 0, 1, 0, 0 );
+          bottomWrapper.context.globalAlpha = node.getOpacity();
+          bottomWrapper.context.drawImage( topWrapper.canvas, 0, 0 );
+          bottomWrapper.context.globalAlpha = 1;
+        }
+      }
+    },
+
+    /**
+     * Walk up towards the next leaf, pushing any clip/opacity effects that are needed.
+     *
+     * @param {Trail} trail
+     * @param {number} branchIndex - The first index where our before and after trails have diverged.
+     */
+    walkUp: function( trail, branchIndex ) {
+      var filterRootIndex = this.filterRootInstance.trail.length - 1;
+
+      for ( var i = branchIndex; i < trail.length; i++ ) {
+        var node = trail.nodes[ i ];
+
+        // We should not apply opacity at or below the filter root
+        if ( i > filterRootIndex && node.getOpacity() !== 1 ) {
+          sceneryLog && sceneryLog.CanvasBlock && sceneryLog.CanvasBlock( 'Push opacity ' + trail.subtrailTo( node ).toString() + ' ' + trail.subtrailTo( node ).toPathString() );
+          // Push opacity
+          this.wrapperStackIndex++;
+          // If we need to push an entirely new Canvas to the stack
+          if ( this.wrapperStackIndex === this.wrapperStack.length ) {
+            var newCanvas = document.createElement( 'canvas' );
+            var newContext = newCanvas.getContext( '2d' );
+            newContext.save();
+            this.wrapperStack.push( new CanvasContextWrapper( newCanvas, newContext ) );
+          }
+          var wrapper = this.wrapperStack[ this.wrapperStackIndex ];
+          var context = wrapper.context;
+
+          // Size and clear our context
+          wrapper.setDimensions( this.canvas.width, this.canvas.height );
+          context.setTransform( 1, 0, 0, 1, 0, 0 ); // identity
+          context.clearRect( 0, 0, this.canvas.width, this.canvas.height ); // clear everything
+
+        }
+
+        if ( node.hasClipArea() ) {
+          sceneryLog && sceneryLog.CanvasBlock && sceneryLog.CanvasBlock( 'Push clip ' + trail.subtrailTo( node ).toString() + ' ' + trail.subtrailTo( node ).toPathString() );
+          // Push clip
+          this.clipCount++;
+          this.clipDirty = true;
+        }
       }
     },
 
@@ -163,6 +288,21 @@ define( function( require ) {
         return;
       }
 
+      // For opacity/clip, walk up/down as necessary (Can only walk down if we are not the first drawable)
+      var branchIndex = this.currentDrawable ? drawable.instance.getBranchIndexTo( this.currentDrawable.instance ) : 0;
+      if ( this.currentDrawable ) {
+        this.walkDown( this.currentDrawable.instance.trail, branchIndex );
+      }
+      this.walkUp( drawable.instance.trail, branchIndex );
+
+      var wrapper = this.wrapperStack[ this.wrapperStackIndex ];
+      var context = wrapper.context;
+
+      // Re-apply the clip if necessary
+      if ( this.clipDirty ) {
+        this.applyClip( drawable );
+      }
+
       // we're directly accessing the relative transform below, so we need to ensure that it is up-to-date
       assert && assert( drawable.instance.relativeTransform.isValidationNotNeeded() );
 
@@ -170,13 +310,15 @@ define( function( require ) {
 
       // set the correct (relative to the transform root) transform up, instead of walking the hierarchy (for now)
       //OHTWO TODO: should we start premultiplying these matrices to remove this bottleneck?
-      this.context.setTransform( this.backingScale, 0, 0, this.backingScale, this.canvasDrawOffset.x * this.backingScale, this.canvasDrawOffset.y * this.backingScale );
+      context.setTransform( this.backingScale, 0, 0, this.backingScale, this.canvasDrawOffset.x * this.backingScale, this.canvasDrawOffset.y * this.backingScale );
       if ( drawable.instance !== this.transformRootInstance ) {
-        matrix.canvasAppendTransform( this.context );
+        matrix.canvasAppendTransform( context );
       }
 
       // paint using its local coordinate frame
-      drawable.paintCanvas( this.wrapper, drawable.instance.node );
+      drawable.paintCanvas( wrapper, drawable.instance.node );
+
+      this.currentDrawable = drawable;
     },
 
     dispose: function() {
@@ -215,10 +357,36 @@ define( function( require ) {
       sceneryLog && sceneryLog.CanvasBlock && sceneryLog.CanvasBlock( '#' + this.id + '.addDrawable ' + drawable.toString() );
 
       FittedBlock.prototype.addDrawable.call( this, drawable );
+
+      // Add opacity listeners (from this node up to the filter root)
+      for ( var instance = drawable.instance; instance && instance !== this.filterRootInstance; instance = instance.parent ) {
+        var node = instance.node;
+
+        // Only add the listener if we don't already have one
+        if ( this.opacityListenerCountMap[ node.id ] ) {
+          this.opacityListenerCountMap[ node.id ]++;
+        }
+        else {
+          this.opacityListenerCountMap[ node.id ] = 1;
+
+          node.onStatic( 'opacity', this.opacityDirtyListener );
+        }
+      }
     },
 
     removeDrawable: function( drawable ) {
       sceneryLog && sceneryLog.CanvasBlock && sceneryLog.CanvasBlock( '#' + this.id + '.removeDrawable ' + drawable.toString() );
+
+      // Remove opacity listeners (from this node up to the filter root)
+      for ( var instance = drawable.instance; instance && instance !== this.filterRootInstance; instance = instance.parent ) {
+        var node = instance.node;
+        assert && assert( this.opacityListenerCountMap[ node.id ] > 0 );
+        this.opacityListenerCountMap[ node.id ]--;
+        if ( this.opacityListenerCountMap[ node.id ] === 0 ) {
+          delete this.opacityListenerCountMap[ node.id ];
+          node.offStatic( 'opacity', this.opacityDirtyListener );
+        }
+      }
 
       FittedBlock.prototype.removeDrawable.call( this, drawable );
     },

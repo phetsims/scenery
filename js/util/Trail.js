@@ -419,7 +419,8 @@ define( function( require ) {
 
       var branchIndex;
 
-      for ( branchIndex = 0; branchIndex < Math.min( this.length, otherTrail.length ); branchIndex++ ) {
+      var min = Math.min( this.length, otherTrail.length );
+      for ( branchIndex = 0; branchIndex < min; branchIndex++ ) {
         if ( this.nodes[ branchIndex ] !== otherTrail.nodes[ branchIndex ] ) {
           break;
         }
