@@ -64,6 +64,10 @@ define( function( require ) {
       }
       this.wrapperStackIndex = 0;
 
+      // Maps node ID => count of how many listeners we WOULD have attached to it. We only attach at most one listener
+      // to each node.
+      this.opacityListenerCountMap = this.opacityListenerCountMap || {};
+
       // reset any fit transforms that were applied
       Util.prepareForTransform( this.canvas, this.forceAcceleration );
       Util.unsetTransform( this.canvas ); // clear out any transforms that could have been previously applied
@@ -78,6 +82,7 @@ define( function( require ) {
       this.backingScale = ( renderer & Renderer.bitmaskCanvasLowResolution ) ? 1 : scenery.Util.backingScale( this.context );
 
       this.clipDirtyListener = this.markDirty.bind( this );
+      this.opacityDirtyListener = this.markDirty.bind( this );
       this.filterRootNode = this.filterRootInstance.node;
       this.filterRootNode.onStatic( 'clip', this.clipDirtyListener );
 
@@ -323,10 +328,32 @@ define( function( require ) {
       sceneryLog && sceneryLog.CanvasBlock && sceneryLog.CanvasBlock( '#' + this.id + '.addDrawable ' + drawable.toString() );
 
       FittedBlock.prototype.addDrawable.call( this, drawable );
+
+      for ( var instance = drawable.instance; instance && instance !== this.filterRootInstance; instance = instance.parent ) {
+        var node = instance.node;
+        if ( this.opacityListenerCountMap[ node.id ] ) {
+          this.opacityListenerCountMap[ node.id ]++;
+        }
+        else {
+          this.opacityListenerCountMap[ node.id ] = 1;
+
+          node.onStatic( 'opacity', this.opacityDirtyListener );
+        }
+      }
     },
 
     removeDrawable: function( drawable ) {
       sceneryLog && sceneryLog.CanvasBlock && sceneryLog.CanvasBlock( '#' + this.id + '.removeDrawable ' + drawable.toString() );
+
+      for ( var instance = drawable.instance; instance && instance !== this.filterRootInstance; instance = instance.parent ) {
+        var node = instance.node;
+        assert && assert( this.opacityListenerCountMap[ node.id ] > 0 );
+        this.opacityListenerCountMap[ node.id ]--;
+        if ( this.opacityListenerCountMap[ node.id ] === 0 ) {
+          delete this.opacityListenerCountMap[ node.id ];
+          node.offStatic( 'opacity', this.opacityDirtyListener );
+        }
+      }
 
       FittedBlock.prototype.removeDrawable.call( this, drawable );
     },
