@@ -22,6 +22,7 @@ define( function( require ) {
   var Util = require( 'SCENERY/util/Util' );
 
   var scratchMatrix = new Matrix3();
+  var scratchMatrix2 = new Matrix3();
 
   function CanvasBlock( display, renderer, transformRootInstance, filterRootInstance ) {
     this.initialize( display, renderer, transformRootInstance, filterRootInstance );
@@ -145,25 +146,27 @@ define( function( require ) {
 
     applyClip: function( drawable ) {
       this.clipDirty = false;
+      sceneryLog && sceneryLog.CanvasBlock && sceneryLog.CanvasBlock( 'Apply clip ' + drawable.instance.trail.toString() + ' ' + drawable.instance.trail.subtrailTo( node ).toPathString() );
+
+      var wrapper = this.wrapperStack[ this.wrapperStackIndex ];
+      var context = wrapper.context;
+
+      // Re-set (even if no clip is needed, so we get rid of the old clip)
+      context.restore();
+      context.save();
+      wrapper.resetStyles();
 
       // If 0, no clip is needed
       if ( this.clipCount ) {
-        var wrapper = this.wrapperStack[ this.wrapperStackIndex ];
-        var context = wrapper.context;
         var instance = drawable.instance;
         var trail = instance.trail;
-
-        // Re-set
-        context.restore();
-        context.save();
 
         // Inverse of what we'll be applying to the scene, to get back to the root coordinate transform
         scratchMatrix.rowMajor( this.backingScale, 0, this.canvasDrawOffset.x * this.backingScale,
                                 0, this.backingScale, this.canvasDrawOffset.y * this.backingScale,
-                                0, 0, 1 )
-                     .multiplyMatrix( instance.relativeTransform.matrix )
-                     .invert();
-        scratchMatrix.canvasSetTransform( context );
+                                0, 0, 1 );
+        scratchMatrix2.set( this.transformRootInstance.trail.getMatrix() ).invert();
+        scratchMatrix2.multiplyMatrix( scratchMatrix ).canvasSetTransform( context );
 
         for ( var i = 0; i < trail.length; i++ ) {
           var node = trail.nodes[ i ];
@@ -171,6 +174,12 @@ define( function( require ) {
           if ( node.hasClipArea() ) {
             context.beginPath();
             node.clipArea.writeToContext( context );
+            // TODO: add the ability to show clipping highlights inline?
+                // context.save();
+                // context.strokeStyle = 'red';
+                // context.lineWidth = 2;
+                // context.stroke();
+                // context.restore();
             context.clip();
           }
         }
@@ -184,11 +193,13 @@ define( function( require ) {
         var node = trail.nodes[ i ];
 
         if ( node.hasClipArea() ) {
+          sceneryLog && sceneryLog.CanvasBlock && sceneryLog.CanvasBlock( 'Pop clip ' + trail.subtrailTo( node ).toString() + ' ' + trail.subtrailTo( node ).toPathString() );
           // Pop clip
           this.clipCount--;
           this.clipDirty = true;
         }
         if ( i > filterRootIndex && node.getOpacity() !== 1 ) {
+          sceneryLog && sceneryLog.CanvasBlock && sceneryLog.CanvasBlock( 'Pop opacity ' + trail.subtrailTo( node ).toString() + ' ' + trail.subtrailTo( node ).toPathString() );
           // Pop opacity
           var topWrapper = this.wrapperStack[ this.wrapperStackIndex ];
           var bottomWrapper = this.wrapperStack[ this.wrapperStackIndex - 1 ];
@@ -198,7 +209,6 @@ define( function( require ) {
           bottomWrapper.context.drawImage( topWrapper.canvas, 0, 0 );
           bottomWrapper.context.globalAlpha = 1;
         }
-
       }
     },
 
@@ -209,6 +219,7 @@ define( function( require ) {
         var node = trail.nodes[ i ];
 
         if ( i > filterRootIndex && node.getOpacity() !== 1 ) {
+          sceneryLog && sceneryLog.CanvasBlock && sceneryLog.CanvasBlock( 'Push opacity ' + trail.subtrailTo( node ).toString() + ' ' + trail.subtrailTo( node ).toPathString() );
           // Push opacity
           this.wrapperStackIndex++;
           // If we need to push an entirely new Canvas to the stack
@@ -228,6 +239,7 @@ define( function( require ) {
         }
 
         if ( node.hasClipArea() ) {
+          sceneryLog && sceneryLog.CanvasBlock && sceneryLog.CanvasBlock( 'Push clip ' + trail.subtrailTo( node ).toString() + ' ' + trail.subtrailTo( node ).toPathString() );
           // Push clip
           this.clipCount++;
           this.clipDirty = true;

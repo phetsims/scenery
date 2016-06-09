@@ -153,8 +153,7 @@ an UI and Display made for visual testing and debugging.
           scene.renderer = 'canvas';
           scene.addChild( c );
           scene.addChild( node );
-          scene.clipArea = kite.Shape.rect( 0, 25, 200, 200 );
-          node.clipArea = kite.Shape.rect( 25, 0, 200, 200 );
+          a.clipArea = kite.Shape.rect( 0, 0, 200, 200 );
           display.updateDisplay();
         }, 400 );
       };
