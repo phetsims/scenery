@@ -56,16 +56,19 @@ define( function( require ) {
         this.context.miterLimit = 20;
         this.context.miterLimit = 10;
 
+        // Tracks intermediate Canvas context state, so we don't have to send unnecessary Canvas commands
         this.wrapper = new CanvasContextWrapper( this.canvas, this.context );
 
         this.domElement = this.canvas;
 
+        // {Array.<CanvasContextWrapper>} as multiple Canvases are needed to properly render opacity within the block.
         this.wrapperStack = [ this.wrapper ];
       }
+      // {number} - The index into the wrapperStack array where our current Canvas (that we are drawing to) is.
       this.wrapperStackIndex = 0;
 
       // Maps node ID => count of how many listeners we WOULD have attached to it. We only attach at most one listener
-      // to each node.
+      // to each node. We need to listen to all ancestors up to our filter root, so that we can pick up opacity changes.
       this.opacityListenerCountMap = this.opacityListenerCountMap || {};
 
       // reset any fit transforms that were applied
@@ -75,8 +78,8 @@ define( function( require ) {
       this.canvasDrawOffset = new Vector2();
 
       this.currentDrawable = null;
-      this.clipDirty = true;
-      this.clipCount = 0;
+      this.clipDirty = true; // Whether we need to re-apply clipping to our current Canvas
+      this.clipCount = 0; // How many clips should be applied
 
       // store our backing scale so we don't have to look it up while fitting
       this.backingScale = ( renderer & Renderer.bitmaskCanvasLowResolution ) ? 1 : scenery.Util.backingScale( this.context );
@@ -151,6 +154,12 @@ define( function( require ) {
       sceneryLog && sceneryLog.CanvasBlock && sceneryLog.pop();
     },
 
+    /**
+     * Reapplies clips to the current context. It's necessary to fully apply every clipping area for every ancestor,
+     * due to how Canvas is set up. Should ideally be called when the clip is dirty.
+     *
+     * @param {CanvasSelfDrawable} Drawable
+     */
     applyClip: function( drawable ) {
       this.clipDirty = false;
       sceneryLog && sceneryLog.CanvasBlock && sceneryLog.CanvasBlock( 'Apply clip ' + drawable.instance.trail.toString() + ' ' + drawable.instance.trail.subtrailTo( node ).toPathString() );
@@ -175,6 +184,7 @@ define( function( require ) {
         scratchMatrix2.set( this.transformRootInstance.trail.getMatrix() ).invert();
         scratchMatrix2.multiplyMatrix( scratchMatrix ).canvasSetTransform( context );
 
+        // Recursively apply clips and transforms
         for ( var i = 0; i < trail.length; i++ ) {
           var node = trail.nodes[ i ];
           node.getMatrix().canvasAppendTransform( context );
@@ -193,6 +203,12 @@ define( function( require ) {
       }
     },
 
+    /**
+     * Walk down towards the root, popping any clip/opacity effects that were needed.
+     *
+     * @param {Trail} trail
+     * @param {number} branchIndex - The first index where our before and after trails have diverged.
+     */
     walkDown: function( trail, branchIndex ) {
       var filterRootIndex = this.filterRootInstance.trail.length - 1;
 
@@ -205,12 +221,15 @@ define( function( require ) {
           this.clipCount--;
           this.clipDirty = true;
         }
+        // We should not apply opacity at or below the filter root
         if ( i > filterRootIndex && node.getOpacity() !== 1 ) {
           sceneryLog && sceneryLog.CanvasBlock && sceneryLog.CanvasBlock( 'Pop opacity ' + trail.subtrailTo( node ).toString() + ' ' + trail.subtrailTo( node ).toPathString() );
           // Pop opacity
           var topWrapper = this.wrapperStack[ this.wrapperStackIndex ];
           var bottomWrapper = this.wrapperStack[ this.wrapperStackIndex - 1 ];
           this.wrapperStackIndex--;
+
+          // Draw the transparent content into the next-level Canvas.
           bottomWrapper.context.setTransform( 1, 0, 0, 1, 0, 0 );
           bottomWrapper.context.globalAlpha = node.getOpacity();
           bottomWrapper.context.drawImage( topWrapper.canvas, 0, 0 );
@@ -219,12 +238,19 @@ define( function( require ) {
       }
     },
 
+    /**
+     * Walk up towards the next leaf, pushing any clip/opacity effects that are needed.
+     *
+     * @param {Trail} trail
+     * @param {number} branchIndex - The first index where our before and after trails have diverged.
+     */
     walkUp: function( trail, branchIndex ) {
       var filterRootIndex = this.filterRootInstance.trail.length - 1;
 
       for ( var i = branchIndex; i < trail.length; i++ ) {
         var node = trail.nodes[ i ];
 
+        // We should not apply opacity at or below the filter root
         if ( i > filterRootIndex && node.getOpacity() !== 1 ) {
           sceneryLog && sceneryLog.CanvasBlock && sceneryLog.CanvasBlock( 'Push opacity ' + trail.subtrailTo( node ).toString() + ' ' + trail.subtrailTo( node ).toPathString() );
           // Push opacity
@@ -261,6 +287,7 @@ define( function( require ) {
         return;
       }
 
+      // For opacity/clip, walk up/down as necessary (Can only walk down if we are not the first drawable)
       var branchIndex = this.currentDrawable ? drawable.instance.getBranchIndexTo( this.currentDrawable.instance ) : 0;
       if ( this.currentDrawable ) {
         this.walkDown( this.currentDrawable.instance.trail, branchIndex );
@@ -270,6 +297,7 @@ define( function( require ) {
       var wrapper = this.wrapperStack[ this.wrapperStackIndex ];
       var context = wrapper.context;
 
+      // Re-apply the clip if necessary
       if ( this.clipDirty ) {
         this.applyClip( drawable );
       }
@@ -329,8 +357,11 @@ define( function( require ) {
 
       FittedBlock.prototype.addDrawable.call( this, drawable );
 
+      // Add opacity listeners (from this node up to the filter root)
       for ( var instance = drawable.instance; instance && instance !== this.filterRootInstance; instance = instance.parent ) {
         var node = instance.node;
+
+        // Only add the listener if we don't already have one
         if ( this.opacityListenerCountMap[ node.id ] ) {
           this.opacityListenerCountMap[ node.id ]++;
         }
@@ -345,6 +376,7 @@ define( function( require ) {
     removeDrawable: function( drawable ) {
       sceneryLog && sceneryLog.CanvasBlock && sceneryLog.CanvasBlock( '#' + this.id + '.removeDrawable ' + drawable.toString() );
 
+      // Remove opacity listeners (from this node up to the filter root)
       for ( var instance = drawable.instance; instance && instance !== this.filterRootInstance; instance = instance.parent ) {
         var node = instance.node;
         assert && assert( this.opacityListenerCountMap[ node.id ] > 0 );
