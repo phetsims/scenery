@@ -3339,7 +3339,7 @@ define( function( require ) {
      * @param {number} [height] - The height of the Canvas output
      */
     toDataURL: function( callback, x, y, width, height ) {
-      this.toCanvas( function( canvas, x, y , width, height ) {
+      this.toCanvas( function( canvas, x, y, width, height ) {
         // this x and y shadow the outside parameters, and will be different if the outside parameters are undefined
         callback( canvas.toDataURL(), x, y, width, height );
       }, x, y, width, height );
@@ -3399,7 +3399,6 @@ define( function( require ) {
      * synchronous, but the resulting image node can ONLY used with Canvas/WebGL (NOT SVG).
      * @public
      *
-     * @param {Function} callback - callback( imageNode {Image} ) is called
      * @param {number} [x] - The X offset for where the upper-left of the content drawn into the Canvas
      * @param {number} [y] - The Y offset for where the upper-left of the content drawn into the Canvas
      * @param {number} [width] - The width of the Canvas output
@@ -3421,11 +3420,9 @@ define( function( require ) {
     /**
      * Calls the callback with a Node that contains this Node's subtree's visual form. This is always
      * synchronous, but the resulting node will not have the correct bounds immediately (that will be asynchronous).
+     * Also sets initialWidth/initialHeight so that we have the bounds immediately
      * @public
      *
-     * TODO: set initialWidth/initialHeight so that we have the bounds immediately?
-     *
-     * @param {Function} callback - callback( imageNode {Image} ) is called
      * @param {number} [x] - The X offset for where the upper-left of the content drawn into the Canvas
      * @param {number} [y] - The Y offset for where the upper-left of the content drawn into the Canvas
      * @param {number} [width] - The width of the Canvas output
