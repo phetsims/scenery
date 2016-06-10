@@ -12,11 +12,11 @@ define( function( require ) {
   var assertInstanceOf = require( 'PHET_IO/assertions/assertInstanceOf' );
   var phetioInherit = require( 'PHET_IO/phetioInherit' );
   var phetioNamespace = require( 'PHET_IO/phetioNamespace' );
-  var TBoolean = require( 'PHET_IO/api/TBoolean' );
-  var TNumber = require( 'PHET_IO/api/TNumber' );
-  var TObject = require( 'PHET_IO/api/TObject' );
-  var TProperty = require( 'PHET_IO/api/axon/TProperty' );
-  var TVoid = require( 'PHET_IO/api/TVoid' );
+  var TBoolean = require( 'PHET_IO/types/TBoolean' );
+  var TNumber = require( 'PHET_IO/types/TNumber' );
+  var TObject = require( 'PHET_IO/types/TObject' );
+  var TProperty = require( 'PHET_IO/types/axon/TProperty' );
+  var TVoid = require( 'PHET_IO/types/TVoid' );
 
   var TNode = phetioInherit( TObject, 'TNode', function( node, phetioID ) {
     TObject.call( this, node, phetioID );
