@@ -539,6 +539,7 @@ define( function( require ) {
       }
       else {
         assert && assert( this._initialWidth === 0 || this._initialWidth === detectedWidth, 'Bad Image.initialWidth' );
+        // assert && assert( this._initialWidth === 0 || Math.floor(this._initialWidth) === detectedWidth, 'Bad Image.initialWidth' );
 
         return detectedWidth;
       }
@@ -552,6 +553,7 @@ define( function( require ) {
       }
       else {
         assert && assert( this._initialHeight === 0 || this._initialHeight === detectedHeight, 'Bad Image.initialHeight' );
+        assert && assert( this._initialHeight === 0 || Math.floor( this._initialHeight ) === detectedHeight, 'Bad Image.initialHeight' );
 
         return detectedHeight;
       }
