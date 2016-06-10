@@ -3395,7 +3395,7 @@ define( function( require ) {
     },
 
     /**
-     * Calls the callback with an Image node that contains this Node's subtree's visual form. This is always
+     * Creates a Node containing an Image node that contains this Node's subtree's visual form. This is always
      * synchronous, but the resulting image node can ONLY used with Canvas/WebGL (NOT SVG).
      * @public
      *
@@ -3418,9 +3418,8 @@ define( function( require ) {
     },
 
     /**
-     * Calls the callback with a Node that contains this Node's subtree's visual form. This is always
-     * synchronous, but the resulting node will not have the correct bounds immediately (that will be asynchronous).
-     * Also sets initialWidth/initialHeight so that we have the bounds immediately
+     * Returns a Node that contains this Node's subtree's visual form. This is always synchronous, and sets
+     * initialWidth/initialHeight so that we have the bounds immediately
      * @public
      *
      * @param {number} [x] - The X offset for where the upper-left of the content drawn into the Canvas
