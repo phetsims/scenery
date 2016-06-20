@@ -66,7 +66,7 @@ define( function( require ) {
    * children:         A list of children to add (in order)
    * cursor:           Will display the specified CSS cursor when the mouse is over this Node or one of its descendents. The Scene needs to have input listeners attached with an initialize method first.
    * visible:          If false, this node (and its children) will not be displayed (or get input events)
-   * pickable:         If false, this node (and its children) will not get input events
+   * pickable:         Sets whether the node and its children will receive input events. Default value: null (receives input events if it has an input listener or child that receives input events)
    * opacity:          Sets the opacity in the range [0,1]
    * matrix:           Sets the {Matrix3} transformation matrix (sets translation, rotation and scaling)
    * translation:      Sets the translation of the node to either the specified dot.Vector2 value, or the x,y values from an object (e.g. translation: { x: 1, y: 2 } )
@@ -129,8 +129,8 @@ define( function( require ) {
 
     // @private Whether this node (and its subtree) will allow hit-testing (and thus user interaction). Notably:
     // pickable: null  - default. Node is only pickable if it (or an ancestor/descendant) has either an input listener or pickable: true set
-    // pickable: false - Node (and subtree) is pickable, just like if there is an input listener
-    // pickable: true  - Node is unpickable (only has an effect when underneath a node with an input listener / pickable: true set)
+    // pickable: true - Node (and subtree) is pickable, just like if there is an input listener
+    // pickable: false  - Node is unpickable (only has an effect when underneath a node with an input listener / pickable: true set)
     this._pickable = null;
 
     // @private - This node and all children will be clipped by this shape (in addition to any other clipping shapes).
