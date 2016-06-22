@@ -62,7 +62,7 @@ define( function( require ) {
     },
 
     canvasPaintSelf: function( wrapper ) {
-      this.paintCanvas( wrapper );
+      this.paintCanvas( wrapper.context );
     },
 
     // override for computation of whether a point is inside the self content
