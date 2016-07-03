@@ -3579,7 +3579,7 @@ define( function( require ) {
      * (and it can be expanded).
      * @public
      *
-     * @param   unds2} bounds
+     * @param {Bounds2} bounds
      * @returns {Bounds2}
      */
     localToParentBounds: function( bounds ) {
