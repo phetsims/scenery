@@ -22,21 +22,6 @@ define( function( require ) {
     TObject.call( this, node, phetioID );
     assertInstanceOf( node, phet.scenery.Node );
   }, {
-
-    // TODO: Not working yet at all.
-    getVisibleProperty: {
-      // Convert the visibility property to property interface.
-      // TODO: Do this in scenery so adapters are not necessary here.
-      returnType: TProperty( TBoolean ),
-      parameterTypes: [],
-      implementation: function() {
-
-        // TODO: We need some way to unlink this.
-        var property = new phet.axon.Property( this.instance.visible );
-        return new TProperty( TBoolean )( property, null );
-      },
-      documentation: 'Gets a TProperty indicating whether the node is visible or not.'
-    },
     isVisible: {
       returnType: TBoolean,
       parameterTypes: [],
