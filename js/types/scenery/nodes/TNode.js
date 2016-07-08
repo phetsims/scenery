@@ -15,7 +15,6 @@ define( function( require ) {
   var TBoolean = require( 'PHET_IO/types/TBoolean' );
   var TNumber = require( 'PHET_IO/types/TNumber' );
   var TObject = require( 'PHET_IO/types/TObject' );
-  var TProperty = require( 'PHET_IO/types/axon/TProperty' );
   var TVoid = require( 'PHET_IO/types/TVoid' );
 
   var TNode = phetioInherit( TObject, 'TNode', function( node, phetioID ) {
