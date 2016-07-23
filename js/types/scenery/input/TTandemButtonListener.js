@@ -19,11 +19,11 @@ define( function( require ) {
     TObject.call( this, tandemButtonListener, phetioID );
     assertInstanceOf( tandemButtonListener, phet.tandem.TandemButtonListener );
 
-    toEventOnEmit( tandemButtonListener, 'CallbacksForUpEmitter', 'user', phetioID, 'up' );
-    toEventOnEmit( tandemButtonListener, 'CallbacksForOverEmitter', 'user', phetioID, 'over' );
-    toEventOnEmit( tandemButtonListener, 'CallbacksForDownEmitter', 'user', phetioID, 'down' );
-    toEventOnEmit( tandemButtonListener, 'CallbacksForOutEmitter', 'user', phetioID, 'out' );
-    toEventOnEmit( tandemButtonListener, 'CallbacksForFireEmitter', 'user', phetioID, 'fire' );
+    toEventOnEmit( tandemButtonListener, 'CallbacksForUpEmitter', 'user', phetioID, TTandemButtonListener, 'up' );
+    toEventOnEmit( tandemButtonListener, 'CallbacksForOverEmitter', 'user', phetioID, TTandemButtonListener, 'over' );
+    toEventOnEmit( tandemButtonListener, 'CallbacksForDownEmitter', 'user', phetioID, TTandemButtonListener, 'down' );
+    toEventOnEmit( tandemButtonListener, 'CallbacksForOutEmitter', 'user', phetioID, TTandemButtonListener, 'out' );
+    toEventOnEmit( tandemButtonListener, 'CallbacksForFireEmitter', 'user', phetioID, TTandemButtonListener, 'fire' );
   }, {}, {
     documentation: 'Button listener',
     events: [ 'up', 'over', 'down', 'out', 'fire' ]

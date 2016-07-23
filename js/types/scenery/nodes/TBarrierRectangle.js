@@ -17,7 +17,7 @@ define( function( require ) {
   var TBarrierRectangle = phetioInherit( TNode, 'TBarrierRectangle', function( barrierRectangle, phetioID ) {
     TNode.call( this, barrierRectangle, phetioID );
 
-    toEventOnStatic( barrierRectangle, 'CallbacksForFired', 'user', phetioID, 'fired' );
+    toEventOnStatic( barrierRectangle, 'CallbacksForFired', 'user', phetioID, TBarrierRectangle, 'fired' );
   }, {}, {
     documentation: 'Shown when a dialog is present, so that clicking on the invisible barrier rectangle will dismiss the dialog',
     events: [ 'fired' ]
