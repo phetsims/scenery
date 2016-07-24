@@ -17,10 +17,12 @@ define( function( require ) {
   var TObject = require( 'PHET_IO/types/TObject' );
   var TVoid = require( 'PHET_IO/types/TVoid' );
 
-  var TNode = phetioInherit( TObject, 'TNode', function( node, phetioID ) {
+  function TNode( node, phetioID ) {
     TObject.call( this, node, phetioID );
     assertInstanceOf( node, phet.scenery.Node );
-  }, {
+  }
+
+  phetioInherit( TObject, 'TNode', TNode, {
     isVisible: {
       returnType: TBoolean,
       parameterTypes: [],
