@@ -19,9 +19,11 @@ define( function( require ) {
     assertInstanceOf( color, phet.scenery.Color );
   }, {}, {
     documentation: 'A color, with rgba',
+
     toStateObject: function( color ) {
       return color.toStateObject();
     },
+
     fromStateObject: function( stateObject ) {
       return new phet.scenery.Color( stateObject.r, stateObject.g, stateObject.b, stateObject.a );
     }

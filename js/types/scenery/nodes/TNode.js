@@ -23,6 +23,7 @@ define( function( require ) {
   }
 
   phetioInherit( TObject, 'TNode', TNode, {
+
     isVisible: {
       returnType: TBoolean,
       parameterTypes: [],
@@ -31,6 +32,7 @@ define( function( require ) {
       },
       documentation: 'Gets a Boolean value indicating whether the node can be seen and interacted with'
     },
+
     setVisible: {
       returnType: TVoid,
       parameterTypes: [ TBoolean ],
@@ -39,6 +41,7 @@ define( function( require ) {
       },
       documentation: 'Set whether the node will be visible (and interactive)'
     },
+
     setPickable: {
       returnType: TVoid,
       parameterTypes: [ TBoolean ],
@@ -47,6 +50,7 @@ define( function( require ) {
       },
       documentation: 'Set whether the node will be pickable (and hence interactive)'
     },
+
     isPickable: {
       returnType: TBoolean,
       parameterTypes: [],
@@ -55,6 +59,7 @@ define( function( require ) {
       },
       documentation: 'Gets whether the node is pickable (and hence interactive)'
     },
+
     setOpacity: {
       returnType: TVoid,
       parameterTypes: [ TNumber( 'unitless' ) ],
@@ -63,6 +68,7 @@ define( function( require ) {
       },
       documentation: 'Set opacity between 0-1 (inclusive)'
     },
+
     setRotation: {
       returnType: TVoid,
       parameterTypes: [ TNumber( 'unitless' ) ],
