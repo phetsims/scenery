@@ -216,7 +216,7 @@ been loaded. -->
     var array = Array.prototype.slice.call( document.getElementById( 'aria-live-elements' ).children );
     array.forEach( function( child ) {
       if ( child.tagName === 'P' ) {
-        child.setAttribute( 'aria-atomic', true );
+        child.setAttribute( 'aria-atomic', isAtomic );
       }
     } );
   };
