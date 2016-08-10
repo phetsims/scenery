@@ -62,7 +62,7 @@ define( function( require ) {
 
     setOpacity: {
       returnType: TVoid,
-      parameterTypes: [ TNumber( 'unitless' ) ],
+      parameterTypes: [ TNumber( ) ],
       implementation: function( opacity ) {
         this.instance.opacity = opacity;
       },
@@ -71,7 +71,7 @@ define( function( require ) {
 
     setRotation: {
       returnType: TVoid,
-      parameterTypes: [ TNumber( 'unitless' ) ],
+      parameterTypes: [ TNumber( ) ],
       implementation: function( rotation ) {
         this.instance.rotation = rotation;
       },
