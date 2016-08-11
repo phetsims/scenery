@@ -14,11 +14,13 @@ define( function( require ) {
   var TNode = require( 'PHET_IO/types/scenery/nodes/TNode' );
   var toEventOnStatic = require( 'PHET_IO/events/toEventOnStatic' );
 
-  var TBarrierRectangle = phetioInherit( TNode, 'TBarrierRectangle', function( barrierRectangle, phetioID ) {
+  var TBarrierRectangle = function( barrierRectangle, phetioID ) {
     TNode.call( this, barrierRectangle, phetioID );
 
     toEventOnStatic( barrierRectangle, 'CallbacksForFired', 'user', phetioID, TBarrierRectangle, 'fired' );
-  }, {}, {
+  };
+
+  phetioInherit( TNode, 'TBarrierRectangle', TBarrierRectangle, {}, {
     documentation: 'Shown when a dialog is present, so that clicking on the invisible barrier rectangle will dismiss the dialog',
     events: [ 'fired' ]
   } );

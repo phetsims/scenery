@@ -14,10 +14,12 @@ define( function( require ) {
   var phetioNamespace = require( 'PHET_IO/phetioNamespace' );
   var TObject = require( 'PHET_IO/types/TObject' );
 
-  var TColor = phetioInherit( TObject, 'TColor', function( color, phetioID ) {
+  var TColor = function( color, phetioID ) {
     TObject.call( this, color, phetioID );
     assertInstanceOf( color, phet.scenery.Color );
-  }, {}, {
+  };
+
+  phetioInherit( TObject, 'TColor', TColor, {}, {
     documentation: 'A color, with rgba',
 
     toStateObject: function( color ) {
