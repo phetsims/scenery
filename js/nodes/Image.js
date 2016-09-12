@@ -97,10 +97,14 @@ define( function( require ) {
    * initialWidth - {number} If the input image hasn't loaded yet, but the (expected) size is known, providing an
    *    initialWidth will cause the Image node to have the correct bounds (width) before the pixel data has been fully
    *    loaded. A value of 0 will be ignored.
+   *    NOTE: setImage will reset this value to 0 (ingnored), since it's potentially likely the new image has
+   *    different dimensions than the current image.
    *
    * initialHeight - {number} If the input image hasn't loaded yet, but the (expected) size is known, providing an
    *    initialHeight will cause the Image node to have the correct bounds (height) before the pixel data has been fully
    *    loaded. A value of 0 will be ignored.
+   *    NOTE: setImage will reset this value to 0 (ingnored), since it's potentially likely the new image has
+   *    different dimensions than the current image.
    *
    * mipmap - {boolean} Whether mipmaps are supported. Defaults to false, but is automatically set to true when a mipmap
    *    image is provided to it. Setting it to true on non-mipmap images will trigger creation of a medium-quality
@@ -217,9 +221,43 @@ define( function( require ) {
       this.setRendererBitmask( r );
     },
 
+    /**
+     * Sets the current image to be displayed by this Image node.
+     *
+     * @param {string|HTMLImageElement|HTMLCanvasElement|Array} image - See the constructor documentation for more
+     *                                                                  information about supported types of input
+     *                                                                  images, and their possible performance
+     *                                                                  implications.
+     */
     setImage: function( image ) {
       assert && assert( image, 'image should be available' );
-      if ( this._image !== image && ( typeof image !== 'string' || !this._image || ( image !== this._image.src && image !== this._mipmapData ) ) ) {
+      assert && assert( typeof image === 'string' ||
+                        image instanceof HTMLImageElement ||
+                        image instanceof HTMLCanvasElement ||
+                        image instanceof Array, 'image is not of the correct type' );
+
+      // Generally, if a different value for image is provided, it has changed
+      var hasImageChanged = this._image !== image;
+      // Except in some cases, where the provided image is a string
+      if ( hasImageChanged && typeof image === 'string' ) {
+
+        // If our current image has the same .src as the "new" image, it's basically the same (as we promote string
+        // images to HTMLImageElements).
+        if ( this._image && image === this._image.src ) {
+          hasImageChanged = false;
+        }
+
+        // If our current mipmap data is the same as the input, then we aren't changing it
+        if ( image === this._mipmapData ) {
+          hasImageChanged = false;
+        }
+      }
+
+      if ( hasImageChanged ) {
+        // Reset the initial dimensions, since we have a new image that may have different dimensions.
+        this._initialWidth = 0;
+        this._initialHeight = 0;
+
         // don't leak memory by referencing old images
         if ( this._image ) {
           this._image.removeEventListener( 'load', this.loadListener );
@@ -261,15 +299,18 @@ define( function( require ) {
 
     /**
      * Sets the image with specific dimensions.
-     * @param image - see setImage
+     * @param {*} image - see the constructor
      * @param {number} width - width of image
      * @param {number} height - height of image
      * @public
      */
     setImageWithSize: function( image, width, height ) {
-      this._initialWidth = width;
-      this._initialHeight = height;
+      // First, setImage(), as it will reset the initial width and height
       this.setImage( image );
+
+      // Then apply the initial dimensions
+      this.setInitialWidth( width );
+      this.setInitialHeight( height );
     },
 
     /**
@@ -311,9 +352,14 @@ define( function( require ) {
     get initialWidth() { return this.getInitialWidth(); },
 
     setInitialWidth: function( width ) {
-      this._initialWidth = width;
+      assert && assert( typeof width === 'number' &&
+                        width >= 0 &&
+                        ( width % 1 === 0 ), 'initialWidth should be a non-negative integer' );
+      if ( width !== this._initialWidth ) {
+        this._initialWidth = width;
 
-      this.invalidateImage();
+        this.invalidateImage();
+      }
     },
     set initialWidth( value ) { this.setInitialWidth( value ); },
 
@@ -323,9 +369,14 @@ define( function( require ) {
     get initialHeight() { return this.getInitialHeight(); },
 
     setInitialHeight: function( height ) {
-      this._initialHeight = height;
+      assert && assert( typeof height === 'number' &&
+                        height >= 0 &&
+                        ( height % 1 === 0 ), 'initialHeight should be a non-negative integer' );
+      if ( height !== this._initialHeight ) {
+        this._initialHeight = height;
 
-      this.invalidateImage();
+        this.invalidateImage();
+      }
     },
     set initialHeight( value ) { this.setInitialHeight( value ); },
 

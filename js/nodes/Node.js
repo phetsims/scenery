@@ -3300,10 +3300,19 @@ define( function( require ) {
      * @param {number} [height] - The height of the Canvas output
      */
     toCanvas: function( callback, x, y, width, height ) {
+      assert && assert( typeof callback === 'function' );
+      assert && assert( x === undefined || typeof x === 'number', 'If provided, x should be a number' );
+      assert && assert( y === undefined || typeof y === 'number', 'If provided, y should be a number' );
+      assert && assert( width === undefined || ( typeof width === 'number' && width >= 0 && ( width % 1 === 0 ) ),
+        'If provided, width should be a non-negative integer' );
+      assert && assert( height === undefined || ( typeof height === 'number' && height >= 0 && ( height % 1 === 0 ) ),
+        'If provided, height should be a non-negative integer' );
+
       var padding = 2; // padding used if x and y are not set
 
       // for now, we add an unpleasant hack around Text and safe bounds in general. We don't want to add another Bounds2 object per Node for now.
       var bounds = this.getBounds().union( this.localToParentBounds( this.getSafeSelfBounds() ) );
+      assert && assert( !bounds.isEmpty(), 'Should not call toCanvas on a Node with empty bounds' );
 
       x = x !== undefined ? x : Math.ceil( padding - bounds.minX );
       y = y !== undefined ? y : Math.ceil( padding - bounds.minY );
@@ -3339,6 +3348,14 @@ define( function( require ) {
      * @param {number} [height] - The height of the Canvas output
      */
     toDataURL: function( callback, x, y, width, height ) {
+      assert && assert( typeof callback === 'function' );
+      assert && assert( x === undefined || typeof x === 'number', 'If provided, x should be a number' );
+      assert && assert( y === undefined || typeof y === 'number', 'If provided, y should be a number' );
+      assert && assert( width === undefined || ( typeof width === 'number' && width >= 0 && ( width % 1 === 0 ) ),
+        'If provided, width should be a non-negative integer' );
+      assert && assert( height === undefined || ( typeof height === 'number' && height >= 0 && ( height % 1 === 0 ) ),
+        'If provided, height should be a non-negative integer' );
+
       this.toCanvas( function( canvas, x, y, width, height ) {
         // this x and y shadow the outside parameters, and will be different if the outside parameters are undefined
         callback( canvas.toDataURL(), x, y, width, height );
@@ -3357,6 +3374,14 @@ define( function( require ) {
      * @param {number} [height] - The height of the Canvas output
      */
     toImage: function( callback, x, y, width, height ) {
+      assert && assert( typeof callback === 'function' );
+      assert && assert( x === undefined || typeof x === 'number', 'If provided, x should be a number' );
+      assert && assert( y === undefined || typeof y === 'number', 'If provided, y should be a number' );
+      assert && assert( width === undefined || ( typeof width === 'number' && width >= 0 && ( width % 1 === 0 ) ),
+        'If provided, width should be a non-negative integer' );
+      assert && assert( height === undefined || ( typeof height === 'number' && height >= 0 && ( height % 1 === 0 ) ),
+        'If provided, height should be a non-negative integer' );
+
       this.toDataURL( function( url, x, y ) {
         // this x and y shadow the outside parameters, and will be different if the outside parameters are undefined
         var img = document.createElement( 'img' );
@@ -3385,6 +3410,14 @@ define( function( require ) {
      * @param {number} [height] - The height of the Canvas output
      */
     toImageNodeAsynchronous: function( callback, x, y, width, height ) {
+      assert && assert( typeof callback === 'function' );
+      assert && assert( x === undefined || typeof x === 'number', 'If provided, x should be a number' );
+      assert && assert( y === undefined || typeof y === 'number', 'If provided, y should be a number' );
+      assert && assert( width === undefined || ( typeof width === 'number' && width >= 0 && ( width % 1 === 0 ) ),
+        'If provided, width should be a non-negative integer' );
+      assert && assert( height === undefined || ( typeof height === 'number' && height >= 0 && ( height % 1 === 0 ) ),
+        'If provided, height should be a non-negative integer' );
+
       this.toImage( function( image, x, y ) {
         callback( new scenery.Node( {
           children: [
@@ -3405,6 +3438,13 @@ define( function( require ) {
      * @param {number} [height] - The height of the Canvas output
      */
     toCanvasNodeSynchronous: function( x, y, width, height ) {
+      assert && assert( x === undefined || typeof x === 'number', 'If provided, x should be a number' );
+      assert && assert( y === undefined || typeof y === 'number', 'If provided, y should be a number' );
+      assert && assert( width === undefined || ( typeof width === 'number' && width >= 0 && ( width % 1 === 0 ) ),
+        'If provided, width should be a non-negative integer' );
+      assert && assert( height === undefined || ( typeof height === 'number' && height >= 0 && ( height % 1 === 0 ) ),
+        'If provided, height should be a non-negative integer' );
+
       var result;
       this.toCanvas( function( canvas, x, y ) {
         result = new scenery.Node( {
@@ -3428,6 +3468,13 @@ define( function( require ) {
      * @param {number} [height] - The height of the Canvas output
      */
     toDataURLNodeSynchronous: function( x, y, width, height ) {
+      assert && assert( x === undefined || typeof x === 'number', 'If provided, x should be a number' );
+      assert && assert( y === undefined || typeof y === 'number', 'If provided, y should be a number' );
+      assert && assert( width === undefined || ( typeof width === 'number' && width >= 0 && ( width % 1 === 0 ) ),
+        'If provided, width should be a non-negative integer' );
+      assert && assert( height === undefined || ( typeof height === 'number' && height >= 0 && ( height % 1 === 0 ) ),
+        'If provided, height should be a non-negative integer' );
+
       var result;
       this.toDataURL( function( dataURL, x, y, width, height ) {
         result = new scenery.Node( {
