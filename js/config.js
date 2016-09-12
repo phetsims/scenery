@@ -14,6 +14,7 @@ require.config( {
 
     // plugins
     image: '../../chipper/js/requirejs-plugins/image',
+    ifphetio: '../../chipper/js/requirejs-plugins/ifphetio',
 
     // third-party libs
     text: '../../sherpa/lib/text-2.0.12',
