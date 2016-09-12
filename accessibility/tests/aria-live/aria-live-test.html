@@ -1,0 +1,232 @@
+<!DOCTYPE HTML>
+<!-- This is just a testing file to determine behavior of live regions.  Buttons will dynamically set
+attributes of the live region to test if it screen readers will honor these attributes after the page has
+been loaded. -->
+<html>
+<head>
+  <meta charset="utf-8"/>
+
+  <title>aria-live tests</title>
+</head>
+<style>
+.button {
+  background-color: white;
+  border: green;
+  color: white;
+  padding: 8px 16px;
+  text-align: center;
+  text-decoration: none;
+  display: inline-block;
+  font-size: 16px;
+  margin: 4px 2px;
+  -webkit-transition-duration: 0.4s; /* Safari */
+  transition-duration: 0.4s;
+  cursor: pointer;
+}
+
+.button {
+    background-color: white;
+    color: black;
+    border: 2px solid #BCDDD2;
+}
+
+.relevant {
+  border: 2px solid #FCB3BC;
+}
+
+.single {
+  border: 2px solid #A9B1A2;
+}
+
+.remove {
+  border: 2px solid #B895D7;
+}
+
+.button:hover {
+    background-color: #BCDDD2;
+    color: white;
+}
+
+.relevant:hover {
+  background-color: #FCB3BC;
+  color: white;
+}
+
+.single:hover {
+  background-color: #A9B1A2;
+  color: white;
+}
+
+.remove:hover {
+  background-color: #B895D7;
+  color: white;
+}
+</style>
+
+<script>
+  // completely random set of sentences
+  // found at https://cockatooscreeching.wordpress.com/2014/05/29/a-list-of-completely-random-sentences/
+  var sentences = [
+    "The quick brown fox jumps over the lazy dog.",
+    "My Mum tries to be cool by saying that she likes all the same things that I do.",
+    "If the Easter Bunny and the Tooth Fairy had babies would they take your teeth and leave chocolate for you?",
+    "A purple pig and a green donkey flew a kite in the middle of the night and ended up sunburnt.",
+    "What was the person thinking when they discovered cow’s milk was fine for human consumption… and why did they do it in the first place!?",
+    "Last Friday in three week’s time I saw a spotted striped blue worm shake hands with a legless lizard.",
+    "Wednesday is hump day, but has anyone asked the camel if he’s happy about it?",
+    "If Purple People Eaters are real… where do they find purple people to eat?",
+    "A song can make or ruin a person’s day if they let it get to them.",
+    "Sometimes it is better to just walk away from things and go back to them later when you’re in a better frame of mind.",
+    "Writing a list of random sentences is harder than I initially thought it would be.",
+    "Where do random thoughts come from?",
+    "Lets all be unique together until we realise we are all the same.",
+    "I will never be this young again. Ever. Oh damn… I just got older.",
+    "If I don’t like something, I’ll stay away from it.",
+    "I love eating toasted cheese and tuna sandwiches.",
+    "If you like tuna and tomato sauce- try combining the two. It’s really not as bad as it sounds.",
+    "Someone I know recently combined Maple Syrup & buttered Popcorn thinking it would taste like caramel popcorn. It didn’t and they don’t recommend anyone else do it either.",
+    "Sometimes, all you need to do is completely make an ass of yourself and laugh it off to realise that life isn’t so bad after all.",
+    "When I was little I had a car door slammed shut on my hand. I still remember it quite vividly.",
+    "The clock within this blog and the clock on my laptop are 1 hour different from each other.",
+    "I want to buy a onesie… but know it won’t suit me.",
+    "I was very proud of my nickname throughout high school but today- I couldn’t be any different to what my nickname was.",
+    "I currently have 4 windows open up… and I don’t know why.",
+    "I often see the time 11:11 or 12:34 on clocks.",
+    "This is the last random sentence I will be writing and I am going to stop mid-sent"
+  ]
+</script>
+
+
+<body>
+  <h1>Aria Live Tests</h1>
+
+  <div>
+    <div class="assertive-row-full">
+      <p>These buttons will change the entire text content of the live regions</p>
+      <button class="button" id="1" onclick="changeContent( 'assertive-alert' )">Change Assertive</button>
+      <button class="button button2" id="2" onclick="changeContent( 'polite-alert' )">Change Polite</button>
+      <button class="button button3" id="3" onclick="changeContent( 'log-alert' )">Change Log</button>
+      <button class="button button4" id="4" onclick="changeContent( 'status-alert' )">Change Status</button>
+      <button class="button button5" id="5" onclick="changeContent( 'alert-alert' )">Change Alert</button>
+      <button class="button button6" id="5" onclick="changeContent( 'progressbar-alert' )">Change Progressbar</button>
+      <button class="button button7" id="5" onclick="changeContent( 'marquee-alert' )">Change Marquee</button>
+      <button class="button button8" id="5" onclick="changeContent( 'timer-alert' )">Change Timer</button>
+    </div>
+
+    <div class="assertive-row-word">
+      <p>These buttons will change a single word of the content to test atomic status</p>
+      <button class="button single" id="1" onclick="editWord( 'assertive-alert' )">Change Assertive</button>
+      <button class="button single" id="2" onclick="editWord( 'polite-alert' )">Change Polite</button>
+      <button class="button single" id="3" onclick="editWord( 'log-alert' )">Change Log</button>
+      <button class="button single" id="4" onclick="editWord( 'status-alert' )">Change Status</button>
+      <button class="button single" id="5" onclick="editWord( 'alert-alert' )">Change Alert</button>
+      <button class="button single" id="5" onclick="editWord( 'progressbar-alert' )">Change Progressbar</button>
+      <button class="button single" id="5" onclick="editWord( 'marquee-alert' )">Change Marquee</button>
+      <button class="button single" id="5" onclick="editWord( 'timer-alert' )">Change Timer</button>
+    </div>
+
+    <div class="assertive-row-remove-word">
+      <p>These buttons will remove a single word of the content to test atomic and relevant state</p>
+      <button class="button remove" id="1" onclick="removeWord( 'assertive-alert' )">Change Assertive</button>
+      <button class="button remove" id="2" onclick="removeWord( 'polite-alert' )">Change Polite</button>
+      <button class="button remove" id="3" onclick="removeWord( 'log-alert' )">Change Log</button>
+      <button class="button remove" id="4" onclick="removeWord( 'status-alert' )">Change Status</button>
+      <button class="button remove" id="5" onclick="removeWord( 'alert-alert' )">Change Alert</button>
+      <button class="button remove" id="5" onclick="removeWord( 'progressbar-alert' )">Change Progressbar</button>
+      <button class="button remove" id="5" onclick="removeWord( 'marquee-alert' )">Change Marquee</button>
+      <button class="button remove" id="5" onclick="removeWord( 'timer-alert' )">Change Timer</button>
+    </div>
+
+    <div class="aria-relevant-row">
+      <p>These buttons will change the relevant and atomic attributes</p>
+      <button class="button relevant" id="6" onclick="setAtomic( 'true' )">aria-atomic to 'true'</button>
+      <button class="button relevant" id="7" onclick="setAtomic( 'false' )">aria-atomic to 'false'</button>
+      <button class="button relevant" id="8" onclick="setRelevant( 'all' )">aria-relevant to 'all'</button>
+      <button class="button relevant" id="8" onclick="setRelevant( 'removals' )">aria-relevant to 'removals'</button>
+      <button class="button relevant" id="9" onclick="setRelevant( 'additions' )">aria-relevant to 'additions'</button>
+      <button class="button relevant" id="10" onclick="setRelevant( 'text' )">aria-relevant to 'text' (default)</button>
+    </div>
+
+
+  <div id='aria-live-elements'>
+
+    <h2>Assertive Alert</h2>
+    <p id='assertive-alert' aria-live='assertive'>text content</p>
+
+    <h2>Polite Alert</h2>
+    <p id='polite-alert' aria-live='polite'>text content</p>
+
+
+    <!-- special alert roles, aria-live='polite'/'assertive' maximizes compatibility -->
+
+    <!-- chat, error, game, or any other type of log -->
+    <h2>Log Alert</h2>
+    <p id='log-alert' role='log' aria-live='polite'>text content</p>
+
+    <!-- status bar or area on screen that reads status of some kind -->
+    <h2>Status Alert</h2>
+    <p id='status-alert' role='status' aria-live='polite'>text content</p>
+
+    <!-- error or warning message that flashes on screen -->
+    <h2>Alert style Alert</h2>
+    <p id='alert-alert' role='alert' aria-live='assertive'>text content</p>
+
+    <!-- hybrid between widget and live region, use with aria-valuemin, aria-valuenow, aria-valuemax -->
+    <h2>Progresssbar Alert</h2>
+    <p id='progressbar-alert' role='progressbar'>text content</p>
+
+    <!-- text which scrolls, like a stock ticker -->
+    <h2>Marquee Alert</h2>
+    <p id='marquee-alert' role='marquee'>text content</p>
+
+    <!-- any kind of timer or clock -->
+    <h2>Timer Alert</h2>
+    <time id='timer-alert' role='timer' datetime='10s'>text content</time>
+
+  </div>
+</body>
+<script>
+  var changeContent = function( id ) {
+    var randomString = sentences[ Math.floor( Math.random() * sentences.length ) ];
+    document.getElementById( id ).textContent = randomString;
+  };
+
+  var editWord = function( id ) {
+    var newWord = 'brainfreeze'
+    var textContent = document.getElementById( id ).textContent.split( ' ' );
+    if ( textContent[ 1 ] ) {
+      textContent[ 1 ] = newWord;
+      textContent = textContent.toString();
+      textContent = textContent.replace(/,/g, ' ' );
+      document.getElementById( id ).textContent = textContent;
+    }
+  };
+
+  var removeWord = function( id ) {
+    var textContent = document.getElementById( id ).textContent.split( ' ' );
+    if ( textContent[ 1 ] ) {
+      textContent.splice( 1, 1 );
+      textContent = textContent.toString();
+      textContent = textContent.replace(/,/g, ' ' );
+      document.getElementById( id ).textContent = textContent;
+    }
+  }
+
+  var setAtomic = function( isAtomic ) {
+    var array = Array.prototype.slice.call( document.getElementById( 'aria-live-elements' ).children );
+    array.forEach( function( child ) {
+      if ( child.tagName === 'P' ) {
+        child.setAttribute( 'aria-atomic', isAtomic );
+      }
+    } );
+  };
+
+  var setRelevant = function( relevance ) {
+    var array = Array.prototype.slice.call( document.getElementById( 'aria-live-elements' ).children );
+    array.forEach( function( child ) {
+      if ( child.tagName === 'P' ) {
+        child.setAttribute( 'aria-relevent', relevance );
+      }
+    } );
+  };
+</script>

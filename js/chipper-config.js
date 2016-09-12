@@ -21,7 +21,8 @@ require.config( {
     ENERGY_SKATE_PARK_BASICS: '../../energy-skate-park-basics/js',
     text: '../../sherpa/lib/text-2.0.12',
 
-    image: '../../chipper/js/requirejs-plugins/image'
+    image: '../../chipper/js/requirejs-plugins/image',
+    ifphetio: '../../chipper/js/requirejs-plugins/ifphetio'
   },
 
   // optional cache buster to make browser refresh load all included scripts, can be disabled with ?cacheBuster=false
