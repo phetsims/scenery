@@ -26,7 +26,7 @@ var marks = marks || {};
 
     runSnapshots: function() {
       // TODO: load in other direction?
-      var that = this;
+      var self = this;
 
       // guard on markNames so we don't trample over the first run
       if ( this.markNames && this.snapshotIndex === this.snapshots.length ) {
@@ -56,12 +56,12 @@ var marks = marks || {};
         else {
           // all scripts have executed
 
-          if ( !that.markNames ) {
-            that.markNames = _.map( marks.currentMarks, function( mark ) { return mark.name; } );
+          if ( !self.markNames ) {
+            self.markNames = _.map( marks.currentMarks, function( mark ) { return mark.name; } );
           }
 
           setTimeout( function() {
-            that.runMark();
+            self.runMark();
           }, 250 );
         }
       }
@@ -70,7 +70,7 @@ var marks = marks || {};
     },
 
     runMark: function() {
-      var that = this;
+      var self = this;
 
       var mark = this.findMark( this.markNames[ this.markNameIndex ] );
 
@@ -86,13 +86,13 @@ var marks = marks || {};
         function tick() {
           if ( count++ === mark.count ) {
             var time = new Date - startTime;
-            if ( that.options.onMark ) {
-              that.options.onMark( that.currentSnapshot, mark, time / mark.count, that );
+            if ( self.options.onMark ) {
+              self.options.onMark( self.currentSnapshot, mark, time / mark.count, self );
             }
             mark.after && mark.after();
 
             setTimeout( function() {
-              that.runSnapshots();
+              self.runSnapshots();
             }, 500 );
           }
           else {
@@ -108,7 +108,7 @@ var marks = marks || {};
       }
       else {
         // skip this one
-        that.runSnapshots();
+        self.runSnapshots();
       }
     }
   };
@@ -128,20 +128,20 @@ var marks = marks || {};
     constructor: PerformanceTableReport,
 
     initializeTable: function( performance ) {
-      var that = this;
+      var self = this;
       this.initialized = true;
 
       this.table.addColumn( 'Benchmark Name' );
 
       _.each( performance.snapshots, function( snapshot ) {
-        that.snapshotColumnMap[ snapshot.name ] = that.table.numColumns;
-        that.table.addColumn( snapshot.name, 2 );
+        self.snapshotColumnMap[ snapshot.name ] = self.table.numColumns;
+        self.table.addColumn( snapshot.name, 2 );
       } );
 
       _.each( performance.markNames, function( markName ) {
-        var rowNumber = that.table.addRow();
-        that.markNameRowMap[ markName ] = rowNumber;
-        that.table.cells[ rowNumber ][ 0 ].innerHTML = markName;
+        var rowNumber = self.table.addRow();
+        self.markNameRowMap[ markName ] = rowNumber;
+        self.table.cells[ rowNumber ][ 0 ].innerHTML = markName;
       } );
     },
 

@@ -27,7 +27,7 @@ define( function( require ) {
    * @param {Object} [options]
    */
   function TransformTracker( trail, options ) {
-    var tracker = this;
+    var self = this;
 
     options = _.extend( {
       isStatic: false // {boolean} - Whether the bounds listeners should be added with on() or onStatic().
@@ -54,7 +54,7 @@ define( function( require ) {
       // Wrapping with closure to prevent changes
       var nodeTransformListener = (function( index ) {
         return function() {
-          tracker.onTransformChange( index );
+          self.onTransformChange( index );
         };
       })( j - 1 );
 

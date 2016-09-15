@@ -71,7 +71,7 @@ var marks = marks || {};
     },
 
     nextSnapshot: function() {
-      var that = this;
+      var self = this;
 
       if ( this.pendingSnapshots.length !== 0 ) {
         var snapshot = this.pendingSnapshots.shift();
@@ -137,7 +137,7 @@ var marks = marks || {};
     },
 
     createSuite: function( snapshot ) {
-      var that = this;
+      var self = this;
       return new Benchmark.Suite( snapshot.name, {
         // TODO: strip out what we don't need from here
         onStart: function( event ) {
@@ -148,7 +148,7 @@ var marks = marks || {};
         onCycle: function( event ) {
           // console.log( snapshot.name + ' (suite onCycle)' );
           // console.log( event );
-          that.onBenchmarkComplete( event );
+          self.onBenchmarkComplete( event );
         },
 
         onAbort: function( event ) {
@@ -169,7 +169,7 @@ var marks = marks || {};
         onComplete: function( event ) {
           // console.log( snapshot.name + ' (suite onComplete)' );
           // console.log( event );
-          that.onSuiteComplete( event );
+          self.onSuiteComplete( event );
         }
       } );
     },

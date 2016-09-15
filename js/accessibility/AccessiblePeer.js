@@ -30,7 +30,7 @@ define( function( require ) {
      *                                             nested elements are placed
      */
     initializeAccessiblePeer: function( accessibleInstance, domElement, containerDOMElement ) {
-      var peer = this;
+      var self = this;
 
       Events.call( this ); // TODO: is Events worth mixing in by default? Will we need to listen to events?
 
@@ -49,23 +49,23 @@ define( function( require ) {
       this.disposed = false;
 
       // @private - listener for the focus event, to be disposed
-      peer.focusEventListener = function( event ) {
-        if ( event.target === peer.domElement ) {
+      self.focusEventListener = function( event ) {
+        if ( event.target === self.domElement ) {
           Display.focus = {
             display: accessibleInstance.display,
             trail: accessibleInstance.trail
           };
         }
       };
-      this.domElement.addEventListener( 'focus', peer.focusEventListener );
+      this.domElement.addEventListener( 'focus', self.focusEventListener );
 
       // @private - listener for the blur event, to be disposed
-      peer.blurEventListener = function( event ) {
-        if( event.target === peer.domElement ) {
+      self.blurEventListener = function( event ) {
+        if ( event.target === self.domElement ) {
           Display.focus = null;
         }
       };
-      this.domElement.addEventListener( 'blur', peer.blurEventListener);
+      this.domElement.addEventListener( 'blur', self.blurEventListener );
 
       return this;
     },
