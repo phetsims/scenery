@@ -72,6 +72,8 @@ define( function( require ) {
         case 2:
           this.rightDown = true;
           break;
+        default:
+          throw new Error( 'invalid button: ' + event.button );
       }
       return pointChanged;
     },
@@ -92,6 +94,8 @@ define( function( require ) {
         case 2:
           this.rightDown = false;
           break;
+        default:
+          throw new Error( 'invalid button: ' + event.button );
       }
       return pointChanged;
     },

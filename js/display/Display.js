@@ -1345,6 +1345,8 @@ define( function( require ) {
           case Matrix3.Types.OTHER:
             transformType = 'other';
             break;
+          default:
+            throw new Error( 'invalid matrix type: ' + node.transform.getMatrix().type );
         }
         if ( transformType ) {
           iSummary += ' <span style="color: #88f" title="' + node.transform.getMatrix().toString().replace( '\n', '&#10;' ) + '">' + transformType + '</span>';
