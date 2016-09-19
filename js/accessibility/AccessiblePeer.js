@@ -4,6 +4,7 @@
  * An accessible peer controls the appearance of an accessible Node's instance in the parallel DOM.
  *
  * @author Jonathan Olson <jonathan.olson@colorado.edu>
+ * @author Jesse Greenberg
  */
 
 define( function( require ) {
@@ -17,20 +18,34 @@ define( function( require ) {
 
   var globalId = 1;
 
-  function AccessiblePeer( accessibleInstance, domElement, containerDOMElement ) {
-    this.initializeAccessiblePeer( accessibleInstance, domElement, containerDOMElement );
+  /**
+   * Constructor.
+   *
+   * @param  {AccessibleInstance} accessibleInstance
+   * @param  {DOMElement} domElement - The main DOM element used for this peer.
+   * @param  {Object} options
+   * @constructor
+   */
+  function AccessiblePeer( accessibleInstance, domElement, options ) {
+    this.initializeAccessiblePeer( accessibleInstance, domElement, options );
   }
 
   scenery.register( 'AccessiblePeer', AccessiblePeer );
 
   inherit( Events, AccessiblePeer, {
+
     /**
+     * @param {AccessibleInstance} accessibleInstance
      * @param {DOMElement} domElement - The main DOM element used for this peer.
-     * @param {DOMElement} [containerDOMElement] - A container DOM element (usually an ancestor of the domElement) where
-     *                                             nested elements are placed
+     * @param {Object} [options]
      */
-    initializeAccessiblePeer: function( accessibleInstance, domElement, containerDOMElement ) {
+    initializeAccessiblePeer: function( accessibleInstance, domElement, options ) {
       var self = this;
+
+      options = _.extend( {
+        parentContainerElement: null, // a parent container for this peer and potential siblings
+        childContainerElement: null // an child container element where nested elements can be placed
+      }, options );
 
       Events.call( this ); // TODO: is Events worth mixing in by default? Will we need to listen to events?
 
@@ -39,12 +54,28 @@ define( function( require ) {
       // unique ID
       this.id = this.id || globalId++;
 
+      // @public
       this.accessibleInstance = accessibleInstance;
+      this.domElement = domElement;
       this.display = accessibleInstance.display;
       this.trail = accessibleInstance.trail;
 
-      this.domElement = domElement;
-      this.containerDOMElement = containerDOMElement ? containerDOMElement : ( this.containerDOMElement || null );
+      // @private - descendent of domElement that can be used to hold nested children
+      this.childContainerElement = options.childContainerElement ? options.childContainerElement : ( this.childContainerElement || null );
+
+      // @private - a parent element that can contain this domElement and other siblings
+      this.parentContainerElement = options.parentContainerElement ? options.parentContainerElement : ( this.parentContainerElement || null );
+      if ( this.parentContainerElement ) {
+        var peerDOMElement = this.domElement;
+
+        // The first child of the parent container element should be the peer dom element
+        // if undefined, the insertBefore method will insert the peerDOMElement as the first child
+        var firstChild = this.parentContainerElement.children[ 0 ];
+
+        // the peer should now be positioned relative to the parent container
+        this.domElement = this.parentContainerElement;
+        this.domElement.insertBefore( peerDOMElement, firstChild );
+      }
 
       this.disposed = false;
 
@@ -71,7 +102,7 @@ define( function( require ) {
     },
 
     getChildContainerElement: function() {
-      return this.containerDOMElement || this.domElement;
+      return this.childContainerElement || this.domElement;
     },
 
     dispose: function() {
