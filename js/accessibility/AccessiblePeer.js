@@ -66,15 +66,12 @@ define( function( require ) {
       // @private - a parent element that can contain this domElement and other siblings
       this.parentContainerElement = options.parentContainerElement ? options.parentContainerElement : ( this.parentContainerElement || null );
       if ( this.parentContainerElement ) {
-        var peerDOMElement = this.domElement;
 
         // The first child of the parent container element should be the peer dom element
         // if undefined, the insertBefore method will insert the peerDOMElement as the first child
+        var peerDOMElement = this.domElement;
         var firstChild = this.parentContainerElement.children[ 0 ];
-
-        // the peer should now be positioned relative to the parent container
-        this.domElement = this.parentContainerElement;
-        this.domElement.insertBefore( peerDOMElement, firstChild );
+        this.parentContainerElement.insertBefore( peerDOMElement, firstChild );
       }
 
       this.disposed = false;
@@ -101,6 +98,29 @@ define( function( require ) {
       return this;
     },
 
+    /**
+     * Check to see if this peer is contained in a parent container.
+     *
+     * @return {boolean}
+     */
+    hasParentContainer: function() {
+      return !!this.parentContainerElement;
+    },
+
+    /**
+     * Get the parent container or the peer's dom element direclty.  Used for sorting.
+     *
+     * @return {type}  description
+     */
+    getParentContainerElement: function() {
+      return this.parentContainerElement || this.domElement;
+    },
+
+    /**
+     * Get the child container or the peer's DOM element, used for sorting.
+     *
+     * @return {type}  description
+     */
     getChildContainerElement: function() {
       return this.childContainerElement || this.domElement;
     },
