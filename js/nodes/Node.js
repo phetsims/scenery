@@ -2227,6 +2227,8 @@ define( function( require ) {
         this._picker.onPickableChange( oldPickable, pickable );
         if ( assertSlow ) { this._picker.audit(); }
         // TODO: invalidate the cursor somehow? #150
+
+        this.trigger0( 'pickability' );
       }
     },
     set pickable( value ) { this.setPickable( value ); },
