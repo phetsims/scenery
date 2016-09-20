@@ -16,6 +16,7 @@ define( function( require ) {
   var TNumber = require( 'PHET_IO/types/TNumber' );
   var TObject = require( 'PHET_IO/types/TObject' );
   var TVoid = require( 'PHET_IO/types/TVoid' );
+  var TFunctionWrapper = require( 'PHET_IO/types/TFunctionWrapper' );
 
   function TNode( node, phetioID ) {
     TObject.call( this, node, phetioID );
@@ -60,9 +61,21 @@ define( function( require ) {
       documentation: 'Gets whether the node is pickable (and hence interactive)'
     },
 
+    addPickableListener: {
+      returnType: TVoid,
+      parameterTypes: [ TFunctionWrapper( TVoid, [ TBoolean ] ) ],
+      implementation: function( callback ) {
+        var inst = this.instance;
+        this.instance.on( 'pickability', function() {
+          callback( inst.isPickable() );
+        } );
+      },
+      documentation: 'Adds a listener for when pickability of the node changes'
+    },
+
     setOpacity: {
       returnType: TVoid,
-      parameterTypes: [ TNumber( ) ],
+      parameterTypes: [ TNumber() ],
       implementation: function( opacity ) {
         this.instance.opacity = opacity;
       },
@@ -71,7 +84,7 @@ define( function( require ) {
 
     setRotation: {
       returnType: TVoid,
-      parameterTypes: [ TNumber( ) ],
+      parameterTypes: [ TNumber() ],
       implementation: function( rotation ) {
         this.instance.rotation = rotation;
       },
