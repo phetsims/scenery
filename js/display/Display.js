@@ -962,10 +962,10 @@ define( function( require ) {
     },
 
     resizeOnWindowResize: function() {
-      var display = this;
+      var self = this;
 
       var resizer = function() {
-        display.setWidthHeight( window.innerWidth, window.innerHeight );
+        self.setWidthHeight( window.innerWidth, window.innerHeight );
       };
       window.addEventListener( 'resize', resizer );
       resizer();
@@ -978,9 +978,9 @@ define( function( require ) {
       var lastTime = 0;
       var timeElapsedInSeconds = 0;
 
-      var display = this;
+      var self = this;
       (function step() {
-        display._requestAnimationFrameID = window.requestAnimationFrame( step, display._domElement );
+        self._requestAnimationFrameID = window.requestAnimationFrame( step, self._domElement );
 
         // calculate how much time has elapsed since we rendered the last frame
         var timeNow = new Date().getTime();
@@ -990,7 +990,7 @@ define( function( require ) {
         lastTime = timeNow;
 
         stepCallback && stepCallback( timeElapsedInSeconds );
-        display.updateDisplay();
+        self.updateDisplay();
       })();
     },
 
@@ -1345,6 +1345,8 @@ define( function( require ) {
           case Matrix3.Types.OTHER:
             transformType = 'other';
             break;
+          default:
+            throw new Error( 'invalid matrix type: ' + node.transform.getMatrix().type );
         }
         if ( transformType ) {
           iSummary += ' <span style="color: #88f" title="' + node.transform.getMatrix().toString().replace( '\n', '&#10;' ) + '">' + transformType + '</span>';

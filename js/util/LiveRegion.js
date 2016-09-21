@@ -15,7 +15,7 @@ define( function( require ) {
   var scenery = require( 'SCENERY/scenery' );
 
   function LiveRegion( instance, property, options ) {
-    var liveRegion = this;
+    var self = this;
     this.property = property;
     options = options || {};
 
@@ -33,9 +33,9 @@ define( function( require ) {
 
     //Just setting the text causes NVDA to read deltas, you have to replace the node to have it read the text
     this.listener = function( newText ) {
-      liveRegion.element.removeChild( liveRegion.textNode );
-      liveRegion.textNode = document.createTextNode( newText );
-      liveRegion.element.appendChild( liveRegion.textNode );
+      self.element.removeChild( self.textNode );
+      self.textNode = document.createTextNode( newText );
+      self.element.appendChild( self.textNode );
     };
     property.link( this.listener );
   }

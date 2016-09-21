@@ -34,7 +34,7 @@ define( function( require ) {
 
   // @deprecated
   function LayoutNode( defaultMethod, options ) {
-    var layoutNode = this;
+    var self = this;
 
     assert && assert( defaultMethod instanceof LayoutMethod, 'defaultMethod is required' );
 
@@ -50,8 +50,8 @@ define( function( require ) {
     this._elementMap = {}; // maps node ID => element
     // this._invisibleBackground = new Rectangle( 0, 0, 0x1f, 0x1f, { visible: false } ); // takes up space that represents the bounds of all of the layout elements (with their padding)
     this._boundsListener = function() {
-      if ( layoutNode._updateOnBounds ) {
-        layoutNode.updateLayout();
+      if ( self._updateOnBounds ) {
+        self.updateLayout();
       }
     };
 
@@ -98,7 +98,7 @@ define( function( require ) {
      *   boundsMethod - custom overriding of entire boundsMethod
      */
     insertChild: function( index, node, options ) {
-      var layoutNode = this;
+      var self = this;
 
       options = extend( {
         useVisibleBounds: false,
@@ -111,7 +111,7 @@ define( function( require ) {
 
       Node.prototype.insertChild.call( this, index, node );
 
-      var methodGetter = options.layoutMethod ? function() { return options.layoutMethod; } : function() { return layoutNode._defaultMethod; };
+      var methodGetter = options.layoutMethod ? function() { return options.layoutMethod; } : function() { return self._defaultMethod; };
       var element = new LayoutElement( node, methodGetter, options.boundsMethod ? options.boundsMethod : function( bounds ) {
         if ( options.useVisibleBounds ) {
           bounds = node.visibleBounds;
@@ -192,10 +192,10 @@ define( function( require ) {
   };
   inherit( Object, LayoutMethod, {
     and: function( otherLayoutMethod ) {
-      var thisLayoutMethod = this;
+      var self = this;
 
       return new LayoutMethod( function compositeLayout( element, index, previousElement, layoutProperties ) {
-        thisLayoutMethod.layout( element, index, previousElement, layoutProperties );
+        self.layout( element, index, previousElement, layoutProperties );
         otherLayoutMethod.layout( element, index, previousElement, layoutProperties );
       } );
     }

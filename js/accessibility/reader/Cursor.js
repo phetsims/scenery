@@ -31,7 +31,7 @@ define( function( require ) {
    */
   function Cursor( domElement ) {
 
-    var thisCursor = this;
+    var self = this;
 
     // the output utterance for the cursor, to be read by the synth and handled in various ways
     // initial output is the document title
@@ -79,7 +79,7 @@ define( function( require ) {
     document.addEventListener( 'keydown', function( event ) {
 
       // update the keystate object
-      thisCursor.keyState[ event.keyCode ] = true;
+      self.keyState[ event.keyCode ] = true;
 
       // store the output text here
       var outputText;
@@ -93,103 +93,103 @@ define( function( require ) {
       var direction = shiftKeyDown ? PREVIOUS : NEXT;
 
       // the dom can change at any time, make sure that we are reading a copy that is up to date
-      thisCursor.linearDOM = thisCursor.getLinearDOMElements( domElement );
+      self.linearDOM = self.getLinearDOMElements( domElement );
 
       // update the list of live elements
-      thisCursor.updateLiveElementList();
+      self.updateLiveElementList();
 
       // if the element has an 'application' like behavior, keyboard should be free for the application
       // TODO: This may be insufficient if we need the 'arrow' keys to continue to work for an application role
-      if ( thisCursor.activeElement && thisCursor.activeElement.getAttribute( 'role' ) === 'application' ) {
+      if ( self.activeElement && self.activeElement.getAttribute( 'role' ) === 'application' ) {
         return;
       }
 
       // otherwise, handle all key events here
-      if ( thisCursor.keyState[ 40 ] && !thisCursor.keyState[ 45 ] ) {
+      if ( self.keyState[ 40 ] && !self.keyState[ 45 ] ) {
         // read the next line on 'down arrow'
-        outputText = thisCursor.readNextPreviousLine( NEXT );
+        outputText = self.readNextPreviousLine( NEXT );
       }
-      else if ( thisCursor.keyState[ 38 ] && !thisCursor.keyState[ 45 ] ) {
+      else if ( self.keyState[ 38 ] && !self.keyState[ 45 ] ) {
         // read the previous line on 'up arrow'
-        outputText = thisCursor.readNextPreviousLine( PREVIOUS );
+        outputText = self.readNextPreviousLine( PREVIOUS );
       }
-      else if ( thisCursor.keyState[ 72 ] ) {
+      else if ( self.keyState[ 72 ] ) {
         // read the previous or next headings depending on whether the shift key is pressed
         var headingLevels = [ 'H1', 'H2', 'H3', 'H4', 'H5', 'H6' ];
-        outputText = thisCursor.readNextPreviousHeading( headingLevels, direction );
+        outputText = self.readNextPreviousHeading( headingLevels, direction );
       }
-      else if ( thisCursor.keyState[ 9 ] ) {
+      else if ( self.keyState[ 9 ] ) {
         // let the browser naturally handle 'tab' for forms elements and elements with a tabIndex
       }
-      else if ( thisCursor.keyState[ 39 ] && !thisCursor.keyState[ 17 ] ) {
+      else if ( self.keyState[ 39 ] && !self.keyState[ 17 ] ) {
         // read the next character of the active line on 'right arrow'
-        outputText = thisCursor.readNextPreviousCharacter( NEXT );
+        outputText = self.readNextPreviousCharacter( NEXT );
       }
-      else if ( thisCursor.keyState[ 37 ] && !thisCursor.keyState[ 17 ] ) {
+      else if ( self.keyState[ 37 ] && !self.keyState[ 17 ] ) {
         // read the previous character on 'left arrow'
-        outputText = thisCursor.readNextPreviousCharacter( PREVIOUS );
+        outputText = self.readNextPreviousCharacter( PREVIOUS );
       }
-      else if ( thisCursor.keyState[ 37 ] && thisCursor.keyState[ 17 ] ) {
+      else if ( self.keyState[ 37 ] && self.keyState[ 17 ] ) {
         // read the previous word on 'control + left arrow'
-        outputText = thisCursor.readNextPreviousWord( PREVIOUS );
+        outputText = self.readNextPreviousWord( PREVIOUS );
       }
-      else if ( thisCursor.keyState[ 39 ] && thisCursor.keyState[ 17 ] ) {
+      else if ( self.keyState[ 39 ] && self.keyState[ 17 ] ) {
         // read the next word on 'control + right arrow'
-        outputText = thisCursor.readNextPreviousWord( NEXT );
+        outputText = self.readNextPreviousWord( NEXT );
       }
-      else if ( thisCursor.keyState[ 45 ] && thisCursor.keyState[ 38 ] ) {
+      else if ( self.keyState[ 45 ] && self.keyState[ 38 ] ) {
         // repeat the active line on 'insert + up arrow'
-        outputText = thisCursor.readActiveLine(); 
+        outputText = self.readActiveLine();
       }
-      else if ( thisCursor.keyState[ 49 ] ) {
+      else if ( self.keyState[ 49 ] ) {
         // find the previous/next heading level 1 on '1'
-        outputText = thisCursor.readNextPreviousHeading( [ 'H1' ], direction );
+        outputText = self.readNextPreviousHeading( [ 'H1' ], direction );
       }
-      else if ( thisCursor.keyState[ 50 ] ) {
+      else if ( self.keyState[ 50 ] ) {
         // find the previous/next heading level 2 on '2'
-        outputText = thisCursor.readNextPreviousHeading( [ 'H2' ], direction );
+        outputText = self.readNextPreviousHeading( [ 'H2' ], direction );
       }
-      else if ( thisCursor.keyState[ 51 ] ) {
+      else if ( self.keyState[ 51 ] ) {
         // find the previous/next heading level 3 on '3'
-        outputText = thisCursor.readNextPreviousHeading( [ 'H3' ], direction );
+        outputText = self.readNextPreviousHeading( [ 'H3' ], direction );
       }
-      else if ( thisCursor.keyState[ 52 ] ) {
+      else if ( self.keyState[ 52 ] ) {
         // find the previous/next heading level 4 on '4'
-        outputText = thisCursor.readNextPreviousHeading( [ 'H4' ], direction );
+        outputText = self.readNextPreviousHeading( [ 'H4' ], direction );
       }
-      else if ( thisCursor.keyState[ 53 ] ) {
+      else if ( self.keyState[ 53 ] ) {
         // find the previous/next heading level 5 on '5'
-        outputText = thisCursor.readNextPreviousHeading( [ 'H5' ], direction );
+        outputText = self.readNextPreviousHeading( [ 'H5' ], direction );
       }
-      else if ( thisCursor.keyState[ 54 ] ) {
+      else if ( self.keyState[ 54 ] ) {
         // find the previous/next heading level 6 on '6'
-        outputText = thisCursor.readNextPreviousHeading( [ 'H6' ], direction );
+        outputText = self.readNextPreviousHeading( [ 'H6' ], direction );
       }
-      else if ( thisCursor.keyState[ 70 ] ) {
+      else if ( self.keyState[ 70 ] ) {
         // find the previous/next form element on 'f'
-        outputText = thisCursor.readNextPreviousFormElement( direction );
+        outputText = self.readNextPreviousFormElement( direction );
       }
-      else if ( thisCursor.keyState[ 66 ] ) {
+      else if ( self.keyState[ 66 ] ) {
         // find the previous/next button element on 'b'
-        outputText = thisCursor.readNextPreviousButton( direction );
+        outputText = self.readNextPreviousButton( direction );
       }
-      else if ( thisCursor.keyState[ 76 ] ) {
+      else if ( self.keyState[ 76 ] ) {
         // find the previous/next list on 'L'
-        outputText = thisCursor.readNextPreviousList( direction );
+        outputText = self.readNextPreviousList( direction );
       }
-      else if ( thisCursor.keyState[ 73 ] ) {
+      else if ( self.keyState[ 73 ] ) {
         // find the previous/next list item on 'I'
-        outputText = thisCursor.readNextPreviousListItem( direction );
+        outputText = self.readNextPreviousListItem( direction );
       }
-      else if ( thisCursor.keyState[ 45 ] && thisCursor.keyState[ 40 ] ) {
+      else if ( self.keyState[ 45 ] && self.keyState[ 40 ] ) {
         // read entire document on 'insert + down arrow'
-        thisCursor.readEntireDocument();
+        self.readEntireDocument();
       }
 
       // if the active element is focusable, set the focus to it so that the virtual cursor can
       // directly interact with elements
-      if( thisCursor.activeElement && thisCursor.isFocusable( thisCursor.activeElement ) ) {
-        thisCursor.activeElement.focus();
+      if ( self.activeElement && self.isFocusable( self.activeElement ) ) {
+        self.activeElement.focus();
       }
 
       // if the output text is a space, we want it to be read as 'blank' or 'space'
@@ -199,7 +199,7 @@ define( function( require ) {
 
       if ( outputText ) {
         // for now, all utterances are off for aria-live
-       thisCursor.outputUtteranceProperty.set( new Utterance( outputText, 'off' ) );
+        self.outputUtteranceProperty.set( new Utterance( outputText, 'off' ) );
       }
 
       // TODO: everything else in https://dequeuniversity.com/screenreaders/nvda-keyboard-shortcuts
@@ -208,7 +208,7 @@ define( function( require ) {
 
     // update the keystate object on keyup to handle multiple key presses at once
     document.addEventListener( 'keyup', function( event ) {
-      thisCursor.keyState[ event.keyCode ] = false;
+      self.keyState[ event.keyCode ] = false;
     } );
 
     // listen for when an element is about to receive focus
@@ -217,16 +217,16 @@ define( function( require ) {
     document.addEventListener( 'focusin', function( event ) {
 
       // anounce the new focus if it is different from the active element
-      if ( event.target !== thisCursor.activeElement ) {
-        thisCursor.activeElement = event.target;
+      if ( event.target !== self.activeElement ) {
+        self.activeElement = event.target;
 
         // so read out all content from aria markup since focus moved via application behavior
         var withApplicationContent = true;
-        var outputText = thisCursor.getAccessibleText( this.activeElement, withApplicationContent );
+        var outputText = self.getAccessibleText( this.activeElement, withApplicationContent );
 
         if( outputText ) {
-          var liveRole = thisCursor.activeElement.getAttribute( 'aria-live' );
-          thisCursor.outputUtteranceProperty.set( new Utterance( outputText, liveRole ) );
+          var liveRole = self.activeElement.getAttribute( 'aria-live' );
+          self.outputUtteranceProperty.set( new Utterance( outputText, liveRole ) );
         }
       }
     } );
@@ -957,7 +957,7 @@ define( function( require ) {
      */
     updateLiveElementList: function() {
 
-      var thisCursor = this;
+      var self = this;
 
       // remove all previous observers
       // TODO: only update the observer list if necessary
@@ -973,7 +973,7 @@ define( function( require ) {
       // search through the DOM, looking for elements with a 'live region' attribute
       for ( i = 0; i < this.linearDOM.length; i++ ) {
         var domElement = this.linearDOM[ i ];
-        var liveRole = thisCursor.getLiveRole( domElement );
+        var liveRole = self.getLiveRole( domElement );
 
         if( liveRole ) {
           var mutationObserverCallback = function( mutations ) {
@@ -984,14 +984,14 @@ define( function( require ) {
               // look for the type of live role that is associated with this mutation
               // if the target has no live attribute, search through the element's ancestors to find the attribute
               while( !liveRole ) {
-                liveRole = thisCursor.getLiveRole( mutatedElement );
+                liveRole = self.getLiveRole( mutatedElement );
                 mutatedElement = mutatedElement.parentElement;
               }
 
               // we only care about nodes added
               if ( mutation.addedNodes[ 0 ] ) {
                 var updatedText = mutation.addedNodes[ 0 ].data;
-                thisCursor.outputUtteranceProperty.set( new Utterance( updatedText, liveRole ) );  
+                self.outputUtteranceProperty.set( new Utterance( updatedText, liveRole ) );
               }
             } );
           };
@@ -1005,7 +1005,7 @@ define( function( require ) {
           var observerConfig = { childList: true, subtree: true };
 
           observer.observe( domElement, observerConfig );
-          thisCursor.observers.push( observer );
+          self.observers.push( observer );
         }
       }
     },

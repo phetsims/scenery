@@ -26,7 +26,7 @@ define( function( require ) {
    * }
    */
   function SimpleDragHandler( options ) {
-    var handler = this;
+    var self = this;
 
     options = _.extend( {
       allowTouchSnag: false,
@@ -48,18 +48,18 @@ define( function( require ) {
     // if an ancestor is transformed, pin our node
     this.transformListener = {
       transform: function( args ) {
-        if ( !handler.trail.isExtensionOf( args.trail, true ) ) {
+        if ( !self.trail.isExtensionOf( args.trail, true ) ) {
           return;
         }
 
         var newMatrix = args.trail.getMatrix();
-        var oldMatrix = handler.transform.getMatrix();
+        var oldMatrix = self.transform.getMatrix();
 
         // if A was the trail's old transform, B is the trail's new transform, we need to apply (B^-1 A) to our node
-        handler.node.prependMatrix( newMatrix.inverted().timesMatrix( oldMatrix ) );
+        self.node.prependMatrix( newMatrix.inverted().timesMatrix( oldMatrix ) );
 
         // store the new matrix so we can do deltas using it now
-        handler.transform.setMatrix( newMatrix );
+        self.transform.setMatrix( newMatrix );
       }
     };
 
@@ -67,61 +67,61 @@ define( function( require ) {
     this.dragListener = {
       // mouse/touch up
       up: function( event ) {
-        assert && assert( event.pointer === handler.pointer );
-        if ( !event.pointer.isMouse || event.domEvent.button === handler.mouseButton ) {
+        assert && assert( event.pointer === self.pointer );
+        if ( !event.pointer.isMouse || event.domEvent.button === self.mouseButton ) {
           var saveCurrentTarget = event.currentTarget;
-          event.currentTarget = handler.node; // #66: currentTarget on a pointer is null, so set it to the node we're dragging
-          handler.endDrag( event );
+          event.currentTarget = self.node; // #66: currentTarget on a pointer is null, so set it to the node we're dragging
+          self.endDrag( event );
           event.currentTarget = saveCurrentTarget; // be polite to other listeners, restore currentTarget
         }
       },
 
       // touch cancel
       cancel: function( event ) {
-        assert && assert( event.pointer === handler.pointer );
+        assert && assert( event.pointer === self.pointer );
 
         var saveCurrentTarget = event.currentTarget;
-        event.currentTarget = handler.node; // #66: currentTarget on a pointer is null, so set it to the node we're dragging
-        handler.endDrag( event );
+        event.currentTarget = self.node; // #66: currentTarget on a pointer is null, so set it to the node we're dragging
+        self.endDrag( event );
         event.currentTarget = saveCurrentTarget; // be polite to other listeners, restore currentTarget
 
         // since it's a cancel event, go back!
-        if ( !handler.transform ) {
-          handler.node.setMatrix( handler.startTransformMatrix );
+        if ( !self.transform ) {
+          self.node.setMatrix( self.startTransformMatrix );
         }
       },
 
       // mouse/touch move
       move: function( event ) {
-        assert && assert( event.pointer === handler.pointer );
+        assert && assert( event.pointer === self.pointer );
 
-        var globalDelta = handler.pointer.point.minus( handler.lastDragPoint );
+        var globalDelta = self.pointer.point.minus( self.lastDragPoint );
 
         // ignore move events that have 0-length (Chrome seems to be auto-firing these on Windows, see https://code.google.com/p/chromium/issues/detail?id=327114)
         if ( globalDelta.magnitudeSquared() === 0 ) {
           return;
         }
 
-        var delta = handler.transform.inverseDelta2( globalDelta );
+        var delta = self.transform.inverseDelta2( globalDelta );
 
         // move by the delta between the previous point, using the precomputed transform
         // prepend the translation on the node, so we can ignore whatever other transform state the node has
-        if ( handler.options.translate ) {
-          var translation = handler.node.getMatrix().getTranslation();
-          handler.options.translate.call( null, {
+        if ( self.options.translate ) {
+          var translation = self.node.getMatrix().getTranslation();
+          self.options.translate.call( null, {
             delta: delta,
             oldPosition: translation,
             position: translation.plus( delta )
           } );
         }
-        handler.lastDragPoint = handler.pointer.point;
+        self.lastDragPoint = self.pointer.point;
 
-        if ( handler.options.drag ) {
+        if ( self.options.drag ) {
           // TODO: consider adding in a delta to the listener
           // TODO: add the position in to the listener
           var saveCurrentTarget = event.currentTarget;
-          event.currentTarget = handler.node; // #66: currentTarget on a pointer is null, so set it to the node we're dragging
-          handler.options.drag.call( null, event, handler.trail ); // new position (old position?) delta
+          event.currentTarget = self.node; // #66: currentTarget on a pointer is null, so set it to the node we're dragging
+          self.options.drag.call( null, event, self.trail ); // new position (old position?) delta
           event.currentTarget = saveCurrentTarget; // be polite to other listeners, restore currentTarget
         }
       }

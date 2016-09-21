@@ -4,6 +4,7 @@
  * An accessible peer controls the appearance of an accessible Node's instance in the parallel DOM.
  *
  * @author Jonathan Olson <jonathan.olson@colorado.edu>
+ * @author Jesse Greenberg
  */
 
 define( function( require ) {
@@ -17,20 +18,34 @@ define( function( require ) {
 
   var globalId = 1;
 
-  function AccessiblePeer( accessibleInstance, domElement, containerDOMElement ) {
-    this.initializeAccessiblePeer( accessibleInstance, domElement, containerDOMElement );
+  /**
+   * Constructor.
+   *
+   * @param  {AccessibleInstance} accessibleInstance
+   * @param  {DOMElement} domElement - The main DOM element used for this peer.
+   * @param  {Object} options
+   * @constructor
+   */
+  function AccessiblePeer( accessibleInstance, domElement, options ) {
+    this.initializeAccessiblePeer( accessibleInstance, domElement, options );
   }
 
   scenery.register( 'AccessiblePeer', AccessiblePeer );
 
   inherit( Events, AccessiblePeer, {
+
     /**
+     * @param {AccessibleInstance} accessibleInstance
      * @param {DOMElement} domElement - The main DOM element used for this peer.
-     * @param {DOMElement} [containerDOMElement] - A container DOM element (usually an ancestor of the domElement) where
-     *                                             nested elements are placed
+     * @param {Object} [options]
      */
-    initializeAccessiblePeer: function( accessibleInstance, domElement, containerDOMElement ) {
-      var peer = this;
+    initializeAccessiblePeer: function( accessibleInstance, domElement, options ) {
+      var self = this;
+
+      options = _.extend( {
+        parentContainerElement: null, // a parent container for this peer and potential siblings
+        childContainerElement: null // an child container element where nested elements can be placed
+      }, options );
 
       Events.call( this ); // TODO: is Events worth mixing in by default? Will we need to listen to events?
 
@@ -39,39 +54,75 @@ define( function( require ) {
       // unique ID
       this.id = this.id || globalId++;
 
+      // @public
       this.accessibleInstance = accessibleInstance;
+      this.domElement = domElement;
       this.display = accessibleInstance.display;
       this.trail = accessibleInstance.trail;
 
-      this.domElement = domElement;
-      this.containerDOMElement = containerDOMElement ? containerDOMElement : ( this.containerDOMElement || null );
+      // @private - descendent of domElement that can be used to hold nested children
+      this.childContainerElement = options.childContainerElement ? options.childContainerElement : ( this.childContainerElement || null );
+
+      // @private - a parent element that can contain this domElement and other siblings
+      this.parentContainerElement = options.parentContainerElement ? options.parentContainerElement : ( this.parentContainerElement || null );
+      if ( this.parentContainerElement ) {
+
+        // The first child of the parent container element should be the peer dom element
+        // if undefined, the insertBefore method will insert the peerDOMElement as the first child
+        var peerDOMElement = this.domElement;
+        var firstChild = this.parentContainerElement.children[ 0 ];
+        this.parentContainerElement.insertBefore( peerDOMElement, firstChild );
+      }
 
       this.disposed = false;
 
       // @private - listener for the focus event, to be disposed
-      peer.focusEventListener = function( event ) {
-        if ( event.target === peer.domElement ) {
+      self.focusEventListener = function( event ) {
+        if ( event.target === self.domElement ) {
           Display.focus = {
             display: accessibleInstance.display,
             trail: accessibleInstance.trail
           };
         }
       };
-      this.domElement.addEventListener( 'focus', peer.focusEventListener );
+      this.domElement.addEventListener( 'focus', self.focusEventListener );
 
       // @private - listener for the blur event, to be disposed
-      peer.blurEventListener = function( event ) {
-        if( event.target === peer.domElement ) {
+      self.blurEventListener = function( event ) {
+        if ( event.target === self.domElement ) {
           Display.focus = null;
         }
       };
-      this.domElement.addEventListener( 'blur', peer.blurEventListener);
+      this.domElement.addEventListener( 'blur', self.blurEventListener );
 
       return this;
     },
 
+    /**
+     * Check to see if this peer is contained in a parent container.
+     *
+     * @return {boolean}
+     */
+    hasParentContainer: function() {
+      return !!this.parentContainerElement;
+    },
+
+    /**
+     * Get the parent container or the peer's dom element direclty.  Used for sorting.
+     *
+     * @return {type}  description
+     */
+    getParentContainerElement: function() {
+      return this.parentContainerElement || this.domElement;
+    },
+
+    /**
+     * Get the child container or the peer's DOM element, used for sorting.
+     *
+     * @return {type}  description
+     */
     getChildContainerElement: function() {
-      return this.containerDOMElement || this.domElement;
+      return this.childContainerElement || this.domElement;
     },
 
     dispose: function() {

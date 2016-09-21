@@ -68,7 +68,9 @@ define( function( require ) {
       else {
         this.peer = this.node.accessibleContent.createPeer( this );
         var childContainerElement = this.parent.peer.getChildContainerElement();
-        childContainerElement.insertBefore( this.peer.domElement, childContainerElement.childNodes[ 0 ] );
+
+        // insert the peer's dom element or its parent if it is contained in a parent element for structure
+        childContainerElement.insertBefore( this.peer.getParentContainerElement(), childContainerElement.childNodes[ 0 ] );
       }
 
       sceneryLog && sceneryLog.AccessibleInstance && sceneryLog.AccessibleInstance(
@@ -112,7 +114,7 @@ define( function( require ) {
       sceneryLog && sceneryLog.AccessibleInstance && sceneryLog.push();
 
       var node = trail.lastNode();
-      var nextInstance = this;
+      var nextInstance = this; // eslint-disable-line consistent-this
       if ( node.accessibleContent ) {
         var accessibleInstance = AccessibleInstance.createFromPool( this, this.display, trail.copy() ); // TODO: Pooling
         sceneryLog && sceneryLog.AccessibleInstance && sceneryLog.AccessibleInstance(
@@ -167,7 +169,7 @@ define( function( require ) {
       assert && assert( !this.isSorted, 'No need to sort children if it is already marked as sorted' );
       this.isSorted = true;
 
-      var parentInstance = this;
+      var parentInstance = this; // eslint-disable-line consistent-this
 
       // Reindex trails in preparation for sorting
       for ( var m = 0; m < this.children.length; m++ ) {
@@ -275,6 +277,10 @@ define( function( require ) {
       for ( var n = this.children.length - 1; n >= 0; n-- ) {
         var peerDOMElement = this.children[ n ].peer.domElement;
 
+        // if the peer has a parent container element, this structure containing the peerDOMElement should be inserted
+        if ( this.children[ n ].peer.hasParentContainer() ) {
+          peerDOMElement = this.children[ n ].peer.getParentContainerElement();
+        }
         if ( peerDOMElement === containerElement.childNodes[ n ] ) {
           continue;
         }

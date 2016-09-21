@@ -313,7 +313,7 @@ define( function( require ) {
     },
 
     accurateCanvasBounds: function() {
-      var node = this;
+      var self = this;
       var svgBounds = this.approximateSVGBounds(); // this seems to be slower than expected, mostly due to Font getters
 
       //If svgBounds are zero, then return the zero bounds
@@ -323,14 +323,14 @@ define( function( require ) {
 
       // NOTE: should return new instance, so that it can be mutated later
       return scenery.Util.canvasAccurateBounds( function( context ) {
-        context.font = node.font;
-        context.direction = node.direction;
-        context.fillText( node.renderedText, 0, 0 );
-        if ( node.hasStroke() ) {
+        context.font = self.font;
+        context.direction = self.direction;
+        context.fillText( self.renderedText, 0, 0 );
+        if ( self.hasStroke() ) {
           var fakeWrapper = new scenery.CanvasContextWrapper( null, context );
-          node.beforeCanvasStroke( fakeWrapper );
-          context.strokeText( node.renderedText, 0, 0 );
-          node.afterCanvasStroke( fakeWrapper );
+          self.beforeCanvasStroke( fakeWrapper );
+          context.strokeText( self.renderedText, 0, 0 );
+          self.afterCanvasStroke( fakeWrapper );
         }
       }, {
         precision: 0.5,

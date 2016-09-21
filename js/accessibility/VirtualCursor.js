@@ -34,7 +34,7 @@ define( function( require ) {
    */
   function VirtualCursor() {
 
-    var thisCursor = this;
+    var self = this;
 
     // handle traversal of the DOM with keyboard navigation
     document.addEventListener( 'keydown', function( k ) {
@@ -47,11 +47,11 @@ define( function( require ) {
         // we do not want to go to the next forms element if tab (yet)
         k.preventDefault();
 
-        selectedElement = thisCursor.goToNextItem( accessibilityDOMElement, DATA_VISITED );
+        selectedElement = self.goToNextItem( accessibilityDOMElement, DATA_VISITED );
 
         if ( !selectedElement ) {
-          thisCursor.clearVisited( accessibilityDOMElement, DATA_VISITED );
-          selectedElement = thisCursor.goToNextItem( accessibilityDOMElement, DATA_VISITED );
+          self.clearVisited( accessibilityDOMElement, DATA_VISITED );
+          selectedElement = self.goToNextItem( accessibilityDOMElement, DATA_VISITED );
         }
       }
 
@@ -61,7 +61,7 @@ define( function( require ) {
         // we do not want to go to the next forms element if tab (yet)
         k.preventDefault();
 
-        var listOfAccessibleElements = thisCursor.getLinearDOM( accessibilityDOMElement );
+        var listOfAccessibleElements = self.getLinearDOM( accessibilityDOMElement );
 
         var foundAccessibleText = false;
         for ( var i = listOfAccessibleElements.length - 1; i >= 0; i-- ) {
@@ -99,7 +99,7 @@ define( function( require ) {
         }
 
         // print the output to the iFrame
-        var accessibleText = thisCursor.getAccessibleText( selectedElement );
+        var accessibleText = self.getAccessibleText( selectedElement );
         parent && parent.updateAccessibilityReadoutText && parent.updateAccessibilityReadoutText( accessibleText );
       }
     } );
@@ -111,14 +111,14 @@ define( function( require ) {
     // look for new live elements and add listeners to them every five seconds
     // TODO: Is there a better way to search through the DOM for new aria-live elements?
     var searchForLiveElements = function() {
-      thisCursor.updateLiveElementList();
+      self.updateLiveElementList();
       setTimeout( searchForLiveElements, 5000 );
     };
     searchForLiveElements();
 
     // run through the active queue of aria live elements
     var step = function() {
-      thisCursor.ariaLiveQueue.run();
+      self.ariaLiveQueue.run();
       setTimeout( step, 100 );
     };
     step();
@@ -255,7 +255,7 @@ define( function( require ) {
      */
     updateLiveElementList: function() {
 
-      var thisCursor = this;
+      var self = this;
 
       // remove all observers from live elements to prevent a memory leak
       if( window.liveElementList ) {
@@ -282,7 +282,7 @@ define( function( require ) {
           var observer = new MutationObserver( function( mutations ) {
             mutations.forEach( function( mutation ) {
               var updatedText = mutation.addedNodes[0].data;
-              thisCursor.ariaLiveQueue.add( function() {
+              self.ariaLiveQueue.add( function() {
                 parent &&
                   parent.updateAccessibilityReadoutText &&
                     parent.updateAccessibilityReadoutText( updatedText );
@@ -355,10 +355,10 @@ define( function( require ) {
      * @public
      */
     add: function( callBack, delay ) {
-      var thisQueue = this;
+      var self = this;
       this.queue.push( {
         callBack: callBack,
-        delay: delay || thisQueue.defaultDelay
+        delay: delay || self.defaultDelay
       } );
     },
 
@@ -389,7 +389,7 @@ define( function( require ) {
     next: function() {
 
       this.running = true;
-      var thisQueue = this;
+      var self = this;
       var i = this.index++;
 
       var active = this.queue[i];
@@ -397,8 +397,8 @@ define( function( require ) {
 
       // return and set running flag to false if there are no items in the queue
       var endRun = function() {
-        thisQueue.running = false;
-        thisQueue.clear();
+        self.running = false;
+        self.clear();
       };
 
       if( !active ) {
@@ -411,8 +411,8 @@ define( function( require ) {
 
       if( next ) {
         setTimeout( function() {
-          thisQueue.next();
-        }, active.delay || thisQueue.defaultDelay );
+          self.next();
+        }, active.delay || self.defaultDelay );
       }
       else {
         endRun();

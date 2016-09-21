@@ -35,7 +35,7 @@ define( function( require ) {
    * }
    */
   function DownUpListener( options ) {
-    var handler = this;
+    var self = this;
 
     options = _.extend( {
       mouseButton: 0 // allow a different mouse button
@@ -50,18 +50,18 @@ define( function( require ) {
     this.downListener = {
       // mouse/touch up
       up: function( event ) {
-        sceneryLog && sceneryLog.InputEvent && sceneryLog.InputEvent( 'DownUpListener (pointer) up for ' + handler.downTrail.toString() );
-        assert && assert( event.pointer === handler.pointer );
-        if ( !event.pointer.isMouse || event.domEvent.button === handler.options.mouseButton ) {
-          handler.buttonUp( event );
+        sceneryLog && sceneryLog.InputEvent && sceneryLog.InputEvent( 'DownUpListener (pointer) up for ' + self.downTrail.toString() );
+        assert && assert( event.pointer === self.pointer );
+        if ( !event.pointer.isMouse || event.domEvent.button === self.options.mouseButton ) {
+          self.buttonUp( event );
         }
       },
 
       // touch cancel
       cancel: function( event ) {
-        sceneryLog && sceneryLog.InputEvent && sceneryLog.InputEvent( 'DownUpListener (pointer) cancel for ' + handler.downTrail.toString() );
-        assert && assert( event.pointer === handler.pointer );
-        handler.buttonUp( event );
+        sceneryLog && sceneryLog.InputEvent && sceneryLog.InputEvent( 'DownUpListener (pointer) cancel for ' + self.downTrail.toString() );
+        assert && assert( event.pointer === self.pointer );
+        self.buttonUp( event );
       },
 
       // When the enter or space key is released, trigger an up event
@@ -69,7 +69,7 @@ define( function( require ) {
       keyup: function( event ) {
         var keyCode = event.domEvent.keyCode;
         if ( keyCode === Input.KEY_ENTER || keyCode === Input.KEY_SPACE ) {
-          handler.buttonUp( event );
+          self.buttonUp( event );
         }
       }
     };

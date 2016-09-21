@@ -45,7 +45,6 @@ define( function( require ) {
 
     this._buttonOptions = options; // store the options object so we can call the callbacks
 
-    var buttonListener = this;
     DownUpListener.call( this, {
 
       mouseButton: options.mouseButton || 0, // forward the mouse button, default to 0 (LMB)
@@ -55,12 +54,12 @@ define( function( require ) {
         if ( event.pointer.isKey ) {
           self.enter( event );
         }
-        buttonListener.setButtonState( event, 'down' );
+        self.setButtonState( event, 'down' );
       },
 
       // parameter to DownUpListener, NOT an input listener itself
       up: function( event, trail ) {
-        buttonListener.setButtonState( event, buttonListener._overCount > 0 ? 'over' : 'up' );
+        self.setButtonState( event, self._overCount > 0 ? 'over' : 'up' );
         if ( event.pointer.isKey ) {
           self.exit( event );
         }

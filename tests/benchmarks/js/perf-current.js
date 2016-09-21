@@ -95,9 +95,9 @@
       this.scene = scene;
     },
     step: function() {
-      var that = this;
+      var self = this;
       _.times( 20, function() {
-        that.text.text = that.i++;
+        self.text.text = self.i++;
       } );
       // this.scene.updateScene();
     },

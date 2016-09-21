@@ -20,7 +20,7 @@ define( function( require ) {
    */
   function Reader( cursor ) {
 
-    var thisReader = this;
+    var self = this;
 
     // @public, listen only, emits an event when the synth begins speaking the utterance
     this.speakingStartedEmitter = new Emitter();
@@ -32,7 +32,7 @@ define( function( require ) {
     this.speaking = false;
 
     // @private, keep track of the polite utterances to assist with the safari specific bug, see below
-    thisReader.politeUtterances = [];
+    self.politeUtterances = [];
 
     // windows Chrome needs a temporary workaround to avoid skipping every other utterance
     // TODO: Use platform.js and revisit once platforms fix their bugs
@@ -51,16 +51,16 @@ define( function( require ) {
         var utterThis = new SpeechSynthesisUtterance( outputUtterance.text );
 
         utterThis.addEventListener( 'start', function( event ) {
-          thisReader.speakingStartedEmitter.emit1( outputUtterance );
+          self.speakingStartedEmitter.emit1( outputUtterance );
         } );
 
         utterThis.addEventListener( 'end', function( event ) {
-          thisReader.speakingEndedEmitter.emit1( outputUtterance );
+          self.speakingEndedEmitter.emit1( outputUtterance );
         } );
 
         // get the default voice
         var defaultVoice;
-        thisReader.synth.getVoices().forEach( function( voice ) {
+        self.synth.getVoices().forEach( function( voice ) {
           if ( voice.default ) {
             defaultVoice = voice;
             return;
@@ -78,8 +78,8 @@ define( function( require ) {
             !outputUtterance.liveRole ) {
 
           // empty the queue of polite utterances
-          thisReader.politeUtterances = [];
-          thisReader.speaking = true;
+          self.politeUtterances = [];
+          self.speaking = true;
 
           // if assertive or off, cancel the current active utterance and begin speaking immediately
           // TODO: This is how most screen readers work, but we will probably want different behavior
@@ -89,14 +89,14 @@ define( function( require ) {
           // or every other utterance will be skipped.
           // NOTE: This only seems to happen on Windows for the default voice?
           if ( osWindows ) {
-            thisReader.synth.pause();
-            thisReader.synth.cancel();
-            thisReader.synth.speak( utterThis );
-            thisReader.synth.resume();
+            self.synth.pause();
+            self.synth.cancel();
+            self.synth.speak( utterThis );
+            self.synth.resume();
           }
           else {
-            thisReader.synth.cancel();
-            thisReader.synth.speak( utterThis );
+            self.synth.cancel();
+            self.synth.speak( utterThis );
           }
         }
         else if ( outputUtterance.liveRole === 'polite' ) {
@@ -104,43 +104,43 @@ define( function( require ) {
           // handle the safari specific bug where 'end' and 'start' events are fired on all utterances
           // after they are added to the queue
           if ( platSafari ) {
-            thisReader.politeUtterances.push( utterThis );
+            self.politeUtterances.push( utterThis );
 
             var readPolite = function() {
-              thisReader.speaking = true;
-              var nextUtterance = thisReader.politeUtterances.shift();
+              self.speaking = true;
+              var nextUtterance = self.politeUtterances.shift();
               if ( nextUtterance ) {
-                thisReader.synth.speak( nextUtterance );
+                self.synth.speak( nextUtterance );
               }
               else {
-                thisReader.speaking = false;
+                self.speaking = false;
               }
             };
 
             // a small delay will allow the utterance to be read in full, even if
             // added after cancel().
-            if ( thisReader.speaking ) {
+            if ( self.speaking ) {
               setTimeout( function() { readPolite(); }, 2000 );
             }
             else {
-              thisReader.synth.speak( utterThis );
+              self.synth.speak( utterThis );
               // remove from queue
-              var index = thisReader.politeUtterances.indexOf( utterThis );
+              var index = self.politeUtterances.indexOf( utterThis );
               if ( index > 0 ) {
-                thisReader.politeUtterances.splice( index, 1 );
+                self.politeUtterances.splice( index, 1 );
               }
             }
           }
           else {
             // simply add to the queue
-            thisReader.synth.speak( utterThis );
+            self.synth.speak( utterThis );
           } 
         }
       } );
     }
     else {
       cursor.outputUtteranceProperty.link( function() {
-        thisReader.speakingStartedEmitter.emit1( { text: 'Sorry! Web Speech API not supported on this platform.' } );
+        self.speakingStartedEmitter.emit1( { text: 'Sorry! Web Speech API not supported on this platform.' } );
       } );
     }
 

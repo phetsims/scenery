@@ -20,7 +20,7 @@ define( function( require ) {
   var Util = require( 'SCENERY/util/Util' );
 
   function PointerOverlay( display, rootNode ) {
-    var pointerOverlay = this;
+    var self = this;
     this.display = display;
     this.rootNode = rootNode;
 
@@ -38,9 +38,9 @@ define( function( require ) {
 
     //Resize the parent div when the rootNode is resized
     display.onStatic( 'displaySize', function( dimension ) {
-      pointerOverlay.pointerSVGContainer.setAttribute( 'width', dimension.width );
-      pointerOverlay.pointerSVGContainer.setAttribute( 'height', dimension.height );
-      pointerOverlay.pointerSVGContainer.style.clip = 'rect(0px,' + dimension.width + 'px,' + dimension.height + 'px,0px)';
+      self.pointerSVGContainer.setAttribute( 'width', dimension.width );
+      self.pointerSVGContainer.setAttribute( 'height', dimension.height );
+      self.pointerSVGContainer.style.clip = 'rect(0px,' + dimension.width + 'px,' + dimension.height + 'px,0px)';
     } );
 
     //Display a pointer that was added.  Use a separate SVG layer for each pointer so it can be hardware accelerated, otherwise it is too slow just setting svg internal attributes
@@ -73,7 +73,7 @@ define( function( require ) {
 
         //For touches that get a touch up event, remove them.  But when the mouse button is released, don't stop showing the mouse location
         if ( pointer.isTouch ) {
-          pointerOverlay.pointerSVGContainer.removeChild( svg );
+          self.pointerSVGContainer.removeChild( svg );
           pointer.removeInputListener( moveListener );
         }
       };
@@ -95,7 +95,7 @@ define( function( require ) {
 
       moveListener.move();
       svg.appendChild( circle );
-      pointerOverlay.pointerSVGContainer.appendChild( svg );
+      self.pointerSVGContainer.appendChild( svg );
     };
     display._input.addPointerAddedListener( pointerAdded );
 

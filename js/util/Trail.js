@@ -59,19 +59,19 @@ define( function( require ) {
     // indices[x] stores the index of nodes[x] in nodes[x-1]'s children, e.g. nodes[i].children[ indices[i] ] === nodes[i+1]
     this.indices = [];
 
-    var trail = this;
+    var self = this;
     if ( nodes ) {
       if ( nodes instanceof scenery.Node ) {
         var node = nodes;
 
         // add just a single node in
-        trail.addDescendant( node );
+        self.addDescendant( node );
       }
       else {
         // process it as an array
         var len = nodes.length;
         for ( var i = 0; i < len; i++ ) {
-          trail.addDescendant( nodes[ i ] );
+          self.addDescendant( nodes[ i ] );
         }
       }
     }

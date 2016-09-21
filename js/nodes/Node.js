@@ -608,9 +608,9 @@ define( function( require ) {
      * @public
      */
     detach: function() {
-      var that = this;
+      var self = this;
       _.each( this._parents.slice( 0 ), function( parent ) {
-        parent.removeChild( that );
+        parent.removeChild( self );
       } );
 
       return this; // allow chaining
@@ -695,7 +695,7 @@ define( function( require ) {
      * @returns {boolean} - Was something potentially updated?
      */
     validateBounds: function() {
-      var that = this;
+      var self = this;
       var i;
 
       var wasDirtyBefore = this.validateSelfBounds();
@@ -820,24 +820,24 @@ define( function( require ) {
           var epsilon = 0.000001;
 
           var childBounds = Bounds2.NOTHING.copy();
-          _.each( that._children, function( child ) { childBounds.includeBounds( child._bounds ); } );
+          _.each( self._children, function( child ) { childBounds.includeBounds( child._bounds ); } );
 
-          var localBounds = that._selfBounds.union( childBounds );
+          var localBounds = self._selfBounds.union( childBounds );
 
-          if ( that.hasClipArea() ) {
-            localBounds = localBounds.intersection( that._clipArea.bounds );
+          if ( self.hasClipArea() ) {
+            localBounds = localBounds.intersection( self._clipArea.bounds );
           }
 
-          var fullBounds = that.localToParentBounds( localBounds );
+          var fullBounds = self.localToParentBounds( localBounds );
 
-          assertSlow && assertSlow( that._childBounds.equalsEpsilon( childBounds, epsilon ),
+          assertSlow && assertSlow( self._childBounds.equalsEpsilon( childBounds, epsilon ),
             'Child bounds mismatch after validateBounds: ' +
-            that._childBounds.toString() + ', expected: ' + childBounds.toString() );
-          assertSlow && assertSlow( that._localBoundsOverridden ||
-                                    that._transformBounds ||
-                                    that._bounds.equalsEpsilon( fullBounds, epsilon ) ||
-                                    that._bounds.equalsEpsilon( fullBounds, epsilon ),
-            'Bounds mismatch after validateBounds: ' + that._bounds.toString() +
+            self._childBounds.toString() + ', expected: ' + childBounds.toString() );
+          assertSlow && assertSlow( self._localBoundsOverridden ||
+                                    self._transformBounds ||
+                                    self._bounds.equalsEpsilon( fullBounds, epsilon ) ||
+                                    self._bounds.equalsEpsilon( fullBounds, epsilon ),
+            'Bounds mismatch after validateBounds: ' + self._bounds.toString() +
             ', expected: ' + fullBounds.toString() );
         })();
       }
@@ -2227,6 +2227,8 @@ define( function( require ) {
         this._picker.onPickableChange( oldPickable, pickable );
         if ( assertSlow ) { this._picker.audit(); }
         // TODO: invalidate the cursor somehow? #150
+
+        this.trigger0( 'pickability' );
       }
     },
     set pickable( value ) { this.setPickable( value ); },
@@ -2836,7 +2838,7 @@ define( function( require ) {
       // logic easier.
       if ( !predicate ) {
         var trail = new scenery.Trail();
-        var node = this;
+        var node = this; // eslint-disable-line consistent-this
 
         while ( node ) {
           assert && assert( node._parents.length <= 1,
@@ -3693,7 +3695,7 @@ define( function( require ) {
      * @returns {Matrix3}
      */
     getLocalToGlobalMatrix: function() {
-      var node = this;
+      var node = this; // eslint-disable-line consistent-this
 
       // we need to apply the transformations in the reverse order, so we temporarily store them
       var matrices = [];
@@ -3755,7 +3757,7 @@ define( function( require ) {
      * @returns {Vector2}
      */
     localToGlobalPoint: function( point ) {
-      var node = this;
+      var node = this; // eslint-disable-line consistent-this
       var resultPoint = point.copy();
       while ( node ) {
         // in-place multiplication
@@ -3777,7 +3779,7 @@ define( function( require ) {
      * @returns {Vector2}
      */
     globalToLocalPoint: function( point ) {
-      var node = this;
+      var node = this; // eslint-disable-line consistent-this
       // TODO: performance: test whether it is faster to get a total transform and then invert (won't compute individual inverses)
 
       // we need to apply the transformations in the reverse order, so we temporarily store them
@@ -4006,7 +4008,7 @@ define( function( require ) {
           'More than one mutation on this Node set the y component, check ' + Object.keys( options ).join( ',' ) );
       }
 
-      var node = this;
+      var self = this;
 
       _.each( this._mutatorKeys, function( key ) {
         if ( options[ key ] !== undefined ) {
@@ -4014,10 +4016,10 @@ define( function( require ) {
 
           // if the key refers to a function that is not ES5 writable, it will execute that function with the single argument
           if ( descriptor && typeof descriptor.value === 'function' ) {
-            node[ key ]( options[ key ] );
+            self[ key ]( options[ key ] );
           }
           else {
-            node[ key ] = options[ key ];
+            self[ key ] = options[ key ];
           }
         }
       } );

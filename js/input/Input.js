@@ -87,33 +87,33 @@ define( function( require ) {
 
     this.pointerAddedListeners = [];
 
-    var input = this;
+    var self = this;
 
     // unique to this input instance
-    this.onpointerdown = function onpointerdown( domEvent ) { input.batchEvent( domEvent, BatchedDOMEvent.POINTER_TYPE, input.pointerDown, false ); };
-    this.onpointerup = function onpointerup( domEvent ) { input.batchEvent( domEvent, BatchedDOMEvent.POINTER_TYPE, input.pointerUp, true ); };
-    this.onpointermove = function onpointermove( domEvent ) { input.batchEvent( domEvent, BatchedDOMEvent.POINTER_TYPE, input.pointerMove, false ); };
-    this.onpointerover = function onpointerover( domEvent ) { input.batchEvent( domEvent, BatchedDOMEvent.POINTER_TYPE, input.pointerOver, false ); };
-    this.onpointerout = function onpointerout( domEvent ) { input.batchEvent( domEvent, BatchedDOMEvent.POINTER_TYPE, input.pointerOut, false ); };
-    this.onpointercancel = function onpointercancel( domEvent ) { input.batchEvent( domEvent, BatchedDOMEvent.POINTER_TYPE, input.pointerCancel, false ); };
-    this.onMSPointerDown = function onMSPointerDown( domEvent ) { input.batchEvent( domEvent, BatchedDOMEvent.MS_POINTER_TYPE, input.pointerDown, false ); };
-    this.onMSPointerUp = function onMSPointerUp( domEvent ) { input.batchEvent( domEvent, BatchedDOMEvent.MS_POINTER_TYPE, input.pointerUp, true ); };
-    this.onMSPointerMove = function onMSPointerMove( domEvent ) { input.batchEvent( domEvent, BatchedDOMEvent.MS_POINTER_TYPE, input.pointerMove, false ); };
-    this.onMSPointerOver = function onMSPointerOver( domEvent ) { input.batchEvent( domEvent, BatchedDOMEvent.MS_POINTER_TYPE, input.pointerOver, false ); };
-    this.onMSPointerOut = function onMSPointerOut( domEvent ) { input.batchEvent( domEvent, BatchedDOMEvent.MS_POINTER_TYPE, input.pointerOut, false ); };
-    this.onMSPointerCancel = function onMSPointerCancel( domEvent ) { input.batchEvent( domEvent, BatchedDOMEvent.MS_POINTER_TYPE, input.pointerCancel, false ); };
-    this.ontouchstart = function ontouchstart( domEvent ) { input.batchEvent( domEvent, BatchedDOMEvent.TOUCH_TYPE, input.touchStart, false ); };
-    this.ontouchend = function ontouchend( domEvent ) { input.batchEvent( domEvent, BatchedDOMEvent.TOUCH_TYPE, input.touchEnd, true ); };
-    this.ontouchmove = function ontouchmove( domEvent ) { input.batchEvent( domEvent, BatchedDOMEvent.TOUCH_TYPE, input.touchMove, false ); };
-    this.ontouchcancel = function ontouchcancel( domEvent ) { input.batchEvent( domEvent, BatchedDOMEvent.TOUCH_TYPE, input.touchCancel, false ); };
-    this.onmousedown = function onmousedown( domEvent ) { input.batchEvent( domEvent, BatchedDOMEvent.MOUSE_TYPE, input.mouseDown, false ); };
-    this.onmouseup = function onmouseup( domEvent ) { input.batchEvent( domEvent, BatchedDOMEvent.MOUSE_TYPE, input.mouseUp, true ); };
-    this.onmousemove = function onmousemove( domEvent ) { input.batchEvent( domEvent, BatchedDOMEvent.MOUSE_TYPE, input.mouseMove, false ); };
-    this.onmouseover = function onmouseover( domEvent ) { input.batchEvent( domEvent, BatchedDOMEvent.MOUSE_TYPE, input.mouseOver, false ); };
-    this.onmouseout = function onmouseout( domEvent ) { input.batchEvent( domEvent, BatchedDOMEvent.MOUSE_TYPE, input.mouseOut, false ); };
-    this.onkeydown = function onkeydown( domEvent ) { input.batchEvent( domEvent, BatchedDOMEvent.KEY_TYPE, input.keyDown, false ); };
-    this.onkeyup = function onkeyup( domEvent ) { input.batchEvent( domEvent, BatchedDOMEvent.KEY_TYPE, input.keyUp, false ); };
-    this.onwheel = function onwheel( domEvent ) { input.batchEvent( domEvent, BatchedDOMEvent.WHEEL_TYPE, input.wheel, false ); };
+    this.onpointerdown = function onpointerdown( domEvent ) { self.batchEvent( domEvent, BatchedDOMEvent.POINTER_TYPE, self.pointerDown, false ); };
+    this.onpointerup = function onpointerup( domEvent ) { self.batchEvent( domEvent, BatchedDOMEvent.POINTER_TYPE, self.pointerUp, true ); };
+    this.onpointermove = function onpointermove( domEvent ) { self.batchEvent( domEvent, BatchedDOMEvent.POINTER_TYPE, self.pointerMove, false ); };
+    this.onpointerover = function onpointerover( domEvent ) { self.batchEvent( domEvent, BatchedDOMEvent.POINTER_TYPE, self.pointerOver, false ); };
+    this.onpointerout = function onpointerout( domEvent ) { self.batchEvent( domEvent, BatchedDOMEvent.POINTER_TYPE, self.pointerOut, false ); };
+    this.onpointercancel = function onpointercancel( domEvent ) { self.batchEvent( domEvent, BatchedDOMEvent.POINTER_TYPE, self.pointerCancel, false ); };
+    this.onMSPointerDown = function onMSPointerDown( domEvent ) { self.batchEvent( domEvent, BatchedDOMEvent.MS_POINTER_TYPE, self.pointerDown, false ); };
+    this.onMSPointerUp = function onMSPointerUp( domEvent ) { self.batchEvent( domEvent, BatchedDOMEvent.MS_POINTER_TYPE, self.pointerUp, true ); };
+    this.onMSPointerMove = function onMSPointerMove( domEvent ) { self.batchEvent( domEvent, BatchedDOMEvent.MS_POINTER_TYPE, self.pointerMove, false ); };
+    this.onMSPointerOver = function onMSPointerOver( domEvent ) { self.batchEvent( domEvent, BatchedDOMEvent.MS_POINTER_TYPE, self.pointerOver, false ); };
+    this.onMSPointerOut = function onMSPointerOut( domEvent ) { self.batchEvent( domEvent, BatchedDOMEvent.MS_POINTER_TYPE, self.pointerOut, false ); };
+    this.onMSPointerCancel = function onMSPointerCancel( domEvent ) { self.batchEvent( domEvent, BatchedDOMEvent.MS_POINTER_TYPE, self.pointerCancel, false ); };
+    this.ontouchstart = function ontouchstart( domEvent ) { self.batchEvent( domEvent, BatchedDOMEvent.TOUCH_TYPE, self.touchStart, false ); };
+    this.ontouchend = function ontouchend( domEvent ) { self.batchEvent( domEvent, BatchedDOMEvent.TOUCH_TYPE, self.touchEnd, true ); };
+    this.ontouchmove = function ontouchmove( domEvent ) { self.batchEvent( domEvent, BatchedDOMEvent.TOUCH_TYPE, self.touchMove, false ); };
+    this.ontouchcancel = function ontouchcancel( domEvent ) { self.batchEvent( domEvent, BatchedDOMEvent.TOUCH_TYPE, self.touchCancel, false ); };
+    this.onmousedown = function onmousedown( domEvent ) { self.batchEvent( domEvent, BatchedDOMEvent.MOUSE_TYPE, self.mouseDown, false ); };
+    this.onmouseup = function onmouseup( domEvent ) { self.batchEvent( domEvent, BatchedDOMEvent.MOUSE_TYPE, self.mouseUp, true ); };
+    this.onmousemove = function onmousemove( domEvent ) { self.batchEvent( domEvent, BatchedDOMEvent.MOUSE_TYPE, self.mouseMove, false ); };
+    this.onmouseover = function onmouseover( domEvent ) { self.batchEvent( domEvent, BatchedDOMEvent.MOUSE_TYPE, self.mouseOver, false ); };
+    this.onmouseout = function onmouseout( domEvent ) { self.batchEvent( domEvent, BatchedDOMEvent.MOUSE_TYPE, self.mouseOut, false ); };
+    this.onkeydown = function onkeydown( domEvent ) { self.batchEvent( domEvent, BatchedDOMEvent.KEY_TYPE, self.keyDown, false ); };
+    this.onkeyup = function onkeyup( domEvent ) { self.batchEvent( domEvent, BatchedDOMEvent.KEY_TYPE, self.keyUp, false ); };
+    this.onwheel = function onwheel( domEvent ) { self.batchEvent( domEvent, BatchedDOMEvent.WHEEL_TYPE, self.wheel, false ); };
     this.uselessListener = function uselessListener( domEvent ) {};
   }
 
@@ -751,13 +751,13 @@ define( function( require ) {
       },
 
       validatePointers: function() {
-        var that = this;
+        var self = this;
 
         var i = this.pointers.length;
         while ( i-- ) {
           var pointer = this.pointers[ i ];
           if ( pointer.point ) {
-            var changed = that.branchChangeEvents( pointer, null, false );
+            var changed = self.branchChangeEvents( pointer, null, false );
             if ( changed ) {
               sceneryLog && sceneryLog.InputEvent && sceneryLog.InputEvent( 'branch change due validatePointers' );
             }
