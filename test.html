@@ -1,0 +1,25 @@
+<html>
+<head>
+  <script src="../sherpa/lib/lodash-2.4.1.min.js"></script>
+  <script src="../sherpa/lib/jquery-2.1.0.min.js"></script>
+  <script src="build/scenery.min.js"></script>
+
+  <script>
+    console.log( 'a', window.scenery );
+    // TODO: why do I have to wait for scenery to be ready?
+    var main = function( scenery ) {
+      console.log( 'hello scenery' );
+    };
+    var t = setInterval( function() {
+      console.log( window.scenery );
+      if ( window.scenery ) {
+        clearInterval( t );
+        main( window.scenery );
+      }
+    }, 0 );
+  </script>
+</head>
+<body>
+
+</body>
+</html>

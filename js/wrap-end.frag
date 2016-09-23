@@ -1,1 +1,0 @@
- window.scenery = require( 'main' ); window.kite = require( 'KITE/main' ); window.dot = require( 'DOT/main' ); window.axon = require( 'AXON/main' ); window.phetCore = require( 'PHET_CORE/main' ); scenery.Util.polyfillRequestAnimationFrame(); }());
