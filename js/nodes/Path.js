@@ -46,6 +46,8 @@ define( function( require ) {
 
     // Used as a listener to Shapes for when they are invalidated
     this._invalidShapeListener = this.invalidateShape.bind( this );
+    // Need to record, since the Shape may be made immutable after our Path is given the Shape (don't want to leak).
+    this._invalidShapeListenerAttached = false;
 
     this.initializePaintable();
 
@@ -77,8 +79,9 @@ define( function( require ) {
     setShape: function( shape ) {
       if ( this._shape !== shape ) {
         // Remove Shape invalidation listener if applicable
-        if ( this._shape ) {
+        if ( this._invalidShapeListenerAttached ) {
           this._shape.offStatic( 'invalidated', this._invalidShapeListener );
+          this._invalidShapeListenerAttached = false;
         }
 
         if ( typeof shape === 'string' ) {
@@ -89,8 +92,9 @@ define( function( require ) {
         this.invalidateShape();
 
         // Add Shape invalidation listener if applicable
-        if ( this._shape ) {
+        if ( this._shape && !this._shape.isImmutable() ) {
           this._shape.onStatic( 'invalidated', this._invalidShapeListener );
+          this._invalidShapeListenerAttached = true;
         }
       }
       return this;
