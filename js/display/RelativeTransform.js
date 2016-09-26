@@ -203,7 +203,6 @@ define( function( require ) {
       else {
         return this.relativeChildrenListenersCount > 0 || this.relativeTransformListeners.length > 0;
       }
-      return;
     },
     // @private: Only for ancestors need, ignores child need on isTransformed
     hasAncestorListenerNeed: function() {
@@ -281,7 +280,6 @@ define( function( require ) {
       else {
         return this.relativeChildrenPrecomputeCount > 0 || this.relativePrecomputeCount > 0;
       }
-      return;
     },
     // @private: Only for ancestors need, ignores child need on isTransformed
     hasAncestorComputeNeed: function() {
