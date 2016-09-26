@@ -66,7 +66,7 @@ define( function( require ) {
       // parse a somewhat proper CSS3 form (not guaranteed to handle it precisely the same as browsers yet)
 
       // split based on whitespace allowed by CSS spec (more restrictive than regular regexp whitespace)
-      var tokens = _.filter( options.split( /[\x09\x0A\x0C\x0D\x20]/ ), function( token ) { return token.length > 0; } );
+      var tokens = _.filter( options.split( /[\x09\x0A\x0C\x0D\x20]/ ), function( token ) { return token.length > 0; } ); // eslint-disable-line no-control-regex
 
       // pull tokens out until we reach something that doesn't match. that must be the font size (according to spec)
       for ( var i = 0; i < tokens.length; i++ ) {
