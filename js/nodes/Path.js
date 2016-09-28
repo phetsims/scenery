@@ -83,8 +83,7 @@ define( function( require ) {
       if ( this._shape !== shape ) {
         // Remove Shape invalidation listener if applicable
         if ( this._invalidShapeListenerAttached ) {
-          this._shape.offStatic( 'invalidated', this._invalidShapeListener );
-          this._invalidShapeListenerAttached = false;
+          this.detachShapeListener();
         }
 
         if ( typeof shape === 'string' ) {
@@ -96,8 +95,7 @@ define( function( require ) {
 
         // Add Shape invalidation listener if applicable
         if ( this._shape && !this._shape.isImmutable() ) {
-          this._shape.onStatic( 'invalidated', this._invalidShapeListener );
-          this._invalidShapeListenerAttached = true;
+          this.attachShapeListener();
         }
       }
       return this;
@@ -116,6 +114,22 @@ define( function( require ) {
       return this._strokedShape;
     },
 
+    // @private
+    attachShapeListener: function() {
+      assert && assert( !this._invalidShapeListenerAttached, 'We do not want to have two listeners attached!' );
+
+      this._shape.onStatic( 'invalidated', this._invalidShapeListener );
+      this._invalidShapeListenerAttached = true;
+    },
+
+    // @private
+    detachShapeListener: function() {
+      assert && assert( this._invalidShapeListenerAttached, 'We cannot detach an unattached listener' );
+
+      this._shape.offStatic( 'invalidated', this._invalidShapeListener );
+      this._invalidShapeListenerAttached = false;
+    },
+
     /**
      * Invalidates the Shape stored itself. Should mainly only be called on Path itself, not subtypes like
      * Line/Rectangle/Circle/etc. once constructed.
@@ -126,6 +140,12 @@ define( function( require ) {
       var stateLen = this._drawables.length;
       for ( var i = 0; i < stateLen; i++ ) {
         this._drawables[ i ].markDirtyShape(); // subtypes of Path may not have this, but it's called during construction
+      }
+
+      // Disconnect our Shape listener if our Shape has become immutable.
+      // see https://github.com/phetsims/sun/issues/270#issuecomment-250266174
+      if ( this._invalidShapeListenerAttached && this._shape && this._shape.isImmutable() ) {
+        this.detachShapeListener();
       }
     },
 
