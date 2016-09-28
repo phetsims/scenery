@@ -152,7 +152,7 @@ define( function( require ) {
     get p2() { return new Vector2( this._x2, this._y2 ); },
 
     createLineShape: function() {
-      return Shape.lineSegment( this._x1, this._y1, this._x2, this._y2 );
+      return Shape.lineSegment( this._x1, this._y1, this._x2, this._y2 ).makeImmutable();
     },
 
     invalidateLine: function() {

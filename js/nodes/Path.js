@@ -1,7 +1,7 @@
 // Copyright 2013-2015, University of Colorado Boulder
 
 /**
- * A Path draws a Shape with a specific type of fill and stroke.
+ * A Path draws a Shape with a specific type of fill and stroke. Mixes in Paintable.
  *
  * @author Jonathan Olson <jonathan.olson@colorado.edu>
  */
@@ -24,12 +24,32 @@ define( function( require ) {
   // TODO: change this based on memory and performance characteristics of the platform
   var keepSVGPathElements = true; // whether we should pool SVG elements for the SVG rendering states, or whether we should free them when possible for memory
 
+  /**
+   * Creates a Path with a given shape specifier (a Shape, a string in the SVG path format, or null to indicate no
+   * shape).
+   * @constructor
+   *
+   * Path has two additional options (above what Node provides):
+   * - shape: The actual Shape (or a string representing an SVG path, or null).
+   * - boundsMethod: Determines how the bounds of a shape are determined.
+   *
+   * @param {Shape|string|null} shape
+   * @param {Object} [options] - All options passed through to Node
+   */
   function Path( shape, options ) {
-    // TODO: consider directly passing in a shape object (or at least handling that case)
-    // NOTE: _shape can be lazily constructed, in the case of types like Rectangle where they have their own drawing code
+    // @private {Shape|null}
+    // NOTE: _shape can be lazily constructed in subtypes (may be null) if hasShape() is overridden to retun true,
+    //       like in Rectangle. This is because usually the actual Shape is already implied by other parameters,
+    //       so it is best to not have to compute it on changes.
+    // NOTE: Please use hasShape() to determine if we are actually drawing things, as it is subtype-safe.
     this._shape = null;
-    this._strokedShape = null; // a stroked copy of the shape, lazily computed
 
+    // @private {Shape|null}
+    // This stores a stroked copy of the Shape which is lazily computed. This can be required for computing bounds
+    // of a Shape with a stroke.
+    this._strokedShape = null;
+
+    // @private {String}, one of 'accurate', 'unstroked', 'tightPadding', 'safePadding', 'none'
     // boundsMethod determines how our (self) bounds are computed, and can particularly determine how expensive
     // to compute our bounds are if we are stroked. There are the following options:
     // 'accurate' - Always uses the most accurate way of getting bounds
@@ -41,12 +61,15 @@ define( function( require ) {
     // 'none' - Returns Bounds2.NOTHING. The bounds will be marked as inaccurate.
     this._boundsMethod = 'accurate'; // 'accurate', 'unstroked', 'tightPadding', 'safePadding', 'none'
 
-    // ensure we have a parameter object
+    // If a parameter object is not provided, create an empty one
     options = options || {};
 
-    // Used as a listener to Shapes for when they are invalidated
+    // @private {Function}, called with no arguments, return value not checked.
+    // Used as a listener to Shapes for when they are invalidated. The listeners are not added if the Shape is
+    // immutable, and if the Shape becomes immutable, then the listeners are removed.
     this._invalidShapeListener = this.invalidateShape.bind( this );
-    // Need to record, since the Shape may be made immutable after our Path is given the Shape (don't want to leak).
+
+    // @private {boolean} Whether our shape listener is attached to a shape.
     this._invalidShapeListenerAttached = false;
 
     this.initializePaintable();
@@ -63,21 +86,34 @@ define( function( require ) {
     this.mutate( options );
   }
 
-  scenery.register( 'Path', Path );
+  scenery.register( 'Path', Path ); // Also mixes in Paintable.
 
   inherit( Node, Path, {
-    // allow more specific path types (Rectangle, Line) to override what restrictions we have
-    getPathRendererBitmask: function() {
-      return Renderer.bitmaskCanvas | Renderer.bitmaskSVG;
-    },
-
-    invalidateSupportedRenderers: function() {
-      this.setRendererBitmask( this.getFillRendererBitmask() & this.getStrokeRendererBitmask() & this.getPathRendererBitmask() );
-    },
-
-    // sets the shape drawn, or null to remove the shape -- TODO: note about immutable Shapes
+    /**
+     * This sets the shape of the Path, which determines the shape of its appearance. It should generally not be called
+     * on Path subtypes like Line, Rectangle, etc.
+     * @public
+     *
+     * NOTE: When you create a Path with a shape in the constructor, this function will be called.
+     *
+     * The valid parameter types are:
+     * - Shape: (from Kite), normally used.
+     * - string: Uses the SVG Path format, see https://www.w3.org/TR/SVG/paths.html (the PATH part of <path d="PATH"/>).
+     *           This will immediately be converted to a Shape object, and getShape() or equivalents will return the new
+     *           Shape object instead of the original string.
+     * - null: Indicates that there is no Shape, and nothing is drawn. Usually used as a placeholder.
+     *
+     * NOTE: Be aware of the potential for memory leaks. If a Shape is not marked as immutable (with makeImmutable()),
+     *       Path will add a listener so that it is updated when the Shape itself changes. If there is a listener
+     *       added, keeping a reference to the Shape will also keep a reference to the Path object (and thus whatever
+     *       Nodes are connected to the Path). For now, set path.shape = null if you need to release the reference
+     *       that the Shape would have.
+     * TODO: Add a dispose() function or equivalent, which releases the listener.
+     *
+     * @param {Shape|string|null} shape
+     */
     setShape: function( shape ) {
-      assert && assert( this._shape === null || typeof this._shape === 'string' || this._shape instanceof Shape,
+      assert && assert( shape === null || typeof shape === 'string' || shape instanceof Shape,
         'A path\'s shape should either be null, a string, or a Shape' );
 
       if ( this._shape !== shape ) {
@@ -102,37 +138,69 @@ define( function( require ) {
     },
     set shape( value ) { this.setShape( value ); },
 
+    /**
+     * Returns the shape that was set for this Path (or for subtypes like Line and Rectangle, will return an immutable
+     * Shape that is equivalent in appearance).
+     * @public
+     *
+     * It is best to generally assume modifications to the Shape returned is not supported. If there is no shape
+     * currently, null will be returned.
+     *
+     * @returns {Shape|null}
+     */
     getShape: function() {
       return this._shape;
     },
     get shape() { return this.getShape(); },
 
+    /**
+     * Returns a lazily-created Shape that has the appearance of the Path's shape but stroked using the current
+     * stroke style of the Path.
+     * @public
+     *
+     * NOTE: It is invalid to call this on a Path that does not currently have a Shape (usually a Path where
+     *       the shape is set to null).
+     *
+     * @returns {Shape}
+     */
     getStrokedShape: function() {
+      assert && assert( this.hasShape(), 'We cannot stroke a non-existing shape' );
+
       if ( !this._strokedShape ) {
         this._strokedShape = this.getShape().getStrokedShape( this._lineDrawingStyles );
       }
       return this._strokedShape;
     },
 
-    // @private
-    attachShapeListener: function() {
-      assert && assert( !this._invalidShapeListenerAttached, 'We do not want to have two listeners attached!' );
-
-      this._shape.onStatic( 'invalidated', this._invalidShapeListener );
-      this._invalidShapeListenerAttached = true;
-    },
-
-    // @private
-    detachShapeListener: function() {
-      assert && assert( this._invalidShapeListenerAttached, 'We cannot detach an unattached listener' );
-
-      this._shape.offStatic( 'invalidated', this._invalidShapeListener );
-      this._invalidShapeListenerAttached = false;
+    /**
+     * Returns a bitmask representing the supported renderers for the current configuration of the Path or subtype.
+     * @protected
+     *
+     * Should be overridden by subtypes to either extend or restrict renderers, depending on what renderers are
+     * supported.
+     *
+     * @returns {number} - A bitmask that includes supported renderers, see Renderer for details.
+     */
+    getPathRendererBitmask: function() {
+      return Renderer.bitmaskCanvas | Renderer.bitmaskSVG;
     },
 
     /**
-     * Invalidates the Shape stored itself. Should mainly only be called on Path itself, not subtypes like
-     * Line/Rectangle/Circle/etc. once constructed.
+     * Triggers a check and update for what renderers the current configuration of this Path or subtype supports.
+     * This should be called whenever something that could potentially change supported renderers happen (which can
+     * be the shape, properties of the strokes or fills, etc.)
+     * @public
+     */
+    invalidateSupportedRenderers: function() {
+      this.setRendererBitmask( this.getFillRendererBitmask() & this.getStrokeRendererBitmask() & this.getPathRendererBitmask() );
+    },
+
+    /**
+     * Notifies the Path that the Shape has changed (either the Shape itself has be mutated, a new Shape has been
+     * provided).
+     * @private
+     *
+     * NOTE: This should not be called on subtypes of Path after they have been constructed, like Line, Rectangle, etc.
      */
     invalidateShape: function() {
       this.invalidatePath();
@@ -150,12 +218,37 @@ define( function( require ) {
     },
 
     /**
-     * Invalidates the self-bounds, that could have changed from different things.
+     * Invalidates the node's self-bounds and any other recorded metadata about the outline or bound sof the Shape.
+     * @private
+     *
+     * This is meant to be used for all Path subtypes (unlike invalidateShape).
      */
     invalidatePath: function() {
       this._strokedShape = null;
 
       this.invalidateSelf(); // We don't immediately compute the bounds
+    },
+
+    /**
+     * Attaches a listener to our Shape that will be called whenever the Shape changes.
+     * @private
+     */
+    attachShapeListener: function() {
+      assert && assert( !this._invalidShapeListenerAttached, 'We do not want to have two listeners attached!' );
+
+      this._shape.onStatic( 'invalidated', this._invalidShapeListener );
+      this._invalidShapeListenerAttached = true;
+    },
+
+    /**
+     * Detaches a previously-attached listener added to our Shape (see attachShapeListener).
+     * @private
+     */
+    detachShapeListener: function() {
+      assert && assert( this._invalidShapeListenerAttached, 'We cannot detach an unattached listener' );
+
+      this._shape.offStatic( 'invalidated', this._invalidShapeListener );
+      this._invalidShapeListenerAttached = false;
     },
 
     /**

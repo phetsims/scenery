@@ -45,7 +45,7 @@
     } );
 
     test( 'Path object support', function() {
-      var path = new Path();
+      var path = new Path( null );
     } );
 
     test( 'Text width measurement in canvas', function() {

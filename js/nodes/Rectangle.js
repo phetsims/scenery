@@ -286,10 +286,10 @@ define( function( require ) {
         // copy border-radius CSS behavior in Chrome, where the arcs won't intersect, in cases where the arc segments at full size would intersect each other
         var maximumArcSize = Math.min( this._rectWidth / 2, this._rectHeight / 2 );
         return Shape.roundRectangle( this._rectX, this._rectY, this._rectWidth, this._rectHeight,
-          Math.min( maximumArcSize, this._cornerXRadius ), Math.min( maximumArcSize, this._cornerYRadius ) );
+          Math.min( maximumArcSize, this._cornerXRadius ), Math.min( maximumArcSize, this._cornerYRadius ) ).makeImmutable();
       }
       else {
-        return Shape.rectangle( this._rectX, this._rectY, this._rectWidth, this._rectHeight );
+        return Shape.rectangle( this._rectX, this._rectY, this._rectWidth, this._rectHeight ).makeImmutable();
       }
     },
 

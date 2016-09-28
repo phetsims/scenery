@@ -75,7 +75,7 @@ define( function( require ) {
     },
 
     createCircleShape: function() {
-      return Shape.circle( 0, 0, this._radius );
+      return Shape.circle( 0, 0, this._radius ).makeImmutable();
     },
 
     intersectsBoundsSelf: function( bounds ) {
