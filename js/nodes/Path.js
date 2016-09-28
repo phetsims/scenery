@@ -129,7 +129,7 @@ define( function( require ) {
 
     /**
      * Invalidates the Shape stored itself. Should mainly only be called on Path itself, not subtypes like
-     * Line/Rectangle/Circle/etc. once constructed.
+     * Line/Rectangle/Circle/etc. once constructed.  This method is never called if a shape is immutable.
      */
     invalidateShape: function() {
       this.invalidatePath();
