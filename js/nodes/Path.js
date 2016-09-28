@@ -75,8 +75,11 @@ define( function( require ) {
       this.setRendererBitmask( this.getFillRendererBitmask() & this.getStrokeRendererBitmask() & this.getPathRendererBitmask() );
     },
 
-    // sets the shape drawn, or null to remove the shape
+    // sets the shape drawn, or null to remove the shape -- TODO: note about immutable Shapes
     setShape: function( shape ) {
+      assert && assert( this._shape === null || typeof this._shape === 'string' || this._shape instanceof Shape,
+        'A path\'s shape should either be null, a string, or a Shape' );
+
       if ( this._shape !== shape ) {
         // Remove Shape invalidation listener if applicable
         if ( this._invalidShapeListenerAttached ) {
