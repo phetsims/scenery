@@ -11,7 +11,7 @@ http://phet.colorado.edu/
 This is under active prototyping, so please expect any sort of API to change. Comments at this stage are very welcome.
 A [tentative website](http://phetsims.github.io/scenery/) is up for browsing documentation and examples in a more user-friendly way.
 
-[Grunt](http://gruntjs.com/) is used to build the source ("npm install -g grunt-cli", "npm install" and "grunt" at the top level
+[Grunt](http://gruntjs.com/) is used to build the source ("npm update -g grunt-cli", "npm update" and "grunt" at the top level
 should build into build/). [Node.js](http://nodejs.org/) is required for this process.
 
 Currently, you can also grab the unminified [scenery.js](http://phetsims.github.io/scenery/build/development/scenery.js) or
