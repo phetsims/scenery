@@ -3314,7 +3314,9 @@ define( function( require ) {
 
       // for now, we add an unpleasant hack around Text and safe bounds in general. We don't want to add another Bounds2 object per Node for now.
       var bounds = this.getBounds().union( this.localToParentBounds( this.getSafeSelfBounds() ) );
-      assert && assert( !bounds.isEmpty(), 'Should not call toCanvas on a Node with empty bounds' );
+      assert && assert( !bounds.isEmpty() ||
+                        ( x !== undefined && y !== undefined && width !== undefined && height !== undefined ),
+        'Should not call toCanvas on a Node with empty bounds, unless all dimensions are provided' );
 
       x = x !== undefined ? x : Math.ceil( padding - bounds.minX );
       y = y !== undefined ? y : Math.ceil( padding - bounds.minY );
