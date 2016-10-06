@@ -32,7 +32,7 @@
   <script type="text/javascript" src="http://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
 
   <!-- Our code, in either the concatenated 'with comments' version or the minified version -->
-  <script src="../build/development/scenery.js"></script>
+  <script src="../build/scenery.min.js"></script>
 
   <script type="text/javascript">
     scenery.Util.polyfillRequestAnimationFrame();
@@ -328,6 +328,8 @@ git clone https://github.com/phetsims/dot.git
 git clone https://github.com/phetsims/kite.git
 git clone https://github.com/phetsims/scenery.git</pre>
 
+    <h2 id="building">Building</h2>
+
     <p>
       For some examples and tests, and to build a custom version, you'll need to install <a href="http://nodejs.org/">node.js</a>, and <a
         href="https://github.com/gruntjs/grunt-cli">grunt-cli</a>. Then,
@@ -336,7 +338,7 @@ git clone https://github.com/phetsims/scenery.git</pre>
       <pre>
 cd scenery
 npm update
-grunt</pre>
+grunt build-js</pre>
 
     <p>
       You will now have the built files under build/, and all of the documentation/examples should work locally.
