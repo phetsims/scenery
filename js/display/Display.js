@@ -782,7 +782,7 @@ define( function( require ) {
         var mouseTrail = this._rootNode.trailUnderPointer( this._input.mouse );
 
         if ( mouseTrail ) {
-          for ( var i = mouseTrail.length - 1; i >= 0; i-- ) {
+          for ( var i = mouseTrail.getCursorCheckIndex(); i >= 0; i-- ) {
             var node = mouseTrail.nodes[ i ];
             var cursor = node.getCursor();
 

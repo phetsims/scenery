@@ -127,11 +127,15 @@ define( function( require ) {
     // @private {number} - Opacity, in the range from 0 (fully transparent) to 1 (fully opaque).
     this._opacity = 1;
 
-    // @private Whether this node (and its subtree) will allow hit-testing (and thus user interaction). Notably:
+    // @private - Whether this node (and its subtree) will allow hit-testing (and thus user interaction). Notably:
     // pickable: null  - default. Node is only pickable if it (or an ancestor/descendant) has either an input listener or pickable: true set
     // pickable: true - Node (and subtree) is pickable, just like if there is an input listener
     // pickable: false  - Node is unpickable (only has an effect when underneath a node with an input listener / pickable: true set)
     this._pickable = null;
+
+    // @private - Whether input event listeners on this node or descendants on a trail will have input listeners.
+    // triggered. Note that this does NOT effect picking, and only prevents some listeners from being fired.
+    this._inputEnabled = true;
 
     // @private - This node and all children will be clipped by this shape (in addition to any other clipping shapes).
     // {Shape|null} The shape should be in the local coordinate frame.
@@ -2245,6 +2249,40 @@ define( function( require ) {
     get pickable() { return this.isPickable(); },
 
     /**
+     * Sets whether input is enabled for this node and its subtree. If false, input event listeners will not be fired
+     * on this node or its descendants in the picked Trail. This does NOT effect picking (what Trail/nodes are under
+     * a pointer), but only effects what listeners are fired.
+     * @public
+     *
+     * Additionally, this will affect cursor behavior. If inputEnabled=false, descendants of this Node will not be
+     * checked when determining what cursor will be shown. Instead, if a pointer (e.g. mouse) is over a descendant,
+     * this Node's cursor will be checked first, then ancestors will be checked as normal.
+     *
+     * @param {boolean} inputEnabled
+     */
+    setInputEnabled: function( inputEnabled ) {
+      assert && assert( typeof inputEnabled === 'boolean' );
+
+      if ( this._inputEnabled !== inputEnabled ) {
+        this._inputEnabled = inputEnabled;
+
+        this.trigger0( 'inputEnabled' );
+      }
+    },
+    set inputEnabled( value ) { this.setInputEnabled( value ); },
+
+    /**
+     * Returns whether input is enabled for this Node and its subtree. See setInputEnabled for more documentation.
+     * @public
+     *
+     * @returns {boolean}
+     */
+    isInputEnabled: function() {
+      return this._inputEnabled;
+    },
+    get inputEnabled() { return this.isInputEnabled(); },
+
+    /**
      * Sets the CSS cursor string that should be used when the mouse is over this node. null is the default, and
      * indicates that ancestor nodes (or the browser default) should be used.
      * @public
@@ -4331,8 +4369,8 @@ define( function( require ) {
    * changes of bounds that may happen beforehand
    */
   Node.prototype._mutatorKeys = [
-    'children', 'cursor', 'visible', 'pickable', 'opacity', 'matrix', 'translation', 'x', 'y', 'rotation', 'scale',
-    'localBounds',
+    'children', 'cursor', 'visible', 'pickable', 'inputEnabled', 'opacity',
+    'matrix', 'translation', 'x', 'y', 'rotation', 'scale', 'localBounds',
     'maxWidth', 'maxHeight', 'leftTop', 'centerTop', 'rightTop', 'leftCenter', 'center', 'rightCenter', 'leftBottom',
     'centerBottom', 'rightBottom', 'left', 'right', 'top', 'bottom', 'centerX', 'centerY', 'renderer',
     'rendererOptions', 'layerSplit', 'usesOpacity', 'cssTransform', 'excludeInvisible', 'webglScale', 'preventFit',

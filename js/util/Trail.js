@@ -429,6 +429,44 @@ define( function( require ) {
       return branchIndex;
     },
 
+    /**
+     * Returns the last (largest) index into the trail's nodes that has inputEnabled=true.
+     * @public
+     *
+     * @returns {number}
+     */
+    getLastInputEnabledIndex: function() {
+      // Determine how far up the Trail input is determined. The first node with !inputEnabled and after will not have
+      // events fired (see https://github.com/phetsims/sun/issues/257)
+      var trailStartIndex = -1;
+      for ( var j = 0; j < this.length; j++ ) {
+        if ( !this.nodes[ j ]._inputEnabled ) {
+          break;
+        }
+
+        trailStartIndex = j;
+      }
+
+      return trailStartIndex;
+    },
+
+    /**
+     * Returns the leaf-most index, unless there is a Node with inputEnabled=false (in which case, the lowest index
+     * for those matching Nodes are returned).
+     * @public
+     *
+     * @returns {number}
+     */
+    getCursorCheckIndex: function() {
+      var lastInputEnabledIndex = this.getLastInputEnabledIndex();
+      if ( lastInputEnabledIndex + 1 < this.length ) {
+        return lastInputEnabledIndex + 1;
+      }
+      else {
+        return lastInputEnabledIndex;
+      }
+    },
+
     // TODO: phase out in favor of get()
     nodeFromTop: function( offset ) {
       return this.nodes[ this.length - 1 - offset ];

@@ -826,7 +826,7 @@ define( function( require ) {
 
         var specificType = pointer.type + type; // e.g. mouseup, touchup
 
-        for ( var i = trail.length - 1; i >= 0; bubbles ? i-- : i = -1 ) {
+        for ( var i = trail.getLastInputEnabledIndex(); i >= 0; bubbles ? i-- : i = -1 ) {
           var target = trail.nodes[ i ];
           inputEvent.currentTarget = target;
 
