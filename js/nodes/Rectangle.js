@@ -539,20 +539,75 @@ define( function( require ) {
     return offsetX + offsetY <= 1; // return whether we are in the rounded corner. see the formula for an ellipse
   };
 
+  /**
+   * Creates a rectangle with the specified x/y/width/height.
+   * @public
+   *
+   * @param {x} number
+   * @param {y} number
+   * @param {width} number
+   * @param {height} number
+   * @param {Object} [options]
+   * @returns {Rectangle}
+   */
   Rectangle.rect = function( x, y, width, height, options ) {
     return new Rectangle( x, y, width, height, 0, 0, options );
   };
 
+  /**
+   * Creates a rounded rectangle with the specified x/y/width/height/arcWidth/arcHeight.
+   * @public
+   *
+   * @param {x} number
+   * @param {y} number
+   * @param {width} number
+   * @param {height} number
+   * @param {arcWidth} number
+   * @param {arcHeight} number
+   * @param {Object} [options]
+   * @returns {Rectangle}
+   */
   Rectangle.roundedRect = function( x, y, width, height, arcWidth, arcHeight, options ) {
     return new Rectangle( x, y, width, height, arcWidth, arcHeight, options );
   };
 
+  /**
+   * Creates a rectangle x/y/width/height matching the specified bounds.
+   * @public
+   *
+   * @param {Bounds2} bounds
+   * @param {Object} [options]
+   * @returns {Rectangle}
+   */
   Rectangle.bounds = function( bounds, options ) {
     return new Rectangle( bounds.minX, bounds.minY, bounds.width, bounds.height, 0, 0, options );
   };
 
+  /**
+   * Creates a rounded rectangle x/y/width/height matching the specified bounds (Rectangle.bounds, but with additional
+   * arcWidth and arcHeight).
+   * @public
+   *
+   * @param {Bounds2} bounds
+   * @param {number} arcWidth
+   * @param {number} arcHeight
+   * @param {Object} [options]
+   * @returns {Rectangle}
+   */
   Rectangle.roundedBounds = function( bounds, arcWidth, arcHeight, options ) {
     return new Rectangle( bounds.minX, bounds.minY, bounds.width, bounds.height, arcWidth, arcHeight, options );
+  };
+
+  /**
+   * Creates a rectangle with top/left of (0,0) with the specified {Dimension2}'s width and height.
+   * @public
+   *
+   * @param {Dimension2} dimension
+   * @param {Object} [options]
+   * @returns {Rectangle}
+   */
+  Rectangle.dimension = function( dimension, options ) {
+    return new Rectangle( 0, 0, dimension.width, dimension.height, 0, 0, options );
   };
 
   /*---------------------------------------------------------------------------*
