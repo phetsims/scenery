@@ -50,15 +50,7 @@ define( function( require ) {
     this._strokedShape = null;
 
     // @private {String}, one of 'accurate', 'unstroked', 'tightPadding', 'safePadding', 'none'
-    // boundsMethod determines how our (self) bounds are computed, and can particularly determine how expensive
-    // to compute our bounds are if we are stroked. There are the following options:
-    // 'accurate' - Always uses the most accurate way of getting bounds
-    // 'unstroked' - Ignores any stroke, just gives the filled bounds.
-    //               If there is a stroke, the bounds will be marked as inaccurate
-    // 'tightPadding' - Pads the filled bounds by enough to cover everything except mitered joints.
-    //                   If there is a stroke, the bounds wil be marked as inaccurate.
-    // 'safePadding' - Pads the filled bounds by enough to cover all line joins/caps.
-    // 'none' - Returns Bounds2.NOTHING. The bounds will be marked as inaccurate.
+    // See setBoundsMethod for details.
     this._boundsMethod = 'accurate'; // 'accurate', 'unstroked', 'tightPadding', 'safePadding', 'none'
 
     // If a parameter object is not provided, create an empty one
@@ -265,6 +257,22 @@ define( function( require ) {
       return changed;
     },
 
+    /**
+     * Sets the bounds method for the Path. This determines how our (self) bounds are computed, and can particularly
+     * determine how expensive to compute our bounds are if we have a stroke.
+     * @public
+     *
+     * There are the following options:
+     * - 'accurate' - Always uses the most accurate way of getting bounds. Computes the exact stroked bounds.
+     * - 'unstroked' - Ignores any stroke, just gives the filled bounds.
+     *                 If there is a stroke, the bounds will be marked as inaccurate
+     * - 'tightPadding' - Pads the filled bounds by enough to cover everything except mitered joints.
+     *                     If there is a stroke, the bounds wil be marked as inaccurate.
+     * - 'safePadding' - Pads the filled bounds by enough to cover all line joins/caps.
+     * - 'none' - Returns Bounds2.NOTHING. The bounds will be marked as inaccurate.
+     *
+     * @param {string} boundsMethod - one of 'accurate', 'unstroked', 'tightPadding', 'safePadding' or 'none'
+     */
     setBoundsMethod: function( boundsMethod ) {
       assert && assert( boundsMethod === 'accurate' ||
                         boundsMethod === 'unstroked' ||
@@ -283,12 +291,25 @@ define( function( require ) {
     },
     set boundsMethod( value ) { return this.setBoundsMethod( value ); },
 
+    /**
+     * Returns the curent bounds method. See setBoundsMethod for details.
+     * @public
+     *
+     * @returns {string}
+     */
     getBoundsMethod: function() {
       return this._boundsMethod;
     },
     get boundsMethod() { return this.getBoundsMethod(); },
 
-    // separated out, so that we can override this with a faster version in subtypes. includes the Stroke, if any
+    /**
+     * Computes the bounds of the Path (or subtype when overridden). Meant to be overridden in subtypes for more
+     * efficient bounds computations (but this will work as a fallback). Includes the stroked region if there is a
+     * stroke applied to the Path.
+     * @public
+     *
+     * @returns {Bounds2}
+     */
     computeShapeBounds: function() {
       // boundsMethod: 'none' will return no bounds
       if ( this._boundsMethod === 'none' ) {
@@ -326,7 +347,14 @@ define( function( require ) {
       }
     },
 
-    // @override
+    /**
+     * @override
+     *
+     * If we use certain bounds methods, our self bounds may not cover the entire painted area, thus we need to mark
+     * this node's self bounds as not valid.
+     *
+     * @returns {boolean}
+     */
     areSelfBoundsValid: function() {
       if ( this._boundsMethod === 'accurate' || this._boundsMethod === 'safePadding' ) {
         return true;
@@ -339,12 +367,20 @@ define( function( require ) {
       }
     },
 
-    // @override
+    /**
+     * @override
+     *
+     * @param {Matrix3} matrix
+     * @returns {Bounds2}
+     */
     getTransformedSelfBounds: function( matrix ) {
       return ( this._stroke ? this.getStrokedShape() : this.getShape() ).getBoundsWithTransform( matrix );
     },
 
-    // hook stroke mixin changes to invalidation
+    /**
+     * Paintable mix-in calls this invalidation typically.
+     * @public (scenery-internal)
+     */
     invalidateStroke: function() {
       this.invalidatePath();
       this.trigger0( 'selfBoundsValid' ); // Stroke changing could have changed our self-bounds-validitity (unstroked/etc)
