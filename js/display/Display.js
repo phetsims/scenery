@@ -1559,7 +1559,72 @@ define( function( require ) {
         displayCanvas.parentNode.replaceChild( displayImg, displayCanvas );
       }
 
-      Display.elementToSVGDataURL( doc.documentElement, this.width, this.height, callback );
+      var displayWidth = this.width;
+      var displayHeight = this.height;
+      var completeFunction = function() {
+        Display.elementToSVGDataURL( doc.documentElement, displayWidth, displayHeight, callback );
+      };
+
+      // Convert each <image>'s xlink:href so that it's a data URL with the relevant data, e.g.
+      // <image ... xlink:href="http://localhost:8080/scenery-phet/images/battery-D-cell.png?bust=1476308407988"/>
+      // gets replaced with a data URL.
+      // See https://github.com/phetsims/scenery/issues/573
+      var replacedImages = 0; // Count how many images get replaced. We'll decrement with each finished image.
+      var hasReplacedImages = false; // Whether any images are replaced
+      var displaySVGImages = Array.prototype.slice.call( doc.documentElement.getElementsByTagName( 'image' ) );
+      for ( var j = 0; j < displaySVGImages.length; j++ ) {
+        var displaySVGImage = displaySVGImages[ j ];
+        var currentHref = displaySVGImage.getAttribute( 'xlink:href' );
+        if ( currentHref.slice( 0, 5 ) !== 'data:' ) {
+          replacedImages++;
+          hasReplacedImages = true;
+
+          (function(){
+            // Closure variables need to be stored for each individual SVG image.
+            var refImage = new window.Image();
+            var svgImage = displaySVGImage;
+
+            refImage.onload = function() {
+              // Get a Canvas
+              var refCanvas = document.createElement( 'canvas' );
+              refCanvas.width = refImage.width;
+              refCanvas.height = refImage.height;
+              var refContext = refCanvas.getContext( '2d' );
+
+              // Draw the (now loaded) image into the Canvas
+              refContext.drawImage( refImage, 0, 0 );
+
+              // Replace the <image>'s href with the Canvas' data.
+              svgImage.setAttribute( 'xlink:href', refCanvas.toDataURL() );
+
+              // If it's the last replaced image, go to the next step
+              if ( --replacedImages === 0 ) {
+                completeFunction();
+              }
+
+              assert && assert( replacedImages >= 0 );
+            };
+            refImage.onerror = function() {
+              // NOTE: not much we can do, leave this element alone.
+
+              // If it's the last replaced image, go to the next step
+              if ( --replacedImages === 0 ) {
+                completeFunction();
+              }
+
+              assert && assert( replacedImages >= 0 );
+            };
+
+            // Kick off loading of the image.
+            refImage.src = currentHref;
+          })();
+        }
+      }
+
+      // If no images are replaced, we need to call our callback through this route.
+      if ( !hasReplacedImages ) {
+        completeFunction();
+      }
     },
 
     popupRasterization: function() {
