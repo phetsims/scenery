@@ -21,10 +21,10 @@
     var node4 = new scenery.Node();
     var node5 = new scenery.Node();
     var node6 = new scenery.Node();
-    var path0 = new scenery.Path();
-    var path1 = new scenery.Path();
-    var path2 = new scenery.Path();
-    var path3 = new scenery.Path();
+    var path0 = new scenery.Path( null );
+    var path1 = new scenery.Path( null );
+    var path2 = new scenery.Path( null );
+    var path3 = new scenery.Path( null );
     var text0 = new scenery.Text( '0!' );
     var text1 = new scenery.Text( '1!' );
     var text2 = new scenery.Text( '2!' );
@@ -507,8 +507,8 @@
     display.updateDisplay();
     var node0 = new scenery.Node();
     var node4 = new scenery.Node();
-    var path1 = new scenery.Path();
-    var path3 = new scenery.Path();
+    var path1 = new scenery.Path( null );
+    var path3 = new scenery.Path( null );
 
     path1.insertChild( 0, node4 );
     node4.insertChild( 0, path3 );
@@ -532,10 +532,10 @@
     var node4 = new scenery.Node();
     var node5 = new scenery.Node();
     var node6 = new scenery.Node();
-    var path0 = new scenery.Path();
-    var path1 = new scenery.Path();
-    var path2 = new scenery.Path();
-    var path3 = new scenery.Path();
+    var path0 = new scenery.Path( null );
+    var path1 = new scenery.Path( null );
+    var path2 = new scenery.Path( null );
+    var path3 = new scenery.Path( null );
     var text0 = new scenery.Text( '0!' );
     var text1 = new scenery.Text( '1!' );
     var text2 = new scenery.Text( '2!' );

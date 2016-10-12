@@ -1535,11 +1535,6 @@ define( function( require ) {
 
       scanForCanvases( this._rootBackbone );
 
-      var canvas = document.createElement( 'canvas' );
-      var context = canvas.getContext( '2d' );
-      canvas.width = this.width;
-      canvas.height = this.height;
-
       // Create a new document, so that we can (1) serialize it to XHTML, and (2) manipulate it independently.
       // Inspired by http://cburgmer.github.io/rasterizeHTML.js/
       var doc = document.implementation.createHTMLDocument( '' );
@@ -1564,11 +1559,34 @@ define( function( require ) {
         displayCanvas.parentNode.replaceChild( displayImg, displayCanvas );
       }
 
+      Display.elementToSVGDataURL( doc.documentElement, this.width, this.height, callback );
+    },
+
+    popupRasterization: function() {
+      this.foreignObjectRasterization( window.open );
+    }
+  }, Events.prototype ), {
+    /**
+     * Takes a given DOM element, and asynchronously renders it to a string that is a data URL representing an SVG
+     * file.
+     * @public
+     *
+     * @param {HTMLElement} domElement
+     * @param {number} width - The width of the output SVG
+     * @param {number} height - The height of the output SVG
+     * @param {function} callback - Called as callback( url: {string} ), where the URL will be the encoded SVG file.
+     */
+    elementToSVGDataURL: function( domElement, width, height, callback ) {
+      var canvas = document.createElement( 'canvas' );
+      var context = canvas.getContext( '2d' );
+      canvas.width = width;
+      canvas.height = height;
+
       // Serialize it to XHTML that can be used in foreignObject (HTML can't be)
-      var xhtml = new window.XMLSerializer().serializeToString( doc.documentElement );
+      var xhtml = new window.XMLSerializer().serializeToString( domElement );
 
       // Create an SVG container with a foreignObject.
-      var data = '<svg xmlns="http://www.w3.org/2000/svg" width="' + this.width + '" height="' + this.height + '">' +
+      var data = '<svg xmlns="http://www.w3.org/2000/svg" width="' + width + '" height="' + height + '">' +
                  '<foreignObject width="100%" height="100%">' +
                  '<div xmlns="http://www.w3.org/1999/xhtml">' +
                  xhtml +
@@ -1577,7 +1595,7 @@ define( function( require ) {
                  '</svg>';
 
       // Load an <img> with the SVG data URL, and when loaded draw it into our Canvas
-      var img = new Image();
+      var img = new window.Image();
       img.onload = function() {
         context.drawImage( img, 0, 0 );
         callback( canvas.toDataURL() ); // Endpoint here
@@ -1585,14 +1603,16 @@ define( function( require ) {
       img.onerror = function() {
         callback( null );
       };
-      // turn it to base64 and wrap it in the data URL format
-      img.src = 'data:image/svg+xml;base64,' + window.btoa( data );
-    },
 
-    popupRasterization: function() {
-      this.foreignObjectRasterization( window.open );
+      // We can't btoa() arbitrary unicode, so we need another solution,
+      // see https://developer.mozilla.org/en-US/docs/Web/API/WindowBase64/Base64_encoding_and_decoding#The_.22Unicode_Problem.22
+      var uint8array = new window.TextEncoderLite( 'utf-8' ).encode( data );
+      var base64 = window.fromByteArray( uint8array );
+
+      // turn it to base64 and wrap it in the data URL format
+      img.src = 'data:image/svg+xml;base64,' + base64;
     }
-  }, Events.prototype ) );
+  } );
 
   Display.customCursors = {
     'scenery-grab-pointer': [ 'grab', '-moz-grab', '-webkit-grab', 'pointer' ],

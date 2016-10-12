@@ -528,7 +528,7 @@
     var scene = new scenery.Node();
     var display = new scenery.Display( scene );
 
-    scene.addChild( new scenery.Path() );
+    scene.addChild( new scenery.Path( null ) );
     display.updateDisplay();
 
     expect( 0 );

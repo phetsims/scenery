@@ -432,9 +432,9 @@
   } );
 
   test( 'Sceneless node handling', function() {
-    var a = new scenery.Path();
-    var b = new scenery.Path();
-    var c = new scenery.Path();
+    var a = new scenery.Path( null );
+    var b = new scenery.Path( null );
+    var c = new scenery.Path( null );
 
     a.setShape( kite.Shape.rectangle( 0, 0, 20, 20 ) );
     c.setShape( kite.Shape.rectangle( 10, 10, 30, 30 ) );
@@ -478,7 +478,7 @@
   } );
 
   test( 'ES5 Setter / Getter tests', function() {
-    var node = new scenery.Path();
+    var node = new scenery.Path( null );
     var fill = '#abcdef';
     node.fill = fill;
     equal( node.fill, fill );

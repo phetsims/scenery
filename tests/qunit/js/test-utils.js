@@ -167,13 +167,13 @@ function sceneEquals( constructionA, constructionB, message, threshold ) {
 
 function strokeEqualsFill( shapeToStroke, shapeToFill, strokeNodeSetup, message ) {
   sceneEquals( function( scene ) {
-    var node = new scenery.Path();
+    var node = new scenery.Path( null );
     node.setShape( shapeToStroke );
     node.setStroke( '#000000' );
     if ( strokeNodeSetup ) { strokeNodeSetup( node ); }
     scene.addChild( node );
   }, function( scene ) {
-    var node = new scenery.Path();
+    var node = new scenery.Path( null );
     node.setShape( shapeToFill );
     node.setFill( '#000000' );
     // node.setStroke( '#ff0000' ); // for debugging strokes
