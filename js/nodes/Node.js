@@ -127,10 +127,7 @@ define( function( require ) {
     // @private {number} - Opacity, in the range from 0 (fully transparent) to 1 (fully opaque).
     this._opacity = 1;
 
-    // @private - Whether this node (and its subtree) will allow hit-testing (and thus user interaction). Notably:
-    // pickable: null  - default. Node is only pickable if it (or an ancestor/descendant) has either an input listener or pickable: true set
-    // pickable: true - Node (and subtree) is pickable, just like if there is an input listener
-    // pickable: false  - Node is unpickable (only has an effect when underneath a node with an input listener / pickable: true set)
+    // @private {boolean|null} - See setPickable().
     this._pickable = null;
 
     // @private - Whether input event listeners on this node or descendants on a trail will have input listeners.
@@ -2214,8 +2211,35 @@ define( function( require ) {
     get opacity() { return this.getOpacity(); },
 
     /**
-     * Sets the pickability of this node (see the constructor for more detailed documentation).
+     * Sets whether this node (and its subtree) will allow hit-testing (and thus user interaction), controlling what
+     * Trail is returned from node.trailUnderPoint().
      * @public
+     *
+     * Pickable can take one of three values:
+     * - null: (default) pass-through behavior. Hit-testing will prune this subtree if there are no
+     *         ancestors/descendants with either pickable: true set or with any input listeners.
+     * - false: Hit-testing is pruned, nothing under a pickable: false will respond to events or be picked.
+     * - true: Hit-testing will not be pruned in this subtree, except for pickable: false cases.
+     *
+     * Hit testing is accomplished mainly with node.trailUnderPointer() and node.trailUnderPoint(), following the
+     * above rules. Nodes that are not pickable (pruned) will not have input events targeted to them.
+     *
+     * Thus in order for a Node (really, a Trail) to be able to receive input events:
+     * 1. If the node or one of its ancestors has pickable: false OR is invisible, the node *will not* receive events
+     *    or hit testing.
+     * 2. If the node or one of its ancestors or descendants is pickable: true OR has an input listener attached, it
+     *    *will* receive events or hit testing.
+     * 3. Otherwise, it *will not* receive events or hit testing.
+     *
+     * This is useful for semi-transparent overlays or other visual elements that should be displayed but should not
+     * prevent objects below from being manipulated by user input, and the default null value is used to increase
+     * performance by ignoring areas that don't need user input.
+     *
+     * NOTE: If you want something to be picked "mouse is over it", but block input events even if there are listeners,
+     *       then pickable:false is not appropriate, and inputEnabled:false is preferred.
+     *
+     * For a visual example of how pickability interacts with input listeners and visibility, see the notes at the
+     * bottom of http://phetsims.github.io/scenery/doc/implementation-notes, or scenery/assets/pickability.svg.
      *
      * @param {boolean|null} pickable
      */
