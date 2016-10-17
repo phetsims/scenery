@@ -15,7 +15,7 @@ define( function( require ) {
   var TObject = require( 'PHET_IO/types/TObject' );
   var toEventOnEmit = require( 'PHET_IO/events/toEventOnEmit' );
 
-  var TTandemButtonListener = function( tandemButtonListener, phetioID ) {
+  function TTandemButtonListener( tandemButtonListener, phetioID ) {
     TObject.call( this, tandemButtonListener, phetioID );
     assertInstanceOf( tandemButtonListener, phet.tandem.TandemButtonListener );
 
@@ -24,7 +24,7 @@ define( function( require ) {
     toEventOnEmit( tandemButtonListener, 'CallbacksForDownEmitter', 'user', phetioID, TTandemButtonListener, 'down' );
     toEventOnEmit( tandemButtonListener, 'CallbacksForOutEmitter', 'user', phetioID, TTandemButtonListener, 'out' );
     toEventOnEmit( tandemButtonListener, 'CallbacksForFireEmitter', 'user', phetioID, TTandemButtonListener, 'fire' );
-  };
+  }
 
   phetioInherit( TObject, 'TTandemButtonListener', TTandemButtonListener, {}, {
     documentation: 'Button listener',
