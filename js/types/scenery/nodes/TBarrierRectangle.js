@@ -3,7 +3,7 @@
 /**
  *
  * @author Sam Reid (PhET Interactive Simulations)
- * @author Andrew Adare
+ * @author Andrew Adare (PhET Interactive Simulations)
  */
 define( function( require ) {
   'use strict';
