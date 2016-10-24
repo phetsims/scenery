@@ -1,0 +1,80 @@
+<!DOCTYPE HTML>
+<!-- This is just a testing file to determine behavior of live regions.  Buttons will dynamically set
+attributes of the live region to test if it screen readers will honor these attributes after the page has
+been loaded. -->
+<html>
+<head>
+  <meta charset="utf-8"/>
+
+  <title>aria-describedby tests</title>
+</head>
+<style>
+.button {
+  background-color: white;
+  border: green;
+  color: white;
+  padding: 8px 16px;
+  text-align: center;
+  text-decoration: none;
+  display: inline-block;
+  font-size: 16px;
+  margin: 4px 2px;
+  -webkit-transition-duration: 0.4s; /* Safari */
+  transition-duration: 0.4s;
+  cursor: pointer;
+}
+
+.button {
+    background-color: white;
+    color: black;
+    border: 2px solid #BCDDD2;
+}
+
+.relevant {
+  border: 2px solid #FCB3BC;
+}
+
+.single {
+  border: 2px solid #A9B1A2;
+}
+
+.remove {
+  border: 2px solid #B895D7;
+}
+
+.button:hover {
+    background-color: #BCDDD2;
+    color: white;
+}
+
+.relevant:hover {
+  background-color: #FCB3BC;
+  color: white;
+}
+
+.single:hover {
+  background-color: #A9B1A2;
+  color: white;
+}
+
+.remove:hover {
+  background-color: #B895D7;
+  color: white;
+}
+</style>
+<body>
+  <h1>aria-describedby Test</h1>
+
+  <div>
+    <h2>First button in the navigation order</h2>
+    <button>Button One</button>
+  </div>
+
+  <div>
+    <h2>Second button in the navigation order</h2>
+    <button aria-describedby='description'>Button 2</button>
+    <p id='description'>aria-describedby test.  How long did VoiceOver wait to read this?</p>
+</div>
+</body>
+
+</html>
