@@ -182,6 +182,14 @@ define( function( require ) {
       return new KiteLine( this.p1, this.p2 ).intersectsBounds( bounds );
     },
 
+    /**
+     * Draws the current Node's self representation, assuming the wrapper's Canvas context is already in the local
+     * coordinate frame of this node.
+     * @protected
+     * @override
+     *
+     * @param {CanvasContextWrapper} wrapper
+     */
     canvasPaintSelf: function( wrapper ) {
       Line.LineCanvasDrawable.prototype.paintCanvas( wrapper, this );
     },
@@ -239,14 +247,38 @@ define( function( require ) {
       }
     },
 
+    /**
+     * Creates a SVG drawable for this Line.
+     * @public (scenery-internal)
+     * @override
+     *
+     * @param {number} renderer - In the bitmask format specified by Renderer, which may contain additional bit flags.
+     * @returns {SVGSelfDrawable}
+     */
     createSVGDrawable: function( renderer, instance ) {
       return Line.LineSVGDrawable.createFromPool( renderer, instance );
     },
 
+    /**
+     * Creates a Canvas drawable for this Line.
+     * @public (scenery-internal)
+     * @override
+     *
+     * @param {number} renderer - In the bitmask format specified by Renderer, which may contain additional bit flags.
+     * @returns {CanvasSelfDrawable}
+     */
     createCanvasDrawable: function( renderer, instance ) {
       return Line.LineCanvasDrawable.createFromPool( renderer, instance );
     },
 
+    /**
+     * Creates a WebGL drawable for this Line.
+     * @public (scenery-internal)
+     * @override
+     *
+     * @param {number} renderer - In the bitmask format specified by Renderer, which may contain additional bit flags.
+     * @returns {WebGLSelfDrawable}
+     */
     createWebGLDrawable: function( renderer, instance ) {
       return Line.LineWebGLDrawable.createFromPool( renderer, instance );
     },

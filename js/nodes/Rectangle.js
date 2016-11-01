@@ -366,22 +366,62 @@ define( function( require ) {
       return !this.computeShapeBounds().intersection( bounds ).isEmpty();
     },
 
+    /**
+     * Draws the current Node's self representation, assuming the wrapper's Canvas context is already in the local
+     * coordinate frame of this node.
+     * @protected
+     * @override
+     *
+     * @param {CanvasContextWrapper} wrapper
+     */
     canvasPaintSelf: function( wrapper ) {
       Rectangle.RectangleCanvasDrawable.prototype.paintCanvas( wrapper, this );
     },
 
+    /**
+     * Creates a DOM drawable for this Rectangle.
+     * @public (scenery-internal)
+     * @override
+     *
+     * @param {number} renderer - In the bitmask format specified by Renderer, which may contain additional bit flags.
+     * @returns {DOMSelfDrawable}
+     */
     createDOMDrawable: function( renderer, instance ) {
       return Rectangle.RectangleDOMDrawable.createFromPool( renderer, instance );
     },
 
+    /**
+     * Creates a SVG drawable for this Rectangle.
+     * @public (scenery-internal)
+     * @override
+     *
+     * @param {number} renderer - In the bitmask format specified by Renderer, which may contain additional bit flags.
+     * @returns {SVGSelfDrawable}
+     */
     createSVGDrawable: function( renderer, instance ) {
       return Rectangle.RectangleSVGDrawable.createFromPool( renderer, instance );
     },
 
+    /**
+     * Creates a Canvas drawable for this Rectangle.
+     * @public (scenery-internal)
+     * @override
+     *
+     * @param {number} renderer - In the bitmask format specified by Renderer, which may contain additional bit flags.
+     * @returns {CanvasSelfDrawable}
+     */
     createCanvasDrawable: function( renderer, instance ) {
       return Rectangle.RectangleCanvasDrawable.createFromPool( renderer, instance );
     },
 
+    /**
+     * Creates a WebGL drawable for this Rectangle.
+     * @public (scenery-internal)
+     * @override
+     *
+     * @param {number} renderer - In the bitmask format specified by Renderer, which may contain additional bit flags.
+     * @returns {WebGLSelfDrawable}
+     */
     createWebGLDrawable: function( renderer, instance ) {
       return Rectangle.RectangleWebGLDrawable.createFromPool( renderer, instance );
     },

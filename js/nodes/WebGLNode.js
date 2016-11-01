@@ -107,6 +107,14 @@ define( function( require ) {
       return false;
     },
 
+    /**
+     * Draws the current Node's self representation, assuming the wrapper's Canvas context is already in the local
+     * coordinate frame of this node.
+     * @protected
+     * @override
+     *
+     * @param {CanvasContextWrapper} wrapper
+     */
     canvasPaintSelf: function( wrapper ) {
       // TODO: see https://github.com/phetsims/scenery/issues/308
       assert && assert( 'unimplemented: canvasPaintSelf in WebGLNode' );
@@ -146,6 +154,14 @@ define( function( require ) {
       wrapper.context.restore();
     },
 
+    /**
+     * Creates a WebGL drawable for this WebGLNode.
+     * @public (scenery-internal)
+     * @override
+     *
+     * @param {number} renderer - In the bitmask format specified by Renderer, which may contain additional bit flags.
+     * @returns {WebGLSelfDrawable}
+     */
     createWebGLDrawable: function( renderer, instance ) {
       return WebGLNode.WebGLNodeDrawable.createFromPool( renderer, instance );
     },

@@ -113,6 +113,14 @@ define( function( require ) {
       return this._container;
     },
 
+    /**
+     * Creates a DOM drawable for this DOM node.
+     * @public (scenery-internal)
+     * @override
+     *
+     * @param {number} renderer - In the bitmask format specified by Renderer, which may contain additional bit flags.
+     * @returns {DOMSelfDrawable}
+     */
     createDOMDrawable: function( renderer, instance ) {
       return DOM.DOMDrawable.createFromPool( renderer, instance );
     },

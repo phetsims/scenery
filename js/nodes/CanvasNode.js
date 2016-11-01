@@ -68,6 +68,14 @@ define( function( require ) {
       }
     },
 
+    /**
+     * Draws the current Node's self representation, assuming the wrapper's Canvas context is already in the local
+     * coordinate frame of this node.
+     * @protected
+     * @override
+     *
+     * @param {CanvasContextWrapper} wrapper
+     */
     canvasPaintSelf: function( wrapper ) {
       this.paintCanvas( wrapper.context );
     },
@@ -79,6 +87,14 @@ define( function( require ) {
       // throw new Error( 'CanvasNode needs containsPointSelf implemented' );
     },
 
+    /**
+     * Creates a Canvas drawable for this CanvasNode.
+     * @public (scenery-internal)
+     * @override
+     *
+     * @param {number} renderer - In the bitmask format specified by Renderer, which may contain additional bit flags.
+     * @returns {CanvasSelfDrawable}
+     */
     createCanvasDrawable: function( renderer, instance ) {
       return CanvasNode.CanvasNodeDrawable.createFromPool( renderer, instance );
     },
@@ -136,5 +152,3 @@ define( function( require ) {
 
   return CanvasNode;
 } );
-
-

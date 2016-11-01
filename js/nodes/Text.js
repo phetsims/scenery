@@ -261,22 +261,62 @@ define( function( require ) {
       this.invalidateText();
     },
 
+    /**
+     * Draws the current Node's self representation, assuming the wrapper's Canvas context is already in the local
+     * coordinate frame of this node.
+     * @protected
+     * @override
+     *
+     * @param {CanvasContextWrapper} wrapper
+     */
     canvasPaintSelf: function( wrapper ) {
       Text.TextCanvasDrawable.prototype.paintCanvas( wrapper, this );
     },
 
+    /**
+     * Creates a DOM drawable for this Text.
+     * @public (scenery-internal)
+     * @override
+     *
+     * @param {number} renderer - In the bitmask format specified by Renderer, which may contain additional bit flags.
+     * @returns {DOMSelfDrawable}
+     */
     createDOMDrawable: function( renderer, instance ) {
       return Text.TextDOMDrawable.createFromPool( renderer, instance );
     },
 
+    /**
+     * Creates a SVG drawable for this Text.
+     * @public (scenery-internal)
+     * @override
+     *
+     * @param {number} renderer - In the bitmask format specified by Renderer, which may contain additional bit flags.
+     * @returns {SVGSelfDrawable}
+     */
     createSVGDrawable: function( renderer, instance ) {
       return Text.TextSVGDrawable.createFromPool( renderer, instance );
     },
 
+    /**
+     * Creates a Canvas drawable for this Text.
+     * @public (scenery-internal)
+     * @override
+     *
+     * @param {number} renderer - In the bitmask format specified by Renderer, which may contain additional bit flags.
+     * @returns {CanvasSelfDrawable}
+     */
     createCanvasDrawable: function( renderer, instance ) {
       return Text.TextCanvasDrawable.createFromPool( renderer, instance );
     },
 
+    /**
+     * Creates a WebGL drawable for this Text.
+     * @public (scenery-internal)
+     * @override
+     *
+     * @param {number} renderer - In the bitmask format specified by Renderer, which may contain additional bit flags.
+     * @returns {WebGLSelfDrawable}
+     */
     createWebGLDrawable: function( renderer, instance ) {
       return Text.TextWebGLDrawable.createFromPool( renderer, instance );
     },

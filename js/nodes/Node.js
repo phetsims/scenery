@@ -3253,6 +3253,9 @@ define( function( require ) {
      * To be overridden in paintable node types. Should hook into the drawable's prototype (presumably).
      * @protected
      *
+     * Draws the current Node's self representation, assuming the wrapper's Canvas context is already in the local
+     * coordinate frame of this node.
+     *
      * @param {CanvasContextWrapper} wrapper
      */
     canvasPaintSelf: function( wrapper ) {
@@ -3551,6 +3554,62 @@ define( function( require ) {
       }, x, y, width, height );
       assert && assert( result, 'toDataURLNodeSynchronous requires that the node can be rendered only using Canvas' );
       return result;
+    },
+
+    /**
+     * Creates a DOM drawable for this Node's self representation.
+     * @public (scenery-internal)
+     *
+     * Implemented by subtypes that support DOM self drawables. There is no need to implement this for subtypes that
+     * do not allow the DOM renderer (not set in its rendererBitmask).
+     *
+     * @param {number} renderer - In the bitmask format specified by Renderer, which may contain additional bit flags.
+     * @returns {DOMSelfDrawable}
+     */
+    createDOMDrawable: function( renderer, instance ) {
+      throw new Error( 'createDOMDrawable is abstract. The subtype should either override this method, or not support the DOM renderer' );
+    },
+
+    /**
+     * Creates an SVG drawable for this Node's self representation.
+     * @public (scenery-internal)
+     *
+     * Implemented by subtypes that support SVG self drawables. There is no need to implement this for subtypes that
+     * do not allow the SVG renderer (not set in its rendererBitmask).
+     *
+     * @param {number} renderer - In the bitmask format specified by Renderer, which may contain additional bit flags.
+     * @returns {SVGSelfDrawable}
+     */
+    createSVGDrawable: function( renderer, instance ) {
+      throw new Error( 'createSVGDrawable is abstract. The subtype should either override this method, or not support the DOM renderer' );
+    },
+
+    /**
+     * Creates a Canvas drawable for this Node's self representation.
+     * @public (scenery-internal)
+     *
+     * Implemented by subtypes that support Canvas self drawables. There is no need to implement this for subtypes that
+     * do not allow the Canvas renderer (not set in its rendererBitmask).
+     *
+     * @param {number} renderer - In the bitmask format specified by Renderer, which may contain additional bit flags.
+     * @returns {CanvasSelfDrawable}
+     */
+    createCanvasDrawable: function( renderer, instance ) {
+      throw new Error( 'createCanvasDrawable is abstract. The subtype should either override this method, or not support the DOM renderer' );
+    },
+
+    /**
+     * Creates a WebGL drawable for this Node's self representation.
+     * @public (scenery-internal)
+     *
+     * Implemented by subtypes that support WebGL self drawables. There is no need to implement this for subtypes that
+     * do not allow the WebGL renderer (not set in its rendererBitmask).
+     *
+     * @param {number} renderer - In the bitmask format specified by Renderer, which may contain additional bit flags.
+     * @returns {WebGLSelfDrawable}
+     */
+    createWebGLDrawable: function( renderer, instance ) {
+      throw new Error( 'createWebGLDrawable is abstract. The subtype should either override this method, or not support the DOM renderer' );
     },
 
     /*---------------------------------------------------------------------------*

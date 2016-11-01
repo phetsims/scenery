@@ -610,22 +610,62 @@ define( function( require ) {
       return true;
     },
 
+    /**
+     * Draws the current Node's self representation, assuming the wrapper's Canvas context is already in the local
+     * coordinate frame of this node.
+     * @protected
+     * @override
+     *
+     * @param {CanvasContextWrapper} wrapper
+     */
     canvasPaintSelf: function( wrapper ) {
       Image.ImageCanvasDrawable.prototype.paintCanvas( wrapper, this );
     },
 
+    /**
+     * Creates a DOM drawable for this Image.
+     * @public (scenery-internal)
+     * @override
+     *
+     * @param {number} renderer - In the bitmask format specified by Renderer, which may contain additional bit flags.
+     * @returns {DOMSelfDrawable}
+     */
     createDOMDrawable: function( renderer, instance ) {
       return Image.ImageDOMDrawable.createFromPool( renderer, instance );
     },
 
+    /**
+     * Creates a SVG drawable for this Image.
+     * @public (scenery-internal)
+     * @override
+     *
+     * @param {number} renderer - In the bitmask format specified by Renderer, which may contain additional bit flags.
+     * @returns {SVGSelfDrawable}
+     */
     createSVGDrawable: function( renderer, instance ) {
       return Image.ImageSVGDrawable.createFromPool( renderer, instance );
     },
 
+    /**
+     * Creates a Canvas drawable for this Image.
+     * @public (scenery-internal)
+     * @override
+     *
+     * @param {number} renderer - In the bitmask format specified by Renderer, which may contain additional bit flags.
+     * @returns {CanvasSelfDrawable}
+     */
     createCanvasDrawable: function( renderer, instance ) {
       return Image.ImageCanvasDrawable.createFromPool( renderer, instance );
     },
 
+    /**
+     * Creates a WebGL drawable for this Image.
+     * @public (scenery-internal)
+     * @override
+     *
+     * @param {number} renderer - In the bitmask format specified by Renderer, which may contain additional bit flags.
+     * @returns {WebGLSelfDrawable}
+     */
     createWebGLDrawable: function( renderer, instance ) {
       return Image.ImageWebGLDrawable.createFromPool( renderer, instance );
     },

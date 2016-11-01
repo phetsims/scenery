@@ -386,22 +386,60 @@ define( function( require ) {
       this.trigger0( 'selfBoundsValid' ); // Stroke changing could have changed our self-bounds-validitity (unstroked/etc)
     },
 
+    /**
+     * Returns whether this Path has an associated Shape (instead of no shape, represented by null)
+     * @public
+     *
+     * @returns {boolean}
+     */
     hasShape: function() {
-      return this._shape;
+      return !!this._shape;
     },
 
+    /**
+     * Draws the current Node's self representation, assuming the wrapper's Canvas context is already in the local
+     * coordinate frame of this node.
+     * @protected
+     * @override
+     *
+     * @param {CanvasContextWrapper} wrapper
+     */
     canvasPaintSelf: function( wrapper ) {
       Path.PathCanvasDrawable.prototype.paintCanvas( wrapper, this );
     },
 
+    /**
+     * Creates a SVG drawable for this Path.
+     * @public (scenery-internal)
+     * @override
+     *
+     * @param {number} renderer - In the bitmask format specified by Renderer, which may contain additional bit flags.
+     * @returns {SVGSelfDrawable}
+     */
     createSVGDrawable: function( renderer, instance ) {
       return Path.PathSVGDrawable.createFromPool( renderer, instance );
     },
 
+    /**
+     * Creates a Canvas drawable for this Path.
+     * @public (scenery-internal)
+     * @override
+     *
+     * @param {number} renderer - In the bitmask format specified by Renderer, which may contain additional bit flags.
+     * @returns {CanvasSelfDrawable}
+     */
     createCanvasDrawable: function( renderer, instance ) {
       return Path.PathCanvasDrawable.createFromPool( renderer, instance );
     },
 
+    /**
+     * Creates a WebGL drawable for this Path.
+     * @public (scenery-internal)
+     * @override
+     *
+     * @param {number} renderer - In the bitmask format specified by Renderer, which may contain additional bit flags.
+     * @returns {WebGLSelfDrawable}
+     */
     createWebGLDrawable: function( renderer, instance ) {
       return Path.PathWebGLDrawable.createFromPool( renderer, instance );
     },
