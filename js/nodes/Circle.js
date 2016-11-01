@@ -1,8 +1,7 @@
 // Copyright 2013-2015, University of Colorado Boulder
 
 /**
- * A circular node that inherits Path, and allows for optimized drawing,
- * and improved parameter handling.
+ * A circular node that inherits Path, and allows for optimized drawing and improved parameter handling.
  *
  * @author Jonathan Olson <jonathan.olson@colorado.edu>
  */
@@ -180,12 +179,17 @@ define( function( require ) {
       return 'new scenery.Circle( ' + this._radius + ', {' + propLines + '} )';
     },
 
-    getRadius: function() {
-      return this._radius;
-    },
-
+    /**
+     * Sets the radius of the circle.
+     * @public
+     *
+     * @param {number} radius
+     * @returns {Circle} - 'this' reference, for chaining
+     */
     setRadius: function( radius ) {
       assert && assert( typeof radius === 'number', 'Circle.radius must be a number' );
+      assert && assert( radius >= 0, 'A circle needs a non-negative radius' );
+      assert && assert( isFinite( radius ), 'A circle needs a finite radius' );
 
       if ( this._radius !== radius ) {
         this._radius = radius;
@@ -198,6 +202,18 @@ define( function( require ) {
       }
       return this;
     },
+    set radius( value ) { return this.setRadius( value ); },
+
+    /**
+     * Returns the radius of the circle.
+     * @public
+     *
+     * @returns {number} - The radius of the circle
+     */
+    getRadius: function() {
+      return this._radius;
+    },
+    get radius() { return this.getRadius(); },
 
     /**
      * Computes the bounds of the Circle, including any applied stroke. Overridden for efficiency.
@@ -253,9 +269,6 @@ define( function( require ) {
         return false; // neither stroke nor fill is pickable
       }
     },
-
-    get radius() { return this.getRadius(); },
-    set radius( value ) { return this.setRadius( value ); },
 
     setShape: function( shape ) {
       if ( shape !== null ) {
