@@ -814,6 +814,7 @@ define( function( require ) {
         }
       }
 
+      // TODO: document!
       if ( proto.invalidateStroke ) {
         var subtypeInvalidateStroke = proto.invalidateStroke;
         proto.invalidateStroke = function() {
