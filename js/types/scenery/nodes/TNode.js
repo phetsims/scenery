@@ -73,6 +73,18 @@ define( function( require ) {
       documentation: 'Adds a listener for when pickability of the node changes'
     },
 
+    addVisibleListener: {
+      returnType: TVoid,
+      parameterTypes: [ TFunctionWrapper( TVoid, [ TBoolean ] ) ],
+      implementation: function( callback ) {
+        var inst = this.instance;
+        this.instance.on( 'visibility', function() {
+          callback( inst.isVisible() );
+        } );
+      },
+      documentation: 'Adds a listener for when visibility of the node changes'
+    },
+
     setOpacity: {
       returnType: TVoid,
       parameterTypes: [ TNumber() ],
