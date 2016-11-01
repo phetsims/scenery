@@ -2628,31 +2628,6 @@ define( function( require ) {
     },
     get accessibleContent() { return this.getAccessibleContent(); },
 
-    // @deprecated
-    supportsCanvas: function() {
-      return ( this._rendererBitmask & Renderer.bitmaskCanvas ) !== 0;
-    },
-
-    // @deprecated
-    supportsSVG: function() {
-      return ( this._rendererBitmask & Renderer.bitmaskSVG ) !== 0;
-    },
-
-    // @deprecated
-    supportsDOM: function() {
-      return ( this._rendererBitmask & Renderer.bitmaskDOM ) !== 0;
-    },
-
-    // @deprecated
-    supportsWebGL: function() {
-      return ( this._rendererBitmask & Renderer.bitmaskWebGL ) !== 0;
-    },
-
-    // @deprecated
-    supportsRenderer: function( renderer ) {
-      return ( this._rendererBitmask & renderer.bitmask ) !== 0;
-    },
-
     /**
      * Sets what self renderers (and other bitmask flags) are supported by this node.
      * @protected
