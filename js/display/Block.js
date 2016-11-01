@@ -27,6 +27,7 @@ define( function( require ) {
     /**
      * @param {Display} display
      * @param {number} renderer
+     * @returns {Block} - Returns 'this' reference, for chaining
      */
     initializeBlock: function( display, renderer ) {
       this.initializeDrawable( renderer );

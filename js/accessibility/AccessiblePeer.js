@@ -38,6 +38,7 @@ define( function( require ) {
      * @param {AccessibleInstance} accessibleInstance
      * @param {DOMElement} domElement - The main DOM element used for this peer.
      * @param {Object} [options]
+     * @returns {AccessiblePeer} - Returns 'this' reference, for chaining
      */
     initializeAccessiblePeer: function( accessibleInstance, domElement, options ) {
       var self = this;

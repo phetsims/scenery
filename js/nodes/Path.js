@@ -158,9 +158,11 @@ define( function( require ) {
     getStrokedShape: function() {
       assert && assert( this.hasShape(), 'We cannot stroke a non-existing shape' );
 
+      // Lazily compute the stroked shape. It should be set to null when we need to recompute it
       if ( !this._strokedShape ) {
         this._strokedShape = this.getShape().getStrokedShape( this._lineDrawingStyles );
       }
+
       return this._strokedShape;
     },
 

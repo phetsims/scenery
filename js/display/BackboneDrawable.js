@@ -46,6 +46,7 @@ define( function( require ) {
      * @param {Instance} transformRootInstance
      * @param {number} renderer
      * @param {boolean} isDisplayRoot
+     * @returns {BackboneDrawable} - Returns 'this' reference, for chaining
      */
     initialize: function( display, backboneInstance, transformRootInstance, renderer, isDisplayRoot ) {
       Drawable.call( this, renderer );

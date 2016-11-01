@@ -303,6 +303,7 @@ define( function( require ) {
       this.mutate( options );
     }
 
+    // Track allocation of nodes internally
     phetAllocation && phetAllocation( 'Node' );
   }
 
@@ -310,13 +311,20 @@ define( function( require ) {
 
   inherit( Object, Node, extend( {
     /**
-     * Inserts a child node at a specific index, see http://phetsims.github.io/scenery/doc/#node-insertChild
+     * Inserts a child node at a specific index.
      * @public
+     *
+     * node.insertChild( 0, childNode ) will insert the child into the beginning of the children array (on the bottom
+     * visually).
+     *
+     * node.insertChild( node.children.length, childNode ) is equivalent to node.addChild( childNode ), and appends it
+     * to the end (top visually) of the children array. It is recommended to use node.addChild when possible.
      *
      * NOTE: overridden by Leaf for some subtypes
      *
-     * @param {number} index
-     * @param {Node} node
+     * @param {number} index - Index where the inserted child node will be after this operation.
+     * @param {Node} node - The new child to insert.
+     * @returns {Node} - Returns 'this' reference, for chaining
      */
     insertChild: function( index, node ) {
       assert && assert( node !== null && node !== undefined, 'insertChild cannot insert a null/undefined child' );
@@ -352,10 +360,13 @@ define( function( require ) {
     },
 
     /**
-     * Appends a child node to our list of children, see http://phetsims.github.io/scenery/doc/#node-addChild
+     * Appends a child node to our list of children.
      * @public
      *
+     * The new child node will be displayed in front (on top) of all of this node's other children.
+     *
      * @param {Node} node
+     * @returns {Node} - Returns 'this' reference, for chaining
      */
     addChild: function( node ) {
       this.insertChild( this._children.length, node );
@@ -369,6 +380,7 @@ define( function( require ) {
      * @public
      *
      * @param {Node} node
+     * @returns {Node} - Returns 'this' reference, for chaining
      */
     removeChild: function( node ) {
       assert && assert( node && node instanceof Node, 'Need to call node.removeChild() with a Node.' );
@@ -387,6 +399,7 @@ define( function( require ) {
      * @public
      *
      * @param {number} index
+     * @returns {Node} - Returns 'this' reference, for chaining
      */
     removeChildAt: function( index ) {
       assert && assert( index >= 0 );
@@ -440,6 +453,8 @@ define( function( require ) {
     /**
      * Removes all children from this Node.
      * @public
+     *
+     * @returns {Node} - Returns 'this' reference, for chaining
      */
     removeAllChildren: function() {
       this.setChildren( [] );
@@ -453,6 +468,7 @@ define( function( require ) {
      * @public
      *
      * @param {Array.<Node>} children
+     * @returns {Node} - Returns 'this' reference, for chaining
      */
     setChildren: function( children ) {
       if ( this._children !== children ) {
@@ -472,8 +488,11 @@ define( function( require ) {
     set children( value ) { this.setChildren( value ); },
 
     /**
-     * Returns a defensive copy of our children.
+     * Returns a defensive copy of the array of direct children of this node, ordered by what is in front (nodes at
+     * the end of the arry are in front of nodes at the start).
      * @public
+     *
+     * Making changes to the returned result will not affect this node's children.
      *
      * @returns {Array.<Node>}
      */
@@ -494,8 +513,11 @@ define( function( require ) {
     },
 
     /**
-     * Returns a defensive copy of our parents.
+     * Returns a defensive copy of our parents. This is an array of parent nodes that is returned in no particular
+     * order (as order is not important here).
      * @public
+     *
+     * NOTE: Modifying the returned array will not in any way modify this node's parents.
      *
      * @returns {Array.<Node>}
      */
@@ -1168,6 +1190,7 @@ define( function( require ) {
      * Returns the bounding box of this Node and all of its sub-trees (in the "parent" coordinate frame).
      *
      * NOTE: Do NOT mutate the returned value!
+     * NOTE: This may require computation of this node's subtree bounds, which may incur some performance loss.
      *
      * @returns {Bounds2}
      */
@@ -1963,7 +1986,10 @@ define( function( require ) {
      * 'left' X value.
      * @public
      *
-     * @param {number} left
+     * NOTE: This may require computation of this node's subtree bounds, which may incur some performance loss.
+     *
+     * @param {number} left - After this operation, node.left should approximately equal this value.
+     * @returns {Node} - For chaining
      */
     setLeft: function( left ) {
       assert && assert( typeof left === 'number' );
@@ -1977,6 +2003,8 @@ define( function( require ) {
      * Returns the X value of the left side of the bounding box of this node (in the parent coordinate frame).
      * @public
      *
+     * NOTE: This may require computation of this node's subtree bounds, which may incur some performance loss.
+     *
      * @returns {number}
      */
     getLeft: function() {
@@ -1989,7 +2017,10 @@ define( function( require ) {
      * 'right' X value.
      * @public
      *
-     * @param {number} right
+     * NOTE: This may require computation of this node's subtree bounds, which may incur some performance loss.
+     *
+     * @param {number} right - After this operation, node.right should approximately equal this value.
+     * @returns {Node} - For chaining
      */
     setRight: function( right ) {
       assert && assert( typeof right === 'number' );
@@ -2003,6 +2034,8 @@ define( function( require ) {
      * Returns the X value of the right side of the bounding box of this node (in the parent coordinate frame).
      * @public
      *
+     * NOTE: This may require computation of this node's subtree bounds, which may incur some performance loss.
+     *
      * @returns {number}
      */
     getRight: function() {
@@ -2015,7 +2048,10 @@ define( function( require ) {
      * passed-in center X value.
      * @public
      *
-     * @param {number} x
+     * NOTE: This may require computation of this node's subtree bounds, which may incur some performance loss.
+     *
+     * @param {number} x - After this operation, node.centerX should approximately equal this value.
+     * @returns {Node} - For chaining
      */
     setCenterX: function( x ) {
       assert && assert( typeof x === 'number' );
@@ -2029,6 +2065,8 @@ define( function( require ) {
      * Returns the X value of this node's horizontal center (in the parent coordinate frame)
      * @public
      *
+     * NOTE: This may require computation of this node's subtree bounds, which may incur some performance loss.
+     *
      * @returns {number}
      */
     getCenterX: function() {
@@ -2041,7 +2079,10 @@ define( function( require ) {
      * passed-in center Y value.
      * @public
      *
-     * @param {number} y
+     * NOTE: This may require computation of this node's subtree bounds, which may incur some performance loss.
+     *
+     * @param {number} y - After this operation, node.centerY should approximately equal this value.
+     * @returns {Node} - For chaining
      */
     setCenterY: function( y ) {
       assert && assert( typeof y === 'number' );
@@ -2055,6 +2096,8 @@ define( function( require ) {
      * Returns the Y value of this node's vertical center (in the parent coordinate frame)
      * @public
      *
+     * NOTE: This may require computation of this node's subtree bounds, which may incur some performance loss.
+     *
      * @returns {number}
      */
     getCenterY: function() {
@@ -2067,8 +2110,9 @@ define( function( require ) {
      * @public
      *
      * NOTE: top is the lowest Y value in our bounds.
+     * NOTE: This may require computation of this node's subtree bounds, which may incur some performance loss.
      *
-     * @param {number} top
+     * @param {number} top - After this operation, node.top should approximately equal this value.
      */
     setTop: function( top ) {
       assert && assert( typeof top === 'number' );
@@ -2082,6 +2126,8 @@ define( function( require ) {
      * Returns the lowest Y value of this node's bounding box (in the parent coordinate frame).
      * @public
      *
+     * NOTE: This may require computation of this node's subtree bounds, which may incur some performance loss.
+     *
      * @returns {number}
      */
     getTop: function() {
@@ -2094,8 +2140,10 @@ define( function( require ) {
      * @public
      *
      * NOTE: top is the highest Y value in our bounds.
+     * NOTE: This may require computation of this node's subtree bounds, which may incur some performance loss.
      *
-     * @param {number} top
+     * @param {number} top - After this operation, node.bottom should approximately equal this value.
+     * @returns {Node} - For chaining
      */
     setBottom: function( bottom ) {
       assert && assert( typeof bottom === 'number' );
@@ -2109,6 +2157,8 @@ define( function( require ) {
      * Returns the highest Y value of this node's bounding box (in the parent coordinate frame).
      * @public
      *
+     * NOTE: This may require computation of this node's subtree bounds, which may incur some performance loss.
+     *
      * @returns {number}
      */
     getBottom: function() {
@@ -2120,6 +2170,8 @@ define( function( require ) {
      * Returns the width of this node's bounding box (in the parent coordinate frame).
      * @public
      *
+     * NOTE: This may require computation of this node's subtree bounds, which may incur some performance loss.
+     *
      * @returns {number}
      */
     getWidth: function() {
@@ -2130,6 +2182,8 @@ define( function( require ) {
     /**
      * Returns the height of this node's bounding box (in the parent coordinate frame).
      * @public
+     *
+     * NOTE: This may require computation of this node's subtree bounds, which may incur some performance loss.
      *
      * @returns {number}
      */
@@ -4029,6 +4083,8 @@ define( function( require ) {
      * NOTE: If there are multiple instances of this node (e.g. this or one ancestor has two parents), it will fail
      * with an assertion (since the transform wouldn't be uniquely defined).
      *
+     * NOTE: This requires computation of this node's subtree bounds, which may incur some performance loss.
+     *
      * @returns {Bounds2}
      */
     getGlobalBounds: function() {
@@ -4394,7 +4450,6 @@ define( function( require ) {
     }
   } ) );
 
-
   /*
    * Convenience locations
    * @public
@@ -4406,6 +4461,8 @@ define( function( require ) {
    * top  (y) | leftTop     centerTop     rightTop
    * centerY  | leftCenter  center        rightCenter
    * bottom   | leftBottom  centerBottom  rightBottom
+   *
+   * NOTE: This requires computation of this node's subtree bounds, which may incur some performance loss.
    */
 
   // assumes the getterMethod is the same for Node and Bounds2
