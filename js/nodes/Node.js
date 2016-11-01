@@ -3544,7 +3544,7 @@ define( function( require ) {
       assert && assert( height === undefined || ( typeof height === 'number' && height >= 0 && ( height % 1 === 0 ) ),
         'If provided, height should be a non-negative integer' );
 
-      var result;
+      var result = null;
       this.toCanvas( function( canvas, x, y ) {
         result = new scenery.Node( {
           children: [
