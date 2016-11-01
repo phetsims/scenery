@@ -168,6 +168,16 @@ define( function( require ) {
       this.invalidatePath();
     },
 
+    /**
+     * Computes whether the provided point is "inside" (contained) in this Line's self content, or "outside".
+     * @protected
+     * @override
+     *
+     * Since an unstroked Line contains no area, we can quickly shortcut this operation.
+     *
+     * @param {Vector2} point - Considered to be in the local coordinate frame
+     * @returns {boolean}
+     */
     containsPointSelf: function( point ) {
       if ( this._strokePickable ) {
         return Path.prototype.containsPointSelf.call( this, point );
@@ -177,6 +187,13 @@ define( function( require ) {
       }
     },
 
+    /**
+     * Returns whether this Line's selfBounds is intersected by the specified bounds.
+     * @public
+     *
+     * @param {Bounds2} bounds - Bounds to test, assumed to be in the local coordinate frame.
+     * @returns {boolean}
+     */
     intersectsBoundsSelf: function( bounds ) {
       // TODO: optimization
       return new KiteLine( this.p1, this.p2 ).intersectsBounds( bounds );
@@ -194,6 +211,13 @@ define( function( require ) {
       Line.LineCanvasDrawable.prototype.paintCanvas( wrapper, this );
     },
 
+    /**
+     * Computes the bounds of the Line, including any applied stroke. Overridden for efficiency.
+     * @public
+     * @override
+     *
+     * @returns {Bounds2}
+     */
     computeShapeBounds: function() {
       // optimized form for a single line segment (no joins, just two caps)
       if ( this._stroke ) {
@@ -283,6 +307,14 @@ define( function( require ) {
       return Line.LineWebGLDrawable.createFromPool( renderer, instance );
     },
 
+    /**
+     * Returns a string containing constructor information for Node.string().
+     * @protected
+     * @override
+     *
+     * @param {string} propLines - A string representing the options properties that need to be set.
+     * @returns {string}
+     */
     getBasicConstructor: function( propLines ) {
       return 'new scenery.Line( ' + this._x1 + ', ' + this._y1 + ', ' + this._x1 + ', ' + this._y1 + ', {' + propLines + '} )';
     },

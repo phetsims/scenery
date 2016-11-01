@@ -75,11 +75,14 @@ define( function( require ) {
     get canvasBounds() { return this.getSelfBounds(); },
 
     /**
+     * Whether this Node itself is painted (displays something itself).
+     * @public
      * @override
      *
-     * @returns {boolean} - Whether this node is painted (always is!)
+     * @returns {boolean}
      */
     isPainted: function() {
+      // Always true for WebGL nodes
       return true;
     },
 
@@ -96,11 +99,13 @@ define( function( require ) {
     },
 
     /**
-     * Whether a given point is contained inside this node. For WebGLNode, we default to false always (you will need to
-     * override this method if you want your WebGLNode to respond to user input).
+     * Computes whether the provided point is "inside" (contained) in this Node's self content, or "outside".
+     * @protected
      * @override
      *
-     * @param {Vector2} point
+     * If WebGLNode subtypes want to support being picked or hit-tested, it should override this function.
+     *
+     * @param {Vector2} point - Considered to be in the local coordinate frame
      * @returns {boolean}
      */
     containsPointSelf: function( point ) {
@@ -166,6 +171,14 @@ define( function( require ) {
       return WebGLNode.WebGLNodeDrawable.createFromPool( renderer, instance );
     },
 
+    /**
+     * Returns a string containing constructor information for Node.string().
+     * @protected
+     * @override
+     *
+     * @param {string} propLines - A string representing the options properties that need to be set.
+     * @returns {string}
+     */
     getBasicConstructor: function( propLines ) {
       return 'new scenery.WebGLNode( {' + propLines + '} )'; // TODO: no real way to do this nicely?
     }

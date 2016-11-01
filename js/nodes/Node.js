@@ -1278,6 +1278,7 @@ define( function( require ) {
      * @returns {boolean}
      */
     isPainted: function() {
+      // Normal nodes don't render anything
       return false;
     },
 
@@ -4151,8 +4152,10 @@ define( function( require ) {
     },
 
     /**
-     * Override for extra information in the debugging output
+     * Override for extra information in the debugging output (from Display.getDebugHTML()).
      * @protected (scenery-internal)
+     *
+     * @returns {string}
      */
     getDebugHTMLExtras: function() {
       return '';
@@ -4175,7 +4178,7 @@ define( function( require ) {
      * Returns a constructor template for toString(). Meant to be overridden by subtypes.
      * @protected (scenery-internal)
      *
-     * @param {string} propLines - What is included.
+     * @param {string} propLines - A string representing the options properties that need to be set.
      */
     getBasicConstructor: function( propLines ) {
       return 'new scenery.Node( {' + propLines + '} )';

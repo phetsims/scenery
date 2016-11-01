@@ -78,6 +78,13 @@ define( function( require ) {
       return Shape.circle( 0, 0, this._radius ).makeImmutable();
     },
 
+    /**
+     * Returns whether this Circle's selfBounds is intersected by the specified bounds.
+     * @public
+     *
+     * @param {Bounds2} bounds - Bounds to test, assumed to be in the local coordinate frame.
+     * @returns {boolean}
+     */
     intersectsBoundsSelf: function( bounds ) {
       // TODO: handle intersection with somewhat-infinite bounds!
       var x = Math.abs( bounds.centerX );
@@ -161,6 +168,14 @@ define( function( require ) {
       return Circle.CircleWebGLDrawable.createFromPool( renderer, instance );
     },
 
+    /**
+     * Returns a string containing constructor information for Node.string().
+     * @protected
+     * @override
+     *
+     * @param {string} propLines - A string representing the options properties that need to be set.
+     * @returns {string}
+     */
     getBasicConstructor: function( propLines ) {
       return 'new scenery.Circle( ' + this._radius + ', {' + propLines + '} )';
     },
@@ -184,6 +199,13 @@ define( function( require ) {
       return this;
     },
 
+    /**
+     * Computes the bounds of the Circle, including any applied stroke. Overridden for efficiency.
+     * @public
+     * @override
+     *
+     * @returns {Bounds2}
+     */
     computeShapeBounds: function() {
       var bounds = new Bounds2( -this._radius, -this._radius, this._radius, this._radius );
       if ( this._stroke ) {
@@ -193,7 +215,16 @@ define( function( require ) {
       return bounds;
     },
 
-    // accelerated hit detection
+    /**
+     * Computes whether the provided point is "inside" (contained) in this Circle's self content, or "outside".
+     * @protected
+     * @override
+     *
+     * Exists to optimize hit detection, as it's quick to compute for circles.
+     *
+     * @param {Vector2} point - Considered to be in the local coordinate frame
+     * @returns {boolean}
+     */
     containsPointSelf: function( point ) {
       var magSq = point.x * point.x + point.y * point.y;
       var result = true;

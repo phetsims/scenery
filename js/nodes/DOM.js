@@ -125,7 +125,15 @@ define( function( require ) {
       return DOM.DOMDrawable.createFromPool( renderer, instance );
     },
 
+    /**
+     * Whether this Node itself is painted (displays something itself).
+     * @public
+     * @override
+     *
+     * @returns {boolean}
+     */
     isPainted: function() {
+      // Always true for DOM nodes
       return true;
     },
 
@@ -188,10 +196,26 @@ define( function( require ) {
     set preventTransform( value ) { this.setPreventTransform( value ); },
     get preventTransform() { return this.isTransformPrevented(); },
 
+    /**
+     * Returns a string containing constructor information for Node.string().
+     * @protected
+     * @override
+     *
+     * @param {string} propLines - A string representing the options properties that need to be set.
+     * @returns {string}
+     */
     getBasicConstructor: function( propLines ) {
       return 'new scenery.DOM( $( \'' + escapeHTML( this._container.innerHTML.replace( /'/g, '\\\'' ) ) + '\' ), {' + propLines + '} )';
     },
 
+    /**
+     * Returns the property object string for use with toString().
+     * @protected (scenery-internal)
+     * @override
+     *
+     * @param {string} spaces - Whitespace to add
+     * @param {boolean} [includeChildren]
+     */
     getPropString: function( spaces, includeChildren ) {
       var result = Node.prototype.getPropString.call( this, spaces, includeChildren );
       if ( this.interactive ) {

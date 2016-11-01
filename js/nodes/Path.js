@@ -244,9 +244,11 @@ define( function( require ) {
     },
 
     /**
+     * Computes a more efficient selfBounds for our Path.
+     * @protected
      * @override
      *
-     * @returns {boolean}
+     * @returns {boolean} - Whether the self bounds changed.
      */
     updateSelfBounds: function() {
       var selfBounds = this.hasShape() ? this.computeShapeBounds() : Bounds2.NOTHING;
@@ -348,10 +350,12 @@ define( function( require ) {
     },
 
     /**
+     * Whether this Node's selfBounds are considered to be valid (always containing the displayed self content
+     * of this node). Meant to be overridden in subtypes when this can change (e.g. Text).
+     * @public
      * @override
      *
-     * If we use certain bounds methods, our self bounds may not cover the entire painted area, thus we need to mark
-     * this node's self bounds as not valid.
+     * If this value would potentially change, please trigger the event 'selfBoundsValid'.
      *
      * @returns {boolean}
      */
@@ -368,6 +372,8 @@ define( function( require ) {
     },
 
     /**
+     * Returns our self bounds when our rendered self is transformed by the matrix.
+     * @public
      * @override
      *
      * @param {Matrix3} matrix
@@ -378,8 +384,9 @@ define( function( require ) {
     },
 
     /**
-     * Paintable mix-in calls this invalidation typically.
-     * @public (scenery-internal)
+     * Called from (and overridden in) the Paintable mixin, invalidates our current stroke, triggering recomputation of
+     * anything that depended on the old stroke's value.
+     * @protected (scenery-internal)
      */
     invalidateStroke: function() {
       this.invalidatePath();
@@ -444,12 +451,26 @@ define( function( require ) {
       return Path.PathWebGLDrawable.createFromPool( renderer, instance );
     },
 
+    /**
+     * Whether this Node itself is painted (displays something itself).
+     * @public
+     * @override
+     *
+     * @returns {boolean}
+     */
     isPainted: function() {
+      // Always true for Path nodes
       return true;
     },
 
-    // override for computation of whether a point is inside the self content
-    // point is considered to be in the local coordinate frame
+    /**
+     * Computes whether the provided point is "inside" (contained) in this Path's self content, or "outside".
+     * @protected
+     * @override
+     *
+     * @param {Vector2} point - Considered to be in the local coordinate frame
+     * @returns {boolean}
+     */
     containsPointSelf: function( point ) {
       var result = false;
       if ( !this.hasShape() ) {
@@ -468,13 +489,25 @@ define( function( require ) {
       return result;
     },
 
-    // whether this node's self intersects the specified bounds, in the local coordinate frame
+    /**
+     * Returns whether this Path's selfBounds is intersected by the specified bounds.
+     * @public
+     *
+     * @param {Bounds2} bounds - Bounds to test, assumed to be in the local coordinate frame.
+     * @returns {boolean}
+     */
     intersectsBoundsSelf: function( bounds ) {
       // TODO: should a shape's stroke be included?
       return this.hasShape() ? this._shape.intersectsBounds( bounds ) : false;
     },
 
-    // if we have to apply a transform workaround for https://github.com/phetsims/scenery/issues/196 (only when we have a pattern or gradient)
+    /**
+     * Returns whether we need to apply a transform workaround for https://github.com/phetsims/scenery/issues/196, which
+     * only applies when we have a pattern or gradient (e.g. subtypes of Paint).
+     * @private
+     *
+     * @returns {boolean}
+     */
     requiresSVGBoundsWorkaround: function() {
       if ( !this._stroke || !this._stroke.getSVGDefinition || !this.hasShape() ) {
         return false;
@@ -484,14 +517,37 @@ define( function( require ) {
       return bounds.x * bounds.y === 0; // at least one of them was zero, so the bounding box has no area
     },
 
+    /**
+     * Override for extra information in the debugging output (from Display.getDebugHTML()).
+     * @protected (scenery-internal)
+     * @override
+     *
+     * @returns {string}
+     */
     getDebugHTMLExtras: function() {
       return this._shape ? ' (<span style="color: #88f" onclick="window.open( \'data:text/plain;charset=utf-8,\' + encodeURIComponent( \'' + this._shape.getSVGPath() + '\' ) );">path</span>)' : '';
     },
 
+    /**
+     * Returns a string containing constructor information for Node.string().
+     * @protected
+     * @override
+     *
+     * @param {string} propLines - A string representing the options properties that need to be set.
+     * @returns {string}
+     */
     getBasicConstructor: function( propLines ) {
       return 'new scenery.Path( ' + ( this._shape ? this._shape.toString() : this._shape ) + ', {' + propLines + '} )';
     },
 
+    /**
+     * Returns the property object string for use with toString().
+     * @protected (scenery-internal)
+     * @override
+     *
+     * @param {string} spaces - Whitespace to add
+     * @param {boolean} [includeChildren]
+     */
     getPropString: function( spaces, includeChildren ) {
       var result = Node.prototype.getPropString.call( this, spaces, includeChildren );
       result = this.appendFillablePropString( spaces, result );

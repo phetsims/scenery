@@ -215,9 +215,11 @@ define( function( require ) {
     },
 
     /**
+     * Computes a more efficient selfBounds for our Text.
+     * @protected
      * @override
      *
-     * @returns {boolean}
+     * @returns {boolean} - Whether the self bounds changed.
      */
     updateSelfBounds: function() {
       // TODO: don't create another Bounds2 object just for this!
@@ -249,13 +251,21 @@ define( function( require ) {
       return changed;
     },
 
-    // @override from Paintable
+    /**
+     * Called from (and overridden in) the Paintable mixin, invalidates our current stroke, triggering recomputation of
+     * anything that depended on the old stroke's value.
+     * @protected (scenery-internal)
+     */
     invalidateStroke: function() {
       // stroke can change both the bounds and renderer
       this.invalidateText();
     },
 
-    // @override from Paintable
+    /**
+     * Called from (and overridden in) the Paintable mixin, invalidates our current fill, triggering recomputation of
+     * anything that depended on the old fill's value.
+     * @protected (scenery-internal)
+     */
     invalidateFill: function() {
       // fill type can change the renderer (gradient/fill not supported by DOM)
       this.invalidateText();
@@ -537,23 +547,63 @@ define( function( require ) {
       return this._direction;
     },
 
+    /**
+     * Whether this Node itself is painted (displays something itself).
+     * @public
+     * @override
+     *
+     * @returns {boolean}
+     */
     isPainted: function() {
+      // Always true for Text nodes
       return true;
     },
 
-    // @override
+    /**
+     * Whether this Node's selfBounds are considered to be valid (always containing the displayed self content
+     * of this node). Meant to be overridden in subtypes when this can change (e.g. Text).
+     * @public
+     * @override
+     *
+     * If this value would potentially change, please trigger the event 'selfBoundsValid'.
+     *
+     * @returns {boolean}
+     */
     areSelfBoundsValid: function() {
       return this._boundsMethod === 'accurate';
     },
 
+    /**
+     * Override for extra information in the debugging output (from Display.getDebugHTML()).
+     * @protected (scenery-internal)
+     * @override
+     *
+     * @returns {string}
+     */
     getDebugHTMLExtras: function() {
       return ' "' + escapeHTML( this.renderedText ) + '"' + ( this._isHTML ? ' (html)' : '' );
     },
 
+    /**
+     * Returns a string containing constructor information for Node.string().
+     * @protected
+     * @override
+     *
+     * @param {string} propLines - A string representing the options properties that need to be set.
+     * @returns {string}
+     */
     getBasicConstructor: function( propLines ) {
       return 'new scenery.Text( \'' + escapeHTML( this._text.replace( /'/g, '\\\'' ) ) + '\', {' + propLines + '} )';
     },
 
+    /**
+     * Returns the property object string for use with toString().
+     * @protected (scenery-internal)
+     * @override
+     *
+     * @param {string} spaces - Whitespace to add
+     * @param {boolean} [includeChildren]
+     */
     getPropString: function( spaces, includeChildren ) {
       var result = Node.prototype.getPropString.call( this, spaces, includeChildren );
       result = this.appendFillablePropString( spaces, result );

@@ -82,11 +82,22 @@ define( function( require ) {
   scenery.register( 'Trail', Trail );
 
   inherit( Object, Trail, {
+    /**
+     * Returns a copy of this Trail that can be modified independently
+     * @public
+     *
+     * @return {Trail}
+     */
     copy: function() {
       return new Trail( this );
     },
 
-    // convenience function to determine whether this trail will render something
+    /**
+     * Whether the leaf-most Node in our trail will render something
+     * @public (scenery-internal)
+     *
+     * @returns {boolean}
+     */
     isPainted: function() {
       return this.lastNode().isPainted();
     },

@@ -43,7 +43,15 @@ define( function( require ) {
     set canvasBounds( value ) { this.setCanvasBounds( value ); },
     get canvasBounds() { return this.getSelfBounds(); },
 
+    /**
+     * Whether this Node itself is painted (displays something itself).
+     * @public
+     * @override
+     *
+     * @returns {boolean}
+     */
     isPainted: function() {
+      // Always true for CanvasNode
       return true;
     },
 
@@ -80,11 +88,18 @@ define( function( require ) {
       this.paintCanvas( wrapper.context );
     },
 
-    // override for computation of whether a point is inside the self content
-    // point is considered to be in the local coordinate frame
+    /**
+     * Computes whether the provided point is "inside" (contained) in this Node's self content, or "outside".
+     * @protected
+     * @override
+     *
+     * If CanvasNode subtypes want to support being picked or hit-tested, it should override this function.
+     *
+     * @param {Vector2} point - Considered to be in the local coordinate frame
+     * @returns {boolean}
+     */
     containsPointSelf: function( point ) {
       return false;
-      // throw new Error( 'CanvasNode needs containsPointSelf implemented' );
     },
 
     /**
@@ -99,15 +114,17 @@ define( function( require ) {
       return CanvasNode.CanvasNodeDrawable.createFromPool( renderer, instance );
     },
 
-    // whether this node's self intersects the specified bounds, in the local coordinate frame
-    // intersectsBoundsSelf: function( bounds ) {
-    //   // TODO: implement?
-    // },
-
+    /**
+     * Returns a string containing constructor information for Node.string().
+     * @protected
+     * @override
+     *
+     * @param {string} propLines - A string representing the options properties that need to be set.
+     * @returns {string}
+     */
     getBasicConstructor: function( propLines ) {
       return 'new scenery.CanvasNode( {' + propLines + '} )'; // TODO: no real way to do this nicely?
     }
-
   } );
 
   CanvasNode.prototype._mutatorKeys = [ 'canvasBounds' ].concat( Node.prototype._mutatorKeys );

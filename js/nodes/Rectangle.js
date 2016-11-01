@@ -263,10 +263,24 @@ define( function( require ) {
     set rectHeightFromBottom( value ) { this.setRectHeightFromBottom( value ); },
     get rectHeightFromBottom() { return this.getRectHeight(); }, // because JSHint complains
 
+    /**
+     * Returns whether this rectangle has any rounding applied at its corners. If either the x or y corner radius is 0,
+     * then there is no rounding applied.
+     * @public
+     *
+     * @returns {boolean}
+     */
     isRounded: function() {
       return this._cornerXRadius !== 0 && this._cornerYRadius !== 0;
     },
 
+    /**
+     * Computes the bounds of the Rectangle, including any applied stroke. Overridden for efficiency.
+     * @public
+     * @override
+     *
+     * @returns {Bounds2}
+     */
     computeShapeBounds: function() {
       var bounds = new Bounds2( this._rectX, this._rectY, this._rectX + this._rectWidth, this._rectY + this._rectHeight );
       if ( this._stroke ) {
@@ -276,7 +290,14 @@ define( function( require ) {
       return bounds;
     },
 
-    // @override, since Path's general function would slow us down (we're a rectangle, our local coordinate frame is perfect for this)
+    /**
+     * Returns our self bounds when our rendered self is transformed by the matrix.
+     * @public
+     * @override
+     *
+     * @param {Matrix3} matrix
+     * @returns {Bounds2}
+     */
     getTransformedSelfBounds: function( matrix ) {
       return this.selfBounds.transformed( matrix );
     },
@@ -317,8 +338,18 @@ define( function( require ) {
       this.invalidateSupportedRenderers();
     },
 
-    // accelerated hit detection for axis-aligned optionally-rounded rectangle
-    // fast computation if it isn't rounded. if rounded, we check if a corner computation is needed (usually isn't), and only check that one needed corner
+    /**
+     * Computes whether the provided point is "inside" (contained) in this Rectangle's self content, or "outside".
+     * @protected
+     * @override
+     *
+     * Handles axis-aligned optionally-rounded rectangles, although can only do optimized computation if it isn't
+     * rounded. If it IS rounded, we check if a corner computation is needed (usually isn't), and only need to check
+     * one corner for that test.
+     *
+     * @param {Vector2} point - Considered to be in the local coordinate frame
+     * @returns {boolean}
+     */
     containsPointSelf: function( point ) {
       var x = this._rectX;
       var y = this._rectY;
@@ -362,6 +393,13 @@ define( function( require ) {
       }
     },
 
+    /**
+     * Returns whether this Rectangle's selfBounds is intersected by the specified bounds.
+     * @public
+     *
+     * @param {Bounds2} bounds - Bounds to test, assumed to be in the local coordinate frame.
+     * @returns {boolean}
+     */
     intersectsBoundsSelf: function( bounds ) {
       return !this.computeShapeBounds().intersection( bounds ).isEmpty();
     },
@@ -430,6 +468,14 @@ define( function( require ) {
      * Miscellaneous
      *----------------------------------------------------------------------------*/
 
+    /**
+     * Returns a string containing constructor information for Node.string().
+     * @protected
+     * @override
+     *
+     * @param {string} propLines - A string representing the options properties that need to be set.
+     * @returns {string}
+     */
     getBasicConstructor: function( propLines ) {
       return 'new scenery.Rectangle( ' +
              this._rectX + ', ' + this._rectY + ', ' +
