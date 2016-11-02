@@ -921,6 +921,18 @@ define( function( require ) {
     this.initialize( renderer, instance );
   };
   inherit( DOMSelfDrawable, Text.TextDOMDrawable, {
+    /**
+     * Initializes this drawable, starting its "lifetime" until it is disposed. This lifecycle can happen multiple
+     * times, with instances generally created by the SelfDrawable.Poolable mixin (dirtyFromPool/createFromPool), and
+     * disposal will return this drawable to the pool.
+     * @private
+     *
+     * This acts as a pseudo-constructor that can be called multiple times, and effectively creates/resets the state
+     * of the drawable to the initial state.
+     *
+     * @param {number} renderer - Renderer bitmask, see Renderer's documentation for more details.
+     * @param {Instance} instance
+     */
     initialize: function( renderer, instance ) {
       this.initializeDOMSelfDrawable( renderer, instance );
       this.initializeState( renderer, instance );
@@ -1003,6 +1015,8 @@ define( function( require ) {
     }
   } );
   Text.TextStatefulDrawable.mixin( Text.TextDOMDrawable );
+  // This sets up TextDOMDrawable.createFromPool/dirtyFromPool and drawable.freeToPool() for the type, so
+  // that we can avoid allocations by reusing previously-used drawables.
   SelfDrawable.Poolable.mixin( Text.TextDOMDrawable );
 
   /*---------------------------------------------------------------------------*
@@ -1021,6 +1035,18 @@ define( function( require ) {
     this.initialize( renderer, instance );
   };
   inherit( SVGSelfDrawable, Text.TextSVGDrawable, {
+    /**
+     * Initializes this drawable, starting its "lifetime" until it is disposed. This lifecycle can happen multiple
+     * times, with instances generally created by the SelfDrawable.Poolable mixin (dirtyFromPool/createFromPool), and
+     * disposal will return this drawable to the pool.
+     * @private
+     *
+     * This acts as a pseudo-constructor that can be called multiple times, and effectively creates/resets the state
+     * of the drawable to the initial state.
+     *
+     * @param {number} renderer - Renderer bitmask, see Renderer's documentation for more details.
+     * @param {Instance} instance
+     */
     initialize: function( renderer, instance ) {
       this.initializeSVGSelfDrawable( renderer, instance, true, keepSVGTextElements ); // usesPaint: true
 
@@ -1071,6 +1097,8 @@ define( function( require ) {
     }
   } );
   Text.TextStatefulDrawable.mixin( Text.TextSVGDrawable );
+  // This sets up TextSVGDrawable.createFromPool/dirtyFromPool and drawable.freeToPool() for the type, so
+  // that we can avoid allocations by reusing previously-used drawables.
   SelfDrawable.Poolable.mixin( Text.TextSVGDrawable );
 
   /*---------------------------------------------------------------------------*
@@ -1089,12 +1117,36 @@ define( function( require ) {
     this.initialize( renderer, instance );
   };
   inherit( CanvasSelfDrawable, Text.TextCanvasDrawable, {
+    /**
+     * Initializes this drawable, starting its "lifetime" until it is disposed. This lifecycle can happen multiple
+     * times, with instances generally created by the SelfDrawable.Poolable mixin (dirtyFromPool/createFromPool), and
+     * disposal will return this drawable to the pool.
+     * @private
+     *
+     * This acts as a pseudo-constructor that can be called multiple times, and effectively creates/resets the state
+     * of the drawable to the initial state.
+     *
+     * @param {number} renderer - Renderer bitmask, see Renderer's documentation for more details.
+     * @param {Instance} instance
+     */
     initialize: function( renderer, instance ) {
       this.initializeCanvasSelfDrawable( renderer, instance );
       this.initializePaintableStateless( renderer, instance );
       return this;
     },
 
+    /**
+     * Paints this drawable to a Canvas (the wrapper contains both a Canvas reference and its drawing context).
+     * @public
+     *
+     * Assumes that the Canvas's context is already in the proper local coordinate frame for the node, and that any
+     * other required effects (opacity, clipping, etc.) have already been prepared.
+     *
+     * This is part of the CanvasSelfDrawable API required to be implemented for subtypes.
+     *
+     * @param {CanvasContextWrapper} wrapper - Contains the Canvas and its drawing context
+     * @param {Node} node - Our node that is being drawn
+     */
     paintCanvas: function( wrapper, node ) {
       var context = wrapper.context;
 
@@ -1128,6 +1180,8 @@ define( function( require ) {
     }
   } );
   Paintable.PaintableStatelessDrawable.mixin( Text.TextCanvasDrawable );
+  // This sets up TextCanvasDrawable.createFromPool/dirtyFromPool and drawable.freeToPool() for the type, so
+  // that we can avoid allocations by reusing previously-used drawables.
   SelfDrawable.Poolable.mixin( Text.TextCanvasDrawable );
 
   /*---------------------------------------------------------------------------*
@@ -1146,7 +1200,18 @@ define( function( require ) {
     this.initialize( renderer, instance );
   };
   inherit( WebGLSelfDrawable, Text.TextWebGLDrawable, {
-    // called either from the constructor or from pooling
+    /**
+     * Initializes this drawable, starting its "lifetime" until it is disposed. This lifecycle can happen multiple
+     * times, with instances generally created by the SelfDrawable.Poolable mixin (dirtyFromPool/createFromPool), and
+     * disposal will return this drawable to the pool.
+     * @private
+     *
+     * This acts as a pseudo-constructor that can be called multiple times, and effectively creates/resets the state
+     * of the drawable to the initial state.
+     *
+     * @param {number} renderer - Renderer bitmask, see Renderer's documentation for more details.
+     * @param {Instance} instance
+     */
     initialize: function( renderer, instance ) {
       this.initializeWebGLSelfDrawable( renderer, instance );
     },
@@ -1217,8 +1282,8 @@ define( function( require ) {
 
   // include stubs (stateless) for marking dirty stroke and fill (if necessary). we only want one dirty flag, not multiple ones, for WebGL (for now)
   Paintable.PaintableStatefulDrawable.mixin( Text.TextWebGLDrawable );
-
-  // set up pooling
+  // This sets up TextWebGLDrawable.createFromPool/dirtyFromPool and drawable.freeToPool() for the type, so
+  // that we can avoid allocations by reusing previously-used drawables.
   SelfDrawable.Poolable.mixin( Text.TextWebGLDrawable );
 
   /*---------------------------------------------------------------------------*

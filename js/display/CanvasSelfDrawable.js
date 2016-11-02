@@ -1,8 +1,8 @@
 // Copyright 2013-2015, University of Colorado Boulder
 
-
 /**
  * TODO docs
+ *   note paintCanvas() required, and other implementation-specific details
  *
  * @author Jonathan Olson <jonathan.olson@colorado.edu>
  */

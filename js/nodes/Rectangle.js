@@ -803,6 +803,18 @@ define( function( require ) {
     this.initialize( renderer, instance );
   };
   inherit( DOMSelfDrawable, Rectangle.RectangleDOMDrawable, {
+    /**
+     * Initializes this drawable, starting its "lifetime" until it is disposed. This lifecycle can happen multiple
+     * times, with instances generally created by the SelfDrawable.Poolable mixin (dirtyFromPool/createFromPool), and
+     * disposal will return this drawable to the pool.
+     * @private
+     *
+     * This acts as a pseudo-constructor that can be called multiple times, and effectively creates/resets the state
+     * of the drawable to the initial state.
+     *
+     * @param {number} renderer - Renderer bitmask, see Renderer's documentation for more details.
+     * @param {Instance} instance
+     */
     initialize: function( renderer, instance ) {
       this.initializeDOMSelfDrawable( renderer, instance );
       this.initializeState( renderer, instance );
@@ -927,6 +939,8 @@ define( function( require ) {
     }
   } );
   Rectangle.RectangleStatefulDrawable.mixin( Rectangle.RectangleDOMDrawable );
+  // This sets up RectangleDOMDrawable.createFromPool/dirtyFromPool and drawable.freeToPool() for the type, so
+  // that we can avoid allocations by reusing previously-used drawables.
   SelfDrawable.Poolable.mixin( Rectangle.RectangleDOMDrawable );
 
   /*---------------------------------------------------------------------------*
@@ -945,6 +959,18 @@ define( function( require ) {
     this.initialize( renderer, instance );
   };
   inherit( SVGSelfDrawable, Rectangle.RectangleSVGDrawable, {
+    /**
+     * Initializes this drawable, starting its "lifetime" until it is disposed. This lifecycle can happen multiple
+     * times, with instances generally created by the SelfDrawable.Poolable mixin (dirtyFromPool/createFromPool), and
+     * disposal will return this drawable to the pool.
+     * @private
+     *
+     * This acts as a pseudo-constructor that can be called multiple times, and effectively creates/resets the state
+     * of the drawable to the initial state.
+     *
+     * @param {number} renderer - Renderer bitmask, see Renderer's documentation for more details.
+     * @param {Instance} instance
+     */
     initialize: function( renderer, instance ) {
       this.initializeSVGSelfDrawable( renderer, instance, true, keepSVGRectangleElements ); // usesPaint: true
 
@@ -998,6 +1024,8 @@ define( function( require ) {
     }
   } );
   Rectangle.RectangleStatefulDrawable.mixin( Rectangle.RectangleSVGDrawable );
+  // This sets up RectangleSVGDrawable.createFromPool/dirtyFromPool and drawable.freeToPool() for the type, so
+  // that we can avoid allocations by reusing previously-used drawables.
   SelfDrawable.Poolable.mixin( Rectangle.RectangleSVGDrawable );
 
   /*---------------------------------------------------------------------------*
@@ -1016,12 +1044,31 @@ define( function( require ) {
     this.initialize( renderer, instance );
   };
   inherit( CanvasSelfDrawable, Rectangle.RectangleCanvasDrawable, {
+    /**
+     * Initializes this drawable, starting its "lifetime" until it is disposed. This lifecycle can happen multiple
+     * times, with instances generally created by the SelfDrawable.Poolable mixin (dirtyFromPool/createFromPool), and
+     * disposal will return this drawable to the pool.
+     * @private
+     *
+     * This acts as a pseudo-constructor that can be called multiple times, and effectively creates/resets the state
+     * of the drawable to the initial state.
+     *
+     * @param {number} renderer - Renderer bitmask, see Renderer's documentation for more details.
+     * @param {Instance} instance
+     */
     initialize: function( renderer, instance ) {
       this.initializeCanvasSelfDrawable( renderer, instance );
       this.initializePaintableStateless( renderer, instance );
       return this;
     },
 
+    /**
+     * Convenience function for drawing a rectangular path (with our Rectangle node's parameters) to the Canvas context.
+     * @private
+     *
+     * @param {CanvasRenderingContext2D} context - To execute drawing commands on.
+     * @param {Node} node - The node whose rectangle we want to draw
+     */
     writeRectangularPath: function( context, node ) {
       context.beginPath();
       context.moveTo( node._rectX, node._rectY );
@@ -1031,6 +1078,18 @@ define( function( require ) {
       context.closePath();
     },
 
+    /**
+     * Paints this drawable to a Canvas (the wrapper contains both a Canvas reference and its drawing context).
+     * @public
+     *
+     * Assumes that the Canvas's context is already in the proper local coordinate frame for the node, and that any
+     * other required effects (opacity, clipping, etc.) have already been prepared.
+     *
+     * This is part of the CanvasSelfDrawable API required to be implemented for subtypes.
+     *
+     * @param {CanvasContextWrapper} wrapper - Contains the Canvas and its drawing context
+     * @param {Node} node - Our node that is being drawn
+     */
     paintCanvas: function( wrapper, node ) {
       var context = wrapper.context;
 
@@ -1134,6 +1193,8 @@ define( function( require ) {
     }
   } );
   Paintable.PaintableStatelessDrawable.mixin( Rectangle.RectangleCanvasDrawable );
+  // This sets up RectangleCanvasDrawable.createFromPool/dirtyFromPool and drawable.freeToPool() for the type, so
+  // that we can avoid allocations by reusing previously-used drawables.
   SelfDrawable.Poolable.mixin( Rectangle.RectangleCanvasDrawable );
 
   /*---------------------------------------------------------------------------*
@@ -1158,7 +1219,18 @@ define( function( require ) {
   inherit( WebGLSelfDrawable, Rectangle.RectangleWebGLDrawable, {
     webglRenderer: Renderer.webglVertexColorPolygons,
 
-    // called either from the constructor or from pooling
+    /**
+     * Initializes this drawable, starting its "lifetime" until it is disposed. This lifecycle can happen multiple
+     * times, with instances generally created by the SelfDrawable.Poolable mixin (dirtyFromPool/createFromPool), and
+     * disposal will return this drawable to the pool.
+     * @private
+     *
+     * This acts as a pseudo-constructor that can be called multiple times, and effectively creates/resets the state
+     * of the drawable to the initial state.
+     *
+     * @param {number} renderer - Renderer bitmask, see Renderer's documentation for more details.
+     * @param {Instance} instance
+     */
     initialize: function( renderer, instance ) {
       this.initializeWebGLSelfDrawable( renderer, instance );
       this.initializeState( renderer, instance );
@@ -1264,7 +1336,9 @@ define( function( require ) {
     }
   } );
   Rectangle.RectangleStatefulDrawable.mixin( Rectangle.RectangleWebGLDrawable );
-  SelfDrawable.Poolable.mixin( Rectangle.RectangleWebGLDrawable ); // pooling
+  // This sets up RectangleWebGLDrawable.createFromPool/dirtyFromPool and drawable.freeToPool() for the type, so
+  // that we can avoid allocations by reusing previously-used drawables.
+  SelfDrawable.Poolable.mixin( Rectangle.RectangleWebGLDrawable );
 
   return Rectangle;
 } );

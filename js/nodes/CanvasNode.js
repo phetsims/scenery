@@ -180,10 +180,34 @@ define( function( require ) {
     this.initialize( renderer, instance );
   };
   inherit( CanvasSelfDrawable, CanvasNode.CanvasNodeDrawable, {
+    /**
+     * Initializes this drawable, starting its "lifetime" until it is disposed. This lifecycle can happen multiple
+     * times, with instances generally created by the SelfDrawable.Poolable mixin (dirtyFromPool/createFromPool), and
+     * disposal will return this drawable to the pool.
+     * @private
+     *
+     * This acts as a pseudo-constructor that can be called multiple times, and effectively creates/resets the state
+     * of the drawable to the initial state.
+     *
+     * @param {number} renderer - Renderer bitmask, see Renderer's documentation for more details.
+     * @param {Instance} instance
+     */
     initialize: function( renderer, instance ) {
       return this.initializeCanvasSelfDrawable( renderer, instance );
     },
 
+    /**
+     * Paints this drawable to a Canvas (the wrapper contains both a Canvas reference and its drawing context).
+     * @public
+     *
+     * Assumes that the Canvas's context is already in the proper local coordinate frame for the node, and that any
+     * other required effects (opacity, clipping, etc.) have already been prepared.
+     *
+     * This is part of the CanvasSelfDrawable API required to be implemented for subtypes.
+     *
+     * @param {CanvasContextWrapper} wrapper - Contains the Canvas and its drawing context
+     * @param {Node} node - Our node that is being drawn
+     */
     paintCanvas: function( wrapper, node ) {
       assert && assert( !node.selfBounds.isEmpty(), 'CanvasNode should not be used with an empty canvasBounds. ' +
                                                     'Please set canvasBounds (or use setCanvasBounds()) on ' + node.constructor.name );
@@ -193,6 +217,7 @@ define( function( require ) {
         context.save();
 
         // set back to Canvas default styles
+        // TODO: are these necessary, or can we drop them for performance?
         context.fillStyle = 'black';
         context.strokeStyle = 'black';
         context.lineWidth = 1;
@@ -208,6 +233,8 @@ define( function( require ) {
       }
     }
   } );
+  // This sets up CanvasNodeDrawable.createFromPool/dirtyFromPool and drawable.freeToPool() for the type, so
+  // that we can avoid allocations by reusing previously-used drawables.
   SelfDrawable.Poolable.mixin( CanvasNode.CanvasNodeDrawable );
 
   return CanvasNode;

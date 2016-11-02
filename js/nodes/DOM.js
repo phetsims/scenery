@@ -254,7 +254,18 @@ define( function( require ) {
     this.initialize( renderer, instance );
   };
   inherit( DOMSelfDrawable, DOM.DOMDrawable, {
-    // initializes, and resets (so we can support pooled states)
+    /**
+     * Initializes this drawable, starting its "lifetime" until it is disposed. This lifecycle can happen multiple
+     * times, with instances generally created by the SelfDrawable.Poolable mixin (dirtyFromPool/createFromPool), and
+     * disposal will return this drawable to the pool.
+     * @private
+     *
+     * This acts as a pseudo-constructor that can be called multiple times, and effectively creates/resets the state
+     * of the drawable to the initial state.
+     *
+     * @param {number} renderer - Renderer bitmask, see Renderer's documentation for more details.
+     * @param {Instance} instance
+     */
     initialize: function( renderer, instance ) {
       this.initializeDOMSelfDrawable( renderer, instance );
 
@@ -284,7 +295,8 @@ define( function( require ) {
       this.domElement = null;
     }
   } );
-
+  // This sets up DOMDrawable.createFromPool/dirtyFromPool and drawable.freeToPool() for the type, so
+  // that we can avoid allocations by reusing previously-used drawables.
   SelfDrawable.Poolable.mixin( DOM.DOMDrawable );
 
   return DOM;

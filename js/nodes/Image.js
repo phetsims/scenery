@@ -822,7 +822,18 @@ define( function( require ) {
     this.initialize( renderer, instance );
   };
   inherit( DOMSelfDrawable, Image.ImageDOMDrawable, {
-    // initializes, and resets (so we can support pooled states)
+    /**
+     * Initializes this drawable, starting its "lifetime" until it is disposed. This lifecycle can happen multiple
+     * times, with instances generally created by the SelfDrawable.Poolable mixin (dirtyFromPool/createFromPool), and
+     * disposal will return this drawable to the pool.
+     * @private
+     *
+     * This acts as a pseudo-constructor that can be called multiple times, and effectively creates/resets the state
+     * of the drawable to the initial state.
+     *
+     * @param {number} renderer - Renderer bitmask, see Renderer's documentation for more details.
+     * @param {Instance} instance
+     */
     initialize: function( renderer, instance ) {
       this.initializeDOMSelfDrawable( renderer, instance );
       this.initializeState( renderer, instance );
@@ -893,6 +904,8 @@ define( function( require ) {
     }
   } );
   Image.ImageStatefulDrawable.mixin( Image.ImageDOMDrawable );
+  // This sets up ImageDOMDrawable.createFromPool/dirtyFromPool and drawable.freeToPool() for the type, so
+  // that we can avoid allocations by reusing previously-used drawables.
   SelfDrawable.Poolable.mixin( Image.ImageDOMDrawable );
 
   /*---------------------------------------------------------------------------*
@@ -911,6 +924,18 @@ define( function( require ) {
     this.initialize( renderer, instance );
   };
   inherit( SVGSelfDrawable, Image.ImageSVGDrawable, {
+    /**
+     * Initializes this drawable, starting its "lifetime" until it is disposed. This lifecycle can happen multiple
+     * times, with instances generally created by the SelfDrawable.Poolable mixin (dirtyFromPool/createFromPool), and
+     * disposal will return this drawable to the pool.
+     * @private
+     *
+     * This acts as a pseudo-constructor that can be called multiple times, and effectively creates/resets the state
+     * of the drawable to the initial state.
+     *
+     * @param {number} renderer - Renderer bitmask, see Renderer's documentation for more details.
+     * @param {Instance} instance
+     */
     initialize: function( renderer, instance ) {
       this.initializeSVGSelfDrawable( renderer, instance, false, keepSVGImageElements ); // usesPaint: false
 
@@ -1059,6 +1084,8 @@ define( function( require ) {
     }
   } );
   Image.ImageStatefulDrawable.mixin( Image.ImageSVGDrawable );
+  // This sets up ImageSVGDrawable.createFromPool/dirtyFromPool and drawable.freeToPool() for the type, so
+  // that we can avoid allocations by reusing previously-used drawables.
   SelfDrawable.Poolable.mixin( Image.ImageSVGDrawable );
 
   /*---------------------------------------------------------------------------*
@@ -1077,10 +1104,34 @@ define( function( require ) {
     this.initialize( renderer, instance );
   };
   inherit( CanvasSelfDrawable, Image.ImageCanvasDrawable, {
+    /**
+     * Initializes this drawable, starting its "lifetime" until it is disposed. This lifecycle can happen multiple
+     * times, with instances generally created by the SelfDrawable.Poolable mixin (dirtyFromPool/createFromPool), and
+     * disposal will return this drawable to the pool.
+     * @private
+     *
+     * This acts as a pseudo-constructor that can be called multiple times, and effectively creates/resets the state
+     * of the drawable to the initial state.
+     *
+     * @param {number} renderer - Renderer bitmask, see Renderer's documentation for more details.
+     * @param {Instance} instance
+     */
     initialize: function( renderer, instance ) {
       return this.initializeCanvasSelfDrawable( renderer, instance );
     },
 
+    /**
+     * Paints this drawable to a Canvas (the wrapper contains both a Canvas reference and its drawing context).
+     * @public
+     *
+     * Assumes that the Canvas's context is already in the proper local coordinate frame for the node, and that any
+     * other required effects (opacity, clipping, etc.) have already been prepared.
+     *
+     * This is part of the CanvasSelfDrawable API required to be implemented for subtypes.
+     *
+     * @param {CanvasContextWrapper} wrapper - Contains the Canvas and its drawing context
+     * @param {Node} node - Our node that is being drawn
+     */
     paintCanvas: function( wrapper, node ) {
       var hasImageOpacity = node._imageOpacity !== 1;
 
@@ -1106,6 +1157,8 @@ define( function( require ) {
     markDirtyMipmap: function() { this.markPaintDirty(); },
     markImageOpacityDirty: function() { this.markPaintDirty(); }
   } );
+  // This sets up ImageCanvasDrawable.createFromPool/dirtyFromPool and drawable.freeToPool() for the type, so
+  // that we can avoid allocations by reusing previously-used drawables.
   SelfDrawable.Poolable.mixin( Image.ImageCanvasDrawable );
 
   /*---------------------------------------------------------------------------*
@@ -1141,9 +1194,21 @@ define( function( require ) {
     this.initialize( renderer, instance );
   };
   inherit( WebGLSelfDrawable, Image.ImageWebGLDrawable, {
+    // TODO: doc
     webglRenderer: Renderer.webglTexturedTriangles,
 
-    // called either from the constructor or from pooling
+    /**
+     * Initializes this drawable, starting its "lifetime" until it is disposed. This lifecycle can happen multiple
+     * times, with instances generally created by the SelfDrawable.Poolable mixin (dirtyFromPool/createFromPool), and
+     * disposal will return this drawable to the pool.
+     * @private
+     *
+     * This acts as a pseudo-constructor that can be called multiple times, and effectively creates/resets the state
+     * of the drawable to the initial state.
+     *
+     * @param {number} renderer - Renderer bitmask, see Renderer's documentation for more details.
+     * @param {Instance} instance
+     */
     initialize: function( renderer, instance ) {
       this.initializeWebGLSelfDrawable( renderer, instance );
 
@@ -1310,7 +1375,9 @@ define( function( require ) {
     }
   } );
   Image.ImageStatefulDrawable.mixin( Image.ImageWebGLDrawable );
-  SelfDrawable.Poolable.mixin( Image.ImageWebGLDrawable ); // pooling
+  // This sets up ImageWebGLDrawable.createFromPool/dirtyFromPool and drawable.freeToPool() for the type, so
+  // that we can avoid allocations by reusing previously-used drawables.
+  SelfDrawable.Poolable.mixin( Image.ImageWebGLDrawable );
 
   return Image;
 } );

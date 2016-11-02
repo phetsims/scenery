@@ -224,10 +224,21 @@ define( function( require ) {
     this.initialize( renderer, instance );
   };
   inherit( WebGLSelfDrawable, WebGLNode.WebGLNodeDrawable, {
-    // What type of WebGL renderer/processor should be used.
+    // What type of WebGL renderer/processor should be used. TODO: doc
     webglRenderer: Renderer.webglCustom,
 
-    // called either from the constructor, or from pooling
+    /**
+     * Initializes this drawable, starting its "lifetime" until it is disposed. This lifecycle can happen multiple
+     * times, with instances generally created by the SelfDrawable.Poolable mixin (dirtyFromPool/createFromPool), and
+     * disposal will return this drawable to the pool.
+     * @private
+     *
+     * This acts as a pseudo-constructor that can be called multiple times, and effectively creates/resets the state
+     * of the drawable to the initial state.
+     *
+     * @param {number} renderer - Renderer bitmask, see Renderer's documentation for more details.
+     * @param {Instance} instance
+     */
     initialize: function( renderer, instance ) {
       this.initializeWebGLSelfDrawable( renderer, instance );
     },
@@ -285,6 +296,8 @@ define( function( require ) {
       this.dirty = false;
     }
   } );
+  // This sets up WebGLNodeDrawable.createFromPool/dirtyFromPool and drawable.freeToPool() for the type, so
+  // that we can avoid allocations by reusing previously-used drawables.
   SelfDrawable.Poolable.mixin( WebGLNode.WebGLNodeDrawable ); // pooling
 
   return WebGLNode;
