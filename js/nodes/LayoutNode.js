@@ -67,6 +67,16 @@ define( function( require ) {
   scenery.register( 'LayoutNode', LayoutNode );
 
   inherit( Node, LayoutNode, {
+    /**
+     * {Array.<string>} - String keys for all of the allowed options that will be set by node.mutate( options ), in the
+     * order they will be evaluated in.
+     * @protected
+     *
+     * NOTE: See Node's _mutatorKeys documentation for more information on how this operates, and potential special
+     *       cases that may apply.
+     */
+    _mutatorKeys: [ 'defaultMethod', 'updateOnBounds' ].concat( Node.prototype._mutatorKeys ),
+
     get layoutProperties() { return new LayoutProperties( this._elements ); },
 
     get layoutBounds() {
@@ -276,8 +286,6 @@ define( function( require ) {
       this.node.left = x + padding;
     }
   } );
-
-  LayoutNode.prototype._mutatorKeys = [ 'defaultMethod', 'updateOnBounds' ].concat( Node.prototype._mutatorKeys );
 
   return LayoutNode;
 } );

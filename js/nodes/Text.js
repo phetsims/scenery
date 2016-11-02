@@ -102,6 +102,17 @@ define( function( require ) {
   scenery.register( 'Text', Text );
 
   inherit( Node, Text, {
+    /**
+     * {Array.<string>} - String keys for all of the allowed options that will be set by node.mutate( options ), in the
+     * order they will be evaluated in.
+     * @protected
+     *
+     * NOTE: See Node's _mutatorKeys documentation for more information on how this operates, and potential special
+     *       cases that may apply.
+     */
+    _mutatorKeys: [ 'boundsMethod', 'text', 'font', 'fontWeight', 'fontFamily', 'fontStretch', 'fontStyle', 'fontSize',
+                    'lineHeight', 'direction' ].concat( Node.prototype._mutatorKeys ),
+
     domUpdateTransformOnRepaint: true, // since we have to integrate the baseline offset into the CSS transform, signal to DOMLayer
 
     setText: function( text ) {
@@ -671,10 +682,6 @@ define( function( require ) {
   addFontForwarding( 'fontStyle', 'FontStyle', 'style' );
   addFontForwarding( 'fontSize', 'FontSize', 'size' );
   addFontForwarding( 'lineHeight', 'LineHeight', 'lineHeight' );
-
-  Text.prototype._mutatorKeys = [
-    'boundsMethod', 'text', 'font', 'fontWeight', 'fontFamily', 'fontStretch', 'fontStyle', 'fontSize', 'lineHeight', 'direction'
-  ].concat( Node.prototype._mutatorKeys );
 
   // font-specific ES5 setters and getters are defined using addFontForwarding above
   Object.defineProperty( Text.prototype, 'font', { set: Text.prototype.setFont, get: Text.prototype.getFont } );

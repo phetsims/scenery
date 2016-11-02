@@ -80,6 +80,15 @@ define( function( require ) {
   scenery.register( 'Line', Line );
 
   inherit( Path, Line, {
+    /**
+     * {Array.<string>} - String keys for all of the allowed options that will be set by node.mutate( options ), in the
+     * order they will be evaluated in.
+     * @protected
+     *
+     * NOTE: See Node's _mutatorKeys documentation for more information on how this operates, and potential special
+     *       cases that may apply.
+     */
+    _mutatorKeys: [ 'p1', 'p2', 'x1', 'y1', 'x2', 'y2' ].concat( Path.prototype._mutatorKeys ),
 
     /**
      * Set the geometry of the line, including stand and end point.
@@ -383,9 +392,6 @@ define( function( require ) {
   addLineProp( 'Y1' );
   addLineProp( 'X2' );
   addLineProp( 'Y2' );
-
-  // not adding mutators for now
-  Line.prototype._mutatorKeys = [ 'p1', 'p2', 'x1', 'y1', 'x2', 'y2' ].concat( Path.prototype._mutatorKeys );
 
   /*---------------------------------------------------------------------------*
    * Rendering State mixin (DOM/SVG)

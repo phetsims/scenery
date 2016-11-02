@@ -173,6 +173,17 @@ define( function( require ) {
   scenery.register( 'Image', Image );
 
   inherit( Node, Image, {
+    /**
+     * {Array.<string>} - String keys for all of the allowed options that will be set by node.mutate( options ), in the
+     * order they will be evaluated in.
+     * @protected
+     *
+     * NOTE: See Node's _mutatorKeys documentation for more information on how this operates, and potential special
+     *       cases that may apply.
+     */
+    _mutatorKeys: [ 'image', 'imageOpacity', 'initialWidth', 'initialHeight',
+                    'mipmap', 'mipmapBias', 'mipmapInitialLevel', 'mipmapMaxLevel' ].concat( Node.prototype._mutatorKeys ),
+
     allowsMultipleDOMInstances: false, // TODO: support multiple instances
 
     invalidateImage: function() {
@@ -689,9 +700,6 @@ define( function( require ) {
       return 'new scenery.Image( \'' + ( this._image.src ? this._image.src.replace( /'/g, '\\\'' ) : 'other' ) + '\', {' + propLines + '} )';
     }
   } );
-
-  Image.prototype._mutatorKeys = [ 'image', 'imageOpacity', 'initialWidth', 'initialHeight', 'mipmap', 'mipmapBias',
-                                   'mipmapInitialLevel', 'mipmapMaxLevel' ].concat( Node.prototype._mutatorKeys );
 
   // utility for others
   Image.createSVGImage = function( url, width, height ) {

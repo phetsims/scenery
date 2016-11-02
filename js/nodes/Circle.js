@@ -51,6 +51,16 @@ define( function( require ) {
   scenery.register( 'Circle', Circle );
 
   inherit( Path, Circle, {
+    /**
+     * {Array.<string>} - String keys for all of the allowed options that will be set by node.mutate( options ), in the
+     * order they will be evaluated in.
+     * @protected
+     *
+     * NOTE: See Node's _mutatorKeys documentation for more information on how this operates, and potential special
+     *       cases that may apply.
+     */
+    _mutatorKeys: [ 'radius' ].concat( Path.prototype._mutatorKeys ),
+
     getStrokeRendererBitmask: function() {
       var bitmask = Path.prototype.getStrokeRendererBitmask.call( this );
       if ( this.hasStroke() && !this.getStroke().isGradient && !this.getStroke().isPattern && this.getLineWidth() <= this.getRadius() ) {
@@ -291,9 +301,6 @@ define( function( require ) {
       return true;
     }
   } );
-
-  // not adding mutators for now
-  Circle.prototype._mutatorKeys = [ 'radius' ].concat( Path.prototype._mutatorKeys );
 
   /*---------------------------------------------------------------------------*
    * Rendering State mixin (DOM/SVG)

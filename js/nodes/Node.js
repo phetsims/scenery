@@ -310,6 +310,34 @@ define( function( require ) {
   scenery.register( 'Node', Node );
 
   inherit( Object, Node, extend( {
+    /*
+     * This is an array of property (setter) names for Node.mutate(), which are also used when creating nodes with
+     * parameter objects.
+     * @protected
+     *
+     * E.g. new scenery.Node( { x: 5, rotation: 20 } ) will create a Path, and apply setters in the order below
+     * (node.x = 5; node.rotation = 20)
+     *
+     * Some special cases exist (for function names). new scenery.Node( { scale: 2 } ) will actually call
+     * node.scale( 2 ).
+     *
+     * The order below is important! Don't change this without knowing the implications.
+     *
+     * NOTE: Translation-based mutators come before rotation/scale, since typically we think of their operations
+     *       occuring "after" the rotation / scaling
+     * NOTE: left/right/top/bottom/centerX/centerY are at the end, since they rely potentially on rotation / scaling
+     *       changes of bounds that may happen beforehand
+     */
+    _mutatorKeys: [
+      'children', 'cursor', 'visible', 'pickable', 'inputEnabled', 'opacity',
+      'matrix', 'translation', 'x', 'y', 'rotation', 'scale', 'localBounds',
+      'maxWidth', 'maxHeight', 'leftTop', 'centerTop', 'rightTop', 'leftCenter', 'center', 'rightCenter', 'leftBottom',
+      'centerBottom', 'rightBottom', 'left', 'right', 'top', 'bottom', 'centerX', 'centerY', 'renderer',
+      'rendererOptions', 'layerSplit', 'usesOpacity', 'cssTransform', 'excludeInvisible', 'webglScale', 'preventFit',
+      'mouseArea', 'touchArea', 'clipArea', 'transformBounds', 'focusable', 'focusIndicator', 'accessibleContent',
+      'accessibleOrder', 'textDescription'
+    ],
+
     /**
      * Inserts a child node at a specific index.
      * @public
@@ -4471,30 +4499,6 @@ define( function( require ) {
   addBoundsVectorGetterSetter( 'getLeftBottom', 'setLeftBottom', 'leftBottom' );
   addBoundsVectorGetterSetter( 'getCenterBottom', 'setCenterBottom', 'centerBottom' );
   addBoundsVectorGetterSetter( 'getRightBottom', 'setRightBottom', 'rightBottom' );
-
-  /*
-   * This is an array of property (setter) names for Node.mutate(), which are also used when creating nodes with
-   * parameter objects.
-   * @protected
-   *
-   * E.g. new scenery.Node( { x: 5, rotation: 20 } ) will create a Path, and apply setters in the order below
-   * (node.x = 5; node.rotation = 20)
-   *
-   * The order below is important! Don't change this without knowing the implications.
-   * NOTE: translation-based mutators come before rotation/scale, since typically we think of their operations occuring
-   * "after" the rotation / scaling
-   * NOTE: left/right/top/bottom/centerX/centerY are at the end, since they rely potentially on rotation / scaling
-   * changes of bounds that may happen beforehand
-   */
-  Node.prototype._mutatorKeys = [
-    'children', 'cursor', 'visible', 'pickable', 'inputEnabled', 'opacity',
-    'matrix', 'translation', 'x', 'y', 'rotation', 'scale', 'localBounds',
-    'maxWidth', 'maxHeight', 'leftTop', 'centerTop', 'rightTop', 'leftCenter', 'center', 'rightCenter', 'leftBottom',
-    'centerBottom', 'rightBottom', 'left', 'right', 'top', 'bottom', 'centerX', 'centerY', 'renderer',
-    'rendererOptions', 'layerSplit', 'usesOpacity', 'cssTransform', 'excludeInvisible', 'webglScale', 'preventFit',
-    'mouseArea', 'touchArea', 'clipArea', 'transformBounds', 'focusable', 'focusIndicator', 'accessibleContent',
-    'accessibleOrder', 'textDescription'
-  ];
 
   return Node;
 } );

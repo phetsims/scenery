@@ -58,6 +58,15 @@ define( function( require ) {
   scenery.register( 'WebGLNode', WebGLNode );
 
   inherit( Node, WebGLNode, {
+    /**
+     * {Array.<string>} - String keys for all of the allowed options that will be set by node.mutate( options ), in the
+     * order they will be evaluated in.
+     * @protected
+     *
+     * NOTE: See Node's _mutatorKeys documentation for more information on how this operates, and potential special
+     *       cases that may apply.
+     */
+    _mutatorKeys: [ 'canvasBounds' ].concat( Node.prototype._mutatorKeys ),
 
     /**
      * Sets the bounds that are used for layout/repainting.
@@ -90,6 +99,8 @@ define( function( require ) {
      * Should be called when this node needs to be repainted. When not called, Scenery assumes that this node does
      * NOT need to be repainted (although Scenery may repaint it due to other nodes needing to be repainted).
      * @public
+     *
+     * This sets a "dirty" flag, so that it will be repainted the next time it would be displayed.
      */
     invalidatePaint: function() {
       var stateLen = this._drawables.length;
@@ -186,8 +197,6 @@ define( function( require ) {
     PAINTED_NOTHING: 0,
     PAINTED_SOMETHING: 1
   } );
-
-  WebGLNode.prototype._mutatorKeys = [ 'canvasBounds' ].concat( Node.prototype._mutatorKeys );
 
   // Use a Float32Array-backed matrix, as it's better for usage with WebGL
   var modelViewMatrix = new Matrix3().setTo32Bit();

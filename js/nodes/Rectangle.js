@@ -136,6 +136,16 @@ define( function( require ) {
   scenery.register( 'Rectangle', Rectangle );
 
   inherit( Path, Rectangle, {
+    /**
+     * {Array.<string>} - String keys for all of the allowed options that will be set by node.mutate( options ), in the
+     * order they will be evaluated in.
+     * @protected
+     *
+     * NOTE: See Node's _mutatorKeys documentation for more information on how this operates, and potential special
+     *       cases that may apply.
+     */
+    _mutatorKeys: [ 'rectX', 'rectY', 'rectWidth', 'rectHeight',
+                    'cornerRadius', 'cornerXRadius', 'cornerYRadius' ].concat( Path.prototype._mutatorKeys ),
 
     getMaximumArcSize: function() {
       return Math.min( this._rectWidth / 2, this._rectHeight / 2 );
@@ -561,9 +571,6 @@ define( function( require ) {
   addRectProp( 'rectHeight', 'RectHeight', 'Height' );
   addRectProp( 'cornerXRadius', 'CornerXRadius', 'CornerXRadius' );
   addRectProp( 'cornerYRadius', 'CornerYRadius', 'CornerYRadius' );
-
-  // not adding mutators for now
-  Rectangle.prototype._mutatorKeys = [ 'rectX', 'rectY', 'rectWidth', 'rectHeight', 'cornerRadius', 'cornerXRadius', 'cornerYRadius' ].concat( Path.prototype._mutatorKeys );
 
   Rectangle.intersects = function( x, y, width, height, arcWidth, arcHeight, point ) {
     var result = point.x >= x &&

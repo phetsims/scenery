@@ -82,6 +82,16 @@ define( function( require ) {
 
   inherit( Node, Path, {
     /**
+     * {Array.<string>} - String keys for all of the allowed options that will be set by node.mutate( options ), in the
+     * order they will be evaluated in.
+     * @protected
+     *
+     * NOTE: See Node's _mutatorKeys documentation for more information on how this operates, and potential special
+     *       cases that may apply.
+     */
+    _mutatorKeys: [ 'boundsMethod', 'shape' ].concat( Node.prototype._mutatorKeys ),
+
+    /**
      * This sets the shape of the Path, which determines the shape of its appearance. It should generally not be called
      * on Path subtypes like Line, Rectangle, etc.
      * @public
@@ -557,8 +567,6 @@ define( function( require ) {
       return result;
     }
   } );
-
-  Path.prototype._mutatorKeys = [ 'boundsMethod', 'shape' ].concat( Node.prototype._mutatorKeys );
 
   // mix in fill/stroke handling code. for now, this is done after 'shape' is added to the mutatorKeys so that stroke parameters
   // get set first

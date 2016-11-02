@@ -1,10 +1,11 @@
 // Copyright 2013-2015, University of Colorado Boulder
 
 /**
- * A node that can be custom-drawn with Canvas calls. Manual handling of dirty region repainting.
+ * An abstract node (should be subtyped) that is drawn by user-provided custom Canvas code.
  *
- * setCanvasBounds (or the mutator canvasBounds) should be used to set the area that is drawn to (otherwise nothing
- * will show up)
+ * The region that can be drawn in is handled manually, by controlling the canvasBounds property of this CanvasNode.
+ * Any regions outside of the canvasBounds will not be guaranteed to be drawn. This can be set with canvasBounds in the
+ * constructor, or later with node.canvasBounds = bounds or setCanvasBounds( bounds ).
  *
  * @author Jonathan Olson <jonathan.olson@colorado.edu>
  */
@@ -20,20 +21,36 @@ define( function( require ) {
   var CanvasSelfDrawable = require( 'SCENERY/display/CanvasSelfDrawable' );
   var SelfDrawable = require( 'SCENERY/display/SelfDrawable' );
 
-  var emptyArray = []; // constant
+  var emptyArray = []; // constant, used for line-dash
 
-  // pass a canvasBounds option if you want to specify the self bounds
+  /**
+   * @constructor
+   *
+   * @param {Object} [options] - Can contain Node's options, and/or CanvasNode options (e.g. canvasBound)
+   */
   function CanvasNode( options ) {
     Node.call( this, options );
+
+    // This shouldn't change, as we only support one renderer
     this.setRendererBitmask( Renderer.bitmaskCanvas );
   }
 
   scenery.register( 'CanvasNode', CanvasNode );
 
   inherit( Node, CanvasNode, {
+    /**
+     * {Array.<string>} - String keys for all of the allowed options that will be set by node.mutate( options ), in the
+     * order they will be evaluated in.
+     * @protected
+     *
+     * NOTE: See Node's _mutatorKeys documentation for more information on how this operates, and potential special
+     *       cases that may apply.
+     */
+    _mutatorKeys: [ 'canvasBounds' ].concat( Node.prototype._mutatorKeys ),
 
     /**
-     * How to set the bounds of the CanvasNode
+     * How to set the bounds of the CanvasNode. This should be used for every CanvasNode, as it lets Scenery know where
+     * the bounds of this CanvasNode are. Otherwise, it's not guaranteed to get painted at all.
      *
      * @param {Bounds2} selfBounds
      */
@@ -69,6 +86,13 @@ define( function( require ) {
       throw new Error( 'CanvasNode needs paintCanvas implemented' );
     },
 
+    /**
+     * Should be called when this node needs to be repainted. When not called, Scenery assumes that this node does
+     * NOT need to be repainted (although Scenery may repaint it due to other nodes needing to be repainted).
+     * @public
+     *
+     * This sets a "dirty" flag, so that it will be repainted the next time it would be displayed.
+     */
     invalidatePaint: function() {
       var stateLen = this._drawables.length;
       for ( var i = 0; i < stateLen; i++ ) {
@@ -126,8 +150,6 @@ define( function( require ) {
       return 'new scenery.CanvasNode( {' + propLines + '} )'; // TODO: no real way to do this nicely?
     }
   } );
-
-  CanvasNode.prototype._mutatorKeys = [ 'canvasBounds' ].concat( Node.prototype._mutatorKeys );
 
   /*---------------------------------------------------------------------------*
    * Canvas rendering

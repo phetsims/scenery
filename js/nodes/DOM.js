@@ -54,6 +54,16 @@ define( function( require ) {
   scenery.register( 'DOM', DOM );
 
   inherit( Node, DOM, {
+    /**
+     * {Array.<string>} - String keys for all of the allowed options that will be set by node.mutate( options ), in the
+     * order they will be evaluated in.
+     * @protected
+     *
+     * NOTE: See Node's _mutatorKeys documentation for more information on how this operates, and potential special
+     *       cases that may apply.
+     */
+    _mutatorKeys: [ 'element', 'interactive', 'preventTransform' ].concat( Node.prototype._mutatorKeys ),
+
     // we use a single DOM instance, so this flag should indicate that we don't support duplicating it
     allowsMultipleDOMInstances: false,
 
@@ -227,8 +237,6 @@ define( function( require ) {
       return result;
     }
   } );
-
-  DOM.prototype._mutatorKeys = [ 'element', 'interactive', 'preventTransform' ].concat( Node.prototype._mutatorKeys );
 
   /*---------------------------------------------------------------------------*
    * DOM rendering
