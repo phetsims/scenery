@@ -533,6 +533,14 @@ define( function( require ) {
    * SVG Rendering
    *----------------------------------------------------------------------------*/
 
+  /**
+   * A generated SVGSelfDrawable whose purpose will be drawing our Line. One of these drawables will be created
+   * for each displayed instance of a Line.
+   * @constructor
+   *
+   * @param {number} renderer - Renderer bitmask, see Renderer's documentation for more details.
+   * @param {Instance} instance
+   */
   Line.LineSVGDrawable = function LineSVGDrawable( renderer, instance ) {
     this.initialize( renderer, instance );
   };
@@ -573,6 +581,14 @@ define( function( require ) {
    * Canvas rendering
    *----------------------------------------------------------------------------*/
 
+  /**
+   * A generated CanvasSelfDrawable whose purpose will be drawing our Line. One of these drawables will be created
+   * for each displayed instance of a Line.
+   * @constructor
+   *
+   * @param {number} renderer - Renderer bitmask, see Renderer's documentation for more details.
+   * @param {Instance} instance
+   */
   Line.LineCanvasDrawable = function LineCanvasDrawable( renderer, instance ) {
     this.initialize( renderer, instance );
   };

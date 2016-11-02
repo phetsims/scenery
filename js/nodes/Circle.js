@@ -349,6 +349,14 @@ define( function( require ) {
    * DOM rendering
    *----------------------------------------------------------------------------*/
 
+  /**
+   * A generated DOMSelfDrawable whose purpose will be drawing our Circle. One of these drawables will be created
+   * for each displayed instance of a Circle.
+   * @constructor
+   *
+   * @param {number} renderer - Renderer bitmask, see Renderer's documentation for more details.
+   * @param {Instance} instance
+   */
   Circle.CircleDOMDrawable = function CircleDOMDrawable( renderer, instance ) {
     this.initialize( renderer, instance );
   };
@@ -475,6 +483,14 @@ define( function( require ) {
    * SVG Rendering
    *----------------------------------------------------------------------------*/
 
+  /**
+   * A generated SVGSelfDrawable whose purpose will be drawing our Circle. One of these drawables will be created
+   * for each displayed instance of a Circle.
+   * @constructor
+   *
+   * @param {number} renderer - Renderer bitmask, see Renderer's documentation for more details.
+   * @param {Instance} instance
+   */
   Circle.CircleSVGDrawable = function CircleSVGDrawable( renderer, instance ) {
     this.initialize( renderer, instance );
   };
@@ -505,6 +521,14 @@ define( function( require ) {
    * Canvas rendering
    *----------------------------------------------------------------------------*/
 
+  /**
+   * A generated CanvasSelfDrawable whose purpose will be drawing our Circle. One of these drawables will be created
+   * for each displayed instance of a Circle.
+   * @constructor
+   *
+   * @param {number} renderer - Renderer bitmask, see Renderer's documentation for more details.
+   * @param {Instance} instance
+   */
   Circle.CircleCanvasDrawable = function CircleCanvasDrawable( renderer, instance ) {
     this.initialize( renderer, instance );
   };

@@ -619,6 +619,14 @@ define( function( require ) {
    * SVG Rendering
    *----------------------------------------------------------------------------*/
 
+  /**
+   * A generated SVGSelfDrawable whose purpose will be drawing our Path. One of these drawables will be created
+   * for each displayed instance of a Path.
+   * @constructor
+   *
+   * @param {number} renderer - Renderer bitmask, see Renderer's documentation for more details.
+   * @param {Instance} instance
+   */
   Path.PathSVGDrawable = function PathSVGDrawable( renderer, instance ) {
     this.initialize( renderer, instance );
   };
@@ -660,6 +668,14 @@ define( function( require ) {
    * Canvas rendering
    *----------------------------------------------------------------------------*/
 
+  /**
+   * A generated CanvasSelfDrawable whose purpose will be drawing our Path. One of these drawables will be created
+   * for each displayed instance of a Path.
+   * @constructor
+   *
+   * @param {number} renderer - Renderer bitmask, see Renderer's documentation for more details.
+   * @param {Instance} instance
+   */
   Path.PathCanvasDrawable = function PathCanvasDrawable( renderer, instance ) {
     this.initialize( renderer, instance );
   };

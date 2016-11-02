@@ -909,9 +909,18 @@ define( function( require ) {
    * DOM rendering
    *----------------------------------------------------------------------------*/
 
-  var TextDOMDrawable = Text.TextDOMDrawable = inherit( DOMSelfDrawable, function TextDOMDrawable( renderer, instance ) {
+  /**
+   * A generated DOMSelfDrawable whose purpose will be drawing our Text node. One of these drawables will be created
+   * for each displayed instance of a Text node.
+   * @constructor
+   *
+   * @param {number} renderer - Renderer bitmask, see Renderer's documentation for more details.
+   * @param {Instance} instance
+   */
+  Text.TextDOMDrawable = function TextDOMDrawable( renderer, instance ) {
     this.initialize( renderer, instance );
-  }, {
+  };
+  inherit( DOMSelfDrawable, Text.TextDOMDrawable, {
     initialize: function( renderer, instance ) {
       this.initializeDOMSelfDrawable( renderer, instance );
       this.initializeState( renderer, instance );
@@ -993,13 +1002,21 @@ define( function( require ) {
       DOMSelfDrawable.prototype.dispose.call( this );
     }
   } );
-  Text.TextStatefulDrawable.mixin( TextDOMDrawable );
-  SelfDrawable.Poolable.mixin( TextDOMDrawable );
+  Text.TextStatefulDrawable.mixin( Text.TextDOMDrawable );
+  SelfDrawable.Poolable.mixin( Text.TextDOMDrawable );
 
   /*---------------------------------------------------------------------------*
    * SVG rendering
    *----------------------------------------------------------------------------*/
 
+  /**
+   * A generated SVGSelfDrawable whose purpose will be drawing our Text. One of these drawables will be created
+   * for each displayed instance of a Text node.
+   * @constructor
+   *
+   * @param {number} renderer - Renderer bitmask, see Renderer's documentation for more details.
+   * @param {Instance} instance
+   */
   Text.TextSVGDrawable = function TextSVGDrawable( renderer, instance ) {
     this.initialize( renderer, instance );
   };
@@ -1060,6 +1077,14 @@ define( function( require ) {
    * Canvas rendering
    *----------------------------------------------------------------------------*/
 
+  /**
+   * A generated CanvasSelfDrawable whose purpose will be drawing our Text. One of these drawables will be created
+   * for each displayed instance of a Text node.
+   * @constructor
+   *
+   * @param {number} renderer - Renderer bitmask, see Renderer's documentation for more details.
+   * @param {Instance} instance
+   */
   Text.TextCanvasDrawable = function TextCanvasDrawable( renderer, instance ) {
     this.initialize( renderer, instance );
   };
@@ -1109,9 +1134,18 @@ define( function( require ) {
    * WebGL rendering
    *----------------------------------------------------------------------------*/
 
-  Text.TextWebGLDrawable = inherit( WebGLSelfDrawable, function TextWebGLDrawable( renderer, instance ) {
+  /**
+   * A generated WebGLSelfDrawable whose purpose will be drawing our Text. One of these drawables will be created
+   * for each displayed instance of a Text node.
+   * @constructor
+   *
+   * @param {number} renderer - Renderer bitmask, see Renderer's documentation for more details.
+   * @param {Instance} instance
+   */
+  Text.TextWebGLDrawable = function TextWebGLDrawable( renderer, instance ) {
     this.initialize( renderer, instance );
-  }, {
+  };
+  inherit( WebGLSelfDrawable, Text.TextWebGLDrawable, {
     // called either from the constructor or from pooling
     initialize: function( renderer, instance ) {
       this.initializeWebGLSelfDrawable( renderer, instance );

@@ -81,7 +81,18 @@ define( function( require ) {
       this.invalidateSelf( selfBounds );
     },
     set canvasBounds( value ) { this.setCanvasBounds( value ); },
-    get canvasBounds() { return this.getSelfBounds(); },
+
+    /**
+     * Returns the previously-set canvasBounds, or Bounds2.NOTHING if it has not been set yet.
+     * @public
+     *
+     * @returns {Bounds2}
+     */
+    getCanvasBounds: function() {
+      return this.getSelfBounds();
+    },
+    get canvasBounds() { return this.getCanvasBounds(); },
+
 
     /**
      * Whether this Node itself is painted (displays something itself).
@@ -201,9 +212,18 @@ define( function( require ) {
   // Use a Float32Array-backed matrix, as it's better for usage with WebGL
   var modelViewMatrix = new Matrix3().setTo32Bit();
 
-  WebGLNode.WebGLNodeDrawable = inherit( WebGLSelfDrawable, function WebGLNodeDrawable( renderer, instance ) {
+  /**
+   * A generated WebGLSelfDrawable whose purpose will be drawing our WebGLNode. One of these drawables will be created
+   * for each displayed instance of a WebGLNode.
+   * @constructor
+   *
+   * @param {number} renderer - Renderer bitmask, see Renderer's documentation for more details.
+   * @param {Instance} instance
+   */
+  WebGLNode.WebGLNodeDrawable = function WebGLNodeDrawable( renderer, instance ) {
     this.initialize( renderer, instance );
-  }, {
+  };
+  inherit( WebGLSelfDrawable, WebGLNode.WebGLNodeDrawable, {
     // What type of WebGL renderer/processor should be used.
     webglRenderer: Renderer.webglCustom,
 

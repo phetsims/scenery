@@ -242,9 +242,18 @@ define( function( require ) {
    * DOM rendering
    *----------------------------------------------------------------------------*/
 
-  DOM.DOMDrawable = inherit( DOMSelfDrawable, function DOMDrawable( renderer, instance ) {
+  /**
+   * A generated DOMSelfDrawable whose purpose will be drawing our DOM node. One of these drawables will be created
+   * for each displayed instance of a DOM node.
+   * @constructor
+   *
+   * @param {number} renderer - Renderer bitmask, see Renderer's documentation for more details.
+   * @param {Instance} instance
+   */
+  DOM.DOMDrawable = function DOMDrawable( renderer, instance ) {
     this.initialize( renderer, instance );
-  }, {
+  };
+  inherit( DOMSelfDrawable, DOM.DOMDrawable, {
     // initializes, and resets (so we can support pooled states)
     initialize: function( renderer, instance ) {
       this.initializeDOMSelfDrawable( renderer, instance );

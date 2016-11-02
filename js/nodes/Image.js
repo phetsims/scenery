@@ -810,9 +810,18 @@ define( function( require ) {
    * DOM rendering
    *----------------------------------------------------------------------------*/
 
-  Image.ImageDOMDrawable = inherit( DOMSelfDrawable, function ImageDOMDrawable( renderer, instance ) {
+  /**
+   * A generated DOMSelfDrawable whose purpose will be drawing our Image. One of these drawables will be created
+   * for each displayed instance of a Image.
+   * @constructor
+   *
+   * @param {number} renderer - Renderer bitmask, see Renderer's documentation for more details.
+   * @param {Instance} instance
+   */
+  Image.ImageDOMDrawable = function ImageDOMDrawable( renderer, instance ) {
     this.initialize( renderer, instance );
-  }, {
+  };
+  inherit( DOMSelfDrawable, Image.ImageDOMDrawable, {
     // initializes, and resets (so we can support pooled states)
     initialize: function( renderer, instance ) {
       this.initializeDOMSelfDrawable( renderer, instance );
@@ -890,6 +899,14 @@ define( function( require ) {
    * SVG Rendering
    *----------------------------------------------------------------------------*/
 
+  /**
+   * A generated SVGSelfDrawable whose purpose will be drawing our Image. One of these drawables will be created
+   * for each displayed instance of a Image.
+   * @constructor
+   *
+   * @param {number} renderer - Renderer bitmask, see Renderer's documentation for more details.
+   * @param {Instance} instance
+   */
   Image.ImageSVGDrawable = function ImageSVGDrawable( renderer, instance ) {
     this.initialize( renderer, instance );
   };
@@ -1048,6 +1065,14 @@ define( function( require ) {
    * Canvas rendering
    *----------------------------------------------------------------------------*/
 
+  /**
+   * A generated CanvasSelfDrawable whose purpose will be drawing our Image. One of these drawables will be created
+   * for each displayed instance of a Image.
+   * @constructor
+   *
+   * @param {number} renderer - Renderer bitmask, see Renderer's documentation for more details.
+   * @param {Instance} instance
+   */
   Image.ImageCanvasDrawable = function ImageCanvasDrawable( renderer, instance ) {
     this.initialize( renderer, instance );
   };
@@ -1104,9 +1129,18 @@ define( function( require ) {
   var VERTEX_V_OFFSET = 3;
   var VERTEX_A_OFFSET = 4;
 
-  Image.ImageWebGLDrawable = inherit( WebGLSelfDrawable, function ImageWebGLDrawable( renderer, instance ) {
+  /**
+   * A generated WebGLSelfDrawable whose purpose will be drawing our Image. One of these drawables will be created
+   * for each displayed instance of an Image.
+   * @constructor
+   *
+   * @param {number} renderer - Renderer bitmask, see Renderer's documentation for more details.
+   * @param {Instance} instance
+   */
+  Image.ImageWebGLDrawable = function ImageWebGLDrawable( renderer, instance ) {
     this.initialize( renderer, instance );
-  }, {
+  };
+  inherit( WebGLSelfDrawable, Image.ImageWebGLDrawable, {
     webglRenderer: Renderer.webglTexturedTriangles,
 
     // called either from the constructor or from pooling

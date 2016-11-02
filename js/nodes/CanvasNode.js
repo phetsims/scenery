@@ -49,8 +49,11 @@ define( function( require ) {
     _mutatorKeys: [ 'canvasBounds' ].concat( Node.prototype._mutatorKeys ),
 
     /**
-     * How to set the bounds of the CanvasNode. This should be used for every CanvasNode, as it lets Scenery know where
-     * the bounds of this CanvasNode are. Otherwise, it's not guaranteed to get painted at all.
+     * Sets the bounds that are used for layout/repainting.
+     * @public
+     *
+     * These bounds should always cover at least the area where the CanvasNode will draw in. If this is violated, this
+     * node may be partially or completely invisible in Scenery's output.
      *
      * @param {Bounds2} selfBounds
      */
@@ -58,7 +61,17 @@ define( function( require ) {
       this.invalidateSelf( selfBounds );
     },
     set canvasBounds( value ) { this.setCanvasBounds( value ); },
-    get canvasBounds() { return this.getSelfBounds(); },
+
+    /**
+     * Returns the previously-set canvasBounds, or Bounds2.NOTHING if it has not been set yet.
+     * @public
+     *
+     * @returns {Bounds2}
+     */
+    getCanvasBounds: function() {
+      return this.getSelfBounds();
+    },
+    get canvasBounds() { return this.getCanvasBounds(); },
 
     /**
      * Whether this Node itself is painted (displays something itself).
@@ -155,6 +168,14 @@ define( function( require ) {
    * Canvas rendering
    *----------------------------------------------------------------------------*/
 
+  /**
+   * A generated CanvasSelfDrawable whose purpose will be drawing our CanvasNode. One of these drawables will be created
+   * for each displayed instance of a CanvasNode.
+   * @constructor
+   *
+   * @param {number} renderer - Renderer bitmask, see Renderer's documentation for more details.
+   * @param {Instance} instance
+   */
   CanvasNode.CanvasNodeDrawable = function CanvasNodeDrawable( renderer, instance ) {
     this.initialize( renderer, instance );
   };

@@ -791,9 +791,18 @@ define( function( require ) {
    * DOM rendering
    *----------------------------------------------------------------------------*/
 
-  var RectangleDOMDrawable = Rectangle.RectangleDOMDrawable = inherit( DOMSelfDrawable, function RectangleDOMDrawable( renderer, instance ) {
+  /**
+   * A generated DOMSelfDrawable whose purpose will be drawing our Rectangle. One of these drawables will be created
+   * for each displayed instance of a Rectangle.
+   * @constructor
+   *
+   * @param {number} renderer - Renderer bitmask, see Renderer's documentation for more details.
+   * @param {Instance} instance
+   */
+  Rectangle.RectangleDOMDrawable = function RectangleDOMDrawable( renderer, instance ) {
     this.initialize( renderer, instance );
-  }, {
+  };
+  inherit( DOMSelfDrawable, Rectangle.RectangleDOMDrawable, {
     initialize: function( renderer, instance ) {
       this.initializeDOMSelfDrawable( renderer, instance );
       this.initializeState( renderer, instance );
@@ -917,13 +926,21 @@ define( function( require ) {
       DOMSelfDrawable.prototype.dispose.call( this );
     }
   } );
-  Rectangle.RectangleStatefulDrawable.mixin( RectangleDOMDrawable );
-  SelfDrawable.Poolable.mixin( RectangleDOMDrawable );
+  Rectangle.RectangleStatefulDrawable.mixin( Rectangle.RectangleDOMDrawable );
+  SelfDrawable.Poolable.mixin( Rectangle.RectangleDOMDrawable );
 
   /*---------------------------------------------------------------------------*
    * SVG rendering
    *----------------------------------------------------------------------------*/
 
+  /**
+   * A generated SVGSelfDrawable whose purpose will be drawing our Rectangle. One of these drawables will be created
+   * for each displayed instance of a Rectangle.
+   * @constructor
+   *
+   * @param {number} renderer - Renderer bitmask, see Renderer's documentation for more details.
+   * @param {Instance} instance
+   */
   Rectangle.RectangleSVGDrawable = function RectangleSVGDrawable( renderer, instance ) {
     this.initialize( renderer, instance );
   };
@@ -987,6 +1004,14 @@ define( function( require ) {
    * Canvas rendering
    *----------------------------------------------------------------------------*/
 
+  /**
+   * A generated CanvasSelfDrawable whose purpose will be drawing our Rectangle. One of these drawables will be created
+   * for each displayed instance of a Rectangle.
+   * @constructor
+   *
+   * @param {number} renderer - Renderer bitmask, see Renderer's documentation for more details.
+   * @param {Instance} instance
+   */
   Rectangle.RectangleCanvasDrawable = function RectangleCanvasDrawable( renderer, instance ) {
     this.initialize( renderer, instance );
   };
@@ -1117,10 +1142,20 @@ define( function( require ) {
 
   var scratchColor = new Color( 'transparent' );
 
-  // NOTE: only currently supports solid fills, no strokes
-  Rectangle.RectangleWebGLDrawable = inherit( WebGLSelfDrawable, function RectangleWebGLDrawable( renderer, instance ) {
+  /**
+   * A generated WebGLSelfDrawable whose purpose will be drawing our Rectangle. One of these drawables will be created
+   * for each displayed instance of a Rectangle.
+   * @constructor
+   *
+   * NOTE: This drawable currently only supports solid fills and no strokes.
+   *
+   * @param {number} renderer - Renderer bitmask, see Renderer's documentation for more details.
+   * @param {Instance} instance
+   */
+  Rectangle.RectangleWebGLDrawable = function RectangleWebGLDrawable( renderer, instance ) {
     this.initialize( renderer, instance );
-  }, {
+  };
+  inherit( WebGLSelfDrawable, Rectangle.RectangleWebGLDrawable, {
     webglRenderer: Renderer.webglVertexColorPolygons,
 
     // called either from the constructor or from pooling
