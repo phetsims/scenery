@@ -328,6 +328,14 @@ define( function( require ) {
       return 'new scenery.Line( ' + this._x1 + ', ' + this._y1 + ', ' + this._x1 + ', ' + this._y1 + ', {' + propLines + '} )';
     },
 
+    /**
+     * It is impossible to set another shape on this Path subtype, as its effective shape is determined by other
+     * parameters.
+     * @public
+     * @override
+     *
+     * @param {Shape|null} Shape - Throws an error if it is not null.
+     */
     setShape: function( shape ) {
       if ( shape !== null ) {
         throw new Error( 'Cannot set the shape of a scenery.Line to something non-null' );
@@ -338,6 +346,15 @@ define( function( require ) {
       }
     },
 
+    /**
+     * Returns an immutable copy of this Path subtype's representation.
+     * @public
+     * @override
+     *
+     * NOTE: This is created lazily, so don't call it if you don't have to!
+     *
+     * @returns {Shape}
+     */
     getShape: function() {
       if ( !this._shape ) {
         this._shape = this.createLineShape();
@@ -345,6 +362,13 @@ define( function( require ) {
       return this._shape;
     },
 
+    /**
+     * Returns whether this Path has an associated Shape (instead of no shape, represented by null)
+     * @public
+     * @override
+     *
+     * @returns {boolean}
+     */
     hasShape: function() {
       return true;
     },
@@ -354,7 +378,6 @@ define( function( require ) {
     getFillRendererBitmask: function() {
       return Renderer.bitmaskCanvas | Renderer.bitmaskSVG | Renderer.bitmaskDOM;
     }
-
   } );
 
   function addLineProp( capitalizedShort ) {

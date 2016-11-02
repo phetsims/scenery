@@ -29,6 +29,18 @@ define( function( require ) {
   var keepDOMCircleElements = true; // whether we should pool DOM elements for the DOM rendering states, or whether we should free them when possible for memory
   var keepSVGCircleElements = true; // whether we should pool SVG elements for the SVG rendering states, or whether we should free them when possible for memory
 
+  /**
+   * @constructor
+   *
+   * NOTE: There are two ways of invoking the constructor:
+   * - new Circle( radius, { ... } )
+   * - new Circle( { radius: radius, ... } )
+   *
+   * This allows the radius to be included in the parameter object for when that is convenient.
+   *
+   * @param {number} radius - The (non-negative) radius of the circle
+   * @param {Object} [options] - Can contain Node's options, and/or CanvasNode options (e.g. canvasBound)
+   */
   function Circle( radius, options ) {
     if ( typeof radius === 'object' ) {
       // allow new Circle( { radius: ... } )
@@ -43,7 +55,6 @@ define( function( require ) {
       options = options || {};
 
     }
-    // fallback for non-canvas or non-svg rendering, and for proper bounds computation
 
     Path.call( this, null, options );
   }
@@ -61,6 +72,16 @@ define( function( require ) {
      */
     _mutatorKeys: [ 'radius' ].concat( Path.prototype._mutatorKeys ),
 
+    /**
+     * Determines the default allowed renderers (returned via the Renderer bitmask) that are allowed, given the
+     * current stroke options.
+     * @public (scenery-internal)
+     * @override
+     *
+     * We can support the DOM renderer if there is a solid-styled stroke (which otherwise wouldn't be supported).
+     *
+     * @returns {number} - Renderer bitmask, see Renderer for details
+     */
     getStrokeRendererBitmask: function() {
       var bitmask = Path.prototype.getStrokeRendererBitmask.call( this );
       if ( this.hasStroke() && !this.getStroke().isGradient && !this.getStroke().isPattern && this.getLineWidth() <= this.getRadius() ) {
@@ -69,10 +90,23 @@ define( function( require ) {
       return bitmask;
     },
 
+    /**
+     * Determines the allowed renderers that are allowed (or excluded) based on the current Path.
+     * @public (scenery-internal)
+     * @override
+     *
+     * @returns {number} - Renderer bitmask, see Renderer for details
+     */
     getPathRendererBitmask: function() {
+      // If we can use CSS borderRadius, we can support the DOM renderer.
       return Renderer.bitmaskCanvas | Renderer.bitmaskSVG | ( Features.borderRadius ? Renderer.bitmaskDOM : 0 );
     },
 
+    /**
+     * Notifies that the circle has changed (probably the radius), and invalidates path information and our cached
+     * shape.
+     * @private
+     */
     invalidateCircle: function() {
       assert && assert( this._radius >= 0, 'A circle needs a non-negative radius' );
 
@@ -83,6 +117,13 @@ define( function( require ) {
       this.invalidatePath();
     },
 
+    /**
+     * Returns a Shape that is equivalent to our rendered display. Generally used to lazily create a Shape instance
+     * when one is needed, without having to do so beforehand.
+     * @private
+     *
+     * @returns {Shape}
+     */
     createCircleShape: function() {
       return Shape.circle( 0, 0, this._radius ).makeImmutable();
     },
@@ -280,6 +321,14 @@ define( function( require ) {
       }
     },
 
+    /**
+     * It is impossible to set another shape on this Path subtype, as its effective shape is determined by other
+     * parameters.
+     * @public
+     * @override
+     *
+     * @param {Shape|null} Shape - Throws an error if it is not null.
+     */
     setShape: function( shape ) {
       if ( shape !== null ) {
         throw new Error( 'Cannot set the shape of a scenery.Circle to something non-null' );
@@ -290,6 +339,15 @@ define( function( require ) {
       }
     },
 
+    /**
+     * Returns an immutable copy of this Path subtype's representation.
+     * @public
+     * @override
+     *
+     * NOTE: This is created lazily, so don't call it if you don't have to!
+     *
+     * @returns {Shape}
+     */
     getShape: function() {
       if ( !this._shape ) {
         this._shape = this.createCircleShape();
@@ -297,7 +355,15 @@ define( function( require ) {
       return this._shape;
     },
 
+    /**
+     * Returns whether this Path has an associated Shape (instead of no shape, represented by null)
+     * @public
+     * @override
+     *
+     * @returns {boolean}
+     */
     hasShape: function() {
+      // Always true for this Path subtype
       return true;
     }
   } );

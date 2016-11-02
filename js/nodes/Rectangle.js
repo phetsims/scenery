@@ -151,6 +151,17 @@ define( function( require ) {
       return Math.min( this._rectWidth / 2, this._rectHeight / 2 );
     },
 
+    /**
+     * Determines the default allowed renderers (returned via the Renderer bitmask) that are allowed, given the
+     * current stroke options.
+     * @public (scenery-internal)
+     * @override
+     *
+     * We can support the DOM renderer if there is a solid-styled stroke with non-bevel line joins
+     * (which otherwise wouldn't be supported).
+     *
+     * @returns {number} - Renderer bitmask, see Renderer for details
+     */
     getStrokeRendererBitmask: function() {
       var bitmask = Path.prototype.getStrokeRendererBitmask.call( this );
       // DOM stroke handling doesn't YET support gradients, patterns, or dashes (with the current implementation, it shouldn't be too hard)
@@ -168,6 +179,13 @@ define( function( require ) {
       return bitmask;
     },
 
+    /**
+     * Determines the allowed renderers that are allowed (or excluded) based on the current Path.
+     * @public (scenery-internal)
+     * @override
+     *
+     * @returns {number} - Renderer bitmask, see Renderer for details
+     */
     getPathRendererBitmask: function() {
       var bitmask = Renderer.bitmaskCanvas | Renderer.bitmaskSVG;
 
@@ -494,6 +512,14 @@ define( function( require ) {
              ', {' + propLines + '} )';
     },
 
+    /**
+     * It is impossible to set another shape on this Path subtype, as its effective shape is determined by other
+     * parameters.
+     * @public
+     * @override
+     *
+     * @param {Shape|null} Shape - Throws an error if it is not null.
+     */
     setShape: function( shape ) {
       if ( shape !== null ) {
         throw new Error( 'Cannot set the shape of a scenery.Rectangle to something non-null' );
@@ -504,6 +530,15 @@ define( function( require ) {
       }
     },
 
+    /**
+     * Returns an immutable copy of this Path subtype's representation.
+     * @public
+     * @override
+     *
+     * NOTE: This is created lazily, so don't call it if you don't have to!
+     *
+     * @returns {Shape}
+     */
     getShape: function() {
       if ( !this._shape ) {
         this._shape = this.createRectangleShape();
@@ -511,6 +546,13 @@ define( function( require ) {
       return this._shape;
     },
 
+    /**
+     * Returns whether this Path has an associated Shape (instead of no shape, represented by null)
+     * @public
+     * @override
+     *
+     * @returns {boolean}
+     */
     hasShape: function() {
       return true;
     },

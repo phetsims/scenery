@@ -186,6 +186,7 @@ define( function( require ) {
      * @returns {number} - A bitmask that includes supported renderers, see Renderer for details.
      */
     getPathRendererBitmask: function() {
+      // By default, Canvas and SVG are accepted.
       return Renderer.bitmaskCanvas | Renderer.bitmaskSVG;
     },
 
