@@ -339,6 +339,16 @@ define( function( require ) {
     ],
 
     /**
+     * {Array.<String>} - List of all dirty flags that should be available on drawables created from this node (or
+     *                    subtype). Given a flag (e.g. radius), it indicates the existence of a function
+     *                    drawable.markDirtyRadius() that will indicate to the drawable that the radius has changed.
+     * @public (scenery-internal)
+     *
+     * Should be overridden by subtypes.
+     */
+    drawableMarkFlags: [],
+
+    /**
      * Inserts a child node at a specific index.
      * @public
      *

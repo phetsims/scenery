@@ -184,6 +184,15 @@ define( function( require ) {
     _mutatorKeys: [ 'image', 'imageOpacity', 'initialWidth', 'initialHeight',
                     'mipmap', 'mipmapBias', 'mipmapInitialLevel', 'mipmapMaxLevel' ].concat( Node.prototype._mutatorKeys ),
 
+    /**
+     * {Array.<String>} - List of all dirty flags that should be available on drawables created from this node (or
+     *                    subtype). Given a flag (e.g. radius), it indicates the existence of a function
+     *                    drawable.markDirtyRadius() that will indicate to the drawable that the radius has changed.
+     * @public (scenery-internal)
+     * @override
+     */
+    drawableMarkFlags: Node.prototype.drawableMarkFlags.concat( [ 'image', 'imageOpacity', 'mipmap' ] ),
+
     allowsMultipleDOMInstances: false, // TODO: support multiple instances
 
     invalidateImage: function() {
@@ -351,7 +360,7 @@ define( function( require ) {
 
         var stateLen = this._drawables.length;
         for ( var i = 0; i < stateLen; i++ ) {
-          this._drawables[ i ].markImageOpacityDirty();
+          this._drawables[ i ].markDirtyImageOpacity();
         }
       }
     },
@@ -758,7 +767,24 @@ define( function( require ) {
    * Rendering State mixin (DOM/SVG) //TODO: Does this also apply to WebGL?
    *----------------------------------------------------------------------------*/
 
+  /**
+   * A mixin to drawables for Image that need to store state about what the current display is currently showing,
+   * so that updates to the Image will only be made on attributes that specifically changed (and no change will be
+   * necessary for an attribute that changed back to its original/currently-displayed value). Generally, this is used
+   * for DOM and SVG drawables.
+   */
   Image.ImageStatefulDrawable = {
+    /**
+     * Given the type (constructor) of a drawable, we'll mix in a combination of:
+     * - initialization/disposal with the *State suffix
+     * - mark* methods to be called on all drawables of nodes of this type, that set specific dirty flags
+     *
+     * This will allow drawables that mix in this type to do the following during an update:
+     * 1. Check specific dirty flags (e.g. if the fill changed, update the fill of our SVG element).
+     * 2. Call setToCleanState() once done, to clear the dirty flags.
+     *
+     * @param {function} drawableType - The constructor for the drawable type
+     */
     mixin: function( drawableType ) {
       var proto = drawableType.prototype;
 
@@ -787,13 +813,13 @@ define( function( require ) {
         this.markPaintDirty();
       };
 
-      proto.markDirtyMipmap = function() {
-        this.dirtyMipmap = true;
+      proto.markDirtyImageOpacity = function() {
+        this.dirtyImageOpacity = true;
         this.markPaintDirty();
       };
 
-      proto.markImageOpacityDirty = function() {
-        this.dirtyImageOpacity = true;
+      proto.markDirtyMipmap = function() {
+        this.dirtyMipmap = true;
         this.markPaintDirty();
       };
 
@@ -1155,7 +1181,7 @@ define( function( require ) {
     // stateless dirty functions
     markDirtyImage: function() { this.markPaintDirty(); },
     markDirtyMipmap: function() { this.markPaintDirty(); },
-    markImageOpacityDirty: function() { this.markPaintDirty(); }
+    markDirtyImageOpacity: function() { this.markPaintDirty(); }
   } );
   // This sets up ImageCanvasDrawable.createFromPool/dirtyFromPool and drawable.freeToPool() for the type, so
   // that we can avoid allocations by reusing previously-used drawables.

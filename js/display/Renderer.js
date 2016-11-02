@@ -170,6 +170,14 @@ define( function( require ) {
       throw new Error( 'Unrecognized renderer: ' + selfRenderer );
     }
 
+    // Check to make sure that all of the drawables have the required mark-dirty methods available.
+    if ( assert ) {
+      _.each( node.drawableMarkFlags, function( flag ) {
+        var methodName = 'markDirty' + flag[ 0 ].toUpperCase() + flag.slice( 1 );
+        assert( typeof drawable[ methodName ] === 'function', 'Did not find ' + methodName );
+      } );
+    }
+
     // Initialize its fittable flag
     drawable.setFittable( fittable );
 

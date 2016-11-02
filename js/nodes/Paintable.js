@@ -36,6 +36,15 @@ define( function( require ) {
 
       extend( proto, {
         /**
+         * {Array.<String>} - List of all dirty flags that should be available on drawables created from this node (or
+         *                    subtype). Given a flag (e.g. radius), it indicates the existence of a function
+         *                    drawable.markDirtyRadius() that will indicate to the drawable that the radius has changed.
+         * @public (scenery-internal)
+         * @override
+         */
+        drawableMarkFlags: proto.drawableMarkFlags.concat( [ 'fill', 'stroke', 'lineWidth', 'lineOptions', 'cachedPaints' ] ),
+
+        /**
          * This should be called in the constructor to initialize the paint-specific parts of the Node.
          * @protected
          */
@@ -933,6 +942,7 @@ define( function( require ) {
 
   // mix-in base for DOM and SVG drawables
   // NOTE: requires state.node to be defined
+  // TODO: doc!
   Paintable.PaintableStatefulDrawable = {
     mixin: function PaintableStatefulDrawable( drawableType ) {
       var proto = drawableType.prototype;
