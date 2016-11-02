@@ -777,6 +777,7 @@ define( function( require ) {
       } );
 
       // on mutation, set the stroke parameters first since they may affect the bounds (and thus later operations)
+      // TODO: docs
       proto._mutatorKeys = [
         'fill', 'fillPickable', 'stroke', 'lineWidth', 'lineCap', 'lineJoin', 'miterLimit', 'lineDash',
         'lineDashOffset', 'strokePickable', 'cachedPaints'
