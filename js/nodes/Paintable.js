@@ -725,6 +725,16 @@ define( function( require ) {
           return result;
         },
 
+        /**
+         * Determines the default allowed renderers (returned via the Renderer bitmask) that are allowed, given the
+         * current fill options.
+         * @public (scenery-internal)
+         *
+         * This will be used for all types that directly mix in Paintable (i.e. Path and Text), but may be overridden
+         * by subtypes.
+         *
+         * @returns {number} - Renderer bitmask, see Renderer for details
+         */
         getFillRendererBitmask: function() {
           var bitmask = 0;
 
@@ -756,9 +766,20 @@ define( function( require ) {
           return bitmask;
         },
 
+        /**
+         * Determines the default allowed renderers (returned via the Renderer bitmask) that are allowed, given the
+         * current stroke options.
+         * @public (scenery-internal)
+         *
+         * This will be used for all types that directly mix in Paintable (i.e. Path and Text), but may be overridden
+         * by subtypes.
+         *
+         * @returns {number} - Renderer bitmask, see Renderer for details
+         */
         getStrokeRendererBitmask: function() {
           var bitmask = 0;
 
+          // IE9 has bad dashed strokes, let's force a different renderer in case
           if ( !( isIE9 && this.hasStroke() && this.hasLineDash() ) ) {
             bitmask |= Renderer.bitmaskCanvas;
           }
@@ -767,7 +788,7 @@ define( function( require ) {
           bitmask |= Renderer.bitmaskSVG;
 
           if ( !this.hasStroke() ) {
-            // allow DOM support if there is no stroke
+            // allow DOM support if there is no stroke (since the fill will determine what is available)
             bitmask |= Renderer.bitmaskDOM;
             bitmask |= Renderer.bitmaskWebGL;
           }
