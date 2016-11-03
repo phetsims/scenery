@@ -56,7 +56,7 @@ define( function( require ) {
       // have a "after" boundary, and should be connected to the closest drawable that is unchanged.
       this.drawableAfter = drawableAfter;
 
-      // {Boolean} If a null-to-X interval gets collapsed all the way, we want to have a flag that indicates that.
+      // {boolean} If a null-to-X interval gets collapsed all the way, we want to have a flag that indicates that.
       // Otherwise, it would be interpreted as a null-to-null change interval ("change everything"), instead of the
       // correct "change nothing".
       this.collapsedEmpty = false;
@@ -119,7 +119,7 @@ define( function( require ) {
       return this.collapsedEmpty || ( this.drawableBefore !== null && this.drawableBefore === this.drawableAfter );
     },
 
-    // {Number} The quantity of "old" internal drawables. Requires the old first/last drawables for the backbone, since
+    // {number} The quantity of "old" internal drawables. Requires the old first/last drawables for the backbone, since
     // we need that information for null-before/after boundaries.
     getOldInternalDrawableCount: function( oldStitchFirstDrawable, oldStitchLastDrawable ) {
       var firstInclude = this.drawableBefore ? this.drawableBefore.oldNextDrawable : oldStitchFirstDrawable;
@@ -133,7 +133,7 @@ define( function( require ) {
       return count;
     },
 
-    // {Number} The quantity of "new" internal drawables. Requires the old first/last drawables for the backbone, since
+    // {number} The quantity of "new" internal drawables. Requires the old first/last drawables for the backbone, since
     // we need that information for null-before/after boundaries.
     getNewInternalDrawableCount: function( newStitchFirstDrawable, newStitchLastDrawable ) {
       var firstInclude = this.drawableBefore ? this.drawableBefore.nextDrawable : newStitchFirstDrawable;

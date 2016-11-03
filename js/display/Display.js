@@ -140,7 +140,7 @@ define( function( require ) {
     // We have a monotonically-increasing frame ID, generally for use with a pattern where we can mark objects with this
     // to note that they are either up-to-date or need refreshing due to this particular frame (without having to clear
     // that information after use). This is incremented every frame
-    this._frameId = 0; // {Number}
+    this._frameId = 0; // {number}
 
     this._dirtyTransformRoots = [];
     this._dirtyTransformRootsWithoutPass = [];
@@ -504,7 +504,7 @@ define( function( require ) {
     },
     set height( value ) { this.setHeight( value ); },
 
-    // {String} (CSS), {Color} instance, or null (no background color).
+    // {string} (CSS), {Color} instance, or null (no background color).
     // Will be applied to the root DOM element on updateDisplay(), and no sooner.
     setBackgroundColor: function( color ) {
       assert && assert( color === null || typeof color === 'string' || color instanceof scenery.Color );
@@ -631,8 +631,8 @@ define( function( require ) {
      * @private
      *
      * @param {Trail} trail
-     * @param {object} oldAccessibleContent
-     * @param {object} newAccessibleContent
+     * @param {Object} oldAccessibleContent
+     * @param {Object} newAccessibleContent
      */
     changedAccessibleContent: function( trail, oldAccessibleContent, newAccessibleContent ) {
       if ( !this.options.accessibility ) {
@@ -698,7 +698,7 @@ define( function( require ) {
 
     /*
      * Called from Instances that will need a transform update (for listeners and precomputation).
-     * @param passTransform {Boolean} - Whether we should pass the first transform root when validating transforms (should be true if the instance is transformed)
+     * @param passTransform {boolean} - Whether we should pass the first transform root when validating transforms (should be true if the instance is transformed)
      */
     markTransformRootDirty: function( instance, passTransform ) {
       passTransform ? this._dirtyTransformRoots.push( instance ) : this._dirtyTransformRootsWithoutPass.push( instance );

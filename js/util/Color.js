@@ -699,7 +699,7 @@ define( function( require ) {
    *
    * @param {Color} color1
    * @param {Color} color2
-   * @param {Number} distance distance between color1 and color2, 0 <= distance <= 1
+   * @param {number} distance distance between color1 and color2, 0 <= distance <= 1
    * @return {Color}
    */
   Color.interpolateRGBA = function( color1, color2, distance ) {

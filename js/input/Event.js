@@ -27,7 +27,7 @@ define( function( require ) {
     // {Trail} path to the leaf-most node, ordered list, from root to leaf
     this.trail = args.trail;
 
-    // {String} what event was triggered on the listener
+    // {string} what event was triggered on the listener
     this.type = args.type;
 
     // {Pointer}

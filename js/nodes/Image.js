@@ -722,7 +722,7 @@ define( function( require ) {
     return element;
   };
 
-  // Creates an {object} suitable to be passed to Image as a mipmap (from a Canvas)
+  // Creates an {Object} suitable to be passed to Image as a mipmap (from a Canvas)
   Image.createFastMipmapFromCanvas = function( baseCanvas ) {
     var mipmaps = [];
 

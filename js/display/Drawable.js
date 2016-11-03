@@ -213,7 +213,7 @@ define( function( require ) {
       this.pendingRemoval = true;
     },
 
-    // returns {Boolean} whether we changed our block
+    // returns {boolean} whether we changed our block
     updateBlock: function() {
       sceneryLog && sceneryLog.Drawable && sceneryLog.Drawable( '[' + this.constructor.name + '*] updateBlock ' + this.toString() +
                                                                 ' with add:' + this.pendingAddition +

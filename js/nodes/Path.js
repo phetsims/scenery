@@ -49,7 +49,7 @@ define( function( require ) {
     // of a Shape with a stroke.
     this._strokedShape = null;
 
-    // @private {String}, one of 'accurate', 'unstroked', 'tightPadding', 'safePadding', 'none'
+    // @private {string}, one of 'accurate', 'unstroked', 'tightPadding', 'safePadding', 'none'
     // See setBoundsMethod for details.
     this._boundsMethod = 'accurate'; // 'accurate', 'unstroked', 'tightPadding', 'safePadding', 'none'
 

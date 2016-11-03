@@ -4,10 +4,10 @@
  * Prototype for a cursor that implements the typical navigation strategies of a screen reader.  The output
  * text is meant to be read to a user by the Web Speech API synthesizer.
  *
- * NOTE: This is a prototype for screen reader behavior, and is an initial implementation for 
+ * NOTE: This is a prototype for screen reader behavior, and is an initial implementation for
  * a cursor that is to be used together with the web speech API, see
  * https://github.com/phetsims/scenery/issues/538
- * 
+ *
  * @author Jesse Greenberg
  */
 define( function( require ) {
@@ -47,7 +47,7 @@ define( function( require ) {
     // @private - the active line is the current line being read and navigated with the cursor
     this.activeLine = null;
 
-    // the letter position is the position of the cursor in the active line to support reading on a 
+    // the letter position is the position of the cursor in the active line to support reading on a
     // letter by letter basis.  This is relative to the length of the active line.
     // @private
     this.letterPosition = 0;
@@ -71,10 +71,10 @@ define( function( require ) {
 
     // the document will listen for keyboard interactions
     // this listener implements common navigation strategies for a typical screen reader
-    // 
+    //
     // see https://dequeuniversity.com/screenreaders/nvda-keyboard-shortcuts
     // for a list of common navigation strategies
-    // 
+    //
     // TODO: Use this.keyState object instead of referencing the event directly
     document.addEventListener( 'keydown', function( event ) {
 
@@ -203,7 +203,7 @@ define( function( require ) {
       }
 
       // TODO: everything else in https://dequeuniversity.com/screenreaders/nvda-keyboard-shortcuts
-      
+
     } );
 
     // update the keystate object on keyup to handle multiple key presses at once
@@ -241,7 +241,7 @@ define( function( require ) {
      * Get all 'element' nodes off the parent element, placing them in an array
      * for easy traversal.  Note that this includes all elements, even those
      * that are 'hidden' or purely for structure.
-     * 
+     *
      * @param  {DOMElement} domElement - the parent element to linearize
      * @return {Array.<DOMElement>}
      * @private
@@ -261,7 +261,7 @@ define( function( require ) {
 
     /**
      * Get the live role from the DOM element.  If the element is not live, return null.
-     * 
+     *
      * @param  {DOMElement} domElement
      * @return {string}
      */
@@ -278,15 +278,15 @@ define( function( require ) {
           return;
         }
       } );
-      
-      return liveRole;      
+
+      return liveRole;
     },
 
     /**
      * Get the next or previous element in the DOM, depending on the desired direction.
-     * 
+     *
      * @param  {[type]} direction - NEXT || PREVIOUS
-     * @return {DOMElement}    
+     * @return {DOMElement}
      */
     getNextPreviousElement: function( direction ) {
       if ( !this.activeElement ) {
@@ -323,10 +323,10 @@ define( function( require ) {
     /**
      * Get the accessible text from the element.  Depending on the navigation strategy,
      * we may or may not want to include all application content text from the markup.
-     * 
+     *
      * @param  {DOMElement} element
-     * @param  {boolean} withApplicationContent - do you want to include all aria text content? 
-     * @return {string}             
+     * @param  {boolean} withApplicationContent - do you want to include all aria text content?
+     * @return {string}
      */
     getAccessibleText: function( element, withApplicationContent ) {
 
@@ -421,7 +421,7 @@ define( function( require ) {
             var ariaChecked = element.getAttribute( 'aria-checked' );
             if ( ariaChecked ) {
               var switchedString = ( ariaChecked === 'true' ) ? 'On' : 'Off';
-              textContent += labelContent + COMMA + SPACE + 'switch' + COMMA + SPACE + switchedString; 
+              textContent += labelContent + COMMA + SPACE + 'switch' + COMMA + SPACE + switchedString;
             }
             else {
               assert && assert ( false, 'checkbox switch must have aria-checked attribute' );
@@ -480,7 +480,7 @@ define( function( require ) {
         if ( element.getAttribute( 'role' ) ) {
           role = element.getAttribute( 'role' );
           // TODO handle all the different roles!
-          
+
           // label if the role is a button
           if ( role === 'button' ) {
             textContent += SPACE + 'Button';
@@ -498,7 +498,7 @@ define( function( require ) {
         }
 
         // look for an element in the DOM that describes this one
-        var ariaDescribedBy = element.getAttribute( 'aria-describedby' ); 
+        var ariaDescribedBy = element.getAttribute( 'aria-describedby' );
         if ( ariaDescribedBy ) {
           // the aria spec supports multiple description ID's for a single element
           var descriptionIDs = ariaDescribedBy.split( SPACE );
@@ -526,7 +526,7 @@ define( function( require ) {
     /**
      * Get the next or previous element in the DOM that has accessible text content, relative to the current
      * active element.
-     * 
+     *
      * @param  {string} direction - NEXT || PREVIOUS
      * @return {DOMElement}
      */
@@ -544,7 +544,7 @@ define( function( require ) {
     /**
      * Get the next element in the DOM with on of the desired tagNames, types, or roles.  This does not set the active element, it
      * only traverses the document looking for elements.
-     * 
+     *
      * @param  {Array.<string>} roles - list of desired DOM tag names, types, or aria roles
      * @param  {[type]} direction - direction flag for to search through the DOM - NEXT || PREVIOUS
      * @return {DOMElement}
@@ -579,7 +579,7 @@ define( function( require ) {
         searchIndex += searchDelta;
       }
 
-      return element; 
+      return element;
     },
 
     readNextPreviousLine: function( direction ) {
@@ -631,7 +631,7 @@ define( function( require ) {
           if ( accessibleText[ i + 1 ] ) {
             line += SPACE;
           }
-          else { 
+          else {
             // we have reached the end of this content, there are no more words
             // wrap the line position to the end so we can easily read back the previous line
             this.positionInLine += LINE_WORD_LENGTH - this.positionInLine % LINE_WORD_LENGTH;
@@ -646,7 +646,7 @@ define( function( require ) {
 
     /**
      * Read the active line without incrementing the word count.
-     * 
+     *
      * @return {[type]} [description]
      */
     readActiveLine: function() {
@@ -670,7 +670,7 @@ define( function( require ) {
             // add space if there are more words
             line += SPACE;
           }
-          else { 
+          else {
             // we have reached the end of the line, there are no more words
             break;
           }
@@ -716,7 +716,7 @@ define( function( require ) {
     /**
      * Read the next or previous heading with one of the levels specified in headingLevels and in the direction
      * specified by the direction flag.
-     * 
+     *
      * @param  {Array.<string>} headingLevels
      * @param  {[type]} direction - direction of traversal through the DOM - NEXT || PREVIOUS
      * @return {string}
@@ -891,7 +891,7 @@ define( function( require ) {
 
         // restore the previous active element
         if ( activeElement ) {
-          this.activeElement = activeElement; 
+          this.activeElement = activeElement;
         }
 
         // let the user know that there are no more lists and move to the next element
@@ -1011,11 +1011,11 @@ define( function( require ) {
     },
 
     /**
-     * Read continuously from the current active element.  Accessible content is read by reader with a 'polite' 
+     * Read continuously from the current active element.  Accessible content is read by reader with a 'polite'
      * utterance so that new text is added to the queue line by line.
      *
      * TODO: If the read is cancelled, the active element should be set appropriately.
-     * 
+     *
      * @return {string}
      */
     readEntireDocument: function() {
@@ -1036,12 +1036,12 @@ define( function( require ) {
     },
 
     /**
-     * Return true if the element is focusable.  A focusable element has a tab index, is a 
+     * Return true if the element is focusable.  A focusable element has a tab index, is a
      * form element, or has a role which adds it to the navigation order.
      *
      * TODO: Populate with the rest of the focusable elements.
      * @param  {DOMElement} domElement
-     * @return {Boolean}
+     * @return {boolean}
      */
     isFocusable: function( domElement ) {
       // list of attributes and tag names which should be in the navigation order
@@ -1074,7 +1074,7 @@ define( function( require ) {
    * need additional flags here for the reader.
    *
    * @param {string} text - the text to be read as the utterance for the synth
-   * @param {string} liveRole - see https://developer.mozilla.org/en-US/docs/Web/Accessibility/ARIA/ARIA_Live_Regions 
+   * @param {string} liveRole - see https://developer.mozilla.org/en-US/docs/Web/Accessibility/ARIA/ARIA_Live_Regions
    */
   function Utterance( text, liveRole ) {
 
