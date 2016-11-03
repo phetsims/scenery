@@ -1,7 +1,7 @@
 // Copyright 2013-2015, University of Colorado Boulder
 
 /**
- * A circular node that inherits Path, and allows for optimized drawing and improved parameter handling.
+ * DOM drawable for Circle nodes.
  *
  * @author Jonathan Olson <jonathan.olson@colorado.edu>
  */

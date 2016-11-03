@@ -1,7 +1,7 @@
 // Copyright 2013-2015, University of Colorado Boulder
 
 /**
- * Canvas drawable for Circle nodes.
+ * Canvas drawable for CanvasNode.
  *
  * @author Jonathan Olson <jonathan.olson@colorado.edu>
  */
@@ -11,46 +11,44 @@ define( function( require ) {
 
   var inherit = require( 'PHET_CORE/inherit' );
   var scenery = require( 'SCENERY/scenery' );
-  var Paintable = require( 'SCENERY/nodes/Paintable' );
   var CanvasSelfDrawable = require( 'SCENERY/display/CanvasSelfDrawable' );
   var SelfDrawable = require( 'SCENERY/display/SelfDrawable' );
 
+  var emptyArray = []; // constant, used for line-dash
+
   /**
-   * A generated CanvasSelfDrawable whose purpose will be drawing our Circle. One of these drawables will be created
-   * for each displayed instance of a Circle.
+   * A generated CanvasSelfDrawable whose purpose will be drawing our CanvasNode. One of these drawables will be created
+   * for each displayed instance of a CanvasNode.
    * @public (scenery-internal)
    * @constructor
    * @extends CanvasSelfDrawable
-   * @mixes Paintable.PaintableStatelessDrawable
    * @mixes SelfDrawable.Poolable
    *
    * @param {number} renderer - Renderer bitmask, see Renderer's documentation for more details.
    * @param {Instance} instance
    */
-  function CircleCanvasDrawable( renderer, instance ) {
+  function CanvasNodeDrawable( renderer, instance ) {
     this.initialize( renderer, instance );
   }
 
-  scenery.register( 'CircleCanvasDrawable', CircleCanvasDrawable );
+  scenery.register( 'CanvasNodeDrawable', CanvasNodeDrawable );
 
-  inherit( CanvasSelfDrawable, CircleCanvasDrawable, {
+  inherit( CanvasSelfDrawable, CanvasNodeDrawable, {
     /**
      * Initializes this drawable, starting its "lifetime" until it is disposed. This lifecycle can happen multiple
      * times, with instances generally created by the SelfDrawable.Poolable mixin (dirtyFromPool/createFromPool), and
      * disposal will return this drawable to the pool.
-     * @public (scenery-internal)
+     * @private
      *
      * This acts as a pseudo-constructor that can be called multiple times, and effectively creates/resets the state
      * of the drawable to the initial state.
      *
      * @param {number} renderer - Renderer bitmask, see Renderer's documentation for more details.
      * @param {Instance} instance
-     * @returns {CircleCanvasDrawable} - Self reference for chaining
+     * @returns {CanvasNodeDrawable} - For chaining
      */
     initialize: function( renderer, instance ) {
-      this.initializeCanvasSelfDrawable( renderer, instance );
-      this.initializePaintableStateless( renderer, instance );
-      return this;
+      return this.initializeCanvasSelfDrawable( renderer, instance );
     },
 
     /**
@@ -66,49 +64,34 @@ define( function( require ) {
      * @param {Node} node - Our node that is being drawn
      */
     paintCanvas: function( wrapper, node ) {
-      var context = wrapper.context;
+      assert && assert( !node.selfBounds.isEmpty(), 'CanvasNode should not be used with an empty canvasBounds. ' +
+                                                    'Please set canvasBounds (or use setCanvasBounds()) on ' + node.constructor.name );
 
-      context.beginPath();
-      context.arc( 0, 0, node._radius, 0, Math.PI * 2, false );
-      context.closePath();
+      if ( !node.selfBounds.isEmpty() ) {
+        var context = wrapper.context;
+        context.save();
 
-      if ( node.hasFill() ) {
-        node.beforeCanvasFill( wrapper ); // defined in Paintable
-        context.fill();
-        node.afterCanvasFill( wrapper ); // defined in Paintable
+        // set back to Canvas default styles
+        // TODO: are these necessary, or can we drop them for performance?
+        context.fillStyle = 'black';
+        context.strokeStyle = 'black';
+        context.lineWidth = 1;
+        context.lineCap = 'butt';
+        context.lineJoin = 'miter';
+        context.lineDash = emptyArray;
+        context.lineDashOffset = 0;
+        context.miterLimit = 10;
+
+        node.paintCanvas( context );
+
+        context.restore();
       }
-      if ( node.hasStroke() ) {
-        node.beforeCanvasStroke( wrapper ); // defined in Paintable
-        context.stroke();
-        node.afterCanvasStroke( wrapper ); // defined in Paintable
-      }
-    },
-
-    /**
-     * Called when the radius of the circle changes.
-     * @public (scenery-internal)
-     */
-    markDirtyRadius: function() {
-      this.markPaintDirty();
-    },
-
-    /**
-     * Disposes the drawable.
-     * @public (scenery-internal)
-     * @override
-     */
-    dispose: function() {
-      CanvasSelfDrawable.prototype.dispose.call( this );
-      this.disposePaintableStateless();
     }
   } );
 
-  // Since we're not using Circle's stateful mixin, we'll need to mix in the Paintable mixin here (of the stateless variety).
-  Paintable.PaintableStatelessDrawable.mixin( CircleCanvasDrawable );
-
-  // This sets up CircleCanvasDrawable.createFromPool/dirtyFromPool and drawable.freeToPool() for the type, so
+  // This sets up CanvasNodeDrawable.createFromPool/dirtyFromPool and drawable.freeToPool() for the type, so
   // that we can avoid allocations by reusing previously-used drawables.
-  SelfDrawable.Poolable.mixin( CircleCanvasDrawable );
+  SelfDrawable.Poolable.mixin( CanvasNodeDrawable );
 
-  return CircleCanvasDrawable;
+  return CanvasNodeDrawable;
 } );

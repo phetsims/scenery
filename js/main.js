@@ -47,6 +47,7 @@ define( [
   'SCENERY/display/WebGLBlock',
   'SCENERY/display/WebGLSelfDrawable',
 
+  'SCENERY/display/drawables/CanvasNodeDrawable',
   'SCENERY/display/drawables/CircleCanvasDrawable',
   'SCENERY/display/drawables/CircleDOMDrawable',
   'SCENERY/display/drawables/CircleStatefulDrawable',

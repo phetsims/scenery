@@ -1298,9 +1298,10 @@ define( function( require ) {
      *
      * @param {number} renderer - Renderer bitmask, see Renderer's documentation for more details.
      * @param {Instance} instance
+     * @returns {TextWebGLDrawable} - For chaining
      */
     initialize: function( renderer, instance ) {
-      this.initializeWebGLSelfDrawable( renderer, instance );
+      return this.initializeWebGLSelfDrawable( renderer, instance );
     },
 
     onAddToBlock: function( webglBlock ) {

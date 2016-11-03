@@ -1193,6 +1193,7 @@ define( function( require ) {
      *
      * @param {number} renderer - Renderer bitmask, see Renderer's documentation for more details.
      * @param {Instance} instance
+     * @returns {ImageCanvasDrawable} - For chaining
      */
     initialize: function( renderer, instance ) {
       return this.initializeCanvasSelfDrawable( renderer, instance );
