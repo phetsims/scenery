@@ -193,8 +193,6 @@ define( function( require ) {
      */
     drawableMarkFlags: Node.prototype.drawableMarkFlags.concat( [ 'image', 'imageOpacity', 'mipmap' ] ),
 
-    allowsMultipleDOMInstances: false, // TODO: support multiple instances
-
     invalidateImage: function() {
       if ( this._image ) {
         this.invalidateSelf( new Bounds2( 0, 0, this.getImageWidth(), this.getImageHeight() ) );

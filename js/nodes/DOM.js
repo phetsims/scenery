@@ -20,33 +20,45 @@ define( function( require ) {
   /**
    * @constructor
    *
-   * @param {HTMLElement|jQueryResult} element - The HTML element, or a jQuery selector result.
+   * @param {Element|Object} element - The HTML element, or a jQuery selector result.
    * @param {Object} [options] - Node and DOM options elements, see Node for details.
    */
   function DOM( element, options ) {
+    assert && assert( element instanceof window.Element || element.jquery,
+      'DOM nodes need to be passed an HTML/DOM element or a jQuery selection like $( ... )' );
+
     options = options || {};
 
     // unwrap from jQuery if that is passed in, for consistency
     if ( element && element.jquery ) {
       element = element[ 0 ];
+      assert && assert( element instanceof window.Element );
     }
 
+    // @public (scenery-internal) {HTMLDivElement} - Container div that will have our main element as a child (so we can position and mutate it).
     this._container = document.createElement( 'div' );
+
+    // @private {Object} - jQuery selection so that we can properly determine size information
     this._$container = $( this._container );
     this._$container.css( 'position', 'absolute' );
     this._$container.css( 'left', 0 );
     this._$container.css( 'top', 0 );
 
+    // @private {boolean} - Flag that indicates whether we are updating/invalidating ourself due to changes to the DOM element. The flag is needed so
+    //                      that updates to our element that we make in the update/invalidate section doesn't trigger an infinite loop with another
+    //                      update.
     this.invalidateDOMLock = false;
 
-    // don't let Scenery apply a transform directly (the DOM element will take care of that)
+    // @private {boolean} - Flag that when true won't let Scenery apply a transform directly (the client will take care of that).
     this._preventTransform = false;
 
-    // so that the mutator will call setElement()
+    // We'll have mutate() call setElement() in the proper order
     options.element = element;
 
     // will set the element after initializing
     Node.call( this, options );
+
+    // Only renderer supported, no need to dynamically compute
     this.setRendererBitmask( Renderer.bitmaskDOM );
   }
 
@@ -62,9 +74,6 @@ define( function( require ) {
      *       cases that may apply.
      */
     _mutatorKeys: [ 'element', 'preventTransform' ].concat( Node.prototype._mutatorKeys ),
-
-    // we use a single DOM instance, so this flag should indicate that we don't support duplicating it
-    allowsMultipleDOMInstances: false,
 
     // needs to be attached to the DOM tree for this to work
     calculateDOMBounds: function() {
