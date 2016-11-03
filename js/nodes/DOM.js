@@ -26,8 +26,6 @@ define( function( require ) {
   function DOM( element, options ) {
     options = options || {};
 
-    this._interactive = false;
-
     // unwrap from jQuery if that is passed in, for consistency
     if ( element && element.jquery ) {
       element = element[ 0 ];
@@ -63,7 +61,7 @@ define( function( require ) {
      * NOTE: See Node's _mutatorKeys documentation for more information on how this operates, and potential special
      *       cases that may apply.
      */
-    _mutatorKeys: [ 'element', 'interactive', 'preventTransform' ].concat( Node.prototype._mutatorKeys ),
+    _mutatorKeys: [ 'element', 'preventTransform' ].concat( Node.prototype._mutatorKeys ),
 
     // we use a single DOM instance, so this flag should indicate that we don't support duplicating it
     allowsMultipleDOMInstances: false,
@@ -167,22 +165,12 @@ define( function( require ) {
 
       return this; // allow chaining
     },
+    set element( value ) { this.setElement( value ); },
 
     getElement: function() {
       return this._element;
     },
-
-    setInteractive: function( interactive ) {
-      if ( this._interactive !== interactive ) {
-        this._interactive = interactive;
-
-        // TODO: anything needed here?
-      }
-    },
-
-    isInteractive: function() {
-      return this._interactive;
-    },
+    get element() { return this.getElement(); },
 
     setPreventTransform: function( preventTransform ) {
       assert && assert( typeof preventTransform === 'boolean' );
@@ -193,18 +181,11 @@ define( function( require ) {
         // TODO: anything needed here?
       }
     },
+    set preventTransform( value ) { this.setPreventTransform( value ); },
 
     isTransformPrevented: function() {
       return this._preventTransform;
     },
-
-    set element( value ) { this.setElement( value ); },
-    get element() { return this.getElement(); },
-
-    set interactive( value ) { this.setInteractive( value ); },
-    get interactive() { return this.isInteractive(); },
-
-    set preventTransform( value ) { this.setPreventTransform( value ); },
     get preventTransform() { return this.isTransformPrevented(); },
 
     /**
@@ -228,14 +209,7 @@ define( function( require ) {
      * @param {boolean} [includeChildren]
      */
     getPropString: function( spaces, includeChildren ) {
-      var result = Node.prototype.getPropString.call( this, spaces, includeChildren );
-      if ( this.interactive ) {
-        if ( result ) {
-          result += ',\n';
-        }
-        result += spaces + 'interactive: true';
-      }
-      return result;
+      return Node.prototype.getPropString.call( this, spaces, includeChildren );
     }
   } );
 
