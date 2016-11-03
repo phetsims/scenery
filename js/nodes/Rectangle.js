@@ -766,6 +766,8 @@ define( function( require ) {
    * so that updates to the Rectangle will only be made on attributes that specifically changed (and no change will be
    * necessary for an attribute that changed back to its original/currently-displayed value). Generally, this is used
    * for DOM and SVG drawables.
+   *
+   * This mixin assumes the PaintableStateful mixin is also mixed (always the case for Rectangle stateful drawables).
    */
   Rectangle.RectangleStatefulDrawable = {
     /**
@@ -788,9 +790,12 @@ define( function( require ) {
        *
        * @param {number} renderer - Renderer bitmask, see Renderer's documentation for more details.
        * @param {Instance} instance
+       * @returns {RectangleStatefulDrawable} - Returns 'this' reference, for chaining
        */
       proto.initializeState = function( renderer, instance ) {
-        this.paintDirty = true; // flag that is marked if ANY "paint" dirty flag is set (basically everything except for transforms, so we can accelerated the transform-only case)
+        // @protected {boolean} - Flag marked as true if ANY of the drawable dirty flags are set (basically everything except for transforms, as we
+        //                        need to accelerate the transform case.
+        this.paintDirty = true;
         this.dirtyX = true;
         this.dirtyY = true;
         this.dirtyWidth = true;
@@ -798,7 +803,7 @@ define( function( require ) {
         this.dirtyCornerXRadius = true;
         this.dirtyCornerYRadius = true;
 
-        // adds fill/stroke-specific flags and state
+        // After adding flags, we'll initialize the mixed-in PaintableStateful state.
         this.initializePaintableState( renderer, instance );
 
         return this; // allow for chaining
@@ -861,6 +866,10 @@ define( function( require ) {
         this.markPaintDirty();
       };
 
+      /**
+       * Clears all of the dirty flags (after they have been checked), so that future mark* methods will be able to flag them again.
+       * @public (scenery-internal)
+       */
       proto.setToCleanState = function() {
         this.paintDirty = false;
         this.dirtyX = false;
@@ -902,9 +911,13 @@ define( function( require ) {
      *
      * @param {number} renderer - Renderer bitmask, see Renderer's documentation for more details.
      * @param {Instance} instance
+     * @returns {RectangleDOMDrawable} - Returns 'this' reference, for chaining
      */
     initialize: function( renderer, instance ) {
+      // Super-type initialization
       this.initializeDOMSelfDrawable( renderer, instance );
+
+      // Stateful mix-in initialization
       this.initializeState( renderer, instance );
 
       // only create elements if we don't already have them (we pool visual states always, and depending on the platform may also pool the actual elements to minimize
@@ -928,11 +941,18 @@ define( function( require ) {
 
       this.domElement = this.fillElement;
 
+      // Apply CSS needed for future CSS transforms to work properly.
       scenery.Util.prepareForTransform( this.domElement, this.forceAcceleration );
 
       return this; // allow for chaining
     },
 
+    /**
+     * Updates our DOM element so that its appearance matches our node's representation.
+     * @protected
+     *
+     * This implements part of the DOMSelfDrawable required API for subtypes.
+     */
     updateDOM: function() {
       var node = this.node;
       var fillElement = this.fillElement;
@@ -1002,17 +1022,16 @@ define( function( require ) {
       }
 
       // clear all of the dirty flags
-      this.setToClean();
-    },
-
-    setToClean: function() {
       this.setToCleanState();
-
       this.cleanPaintableState();
-
       this.transformDirty = false;
     },
 
+    /**
+     * Disposes the drawable.
+     * @public
+     * @override
+     */
     dispose: function() {
       this.disposeState();
 
@@ -1058,16 +1077,17 @@ define( function( require ) {
      *
      * @param {number} renderer - Renderer bitmask, see Renderer's documentation for more details.
      * @param {Instance} instance
+     * @returns {RectangleSVGDrawable} - Returns 'this' reference, for chaining
      */
     initialize: function( renderer, instance ) {
+      // Super-type initialization
       this.initializeSVGSelfDrawable( renderer, instance, true, keepSVGRectangleElements ); // usesPaint: true
 
       this.lastArcW = -1; // invalid on purpose
       this.lastArcH = -1; // invalid on purpose
 
-      if ( !this.svgElement ) {
-        this.svgElement = document.createElementNS( scenery.svgns, 'rect' );
-      }
+      // @protected {SVGRectElement} - Sole SVG element for this drawable, implementing API for SVGSelfDrawable
+      this.svgElement = this.svgElement || document.createElementNS( scenery.svgns, 'rect' );
 
       return this;
     },
@@ -1143,6 +1163,7 @@ define( function( require ) {
      *
      * @param {number} renderer - Renderer bitmask, see Renderer's documentation for more details.
      * @param {Instance} instance
+     * @returns {RectangleCanvasDrawable} - Returns 'this' reference, for chaining
      */
     initialize: function( renderer, instance ) {
       this.initializeCanvasSelfDrawable( renderer, instance );
@@ -1275,6 +1296,11 @@ define( function( require ) {
       this.markDirtyRectangle();
     },
 
+    /**
+     * Disposes the drawable.
+     * @public
+     * @override
+     */
     dispose: function() {
       CanvasSelfDrawable.prototype.dispose.call( this );
       this.disposePaintableStateless();
@@ -1318,9 +1344,12 @@ define( function( require ) {
      *
      * @param {number} renderer - Renderer bitmask, see Renderer's documentation for more details.
      * @param {Instance} instance
+     * @returns {RectangleWebGLDrawable} - Returns 'this' reference, for chaining
      */
     initialize: function( renderer, instance ) {
       this.initializeWebGLSelfDrawable( renderer, instance );
+
+      // Stateful mix-in initialization
       this.initializeState( renderer, instance );
 
       if ( !this.vertexArray ) {
@@ -1416,6 +1445,11 @@ define( function( require ) {
       this.cleanPaintableState();
     },
 
+    /**
+     * Disposes the drawable.
+     * @public
+     * @override
+     */
     dispose: function() {
       // TODO: disposal of buffers?
 

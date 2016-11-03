@@ -124,6 +124,7 @@ define( function( require ) {
 
     domUpdateTransformOnRepaint: true, // since we have to integrate the baseline offset into the CSS transform, signal to DOMLayer
 
+    // TODO: documentation!
     setText: function( text ) {
       assert && assert( text !== null && text !== undefined, 'Text should be defined and non-null. Use the empty string if needed.' );
 
@@ -884,15 +885,18 @@ define( function( require ) {
        *
        * @param {number} renderer - Renderer bitmask, see Renderer's documentation for more details.
        * @param {Instance} instance
+       * @returns {TextStatefulDrawable} - Returns 'this' reference, for chaining
        */
       proto.initializeState = function( renderer, instance ) {
-        this.paintDirty = true; // flag that is marked if ANY "paint" dirty flag is set (basically everything except for transforms, so we can accelerated the transform-only case)
+        // @protected {boolean} - Flag marked as true if ANY of the drawable dirty flags are set (basically everything except for transforms, as we
+        //                        need to accelerate the transform case.
+        this.paintDirty = true;
         this.dirtyText = true;
         this.dirtyFont = true;
         this.dirtyBounds = true;
         this.dirtyDirection = true;
 
-        // adds fill/stroke-specific flags and state
+        // After adding flags, we'll initialize the mixed-in PaintableStateful state.
         this.initializePaintableState( renderer, instance );
 
         return this; // allow for chaining
@@ -936,6 +940,10 @@ define( function( require ) {
         this.markPaintDirty();
       };
 
+      /**
+       * Clears all of the dirty flags (after they have been checked), so that future mark* methods will be able to flag them again.
+       * @public (scenery-internal)
+       */
       proto.setToCleanState = function() {
         this.paintDirty = false;
         this.dirtyText = false;
@@ -975,9 +983,13 @@ define( function( require ) {
      *
      * @param {number} renderer - Renderer bitmask, see Renderer's documentation for more details.
      * @param {Instance} instance
+     * @returns {TextDOMDrawable} - Returns 'this' reference, for chaining
      */
     initialize: function( renderer, instance ) {
+      // Super-type initialization
       this.initializeDOMSelfDrawable( renderer, instance );
+
+      // Stateful mix-in initialization
       this.initializeState( renderer, instance );
 
       // only create elements if we don't already have them (we pool visual states always, and depending on the platform may also pool the actual elements to minimize
@@ -991,11 +1003,18 @@ define( function( require ) {
         this.domElement.style.top = '0';
       }
 
+      // Apply CSS needed for future CSS transforms to work properly.
       scenery.Util.prepareForTransform( this.domElement, this.forceAcceleration );
 
       return this; // allow for chaining
     },
 
+    /**
+     * Updates our DOM element so that its appearance matches our node's representation.
+     * @protected
+     *
+     * This implements part of the DOMSelfDrawable required API for subtypes.
+     */
     updateDOM: function() {
       var node = this.node;
 
@@ -1035,17 +1054,16 @@ define( function( require ) {
       }
 
       // clear all of the dirty flags
-      this.setToClean();
-    },
-
-    setToClean: function() {
       this.setToCleanState();
-
       this.cleanPaintableState();
-
       this.transformDirty = false;
     },
 
+    /**
+     * Disposes the drawable.
+     * @public
+     * @override
+     */
     dispose: function() {
       this.disposeState();
 
@@ -1089,12 +1107,14 @@ define( function( require ) {
      *
      * @param {number} renderer - Renderer bitmask, see Renderer's documentation for more details.
      * @param {Instance} instance
+     * @returns {TextSVGDrawable} - Returns 'this' reference, for chaining
      */
     initialize: function( renderer, instance ) {
+      // Super-type initialization
       this.initializeSVGSelfDrawable( renderer, instance, true, keepSVGTextElements ); // usesPaint: true
 
       if ( !this.svgElement ) {
-        // NOTE! reference SVG element at top of file copies createSVGElement!
+        // @protected {SVGTextElement} - Sole SVG element for this drawable, implementing API for SVGSelfDrawable
         var text = this.svgElement = document.createElementNS( scenery.svgns, 'text' );
         text.appendChild( document.createTextNode( '' ) );
 
@@ -1171,6 +1191,7 @@ define( function( require ) {
      *
      * @param {number} renderer - Renderer bitmask, see Renderer's documentation for more details.
      * @param {Instance} instance
+     * @returns {TextCanvasDrawable} - Returns 'this' reference, for chaining
      */
     initialize: function( renderer, instance ) {
       this.initializeCanvasSelfDrawable( renderer, instance );
@@ -1217,6 +1238,11 @@ define( function( require ) {
     markDirtyBounds: function() { this.markPaintDirty(); },
     markDirtyDirection: function() { this.markPaintDirty(); },
 
+    /**
+     * Disposes the drawable.
+     * @public
+     * @override
+     */
     dispose: function() {
       CanvasSelfDrawable.prototype.dispose.call( this );
       this.disposePaintableStateless();
@@ -1291,6 +1317,11 @@ define( function( require ) {
       // This is handled by the ColorTriangleRenderer
     },
 
+    /**
+     * Disposes the drawable.
+     * @public
+     * @override
+     */
     dispose: function() {
       this.disposeWebGLBuffers();
       // super

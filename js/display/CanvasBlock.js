@@ -72,7 +72,7 @@ define( function( require ) {
       this.opacityListenerCountMap = this.opacityListenerCountMap || {};
 
       // reset any fit transforms that were applied
-      Util.prepareForTransform( this.canvas, this.forceAcceleration );
+      Util.prepareForTransform( this.canvas, this.forceAcceleration ); // Apply CSS needed for future CSS transforms to work properly.
       Util.unsetTransform( this.canvas ); // clear out any transforms that could have been previously applied
 
       this.canvasDrawOffset = new Vector2();

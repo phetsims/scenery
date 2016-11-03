@@ -99,6 +99,7 @@ define( function( require ) {
          * can also be provided.
          *
          * @param {null|string|Color|Property.<string|Color>|LinearGradient|RadialGradient|Pattern} fill
+         * @returns {Paintable} - Returns 'this' reference, for chaining
          */
         setFill: function( fill ) {
           assert && assert( fill === null ||
@@ -143,6 +144,7 @@ define( function( require ) {
          * can also be provided.
          *
          * @param {null|string|Color|Property.<string|Color>|LinearGradient|RadialGradient|Pattern} stroke
+         * @returns {Paintable} - Returns 'this' reference, for chaining
          */
         setStroke: function( stroke ) {
           assert && assert( stroke === null ||
@@ -219,6 +221,7 @@ define( function( require ) {
          * @public
          *
          * @param {boolean} pickable
+         * @returns {Paintable} - Returns 'this' reference, for chaining
          */
         setFillPickable: function( pickable ) {
           assert && assert( typeof pickable === 'boolean' );
@@ -248,6 +251,7 @@ define( function( require ) {
          * @public
          *
          * @param {boolean} pickable
+         * @returns {Paintable} - Returns 'this' reference, for chaining
          */
         setStrokePickable: function( pickable ) {
           assert && assert( typeof pickable === 'boolean', 'strokePickable should be a boolean, not ' + pickable );
@@ -278,6 +282,7 @@ define( function( require ) {
          * @public
          *
          * @param {number} lineWidth
+         * @returns {Paintable} - Returns 'this' reference, for chaining
          */
         setLineWidth: function( lineWidth ) {
           assert && assert( typeof lineWidth === 'number', 'lineWidth should be a number, not ' + lineWidth );
@@ -315,6 +320,7 @@ define( function( require ) {
          * @public
          *
          * @param {string} lineCap
+         * @returns {Paintable} - Returns 'this' reference, for chaining
          */
         setLineCap: function( lineCap ) {
           assert && assert( lineCap === 'butt' || lineCap === 'round' || lineCap === 'square',
@@ -353,6 +359,7 @@ define( function( require ) {
          * @public
          *
          * @param {string} lineJoin
+         * @returns {Paintable} - Returns 'this' reference, for chaining
          */
         setLineJoin: function( lineJoin ) {
           assert && assert( lineJoin === 'miter' || lineJoin === 'round' || lineJoin === 'bevel',
@@ -388,6 +395,7 @@ define( function( require ) {
          * @public
          *
          * @param {number} miterLimit
+         * @returns {Paintable} - Returns 'this' reference, for chaining
          */
         setMiterLimit: function( miterLimit ) {
           assert && assert( typeof miterLimit === 'number' );
@@ -432,6 +440,7 @@ define( function( require ) {
          * @public
          *
          * @param {Array.<number>} lineDash
+         * @returns {Paintable} - Returns 'this' reference, for chaining
          */
         setLineDash: function( lineDash ) {
           if ( this._lineDrawingStyles.lineDash !== lineDash ) {
@@ -463,6 +472,7 @@ define( function( require ) {
          * @public
          *
          * @param {number} lineDashOffset
+         * @returns {Paintable} - Returns 'this' reference, for chaining
          */
         setLineDashOffset: function( lineDashOffset ) {
           assert && assert( typeof lineDashOffset === 'number', 'lineDashOffset should be a number, not ' + lineDashOffset );
@@ -496,6 +506,7 @@ define( function( require ) {
          * @public
          *
          * @param {LineStyles} lineStyles
+         * @returns {Paintable} - Returns 'this' reference, for chaining
          */
         setLineStyles: function( lineStyles ) {
           this._lineDrawingStyles = lineStyles;
@@ -527,6 +538,7 @@ define( function( require ) {
          * Also note that duplicate paints are acceptible, and don't need to be filtered out before-hand.
          *
          * @param {Array.<string|Color|Property.<string|Color>|LinearGradient|RadialGradient|Pattern|null>} paints
+         * @returns {Paintable} - Returns 'this' reference, for chaining
          */
         setCachedPaints: function( paints ) {
           this._cachedPaints = paints.filter( function( paint ) { return paint && paint.isPaint; } );
@@ -1107,6 +1119,10 @@ define( function( require ) {
       this.strokeDetailStyle = ''; // width/dash/cap/join CSS
     },
 
+    /**
+     * Disposes the PaintSVGState, releasing listeners as needed.
+     * @public
+     */
     dispose: function() {
       // be cautious, release references
       this.releaseFillPaint();

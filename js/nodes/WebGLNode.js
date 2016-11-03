@@ -271,6 +271,11 @@ define( function( require ) {
       return painted;
     },
 
+    /**
+     * Disposes the drawable.
+     * @public
+     * @override
+     */
     dispose: function() {
       this.painter.dispose();
 

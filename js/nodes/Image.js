@@ -248,6 +248,7 @@ define( function( require ) {
      *                                                                  information about supported types of input
      *                                                                  images, and their possible performance
      *                                                                  implications.
+     * @returns {Image} - Self reference for chaining
      */
     setImage: function( image ) {
       assert && assert( image, 'image should be available' );
@@ -794,9 +795,12 @@ define( function( require ) {
        *
        * @param {number} renderer - Renderer bitmask, see Renderer's documentation for more details.
        * @param {Instance} instance
+       * @returns {ImageStatefulDrawable} - Self reference for chaining
        */
       proto.initializeState = function( renderer, instance ) {
-        this.paintDirty = true; // flag that is marked if ANY "paint" dirty flag is set (basically everything except for transforms, so we can accelerated the transform-only case)
+        // @protected {boolean} - Flag marked as true if ANY of the drawable dirty flags are set (basically everything except for transforms, as we
+        //                        need to accelerate the transform case.
+        this.paintDirty = true;
         this.dirtyImage = true;
         this.dirtyImageOpacity = true;
         this.dirtyMipmap = true;
@@ -840,6 +844,10 @@ define( function( require ) {
         this.markPaintDirty();
       };
 
+      /**
+       * Clears all of the dirty flags (after they have been checked), so that future mark* methods will be able to flag them again.
+       * @public (scenery-internal)
+       */
       proto.setToCleanState = function() {
         this.paintDirty = false;
         this.dirtyImage = false;
@@ -876,9 +884,13 @@ define( function( require ) {
      *
      * @param {number} renderer - Renderer bitmask, see Renderer's documentation for more details.
      * @param {Instance} instance
+     * @returns {ImageDOMDrawable} - Self reference for chaining
      */
     initialize: function( renderer, instance ) {
+      // Super-type initialization
       this.initializeDOMSelfDrawable( renderer, instance );
+
+      // Stateful mix-in initialization
       this.initializeState( renderer, instance );
 
       // only create elements if we don't already have them (we pool visual states always, and depending on the platform may also pool the actual elements to minimize
@@ -895,11 +907,18 @@ define( function( require ) {
       // Whether we have an opacity attribute specified on the DOM element.
       this.hasOpacity = false;
 
+      // Apply CSS needed for future CSS transforms to work properly.
       scenery.Util.prepareForTransform( this.domElement, this.forceAcceleration );
 
       return this; // allow for chaining
     },
 
+    /**
+     * Updates our DOM element so that its appearance matches our node's representation.
+     * @protected
+     *
+     * This implements part of the DOMSelfDrawable required API for subtypes.
+     */
     updateDOM: function() {
       var node = this.node;
       var img = this.domElement;
@@ -927,15 +946,15 @@ define( function( require ) {
       }
 
       // clear all of the dirty flags
-      this.setToClean();
-    },
-
-    setToClean: function() {
       this.setToCleanState();
-
       this.transformDirty = false;
     },
 
+    /**
+     * Disposes the drawable.
+     * @public
+     * @override
+     */
     dispose: function() {
       this.disposeState();
 
@@ -978,18 +997,19 @@ define( function( require ) {
      *
      * @param {number} renderer - Renderer bitmask, see Renderer's documentation for more details.
      * @param {Instance} instance
+     * @returns {ImageSVGDrawable} - Self reference for chaining
      */
     initialize: function( renderer, instance ) {
+      // Super-type initialization
       this.initializeSVGSelfDrawable( renderer, instance, false, keepSVGImageElements ); // usesPaint: false
 
       sceneryLog && sceneryLog.ImageSVGDrawable && sceneryLog.ImageSVGDrawable( this.id + ' initialized for ' + instance.toString() );
       var self = this;
 
-      if ( !this.svgElement ) {
-        this.svgElement = document.createElementNS( scenery.svgns, 'image' );
-        this.svgElement.setAttribute( 'x', 0 );
-        this.svgElement.setAttribute( 'y', 0 );
-      }
+      // @protected {SVGImageElement} - Sole SVG element for this drawable, implementing API for SVGSelfDrawable
+      this.svgElement = this.svgElement || document.createElementNS( scenery.svgns, 'image' );
+      this.svgElement.setAttribute( 'x', 0 );
+      this.svgElement.setAttribute( 'y', 0 );
 
       // Whether we have an opacity attribute specified on the DOM element.
       this.hasOpacity = false;
@@ -1116,6 +1136,11 @@ define( function( require ) {
       }
     },
 
+    /**
+     * Disposes the drawable.
+     * @public
+     * @override
+     */
     dispose: function() {
       sceneryLog && sceneryLog.ImageSVGDrawable && sceneryLog.ImageSVGDrawable( this.id + ' disposing' );
 
@@ -1251,6 +1276,7 @@ define( function( require ) {
      *
      * @param {number} renderer - Renderer bitmask, see Renderer's documentation for more details.
      * @param {Instance} instance
+     * @returns {ImageWebGLDrawable} - Self reference for chaining
      */
     initialize: function( renderer, instance ) {
       this.initializeWebGLSelfDrawable( renderer, instance );
@@ -1417,6 +1443,11 @@ define( function( require ) {
       }
     },
 
+    /**
+     * Disposes the drawable.
+     * @public
+     * @override
+     */
     dispose: function() {
       // TODO: disposal of buffers?
 

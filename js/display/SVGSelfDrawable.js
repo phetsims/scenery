@@ -10,6 +10,8 @@
  *   initializeState( renderer, instance )
  *   disposeState()
  *
+ * Subtypes should also implement drawable.svgElement, as the actual SVG element to be used.
+ *
  * @author Jonathan Olson <jonathan.olson@colorado.edu>
  */
 
@@ -107,7 +109,7 @@ define( function( require ) {
       }
 
       // clear all of the dirty flags
-      this.setToClean();
+      this.setToCleanState();
     },
 
     // to be used by our passed in options.updateSVG
@@ -177,10 +179,6 @@ define( function( require ) {
       this.svgBlock = null;
 
       SelfDrawable.prototype.dispose.call( this );
-    },
-
-    setToClean: function() {
-      this.setToCleanState();
     }
   } );
 

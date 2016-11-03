@@ -437,6 +437,8 @@ define( function( require ) {
    * so that updates to the Line will only be made on attributes that specifically changed (and no change will be
    * necessary for an attribute that changed back to its original/currently-displayed value). Generally, this is used
    * for DOM and SVG drawables.
+   *
+   * This mixin assumes the PaintableStateful mixin is also mixed (always the case for Line stateful drawables).
    */
   Line.LineStatefulDrawable = {
     /**
@@ -459,15 +461,18 @@ define( function( require ) {
        *
        * @param {number} renderer - Renderer bitmask, see Renderer's documentation for more details.
        * @param {Instance} instance
+       * @returns {LineStatefulDrawable} - Self reference for chaining
        */
       proto.initializeState = function( renderer, instance ) {
-        this.paintDirty = true; // flag that is marked if ANY "paint" dirty flag is set (basically everything except for transforms, so we can accelerated the transform-only case)
+        // @protected {boolean} - Flag marked as true if ANY of the drawable dirty flags are set (basically everything except for transforms, as we
+        //                        need to accelerate the transform case.
+        this.paintDirty = true;
         this.dirtyX1 = true;
         this.dirtyY1 = true;
         this.dirtyX2 = true;
         this.dirtyY2 = true;
 
-        // adds fill/stroke-specific flags and state
+        // After adding flags, we'll initialize the mixed-in PaintableStateful state.
         this.initializePaintableState( renderer, instance );
 
         return this; // allow for chaining
@@ -534,6 +539,10 @@ define( function( require ) {
         this.markPaintDirty();
       };
 
+      /**
+       * Clears all of the dirty flags (after they have been checked), so that future mark* methods will be able to flag them again.
+       * @public (scenery-internal)
+       */
       proto.setToCleanState = function() {
         this.paintDirty = false;
         this.dirtyX1 = false;
@@ -556,7 +565,9 @@ define( function( require ) {
 
       // initializes, and resets (so we can support pooled states)
       proto.initializeLineStateless = function() {
-        this.paintDirty = true; // flag that is marked if ANY "paint" dirty flag is set (basically everything except for transforms, so we can accelerated the transform-only case)
+        // @protected {boolean} - Flag marked as true if ANY of the drawable dirty flags are set (basically everything except for transforms, as we
+        //                        need to accelerate the transform case.
+        this.paintDirty = true;
         return this; // allow for chaining
       };
 
@@ -632,13 +643,14 @@ define( function( require ) {
      *
      * @param {number} renderer - Renderer bitmask, see Renderer's documentation for more details.
      * @param {Instance} instance
+     * @returns {LineSVGDrawable} - Self reference for chaining
      */
     initialize: function( renderer, instance ) {
+      // Super-type initialization
       this.initializeSVGSelfDrawable( renderer, instance, true, keepSVGLineElements ); // usesPaint: true
 
-      if ( !this.svgElement ) {
-        this.svgElement = document.createElementNS( scenery.svgns, 'line' );
-      }
+      // @protected {SVGLineElement} - Sole SVG element for this drawable, implementing API for SVGSelfDrawable
+      this.svgElement = this.svgElement || document.createElementNS( scenery.svgns, 'line' );
 
       return this;
     },
@@ -694,6 +706,7 @@ define( function( require ) {
      *
      * @param {number} renderer - Renderer bitmask, see Renderer's documentation for more details.
      * @param {Instance} instance
+     * @returns {LineCanvasDrawable} - Self reference for chaining
      */
     initialize: function( renderer, instance ) {
       this.initializeCanvasSelfDrawable( renderer, instance );
@@ -736,6 +749,11 @@ define( function( require ) {
     markDirtyX2: function() { this.markPaintDirty(); },
     markDirtyY2: function() { this.markPaintDirty(); },
 
+    /**
+     * Disposes the drawable.
+     * @public
+     * @override
+     */
     dispose: function() {
       CanvasSelfDrawable.prototype.dispose.call( this );
       this.disposePaintableStateless();

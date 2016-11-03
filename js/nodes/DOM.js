@@ -265,30 +265,40 @@ define( function( require ) {
      *
      * @param {number} renderer - Renderer bitmask, see Renderer's documentation for more details.
      * @param {Instance} instance
+     * @returns {DOMDrawable} - Self reference for chaining
      */
     initialize: function( renderer, instance ) {
+      // Super-type initialization
       this.initializeDOMSelfDrawable( renderer, instance );
 
       this.domElement = this.node._container;
 
+      // Apply CSS needed for future CSS transforms to work properly.
       scenery.Util.prepareForTransform( this.domElement, this.forceAcceleration );
 
       return this; // allow for chaining
     },
 
+    /**
+     * Updates our DOM element so that its appearance matches our node's representation.
+     * @protected
+     *
+     * This implements part of the DOMSelfDrawable required API for subtypes.
+     */
     updateDOM: function() {
       if ( this.transformDirty && !this.node._preventTransform ) {
         scenery.Util.applyPreparedTransform( this.getTransformMatrix(), this.domElement, this.forceAcceleration );
       }
 
       // clear all of the dirty flags
-      this.setToClean();
-    },
-
-    setToClean: function() {
       this.transformDirty = false;
     },
 
+    /**
+     * Disposes the drawable.
+     * @public
+     * @override
+     */
     dispose: function() {
       DOMSelfDrawable.prototype.dispose.call( this );
 

@@ -93,7 +93,7 @@ define( function( require ) {
       this.gl.clear( this.gl.COLOR_BUFFER_BIT );
 
       // reset any fit transforms that were applied
-      Util.prepareForTransform( this.canvas, false );
+      Util.prepareForTransform( this.canvas, false ); // Apply CSS needed for future CSS transforms to work properly.
       Util.unsetTransform( this.canvas ); // clear out any transforms that could have been previously applied
 
       // Projection {Matrix3} that maps from Scenery's global coordinate frame to normalized device coordinates,

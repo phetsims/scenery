@@ -86,6 +86,7 @@ define( function( require ) {
       this.isDisplayRoot = isDisplayRoot;
       this.dirtyDrawables = cleanArray( this.dirtyDrawables );
 
+      // Apply CSS needed for future CSS transforms to work properly.
       Util.prepareForTransform( this.domElement, this.forceAcceleration );
 
       // if we need to, watch nodes below us (and including us) and apply their filters (opacity/visibility/clip) to the backbone.

@@ -81,7 +81,7 @@ define( function( require ) {
       }
 
       // reset what layer fitting can do (this.forceAcceleration set in fitted block initialization)
-      Util.prepareForTransform( this.svg, this.forceAcceleration );
+      Util.prepareForTransform( this.svg, this.forceAcceleration ); // Apply CSS needed for future CSS transforms to work properly.
 
       Util.unsetTransform( this.svg ); // clear out any transforms that could have been previously applied
       this.baseTransformGroup.setAttribute( 'transform', '' ); // no base transform

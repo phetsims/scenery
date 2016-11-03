@@ -122,6 +122,7 @@ define( function( require ) {
      * TODO: Add a dispose() function or equivalent, which releases the listener.
      *
      * @param {Shape|string|null} shape
+     * @returns {Path} - Returns 'this' reference, for chaining
      */
     setShape: function( shape ) {
       assert && assert( shape === null || typeof shape === 'string' || shape instanceof Shape,
@@ -296,6 +297,7 @@ define( function( require ) {
      * - 'none' - Returns Bounds2.NOTHING. The bounds will be marked as inaccurate.
      *
      * @param {string} boundsMethod - one of 'accurate', 'unstroked', 'tightPadding', 'safePadding' or 'none'
+     * @returns {Path} - Returns 'this' reference, for chaining
      */
     setBoundsMethod: function( boundsMethod ) {
       assert && assert( boundsMethod === 'accurate' ||
@@ -591,6 +593,8 @@ define( function( require ) {
    * so that updates to the Path will only be made on attributes that specifically changed (and no change will be
    * necessary for an attribute that changed back to its original/currently-displayed value). Generally, this is used
    * for DOM and SVG drawables.
+   *
+   * This mixin assumes the PaintableStateful mixin is also mixed (always the case for Path stateful drawables).
    */
   Path.PathStatefulDrawable = {
     /**
@@ -613,12 +617,15 @@ define( function( require ) {
        *
        * @param {number} renderer - Renderer bitmask, see Renderer's documentation for more details.
        * @param {Instance} instance
+       * @returns {PathStatefulDrawable} - Returns 'this' reference, for chaining
        */
       proto.initializeState = function( renderer, instance ) {
-        this.paintDirty = true; // flag that is marked if ANY "paint" dirty flag is set (basically everything except for transforms, so we can accelerated the transform-only case)
+        // @protected {boolean} - Flag marked as true if ANY of the drawable dirty flags are set (basically everything except for transforms, as we
+        //                        need to accelerate the transform case.
+        this.paintDirty = true;
         this.dirtyShape = true;
 
-        // adds fill/stroke-specific flags and state
+        // After adding flags, we'll initialize the mixed-in PaintableStateful state.
         this.initializePaintableState( renderer, instance );
 
         return this; // allow for chaining
@@ -650,6 +657,10 @@ define( function( require ) {
         this.markPaintDirty();
       };
 
+      /**
+       * Clears all of the dirty flags (after they have been checked), so that future mark* methods will be able to flag them again.
+       * @public (scenery-internal)
+       */
       proto.setToCleanState = function() {
         this.paintDirty = false;
         this.dirtyShape = false;
@@ -686,13 +697,14 @@ define( function( require ) {
      *
      * @param {number} renderer - Renderer bitmask, see Renderer's documentation for more details.
      * @param {Instance} instance
+     * @returns {PathSVGDrawable} - Returns 'this' reference, for chaining
      */
     initialize: function( renderer, instance ) {
+      // Super-type initialization
       this.initializeSVGSelfDrawable( renderer, instance, true, keepSVGPathElements ); // usesPaint: true
 
-      if ( !this.svgElement ) {
-        this.svgElement = document.createElementNS( scenery.svgns, 'path' );
-      }
+      // @protected {SVGPathElement} - Sole SVG element for this drawable, implementing API for SVGSelfDrawable
+      this.svgElement = this.svgElement || document.createElementNS( scenery.svgns, 'path' );
 
       return this;
     },
@@ -749,6 +761,7 @@ define( function( require ) {
      *
      * @param {number} renderer - Renderer bitmask, see Renderer's documentation for more details.
      * @param {Instance} instance
+     * @returns {PathCanvasDrawable} - Returns 'this' reference, for chaining
      */
     initialize: function( renderer, instance ) {
       this.initializeCanvasSelfDrawable( renderer, instance );
@@ -794,6 +807,11 @@ define( function( require ) {
     // stateless dirty functions
     markDirtyShape: function() { this.markPaintDirty(); },
 
+    /**
+     * Disposes the drawable.
+     * @public
+     * @override
+     */
     dispose: function() {
       CanvasSelfDrawable.prototype.dispose.call( this );
       this.disposePaintableStateless();

@@ -611,6 +611,8 @@ define( function( require ) {
     /**
      * Moves this node to the front (end) of all of its parents children array.
      * @public
+     *
+     * @returns {Node} - Returns 'this' reference, for chaining
      */
     moveToFront: function() {
       var self = this;
@@ -626,6 +628,7 @@ define( function( require ) {
      * @public
      *
      * @param {Node} child - Our child to move to the front.
+     * @returns {Node} - Returns 'this' reference, for chaining
      */
     moveChildToFront: function( child ) {
       if ( this.indexOfChild( child ) !== this._children.length - 1 ) {
@@ -639,6 +642,8 @@ define( function( require ) {
     /**
      * Moves this node to the back (front) of all of its parents children array.
      * @public
+     *
+     * @returns {Node} - Returns 'this' reference, for chaining
      */
     moveToBack: function() {
       var self = this;
@@ -654,6 +659,7 @@ define( function( require ) {
      * @public
      *
      * @param {Node} child - Our child to move to the back.
+     * @returns {Node} - Returns 'this' reference, for chaining
      */
     moveChildToBack: function( child ) {
       if ( this.indexOfChild( child ) !== 0 ) {
@@ -667,6 +673,8 @@ define( function( require ) {
     /**
      * Removes this node from all of its parents.
      * @public
+     *
+     * @returns {Node} - Returns 'this' reference, for chaining
      */
     detach: function() {
       var self = this;
@@ -1139,6 +1147,7 @@ define( function( require ) {
      * @public
      *
      * @param {Bounds2|null} localBounds
+     * @returns {Node} - Returns 'this' reference, for chaining
      */
     setLocalBounds: function( localBounds ) {
       assert && assert( localBounds === null || localBounds instanceof Bounds2, 'localBounds override should be set to either null or a Bounds2' );
@@ -1199,6 +1208,7 @@ define( function( require ) {
      * A good example of when this is necessary is if there are a bunch of nested children that each have pi/4 rotations.
      *
      * @param {boolean} transformBounds - Whether accurate transform bounds should be used.
+     * @returns {Node} - Returns 'this' reference, for chaining
      */
     setTransformBounds: function( transformBounds ) {
       assert && assert( typeof transformBounds === 'boolean', 'transformBounds should be boolean' );
@@ -1414,6 +1424,7 @@ define( function( require ) {
      * @public
      *
      * @param {Object} listener
+     * @returns {Node} - Returns 'this' reference, for chaining
      */
     addInputListener: function( listener ) {
       // don't allow listeners to be added multiple times
@@ -1430,6 +1441,7 @@ define( function( require ) {
      * @public
      *
      * @param {Object} listener
+     * @returns {Node} - Returns 'this' reference, for chaining
      */
     removeInputListener: function( listener ) {
       // ensure the listener is in our list
@@ -1634,6 +1646,7 @@ define( function( require ) {
      * @public
      *
      * @param {number} x
+     * @returns {Node} - Returns 'this' reference, for chaining
      */
     setX: function( x ) {
       assert && assert( typeof x === 'number' );
@@ -1659,6 +1672,7 @@ define( function( require ) {
      * @public
      *
      * @param {number} y
+     * @returns {Node} - Returns 'this' reference, for chaining
      */
     setY: function( y ) {
       assert && assert( typeof y === 'number' );
@@ -1696,6 +1710,7 @@ define( function( require ) {
      * @param {number} sx - Scale for the X axis
      * @param {number} sy - Scale for the Y axis
      * @param {Vector2} vector - Scale for the x/y axes in the vector's components.
+     * @returns {Node} - Returns 'this' reference, for chaining
      */
     setScaleMagnitude: function( a, b ) {
       var currentScale = this.getScaleVector();
@@ -1734,6 +1749,7 @@ define( function( require ) {
      * @public
      *
      * @param {number} rotation - In radians
+     * @returns {Node} - Returns 'this' reference, for chaining
      */
     setRotation: function( rotation ) {
       assert && assert( typeof rotation === 'number' );
@@ -1767,6 +1783,7 @@ define( function( require ) {
      * @param {number} x - X translation
      * @param {number} y - Y translation
      * @param {Vector2} vector - Vector with x/y translation in components
+     * @returns {Node} - Returns 'this' reference, for chaining
      */
     setTranslation: function( a, b ) {
       var m = this._transform.getMatrix();
@@ -2151,6 +2168,7 @@ define( function( require ) {
      * NOTE: This may require computation of this node's subtree bounds, which may incur some performance loss.
      *
      * @param {number} top - After this operation, node.top should approximately equal this value.
+     * @returns {Node} - Returns 'this' reference, for chaining
      */
     setTop: function( top ) {
       assert && assert( typeof top === 'number' );
@@ -2181,7 +2199,7 @@ define( function( require ) {
      * NOTE: This may require computation of this node's subtree bounds, which may incur some performance loss.
      *
      * @param {number} top - After this operation, node.bottom should approximately equal this value.
-     * @returns {Node} - For chaining
+     * @returns {Node} - Returns 'this' reference, for chaining
      */
     setBottom: function( bottom ) {
       assert && assert( typeof bottom === 'number' );
@@ -2246,6 +2264,7 @@ define( function( require ) {
      * @public
      *
      * @param {boolean} visible
+     * @returns {Node} - Returns 'this' reference, for chaining
      */
     setVisible: function( visible ) {
       assert && assert( typeof visible === 'boolean' );
@@ -4145,6 +4164,7 @@ define( function( require ) {
      * @public (scenery-internal)
      *
      * @param {Drawable} drawable
+     * @returns {Node} - Returns 'this' reference, for chaining
      */
     attachDrawable: function( drawable ) {
       this._drawables.push( drawable );
@@ -4156,6 +4176,7 @@ define( function( require ) {
      * @public (scenery-internal)
      *
      * @param {Drawable} drawable
+     * @returns {Node} - Returns 'this' reference, for chaining
      */
     detachDrawable: function( drawable ) {
       var index = _.indexOf( this._drawables, drawable );
@@ -4187,6 +4208,7 @@ define( function( require ) {
      * node.scale( 2 ) instead of activating an ES5 setter directly.
      *
      * @param {Object} [options]
+     * @returns {Node} - Returns 'this' reference, for chaining
      */
     mutate: function( options ) {
       if ( !options ) {
