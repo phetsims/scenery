@@ -53,6 +53,11 @@ define( [
   'SCENERY/display/drawables/CircleStatefulDrawable',
   'SCENERY/display/drawables/CircleSVGDrawable',
   'SCENERY/display/drawables/DOMDrawable',
+  'SCENERY/display/drawables/ImageCanvasDrawable',
+  'SCENERY/display/drawables/ImageDOMDrawable',
+  'SCENERY/display/drawables/ImageStatefulDrawable',
+  'SCENERY/display/drawables/ImageSVGDrawable',
+  'SCENERY/display/drawables/ImageWebGLDrawable',
 
   'SCENERY/input/BatchedDOMEvent',
   'SCENERY/input/ButtonListener',
