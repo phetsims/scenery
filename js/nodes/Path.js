@@ -12,17 +12,12 @@ define( function( require ) {
   var inherit = require( 'PHET_CORE/inherit' );
   var Shape = require( 'KITE/Shape' );
   var Bounds2 = require( 'DOT/Bounds2' );
-
   var scenery = require( 'SCENERY/scenery' );
   var Node = require( 'SCENERY/nodes/Node' );
   var Renderer = require( 'SCENERY/display/Renderer' );
   var Paintable = require( 'SCENERY/nodes/Paintable' );
-  var SVGSelfDrawable = require( 'SCENERY/display/SVGSelfDrawable' );
-  var CanvasSelfDrawable = require( 'SCENERY/display/CanvasSelfDrawable' );
-  var SelfDrawable = require( 'SCENERY/display/SelfDrawable' );
-
-  // TODO: change this based on memory and performance characteristics of the platform
-  var keepSVGPathElements = true; // whether we should pool SVG elements for the SVG rendering states, or whether we should free them when possible for memory
+  var PathCanvasDrawable = require( 'SCENERY/display/drawables/PathCanvasDrawable' );
+  var PathSVGDrawable = require( 'SCENERY/display/drawables/PathSVGDrawable' );
 
   /**
    * Creates a Path with a given shape specifier (a Shape, a string in the SVG path format, or null to indicate no
@@ -437,7 +432,7 @@ define( function( require ) {
      * @param {CanvasContextWrapper} wrapper
      */
     canvasPaintSelf: function( wrapper ) {
-      Path.PathCanvasDrawable.prototype.paintCanvas( wrapper, this );
+      PathCanvasDrawable.prototype.paintCanvas( wrapper, this );
     },
 
     /**
@@ -450,7 +445,7 @@ define( function( require ) {
      * @returns {SVGSelfDrawable}
      */
     createSVGDrawable: function( renderer, instance ) {
-      return Path.PathSVGDrawable.createFromPool( renderer, instance );
+      return PathSVGDrawable.createFromPool( renderer, instance );
     },
 
     /**
@@ -463,20 +458,7 @@ define( function( require ) {
      * @returns {CanvasSelfDrawable}
      */
     createCanvasDrawable: function( renderer, instance ) {
-      return Path.PathCanvasDrawable.createFromPool( renderer, instance );
-    },
-
-    /**
-     * Creates a WebGL drawable for this Path.
-     * @public (scenery-internal)
-     * @override
-     *
-     * @param {number} renderer - In the bitmask format specified by Renderer, which may contain additional bit flags.
-     * @param {Instance} instance - Instance object that will be associated with the drawable
-     * @returns {WebGLSelfDrawable}
-     */
-    createWebGLDrawable: function( renderer, instance ) {
-      return Path.PathWebGLDrawable.createFromPool( renderer, instance );
+      return PathCanvasDrawable.createFromPool( renderer, instance );
     },
 
     /**
@@ -588,252 +570,5 @@ define( function( require ) {
   // get set first
   Paintable.mixin( Path );
 
-  /*---------------------------------------------------------------------------*
-   * Rendering State mixin (DOM/SVG)
-   *----------------------------------------------------------------------------*/
-
-  /**
-   * A mixin to drawables for Path that need to store state about what the current display is currently showing,
-   * so that updates to the Path will only be made on attributes that specifically changed (and no change will be
-   * necessary for an attribute that changed back to its original/currently-displayed value). Generally, this is used
-   * for DOM and SVG drawables.
-   *
-   * This mixin assumes the PaintableStateful mixin is also mixed (always the case for Path stateful drawables).
-   */
-  Path.PathStatefulDrawable = {
-    /**
-     * Given the type (constructor) of a drawable, we'll mix in a combination of:
-     * - initialization/disposal with the *State suffix
-     * - mark* methods to be called on all drawables of nodes of this type, that set specific dirty flags
-     *
-     * This will allow drawables that mix in this type to do the following during an update:
-     * 1. Check specific dirty flags (e.g. if the fill changed, update the fill of our SVG element).
-     * 2. Call setToCleanState() once done, to clear the dirty flags.
-     *
-     * @param {function} drawableType - The constructor for the drawable type
-     */
-    mixin: function( drawableType ) {
-      var proto = drawableType.prototype;
-
-      /**
-       * Initializes the stateful mixin state, starting its "lifetime" until it is disposed with disposeState().
-       * @protected
-       *
-       * @param {number} renderer - Renderer bitmask, see Renderer's documentation for more details.
-       * @param {Instance} instance
-       * @returns {PathStatefulDrawable} - Returns 'this' reference, for chaining
-       */
-      proto.initializeState = function( renderer, instance ) {
-        // @protected {boolean} - Flag marked as true if ANY of the drawable dirty flags are set (basically everything except for transforms, as we
-        //                        need to accelerate the transform case.
-        this.paintDirty = true;
-        this.dirtyShape = true;
-
-        // After adding flags, we'll initialize the mixed-in PaintableStateful state.
-        this.initializePaintableState( renderer, instance );
-
-        return this; // allow for chaining
-      };
-
-      /**
-       * Disposes the stateful mixin state, so it can be put into the pool to be initialized again.
-       * @protected
-       */
-      proto.disposeState = function() {
-        this.disposePaintableState();
-      };
-
-      /**
-       * A "catch-all" dirty method that directly marks the paintDirty flag and triggers propagation of dirty
-       * information. This can be used by other mark* methods, or directly itself if the paintDirty flag is checked.
-       * @public (scenery-internal)
-       *
-       * It should be fired (indirectly or directly) for anything besides transforms that needs to make a drawable
-       * dirty.
-       */
-      proto.markPaintDirty = function() {
-        this.paintDirty = true;
-        this.markDirty();
-      };
-
-      proto.markDirtyShape = function() {
-        this.dirtyShape = true;
-        this.markPaintDirty();
-      };
-
-      /**
-       * Clears all of the dirty flags (after they have been checked), so that future mark* methods will be able to flag them again.
-       * @public (scenery-internal)
-       */
-      proto.setToCleanState = function() {
-        this.paintDirty = false;
-        this.dirtyShape = false;
-      };
-
-      Paintable.PaintableStatefulDrawable.mixin( drawableType );
-    }
-  };
-
-  /*---------------------------------------------------------------------------*
-   * SVG Rendering
-   *----------------------------------------------------------------------------*/
-
-  /**
-   * A generated SVGSelfDrawable whose purpose will be drawing our Path. One of these drawables will be created
-   * for each displayed instance of a Path.
-   * @constructor
-   *
-   * @param {number} renderer - Renderer bitmask, see Renderer's documentation for more details.
-   * @param {Instance} instance
-   */
-  Path.PathSVGDrawable = function PathSVGDrawable( renderer, instance ) {
-    this.initialize( renderer, instance );
-  };
-  inherit( SVGSelfDrawable, Path.PathSVGDrawable, {
-    /**
-     * Initializes this drawable, starting its "lifetime" until it is disposed. This lifecycle can happen multiple
-     * times, with instances generally created by the SelfDrawable.Poolable mixin (dirtyFromPool/createFromPool), and
-     * disposal will return this drawable to the pool.
-     * @public (scenery-internal)
-     *
-     * This acts as a pseudo-constructor that can be called multiple times, and effectively creates/resets the state
-     * of the drawable to the initial state.
-     *
-     * @param {number} renderer - Renderer bitmask, see Renderer's documentation for more details.
-     * @param {Instance} instance
-     * @returns {PathSVGDrawable} - Returns 'this' reference, for chaining
-     */
-    initialize: function( renderer, instance ) {
-      // Super-type initialization
-      this.initializeSVGSelfDrawable( renderer, instance, true, keepSVGPathElements ); // usesPaint: true
-
-      // @protected {SVGPathElement} - Sole SVG element for this drawable, implementing API for SVGSelfDrawable
-      this.svgElement = this.svgElement || document.createElementNS( scenery.svgns, 'path' );
-
-      return this;
-    },
-
-    /**
-     * Updates the SVG elements so that they will appear like the current node's representation.
-     * @protected
-     *
-     * Implements the interface for SVGSelfDrawable (and is called from the SVGSelfDrawable's update).
-     */
-    updateSVGSelf: function() {
-      assert && assert( !this.node.requiresSVGBoundsWorkaround(),
-        'No workaround for https://github.com/phetsims/scenery/issues/196 is provided at this time, please add an epsilon' );
-
-      var path = this.svgElement;
-      if ( this.dirtyShape ) {
-        var svgPath = this.node.hasShape() ? this.node._shape.getSVGPath() : '';
-
-        // temporary workaround for https://bugs.webkit.org/show_bug.cgi?id=78980
-        // and http://code.google.com/p/chromium/issues/detail?id=231626 where even removing
-        // the attribute can cause this bug
-        if ( !svgPath ) { svgPath = 'M0 0'; }
-
-        // only set the SVG path if it's not the empty string
-        path.setAttribute( 'd', svgPath );
-      }
-
-      // Apply any fill/stroke changes to our element.
-      this.updateFillStrokeStyle( path );
-    }
-  } );
-  Path.PathStatefulDrawable.mixin( Path.PathSVGDrawable );
-  // This sets up PathSVGDrawable.createFromPool/dirtyFromPool and drawable.freeToPool() for the type, so
-  // that we can avoid allocations by reusing previously-used drawables.
-  SelfDrawable.Poolable.mixin( Path.PathSVGDrawable );
-
-  /*---------------------------------------------------------------------------*
-   * Canvas rendering
-   *----------------------------------------------------------------------------*/
-
-  /**
-   * A generated CanvasSelfDrawable whose purpose will be drawing our Path. One of these drawables will be created
-   * for each displayed instance of a Path.
-   * @constructor
-   *
-   * @param {number} renderer - Renderer bitmask, see Renderer's documentation for more details.
-   * @param {Instance} instance
-   */
-  Path.PathCanvasDrawable = function PathCanvasDrawable( renderer, instance ) {
-    this.initialize( renderer, instance );
-  };
-  inherit( CanvasSelfDrawable, Path.PathCanvasDrawable, {
-    /**
-     * Initializes this drawable, starting its "lifetime" until it is disposed. This lifecycle can happen multiple
-     * times, with instances generally created by the SelfDrawable.Poolable mixin (dirtyFromPool/createFromPool), and
-     * disposal will return this drawable to the pool.
-     * @public (scenery-internal)
-     *
-     * This acts as a pseudo-constructor that can be called multiple times, and effectively creates/resets the state
-     * of the drawable to the initial state.
-     *
-     * @param {number} renderer - Renderer bitmask, see Renderer's documentation for more details.
-     * @param {Instance} instance
-     * @returns {PathCanvasDrawable} - Returns 'this' reference, for chaining
-     */
-    initialize: function( renderer, instance ) {
-      this.initializeCanvasSelfDrawable( renderer, instance );
-      this.initializePaintableStateless( renderer, instance );
-      return this;
-    },
-
-    /**
-     * Paints this drawable to a Canvas (the wrapper contains both a Canvas reference and its drawing context).
-     * @public
-     *
-     * Assumes that the Canvas's context is already in the proper local coordinate frame for the node, and that any
-     * other required effects (opacity, clipping, etc.) have already been prepared.
-     *
-     * This is part of the CanvasSelfDrawable API required to be implemented for subtypes.
-     *
-     * @param {CanvasContextWrapper} wrapper - Contains the Canvas and its drawing context
-     * @param {Node} node - Our node that is being drawn
-     */
-    paintCanvas: function( wrapper, node ) {
-      var context = wrapper.context;
-
-      if ( node.hasShape() ) {
-        // TODO: fill/stroke delay optimizations?
-        context.beginPath();
-        node._shape.writeToContext( context );
-
-        if ( node.hasFill() ) {
-          node.beforeCanvasFill( wrapper ); // defined in Paintable
-          context.fill();
-          node.afterCanvasFill( wrapper ); // defined in Paintable
-        }
-
-        // Do not render strokes in Canvas if the lineWidth is 0, see https://github.com/phetsims/scenery/issues/523
-        if ( node.hasStroke() && node.getLineWidth() > 0 ) {
-          node.beforeCanvasStroke( wrapper ); // defined in Paintable
-          context.stroke();
-          node.afterCanvasStroke( wrapper ); // defined in Paintable
-        }
-      }
-    },
-
-    // stateless dirty functions
-    markDirtyShape: function() { this.markPaintDirty(); },
-
-    /**
-     * Disposes the drawable.
-     * @public
-     * @override
-     */
-    dispose: function() {
-      CanvasSelfDrawable.prototype.dispose.call( this );
-      this.disposePaintableStateless();
-    }
-  } );
-  Paintable.PaintableStatelessDrawable.mixin( Path.PathCanvasDrawable );
-  // This sets up PathCanvasDrawable.createFromPool/dirtyFromPool and drawable.freeToPool() for the type, so
-  // that we can avoid allocations by reusing previously-used drawables.
-  SelfDrawable.Poolable.mixin( Path.PathCanvasDrawable );
-
   return Path;
 } );
-
-

@@ -62,6 +62,9 @@ define( [
   'SCENERY/display/drawables/LineStatefulDrawable',
   'SCENERY/display/drawables/LineStatelessDrawable',
   'SCENERY/display/drawables/LineSVGDrawable',
+  'SCENERY/display/drawables/PathCanvasDrawable',
+  'SCENERY/display/drawables/PathStatefulDrawable',
+  'SCENERY/display/drawables/PathSVGDrawable',
 
   'SCENERY/input/BatchedDOMEvent',
   'SCENERY/input/ButtonListener',
