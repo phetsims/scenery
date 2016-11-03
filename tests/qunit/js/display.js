@@ -54,9 +54,9 @@
 
     ok( r1._drawables.length === 0, 'After dispose, should not have drawable refs' );
 
-    ok( scenery.Rectangle.RectangleDOMDrawable.pool.length > 0, 'Disposed drawable returned to pool' );
-    ok( scenery.Rectangle.RectangleSVGDrawable.pool.length > 0, 'Disposed drawable returned to pool' );
-    ok( scenery.Rectangle.RectangleCanvasDrawable.pool.length > 0, 'Disposed drawable returned to pool' );
+    ok( scenery.RectangleDOMDrawable.pool.length > 0, 'Disposed drawable returned to pool' );
+    ok( scenery.RectangleSVGDrawable.pool.length > 0, 'Disposed drawable returned to pool' );
+    ok( scenery.RectangleCanvasDrawable.pool.length > 0, 'Disposed drawable returned to pool' );
   } );
 
   test( 'Drawables (Circle)', function() {
@@ -142,8 +142,8 @@
 
     ok( r1._drawables.length === 0, 'After dispose, should not have drawable refs' );
 
-    ok( scenery.Line.LineSVGDrawable.pool.length > 0, 'Disposed drawable returned to pool' );
-    ok( scenery.Line.LineCanvasDrawable.pool.length > 0, 'Disposed drawable returned to pool' );
+    ok( scenery.LineSVGDrawable.pool.length > 0, 'Disposed drawable returned to pool' );
+    ok( scenery.LineCanvasDrawable.pool.length > 0, 'Disposed drawable returned to pool' );
   } );
 
   test( 'Drawables (Path)', function() {
@@ -187,8 +187,8 @@
 
     ok( r1._drawables.length === 0, 'After dispose, should not have drawable refs' );
 
-    ok( scenery.Path.PathSVGDrawable.pool.length > 0, 'Disposed drawable returned to pool' );
-    ok( scenery.Path.PathCanvasDrawable.pool.length > 0, 'Disposed drawable returned to pool' );
+    ok( scenery.PathSVGDrawable.pool.length > 0, 'Disposed drawable returned to pool' );
+    ok( scenery.PathCanvasDrawable.pool.length > 0, 'Disposed drawable returned to pool' );
   } );
 
   test( 'Drawables (Text)', function() {
@@ -238,9 +238,9 @@
 
     ok( r1._drawables.length === 0, 'After dispose, should not have drawable refs' );
 
-    ok( scenery.Text.TextDOMDrawable.pool.length > 0, 'Disposed drawable returned to pool' );
-    ok( scenery.Text.TextSVGDrawable.pool.length > 0, 'Disposed drawable returned to pool' );
-    ok( scenery.Text.TextCanvasDrawable.pool.length > 0, 'Disposed drawable returned to pool' );
+    ok( scenery.TextDOMDrawable.pool.length > 0, 'Disposed drawable returned to pool' );
+    ok( scenery.TextSVGDrawable.pool.length > 0, 'Disposed drawable returned to pool' );
+    ok( scenery.TextCanvasDrawable.pool.length > 0, 'Disposed drawable returned to pool' );
   } );
 
   test( 'Drawables (Image)', function() {
@@ -278,9 +278,9 @@
 
     ok( r1._drawables.length === 0, 'After dispose, should not have drawable refs' );
 
-    ok( scenery.Image.ImageDOMDrawable.pool.length > 0, 'Disposed drawable returned to pool' );
-    ok( scenery.Image.ImageSVGDrawable.pool.length > 0, 'Disposed drawable returned to pool' );
-    ok( scenery.Image.ImageCanvasDrawable.pool.length > 0, 'Disposed drawable returned to pool' );
+    ok( scenery.ImageDOMDrawable.pool.length > 0, 'Disposed drawable returned to pool' );
+    ok( scenery.ImageSVGDrawable.pool.length > 0, 'Disposed drawable returned to pool' );
+    ok( scenery.ImageCanvasDrawable.pool.length > 0, 'Disposed drawable returned to pool' );
   } );
 
   test( 'Drawables (DOM)', function() {
