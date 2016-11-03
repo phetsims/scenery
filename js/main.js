@@ -52,6 +52,7 @@ define( [
   'SCENERY/display/drawables/CircleDOMDrawable',
   'SCENERY/display/drawables/CircleStatefulDrawable',
   'SCENERY/display/drawables/CircleSVGDrawable',
+  'SCENERY/display/drawables/DOMDrawable',
 
   'SCENERY/input/BatchedDOMEvent',
   'SCENERY/input/ButtonListener',

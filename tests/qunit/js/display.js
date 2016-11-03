@@ -298,7 +298,7 @@
 
     ok( r1._drawables.length === 0, 'After dispose, should not have drawable refs' );
 
-    ok( scenery.DOM.DOMDrawable.pool.length > 0, 'Disposed drawable returned to pool' );
+    ok( scenery.DOMDrawable.pool.length > 0, 'Disposed drawable returned to pool' );
   } );
 
   test( 'Renderer order bitmask', function() {

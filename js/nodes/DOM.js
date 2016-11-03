@@ -10,17 +10,12 @@ define( function( require ) {
   'use strict';
 
   var inherit = require( 'PHET_CORE/inherit' );
+  var scenery = require( 'SCENERY/scenery' );
   var escapeHTML = require( 'PHET_CORE/escapeHTML' );
   var Bounds2 = require( 'DOT/Bounds2' );
-
-  var scenery = require( 'SCENERY/scenery' );
-
   var Node = require( 'SCENERY/nodes/Node' ); // DOM inherits from Node
   var Renderer = require( 'SCENERY/display/Renderer' );
-  require( 'SCENERY/util/Util' );
-
-  var DOMSelfDrawable = require( 'SCENERY/display/DOMSelfDrawable' );
-  var SelfDrawable = require( 'SCENERY/display/SelfDrawable' );
+  var DOMDrawable = require( 'SCENERY/display/drawables/DOMDrawable' );
 
   /**
    * @constructor
@@ -139,7 +134,7 @@ define( function( require ) {
      * @returns {DOMSelfDrawable}
      */
     createDOMDrawable: function( renderer, instance ) {
-      return DOM.DOMDrawable.createFromPool( renderer, instance );
+      return DOMDrawable.createFromPool( renderer, instance );
     },
 
     /**
@@ -163,7 +158,6 @@ define( function( require ) {
         }
 
         this._element = element;
-        this._$element = $( element );
 
         this._container.appendChild( this._element );
 
@@ -245,80 +239,5 @@ define( function( require ) {
     }
   } );
 
-  /*---------------------------------------------------------------------------*
-   * DOM rendering
-   *----------------------------------------------------------------------------*/
-
-  /**
-   * A generated DOMSelfDrawable whose purpose will be drawing our DOM node. One of these drawables will be created
-   * for each displayed instance of a DOM node.
-   * @constructor
-   * @mixes SelfDrawable.Poolable
-   *
-   * @param {number} renderer - Renderer bitmask, see Renderer's documentation for more details.
-   * @param {Instance} instance
-   */
-  DOM.DOMDrawable = function DOMDrawable( renderer, instance ) {
-    this.initialize( renderer, instance );
-  };
-  inherit( DOMSelfDrawable, DOM.DOMDrawable, {
-    /**
-     * Initializes this drawable, starting its "lifetime" until it is disposed. This lifecycle can happen multiple
-     * times, with instances generally created by the SelfDrawable.Poolable mixin (dirtyFromPool/createFromPool), and
-     * disposal will return this drawable to the pool.
-     * @private
-     *
-     * This acts as a pseudo-constructor that can be called multiple times, and effectively creates/resets the state
-     * of the drawable to the initial state.
-     *
-     * @param {number} renderer - Renderer bitmask, see Renderer's documentation for more details.
-     * @param {Instance} instance
-     * @returns {DOMDrawable} - Self reference for chaining
-     */
-    initialize: function( renderer, instance ) {
-      // Super-type initialization
-      this.initializeDOMSelfDrawable( renderer, instance );
-
-      this.domElement = this.node._container;
-
-      // Apply CSS needed for future CSS transforms to work properly.
-      scenery.Util.prepareForTransform( this.domElement, this.forceAcceleration );
-
-      return this; // allow for chaining
-    },
-
-    /**
-     * Updates our DOM element so that its appearance matches our node's representation.
-     * @protected
-     *
-     * This implements part of the DOMSelfDrawable required API for subtypes.
-     */
-    updateDOM: function() {
-      if ( this.transformDirty && !this.node._preventTransform ) {
-        scenery.Util.applyPreparedTransform( this.getTransformMatrix(), this.domElement, this.forceAcceleration );
-      }
-
-      // clear all of the dirty flags
-      this.transformDirty = false;
-    },
-
-    /**
-     * Disposes the drawable.
-     * @public
-     * @override
-     */
-    dispose: function() {
-      DOMSelfDrawable.prototype.dispose.call( this );
-
-      this.domElement = null;
-    }
-  } );
-
-  // This sets up DOMDrawable.createFromPool/dirtyFromPool and drawable.freeToPool() for the type, so
-  // that we can avoid allocations by reusing previously-used drawables.
-  SelfDrawable.Poolable.mixin( DOM.DOMDrawable );
-
   return DOM;
 } );
-
-

@@ -642,7 +642,7 @@ define( function( require ) {
      * Initializes this drawable, starting its "lifetime" until it is disposed. This lifecycle can happen multiple
      * times, with instances generally created by the SelfDrawable.Poolable mixin (dirtyFromPool/createFromPool), and
      * disposal will return this drawable to the pool.
-     * @private
+     * @public (scenery-internal)
      *
      * This acts as a pseudo-constructor that can be called multiple times, and effectively creates/resets the state
      * of the drawable to the initial state.
@@ -712,7 +712,7 @@ define( function( require ) {
      * Initializes this drawable, starting its "lifetime" until it is disposed. This lifecycle can happen multiple
      * times, with instances generally created by the SelfDrawable.Poolable mixin (dirtyFromPool/createFromPool), and
      * disposal will return this drawable to the pool.
-     * @private
+     * @public (scenery-internal)
      *
      * This acts as a pseudo-constructor that can be called multiple times, and effectively creates/resets the state
      * of the drawable to the initial state.
