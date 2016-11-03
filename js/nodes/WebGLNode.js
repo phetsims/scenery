@@ -282,7 +282,14 @@ define( function( require ) {
       WebGLSelfDrawable.prototype.dispose.call( this );
     },
 
-    // general flag set on the state, which we forward directly to the drawable's paint flag
+    /**
+     * A "catch-all" dirty method that directly marks the paintDirty flag and triggers propagation of dirty
+     * information. This can be used by other mark* methods, or directly itself if the paintDirty flag is checked.
+     * @public (scenery-internal)
+     *
+     * It should be fired (indirectly or directly) for anything besides transforms that needs to make a drawable
+     * dirty.
+     */
     markPaintDirty: function() {
       this.markDirty();
     },

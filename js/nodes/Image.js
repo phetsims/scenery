@@ -788,7 +788,13 @@ define( function( require ) {
     mixin: function( drawableType ) {
       var proto = drawableType.prototype;
 
-      // initializes, and resets (so we can support pooled states)
+      /**
+       * Initializes the stateful mixin state, starting its "lifetime" until it is disposed with disposeState().
+       * @protected
+       *
+       * @param {number} renderer - Renderer bitmask, see Renderer's documentation for more details.
+       * @param {Instance} instance
+       */
       proto.initializeState = function( renderer, instance ) {
         this.paintDirty = true; // flag that is marked if ANY "paint" dirty flag is set (basically everything except for transforms, so we can accelerated the transform-only case)
         this.dirtyImage = true;
@@ -798,11 +804,22 @@ define( function( require ) {
         return this; // allow for chaining
       };
 
+      /**
+       * Disposes the stateful mixin state, so it can be put into the pool to be initialized again.
+       * @protected
+       */
       proto.disposeState = function() {
 
       };
 
-      // catch-all dirty, if anything that isn't a transform is marked as dirty
+      /**
+       * A "catch-all" dirty method that directly marks the paintDirty flag and triggers propagation of dirty
+       * information. This can be used by other mark* methods, or directly itself if the paintDirty flag is checked.
+       * @public (scenery-internal)
+       *
+       * It should be fired (indirectly or directly) for anything besides transforms that needs to make a drawable
+       * dirty.
+       */
       proto.markPaintDirty = function() {
         this.paintDirty = true;
         this.markDirty();
@@ -1308,7 +1325,14 @@ define( function( require ) {
       WebGLSelfDrawable.prototype.markTransformDirty.call( this );
     },
 
-    // called when something about the Image's image itself changes (not transform, etc.)
+    /**
+     * A "catch-all" dirty method that directly marks the paintDirty flag and triggers propagation of dirty
+     * information. This can be used by other mark* methods, or directly itself if the paintDirty flag is checked.
+     * @public (scenery-internal)
+     *
+     * It should be fired (indirectly or directly) for anything besides transforms that needs to make a drawable
+     * dirty.
+     */
     markPaintDirty: function() {
       this.xyDirty = true; // vertex positions can depend on image width/height
       this.uvDirty = true;
