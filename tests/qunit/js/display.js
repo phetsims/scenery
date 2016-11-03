@@ -100,9 +100,9 @@
 
     ok( r1._drawables.length === 0, 'After dispose, should not have drawable refs' );
 
-    ok( scenery.Circle.CircleDOMDrawable.pool.length > 0, 'Disposed drawable returned to pool' );
-    ok( scenery.Circle.CircleSVGDrawable.pool.length > 0, 'Disposed drawable returned to pool' );
-    ok( scenery.Circle.CircleCanvasDrawable.pool.length > 0, 'Disposed drawable returned to pool' );
+    ok( scenery.CircleDOMDrawable.pool.length > 0, 'Disposed drawable returned to pool' );
+    ok( scenery.CircleSVGDrawable.pool.length > 0, 'Disposed drawable returned to pool' );
+    ok( scenery.CircleCanvasDrawable.pool.length > 0, 'Disposed drawable returned to pool' );
   } );
 
   test( 'Drawables (Line)', function() {

@@ -29,6 +29,8 @@ define( function( require ) {
    * @param {Object} [options] - Node and DOM options elements, see Node for details.
    */
   function DOM( element, options ) {
+    options = options || {};
+
     this._interactive = false;
 
     // unwrap from jQuery if that is passed in, for consistency
@@ -51,7 +53,7 @@ define( function( require ) {
     options.element = element;
 
     // will set the element after initializing
-    Node.call( this, options || {} );
+    Node.call( this, options );
     this.setRendererBitmask( Renderer.bitmaskDOM );
   }
 

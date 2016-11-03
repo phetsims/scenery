@@ -12,22 +12,13 @@ define( function( require ) {
   var inherit = require( 'PHET_CORE/inherit' );
   var scenery = require( 'SCENERY/scenery' );
   var Bounds2 = require( 'DOT/Bounds2' );
-  var Matrix3 = require( 'DOT/Matrix3' );
-
   var Path = require( 'SCENERY/nodes/Path' );
   var Shape = require( 'KITE/Shape' );
   var Features = require( 'SCENERY/util/Features' );
-  var Paintable = require( 'SCENERY/nodes/Paintable' );
-  var DOMSelfDrawable = require( 'SCENERY/display/DOMSelfDrawable' );
-  var SVGSelfDrawable = require( 'SCENERY/display/SVGSelfDrawable' );
-  var CanvasSelfDrawable = require( 'SCENERY/display/CanvasSelfDrawable' );
-  var SelfDrawable = require( 'SCENERY/display/SelfDrawable' );
   var Renderer = require( 'SCENERY/display/Renderer' );
-  require( 'SCENERY/util/Util' );
-
-  // TODO: change this based on memory and performance characteristics of the platform
-  var keepDOMCircleElements = true; // whether we should pool DOM elements for the DOM rendering states, or whether we should free them when possible for memory
-  var keepSVGCircleElements = true; // whether we should pool SVG elements for the SVG rendering states, or whether we should free them when possible for memory
+  var CircleDOMDrawable = require( 'SCENERY/display/drawables/CircleDOMDrawable' );
+  var CircleSVGDrawable = require( 'SCENERY/display/drawables/CircleSVGDrawable' );
+  var CircleCanvasDrawable = require( 'SCENERY/display/drawables/CircleCanvasDrawable' );
 
   /**
    * @constructor
@@ -179,7 +170,7 @@ define( function( require ) {
      * @param {CanvasContextWrapper} wrapper
      */
     canvasPaintSelf: function( wrapper ) {
-      Circle.CircleCanvasDrawable.prototype.paintCanvas( wrapper, this );
+      CircleCanvasDrawable.prototype.paintCanvas( wrapper, this );
     },
 
     /**
@@ -192,7 +183,7 @@ define( function( require ) {
      * @returns {DOMSelfDrawable}
      */
     createDOMDrawable: function( renderer, instance ) {
-      return Circle.CircleDOMDrawable.createFromPool( renderer, instance );
+      return CircleDOMDrawable.createFromPool( renderer, instance );
     },
 
     /**
@@ -205,7 +196,7 @@ define( function( require ) {
      * @returns {SVGSelfDrawable}
      */
     createSVGDrawable: function( renderer, instance ) {
-      return Circle.CircleSVGDrawable.createFromPool( renderer, instance );
+      return CircleSVGDrawable.createFromPool( renderer, instance );
     },
 
     /**
@@ -218,20 +209,7 @@ define( function( require ) {
      * @returns {CanvasSelfDrawable}
      */
     createCanvasDrawable: function( renderer, instance ) {
-      return Circle.CircleCanvasDrawable.createFromPool( renderer, instance );
-    },
-
-    /**
-     * Creates a WebGL drawable for this Circle.
-     * @public (scenery-internal)
-     * @override
-     *
-     * @param {number} renderer - In the bitmask format specified by Renderer, which may contain additional bit flags.
-     * @param {Instance} instance - Instance object that will be associated with the drawable
-     * @returns {WebGLSelfDrawable}
-     */
-    createWebGLDrawable: function( renderer, instance ) {
-      return Circle.CircleWebGLDrawable.createFromPool( renderer, instance );
+      return CircleCanvasDrawable.createFromPool( renderer, instance );
     },
 
     /**
@@ -383,430 +361,6 @@ define( function( require ) {
       return true;
     }
   } );
-
-  /*---------------------------------------------------------------------------*
-   * Rendering State mixin (DOM/SVG)
-   *----------------------------------------------------------------------------*/
-
-  /**
-   * A mixin to drawables for Circle that need to store state about what the current display is currently showing,
-   * so that updates to the Circle will only be made on attributes that specifically changed (and no change will be
-   * necessary for an attribute that changed back to its original/currently-displayed value). Generally, this is used
-   * for DOM and SVG drawables.
-   *
-   * This mixin assumes the PaintableStateful mixin is also mixed (always the case for Circle stateful drawables).
-   */
-  Circle.CircleStatefulDrawable = {
-    /**
-     * Given the type (constructor) of a drawable, we'll mix in a combination of:
-     * - initialization/disposal with the *State suffix
-     * - mark* methods to be called on all drawables of nodes of this type, that set specific dirty flags
-     *
-     * This will allow drawables that mix in this type to do the following during an update:
-     * 1. Check specific dirty flags (e.g. if the fill changed, update the fill of our SVG element).
-     * 2. Call setToCleanState() once done, to clear the dirty flags.
-     *
-     * @param {function} drawableType - The constructor for the drawable type
-     */
-    mixin: function( drawableType ) {
-      var proto = drawableType.prototype;
-
-      /**
-       * Initializes the stateful mixin state, starting its "lifetime" until it is disposed with disposeState().
-       * @protected
-       *
-       * @param {number} renderer - Renderer bitmask, see Renderer's documentation for more details.
-       * @param {Instance} instance
-       * @returns {CircleStatefulDrawable} - Self reference for chaining
-       */
-      proto.initializeState = function( renderer, instance ) {
-        // @protected {boolean} - Flag marked as true if ANY of the drawable dirty flags are set (basically everything except for transforms, as we
-        //                        need to accelerate the transform case.
-        this.paintDirty = true;
-
-        // @protected {boolean} - Whether the radius has changed since our last update.
-        this.dirtyRadius = true;
-
-        // After adding flags, we'll initialize the mixed-in PaintableStateful state.
-        this.initializePaintableState( renderer, instance );
-
-        return this; // allow for chaining
-      };
-
-      /**
-       * Disposes the stateful mixin state, so it can be put into the pool to be initialized again.
-       * @protected
-       */
-      proto.disposeState = function() {
-        this.disposePaintableState();
-      };
-
-      /**
-       * A "catch-all" dirty method that directly marks the paintDirty flag and triggers propagation of dirty
-       * information. This can be used by other mark* methods, or directly itself if the paintDirty flag is checked.
-       * @public (scenery-internal)
-       *
-       * It should be fired (indirectly or directly) for anything besides transforms that needs to make a drawable
-       * dirty.
-       */
-      proto.markPaintDirty = function() {
-        this.paintDirty = true;
-        this.markDirty();
-      };
-
-      /**
-       * Called when the radius of the circle changes.
-       * @public (scenery-internal)
-       */
-      proto.markDirtyRadius = function() {
-        this.dirtyRadius = true;
-        this.markPaintDirty();
-      };
-
-      /**
-       * Clears all of the dirty flags (after they have been checked), so that future mark* methods will be able to flag them again.
-       * @public (scenery-internal)
-       */
-      proto.setToCleanState = function() {
-        this.paintDirty = false;
-        this.dirtyRadius = false;
-      };
-
-      Paintable.PaintableStatefulDrawable.mixin( drawableType );
-    }
-  };
-
-  /*---------------------------------------------------------------------------*
-   * DOM rendering
-   *----------------------------------------------------------------------------*/
-
-  /**
-   * A generated DOMSelfDrawable whose purpose will be drawing our Circle. One of these drawables will be created
-   * for each displayed instance of a Circle.
-   * @constructor
-   * @mixes Circle.CircleStatefulDrawable
-   * @mixes Paintable.PaintableStatefulDrawable
-   * @mixes SelfDrawable.Poolable
-   *
-   * @param {number} renderer - Renderer bitmask, see Renderer's documentation for more details.
-   * @param {Instance} instance
-   */
-  Circle.CircleDOMDrawable = function CircleDOMDrawable( renderer, instance ) {
-    this.initialize( renderer, instance );
-  };
-  inherit( DOMSelfDrawable, Circle.CircleDOMDrawable, {
-    /**
-     * Initializes this drawable, starting its "lifetime" until it is disposed. This lifecycle can happen multiple
-     * times, with instances generally created by the SelfDrawable.Poolable mixin (dirtyFromPool/createFromPool), and
-     * disposal will return this drawable to the pool.
-     * @private
-     *
-     * This acts as a pseudo-constructor that can be called multiple times, and effectively creates/resets the state
-     * of the drawable to the initial state.
-     *
-     * @param {number} renderer - Renderer bitmask, see Renderer's documentation for more details.
-     * @param {Instance} instance
-     * @returns {CircleDOMDrawable} - Self reference for chaining
-     */
-    initialize: function( renderer, instance ) {
-      // Super-type initialization
-      this.initializeDOMSelfDrawable( renderer, instance );
-
-      // Stateful mix-in initialization
-      this.initializeState( renderer, instance );
-
-      // @protected {Matrix3} - We need to store an independent matrix, as our CSS transform actually depends on the radius.
-      this.matrix = this.matrix || Matrix3.dirtyFromPool();
-
-      // only create elements if we don't already have them (we pool visual states always, and depending on the platform may also pool the actual elements to minimize
-      // allocation and performance costs)
-      if ( !this.fillElement || !this.strokeElement ) {
-        // @protected {HTMLDivElement} - Will contain the fill by manipulating borderRadius
-        var fillElement = this.fillElement = document.createElement( 'div' );
-
-        // @protected {HTMLDivElement} - Will contain the stroke by manipulating borderRadius
-        var strokeElement = this.strokeElement = document.createElement( 'div' );
-
-        fillElement.style.display = 'block';
-        fillElement.style.position = 'absolute';
-        fillElement.style.left = '0';
-        fillElement.style.top = '0';
-        fillElement.style.pointerEvents = 'none';
-        strokeElement.style.display = 'block';
-        strokeElement.style.position = 'absolute';
-        strokeElement.style.left = '0';
-        strokeElement.style.top = '0';
-        strokeElement.style.pointerEvents = 'none';
-
-        // Nesting allows us to transform only one AND to guarantee that the stroke is on top.
-        fillElement.appendChild( strokeElement );
-      }
-
-      // @protected {HTMLElement} - Our primary DOM element. This is exposed as part of the DOMSelfDrawable API.
-      this.domElement = this.fillElement;
-
-      // Apply CSS needed for future CSS transforms to work properly.
-      scenery.Util.prepareForTransform( this.domElement, this.forceAcceleration );
-
-      return this; // allow for chaining
-    },
-
-    /**
-     * Updates our DOM element so that its appearance matches our node's representation.
-     * @protected
-     *
-     * This implements part of the DOMSelfDrawable required API for subtypes.
-     */
-    updateDOM: function() {
-      var node = this.node;
-      var fillElement = this.fillElement;
-      var strokeElement = this.strokeElement;
-
-      // If paintDirty is false, there are no updates that are needed.
-      if ( this.paintDirty ) {
-        if ( this.dirtyRadius ) {
-          fillElement.style.width = ( 2 * node._radius ) + 'px';
-          fillElement.style.height = ( 2 * node._radius ) + 'px';
-          fillElement.style[ Features.borderRadius ] = node._radius + 'px';
-        }
-        if ( this.dirtyFill ) {
-          fillElement.style.backgroundColor = node.getCSSFill();
-        }
-
-        if ( this.dirtyStroke ) {
-          // update stroke presence
-          if ( node.hasStroke() ) {
-            strokeElement.style.borderStyle = 'solid';
-          }
-          else {
-            strokeElement.style.borderStyle = 'none';
-          }
-        }
-
-        if ( node.hasStroke() ) {
-          // since we only execute these if we have a stroke, we need to redo everything if there was no stroke previously.
-          // the other option would be to update stroked information when there is no stroke (major performance loss for fill-only Circles)
-          var hadNoStrokeBefore = this.lastStroke === null;
-
-          if ( hadNoStrokeBefore || this.dirtyLineWidth || this.dirtyRadius ) {
-            strokeElement.style.width = ( 2 * node._radius - node.getLineWidth() ) + 'px';
-            strokeElement.style.height = ( 2 * node._radius - node.getLineWidth() ) + 'px';
-            strokeElement.style[ Features.borderRadius ] = ( node._radius + node.getLineWidth() / 2 ) + 'px';
-          }
-          if ( hadNoStrokeBefore || this.dirtyLineWidth ) {
-            strokeElement.style.left = ( -node.getLineWidth() / 2 ) + 'px';
-            strokeElement.style.top = ( -node.getLineWidth() / 2 ) + 'px';
-            strokeElement.style.borderWidth = node.getLineWidth() + 'px';
-          }
-          if ( hadNoStrokeBefore || this.dirtyStroke ) {
-            strokeElement.style.borderColor = node.getSimpleCSSStroke();
-          }
-        }
-      }
-
-      // shift the element vertically, postmultiplied with the entire transform.
-      if ( this.transformDirty || this.dirtyRadius ) {
-        this.matrix.set( this.getTransformMatrix() );
-        var translation = Matrix3.translation( -node._radius, -node._radius );
-        this.matrix.multiplyMatrix( translation );
-        translation.freeToPool();
-        scenery.Util.applyPreparedTransform( this.matrix, this.fillElement, this.forceAcceleration );
-      }
-
-      // clear all of the dirty flags
-      this.setToCleanState();
-      this.cleanPaintableState();
-      this.transformDirty = false;
-    },
-
-    /**
-     * Disposes the drawable.
-     * @public
-     * @override
-     */
-    dispose: function() {
-      this.disposeState();
-
-      // Release the DOM elements from the poolable visual state so they aren't kept in memory.
-      // May not be done on platforms where we have enough memory to pool these
-      if ( !keepDOMCircleElements ) {
-        // clear the references
-        this.fillElement = null;
-        this.strokeElement = null;
-        this.domElement = null;
-      }
-
-      DOMSelfDrawable.prototype.dispose.call( this );
-    }
-  } );
-
-  // Include Circle's stateful mixin (used for dirty flags)
-  Circle.CircleStatefulDrawable.mixin( Circle.CircleDOMDrawable );
-
-  // This sets up CircleDOMDrawable.createFromPool/dirtyFromPool and drawable.freeToPool() for the type, so
-  // that we can avoid allocations by reusing previously-used drawables.
-  SelfDrawable.Poolable.mixin( Circle.CircleDOMDrawable );
-
-  /*---------------------------------------------------------------------------*
-   * SVG Rendering
-   *----------------------------------------------------------------------------*/
-
-  /**
-   * A generated SVGSelfDrawable whose purpose will be drawing our Circle. One of these drawables will be created
-   * for each displayed instance of a Circle.
-   * @constructor
-   * @mixes Circle.CircleStatefulDrawable
-   * @mixes Paintable.PaintableStatefulDrawable
-   * @mixes SelfDrawable.Poolable
-   *
-   * @param {number} renderer - Renderer bitmask, see Renderer's documentation for more details.
-   * @param {Instance} instance
-   */
-  Circle.CircleSVGDrawable = function CircleSVGDrawable( renderer, instance ) {
-    this.initialize( renderer, instance );
-  };
-  inherit( SVGSelfDrawable, Circle.CircleSVGDrawable, {
-    /**
-     * Initializes this drawable, starting its "lifetime" until it is disposed. This lifecycle can happen multiple
-     * times, with instances generally created by the SelfDrawable.Poolable mixin (dirtyFromPool/createFromPool), and
-     * disposal will return this drawable to the pool.
-     * @private
-     *
-     * This acts as a pseudo-constructor that can be called multiple times, and effectively creates/resets the state
-     * of the drawable to the initial state.
-     *
-     * @param {number} renderer - Renderer bitmask, see Renderer's documentation for more details.
-     * @param {Instance} instance
-     * @returns {SVGSelfDrawable} - Self reference for chaining
-     */
-    initialize: function( renderer, instance ) {
-      // Super-type initialization
-      this.initializeSVGSelfDrawable( renderer, instance, true, keepSVGCircleElements ); // usesPaint: true
-
-      // @protected {SVGCircleElement} - Sole SVG element for this drawable, implementing API for SVGSelfDrawable
-      this.svgElement = this.svgElement || document.createElementNS( scenery.svgns, 'circle' );
-
-      return this;
-    },
-
-    /**
-     * Updates the SVG elements so that they will appear like the current node's representation.
-     * @protected
-     *
-     * Implements the interface for SVGSelfDrawable (and is called from the SVGSelfDrawable's update).
-     */
-    updateSVGSelf: function() {
-      var circle = this.svgElement;
-
-      if ( this.dirtyRadius ) {
-        circle.setAttribute( 'r', this.node._radius );
-      }
-
-      // Apply any fill/stroke changes to our element.
-      this.updateFillStrokeStyle( circle );
-    }
-  } );
-
-  // Include Circle's stateful mixin (used for dirty flags)
-  Circle.CircleStatefulDrawable.mixin( Circle.CircleSVGDrawable );
-
-  // This sets up CircleSVGDrawable.createFromPool/dirtyFromPool and drawable.freeToPool() for the type, so
-  // that we can avoid allocations by reusing previously-used drawables.
-  SelfDrawable.Poolable.mixin( Circle.CircleSVGDrawable );
-
-  /*---------------------------------------------------------------------------*
-   * Canvas rendering
-   *----------------------------------------------------------------------------*/
-
-  /**
-   * A generated CanvasSelfDrawable whose purpose will be drawing our Circle. One of these drawables will be created
-   * for each displayed instance of a Circle.
-   * @constructor
-   * @mixes Paintable.PaintableStatelessDrawable
-   * @mixes SelfDrawable.Poolable
-   *
-   * @param {number} renderer - Renderer bitmask, see Renderer's documentation for more details.
-   * @param {Instance} instance
-   */
-  Circle.CircleCanvasDrawable = function CircleCanvasDrawable( renderer, instance ) {
-    this.initialize( renderer, instance );
-  };
-  inherit( CanvasSelfDrawable, Circle.CircleCanvasDrawable, {
-    /**
-     * Initializes this drawable, starting its "lifetime" until it is disposed. This lifecycle can happen multiple
-     * times, with instances generally created by the SelfDrawable.Poolable mixin (dirtyFromPool/createFromPool), and
-     * disposal will return this drawable to the pool.
-     * @private
-     *
-     * This acts as a pseudo-constructor that can be called multiple times, and effectively creates/resets the state
-     * of the drawable to the initial state.
-     *
-     * @param {number} renderer - Renderer bitmask, see Renderer's documentation for more details.
-     * @param {Instance} instance
-     * @returns {CircleCanvasDrawable} - Self reference for chaining
-     */
-    initialize: function( renderer, instance ) {
-      this.initializeCanvasSelfDrawable( renderer, instance );
-      this.initializePaintableStateless( renderer, instance );
-      return this;
-    },
-
-    /**
-     * Paints this drawable to a Canvas (the wrapper contains both a Canvas reference and its drawing context).
-     * @public
-     *
-     * Assumes that the Canvas's context is already in the proper local coordinate frame for the node, and that any
-     * other required effects (opacity, clipping, etc.) have already been prepared.
-     *
-     * This is part of the CanvasSelfDrawable API required to be implemented for subtypes.
-     *
-     * @param {CanvasContextWrapper} wrapper - Contains the Canvas and its drawing context
-     * @param {Node} node - Our node that is being drawn
-     */
-    paintCanvas: function( wrapper, node ) {
-      var context = wrapper.context;
-
-      context.beginPath();
-      context.arc( 0, 0, node._radius, 0, Math.PI * 2, false );
-      context.closePath();
-
-      if ( node.hasFill() ) {
-        node.beforeCanvasFill( wrapper ); // defined in Paintable
-        context.fill();
-        node.afterCanvasFill( wrapper ); // defined in Paintable
-      }
-      if ( node.hasStroke() ) {
-        node.beforeCanvasStroke( wrapper ); // defined in Paintable
-        context.stroke();
-        node.afterCanvasStroke( wrapper ); // defined in Paintable
-      }
-    },
-
-    /**
-     * Called when the radius of the circle changes.
-     * @public (scenery-internal)
-     */
-    markDirtyRadius: function() {
-      this.markPaintDirty();
-    },
-
-    /**
-     * Disposes the drawable.
-     * @public
-     * @override
-     */
-    dispose: function() {
-      CanvasSelfDrawable.prototype.dispose.call( this );
-      this.disposePaintableStateless();
-    }
-  } );
-
-  // Since we're not using Circle's stateful mixin, we'll need to mix in the Paintable mixin here (of the stateless variety).
-  Paintable.PaintableStatelessDrawable.mixin( Circle.CircleCanvasDrawable );
-
-  // This sets up CircleCanvasDrawable.createFromPool/dirtyFromPool and drawable.freeToPool() for the type, so
-  // that we can avoid allocations by reusing previously-used drawables.
-  SelfDrawable.Poolable.mixin( Circle.CircleCanvasDrawable );
 
   return Circle;
 } );
