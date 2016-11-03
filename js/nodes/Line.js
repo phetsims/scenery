@@ -15,21 +15,13 @@ define( function( require ) {
   var inherit = require( 'PHET_CORE/inherit' );
   var scenery = require( 'SCENERY/scenery' );
   var KiteLine = require( 'KITE/segments/Line' ); // eslint-disable-line require-statement-match
-
   var Path = require( 'SCENERY/nodes/Path' );
   var Shape = require( 'KITE/Shape' );
   var Bounds2 = require( 'DOT/Bounds2' );
   var Vector2 = require( 'DOT/Vector2' );
-
-  var Paintable = require( 'SCENERY/nodes/Paintable' );
-  var SVGSelfDrawable = require( 'SCENERY/display/SVGSelfDrawable' );
-  var CanvasSelfDrawable = require( 'SCENERY/display/CanvasSelfDrawable' );
-
-  var SelfDrawable = require( 'SCENERY/display/SelfDrawable' );
   var Renderer = require( 'SCENERY/display/Renderer' );
-
-  // TODO: change this based on memory and performance characteristics of the platform
-  var keepSVGLineElements = true; // whether we should pool SVG elements for the SVG rendering states, or whether we should free them when possible for memory
+  var LineCanvasDrawable = require( 'SCENERY/display/drawables/LineCanvasDrawable' );
+  var LineSVGDrawable = require( 'SCENERY/display/drawables/LineSVGDrawable' );
 
   /**
    * @constructor
@@ -232,7 +224,7 @@ define( function( require ) {
      * @param {CanvasContextWrapper} wrapper
      */
     canvasPaintSelf: function( wrapper ) {
-      Line.LineCanvasDrawable.prototype.paintCanvas( wrapper, this );
+      LineCanvasDrawable.prototype.paintCanvas( wrapper, this );
     },
 
     /**
@@ -305,7 +297,7 @@ define( function( require ) {
      * @returns {SVGSelfDrawable}
      */
     createSVGDrawable: function( renderer, instance ) {
-      return Line.LineSVGDrawable.createFromPool( renderer, instance );
+      return LineSVGDrawable.createFromPool( renderer, instance );
     },
 
     /**
@@ -318,20 +310,7 @@ define( function( require ) {
      * @returns {CanvasSelfDrawable}
      */
     createCanvasDrawable: function( renderer, instance ) {
-      return Line.LineCanvasDrawable.createFromPool( renderer, instance );
-    },
-
-    /**
-     * Creates a WebGL drawable for this Line.
-     * @public (scenery-internal)
-     * @override
-     *
-     * @param {number} renderer - In the bitmask format specified by Renderer, which may contain additional bit flags.
-     * @param {Instance} instance - Instance object that will be associated with the drawable
-     * @returns {WebGLSelfDrawable}
-     */
-    createWebGLDrawable: function( renderer, instance ) {
-      return Line.LineWebGLDrawable.createFromPool( renderer, instance );
+      return LineCanvasDrawable.createFromPool( renderer, instance );
     },
 
     /**
@@ -434,350 +413,5 @@ define( function( require ) {
   addLineProp( 'X2' );
   addLineProp( 'Y2' );
 
-  /*---------------------------------------------------------------------------*
-   * Rendering State mixin (DOM/SVG)
-   *----------------------------------------------------------------------------*/
-
-  /**
-   * A mixin to drawables for Line that need to store state about what the current display is currently showing,
-   * so that updates to the Line will only be made on attributes that specifically changed (and no change will be
-   * necessary for an attribute that changed back to its original/currently-displayed value). Generally, this is used
-   * for DOM and SVG drawables.
-   *
-   * This mixin assumes the PaintableStateful mixin is also mixed (always the case for Line stateful drawables).
-   */
-  Line.LineStatefulDrawable = {
-    /**
-     * Given the type (constructor) of a drawable, we'll mix in a combination of:
-     * - initialization/disposal with the *State suffix
-     * - mark* methods to be called on all drawables of nodes of this type, that set specific dirty flags
-     *
-     * This will allow drawables that mix in this type to do the following during an update:
-     * 1. Check specific dirty flags (e.g. if the fill changed, update the fill of our SVG element).
-     * 2. Call setToCleanState() once done, to clear the dirty flags.
-     *
-     * @param {function} drawableType - The constructor for the drawable type
-     */
-    mixin: function( drawableType ) {
-      var proto = drawableType.prototype;
-
-      /**
-       * Initializes the stateful mixin state, starting its "lifetime" until it is disposed with disposeState().
-       * @protected
-       *
-       * @param {number} renderer - Renderer bitmask, see Renderer's documentation for more details.
-       * @param {Instance} instance
-       * @returns {LineStatefulDrawable} - Self reference for chaining
-       */
-      proto.initializeState = function( renderer, instance ) {
-        // @protected {boolean} - Flag marked as true if ANY of the drawable dirty flags are set (basically everything except for transforms, as we
-        //                        need to accelerate the transform case.
-        this.paintDirty = true;
-        this.dirtyX1 = true;
-        this.dirtyY1 = true;
-        this.dirtyX2 = true;
-        this.dirtyY2 = true;
-
-        // After adding flags, we'll initialize the mixed-in PaintableStateful state.
-        this.initializePaintableState( renderer, instance );
-
-        return this; // allow for chaining
-      };
-
-      /**
-       * Disposes the stateful mixin state, so it can be put into the pool to be initialized again.
-       * @protected
-       */
-      proto.disposeState = function() {
-        this.disposePaintableState();
-      };
-
-      /**
-       * A "catch-all" dirty method that directly marks the paintDirty flag and triggers propagation of dirty
-       * information. This can be used by other mark* methods, or directly itself if the paintDirty flag is checked.
-       * @public (scenery-internal)
-       *
-       * It should be fired (indirectly or directly) for anything besides transforms that needs to make a drawable
-       * dirty.
-       */
-      proto.markPaintDirty = function() {
-        this.paintDirty = true;
-        this.markDirty();
-      };
-
-      proto.markDirtyLine = function() {
-        this.dirtyX1 = true;
-        this.dirtyY1 = true;
-        this.dirtyX2 = true;
-        this.dirtyY2 = true;
-        this.markPaintDirty();
-      };
-
-      proto.markDirtyP1 = function() {
-        this.dirtyX1 = true;
-        this.dirtyY1 = true;
-        this.markPaintDirty();
-      };
-
-      proto.markDirtyP2 = function() {
-        this.dirtyX2 = true;
-        this.dirtyY2 = true;
-        this.markPaintDirty();
-      };
-
-      proto.markDirtyX1 = function() {
-        this.dirtyX1 = true;
-        this.markPaintDirty();
-      };
-
-      proto.markDirtyY1 = function() {
-        this.dirtyY1 = true;
-        this.markPaintDirty();
-      };
-
-      proto.markDirtyX2 = function() {
-        this.dirtyX2 = true;
-        this.markPaintDirty();
-      };
-
-      proto.markDirtyY2 = function() {
-        this.dirtyY2 = true;
-        this.markPaintDirty();
-      };
-
-      /**
-       * Clears all of the dirty flags (after they have been checked), so that future mark* methods will be able to flag them again.
-       * @public (scenery-internal)
-       */
-      proto.setToCleanState = function() {
-        this.paintDirty = false;
-        this.dirtyX1 = false;
-        this.dirtyY1 = false;
-        this.dirtyX2 = false;
-        this.dirtyY2 = false;
-      };
-
-      Paintable.PaintableStatefulDrawable.mixin( drawableType );
-    }
-  };
-
-  /*---------------------------------------------------------------------------*
-   * Stateless drawable mixin
-   *----------------------------------------------------------------------------*/
-
-  Line.LineStatelessDrawable = {
-    mixin: function( drawableType ) {
-      var proto = drawableType.prototype;
-
-      // initializes, and resets (so we can support pooled states)
-      proto.initializeLineStateless = function() {
-        // @protected {boolean} - Flag marked as true if ANY of the drawable dirty flags are set (basically everything except for transforms, as we
-        //                        need to accelerate the transform case.
-        this.paintDirty = true;
-        return this; // allow for chaining
-      };
-
-      /**
-       * A "catch-all" dirty method that directly marks the paintDirty flag and triggers propagation of dirty
-       * information. This can be used by other mark* methods, or directly itself if the paintDirty flag is checked.
-       * @public (scenery-internal)
-       *
-       * It should be fired (indirectly or directly) for anything besides transforms that needs to make a drawable
-       * dirty.
-       */
-      proto.markPaintDirty = function() {
-        this.paintDirty = true;
-        this.markDirty();
-      };
-
-      proto.markDirtyLine = function() {
-        this.markPaintDirty();
-      };
-
-      proto.markDirtyP1 = function() {
-        this.markPaintDirty();
-      };
-
-      proto.markDirtyP2 = function() {
-        this.markPaintDirty();
-      };
-
-      proto.markDirtyX1 = function() {
-        this.markPaintDirty();
-      };
-
-      proto.markDirtyY1 = function() {
-        this.markPaintDirty();
-      };
-
-      proto.markDirtyX2 = function() {
-        this.markPaintDirty();
-      };
-
-      proto.markDirtyY2 = function() {
-        this.markPaintDirty();
-      };
-
-      Paintable.PaintableStatefulDrawable.mixin( drawableType );
-    }
-  };
-
-  /*---------------------------------------------------------------------------*
-   * SVG Rendering
-   *----------------------------------------------------------------------------*/
-
-  /**
-   * A generated SVGSelfDrawable whose purpose will be drawing our Line. One of these drawables will be created
-   * for each displayed instance of a Line.
-   * @constructor
-   *
-   * @param {number} renderer - Renderer bitmask, see Renderer's documentation for more details.
-   * @param {Instance} instance
-   */
-  Line.LineSVGDrawable = function LineSVGDrawable( renderer, instance ) {
-    this.initialize( renderer, instance );
-  };
-  inherit( SVGSelfDrawable, Line.LineSVGDrawable, {
-    /**
-     * Initializes this drawable, starting its "lifetime" until it is disposed. This lifecycle can happen multiple
-     * times, with instances generally created by the SelfDrawable.Poolable mixin (dirtyFromPool/createFromPool), and
-     * disposal will return this drawable to the pool.
-     * @public (scenery-internal)
-     *
-     * This acts as a pseudo-constructor that can be called multiple times, and effectively creates/resets the state
-     * of the drawable to the initial state.
-     *
-     * @param {number} renderer - Renderer bitmask, see Renderer's documentation for more details.
-     * @param {Instance} instance
-     * @returns {LineSVGDrawable} - Self reference for chaining
-     */
-    initialize: function( renderer, instance ) {
-      // Super-type initialization
-      this.initializeSVGSelfDrawable( renderer, instance, true, keepSVGLineElements ); // usesPaint: true
-
-      // @protected {SVGLineElement} - Sole SVG element for this drawable, implementing API for SVGSelfDrawable
-      this.svgElement = this.svgElement || document.createElementNS( scenery.svgns, 'line' );
-
-      return this;
-    },
-
-    /**
-     * Updates the SVG elements so that they will appear like the current node's representation.
-     * @protected
-     *
-     * Implements the interface for SVGSelfDrawable (and is called from the SVGSelfDrawable's update).
-     */
-    updateSVGSelf: function() {
-      var line = this.svgElement;
-
-      if ( this.dirtyX1 ) {
-        line.setAttribute( 'x1', this.node._x1 );
-      }
-      if ( this.dirtyY1 ) {
-        line.setAttribute( 'y1', this.node._y1 );
-      }
-      if ( this.dirtyX2 ) {
-        line.setAttribute( 'x2', this.node._x2 );
-      }
-      if ( this.dirtyY2 ) {
-        line.setAttribute( 'y2', this.node._y2 );
-      }
-
-      // Apply any fill/stroke changes to our element.
-      this.updateFillStrokeStyle( line );
-    }
-  } );
-  Line.LineStatefulDrawable.mixin( Line.LineSVGDrawable );
-  // This sets up LineSVGDrawable.createFromPool/dirtyFromPool and drawable.freeToPool() for the type, so
-  // that we can avoid allocations by reusing previously-used drawables.
-  SelfDrawable.Poolable.mixin( Line.LineSVGDrawable );
-
-  /*---------------------------------------------------------------------------*
-   * Canvas rendering
-   *----------------------------------------------------------------------------*/
-
-  /**
-   * A generated CanvasSelfDrawable whose purpose will be drawing our Line. One of these drawables will be created
-   * for each displayed instance of a Line.
-   * @constructor
-   *
-   * @param {number} renderer - Renderer bitmask, see Renderer's documentation for more details.
-   * @param {Instance} instance
-   */
-  Line.LineCanvasDrawable = function LineCanvasDrawable( renderer, instance ) {
-    this.initialize( renderer, instance );
-  };
-  inherit( CanvasSelfDrawable, Line.LineCanvasDrawable, {
-    /**
-     * Initializes this drawable, starting its "lifetime" until it is disposed. This lifecycle can happen multiple
-     * times, with instances generally created by the SelfDrawable.Poolable mixin (dirtyFromPool/createFromPool), and
-     * disposal will return this drawable to the pool.
-     * @public (scenery-internal)
-     *
-     * This acts as a pseudo-constructor that can be called multiple times, and effectively creates/resets the state
-     * of the drawable to the initial state.
-     *
-     * @param {number} renderer - Renderer bitmask, see Renderer's documentation for more details.
-     * @param {Instance} instance
-     * @returns {LineCanvasDrawable} - Self reference for chaining
-     */
-    initialize: function( renderer, instance ) {
-      this.initializeCanvasSelfDrawable( renderer, instance );
-      this.initializePaintableStateless( renderer, instance );
-      return this;
-    },
-
-    /**
-     * Paints this drawable to a Canvas (the wrapper contains both a Canvas reference and its drawing context).
-     * @public
-     *
-     * Assumes that the Canvas's context is already in the proper local coordinate frame for the node, and that any
-     * other required effects (opacity, clipping, etc.) have already been prepared.
-     *
-     * This is part of the CanvasSelfDrawable API required to be implemented for subtypes.
-     *
-     * @param {CanvasContextWrapper} wrapper - Contains the Canvas and its drawing context
-     * @param {Node} node - Our node that is being drawn
-     */
-    paintCanvas: function( wrapper, node ) {
-      var context = wrapper.context;
-
-      context.beginPath();
-      context.moveTo( node._x1, node._y1 );
-      context.lineTo( node._x2, node._y2 );
-
-      if ( node._stroke ) {
-        node.beforeCanvasStroke( wrapper ); // defined in Paintable
-        context.stroke();
-        node.afterCanvasStroke( wrapper ); // defined in Paintable
-      }
-    },
-
-    // stateless dirty methods:
-    markDirtyLine: function() { this.markPaintDirty(); },
-    markDirtyP1: function() { this.markPaintDirty(); },
-    markDirtyP2: function() { this.markPaintDirty(); },
-    markDirtyX1: function() { this.markPaintDirty(); },
-    markDirtyY1: function() { this.markPaintDirty(); },
-    markDirtyX2: function() { this.markPaintDirty(); },
-    markDirtyY2: function() { this.markPaintDirty(); },
-
-    /**
-     * Disposes the drawable.
-     * @public
-     * @override
-     */
-    dispose: function() {
-      CanvasSelfDrawable.prototype.dispose.call( this );
-      this.disposePaintableStateless();
-    }
-  } );
-  Paintable.PaintableStatelessDrawable.mixin( Line.LineCanvasDrawable );
-  // This sets up LineCanvasDrawable.createFromPool/dirtyFromPool and drawable.freeToPool() for the type, so
-  // that we can avoid allocations by reusing previously-used drawables.
-  SelfDrawable.Poolable.mixin( Line.LineCanvasDrawable );
-
   return Line;
 } );
-
-

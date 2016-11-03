@@ -1,0 +1,75 @@
+// Copyright 2013-2015, University of Colorado Boulder
+
+/**
+ * A mixin to drawables for Line does not store the line's state, as it just needs to track dirtyness overall.
+ *
+ * @author Jonathan Olson <jonathan.olson@colorado.edu>
+ */
+
+define( function( require ) {
+  'use strict';
+
+  var scenery = require( 'SCENERY/scenery' );
+  var Paintable = require( 'SCENERY/nodes/Paintable' );
+
+  var LineStatelessDrawable = {
+    mixin: function( drawableType ) {
+      var proto = drawableType.prototype;
+
+      // initializes, and resets (so we can support pooled states)
+      proto.initializeLineStateless = function() {
+        // @protected {boolean} - Flag marked as true if ANY of the drawable dirty flags are set (basically everything except for transforms, as we
+        //                        need to accelerate the transform case.
+        this.paintDirty = true;
+        return this; // allow for chaining
+      };
+
+      /**
+       * A "catch-all" dirty method that directly marks the paintDirty flag and triggers propagation of dirty
+       * information. This can be used by other mark* methods, or directly itself if the paintDirty flag is checked.
+       * @public (scenery-internal)
+       *
+       * It should be fired (indirectly or directly) for anything besides transforms that needs to make a drawable
+       * dirty.
+       */
+      proto.markPaintDirty = function() {
+        this.paintDirty = true;
+        this.markDirty();
+      };
+
+      proto.markDirtyLine = function() {
+        this.markPaintDirty();
+      };
+
+      proto.markDirtyP1 = function() {
+        this.markPaintDirty();
+      };
+
+      proto.markDirtyP2 = function() {
+        this.markPaintDirty();
+      };
+
+      proto.markDirtyX1 = function() {
+        this.markPaintDirty();
+      };
+
+      proto.markDirtyY1 = function() {
+        this.markPaintDirty();
+      };
+
+      proto.markDirtyX2 = function() {
+        this.markPaintDirty();
+      };
+
+      proto.markDirtyY2 = function() {
+        this.markPaintDirty();
+      };
+
+      Paintable.PaintableStatefulDrawable.mixin( drawableType );
+    }
+  };
+
+  scenery.register( 'LineStatelessDrawable', LineStatelessDrawable );
+
+  return LineStatelessDrawable;
+} );

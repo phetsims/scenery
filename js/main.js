@@ -58,6 +58,10 @@ define( [
   'SCENERY/display/drawables/ImageStatefulDrawable',
   'SCENERY/display/drawables/ImageSVGDrawable',
   'SCENERY/display/drawables/ImageWebGLDrawable',
+  'SCENERY/display/drawables/LineCanvasDrawable',
+  'SCENERY/display/drawables/LineStatefulDrawable',
+  'SCENERY/display/drawables/LineStatelessDrawable',
+  'SCENERY/display/drawables/LineSVGDrawable',
 
   'SCENERY/input/BatchedDOMEvent',
   'SCENERY/input/ButtonListener',
