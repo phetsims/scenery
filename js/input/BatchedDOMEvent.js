@@ -15,6 +15,14 @@ define( function( require ) {
   var Poolable = require( 'PHET_CORE/Poolable' );
   var scenery = require( 'SCENERY/scenery' );
 
+  /**
+   * @constructor
+   * @mixes Poolable
+   *
+   * @param domEvent
+   * @param type
+   * @param callback
+   */
   function BatchedDOMEvent( domEvent, type, callback ) {
     assert && assert( domEvent, 'for some reason, there is no DOM event?' );
 

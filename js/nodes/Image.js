@@ -656,6 +656,7 @@ define( function( require ) {
      * @override
      *
      * @param {number} renderer - In the bitmask format specified by Renderer, which may contain additional bit flags.
+     * @param {Instance} instance - Instance object that will be associated with the drawable
      * @returns {DOMSelfDrawable}
      */
     createDOMDrawable: function( renderer, instance ) {
@@ -668,6 +669,7 @@ define( function( require ) {
      * @override
      *
      * @param {number} renderer - In the bitmask format specified by Renderer, which may contain additional bit flags.
+     * @param {Instance} instance - Instance object that will be associated with the drawable
      * @returns {SVGSelfDrawable}
      */
     createSVGDrawable: function( renderer, instance ) {
@@ -680,6 +682,7 @@ define( function( require ) {
      * @override
      *
      * @param {number} renderer - In the bitmask format specified by Renderer, which may contain additional bit flags.
+     * @param {Instance} instance - Instance object that will be associated with the drawable
      * @returns {CanvasSelfDrawable}
      */
     createCanvasDrawable: function( renderer, instance ) {
@@ -692,6 +695,7 @@ define( function( require ) {
      * @override
      *
      * @param {number} renderer - In the bitmask format specified by Renderer, which may contain additional bit flags.
+     * @param {Instance} instance - Instance object that will be associated with the drawable
      * @returns {WebGLSelfDrawable}
      */
     createWebGLDrawable: function( renderer, instance ) {
@@ -1036,6 +1040,12 @@ define( function( require ) {
       return this;
     },
 
+    /**
+     * Updates the SVG elements so that they will appear like the current node's representation.
+     * @protected
+     *
+     * Implements the interface for SVGSelfDrawable (and is called from the SVGSelfDrawable's update).
+     */
     updateSVGSelf: function() {
       var image = this.svgElement;
 

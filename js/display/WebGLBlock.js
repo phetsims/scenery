@@ -22,6 +22,16 @@ define( function( require ) {
   var SpriteSheet = require( 'SCENERY/util/SpriteSheet' );
   var ShaderProgram = require( 'SCENERY/util/ShaderProgram' );
 
+  /**
+   * @constructor
+   * @extends FittedBlock
+   * @mixes Poolable
+   *
+   * @param display
+   * @param renderer
+   * @param transformRootInstance
+   * @param filterRootInstance
+   */
   function WebGLBlock( display, renderer, transformRootInstance, filterRootInstance ) {
     this.initialize( display, renderer, transformRootInstance, filterRootInstance );
   }

@@ -15,6 +15,14 @@ define( function( require ) {
   var scenery = require( 'SCENERY/scenery' );
   var Drawable = require( 'SCENERY/display/Drawable' );
 
+  /**
+   * @constructor
+   * @extends Drawable
+   * @mixes Poolable
+   *
+   * @param renderer
+   * @param instance
+   */
   function SelfDrawable( renderer, instance ) {
     this.initializeSelfDrawable( renderer, instance );
   }

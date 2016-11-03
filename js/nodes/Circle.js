@@ -31,6 +31,7 @@ define( function( require ) {
 
   /**
    * @constructor
+   * @mixes Paintable
    *
    * NOTE: There are two ways of invoking the constructor:
    * - new Circle( radius, { ... } )
@@ -53,7 +54,6 @@ define( function( require ) {
 
       // ensure we have a parameter object
       options = options || {};
-
     }
 
     Path.call( this, null, options );
@@ -188,6 +188,7 @@ define( function( require ) {
      * @override
      *
      * @param {number} renderer - In the bitmask format specified by Renderer, which may contain additional bit flags.
+     * @param {Instance} instance - Instance object that will be associated with the drawable
      * @returns {DOMSelfDrawable}
      */
     createDOMDrawable: function( renderer, instance ) {
@@ -200,6 +201,7 @@ define( function( require ) {
      * @override
      *
      * @param {number} renderer - In the bitmask format specified by Renderer, which may contain additional bit flags.
+     * @param {Instance} instance - Instance object that will be associated with the drawable
      * @returns {SVGSelfDrawable}
      */
     createSVGDrawable: function( renderer, instance ) {
@@ -212,6 +214,7 @@ define( function( require ) {
      * @override
      *
      * @param {number} renderer - In the bitmask format specified by Renderer, which may contain additional bit flags.
+     * @param {Instance} instance - Instance object that will be associated with the drawable
      * @returns {CanvasSelfDrawable}
      */
     createCanvasDrawable: function( renderer, instance ) {
@@ -224,6 +227,7 @@ define( function( require ) {
      * @override
      *
      * @param {number} renderer - In the bitmask format specified by Renderer, which may contain additional bit flags.
+     * @param {Instance} instance - Instance object that will be associated with the drawable
      * @returns {WebGLSelfDrawable}
      */
     createWebGLDrawable: function( renderer, instance ) {
@@ -480,6 +484,9 @@ define( function( require ) {
    * A generated DOMSelfDrawable whose purpose will be drawing our Circle. One of these drawables will be created
    * for each displayed instance of a Circle.
    * @constructor
+   * @mixes Circle.CircleStatefulDrawable
+   * @mixes Paintable.PaintableStatefulDrawable
+   * @mixes SelfDrawable.Poolable
    *
    * @param {number} renderer - Renderer bitmask, see Renderer's documentation for more details.
    * @param {Instance} instance
@@ -648,6 +655,9 @@ define( function( require ) {
    * A generated SVGSelfDrawable whose purpose will be drawing our Circle. One of these drawables will be created
    * for each displayed instance of a Circle.
    * @constructor
+   * @mixes Circle.CircleStatefulDrawable
+   * @mixes Paintable.PaintableStatefulDrawable
+   * @mixes SelfDrawable.Poolable
    *
    * @param {number} renderer - Renderer bitmask, see Renderer's documentation for more details.
    * @param {Instance} instance
@@ -678,6 +688,13 @@ define( function( require ) {
 
       return this;
     },
+
+    /**
+     * Updates the SVG elements so that they will appear like the current node's representation.
+     * @protected
+     *
+     * Implements the interface for SVGSelfDrawable (and is called from the SVGSelfDrawable's update).
+     */
     updateSVGSelf: function() {
       var circle = this.svgElement;
 
@@ -685,10 +702,14 @@ define( function( require ) {
         circle.setAttribute( 'r', this.node._radius );
       }
 
+      // Apply any fill/stroke changes to our element.
       this.updateFillStrokeStyle( circle );
     }
   } );
+
+  // Include Circle's stateful mixin (used for dirty flags)
   Circle.CircleStatefulDrawable.mixin( Circle.CircleSVGDrawable );
+
   // This sets up CircleSVGDrawable.createFromPool/dirtyFromPool and drawable.freeToPool() for the type, so
   // that we can avoid allocations by reusing previously-used drawables.
   SelfDrawable.Poolable.mixin( Circle.CircleSVGDrawable );
@@ -701,6 +722,8 @@ define( function( require ) {
    * A generated CanvasSelfDrawable whose purpose will be drawing our Circle. One of these drawables will be created
    * for each displayed instance of a Circle.
    * @constructor
+   * @mixes Paintable.PaintableStatelessDrawable
+   * @mixes SelfDrawable.Poolable
    *
    * @param {number} renderer - Renderer bitmask, see Renderer's documentation for more details.
    * @param {Instance} instance
@@ -759,8 +782,13 @@ define( function( require ) {
       }
     },
 
-    // stateless dirty functions
-    markDirtyRadius: function() { this.markPaintDirty(); },
+    /**
+     * Called when the radius of the circle changes.
+     * @public (scenery-internal)
+     */
+    markDirtyRadius: function() {
+      this.markPaintDirty();
+    },
 
     /**
      * Disposes the drawable.
@@ -772,7 +800,10 @@ define( function( require ) {
       this.disposePaintableStateless();
     }
   } );
+
+  // Since we're not using Circle's stateful mixin, we'll need to mix in the Paintable mixin here (of the stateless variety).
   Paintable.PaintableStatelessDrawable.mixin( Circle.CircleCanvasDrawable );
+
   // This sets up CircleCanvasDrawable.createFromPool/dirtyFromPool and drawable.freeToPool() for the type, so
   // that we can avoid allocations by reusing previously-used drawables.
   SelfDrawable.Poolable.mixin( Circle.CircleCanvasDrawable );

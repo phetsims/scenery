@@ -25,12 +25,14 @@ define( function( require ) {
   var useGreedyStitcher = true;
 
   /**
+   * @constructor
+   * @mixes Poolable
+   *
    * @param {Display} display
    * @param {Instance} backboneInstance
    * @param {Instance} transformRootInstance
    * @param {number} renderer
    * @param {boolean} isDisplayRoot
-   * @constructor
    */
   function BackboneDrawable( display, backboneInstance, transformRootInstance, renderer, isDisplayRoot ) {
     this.initialize( display, backboneInstance, transformRootInstance, renderer, isDisplayRoot );

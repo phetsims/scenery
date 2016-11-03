@@ -45,7 +45,17 @@ define( function( require ) {
   var defaultPreferredRenderers = Renderer.createOrderBitmask(
     Renderer.bitmaskSVG, Renderer.bitmaskCanvas, Renderer.bitmaskDOM, Renderer.bitmaskWebGL );
 
-  // see initialize() for documentation
+  /**
+   * @constructor
+   * @mixes Poolable
+   *
+   * See initialize() for documentation
+   *
+   * @param display
+   * @param trail
+   * @param isDisplayRoot
+   * @param isSharedCanvasCacheRoot
+   */
   function Instance( display, trail, isDisplayRoot, isSharedCanvasCacheRoot ) {
     Events.call( this );
 

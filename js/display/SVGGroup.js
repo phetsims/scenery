@@ -16,6 +16,14 @@ define( function( require ) {
   var platform = require( 'PHET_CORE/platform' );
   var scenery = require( 'SCENERY/scenery' );
 
+  /**
+   * @constructor
+   * @mixes Poolable
+   *
+   * @param block
+   * @param instance
+   * @param parent
+   */
   function SVGGroup( block, instance, parent ) {
     this.initialize( block, instance, parent );
   }

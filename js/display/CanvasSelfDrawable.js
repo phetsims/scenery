@@ -15,6 +15,13 @@ define( function( require ) {
   var SelfDrawable = require( 'SCENERY/display/SelfDrawable' );
   var Paintable = require( 'SCENERY/nodes/Paintable' );
 
+  /**
+   * @constructor
+   * @mixes Poolable
+   *
+   * @param renderer
+   * @param instance
+   */
   function CanvasSelfDrawable( renderer, instance ) {
     this.initializeCanvasSelfDrawable( renderer, instance );
 

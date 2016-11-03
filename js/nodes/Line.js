@@ -32,6 +32,9 @@ define( function( require ) {
   var keepSVGLineElements = true; // whether we should pool SVG elements for the SVG rendering states, or whether we should free them when possible for memory
 
   /**
+   * @constructor
+   * @mixes Paintable
+   *
    * Currently, all numerical parameters should be finite.
    * x1:         x-position of the start
    * y1:         y-position of the start
@@ -298,6 +301,7 @@ define( function( require ) {
      * @override
      *
      * @param {number} renderer - In the bitmask format specified by Renderer, which may contain additional bit flags.
+     * @param {Instance} instance - Instance object that will be associated with the drawable
      * @returns {SVGSelfDrawable}
      */
     createSVGDrawable: function( renderer, instance ) {
@@ -310,6 +314,7 @@ define( function( require ) {
      * @override
      *
      * @param {number} renderer - In the bitmask format specified by Renderer, which may contain additional bit flags.
+     * @param {Instance} instance - Instance object that will be associated with the drawable
      * @returns {CanvasSelfDrawable}
      */
     createCanvasDrawable: function( renderer, instance ) {
@@ -322,6 +327,7 @@ define( function( require ) {
      * @override
      *
      * @param {number} renderer - In the bitmask format specified by Renderer, which may contain additional bit flags.
+     * @param {Instance} instance - Instance object that will be associated with the drawable
      * @returns {WebGLSelfDrawable}
      */
     createWebGLDrawable: function( renderer, instance ) {
@@ -655,6 +661,12 @@ define( function( require ) {
       return this;
     },
 
+    /**
+     * Updates the SVG elements so that they will appear like the current node's representation.
+     * @protected
+     *
+     * Implements the interface for SVGSelfDrawable (and is called from the SVGSelfDrawable's update).
+     */
     updateSVGSelf: function() {
       var line = this.svgElement;
 
@@ -671,6 +683,7 @@ define( function( require ) {
         line.setAttribute( 'y2', this.node._y2 );
       }
 
+      // Apply any fill/stroke changes to our element.
       this.updateFillStrokeStyle( line );
     }
   } );

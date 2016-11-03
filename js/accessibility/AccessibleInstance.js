@@ -18,6 +18,14 @@ define( function( require ) {
 
   var globalId = 1;
 
+  /**
+   * @constructor
+   * @mixes Poolable
+   *
+   * @param parent
+   * @param display
+   * @param trail
+   */
   function AccessibleInstance( parent, display, trail ) {
     this.initializeAccessibleInstance( parent, display, trail );
   }

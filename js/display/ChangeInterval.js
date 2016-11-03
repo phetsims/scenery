@@ -26,6 +26,13 @@ define( function( require ) {
   var scenery = require( 'SCENERY/scenery' );
   var Drawable = require( 'SCENERY/display/Drawable' );
 
+  /**
+   * @constructor
+   * @mixes Poolable
+   *
+   * @param drawableBefore
+   * @param drawableAfter
+   */
   function ChangeInterval( drawableBefore, drawableAfter ) {
     this.initialize( drawableBefore, drawableAfter );
   }

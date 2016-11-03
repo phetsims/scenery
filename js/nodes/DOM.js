@@ -1,7 +1,7 @@
 // Copyright 2013-2015, University of Colorado Boulder
 
 /**
- * DOM nodes. Currently lightweight handling
+ * Displays a DOM element directly in a node, so that it can be positioned/transformed properly, and bounds are handled properly in Scenery.
  *
  * @author Jonathan Olson <jonathan.olson@colorado.edu>
  */
@@ -22,9 +22,13 @@ define( function( require ) {
   var DOMSelfDrawable = require( 'SCENERY/display/DOMSelfDrawable' );
   var SelfDrawable = require( 'SCENERY/display/SelfDrawable' );
 
+  /**
+   * @constructor
+   *
+   * @param {HTMLElement|jQueryResult} element - The HTML element, or a jQuery selector result.
+   * @param {Object} [options] - Node and DOM options elements, see Node for details.
+   */
   function DOM( element, options ) {
-    options = options || {};
-
     this._interactive = false;
 
     // unwrap from jQuery if that is passed in, for consistency
@@ -47,7 +51,7 @@ define( function( require ) {
     options.element = element;
 
     // will set the element after initializing
-    Node.call( this, options );
+    Node.call( this, options || {} );
     this.setRendererBitmask( Renderer.bitmaskDOM );
   }
 
@@ -129,6 +133,7 @@ define( function( require ) {
      * @override
      *
      * @param {number} renderer - In the bitmask format specified by Renderer, which may contain additional bit flags.
+     * @param {Instance} instance - Instance object that will be associated with the drawable
      * @returns {DOMSelfDrawable}
      */
     createDOMDrawable: function( renderer, instance ) {
@@ -246,6 +251,7 @@ define( function( require ) {
    * A generated DOMSelfDrawable whose purpose will be drawing our DOM node. One of these drawables will be created
    * for each displayed instance of a DOM node.
    * @constructor
+   * @mixes SelfDrawable.Poolable
    *
    * @param {number} renderer - Renderer bitmask, see Renderer's documentation for more details.
    * @param {Instance} instance
@@ -305,6 +311,7 @@ define( function( require ) {
       this.domElement = null;
     }
   } );
+
   // This sets up DOMDrawable.createFromPool/dirtyFromPool and drawable.freeToPool() for the type, so
   // that we can avoid allocations by reusing previously-used drawables.
   SelfDrawable.Poolable.mixin( DOM.DOMDrawable );

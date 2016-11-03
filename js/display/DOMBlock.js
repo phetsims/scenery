@@ -16,6 +16,13 @@ define( function( require ) {
   var scenery = require( 'SCENERY/scenery' );
   var Block = require( 'SCENERY/display/Block' );
 
+  /**
+   * @constructor
+   * @mixes Poolable
+   *
+   * @param display
+   * @param domDrawable
+   */
   function DOMBlock( display, domDrawable ) {
     this.initialize( display, domDrawable );
   }

@@ -187,6 +187,7 @@ define( function( require ) {
      * @override
      *
      * @param {number} renderer - In the bitmask format specified by Renderer, which may contain additional bit flags.
+     * @param {Instance} instance - Instance object that will be associated with the drawable
      * @returns {WebGLSelfDrawable}
      */
     createWebGLDrawable: function( renderer, instance ) {

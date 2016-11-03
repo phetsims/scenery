@@ -66,6 +66,13 @@ define( function( require ) {
   // Maps CSS {string} => {Bounds2}, so that we can cache the vertical font sizes outside of the Font objects themselves.
   var hybridFontVerticalCache = {};
 
+  /**
+   * @constructor
+   * @mixes Paintable
+   *
+   * @param text
+   * @param options
+   */
   function Text( text, options ) {
     this._text = '';                   // filled in with mutator
     this._font = scenery.Font.DEFAULT; // default font, usually 10px sans-serif
@@ -310,6 +317,7 @@ define( function( require ) {
      * @override
      *
      * @param {number} renderer - In the bitmask format specified by Renderer, which may contain additional bit flags.
+     * @param {Instance} instance - Instance object that will be associated with the drawable
      * @returns {DOMSelfDrawable}
      */
     createDOMDrawable: function( renderer, instance ) {
@@ -322,6 +330,7 @@ define( function( require ) {
      * @override
      *
      * @param {number} renderer - In the bitmask format specified by Renderer, which may contain additional bit flags.
+     * @param {Instance} instance - Instance object that will be associated with the drawable
      * @returns {SVGSelfDrawable}
      */
     createSVGDrawable: function( renderer, instance ) {
@@ -334,6 +343,7 @@ define( function( require ) {
      * @override
      *
      * @param {number} renderer - In the bitmask format specified by Renderer, which may contain additional bit flags.
+     * @param {Instance} instance - Instance object that will be associated with the drawable
      * @returns {CanvasSelfDrawable}
      */
     createCanvasDrawable: function( renderer, instance ) {
@@ -346,6 +356,7 @@ define( function( require ) {
      * @override
      *
      * @param {number} renderer - In the bitmask format specified by Renderer, which may contain additional bit flags.
+     * @param {Instance} instance - Instance object that will be associated with the drawable
      * @returns {WebGLSelfDrawable}
      */
     createWebGLDrawable: function( renderer, instance ) {
@@ -1130,6 +1141,12 @@ define( function( require ) {
       return this;
     },
 
+    /**
+     * Updates the SVG elements so that they will appear like the current node's representation.
+     * @protected
+     *
+     * Implements the interface for SVGSelfDrawable (and is called from the SVGSelfDrawable's update).
+     */
     updateSVGSelf: function() {
       var text = this.svgElement;
 
@@ -1156,6 +1173,7 @@ define( function( require ) {
         text.setAttribute( 'textLength', this.node.selfBounds.width );
       }
 
+      // Apply any fill/stroke changes to our element.
       this.updateFillStrokeStyle( text );
     }
   } );

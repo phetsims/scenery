@@ -3651,6 +3651,7 @@ define( function( require ) {
      * do not allow the DOM renderer (not set in its rendererBitmask).
      *
      * @param {number} renderer - In the bitmask format specified by Renderer, which may contain additional bit flags.
+     * @param {Instance} instance - Instance object that will be associated with the drawable
      * @returns {DOMSelfDrawable}
      */
     createDOMDrawable: function( renderer, instance ) {
@@ -3665,6 +3666,7 @@ define( function( require ) {
      * do not allow the SVG renderer (not set in its rendererBitmask).
      *
      * @param {number} renderer - In the bitmask format specified by Renderer, which may contain additional bit flags.
+     * @param {Instance} instance - Instance object that will be associated with the drawable
      * @returns {SVGSelfDrawable}
      */
     createSVGDrawable: function( renderer, instance ) {
@@ -3679,6 +3681,7 @@ define( function( require ) {
      * do not allow the Canvas renderer (not set in its rendererBitmask).
      *
      * @param {number} renderer - In the bitmask format specified by Renderer, which may contain additional bit flags.
+     * @param {Instance} instance - Instance object that will be associated with the drawable
      * @returns {CanvasSelfDrawable}
      */
     createCanvasDrawable: function( renderer, instance ) {
@@ -3693,6 +3696,7 @@ define( function( require ) {
      * do not allow the WebGL renderer (not set in its rendererBitmask).
      *
      * @param {number} renderer - In the bitmask format specified by Renderer, which may contain additional bit flags.
+     * @param {Instance} instance - Instance object that will be associated with the drawable
      * @returns {WebGLSelfDrawable}
      */
     createWebGLDrawable: function( renderer, instance ) {

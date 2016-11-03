@@ -145,6 +145,7 @@ define( function( require ) {
      * @override
      *
      * @param {number} renderer - In the bitmask format specified by Renderer, which may contain additional bit flags.
+     * @param {Instance} instance - Instance object that will be associated with the drawable
      * @returns {CanvasSelfDrawable}
      */
     createCanvasDrawable: function( renderer, instance ) {
@@ -172,6 +173,7 @@ define( function( require ) {
    * A generated CanvasSelfDrawable whose purpose will be drawing our CanvasNode. One of these drawables will be created
    * for each displayed instance of a CanvasNode.
    * @constructor
+   * @mixes SelfDrawable.Poolable
    *
    * @param {number} renderer - Renderer bitmask, see Renderer's documentation for more details.
    * @param {Instance} instance

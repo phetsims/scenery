@@ -24,6 +24,15 @@ define( function( require ) {
   var scratchMatrix = new Matrix3();
   var scratchMatrix2 = new Matrix3();
 
+  /**
+   * @constructor
+   * @mixes Poolable
+   *
+   * @param display
+   * @param renderer
+   * @param transformRootInstance
+   * @param filterRootInstance
+   */
   function CanvasBlock( display, renderer, transformRootInstance, filterRootInstance ) {
     this.initialize( display, renderer, transformRootInstance, filterRootInstance );
   }

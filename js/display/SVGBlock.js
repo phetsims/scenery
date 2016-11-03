@@ -19,7 +19,9 @@ define( function( require ) {
   var Util = require( 'SCENERY/util/Util' );
 
   /**
-   * Main constructor for SVGBlock.
+   * @constructor
+   * @extends FittedBlock
+   * @mixes Poolable
    *
    * @param {Display} display - the scenery Display this SVGBlock will appear in
    * @param {number} renderer - the bitmask for the renderer, see Renderer.js

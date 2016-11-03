@@ -28,6 +28,7 @@ define( function( require ) {
    * Creates a Path with a given shape specifier (a Shape, a string in the SVG path format, or null to indicate no
    * shape).
    * @constructor
+   * @mixes Paintable
    *
    * Path has two additional options (above what Node provides):
    * - shape: The actual Shape (or a string representing an SVG path, or null).
@@ -445,6 +446,7 @@ define( function( require ) {
      * @override
      *
      * @param {number} renderer - In the bitmask format specified by Renderer, which may contain additional bit flags.
+     * @param {Instance} instance - Instance object that will be associated with the drawable
      * @returns {SVGSelfDrawable}
      */
     createSVGDrawable: function( renderer, instance ) {
@@ -457,6 +459,7 @@ define( function( require ) {
      * @override
      *
      * @param {number} renderer - In the bitmask format specified by Renderer, which may contain additional bit flags.
+     * @param {Instance} instance - Instance object that will be associated with the drawable
      * @returns {CanvasSelfDrawable}
      */
     createCanvasDrawable: function( renderer, instance ) {
@@ -469,6 +472,7 @@ define( function( require ) {
      * @override
      *
      * @param {number} renderer - In the bitmask format specified by Renderer, which may contain additional bit flags.
+     * @param {Instance} instance - Instance object that will be associated with the drawable
      * @returns {WebGLSelfDrawable}
      */
     createWebGLDrawable: function( renderer, instance ) {
@@ -709,6 +713,12 @@ define( function( require ) {
       return this;
     },
 
+    /**
+     * Updates the SVG elements so that they will appear like the current node's representation.
+     * @protected
+     *
+     * Implements the interface for SVGSelfDrawable (and is called from the SVGSelfDrawable's update).
+     */
     updateSVGSelf: function() {
       assert && assert( !this.node.requiresSVGBoundsWorkaround(),
         'No workaround for https://github.com/phetsims/scenery/issues/196 is provided at this time, please add an epsilon' );
@@ -726,6 +736,7 @@ define( function( require ) {
         path.setAttribute( 'd', svgPath );
       }
 
+      // Apply any fill/stroke changes to our element.
       this.updateFillStrokeStyle( path );
     }
   } );
