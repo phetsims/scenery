@@ -17,6 +17,11 @@ define( function( require ) {
 
   /**
    * Creates a strut with x=0 and y in the range [0,height].
+   * @constructor
+   * @extends Spacer
+   *
+   * @param {number} width - Width of the strut
+   * @param {Object} [options] - Passed to Spacer/Node
    */
   function VStrut( height, options ) {
     Spacer.call( this, 0, height, options );

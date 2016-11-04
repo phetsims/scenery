@@ -12,11 +12,15 @@ define( function( require ) {
 
   var inherit = require( 'PHET_CORE/inherit' );
   var scenery = require( 'SCENERY/scenery' );
-
   var Spacer = require( 'SCENERY/nodes/Spacer' );
 
   /**
    * Creates a strut with x in the range [0,width] and y=0.
+   * @constructor
+   * @extends Spacer
+   *
+   * @param {number} width - Width of the strut
+   * @param {Object} [options] - Passed to Spacer/Node
    */
   function HStrut( width, options ) {
     Spacer.call( this, width, 0, options );

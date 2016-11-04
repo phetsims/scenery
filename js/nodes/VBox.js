@@ -13,8 +13,10 @@ define( function( require ) {
   var scenery = require( 'SCENERY/scenery' );
 
   /**
-   * @param {Object} [options] see LayoutBox
    * @constructor
+   * @extends LayoutBox
+   *
+   * @param {Object} [options] see LayoutBox
    */
   function VBox( options ) {
     LayoutBox.call( this, _.extend( {}, options, { orientation: 'vertical' } ) );

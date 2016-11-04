@@ -11,7 +11,6 @@ define( function( require ) {
 
   var inherit = require( 'PHET_CORE/inherit' );
   var scenery = require( 'SCENERY/scenery' );
-
   var Bounds2 = require( 'DOT/Bounds2' );
   var Node = require( 'SCENERY/nodes/Node' );
   var Leaf = require( 'SCENERY/nodes/Leaf' );
@@ -19,6 +18,12 @@ define( function( require ) {
   /**
    * Creates a spacer taking up a rectangular area from x: [0,width] and y: [0,height]. Use x/y in options to control
    * its position.
+   * @constructor
+   * @extends Node
+   *
+   * @param {number} width - The width of the spacer
+   * @param {number} height - The height of the spacer
+   * @param {Object} [options] - Passed to Node
    */
   function Spacer( width, height, options ) {
     Node.call( this );

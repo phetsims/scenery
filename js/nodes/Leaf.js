@@ -12,13 +12,25 @@ define( function( require ) {
   var scenery = require( 'SCENERY/scenery' );
 
   var Leaf = {
+    /**
+     * Removes the capability to insert children when this is mixed into a type.
+     * @public
+     *
+     * @param {function} type - The type (constructor) whose prototype we'll modify so that it can't have children.
+     */
     mixin: function( type ) {
       var proto = type.prototype;
 
+      /**
+       * @override
+       */
       proto.insertChild = function( index, node ) {
         throw new Error( 'Attempt to insert child into Leaf' );
       };
 
+      /**
+       * @override
+       */
       proto.removeChildWithIndex = function( node, indexOfChild ) {
         throw new Error( 'Attempt to remove child from Leaf' );
       };
