@@ -96,7 +96,6 @@ define( [
   'SCENERY/nodes/HTMLText',
   'SCENERY/nodes/HStrut',
   'SCENERY/nodes/Image',
-  'SCENERY/nodes/LayoutNode',
   'SCENERY/nodes/Leaf',
   'SCENERY/nodes/Line',
   'SCENERY/nodes/Node',
