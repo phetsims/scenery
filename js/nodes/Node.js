@@ -505,6 +505,8 @@ define( function( require ) {
      * children, and adding in children from the array.
      * @public
      *
+     * NOTE: Overridden in LayoutBox
+     *
      * @param {Array.<Node>} children
      * @returns {Node} - Returns 'this' reference, for chaining
      */
