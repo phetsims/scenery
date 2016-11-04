@@ -229,8 +229,8 @@ define( function( require ) {
     },
 
     /**
-     * Invalidates the node's self-bounds and any other recorded metadata about the outline or bound sof the Shape.
-     * @private
+     * Invalidates the node's self-bounds and any other recorded metadata about the outline or bounds of the Shape.
+     * @protected
      *
      * This is meant to be used for all Path subtypes (unlike invalidateShape).
      */
@@ -523,7 +523,7 @@ define( function( require ) {
         return false;
       }
 
-      var bounds = this.computeShapeBounds( false ); // without stroke
+      var bounds = this.computeShapeBounds();
       return bounds.x * bounds.y === 0; // at least one of them was zero, so the bounding box has no area
     },
 

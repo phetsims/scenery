@@ -1021,9 +1021,12 @@ define( function( require ) {
      * Should be called to notify that our selfBounds needs to change to this new value.
      * @public
      *
-     * @param {Bounds2} newSelfBounds
+     * @param {Bounds2} [newSelfBounds]
      */
     invalidateSelf: function( newSelfBounds ) {
+      assert && assert( newSelfBounds === undefined || newSelfBounds instanceof Bounds2,
+        'invalidateSelf\'s newSelfBounds, if proided, needs to be Bounds2' );
+
       // If no self bounds are provided, rely on the bounds validation to trigger computation (using updateSelfBounds()).
       if ( !newSelfBounds ) {
         this._selfBoundsDirty = true;

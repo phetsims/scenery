@@ -321,7 +321,7 @@ define( function( require ) {
      * @public
      * @override
      *
-     * @param {Shape|null} Shape - Throws an error if it is not null.
+     * @param {Shape|null} shape - Throws an error if it is not null.
      */
     setShape: function( shape ) {
       if ( shape !== null ) {

@@ -75,15 +75,37 @@ define( function( require ) {
      */
     _mutatorKeys: [ 'element', 'preventTransform' ].concat( Node.prototype._mutatorKeys ),
 
-    // needs to be attached to the DOM tree for this to work
+    /**
+     * Computes the bounds of our current DOM element (using jQuery, as replacing this with other things seems a bit
+     * bug-prone and has caused issues in the past).
+     * @private
+     *
+     * The dom element needs to be attached to the DOM tree in order for this to work.
+     *
+     * Alternative getBoundingClientRect explored, but did not seem sufficient (possibly due to CSS transforms)?
+     *
+     * @returns {Bounds2}
+     */
     calculateDOMBounds: function() {
-      // var boundingRect = this._element.getBoundingClientRect();
-      // return new Bounds2( 0, 0, boundingRect.width, boundingRect.height );
       var $element = $( this._element );
       return new Bounds2( 0, 0, $element.width(), $element.height() );
     },
 
-    createTemporaryContainer: function() {
+    /**
+     * Triggers recomputation of our DOM element's bounds.
+     * @public
+     *
+     * This should be called after the DOM element's bounds may have changed, to properly update the bounding box
+     * in Scenery.
+     */
+    invalidateDOM: function() {
+      // prevent this from being executed as a side-effect from inside one of its own calls
+      if ( this.invalidateDOMLock ) {
+        return;
+      }
+      this.invalidateDOMLock = true;
+
+      // we will place ourselves in a temporary container to get our real desired bounds
       var temporaryContainer = document.createElement( 'div' );
       $( temporaryContainer ).css( {
         display: 'hidden',
@@ -95,18 +117,6 @@ define( function( require ) {
         width: 65535,
         height: 65535
       } );
-      return temporaryContainer;
-    },
-
-    invalidateDOM: function() {
-      // prevent this from being executed as a side-effect from inside one of its own calls
-      if ( this.invalidateDOMLock ) {
-        return;
-      }
-      this.invalidateDOMLock = true;
-
-      // we will place ourselves in a temporary container to get our real desired bounds
-      var temporaryContainer = this.createTemporaryContainer();
 
       // move to the temporary container
       this._container.removeChild( this._element );
@@ -124,11 +134,8 @@ define( function( require ) {
       temporaryContainer.removeChild( this._element );
       this._container.appendChild( this._element );
 
+      // unlock
       this.invalidateDOMLock = false;
-    },
-
-    getDOMElement: function() {
-      return this._container;
     },
 
     /**
@@ -156,6 +163,15 @@ define( function( require ) {
       return true;
     },
 
+    /**
+     * Changes the DOM element of this DOM node to another element.
+     * @public
+     *
+     * TODO: is this supported?
+     *
+     * @param {Element} element
+     * @returns {DOM} - For chaining
+     */
     setElement: function( element ) {
       assert && assert( !this._element, 'We should only ever attach one DOMElement to a DOM node' );
 
@@ -176,22 +192,44 @@ define( function( require ) {
     },
     set element( value ) { this.setElement( value ); },
 
+    /**
+     * Returns the DOM element being displayed by this DOM node.
+     * @public
+     *
+     * @returns {Element}
+     */
     getElement: function() {
       return this._element;
     },
     get element() { return this.getElement(); },
 
+    /**
+     * Sets the value of the preventTransform flag.
+     * @public
+     *
+     * When the preventTransform flag is set to true, Scenery will not reposition (CSS transform) the DOM element, but
+     * instead it will be at the upper-left (0,0) of the Scenery Display. The client will be responsible for sizing or
+     * positioning this element instead.
+     *
+     * @param {boolean} preventTransform
+     */
     setPreventTransform: function( preventTransform ) {
       assert && assert( typeof preventTransform === 'boolean' );
 
       if ( this._preventTransform !== preventTransform ) {
         this._preventTransform = preventTransform;
-
-        // TODO: anything needed here?
       }
     },
     set preventTransform( value ) { this.setPreventTransform( value ); },
 
+    /**
+     * Returns the value of the preventTransform flag.
+     * @public
+     *
+     * See the setPreventTransform documentation for more information on the flag.
+     *
+     * @returns {boolean}
+     */
     isTransformPrevented: function() {
       return this._preventTransform;
     },
