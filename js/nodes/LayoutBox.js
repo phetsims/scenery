@@ -230,6 +230,11 @@ define( function( require ) {
      * @returns {LayoutBox} - Returns 'this' reference, for chaining
      */
     setChildren: function( children ) {
+      // If the layout is already locked, we need to bail and only call Node's setChildren.
+      if ( this._updateLayoutLocked ) {
+        return Node.prototype.setChildren.call( this, children );
+      }
+
       var oldChildren = this.getChildren(); // defensive copy
 
       // Lock layout while the children are removed and added

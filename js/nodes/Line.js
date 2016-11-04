@@ -1,10 +1,7 @@
 // Copyright 2013-2015, University of Colorado Boulder
 
 /**
- * A line that inherits Path, and allows for optimized drawing,
- * and improved line handling.
- *
- * TODO: add DOM support
+ * Displays a (stroked) line. Inherits Path, and allows for optimized drawing and improved parameter handling.
  *
  * @author Jonathan Olson <jonathan.olson@colorado.edu>
  */
@@ -23,51 +20,79 @@ define( function( require ) {
   var LineCanvasDrawable = require( 'SCENERY/display/drawables/LineCanvasDrawable' );
   var LineSVGDrawable = require( 'SCENERY/display/drawables/LineSVGDrawable' );
 
+  var LINE_OPTION_KEYS = [
+    'p1', // {Vector2} - Start position
+    'p2', // {Vector2} - End position
+    'x1', // {number} - Start x position
+    'y1', // {number} - Start y position
+    'x2', // {number} - End x position
+    'y2' // {number} - End y position
+  ];
+
   /**
+   * @public
    * @constructor
+   * @extends Path
    * @mixes Paintable
    *
    * Currently, all numerical parameters should be finite.
-   * x1:         x-position of the start
-   * y1:         y-position of the start
-   * x2:         x-position of the end
-   * y2:         y-position of the end
+   * x1: {number} - x-position of the start
+   * y1: {number} - y-position of the start
+   * x2: {number} - x-position of the end
+   * y2: {number} - y-position of the end
+   * p1: {Vector2} - position of the start
+   * p2: {Vector2} - position of the end
    *
-   * Available constructors:
-   * new Line( x1, y1, x2, y2, { ... } )
-   * new Line( new Vector2( x1, y1 ), new Vector2( x2, y2 ), { ... } )
-   * new Line( { x1: x1, y1: y1, x2: x2, y2: y2,  ... } )
+   * Available constructors (with "..." denoting options parameters):
+   * - new Line( x1, y1, x2, y2, { ... } )
+   * - new Line( p1, p2, { ... } )
+   * - A combination of options that sets all of the x's and y's, e.g.:
+   *   - new Line( { p1: p1, p2: p2, ... } )
+   *   - new Line( { p1: p1, x2: x2, y2: y2, ... } )
+   *   - new Line( { x1: x1, y1: y1, x2: x2, y2: y2, ... } )
+   *
+   * @param {number} x1
+   * @param {number} y1
+   * @param {number} x2
+   * @param {number} y2
+   * @param {Object} [options] - Line-specific options are documented in LINE_OPTION_KEYS above, and can be provided
+   *                             along-side options for Node
    */
   function Line( x1, y1, x2, y2, options ) {
+    // @private {number} - The x coordinate of the start point (point 1)
+    this._x1 = 0;
+
+    // @private {number} - The y coordinate of the start point (point 1)
+    this._y1 = 0;
+
+    // @private {number} - The x coordinate of the start point (point 2)
+    this._x2 = 0;
+
+    // @private {number} - The y coordinate of the start point (point 2)
+    this._y2 = 0;
+
+    // Remap constructor parameters to options
     if ( typeof x1 === 'object' ) {
       if ( x1 instanceof Vector2 ) {
-        // assumes Line( Vector2, Vector2, options );
-        this._x1 = x1.x;
-        this._y1 = x1.y;
-        this._x2 = y1.x;
-        this._y2 = y1.y;
-        options = x2 || {};
+        // assumes Line( Vector2, Vector2, options ), where x2 is our options
+        assert && assert( y1 instanceof Vector2 );
+        assert && assert( x2 === undefined || typeof x2 === 'object' );
+        options = _.extend( { x1: x1.x, y1: x1.y, x2: y1.x, y2: y1.y }, x2 );
       }
       else {
         // assumes Line( { ... } ), init to zero for now
-        this._x1 = 0;
-        this._y1 = 0;
-        this._x2 = 0;
-        this._y2 = 0;
-        options = x1 || {};
+        assert && assert( y1 === undefined );
+        options = x1;
       }
     }
     else {
       // new Line(  x1, y1, x2, y2, [options] )
-      this._x1 = x1;
-      this._y1 = y1;
-      this._x2 = x2;
-      this._y2 = y2;
-
-      // ensure we have a parameter object
-      options = options || {};
+      assert && assert( typeof x1 === 'number' &&
+                        typeof y1 === 'number' &&
+                        typeof x2 === 'number' &&
+                        typeof y2 === 'number' );
+      options = _.extend( { x1: x1, y1: y1, x2: x2, y2: y2 }, options );
     }
-    // fallback for non-canvas or non-svg rendering, and for proper bounds computation
 
     Path.call( this, null, options );
   }
@@ -83,7 +108,7 @@ define( function( require ) {
      * NOTE: See Node's _mutatorKeys documentation for more information on how this operates, and potential special
      *       cases that may apply.
      */
-    _mutatorKeys: [ 'p1', 'p2', 'x1', 'y1', 'x2', 'y2' ].concat( Path.prototype._mutatorKeys ),
+    _mutatorKeys: LINE_OPTION_KEYS.concat( Path.prototype._mutatorKeys ),
 
     /**
      * {Array.<String>} - List of all dirty flags that should be available on drawables created from this node (or
@@ -98,14 +123,20 @@ define( function( require ) {
     } ),
 
     /**
-     * Set the geometry of the line, including stand and end point.
+     * Set all of the line's x and y values.
+     * @public
+     *
      * @param {number} x1 - the start x coordinate
      * @param {number} y1 - the start y coordinate
      * @param {number} x2 - the end x coordinate
      * @param {number} y2 - the end y coordinate
+     * @returns {Line} - For chaining
      */
     setLine: function( x1, y1, x2, y2 ) {
-      assert && assert( x1 !== undefined && y1 !== undefined && x2 !== undefined && y2 !== undefined, 'parameters need to be defined' );
+      assert && assert( x1 !== undefined &&
+                        y1 !== undefined &&
+                        x2 !== undefined &&
+                        y2 !== undefined, 'parameters need to be defined' );
 
       this._x1 = x1;
       this._y1 = y1;
@@ -119,8 +150,27 @@ define( function( require ) {
       }
 
       this.invalidateLine();
+
+      return this;
     },
 
+    /**
+     * Set the line's first point's x and y values
+     * @public
+     *
+     * Numeric parameters:
+     * p1 {Vector2} - The first point
+     * x1 {number} - The x coordinate of the first point
+     * y1 {number} - THe y coordinate of the first point
+     *
+     * Available type signatures to call:
+     * - setPoint1( x1, y1 )
+     * - setPoint1( p1 )
+     *
+     * @param {number} x1 - the start x coordinate
+     * @param {number} y1 - the start y coordinate
+     * @returns {Line} - For chaining
+     */
     setPoint1: function( x1, y1 ) {
       if ( typeof x1 === 'number' ) {
         // setPoint1( x1, y1 );
@@ -140,10 +190,29 @@ define( function( require ) {
         state.markDirtyP1();
       }
       this.invalidateLine();
+
+      return this;
     },
     set p1( point ) { this.setPoint1( point ); },
     get p1() { return new Vector2( this._x1, this._y1 ); },
 
+    /**
+     * Set the line's second point's x and y values
+     * @public
+     *
+     * Numeric parameters:
+     * p2 {Vector2} - The second point
+     * x2 {number} - The x coordinate of the second point
+     * y2 {number} - THe y coordinate of the second point
+     *
+     * Available type signatures to call:
+     * - setPoint2( x2, y2 )
+     * - setPoint2( p2 )
+     *
+     * @param {number} x2 - the start x coordinate
+     * @param {number} y2 - the start y coordinate
+     * @returns {Line} - For chaining
+     */
     setPoint2: function( x2, y2 ) {
       if ( typeof x2 === 'number' ) {
         // setPoint2( x2, y2 );
@@ -163,14 +232,27 @@ define( function( require ) {
         state.markDirtyP2();
       }
       this.invalidateLine();
+
+      return this;
     },
     set p2( point ) { this.setPoint2( point ); },
     get p2() { return new Vector2( this._x2, this._y2 ); },
 
+    /**
+     * Returns a Shape that is equivalent to our rendered display. Generally used to lazily create a Shape instance
+     * when one is needed, without having to do so beforehand.
+     * @private
+     *
+     * @returns {Shape}
+     */
     createLineShape: function() {
       return Shape.lineSegment( this._x1, this._y1, this._x2, this._y2 ).makeImmutable();
     },
 
+    /**
+     * Notifies that the line has changed and invalidates path information and our cached shape.
+     * @private
+     */
     invalidateLine: function() {
       assert && assert( isFinite( this._x1 ), 'A rectangle needs to have a finite x1 (' + this._x1 + ')' );
       assert && assert( isFinite( this._y1 ), 'A rectangle needs to have a finite y1 (' + this._y1 + ')' );
@@ -370,14 +452,25 @@ define( function( require ) {
       return true;
     },
 
-    // A line does not render its fill, so it supports all renderers.  Right?
-    // - SR, 2014
+    /**
+     * Returns available fill renderers.
+     * @public (scenery-internal)
+     * @override
+     *
+     * Since our line can't be filled, we support all fill renderers.
+     *
+     * @returns {number} - See Renderer for more information on the bitmasks
+     */
     getFillRendererBitmask: function() {
-      return Renderer.bitmaskCanvas | Renderer.bitmaskSVG | Renderer.bitmaskDOM;
+      return Renderer.bitmaskCanvas | Renderer.bitmaskSVG | Renderer.bitmaskDOM | Renderer.bitmaskWebGL;
     }
   } );
 
-  function addLineProp( capitalizedShort ) {
+  /**
+   * Getters or setters a specific coordinate (x1, y1, x2, or y2) of the line.
+   * @public
+   */
+  [ 'X1', 'Y1', 'X2', 'Y2' ].forEach( function addLineProp( capitalizedShort ) {
     var lowerShort = capitalizedShort.toLowerCase();
 
     var getName = 'get' + capitalizedShort;
@@ -406,12 +499,7 @@ define( function( require ) {
       set: Line.prototype[ setName ],
       get: Line.prototype[ getName ]
     } );
-  }
-
-  addLineProp( 'X1' );
-  addLineProp( 'Y1' );
-  addLineProp( 'X2' );
-  addLineProp( 'Y2' );
+  } );
 
   return Line;
 } );
