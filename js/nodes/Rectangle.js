@@ -1,8 +1,7 @@
 // Copyright 2013-2015, University of Colorado Boulder
 
 /**
- * A rectangular node that inherits Path, and allows for optimized drawing,
- * and improved rectangle handling.
+ * A rectangular node that inherits Path, and allows for optimized drawing and improved rectangle handling.
  *
  * @author Jonathan Olson <jonathan.olson@colorado.edu>
  */
@@ -25,6 +24,7 @@ define( function( require ) {
 
   /**
    * @constructor
+   * @extends Path
    * @mixes Paintable
    *
    * Possible constructor signatures
@@ -130,7 +130,7 @@ define( function( require ) {
      * NOTE: See Node's _mutatorKeys documentation for more information on how this operates, and potential special
      *       cases that may apply.
      */
-    _mutatorKeys: [ 'rectX', 'rectY', 'rectWidth', 'rectHeight',
+    _mutatorKeys: [ 'rectBounds', 'rectSize', 'rectX', 'rectY', 'rectWidth', 'rectHeight',
                     'cornerRadius', 'cornerXRadius', 'cornerYRadius' ].concat( Path.prototype._mutatorKeys ),
 
     /**
@@ -145,6 +145,16 @@ define( function( require ) {
       return flag !== 'shape';
     } ),
 
+    /**
+     * Determines the maximum arc size that can be accomodated by the current width and height.
+     * @private
+     *
+     * If the corner radii are the same as the maximum arc size on a square, it will appear to be a circle (the arcs
+     * take up all of the room, and leave no straight segments). In the case of a non-square, one direction of edges
+     * will exist (e.g. top/bottom or left/right), while the other edges would be fully rounded.
+     *
+     * @returns {number}
+     */
     getMaximumArcSize: function() {
       return Math.min( this._rectWidth / 2, this._rectHeight / 2 );
     },
@@ -206,7 +216,18 @@ define( function( require ) {
       return bitmask;
     },
 
-    setRect: function( x, y, width, height, arcWidth, arcHeight ) {
+    /**
+     * Sets all of the shape-determining parameters for the rectangle.
+     * @public
+     *
+     * @param {number} x - The x-position of the left side of the rectangle.
+     * @param {number} y - The y-position of the top side of the rectangle.
+     * @param {number} width - The width of the rectangle.
+     * @param {number} height - The height of the rectangle.
+     * @param {number} [cornerXRadius] - The horizontal radius of curved corners (0 for sharp corners)
+     * @param {number} [cornerYRadius] - The vertical radius of curved corners (0 for sharp corners)
+     */
+    setRect: function( x, y, width, height, cornerXRadius, cornerYRadius ) {
       assert && assert( x !== undefined && y !== undefined && width !== undefined && height !== undefined, 'x/y/width/height need to be defined' );
 
       // for now, check whether this is needed
@@ -215,8 +236,8 @@ define( function( require ) {
            this._rectY === y &&
            this._rectWidth === width &&
            this._rectHeight === height &&
-           this._cornerXRadius === arcWidth &&
-           this._cornerYRadius === arcHeight ) {
+           this._cornerXRadius === cornerXRadius &&
+           this._cornerYRadius === cornerYRadius ) {
         return;
       }
 
@@ -224,8 +245,8 @@ define( function( require ) {
       this._rectY = y;
       this._rectWidth = width;
       this._rectHeight = height;
-      this._cornerXRadius = arcWidth || 0;
-      this._cornerYRadius = arcHeight || 0;
+      this._cornerXRadius = cornerXRadius || 0;
+      this._cornerYRadius = cornerYRadius || 0;
 
       var stateLen = this._drawables.length;
       for ( var i = 0; i < stateLen; i++ ) {
@@ -234,30 +255,58 @@ define( function( require ) {
       this.invalidateRectangle();
     },
 
-    // sets the Rectangle's x/y/width/height from the {Bounds2} bounds passed in.
+    /**
+     * Sets the Rectangle's x/y/wdith/height from the Bounds2 passed in.
+     * @public
+     *
+     * TODO: Note that it currently resets corner radii, see https://github.com/phetsims/scenery/issues/576
+     *
+     * @param {Bounds2} bounds
+     * @returns {Rectangle} - For chaining
+     */
     setRectBounds: function( bounds ) {
       assert && assert( bounds instanceof Bounds2 );
 
       this.setRect( bounds.x, bounds.y, bounds.width, bounds.height );
+
+      return this;
     },
     set rectBounds( value ) { this.setRectBounds( value ); },
 
-    // gets a {Bounds2} from the Rectangle's x/y/width/height
+    /**
+     * Returns a new Bounds2 generated from this Rectangle's x/y/width/height.
+     * @public
+     *
+     * @returns {Bounds2}
+     */
     getRectBounds: function() {
       return Bounds2.rect( this._rectX, this._rectY, this._rectWidth, this._rectHeight );
     },
     get rectBounds() { return this.getRectBounds(); },
 
-    // sets the Rectangle's width/height from the {Dimension2} size passed in.
+    /**
+     * Sets the Rectangle's width/height from the Dimension2 size passed in.
+     * @public
+     *
+     * @param {Dimension2} size
+     * @returns {Rectangle} - For chaining
+     */
     setRectSize: function( size ) {
       assert && assert( size instanceof Dimension2 );
 
       this.setRectWidth( size.width );
       this.setRectHeight( size.height );
+
+      return this;
     },
     set rectSize( value ) { this.setRectSize( value ); },
 
-    // gets a {Dimension2} from the Rectangle's width/height
+    /**
+     * Returns a new Dimension2 generated from this Rectangle's width/height.
+     * @public
+     *
+     * @returns {Dimension2}
+     */
     getRectSize: function() {
       return new Dimension2( this._rectWidth, this._rectHeight );
     },
