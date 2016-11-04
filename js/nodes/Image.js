@@ -638,7 +638,10 @@ define( function( require ) {
     },
     get mipmapMaxLevel() { return this.getMipmapMaxLevel(); },
 
-    // @private
+    /**
+     * Constructs the next available (uncomputed) mipmap level, as long as the previous level was larger than 1x1.
+     * @private
+     */
     constructNextMipmap: function() {
       var level = this._mipmapCanvases.length;
       var biggerCanvas = this._mipmapCanvases[ level - 1 ];
@@ -651,6 +654,7 @@ define( function( require ) {
 
         // sanity check
         if ( canvas.width > 0 && canvas.height > 0 ) {
+          // Draw half-scale into the smaller Canvas
           var context = canvas.getContext( '2d' );
           context.scale( 0.5, 0.5 );
           context.drawImage( biggerCanvas, 0, 0 );
@@ -661,12 +665,17 @@ define( function( require ) {
       }
     },
 
-    // @public
+    /**
+     * Triggers recomputation of mipmaps (as long as mipmapping is enabled)
+     * @private
+     */
     invalidateMipmaps: function() {
+      // Clean output arrays
       cleanArray( this._mipmapCanvases );
       cleanArray( this._mipmapURLs );
 
       if ( this._image && this._mipmap ) {
+        // If we have mipmap data as an input
         if ( this._mipmapData ) {
           for ( var k = 0; k < this._mipmapData.length; k++ ) {
             var url = this._mipmapData[ k ].url;
@@ -680,6 +689,7 @@ define( function( require ) {
             this._mipmapCanvases.push( canvas );
           }
         }
+        // Otherwise, we have an image (not mipmap) as our input, so we'll need to construct mipmap levels.
         else {
           var baseCanvas = document.createElement( 'canvas' );
           baseCanvas.width = this.getImageWidth();
@@ -711,11 +721,12 @@ define( function( require ) {
 
     /**
      * Returns the desired mipmap level (0-indexed) that should be used for the particular scale.
+     * @public (scenery-internal)
      *
      * @param {number} scale
      */
     getMipmapLevel: function( scale ) {
-      assert && assert( scale > 0 );
+      assert && assert( typeof scale === 'number' && scale > 0, 'scale should be a positive number' );
 
       // If we are shown larger than scale, ALWAYS choose the highest resolution
       if ( scale >= 1 ) {
@@ -748,27 +759,55 @@ define( function( require ) {
     },
 
     /**
+     * Returns a matching Canvas element for the given level-of-detail.
+     * @public (scenery-internal)
+     *
+     * @param {number} level - Non-negative integer representing the mipmap level
      * @returns {HTMLCanvasElement} - Matching <canvas> for the level of detail
      */
     getMipmapCanvas: function( level ) {
-      assert && assert( level >= 0 && level < this._mipmapCanvases.length && ( level % 1 ) === 0 );
+      assert && assert( typeof level === 'number' &&
+                        level >= 0 &&
+                        level < this._mipmapCanvases.length &&
+                        ( level % 1 ) === 0 );
 
       return this._mipmapCanvases[ level ];
     },
 
     /**
+     * Returns a matching URL string for an image for the given level-of-detail.
+     * @public (scenery-internal)
+     *
+     * @param {number} level - Non-negative integer representing the mipmap level
      * @returns {string} - Matching data URL for the level of detail
      */
     getMipmapURL: function( level ) {
-      assert && assert( level >= 0 && level < this._mipmapCanvases.length && ( level % 1 ) === 0 );
+      assert && assert( typeof level === 'number' &&
+                        level >= 0 &&
+                        level < this._mipmapCanvases.length &&
+                        ( level % 1 ) === 0 );
 
       return this._mipmapURLs[ level ];
     },
 
+    /**
+     * Returns whether there are mipmap levels that have been computed.
+     * @public (scenery-internal)
+     *
+     * @returns {boolean}
+     */
     hasMipmaps: function() {
       return this._mipmapCanvases.length > 0;
     },
 
+    /**
+     * Returns the width of the displayed image (not related to how this node is transformed).
+     * @public
+     *
+     * NOTE: If the image is not loaded and an initialWidth was provided, that width will be used.
+     *
+     * @returns {number}
+     */
     getImageWidth: function() {
       var detectedWidth = this._mipmapData ? this._mipmapData[ 0 ].width : ( this._image.naturalWidth || this._image.width );
       if ( detectedWidth === 0 ) {
@@ -782,6 +821,14 @@ define( function( require ) {
     },
     get imageWidth() { return this.getImageWidth(); },
 
+    /**
+     * Returns the height of the displayed image (not related to how this node is transformed).
+     * @public
+     *
+     * NOTE: If the image is not loaded and an initialHeight was provided, that height will be used.
+     *
+     * @returns {number}
+     */
     getImageHeight: function() {
       var detectedHeight = this._mipmapData ? this._mipmapData[ 0 ].height : ( this._image.naturalHeight || this._image.height );
       if ( detectedHeight === 0 ) {
@@ -795,7 +842,15 @@ define( function( require ) {
     },
     get imageHeight() { return this.getImageHeight(); },
 
+    /**
+     * If our provided image is an HTMLImageElement, returns its URL (src).
+     * @public (scenery-internal)
+     *
+     * @returns {string}
+     */
     getImageURL: function() {
+      assert && assert( this._image instanceof HTMLImageElement, 'Only supported for HTML image elements' );
+
       return this._image.src;
     },
 
@@ -875,14 +930,21 @@ define( function( require ) {
       return ImageWebGLDrawable.createFromPool( renderer, instance );
     },
 
+    /**
+     * Attaches our on-load listener to our current image.
+     * @private
+     */
     attachImageLoadListener: function() {
       assert && assert( !this._imageLoadListenerAttached, 'Should only be attached to one thing at a time' );
-
 
       this._image.addEventListener( 'load', this._imageLoadListener );
       this._imageLoadListenerAttached = true;
     },
 
+    /**
+     * Detaches our on-load listener from our current image.
+     * @private
+     */
     detachImageLoadListener: function() {
       assert && assert( this._imageLoadListenerAttached, 'Needs to be attached first to be detached.' );
 
@@ -890,11 +952,14 @@ define( function( require ) {
       this._imageLoadListenerAttached = false;
     },
 
+    /**
+     * Called when our image has loaded (it was not yet loaded with then listener was added)
+     * @private
+     */
     onImageLoad: function() {
       assert && assert( this._imageLoadListenerAttached, 'If onImageLoad is firing, it should be attached' );
 
       this.invalidateImage();
-
       this.detachImageLoadListener();
     },
 
@@ -911,8 +976,22 @@ define( function( require ) {
     }
   } );
 
-  // utility for others
+  /**
+   * Creates an SVG image element with a given URL and dimensions
+   * @public
+   *
+   * @param {string} url - The URL for the image
+   * @param {number} width - Non-negative integer for the image's width
+   * @param {number} height - Non-negative integer for the image's height
+   * @returns {SVGImageElement}
+   */
   Image.createSVGImage = function( url, width, height ) {
+    assert && assert( typeof url === 'string', 'Requires the URL as a string' );
+    assert && assert( typeof width === 'number' && isFinite( width ) && width >= 0 && ( width % 1 ) === 0,
+      'width should be a non-negative finite integer' );
+    assert && assert( typeof height === 'number' && isFinite( height ) && height >= 0 && ( height % 1 ) === 0,
+      'height should be a non-negative finite integer' );
+
     var element = document.createElementNS( scenery.svgns, 'image' );
     element.setAttribute( 'x', 0 );
     element.setAttribute( 'y', 0 );
@@ -923,7 +1002,13 @@ define( function( require ) {
     return element;
   };
 
-  // Creates an {Object} suitable to be passed to Image as a mipmap (from a Canvas)
+  /**
+   * Creates an object suitable to be passed to Image as a mipmap (from a Canvas)
+   * @public
+   *
+   * @param {HTMLCanvasElement} baseCanvas
+   * @returns {Array}
+   */
   Image.createFastMipmapFromCanvas = function( baseCanvas ) {
     var mipmaps = [];
 
