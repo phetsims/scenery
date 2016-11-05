@@ -1,10 +1,11 @@
 // Copyright 2014-2015, University of Colorado Boulder
 
 /**
- * A node that is drawn with custom WebGL calls, specified by the painter type passed in. Responsible for handling its
- * own bounds and invalidation (via setting canvasBounds and calling invalidatePaint()).
+ * An abstract node (should be subtyped) that is drawn by user-provided custom WebGL code.
  *
- * This is the WebGL equivalent of CanvasNode.
+ * The region that can be drawn in is handled manually, by controlling the canvasBounds property of this WebGLNode.
+ * Any regions outside of the canvasBounds will not be guaranteed to be drawn. This can be set with canvasBounds in the
+ * constructor, or later with node.canvasBounds = bounds or setCanvasBounds( bounds ).
  *
  * @author Jonathan Olson <jonathan.olson@colorado.edu>
  * @author Sam Reid
@@ -21,8 +22,14 @@ define( function( require ) {
   var WebGLNodeDrawable = require( 'SCENERY/display/drawables/WebGLNodeDrawable' );
   var Util = require( 'SCENERY/util/Util' );
 
+  var WEBGL_NODE_OPTION_KEYS = [
+    'canvasBounds' // Sets the available Canvas bounds that content will show up in. See setCanvasBounds()
+  ];
+
   /**
+   * @public
    * @constructor
+   * @extends Node
    *
    * It is required to pass a canvasBounds option and/or keep canvasBounds such that it will cover the entirety of the
    * Node. This will also set its self bounds.
@@ -37,10 +44,12 @@ define( function( require ) {
    *   {Matrix3} modelViewMatrix - Transforms from the node's local coordinate frame to Scenery's global coordinate
    *                               frame.
    *   {Matrix3} projectionMatrix - Transforms from the global coordinate frame to normalized device coordinates.
+   *   Returns either WebGLNode.PAINTED_NOTHING or WebGLNode.PAINTED_SOMETHING.
    * dispose()
    *
    * @param {Function} painterType - The type (constructor) for the painters that will be used for this node.
-   * @param {Object} [options]
+   * @param {Object} [options] - WebGLNode-specific options are documented in LINE_OPTION_KEYS above, and can be
+   *                             provided along-side options for Node
    */
   function WebGLNode( painterType, options ) {
     Node.call( this, options );
@@ -65,7 +74,7 @@ define( function( require ) {
      * NOTE: See Node's _mutatorKeys documentation for more information on how this operates, and potential special
      *       cases that may apply.
      */
-    _mutatorKeys: [ 'canvasBounds' ].concat( Node.prototype._mutatorKeys ),
+    _mutatorKeys: WEBGL_NODE_OPTION_KEYS.concat( Node.prototype._mutatorKeys ),
 
     /**
      * Sets the bounds that are used for layout/repainting.
@@ -75,9 +84,12 @@ define( function( require ) {
      * node may be partially or completely invisible in Scenery's output.
      *
      * @param {Bounds2} selfBounds
+     * @returns {WebGLNode} - For Chaining
      */
     setCanvasBounds: function( selfBounds ) {
       this.invalidateSelf( selfBounds );
+
+      return this;
     },
     set canvasBounds( value ) { this.setCanvasBounds( value ); },
 
@@ -146,6 +158,14 @@ define( function( require ) {
       assert && assert( 'unimplemented: canvasPaintSelf in WebGLNode' );
     },
 
+    /**
+     * Renders this Node only (its self) into the Canvas wrapper, in its local coordinate frame.
+     * @public
+     * @override
+     *
+     * @param {CanvasContextWrapper} wrapper
+     * @param {Matrix3} matrix - The current transformation matrix associated with the wrapper
+     */
     renderToCanvasSelf: function( wrapper, matrix ) {
       var width = wrapper.canvas.width;
       var height = wrapper.canvas.height;
@@ -205,7 +225,14 @@ define( function( require ) {
       return 'new scenery.WebGLNode( {' + propLines + '} )'; // TODO: no real way to do this nicely?
     }
   }, {
+    /**
+     * @public {number} - Return code from painter.paint() when nothing was painted to the WebGL context.
+     */
     PAINTED_NOTHING: 0,
+
+    /**
+     * @public {number} - Return code from painter.paint() when something was painted to the WebGL context.
+     */
     PAINTED_SOMETHING: 1
   } );
 
