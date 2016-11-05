@@ -17,11 +17,17 @@ define( function( require ) {
   var Renderer = require( 'SCENERY/display/Renderer' );
   var DOMDrawable = require( 'SCENERY/display/drawables/DOMDrawable' );
 
+  var DOM_OPTION_KEYS = [
+    'element', // Sets the element, see setElement() for more documentation
+    'preventTransform' // Sets whether Scenery is allowed to transform the element. see setPreventTransform() for docs
+  ];
+
   /**
    * @constructor
    *
    * @param {Element|Object} element - The HTML element, or a jQuery selector result.
-   * @param {Object} [options] - Node and DOM options elements, see Node for details.
+   * @param {Object} [options] - DOM-specific options are documented in DOM_OPTION_KEYS above, and can be provided
+   *                             along-side options for Node
    */
   function DOM( element, options ) {
     assert && assert( element instanceof window.Element || element.jquery,
@@ -73,7 +79,7 @@ define( function( require ) {
      * NOTE: See Node's _mutatorKeys documentation for more information on how this operates, and potential special
      *       cases that may apply.
      */
-    _mutatorKeys: [ 'element', 'preventTransform' ].concat( Node.prototype._mutatorKeys ),
+    _mutatorKeys: DOM_OPTION_KEYS.concat( Node.prototype._mutatorKeys ),
 
     /**
      * Computes the bounds of our current DOM element (using jQuery, as replacing this with other things seems a bit

@@ -20,9 +20,7 @@ define( function( require ) {
   var Matrix3 = require( 'DOT/Matrix3' );
   var Vector2 = require( 'DOT/Vector2' );
   var Util = require( 'DOT/Util' );
-
   var Shape = require( 'KITE/Shape' );
-
   var scenery = require( 'SCENERY/scenery' );
   var Renderer = require( 'SCENERY/display/Renderer' );
   var RendererSummary = require( 'SCENERY/util/RendererSummary' );
@@ -58,45 +56,92 @@ define( function( require ) {
   var scratchBounds2 = Bounds2.NOTHING.copy(); // mutable {Bounds2} used temporarily in methods
   var scratchMatrix3 = new Matrix3();
 
-  /*
-   * See http://phetsims.github.io/scenery/doc/#node-options
+  // Node options, in the order they are executed in the constructor/mutate()
+  var NODE_OPTION_KEYS = [
+    'children', // List of children to add (in order), see setChildren for more documentation
+    'cursor', // CSS cursor to display when over this node, see setCursor() for more documentation
+    'visible', // Whether the node is visible, see setVisible() for more documentation
+    'pickable', // Whether the node is pickable, see setPickable() for more documentation
+    'inputEnabled', // Whether input events can reach into this subtree, see setInputEnabled() for more documentation
+    'opacity', // Opacity of this node's subtree, see setOpacity() for more documentation
+    'matrix', // Transformation matrix of the node, see setMatrix() for more documentation
+    'translation', // x/y translation of the node, see setTranslation() for more documentation
+    'x', // x translation of the node, see setX() for more documentation
+    'y', // y translation of the node, see setY() for more documentation
+    'rotation', // rotation (in radians) of the node, see setRotation() for more documentation
+    'scale', // scale of the node, see scale() for more documentation
+    'localBounds', // bounds of subtree in local coordinate frame, see setLocalBounds() for more documentation
+    'maxWidth', // Constrains width of this node, see setMaxWidth() for more documentation
+    'maxHeight', // Constrains height of this node, see setMaxHeight() for more documentation
+    'leftTop', // The upper-left corner of this node's bounds, see setLeftTop() for more documentation
+    'centerTop', // The top-center of this node's bounds, see setCenterTop() for more documentation
+    'rightTop', // The upper-right corner of this node's bounds, see setRightTop() for more documentation
+    'leftCenter', // The left-center of this node's bounds, see setLeftCenter() for more documentation
+    'center', // The center of this node's bounds, see setCenter() for more documentation
+    'rightCenter', // The center-right of this node's bounds, see setRightCenter() for more documentation
+    'leftBottom', // The bottom-left of this node's bounds, see setLeftBottom() for more documentation
+    'centerBottom', // The middle center of this node's bounds, see setCenterBottom() for more documentation
+    'rightBottom', // The bottom right of this node's bounds, see setRightBottom() for more documentation
+    'left', // The left side of this node's bounds, see setLeft() for more documentation
+    'right', // The right side of this node's bounds, see setRight() for more documentation
+    'top', // The top side of this node's bounds, see setTop() for more documentation
+    'bottom', // The bottom side of this node's bounds, see setBottom() for more documentation
+    'centerX', // The x-center of this node's bounds, see setCenterX() for more documentation
+    'centerY', // The y-center of this node's bounds, see setCenterY() for more documentation
+    'renderer', // The preferred renderer for this subtree, see setRenderer() for more documentation
+    'rendererOptions', // Renderer options for this subtree, see setRendererOptions() for more documentation
+    'layerSplit', // Forces this subtree into a layer of its own, see setLayerSplit() for more documentation
+    'usesOpacity', // Hint that opacity will be changed, see setUsesOpacity() for more documentation
+    'cssTransform', // Hint that can trigger using CSS transforms, see setCssTransform() for more documentation
+    'excludeInvisible', // If this is invisible, exclude from DOM, see setExcludeInvisible() for more documentation
+    'webglScale', // Hint to adjust WebGL scaling quality for this subtree, see setWebglScale() for more documentation
+    'preventFit', // Prevents layers from fitting this subtree, see setPreventFit() for more documentation
+    'mouseArea', // Changes the area the mouse can interact with, see setMouseArea() for more documentation
+    'touchArea', // Changes the area touches can interact with, see setTouchArea() for more documentation
+    'clipArea', // Makes things outside of a shape invisible, see setClipArea() for more documentation
+    'transformBounds', // Flag that makes bounds tighter, see setTransformBounds() for more documentation
+    'focusable', // Whether this node is focusable for keyboard support, see setFocusable() for more documentation
+    'focusIndicator', // Changes indicator used to show focus, see setFocusIndicator() for more documentation
+    'accessibleContent', // Sets up accessibility handling, see setAccessibleContent() for more documentation
+    'accessibleOrder' // Modifies the keyboard accessibility order, see setAccessibleOrder() for more documentation
+  ];
+
+  /**
+   * Creates a Node with options.
+   * @public
+   * @constructor
+   * @mixes Events
    *
-   * Available keys for use in the options parameter object for a vanilla Node (not inherited), in the order they are executed in:
+   * NOTE: Directly created Nodes (not of any subtype, but created with "new Node( ... )") are generally used as
+   *       containers, which can hold other Nodes, subtypes of Node that can display things.
    *
-   * children:         A list of children to add (in order)
-   * cursor:           Will display the specified CSS cursor when the mouse is over this Node or one of its descendents. The Scene needs to have input listeners attached with an initialize method first.
-   * visible:          If false, this node (and its children) will not be displayed (or get input events)
-   * pickable:         Sets whether the node and its children will receive input events. Default value: null (receives input events if it has an input listener or child that receives input events)
-   * opacity:          Sets the opacity in the range [0,1]
-   * matrix:           Sets the {Matrix3} transformation matrix (sets translation, rotation and scaling)
-   * translation:      Sets the translation of the node to either the specified dot.Vector2 value, or the x,y values from an object (e.g. translation: { x: 1, y: 2 } )
-   * x:                Sets the x-translation of the node
-   * y:                Sets the y-translation of the node
-   * rotation:         Sets the rotation of the node in radians
-   * scale:            Sets the scale of the node. Supports either a number (same x-y scale), or a dot.Vector2 / object with ob.x and ob.y to set the scale for each axis independently
-   * leftTop:          Sets the translation so that the left-top corner of the bounding box (in the parent coordinate frame) is at the specified point
-   * centerTop:        Sets the translation so that the center of the top edge of the bounding box (in the parent coordinate frame) is at the specified point
-   * rightTop:         Sets the translation so that the right-top corner of the bounding box (in the parent coordinate frame) is at the specified point
-   * leftCenter:       Sets the translation so that the center of the left edge of the bounding box (in the parent coordinate frame) is at the specified point
-   * center:           Sets the translation so that the center the bounding box (in the parent coordinate frame) is at the specified point
-   * rightCenter:      Sets the translation so that the center of the right edge of the bounding box (in the parent coordinate frame) is at the specified point
-   * leftBottom:       Sets the translation so that the left-bottom corner of the bounding box (in the parent coordinate frame) is at the specified point
-   * centerBottom:     Sets the translation so that the center of the bottom edge of the bounding box (in the parent coordinate frame) is at the specified point
-   * rightBottom:      Sets the translation so that the right-bottom corner of the bounding box (in the parent coordinate frame) is at the specified point
-   * left:             Sets the x-translation so that the left (min X) of the bounding box (in the parent coordinate frame) is at the specified value
-   * right:            Sets the x-translation so that the right (max X) of the bounding box (in the parent coordinate frame) is at the specified value
-   * top:              Sets the y-translation so that the top (min Y) of the bounding box (in the parent coordinate frame) is at the specified value
-   * bottom:           Sets the y-translation so that the bottom (min Y) of the bounding box (in the parent coordinate frame) is at the specified value
-   * centerX:          Sets the x-translation so that the horizontal center of the bounding box (in the parent coordinate frame) is at the specified value
-   * centerY:          Sets the y-translation so that the vertical center of the bounding box (in the parent coordinate frame) is at the specified value
-   * renderer:         Forces Scenery to use the specific renderer (canvas/svg) to display this node (and if possible, children). Accepts both strings (e.g. 'canvas', 'svg', etc.) or actual Renderer objects (e.g. Renderer.Canvas, Renderer.SVG, etc.)
-   * rendererOptions:  Parameter object that is passed to the created layer, and can affect how the layering process works.
-   * layerSplit:       Forces a split between layers before and after this node (and its children) have been rendered. Useful for performance with Canvas-based renderers.
-   * mouseArea:        Shape (in local coordinate frame) that overrides the 'hit area' for mouse input.
-   * touchArea:        Shape (in local coordinate frame) that overrides the 'hit area' for touch input.
-   * clipArea:         Shape (in local coordinate frame) that causes any graphics outside of the shape to be invisible (for the node and any children).
-   * transformBounds:  Whether to compute tighter parent bounding boxes for rotated bounding boxes, or to just use the bounding box of the rotated bounding box.
-   * focusable:        True if the node should be able to receive keyboard focus.
+   * Node and its subtypes generally have the last constructor parameter reserved for the 'options' object. This is a
+   * key-value map that specifies relevant options that are used by Node and subtypes.
+   *
+   * For example, one of Node's options is bottom, and one of Circle's options is radius. When a circle is created:
+   *   var circle = new Circle( {
+   *     radius: 10,
+   *     bottom: 200
+   *   } );
+   * This will create a Circle, set its radius (by executing circle.radius = 10, which uses circle.setRadius()), and
+   * then will align the bottom of the circle along y=200 (by executing circle.bottom = 200, which uses
+   * node.setBottom()).
+   *
+   * The options are executed in the order specified by each types _mutatorKeys property.
+   *
+   * The options object is currently not checked to see whether there are property (key) names that are not used, so it
+   * is currently legal to do "new Node( { fork_kitchen_spoon: 5 } )".
+   *
+   * Usually, an option (e.g. 'visible'), when used in a constructor or mutate() call, will directly use the ES5 setter
+   * for that property (e.g. node.visible = ...), which generally forwards to a non-ES5 setter function
+   * (e.g. node.setVisible( ... )) that is responsible for the behavior. Documentation is generally on these methods
+   * (e.g. setVisible), although some methods may be dynamically created to avoid verbosity (like node.leftTop).
+   *
+   * Sometimes, options invoke a function instead (e.g. 'scale') because the verb and noun are identical. In this case,
+   * instead of setting the setter (node.scale = ..., which would override the function), it will instead call
+   * the method directly (e.g. node.scale( ... )).
+   *
+   * @param {Object} [options] - Optional options object, as described above.
    */
   function Node( options ) {
     // supertype call to axon.Events (should just initialize a few properties here, notably _eventListeners and _staticEventListeners)
@@ -328,15 +373,7 @@ define( function( require ) {
      * NOTE: left/right/top/bottom/centerX/centerY are at the end, since they rely potentially on rotation / scaling
      *       changes of bounds that may happen beforehand
      */
-    _mutatorKeys: [
-      'children', 'cursor', 'visible', 'pickable', 'inputEnabled', 'opacity',
-      'matrix', 'translation', 'x', 'y', 'rotation', 'scale', 'localBounds',
-      'maxWidth', 'maxHeight', 'leftTop', 'centerTop', 'rightTop', 'leftCenter', 'center', 'rightCenter', 'leftBottom',
-      'centerBottom', 'rightBottom', 'left', 'right', 'top', 'bottom', 'centerX', 'centerY', 'renderer',
-      'rendererOptions', 'layerSplit', 'usesOpacity', 'cssTransform', 'excludeInvisible', 'webglScale', 'preventFit',
-      'mouseArea', 'touchArea', 'clipArea', 'transformBounds', 'focusable', 'focusIndicator', 'accessibleContent',
-      'accessibleOrder', 'textDescription'
-    ],
+    _mutatorKeys: NODE_OPTION_KEYS,
 
     /**
      * {Array.<String>} - List of all dirty flags that should be available on drawables created from this node (or

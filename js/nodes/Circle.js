@@ -20,6 +20,10 @@ define( function( require ) {
   var CircleSVGDrawable = require( 'SCENERY/display/drawables/CircleSVGDrawable' );
   var CircleCanvasDrawable = require( 'SCENERY/display/drawables/CircleCanvasDrawable' );
 
+  var CIRCLE_OPTION_KEYS = [
+    'radius' // see setRadius() for more documentation
+  ];
+
   /**
    * @constructor
    * @mixes Paintable
@@ -31,7 +35,8 @@ define( function( require ) {
    * This allows the radius to be included in the parameter object for when that is convenient.
    *
    * @param {number} radius - The (non-negative) radius of the circle
-   * @param {Object} [options] - Can contain Node's options, and/or CanvasNode options (e.g. canvasBound)
+   * @param {Object} [options] - Circle-specific options are documented in CIRCLE_OPTION_KEYS above, and can be provided
+   *                             along-side options for Node
    */
   function Circle( radius, options ) {
     if ( typeof radius === 'object' ) {
@@ -61,7 +66,7 @@ define( function( require ) {
      * NOTE: See Node's _mutatorKeys documentation for more information on how this operates, and potential special
      *       cases that may apply.
      */
-    _mutatorKeys: [ 'radius' ].concat( Path.prototype._mutatorKeys ),
+    _mutatorKeys: CIRCLE_OPTION_KEYS.concat( Path.prototype._mutatorKeys ),
 
     /**
      * {Array.<String>} - List of all dirty flags that should be available on drawables created from this node (or
