@@ -52,8 +52,7 @@ define( function( require ) {
     'fontFamily', // Sets the family of the current font, see setFont() for more documentation
     'fontStretch', // Sets the stretch of the current font, see setFont() for more documentation
     'fontStyle', // Sets the style of the current font, see setFont() for more documentation
-    'fontSize', // Sets the size of the current font, see setFont() for more documentation
-    'lineHeight' // Sets the line height of the current font, see setFont() for more documentation TODO: consider deprecation
+    'fontSize' // Sets the size of the current font, see setFont() for more documentation
   ];
 
   /**
@@ -679,7 +678,6 @@ define( function( require ) {
   addFontForwarding( 'fontStretch', 'FontStretch', 'stretch' );
   addFontForwarding( 'fontStyle', 'FontStyle', 'style' );
   addFontForwarding( 'fontSize', 'FontSize', 'size' );
-  addFontForwarding( 'lineHeight', 'LineHeight', 'lineHeight' );
 
   // font-specific ES5 setters and getters are defined using addFontForwarding above
   // TODO: define in prototype
