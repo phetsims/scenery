@@ -43,6 +43,8 @@ define( function( require ) {
       self.pointerSVGContainer.style.clip = 'rect(0px,' + dimension.width + 'px,' + dimension.height + 'px,0px)';
     } );
 
+    var scratchMatrix = Matrix3.IDENTITY.copy();
+
     //Display a pointer that was added.  Use a separate SVG layer for each pointer so it can be hardware accelerated, otherwise it is too slow just setting svg internal attributes
     var pointerAdded = this.pointerAdded = function( pointer ) {
 
@@ -53,6 +55,8 @@ define( function( require ) {
       svg.style.top = 0;
       svg.style.left = 0;
       svg.style[ 'pointer-events' ] = 'none';
+
+      Util.prepareForTransform( svg, false );
 
       //Fit the size to the display
       svg.setAttribute( 'width', diameter );
@@ -79,12 +83,10 @@ define( function( require ) {
       };
       var moveListener = {
         move: function() {
-
           //TODO: Why is point sometimes null?
           if ( pointer.point ) {
 
-            //TODO: this allocates memory when pointers are dragging, perhaps rewrite to remove allocations
-            Util.applyCSSTransform( Matrix3.translation( pointer.point.x - radius, pointer.point.y - radius ), svg );
+            Util.applyPreparedTransform( scratchMatrix.setToTranslation( pointer.point.x - radius, pointer.point.y - radius ), svg, false );
           }
         },
 

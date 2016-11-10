@@ -73,7 +73,7 @@ define( function( require ) {
     // @private {string}
     this._boundsMethod = 'hybrid';
 
-    // whether the text is rendered as HTML or not. if defined (in a subtype constructor), use that value instead
+    // @private {boolean} - Whether the text is rendered as HTML or not. if defined (in a subtype constructor), use that value instead
     this._isHTML = this._isHTML === undefined ? false : this._isHTML;
 
     // {null|string} - The actual string displayed (can have non-breaking spaces and embedding marks rewritten).

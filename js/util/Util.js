@@ -35,28 +35,6 @@ define( function( require ) {
      *---------------------------------------------------------------------------*/
 
     /**
-     * @deprecated (bad performance since it is setting multiple properties). see applyPreparedTransform
-     * Applies the transformation matrix to the passed-in DOM element via a CSS transform.
-     * @public
-     *
-     * @param {Matrix3} matrix - Assumed to be affine
-     * @param {DOMElement} element - Any DOM element
-     * @param {boolean} forceAcceleration - Whether to add flags to force graphical acceleration (can slow things down!)
-     */
-    applyCSSTransform: function( matrix, element, forceAcceleration ) {
-      var transformCSS = matrix.getCSSTransform();
-      // notes on triggering hardware acceleration: http://creativejs.com/2011/12/day-2-gpu-accelerate-your-dom-elements/
-
-      if ( forceAcceleration ) {
-        element.style.webkitBackfaceVisibility = 'hidden';
-        transformCSS += ' translateZ(0)';
-      }
-
-      element.style[ transformProperty ] = transformCSS;
-      element.style[ transformOriginProperty ] = 'top left'; //OHTWO TODO: performance: this only needs to be set once!
-    },
-
-    /**
      * Prepares a DOM element for use with applyPreparedTransform(). Applies some CSS styles that are required, but
      * that we don't want to set while animating.
      * @public
