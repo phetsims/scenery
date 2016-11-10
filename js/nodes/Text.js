@@ -1,15 +1,9 @@
 // Copyright 2013-2015, University of Colorado Boulder
 
 /**
- * Text
+ * Displays text that can be filled/stroked.
  *
- * TODO: newlines (multiline)
- * TODO: don't get bounds until the Text node is fully mutated?
- *
- * Useful specs:
- * http://www.w3.org/TR/css3-text/
- * http://www.w3.org/TR/css3-fonts/
- * http://www.w3.org/TR/SVG/text.html
+ * For many font/text-related properties, it's helpful to understand the CSS equivalents (http://www.w3.org/TR/css3-fonts/).
  *
  * @author Jonathan Olson <jonathan.olson@colorado.edu>
  */
@@ -50,7 +44,21 @@ define( function( require ) {
   // Maps CSS {string} => {Bounds2}, so that we can cache the vertical font sizes outside of the Font objects themselves.
   var hybridFontVerticalCache = {};
 
+  var TEXT_OPTION_KEYS = [
+    'boundsMethod', // Sets how bounds are determined for text, see setBoundsMethod() for more documentation
+    'text', // Sets the text to be displayed, see setText() for more documentation
+    'font', // Sets the font used for the text, see setFont() for more documentation
+    'fontWeight', // Sets the weight of the current font, see setFont() for more documentation
+    'fontFamily', // Sets the family of the current font, see setFont() for more documentation
+    'fontStretch', // Sets the stretch of the current font, see setFont() for more documentation
+    'fontStyle', // Sets the style of the current font, see setFont() for more documentation
+    'fontSize', // Sets the size of the current font, see setFont() for more documentation
+    'lineHeight', // Sets the line height of the current font, see setFont() for more documentation TODO: consider deprecation
+    'direction' // Sets the direction of the text to be displayed, see setDirection() for more documentation TODO: consider deprecation
+  ];
+
   /**
+   * @public
    * @constructor
    * @mixes Paintable
    *
@@ -58,11 +66,18 @@ define( function( require ) {
    * @param options
    */
   function Text( text, options ) {
-    this._text = '';                   // filled in with mutator
-    this._font = scenery.Font.DEFAULT; // default font, usually 10px sans-serif
-    this._direction = 'ltr';           // ltr, rtl, inherit -- consider inherit deprecated, due to how we compute text bounds in an off-screen canvas
-    this._boundsMethod = 'hybrid';     // fast (SVG/DOM, no canvas rendering allowed), fastCanvas (SVG/DOM, canvas rendering allowed without dirty regions),
-    // accurate (Canvas accurate recursive), or hybrid (cache SVG height, use canvas measureText for width)
+    // @private {string} - The text to display. We'll initialize this by mutating.
+    this._text = '';
+
+    // @private {Font} - The font with which to display the text.
+    this._font = scenery.Font.DEFAULT;
+
+    // @private {string} - One of 'ltr', 'rtl' or 'inherit' -- consider inherit deprecated, due to how we compute text bounds in an off-screen canvas
+    // TODO: investigate deprecation
+    this._direction = 'ltr';
+
+    // @private {string}
+    this._boundsMethod = 'hybrid';
 
     // whether the text is rendered as HTML or not. if defined (in a subtype constructor), use that value instead
     this._isHTML = this._isHTML === undefined ? false : this._isHTML;
@@ -71,22 +86,14 @@ define( function( require ) {
     // When this is null, its value needs to be recomputed
     this._cachedRenderedText = null;
 
-    // ensure we have a parameter object
-    options = options || {};
-
-    // default to black filled text
-    if ( options.fill === undefined ) {
-      options.fill = '#000000';
-    }
-
-    if ( text !== undefined ) {
-      // set the text parameter so that setText( text ) is effectively called in the mutator from the super call
-      options.text = text;
-    }
-
     this.initializePaintable();
 
-    Node.call( this, options );
+    Node.call( this, _.extend( {
+      fill: '#000000' // We want to default to black-filled text
+    }, options, {
+      text: text // Override the text option so that it will call setText()
+    } ) );
+
     this.updateTextFlags(); // takes care of setting up supported renderers
   }
 
@@ -101,8 +108,7 @@ define( function( require ) {
      * NOTE: See Node's _mutatorKeys documentation for more information on how this operates, and potential special
      *       cases that may apply.
      */
-    _mutatorKeys: [ 'boundsMethod', 'text', 'font', 'fontWeight', 'fontFamily', 'fontStretch', 'fontStyle', 'fontSize',
-                    'lineHeight', 'direction' ].concat( Node.prototype._mutatorKeys ),
+    _mutatorKeys: TEXT_OPTION_KEYS.concat( Node.prototype._mutatorKeys ),
 
     /**
      * {Array.<String>} - List of all dirty flags that should be available on drawables created from this node (or
@@ -164,6 +170,21 @@ define( function( require ) {
     },
     get renderedText() { return this.getRenderedText(); },
 
+    /**
+     * Sets the method that is used to determine bounds from the text.
+     * @public
+     *
+     * Possible values:
+     * - 'fast' - Measures using SVG, can be inaccurate. Can't be rendered in Canvas.
+     * - 'fastCanvas' - Like 'fast', but allows rendering in Canvas.
+     * - 'accurate' - Recursively renders to a Canvas to accurately determine bounds. Slow, but works with all renderers.
+     * - 'hybrid' - [default] Cache SVG height, and uses Canvas measureText for the width.
+     *
+     * TODO: deprecate fast/fastCanvas options?
+     *
+     * @param {string} method - One of the above methods
+     * @returns {Text} - For chaining.
+     */
     setBoundsMethod: function( method ) {
       assert && assert( method === 'fast' || method === 'fastCanvas' || method === 'accurate' || method === 'hybrid', 'Unknown Text boundsMethod' );
       if ( method !== this._boundsMethod ) {
