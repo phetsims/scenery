@@ -593,27 +593,27 @@
 
     var epsilon = 0.0000001;
 
-    node.addEventListener( 'childBounds', function() {
+    node.on( 'childBounds', function() {
       ok( node.childBounds.equalsEpsilon( new dot.Bounds2( 10, 0, 110, 30 ), epsilon ), 'Parent child bounds check: ' + node.childBounds.toString() );
     } );
 
-    node.addEventListener( 'bounds', function() {
+    node.on( 'bounds', function() {
       ok( node.bounds.equalsEpsilon( new dot.Bounds2( 10, 10, 110, 40 ), epsilon ), 'Parent bounds check: ' + node.bounds.toString() );
     } );
 
-    node.addEventListener( 'selfBounds', function() {
+    node.on( 'selfBounds', function() {
       ok( false, 'Self bounds should not change for parent node' );
     } );
 
-    rect.addEventListener( 'selfBounds', function() {
+    rect.on( 'selfBounds', function() {
       ok( rect.selfBounds.equalsEpsilon( new dot.Bounds2( 0, 0, 100, 30 ), epsilon ), 'Self bounds check: ' + rect.selfBounds.toString() );
     } );
 
-    rect.addEventListener( 'bounds', function() {
+    rect.on( 'bounds', function() {
       ok( rect.bounds.equalsEpsilon( new dot.Bounds2( 10, 0, 110, 30 ), epsilon ), 'Bounds check: ' + rect.bounds.toString() );
     } );
 
-    rect.addEventListener( 'childBounds', function() {
+    rect.on( 'childBounds', function() {
       ok( false, 'Child bounds should not change for leaf node' );
     } );
 

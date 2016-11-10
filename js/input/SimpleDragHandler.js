@@ -136,7 +136,6 @@ define( function( require ) {
       event.pointer.dragging = true;
       event.pointer.cursor = this.options.dragCursor;
       event.pointer.addInputListener( this.dragListener );
-      // event.trail.rootNode().addEventListener( this.transformListener ); // TODO: replace with new parent transform listening solution
 
       // set all of our persistent information
       this.dragging = true;
@@ -158,7 +157,6 @@ define( function( require ) {
       this.pointer.dragging = false;
       this.pointer.cursor = null;
       this.pointer.removeInputListener( this.dragListener );
-      // this.trail.rootNode().removeEventListener( this.transformListener ); // TODO: replace with new parent transform listening solution
       this.dragging = false;
 
       if ( this.options.end ) {

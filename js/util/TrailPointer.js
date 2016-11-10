@@ -22,7 +22,6 @@ define( function( require ) {
   /*
    * isBefore: whether this points to before the node (and its children) have been rendered, or after
    */
-  //@deprecated
   function TrailPointer( trail, isBefore ) {
     assert && assert( trail instanceof scenery.Trail, 'trail is not a trail' );
     this.trail = trail;

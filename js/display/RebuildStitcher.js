@@ -1,8 +1,7 @@
 // Copyright 2014, University of Colorado Boulder
 
-
 /**
- * @deprecated Stitcher that rebuilds all of the blocks and reattaches drawables. Simple, but inefficient.
+ * Stitcher that rebuilds all of the blocks and reattaches drawables. Simple, but inefficient.
  *
  * Kept for now as a run-time comparison and baseline for the GreedyStitcher or any other more advanced (but
  * more error-prone) stitching process.

@@ -4384,48 +4384,6 @@ define( function( require ) {
       }
     },
 
-    /*---------------------------------------------------------------------------*
-     * Compatibility with old events API (now using axon.Events)
-     *----------------------------------------------------------------------------*/
-
-    /**
-     * @deprecated, please use node.on( eventName, listener) instead.
-     * Adds a listener for a specific event name.
-     * @public
-     *
-     * @param {string} eventName
-     * @param {Function} listener
-     */
-    addEventListener: function( eventName, listener ) {
-      // can't guarantee static with old usage
-      return this.on( eventName, listener );
-    },
-
-    /**
-     * @deprecated, please use node.off( eventName, listener) instead.
-     * Removes a listener for a specific event name.
-     * @public
-     *
-     * @param {string} eventName
-     * @param {Function} listener
-     */
-    removeEventListener: function( eventName, listener ) {
-      // can't guarantee static with old usage
-      return this.off( eventName, listener );
-    },
-
-    /**
-     * @deprecated, please use node.hasListener( eventName, listener) instead.
-     * Checks for the presence of a listener for a specific event name.
-     * @public
-     *
-     * @param {string} eventName
-     * @param {Function} listener
-     */
-    containsEventListener: function( eventName, listener ) {
-      return this.hasListener( eventName, listener );
-    },
-
     /**
      * Tracks when an event listener is added, so that we can prune hit testing for performance.
      * @private
