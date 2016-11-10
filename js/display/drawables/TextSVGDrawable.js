@@ -68,6 +68,7 @@ define( function( require ) {
           text.setAttribute( 'lengthAdjust', 'spacingAndGlyphs' );
         }
         text.setAttributeNS( 'http://www.w3.org/XML/1998/namespace', 'xml:space', 'preserve' );
+        text.setAttribute( 'direction', 'ltr' );
       }
 
       return this;
@@ -81,10 +82,6 @@ define( function( require ) {
      */
     updateSVGSelf: function() {
       var text = this.svgElement;
-
-      if ( this.dirtyDirection ) {
-        text.setAttribute( 'direction', this.node._direction );
-      }
 
       // set all of the font attributes, since we can't use the combined one
       if ( this.dirtyFont ) {

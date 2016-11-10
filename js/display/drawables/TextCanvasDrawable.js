@@ -67,7 +67,7 @@ define( function( require ) {
       // extra parameters we need to set, but should avoid setting if we aren't drawing anything
       if ( node.hasFill() || node.hasStroke() ) {
         wrapper.setFont( node._font.getFont() );
-        wrapper.setDirection( node._direction );
+        wrapper.setDirection( 'ltr' );
       }
 
       if ( node.hasFill() ) {
@@ -86,7 +86,6 @@ define( function( require ) {
     markDirtyText: function() { this.markPaintDirty(); },
     markDirtyFont: function() { this.markPaintDirty(); },
     markDirtyBounds: function() { this.markPaintDirty(); },
-    markDirtyDirection: function() { this.markPaintDirty(); },
 
     /**
      * Disposes the drawable.

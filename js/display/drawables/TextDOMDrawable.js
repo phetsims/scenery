@@ -68,6 +68,7 @@ define( function( require ) {
         this.domElement.style.pointerEvents = 'none';
         this.domElement.style.left = '0';
         this.domElement.style.top = '0';
+        this.domElement.setAttribute( 'dir', 'ltr' );
       }
 
       // Apply CSS needed for future CSS transforms to work properly.
@@ -104,9 +105,6 @@ define( function( require ) {
         if ( this.dirtyText ) {
           // TODO: actually do this in a better way
           div.innerHTML = node.renderedText;
-        }
-        if ( this.dirtyDirection ) {
-          div.setAttribute( 'dir', node._direction );
         }
       }
 

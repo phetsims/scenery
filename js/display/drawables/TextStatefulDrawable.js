@@ -47,7 +47,6 @@ define( function( require ) {
         this.dirtyText = true;
         this.dirtyFont = true;
         this.dirtyBounds = true;
-        this.dirtyDirection = true;
 
         // After adding flags, we'll initialize the mixed-in PaintableStateful state.
         this.initializePaintableState( renderer, instance );
@@ -88,10 +87,6 @@ define( function( require ) {
         this.dirtyBounds = true;
         this.markPaintDirty();
       };
-      proto.markDirtyDirection = function() {
-        this.dirtyDirection = true;
-        this.markPaintDirty();
-      };
 
       /**
        * Clears all of the dirty flags (after they have been checked), so that future mark* methods will be able to flag them again.
@@ -102,7 +97,6 @@ define( function( require ) {
         this.dirtyText = false;
         this.dirtyFont = false;
         this.dirtyBounds = false;
-        this.dirtyDirection = false;
       };
 
       Paintable.PaintableStatefulDrawable.mixin( drawableType );

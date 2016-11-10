@@ -53,8 +53,7 @@ define( function( require ) {
     'fontStretch', // Sets the stretch of the current font, see setFont() for more documentation
     'fontStyle', // Sets the style of the current font, see setFont() for more documentation
     'fontSize', // Sets the size of the current font, see setFont() for more documentation
-    'lineHeight', // Sets the line height of the current font, see setFont() for more documentation TODO: consider deprecation
-    'direction' // Sets the direction of the text to be displayed, see setDirection() for more documentation TODO: consider deprecation
+    'lineHeight' // Sets the line height of the current font, see setFont() for more documentation TODO: consider deprecation
   ];
 
   /**
@@ -71,10 +70,6 @@ define( function( require ) {
 
     // @private {Font} - The font with which to display the text.
     this._font = scenery.Font.DEFAULT;
-
-    // @private {string} - One of 'ltr', 'rtl' or 'inherit' -- consider inherit deprecated, due to how we compute text bounds in an off-screen canvas
-    // TODO: investigate deprecation
-    this._direction = 'ltr';
 
     // @private {string}
     this._boundsMethod = 'hybrid';
@@ -117,7 +112,7 @@ define( function( require ) {
      * @public (scenery-internal)
      * @override
      */
-    drawableMarkFlags: Node.prototype.drawableMarkFlags.concat( [ 'text', 'font', 'bounds', 'direction' ] ),
+    drawableMarkFlags: Node.prototype.drawableMarkFlags.concat( [ 'text', 'font', 'bounds' ] ),
 
     domUpdateTransformOnRepaint: true, // since we have to integrate the baseline offset into the CSS transform, signal to DOMLayer
 
@@ -411,7 +406,7 @@ define( function( require ) {
       // NOTE: should return new instance, so that it can be mutated later
       return scenery.Util.canvasAccurateBounds( function( context ) {
         context.font = self.font;
-        context.direction = self.direction;
+        context.direction = 'ltr';
         context.fillText( self.renderedText, 0, 0 );
         if ( self.hasStroke() ) {
           var fakeWrapper = new scenery.CanvasContextWrapper( null, context );
@@ -429,7 +424,7 @@ define( function( require ) {
     approximateCanvasWidth: function() {
       var context = scenery.scratchContext;
       context.font = this.font;
-      context.direction = this.direction;
+      context.direction = 'ltr';
       return context.measureText( this.renderedText ).width;
     },
 
@@ -468,7 +463,6 @@ define( function( require ) {
     // NOTE: should return new instance, so that it can be mutated later
     approximateDOMBounds: function() {
       var maxHeight = 1024; // technically this will fail if the font is taller than this!
-      var isRTL = this.direction === 'rtl';
 
       // <div style="position: absolute; left: 0; top: 0; padding: 0 !important; margin: 0 !important;"><span id="baselineSpan" style="font-family: Verdana; font-size: 25px;">QuipTaQiy</span><div style="vertical-align: baseline; display: inline-block; width: 0; height: 500px; margin: 0 important!; padding: 0 important!;"></div></div>
 
@@ -485,7 +479,7 @@ define( function( require ) {
       var span = document.createElement( 'span' );
       $( span ).css( 'font', this.getFont() );
       span.appendChild( this.getDOMTextNode() );
-      span.setAttribute( 'direction', this._direction );
+      span.setAttribute( 'direction', 'ltr' );
 
       var fakeImage = document.createElement( 'div' );
       $( fakeImage ).css( {
@@ -505,11 +499,9 @@ define( function( require ) {
       var divRect = div.getBoundingClientRect();
       // add 1 pixel to rect.right to prevent HTML text wrapping
       var result = new Bounds2( rect.left, rect.top - maxHeight, rect.right + 1, rect.bottom - maxHeight ).shifted( -divRect.left, -divRect.top );
-      // console.log( 'result: ' + result );
       document.body.removeChild( div );
 
-      var width = rect.right - rect.left;
-      return result.shiftedX( isRTL ? -width : 0 ); // should we even swap here?
+      return result;
     },
 
     approximateImprovedDOMBounds: function() {
@@ -523,7 +515,7 @@ define( function( require ) {
       div.style.position = 'absolute';
       div.style.left = '0';
       div.style.top = '0';
-      div.setAttribute( 'direction', this._direction );
+      div.setAttribute( 'direction', 'ltr' );
       div.appendChild( this.getDOMTextNode() );
 
       document.body.appendChild( div );
@@ -566,22 +558,6 @@ define( function( require ) {
     // NOTE: returns mutable copy for now, consider either immutable version, defensive copy, or note about invalidateText()
     getFont: function() {
       return this._font.getFont();
-    },
-
-    setDirection: function( direction ) {
-      this._direction = direction;
-
-      var stateLen = this._drawables.length;
-      for ( var i = 0; i < stateLen; i++ ) {
-        this._drawables[ i ].markDirtyDirection();
-      }
-
-      this.invalidateText();
-      return this;
-    },
-
-    getDirection: function() {
-      return this._direction;
     },
 
     /**
@@ -663,10 +639,6 @@ define( function( require ) {
         addProp( 'font', this.font.replace( /'/g, '\\\'' ) );
       }
 
-      if ( this._direction !== 'ltr' ) {
-        addProp( 'direction', this._direction );
-      }
-
       return result;
     }
   } );
@@ -710,12 +682,9 @@ define( function( require ) {
   addFontForwarding( 'lineHeight', 'LineHeight', 'lineHeight' );
 
   // font-specific ES5 setters and getters are defined using addFontForwarding above
+  // TODO: define in prototype
   Object.defineProperty( Text.prototype, 'font', { set: Text.prototype.setFont, get: Text.prototype.getFont } );
   Object.defineProperty( Text.prototype, 'text', { set: Text.prototype.setText, get: Text.prototype.getText } );
-  Object.defineProperty( Text.prototype, 'direction', {
-    set: Text.prototype.setDirection,
-    get: Text.prototype.getDirection
-  } );
   Object.defineProperty( Text.prototype, 'boundsMethod', {
     set: Text.prototype.setBoundsMethod,
     get: Text.prototype.getBoundsMethod
@@ -886,7 +855,7 @@ define( function( require ) {
   }
 
   function updateSVGTextToMeasure( textElement, textNode ) {
-    textElement.setAttribute( 'direction', textNode._direction );
+    textElement.setAttribute( 'direction', 'ltr' );
     textElement.setAttribute( 'font-family', textNode._font.getFamily() );
     textElement.setAttribute( 'font-size', textNode._font.getSize() );
     textElement.setAttribute( 'font-style', textNode._font.getStyle() );
