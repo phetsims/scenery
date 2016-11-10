@@ -89,7 +89,6 @@ define( function( require ) {
     'centerX', // The x-center of this node's bounds, see setCenterX() for more documentation
     'centerY', // The y-center of this node's bounds, see setCenterY() for more documentation
     'renderer', // The preferred renderer for this subtree, see setRenderer() for more documentation
-    'rendererOptions', // Renderer options for this subtree, see setRendererOptions() for more documentation
     'layerSplit', // Forces this subtree into a layer of its own, see setLayerSplit() for more documentation
     'usesOpacity', // Hint that opacity will be changed, see setUsesOpacity() for more documentation
     'cssTransform', // Hint that can trigger using CSS transforms, see setCssTransform() for more documentation
@@ -2831,23 +2830,6 @@ define( function( require ) {
       return !!this._hints.renderer;
     },
 
-    // @deprecated
-    setRendererOptions: function( options ) {
-      // TODO: consider checking options based on the specified 'renderer'?
-      // TODO: consider a guard where we check if anything changed
-      //OHTWO TODO: Split out all of the renderer options into individual flag ES5'ed getter/setters
-      _.extend( this._hints, options );
-
-      this.trigger0( 'hint' );
-    },
-    set rendererOptions( value ) { this.setRendererOptions( value ); },
-
-    // @deprecated
-    getRendererOptions: function() {
-      return this._hints;
-    },
-    get rendererOptions() { return this.getRendererOptions(); },
-
     /**
      * Sets whether or not Scenery will try to put this node (and its descendants) into a separate SVG/Canvas/WebGL/etc.
      * layer, different from other siblings or other nodes. Can be used for performance purposes.
@@ -4370,9 +4352,6 @@ define( function( require ) {
 
       if ( this.renderer ) {
         addProp( 'renderer', this.renderer );
-        if ( this.rendererOptions ) {
-          // addProp( 'rendererOptions', JSON.stringify( this.rendererOptions ), true );
-        }
       }
 
       if ( this._hints.layerSplit ) {

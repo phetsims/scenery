@@ -485,9 +485,7 @@
 
     var node = new scenery.Node( {
       renderer: 'svg',
-      rendererOptions: {
-        cssTransform: true
-      }
+      cssTransform: true
     } );
     var rect = new scenery.Rectangle( 0, 0, 100, 50, { fill: 'red' } );
 
@@ -509,9 +507,7 @@
     var rect = new scenery.Rectangle( 0, 0, 100, 50, {
       fill: 'red',
       renderer: 'svg',
-      rendererOptions: {
-        cssTransform: true
-      }
+      cssTransform: true
     } );
 
     scene.addChild( node );

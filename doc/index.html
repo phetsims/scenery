@@ -192,7 +192,6 @@
     <a class="sublink" href="#node-centerX">centerX</a><br>
     <a class="sublink" href="#node-centerY">centerY</a><br>
     <a class="sublink" href="#node-renderer">renderer</a><br>
-    <a class="sublink" href="#node-rendererOptions">rendererOptions</a><br>
     <a class="sublink" href="#node-layerSplit">layerSplit</a><br>
 
     <a class="navlink" href="#display">Display</a><br>
@@ -443,9 +442,6 @@ window.assertions.disableAssertSlow();
       </li>
       <li><a href="#node-renderer">renderer</a>: Forces Scenery to use the specific renderer (canvas/svg) to display this node (and if possible,
         children). Accepts both strings (e.g. 'canvas', 'svg', etc.) or actual Renderer objects (e.g. Renderer.Canvas, Renderer.SVG, etc.)
-      </li>
-      <li><a href="#node-rendererOptions">rendererOptions</a>: Parameter object that is passed to the created layer, and can affect how the layering
-        process works.
       </li>
       <li><a href="#node-layerSplit">layerSplit</a>: Forces a split between layers before and after this node (and its children) have been rendered.
         Useful for performance with Canvas-based renderers.
@@ -977,18 +973,6 @@ window.assertions.disableAssertSlow();
 
     <p>
       <code>node.hasRenderer()</code> is a convenience function to determine if this is set on the node.
-    </p>
-
-    <h4 id="node-rendererOptions">node.rendererOptions</h4>
-
-    <p>
-      <code>node.rendererOptions</code> gets or sets options for the specified <a href="#node-renderer">renderer</a> using
-      <code>node.getRendererOptions()</code> or <code>node.setRendererOptions( renderer )</code>.
-      Setting <a href="#node-rendererOptions">rendererOptions</a> without setting <a href="#node-renderer">renderer</a> will have no effect, and may
-      in future
-      versions throw an error. If this option and the <a href="#node-renderer">renderer</a> is set, this node will have layer boundaries inserted
-      before and after.
-      <!-- TODO: docs of rendererOptions for different layers -->
     </p>
 
     <h4 id="node-layerSplit">node.layerSplit</h4>

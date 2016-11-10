@@ -867,11 +867,6 @@ define( function( require ) {
 
     //TODO: reduce code duplication for handling overlays
     setPointerDisplayVisible: function( visibility ) {
-      // @deprecated, Joist code calls us with undefined first....
-      if ( visibility === undefined ) {
-        return;
-      }
-
       assert && assert( typeof visibility === 'boolean' );
 
       var hasOverlay = !!this._pointerOverlay;
@@ -891,11 +886,6 @@ define( function( require ) {
 
     //TODO: reduce code duplication for handling overlays
     setPointerAreaDisplayVisible: function( visibility ) {
-      // @deprecated, Joist code calls us with undefined first....
-      if ( visibility === undefined ) {
-        return;
-      }
-
       assert && assert( typeof visibility === 'boolean' );
 
       var hasOverlay = !!this._pointerAreaOverlay;
@@ -915,11 +905,6 @@ define( function( require ) {
 
     //TODO: reduce code duplication for handling overlays
     setCanvasNodeBoundsVisible: function( visibility ) {
-      // @deprecated, Joist code calls us with undefined first....
-      if ( visibility === undefined ) {
-        return;
-      }
-
       assert && assert( typeof visibility === 'boolean' );
 
       var hasOverlay = !!this._canvasAreaBoundsOverlay;
@@ -939,11 +924,6 @@ define( function( require ) {
 
     //TODO: reduce code duplication for handling overlays
     setFittedBlockBoundsVisible: function( visibility ) {
-      // @deprecated, Joist code calls us with undefined first....
-      if ( visibility === undefined ) {
-        return;
-      }
-
       assert && assert( typeof visibility === 'boolean' );
 
       var hasOverlay = !!this._fittedBlockBoundsOverlay;
