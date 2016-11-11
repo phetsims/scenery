@@ -228,16 +228,24 @@ define( function( require ) {
      * @param {number} [cornerYRadius] - The vertical radius of curved corners (0 for sharp corners)
      */
     setRect: function( x, y, width, height, cornerXRadius, cornerYRadius ) {
-      assert && assert( x !== undefined && y !== undefined && width !== undefined && height !== undefined, 'x/y/width/height need to be defined' );
+      var hasXRadius = cornerXRadius !== undefined;
+      var hasYRadius = cornerYRadius !== undefined;
 
-      // for now, check whether this is needed
-      // TODO: note that this could decrease performance? Remove if this is a bottleneck
+      assert && assert( typeof x === 'number' && isFinite( x ) &&
+                        typeof y === 'number' && isFinite( y ) &&
+                        typeof width === 'number' && isFinite( width ) &&
+                        typeof height === 'number' && isFinite( height ), 'x/y/width/height should be finite numbers' );
+      assert && assert( !hasXRadius || ( typeof cornerXRadius === 'number' && isFinite( cornerXRadius ) ) &&
+                        !hasYRadius || ( typeof cornerYRadius === 'number' && isFinite( cornerYRadius ) ),
+                        'Corner radii (if provided) should be finite numbers' );
+
+      // If this doesn't change the rectangle, don't notify about changes.
       if ( this._rectX === x &&
            this._rectY === y &&
            this._rectWidth === width &&
            this._rectHeight === height &&
-           this._cornerXRadius === cornerXRadius &&
-           this._cornerYRadius === cornerYRadius ) {
+           ( !hasXRadius || this._cornerXRadius === cornerXRadius ) &&
+           ( !hasYRadius || this._cornerYRadius === cornerYRadius ) ) {
         return;
       }
 
@@ -245,8 +253,8 @@ define( function( require ) {
       this._rectY = y;
       this._rectWidth = width;
       this._rectHeight = height;
-      this._cornerXRadius = cornerXRadius || 0;
-      this._cornerYRadius = cornerYRadius || 0;
+      this._cornerXRadius = hasXRadius ? cornerXRadius : this._cornerXRadius;
+      this._cornerYRadius = hasYRadius ? cornerYRadius : this._cornerYRadius;
 
       var stateLen = this._drawables.length;
       for ( var i = 0; i < stateLen; i++ ) {
