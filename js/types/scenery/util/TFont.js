@@ -28,13 +28,13 @@ define( function( require ) {
 
     // Info from Font.js
     documentation: 'Font handling for text drawing. Options: <br>' +
-    'style: normal      // normal | italic | oblique <br>' +
-    'variant: normal    // normal | small-caps <br>' +
-    'weight: normal     // normal | bold | bolder | lighter | 100 | 200 | 300 | 400 | 500 | 600 | 700 | 800 | 900 <br>' +
-    'stretch: normal    // normal | ultra-condensed | extra-condensed | condensed | semi-condensed | semi-expanded | expanded | extra-expanded | ultra-expanded <br>' +
-    'size: 10px         // absolute-size | relative-size | length | percentage -- unitless number interpreted as px. absolute suffixes: cm, mm, in, pt, pc, px. relative suffixes: em, ex, ch, rem, vw, vh, vmin, vmax. <br>' +
-    'lineHeight: normal // normal | number | length | percentage -- NOTE: Canvas spec forces line-height to normal <br>' +
-    'family: sans-serif // comma-separated list of families, including generic families (serif, sans-serif, cursive, fantasy, monospace). ideally escape with double-quotes',
+                   'style: normal      // normal | italic | oblique <br>' +
+                   'variant: normal    // normal | small-caps <br>' +
+                   'weight: normal     // normal | bold | bolder | lighter | 100 | 200 | 300 | 400 | 500 | 600 | 700 | 800 | 900 <br>' +
+                   'stretch: normal    // normal | ultra-condensed | extra-condensed | condensed | semi-condensed | semi-expanded | expanded | extra-expanded | ultra-expanded <br>' +
+                   'size: 10px         // absolute-size | relative-size | length | percentage -- unitless number interpreted as px. absolute suffixes: cm, mm, in, pt, pc, px. relative suffixes: em, ex, ch, rem, vw, vh, vmin, vmax. <br>' +
+                   'lineHeight: normal // normal | number | length | percentage -- NOTE: Canvas spec forces line-height to normal <br>' +
+                   'family: sans-serif // comma-separated list of families, including generic families (serif, sans-serif, cursive, fantasy, monospace). ideally escape with double-quotes',
 
     // Serialize this font's configuration to an options object
     toStateObject: function( font ) {
