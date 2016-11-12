@@ -19,8 +19,13 @@ define( function( require ) {
   var Rectangle = require( 'SCENERY/nodes/Rectangle' );
 
   /**
-   * @param {Object} [options] Any options for the plane, typically fill/opacity (many others such as scale, translation, rotation should have no effect)
+   * @public
    * @constructor
+   * @extends Rectangle
+   * @mixes Paintable
+   * @mixes Events
+   *
+   * @param {Object} [options] Passed to Rectangle. See Rectangle for more documentation
    */
   function Plane( options ) {
     Rectangle.call( this, -2000, -2000, 6000, 6000, options );

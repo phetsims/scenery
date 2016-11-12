@@ -59,7 +59,9 @@ define( function( require ) {
   /**
    * @public
    * @constructor
+   * @extends Node
    * @mixes Paintable
+   * @mixes Events
    *
    * @param text
    * @param options

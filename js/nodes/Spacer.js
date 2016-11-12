@@ -18,8 +18,10 @@ define( function( require ) {
   /**
    * Creates a spacer taking up a rectangular area from x: [0,width] and y: [0,height]. Use x/y in options to control
    * its position.
+   * @public
    * @constructor
    * @extends Node
+   * @mixes Events
    *
    * @param {number} width - The width of the spacer
    * @param {number} height - The height of the spacer

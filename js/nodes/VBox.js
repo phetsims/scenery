@@ -13,8 +13,10 @@ define( function( require ) {
   var scenery = require( 'SCENERY/scenery' );
 
   /**
+   * @public
    * @constructor
    * @extends LayoutBox
+   * @mixes Events
    *
    * @param {Object} [options] see LayoutBox
    */

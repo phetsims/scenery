@@ -36,9 +36,11 @@ define( function( require ) {
   ];
 
   /**
+   * @public
    * @constructor
    * @extends Path
    * @mixes Paintable
+   * @mixes Events
    *
    * Possible constructor signatures
    * new Rectangle( x, y, width, height, cornerXRadius, cornerYRadius, [options] )

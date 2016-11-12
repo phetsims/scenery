@@ -26,8 +26,11 @@ define( function( require ) {
   ];
 
   /**
+   * @public
    * @constructor
+   * @extends Path
    * @mixes Paintable
+   * @mixes Events
    *
    * NOTE: There are two ways of invoking the constructor:
    * - new Circle( radius, { ... } )

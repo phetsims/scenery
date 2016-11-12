@@ -16,8 +16,10 @@ define( function( require ) {
 
   /**
    * Creates a strut with x in the range [0,width] and y=0.
+   * @public
    * @constructor
    * @extends Spacer
+   * @mixes Events
    *
    * @param {number} width - Width of the strut
    * @param {Object} [options] - Passed to Spacer/Node

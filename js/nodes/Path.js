@@ -20,10 +20,17 @@ define( function( require ) {
   var PathCanvasDrawable = require( 'SCENERY/display/drawables/PathCanvasDrawable' );
   var PathSVGDrawable = require( 'SCENERY/display/drawables/PathSVGDrawable' );
 
+  var PATH_OPTION_KEYS = [
+    'boundsMethod', // Sets how bounds are determined, see setBoundsMethod() for more documentation.
+    'shape' // Sets the shape of the Path, see  setShape() for more documentation.
+  ];
+
   /**
    * Creates a Path with a given shape specifier (a Shape, a string in the SVG path format, or null to indicate no
    * shape).
+   * @public
    * @constructor
+   * @extends Node
    * @mixes Paintable
    *
    * Path has two additional options (above what Node provides):
@@ -81,7 +88,7 @@ define( function( require ) {
      * NOTE: See Node's _mutatorKeys documentation for more information on how this operates, and potential special
      *       cases that may apply.
      */
-    _mutatorKeys: [ 'boundsMethod', 'shape' ].concat( Node.prototype._mutatorKeys ),
+    _mutatorKeys: PATH_OPTION_KEYS.concat( Node.prototype._mutatorKeys ),
 
     /**
      * {Array.<String>} - List of all dirty flags that should be available on drawables created from this node (or

@@ -14,8 +14,10 @@ define( function( require ) {
   var Text = require( 'SCENERY/nodes/Text' ); // inherits from Text
 
   /**
+   * @public
    * @constructor
    * @extends Text
+   * @mixes Events
    *
    * NOTE: Currently does not properly handle multi-line (<br>) text height, since it expects DOM text that will be an
    * inline element

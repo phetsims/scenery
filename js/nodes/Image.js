@@ -42,6 +42,8 @@ define( function( require ) {
    * Constructs an Image node from a particular source.
    * @public
    * @constructor
+   * @extends Node
+   * @mixes Events
    *
    * IMAGE_OPTION_KEYS (above) describes the available options keys that can be provided, on top of Node's options.
    *

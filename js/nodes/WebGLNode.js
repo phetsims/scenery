@@ -30,6 +30,7 @@ define( function( require ) {
    * @public
    * @constructor
    * @extends Node
+   * @mixes Events
    *
    * It is required to pass a canvasBounds option and/or keep canvasBounds such that it will cover the entirety of the
    * Node. This will also set its self bounds.

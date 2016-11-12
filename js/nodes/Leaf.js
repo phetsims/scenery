@@ -15,6 +15,7 @@ define( function( require ) {
     /**
      * Removes the capability to insert children when this is mixed into a type.
      * @public
+     * @mixin
      *
      * @param {function} type - The type (constructor) whose prototype we'll modify so that it can't have children.
      */
