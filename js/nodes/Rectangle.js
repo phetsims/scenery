@@ -23,6 +23,18 @@ define( function( require ) {
   var RectangleSVGDrawable = require( 'SCENERY/display/drawables/RectangleSVGDrawable' );
   var RectangleWebGLDrawable = require( 'SCENERY/display/drawables/RectangleWebGLDrawable' );
 
+  var RECTANGLE_OPTION_KEYS = [
+    'rectBounds', // Sets x/y/width/height based on bounds. See setRectBounds() for more documentation.
+    'rectSize', // Sets width/height based on dimension. See setRectSize() for more documentation.
+    'rectX', // Sets x. See setRectX() for more documentation.
+    'rectY', // Sets y. See setRectY() for more documentation.
+    'rectWidth', // Sets width. See setRectWidth() for more documentation.
+    'rectHeight', // Sets height. See setRectHeight() for more documentation.
+    'cornerRadius', // Sets corner radii. See setCornerRadius() for more documentation.
+    'cornerXRadius', // Sets horizontal corner radius. See setCornerXRadius() for more documentation.
+    'cornerYRadius' // Sets vertical corner radius. See setCornerYRadius() for more documentation.
+  ];
+
   /**
    * @constructor
    * @extends Path
@@ -35,15 +47,6 @@ define( function( require ) {
    * new Rectangle( bounds2, [options] )
    * new Rectangle( bounds2, cornerXRadius, cornerYRadius, [options] )
    *
-   * Available parameters to the various constructor options:
-   * @param {number} x - x-position of the upper-left corner (left bound)
-   * @param {number} y - y-position of the upper-left corner (top bound)
-   * @param {number} width - width of the rectangle to the right of the upper-left corner, required to be >= 0
-   * @param {number} height - height of the rectangle below the upper-left corner, required to be >= 0
-   * @param {number} cornerXRadius - positive vertical radius (width) of the rounded corner, or 0 to indicate the corner should be sharp
-   * @param {number} cornerYRadius - positive horizontal radius (height) of the rounded corner, or 0 to indicate the corner should be sharp
-   * @param {Object} [options] - Options object for Scenery
-   *
    * Current available options for the options object (custom for Rectangle, not Path or Node):
    * rectX - Left edge of the rectangle in the local coordinate frame
    * rectY - Top edge of the rectangle in the local coordinate frame
@@ -55,6 +58,16 @@ define( function( require ) {
    *
    * NOTE: the X and Y corner radii need to both be greater than zero for rounded corners to appear. If they have the
    * same non-zero value, circular rounded corners will be used.
+   *
+   * Available parameters to the various constructor options:
+   * @param {number} x - x-position of the upper-left corner (left bound)
+   * @param {number} y - y-position of the upper-left corner (top bound)
+   * @param {number} width - width of the rectangle to the right of the upper-left corner, required to be >= 0
+   * @param {number} height - height of the rectangle below the upper-left corner, required to be >= 0
+   * @param {number} cornerXRadius - positive vertical radius (width) of the rounded corner, or 0 to indicate the corner should be sharp
+   * @param {number} cornerYRadius - positive horizontal radius (height) of the rounded corner, or 0 to indicate the corner should be sharp
+   * @param {Object} [options] - Rectangle-specific options are documented in RECTANGLE_OPTION_KEYS above, and can be provided
+   *                             along-side options for Node
    */
   function Rectangle( x, y, width, height, cornerXRadius, cornerYRadius, options ) {
     // @private {number} - X value of the left side of the rectangle
@@ -153,8 +166,7 @@ define( function( require ) {
      * NOTE: See Node's _mutatorKeys documentation for more information on how this operates, and potential special
      *       cases that may apply.
      */
-    _mutatorKeys: [ 'rectBounds', 'rectSize', 'rectX', 'rectY', 'rectWidth', 'rectHeight',
-                    'cornerRadius', 'cornerXRadius', 'cornerYRadius' ].concat( Path.prototype._mutatorKeys ),
+    _mutatorKeys: RECTANGLE_OPTION_KEYS.concat( Path.prototype._mutatorKeys ),
 
     /**
      * {Array.<String>} - List of all dirty flags that should be available on drawables created from this node (or
@@ -249,6 +261,7 @@ define( function( require ) {
      * @param {number} height - The height of the rectangle.
      * @param {number} [cornerXRadius] - The horizontal radius of curved corners (0 for sharp corners)
      * @param {number} [cornerYRadius] - The vertical radius of curved corners (0 for sharp corners)
+     * @returns {Rectangle} - For chaining
      */
     setRect: function( x, y, width, height, cornerXRadius, cornerYRadius ) {
       var hasXRadius = cornerXRadius !== undefined;
@@ -284,13 +297,13 @@ define( function( require ) {
         this._drawables[ i ].markDirtyRectangle();
       }
       this.invalidateRectangle();
+
+      return this;
     },
 
     /**
-     * Sets the Rectangle's x/y/wdith/height from the Bounds2 passed in.
+     * Sets the Rectangle's x/y/width/height from the Bounds2 passed in.
      * @public
-     *
-     * TODO: Note that it currently resets corner radii, see https://github.com/phetsims/scenery/issues/576
      *
      * @param {Bounds2} bounds
      * @returns {Rectangle} - For chaining
@@ -343,7 +356,13 @@ define( function( require ) {
     },
     get rectSize() { return this.getRectSize(); },
 
-    // sets the width of the rectangle while keeping its right edge (x + width) in the same position
+    /**
+     * Sets the width of the rectangle while keeping its right edge (x + width) in the same position
+     * @public
+     *
+     * @param {number} width - New width for the rectangle
+     * @returns {Rectangle} - For chaining
+     */
     setRectWidthFromRight: function( width ) {
       assert && assert( typeof width === 'number' );
 
@@ -352,11 +371,19 @@ define( function( require ) {
         this.setRectWidth( width );
         this.setRectX( right - width );
       }
+
+      return this;
     },
     set rectWidthFromRight( value ) { this.setRectWidthFromRight( value ); },
     get rectWidthFromRight() { return this.getRectWidth(); }, // because JSHint complains
 
-    // sets the height of the rectangle while keeping its bottom edge (y + height) in the same position
+    /**
+     * Sets the height of the rectangle while keeping its bottom edge (y + height) in the same position
+     * @public
+     *
+     * @param {number} height - New height for the rectangle
+     * @returns {Rectangle} - For chaining
+     */
     setRectHeightFromBottom: function( height ) {
       assert && assert( typeof height === 'number' );
 
@@ -365,6 +392,8 @@ define( function( require ) {
         this.setRectHeight( height );
         this.setRectY( bottom - height );
       }
+
+      return this;
     },
     set rectHeightFromBottom( value ) { this.setRectHeightFromBottom( value ); },
     get rectHeightFromBottom() { return this.getRectHeight(); }, // because JSHint complains
@@ -408,6 +437,13 @@ define( function( require ) {
       return this.selfBounds.transformed( matrix );
     },
 
+    /**
+     * Returns a Shape that is equivalent to our rendered display. Generally used to lazily create a Shape instance
+     * when one is needed, without having to do so beforehand.
+     * @private
+     *
+     * @returns {Shape}
+     */
     createRectangleShape: function() {
       if ( this.isRounded() ) {
         // copy border-radius CSS behavior in Chrome, where the arcs won't intersect, in cases where the arc segments at full size would intersect each other
@@ -420,6 +456,10 @@ define( function( require ) {
       }
     },
 
+    /**
+     * Notifies that the rectangle has changed, and invalidates path information and our cached shape.
+     * @private
+     */
     invalidateRectangle: function() {
       assert && assert( isFinite( this._rectX ), 'A rectangle needs to have a finite x (' + this._rectX + ')' );
       assert && assert( isFinite( this._rectY ), 'A rectangle needs to have a finite y (' + this._rectY + ')' );
@@ -431,8 +471,6 @@ define( function( require ) {
         'A rectangle needs to have a non-negative finite arcWidth (' + this._cornerXRadius + ')' );
       assert && assert( this._cornerYRadius >= 0 && isFinite( this._cornerYRadius ),
         'A rectangle needs to have a non-negative finite arcHeight (' + this._cornerYRadius + ')' );
-      // assert && assert( !this.isRounded() || ( this._rectWidth >= this._cornerXRadius * 2 && this._rectHeight >= this._cornerYRadius * 2 ),
-      //                                 'The rounded sections of the rectangle should not intersect (the length of the straight sections shouldn\'t be negative' );
 
       // sets our 'cache' to null, so we don't always have to recompute our shape
       this._shape = null;
@@ -600,7 +638,7 @@ define( function( require ) {
      * @public
      * @override
      *
-     * @param {Shape|null} Shape - Throws an error if it is not null.
+     * @param {Shape|null} shape - Throws an error if it is not null.
      */
     setShape: function( shape ) {
       if ( shape !== null ) {
@@ -639,20 +677,35 @@ define( function( require ) {
       return true;
     },
 
+    /**
+     * Sets both of the corner radii to the same value, so that the rounded corners will be circular arcs.
+     * @public
+     *
+     * @param {number} cornerRadius - The radius of the corners
+     * @returns {Rectangle} - For chaining
+     */
+    setCornerRadius: function( cornerRadius ) {
+      this.setCornerXRadius( cornerRadius );
+      this.setCornerYRadius( cornerRadius );
+      return this;
+    },
+    set cornerRadius( value ) { this.setCornerRadius( value ); },
+
+    /**
+     * Returns the corner radius if both the horizontal and vertical corner radii are the same.
+     * @public
+     *
+     * NOTE: If there are different horizontal and vertical corner radii, this will fail an assertion and return the horizontal radius.
+     *
+     * @returns {number}
+     */
     getCornerRadius: function() {
       assert && assert( this._cornerXRadius === this._cornerYRadius,
         'getCornerRadius() invalid if x/y radii are different' );
 
       return this._cornerXRadius;
     },
-    get cornerRadius() { return this.getCornerRadius(); },
-
-    setCornerRadius: function( cornerRadius ) {
-      this.setCornerXRadius( cornerRadius );
-      this.setCornerYRadius( cornerRadius );
-      return this;
-    },
-    set cornerRadius( value ) { this.setCornerRadius( value ); }
+    get cornerRadius() { return this.getCornerRadius(); }
   } );
 
   /*---------------------------------------------------------------------------*
@@ -696,6 +749,19 @@ define( function( require ) {
   addRectProp( 'cornerXRadius', 'CornerXRadius', 'CornerXRadius' );
   addRectProp( 'cornerYRadius', 'CornerYRadius', 'CornerYRadius' );
 
+  /**
+   * Returns whether a point is within a rounded rectangle.
+   * @public
+   *
+   * @param {number} x - X value of the left side of the rectangle
+   * @param {number} y - Y value of the top side of the rectangle
+   * @param {number} width - Width of the rectangle
+   * @param {number} height - Height of the rectangle
+   * @param {number} arcWidth - Horizontal corner radius of the rectangle
+   * @param {number} arcHeight - Vertical corner radius of the rectangle
+   * @param {Vector2} point - The point that may or may not be in the rounded rectangle
+   * @returns {boolean}
+   */
   Rectangle.intersects = function( x, y, width, height, arcWidth, arcHeight, point ) {
     var result = point.x >= x &&
                  point.x <= x + width &&
@@ -760,10 +826,12 @@ define( function( require ) {
    * Creates a rectangle with the specified x/y/width/height.
    * @public
    *
-   * @param {x} number
-   * @param {y} number
-   * @param {width} number
-   * @param {height} number
+   * See Rectangle's constructor for detailed parameter information.
+   *
+   * @param {number} x
+   * @param {number} y
+   * @param {number} width
+   * @param {number} height
    * @param {Object} [options]
    * @returns {Rectangle}
    */
@@ -772,25 +840,29 @@ define( function( require ) {
   };
 
   /**
-   * Creates a rounded rectangle with the specified x/y/width/height/arcWidth/arcHeight.
+   * Creates a rounded rectangle with the specified x/y/width/height/cornerXRadius/cornerYRadius.
    * @public
    *
-   * @param {x} number
-   * @param {y} number
-   * @param {width} number
-   * @param {height} number
-   * @param {arcWidth} number
-   * @param {arcHeight} number
+   * See Rectangle's constructor for detailed parameter information.
+   *
+   * @param {number} x
+   * @param {number} y
+   * @param {number} width
+   * @param {number} height
+   * @param {number} cornerXRadius
+   * @param {number} cornerYRadius
    * @param {Object} [options]
    * @returns {Rectangle}
    */
-  Rectangle.roundedRect = function( x, y, width, height, arcWidth, arcHeight, options ) {
-    return new Rectangle( x, y, width, height, arcWidth, arcHeight, options );
+  Rectangle.roundedRect = function( x, y, width, height, cornerXRadius, cornerYRadius, options ) {
+    return new Rectangle( x, y, width, height, cornerXRadius, cornerYRadius, options );
   };
 
   /**
    * Creates a rectangle x/y/width/height matching the specified bounds.
    * @public
+   *
+   * See Rectangle's constructor for detailed parameter information.
    *
    * @param {Bounds2} bounds
    * @param {Object} [options]
@@ -802,22 +874,26 @@ define( function( require ) {
 
   /**
    * Creates a rounded rectangle x/y/width/height matching the specified bounds (Rectangle.bounds, but with additional
-   * arcWidth and arcHeight).
+   * cornerXRadius and cornerYRadius).
    * @public
    *
+   * See Rectangle's constructor for detailed parameter information.
+   *
    * @param {Bounds2} bounds
-   * @param {number} arcWidth
-   * @param {number} arcHeight
+   * @param {number} cornerXRadius
+   * @param {number} cornerYRadius
    * @param {Object} [options]
    * @returns {Rectangle}
    */
-  Rectangle.roundedBounds = function( bounds, arcWidth, arcHeight, options ) {
-    return new Rectangle( bounds.minX, bounds.minY, bounds.width, bounds.height, arcWidth, arcHeight, options );
+  Rectangle.roundedBounds = function( bounds, cornerXRadius, cornerYRadius, options ) {
+    return new Rectangle( bounds.minX, bounds.minY, bounds.width, bounds.height, cornerXRadius, cornerYRadius, options );
   };
 
   /**
    * Creates a rectangle with top/left of (0,0) with the specified {Dimension2}'s width and height.
    * @public
+   *
+   * See Rectangle's constructor for detailed parameter information.
    *
    * @param {Dimension2} dimension
    * @param {Object} [options]
