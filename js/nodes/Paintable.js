@@ -24,13 +24,14 @@ define( function( require ) {
   var isSafari5 = platform.safari5;
   var isIE9 = platform.ie9;
 
-  /*
-   * Applies the mix-in to a subtype of Node.
-   * @public
-   *
-   * @param {constructor} type - A constructor that inherits from Node
-   */
   var Paintable = {
+    /**
+     * Applies the mix-in to a subtype of Node.
+     * @public
+     * @mixin
+     *
+     * @param {constructor} type - A constructor that inherits from Node
+     */
     mixin: function( type ) {
       var proto = type.prototype;
 
