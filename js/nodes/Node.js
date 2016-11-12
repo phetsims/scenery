@@ -1581,6 +1581,10 @@ define( function( require ) {
     translate: function( x, y, prependInstead ) {
       if ( typeof x === 'number' ) {
         // translate( x, y, prependInstead )
+        assert && assert( typeof x === 'number' && isFinite( x ), 'x should be a finite number' );
+        assert && assert( typeof y === 'number' && isFinite( y ), 'y should be a finite number' );
+        assert && assert( prependInstead === undefined || typeof prependInstead === 'boolean', 'If provided, prependInstead should be boolean' );
+
         if ( !x && !y ) { return; } // bail out if both are zero
         if ( prependInstead ) {
           this.prependTranslation( x, y );
@@ -1592,6 +1596,7 @@ define( function( require ) {
       else {
         // translate( vector, prependInstead )
         var vector = x;
+        assert && assert( vector instanceof Vector2 && vector.isFinite(), 'translation should be a finite Vector2 if not finite numbers' );
         if ( !vector.x && !vector.y ) { return; } // bail out if both are zero
         this.translate( vector.x, vector.y, y ); // forward to full version
       }
@@ -1608,25 +1613,26 @@ define( function( require ) {
      * scale( 2, true ) will shift the node to (200,0).
      *
      * Allowed call signatures:
-     * scale( s {number} )
-     * scale( s {number}, prependInstead {boolean} )
-     * scale( sx {number}, sy {number} )
-     * scale( sx {number}, sy {number}, prependInstead {boolean} )
+     * scale( s {number|Vector2}, [prependInstead] {boolean} )
+     * scale( x {number}, y {number}, [prependInstead] {boolean} )
      *
      * @param {number} s - Scales in both the X and Y directions
-     * @param {number} sx - Scales in the X direction
-     * @param {number} sy - Scales in the Y direction
+     * @param {number} x - Scales in the X direction
+     * @param {number} y - Scales in the Y direction
      * @param {boolean} [prependInstead] - Whether the transform should be prepended (defaults to false)
      */
     scale: function( x, y, prependInstead ) {
       if ( typeof x === 'number' ) {
-        if ( y === undefined ) {
-          // scale( scale )
-          if ( x === 1 ) { return; } // bail out if we are scaling by 1 (identity)
-          this.appendMatrix( Matrix3.scaling( x, x ) );
+        assert && assert( isFinite( x ), 'scales should be finite' );
+        if ( y === undefined || typeof y === 'boolean' ) {
+          // scale( scale, [prependInstead] )
+          this.scale( x, x, y );
         }
         else {
-          // scale( x, y, prependInstead )
+          // scale( x, y, [prependInstead] )
+          assert && assert( typeof y === 'number' && isFinite( y ), 'scales should be finite numbers' );
+          assert && assert( prependInstead === undefined || typeof prependInstead === 'boolean', 'If provided, prependInstead should be boolean' );
+
           if ( x === 1 && y === 1 ) { return; } // bail out if we are scaling by 1 (identity)
           if ( prependInstead ) {
             this.prependMatrix( Matrix3.scaling( x, y ) );
@@ -1637,8 +1643,9 @@ define( function( require ) {
         }
       }
       else {
-        // scale( vector, prependInstead ) or scale( { x: x, y: y }, prependInstead )
+        // scale( vector, [prependInstead] )
         var vector = x;
+        assert && assert( vector instanceof Vector2 && vector.isFinite(), 'scale should be a finite Vector2 if not a finite number' );
         this.scale( vector.x, vector.y, y ); // forward to full version
       }
     },
@@ -1657,6 +1664,8 @@ define( function( require ) {
      * @param {boolean} [prependInstead] - Whether the transform should be prepended (defaults to false)
      */
     rotate: function( angle, prependInstead ) {
+      assert && assert( typeof angle === 'number' && isFinite( angle ), 'angle should be a finite number' );
+      assert && assert( prependInstead === undefined || typeof prependInstead === 'boolean' );
       if ( angle % ( 2 * Math.PI ) === 0 ) { return; } // bail out if our angle is effectively 0
       if ( prependInstead ) {
         this.prependMatrix( Matrix3.rotation2( angle ) );
@@ -1670,16 +1679,21 @@ define( function( require ) {
      * Rotates the node's transform around a specific point (in the parent coordinate frame) by prepending the transform.
      * @public
      *
+     * TODO: determine whether this should use the appendMatrix method
+     *
      * @param {Vector2} point - In the parent coordinate frame
      * @param {number} angle - In radians
-     *
-     * TODO: determine whether this should use the appendMatrix method
+     * @returns {Node} - For chaining
      */
     rotateAround: function( point, angle ) {
+      assert && assert( point instanceof Vector2 && point.isFinite(), 'point should be a finite Vector2' );
+      assert && assert( typeof angle === 'number' && isFinite( angle ), 'angle should be a finite number' );
+
       var matrix = Matrix3.translation( -point.x, -point.y );
       matrix = Matrix3.rotation2( angle ).timesMatrix( matrix );
       matrix = Matrix3.translation( point.x, point.y ).timesMatrix( matrix );
       this.prependMatrix( matrix );
+      return this;
     },
 
     /**
@@ -1690,7 +1704,7 @@ define( function( require ) {
      * @returns {Node} - Returns 'this' reference, for chaining
      */
     setX: function( x ) {
-      assert && assert( typeof x === 'number' );
+      assert && assert( typeof x === 'number' && isFinite( x ), 'x should be a finite number' );
 
       this.translate( x - this.getX(), 0, true );
       return this;
@@ -1716,7 +1730,7 @@ define( function( require ) {
      * @returns {Node} - Returns 'this' reference, for chaining
      */
     setY: function( y ) {
-      assert && assert( typeof y === 'number' );
+      assert && assert( typeof y === 'number' && isFinite( y ), 'y should be a finite number' );
 
       this.translate( 0, y - this.getY(), true );
       return this;
@@ -1761,11 +1775,15 @@ define( function( require ) {
           // to map setScaleMagnitude( scale ) => setScaleMagnitude( scale, scale )
           b = a;
         }
+        assert && assert( typeof a === 'number' && isFinite( a ), 'setScaleMagnitude parameters should be finite numbers' );
+        assert && assert( typeof b === 'number' && isFinite( b ), 'setScaleMagnitude parameters should be finite numbers' );
         // setScaleMagnitude( x, y )
         this.appendMatrix( Matrix3.scaling( a / currentScale.x, b / currentScale.y ) );
       }
       else {
         // setScaleMagnitude( vector ), where we set the x-scale to vector.x and y-scale to vector.y
+        assert && assert( a instanceof Vector2 && a.isFinite(), 'first parameter should be a finite Vector2' );
+
         this.appendMatrix( Matrix3.scaling( a.x / currentScale.x, a.y / currentScale.y ) );
       }
       return this;
@@ -1793,7 +1811,8 @@ define( function( require ) {
      * @returns {Node} - Returns 'this' reference, for chaining
      */
     setRotation: function( rotation ) {
-      assert && assert( typeof rotation === 'number' );
+      assert && assert( typeof rotation === 'number' && isFinite( rotation ),
+        'rotation should be a finite number' );
 
       this.appendMatrix( scratchMatrix3.setToRotationZ( rotation - this.getRotation() ) );
       return this;
@@ -1835,10 +1854,13 @@ define( function( require ) {
       var dy;
 
       if ( typeof a === 'number' ) {
+        assert && assert( typeof a === 'number' && isFinite( a ), 'Parameters to setTranslation should be finite numbers' );
+        assert && assert( typeof b === 'number' && isFinite( b ), 'Parameters to setTranslation should be finite numbers' );
         dx = a - tx;
         dy = b - ty;
       }
       else {
+        assert && assert( a instanceof Vector2 && a.isFinite(), 'Should be a finite Vector2' );
         dx = a.x - tx;
         dy = a.y - ty;
       }
@@ -1869,6 +1891,8 @@ define( function( require ) {
      * @param {Matrix3} matrix
      */
     appendMatrix: function( matrix ) {
+      assert && assert( matrix instanceof Matrix3 && matrix.isFinite(), 'matrix should be a finite Matrix3' );
+      assert && assert( matrix.getDeterminant() !== 0, 'matrix should not map plane to a line or point' );
       this._transform.append( matrix );
     },
 
@@ -1880,6 +1904,8 @@ define( function( require ) {
      * @param {Matrix3} matrix
      */
     prependMatrix: function( matrix ) {
+      assert && assert( matrix instanceof Matrix3 && matrix.isFinite(), 'matrix should be a finite Matrix3' );
+      assert && assert( matrix.getDeterminant() !== 0, 'matrix should not map plane to a line or point' );
       this._transform.prepend( matrix );
     },
 
@@ -1892,10 +1918,8 @@ define( function( require ) {
      * @param {number} y
      */
     prependTranslation: function( x, y ) {
-      assert && assert( typeof x === 'number', 'x not a number' );
-      assert && assert( typeof y === 'number', 'y not a number' );
-      assert && assert( isFinite( x ), 'x not finite' );
-      assert && assert( isFinite( y ), 'y not finite' );
+      assert && assert( typeof x === 'number' && isFinite( x ), 'x should be a finite number' );
+      assert && assert( typeof y === 'number' && isFinite( y ), 'y should be a finite number' );
 
       if ( !x && !y ) { return; } // bail out if both are zero
 
@@ -1909,6 +1933,9 @@ define( function( require ) {
      * @param {Matrix3} matrix
      */
     setMatrix: function( matrix ) {
+      assert && assert( matrix instanceof Matrix3 && matrix.isFinite(), 'matrix should be a finite Matrix3' );
+      assert && assert( matrix.getDeterminant() !== 0, 'matrix should not map plane to a line or point' );
+
       this._transform.setMatrix( matrix );
     },
     set matrix( value ) { this.setMatrix( value ); },
@@ -2338,10 +2365,12 @@ define( function( require ) {
      * Sets the opacity of this node (and its sub-tree), where 0 is fully transparent, and 1 is fully opaque.
      * @public
      *
+     * NOTE: opacity is clamped to be between 0 and 1.
+     *
      * @param {number} opacity
      */
     setOpacity: function( opacity ) {
-      assert && assert( typeof opacity === 'number' );
+      assert && assert( typeof opacity === 'number' && isFinite( opacity ), 'opacity should be a finite number' );
 
       var clampedOpacity = clamp( opacity, 0, 1 );
       if ( clampedOpacity !== this._opacity ) {
@@ -2733,6 +2762,8 @@ define( function( require ) {
      * @param {number} bitmask
      */
     setRendererBitmask: function( bitmask ) {
+      assert && assert( typeof bitmask === 'number' && isFinite( bitmask ) );
+
       if ( bitmask !== this._rendererBitmask ) {
         this._rendererBitmask = bitmask;
 
@@ -2823,6 +2854,8 @@ define( function( require ) {
     /**
      * Returns whether there is a preferred renderer for this node.
      * @public
+     *
+     * TODO: is this unused?
      *
      * @returns {boolean}
      */
@@ -2971,7 +3004,7 @@ define( function( require ) {
      * @param {number|null} webglScale
      */
     setWebGLScale: function( webglScale ) {
-      assert && assert( webglScale === null || typeof webglScale === 'number' );
+      assert && assert( webglScale === null || ( typeof webglScale === 'number' && isFinite( webglScale ) ) );
 
       if ( webglScale !== this._hints.webglScale ) {
         this._hints.webglScale = webglScale;
