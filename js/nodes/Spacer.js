@@ -28,6 +28,9 @@ define( function( require ) {
    * @param {Object} [options] - Passed to Node
    */
   function Spacer( width, height, options ) {
+    assert && assert( typeof width === 'number' && isFinite( width ), 'width should be a finite number' );
+    assert && assert( typeof height === 'number' && isFinite( height ), 'height should be a finite number' );
+
     Node.call( this );
 
     // override the local bounds to our area

@@ -226,6 +226,7 @@ define( function( require ) {
          */
         setFillPickable: function( pickable ) {
           assert && assert( typeof pickable === 'boolean' );
+
           if ( this._fillPickable !== pickable ) {
             this._fillPickable = pickable;
 
@@ -399,7 +400,7 @@ define( function( require ) {
          * @returns {Paintable} - Returns 'this' reference, for chaining
          */
         setMiterLimit: function( miterLimit ) {
-          assert && assert( typeof miterLimit === 'number' );
+          assert && assert( typeof miterLimit === 'number' && isFinite( miterLimit ), 'miterLimit should be a finite number' );
 
           if ( this._lineDrawingStyles.miterLimit !== miterLimit ) {
             this._lineDrawingStyles.miterLimit = miterLimit;
@@ -444,6 +445,9 @@ define( function( require ) {
          * @returns {Paintable} - Returns 'this' reference, for chaining
          */
         setLineDash: function( lineDash ) {
+          assert && assert( lineDash instanceof Array && lineDash.every( function( n ) { return typeof n === 'number' && isFinite( n ) && n >= 0; } ),
+            'lineDash should be an array of finite non-negative numbers' );
+
           if ( this._lineDrawingStyles.lineDash !== lineDash ) {
             this._lineDrawingStyles.lineDash = lineDash || [];
             this.invalidateStroke();
@@ -476,7 +480,8 @@ define( function( require ) {
          * @returns {Paintable} - Returns 'this' reference, for chaining
          */
         setLineDashOffset: function( lineDashOffset ) {
-          assert && assert( typeof lineDashOffset === 'number', 'lineDashOffset should be a number, not ' + lineDashOffset );
+          assert && assert( typeof lineDashOffset === 'number' && isFinite( lineDashOffset ),
+            'lineDashOffset should be a number, not ' + lineDashOffset );
 
           if ( this._lineDrawingStyles.lineDashOffset !== lineDashOffset ) {
             this._lineDrawingStyles.lineDashOffset = lineDashOffset;
@@ -510,6 +515,8 @@ define( function( require ) {
          * @returns {Paintable} - Returns 'this' reference, for chaining
          */
         setLineStyles: function( lineStyles ) {
+          assert && assert( lineStyles instanceof LineStyles );
+
           this._lineDrawingStyles = lineStyles;
           this.invalidateStroke();
           return this;
@@ -536,7 +543,7 @@ define( function( require ) {
          * <defs> element, so that we can switch quickly to use the given paint (instead of having to create it on the
          * SVG-side whenever the switch is made).
          *
-         * Also note that duplicate paints are acceptible, and don't need to be filtered out before-hand.
+         * Also note that duplicate paints are acceptable, and don't need to be filtered out before-hand.
          *
          * @param {Array.<string|Color|Property.<string|Color>|LinearGradient|RadialGradient|Pattern|null>} paints
          * @returns {Paintable} - Returns 'this' reference, for chaining

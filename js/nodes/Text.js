@@ -117,11 +117,16 @@ define( function( require ) {
      */
     drawableMarkFlags: Node.prototype.drawableMarkFlags.concat( [ 'text', 'font', 'bounds' ] ),
 
-    domUpdateTransformOnRepaint: true, // since we have to integrate the baseline offset into the CSS transform, signal to DOMLayer
-
-    // TODO: documentation!
+    /**
+     * Sets the text displayed by our node.
+     * @public
+     *
+     * @param {string|number} text - The text to display. If it's a number, it will be cast to a string
+     * @returns {Text} - For chaining
+     */
     setText: function( text ) {
       assert && assert( text !== null && text !== undefined, 'Text should be defined and non-null. Use the empty string if needed.' );
+      assert && assert( typeof text === 'number' || typeof text === 'string', 'text should be a string or number' );
 
       // cast it to a string (for numbers, etc., and do it before the change guard so we don't accidentally trigger on non-changed text)
       text = '' + text;
@@ -142,6 +147,14 @@ define( function( require ) {
       return this;
     },
 
+    /**
+     * Returns the text displayed by our node.
+     * @public
+     *
+     * NOTE: If a number was provided to setText(), it will not be returned as a number here.
+     *
+     * @returns {string}
+     */
     getText: function() {
       return this._text;
     },

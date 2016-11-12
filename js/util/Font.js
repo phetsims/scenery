@@ -62,6 +62,9 @@ define( function( require ) {
     // <font-variant-css21> = [normal | small-caps]
 
     var type = typeof options;
+    assert && assert( options === undefined || type === 'string' || ( type === 'object' && Object.getPrototypeOf( options ) === Object.prototype ),
+      'options should be a string or a raw object');
+
     if ( type === 'string' ) {
       // parse a somewhat proper CSS3 form (not guaranteed to handle it precisely the same as browsers yet)
 
