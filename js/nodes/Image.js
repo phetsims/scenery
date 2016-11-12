@@ -11,6 +11,7 @@ define( function( require ) {
   'use strict';
 
   var inherit = require( 'PHET_CORE/inherit' );
+  var extendDefined = require( 'PHET_CORE/extendDefined' );
   var scenery = require( 'SCENERY/scenery' );
   var cleanArray = require( 'PHET_CORE/cleanArray' );
   var Bounds2 = require( 'DOT/Bounds2' );
@@ -51,14 +52,6 @@ define( function( require ) {
   function Image( image, options ) {
     assert && assert( image, 'image should be available' );
 
-    // allow not passing an options object
-    options = options || {};
-
-    // rely on the setImage call from the super constructor to do the setup
-    if ( image ) {
-      options.image = image;
-    }
-
     // @private {number} - Internal stateful value, see setInitialWidth() for documentation.
     this._initialWidth = 0;
 
@@ -97,6 +90,11 @@ define( function( require ) {
 
     // @private {boolean} - Whether our _imageLoadListener has been attached as a listener to the current image.
     this._imageLoadListenerAttached = false;
+
+    // rely on the setImage call from the super constructor to do the setup
+    options = extendDefined( {
+      image: image
+    }, options );
 
     Node.call( this, options );
 

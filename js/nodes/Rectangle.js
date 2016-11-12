@@ -10,6 +10,7 @@ define( function( require ) {
   'use strict';
 
   var inherit = require( 'PHET_CORE/inherit' );
+  var extendDefined = require( 'PHET_CORE/extendDefined' );
   var scenery = require( 'SCENERY/scenery' );
   var Path = require( 'SCENERY/nodes/Path' );
   var Shape = require( 'KITE/Shape' );
@@ -56,65 +57,87 @@ define( function( require ) {
    * same non-zero value, circular rounded corners will be used.
    */
   function Rectangle( x, y, width, height, cornerXRadius, cornerYRadius, options ) {
+    // @private {number} - X value of the left side of the rectangle
+    this._rectX = 0;
+
+    // @private {number} - Y value of the top side of the rectangle
+    this._rectY = 0;
+
+    // @private {number} - Width of the rectangle
+    this._rectWidth = 0;
+
+    // @private {number} - Height of the rectangle
+    this._rectHeight = 0;
+
+    // @private {number} - X radius of rounded corners
+    this._cornerXRadius = 0;
+
+    // @private {number} - Y radius of rounded corners
+    this._cornerYRadius = 0;
+
     if ( typeof x === 'object' ) {
+      // allow new Rectangle( bounds2, { ... } ) or new Rectangle( bounds2, cornerXRadius, cornerYRadius, { ... } )
       if ( x instanceof Bounds2 ) {
-        // allow new Rectangle( bounds2, { ... } ) or new Rectangle( bounds2, cornerXRadius, cornerYRadius, options )
-        this._rectX = x.minX;
-        this._rectY = x.minY;
-        this._rectWidth = x.width;
-        this._rectHeight = x.height;
-        if ( arguments.length < 3 ) {
-          // Rectangle( bounds2, { ... } )
-          options = y;
-          this._cornerXRadius = 0;
-          this._cornerYRadius = 0;
+        // new Rectangle( bounds2, { ... } )
+        if ( typeof y !== 'number' ) {
+          assert && assert( arguments.length === 1 || arguments.length === 2,
+            'new Rectangle( bounds, { ... } ) should only take one or two arguments' );
+          assert && assert( y === undefined || typeof y === 'object',
+            'new Rectangle( bounds, { ... } ) second parameter should only ever be an options object' );
+
+          options = extendDefined( {
+            rectBounds: x
+          }, y ); // Our options object would be at y
         }
+        // Rectangle( bounds2, cornerXRadius, cornerYRadius, { ... } )
         else {
-          // Rectangle( bounds2, cornerXRadius, cornerYRadius, { ... } )
-          options = height;
-          this._cornerXRadius = y;
-          this._cornerYRadius = width;
+          assert && assert( arguments.length === 3 || arguments.length === 4,
+            'new Rectangle( bounds, cornerXRadius, cornerYRadius, { ... } ) should only take three or four arguments' );
+          assert && assert( height === undefined || typeof height === 'object',
+            'new Rectangle( bounds, cornerXRadius, cornerYRadius, { ... } ) fourth parameter should only ever be an options object' );
+
+          options = extendDefined( {
+            rectBounds: x,
+            cornerXRadius: y, // ignore Intellij warning, our cornerXRadius is the second parameter
+            cornerYRadius: width // ignore Intellij warning, our cornerYRadius is the third parameter
+          }, height ); // Our options object would be at height
         }
       }
+      // allow new Rectangle( { rectX: x, rectY: y, rectWidth: width, rectHeight: height, ... } )
       else {
-        // allow new Rectangle( { rectX: x, rectY: y, rectWidth: width, rectHeight: height, ... } )
-        // the mutators will call invalidateRectangle() and properly set the shape
         options = x;
-        this._rectX = options.rectX || 0;
-        this._rectY = options.rectY || 0;
-        this._rectWidth = options.rectWidth;
-        this._rectHeight = options.rectHeight;
-        this._cornerXRadius = options.cornerXRadius || 0;
-        this._cornerYRadius = options.cornerYRadius || 0;
       }
     }
-    else if ( arguments.length < 6 ) {
-      // new Rectangle( x, y, width, height, [options] )
-      this._rectX = x;
-      this._rectY = y;
-      this._rectWidth = width;
-      this._rectHeight = height;
-      this._cornerXRadius = 0;
-      this._cornerYRadius = 0;
+    // new Rectangle( x, y, width, height, { ... } )
+    else if ( cornerYRadius === undefined ) {
+      assert && assert( arguments.length === 4 || arguments.length === 5,
+        'new Rectangle( x, y, width, height, { ... } ) should only take four or five arguments' );
+      assert && assert( cornerXRadius === undefined || typeof cornerXRadius === 'object',
+        'new Rectangle( x, y, width, height, { ... } ) fifth parameter should only ever be an options object' );
 
-      // ensure we have a parameter object
-      options = cornerXRadius || {};
-
+      options = extendDefined( {
+        rectX: x,
+        rectY: y,
+        rectWidth: width,
+        rectHeight: height
+      }, cornerXRadius );
     }
+    // new Rectangle( x, y, width, height, cornerXRadius, cornerYRadius, { ... } )
     else {
-      // normal case with args (including cornerXRadius / cornerYRadius)
-      this._rectX = x;
-      this._rectY = y;
-      this._rectWidth = width;
-      this._rectHeight = height;
-      this._cornerXRadius = cornerXRadius;
-      this._cornerYRadius = cornerYRadius;
+      assert && assert( arguments.length === 6 || arguments.length === 7,
+        'new Rectangle( x, y, width, height, cornerXRadius, cornerYRadius{ ... } ) should only take six or seven arguments' );
+      assert && assert( options === undefined || typeof options === 'object',
+        'new Rectangle( x, y, width, height, cornerXRadius, cornerYRadius{ ... } ) seventh parameter should only ever be an options object' );
 
-      // ensure we have a parameter object
-      options = options || {};
-
+      options = extendDefined( {
+        rectX: x,
+        rectY: y,
+        rectWidth: width,
+        rectHeight: height,
+        cornerXRadius: cornerXRadius,
+        cornerYRadius: cornerYRadius
+      }, options );
     }
-    // fallback for non-canvas or non-svg rendering, and for proper bounds computation
 
     Path.call( this, null, options );
   }

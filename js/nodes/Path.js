@@ -10,6 +10,7 @@ define( function( require ) {
   'use strict';
 
   var inherit = require( 'PHET_CORE/inherit' );
+  var extendDefined = require( 'PHET_CORE/extendDefined' );
   var Shape = require( 'KITE/Shape' );
   var Bounds2 = require( 'DOT/Bounds2' );
   var scenery = require( 'SCENERY/scenery' );
@@ -49,9 +50,6 @@ define( function( require ) {
     // See setBoundsMethod for details.
     this._boundsMethod = 'accurate'; // 'accurate', 'unstroked', 'tightPadding', 'safePadding', 'none'
 
-    // If a parameter object is not provided, create an empty one
-    options = options || {};
-
     // @private {Function}, called with no arguments, return value not checked.
     // Used as a listener to Shapes for when they are invalidated. The listeners are not added if the Shape is
     // immutable, and if the Shape becomes immutable, then the listeners are removed.
@@ -65,11 +63,9 @@ define( function( require ) {
     Node.call( this );
     this.invalidateSupportedRenderers();
 
-    // Set up the boundsMethod first before setting the Shape, see https://github.com/phetsims/scenery/issues/489
-    if ( options.boundsMethod ) {
-      this.setBoundsMethod( options.boundsMethod );
-    }
-    this.setShape( shape );
+    options = extendDefined( {
+      shape: shape
+    }, options );
 
     this.mutate( options );
   }

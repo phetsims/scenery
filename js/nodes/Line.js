@@ -10,6 +10,7 @@ define( function( require ) {
   'use strict';
 
   var inherit = require( 'PHET_CORE/inherit' );
+  var extendDefined = require( 'PHET_CORE/extendDefined' );
   var scenery = require( 'SCENERY/scenery' );
   var KiteLine = require( 'KITE/segments/Line' ); // eslint-disable-line require-statement-match
   var Path = require( 'SCENERY/nodes/Path' );
@@ -77,21 +78,37 @@ define( function( require ) {
         // assumes Line( Vector2, Vector2, options ), where x2 is our options
         assert && assert( y1 instanceof Vector2 );
         assert && assert( x2 === undefined || typeof x2 === 'object' );
-        options = _.extend( { x1: x1.x, y1: x1.y, x2: y1.x, y2: y1.y }, x2 );
+
+        options = extendDefined( {
+          // First Vector2 is under the x1 name
+          x1: x1.x,
+          y1: x1.y,
+          // Second Vector2 is under the y1 name
+          x2: y1.x,
+          y2: y1.y
+        }, x2 ); // Options object (if available) is under the x2 name
       }
       else {
         // assumes Line( { ... } ), init to zero for now
         assert && assert( y1 === undefined );
+
+        // Options object is under the x1 name
         options = x1;
       }
     }
     else {
-      // new Line(  x1, y1, x2, y2, [options] )
+      // new Line( x1, y1, x2, y2, [options] )
       assert && assert( typeof x1 === 'number' &&
                         typeof y1 === 'number' &&
                         typeof x2 === 'number' &&
                         typeof y2 === 'number' );
-      options = _.extend( { x1: x1, y1: y1, x2: x2, y2: y2 }, options );
+
+      options = extendDefined( {
+        x1: x1,
+        y1: y1,
+        x2: x2,
+        y2: y2
+      }, options );
     }
 
     Path.call( this, null, options );

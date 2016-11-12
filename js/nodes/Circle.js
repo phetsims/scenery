@@ -10,6 +10,7 @@ define( function( require ) {
   'use strict';
 
   var inherit = require( 'PHET_CORE/inherit' );
+  var extendDefined = require( 'PHET_CORE/extendDefined' );
   var scenery = require( 'SCENERY/scenery' );
   var Bounds2 = require( 'DOT/Bounds2' );
   var Path = require( 'SCENERY/nodes/Path' );
@@ -39,17 +40,18 @@ define( function( require ) {
    *                             along-side options for Node
    */
   function Circle( radius, options ) {
-    if ( typeof radius === 'object' ) {
-      // allow new Circle( { radius: ... } )
-      // the mutators will call invalidateCircle() and properly set the shape
-      options = radius;
-      this._radius = options.radius;
-    }
-    else {
-      this._radius = radius;
+    // @private {number} - The radius of the circle
+    this._radius = 0;
 
-      // ensure we have a parameter object
-      options = options || {};
+    // Handle new Circle( { radius: ... } )
+    if ( typeof radius === 'object' ) {
+      options = radius;
+    }
+    // Handle new Circle( radius, { ... } )
+    else {
+      options = extendDefined( {
+        radius: radius
+      }, options );
     }
 
     Path.call( this, null, options );

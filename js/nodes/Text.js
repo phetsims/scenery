@@ -12,6 +12,7 @@ define( function( require ) {
   'use strict';
 
   var inherit = require( 'PHET_CORE/inherit' );
+  var extendDefined = require( 'PHET_CORE/extendDefined' );
   var scenery = require( 'SCENERY/scenery' );
   var escapeHTML = require( 'PHET_CORE/escapeHTML' );
   var platform = require( 'PHET_CORE/platform' );
@@ -82,11 +83,12 @@ define( function( require ) {
 
     this.initializePaintable();
 
-    Node.call( this, _.extend( {
-      fill: '#000000' // We want to default to black-filled text
-    }, options, {
-      text: text // Override the text option so that it will call setText()
-    } ) );
+    options = extendDefined( {
+      fill: '#000000', // Default to black filled text
+      text: text
+    }, options );
+
+    Node.call( this, options );
 
     this.updateTextFlags(); // takes care of setting up supported renderers
   }

@@ -10,6 +10,7 @@ define( function( require ) {
   'use strict';
 
   var inherit = require( 'PHET_CORE/inherit' );
+  var extendDefined = require( 'PHET_CORE/extendDefined' );
   var scenery = require( 'SCENERY/scenery' );
   var escapeHTML = require( 'PHET_CORE/escapeHTML' );
   var Bounds2 = require( 'DOT/Bounds2' );
@@ -32,8 +33,6 @@ define( function( require ) {
   function DOM( element, options ) {
     assert && assert( element instanceof window.Element || element.jquery,
       'DOM nodes need to be passed an HTML/DOM element or a jQuery selection like $( ... )' );
-
-    options = options || {};
 
     // unwrap from jQuery if that is passed in, for consistency
     if ( element && element.jquery ) {
@@ -58,8 +57,10 @@ define( function( require ) {
     // @private {boolean} - Flag that when true won't let Scenery apply a transform directly (the client will take care of that).
     this._preventTransform = false;
 
-    // We'll have mutate() call setElement() in the proper order
-    options.element = element;
+    // Have mutate() call setElement() in the proper order
+    options = extendDefined( {
+      element: element
+    }, options );
 
     // will set the element after initializing
     Node.call( this, options );
