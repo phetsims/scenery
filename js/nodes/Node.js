@@ -4243,6 +4243,9 @@ define( function( require ) {
         return this;
       }
 
+      assert && assert( Object.getPrototypeOf( options ) === Object.prototype,
+        'Extra prototype on Node options object is a code smell' );
+
       if ( assert ) {
         assert && assert( _.filter( [ 'translation', 'x', 'left', 'right', 'centerX', 'centerTop', 'rightTop', 'leftCenter', 'center', 'rightCenter', 'leftBottom', 'centerBottom', 'rightBottom' ], function( key ) { return options[ key ] !== undefined; } ).length <= 1,
           'More than one mutation on this Node set the x component, check ' + Object.keys( options ).join( ',' ) );
