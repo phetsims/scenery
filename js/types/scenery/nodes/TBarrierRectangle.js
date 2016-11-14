@@ -14,6 +14,12 @@ define( function( require ) {
   var TNode = require( 'PHET_IO/types/scenery/nodes/TNode' );
   var toEventOnStatic = require( 'PHET_IO/events/toEventOnStatic' );
 
+  /**
+   * Wrapper type for phet/scenery's BarrierRectangle
+   * @param barrierRectangle
+   * @param phetioID
+   * @constructor
+   */
   function TBarrierRectangle( barrierRectangle, phetioID ) {
     TNode.call( this, barrierRectangle, phetioID );
 

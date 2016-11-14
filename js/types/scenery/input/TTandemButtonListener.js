@@ -15,6 +15,12 @@ define( function( require ) {
   var TObject = require( 'PHET_IO/types/TObject' );
   var toEventOnEmit = require( 'PHET_IO/events/toEventOnEmit' );
 
+  /**
+   * Wrapper type for phet/scenery's TandemButtonListener
+   * @param tandemButtonListener
+   * @param phetioID
+   * @constructor
+   */
   function TTandemButtonListener( tandemButtonListener, phetioID ) {
     TObject.call( this, tandemButtonListener, phetioID );
     assertInstanceOf( tandemButtonListener, phet.tandem.TandemButtonListener );

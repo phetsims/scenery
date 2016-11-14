@@ -15,7 +15,7 @@ define( function( require ) {
 
   /**
    * @constructor
-   *
+   * Wrapper type for phet/scenery's Font class
    * @param {Font} font - An instance of a phet.scenery.Font type
    * @param {string} phetioID - Full name of this font instance
    */
@@ -36,7 +36,23 @@ define( function( require ) {
                    'lineHeight: normal // normal | number | length | percentage -- NOTE: Canvas spec forces line-height to normal <br>' +
                    'family: sans-serif // comma-separated list of families, including generic families (serif, sans-serif, cursive, fantasy, monospace). ideally escape with double-quotes',
 
-    // Serialize this font's configuration to an options object
+
+    /**
+     * Decodes a state into a Font.
+     * Use stateObject as the Font constructor's options argument
+     * @param {Object} stateObject
+     * @returns {Font}
+     */
+    fromStateObject: function( stateObject ) {
+      return new phet.scenery.Font( stateObject );
+    },
+
+    /**
+     * Encodes a Font instance to a state.
+     * Serialize this font's configuration to an options object
+     * @param {Font} instance
+     * @returns {Object}
+     */
     toStateObject: function( font ) {
       return {
         style: font.getStyle(),
@@ -47,11 +63,6 @@ define( function( require ) {
         lineHeight: font.getLineHeight(),
         family: font.getFamily()
       };
-    },
-
-    // Use stateObject as the Font constructor's options argument
-    fromStateObject: function( stateObject ) {
-      return new phet.scenery.Font( stateObject );
     }
   } );
 

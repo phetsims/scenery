@@ -18,6 +18,12 @@ define( function( require ) {
   var TVoid = require( 'PHET_IO/types/TVoid' );
   var TFunctionWrapper = require( 'PHET_IO/types/TFunctionWrapper' );
 
+  /**
+   * Wrapper type for phet/scenery's Node
+   * @param node
+   * @param phetioID
+   * @constructor
+   */
   function TNode( node, phetioID ) {
     TObject.call( this, node, phetioID );
     assertInstanceOf( node, phet.scenery.Node );
