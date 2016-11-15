@@ -918,8 +918,8 @@
           ];
 
           var filterSubset = function( array, queryParameterKey ) {
-            if ( phet.chipper.getQueryParameter( queryParameterKey ) ) {
-              var test = phet.chipper.getQueryParameter( queryParameterKey );
+            if ( QueryStringMachine.containsKey( queryParameterKey ) ) {
+              var test = QueryStringMachine.get( queryParameterKey, { type: 'string' } );
               var testIndices = test.split( '.' ).map( function( test ) {
                 return parseInt( test, 10 );
               } );
