@@ -160,10 +160,6 @@ define( function( require ) {
      * @param {Array.<string>} logNames - keys from logProperties
      */
     enableLogging: function( logNames ) {
-      if ( !logNames ) {
-        logNames = [ 'stitch' ];
-      }
-
       window.sceneryLog = function( ob ) { scenery.logFunction( ob ); };
 
       window.sceneryLog.push = function() {
