@@ -20,13 +20,13 @@ define( function( require ) {
   var Node = require( 'SCENERY/nodes/Node' );
   var Renderer = require( 'SCENERY/display/Renderer' );
   var Paintable = require( 'SCENERY/nodes/Paintable' );
+  var Font = require( 'SCENERY/util/Font' );
+  var Util = require( 'SCENERY/util/Util' );
   var TextCanvasDrawable = require( 'SCENERY/display/drawables/TextCanvasDrawable' );
   var TextDOMDrawable = require( 'SCENERY/display/drawables/TextDOMDrawable' );
   var TextSVGDrawable = require( 'SCENERY/display/drawables/TextSVGDrawable' );
   var TextWebGLDrawable = require( 'SCENERY/display/drawables/TextWebGLDrawable' );
-  require( 'SCENERY/util/Font' );
-  require( 'SCENERY/util/Util' );
-  require( 'SCENERY/util/CanvasContextWrapper' );
+  var CanvasContextWrapper = require( 'SCENERY/util/CanvasContextWrapper' );
 
   var textSizeContainerId = 'sceneryTextSizeContainer';
   var textSizeElementId = 'sceneryTextSizeElement';
@@ -63,15 +63,16 @@ define( function( require ) {
    * @mixes Paintable
    * @mixes Events
    *
-   * @param text
-   * @param options
+   * @param {string|number} text - See setText() for more documentation
+   * @param {Object} [options] - Text-specific options are documented in TEXT_OPTION_KEYS above, and can be provided
+   *                             along-side options for Node
    */
   function Text( text, options ) {
     // @private {string} - The text to display. We'll initialize this by mutating.
     this._text = '';
 
     // @private {Font} - The font with which to display the text.
-    this._font = scenery.Font.DEFAULT;
+    this._font = Font.DEFAULT;
 
     // @private {string}
     this._boundsMethod = 'hybrid';
@@ -420,12 +421,12 @@ define( function( require ) {
       }
 
       // NOTE: should return new instance, so that it can be mutated later
-      return scenery.Util.canvasAccurateBounds( function( context ) {
+      return Util.canvasAccurateBounds( function( context ) {
         context.font = self.font;
         context.direction = 'ltr';
         context.fillText( self.renderedText, 0, 0 );
         if ( self.hasStroke() ) {
-          var fakeWrapper = new scenery.CanvasContextWrapper( null, context );
+          var fakeWrapper = new CanvasContextWrapper( null, context );
           self.beforeCanvasStroke( fakeWrapper );
           context.strokeText( self.renderedText, 0, 0 );
           self.afterCanvasStroke( fakeWrapper );
