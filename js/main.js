@@ -129,6 +129,7 @@ define( [
   'SCENERY/util/SceneryStyle',
   'SCENERY/util/ShaderProgram',
   'SCENERY/util/SpriteSheet',
+  'SCENERY/util/TextBounds',
   'SCENERY/util/Trail',
   'SCENERY/util/TrailPointer',
   'SCENERY/util/TransformTracker',

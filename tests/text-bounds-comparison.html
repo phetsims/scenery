@@ -47,11 +47,11 @@
 
   function boundsSnapshot( textNode ) {
 
-    var canvasBounds = scenery.Text.accurateCanvasBounds( textNode );
-    var svgBounds = scenery.Text.approximateSVGBounds( textNode._font, textNode.renderedText );
-    var domBounds = scenery.Text.approximateDOMBounds( textNode._font, textNode.getDOMTextNode() );
-    var domImprovedBounds = scenery.Text.approximateImprovedDOMBounds(  textNode._font, textNode.getDOMTextNode() );
-    var width = scenery.Text.approximateCanvasWidth( textNode._font, textNode.renderedText );
+    var canvasBounds = scenery.TextBounds.accurateCanvasBounds( textNode );
+    var svgBounds = scenery.TextBounds.approximateSVGBounds( textNode._font, textNode.renderedText );
+    var domBounds = scenery.TextBounds.approximateDOMBounds( textNode._font, textNode.getDOMTextNode() );
+    var domImprovedBounds = scenery.TextBounds.approximateImprovedDOMBounds(  textNode._font, textNode.getDOMTextNode() );
+    var width = scenery.TextBounds.approximateCanvasWidth( textNode._font, textNode.renderedText );
 
     var unionBounds = canvasBounds.union( svgBounds ).union( domBounds ).union( domImprovedBounds );
 
