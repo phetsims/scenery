@@ -280,16 +280,17 @@ define( function( require ) {
 
       // investigate http://mudcu.be/journal/2011/01/html5-typographic-metrics/
       if ( this._isHTML || ( useDOMAsFastBounds && this._boundsMethod !== 'accurate' ) ) {
-        selfBounds = this.approximateDOMBounds();
+        selfBounds = Text.approximateDOMBounds( this._font, this.getDOMTextNode() );
       }
       else if ( this._boundsMethod === 'hybrid' ) {
-        selfBounds = this.approximateHybridBounds();
+        selfBounds = Text.approximateHybridBounds( this._font, this.renderedText );
       }
-      else if ( this._boundsMethod === 'fast' || this._boundsMethod === 'fastCanvas' ) {
-        selfBounds = this.approximateSVGBounds();
+      else if ( this._boundsMethod === 'accurate' ) {
+        selfBounds = Text.accurateCanvasBounds( this );
       }
       else {
-        selfBounds = this.accurateCanvasBounds();
+        assert && assert( this._boundsMethod === 'fast' || this._boundsMethod === 'fastCanvas' );
+        selfBounds = Text.approximateSVGBounds( this._font, this.renderedText );
       }
 
       // for now, just add extra on, ignoring the possibility of mitered joints passing beyond
@@ -403,155 +404,6 @@ define( function( require ) {
     /*---------------------------------------------------------------------------*
      * Bounds
      *----------------------------------------------------------------------------*/
-
-    getVerticalBounds: function() {
-      if ( !hybridTextNode ) {
-        return Bounds2.NOTHING; // we are the hybridTextNode, ignore us
-      }
-
-      var css = this._font.toCSS();
-      var verticalBounds = hybridFontVerticalCache[ css ];
-      if ( !verticalBounds ) {
-        hybridTextNode.setFont( this._font );
-        verticalBounds = hybridFontVerticalCache[ css ] = hybridTextNode.getBounds().copy();
-      }
-
-      return verticalBounds;
-    },
-
-    accurateCanvasBounds: function() {
-      var self = this;
-      var svgBounds = this.approximateSVGBounds(); // this seems to be slower than expected, mostly due to Font getters
-
-      //If svgBounds are zero, then return the zero bounds
-      if ( !this._text || svgBounds.width === 0 ) {
-        return svgBounds;
-      }
-
-      // NOTE: should return new instance, so that it can be mutated later
-      return Util.canvasAccurateBounds( function( context ) {
-        context.font = self.font;
-        context.direction = 'ltr';
-        context.fillText( self.renderedText, 0, 0 );
-        if ( self.hasStroke() ) {
-          var fakeWrapper = new CanvasContextWrapper( null, context );
-          self.beforeCanvasStroke( fakeWrapper );
-          context.strokeText( self.renderedText, 0, 0 );
-          self.afterCanvasStroke( fakeWrapper );
-        }
-      }, {
-        precision: 0.5,
-        resolution: 128,
-        initialScale: 32 / Math.max( Math.abs( svgBounds.minX ), Math.abs( svgBounds.minY ), Math.abs( svgBounds.maxX ), Math.abs( svgBounds.maxY ) )
-      } );
-    },
-
-    approximateCanvasWidth: function() {
-      var context = scenery.scratchContext;
-      context.font = this.font;
-      context.direction = 'ltr';
-      return context.measureText( this.renderedText ).width;
-    },
-
-    // NOTE: should return new instance, so that it can be mutated later
-    approximateSVGBounds: function() {
-      if ( !svgTextSizeContainer.parentNode ) {
-        if ( document.body ) {
-          document.body.appendChild( svgTextSizeContainer );
-        }
-        else {
-          // TODO: better way to handle the hybridTextNode being added inside the HEAD? Requiring a body for proper operation might be a problem.
-          if ( initializingHybridTextNode ) {
-            // if this is almost assuredly the hybridTextNode, return nothing for now. TODO: better way of handling this! it's a hack!
-            return Bounds2.NOTHING;
-          }
-          else {
-            throw new Error( 'No document.body and trying to get approximate SVG bounds of a Text node' );
-          }
-        }
-      }
-      Text.updateSVGTextToMeasure( svgTextSizeElement, this._font.getFamily(), this._font.getSize(), this._font.getStyle(),
-                                   this._font.getWeight(), this._font.getStretch(), this.renderedText );
-      var rect = svgTextSizeElement.getBBox();
-      return new Bounds2( rect.x, rect.y, rect.x + rect.width, rect.y + rect.height );
-    },
-
-    // NOTE: should return new instance, so that it can be mutated later
-    approximateHybridBounds: function() {
-      var verticalBounds = this.getVerticalBounds();
-
-      var canvasWidth = this.approximateCanvasWidth();
-
-      // it seems that SVG bounds generally have x=0, so we hard code that here
-      return new Bounds2( 0, verticalBounds.minY, canvasWidth, verticalBounds.maxY );
-    },
-
-    // NOTE: should return new instance, so that it can be mutated later
-    approximateDOMBounds: function() {
-      var maxHeight = 1024; // technically this will fail if the font is taller than this!
-
-      // <div style="position: absolute; left: 0; top: 0; padding: 0 !important; margin: 0 !important;"><span id="baselineSpan" style="font-family: Verdana; font-size: 25px;">QuipTaQiy</span><div style="vertical-align: baseline; display: inline-block; width: 0; height: 500px; margin: 0 important!; padding: 0 important!;"></div></div>
-
-      var div = document.createElement( 'div' );
-      $( div ).css( {
-        position: 'absolute',
-        left: 0,
-        top: 0,
-        padding: '0 !important',
-        margin: '0 !important',
-        display: 'hidden'
-      } );
-
-      var span = document.createElement( 'span' );
-      $( span ).css( 'font', this.getFont() );
-      span.appendChild( this.getDOMTextNode() );
-      span.setAttribute( 'direction', 'ltr' );
-
-      var fakeImage = document.createElement( 'div' );
-      $( fakeImage ).css( {
-        'vertical-align': 'baseline',
-        display: 'inline-block',
-        width: 0,
-        height: maxHeight + 'px',
-        margin: '0 !important',
-        padding: '0 !important'
-      } );
-
-      div.appendChild( span );
-      div.appendChild( fakeImage );
-
-      document.body.appendChild( div );
-      var rect = span.getBoundingClientRect();
-      var divRect = div.getBoundingClientRect();
-      // add 1 pixel to rect.right to prevent HTML text wrapping
-      var result = new Bounds2( rect.left, rect.top - maxHeight, rect.right + 1, rect.bottom - maxHeight ).shifted( -divRect.left, -divRect.top );
-      document.body.removeChild( div );
-
-      return result;
-    },
-
-    approximateImprovedDOMBounds: function() {
-      // TODO: reuse this div?
-      var div = document.createElement( 'div' );
-      div.style.display = 'inline-block';
-      div.style.font = this.getFont();
-      div.style.color = 'transparent';
-      div.style.padding = '0 !important';
-      div.style.margin = '0 !important';
-      div.style.position = 'absolute';
-      div.style.left = '0';
-      div.style.top = '0';
-      div.setAttribute( 'direction', 'ltr' );
-      div.appendChild( this.getDOMTextNode() );
-
-      document.body.appendChild( div );
-      var bounds = new Bounds2( div.offsetLeft, div.offsetTop, div.offsetLeft + div.offsetWidth + 1, div.offsetTop + div.offsetHeight + 1 );
-      document.body.removeChild( div );
-
-      // Compensate for the baseline alignment
-      var verticalBounds = this.getVerticalBounds();
-      return bounds.shiftedY( verticalBounds.minY );
-    },
 
     // @override from Node
     getSafeSelfBounds: function() {
@@ -868,14 +720,180 @@ define( function( require ) {
    * Hybrid text setup (for bounds testing)
    *----------------------------------------------------------------------------*/
 
+  // NOTE: should return new instance, so that it can be mutated later
+  Text.approximateSVGBounds = function( font, renderedText ) {
+    assert && assert( font instanceof Font, 'Font required' );
+    assert && assert( typeof renderedText === 'string', 'renderedText required' );
+
+    if ( !svgTextSizeContainer.parentNode ) {
+      if ( document.body ) {
+        document.body.appendChild( svgTextSizeContainer );
+      }
+      else {
+        // TODO: better way to handle the hybridTextNode being added inside the HEAD? Requiring a body for proper operation might be a problem.
+        if ( initializingHybridTextNode ) {
+          // if this is almost assuredly the hybridTextNode, return nothing for now. TODO: better way of handling this! it's a hack!
+          return Bounds2.NOTHING;
+        }
+        else {
+          throw new Error( 'No document.body and trying to get approximate SVG bounds of a Text node' );
+        }
+      }
+    }
+    Text.setSVGTextAttributes( svgTextSizeElement, font, renderedText );
+    var rect = svgTextSizeElement.getBBox();
+    return new Bounds2( rect.x, rect.y, rect.x + rect.width, rect.y + rect.height );
+  };
+
+  Text.accurateCanvasBounds = function( text ) {
+    var svgBounds = Text.approximateSVGBounds( text._font, text.renderedText ); // this seems to be slower than expected, mostly due to Font getters
+
+    //If svgBounds are zero, then return the zero bounds
+    if ( !text.renderedText.length || svgBounds.width === 0 ) {
+      return svgBounds;
+    }
+
+    // NOTE: should return new instance, so that it can be mutated later
+    return Util.canvasAccurateBounds( function( context ) {
+      context.font = text._font.toCSS();
+      context.direction = 'ltr';
+      context.fillText( text.renderedText, 0, 0 );
+      if ( text.hasStroke() ) {
+        var fakeWrapper = new CanvasContextWrapper( null, context );
+        text.beforeCanvasStroke( fakeWrapper );
+        context.strokeText( text.renderedText, 0, 0 );
+        text.afterCanvasStroke( fakeWrapper );
+      }
+    }, {
+      precision: 0.5,
+      resolution: 128,
+      initialScale: 32 / Math.max( Math.abs( svgBounds.minX ), Math.abs( svgBounds.minY ), Math.abs( svgBounds.maxX ), Math.abs( svgBounds.maxY ) )
+    } );
+  };
+
+  Text.getVerticalBounds = function( font ) {
+    assert && assert( font instanceof Font, 'Font required' );
+
+    if ( !hybridTextNode ) {
+      return Bounds2.NOTHING; // we are the hybridTextNode, ignore us
+    }
+
+    var css = font.toCSS();
+    var verticalBounds = hybridFontVerticalCache[ css ];
+    if ( !verticalBounds ) {
+      hybridTextNode.setFont( font );
+      verticalBounds = hybridFontVerticalCache[ css ] = hybridTextNode.getBounds().copy();
+    }
+
+    return verticalBounds;
+  };
+
+  Text.approximateCanvasWidth = function( font, renderedText ) {
+    assert && assert( font instanceof Font, 'Font required' );
+    assert && assert( typeof renderedText === 'string', 'renderedText required' );
+
+    var context = scenery.scratchContext;
+    context.font = font.toCSS();
+    context.direction = 'ltr';
+    return context.measureText( renderedText ).width;
+  };
+
+  // NOTE: should return new instance, so that it can be mutated later
+  Text.approximateHybridBounds = function( font, renderedText ) {
+    assert && assert( font instanceof Font, 'Font required' );
+    assert && assert( typeof renderedText === 'string', 'renderedText required' );
+
+    var verticalBounds = Text.getVerticalBounds( font );
+
+    var canvasWidth = Text.approximateCanvasWidth( font, renderedText );
+
+    // it seems that SVG bounds generally have x=0, so we hard code that here
+    return new Bounds2( 0, verticalBounds.minY, canvasWidth, verticalBounds.maxY );
+  };
+
+  // NOTE: should return new instance, so that it can be mutated later
+  Text.approximateDOMBounds = function( font, element ) {
+    assert && assert( font instanceof Font, 'Font required' );
+
+    var maxHeight = 1024; // technically this will fail if the font is taller than this!
+
+    // <div style="position: absolute; left: 0; top: 0; padding: 0 !important; margin: 0 !important;"><span id="baselineSpan" style="font-family: Verdana; font-size: 25px;">QuipTaQiy</span><div style="vertical-align: baseline; display: inline-block; width: 0; height: 500px; margin: 0 important!; padding: 0 important!;"></div></div>
+
+    var div = document.createElement( 'div' );
+    $( div ).css( {
+      position: 'absolute',
+      left: 0,
+      top: 0,
+      padding: '0 !important',
+      margin: '0 !important',
+      display: 'hidden'
+    } );
+
+    var span = document.createElement( 'span' );
+    $( span ).css( 'font', font.toCSS() );
+    span.appendChild( element );
+    span.setAttribute( 'direction', 'ltr' );
+
+    var fakeImage = document.createElement( 'div' );
+    $( fakeImage ).css( {
+      'vertical-align': 'baseline',
+      display: 'inline-block',
+      width: 0,
+      height: maxHeight + 'px',
+      margin: '0 !important',
+      padding: '0 !important'
+    } );
+
+    div.appendChild( span );
+    div.appendChild( fakeImage );
+
+    document.body.appendChild( div );
+    var rect = span.getBoundingClientRect();
+    var divRect = div.getBoundingClientRect();
+    // add 1 pixel to rect.right to prevent HTML text wrapping
+    var result = new Bounds2( rect.left, rect.top - maxHeight, rect.right + 1, rect.bottom - maxHeight ).shifted( -divRect.left, -divRect.top );
+    document.body.removeChild( div );
+
+    return result;
+  };
+
+  // TODO: can we use this?
+  Text.approximateImprovedDOMBounds = function( font, element ) {
+    assert && assert( font instanceof Font, 'Font required' );
+
+    // TODO: reuse this div?
+    var div = document.createElement( 'div' );
+    div.style.display = 'inline-block';
+    div.style.font = font.toCSS();
+    div.style.color = 'transparent';
+    div.style.padding = '0 !important';
+    div.style.margin = '0 !important';
+    div.style.position = 'absolute';
+    div.style.left = '0';
+    div.style.top = '0';
+    div.setAttribute( 'direction', 'ltr' );
+    div.appendChild( element );
+
+    document.body.appendChild( div );
+    var bounds = new Bounds2( div.offsetLeft, div.offsetTop, div.offsetLeft + div.offsetWidth + 1, div.offsetTop + div.offsetHeight + 1 );
+    document.body.removeChild( div );
+
+    // Compensate for the baseline alignment
+    var verticalBounds = Text.getVerticalBounds( font );
+    return bounds.shiftedY( verticalBounds.minY );
+  };
+
   // TODO: update name!
-  Text.updateSVGTextToMeasure = function( textElement, family, size, style, weight, stretch, renderedText ) {
+  Text.setSVGTextAttributes = function( textElement, font, renderedText ) {
+    assert && assert( font instanceof Font, 'Font required' );
+    assert && assert( typeof renderedText === 'string', 'renderedText required' );
+
     textElement.setAttribute( 'direction', 'ltr' );
-    textElement.setAttribute( 'font-family', family );
-    textElement.setAttribute( 'font-size', size );
-    textElement.setAttribute( 'font-style', style );
-    textElement.setAttribute( 'font-weight', weight );
-    textElement.setAttribute( 'font-stretch', stretch );
+    textElement.setAttribute( 'font-family', font.getFamily() );
+    textElement.setAttribute( 'font-size', font.getSize() );
+    textElement.setAttribute( 'font-style', font.getStyle() );
+    textElement.setAttribute( 'font-weight', font.getWeight() );
+    textElement.setAttribute( 'font-stretch', font.getStretch() );
     textElement.lastChild.nodeValue = renderedText;
   };
 

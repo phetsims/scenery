@@ -184,7 +184,7 @@
   var textNode = new scenery.Text( 'QuipTaQiy' );
 
   function canvasAccurate( textNode ) {
-    return textNode.accurateCanvasBounds();
+    return scenery.Text.accurateCanvasBounds( textNode );
   }
 
   function svgApproximate( textNode ) {
@@ -301,9 +301,9 @@
   console.log( svgApproximate( textNode ) );
   console.log( domApproximate( textNode ) );
 
-  console.log( textNode.accurateCanvasBounds() );
-  console.log( textNode.approximateSVGBounds() );
-  console.log( textNode.approximateDOMBounds() );
+  console.log( scenery.Text.accurateCanvasBounds( textNode ) );
+  console.log( scenery.Text.approximateSVGBounds( textNode._font, textNode.renderedText ) );
+  console.log( scenery.Text.approximateDOMBounds( textNode._font, textNode.getDOMTextNode() ) );
 
 
 </script>
