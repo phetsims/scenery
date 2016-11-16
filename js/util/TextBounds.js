@@ -27,14 +27,22 @@ define( function( require ) {
   // @private {SVGElement} - Test SVG element (determined to find the size of text elements with SVG)
   var svgTextSizeElement;
 
-  var hybridTextNode; // a node that is used to measure SVG text top/height for hybrid caching purposes
-  var initializingHybridTextNode = false;
-
   // Maps CSS {string} => {Bounds2}, so that we can cache the vertical font sizes outside of the Font objects themselves.
   var hybridFontVerticalCache = {};
 
   var TextBounds = {
-    // NOTE: should return new instance, so that it can be mutated later
+    /**
+     * Returns a new Bounds2 that is the approximate bounds of a Text node displayed with the specified font and renderedText.
+     * @public
+     *
+     * This method uses an SVG Text element, sets its text, and then determines its size to estimate the size of rendered text.
+     *
+     * NOTE: Calling code relies on the new Bounds2 instance, as they mutate it.
+     *
+     * @param {Font} font - The font of the text
+     * @param {string} renderedText - Text to display (with any special characters replaced)
+     * @returns {Bounds2}
+     */
     approximateSVGBounds: function( font, renderedText ) {
       assert && assert( font instanceof Font, 'Font required' );
       assert && assert( typeof renderedText === 'string', 'renderedText required' );
@@ -44,14 +52,7 @@ define( function( require ) {
           document.body.appendChild( svgTextSizeContainer );
         }
         else {
-          // TODO: better way to handle the hybridTextNode being added inside the HEAD? Requiring a body for proper operation might be a problem.
-          if ( initializingHybridTextNode ) {
-            // if this is almost assuredly the hybridTextNode, return nothing for now. TODO: better way of handling this! it's a hack!
-            return Bounds2.NOTHING;
-          }
-          else {
-            throw new Error( 'No document.body and trying to get approximate SVG bounds of a Text node' );
-          }
+          throw new Error( 'No document.body and trying to get approximate SVG bounds of a Text node' );
         }
       }
       TextBounds.setSVGTextAttributes( svgTextSizeElement, font, renderedText );
@@ -88,15 +89,12 @@ define( function( require ) {
     getVerticalBounds: function( font ) {
       assert && assert( font instanceof Font, 'Font required' );
 
-      if ( !hybridTextNode ) {
-        return Bounds2.NOTHING; // we are the hybridTextNode, ignore us
-      }
-
       var css = font.toCSS();
+
+      // Cache these, as it's more expensive
       var verticalBounds = hybridFontVerticalCache[ css ];
       if ( !verticalBounds ) {
-        hybridTextNode.setFont( font );
-        verticalBounds = hybridFontVerticalCache[ css ] = hybridTextNode.getBounds().copy();
+        verticalBounds = hybridFontVerticalCache[ css ] = TextBounds.approximateSVGBounds( font, 'm' );
       }
 
       return verticalBounds;
@@ -112,7 +110,18 @@ define( function( require ) {
       return context.measureText( renderedText ).width;
     },
 
-    // NOTE: should return new instance, so that it can be mutated later
+    /**
+     * Returns a new Bounds2 that is the approximate bounds of a Text node displayed with the specified font and renderedText.
+     * @public
+     *
+     * This method uses a hybrid approach, using SVG measurement to determine the height, but using Canvas to determine the width.
+     *
+     * NOTE: Calling code relies on the new Bounds2 instance, as they mutate it.
+     *
+     * @param {Font} font - The font of the text
+     * @param {string} renderedText - Text to display (with any special characters replaced)
+     * @returns {Bounds2}
+     */
     approximateHybridBounds: function( font, renderedText ) {
       assert && assert( font instanceof Font, 'Font required' );
       assert && assert( typeof renderedText === 'string', 'renderedText required' );
@@ -242,10 +251,6 @@ define( function( require ) {
         svgTextSizeElement.setAttribute( 'id', TEXT_SIZE_ELEMENT_ID );
         svgTextSizeContainer.appendChild( svgTextSizeElement );
       }
-
-      initializingHybridTextNode = true;
-      hybridTextNode = new scenery.Text( 'm', { boundsMethod: 'fast' } );
-      initializingHybridTextNode = false;
     }
   };
 
