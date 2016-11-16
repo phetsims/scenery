@@ -28,23 +28,6 @@ define( function( require ) {
   var TextWebGLDrawable = require( 'SCENERY/display/drawables/TextWebGLDrawable' );
   var CanvasContextWrapper = require( 'SCENERY/util/CanvasContextWrapper' );
 
-  var textSizeContainerId = 'sceneryTextSizeContainer';
-  var textSizeElementId = 'sceneryTextSizeElement';
-  var svgTextSizeContainer = document.getElementById( textSizeContainerId );
-  var svgTextSizeElement = document.getElementById( textSizeElementId );
-
-  // SVG bounds seems to be malfunctioning for Safari 5. Since we don't have a reproducible test machine for
-  // fast iteration, we'll guess the user agent and use DOM bounds instead of SVG.
-  // Hopefully the two contraints rule out any future Safari versions (fairly safe, but not impossible!)
-  var useDOMAsFastBounds = window.navigator.userAgent.indexOf( 'like Gecko) Version/5' ) !== -1 &&
-                           window.navigator.userAgent.indexOf( 'Safari/' ) !== -1;
-
-  var hybridTextNode; // a node that is used to measure SVG text top/height for hybrid caching purposes
-  var initializingHybridTextNode = false;
-
-  // Maps CSS {string} => {Bounds2}, so that we can cache the vertical font sizes outside of the Font objects themselves.
-  var hybridFontVerticalCache = {};
-
   var TEXT_OPTION_KEYS = [
     'boundsMethod', // Sets how bounds are determined for text, see setBoundsMethod() for more documentation
     'text', // Sets the text to be displayed, see setText() for more documentation
@@ -55,6 +38,31 @@ define( function( require ) {
     'fontStyle', // Sets the style of the current font, see setFont() for more documentation
     'fontSize' // Sets the size of the current font, see setFont() for more documentation
   ];
+
+  // @private {string} - ID for a container for our SVG test element (determined to find the size of text elements with SVG)
+  var TEXT_SIZE_CONTAINER_ID = 'sceneryTextSizeContainer';
+
+  // @private {string} - ID for our SVG test element (determined to find the size of text elements with SVG)
+  var TEXT_SIZE_ELEMENT_ID = 'sceneryTextSizeElement';
+
+  // @private {SVGElement} - Container for our SVG test element (determined to find the size of text elements with SVG)
+  var svgTextSizeContainer;
+
+  // @private {SVGElement} - Test SVG element (determined to find the size of text elements with SVG)
+  var svgTextSizeElement;
+
+  // SVG bounds seems to be malfunctioning for Safari 5. Since we don't have a reproducible test machine for
+  // fast iteration, we'll guess the user agent and use DOM bounds instead of SVG.
+  // Hopefully the two contraints rule out any future Safari versions (fairly safe, but not impossible!)
+  // @private {boolean}
+  var useDOMAsFastBounds = window.navigator.userAgent.indexOf( 'like Gecko) Version/5' ) !== -1 &&
+                           window.navigator.userAgent.indexOf( 'Safari/' ) !== -1;
+
+  var hybridTextNode; // a node that is used to measure SVG text top/height for hybrid caching purposes
+  var initializingHybridTextNode = false;
+
+  // Maps CSS {string} => {Bounds2}, so that we can cache the vertical font sizes outside of the Font objects themselves.
+  var hybridFontVerticalCache = {};
 
   /**
    * @public
@@ -462,7 +470,8 @@ define( function( require ) {
           }
         }
       }
-      updateSVGTextToMeasure( svgTextSizeElement, this );
+      Text.updateSVGTextToMeasure( svgTextSizeElement, this._font.getFamily(), this._font.getSize(), this._font.getStyle(),
+                                   this._font.getWeight(), this._font.getStretch(), this.renderedText );
       var rect = svgTextSizeElement.getBBox();
       return new Bounds2( rect.x, rect.y, rect.x + rect.width, rect.y + rect.height );
     },
@@ -859,6 +868,17 @@ define( function( require ) {
    * Hybrid text setup (for bounds testing)
    *----------------------------------------------------------------------------*/
 
+  // TODO: update name!
+  Text.updateSVGTextToMeasure = function( textElement, family, size, style, weight, stretch, renderedText ) {
+    textElement.setAttribute( 'direction', 'ltr' );
+    textElement.setAttribute( 'font-family', family );
+    textElement.setAttribute( 'font-size', size );
+    textElement.setAttribute( 'font-style', style );
+    textElement.setAttribute( 'font-weight', weight );
+    textElement.setAttribute( 'font-stretch', stretch );
+    textElement.lastChild.nodeValue = renderedText;
+  };
+
   function createSVGTextToMeasure() {
     var text = document.createElementNS( scenery.svgns, 'text' );
     text.appendChild( document.createTextNode( '' ) );
@@ -870,28 +890,23 @@ define( function( require ) {
     return text;
   }
 
-  function updateSVGTextToMeasure( textElement, textNode ) {
-    textElement.setAttribute( 'direction', 'ltr' );
-    textElement.setAttribute( 'font-family', textNode._font.getFamily() );
-    textElement.setAttribute( 'font-size', textNode._font.getSize() );
-    textElement.setAttribute( 'font-style', textNode._font.getStyle() );
-    textElement.setAttribute( 'font-weight', textNode._font.getWeight() );
-    textElement.setAttribute( 'font-stretch', textNode._font.getStretch() );
-    textElement.lastChild.nodeValue = textNode.renderedText;
-  }
+  svgTextSizeContainer = document.getElementById( TEXT_SIZE_CONTAINER_ID );
 
   if ( !svgTextSizeContainer ) {
     // set up the container and text for testing text bounds quickly (using approximateSVGBounds)
     svgTextSizeContainer = document.createElementNS( scenery.svgns, 'svg' );
     svgTextSizeContainer.setAttribute( 'width', '2' );
     svgTextSizeContainer.setAttribute( 'height', '2' );
-    svgTextSizeContainer.setAttribute( 'id', textSizeContainerId );
+    svgTextSizeContainer.setAttribute( 'id', TEXT_SIZE_CONTAINER_ID );
     svgTextSizeContainer.setAttribute( 'style', 'visibility: hidden; pointer-events: none; position: absolute; left: -65535px; right: -65535px;' ); // so we don't flash it in a visible way to the user
   }
+
+  svgTextSizeElement = document.getElementById( TEXT_SIZE_ELEMENT_ID );
+
   // NOTE! copies createSVGElement
   if ( !svgTextSizeElement ) {
     svgTextSizeElement = createSVGTextToMeasure();
-    svgTextSizeElement.setAttribute( 'id', textSizeElementId );
+    svgTextSizeElement.setAttribute( 'id', TEXT_SIZE_ELEMENT_ID );
     svgTextSizeContainer.appendChild( svgTextSizeElement );
   }
 
@@ -901,5 +916,3 @@ define( function( require ) {
 
   return Text;
 } );
-
-

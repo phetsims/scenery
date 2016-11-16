@@ -1,8 +1,7 @@
 // Copyright 2013-2015, University of Colorado Boulder
 
-
 /**
- * Font handling for text drawing
+ * Immutable font object.
  *
  * Examples:
  * new scenery.Font().font                      // "10px sans-serif" (the default)
@@ -30,36 +29,70 @@ define( function( require ) {
   var inherit = require( 'PHET_CORE/inherit' );
   var scenery = require( 'SCENERY/scenery' );
 
-  // constants used for detection (since styles/variants/weights/stretches can be mixed in the preamble of the shorthand string)
-  var styles = [ 'normal', 'italic', 'oblique' ];
-  var variants = [ 'normal', 'small-caps' ];
-  var weights = [ 'normal', 'bold', 'bolder', 'lighter', '100', '200', '300', '400', '500', '600', '700', '800', '900' ];
-  var stretches = [ 'normal', 'ultra-condensed', 'extra-condensed', 'condensed', 'semi-condensed', 'semi-expanded', 'expanded', 'extra-expanded', 'ultra-expanded' ];
+  // @private {Array.<string>} - Valid values for the 'style' property of Font
+  var VALID_STYLES = [ 'normal', 'italic', 'oblique' ];
 
-  // size constants used for detection
-  // var sizes = [ 'xx-small', 'x-small', 'small', 'medium', 'large', 'x-large', 'xx-large', 'larger', 'smaller' ];
+  // @private {Array.<string>} - Valid values for the 'variant' property of Font
+  var VALID_VARIANTS = [ 'normal', 'small-caps' ];
 
-  function castSize( size ) {
-    if ( typeof size === 'number' ) {
-      return size + 'px'; // add the pixels suffix by default for numbers
-    }
-    else {
-      return size; // assume that it's a valid to-spec string
-    }
-  }
+  // @private {Array.<string>} - Valid values for the 'weight' property of Font
+  var VALID_WEIGHTS = [ 'normal', 'bold', 'bolder', 'lighter',
+                        '100', '200', '300', '400', '500', '600', '700', '800', '900' ];
 
+  // @private {Array.<string>} - Valid values for the 'stretch' property of Font
+  var VALID_STRETCHES = [ 'normal', 'ultra-condensed', 'extra-condensed', 'condensed', 'semi-condensed',
+                          'semi-expanded', 'expanded', 'extra-expanded', 'ultra-expanded' ];
+
+  /**
+   * @public
+   * @constructor
+   *
+   * Font options objects (if provided) support the following options:
+   * {
+   *   style: {string} - 'normal', 'italic' or 'oblique',
+   *   variant: {string} - 'normal' or 'small-caps',
+   *   weight: {string|number} - 'normal', 'bold', 'bolder', 'lighter', '100', '200', '300', '400', '500', '600',
+   *                             '700', '800', '900', or a number that when cast to a string will be one of the strings
+   *                             above.
+   *   stretch: {string} - 'normal', 'ultra-condensed', 'extra-condensed', 'condensed', 'semi-condensed',
+   *                       'semi-expanded', 'expanded', 'extra-expanded' or 'ultra-expanded'
+   *   size: {string|number} - A valid CSS font-size string, or a number representing a quantity of 'px'
+   *   lineHeight: {string} - A valid CSS line-height, typically 'normal', a number, a CSS length (e.g. '15px'), or
+   *                          a percentage of the normal height.
+   *   family: {string} - A comma-separated list of families, which can include generic families (preferably at the
+   *                      end) such as 'serif', 'sans-serif', 'cursive', 'fantasy' and 'monospace'. If there is any
+   *                      question about escaping (such as spaces in a font name), the family should be surrounded
+   *                      by double quotes.
+   * }
+   *
+   * Font strings should be a valid CSS3 font declaration value (see http://www.w3.org/TR/css3-fonts/) which consists
+   * of the following pattern:
+   *   [ [ <‘font-style’> || <font-variant-css21> || <‘font-weight’> || <‘font-stretch’> ]? <‘font-size’>
+   *   [ / <‘line-height’> ]? <‘font-family’> ]
+   *
+   * @param {string|Object} [options] - A valid CSS 'font' string or an options object as described above.
+   */
   function Font( options ) {
-    // options from http://www.w3.org/TR/css3-fonts/
-    this._style = 'normal';      // normal | italic | oblique
-    this._variant = 'normal';    // normal | small-caps
-    this._weight = 'normal';     // normal | bold | bolder | lighter | 100 | 200 | 300 | 400 | 500 | 600 | 700 | 800 | 900
-    this._stretch = 'normal';    // normal | ultra-condensed | extra-condensed | condensed | semi-condensed | semi-expanded | expanded | extra-expanded | ultra-expanded
-    this._size = '10px';         // <absolute-size> | <relative-size> | <length> | <percentage> -- unitless number interpreted as px. absolute suffixes: cm, mm, in, pt, pc, px. relative suffixes: em, ex, ch, rem, vw, vh, vmin, vmax.
-    this._lineHeight = 'normal'; // normal | <number> | <length> | <percentage> -- NOTE: Canvas spec forces line-height to normal
-    this._family = 'sans-serif'; // comma-separated list of families, including generic families (serif, sans-serif, cursive, fantasy, monospace). ideally escape with double-quotes
+    // @private {string} - See https://www.w3.org/TR/css-fonts-3/#propdef-font-style
+    this._style = 'normal';
 
-    // font  [ [ <‘font-style’> || <font-variant-css21> || <‘font-weight’> || <‘font-stretch’> ]? <‘font-size’> [ / <‘line-height’> ]? <‘font-family’> ] | caption | icon | menu | message-box | small-caption | status-bar
-    // <font-variant-css21> = [normal | small-caps]
+    // @private {string} - See https://www.w3.org/TR/css-fonts-3/#font-variant-css21-values
+    this._variant = 'normal';
+
+    // @private {string} - See https://www.w3.org/TR/css-fonts-3/#propdef-font-weight
+    this._weight = 'normal';
+
+    // @private {string} - See https://www.w3.org/TR/css-fonts-3/#propdef-font-stretch
+    this._stretch = 'normal';
+
+    // @private {string} - See https://www.w3.org/TR/css-fonts-3/#propdef-font-size
+    this._size = '10px';
+
+    // @private {string} - See https://www.w3.org/TR/CSS2/visudet.html#propdef-line-height
+    this._lineHeight = 'normal';
+
+    // @private {string} - See https://www.w3.org/TR/css-fonts-3/#propdef-font-family
+    this._family = 'sans-serif';
 
     var type = typeof options;
     assert && assert( options === undefined || type === 'string' || ( type === 'object' && Object.getPrototypeOf( options ) === Object.prototype ),
@@ -77,19 +110,19 @@ define( function( require ) {
         if ( token === 'normal' ) {
           // nothing has to be done, everything already normal as default
         }
-        else if ( _.contains( styles, token ) ) {
+        else if ( _.contains( VALID_STYLES, token ) ) {
           assert && assert( this._style === 'normal', 'Style cannot be applied twice. Already set to "' + this._style + '", attempt to replace with "' + token + '"' );
           this._style = token;
         }
-        else if ( _.contains( variants, token ) ) {
+        else if ( _.contains( VALID_VARIANTS, token ) ) {
           assert && assert( this._variant === 'normal', 'Variant cannot be applied twice. Already set to "' + this._variant + '", attempt to replace with "' + token + '"' );
           this._variant = token;
         }
-        else if ( _.contains( weights, token ) ) {
+        else if ( _.contains( VALID_WEIGHTS, token ) ) {
           assert && assert( this._weight === 'normal', 'Weight cannot be applied twice. Already set to "' + this._weight + '", attempt to replace with "' + token + '"' );
           this._weight = token;
         }
-        else if ( _.contains( stretches, token ) ) {
+        else if ( _.contains( VALID_STRETCHES, token ) ) {
           assert && assert( this._stretch === 'normal', 'Stretch cannot be applied twice. Already set to "' + this._stretch + '", attempt to replace with "' + token + '"' );
           this._stretch = token;
         }
@@ -120,7 +153,7 @@ define( function( require ) {
         this._stretch = options.stretch;
       }
       if ( options.size !== undefined ) {
-        this._size = castSize( options.size );
+        this._size = Font.castSize( options.size );
       }
       if ( options.lineHeight !== undefined ) {
         this._lineHeight = options.lineHeight;
@@ -131,20 +164,20 @@ define( function( require ) {
     }
 
     // sanity checks to prevent errors in interpretation or in the font shorthand usage
-    assert && assert( typeof this._style === 'string' && _.contains( styles, this._style ),
+    assert && assert( typeof this._style === 'string' && _.contains( VALID_STYLES, this._style ),
       'Font style must be one of "normal", "italic", or "oblique"' );
-    assert && assert( typeof this._variant === 'string' && _.contains( variants, this._variant ),
+    assert && assert( typeof this._variant === 'string' && _.contains( VALID_VARIANTS, this._variant ),
       'Font variant must be "normal" or "small-caps"' );
-    assert && assert( typeof this._weight === 'string' && _.contains( weights, this._weight ),
+    assert && assert( typeof this._weight === 'string' && _.contains( VALID_WEIGHTS, this._weight ),
       'Font weight must be one of "normal", "bold", "bolder", "lighter", "100", "200", "300", "400", "500", "600", "700", "800", or "900"' );
-    assert && assert( typeof this._stretch === 'string' && _.contains( stretches, this._stretch ),
+    assert && assert( typeof this._stretch === 'string' && _.contains( VALID_STRETCHES, this._stretch ),
       'Font stretch must be one of "normal", "ultra-condensed", "extra-condensed", "condensed", "semi-condensed", "semi-expanded", "expanded", "extra-expanded", or "ultra-expanded"' );
     assert && assert( typeof this._size === 'string' && !_.contains( [ '0', '1', '2', '3', '4', '5', '6', '7', '8', '9' ], this._size[ this._size.length - 1 ] ),
       'Font size must be either passed as a number (not a string, interpreted as px), or must contain a suffix for percentage, absolute or relative units, or an explicit size constant' );
     assert && assert( typeof this._lineHeight === 'string' );
     assert && assert( typeof this._family === 'string' );
 
-    // initialize the shorthand font property (stored as _font)
+    // @private {string} - Initialize the shorthand font property (stored as _font)
     this._font = this.computeShorthand();
 
     phetAllocation && phetAllocation( 'Font' );
@@ -153,24 +186,110 @@ define( function( require ) {
   scenery.register( 'Font', Font );
 
   inherit( Object, Font, {
-    getFont: function() { return this._font; },
-    getStyle: function() { return this._style; },
-    getVariant: function() { return this._variant; },
-    getWeight: function() { return this._weight; },
-    getStretch: function() { return this._stretch; },
-    getSize: function() { return this._size; },
-    getLineHeight: function() { return this._lineHeight; },
-    getFamily: function() { return this._family; },
-
+    /**
+     * Returns this font's CSS shorthand, which includes all of the font's information reduced into a single string.
+     * @public
+     *
+     * This can be used for CSS as the 'font' attribute, or is needed to set Canvas fonts.
+     *
+     * https://www.w3.org/TR/css-fonts-3/#propdef-font contains detailed information on how this is formatted.
+     *
+     * @returns {string}
+     */
+    getFont: function() {
+      return this._font;
+    },
     get font() { return this.getFont(); },
+
+    /**
+     * Returns this font's style. See the constructor for more details on valid values.
+     * @public
+     *
+     * @returns {string}
+     */
+    getStyle: function() {
+      return this._style;
+    },
     get style() { return this.getStyle(); },
+
+    /**
+     * Returns this font's variant. See the constructor for more details on valid values.
+     * @public
+     *
+     * @returns {string}
+     */
+    getVariant: function() {
+      return this._variant;
+    },
     get variant() { return this.getVariant(); },
+
+    /**
+     * Returns this font's weight. See the constructor for more details on valid values.
+     * @public
+     *
+     * NOTE: If a numeric weight was passed in, it has been cast to a string, and a string will be returned here.
+     *
+     * @returns {string}
+     */
+    getWeight: function() {
+      return this._weight;
+    },
     get weight() { return this.getWeight(); },
+
+    /**
+     * Returns this font's stretch. See the constructor for more details on valid values.
+     * @public
+     *
+     * @returns {string}
+     */
+    getStretch: function() {
+      return this._stretch;
+    },
     get stretch() { return this.getStretch(); },
+
+    /**
+     * Returns this font's size. See the constructor for more details on valid values.
+     * @public
+     *
+     * NOTE: If a numeric size was passed in, it has been cast to a string, and a string will be returned here.
+     *
+     * @returns {string}
+     */
+    getSize: function() {
+      return this._size;
+    },
     get size() { return this.getSize(); },
+
+    /**
+     * Returns this font's line-height. See the constructor for more details on valid values.
+     * @public
+     *
+     * @returns {string}
+     */
+    getLineHeight: function() {
+      return this._lineHeight;
+    },
     get lineHeight() { return this.getLineHeight(); },
+
+    /**
+     * Returns this font's family. See the constructor for more details on valid values.
+     * @public
+     *
+     * @returns {string}
+     */
+    getFamily: function() {
+      return this._family;
+    },
     get family() { return this.getFamily(); },
 
+    /**
+     * Returns a new Font object, which is a copy of this object. If options are provided, they override the current
+     * values in this object.
+     * @public
+     *
+     * @param {Object} [options] - See the constructor for the object format
+     * @returns {Font}
+     */
     copy: function( options ) {
       return new Font( _.extend( {
         style: this._style,
@@ -183,6 +302,14 @@ define( function( require ) {
       }, options ) );
     },
 
+    /**
+     * Computes the combined CSS shorthand font string.
+     * @private
+     *
+     * https://www.w3.org/TR/css-fonts-3/#propdef-font contains details about the format.
+     *
+     * @returns {string}
+     */
     computeShorthand: function() {
       var ret = '';
       if ( this._style !== 'normal' ) { ret += this._style + ' '; }
@@ -195,11 +322,40 @@ define( function( require ) {
       return ret;
     },
 
+    /**
+     * Returns this font's CSS shorthand, which includes all of the font's information reduced into a single string.
+     * @public
+     *
+     * NOTE: This is an alias of getFont().
+     *
+     * This can be used for CSS as the 'font' attribute, or is needed to set Canvas fonts.
+     *
+     * https://www.w3.org/TR/css-fonts-3/#propdef-font contains detailed information on how this is formatted.
+     *
+     * @returns {string}
+     */
     toCSS: function() {
       return this.getFont();
     }
+  }, {
+    /**
+     * Converts a generic size to a specific CSS pixel string, assuming 'px' for numbers.
+     * @public
+     *
+     * @param {string|number} size - If it's a number, 'px' will be appended
+     * @returns {string}
+     */
+    castSize: function( size ) {
+      if ( typeof size === 'number' ) {
+        return size + 'px'; // add the pixels suffix by default for numbers
+      }
+      else {
+        return size; // assume that it's a valid to-spec string
+      }
+    }
   } );
 
+  // @public {Font} - Default Font object (since they are immutable).
   Font.DEFAULT = new Font();
 
   return Font;
