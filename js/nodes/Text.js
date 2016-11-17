@@ -182,6 +182,13 @@ define( function( require ) {
      *
      * TODO: deprecate fast/fastCanvas options?
      *
+     * NOTE: Most of these are unfortunately not hard guarantees that content is all inside of the returned bounds.
+     *       'accurate' should probably be the only one where that guarantee can be assumed. Things like cyrillic in
+     *       italic, combining marks and other unicode features can fail to be detected. This is particularly relevant
+     *       for the height, as certain stacked accent marks or descenders can go outside of the prescribed range,
+     *       and fast/canvasCanvas/hybrid will always return the same vertical bounds (top and bottom) for a given font
+     *       when the text isn't the empty string.
+     *
      * @param {string} method - One of the above methods
      * @returns {Text} - For chaining.
      */
@@ -205,6 +212,12 @@ define( function( require ) {
       return this;
     },
 
+    /**
+     * Returns the current method to estimate the bounds of the text. See setBoundsMethod() for more information.
+     * @public
+     *
+     * @returns {string}
+     */
     getBoundsMethod: function() {
       return this._boundsMethod;
     },
