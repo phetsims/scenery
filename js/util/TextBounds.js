@@ -60,6 +60,18 @@ define( function( require ) {
       return new Bounds2( rect.x, rect.y, rect.x + rect.width, rect.y + rect.height );
     },
 
+    /**
+     * Returns a new Bounds2 that is the approximate bounds of the specified Text node.
+     * @public
+     *
+     * This method repeatedly renders the text into a Canvas and checks for what pixels are filled. Iteratively doing this for each bound
+     * (top/left/bottom/right) until a tolerance results in very accurate bounds of what is displayed.
+     *
+     * NOTE: Calling code relies on the new Bounds2 instance, as they mutate it.
+     *
+     * @param {Text} text - The Text node
+     * @returns {Bounds2}
+     */
     accurateCanvasBounds: function( text ) {
       var svgBounds = TextBounds.approximateSVGBounds( text._font, text.renderedText ); // this seems to be slower than expected, mostly due to Font getters
 
@@ -86,6 +98,15 @@ define( function( require ) {
       } );
     },
 
+    /**
+     * Returns a possibly-cached (treat as immutable) Bounds2 for use mainly for vertical parameters, given a specific Font.
+     * @public
+     *
+     * Uses SVG bounds determination for this value.
+     *
+     * @param {Font} font - The font of the text
+     * @returns {Bounds2}
+     */
     getVerticalBounds: function( font ) {
       assert && assert( font instanceof Font, 'Font required' );
 
@@ -100,6 +121,14 @@ define( function( require ) {
       return verticalBounds;
     },
 
+    /**
+     * Returns an approximate width for text, determined by using Canvas' measureText().
+     * @public
+     *
+     * @param {Font} font - The font of the text
+     * @param {string} renderedText - Text to display (with any special characters replaced)
+     * @returns {number}
+     */
     approximateCanvasWidth: function( font, renderedText ) {
       assert && assert( font instanceof Font, 'Font required' );
       assert && assert( typeof renderedText === 'string', 'renderedText required' );
@@ -134,7 +163,16 @@ define( function( require ) {
       return new Bounds2( 0, verticalBounds.minY, canvasWidth, verticalBounds.maxY );
     },
 
-    // NOTE: should return new instance, so that it can be mutated later
+    /**
+     * Returns a new Bounds2 that is the approximate bounds of a Text node displayed with the specified font, given a DOM element
+     * @public
+     *
+     * NOTE: Calling code relies on the new Bounds2 instance, as they mutate it.
+     *
+     * @param {Font} font - The font of the text
+     * @param {Element} element - DOM element created for the text. This is required, as the text handles HTML and non-HTML text differently.
+     * @returns {Bounds2}
+     */
     approximateDOMBounds: function( font, element ) {
       assert && assert( font instanceof Font, 'Font required' );
 
@@ -180,7 +218,18 @@ define( function( require ) {
       return result;
     },
 
-    // TODO: can we use this?
+    /**
+     * Returns a new Bounds2 that is the approximate bounds of a Text node displayed with the specified font, given a DOM element
+     * @public
+     *
+     * TODO: Can we use this? What are the differences?
+     *
+     * NOTE: Calling code relies on the new Bounds2 instance, as they mutate it.
+     *
+     * @param {Font} font - The font of the text
+     * @param {Element} element - DOM element created for the text. This is required, as the text handles HTML and non-HTML text differently.
+     * @returns {Bounds2}
+     */
     approximateImprovedDOMBounds: function( font, element ) {
       assert && assert( font instanceof Font, 'Font required' );
 
@@ -202,11 +251,18 @@ define( function( require ) {
       document.body.removeChild( div );
 
       // Compensate for the baseline alignment
-      var verticalBounds = Text.getVerticalBounds( font );
+      var verticalBounds = TextBounds.getVerticalBounds( font );
       return bounds.shiftedY( verticalBounds.minY );
     },
 
-    // TODO: update name!
+    /**
+     * Modifies an SVG text element's properties to match the specified font and text.
+     * @public
+     *
+     * @param {SVGTextElement} textElement
+     * @param {Font} font - The font of the text
+     * @param {string} renderedText - Text to display (with any special characters replaced)
+     */
     setSVGTextAttributes: function( textElement, font, renderedText ) {
       assert && assert( font instanceof Font, 'Font required' );
       assert && assert( typeof renderedText === 'string', 'renderedText required' );
@@ -220,18 +276,11 @@ define( function( require ) {
       textElement.lastChild.nodeValue = renderedText;
     },
 
-    setupHybridTextNode: function() {
-      function createSVGTextToMeasure() {
-        var text = document.createElementNS( scenery.svgns, 'text' );
-        text.appendChild( document.createTextNode( '' ) );
-
-        // TODO: flag adjustment for SVG qualities
-        text.setAttribute( 'dominant-baseline', 'alphabetic' ); // to match Canvas right now
-        text.setAttribute( 'text-rendering', 'geometricPrecision' );
-        text.setAttributeNS( 'http://www.w3.org/XML/1998/namespace', 'xml:space', 'preserve' );
-        return text;
-      }
-
+    /**
+     * Initializes containers and elements required for SVG text measurement.
+     * @public
+     */
+    initializeTextBounds: function() {
       svgTextSizeContainer = document.getElementById( TEXT_SIZE_CONTAINER_ID );
 
       if ( !svgTextSizeContainer ) {
@@ -247,7 +296,11 @@ define( function( require ) {
 
       // NOTE! copies createSVGElement
       if ( !svgTextSizeElement ) {
-        svgTextSizeElement = createSVGTextToMeasure();
+        svgTextSizeElement = document.createElementNS( scenery.svgns, 'text' );
+        svgTextSizeElement.appendChild( document.createTextNode( '' ) );
+        svgTextSizeElement.setAttribute( 'dominant-baseline', 'alphabetic' ); // to match Canvas right now
+        svgTextSizeElement.setAttribute( 'text-rendering', 'geometricPrecision' );
+        svgTextSizeElement.setAttributeNS( 'http://www.w3.org/XML/1998/namespace', 'xml:space', 'preserve' );
         svgTextSizeElement.setAttribute( 'id', TEXT_SIZE_ELEMENT_ID );
         svgTextSizeContainer.appendChild( svgTextSizeElement );
       }

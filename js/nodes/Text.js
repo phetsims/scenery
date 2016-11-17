@@ -697,7 +697,7 @@ define( function( require ) {
   };
 
   // Initialize computation of hybrid text
-  TextBounds.setupHybridTextNode();
+  TextBounds.initializeTextBounds();
 
   return Text;
 } );
