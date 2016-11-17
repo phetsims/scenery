@@ -138,7 +138,7 @@ define( function( require ) {
 
       var children = this.instance.children;
       for ( var i = 0; i < children.length; i++ ) {
-        children[ i ].markSubtreeUnfittable();
+        children[ i ].fittability.markSubtreeUnfittable();
       }
 
       // Update the Instance's drawables, so that their blocks can potentially now be prevented from being fitted.
