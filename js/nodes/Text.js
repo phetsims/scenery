@@ -720,11 +720,8 @@ define( function( require ) {
   // mix in support for fills and strokes
   Paintable.mixin( Text );
 
-  /*---------------------------------------------------------------------------*
-   * Unicode embedding marks workaround for https://github.com/phetsims/scenery/issues/520
-   *----------------------------------------------------------------------------*/
-
-  // Unicode embedding marks that we can combine to work around the Edge issue
+  // Unicode embedding marks that we can combine to work around the Edge issue.
+  // See https://github.com/phetsims/scenery/issues/520
   var LTR = '\u202a';
   var RTL = '\u202b';
   var POP = '\u202c';
