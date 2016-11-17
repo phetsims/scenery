@@ -304,6 +304,222 @@ define( function( require ) {
     },
 
     /**
+     * Sets the x coordinate of the left side of this rectangle (in the local coordinate frame).
+     * @public
+     *
+     * @param {number} x
+     */
+    setRectX: function( x ) {
+      assert && assert( typeof x === 'number' && isFinite( x ), 'rectX should be a finite number' );
+
+      if ( this._rectX !== x ) {
+        this._rectX = x;
+
+        var stateLen = this._drawables.length;
+        for ( var i = 0; i < stateLen; i++ ) {
+          this._drawables[ i ].markDirtyX();
+        }
+
+        this.invalidateRectangle();
+      }
+      return this;
+    },
+    set rectX( value ) { this.setRectX( value ); },
+
+    /**
+     * Returns the x coordinate of the left side of this rectangle (in the local coordinate frame).
+     * @public
+     *
+     * @returns {number}
+     */
+    getRectX: function() {
+      return this._rectX;
+    },
+    get rectX() { return this.getRectX(); },
+
+    /**
+     * Sets the y coordinate of the top side of this rectangle (in the local coordinate frame).
+     * @public
+     *
+     * @param {number} y
+     */
+    setRectY: function( y ) {
+      assert && assert( typeof y === 'number' && isFinite( y ), 'rectY should be a finite number' );
+
+      if ( this._rectY !== y ) {
+        this._rectY = y;
+
+        var stateLen = this._drawables.length;
+        for ( var i = 0; i < stateLen; i++ ) {
+          this._drawables[ i ].markDirtyY();
+        }
+
+        this.invalidateRectangle();
+      }
+      return this;
+    },
+    set rectY( value ) { this.setRectY( value ); },
+
+    /**
+     * Returns the y coordinate of the top side of this rectangle (in the local coordinate frame).
+     * @public
+     *
+     * @returns {number}
+     */
+    getRectY: function() {
+      return this._rectY;
+    },
+    get rectY() { return this.getRectY(); },
+
+    /**
+     * Sets the width of the rectangle (in the local coordinate frame).
+     * @public
+     *
+     * @param {number} width
+     */
+    setRectWidth: function( width ) {
+      assert && assert( typeof width === 'number' && isFinite( width ), 'rectWidth should be a finite number' );
+
+      if ( this._rectWidth !== width ) {
+        this._rectWidth = width;
+
+        var stateLen = this._drawables.length;
+        for ( var i = 0; i < stateLen; i++ ) {
+          this._drawables[ i ].markDirtyWidth();
+        }
+
+        this.invalidateRectangle();
+      }
+      return this;
+    },
+    set rectWidth( value ) { this.setRectWidth( value ); },
+
+    /**
+     * Returns the width of the rectangle (in the local coordinate frame).
+     * @public
+     *
+     * @returns {number}
+     */
+    getRectWidth: function() {
+      return this._rectWidth;
+    },
+    get rectWidth() { return this.getRectWidth(); },
+
+    /**
+     * Sets the height of the rectangle (in the local coordinate frame).
+     * @public
+     *
+     * @param {number} height
+     */
+    setRectHeight: function( height ) {
+      assert && assert( typeof height === 'number' && isFinite( height ), 'rectHeight should be a finite number' );
+
+      if ( this._rectHeight !== height ) {
+        this._rectHeight = height;
+
+        var stateLen = this._drawables.length;
+        for ( var i = 0; i < stateLen; i++ ) {
+          this._drawables[ i ].markDirtyHeight();
+        }
+
+        this.invalidateRectangle();
+      }
+      return this;
+    },
+    set rectHeight( value ) { this.setRectHeight( value ); },
+
+    /**
+     * Returns the height of the rectangle (in the local coordinate frame).
+     * @public
+     *
+     * @returns {number}
+     */
+    getRectHeight: function() {
+      return this._rectHeight;
+    },
+    get rectHeight() { return this.getRectHeight(); },
+
+    /**
+     * Sets the horizontal corner radius of the rectangle (in the local coordinate frame).
+     * @public
+     *
+     * If the cornerXRadius and cornerYRadius are the same, the corners will be rounded circular arcs with that radius
+     * (or a smaller radius if the rectangle is too small).
+     *
+     * If the cornerXRadius and cornerYRadius are different, the corners will be elliptical arcs, and the horizontal
+     * radius will be equal to cornerXRadius (or a smaller radius if the rectangle is too small).
+     *
+     * @param {number} radius
+     */
+    setCornerXRadius: function( radius ) {
+      assert && assert( typeof radius === 'number' && isFinite( radius ), 'cornerXRadius should be a finite number' );
+
+      if ( this._cornerXRadius !== radius ) {
+        this._cornerXRadius = radius;
+
+        var stateLen = this._drawables.length;
+        for ( var i = 0; i < stateLen; i++ ) {
+          this._drawables[ i ].markDirtyCornerXRadius();
+        }
+
+        this.invalidateRectangle();
+      }
+      return this;
+    },
+    set cornerXRadius( value ) { this.setCornerXRadius( value ); },
+
+    /**
+     * Returns the horizontal corner radius of the rectangle (in the local coordinate frame).
+     * @public
+     *
+     * @returns {number}
+     */
+    getCornerXRadius: function() {
+      return this._cornerXRadius;
+    },
+    get cornerXRadius() { return this.getCornerXRadius(); },
+
+    /**
+     * Sets the vertical corner radius of the rectangle (in the local coordinate frame).
+     * @public
+     *
+     * If the cornerXRadius and cornerYRadius are the same, the corners will be rounded circular arcs with that radius
+     * (or a smaller radius if the rectangle is too small).
+     *
+     * If the cornerXRadius and cornerYRadius are different, the corners will be elliptical arcs, and the vertical
+     * radius will be equal to cornerYRadius (or a smaller radius if the rectangle is too small).
+     *
+     * @param {number} radius
+     */
+    setCornerYRadius: function( radius ) {
+      assert && assert( typeof radius === 'number' && isFinite( radius ), 'cornerYRadius should be a finite number' );
+
+      if ( this._cornerYRadius !== radius ) {
+        this._cornerYRadius = radius;
+
+        var stateLen = this._drawables.length;
+        for ( var i = 0; i < stateLen; i++ ) {
+          this._drawables[ i ].markDirtyCornerYRadius();
+        }
+
+        this.invalidateRectangle();
+      }
+      return this;
+    },
+    set cornerYRadius( value ) { this.setCornerYRadius( value ); },
+
+    /**
+     * Returns the vertical corner radius of the rectangle (in the local coordinate frame).
+     * @public
+     *
+     * @returns {number}
+     */
+    getCornerYRadius: function() {
+      return this._cornerYRadius;
+    },
+    get cornerYRadius() { return this.getCornerYRadius(); },
+
+    /**
      * Sets the Rectangle's x/y/width/height from the Bounds2 passed in.
      * @public
      *
@@ -709,47 +925,6 @@ define( function( require ) {
     },
     get cornerRadius() { return this.getCornerRadius(); }
   } );
-
-  /*---------------------------------------------------------------------------*
-   * Other Rectangle properties and ES5
-   *----------------------------------------------------------------------------*/
-
-  function addRectProp( name, setGetCapitalized, eventName ) {
-    var getName = 'get' + setGetCapitalized;
-    var setName = 'set' + setGetCapitalized;
-    var privateName = '_' + name;
-    var dirtyMethodName = 'markDirty' + eventName;
-
-    Rectangle.prototype[ getName ] = function() {
-      return this[ privateName ];
-    };
-
-    Rectangle.prototype[ setName ] = function( value ) {
-      if ( this[ privateName ] !== value ) {
-        this[ privateName ] = value;
-        var stateLen = this._drawables.length;
-        for ( var i = 0; i < stateLen; i++ ) {
-          var state = this._drawables[ i ];
-          state[ dirtyMethodName ]();
-          state.markPaintDirty();
-        }
-        this.invalidateRectangle();
-      }
-      return this;
-    };
-
-    Object.defineProperty( Rectangle.prototype, name, {
-      set: Rectangle.prototype[ setName ],
-      get: Rectangle.prototype[ getName ]
-    } );
-  }
-
-  addRectProp( 'rectX', 'RectX', 'X' );
-  addRectProp( 'rectY', 'RectY', 'Y' );
-  addRectProp( 'rectWidth', 'RectWidth', 'Width' );
-  addRectProp( 'rectHeight', 'RectHeight', 'Height' );
-  addRectProp( 'cornerXRadius', 'CornerXRadius', 'CornerXRadius' );
-  addRectProp( 'cornerYRadius', 'CornerYRadius', 'CornerYRadius' );
 
   /**
    * Returns whether a point is within a rounded rectangle.

@@ -257,6 +257,138 @@ define( function( require ) {
     get p2() { return new Vector2( this._x2, this._y2 ); },
 
     /**
+     * Sets the x coordinate of the first point of the line.
+     * @public
+     *
+     * @param {number} x1
+     * @returns {Line} - For chaining.
+     */
+    setX1: function( x1 ) {
+      if ( this._x1 !== x1 ) {
+        this._x1 = x1;
+
+        var stateLen = this._drawables.length;
+        for ( var i = 0; i < stateLen; i++ ) {
+          this._drawables[ i ].markDirtyX1();
+        }
+
+        this.invalidateLine();
+      }
+      return this;
+    },
+    set x1( value ) { this.setX1( value ); },
+
+    /**
+     * Returns the x coordinate of the first point of the line.
+     * @public
+     *
+     * @returns {number}
+     */
+    getX1: function() {
+      return this._x1;
+    },
+    get x1() { return this.getX1(); },
+
+    /**
+     * Sets the y coordinate of the first point of the line.
+     * @public
+     *
+     * @param {number} y1
+     * @returns {Line} - For chaining.
+     */
+    setY1: function( y1 ) {
+      if ( this._y1 !== y1 ) {
+        this._y1 = y1;
+
+        var stateLen = this._drawables.length;
+        for ( var i = 0; i < stateLen; i++ ) {
+          this._drawables[ i ].markDirtyY1();
+        }
+
+        this.invalidateLine();
+      }
+      return this;
+    },
+    set y1( value ) { this.setY1( value ); },
+
+    /**
+     * Returns the y coordinate of the first point of the line.
+     * @public
+     *
+     * @returns {number}
+     */
+    getY1: function() {
+      return this._y1;
+    },
+    get y1() { return this.getY1(); },
+
+    /**
+     * Sets the x coordinate of the second point of the line.
+     * @public
+     *
+     * @param {number} x2
+     * @returns {Line} - For chaining.
+     */
+    setX2: function( x2 ) {
+      if ( this._x2 !== x2 ) {
+        this._x2 = x2;
+
+        var stateLen = this._drawables.length;
+        for ( var i = 0; i < stateLen; i++ ) {
+          this._drawables[ i ].markDirtyX2();
+        }
+
+        this.invalidateLine();
+      }
+      return this;
+    },
+    set x2( value ) { this.setX2( value ); },
+
+    /**
+     * Returns the x coordinate of the second point of the line.
+     * @public
+     *
+     * @returns {number}
+     */
+    getX2: function() {
+      return this._x2;
+    },
+    get x2() { return this.getX2(); },
+
+    /**
+     * Sets the y coordinate of the second point of the line.
+     * @public
+     *
+     * @param {number} y2
+     * @returns {Line} - For chaining.
+     */
+    setY2: function( y2 ) {
+      if ( this._y2 !== y2 ) {
+        this._y2 = y2;
+
+        var stateLen = this._drawables.length;
+        for ( var i = 0; i < stateLen; i++ ) {
+          this._drawables[ i ].markDirtyY2();
+        }
+
+        this.invalidateLine();
+      }
+      return this;
+    },
+    set y2( value ) { this.setY2( value ); },
+
+    /**
+     * Returns the y coordinate of the second point of the line.
+     * @public
+     *
+     * @returns {number}
+     */
+    getY2: function() {
+      return this._y2;
+    },
+    get y2() { return this.getY2(); },
+
+    /**
      * Returns a Shape that is equivalent to our rendered display. Generally used to lazily create a Shape instance
      * when one is needed, without having to do so beforehand.
      * @private
@@ -482,41 +614,6 @@ define( function( require ) {
     getFillRendererBitmask: function() {
       return Renderer.bitmaskCanvas | Renderer.bitmaskSVG | Renderer.bitmaskDOM | Renderer.bitmaskWebGL;
     }
-  } );
-
-  /**
-   * Getters or setters a specific coordinate (x1, y1, x2, or y2) of the line.
-   * @public
-   */
-  [ 'X1', 'Y1', 'X2', 'Y2' ].forEach( function addLineProp( capitalizedShort ) {
-    var lowerShort = capitalizedShort.toLowerCase();
-
-    var getName = 'get' + capitalizedShort;
-    var setName = 'set' + capitalizedShort;
-    var privateName = '_' + lowerShort;
-    var dirtyMethodName = 'markDirty' + capitalizedShort;
-
-    Line.prototype[ getName ] = function() {
-      return this[ privateName ];
-    };
-
-    Line.prototype[ setName ] = function( value ) {
-      if ( this[ privateName ] !== value ) {
-        this[ privateName ] = value;
-        var stateLen = this._drawables.length;
-        for ( var i = 0; i < stateLen; i++ ) {
-          var state = this._drawables[ i ];
-          state[ dirtyMethodName ]();
-        }
-        this.invalidateLine();
-      }
-      return this;
-    };
-
-    Object.defineProperty( Line.prototype, lowerShort, {
-      set: Line.prototype[ setName ],
-      get: Line.prototype[ getName ]
-    } );
   } );
 
   return Line;

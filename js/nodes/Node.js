@@ -2290,6 +2290,254 @@ define( function( require ) {
     },
     get bottom() { return this.getBottom(); },
 
+    /*
+     * Convenience locations
+     *
+     * Upper is in terms of the visual layout in Scenery and other programs, so the minY is the "upper", and minY is the "lower"
+     *
+     *             left (x)     centerX        right
+     *          ---------------------------------------
+     * top  (y) | leftTop     centerTop     rightTop
+     * centerY  | leftCenter  center        rightCenter
+     * bottom   | leftBottom  centerBottom  rightBottom
+     *
+     * NOTE: This requires computation of this node's subtree bounds, which may incur some performance loss.
+     */
+
+    /**
+     * Sets the position of the upper-left corner of this node's bounds to the specified point.
+     * @public
+     *
+     * @param {Vector2} leftTop
+     * @returns {Node} - For chaining
+     */
+    setLeftTop: function( leftTop ) {
+      assert && assert( leftTop instanceof Vector2 && leftTop.isFinite(), 'leftTop should be a finite Vector2' );
+
+      this.translate( leftTop.minus( this.getLeftTop() ), true );
+      return this;
+    },
+    set leftTop( value ) { this.setLeftTop( value ); },
+
+    /**
+     * Returns the upper-left corner of this node's bounds.
+     * @public
+     *
+     * @returns {Vector2}
+     */
+    getLeftTop: function() {
+      return this.getBounds().getLeftTop();
+    },
+    get leftTop() { return this.getLeftTop(); },
+
+    /**
+     * Sets the position of the center-top location of this node's bounds to the specified point.
+     * @public
+     *
+     * @param {Vector2} centerTop
+     * @returns {Node} - For chaining
+     */
+    setCenterTop: function( centerTop ) {
+      assert && assert( centerTop instanceof Vector2 && centerTop.isFinite(), 'centerTop should be a finite Vector2' );
+
+      this.translate( centerTop.minus( this.getCenterTop() ), true );
+      return this;
+    },
+    set centerTop( value ) { this.setCenterTop( value ); },
+
+    /**
+     * Returns the center-top location of this node's bounds.
+     * @public
+     *
+     * @returns {Vector2}
+     */
+    getCenterTop: function() {
+      return this.getBounds().getCenterTop();
+    },
+    get centerTop() { return this.getCenterTop(); },
+
+    /**
+     * Sets the position of the upper-right corner of this node's bounds to the specified point.
+     * @public
+     *
+     * @param {Vector2} rightTop
+     * @returns {Node} - For chaining
+     */
+    setRightTop: function( rightTop ) {
+      assert && assert( rightTop instanceof Vector2 && rightTop.isFinite(), 'rightTop should be a finite Vector2' );
+
+      this.translate( rightTop.minus( this.getRightTop() ), true );
+      return this;
+    },
+    set rightTop( value ) { this.setRightTop( value ); },
+
+    /**
+     * Returns the upper-right corner of this node's bounds.
+     * @public
+     *
+     * @returns {Vector2}
+     */
+    getRightTop: function() {
+      return this.getBounds().getRightTop();
+    },
+    get rightTop() { return this.getRightTop(); },
+
+    /**
+     * Sets the position of the center-left of this node's bounds to the specified point.
+     * @public
+     *
+     * @param {Vector2} leftCenter
+     * @returns {Node} - For chaining
+     */
+    setLeftCenter: function( leftCenter ) {
+      assert && assert( leftCenter instanceof Vector2 && leftCenter.isFinite(), 'leftCenter should be a finite Vector2' );
+
+      this.translate( leftCenter.minus( this.getLeftCenter() ), true );
+      return this;
+    },
+    set leftCenter( value ) { this.setLeftCenter( value ); },
+
+    /**
+     * Returns the center-left corner of this node's bounds.
+     * @public
+     *
+     * @returns {Vector2}
+     */
+    getLeftCenter: function() {
+      return this.getBounds().getLeftCenter();
+    },
+    get leftCenter() { return this.getLeftCenter(); },
+
+    /**
+     * Sets the center of this node's bounds to the specified point.
+     * @public
+     *
+     * @param {Vector2} center
+     * @returns {Node} - For chaining
+     */
+    setCenter: function( center ) {
+      assert && assert( center instanceof Vector2 && center.isFinite(), 'center should be a finite Vector2' );
+
+      this.translate( center.minus( this.getCenter() ), true );
+      return this;
+    },
+    set center( value ) { this.setCenter( value ); },
+
+    /**
+     * Returns the center of this node's bounds.
+     * @public
+     *
+     * @returns {Vector2}
+     */
+    getCenter: function() {
+      return this.getBounds().getCenter();
+    },
+    get center() { return this.getCenter(); },
+
+    /**
+     * Sets the position of the center-right of this node's bounds to the specified point.
+     * @public
+     *
+     * @param {Vector2} rightCenter
+     * @returns {Node} - For chaining
+     */
+    setRightCenter: function( rightCenter ) {
+      assert && assert( rightCenter instanceof Vector2 && rightCenter.isFinite(), 'rightCenter should be a finite Vector2' );
+
+      this.translate( rightCenter.minus( this.getRightCenter() ), true );
+      return this;
+    },
+    set rightCenter( value ) { this.setRightCenter( value ); },
+
+    /**
+     * Returns the center-right of this node's bounds.
+     * @public
+     *
+     * @returns {Vector2}
+     */
+    getRightCenter: function() {
+      return this.getBounds().getRightCenter();
+    },
+    get rightCenter() { return this.getRightCenter(); },
+
+    /**
+     * Sets the position of the lower-left corner of this node's bounds to the specified point.
+     * @public
+     *
+     * @param {Vector2} leftBottom
+     * @returns {Node} - For chaining
+     */
+    setLeftBottom: function( leftBottom ) {
+      assert && assert( leftBottom instanceof Vector2 && leftBottom.isFinite(), 'leftBottom should be a finite Vector2' );
+
+      this.translate( leftBottom.minus( this.getLeftBottom() ), true );
+      return this;
+    },
+    set leftBottom( value ) { this.setLeftBottom( value ); },
+
+    /**
+     * Returns the lower-left corner of this node's bounds.
+     * @public
+     *
+     * @returns {Vector2}
+     */
+    getLeftBottom: function() {
+      return this.getBounds().getLeftBottom();
+    },
+    get leftBottom() { return this.getLeftBottom(); },
+
+    /**
+     * Sets the position of the center-bottom of this node's bounds to the specified point.
+     * @public
+     *
+     * @param {Vector2} centerBottom
+     * @returns {Node} - For chaining
+     */
+    setCenterBottom: function( centerBottom ) {
+      assert && assert( centerBottom instanceof Vector2 && centerBottom.isFinite(), 'centerBottom should be a finite Vector2' );
+
+      this.translate( centerBottom.minus( this.getCenterBottom() ), true );
+      return this;
+    },
+    set centerBottom( value ) { this.setCenterBottom( value ); },
+
+    /**
+     * Returns the center-bottom of this node's bounds.
+     * @public
+     *
+     * @returns {Vector2}
+     */
+    getCenterBottom: function() {
+      return this.getBounds().getCenterBottom();
+    },
+    get centerBottom() { return this.getCenterBottom(); },
+
+    /**
+     * Sets the position of the lower-right corner of this node's bounds to the specified point.
+     * @public
+     *
+     * @param {Vector2} rightBottom
+     * @returns {Node} - For chaining
+     */
+    setRightBottom: function( rightBottom ) {
+      assert && assert( rightBottom instanceof Vector2 && rightBottom.isFinite(), 'rightBottom should be a finite Vector2' );
+
+      this.translate( rightBottom.minus( this.getRightBottom() ), true );
+      return this;
+    },
+    set rightBottom( value ) { this.setRightBottom( value ); },
+
+    /**
+     * Returns the lower-right corner of this node's bounds.
+     * @public
+     *
+     * @returns {Vector2}
+     */
+    getRightBottom: function() {
+      return this.getBounds().getRightBottom();
+    },
+    get rightBottom() { return this.getRightBottom(); },
+
     /**
      * Returns the width of this node's bounding box (in the parent coordinate frame).
      * @public
@@ -4290,6 +4538,10 @@ define( function( require ) {
       var self = this;
 
       _.each( this._mutatorKeys, function( key ) {
+        // See https://github.com/phetsims/scenery/issues/580 for more about passing undefined.
+        assert && assert( !options.hasOwnProperty( key ) || options[ key ] !== undefined,
+          'Undefined not allowed for Node key: ' + key );
+
         if ( options[ key ] !== undefined ) {
           var descriptor = Object.getOwnPropertyDescriptor( Node.prototype, key );
 
@@ -4503,53 +4755,6 @@ define( function( require ) {
       return index;
     }
   } ) );
-
-  /*
-   * Convenience locations
-   * @public
-   *
-   * Upper is in terms of the visual layout in Scenery and other programs, so the minY is the "upper", and minY is the "lower"
-   *
-   *             left (x)     centerX        right
-   *          ---------------------------------------
-   * top  (y) | leftTop     centerTop     rightTop
-   * centerY  | leftCenter  center        rightCenter
-   * bottom   | leftBottom  centerBottom  rightBottom
-   *
-   * NOTE: This requires computation of this node's subtree bounds, which may incur some performance loss.
-   */
-
-  // assumes the getterMethod is the same for Node and Bounds2
-  function addBoundsVectorGetterSetter( getterMethod, setterMethod, propertyName ) {
-    Node.prototype[ getterMethod ] = function() {
-      return this.getBounds()[ getterMethod ]();
-    };
-
-    Node.prototype[ setterMethod ] = function( value ) {
-      assert && assert( value instanceof Vector2 );
-
-      this.translate( value.minus( this[ getterMethod ]() ), true );
-      return this; // allow chaining
-    };
-
-    // ES5 getter and setter
-    Object.defineProperty( Node.prototype, propertyName, {
-      set: Node.prototype[ setterMethod ],
-      get: Node.prototype[ getterMethod ]
-    } );
-  }
-
-  // @public
-  // arguments are more explicit so text-searches will hopefully identify this code.
-  addBoundsVectorGetterSetter( 'getLeftTop', 'setLeftTop', 'leftTop' );
-  addBoundsVectorGetterSetter( 'getCenterTop', 'setCenterTop', 'centerTop' );
-  addBoundsVectorGetterSetter( 'getRightTop', 'setRightTop', 'rightTop' );
-  addBoundsVectorGetterSetter( 'getLeftCenter', 'setLeftCenter', 'leftCenter' );
-  addBoundsVectorGetterSetter( 'getCenter', 'setCenter', 'center' );
-  addBoundsVectorGetterSetter( 'getRightCenter', 'setRightCenter', 'rightCenter' );
-  addBoundsVectorGetterSetter( 'getLeftBottom', 'setLeftBottom', 'leftBottom' );
-  addBoundsVectorGetterSetter( 'getCenterBottom', 'setCenterBottom', 'centerBottom' );
-  addBoundsVectorGetterSetter( 'getRightBottom', 'setRightBottom', 'rightBottom' );
 
   return Node;
 } );
