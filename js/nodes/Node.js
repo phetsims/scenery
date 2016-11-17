@@ -4538,6 +4538,10 @@ define( function( require ) {
       var self = this;
 
       _.each( this._mutatorKeys, function( key ) {
+        // See https://github.com/phetsims/scenery/issues/580 for more about passing undefined.
+        assert && assert( !options.hasOwnProperty( key ) || options[ key ] !== undefined,
+          'Undefined not allowed for Node key: ' + key );
+
         if ( options[ key ] !== undefined ) {
           var descriptor = Object.getOwnPropertyDescriptor( Node.prototype, key );
 
