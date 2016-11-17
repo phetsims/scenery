@@ -81,7 +81,7 @@ define( function( require ) {
 
     Node.call( this, options );
 
-    this.updateTextFlags(); // takes care of setting up supported renderers
+    this.invalidateSupportedRenderers(); // takes care of setting up supported renderers
   }
 
   scenery.register( 'Text', Text );
@@ -135,6 +135,7 @@ define( function( require ) {
       }
       return this;
     },
+    set text( value ) { this.setText( value ); },
 
     /**
      * Returns the text displayed by our node.
@@ -147,6 +148,7 @@ define( function( require ) {
     getText: function() {
       return this._text;
     },
+    get text() { return this.getText(); },
 
     /**
      * Returns a potentially modified version of this.text, where spaces are replaced with non-breaking spaces,
@@ -196,7 +198,7 @@ define( function( require ) {
       assert && assert( method === 'fast' || method === 'fastCanvas' || method === 'accurate' || method === 'hybrid', 'Unknown Text boundsMethod' );
       if ( method !== this._boundsMethod ) {
         this._boundsMethod = method;
-        this.updateTextFlags();
+        this.invalidateSupportedRenderers();
 
         var stateLen = this._drawables.length;
         for ( var i = 0; i < stateLen; i++ ) {
@@ -211,6 +213,7 @@ define( function( require ) {
       }
       return this;
     },
+    set boundsMethod( value ) { this.setBoundsMethod( value ); },
 
     /**
      * Returns the current method to estimate the bounds of the text. See setBoundsMethod() for more information.
@@ -221,7 +224,14 @@ define( function( require ) {
     getBoundsMethod: function() {
       return this._boundsMethod;
     },
+    get boundsMethod() { return this.getBoundsMethod(); },
 
+    /**
+     * Returns a bitmask representing the supported renderers for the current configuration of the Text node.
+     * @protected
+     *
+     * @returns {number} - A bitmask that includes supported renderers, see Renderer for details.
+     */
     getTextRendererBitmask: function() {
       var bitmask = 0;
 
@@ -239,14 +249,21 @@ define( function( require ) {
       return bitmask;
     },
 
+    /**
+     * Triggers a check and update for what renderers the current configuration supports.
+     * This should be called whenever something that could potentially change supported renderers happen (which can
+     * be isHTML, boundsMethod, etc.)
+     * @public
+     */
     invalidateSupportedRenderers: function() {
       this.setRendererBitmask( this.getFillRendererBitmask() & this.getStrokeRendererBitmask() & this.getTextRendererBitmask() );
     },
 
-    updateTextFlags: function() {
-      this.invalidateSupportedRenderers();
-    },
-
+    /**
+     * Notifies that something about the text's potential bounds have changed (different text, different stroke or font,
+     * etc.)
+     * @private
+     */
     invalidateText: function() {
       this.invalidateSelf();
 
@@ -257,7 +274,7 @@ define( function( require ) {
       }
 
       // we may have changed renderers if parameters were changed!
-      this.updateTextFlags();
+      this.invalidateSupportedRenderers();
     },
 
     /**
@@ -382,7 +399,14 @@ define( function( require ) {
       return TextWebGLDrawable.createFromPool( renderer, instance );
     },
 
-    // a DOM node (not a Scenery DOM node, but an actual DOM node) with the text
+    /**
+     * Returns a DOM element that contains the specified text.
+     * @public (scenery-internal)
+     *
+     * This is needed since we have to handle HTML text differently.
+     *
+     * @returns {Element}
+     */
     getDOMTextNode: function() {
       if ( this._isHTML ) {
         var span = document.createElement( 'span' );
@@ -394,11 +418,17 @@ define( function( require ) {
       }
     },
 
-    /*---------------------------------------------------------------------------*
-     * Bounds
-     *----------------------------------------------------------------------------*/
-
-    // @override from Node
+    /**
+     * Returns a bounding box that should contain all self content in the local coordinate frame (our normal self bounds
+     * aren't guaranteed this for Text)
+     * @public
+     * @override
+     *
+     * We need to add additional padding around the text when the text is in a container that could clip things badly
+     * if the text is larger than the normal bounds computation.
+     *
+     * @returns {Bounds2}
+     */
     getSafeSelfBounds: function() {
       var expansionFactor = 1; // we use a new bounding box with a new size of size * ( 1 + 2 * expansionFactor )
 
@@ -408,13 +438,27 @@ define( function( require ) {
       return selfBounds.dilatedXY( expansionFactor * selfBounds.width, expansionFactor * selfBounds.height );
     },
 
-    /*---------------------------------------------------------------------------*
-     * Self setters / getters
-     *----------------------------------------------------------------------------*/
-
+    /**
+     * Sets the font of the Text node.
+     * @public
+     *
+     * This can either be a Scenery Font object, or a string. The string format is described by Font's constructor, and
+     * is basically the CSS3 font shortcut format. If a string is provided, it will be wrapped with a new (immutable)
+     * Scenery Font object.
+     *
+     * @param {Font|string} font
+     * @returns {Node} - For chaining.
+     */
     setFont: function( font ) {
-      if ( this.font !== font ) {
-        this._font = font instanceof scenery.Font ? font : new scenery.Font( font );
+      assert && assert( font instanceof Font || typeof font === 'string',
+        'Fonts provided to setFont should be a Font object or a string in the CSS3 font shortcut format' );
+
+      // We need to detect whether things have updated in a different way depending on whether we are passed a string
+      // or a Font object.
+      var changed = font !== ( ( typeof font === 'string' ) ? this._font.toCSS() : this._font );
+      if ( changed ) {
+        // Wrap so that our _font is of type {Font}
+        this._font = ( typeof font === 'string' ) ? new Font( font ) : font;
 
         var stateLen = this._drawables.length;
         for ( var i = 0; i < stateLen; i++ ) {
@@ -425,11 +469,170 @@ define( function( require ) {
       }
       return this;
     },
+    set font( value ) { this.setFont( value ); },
 
-    // NOTE: returns mutable copy for now, consider either immutable version, defensive copy, or note about invalidateText()
+    /**
+     * Returns a string representation of the current Font.
+     * @public
+     *
+     * This returns the CSS3 font shortcut that is a possible input to setFont(). See Font's constructor for detailed
+     * information on the ordering of information.
+     *
+     * NOTE: If a Font object was provided to setFont(), this will not currently return it.
+     * TODO: Can we refactor so we can have access to (a) the Font object, and possibly (b) the initially provided value.
+     *
+     * @returns {string}
+     */
     getFont: function() {
       return this._font.getFont();
     },
+    get font() { return this.getFont(); },
+
+    /**
+     * Sets the weight of this node's font.
+     * @public
+     *
+     * The font weight supports the following options:
+     *   'normal', 'bold', 'bolder', 'lighter', '100', '200', '300', '400', '500', '600', '700', '800', '900',
+     *   or a number that when cast to a string will be one of the strings above.
+     *
+     * @param {string|number} weight - See above
+     * @returns {Text} - For chaining.
+     */
+    setFontWeight: function( weight ) {
+      return this.setFont( this._font.copy( {
+        weight: weight
+      } ) );
+    },
+    set fontWeight( value ) { this.setFontWeight( value ); },
+
+    /**
+     * Returns the weight of this node's font, see setFontWeight() for details.
+     * @public
+     *
+     * NOTE: If a numeric weight was passed in, it has been cast to a string, and a string will be returned here.
+     *
+     * @returns {string}
+     */
+    getFontWeight: function() {
+      return this._font.getWeight();
+    },
+    get fontWeight() { return this.getFontWeight(); },
+
+    /**
+     * Sets the family of this node's font.
+     * @public
+     *
+     * @param {string} family - A comma-separated list of families, which can include generic families (preferably at
+     *                          the end) such as 'serif', 'sans-serif', 'cursive', 'fantasy' and 'monospace'. If there
+     *                          is any question about escaping (such as spaces in a font name), the family should be
+     *                          surrounded by double quotes.
+     * @returns {Text} - For chaining.
+     */
+    setFontFamily: function( family ) {
+      return this.setFont( this._font.copy( {
+        family: family
+      } ) );
+    },
+    set fontFamily( value ) { this.setFontFamily( value ); },
+
+    /**
+     * Returns the family of this node's font, see setFontFamily() for details.
+     * @public
+     *
+     * @returns {string}
+     */
+    getFontFamily: function() {
+      return this._font.getFamily();
+    },
+    get fontFamily() { return this.getFontFamily(); },
+
+    /**
+     * Sets the stretch of this node's font.
+     * @public
+     *
+     * The font stretch supports the following options:
+     *   'normal', 'ultra-condensed', 'extra-condensed', 'condensed', 'semi-condensed',
+     *   'semi-expanded', 'expanded', 'extra-expanded' or 'ultra-expanded'
+     *
+     * @param {string} stretch - See above
+     * @returns {Text} - For chaining.
+     */
+    setFontStretch: function( stretch ) {
+      return this.setFont( this._font.copy( {
+        stretch: stretch
+      } ) );
+    },
+    set fontStretch( value ) { this.setFontStretch( value ); },
+
+    /**
+     * Returns the stretch of this node's font, see setFontStretch() for details.
+     * @public
+     *
+     * @returns {string}
+     */
+    getFontStretch: function() {
+      return this._font.getStretch();
+    },
+    get fontStretch() { return this.getFontStretch(); },
+
+    /**
+     * Sets the style of this node's font.
+     * @public
+     *
+     * The font style supports the following options: 'normal', 'italic' or 'oblique'
+     *
+     * @param {string} style - See above
+     * @returns {Text} - For chaining.
+     */
+    setFontStyle: function( style ) {
+      return this.setFont( this._font.copy( {
+        style: style
+      } ) );
+    },
+    set fontStyle( value ) { this.setFontStyle( value ); },
+
+    /**
+     * Returns the style of this node's font, see setFontStyle() for details.
+     * @public
+     *
+     * @returns {string}
+     */
+    getFontStyle: function() {
+      return this._font.getStyle();
+    },
+    get fontStyle() { return this.getFontStyle(); },
+
+    /**
+     * Sets the size of this node's font.
+     * @public
+     *
+     * The size can either be a number (created as a quantity of 'px'), or any general CSS font-size string (for
+     * example, '30pt', '5em', etc.)
+     *
+     * @param {string|number} size - See above
+     * @returns {Text} - For chaining.
+     */
+    setFontSize: function( size ) {
+      return this.setFont( this._font.copy( {
+        size: size
+      } ) );
+    },
+    set fontSize( value ) { this.setFontSize( value ); },
+
+    /**
+     * Returns the size of this node's font, see setFontSize() for details.
+     * @public
+     *
+     * NOTE: If a numeric size was passed in, it has been converted to a string with 'px', and a string will be
+     * returned here.
+     *
+     * @returns {string}
+     */
+    getFontSize: function() {
+      return this._font.getSize();
+    },
+    get fontSize() { return this.getFontSize(); },
 
     /**
      * Whether this Node itself is painted (displays something itself).
@@ -512,52 +715,6 @@ define( function( require ) {
 
       return result;
     }
-  } );
-
-  /*---------------------------------------------------------------------------*
-   * Font setters / getters
-   *----------------------------------------------------------------------------*/
-
-  function addFontForwarding( propertyName, fullCapitalized, shortUncapitalized ) {
-    var getterName = 'get' + fullCapitalized;
-    var setterName = 'set' + fullCapitalized;
-
-    Text.prototype[ getterName ] = function() {
-      // use the ES5 getter to retrieve the property. probably somewhat slow.
-      return this._font[ shortUncapitalized ];
-    };
-
-    Text.prototype[ setterName ] = function( value ) {
-      // create a full copy of our font instance
-      var ob = {};
-      ob[ shortUncapitalized ] = value;
-      var newFont = this._font.copy( ob );
-
-      // apply the new Font. this should call invalidateText() as normal
-      // TODO: do more specific font dirty flags in the future, for how SVG does things
-      this.setFont( newFont );
-      return this;
-    };
-
-    Object.defineProperty( Text.prototype, propertyName, {
-      set: Text.prototype[ setterName ],
-      get: Text.prototype[ getterName ]
-    } );
-  }
-
-  addFontForwarding( 'fontWeight', 'FontWeight', 'weight' );
-  addFontForwarding( 'fontFamily', 'FontFamily', 'family' );
-  addFontForwarding( 'fontStretch', 'FontStretch', 'stretch' );
-  addFontForwarding( 'fontStyle', 'FontStyle', 'style' );
-  addFontForwarding( 'fontSize', 'FontSize', 'size' );
-
-  // font-specific ES5 setters and getters are defined using addFontForwarding above
-  // TODO: define in prototype
-  Object.defineProperty( Text.prototype, 'font', { set: Text.prototype.setFont, get: Text.prototype.getFont } );
-  Object.defineProperty( Text.prototype, 'text', { set: Text.prototype.setText, get: Text.prototype.getText } );
-  Object.defineProperty( Text.prototype, 'boundsMethod', {
-    set: Text.prototype.setBoundsMethod,
-    get: Text.prototype.getBoundsMethod
   } );
 
   // mix in support for fills and strokes
