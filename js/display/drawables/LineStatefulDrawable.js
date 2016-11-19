@@ -1,4 +1,4 @@
-// Copyright 2013-2015, University of Colorado Boulder
+// Copyright 2016, University of Colorado Boulder
 
 /**
  * A mixin to drawables for Line that need to store state about what the current display is currently showing,
@@ -15,7 +15,7 @@ define( function( require ) {
   'use strict';
 
   var scenery = require( 'SCENERY/scenery' );
-  var Paintable = require( 'SCENERY/nodes/Paintable' );
+  var PaintableStatefulDrawable = require( 'SCENERY/display/drawables/PaintableStatefulDrawable' );
 
   var LineStatefulDrawable = {
     /**
@@ -128,7 +128,7 @@ define( function( require ) {
         this.dirtyY2 = false;
       };
 
-      Paintable.PaintableStatefulDrawable.mixin( drawableType );
+      PaintableStatefulDrawable.mixin( drawableType );
     }
   };
 

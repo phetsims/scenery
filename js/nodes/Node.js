@@ -1,10 +1,152 @@
-// Copyright 2012-2015, University of Colorado Boulder
+// Copyright 2012-2016, University of Colorado Boulder
 
 /**
  * A node for the Scenery scene graph. Supports general directed acyclic graphics (DAGs).
  * Handles multiple layers with assorted types (Canvas 2D, SVG, DOM, WebGL, etc.).
  *
- * See http://phetsims.github.io/scenery/doc/#node
+ * ## General description of Nodes
+ *
+ * In Scenery, the visual output is determined by a group of connected nodes (generally known as a scene graph).
+ * Each node has a list of 'child' nodes. When a node is visually displayed, its child nodes (children) will also be
+ * displayed, along with their children, etc. There is typically one 'root' node that is passed to the Scenery Display
+ * whose descendants (nodes that can be traced from the root by child relationships) will be displayed.
+ *
+ * For instance, say there are nodes named A, B, C, D and E, who have the relationships:
+ * - B is a child of A (thus A is a parent of B)
+ * - C is a child of A (thus A is a parent of C)
+ * - D is a child of C (thus C is a parent of D)
+ * - E is a child of C (thus C is a parent of E)
+ * where A would be the root node. This can be visually represented as a scene graph, where a line connects a parent
+ * node to a child node (where the parent is usually always at the top of the line, and the child is at the bottom):
+ * For example:
+ *
+ *   A
+ *  / \
+ * B   C
+ *    / \
+ *   D   E
+ *
+ * Additionally, in this case:
+ * - D is a 'descendant' of A (due to the C being a child of A, and D being a child of C)
+ * - A is an 'ancestor' of D (due to the reverse)
+ * - C's 'subtree' is C, D and E, which consists of C itself and all of its descendants.
+ *
+ * Note that Scenery allows some more complicated forms, where nodes can have multiple parents, e.g.:
+ *
+ *   A
+ *  / \
+ * B   C
+ *  \ /
+ *   D
+ *
+ * In this case, D has two parents (B and C). Scenery disallows any node from being its own ancestor or descendant,
+ * so that loops are not possible. When a node has two or more parents, it means that the node's subtree will typically
+ * be displayed twice on the screen. In the above case, D would appear both at B's position and C's position. Each
+ * place a node would be displayed is known as an 'instance'.
+ *
+ * Each node has a 'transform' associated with it, which determines how its subtree (that node and all of its
+ * descendants) will be positioned. Transforms can contain:
+ * - Translation, which moves the position the subtree is displayed
+ * - Scale, which makes the displayed subtree larger or smaller
+ * - Rotation, which displays the subtree at an angle
+ * - or any combination of the above that uses an affine matrix (more advanced transforms with shear and combinations
+ *   are possible).
+ *
+ * Say we have the following scene graph:
+ *
+ *   A
+ *   |
+ *   B
+ *   |
+ *   C
+ *
+ * where there are the following transforms:
+ * - A has a 'translation' that moves the content 100 pixels to the right
+ * - B has a 'scale' that doubles the size of the content
+ * - C has a 'rotation' that rotates 180-degrees around the origin
+ *
+ * If C displays a square that fills the area with 0 <= x <= 10 and 0 <= y <= 10, we can determine the position on
+ * the display by applying transforms starting at C and moving towards the root node (in this case, A):
+ * 1. We apply C's rotation to our square, so the filled area will now be -10 <= x <= 0 and -10 <= y <= 0
+ * 2. We apply B's scale to our square, so now we have -20 <= x <= 0 and -20 <= y <= 0
+ * 3. We apply A's translation to our square, moving it to 80 <= x <= 100 and -20 <= y <= 0
+ *
+ * Nodes also have a large number of properties that will affect how their entire subtree is rendered, such as
+ * visibility, opacity, etc.
+ *
+ * ## Creating nodes
+ *
+ * Generally, there are two types of nodes:
+ * - Nodes that don't display anything, but serve as a container for other nodes (e.g. Node itself, HBox, VBox)
+ * - Nodes that display content, but ALSO serve as a container (e.g. Circle, Image, Text)
+ *
+ * When a node is created with the default Node constructor, e.g.:
+ *   var node = new Node();
+ * then that node will not display anything by itself.
+ *
+ * Generally subtypes of Node are used for displaying things, such as Circle, e.g.:
+ *   var circle = new Circle( 20 ); // radius of 20
+ *
+ * Almost all nodes (with the exception of leaf-only nodes like Spacer) can contain children.
+ *
+ * ## Connecting nodes, and rendering order
+ *
+ * To make a 'childNode' become a 'parentNode', the typical way is to call addChild():
+ *   parentNode.addChild( childNode );
+ *
+ * To remove this connection, you can call:
+ *   parentNode.removeChild( childNode );
+ *
+ * Adding a child node with addChild() puts it at the end of parentNode's list of child nodes. This is important,
+ * because the order of children affects what nodes are drawn on the 'top' or 'bottom' visually. Nodes that are at the
+ * end of the list of children are generally drawn on top.
+ *
+ * This is generally easiest to represent by notating scene graphs with children in order from left to right, thus:
+ *
+ *   A
+ *  / \
+ * B   C
+ *    / \
+ *   D   E
+ *
+ * would indicate that A's children are [B,C], so C's subtree is drawn ON TOP of B. The same is true of C's children
+ * [D,E], so E is drawn on top of D. If a node itself has content, it is drawn below that of its children (so C itself
+ * would be below D and E).
+ *
+ * This means that for every scene graph, nodes instances can be ordered from bottom to top. For the above example, the
+ * order is:
+ * 1. A (on the very bottom visually, may get covered up by other nodes)
+ * 2. B
+ * 3. C
+ * 4. D
+ * 5. E (on the very top visually, may be covering other nodes)
+ *
+ * ## Trails
+ *
+ * For examples where there are multiple parents for some nodes (also referred to as DAG in some code, as it represents
+ * a Directed Acyclic Graph), we need more information about the rendering order (as otherwise nodes could appear
+ * multiple places in the visual bottom-to-top order.
+ *
+ * A Trail is basically a list of nodes, where every node in the list is a child of its previous element, and a parent
+ * of its next element. Thus for the scene graph:
+ *
+ *   A
+ *  / \
+ * B   C
+ *  \ / \
+ *   D   E
+ *    \ /
+ *     F
+ *
+ * there are actually three instances of F being displayed, with three trails:
+ * - [A,B,D,F]
+ * - [A,C,D,F]
+ * - [A,C,E,F]
+ * Note that the trails are essentially listing nodes used in walking from the root (A) to the relevant node (F) using
+ * connections between parents and children.
+ *
+ * The trails above are in order from bottom to top (visually), due to the order of children. Thus since A's children
+ * are [B,C] in that order, F with the trail [A,B,D,F] is displayed below [A,C,D,F], because C is after B.
  *
  * @author Jonathan Olson <jonathan.olson@colorado.edu>
  */
@@ -2290,6 +2432,254 @@ define( function( require ) {
     },
     get bottom() { return this.getBottom(); },
 
+    /*
+     * Convenience locations
+     *
+     * Upper is in terms of the visual layout in Scenery and other programs, so the minY is the "upper", and minY is the "lower"
+     *
+     *             left (x)     centerX        right
+     *          ---------------------------------------
+     * top  (y) | leftTop     centerTop     rightTop
+     * centerY  | leftCenter  center        rightCenter
+     * bottom   | leftBottom  centerBottom  rightBottom
+     *
+     * NOTE: This requires computation of this node's subtree bounds, which may incur some performance loss.
+     */
+
+    /**
+     * Sets the position of the upper-left corner of this node's bounds to the specified point.
+     * @public
+     *
+     * @param {Vector2} leftTop
+     * @returns {Node} - For chaining
+     */
+    setLeftTop: function( leftTop ) {
+      assert && assert( leftTop instanceof Vector2 && leftTop.isFinite(), 'leftTop should be a finite Vector2' );
+
+      this.translate( leftTop.minus( this.getLeftTop() ), true );
+      return this;
+    },
+    set leftTop( value ) { this.setLeftTop( value ); },
+
+    /**
+     * Returns the upper-left corner of this node's bounds.
+     * @public
+     *
+     * @returns {Vector2}
+     */
+    getLeftTop: function() {
+      return this.getBounds().getLeftTop();
+    },
+    get leftTop() { return this.getLeftTop(); },
+
+    /**
+     * Sets the position of the center-top location of this node's bounds to the specified point.
+     * @public
+     *
+     * @param {Vector2} centerTop
+     * @returns {Node} - For chaining
+     */
+    setCenterTop: function( centerTop ) {
+      assert && assert( centerTop instanceof Vector2 && centerTop.isFinite(), 'centerTop should be a finite Vector2' );
+
+      this.translate( centerTop.minus( this.getCenterTop() ), true );
+      return this;
+    },
+    set centerTop( value ) { this.setCenterTop( value ); },
+
+    /**
+     * Returns the center-top location of this node's bounds.
+     * @public
+     *
+     * @returns {Vector2}
+     */
+    getCenterTop: function() {
+      return this.getBounds().getCenterTop();
+    },
+    get centerTop() { return this.getCenterTop(); },
+
+    /**
+     * Sets the position of the upper-right corner of this node's bounds to the specified point.
+     * @public
+     *
+     * @param {Vector2} rightTop
+     * @returns {Node} - For chaining
+     */
+    setRightTop: function( rightTop ) {
+      assert && assert( rightTop instanceof Vector2 && rightTop.isFinite(), 'rightTop should be a finite Vector2' );
+
+      this.translate( rightTop.minus( this.getRightTop() ), true );
+      return this;
+    },
+    set rightTop( value ) { this.setRightTop( value ); },
+
+    /**
+     * Returns the upper-right corner of this node's bounds.
+     * @public
+     *
+     * @returns {Vector2}
+     */
+    getRightTop: function() {
+      return this.getBounds().getRightTop();
+    },
+    get rightTop() { return this.getRightTop(); },
+
+    /**
+     * Sets the position of the center-left of this node's bounds to the specified point.
+     * @public
+     *
+     * @param {Vector2} leftCenter
+     * @returns {Node} - For chaining
+     */
+    setLeftCenter: function( leftCenter ) {
+      assert && assert( leftCenter instanceof Vector2 && leftCenter.isFinite(), 'leftCenter should be a finite Vector2' );
+
+      this.translate( leftCenter.minus( this.getLeftCenter() ), true );
+      return this;
+    },
+    set leftCenter( value ) { this.setLeftCenter( value ); },
+
+    /**
+     * Returns the center-left corner of this node's bounds.
+     * @public
+     *
+     * @returns {Vector2}
+     */
+    getLeftCenter: function() {
+      return this.getBounds().getLeftCenter();
+    },
+    get leftCenter() { return this.getLeftCenter(); },
+
+    /**
+     * Sets the center of this node's bounds to the specified point.
+     * @public
+     *
+     * @param {Vector2} center
+     * @returns {Node} - For chaining
+     */
+    setCenter: function( center ) {
+      assert && assert( center instanceof Vector2 && center.isFinite(), 'center should be a finite Vector2' );
+
+      this.translate( center.minus( this.getCenter() ), true );
+      return this;
+    },
+    set center( value ) { this.setCenter( value ); },
+
+    /**
+     * Returns the center of this node's bounds.
+     * @public
+     *
+     * @returns {Vector2}
+     */
+    getCenter: function() {
+      return this.getBounds().getCenter();
+    },
+    get center() { return this.getCenter(); },
+
+    /**
+     * Sets the position of the center-right of this node's bounds to the specified point.
+     * @public
+     *
+     * @param {Vector2} rightCenter
+     * @returns {Node} - For chaining
+     */
+    setRightCenter: function( rightCenter ) {
+      assert && assert( rightCenter instanceof Vector2 && rightCenter.isFinite(), 'rightCenter should be a finite Vector2' );
+
+      this.translate( rightCenter.minus( this.getRightCenter() ), true );
+      return this;
+    },
+    set rightCenter( value ) { this.setRightCenter( value ); },
+
+    /**
+     * Returns the center-right of this node's bounds.
+     * @public
+     *
+     * @returns {Vector2}
+     */
+    getRightCenter: function() {
+      return this.getBounds().getRightCenter();
+    },
+    get rightCenter() { return this.getRightCenter(); },
+
+    /**
+     * Sets the position of the lower-left corner of this node's bounds to the specified point.
+     * @public
+     *
+     * @param {Vector2} leftBottom
+     * @returns {Node} - For chaining
+     */
+    setLeftBottom: function( leftBottom ) {
+      assert && assert( leftBottom instanceof Vector2 && leftBottom.isFinite(), 'leftBottom should be a finite Vector2' );
+
+      this.translate( leftBottom.minus( this.getLeftBottom() ), true );
+      return this;
+    },
+    set leftBottom( value ) { this.setLeftBottom( value ); },
+
+    /**
+     * Returns the lower-left corner of this node's bounds.
+     * @public
+     *
+     * @returns {Vector2}
+     */
+    getLeftBottom: function() {
+      return this.getBounds().getLeftBottom();
+    },
+    get leftBottom() { return this.getLeftBottom(); },
+
+    /**
+     * Sets the position of the center-bottom of this node's bounds to the specified point.
+     * @public
+     *
+     * @param {Vector2} centerBottom
+     * @returns {Node} - For chaining
+     */
+    setCenterBottom: function( centerBottom ) {
+      assert && assert( centerBottom instanceof Vector2 && centerBottom.isFinite(), 'centerBottom should be a finite Vector2' );
+
+      this.translate( centerBottom.minus( this.getCenterBottom() ), true );
+      return this;
+    },
+    set centerBottom( value ) { this.setCenterBottom( value ); },
+
+    /**
+     * Returns the center-bottom of this node's bounds.
+     * @public
+     *
+     * @returns {Vector2}
+     */
+    getCenterBottom: function() {
+      return this.getBounds().getCenterBottom();
+    },
+    get centerBottom() { return this.getCenterBottom(); },
+
+    /**
+     * Sets the position of the lower-right corner of this node's bounds to the specified point.
+     * @public
+     *
+     * @param {Vector2} rightBottom
+     * @returns {Node} - For chaining
+     */
+    setRightBottom: function( rightBottom ) {
+      assert && assert( rightBottom instanceof Vector2 && rightBottom.isFinite(), 'rightBottom should be a finite Vector2' );
+
+      this.translate( rightBottom.minus( this.getRightBottom() ), true );
+      return this;
+    },
+    set rightBottom( value ) { this.setRightBottom( value ); },
+
+    /**
+     * Returns the lower-right corner of this node's bounds.
+     * @public
+     *
+     * @returns {Vector2}
+     */
+    getRightBottom: function() {
+      return this.getBounds().getRightBottom();
+    },
+    get rightBottom() { return this.getRightBottom(); },
+
     /**
      * Returns the width of this node's bounding box (in the parent coordinate frame).
      * @public
@@ -3499,7 +3889,7 @@ define( function( require ) {
       callback && callback(); // this was originally asynchronous, so we had a callback
     },
 
-    /*
+    /**
      * Renders this node to a canvas. If toCanvas( callback ) is used, the canvas will contain the node's
      * entire bounds (if no x/y/width/height is provided)
      * @public
@@ -4290,6 +4680,10 @@ define( function( require ) {
       var self = this;
 
       _.each( this._mutatorKeys, function( key ) {
+        // See https://github.com/phetsims/scenery/issues/580 for more about passing undefined.
+        assert && assert( !options.hasOwnProperty( key ) || options[ key ] !== undefined,
+          'Undefined not allowed for Node key: ' + key );
+
         if ( options[ key ] !== undefined ) {
           var descriptor = Object.getOwnPropertyDescriptor( Node.prototype, key );
 
@@ -4503,53 +4897,6 @@ define( function( require ) {
       return index;
     }
   } ) );
-
-  /*
-   * Convenience locations
-   * @public
-   *
-   * Upper is in terms of the visual layout in Scenery and other programs, so the minY is the "upper", and minY is the "lower"
-   *
-   *             left (x)     centerX        right
-   *          ---------------------------------------
-   * top  (y) | leftTop     centerTop     rightTop
-   * centerY  | leftCenter  center        rightCenter
-   * bottom   | leftBottom  centerBottom  rightBottom
-   *
-   * NOTE: This requires computation of this node's subtree bounds, which may incur some performance loss.
-   */
-
-  // assumes the getterMethod is the same for Node and Bounds2
-  function addBoundsVectorGetterSetter( getterMethod, setterMethod, propertyName ) {
-    Node.prototype[ getterMethod ] = function() {
-      return this.getBounds()[ getterMethod ]();
-    };
-
-    Node.prototype[ setterMethod ] = function( value ) {
-      assert && assert( value instanceof Vector2 );
-
-      this.translate( value.minus( this[ getterMethod ]() ), true );
-      return this; // allow chaining
-    };
-
-    // ES5 getter and setter
-    Object.defineProperty( Node.prototype, propertyName, {
-      set: Node.prototype[ setterMethod ],
-      get: Node.prototype[ getterMethod ]
-    } );
-  }
-
-  // @public
-  // arguments are more explicit so text-searches will hopefully identify this code.
-  addBoundsVectorGetterSetter( 'getLeftTop', 'setLeftTop', 'leftTop' );
-  addBoundsVectorGetterSetter( 'getCenterTop', 'setCenterTop', 'centerTop' );
-  addBoundsVectorGetterSetter( 'getRightTop', 'setRightTop', 'rightTop' );
-  addBoundsVectorGetterSetter( 'getLeftCenter', 'setLeftCenter', 'leftCenter' );
-  addBoundsVectorGetterSetter( 'getCenter', 'setCenter', 'center' );
-  addBoundsVectorGetterSetter( 'getRightCenter', 'setRightCenter', 'rightCenter' );
-  addBoundsVectorGetterSetter( 'getLeftBottom', 'setLeftBottom', 'leftBottom' );
-  addBoundsVectorGetterSetter( 'getCenterBottom', 'setCenterBottom', 'centerBottom' );
-  addBoundsVectorGetterSetter( 'getRightBottom', 'setRightBottom', 'rightBottom' );
 
   return Node;
 } );

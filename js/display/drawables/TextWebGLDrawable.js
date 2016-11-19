@@ -1,4 +1,4 @@
-// Copyright 2013-2015, University of Colorado Boulder
+// Copyright 2016, University of Colorado Boulder
 
 /**
  * WebGL drawable for Text nodes.
@@ -11,9 +11,9 @@ define( function( require ) {
 
   var inherit = require( 'PHET_CORE/inherit' );
   var scenery = require( 'SCENERY/scenery' );
-  var Paintable = require( 'SCENERY/nodes/Paintable' );
   var SelfDrawable = require( 'SCENERY/display/SelfDrawable' );
   var WebGLSelfDrawable = require( 'SCENERY/display/WebGLSelfDrawable' );
+  var PaintableStatefulDrawable = require( 'SCENERY/display/drawables/PaintableStatefulDrawable' );
 
   /**
    * A generated WebGLSelfDrawable whose purpose will be drawing our Text. One of these drawables will be created
@@ -123,8 +123,9 @@ define( function( require ) {
     }
   } );
 
+  // TODO: review this doc, we added the stateful drawable!
   // include stubs (stateless) for marking dirty stroke and fill (if necessary). we only want one dirty flag, not multiple ones, for WebGL (for now)
-  Paintable.PaintableStatefulDrawable.mixin( TextWebGLDrawable );
+  PaintableStatefulDrawable.mixin( TextWebGLDrawable );
 
   // This sets up TextWebGLDrawable.createFromPool/dirtyFromPool and drawable.freeToPool() for the type, so
   // that we can avoid allocations by reusing previously-used drawables.

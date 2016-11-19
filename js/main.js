@@ -1,4 +1,4 @@
-// Copyright 2013-2015, University of Colorado Boulder
+// Copyright 2013-2016, University of Colorado Boulder
 
 /**
  * Module that includes all Scenery dependencies, so that requiring this module will return an object
@@ -34,6 +34,8 @@ define( [
   'SCENERY/display/GreedyStitcher',
   'SCENERY/display/InlineCanvasCacheDrawable',
   'SCENERY/display/Instance',
+  'SCENERY/display/PaintObserver',
+  'SCENERY/display/PaintSVGState',
   'SCENERY/display/RebuildStitcher',
   'SCENERY/display/RelativeTransform',
   'SCENERY/display/Renderer',
@@ -61,6 +63,8 @@ define( [
   'SCENERY/display/drawables/LineStatefulDrawable',
   'SCENERY/display/drawables/LineStatelessDrawable',
   'SCENERY/display/drawables/LineSVGDrawable',
+  'SCENERY/display/drawables/PaintableStatefulDrawable',
+  'SCENERY/display/drawables/PaintableStatelessDrawable',
   'SCENERY/display/drawables/PathCanvasDrawable',
   'SCENERY/display/drawables/PathStatefulDrawable',
   'SCENERY/display/drawables/PathSVGDrawable',

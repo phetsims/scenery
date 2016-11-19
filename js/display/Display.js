@@ -1,11 +1,22 @@
-// Copyright 2013-2015, University of Colorado Boulder
+// Copyright 2013-2016, University of Colorado Boulder
 
 /**
  * A persistent display of a specific Node and its descendants, which is updated at discrete points in time.
- * Unlike Scenery's old Scene type, a Display is not itself a Node.
  *
  * Use display.getDOMElement or display.domElement to retrieve the Display's DOM representation.
  * Use display.updateDisplay() to trigger the visual update in the Display's DOM element.
+ *
+ * A standard way of using a Display with Scenery is to:
+ * 1. Create a Node that will be the root
+ * 2. Create a Display, referencing that node
+ * 3. Make changes to the scene graph
+ * 4. Call display.updateDisplay() to draw the scene graph into the Display
+ * 5. Go to (3)
+ *
+ * Common ways to simplify the change/update loop would be to:
+ * - Use Node-based events. Initialize it with Display.initializeStandaloneEvents/initializeWindowEvents/etc., then
+ *   add input listeners to parts of the scene graph (see Node.addInputListener).
+ * - Execute code (and update the display afterwards) by using Display.updateOnRequestAnimationFrame.
  *
  * Internal documentation:
  *

@@ -1,4 +1,4 @@
-// Copyright 2013-2015, University of Colorado Boulder
+// Copyright 2013-2016, University of Colorado Boulder
 
 /**
  * Represents an SVG visual element, and is responsible for tracking changes to the visual element, and then applying
@@ -21,7 +21,7 @@ define( function( require ) {
   var inherit = require( 'PHET_CORE/inherit' );
   var scenery = require( 'SCENERY/scenery' );
   var SelfDrawable = require( 'SCENERY/display/SelfDrawable' );
-  var Paintable = require( 'SCENERY/nodes/Paintable' );
+  var PaintSVGState = require( 'SCENERY/display/PaintSVGState' );
 
   function SVGSelfDrawable( renderer, instance ) {
     this.initializeSVGSelfDrawable( renderer, instance );
@@ -46,7 +46,7 @@ define( function( require ) {
 
       if ( this.usesPaint ) {
         if ( !this.paintState ) {
-          this.paintState = new Paintable.PaintSVGState();
+          this.paintState = new PaintSVGState();
         }
         else {
           this.paintState.initialize();

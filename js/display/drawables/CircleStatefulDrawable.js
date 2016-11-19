@@ -1,4 +1,4 @@
-// Copyright 2013-2015, University of Colorado Boulder
+// Copyright 2016, University of Colorado Boulder
 
 /**
  * A mixin to drawables for Circle that need to store state about what the current display is currently showing,
@@ -15,7 +15,7 @@ define( function( require ) {
   'use strict';
 
   var scenery = require( 'SCENERY/scenery' );
-  var Paintable = require( 'SCENERY/nodes/Paintable' );
+  var PaintableStatefulDrawable = require( 'SCENERY/display/drawables/PaintableStatefulDrawable' );
 
   var CircleStatefulDrawable = {
     /**
@@ -28,7 +28,7 @@ define( function( require ) {
      * 1. Check specific dirty flags (e.g. if the fill changed, update the fill of our SVG element).
      * 2. Call setToCleanState() once done, to clear the dirty flags.
      *
-     * Also mixes in Paintable.PaintableStatefulDrawable, as this is needed by all stateful Circle drawables.
+     * Also mixes in PaintableStatefulDrawable, as this is needed by all stateful Circle drawables.
      *
      * @param {function} drawableType - The constructor for the drawable type
      */
@@ -96,7 +96,7 @@ define( function( require ) {
         this.dirtyRadius = false;
       };
 
-      Paintable.PaintableStatefulDrawable.mixin( drawableType );
+      PaintableStatefulDrawable.mixin( drawableType );
     }
   };
 

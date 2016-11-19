@@ -1,4 +1,4 @@
-// Copyright 2014-2015, University of Colorado Boulder
+// Copyright 2014-2016, University of Colorado Boulder
 
 /**
  * PoolableMixin wrapper for SVG <group> elements. We store state and add listeners directly to the corresponding Node, so that we can set dirty flags and

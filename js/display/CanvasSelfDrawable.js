@@ -1,4 +1,4 @@
-// Copyright 2013-2015, University of Colorado Boulder
+// Copyright 2013-2016, University of Colorado Boulder
 
 /**
  * TODO docs
@@ -13,7 +13,7 @@ define( function( require ) {
   var inherit = require( 'PHET_CORE/inherit' );
   var scenery = require( 'SCENERY/scenery' );
   var SelfDrawable = require( 'SCENERY/display/SelfDrawable' );
-  var Paintable = require( 'SCENERY/nodes/Paintable' );
+  var PaintableStatelessDrawable = require( 'SCENERY/display/drawables/PaintableStatelessDrawable' );
 
   /**
    * @constructor
@@ -118,7 +118,7 @@ define( function( require ) {
 
     // include stubs (stateless) for marking dirty stroke and fill (if necessary). we only want one dirty flag, not multiple ones, for Canvas (for now)
     if ( usesPaint ) {
-      Paintable.PaintableStatelessDrawable.mixin( type );
+      PaintableStatelessDrawable.mixin( type );
     }
 
     // set up pooling

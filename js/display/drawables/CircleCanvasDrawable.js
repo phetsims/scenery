@@ -1,4 +1,4 @@
-// Copyright 2013-2015, University of Colorado Boulder
+// Copyright 2016, University of Colorado Boulder
 
 /**
  * Canvas drawable for Circle nodes.
@@ -11,9 +11,9 @@ define( function( require ) {
 
   var inherit = require( 'PHET_CORE/inherit' );
   var scenery = require( 'SCENERY/scenery' );
-  var Paintable = require( 'SCENERY/nodes/Paintable' );
   var CanvasSelfDrawable = require( 'SCENERY/display/CanvasSelfDrawable' );
   var SelfDrawable = require( 'SCENERY/display/SelfDrawable' );
+  var PaintableStatelessDrawable = require( 'SCENERY/display/drawables/PaintableStatelessDrawable' );
 
   /**
    * A generated CanvasSelfDrawable whose purpose will be drawing our Circle. One of these drawables will be created
@@ -21,7 +21,7 @@ define( function( require ) {
    * @public (scenery-internal)
    * @constructor
    * @extends CanvasSelfDrawable
-   * @mixes Paintable.PaintableStatelessDrawable
+   * @mixes PaintableStatelessDrawable
    * @mixes SelfDrawable.Poolable
    *
    * @param {number} renderer - Renderer bitmask, see Renderer's documentation for more details.
@@ -104,7 +104,7 @@ define( function( require ) {
   } );
 
   // Since we're not using Circle's stateful mixin, we'll need to mix in the Paintable mixin here (of the stateless variety).
-  Paintable.PaintableStatelessDrawable.mixin( CircleCanvasDrawable );
+  PaintableStatelessDrawable.mixin( CircleCanvasDrawable );
 
   // This sets up CircleCanvasDrawable.createFromPool/dirtyFromPool and drawable.freeToPool() for the type, so
   // that we can avoid allocations by reusing previously-used drawables.

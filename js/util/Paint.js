@@ -1,4 +1,4 @@
-// Copyright 2014, University of Colorado Boulder
+// Copyright 2014-2016, University of Colorado Boulder
 
 /**
  * Base type for gradients and patterns (and NOT the only type for fills/strokes)
