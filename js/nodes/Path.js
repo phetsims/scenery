@@ -32,16 +32,18 @@ define( function( require ) {
    * @constructor
    * @extends Node
    * @mixes Paintable
+   * @mixes Events
    *
    * Path has two additional options (above what Node provides):
    * - shape: The actual Shape (or a string representing an SVG path, or null).
    * - boundsMethod: Determines how the bounds of a shape are determined.
    *
-   * @param {Shape|string|null} shape
-   * @param {Object} [options] - All options passed through to Node
+   * @param {Shape|string|null} shape - The initial Shape to display. See setShape() for more details and documentation.
+   * @param {Object} [options] - Path-specific options are documented in PATH_OPTION_KEYS above, and can be provided
+   *                             along-side options for Node
    */
   function Path( shape, options ) {
-    // @private {Shape|null}
+    // @private {Shape|null} - The Shape used for displaying this Path.
     // NOTE: _shape can be lazily constructed in subtypes (may be null) if hasShape() is overridden to retun true,
     //       like in Rectangle. This is because usually the actual Shape is already implied by other parameters,
     //       so it is best to not have to compute it on changes.
@@ -53,9 +55,8 @@ define( function( require ) {
     // of a Shape with a stroke.
     this._strokedShape = null;
 
-    // @private {string}, one of 'accurate', 'unstroked', 'tightPadding', 'safePadding', 'none'
-    // See setBoundsMethod for details.
-    this._boundsMethod = 'accurate'; // 'accurate', 'unstroked', 'tightPadding', 'safePadding', 'none'
+    // @private {string}, one of 'accurate', 'unstroked', 'tightPadding', 'safePadding', 'none', see setBoundsMethod()
+    this._boundsMethod = 'accurate';
 
     // @private {Function}, called with no arguments, return value not checked.
     // Used as a listener to Shapes for when they are invalidated. The listeners are not added if the Shape is
@@ -68,6 +69,7 @@ define( function( require ) {
     this.initializePaintable();
 
     Node.call( this );
+
     this.invalidateSupportedRenderers();
 
     options = extendDefined( {
@@ -77,7 +79,7 @@ define( function( require ) {
     this.mutate( options );
   }
 
-  scenery.register( 'Path', Path ); // Also mixes in Paintable.
+  scenery.register( 'Path', Path );
 
   inherit( Node, Path, {
     /**
@@ -569,8 +571,7 @@ define( function( require ) {
     }
   } );
 
-  // mix in fill/stroke handling code. for now, this is done after 'shape' is added to the mutatorKeys so that stroke parameters
-  // get set first
+  // mix in support for fills and strokes
   Paintable.mixin( Path );
 
   return Path;
