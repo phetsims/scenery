@@ -4,7 +4,149 @@
  * A node for the Scenery scene graph. Supports general directed acyclic graphics (DAGs).
  * Handles multiple layers with assorted types (Canvas 2D, SVG, DOM, WebGL, etc.).
  *
- * See http://phetsims.github.io/scenery/doc/#node
+ * ## General description of Nodes
+ *
+ * In Scenery, the visual output is determined by a group of connected nodes (generally known as a scene graph).
+ * Each node has a list of 'child' nodes. When a node is visually displayed, its child nodes (children) will also be
+ * displayed, along with their children, etc. There is typically one 'root' node that is passed to the Scenery Display
+ * whose descendants (nodes that can be traced from the root by child relationships) will be displayed.
+ *
+ * For instance, say there are nodes named A, B, C, D and E, who have the relationships:
+ * - B is a child of A (thus A is a parent of B)
+ * - C is a child of A (thus A is a parent of C)
+ * - D is a child of C (thus C is a parent of D)
+ * - E is a child of C (thus C is a parent of E)
+ * where A would be the root node. This can be visually represented as a scene graph, where a line connects a parent
+ * node to a child node (where the parent is usually always at the top of the line, and the child is at the bottom):
+ * For example:
+ *
+ *   A
+ *  / \
+ * B   C
+ *    / \
+ *   D   E
+ *
+ * Additionally, in this case:
+ * - D is a 'descendant' of A (due to the C being a child of A, and D being a child of C)
+ * - A is an 'ancestor' of D (due to the reverse)
+ * - C's 'subtree' is C, D and E, which consists of C itself and all of its descendants.
+ *
+ * Note that Scenery allows some more complicated forms, where nodes can have multiple parents, e.g.:
+ *
+ *   A
+ *  / \
+ * B   C
+ *  \ /
+ *   D
+ *
+ * In this case, D has two parents (B and C). Scenery disallows any node from being its own ancestor or descendant,
+ * so that loops are not possible. When a node has two or more parents, it means that the node's subtree will typically
+ * be displayed twice on the screen. In the above case, D would appear both at B's position and C's position. Each
+ * place a node would be displayed is known as an 'instance'.
+ *
+ * Each node has a 'transform' associated with it, which determines how its subtree (that node and all of its
+ * descendants) will be positioned. Transforms can contain:
+ * - Translation, which moves the position the subtree is displayed
+ * - Scale, which makes the displayed subtree larger or smaller
+ * - Rotation, which displays the subtree at an angle
+ * - or any combination of the above that uses an affine matrix (more advanced transforms with shear and combinations
+ *   are possible).
+ *
+ * Say we have the following scene graph:
+ *
+ *   A
+ *   |
+ *   B
+ *   |
+ *   C
+ *
+ * where there are the following transforms:
+ * - A has a 'translation' that moves the content 100 pixels to the right
+ * - B has a 'scale' that doubles the size of the content
+ * - C has a 'rotation' that rotates 180-degrees around the origin
+ *
+ * If C displays a square that fills the area with 0 <= x <= 10 and 0 <= y <= 10, we can determine the position on
+ * the display by applying transforms starting at C and moving towards the root node (in this case, A):
+ * 1. We apply C's rotation to our square, so the filled area will now be -10 <= x <= 0 and -10 <= y <= 0
+ * 2. We apply B's scale to our square, so now we have -20 <= x <= 0 and -20 <= y <= 0
+ * 3. We apply A's translation to our square, moving it to 80 <= x <= 100 and -20 <= y <= 0
+ *
+ * Nodes also have a large number of properties that will affect how their entire subtree is rendered, such as
+ * visibility, opacity, etc.
+ *
+ * ## Creating nodes
+ *
+ * Generally, there are two types of nodes:
+ * - Nodes that don't display anything, but serve as a container for other nodes (e.g. Node itself, HBox, VBox)
+ * - Nodes that display content, but ALSO serve as a container (e.g. Circle, Image, Text)
+ *
+ * When a node is created with the default Node constructor, e.g.:
+ *   var node = new Node();
+ * then that node will not display anything by itself.
+ *
+ * Generally subtypes of Node are used for displaying things, such as Circle, e.g.:
+ *   var circle = new Circle( 20 ); // radius of 20
+ *
+ * Almost all nodes (with the exception of leaf-only nodes like Spacer) can contain children.
+ *
+ * ## Connecting nodes, and rendering order
+ *
+ * To make a 'childNode' become a 'parentNode', the typical way is to call addChild():
+ *   parentNode.addChild( childNode );
+ *
+ * To remove this connection, you can call:
+ *   parentNode.removeChild( childNode );
+ *
+ * Adding a child node with addChild() puts it at the end of parentNode's list of child nodes. This is important,
+ * because the order of children affects what nodes are drawn on the 'top' or 'bottom' visually. Nodes that are at the
+ * end of the list of children are generally drawn on top.
+ *
+ * This is generally easiest to represent by notating scene graphs with children in order from left to right, thus:
+ *
+ *   A
+ *  / \
+ * B   C
+ *    / \
+ *   D   E
+ *
+ * would indicate that A's children are [B,C], so C's subtree is drawn ON TOP of B. The same is true of C's children
+ * [D,E], so E is drawn on top of D. If a node itself has content, it is drawn below that of its children (so C itself
+ * would be below D and E).
+ *
+ * This means that for every scene graph, nodes instances can be ordered from bottom to top. For the above example, the
+ * order is:
+ * 1. A (on the very bottom visually, may get covered up by other nodes)
+ * 2. B
+ * 3. C
+ * 4. D
+ * 5. E (on the very top visually, may be covering other nodes)
+ *
+ * ## Trails
+ *
+ * For examples where there are multiple parents for some nodes (also referred to as DAG in some code, as it represents
+ * a Directed Acyclic Graph), we need more information about the rendering order (as otherwise nodes could appear
+ * multiple places in the visual bottom-to-top order.
+ *
+ * A Trail is basically a list of nodes, where every node in the list is a child of its previous element, and a parent
+ * of its next element. Thus for the scene graph:
+ *
+ *   A
+ *  / \
+ * B   C
+ *  \ / \
+ *   D   E
+ *    \ /
+ *     F
+ *
+ * there are actually three instances of F being displayed, with three trails:
+ * - [A,B,D,F]
+ * - [A,C,D,F]
+ * - [A,C,E,F]
+ * Note that the trails are essentially listing nodes used in walking from the root (A) to the relevant node (F) using
+ * connections between parents and children.
+ *
+ * The trails above are in order from bottom to top (visually), due to the order of children. Thus since A's children
+ * are [B,C] in that order, F with the trail [A,B,D,F] is displayed below [A,C,D,F], because C is after B.
  *
  * @author Jonathan Olson <jonathan.olson@colorado.edu>
  */
