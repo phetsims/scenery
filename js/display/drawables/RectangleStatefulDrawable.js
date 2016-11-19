@@ -1,4 +1,4 @@
-// Copyright 2013-2015, University of Colorado Boulder
+// Copyright 2016, University of Colorado Boulder
 
 /**
  * A mixin to drawables for Rectangle that need to store state about what the current display is currently showing,

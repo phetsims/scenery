@@ -1,4 +1,4 @@
-// Copyright 2013-2015, University of Colorado Boulder
+// Copyright 2016, University of Colorado Boulder
 
 /**
  * A mixin to drawables for Line does not store the line's state, as it just needs to track dirtyness overall.
