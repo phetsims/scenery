@@ -11,7 +11,7 @@ define( function( require ) {
   'use strict';
 
   var scenery = require( 'SCENERY/scenery' );
-  var Paintable = require( 'SCENERY/nodes/Paintable' );
+  var PaintObserver = require( 'SCENERY/display/PaintObserver' );
 
   var PaintableStatelessDrawable = {
     mixin: function( drawableType ) {
@@ -20,8 +20,8 @@ define( function( require ) {
       proto.initializePaintableStateless = function( renderer, instance ) {
         this.fillCallback = this.fillCallback || this.markDirtyFill.bind( this );
         this.strokeCallback = this.strokeCallback || this.markDirtyStroke.bind( this );
-        this.fillObserver = this.fillObserver || new Paintable.PaintObserver( 'fill', this.fillCallback );
-        this.strokeObserver = this.strokeObserver || new Paintable.PaintObserver( 'stroke', this.strokeCallback );
+        this.fillObserver = this.fillObserver || new PaintObserver( 'fill', this.fillCallback );
+        this.strokeObserver = this.strokeObserver || new PaintObserver( 'stroke', this.strokeCallback );
 
         this.fillObserver.initialize( instance.node );
         this.strokeObserver.initialize( instance.node );

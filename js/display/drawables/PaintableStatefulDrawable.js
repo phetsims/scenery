@@ -13,7 +13,7 @@ define( function( require ) {
   'use strict';
 
   var scenery = require( 'SCENERY/scenery' );
-  var Paintable = require( 'SCENERY/nodes/Paintable' );
+  var PaintObserver = require( 'SCENERY/display/PaintObserver' );
 
   var PaintableStatefulDrawable = {
     /**
@@ -76,10 +76,10 @@ define( function( require ) {
         this.strokeCallback = this.strokeCallback || this.markDirtyStroke.bind( this );
 
         // @private {PaintObserver} - Observers the fill property for nodes
-        this.fillObserver = this.fillObserver || new Paintable.PaintObserver( 'fill', this.fillCallback );
+        this.fillObserver = this.fillObserver || new PaintObserver( 'fill', this.fillCallback );
 
         // @private {PaintObserver} - Observers the stroke property for nodes
-        this.strokeObserver = this.strokeObserver || new Paintable.PaintObserver( 'stroke', this.strokeCallback );
+        this.strokeObserver = this.strokeObserver || new PaintObserver( 'stroke', this.strokeCallback );
 
         // Hook up our fill/stroke observers to this node
         this.fillObserver.initialize( instance.node );

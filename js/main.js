@@ -34,6 +34,8 @@ define( [
   'SCENERY/display/GreedyStitcher',
   'SCENERY/display/InlineCanvasCacheDrawable',
   'SCENERY/display/Instance',
+  'SCENERY/display/PaintObserver',
+  'SCENERY/display/PaintSVGState',
   'SCENERY/display/RebuildStitcher',
   'SCENERY/display/RelativeTransform',
   'SCENERY/display/Renderer',
