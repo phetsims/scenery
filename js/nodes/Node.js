@@ -3889,7 +3889,7 @@ define( function( require ) {
       callback && callback(); // this was originally asynchronous, so we had a callback
     },
 
-    /*
+    /**
      * Renders this node to a canvas. If toCanvas( callback ) is used, the canvas will contain the node's
      * entire bounds (if no x/y/width/height is provided)
      * @public
