@@ -518,7 +518,7 @@
                   fill: mainGradient
                 } ) );
                 scene.addChild( new scenery.Path( kite.Shape.regularPolygon( 6, 22 ), {
-                  x:        32 + 64,
+                  x: 32 + 64,
                   y: 32,
                   rotation: Math.PI / 4,
                   fill: fillGradient,
@@ -917,11 +917,14 @@
             }
           ];
 
-          var filterSubset = function( array, queryParameterKey ) {
+          var selectTestCases = function( array, queryParameterKey ) {
             if ( QueryStringMachine.containsKey( queryParameterKey ) ) {
-              var test = QueryStringMachine.get( queryParameterKey, { type: 'string' } );
-              var testIndices = test.split( '.' ).map( function( test ) {
-                return parseInt( test, 10 );
+              var testIndices = QueryStringMachine.get( queryParameterKey, {
+                type: 'array',
+                elementSchema: {
+                  type: 'number'
+                },
+                defaultValue: []
               } );
               var result = [];
               for ( var i = 0; i < testIndices.length; i++ ) {
@@ -934,17 +937,24 @@
           };
 
           // Select the renderers to be compared (for tests that declare support for them).
-          var renderers = filterSubset( [
-            'canvas',
-            'svg',
-            'dom',
-            'webgl'
-          ], 'renderer' );
+          var renderers = QueryStringMachine.get( 'renderers', {
+            type: 'array',
+            elementSchema: {
+              type: 'string',
+
+              validValues: [
+                'canvas',
+                'svg',
+                'dom',
+                'webgl'
+              ]
+            }
+          } );
 
           // Allow selection of the tests by a query parameter ?test=...
           // For instance, when test=0 is specified, only show the 0th test.
-          // When test=0.1.2 is specified, show tests 0,1,2
-          testCases = filterSubset( testCases, 'test' );
+          // When test=0,1,2 is specified, show tests 0,1,2
+          testCases = selectTestCases( testCases, 'tests' );
 
           _.each( testCases, function( testCase, index ) {
             var $testTitle = $( document.createElement( 'h2' ) );
