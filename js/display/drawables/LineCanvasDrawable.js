@@ -11,9 +11,9 @@ define( function( require ) {
 
   var inherit = require( 'PHET_CORE/inherit' );
   var scenery = require( 'SCENERY/scenery' );
-  var Paintable = require( 'SCENERY/nodes/Paintable' );
   var CanvasSelfDrawable = require( 'SCENERY/display/CanvasSelfDrawable' );
   var SelfDrawable = require( 'SCENERY/display/SelfDrawable' );
+  var PaintableStatelessDrawable = require( 'SCENERY/display/drawables/PaintableStatelessDrawable' );
   // TODO: use LineStatelessDrawable instead of the custom stuff going on
   // var LineStatelessDrawable = require( 'SCENERY/display/drawables/LineStatelessDrawable' );
 
@@ -97,7 +97,7 @@ define( function( require ) {
     }
   } );
 
-  Paintable.PaintableStatelessDrawable.mixin( LineCanvasDrawable );
+  PaintableStatelessDrawable.mixin( LineCanvasDrawable );
 
   // This sets up LineCanvasDrawable.createFromPool/dirtyFromPool and drawable.freeToPool() for the type, so
   // that we can avoid allocations by reusing previously-used drawables.

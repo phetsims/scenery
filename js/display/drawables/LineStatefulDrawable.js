@@ -15,7 +15,7 @@ define( function( require ) {
   'use strict';
 
   var scenery = require( 'SCENERY/scenery' );
-  var Paintable = require( 'SCENERY/nodes/Paintable' );
+  var PaintableStatefulDrawable = require( 'SCENERY/display/drawables/PaintableStatefulDrawable' );
 
   var LineStatefulDrawable = {
     /**
@@ -128,7 +128,7 @@ define( function( require ) {
         this.dirtyY2 = false;
       };
 
-      Paintable.PaintableStatefulDrawable.mixin( drawableType );
+      PaintableStatefulDrawable.mixin( drawableType );
     }
   };
 

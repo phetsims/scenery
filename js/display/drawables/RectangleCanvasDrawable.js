@@ -11,9 +11,9 @@ define( function( require ) {
 
   var inherit = require( 'PHET_CORE/inherit' );
   var scenery = require( 'SCENERY/scenery' );
-  var Paintable = require( 'SCENERY/nodes/Paintable' );
   var CanvasSelfDrawable = require( 'SCENERY/display/CanvasSelfDrawable' );
   var SelfDrawable = require( 'SCENERY/display/SelfDrawable' );
+  var PaintableStatelessDrawable = require( 'SCENERY/display/drawables/PaintableStatelessDrawable' );
 
   /**
    * A generated CanvasSelfDrawable whose purpose will be drawing our Rectangle. One of these drawables will be created
@@ -186,7 +186,7 @@ define( function( require ) {
     }
   } );
 
-  Paintable.PaintableStatelessDrawable.mixin( RectangleCanvasDrawable );
+  PaintableStatelessDrawable.mixin( RectangleCanvasDrawable );
 
   // This sets up RectangleCanvasDrawable.createFromPool/dirtyFromPool and drawable.freeToPool() for the type, so
   // that we can avoid allocations by reusing previously-used drawables.

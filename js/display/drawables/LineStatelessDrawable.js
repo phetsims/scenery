@@ -1,7 +1,7 @@
 // Copyright 2016, University of Colorado Boulder
 
 /**
- * A mixin to drawables for Line does not store the line's state, as it just needs to track dirtyness overall.
+ * A mixin to drawables for Line that does not store the line's state, as it just needs to track dirtyness overall.
  *
  * @author Jonathan Olson <jonathan.olson@colorado.edu>
  */
@@ -10,7 +10,7 @@ define( function( require ) {
   'use strict';
 
   var scenery = require( 'SCENERY/scenery' );
-  var Paintable = require( 'SCENERY/nodes/Paintable' );
+  var PaintableStatelessDrawable = require( 'SCENERY/display/drawables/PaintableStatelessDrawable' );
 
   var LineStatelessDrawable = {
     mixin: function( drawableType ) {
@@ -65,7 +65,8 @@ define( function( require ) {
         this.markPaintDirty();
       };
 
-      Paintable.PaintableStatefulDrawable.mixin( drawableType );
+      // TODO: egad! mixing in the wrong drawable???
+      PaintableStatelessDrawable.mixin( drawableType );
     }
   };
 
