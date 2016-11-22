@@ -88,8 +88,8 @@ define( function( require ) {
 
     Node.call( this );
 
-    // @private {function} - If resize:true, will be called whenever a child is added/removed/resized
-    this._boundsListener = this.updateLayout.bind( this );
+    // @private {function} - If resize:true, will be called whenever a child has its bounds change
+    this._boundsListener = this.updateLayoutAutomatically.bind( this );
 
     // @private {boolean} - Prevents layout() from running while true. Generally will be unlocked and laid out.
     this._updateLayoutLocked = false;
@@ -97,10 +97,12 @@ define( function( require ) {
     this.onStatic( 'childInserted', this.onLayoutBoxChildInserted.bind( this ) );
     this.onStatic( 'childRemoved', this.onLayoutBoxChildRemoved.bind( this ) );
 
+    // @private {boolean} - We'll ignore the resize flag while running the initial mutate.
+    this._layoutMutating = true;
+
     this.mutate( options );
 
-    // Sanity check, since it (usually) won't fire if resize:false by now.
-    this.updateLayout();
+    this._layoutMutating = false;
   }
 
   scenery.register( 'LayoutBox', LayoutBox );
@@ -191,6 +193,16 @@ define( function( require ) {
     },
 
     /**
+     * Called when we attempt to automatically layout components.
+     * @private
+     */
+    updateLayoutAutomatically: function() {
+      if ( this._layoutMutating || this._resize ) {
+        this.updateLayout();
+      }
+    },
+
+    /**
      * Called when a child is inserted.
      * @private
      *
@@ -200,7 +212,7 @@ define( function( require ) {
       if ( this._resize ) {
         node.onStatic( 'bounds', this._boundsListener );
 
-        this.updateLayout();
+        this.updateLayoutAutomatically();
       }
     },
 
@@ -214,7 +226,7 @@ define( function( require ) {
       if ( this._resize ) {
         node.offStatic( 'bounds', this._boundsListener );
 
-        this.updateLayout();
+        this.updateLayoutAutomatically();
       }
     },
 
@@ -245,8 +257,8 @@ define( function( require ) {
 
       // Determine if the children array has changed. We'll gain a performance benefit by not triggering layout when
       // the children haven't changed.
-      if ( this._resize && !_.isEqual( oldChildren, children ) ) {
-        this.updateLayout();
+      if ( !_.isEqual( oldChildren, children ) ) {
+        this.updateLayoutAutomatically();
       }
 
       return this;
@@ -403,9 +415,7 @@ define( function( require ) {
         }
 
         // Only trigger an update if we switched TO resizing
-        if ( resize ) {
-          this.updateLayout();
-        }
+        this.updateLayoutAutomatically();
       }
 
       return this;
