@@ -211,8 +211,6 @@ define( function( require ) {
     // global reference if we have a Display (useful)
     this.scenery = scenery;
 
-    this.focusProperty = new Property( null ); // { display: {Display}, trail: {Trail} }
-
     if ( this.options.accessibility ) {
       if ( this.options.isApplication ) {
         this._domElement.setAttribute( 'aria-role', 'application' );
@@ -437,14 +435,6 @@ define( function( require ) {
         //TODO: 0px => 0?
         this._domElement.style.clip = 'rect(0px,' + this._size.width + 'px,' + this._size.height + 'px,0px)';
       }
-    },
-
-    set focus( value ) {
-      this.focusProperty.value = value;
-    },
-
-    get focus() {
-      return this.focusProperty.value;
     },
 
     getRootNode: function() {
@@ -1669,6 +1659,14 @@ define( function( require ) {
 
       // turn it to base64 and wrap it in the data URL format
       img.src = 'data:image/svg+xml;base64,' + base64;
+    },
+
+    set focus( value ) {
+      this.focusProperty.value = value;
+    },
+
+    get focus() {
+      return this.focusProperty.value;
     }
   } );
 
@@ -1676,6 +1674,8 @@ define( function( require ) {
     'scenery-grab-pointer': [ 'grab', '-moz-grab', '-webkit-grab', 'pointer' ],
     'scenery-grabbing-pointer': [ 'grabbing', '-moz-grabbing', '-webkit-grabbing', 'pointer' ]
   };
+
+  Display.focusProperty = new Property( null ); // { display: {Display}, trail: {Trail} }
 
   return Display;
 } );
