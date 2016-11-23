@@ -351,7 +351,6 @@ define( function( require ) {
     this._parents = []; // {Array.<Node>} - Unordered array of parent nodes.
 
     // @private @deprecated
-    this._peers = []; // array of peer factories: { element: ..., options: ... }, where element can be an element or a string
     this._liveRegions = []; // array of live region instances
 
     // @private {boolean} - Whether we will do more accurate (and tight) bounds computations for rotations and shears.
@@ -886,17 +885,6 @@ define( function( require ) {
           }
         }
       }
-    },
-
-    /**
-     * @deprecated?
-     * currently, there is no way to remove peers. if a string is passed as the element pattern, it will be turned into
-     * an element
-     */
-    addPeer: function( element, options ) {
-      assert && assert( !this.instances.length, 'Cannot call addPeer after a node has instances (yet)' );
-
-      this._peers.push( { element: element, options: options } );
     },
 
     /**
