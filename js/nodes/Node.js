@@ -350,9 +350,6 @@ define( function( require ) {
     this._children = []; // {Array.<Node>} - Ordered array of child nodes.
     this._parents = []; // {Array.<Node>} - Unordered array of parent nodes.
 
-    // @private @deprecated
-    this._liveRegions = []; // array of live region instances
-
     // @private {boolean} - Whether we will do more accurate (and tight) bounds computations for rotations and shears.
     this._transformBounds = false;
 
@@ -885,13 +882,6 @@ define( function( require ) {
           }
         }
       }
-    },
-
-    /**
-     * @param property any object that has es5 getter for 'value' es5 setter for value, and
-     */
-    addLiveRegion: function( property, options ) {
-      this._liveRegions.push( { property: property, options: options } );
     },
 
     /**
