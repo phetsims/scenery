@@ -242,7 +242,6 @@ define( function( require ) {
     'clipArea', // Makes things outside of a shape invisible, see setClipArea() for more documentation
     'transformBounds', // Flag that makes bounds tighter, see setTransformBounds() for more documentation
     'focusable', // Whether this node is focusable for keyboard support, see setFocusable() for more documentation
-    'focusIndicator', // Changes indicator used to show focus, see setFocusIndicator() for more documentation
     'accessibleContent', // Sets up accessibility handling, see setAccessibleContent() for more documentation
     'accessibleOrder' // Modifies the keyboard accessibility order, see setAccessibleOrder() for more documentation
   ];
@@ -333,9 +332,6 @@ define( function( require ) {
 
     // @private @deprecated {boolean} - Whether this Node should be accessible via tab ordering. Defaults to false.
     this._focusable = false;
-
-    // @private @deprecated {string} - 'cursor' or 'rectangle' at the moment. WARNING: in active development!
-    this._focusIndicator = 'rectangle';
 
     // @private {null|Object} - If non-null, this node will be represented in the parallel DOM by the accessible content.
     // The accessibleContent object will be of the form:
@@ -3040,32 +3036,6 @@ define( function( require ) {
       return this._focusable;
     },
     get focusable() { return this.getFocusable(); },
-
-    /**
-     * Sets the focus indicator for the node ('rectangle' or 'cursor').
-     * @public
-     *
-     * @param {string} focusIndicator
-     */
-    setFocusIndicator: function( focusIndicator ) {
-      if ( this._focusIndicator !== focusIndicator ) {
-        this._focusIndicator = focusIndicator;
-
-        this.trigger0( 'focusIndicator' );
-      }
-    },
-    set focusIndicator( value ) { this.setFocusIndicator( value ); },
-
-    /**
-     * Returns the focus indicator string for this node.
-     * @public
-     *
-     * @returns {string}
-     */
-    getFocusIndicator: function() {
-      return this._focusIndicator;
-    },
-    get focusIndicator() { return this.getFocusIndicator(); },
 
     /**
      * Sets the accessible focus order for this node. This includes not only focussed items, but elements that can be
