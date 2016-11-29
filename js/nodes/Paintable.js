@@ -584,7 +584,7 @@ define( function( require ) {
          * Returns the cached paints.
          * @public
          *
-         * @returns {Array.<string|Color|LinearGradient|RadialGradient|Pattern|null}
+         * @returns {Array.<string|Color|LinearGradient|RadialGradient|Pattern|null>}
          */
         getCachedPaints: function() {
           return this._cachedPaints;
