@@ -3190,18 +3190,6 @@ define( function( require ) {
     get renderer() { return this.getRenderer(); },
 
     /**
-     * Returns whether there is a preferred renderer for this node.
-     * @public
-     *
-     * TODO: is this unused?
-     *
-     * @returns {boolean}
-     */
-    hasRenderer: function() {
-      return !!this._hints.renderer;
-    },
-
-    /**
      * Sets whether or not Scenery will try to put this node (and its descendants) into a separate SVG/Canvas/WebGL/etc.
      * layer, different from other siblings or other nodes. Can be used for performance purposes.
      * @public

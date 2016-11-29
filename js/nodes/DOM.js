@@ -177,8 +177,6 @@ define( function( require ) {
      * Changes the DOM element of this DOM node to another element.
      * @public
      *
-     * TODO: is this supported?
-     *
      * @param {Element} element
      * @returns {DOM} - For chaining
      */
@@ -194,7 +192,6 @@ define( function( require ) {
 
         this._container.appendChild( this._element );
 
-        // TODO: bounds issue, since this will probably set to empty bounds and thus a repaint may not draw over it
         this.invalidateDOM();
       }
 
