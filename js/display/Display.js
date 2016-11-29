@@ -1061,9 +1061,12 @@ define( function( require ) {
     fuzzMouseEvents: function( averageEventQuantity ) {
       var chance;
 
+      assert && assert( averageEventQuantity > 0, 'Should not be fuzzing with a rate of 0' );
+
       // run a variable number of events, with a certain chance of bailing out (so no events are possible)
       // models a geometric distribution of events
-      while ( ( chance = Math.random() ) < 1 - 1 / averageEventQuantity ) {
+      // See https://github.com/phetsims/joist/issues/343 for notes on the distribution.
+      while ( ( chance = Math.random() ) < 1 - 1 / ( averageEventQuantity + 1 ) ) {
         var domEvent;
         if ( chance < ( this._fuzzMouseLastMoved ? 0.7 : 0.4 ) ) {
           // toggle up/down
