@@ -56,7 +56,7 @@ define( function( require ) {
     }
   };
 
-  // TODO: decide on an approach
+  // TODO: decide on an approach. See https://github.com/phetsims/scenery/issues/590
   var MIMIC_OLD_ALIGNMENT = true;
 
   /**
