@@ -1061,7 +1061,7 @@ define( function( require ) {
     fuzzMouseEvents: function( averageEventQuantity ) {
       var chance;
 
-      assert && assert( averageEventQuantity > 0, 'Should not be fuzzing with a rate of 0' );
+      assert && assert( averageEventQuantity > 0, 'averageEventQuantity must be positive: ' +  averageEventQuantity );
 
       // run a variable number of events, with a certain chance of bailing out (so no events are possible)
       // models a geometric distribution of events
