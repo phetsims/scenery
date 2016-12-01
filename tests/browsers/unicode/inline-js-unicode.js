@@ -1,3 +1,5 @@
+// Copyright 2016, University of Colorado Boulder
+
 $( window ).ready( function() {
   var element;
 

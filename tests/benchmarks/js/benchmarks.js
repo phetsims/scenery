@@ -1,3 +1,5 @@
+// Copyright 2016, University of Colorado Boulder
+
 /*
  * TODO notes:
  *       async vs defer vs queued

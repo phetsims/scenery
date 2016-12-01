@@ -1,4 +1,5 @@
-// Copyright 2002-2012, University of Colorado
+// Copyright 2002-2016, University of Colorado Boulder
+
 
 /**
  * Compares performance benchmarks across version snapshots to help determine

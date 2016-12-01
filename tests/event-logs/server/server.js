@@ -1,3 +1,5 @@
+// Copyright 2016, University of Colorado Boulder
+
 // WARNING: running this on a server is a MAJOR security risk, since it could allow arbitrary file reads/writes to a remote attacker.
 // Only run this sporadically, and when behind a NAT router or firewall where it will never be touched.
 

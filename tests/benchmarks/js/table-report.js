@@ -1,3 +1,5 @@
+// Copyright 2016, University of Colorado Boulder
+
 var marks = marks || {};
 
 (function() {
