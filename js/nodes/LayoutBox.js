@@ -56,9 +56,6 @@ define( function( require ) {
     }
   };
 
-  // TODO: decide on an approach. See https://github.com/phetsims/scenery/issues/590
-  var MIMIC_OLD_ALIGNMENT = true;
-
   /**
    * @public
    * @constructor
@@ -127,22 +124,16 @@ define( function( require ) {
      * @returns {Bounds2}
      */
     getAlignmentBounds: function() {
-      if ( MIMIC_OLD_ALIGNMENT ) {
-        // The bounding box containing all current children (not aligned to the origin)
-        return this.childBounds;
-      }
-      else {
-        // Construct a Bounds2 at the origin, but with the maximum width/height of the children.
-        var maxWidth = Number.NEGATIVE_INFINITY;
-        var maxHeight = Number.NEGATIVE_INFINITY;
+      // Construct a Bounds2 at the origin, but with the maximum width/height of the children.
+      var maxWidth = Number.NEGATIVE_INFINITY;
+      var maxHeight = Number.NEGATIVE_INFINITY;
 
-        for ( var i = 0; i < this._children.length; i++ ) {
-          var child = this._children[ i ];
-          maxWidth = Math.max( maxWidth, child.width );
-          maxHeight = Math.max( maxHeight, child.height );
-        }
-        return new Bounds2( 0, 0, maxWidth, maxHeight );
+      for ( var i = 0; i < this._children.length; i++ ) {
+        var child = this._children[ i ];
+        maxWidth = Math.max( maxWidth, child.width );
+        maxHeight = Math.max( maxHeight, child.height );
       }
+      return new Bounds2( 0, 0, maxWidth, maxHeight );
     },
 
     /**
