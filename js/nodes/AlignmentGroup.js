@@ -47,13 +47,28 @@ define( function( require ) {
     createContainer: function( content, options ) {
       assert && assert( content instanceof Node );
 
+      // Set a resize lock around creating the alignment container, so that we don't waste time on every mutation.
+      var lastLock = this._resizeLock;
+      this._resizeLock = true;
       var container = new AlignmentContainer( content, this, options );
+      this._resizeLock = lastLock;
+
       this._containers.push( container );
 
       // Trigger an update when a container is added
       this.updateLayout();
 
       return container;
+    },
+
+    /**
+     * Dispose all of the containers.
+     * @public
+     */
+    dispose: function() {
+      for ( var i = this._containers.length - 1; i >= 0; i-- ) {
+        this._containers[ i ].dispose();
+      }
     },
 
     /**
@@ -111,18 +126,15 @@ define( function( require ) {
 
       // Trigger an update when a container is removed
       this.updateLayout();
-    },
-
-    /**
-     * Dispose all of the containers.
-     * @public
-     */
-    dispose: function() {
-      for ( var i = this._containers.length - 1; i >= 0; i-- ) {
-        this._containers[ i ].dispose();
-      }
     }
   } );
+
+  var ALIGNMENT_CONTAINER_OPTION_KEYS = [
+    'xAlign', // {string} - 'left', 'center', or 'right', for horizontal positioning
+    'yAlign', // {string} - 'top', 'center', or 'bottom', for vertical positioning
+    'xMargin', // {number} - Non-negative margin that should exist on the left and right of the content
+    'yMargin' // {number} - Non-negative margin that should exist on the top and bottom of the content.
+  ];
 
   /**
    * @constructor
@@ -133,29 +145,13 @@ define( function( require ) {
    * @param {Object} [options] - See the _.extend below in AlignmentContainer for documentation. Also passed to Node.
    */
   function AlignmentContainer( content, alignmentGroup, options ) {
-    options = _.extend( {
-      xAlign: 'center', // {string} - 'left', 'center', or 'right', for horizontal positioning
-      yAlign: 'center', // {string} - 'top', 'center', or 'bottom', for vertical positioning
-      xMargin: 0, // {number} - Non-negative margin that should exist on the left and right of the content
-      yMargin: 0 // {number} - Non-negative margin that should exist on the top and bottom of the content.
-    }, options );
-
-    assert && assert( options.xAlign === 'left' || options.xAlign === 'center' || options.xAlign === 'right',
-      'xAlign should be one of: \'left\', \'center\', or \'right\'' );
-    assert && assert( options.yAlign === 'left' || options.yAlign === 'center' || options.yAlign === 'right',
-      'yAlign should be one of: \'top\', \'center\', or \'bottom\'' );
-    assert && assert( typeof options.xMargin === 'number' && isFinite( options.xMargin ) && options.xMargin >= 0,
-      'xMargin should be a finite non-negative number' );
-    assert && assert( typeof options.yMargin === 'number' && isFinite( options.yMargin ) && options.yMargin >= 0,
-      'yMargin should be a finite non-negative number' );
-
     // @private {string}
-    this._xAlign = options.xAlign;
-    this._yAlign = options.yAlign;
+    this._xAlign = 'center';
+    this._yAlign = 'center';
 
     // @private {number}
-    this._xMargin = options.xMargin;
-    this._yMargin = options.yMargin;
+    this._xMargin = 0;
+    this._yMargin = 0;
 
     // @private {Node}
     this._content = content;
@@ -168,12 +164,164 @@ define( function( require ) {
 
     this._content.on( 'bounds', this._contentBoundsListener );
 
-    Node.call( this, _.extend( options, {
+    Node.call( this, _.extend( {}, options, {
       children: [ this._content ]
     } ) );
   }
 
   inherit( Node, AlignmentContainer, {
+    /**
+     * {Array.<string>} - String keys for all of the allowed options that will be set by node.mutate( options ), in the
+     * order they will be evaluated in.
+     * @protected
+     *
+     * NOTE: See Node's _mutatorKeys documentation for more information on how this operates, and potential special
+     *       cases that may apply.
+     */
+    _mutatorKeys: ALIGNMENT_CONTAINER_OPTION_KEYS.concat( Node.prototype._mutatorKeys ),
+
+    /**
+     * Sets the horizontal alignment of this container.
+     * @public
+     *
+     * Available values are 'left', 'center', or 'right'.
+     *
+     * @param {string} xAlign
+     * @returns {AlignmentContainer} - For chaining
+     */
+    setXAlign: function( xAlign ) {
+      assert && assert( xAlign === 'left' || xAlign === 'center' || xAlign === 'right',
+        'xAlign should be one of: \'left\', \'center\', or \'right\'' );
+
+      if ( this._xAlign !== xAlign ) {
+        this._xAlign = xAlign;
+
+        // Trigger re-layout
+        this._alignmentGroup.onContainerContentResized( this );
+      }
+
+      return this;
+    },
+    set xAlign( value ) { this.setXAlign( value ); },
+
+    /**
+     * Returns the current horizontal alignment of this container.
+     * @public
+     *
+     * @returns {string} - See setXAlign for values.
+     */
+    getXAlign: function() {
+      return this._xAlign;
+    },
+    get xAlign() { return this.getXAlign(); },
+
+    /**
+     * Sets the vertical alignment of this container.
+     * @public
+     *
+     * Available values are 'top', 'center', or 'bottom'.
+     *
+     * @param {string} yAlign
+     * @returns {AlignmentContainer} - For chaining
+     */
+    setYAlign: function( yAlign ) {
+      assert && assert( yAlign === 'left' || yAlign === 'center' || yAlign === 'right',
+        'yAlign should be one of: \'top\', \'center\', or \'bottom\'' );
+
+      if ( this._yAlign !== yAlign ) {
+        this._yAlign = yAlign;
+
+        // Trigger re-layout
+        this._alignmentGroup.onContainerContentResized( this );
+      }
+
+      return this;
+    },
+    set yAlign( value ) { this.setYAlign( value ); },
+
+    /**
+     * Returns the current vertical alignment of this container.
+     * @public
+     *
+     * @returns {string} - See setYAlign for values.
+     */
+    getYAlign: function() {
+      return this._yAlign;
+    },
+    get yAlign() { return this.getYAlign(); },
+
+    /**
+     * Sets the horizontal margin of this container.
+     * @public
+     *
+     * This margin is the minimum amount of horizontal space that will exist between the content and the left and
+     * right sides of this container.
+     *
+     * @param {number} xMargin
+     * @returns {AlignmentContainer} - For chaining
+     */
+    setXMargin: function( xMargin ) {
+      assert && assert( typeof xMargin === 'number' && isFinite( xMargin ) && xMargin >= 0,
+        'xMargin should be a finite non-negative number' );
+
+      if ( this._xMargin !== xMargin ) {
+        this._xMargin = xMargin;
+
+        // Trigger re-layout
+        this._alignmentGroup.onContainerContentResized( this );
+      }
+
+      return this;
+    },
+    set xMargin( value ) { this.setXMargin( value ); },
+
+    /**
+     * Returns the current horizontal margin of this container.
+     * @public
+     *
+     * @returns {number} - See setXMargin for values.
+     */
+    getXMargin: function() {
+      return this._xMargin;
+    },
+    get xMargin() { return this.getXMargin(); },
+
+    /**
+     * Sets the vertical margin of this container.
+     * @public
+     *
+     * This margin is the minimum amount of vertical space that will exist between the content and the top and
+     * bottom sides of this container.
+     *
+     * @param {number} yMargin
+     * @returns {AlignmentContainer} - For chaining
+     */
+    setYMargin: function( yMargin ) {
+      assert && assert( typeof yMargin === 'number' && isFinite( yMargin ) && yMargin >= 0,
+        'yMargin should be a finite non-negative number' );
+
+      if ( this._yMargin !== yMargin ) {
+        this._yMargin = yMargin;
+
+        // Trigger re-layout
+        this._alignmentGroup.onContainerContentResized( this );
+      }
+
+      return this;
+    },
+    set yMargin( value ) { this.setYMargin( value ); },
+
+    /**
+     * Returns the current vertical margin of this container.
+     * @public
+     *
+     * @returns {number} - See setYMargin for values.
+     */
+    getYMargin: function() {
+      return this._yMargin;
+    },
+    get yMargin() { return this.getYMargin(); },
+
     /**
      * Returns the bounding box of this container's content. This will include any margins.
      * @private
@@ -192,6 +340,11 @@ define( function( require ) {
      * @param {number} height
      */
     updateLayout: function( width, height ) {
+      // Avoid layout if width/height haven't been properly updated yet
+      if ( width === 0 && height === 0 ) {
+        return;
+      }
+
       this.localBounds = new Bounds2( 0, 0, width, height );
 
       if ( this._xAlign === 'center' ) {
