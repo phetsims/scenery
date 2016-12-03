@@ -1,7 +1,7 @@
 // Copyright 2016-2016, University of Colorado Boulder
 
 /**
- * A container Node that will align content within a specific bounding box.
+ * A Node that will align child (content) node within a specific bounding box.
  *
  * If a custom alignBounds is provided, content will be aligned within that bounding box. Otherwise, it will be aligned
  * within a bounding box with the left-top corner of (0,0) of the necessary size to include both the content and
@@ -10,10 +10,10 @@
  * There are four margins: left, right, top, bottom. They can be set independently, or multiple can be set at the
  * same time (xMargin, yMargin and margin).
  *
- * NOTE: Container resize may not happen immediately, and may be delayed until bounds of a container's child occurs.
- *       layout updates can be forced with invalidateAlignment(). If the container's content that changed is connected
+ * NOTE: AlignBox resize may not happen immediately, and may be delayed until bounds of a alignBox's child occurs.
+ *       layout updates can be forced with invalidateAlignment(). If the alignBox's content that changed is connected
  *       to a Scenery display, its bounds will update when Display.updateDisplay() will called, so this will guarantee
- *       that the layout will be applied before it is displayed. container.getBounds() will not force a refresh, and
+ *       that the layout will be applied before it is displayed. alignBox.getBounds() will not force a refresh, and
  *       may return stale bounds.
  *
  * @author Jonathan Olson <jonathan.olson@colorado.edu>
@@ -38,7 +38,7 @@ define( function( require ) {
     'rightMargin', // {number} - Sets right margin, see setRightMargin() for more documentation
     'topMargin', // {number} - Sets top margin, see setTopMargin() for more documentation
     'bottomMargin', // {number} - Sets bottom margin, see setBottomMargin() for more documentation
-    'group' // {AlignmentGroup|null} - Share bounds with others, see setGroup() for more documentation
+    'group' // {AlignGroup|null} - Share bounds with others, see setGroup() for more documentation
   ];
 
   /**
@@ -47,11 +47,11 @@ define( function( require ) {
    * @constructor
    * @public
    *
-   * @param {Node} content - Content to align inside of the container
-   * @param {Object} [options] - AlignmentContainer-specific options are documented in ALIGNMENT_CONTAINER_OPTION_KEYS
+   * @param {Node} content - Content to align inside of the alignBox
+   * @param {Object} [options] - AlignBox-specific options are documented in ALIGNMENT_CONTAINER_OPTION_KEYS
    *                             above, and can be provided along-side options for Node
    */
-  function AlignmentContainer( content, options ) {
+  function AlignBox( content, options ) {
 
     // @private {Node} - Our actual content
     this._content = content;
@@ -69,7 +69,7 @@ define( function( require ) {
     this._topMargin = 0;
     this._bottomMargin = 0;
 
-    // @private {AlignmentGroup|null} - If available, an AlignmentGroup that will control our alignBounds
+    // @private {AlignGroup|null} - If available, an AlignGroup that will control our alignBounds
     this._group = null;
 
     // @private {function} - Callback for when bounds change (takes no arguments)
@@ -83,9 +83,9 @@ define( function( require ) {
     } ) );
   }
 
-  scenery.register( 'AlignmentContainer', AlignmentContainer );
+  scenery.register( 'AlignBox', AlignBox );
 
-  inherit( Node, AlignmentContainer, {
+  inherit( Node, AlignBox, {
     /**
      * {Array.<string>} - String keys for all of the allowed options that will be set by node.mutate( options ), in the
      * order they will be evaluated in.
@@ -100,14 +100,14 @@ define( function( require ) {
      * Triggers recomputation of the alignment. Should be called if it needs to be refreshed.
      * @public
      *
-     * NOTE: container.getBounds() will not trigger a bounds validation for our content, and thus WILL NOT trigger
+     * NOTE: alignBox.getBounds() will not trigger a bounds validation for our content, and thus WILL NOT trigger
      * layout. content.getBounds() should trigger it, but invalidateAligment() is the preferred method for forcing a
      * re-check.
      */
     invalidateAlignment: function() {
       // The group update will change our alignBounds if required.
       if ( this._group ) {
-        this._group.onContainerContentResized( this );
+        this._group.onAlignBoxResized( this );
       }
 
       // If the alignBounds didn't change, we'll still need to update our own layout
@@ -115,15 +115,15 @@ define( function( require ) {
     },
 
     /**
-     * Sets the alignment bounds (the bounds in which our content will be aligned). If null, AlignmentContainer will act
+     * Sets the alignment bounds (the bounds in which our content will be aligned). If null, AlignBox will act
      * as if the alignment bounds have a left-top corner of (0,0) and with a width/height that fits the content and
      * bounds.
      * @public
      *
-     * NOTE: If the group is a valid AlignmentGroup, it will be responsible for setting the alignBounds.
+     * NOTE: If the group is a valid AlignGroup, it will be responsible for setting the alignBounds.
      *
      * @param {Bounds2|null} alignBounds
-     * @returns {AlignmentContainer} - For chaining
+     * @returns {AlignBox} - For chaining
      */
     setAlignBounds: function( alignBounds ) {
       assert && assert( alignBounds === null || ( alignBounds instanceof Bounds2 && !alignBounds.isEmpty() && alignBounds.isFinite() ),
@@ -154,26 +154,26 @@ define( function( require ) {
     get alignBounds() { return this.getAlignBounds(); },
 
     /**
-     * Sets the attachment to an AlignmentGroup. When attached, our alignBounds will be controlled by the group.
+     * Sets the attachment to an AlignGroup. When attached, our alignBounds will be controlled by the group.
      * @public
      *
-     * @param {AlignmentGroup|null} group
-     * @returns {AlignmentContainer} - For chaining
+     * @param {AlignGroup|null} group
+     * @returns {AlignBox} - For chaining
      */
     setGroup: function( group ) {
-      assert && assert( group instanceof scenery.AlignmentGroup, 'group should be an AlignmentGroup' );
+      assert && assert( group === null || group instanceof scenery.AlignGroup, 'group should be an AlignGroup' );
 
       if ( this._group !== group ) {
         // Remove from a previous group
         if ( this._group ) {
-          this._group.removeContainer( this );
+          this._group.removeAlignBox( this );
         }
 
         this._group = group;
 
         // Add to a new group
         if ( this._group ) {
-          this._group.addContainer( this );
+          this._group.addAlignBox( this );
         }
       }
 
@@ -185,7 +185,7 @@ define( function( require ) {
      * Returns the attached alignment group (if one exists), or null otherwise.
      * @public
      *
-     * @returns {AlignmentGroup|null}
+     * @returns {AlignGroup|null}
      */
     getGroup: function() {
       return this._group;
@@ -193,13 +193,13 @@ define( function( require ) {
     get group() { return this.getGroup(); },
 
     /**
-     * Sets the horizontal alignment of this container.
+     * Sets the horizontal alignment of this box.
      * @public
      *
      * Available values are 'left', 'center', or 'right'.
      *
      * @param {string} xAlign
-     * @returns {AlignmentContainer} - For chaining
+     * @returns {AlignBox} - For chaining
      */
     setXAlign: function( xAlign ) {
       assert && assert( xAlign === 'left' || xAlign === 'center' || xAlign === 'right',
@@ -217,7 +217,7 @@ define( function( require ) {
     set xAlign( value ) { this.setXAlign( value ); },
 
     /**
-     * Returns the current horizontal alignment of this container.
+     * Returns the current horizontal alignment of this box.
      * @public
      *
      * @returns {string} - See setXAlign for values.
@@ -228,13 +228,13 @@ define( function( require ) {
     get xAlign() { return this.getXAlign(); },
 
     /**
-     * Sets the vertical alignment of this container.
+     * Sets the vertical alignment of this box.
      * @public
      *
      * Available values are 'top', 'center', or 'bottom'.
      *
      * @param {string} yAlign
-     * @returns {AlignmentContainer} - For chaining
+     * @returns {AlignBox} - For chaining
      */
     setYAlign: function( yAlign ) {
       assert && assert( yAlign === 'top' || yAlign === 'center' || yAlign === 'bottom',
@@ -252,7 +252,7 @@ define( function( require ) {
     set yAlign( value ) { this.setYAlign( value ); },
 
     /**
-     * Returns the current vertical alignment of this container.
+     * Returns the current vertical alignment of this box.
      * @public
      *
      * @returns {string} - See setYAlign for values.
@@ -263,14 +263,14 @@ define( function( require ) {
     get yAlign() { return this.getYAlign(); },
 
     /**
-     * Sets the margin of this container (setting margin values for all sides at once).
+     * Sets the margin of this box (setting margin values for all sides at once).
      * @public
      *
      * This margin is the minimum amount of horizontal space that will exist between the content the sides of this
-     * container.
+     * box.
      *
      * @param {number} margin
-     * @returns {AlignmentContainer} - For chaining
+     * @returns {AlignBox} - For chaining
      */
     setMargin: function( margin ) {
       assert && assert( typeof margin === 'number' && isFinite( margin ) && margin >= 0,
@@ -291,7 +291,7 @@ define( function( require ) {
     set margin( value ) { this.setMargin( value ); },
 
     /**
-     * Returns the current margin of this container (assuming all margin values are the same).
+     * Returns the current margin of this box (assuming all margin values are the same).
      * @public
      *
      * @returns {number} - See setMargin for more information.
@@ -306,14 +306,14 @@ define( function( require ) {
     get margin() { return this.getMargin(); },
 
     /**
-     * Sets the horizontal margin of this container (setting both left and right margins at once).
+     * Sets the horizontal margin of this box (setting both left and right margins at once).
      * @public
      *
      * This margin is the minimum amount of horizontal space that will exist between the content and the left and
-     * right sides of this container.
+     * right sides of this box.
      *
      * @param {number} xMargin
-     * @returns {AlignmentContainer} - For chaining
+     * @returns {AlignBox} - For chaining
      */
     setXMargin: function( xMargin ) {
       assert && assert( typeof xMargin === 'number' && isFinite( xMargin ) && xMargin >= 0,
@@ -331,7 +331,7 @@ define( function( require ) {
     set xMargin( value ) { this.setXMargin( value ); },
 
     /**
-     * Returns the current horizontal margin of this container (assuming the left and right margins are the same).
+     * Returns the current horizontal margin of this box (assuming the left and right margins are the same).
      * @public
      *
      * @returns {number} - See setXMargin for more information.
@@ -344,14 +344,14 @@ define( function( require ) {
     get xMargin() { return this.getXMargin(); },
 
     /**
-     * Sets the vertical margin of this container (setting both top and bottom margins at once).
+     * Sets the vertical margin of this box (setting both top and bottom margins at once).
      * @public
      *
      * This margin is the minimum amount of vertical space that will exist between the content and the top and
-     * bottom sides of this container.
+     * bottom sides of this box.
      *
      * @param {number} yMargin
-     * @returns {AlignmentContainer} - For chaining
+     * @returns {AlignBox} - For chaining
      */
     setYMargin: function( yMargin ) {
       assert && assert( typeof yMargin === 'number' && isFinite( yMargin ) && yMargin >= 0,
@@ -369,7 +369,7 @@ define( function( require ) {
     set yMargin( value ) { this.setYMargin( value ); },
 
     /**
-     * Returns the current vertical margin of this container (assuming the top and bottom margins are the same).
+     * Returns the current vertical margin of this box (assuming the top and bottom margins are the same).
      * @public
      *
      * @returns {number} - See setYMargin for more information.
@@ -382,14 +382,14 @@ define( function( require ) {
     get yMargin() { return this.getYMargin(); },
 
     /**
-     * Sets the left margin of this container.
+     * Sets the left margin of this box.
      * @public
      *
      * This margin is the minimum amount of horizontal space that will exist between the content and the left side of
-     * the container.
+     * the box.
      *
      * @param {number} leftMargin
-     * @returns {AlignmentContainer} - For chaining
+     * @returns {AlignBox} - For chaining
      */
     setLeftMargin: function( leftMargin ) {
       assert && assert( typeof leftMargin === 'number' && isFinite( leftMargin ) && leftMargin >= 0,
@@ -407,7 +407,7 @@ define( function( require ) {
     set leftMargin( value ) { this.setLeftMargin( value ); },
 
     /**
-     * Returns the current left margin of this container.
+     * Returns the current left margin of this box.
      * @public
      *
      * @returns {number} - See setLeftMargin for more information.
@@ -418,14 +418,14 @@ define( function( require ) {
     get leftMargin() { return this.getLeftMargin(); },
 
     /**
-     * Sets the right margin of this container.
+     * Sets the right margin of this box.
      * @public
      *
      * This margin is the minimum amount of horizontal space that will exist between the content and the right side of
      * the container.
      *
      * @param {number} rightMargin
-     * @returns {AlignmentContainer} - For chaining
+     * @returns {AlignBox} - For chaining
      */
     setRightMargin: function( rightMargin ) {
       assert && assert( typeof rightMargin === 'number' && isFinite( rightMargin ) && rightMargin >= 0,
@@ -443,7 +443,7 @@ define( function( require ) {
     set rightMargin( value ) { this.setRightMargin( value ); },
 
     /**
-     * Returns the current right margin of this container.
+     * Returns the current right margin of this box.
      * @public
      *
      * @returns {number} - See setRightMargin for more information.
@@ -454,14 +454,14 @@ define( function( require ) {
     get rightMargin() { return this.getRightMargin(); },
 
     /**
-     * Sets the top margin of this container.
+     * Sets the top margin of this box.
      * @public
      *
      * This margin is the minimum amount of vertical space that will exist between the content and the top side of the
      * container.
      *
      * @param {number} topMargin
-     * @returns {AlignmentContainer} - For chaining
+     * @returns {AlignBox} - For chaining
      */
     setTopMargin: function( topMargin ) {
       assert && assert( typeof topMargin === 'number' && isFinite( topMargin ) && topMargin >= 0,
@@ -479,7 +479,7 @@ define( function( require ) {
     set topMargin( value ) { this.setTopMargin( value ); },
 
     /**
-     * Returns the current top margin of this container.
+     * Returns the current top margin of this box.
      * @public
      *
      * @returns {number} - See setTopMargin for more information.
@@ -490,14 +490,14 @@ define( function( require ) {
     get topMargin() { return this.getTopMargin(); },
 
     /**
-     * Sets the bottom margin of this container.
+     * Sets the bottom margin of this box.
      * @public
      *
      * This margin is the minimum amount of vertical space that will exist between the content and the bottom side of the
      * container.
      *
      * @param {number} bottomMargin
-     * @returns {AlignmentContainer} - For chaining
+     * @returns {AlignBox} - For chaining
      */
     setBottomMargin: function( bottomMargin ) {
       assert && assert( typeof bottomMargin === 'number' && isFinite( bottomMargin ) && bottomMargin >= 0,
@@ -515,7 +515,7 @@ define( function( require ) {
     set bottomMargin( value ) { this.setBottomMargin( value ); },
 
     /**
-     * Returns the current bottom margin of this container.
+     * Returns the current bottom margin of this box.
      * @public
      *
      * @returns {number} - See setBottomMargin for more information.
@@ -526,7 +526,7 @@ define( function( require ) {
     get bottomMargin() { return this.getBottomMargin(); },
 
     /**
-     * Returns the bounding box of this container's content. This will include any margins.
+     * Returns the bounding box of this box's content. This will include any margins.
      * @private
      *
      * @returns {Bounds2}
@@ -540,7 +540,7 @@ define( function( require ) {
     },
 
     /**
-     * Updates the layout of this alignment container.
+     * Updates the layout of this alignment box.
      * @private
      */
     updateLayout: function() {
@@ -586,18 +586,17 @@ define( function( require ) {
     },
 
     /**
-     * Disposes this container, so that the alignment group won't update this container, and won't use its bounds for
-     * laying out the other containers.
+     * Disposes this box, releasing listeners and any references to an AlignGroup
      * @public
      */
     dispose: function() {
+      // Remove our listener
       this._content.off( 'bounds', this._contentBoundsListener );
 
-      if ( this._group ) {
-        this._group.removeContainer( this );
-      }
+      // Disconnects from the group
+      this.group = null;
     }
   } );
 
-  return AlignmentContainer;
+  return AlignBox;
 } );

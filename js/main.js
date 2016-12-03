@@ -92,8 +92,8 @@ define( [
   'SCENERY/input/SimpleDragHandler',
   'SCENERY/input/Touch',
 
-  'SCENERY/nodes/AlignmentContainer',
-  'SCENERY/nodes/AlignmentGroup',
+  'SCENERY/nodes/AlignBox',
+  'SCENERY/nodes/AlignGroup',
   'SCENERY/nodes/CanvasNode',
   'SCENERY/nodes/Circle',
   'SCENERY/nodes/DOM',

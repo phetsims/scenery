@@ -3,13 +3,13 @@
 (function() {
   'use strict';
 
-  module( 'Scenery: AlignmentGroup' );
+  module( 'Scenery: AlignBox/AlignGroup' );
 
   test( 'Single Container', function() {
     var circle = new scenery.Circle( 20 );
 
-    var group = new scenery.AlignmentGroup();
-    var container = group.createContainer( circle, {
+    var group = new scenery.AlignGroup();
+    var container = group.createBox( circle, {
       xMargin: 10,
       yMargin: 20
     } );
@@ -45,16 +45,16 @@
     var circle = new scenery.Circle( 10 );
     var rectangle = new scenery.Rectangle( 0, 0, 60, 60 );
 
-    var group = new scenery.AlignmentGroup();
+    var group = new scenery.AlignGroup();
 
-    var circleContainer = group.createContainer( circle, {
+    var circleContainer = group.createBox( circle, {
       xMargin: 10,
       yMargin: 20,
       xAlign: 'left',
       yAlign: 'bottom'
     } );
 
-    var rectangleContainer = group.createContainer( rectangle );
+    var rectangleContainer = group.createBox( rectangle );
 
     ok( circleContainer.xMargin === 10, 'circle: xMargin' );
     ok( circleContainer.yMargin === 20, 'circle: yMargin' );
@@ -94,7 +94,7 @@
     ok( circleContainer.bounds.equals( new dot.Bounds2( 0, 0, 40, 60 ) ), 'Circle Container: Removed Rect Container' );
     ok( circle.bounds.equals( new dot.Bounds2( 10, 20, 30, 40 ) ), 'Circle: Removed Rect Container' );
 
-    rectangleContainer = group.createContainer( rectangle, { yMargin: 20 } ); circleContainer.getBounds(); rectangleContainer.getBounds(); // trigger check
+    rectangleContainer = group.createBox( rectangle, { yMargin: 20 } ); circleContainer.getBounds(); rectangleContainer.getBounds(); // trigger check
     // circle: 20x20, with margin: 40x60
     // rectangle: 60x60, with margin: 60x100
     ok( circleContainer.bounds.equals( new dot.Bounds2( 0, 0, 60, 100 ) ), 'Circle Container: Added back container' );
