@@ -8,6 +8,11 @@
  *
  * Containers can be dynamically created and disposed, and only active containers will be considered for the bounds.
  *
+ * NOTE: Container resizes may not happen immediately, and may be delayed until bounds of a container's child occurs.
+ *       layout updates can be forced with group.updateLayout(). If the container's content that changed is connected
+ *       to a Scenery display, its bounds will update when Display.updateDisplay() will called, so this will guarantee
+ *       that the layout will be applied before it is displayed.
+ *
  * @author Jonathan Olson <jonathan.olson@colorado.edu>
  */
 
@@ -21,9 +26,12 @@ define( function( require ) {
   var Node = require( 'SCENERY/nodes/Node' );
 
   /**
-   * Creates an alignment group that can be composed of multiple containers (made with createContainer()).
+   * Creates an alignment group that can be composed of multiple containers.
    * @constructor
    * @public
+   *
+   * Use createContainer() to create containers. You can dispose() individual containers, or call dispose() on this
+   * group to dispose all of them.
    */
   function AlignmentGroup() {
     // @private {Array.<AlignmentContainer>}
@@ -48,6 +56,7 @@ define( function( require ) {
       assert && assert( content instanceof Node );
 
       // Set a resize lock around creating the alignment container, so that we don't waste time on every mutation.
+      // We'll want to restore its previous value afterwards.
       var lastLock = this._resizeLock;
       this._resizeLock = true;
       var container = new AlignmentContainer( content, this, options );
@@ -73,7 +82,10 @@ define( function( require ) {
 
     /**
      * Updates the localBounds and alignment for each container.
-     * @private
+     * @public
+     *
+     * NOTE: Calling this will usually not be necessary outside of Scenery, but this WILL trigger bounds revalidation
+     *       for every container, which can force the layout code to run.
      */
     updateLayout: function() {
       if ( this._resizeLock ) { return; }
@@ -137,10 +149,12 @@ define( function( require ) {
   ];
 
   /**
+   * An individual container for an alignment group. Will maintain its size to match that of the group by overriding
+   * its localBounds, and will position its content inside its localBounds by respecting its alignment and margins.
    * @constructor
    * @private
    *
-   * @param {Node} content
+   * @param {Node} content - Node that was passed to createContainer(). We will change its position to keep it aligned.
    * @param {AlignmentGroup} alignmentGroup
    * @param {Object} [options] - See the _.extend below in AlignmentContainer for documentation. Also passed to Node.
    */
@@ -162,6 +176,7 @@ define( function( require ) {
     // @private {function} - Callback for when bounds change
     this._contentBoundsListener = alignmentGroup.onContainerContentResized.bind( alignmentGroup, this );
 
+    // dispose() will remove it.
     this._content.on( 'bounds', this._contentBoundsListener );
 
     Node.call( this, _.extend( {}, options, {
