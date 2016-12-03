@@ -56,21 +56,10 @@ define( function( require ) {
     createContainer: function( content, options ) {
       assert && assert( content instanceof Node );
 
-      // Set a resize lock around creating the alignment container, so that we don't waste time on every mutation.
-      // We'll want to restore its previous value afterwards.
-      var lastLock = this._resizeLock;
-      this._resizeLock = true;
-      var container = new AlignmentContainer( content, _.extend( {
+      // Setting the group should call our addContainer()
+      return new AlignmentContainer( content, _.extend( {
         group: this
       }, options ) );
-      this._resizeLock = lastLock;
-
-      this._containers.push( container );
-
-      // Trigger an update when a container is added
-      this.updateLayout();
-
-      return container;
     },
 
     /**
@@ -135,10 +124,21 @@ define( function( require ) {
     },
 
     /**
-     * Handles disposal of the container
+     * Adds the container to the group
      * @private
      */
-    disposeContainer: function( container ) {
+    addContainer: function( container ) {
+      this._containers.push( container );
+
+      // Trigger an update when a container is added
+      this.updateLayout();
+    },
+
+    /**
+     * Removes the container from the group
+     * @private
+     */
+    removeContainer: function( container ) {
       arrayRemove( this._containers, container );
 
       // Trigger an update when a container is removed
