@@ -16,7 +16,7 @@ function runSceneryTests( pathToTestBase ) {
   loadTestFile( 'js/test-utils.js' );
   loadTestFile( 'js/scene.js' );
   loadTestFile( 'js/shapes.js' );
-  loadTestFile( 'js/alignmentContainer.js' );
+  loadTestFile( 'js/alignment.js' );
   loadTestFile( 'js/color.js' );
   loadTestFile( 'js/input.js' );
   loadTestFile( 'js/transforms.js' );

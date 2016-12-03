@@ -22,19 +22,19 @@
     ok( container.bounds.equals( new dot.Bounds2( 0, 0, 60, 80 ) ), 'Margins' );
     ok( circle.bounds.equals( new dot.Bounds2( 10, 20, 50, 60 ) ), 'Circle: Margins' );
 
-    circle.radius = 10; container.getBounds(); // trigger bounds check
+    circle.radius = 10; circle.getBounds(); // trigger bounds check
     ok( container.bounds.equals( new dot.Bounds2( 0, 0, 40, 60 ) ), 'Change to the content size' );
     ok( circle.bounds.equals( new dot.Bounds2( 10, 20, 30, 40 ) ), 'Circle: Change to the content size' );
 
-    circle.x = 100; container.getBounds(); // trigger bounds check
+    circle.x = 100; circle.getBounds(); // trigger bounds check
     ok( container.bounds.equals( new dot.Bounds2( 0, 0, 40, 60 ) ), 'Reposition on content location change' );
     ok( circle.bounds.equals( new dot.Bounds2( 10, 20, 30, 40 ) ), 'Circle: Reposition on content location change' );
 
-    circle.scale( 2 ); container.getBounds(); // trigger bounds check
+    circle.scale( 2 ); circle.getBounds(); // trigger bounds check
     ok( container.bounds.equals( new dot.Bounds2( 0, 0, 60, 80 ) ), 'Handle scaling' );
     ok( circle.bounds.equals( new dot.Bounds2( 10, 20, 50, 60 ) ), 'Circle: Handle scaling' );
 
-    container.xMargin = 0; container.getBounds(); // trigger bounds check
+    container.xMargin = 0; circle.getBounds(); // trigger bounds check
     ok( container.bounds.equals( new dot.Bounds2( 0, 0, 40, 80 ) ), 'xMargin change' );
     ok( circle.bounds.equals( new dot.Bounds2( 0, 20, 40, 60 ) ), 'Circle: xMargin change' );
 
