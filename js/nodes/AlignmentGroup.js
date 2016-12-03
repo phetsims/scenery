@@ -225,7 +225,7 @@ define( function( require ) {
      * @returns {AlignmentContainer} - For chaining
      */
     setYAlign: function( yAlign ) {
-      assert && assert( yAlign === 'left' || yAlign === 'center' || yAlign === 'right',
+      assert && assert( yAlign === 'top' || yAlign === 'center' || yAlign === 'bottom',
         'yAlign should be one of: \'top\', \'center\', or \'bottom\'' );
 
       if ( this._yAlign !== yAlign ) {
