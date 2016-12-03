@@ -75,6 +75,9 @@ define( function( require ) {
     // @private {function} - Callback for when bounds change (takes no arguments)
     this._contentBoundsListener = this.invalidateAlignment.bind( this );
 
+    // @private {boolean} - Used to prevent loops
+    this._layoutLock = false;
+
     // Will be removed by dispose()
     this._content.on( 'bounds', this._contentBoundsListener );
 
@@ -544,6 +547,9 @@ define( function( require ) {
      * @private
      */
     updateLayout: function() {
+      if ( this._layoutLock ) { return; }
+      this._layoutLock = true;
+
       // If we have alignBounds, use that.
       if ( this._alignBounds !== null ) {
         this.localBounds = this._alignBounds;
@@ -556,7 +562,7 @@ define( function( require ) {
       }
 
       if ( this._xAlign === 'center' ) {
-        this._content.centerX = this.localBounds.centerX;
+        this._content.centerX = this.localBounds.centerX + ( this.leftMargin - this.rightMargin ) / 2;
       }
       else if ( this._xAlign === 'left' ) {
         this._content.left = this.localBounds.left + this._leftMargin;
@@ -569,7 +575,7 @@ define( function( require ) {
       }
 
       if ( this._yAlign === 'center' ) {
-        this._content.centerY = this.localBounds.centerY;
+        this._content.centerY = this.localBounds.centerY + ( this.topMargin - this.bottomMargin ) / 2;
       }
       else if ( this._yAlign === 'top' ) {
         this._content.top = this.localBounds.top + this._topMargin;
@@ -581,8 +587,10 @@ define( function( require ) {
         assert && assert( 'Bad yAlign: ' + this._yAlign );
       }
 
-      assert && assert( this.localBounds.dilated( 1e-5 ).containsBounds( this._content.bounds ),
-        'All of our contents should be contained in our localBounds' );
+      // assert && assert( this.localBounds.dilated( 1e-5 ).containsBounds( this._content.bounds ),
+      //   'All of our contents should be contained in our localBounds' );
+
+      this._layoutLock = false;
     },
 
     /**
