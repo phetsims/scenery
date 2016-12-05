@@ -89,7 +89,9 @@ define( function( require ) {
     ImageSVGDrawable: { name: 'ImageSVGDrawable', style: 'color: #000;' },
     Paints: { name: 'Paints', style: 'color: #000;' },
     Accessibility: { name: 'Accessibility', style: 'color: #000;' },
-    AccessibleInstance: { name: 'AccessibleInstance', style: 'color: #000;' }
+    AccessibleInstance: { name: 'AccessibleInstance', style: 'color: #000;' },
+    AlignBox: { name: 'AlignBox', style: 'color: #000;' },
+    AlignGroup: { name: 'AlignGroup', style: 'color: #000;' }
   };
 
   // will be filled in by other modules
@@ -167,6 +169,9 @@ define( function( require ) {
       };
       window.sceneryLog.pop = function() {
         logPadding = logPadding.slice( 0, -2 );
+      };
+      window.sceneryLog.getDepth = function() {
+        return logPadding.length / 2;
       };
 
       for ( var i = 0; i < logNames.length; i++ ) {
