@@ -515,7 +515,7 @@
     scene.insertChild( 0, node0 );
     node0.insertChild( 0, path1 );
     scene.transform.append( dot.Matrix3.scaling( 1.5586118499044517 ) );
-    node0.renderer = "canvas";
+    node0.renderer = 'canvas';
     display.updateDisplay();
 
     expect( 0 );
@@ -551,7 +551,7 @@
     var paint5 = new scenery.RadialGradient( 0, 0, 0, 0, 0, 50 ).addColorStop( 0, 'red' ).addColorStop( 1, 'black' );
     node5.insertChild( 0, node6 );
     node5.removeChild( node6 );
-    text0.renderer = "dom";
+    text0.renderer = 'dom';
     display.updateDisplay();
     path1.insertChild( 0, path2 );
     text0.transform.append( dot.Matrix3.translation( 23.65897111594677, 82.57610886357725 ) );
@@ -621,7 +621,7 @@
     scene.insertChild( 0, node6 );
     node4.removeChild( node5 );
     text1.insertChild( 1, path3 );
-    text0.renderer = "svg";
+    text0.renderer = 'svg';
     scene.insertChild( 1, path2 );
     text1.transform.prepend( dot.Matrix3.scaling( 1.6156445062946716 ) );
     display.updateDisplay();
@@ -679,7 +679,7 @@
     path2.stroke = paint0;
     text0.transform.setMatrix( dot.Matrix3.rotation2( 0.7311607901360053 ) );
     path2.fill = paint2;
-    path0.renderer = "canvas";
+    path0.renderer = 'canvas';
     display.updateDisplay();
     node4.insertChild( 0, text1 );
     text1.fill = paint4;
@@ -736,7 +736,7 @@
     display.updateDisplay();
     text0.stroke = paint3;
     node4.insertChild( 2, node5 );
-    text0.renderer = "canvas";
+    text0.renderer = 'canvas';
     path2.transform.prepend( dot.Matrix3.scaling( 1.1811730723124185 ) );
     path1.shape = shape1;
     display.updateDisplay();
@@ -747,7 +747,7 @@
     node6.transform.prepend( dot.Matrix3.rotation2( 3.265904462624187 ) );
     text0.insertChild( 0, node4 );
     node2.transform.setMatrix( dot.Matrix3.scaling( 1.4989715692348966 ) );
-    text0.renderer = "svg";
+    text0.renderer = 'svg';
     scene.transform.append( dot.Matrix3.translation( 44.83502432703972, 94.38534369692206 ) );
     display.updateDisplay();
     display.updateDisplay();
@@ -792,8 +792,8 @@
     text1.stroke = paint2;
     node4.removeChild( text1 );
     text1.insertChild( 0, path0 );
-    node1.renderer = "dom";
-    node1.renderer = "canvas";
+    node1.renderer = 'dom';
+    node1.renderer = 'canvas';
     node2.insertChild( 0, node5 );
     node3.transform.prepend( dot.Matrix3.rotation2( 3.527586292277044 ) );
     node2.transform.append( dot.Matrix3.rotation2( 4.657131034509444 ) );
@@ -818,7 +818,7 @@
     display.updateDisplay();
     text0.removeChild( node4 );
     path3.stroke = paint0;
-    path2.renderer = "svg";
+    path2.renderer = 'svg';
     node1.removeChild( path3 );
     path1.insertChild( 1, text0 );
     node1.renderer = null;
@@ -834,11 +834,11 @@
     path2.insertChild( 0, path0 );
     path1.shape = shape1;
     path0.removeChild( node1 );
-    node0.renderer = "svg";
+    node0.renderer = 'svg';
     node0.renderer = null;
     text2.insertChild( 0, path2 );
     node2.insertChild( 0, node0 );
-    path1.renderer = "canvas";
+    path1.renderer = 'canvas';
     display.updateDisplay();
     node2.removeChild( node0 );
     node0.insertChild( 2, path2 );
@@ -901,7 +901,7 @@
     path1.insertChild( 1, path0 );
     path1.removeChild( path0 );
     path1.removeChild( node5 );
-    path3.renderer = "svg";
+    path3.renderer = 'svg';
     path0.transform.append( dot.Matrix3.translation( -76.12051209434867, 43.94800164736807 ) );
     path2.renderer = null;
     scene.removeChild( text1 );
@@ -967,14 +967,14 @@
     text2.fill = paint2;
     display.updateDisplay();
     path2.shape = shape2;
-    node5.renderer = "canvas";
+    node5.renderer = 'canvas';
     path1.transform.prepend( dot.Matrix3.translation( -69.14590587839484, 19.880587048828602 ) );
     node3.insertChild( 2, node2 );
     path2.insertChild( 0, text1 );
     display.updateDisplay();
     text0.removeChild( node0 );
     path3.transform.setMatrix( dot.Matrix3.rotation2( 3.4165883704823514 ) );
-    node0.renderer = "svg";
+    node0.renderer = 'svg';
     text0.fill = paint5;
     text2.insertChild( 0, node1 );
     display.updateDisplay();
@@ -1012,7 +1012,7 @@
     node3.removeChild( node2 );
     display.updateDisplay();
     path3.renderer = null;
-    node2.renderer = "svg";
+    node2.renderer = 'svg';
     path0.shape = shape1;
     path2.insertChild( 2, path1 );
     scene.removeChild( path3 );
@@ -1037,7 +1037,7 @@
     path0.removeChild( path1 );
     node1.removeChild( node4 );
     path0.removeChild( node6 );
-    path1.renderer = "svg";
+    path1.renderer = 'svg';
     node3.removeChild( path0 );
     node5.removeChild( path3 );
     node5.insertChild( 0, text1 );
@@ -1061,13 +1061,13 @@
     scene.removeChild( node4 );
     display.updateDisplay();
     path3.insertChild( 0, path0 );
-    path0.renderer = "canvas";
+    path0.renderer = 'canvas';
     path0.renderer = null;
     path1.transform.append( dot.Matrix3.translation( -35.264304326847196, 96.3960608933121 ) );
     path0.transform.prepend( dot.Matrix3.scaling( 0.9710232618957948 ) );
     node1.removeChild( node5 );
     path3.shape = shape0;
-    node3.renderer = "svg";
+    node3.renderer = 'svg';
     path2.stroke = paint2;
     display.updateDisplay();
     path0.shape = shape2;
@@ -1211,7 +1211,7 @@
     display.updateDisplay();
     path1.insertChild( 1, scene );
     display.updateDisplay();
-    node3.renderer = "canvas";
+    node3.renderer = 'canvas';
     node5.removeChild( text1 );
     display.updateDisplay();
     display.updateDisplay();
@@ -1240,7 +1240,7 @@
     text1.transform.prepend( dot.Matrix3.translation( 16.831281781196594, -17.87359449081123 ) );
     display.updateDisplay();
     text1.fill = paint2;
-    text2.renderer = "svg";
+    text2.renderer = 'svg';
     display.updateDisplay();
     scene.transform.append( dot.Matrix3.scaling( 1.1725298586528936 ) );
     path2.stroke = paint4;
@@ -1265,7 +1265,7 @@
     path3.transform.prepend( dot.Matrix3.scaling( 1.3556024435669372 ) );
     text0.removeChild( node3 );
     text1.fill = paint5;
-    node2.renderer = "canvas";
+    node2.renderer = 'canvas';
     display.updateDisplay();
     node6.removeChild( scene );
     display.updateDisplay();
@@ -1297,7 +1297,7 @@
     path3.stroke = paint4;
     path0.removeChild( node0 );
     text0.transform.prepend( dot.Matrix3.scaling( 0.821637343731169 ) );
-    node1.renderer = "canvas";
+    node1.renderer = 'canvas';
     display.updateDisplay();
     path1.shape = shape2;
     text0.insertChild( 0, node0 );
