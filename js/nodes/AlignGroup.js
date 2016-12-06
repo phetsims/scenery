@@ -26,6 +26,8 @@ define( function( require ) {
   var Node = require( 'SCENERY/nodes/Node' );
   var AlignBox = require( 'SCENERY/nodes/AlignBox' );
 
+  var globalId = 1;
+
   /**
    * Creates an alignment group that can be composed of multiple boxes.
    * @constructor
@@ -58,6 +60,9 @@ define( function( require ) {
 
     // @private {boolean} - Gets locked when certain layout is performed.
     this._resizeLock = false;
+
+    // @private {number}
+    this.id = globalId++;
   }
 
   scenery.register( 'AlignGroup', AlignGroup );
@@ -167,6 +172,13 @@ define( function( require ) {
       if ( this._resizeLock ) { return; }
       this._resizeLock = true;
 
+      sceneryLog && sceneryLog.AlignGroup && sceneryLog.AlignGroup(
+        'AlignGroup#' + this.id + ' updateLayout' );
+      sceneryLog && sceneryLog.AlignGroup && sceneryLog.push();
+
+      sceneryLog && sceneryLog.AlignGroup && sceneryLog.AlignGroup( 'AlignGroup computing maximum dimension' );
+      sceneryLog && sceneryLog.AlignGroup && sceneryLog.push();
+
       // Compute the maximum dimension of our alignBoxs' content
       var maxWidth = 0;
       var maxHeight = 0;
@@ -184,6 +196,9 @@ define( function( require ) {
         maxHeight = Math.max( maxHeight, bounds.height );
       }
 
+      sceneryLog && sceneryLog.AlignGroup && sceneryLog.pop();
+      sceneryLog && sceneryLog.AlignGroup && sceneryLog.AlignGroup( 'AlignGroup applying to boxes' );
+      sceneryLog && sceneryLog.AlignGroup && sceneryLog.push();
 
       if ( maxWidth > 0 && maxHeight > 0 ) {
         // Apply that maximum dimension for each alignBox
@@ -191,6 +206,9 @@ define( function( require ) {
           this.setBoxBounds( this._alignBoxes[ i ], maxWidth, maxHeight );
         }
       }
+
+      sceneryLog && sceneryLog.AlignGroup && sceneryLog.pop();
+      sceneryLog && sceneryLog.AlignGroup && sceneryLog.pop();
 
       this._resizeLock = false;
     },

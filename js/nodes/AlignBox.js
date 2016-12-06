@@ -108,6 +108,9 @@ define( function( require ) {
      * re-check.
      */
     invalidateAlignment: function() {
+      sceneryLog && sceneryLog.AlignBox && sceneryLog.AlignBox( 'AlignBox#' + this.id + ' invalidateAlignment' );
+      sceneryLog && sceneryLog.AlignBox && sceneryLog.push();
+
       // The group update will change our alignBounds if required.
       if ( this._group ) {
         this._group.onAlignBoxResized( this );
@@ -115,6 +118,8 @@ define( function( require ) {
 
       // If the alignBounds didn't change, we'll still need to update our own layout
       this.updateLayout();
+
+      sceneryLog && sceneryLog.AlignBox && sceneryLog.pop();
     },
 
     /**
@@ -535,11 +540,38 @@ define( function( require ) {
      * @returns {Bounds2}
      */
     getContentBounds: function() {
+      sceneryLog && sceneryLog.AlignBox && sceneryLog.AlignBox( 'AlignBox#' + this.id + ' getContentBounds' );
+      sceneryLog && sceneryLog.AlignBox && sceneryLog.push();
+
       var bounds = this._content.bounds;
+
+      sceneryLog && sceneryLog.AlignBox && sceneryLog.pop();
+
       return new Bounds2( bounds.left - this._leftMargin,
                           bounds.top - this._topMargin,
                           bounds.right + this._rightMargin,
                           bounds.bottom + this._bottomMargin );
+    },
+
+    /**
+     * Conditionally updates a certain property of our content's positioning.
+     * @private
+     *
+     * Essentially does the following (but prevents infinite loops by not applying changes if the numbers are very
+     * similar):
+     * this._content[ propName ] = this.localBounds[ propName ] + offset;
+     *
+     * @param {string} propName - A positional property on both Node and Bounds2, e.g. 'left'
+     * @param {number} offset - Offset to be applied to the localBounds location.
+     */
+    updateProperty: function( propName, offset ) {
+      var currentValue = this._content[ propName ];
+      var newValue = this.localBounds[ propName ] + offset;
+
+      // Prevent infinite loops or stack overflows by ignoring tiny changes
+      if ( Math.abs( currentValue - newValue ) > 1e-5 ) {
+        this._content[ propName ] = newValue;
+      }
     },
 
     /**
@@ -549,6 +581,9 @@ define( function( require ) {
     updateLayout: function() {
       if ( this._layoutLock ) { return; }
       this._layoutLock = true;
+
+      sceneryLog && sceneryLog.AlignBox && sceneryLog.AlignBox( 'AlignBox#' + this.id + ' updateLayout' );
+      sceneryLog && sceneryLog.AlignBox && sceneryLog.push();
 
       // If we have alignBounds, use that.
       if ( this._alignBounds !== null ) {
@@ -562,26 +597,26 @@ define( function( require ) {
       }
 
       if ( this._xAlign === 'center' ) {
-        this._content.centerX = this.localBounds.centerX + ( this.leftMargin - this.rightMargin ) / 2;
+        this.updateProperty( 'centerX', ( this.leftMargin - this.rightMargin ) / 2 );
       }
       else if ( this._xAlign === 'left' ) {
-        this._content.left = this.localBounds.left + this._leftMargin;
+        this.updateProperty( 'left', this._leftMargin );
       }
       else if ( this._xAlign === 'right' ) {
-        this._content.right = this.localBounds.right - this._rightMargin;
+        this.updateProperty( 'right', -this._rightMargin );
       }
       else {
         assert && assert( 'Bad xAlign: ' + this._xAlign );
       }
 
       if ( this._yAlign === 'center' ) {
-        this._content.centerY = this.localBounds.centerY + ( this.topMargin - this.bottomMargin ) / 2;
+        this.updateProperty( 'centerY', ( this.topMargin - this.bottomMargin ) / 2 );
       }
       else if ( this._yAlign === 'top' ) {
-        this._content.top = this.localBounds.top + this._topMargin;
+        this.updateProperty( 'top', this._topMargin );
       }
       else if ( this._yAlign === 'bottom' ) {
-        this._content.bottom = this.localBounds.bottom - this._bottomMargin;
+        this.updateProperty( 'bottom', -this._bottomMargin );
       }
       else {
         assert && assert( 'Bad yAlign: ' + this._yAlign );
@@ -589,6 +624,8 @@ define( function( require ) {
 
       // assert && assert( this.localBounds.dilated( 1e-5 ).containsBounds( this._content.bounds ),
       //   'All of our contents should be contained in our localBounds' );
+
+      sceneryLog && sceneryLog.AlignBox && sceneryLog.pop();
 
       this._layoutLock = false;
     },
