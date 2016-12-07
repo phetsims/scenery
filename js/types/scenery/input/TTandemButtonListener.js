@@ -25,11 +25,11 @@ define( function( require ) {
     TObject.call( this, tandemButtonListener, phetioID );
     assertInstanceOf( tandemButtonListener, phet.tandem.TandemButtonListener );
 
-    toEventOnEmit( tandemButtonListener, 'CallbacksForUpEmitter', 'user', phetioID, TTandemButtonListener, 'up' );
-    toEventOnEmit( tandemButtonListener, 'CallbacksForOverEmitter', 'user', phetioID, TTandemButtonListener, 'over' );
-    toEventOnEmit( tandemButtonListener, 'CallbacksForDownEmitter', 'user', phetioID, TTandemButtonListener, 'down' );
-    toEventOnEmit( tandemButtonListener, 'CallbacksForOutEmitter', 'user', phetioID, TTandemButtonListener, 'out' );
-    toEventOnEmit( tandemButtonListener, 'CallbacksForFireEmitter', 'user', phetioID, TTandemButtonListener, 'fire' );
+    toEventOnEmit( tandemButtonListener.startedCallbacksForUpEmitter, tandemButtonListener.endedCallbacksForUpEmitter, 'user', phetioID, TTandemButtonListener, 'up' );
+    toEventOnEmit( tandemButtonListener.startedCallbacksForOverEmitter, tandemButtonListener.endedCallbacksForOverEmitter, 'user', phetioID, TTandemButtonListener, 'over' );
+    toEventOnEmit( tandemButtonListener.startedCallbacksForDownEmitter, tandemButtonListener.endedCallbacksForDownEmitter, 'user', phetioID, TTandemButtonListener, 'down' );
+    toEventOnEmit( tandemButtonListener.startedCallbacksForOutEmitter, tandemButtonListener.endedCallbacksForOutEmitter, 'user', phetioID, TTandemButtonListener, 'out' );
+    toEventOnEmit( tandemButtonListener.startedCallbacksForFireEmitter, tandemButtonListener.endedCallbacksForFireEmitter, 'user', phetioID, TTandemButtonListener, 'fire' );
   }
 
   phetioInherit( TObject, 'TTandemButtonListener', TTandemButtonListener, {}, {
