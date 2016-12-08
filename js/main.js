@@ -126,7 +126,6 @@ define( [
   'SCENERY/util/Font',
   'SCENERY/util/Gradient',
   'SCENERY/util/LinearGradient',
-  'SCENERY/util/LiveRegion',
   'SCENERY/util/Pattern',
   'SCENERY/util/Picker',
   'SCENERY/util/RadialGradient',
