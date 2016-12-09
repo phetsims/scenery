@@ -127,10 +127,6 @@ define( function( require ) {
       return true;
     },
 
-    isFocusable: function() {
-      return this.isVisible() && this.lastNode().focusable === true;
-    },
-
     getOpacity: function() {
       var opacity = 1;
       var i = this.nodes.length;

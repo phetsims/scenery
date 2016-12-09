@@ -241,7 +241,6 @@ define( function( require ) {
     'touchArea', // Changes the area touches can interact with, see setTouchArea() for more documentation
     'clipArea', // Makes things outside of a shape invisible, see setClipArea() for more documentation
     'transformBounds', // Flag that makes bounds tighter, see setTransformBounds() for more documentation
-    'focusable', // Whether this node is focusable for keyboard support, see setFocusable() for more documentation
     'accessibleContent', // Sets up accessibility handling, see setAccessibleContent() for more documentation
     'accessibleOrder' // Modifies the keyboard accessibility order, see setAccessibleOrder() for more documentation
   ];
@@ -329,9 +328,6 @@ define( function( require ) {
 
     // @private {string} - The CSS cursor to be displayed over this node. null should be the default (inherit) value.
     this._cursor = null;
-
-    // @private @deprecated {boolean} - Whether this Node should be accessible via tab ordering. Defaults to false.
-    this._focusable = false;
 
     // @private {null|Object} - If non-null, this node will be represented in the parallel DOM by the accessible content.
     // The accessibleContent object will be of the form:
@@ -2988,32 +2984,6 @@ define( function( require ) {
     hasClipArea: function() {
       return this._clipArea !== null;
     },
-
-    /**
-     * Sets whether this node should be focusable for keyboard support.
-     * @public
-     *
-     * @param {boolean} focusable
-     */
-    setFocusable: function( focusable ) {
-      if ( this._focusable !== focusable ) {
-        this._focusable = focusable;
-
-        this.trigger0( 'focusable' );
-      }
-    },
-    set focusable( value ) { this.setFocusable( value ); },
-
-    /**
-     * Returns whether this node is focusable.
-     * @public
-     *
-     * @returns {boolean}
-     */
-    getFocusable: function() {
-      return this._focusable;
-    },
-    get focusable() { return this.getFocusable(); },
 
     /**
      * Sets the accessible focus order for this node. This includes not only focussed items, but elements that can be
