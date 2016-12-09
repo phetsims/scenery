@@ -34,7 +34,6 @@ define( function( require ) {
   require( 'SCENERY/input/Touch' );
   require( 'SCENERY/input/Pen' );
   require( 'SCENERY/input/Event' );
-  require( 'SCENERY/input/Key' );
   var BatchedDOMEvent = require( 'SCENERY/input/BatchedDOMEvent' );
   var Emitter = require( 'AXON/Emitter' );
 
