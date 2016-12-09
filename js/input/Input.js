@@ -36,7 +36,6 @@ define( function( require ) {
   require( 'SCENERY/input/Event' );
   require( 'SCENERY/input/Key' );
   var BatchedDOMEvent = require( 'SCENERY/input/BatchedDOMEvent' );
-  var Property = require( 'AXON/Property' );
   var Emitter = require( 'AXON/Emitter' );
 
   // Object literal makes it easy to check for the existence of an attribute (compared to [].indexOf()>=0)
@@ -45,24 +44,6 @@ define( function( require ) {
     deltaX: true, deltaY: true, deltaZ: true, deltaMode: true, pointerId: true,
     pointerType: true, charCode: true, which: true, clientX: true, clientY: true, changedTouches: true
   };
-
-  /**
-   * Find the index of the first occurrence of an element within an array, using equals() comparison.
-   * @param array
-   * @param element
-   * @returns {number}
-   */
-  var indexOfUsingEquality = function( array, element ) {
-    for ( var i = 0; i < array.length; i++ ) {
-      var item = array[ i ];
-      if ( item.equals( element ) ) {
-        return i;
-      }
-    }
-    return -1;
-  };
-
-  var globalDisplay = null;
 
   // listenerTarget is the DOM node (window/document/element) to which DOM event listeners will be attached
   function Input( display, listenerTarget, batchDOMEvents, enablePointerEvents, pointFromEvent ) {
@@ -73,7 +54,6 @@ define( function( require ) {
     this.enablePointerEvents = enablePointerEvents;
     this.pointFromEvent = pointFromEvent;
     this.displayUpdateOnEvent = false;
-    globalDisplay = display;
 
     this.batchedEvents = [];
 
@@ -351,76 +331,11 @@ define( function( require ) {
       },
 
       keyDown: function( event ) {
-        sceneryLog && sceneryLog.Input && sceneryLog.Input( 'keyDown(' + Input.debugKeyEvent( event ) + ');' );
-        if ( this.emitter.hasListeners() ) { this.emitter.emit1( 'keyDown(' + Input.serializeDomEvent( event ) + ');' ); }
 
-        // temporary disabling
-        if ( true ) { //eslint-disable-line no-constant-condition
-          // if ( !this.display.options.accessibility ) {
-          return;
-        }
-
-        var code = event.which;
-
-        if ( Input.pressedKeys.indexOf( code ) === -1 ) {
-          Input.pressedKeys.push( code );
-        }
-
-        // Handle TAB key
-        var shiftPressed = Input.pressedKeys.indexOf( Input.KEY_SHIFT ) >= 0;
-
-        if ( code === Input.KEY_TAB ) {
-
-          // Move the focus to the next item
-          // TODO: More general focus order strategy
-          var deltaIndex = shiftPressed ? -1 : +1;
-          Input.moveFocus( deltaIndex );
-
-          //TODO: Moving focus first then dispatching to focused node means newly focused node gets a fresh TAB event
-          //TODO: That is probably undesirable
-        }
-
-        var key = new scenery.Key( event );
-        this.addPointer( key );
-
-        var focusedTrail = Input.focusedTrail;
-        if ( focusedTrail ) {
-          this.dispatchEvent( focusedTrail, 'down', key, event, true );
-        }
       },
 
       keyUp: function( event ) {
-        sceneryLog && sceneryLog.Input && sceneryLog.Input( 'keyUp(' + Input.debugKeyEvent( event ) + ');' );
-        if ( this.emitter.hasListeners() ) { this.emitter.emit1( 'keyUp(' + Input.serializeDomEvent( event ) + ');' ); }
 
-        // temporary disabling
-        if ( true ) { //eslint-disable-line no-constant-condition
-          // if ( !this.display.options.accessibility ) {
-          return;
-        }
-
-        var code = event.which;
-
-        // Better remove all occurences, just in case!
-        while ( true ) { //eslint-disable-line no-constant-condition
-          var index = Input.pressedKeys.indexOf( code );
-
-          if ( index > -1 ) {
-            Input.pressedKeys.splice( index, 1 );
-          }
-          else {
-            break;
-          }
-        }
-
-        var key = this.findKeyByEvent( event );
-        if ( key ) {
-          this.removePointer( key );
-          var focusedTrail = Input.focusedTrail;
-          if ( focusedTrail ) {
-            this.dispatchEvent( focusedTrail, 'up', key, event, true );
-          }
-        }
       },
 
       // called on mouse wheels
@@ -916,146 +831,6 @@ define( function( require ) {
           return evt.pointerType; // hope for the best
         }
       },
-
-      /*---------------------------------------------------------------------------*
-       * Accessibility Support (TODO: Should this move to another file?)
-       *----------------------------------------------------------------------------*/
-
-      // Since only one element can have focus, Scenery uses a static element to track node focus.  That is, even
-      // if there are multiple Displays, only one Node (across all displays) will have focus in this frame.
-      focusedTrailProperty: new Property( null ),
-
-      // ES5 getter and setter for axon-style convenience (reportedly at a performance cost)
-      get focusedTrail() {
-        return Input.focusedTrailProperty.get();
-      },
-
-      set focusedTrail( trail ) {
-        Input.focusedTrailProperty.set( trail );
-      },
-
-      /**
-       * Adds the entire list of trails from the parent instance into the list.  List is modified in-place and returned.
-       * This is very expensive (linear in the size of the scene graph), so use sparingly.  Currently used for focus
-       * traversal.
-       * @param trail
-       * @param list
-       * @param predicate
-       */
-      flattenTrails: function( parentTrail, trail, list, predicate ) {
-        while ( trail !== null ) {
-          if ( predicate( trail ) && trail.isExtensionOf( parentTrail, true ) ) {
-            list.push( trail );
-          }
-          trail = trail.next();
-        }
-      },
-
-      getAllFocusableTrails: function() {
-        var focusableTrails = [];
-        var focusable = function( trail ) {
-          return trail.isFocusable() && trail.isVisible();
-        };
-
-        // If a focus context (such as a popup) has been added, restrict the search to that instances and its children.
-        if ( Input.focusContexts.length ) {
-          Input.flattenTrails( Input.focusContexts[ Input.focusContexts.length - 1 ].trail, Input.focusContexts[ Input.focusContexts.length - 1 ].trail, focusableTrails, focusable );
-        }
-        else {
-          var display = globalDisplay;
-
-          var rootNode = display.rootNode;
-          var trails = rootNode.getTrails();
-
-          for ( var k = 0; k < trails.length; k++ ) {
-            var trail = trails[ k ];
-
-            // Add to the list of all focusable items across Displays & Trails
-            Input.flattenTrails( trail, trail, focusableTrails, focusable );
-          }
-        }
-        return focusableTrails;
-      },
-
-      getNextFocusableTrail: function( deltaIndex ) {
-
-        // TODO: Should we persist this list across frames and do deltas for performance?
-        // TODO: We used to, but it was difficult to handle instances added/removed
-        // TODO: And on OSX/Chrome this seems to have good enough performance (didn't notice any qualitative slowdown)
-        // TODO: Perhaps test on Mobile Safari?
-        // TODO: Also, using a pattern like this could make it difficult to customize the focus traversal regions.
-        var focusableTrails = Input.getAllFocusableTrails();
-
-        //If the focused instance was null, find the first focusable element.
-        if ( Input.focusedTrail === null ) {
-
-          return focusableTrails[ 0 ];
-        }
-        else {
-          //Find the index of the currently focused instance, and look for the next focusable instance.
-          //TODO: this will fail horribly if the old node was removed, for instance.
-          //TODO: Will need to be generalized, etc.
-
-          var currentlyFocusedTrail = indexOfUsingEquality( focusableTrails, Input.focusedTrail );
-          var newIndex = currentlyFocusedTrail + deltaIndex;
-          //console.log( focusableInstances.length, currentlyFocusedInstance, newIndex );
-
-          //TODO: These loops probably not too smart here, may be better as math.
-          while ( newIndex < 0 ) {
-            newIndex += focusableTrails.length;
-          }
-          while ( newIndex >= focusableTrails.length ) {
-            newIndex -= focusableTrails.length;
-          }
-
-          return focusableTrails[ newIndex ];
-        }
-      },
-
-      // Move the focus to the next focusable element.  Called by AccessibilityLayer.
-      moveFocus: function( deltaIndex ) {
-        Input.focusedTrail = Input.getNextFocusableTrail( deltaIndex );
-      },
-
-      // A focusContext is a node that focus is restricted to.  If the list is empty, then anything in the application
-      // can be focused.  This is used when showing dialogs that will restrict focus.  The reason this is a stack is that
-      // dialogs can spawn other dialogs.  When a dialog is dismissed, focus should return to the component that had focus
-      // before the dialog was shown.
-      // @private Could be a private closure var, but left public for ease of debugging.
-      focusContexts: [],
-
-      pushFocusContext: function( trail ) {
-        Input.focusContexts.push( {
-          trail: trail,
-          previousFocusedNode: Input.focusedTrail
-        } );
-
-        // Move focus to the 1st element in the new context, but only if the focus subsystem is enabled
-        // Simulation do not show focus regions unless the user has pressed tab once
-        if ( Input.focusedTrail ) {
-          Input.focusedTrail = Input.getAllFocusableTrails()[ 0 ];
-        }
-      },
-
-      /**
-       * Removes the last focus context, such as when a dialog is dismissed.  The dialog's instance is required as an argument
-       * so it can be verified that it was the top element on the stack.
-       */
-      popFocusContext: function( trail ) {
-        var top = Input.focusContexts.pop();
-        assert && assert( top.trail.equals( trail ) );
-
-        // Restore focus to the node that had focus before the popup was shown (if it still exists), but only if the
-        // focus subsystem is enabled.  Simulation do not show focus regions unless the user has pressed tab once
-        if ( Input.focusedTrail ) {
-          Input.focusedTrail = top.previousFocusedNode;
-        }
-      },
-
-      // Keep track of which keys are currently pressed so we know whether the shift key is down for accessibility
-      // TODO: this effort is duplicated with this.pointers (which also covers different things)
-      // TODO: Should they be coalesced?
-      pressedKeys: [],
 
       // Export some key codes for reuse in listeners.
       // TODO: See if these can be replaced by DOM/Browser API support
