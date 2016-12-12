@@ -3778,7 +3778,7 @@ define( function( require ) {
      * @param {Function} callback - Called with no arguments
      * @param {string} [backgroundColor]
      */
-    // @public @deprecated (API compatibility for now): Render this node to the Canvas (clearing it first)
+    // @public (API compatibility for now): Render this node to the Canvas (clearing it first)
     renderToCanvas: function( canvas, context, callback, backgroundColor ) {
       // should basically reset everything (and clear the Canvas)
       canvas.width = canvas.width;
