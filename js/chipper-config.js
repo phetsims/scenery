@@ -24,9 +24,7 @@ require.config( {
     image: '../../chipper/js/requirejs-plugins/image',
     ifphetio: '../../chipper/js/requirejs-plugins/ifphetio',
 
-
     TANDEM: '../../tandem/js',
-    PHETCOMMON: '../../phetcommon/js',
     REPOSITORY: '..'
   },
 
