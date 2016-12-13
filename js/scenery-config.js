@@ -23,7 +23,11 @@ require.config( {
     KITE: '../../kite/js',
     DOT: '../../dot/js',
     PHET_CORE: '../../phet-core/js',
-    AXON: '../../axon/js'
+    AXON: '../../axon/js',
+
+    TANDEM: '../../tandem/js',
+    PHETCOMMON: '../../phetcommon/js',
+    REPOSITORY: '..'
   },
 
   // optional cache buster to make browser refresh load all included scripts, can be disabled with ?cacheBuster=false

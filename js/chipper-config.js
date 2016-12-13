@@ -22,7 +22,12 @@ require.config( {
     text: '../../sherpa/lib/text-2.0.12',
 
     image: '../../chipper/js/requirejs-plugins/image',
-    ifphetio: '../../chipper/js/requirejs-plugins/ifphetio'
+    ifphetio: '../../chipper/js/requirejs-plugins/ifphetio',
+
+
+    TANDEM: '../../tandem/js',
+    PHETCOMMON: '../../phetcommon/js',
+    REPOSITORY: '..'
   },
 
   // optional cache buster to make browser refresh load all included scripts, can be disabled with ?cacheBuster=false
