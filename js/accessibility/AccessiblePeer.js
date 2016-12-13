@@ -78,7 +78,7 @@ define( function( require ) {
       this.disposed = false;
 
       // @private - listener for the focus event, to be disposed
-      self.focusEventListener = function( event ) {
+      var focusEventListener = function( event ) {
         if ( event.target === self.domElement ) {
           Display.focus = {
             display: accessibleInstance.display,
@@ -86,15 +86,21 @@ define( function( require ) {
           };
         }
       };
-      this.domElement.addEventListener( 'focus', self.focusEventListener );
+      this.domElement.addEventListener( 'focus', focusEventListener );
 
       // @private - listener for the blur event, to be disposed
-      self.blurEventListener = function( event ) {
+      var blurEventListener = function( event ) {
         if ( event.target === self.domElement ) {
           Display.focus = null;
         }
       };
-      this.domElement.addEventListener( 'blur', self.blurEventListener );
+      this.domElement.addEventListener( 'blur', blurEventListener );
+
+      // make AccessiblePeer eligible for garabage collection
+      this.disposeAccessiblePeer = function() {
+        self.domElement.removeEventListener( 'blur', blurEventListener );
+        self.domElement.removeEventListener( 'focus', focusEventListener );
+      };
 
       return this;
     },
@@ -128,9 +134,7 @@ define( function( require ) {
 
     dispose: function() {
       this.disposed = true;
-
-      this.domElement.removeEventListener( 'blur', this.blurEventListener );
-      this.domElement.removeEventListener( 'focus', this.focusEventListener );
+      this.disposeAccessiblePeer();
 
       // for now
       this.freeToPool && this.freeToPool();
