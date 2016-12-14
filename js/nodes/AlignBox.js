@@ -596,34 +596,35 @@ define( function( require ) {
         this.localBounds = new Bounds2( 0, 0, widthWithMargin, heightWithMargin );
       }
 
-      if ( this._xAlign === 'center' ) {
-        this.updateProperty( 'centerX', ( this.leftMargin - this.rightMargin ) / 2 );
-      }
-      else if ( this._xAlign === 'left' ) {
-        this.updateProperty( 'left', this._leftMargin );
-      }
-      else if ( this._xAlign === 'right' ) {
-        this.updateProperty( 'right', -this._rightMargin );
-      }
-      else {
-        assert && assert( 'Bad xAlign: ' + this._xAlign );
-      }
+      // Don't try to lay out empty bounds
+      if ( !this._content.localBounds.isEmpty() ) {
 
-      if ( this._yAlign === 'center' ) {
-        this.updateProperty( 'centerY', ( this.topMargin - this.bottomMargin ) / 2 );
-      }
-      else if ( this._yAlign === 'top' ) {
-        this.updateProperty( 'top', this._topMargin );
-      }
-      else if ( this._yAlign === 'bottom' ) {
-        this.updateProperty( 'bottom', -this._bottomMargin );
-      }
-      else {
-        assert && assert( 'Bad yAlign: ' + this._yAlign );
-      }
+        if ( this._xAlign === 'center' ) {
+          this.updateProperty( 'centerX', ( this.leftMargin - this.rightMargin ) / 2 );
+        }
+        else if ( this._xAlign === 'left' ) {
+          this.updateProperty( 'left', this._leftMargin );
+        }
+        else if ( this._xAlign === 'right' ) {
+          this.updateProperty( 'right', -this._rightMargin );
+        }
+        else {
+          assert && assert( 'Bad xAlign: ' + this._xAlign );
+        }
 
-      // assert && assert( this.localBounds.dilated( 1e-5 ).containsBounds( this._content.bounds ),
-      //   'All of our contents should be contained in our localBounds' );
+        if ( this._yAlign === 'center' ) {
+          this.updateProperty( 'centerY', ( this.topMargin - this.bottomMargin ) / 2 );
+        }
+        else if ( this._yAlign === 'top' ) {
+          this.updateProperty( 'top', this._topMargin );
+        }
+        else if ( this._yAlign === 'bottom' ) {
+          this.updateProperty( 'bottom', -this._bottomMargin );
+        }
+        else {
+          assert && assert( 'Bad yAlign: ' + this._yAlign );
+        }
+      }
 
       sceneryLog && sceneryLog.AlignBox && sceneryLog.pop();
 
