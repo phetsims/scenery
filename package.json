@@ -11,5 +11,18 @@
     "grunt-eslint": "~19.0.0",
     "uglify-js": "~2.4.0",
     "requirejs": "~2.1.8"
+  },
+  "phet": {
+    "isJSOnly": true,
+    "requiresLodash": true,
+    "requiresJQuery": true,
+    "assignGlobals": {
+      "scenery": "main",
+      "kite": "KITE/main",
+      "dot": "DOT/main",
+      "axon": "AXON/main",
+      "phetCore": "PHET_CORE/main"
+    },
+    "finalizeJS": "scenery.Util.polyfillRequestAnimationFrame();"
   }
 }
