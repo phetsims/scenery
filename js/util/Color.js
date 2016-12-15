@@ -717,5 +717,9 @@ define( function( require ) {
     return new Color( stateObject.r, stateObject.g, stateObject.b, stateObject.a );
   };
 
+  Color.hsla = function( hue, saturation, lightness, alpha ) {
+    return new Color( 0, 0, 0, 1 ).setHSLA( hue, saturation, lightness, alpha );
+  };
+
   return Color;
 } );
