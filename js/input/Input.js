@@ -841,6 +841,8 @@ define( function( require ) {
       KEY_UP_ARROW: 38,
       KEY_DOWN_ARROW: 40,
       KEY_SHIFT: 16,
-      KEY_ESCAPE: 27
+      KEY_ESCAPE: 27,
+      KEY_DELETE: 46,
+      KEY_BACKSPACE: 8
     } );
 } );
