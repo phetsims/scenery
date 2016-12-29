@@ -288,7 +288,7 @@ define( function( require ) {
       else if ( this.elementSupportsInnerText() ) {
         this.domElement.innerText = this._label;
       }
-      else {
+      else if( this._labelTagName ) {
 
         // the remaining methods require a new DOM element
         this._labelElement = this.createDOMElement( this._labelTagName );
