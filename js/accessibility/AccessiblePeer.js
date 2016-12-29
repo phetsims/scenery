@@ -99,7 +99,7 @@ define( function( require ) {
       // make AccessiblePeer eligible for garabage collection
       this.disposeAccessiblePeer = function() {
 
-        // blur the dom element if the active element is currently in focus
+        // blur the dom element if it currently in focus
         if ( document.activeElement === self.domElement ) {
           Display.focus = null;
         }
