@@ -689,7 +689,7 @@ define( function( require ) {
                 nextFocusable = nextElement;
                 break;
               }
-              else if ( nextElement._tagName === focusableTypes[ j ] ) {
+              else if ( nextElement.tagName === focusableTypes[ j ] ) {
                 nextFocusable = nextElement;
                 break;
               }
