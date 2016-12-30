@@ -75,7 +75,8 @@
  * For additional accessibility options, please see the options at the top of the AccessibleNode constructor. For more
  * documentation on Scenery, Nodes, and the scene graph, please see http://phetsims.github.io/scenery/
  *
- * @author Jesse Greenberg
+ * @author Jesse Greenberg (PhET Interactive Simulations)
+ * @author Sam Reid (PhET Interactive Simulations)
  */
 define( function( require ) {
   'use strict';
