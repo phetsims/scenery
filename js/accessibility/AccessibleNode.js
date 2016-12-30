@@ -262,7 +262,6 @@ define( function( require ) {
      *
      * @private
      * @param  {string} tagName
-     * @param {string} [idModifier] - modifier added to the id, making it easier to track in the DOM
      */
     createDOMElement: function( tagName ) {
       var domElement = document.createElement( tagName );
@@ -277,8 +276,6 @@ define( function( require ) {
      *  - As inner text on the node's dom element itself
      *  - As a separate dom element positioned as a peer or child of this nod'es dom element
      *
-     * @param {string} tagName
-     * @param {string} textContent
      * @private
      */
     addLabel: function() {
@@ -365,7 +362,7 @@ define( function( require ) {
      * Add the attributes included in attributes to the dom element representing this node.
      *
      * @public
-     * @param {array.<string>} attributes
+     * @param {String[]} attributes
      */
     setDOMAttributes: function( attributes ) {
       this._dOMAttributes = attributes;
@@ -379,7 +376,7 @@ define( function( require ) {
     /**
      * Get an array of all ARIA attributes on this node's domElement.
      * @public
-     * @return {array.<strinng>}
+     * @return {String[]}
      */
     getAriaAttributes: function() {
       return this._ariaAttributes;
@@ -500,9 +497,10 @@ define( function( require ) {
     },
 
     /**
-     * Hide the desired list item from the screen reader
+     * Hide or show the desired list item from the screen reader
      *
-     * @param  {string} itemID - id of the list item to hide
+     * @param {string} itemID - id of the list item to hide
+     * @param {boolean} hidden - whether the list item should be hidden
      * @public
      */
     setDescriptionItemHidden: function( itemID, hidden ) {
@@ -740,7 +738,7 @@ define( function( require ) {
     },
 
     /**
-     * Append a child elelement, but only if it has content.
+     * Append a child element, but only if it has content.
      *
      * @param {DOMElement} domElement - the dom element to append the child
      * @param {DOMElement} childElement - the child element to append
