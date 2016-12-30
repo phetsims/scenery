@@ -5,8 +5,8 @@
  *
  * The parallel DOM is an HTML structure that provides semantics for assistive technologies. For web content to be
  * accessible, assistive technologies require HTML markup, which is something that pure graphical content does not
- * include.  This type implements the accessible HTML content for a node in the scene graph.  The parallel DOM is the
- * full HTML structure rendered by Scenery, containing the accessible content for each node in the scene graph.
+ * include.  AccessibleNode implements the accessible HTML content for a node in the scene graph.  The parallel DOM
+ * contains accessible content for each AccessibleNode in the scene graph.
  *
  * Each node can have accessible content.  The structure of the accessible content will match the structure of the scene
  * graph.
