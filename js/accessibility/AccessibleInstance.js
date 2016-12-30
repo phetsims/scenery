@@ -36,7 +36,7 @@ define( function( require ) {
     /**
      * @param {AccessibleInstance|null} parent
      * @param {Display} display
-     * @param {DOMElement} [domElement] - If not included here, subtype is responsible for setting it in the constructor.
+     * @param {HTMLElement} [domElement] - If not included here, subtype is responsible for setting it in the constructor.
      * @returns {AccessibleInstance} - Returns 'this' reference, for chaining
      */
     initializeAccessibleInstance: function( parent, display, trail ) {

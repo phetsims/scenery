@@ -47,7 +47,7 @@ define( function( require ) {
       interactive: false
     } );
 
-    // @private {DOMElement}
+    // @private {HTMLElement}
     this.domElement = this.focusDisplay.domElement;
     this.domElement.style.pointerEvents = 'none';
 

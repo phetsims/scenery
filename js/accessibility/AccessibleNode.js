@@ -347,7 +347,7 @@ define( function( require ) {
     /**
      * Get the dom element representing this node.
      * @public
-     * @return {DOMElement}
+     * @return {HTMLElement}
      */
     getDomElement: function() {
       return this._domElement;
@@ -574,8 +574,8 @@ define( function( require ) {
      * for easy traversal.  Note that this includes all elements, even those
      * that are 'hidden' or purely for structure.
      *
-     * @param  {DOMElement} domElement - the parent element to linearize
-     * @return {DOMElement[]}
+     * @param  {HTMLElement} domElement - the parent element to linearize
+     * @return {HTMLElement[]}
      * @private
      */
     getLinearDOMElements: function( domElement ) {
@@ -597,7 +597,7 @@ define( function( require ) {
     /**
      * Get the next focusable element in the parallel DOM.
      *
-     * @return {DOMElement}
+     * @return {HTMLElement}
      * @public
      */
     getNextFocusable: function() {
@@ -607,7 +607,7 @@ define( function( require ) {
     /**
      * Get the previous focusable elements in the parallel DOM
      *
-     * @return {DOMElement}
+     * @return {HTMLElement}
      * @public
      */
     getPreviousFocusable: function() {
@@ -696,9 +696,9 @@ define( function( require ) {
      * This function is still useful because elements can exist before being added to the DOM during
      * instantiation of the Node's peer.
      *
-     * @param  {DOMElement} parentElement
+     * @param  {HTMLElement} parentElement
      * @param  {string} childId
-     * @return {DOMElement}
+     * @return {HTMLElement}
      */
     getChildElementWithId: function( parentElement, childId ) {
       var childElement;
@@ -721,8 +721,8 @@ define( function( require ) {
     /**
      * Append a child element, but only if it has content.
      *
-     * @param {DOMElement} domElement - the dom element to append the child
-     * @param {DOMElement} childElement - the child element to append
+     * @param {HTMLElement} domElement - the dom element to append the child
+     * @param {HTMLElement} childElement - the child element to append
      */
     appendElementWithContent: function( domElement, childElement ) {
       childElement.textContent && domElement.appendChild( childElement );

@@ -22,7 +22,7 @@ define( function( require ) {
    * Constructor.
    *
    * @param  {AccessibleInstance} accessibleInstance
-   * @param  {DOMElement} domElement - The main DOM element used for this peer.
+   * @param  {HTMLElement} domElement - The main DOM element used for this peer.
    * @param  {Object} options
    * @constructor
    */
@@ -36,7 +36,7 @@ define( function( require ) {
 
     /**
      * @param {AccessibleInstance} accessibleInstance
-     * @param {DOMElement} domElement - The main DOM element used for this peer.
+     * @param {HTMLElement} domElement - The main DOM element used for this peer.
      * @param {Object} [options]
      * @returns {AccessiblePeer} - Returns 'this' reference, for chaining
      */

@@ -39,7 +39,7 @@ define( function( require ) {
      * that we don't want to set while animating.
      * @public
      *
-     * @param {DOMElement} element
+     * @param {Element} element
      * @param {boolean} forceAcceleration - Whether graphical acceleration should be forced (may slow things down!)
      */
     prepareForTransform: function( element, forceAcceleration ) {
@@ -56,7 +56,7 @@ define( function( require ) {
      * Apply CSS styles that will potentially trigger graphical acceleration. Use at your own risk.
      * @private
      *
-     * @param {DOMElement} element
+     * @param {Element} element
      */
     setTransformAcceleration: function( element ) {
       element.style.webkitBackfaceVisibility = 'hidden';
@@ -66,7 +66,7 @@ define( function( require ) {
      * Unapply CSS styles (from setTransformAcceleration) that would potentially trigger graphical acceleration.
      * @private
      *
-     * @param {DOMElement} element
+     * @param {Element} element
      */
     unsetTransformAcceleration: function( element ) {
       element.style.webkitBackfaceVisibility = '';
@@ -78,7 +78,7 @@ define( function( require ) {
      * @public
      *
      * @param {Matrix3} matrix
-     * @param {DOMElement} element
+     * @param {Element} element
      * @param {boolean} forceAcceleration
      */
     applyPreparedTransform: function( matrix, element, forceAcceleration ) {
@@ -92,7 +92,7 @@ define( function( require ) {
      * @public
      *
      * @param {string} transformString
-     * @param {DOMElement} element
+     * @param {Element} element
      * @param {boolean} forceAcceleration
      */
     setTransform: function( transformString, element, forceAcceleration ) {
@@ -105,7 +105,7 @@ define( function( require ) {
      * Removes a CSS transform from a DOM element.
      * @public
      *
-     * @param {DOMElement} element
+     * @param {Element} element
      */
     unsetTransform: function( element ) {
       element.style[ transformProperty ] = '';
