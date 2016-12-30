@@ -116,7 +116,7 @@ define( function( require ) {
 
       // html tag names
       tagName: 'button', // {string} - tag name for the element representing this node in the parallel DOM
-      inputType: null, // {string} - specify the input type attribute - only relevant if tagName is 'intput'
+      inputType: null, // {string} - specify the input type attribute - only relevant if tagName is 'input'
       parentContainerTagName: null, // {string} - creates a parent container DOM element for this node's DOM element and its peers
       childContainerTagName: null, // {string} - creates a container element for the children under this node's DOM element
       labelTagName: null, // {string} - tag name for the element containing the label, usually a paragraph, label, or heading
@@ -130,13 +130,13 @@ define( function( require ) {
       useAriaLabel: false, // {boolean} - if true, a label element will not be created and the label will be inline with aria-label
 
       // accessible descriptions
-      description: '', // {string} - description for this node in the PDOM, only read on focus if ariaDescribedBy defined
+      description: '', // {string} - description for this node in the parallel DOM, only read on focus if ariaDescribedBy defined
 
       // DOM events
       events: {}, // {object} - array of objects with keys of type event name, values of type function
 
       // attributes
-      hidden: false, // {boolean} - hides the element in the paralllel DOM from the AT
+      hidden: false, // {boolean} - hides the element in the parallel DOM from the AT
       focusable: false, // {boolean} = whether or not the element can receive keyboard focus
 
       // aria
