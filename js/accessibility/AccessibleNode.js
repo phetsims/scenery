@@ -3,17 +3,16 @@
 /**
  * Base type for accessible components, adding accessible HTML content to the parallel DOM.
  *
- * The parallel DOM is an HTML structure that provides semantics for assistive technologies. For web 
- * content to be accessible, assistive technologies require HTML markup, which is something that pure
- * graphical content does not include.  This type implements the accessible HTML content for a node 
- * in the scene graph.  The parallel DOM is the full HTML structure rendered by Scenery, containing
- * the accessible content for each node in the scene graph.
- * 
- * Each node can have accessible content.  The structure of the accessible content will match the
- * structure of the scene graph.
+ * The parallel DOM is an HTML structure that provides semantics for assistive technologies. For web content to be
+ * accessible, assistive technologies require HTML markup, which is something that pure graphical content does not
+ * include.  This type implements the accessible HTML content for a node in the scene graph.  The parallel DOM is the
+ * full HTML structure rendered by Scenery, containing the accessible content for each node in the scene graph.
+ *
+ * Each node can have accessible content.  The structure of the accessible content will match the structure of the scene
+ * graph.
  *
  * Say we have the following scene graph:
- * 
+ *
  *   A
  *  / \
  * B   C
@@ -22,8 +21,8 @@
  *        \
  *         F
  *
- * And say that nodes A, B, C, D, and F specify accessible content for the DOM.  Scenery will render the
- * accessible content like so:
+ * And say that nodes A, B, C, D, and F specify accessible content for the DOM.  Scenery will render the accessible
+ * content like so:
  *
  * <div id="node-A">
  *   <div id="node-B"></div>
@@ -33,9 +32,9 @@
  *   </div>
  * </div>
  *
- * In this example, each element is represented by a div, but any HTML element could be used. Note that in this
- * example, node E did not specify accessible content, so node F was added as a child under node C.  If node E
- * had specified accessible content, content for node F would have been added as a child under the content for node E.
+ * In this example, each element is represented by a div, but any HTML element could be used. Note that in this example,
+ * node E did not specify accessible content, so node F was added as a child under node C.  If node E had specified
+ * accessible content, content for node F would have been added as a child under the content for node E.
  *
  * It is possible to add additional structure to the accessible content if necessary.  For instance, consider the
  * following accessible content for a button node:
@@ -45,20 +44,20 @@
  *   <p>This is a description for the button</p>
  * </div>
  *
- * The node is represented by the <button> DOM element, but the accessible content needs to include the parent
- * div, and a peer description paragraph.  To allow this, it is possible to specify an optional
- * 'parentContainerElement'.  In this example, the parentContainerElement is the div, while the description is
- * added as a child under the button node's domElement.
+ * The node is represented by the <button> DOM element, but the accessible content needs to include the parent div, and
+ * a peer description paragraph.  To allow this, it is possible to specify an optional 'parentContainerElement'.  In
+ * this example, the parentContainerElement is the div, while the description is added as a child under the button
+ * node's domElement.
  *
- * There is also a `childContainerElement`, which is a container element for accessible content for children
- * under this node.  For instance, consider the following scene graph:
+ * There is also a `childContainerElement`, which is a container element for accessible content for children under this
+ * node.  For instance, consider the following scene graph:
  *
  *   A
  *  / \
  * B   C
  *
- * And suppose you want add a specific label and description to node A without altering the structure of the scene
- * graph with HTML content like this:
+ * And suppose you want add a specific label and description to node A without altering the structure of the scene graph
+ * with HTML content like this:
  *
  * <div id="node-A">
  *   <p>Label for node A</p>
@@ -73,10 +72,10 @@
  * The above is easily handled by passing in an optional 'childContainerTagName', which will create a child container
  * element with the desired tag name.
  *
- * For additional accessibility options, please see the options at the top of the AccessibleNode constructor.
- * For more documentation on Scenery, Nodes, and the scene graph, please see http://phetsims.github.io/scenery/
+ * For additional accessibility options, please see the options at the top of the AccessibleNode constructor. For more
+ * documentation on Scenery, Nodes, and the scene graph, please see http://phetsims.github.io/scenery/
  *
- * @author: Jesse Greenberg
+ * @author Jesse Greenberg
  */
 define( function( require ) {
   'use strict';
@@ -125,7 +124,7 @@ define( function( require ) {
       // focus highlight
       focusHighlight: null, // {Node|Shape|Bounds2} - default is a pink rectangle around the node's local bounds
 
-      // acccessible labels
+      // accessible labels
       label: null, // {string} - accessible label applied to this node, usually read by the screen reader on focus
       useAriaLabel: false, // {boolean} - if true, a label element will not be created and the label will be inline with aria-label
 
@@ -259,7 +258,7 @@ define( function( require ) {
 
     /**
      * Create an element to represent this node in the parallel DOM.
-     * 
+     *
      * @private
      * @param  {string} tagName
      * @param {string} [idModifier] - modifier added to the id, making it easier to track in the DOM
@@ -288,7 +287,7 @@ define( function( require ) {
       else if ( this.elementSupportsInnerText() ) {
         this.domElement.innerText = this._label;
       }
-      else if( this._labelTagName ) {
+      else if ( this._labelTagName ) {
 
         // the remaining methods require a new DOM element
         this._labelElement = this.createDOMElement( this._labelTagName );
@@ -303,7 +302,7 @@ define( function( require ) {
     /**
      * Create the description element for this node's dom element. If a description
      * was passed through options, set it immediately.
-     * 
+     *
      * @param {string} tagName
      * @private
      */
@@ -568,7 +567,7 @@ define( function( require ) {
 
     /**
      * Get if this node is focusable by a keyboard.
-     * 
+     *
      * @return {boolean}
      * @public
      */
