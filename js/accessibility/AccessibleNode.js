@@ -157,7 +157,7 @@ define( function( require ) {
     // @private - the description for this dom element
     this._descriptionElement = null;
     this._description = options.description;
-    if ( options.descriptionTagName ) { this.createDescriptionElement( options.descriptionTagName, 'description' ); }
+    options.descriptionTagName && this.createDescriptionElement( options.descriptionTagName, 'description' );
 
     // @private - the label for this dom element
     // the label might be an element, or it could be inline text on the dom element
@@ -178,10 +178,10 @@ define( function( require ) {
     this._ariaRole = options.ariaRole;
 
     // add aria role
-    if ( options.ariaRole ) { this.setAttribute( 'role', options.ariaRole ); }
+    options.ariaRole && this.setAttribute( 'role', options.ariaRole );
 
     // add input type if supported and defined
-    if ( options.inputType ) { this.setInputType( options.inputType ); }
+    options.inputType && this.setInputType( options.inputType );
 
     // @private - parent container for this node's dom element and its peers
     this._parentContainerElement = null;
