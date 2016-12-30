@@ -104,6 +104,13 @@ define( function( require ) {
   // global incremented to provide unique id's
   var ITEM_NUMBER = 0;
 
+  // values representing the type of DOM Node, useful for comparing element types
+  // types are declared here since the native DOM Node is undefined when we declare the scenery Node 
+  // see https://developer.mozilla.org/en-US/docs/Web/API/Node/nodeType for all possible types
+  var DOMNode = {
+    ELEMENT_NODE: 1
+  };
+
   /**
    * Constructor for an accessible Node.
    *
@@ -600,7 +607,7 @@ define( function( require ) {
       for ( var i = 0; i < children.length; i++ ) {
 
         // searching for the HTML type Node.ELEMENT_NODE, which is equal to 1
-        if ( children[ i ].nodeType === 1 ) {
+        if ( children[ i ].nodeType === DOMNode.ELEMENT_NODE ) {
           linearDOM[ i ] = ( children[ i ] );
         }
       }
