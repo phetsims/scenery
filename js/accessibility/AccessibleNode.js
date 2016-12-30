@@ -107,7 +107,7 @@ define( function( require ) {
   /**
    * Constructor for an accessible Node.
    *
-   * @param {Object} options
+   * @param {Object} [options]
    * @constructor
    **/
   function AccessibleNode( options ) {
