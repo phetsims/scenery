@@ -140,7 +140,7 @@ define( function( require ) {
       focusable: false, // {boolean} = whether or not the element can receive keyboard focus
 
       // aria
-      attributes: [], // {array.<object>} - objects specifying element attributes - keys attribute and value of attribute value
+      attributes: [], // {Object[]} - objects specifying element attributes - keys attribute and value of attribute value
       ariaRole: null, // {string} - aria role for the element, can define extra semantics for the reader, see https://www.w3.org/TR/wai-aria/roles for list of roles
       ariaDescribedBy: null, // {string} - an ID of a description element to describe this dom element
       ariaLabelledBy: null // {string} - an ID of a label element to describe this dom element
@@ -594,7 +594,7 @@ define( function( require ) {
      * that are 'hidden' or purely for structure.
      *
      * @param  {DOMElement} domElement - the parent element to linearize
-     * @return {Array.<DOMElement>}
+     * @return {DOMElement[]}
      * @private
      */
     getLinearDOMElements: function( domElement ) {
