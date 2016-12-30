@@ -738,9 +738,7 @@ define( function( require ) {
      * @param {DOMElement} childElement - the child element to append
      */
     appendElementWithContent: function( domElement, childElement ) {
-      if ( childElement.textContent ) {
-        domElement.appendChild( childElement );
-      }
+      childElement.textContent && domElement.appendChild( childElement );
     }
   } );
 } );
