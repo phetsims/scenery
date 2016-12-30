@@ -190,6 +190,12 @@ define( function( require ) {
     // add input type if supported and defined
     options.inputType && this.setInputType( options.inputType );
 
+    // add additional attributes
+    var self = this;
+    options.attributes.forEach( function( attribute ) {
+      self.setAttribute( attribute.attribute, attribute.value );
+    } );
+
     // @private - parent container for this node's dom element and its peers
     this._parentContainerElement = null;
 
@@ -218,7 +224,6 @@ define( function( require ) {
     }
 
     // now set the accessible content by creating an accessible peer
-    var self = this;
     this.accessibleContent = {
       focusHighlight: options.focusHighlight,
       createPeer: function( accessibleInstance ) {
@@ -358,31 +363,6 @@ define( function( require ) {
       return this._ariaRole;
     },
     get ariaRole() { return this.getAriaRole(); },
-
-    /**
-     * Add the attributes included in attributes to the dom element representing this node.
-     *
-     * @public
-     * @param {String[]} attributes
-     */
-    setDOMAttributes: function( attributes ) {
-      this._dOMAttributes = attributes;
-      for ( var i = 0; i < attributes.length; i++ ) {
-        var domAttribute = attributes[ i ];
-        this.setAttribute( domAttribute.attribute, domAttribute.value );
-      }
-    },
-    set dOMAttributes( attributes ) { this.setDOMAttributes( attributes ); },
-
-    /**
-     * Get an array of all ARIA attributes on this node's domElement.
-     * @public
-     * @return {String[]}
-     */
-    getAriaAttributes: function() {
-      return this._ariaAttributes;
-    },
-    get ariaAttributes0() { return this.getAriaAttributes(); },
 
     /**
      * Set the text content for the label element of this node.  The label element
