@@ -333,8 +333,9 @@ define( function( require ) {
     // The accessibleContent object will be of the form:
     // {
     //   createPeer: function( {AccessibleInstance} ): {AccessiblePeer},
-    //   [focusHighlight]: {Bounds2|Shape|Node}
+    //   [focusHighlight]: {Bounds2|Shape|Node|string.<'invisible'>}
     // }
+    // The focus highlight can be a custom Shape, Node, contain the Node's local bounds, or be invisible.
     this._accessibleContent = null;
 
     // @private {Array.<Node> | null} - If provided, it will override the focus order between children (and optionally

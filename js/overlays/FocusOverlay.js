@@ -104,8 +104,12 @@ define( function( require ) {
       } );
       this.transformTracker.addListener( this.transformListener );
 
+      // Invisible mode - no focus highlight
+      if ( this.node.accessibleContent.focusHighlight === 'invisible' ) {
+        this.mode = 'invisible';
+      }
       // Shape mode
-      if ( this.node.accessibleContent.focusHighlight instanceof Shape ) {
+      else if ( this.node.accessibleContent.focusHighlight instanceof Shape ) {
         this.mode = 'shape';
 
         this.shapeHighlight.visible = true;
