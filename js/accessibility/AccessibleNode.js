@@ -45,7 +45,7 @@
  * </div>
  *
  * The node is represented by the <button> DOM element, but the accessible content needs to include the parent div, and
- * a peer description paragraph.  To allow this, it is possible to specify an optional 'parentContainerElement'.  In
+ * a peer description paragraph.  AccessibleNode supports this structure with the 'parentContainerElement' option.  In
  * this example, the parentContainerElement is the div, while the description is added as a child under the button
  * node's domElement.
  *
