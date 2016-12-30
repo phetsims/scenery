@@ -133,7 +133,7 @@ define( function( require ) {
       description: '', // {string} - description for this node in the parallel DOM, only read on focus if ariaDescribedBy defined
 
       // DOM events
-      events: {}, // {object} - array of objects with keys of type event name, values of type function
+      events: {}, // {object} - object with keys of type event name, values of type function callback for the event
 
       // attributes
       hidden: false, // {boolean} - hides the element in the parallel DOM from the AT
