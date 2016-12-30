@@ -172,7 +172,7 @@ define( function( require ) {
 
     // @private
     this._hidden = options.hidden;
-    if ( this._hidden ) { this.setHidden( this._hidden ); }
+    this._hidden && this.setHidden( this._hidden );
 
     // @private
     this._ariaRole = options.ariaRole;
@@ -193,21 +193,21 @@ define( function( require ) {
       this._parentContainerElement = this.createDOMElement( options.parentContainerTagName );
 
       // if using a parent container, it should contain the description and label as peers of this dom element
-      if ( this._labelElement ) { this._parentContainerElement.appendChild( this._labelElement ); }
-      if ( this._descriptionElement ) { this._parentContainerElement.appendChild( this._descriptionElement ); }
+      this._labelElement && this._parentContainerElement.appendChild( this._labelElement );
+      this._descriptionElement && this._parentContainerElement.appendChild( this._descriptionElement );
     }
     else if ( options.childContainerTagName ) {
 
       // if using a child container element, label and description come first
-      if ( this._labelElement ) { this._domElement.appendChild( this._labelElement ); }
-      if ( this._descriptionElement ) { this._domElement.appendChild( this._descriptionElement ); }
+      this._labelElement && this._domElement.appendChild( this._labelElement );
+      this._descriptionElement && this._domElement.appendChild( this._descriptionElement );
 
       this._childContainerElement = this.createDOMElement( options.childContainerTagName );
       this._domElement.appendChild( this._childContainerElement );
     }
     else {
-      if ( this._labelElement ) { this._domElement.appendChild( this._labelElement ); }
-      if ( this._descriptionElement ) { this._domElement.appendChild( this._descriptionElement ); }
+      this._labelElement && this._domElement.appendChild( this._labelElement );
+      this._descriptionElement && this._domElement.appendChild( this._descriptionElement );
     }
 
     // now set the accessible content by creating an accessible peer
@@ -223,19 +223,13 @@ define( function( require ) {
           }
         }
 
-        if ( self.childContainerElement ) {
-          self._domElement.appendChild( self.childContainerElement );
-        }
+        self.childContainerElement && self._domElement.appendChild( self.childContainerElement );
 
         // add an aria-describedby attribute if it is specified in options
-        if ( options.ariaDescribedBy ) {
-          self.setAriaDescribedBy( options.ariaDescribedBy );
-        }
+        options.ariaDescribedBy && self.setAriaDescribedBy( options.ariaDescribedBy );
 
         // add an aria-labelledby attribute if it is specified in options
-        if ( options.ariaLabelledBy ) {
-          self.setAriaLabelledBy( options.ariaLabelledBy );
-        }
+        options.ariaLabelledBy && self.setAriaLabelledBy( options.ariaLabelledBy );
 
         return new AccessiblePeer( accessibleInstance, self._domElement, {
           parentContainerElement: self._parentContainerElement,
@@ -306,7 +300,7 @@ define( function( require ) {
      */
     createDescriptionElement: function( tagName ) {
       this._descriptionElement = this.createDOMElement( tagName );
-      if ( this._description ) { this.setDescription( this._description ); }
+      this._description && this.setDescription( this._description );
     },
 
     /**
@@ -599,7 +593,7 @@ define( function( require ) {
      */
     getLinearDOMElements: function( domElement ) {
 
-      // gets ALL descendent children for the element
+      // gets ALL descendant children for the element
       var children = domElement.getElementsByTagName( '*' );
 
       var linearDOM = [];
