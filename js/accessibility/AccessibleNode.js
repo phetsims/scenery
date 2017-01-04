@@ -211,7 +211,7 @@ define( function( require ) {
     this._childContainerElement = null;
 
     if ( options.parentContainerTagName ) {
-      this._parentContainerElement = this.createDOMElement( options.parentContainerTagName );
+      this._parentContainerElement = this.createDOMElement( options.parentContainerTagName, 'parent-container-' + this.id );
 
       // if using a parent container, it should contain the description and label as peers of this dom element
       this._labelElement && this._parentContainerElement.appendChild( this._labelElement );
@@ -223,7 +223,7 @@ define( function( require ) {
       this._labelElement && this._domElement.appendChild( this._labelElement );
       this._descriptionElement && this._domElement.appendChild( this._descriptionElement );
 
-      this._childContainerElement = this.createDOMElement( options.childContainerTagName );
+      this._childContainerElement = this.createDOMElement( options.childContainerTagName, 'child-container-' + this.id );
       this._domElement.appendChild( this._childContainerElement );
     }
     else {
@@ -303,7 +303,7 @@ define( function( require ) {
       else if ( this._labelTagName ) {
 
         // the remaining methods require a new DOM element
-        this._labelElement = this.createDOMElement( this._labelTagName, this.id + '-label' );
+        this._labelElement = this.createDOMElement( this._labelTagName, 'label-' + this.id  );
         this._labelElement.textContent = this._label;
 
         if ( this._labelTagName.toUpperCase() === DOM_LABEL ) {
@@ -320,7 +320,7 @@ define( function( require ) {
      * @private
      */
     createDescriptionElement: function( tagName ) {
-      this._descriptionElement = this.createDOMElement( tagName );
+      this._descriptionElement = this.createDOMElement( tagName, 'description-' + this.id );
       this._description && this.setDescription( this._description );
     },
 
