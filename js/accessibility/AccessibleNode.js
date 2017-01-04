@@ -276,10 +276,11 @@ define( function( require ) {
      *
      * @private
      * @param  {string} tagName
+     * @param {string} [id] - optional id for the dom element, will be the node's id if not defined
      */
-    createDOMElement: function( tagName ) {
+    createDOMElement: function( tagName, id ) {
       var domElement = document.createElement( tagName );
-      domElement.id = this.id;
+      domElement.id = id || this.id;
       return domElement;
     },
 
@@ -302,10 +303,10 @@ define( function( require ) {
       else if ( this._labelTagName ) {
 
         // the remaining methods require a new DOM element
-        this._labelElement = this.createDOMElement( this._labelTagName );
+        this._labelElement = this.createDOMElement( this._labelTagName, this.id + '-label' );
         this._labelElement.textContent = this._label;
 
-        if ( this._labelTagName === DOM_LABEL ) {
+        if ( this._labelTagName.toUpperCase() === DOM_LABEL ) {
           this._labelElement.setAttribute( 'for', this.id );
         }
       }
