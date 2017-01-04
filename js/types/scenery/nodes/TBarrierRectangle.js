@@ -12,7 +12,7 @@ define( function( require ) {
   var phetioInherit = require( 'PHET_IO/phetioInherit' );
   var phetioNamespace = require( 'PHET_IO/phetioNamespace' );
   var TNode = require( 'PHET_IO/types/scenery/nodes/TNode' );
-  var toEventOnStatic = require( 'PHET_IO/events/toEventOnStatic' );
+  var toEventOnEmit = require( 'PHET_IO/events/toEventOnEmit' );
 
   /**
    * Wrapper type for phet/scenery's BarrierRectangle
@@ -23,7 +23,12 @@ define( function( require ) {
   function TBarrierRectangle( barrierRectangle, phetioID ) {
     TNode.call( this, barrierRectangle, phetioID );
 
-    toEventOnStatic( barrierRectangle, 'CallbacksForFired', 'user', phetioID, TBarrierRectangle, 'fired' );
+    toEventOnEmit( barrierRectangle.startedCallbacksForFiredEmitter,
+      barrierRectangle.endedCallbacksForFiredEmitter,
+      'user',
+      phetioID,
+      TBarrierRectangle,
+      'fired' );
   }
 
   phetioInherit( TNode, 'TBarrierRectangle', TBarrierRectangle, {}, {
