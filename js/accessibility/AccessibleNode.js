@@ -97,9 +97,17 @@ define( function( require ) {
   var DOM_LABEL = 'LABEL';
   var DOM_UNORDERED_LIST = 'UL';
   var DOM_BUTTON = 'BUTTON';
+  var DOM_TEXTAREA = 'TEXTAREA';
+  var DOM_SELECT = 'SELECT';
+  var DOM_OPTGROUP = 'OPTGROUP';
+  var DOM_DATALIST = 'DATALIST';
+  var DOM_OUTPUT = 'OUTPUT';
 
   // these elements will have labels that use inner text
   var ELEMENTS_WITH_INNER_TEXT = [ DOM_BUTTON ];
+
+  // these elements are typically associated with forms, and support certain attributes
+  var FORM_ELEMENTS = [ DOM_INPUT, DOM_BUTTON, DOM_TEXTAREA, DOM_SELECT, DOM_OPTGROUP, DOM_DATALIST, DOM_OUTPUT ];
 
   // global incremented to provide unique id's
   var ITEM_NUMBER = 0;
@@ -525,6 +533,30 @@ define( function( require ) {
     set hidden( hidden ) { this.setHidden( hidden ); },
 
     /**
+     * Set the value of an input element.
+     * 
+     * @param {string} value [description]
+     */
+    setInputValue: function( value ) {
+      assert && assert( _.contains( FORM_ELEMENTS, this._domElement.tagName ), 'dom element must be a form element to support value' );
+
+      this._domElement.value = value;
+    },
+    set inputValue( value ) { this.setInputValue( value ); },
+
+    /**
+     * Get the value of the element.
+     * 
+     * @return {string}
+     */
+    getInputValue: function() {
+      assert && assert( _.contains( FORM_ELEMENTS, this._domElement.tagName ), 'dom element must be a form element to support value' );
+
+      return this._domElement.value;
+    },
+    get inputValue() { return this.getInputValue(); },
+
+    /**
      * Set a particular attribute for this node's dom element, generally to provide extra
      * semantic information for a screen reader.
      *
@@ -568,7 +600,7 @@ define( function( require ) {
     getFocusable: function() {
       return this._focusable;
     },
-    get isFocusable() { this.getFocusable(); },
+    get isFocusable() { return this.getFocusable(); },
 
     /**
      * Focus this node's dom element.
