@@ -231,7 +231,7 @@ define( function( require ) {
         // register listeners to the events
         for ( var event in options.events ) {
           if ( options.events.hasOwnProperty( event ) ) {
-            self._domElement.addEventListener( event, options.events[ event ] );
+            self.addDOMEventListener( event, options.events[ event ] );
           }
         }
 
@@ -254,7 +254,7 @@ define( function( require ) {
     this.disposeAccessibleNode = function() {
       for ( var i = 0; i < options.events.length; i++ ) {
         var eventEntry = options.events[ i ];
-        self._domElement.removeEventListener( eventEntry.eventName, eventEntry.eventFunction );
+        self.removeDOMEventListener( eventEntry.eventName, eventEntry.eventFunction );
       }
     };
   }
@@ -363,6 +363,20 @@ define( function( require ) {
       return this._ariaRole;
     },
     get ariaRole() { return this.getAriaRole(); },
+
+    /**
+     * Set the focus highlight for this node.
+     * 
+     * @param {Node|Shape|string.<'invisible'>} focusHighlight
+     * @public
+     */
+    setFocusHighlight: function( focusHighlight ) {
+      var accessibleContent = this.accessibleContent;
+      accessibleContent.focusHighlight = focusHighlight;
+
+      this.setAccessibleContent( accessibleContent );
+    },
+    set focusHighlight( focusHighlight ) { this.setFocusHighlight( focusHighlight ); },
 
     /**
      * Set the text content for the label element of this node.  The label element
@@ -567,6 +581,28 @@ define( function( require ) {
       // make sure that the elememnt is in the navigation order
       this.setFocusable( true );
       this._domElement.focus();
+    },
+
+    /**
+     * Add an event listener to the dom element.  The listener is usually meant to keep
+     * the attributes of the element up to date with properties of the sim.
+     * 
+     * @param {string} eventName - name of the event to listen to
+     * @param {function} callBack
+     */
+    addDOMEventListener: function( eventName, callBack ) {
+      this._domElement.addEventListener( eventName, callBack );
+    },
+
+    /**
+     * Remove an event listener from the DOM element, when you want to stop listening
+     * or dispose.
+     * 
+     * @param  {string} eventName
+     * @param  {function} callBack
+     */
+    removeDOMEventListener: function( eventName, callBack ) {
+      this._domElement.removeEventListener( eventName, callBack );
     },
 
     /**
