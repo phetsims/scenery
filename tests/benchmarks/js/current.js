@@ -4,6 +4,7 @@ var phet = phet || {};
 phet.benchmark = phet.benchmark || {};
 
 (function() {
+  'use strict';
 
   phet.benchmark.createDetachedScene = function( width, height ) {
     width = width || 640;
@@ -13,7 +14,7 @@ phet.benchmark = phet.benchmark || {};
     main.width( 640 );
     main.height( 480 );
     return new scenery.Scene( main );
-  }
+  };
 
   // manual testing to see if we can do better than benchmark.js
   var scene = phet.benchmark.createDetachedScene( 256, 256 );
@@ -24,7 +25,7 @@ phet.benchmark = phet.benchmark || {};
     } ) );
   }
   var start = new Date;
-  for ( var i = 0; i < 100; i++ ) {
+  for ( i = 0; i < 100; i++ ) {
     scene.rotate( Math.sin( i ) );
     scene.updateScene();
   }

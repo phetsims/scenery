@@ -45,7 +45,7 @@
     } );
 
     test( 'Path object support', function() {
-      var path = new Path( null );
+      new scenery.Path( null ); // eslint-disable-line
     } );
 
     test( 'Text width measurement in canvas', function() {

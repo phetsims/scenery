@@ -1,5 +1,4 @@
 // Copyright 2015, University of Colorado Boulder
-'use strict';
 
 /**
  * Some scripting for the the prototype parallel DOM.  This mimics some dynamic content for the parallel DOM that would
@@ -17,6 +16,8 @@
  * @param {domElement} parent
  */
 function enterGroup( event, parent ) {
+  'use strict';
+
   parent.hidden = false;
   parent.children[0].focus();
 }
@@ -29,8 +30,10 @@ function enterGroup( event, parent ) {
  * @param parent
  */
 function exitGroup( event, parent ) {
+  'use strict';
+  
   if ( event.keyCode === 27 || event.keyCode === 9 ) {
-    parent.hidden = true
+    parent.hidden = true;
     parent.focus();
   }
 }
@@ -44,6 +47,7 @@ function exitGroup( event, parent ) {
  * @param child
  */
 function focusNextElement( event, child ) {
+  'use strict';
 
   // isolate children, and the first and last children in the group
   var children = child.parentElement.children;
@@ -88,6 +92,8 @@ function focusNextElement( event, child ) {
  * @param knot
  */
 function placePullerOnKnot( event, puller, knotGroup ) {
+  'use strict';
+  
   if ( event.keyCode === 13 ) {
 
     // pick up the object for drag and drop with the aria attribute
@@ -124,6 +130,7 @@ function placePullerOnKnot( event, puller, knotGroup ) {
  * with aria-grabbed
  */ 
 function selectKnot( event, pullerGroup, knot ) {
+  'use strict';
 
   if ( event.keyCode === 13 ) {
 
@@ -136,10 +143,10 @@ function selectKnot( event, pullerGroup, knot ) {
         break;
       }
     }
-    assert && assert( grabbedChild, "A puller must be grabbed in order to select a knot")
+    assert && assert( grabbedChild, 'A puller must be grabbed in order to select a knot' );
 
     // drop the puller by setting the aria attribute to false
-    console.log( 'dropping ' + grabbedChild )
+    console.log( 'dropping ' + grabbedChild );
     grabbedChild.setAttribute( 'aria-grabbed', 'false' );
 
     // the knot is now taken by a puller. hide it from other pullers.

@@ -3,6 +3,7 @@
 var marks = marks || {};
 
 (function() {
+  'use strict';
 
   marks.Performance = function( options ) {
     this.options = options || {};
@@ -184,11 +185,11 @@ var marks = marks || {};
     }
   }
 
-  function info( msg ) {
-    if ( console && console.log ) {
-      console.log( msg );
-    }
-  }
+  // function info( msg ) {
+  //   if ( console && console.log ) {
+  //     console.log( msg );
+  //   }
+  // }
 
   function loadScript( src, callback ) {
     debug( 'requesting script ' + src );
@@ -200,7 +201,7 @@ var marks = marks || {};
     script.async = true;
     script.onload = script.onreadystatechange = function() {
       var state = this.readyState;
-      if ( state && state != "complete" && state != "loaded" ) {
+      if ( state && state !== 'complete' && state !== 'loaded' ) {
         return;
       }
 

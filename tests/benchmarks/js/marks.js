@@ -12,6 +12,7 @@
 var marks = marks || {};
 
 (function() {
+  'use strict';
 
   marks.Timer = function( options ) {
     // onFinish()
@@ -72,7 +73,6 @@ var marks = marks || {};
     },
 
     nextSnapshot: function() {
-      var self = this;
 
       if ( this.pendingSnapshots.length !== 0 ) {
         var snapshot = this.pendingSnapshots.shift();
@@ -128,8 +128,6 @@ var marks = marks || {};
     },
 
     onSuiteComplete: function( event ) {
-      var suite = this.currentSuite;
-
       if ( this.options.onSnapshotEnd ) {
         this.options.onSnapshotEnd( this.currentSnapshot );
       }
@@ -182,7 +180,7 @@ var marks = marks || {};
     display: function() {
 
     }
-  }
+  };
 
   // passed to marks.Timer constructor as an options object. container is a block-level element that the report is placed in
   marks.TableReport = function( container ) {
@@ -379,11 +377,11 @@ var marks = marks || {};
     }
   }
 
-  function info( msg ) {
-    if ( console && console.log ) {
-      console.log( msg );
-    }
-  }
+  // function info( msg ) {
+  //   if ( console && console.log ) {
+  //     console.log( msg );
+  //   }
+  // }
 
   function loadScript( src, callback ) {
     debug( 'requesting script ' + src );
@@ -395,7 +393,7 @@ var marks = marks || {};
     script.async = true;
     script.onload = script.onreadystatechange = function() {
       var state = this.readyState;
-      if ( state && state != "complete" && state != "loaded" ) {
+      if ( state && state !== 'complete' && state !== 'loaded' ) {
         return;
       }
 

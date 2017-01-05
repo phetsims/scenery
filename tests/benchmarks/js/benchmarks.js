@@ -20,6 +20,7 @@
  */
 
 (function() {
+  'use strict';
 
   var results = $( '#results' );
 
@@ -84,7 +85,7 @@
     script.async = true;
     script.onload = script.onreadystatechange = function() {
       var state = this.readyState;
-      if ( state && state != "complete" && state != "loaded" ) {
+      if ( state && state !== 'complete' && state !== 'loaded' ) {
         return;
       }
 
@@ -114,8 +115,8 @@
 
     var baseWidth = Math.round( 100 * minHz / maxHz );
 
-    var baseBar = '<div class="bar" style="width: ' + baseWidth.toFixed() + '%;"></div>'
-    var extraBar = '<div class="bar ' + extraClass + '" style="width: ' + ( 100 - baseWidth ).toFixed() + '%;"></div>'
+    var baseBar = '<div class="bar" style="width: ' + baseWidth.toFixed() + '%;"></div>';
+    var extraBar = '<div class="bar ' + extraClass + '" style="width: ' + ( 100 - baseWidth ).toFixed() + '%;"></div>';
 
     td.html( '<div class="progress">' + baseBar + extraBar + '</div>' );
     return td;

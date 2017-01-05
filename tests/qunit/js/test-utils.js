@@ -4,24 +4,26 @@ var canvasWidth = 320;
 var canvasHeight = 240;
 
 var unicodeTestStrings = [
-  "This is a test",
-  "Newline\nJaggies?",
-  "\u222b",
-  "\ufdfa",
-  "\u00a7",
-  "\u00C1",
-  "\u00FF",
-  "\u03A9",
-  "\u0906",
-  "\u79C1",
-  "\u9054",
-  "A\u030a\u0352\u0333\u0325\u0353\u035a\u035e\u035e",
-  "0\u0489",
-  "\u2588"
+  'This is a test',
+  'Newline\nJaggies?',
+  '\u222b',
+  '\ufdfa',
+  '\u00a7',
+  '\u00C1',
+  '\u00FF',
+  '\u03A9',
+  '\u0906',
+  '\u79C1',
+  '\u9054',
+  'A\u030a\u0352\u0333\u0325\u0353\u035a\u035e\u035e',
+  '0\u0489',
+  '\u2588'
 ];
 
 // takes a snapshot of a scene and stores the pixel data, so that we can compare them
 function snapshot( scene, width, height ) {
+  'use strict';
+  
   width = width || canvasWidth;
   height = height || canvasHeight;
 
@@ -35,6 +37,8 @@ function snapshot( scene, width, height ) {
 }
 
 function asyncSnapshot( scene, callback, width, height ) {
+  'use strict';
+  
   width = width || canvasWidth;
   height = height || canvasHeight;
 
@@ -49,6 +53,8 @@ function asyncSnapshot( scene, callback, width, height ) {
 }
 
 function snapshotToCanvas( snapshot ) {
+  'use strict';
+  
   var canvas = document.createElement( 'canvas' );
   canvas.width = snapshot.width;
   canvas.height = snapshot.height;
@@ -59,6 +65,8 @@ function snapshotToCanvas( snapshot ) {
 }
 
 function imageFromDataURL( dataURL, callback ) {
+  'use strict';
+  
   var img = document.createElement( 'img' );
 
   img.onload = function() {
@@ -69,6 +77,8 @@ function imageFromDataURL( dataURL, callback ) {
 }
 
 function snapshotFromImage( image ) {
+  'use strict';
+  
   var canvas = document.createElement( 'canvas' );
   canvas.width = image.width;
   canvas.height = image.height;
@@ -78,6 +88,8 @@ function snapshotFromImage( image ) {
 }
 
 function snapshotFromDataURL( dataURL, callback ) {
+  'use strict';
+  
   imageFromDataURL( dataURL, function( image ) {
     callback( snapshotFromImage( image ) );
   } );
@@ -85,7 +97,9 @@ function snapshotFromDataURL( dataURL, callback ) {
 
 // compares two pixel snapshots {ImageData} and uses the qunit's assert to verify they are the same
 function snapshotEquals( a, b, threshold, message, extraDom ) {
-  var isEqual = a.width == b.width && a.height == b.height;
+  'use strict';
+  
+  var isEqual = a.width === b.width && a.height === b.height;
   var largestDifference = 0;
   var totalDifference = 0;
   var colorDiffData = document.createElement( 'canvas' ).getContext( '2d' ).createImageData( a.width, a.height );
@@ -109,7 +123,7 @@ function snapshotEquals( a, b, threshold, message, extraDom ) {
 
       totalDifference += alphaMultipliedDiff;
       // if ( alphaMultipliedDiff > threshold ) {
-        // console.log( message + ": " + Math.abs( a.data[i] - b.data[i] ) );
+        // console.log( message + ': ' + Math.abs( a.data[i] - b.data[i] ) );
       largestDifference = Math.max( largestDifference, alphaMultipliedDiff );
         // isEqual = false;
         // break;
@@ -146,6 +160,8 @@ function snapshotEquals( a, b, threshold, message, extraDom ) {
 }
 
 function sceneEquals( constructionA, constructionB, message, threshold ) {
+  'use strict';
+  
   if ( threshold === undefined ) {
     threshold = 0;
   }
@@ -166,6 +182,8 @@ function sceneEquals( constructionA, constructionB, message, threshold ) {
 }
 
 function strokeEqualsFill( shapeToStroke, shapeToFill, strokeNodeSetup, message ) {
+  'use strict';
+  
   sceneEquals( function( scene ) {
     var node = new scenery.Path( null );
     node.setShape( shapeToStroke );
@@ -187,10 +205,14 @@ function strokeEqualsFill( shapeToStroke, shapeToFill, strokeNodeSetup, message 
 }
 
 function compareShapeRenderers( shape, message ) {
+  'use strict';
+  
 
 }
 
 function testTextBounds( getBoundsOfText, fontDrawingStyles, message ) {
+  'use strict';
+  
   var precision = 1;
   var title = document.createElement( 'h2' );
   $( title ).text( message );
@@ -240,10 +262,14 @@ function testTextBounds( getBoundsOfText, fontDrawingStyles, message ) {
 }
 
 function equalsApprox( a, b, message ) {
+  'use strict';
+  
   ok( Math.abs( a - b ) < 0.0000001, ( message ? message + ': ' : '' ) + a + ' =? ' + b );
 }
 
 function createTestNodeTree() {
+  'use strict';
+  
   var node = new scenery.Node();
   node.addChild( new scenery.Node() );
   node.addChild( new scenery.Node() );

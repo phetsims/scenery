@@ -2,6 +2,8 @@
 
 // path to test base, without a slash, e.g. '../../../scenery/tests/qunit'
 function runSceneryTests( pathToTestBase ) {
+  'use strict';
+
   function loadTestFile( src ) {
     var script = document.createElement( 'script' );
     script.type = 'text/javascript';
@@ -25,4 +27,4 @@ function runSceneryTests( pathToTestBase ) {
   loadTestFile( 'js/focus.js' );
   loadTestFile( 'js/from-fuzzer.js' );
   loadTestFile( 'js/pixel-comparison.js' );
-};
+}

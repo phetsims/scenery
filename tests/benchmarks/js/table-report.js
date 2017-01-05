@@ -3,6 +3,8 @@
 var marks = marks || {};
 
 (function() {
+  'use strict';
+  
   marks.TableBase = function( container ) {
     this.container = container;
 

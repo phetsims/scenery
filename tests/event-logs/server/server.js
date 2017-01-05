@@ -12,6 +12,8 @@ var ip = 'localhost'; // hardcoded for now, maybe 'localhost' will work?
 var port = 8083;
 
 http.createServer( function( req, res ) {
+  'use strict';
+
   // see http://nodejs.org/api/http.html#http_request_method for docs
 
   var headers = {
@@ -35,12 +37,12 @@ http.createServer( function( req, res ) {
 
   // interpret a POST as a file write
   if ( req.method === 'POST' ) {
-    var postdata = "";
+    var postdata = '';
     req.on( 'data', function( chunk ) {
       postdata += chunk;
     } );
     req.on( 'end', function() {
-      var logname = decodeURIComponent( req.url.slice( 1 ) );
+      // logname = decodeURIComponent( req.url.slice( 1 ) );
       console.log( 'write to logfile: ' + logfile );
 
       fs.writeFile( logfile, postdata, function( err ) {

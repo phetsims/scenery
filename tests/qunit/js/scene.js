@@ -158,7 +158,7 @@
         scenery.Trail.eachTrailBetween( trails[ i ], trails[ j ], function( trail ) {
           inclusiveList.push( trail.copy() );
         }, false, node );
-        var trailString = i + ',' + j + ' ' + trails[ i ].toString() + ' to ' + trails[ j ].toString()
+        var trailString = i + ',' + j + ' ' + trails[ i ].toString() + ' to ' + trails[ j ].toString();
         ok( inclusiveList[ 0 ].equals( trails[ i ] ), 'inclusive start on ' + trailString + ' is ' + inclusiveList[ 0 ].toString() );
         ok( inclusiveList[ inclusiveList.length - 1 ].equals( trails[ j ] ), 'inclusive end on ' + trailString + 'is ' + inclusiveList[ inclusiveList.length - 1 ].toString() );
         equal( inclusiveList.length, j - i + 1, 'inclusive length on ' + trailString + ' is ' + inclusiveList.length + ', ' + _.map( inclusiveList, function( trail ) { return trail.toString(); } ).join( '\n' ) );
@@ -298,7 +298,7 @@
     }
 
     // verify forwards and backwards, as well as copy constructors
-    for ( var i = 1; i < pointers.length; i++ ) {
+    for ( i = 1; i < pointers.length; i++ ) {
       var a = pointers[ i - 1 ];
       var b = pointers[ i ];
 
@@ -312,8 +312,8 @@
     }
 
     // exhaustively check depthFirstUntil inclusive
-    for ( var i = 0; i < pointers.length; i++ ) {
-      for ( var j = i + 1; j < pointers.length; j++ ) {
+    for ( i = 0; i < pointers.length; i++ ) {
+      for ( j = i + 1; j < pointers.length; j++ ) {
         // i < j guaranteed
         var contents = [];
         pointers[ i ].depthFirstUntil( pointers[ j ], function( pointer ) { contents.push( pointer.copy() ); }, false );
@@ -322,7 +322,7 @@
         // do an actual pointer to pointer comparison
         var isOk = true;
         for ( var k = 0; k < contents.length; k++ ) {
-          var comparison = contents[ k ].compareNested( pointers[ i + k ] );
+          comparison = contents[ k ].compareNested( pointers[ i + k ] );
           if ( comparison !== 0 ) {
             equal( comparison, 0, 'depthFirstUntil inclusive ' + i + ',' + j + ',' + k + ' comparison check ' + contents[ k ].trail.indices.join() + ' - ' + pointers[ i + k ].trail.indices.join() );
             isOk = false;
@@ -333,17 +333,17 @@
     }
 
     // exhaustively check depthFirstUntil exclusive
-    for ( var i = 0; i < pointers.length; i++ ) {
-      for ( var j = i + 1; j < pointers.length; j++ ) {
+    for ( i = 0; i < pointers.length; i++ ) {
+      for ( j = i + 1; j < pointers.length; j++ ) {
         // i < j guaranteed
-        var contents = [];
+        contents = [];
         pointers[ i ].depthFirstUntil( pointers[ j ], function( pointer ) { contents.push( pointer.copy() ); }, true );
         equal( contents.length, j - i - 1, 'depthFirstUntil exclusive ' + i + ',' + j + ' count check' );
 
         // do an actual pointer to pointer comparison
-        var isOk = true;
-        for ( var k = 0; k < contents.length; k++ ) {
-          var comparison = contents[ k ].compareNested( pointers[ i + k + 1 ] );
+        isOk = true;
+        for ( k = 0; k < contents.length; k++ ) {
+          comparison = contents[ k ].compareNested( pointers[ i + k + 1 ] );
           if ( comparison !== 0 ) {
             equal( comparison, 0, 'depthFirstUntil exclusive ' + i + ',' + j + ',' + k + ' comparison check ' + contents[ k ].trail.indices.join() + ' - ' + pointers[ i + k ].trail.indices.join() );
             isOk = false;
@@ -566,7 +566,9 @@
     var scene = new scenery.Node();
     var display = new scenery.Display( scene );
 
-    var width, height, count = 0;
+    var width;
+    var height;
+    var count = 0;
 
     display.on( 'displaySize', function( size ) {
       width = size.width;
