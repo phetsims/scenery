@@ -167,6 +167,7 @@ define( function( require ) {
   var Renderer = require( 'SCENERY/display/Renderer' );
   var RendererSummary = require( 'SCENERY/util/RendererSummary' );
   var Picker = require( 'SCENERY/util/Picker' );
+  var Accessibility = require( 'SCENERY/accessibility/Accessibility' );
   require( 'SCENERY/util/CanvasContextWrapper' );
   // commented out so Require.js doesn't balk at the circular dependency
   // require( 'SCENERY/util/Trail' );
@@ -250,6 +251,7 @@ define( function( require ) {
    * @public
    * @constructor
    * @mixes Events
+   * @mixes Accessibility
    *
    * NOTE: Directly created Nodes (not of any subtype, but created with "new Node( ... )") are generally used as
    *       containers, which can hold other Nodes, subtypes of Node that can display things.
@@ -474,12 +476,16 @@ define( function( require ) {
     // Initialize sub-components
     this._picker = new Picker( this );
 
+    // Mix in accessibility
+    this.mixinAccessibility( options );
+
     if ( options ) {
       this.mutate( options );
     }
 
     // Track allocation of nodes internally
     phetAllocation && phetAllocation( 'Node' );
+
   }
 
   scenery.register( 'Node', Node );
@@ -4608,7 +4614,7 @@ define( function( require ) {
     },
 
     /**
-     * Override for extra information in the debugging output (from Display.getDebugHTML()).
+     * Override for extra information in the fing output (from Display.getDebugHTML()).
      * @protected (scenery-internal)
      *
      * @returns {string}
@@ -4804,6 +4810,9 @@ define( function( require ) {
       return index;
     }
   } ) );
+
+  // mixin accessibility
+  Accessibility.mixin( Node );
 
   return Node;
 } );
