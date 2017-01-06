@@ -125,6 +125,13 @@ define( function( require ) {
       // add accessibility functions to the prototype
       //----------------------------------------------------------------------------------------------------------------
 
+      /**
+       * Mix accessibility into an instance of a node, instantiating the accessible peer and creating 
+       * representative DOM elements.
+       * 
+       * @param  {Object} options
+       * @public (scenery-internal)
+       */
       proto.mixinAccessibility = function( options ) {
         options = _.extend( {
 
