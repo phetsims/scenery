@@ -6,6 +6,8 @@ phet.benchmark = phet.benchmark || {};
 (function() {
   'use strict';
 
+  /* eslint-disable no-undef */
+
   phet.benchmark.createDetachedScene = function( width, height ) {
     width = width || 640;
     height = height || 480;
@@ -216,5 +218,8 @@ phet.benchmark = phet.benchmark || {};
   //     }
   //   }
   // } );
+
+  /* eslint-disable no-undef */
+
 
 })();

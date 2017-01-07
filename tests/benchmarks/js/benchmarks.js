@@ -45,7 +45,7 @@
 
     currentRunCount = currentRunCount + 1;
 
-    var bench = new Benchmark( name, fn, {
+    var bench = new Benchmark( name, fn, { // eslint-disable-line no-undef
       defer: !!async,
 
       // maxTime: 10,

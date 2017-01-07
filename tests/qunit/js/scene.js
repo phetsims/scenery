@@ -5,6 +5,8 @@
 
   module( 'Scenery: Scene' );
 
+  /* eslint-disable no-undef */
+
   test( 'Dirty bounds propagation test', function() {
     var node = createTestNodeTree();
 
@@ -1037,4 +1039,6 @@
     ok( emptyNode._rendererSummary.isNotPainted(), 'Empty node is not painted' );
     ok( emptyNode._rendererSummary.areBoundsValid(), 'Empty node has valid bounds' );
   } );
+
+  /* eslint-enable */
 })();

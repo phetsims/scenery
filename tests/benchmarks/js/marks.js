@@ -137,7 +137,7 @@ var marks = marks || {};
 
     createSuite: function( snapshot ) {
       var self = this;
-      return new Benchmark.Suite( snapshot.name, {
+      return new Benchmark.Suite( snapshot.name, { // eslint-disable-line no-undef
         // TODO: strip out what we don't need from here
         onStart: function( event ) {
           // console.log( snapshot.name + ' (suite onStart)' );

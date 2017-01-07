@@ -99,13 +99,13 @@ var marks = marks || {};
             }, 500 );
           }
           else {
-            window.requestAnimationFrame( tick, main[ 0 ] );
+            window.requestAnimationFrame( tick, main[ 0 ] ); // eslint-disable-line no-undef
 
             mark.step && mark.step();
           }
         }
 
-        window.requestAnimationFrame( tick, main[ 0 ] );
+        window.requestAnimationFrame( tick, main[ 0 ] ); // eslint-disable-line no-undef
 
         var startTime = new Date;
       }

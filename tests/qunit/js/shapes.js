@@ -9,6 +9,8 @@
 
   function p( x, y ) { return new dot.Vector2( x, y ); }
 
+  /* eslint-disable no-undef */
+
   test( 'Verifying Line/Rect', function() {
     var lineWidth = 50;
     // /shapeToStroke, shapeToFill, strokeNodeSetup, message, debugFlag
@@ -222,4 +224,6 @@
 
     strokeEqualsFill( strokeShape, fillShape, function( node ) { node.setLineStyles( styles ); }, QUnit.config.current.testName );
   } );
+
+  /* eslint-enable */
 })();

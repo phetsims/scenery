@@ -13,6 +13,7 @@
   // known clipping issues to fix
   var nonDomWebGLTestedRenderers = testedRenderers.filter( function( renderer ) { return renderer !== 'dom' && renderer !== 'webgl'; } );
 
+  /* eslint-disable no-undef */
   // We can only guarantee comparisons for Firefox and Chrome
   if ( !phetCore.platform.firefox && !phetCore.platform.chromium ) {
     window.console && window.console.log && window.console.log( 'Not running pixel-comparison tests' );
@@ -230,6 +231,8 @@
     }, simpleRectangleDataURL,
     0, testedRenderers
   );
+
+  /* eslint-enable */
 
   multipleRendererTest( 'Color change before display',
     function( scene, display ) {
@@ -870,7 +873,7 @@
         };
         img2.error = function() {
           asyncCallback();
-        }
+        };
         img2.src = redCenteredCircle;
       };
       img1.error = function() {

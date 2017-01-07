@@ -25,9 +25,9 @@
     var path1 = new scenery.Path( null );
     var path2 = new scenery.Path( null );
     var path3 = new scenery.Path( null );
-    var text0 = new scenery.Text( '0!' );
-    var text1 = new scenery.Text( '1!' );
-    var text2 = new scenery.Text( '2!' );
+    // var text0 = new scenery.Text( '0!' );
+    // var text1 = new scenery.Text( '1!' );
+    // var text2 = new scenery.Text( '2!' );
     node2.insertChild( 0, node0 );
     display.updateDisplay();
     path3.insertChild( 0, node3 );
@@ -498,7 +498,7 @@
     node4.removeChild( path2 );
     node0.removeChild( node6 );
 
-    expect( 0 );
+    expect( 0 ); // eslint-disable-line no-undef
   } );
 
   test( 'RelativeTransform matrix mismatch #393', function() {
@@ -518,7 +518,7 @@
     node0.renderer = 'canvas';
     display.updateDisplay();
 
-    expect( 0 );
+    expect( 0 ); // eslint-disable-line no-undef
   } );
 
   test( 'computeShapeBounds in requiresSVGBoundsWorkaround', function() {
@@ -1308,7 +1308,7 @@
     path3.transform.prepend( dot.Matrix3.scaling( 0.6607098999660652 ) );
     display.updateDisplay();
 
-    expect( 0 );
+    expect( 0 ); // eslint-disable-line no-undef
   } );
 
 })();

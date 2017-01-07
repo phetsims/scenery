@@ -9,6 +9,7 @@
 
   module( 'Scenery: Display' );
 
+
   test( 'Drawables (Rectangle)', function() {
 
     // The stubDisplay It's a hack that implements the subset of the Display API needed where called. It will definitely
@@ -384,6 +385,8 @@
     // console.log( mask.toString( 16 ) );
   } );
 
+  /* eslint-disable no-undef */
+
   test( 'Empty Display usage', function() {
     var n = new scenery.Node();
     var d = new scenery.Display( n );
@@ -551,5 +554,7 @@
 
     expect( 0 );
   } );
+
+  /* eslint-enable */
 
 })();
