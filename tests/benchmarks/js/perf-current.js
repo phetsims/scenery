@@ -591,7 +591,7 @@
   //   }
   // };
 
-  marks.currentMarks = [
+  marks.currentMarks = [ // eslint-disable-line no-undef
     // textNodeInstances,
     // textPathInstances,
     textBoundsChanges,

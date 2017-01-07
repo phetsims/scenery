@@ -121,15 +121,15 @@ phet.benchmark = phet.benchmark || {};
 
   benchmarkTimer.add( 'Canvas/context creation', function() {
     var canvas = document.createElement( 'canvas' );
-    var context = phet.canvas.initCanvas( canvas );
+    var context = phet.canvas.initCanvas( canvas ); // eslint-disable-line no-unused-vars
   } );
 
   benchmarkTimer.add( 'Node creation', function() {
-    var node = new scenery.Node();
+    var node = new scenery.Node(); // eslint-disable-line no-unused-vars
   } );
 
   benchmarkTimer.add( 'Node creation with inline parameters', function() {
-    var node = new scenery.Node( { x: 5, y: 10 } );
+    var node = new scenery.Node( { x: 5, y: 10 } ); // eslint-disable-line no-unused-vars
   } );
 
   benchmarkTimer.add( 'Node creation with ES5 setters', function() {
@@ -149,7 +149,7 @@ phet.benchmark = phet.benchmark || {};
     node.y = 10;
   }, {
     setup: function() {
-      var node = new scenery.Node();
+      // var node = new scenery.Node();
     }
   } );
 
@@ -158,7 +158,7 @@ phet.benchmark = phet.benchmark || {};
     node.setY( 10 );
   }, {
     setup: function() {
-      var node = new scenery.Node();
+      var node = new scenery.Node(); // eslint-disable-line no-unused-vars
     }
   } );
 

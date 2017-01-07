@@ -29,7 +29,7 @@ function enterGroup( event, parent ) {
  * @param event
  * @param parent
  */
-function exitGroup( event, parent ) {
+function exitGroup( event, parent ) { // eslint-disable-line no-unused-vars
   'use strict';
   
   if ( event.keyCode === 27 || event.keyCode === 9 ) {
@@ -46,7 +46,7 @@ function exitGroup( event, parent ) {
  * @param event
  * @param child
  */
-function focusNextElement( event, child ) {
+function focusNextElement( event, child ) { // eslint-disable-line no-unused-vars
   'use strict';
 
   // isolate children, and the first and last children in the group
@@ -91,7 +91,7 @@ function focusNextElement( event, child ) {
  * @param puller
  * @param knot
  */
-function placePullerOnKnot( event, puller, knotGroup ) {
+function placePullerOnKnot( event, puller, knotGroup ) { // eslint-disable-line no-unused-vars
   'use strict';
   
   if ( event.keyCode === 13 ) {
@@ -129,7 +129,7 @@ function placePullerOnKnot( event, puller, knotGroup ) {
  * Place a puller on the selected knot, searching through the document for the puller being dragged
  * with aria-grabbed
  */ 
-function selectKnot( event, pullerGroup, knot ) {
+function selectKnot( event, pullerGroup, knot ) { // eslint-disable-line no-unused-vars
   'use strict';
 
   if ( event.keyCode === 13 ) {
