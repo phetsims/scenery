@@ -60,6 +60,7 @@ define( function( require ) {
   var Dimension2 = require( 'DOT/Dimension2' );
   var Vector2 = require( 'DOT/Vector2' );
   var Matrix3 = require( 'DOT/Matrix3' );
+  var Tandem = require( 'TANDEM/Tandem' );
 
   var scenery = require( 'SCENERY/scenery' );
   var Node = require( 'SCENERY/nodes/Node' );
@@ -84,6 +85,9 @@ define( function( require ) {
   var PointerOverlay = require( 'SCENERY/overlays/PointerOverlay' );
   var CanvasNodeBoundsOverlay = require( 'SCENERY/overlays/CanvasNodeBoundsOverlay' );
   var FittedBlockBoundsOverlay = require( 'SCENERY/overlays/FittedBlockBoundsOverlay' );
+
+  // phet-io modules
+  var TFocus = require( 'ifphetio!PHET_IO/types/scenery/TFocus' );
 
   /*
    * Constructs a Display that will show the rootNode and its subtree in a visual state. Default options provided below
@@ -1061,7 +1065,7 @@ define( function( require ) {
     fuzzMouseEvents: function( averageEventQuantity ) {
       var chance;
 
-      assert && assert( averageEventQuantity > 0, 'averageEventQuantity must be positive: ' +  averageEventQuantity );
+      assert && assert( averageEventQuantity > 0, 'averageEventQuantity must be positive: ' + averageEventQuantity );
 
       // run a variable number of events, with a certain chance of bailing out (so no events are possible)
       // models a geometric distribution of events
@@ -1565,7 +1569,7 @@ define( function( require ) {
           replacedImages++;
           hasReplacedImages = true;
 
-          (function(){
+          (function() {
             // Closure variables need to be stored for each individual SVG image.
             var refImage = new window.Image();
             var svgImage = displaySVGImage;
@@ -1678,7 +1682,13 @@ define( function( require ) {
     'scenery-grabbing-pointer': [ 'grabbing', '-moz-grabbing', '-webkit-grabbing', 'pointer' ]
   };
 
-  Display.focusProperty = new Property( null ); // { display: {Display}, trail: {Trail} }
+  // Each Display has an axon Property to indicate which component is focused (or null, if no scenery node is focused).
+  // By passing the tandem and phetioValueType, PhET-iO is able to interoperate (save/restore/control/observe) the focus rectangle
+  // When focused, the value has this type: { display: {Display}, trail: {Trail} }
+  Display.focusProperty = new Property( null, {
+    tandem: Tandem.createRootTandem().createTandem( 'display' ).createTandem( 'focusProperty' ),
+    phetioValueType: TFocus
+  } );
 
   return Display;
 } );
