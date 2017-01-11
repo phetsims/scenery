@@ -13,7 +13,6 @@ define( function( require ) {
   var assertInstanceOf = require( 'PHET_IO/assertions/assertInstanceOf' );
   var phetioInherit = require( 'PHET_IO/phetioInherit' );
   var phetioNamespace = require( 'PHET_IO/phetioNamespace' );
-  var toEventOnEmit = require( 'PHET_IO/events/toEventOnEmit' );
   var TObject = require( 'PHET_IO/types/TObject' );
 
   /**
