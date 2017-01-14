@@ -108,6 +108,10 @@ define( function( require ) {
                             ) ),
             'Invalid fill type' );
 
+          if ( assert && typeof fill === 'string' ) {
+            Color.checkPaintString( fill );
+          }
+
           // Instance equality used here since it would be more expensive to parse all CSS
           // colors and compare every time the fill changes. Right now, usually we don't have
           // to parse CSS colors. See https://github.com/phetsims/scenery/issues/255
@@ -185,6 +189,10 @@ define( function( require ) {
                               stroke.value instanceof Color
                             ) ),
             'Invalid stroke type' );
+
+          if ( assert && typeof stroke === 'string' ) {
+            Color.checkPaintString( stroke );
+          }
 
           // Instance equality used here since it would be more expensive to parse all CSS
           // colors and compare every time the fill changes. Right now, usually we don't have
