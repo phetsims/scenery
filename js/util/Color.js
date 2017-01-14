@@ -16,6 +16,7 @@ define( function( require ) {
   var inherit = require( 'PHET_CORE/inherit' );
   var scenery = require( 'SCENERY/scenery' );
 
+  var Property = require( 'AXON/Property' );
   var Util = require( 'DOT/Util' );
 
   // constants
@@ -719,6 +720,28 @@ define( function( require ) {
 
   Color.hsla = function( hue, saturation, lightness, alpha ) {
     return new Color( 0, 0, 0, 1 ).setHSLA( hue, saturation, lightness, alpha );
+  };
+
+  var scratchColor = new Color( 'blue' );
+  Color.checkPaintString = function( cssString ) {
+    if ( assert ) {
+      try {
+        scratchColor.setCSS( cssString );
+      }
+      catch( e ) {
+        assert( false, 'The CSS string is an invalid color: ' + cssString );
+      }
+    }
+  };
+
+  // a Paint of the type that Paintable accepts as fills or strokes
+  Color.checkPaint = function( paint ) {
+    if ( typeof paint === 'string' ) {
+      Color.checkPaintString( paint );
+    }
+    else if ( ( paint instanceof Property ) && ( typeof paint.value === 'string' ) ) {
+      Color.checkPaintString( paint.value );
+    }
   };
 
   return Color;

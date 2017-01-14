@@ -12,6 +12,7 @@ define( function( require ) {
 
   var scenery = require( 'SCENERY/scenery' );
   var PaintObserver = require( 'SCENERY/display/PaintObserver' );
+  var Color = require( 'SCENERY/util/Color' );
 
   var PaintableStatelessDrawable = {
     mixin: function( drawableType ) {
@@ -35,11 +36,15 @@ define( function( require ) {
       };
 
       proto.markDirtyFill = function() {
+        assert && Color.checkPaint( this.instance.node._fill );
+
         this.markPaintDirty();
         this.fillObserver.update(); // TODO: look into having the fillObserver be notified of Node changes as our source
       };
 
       proto.markDirtyStroke = function() {
+        assert && Color.checkPaint( this.instance.node._stroke );
+
         this.markPaintDirty();
         this.strokeObserver.update(); // TODO: look into having the strokeObserver be notified of Node changes as our source
       };
