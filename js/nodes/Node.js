@@ -477,7 +477,7 @@ define( function( require ) {
     this._picker = new Picker( this );
 
     // Mix in accessibility
-    this.mixinAccessibility( options );
+    this.initializeAccessibility( options );
 
     if ( options ) {
       this.mutate( options );

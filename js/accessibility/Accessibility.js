@@ -129,10 +129,10 @@ define( function( require ) {
        * Mix accessibility into an instance of a node, instantiating the accessible peer and creating 
        * representative DOM elements.
        * 
-       * @param  {Object} options
+       * @param  {Object} [options]
        * @public (scenery-internal)
        */
-      proto.mixinAccessibility = function( options ) {
+      proto.initializeAccessibility = function( options ) {
         options = _.extend( {
 
           // html tag names
