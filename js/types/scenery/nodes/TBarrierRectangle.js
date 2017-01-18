@@ -9,6 +9,7 @@ define( function( require ) {
   'use strict';
 
   // modules
+  var assertInstanceOf = require( 'PHET_IO/assertions/assertInstanceOf' );
   var phetioInherit = require( 'PHET_IO/phetioInherit' );
   var phetioNamespace = require( 'PHET_IO/phetioNamespace' );
   var TNode = require( 'PHET_IO/types/scenery/nodes/TNode' );
@@ -21,6 +22,7 @@ define( function( require ) {
    * @constructor
    */
   function TBarrierRectangle( barrierRectangle, phetioID ) {
+    assertInstanceOf( barrierRectangle, phet.scenery.Rectangle );
     TNode.call( this, barrierRectangle, phetioID );
 
     toEventOnEmit( barrierRectangle.startedCallbacksForFiredEmitter,
