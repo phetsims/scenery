@@ -49,29 +49,6 @@
  * this example, the parentContainerElement is the div, while the description is added as a child under the button
  * node's domElement.
  *
- * There is also a `childContainerElement`, which is a container element for accessible content for children under this
- * node.  For instance, consider the following scene graph:
- *
- *   A
- *  / \
- * B   C
- *
- * And suppose you want add a specific label and description to node A without altering the structure of the scene graph
- * with HTML content like this:
- *
- * <div id="node-A">
- *   <p>Label for node A</p>
- *   <p>Label for node B</p>
- *
- *   <div id='childContainerElement'>
- *     <div id="node-B"></div>
- *     <div id="node-C"></div>
- *   </div>
- * </div>
- *
- * The above is easily handled by passing in an optional 'childContainerTagName', which will create a child container
- * element with the desired tag name.
- *
  * For additional accessibility options, please see the options at the top of the AccessibleNode constructor. For more
  * documentation on Scenery, Nodes, and the scene graph, please see http://phetsims.github.io/scenery/
  *
@@ -83,689 +60,977 @@ define( function( require ) {
 
   // modules
   var scenery = require( 'SCENERY/scenery' );
+  var extend = require( 'PHET_CORE/extend' );
+  var AccessibilityUtil = require( 'SCENERY/accessibility/AccessibilityUtil' );
   // we use the following but comment out to avoid circular dependency
   // var AccessiblePeer = require( 'SCENERY/accessibility/AccessiblePeer' );
 
   // constants
-  // for specifying direction of DOM traversal
-  var NEXT = 'NEXT';
-  var PREVIOUS = 'PREVIOUS';
-
-  // specific DOM tag names, used frequently and for validation
-  var DOM_INPUT = 'INPUT';
-  var DOM_LABEL = 'LABEL';
-  var DOM_UNORDERED_LIST = 'UL';
-  var DOM_BUTTON = 'BUTTON';
-  var DOM_TEXTAREA = 'TEXTAREA';
-  var DOM_SELECT = 'SELECT';
-  var DOM_OPTGROUP = 'OPTGROUP';
-  var DOM_DATALIST = 'DATALIST';
-  var DOM_OUTPUT = 'OUTPUT';
-
-  // these elements will have labels that use inner text
-  var ELEMENTS_WITH_INNER_TEXT = [ DOM_BUTTON ];
-
-  // these elements are typically associated with forms, and support certain attributes
-  var FORM_ELEMENTS = [ DOM_INPUT, DOM_BUTTON, DOM_TEXTAREA, DOM_SELECT, DOM_OPTGROUP, DOM_DATALIST, DOM_OUTPUT ];
-
   // global incremented to provide unique id's
   var ITEM_NUMBER = 0;
+
+  var ACCESSIBILITY_OPTION_KEYS = [
+    'tagName', // Sets the tag name for the DOM element representing this node in the parallel DOM
+    'inputType', // Sets the input type for the representative DOM element, only relevant if tagname is 'input'
+    'parentContainerTagName', // Sets the tag name for an element that contains this node's DOM element and its peers
+    'labelTagName', // Sets the tag name for the DOM element labelling this node, usually a paragraph
+    'descriptionTagName', // Sets the tag name for the DOM element describing this node, usually a paragraph
+    'focusHighlight', // Sets the focus highlight for the node, see setFocusHighlight()
+    'accessibleLabel', // Set the label content for the node
+    'accessibleDescription', // Set the description content for the node
+    'accessibleHidden', // Sets wheter or not the node's DOM element is hidden in the parallel DOM
+    'focusable', // Sets whether or not the node can receive keyboard focus
+    'useAriaLabel', // Sets whether or not the label will use the 'aria-label' attribute
+    'ariaRole', // Sets the ARIA role for the DOM element, see setAriaRole() for documentation
+    'ariaDescribedById', // Sets a description relationship for this node's DOM element by id, see setAriaDescribedById()
+    'ariaLabelledById', // Sets a label relationship with another element in the DOM by id, see setAriaLabelledById()
+    'prependLabels'// Sets whether we want to prepend labels above the node's HTML element, see setPrependLabels()
+  ];
 
   var Accessibility = {
 
     /**
      * Given the constructor for Node, mix accessibility functions into the prototype
      * 
-     * @param  {function} type - the constructor for Node
+     * @param {function} type - the constructor for Node
      */
     mixin: function( type  ) {
       var proto = type.prototype;
 
-      //----------------------------------------------------------------------------------------------------------------
-      // add accessibility functions to the prototype
-      //----------------------------------------------------------------------------------------------------------------
-
       /**
-       * Mix accessibility into an instance of a node, instantiating the accessible peer and creating 
-       * representative DOM elements.
-       * 
-       * @param  {Object} [options]
-       * @public (scenery-internal)
+       * These properties and methods are put directly on the prototype of nodes
+       * that have Accessibility mixed in.
        */
-      proto.initializeAccessibility = function( options ) {
-        options = _.extend( {
+      extend( proto, {
 
-          // html tag names
-          tagName: null, // {string} - tag name for the element representing this node in the parallel DOM
-          inputType: null, // {string} - specify the input type attribute - only relevant if tagName is 'input'
-          parentContainerTagName: null, // {string} - creates a parent container DOM element for this node's DOM element and its peers
-          childContainerTagName: null, // {string} - creates a container element for the children under this node's DOM element
-          labelTagName: null, // {string} - tag name for the element containing the label, usually a paragraph, label, or heading
-          descriptionTagName: null, // - tag name for the element containing the description, usually a paragraph or a list item
+        /**
+         * {Array.<string>} - String keys for all of the allowed options that will be set by node.mutate( options ), in the
+         * order they will be evaluated in.  Order does not matter for accessibility options, though order does matter
+         * for Scenery's Node.js and its other mixins.
+         * @protected
+         *
+         * NOTE: See Node's _mutatorKeys documentation for more information on how this operates, and potential special
+         *       cases that may apply.
+         */
+        _mutatorKeys: ACCESSIBILITY_OPTION_KEYS.concat( proto._mutatorKeys ),
 
-          // focus highlight
-          focusHighlight: null, // {Node|Shape|Bounds2} - default is a pink rectangle around the node's local bounds
+        /**
+         * This should be called in the constructor to initialize the accessibility-specific
+         * parts of Node.
+         * @protected
+         */
+        initializeAccessibility: function() {
 
-          // accessible labels
-          label: null, // {string} - accessible label applied to this node, usually read by the screen reader on focus
-          useAriaLabel: false, // {boolean} - if true, a label element will not be created and the label will be inline with aria-label
+          // tag names
+          this._tagName = null;
+          this._inputTagName = null;
+          this._parentContainerTagName = null;
+          this._labelTagName = null;
+          this._descriptionTagName = null;
 
-          // accessible descriptions
-          description: '', // {string} - description for this node in the parallel DOM, only read on focus if ariaDescribedBy defined
+          // DOM elements
+          this._domElement = null;
+          this._labelElement = null;
+          this._descriptionElement = null;
+          this._parentContainerElement = null;
 
-          // DOM events
-          events: {}, // {object} - object with keys of type event name, values of type function callback for the event
+          // array of attributes on the DOM Element.  The array will contain objects
+          // of the form { attribute: {string}, value: {string|number} } 
+          this._accessibleAttributes = [];
 
-          // attributes
-          hidden: false, // {boolean} - hides the element in the parallel DOM from the AT
-          focusable: false, // {boolean} = whether or not the element can receive keyboard focus
+          // content
+          this._accessibleLabel = null;
+          this._accessibleDescription = null;
+          this._prependLabels = null;
 
           // aria
-          attributes: [], // {Object[]} - objects specifying element attributes - keys attribute and value of attribute value
-          ariaRole: null, // {string} - aria role for the element, can define extra semantics for the reader, see https://www.w3.org/TR/wai-aria/roles for list of roles
-          ariaDescribedBy: null, // {string} - an ID of a description element to describe this dom element
-          ariaLabelledBy: null // {string} - an ID of a label element to describe this dom element
-        }, options );
+          this._useAriaLabel = null;
+          this._ariaRole = null;
+          this._ariaDescribedById = null;
+          this._ariaLabelledById = null;
 
-        //----------------------------------------------------------------------------------------------------------------
-        // Instantiate the accessible content
-        //----------------------------------------------------------------------------------------------------------------
+          this._focusable = null;
+          this._focusHighlight = null;
+          this._accessibleHidden = null;
+
+          // An id used for the purposes of accessibility.  The accessible id
+          // is a string, since the DOM API frequently uses string identifiers
+          // to reference other elements in the DOM.
+          this._accessibleId = AccessibilityUtil.generateHTMLElementId();
+
+          // @private {Array.<Function>} - For accessibility input handling {keyboard/click/HTML form}
+          this._accessibleInputListeners = [];
+        },
+
+        /**
+         * Create a DOM element, giving it a unique ID if necessary.
+         * @private
+         * 
+         * @param  {string} tagName
+         * @param {string} [id] - optional id for the dom element, will be the node's id if not defined
+         */
+        createDOMElement: function( tagName ) {
+          return document.createElement( tagName );
+        },
+
+        /**
+         * Add DOM event listeners contained in the accessibleInput directly
+         * to the DOM element.
+         * @private
+         * 
+         * @param {Object} accessibleInput
+         */
+        addDOMEventListeners: function( accessibleInput ) {
+          var self = this;
+          for ( var event in accessibleInput ) {
+            if ( accessibleInput.hasOwnProperty( event ) ) {
+              self._domElement.addEventListener( event, accessibleInput[ event ] );
+            }
+          }
+        },
+
+        /**
+         * Remove a DOM event listener contained in an accesssibleInput.
+         * @private
+         *
+         * @param  {Object} accesssibleInput
+         */
+        removeDOMEventListeners: function( accesssibleInput ) {
+          var self = this;
+          for ( var event in accesssibleInput ) {
+            if ( accesssibleInput.hasOwnProperty( event ) ) {
+              self._domElement.removeEventListener( event, accesssibleInput[ event ] );
+            }
+          }
+        },
+
+        /**
+         * Adds an accessibility input listener.
+         * @public
+         *
+         * @param {Object} listener
+         * @returns {Node} - Returns 'this' reference, for chaining
+         */
+        addAccessibleInputListener: function( accessibleInput ) {
+          // don't allow listeners to be added multiple times
+          if ( _.indexOf( this._accessibleInputListeners, accessibleInput ) === -1 ) {
+            this._accessibleInputListeners.push( accessibleInput );
+
+            // add the event listener to the DOM element
+            this.addDOMEventListeners( accessibleInput );
+          }
+          return this;
+        },
+
+        /**
+         * Removes an input listener that was previously added with addAccessibleInputListener.
+         * @public
+         *
+         * @param {Object} listener
+         * @returns {Node} - Returns 'this' reference, for chaining
+         */
+        removeAccessibleInputListener: function( listener ) {
+          // ensure the listener is in our list
+          assert && assert( _.indexOf( this._accessibleInputListeners, listener ) !== -1 );
+          this._accessibleInputListeners.splice( _.indexOf( this._accessibleInputListeners, listener ), 1 );
+
+          // remove the event listeners from the DOM element
+          this.removeDOMEventListeners( listener );
+
+          return this;
+        },
+
+        /**
+         * Returns a copy of all accessibiltiy input listeners.
+         * @public
+         *
+         * @returns {Array.<Object>}
+         */
+        getAccessibleInputListeners: function() {
+          return this._accessibleInputListeners.slice( 0 ); // defensive copy
+        },
+        get accessibleInputListeners() { return this.getAccessibleInputListeners(); },
+
+        /**
+         * Get the accesible id for this node.  The accessible id is built from
+         * the node's trail in invalidateAccessibleContent. It is
+         * a string since elemetns are are generally referenced by string in the
+         * the DOM API.
+         * 
+         * @return {string}
+         */
+        getAccessibleId: function() {
+          return this._accessibleId;
+        },
+        get accessibleId() { return this.getAccessibleId(); },
+
+        /**
+         * Set the tag name representing this element in the DOM. DOM element 
+         * tag names are read-only, so this function will create a new DOM
+         * element for the Node and reset the accessible content.
+         *  
+         * @param {string} tagName
+         */
+        setTagName: function( tagName ) {
+          this._tagName = tagName;
+          this._domElement = this.createDOMElement( tagName );
+          this._domElement.id = this._accessibleId;
+
+          this.invalidateAccessibleContent();
+        },
+        set tagName( tagName ) { this.setTagName( tagName ); },
+
+        /**
+         * Get the tag name of the DOM element representing this node for 
+         * accessibility.
+         * @public
+         * 
+         * @return {string}
+         */
+        getTagName: function() {
+          return this._tagName;
+        },
+        get tagName() { return this.getTagName(); },
+
+        /**
+         * Set the tag name for the accessible label for this Node.  DOM element
+         * tag names are read-only, so this will require creating a new label
+         * element.
+         * 
+         * @param {string} tagName
+         */
+        setLabelTagName: function( tagName ) {
+          this._labelTagName = tagName;
+          this._labelElement = null;
+
+          if ( tagName ) {
+            this._labelElement = this.createDOMElement( tagName );
+            this._labelElement.id = 'label-' + this._accessibleId;
+          }
+
+          this.invalidateAccessibleContent();
+        },
+        set labelTagName( tagName ) { this.setLabelTagName( tagName ); },
+
+        getLabelTagName: function() {
+          return this._labelTagName;
+        },
+        get labelTagName() { return this.getLabelTagName(); },
+
+        /**
+         * Set the tag name for the description. DOM element tag names are
+         * read-only, so this will require creating a new descriptiton element.
+         * @public
+         * 
+         * @param {string} tagName
+         */
+        setDescriptionTagName: function( tagName ) {
+          this._descriptionTagName = tagName;
+          this._descriptionElement = null;
+
+          if ( tagName ) {
+            this._descriptionElement = this.createDOMElement( tagName );
+            this._descriptionElement.id = 'description-' + this._accessibleId;
+          }
+
+          this.invalidateAccessibleContent();
+        },
+        set descriptionTagName( tagName ) { this.setDescriptionTagName( tagName ); },
+
+        getDescriptionTagName: function() {
+          return this._descriptionTagName;
+        },
+        get descriptionTagName() { return this.getDescriptionTagName(); },
         
-        // no need to create accessible content if there is no tagname
-        if ( !options.tagName ) {
-          return;
+        /**
+         * Sets the type for an input element.  Element must have the INPUT tag
+         * name. The input attribute is not specified as readonly, so
+         * invalidating accessible content is not necessary.
+         * 
+         * @param {string} inputType
+         */
+        setInputType: function( inputType ) {
+          assert && assert( this._tagName.toUpperCase() === AccessibilityUtil.INPUT_TAG, 'tag name must be INPUT to support inputType' );
+
+          this._inputType = inputType;
+          this._domElement.type = inputType;
+        },
+        set inputType( inputType ) { this.setInputType( inputType ); },
+
+        getInputType: function( inputType ) {
+          return this._inputType;
+        },
+        get inputType() { return this.getInputType(); },
+
+        /**
+         * Set whether or not we want to prepend labels above the node's
+         * HTML element.  This should only be used if the node has a parent
+         * container element. If prepending labels, the label and description
+         * elements will be located above the HTML element like:
+         *
+         * <div id='parent-container'>
+         *   <p>Label</p>
+         *   <p>Description</p>
+         *   <div id="node-content"></div>
+         * </div>
+         * 
+         * @param {boolean} prependLabels
+         */
+        setPrependLabels: function( prependLabels ) {
+          assert && assert( this._parentContainerElement, 'prependLabels requires a parent container element' );
+          this._prependLabels = prependLabels;
+
+          this.invalidateAccessibleContent();
+        },
+        set prependLabels( prependLabels ) { this.setPrependLabels( prependLabels ); },
+        
+        /**
+         * Get whether or not this node adds labels above the accessible content.
+         * @return {[type]} [description]
+         */
+        getPrependLabels: function() {
+          return this._prependLabels;
+        },
+        get prependLabels() { return this.getPrependLabels(); },
+
+        /**
+         * Set the parent container tag name.  By specifying this parent container,
+         * an element will be created that acts as a container for this node's
+         * DOM element and its label and description peers.  For instance, 
+         * a button element with a label and description will be contained
+         * like the following if the parent container tag name is specified as
+         * 'section'.
+         *
+         * <section id='parent-container-trail-id'>
+         *   <button>Press me!</button>
+         *   <p>Button label</p>
+         *   <p>Button description</p>
+         * </section>
+         * 
+         * @param {string} tagName - tag name for the parent container
+         */
+        setParentContainerTagName: function( tagName ) {
+          this._parentContainerTagName = tagName;
+          this._parentContainerElement = this.createDOMElement( tagName );
+          this._parentContainerElement.id = 'parent-container-' + this._accessibleId;
+
+          this.invalidateAccessibleContent();
+        },
+        set parentContainerTagName( tagName ) { this.setParentContainerTagName( tagName ); },
+
+        /**
+         * Get the tag name for the parent container element.
+         * 
+         * @param  {string} tagName
+         * @return {string}         
+         */
+        getParentContainerTagName: function( tagName ) {
+          return this._parentContainerTagName;
+        },
+        get parentContainerTagName() { return this.getParentContainerTagName(); },
+
+        /**
+         * Get the parent container element, returning null if none exists.
+         * @public (scenery-internal)
+         * 
+         * @return {HTMLElement|null}
+         */
+        getParentContainerElement: function() {
+          return this._parentContainerElement;
+        },
+        get parentContainerElement() { return this.getParentContainerElement(); },
+
+        /**
+         * Set the label for the this node.  The label can be added in one of
+         * four ways:
+         *   - As an inline text with the 'aria-label' attribute.
+         *   - As a 'label' ellement with the 'for' attribute pointing to the
+         *     node's DOM element.
+         *   - As inner text on the Node's DOM element itself.
+         *   - As a separate DOM element positioned as a peer or child of this
+         *     node's DOM element.
+         *     
+         * The way in which the label is added to the Node is dependent on the 
+         * _labelTagName, _useAriaLabel, and whether the node's DOM element
+         * supports inner text.
+         *
+         * @param {string} label
+         */
+        setAccessibleLabel: function( label ) {
+          this._accessibleLabel = label;
+
+          if ( this._useAriaLabel ) {
+            this.setAccessibleAttribute( 'aria-label', this._accessibleLabel );
+          }
+          else if ( AccessibilityUtil.elementSupportsInnerText( this._domElement ) ) {
+            this._domElement.innerText = this._accessibleLabel;
+          }
+          else if ( this._labelTagName ) {
+            assert && assert( this._labelElement, 'label element must have been created' );
+
+            // the remaining methods require a new DOM element
+            this._labelElement.textContent = this._accessibleLabel;
+
+            // if using a label element it must point to the dom element
+            if ( this._labelTagName && this._labelTagName.toUpperCase() === AccessibilityUtil.LABEL_TAG ) {
+              this._labelElement.setAttribute( 'for', this._accessibleId );
+            }
+          }
+
+        },
+        set accessibleLabel( label ) { this.setAccessibleLabel( label ); },
+
+        getAccessibleLabel: function() {
+          return this._accessibleLabel;
+        },
+        get accessibleLabel() { return this.getAccessibleLabel(); },
+
+        /**
+         * Set the description content for this node's DOM element. A description
+         * element must exist and that element must support inner text.
+         * @param {[type]} textContent [description]
+         */
+        setAccessibleDescription: function( textContent ) {
+          assert && assert( this._descriptionElement, 'description element required for description' );
+          assert && assert( AccessibilityUtil.elementSupportsInnerText( this._descriptionElement ), 'description element must support inner text' );
+
+          this._accessibleDescription = textContent;
+          this._descriptionElement.textContent = this._accessibleDescription;
+        },
+        set accessibleDescription( textContent ) { this.setAccessibleDescription( textContent ); },
+
+        getAccessibleDescription: function() {
+          return this._accessibleDescription;
+        },
+        get accessibleDescription() { return this.getAccessibleDescription(); },
+
+        /**
+         * Set the ARIA role for this node's DOM element. According to the W3C,
+         * the ARIA role is read-only for a DOM element.  So this will create a
+         * new DOM element for this Node with the desired role, and replace the
+         * old element in the DOM.
+         * @public
+         *
+         * @param {string} ariaRole - role for the element, see https://www.w3.org/TR/html-aria/#allowed-aria-roles-states-and-properties
+         *                            for a list of roles, states, and properties.
+         */
+        setAriaRole: function( ariaRole ) {
+          this._ariaRole = ariaRole;
+          this.setAccessibleAttribute( 'role', ariaRole );
+
+          this.invalidateAccessibleContent();
+        },
+        set ariaRole( ariaRole ) { this.setAriaRole( ariaRole ); },
+
+        /**
+         * Get the ARIA role representing this node.
+         * @public
+         * @return {string}
+         */
+        getAriaRole: function() {
+          return this._ariaRole;
+        },
+        get ariaRole() { return this.getAriaRole(); },
+
+        /**
+         * Sets whether or not to use the 'aria-label' attribute for labelling 
+         * the node's DOM element. By using the 'aria-label' attribute, the
+         * label will be read on focus, but will not be available with the
+         * virtual cursor.  If there is label content, we reset the accessible
+         * label.
+         * @public
+         * 
+         * @param {string} useAriaLabel
+         */
+        setUseAriaLabel: function( useAriaLabel ) {
+          this._useAriaLabel = useAriaLabel;
+          if ( this._labelElement ) {
+            // if we previously had a label element, remove it
+            
+            this._labelElement.parentNode && this._labelElement.parentNode.removeChild( this._labelElement );
+            this._labelElement = null;
+            this._labelTagName = null;
+          }
+
+          if ( this._accessibleLabel ) {
+            this.setAccessibleLabel( this._accessibleLabel );
+          }
+
+          this.invalidateAccessibleContent();
+        },
+        set useAriaLabel( useAriaLabel ) { this.setUseAriaLabel( useAriaLabel ); },
+
+        getUseAriaLabel: function() {
+          return this._useAriaLabel;
+        },
+        get useAriaLabel() { return this.getUseAriaLabel(); },
+
+        /**
+         * Set the focus highlight for this node.
+         * @public
+         * 
+         * @param {Node|Shape|string.<'invisible'>} focusHighlight
+         */
+        setFocusHighlight: function( focusHighlight ) {
+          this._focusHighlight = focusHighlight;
+          this.invalidateAccessibleContent();
+        },
+        set focusHighlight( focusHighlight ) { this.setFocusHighlight( focusHighlight ); },
+
+        getFocusHighlight: function() {
+          return this._focusHighlight;
+        },
+        get focusHighlight() { return this.getFocusHighlight(); },
+
+        /**
+         * Get an id referencing the description element of this node.  Useful when you want to
+         * set aria-describedby on a DOM element that is far from this one in the scene graph or
+         * DOM.
+         *
+         * @return {string}
+         * @public
+         */
+        getDescriptionElementID: function() {
+          assert && assert( this._descriptionElement, 'description element must exist in the parallel DOM' );
+          return this._descriptionElement.id;
+        },
+
+        /**
+         * Get an id referencing the label element of this node.  Useful when you want to
+         * set aria-labelledby on a DOM element that is far from this one in the scene graph.
+         * @public
+         *
+         * @return {string}
+         */
+        getLabelElementID: function() {
+          assert && assert( this._labelElement, 'description element must exist in the parallel DOM' );
+          return this._labelElement.id;
+        },
+
+        /**
+         * Add the 'aria-describedby' attribute to this node's dom element.
+         * @public
+         *
+         * @param {string} descriptionId - id referencing the description element
+         */
+        setAriaDescribedById: function( descriptionId ) {
+          this._ariaDescribedById = descriptionId;
+          this.setAccessibleAttribute( 'aria-describedby', descriptionId );
+        },
+        set ariaDescribedById( descriptionId ) { this.setAriaDescribedById( descriptionId ); },
+
+        getAriaDescribedById: function() {
+          return this._ariaDescribedById;
+        },
+        get ariaDescribedById() { return this.getAriaDescribedById(); },
+
+        /**
+         * Add the 'aria-labelledby' attribute to this node's dom element.
+         * @public
+         *
+         * @param {string} labelId - id referencing the description element
+         */
+        setAriaLabelledById: function( labelId ) {
+          this._ariaLabelledById = labelId;
+
+          // Need to invalidate?
+          this.setAccessibleAttribute( 'aria-labelledby', labelId );
+        },
+        set ariaLabelledById( labelId ) { this.setAriaLabelledById( labelId ); },
+
+        /**
+         * Get the id of the element that labels this node's DOM element through
+         * the aria-labelledby attribute.
+         * @public
+         * 
+         * @return {string}
+         */
+        getAriaLabelledById: function() {
+          return this._ariaLabelledById;
+        },
+        get ariaLabelledById() { return this.getAriaLabelledById(); },
+
+        /**
+         * If the node is using a list for its description, add a list item to 
+         * the end of the list with the text content.  Returns an id so that
+         * the element can be referenced if need be.
+         * @public
+         * 
+         * @param  {string} textContent
+         * @return {string} - the id of the list item returned for reference
+         */
+        addDescriptionItem: function( textContent ) {
+          assert && assert( this._descriptionElement.tagName === AccessibilityUtil.UNORDERED_LIST_TAG, 'description element must be a list to use addDescriptionItem' );
+
+          var listItem = document.createElement( 'li' );
+          listItem.textContent = textContent;
+          listItem.id = 'list-item-' + ITEM_NUMBER++;
+          this._descriptionElement.appendChild( listItem );
+
+          return listItem.id;
+        },
+
+        /**
+         * Update the text content of the description item.  The item may not yet be in the DOM, so
+         * document.getElementById cannot be used, and the element needs to be found
+         * under the description element.
+         *
+         * @param  {string} itemID - id of the lits item to update
+         * @param  {string} description - new textContent for the string
+         * @public
+         */
+        updateDescriptionItem: function( itemID, description ) {
+          var listItem = this.getChildElementWithId( this._descriptionElement, itemID );
+          assert && assert( this._descriptionElement.tagName === AccessibilityUtil.UNORDERED_LIST_TAG, 'description must be a list to hide list items' );
+          assert && assert( listItem, 'No list item in description with id ' + itemID );
+
+          listItem.textContent = description;
+        },
+
+        /**
+         * Hide or show the desired list item from the screen reader
+         *
+         * @param {string} itemID - id of the list item to hide
+         * @param {boolean} hidden - whether the list item should be hidden
+         * @public
+         */
+        setDescriptionItemHidden: function( itemID, hidden ) {
+          var listItem = document.getElementById( itemID );
+          assert && assert( this._descriptionElement.tagName === AccessibilityUtil.UNORDERED_LIST_TAG, 'description must be a list to hide list items' );
+          assert && assert( listItem, 'No list item in description with id ' + itemID );
+
+          listItem.hidden = hidden;
+        },
+
+        /**
+         * Hide completely from a screen reader by setting the aria-hidden attribute.
+         * If this domElement and its peers have a parent container, it should
+         * be hidden so that all peers are hidden as well.
+         *
+         * @param {boolean} hidden
+         * @public
+         */
+        setAccessibleHidden: function( hidden ) {
+          assert && assert( this._domElement, 'node requires an accessible DOM element for setAccessibleHidden' );
+
+          this._accessibleHidden = hidden;
+          if ( this._parentContainerElement ) {
+            this._parentContainerElement.hidden = hidden;
+          }
+          else {
+            this._domElement.hidden = hidden;
+          }
+        },
+        set accessibleHidden( hidden ) { this.setAccessibleHidden( hidden ); },
+
+        getAccessibleHidden: function() {
+          return this._accessibleHidden;
+        },
+        get accessibleHidden() { return this.getAccessibleHidden(); },
+
+        /**
+         * Set the value of an input element.
+         * 
+         * @param {string} value
+         */
+        setInputValue: function( value ) {
+          assert && assert( _.contains( AccessibilityUtil.FORM_ELEMENTS, this._domElement.tagName ), 'dom element must be a form element to support value' );
+          this._domElement.value = value;
+        },
+        set inputValue( value ) { this.setINputValue( value ); },
+
+        /**
+         * Get the value of the element.
+         * 
+         * @return {string}
+         */
+        getInputValue: function() {
+          assert && assert( _.contains( AccessibilityUtil.FORM_ELEMENTS, this._domElement.tagName ), 'dom element must be a form element to support value' );
+          return this._domElement.value;
+        },
+        get inputValue() { return this.getInputValue(); },
+        
+        /**
+         * Get an array containing all accessible attributes that have been
+         * added to this node's DOM element.
+         * @public
+         * 
+         * @return {string[]}
+         */
+        getAccessibleAttributes: function() {
+          return this._accessibleAttributes.slice( 0 ); // defensive copy
+        },
+        get accessibleAttributes() { return this.getAccessibleAttributes(); },
+
+        /**
+         * Set a particular attribute for this node's DOM element, generally to
+         * provide extra semantic information for a screen reader.
+         *
+         * @param  {string} attribute - string naming the attribute
+         * @param  {string|boolean} value - the value for the attribute
+         * @public
+         */
+        setAccessibleAttribute: function( attribute, value ) {
+          this._accessibleAttributes.push( { attribute: attribute, value: value } );
+          this._domElement.setAttribute( attribute, value );
+        },
+
+        /**
+         * Remove a particular attribute, removing the associated semantic
+         * information from the DOM element.
+         *
+         * @param {string} attribute - name of the attribute to remove
+         * @public
+         */
+        removeAccessibleAttribute: function( attribute ) {
+          assert && assert( AccessibilityUtil.hasAttribute( this.domElement, attribute ) );
+          this._domElement.removeAttribute( attribute );
+        },
+
+        /**
+         * Remove all accessible attributes from this node's dom element.
+         * @public
+         */
+        removeAccessibleAttributes: function() {
+
+          // all attributes currently on this node's DOM element
+          var attributes = this.getAccessibleAttributes();
+
+          for ( var i = 0; i < attributes.length; i++ ) {
+            var attribute = attributes[ i ].attribute;
+            this.removeAttribute( attribute );
+          }
+        },
+
+        /**
+         * Make the DOM element explicitly focusable with tab index. Note that
+         * native HTML form elements will generally be in the navigation order
+         * without explicitly setting focusable.  If these need to be removed
+         * from the navigation order, setFocusable( false ).
+         * @public
+         * 
+         * @param {boolean} isFocusable
+         */
+        setFocusable: function( isFocusable ) {
+          this._focusable = isFocusable;
+          this._domElement.tabIndex = isFocusable ? 0 : -1;
+        },
+        set focusable( isFocusable ) { this.setFocusable( isFocusable ); },
+
+        /**
+         * Get if this node is focusable by a keyboard.
+         *
+         * @return {boolean}
+         * @public
+         */
+        getFocusable: function() {
+          return this._focusable;
+        },
+        get focusable() { return this.getFocusable(); },
+
+        /**
+         * Focus this node's dom element.
+         *
+         * @public
+         */
+        focus: function() {
+          assert && assert( this._focusable, 'trying to set focus on a node that is not focusable' );
+          assert && assert( !this._accessibleHidden, 'trying to set focus on a node with hidden accessible content' );
+
+          // make sure that the elememnt is in the navigation order
+          this.setFocusable( true );
+          this._domElement.focus();
+        },
+
+        /**
+         * Get all 'element' nodes off the parent element, placing them in an
+         * array for easy traversal.  Note that this includes all elements, even
+         * those that are 'hidden' or purely for structure.
+         *
+         * @param  {HTMLElement} domElement - parent whose children will be linearized
+         * @return {HTMLElement[]}
+         * @private
+         */
+        getLinearDOMElements: function( domElement ) {
+
+          // gets ALL descendant children for the element
+          var children = domElement.getElementsByTagName( '*' );
+
+          var linearDOM = [];
+          for ( var i = 0; i < children.length; i++ ) {
+
+            // searching for the HTML elemetn nodes
+            if ( children[ i ].nodeType === HTMLElement.ELEMENT_NODE ) {
+              linearDOM[ i ] = ( children[ i ] );
+            }
+          }
+          return linearDOM;
+        },
+
+        /**
+         * Get the next focusable element from this node's DOM element.
+         * @public
+         *
+         * @return {HTMLElement}
+         */
+        getNextFocusable: function() {
+          return this.getNextPreviousFocusable( AccessibilityUtil.NEXT );
+        },
+
+        /**
+         * Get the previous focusable element from this node's DOM element.
+         * @public
+         *
+         * @return {HTMLElement}
+         */
+        getPreviousFocusable: function() {
+          return this.getNextPreviousFocusable( AccessibilityUtil.PREVIOUS );
+        },
+
+        /**
+         * Get the next or previous focusable element in the parallel DOM,
+         * relative to this Node's domElement depending on the parameter.
+         * Useful if you need to set focus dynamically or need to prevent
+         * default behavior when focus changes.
+         * This function should not be used directly, use getNextFocusable() or
+         * getPreviousFocusable() instead.
+         * @private
+         *
+         * @param {string} direction - direction of traversal, one of 'NEXT' | 'PREVIOUS'
+         * @return {HTMLElement}
+         */
+        getNextPreviousFocusable: function( direction ) {
+
+          // linearize the DOM or easy traversal
+          var linearDOM = this.getLinearDOMElements( document.getElementsByClassName( 'accessibility' )[ 0 ] );
+
+          var activeElement = this._domElement;
+          var activeIndex = linearDOM.indexOf( activeElement );
+          var delta = direction === AccessibilityUtil.NEXT ? +1 : -1;
+
+          // find the next focusable element in the DOM
+          var nextIndex = activeIndex + delta;
+          var nextFocusable;
+          while ( !nextFocusable && nextIndex < linearDOM.length - 1 ) {
+            var nextElement = linearDOM[ nextIndex ];
+            nextIndex += delta;
+
+            // continue to while if the next element is meant to be hidden
+            if ( nextElement.hidden ) {
+              continue;
+            }
+
+            if ( nextElement.tabIndex > -1 ) {
+              nextFocusable = nextElement;
+              break;
+            }
+          }
+
+          // if no next focusable is found, return this DOMElement
+          return nextFocusable || this._domElement;
+        },
+
+        /**
+         * Get a child element with an id.  This should only be used if the
+         * element has not been added to the document yet.  If the element is
+         * in the document, document.getElementById is a faster and more
+         * conventional option.
+         *
+         * @param  {HTMLElement} parentElement
+         * @param  {string} childId
+         * @return {HTMLElement}
+         */
+        getChildElementWithId: function( parentElement, childId ) {
+          var childElement;
+          var children = parentElement.children;
+
+          for ( var i = 0; i < children.length; i++ ) {
+            if ( children[ i ].id === childId ) {
+              childElement = children[ i ];
+              break;
+            }
+          }
+
+          if ( !childElement ) {
+            throw new Error( 'No child element under ' + parentElement + ' with id ' + childId );
+          }
+
+          return childElement;
+        }
+      } );
+
+      /**
+       * Invalidate our current accessible content, triggering recomputation
+       * of anything that depended on the old accessible content. This can be
+       * combined with a client implementation of invalidateAccessibleContent.
+       *
+       * @protected
+       */
+      function invalidateAccessibleContent() {
+
+        // clear the parent container if it exists since we will be reinserting labels
+        // and the dom element in createPeer
+        while ( this._parentContainerElement && this._parentContainerElement.hasChildNodes() ) {
+          this._parentContainerElement.removeChild( this._parentContainerElement.lastChild );
         }
 
-        // @private - the dom element representing this node in the parallel DOM
-        this._domElement = this.createDOMElement( options.tagName );
-
-        // @private - whether or not to use the aria-label attribute
-        this._useAriaLabel = options.useAriaLabel;
-
-        // @private - the description for this dom element
-        this._descriptionElement = null;
-        this._description = options.description;
-        options.descriptionTagName && this.createDescriptionElement( options.descriptionTagName, 'description' );
-
-        // @private - the label for this dom element
-        // the label might be an element, or it could be inline text on the dom element
-        this._labelElement = null;
-        this._label = options.label;
-        this._labelTagName = options.labelTagName;
-        this.addLabel();
-
-        // @private - set tab index if explicitly added or removed from navigation order
-        this._focusable = options.focusable;
-        this.setFocusable( this._focusable );
-
-        // @private
-        this._hidden = options.hidden;
-        this._hidden && this.setHidden( this._hidden );
-
-        // @private
-        this._ariaRole = options.ariaRole;
-
-        // add aria role
-        options.ariaRole && this.setAttribute( 'role', options.ariaRole );
-
-        // add input type if supported and defined
-        options.inputType && this.setInputType( options.inputType );
-
-        // add additional attributes
-        options.attributes.forEach( function( attribute ) {
-          this.setAttribute( attribute.attribute, attribute.value );
-        } );
-
-        // @private - parent container for this node's dom element and its peers
-        this._parentContainerElement = null;
-
-        // @private - container element for children under this node's dom element
-        this._childContainerElement = null;
-
-        if ( options.parentContainerTagName ) {
-          this._parentContainerElement = this.createDOMElement( options.parentContainerTagName, 'parent-container-' + this.id );
-
-          // if using a parent container, it should contain the description and label as peers of this dom element
-          this._labelElement && this._parentContainerElement.appendChild( this._labelElement );
-          this._descriptionElement && this._parentContainerElement.appendChild( this._descriptionElement );
-        }
-        else if ( options.childContainerTagName ) {
-
-          // if using a child container element, label and description come first
-          this._labelElement && this._domElement.appendChild( this._labelElement );
-          this._descriptionElement && this._domElement.appendChild( this._descriptionElement );
-
-          this._childContainerElement = this.createDOMElement( options.childContainerTagName, 'child-container-' + this.id );
-          this._domElement.appendChild( this._childContainerElement );
-        }
-        else {
-          this._labelElement && this._domElement.appendChild( this._labelElement );
-          this._descriptionElement && this._domElement.appendChild( this._descriptionElement );
-        }
-
-        // now set the accessible content by creating an accessible peer, assuming that
-        // a dom element was defined
         var self = this;
         this.accessibleContent = {
-          focusHighlight: options.focusHighlight,
+          focusHighlight: this._focusHighlight,
           createPeer: function( accessibleInstance ) {
 
-            // register listeners to the events
-            for ( var event in options.events ) {
-              if ( options.events.hasOwnProperty( event ) ) {
-                self.addDOMEventListener( event, options.events[ event ] );
+            var accessiblePeer = new scenery.AccessiblePeer( accessibleInstance, self._domElement, {
+              parentContainerElement: self._parentContainerElement
+            } );
+
+            // if we have a parent container, add the label element as a child of the container
+            // otherwise, add as child of the node's DOM element
+            if ( self._labelElement ) {
+              if ( self._parentContainerElement ) {
+                if ( self._prependLabels && self._parentContainerElement === self._domElement.parentNode ) {
+                  self._parentContainerElement.insertBefore( self._labelElement, self._domElement );
+                }
+                else {
+                  self._parentContainerElement.appendChild( self._labelElement );
+                }
+              }
+              else {
+                self._domElement.appendChild( self._labelElement );
               }
             }
 
-            self.childContainerElement && self._domElement.appendChild( self.childContainerElement );
+            // if we have a parent container, add the description element as a child of the container
+            // otherwise, add as a child of the node's dom element
+            if ( self._descriptionElement ) {
+              if ( self._parentContainerElement ) {
+                if ( self._prependLabels && self._parentContainerElement === self._domElement.parentNode ) {
+                  self._parentContainerElement.insertBefore( self._descriptionElement, self._domElement );
+                }
+                else {
+                  self._parentContainerElement.appendChild( self._descriptionElement );
+                }
+              }
+              else {
+                self._domElement.appendChild( self._descriptionElement );
+              }
+            }
 
-            // add an aria-describedby attribute if it is specified in options
-            options.ariaDescribedBy && self.setAriaDescribedBy( options.ariaDescribedBy );
-
-            // add an aria-labelledby attribute if it is specified in options
-            options.ariaLabelledBy && self.setAriaLabelledBy( options.ariaLabelledBy );
-
-            return new scenery.AccessiblePeer( accessibleInstance, self._domElement, {
-              parentContainerElement: self._parentContainerElement,
-              childContainerElement: self._childContainerElement
-            } );
+            return accessiblePeer;
           }
         };
-      };
+      }
 
-      /**
-       * Create an element to represent this node in the parallel DOM.
-       *
-       * @private
-       * @param  {string} tagName
-       * @param {string} [id] - optional id for the dom element, will be the node's id if not defined
-       */
-      proto.createDOMElement = function( tagName, id ) {
-        var domElement = document.createElement( tagName );
-        domElement.id = id || this.id;
-        return domElement;
-      };
-
-      /**
-       * Add the label for this element.  The label can be added in one of four ways.
-       *  - As inline text with the 'aria-label' attribute.
-       *  - As a 'label' element with the 'for' attribute pointing to this node's dom element
-       *  - As inner text on the node's dom element itself
-       *  - As a separate dom element positioned as a peer or child of this nod'es dom element
-       *
-       * @private
-       */
-      proto.addLabel = function() {
-        if ( this._useAriaLabel ) {
-          this.setAttribute( 'aria-label', this._label );
-        }
-        else if ( this.elementSupportsInnerText() ) {
-          this.domElement.innerText = this._label;
-        }
-        else if ( this._labelTagName ) {
-
-          // the remaining methods require a new DOM element
-          this._labelElement = this.createDOMElement( this._labelTagName, 'label-' + this.id  );
-          this._labelElement.textContent = this._label;
-
-          if ( this._labelTagName.toUpperCase() === DOM_LABEL ) {
-            this._labelElement.setAttribute( 'for', this.id );
-          }
-        }
-      };
-
-      /**
-       * Create the description element for this node's dom element. If a description
-       * was passed through options, set it immediately.
-       *
-       * @param {string} tagName
-       * @private
-       */
-      proto.createDescriptionElement = function( tagName ) {
-        this._descriptionElement = this.createDOMElement( tagName, 'description-' + this.id );
-        this._description && this.setDescription( this._description );
-      };
-
-      /**
-       * Set the input type.  Assert that the tagname is input.
-       * @param {string} type
-       * @private
-       */
-      proto.setInputType = function( type ) {
-        assert && assert( this._domElement.tagName === DOM_INPUT, 'input type can only be set on element with tagname INPUT' );
-        this.setAttribute( 'type', type );
-      };
-
-      /**
-       * Some types support inner text, and these types should have a label
-       * defined this way, rather than a second paragraph contained in a parent element.
-       *
-       * @return {boolean}
-       * @private
-       */
-      proto.elementSupportsInnerText = function() {
-        var supportsInnerText = false;
-
-        // more input types will need to be added here
-        for ( var i = 0; i < ELEMENTS_WITH_INNER_TEXT.length; i++ ) {
-          if ( this._domElement.tagName === ELEMENTS_WITH_INNER_TEXT[ i ] ) {
-            supportsInnerText = true;
-          }
-        }
-        return supportsInnerText;
-      };
-
-      /**
-       * Get the dom element representing this node.
-       * @public
-       * @return {HTMLElement}
-       */
-      proto.getDOMElement = function() {
-        return this._domElement;
-      };
-      Object.defineProperty( proto, 'domElement', { get: function() { return this.getDOMElement(); } } );
-
-      /**
-       * Get the ARIA role representing this node.
-       * @public
-       * @return {string}
-       */
-      proto.getAriaRole = function() {
-        return this._ariaRole;
-      };
-      Object.defineProperty( proto, 'ariaRole', { get: function() { return this.getAriaRole(); } } );
-
-      /**
-       * Set the focus highlight for this node.
-       * 
-       * @param {Node|Shape|string.<'invisible'>} focusHighlight
-       * @public
-       */
-      proto.setFocusHighlight = function( focusHighlight ) {
-        var accessibleContent = this.accessibleContent;
-        accessibleContent.focusHighlight = focusHighlight;
-
-        this.setAccessibleContent( accessibleContent );
-      };
-      Object.defineProperty( proto, 'focusHighlight', { set: function( focusHighlight ) { this.setFocusHighlight( focusHighlight ); } } );
-
-      /**
-       * Set the text content for the label element of this node.  The label element
-       * is usually either a paragraph, a label, or innerText for a certain inputs.
-       *
-       * @param  {string} textContent
-       * @public
-       */
-      proto.setLabel = function( textContent ) {
-        if ( !this.elementSupportsInnerText() ) {
-          this._labelElement.textContent = textContent;
-        }
-        else if ( this._useAriaLabel ) {
-          this.setAttribute( 'aria-label', textContent );
-        }
-        else {
-          this._domElement.textContent = textContent;
-        }
-      };
-
-      /**
-       * Set the description content for this node.  If the node is described by a list, please
-       * update description list items individually with updateDescriptionItem.
-       *
-       * @param {string} textContent
-       * @public
-       */
-      proto.setDescription = function( textContent ) {
-        assert && assert( this._descriptionElement, 'desription element must exist in prallel DOM' );
-        assert && assert( this._descriptionElement.tagName !== DOM_UNORDERED_LIST, 'list description in use, please use  ' );
-        this._descriptionElement.textContent = textContent;
-      };
-
-      /**
-       * Get an id referencing the description element of this node.  Useful when you want to
-       * set aria-describedby on a DOM element that is far from this one in the scene graph.
-       *
-       * @return {string}
-       * @public
-       */
-      proto.getDescriptionElementID = function() {
-        assert && assert( this._descriptionElement, 'description element must exist in the parallel DOM' );
-        return this._descriptionElement.id;
-      };
-
-      /**
-       * Get an id referencing the label element of this node.  Useful when you want to
-       * set aria-labelledby on a DOM element that is far from this one in the scene graph.
-       *
-       * @return {string}
-       * @public
-       */
-      proto.getLabelElementID = function() {
-        assert && assert( this._labelElement, 'description element must exist in the parallel DOM' );
-        return this._labelElement.id;
-      };
-
-      /**
-       * Add the 'aria-describedby' attribute to this node's dom element.
-       *
-       * @param {string} [descriptionID] - optional id referencing the description element
-       * @public
-       */
-      proto.setAriaDescribedBy = function( descriptionID ) {
-        this._domElement.setAttribute( 'aria-describedby', descriptionID );
-      };
-
-      /**
-       * Add the 'aria-labelledby' attribute to this node's dom element.
-       *
-       * @param {string} [labelID] - optional id referencing the description element
-       * @public
-       */
-      proto.setAriaLabelledBy = function( labelID ) {
-        this._domElement.setAttribute( 'aria-labelledby', labelID );
-      };
-
-      /**
-       * If the node is using a list for its description, add a list item to the end of the list with
-       * the text content.  Returns an id so that the element can be referenced if need be.
-       *
-       * @param  {string} textContent
-       * @return {string}
-       * @public
-       */
-      proto.addDescriptionItem = function( textContent ) {
-        assert && assert( this._descriptionElement.tagName === DOM_UNORDERED_LIST, 'description element must be a list to use addDescriptionItem' );
-
-        var listItem = document.createElement( 'li' );
-        listItem.textContent = textContent;
-        listItem.id = 'list-item-' + ITEM_NUMBER++;
-        this._descriptionElement.appendChild( listItem );
-
-        return listItem.id;
-      };
-
-      /**
-       * Update the text content of the description item.  The item may not yet be in the DOM, so
-       * document.getElementById cannot be used, and the element needs to be found
-       * under the description element.
-       *
-       * @param  {string} itemID - id of the lits item to update
-       * @param  {string} description - new textContent for the string
-       * @public
-       */
-      proto.updateDescriptionItem = function( itemID, description ) {
-        var listItem = this.getChildElementWithId( this._descriptionElement, itemID );
-        assert && assert( this._descriptionElement.tagName === DOM_UNORDERED_LIST, 'description must be a list to hide list items' );
-        assert && assert( listItem, 'No list item in description with id ' + itemID );
-
-        listItem.textContent = description;
-      };
-
-      /**
-       * Hide or show the desired list item from the screen reader
-       *
-       * @param {string} itemID - id of the list item to hide
-       * @param {boolean} hidden - whether the list item should be hidden
-       * @public
-       */
-      proto.setDescriptionItemHidden = function( itemID, hidden ) {
-        var listItem = document.getElementById( itemID );
-        assert && assert( this._descriptionElement.tagName === DOM_UNORDERED_LIST, 'description must be a list to hide list items' );
-        assert && assert( listItem, 'No list item in description with id ' + itemID );
-
-        listItem.hidden = hidden;
-      };
-
-      /**
-       * Hide completely from a screen reader by setting the aria-hidden attribute. If this domElement
-       * and its peers have a parent container, it should be hidden.
-       *
-       * @param {boolean} hidden
-       * @public
-       */
-      proto.setHidden = function( hidden ) {
-        if ( this._parentContainerElement ) {
-          this._parentContainerElement.hidden = hidden;
-        }
-        else {
-          this._domElement.hidden = hidden;
-        }
-        this._hidden = hidden;
-      };
-      Object.defineProperty( proto, 'hidden', { set: function( hidden ) { this.setHidden( hidden ); } } );
-
-      /**
-       * Set the value of an input element.
-       * 
-       * @param {string} value [description]
-       */
-      proto.setInputValue = function( value ) {
-        assert && assert( _.contains( FORM_ELEMENTS, this._domElement.tagName ), 'dom element must be a form element to support value' );
-
-        this._domElement.value = value;
-      };
-
-      /**
-       * Get the value of the element.
-       * 
-       * @return {string}
-       */
-      proto.getInputValue = function() {
-        assert && assert( _.contains( FORM_ELEMENTS, this._domElement.tagName ), 'dom element must be a form element to support value' );
-
-        return this._domElement.value;
-      };
-      Object.defineProperty( proto, 'inputValue', {
-        set: function( inputValue ) { this.setInputValue( inputValue ); },
-        get: function() { this.getInputValue(); }
-      } );
-
-      /**
-       * Set a particular attribute for this node's dom element, generally to provide extra
-       * semantic information for a screen reader.
-       *
-       * @param  {string} attribute - string naming the attribute
-       * @param  {string|boolean} value - the value for the attribute
-       * @public
-       */
-      proto.setAttribute = function( attribute, value ) {
-        this._domElement.setAttribute( attribute, value );
-      };
-
-      /**
-       * Remove a particular attribute, removing the associated semantic information from
-       * the DOM element.
-       *
-       * @param  {string} attribute - name of the attribute to remove
-       * @public
-       */
-      proto.removeAttribute = function( attribute ) {
-        this._domElement.removeAttribute( attribute );
-      };
-
-      /**
-       * Make the container dom element focusable.
-       *
-       * @param {boolean} isFocusable
-       * @public
-       */
-      proto.setFocusable = function( isFocusable ) {
-        this._focusable = isFocusable;
-        this._domElement.tabIndex = isFocusable ? 0 : -1;
-      };
-
-      /**
-       * Get if this node is focusable by a keyboard.
-       *
-       * @return {boolean}
-       * @public
-       */
-      proto.getFocusable = function() {
-        return this._focusable;
-      };
-      Object.defineProperty( proto, 'focusable', {
-        set: function( focusable ) { this.setFocusable( focusable ); },
-        get: function() { return this.getFocusable(); }
-      } );
-
-      /**
-       * Focus this node's dom element.
-       *
-       * @public
-       */
-      proto.focus = function() {
-        assert && assert( this._focusable, 'trying to set focus on a node that is not focusable' );
-
-        // make sure that the elememnt is in the navigation order
-        this.setFocusable( true );
-        this._domElement.focus();
-      };
-
-      /**
-       * Add an event listener to the dom element.  The listener is usually meant to keep
-       * the attributes of the element up to date with properties of the sim.
-       * 
-       * @param {string} eventName - name of the event to listen to
-       * @param {function} callBack
-       */
-      proto.addDOMEventListener = function( eventName, callBack ) {
-        this._domElement.addEventListener( eventName, callBack );
-      };
-
-      /**
-       * Remove an event listener from the DOM element, when you want to stop listening
-       * or dispose.
-       * 
-       * @param  {string} eventName
-       * @param  {function} callBack
-       */
-      proto.removeDOMEventListener = function( eventName, callBack ) {
-        this._domElement.removeEventListener( eventName, callBack );
-      };
-
-      /**
-       * Get all 'element' nodes off the parent element, placing them in an array
-       * for easy traversal.  Note that this includes all elements, even those
-       * that are 'hidden' or purely for structure.
-       *
-       * @param  {HTMLElement} domElement - the parent element to linearize
-       * @return {HTMLElement[]}
-       * @private
-       */
-      proto.getLinearDOMElements = function( domElement ) {
-
-        // gets ALL descendant children for the element
-        var children = domElement.getElementsByTagName( '*' );
-
-        var linearDOM = [];
-        for ( var i = 0; i < children.length; i++ ) {
-
-          // searching for the HTML elemetn nodes
-          if ( children[ i ].nodeType === HTMLElement.ELEMENT_NODE ) {
-            linearDOM[ i ] = ( children[ i ] );
-          }
-        }
-        return linearDOM;
-      };
-
-      /**
-       * Get the next focusable element in the parallel DOM.
-       *
-       * @return {HTMLElement}
-       * @public
-       */
-      proto.getNextFocusable = function() {
-        return this.getNextPreviousFocusable( NEXT );
-      };
-
-      /**
-       * Get the previous focusable elements in the parallel DOM
-       *
-       * @return {HTMLElement}
-       * @public
-       */
-      proto.getPreviousFocusable = function() {
-        return this.getNextPreviousFocusable( PREVIOUS );
-      };
-
-      /**
-       * Make eligible for garbage collection.
-       *
-       * @public
-       */
-      proto.dispose = function() {
-        this.disposeAccessibleNode();
-      };
-
-      /**
-       * Get the next or previous focusable element in the parallel DOM, relative to this Node's domElement 
-       * depending on the parameter.  Useful if you need to set focus dynamically or need to prevent
-       * default behavior for the tab key.
-       *
-       * @param {string} direction - direction of traversal, one of 'Next' | 'PREVIOUS'
-       * @return {HTMLElement}
-       * @private
-       */
-      proto.getNextPreviousFocusable = function( direction ) {
-
-        // linearize the DOM or easy traversal
-        var linearDOM = this.getLinearDOMElements( document.getElementsByClassName( 'accessibility' )[ 0 ] );
-
-        var activeElement = this._domElement;
-        var activeIndex = linearDOM.indexOf( activeElement );
-        var delta = direction === NEXT ? +1 : -1;
-
-        // find the next focusable element in the DOM
-        var nextIndex = activeIndex + delta;
-        var nextFocusable;
-        while ( !nextFocusable && nextIndex < linearDOM.length - 1 ) {
-          var nextElement = linearDOM[ nextIndex ];
-          nextIndex += delta;
-
-          // continue to while if the next element is meant to be hidden
-          if ( nextElement.hidden ) {
-            continue;
-          }
-
-          if ( nextElement.tabIndex > -1 ) {
-            nextFocusable = nextElement;
-            break;
-          }
-        }
-
-        // if no next focusable is found, return this DOMElement
-        return nextFocusable || this._domElement;
-      };
-
-      /**
-       * Get a child element with an id.  This should only be used if the element is not in the document.
-       * If the element is in the document, document.getElementById is a faster (and more conventional)
-       * option.
-       *
-       * This function is still useful because elements can exist before being added to the DOM during
-       * instantiation of the Node's peer.
-       *
-       * @param  {HTMLElement} parentElement
-       * @param  {string} childId
-       * @return {HTMLElement}
-       */
-      proto.getChildElementWithId = function( parentElement, childId ) {
-        var childElement;
-        var children = parentElement.children;
-
-        for ( var i = 0; i < children.length; i++ ) {
-          if ( children[ i ].id === childId ) {
-            childElement = children[ i ];
-            break;
-          }
-        }
-
-        if ( !childElement ) {
-          throw new Error( 'No child element under ' + parentElement + ' with id ' + childId );
-        }
-
-        return childElement;
-      };
+      // Patch in a sub-type call if it already exists on the prototype
+      if ( proto.invalidateAccessibleContent ) {
+        var subtypeInvalidateAccesssibleContent = proto.invalidateAccessibleContent;
+        proto.invalidateAccessibleContent = function() {
+          subtypeInvalidateAccesssibleContent.call( this );
+          invalidateAccessibleContent.call( this );
+        };
+      }
+      else {
+        proto.invalidateAccessibleContent = invalidateAccessibleContent;
+      }
     }
   };
 
