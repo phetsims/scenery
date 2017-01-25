@@ -25,4 +25,5 @@ function runSceneryTests( pathToTestBase ) {
   loadTestFile( 'js/focus.js' );
   loadTestFile( 'js/from-fuzzer.js' );
   loadTestFile( 'js/pixel-comparison.js' );
+  loadTestFile( 'js/accessibility.js' )
 };
