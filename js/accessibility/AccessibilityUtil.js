@@ -32,6 +32,9 @@ define( function( require ) {
   // these elements support inner text
   var ELEMENTS_WITH_INNER_TEXT = [ BUTTON_TAG, PARAGRAPH_TAG ];
 
+  // these elements require a minimum width to be visible in Safari
+  var ELEMENTS_THAT_NEED_WIDTH = [ 'INPUT' ];
+
   // flags for specifying direction of DOM traversal
   var NEXT = 'NEXT';
   var PREVIOUS = 'PREVIOUS';
@@ -142,6 +145,7 @@ define( function( require ) {
     // groups of elements with special behavior
     FORM_ELEMENTS: FORM_ELEMENTS,
     ELEMENTS_WITH_INNER_TEXT: ELEMENTS_WITH_INNER_TEXT,
+    ELEMENTS_THAT_NEED_WIDTH: ELEMENTS_THAT_NEED_WIDTH,
 
     // traversal flags
     NEXT: NEXT,

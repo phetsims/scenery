@@ -160,6 +160,7 @@ define( function( require ) {
 
           // @private {Array.<Function>} - For accessibility input handling {keyboard/click/HTML form}
           this._accessibleInputListeners = [];
+
         },
 
         /**
@@ -275,6 +276,11 @@ define( function( require ) {
           this._tagName = tagName;
           this._domElement = this.createDOMElement( tagName );
           this._domElement.id = this._accessibleId;
+
+          // Safari seems to require that a range input has a width, otherwise it will not be keyboard accessible.
+          if ( _.contains( AccessibilityUtil.ELEMENTS_THAT_NEED_WIDTH, tagName ) ) {
+            this._domElement.style.width = '1px';
+          }
 
           this.invalidateAccessibleContent();
         },
@@ -487,15 +493,23 @@ define( function( require ) {
 
         /**
          * Set the description content for this node's DOM element. A description
-         * element must exist and that element must support inner text.
-         * @param {[type]} textContent [description]
+         * element must exist and that element must support inner text.  If a
+         * description element does not exist yet, we assume that a default paragraph
+         * should be used.
+         * 
+         * @param {string} textContent
          */
         setAccessibleDescription: function( textContent ) {
-          assert && assert( this._descriptionElement, 'description element required for description' );
-          assert && assert( AccessibilityUtil.elementSupportsInnerText( this._descriptionElement ), 'description element must support inner text' );
-
           this._accessibleDescription = textContent;
+
+          // if there is no description element, assume that a paragraph element should be used
+          if ( !this.descriptionElement ) {
+            this.setDescriptionTagName( 'p' );
+          }
+
+          assert && assert( AccessibilityUtil.elementSupportsInnerText( this._descriptionElement ), 'description element must support inner text' );
           this._descriptionElement.textContent = this._accessibleDescription;
+
         },
         set accessibleDescription( textContent ) { this.setAccessibleDescription( textContent ); },
 
@@ -590,10 +604,11 @@ define( function( require ) {
          * @return {string}
          * @public
          */
-        getDescriptionElementID: function() {
+        getDescriptionElementId: function() {
           assert && assert( this._descriptionElement, 'description element must exist in the parallel DOM' );
           return this._descriptionElement.id;
         },
+        get descriptionElementId() { return this.getDescriptionElementId(); },
 
         /**
          * Get an id referencing the label element of this node.  Useful when you want to
