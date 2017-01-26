@@ -925,6 +925,8 @@ define( function( require ) {
          * @param {boolean} isFocusable
          */
         setFocusable: function( isFocusable ) {
+          assert && assert( this._domElement, 'node requires a dom element to focus. Use setTagName()' );
+
           this._focusable = isFocusable;
           this._domElement.tabIndex = isFocusable ? 0 : -1;
         },
@@ -948,74 +950,11 @@ define( function( require ) {
          * @public
          */
         focus: function() {
-          assert && assert( this._domElement.tabIndex === -1, 'trying to set focus on a node that is not focusable' );
+          assert && assert( !( this._domElement.tabIndex === -1 ), 'trying to set focus on a node that is not focusable' );
           assert && assert( !this._accessibleHidden, 'trying to set focus on a node with hidden accessible content' );
 
           // make sure that the elememnt is in the navigation order
-          this.setFocusable( true );
           this._domElement.focus();
-        },
-
-        /**
-         * Get the next focusable element from this node's DOM element.
-         * @public
-         *
-         * @return {HTMLElement}
-         */
-        getNextFocusable: function() {
-          return this.getNextPreviousFocusable( AccessibilityUtil.NEXT );
-        },
-
-        /**
-         * Get the previous focusable element from this node's DOM element.
-         * @public
-         *
-         * @return {HTMLElement}
-         */
-        getPreviousFocusable: function() {
-          return this.getNextPreviousFocusable( AccessibilityUtil.PREVIOUS );
-        },
-
-        /**
-         * Get the next or previous focusable element in the parallel DOM, relative to this Node's domElement
-         * depending on the direction. Useful if you need to set focus dynamically or need to prevent default behavior
-         * when focus changes. This function should not be used directly, use getNextFocusable() or
-         * getPreviousFocusable() instead.
-         * @private
-         *
-         * @param {string} direction - direction of traversal, one of 'NEXT' | 'PREVIOUS'
-         * @return {HTMLElement}
-         */
-        getNextPreviousFocusable: function( direction ) {
-
-          // linearize the DOM or easy traversal
-          // TODO: This is very fragile and will not work for more than one display
-          var linearDOM = AccessibilityUtil.getLinearDOMElements( document.getElementsByClassName( 'accessibility' )[ 0 ] );
-
-          var activeElement = this._domElement;
-          var activeIndex = linearDOM.indexOf( activeElement );
-          var delta = direction === AccessibilityUtil.NEXT ? +1 : -1;
-
-          // find the next focusable element in the DOM
-          var nextIndex = activeIndex + delta;
-          var nextFocusable;
-          while ( !nextFocusable && nextIndex < linearDOM.length - 1 ) {
-            var nextElement = linearDOM[ nextIndex ];
-            nextIndex += delta;
-
-            // continue to while if the next element is meant to be hidden
-            if ( nextElement.hidden ) {
-              continue;
-            }
-
-            if ( nextElement.tabIndex > -1 ) {
-              nextFocusable = nextElement;
-              break;
-            }
-          }
-
-          // if no next focusable is found, return this DOMElement
-          return nextFocusable || this._domElement;
         }
 
       } );

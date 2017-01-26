@@ -83,6 +83,70 @@ define( function( require ) {
     return unique;
   }
 
+  /**
+   * Determine if an element is hidden.  An element is considered 'hidden' if it (or any of its ancestors) has the
+   * 'hidden' attribute.
+   * @private
+   *
+   * @param {HTMLElement} domElement
+   * @return {Boolean}
+   */
+  function isElementHidden( domElement ) {
+    if ( domElement.hidden ) {
+      return true;
+    }
+    else if ( domElement === document.body ) {
+      return false;
+    }
+    else {
+      return isElementHidden( domElement.parentElement );
+    }
+  }
+
+  /**
+   * Get the next or previous focusable element in the parallel DOM, relative to this Node's domElement
+   * depending on the direction. Useful if you need to set focus dynamically or need to prevent default behavior
+   * when focus changes. If no next or previous focusable is found, it returns the currently focused element.
+   * This function should not be used directly, use getNextFocusable() or getPreviousFocusable() instead.
+   * @private
+   *
+   * @param {string} direction - direction of traversal, one of 'NEXT' | 'PREVIOUS'
+   * @param {HTMLElement} [parentElement] - optional, search will be limited to children of this element
+   * @return {HTMLElement}
+   */
+  function getNextPreviousFocusable( direction, parentElement ) {
+
+    // linearize the document [or the desired parent] for traversal
+    var parent = parentElement || document.body;
+    var linearDOM = AccessibilityUtil.getLinearDOMElements( parent );
+
+    var activeElement = document.activeElement;
+    var activeIndex = linearDOM.indexOf( activeElement );
+    var delta = direction === NEXT ? +1 : -1;
+
+    // find the next focusable element in the DOM
+    var nextIndex = activeIndex + delta;
+    var nextFocusable;
+    while ( !nextFocusable && nextIndex < linearDOM.length && nextIndex >= 0 ) {
+      var nextElement = linearDOM[ nextIndex ];
+      nextIndex += delta;
+
+      // continue to next element if this one is meant to be hidden
+      if ( isElementHidden( nextElement ) ) {
+        continue;
+      }
+
+      // if tabindex is greater than -1, the element is focusable so break
+      if ( nextElement.tabIndex > -1 ) {
+        nextFocusable = nextElement;
+        break;
+      }
+    }
+
+    // if no next focusable is found, return the active DOM element
+    return nextFocusable || activeElement;
+  }
+
   var AccessibilityUtil = {
 
     /**
@@ -118,6 +182,32 @@ define( function( require ) {
         }
       }
       return linearDOM;
+    },
+
+    /**
+     * Get the next focusable element. This should very rarely be used.  The next focusable element can almost
+     * always be focused automatically with 'Tab'.  However, if the 'Tab' key needs to be emulated this can be 
+     * helpful. If no next focusable can be found, it will return the currently focused element.
+     * @public
+     *
+     * @param{HTMLElement} [parentElement] - optional, search will be limited to elements under this element
+     * @return {HTMLElement}
+     */
+    getNextFocusable: function( parentElement ) {
+      return getNextPreviousFocusable( NEXT, parentElement );
+    },
+
+    /**
+     * Get the previous focusable element. This should very rarely be used.  The previous focusable element can almost
+     * always be found automatically with default 'Shift+Tab' behavior.  However, if the 'Tab' key needs to be emulated
+     * this can be helpful.  If no next focusable can be found, it will return the currently focused element.
+     * @public
+     *
+     * @param {HTMLElement} [parentElement] - optional, search will be limited to elements under this parent
+     * @return {HTMLElement}
+     */
+    getPreviousFocusable: function( parentElement ) {
+      return getNextPreviousFocusable( PREVIOUS, parentElement );
     },
 
     /**
