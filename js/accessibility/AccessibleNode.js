@@ -692,6 +692,18 @@ define( function( require ) {
       this.disposeAccessibleNode();
     },
 
+    isElementHidden: function( domElement ) {
+      if ( domElement.hidden ) {
+        return true;
+      }
+      else if ( domElement === document.body ) {
+        return false;
+      }
+      else {
+        this.isElementHidden( domElement.parentElement );
+      }
+    },
+
     /**
      * Get the next or previous focusable element in the parallel DOM, depending on
      * parameter.  Useful if you need to set focus dynamically or need to prevent
@@ -709,7 +721,7 @@ define( function( require ) {
       var focusableTypes = [ 'BUTTON', 'INPUT' ];
 
       // get the active element
-      var activeElement = this._domElement;
+      var activeElement = document.activeElement;
 
       // get the index of the active element in the linear DOM
       var activeIndex;
@@ -729,7 +741,7 @@ define( function( require ) {
               var nextElement = linearDOM[ nextIndex ];
 
               // continue to while if the next element is meant to be hidden
-              if ( nextElement.hidden ) {
+              if ( this.isElementHidden( nextElement ) ) {
                 break;
               }
 
