@@ -40,9 +40,8 @@ define( function( require ) {
   var PREVIOUS = 'PREVIOUS';
 
   /**
-   * Get all 'element' nodes off the parent element, placing them in an
-   * array for easy traversal.  Note that this includes all elements, even
-   * those that are 'hidden' or purely for structure.
+   * Get all 'element' nodes off the parent element, placing them in an array for easy traversal.  Note that this
+   * includes all elements, even those that are 'hidden' or purely for structure.
    *
    * @param  {HTMLElement} domElement - parent whose children will be linearized
    * @return {HTMLElement[]}
@@ -65,8 +64,7 @@ define( function( require ) {
   }
 
   /**
-   * Verify that an id is unique in the document, by searching through the
-   * id's of all HTML elements.
+   * Verify that an id is unique in the document, by searching through the id's of all HTML elements in the body.
    * 
    * @param  {string} id
    * @return {boolean}
@@ -99,6 +97,40 @@ define( function( require ) {
     },
 
     /**
+     * Get all 'element' nodes off the parent element, placing them in an array for easy traversal.  Note that this
+     * includes all elements, even those that are 'hidden' or purely for structure.
+     *
+     * @param  {HTMLElement} domElement - parent whose children will be linearized
+     * @return {HTMLElement[]}
+     * @private
+     */
+    getLinearDOMElements: function( domElement ) {
+
+      // gets ALL descendant children for the element
+      var children = domElement.getElementsByTagName( '*' );
+
+      var linearDOM = [];
+      for ( var i = 0; i < children.length; i++ ) {
+
+        // searching for the HTML elemetn nodes
+        if ( children[ i ].nodeType === HTMLElement.ELEMENT_NODE ) {
+          linearDOM[ i ] = ( children[ i ] );
+        }
+      }
+      return linearDOM;
+    },
+
+    /**
+     * Create a DOM element with the given tagname
+     * @private
+     * 
+     * @param  {string} tagName
+     */
+    createDOMElement: function( tagName ) {
+      return document.createElement( tagName );
+    },
+
+    /**
      * Generate a random unique id for a DOM element.  After generating
      * a unique id, we verify that the id is not shared with any other id in the
      * document. The return value is a string because the DOM API generally
@@ -118,6 +150,32 @@ define( function( require ) {
       }
 
       return id;
+    },
+
+    /**
+     * Get a child element with an id.  This should only be used if the element has not been added to the document yet.
+     * If the element is in the document, document.getElementById is a faster and more conventional option.
+     *
+     * @param  {HTMLElement} parentElement
+     * @param  {string} childId
+     * @return {HTMLElement}
+     */
+    getChildElementWithId: function( parentElement, childId ) {
+      var childElement;
+      var children = parentElement.children;
+
+      for ( var i = 0; i < children.length; i++ ) {
+        if ( children[ i ].id === childId ) {
+          childElement = children[ i ];
+          break;
+        }
+      }
+
+      if ( !childElement ) {
+        throw new Error( 'No child element under ' + parentElement + ' with id ' + childId );
+      }
+
+      return childElement;
     },
 
     /**
