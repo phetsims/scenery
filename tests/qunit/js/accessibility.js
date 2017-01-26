@@ -68,14 +68,14 @@
     ok( accessibleNode.ariaDescribedById === buttonNode.accessibleId, ' aria-describedby id' );
 
 
-    // verify DOM structure - options above should create
+    // verify DOM structure - options above should create something like:
     // <div id="display-root">
     //  <div id="parent-container-id">
     //    <label for="id">Test Label</label>
     //    <p>Description>Test Description</p>
     //    <input type='button' role='button' tabindex="-1" id=id>
     //  </div>
-    //  
+    //
     //  <div aria-label="Test Label" hidden aria-labelledBy="button-node-id" aria-describedby='button-node-id'>
     //    <p>Test Description</p>
     //  </div>
@@ -191,6 +191,63 @@
     a1.accessibleLabel = TEST_LABEL_2;
     document.getElementById( a1.accessibleId ).click();
     ok( a1.accessibleLabel === TEST_LABEL_2 );
+
+  } );
+
+  test( 'Next/Previous focusable', function() {
+    var util = scenery.AccessibilityUtil;
+
+    var rootNode = new scenery.Node( { tagName: 'div', focusable: true } );
+    var display = new scenery.Display( rootNode );
+    var rootElement = document.getElementById( rootNode.accessibleId );
+
+    var a = new scenery.Node( { tagName: 'div', focusable: true, focusHighlight: 'invisible' } );
+    var b = new scenery.Node( { tagName: 'div', focusable: true, focusHighlight: 'invisible' } );
+    var c = new scenery.Node( { tagName: 'div', focusable: true, focusHighlight: 'invisible' } );
+    var d = new scenery.Node( { tagName: 'div', focusable: true, focusHighlight: 'invisible' } );
+    var e = new scenery.Node( { tagName: 'div', focusable: true, focusHighlight: 'invisible' } );
+    rootNode.children = [ a, b, c, d ];
+
+    a.focus();
+    ok( document.activeElement.id === a.accessibleId, 'a in focus (next)' );
+
+    util.getNextFocusable( rootElement ).focus();
+    ok( document.activeElement.id === b.accessibleId, 'b in focus (next)' );
+
+    util.getNextFocusable( rootElement ).focus(); 
+    ok( document.activeElement.id === c.accessibleId, 'c in focus (next)' );
+
+    util.getNextFocusable( rootElement ).focus(); 
+    ok( document.activeElement.id === d.accessibleId, 'd in focus (next)' );
+
+    util.getNextFocusable( rootElement ).focus(); 
+    ok( document.activeElement.id === d.accessibleId, 'd still in focus (next)' );
+
+    util.getPreviousFocusable( rootElement ).focus();
+    ok( document.activeElement.id === c.accessibleId, 'c in focus (previous)' );
+
+    util.getPreviousFocusable( rootElement ).focus(); 
+    ok( document.activeElement.id === b.accessibleId, 'b in focus (previous)' );
+
+    util.getPreviousFocusable( rootElement ).focus(); 
+    ok( document.activeElement.id === a.accessibleId, 'a in focus (previous)' );
+
+    util.getPreviousFocusable( rootElement ).focus(); 
+    ok( document.activeElement.id === a.accessibleId, 'a still in focus (previous)' );
+
+    rootNode.removeAllChildren();
+    rootNode.addChild( a );
+    a.children = [ b, c ];
+    c.addChild( d );
+    d.addChild( e );
+
+    // this should hide everything except a
+    b.focusable = false;
+    c.accessibleHidden = true;
+
+    a.focus();
+    util.getNextFocusable( rootElement ).focus();
+    ok( document.activeElement.id === a.accessibleId, 'a only element focusable' );
 
   } );
   
