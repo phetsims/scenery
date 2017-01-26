@@ -303,7 +303,7 @@ define( function( require ) {
       else if ( this._labelTagName ) {
 
         // the remaining methods require a new DOM element
-        this._labelElement = this.createDOMElement( this._labelTagName, 'label-' + this.id  );
+        this._labelElement = this.createDOMElement( this._labelTagName, 'label-' + this.id );
         this._labelElement.textContent = this._label;
 
         if ( this._labelTagName.toUpperCase() === DOM_LABEL ) {
@@ -375,7 +375,7 @@ define( function( require ) {
 
     /**
      * Set the focus highlight for this node.
-     * 
+     *
      * @param {Node|Shape|string.<'invisible'>} focusHighlight
      * @public
      */
@@ -535,7 +535,7 @@ define( function( require ) {
 
     /**
      * Set the value of an input element.
-     * 
+     *
      * @param {string} value [description]
      */
     setInputValue: function( value ) {
@@ -547,7 +547,7 @@ define( function( require ) {
 
     /**
      * Get the value of the element.
-     * 
+     *
      * @return {string}
      */
     getInputValue: function() {
@@ -619,7 +619,7 @@ define( function( require ) {
     /**
      * Add an event listener to the dom element.  The listener is usually meant to keep
      * the attributes of the element up to date with properties of the sim.
-     * 
+     *
      * @param {string} eventName - name of the event to listen to
      * @param {function} callBack
      */
@@ -630,7 +630,7 @@ define( function( require ) {
     /**
      * Remove an event listener from the DOM element, when you want to stop listening
      * or dispose.
-     * 
+     *
      * @param  {string} eventName
      * @param  {function} callBack
      */
@@ -700,7 +700,7 @@ define( function( require ) {
         return false;
       }
       else {
-        this.isElementHidden( domElement.parentElement );
+        return this.isElementHidden( domElement.parentElement );
       }
     },
 
@@ -739,7 +739,7 @@ define( function( require ) {
           while ( !nextFocusable && nextIndex < linearDOM.length - 1 ) {
             for ( var j = 0; j < focusableTypes.length; j++ ) {
               var nextElement = linearDOM[ nextIndex ];
-
+              
               // continue to while if the next element is meant to be hidden
               if ( this.isElementHidden( nextElement ) ) {
                 break;
