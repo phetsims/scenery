@@ -44,11 +44,11 @@
  * </div>
  *
  * The node is represented by the <button> DOM element, but the accessible content needs to include the parent div, and
- * a peer description paragraph.  AccessibleNode supports this structure with the 'parentContainerElement' option.  In
+ * a peer description paragraph.  This mixin supports this structure with the 'parentContainerElement' option.  In
  * this example, the parentContainerElement is the div, while the description is added as a child under the button
  * node's domElement.
  *
- * For additional accessibility options, please see the options at the top of the AccessibleNode constructor. For more
+ * For additional accessibility options, please see the options listed in ACCESSIBILITY_OPTION_KEYS. For more
  * documentation on Scenery, Nodes, and the scene graph, please see http://phetsims.github.io/scenery/
  *
  * @author Jesse Greenberg (PhET Interactive Simulations)
