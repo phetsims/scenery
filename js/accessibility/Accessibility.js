@@ -65,8 +65,28 @@ define( function( require ) {
   // var AccessiblePeer = require( 'SCENERY/accessibility/AccessiblePeer' );
 
   // constants
-  // global incremented to provide unique id's to list description items
-  var ITEM_NUMBER = 0;
+  var globalListItemCounter = 0;
+
+  // specific HTML tag names
+  var INPUT_TAG = 'INPUT';
+  var LABEL_TAG = 'LABEL';
+  var UNORDERED_LIST_TAG = 'UL';
+  var BUTTON_TAG = 'BUTTON';
+  var TEXTAREA_TAG = 'TEXTAREA';
+  var SELECT_TAG = 'SELECT';
+  var OPTGROUP_TAG = 'OPTGROUP';
+  var DATALIST_TAG = 'DATALIST';
+  var OUTPUT_TAG = 'OUTPUT';
+  var PARAGRAPH_TAG = 'P';
+
+  // these elements are typically associated with forms, and support certain attributes
+  var FORM_ELEMENTS = [ INPUT_TAG, BUTTON_TAG, TEXTAREA_TAG, SELECT_TAG, OPTGROUP_TAG, DATALIST_TAG, OUTPUT_TAG ];
+
+  // these elements support inner text
+  var ELEMENTS_SUPPORT_INNER_TEXT = [ BUTTON_TAG, PARAGRAPH_TAG ];
+
+  // these elements require a minimum width to be visible in Safari
+  var ELEMENTS_REQUIRE_WIDTH = [ 'INPUT' ];
 
   var ACCESSIBILITY_OPTION_KEYS = [
     'tagName', // Sets the tag name for the DOM element representing this node in the parallel DOM
@@ -320,11 +340,11 @@ define( function( require ) {
          */
         setTagName: function( tagName ) {
           this._tagName = tagName;
-          this._domElement = AccessibilityUtil.createDOMElement( tagName );
+          this._domElement = document.createElement( tagName );
           this._domElement.id = this._accessibleId;
 
           // Safari requires that certain input elements have width, otherwise it will not be keyboard accessible
-          if ( _.contains( AccessibilityUtil.ELEMENTS_THAT_NEED_WIDTH, tagName ) ) {
+          if ( _.contains( ELEMENTS_REQUIRE_WIDTH, tagName ) ) {
             this._domElement.style.width = '1px';
           }
 
@@ -354,7 +374,7 @@ define( function( require ) {
           this._labelElement = null;
 
           if ( tagName ) {
-            this._labelElement = AccessibilityUtil.createDOMElement( tagName );
+            this._labelElement = document.createElement( tagName );
             this._labelElement.id = 'label-' + this._accessibleId;
           }
 
@@ -385,7 +405,7 @@ define( function( require ) {
           this._descriptionElement = null;
 
           if ( tagName ) {
-            this._descriptionElement = AccessibilityUtil.createDOMElement( tagName );
+            this._descriptionElement = document.createElement( tagName );
             this._descriptionElement.id = 'description-' + this._accessibleId;
           }
 
@@ -411,7 +431,7 @@ define( function( require ) {
          * @param {string} inputType
          */
         setInputType: function( inputType ) {
-          assert && assert( this._tagName.toUpperCase() === AccessibilityUtil.INPUT_TAG, 'tag name must be INPUT to support inputType' );
+          assert && assert( this._tagName.toUpperCase() === INPUT_TAG, 'tag name must be INPUT to support inputType' );
 
           this._inputType = inputType;
           this._domElement.type = inputType;
@@ -425,7 +445,7 @@ define( function( require ) {
          * @return {string}
          */
         getInputType: function() {
-          assert && assert( this._tagName.toUpperCase() === AccessibilityUtil.INPUT_TAG, 'tag name must be INPUT to support inputType' );
+          assert && assert( this._tagName.toUpperCase() === INPUT_TAG, 'tag name must be INPUT to support inputType' );
 
           return this._inputType;
         },
@@ -481,7 +501,7 @@ define( function( require ) {
          */
         setParentContainerTagName: function( tagName ) {
           this._parentContainerTagName = tagName;
-          this._parentContainerElement = AccessibilityUtil.createDOMElement( tagName );
+          this._parentContainerElement = document.createElement( tagName );
           this._parentContainerElement.id = 'parent-container-' + this._accessibleId;
 
           this.invalidateAccessibleContent();
@@ -529,7 +549,7 @@ define( function( require ) {
           if ( this._useAriaLabel ) {
             this.setAccessibleAttribute( 'aria-label', this._accessibleLabel );
           }
-          else if ( AccessibilityUtil.elementSupportsInnerText( this._domElement ) ) {
+          else if ( elementSupportsInnerText( this._domElement ) ) {
             this._domElement.innerText = this._accessibleLabel;
           }
           else if ( this._labelTagName ) {
@@ -539,7 +559,7 @@ define( function( require ) {
             this._labelElement.textContent = this._accessibleLabel;
 
             // if using a label element it must point to the dom element
-            if ( this._labelTagName && this._labelTagName.toUpperCase() === AccessibilityUtil.LABEL_TAG ) {
+            if ( this._labelTagName && this._labelTagName.toUpperCase() === LABEL_TAG ) {
               this._labelElement.setAttribute( 'for', this._accessibleId );
             }
           }
@@ -572,7 +592,7 @@ define( function( require ) {
             this.setDescriptionTagName( 'p' );
           }
 
-          assert && assert( AccessibilityUtil.elementSupportsInnerText( this._descriptionElement ), 'description element must support inner text' );
+          assert && assert( elementSupportsInnerText( this._descriptionElement ), 'description element must support inner text' );
           this._descriptionElement.textContent = this._accessibleDescription;
 
         },
@@ -765,11 +785,11 @@ define( function( require ) {
          * @return {string} - the id of the list item returned for reference
          */
         addDescriptionItem: function( textContent ) {
-          assert && assert( this._descriptionElement.tagName === AccessibilityUtil.UNORDERED_LIST_TAG, 'description element must be a list to use addDescriptionItem' );
+          assert && assert( this._descriptionElement.tagName === UNORDERED_LIST_TAG, 'description element must be a list to use addDescriptionItem' );
 
           var listItem = document.createElement( 'li' );
           listItem.textContent = textContent;
-          listItem.id = 'list-item-' + ITEM_NUMBER++;
+          listItem.id = 'list-item-' + globalListItemCounter++;
           this._descriptionElement.appendChild( listItem );
 
           return listItem.id;
@@ -777,15 +797,15 @@ define( function( require ) {
 
         /**
          * Update the text content of the description item.  The item may not yet be in the DOM, so
-         * document.getElementById cannot be used, and the element needs to be found under the description element.
+         * document.getElementById cannot be used, see getChildElementWithId()
          * @public
          *
          * @param {string} itemID - id of the lits item to update
          * @param {string} description - new textContent for the string
          */
         updateDescriptionItem: function( itemID, description ) {
-          var listItem = this.getChildElementWithId( this._descriptionElement, itemID );
-          assert && assert( this._descriptionElement.tagName === AccessibilityUtil.UNORDERED_LIST_TAG, 'description must be a list to hide list items' );
+          var listItem = getChildElementWithId( this._descriptionElement, itemID );
+          assert && assert( this._descriptionElement.tagName === UNORDERED_LIST_TAG, 'description must be a list to hide list items' );
           assert && assert( listItem, 'No list item in description with id ' + itemID );
 
           listItem.textContent = description;
@@ -800,7 +820,7 @@ define( function( require ) {
          */
         setDescriptionItemHidden: function( itemID, hidden ) {
           var listItem = document.getElementById( itemID );
-          assert && assert( this._descriptionElement.tagName === AccessibilityUtil.UNORDERED_LIST_TAG, 'description must be a list to hide list items' );
+          assert && assert( this._descriptionElement.tagName === UNORDERED_LIST_TAG, 'description must be a list to hide list items' );
           assert && assert( listItem, 'No list item in description with id ' + itemID );
 
           listItem.hidden = hidden;
@@ -847,7 +867,7 @@ define( function( require ) {
          * @param {string} value
          */
         setInputValue: function( value ) {
-          assert && assert( _.contains( AccessibilityUtil.FORM_ELEMENTS, this._domElement.tagName ), 'dom element must be a form element to support value' );
+          assert && assert( _.contains( FORM_ELEMENTS, this._domElement.tagName ), 'dom element must be a form element to support value' );
           this._domElement.value = value;
         },
         set inputValue( value ) { this.setINputValue( value ); },
@@ -859,7 +879,7 @@ define( function( require ) {
          * @return {string}
          */
         getInputValue: function() {
-          assert && assert( _.contains( AccessibilityUtil.FORM_ELEMENTS, this._domElement.tagName ), 'dom element must be a form element to support value' );
+          assert && assert( _.contains( FORM_ELEMENTS, this._domElement.tagName ), 'dom element must be a form element to support value' );
           return this._domElement.value;
         },
         get inputValue() { return this.getInputValue(); },
@@ -895,7 +915,7 @@ define( function( require ) {
          * @public
          */
         removeAccessibleAttribute: function( attribute ) {
-          assert && assert( AccessibilityUtil.hasAttribute( this.domElement, attribute ) );
+          assert && assert( elementHasAttribute( this._domElement, attribute ) );
           this._domElement.removeAttribute( attribute );
         },
 
@@ -958,6 +978,54 @@ define( function( require ) {
         }
 
       } );
+
+      /**
+       * Returns whether or not the attribute exists on the DOM element.
+       * 
+       * @param  {HTMLElement}  domElement
+       * @param  {string}  attribute
+       * @return {string|null}
+       */
+      function elementHasAttribute( domElement, attribute ) {
+        return !!domElement.getAttribute( attribute );
+      }
+
+      /**
+       * Get a child element with an id.  This should only be used if the element has not been added to the document
+       * yet.  This might happen while setting up or creating the accessible HTML elements. If the element is in the
+       * document, document.getElementById is a faster and more conventional option.
+       *
+       * @param  {HTMLElement} parentElement
+       * @param  {string} childId
+       * @return {HTMLElement}
+       */
+      function getChildElementWithId( parentElement, childId ) {
+        var childElement;
+        var children = parentElement.children;
+
+        for ( var i = 0; i < children.length; i++ ) {
+          if ( children[ i ].id === childId ) {
+            childElement = children[ i ];
+            break;
+          }
+        }
+
+        if ( !childElement ) {
+          throw new Error( 'No child element under ' + parentElement + ' with id ' + childId );
+        }
+
+        return childElement;
+      }
+
+      /**
+       * Returns whether or not the element supports inner text.
+       * @private
+       *
+       * @return {boolean}
+       */
+      function elementSupportsInnerText( domElement ) {
+        return _.contains( ELEMENTS_SUPPORT_INNER_TEXT, domElement.tagName );
+      }
 
       /**
        * Invalidate our current accessible content, triggering recomputation
