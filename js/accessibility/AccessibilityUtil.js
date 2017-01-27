@@ -42,26 +42,6 @@ define( function( require ) {
   }
 
   /**
-   * Verify that an id is unique in the document, by searching through the id's of all HTML elements in the body.
-   * 
-   * @param  {string} id
-   * @return {boolean}
-   */
-  function verifyUniqueId( id ) {
-    var unique = true;
-
-    // search through the elements
-    var elements = getLinearDOMElements( document.body );
-    for ( var i = 0; i < elements.length; i++ ) {
-      if ( elements[ i ].id === id ) {
-        unique = false;
-        break;
-      }
-    }
-    return unique;
-  }
-
-  /**
    * Determine if an element is hidden.  An element is considered 'hidden' if it (or any of its ancestors) has the
    * 'hidden' attribute.
    * @private
@@ -151,29 +131,8 @@ define( function( require ) {
      */
     getPreviousFocusable: function( parentElement ) {
       return getNextPreviousFocusable( PREVIOUS, parentElement );
-    },
-
-    /**
-     * Generate a random unique id for a DOM element.  After generating
-     * a unique id, we verify that the id is not shared with any other id in the
-     * document. The return value is a string because the DOM API generally
-     * handles id references by string.if
-     * 
-     * @return {string}
-     */
-    generateHTMLElementId: function() {
-      var id;
-      
-      var isUnique = false;
-      while( !isUnique ) {
-
-        // try a random sequence of values
-        id = Math.random().toString().substr( 2, 16 );
-        isUnique = verifyUniqueId( id );
-      }
-
-      return id;
     }
+
   };
 
   scenery.register( 'AccessibilityUtil', AccessibilityUtil );
