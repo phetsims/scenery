@@ -8,6 +8,7 @@
   var TEST_LABEL = 'Test label';
   var TEST_LABEL_2 = 'Test label 2';
   var TEST_DESCRIPTION = 'Test decsription';
+  var TEST_DESCRIPTION_2 = 'Test decsription 2';
   var TEST_TITLE = 'Test title';
 
   test( 'Accessibility options', function() {
@@ -159,6 +160,31 @@
     ok( a1.parentContainerElement.childNodes[ 1 ].tagName === 'P', 'description after div without prependLabels' );
     ok( a1.parentContainerElement.childNodes.length === 2, 'label removed' );
     ok( document.getElementById( a1.accessibleId).getAttribute( 'aria-label' ) === TEST_LABEL, 'aria-label set' );
+
+  } );
+
+  test( 'Accessibility setters/getters', function() {
+
+    var a1 = new scenery.Node( {
+      tagName: 'div'
+    } );
+    var display = new scenery.Display( a1 );
+
+    // set/get attributes
+    a1.setAccessibleAttribute( 'role', 'switch' );
+    ok( a1.getAccessibleAttributes()[ 0 ].attribute === 'role', 'attribute set' );
+    ok( document.getElementById( a1.accessibleId ).getAttribute( 'role' ) === 'switch', 'HTML attribute set' );
+
+    a1.removeAccessibleAttribute( 'role' );
+    ok( !document.getElementById( a1.accessibleId ).getAttribute( 'role' ), 'attribute removed' );
+
+    // set/get list item and description
+    a1.descriptionTagName = 'ul';
+    var itemId = a1.addDescriptionItem( TEST_DESCRIPTION );
+    ok( document.getElementById( itemId ).textContent === TEST_DESCRIPTION, 'description item added' );
+
+    a1.updateDescriptionItem( itemId, TEST_DESCRIPTION_2 );
+    ok( document.getElementById( itemId ).textContent === TEST_DESCRIPTION_2, 'description item updated' );
 
   } );
 
