@@ -1026,6 +1026,32 @@ define( function( require ) {
       }
 
       /**
+       * Called by invalidateAccessibleContent.  'this' will be bound by call. The contentElement will either be a
+       * label or description element.  The contentElement will be sorted relative to this node's DOM element or its
+       * parentContainerElement.  Its placement will also depend on whether or not this node wants to prepend labels,
+       * see setPrependLabels().
+       * @private
+       * 
+       * @param  {HTMLElement} contentElement
+       */
+      function insertContentElement( contentElement ) {
+
+        // if we have a parent container, add the element as a child of the container - otherwise, add as child of the
+        // node's DOM element
+        if ( this._parentContainerElement ) {
+          if ( this._prependLabels && this._parentContainerElement === this._domElement.parentNode ) {
+            this._parentContainerElement.insertBefore( contentElement, this._domElement );
+          }
+          else {
+            this._parentContainerElement.appendChild( contentElement );
+          }
+        }
+        else {
+          this._domElement.appendChild( contentElement );
+        }
+      }
+
+      /**
        * Invalidate our current accessible content, triggering recomputation
        * of anything that depended on the old accessible content. This can be
        * combined with a client implementation of invalidateAccessibleContent.
@@ -1071,37 +1097,9 @@ define( function( require ) {
               parentContainerElement: self._parentContainerElement
             } );
 
-            // if we have a parent container, add the label element as a child of the container
-            // otherwise, add as child of the node's DOM element
-            if ( self._labelElement ) {
-              if ( self._parentContainerElement ) {
-                if ( self._prependLabels && self._parentContainerElement === self._domElement.parentNode ) {
-                  self._parentContainerElement.insertBefore( self._labelElement, self._domElement );
-                }
-                else {
-                  self._parentContainerElement.appendChild( self._labelElement );
-                }
-              }
-              else {
-                self._domElement.appendChild( self._labelElement );
-              }
-            }
-
-            // if we have a parent container, add the description element as a child of the container
-            // otherwise, add as a child of the node's dom element
-            if ( self._descriptionElement ) {
-              if ( self._parentContainerElement ) {
-                if ( self._prependLabels && self._parentContainerElement === self._domElement.parentNode ) {
-                  self._parentContainerElement.insertBefore( self._descriptionElement, self._domElement );
-                }
-                else {
-                  self._parentContainerElement.appendChild( self._descriptionElement );
-                }
-              }
-              else {
-                self._domElement.appendChild( self._descriptionElement );
-              }
-            }
+            // insert the label and description elements in the correct location if they exist
+            self._labelElement && insertContentElement.call( self, self._labelElement );
+            self._descriptionElement && insertContentElement.call( self, self._descriptionElement );
 
             return accessiblePeer;
           }
