@@ -60,7 +60,6 @@ define( function( require ) {
   // modules
   var scenery = require( 'SCENERY/scenery' );
   var extend = require( 'PHET_CORE/extend' );
-  var AccessibilityUtil = require( 'SCENERY/accessibility/AccessibilityUtil' );
   // we use the following but comment out to avoid circular dependency
   // var AccessiblePeer = require( 'SCENERY/accessibility/AccessiblePeer' );
 
@@ -235,7 +234,9 @@ define( function( require ) {
 
           // @private {string} - An id used for the purposes of accessibility.  The accessible id is a string, since
           // the DOM API frequently uses string identifiers to reference other elements in the document.
-          this._accessibleId = AccessibilityUtil.generateHTMLElementId();
+          // The accessible id will be null until all instancess have been added to the instance tree. Each instance
+          // must have a unique id or else the document would contain duplicate ids.
+          this._accessibleId = null;
 
           // @private {Array.<Function>} - For accessibility input handling {keyboard/click/HTML form}
           this._accessibleInputListeners = [];
@@ -328,6 +329,7 @@ define( function( require ) {
          * @return {string}
          */
         getAccessibleId: function() {
+          assert && assert( this._accessibleId, 'accessibleId cannot be referenced until after all instances have been sorted' );
           return this._accessibleId;
         },
         get accessibleId() { return this.getAccessibleId(); },
@@ -341,7 +343,6 @@ define( function( require ) {
         setTagName: function( tagName ) {
           this._tagName = tagName;
           this._domElement = document.createElement( tagName );
-          this._domElement.id = this._accessibleId;
 
           // Safari requires that certain input elements have width, otherwise it will not be keyboard accessible
           if ( _.contains( ELEMENTS_REQUIRE_WIDTH, tagName ) ) {
@@ -375,7 +376,6 @@ define( function( require ) {
 
           if ( tagName ) {
             this._labelElement = document.createElement( tagName );
-            this._labelElement.id = 'label-' + this._accessibleId;
           }
 
           this.invalidateAccessibleContent();
@@ -406,7 +406,6 @@ define( function( require ) {
 
           if ( tagName ) {
             this._descriptionElement = document.createElement( tagName );
-            this._descriptionElement.id = 'description-' + this._accessibleId;
           }
 
           this.invalidateAccessibleContent();
@@ -502,7 +501,6 @@ define( function( require ) {
         setParentContainerTagName: function( tagName ) {
           this._parentContainerTagName = tagName;
           this._parentContainerElement = document.createElement( tagName );
-          this._parentContainerElement.id = 'parent-container-' + this._accessibleId;
 
           this.invalidateAccessibleContent();
         },
@@ -559,8 +557,8 @@ define( function( require ) {
             this._labelElement.textContent = this._accessibleLabel;
 
             // if using a label element it must point to the dom element
-            if ( this._labelTagName && this._labelTagName.toUpperCase() === LABEL_TAG ) {
-              this._labelElement.setAttribute( 'for', this._accessibleId );
+            if ( this._labelTagName.toUpperCase() === LABEL_TAG ) {
+              this.invalidateAccessibleContent();
             }
           }
 
@@ -1046,6 +1044,28 @@ define( function( require ) {
         this.accessibleContent = {
           focusHighlight: this._focusHighlight,
           createPeer: function( accessibleInstance ) {
+
+            // set up the unique id's for the DOM elements associated with this node's accessible content.
+            self._accessibleId = accessibleInstance.trail.getUniqueId();
+            self._domElement.id = self._accessibleId;
+
+            // set up id relations for the label element
+            if ( self._labelElement ) {
+              self._labelElement.id = 'label-' + self._accessibleId;
+              if ( self._labelTagName.toUpperCase() === LABEL_TAG ) {
+                self._labelElement.setAttribute( 'for', self._accessibleId );
+              }
+            }
+
+            // identify the description element
+            if ( self._descriptionElement ) {
+              self._descriptionElement.id = 'description-' + self._accessibleId;
+            }
+
+            // identify the parent container element
+            if ( self._parentContainerElement ) {
+              self._parentContainerElement.id = 'parent-container-' + self._accessibleId;
+            }
 
             var accessiblePeer = new scenery.AccessiblePeer( accessibleInstance, self._domElement, {
               parentContainerElement: self._parentContainerElement

@@ -14,6 +14,7 @@
   test( 'Accessibility options', function() {
 
     var rootNode = new scenery.Node();
+    var display = new scenery.Display( rootNode );
 
     // test setting of accessible content through options
     var buttonNode = new scenery.Node( {
@@ -29,6 +30,7 @@
       ariaRole: 'button', // uses the ARIA button role
       prependLabels: true // labels placed above DOM element in read order
     } );
+    rootNode.addChild( buttonNode );
 
     var accessibleNode = new scenery.Node( {
       tagName: 'div',
@@ -41,10 +43,7 @@
       ariaLabelledById: buttonNode.accessibleId, // ARIA label relation
       ariaDescribedById: buttonNode.accessibleId // ARIA description relation
     } );
-
-    // accessible instances are not sorted until added to a display
-    var display = new scenery.Display( rootNode );
-    rootNode.children = [ buttonNode, accessibleNode ];
+    rootNode.addChild( accessibleNode );
 
     // verify that setters and getters worked correctly
     ok( buttonNode.labelTagName === 'label', 'Label tag name' );
