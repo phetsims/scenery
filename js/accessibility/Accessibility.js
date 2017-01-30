@@ -159,6 +159,9 @@ define( function( require ) {
           // if the element has a tag name INPUT. 
           this._inputType = null;
 
+          // @private {string} - the value of the input, only relevant if the tag name is of type "INPUT".
+          this._inputValue = null;
+
           // @private {HTMLElement} - the HTML element representing this node in the DOM.
           this._domElement = null;
 
@@ -237,6 +240,16 @@ define( function( require ) {
           // The accessible id will be null until all instancess have been added to the instance tree. Each instance
           // must have a unique id or else the document would contain duplicate ids.
           this._accessibleId = null;
+
+          // @private {string} - An id used to reference the label element.  This will only be defined if a label
+          // element exists, see setLabelTagName() for the ways a label can be added.  This is useful for setting
+          // attributes on the DOM element relative to the label element such as "aria-labelledby". 
+          this._labelElementId = null;
+
+          // @private {string} - An id used to reference the description element.  This will only be defined if a
+          // description exists, set setDescriptionTagName().  This is useful for setting attributes on this node's
+          // DOM element relative to the description element, such as "aria-describedby".
+          this._descrptionElementId = null;
 
           // @private {Array.<Function>} - For accessibility input handling {keyboard/click/HTML form}
           this._accessibleInputListeners = [];
@@ -329,7 +342,6 @@ define( function( require ) {
          * @return {string}
          */
         getAccessibleId: function() {
-          assert && assert( this._accessibleId, 'accessibleId cannot be referenced until after all instances have been sorted' );
           return this._accessibleId;
         },
         get accessibleId() { return this.getAccessibleId(); },
@@ -444,8 +456,6 @@ define( function( require ) {
          * @return {string}
          */
         getInputType: function() {
-          assert && assert( this._tagName.toUpperCase() === INPUT_TAG, 'tag name must be INPUT to support inputType' );
-
           return this._inputType;
         },
         get inputType() { return this.getInputType(); },
@@ -705,8 +715,7 @@ define( function( require ) {
          * @public
          */
         getDescriptionElementId: function() {
-          assert && assert( this._descriptionElement, 'description element must exist in the parallel DOM' );
-          return this._descriptionElement.id;
+          return this._descriptionElementId;
         },
         get descriptionElementId() { return this.getDescriptionElementId(); },
 
@@ -718,8 +727,7 @@ define( function( require ) {
          * @return {string}
          */
         getLabelElementID: function() {
-          assert && assert( this._labelElement, 'description element must exist in the parallel DOM' );
-          return this._labelElement.id;
+          return this._labelElementId;
         },
 
         /**
@@ -866,6 +874,8 @@ define( function( require ) {
          */
         setInputValue: function( value ) {
           assert && assert( _.contains( FORM_ELEMENTS, this._domElement.tagName ), 'dom element must be a form element to support value' );
+
+          this._inputValue = value;
           this._domElement.value = value;
         },
         set inputValue( value ) { this.setINputValue( value ); },
@@ -877,8 +887,7 @@ define( function( require ) {
          * @return {string}
          */
         getInputValue: function() {
-          assert && assert( _.contains( FORM_ELEMENTS, this._domElement.tagName ), 'dom element must be a form element to support value' );
-          return this._domElement.value;
+          return this._inputValue;
         },
         get inputValue() { return this.getInputValue(); },
         
@@ -1077,7 +1086,8 @@ define( function( require ) {
 
             // set up id relations for the label element
             if ( self._labelElement ) {
-              self._labelElement.id = 'label-' + self._accessibleId;
+              self._labelElementId = 'label-' + self._accessibleId;
+              self._labelElement.id = self._labelElementId;
               if ( self._labelTagName.toUpperCase() === LABEL_TAG ) {
                 self._labelElement.setAttribute( 'for', self._accessibleId );
               }
@@ -1085,7 +1095,8 @@ define( function( require ) {
 
             // identify the description element
             if ( self._descriptionElement ) {
-              self._descriptionElement.id = 'description-' + self._accessibleId;
+              self._descriptionElementId = 'description-' + self._accessibleId;
+              self._descriptionElement.id = self._descriptionElementId;
             }
 
             // identify the parent container element
