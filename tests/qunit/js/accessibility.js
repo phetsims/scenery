@@ -40,8 +40,8 @@
       labelTagName: 'p',
       descriptionTagName: 'p',
       accessibleDescription: TEST_DESCRIPTION,
-      ariaLabelledById: buttonNode.accessibleId, // ARIA label relation
-      ariaDescribedById: buttonNode.accessibleId // ARIA description relation
+      ariaLabelledByElement: buttonNode.domElement, // ARIA label relation
+      ariaDescribedByElement: buttonNode.domElement // ARIA description relation
     } );
     rootNode.addChild( accessibleNode );
 
@@ -64,8 +64,8 @@
     ok( accessibleNode.accessibleLabel === TEST_LABEL, 'Accessible label' );
     ok( accessibleNode.labelTagName === null, 'Label tag name with aria label' );
     ok( accessibleNode.descriptionTagName === 'p', 'Description tag name' );
-    ok( accessibleNode.ariaLabelledById === buttonNode.accessibleId, 'aria-labelledby id' );
-    ok( accessibleNode.ariaDescribedById === buttonNode.accessibleId, ' aria-describedby id' );
+    ok( accessibleNode.ariaLabelledByElement === buttonNode.domElement, 'aria-labelledby id' );
+    ok( accessibleNode.ariaDescribedByElement === buttonNode.domElement, ' aria-describedby id' );
 
 
     // verify DOM structure - options above should create something like:

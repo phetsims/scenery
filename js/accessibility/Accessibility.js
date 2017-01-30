@@ -100,8 +100,8 @@ define( function( require ) {
     'focusable', // Sets whether or not the node can receive keyboard focus
     'useAriaLabel', // Sets whether or not the label will use the 'aria-label' attribute, see setUseAriaLabel()
     'ariaRole', // Sets the ARIA role for the DOM element, see setAriaRole() for documentation
-    'ariaDescribedById', // Sets a description relationship for this node's DOM element by id, see setAriaDescribedById()
-    'ariaLabelledById', // Sets a label relationship with another element in the DOM by id, see setAriaLabelledById()
+    'ariaDescribedByElement', // Sets a description relationship for this node's DOM element by id, see setAriaDescribedByElement()
+    'ariaLabelledByElement', // Sets a label relationship with another element in the DOM by id, see setAriaLabelledByElement()
     'prependLabels'// Sets whether we want to prepend labels above the node's HTML element, see setPrependLabels()
   ];
 
@@ -203,19 +203,19 @@ define( function( require ) {
           // by browsers or assistive technologies, so use vanilla HTML for accessibility semantics where possible.
           this._ariaRole = null;
 
-          // @private {string} - the id pointing to an HTML element that will act as the description for this node's
-          // DOM element. The id is added to this node's DOM element as the 'aria-describedby' attribute.
+          // @private {string} - the HTML element that will act as the description for this node's
+          // DOM element. The id is added to this node's DOM element with the 'aria-describedby' attribute.
           // The description element can be anywhere in the document.  The behavior for aria-describedby is such that
           // content under the description element will be read whenever the element with the aria-describedby attribute
           // receives focus.
-          this._ariaDescribedById = null;
+          this._ariaDescribedByElement = null;
 
-          // @private {string} - the id pointing to an HTML element that will act as the label for this node's
+          // @private {string} - the HTML element that will act as the label for this node's
           // DOM element. The id is added to this node's DOM element as the 'aria-labelledby' attribute.  
           // The label element can be anywhere in the document.  The behavior for aria-labelledby is such
           // that the content under the label element will be read whenever the element with the aria-labelledby
-          // attribute receives focus.
-          this._ariaLabelledById = null;
+          // attribute receives focus.  There are multiple ways to add a label to a node, see setAccessibleLabel().
+          this._ariaLabelledByElement = null;
 
           // @private {boolean} - whether or not this node's DOM element can receive focus from tab navigation.
           // Sets the tabIndex attribute on the node's DOM element.  Setting to false will not remove the node's DOM
@@ -345,6 +345,17 @@ define( function( require ) {
           return this._accessibleId;
         },
         get accessibleId() { return this.getAccessibleId(); },
+
+        /**
+         * Get HTML element representing this node in the document.
+         * @public
+         *
+         * @return {HTMLElement}
+         */
+        getDomElement: function() {
+          return this._domElement;
+        },
+        get domElement() { return this.getDomElement(); },
 
         /**
          * Set the tag name representing this element in the DOM. DOM element  tag names are read-only, so this
@@ -708,81 +719,81 @@ define( function( require ) {
         get focusHighlight() { return this.getFocusHighlight(); },
 
         /**
-         * Get an id referencing the description element of this node.  Useful when you want to set aria-describedby on
-         * another node's accessible HTML element.
-         *
-         * @return {string}
+         * Get the description element that holds the description content for this node.
          * @public
+         * 
+         * @return {HTMLElement|null}
          */
-        getDescriptionElementId: function() {
-          return this._descriptionElementId;
+        getDescriptionElement: function() {
+          return this._descriptionElement;
         },
-        get descriptionElementId() { return this.getDescriptionElementId(); },
+        get descriptionElement() { return this.getDescriptionElement(); },
 
         /**
-         * Get an id referencing the label element of this node.  Useful when you want to set aria-labelledby on a
-         * another node's accessible HTML element.
+         * Get the label element that holds the label content for this node.
          * @public
-         *
-         * @return {string}
+         * @return {HTMLElement|null}
          */
-        getLabelElementId: function() {
-          return this._labelElementId;
+        getLabelElement: function() {
+          return this._labelElement;
         },
 
         /**
-         * Set the 'aria-describedby' attribute on this node's DOM element. The value of the 'aria-describedby'
-         * attribute is a string id that references another HTML element.  Upon focus, a screen reader should also
+         * Set the 'aria-describedby' element for this node's DOM element. The value of the 'aria-describedby'
+         * attribute is a string id that references the desired HTML element.  Upon focus, a screen reader should
          * read the content under the HTML element referenced by the 'aria-describedby' id.
          * @public
          *
-         * @param {string} descriptionId - id referencing the description element
+         * @param {HTMLElement} descriptionElement
          */
-        setAriaDescribedById: function( descriptionId ) {
+        setAriaDescribedByElement: function( descriptionElement ) {
           assert && assert( this._domElement, 'HTML element required for aria-describedby attribute, see setTagName' );
+          assert && assert( descriptionElement.nodeType === HTMLElement.ELEMENT_NODE, 'HTML element required' );
 
-          this._ariaDescribedById = descriptionId;
-          this.setAccessibleAttribute( 'aria-describedby', descriptionId );
+          this._ariaDescribedByElement = descriptionElement;
+          this.invalidateAccessibleContent();
         },
-        set ariaDescribedById( descriptionId ) { this.setAriaDescribedById( descriptionId ); },
+        set ariaDescribedByElement( descriptionElement ) { this.setAriaDescribedByElement( descriptionElement ); },
 
         /**
          * Get the id that is the value of the 'aria-describedby' attribute.  See setAriaDescribedBy() for details
          * about the 'aria-describedby' attribute.
          * @return {[type]} [description]
          */
-        getAriaDescribedById: function() {
-          return this._ariaDescribedById;
+        getAriaDescribedByElement: function() {
+          return this._ariaDescribedByElement;
         },
-        get ariaDescribedById() { return this.getAriaDescribedById(); },
+        get ariaDescribedByElement() { return this.getAriaDescribedByElement(); },
 
         /**
-         * Get the id which is the value of the 'aria-labelledby' attribute. The value of the 'aria-labelledby'
-         * attribute is a string id that references another HTML element.  Upon focus, a screen reader should also 
+         * Sets the element for the aria-labelledby attribute. The value of the 'aria-labelledby'
+         * attribute is a string id that references another HTML element.  Upon focus, a screen reader should 
          * read the content under the HTML element referenced by the 'aria-labelledby' id.
          * @public
          *
          * @param {string} labelId - id referencing the description element
          */
-        setAriaLabelledById: function( labelId ) {
-          this._ariaLabelledById = labelId;
+        setAriaLabelledByElement: function( labelElement ) {
+          assert && assert( this._domElement, 'HTML element required for aria-labelledby attribute, see setTagName' );
+          assert && assert( labelElement.nodeType === HTMLElement.ELEMENT_NODE, 'HTML element required' );
 
-          // Need to invalidate?
-          this.setAccessibleAttribute( 'aria-labelledby', labelId );
+          this._ariaLabelledByElement = labelElement;
+
+          this.invalidateAccessibleContent();
         },
-        set ariaLabelledById( labelId ) { this.setAriaLabelledById( labelId ); },
+        set ariaLabelledByElement( labelElement ) { this.setAriaLabelledByElement( labelElement ); },
 
         /**
-         * Get the id of the element that labels this node's DOM element through the 'aria-labelledby' attribute.
-         * See setAriaLabelledBy() for more information about the 'aria-labelledby' attribute.
+         * Get the element that labels this node's DOM element through the 'aria-labelledby' attribute.
+         * See setAriaLabelledBy() for more information about the 'aria-labelledby' attribute behavior.
          * @public
          * 
          * @return {string}
          */
-        getAriaLabelledById: function() {
-          return this._ariaLabelledById;
+        getAriaLabelledByElement: function() {
+          return this._ariaLabelledByElement;
         },
-        get ariaLabelledById() { return this.getAriaLabelledById(); },
+        get ariaLabelledByElement() { return this.getAriaLabelledByElement(); },
 
         /**
          * If the node is using a list for its description, add a list item to  the end of the list with the text
@@ -1113,6 +1124,16 @@ define( function( require ) {
             // insert the label and description elements in the correct location if they exist
             self._labelElement && insertContentElement.call( self, self._labelElement );
             self._descriptionElement && insertContentElement.call( self, self._descriptionElement );
+
+            // set up aria-describedby and aria-labelledby relations now that ids have been set up
+            if ( self._ariaDescribedByElement ) {
+              assert && assert( self._ariaDescribedByElement.id, 'aria-describedby element must have a unique id' );
+              self.setAccessibleAttribute( 'aria-describedby', self._ariaDescribedByElement.id );
+            }
+            if ( self._ariaLabelledByElement ) {
+              assert && assert( self._ariaLabelledByElement.id, 'aria-labelledby element must have a unique id' );
+              self.setAccessibleAttribute( 'aria-labelledby', self._ariaLabelledByElement.id );
+            }
 
             return accessiblePeer;
           }
