@@ -249,7 +249,7 @@ define( function( require ) {
           // @private {string} - An id used to reference the description element.  This will only be defined if a
           // description exists, set setDescriptionTagName().  This is useful for setting attributes on this node's
           // DOM element relative to the description element, such as "aria-describedby".
-          this._descrptionElementId = null;
+          this._descriptionElementId = null;
 
           // @private {Array.<Function>} - For accessibility input handling {keyboard/click/HTML form}
           this._accessibleInputListeners = [];
@@ -726,7 +726,7 @@ define( function( require ) {
          *
          * @return {string}
          */
-        getLabelElementID: function() {
+        getLabelElementId: function() {
           return this._labelElementId;
         },
 
@@ -739,6 +739,8 @@ define( function( require ) {
          * @param {string} descriptionId - id referencing the description element
          */
         setAriaDescribedById: function( descriptionId ) {
+          assert && assert( this._domElement, 'HTML element required for aria-describedby attribute, see setTagName' );
+
           this._ariaDescribedById = descriptionId;
           this.setAccessibleAttribute( 'aria-describedby', descriptionId );
         },
