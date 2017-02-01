@@ -67,7 +67,7 @@ define( function( require ) {
     this.dragListener = {
       // mouse/touch up
       up: function( event ) {
-        assert && assert( event.pointer === self.pointer );
+        assert && assert( event.pointer === self.pointer, 'Wrong pointer in up' );
         if ( !event.pointer.isMouse || event.domEvent.button === self.mouseButton ) {
           var saveCurrentTarget = event.currentTarget;
           event.currentTarget = self.node; // #66: currentTarget on a pointer is null, so set it to the node we're dragging
@@ -78,7 +78,7 @@ define( function( require ) {
 
       // touch cancel
       cancel: function( event ) {
-        assert && assert( event.pointer === self.pointer );
+        assert && assert( event.pointer === self.pointer, 'Wrong pointer in cancel' );
 
         var saveCurrentTarget = event.currentTarget;
         event.currentTarget = self.node; // #66: currentTarget on a pointer is null, so set it to the node we're dragging
@@ -93,7 +93,7 @@ define( function( require ) {
 
       // mouse/touch move
       move: function( event ) {
-        assert && assert( event.pointer === self.pointer );
+        assert && assert( event.pointer === self.pointer, 'Wrong pointer in move' );
 
         var globalDelta = self.pointer.point.minus( self.lastDragPoint );
 
