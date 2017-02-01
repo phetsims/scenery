@@ -27,4 +27,5 @@ function runSceneryTests( pathToTestBase ) { // eslint-disable-line no-unused-va
   loadTestFile( 'js/focus.js' );
   loadTestFile( 'js/from-fuzzer.js' );
   loadTestFile( 'js/pixel-comparison.js' );
+  loadTestFile( 'js/accessibility.js' );
 }

@@ -306,7 +306,10 @@ define( function( require ) {
       // Disconnect DOM and remove listeners
       if ( !this.isRootInstance ) {
         this.peer.dispose();
-        this.parent.peer.getChildContainerElement().removeChild( this.peer.domElement );
+
+        // remove this peer's dom element (or its parent container) from the parent peer's
+        // dom element (or its child container)
+        this.parent.peer.getChildContainerElement().removeChild( this.peer.getParentContainerElement() );
       }
 
       while ( this.children.length ) {

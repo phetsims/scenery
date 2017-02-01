@@ -226,15 +226,14 @@ define( function( require ) {
       this._focusOverlay = new FocusOverlay( this, this._focusRootNode );
       this.addOverlay( this._focusOverlay );
 
+      this._unsortedAccessibleInstances = [];
+
       this._rootAccessibleInstance = AccessibleInstance.createFromPool( null, this, new scenery.Trail() );
       sceneryLog && sceneryLog.AccessibleInstance && sceneryLog.AccessibleInstance(
         'Display root instance: ' + this._rootAccessibleInstance.toString() );
       this._rootAccessibleInstance.addSubtree( new scenery.Trail( this._rootNode ) );
 
       document.body.appendChild( this._rootAccessibleInstance.peer.domElement );
-
-      this._unsortedAccessibleInstances = [];
-
     }
   }
 

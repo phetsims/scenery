@@ -15,7 +15,8 @@ define( [
 
   'SCENERY/accessibility/AccessibleInstance',
   'SCENERY/accessibility/AccessiblePeer',
-  'SCENERY/accessibility/AccessibleNode',
+  'SCENERY/accessibility/Accessibility',
+  'SCENERY/accessibility/AccessibilityUtil',
   'SCENERY/accessibility/reader/Cursor',
   'SCENERY/accessibility/reader/Reader',
 
