@@ -172,7 +172,8 @@ define( function( require ) {
   // commented out so Require.js doesn't balk at the circular dependency
   // require( 'SCENERY/util/Trail' );
   // require( 'SCENERY/util/TrailPointer' );
-
+  var TNode = require( 'ifphetio!PHET_IO/types/scenery/nodes/TNode' );
+  var Tandem = require( 'TANDEM/Tandem' );
   // constants
   var clamp = Util.clamp;
 
@@ -243,7 +244,8 @@ define( function( require ) {
     'clipArea', // Makes things outside of a shape invisible, see setClipArea() for more documentation
     'transformBounds', // Flag that makes bounds tighter, see setTransformBounds() for more documentation
     'accessibleContent', // Sets up accessibility handling, see setAccessibleContent() for more documentation
-    'accessibleOrder' // Modifies the keyboard accessibility order, see setAccessibleOrder() for more documentation
+    'accessibleOrder', // Modifies the keyboard accessibility order, see setAccessibleOrder() for more documentation
+    'tandem' // For instrumenting Scenery nodes, see setTandem()
   ];
 
   /**
@@ -292,6 +294,9 @@ define( function( require ) {
 
     // @private {number} - Assigns a unique ID to this node (allows trails to get a unique list of IDs)
     this._id = globalIdCounter++;
+
+    // @protected {Tandem|null} - Only one can be provided
+    this._tandem = null;
 
     // @protected {Array.<Instance>} - All of the Instances tracking this Node
     this._instances = [];
@@ -491,7 +496,7 @@ define( function( require ) {
   scenery.register( 'Node', Node );
 
   inherit( Object, Node, extend( {
-    /*
+    /**
      * This is an array of property (setter) names for Node.mutate(), which are also used when creating nodes with
      * parameter objects.
      * @protected
@@ -510,6 +515,11 @@ define( function( require ) {
      *       changes of bounds that may happen beforehand
      */
     _mutatorKeys: NODE_OPTION_KEYS,
+
+    /**
+     * TODO
+     */
+    tandemType: TNode,
 
     /**
      * {Array.<String>} - List of all dirty flags that should be available on drawables created from this node (or
@@ -3327,6 +3337,41 @@ define( function( require ) {
     },
     get webglScale() { return this.getWebGLScale(); },
 
+    /**
+     * Sets the tandem of this node. This should generally be done after the node is fully constructed, and preferably
+     * within the node.mutate() call that sets other options (which is called from the constructor).
+     * @public
+     *
+     * @param {Tandem} tandem
+     * @returns {Node}
+     */
+    setTandem: function( tandem ) {
+      assert && assert( tandem instanceof Tandem );
+
+      if ( tandem !== this._tandem ) {
+        assert && assert( !this._tandem || this._tandem.id === tandem.id,
+          'Node cannot be given multiple tandems with different IDs' );
+
+        this._tandem = tandem;
+
+        this._tandem.addInstance( this, this.tandemType );
+      }
+
+      return this; // for chaining
+    },
+    set tandem( value ) { this.setTandem( value ); },
+
+    /**
+     * Returns the tandem previously set with setTandem().
+     * @public
+     *
+     * @returns {Tandem}
+     */
+    getTandem: function() {
+      return this._tandem;
+    },
+    get tandem() { return this.getTandem(); },
+
     /*---------------------------------------------------------------------------*
      * Trail operations
      *----------------------------------------------------------------------------*/
@@ -4754,7 +4799,6 @@ define( function( require ) {
         this._boundsEventSelfCount--;
       }
     }
-
   }, Events.prototype, {
     /**
      * Adds a listener for a specific event name. Overridden so we can track specific types of listeners.
@@ -4808,6 +4852,19 @@ define( function( require ) {
       assert && assert( index >= 0, 'Node.offStatic was called but no listener was removed' );
       this.onEventListenerRemoved( eventName, listener );
       return index;
+    },
+
+    /** 
+     * Disposes the node, releasing all references that it maintained.
+     * @public
+     */
+    dispose: function() {
+      Events.prototype.dispose.call( this ); // TODO: don't rely on Events
+
+      if ( this._tandem ) {
+        this._tandem.removeInstance( this );
+        this._tandem = null;
+      }      
     }
   } ) );
 
