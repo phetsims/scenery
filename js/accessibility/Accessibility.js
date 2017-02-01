@@ -741,7 +741,8 @@ define( function( require ) {
         /**
          * Set the 'aria-describedby' element for this node's DOM element. The value of the 'aria-describedby'
          * attribute is a string id that references the desired HTML element.  Upon focus, a screen reader should
-         * read the content under the HTML element referenced by the 'aria-describedby' id.
+         * read the content under the HTML element referenced by the 'aria-describedby' id. Exact behavior will depend
+         * slightly on user agent.
          * @public
          *
          * @param {HTMLElement} descriptionElement
@@ -768,7 +769,8 @@ define( function( require ) {
         /**
          * Sets the element for the aria-labelledby attribute. The value of the 'aria-labelledby'
          * attribute is a string id that references another HTML element.  Upon focus, a screen reader should 
-         * read the content under the HTML element referenced by the 'aria-labelledby' id.
+         * read the content under the HTML element referenced by the 'aria-labelledby' id. Behavior will depend
+         * slightly on user agent.
          * @public
          *
          * @param {string} labelId - id referencing the description element
