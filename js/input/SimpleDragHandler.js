@@ -67,6 +67,8 @@ define( function( require ) {
     this.dragListener = {
       // mouse/touch up
       up: function( event ) {
+        if ( !self.dragging ) { return; }
+
         assert && assert( event.pointer === self.pointer, 'Wrong pointer in up' );
         if ( !event.pointer.isMouse || event.domEvent.button === self.mouseButton ) {
           var saveCurrentTarget = event.currentTarget;
@@ -78,6 +80,8 @@ define( function( require ) {
 
       // touch cancel
       cancel: function( event ) {
+        if ( !self.dragging ) { return; }
+
         assert && assert( event.pointer === self.pointer, 'Wrong pointer in cancel' );
 
         var saveCurrentTarget = event.currentTarget;
@@ -93,6 +97,8 @@ define( function( require ) {
 
       // mouse/touch move
       move: function( event ) {
+        if ( !self.dragging ) { return; }
+        
         assert && assert( event.pointer === self.pointer, 'Wrong pointer in move' );
 
         var globalDelta = self.pointer.point.minus( self.lastDragPoint );
@@ -132,6 +138,8 @@ define( function( require ) {
 
   inherit( Object, SimpleDragHandler, {
     startDrag: function( event ) {
+      if ( this.dragging ) { return; }
+
       // set a flag on the pointer so it won't pick up other nodes
       event.pointer.dragging = true;
       event.pointer.cursor = this.options.dragCursor;
@@ -154,6 +162,8 @@ define( function( require ) {
     },
 
     endDrag: function( event ) {
+      if ( !this.dragging ) { return; }
+
       this.pointer.dragging = false;
       this.pointer.cursor = null;
       this.pointer.removeInputListener( this.dragListener );
