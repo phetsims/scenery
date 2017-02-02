@@ -91,7 +91,7 @@ var marks = marks || {};
         // run library dependencies before running the tests
         var scripts = snapshot.libs.concat( snapshot.tests );
 
-        function nextScript() {
+        var nextScript = function() {
           if ( scripts.length !== 0 ) {
             var script = scripts.shift();
 
@@ -106,7 +106,7 @@ var marks = marks || {};
             // TODO: determine whether queued is necessary
             suite.run( { queued: true } );
           }
-        }
+        };
 
         nextScript();
       }

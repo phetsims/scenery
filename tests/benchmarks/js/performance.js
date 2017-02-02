@@ -86,7 +86,7 @@ var marks = marks || {};
           mark.count = 50;
         }
 
-        function tick() {
+        var tick = function() {
           if ( count++ === mark.count ) {
             var time = new Date - startTime;
             if ( self.options.onMark ) {
@@ -103,7 +103,7 @@ var marks = marks || {};
 
             mark.step && mark.step();
           }
-        }
+        };
 
         window.requestAnimationFrame( tick, main[ 0 ] ); // eslint-disable-line no-undef
 
