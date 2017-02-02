@@ -124,7 +124,7 @@ define( function( require ) {
   require( 'SCENERY/input/Mouse' );
   require( 'SCENERY/input/Touch' );
   require( 'SCENERY/input/Pen' );
-  require( 'SCENERY/input/Event' );
+  var Event = require( 'SCENERY/input/Event' );
   var BatchedDOMEvent = require( 'SCENERY/input/BatchedDOMEvent' );
   var Emitter = require( 'AXON/Emitter' );
 
@@ -753,15 +753,8 @@ define( function( require ) {
         'Input: ' + type + ' on ' + trail.toString() + ' for pointer ' + pointer.toString() + ' at ' + pointer.point.toString() );
       assert && assert( trail, 'Falsy trail for dispatchEvent' );
 
-      // TODO: is there a way to make this event immutable?
-      var inputEvent = new scenery.Event( {
-        trail: trail, // {Trail} path to the leaf-most node, ordered list, from root to leaf
-        type: type, // {string} what event was triggered on the listener
-        pointer: pointer, // {Pointer}
-        domEvent: event, // raw DOM InputEvent (TouchEvent, PointerEvent, MouseEvent,...)
-        currentTarget: null, // {Node} whatever node you attached the listener to, null when passed to a Pointer,
-        target: trail.lastNode() // {Node} leaf-most node in trail
-      } );
+      // NOTE: event is not immutable, as its currentTarget changes
+      var inputEvent = new Event( trail, type, pointer, event );
 
       // first run through the pointer's listeners to see if one of them will handle the event
       this.dispatchToPointer( type, pointer, inputEvent );
