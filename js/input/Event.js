@@ -16,31 +16,31 @@ define( function( require ) {
   var inherit = require( 'PHET_CORE/inherit' );
   var scenery = require( 'SCENERY/scenery' );
 
-  function Event( args ) {
-    // ensure that all of the required args are supplied
-    assert && assert( args.trail && args.type && args.pointer && args.target,
+  function Event( options ) {
+    // ensure that all of the required options are supplied
+    assert && assert( options.trail && options.type && options.pointer && options.target,
       'Missing required scenery.Event argument' );
 
     this.handled = false;
     this.aborted = false;
 
-    // {Trail} path to the leaf-most node, ordered list, from root to leaf
-    this.trail = args.trail;
+    // @public {Trail} - Path to the leaf-most node, ordered list, from root to leaf
+    this.trail = options.trail;
 
     // {string} what event was triggered on the listener
-    this.type = args.type;
+    this.type = options.type;
 
     // {Pointer}
-    this.pointer = args.pointer;
+    this.pointer = options.pointer;
 
     // raw DOM InputEvent (TouchEvent, PointerEvent, MouseEvent,...)
-    this.domEvent = args.domEvent;
+    this.domEvent = options.domEvent;
 
     // {Node} whatever node you attached the listener to, or null when firing events on a Pointer
-    this.currentTarget = args.currentTarget;
+    this.currentTarget = options.currentTarget;
 
     // {Node} leaf-most node in trail
-    this.target = args.target;
+    this.target = options.target;
 
     // TODO: add extended information based on an event here?
   }

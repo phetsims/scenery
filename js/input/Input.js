@@ -1,21 +1,112 @@
 // Copyright 2013-2016, University of Colorado Boulder
 
-
 /**
- * API for handling mouse / touch / keyboard events.
+ * Main handler for user-input events in Scenery.
  *
- * A 'pointer' is an abstract way of describing either the mouse, a single touch point, or a key being pressed.
- * touch points and key presses go away after being released, whereas the mouse 'pointer' is persistent.
+ * *** Adding input handling to a display
  *
- * Events will be called on listeners with a single event object. Supported event types are:
- * 'up', 'down', 'out', 'over', 'enter', 'exit', 'move', and 'cancel'. Scenery also supports more specific event
- * types that constrain the type of pointer, so 'mouse' + type, 'touch' + type and 'pen' + type will fire
- * on each listener before the generic event would be fined. E.g. for mouse movement, listener.mousemove will be
- * fired before listener.move.
+ * Displays do not have event listeners attached by default. To initialize the event system (that will set up
+ * listeners), use one of Display's initialize*Events functions.
+ *
+ * *** Pointers
+ *
+ * A 'pointer' is an abstract way of describing a mouse, a single touch point, or a pen/stylus, similar to in the
+ * Pointer Events specification (https://dvcs.w3.org/hg/pointerevents/raw-file/tip/pointerEvents.html). Touch and pen
+ * pointers are transient, created when the relevant DOM down event occurs and released when corresponding the DOM up
+ * or cancel event occurs. However, the mouse pointer is persistent.
+ *
+ * Input event listeners can be added to {Node}s directly, or to a pointer. When a DOM event is received, it is first
+ * broken up into multiple events (if necessary, e.g. multiple touch points), then the dispatch is handled for each
+ * individual Scenery event. Events are first fired for any listeners attached to the pointer that caused the event,
+ * then fire on the node directly under the pointer, and if applicable, bubble up the graph to the Scene from which the
+ * event was triggered. Events are not fired directly on nodes that are not under the pointer at the time of the event.
+ * To handle many common patterns (like button presses, where mouse-ups could happen when not over the button), it is
+ * necessary to add those move/up listeners to the pointer itself.
+ *
+ * *** Listeners and Events
+ *
+ * Event listeners are added with node.addInputListener( listener ) and pointer.addInputListener( listener ).
+ * This listener can be an arbitrary object, and the listener will be triggered by calling listener[eventType]( event ),
+ * where eventType is one of the event types as described below, and event is a Scenery event with the
+ * following properties:
+ * - trail {Trail} - Points to the node under the pointer
+ * - pointer {Pointer} - The pointer that triggered the event. Additional information about the mouse/touch/pen can be
+ *                       obtained from the pointer, for example event.pointer.point.
+ * - type {string} - The base type of the event (e.g. for touch down events, it will always just be "down").
+ * - domEvent {Event} - The underlying DOM event that triggered this Scenery event. The DOM event may correspond to
+ *                      multiple Scenery events, particularly for touch events. This could be a TouchEvent,
+ *                      PointerEvent, MouseEvent, MSPointerEvent, etc.
+ * - target {Node} - The leaf-most Node in the trail.
+ * - currentTarget {Node} - The Node to which the listener being fired is attached, or null if the listener is being
+ *                          fired directly from a pointer.
+ *
+ * *** Event Types
+ *
+ * Scenery will fire the following base event types:
+ *
+ * - down: Triggered when a pointer is pressed down. Touch / pen pointers are created for each down event, and are
+ *         active until an up/cancel event is sent.
+ * - up: Triggered when a pointer is released normally. Touch / pen pointers will not have any more events associated
+ *       with them after an up event.
+ * - cancel: Triggered when a pointer is canceled abnormally. Touch / pen pointers will not have any more events
+ *           associated with them after an up event.
+ * - move: Triggered when a pointer moves.
+ * - wheel: Triggered when the (mouse) wheel is scrolled. The associated pointer will have wheelDelta information.
+ * - enter: Triggered when a pointer moves over a Node or one of its children. Does not bubble up. Mirrors behavior from
+ *          the DOM mouseenter (http://www.w3.org/TR/DOM-Level-3-Events/#event-type-mouseenter)
+ * - exit:  Triggered when a pointer moves out from over a Node or one of its children. Does not bubble up. Mirrors
+ *          behavior from the DOM mouseleave (http://www.w3.org/TR/DOM-Level-3-Events/#event-type-mouseleave).
+ * - over: Triggered when a pointer moves over a Node (not including its children). Mirrors behavior from the DOM
+ *         mouseover (http://www.w3.org/TR/DOM-Level-3-Events/#event-type-mouseover).
+ * - out: Triggered when a pointer moves out from over a Node (not including its children). Mirrors behavior from the
+ *        DOM mouseout (http://www.w3.org/TR/DOM-Level-3-Events/#event-type-mouseout).
+ *
+ * Before firing the base event type (for example, 'move'), Scenery will also fire an event specific to the type of
+ * pointer. For mice, it will fire 'mousemove', for touch events it will fire 'touchmove', and for pen events it will
+ * fire 'penmove'. Similarly, for any type of event, it will first fire pointerType+eventType, and then eventType.
+ *
+ * *** Event Dispatch
+ *
+ * Events have two methods that will cause early termination: event.abort() will cause no more listeners to be notified
+ * for this event, and event.handle() will allow the current level of listeners to be notified (all pointer listeners,
+ * or all listeners attached to the current node), but no more listeners after that level will fire. handle and abort
+ * are like stopPropagation, stopImmediatePropagation for DOM events, except they do not trigger those DOM methods on
+ * the underlying DOM event.
+ *
+ * Up/down/cancel events all happen separately, but for move events, a specific sequence of events occurs if the pointer
+ * changes the node it is over:
+ *
+ * 1. The move event is fired (and bubbles).
+ * 2. An out event is fired for the old topmost Node (and bubbles).
+ * 3. exit events are fired for all Nodes in the Trail hierarchy that are now not under the pointer, from the root-most
+ *    to the leaf-most. Does not bubble.
+ * 4. enter events are fired for all Nodes in the Trail hierarchy that were not under the pointer (but now are), from
+ *    the leaf-most to the root-most. Does not bubble.
+ * 5. An over event is fired for the new topmost Node (and bubbles).
+ *
+ * event.abort() and event.handle() will currently not affect other stages in the 'move' sequence (e.g. event.abort() in
+ * the 'move' event will not affect the following 'out' event).
+ *
+ * For each event type:
+ *
+ * 1. Listeners on the pointer will be triggered first (in the order they were added)
+ * 2. Listeners on the target (top-most) Node will be triggered (in the order they were added to that Node)
+ * 3. Then if the event bubbles, each Node in the Trail will be triggered, starting from the Node under the top-most
+ *    (that just had listeners triggered) and all the way down to the Scene. Listeners are triggered in the order they
+ *    were added for each Node.
+ *
+ * For each listener being notified, it will fire the more specific pointerType+eventType first (e.g. 'mousemove'),
+ * then eventType next (e.g. 'move').
+ *
+ * Currently, preventDefault() is called on the associated DOM event if the top-most node has the 'interactive' property
+ * set to a truthy value.
+ *
+ * *** Relevant Specifications
  *
  * DOM Level 3 events spec: http://www.w3.org/TR/DOM-Level-3-Events/
  * Touch events spec: http://www.w3.org/TR/touch-events/
  * Pointer events spec draft: https://dvcs.w3.org/hg/pointerevents/raw-file/tip/pointerEvents.html
+ *                            http://msdn.microsoft.com/en-us/library/ie/hh673557(v=vs.85).aspx
  *
  * @author Jonathan Olson <jonathan.olson@colorado.edu>
  * @author Sam Reid (PhET Interactive Simulations)
@@ -90,8 +181,6 @@ define( function( require ) {
     this.onmousemove = function onmousemove( domEvent ) { self.batchEvent( domEvent, BatchedDOMEvent.MOUSE_TYPE, self.mouseMove, false ); };
     this.onmouseover = function onmouseover( domEvent ) { self.batchEvent( domEvent, BatchedDOMEvent.MOUSE_TYPE, self.mouseOver, false ); };
     this.onmouseout = function onmouseout( domEvent ) { self.batchEvent( domEvent, BatchedDOMEvent.MOUSE_TYPE, self.mouseOut, false ); };
-    this.onkeydown = function onkeydown( domEvent ) { self.batchEvent( domEvent, BatchedDOMEvent.KEY_TYPE, self.keyDown, false ); };
-    this.onkeyup = function onkeyup( domEvent ) { self.batchEvent( domEvent, BatchedDOMEvent.KEY_TYPE, self.keyUp, false ); };
     this.onwheel = function onwheel( domEvent ) { self.batchEvent( domEvent, BatchedDOMEvent.WHEEL_TYPE, self.wheel, false ); };
     this.uselessListener = function uselessListener( domEvent ) {};
   }
@@ -149,7 +238,6 @@ define( function( require ) {
       msPointerListenerTypes: [ 'MSPointerDown', 'MSPointerUp', 'MSPointerMove', 'MSPointerOver', 'MSPointerOut', 'MSPointerCancel' ],
       touchListenerTypes: [ 'touchstart', 'touchend', 'touchmove', 'touchcancel' ],
       mouseListenerTypes: [ 'mousedown', 'mouseup', 'mousemove', 'mouseover', 'mouseout' ],
-      keyListenerTypes: [ 'keydown', 'keyup' ],
       wheelListenerTypes: [ 'wheel' ],
 
       // W3C spec for pointer events
@@ -182,7 +270,6 @@ define( function( require ) {
           eventTypes = this.touchListenerTypes.concat( this.mouseListenerTypes );
         }
 
-        eventTypes = eventTypes.concat( this.keyListenerTypes );
         eventTypes = eventTypes.concat( this.wheelListenerTypes );
 
         return eventTypes;
@@ -267,16 +354,6 @@ define( function( require ) {
         return undefined;
       },
 
-      findKeyByEvent: function( event ) {
-        assert && assert( event.keyCode !== undefined && event.charCode !== undefined, 'Assumes the KeyboardEvent has keyCode and charCode properties' );
-        var result = _.find( this.pointers, function( pointer ) {
-          // TODO: also check location (if that exists), so we don't mix up left and right shift, etc.
-          return pointer.event && pointer.event.keyCode === event.keyCode && pointer.event.charCode === event.charCode;
-        } );
-        // assert && assert( result, 'No key found for the combination of key:' + event.key + ' and location:' + event.location );
-        return result;
-      },
-
       //Init the mouse on the first mouse event (if any!)
       initMouse: function() {
         this.mouse = new scenery.Mouse();
@@ -327,14 +404,6 @@ define( function( require ) {
         if ( !this.mouse ) { this.initMouse(); }
         this.mouse.out( point, event );
         // TODO: how to handle mouse-out (and log it)
-      },
-
-      keyDown: function( event ) {
-
-      },
-
-      keyUp: function( event ) {
-
       },
 
       // called on mouse wheels
@@ -773,12 +842,7 @@ define( function( require ) {
           }
         }
       }
-    },
-
-    // Statics
-    {
-
-
+    }, {
       serializeDomEvent: function serializeDomEvent( domEvent ) {
         var lines = [];
         for ( var prop in domEvent ) {
