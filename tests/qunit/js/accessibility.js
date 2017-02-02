@@ -9,12 +9,11 @@
   var TEST_LABEL_2 = 'Test label 2';
   var TEST_DESCRIPTION = 'Test decsription';
   var TEST_DESCRIPTION_2 = 'Test decsription 2';
-  var TEST_TITLE = 'Test title';
 
   test( 'Accessibility options', function() {
 
     var rootNode = new scenery.Node();
-    var display = new scenery.Display( rootNode );
+    var display = new scenery.Display( rootNode ); // eslint-disable-line
 
     // test setting of accessible content through options
     var buttonNode = new scenery.Node( {
@@ -118,12 +117,12 @@
     a1.tagName = 'button';
 
     // accessible instances are not sorted until added to a display
-    var display = new scenery.Display( rootNode );
+    var display = new scenery.Display( rootNode ); // eslint-disable-line
     rootNode.addChild( a1 );
 
     // verify that elements are in the DOM
     ok( document.getElementById( a1.accessibleId ), 'button in DOM' );
-    ok( document.getElementById( a1.accessibleId ).tagName === 'BUTTON', 'button tag name set' )
+    ok( document.getElementById( a1.accessibleId ).tagName === 'BUTTON', 'button tag name set' );
 
     // give the button a parent container and some prepended empty labels
     a1.parentContainerTagName = 'div';
@@ -167,7 +166,7 @@
     var a1 = new scenery.Node( {
       tagName: 'div'
     } );
-    var display = new scenery.Display( a1 );
+    var display = new scenery.Display( a1 ); // eslint-disable-line
 
     // set/get attributes
     a1.setAccessibleAttribute( 'role', 'switch' );
@@ -193,13 +192,13 @@
     var a1 = new scenery.Node( {
       tagName: 'button'
     } );
-    var display = new scenery.Display( a1 );
+    var display = new scenery.Display( a1 ); // eslint-disable-line
 
     ok( a1.accessibleInputListeners.length === 0, 'no input accessible listeners on instantiation' );
     ok( a1.accessibleLabel === null, 'no label on instantiation' );
 
     // add a listener
-    var listener = { click: function() { a1.accessibleLabel = TEST_LABEL } };
+    var listener = { click: function() { a1.accessibleLabel = TEST_LABEL; } };
     a1.addAccessibleInputListener( listener );
     ok( a1.accessibleInputListeners.length === 1, 'accessible listener added' );
 
@@ -223,7 +222,7 @@
     var util = scenery.AccessibilityUtil;
 
     var rootNode = new scenery.Node( { tagName: 'div', focusable: true } );
-    var display = new scenery.Display( rootNode );
+    var display = new scenery.Display( rootNode ); // eslint-disable-line
     var rootElement = document.getElementById( rootNode.accessibleId );
 
     var a = new scenery.Node( { tagName: 'div', focusable: true, focusHighlight: 'invisible' } );
@@ -239,25 +238,25 @@
     util.getNextFocusable( rootElement ).focus();
     ok( document.activeElement.id === b.accessibleId, 'b in focus (next)' );
 
-    util.getNextFocusable( rootElement ).focus(); 
+    util.getNextFocusable( rootElement ).focus();
     ok( document.activeElement.id === c.accessibleId, 'c in focus (next)' );
 
-    util.getNextFocusable( rootElement ).focus(); 
+    util.getNextFocusable( rootElement ).focus();
     ok( document.activeElement.id === d.accessibleId, 'd in focus (next)' );
 
-    util.getNextFocusable( rootElement ).focus(); 
+    util.getNextFocusable( rootElement ).focus();
     ok( document.activeElement.id === d.accessibleId, 'd still in focus (next)' );
 
     util.getPreviousFocusable( rootElement ).focus();
     ok( document.activeElement.id === c.accessibleId, 'c in focus (previous)' );
 
-    util.getPreviousFocusable( rootElement ).focus(); 
+    util.getPreviousFocusable( rootElement ).focus();
     ok( document.activeElement.id === b.accessibleId, 'b in focus (previous)' );
 
-    util.getPreviousFocusable( rootElement ).focus(); 
+    util.getPreviousFocusable( rootElement ).focus();
     ok( document.activeElement.id === a.accessibleId, 'a in focus (previous)' );
 
-    util.getPreviousFocusable( rootElement ).focus(); 
+    util.getPreviousFocusable( rootElement ).focus();
     ok( document.activeElement.id === a.accessibleId, 'a still in focus (previous)' );
 
     rootNode.removeAllChildren();
@@ -275,5 +274,5 @@
     ok( document.activeElement.id === a.accessibleId, 'a only element focusable' );
 
   } );
-  
+
 })();
