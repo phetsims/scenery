@@ -635,7 +635,7 @@ define( function( require ) {
          */
         removeCachedPaint: function( paint ) {
           if ( paint && paint.isPaint ) {
-            assert && assert( _.contains( this._cachedPaints, paint ) );
+            assert && assert( _.includes( this._cachedPaints, paint ) );
 
             arrayRemove( this._cachedPaints, paint );
 

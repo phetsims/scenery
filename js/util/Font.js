@@ -110,19 +110,19 @@ define( function( require ) {
         if ( token === 'normal' ) {
           // nothing has to be done, everything already normal as default
         }
-        else if ( _.contains( VALID_STYLES, token ) ) {
+        else if ( _.includes( VALID_STYLES, token ) ) {
           assert && assert( this._style === 'normal', 'Style cannot be applied twice. Already set to "' + this._style + '", attempt to replace with "' + token + '"' );
           this._style = token;
         }
-        else if ( _.contains( VALID_VARIANTS, token ) ) {
+        else if ( _.includes( VALID_VARIANTS, token ) ) {
           assert && assert( this._variant === 'normal', 'Variant cannot be applied twice. Already set to "' + this._variant + '", attempt to replace with "' + token + '"' );
           this._variant = token;
         }
-        else if ( _.contains( VALID_WEIGHTS, token ) ) {
+        else if ( _.includes( VALID_WEIGHTS, token ) ) {
           assert && assert( this._weight === 'normal', 'Weight cannot be applied twice. Already set to "' + this._weight + '", attempt to replace with "' + token + '"' );
           this._weight = token;
         }
-        else if ( _.contains( VALID_STRETCHES, token ) ) {
+        else if ( _.includes( VALID_STRETCHES, token ) ) {
           assert && assert( this._stretch === 'normal', 'Stretch cannot be applied twice. Already set to "' + this._stretch + '", attempt to replace with "' + token + '"' );
           this._stretch = token;
         }
@@ -164,15 +164,15 @@ define( function( require ) {
     }
 
     // sanity checks to prevent errors in interpretation or in the font shorthand usage
-    assert && assert( typeof this._style === 'string' && _.contains( VALID_STYLES, this._style ),
+    assert && assert( typeof this._style === 'string' && _.includes( VALID_STYLES, this._style ),
       'Font style must be one of "normal", "italic", or "oblique"' );
-    assert && assert( typeof this._variant === 'string' && _.contains( VALID_VARIANTS, this._variant ),
+    assert && assert( typeof this._variant === 'string' && _.includes( VALID_VARIANTS, this._variant ),
       'Font variant must be "normal" or "small-caps"' );
-    assert && assert( typeof this._weight === 'string' && _.contains( VALID_WEIGHTS, this._weight ),
+    assert && assert( typeof this._weight === 'string' && _.includes( VALID_WEIGHTS, this._weight ),
       'Font weight must be one of "normal", "bold", "bolder", "lighter", "100", "200", "300", "400", "500", "600", "700", "800", or "900"' );
-    assert && assert( typeof this._stretch === 'string' && _.contains( VALID_STRETCHES, this._stretch ),
+    assert && assert( typeof this._stretch === 'string' && _.includes( VALID_STRETCHES, this._stretch ),
       'Font stretch must be one of "normal", "ultra-condensed", "extra-condensed", "condensed", "semi-condensed", "semi-expanded", "expanded", "extra-expanded", or "ultra-expanded"' );
-    assert && assert( typeof this._size === 'string' && !_.contains( [ '0', '1', '2', '3', '4', '5', '6', '7', '8', '9' ], this._size[ this._size.length - 1 ] ),
+    assert && assert( typeof this._size === 'string' && !_.includes( [ '0', '1', '2', '3', '4', '5', '6', '7', '8', '9' ], this._size[ this._size.length - 1 ] ),
       'Font size must be either passed as a number (not a string, interpreted as px), or must contain a suffix for percentage, absolute or relative units, or an explicit size constant' );
     assert && assert( typeof this._lineHeight === 'string' );
     assert && assert( typeof this._family === 'string' );

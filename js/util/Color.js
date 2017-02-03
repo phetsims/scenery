@@ -481,12 +481,12 @@ define( function( require ) {
     // listener should be a callback expecting no arguments, listener() will be called when the color changes
     addChangeListener: function( listener ) {
       assert && assert( listener !== undefined && listener !== null, 'Verify that the listener exists' );
-      assert && assert( !_.contains( this.listeners, listener ) );
+      assert && assert( !_.includes( this.listeners, listener ) );
       this.listeners.push( listener );
     },
 
     removeChangeListener: function( listener ) {
-      assert && assert( _.contains( this.listeners, listener ) );
+      assert && assert( _.includes( this.listeners, listener ) );
       this.listeners.splice( _.indexOf( this.listeners, listener ), 1 );
     },
 

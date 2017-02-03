@@ -28,7 +28,7 @@ define( function( require ) {
     firesGenericEvent: true, // e.g. fires 'down' in addition to something like 'keydown'
 
     addInputListener: function( listener ) {
-      assert && assert( !_.contains( this.listeners, listener ) );
+      assert && assert( !_.includes( this.listeners, listener ) );
 
       this.listeners.push( listener );
     },

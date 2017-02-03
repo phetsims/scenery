@@ -542,7 +542,7 @@ define( function( require ) {
       assert && assert( node instanceof Node,
         'addChild/insertChild requires the child to be a Node. Constructor: ' +
         ( node.constructor ? node.constructor.name : 'none' ) );
-      assert && assert( !_.contains( this._children, node ), 'Parent already contains child' );
+      assert && assert( !_.includes( this._children, node ), 'Parent already contains child' );
       assert && assert( node !== this, 'Cannot add self as a child' );
 
       // needs to be early to prevent re-entrant children modifications
@@ -1235,8 +1235,8 @@ define( function( require ) {
      */
     hasChild: function( potentialChild ) {
       assert && assert( potentialChild && ( potentialChild instanceof Node ), 'hasChild needs to be called with a Node' );
-      var ourChild = _.contains( this._children, potentialChild );
-      var itsParent = _.contains( potentialChild._parents, this );
+      var ourChild = _.includes( this._children, potentialChild );
+      var itsParent = _.includes( potentialChild._parents, this );
       assert && assert( ourChild === itsParent );
       return ourChild;
     },
@@ -3492,7 +3492,7 @@ define( function( require ) {
       var fresh = this._children.concat( this._parents ).concat( this );
       while ( fresh.length ) {
         var node = fresh.pop();
-        if ( !_.contains( result, node ) ) {
+        if ( !_.includes( result, node ) ) {
           result.push( node );
           fresh = fresh.concat( node._children, node._parents );
         }
@@ -3650,7 +3650,7 @@ define( function( require ) {
      * @returns {boolean}
      */
     canAddChild: function( child ) {
-      if ( this === child || _.contains( this._children, child ) ) {
+      if ( this === child || _.includes( this._children, child ) ) {
         return false;
       }
 

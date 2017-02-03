@@ -368,7 +368,7 @@ define( function( require ) {
           this._domElement = document.createElement( tagName );
 
           // Safari requires that certain input elements have width, otherwise it will not be keyboard accessible
-          if ( _.contains( ELEMENTS_REQUIRE_WIDTH, tagName ) ) {
+          if ( _.includes( ELEMENTS_REQUIRE_WIDTH, tagName ) ) {
             this._domElement.style.width = '1px';
           }
 
@@ -888,7 +888,7 @@ define( function( require ) {
          * @param {string} value
          */
         setInputValue: function( value ) {
-          assert && assert( _.contains( FORM_ELEMENTS, this._domElement.tagName ), 'dom element must be a form element to support value' );
+          assert && assert( _.includes( FORM_ELEMENTS, this._domElement.tagName ), 'dom element must be a form element to support value' );
 
           this._inputValue = value;
           this._domElement.value = value;
@@ -1046,7 +1046,7 @@ define( function( require ) {
        * @return {boolean}
        */
       function elementSupportsInnerText( domElement ) {
-        return _.contains( ELEMENTS_SUPPORT_INNER_TEXT, domElement.tagName );
+        return _.includes( ELEMENTS_SUPPORT_INNER_TEXT, domElement.tagName );
       }
 
       /**
