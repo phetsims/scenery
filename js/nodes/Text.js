@@ -81,8 +81,11 @@ define( function( require ) {
       text: text,
       tandem: Tandem.tandemOptional()
     }, options );
+
+    // Pass the supertype tandem to the parent so we may override it with a custom wrapper type
     var tandem = options.tandem;
     options.tandem = options.tandem.createSupertypeTandem();
+
     Node.call( this, options );
     tandem.addInstance( this, TText );
 
