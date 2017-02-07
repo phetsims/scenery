@@ -20,11 +20,13 @@ define( function( require ) {
   var Renderer = require( 'SCENERY/display/Renderer' );
   var Paintable = require( 'SCENERY/nodes/Paintable' );
   var Font = require( 'SCENERY/util/Font' );
+  var Tandem = require( 'TANDEM/Tandem' );
   var TextCanvasDrawable = require( 'SCENERY/display/drawables/TextCanvasDrawable' );
   var TextDOMDrawable = require( 'SCENERY/display/drawables/TextDOMDrawable' );
   var TextSVGDrawable = require( 'SCENERY/display/drawables/TextSVGDrawable' );
   var TextWebGLDrawable = require( 'SCENERY/display/drawables/TextWebGLDrawable' );
   var TextBounds = require( 'SCENERY/util/TextBounds' );
+  var TText = require( 'ifphetio!PHET_IO/types/scenery/nodes/TText' );
 
   var TEXT_OPTION_KEYS = [
     'boundsMethod', // Sets how bounds are determined for text, see setBoundsMethod() for more documentation
@@ -76,10 +78,13 @@ define( function( require ) {
 
     options = extendDefined( {
       fill: '#000000', // Default to black filled text
-      text: text
+      text: text,
+      tandem: Tandem.tandemOptional()
     }, options );
-
+    var tandem = options.tandem;
+    options.tandem = options.tandem.createSupertypeTandem();
     Node.call( this, options );
+    tandem.addInstance( this, TText );
 
     this.invalidateSupportedRenderers(); // takes care of setting up supported renderers
   }
