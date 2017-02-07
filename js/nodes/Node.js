@@ -245,7 +245,9 @@ define( function( require ) {
     'transformBounds', // Flag that makes bounds tighter, see setTransformBounds() for more documentation
     'accessibleContent', // Sets up accessibility handling, see setAccessibleContent() for more documentation
     'accessibleOrder', // Modifies the keyboard accessibility order, see setAccessibleOrder() for more documentation
-    'tandem' // For instrumenting Scenery nodes, see setTandem()
+    'phetioType', // The corresponding phet-io wrapper type
+    'tandem' // For instrumenting Scenery nodes, see setTandem().  This must be last so that (a) the phetioType
+    // is available and (b) because when tandem.addInstance is called the node becomes active in the PhET-iO API immediately
   ];
 
   /**
@@ -297,6 +299,9 @@ define( function( require ) {
 
     // @protected {Tandem|null} - Only one can be provided
     this._tandem = null;
+
+    // @protected {function} - the wrapper type for phet-io
+    this._phetioType = TNode;
 
     // @protected {Array.<Instance>} - All of the Instances tracking this Node
     this._instances = [];
@@ -515,11 +520,6 @@ define( function( require ) {
      *       changes of bounds that may happen beforehand
      */
     _mutatorKeys: NODE_OPTION_KEYS,
-
-    /**
-     * TODO
-     */
-    tandemType: TNode,
 
     /**
      * {Array.<String>} - List of all dirty flags that should be available on drawables created from this node (or
@@ -3338,6 +3338,36 @@ define( function( require ) {
     get webglScale() { return this.getWebGLScale(); },
 
     /**
+     * Sets the phetioType of this node, a wrapper type like TCheckBox
+     * @public
+     *
+     * @param {function} phetioType
+     * @returns {Node}
+     */
+    setPhetioType: function( phetioType ) {
+      assert && assert( typeof phetioType === 'function', 'phetioValue should be a function' );
+      if ( this._phetioType !== TNode ) {
+        assert && assert( phetioType === this._phetioType, 'Node cannot be given multiple phetioTypes' );
+      }
+
+      this._phetioType = phetioType;
+
+      return this; // for chaining
+    },
+    set phetioType( value ) { this.setPhetioType( value ); },
+
+    /**
+     * Returns the phetioType previously set with setPhetioType().
+     * @public
+     *
+     * @returns {function}
+     */
+    getPhetioType: function() {
+      return this._phetioType;
+    },
+    get phetioType() { return this.getPhetioType(); },
+
+    /**
      * Sets the tandem of this node. This should generally be done after the node is fully constructed, and preferably
      * within the node.mutate() call that sets other options (which is called from the constructor).
      * @public
@@ -3354,7 +3384,7 @@ define( function( require ) {
 
         this._tandem = tandem;
 
-        this._tandem.addInstance( this, this.tandemType );
+        this._tandem.addInstance( this, this._phetioType );
       }
 
       return this; // for chaining
@@ -4854,7 +4884,7 @@ define( function( require ) {
       return index;
     },
 
-    /** 
+    /**
      * Disposes the node, releasing all references that it maintained.
      * @public
      */
@@ -4864,7 +4894,7 @@ define( function( require ) {
       if ( this._tandem ) {
         this._tandem.removeInstance( this );
         this._tandem = null;
-      }      
+      }
     }
   } ) );
 
