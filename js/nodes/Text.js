@@ -83,15 +83,11 @@ define( function( require ) {
     options = extendDefined( {
       fill: '#000000', // Default to black filled text
       text: text,
-      tandem: Tandem.tandemOptional()
+      tandem: Tandem.tandemOptional(),
+      phetioType: TText
     }, options );
 
-    // Pass the supertype tandem to the parent so we may override it with a custom wrapper type
-    var tandem = options.tandem;
-    options.tandem = options.tandem.createSupertypeTandem();
-
     Node.call( this, options );
-    tandem.addInstance( this, TText );
 
     this.invalidateSupportedRenderers(); // takes care of setting up supported renderers
   }
