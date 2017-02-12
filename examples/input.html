@@ -1,0 +1,213 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8"/>
+  <meta http-equiv="X-UA-Compatible" content="IE=edge"/>
+  <meta name="viewport" content="initial-scale=1,user-scalable=no,maximum-scale=1"/>
+  <meta name="apple-mobile-web-app-capable" content="yes">
+
+  <title>Input - Scenery Example</title>
+
+  <!-- jQuery and LoDash are dependencies -->
+  <script src="../../sherpa/lib/jquery-2.1.0.min.js"></script>
+  <script src="../../sherpa/lib/lodash-4.17.4.min.js"></script>
+
+  <!-- Scenery code -->
+  <script src="../build/scenery.min.js"></script>
+
+  <style type="text/css">
+    /* Let content go to the edges */
+    html, body {
+      width: 100%;
+      height: 100%;
+      margin: 0;
+      padding: 0;
+      background-color: #fff;
+      overflow: hidden;
+    }
+
+    /* Have the #main div cover the entire viewport */
+    #main {
+      position: absolute;
+      left: 0;
+      top: 0;
+      background-color: #fff;
+      z-index: 0;
+    }
+
+  </style>
+</head>
+
+<body>
+
+<!-- our scene graph will be in this div -->
+<div id="main">
+</div>
+
+<script>
+
+  // initialize our scene
+  var scene = new scenery.Node();
+  var display = new scenery.Display( scene, {
+    container: document.getElementById( 'main' )
+  } );
+  display.initializeFullscreenEvents(); // set up listeners on the document
+  display.resizeOnWindowResize(); // keep the display size linked to the window size
+
+  var inactiveColor = '#ccc';
+  var activeColor = '#8f8';
+  var strokeColor = '#000';
+  var buttonLeft = 10;
+
+  var pressReleaseText = new scenery.Text( 'released', {
+    fontSize: 20,
+    centerX: 0,
+    centerY: 0
+  } );
+  var pressReleaseBackground = scenery.Rectangle.bounds( pressReleaseText.bounds.dilatedXY( 20, 10 ), {
+    stroke: strokeColor
+  } );
+  var pressReleaseNode = new scenery.Node( {
+    children: [ pressReleaseBackground, pressReleaseText ],
+    cursor: 'pointer',
+    left: buttonLeft,
+    y: 100
+  } );
+  scene.addChild( pressReleaseNode );
+
+  var TouchSnagPressListener = phetCore.mixedWith( scenery.PressListener, scenery.TouchSnaggable.mixin );
+
+  var pressReleaseListener = new TouchSnagPressListener( {
+    press: function() { console.log( 'press' ); },
+    release: function() { console.log( 'release' ); },
+    drag: function() { console.log( 'drag' ); }
+  } );
+  pressReleaseNode.addInputListener( pressReleaseListener );
+  pressReleaseListener.isPressedProperty.link( function( isPressed ) {
+    pressReleaseBackground.fill = isPressed ? activeColor : inactiveColor;
+    pressReleaseText.text = isPressed ? 'pressed' : 'released';
+    pressReleaseText.center = new dot.Vector2();
+  } );
+
+
+
+
+  var hoverText = new scenery.Text( 'outside', {
+    fontSize: 20,
+    centerX: 0,
+    centerY: 0
+  } );
+  var hoverBackground = scenery.Rectangle.bounds( hoverText.bounds.dilatedXY( 20, 10 ), {
+    stroke: strokeColor
+  } );
+  var hoverNode = new scenery.Node( {
+    children: [ hoverBackground, hoverText ],
+    cursor: 'pointer',
+    left: buttonLeft,
+    y: 150
+  } );
+  scene.addChild( hoverNode );
+
+  var HoverPressListener = phetCore.mixedWith( scenery.PressListener, scenery.Hoverable.mixin,
+                                                                      scenery.TouchSnaggable.mixin );
+
+  var hoverListener = new HoverPressListener( {
+    press: function() { console.log( 'press' ); },
+    release: function() { console.log( 'release' ); },
+    drag: function() { console.log( 'drag' ); }
+  } );
+  hoverNode.addInputListener( hoverListener );
+  hoverListener.isOverProperty.link( function( isOver ) {
+    hoverBackground.fill = isOver ? activeColor : inactiveColor;
+    hoverText.text = isOver ? 'inside' : 'outside';
+    hoverText.center = new dot.Vector2();
+  } );
+
+
+
+
+  var buttonText = new scenery.Text( 'outside released', {
+    fontSize: 20,
+    centerX: 0,
+    centerY: 0
+  } );
+  var buttonBackground = scenery.Rectangle.bounds( buttonText.bounds.dilatedXY( 20, 10 ), {
+    stroke: strokeColor
+  } );
+  var buttonNode = new scenery.Node( {
+    children: [ buttonBackground, buttonText ],
+    cursor: 'pointer',
+    left: buttonLeft,
+    y: 200
+  } );
+  scene.addChild( buttonNode );
+
+  var fireNode = new scenery.Rectangle( 0, 0, buttonNode.height, buttonNode.height, {
+    opacity: 0,
+    fill: 'red',
+    left: buttonNode.right + 10,
+    top: buttonNode.top
+  } );
+  scene.addChild( fireNode );
+
+  var ButtonPressListener = phetCore.mixedWith( scenery.PressListener, scenery.Hoverable.mixin,
+                                                                       scenery.Fireable.mixin,
+                                                                       scenery.Highlightable.mixin,
+                                                                       scenery.TouchSnaggable.mixin );
+
+  var buttonListener = new ButtonPressListener( {
+    press: function() { console.log( 'press' ); },
+    release: function() { console.log( 'release' ); },
+    drag: function() { console.log( 'drag' ); },
+    fire: function() { console.log( 'fire' ); fireNode.opacity = 1; }
+  } );
+  buttonNode.addInputListener( buttonListener );
+
+  axon.Property.multilink( [ buttonListener.isOverProperty, buttonListener.isPressedProperty ], function( isOver, isPressed ) {
+    var isActive = isOver || isPressed;
+    buttonBackground.fill = isActive ? activeColor : inactiveColor;
+    buttonText.text = ( isOver ? 'inside' : 'outside' ) + ' ' + ( isPressed ? 'pressed' : 'released' );
+    buttonText.center = new dot.Vector2();
+  } );
+
+
+
+
+  var interruptText = new scenery.Text( 'Interrupt All', {
+    fontSize: 20,
+    centerX: 0,
+    centerY: 0
+  } );
+  var interruptBackground = scenery.Rectangle.bounds( interruptText.bounds.dilatedXY( 20, 10 ), {
+    stroke: strokeColor
+  } );
+  var interruptNode = new scenery.Node( {
+    children: [ interruptBackground, interruptText ],
+    cursor: 'pointer',
+    left: buttonLeft,
+    y: 250
+  } );
+  scene.addChild( interruptNode );
+
+  var interruptListener = new ButtonPressListener( {
+    fire: function() {
+      scene.interruptSubtreeInput();
+    }
+  } );
+  interruptNode.addInputListener( interruptListener );
+  interruptBackground.fill = new axon.DerivedProperty( [ interruptListener.isHighlightedProperty ], function( isHighlighted ) {
+    return isHighlighted ? activeColor : inactiveColor;
+  } );
+
+  /*---------------------------------------------------------------------------*
+   * main loop
+   *----------------------------------------------------------------------------*/
+
+  display.updateOnRequestAnimationFrame( function( dt ) {
+    fireNode.opacity *= Math.pow( 0.2, dt );
+  } );
+
+</script>
+
+</body>
+</html>

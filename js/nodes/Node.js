@@ -207,6 +207,7 @@ define( function( require ) {
     'visible', // Whether the node is visible, see setVisible() for more documentation
     'pickable', // Whether the node is pickable, see setPickable() for more documentation
     'inputEnabled', // Whether input events can reach into this subtree, see setInputEnabled() for more documentation
+    'inputListeners', // The input listeners attached to the Node, see setInputListeners() for more documentation
     'opacity', // Opacity of this node's subtree, see setOpacity() for more documentation
     'matrix', // Transformation matrix of the node, see setMatrix() for more documentation
     'translation', // x/y translation of the node, see setTranslation() for more documentation
@@ -1625,13 +1626,38 @@ define( function( require ) {
     },
 
     /**
-     * Returns a copy of all of our input listeners.
+     * Interrupts all input listeners that are attached to this node.
      * @public
      *
-     * @returns {Array.<Object>}
+     * @returns {Node} - For chaining
      */
-    getInputListeners: function() {
-      return this._inputListeners.slice( 0 ); // defensive copy
+    interruptInput: function() {
+      var listenersCopy = this.inputListeners;
+
+      for ( var i = 0; i < listenersCopy.length; i++ ) {
+        var listener = listenersCopy[ i ];
+
+        listener.interrupt && listener.interrupt(); // TODO: get rid of the event?
+      }
+
+      return this;
+    },
+
+    /**
+     * Interrupts all input listeners that are attached to either this node, or a descendant node.
+     * @public
+     *
+     * @returns {Node} - For chaining
+     */
+    interruptSubtreeInput: function() {
+      this.interruptInput();
+
+      var children = this._children.slice();
+      for ( var i = 0; i < children.length; i++ ) {
+        children[ i ].interruptSubtreeInput();
+      }
+
+      return this;
     },
 
     /**
@@ -2864,6 +2890,44 @@ define( function( require ) {
       return this._inputEnabled;
     },
     get inputEnabled() { return this.isInputEnabled(); },
+
+    /**
+     * Sets all of the input listeners attached to this Node.
+     * @public
+     *
+     * This is equivalent to removing all current input listeners with removeInputListener() and adding all new
+     * listeners (in order) with addInputListener().
+     *
+     * @param {Array.<Object>} inputlisteners - The input listeners to add.
+     * @returns {Node} - For chaining
+     */
+    setInputListeners: function( inputListeners ) {
+      assert && assert( inputListeners instanceof Array );
+
+      // Remove all old input listeners
+      while ( this._inputListeners.length ) {
+        this.removeInputListener( this._inputListeners[ 0 ] );
+      }
+
+      // Add in all new input listeners
+      for ( var i = 0; i < inputListeners.length; i++ ) {
+        this.addInputListener( inputListeners[ i ] );
+      }
+
+      return this;
+    },
+    set inputListeners( value ) { this.setInputListeners( value ); },
+
+    /**
+     * Returns a copy of all of our input listeners.
+     * @public
+     *
+     * @returns {Array.<Object>}
+     */
+    getInputListeners: function() {
+      return this._inputListeners.slice( 0 ); // defensive copy
+    },
+    get inputListeners() { return this.getInputListeners(); },
 
     /**
      * Sets the CSS cursor string that should be used when the mouse is over this node. null is the default, and

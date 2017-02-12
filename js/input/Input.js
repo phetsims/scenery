@@ -187,7 +187,7 @@ define( function( require ) {
 
   scenery.register( 'Input', Input );
 
-  return inherit( Object, Input, {
+  inherit( Object, Input, {
     batchEvent: function( domEvent, batchType, callback, triggerImmediate ) {
       // If our display is not interactive, do not respond to any events (but still prevent default)
       if ( this.display.interactive ) {
@@ -902,4 +902,14 @@ define( function( require ) {
     KEY_DELETE: 46,
     KEY_BACKSPACE: 8
   } );
+
+  Input.BASIC_EVENT_TYPES = [ 'down', 'up', 'cancel', 'move', 'wheel', 'enter', 'exit', 'over', 'out' ];
+  Input.EVENT_PREFIXES = [ '', 'mouse', 'touch', 'pen' ];
+  Input.ALL_EVENT_TYPES = Input.EVENT_PREFIXES.map( function( prefix ) {
+    return Input.BASIC_EVENT_TYPES.map( function( eventName ) {
+      return prefix + eventName;
+    } );
+  } );
+
+  return Input;
 } );

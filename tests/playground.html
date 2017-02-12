@@ -175,6 +175,29 @@ an UI and Display made for visual testing and debugging.
         } );
       };
 
+      window.inputTest = function() {
+        display.initializeWindowEvents();
+        toggleUpdates();
+
+        var TouchSnagPressListener = phetCore.mixedWith( scenery.PressListener, scenery.TouchSnaggable.mixin );
+
+        var circle = new scenery.Circle( 30, { fill: 'red', cursor: 'pointer' } );
+        scene.addChild( circle );
+        circle.addInputListener( new TouchSnagPressListener( {
+          press: function() { console.log( 'press' ); },
+          release: function() { console.log( 'release' ); },
+          drag: function() { console.log( 'drag' ); }
+        } ) );
+
+        var square = new scenery.Rectangle( 0, 0, 60, 60, { fill: 'blue', cursor: 'pointer', x: -30, y: 90 } );
+        scene.addChild( square );
+        square.addInputListener( new scenery.SimpleDragHandler( {
+          start: function() { console.log( 'start' ); },
+          end: function() { console.log( 'end' ); },
+          drag: function() { console.log( 'drag' ); }
+        } ) );
+      };
+
       window.cssTest = function() {
         window.assertSlow = window.assert;
         setTimeout( function() {

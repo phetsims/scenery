@@ -93,6 +93,15 @@ define( [
   'SCENERY/input/SimpleDragHandler',
   'SCENERY/input/Touch',
 
+  // TODO: move to SCENERY/input?
+  'SCENERY/listeners/Fireable',
+  'SCENERY/listeners/Highlightable',
+  'SCENERY/listeners/Hoverable',
+  'SCENERY/listeners/PressListener',
+  'SCENERY/listeners/protoAfter',
+  'SCENERY/listeners/protoBefore',
+  'SCENERY/listeners/TouchSnaggable',
+
   'SCENERY/nodes/AlignBox',
   'SCENERY/nodes/AlignGroup',
   'SCENERY/nodes/CanvasNode',

@@ -167,6 +167,7 @@ define( function( require ) {
       return new Trail( this.nodes.slice( startIndex, endIndex ) );
     },
 
+    // TODO: consider renaming to subtrailToExcluding and subtrailToIncluding?
     subtrailTo: function( node, excludeNode ) {
       return this.slice( 0, _.indexOf( this.nodes, node ) + ( excludeNode ? 0 : 1 ) );
     },
