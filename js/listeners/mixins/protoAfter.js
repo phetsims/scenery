@@ -1,4 +1,4 @@
-// Copyright 2013-2016, University of Colorado Boulder
+// Copyright 2013-2017, University of Colorado Boulder
 
 /**
  * [[EXPERIMENTAL]] Assists mixins by applying a method after any existing prototype method
