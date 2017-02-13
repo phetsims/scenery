@@ -95,15 +95,16 @@ define( [
 
   // TODO: move to SCENERY/input?
   'SCENERY/listeners/DragListener',
-  'SCENERY/listeners/Fireable',
   'SCENERY/listeners/FireListener',
   'SCENERY/listeners/HandleDownListener',
-  'SCENERY/listeners/Highlightable',
-  'SCENERY/listeners/Hoverable',
   'SCENERY/listeners/PressListener',
-  'SCENERY/listeners/protoAfter',
-  'SCENERY/listeners/protoBefore',
-  'SCENERY/listeners/TouchSnaggable',
+
+  'SCENERY/listeners/mixins/Fireable',
+  'SCENERY/listeners/mixins/Highlightable',
+  'SCENERY/listeners/mixins/Hoverable',
+  'SCENERY/listeners/mixins/protoAfter',
+  'SCENERY/listeners/mixins/protoBefore',
+  'SCENERY/listeners/mixins/TouchSnaggable',
 
   'SCENERY/nodes/AlignBox',
   'SCENERY/nodes/AlignGroup',

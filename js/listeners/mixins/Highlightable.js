@@ -1,9 +1,7 @@
 // Copyright 2013-2016, University of Colorado Boulder
 
 /**
- * TODO: doc
- *
- * TODO: unit tests
+ * [[EXPERIMENTAL]] Mixin for PressListener that adds highlight tracking (pressed or hovering)
  *
  * @author Jonathan Olson <jonathan.olson@colorado.edu>
  */

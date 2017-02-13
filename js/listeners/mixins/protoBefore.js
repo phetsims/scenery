@@ -1,9 +1,7 @@
 // Copyright 2013-2016, University of Colorado Boulder
 
 /**
- * TODO: doc      AND MOVE TO PHET_CORE?
- *
- * TODO: unit tests
+ * [[EXPERIMENTAL]] Assists mixins by applying a method after any existing prototype method
  *
  * @author Jonathan Olson <jonathan.olson@colorado.edu>
  */

@@ -1,9 +1,7 @@
 // Copyright 2013-2016, University of Colorado Boulder
 
 /**
- * TODO: doc
- *
- * TODO: unit tests
+ * [[EXPERIMENTAL]] Mixin for PressListener that adds tracking for how many pointers are over the listener.
  *
  * @author Jonathan Olson <jonathan.olson@colorado.edu>
  */
@@ -13,7 +11,7 @@ define( function( require ) {
 
   var scenery = require( 'SCENERY/scenery' );
   var Property = require( 'AXON/Property' );
-  var protoAfter = require( 'SCENERY/listeners/protoAfter' );
+  var protoAfter = require( 'SCENERY/listeners/mixins/protoAfter' );
 
   function HoverableConstructor( options ) {
     var self = this;
