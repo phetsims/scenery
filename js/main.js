@@ -94,7 +94,10 @@ define( [
   'SCENERY/input/Touch',
 
   // TODO: move to SCENERY/input?
+  'SCENERY/listeners/DragListener',
   'SCENERY/listeners/Fireable',
+  'SCENERY/listeners/FireListener',
+  'SCENERY/listeners/HandleDownListener',
   'SCENERY/listeners/Highlightable',
   'SCENERY/listeners/Hoverable',
   'SCENERY/listeners/PressListener',

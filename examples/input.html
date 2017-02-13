@@ -57,77 +57,9 @@
   var inactiveColor = '#ccc';
   var activeColor = '#8f8';
   var strokeColor = '#000';
-  var buttonLeft = 10;
-
-  var pressReleaseText = new scenery.Text( 'released', {
-    fontSize: 20,
-    centerX: 0,
-    centerY: 0
-  } );
-  var pressReleaseBackground = scenery.Rectangle.bounds( pressReleaseText.bounds.dilatedXY( 20, 10 ), {
-    stroke: strokeColor
-  } );
-  var pressReleaseNode = new scenery.Node( {
-    children: [ pressReleaseBackground, pressReleaseText ],
-    cursor: 'pointer',
-    left: buttonLeft,
-    y: 100
-  } );
-  scene.addChild( pressReleaseNode );
-
-  var TouchSnagPressListener = phetCore.mixedWith( scenery.PressListener, scenery.TouchSnaggable.mixin );
-
-  var pressReleaseListener = new TouchSnagPressListener( {
-    press: function() { console.log( 'press' ); },
-    release: function() { console.log( 'release' ); },
-    drag: function() { console.log( 'drag' ); }
-  } );
-  pressReleaseNode.addInputListener( pressReleaseListener );
-  pressReleaseListener.isPressedProperty.link( function( isPressed ) {
-    pressReleaseBackground.fill = isPressed ? activeColor : inactiveColor;
-    pressReleaseText.text = isPressed ? 'pressed' : 'released';
-    pressReleaseText.center = new dot.Vector2();
-  } );
-
-
-
-
-  var hoverText = new scenery.Text( 'outside', {
-    fontSize: 20,
-    centerX: 0,
-    centerY: 0
-  } );
-  var hoverBackground = scenery.Rectangle.bounds( hoverText.bounds.dilatedXY( 20, 10 ), {
-    stroke: strokeColor
-  } );
-  var hoverNode = new scenery.Node( {
-    children: [ hoverBackground, hoverText ],
-    cursor: 'pointer',
-    left: buttonLeft,
-    y: 150
-  } );
-  scene.addChild( hoverNode );
-
-  var HoverPressListener = phetCore.mixedWith( scenery.PressListener, scenery.Hoverable.mixin,
-                                                                      scenery.TouchSnaggable.mixin );
-
-  var hoverListener = new HoverPressListener( {
-    press: function() { console.log( 'press' ); },
-    release: function() { console.log( 'release' ); },
-    drag: function() { console.log( 'drag' ); }
-  } );
-  hoverNode.addInputListener( hoverListener );
-  hoverListener.isOverProperty.link( function( isOver ) {
-    hoverBackground.fill = isOver ? activeColor : inactiveColor;
-    hoverText.text = isOver ? 'inside' : 'outside';
-    hoverText.center = new dot.Vector2();
-  } );
-
-
-
 
   var buttonText = new scenery.Text( 'outside released', {
-    fontSize: 20,
+    fontSize: 14,
     centerX: 0,
     centerY: 0
   } );
@@ -137,8 +69,8 @@
   var buttonNode = new scenery.Node( {
     children: [ buttonBackground, buttonText ],
     cursor: 'pointer',
-    left: buttonLeft,
-    y: 200
+    left: 10,
+    top: 10
   } );
   scene.addChild( buttonNode );
 
@@ -150,12 +82,7 @@
   } );
   scene.addChild( fireNode );
 
-  var ButtonPressListener = phetCore.mixedWith( scenery.PressListener, scenery.Hoverable.mixin,
-                                                                       scenery.Fireable.mixin,
-                                                                       scenery.Highlightable.mixin,
-                                                                       scenery.TouchSnaggable.mixin );
-
-  var buttonListener = new ButtonPressListener( {
+  var buttonListener = new scenery.FireListener( {
     press: function() { console.log( 'press' ); },
     release: function() { console.log( 'release' ); },
     drag: function() { console.log( 'drag' ); },
@@ -174,7 +101,7 @@
 
 
   var interruptText = new scenery.Text( 'Interrupt All', {
-    fontSize: 20,
+    fontSize: 14,
     centerX: 0,
     centerY: 0
   } );
@@ -184,12 +111,12 @@
   var interruptNode = new scenery.Node( {
     children: [ interruptBackground, interruptText ],
     cursor: 'pointer',
-    left: buttonLeft,
-    y: 250
+    left: buttonNode.left,
+    top: buttonNode.bottom + 10
   } );
   scene.addChild( interruptNode );
 
-  var interruptListener = new ButtonPressListener( {
+  var interruptListener = new scenery.FireListener( {
     fire: function() {
       scene.interruptSubtreeInput();
     }
@@ -198,6 +125,62 @@
   interruptBackground.fill = new axon.DerivedProperty( [ interruptListener.isHighlightedProperty ], function( isHighlighted ) {
     return isHighlighted ? activeColor : inactiveColor;
   } );
+
+
+
+
+
+  var simpleDragNode = new scenery.Circle( 30, {
+    fill: 'red',
+    stroke: strokeColor,
+    cursor: 'pointer',
+    x: 300,
+    y: 100
+  } );
+  scene.addChild( simpleDragNode );
+  simpleDragNode.addInputListener( new scenery.DragListener( { translateNode: true } ) );
+
+
+
+
+
+  var transformContainer = new scenery.Node( {
+    scale: 1.5,
+    rotation: Math.PI / 4,
+    x: 100,
+    y: 50
+  } );
+  scene.addChild( transformContainer );
+  var transformedDragNode = new scenery.Rectangle( 0, 0, 50, 25, {
+    fill: '#08F',
+    stroke: strokeColor,
+    cursor: 'pointer',
+    x: 120,
+    y: -40
+  } );
+  transformContainer.addChild( transformedDragNode );
+  transformedDragNode.addInputListener( new scenery.DragListener( { translateNode: true } ) );
+
+
+
+
+
+  var constrainBounds = new dot.Bounds2( 50, 0, 200, 100 );
+  transformContainer.addChild( scenery.Rectangle.bounds( constrainBounds, {
+    stroke: strokeColor,
+    lineDash: [ 5, 5 ]
+  } ) );
+  var constrainedNode = new scenery.Circle( 20, {
+    fill: '#2f2',
+    cursor: 'pointer',
+    stroke: strokeColor,
+    center: constrainBounds.center
+  } );
+  transformContainer.addChild( constrainedNode );
+  constrainedNode.addInputListener( new scenery.DragListener( {
+    translateNode: true,
+    dragBounds: constrainBounds.eroded( constrainedNode.radius )
+  } ) );
 
   /*---------------------------------------------------------------------------*
    * main loop

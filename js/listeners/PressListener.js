@@ -5,8 +5,6 @@
  *
  * TODO: unit tests
  *
- * TODO: Allow inline Node( { inputListener: ... } ) and inputListeners
- *
  * @author Jonathan Olson <jonathan.olson@colorado.edu>
  */
 
@@ -99,6 +97,7 @@ define( function( require ) {
     },
 
     // TODO: doc
+    // TODO: evaluate if this should be here?
     get currentTarget() {
       assert && assert( this.isPressListener, 'We have no currentTarget if we are not pressed' );
 
@@ -158,7 +157,7 @@ define( function( require ) {
       this._dragListener && this._dragListener(); // TODO: args
     },
 
-    interrupt: function( event ) {
+    interrupt: function() {
       if ( this.isPressed ) {
         this.wasInterrupted = true;
 
