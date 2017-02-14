@@ -243,14 +243,50 @@
   objectButton.addInputListener( {
     down: function( event ) {
       var modelPosition = objectTransform.inversePosition2( event.pointer.point );
-      // console.log( modelPosition );
       var newObject = new axon.Property( modelPosition );
-      // newObject.lazyLink( function() { debugger; } );
       objects.push( newObject );
       getObjectNode( newObject ).dragListener.press( event );
-      // console.log( newObject.value );
     }
   } );
+
+
+  var innerRadius = 20;
+  var outerRadius = 50;
+  var halfAngle = Math.PI / 8;
+  var rotationShape = new kite.Shape().arc( 0, 0, innerRadius, -halfAngle, halfAngle, false )
+                                      .arc( 0, 0, outerRadius, halfAngle, -halfAngle, true )
+                                      .close();
+  var touchAmount = 10;
+  var touchCenterOffset = touchAmount * Math.sqrt( 2 ) * 1.5;
+  var rotationTouchShape = new kite.Shape().arc( -touchCenterOffset, 0, touchCenterOffset + innerRadius - touchAmount, -halfAngle, halfAngle, false )
+                                           .arc( -touchCenterOffset, 0, touchCenterOffset + outerRadius + touchAmount, halfAngle, -halfAngle, true )
+                                           .close();
+  var rotationNode = new scenery.Path( rotationShape, {
+    fill: '#f80',
+    stroke: strokeColor,
+    cursor: 'pointer',
+    touchArea: rotationTouchShape
+  } );
+  var rotationProperty = new axon.Property( 0 );
+  rotationProperty.linkAttribute( rotationNode, 'rotation' );
+  var initialDragRotation;
+  rotationNode.addInputListener( new scenery.DragListener( {
+    applyOffset: false,
+    drag: function( event ) {
+      rotationProperty.value = this.modelPoint.angle() - this.initialLocalPoint.angle();
+    }
+  } ) );
+
+  var rotationContainer = new scenery.Node( {
+    children: [
+      new scenery.Circle( 3, { fill: 'black' } ),
+      new scenery.Circle( 0.5 * ( innerRadius + outerRadius ), { stroke: strokeColor, lineWidth: 0.25 } ),
+      rotationNode
+    ],
+    x: 210,
+    y: 60
+  } );
+  scene.addChild( rotationContainer );
 
   /*---------------------------------------------------------------------------*
    * main loop

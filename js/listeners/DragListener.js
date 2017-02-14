@@ -22,11 +22,14 @@ define( function( require ) {
   function DragListener( options ) {
     options = _.extend( {
       allowTouchSnag: false, // TODO: decide on appropriate default
+      applyOffset: true,
       translateNode: false,
       transform: null,
       locationProperty: null, // TODO doc
       mapLocation: null, // TODO: doc
-      dragBounds: null
+      dragBounds: null,
+      start: null,
+      end: null
     }, options );
 
     assert && assert( !options.mapLocation || !options.dragBounds,
@@ -35,13 +38,19 @@ define( function( require ) {
     PressListener.call( this, options );
 
     this._allowTouchSnag = options.allowTouchSnag;
+    this._applyOffset = options.applyOffset;
     this._translateNode = options.translateNode;
     this._transform = options.transform;
     this._locationProperty = options.locationProperty;
     this._mapLocation = options.mapLocation;
     this._dragBounds = options.dragBounds;
+    this._start = options.start;
+    this._end = options.end;
 
-    this._initialLocalPoint = null;
+    // TODO: scratch vectors?
+    this.initialLocalPoint = null;
+    this.parentPoint = new Vector2();
+    this.modelPoint = new Vector2();
   }
 
   scenery.register( 'DragListener', DragListener );
@@ -100,37 +109,48 @@ define( function( require ) {
       PressListener.prototype.press.call( this, event ); // TODO: do we need to delay notification with options release?
 
       // TODO: scratch vectors
-      this._initialLocalPoint = this.parentToLocalPoint( this.globalToParentPoint( this.pointer.point ) );
+      this.initialLocalPoint = this.parentToLocalPoint( this.globalToParentPoint( this.pointer.point ) );
 
       this.reposition( this.pointer.point );
+
+      this._start && this._start( event );
+    },
+
+    release: function( event ) {
+      PressListener.prototype.release.call( this, event );
+
+      this._end && this._end( event );
     },
 
     drag: function( event ) {
+      // NOTE: This is done first, before the drag listener is called
+      this.reposition( this.pointer.point );
+
       //TODO ignore global moves that have zero length (Chrome might autofire, see https://code.google.com/p/chromium/issues/detail?id=327114)
       //TODO: should this apply in PressListener's drag?
       PressListener.prototype.drag.call( this, event );
-
-      this.reposition( this.pointer.point );
     },
 
     // TODO: hardcode pointer.point?
     reposition: function( globalPoint ) {
       // TODO: scratch vectors, better codepath for minimizing computation
       var parentPointerPoint = this.globalToParentPoint( globalPoint );
-      var parentLocalPoint = this.localToParentPoint( this._initialLocalPoint );
+      var parentLocalPoint = this.localToParentPoint( this.initialLocalPoint );
       var parentOriginPoint = this.localToParentPoint( new Vector2() ); // usually node.translation
       var parentOffset = parentOriginPoint.minus( parentLocalPoint );
-      var parentPoint = parentPointerPoint.plus( parentOffset );
-      var modelPoint = this.mapModelPoint( this.parentToModelPoint( parentPoint ) );
-      parentPoint = this.modelToParentPoint( modelPoint ); // apply any mapping changes
+      this.parentPoint = this._applyOffset ? parentPointerPoint.plus( parentOffset ) : parentPointerPoint;
+      this.modelPoint = this.mapModelPoint( this.parentToModelPoint( this.parentPoint ) );
+      this.parentPoint = this.modelToParentPoint( this.modelPoint ); // apply any mapping changes
 
       if ( this._translateNode ) {
-        this.pressedTrail.lastNode().translation = parentPoint;
+        this.pressedTrail.lastNode().translation = this.parentPoint;
       }
 
       if ( this._locationProperty ) {
-        this._locationProperty.value = modelPoint;
+        this._locationProperty.value = this.modelPoint;
       }
+
+      // TODO: consider other options to handle here
     },
 
     touchenter: function( event ) {
