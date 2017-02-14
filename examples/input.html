@@ -58,6 +58,9 @@
   var activeColor = '#8f8';
   var strokeColor = '#000';
 
+
+
+
   var buttonText = new scenery.Text( 'outside released', {
     fontSize: 14,
     centerX: 0,
@@ -306,6 +309,7 @@
   var trackerContainer = new scenery.Circle( 30, {
     children: [ trackerNode ],
     stroke: strokeColor,
+    lineWidth: 0.25,
     lineDash: [ 2, 2 ]
   } );
   scene.addChild( trackerContainer );
