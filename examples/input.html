@@ -55,12 +55,82 @@
   display.resizeOnWindowResize(); // keep the display size linked to the window size
 
   var inactiveColor = '#ccc';
-  var activeColor = '#8f8';
+  var activeColor = '#eee';
+  var armedColor = '#aaa';
   var strokeColor = '#000';
 
+  function createButton( label, callback, options ) {
+    var label = new scenery.Text( label, {
+      fontSize: 14,
+      center: new dot.Vector2()
+    } );
+    var buttonListener = new scenery.FireListener( {
+      fire: callback
+    } );
+    var background = scenery.Rectangle.bounds( label.bounds.dilatedXY( 8, 5 ), {
+      stroke: strokeColor,
+      fill: ( options.color && options.color( buttonListener ) ) || new axon.DerivedProperty( [ buttonListener.isHighlightedProperty, buttonListener.isPressedProperty ], function( isHighlighted, isPressed ) {
+        return isPressed ? armedColor : ( isHighlighted ? activeColor : inactiveColor );
+      } )
+    } );
+    return new scenery.Node( _.extend( {
+      children: [ background, label ],
+      cursor: 'pointer',
+      inputListeners: [ buttonListener ]
+    }, options ) );
+  }
+
+  var tabProperty = new axon.Property( null );
+  var tabs = [];
+  tabProperty.lazyLink( function( selectedTab ) {
+    tabs.forEach( function( tab ) {
+      var isVisible = tab === selectedTab;
+      tab.visible = isVisible;
+      if ( !isVisible ) {
+        tab.interruptSubtreeInput();
+      }
+    } );
+  } );
+  var tabContent = new scenery.Node( {
+    x: 10,
+    y: 100
+  } );
+  scene.addChild( tabContent );
+  var tabBox = new scenery.HBox( {
+    spacing: -1,
+    x: 10,
+    y: 10
+  } );
+  scene.addChild( tabBox );
+  function createTab( label, value ) {
+    value.visible = false;
+    tabs.push( value );
+    if ( !tabProperty.value ) { tabProperty.value = value; }
+    var button = createButton( label, function() {
+      tabProperty.value = value;
+    }, {
+      color: function( buttonListener ) {
+        return new axon.DerivedProperty( [ tabProperty, buttonListener.isHighlightedProperty, buttonListener.isPressedProperty ], function( tabValue, isHighlighted, isPressed ) {
+          return isPressed ? armedColor : ( ( isHighlighted || tabValue === value ) ? activeColor : inactiveColor );
+        } );
+      }
+    } );
+    tabBox.addChild( button );
+    tabContent.addChild( value );
+  }
+
+  var interruptButton = createButton( 'Interrupt Input', function() {
+    scene.interruptSubtreeInput();
+  }, {
+    top: 50,
+    left: 10
+  } );
+
+  scene.addChild( interruptButton );
 
 
-
+  var buttonExample = new scenery.Node();
+  createTab( 'Button', buttonExample );
   var buttonText = new scenery.Text( 'outside released', {
     fontSize: 14,
     centerX: 0,
@@ -72,10 +142,10 @@
   var buttonNode = new scenery.Node( {
     children: [ buttonBackground, buttonText ],
     cursor: 'pointer',
-    left: 10,
-    top: 10
+    left: 40,
+    top: 40
   } );
-  scene.addChild( buttonNode );
+  buttonExample.addChild( buttonNode );
 
   var fireNode = new scenery.Rectangle( 0, 0, buttonNode.height, buttonNode.height, {
     opacity: 0,
@@ -83,7 +153,7 @@
     left: buttonNode.right + 10,
     top: buttonNode.top
   } );
-  scene.addChild( fireNode );
+  buttonExample.addChild( fireNode );
 
   var buttonListener = new scenery.FireListener( {
     press: function() { console.log( 'press' ); },
@@ -103,45 +173,27 @@
 
 
 
-  var interruptText = new scenery.Text( 'Interrupt All', {
-    fontSize: 14,
-    centerX: 0,
-    centerY: 0
-  } );
-  var interruptBackground = scenery.Rectangle.bounds( interruptText.bounds.dilatedXY( 20, 10 ), {
-    stroke: strokeColor
-  } );
-  var interruptNode = new scenery.Node( {
-    children: [ interruptBackground, interruptText ],
-    cursor: 'pointer',
-    left: buttonNode.left,
-    top: buttonNode.bottom + 10
-  } );
-  scene.addChild( interruptNode );
-
-  var interruptListener = new scenery.FireListener( {
-    fire: function() {
-      scene.interruptSubtreeInput();
-    }
-  } );
-  interruptNode.addInputListener( interruptListener );
-  interruptBackground.fill = new axon.DerivedProperty( [ interruptListener.isHighlightedProperty ], function( isHighlighted ) {
-    return isHighlighted ? activeColor : inactiveColor;
-  } );
 
 
-
-
-
-  var simpleDragNode = new scenery.Circle( 30, {
+  var simpleDragContainer = new scenery.Node();
+  createTab( 'Drag', simpleDragContainer );
+  simpleDragContainer.addChild( new scenery.Circle( 30, {
     fill: 'red',
     stroke: strokeColor,
     cursor: 'pointer',
-    x: 300,
-    y: 100
-  } );
-  scene.addChild( simpleDragNode );
-  simpleDragNode.addInputListener( new scenery.DragListener( { translateNode: true } ) );
+    centerX: 70,
+    centerY: 70,
+    inputListeners: [ new scenery.DragListener( { translateNode: true } ) ]
+  } ) );
+  simpleDragContainer.addChild( new scenery.Rectangle( 0, 0, 45, 45, {
+    fill: '#08F',
+    stroke: strokeColor,
+    cursor: 'pointer',
+    rotation: Math.PI / 4,
+    centerX: 150,
+    centerY: 70,
+    inputListeners: [ new scenery.DragListener( { translateNode: true } ) ]
+  } ) );
 
 
 
@@ -151,24 +203,11 @@
     scale: 1.5,
     rotation: Math.PI / 4,
     x: 100,
-    y: 50
+    y: -50
   } );
-  scene.addChild( transformContainer );
-  var transformedDragNode = new scenery.Rectangle( 0, 0, 50, 25, {
-    fill: '#08F',
-    stroke: strokeColor,
-    cursor: 'pointer',
-    x: 120,
-    y: -40
-  } );
-  transformContainer.addChild( transformedDragNode );
-  transformedDragNode.addInputListener( new scenery.DragListener( { translateNode: true } ) );
+  createTab( 'Bound+Transform', transformContainer );
 
-
-
-
-
-  var constrainBounds = new dot.Bounds2( 50, 0, 200, 100 );
+  var constrainBounds = new dot.Bounds2( 50, 0, 150, 75 );
   transformContainer.addChild( scenery.Rectangle.bounds( constrainBounds, {
     stroke: strokeColor,
     lineDash: [ 5, 5 ]
@@ -189,6 +228,8 @@
 
 
 
+  var modelContainer = new scenery.Node();
+  createTab( 'Panel+Model', modelContainer );
   var objectGraphic = new scenery.Path( kite.Shape.regularPolygon( 6, 20 ), {
     fill: '#f3f',
     stroke: strokeColor
@@ -211,7 +252,7 @@
       objectNode.translation = objectTransform.transformPosition2( position );
     } );
     objectNodes.push( objectNode );
-    scene.addChild( objectNode );
+    modelContainer.addChild( objectNode );
 
     var dragListener = new scenery.DragListener( {
       transform: objectTransform,
@@ -228,24 +269,24 @@
   } );
   objects.addItemRemovedListener( function( removedObject ) {
     var objectNode = getObjectNode( removedObject );
-    scene.removeChild( objectNode );
+    modelContainer.removeChild( objectNode );
     objectNode.interruptSubtreeInput(); // Removing it, so we interrupt any drags that it is involved in
     phetCore.arrayRemove( objectNodes, objectNode );
   } );
 
   var objectButton = scenery.Rectangle.roundedBounds( objectGraphic.bounds.dilated( 10 ), 10, 10, {
     children: [ objectGraphic ],
-    left: interruptNode.left,
-    top: interruptNode.bottom + 10,
+    left: fireNode.left,
+    top: fireNode.bottom + 10,
     fill: '#eee',
     stroke: strokeColor,
     cursor: 'pointer'
   } );
-  scene.addChild( objectButton );
+  modelContainer.addChild( objectButton );
 
   objectButton.addInputListener( {
     down: function( event ) {
-      var modelPosition = objectTransform.inversePosition2( event.pointer.point );
+      var modelPosition = objectTransform.inversePosition2( modelContainer.getUniqueTrail().globalToLocalPoint( event.pointer.point ) );
       var newObject = new axon.Property( modelPosition );
       objects.push( newObject );
       getObjectNode( newObject ).dragListener.press( event );
@@ -253,8 +294,10 @@
   } );
 
 
-  var innerRadius = 20;
-  var outerRadius = 50;
+
+
+  var innerRadius = 40;
+  var outerRadius = 80;
   var halfAngle = Math.PI / 8;
   var rotationShape = new kite.Shape().arc( 0, 0, innerRadius, -halfAngle, halfAngle, false )
                                       .arc( 0, 0, outerRadius, halfAngle, -halfAngle, true )
@@ -289,14 +332,14 @@
     x: 210,
     y: 60
   } );
-  scene.addChild( rotationContainer );
+  createTab( 'Rotation', rotationContainer );
 
 
 
 
 
-  var trackerNode = new scenery.Path( kite.Shape.regularPolygon( 5, 20 ), {
-    fill: '#3ff',
+  var trackerNode = new scenery.Path( kite.Shape.regularPolygon( 5, 40 ), {
+    fill: '#08F',
     stroke: strokeColor,
     rotation: -Math.PI / 2,
     cursor: 'pointer'
@@ -306,13 +349,13 @@
     translateNode: true
   } ) );
 
-  var trackerContainer = new scenery.Circle( 30, {
+  var trackerContainer = new scenery.Circle( 60, {
     children: [ trackerNode ],
     stroke: strokeColor,
     lineWidth: 0.25,
     lineDash: [ 2, 2 ]
   } );
-  scene.addChild( trackerContainer );
+  createTab( 'Ancestor+Move', trackerContainer );
 
   /*---------------------------------------------------------------------------*
    * main loop
@@ -323,7 +366,7 @@
     elapsedTime += dt;
 
     fireNode.opacity *= Math.pow( 0.2, dt );
-    trackerContainer.translation = dot.Vector2.createPolar( 20, elapsedTime ).plusXY( 75, 325 );
+    trackerContainer.translation = dot.Vector2.createPolar( 20, elapsedTime ).plusXY( 150, 75 );
   } );
 
 </script>
