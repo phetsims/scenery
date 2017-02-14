@@ -182,6 +182,76 @@
     dragBounds: constrainBounds.eroded( constrainedNode.radius )
   } ) );
 
+
+
+
+
+  var objectGraphic = new scenery.Path( kite.Shape.regularPolygon( 6, 20 ), {
+    fill: '#f3f',
+    stroke: strokeColor
+  } );
+
+  var objectTransform = new dot.Transform3( dot.Matrix3.scaling( 2 ).timesMatrix( dot.Matrix3.translation( 100, 50 ) ) );
+  var objects = new axon.ObservableArray(); // {ObservableArray.<Property.<Vector2>>}
+  var objectNodes = []; // Node with { model: {Property.<Vector2>}, dragListener: {DragListener} }
+  function getObjectNode( object ) {
+    return objectNodes.filter( function( objectNode ) { return objectNode.model === object; } )[ 0 ];
+  }
+  objects.addItemAddedListener( function( newObject ) {
+    var objectNode = new scenery.Node( {
+      children: [ objectGraphic ],
+      cursor: 'pointer',
+      scale: 1.3
+    } );
+    objectNode.model = newObject;
+    newObject.link( function( position ) {
+      objectNode.translation = objectTransform.transformPosition2( position );
+    } );
+    objectNodes.push( objectNode );
+    scene.addChild( objectNode );
+
+    var dragListener = new scenery.DragListener( {
+      transform: objectTransform,
+      locationProperty: newObject,
+      targetNode: objectNode,
+      release: function() {
+        if ( objectButton.containsPoint( objectNode.center ) ) {
+          objects.remove( newObject );
+        }
+      }
+    } );
+    objectNode.addInputListener( dragListener );
+    objectNode.dragListener = dragListener;
+  } );
+  objects.addItemRemovedListener( function( removedObject ) {
+    var objectNode = getObjectNode( removedObject );
+    scene.removeChild( objectNode );
+    objectNode.interruptSubtreeInput(); // Removing it, so we interrupt any drags that it is involved in
+    phetCore.arrayRemove( objectNodes, objectNode );
+  } );
+
+  var objectButton = scenery.Rectangle.roundedBounds( objectGraphic.bounds.dilated( 10 ), 10, 10, {
+    children: [ objectGraphic ],
+    left: interruptNode.left,
+    top: interruptNode.bottom + 10,
+    fill: '#eee',
+    stroke: strokeColor,
+    cursor: 'pointer'
+  } );
+  scene.addChild( objectButton );
+
+  objectButton.addInputListener( {
+    down: function( event ) {
+      var modelPosition = objectTransform.inversePosition2( event.pointer.point );
+      // console.log( modelPosition );
+      var newObject = new axon.Property( modelPosition );
+      // newObject.lazyLink( function() { debugger; } );
+      objects.push( newObject );
+      getObjectNode( newObject ).dragListener.press( event );
+      // console.log( newObject.value );
+    }
+  } );
+
   /*---------------------------------------------------------------------------*
    * main loop
    *----------------------------------------------------------------------------*/

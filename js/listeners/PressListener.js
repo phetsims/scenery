@@ -53,7 +53,10 @@ define( function( require ) {
 
       // {Property.<Boolean>} - If provided, this property will be used to track whether this listener's node is
       // "pressed" or not.
-      isPressedProperty: new Property( false )
+      isPressedProperty: new Property( false ),
+
+      // TODO doc
+      targetNode: null
     }, options );
 
     assert && assert( options.isPressedProperty.value === false,
@@ -71,6 +74,9 @@ define( function( require ) {
 
     // @public {Trail|null} [read-only] - The Trail for the press, with no descendant nodes past the currentTarget
     this.pressedTrail = null;
+
+    // TODO: doc
+    this._targetNode = options.targetNode;
 
     // @public {boolean} [read-only] - Whether the last press was interrupted. Will be valid until the next press.
     this.wasInterrupted = false;
@@ -146,7 +152,8 @@ define( function( require ) {
       // Set self properties before the property change, so they are visible to listeners.
       this.pointer = event.pointer;
       this.fullPressedTrail = event.trail;
-      this.pressedTrail = event.trail.subtrailTo( event.currentTarget, false );
+      this.pressedTrail = this._targetNode ? this._targetNode.getUniqueTrail() :
+                                             event.trail.subtrailTo( event.currentTarget, false );
       this.wasInterrupted = false;
 
       this.isPressedProperty.value = true;
