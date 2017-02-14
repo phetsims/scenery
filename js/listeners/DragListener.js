@@ -15,6 +15,7 @@ define( function( require ) {
   var scenery = require( 'SCENERY/scenery' );
   var Vector2 = require( 'DOT/Vector2' );
   var PressListener = require( 'SCENERY/listeners/PressListener' );
+  var TransformTracker = require( 'SCENERY/util/TransformTracker' );
 
   /**
    * TODO: doc
@@ -23,11 +24,12 @@ define( function( require ) {
     options = _.extend( {
       allowTouchSnag: false, // TODO: decide on appropriate default
       applyOffset: true,
+      trackAncestors: false,
       translateNode: false,
       transform: null,
       locationProperty: null, // TODO doc
       mapLocation: null, // TODO: doc
-      dragBounds: null,
+      dragBounds: null, // TODO: support mutability for this type of thing (or support Property.<Bounds2>)
       start: null,
       end: null
     }, options );
@@ -39,6 +41,7 @@ define( function( require ) {
 
     this._allowTouchSnag = options.allowTouchSnag;
     this._applyOffset = options.applyOffset;
+    this._trackAncestors = options.trackAncestors;
     this._translateNode = options.translateNode;
     this._transform = options.transform;
     this._locationProperty = options.locationProperty;
@@ -51,6 +54,9 @@ define( function( require ) {
     this.initialLocalPoint = null;
     this.parentPoint = new Vector2();
     this.modelPoint = new Vector2();
+
+    this._transformTracker = null;
+    this._transformTrackerListener = this.ancestorTransformed.bind( this );
   }
 
   scenery.register( 'DragListener', DragListener );
@@ -108,6 +114,8 @@ define( function( require ) {
     press: function( event ) {
       PressListener.prototype.press.call( this, event ); // TODO: do we need to delay notification with options release?
 
+      this.attachTransformTracker();
+
       // TODO: scratch vectors
       this.initialLocalPoint = this.parentToLocalPoint( this.globalToParentPoint( this.pointer.point ) );
 
@@ -118,6 +126,8 @@ define( function( require ) {
 
     release: function( event ) {
       PressListener.prototype.release.call( this, event );
+
+      this.detachTransformTracker();
 
       this._end && this._end( event );
     },
@@ -153,6 +163,10 @@ define( function( require ) {
       // TODO: consider other options to handle here
     },
 
+    ancestorTransformed: function() {
+      this.reposition( this.pointer.point );
+    },
+
     touchenter: function( event ) {
       this.tryTouchSnag( event );
     },
@@ -165,6 +179,27 @@ define( function( require ) {
       if ( this._allowTouchSnag ) {
         this.tryPress( event );
       }
+    },
+
+    attachTransformTracker: function() {
+      if ( this._trackAncestors ) {
+        this._transformTracker = new TransformTracker( this.pressedTrail.copy().removeDescendant() );
+        this._transformTracker.addListener( this._transformTrackerListener );
+      }
+    },
+
+    detachTransformTracker: function() {
+      if ( this._transformTracker ) {
+        this._transformTracker.removeListener( this._transformTrackerListener );
+        this._transformTracker.dispose();
+        this._transformTracker = null;
+      }
+    },
+
+    dispose: function() {
+      this.detachTransformTracker();
+
+      PressListener.prototype.dispose.call( this );
     }
 
   } );

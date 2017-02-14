@@ -288,12 +288,38 @@
   } );
   scene.addChild( rotationContainer );
 
+
+
+
+
+  var trackerNode = new scenery.Path( kite.Shape.regularPolygon( 5, 20 ), {
+    fill: '#3ff',
+    stroke: strokeColor,
+    rotation: -Math.PI / 2,
+    cursor: 'pointer'
+  } );
+  trackerNode.addInputListener( new scenery.DragListener( {
+    trackAncestors: true,
+    translateNode: true
+  } ) );
+
+  var trackerContainer = new scenery.Circle( 30, {
+    children: [ trackerNode ],
+    stroke: strokeColor,
+    lineDash: [ 2, 2 ]
+  } );
+  scene.addChild( trackerContainer );
+
   /*---------------------------------------------------------------------------*
    * main loop
    *----------------------------------------------------------------------------*/
 
+  var elapsedTime = 0;
   display.updateOnRequestAnimationFrame( function( dt ) {
+    elapsedTime += dt;
+
     fireNode.opacity *= Math.pow( 0.2, dt );
+    trackerContainer.translation = dot.Vector2.createPolar( 20, elapsedTime ).plusXY( 75, 325 );
   } );
 
 </script>

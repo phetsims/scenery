@@ -88,6 +88,7 @@ define( function( require ) {
     this._releaseListener = options.release;
     this._dragListener = options.drag;
 
+    this._pointerListenerAttached = false;
     // @private {Object} - The listener that gets added to the pointer when we are pressed
     this._pointerListener = {
       up: function( event ) {
@@ -159,6 +160,8 @@ define( function( require ) {
       this.isPressedProperty.value = true;
 
       this.pointer.addInputListener( this._pointerListener );
+      this._pointerListenerAttached = true;
+
       this.pointer.cursor = this._pressCursor;
 
       this._pressListener && this._pressListener( event );
@@ -171,6 +174,8 @@ define( function( require ) {
       this.isPressedProperty.value = false;
 
       this.pointer.removeInputListener( this._pointerListener );
+      this._pointerListenerAttached = false;
+
       this.pointer.cursor = null;
 
       // Unset self properties after the property change, so they are visible to listeners beforehand.
@@ -192,6 +197,12 @@ define( function( require ) {
         this.wasInterrupted = true;
 
         this.release();
+      }
+    },
+
+    dispose: function() {
+      if ( this._pointerListenerAttached ) {
+        this.pointer.removeInputListener( this._pointerListener );
       }
     }
   } );
