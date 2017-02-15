@@ -357,6 +357,30 @@
   } );
   createTab( 'Ancestor+Move', trackerContainer );
 
+
+
+  function addMulti( allowScale, allowRotation, label ) {
+    var multiNode = new scenery.Path( kite.Shape.regularPolygon( 3, 100 ), {
+      fill: '#F08',
+      stroke: strokeColor,
+      cursor: 'pointer',
+      x: 130,
+      y: 130
+    } );
+    multiNode.addInputListener( new scenery.MultiListener( {
+      targetNode: multiNode,
+      allowScale: allowScale,
+      allowRotation: allowRotation
+    } ) );
+    createTab( label, multiNode );
+  }
+
+  addMulti( true, true, 'M+SR' );
+  addMulti( false, true, 'M+R' );
+  addMulti( true, false, 'M+S' );
+  addMulti( false, false, 'M' );
+
+
   /*---------------------------------------------------------------------------*
    * main loop
    *----------------------------------------------------------------------------*/
