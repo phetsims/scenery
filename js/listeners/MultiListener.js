@@ -113,11 +113,18 @@ define( function( require ) {
 
       arrayRemove( this._presses, press );
 
+      this.recomputeLocals();
       this.reposition();
     },
 
     reposition: function() {
       this._targetNode.matrix = this.computeMatrix();
+    },
+
+    recomputeLocals: function() {
+      for ( var i = 0; i < this._presses.length; i++ ) {
+        this._presses[ i ].recomputeLocalPoint();
+      }
     },
 
     interrupt: function() {
@@ -267,10 +274,14 @@ define( function( require ) {
     this.trail = trail;
     this.interrupted = false;
 
-    this.localPoint = trail.globalToLocalPoint( pointer.point );
+    this.localPoint = null;
+    this.recomputeLocalPoint();
   }
 
   inherit( Object, Press, {
+    recomputeLocalPoint: function() {
+      this.localPoint = this.trail.globalToLocalPoint( this.pointer.point );
+    },
     get targetPoint() {
       return this.trail.globalToParentPoint( this.pointer.point );
     }
