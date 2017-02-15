@@ -61,13 +61,13 @@
 
   function createButton( label, callback, options ) {
     var label = new scenery.Text( label, {
-      fontSize: 14,
+      fontSize: 12,
       center: new dot.Vector2()
     } );
     var buttonListener = new scenery.FireListener( {
       fire: callback
     } );
-    var background = scenery.Rectangle.bounds( label.bounds.dilatedXY( 8, 5 ), {
+    var background = scenery.Rectangle.bounds( label.bounds.dilatedXY( 5, 5 ), {
       stroke: strokeColor,
       fill: ( options.color && options.color( buttonListener ) ) || new axon.DerivedProperty( [ buttonListener.isHighlightedProperty, buttonListener.isPressedProperty ], function( isHighlighted, isPressed ) {
         return isPressed ? armedColor : ( isHighlighted ? activeColor : inactiveColor );
@@ -93,13 +93,13 @@
   } );
   var tabContent = new scenery.Node( {
     x: 10,
-    y: 100
+    y: 120
   } );
   scene.addChild( tabContent );
   var tabBox = new scenery.HBox( {
     spacing: -1,
     x: 10,
-    y: 10
+    y: 30
   } );
   scene.addChild( tabBox );
   function createTab( label, value ) {
@@ -122,11 +122,39 @@
   var interruptButton = createButton( 'Interrupt Input', function() {
     scene.interruptSubtreeInput();
   }, {
-    top: 50,
+    top: 70,
     left: 10
   } );
 
   scene.addChild( interruptButton );
+
+
+
+
+
+
+
+  var simpleDragContainer = new scenery.Node();
+  createTab( 'Drag', simpleDragContainer );
+  simpleDragContainer.addChild( new scenery.Circle( 30, {
+    fill: 'red',
+    stroke: strokeColor,
+    cursor: 'pointer',
+    centerX: 70,
+    centerY: 70,
+    inputListeners: [ new scenery.DragListener( { translateNode: true } ) ]
+  } ) );
+  simpleDragContainer.addChild( new scenery.Rectangle( 0, 0, 45, 45, {
+    fill: '#08F',
+    stroke: strokeColor,
+    cursor: 'pointer',
+    rotation: Math.PI / 4,
+    centerX: 150,
+    centerY: 70,
+    inputListeners: [ new scenery.DragListener( { translateNode: true } ) ]
+  } ) );
+
+
 
 
   var buttonExample = new scenery.Node();
@@ -174,26 +202,6 @@
 
 
 
-
-  var simpleDragContainer = new scenery.Node();
-  createTab( 'Drag', simpleDragContainer );
-  simpleDragContainer.addChild( new scenery.Circle( 30, {
-    fill: 'red',
-    stroke: strokeColor,
-    cursor: 'pointer',
-    centerX: 70,
-    centerY: 70,
-    inputListeners: [ new scenery.DragListener( { translateNode: true } ) ]
-  } ) );
-  simpleDragContainer.addChild( new scenery.Rectangle( 0, 0, 45, 45, {
-    fill: '#08F',
-    stroke: strokeColor,
-    cursor: 'pointer',
-    rotation: Math.PI / 4,
-    centerX: 150,
-    centerY: 70,
-    inputListeners: [ new scenery.DragListener( { translateNode: true } ) ]
-  } ) );
 
 
 
@@ -379,6 +387,45 @@
   addMulti( false, true, 'M+R' );
   addMulti( true, false, 'M+S' );
   addMulti( false, false, 'M' );
+
+
+
+
+
+  var panBounds = new dot.Bounds2( 0, 0, 400, 200 );
+  var panGridShape = new kite.Shape();
+  for ( var x = panBounds.left + 20; x <= panBounds.right - 10; x += 20 ) {
+    panGridShape.moveTo( x, panBounds.top + 1 )
+                .lineTo( x, panBounds.bottom - 1 )
+  }
+  for ( var y = panBounds.top + 20; y <= panBounds.bottom - 10; y += 20 ) {
+    panGridShape.moveTo( panBounds.left + 1, y )
+                .lineTo( panBounds.right - 1, y )
+  }
+  var panContent = new scenery.Node( {
+    children: [
+      scenery.Rectangle.bounds( panBounds ),
+      new scenery.Path( panGridShape, { stroke: strokeColor, lineWidth: 0.25 } ),
+      new scenery.Text( 'pan and zoom?', { fill: '#606', fontSize: 50, center: panBounds.center } ),
+      createButton( 'button can stick!', function(){}, { centerX: panBounds.centerX, centerY: panBounds.height * 4 / 5 } ),
+      new scenery.Rectangle( 0, 0, 20, 20, { fill: 'red' } ),
+      new scenery.Rectangle( 380, 0, 20, 20, { fill: 'red' } ),
+      new scenery.Rectangle( 0, 180, 20, 20, { fill: 'red' } ),
+      new scenery.Rectangle( 380, 180, 20, 20, { fill: 'red' } )
+    ]
+  } );
+  panContent.addInputListener( new scenery.PanZoomListener( {
+    targetNode: panContent,
+    panBounds: panBounds
+  } ) );
+  var panContainer = new scenery.Node( {
+    children: [
+      panContent,
+      scenery.Rectangle.bounds( panBounds, { stroke: strokeColor } )
+    ],
+    clipArea: kite.Shape.bounds( panBounds.dilated( 0.5 ) )
+  } );
+  createTab( 'Pan', panContainer );
 
 
   /*---------------------------------------------------------------------------*

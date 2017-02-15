@@ -98,6 +98,7 @@ define( [
   'SCENERY/listeners/FireListener',
   'SCENERY/listeners/HandleDownListener',
   'SCENERY/listeners/MultiListener',
+  'SCENERY/listeners/PanZoomListener',
   'SCENERY/listeners/PressListener',
 
   'SCENERY/listeners/mixins/Fireable',
