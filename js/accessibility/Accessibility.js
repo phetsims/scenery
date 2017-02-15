@@ -87,6 +87,9 @@ define( function( require ) {
   // these elements require a minimum width to be visible in Safari
   var ELEMENTS_REQUIRE_WIDTH = [ 'INPUT' ];
 
+  // these events change the input value on the dom element
+  var INPUT_CHANGE_EVENTS = [ 'input', 'change' ];
+
   var ACCESSIBILITY_OPTION_KEYS = [
     'tagName', // Sets the tag name for the DOM element representing this node in the parallel DOM
     'inputType', // Sets the input type for the representative DOM element, only relevant if tagname is 'input'
@@ -267,6 +270,15 @@ define( function( require ) {
           var self = this;
           for ( var event in accessibleInput ) {
             if ( accessibleInput.hasOwnProperty( event ) ) {
+
+              // event changes the input value, wrap the listener with a function that will handle this
+              if ( _.includes( INPUT_CHANGE_EVENTS, event ) ) {
+                var listener = accessibleInput[ event ];
+                accessibleInput[ event ] = function( e ) {
+                  self._inputValue = e.target.value;
+                  listener();
+                };
+              }
               self._domElement.addEventListener( event, accessibleInput[ event ] );
             }
           }
@@ -882,7 +894,8 @@ define( function( require ) {
         get accessibleHidden() { return this.getAccessibleHidden(); },
 
         /**
-         * Set the value of an input element.  Element must be a form element to support the value attribute.
+         * Set the value of an input element.  Element must be a form element to support the value attribute. The input
+         * value is converted to string since input values are generally string for HTML.
          * @public
          * 
          * @param {string} value
@@ -890,10 +903,12 @@ define( function( require ) {
         setInputValue: function( value ) {
           assert && assert( _.includes( FORM_ELEMENTS, this._domElement.tagName ), 'dom element must be a form element to support value' );
 
+          value = value.toString();
+
           this._inputValue = value;
           this._domElement.value = value;
         },
-        set inputValue( value ) { this.setINputValue( value ); },
+        set inputValue( value ) { this.setInputValue( value ); },
 
         /**
          * Get the value of the element. Element must be a form element to support the value attribute.
