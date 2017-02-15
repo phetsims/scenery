@@ -102,6 +102,7 @@ define( function( require ) {
       cancel: function( event ) {
         assert && assert( event.pointer === self.pointer );
 
+        // TODO: consider rename to 'interrupted'
         self.wasInterrupted = true;
 
         self.release();

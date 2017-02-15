@@ -97,6 +97,7 @@ define( [
   'SCENERY/listeners/DragListener',
   'SCENERY/listeners/FireListener',
   'SCENERY/listeners/HandleDownListener',
+  'SCENERY/listeners/MultiListener',
   'SCENERY/listeners/PressListener',
 
   'SCENERY/listeners/mixins/Fireable',
