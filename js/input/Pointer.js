@@ -19,6 +19,9 @@ define( function( require ) {
   function Pointer() {
     this.listeners = [];
 
+    // TODO: doc, possibly rename? -- decide on visibility
+    this.attachedCount = 0;
+
     phetAllocation && phetAllocation( 'Pointer' );
   }
 
@@ -38,6 +41,21 @@ define( function( require ) {
       assert && assert( index !== -1 );
 
       this.listeners.splice( index, 1 );
+    },
+
+    // TODO: finalize API?
+    attach: function() {
+      this.attachedCount++;
+    },
+
+    // TODO: finalize API?
+    detach: function() {
+      this.attachedCount--;
+    },
+
+    // TODO: finalize API?
+    isAttached: function() {
+      return this.attachedCount > 0;
     },
 
     // for mouse/touch/pen

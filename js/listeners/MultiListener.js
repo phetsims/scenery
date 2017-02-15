@@ -85,7 +85,7 @@ define( function( require ) {
 
     // TODO: see PressListener
     tryPress: function( event ) {
-      if ( this.isPressed ) { return; }
+      if ( this.isPressed || event.pointer.isAttached() ) { return; }
 
       if ( event.pointer.isMouse && event.domEvent.button !== this._mouseButton ) { return; }
 
@@ -97,6 +97,7 @@ define( function( require ) {
 
       press.pointer.cursor = this._pressCursor;
       press.pointer.addInputListener( this._pressListener );
+      press.pointer.attach();
 
       this.reposition();
 
@@ -108,6 +109,7 @@ define( function( require ) {
     },
 
     removePress: function( press ) {
+      press.pointer.detach();
       press.pointer.removeInputListener( this._pressListener );
       press.pointer.cursor = null;
 

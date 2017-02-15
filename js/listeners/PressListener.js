@@ -56,7 +56,10 @@ define( function( require ) {
       isPressedProperty: new Property( false ),
 
       // TODO doc
-      targetNode: null
+      targetNode: null,
+
+      // TODO: doc
+      attach: true
     }, options );
 
     assert && assert( options.isPressedProperty.value === false,
@@ -77,6 +80,9 @@ define( function( require ) {
 
     // TODO: doc
     this._targetNode = options.targetNode;
+
+    // TODO: doc
+    this._attach = options.attach;
 
     // @public {boolean} [read-only] - Whether the last press was interrupted. Will be valid until the next press.
     this.wasInterrupted = false;
@@ -151,6 +157,10 @@ define( function( require ) {
     press: function( event ) {
       assert && assert( !this.isPressed, 'This listener is already pressed' );
 
+      if ( this._attach && event.pointer.isAttached() ) {
+        return;
+      }
+
       // Set self properties before the property change, so they are visible to listeners.
       this.pointer = event.pointer;
       this.fullPressedTrail = event.trail;
@@ -161,6 +171,7 @@ define( function( require ) {
       this.isPressedProperty.value = true;
 
       this.pointer.addInputListener( this._pointerListener );
+      this._attach && this.pointer.attach();
       this._pointerListenerAttached = true;
 
       this.pointer.cursor = this._pressCursor;
@@ -174,6 +185,7 @@ define( function( require ) {
 
       this.isPressedProperty.value = false;
 
+      this._attach && this.pointer.detach();
       this.pointer.removeInputListener( this._pointerListener );
       this._pointerListenerAttached = false;
 
