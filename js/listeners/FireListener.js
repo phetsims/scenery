@@ -43,6 +43,7 @@ define( function( require ) {
     this._fireOnDown = options.fireOnDown;
     this._fireCallback = options.fire;
 
+    // TODO: highlight should ignore attached pointers that isn't our pointer that's pressing us
     this.isHighlightedProperty = options.isHighlightedProperty;
 
     // TODO: Don't highlight for "pressed" pointers that weren't pressed for us

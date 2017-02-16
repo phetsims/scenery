@@ -47,6 +47,8 @@ define( function( require ) {
       // when pressed).
       release: null,
 
+      // TODO: decide on {scenery.Event} or {Event} docs, as window.Event is the DOM event type (also potentially
+      //       documented as {Event}
       // {Function|null} - Called as drag( event: {scenery.Event} ) when this listener's node is dragged (move events
       // on the pointer while pressed).
       drag: null,

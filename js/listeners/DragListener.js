@@ -1,7 +1,9 @@
 // Copyright 2013-2017, University of Colorado Boulder
 
 /**
- * TODO: doc
+ * PressListener subtype customized for handling most drag-related listener needs.
+ *
+ * TODO: doc the coordinate frames (global, parent, local, model)
  *
  * TODO: unit tests
  *
@@ -18,19 +20,53 @@ define( function( require ) {
   var TransformTracker = require( 'SCENERY/util/TransformTracker' );
 
   /**
-   * TODO: doc
+   * @constructor
+   * @extends PressListener
+   *
+   * @params {Object} [options] - See the constructor body (below) for documented options.
    */
   function DragListener( options ) {
     options = _.extend( {
-      allowTouchSnag: false, // TODO: decide on appropriate default
+      // {boolean} - If true, unattached touches that move across our node will trigger a press(). This helps sometimes
+      // for small draggable objects.
+      allowTouchSnag: false,
+
+      // {boolean} - If true, the initial offset of the pointer's location is taken into account, so that drags will
+      // try to keep the pointer at the same local point of our dragged node.
+      // TODO: how does this work if our node gets scaled/rotated during drag?
       applyOffset: true,
+
+      // {boolean} - If true, ancestor transforms will be watched. If they change, it will trigger a repositioning,
+      // which will usually adjust the location/transform to maintain position.
       trackAncestors: false,
+
+      // {boolean} - If true, the effective currentTarget will be translated when the drag position changes.
       translateNode: false,
+
+      // {Transform3|null} - If provided, this will be the conversion between the parent (view) and model coordinate
+      // frames. Usually most useful when paired with the locationProperty.
       transform: null,
-      locationProperty: null, // TODO doc
-      mapLocation: null, // TODO: doc
-      dragBounds: null, // TODO: support mutability for this type of thing (or support Property.<Bounds2>)
+
+      // {Property.<Vector2>|null} - If provided, it will be synchronized with the drag location in the model coordinate
+      // frame (applying any provided transforms as needed).
+      locationProperty: null,
+
+      // {Bounds2|null} - If provided, the model location will be constrained to be inside these bounds.
+      // TODO: support mutability for this type of thing (or support Property.<Bounds2>)
+      dragBounds: null,
+
+      // {Function|null} - function( modelPoint: {Vector2} ) : {Vector2}. If provided, it will allow custom mapping
+      // from the desired location (i.e. where the pointer is) to the actual possible location (i.e. where the dragged
+      // object ends up). For example, using dragBounds is equivalent to passing:
+      //   mapLocation: function( point ) { return dragBounds.closestPointTo( point ); }
+      mapLocation: null,
+
+      // {Function|null} - Called as start( event: {Event} ) when the drag is started. This is preferred over passing
+      // press(), as the drag start hasn't been fully processed at that point.
       start: null,
+
+      // {Function|null} - Called as end() when the drag is ended. This is preferred over passing release(), as the
+      // drag start hasn't been fully processed at that point.
       end: null
     }, options );
 
@@ -39,6 +75,7 @@ define( function( require ) {
 
     PressListener.call( this, options );
 
+    // @private (stored options)
     this._allowTouchSnag = options.allowTouchSnag;
     this._applyOffset = options.applyOffset;
     this._trackAncestors = options.trackAncestors;
@@ -51,11 +88,19 @@ define( function( require ) {
     this._end = options.end;
 
     // TODO: scratch vectors?
+    // @public {Vector2} - Initial point of the drag in the target's local coordinate frame
     this.initialLocalPoint = null;
+
+    // @public {Vector2} - Current drag point in the parent coordinate frame
     this.parentPoint = new Vector2();
+
+    // @public {Vector2} - Current drag point in the model coordinate frame
     this.modelPoint = new Vector2();
 
+    // @private {TransformTracker|null} - Handles watching ancestor transforms for callbacks.
     this._transformTracker = null;
+
+    // @private {Function} - Listener passed to the transform tracker
     this._transformTrackerListener = this.ancestorTransformed.bind( this );
   }
 
@@ -124,12 +169,12 @@ define( function( require ) {
       this._start && this._start( event );
     },
 
-    release: function( event ) {
-      PressListener.prototype.release.call( this, event );
+    release: function() {
+      PressListener.prototype.release.call( this );
 
       this.detachTransformTracker();
 
-      this._end && this._end( event );
+      this._end && this._end();
     },
 
     drag: function( event ) {
@@ -176,11 +221,15 @@ define( function( require ) {
     },
 
     tryTouchSnag: function( event ) {
-      if ( this._allowTouchSnag ) {
+      if ( this._allowTouchSnag && !event.pointer.isAttached() ) {
         this.press( event );
       }
     },
 
+    /**
+     * Attaches our transform tracker (begins listening to the ancestor transforms)
+     * @private
+     */
     attachTransformTracker: function() {
       if ( this._trackAncestors ) {
         this._transformTracker = new TransformTracker( this.pressedTrail.copy().removeDescendant() );
@@ -188,6 +237,10 @@ define( function( require ) {
       }
     },
 
+    /**
+     * Detaches our transform tracker (stops listening to the ancestor transforms)
+     * @private
+     */
     detachTransformTracker: function() {
       if ( this._transformTracker ) {
         this._transformTracker.removeListener( this._transformTrackerListener );
@@ -196,12 +249,15 @@ define( function( require ) {
       }
     },
 
+    /**
+     * Disposes the listener, releasing references. It should not be used after this.
+     * @public
+     */
     dispose: function() {
       this.detachTransformTracker();
 
       PressListener.prototype.dispose.call( this );
     }
-
   } );
 
   return DragListener;
