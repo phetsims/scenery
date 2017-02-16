@@ -17,30 +17,24 @@ define( function( require ) {
   var Pointer = require( 'SCENERY/input/Pointer' ); // inherits from Pointer
 
   function Mouse() {
-    Pointer.call( this );
-
-    this.point = null;
+    Pointer.call( this, null, false );
 
     this.leftDown = false;
     this.middleDown = false;
     this.rightDown = false;
 
-    this.isMouse = true;
-
-    this.trail = null;
-
-    this.isDown = false;
-
     // mouse wheel delta and mode for the last event, see https://developer.mozilla.org/en-US/docs/Web/Events/wheel
     this.wheelDelta = new Vector3();
     this.wheelDeltaMode = 0; // 0: pixels, 1: lines, 2: pages
-
-    this.type = 'mouse';
   }
 
   scenery.register( 'Mouse', Mouse );
 
   inherit( Pointer, Mouse, {
+    type: 'mouse',
+
+    isMouse: true,
+
     down: function( point, event ) {
       var pointChanged = this.hasPointChanged( point );
       point && sceneryLog && sceneryLog.InputEvent && sceneryLog.InputEvent( 'mouse down at ' + point.toString() );

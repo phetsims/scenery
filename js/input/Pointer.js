@@ -31,9 +31,26 @@ define( function( require ) {
   /**
    * @constructor
    * @protected (scenery-internal)
+   *
+   * @param {Vector2|null} initialPoint
+   * @param {boolean} initialDownState
    */
-  function Pointer() {
-    // TODO: consider moving 'point' to pointer
+  function Pointer( initialPoint, initialDownState ) {
+    assert && assert( initialPoint === null || typeof initialPoint === 'boolean' );
+    assert && assert( typeof initialDownState === 'boolean' );
+
+    // @public {Vector2|null} - The location of the pointer in the global coordinate system. If there has no location
+    //                          recorded yet, it may be null.
+    this.point = initialPoint;
+
+    // @public {Trail|null} - The trail that the pointer is currently over (if it has yet been registered). If the
+    //                        pointer has not yet registered a trail, it may be null. If the pointer wasn't over any
+    //                        specific trail, then a trail with only the display's rootNode will be set.
+    this.trail = null;
+
+    // @public {boolean} - Whether this pointer is 'down' (pressed).
+    // TODO: is this used? How does it work with mouse buttons? Check if we can deprecate/remove it
+    this.isDown = initialDownState;
 
     // @private {Array.<Object>} - All attached listeners (will be activated in order). See top-level documentation for
     //                             information about listener structure.

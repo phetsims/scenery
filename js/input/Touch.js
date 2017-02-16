@@ -1,6 +1,5 @@
 // Copyright 2013-2015, University of Colorado Boulder
 
-
 /**
  * Tracks a single touch point
  *
@@ -18,21 +17,18 @@ define( function( require ) {
   var Pointer = require( 'SCENERY/input/Pointer' ); // extends Pointer
 
   function Touch( id, point, event ) {
-    Pointer.call( this );
+    Pointer.call( this, point, true ); // true: touches always start in the down state
 
     this.id = id;
-    this.point = point;
-    this.isTouch = true;
-    this.trail = null;
-
-    this.isDown = true; // touches always start down
-
-    this.type = 'touch';
   }
 
   scenery.register( 'Touch', Touch );
 
   inherit( Pointer, Touch, {
+    type: 'touch',
+
+    isTouch: true,
+
     move: function( point, event ) {
       var pointChanged = this.hasPointChanged( point );
       // if ( this.point ) { this.point.freeToPool(); }

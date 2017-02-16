@@ -16,21 +16,18 @@ define( function( require ) {
   var Pointer = require( 'SCENERY/input/Pointer' ); // extends Pointer
 
   function Pen( id, point, event ) {
-    Pointer.call( this );
+    Pointer.call( this, point, true ); // true: pen pointers always start in the down state
 
     this.id = id;
-    this.point = point;
-    this.isPen = true;
-    this.trail = null;
-
-    this.isDown = true; // pens always start down? TODO: is this true with pointer events?
-
-    this.type = 'pen';
   }
 
   scenery.register( 'Pen', Pen );
 
   inherit( Pointer, Pen, {
+    type: 'pen',
+
+    isPen: true,
+
     move: function( point, event ) {
       var pointChanged = this.hasPointChanged( point );
       // if ( this.point ) { this.point.freeToPool(); }
