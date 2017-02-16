@@ -375,8 +375,7 @@
       x: 130,
       y: 130
     } );
-    multiNode.addInputListener( new scenery.MultiListener( {
-      targetNode: multiNode,
+    multiNode.addInputListener( new scenery.MultiListener( multiNode, {
       allowScale: allowScale,
       allowRotation: allowRotation
     } ) );
@@ -414,10 +413,7 @@
       new scenery.Rectangle( 380, 180, 20, 20, { fill: 'red' } )
     ]
   } );
-  panContent.addInputListener( new scenery.PanZoomListener( {
-    targetNode: panContent,
-    panBounds: panBounds
-  } ) );
+  panContent.addInputListener( new scenery.PanZoomListener( panContent, panBounds ) );
   var panContainer = new scenery.Node( {
     children: [
       panContent,

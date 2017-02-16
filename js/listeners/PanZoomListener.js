@@ -20,17 +20,16 @@ define( function( require ) {
    *
    * @params {Object} [options] - See the constructor body (below) for documented options.
    */
-  function PanZoomListener( options ) {
+  function PanZoomListener( targetNode, panBounds, options ) {
     options = _.extend( {
       allowScale: true,
       allowRotation: false,
-      pressCursor: null,
-      panBounds: null // TODO: consider making this required
+      pressCursor: null
     }, options );
 
-    MultiListener.call( this, options );
+    MultiListener.call( this, targetNode, options );
 
-    this._panBounds = options.panBounds;
+    this._panBounds = panBounds;
   }
 
   scenery.register( 'PanZoomListener', PanZoomListener );

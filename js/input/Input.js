@@ -772,7 +772,7 @@ define( function( require ) {
 
       var specificType = pointer.type + type; // e.g. mouseup, touchup
 
-      var pointerListeners = pointer.listeners.slice( 0 ); // defensive copy
+      var pointerListeners = pointer.getListeners(); // defensive copy
       for ( var i = 0; i < pointerListeners.length; i++ ) {
         var listener = pointerListeners[ i ];
 
@@ -783,7 +783,7 @@ define( function( require ) {
           listener[ specificType ]( inputEvent );
           aborted = inputEvent.aborted;
         }
-        if ( pointer.firesGenericEvent && !aborted && listener[ type ] ) {
+        if ( !aborted && listener[ type ] ) {
           listener[ type ]( inputEvent );
           aborted = inputEvent.aborted;
         }
@@ -818,7 +818,7 @@ define( function( require ) {
             listener[ specificType ]( inputEvent );
             aborted = inputEvent.aborted;
           }
-          if ( pointer.firesGenericEvent && !aborted && listener[ type ] ) {
+          if ( !aborted && listener[ type ] ) {
             listener[ type ]( inputEvent );
             aborted = inputEvent.aborted;
           }

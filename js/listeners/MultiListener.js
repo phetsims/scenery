@@ -24,7 +24,7 @@ define( function( require ) {
    *
    * @params {Object} [options] - See the constructor body (below) for documented options.
    */
-  function MultiListener( options ) {
+  function MultiListener( targetNode, options ) {
     var self = this;
 
     options = _.extend( {
@@ -35,9 +35,10 @@ define( function( require ) {
       allowRotation: true
     }, options );
 
+    this._targetNode = targetNode;
+
     this._mouseButton = options.mouseButton;
     this._pressCursor = options.pressCursor;
-    this._targetNode = options.targetNode;
     this._allowScale = options.allowScale;
     this._allowRotation = options.allowRotation;
 
@@ -60,6 +61,11 @@ define( function( require ) {
         press.interrupted = true;
 
         self.removePress( press );
+      },
+
+      interrupt: function() {
+        // For the future, we could figure out how to track the pointer that calls this
+        self.interrupt();
       }
     };
   }
@@ -96,8 +102,7 @@ define( function( require ) {
       this._presses.push( press );
 
       press.pointer.cursor = this._pressCursor;
-      press.pointer.addInputListener( this._pressListener );
-      press.pointer.attach();
+      press.pointer.addInputListener( this._pressListener, true );
 
       this.reposition();
 
@@ -109,7 +114,6 @@ define( function( require ) {
     },
 
     removePress: function( press ) {
-      press.pointer.detach();
       press.pointer.removeInputListener( this._pressListener );
       press.pointer.cursor = null;
 

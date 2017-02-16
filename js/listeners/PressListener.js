@@ -55,7 +55,7 @@ define( function( require ) {
       // "pressed" or not.
       isPressedProperty: new Property( false ),
 
-      // TODO doc
+      // {Node|null} - If provided, the pressedTrail (calculated from the down event) will be replaced with
       targetNode: null,
 
       // TODO: doc
@@ -121,6 +121,10 @@ define( function( require ) {
 
         self.drag( event );
         // TODO: should we fill in currentTarget and replace after?
+      },
+
+      interrupt: function() {
+        self.interrupt();
       }
     };
   }
@@ -170,8 +174,7 @@ define( function( require ) {
 
       this.isPressedProperty.value = true;
 
-      this.pointer.addInputListener( this._pointerListener );
-      this._attach && this.pointer.attach();
+      this.pointer.addInputListener( this._pointerListener, this._attach );
       this._pointerListenerAttached = true;
 
       this.pointer.cursor = this._pressCursor;
@@ -185,7 +188,6 @@ define( function( require ) {
 
       this.isPressedProperty.value = false;
 
-      this._attach && this.pointer.detach();
       this.pointer.removeInputListener( this._pointerListener );
       this._pointerListenerAttached = false;
 

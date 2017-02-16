@@ -339,7 +339,7 @@ define( function( require ) {
     this._mouseArea = null; // {Shape|Bounds2} for mouse position in the local coordinate frame
     this._touchArea = null; // {Shape|Bounds2} for touch and pen position in the local coordinate frame
 
-    // @private {string} - The CSS cursor to be displayed over this node. null should be the default (inherit) value.
+    // @private {string|null} - The CSS cursor to be displayed over this node. null should be the default (inherit) value.
     this._cursor = null;
 
     // @private {null|Object} - If non-null, this node will be represented in the parallel DOM by the accessible content.
@@ -2934,7 +2934,7 @@ define( function( require ) {
      * indicates that ancestor nodes (or the browser default) should be used.
      * @public
      *
-     * @param {string} cursor - A CSS cursor string, like 'pointer', or 'none'
+     * @param {string|null} cursor - A CSS cursor string, like 'pointer', or 'none'
      */
     setCursor: function( cursor ) {
       assert && assert( typeof cursor === 'string' || cursor === null );
@@ -2952,10 +2952,10 @@ define( function( require ) {
     set cursor( value ) { this.setCursor( value ); },
 
     /**
-     * Returns the CSS cursor string for this node.
+     * Returns the CSS cursor string for this node, or null if there is no cursor specified.
      * @public
      *
-     * @returns {string}
+     * @returns {string|null}
      */
     getCursor: function() {
       return this._cursor;
