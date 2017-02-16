@@ -58,7 +58,9 @@ define( function( require ) {
       // {Node|null} - If provided, the pressedTrail (calculated from the down event) will be replaced with
       targetNode: null,
 
-      // TODO: doc
+      // {boolean} - If true, this listener will not "press" while the associated pointer is attached, and when pressed,
+      // will mark itself as attached to the pointer. If this listener should not be interrupted by others and isn't
+      // a "primary" handler of the pointer's behavior, this should be set to false.
       attach: true
     }, options );
 
@@ -71,21 +73,11 @@ define( function( require ) {
     // @public {Pointer|null} [read-only] - The current pointer (if pressed)
     this.pointer = null;
 
-    // @public {Trail|null} [read-only] - The Trail for the press, possibly including descendant nodes past the currentTarget
-    // TODO: evaluate how often this would be used (event.trail may be sufficient in most cases)
-    this.fullPressedTrail = null;
-
     // @public {Trail|null} [read-only] - The Trail for the press, with no descendant nodes past the currentTarget
     this.pressedTrail = null;
 
-    // TODO: doc
-    this._targetNode = options.targetNode;
-
-    // TODO: doc
-    this._attach = options.attach;
-
     // @public {boolean} [read-only] - Whether the last press was interrupted. Will be valid until the next press.
-    this.wasInterrupted = false;
+    this.interrupted = false;
 
     // @private (stored options)
     this._mouseButton = options.mouseButton;
@@ -93,36 +85,55 @@ define( function( require ) {
     this._pressListener = options.press;
     this._releaseListener = options.release;
     this._dragListener = options.drag;
+    this._targetNode = options.targetNode;
+    this._attach = options.attach;
 
-    this._pointerListenerAttached = false;
+    // @private {boolean} - Whether our pointer listener is referenced by the pointer (need to have a flag due to
+    //                      handling disposal properly).
+    this._listeningToPointer = false;
+
     // @private {Object} - The listener that gets added to the pointer when we are pressed
     this._pointerListener = {
+      /**
+       * Called with 'up' events from the pointer (part of the listener API)
+       * @public
+       *
+       * @param {Event} event
+       */
       up: function( event ) {
         assert && assert( event.pointer === self.pointer );
 
         self.release();
-
-        // TODO: should we fill in currentTarget and replace after?
       },
 
+      /**
+       * Called with 'cancel' events from the pointer (part of the listener API)
+       * @public
+       *
+       * @param {Event} event
+       */
       cancel: function( event ) {
         assert && assert( event.pointer === self.pointer );
 
-        // TODO: consider rename to 'interrupted'
-        self.wasInterrupted = true;
-
-        self.release();
-
-        // TODO: should we fill in currentTarget and replace after?
+        self.interrupt(); // will mark as interrupted and release()
       },
 
+      /**
+       * Called with 'move' events from the pointer (part of the listener API)
+       * @public
+       *
+       * @param {Event} event
+       */
       move: function( event ) {
         assert && assert( event.pointer === self.pointer );
 
         self.drag( event );
-        // TODO: should we fill in currentTarget and replace after?
       },
 
+      /**
+       * Called when the pointer needs to interrupt its current listener (usually so another can be added).
+       * @public
+       */
       interrupt: function() {
         self.interrupt();
       }
@@ -132,91 +143,142 @@ define( function( require ) {
   scenery.register( 'PressListener', PressListener );
 
   inherit( Object, PressListener, {
-    // TODO: doc
+    /**
+     * Whether this listener is currently activated with a press.
+     * @public
+     *
+     * @returns {boolean}
+     */
     get isPressed() {
       return this.isPressedProperty.value;
     },
 
-    // TODO: doc
-    // TODO: evaluate if this should be here?
-    get currentTarget() {
-      assert && assert( this.isPressListener, 'We have no currentTarget if we are not pressed' );
+    /**
+     * The main node that this listener is responsible for dragging.
+     * @public
+     *
+     * @returns {Node}
+     */
+    getCurrentTarget: function() {
+      assert && assert( this.isPressed, 'We have no currentTarget if we are not pressed' );
 
-      return this.trail.lastNode();
+      return this.pressedTrail.lastNode();
     },
 
+    /**
+     * Called with 'down' events from the pointer (part of the listener API).
+     * @public
+     *
+     * NOTE: Do not call directly. See the press method instead.
+     *
+     * @param {Event} event
+     */
     down: function( event ) {
-      this.tryPress( event );
-    },
-
-    tryPress: function( event ) {
-      if ( this.isPressed ) { return; }
-
-      if ( event.pointer.isMouse && event.domEvent.button !== this._mouseButton ) { return; }
-
       this.press( event );
     },
 
-    // TODO: can we do this without the event? Maybe pointer, trail, etc?
+    /**
+     * Moves the listener to the 'pressed' state if possible (attaches listeners and initializes press-related
+     * properties).
+     * @public
+     *
+     * This can be overridden (with super-calls) when custom press behavior is needed for a type.
+     *
+     * This can be called by outside clients in order to try to begin a process (generally on an already-pressed
+     * pointer), and is useful if a 'drag' needs to change between listeners.
+     *
+     * TODO: Can we separate this out so it's possible to not have to pass in the original event?
+     *       The pointer, trail and currentTarget should be sufficient (if we don't need to pass it to our listener)
+     *       Pointer is sufficient if a targetNode is provided.
+     *
+     * @param {Event} event
+     */
     press: function( event ) {
       assert && assert( !this.isPressed, 'This listener is already pressed' );
 
-      if ( this._attach && event.pointer.isAttached() ) {
-        return;
-      }
+      // If this listener is already involved in pressing something, we can't press something
+      if ( this.isPressed ) { return; }
+
+      // Only let presses be started with the correct mouse button.
+      if ( event.pointer.isMouse && event.domEvent.button !== this._mouseButton ) { return; }
+
+      // We can't attach to a pointer that is already attached.
+      if ( this._attach && event.pointer.isAttached() ) { return; }
 
       // Set self properties before the property change, so they are visible to listeners.
       this.pointer = event.pointer;
-      this.fullPressedTrail = event.trail;
       this.pressedTrail = this._targetNode ? this._targetNode.getUniqueTrail() :
                                              event.trail.subtrailTo( event.currentTarget, false );
-      this.wasInterrupted = false;
+      this.interrupted = false; // clears the flag (don't set to false before here)
 
       this.isPressedProperty.value = true;
 
       this.pointer.addInputListener( this._pointerListener, this._attach );
-      this._pointerListenerAttached = true;
+      this._listeningToPointer = true;
 
       this.pointer.cursor = this._pressCursor;
 
       this._pressListener && this._pressListener( event );
     },
 
-    // TODO: can we do this without the event? Maybe pointer, trail, etc?
+    /**
+     * Releases a pressed listener.
+     * @public
+     *
+     * This can be overridden (with super-calls) when custom release behavior is needed for a type.
+     *
+     * This can be called from the outside to release the press without the pointer having actually fired any 'up'
+     * events. If the cancel/interrupt behavior is more preferable, call interrupt() on this listener instead.
+     */
     release: function() {
       assert && assert( this.isPressed, 'This listener is not pressed' );
 
       this.isPressedProperty.value = false;
 
       this.pointer.removeInputListener( this._pointerListener );
-      this._pointerListenerAttached = false;
+      this._listeningToPointer = false;
 
       this.pointer.cursor = null;
 
       // Unset self properties after the property change, so they are visible to listeners beforehand.
       this.pointer = null;
-      this.fullPressedTrail = null;
       this.pressedTrail = null;
 
       this._releaseListener && this._releaseListener();
     },
 
+    /**
+     * Called when move events are fired on the attached pointer listener.
+     * @protected
+     *
+     * This can be overridden (with super-calls) when custom drag behavior is needed for a type.
+     */
     drag: function( event ) {
       assert && assert( this.isPressed, 'Can only drag while pressed' );
 
       this._dragListener && this._dragListener( event );
     },
 
+    /**
+     * Interrupts the listener, releasing it (canceling behavior).
+     * @public
+     *
+     * This can be called manually, but can also be called through node.interruptSubtreeInput().
+     */
     interrupt: function() {
       if ( this.isPressed ) {
-        this.wasInterrupted = true;
+        this.interrupted = true;
 
         this.release();
       }
     },
 
+    /**
+     * Disposes the listener, releasing references. It should not be used after this.
+     * @public
+     */
     dispose: function() {
-      if ( this._pointerListenerAttached ) {
+      if ( this._listeningToPointer ) {
         this.pointer.removeInputListener( this._pointerListener );
       }
     }

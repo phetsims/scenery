@@ -86,11 +86,6 @@ define( function( require ) {
 
     // TODO: see PressListener
     down: function( event ) {
-      this.tryPress( event );
-    },
-
-    // TODO: see PressListener
-    tryPress: function( event ) {
       if ( this.isPressed || event.pointer.isAttached() ) { return; }
 
       if ( event.pointer.isMouse && event.domEvent.button !== this._mouseButton ) { return; }

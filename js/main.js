@@ -101,13 +101,6 @@ define( [
   'SCENERY/listeners/PanZoomListener',
   'SCENERY/listeners/PressListener',
 
-  'SCENERY/listeners/mixins/Fireable',
-  'SCENERY/listeners/mixins/Highlightable',
-  'SCENERY/listeners/mixins/Hoverable',
-  'SCENERY/listeners/mixins/protoAfter',
-  'SCENERY/listeners/mixins/protoBefore',
-  'SCENERY/listeners/mixins/TouchSnaggable',
-
   'SCENERY/nodes/AlignBox',
   'SCENERY/nodes/AlignGroup',
   'SCENERY/nodes/CanvasNode',

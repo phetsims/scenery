@@ -83,7 +83,7 @@ define( function( require ) {
     release: function() {
       PressListener.prototype.release.call( this, event );
 
-      if ( !this._fireOnDown && this.isOverProperty.value && !this.wasInterrupted ) {
+      if ( !this._fireOnDown && this.isOverProperty.value && !this.interrupted ) {
         this.fire();
       }
     }

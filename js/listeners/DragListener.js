@@ -177,7 +177,7 @@ define( function( require ) {
 
     tryTouchSnag: function( event ) {
       if ( this._allowTouchSnag ) {
-        this.tryPress( event );
+        this.press( event );
       }
     },
 
