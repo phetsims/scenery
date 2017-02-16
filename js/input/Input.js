@@ -40,6 +40,10 @@
  * - currentTarget {Node} - The Node to which the listener being fired is attached, or null if the listener is being
  *                          fired directly from a pointer.
  *
+ * Additionally, listeners may support an interrupt() method that detaches it from pointers, or may support being
+ * "attached" to a pointer (indicating a primary role in controlling the pointer's behavior). See Pointer for more
+ * information about these interactions.
+ *
  * *** Event Types
  *
  * Scenery will fire the following base event types:
