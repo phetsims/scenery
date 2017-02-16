@@ -70,6 +70,7 @@ define( function( require ) {
   var INPUT_TAG = 'INPUT';
   var LABEL_TAG = 'LABEL';
   var UNORDERED_LIST_TAG = 'UL';
+  var LIST_ITEM_TAG = 'LI';
   var BUTTON_TAG = 'BUTTON';
   var TEXTAREA_TAG = 'TEXTAREA';
   var SELECT_TAG = 'SELECT';
@@ -82,7 +83,7 @@ define( function( require ) {
   var FORM_ELEMENTS = [ INPUT_TAG, BUTTON_TAG, TEXTAREA_TAG, SELECT_TAG, OPTGROUP_TAG, DATALIST_TAG, OUTPUT_TAG ];
 
   // these elements support inner text
-  var ELEMENTS_SUPPORT_INNER_TEXT = [ BUTTON_TAG, PARAGRAPH_TAG ];
+  var ELEMENTS_SUPPORT_INNER_TEXT = [ BUTTON_TAG, PARAGRAPH_TAG, LIST_ITEM_TAG ];
 
   // these elements require a minimum width to be visible in Safari
   var ELEMENTS_REQUIRE_WIDTH = [ 'INPUT' ];
@@ -93,6 +94,7 @@ define( function( require ) {
   var ACCESSIBILITY_OPTION_KEYS = [
     'tagName', // Sets the tag name for the DOM element representing this node in the parallel DOM
     'inputType', // Sets the input type for the representative DOM element, only relevant if tagname is 'input'
+    'inputValue', // Sets the input value for the representative DOM element, only relevant if tagname is 'input'
     'parentContainerTagName', // Sets the tag name for an element that contains this node's DOM element and its peers
     'labelTagName', // Sets the tag name for the DOM element labelling this node, usually a paragraph
     'descriptionTagName', // Sets the tag name for the DOM element describing this node, usually a paragraph
