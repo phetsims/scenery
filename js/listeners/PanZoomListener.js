@@ -17,8 +17,18 @@ define( function( require ) {
 
   /**
    * @constructor
+   * @extends MultiListener
    *
-   * @params {Object} [options] - See the constructor body (below) for documented options.
+   * TODO: Have 'content' bounds (instead of using the targetNode's bounds), since some things may extend off the side
+   *       of the content bounds.
+   *
+   * TODO: Support mutable target or pan bounds (adjust transform).
+   *
+   * TODO: If scale !~=1, allow interrupting other pointers when multitouch begins (say pan area is filled with button)
+   *
+   * @param {Node} targetNode - The Node that should be transformed by this PanZoomListener.
+   * @param {Bounds2} panBounds - Bounds that should be fully filled with content at all times.
+   * @param {Object} [options] - See the constructor body (below) for documented options.
    */
   function PanZoomListener( targetNode, panBounds, options ) {
     options = _.extend( {

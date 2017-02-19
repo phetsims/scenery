@@ -22,7 +22,7 @@ define( function( require ) {
   /**
    * @constructor
    *
-   * @params {Object} [options] - See the constructor body (below) for documented options.
+   * @param {Object} [options] - See the constructor body (below) for documented options.
    */
   function MultiListener( targetNode, options ) {
     var self = this;

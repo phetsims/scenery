@@ -46,7 +46,11 @@
 
 <script>
 
-  // initialize our scene
+  /*---------------------------------------------------------------------------*
+  * Initialization and utility
+  *----------------------------------------------------------------------------*/
+
+  // Set up the display
   var scene = new scenery.Node();
   var display = new scenery.Display( scene, {
     container: document.getElementById( 'main' )
@@ -59,6 +63,7 @@
   var armedColor = '#aaa';
   var strokeColor = '#000';
 
+  // creates a minimally stylized button
   function createButton( label, callback, options ) {
     var label = new scenery.Text( label, {
       fontSize: 12,
@@ -80,6 +85,7 @@
     }, options ) );
   }
 
+  // Handle tabs (each 'tab' is a Node)
   var tabProperty = new axon.Property( null );
   var tabs = [];
   tabProperty.lazyLink( function( selectedTab ) {
@@ -110,6 +116,7 @@
       tabProperty.value = value;
     }, {
       color: function( buttonListener ) {
+        // handle highlighting of the active tab (on top of what the button above does)
         return new axon.DerivedProperty( [ tabProperty, buttonListener.isHighlightedProperty, buttonListener.isPressedProperty ], function( tabValue, isHighlighted, isPressed ) {
           return isPressed ? armedColor : ( ( isHighlighted || tabValue === value ) ? activeColor : inactiveColor );
         } );
@@ -119,20 +126,18 @@
     tabContent.addChild( value );
   }
 
-  var interruptButton = createButton( 'Interrupt Input', function() {
+  // Interrupt button should interrupt every listener attached to a Node
+  scene.addChild( createButton( 'Interrupt Input', function() {
     scene.interruptSubtreeInput();
   }, {
     top: 70,
     left: 10
-  } );
+  } ) );
 
-  scene.addChild( interruptButton );
-
-
-
-
-
-
+  /*---------------------------------------------------------------------------*
+  * "Drag" tab
+  * Uses new DragListener( { translateNode: true } )
+  *----------------------------------------------------------------------------*/
 
   var simpleDragContainer = new scenery.Node();
   createTab( 'Drag', simpleDragContainer );
@@ -154,8 +159,10 @@
     inputListeners: [ new scenery.DragListener( { translateNode: true } ) ]
   } ) );
 
-
-
+  /*---------------------------------------------------------------------------*
+  * "Button" tab
+  * Uses FireListener (naming?)
+  *----------------------------------------------------------------------------*/
 
   var buttonExample = new scenery.Node();
   createTab( 'Button', buttonExample );
@@ -198,14 +205,10 @@
     buttonText.center = new dot.Vector2();
   } );
 
-
-
-
-
-
-
-
-
+  /*---------------------------------------------------------------------------*
+  * "Bound+Transform" tab
+  * DragListener with dragBounds, with a parent that is rotated and scaled.
+  *----------------------------------------------------------------------------*/
 
   var transformContainer = new scenery.Node( {
     scale: 1.5,
@@ -232,9 +235,11 @@
     dragBounds: constrainBounds.eroded( constrainedNode.radius )
   } ) );
 
-
-
-
+  /*---------------------------------------------------------------------------*
+  * "Panel+Model" tab
+  * Typical PhET model-view setup, with an MVT, model location property, observable array of draggables, and
+  * hook-ups for dragging things from a panel (removing when dragged back).
+  *----------------------------------------------------------------------------*/
 
   var modelContainer = new scenery.Node();
   createTab( 'Panel+Model', modelContainer );
@@ -294,15 +299,19 @@
 
   objectButton.addInputListener( {
     down: function( event ) {
+      // Put the initial model location right where the pointer is
       var modelPosition = objectTransform.inversePosition2( modelContainer.getUniqueTrail().globalToLocalPoint( event.pointer.point ) );
       var newObject = new axon.Property( modelPosition );
       objects.push( newObject );
+
+      // pass it off to the drag listener
       getObjectNode( newObject ).dragListener.press( event );
     }
   } );
 
-
-
+  /*---------------------------------------------------------------------------*
+  * "Rotation" tab
+  *----------------------------------------------------------------------------*/
 
   var innerRadius = 40;
   var outerRadius = 80;
@@ -323,9 +332,8 @@
   } );
   var rotationProperty = new axon.Property( 0 );
   rotationProperty.linkAttribute( rotationNode, 'rotation' );
-  var initialDragRotation;
   rotationNode.addInputListener( new scenery.DragListener( {
-    applyOffset: false,
+    applyOffset: false, // Tracking the initial rotation needs to be done, have our model point ignore local location.
     drag: function( event ) {
       rotationProperty.value = this.modelPoint.angle() - this.initialLocalPoint.angle();
     }
@@ -342,9 +350,10 @@
   } );
   createTab( 'Rotation', rotationContainer );
 
-
-
-
+  /*---------------------------------------------------------------------------*
+  * "Ancestor+Move" tab
+  * Handle tracking ancestors so that a drag pins the node on the screen (ignores ancestor transform)
+  *----------------------------------------------------------------------------*/
 
   var trackerNode = new scenery.Path( kite.Shape.regularPolygon( 5, 40 ), {
     fill: '#08F',
@@ -365,7 +374,13 @@
   } );
   createTab( 'Ancestor+Move', trackerContainer );
 
-
+  /*---------------------------------------------------------------------------*
+  * Multitouch tabs (use 2+ fingers)
+  * "M+SR" tab: Multi-touch drag with scaling and rotation enabled (rigid + zoom).
+  * "M+R" tab: Multi-touch drag with rotation enabled (rigid transformations).
+  * "M+S" tab: Multi-touch drag with scaling enabled (pan-zoom transformations).
+  * "M" tab: Multi-touch drag (just translation)
+  *----------------------------------------------------------------------------*/
 
   function addMulti( allowScale, allowRotation, label ) {
     var multiNode = new scenery.Path( kite.Shape.regularPolygon( 3, 100 ), {
@@ -387,9 +402,9 @@
   addMulti( true, false, 'M+S' );
   addMulti( false, false, 'M' );
 
-
-
-
+  /*---------------------------------------------------------------------------*
+  * Pan + zoom prototype
+  *----------------------------------------------------------------------------*/
 
   var panBounds = new dot.Bounds2( 0, 0, 400, 200 );
   var panGridShape = new kite.Shape();

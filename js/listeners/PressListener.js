@@ -19,7 +19,7 @@ define( function( require ) {
   /**
    * @constructor
    *
-   * @params {Object} [options] - See the constructor body (below) for documented options.
+   * @param {Object} [options] - See the constructor body (below) for documented options.
    */
   function PressListener( options ) {
     var self = this;

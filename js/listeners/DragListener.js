@@ -23,7 +23,7 @@ define( function( require ) {
    * @constructor
    * @extends PressListener
    *
-   * @params {Object} [options] - See the constructor body (below) for documented options.
+   * @param {Object} [options] - See the constructor body (below) for documented options.
    */
   function DragListener( options ) {
     options = _.extend( {
