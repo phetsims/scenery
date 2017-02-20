@@ -27,6 +27,7 @@ define( function( require ) {
 
   var inherit = require( 'PHET_CORE/inherit' );
   var scenery = require( 'SCENERY/scenery' );
+  var Vector2 = require( 'DOT/Vector2' );
 
   /**
    * @constructor
@@ -36,7 +37,7 @@ define( function( require ) {
    * @param {boolean} initialDownState
    */
   function Pointer( initialPoint, initialDownState ) {
-    assert && assert( initialPoint === null || typeof initialPoint === 'boolean' );
+    assert && assert( initialPoint === null || initialPoint instanceof Vector2 );
     assert && assert( typeof initialDownState === 'boolean' );
 
     // @public {Vector2|null} - The location of the pointer in the global coordinate system. If there has no location
