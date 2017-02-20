@@ -523,5 +523,7 @@ define( function( require ) {
     }
   };
 
+  scenery.register( 'BrowserEvents', BrowserEvents );
+
   return BrowserEvents;
 } );
