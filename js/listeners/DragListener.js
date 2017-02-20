@@ -157,16 +157,20 @@ define( function( require ) {
     },
 
     press: function( event ) {
-      PressListener.prototype.press.call( this, event ); // TODO: do we need to delay notification with options release?
+      var success = PressListener.prototype.press.call( this, event ); // TODO: do we need to delay notification with options release?
 
-      this.attachTransformTracker();
+      if ( success ) {
+        this.attachTransformTracker();
 
-      // TODO: scratch vectors
-      this.initialLocalPoint = this.parentToLocalPoint( this.globalToParentPoint( this.pointer.point ) );
+        // TODO: scratch vectors
+        this.initialLocalPoint = this.parentToLocalPoint( this.globalToParentPoint( this.pointer.point ) );
 
-      this.reposition( this.pointer.point );
+        this.reposition( this.pointer.point );
 
-      this._start && this._start( event );
+        this._start && this._start( event );
+      }
+
+      return success;
     },
 
     release: function() {

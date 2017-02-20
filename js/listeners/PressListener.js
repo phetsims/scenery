@@ -194,18 +194,19 @@ define( function( require ) {
      *       Pointer is sufficient if a targetNode is provided.
      *
      * @param {Event} event
+     * @returns {boolean} success - Returns whether the press was actually started
      */
     press: function( event ) {
       assert && assert( !this.isPressed, 'This listener is already pressed' );
 
       // If this listener is already involved in pressing something, we can't press something
-      if ( this.isPressed ) { return; }
+      if ( this.isPressed ) { return false; }
 
       // Only let presses be started with the correct mouse button.
-      if ( event.pointer.isMouse && event.domEvent.button !== this._mouseButton ) { return; }
+      if ( event.pointer.isMouse && event.domEvent.button !== this._mouseButton ) { return false; }
 
       // We can't attach to a pointer that is already attached.
-      if ( this._attach && event.pointer.isAttached() ) { return; }
+      if ( this._attach && event.pointer.isAttached() ) { return false; }
 
       // Set self properties before the property change, so they are visible to listeners.
       this.pointer = event.pointer;
@@ -221,6 +222,8 @@ define( function( require ) {
       this.pointer.cursor = this._pressCursor;
 
       this._pressListener && this._pressListener( event );
+
+      return true;
     },
 
     /**

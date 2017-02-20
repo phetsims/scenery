@@ -73,11 +73,15 @@ define( function( require ) {
 
     // @override
     press: function( event ) {
-      PressListener.prototype.press.call( this, event );
+      var success = PressListener.prototype.press.call( this, event );
 
-      if ( this._fireOnDown ) {
-        this.fire( event );
+      if ( success ) {
+        if ( this._fireOnDown ) {
+          this.fire( event );
+        }
       }
+
+      return success;
     },
 
     // @override
