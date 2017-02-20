@@ -22,6 +22,7 @@ define( function( require ) {
   /**
    * @constructor
    *
+   * @param {Node} targetNode - The Node that should be transformed by this MultiListener.
    * @param {Object} [options] - See the constructor body (below) for documented options.
    */
   function MultiListener( targetNode, options ) {
@@ -134,6 +135,7 @@ define( function( require ) {
       }
     },
 
+    // @private?
     computeMatrix: function() {
       if ( this._presses.length === 0 ) {
         return this._targetNode.getMatrix();
@@ -152,6 +154,7 @@ define( function( require ) {
       }
     },
 
+    // @private
     computeSinglePressMatrix: function() {
       // TODO: scratch things
       var singleTargetPoint = this._presses[ 0 ].targetPoint;
@@ -160,6 +163,7 @@ define( function( require ) {
       return Matrix3.translationFromVector( delta ).timesMatrix( this._targetNode.getMatrix() );
     },
 
+    // @private
     computeTranslationMatrix: function() {
       // translation only. linear least-squares simplifies to sum of differences
       var sum = new Vector2();
@@ -170,6 +174,7 @@ define( function( require ) {
       return Matrix3.translationFromVector( sum.dividedScalar( this._presses.length ) );
     },
 
+    // @private
     computeTranslationScaleMatrix: function() {
       // TODO: minimize closures
       var localPoints = this._presses.map( function( press ) { return press.localPoint; } );
@@ -198,6 +203,7 @@ define( function( require ) {
       return translateToTarget.timesMatrix( Matrix3.scaling( scale ) ).timesMatrix( translateFromLocal );
     },
 
+    // @private
     computeTranslationRotationMatrix: function() {
       var i;
       var localMatrix = new Matrix( 2, this._presses.length );
@@ -239,6 +245,7 @@ define( function( require ) {
       return rotation3;
     },
 
+    // @private
     computeTranslationRotationScaleMatrix: function() {
       var i;
       var localMatrix = new Matrix( this._presses.length * 2, 4 );

@@ -121,10 +121,8 @@ define( function( require ) {
       // initial display height
       height: ( options && options.container && options.container.clientHeight ) || 480,
 
-      //OHTWO TODO: hook up allowCSSHacks
       allowCSSHacks: true,       // applies CSS styles to the root DOM element that make it amenable to interactive content
       allowSceneOverflow: false, // usually anything displayed outside of our dom element is hidden with CSS overflow
-      //OHTWO TODO: hook up enablePointerEvents
       enablePointerEvents: true, // whether we should specifically listen to pointer events if we detect support
       defaultCursor: 'default',  // what cursor is used when no other cursor is specified
       backgroundColor: null,      // initial background color
@@ -271,6 +269,7 @@ define( function( require ) {
       // check to see whether contents under pointers changed (and if so, send the enter/exit events) to
       // maintain consistent state
       if ( this._input ) {
+        // TODO: Should this be handled elsewhere?
         this._input.validatePointers();
       }
 
@@ -1016,7 +1015,6 @@ define( function( require ) {
       }, parameters ) );
     },
 
-    //OHTWO TODO: ability to disconnect event handling (useful for playground debugging)
     initializeEvents: function( parameters ) {
       assert && assert( !this._input, 'Events cannot be attached twice to a display (for now)' );
 
