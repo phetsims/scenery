@@ -41,7 +41,7 @@
     height: 400,
     backgroundColor: '#fff'
   } );
-  display1.initializeStandaloneEvents(); // TODO: initializeFullscreenEvents possibly?
+  display1.initializeEvents();
   display1.updateOnRequestAnimationFrame();
 
   var scene2 = new scenery.Node();
@@ -51,7 +51,7 @@
     height: 400,
     backgroundColor: '#fff'
   } );
-  display2.initializeStandaloneEvents(); // TODO: initializeFullscreenEvents possibly?
+  display2.initializeEvents();
   display2.updateOnRequestAnimationFrame();
 
   var inactiveColor = '#ccc';

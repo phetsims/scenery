@@ -157,7 +157,7 @@
     scene.addChild( new scenery.DOM( textField, { interactive: true } ) );
 
     scene.resize( window.innerWidth, 1200 );
-    scene.initializeFullscreenEvents();
+    scene.initializeEvents();
     scene.updateOnRequestAnimationFrame();
 
     textField.addEventListener( 'change', function() {

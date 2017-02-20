@@ -130,7 +130,9 @@ define( function( require ) {
   require( 'SCENERY/input/Pen' );
   var Event = require( 'SCENERY/input/Event' );
   var BatchedDOMEvent = require( 'SCENERY/input/BatchedDOMEvent' );
+  var BrowserEvents = require( 'SCENERY/input/BrowserEvents' );
   var Emitter = require( 'AXON/Emitter' );
+  var Vector2 = require( 'DOT/Vector2' );
 
   // Object literal makes it easy to check for the existence of an attribute (compared to [].indexOf()>=0)
   var domEventPropertiesToSerialize = {
@@ -139,14 +141,17 @@ define( function( require ) {
     pointerType: true, charCode: true, which: true, clientX: true, clientY: true, changedTouches: true
   };
 
-  // listenerTarget is the DOM node (window/document/element) to which DOM event listeners will be attached
-  function Input( display, listenerTarget, batchDOMEvents, enablePointerEvents, pointFromEvent ) {
+  function Input( display, attachToWindow, batchDOMEvents, assumeFullWindow ) {
+    assert && assert( display instanceof scenery.Display );
+    assert && assert( typeof attachToWindow === 'boolean' );
+    assert && assert( typeof batchDOMEvents === 'boolean' );
+    assert && assert( typeof assumeFullWindow === 'boolean' );
+
     this.display = display;
     this.rootNode = display.rootNode;
-    this.listenerTarget = listenerTarget;
+    this.attachToWindow = attachToWindow;
     this.batchDOMEvents = batchDOMEvents;
-    this.enablePointerEvents = enablePointerEvents;
-    this.pointFromEvent = pointFromEvent;
+    this.assumeFullWindow = assumeFullWindow;
     this.displayUpdateOnEvent = false;
 
     this.batchedEvents = [];
@@ -157,36 +162,10 @@ define( function( require ) {
     this.pointers = [];
 
     // For PhET-iO
+    // TODO: this could be made a general thing
     this.emitter = new Emitter();
 
     this.pointerAddedListeners = [];
-
-    var self = this;
-
-    // unique to this input instance
-    this.onpointerdown = function onpointerdown( domEvent ) { self.batchEvent( domEvent, BatchedDOMEvent.POINTER_TYPE, self.pointerDown, false ); };
-    this.onpointerup = function onpointerup( domEvent ) { self.batchEvent( domEvent, BatchedDOMEvent.POINTER_TYPE, self.pointerUp, true ); };
-    this.onpointermove = function onpointermove( domEvent ) { self.batchEvent( domEvent, BatchedDOMEvent.POINTER_TYPE, self.pointerMove, false ); };
-    this.onpointerover = function onpointerover( domEvent ) { self.batchEvent( domEvent, BatchedDOMEvent.POINTER_TYPE, self.pointerOver, false ); };
-    this.onpointerout = function onpointerout( domEvent ) { self.batchEvent( domEvent, BatchedDOMEvent.POINTER_TYPE, self.pointerOut, false ); };
-    this.onpointercancel = function onpointercancel( domEvent ) { self.batchEvent( domEvent, BatchedDOMEvent.POINTER_TYPE, self.pointerCancel, false ); };
-    this.onMSPointerDown = function onMSPointerDown( domEvent ) { self.batchEvent( domEvent, BatchedDOMEvent.MS_POINTER_TYPE, self.pointerDown, false ); };
-    this.onMSPointerUp = function onMSPointerUp( domEvent ) { self.batchEvent( domEvent, BatchedDOMEvent.MS_POINTER_TYPE, self.pointerUp, true ); };
-    this.onMSPointerMove = function onMSPointerMove( domEvent ) { self.batchEvent( domEvent, BatchedDOMEvent.MS_POINTER_TYPE, self.pointerMove, false ); };
-    this.onMSPointerOver = function onMSPointerOver( domEvent ) { self.batchEvent( domEvent, BatchedDOMEvent.MS_POINTER_TYPE, self.pointerOver, false ); };
-    this.onMSPointerOut = function onMSPointerOut( domEvent ) { self.batchEvent( domEvent, BatchedDOMEvent.MS_POINTER_TYPE, self.pointerOut, false ); };
-    this.onMSPointerCancel = function onMSPointerCancel( domEvent ) { self.batchEvent( domEvent, BatchedDOMEvent.MS_POINTER_TYPE, self.pointerCancel, false ); };
-    this.ontouchstart = function ontouchstart( domEvent ) { self.batchEvent( domEvent, BatchedDOMEvent.TOUCH_TYPE, self.touchStart, false ); };
-    this.ontouchend = function ontouchend( domEvent ) { self.batchEvent( domEvent, BatchedDOMEvent.TOUCH_TYPE, self.touchEnd, true ); };
-    this.ontouchmove = function ontouchmove( domEvent ) { self.batchEvent( domEvent, BatchedDOMEvent.TOUCH_TYPE, self.touchMove, false ); };
-    this.ontouchcancel = function ontouchcancel( domEvent ) { self.batchEvent( domEvent, BatchedDOMEvent.TOUCH_TYPE, self.touchCancel, false ); };
-    this.onmousedown = function onmousedown( domEvent ) { self.batchEvent( domEvent, BatchedDOMEvent.MOUSE_TYPE, self.mouseDown, false ); };
-    this.onmouseup = function onmouseup( domEvent ) { self.batchEvent( domEvent, BatchedDOMEvent.MOUSE_TYPE, self.mouseUp, true ); };
-    this.onmousemove = function onmousemove( domEvent ) { self.batchEvent( domEvent, BatchedDOMEvent.MOUSE_TYPE, self.mouseMove, false ); };
-    this.onmouseover = function onmouseover( domEvent ) { self.batchEvent( domEvent, BatchedDOMEvent.MOUSE_TYPE, self.mouseOver, false ); };
-    this.onmouseout = function onmouseout( domEvent ) { self.batchEvent( domEvent, BatchedDOMEvent.MOUSE_TYPE, self.mouseOut, false ); };
-    this.onwheel = function onwheel( domEvent ) { self.batchEvent( domEvent, BatchedDOMEvent.WHEEL_TYPE, self.wheel, false ); };
-    this.uselessListener = function uselessListener( domEvent ) {};
   }
 
   scenery.register( 'Input', Input );
@@ -204,18 +183,12 @@ define( function( require ) {
         }
       }
 
-      var isKey = batchType === BatchedDOMEvent.KEY_TYPE;
-
-      // Don't preventDefault for key events, which often need to be handled by the browser
-      // (such as F5, CMD+R, CMD+OPTION+J, etc), see #332
-      if ( !isKey ) {
-        // Always preventDefault on touch events, since we don't want mouse events triggered afterwards. See
-        // http://www.html5rocks.com/en/mobile/touchandmouse/ for more information.
-        // Additionally, IE had some issues with skipping prevent default, see
-        // https://github.com/phetsims/scenery/issues/464 for mouse handling.
-        if ( callback !== this.mouseDown || platform.ie || platform.edge ) {
-          domEvent.preventDefault();
-        }
+      // Always preventDefault on touch events, since we don't want mouse events triggered afterwards. See
+      // http://www.html5rocks.com/en/mobile/touchandmouse/ for more information.
+      // Additionally, IE had some issues with skipping prevent default, see
+      // https://github.com/phetsims/scenery/issues/464 for mouse handling.
+      if ( callback !== this.mouseDown || platform.ie || platform.edge ) {
+        domEvent.preventDefault();
       }
     },
 
@@ -238,82 +211,35 @@ define( function( require ) {
       this.batchedEvents.length = 0;
     },
 
-    pointerListenerTypes: [ 'pointerdown', 'pointerup', 'pointermove', 'pointerover', 'pointerout', 'pointercancel' ],
-    msPointerListenerTypes: [ 'MSPointerDown', 'MSPointerUp', 'MSPointerMove', 'MSPointerOver', 'MSPointerOut', 'MSPointerCancel' ],
-    touchListenerTypes: [ 'touchstart', 'touchend', 'touchmove', 'touchcancel' ],
-    mouseListenerTypes: [ 'mousedown', 'mouseup', 'mousemove', 'mouseover', 'mouseout' ],
-    wheelListenerTypes: [ 'wheel' ],
-
-    // W3C spec for pointer events
-    canUsePointerEvents: function() {
-      return window.navigator && window.navigator.pointerEnabled && this.enablePointerEvents;
-    },
-
-    // MS spec for pointer event
-    canUseMSPointerEvents: function() {
-      return window.navigator && window.navigator.msPointerEnabled && this.enablePointerEvents;
-    },
-
-    getUsedEventTypes: function() {
-      var eventTypes;
-
-      if ( this.canUsePointerEvents() ) {
-        // accepts pointer events corresponding to the spec at http://www.w3.org/TR/pointerevents/
-        sceneryLog && sceneryLog.Input && sceneryLog.Input( 'Detected pointer events support, using that instead of mouse/touch events' );
-
-        eventTypes = this.pointerListenerTypes;
-      }
-      else if ( this.canUseMSPointerEvents() ) {
-        sceneryLog && sceneryLog.Input && sceneryLog.Input( 'Detected MS pointer events support, using that instead of mouse/touch events' );
-
-        eventTypes = this.msPointerListenerTypes;
-      }
-      else {
-        sceneryLog && sceneryLog.Input && sceneryLog.Input( 'No pointer events support detected, using mouse/touch events' );
-
-        eventTypes = this.touchListenerTypes.concat( this.mouseListenerTypes );
-      }
-
-      eventTypes = eventTypes.concat( this.wheelListenerTypes );
-
-      return eventTypes;
-    },
-
     connectListeners: function() {
-      this.processListeners( true );
+      BrowserEvents.addDisplay( this.display, this.attachToWindow );
     },
 
     disconnectListeners: function() {
-      this.processListeners( false );
+      BrowserEvents.removeDisplay( this.display, this.attachToWindow );
     },
 
-    // @param addOrRemove: true if adding, false if removing
-    processListeners: function( addOrRemove ) {
-      var eventTypes = this.getUsedEventTypes();
+    pointFromEvent: function( domEvent ) {
+      var position = Vector2.createFromPool( domEvent.clientX, domEvent.clientY );
+      if ( !this.assumeFullWindow ) {
+        var domBounds = this.display.domElement.getBoundingClientRect();
 
-      for ( var i = 0; i < eventTypes.length; i++ ) {
-        var type = eventTypes[ i ];
+        // TODO: consider totally ignoring any with zero width/height, as we aren't attached to the display?
+        // For now, don't offset.
+        if ( domBounds.width > 0 && domBounds.height > 0 ) {
+          position.subtractXY( domBounds.left, domBounds.top );
 
-        // work around iOS Safari 7 not sending touch events to Scenes contained in an iframe
-        if ( this.listenerTarget === window ) {
-          if ( addOrRemove ) {
-            document.addEventListener( type, this.uselessListener );
+          // Detect a scaling of the display here (the client bounding rect having different dimensions from our
+          // display), and attempt to compensate.
+          // NOTE: We can't handle rotation here.
+          if ( domBounds.width !== this.display.width || domBounds.height !== this.display.height ) {
+            // TODO: Have code verify the correctness here, and that it's not triggering all the time
+            position.x *= this.display.width / domBounds.width;
+            position.y *= this.display.height / domBounds.height;
           }
-          else {
-            document.removeEventListener( type, this.uselessListener );
-          }
-        }
-
-        var callback = this[ 'on' + type ];
-        assert && assert( !!callback );
-
-        if ( addOrRemove ) {
-          this.listenerTarget.addEventListener( type, callback, false ); // don't use capture for now
-        }
-        else {
-          this.listenerTarget.removeEventListener( type, callback, false ); // don't use capture for now
         }
       }
+      return position;
     },
 
     addPointer: function( pointer ) {
@@ -543,7 +469,7 @@ define( function( require ) {
           // In IE for pointer down events, we want to make sure than the next interactions off the page are sent to
           // this element (it will bubble). See https://github.com/phetsims/scenery/issues/464 and
           // http://news.qooxdoo.org/mouse-capturing.
-          var target = ( this.listenerTarget === window || this.listenerTarget === document ) ? document.body : this.listenerTarget;
+          var target = this.attachToWindow ? document.body : this.display.domElement;
           if ( target.setPointerCapture && event.pointerId ) {
             target.setPointerCapture( event.pointerId );
           }

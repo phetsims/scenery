@@ -14,7 +14,7 @@
  * 5. Go to (3)
  *
  * Common ways to simplify the change/update loop would be to:
- * - Use Node-based events. Initialize it with Display.initializeStandaloneEvents/initializeWindowEvents/etc., then
+ * - Use Node-based events. Initialize it with Display.initializeEvents(), then
  *   add input listeners to parts of the scene graph (see Node.addInputListener).
  * - Execute code (and update the display afterwards) by using Display.updateOnRequestAnimationFrame.
  *
@@ -76,7 +76,7 @@ define( function( require ) {
   var Renderer = require( 'SCENERY/display/Renderer' );
   require( 'SCENERY/display/SharedCanvasCacheDrawable' );
   require( 'SCENERY/display/SVGSelfDrawable' );
-  require( 'SCENERY/input/Input' );
+  var Input = require( 'SCENERY/input/Input' );
   require( 'SCENERY/util/Trail' );
   var AccessibleInstance = require( 'SCENERY/accessibility/AccessibleInstance' );
   var SceneryStyle = require( 'SCENERY/util/SceneryStyle' );
@@ -98,7 +98,6 @@ define( function( require ) {
    * {
    *   allowSceneOverflow: false,           // Usually anything displayed outside of this $main (DOM/CSS3 transformed SVG) is hidden with CSS overflow
    *   allowCSSHacks: true,                 // Applies styling that prevents mobile browser graphical issues
-   *   enablePointerEvents: true,           // Allows pointer events / MSPointerEvent to be used on supported platforms.
    *   width: <current main width>,         // Override the main container's width
    *   height: <current main height>,       // Override the main container's height
    *   preserveDrawingBuffer: false,        // Whether WebGL Canvases should preserve their drawing buffer.
@@ -110,6 +109,8 @@ define( function( require ) {
    */
   function Display( rootNode, options ) {
     assert && assert( rootNode, 'rootNode is a required parameter' );
+
+    //OHTWO TODO: hybrid batching (option to batch until an event like 'up' that might be needed for security issues)
 
     // supertype call to axon.Events (should just initialize a few properties here, notably _eventListeners and _staticEventListeners)
     Events.call( this );
@@ -123,15 +124,34 @@ define( function( require ) {
 
       allowCSSHacks: true,       // applies CSS styles to the root DOM element that make it amenable to interactive content
       allowSceneOverflow: false, // usually anything displayed outside of our dom element is hidden with CSS overflow
-      enablePointerEvents: true, // whether we should specifically listen to pointer events if we detect support
       defaultCursor: 'default',  // what cursor is used when no other cursor is specified
       backgroundColor: null,      // initial background color
       preserveDrawingBuffer: false,
       allowWebGL: true,
       accessibility: true,
       isApplication: false,      // adds the aria-role: 'application' when accessibility is enabled
-      interactive: true
+      interactive: true,
+
+      // {boolean} - If true, input event listeners will be attached to the Display's DOM element instead of the window.
+      // Normally, attaching listeners to the window is preferred (it will see mouse moves/ups outside of the browser
+      // window, allowing correct button tracking), however there may be instances where a global listener is not
+      // preferred.
+      listenToOnlyElement: false,
+
+      // TODO: doc
+      batchDOMEvents: false,
+
+      // {boolean} - If true, the input event location (based on the top-left of the browser tab's viewport, with no
+      // scaling applied) will be used. Usually, this is not a safe assumption, so when false the location of the
+      // display's DOM element will be used to get the correct event location. There is a slight performance hit to
+      // doing so, thus this option is provided if the top-left location can be guaranteed.
+      // NOTE: Rotation of the Display's DOM element (e.g. with a CSS transform) will result in an incorrect event
+      //       mapping, as getBoundingClientRect() can't work with this. getBoxQuads() should fix this when browser
+      //       support is available.
+      assumeFullWindow: false
     }, options );
+
+    // TODO: don't store the options, it's an anti-pattern.
     this.options = options; // @private
 
     // The (integral, > 0) dimensions of the Display's DOM element (only updates the DOM element on updateDisplay())
@@ -185,6 +205,9 @@ define( function( require ) {
     // will be filled in with a scenery.Input if event handling is enabled
     this._input = null;
     this._interactive = this.options.interactive;
+    this._listenToOnlyElement = options.listenToOnlyElement; // TODO: doc
+    this._batchDOMEvents = options.batchDOMEvents; // TODO: doc
+    this._assumeFullWindow = options.assumeFullWindow; // TODO: doc
 
     // overlays currently being displayed.
     // API expected:
@@ -983,52 +1006,26 @@ define( function( require ) {
       window.cancelAnimationFrame( this._requestAnimationFrameID );
     },
 
-    initializeStandaloneEvents: function( parameters ) {
-      // TODO extract similarity between standalone and fullscreen!
-      var element = this._domElement;
-      this.initializeEvents( _.extend( {}, {
-        listenerTarget: element,
-        pointFromEvent: function pointFromEvent( evt ) {
-          var mainBounds = element.getBoundingClientRect();
-          return Vector2.createFromPool( evt.clientX - mainBounds.left, evt.clientY - mainBounds.top );
-        }
-      }, parameters ) );
-    },
-
-    initializeFullscreenEvents: function( parameters ) {
-      var element = this._domElement;
-      this.initializeEvents( _.extend( {}, {
-        listenerTarget: document,
-        pointFromEvent: function pointFromEvent( evt ) {
-          var mainBounds = element.getBoundingClientRect();
-          return Vector2.createFromPool( evt.clientX - mainBounds.left, evt.clientY - mainBounds.top );
-        }
-      }, parameters ) );
-    },
-
-    initializeWindowEvents: function( parameters ) {
-      this.initializeEvents( _.extend( {}, {
-        listenerTarget: window,
-        pointFromEvent: function pointFromEvent( evt ) {
-          return Vector2.createFromPool( evt.clientX, evt.clientY );
-        }
-      }, parameters ) );
-    },
-
-    initializeEvents: function( parameters ) {
+    /**
+     * Initializes event handling, and connects the browser's input event handlers to notify this Display of events.
+     * @public
+     *
+     * NOTE: This can be reversed with detachEvents().
+     */
+    initializeEvents: function() {
       assert && assert( !this._input, 'Events cannot be attached twice to a display (for now)' );
 
-      // TODO: come up with more parameter names that have the same string length, so it looks creepier
-      var pointFromEvent = parameters.pointFromEvent;
-      var listenerTarget = parameters.listenerTarget;
-      var batchDOMEvents = parameters.batchDOMEvents; //OHTWO TODO: hybrid batching (option to batch until an event like 'up' that might be needed for security issues)
-
-      var input = new scenery.Input( this, listenerTarget, !!batchDOMEvents, this.options.enablePointerEvents, pointFromEvent );
+      // TODO: refactor here
+      var input = new Input( this, !this._listenToOnlyElement, this._batchDOMEvents, this._assumeFullWindow );
       this._input = input;
 
       input.connectListeners();
     },
 
+    /**
+     * Detach already-attached input event handling (from initializeEvents()).
+     * @public
+     */
     detachEvents: function() {
       assert && assert( this._input, 'detachEvents() should be called only when events are attached' );
 
@@ -1043,6 +1040,9 @@ define( function( require ) {
      * @public
      */
     dispose: function() {
+      if ( this._input ) {
+        this.detachEvents();
+      }
       this._rootNode.removeRootedDisplay( this );
     },
 

@@ -71,7 +71,7 @@
         container: document.getElementById( 'main' ),
         backgroundColor: '#eee'
       } );
-      display.initializeFullscreenEvents(); // sets up listeners on the document with preventDefault(), and forwards those events to our scene
+      display.initializeEvents(); // sets up listeners on the document with preventDefault(), and forwards those events to our scene
       display.resizeOnWindowResize(); // the scene gets resized to the full screen size
 
       var image1 = new scenery.Image( document.getElementById( 'example-image-1' ) );

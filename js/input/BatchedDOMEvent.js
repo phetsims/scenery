@@ -35,12 +35,12 @@ define( function( require ) {
   scenery.register( 'BatchedDOMEvent', BatchedDOMEvent );
 
   // enum for type
+  // TODO: Create a specific enumeration type for this?
   BatchedDOMEvent.POINTER_TYPE = 1;
   BatchedDOMEvent.MS_POINTER_TYPE = 2;
   BatchedDOMEvent.TOUCH_TYPE = 3;
   BatchedDOMEvent.MOUSE_TYPE = 4;
-  BatchedDOMEvent.KEY_TYPE = 5; //TODO: Or are Keys Pointers, as they were in previous sceneries?
-  BatchedDOMEvent.WHEEL_TYPE = 6;
+  BatchedDOMEvent.WHEEL_TYPE = 5;
 
   inherit( Object, BatchedDOMEvent, {
     run: function( input ) {
@@ -69,9 +69,6 @@ define( function( require ) {
       }
       else if ( this.type === BatchedDOMEvent.MOUSE_TYPE ) {
         callback.call( input, input.pointFromEvent( domEvent ), domEvent );
-      }
-      else if ( this.type === BatchedDOMEvent.KEY_TYPE ) { //TODO: or should keys be handled with the other Pointers?
-        callback.call( input, domEvent );
       }
       else if ( this.type === BatchedDOMEvent.WHEEL_TYPE ) {
         callback.call( input, domEvent );

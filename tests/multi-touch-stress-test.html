@@ -63,7 +63,7 @@
 
   // initialize our scene
   var scene = new scenery.Scene( main );
-  scene.initializeFullscreenEvents(); // sets up listeners on the document with preventDefault(), and forwards those events to our scene
+  scene.initializeEvents(); // sets up listeners on the document with preventDefault(), and forwards those events to our scene
   scene.resizeOnWindowResize(); // the scene gets resized to the full screen size
 
   var container = new scenery.Node();

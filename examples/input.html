@@ -55,7 +55,7 @@
   var display = new scenery.Display( scene, {
     container: document.getElementById( 'main' )
   } );
-  display.initializeFullscreenEvents(); // set up listeners on the document
+  display.initializeEvents();
   display.resizeOnWindowResize(); // keep the display size linked to the window size
 
   var inactiveColor = '#ccc';

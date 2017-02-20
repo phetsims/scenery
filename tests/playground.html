@@ -72,7 +72,7 @@ an UI and Display made for visual testing and debugging.
   <br>
   <button onclick="toggleUpdates();">Toggle Update</button>
   <br>
-  <button onclick="display.initializeStandaloneEvents();">Standalone Events</button>
+  <button onclick="display.initializeEvents();">Events</button>
   <br>
   <br>
   <button onclick="display.updateDisplay();">Update</button>
@@ -176,14 +176,13 @@ an UI and Display made for visual testing and debugging.
       };
 
       window.inputTest = function() {
-        display.initializeWindowEvents();
+        display.initializeEvents();
         toggleUpdates();
-
-        var TouchSnagPressListener = phetCore.mixedWith( scenery.PressListener, scenery.TouchSnaggable.mixin );
 
         var circle = new scenery.Circle( 30, { fill: 'red', cursor: 'pointer' } );
         scene.addChild( circle );
-        circle.addInputListener( new TouchSnagPressListener( {
+        circle.addInputListener( new scenery.DragListener( {
+          translateNode: true,
           press: function() { console.log( 'press' ); },
           release: function() { console.log( 'release' ); },
           drag: function() { console.log( 'drag' ); }

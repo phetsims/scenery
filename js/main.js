@@ -83,6 +83,7 @@ define( [
   'SCENERY/display/drawables/WebGLNodeDrawable',
 
   'SCENERY/input/BatchedDOMEvent',
+  'SCENERY/input/BrowserEvents',
   'SCENERY/input/ButtonListener',
   'SCENERY/input/DownUpListener',
   'SCENERY/input/Event',

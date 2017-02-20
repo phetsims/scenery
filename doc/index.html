@@ -591,7 +591,7 @@ window.assertions.disableAssertSlow();
 
     <p>
       The cursor is updated whenever <a href="#display-updateDisplay">display.updateDisplay</a> is called, and event initialization like <a
-        href="#display-initializeStandaloneEvents">display.initializeStandaloneEvents</a> should be added so Scenery can track the mouse input.
+        href="#display-initializeEvents">display.initializeEvents</a> should be added so Scenery can track the mouse input.
     </p>
 
     <p>
@@ -617,7 +617,7 @@ window.assertions.disableAssertSlow();
         } ) );
         /*END*/
 // event initialization needed for cursor to work
-        display.initializeStandaloneEvents();
+        display.initializeEvents();
 
 // and update on every frame
         display.updateOnRequestAnimationFrame();
@@ -995,9 +995,6 @@ window.assertions.disableAssertSlow();
         transformed SVG) is hidden with CSS overflow
       </li>
       <li><a href="#display-allowCSSHacks">allowCSSHacks</a> (default true): applies styling that prevents mobile browser graphical issues</li>
-      <li><a href="#display-enablePointerEvents">enablePointerEvents</a> (default true): allows pointer events / MSPointerEvent to be used on
-        supported platforms.
-      </li>
       <li><a href="#display-allowWebGL">allowWebGL</a> (default true): sets whether WebGL can be used.</li>
       <li><a href="#display-width">width</a> (default currentWidth): override the main container's width</li>
       <li><a href="#display-height">height</a> (default currentHeight): override the main container's height</li>
