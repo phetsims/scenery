@@ -7,6 +7,8 @@
  *
  * TODO: unit tests
  *
+ * TODO: add example usage
+ *
  * @author Jonathan Olson <jonathan.olson@colorado.edu>
  */
 
@@ -53,7 +55,15 @@ define( function( require ) {
       isHighlightedProperty: new Property( false )
     }, options );
 
-    // TODO: type checks for options
+    assert && assert( options.fire === null || typeof options.fire === 'function',
+      'The fire callback, if provided, should be a function' );
+    assert && assert( typeof options.fireOnDown === 'boolean', 'fireOnDown should be a boolean' );
+    assert && assert( options.isOverProperty instanceof Property && options.isOverProperty.value === false,
+      'If a custom isOverProperty is provided, it must be a Property that is false initially' );
+    assert && assert( options.isHoveringProperty instanceof Property && options.isHoveringProperty.value === false,
+      'If a custom isHoveringProperty is provided, it must be a Property that is false initially' );
+    assert && assert( options.isHighlightedProperty instanceof Property && options.isHighlightedProperty.value === false,
+      'If a custom isHighlightedProperty is provided, it must be a Property that is false initially' );
 
     PressListener.call( this, options );
 

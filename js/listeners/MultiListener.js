@@ -5,6 +5,8 @@
  *
  * TODO: unit tests
  *
+ * TODO: add example usage
+ *
  * @author Jonathan Olson <jonathan.olson@colorado.edu>
  */
 

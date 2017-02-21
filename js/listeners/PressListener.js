@@ -9,6 +9,8 @@
  *
  * TODO: unit tests
  *
+ * TODO: add example usage
+ *
  * @author Jonathan Olson <jonathan.olson@colorado.edu>
  */
 
@@ -17,6 +19,7 @@ define( function( require ) {
 
   var inherit = require( 'PHET_CORE/inherit' );
   var scenery = require( 'SCENERY/scenery' );
+  var Node = require( 'SCENERY/nodes/Node' );
   var Property = require( 'AXON/Property' );
 
   /**
@@ -37,9 +40,9 @@ define( function( require ) {
       //   3+: other specific numbered buttons that are more rare
       mouseButton: 0,
 
-      // {string} - Sets the pointer cursor to this value when this listener is "pressed". This means that even when
-      // the mouse moves out of the node after pressing down, it will still have this cursor (overriding the cursor of
-      // whatever nodes the pointer may be over).
+      // {string|null} - Sets the pointer cursor to this value when this listener is "pressed". This means that even
+      // when the mouse moves out of the node after pressing down, it will still have this cursor (overriding the
+      // cursor of whatever nodes the pointer may be over).
       pressCursor: 'pointer',
 
       // {Function|null} - Called as press( event: {Event} ) when this listener's node is pressed (typically
@@ -67,24 +70,37 @@ define( function( require ) {
       attach: true
     }, options );
 
-    // TODO: type checks for options
-
-    assert && assert( options.isPressedProperty.value === false,
-      'If a custom isPressedProperty is provided, it must be false initially' );
+    assert && assert( typeof options.mouseButton === 'number' &&
+                      options.mouseButton >= 0 &&
+                      options.mouseButton % 1 === 0, 'mouseButton should be a non-negative integer' );
+    assert && assert( options.pressCursor === null || typeof options.pressCursor === 'string',
+      'pressCursor should either be a string or null' );
+    assert && assert( options.press === null || typeof options.press === 'function',
+      'The press callback, if provided, should be a function' );
+    assert && assert( options.release === null || typeof options.release === 'function',
+      'The release callback, if provided, should be a function' );
+    assert && assert( options.drag === null || typeof options.drag === 'function',
+      'The drag callback, if provided, should be a function' );
+    assert && assert( options.isPressedProperty instanceof Property && options.isPressedProperty.value === false,
+      'If a custom isPressedProperty is provided, it must be a Property that is false initially' );
+    assert && assert( options.targetNode === null || options.targetNode instanceof Node,
+      'If provided, targetNode should be a Node' );
+    assert && assert( typeof options.attach === 'boolean', 'attach should be a boolean' );
 
     // @public {Property.<Boolean>} [read-only] - Whether this listener is currently in the 'pressed' state or not
     this.isPressedProperty = options.isPressedProperty;
 
-    // @public {Pointer|null} [read-only] - The current pointer (if pressed)
+    // @public {Pointer|null} [read-only] - The current pointer, or null when not pressed.
     this.pointer = null;
 
     // @public {Trail|null} [read-only] - The Trail for the press, with no descendant nodes past the currentTarget
+    // or targetNode (if provided). Will be null when not pressed.
     this.pressedTrail = null;
 
     // @public {boolean} [read-only] - Whether the last press was interrupted. Will be valid until the next press.
     this.interrupted = false;
 
-    // @private (stored options)
+    // @private - Stored options, see options for documentation.
     this._mouseButton = options.mouseButton;
     this._pressCursor = options.pressCursor;
     this._pressListener = options.press;
