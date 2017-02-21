@@ -111,60 +111,22 @@ define( function( require ) {
   scenery.register( 'DragListener', DragListener );
 
   inherit( PressListener, DragListener, {
-    // TODO: Handle specifying the pressed trail, so this is done accurately?
-    // Most general: pass in a predicate to identify the last node in the trail (if we have a trail)
-    globalToParentPoint: function( globalPoint ) {
-      return this.pressedTrail.globalToParentPoint( globalPoint );
-    },
-
-    parentToLocalPoint: function( parentPoint ) {
-      // TODO: test scale/rotation on our dragged thing
-      return this.pressedTrail.lastNode().parentToLocalPoint( parentPoint );
-    },
-
-    localToParentPoint: function( localPoint ) {
-      // TODO: test scale/rotation on our dragged thing
-      return this.pressedTrail.lastNode().localToParentPoint( localPoint );
-    },
-
-    parentToModelPoint: function( parentPoint ) {
-      // TODO: override
-      if ( this._transform ) {
-        return this._transform.inversePosition2( parentPoint );
-      }
-      else {
-        return parentPoint;
-      }
-    },
-
-    modelToParentPoint: function( modelPoint ) {
-      // TODO: override
-      if ( this._transform ) {
-        return this._transform.transformPosition2( modelPoint );
-      }
-      else {
-        return modelPoint;
-      }
-    },
-
-    // mark as overrideable
-    mapModelPoint: function( modelPoint ) {
-      if ( this._mapLocation ) {
-        return this._mapLocation( modelPoint );
-      }
-      else if ( this._dragBounds ) {
-        return this._dragBounds.closestPointTo( modelPoint );
-      }
-      else {
-        return modelPoint;
-      }
-    },
-
+    /**
+     * Attempts to start a drag with a press.
+     * @public
+     * @override
+     *
+     * NOTE: This is safe to call externally in order to attempt to start a press. dragListener.canPress( event ) can
+     * be used to determine whether this will actually start a drag.
+     *
+     * @param {Event} event
+     * @returns {boolean} success - Returns whether the press was actually started
+     */
     press: function( event ) {
       sceneryLog && sceneryLog.InputListener && sceneryLog.InputListener( 'DragListener press' );
       sceneryLog && sceneryLog.InputListener && sceneryLog.push();
 
-      var success = PressListener.prototype.press.call( this, event ); // TODO: do we need to delay notification with options release?
+      var success = PressListener.prototype.press.call( this, event );
 
       if ( success ) {
         sceneryLog && sceneryLog.InputListener && sceneryLog.InputListener( 'DragListener successful press' );
@@ -177,6 +139,7 @@ define( function( require ) {
 
         this.reposition( this.pointer.point );
 
+        // Notify after positioning and other changes
         this._start && this._start( event );
 
         sceneryLog && sceneryLog.InputListener && sceneryLog.pop();
@@ -187,24 +150,40 @@ define( function( require ) {
       return success;
     },
 
+    /**
+     * Stops the drag.
+     * @public
+     * @override
+     *
+     * This can be called from the outside to stop the drag without the pointer having actually fired any 'up'
+     * events. If the cancel/interrupt behavior is more preferable, call interrupt() on this listener instead.
+     */
     release: function() {
       sceneryLog && sceneryLog.InputListener && sceneryLog.InputListener( 'DragListener release' );
       sceneryLog && sceneryLog.InputListener && sceneryLog.push();
+
+      // Notify before things are 'unset', in case it wants to access any properties.
+      this._end && this._end();
 
       PressListener.prototype.release.call( this );
 
       this.detachTransformTracker();
 
-      this._end && this._end();
-
       sceneryLog && sceneryLog.InputListener && sceneryLog.pop();
     },
 
+    /**
+     * Called when move events are fired on the attached pointer listener during a drag.
+     * @protected
+     * @override
+     *
+     * @param {Event} event
+     */
     drag: function( event ) {
       sceneryLog && sceneryLog.InputListener && sceneryLog.InputListener( 'DragListener drag' );
       sceneryLog && sceneryLog.InputListener && sceneryLog.push();
 
-      // NOTE: This is done first, before the drag listener is called
+      // This is done first, before the drag listener is called (from the prototype drag call)
       this.reposition( this.pointer.point );
 
       //TODO ignore global moves that have zero length (Chrome might autofire, see https://code.google.com/p/chromium/issues/detail?id=327114)
@@ -214,17 +193,173 @@ define( function( require ) {
       sceneryLog && sceneryLog.InputListener && sceneryLog.pop();
     },
 
-    // TODO: hardcode pointer.point?
+    /**
+     * Attempts to start a touch snag, given a Scenery Event.
+     * @public
+     *
+     * Should be safe to be called externally with an event.
+     *
+     * @param {Event} event
+     */
+    tryTouchSnag: function( event ) {
+      sceneryLog && sceneryLog.InputListener && sceneryLog.InputListener( 'DragListener tryTouchSnag' );
+      sceneryLog && sceneryLog.InputListener && sceneryLog.push();
+
+      if ( this._allowTouchSnag && !event.pointer.isAttached() ) {
+        this.press( event );
+      }
+
+      sceneryLog && sceneryLog.InputListener && sceneryLog.pop();
+    },
+
+    /**
+     * Maps a point from the global coordinate frame to our drag target's parent coordinate frame.
+     * @protected
+     *
+     * Should be overridden if a custom transformation is needed.
+     *
+     * TODO: Reduce allocations. Will probably require augmenting Transform3 to use Matrix3 methods like multiplyVector2
+     *
+     * @param {Vector2} globalPoint
+     * @returns {Vector2}
+     */
+    globalToParentPoint: function( globalPoint ) {
+      return this.pressedTrail.globalToParentPoint( globalPoint );
+    },
+
+    /**
+     * Maps a point from the drag target's parent coordinate frame to its local coordinate frame.
+     * @protected
+     *
+     * Should be overridden if a custom transformation is needed.
+     *
+     * TODO: Reduce allocations. Will probably require augmenting Transform3 to use Matrix3 methods like multiplyVector2
+     *
+     * @param {Vector2} parentPoint
+     * @returns {Vector2}
+     */
+    parentToLocalPoint: function( parentPoint ) {
+      return this.pressedTrail.lastNode().parentToLocalPoint( parentPoint );
+    },
+
+    /**
+     * Maps a point from the drag target's local coordinate frame to its parent coordinate frame.
+     * @protected
+     *
+     * Should be overridden if a custom transformation is needed.
+     *
+     * TODO: Reduce allocations. Will probably require augmenting Transform3 to use Matrix3 methods like multiplyVector2
+     *
+     * @param {Vector2} localPoint
+     * @returns {Vector2}
+     */
+    localToParentPoint: function( localPoint ) {
+      return this.pressedTrail.lastNode().localToParentPoint( localPoint );
+    },
+
+    /**
+     * Maps a point from the drag target's parent coordinate frame to the model coordinate frame.
+     * @protected
+     *
+     * Should be overridden if a custom transformation is needed. Note that by default, unless a transform is provided,
+     * the parent coordinate frame will be the same as the model coordinate frame.
+     *
+     * TODO: Reduce allocations. Will probably require augmenting Transform3 to use Matrix3 methods like multiplyVector2
+     *
+     * @param {Vector2} parentPoint
+     * @returns {Vector2}
+     */
+    parentToModelPoint: function( parentPoint ) {
+      if ( this._transform ) {
+        return this._transform.inversePosition2( parentPoint );
+      }
+      else {
+        return parentPoint;
+      }
+    },
+
+    /**
+     * Maps a point from the model coordinate frame to the drag target's parent coordinate frame.
+     * @protected
+     *
+     * Should be overridden if a custom transformation is needed. Note that by default, unless a transform is provided,
+     * the parent coordinate frame will be the same as the model coordinate frame.
+     *
+     * TODO: Reduce allocations. Will probably require augmenting Transform3 to use Matrix3 methods like multiplyVector2
+     *
+     * @param {Vector2} modelPoint
+     * @returns {Vector2}
+     */
+    modelToParentPoint: function( modelPoint ) {
+      if ( this._transform ) {
+        return this._transform.transformPosition2( modelPoint );
+      }
+      else {
+        return modelPoint;
+      }
+    },
+
+    /**
+     * Apply a mapping from from the drag target's model location to an allowed model location.
+     * @protected
+     *
+     * A common example is using dragBounds, where the location of the drag target is constrained to within a bounding
+     * box. This is done by mapping points outside of the bounding box to the closest location inside the box. More
+     * general mappings can be used.
+     *
+     * Should be overridden (or use mapLocation) if a custom transformation is needed.
+     *
+     * TODO: consider mutating the point if possible? Can closestPointTo do that?
+     *
+     * @param {Vector2} modelPoint
+     * @returns {Vector2} - A point in the model coordinate frame
+     */
+    mapModelPoint: function( modelPoint ) {
+      if ( this._mapLocation ) {
+        return this._mapLocation( modelPoint );
+      }
+      else if ( this._dragBounds ) {
+        return this._dragBounds.closestPointTo( modelPoint );
+      }
+      else {
+        return modelPoint;
+      }
+    },
+
+    /**
+     * Mutates the parentPoint given to account for the initial pointer's offset from the drag target's origin.
+     * @protected
+     *
+     * @param {Vector2} parentPoint
+     */
+    applyParentOffset: function( parentPoint ) {
+      // Don't apply any offset if applyOffset is false
+      if ( this._applyOffset ) {
+        // TODO: more scratch vector handling? Will need to augment Transform3 to use things like multiplyVector2.
+        var parentLocalPoint = this.localToParentPoint( this.initialLocalPoint );
+        var parentOriginPoint = this.localToParentPoint( new Vector2() ); // usually node.translation
+        var parentOffset = parentOriginPoint.minus( parentLocalPoint );
+
+        parentPoint.add( parentOffset );
+      }
+    },
+
+    /**
+     * Triggers an update of the drag position, potentially changing location properties.
+     * @public
+     *
+     * Should be called when something that changes the output locations of the drag occurs (most often, a drag event
+     * itself).
+     *
+     * @param {Vector2} globalPoint
+     */
     reposition: function( globalPoint ) {
       sceneryLog && sceneryLog.InputListener && sceneryLog.InputListener( 'DragListener reposition' );
       sceneryLog && sceneryLog.InputListener && sceneryLog.push();
 
-      // TODO: scratch vectors, better codepath for minimizing computation
-      var parentPointerPoint = this.globalToParentPoint( globalPoint );
-      var parentLocalPoint = this.localToParentPoint( this.initialLocalPoint );
-      var parentOriginPoint = this.localToParentPoint( new Vector2() ); // usually node.translation
-      var parentOffset = parentOriginPoint.minus( parentLocalPoint );
-      this.parentPoint = this._applyOffset ? parentPointerPoint.plus( parentOffset ) : parentPointerPoint;
+      // TODO: scratch vectors
+      this.parentPoint = this.globalToParentPoint( globalPoint );
+      this.applyParentOffset( this.parentPoint );
       this.modelPoint = this.mapModelPoint( this.parentToModelPoint( this.parentPoint ) );
       this.parentPoint = this.modelToParentPoint( this.modelPoint ); // apply any mapping changes
 
@@ -236,32 +371,42 @@ define( function( require ) {
         this._locationProperty.value = this.modelPoint;
       }
 
-      // TODO: consider other options to handle here
+      // TODO: consider other options to handle here. Should deltas (global/parent/local/model) be provided?
 
       sceneryLog && sceneryLog.InputListener && sceneryLog.pop();
     },
 
-    ancestorTransformed: function() {
-      this.reposition( this.pointer.point );
-    },
-
+    /**
+     * Called with 'touchenter' events (part of the listener API).
+     * @public (scenery-internal)
+     *
+     * NOTE: Do not call directly. See the press method instead.
+     *
+     * @param {Event} event
+     */
     touchenter: function( event ) {
       this.tryTouchSnag( event );
     },
 
+    /**
+     * Called with 'touchmove' events (part of the listener API).
+     * @public (scenery-internal)
+     *
+     * NOTE: Do not call directly. See the press method instead.
+     *
+     * @param {Event} event
+     */
     touchmove: function( event ) {
       this.tryTouchSnag( event );
     },
 
-    tryTouchSnag: function( event ) {
-      sceneryLog && sceneryLog.InputListener && sceneryLog.InputListener( 'DragListener tryTouchSnag' );
-      sceneryLog && sceneryLog.InputListener && sceneryLog.push();
-
-      if ( this._allowTouchSnag && !event.pointer.isAttached() ) {
-        this.press( event );
-      }
-
-      sceneryLog && sceneryLog.InputListener && sceneryLog.pop();
+    /**
+     * Called when an ancestor's transform has changed (when trackAncestors is true).
+     * @private
+     */
+    ancestorTransformed: function() {
+      // Reposition based on the current point.
+      this.reposition( this.pointer.point );
     },
 
     /**

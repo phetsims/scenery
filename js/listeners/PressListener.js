@@ -289,6 +289,7 @@ define( function( require ) {
 
       this.pointer.cursor = this._pressCursor;
 
+      // Notify after everything else is set up
       this._pressListener && this._pressListener( event );
 
       sceneryLog && sceneryLog.InputListener && sceneryLog.pop();
@@ -311,6 +312,9 @@ define( function( require ) {
 
       assert && assert( this.isPressed, 'This listener is not pressed' );
 
+      // Call release listener before things are 'unset', in case it wants to access any properties.
+      this._releaseListener && this._releaseListener();
+
       this.isPressedProperty.value = false;
 
       this.pointer.removeInputListener( this._pointerListener );
@@ -322,8 +326,6 @@ define( function( require ) {
       this.pointer = null;
       this.pressedTrail = null;
 
-      this._releaseListener && this._releaseListener();
-
       sceneryLog && sceneryLog.InputListener && sceneryLog.pop();
     },
 
@@ -332,6 +334,8 @@ define( function( require ) {
      * @protected
      *
      * This can be overridden (with super-calls) when custom drag behavior is needed for a type.
+     *
+     * @param {Event} event
      */
     drag: function( event ) {
       sceneryLog && sceneryLog.InputListener && sceneryLog.InputListener( 'PressListener drag' );
