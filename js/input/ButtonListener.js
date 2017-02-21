@@ -22,8 +22,12 @@ define( function( require ) {
   var scenery = require( 'SCENERY/scenery' );
   require( 'SCENERY/util/Trail' );
   var inherit = require( 'PHET_CORE/inherit' );
-
+  var Emitter = require( 'AXON/Emitter' );
+  var Tandem = require( 'TANDEM/Tandem' );
   var DownUpListener = require( 'SCENERY/input/DownUpListener' );
+
+  // phet-io modules
+  var TButtonListener = require( 'ifphetio!PHET_IO/types/scenery/input/TButtonListener' );
 
   /**
    * Options for the ButtonListener:
@@ -39,11 +43,34 @@ define( function( require ) {
   function ButtonListener( options ) {
     var self = this;
 
+    options = _.extend( {
+
+      // When running in PhET-iO brand, the tandem must be supplied
+      tandem: Tandem.tandemOptional()
+    }, options );
+
     this.buttonState = 'up'; // public: 'up', 'over', 'down' or 'out'
 
     this._overCount = 0; // how many pointers are over us (track a count, so we can handle multiple pointers gracefully)
 
     this._buttonOptions = options; // store the options object so we can call the callbacks
+
+    var states = [ 'up', 'over', 'down', 'out' ];
+
+    // @public (phet-io) - for phet-io event nesting
+    this.callbackEmitters = {};
+    states.forEach( function( state ) {
+      self.callbackEmitters[ state ] = {
+        startedEmitter: new Emitter(),
+        endedEmitter: new Emitter()
+      };
+    } );
+
+    // @public (phet-io) - for phet-io event nesting
+    this.startedCallbacksForFireEmitter = new Emitter();
+
+    // @public (phet-io) - for phet-io event nesting
+    this.endedCallbacksForFireEmitter = new Emitter();
 
     DownUpListener.call( this, {
 
@@ -65,6 +92,8 @@ define( function( require ) {
         }
       }
     } );
+
+    options.tandem.addInstance( this, TButtonListener );
   }
 
   scenery.register( 'ButtonListener', ButtonListener );
@@ -80,13 +109,29 @@ define( function( require ) {
         this.buttonState = state;
 
         if ( this._buttonOptions[ state ] ) {
+
+          // For PhET-iO event stream nesting, indicate the start of callbacks
+          this.callbackEmitters[ state ].startedEmitter.emit();
+
+          // Then invoke the callback
           this._buttonOptions[ state ]( event, oldState );
+
+          // Then signify that the callbacks completed
+          this.callbackEmitters[ state ].endedEmitter.emit();
         }
 
         if ( this._buttonOptions.fire &&
              this._overCount > 0 &&
              ( this._buttonOptions.fireOnDown ? ( state === 'down' ) : ( oldState === 'down' ) ) ) {
+
+          // For PhET-iO event stream nesting, indicate the start of callbacks
+          this.startedCallbacksForFireEmitter.emit();
+
+          // Then fire the event
           this._buttonOptions.fire( event );
+
+          // Then indicate the callbacks completed.
+          this.endedCallbacksForFireEmitter.emit();
         }
       }
     },
