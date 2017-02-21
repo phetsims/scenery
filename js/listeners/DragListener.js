@@ -23,7 +23,7 @@ define( function( require ) {
    * @constructor
    * @extends PressListener
    *
-   * @param {Object} [options] - See the constructor body (below) for documented options.
+   * @param {Object} [options] - See the constructor body (below) and in PressListener for documented options.
    */
   function DragListener( options ) {
     options = _.extend( {
@@ -69,6 +69,8 @@ define( function( require ) {
       // drag start hasn't been fully processed at that point.
       end: null
     }, options );
+
+    // TODO: type checks for options
 
     assert && assert( !options.mapLocation || !options.dragBounds,
       'mapLocation and dragBounds cannot both be provided, as they both handle mapping of the drag point' );

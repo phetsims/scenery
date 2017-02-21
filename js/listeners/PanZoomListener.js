@@ -37,6 +37,8 @@ define( function( require ) {
       pressCursor: null
     }, options );
 
+    // TODO: type checks for options
+
     MultiListener.call( this, targetNode, options );
 
     this._panBounds = panBounds;

@@ -37,6 +37,8 @@ define( function( require ) {
       allowMultitouchInterruption: false
     }, options );
 
+    // TODO: type checks for options
+
     this._targetNode = targetNode;
 
     this._mouseButton = options.mouseButton;

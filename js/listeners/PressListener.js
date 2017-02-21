@@ -42,7 +42,7 @@ define( function( require ) {
       // whatever nodes the pointer may be over).
       pressCursor: 'pointer',
 
-      // {Function|null} - Called as press( event: {scenery.Event} ) when this listener's node is pressed (typically
+      // {Function|null} - Called as press( event: {Event} ) when this listener's node is pressed (typically
       // from a down event, but can be triggered by other handlers).
       press: null,
 
@@ -50,9 +50,7 @@ define( function( require ) {
       // when pressed).
       release: null,
 
-      // TODO: decide on {scenery.Event} or {Event} docs, as window.Event is the DOM event type (also potentially
-      //       documented as {Event}
-      // {Function|null} - Called as drag( event: {scenery.Event} ) when this listener's node is dragged (move events
+      // {Function|null} - Called as drag( event: {Event} ) when this listener's node is dragged (move events
       // on the pointer while pressed).
       drag: null,
 
@@ -68,6 +66,8 @@ define( function( require ) {
       // a "primary" handler of the pointer's behavior, this should be set to false.
       attach: true
     }, options );
+
+    // TODO: type checks for options
 
     assert && assert( options.isPressedProperty.value === false,
       'If a custom isPressedProperty is provided, it must be false initially' );
@@ -101,7 +101,7 @@ define( function( require ) {
     this._pointerListener = {
       /**
        * Called with 'up' events from the pointer (part of the listener API)
-       * @public
+       * @public (scenery-internal)
        *
        * @param {Event} event
        */
@@ -118,7 +118,7 @@ define( function( require ) {
 
       /**
        * Called with 'cancel' events from the pointer (part of the listener API)
-       * @public
+       * @public (scenery-internal)
        *
        * @param {Event} event
        */
@@ -135,7 +135,7 @@ define( function( require ) {
 
       /**
        * Called with 'move' events from the pointer (part of the listener API)
-       * @public
+       * @public (scenery-internal)
        *
        * @param {Event} event
        */
@@ -152,7 +152,7 @@ define( function( require ) {
 
       /**
        * Called when the pointer needs to interrupt its current listener (usually so another can be added).
-       * @public
+       * @public (scenery-internal)
        */
       interrupt: function() {
         sceneryLog && sceneryLog.InputListener && sceneryLog.InputListener( 'PressListener pointer interrupt' );
@@ -191,8 +191,8 @@ define( function( require ) {
     },
 
     /**
-     * Called with 'down' events from the pointer (part of the listener API).
-     * @public
+     * Called with 'down' events (part of the listener API).
+     * @public (scenery-internal)
      *
      * NOTE: Do not call directly. See the press method instead.
      *
@@ -241,16 +241,15 @@ define( function( require ) {
      * This can be overridden (with super-calls) when custom press behavior is needed for a type.
      *
      * This can be called by outside clients in order to try to begin a process (generally on an already-pressed
-     * pointer), and is useful if a 'drag' needs to change between listeners.
-     *
-     * TODO: Can we separate this out so it's possible to not have to pass in the original event?
-     *       The pointer, trail and currentTarget should be sufficient (if we don't need to pass it to our listener)
-     *       Pointer is sufficient if a targetNode is provided.
+     * pointer), and is useful if a 'drag' needs to change between listeners. Use canPress( event ) to determine if
+     * a press can be started (if needed beforehand).
      *
      * @param {Event} event
      * @returns {boolean} success - Returns whether the press was actually started
      */
     press: function( event ) {
+      assert && assert( event, 'An event is required' );
+
       sceneryLog && sceneryLog.InputListener && sceneryLog.InputListener( 'PressListener press' );
 
       if ( !this.canPress( event ) ) {

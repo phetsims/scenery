@@ -31,7 +31,7 @@ define( function( require ) {
      * Scenery input callback to absorb down events.
      * @public
      *
-     * @param {scenery.Event} event
+     * @param {Event} event
      */
     down: function( event ) {
       event.handle();

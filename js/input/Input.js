@@ -33,9 +33,9 @@
  * - pointer {Pointer} - The pointer that triggered the event. Additional information about the mouse/touch/pen can be
  *                       obtained from the pointer, for example event.pointer.point.
  * - type {string} - The base type of the event (e.g. for touch down events, it will always just be "down").
- * - domEvent {Event} - The underlying DOM event that triggered this Scenery event. The DOM event may correspond to
- *                      multiple Scenery events, particularly for touch events. This could be a TouchEvent,
- *                      PointerEvent, MouseEvent, MSPointerEvent, etc.
+ * - domEvent {UIEvent} - The underlying DOM event that triggered this Scenery event. The DOM event may correspond to
+ *                        multiple Scenery events, particularly for touch events. This could be a TouchEvent,
+ *                        PointerEvent, MouseEvent, MSPointerEvent, etc.
  * - target {Node} - The leaf-most Node in the trail.
  * - currentTarget {Node} - The Node to which the listener being fired is attached, or null if the listener is being
  *                          fired directly from a pointer.
