@@ -30,8 +30,9 @@ define( function( require ) {
    */
   function Event( trail, type, pointer, domEvent ) {
     assert && assert( trail instanceof Trail, 'Event\'s trail parameter should be a {Trail}' );
-    assert && assert( typeof type === 'string', 'Event\'s type shoudl be a {string}' );
+    assert && assert( typeof type === 'string', 'Event\'s type should be a {string}' );
     assert && assert( pointer instanceof Pointer, 'Event\'s pointer parameter should be a {Pointer}' );
+    // TODO: add domEvent type assertion
 
     // @public {boolean} - Whether this Event has been 'handled'. If so, it will not bubble further.
     this.handled = false;
@@ -57,6 +58,10 @@ define( function( require ) {
     // @public {Node} - Leaf-most node in trail
     this.target = trail.lastNode();
 
+    // @public {boolean} - Whether this is the 'primary' mode for the pointer. Always true for touches, and will be true
+    // for the mouse if it is the primary (left) mouse button.
+    // TODO: don't require check on domEvent (seems sometimes this is passed as null as a hack?)
+    this.isPrimary = !pointer.isMouse || !domEvent || domEvent.button === 0;
   }
 
   scenery.register( 'Event', Event );
@@ -71,6 +76,31 @@ define( function( require ) {
     abort: function() {
       this.handled = true;
       this.aborted = true;
+    },
+
+    /**
+     * Returns whether a typical PressListener (that isn't already attached) could start a drag with this event.
+     * @public
+     *
+     * This can typically be used for patterns where no action should be taken if a press can't be started, e.g.:
+     *
+     *   down: function( event ) {
+     *     if ( !event.canStartPress() ) { return; }
+     *
+     *     // ... Do stuff to create a node with some type of PressListener
+     *
+     *     dragListener.press( event );
+     *   }
+     *
+     * NOTE: This ignores non-left mouse buttons (as this is the typical behavior). Custom checks should be done if this
+     *       is not suitable.
+     *
+     * @returns {boolean}
+     */
+    canStartPress: function() {
+      // If the pointer is already attached (some other press probably), it can't start a press.
+      // Additionally, we generally want to ignore non-left mouse buttons.
+      return !this.pointer.isAttached() && ( !this.pointer.isMouse || this.domEvent.button === 0 );
     }
   } );
 

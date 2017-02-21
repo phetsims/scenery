@@ -303,6 +303,9 @@
 
   objectButton.addInputListener( {
     down: function( event ) {
+      // Don't try to start drags with a right mouse button
+      if ( !event.canStartPress() ) { return; }
+
       // Put the initial model location right where the pointer is
       var modelPosition = objectTransform.inversePosition2( modelContainer.getUniqueTrail().globalToLocalPoint( event.pointer.point ) );
       var newObject = new axon.Property( modelPosition );

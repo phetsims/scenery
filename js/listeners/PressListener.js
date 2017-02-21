@@ -4,6 +4,9 @@
  * Listens to presses (down events), attaching a listener to the pointer when one occurs, so that a release (up/cancel
  * or interruption) can be recorded.
  *
+ * This is the base type for both DragListener and FireListener, which contains the shared logic that would be needed
+ * by both.
+ *
  * TODO: unit tests
  *
  * @author Jonathan Olson <jonathan.olson@colorado.edu>
@@ -205,6 +208,32 @@ define( function( require ) {
     },
 
     /**
+     * Returns whether a press can be started with a particular event.
+     * @public
+     *
+     * @param {Event} event
+     * @returns {boolean}
+     */
+    canPress: function( event ) {
+      // If this listener is already involved in pressing something, we can't press something
+      if ( this.isPressed ) {
+        return false;
+      }
+
+      // Only let presses be started with the correct mouse button.
+      if ( event.pointer.isMouse && event.domEvent.button !== this._mouseButton ) {
+        return false;
+      }
+
+      // We can't attach to a pointer that is already attached.
+      if ( this._attach && event.pointer.isAttached() ) {
+        return false;
+      }
+
+      return true;
+    },
+
+    /**
      * Moves the listener to the 'pressed' state if possible (attaches listeners and initializes press-related
      * properties).
      * @public
@@ -224,21 +253,8 @@ define( function( require ) {
     press: function( event ) {
       sceneryLog && sceneryLog.InputListener && sceneryLog.InputListener( 'PressListener press' );
 
-      // If this listener is already involved in pressing something, we can't press something
-      if ( this.isPressed ) {
-        sceneryLog && sceneryLog.InputListener && sceneryLog.InputListener( 'PressListener abort: already pressed!' );
-        return false;
-      }
-
-      // Only let presses be started with the correct mouse button.
-      if ( event.pointer.isMouse && event.domEvent.button !== this._mouseButton ) {
-        sceneryLog && sceneryLog.InputListener && sceneryLog.InputListener( 'PressListener abort: wrong mouse button' );
-        return false;
-      }
-
-      // We can't attach to a pointer that is already attached.
-      if ( this._attach && event.pointer.isAttached() ) {
-        sceneryLog && sceneryLog.InputListener && sceneryLog.InputListener( 'PressListener abort: pointer already attached' );
+      if ( !this.canPress( event ) ) {
+        sceneryLog && sceneryLog.InputListener && sceneryLog.InputListener( 'PressListener could not press' );
         return false;
       }
 
@@ -344,6 +360,9 @@ define( function( require ) {
       if ( this._listeningToPointer ) {
         this.pointer.removeInputListener( this._pointerListener );
       }
+
+      // TODO: Should we dispose our properties like isPressedProperty? If so, we'll have to be more careful with
+      // multilinks, and there will be more overhead.
 
       sceneryLog && sceneryLog.InputListener && sceneryLog.pop();
     }
