@@ -103,9 +103,14 @@ define( function( require ) {
        * @param {Event} event
        */
       up: function( event ) {
+        sceneryLog && sceneryLog.InputListener && sceneryLog.InputListener( 'PressListener pointer up' );
+        sceneryLog && sceneryLog.InputListener && sceneryLog.push();
+
         assert && assert( event.pointer === self.pointer );
 
         self.release();
+
+        sceneryLog && sceneryLog.InputListener && sceneryLog.pop();
       },
 
       /**
@@ -115,9 +120,14 @@ define( function( require ) {
        * @param {Event} event
        */
       cancel: function( event ) {
+        sceneryLog && sceneryLog.InputListener && sceneryLog.InputListener( 'PressListener pointer cancel' );
+        sceneryLog && sceneryLog.InputListener && sceneryLog.push();
+
         assert && assert( event.pointer === self.pointer );
 
         self.interrupt(); // will mark as interrupted and release()
+
+        sceneryLog && sceneryLog.InputListener && sceneryLog.pop();
       },
 
       /**
@@ -127,9 +137,14 @@ define( function( require ) {
        * @param {Event} event
        */
       move: function( event ) {
+        sceneryLog && sceneryLog.InputListener && sceneryLog.InputListener( 'PressListener pointer move' );
+        sceneryLog && sceneryLog.InputListener && sceneryLog.push();
+
         assert && assert( event.pointer === self.pointer );
 
         self.drag( event );
+
+        sceneryLog && sceneryLog.InputListener && sceneryLog.pop();
       },
 
       /**
@@ -137,7 +152,12 @@ define( function( require ) {
        * @public
        */
       interrupt: function() {
+        sceneryLog && sceneryLog.InputListener && sceneryLog.InputListener( 'PressListener pointer interrupt' );
+        sceneryLog && sceneryLog.InputListener && sceneryLog.push();
+
         self.interrupt();
+
+        sceneryLog && sceneryLog.InputListener && sceneryLog.pop();
       }
     };
   }
@@ -176,7 +196,12 @@ define( function( require ) {
      * @param {Event} event
      */
     down: function( event ) {
+      sceneryLog && sceneryLog.InputListener && sceneryLog.InputListener( 'PressListener down' );
+      sceneryLog && sceneryLog.InputListener && sceneryLog.push();
+
       this.press( event );
+
+      sceneryLog && sceneryLog.InputListener && sceneryLog.pop();
     },
 
     /**
@@ -197,16 +222,28 @@ define( function( require ) {
      * @returns {boolean} success - Returns whether the press was actually started
      */
     press: function( event ) {
-      assert && assert( !this.isPressed, 'This listener is already pressed' );
+      sceneryLog && sceneryLog.InputListener && sceneryLog.InputListener( 'PressListener press' );
 
       // If this listener is already involved in pressing something, we can't press something
-      if ( this.isPressed ) { return false; }
+      if ( this.isPressed ) {
+        sceneryLog && sceneryLog.InputListener && sceneryLog.InputListener( 'PressListener abort: already pressed!' );
+        return false;
+      }
 
       // Only let presses be started with the correct mouse button.
-      if ( event.pointer.isMouse && event.domEvent.button !== this._mouseButton ) { return false; }
+      if ( event.pointer.isMouse && event.domEvent.button !== this._mouseButton ) {
+        sceneryLog && sceneryLog.InputListener && sceneryLog.InputListener( 'PressListener abort: wrong mouse button' );
+        return false;
+      }
 
       // We can't attach to a pointer that is already attached.
-      if ( this._attach && event.pointer.isAttached() ) { return false; }
+      if ( this._attach && event.pointer.isAttached() ) {
+        sceneryLog && sceneryLog.InputListener && sceneryLog.InputListener( 'PressListener abort: pointer already attached' );
+        return false;
+      }
+
+      sceneryLog && sceneryLog.InputListener && sceneryLog.InputListener( 'PressListener successful press' );
+      sceneryLog && sceneryLog.InputListener && sceneryLog.push();
 
       // Set self properties before the property change, so they are visible to listeners.
       this.pointer = event.pointer;
@@ -223,6 +260,8 @@ define( function( require ) {
 
       this._pressListener && this._pressListener( event );
 
+      sceneryLog && sceneryLog.InputListener && sceneryLog.pop();
+
       return true;
     },
 
@@ -236,6 +275,9 @@ define( function( require ) {
      * events. If the cancel/interrupt behavior is more preferable, call interrupt() on this listener instead.
      */
     release: function() {
+      sceneryLog && sceneryLog.InputListener && sceneryLog.InputListener( 'PressListener release' );
+      sceneryLog && sceneryLog.InputListener && sceneryLog.push();
+
       assert && assert( this.isPressed, 'This listener is not pressed' );
 
       this.isPressedProperty.value = false;
@@ -250,6 +292,8 @@ define( function( require ) {
       this.pressedTrail = null;
 
       this._releaseListener && this._releaseListener();
+
+      sceneryLog && sceneryLog.InputListener && sceneryLog.pop();
     },
 
     /**
@@ -259,9 +303,14 @@ define( function( require ) {
      * This can be overridden (with super-calls) when custom drag behavior is needed for a type.
      */
     drag: function( event ) {
+      sceneryLog && sceneryLog.InputListener && sceneryLog.InputListener( 'PressListener drag' );
+      sceneryLog && sceneryLog.InputListener && sceneryLog.push();
+
       assert && assert( this.isPressed, 'Can only drag while pressed' );
 
       this._dragListener && this._dragListener( event );
+
+      sceneryLog && sceneryLog.InputListener && sceneryLog.pop();
     },
 
     /**
@@ -271,11 +320,17 @@ define( function( require ) {
      * This can be called manually, but can also be called through node.interruptSubtreeInput().
      */
     interrupt: function() {
+      sceneryLog && sceneryLog.InputListener && sceneryLog.InputListener( 'PressListener interrupt' );
+      sceneryLog && sceneryLog.InputListener && sceneryLog.push();
+
       if ( this.isPressed ) {
+        sceneryLog && sceneryLog.InputListener && sceneryLog.InputListener( 'PressListener interrupting' );
         this.interrupted = true;
 
         this.release();
       }
+
+      sceneryLog && sceneryLog.InputListener && sceneryLog.pop();
     },
 
     /**
@@ -283,9 +338,14 @@ define( function( require ) {
      * @public
      */
     dispose: function() {
+      sceneryLog && sceneryLog.InputListener && sceneryLog.InputListener( 'PressListener dispose' );
+      sceneryLog && sceneryLog.InputListener && sceneryLog.push();
+
       if ( this._listeningToPointer ) {
         this.pointer.removeInputListener( this._pointerListener );
       }
+
+      sceneryLog && sceneryLog.InputListener && sceneryLog.pop();
     }
   } );
 

@@ -157,9 +157,15 @@ define( function( require ) {
     },
 
     press: function( event ) {
+      sceneryLog && sceneryLog.InputListener && sceneryLog.InputListener( 'DragListener press' );
+      sceneryLog && sceneryLog.InputListener && sceneryLog.push();
+
       var success = PressListener.prototype.press.call( this, event ); // TODO: do we need to delay notification with options release?
 
       if ( success ) {
+        sceneryLog && sceneryLog.InputListener && sceneryLog.InputListener( 'DragListener successful press' );
+        sceneryLog && sceneryLog.InputListener && sceneryLog.push();
+
         this.attachTransformTracker();
 
         // TODO: scratch vectors
@@ -168,30 +174,47 @@ define( function( require ) {
         this.reposition( this.pointer.point );
 
         this._start && this._start( event );
+
+        sceneryLog && sceneryLog.InputListener && sceneryLog.pop();
       }
+
+      sceneryLog && sceneryLog.InputListener && sceneryLog.pop();
 
       return success;
     },
 
     release: function() {
+      sceneryLog && sceneryLog.InputListener && sceneryLog.InputListener( 'DragListener release' );
+      sceneryLog && sceneryLog.InputListener && sceneryLog.push();
+
       PressListener.prototype.release.call( this );
 
       this.detachTransformTracker();
 
       this._end && this._end();
+
+      sceneryLog && sceneryLog.InputListener && sceneryLog.pop();
     },
 
     drag: function( event ) {
+      sceneryLog && sceneryLog.InputListener && sceneryLog.InputListener( 'DragListener drag' );
+      sceneryLog && sceneryLog.InputListener && sceneryLog.push();
+
       // NOTE: This is done first, before the drag listener is called
       this.reposition( this.pointer.point );
 
       //TODO ignore global moves that have zero length (Chrome might autofire, see https://code.google.com/p/chromium/issues/detail?id=327114)
       //TODO: should this apply in PressListener's drag?
       PressListener.prototype.drag.call( this, event );
+
+      sceneryLog && sceneryLog.InputListener && sceneryLog.pop();
     },
 
     // TODO: hardcode pointer.point?
     reposition: function( globalPoint ) {
+      sceneryLog && sceneryLog.InputListener && sceneryLog.InputListener( 'DragListener reposition' );
+      sceneryLog && sceneryLog.InputListener && sceneryLog.push();
+
       // TODO: scratch vectors, better codepath for minimizing computation
       var parentPointerPoint = this.globalToParentPoint( globalPoint );
       var parentLocalPoint = this.localToParentPoint( this.initialLocalPoint );
@@ -210,6 +233,8 @@ define( function( require ) {
       }
 
       // TODO: consider other options to handle here
+
+      sceneryLog && sceneryLog.InputListener && sceneryLog.pop();
     },
 
     ancestorTransformed: function() {
@@ -225,9 +250,14 @@ define( function( require ) {
     },
 
     tryTouchSnag: function( event ) {
+      sceneryLog && sceneryLog.InputListener && sceneryLog.InputListener( 'DragListener tryTouchSnag' );
+      sceneryLog && sceneryLog.InputListener && sceneryLog.push();
+
       if ( this._allowTouchSnag && !event.pointer.isAttached() ) {
         this.press( event );
       }
+
+      sceneryLog && sceneryLog.InputListener && sceneryLog.pop();
     },
 
     /**
@@ -258,9 +288,14 @@ define( function( require ) {
      * @public
      */
     dispose: function() {
+      sceneryLog && sceneryLog.InputListener && sceneryLog.InputListener( 'DragListener dispose' );
+      sceneryLog && sceneryLog.InputListener && sceneryLog.push();
+
       this.detachTransformTracker();
 
       PressListener.prototype.dispose.call( this );
+
+      sceneryLog && sceneryLog.InputListener && sceneryLog.pop();
     }
   } );
 

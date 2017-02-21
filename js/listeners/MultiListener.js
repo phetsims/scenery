@@ -54,38 +54,73 @@ define( function( require ) {
     // @private
     this._pressListener = {
       move: function( event ) {
+        sceneryLog && sceneryLog.InputListener && sceneryLog.InputListener( 'MultiListener pointer move' );
+        sceneryLog && sceneryLog.InputListener && sceneryLog.push();
+
         self.movePress( self.findPress( event.pointer ) );
+
+        sceneryLog && sceneryLog.InputListener && sceneryLog.pop();
       },
 
       up: function( event ) {
+        sceneryLog && sceneryLog.InputListener && sceneryLog.InputListener( 'MultiListener pointer up' );
+        sceneryLog && sceneryLog.InputListener && sceneryLog.push();
+
         // TODO: consider logging press on the pointer itself?
         self.removePress( self.findPress( event.pointer ) );
+
+        sceneryLog && sceneryLog.InputListener && sceneryLog.pop();
       },
 
       cancel: function( event ) {
+        sceneryLog && sceneryLog.InputListener && sceneryLog.InputListener( 'MultiListener pointer cancel' );
+        sceneryLog && sceneryLog.InputListener && sceneryLog.push();
+
         var press = self.findPress( event.pointer );
         press.interrupted = true;
 
         self.removePress( press );
+
+        sceneryLog && sceneryLog.InputListener && sceneryLog.pop();
       },
 
       interrupt: function() {
+        sceneryLog && sceneryLog.InputListener && sceneryLog.InputListener( 'MultiListener pointer interrupt' );
+        sceneryLog && sceneryLog.InputListener && sceneryLog.push();
+
         // For the future, we could figure out how to track the pointer that calls this
         self.interrupt();
+
+        sceneryLog && sceneryLog.InputListener && sceneryLog.pop();
       }
     };
 
     this._backgroundListener = {
       up: function( event ) {
+        sceneryLog && sceneryLog.InputListener && sceneryLog.InputListener( 'MultiListener background up' );
+        sceneryLog && sceneryLog.InputListener && sceneryLog.push();
+
         self.removeBackgroundPress( self.findBackgroundPress( event.pointer ) );
+
+        sceneryLog && sceneryLog.InputListener && sceneryLog.pop();
       },
 
       cancel: function( event ) {
+        sceneryLog && sceneryLog.InputListener && sceneryLog.InputListener( 'MultiListener background cancel' );
+        sceneryLog && sceneryLog.InputListener && sceneryLog.push();
+
         self.removeBackgroundPress( self.findBackgroundPress( event.pointer ) );
+
+        sceneryLog && sceneryLog.InputListener && sceneryLog.pop();
       },
 
       interrupt: function() {
+        sceneryLog && sceneryLog.InputListener && sceneryLog.InputListener( 'MultiListener background interrupt' );
+        sceneryLog && sceneryLog.InputListener && sceneryLog.push();
+
         self.removeBackgroundPress( self.findBackgroundPress( event.pointer ) );
+
+        sceneryLog && sceneryLog.InputListener && sceneryLog.pop();
       }
     };
   }
@@ -117,7 +152,15 @@ define( function( require ) {
 
     // TODO: see PressListener
     down: function( event ) {
-      if ( event.pointer.isMouse && event.domEvent.button !== this._mouseButton ) { return; }
+      sceneryLog && sceneryLog.InputListener && sceneryLog.InputListener( 'MultiListener down' );
+
+      if ( event.pointer.isMouse && event.domEvent.button !== this._mouseButton ) {
+        sceneryLog && sceneryLog.InputListener && sceneryLog.InputListener( 'MultiListener abort: wrong mouse button' );
+
+        return;
+      }
+
+      sceneryLog && sceneryLog.InputListener && sceneryLog.push();
 
       assert && assert( _.includes( event.trail.nodes, this._targetNode ),
         'MultiListener down trail does not include targetNode?' );
@@ -125,21 +168,30 @@ define( function( require ) {
       var press = new Press( event.pointer, event.trail.subtrailTo( this._targetNode, false ) );
 
       if ( !event.pointer.isAttached() ) {
+        sceneryLog && sceneryLog.InputListener && sceneryLog.InputListener( 'MultiListener unattached, using press' );
         this.addPress( press );
+        this.convertBackgroundPresses();
       }
       else if ( this._allowMultitouchInterruption ) {
         if ( this._presses.length || this._backgroundPresses.length ) {
+          sceneryLog && sceneryLog.InputListener && sceneryLog.InputListener( 'MultiListener attached, interrupting for press' );
           press.pointer.interruptAttached();
           this.addPress( press );
           this.convertBackgroundPresses();
         }
         else {
+          sceneryLog && sceneryLog.InputListener && sceneryLog.InputListener( 'MultiListener attached, adding background press' );
           this.addBackgroundPress( press );
         }
       }
+
+      sceneryLog && sceneryLog.InputListener && sceneryLog.pop();
     },
 
     addPress: function( press ) {
+      sceneryLog && sceneryLog.InputListener && sceneryLog.InputListener( 'MultiListener addPress' );
+      sceneryLog && sceneryLog.InputListener && sceneryLog.push();
+
       this._presses.push( press );
 
       press.pointer.cursor = this._pressCursor;
@@ -148,14 +200,24 @@ define( function( require ) {
       this.recomputeLocals();
       this.reposition();
 
-      // TODO: handle interrupted
+      // TODO: handle interrupted?
+
+      sceneryLog && sceneryLog.InputListener && sceneryLog.pop();
     },
 
     movePress: function( press ) {
+      sceneryLog && sceneryLog.InputListener && sceneryLog.InputListener( 'MultiListener movePress' );
+      sceneryLog && sceneryLog.InputListener && sceneryLog.push();
+
       this.reposition();
+
+      sceneryLog && sceneryLog.InputListener && sceneryLog.pop();
     },
 
     removePress: function( press ) {
+      sceneryLog && sceneryLog.InputListener && sceneryLog.InputListener( 'MultiListener removePress' );
+      sceneryLog && sceneryLog.InputListener && sceneryLog.push();
+
       press.pointer.removeInputListener( this._pressListener );
       press.pointer.cursor = null;
 
@@ -163,21 +225,36 @@ define( function( require ) {
 
       this.recomputeLocals();
       this.reposition();
+
+      sceneryLog && sceneryLog.InputListener && sceneryLog.pop();
     },
 
     addBackgroundPress: function( press ) {
+      sceneryLog && sceneryLog.InputListener && sceneryLog.InputListener( 'MultiListener addBackgroundPress' );
+      sceneryLog && sceneryLog.InputListener && sceneryLog.push();
+
       // TODO: handle turning background presses into main presses here
       this._backgroundPresses.push( press );
       press.pointer.addInputListener( this._backgroundListener, false );
+
+      sceneryLog && sceneryLog.InputListener && sceneryLog.pop();
     },
 
     removeBackgroundPress: function( press ) {
+      sceneryLog && sceneryLog.InputListener && sceneryLog.InputListener( 'MultiListener removeBackgroundPress' );
+      sceneryLog && sceneryLog.InputListener && sceneryLog.push();
+
       press.pointer.removeInputListener( this._backgroundListener );
 
       arrayRemove( this._backgroundPresses, press );
+
+      sceneryLog && sceneryLog.InputListener && sceneryLog.pop();
     },
 
     convertBackgroundPresses: function() {
+      sceneryLog && sceneryLog.InputListener && sceneryLog.InputListener( 'MultiListener convertBackgroundPresses' );
+      sceneryLog && sceneryLog.InputListener && sceneryLog.push();
+
       var presses = this._backgroundPresses.slice();
       for ( var i = 0; i < presses.length; i++ ) {
         var press = presses[ i ];
@@ -185,22 +262,39 @@ define( function( require ) {
         press.pointer.interruptAttached();
         this.addPress( press );
       }
+
+      sceneryLog && sceneryLog.InputListener && sceneryLog.pop();
     },
 
     reposition: function() {
+      sceneryLog && sceneryLog.InputListener && sceneryLog.InputListener( 'MultiListener reposition' );
+      sceneryLog && sceneryLog.InputListener && sceneryLog.push();
+
       this._targetNode.matrix = this.computeMatrix();
+
+      sceneryLog && sceneryLog.InputListener && sceneryLog.pop();
     },
 
     recomputeLocals: function() {
+      sceneryLog && sceneryLog.InputListener && sceneryLog.InputListener( 'MultiListener recomputeLocals' );
+      sceneryLog && sceneryLog.InputListener && sceneryLog.push();
+
       for ( var i = 0; i < this._presses.length; i++ ) {
         this._presses[ i ].recomputeLocalPoint();
       }
+
+      sceneryLog && sceneryLog.InputListener && sceneryLog.pop();
     },
 
     interrupt: function() {
+      sceneryLog && sceneryLog.InputListener && sceneryLog.InputListener( 'MultiListener interrupt' );
+      sceneryLog && sceneryLog.InputListener && sceneryLog.push();
+
       while ( this._presses.length ) {
         this.removePress( this._presses[ this._presses.length - 1 ] );
       }
+
+      sceneryLog && sceneryLog.InputListener && sceneryLog.pop();
     },
 
     // @private?

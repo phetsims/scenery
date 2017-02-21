@@ -58,17 +58,32 @@ define( function( require ) {
 
   inherit( PressListener, FireListener, {
     enter: function( event ) {
+      sceneryLog && sceneryLog.InputListener && sceneryLog.InputListener( 'FireListener enter' );
+      sceneryLog && sceneryLog.InputListener && sceneryLog.push();
+
       this.overCountProperty.value++;
+
+      sceneryLog && sceneryLog.InputListener && sceneryLog.pop();
     },
 
     exit: function( event ) {
+      sceneryLog && sceneryLog.InputListener && sceneryLog.InputListener( 'FireListener exit' );
+      sceneryLog && sceneryLog.InputListener && sceneryLog.push();
+
       assert && assert( this.overCountProperty.value >= 0, 'Exit event not matched by an enter event' );
 
       this.overCountProperty.value--;
+
+      sceneryLog && sceneryLog.InputListener && sceneryLog.pop();
     },
 
     fire: function() {
+      sceneryLog && sceneryLog.InputListener && sceneryLog.InputListener( 'FireListener fire' );
+      sceneryLog && sceneryLog.InputListener && sceneryLog.push();
+
       this._fireCallback && this._fireCallback();
+
+      sceneryLog && sceneryLog.InputListener && sceneryLog.pop();
     },
 
     // @override
