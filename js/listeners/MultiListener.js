@@ -77,15 +77,15 @@ define( function( require ) {
 
     this._backgroundListener = {
       up: function( event ) {
-        self.removeBackgroundPress( self.findPress( event.pointer ) );
+        self.removeBackgroundPress( self.findBackgroundPress( event.pointer ) );
       },
 
       cancel: function( event ) {
-        self.removeBackgroundPress( self.findPress( event.pointer ) );
+        self.removeBackgroundPress( self.findBackgroundPress( event.pointer ) );
       },
 
       interrupt: function() {
-        self.removeBackgroundPress( self.findPress( event.pointer ) );
+        self.removeBackgroundPress( self.findBackgroundPress( event.pointer ) );
       }
     };
   }
