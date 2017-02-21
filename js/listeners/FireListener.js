@@ -224,6 +224,8 @@ define( function( require ) {
     release: function() {
       PressListener.prototype.release.call( this, event );
 
+      // Notify after the rest of release is called in order to prevent it from triggering interrupt().
+      // TODO: Is this a problem that we can't access things like this.pointer here?
       if ( !this._fireOnDown && this.isHoveringProperty.value && !this.interrupted ) {
         this.fire();
       }

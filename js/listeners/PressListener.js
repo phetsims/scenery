@@ -312,9 +312,6 @@ define( function( require ) {
 
       assert && assert( this.isPressed, 'This listener is not pressed' );
 
-      // Call release listener before things are 'unset', in case it wants to access any properties.
-      this._releaseListener && this._releaseListener();
-
       this.isPressedProperty.value = false;
 
       this.pointer.removeInputListener( this._pointerListener );
@@ -325,6 +322,10 @@ define( function( require ) {
       // Unset self properties after the property change, so they are visible to listeners beforehand.
       this.pointer = null;
       this.pressedTrail = null;
+
+      // Notify after the rest of release is called in order to prevent it from triggering interrupt().
+      // TODO: Is this a problem that we can't access things like this.pointer here?
+      this._releaseListener && this._releaseListener();
 
       sceneryLog && sceneryLog.InputListener && sceneryLog.pop();
     },

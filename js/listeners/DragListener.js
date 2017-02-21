@@ -3,7 +3,33 @@
 /**
  * PressListener subtype customized for handling most drag-related listener needs.
  *
- * TODO: doc the coordinate frames (global, parent, local, model)
+ * DragListener uses some specific terminology that is helpful to understand:
+ *
+ * - Drag target: The node whose trail is used for coordinate transforms. When a targetNode is specified, it will be the
+ *                drag target. Otherwise, whatever was the currentTarget during event bubbling for the event that
+ *                triggered press will be used (almost always the node that the listener is added to).
+ * - Global coordinate frame: Coordinate frame of the Display (specifically it's rootNode's local coordinate frame),
+ *                            that in some applications will be screen coordinates.
+ * - Parent coordinate frame: The parent coordinate frame of our drag target. Basically, it's the coordinate frame
+ *                            you'd need to use to set dragTarget.translation = <parent coordinate frame point> for the
+ *                            drag target to follow the pointer.
+ * - Local coordinate frame: The local coordinate frame of our drag target, where (0,0) would be at the drag target's
+ *                           origin.
+ * - Model coordinate frame: Optionally defined by a model-view transform (treating the parent coordinate frame as the
+ *                           view). When a transform is provided, it's the coordinate frame needed for setting
+ *                           dragModelElement.position = <model cordinate frame point>. If a transform is not provided
+ *                           (or overridden), it will be the same as the parent coordinate frame.
+ *
+ * The typical coordinate handling of DragListener is to:
+ * 1. When a drag is started (with press), record the pointer's location in the local coordinate frame. This is visually
+ *    where the pointer is over the drag target, and typically most drags will want to move the dragged element so that
+ *    the pointer continues to be over this point.
+ * 2. When the pointer is moved, compute the new parent translation to keep the pointer on the same place on the
+ *    dragged element.
+ * 3. (optionally) map that to a model location, and (optionally) move that model location to satisfy any constraints of
+ *    where the element can be dragged (recomputing the parent/model translation as needed)
+ * 4. Apply the required translation (with a provided drag callback, using the locationProperty, or directly
+ *    transforming the Node if translateNode:true.
  *
  * TODO: unit tests
  *
@@ -162,12 +188,13 @@ define( function( require ) {
       sceneryLog && sceneryLog.InputListener && sceneryLog.InputListener( 'DragListener release' );
       sceneryLog && sceneryLog.InputListener && sceneryLog.push();
 
-      // Notify before things are 'unset', in case it wants to access any properties.
-      this._end && this._end();
-
       PressListener.prototype.release.call( this );
 
       this.detachTransformTracker();
+
+      // Notify after the rest of release is called in order to prevent it from triggering interrupt().
+      // TODO: Is this a problem that we can't access things like this.pointer here?
+      this._end && this._end();
 
       sceneryLog && sceneryLog.InputListener && sceneryLog.pop();
     },
