@@ -428,7 +428,9 @@
       new scenery.Rectangle( 380, 180, 20, 20, { fill: 'red' } )
     ]
   } );
-  panContent.addInputListener( new scenery.PanZoomListener( panContent, panBounds ) );
+  panContent.addInputListener( new scenery.PanZoomListener( panContent, panBounds, {
+    allowMultitouchInterruption: true
+  } ) );
   var panContainer = new scenery.Node( {
     children: [
       panContent,

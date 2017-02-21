@@ -33,7 +33,8 @@ define( function( require ) {
       pressCursor: 'pointer', // TODO: see PressListener
       targetNode: null, // TODO: required? pass in at front
       allowScale: true,
-      allowRotation: true
+      allowRotation: true,
+      allowMultitouchInterruption: false
     }, options );
 
     this._targetNode = targetNode;
@@ -42,9 +43,13 @@ define( function( require ) {
     this._pressCursor = options.pressCursor;
     this._allowScale = options.allowScale;
     this._allowRotation = options.allowRotation;
+    this._allowMultitouchInterruption = options.allowMultitouchInterruption;
 
     // @private {Array.<Press>}
     this._presses = [];
+
+    // @private {Array.<Press>}
+    this._backgroundPresses = [];
 
     // @private
     this._pressListener = {
@@ -69,6 +74,20 @@ define( function( require ) {
         self.interrupt();
       }
     };
+
+    this._backgroundListener = {
+      up: function( event ) {
+        self.removeBackgroundPress( self.findPress( event.pointer ) );
+      },
+
+      cancel: function( event ) {
+        self.removeBackgroundPress( self.findPress( event.pointer ) );
+      },
+
+      interrupt: function() {
+        self.removeBackgroundPress( self.findPress( event.pointer ) );
+      }
+    };
   }
 
   scenery.register( 'MultiListener', MultiListener );
@@ -85,13 +104,39 @@ define( function( require ) {
       return null;
     },
 
+    findBackgroundPress: function( pointer ) {
+      // TODO: reduce duplication with findPress?
+      for ( var i = 0; i < this._backgroundPresses.length; i++ ) {
+        if ( this._backgroundPresses[ i ].pointer === pointer ) {
+          return this._backgroundPresses[ i ];
+        }
+      }
+      assert && assert( false, 'Did not find press' );
+      return null;
+    },
+
     // TODO: see PressListener
     down: function( event ) {
-      if ( this.isPressed || event.pointer.isAttached() ) { return; }
-
       if ( event.pointer.isMouse && event.domEvent.button !== this._mouseButton ) { return; }
 
-      this.addPress( new Press( event.pointer, event.trail.subtrailTo( event.currentTarget, false ) ) );
+      assert && assert( _.includes( event.trail.nodes, this._targetNode ),
+        'MultiListener down trail does not include targetNode?' );
+
+      var press = new Press( event.pointer, event.trail.subtrailTo( this._targetNode, false ) );
+
+      if ( !event.pointer.isAttached() ) {
+        this.addPress( press );
+      }
+      else if ( this._allowMultitouchInterruption ) {
+        if ( this._presses.length || this._backgroundPresses.length ) {
+          press.pointer.interruptAttached();
+          this.addPress( press );
+          this.convertBackgroundPresses();
+        }
+        else {
+          this.addBackgroundPress( press );
+        }
+      }
     },
 
     addPress: function( press ) {
@@ -100,6 +145,7 @@ define( function( require ) {
       press.pointer.cursor = this._pressCursor;
       press.pointer.addInputListener( this._pressListener, true );
 
+      this.recomputeLocals();
       this.reposition();
 
       // TODO: handle interrupted
@@ -117,6 +163,28 @@ define( function( require ) {
 
       this.recomputeLocals();
       this.reposition();
+    },
+
+    addBackgroundPress: function( press ) {
+      // TODO: handle turning background presses into main presses here
+      this._backgroundPresses.push( press );
+      press.pointer.addInputListener( this._backgroundListener, false );
+    },
+
+    removeBackgroundPress: function( press ) {
+      press.pointer.removeInputListener( this._backgroundListener );
+
+      arrayRemove( this._backgroundPresses, press );
+    },
+
+    convertBackgroundPresses: function() {
+      var presses = this._backgroundPresses.slice();
+      for ( var i = 0; i < presses.length; i++ ) {
+        var press = presses[ i ];
+        this.removeBackgroundPress( press );
+        press.pointer.interruptAttached();
+        this.addPress( press );
+      }
     },
 
     reposition: function() {
