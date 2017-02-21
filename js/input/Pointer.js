@@ -28,6 +28,7 @@ define( function( require ) {
   var inherit = require( 'PHET_CORE/inherit' );
   var scenery = require( 'SCENERY/scenery' );
   var Vector2 = require( 'DOT/Vector2' );
+  var BooleanProperty = require( 'AXON/BooleanProperty' );
 
   /**
    * @constructor
@@ -49,18 +50,17 @@ define( function( require ) {
     //                        specific trail, then a trail with only the display's rootNode will be set.
     this.trail = null;
 
-    // @public {boolean} - Whether this pointer is 'down' (pressed).
-    // TODO: is this used? How does it work with mouse buttons? Check if we can deprecate/remove it
-    this.isDown = initialDownState;
+    // @public {BooleanProperty} - Whether this pointer is 'down' (pressed).
+    this.isDownProperty = new BooleanProperty( initialDownState );
+
+    // @public {BooleanProperty} - Whether there is a main listener "attached" to this pointer. This signals that the
+    // listener is "doing" something with the pointer, and that it should be interrupted if other actions need to take
+    // over the pointer behavior.
+    this.attachedProperty = new BooleanProperty( false );
 
     // @private {Array.<Object>} - All attached listeners (will be activated in order). See top-level documentation for
     //                             information about listener structure.
     this._listeners = [];
-
-    // @private {boolean} - Whether there is a main listener "attached" to this pointer. This signals that the listener
-    //                      is "doing" something with the pointer, and that it should be interrupted if other actions
-    //                      need to take over the pointer behavior.
-    this._attached = 0;
 
     // @private {Object|null} - Our main "attached" listener, if there is one (otherwise null)
     this._attachedListener = null;
@@ -152,7 +152,7 @@ define( function( require ) {
       assert && assert( index !== -1, 'Could not find the input listener to remove' );
 
       // If this listener is our attached listener, also detach it
-      if ( this._attached && listener === this._attachedListener ) {
+      if ( this.isAttached() && listener === this._attachedListener ) {
         this.detach( listener );
       }
 
@@ -166,7 +166,33 @@ define( function( require ) {
      * @returns {boolean}
      */
     isAttached: function() {
-      return this._attached;
+      return this.attachedProperty.value;
+    },
+
+    /**
+     * Sets whether this pointer is down/pressed, or up.
+     * @public
+     *
+     * NOTE: Naming convention is for legacy code, would usually have pointer.down
+     * TODO: improve name, .setDown( value ) with .down =
+     *
+     * @param {boolean} value
+     */
+    set isDown( value ) {
+      this.isDownProperty.value = value;
+    },
+
+    /**
+     * Returns whether this pointer is down/pressed, or up.
+     * @public
+     *
+     * NOTE: Naming convention is for legacy code, would usually have pointer.down
+     * TODO: improve name, .isDown() with .down
+     *
+     * @returns {boolean}
+     */
+    get isDown() {
+      return this.isDownProperty.value;
     },
 
     /**
@@ -176,7 +202,7 @@ define( function( require ) {
      * After this executes, this pointer should not be attached.
      */
     interruptAttached: function() {
-      if ( this._attached ) {
+      if ( this.isAttached() ) {
         this._attachedListener.interrupt(); // Any listener that uses the 'attach' API should have interrupt()
       }
     },
@@ -200,9 +226,9 @@ define( function( require ) {
      * @param {Object} listener
      */
     attach: function( listener ) {
-      assert && assert( !this._attached, 'Attempted to attach to an already attached pointer' );
+      assert && assert( !this.isAttached(), 'Attempted to attach to an already attached pointer' );
 
-      this._attached = true;
+      this.attachedProperty.value = true;
       this._attachedListener = listener;
     },
 
@@ -213,10 +239,10 @@ define( function( require ) {
      * @param {Object} listener
      */
     detach: function( listener ) {
-      assert && assert( this._attached, 'Cannot detach a listener if one is not attached' );
+      assert && assert( this.isAttached(), 'Cannot detach a listener if one is not attached' );
       assert && assert( this._attachedListener === listener, 'Cannot detach a different listener' );
 
-      this._attached = false;
+      this.attachedProperty.value = false;
       this._attachedListener = null;
     },
 

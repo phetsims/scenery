@@ -201,10 +201,11 @@
   } );
   buttonNode.addInputListener( buttonListener );
 
-  axon.Property.multilink( [ buttonListener.isOverProperty, buttonListener.isPressedProperty ], function( isOver, isPressed ) {
-    var isActive = isOver || isPressed;
+  axon.Property.multilink( [ buttonListener.isHoveringProperty, buttonListener.isPressedProperty ], function( isHovering, isPressed ) {
+    console.log( 'hovering: ' + isHovering + ', pressed: ' + isPressed );
+    var isActive = isHovering || isPressed;
     buttonBackground.fill = isActive ? activeColor : inactiveColor;
-    buttonText.text = ( isOver ? 'inside' : 'outside' ) + ' ' + ( isPressed ? 'pressed' : 'released' );
+    buttonText.text = ( isHovering ? 'hovering' : 'no-hover' ) + ' ' + ( isPressed ? 'pressed' : 'released' );
     buttonText.center = new dot.Vector2();
   } );
 

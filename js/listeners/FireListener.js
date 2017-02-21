@@ -16,6 +16,7 @@ define( function( require ) {
   var inherit = require( 'PHET_CORE/inherit' );
   var scenery = require( 'SCENERY/scenery' );
   var Property = require( 'AXON/Property' );
+  var ObservableArray = require( 'AXON/ObservableArray' );
   var PressListener = require( 'SCENERY/listeners/PressListener' );
 
   /**
@@ -25,7 +26,7 @@ define( function( require ) {
     var self = this;
 
     options = _.extend( {
-      isOverProperty: new Property( false ), // allowing this to be overridden helps with button models
+      isHoveringProperty: new Property( false ), // allowing this to be overridden helps with button models
       fireOnDown: false,
       fire: null, // TODO: fire can't take an event right now, because release doesn't
       isHighlightedProperty: new Property( false ) // allowing this to be overridden helps with button models
@@ -33,35 +34,51 @@ define( function( require ) {
 
     PressListener.call( this, options );
 
-    this.overCountProperty = new Property( 0 );
-    this.isOverProperty = options.isOverProperty;
+    this.overPointers = new ObservableArray();
+    this.overCountProperty = this.overPointers.lengthProperty;
+    assert && assert( this.overCountProperty instanceof Property && this.overCountProperty.value === 0 );
+    this.isHoveringProperty = options.isHoveringProperty;
 
-    this.overCountProperty.link( function( overCount ) {
-      self.isOverProperty.value = overCount > 0;
+    var isHoveringListener = this.invalidateHover.bind( this );
+    this.overCountProperty.link( isHoveringListener );
+    this.isPressedProperty.link( isHoveringListener );
+    this.overPointers.addItemAddedListener( function( pointer ) {
+      pointer.isDownProperty.link( isHoveringListener );
+    } );
+    this.overPointers.addItemRemovedListener( function( pointer ) {
+      pointer.isDownProperty.unlink( isHoveringListener );
     } );
 
     this._fireOnDown = options.fireOnDown;
     this._fireCallback = options.fire;
 
-    // TODO: highlight should ignore attached pointers that isn't our pointer that's pressing us
     this.isHighlightedProperty = options.isHighlightedProperty;
 
-    // TODO: Don't highlight for "pressed" pointers that weren't pressed for us
-    Property.multilink( [ this.isOverProperty, this.isPressedProperty ], function( isOver, isPressed ) {
-      self.isHighlightedProperty.value = isOver || isPressed;
+    Property.multilink( [ this.isHoveringProperty, this.isPressedProperty ], function( isHovering, isPressed ) {
+      self.isHighlightedProperty.value = isHovering || isPressed;
     } );
-
-    // Hoverable, Fireable, Highlightable, TouchSnaggable
   }
 
   scenery.register( 'FireListener', FireListener );
 
   inherit( PressListener, FireListener, {
+    invalidateHover: function() {
+      var pointers = this.overPointers.getArray();
+      for ( var i = 0; i < pointers.length; i++ ) {
+        var pointer = pointers[ i ];
+        if ( !pointer.isDown || pointer === this.pointer ) {
+          this.isHoveringProperty.value = true;
+          return;
+        }
+      }
+      this.isHoveringProperty.value = false;
+    },
+
     enter: function( event ) {
       sceneryLog && sceneryLog.InputListener && sceneryLog.InputListener( 'FireListener enter' );
       sceneryLog && sceneryLog.InputListener && sceneryLog.push();
 
-      this.overCountProperty.value++;
+      this.overPointers.push( event.pointer );
 
       sceneryLog && sceneryLog.InputListener && sceneryLog.pop();
     },
@@ -70,9 +87,9 @@ define( function( require ) {
       sceneryLog && sceneryLog.InputListener && sceneryLog.InputListener( 'FireListener exit' );
       sceneryLog && sceneryLog.InputListener && sceneryLog.push();
 
-      assert && assert( this.overCountProperty.value >= 0, 'Exit event not matched by an enter event' );
+      assert && assert( this.overPointers.contains( event.pointer ), 'Exit event not matched by an enter event' );
 
-      this.overCountProperty.value--;
+      this.overPointers.remove( event.pointer );
 
       sceneryLog && sceneryLog.InputListener && sceneryLog.pop();
     },
@@ -103,9 +120,25 @@ define( function( require ) {
     release: function() {
       PressListener.prototype.release.call( this, event );
 
-      if ( !this._fireOnDown && this.isOverProperty.value && !this.interrupted ) {
+      if ( !this._fireOnDown && this.isHoveringProperty.value && !this.interrupted ) {
         this.fire();
       }
+    },
+
+    /**
+     * Disposes the listener, releasing references. It should not be used after this.
+     * @public
+     */
+    dispose: function() {
+      sceneryLog && sceneryLog.InputListener && sceneryLog.InputListener( 'FireListener dispose' );
+      sceneryLog && sceneryLog.InputListener && sceneryLog.push();
+
+      // We need to release references to any pointers that are over us.
+      this.overPointers.clear();
+
+      PressListener.prototype.dispose.call( this );
+
+      sceneryLog && sceneryLog.InputListener && sceneryLog.pop();
     }
   } );
 
