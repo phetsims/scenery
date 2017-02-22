@@ -83,6 +83,8 @@ define( function( require ) {
   var FORM_ELEMENTS = [ INPUT_TAG, BUTTON_TAG, TEXTAREA_TAG, SELECT_TAG, OPTGROUP_TAG, DATALIST_TAG, OUTPUT_TAG ];
 
   // these elements support inner text
+  //REVIEW: Doesn't every element support innerText? Was surprised a div wasn't allowed here, but innerText should work
+  //        on divs?
   var ELEMENTS_SUPPORT_INNER_TEXT = [ BUTTON_TAG, PARAGRAPH_TAG, LIST_ITEM_TAG ];
 
   // these elements require a minimum width to be visible in Safari
@@ -114,7 +116,7 @@ define( function( require ) {
 
     /**
      * Given the constructor for Node, mix accessibility functions into the prototype
-     * 
+     *
      * @param {function} type - the constructor for Node
      */
     mixin: function( type ) {
@@ -142,6 +144,8 @@ define( function( require ) {
          */
         initializeAccessibility: function() {
 
+          //REVIEW: Including the 'null' case in type documentation here would help.
+
           // @private {string} - the HTML tag name of the element representing this node in the DOM
           this._tagName = null;
 
@@ -161,7 +165,7 @@ define( function( require ) {
           this._descriptionTagName = null;
 
           // @private {string} - the type for an element with tag name of INPUT.  This should only be used
-          // if the element has a tag name INPUT. 
+          // if the element has a tag name INPUT.
           this._inputType = null;
 
           // @private {string} - the value of the input, only relevant if the tag name is of type "INPUT".
@@ -202,6 +206,7 @@ define( function( require ) {
           // element.  This will determine how the label content is associated with the DOM element, see
           // setAccessibleLabel() for more information
           this._useAriaLabel = null;
+          //REVIEW: This is marked as boolean, but initialized to null?
 
           // @private {string} - the ARIA role for this node's DOM element, added as an HTML attribute.  For a complete
           // list of ARIA roles, see https://www.w3.org/TR/wai-aria/roles.  Beware that many roles are not supported
@@ -216,7 +221,7 @@ define( function( require ) {
           this._ariaDescribedByElement = null;
 
           // @private {string} - the HTML element that will act as the label for this node's
-          // DOM element. The id is added to this node's DOM element as the 'aria-labelledby' attribute.  
+          // DOM element. The id is added to this node's DOM element as the 'aria-labelledby' attribute.
           // The label element can be anywhere in the document.  The behavior for aria-labelledby is such
           // that the content under the label element will be read whenever the element with the aria-labelledby
           // attribute receives focus.  There are multiple ways to add a label to a node, see setAccessibleLabel().
@@ -248,7 +253,7 @@ define( function( require ) {
 
           // @private {string} - An id used to reference the label element.  This will only be defined if a label
           // element exists, see setLabelTagName() for the ways a label can be added.  This is useful for setting
-          // attributes on the DOM element relative to the label element such as "aria-labelledby". 
+          // attributes on the DOM element relative to the label element such as "aria-labelledby".
           this._labelElementId = null;
 
           // @private {string} - An id used to reference the description element.  This will only be defined if a
@@ -265,7 +270,11 @@ define( function( require ) {
          * Add DOM event listeners contained in the accessibleInput directly to the DOM element. Never to be used
          * directly, see addAccessibilityInputListener().
          * @private
-         * 
+         *
+         * REVIEW: In general, functions like this shouldn't mutate the object provided. Currently,
+         * calling it on two consecutive nodes will double-wrap the listener. A typical pattern would be to return an
+         * object with the actually-added listeners, so that they could be removed with removeDOMEventListeners.
+         *
          * @param {Object} accessibleInput
          */
         addDOMEventListeners: function( accessibleInput ) {
@@ -306,11 +315,15 @@ define( function( require ) {
          * Adds an accessible input listener.
          * @public
          *
+         * The listener's keys should be DOM event names, and the values should be functions to be called when that
+         * event is fired on the dom element.
+         *
          * @param {Object} listener
          * @returns {Node} - Returns 'this' reference, for chaining
          */
         addAccessibleInputListener: function( accessibleInput ) {
           // don't allow listeners to be added multiple times
+          // REVIEW: Presumably passing an already-existing listener would be an assertion failure?
           if ( _.indexOf( this._accessibleInputListeners, accessibleInput ) === -1 ) {
             this._accessibleInputListeners.push( accessibleInput );
 
@@ -350,9 +363,12 @@ define( function( require ) {
         get accessibleInputListeners() { return this.getAccessibleInputListeners(); },
 
         /**
-         * Get the accesible id for this node. It is a string since elemetns are are generally referenced by string 
+         * Get the accesible id for this node. It is a string since elemetns are are generally referenced by string
          * with the the DOM API.
-         * 
+         *
+         * REVIEW: How can this guarantee it is a string, when it is initialized as null?
+         *         new Node().accessibleId returns null.
+         *
          * @return {string}
          */
         getAccessibleId: function() {
@@ -364,6 +380,9 @@ define( function( require ) {
          * Get HTML element representing this node in the document.
          * @public
          *
+         * REVIEW: How can this guarantee it is an HTMLElement, when it is initialized as null?
+         *         new Node().domElement returns null.
+         *
          * @return {HTMLElement}
          */
         getDomElement: function() {
@@ -372,12 +391,22 @@ define( function( require ) {
         get domElement() { return this.getDomElement(); },
 
         /**
-         * Set the tag name representing this element in the DOM. DOM element  tag names are read-only, so this
+         * Set the tag name representing this element in the DOM. DOM element tag names are read-only, so this
          * function will create a new DOM element for the Node and reset the accessible content.
-         *  
+         *
+         * REVIEW: Setting the tag name multiple times results in incorrect behavior with many functions, e.g.:
+         *   var node = new scenery.Node();
+         *   node.tagName = 'div';
+         *   node.focusable = true;
+         *   node.domElement.tabIndex // 0 (as expected)
+         *   node.tagName = 'p';
+         *   node.domElement.tabIndex // -1 (yikes!, even when node.focusable returns true)
+         *
          * @param {string} tagName
          */
         setTagName: function( tagName ) {
+          assert && assert( typeof tagName === 'string' );
+
           this._tagName = tagName;
           this._domElement = document.createElement( tagName );
 
@@ -393,7 +422,9 @@ define( function( require ) {
         /**
          * Get the tag name of the DOM element representing this node for accessibility.
          * @public
-         * 
+         *
+         * REVIEW: Return type should include null, since new scenery.Node().tagName is null.
+         *
          * @return {string}
          */
         getTagName: function() {
@@ -404,13 +435,25 @@ define( function( require ) {
         /**
          * Set the tag name for the accessible label for this Node.  DOM element tag names are read-only, so this will
          * require creating a new label element.
-         * 
+         *
+         * REVIEW: Same problem with after-the-fact modification as tagName:
+         *   var node = new scenery.Node()
+         *   node.tagName = 'div';
+         *   node.labelTagName = 'p'
+         *   node.accessibleLabel = 'Label';
+         *   node.getLabelElement() // <p>Label</p>
+         *   node.labelTagName = 'div';
+         *   node.getLabelElement() // <div></div> -- NO label specified, even though accessibleLabel is still set
+         *
          * @param {string} tagName
          */
         setLabelTagName: function( tagName ) {
+          assert && assert( typeof tagName === 'string' );
+
           this._labelTagName = tagName;
           this._labelElement = null;
 
+          // REVIEW: Is null supported, or is this meant to check for empty strings?
           if ( tagName ) {
             this._labelElement = document.createElement( tagName );
           }
@@ -422,7 +465,9 @@ define( function( require ) {
         /**
          * Get the label element HTML tag name.
          * @public
-         * 
+         *
+         * REVIEW: Return type should include null, since new scenery.Node().labelTagName is null.
+         *
          * @return {string}
          */
         getLabelTagName: function() {
@@ -434,13 +479,16 @@ define( function( require ) {
          * Set the tag name for the description. HTML element tag names are read-only, so this will require creating
          * a new HTML element, and inserting it into the DOM.
          * @public
-         * 
+         *
+         * REVIEW: Has same issue with setting tagName and labelTagName (see those review comments)
+         *
          * @param {string} tagName
          */
         setDescriptionTagName: function( tagName ) {
           this._descriptionTagName = tagName;
           this._descriptionElement = null;
 
+          // REVIEW: Is null supported, or is this meant to check for empty strings?
           if ( tagName ) {
             this._descriptionElement = document.createElement( tagName );
           }
@@ -453,17 +501,17 @@ define( function( require ) {
          * Get the HTML get name for the description element.
          * @public
          *
-         * @return {}
+         * @return {string|null}
          */
         getDescriptionTagName: function() {
           return this._descriptionTagName;
         },
         get descriptionTagName() { return this.getDescriptionTagName(); },
-        
+
         /**
          * Sets the type for an input element.  Element must have the INPUT tag name. The input attribute is not
          * specified as readonly, so invalidating accessible content is not necessary.
-         * 
+         *
          * @param {string} inputType
          */
         setInputType: function( inputType ) {
@@ -476,8 +524,8 @@ define( function( require ) {
 
         /**
          * Get the input type. Input type is only relevant if this node's DOM element has tag name "INPUT".
-         * @public 
-         * 
+         * @public
+         *
          * @return {string}
          */
         getInputType: function() {
@@ -497,7 +545,7 @@ define( function( require ) {
          * </div>
          *
          * By default, label and description elements are placed below the node's HTML element.
-         * 
+         *
          * @param {boolean} prependLabels
          */
         setPrependLabels: function( prependLabels ) {
@@ -507,11 +555,11 @@ define( function( require ) {
           this.invalidateAccessibleContent();
         },
         set prependLabels( prependLabels ) { this.setPrependLabels( prependLabels ); },
-        
+
         /**
          * Get whether or not this node adds labels and descriptions above the representative DOM element.
          * @public
-         * 
+         *
          * @return {boolean}
          */
         getPrependLabels: function() {
@@ -530,7 +578,7 @@ define( function( require ) {
          *   <p>Button label</p>
          *   <p>Button description</p>
          * </section>
-         * 
+         *
          * @param {string} tagName
          */
         setParentContainerTagName: function( tagName ) {
@@ -543,8 +591,8 @@ define( function( require ) {
 
         /**
          * Get the tag name for the parent container element.
-         * 
-         * @return {string}         
+         *
+         * @return {string}
          */
         getParentContainerTagName: function() {
           return this._parentContainerTagName;
@@ -554,7 +602,7 @@ define( function( require ) {
         /**
          * Get the parent container element, returning null if none exists.
          * @public (scenery-internal)
-         * 
+         *
          * @return {HTMLElement|null}
          */
         getParentContainerElement: function() {
@@ -570,7 +618,7 @@ define( function( require ) {
          *   - As inner text on the Node's DOM element itself.
          *   - As a separate DOM element positioned as a peer or child of this
          *     node's DOM element.
-         *     
+         *
          * The way in which the label is added to the Node is dependent on the label tag name, whether we use the
          * aria-label attribute, and whether the node's DOM element supports inner text.
          *
@@ -602,7 +650,7 @@ define( function( require ) {
 
         /**
          * Get the label content for this node's DOM element.
-         * 
+         *
          * @return {string}
          */
         getAccessibleLabel: function() {
@@ -614,7 +662,7 @@ define( function( require ) {
          * Set the description content for this node's DOM element. A description element must exist and that element
          * must support inner text.  If a description element does not exist yet, we assume that a default paragraph
          * should be used.
-         * 
+         *
          * @param {string} textContent
          */
         setAccessibleDescription: function( textContent ) {
@@ -633,7 +681,7 @@ define( function( require ) {
 
         /**
          * Get the accessible description content that is describing this Node.
-         * 
+         *
          * @return {string}
          */
         getAccessibleDescription: function() {
@@ -662,7 +710,7 @@ define( function( require ) {
         /**
          * Get the ARIA role representing this node.
          * @public
-         * 
+         *
          * @return {string}
          */
         getAriaRole: function() {
@@ -675,7 +723,7 @@ define( function( require ) {
          * 'aria-label' attribute, the label will be read on focus, but will can not be found with the
          * virtual cursor.
          * @public
-         * 
+         *
          * @param {string} useAriaLabel
          */
         setUseAriaLabel: function( useAriaLabel ) {
@@ -699,7 +747,7 @@ define( function( require ) {
 
         /**
          * Get whether or not we are using an aria-label to label this node's HTML element.
-         * 
+         *
          * @return {boolean}
          */
         getUseAriaLabel: function() {
@@ -712,7 +760,7 @@ define( function( require ) {
          * surrounds the node's local bounds.  If focus highlight is set to 'invisible', the node will not have
          * any highlighting when it receives focus.
          * @public
-         * 
+         *
          * @param {Node|Shape|string.<'invisible'>} focusHighlight
          */
         setFocusHighlight: function( focusHighlight ) {
@@ -724,7 +772,7 @@ define( function( require ) {
         /**
          * Get the focus highlight for this node.
          * @public
-         * 
+         *
          * @return {Node|Shape|string<'invisible'>}
          */
         getFocusHighlight: function() {
@@ -735,7 +783,7 @@ define( function( require ) {
         /**
          * Get the description element that holds the description content for this node.
          * @public
-         * 
+         *
          * @return {HTMLElement|null}
          */
         getDescriptionElement: function() {
@@ -751,6 +799,7 @@ define( function( require ) {
         getLabelElement: function() {
           return this._labelElement;
         },
+        //REVIEW: Why no ES5 getter?
 
         /**
          * Set the 'aria-describedby' element for this node's DOM element. The value of the 'aria-describedby'
@@ -782,7 +831,7 @@ define( function( require ) {
 
         /**
          * Sets the element for the aria-labelledby attribute. The value of the 'aria-labelledby'
-         * attribute is a string id that references another HTML element.  Upon focus, a screen reader should 
+         * attribute is a string id that references another HTML element.  Upon focus, a screen reader should
          * read the content under the HTML element referenced by the 'aria-labelledby' id. Behavior will depend
          * slightly on user agent.
          * @public
@@ -803,7 +852,7 @@ define( function( require ) {
          * Get the element that labels this node's DOM element through the 'aria-labelledby' attribute.
          * See setAriaLabelledBy() for more information about the 'aria-labelledby' attribute behavior.
          * @public
-         * 
+         *
          * @return {string}
          */
         getAriaLabelledByElement: function() {
@@ -815,7 +864,7 @@ define( function( require ) {
          * If the node is using a list for its description, add a list item to  the end of the list with the text
          * content.  Returns an id so that the element can be referenced if need be.
          * @public
-         * 
+         *
          * @param  {string} textContent
          * @return {string} - the id of the list item returned for reference
          */
@@ -887,7 +936,7 @@ define( function( require ) {
         /**
          * Get whether or not this node's representative DOM element is hidden.
          * @public
-         * 
+         *
          * @return {boolean}
          */
         getAccessibleHidden: function() {
@@ -899,7 +948,7 @@ define( function( require ) {
          * Set the value of an input element.  Element must be a form element to support the value attribute. The input
          * value is converted to string since input values are generally string for HTML.
          * @public
-         * 
+         *
          * @param {string} value
          */
         setInputValue: function( value ) {
@@ -915,18 +964,18 @@ define( function( require ) {
         /**
          * Get the value of the element. Element must be a form element to support the value attribute.
          * @public
-         * 
+         *
          * @return {string}
          */
         getInputValue: function() {
           return this._inputValue;
         },
         get inputValue() { return this.getInputValue(); },
-        
+
         /**
          * Get an array containing all accessible attributes that have been added to this node's DOM element.
          * @public
-         * 
+         *
          * @return {string[]}
          */
         getAccessibleAttributes: function() {
@@ -960,7 +1009,6 @@ define( function( require ) {
 
         /**
          * Remove all attributes from this node's dom element.
-         * 
          * @public
          */
         removeAccessibleAttributes: function() {
@@ -977,10 +1025,10 @@ define( function( require ) {
         /**
          * Make the DOM element explicitly focusable with a tab index. Native HTML form elements will generally be in
          * the navigation order without explicitly setting focusable.  If these need to be removed from the navigation
-         * order setFocusable( false ).  Removing an element from the focus order does not hide the element from
+         * order, call setFocusable( false ).  Removing an element from the focus order does not hide the element from
          * assistive technology.
          * @public
-         * 
+         *
          * @param {boolean} isFocusable
          */
         setFocusable: function( isFocusable ) {
@@ -994,7 +1042,8 @@ define( function( require ) {
         /**
          * Get whether or not the node is focusable.
          * @public
-         * 
+         *
+         * REVIEW: Usually boolean getters would be called something like isFocusable().
          *
          * @return {boolean}
          */
@@ -1005,7 +1054,6 @@ define( function( require ) {
 
         /**
          * Focus this node's dom element. The element must not be hidden, and it must be focusable.
-         *
          * @public
          */
         focus: function() {
@@ -1020,7 +1068,7 @@ define( function( require ) {
 
       /**
        * Returns whether or not the attribute exists on the DOM element.
-       * 
+       *
        * @param  {HTMLElement}  domElement
        * @param  {string}  attribute
        * @return {string|null}
@@ -1072,7 +1120,7 @@ define( function( require ) {
        * parentContainerElement.  Its placement will also depend on whether or not this node wants to prepend labels,
        * see setPrependLabels().
        * @private
-       * 
+       *
        * @param  {HTMLElement} contentElement
        */
       function insertContentElement( contentElement ) {
