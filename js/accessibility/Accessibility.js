@@ -445,11 +445,11 @@ define( function( require ) {
          *   node.labelTagName = 'div';
          *   node.getLabelElement() // <div></div> -- NO label specified, even though accessibleLabel is still set
          *
+         * REVIEW: null used in unit tests, so this should be marked as accepting null
+         *
          * @param {string} tagName
          */
         setLabelTagName: function( tagName ) {
-          assert && assert( typeof tagName === 'string' );
-
           this._labelTagName = tagName;
           this._labelElement = null;
 
