@@ -490,6 +490,22 @@ define( function( require ) {
     // Mix in accessibility
     this.initializeAccessibility();
 
+    // Make sure Node's prototype dispose() is called when dispose() is called, and make sure that it isn't called
+    // more than once. See https://github.com/phetsims/scenery/issues/601.
+    if ( assert ) {
+      // @private {boolean}
+      this.isNodeDisposed = false;
+
+      // Wrap the prototype dispose method with a check. NOTE: We will not catch devious cases where the dispose() is
+      // overridden after the Node constructor (which may happen).
+      var protoDispose = this.dispose;
+      this.dispose = function() {
+        assert && assert( !this.isNodeDisposed, 'This Node has already been disposed, and cannot be disposed again' );
+        protoDispose.call( this );
+        assert && assert( this.isNodeDisposed, 'Node.dispose() call is missing from an overridden dispose method' );
+      };
+    }
+
     if ( options ) {
       this.mutate( options );
     }
@@ -4953,6 +4969,11 @@ define( function( require ) {
      * @public
      */
     dispose: function() {
+      // See constructor for Node disposal checks
+      if ( assert ) {
+        this.isNodeDisposed = true;
+      }
+
       Events.prototype.dispose.call( this ); // TODO: don't rely on Events
 
       if ( this._tandem ) {
