@@ -641,6 +641,8 @@ define( function( require ) {
 
       // Disconnects from the group
       this.group = null;
+
+      Node.prototype.dispose.call( this );
     }
   } );
 
