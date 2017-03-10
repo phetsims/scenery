@@ -183,7 +183,7 @@ define( function( require ) {
 
           // @private {HTMLElement} - the HTML element that will contain this node's DOM element, and possibly its peer
           // description and label elements.  This element will let you structure the label/description content above
-          // or below this node's DOM element.  see setParentContainerElement() and setPrependLabels()
+          // or below this node's DOM element.  see setParentContainerTagName() and setPrependLabels()
           this._parentContainerElement = null;
 
           // @private {boolean} - determines whether or not labels should be prepended above the node's DOM element. This
@@ -534,9 +534,9 @@ define( function( require ) {
         get inputType() { return this.getInputType(); },
 
         /**
-         * Set whether or not we want to prepend labels above the node's HTML element.  This should only be used if the
-         * node has a parent container element. If prepending labels, the label and description elements will be
-         * located above the HTML element like:
+         * Set whether or not we want to prepend labels above the node's HTML element.  If the node does not have
+         * a parent container element, one will be created. If prepending labels, the label and description elements
+         * will be located above the HTML element like:
          *
          * <div id='parent-container'>
          *   <p>Label</p>
@@ -549,7 +549,12 @@ define( function( require ) {
          * @param {boolean} prependLabels
          */
         setPrependLabels: function( prependLabels ) {
-          assert && assert( this._parentContainerElement, 'prependLabels requires a parent container element' );
+
+          // if there isn't a parent container element, create one so labels can be prepended
+          if ( !this._parentContainerElement ) {
+            this.parentContainerTagName = 'div';
+          }
+
           this._prependLabels = prependLabels;
 
           this.invalidateAccessibleContent();
