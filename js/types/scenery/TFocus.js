@@ -70,7 +70,9 @@ define( function( require ) {
 
         return { display: phet.joist.sim.display, trail: new phet.scenery.Trail( nodes ) };
       }
-    }
+    },
+
+    documentation: 'A wrapper type for the instance in the simulation which currently has keyboard focus.'
   } );
 
   phetioNamespace.register( 'TFocus', TFocus );
