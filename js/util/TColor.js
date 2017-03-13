@@ -9,10 +9,12 @@ define( function( require ) {
   'use strict';
 
   // modules
-  var assertInstanceOf = require( 'PHET_IO/assertions/assertInstanceOf' );
-  var phetioInherit = require( 'PHET_IO/phetioInherit' );
-  var phetioNamespace = require( 'PHET_IO/phetioNamespace' );
-  var TObject = require( 'PHET_IO/types/TObject' );
+  var scenery = require( 'SCENERY/scenery' );
+
+  // phet-io modules
+  var assertInstanceOf = require( 'ifphetio!PHET_IO/assertions/assertInstanceOf' );
+  var phetioInherit = require( 'ifphetio!PHET_IO/phetioInherit' );
+  var TObject = require( 'ifphetio!PHET_IO/types/TObject' );
 
   /**
    * Wrapper type for phet/scenery's Color class.
@@ -48,7 +50,7 @@ define( function( require ) {
     }
   } );
 
-  phetioNamespace.register( 'TColor', TColor );
+  scenery.register( 'TColor', TColor );
 
   return TColor;
 } );

@@ -9,14 +9,16 @@ define( function( require ) {
   'use strict';
 
   // modules
-  var assertInstanceOf = require( 'PHET_IO/assertions/assertInstanceOf' );
-  var phetioInherit = require( 'PHET_IO/phetioInherit' );
-  var phetioNamespace = require( 'PHET_IO/phetioNamespace' );
-  var TBoolean = require( 'PHET_IO/types/TBoolean' );
-  var TNumber = require( 'PHET_IO/types/TNumber' );
-  var TObject = require( 'PHET_IO/types/TObject' );
-  var TVoid = require( 'PHET_IO/types/TVoid' );
-  var TFunctionWrapper = require( 'PHET_IO/types/TFunctionWrapper' );
+  var scenery = require( 'SCENERY/scenery' );
+
+  // phet-io modules
+  var assertInstanceOf = require( 'ifphetio!PHET_IO/assertions/assertInstanceOf' );
+  var phetioInherit = require( 'ifphetio!PHET_IO/phetioInherit' );
+  var TBoolean = require( 'ifphetio!PHET_IO/types/TBoolean' );
+  var TNumber = require( 'ifphetio!PHET_IO/types/TNumber' );
+  var TObject = require( 'ifphetio!PHET_IO/types/TObject' );
+  var TVoid = require( 'ifphetio!PHET_IO/types/TVoid' );
+  var TFunctionWrapper = require( 'ifphetio!PHET_IO/types/TFunctionWrapper' );
 
   /**
    * Wrapper type for phet/scenery's Node
@@ -112,7 +114,7 @@ define( function( require ) {
     documentation: 'The base type for graphical and potentially interactive objects'
   } );
 
-  phetioNamespace.register( 'TNode', TNode );
+  scenery.register( 'TNode', TNode );
 
   return TNode;
 } );

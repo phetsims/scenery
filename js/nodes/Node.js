@@ -172,7 +172,7 @@ define( function( require ) {
   // commented out so Require.js doesn't balk at the circular dependency
   // require( 'SCENERY/util/Trail' );
   // require( 'SCENERY/util/TrailPointer' );
-  var TNode = require( 'ifphetio!PHET_IO/types/scenery/nodes/TNode' );
+  var TNode = require( 'SCENERY/nodes/TNode' );
   var Tandem = require( 'TANDEM/Tandem' );
   // constants
   var clamp = Util.clamp;

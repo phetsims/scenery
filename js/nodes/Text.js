@@ -27,9 +27,7 @@ define( function( require ) {
   var TextSVGDrawable = require( 'SCENERY/display/drawables/TextSVGDrawable' );
   var TextWebGLDrawable = require( 'SCENERY/display/drawables/TextWebGLDrawable' );
   var TextBounds = require( 'SCENERY/util/TextBounds' );
-
-  // phet-io modules
-  var TText = require( 'ifphetio!PHET_IO/types/scenery/nodes/TText' );
+  var TText = require( 'SCENERY/nodes/TText' );
 
   // constants
   var TEXT_OPTION_KEYS = [

@@ -10,10 +10,12 @@ define( function( require ) {
   'use strict';
 
   // modules
-  var assertInstanceOf = require( 'PHET_IO/assertions/assertInstanceOf' );
-  var phetioInherit = require( 'PHET_IO/phetioInherit' );
-  var phetioNamespace = require( 'PHET_IO/phetioNamespace' );
-  var TObject = require( 'PHET_IO/types/TObject' );
+  var scenery = require( 'SCENERY/scenery' );
+
+  // phet-io modules
+  var assertInstanceOf = require( 'ifphetio!PHET_IO/assertions/assertInstanceOf' );
+  var phetioInherit = require( 'ifphetio!PHET_IO/phetioInherit' );
+  var TObject = require( 'ifphetio!PHET_IO/types/TObject' );
 
   /**
    * Wrapper type for phet/sun's Faucet class.
@@ -75,7 +77,7 @@ define( function( require ) {
     documentation: 'A wrapper type for the instance in the simulation which currently has keyboard focus.'
   } );
 
-  phetioNamespace.register( 'TFocus', TFocus );
+  scenery.register( 'TFocus', TFocus );
 
   return TFocus;
 } );

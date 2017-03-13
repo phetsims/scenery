@@ -25,9 +25,7 @@ define( function( require ) {
   var Emitter = require( 'AXON/Emitter' );
   var Tandem = require( 'TANDEM/Tandem' );
   var DownUpListener = require( 'SCENERY/input/DownUpListener' );
-
-  // phet-io modules
-  var TButtonListener = require( 'ifphetio!PHET_IO/types/scenery/input/TButtonListener' );
+  var TButtonListener = require( 'SCENERY/input/TButtonListener' );
 
   /**
    * Options for the ButtonListener:

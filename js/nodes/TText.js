@@ -10,16 +10,18 @@ define( function( require ) {
   'use strict';
 
   // modules
-  var assertInstanceOf = require( 'PHET_IO/assertions/assertInstanceOf' );
-  var phetioInherit = require( 'PHET_IO/phetioInherit' );
-  var phetioEvents = require( 'PHET_IO/phetioEvents' );
-  var phetioNamespace = require( 'PHET_IO/phetioNamespace' );
-  var TFont = require( 'PHET_IO/types/scenery/util/TFont' );
-  var TNode = require( 'PHET_IO/types/scenery/nodes/TNode' );
-  var TNumber = require( 'PHET_IO/types/TNumber' );
-  var TString = require( 'PHET_IO/types/TString' );
-  var TVoid = require( 'PHET_IO/types/TVoid' );
-  var TFunctionWrapper = require( 'PHET_IO/types/TFunctionWrapper' );
+  var scenery = require( 'SCENERY/scenery' );
+  var TFont = require( 'SCENERY/util/TFont' );
+  var TNode = require( 'SCENERY/nodes/TNode' );
+
+  // phet-io modules
+  var assertInstanceOf = require( 'ifphetio!PHET_IO/assertions/assertInstanceOf' );
+  var phetioInherit = require( 'ifphetio!PHET_IO/phetioInherit' );
+  var phetioEvents = require( 'ifphetio!PHET_IO/phetioEvents' );
+  var TNumber = require( 'ifphetio!PHET_IO/types/TNumber' );
+  var TString = require( 'ifphetio!PHET_IO/types/TString' );
+  var TVoid = require( 'ifphetio!PHET_IO/types/TVoid' );
+  var TFunctionWrapper = require( 'ifphetio!PHET_IO/types/TFunctionWrapper' );
 
   /**
    * Wrapper type for scenery's Text node.
@@ -110,7 +112,7 @@ define( function( require ) {
     events: [ 'textChanged' ]
   } );
 
-  phetioNamespace.register( 'TText', TText );
+  scenery.register( 'TText', TText );
 
   return TText;
 } );

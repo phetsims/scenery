@@ -85,9 +85,7 @@ define( function( require ) {
   var PointerOverlay = require( 'SCENERY/overlays/PointerOverlay' );
   var CanvasNodeBoundsOverlay = require( 'SCENERY/overlays/CanvasNodeBoundsOverlay' );
   var FittedBlockBoundsOverlay = require( 'SCENERY/overlays/FittedBlockBoundsOverlay' );
-
-  // phet-io modules
-  var TFocus = require( 'ifphetio!PHET_IO/types/scenery/TFocus' );
+  var TFocus = require( 'SCENERY/accessibility/TFocus' );
 
   /*
    * Constructs a Display that will show the rootNode and its subtree in a visual state. Default options provided below
