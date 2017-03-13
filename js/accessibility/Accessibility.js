@@ -78,6 +78,7 @@ define( function( require ) {
   var DATALIST_TAG = 'DATALIST';
   var OUTPUT_TAG = 'OUTPUT';
   var PARAGRAPH_TAG = 'P';
+  var HEADING_1_TAG = 'H1';
 
   // these elements are typically associated with forms, and support certain attributes
   var FORM_ELEMENTS = [ INPUT_TAG, BUTTON_TAG, TEXTAREA_TAG, SELECT_TAG, OPTGROUP_TAG, DATALIST_TAG, OUTPUT_TAG ];
@@ -85,10 +86,14 @@ define( function( require ) {
   // these elements support inner text
   //REVIEW: Doesn't every element support innerText? Was surprised a div wasn't allowed here, but innerText should work
   //        on divs?
-  var ELEMENTS_SUPPORT_INNER_TEXT = [ BUTTON_TAG, PARAGRAPH_TAG, LIST_ITEM_TAG ];
+  var ELEMENTS_SUPPORT_INNER_TEXT = [ BUTTON_TAG, PARAGRAPH_TAG, LIST_ITEM_TAG, HEADING_1_TAG ];
 
   // these elements require a minimum width to be visible in Safari
   var ELEMENTS_REQUIRE_WIDTH = [ 'INPUT' ];
+
+  // these custom attributes flag that the DOM element needs special handling during invalidation
+  var DATA_FLAG = 'data-';
+  var RELATION_ATTRIBUTES = [ 'aria-labelledby', 'aria-describedby' ];
 
   // these events change the input value on the dom element
   var INPUT_CHANGE_EVENTS = [ 'input', 'change' ];
@@ -1146,6 +1151,48 @@ define( function( require ) {
       }
 
       /**
+       * Some accessibility attributes require a relation to the ID of another element in the DOM. During instantiation,
+       * the client can set up a relation to accessible content that is not yet invalidated. If the related element
+       * does not have an id, its peer hasn't been created yet, so we flag it with a data attribute to indicate
+       * that a relational attribute should be set up via processRelationDataAttributes() when the peer is
+       * eventually created.
+       * 
+       * @param {HTMLElement} relatedElement
+       * @param {string} attribute
+       */
+      function addRelationAttribute( relatedElement, attribute ) {
+        if ( !relatedElement.id ) {
+          relatedElement.setAttribute( DATA_FLAG + attribute , this._accessibleId );
+        }
+        else {
+          this.setAccessibleAttribute( attribute, relatedElement.id );
+        }
+      }
+
+      /**
+       * If an element was flagged with addRelationAttribute above, set the attribute and remove the flag from the
+       * DOM element.
+       */
+      function processRelationDataAttributes() {
+
+        for ( var i = 0; i < RELATION_ATTRIBUTES.length; i++ ) {
+          var attribute = RELATION_ATTRIBUTES[ i ];
+          var dataAttribute = DATA_FLAG + attribute;
+
+          var relatedElementId = this._domElement.getAttribute( dataAttribute );
+          if ( relatedElementId ) {
+            var relatedElement = document.getElementById( relatedElementId );
+
+            // set the attribute on the flagged element
+            relatedElement.setAttribute( attribute, this.domElement.id );
+
+            // remove the data attribute from this dom element now that it has been processed
+            this.domElement.removeAttribute( dataAttribute );
+          }
+        }
+      }
+
+      /**
        * Invalidate our current accessible content, triggering recomputation
        * of anything that depended on the old accessible content. This can be
        * combined with a client implementation of invalidateAccessibleContent.
@@ -1168,6 +1215,8 @@ define( function( require ) {
             // set up the unique id's for the DOM elements associated with this node's accessible content.
             self._accessibleId = accessibleInstance.trail.getUniqueId();
             self._domElement.id = self._accessibleId;
+
+            processRelationDataAttributes.call( self );
 
             // set up id relations for the label element
             if ( self._labelElement ) {
@@ -1197,15 +1246,10 @@ define( function( require ) {
             self._labelElement && insertContentElement.call( self, self._labelElement );
             self._descriptionElement && insertContentElement.call( self, self._descriptionElement );
 
-            // set up aria-describedby and aria-labelledby relations now that ids have been set up
-            if ( self._ariaDescribedByElement ) {
-              assert && assert( self._ariaDescribedByElement.id, 'aria-describedby element must have a unique id' );
-              self.setAccessibleAttribute( 'aria-describedby', self._ariaDescribedByElement.id );
-            }
-            if ( self._ariaLabelledByElement ) {
-              assert && assert( self._ariaLabelledByElement.id, 'aria-labelledby element must have a unique id' );
-              self.setAccessibleAttribute( 'aria-labelledby', self._ariaLabelledByElement.id );
-            }
+            // now that the ids have been set up, set up relationships for attributes which depend on the
+            // unique ID
+            self._ariaDescribedByElement && addRelationAttribute.call( self, self._ariaDescribedByElement, 'aria-describedby' );
+            self._ariaLabelledByElement && addRelationAttribute.call( self, self._ariaLabelledByElement, 'aria-labelledby' );
 
             return accessiblePeer;
           }
