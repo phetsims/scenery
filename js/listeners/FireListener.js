@@ -222,7 +222,7 @@ define( function( require ) {
      * on this listener instead.
      */
     release: function() {
-      PressListener.prototype.release.call( this, event );
+      PressListener.prototype.release.call( this );
 
       // Notify after the rest of release is called in order to prevent it from triggering interrupt().
       // TODO: Is this a problem that we can't access things like this.pointer here?
