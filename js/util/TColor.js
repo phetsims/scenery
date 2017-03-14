@@ -18,7 +18,7 @@ define( function( require ) {
 
   /**
    * Wrapper type for phet/scenery's Color class.
-   * @param color
+   * @param {Color} color
    * @param phetioID
    * @constructor
    */
