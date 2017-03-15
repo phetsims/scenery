@@ -79,6 +79,7 @@ define( function( require ) {
   var OUTPUT_TAG = 'OUTPUT';
   var PARAGRAPH_TAG = 'P';
   var HEADING_1_TAG = 'H1';
+  var ANCHOR_TAG = 'A';
 
   // these elements are typically associated with forms, and support certain attributes
   var FORM_ELEMENTS = [ INPUT_TAG, BUTTON_TAG, TEXTAREA_TAG, SELECT_TAG, OPTGROUP_TAG, DATALIST_TAG, OUTPUT_TAG ];
@@ -86,7 +87,7 @@ define( function( require ) {
   // these elements support inner text
   //REVIEW: Doesn't every element support innerText? Was surprised a div wasn't allowed here, but innerText should work
   //        on divs?
-  var ELEMENTS_SUPPORT_INNER_TEXT = [ BUTTON_TAG, PARAGRAPH_TAG, LIST_ITEM_TAG, HEADING_1_TAG ];
+  var ELEMENTS_SUPPORT_INNER_TEXT = [ BUTTON_TAG, PARAGRAPH_TAG, LIST_ITEM_TAG, HEADING_1_TAG, ANCHOR_TAG ];
 
   // these elements require a minimum width to be visible in Safari
   var ELEMENTS_REQUIRE_WIDTH = [ 'INPUT' ];
@@ -416,7 +417,7 @@ define( function( require ) {
           this._domElement = document.createElement( tagName );
 
           // Safari requires that certain input elements have width, otherwise it will not be keyboard accessible
-          if ( _.includes( ELEMENTS_REQUIRE_WIDTH, tagName ) ) {
+          if ( _.includes( ELEMENTS_REQUIRE_WIDTH, tagName.toUpperCase() ) ) {
             this._domElement.style.width = '1px';
           }
 
