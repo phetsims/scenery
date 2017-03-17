@@ -660,9 +660,6 @@ define( function( require ) {
           if ( this._useAriaLabel ) {
             this.setAccessibleAttribute( 'aria-label', this._accessibleLabel );
           }
-          else if ( elementSupportsInnerText( this._domElement ) ) {
-            this._domElement.innerText = this._accessibleLabel;
-          }
           else if ( this._labelTagName ) {
             assert && assert( this._labelElement, 'label element must have been created' );
 
@@ -673,6 +670,9 @@ define( function( require ) {
             if ( this._labelTagName.toUpperCase() === LABEL_TAG ) {
               this.invalidateAccessibleContent();
             }
+          }
+          else if ( elementSupportsInnerText( this._domElement ) ) {
+            this._domElement.innerText = this._accessibleLabel;
           }
 
         },
