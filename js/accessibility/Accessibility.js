@@ -70,24 +70,18 @@ define( function( require ) {
   var INPUT_TAG = 'INPUT';
   var LABEL_TAG = 'LABEL';
   var UNORDERED_LIST_TAG = 'UL';
-  var LIST_ITEM_TAG = 'LI';
   var BUTTON_TAG = 'BUTTON';
   var TEXTAREA_TAG = 'TEXTAREA';
   var SELECT_TAG = 'SELECT';
   var OPTGROUP_TAG = 'OPTGROUP';
   var DATALIST_TAG = 'DATALIST';
   var OUTPUT_TAG = 'OUTPUT';
-  var PARAGRAPH_TAG = 'P';
-  var HEADING_1_TAG = 'H1';
-  var ANCHOR_TAG = 'A';
 
   // these elements are typically associated with forms, and support certain attributes
   var FORM_ELEMENTS = [ INPUT_TAG, BUTTON_TAG, TEXTAREA_TAG, SELECT_TAG, OPTGROUP_TAG, DATALIST_TAG, OUTPUT_TAG ];
 
-  // these elements support inner text
-  //REVIEW: Doesn't every element support innerText? Was surprised a div wasn't allowed here, but innerText should work
-  //        on divs?
-  var ELEMENTS_SUPPORT_INNER_TEXT = [ BUTTON_TAG, PARAGRAPH_TAG, LIST_ITEM_TAG, HEADING_1_TAG, ANCHOR_TAG ];
+  // these elements do not have a closing tag, so they won't support features like 'innerText'
+  var ELEMENTS_WITHOUT_CLOSING_TAG = [ INPUT_TAG ];
 
   // these elements require a minimum width to be visible in Safari
   var ELEMENTS_REQUIRE_WIDTH = [ 'INPUT' ];
@@ -674,7 +668,6 @@ define( function( require ) {
           else if ( elementSupportsInnerText( this._domElement ) ) {
             this._domElement.innerText = this._accessibleLabel;
           }
-
         },
         set accessibleLabel( label ) { this.setAccessibleLabel( label ); },
 
@@ -702,10 +695,7 @@ define( function( require ) {
           if ( !this.descriptionElement ) {
             this.setDescriptionTagName( 'p' );
           }
-
-          assert && assert( elementSupportsInnerText( this._descriptionElement ), 'description element must support inner text' );
           this._descriptionElement.textContent = this._accessibleDescription;
-
         },
         set accessibleDescription( textContent ) { this.setAccessibleDescription( textContent ); },
 
@@ -1136,11 +1126,11 @@ define( function( require ) {
       /**
        * Returns whether or not the element supports inner text.
        * @private
-       *
+       * @param {HTMLElement} domElement
        * @return {boolean}
        */
       function elementSupportsInnerText( domElement ) {
-        return _.includes( ELEMENTS_SUPPORT_INNER_TEXT, domElement.tagName );
+        return !_.includes( ELEMENTS_WITHOUT_CLOSING_TAG, domElement.tagName );
       }
 
       /**
