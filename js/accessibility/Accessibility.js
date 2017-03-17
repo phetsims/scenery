@@ -270,6 +270,10 @@ define( function( require ) {
           // @private {Array.<Function>} - For accessibility input handling {keyboard/click/HTML form}
           this._accessibleInputListeners = [];
 
+          // @private {Array.<Function>} - Accessibility input listeners that need to be added to the DOM element, see
+          // addDOMEventListeners(). Once added, the listener will be moved to this._accessibleInputListeners.
+          this._accessibleInputListenersToAdd = [];
+
         },
 
         /**
@@ -285,20 +289,21 @@ define( function( require ) {
          */
         addDOMEventListeners: function( accessibleInput ) {
           var self = this;
+
+          var listenerIndex = self._accessibleInputListenersToAdd.indexOf( accessibleInput );
+          assert && assert( listenerIndex >= 0, 'listener must have been in self._accessibleInputListenersToAdd' );
+
+          // wrap the input with a listener that changes this._inputValue when the domElement.inputValue changes
+          wrapAccessibleInput( accessibleInput ); 
+
           for ( var event in accessibleInput ) {
             if ( accessibleInput.hasOwnProperty( event ) ) {
-
-              // event changes the input value, wrap the listener with a function that will handle this
-              if ( _.includes( INPUT_CHANGE_EVENTS, event ) ) {
-                var listener = accessibleInput[ event ];
-                accessibleInput[ event ] = function( e ) {
-                  self._inputValue = e.target.value;
-                  listener();
-                };
-              }
               self._domElement.addEventListener( event, accessibleInput[ event ] );
             }
           }
+
+          self._accessibleInputListenersToAdd.splice( listenerIndex, 1 );
+          self._accessibleInputListeners.push( accessibleInput );
         },
 
         /**
@@ -308,11 +313,16 @@ define( function( require ) {
          *
          * @param {Object} accessibleInput
          */
-        removeDOMEventListeners: function( accesssibleInput ) {
+        removeDOMEventListeners: function( accessibleInput ) {
           var self = this;
-          for ( var event in accesssibleInput ) {
-            if ( accesssibleInput.hasOwnProperty( event ) ) {
-              self._domElement.removeEventListener( event, accesssibleInput[ event ] );
+
+          // wrap the input with a listener that changes this._inputValue when the domElement.inputValue changes
+          wrapAccessibleInput( accessibleInput );
+
+          assert && assert( this._domElement, 'dom element must be defined to remove event listeners' );
+          for ( var event in accessibleInput ) {
+            if ( accessibleInput.hasOwnProperty( event ) ) {
+              self._domElement.removeEventListener( event, accessibleInput[ event ] );
             }
           }
         },
@@ -328,14 +338,18 @@ define( function( require ) {
          * @returns {Node} - Returns 'this' reference, for chaining
          */
         addAccessibleInputListener: function( accessibleInput ) {
+
+          wrapAccessibleInput( accessibleInput );
+
           // don't allow listeners to be added multiple times
           // REVIEW: Presumably passing an already-existing listener would be an assertion failure?
-          if ( _.indexOf( this._accessibleInputListeners, accessibleInput ) === -1 ) {
-            this._accessibleInputListeners.push( accessibleInput );
-
-            // add the event listener to the DOM element
-            this.addDOMEventListeners( accessibleInput );
+          var listenerAdded = ( _.indexOf( this._accessibleInputListeners, accessibleInput ) > 0 ); 
+          var listenerWillBeAdded = ( _.indexOf( this._accessibleInputListenersToAdd, accessibleInput ) > 0 ); 
+          if ( !listenerAdded && !listenerWillBeAdded ) {
+            this._accessibleInputListenersToAdd.push( accessibleInput );
           }
+
+          this.invalidateAccessibleContent();
           return this;
         },
 
@@ -346,14 +360,19 @@ define( function( require ) {
          * @param {Object} listener
          * @returns {Node} - Returns 'this' reference, for chaining
          */
-        removeAccessibleInputListener: function( listener ) {
+        removeAccessibleInputListener: function( accessibleInput ) {
+
+          // wrap the accessible content
+          wrapAccessibleInput( accessibleInput );
+
           // ensure the listener is in our list
-          assert && assert( _.indexOf( this._accessibleInputListeners, listener ) !== -1 );
-          this._accessibleInputListeners.splice( _.indexOf( this._accessibleInputListeners, listener ), 1 );
+          assert && assert( _.indexOf( this._accessibleInputListeners, accessibleInput ) !== -1, 'accessibleInput was not added' );
+          this._accessibleInputListeners.splice( _.indexOf( this._accessibleInputListeners, accessibleInput ), 1 );
 
           // remove the event listeners from the DOM element
-          this.removeDOMEventListeners( listener );
+          this.removeDOMEventListeners( accessibleInput );
 
+          this.invalidateAccessibleContent();
           return this;
         },
 
@@ -1194,6 +1213,25 @@ define( function( require ) {
       }
 
       /**
+       * If the accessibleInput includes an event that could change the value of the input element,
+       * wrap the listener with a function that will change this._inputValue when domElement.inputValue
+       * changes.
+       * 
+       * @param {Object} accessibleInput
+       */
+      function wrapAccessibleInput( accessibleInput ) {
+
+        // event changes the input value, wrap the listener with a function that will handle this
+        if ( _.includes( INPUT_CHANGE_EVENTS, event ) ) {
+          var listener = accessibleInput[ event ];
+          accessibleInput[ event ] = function( e ) {
+            self._inputValue = e.target.value;
+            listener();
+          };
+        }
+      }
+
+      /**
        * Invalidate our current accessible content, triggering recomputation
        * of anything that depended on the old accessible content. This can be
        * combined with a client implementation of invalidateAccessibleContent.
@@ -1216,6 +1254,11 @@ define( function( require ) {
             // set up the unique id's for the DOM elements associated with this node's accessible content.
             self._accessibleId = accessibleInstance.trail.getUniqueId();
             self._domElement.id = self._accessibleId;
+
+            // add DOM event listeners to the dom element
+            for ( var i = 0; i < self._accessibleInputListenersToAdd.length; i++ ) {
+              self.addDOMEventListeners( self._accessibleInputListenersToAdd[ i ] );
+            }
 
             processRelationDataAttributes.call( self );
 
