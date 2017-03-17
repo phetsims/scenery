@@ -294,7 +294,7 @@ define( function( require ) {
           assert && assert( listenerIndex >= 0, 'listener must have been in self._accessibleInputListenersToAdd' );
 
           // wrap the input with a listener that changes this._inputValue when the domElement.inputValue changes
-          wrapAccessibleInput( accessibleInput ); 
+          wrapAccessibleInput( accessibleInput );
 
           for ( var event in accessibleInput ) {
             if ( accessibleInput.hasOwnProperty( event ) ) {
@@ -343,8 +343,8 @@ define( function( require ) {
 
           // don't allow listeners to be added multiple times
           // REVIEW: Presumably passing an already-existing listener would be an assertion failure?
-          var listenerAdded = ( _.indexOf( this._accessibleInputListeners, accessibleInput ) > 0 ); 
-          var listenerWillBeAdded = ( _.indexOf( this._accessibleInputListenersToAdd, accessibleInput ) > 0 ); 
+          var listenerAdded = ( _.indexOf( this._accessibleInputListeners, accessibleInput ) > 0 );
+          var listenerWillBeAdded = ( _.indexOf( this._accessibleInputListenersToAdd, accessibleInput ) > 0 );
           if ( !listenerAdded && !listenerWillBeAdded ) {
             this._accessibleInputListenersToAdd.push( accessibleInput );
           }
@@ -357,7 +357,7 @@ define( function( require ) {
          * Removes an input listener that was previously added with addAccessibleInputListener.
          * @public
          *
-         * @param {Object} listener
+         * @param {Object} accessibleInput
          * @returns {Node} - Returns 'this' reference, for chaining
          */
         removeAccessibleInputListener: function( accessibleInput ) {
@@ -951,13 +951,12 @@ define( function( require ) {
          * @param {boolean} hidden
          */
         setAccessibleHidden: function( hidden ) {
-          assert && assert( this._domElement, 'node requires an accessible DOM element for setAccessibleHidden' );
 
           this._accessibleHidden = hidden;
           if ( this._parentContainerElement ) {
             this._parentContainerElement.hidden = hidden;
           }
-          else {
+          else if ( this._domElement ) {
             this._domElement.hidden = hidden;
           }
         },
@@ -1176,13 +1175,13 @@ define( function( require ) {
        * does not have an id, its peer hasn't been created yet, so we flag it with a data attribute to indicate
        * that a relational attribute should be set up via processRelationDataAttributes() when the peer is
        * eventually created.
-       * 
+       *
        * @param {HTMLElement} relatedElement
        * @param {string} attribute
        */
       function addRelationAttribute( relatedElement, attribute ) {
         if ( !relatedElement.id ) {
-          relatedElement.setAttribute( DATA_FLAG + attribute , this._accessibleId );
+          relatedElement.setAttribute( DATA_FLAG + attribute, this._accessibleId );
         }
         else {
           this.setAccessibleAttribute( attribute, relatedElement.id );
@@ -1216,7 +1215,7 @@ define( function( require ) {
        * If the accessibleInput includes an event that could change the value of the input element,
        * wrap the listener with a function that will change this._inputValue when domElement.inputValue
        * changes.
-       * 
+       *
        * @param {Object} accessibleInput
        */
       function wrapAccessibleInput( accessibleInput ) {
@@ -1254,6 +1253,11 @@ define( function( require ) {
             // set up the unique id's for the DOM elements associated with this node's accessible content.
             self._accessibleId = accessibleInstance.trail.getUniqueId();
             self._domElement.id = self._accessibleId;
+
+            // Call this because the _domElement isn't guaranteed to exist before we call createPeer().
+            if ( self._accessibleHidden !== null ) {
+              self.setAccessibleHidden( self._accessibleHidden );
+            }
 
             // add DOM event listeners to the dom element
             for ( var i = 0; i < self._accessibleInputListenersToAdd.length; i++ ) {
