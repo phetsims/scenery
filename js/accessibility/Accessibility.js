@@ -287,9 +287,6 @@ define( function( require ) {
           var listenerIndex = self._accessibleInputListenersToAdd.indexOf( accessibleInput );
           assert && assert( listenerIndex >= 0, 'listener must have been in self._accessibleInputListenersToAdd' );
 
-          // wrap the input with a listener that changes this._inputValue when the domElement.inputValue changes
-          wrapAccessibleInput( accessibleInput );
-
           for ( var event in accessibleInput ) {
             if ( accessibleInput.hasOwnProperty( event ) ) {
               self._domElement.addEventListener( event, accessibleInput[ event ] );
@@ -310,9 +307,6 @@ define( function( require ) {
         removeDOMEventListeners: function( accessibleInput ) {
           var self = this;
 
-          // wrap the input with a listener that changes this._inputValue when the domElement.inputValue changes
-          wrapAccessibleInput( accessibleInput );
-
           assert && assert( this._domElement, 'dom element must be defined to remove event listeners' );
           for ( var event in accessibleInput ) {
             if ( accessibleInput.hasOwnProperty( event ) ) {
@@ -329,22 +323,35 @@ define( function( require ) {
          * event is fired on the dom element.
          *
          * @param {Object} listener
-         * @returns {Node} - Returns 'this' reference, for chaining
+         * @returns {Object} - the actually added listener, so it can be removed via removeAccessibleInputListener
          */
         addAccessibleInputListener: function( accessibleInput ) {
+          var self = this;
 
-          wrapAccessibleInput( accessibleInput );
+          // event changes the input value, wrap the listener with a function that will handle this
+          var addedAccessibleInput = {};
+          for ( var event in accessibleInput ) {
+            if ( accessibleInput.hasOwnProperty( event ) ) {
+              addedAccessibleInput[ event ] = accessibleInput[ event ];
+              if ( _.includes( INPUT_CHANGE_EVENTS, event ) ) {
+                addedAccessibleInput[ event ] = function( e ) {
+                  self._inputValue = e.target.value;
+                  accessibleInput[ e.type ]();
+                };
+              }
+            }
+          }
 
           // don't allow listeners to be added multiple times
           // REVIEW: Presumably passing an already-existing listener would be an assertion failure?
-          var listenerAdded = ( _.indexOf( this._accessibleInputListeners, accessibleInput ) > 0 );
-          var listenerWillBeAdded = ( _.indexOf( this._accessibleInputListenersToAdd, accessibleInput ) > 0 );
-          if ( !listenerAdded && !listenerWillBeAdded ) {
-            this._accessibleInputListenersToAdd.push( accessibleInput );
+          var listenerAlreadyAdded = ( _.indexOf( this._accessibleInputListeners, addedAccessibleInput ) > 0 );
+          var listenerWillBeAdded = ( _.indexOf( this._accessibleInputListenersToAdd, addedAccessibleInput ) > 0 );
+          if ( !listenerAlreadyAdded && !listenerWillBeAdded ) {
+            this._accessibleInputListenersToAdd.push( addedAccessibleInput );
           }
 
           this.invalidateAccessibleContent();
-          return this;
+          return addedAccessibleInput;
         },
 
         /**
@@ -356,17 +363,26 @@ define( function( require ) {
          */
         removeAccessibleInputListener: function( accessibleInput ) {
 
-          // wrap the accessible content
-          wrapAccessibleInput( accessibleInput );
+          // ensure the listener is in our list, or will be added in invalidation
+          var addedIndex = _.indexOf( this._accessibleInputListeners, accessibleInput );
+          var toBeAddedIndex = _.indexOf( this._accessibleInputListenersToAdd, accessibleInput );
+          var listenerAdded = addedIndex > -1;
+          var listenerToBeAdded = toBeAddedIndex > -1;
+          assert && assert( listenerAdded || listenerToBeAdded, 'accessibleInput was not added' );
 
-          // ensure the listener is in our list
-          assert && assert( _.indexOf( this._accessibleInputListeners, accessibleInput ) !== -1, 'accessibleInput was not added' );
-          this._accessibleInputListeners.splice( _.indexOf( this._accessibleInputListeners, accessibleInput ), 1 );
+          if ( listenerAdded ) {
+            this._accessibleInputListeners.splice( addedIndex, 1 );
 
-          // remove the event listeners from the DOM element
-          this.removeDOMEventListeners( accessibleInput );
+            // remove the event listeners from the DOM element
+            this.removeDOMEventListeners( accessibleInput );
+            this.invalidateAccessibleContent();
+          }
+          else {
 
-          this.invalidateAccessibleContent();
+            // listener hasn't been added yet, remove from list of listeners to add
+            this._accessibleInputListenersToAdd.splice( toBeAddedIndex, 1 );
+          }
+
           return this;
         },
 
@@ -1072,6 +1088,17 @@ define( function( require ) {
         get focusable() { return this.getFocusable(); },
 
         /**
+         * Get whether this node's dom element is currently focussed.
+         * @public
+         * 
+         * @return {boolean}
+         */
+        isFocussed: function() {
+          return document.activeElement === this.domElement;
+        },
+        get focussed() { return this.isFocussed(); },
+
+        /**
          * Focus this node's dom element. The element must not be hidden, and it must be focusable.
          * @public
          */
@@ -1198,25 +1225,6 @@ define( function( require ) {
             // remove the data attribute from this dom element now that it has been processed
             this.domElement.removeAttribute( dataAttribute );
           }
-        }
-      }
-
-      /**
-       * If the accessibleInput includes an event that could change the value of the input element,
-       * wrap the listener with a function that will change this._inputValue when domElement.inputValue
-       * changes.
-       *
-       * @param {Object} accessibleInput
-       */
-      function wrapAccessibleInput( accessibleInput ) {
-
-        // event changes the input value, wrap the listener with a function that will handle this
-        if ( _.includes( INPUT_CHANGE_EVENTS, event ) ) {
-          var listener = accessibleInput[ event ];
-          accessibleInput[ event ] = function( e ) {
-            self._inputValue = e.target.value;
-            listener();
-          };
         }
       }
 

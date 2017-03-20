@@ -199,7 +199,7 @@
 
     // add a listener
     var listener = { click: function() { a1.accessibleLabel = TEST_LABEL; } };
-    a1.addAccessibleInputListener( listener );
+    var addedListener = a1.addAccessibleInputListener( listener );
     ok( a1.accessibleInputListeners.length === 1, 'accessible listener added' );
 
     // fire the event
@@ -207,7 +207,7 @@
     ok( a1.accessibleLabel === TEST_LABEL, 'click fired, label set' );
 
     // remove the listener
-    a1.removeAccessibleInputListener( listener );
+    a1.removeAccessibleInputListener( addedListener );
     ok( a1.accessibleInputListeners.length === 0, 'accessible listener removed' );
 
     // make sure event listener was also removed from DOM element
