@@ -107,6 +107,7 @@ define( function( require ) {
     'focusable', // Sets whether or not the node can receive keyboard focus
     'useAriaLabel', // Sets whether or not the label will use the 'aria-label' attribute, see setUseAriaLabel()
     'ariaRole', // Sets the ARIA role for the DOM element, see setAriaRole() for documentation
+    'parentContainerAriaRole', // Sets the ARIA role for the parent container DOM element, see setParentContainerAriaRole()
     'ariaDescribedByElement', // Sets a description relationship for this node's DOM element by id, see setAriaDescribedByElement()
     'ariaLabelledByElement', // Sets a label relationship with another element in the DOM by id, see setAriaLabelledByElement()
     'prependLabels'// Sets whether we want to prepend labels above the node's HTML element, see setPrependLabels()
@@ -212,6 +213,12 @@ define( function( require ) {
           // list of ARIA roles, see https://www.w3.org/TR/wai-aria/roles.  Beware that many roles are not supported
           // by browsers or assistive technologies, so use vanilla HTML for accessibility semantics where possible.
           this._ariaRole = null;
+
+          // @private {string} - the ARIA role for the parent container element, added as an HTML attribute. For a
+          // complete list of ARIA roles, see https://www.w3.org/TR/wai-aria/roles. Beware that many roles are not
+          // supported by browsers or assistive technologies, so use vanilla HTML for accessibility semantics where
+          // possible.
+          this._parentContainerAriaRole = null;
 
           // @private {string} - the HTML element that will act as the description for this node's
           // DOM element. The id is added to this node's DOM element with the 'aria-describedby' attribute.
@@ -755,6 +762,32 @@ define( function( require ) {
         get ariaRole() { return this.getAriaRole(); },
 
         /**
+         * Set the ARIA role for this node's parent container element.  According to the W3C, the ARIA role is read-only
+         * for a DOM element. This will create a new DOM element for the parent container with the desired role, and
+         * replace it in the DOM.
+         * @public
+         * 
+         * @param {string} ariaRole - role for the element, see 
+         *                            https://www.w3.org/TR/html-aria/#allowed-aria-roles-states-and-properties
+         *                            for a lsit of roles, states, and properties.
+         */
+        setParentContainerAriaRole: function( ariaRole ) {
+          this._parentContainerAriaRole = ariaRole;
+          this.invalidateAccessibleContent();
+        },
+        set parentContainerAriaRole( ariaRole ) { this.setParentContainerAriaRole( ariaRole ); },
+
+        /**
+         * Get the ARIA role assigned to the parent container element.
+         * @public
+         * @return {string|null}
+         */
+        getParentContainerAriaRole: function() {
+          return this._parentContainerAriaRole;
+        },
+        get parentcontainerAriaRole() { return this.getParentContainerAriaRole(); },
+
+        /**
          * Sets whether or not to use the 'aria-label' attribute for labelling  the node's DOM element. By using the
          * 'aria-label' attribute, the label will be read on focus, but will can not be found with the
          * virtual cursor.
@@ -1282,6 +1315,11 @@ define( function( require ) {
             // identify the parent container element
             if ( self._parentContainerElement ) {
               self._parentContainerElement.id = 'parent-container-' + self._accessibleId;
+
+              // provide the aria-role if it is specified
+              if ( self._parentContainerAriaRole ) {
+                self._parentContainerElement.setAttribute( 'role', self._parentContainerAriaRole );
+              }
             }
 
             var accessiblePeer = new scenery.AccessiblePeer( accessibleInstance, self._domElement, {
