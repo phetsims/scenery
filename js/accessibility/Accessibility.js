@@ -80,7 +80,7 @@ define( function( require ) {
   // these elements are typically associated with forms, and support certain attributes
   var FORM_ELEMENTS = [ INPUT_TAG, BUTTON_TAG, TEXTAREA_TAG, SELECT_TAG, OPTGROUP_TAG, DATALIST_TAG, OUTPUT_TAG ];
 
-  // these elements do not have a closing tag, so they won't support features like 'innerText'
+  // these elements do not have a closing tag, so they won't support features like innerHTML
   var ELEMENTS_WITHOUT_CLOSING_TAG = [ INPUT_TAG ];
 
   // these elements require a minimum width to be visible in Safari
@@ -662,12 +662,12 @@ define( function( require ) {
          *   - As an inline text with the 'aria-label' attribute.
          *   - As a 'label' ellement with the 'for' attribute pointing to the
          *     node's DOM element.
-         *   - As inner text on the Node's DOM element itself.
+         *   - As inner HTML on the Node's DOM element itself.
          *   - As a separate DOM element positioned as a peer or child of this
          *     node's DOM element.
          *
          * The way in which the label is added to the Node is dependent on the label tag name, whether we use the
-         * aria-label attribute, and whether the node's DOM element supports inner text.
+         * aria-label attribute, and whether the node's DOM element supports inner HTML.
          *
          * @param {string} label
          */
@@ -681,15 +681,15 @@ define( function( require ) {
             assert && assert( this._labelElement, 'label element must have been created' );
 
             // the remaining methods require a new DOM element
-            this._labelElement.textContent = this._accessibleLabel;
+            this._labelElement.innerHTML = this._accessibleLabel;
 
             // if using a label element it must point to the dom element
             if ( this._labelTagName.toUpperCase() === LABEL_TAG ) {
               this.invalidateAccessibleContent();
             }
           }
-          else if ( elementSupportsInnerText( this._domElement ) ) {
-            this._domElement.innerText = this._accessibleLabel;
+          else if ( elementSupportsInnerHTML( this._domElement ) ) {
+            this._domElement.innerHTML = this._accessibleLabel;
           }
         },
         set accessibleLabel( label ) { this.setAccessibleLabel( label ); },
@@ -706,7 +706,7 @@ define( function( require ) {
 
         /**
          * Set the description content for this node's DOM element. A description element must exist and that element
-         * must support inner text.  If a description element does not exist yet, we assume that a default paragraph
+         * must support inner HTML.  If a description element does not exist yet, we assume that a default paragraph
          * should be used.
          *
          * @param {string} textContent
@@ -718,7 +718,7 @@ define( function( require ) {
           if ( !this.descriptionElement ) {
             this.setDescriptionTagName( 'p' );
           }
-          this._descriptionElement.textContent = this._accessibleDescription;
+          this._descriptionElement.innerHTML = this._accessibleDescription;
         },
         set accessibleDescription( textContent ) { this.setAccessibleDescription( textContent ); },
 
@@ -941,7 +941,7 @@ define( function( require ) {
           assert && assert( this._descriptionElement.tagName === UNORDERED_LIST_TAG, 'description element must be a list to use addDescriptionItem' );
 
           var listItem = document.createElement( 'li' );
-          listItem.textContent = textContent;
+          listItem.innerHTML = textContent;
           listItem.id = 'list-item-' + globalListItemCounter++;
           this._descriptionElement.appendChild( listItem );
 
@@ -961,7 +961,7 @@ define( function( require ) {
           assert && assert( this._descriptionElement.tagName === UNORDERED_LIST_TAG, 'description must be a list to hide list items' );
           assert && assert( listItem, 'No list item in description with id ' + itemID );
 
-          listItem.textContent = description;
+          listItem.innerHTML = description;
         },
 
         /**
@@ -1184,12 +1184,12 @@ define( function( require ) {
       }
 
       /**
-       * Returns whether or not the element supports inner text.
+       * Returns whether or not the element supports innerHTML.
        * @private
        * @param {HTMLElement} domElement
        * @return {boolean}
        */
-      function elementSupportsInnerText( domElement ) {
+      function elementSupportsInnerHTML( domElement ) {
         return !_.includes( ELEMENTS_WITHOUT_CLOSING_TAG, domElement.tagName );
       }
 
