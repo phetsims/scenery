@@ -14,7 +14,8 @@ define( function( require ) {
   var Poolable = require( 'PHET_CORE/Poolable' );
   var Events = require( 'AXON/Events' );
   var scenery = require( 'SCENERY/scenery' );
-  var Display = require( 'SCENERY/display/Display' );
+  // so RequireJS doesn't complain about circular dependency
+  // var Display = require( 'SCENERY/display/Display' );
 
   var globalId = 1;
 
@@ -80,7 +81,7 @@ define( function( require ) {
       // @private - listener for the focus event, to be disposed
       var focusEventListener = function( event ) {
         if ( event.target === self.domElement ) {
-          Display.focus = {
+          scenery.Display.focus = {
             display: accessibleInstance.display,
             trail: accessibleInstance.trail
           };
@@ -91,7 +92,7 @@ define( function( require ) {
       // @private - listener for the blur event, to be disposed
       var blurEventListener = function( event ) {
         if ( event.target === self.domElement ) {
-          Display.focus = null;
+          scenery.Display.focus = null;
         }
       };
       this.domElement.addEventListener( 'blur', blurEventListener );
@@ -101,7 +102,7 @@ define( function( require ) {
 
         // blur the dom element if it currently in focus
         if ( document.activeElement === self.domElement ) {
-          Display.focus = null;
+          scenery.Display.focus = null;
         }
 
         self.domElement.removeEventListener( 'blur', blurEventListener );

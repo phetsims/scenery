@@ -60,8 +60,7 @@ define( function( require ) {
   // modules
   var scenery = require( 'SCENERY/scenery' );
   var extend = require( 'PHET_CORE/extend' );
-  // we use the following but comment out to avoid circular dependency
-  // var AccessiblePeer = require( 'SCENERY/accessibility/AccessiblePeer' );
+  var AccessiblePeer = require( 'SCENERY/accessibility/AccessiblePeer' );
 
   // constants
   var globalListItemCounter = 0;
@@ -1322,7 +1321,7 @@ define( function( require ) {
               }
             }
 
-            var accessiblePeer = new scenery.AccessiblePeer( accessibleInstance, self._domElement, {
+            var accessiblePeer = new AccessiblePeer( accessibleInstance, self._domElement, {
               parentContainerElement: self._parentContainerElement
             } );
 
