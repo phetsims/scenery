@@ -82,11 +82,7 @@ define( function( require ) {
       fill: '#000000', // Default to black filled text
       text: text,
       tandem: Tandem.tandemOptional(),
-      phetioType: TText,
-
-      // a11y
-      tagName: 'span',
-      accessibleLabel: text
+      phetioType: TText
     }, options );
 
     Node.call( this, options );
