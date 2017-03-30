@@ -765,8 +765,8 @@ define( function( require ) {
          * for a DOM element. This will create a new DOM element for the parent container with the desired role, and
          * replace it in the DOM.
          * @public
-         * 
-         * @param {string} ariaRole - role for the element, see 
+         *
+         * @param {string} ariaRole - role for the element, see
          *                            https://www.w3.org/TR/html-aria/#allowed-aria-roles-states-and-properties
          *                            for a lsit of roles, states, and properties.
          */
@@ -833,7 +833,16 @@ define( function( require ) {
          */
         setFocusHighlight: function( focusHighlight ) {
           this._focusHighlight = focusHighlight;
+
+          var isFocussed = false;
+          if ( this.isFocussed() ) {
+            isFocussed = true;
+          }
           this.invalidateAccessibleContent();
+
+          // Reset the focus after invalidating the content.
+          isFocussed && this.focus();
+
         },
         set focusHighlight( focusHighlight ) { this.setFocusHighlight( focusHighlight ); },
 
@@ -1122,7 +1131,7 @@ define( function( require ) {
         /**
          * Get whether this node's dom element is currently focussed.
          * @public
-         * 
+         *
          * @return {boolean}
          */
         isFocussed: function() {
