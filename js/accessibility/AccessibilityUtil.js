@@ -33,8 +33,8 @@ define( function( require ) {
     var linearDOM = [];
     for ( var i = 0; i < children.length; i++ ) {
 
-      // searching for the HTML elemetn nodes
-      if ( children[ i ].nodeType === HTMLElement.ELEMENT_NODE ) {
+      // searching for the HTML element nodes (NOT Scenery nodes)
+      if ( children[ i ].nodeType === Node.ELEMENT_NODE ) {
         linearDOM[ i ] = ( children[ i ] );
       }
     }
