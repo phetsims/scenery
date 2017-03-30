@@ -65,6 +65,9 @@ define( function( require ) {
   // constants
   var globalListItemCounter = 0;
 
+  // type flag, ELEMENT_NODE isn't defined on HTMLElement in Safari
+  var ELEMENT_NODE = HTMLElement.ELEMENT_NODE || HTMLElement.prototype.ELEMENT_NODE;
+
   // specific HTML tag names
   var INPUT_TAG = 'INPUT';
   var LABEL_TAG = 'LABEL';
@@ -889,7 +892,7 @@ define( function( require ) {
          */
         setAriaDescribedByElement: function( descriptionElement ) {
           assert && assert( this._domElement, 'HTML element required for aria-describedby attribute, see setTagName' );
-          assert && assert( descriptionElement.nodeType === HTMLElement.ELEMENT_NODE, 'HTML element required' );
+          assert && assert( descriptionElement.nodeType === ELEMENT_NODE, 'HTML element required' );
 
           this._ariaDescribedByElement = descriptionElement;
           this.invalidateAccessibleContent();
@@ -917,7 +920,7 @@ define( function( require ) {
          */
         setAriaLabelledByElement: function( labelElement ) {
           assert && assert( this._domElement, 'HTML element required for aria-labelledby attribute, see setTagName' );
-          assert && assert( labelElement.nodeType === HTMLElement.ELEMENT_NODE, 'HTML element required' );
+          assert && assert( labelElement.nodeType === ELEMENT_NODE, 'HTML element required' );
 
           this._ariaLabelledByElement = labelElement;
 
