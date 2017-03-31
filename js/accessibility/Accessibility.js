@@ -1145,14 +1145,29 @@ define( function( require ) {
 
         /**
          * Focus this node's dom element. The element must not be hidden, and it must be focusable.
+         *
+         * REVIEW: At call sites, it is not clear that this is related to accessibility.  Consider prepending with
+         * 'accessible' or something else to clarify
          * @public
          */
         focus: function() {
-          assert && assert( !( this._domElement.tabIndex === -1 ), 'trying to set focus on a node that is not focusable' );
+          assert && assert( this._domElement.tabIndex !== -1 , 'trying to set focus on a node that is not focusable' );
           assert && assert( !this._accessibleHidden, 'trying to set focus on a node with hidden accessible content' );
 
           // make sure that the element is in the navigation order
           this._domElement.focus();
+        },
+
+        /**
+         * Remove focus from this DOM element.  The focus highlight will dissapear, and the element will not receive
+         * keyboard events when it doesn't have focus.
+         * @public
+         * 
+         * REVIEW: At call sites, it is not clear that this is related to accessibility.  Consider prepending with
+         * 'accessible' or something else to clarify
+         */
+        blur: function() {
+          this._domElement.blur();
         }
 
       } );
