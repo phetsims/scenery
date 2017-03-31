@@ -78,6 +78,7 @@ define( function( require ) {
   var OPTGROUP_TAG = 'OPTGROUP';
   var DATALIST_TAG = 'DATALIST';
   var OUTPUT_TAG = 'OUTPUT';
+  var A_TAG = 'A';
 
   // these elements are typically associated with forms, and support certain attributes
   var FORM_ELEMENTS = [ INPUT_TAG, BUTTON_TAG, TEXTAREA_TAG, SELECT_TAG, OPTGROUP_TAG, DATALIST_TAG, OUTPUT_TAG ];
@@ -86,7 +87,7 @@ define( function( require ) {
   var ELEMENTS_WITHOUT_CLOSING_TAG = [ INPUT_TAG ];
 
   // these elements require a minimum width to be visible in Safari
-  var ELEMENTS_REQUIRE_WIDTH = [ 'INPUT' ];
+  var ELEMENTS_REQUIRE_WIDTH = [ INPUT_TAG, A_TAG ];
 
   // these custom attributes flag that the DOM element needs special handling during invalidation
   var DATA_FLAG = 'data-';
