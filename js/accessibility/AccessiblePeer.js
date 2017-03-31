@@ -100,9 +100,12 @@ define( function( require ) {
       // make AccessiblePeer eligible for garabage collection
       this.disposeAccessiblePeer = function() {
 
-        // blur the dom element if it currently in focus
-        if ( document.activeElement === self.domElement ) {
-          scenery.Display.focus = null;
+        // remove focus if the disposed peer currently has a focus highlight
+        if ( scenery.Display.focus &&
+            scenery.Display.focus.trail &&
+              scenery.Display.focus.trail.equals( self.trail ) ) {
+
+            scenery.Display.focus = null;
         }
 
         self.domElement.removeEventListener( 'blur', blurEventListener );
