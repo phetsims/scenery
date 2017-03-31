@@ -1151,7 +1151,7 @@ define( function( require ) {
           assert && assert( !( this._domElement.tabIndex === -1 ), 'trying to set focus on a node that is not focusable' );
           assert && assert( !this._accessibleHidden, 'trying to set focus on a node with hidden accessible content' );
 
-          // make sure that the elememnt is in the navigation order
+          // make sure that the element is in the navigation order
           this._domElement.focus();
         }
 
