@@ -81,7 +81,7 @@ define( function( require ) {
   var A_TAG = 'A';
 
   // these elements are typically associated with forms, and support certain attributes
-  var FORM_ELEMENTS = [ INPUT_TAG, BUTTON_TAG, TEXTAREA_TAG, SELECT_TAG, OPTGROUP_TAG, DATALIST_TAG, OUTPUT_TAG ];
+  var FORM_ELEMENTS = [ INPUT_TAG, BUTTON_TAG, TEXTAREA_TAG, SELECT_TAG, OPTGROUP_TAG, DATALIST_TAG, OUTPUT_TAG, A_TAG ];
 
   // these elements do not have a closing tag, so they won't support features like innerHTML
   var ELEMENTS_WITHOUT_CLOSING_TAG = [ INPUT_TAG ];
@@ -453,7 +453,7 @@ define( function( require ) {
           assert && assert( typeof tagName === 'string' );
 
           this._tagName = tagName;
-          this._domElement = document.createElement( tagName );
+          this._domElement = createElement( tagName, this._focusable );
 
           // Safari requires that certain input elements have width, otherwise it will not be keyboard accessible
           if ( _.includes( ELEMENTS_REQUIRE_WIDTH, tagName.toUpperCase() ) ) {
@@ -500,7 +500,7 @@ define( function( require ) {
 
           // REVIEW: Is null supported, or is this meant to check for empty strings?
           if ( tagName ) {
-            this._labelElement = document.createElement( tagName );
+            this._labelElement = createElement( tagName, false );
           }
 
           this.invalidateAccessibleContent();
@@ -535,7 +535,7 @@ define( function( require ) {
 
           // REVIEW: Is null supported, or is this meant to check for empty strings?
           if ( tagName ) {
-            this._descriptionElement = document.createElement( tagName );
+            this._descriptionElement = createElement( tagName, false );
           }
 
           this.invalidateAccessibleContent();
@@ -633,7 +633,7 @@ define( function( require ) {
          */
         setParentContainerTagName: function( tagName ) {
           this._parentContainerTagName = tagName;
-          this._parentContainerElement = document.createElement( tagName );
+          this._parentContainerElement = createElement( tagName, false /* not focusable */ );
 
           this.invalidateAccessibleContent();
         },
@@ -952,7 +952,7 @@ define( function( require ) {
         addDescriptionItem: function( textContent ) {
           assert && assert( this._descriptionElement.tagName === UNORDERED_LIST_TAG, 'description element must be a list to use addDescriptionItem' );
 
-          var listItem = document.createElement( 'li' );
+          var listItem = createElement( 'li', false );
           listItem.innerHTML = textContent;
           listItem.id = 'list-item-' + globalListItemCounter++;
           this._descriptionElement.appendChild( listItem );
@@ -1218,6 +1218,25 @@ define( function( require ) {
        */
       function elementSupportsInnerHTML( domElement ) {
         return !_.includes( ELEMENTS_WITHOUT_CLOSING_TAG, domElement.tagName );
+      }
+
+      /**
+       * Create an HTML element.  Unless this is a form element or explicitly marked as focusable, add a negative
+       * tab index. IE gives all elements a tabIndex of 0 and handles tab navigation internally, so this marks
+       * which elements should not be in the focus order. 
+       * 
+       * @param  {string} tagName
+       * @param {boolean} focusable - should the element be explicitly added to the focus order?
+       * @return {HTMLElement} [description]
+       */
+      function createElement( tagName, focusable ) {
+        var domElement = document.createElement( tagName );
+
+        if ( !_.includes( FORM_ELEMENTS, tagName.toUpperCase() ) && !focusable ) {
+          domElement.tabIndex = -1;          
+        }
+
+        return domElement;
       }
 
       /**
