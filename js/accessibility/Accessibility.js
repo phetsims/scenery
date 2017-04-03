@@ -665,7 +665,7 @@ define( function( require ) {
          *   - As an inline text with the 'aria-label' attribute.
          *   - As a 'label' ellement with the 'for' attribute pointing to the
          *     node's DOM element.
-         *   - As inner HTML on the Node's DOM element itself.
+         *   - As inner text on the Node's DOM element itself.
          *   - As a separate DOM element positioned as a peer or child of this
          *     node's DOM element.
          *
@@ -684,7 +684,7 @@ define( function( require ) {
             assert && assert( this._labelElement, 'label element must have been created' );
 
             // the remaining methods require a new DOM element
-            this._labelElement.innerHTML = this._accessibleLabel;
+            this._labelElement.textContent = this._accessibleLabel;
 
             // if using a label element it must point to the dom element
             if ( this._labelTagName.toUpperCase() === LABEL_TAG ) {
@@ -692,7 +692,7 @@ define( function( require ) {
             }
           }
           else if ( elementSupportsInnerHTML( this._domElement ) ) {
-            this._domElement.innerHTML = this._accessibleLabel;
+            this._domElement.textContent = this._accessibleLabel;
           }
         },
         set accessibleLabel( label ) { this.setAccessibleLabel( label ); },
@@ -721,7 +721,7 @@ define( function( require ) {
           if ( !this.descriptionElement ) {
             this.setDescriptionTagName( 'p' );
           }
-          this._descriptionElement.innerHTML = this._accessibleDescription;
+          this._descriptionElement.textContent = this._accessibleDescription;
         },
         set accessibleDescription( textContent ) { this.setAccessibleDescription( textContent ); },
 
@@ -953,7 +953,7 @@ define( function( require ) {
           assert && assert( this._descriptionElement.tagName === UNORDERED_LIST_TAG, 'description element must be a list to use addDescriptionItem' );
 
           var listItem = createElement( 'li', false );
-          listItem.innerHTML = textContent;
+          listItem.textContent = textContent;
           listItem.id = 'list-item-' + globalListItemCounter++;
           this._descriptionElement.appendChild( listItem );
 
@@ -973,7 +973,7 @@ define( function( require ) {
           assert && assert( this._descriptionElement.tagName === UNORDERED_LIST_TAG, 'description must be a list to hide list items' );
           assert && assert( listItem, 'No list item in description with id ' + itemID );
 
-          listItem.innerHTML = description;
+          listItem.textContent = description;
         },
 
         /**
