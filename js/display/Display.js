@@ -700,6 +700,17 @@ define( function( require ) {
       sceneryLog && sceneryLog.Accessibility && sceneryLog.pop();
     },
 
+    /**
+     * Get the root accessible DOM element which represents this display and provides semantics for assistive
+     * technology.
+     * @public
+     * @return {HTMLElement}
+     */
+    getAccessibleDOMElement: function() {
+      return this._rootAccessibleInstance.peer.domElement;
+    },
+    get accessibleDOMElement() { return this.getAccessibleDOMElement(); },
+
     /*
      * Returns the bitmask union of all renderers (canvas/svg/dom/webgl) that are used for display, excluding
      * BackboneDrawables (which would be DOM).
