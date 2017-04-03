@@ -17,6 +17,21 @@ define( function( require ) {
   var NEXT = 'NEXT';
   var PREVIOUS = 'PREVIOUS';
 
+  // tag names with special behavior
+  var BOLD_TAG = 'B';
+  var STRONG_TAG = 'STRONG';
+  var I_TAG = 'I';
+  var EM_TAG = 'EM';
+  var MARK_TAG = 'MARK';
+  var SMALL_TAG = 'SMALL';
+  var DEL_TAG = 'DEL';
+  var INS_TAG = 'INS';
+  var SUB_TAG = 'SUB';
+  var SUP_TAG = 'SUP';
+
+  // collection of tags that are used for formatting text
+  var FORMATTING_TAGS = [ BOLD_TAG, STRONG_TAG, I_TAG, EM_TAG, MARK_TAG, SMALL_TAG, DEL_TAG, INS_TAG, SUB_TAG, SUP_TAG ];
+
   /**
    * Get all 'element' nodes off the parent element, placing them in an array for easy traversal.  Note that this
    * includes all elements, even those that are 'hidden' or purely for structure.
@@ -91,6 +106,11 @@ define( function( require ) {
 
       // continue to next element if this one is meant to be hidden
       if ( isElementHidden( nextElement ) ) {
+        continue;
+      }
+
+      // if element is for formatting, skipe over it - required since IE gives these tabindex="0" 
+      if ( _.includes( FORMATTING_TAGS, nextElement.tagName ) ) {
         continue;
       }
 
