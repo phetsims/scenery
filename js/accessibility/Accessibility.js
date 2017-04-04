@@ -81,7 +81,7 @@ define( function( require ) {
   var A_TAG = 'A';
 
   // these elements are typically associated with forms, and support certain attributes
-  var FORM_ELEMENTS = [ INPUT_TAG, BUTTON_TAG, TEXTAREA_TAG, SELECT_TAG, OPTGROUP_TAG, DATALIST_TAG, OUTPUT_TAG ];
+  var FORM_ELEMENTS = [ INPUT_TAG, BUTTON_TAG, TEXTAREA_TAG, SELECT_TAG, OPTGROUP_TAG, DATALIST_TAG, OUTPUT_TAG, A_TAG ];
 
   // these elements do not have a closing tag, so they won't support features like innerHTML
   var ELEMENTS_WITHOUT_CLOSING_TAG = [ INPUT_TAG ];
@@ -453,7 +453,7 @@ define( function( require ) {
           assert && assert( typeof tagName === 'string' );
 
           this._tagName = tagName;
-          this._domElement = document.createElement( tagName );
+          this._domElement = createElement( tagName, this._focusable );
 
           // Safari requires that certain input elements have width, otherwise it will not be keyboard accessible
           if ( _.includes( ELEMENTS_REQUIRE_WIDTH, tagName.toUpperCase() ) ) {
@@ -500,7 +500,7 @@ define( function( require ) {
 
           // REVIEW: Is null supported, or is this meant to check for empty strings?
           if ( tagName ) {
-            this._labelElement = document.createElement( tagName );
+            this._labelElement = createElement( tagName, false );
           }
 
           this.invalidateAccessibleContent();
@@ -535,7 +535,7 @@ define( function( require ) {
 
           // REVIEW: Is null supported, or is this meant to check for empty strings?
           if ( tagName ) {
-            this._descriptionElement = document.createElement( tagName );
+            this._descriptionElement = createElement( tagName, false );
           }
 
           this.invalidateAccessibleContent();
@@ -633,7 +633,7 @@ define( function( require ) {
          */
         setParentContainerTagName: function( tagName ) {
           this._parentContainerTagName = tagName;
-          this._parentContainerElement = document.createElement( tagName );
+          this._parentContainerElement = createElement( tagName, false /* not focusable */ );
 
           this.invalidateAccessibleContent();
         },
@@ -665,7 +665,7 @@ define( function( require ) {
          *   - As an inline text with the 'aria-label' attribute.
          *   - As a 'label' ellement with the 'for' attribute pointing to the
          *     node's DOM element.
-         *   - As inner HTML on the Node's DOM element itself.
+         *   - As inner text on the Node's DOM element itself.
          *   - As a separate DOM element positioned as a peer or child of this
          *     node's DOM element.
          *
@@ -684,7 +684,7 @@ define( function( require ) {
             assert && assert( this._labelElement, 'label element must have been created' );
 
             // the remaining methods require a new DOM element
-            this._labelElement.innerHTML = this._accessibleLabel;
+            this._labelElement.textContent = this._accessibleLabel;
 
             // if using a label element it must point to the dom element
             if ( this._labelTagName.toUpperCase() === LABEL_TAG ) {
@@ -692,7 +692,7 @@ define( function( require ) {
             }
           }
           else if ( elementSupportsInnerHTML( this._domElement ) ) {
-            this._domElement.innerHTML = this._accessibleLabel;
+            this._domElement.textContent = this._accessibleLabel;
           }
         },
         set accessibleLabel( label ) { this.setAccessibleLabel( label ); },
@@ -721,7 +721,7 @@ define( function( require ) {
           if ( !this.descriptionElement ) {
             this.setDescriptionTagName( 'p' );
           }
-          this._descriptionElement.innerHTML = this._accessibleDescription;
+          this._descriptionElement.textContent = this._accessibleDescription;
         },
         set accessibleDescription( textContent ) { this.setAccessibleDescription( textContent ); },
 
@@ -952,8 +952,8 @@ define( function( require ) {
         addDescriptionItem: function( textContent ) {
           assert && assert( this._descriptionElement.tagName === UNORDERED_LIST_TAG, 'description element must be a list to use addDescriptionItem' );
 
-          var listItem = document.createElement( 'li' );
-          listItem.innerHTML = textContent;
+          var listItem = createElement( 'li', false );
+          listItem.textContent = textContent;
           listItem.id = 'list-item-' + globalListItemCounter++;
           this._descriptionElement.appendChild( listItem );
 
@@ -973,7 +973,7 @@ define( function( require ) {
           assert && assert( this._descriptionElement.tagName === UNORDERED_LIST_TAG, 'description must be a list to hide list items' );
           assert && assert( listItem, 'No list item in description with id ' + itemID );
 
-          listItem.innerHTML = description;
+          listItem.textContent = description;
         },
 
         /**
@@ -1145,14 +1145,29 @@ define( function( require ) {
 
         /**
          * Focus this node's dom element. The element must not be hidden, and it must be focusable.
+         *
+         * REVIEW: At call sites, it is not clear that this is related to accessibility.  Consider prepending with
+         * 'accessible' or something else to clarify
          * @public
          */
         focus: function() {
-          assert && assert( !( this._domElement.tabIndex === -1 ), 'trying to set focus on a node that is not focusable' );
+          assert && assert( this._domElement.tabIndex !== -1 , 'trying to set focus on a node that is not focusable' );
           assert && assert( !this._accessibleHidden, 'trying to set focus on a node with hidden accessible content' );
 
           // make sure that the element is in the navigation order
           this._domElement.focus();
+        },
+
+        /**
+         * Remove focus from this DOM element.  The focus highlight will dissapear, and the element will not receive
+         * keyboard events when it doesn't have focus.
+         * @public
+         * 
+         * REVIEW: At call sites, it is not clear that this is related to accessibility.  Consider prepending with
+         * 'accessible' or something else to clarify
+         */
+        blur: function() {
+          this._domElement.blur();
         }
 
       } );
@@ -1203,6 +1218,25 @@ define( function( require ) {
        */
       function elementSupportsInnerHTML( domElement ) {
         return !_.includes( ELEMENTS_WITHOUT_CLOSING_TAG, domElement.tagName );
+      }
+
+      /**
+       * Create an HTML element.  Unless this is a form element or explicitly marked as focusable, add a negative
+       * tab index. IE gives all elements a tabIndex of 0 and handles tab navigation internally, so this marks
+       * which elements should not be in the focus order. 
+       * 
+       * @param  {string} tagName
+       * @param {boolean} focusable - should the element be explicitly added to the focus order?
+       * @return {HTMLElement} [description]
+       */
+      function createElement( tagName, focusable ) {
+        var domElement = document.createElement( tagName );
+
+        if ( !_.includes( FORM_ELEMENTS, tagName.toUpperCase() ) && !focusable ) {
+          domElement.tabIndex = -1;          
+        }
+
+        return domElement;
       }
 
       /**

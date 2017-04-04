@@ -1,4 +1,4 @@
-// Copyright 2013-2017, University of Colorado Boulder
+// Copyright 2017, University of Colorado Boulder
 
 /**
  * Listens to presses (down events), attaching a listener to the pointer when one occurs, so that a release (up/cancel

@@ -1,4 +1,4 @@
-// Copyright 2013-2017, University of Colorado Boulder
+// Copyright 2017, University of Colorado Boulder
 
 /**
  * A listener for common button usage, providing the fire() method/callback and helpful properties.
@@ -68,7 +68,7 @@ define( function( require ) {
     PressListener.call( this, options );
 
     // @public {ObservableArray.<Pointer>} - Contains all pointers that are over our button. Tracked by adding with
-    // 'enter' events and removin with 'exit' events.
+    // 'enter' events and removing with 'exit' events.
     this.overPointers = new ObservableArray();
 
     // @public {Property.<boolean>} - See options for documentation.
