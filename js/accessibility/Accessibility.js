@@ -60,6 +60,7 @@ define( function( require ) {
   // modules
   var scenery = require( 'SCENERY/scenery' );
   var extend = require( 'PHET_CORE/extend' );
+  var AccessibilityUtil = require( 'SCENERY/accessibility/AccessibilityUtil' );
   var AccessiblePeer = require( 'SCENERY/accessibility/AccessiblePeer' );
 
   // constants
@@ -684,7 +685,7 @@ define( function( require ) {
             assert && assert( this._labelElement, 'label element must have been created' );
 
             // the remaining methods require a new DOM element
-            this._labelElement.textContent = this._accessibleLabel;
+            setTextContent( this._labelElement, this._accessibleLabel );
 
             // if using a label element it must point to the dom element
             if ( this._labelTagName.toUpperCase() === LABEL_TAG ) {
@@ -692,7 +693,7 @@ define( function( require ) {
             }
           }
           else if ( elementSupportsInnerHTML( this._domElement ) ) {
-            this._domElement.textContent = this._accessibleLabel;
+            setTextContent( this._domElement, this._accessibleLabel );
           }
         },
         set accessibleLabel( label ) { this.setAccessibleLabel( label ); },
@@ -721,7 +722,7 @@ define( function( require ) {
           if ( !this.descriptionElement ) {
             this.setDescriptionTagName( 'p' );
           }
-          this._descriptionElement.textContent = this._accessibleDescription;
+          setTextContent( this._descriptionElement, this._accessibleDescription );
         },
         set accessibleDescription( textContent ) { this.setAccessibleDescription( textContent ); },
 
@@ -953,7 +954,8 @@ define( function( require ) {
           assert && assert( this._descriptionElement.tagName === UNORDERED_LIST_TAG, 'description element must be a list to use addDescriptionItem' );
 
           var listItem = createElement( 'li', false );
-          listItem.textContent = textContent;
+          setTextContent( listItem, textContent );
+
           listItem.id = 'list-item-' + globalListItemCounter++;
           this._descriptionElement.appendChild( listItem );
 
@@ -973,7 +975,7 @@ define( function( require ) {
           assert && assert( this._descriptionElement.tagName === UNORDERED_LIST_TAG, 'description must be a list to hide list items' );
           assert && assert( listItem, 'No list item in description with id ' + itemID );
 
-          listItem.textContent = description;
+          setTextContent( listItem, description );
         },
 
         /**
@@ -1181,6 +1183,23 @@ define( function( require ) {
        */
       function elementHasAttribute( domElement, attribute ) {
         return !!domElement.getAttribute( attribute );
+      }
+
+      /**
+       * If the text content uses formatting tags, set the content as innerHTML. Otherwise, set as textContent.
+       * In general, textContent is more secure and more performant because it doesn't trigger DOM styling and
+       * element insertions.
+       * 
+       * @param {HTMLElement} domElement
+       * @param {string} textContent
+       */
+      function setTextContent( domElement, textContent ) {
+        if ( textContent && AccessibilityUtil.usesFormattingTagsExclusive( textContent ) ) {
+          domElement.innerHTML = textContent;
+        }
+        else {
+          domElement.textContent = textContent;
+        }
       }
 
       /**

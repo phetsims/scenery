@@ -151,8 +151,65 @@ define( function( require ) {
      */
     getPreviousFocusable: function( parentElement ) {
       return getNextPreviousFocusable( PREVIOUS, parentElement );
-    }
+    },
 
+    /**
+     * If the text content has formatting tags (and ONLY formatting tags), return true.
+     * @public
+     * 
+     * @param  {string} textContent
+     * @return {boolean}
+     */
+    usesFormattingTagsExclusive: function( textContent ) {
+
+      // if there are no tags at all, return false immediately
+      if ( textContent.indexOf( '<' ) < 0 ) {
+        return false;
+      }
+
+      var i = 0;
+      var openIndices = [];
+      var closeIndices = [];
+
+      // find open/close tag pairs in the text content
+      while ( i < textContent.length ) {
+        var openIndex = textContent.indexOf( '<', i );
+        var closeIndex = textContent.indexOf( '>', i );
+
+        if ( openIndex > -1 ) {
+          openIndices.push( openIndex );
+          i = openIndex + 1;
+        }
+        if ( closeIndex > -1 ) {
+          closeIndices.push( closeIndex );
+          i = closeIndex + 1;
+        }
+        else {
+          i++;
+        }
+      }
+
+      // if length of open and close tags are not equal, html is invalid
+      if ( openIndices.length !== closeIndices.length ) {
+        return false;
+      }
+
+      // check the name in between the open and close brackets - if anything other than formatting tags, return false
+      var onlyFormatting = true;
+      var upperCaseContent = textContent.toUpperCase();
+      for ( var j = 0; j < openIndices.length; j++ ) {
+
+        // get the name and remove the closing slash
+        var subString = upperCaseContent.substring( openIndices[ j ] + 1, closeIndices[ j ] );
+        subString = subString.replace( '/', '' );
+
+        if ( !_.includes( FORMATTING_TAGS, subString ) ) {
+          onlyFormatting = false;
+        }
+      }
+
+      return onlyFormatting;
+    }
   };
 
   scenery.register( 'AccessibilityUtil', AccessibilityUtil );
