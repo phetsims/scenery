@@ -415,7 +415,7 @@ define( function( require ) {
          * REVIEW: How can this guarantee it is a string, when it is initialized as null?
          *         new Node().accessibleId returns null.
          *
-         * @return {string}
+         * @returns {string}
          */
         getAccessibleId: function() {
           return this._accessibleId;
@@ -429,7 +429,7 @@ define( function( require ) {
          * REVIEW: How can this guarantee it is an HTMLElement, when it is initialized as null?
          *         new Node().domElement returns null.
          *
-         * @return {HTMLElement}
+         * @returns {HTMLElement}
          */
         getDomElement: function() {
           return this._domElement;
@@ -471,7 +471,7 @@ define( function( require ) {
          *
          * REVIEW: Return type should include null, since new scenery.Node().tagName is null.
          *
-         * @return {string}
+         * @returns {string}
          */
         getTagName: function() {
           return this._tagName;
@@ -514,7 +514,7 @@ define( function( require ) {
          *
          * REVIEW: Return type should include null, since new scenery.Node().labelTagName is null.
          *
-         * @return {string}
+         * @returns {string}
          */
         getLabelTagName: function() {
           return this._labelTagName;
@@ -547,7 +547,7 @@ define( function( require ) {
          * Get the HTML get name for the description element.
          * @public
          *
-         * @return {string|null}
+         * @returns {string|null}
          */
         getDescriptionTagName: function() {
           return this._descriptionTagName;
@@ -572,7 +572,7 @@ define( function( require ) {
          * Get the input type. Input type is only relevant if this node's DOM element has tag name "INPUT".
          * @public
          *
-         * @return {string}
+         * @returns {string}
          */
         getInputType: function() {
           return this._inputType;
@@ -611,7 +611,7 @@ define( function( require ) {
          * Get whether or not this node adds labels and descriptions above the representative DOM element.
          * @public
          *
-         * @return {boolean}
+         * @returns {boolean}
          */
         getPrependLabels: function() {
           return this._prependLabels;
@@ -643,7 +643,7 @@ define( function( require ) {
         /**
          * Get the tag name for the parent container element.
          *
-         * @return {string}
+         * @returns {string}
          */
         getParentContainerTagName: function() {
           return this._parentContainerTagName;
@@ -654,7 +654,7 @@ define( function( require ) {
          * Get the parent container element, returning null if none exists.
          * @public (scenery-internal)
          *
-         * @return {HTMLElement|null}
+         * @returns {HTMLElement|null}
          */
         getParentContainerElement: function() {
           return this._parentContainerElement;
@@ -701,7 +701,7 @@ define( function( require ) {
         /**
          * Get the label content for this node's DOM element.
          *
-         * @return {string}
+         * @returns {string}
          */
         getAccessibleLabel: function() {
           return this._accessibleLabel;
@@ -729,7 +729,7 @@ define( function( require ) {
         /**
          * Get the accessible description content that is describing this Node.
          *
-         * @return {string}
+         * @returns {string}
          */
         getAccessibleDescription: function() {
           return this._accessibleDescription;
@@ -758,7 +758,7 @@ define( function( require ) {
          * Get the ARIA role representing this node.
          * @public
          *
-         * @return {string}
+         * @returns {string}
          */
         getAriaRole: function() {
           return this._ariaRole;
@@ -784,7 +784,7 @@ define( function( require ) {
         /**
          * Get the ARIA role assigned to the parent container element.
          * @public
-         * @return {string|null}
+         * @returns {string|null}
          */
         getParentContainerAriaRole: function() {
           return this._parentContainerAriaRole;
@@ -821,7 +821,7 @@ define( function( require ) {
         /**
          * Get whether or not we are using an aria-label to label this node's HTML element.
          *
-         * @return {boolean}
+         * @returns {boolean}
          */
         getUseAriaLabel: function() {
           return this._useAriaLabel;
@@ -855,7 +855,7 @@ define( function( require ) {
          * Get the focus highlight for this node.
          * @public
          *
-         * @return {Node|Shape|string<'invisible'>}
+         * @returns {Node|Shape|string<'invisible'>}
          */
         getFocusHighlight: function() {
           return this._focusHighlight;
@@ -866,7 +866,7 @@ define( function( require ) {
          * Get the description element that holds the description content for this node.
          * @public
          *
-         * @return {HTMLElement|null}
+         * @returns {HTMLElement|null}
          */
         getDescriptionElement: function() {
           return this._descriptionElement;
@@ -876,7 +876,7 @@ define( function( require ) {
         /**
          * Get the label element that holds the label content for this node.
          * @public
-         * @return {HTMLElement|null}
+         * @returns {HTMLElement|null}
          */
         getLabelElement: function() {
           return this._labelElement;
@@ -904,7 +904,7 @@ define( function( require ) {
         /**
          * Get the id that is the value of the 'aria-describedby' attribute.  See setAriaDescribedBy() for details
          * about the 'aria-describedby' attribute.
-         * @return {[type]} [description]
+         * @returns {[type]} [description]
          */
         getAriaDescribedByElement: function() {
           return this._ariaDescribedByElement;
@@ -935,7 +935,7 @@ define( function( require ) {
          * See setAriaLabelledBy() for more information about the 'aria-labelledby' attribute behavior.
          * @public
          *
-         * @return {string}
+         * @returns {string}
          */
         getAriaLabelledByElement: function() {
           return this._ariaLabelledByElement;
@@ -948,7 +948,7 @@ define( function( require ) {
          * @public
          *
          * @param  {string} textContent
-         * @return {string} - the id of the list item returned for reference
+         * @returns {string} - the id of the list item returned for reference
          */
         addDescriptionItem: function( textContent ) {
           assert && assert( this._descriptionElement.tagName === UNORDERED_LIST_TAG, 'description element must be a list to use addDescriptionItem' );
@@ -1019,7 +1019,7 @@ define( function( require ) {
          * Get whether or not this node's representative DOM element is hidden.
          * @public
          *
-         * @return {boolean}
+         * @returns {boolean}
          */
         getAccessibleHidden: function() {
           return this._accessibleHidden;
@@ -1047,7 +1047,7 @@ define( function( require ) {
          * Get the value of the element. Element must be a form element to support the value attribute.
          * @public
          *
-         * @return {string}
+         * @returns {string}
          */
         getInputValue: function() {
           return this._inputValue;
@@ -1058,7 +1058,7 @@ define( function( require ) {
          * Get an array containing all accessible attributes that have been added to this node's DOM element.
          * @public
          *
-         * @return {string[]}
+         * @returns {string[]}
          */
         getAccessibleAttributes: function() {
           return this._accessibleAttributes.slice( 0 ); // defensive copy
@@ -1127,7 +1127,7 @@ define( function( require ) {
          *
          * REVIEW: Usually boolean getters would be called something like isFocusable().
          *
-         * @return {boolean}
+         * @returns {boolean}
          */
         getFocusable: function() {
           return this._focusable;
@@ -1138,7 +1138,7 @@ define( function( require ) {
          * Get whether this node's dom element is currently focussed.
          * @public
          *
-         * @return {boolean}
+         * @returns {boolean}
          */
         isFocussed: function() {
           return document.activeElement === this.domElement;
@@ -1179,7 +1179,7 @@ define( function( require ) {
        *
        * @param  {HTMLElement}  domElement
        * @param  {string}  attribute
-       * @return {string|null}
+       * @returns {string|null}
        */
       function elementHasAttribute( domElement, attribute ) {
         return !!domElement.getAttribute( attribute );
@@ -1209,7 +1209,7 @@ define( function( require ) {
        *
        * @param  {HTMLElement} parentElement
        * @param  {string} childId
-       * @return {HTMLElement}
+       * @returns {HTMLElement}
        */
       function getChildElementWithId( parentElement, childId ) {
         var childElement;
@@ -1233,7 +1233,7 @@ define( function( require ) {
        * Returns whether or not the element supports innerHTML.
        * @private
        * @param {HTMLElement} domElement
-       * @return {boolean}
+       * @returns {boolean}
        */
       function elementSupportsInnerHTML( domElement ) {
         return !_.includes( ELEMENTS_WITHOUT_CLOSING_TAG, domElement.tagName );
@@ -1246,7 +1246,7 @@ define( function( require ) {
        * 
        * @param  {string} tagName
        * @param {boolean} focusable - should the element be explicitly added to the focus order?
-       * @return {HTMLElement} [description]
+       * @returns {HTMLElement} [description]
        */
       function createElement( tagName, focusable ) {
         var domElement = document.createElement( tagName );

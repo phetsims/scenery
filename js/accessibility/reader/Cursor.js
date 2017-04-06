@@ -243,7 +243,7 @@ define( function( require ) {
      * that are 'hidden' or purely for structure.
      *
      * @param  {HTMLElement} domElement - the parent element to linearize
-     * @return {Array.<HTMLElement>}
+     * @returns {Array.<HTMLElement>}
      * @private
      */
     getLinearDOMElements: function( domElement ) {
@@ -263,7 +263,7 @@ define( function( require ) {
      * Get the live role from the DOM element.  If the element is not live, return null.
      *
      * @param  {HTMLElement} domElement
-     * @return {string}
+     * @returns {string}
      */
     getLiveRole: function( domElement ) {
       var liveRole = null;
@@ -286,7 +286,7 @@ define( function( require ) {
      * Get the next or previous element in the DOM, depending on the desired direction.
      *
      * @param  {[type]} direction - NEXT || PREVIOUS
-     * @return {HTMLElement}
+     * @returns {HTMLElement}
      */
     getNextPreviousElement: function( direction ) {
       if ( !this.activeElement ) {
@@ -303,7 +303,7 @@ define( function( require ) {
     /**
      * Get the label for a particular id
      * @param  {string} id
-     * @return {HTMLElement}
+     * @returns {HTMLElement}
      */
     getLabel: function( id ) {
       var labels = document.getElementsByTagName( 'label' );
@@ -326,7 +326,7 @@ define( function( require ) {
      *
      * @param  {HTMLElement} element
      * @param  {boolean} withApplicationContent - do you want to include all aria text content?
-     * @return {string}
+     * @returns {string}
      */
     getAccessibleText: function( element, withApplicationContent ) {
 
@@ -528,7 +528,7 @@ define( function( require ) {
      * active element.
      *
      * @param  {string} direction - NEXT || PREVIOUS
-     * @return {HTMLElement}
+     * @returns {HTMLElement}
      */
     getNextPreviousElementWithAccessibleContent: function( direction ) {
       var accessibleContent;
@@ -547,7 +547,7 @@ define( function( require ) {
      *
      * @param  {Array.<string>} roles - list of desired DOM tag names, types, or aria roles
      * @param  {[type]} direction - direction flag for to search through the DOM - NEXT || PREVIOUS
-     * @return {HTMLElement}
+     * @returns {HTMLElement}
      */
     getNextPreviousElementWithRole: function( roles, direction ) {
 
@@ -647,7 +647,7 @@ define( function( require ) {
     /**
      * Read the active line without incrementing the word count.
      *
-     * @return {[type]} [description]
+     * @returns {[type]} [description]
      */
     readActiveLine: function() {
 
@@ -719,7 +719,7 @@ define( function( require ) {
      *
      * @param  {Array.<string>} headingLevels
      * @param  {[type]} direction - direction of traversal through the DOM - NEXT || PREVIOUS
-     * @return {string}
+     * @returns {string}
      */
     readNextPreviousHeading: function( headingLevels, direction ) {
 
@@ -767,7 +767,7 @@ define( function( require ) {
      * Read the next/previous button element.  A button can have the tagname button, have the aria button role, or
      * or have one of the following types: submit, button, reset
      * @param  {string}} direction
-     * @return {HTMLElement}
+     * @returns {HTMLElement}
      */
     readNextPreviousButton: function( direction ) {
       // the following roles should handle 'role=button', 'type=button', 'tagName=BUTTON'
@@ -1016,7 +1016,7 @@ define( function( require ) {
      *
      * TODO: If the read is cancelled, the active element should be set appropriately.
      *
-     * @return {string}
+     * @returns {string}
      */
     readEntireDocument: function() {
 
@@ -1041,7 +1041,7 @@ define( function( require ) {
      *
      * TODO: Populate with the rest of the focusable elements.
      * @param  {HTMLElement} domElement
-     * @return {boolean}
+     * @returns {boolean}
      */
     isFocusable: function( domElement ) {
       // list of attributes and tag names which should be in the navigation order

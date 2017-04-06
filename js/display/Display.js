@@ -704,7 +704,7 @@ define( function( require ) {
      * Get the root accessible DOM element which represents this display and provides semantics for assistive
      * technology.
      * @public
-     * @return {HTMLElement}
+     * @returns {HTMLElement}
      */
     getAccessibleDOMElement: function() {
       return this._rootAccessibleInstance.peer.domElement;

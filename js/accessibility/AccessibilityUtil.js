@@ -37,7 +37,7 @@ define( function( require ) {
    * includes all elements, even those that are 'hidden' or purely for structure.
    *
    * @param  {HTMLElement} domElement - parent whose children will be linearized
-   * @return {HTMLElement[]}
+   * @returns {HTMLElement[]}
    * @private
    */
   function getLinearDOMElements( domElement ) {
@@ -62,7 +62,7 @@ define( function( require ) {
    * @private
    *
    * @param {HTMLElement} domElement
-   * @return {Boolean}
+   * @returns {Boolean}
    */
   function isElementHidden( domElement ) {
     if ( domElement.hidden ) {
@@ -85,7 +85,7 @@ define( function( require ) {
    *
    * @param {string} direction - direction of traversal, one of 'NEXT' | 'PREVIOUS'
    * @param {HTMLElement} [parentElement] - optional, search will be limited to children of this element
-   * @return {HTMLElement}
+   * @returns {HTMLElement}
    */
   function getNextPreviousFocusable( direction, parentElement ) {
 
@@ -134,7 +134,7 @@ define( function( require ) {
      * @public
      *
      * @param{HTMLElement} [parentElement] - optional, search will be limited to elements under this element
-     * @return {HTMLElement}
+     * @returns {HTMLElement}
      */
     getNextFocusable: function( parentElement ) {
       return getNextPreviousFocusable( NEXT, parentElement );
@@ -147,7 +147,7 @@ define( function( require ) {
      * @public
      *
      * @param {HTMLElement} [parentElement] - optional, search will be limited to elements under this parent
-     * @return {HTMLElement}
+     * @returns {HTMLElement}
      */
     getPreviousFocusable: function( parentElement ) {
       return getNextPreviousFocusable( PREVIOUS, parentElement );
@@ -158,7 +158,7 @@ define( function( require ) {
      * @public
      * 
      * @param  {string} textContent
-     * @return {boolean}
+     * @returns {boolean}
      */
     usesFormattingTagsExclusive: function( textContent ) {
 

@@ -86,7 +86,7 @@ define( function( require ) {
      * Returns a copy of this Trail that can be modified independently
      * @public
      *
-     * @return {Trail}
+     * @returns {Trail}
      */
     copy: function() {
       return new Trail( this );

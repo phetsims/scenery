@@ -118,7 +118,7 @@ define( function( require ) {
     /**
      * Check to see if this peer is contained in a parent container.
      *
-     * @return {boolean}
+     * @returns {boolean}
      */
     hasParentContainer: function() {
       return !!this.parentContainerElement;
@@ -127,7 +127,7 @@ define( function( require ) {
     /**
      * Get the parent container or the peer's dom element direclty.  Used for sorting.
      *
-     * @return {type}  description
+     * @returns {type}  description
      */
     getParentContainerElement: function() {
       return this.parentContainerElement || this.domElement;
@@ -136,7 +136,7 @@ define( function( require ) {
     /**
      * Get the child container or the peer's DOM element, used for sorting.
      *
-     * @return {type}  description
+     * @returns {type}  description
      */
     getChildContainerElement: function() {
       return this.childContainerElement || this.domElement;
