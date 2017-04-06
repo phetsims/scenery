@@ -685,8 +685,7 @@ define( function( require ) {
           // $div.height( node.getSelfBounds().height );
         }
         if ( this.dirtyText ) {
-          // TODO: actually do this in a better way
-          div.innerHTML = node.getNonBreakingText();
+          div.textContent = node.getNonBreakingText();
         }
         if ( this.dirtyDirection ) {
           div.setAttribute( 'dir', node._direction );
