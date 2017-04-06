@@ -15,6 +15,7 @@ define( [
 
   'SCENERY/accessibility/AccessibleInstance',
   'SCENERY/accessibility/AccessiblePeer',
+  'SCENERY/accessibility/VirtualCursor',
 
   'SCENERY/debug/DebugContext',
 
@@ -91,6 +92,7 @@ define( [
   'SCENERY/util/LinearGradient',
   'SCENERY/util/LiveRegion',
   'SCENERY/util/Pattern',
+  'SCENERY/util/Picker',
   'SCENERY/util/RadialGradient',
   'SCENERY/util/RendererSummary',
   'SCENERY/util/SceneImage',

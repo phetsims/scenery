@@ -52,6 +52,7 @@ define( function( require ) {
 
   var scenery = require( 'SCENERY/scenery' );
   var Node = require( 'SCENERY/nodes/Node' );
+  var VirtualCursor = require( 'SCENERY/accessibility/VirtualCursor' );
   var Features = require( 'SCENERY/util/Features' );
   require( 'SCENERY/display/BackboneDrawable' );
   require( 'SCENERY/display/CanvasBlock' );
@@ -74,9 +75,6 @@ define( function( require ) {
   var CanvasNodeBoundsOverlay = require( 'SCENERY/overlays/CanvasNodeBoundsOverlay' );
   var FittedBlockBoundsOverlay = require( 'SCENERY/overlays/FittedBlockBoundsOverlay' );
 
-  // flags object used for determining what the cursor should be underneath a mouse
-  var isMouseFlags = { isMouse: true };
-
   /*
    * Constructs a Display that will show the rootNode and its subtree in a visual state. Default options provided below
    *
@@ -94,6 +92,7 @@ define( function( require ) {
    *   allowWebGL: true,                    // Boolean flag that indicates whether scenery is allowed to use WebGL for rendering
    *                                        // Makes it possible to disable WebGL for ease of testing on non-WebGL platforms, see #289
    *   accessibility: true                  // Whether accessibility enhancements is enabled
+   *   virtualCursor: false                 // Whether the accessibility virtual cursor is enabled
    *   interactive: true                    // Whether mouse/touch/keyboard inputs are enabled (if input has been added)
    */
   function Display( rootNode, options ) {
@@ -119,6 +118,7 @@ define( function( require ) {
       preserveDrawingBuffer: false,
       allowWebGL: true,
       accessibility: true,
+      virtualCursor: false,
       isApplication: false,      // adds the aria-role: 'application' when accessibility is enabled
       interactive: true
     }, options );
@@ -222,6 +222,12 @@ define( function( require ) {
       document.body.appendChild( this._rootAccessibleInstance.peer.domElement );
 
       this._unsortedAccessibleInstances = [];
+
+      // A virtual cursor for navigating to non-focusable but accessible instances,
+      // see https://github.com/phetsims/scenery-phet/issues/227
+      if ( options.virtualCursor ) {
+        this._virtualCursor = new VirtualCursor();
+      }
     }
   }
 
@@ -267,6 +273,8 @@ define( function( require ) {
       this._rootNode.validateWatchedBounds();
 
       if ( assertSlow ) { this.options.accessibility && this._rootAccessibleInstance.auditRoot(); }
+
+      if ( assertSlow ) { this._rootNode._picker.audit(); }
 
       this._baseInstance = this._baseInstance || scenery.Instance.createFromPool( this, new scenery.Trail( this._rootNode ), true, false );
       this._baseInstance.baseSyncTree();
@@ -771,7 +779,7 @@ define( function( require ) {
         }
 
         //OHTWO TODO: For a display, just return an instance and we can avoid the garbage collection/mutation at the cost of the linked-list traversal instead of an array
-        var mouseTrail = this._rootNode.trailUnderPoint( this._input.mouse.point, isMouseFlags );
+        var mouseTrail = this._rootNode.trailUnderPointer( this._input.mouse );
 
         if ( mouseTrail ) {
           for ( var i = mouseTrail.length - 1; i >= 0; i-- ) {

@@ -76,6 +76,10 @@ define( function( require ) {
     // whether the text is rendered as HTML or not. if defined (in a subtype constructor), use that value instead
     this._isHTML = this._isHTML === undefined ? false : this._isHTML;
 
+    // {null|string} - The actual string displayed (can have non-breaking spaces and embedding marks rewritten).
+    // When this is null, its value needs to be recomputed
+    this._cachedRenderedText = null;
+
     // ensure we have a parameter object
     options = options || {};
 
@@ -109,6 +113,7 @@ define( function( require ) {
       if ( text !== this._text ) {
         var oldText = this._text;
         this._text = text;
+        this._cachedRenderedText = null;
 
         var stateLen = this._drawables.length;
         for ( var i = 0; i < stateLen; i++ ) {
@@ -125,10 +130,27 @@ define( function( require ) {
       return this._text;
     },
 
-    // Using the non-breaking space (&nbsp;) encoded as 0x00A0 in UTF-8
-    getNonBreakingText: function() {
-      return this._text.replace( ' ', '\xA0' );
+    /**
+     * Returns a potentially modified version of this.text, where spaces are replaced with non-breaking spaces,
+     * and embedding marks are potentially simplified.
+     * @public
+     *
+     * @returns {string}
+     */
+    getRenderedText: function() {
+      if ( this._cachedRenderedText === null ) {
+        // Using the non-breaking space (&nbsp;) encoded as 0x00A0 in UTF-8
+        this._cachedRenderedText = this._text.replace( ' ', '\xA0' );
+
+        if ( platform.edge ) {
+          // Simplify embedding marks to work around an Edge bug, see https://github.com/phetsims/scenery/issues/520
+          this._cachedRenderedText = Text.simplifyEmbeddingMarks( this._cachedRenderedText );
+        }
+      }
+
+      return this._cachedRenderedText;
     },
+    get renderedText() { return this.getRenderedText(); },
 
     setBoundsMethod: function( method ) {
       assert && assert( method === 'fast' || method === 'fastCanvas' || method === 'accurate' || method === 'hybrid', 'Unknown Text boundsMethod' );
@@ -267,7 +289,7 @@ define( function( require ) {
         return span;
       }
       else {
-        return document.createTextNode( this.getNonBreakingText() );
+        return document.createTextNode( this.renderedText );
       }
     },
 
@@ -303,11 +325,11 @@ define( function( require ) {
       return scenery.Util.canvasAccurateBounds( function( context ) {
         context.font = node.font;
         context.direction = node.direction;
-        context.fillText( node.text, 0, 0 );
+        context.fillText( node.renderedText, 0, 0 );
         if ( node.hasStroke() ) {
           var fakeWrapper = new scenery.CanvasContextWrapper( null, context );
           node.beforeCanvasStroke( fakeWrapper );
-          context.strokeText( node.text, 0, 0 );
+          context.strokeText( node.renderedText, 0, 0 );
           node.afterCanvasStroke( fakeWrapper );
         }
       }, {
@@ -321,7 +343,7 @@ define( function( require ) {
       var context = scenery.scratchContext;
       context.font = this.font;
       context.direction = this.direction;
-      return context.measureText( this.text ).width;
+      return context.measureText( this.renderedText ).width;
     },
 
     // NOTE: should return new instance, so that it can be mutated later
@@ -485,7 +507,7 @@ define( function( require ) {
     },
 
     getDebugHTMLExtras: function() {
-      return ' "' + escapeHTML( this.getNonBreakingText() ) + '"' + ( this._isHTML ? ' (html)' : '' );
+      return ' "' + escapeHTML( this.renderedText ) + '"' + ( this._isHTML ? ' (html)' : '' );
     },
 
     getBasicConstructor: function( propLines ) {
@@ -578,6 +600,152 @@ define( function( require ) {
 
   // mix in support for fills and strokes
   Paintable.mixin( Text );
+
+  /*---------------------------------------------------------------------------*
+   * Unicode embedding marks workaround for https://github.com/phetsims/scenery/issues/520
+   *----------------------------------------------------------------------------*/
+
+  // Unicode embedding marks that we can combine to work around the Edge issue
+  var LTR = '\u202a';
+  var RTL = '\u202b';
+  var POP = '\u202c';
+
+  /**
+   * Replaces embedding mark characters with visible strings. Useful for debugging for strings with embedding marks.
+   * @public
+   *
+   * @param {string} string
+   * @returns {string} - With embedding marks replaced.
+   */
+  Text.embeddedDebugString = function( string ) {
+    return string.replace( /\u202a/g, '[LTR]' ).replace( /\u202b/g, '[RTL]' ).replace( /\u202c/g, '[POP]' );
+  };
+
+  /**
+   * Returns a (potentially) modified string where embedding marks have been simplified.
+   * @public
+   *
+   * This simplification wouldn't usually be necessary, but we need to prevent cases like
+   * https://github.com/phetsims/scenery/issues/520 where Edge decides to turn [POP][LTR] (after another [LTR]) into
+   * a 'box' character, when nothing should be rendered.
+   *
+   * This will remove redundant nesting:
+   *   e.g. [LTR][LTR]boo[POP][POP] => [LTR]boo[POP])
+   * and will also combine adjacent directions:
+   *   e.g. [LTR]Mail[POP][LTR]Man[POP] => [LTR]MailMan[Pop]
+   *
+   * Note that it will NOT combine in this way if there was a space between the two LTRs:
+   *   e.g. [LTR]Mail[POP] [LTR]Man[Pop])
+   * as in the general case, we'll want to preserve the break there between embeddings.
+   *
+   * TODO: A stack-based implementation that doesn't create a bunch of objects/closures would be nice for performance.
+   *
+   * @param {string} string
+   * @returns {string}
+   */
+  Text.simplifyEmbeddingMarks = function( string ) {
+    // First, we'll convert the string into a tree form, where each node is either a string object OR an object of the
+    // node type { dir: {LTR||RTL}, children: {Array.<node>}, parent: {null|node} }. Thus each LTR...POP and RTL...POP
+    // become a node with their interiors becoming children.
+
+    // Root node (no direction, so we preserve root LTR/RTLs)
+    var root = {
+      dir: null,
+      children: [],
+      parent: null
+    };
+    var current = root;
+    for ( var i = 0; i < string.length; i++ ) {
+      var chr = string.charAt( i );
+
+      // Push a direction
+      if ( chr === LTR || chr === RTL ) {
+        var node = {
+          dir: chr,
+          children: [],
+          parent: current
+        };
+        current.children.push( node );
+        current = node;
+      }
+      // Pop a direction
+      else if ( chr === POP ) {
+        assert && assert( current.parent, 'Bad nesting of embedding marks: ' + Text.embeddedDebugString( string ) );
+        current = current.parent;
+      }
+      // Append characters to the current direction
+      else {
+        current.children.push( chr );
+      }
+    }
+    assert && assert( current === root, 'Bad nesting of embedding marks: ' + Text.embeddedDebugString( string ) );
+
+    // Remove redundant nesting (e.g. [LTR][LTR]...[POP][POP])
+    function collapseNesting( node ) {
+      for ( var i = node.children.length - 1; i >= 0; i-- ) {
+        var child = node.children[ i ];
+        if ( node.dir === child.dir ) {
+          Array.prototype.splice.apply( node.children, [ i, 1 ].concat( child.children ) );
+        }
+      }
+    }
+
+    // Remove overridden nesting (e.g. [LTR][RTL]...[POP][POP]), since the outer one is not needed
+    function collapseUnnecessary( node ) {
+      if ( node.children.length === 1 && node.children[ 0 ].dir ) {
+        node.dir = node.children[ 0 ].dir;
+        node.children = node.children[ 0 ].children;
+      }
+    }
+
+    // Collapse adjacent matching dirs, e.g. [LTR]...[POP][LTR]...[POP]
+    function collapseAdjacent( node ) {
+      for ( var i = node.children.length - 1; i >= 1; i-- ) {
+        var previousChild = node.children[ i - 1 ];
+        var child = node.children[ i ];
+        if ( child.dir && previousChild.dir === child.dir ) {
+          previousChild.children = previousChild.children.concat( child.children );
+          node.children.splice( i, 1 );
+
+          // Now try to collapse adjacent items in the child, since we combined children arrays
+          collapseAdjacent( previousChild );
+        }
+      }
+    }
+
+    // Simplifies the tree using the above functions
+    function simplify( node ) {
+      if ( typeof node === 'string' ) {
+        return;
+      }
+
+      for ( var i = 0; i < node.children.length; i++ ) {
+        simplify( node.children[ i ] );
+      }
+
+      collapseUnnecessary( node );
+      collapseNesting( node );
+      collapseAdjacent( node );
+
+      return node;
+    }
+
+    // Turns a tree into a string
+    function stringify( node ) {
+      if ( typeof node === 'string' ) {
+        return node;
+      }
+      var childString = node.children.map( stringify ).join( '' );
+      if ( node.dir ) {
+        return node.dir + childString + '\u202c';
+      }
+      else {
+        return childString;
+      }
+    }
+
+    return stringify( simplify( root ) );
+  };
 
   /*---------------------------------------------------------------------------*
    * Rendering State mixin (DOM/SVG)
@@ -688,7 +856,7 @@ define( function( require ) {
         }
         if ( this.dirtyText ) {
           // TODO: actually do this in a better way
-          div.innerHTML = node.getNonBreakingText();
+          div.innerHTML = node.renderedText;
         }
         if ( this.dirtyDirection ) {
           div.setAttribute( 'dir', node._direction );
@@ -777,7 +945,7 @@ define( function( require ) {
 
       // update the text-node's value
       if ( this.dirtyText ) {
-        text.lastChild.nodeValue = this.node.getNonBreakingText();
+        text.lastChild.nodeValue = this.node.renderedText;
       }
 
       // text length correction, tested with scenery/tests/text-quality-test.html to determine how to match Canvas/SVG rendering (and overall length)
@@ -816,12 +984,12 @@ define( function( require ) {
 
       if ( node.hasFill() ) {
         node.beforeCanvasFill( wrapper ); // defined in Paintable
-        context.fillText( node._text, 0, 0 );
+        context.fillText( node.renderedText, 0, 0 );
         node.afterCanvasFill( wrapper ); // defined in Paintable
       }
       if ( node.hasStroke() ) {
         node.beforeCanvasStroke( wrapper ); // defined in Paintable
-        context.strokeText( node._text, 0, 0 );
+        context.strokeText( node.renderedText, 0, 0 );
         node.afterCanvasStroke( wrapper ); // defined in Paintable
       }
     },
@@ -944,7 +1112,7 @@ define( function( require ) {
     textElement.setAttribute( 'font-style', textNode._font.getStyle() );
     textElement.setAttribute( 'font-weight', textNode._font.getWeight() );
     textElement.setAttribute( 'font-stretch', textNode._font.getStretch() );
-    textElement.lastChild.nodeValue = textNode.getNonBreakingText();
+    textElement.lastChild.nodeValue = textNode.renderedText;
   }
 
   if ( !svgTextSizeContainer ) {

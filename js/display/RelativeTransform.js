@@ -578,7 +578,9 @@ define( function( require ) {
           'If we have a parent, we need to hold the invariant ' +
           'this.relativeChildDirtyFrame => parent.relativeChildDirtyFrame' );
 
-        if ( !hasRelativeSelfDirty( this ) ) {
+        // Since we check to see if something is not dirty, we need to handle this when we are actually reporting
+        // what is dirty. See https://github.com/phetsims/scenery/issues/512
+        if ( !allowValidationNotNeededChecks && !hasRelativeSelfDirty( this ) ) {
           var matrix = currentRelativeMatrix( this );
           assertSlow( matrix.equals( this.matrix ), 'If there is no relativeSelfDirty flag set here or in our' +
                                                     ' ancestors, our matrix should be up-to-date' );

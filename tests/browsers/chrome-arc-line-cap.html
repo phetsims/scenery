@@ -1,0 +1,37 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8"/>
+  <meta http-equiv="X-UA-Compatible" content="IE=edge"/>
+
+  <title>Chrome arc line-cap</title>
+
+  <style>
+    canvas {
+      border: 1px solid black;
+    }
+  </style>
+</head>
+<body>
+
+<script type="text/javascript">
+
+var canvas = document.createElement( 'canvas' );
+var context = canvas.getContext( '2d' )
+canvas.width = 220;
+canvas.height = 220;
+context.setTransform( 1, 0, 0, 1, -151, -440 );
+context.transform( 0.6744791666666666, 0, 0, 0.6744791666666666, 259, 548.5911458333333 );
+context.beginPath();
+context.moveTo( -43.44464063610148, 79.43535936389853 );
+context.arc( 0, 122.88000000000002, 61.44000000000001, -2.356194490192345, -0.7853981633974483, false );
+context.strokeStyle = "black";
+context.lineWidth = 15.360000000000003;
+context.lineCap = "round";
+context.stroke();
+document.body.appendChild( canvas );
+
+</script>
+
+</body>
+</html>

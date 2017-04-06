@@ -61,6 +61,7 @@ define( function( require ) {
     dirty: { name: 'dirty', style: 'color: #aaa;' },
     bounds: { name: 'bounds', style: 'color: #aaa;' },
     hitTest: { name: 'hitTest', style: 'color: #aaa;' },
+    hitTestInternal: { name: 'hitTestInternal', style: 'color: #aaa;' },
     PerfCritical: { name: 'Perf', style: 'color: #f00;' },
     PerfMajor: { name: 'Perf', style: 'color: #aa0;' },
     PerfMinor: { name: 'Perf', style: 'color: #088;' },

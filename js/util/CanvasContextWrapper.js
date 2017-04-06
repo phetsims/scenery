@@ -15,6 +15,7 @@ define( function( require ) {
 
   var inherit = require( 'PHET_CORE/inherit' );
   var scenery = require( 'SCENERY/scenery' );
+  var Property = require( 'AXON/Property' );
 
   function CanvasContextWrapper( canvas, context ) {
     this.canvas = canvas;
@@ -60,6 +61,11 @@ define( function( require ) {
     },
 
     setFillStyle: function( style ) {
+      // turn {Property}s into their values when necessary
+      if ( style && style instanceof Property ) {
+        style = style.value;
+      }
+
       // turn {Color}s into strings when necessary
       if ( style && style.getCanvasStyle ) {
         style = style.getCanvasStyle();
@@ -74,6 +80,11 @@ define( function( require ) {
     },
 
     setStrokeStyle: function( style ) {
+      // turn {Property}s into their values when necessary
+      if ( style && style instanceof Property ) {
+        style = style.value;
+      }
+
       // turn {Color}s into strings when necessary
       if ( style && style.getCanvasStyle ) {
         style = style.getCanvasStyle();

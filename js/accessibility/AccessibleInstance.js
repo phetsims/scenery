@@ -62,6 +62,7 @@ define( function( require ) {
         accessibilityContainer.style.width = '0';
         accessibilityContainer.style.height = '0';
         accessibilityContainer.style.clip = 'rect(0,0,0,0)';
+        accessibilityContainer.style.pointerEvents = 'none';
         this.peer = new scenery.AccessiblePeer( this, accessibilityContainer );
       }
       else {
@@ -287,8 +288,9 @@ define( function( require ) {
         'Disposing ' + this.toString() );
       sceneryLog && sceneryLog.AccessibleInstance && sceneryLog.push();
 
-      // Disconnect DOM
+      // Disconnect DOM and remove listeners
       if ( !this.isRootInstance ) {
+        this.peer.dispose();
         this.parent.peer.getChildContainerElement().removeChild( this.peer.domElement );
       }
 

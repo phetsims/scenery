@@ -27,6 +27,7 @@ define( function( require ) {
   var CanvasSelfDrawable = require( 'SCENERY/display/CanvasSelfDrawable' );
   var SelfDrawable = require( 'SCENERY/display/SelfDrawable' );
   var WebGLSelfDrawable = require( 'SCENERY/display/WebGLSelfDrawable' );
+  var SpriteSheet = require( 'SCENERY/util/SpriteSheet' );
 
   // TODO: change this based on memory and performance characteristics of the platform
   var keepDOMImageElements = true; // whether we should pool DOM elements for the DOM rendering states, or whether we should free them when possible for memory
@@ -138,6 +139,9 @@ define( function( require ) {
     this._initialWidth = 0;
     this._initialHeight = 0;
 
+    // {number} - Opacity applied directly to the image itself, without affecting the rendering of children.
+    this._imageOpacity = 1;
+
     // Mipmap client values
     this._mipmap = false; // {bool} - Whether mipmapping is enabled
     this._mipmapBias = defaultMipmapBias; // {number} - Amount of level-of-detail adjustment added to everything.
@@ -181,6 +185,7 @@ define( function( require ) {
       }
 
       this.invalidateMipmaps();
+      this.invalidateSupportedRenderers();
     },
 
     getImage: function() {
@@ -189,24 +194,31 @@ define( function( require ) {
     get image() { return this.getImage(); },
 
     invalidateSupportedRenderers: function() {
-      if ( this._image instanceof HTMLCanvasElement ) {
-        this.setRendererBitmask(
-          Renderer.bitmaskCanvas |
-          Renderer.bitmaskWebGL
-        );
+
+      // Canvas is always permitted
+      var r = Renderer.bitmaskCanvas;
+
+      // If it fits within the sprite sheet, then WebGL is also permitted
+      // If the image hasn't loaded, the getImageWidth/Height will be 0 and this rule would pass.  However, this
+      // function will be called again after the image loads, and would correctly invalidate WebGL, if too large to fit
+      // in a SpriteSheet
+      var fitsWithinSpriteSheet = this.getImageWidth() <= SpriteSheet.MAX_DIMENSION.width &&
+                                  this.getImageHeight() <= SpriteSheet.MAX_DIMENSION.height;
+      if ( fitsWithinSpriteSheet ) {
+        r |= Renderer.bitmaskWebGL;
       }
-      else {
+
+      // If it is not a canvas, then it can additionally be rendered in SVG or DOM
+      if ( !( this._image instanceof HTMLCanvasElement ) ) {
         // assumes HTMLImageElement
-        this.setRendererBitmask(
-          Renderer.bitmaskCanvas |
-          Renderer.bitmaskSVG |
-          Renderer.bitmaskDOM |
-          Renderer.bitmaskWebGL
-        );
+        r |= Renderer.bitmaskSVG | Renderer.bitmaskDOM;
       }
+
+      this.setRendererBitmask( r );
     },
 
     setImage: function( image ) {
+      assert && assert( image, 'image should be available' );
       if ( this._image !== image && ( typeof image !== 'string' || !this._image || ( image !== this._image.src && image !== this._mipmapData ) ) ) {
         // don't leak memory by referencing old images
         if ( this._image ) {
@@ -239,9 +251,6 @@ define( function( require ) {
           this._mipmap = true;
         }
 
-        // swap supported renderers if necessary
-        this.invalidateSupportedRenderers();
-
         this._image = image;
 
         this.invalidateImage(); // yes, if we aren't loaded yet this will give us 0x0 bounds
@@ -249,6 +258,39 @@ define( function( require ) {
       return this;
     },
     set image( value ) { this.setImage( value ); },
+
+    /**
+     * Returns the opacity applied only to this image (not including children).
+     * @public
+     *
+     * @returns {number}
+     */
+    getImageOpacity: function() {
+      return this._imageOpacity;
+    },
+    get imageOpacity() { return this.getImageOpacity(); },
+
+    /**
+     * Sets an opacity that is applied only to this image (will not affect children or the rest of the node's subtree).
+     * @public
+     *
+     * @param {number} imageOpacty - Should be a number between 0 (transparent) and 1 (opaque), just like normal opacity
+     */
+    setImageOpacity: function( imageOpacity ) {
+      assert && assert( typeof imageOpacity === 'number', 'imageOpacity was not a number' );
+      assert && assert( isFinite( imageOpacity ) && imageOpacity >= 0 && imageOpacity <= 1,
+        'imageOpacity out of range: ' + imageOpacity );
+
+      if ( this._imageOpacity !== imageOpacity ) {
+        this._imageOpacity = imageOpacity;
+
+        var stateLen = this._drawables.length;
+        for ( var i = 0; i < stateLen; i++ ) {
+          this._drawables[ i ].markImageOpacityDirty();
+        }
+      }
+    },
+    set imageOpacity( value ) { this.setImageOpacity( value ); },
 
     getInitialWidth: function() {
       return this._initialWidth;
@@ -529,7 +571,8 @@ define( function( require ) {
     }
   } );
 
-  Image.prototype._mutatorKeys = [ 'image', 'initialWidth', 'initialHeight', 'mipmap', 'mipmapBias', 'mipmapInitialLevel', 'mipmapMaxLevel' ].concat( Node.prototype._mutatorKeys );
+  Image.prototype._mutatorKeys = [ 'image', 'imageOpacity', 'initialWidth', 'initialHeight', 'mipmap', 'mipmapBias',
+                                   'mipmapInitialLevel', 'mipmapMaxLevel' ].concat( Node.prototype._mutatorKeys );
 
   // utility for others
   Image.createSVGImage = function( url, width, height ) {
@@ -596,6 +639,7 @@ define( function( require ) {
       proto.initializeState = function( renderer, instance ) {
         this.paintDirty = true; // flag that is marked if ANY "paint" dirty flag is set (basically everything except for transforms, so we can accelerated the transform-only case)
         this.dirtyImage = true;
+        this.dirtyImageOpacity = true;
         this.dirtyMipmap = true;
 
         return this; // allow for chaining
@@ -621,9 +665,15 @@ define( function( require ) {
         this.markPaintDirty();
       };
 
+      proto.markImageOpacityDirty = function() {
+        this.dirtyImageOpacity = true;
+        this.markPaintDirty();
+      };
+
       proto.setToCleanState = function() {
         this.paintDirty = false;
         this.dirtyImage = false;
+        this.dirtyImageOpacity = false;
         this.dirtyMipmap = false;
       };
     }
@@ -652,6 +702,9 @@ define( function( require ) {
         this.domElement.style.top = '0';
       }
 
+      // Whether we have an opacity attribute specified on the DOM element.
+      this.hasOpacity = false;
+
       scenery.Util.prepareForTransform( this.domElement, this.forceAcceleration );
 
       return this; // allow for chaining
@@ -664,6 +717,19 @@ define( function( require ) {
       if ( this.paintDirty && this.dirtyImage ) {
         // TODO: allow other ways of showing a DOM image?
         img.src = node._image ? node._image.src : '//:0'; // NOTE: for img with no src (but with a string), see http://stackoverflow.com/questions/5775469/whats-the-valid-way-to-include-an-image-with-no-src
+      }
+
+      if ( this.dirtyImageOpacity ) {
+        if ( node._imageOpacity === 1 ) {
+          if ( this.hasOpacity ) {
+            this.hasOpacity = false;
+            img.style.opacity = '';
+          }
+        }
+        else {
+          this.hasOpacity = true;
+          img.style.opacity = node._imageOpacity;
+        }
       }
 
       if ( this.transformDirty ) {
@@ -713,6 +779,9 @@ define( function( require ) {
         this.svgElement.setAttribute( 'y', 0 );
       }
 
+      // Whether we have an opacity attribute specified on the DOM element.
+      this.hasOpacity = false;
+
       this._usingMipmap = false;
       this._mipmapLevel = -1; // will always be invalidated
 
@@ -753,6 +822,19 @@ define( function( require ) {
       else if ( this.dirtyMipmap && this.node._image ) {
         sceneryLog && sceneryLog.ImageSVGDrawable && sceneryLog.ImageSVGDrawable( this.id + ' Updating dirty mipmap' );
         this.updateURL( image, false );
+      }
+
+      if ( this.dirtyImageOpacity ) {
+        if ( this.node._imageOpacity === 1 ) {
+          if ( this.hasOpacity ) {
+            this.hasOpacity = false;
+            image.removeAttribute( 'opacity' );
+          }
+        }
+        else {
+          this.hasOpacity = true;
+          image.setAttribute( 'opacity', this.node._imageOpacity );
+        }
       }
     },
 
@@ -848,20 +930,52 @@ define( function( require ) {
     },
 
     paintCanvas: function( wrapper, node ) {
-      if ( node._image ) {
+      var hasImageOpacity = node._imageOpacity !== 1;
+
+      // Ensure that the image has been loaded by checking whether it has a width or height of 0.
+      // See https://github.com/phetsims/scenery/issues/536
+      if ( node._image && node._image.width !== 0 && node._image.height !== 0 ) {
+        // If we have image opacity, we need to apply the opacity on top of whatever globalAlpha may exist
+        if ( hasImageOpacity ) {
+          wrapper.context.save();
+          wrapper.context.globalAlpha *= node._imageOpacity;
+        }
+
         wrapper.context.drawImage( node._image, 0, 0 );
+
+        if ( hasImageOpacity ) {
+          wrapper.context.restore();
+        }
       }
     },
 
     // stateless dirty functions
     markDirtyImage: function() { this.markPaintDirty(); },
-    markDirtyMipmap: function() { this.markPaintDirty(); }
+    markDirtyMipmap: function() { this.markPaintDirty(); },
+    markImageOpacityDirty: function() { this.markPaintDirty(); }
   } );
   SelfDrawable.Poolable.mixin( Image.ImageCanvasDrawable );
 
   /*---------------------------------------------------------------------------*
    * WebGL rendering
    *----------------------------------------------------------------------------*/
+
+  // For alignment, we keep things to 8 components, aligned on 4-byte boundaries.
+  // See https://developer.apple.com/library/ios/documentation/3DDrawing/Conceptual/OpenGLES_ProgrammingGuide/TechniquesforWorkingwithVertexData/TechniquesforWorkingwithVertexData.html#//apple_ref/doc/uid/TP40008793-CH107-SW15
+  var WEBGL_COMPONENTS = 5; // format [X Y U V A] for 6 vertices
+
+  var VERTEX_0_OFFSET = WEBGL_COMPONENTS * 0;
+  var VERTEX_1_OFFSET = WEBGL_COMPONENTS * 1;
+  var VERTEX_2_OFFSET = WEBGL_COMPONENTS * 2;
+  var VERTEX_3_OFFSET = WEBGL_COMPONENTS * 3;
+  var VERTEX_4_OFFSET = WEBGL_COMPONENTS * 4;
+  var VERTEX_5_OFFSET = WEBGL_COMPONENTS * 5;
+
+  var VERTEX_X_OFFSET = 0;
+  var VERTEX_Y_OFFSET = 1;
+  var VERTEX_U_OFFSET = 2;
+  var VERTEX_V_OFFSET = 3;
+  var VERTEX_A_OFFSET = 4;
 
   Image.ImageWebGLDrawable = inherit( WebGLSelfDrawable, function ImageWebGLDrawable( renderer, instance ) {
     this.initialize( renderer, instance );
@@ -873,8 +987,8 @@ define( function( require ) {
       this.initializeWebGLSelfDrawable( renderer, instance );
 
       if ( !this.vertexArray ) {
-        // format [X Y U V] for 6 vertices
-        this.vertexArray = new Float32Array( 4 * 6 ); // 4-length components for 6 vertices (2 tris).
+        // for 6 vertices
+        this.vertexArray = new Float32Array( WEBGL_COMPONENTS * 6 ); // 5-length components for 6 vertices (2 tris).
       }
 
       // corner vertices in the relative transform root coordinate space
@@ -885,6 +999,7 @@ define( function( require ) {
 
       this.xyDirty = true; // is our vertex position information out of date?
       this.uvDirty = true; // is our UV information out of date?
+      this.updatedOnce = false;
 
       // {SpriteSheet.Sprite} exported for WebGLBlock's rendering loop
       this.sprite = null;
@@ -956,6 +1071,16 @@ define( function( require ) {
         // ensure that we have a reserved sprite (part of the spritesheet)
         this.reserveSprite();
 
+        if ( this.dirtyImageOpacity || !this.updatedOnce ) {
+          this.vertexArray[ VERTEX_0_OFFSET + VERTEX_A_OFFSET ] = this.node._imageOpacity;
+          this.vertexArray[ VERTEX_1_OFFSET + VERTEX_A_OFFSET ] = this.node._imageOpacity;
+          this.vertexArray[ VERTEX_2_OFFSET + VERTEX_A_OFFSET ] = this.node._imageOpacity;
+          this.vertexArray[ VERTEX_3_OFFSET + VERTEX_A_OFFSET ] = this.node._imageOpacity;
+          this.vertexArray[ VERTEX_4_OFFSET + VERTEX_A_OFFSET ] = this.node._imageOpacity;
+          this.vertexArray[ VERTEX_5_OFFSET + VERTEX_A_OFFSET ] = this.node._imageOpacity;
+        }
+        this.updatedOnce = true;
+
         // if we don't have a sprite (we don't have a loaded image yet), just bail
         if ( !this.sprite ) {
           return;
@@ -969,20 +1094,20 @@ define( function( require ) {
           // TODO: consider reversal of minY and maxY usage here for vertical inverse
 
           // first triangle UVs
-          this.vertexArray[ 2 ] = uvBounds.minX; // upper left U
-          this.vertexArray[ 3 ] = uvBounds.minY; // upper left V
-          this.vertexArray[ 6 ] = uvBounds.minX; // lower left U
-          this.vertexArray[ 7 ] = uvBounds.maxY; // lower left V
-          this.vertexArray[ 10 ] = uvBounds.maxX; // upper right U
-          this.vertexArray[ 11 ] = uvBounds.minY; // upper right V
+          this.vertexArray[ VERTEX_0_OFFSET + VERTEX_U_OFFSET ] = uvBounds.minX; // upper left U
+          this.vertexArray[ VERTEX_0_OFFSET + VERTEX_V_OFFSET ] = uvBounds.minY; // upper left V
+          this.vertexArray[ VERTEX_1_OFFSET + VERTEX_U_OFFSET ] = uvBounds.minX; // lower left U
+          this.vertexArray[ VERTEX_1_OFFSET + VERTEX_V_OFFSET ] = uvBounds.maxY; // lower left V
+          this.vertexArray[ VERTEX_2_OFFSET + VERTEX_U_OFFSET ] = uvBounds.maxX; // upper right U
+          this.vertexArray[ VERTEX_2_OFFSET + VERTEX_V_OFFSET ] = uvBounds.minY; // upper right V
 
           // second triangle UVs
-          this.vertexArray[ 14 ] = uvBounds.maxX; // upper right U
-          this.vertexArray[ 15 ] = uvBounds.minY; // upper right V
-          this.vertexArray[ 18 ] = uvBounds.minX; // lower left U
-          this.vertexArray[ 19 ] = uvBounds.maxY; // lower left V
-          this.vertexArray[ 22 ] = uvBounds.maxX; // lower right U
-          this.vertexArray[ 23 ] = uvBounds.maxY; // lower right V
+          this.vertexArray[ VERTEX_3_OFFSET + VERTEX_U_OFFSET ] = uvBounds.maxX; // upper right U
+          this.vertexArray[ VERTEX_3_OFFSET + VERTEX_V_OFFSET ] = uvBounds.minY; // upper right V
+          this.vertexArray[ VERTEX_4_OFFSET + VERTEX_U_OFFSET ] = uvBounds.minX; // lower left U
+          this.vertexArray[ VERTEX_4_OFFSET + VERTEX_V_OFFSET ] = uvBounds.maxY; // lower left V
+          this.vertexArray[ VERTEX_5_OFFSET + VERTEX_U_OFFSET ] = uvBounds.maxX; // lower right U
+          this.vertexArray[ VERTEX_5_OFFSET + VERTEX_V_OFFSET ] = uvBounds.maxY; // lower right V
         }
 
         if ( this.xyDirty ) {
@@ -998,20 +1123,20 @@ define( function( require ) {
           transformMatrix.multiplyVector2( this.lowerRight.setXY( width, height ) );
 
           // first triangle XYs
-          this.vertexArray[ 0 ] = this.upperLeft.x;
-          this.vertexArray[ 1 ] = this.upperLeft.y;
-          this.vertexArray[ 4 ] = this.lowerLeft.x;
-          this.vertexArray[ 5 ] = this.lowerLeft.y;
-          this.vertexArray[ 8 ] = this.upperRight.x;
-          this.vertexArray[ 9 ] = this.upperRight.y;
+          this.vertexArray[ VERTEX_0_OFFSET + VERTEX_X_OFFSET ] = this.upperLeft.x;
+          this.vertexArray[ VERTEX_0_OFFSET + VERTEX_Y_OFFSET ] = this.upperLeft.y;
+          this.vertexArray[ VERTEX_1_OFFSET + VERTEX_X_OFFSET ] = this.lowerLeft.x;
+          this.vertexArray[ VERTEX_1_OFFSET + VERTEX_Y_OFFSET ] = this.lowerLeft.y;
+          this.vertexArray[ VERTEX_2_OFFSET + VERTEX_X_OFFSET ] = this.upperRight.x;
+          this.vertexArray[ VERTEX_2_OFFSET + VERTEX_Y_OFFSET ] = this.upperRight.y;
 
           // second triangle XYs
-          this.vertexArray[ 12 ] = this.upperRight.x;
-          this.vertexArray[ 13 ] = this.upperRight.y;
-          this.vertexArray[ 16 ] = this.lowerLeft.x;
-          this.vertexArray[ 17 ] = this.lowerLeft.y;
-          this.vertexArray[ 20 ] = this.lowerRight.x;
-          this.vertexArray[ 21 ] = this.lowerRight.y;
+          this.vertexArray[ VERTEX_3_OFFSET + VERTEX_X_OFFSET ] = this.upperRight.x;
+          this.vertexArray[ VERTEX_3_OFFSET + VERTEX_Y_OFFSET ] = this.upperRight.y;
+          this.vertexArray[ VERTEX_4_OFFSET + VERTEX_X_OFFSET ] = this.lowerLeft.x;
+          this.vertexArray[ VERTEX_4_OFFSET + VERTEX_Y_OFFSET ] = this.lowerLeft.y;
+          this.vertexArray[ VERTEX_5_OFFSET + VERTEX_X_OFFSET ] = this.lowerRight.x;
+          this.vertexArray[ VERTEX_5_OFFSET + VERTEX_Y_OFFSET ] = this.lowerRight.y;
         }
       }
     },

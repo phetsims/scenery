@@ -22,6 +22,12 @@ define( function( require ) {
   var inherit = require( 'PHET_CORE/inherit' );
   var BinPacker = require( 'DOT/BinPacker' );
   var Bounds2 = require( 'DOT/Bounds2' );
+  var Dimension2 = require( 'DOT/Dimension2' );
+
+  // constants
+  // The max SpriteSheet size was selected to minimize memory overhead while still accommodating many large images
+  // See https://github.com/phetsims/scenery/issues/539
+  var MAX_DIMENSION = new Dimension2( 1024, 1024 );
 
   /**
    * @constructor
@@ -36,7 +42,7 @@ define( function( require ) {
 
     // Use the max supported texture size (according to http://codeflow.org/entries/2013/feb/22/how-to-write-portable-webgl/ )
     // TODO: potentially support larger texture sizes based on reported capabilities (could cause fewer draw calls?)
-    this.bounds = new Bounds2( 0, 0, 1024, 1024 );
+    this.bounds = new Bounds2( 0, 0, MAX_DIMENSION.width, MAX_DIMENSION.height );
     assert && assert( this.bounds.minX === 0 && this.bounds.minY === 0, 'Assumed constraint later on for transforms' );
     this.width = this.bounds.width;
     this.height = this.bounds.height;
@@ -247,6 +253,9 @@ define( function( require ) {
     // the count is 0, it should be in the 'unusedSprites' array, otherwise it should be in the 'usedSprites' array.
     this.count = initialCount;
   };
+
+  // @public (read-only) the size of a sprite sheet
+  SpriteSheet.MAX_DIMENSION = MAX_DIMENSION;
 
   return SpriteSheet;
 } );

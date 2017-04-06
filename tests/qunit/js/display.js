@@ -272,12 +272,6 @@
     r1ds.updateSVG();
     r1dc.paintCanvas( wrapper, r1 );
 
-    r1.image = null;
-
-    r1dd.updateDOM();
-    r1ds.updateSVG();
-    r1dc.paintCanvas( wrapper, r1 );
-
     r1dd.dispose();
     r1ds.dispose();
     r1dc.dispose();
