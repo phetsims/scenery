@@ -103,8 +103,7 @@ define( function( require ) {
           // $div.height( node.getSelfBounds().height );
         }
         if ( this.dirtyText ) {
-          // TODO: actually do this in a better way
-          div.innerHTML = node.renderedText;
+          div.textContent = node.renderedText;
         }
       }
 
