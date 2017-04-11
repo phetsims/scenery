@@ -14,6 +14,7 @@
 
     var rootNode = new scenery.Node();
     var display = new scenery.Display( rootNode ); // eslint-disable-line
+    document.body.appendChild( display.domElement );
 
     // test setting of accessible content through options
     var buttonNode = new scenery.Node( {
@@ -118,6 +119,8 @@
 
     // accessible instances are not sorted until added to a display
     var display = new scenery.Display( rootNode ); // eslint-disable-line
+    document.body.appendChild( display.domElement );
+    
     rootNode.addChild( a1 );
 
     // verify that elements are in the DOM
@@ -167,6 +170,7 @@
       tagName: 'div'
     } );
     var display = new scenery.Display( a1 ); // eslint-disable-line
+    document.body.appendChild( display.domElement );
 
     // set/get attributes
     a1.setAccessibleAttribute( 'role', 'switch' );
@@ -193,6 +197,7 @@
       tagName: 'button'
     } );
     var display = new scenery.Display( a1 ); // eslint-disable-line
+    document.body.appendChild( display.domElement );
 
     ok( a1.accessibleInputListeners.length === 0, 'no input accessible listeners on instantiation' );
     ok( a1.accessibleLabel === null, 'no label on instantiation' );
@@ -223,6 +228,8 @@
 
     var rootNode = new scenery.Node( { tagName: 'div', focusable: true } );
     var display = new scenery.Display( rootNode ); // eslint-disable-line
+    document.body.appendChild( display.domElement );
+
     var rootElement = document.getElementById( rootNode.accessibleId );
 
     var a = new scenery.Node( { tagName: 'div', focusable: true, focusHighlight: 'invisible' } );
