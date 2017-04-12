@@ -402,6 +402,11 @@ define( function( require ) {
       //OHTWO TODO: minor speedup by appending only once its fragment is constructed? or use DocumentFragment?
       backbone.domElement.appendChild( block.domElement );
 
+      // if backbone is a display root, hide all of its content from screen readers
+      if ( backbone.isDisplayRoot ) {
+        block.domElement.setAttribute( 'aria-hidden', true );
+      }
+
       // mark it dirty for now, so we can check
       backbone.markDirtyDrawable( block );
 

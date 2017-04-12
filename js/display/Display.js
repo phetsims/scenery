@@ -556,6 +556,10 @@ define( function( require ) {
     addOverlay: function( overlay ) {
       this._overlays.push( overlay );
       this._domElement.appendChild( overlay.domElement );
+
+      // ensure that the overlay is hidden from screen readers, all accessible content should be in the dom element
+      // of the this._rootAccessibleInstance
+      overlay.domElement.setAttribute( 'aria-hidden', true );
     },
 
     removeOverlay: function( overlay ) {
