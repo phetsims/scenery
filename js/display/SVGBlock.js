@@ -68,6 +68,9 @@ define( function( require ) {
         this.svg.style.left = '0';
         this.svg.style.top = '0';
 
+        // a11y - make sure the element is not focusable (it is focusable by default in IE11 full screen mode)
+        this.svg.setAttribute( 'focusable', false );
+
         //OHTWO TODO: why would we clip the individual layers also? Seems like a potentially useless performance loss
         // this.svg.style.clip = 'rect(0px,' + width + 'px,' + height + 'px,0px)';
         this.svg.style[ 'pointer-events' ] = 'none';
