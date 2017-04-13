@@ -104,7 +104,7 @@ define( function( require ) {
         }
         if ( this.dirtyText ) {
           // TODO: actually do this in a better way
-          div.innerHTML = node.renderedText;
+          div.textContent = node.renderedText;
         }
       }
 
