@@ -11,6 +11,12 @@
     canvas, body,html {
       padding: 0; margin: 0;
     }
+    canvas {
+      display: block;
+    }
+    svg {
+      display: block;
+    }
   </style>
 
 </head>
@@ -21,11 +27,12 @@
 
 <div>
   <script type="text/javascript">
+    var n = 512;
 
     var canvas = document.createElement( 'canvas' );
     var gl = canvas.getContext( 'webgl', { antialias: true } );
-    canvas.width = 512;
-    canvas.height = 256;
+    canvas.width = n;
+    canvas.height = n / 2;
     document.body.appendChild( canvas );
 
     function createShader( source, type ) {
@@ -143,7 +150,7 @@
       +1, +1
     ] ), gl.STATIC_DRAW );
 
-    gl.viewport( 0, 0, 512, 512 );
+    gl.viewport( 0, 0, n, n );
     gl.clearColor( 0, 0, 0, 0 );
     gl.useProgram( program );
 
@@ -151,12 +158,12 @@
 
     var basicCanvas = document.createElement( 'canvas' );
     var context = basicCanvas.getContext( '2d' );
-    basicCanvas.width = 512;
+    basicCanvas.width = n;
     basicCanvas.height = 64;
     document.body.appendChild( basicCanvas );
 
     var svg = document.createElementNS( 'http://www.w3.org/2000/svg', 'svg' );
-    svg.setAttribute( 'width', 512 );
+    svg.setAttribute( 'width', n );
     svg.setAttribute( 'height', 64 );
     svg.style.backgroundColor = 'black';
     document.body.appendChild( svg );
@@ -176,16 +183,16 @@
 
       gl.drawArrays( gl.TRIANGLE_STRIP, 0, 4 );
 
-      context.clearRect( 0, 0, 512, 64 );
+      context.clearRect( 0, 0, n, n/8 );
       context.fillStyle = 'black';
-      context.fillRect( 0, 0, 512, 64 );
+      context.fillRect( 0, 0, n, n/8 );
       context.fillStyle = 'blue';
-      context.fillRect( 512 * ( ( time / 1000 ) % 1 ), 0, 512, 64 );
+      context.fillRect( n * ( ( time / 1000 ) % 1 ), 0, n, n/8 );
 
-      svgRect.setAttribute( 'x', 512 * ( ( time / 1000 ) % 1 ) );
+      svgRect.setAttribute( 'x', n * ( ( time / 1000 ) % 1 ) );
       svgRect.setAttribute( 'y', 0 );
-      svgRect.setAttribute( 'width', 512 );
-      svgRect.setAttribute( 'height', 64 );
+      svgRect.setAttribute( 'width', n );
+      svgRect.setAttribute( 'height', n/8 );
     }
 
     ( function step() {
