@@ -419,7 +419,7 @@ define( function( require ) {
      *
      * See setResize() for more documentation on spacing.
      *
-     * @returns {number}
+     * @returns {boolean}
      */
     isResize: function() {
       return this._resize;
