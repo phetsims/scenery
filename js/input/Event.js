@@ -32,7 +32,7 @@ define( function( require ) {
     assert && assert( trail instanceof Trail, 'Event\'s trail parameter should be a {Trail}' );
     assert && assert( typeof type === 'string', 'Event\'s type should be a {string}' );
     assert && assert( pointer instanceof Pointer, 'Event\'s pointer parameter should be a {Pointer}' );
-    // TODO: add domEvent type assertion
+    // TODO: add domEvent type assertion -- will browsers support this?
 
     // @public {boolean} - Whether this Event has been 'handled'. If so, it will not bubble further.
     this.handled = false;
