@@ -8,7 +8,7 @@
  * - Drag target: The node whose trail is used for coordinate transforms. When a targetNode is specified, it will be the
  *                drag target. Otherwise, whatever was the currentTarget during event bubbling for the event that
  *                triggered press will be used (almost always the node that the listener is added to).
- * - Global coordinate frame: Coordinate frame of the Display (specifically it's rootNode's local coordinate frame),
+ * - Global coordinate frame: Coordinate frame of the Display (specifically its rootNode's local coordinate frame),
  *                            that in some applications will be screen coordinates.
  * - Parent coordinate frame: The parent coordinate frame of our drag target. Basically, it's the coordinate frame
  *                            you'd need to use to set dragTarget.translation = <parent coordinate frame point> for the
@@ -17,7 +17,7 @@
  *                           origin.
  * - Model coordinate frame: Optionally defined by a model-view transform (treating the parent coordinate frame as the
  *                           view). When a transform is provided, it's the coordinate frame needed for setting
- *                           dragModelElement.position = <model cordinate frame point>. If a transform is not provided
+ *                           dragModelElement.position = <model coordinate frame point>. If a transform is not provided
  *                           (or overridden), it will be the same as the parent coordinate frame.
  *
  * The typical coordinate handling of DragListener is to:
@@ -100,8 +100,10 @@ define( function( require ) {
 
     // TODO: type checks for options
 
-    assert && assert( !options.mapLocation || !options.dragBounds,
-      'mapLocation and dragBounds cannot both be provided, as they both handle mapping of the drag point' );
+    assert && assert(
+      !options.mapLocation || !options.dragBounds,
+      'mapLocation and dragBounds cannot both be provided, as they both handle mapping of the drag point'
+    );
 
     PressListener.call( this, options );
 
