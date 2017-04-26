@@ -1390,7 +1390,7 @@ define( function( require ) {
         }
 
         var accessibleContent = null;
-        if ( contentDisplayed ) {
+        if ( contentDisplayed && this._tagName ) {
           accessibleContent = {
             focusHighlight: this._focusHighlight,
             createPeer: function( accessibleInstance ) {
