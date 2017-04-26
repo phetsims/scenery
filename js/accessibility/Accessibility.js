@@ -108,6 +108,7 @@ define( function( require ) {
     'accessibleLabel', // Set the label content for the node, see setAccessibleLabel()
     'accessibleDescription', // Set the description content for the node, see setAccessibleDescription()
     'accessibleHidden', // Sets wheter or not the node's DOM element is hidden in the parallel DOM
+    'accessibleContentDisplayed', // sets whether or not the accessible content of the node (and its subtree) is displayed, see setAccessibleContentDisplayed()
     'focusable', // Sets whether or not the node can receive keyboard focus
     'useAriaLabel', // Sets whether or not the label will use the 'aria-label' attribute, see setUseAriaLabel()
     'ariaRole', // Sets the ARIA role for the DOM element, see setAriaRole() for documentation
@@ -255,6 +256,12 @@ define( function( require ) {
           // read with the virtual cursor see
           // http://www.ssbbartgroup.com/blog/how-windows-screen-readers-work-on-the-web/
           this._accessibleHidden = null;
+
+          // @private {boolean} - Whether or not the accessible content will be hidden from the browser and assistive
+          // technologies.  When accessible content is not displayed, the node will not be focusable, and it cannot
+          // be found by assistive technology with the virtual cursor.  Content should almost always be hidden with 
+          // setAccessibleHidden(), see that function and setAccessibleContentDisplayed() for more information.
+          this._accessibleContentDisplayed = true;
 
           // @private {string} - An id used for the purposes of accessibility.  The accessible id is a string, since
           // the DOM API frequently uses string identifiers to reference other elements in the document.
@@ -1027,6 +1034,38 @@ define( function( require ) {
         get accessibleHidden() { return this.getAccessibleHidden(); },
 
         /**
+         * Sets whether or not the accessible content should be displayed in the DOM. Almost always, setAccessibleHidden
+         * should be used instead of this function.  This should behave exactly like setAccessibleHidden. If removed
+         * from display, content will be removed from focus order and undiscoverable with the virtual cursor. Sometimes,
+         * hidden attribute is not handled the same way across screen readers, so this function can be used to
+         * completely remove the content from the DOM. 
+         * @public 
+         * 
+         * @param {boolean} contentDisplayed
+         */
+        setAccessibleContentDisplayed: function( contentDisplayed ) {
+          this._accessibleContentDisplayed = contentDisplayed;
+
+          for ( var j = 0; j < this._children.length; j++ ) {
+            var child = this._children[ j ];
+            if ( !contentDisplayed ) {
+              child.accessibleContent = null;
+            }
+            else {
+              child.invalidateAccessibleContent();
+            }
+            child.setAccessibleContentDisplayed( contentDisplayed );
+          }
+          this.invalidateAccessibleContent();
+        },
+        set accessibleContentDisplayed( contentDisplayed ) { this.setAccessibleContentDisplayed( contentDisplayed ); },
+        
+        getAccessibleContentDisplayed: function() {
+          return this._accessibleContentDisplayed;
+        },
+        get accessibleContentDisplayed() { return this.getAccessibleContentDisplayed(); },
+
+        /**
          * Set the value of an input element.  Element must be a form element to support the value attribute. The input
          * value is converted to string since input values are generally string for HTML.
          * @public
@@ -1334,6 +1373,7 @@ define( function( require ) {
        * @protected
        */
       function invalidateAccessibleContent() {
+        var self = this;
 
         // clear the parent container if it exists since we will be reinserting labels
         // and the dom element in createPeer
@@ -1341,68 +1381,80 @@ define( function( require ) {
           this._parentContainerElement.removeChild( this._parentContainerElement.lastChild );
         }
 
-        var self = this;
-        this.accessibleContent = {
-          focusHighlight: this._focusHighlight,
-          createPeer: function( accessibleInstance ) {
-
-            // set up the unique id's for the DOM elements associated with this node's accessible content.
-            self._accessibleId = accessibleInstance.trail.getUniqueId();
-            self._domElement.id = self._accessibleId;
-
-            // Call this because the _domElement isn't guaranteed to exist before we call createPeer().
-            if ( self._accessibleHidden !== null ) {
-              self.setAccessibleHidden( self._accessibleHidden );
-            }
-
-            // add DOM event listeners to the dom element
-            for ( var i = 0; i < self._accessibleInputListenersToAdd.length; i++ ) {
-              self.addDOMEventListeners( self._accessibleInputListenersToAdd[ i ] );
-            }
-
-            processRelationDataAttributes.call( self );
-
-            // set up id relations for the label element
-            if ( self._labelElement ) {
-              self._labelElementId = 'label-' + self._accessibleId;
-              self._labelElement.id = self._labelElementId;
-              if ( self._labelTagName.toUpperCase() === LABEL_TAG ) {
-                self._labelElement.setAttribute( 'for', self._accessibleId );
-              }
-            }
-
-            // identify the description element
-            if ( self._descriptionElement ) {
-              self._descriptionElementId = 'description-' + self._accessibleId;
-              self._descriptionElement.id = self._descriptionElementId;
-            }
-
-            // identify the parent container element
-            if ( self._parentContainerElement ) {
-              self._parentContainerElement.id = 'parent-container-' + self._accessibleId;
-
-              // provide the aria-role if it is specified
-              if ( self._parentContainerAriaRole ) {
-                self._parentContainerElement.setAttribute( 'role', self._parentContainerAriaRole );
-              }
-            }
-
-            var accessiblePeer = new AccessiblePeer( accessibleInstance, self._domElement, {
-              parentContainerElement: self._parentContainerElement
-            } );
-
-            // insert the label and description elements in the correct location if they exist
-            self._labelElement && insertContentElement.call( self, self._labelElement );
-            self._descriptionElement && insertContentElement.call( self, self._descriptionElement );
-
-            // now that the ids have been set up, set up relationships for attributes which depend on the
-            // unique ID
-            self._ariaDescribedByElement && addRelationAttribute.call( self, self._ariaDescribedByElement, 'aria-describedby' );
-            self._ariaLabelledByElement && addRelationAttribute.call( self, self._ariaLabelledByElement, 'aria-labelledby' );
-
-            return accessiblePeer;
+        // if any parents are flagged as removed from the accessibility tree, set content to null
+        var contentDisplayed = this._accessibleContentDisplayed;
+        for ( var i = 0; i < this._parents.length; i++ ) {
+          if ( !this._parents[ i ].accessibleContentDisplayed ) {
+            contentDisplayed = false;
           }
-        };
+        }
+
+        var accessibleContent = null;
+        if ( contentDisplayed ) {
+          accessibleContent = {
+            focusHighlight: this._focusHighlight,
+            createPeer: function( accessibleInstance ) {
+
+              // set up the unique id's for the DOM elements associated with this node's accessible content.
+              self._accessibleId = accessibleInstance.trail.getUniqueId();
+              self._domElement.id = self._accessibleId;
+
+              // Call this because the _domElement isn't guaranteed to exist before we call createPeer().
+              if ( self._accessibleHidden !== null ) {
+                self.setAccessibleHidden( self._accessibleHidden );
+              }
+
+              // add DOM event listeners to the dom element
+              for ( var i = 0; i < self._accessibleInputListenersToAdd.length; i++ ) {
+                self.addDOMEventListeners( self._accessibleInputListenersToAdd[ i ] );
+              }
+
+              processRelationDataAttributes.call( self );
+
+              // set up id relations for the label element
+              if ( self._labelElement ) {
+                self._labelElementId = 'label-' + self._accessibleId;
+                self._labelElement.id = self._labelElementId;
+                if ( self._labelTagName.toUpperCase() === LABEL_TAG ) {
+                  self._labelElement.setAttribute( 'for', self._accessibleId );
+                }
+              }
+
+              // identify the description element
+              if ( self._descriptionElement ) {
+                self._descriptionElementId = 'description-' + self._accessibleId;
+                self._descriptionElement.id = self._descriptionElementId;
+              }
+
+              // identify the parent container element
+              if ( self._parentContainerElement ) {
+                self._parentContainerElement.id = 'parent-container-' + self._accessibleId;
+
+                // provide the aria-role if it is specified
+                if ( self._parentContainerAriaRole ) {
+                  self._parentContainerElement.setAttribute( 'role', self._parentContainerAriaRole );
+                }
+              }
+
+              var accessiblePeer = new AccessiblePeer( accessibleInstance, self._domElement, {
+                parentContainerElement: self._parentContainerElement
+              } );
+
+              // insert the label and description elements in the correct location if they exist
+              self._labelElement && insertContentElement.call( self, self._labelElement );
+              self._descriptionElement && insertContentElement.call( self, self._descriptionElement );
+
+              // now that the ids have been set up, set up relationships for attributes which depend on the
+              // unique ID
+              self._ariaDescribedByElement && addRelationAttribute.call( self, self._ariaDescribedByElement, 'aria-describedby' );
+              self._ariaLabelledByElement && addRelationAttribute.call( self, self._ariaLabelledByElement, 'aria-labelledby' );
+
+              return accessiblePeer;
+            }
+          };
+        }
+
+        this.accessibleContent = accessibleContent;
       }
 
       // Patch in a sub-type call if it already exists on the prototype

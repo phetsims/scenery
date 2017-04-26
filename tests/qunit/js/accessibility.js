@@ -282,4 +282,35 @@
 
   } );
 
+  test( 'Remove accessibility subtree', function() {
+    var rootNode = new scenery.Node( { tagName: 'div', focusable: true } );
+    var display = new scenery.Display( rootNode ); // eslint-disable-line
+    document.body.appendChild( display.domElement );
+
+    var a = new scenery.Node( { tagName: 'div', focusable: true, focusHighlight: 'invisible' } );
+    var b = new scenery.Node( { tagName: 'div', focusable: true, focusHighlight: 'invisible' } );
+    var c = new scenery.Node( { tagName: 'div', focusable: true, focusHighlight: 'invisible' } );
+    var d = new scenery.Node( { tagName: 'div', focusable: true, focusHighlight: 'invisible' } );
+    var e = new scenery.Node( { tagName: 'div', focusable: true, focusHighlight: 'invisible' } );
+    var f = new scenery.Node( { tagName: 'div', focusable: true, focusHighlight: 'invisible' } );
+    rootNode.children = [ a, b, c, d, e ];
+    d.addChild( f );
+
+    // verify the dom
+    ok( rootNode.domElement.children.length === 5, 'children added' );
+
+    rootNode.accessibleContentDisplayed = false;
+    ok ( rootNode.domElement.children.length === 0, 'sub tree removed from DOM' );
+    ok ( d.domElement.children.length === 0, 'sub tree removed from DOM' );
+
+    // invalidation should not add content back to the DOM
+    rootNode.tagName = 'button';
+    d.tagName = 'span';
+    ok ( rootNode.domElement.children.length === 0, 'invalidate without addition' );
+
+    rootNode.accessibleContentDisplayed = true;
+    ok( rootNode.domElement.children.length === 5, 'children added back' );
+    ok( d.domElement.children.length === 1, 'descendant child added back' );
+
+  } );
 })();
