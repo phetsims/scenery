@@ -886,7 +886,13 @@ define( function( require ) {
     KEY_SHIFT: 16,
     KEY_ESCAPE: 27,
     KEY_DELETE: 46,
-    KEY_BACKSPACE: 8
+    KEY_BACKSPACE: 8,
+
+    // returns whether or not the keyCode corresponds to pressing an arrow key
+    isArrowKey: function( keyCode ) {
+      return ( keyCode === Input.KEY_RIGHT_ARROW || keyCode === Input.KEY_LEFT_ARROW ||
+               keyCode === Input.KEY_UP_ARROW || keyCode === Input.KEY_DOWN_ARROW );
+    }
   } );
 
   Input.BASIC_EVENT_TYPES = [ 'down', 'up', 'cancel', 'move', 'wheel', 'enter', 'exit', 'over', 'out' ];
