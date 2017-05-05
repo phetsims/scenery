@@ -119,9 +119,16 @@ define( function( require ) {
       else if ( this.node.accessibleContent.focusHighlight instanceof Node ) {
         this.mode = 'node';
 
-        // Use the node itself as the highlight
-        this.nodeHighlight = this.node.accessibleContent.focusHighlight;
-        this.highlightNode.addChild( this.nodeHighlight );
+        // If focusHighlightLayerable, then the focusHighlight is just a node in the scene graph, so set it visible
+        if ( this.node.accessibleContent.focusHighlightLayerable ) {
+          this.node.accessibleContent.focusHighlight.visible = true;
+        }
+        else {
+          this.nodeHighlight = this.node.accessibleContent.focusHighlight;
+
+          // Use the node itself as the highlight
+          this.highlightNode.addChild( this.nodeHighlight );
+        }
       }
       // Bounds mode
       else {
@@ -145,8 +152,15 @@ define( function( require ) {
         this.shapeHighlight.visible = false;
       }
       else if ( this.mode === 'node' ) {
-        this.highlightNode.removeChild( this.nodeHighlight );
-        this.nodeHighlight = null;
+
+        // If focusHighlightLayerable, then the focusHighlight is just a node in the scene graph, so set it invisible
+        if ( this.node.accessibleContent.focusHighlightLayerable ) {
+          this.node.accessibleContent.focusHighlight.visible = false;
+        }
+        else {
+          this.highlightNode.removeChild( this.nodeHighlight );
+          this.nodeHighlight = null;
+        }
       }
       else if ( this.mode === 'bounds' ) {
         this.boundsHighlight.visible = false;

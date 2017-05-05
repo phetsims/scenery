@@ -105,6 +105,7 @@ define( function( require ) {
     'labelTagName', // Sets the tag name for the DOM element labelling this node, usually a paragraph
     'descriptionTagName', // Sets the tag name for the DOM element describing this node, usually a paragraph
     'focusHighlight', // Sets the focus highlight for the node, see setFocusHighlight()
+    'focusHighlightLayerable', // Flag to determine if the focus highlight node can be layered in the scene graph, see setFocusHighlightLayerable()
     'accessibleLabel', // Set the label content for the node, see setAccessibleLabel()
     'accessibleDescription', // Set the description content for the node, see setAccessibleDescription()
     'accessibleHidden', // Sets wheter or not the node's DOM element is hidden in the parallel DOM
@@ -870,6 +871,28 @@ define( function( require ) {
         get focusHighlight() { return this.getFocusHighlight(); },
 
         /**
+         * Setting a flag to break default and allow the focus highlight to be (z) layered into the scene graph.
+         * TODO: We may want to eventually handle the case of setting this flag while the node is currently focused.
+         * @param {Boolean} focusHighlightLayerable
+         */
+        setFocusHighlightLayerable: function( focusHighlightLayerable ) {
+          this._focusHighlightLayerable = focusHighlightLayerable;
+          this.invalidateAccessibleContent();
+        },
+        set focusHighlightLayerable( focusHighlightLayerable ) { this.setFocusHighlightLayerable( focusHighlightLayerable ); },
+
+        /**
+         * Get the flag for if this node is layerable in the scene graph (or if it is always on top, like the default).
+         * @public
+         *
+         * @returns {Boolean}
+         */
+        getFocusHighlightLayerable: function() {
+          return this._focusHighlightLayerable;
+        },
+        get focusHighlightLayerable() { return this.getFocusHighlightLayerable(); },
+
+        /**
          * Get the description element that holds the description content for this node.
          * @public
          *
@@ -1038,9 +1061,9 @@ define( function( require ) {
          * should be used instead of this function.  This should behave exactly like setAccessibleHidden. If removed
          * from display, content will be removed from focus order and undiscoverable with the virtual cursor. Sometimes,
          * hidden attribute is not handled the same way across screen readers, so this function can be used to
-         * completely remove the content from the DOM. 
-         * @public 
-         * 
+         * completely remove the content from the DOM.
+         * @public
+         *
          * @param {boolean} contentDisplayed
          */
         setAccessibleContentDisplayed: function( contentDisplayed ) {
@@ -1059,7 +1082,7 @@ define( function( require ) {
           this.invalidateAccessibleContent();
         },
         set accessibleContentDisplayed( contentDisplayed ) { this.setAccessibleContentDisplayed( contentDisplayed ); },
-        
+
         getAccessibleContentDisplayed: function() {
           return this._accessibleContentDisplayed;
         },
@@ -1192,7 +1215,7 @@ define( function( require ) {
          * @public
          */
         focus: function() {
-          assert && assert( this._domElement.tabIndex !== -1 , 'trying to set focus on a node that is not focusable' );
+          assert && assert( this._domElement.tabIndex !== -1, 'trying to set focus on a node that is not focusable' );
           assert && assert( !this._accessibleHidden, 'trying to set focus on a node with hidden accessible content' );
 
           // make sure that the element is in the navigation order
@@ -1203,7 +1226,7 @@ define( function( require ) {
          * Remove focus from this DOM element.  The focus highlight will dissapear, and the element will not receive
          * keyboard events when it doesn't have focus.
          * @public
-         * 
+         *
          * REVIEW: At call sites, it is not clear that this is related to accessibility.  Consider prepending with
          * 'accessible' or something else to clarify
          */
@@ -1228,7 +1251,7 @@ define( function( require ) {
        * If the text content uses formatting tags, set the content as innerHTML. Otherwise, set as textContent.
        * In general, textContent is more secure and more performant because it doesn't trigger DOM styling and
        * element insertions.
-       * 
+       *
        * @param {HTMLElement} domElement
        * @param {string} textContent
        */
@@ -1281,8 +1304,8 @@ define( function( require ) {
       /**
        * Create an HTML element.  Unless this is a form element or explicitly marked as focusable, add a negative
        * tab index. IE gives all elements a tabIndex of 0 and handles tab navigation internally, so this marks
-       * which elements should not be in the focus order. 
-       * 
+       * which elements should not be in the focus order.
+       *
        * @param  {string} tagName
        * @param {boolean} focusable - should the element be explicitly added to the focus order?
        * @returns {HTMLElement} [description]
@@ -1291,7 +1314,7 @@ define( function( require ) {
         var domElement = document.createElement( tagName );
 
         if ( !_.includes( FORM_ELEMENTS, tagName.toUpperCase() ) && !focusable ) {
-          domElement.tabIndex = -1;          
+          domElement.tabIndex = -1;
         }
 
         return domElement;
@@ -1393,6 +1416,7 @@ define( function( require ) {
         if ( contentDisplayed && this._tagName ) {
           accessibleContent = {
             focusHighlight: this._focusHighlight,
+            focusHighlightLayerable: this._focusHighlightLayerable,
             createPeer: function( accessibleInstance ) {
 
               // set up the unique id's for the DOM elements associated with this node's accessible content.
@@ -1448,6 +1472,11 @@ define( function( require ) {
               // unique ID
               self._ariaDescribedByElement && addRelationAttribute.call( self, self._ariaDescribedByElement, 'aria-describedby' );
               self._ariaLabelledByElement && addRelationAttribute.call( self, self._ariaLabelledByElement, 'aria-labelledby' );
+
+              // Default the focus highlight in this special case to be invisible until selected.
+              if ( self._focusHighlightLayerable ) {
+                self._focusHighlight.visible = false;
+              }
 
               return accessiblePeer;
             }
