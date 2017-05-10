@@ -1697,7 +1697,10 @@ define( function( require ) {
   // By passing the tandem and phetioValueType, PhET-iO is able to interoperate (save/restore/control/observe) the focus rectangle
   // When focused, the value has this type: { display: {Display}, trail: {Trail} }
   Display.focusProperty = new Property( null, {
-    tandem: Tandem.createRootTandem().createTandem( 'display' ).createTandem( 'focusProperty' ),
+
+    // Make this a static tandem so that it can be added to instance proxies correctly (batched and then flushed when the
+    // listener is added).
+    tandem: Tandem.createRootTandem().createTandem( 'display' ).createTandem( 'focusProperty', { static: true } ),
     phetioValueType: TFocus
   } );
 
