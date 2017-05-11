@@ -3124,7 +3124,7 @@ define( function( require ) {
 
     /**
      * Sets the accessible content for a Node. See constructor for more information.
-     * @public
+     * @public (scenery-internal)
      *
      * @param {null|Object} accessibleContent
      */
@@ -3151,9 +3151,10 @@ define( function( require ) {
 
     /**
      * Returns the accessible content for this node.
-     * @public
+     * @public (scenery-internal)
      *
-     * @returns {Array.<Node>|null}
+     *
+     * @returns {null|Object}
      */
     getAccessibleContent: function() {
       return this._accessibleContent;

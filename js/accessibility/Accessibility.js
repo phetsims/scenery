@@ -459,14 +459,16 @@ define( function( require ) {
          * @param {string} tagName
          */
         setTagName: function( tagName ) {
-          assert && assert( typeof tagName === 'string' );
+          assert && assert( tagName === null || typeof tagName === 'string' );
 
           this._tagName = tagName;
-          this._domElement = createElement( tagName, this._focusable );
+          if ( tagName ) {
+            this._domElement = createElement( tagName, this._focusable );
 
-          // Safari requires that certain input elements have width, otherwise it will not be keyboard accessible
-          if ( _.includes( ELEMENTS_REQUIRE_WIDTH, tagName.toUpperCase() ) ) {
-            this._domElement.style.width = '1px';
+            // Safari requires that certain input elements have width, otherwise it will not be keyboard accessible
+            if ( _.includes( ELEMENTS_REQUIRE_WIDTH, tagName.toUpperCase() ) ) {
+              this._domElement.style.width = '1px';
+            }
           }
 
           this.invalidateAccessibleContent();
@@ -1176,10 +1178,11 @@ define( function( require ) {
          * @param {boolean} isFocusable
          */
         setFocusable: function( isFocusable ) {
-          assert && assert( this._domElement, 'node requires a dom element to focus. Use setTagName()' );
-
           this._focusable = isFocusable;
-          this._domElement.tabIndex = isFocusable ? 0 : -1;
+
+          if ( this._domElement ) {
+            this._domElement.tabIndex = isFocusable ? 0 : -1;
+          }
         },
         set focusable( isFocusable ) { this.setFocusable( isFocusable ); },
 
@@ -1476,6 +1479,11 @@ define( function( require ) {
               // Default the focus highlight in this special case to be invisible until selected.
               if ( self._focusHighlightLayerable ) {
                 self._focusHighlight.visible = false;
+              }
+
+              // if we created a new DOM element, update whether or not it can receive focus
+              if ( self._focusable ) {
+                self.setFocusable( self._focusable );
               }
 
               return accessiblePeer;
