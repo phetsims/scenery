@@ -1480,6 +1480,20 @@ define( function( require ) {
       return this._picker.hitTest( pointer.point, pointer.isMouse, pointer.isTouch || pointer.isPen );
     },
 
+    /**
+     * Hit tests the given point, optionally using mouse and touch areas.
+     * @public
+     *
+     * @param {Vector2} point - the point to hit test
+     * @param {boolean} isMouse - true if mouse areas should be hit
+     * @param {boolean} isTouch - true if touch areas should be hit
+     *
+     * @returns {Trail|null}
+     */
+    hitTest: function( point, isMouse, isTouch ) {
+      return this._picker.hitTest( point, isMouse, isTouch );
+    },
+
     /*
      * Return a trail to the top node (if any, otherwise null) whose self-rendered area contains the
      * point (in parent coordinates).
