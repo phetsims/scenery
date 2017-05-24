@@ -348,14 +348,18 @@ define( function( require ) {
           var self = this;
 
           // event changes the input value, wrap the listener with a function that will handle this
-          var addedAccessibleInput = {};
-          for ( var event in accessibleInput ) {
-            if ( accessibleInput.hasOwnProperty( event ) ) {
-              addedAccessibleInput[ event ] = accessibleInput[ event ];
-              if ( _.includes( INPUT_CHANGE_EVENTS, event ) ) {
-                addedAccessibleInput[ event ] = function( e ) {
-                  self._inputValue = e.target.value;
-                  accessibleInput[ e.type ]();
+          var addedAccessibleInput = accessibleInput;
+          for ( var ev in accessibleInput ) {
+            if ( accessibleInput.hasOwnProperty( ev ) ) {
+              addedAccessibleInput[ ev ] = accessibleInput[ ev ];
+
+              if ( _.includes( INPUT_CHANGE_EVENTS, ev ) ) {
+
+                // store so that we don't call the listener recursively
+                var listenerFunction = accessibleInput[ ev ];
+                addedAccessibleInput[ ev ] = function() {
+                    self._inputValue = event.target.value;
+                    listenerFunction();
                 };
               }
             }
