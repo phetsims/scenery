@@ -887,6 +887,13 @@ define( function( require ) {
     KEY_ESCAPE: 27,
     KEY_DELETE: 46,
     KEY_BACKSPACE: 8,
+    KEY_S: 83,
+    KEY_W: 87,
+    KEY_A: 65,
+    KEY_D: 68,
+    KEY_J: 74,
+    KEY_C: 67,
+    KEY_N: 78,
 
     // returns whether or not the keyCode corresponds to pressing an arrow key
     isArrowKey: function( keyCode ) {
