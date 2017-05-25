@@ -97,6 +97,9 @@ define( function( require ) {
   // these events change the input value on the dom element
   var INPUT_CHANGE_EVENTS = [ 'input', 'change' ];
 
+  // valid types of DOM events that can be added to a node
+  var DOM_EVENTS = [ 'input', 'change', 'click', 'keydown', 'keyup', 'focus', 'blur' ];
+
   var ACCESSIBILITY_OPTION_KEYS = [
     'tagName', // Sets the tag name for the DOM element representing this node in the parallel DOM
     'inputType', // Sets the input type for the representative DOM element, only relevant if tagname is 'input'
@@ -307,7 +310,7 @@ define( function( require ) {
           assert && assert( listenerIndex >= 0, 'listener must have been in self._accessibleInputListenersToAdd' );
 
           for ( var event in accessibleInput ) {
-            if ( accessibleInput.hasOwnProperty( event ) ) {
+            if ( accessibleInput.hasOwnProperty( event ) && _.includes( DOM_EVENTS, event ) ) {
               self._domElement.addEventListener( event, accessibleInput[ event ] );
             }
           }
@@ -328,7 +331,7 @@ define( function( require ) {
 
           assert && assert( this._domElement, 'dom element must be defined to remove event listeners' );
           for ( var event in accessibleInput ) {
-            if ( accessibleInput.hasOwnProperty( event ) ) {
+            if ( accessibleInput.hasOwnProperty( event ) && _.includes( DOM_EVENTS, event ) ) {
               self._domElement.removeEventListener( event, accessibleInput[ event ] );
             }
           }
