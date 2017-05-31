@@ -360,7 +360,7 @@ define( function( require ) {
 
                 // store so that we don't call the listener recursively
                 var listenerFunction = accessibleInput[ ev ];
-                addedAccessibleInput[ ev ] = function() {
+                addedAccessibleInput[ ev ] = function( event ) {
                     self._inputValue = event.target.value;
                     listenerFunction();
                 };
