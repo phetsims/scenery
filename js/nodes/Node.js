@@ -1262,10 +1262,9 @@ define( function( require ) {
      */
     hasChild: function( potentialChild ) {
       assert && assert( potentialChild && ( potentialChild instanceof Node ), 'hasChild needs to be called with a Node' );
-      var ourChild = _.includes( this._children, potentialChild );
-      var itsParent = _.includes( potentialChild._parents, this );
-      assert && assert( ourChild === itsParent );
-      return ourChild;
+      var isOurChild = _.includes( this._children, potentialChild );
+      assert && assert( isOurChild === _.includes( potentialChild._parents, this ), 'child-parent reference should match parent-child reference' );
+      return isOurChild;
     },
 
     /**
