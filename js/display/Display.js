@@ -152,6 +152,8 @@ define( function( require ) {
     // TODO: don't store the options, it's an anti-pattern.
     this.options = options; // @private
 
+    this._allowWebGL = options.allowWebGL;
+
     // The (integral, > 0) dimensions of the Display's DOM element (only updates the DOM element on updateDisplay())
     this._size = new Dimension2( this.options.width, this.options.height );
     this._currentSize = new Dimension2( -1, -1 ); // used to check against new size to see what we need to change

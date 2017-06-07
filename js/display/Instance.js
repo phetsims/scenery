@@ -39,8 +39,6 @@ define( function( require ) {
 
   var globalIdCounter = 1;
 
-  var isWebGLSupported = Util.isWebGLSupported;
-
   // preferences top to bottom in general
   var defaultPreferredRenderers = Renderer.createOrderBitmask(
     Renderer.bitmaskSVG, Renderer.bitmaskCanvas, Renderer.bitmaskDOM, Renderer.bitmaskWebGL );
@@ -82,6 +80,8 @@ define( function( require ) {
       trail.setImmutable();
 
       this.id = this.id || globalIdCounter++;
+
+      this.isWebGLSupported = display._allowWebGL && Util.isWebGLSupported;
 
       // {RelativeTransform}, provides high-performance access to 'relative' transforms (from our nearest
       // transform root), and allows for listening to when our relative transform changes (called during
@@ -352,7 +352,7 @@ define( function( require ) {
           if ( this.isSharedCanvasCacheRoot ) {
             this.isSharedCanvasCacheSelf = true;
 
-            this.sharedCacheRenderer = isWebGLSupported ? Renderer.bitmaskWebGL : Renderer.bitmaskCanvas;
+            this.sharedCacheRenderer = this.isWebGLSupported ? Renderer.bitmaskWebGL : Renderer.bitmaskCanvas;
           }
           else {
             // everything underneath needs to guarantee that its bounds are valid
@@ -367,7 +367,7 @@ define( function( require ) {
         else {
           this.isInstanceCanvasCache = true;
           this.isUnderCanvasCache = true;
-          this.groupRenderer = isWebGLSupported ? Renderer.bitmaskWebGL : Renderer.bitmaskCanvas;
+          this.groupRenderer = this.isWebGLSupported ? Renderer.bitmaskWebGL : Renderer.bitmaskCanvas;
         }
       }
 
@@ -377,7 +377,7 @@ define( function( require ) {
         }
         else {
           var supportedNodeBitmask = this.node._rendererBitmask;
-          if ( !isWebGLSupported ) {
+          if ( !this.isWebGLSupported ) {
             var invalidBitmasks = Renderer.bitmaskWebGL;
             supportedNodeBitmask = supportedNodeBitmask ^ ( supportedNodeBitmask & invalidBitmasks );
           }
