@@ -1046,7 +1046,7 @@ define( function( require ) {
    * @returns {Rectangle}
    */
   Rectangle.bounds = function( bounds, options ) {
-    return new Rectangle( bounds.minX, bounds.minY, bounds.width, bounds.height, 0, 0, options );
+    return new Rectangle( bounds.minX, bounds.minY, bounds.width, bounds.height, options );
   };
 
   /**
