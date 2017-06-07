@@ -41,6 +41,7 @@ define( function( require ) {
     this.focusDisplay = new scenery.Display( this.focusRootNode, {
       width: this.width,
       height: this.height,
+      allowWebGL: display._allowWebGL,
       allowCSSHacks: false,
       accessibility: false,
       isApplication: false,
