@@ -63,16 +63,9 @@ define( function( require ) {
   var AccessibilityUtil = require( 'SCENERY/accessibility/AccessibilityUtil' );
   var AccessiblePeer = require( 'SCENERY/accessibility/AccessiblePeer' );
 
-  // constants
-  var globalListItemCounter = 0;
-
-  // type flag, ELEMENT_NODE isn't defined on HTMLElement in Safari
-  var ELEMENT_NODE = HTMLElement.ELEMENT_NODE || HTMLElement.prototype.ELEMENT_NODE;
-
   // specific HTML tag names
   var INPUT_TAG = 'INPUT';
   var LABEL_TAG = 'LABEL';
-  var UNORDERED_LIST_TAG = 'UL';
   var BUTTON_TAG = 'BUTTON';
   var TEXTAREA_TAG = 'TEXTAREA';
   var SELECT_TAG = 'SELECT';
@@ -89,10 +82,6 @@ define( function( require ) {
 
   // these elements require a minimum width to be visible in Safari
   var ELEMENTS_REQUIRE_WIDTH = [ INPUT_TAG, A_TAG ];
-
-  // these custom attributes flag that the DOM element needs special handling during invalidation
-  var DATA_FLAG = 'data-';
-  var RELATION_ATTRIBUTES = [ 'aria-labelledby', 'aria-describedby' ];
 
   // these events change the input value on the dom element
   var INPUT_CHANGE_EVENTS = [ 'input', 'change' ];
@@ -181,21 +170,6 @@ define( function( require ) {
           // @private {string} - the value of the input, only relevant if the tag name is of type "INPUT".
           this._inputValue = null;
 
-          // @private {HTMLElement} - the HTML element representing this node in the DOM.
-          this._domElement = null;
-
-          // @private {HTMLElement} - the HTML element that contains label content for this node in the DOM. There
-          // are ways to create labels without the label element, see setAccessibleLabel() for more information.
-          this._labelElement = null;
-
-          // @private {HTMLElement} - the HTML element that contains the description content for this node in the DOM.
-          this._descriptionElement = null;
-
-          // @private {HTMLElement} - the HTML element that will contain this node's DOM element, and possibly its peer
-          // description and label elements.  This element will let you structure the label/description content above
-          // or below this node's DOM element.  see setParentContainerTagName() and setPrependLabels()
-          this._parentContainerElement = null;
-
           // @private {boolean} - determines whether or not labels should be prepended above the node's DOM element. This
           // should only be used if the element has a parentContainerElement, as the labels are sorted relative to the
           // node's DOM element under the parent container.
@@ -229,19 +203,29 @@ define( function( require ) {
           // possible.
           this._parentContainerAriaRole = null;
 
-          // @private {string} - the HTML element that will act as the description for this node's
-          // DOM element. The id is added to this node's DOM element with the 'aria-describedby' attribute.
-          // The description element can be anywhere in the document.  The behavior for aria-describedby is such that
-          // content under the description element will be read whenever the element with the aria-describedby attribute
-          // receives focus.
-          this._ariaDescribedByElement = null;
+          // @private {Node} - Another node that is described by this node.  The accessible id of this node will be
+          // added as the value of the "aria-describedby" accessible attribute.  The other node can be anywhere in
+          // the scene graph.  The behavior for "aria-describedby" is such when the other node receives focus,
+          // the accessible content under this node will be read (after any label content). Use with
+          // this._ariaDescribesAssociation to limit the amount of content under this node that describes the other
+          // node.
+          this._ariaDescribesNode = null;
 
-          // @private {string} - the HTML element that will act as the label for this node's
-          // DOM element. The id is added to this node's DOM element as the 'aria-labelledby' attribute.
-          // The label element can be anywhere in the document.  The behavior for aria-labelledby is such
-          // that the content under the label element will be read whenever the element with the aria-labelledby
-          // attribute receives focus.  There are multiple ways to add a label to a node, see setAccessibleLabel().
-          this._ariaLabelledByElement = null;
+          // @private {string} - Limitation on how much of the accessible content will describe this._ariaDescribesNode.
+          // The describing content can be all the content, or just the description, label, or parent container.
+          // AccessiblePeer.NODE is all of the accessible content, see AccessiblePeer for the other flags.
+          this._ariaDescribesAssociation = AccessiblePeer.NODE;
+
+          // @private - Another node that is labelled by this node.  The id of this node's accessible content
+          // will be added as the value of the "aria-labelledby" accessible attribute. The other node can be anywhere in
+          // the scene graph.  The behavior for "aria-labelledby" is such that when the other node receives focus, the
+          // accessible content under this node will be read (before any description content).
+          this._ariaLabelsNode = null;
+
+          // @private {string} - Limitation on how much of the accessible content will label this._ariaLabelsNode.
+          // The describing content can be all the content, or just the description, label, or parent container.
+          // AccessiblePeer.NODE is all of this node's accessible content, see AccessiblePeer for the other flags.
+          this._ariaLabelsAssociation = AccessiblePeer.NODE;
 
           // @private {boolean} - whether or not this node's DOM element can receive focus from tab navigation.
           // Sets the tabIndex attribute on the node's DOM element.  Setting to false will not remove the node's DOM
@@ -253,6 +237,11 @@ define( function( require ) {
           // is focussed.  By default, the focus highlight will be a pink rectangle that surrounds the Node's local
           // bounds.
           this._focusHighlight = null;
+
+          // @private {boolean} - A flag that allows prevents focus highlight from being displayed in the FocusOverlay.
+          // If true, the focus highlight for this node will be layerable in the scene graph.  Client is responsible
+          // for placement of the focus highlight in the scene graph.
+          this._focusHighlightLayerable = false;
 
           // @private {boolean} - Whether or not the accessible content will be hidden from the browser and assistive
           // technologies.  When accessibleHidden is true, the node's DOM element will not be focusable, and it cannot
@@ -267,82 +256,15 @@ define( function( require ) {
           // setAccessibleHidden(), see that function and setAccessibleContentDisplayed() for more information.
           this._accessibleContentDisplayed = true;
 
-          // @private {string} - An id used for the purposes of accessibility.  The accessible id is a string, since
-          // the DOM API frequently uses string identifiers to reference other elements in the document.
-          // The accessible id will be null until all instancess have been added to the instance tree. Each instance
-          // must have a unique id or else the document would contain duplicate ids.
-          this._accessibleId = null;
-
-          // @private {string} - An id used to reference the label element.  This will only be defined if a label
-          // element exists, see setLabelTagName() for the ways a label can be added.  This is useful for setting
-          // attributes on the DOM element relative to the label element such as "aria-labelledby".
-          this._labelElementId = null;
-
-          // @private {string} - An id used to reference the description element.  This will only be defined if a
-          // description exists, set setDescriptionTagName().  This is useful for setting attributes on this node's
-          // DOM element relative to the description element, such as "aria-describedby".
-          this._descriptionElementId = null;
-
           // @private {Array.<Function>} - For accessibility input handling {keyboard/click/HTML form}
           this._accessibleInputListeners = [];
-
-          // @private {Array.<Function>} - Accessibility input listeners that need to be added to the DOM element, see
-          // addDOMEventListeners(). Once added, the listener will be moved to this._accessibleInputListeners.
-          this._accessibleInputListenersToAdd = [];
-
         },
 
         /**
-         * Add DOM event listeners contained in the accessibleInput directly to the DOM element. Never to be used
-         * directly, see addAccessibilityInputListener().
-         * @private
-         *
-         * REVIEW: In general, functions like this shouldn't mutate the object provided. Currently,
-         * calling it on two consecutive nodes will double-wrap the listener. A typical pattern would be to return an
-         * object with the actually-added listeners, so that they could be removed with removeDOMEventListeners.
-         *
-         * @param {Object} accessibleInput
-         */
-        addDOMEventListeners: function( accessibleInput ) {
-          var self = this;
-
-          var listenerIndex = self._accessibleInputListenersToAdd.indexOf( accessibleInput );
-          assert && assert( listenerIndex >= 0, 'listener must have been in self._accessibleInputListenersToAdd' );
-
-          for ( var event in accessibleInput ) {
-            if ( accessibleInput.hasOwnProperty( event ) && _.includes( DOM_EVENTS, event ) ) {
-              self._domElement.addEventListener( event, accessibleInput[ event ] );
-            }
-          }
-
-          self._accessibleInputListenersToAdd.splice( listenerIndex, 1 );
-          self._accessibleInputListeners.push( accessibleInput );
-        },
-
-        /**
-         * Remove a DOM event listener contained in an accesssibleInput.  Never to be used directly, see
-         * removeAccessibilityInputListener().
-         * @private
-         *
-         * @param {Object} accessibleInput
-         */
-        removeDOMEventListeners: function( accessibleInput ) {
-          var self = this;
-
-          assert && assert( this._domElement, 'dom element must be defined to remove event listeners' );
-          for ( var event in accessibleInput ) {
-            if ( accessibleInput.hasOwnProperty( event ) && _.includes( DOM_EVENTS, event ) ) {
-              self._domElement.removeEventListener( event, accessibleInput[ event ] );
-            }
-          }
-        },
-
-        /**
-         * Adds an accessible input listener.
+         * Adds an accessible input listener. The listener's keys should be DOM event names, and the values should be
+         * functions to be called when that event is fired on the dom element.
          * @public
-         *
-         * The listener's keys should be DOM event names, and the values should be functions to be called when that
-         * event is fired on the dom element.
+         * 
          *
          * @param {Object} listener
          * @returns {Object} - the actually added listener, so it can be removed via removeAccessibleInputListener
@@ -368,15 +290,15 @@ define( function( require ) {
             }
           }
 
-          // don't allow listeners to be added multiple times
-          // REVIEW: Presumably passing an already-existing listener would be an assertion failure?
           var listenerAlreadyAdded = ( _.indexOf( this._accessibleInputListeners, addedAccessibleInput ) > 0 );
-          var listenerWillBeAdded = ( _.indexOf( this._accessibleInputListenersToAdd, addedAccessibleInput ) > 0 );
-          if ( !listenerAlreadyAdded && !listenerWillBeAdded ) {
-            this._accessibleInputListenersToAdd.push( addedAccessibleInput );
-          }
+          assert && assert( !listenerAlreadyAdded, 'accessibleInput listener already added' );
 
-          this.invalidateAccessibleContent();
+          // add the listener directly to any AccessiblePeers that are representing this node
+          this._accessibleInputListeners.push( addedAccessibleInput );
+          this.updateAccessiblePeers( function( accessiblePeer ) {
+            self.addDOMEventListeners( addedAccessibleInput, accessiblePeer.domElement );
+          } );
+
           return addedAccessibleInput;
         },
 
@@ -391,23 +313,15 @@ define( function( require ) {
 
           // ensure the listener is in our list, or will be added in invalidation
           var addedIndex = _.indexOf( this._accessibleInputListeners, accessibleInput );
-          var toBeAddedIndex = _.indexOf( this._accessibleInputListenersToAdd, accessibleInput );
-          var listenerAdded = addedIndex > -1;
-          var listenerToBeAdded = toBeAddedIndex > -1;
-          assert && assert( listenerAdded || listenerToBeAdded, 'accessibleInput was not added' );
+          assert && assert( addedIndex > -1, 'accessibleInput listener was not added' );
 
-          if ( listenerAdded ) {
-            this._accessibleInputListeners.splice( addedIndex, 1 );
+          this._accessibleInputListeners.splice( addedIndex, 1 );
 
-            // remove the event listeners from the DOM element
-            this.removeDOMEventListeners( accessibleInput );
-            this.invalidateAccessibleContent();
-          }
-          else {
-
-            // listener hasn't been added yet, remove from list of listeners to add
-            this._accessibleInputListenersToAdd.splice( toBeAddedIndex, 1 );
-          }
+          // remove the event listeners from any peers
+          var self = this;
+          this.updateAccessiblePeers( function( accessiblePeer ) {
+            self.removeDOMEventListeners( accessibleInput, accessiblePeer.domElement );
+          } );
 
           return this;
         },
@@ -433,12 +347,13 @@ define( function( require ) {
          * @returns {string}
          */
         getAccessibleId: function() {
-          return this._accessibleId;
+          throw new Error( 'Please do not use getAccessibleId anymore' );
         },
         get accessibleId() { return this.getAccessibleId(); },
 
         /**
-         * Get HTML element representing this node in the document.
+         * Get HTML element representing this node in the document. Note that this will error if there
+         * are more than one accessible instances because the DOM element is not uniquely defined.
          * @public
          *
          * REVIEW: How can this guarantee it is an HTMLElement, when it is initialized as null?
@@ -447,7 +362,7 @@ define( function( require ) {
          * @returns {HTMLElement}
          */
         getDomElement: function() {
-          return this._domElement;
+          throw new Error( 'Please do not use getDomElement anymore' );
         },
         get domElement() { return this.getDomElement(); },
 
@@ -469,15 +384,6 @@ define( function( require ) {
           assert && assert( tagName === null || typeof tagName === 'string' );
 
           this._tagName = tagName;
-          if ( tagName ) {
-            this._domElement = createElement( tagName, this._focusable );
-
-            // Safari requires that certain input elements have width, otherwise it will not be keyboard accessible
-            if ( _.includes( ELEMENTS_REQUIRE_WIDTH, tagName.toUpperCase() ) ) {
-              this._domElement.style.width = '1px';
-            }
-          }
-
           this.invalidateAccessibleContent();
         },
         set tagName( tagName ) { this.setTagName( tagName ); },
@@ -510,17 +416,12 @@ define( function( require ) {
          *
          * REVIEW: null used in unit tests, so this should be marked as accepting null
          *
-         * @param {string} tagName
+         * @param {string|null} tagName
          */
         setLabelTagName: function( tagName ) {
+          assert && assert( tagName === null || typeof tagName === 'string' );
+
           this._labelTagName = tagName;
-          this._labelElement = null;
-
-          // REVIEW: Is null supported, or is this meant to check for empty strings?
-          if ( tagName ) {
-            this._labelElement = createElement( tagName, false );
-          }
-
           this.invalidateAccessibleContent();
         },
         set labelTagName( tagName ) { this.setLabelTagName( tagName ); },
@@ -548,14 +449,9 @@ define( function( require ) {
          * @param {string} tagName
          */
         setDescriptionTagName: function( tagName ) {
+          assert && assert( tagName === null || typeof tagName === 'string' );
+
           this._descriptionTagName = tagName;
-          this._descriptionElement = null;
-
-          // REVIEW: Is null supported, or is this meant to check for empty strings?
-          if ( tagName ) {
-            this._descriptionElement = createElement( tagName, false );
-          }
-
           this.invalidateAccessibleContent();
         },
         set descriptionTagName( tagName ) { this.setDescriptionTagName( tagName ); },
@@ -581,7 +477,9 @@ define( function( require ) {
           assert && assert( this._tagName.toUpperCase() === INPUT_TAG, 'tag name must be INPUT to support inputType' );
 
           this._inputType = inputType;
-          this._domElement.type = inputType;
+          this.updateAccessiblePeers( function( accessiblePeer ) {
+            accessiblePeer.domElement.type = inputType;
+          } );
         },
         set inputType( inputType ) { this.setInputType( inputType ); },
 
@@ -612,14 +510,14 @@ define( function( require ) {
          * @param {boolean} prependLabels
          */
         setPrependLabels: function( prependLabels ) {
-
-          // if there isn't a parent container element, create one so labels can be prepended
-          if ( !this._parentContainerElement ) {
-            this.parentContainerTagName = 'div';
-          }
-
           this._prependLabels = prependLabels;
 
+          // if there isn't a parent container element, create one so labels can be prepended
+          if ( !this._parentContainerTagName ) {
+            this.setParentContainerTagName( 'div' );
+          }
+
+          // TODO: can we do this without recomputing everything?
           this.invalidateAccessibleContent();
         },
         set prependLabels( prependLabels ) { this.setPrependLabels( prependLabels ); },
@@ -650,9 +548,9 @@ define( function( require ) {
          * @param {string} tagName
          */
         setParentContainerTagName: function( tagName ) {
-          this._parentContainerTagName = tagName;
-          this._parentContainerElement = createElement( tagName, false /* not focusable */ );
+          assert && assert( tagName === null || typeof tagName === 'string' );
 
+          this._parentContainerTagName = tagName;
           this.invalidateAccessibleContent();
         },
         set parentContainerTagName( tagName ) { this.setParentContainerTagName( tagName ); },
@@ -674,7 +572,7 @@ define( function( require ) {
          * @returns {HTMLElement|null}
          */
         getParentContainerElement: function() {
-          return this._parentContainerElement;
+          throw new Error( 'Please stop using getParentContainerElement' );
         },
         get parentContainerElement() { return this.getParentContainerElement(); },
 
@@ -699,18 +597,24 @@ define( function( require ) {
             this.setAccessibleAttribute( 'aria-label', this._accessibleLabel );
           }
           else if ( this._labelTagName ) {
-            assert && assert( this._labelElement, 'label element must have been created' );
+            var self = this;
+            this.updateAccessiblePeers( function( accessiblePeer ) {
+              if ( accessiblePeer.labelElement ) {
+                setTextContent( accessiblePeer.labelElement, self._accessibleLabel );
 
-            // the remaining methods require a new DOM element
-            setTextContent( this._labelElement, this._accessibleLabel );
-
-            // if using a label element it must point to the dom element
-            if ( this._labelTagName.toUpperCase() === LABEL_TAG ) {
-              this.invalidateAccessibleContent();
-            }
+                // if the label element happens to be a 'label', associate with 'for' attribute
+                if ( self._labelTagName.toUpperCase() === LABEL_TAG ) {
+                  accessiblePeer.labelElement.setAttribute( 'for', accessiblePeer.domElement.id );
+                }
+              }
+            } );
           }
-          else if ( elementSupportsInnerHTML( this._domElement ) ) {
-            setTextContent( this._domElement, this._accessibleLabel );
+          else {
+            this.updateAccessiblePeers( function( accessiblePeer ) {
+              if ( elementSupportsInnerHTML( accessiblePeer.domElement ) ) {
+                setTextContent( accessiblePeer.domElement, label );
+              }
+            } );
           }
         },
         set accessibleLabel( label ) { this.setAccessibleLabel( label ); },
@@ -736,10 +640,13 @@ define( function( require ) {
           this._accessibleDescription = textContent;
 
           // if there is no description element, assume that a paragraph element should be used
-          if ( !this.descriptionElement ) {
+          if ( !this._descriptionTagName ) {
             this.setDescriptionTagName( 'p' );
           }
-          setTextContent( this._descriptionElement, this._accessibleDescription );
+
+          this.updateAccessiblePeers( function( accessiblePeer ) {
+            setTextContent( accessiblePeer.descriptionElement, textContent );
+          } );
         },
         set accessibleDescription( textContent ) { this.setAccessibleDescription( textContent ); },
 
@@ -818,20 +725,25 @@ define( function( require ) {
          */
         setUseAriaLabel: function( useAriaLabel ) {
           this._useAriaLabel = useAriaLabel;
-          if ( this._labelElement ) {
 
-            // if we previously had a label element, remove it
-            this._labelElement.parentNode && this._labelElement.parentNode.removeChild( this._labelElement );
-            this._labelElement = null;
-            this._labelTagName = null;
+          var self = this;
+
+          if ( useAriaLabel && this._labelTagName ) {
+            self.setLabelTagName( null );
           }
+          this.updateAccessiblePeers( function( accessiblePeer ) {
+            if ( accessiblePeer.labelElement ) {
+
+              // if we previously had a label element, remove it
+              self.setLabelTagName( null );
+              accessiblePeer.labelElement.parentNode && accessiblePeer.labelElement.parentNode.removeChild( accessiblePeer.labelElement );
+            }
+          } );
 
           // if a label is defined, reset the label content
           if ( this._accessibleLabel ) {
             this.setAccessibleLabel( this._accessibleLabel );
           }
-
-          this.invalidateAccessibleContent();
         },
         set useAriaLabel( useAriaLabel ) { this.setUseAriaLabel( useAriaLabel ); },
 
@@ -908,7 +820,7 @@ define( function( require ) {
          * @returns {HTMLElement|null}
          */
         getDescriptionElement: function() {
-          return this._descriptionElement;
+          throw new Error( 'Please do not use getDescriptionElement' );
         },
         get descriptionElement() { return this.getDescriptionElement(); },
 
@@ -918,118 +830,56 @@ define( function( require ) {
          * @returns {HTMLElement|null}
          */
         getLabelElement: function() {
-          return this._labelElement;
+          throw new Error( 'Please do not use getLabelElement' );
         },
-        //REVIEW: Why no ES5 getter?
+        get labelElement() { return this.getLabelElement(); },
 
         /**
-         * Set the 'aria-describedby' element for this node's DOM element. The value of the 'aria-describedby'
-         * attribute is a string id that references the desired HTML element.  Upon focus, a screen reader should
-         * read the content under the HTML element referenced by the 'aria-describedby' id. Exact behavior will depend
-         * slightly on user agent.
+         * Set the aria-describedby relation between this node's accessible content and the accessible
+         * content of another node.  The value of the 'aria-describedby' attribute is a string id that references
+         * another HTMLElement in the DOM.  Upon focus, a screen reader should read the content under the HTML element
+         * referenced by the id, after any label content.  Exact behavior will depend on the user agent. This node must
+         * have only one accessible instance so that value for 'aria-describedby' is unique.
          * @public
-         *
-         * @param {HTMLElement} descriptionElement
+         * 
+         * @param {Node} node
+         * @param {string} [association] 'NODE'|'LABEL'|'DESCRIPTION'|'PARENT_CONTAINER'
          */
-        setAriaDescribedByElement: function( descriptionElement ) {
-          assert && assert( this._domElement, 'HTML element required for aria-describedby attribute, see setTagName' );
-          assert && assert( descriptionElement.nodeType === ELEMENT_NODE, 'HTML element required' );
+        setAriaDescribesNode: function( node, association ) {
+          assert && assert( this.accessibleInstances.length < 2, 'Cannot describe another node if using DAG' );
 
-          this._ariaDescribedByElement = descriptionElement;
-          this.invalidateAccessibleContent();
+          this._ariaDescribesNode = node;
+          this._ariaDescribesAssociation = association || AccessiblePeer.NODE;
+
+          if ( this.accessibleInstances.length > 0 ) {
+            var peer = this.accessibleInstances[ 0 ].peer;
+            var associatedElement = peer.getElementByAssociation( this._ariaDescribesAssociation );
+            node.setAccessibleAttribute( 'aria-describedby', associatedElement.id );
+          }
         },
-        set ariaDescribedByElement( descriptionElement ) { this.setAriaDescribedByElement( descriptionElement ); },
 
         /**
-         * Get the id that is the value of the 'aria-describedby' attribute.  See setAriaDescribedBy() for details
-         * about the 'aria-describedby' attribute.
-         * @returns {[type]} [description]
-         */
-        getAriaDescribedByElement: function() {
-          return this._ariaDescribedByElement;
-        },
-        get ariaDescribedByElement() { return this.getAriaDescribedByElement(); },
-
-        /**
-         * Sets the element for the aria-labelledby attribute. The value of the 'aria-labelledby'
-         * attribute is a string id that references another HTML element.  Upon focus, a screen reader should
-         * read the content under the HTML element referenced by the 'aria-labelledby' id. Behavior will depend
-         * slightly on user agent.
+         * Set the aria-labelledby relation between this node's accessible content and the accessible
+         * content of another node.  The value of the 'aria-labelledby' attribute is a string id that references
+         * another HTMLElement in the DOM.  Upon focus, a screen reader should read the content under the HTML element
+         * referenced by the id, before any description content.  Exact behavior will depend on the user agent. This
+         * node must have only one accessible instance so that value for 'aria-labelledby' is unique.
          * @public
-         *
-         * @param {string} labelId - id referencing the description element
+         * 
+         * @param {Node} node
+         * @param {string} [association] 'NODE'|'LABEL'|'DESCRIPTION'|'PARENT_CONTAINER'
          */
-        setAriaLabelledByElement: function( labelElement ) {
-          assert && assert( this._domElement, 'HTML element required for aria-labelledby attribute, see setTagName' );
-          assert && assert( labelElement.nodeType === ELEMENT_NODE, 'HTML element required' );
+        setAriaLabelsNode: function( node, association ) {
+          assert && assert( this.accessibleInstances.length < 2, 'Cannot describe another node if using DAG' );
 
-          this._ariaLabelledByElement = labelElement;
+          this._ariaLabelsNode = node;
+          this._ariaLabelsAssociation = association || AccessiblePeer.NODE;
 
-          this.invalidateAccessibleContent();
-        },
-        set ariaLabelledByElement( labelElement ) { this.setAriaLabelledByElement( labelElement ); },
-
-        /**
-         * Get the element that labels this node's DOM element through the 'aria-labelledby' attribute.
-         * See setAriaLabelledBy() for more information about the 'aria-labelledby' attribute behavior.
-         * @public
-         *
-         * @returns {string}
-         */
-        getAriaLabelledByElement: function() {
-          return this._ariaLabelledByElement;
-        },
-        get ariaLabelledByElement() { return this.getAriaLabelledByElement(); },
-
-        /**
-         * If the node is using a list for its description, add a list item to  the end of the list with the text
-         * content.  Returns an id so that the element can be referenced if need be.
-         * @public
-         *
-         * @param  {string} textContent
-         * @returns {string} - the id of the list item returned for reference
-         */
-        addDescriptionItem: function( textContent ) {
-          assert && assert( this._descriptionElement.tagName === UNORDERED_LIST_TAG, 'description element must be a list to use addDescriptionItem' );
-
-          var listItem = createElement( 'li', false );
-          setTextContent( listItem, textContent );
-
-          listItem.id = 'list-item-' + globalListItemCounter++;
-          this._descriptionElement.appendChild( listItem );
-
-          return listItem.id;
-        },
-
-        /**
-         * Update the text content of the description item.  The item may not yet be in the DOM, so
-         * document.getElementById cannot be used, see getChildElementWithId()
-         * @public
-         *
-         * @param {string} itemID - id of the lits item to update
-         * @param {string} description - new textContent for the string
-         */
-        updateDescriptionItem: function( itemID, description ) {
-          var listItem = getChildElementWithId( this._descriptionElement, itemID );
-          assert && assert( this._descriptionElement.tagName === UNORDERED_LIST_TAG, 'description must be a list to hide list items' );
-          assert && assert( listItem, 'No list item in description with id ' + itemID );
-
-          setTextContent( listItem, description );
-        },
-
-        /**
-         * Hide or show the desired list item from the screen reader.
-         *
-         * @param {string} itemID - id of the list item to hide
-         * @param {boolean} hidden - whether the list item should be hidden
-         * @public
-         */
-        setDescriptionItemHidden: function( itemID, hidden ) {
-          var listItem = document.getElementById( itemID );
-          assert && assert( this._descriptionElement.tagName === UNORDERED_LIST_TAG, 'description must be a list to hide list items' );
-          assert && assert( listItem, 'No list item in description with id ' + itemID );
-
-          listItem.hidden = hidden;
+          if ( this.accessibleInstances.length > 0 ) {
+            var peer = this.accessibleInstances[ 0 ].peer;
+            var associatedElement = peer.getElementByAssociation( this._ariaLabelsAssociation );
+            node.setAccessibleAttribute( 'aria-labelledby', associatedElement.id );
+          }
         },
 
         /**
@@ -1043,14 +893,16 @@ define( function( require ) {
          * @param {boolean} hidden
          */
         setAccessibleHidden: function( hidden ) {
-
           this._accessibleHidden = hidden;
-          if ( this._parentContainerElement ) {
-            this._parentContainerElement.hidden = hidden;
-          }
-          else if ( this._domElement ) {
-            this._domElement.hidden = hidden;
-          }
+
+          this.updateAccessiblePeers( function( accessiblePeer ) {
+            if ( accessiblePeer.parentContainerElement ) {
+              accessiblePeer.parentContainerElement.hidden = hidden;
+            }
+            else if ( accessiblePeer.domElement ) {
+              accessiblePeer.domElement.hidden = hidden;
+            }
+          } );
         },
         set accessibleHidden( hidden ) { this.setAccessibleHidden( hidden ); },
 
@@ -1080,12 +932,6 @@ define( function( require ) {
 
           for ( var j = 0; j < this._children.length; j++ ) {
             var child = this._children[ j ];
-            if ( !contentDisplayed ) {
-              child.accessibleContent = null;
-            }
-            else {
-              child.invalidateAccessibleContent();
-            }
             child.setAccessibleContentDisplayed( contentDisplayed );
           }
           this.invalidateAccessibleContent();
@@ -1105,12 +951,14 @@ define( function( require ) {
          * @param {string} value
          */
         setInputValue: function( value ) {
-          assert && assert( _.includes( FORM_ELEMENTS, this._domElement.tagName ), 'dom element must be a form element to support value' );
+          assert && assert( _.includes( FORM_ELEMENTS, this._tagName.toUpperCase() ), 'dom element must be a form element to support value' );
 
           value = value.toString();
-
           this._inputValue = value;
-          this._domElement.value = value;
+
+          this.updateAccessiblePeers( function( accessiblePeer ) {
+            accessiblePeer.domElement.value = value;
+          } );
         },
         set inputValue( value ) { this.setInputValue( value ); },
 
@@ -1145,8 +993,19 @@ define( function( require ) {
          * @public
          */
         setAccessibleAttribute: function( attribute, value ) {
+
+          // if the accessible attribute already exists in the list, remove it - no need
+          // to remove from the peers, existing attributes will simply be replaced in the DOM
+          for ( var i = 0; i < this._accessibleAttributes.length; i++ ) {
+            if ( this._accessibleAttributes[ i ].attribute === attribute ) {
+              this._accessibleAttributes.splice( i, 1 );
+            }
+          }
+
           this._accessibleAttributes.push( { attribute: attribute, value: value } );
-          this._domElement.setAttribute( attribute, value );
+          this.updateAccessiblePeers( function( accessiblePeer ) {
+            accessiblePeer.domElement.setAttribute( attribute, value );
+          } );
         },
 
         /**
@@ -1156,8 +1015,19 @@ define( function( require ) {
          * @public
          */
         removeAccessibleAttribute: function( attribute ) {
-          assert && assert( elementHasAttribute( this._domElement, attribute ) );
-          this._domElement.removeAttribute( attribute );
+
+          var attributeRemoved = false;
+          for ( var i = 0; i < this._accessibleAttributes.length; i++ ) {
+            if ( this._accessibleAttributes[ i ].attribute === attribute ) {
+              this._accessibleAttributes.splice( i, 1 );
+              attributeRemoved = true;
+            }
+          }
+          assert && assert( attributeRemoved, 'Node does not have accessible attribute ' + attribute );
+
+          this.updateAccessiblePeers( function( accessiblePeer ) {
+            accessiblePeer.domElement.removeAttribute( attribute );
+          } );
         },
 
         /**
@@ -1171,7 +1041,7 @@ define( function( require ) {
 
           for ( var i = 0; i < attributes.length; i++ ) {
             var attribute = attributes[ i ].attribute;
-            this.removeAttribute( attribute );
+            this.removeAccessibleAttribute( attribute );
           }
         },
 
@@ -1187,9 +1057,11 @@ define( function( require ) {
         setFocusable: function( isFocusable ) {
           this._focusable = isFocusable;
 
-          if ( this._domElement ) {
-            this._domElement.tabIndex = isFocusable ? 0 : -1;
-          }
+          this.updateAccessiblePeers( function( accessiblePeer ) {
+            if ( accessiblePeer.domElement ) {
+              accessiblePeer.domElement.tabIndex = isFocusable ? 0 : -1;
+            }
+          } );
         },
         set focusable( isFocusable ) { this.setFocusable( isFocusable ); },
 
@@ -1210,52 +1082,86 @@ define( function( require ) {
          * Get whether this node's dom element is currently focussed.
          * @public
          *
+         * REVIEW: This function is not spelled correctly.
+         * 
          * @returns {boolean}
          */
         isFocussed: function() {
-          return document.activeElement === this.domElement;
+          var isFocused = false;
+          if ( this.accessibleInstances.length > 0 ) {
+            isFocused = document.activeElement === this.accessibleInstances[ 0 ].peer.domElement;
+          }
+
+          return isFocused;
         },
         get focussed() { return this.isFocussed(); },
 
         /**
-         * Focus this node's dom element. The element must not be hidden, and it must be focusable.
-         *
-         * REVIEW: At call sites, it is not clear that this is related to accessibility.  Consider prepending with
-         * 'accessible' or something else to clarify
+         * Focus this node's dom element. The element must not be hidden, and it must be focusable. If the node
+         * has more than one instance, this will fail because the DOM element is not uniquely defined.
+         * 
          * @public
          */
         focus: function() {
-          assert && assert( this._domElement.tabIndex !== -1, 'trying to set focus on a node that is not focusable' );
+          assert && assert( this.focusable, 'trying to set focus on a node that is not focusable' );
           assert && assert( !this._accessibleHidden, 'trying to set focus on a node with hidden accessible content' );
-
-          // make sure that the element is in the navigation order
-          this._domElement.focus();
+          this.accessibleInstances[ 0 ].peer.domElement.focus();
         },
 
         /**
          * Remove focus from this DOM element.  The focus highlight will dissapear, and the element will not receive
          * keyboard events when it doesn't have focus.
          * @public
-         *
-         * REVIEW: At call sites, it is not clear that this is related to accessibility.  Consider prepending with
-         * 'accessible' or something else to clarify
          */
         blur: function() {
-          this._domElement.blur();
+          if ( this.accessibleInstances.length > 0 ) {
+            this.accessibleInstances[ 0 ].peer.domElement.blur();
+          }
+        },
+
+        /**
+         * Add DOM event listeners contained in the accessibleInput directly to the DOM elements on each
+         * accessibleInstance.  Never use this directly, use addAccessibleInputListener()
+         * @private
+         *
+         * @param {Object} accessibleInput
+         * @param {AccessibleInstance} accessibleInstance
+         */
+        addDOMEventListeners: function( accessibleInput, domElement ) {
+          for ( var event in accessibleInput ) {
+            if ( accessibleInput.hasOwnProperty( event ) && _.includes( DOM_EVENTS, event ) ) {
+              domElement.addEventListener( event, accessibleInput[ event ] );
+            }
+          }
+        },
+
+        /**
+         * Remove a DOM event listener contained in an accesssibleInput.  Never to be used directly, see
+         * removeAccessibilityInputListener().
+         * @private
+         *
+         * @param {Object} accessibleInput
+         */
+        removeDOMEventListeners: function( accessibleInput, domElement ) {
+          for ( var event in accessibleInput ) {
+            if ( accessibleInput.hasOwnProperty( event ) && _.includes( DOM_EVENTS, event ) ) {
+              domElement.removeEventListener( event, accessibleInput[ event ] );
+            }
+          }
+        },
+
+        /**
+         * Update all AccessiblePeers representing this node with the callback, which takes the AccessiblePeer 
+         * as an argument.
+         * @private
+         * @param {function} callback
+         */
+        updateAccessiblePeers: function( callback ) {
+          for ( var i = 0; i < this.accessibleInstances.length; i++ ) {
+            this.accessibleInstances[ i ].peer && callback( this.accessibleInstances[ i ].peer );
+          }
         }
-
       } );
-
-      /**
-       * Returns whether or not the attribute exists on the DOM element.
-       *
-       * @param  {HTMLElement}  domElement
-       * @param  {string}  attribute
-       * @returns {string|null}
-       */
-      function elementHasAttribute( domElement, attribute ) {
-        return !!domElement.getAttribute( attribute );
-      }
 
       /**
        * If the text content uses formatting tags, set the content as innerHTML. Otherwise, set as textContent.
@@ -1272,33 +1178,6 @@ define( function( require ) {
         else {
           domElement.textContent = textContent;
         }
-      }
-
-      /**
-       * Get a child element with an id.  This should only be used if the element has not been added to the document
-       * yet.  This might happen while setting up or creating the accessible HTML elements. If the element is in the
-       * document, document.getElementById is a faster and more conventional option.
-       *
-       * @param  {HTMLElement} parentElement
-       * @param  {string} childId
-       * @returns {HTMLElement}
-       */
-      function getChildElementWithId( parentElement, childId ) {
-        var childElement;
-        var children = parentElement.children;
-
-        for ( var i = 0; i < children.length; i++ ) {
-          if ( children[ i ].id === childId ) {
-            childElement = children[ i ];
-            break;
-          }
-        }
-
-        if ( !childElement ) {
-          throw new Error( 'No child element under ' + parentElement + ' with id ' + childId );
-        }
-
-        return childElement;
       }
 
       /**
@@ -1322,9 +1201,16 @@ define( function( require ) {
        */
       function createElement( tagName, focusable ) {
         var domElement = document.createElement( tagName );
+        var upperCaseTagName = tagName.toUpperCase();
 
-        if ( !_.includes( FORM_ELEMENTS, tagName.toUpperCase() ) && !focusable ) {
+        // give all non-focusable elements a tabindex of -1 for browser consistency
+        if ( !_.includes( FORM_ELEMENTS, upperCaseTagName ) && !focusable ) {
           domElement.tabIndex = -1;
+        }
+
+        // Safari requires that certain input elements have width, otherwise it will not be keyboard accessible
+        if ( _.includes( ELEMENTS_REQUIRE_WIDTH, upperCaseTagName ) ) {
+          domElement.style.width = '1px';
         }
 
         return domElement;
@@ -1337,64 +1223,24 @@ define( function( require ) {
        * see setPrependLabels().
        * @private
        *
-       * @param  {HTMLElement} contentElement
+       * @param {AccessiblePeer} contentElement
+       * @param {HTMLElement} contentElement 
+       * @param {boolean} prependLabels
        */
-      function insertContentElement( contentElement ) {
+      function insertContentElement( accessiblePeer, contentElement, prependLabels ) {
 
         // if we have a parent container, add the element as a child of the container - otherwise, add as child of the
         // node's DOM element
-        if ( this._parentContainerElement ) {
-          if ( this._prependLabels && this._parentContainerElement === this._domElement.parentNode ) {
-            this._parentContainerElement.insertBefore( contentElement, this._domElement );
+        if ( accessiblePeer.parentContainerElement ) {
+          if ( prependLabels && accessiblePeer.parentContainerElement === accessiblePeer.domElement.parentNode ) {
+            accessiblePeer.parentContainerElement.insertBefore( contentElement, accessiblePeer.domElement );
           }
           else {
-            this._parentContainerElement.appendChild( contentElement );
+            accessiblePeer.parentContainerElement.appendChild( contentElement );
           }
         }
-        else {
-          this._domElement.appendChild( contentElement );
-        }
-      }
-
-      /**
-       * Some accessibility attributes require a relation to the ID of another element in the DOM. During instantiation,
-       * the client can set up a relation to accessible content that is not yet invalidated. If the related element
-       * does not have an id, its peer hasn't been created yet, so we flag it with a data attribute to indicate
-       * that a relational attribute should be set up via processRelationDataAttributes() when the peer is
-       * eventually created.
-       *
-       * @param {HTMLElement} relatedElement
-       * @param {string} attribute
-       */
-      function addRelationAttribute( relatedElement, attribute ) {
-        if ( !relatedElement.id ) {
-          relatedElement.setAttribute( DATA_FLAG + attribute, this._accessibleId );
-        }
-        else {
-          this.setAccessibleAttribute( attribute, relatedElement.id );
-        }
-      }
-
-      /**
-       * If an element was flagged with addRelationAttribute above, set the attribute and remove the flag from the
-       * DOM element.
-       */
-      function processRelationDataAttributes() {
-
-        for ( var i = 0; i < RELATION_ATTRIBUTES.length; i++ ) {
-          var attribute = RELATION_ATTRIBUTES[ i ];
-          var dataAttribute = DATA_FLAG + attribute;
-
-          var relatedElementId = this._domElement.getAttribute( dataAttribute );
-          if ( relatedElementId ) {
-            var relatedElement = document.getElementById( relatedElementId );
-
-            // set the attribute on the flagged element
-            relatedElement.setAttribute( attribute, this.domElement.id );
-
-            // remove the data attribute from this dom element now that it has been processed
-            this.domElement.removeAttribute( dataAttribute );
-          }
+        else if ( accessiblePeer.domElement ) {
+          accessiblePeer.domElement.appendChild( contentElement );
         }
       }
 
@@ -1408,15 +1254,21 @@ define( function( require ) {
       function invalidateAccessibleContent() {
         var self = this;
 
-        // clear the parent container if it exists since we will be reinserting labels
-        // and the dom element in createPeer
-        while ( this._parentContainerElement && this._parentContainerElement.hasChildNodes() ) {
-          this._parentContainerElement.removeChild( this._parentContainerElement.lastChild );
-        }
+        // iteration variable used through this function
+        var i = 0;
+
+        // for each accessible peer, clear the parent container if it exists since we will be reinserting labels and
+        // the dom element in createPeer
+        this.updateAccessiblePeers( function( accessiblePeer ) {
+          var parentContainerElement = accessiblePeer.parentContainerElement;
+          while ( parentContainerElement && parentContainerElement.hasChildNodes() ) {
+            parentContainerElement.removeChild( parentContainerElement.lastChild );
+          }
+        } );
 
         // if any parents are flagged as removed from the accessibility tree, set content to null
         var contentDisplayed = this._accessibleContentDisplayed;
-        for ( var i = 0; i < this._parents.length; i++ ) {
+        for ( i = 0; i < this._parents.length; i++ ) {
           if ( !this._parents[ i ].accessibleContentDisplayed ) {
             contentDisplayed = false;
           }
@@ -1429,68 +1281,101 @@ define( function( require ) {
             focusHighlightLayerable: this._focusHighlightLayerable,
             createPeer: function( accessibleInstance ) {
 
-              // set up the unique id's for the DOM elements associated with this node's accessible content.
-              self._accessibleId = accessibleInstance.trail.getUniqueId();
-              self._domElement.id = self._accessibleId;
+              var uniqueId = accessibleInstance.trail.getUniqueId();
 
-              // Call this because the _domElement isn't guaranteed to exist before we call createPeer().
-              if ( self._accessibleHidden !== null ) {
-                self.setAccessibleHidden( self._accessibleHidden );
-              }
+              // create the base DOM element representing this accessible instance
+              var domElement = createElement( self._tagName, self._focusable );
+              domElement.id = uniqueId;
 
-              // add DOM event listeners to the dom element
-              for ( var i = 0; i < self._accessibleInputListenersToAdd.length; i++ ) {
-                self.addDOMEventListeners( self._accessibleInputListenersToAdd[ i ] );
-              }
-
-              processRelationDataAttributes.call( self );
-
-              // set up id relations for the label element
-              if ( self._labelElement ) {
-                self._labelElementId = 'label-' + self._accessibleId;
-                self._labelElement.id = self._labelElementId;
-                if ( self._labelTagName.toUpperCase() === LABEL_TAG ) {
-                  self._labelElement.setAttribute( 'for', self._accessibleId );
-                }
-              }
-
-              // identify the description element
-              if ( self._descriptionElement ) {
-                self._descriptionElementId = 'description-' + self._accessibleId;
-                self._descriptionElement.id = self._descriptionElementId;
-              }
-
-              // identify the parent container element
-              if ( self._parentContainerElement ) {
-                self._parentContainerElement.id = 'parent-container-' + self._accessibleId;
+              // create the parent container element for the dom element and label description elements
+              var parentContainerElement = null;
+              if ( self._parentContainerTagName ) {
+                parentContainerElement = createElement( self._parentContainerTagName, false );
+                parentContainerElement.id = 'container-' + uniqueId;
 
                 // provide the aria-role if it is specified
                 if ( self._parentContainerAriaRole ) {
-                  self._parentContainerElement.setAttribute( 'role', self._parentContainerAriaRole );
+                  parentContainerElement.setAttribute( 'role', self._parentContainerAriaRole );
                 }
               }
 
-              var accessiblePeer = new AccessiblePeer( accessibleInstance, self._domElement, {
-                parentContainerElement: self._parentContainerElement
+              // create the label DOM element representing this instance
+              var labelElement = null;
+              if ( self._labelTagName ) {
+                labelElement = createElement( self._labelTagName, false );
+                labelElement.id = 'label-' + uniqueId;
+
+                if ( self._labelTagName.toUpperCase() === LABEL_TAG ) {
+                  labelElement.setAttribute( 'for', uniqueId );
+                }
+              }
+
+              // create the description DOM element representing this instance
+              var descriptionElement = null;
+              if ( self._descriptionTagName ) {
+                descriptionElement = createElement( self._descriptionTagName, false );
+                descriptionElement.id = 'description-' + uniqueId;
+              }
+
+              var accessiblePeer = new AccessiblePeer( accessibleInstance, domElement, {
+                parentContainerElement: parentContainerElement,
+                labelElement: labelElement,
+                descriptionElement: descriptionElement
               } );
+              accessibleInstance.peer = accessiblePeer;
+
+              // restore whether or not this element is focusable
+              if ( self._focusable === null ) {
+                self._focusable = _.includes( FORM_ELEMENTS, self._tagName.toUpperCase() );
+              }
+              self.setFocusable( self._focusable );
+
+              // set the accessible label now that the element has been recreated again
+              self._accessibleLabel && self.setAccessibleLabel( self._accessibleLabel );
+
+              // set if using aria-label
+              if ( self._useAriaLabel ) {
+                self.setUseAriaLabel( self._useAriaLabel );
+              }
+
+              // resetore hidden
+              self.setAccessibleHidden( self._accessibleHidden );
+
+              // restore input value
+              self._inputValue && self.setInputValue( self._inputValue );
+
+              // set the accessible attributes, restoring from a defenseive copy
+              var defensiveAttributes = self.accessibleAttributes;
+              for ( i = 0; i < defensiveAttributes.length; i++ ) {
+                var attribute = defensiveAttributes[ i ].attribute;
+                var value = defensiveAttributes[ i ].value;
+                self.setAccessibleAttribute( attribute, value );
+              }
+
+              // set the accessible description
+              self._accessibleDescription && self.setAccessibleDescription( self._accessibleDescription );
+
+              // if element is an input element, set input type
+              if ( self._tagName.toUpperCase() === INPUT_TAG && self._inputType ) {
+                self.setInputType( self._inputType );
+              }
+
+              // restore aria-labelledby and aria-describedby associations
+              self._ariaLabelsNode && self.setAriaLabelsNode( self._ariaLabelsNode, self._ariaLabelsAssociation );
+              self._ariaDescribesNode && self.setAriaDescribesNode( self._ariaDescribesNode, self._ariaDescribesAssociation );
+
+              // add all listeners to the dom element
+              for ( i = 0; i < self._accessibleInputListeners.length; i++ ) {
+                self.addDOMEventListeners( self._accessibleInputListeners[ i ], domElement );
+              }
 
               // insert the label and description elements in the correct location if they exist
-              self._labelElement && insertContentElement.call( self, self._labelElement );
-              self._descriptionElement && insertContentElement.call( self, self._descriptionElement );
-
-              // now that the ids have been set up, set up relationships for attributes which depend on the
-              // unique ID
-              self._ariaDescribedByElement && addRelationAttribute.call( self, self._ariaDescribedByElement, 'aria-describedby' );
-              self._ariaLabelledByElement && addRelationAttribute.call( self, self._ariaLabelledByElement, 'aria-labelledby' );
+              labelElement && insertContentElement( accessiblePeer, labelElement, self._prependLabels );
+              descriptionElement && insertContentElement( accessiblePeer, descriptionElement, self._prependLabels );
 
               // Default the focus highlight in this special case to be invisible until selected.
               if ( self._focusHighlightLayerable ) {
                 self._focusHighlight.visible = false;
-              }
-
-              // if we created a new DOM element, update whether or not it can receive focus
-              if ( self._focusable ) {
-                self.setFocusable( self._focusable );
               }
 
               return accessiblePeer;

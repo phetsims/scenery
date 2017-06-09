@@ -46,7 +46,9 @@ define( function( require ) {
 
       options = _.extend( {
         parentContainerElement: null, // a parent container for this peer and potential siblings
-        childContainerElement: null // an child container element where nested elements can be placed
+        childContainerElement: null, // an child container element where nested elements can be placed
+        labelElement: null, // the element containing this node's label content 
+        descriptionElement: null // the element that will contain this node's description content
       }, options );
 
       Events.call( this ); // TODO: is Events worth mixing in by default? Will we need to listen to events?
@@ -58,14 +60,18 @@ define( function( require ) {
 
       // @public
       this.accessibleInstance = accessibleInstance;
-      this.domElement = domElement;
       this.display = accessibleInstance.display;
       this.trail = accessibleInstance.trail;
+
+      // @public, the DOM elements associated with this peer
+      this.domElement = domElement;
+      this.labelElement = options.labelElement;
+      this.descriptionElement = options.descriptionElement;
 
       // @private - descendent of domElement that can be used to hold nested children
       this.childContainerElement = options.childContainerElement ? options.childContainerElement : ( this.childContainerElement || null );
 
-      // @private - a parent element that can contain this domElement and other siblings
+      // @private - a parent element that can contain this domElement and other siblings, usually label and description content
       this.parentContainerElement = options.parentContainerElement ? options.parentContainerElement : ( this.parentContainerElement || null );
       if ( this.parentContainerElement ) {
 
@@ -142,6 +148,32 @@ define( function( require ) {
       return this.childContainerElement || this.domElement;
     },
 
+    /**
+     * Get an element on this node, looked up by the association flag passed in.
+     * @public (scenery-internal)
+     * 
+     * @param  {string} association - see AccessibilityUtil for valid associations
+     * @return {HTMLElement}
+     */
+    getElementByAssociation: function( association ) {
+      var htmlElement = null;
+
+      if ( association === AccessiblePeer.NODE ) {
+        return this.domElement;
+      }
+      else if ( association === AccessiblePeer.LABEL ) {
+        return this.labelElement;
+      }
+      else if ( association === AccessiblePeer.DESCRIPTION ) {
+        return this.descriptionElement;
+      }
+      else if ( association === AccessiblePeer.LABEL ) {
+        return this.parentContainerElement;
+      }
+      assert && assert( htmlElement, 'no HTMLELement found by association ' + association );
+      return htmlElement;
+    },
+
     dispose: function() {
       this.disposed = true;
       this.disposeAccessiblePeer();
@@ -149,6 +181,13 @@ define( function( require ) {
       // for now
       this.freeToPool && this.freeToPool();
     }
+  }, {
+
+    // @static - specifies valid associations between related AccessiblePeers in the DOM
+    NODE: 'NODE', // associate with all accessible content related to this peer
+    LABEL: 'LABEL', // associate with just the label content of this peer
+    DESCRIPTION: 'DESCRIPTION', // associate with just the description content of this peer
+    PARENT_CONTAINER: 'PARENT_CONTAINER' // associate with everything under the parent container element of this peer
   } );
 
   // TODO: evaluate pooling, and is it OK to pool only some peers?
