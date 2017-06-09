@@ -338,35 +338,6 @@ define( function( require ) {
         get accessibleInputListeners() { return this.getAccessibleInputListeners(); },
 
         /**
-         * Get the accesible id for this node. It is a string since elemetns are are generally referenced by string
-         * with the the DOM API.
-         *
-         * REVIEW: How can this guarantee it is a string, when it is initialized as null?
-         *         new Node().accessibleId returns null.
-         *
-         * @returns {string}
-         */
-        getAccessibleId: function() {
-          throw new Error( 'Please do not use getAccessibleId anymore' );
-        },
-        get accessibleId() { return this.getAccessibleId(); },
-
-        /**
-         * Get HTML element representing this node in the document. Note that this will error if there
-         * are more than one accessible instances because the DOM element is not uniquely defined.
-         * @public
-         *
-         * REVIEW: How can this guarantee it is an HTMLElement, when it is initialized as null?
-         *         new Node().domElement returns null.
-         *
-         * @returns {HTMLElement}
-         */
-        getDomElement: function() {
-          throw new Error( 'Please do not use getDomElement anymore' );
-        },
-        get domElement() { return this.getDomElement(); },
-
-        /**
          * Set the tag name representing this element in the DOM. DOM element tag names are read-only, so this
          * function will create a new DOM element for the Node and reset the accessible content.
          *
@@ -564,17 +535,6 @@ define( function( require ) {
           return this._parentContainerTagName;
         },
         get parentContainerTagName() { return this.getParentContainerTagName(); },
-
-        /**
-         * Get the parent container element, returning null if none exists.
-         * @public (scenery-internal)
-         *
-         * @returns {HTMLElement|null}
-         */
-        getParentContainerElement: function() {
-          throw new Error( 'Please stop using getParentContainerElement' );
-        },
-        get parentContainerElement() { return this.getParentContainerElement(); },
 
         /**
          * Set the label for the this node.  The label can be added in one of four ways:
@@ -812,27 +772,6 @@ define( function( require ) {
           return this._focusHighlightLayerable;
         },
         get focusHighlightLayerable() { return this.getFocusHighlightLayerable(); },
-
-        /**
-         * Get the description element that holds the description content for this node.
-         * @public
-         *
-         * @returns {HTMLElement|null}
-         */
-        getDescriptionElement: function() {
-          throw new Error( 'Please do not use getDescriptionElement' );
-        },
-        get descriptionElement() { return this.getDescriptionElement(); },
-
-        /**
-         * Get the label element that holds the label content for this node.
-         * @public
-         * @returns {HTMLElement|null}
-         */
-        getLabelElement: function() {
-          throw new Error( 'Please do not use getLabelElement' );
-        },
-        get labelElement() { return this.getLabelElement(); },
 
         /**
          * Set the aria-describedby relation between this node's accessible content and the accessible
