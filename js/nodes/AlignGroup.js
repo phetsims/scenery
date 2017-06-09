@@ -8,6 +8,9 @@
  *
  * Align boxes can be dynamically created and disposed, and only active boxes will be considered for the bounds.
  *
+ * Since many sun components do not support resizing their contents dynamically, you may need to populate the AlignGroup
+ * in the order of largest to smallest so that a fixed size container is large enough to contain the largest item.
+ *
  * NOTE: Align box resizes may not happen immediately, and may be delayed until bounds of a align box's child occurs.
  *       layout updates can be forced with group.updateLayout(). If the align box's content that changed is connected
  *       to a Scenery display, its bounds will update when Display.updateDisplay() will called, so this will guarantee
