@@ -43,7 +43,6 @@ define( function( require ) {
    * @public
    * @constructor
    * @extends Node
-   * @mixes Events
    *
    * IMAGE_OPTION_KEYS (above) describes the available options keys that can be provided, on top of Node's options.
    *

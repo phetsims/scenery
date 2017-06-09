@@ -19,7 +19,6 @@ define( function( require ) {
    * @public
    * @constructor
    * @extends Spacer
-   * @mixes Events
    *
    * @param {number} width - Width of the strut
    * @param {Object} [options] - Passed to Spacer/Node

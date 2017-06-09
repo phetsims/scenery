@@ -27,7 +27,6 @@ define( function( require ) {
    * @public
    * @constructor
    * @extends Node
-   * @mixes Events
    *
    * @param {Element|Object} element - The HTML element, or a jQuery selector result.
    * @param {Object} [options] - DOM-specific options are documented in DOM_OPTION_KEYS above, and can be provided

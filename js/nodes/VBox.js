@@ -16,7 +16,6 @@ define( function( require ) {
    * @public
    * @constructor
    * @extends LayoutBox
-   * @mixes Events
    *
    * @param {Object} [options] see LayoutBox
    */

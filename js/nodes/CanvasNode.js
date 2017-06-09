@@ -24,7 +24,6 @@ define( function( require ) {
    * @public
    * @constructor
    * @extends Node
-   * @mixes Events
    *
    * @param {Object} [options] - Can contain Node's options, and/or CanvasNode options (e.g. canvasBound)
    */

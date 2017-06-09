@@ -60,7 +60,6 @@ define( function( require ) {
    * @public
    * @constructor
    * @extends Node
-   * @mixes Events
    *
    * @param {Object} [options] - LayoutBox-specific options are documented in LAYOUT_BOX_OPTION_KEYS above, and can be
    *                             provided along-side options for Node.

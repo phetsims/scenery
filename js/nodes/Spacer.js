@@ -21,7 +21,6 @@ define( function( require ) {
    * @public
    * @constructor
    * @extends Node
-   * @mixes Events
    *
    * @param {number} width - The width of the spacer
    * @param {number} height - The height of the spacer

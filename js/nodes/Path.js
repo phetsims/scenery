@@ -32,7 +32,6 @@ define( function( require ) {
    * @constructor
    * @extends Node
    * @mixes Paintable
-   * @mixes Events
    *
    * Path has two additional options (above what Node provides):
    * - shape: The actual Shape (or a string representing an SVG path, or null).

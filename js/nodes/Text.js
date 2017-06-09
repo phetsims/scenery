@@ -52,8 +52,6 @@ define( function( require ) {
    * @public
    * @constructor
    * @extends Node
-   * @mixes Paintable
-   * @mixes Events
    *
    * @param {string|number} text - See setText() for more documentation
    * @param {Object} [options] - Text-specific options are documented in TEXT_OPTION_KEYS above, and can be provided

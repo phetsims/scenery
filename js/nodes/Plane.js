@@ -22,8 +22,6 @@ define( function( require ) {
    * @public
    * @constructor
    * @extends Rectangle
-   * @mixes Paintable
-   * @mixes Events
    *
    * @param {Object} [options] Passed to Rectangle. See Rectangle for more documentation
    */

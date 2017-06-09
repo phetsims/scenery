@@ -34,8 +34,6 @@ define( function( require ) {
    * @public
    * @constructor
    * @extends Path
-   * @mixes Paintable
-   * @mixes Events
    *
    * Currently, all numerical parameters should be finite.
    * x1: {number} - x-position of the start

@@ -20,7 +20,6 @@ define( function( require ) {
    * @public
    * @constructor
    * @extends Spacer
-   * @mixes Events
    *
    * @param {number} height - Height of the strut
    * @param {Object} [options] - Passed to Spacer/Node
