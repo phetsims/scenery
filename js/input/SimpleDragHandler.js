@@ -43,6 +43,7 @@ define( function( require ) {
     this.lastDragPoint = null;        // the location of the drag at the previous event (so we can calculate a delta)
     this.startTransformMatrix = null; // the node's transform at the start of the drag, so we can reset on a touch cancel
     this.mouseButton = undefined;     // tracks which mouse button was pressed, so we can handle that specifically
+    this.interrupted = false;         // whether the last input was interrupted (available during endDrag)
     // TODO: consider mouse buttons as separate pointers?
 
     // if an ancestor is transformed, pin our node
@@ -98,7 +99,7 @@ define( function( require ) {
       // mouse/touch move
       move: function( event ) {
         if ( !self.dragging ) { return; }
-        
+
         assert && assert( event.pointer === self.pointer, 'Wrong pointer in move' );
 
         var globalDelta = self.pointer.point.minus( self.lastDragPoint );
@@ -175,6 +176,21 @@ define( function( require ) {
 
       // release our reference
       this.pointer = null;
+    },
+
+    // Called when input is interrupted on this listener, see https://github.com/phetsims/scenery/issues/218
+    interrupt: function() {
+      if ( this.dragging ) {
+        this.interrupted = true;
+
+        // We create a synthetic event here, as there is no available event here.
+        this.endDrag( {
+          pointer: this.pointer,
+          currentTarget: this.node
+        } );
+
+        this.interrupted = false;
+      }
     },
 
     tryToSnag: function( event ) {

@@ -17,6 +17,7 @@ define( function( require ) {
   var scenery = require( 'SCENERY/scenery' );
   require( 'SCENERY/util/Trail' );
   var Input = require( 'SCENERY/input/Input' );
+  var Trail = require( 'SCENERY/util/Trail' );
 
   /*
    * The 'trail' parameter passed to down/upInside/upOutside will end with the node to which this DownUpListener has been added.
@@ -45,6 +46,7 @@ define( function( require ) {
     this.downCurrentTarget = null; // 'up' is handled via a pointer lister, which will have null currentTarget, so save the 'down' currentTarget
     this.downTrail = null;
     this.pointer = null;
+    this.interrupted = false;
 
     // this listener gets added to the pointer on a 'down'
     this.downListener = {
@@ -109,7 +111,7 @@ define( function( require ) {
         var trailUnderPointer = event.trail;
 
         // TODO: consider changing this so that it just does a hit check and ignores anything in front?
-        var isInside = trailUnderPointer.isExtensionOf( this.downTrail, true );
+        var isInside = trailUnderPointer.isExtensionOf( this.downTrail, true ) && !this.interrupted;
 
         if ( isInside && this.options.upInside ) {
           this.options.upInside( event, this.downTrail );
@@ -132,6 +134,23 @@ define( function( require ) {
     // mouse/touch down on this node
     down: function( event ) {
       this.buttonDown( event );
+    },
+
+    // Called when input is interrupted on this listener, see https://github.com/phetsims/scenery/issues/218
+    interrupt: function() {
+      if ( this.isDown ) {
+        this.interrupted = true;
+
+        // We create a synthetic event here, as there is no available event here.
+        this.buttonUp( {
+          // Empty trail, so that it for-sure isn't under our downTrail (guaranteeing that isInside will be false).
+          trail: new Trail(),
+          currentTarget: this.downCurrentTarget,
+          pointer: this.pointer
+        } );
+
+        this.interrupted = false;
+      }
     },
 
     // When enter/space pressed for this node, trigger a button down
