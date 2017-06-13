@@ -1386,6 +1386,41 @@ define( function( require ) {
     },
 
     /**
+     * Interrupts all input listeners that are attached to this node.
+     * @public
+     *
+     * @returns {Node} - For chaining
+     */
+    interruptInput: function() {
+      var listenersCopy = this.getInputListeners();
+
+      for ( var i = 0; i < listenersCopy.length; i++ ) {
+        var listener = listenersCopy[ i ];
+
+        listener.interrupt && listener.interrupt(); // TODO: get rid of the event?
+      }
+
+      return this;
+    },
+
+    /**
+     * Interrupts all input listeners that are attached to either this node, or a descendant node.
+     * @public
+     *
+     * @returns {Node} - For chaining
+     */
+    interruptSubtreeInput: function() {
+      this.interruptInput();
+
+      var children = this._children.slice();
+      for ( var i = 0; i < children.length; i++ ) {
+        children[ i ].interruptSubtreeInput();
+      }
+
+      return this;
+    },
+
+    /**
      * Called when the node is added as a child to this node AND the node's subtree contains accessible content.
      * We need to notify all Displays that can see this change, so that they can update the AccessibleInstance tree.
      * @private
