@@ -94,7 +94,7 @@ define( function( require ) {
 
       // mouse/touch move
       move: function( event ) {
-        if ( !hanlder.dragging ) { return; }
+        if ( !handler.dragging ) { return; }
 
         assert && assert( event.pointer === handler.pointer );
         var globalDelta = handler.pointer.point.minus( handler.lastDragPoint );
