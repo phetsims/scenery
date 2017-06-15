@@ -1,4 +1,4 @@
-// Copyright 2013-2015, University of Colorado Boulder
+// Copyright 2017, University of Colorado Boulder
 
 /**
  * Controller that creates and keeps an SVG radial gradient up-to-date with a Scenery RadialGradient
@@ -20,10 +20,11 @@ define( function( require ) {
    * @constructor
    * @mixes Poolable
    *
-   * @param {RadialGradient} gradient
+   * @param {SVGBlock} svgBlock
+   * @param {RadialGradient} radialGradient
    */
-  function SVGRadialGradient( gradient ) {
-    this.initialize( gradient );
+  function SVGRadialGradient( svgBlock, radialGradient ) {
+    this.initialize( svgBlock, radialGradient );
   }
 
   scenery.register( 'SVGRadialGradient', SVGRadialGradient );
@@ -33,10 +34,11 @@ define( function( require ) {
      * Poolable initializer.
      * @private
      *
+     * @param {SVGBlock} svgBlock
      * @param {RadialGradient} radialGradient
      */
-    initialize: function( radialGradient ) {
-      SVGGradient.prototype.initialize.call( this, radialGradient );
+    initialize: function( svgBlock, radialGradient ) {
+      SVGGradient.prototype.initialize.call( this, svgBlock, radialGradient );
 
       // Radial-specific setup
       this.definition.setAttribute( 'cx', radialGradient.largePoint.x );
@@ -60,12 +62,12 @@ define( function( require ) {
 
   Poolable.mixin( SVGRadialGradient, {
     constructorDuplicateFactory: function( pool ) {
-      return function( gradient ) {
+      return function( svgBlock, radialGradient ) {
         if ( pool.length ) {
-          return pool.pop().initialize( gradient );
+          return pool.pop().initialize( svgBlock, radialGradient );
         }
         else {
-          return new SVGRadialGradient( gradient );
+          return new SVGRadialGradient( svgBlock, radialGradient );
         }
       };
     }

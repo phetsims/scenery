@@ -1,4 +1,4 @@
-// Copyright 2013-2015, University of Colorado Boulder
+// Copyright 2017, University of Colorado Boulder
 
 /**
  * Base type for controllers that create and keep an SVG gradient element up-to-date with a Scenery gradient.
@@ -31,9 +31,10 @@ define( function( require ) {
      * Poolable initializer.
      * @private
      *
+     * @param {SVGBlock} svgBlock
      * @param {Gradient} gradient
      */
-    initializeGradient: function( svgBlock, gradient ) {
+    initialize: function( svgBlock, gradient ) {
       // @private {SVGBlock} - transient
       this.svgBlock = svgBlock;
 

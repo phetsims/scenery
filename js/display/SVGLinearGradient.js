@@ -1,4 +1,4 @@
-// Copyright 2013-2015, University of Colorado Boulder
+// Copyright 2017, University of Colorado Boulder
 
 /**
  * Controller that creates and keeps an SVG linear gradient up-to-date with a Scenery LinearGradient
@@ -20,10 +20,11 @@ define( function( require ) {
    * @constructor
    * @mixes Poolable
    *
-   * @param {LinearGradient} gradient
+   * @param {SVGBlock} svgBlock
+   * @param {LinearGradient} linearGradient
    */
-  function SVGLinearGradient( gradient ) {
-    this.initialize( gradient );
+  function SVGLinearGradient( svgBlock, linearGradient ) {
+    this.initialize( svgBlock, linearGradient );
   }
 
   scenery.register( 'SVGLinearGradient', SVGLinearGradient );
@@ -33,10 +34,22 @@ define( function( require ) {
      * Poolable initializer.
      * @private
      *
+     * @param {SVGBlock} svgBlock
      * @param {LinearGradient} linearGradient
      */
-    initialize: function( linearGradient ) {
-      SVGGradient.prototype.initialize.call( this, linearGradient );
+    initialize: function( svgBlock, linearGradient ) {
+      SVGGradient.prototype.initialize.call( this, svgBlock, linearGradient );
+
+      // seems we need the defs: http://stackoverflow.com/questions/7614209/linear-gradients-in-svg-without-defs
+      // SVG: spreadMethod 'pad' 'reflect' 'repeat' - find Canvas usage
+
+      /* Approximate example of what we are creating:
+       <linearGradient id="grad2" x1="0" y1="0" x2="100" y2="0" gradientUnits="userSpaceOnUse">
+       <stop offset="0" style="stop-color:rgb(255,255,0);stop-opacity:1" />
+       <stop offset="0.5" style="stop-color:rgba(255,255,0,0);stop-opacity:0" />
+       <stop offset="1" style="stop-color:rgb(255,0,0);stop-opacity:1" />
+       </linearGradient>
+       */
 
       // Linear-specific setup
       this.definition.setAttribute( 'x1', linearGradient.start.x );
@@ -59,12 +72,12 @@ define( function( require ) {
 
   Poolable.mixin( SVGLinearGradient, {
     constructorDuplicateFactory: function( pool ) {
-      return function( gradient ) {
+      return function( svgBlock, linearGradient ) {
         if ( pool.length ) {
-          return pool.pop().initialize( gradient );
+          return pool.pop().initialize( svgBlock, linearGradient );
         }
         else {
-          return new SVGLinearGradient( gradient );
+          return new SVGLinearGradient( svgBlock, linearGradient );
         }
       };
     }

@@ -1,5 +1,4 @@
-// Copyright 2013-2015, University of Colorado Boulder
-
+// Copyright 2013-2017, University of Colorado Boulder
 
 /**
  * A pattern that will deliver a fill or stroke that will repeat an image in both directions (x and y).
@@ -13,8 +12,9 @@ define( function( require ) {
   'use strict';
 
   var inherit = require( 'PHET_CORE/inherit' );
-  var scenery = require( 'SCENERY/scenery' );
   var Paint = require( 'SCENERY/util/Paint' );
+  var scenery = require( 'SCENERY/scenery' );
+  var SVGPattern = require( 'SCENERY/display/SVGPattern' );
 
   // TODO: support scene or other various content (SVG is flexible, can backport to canvas)
   // TODO: investigate options to support repeat-x, repeat-y or no-repeat in SVG (available repeat options from Canvas)
@@ -36,21 +36,15 @@ define( function( require ) {
       return this.canvasPattern;
     },
 
-    getSVGDefinition: function() {
-      var definition = document.createElementNS( scenery.svgns, 'pattern' );
-      definition.setAttribute( 'patternUnits', 'userSpaceOnUse' ); // so we don't depend on the bounds of the object being drawn with the gradient
-      definition.setAttribute( 'patternContentUnits', 'userSpaceOnUse' ); // TODO: is this needed?
-      definition.setAttribute( 'x', 0 );
-      definition.setAttribute( 'y', 0 );
-      definition.setAttribute( 'width', this.image.width );
-      definition.setAttribute( 'height', this.image.height );
-      if ( this.transformMatrix ) {
-        definition.setAttribute( 'patternTransform', this.transformMatrix.getSVGTransform() );
-      }
-
-      definition.appendChild( scenery.Image.createSVGImage( this.image.src, this.image.width, this.image.height ) );
-
-      return definition;
+    /**
+     * Creates an SVG paint object for creating/updating the SVG equivalent definition.
+     * @public
+     *
+     * @param {SVGBlock} svgBlock
+     * @returns {SVGGradient|SVGPattern}
+     */
+    createSVGPaint: function( svgBlock ) {
+      return SVGPattern.createFromPool( this );
     },
 
     toString: function() {

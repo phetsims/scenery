@@ -1,5 +1,4 @@
-// Copyright 2013-2016, University of Colorado Boulder
-
+// Copyright 2013-2017, University of Colorado Boulder
 
 /**
  * Handles a visual SVG layer of drawables.
@@ -120,17 +119,17 @@ define( function( require ) {
         this.paintMap[ paint.id ].count++;
       }
       else {
-        var def = paint.getSVGDefinition();
-        def.setAttribute( 'id', paint.id + '-' + this.id );
+        var svgPaint = paint.createSVGPaint();
+        svgPaint.definition.setAttribute( 'id', paint.id + '-' + this.id );
 
-        // TODO: reduce allocations?
+        // TODO: reduce allocations? (pool these)
         this.paintMap[ paint.id ] = {
           count: 1,
           paint: paint,
-          def: def
+          svgPaint: svgPaint
         };
 
-        this.defs.appendChild( def );
+        this.defs.appendChild( svgPaint.definition );
       }
     },
 
@@ -151,7 +150,8 @@ define( function( require ) {
         assert && assert( entry.count >= 1 );
 
         if ( entry.count === 1 ) {
-          this.defs.removeChild( entry.def );
+          this.defs.removeChild( entry.svgPaint.definition );
+          entry.svgPaint.dispose();
           delete this.paintMap[ paint.id ]; // delete, so we don't memory leak if we run through MANY paints
         }
         else {
