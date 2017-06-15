@@ -39,14 +39,14 @@ define( function( require ) {
         assert && Color.checkPaint( this.instance.node._fill );
 
         this.markPaintDirty();
-        this.fillObserver.update(); // TODO: look into having the fillObserver be notified of Node changes as our source
+        this.fillObserver.updatePrimary(); // TODO: look into having the fillObserver be notified of Node changes as our source
       };
 
       proto.markDirtyStroke = function() {
         assert && Color.checkPaint( this.instance.node._stroke );
 
         this.markPaintDirty();
-        this.strokeObserver.update(); // TODO: look into having the strokeObserver be notified of Node changes as our source
+        this.strokeObserver.updatePrimary(); // TODO: look into having the strokeObserver be notified of Node changes as our source
       };
 
       proto.markDirtyLineWidth = function() {

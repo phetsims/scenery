@@ -1,4 +1,4 @@
-// Copyright 2013-2016, University of Colorado Boulder
+// Copyright 2013-2017, University of Colorado Boulder
 
 /**
  * Listens to the fill or stroke of a Node, and notifies when the actual represented value has changed.
@@ -9,10 +9,11 @@
 define( function( require ) {
   'use strict';
 
-  var inherit = require( 'PHET_CORE/inherit' );
-  var scenery = require( 'SCENERY/scenery' );
   var Color = require( 'SCENERY/util/Color' );
+  var Gradient = require( 'SCENERY/util/Gradient' );
+  var inherit = require( 'PHET_CORE/inherit' );
   var Property = require( 'AXON/Property' );
+  var scenery = require( 'SCENERY/scenery' );
 
   /**
    * An observer for a fill or stroke, that will be able to trigger notifications when it changes.
@@ -33,16 +34,15 @@ define( function( require ) {
     // @private {function} - Our callback
     this.changeCallback = changeCallback;
 
+    // @private {function} - To be called when a potential change is detected
+    this.notifyChangeCallback = this.notifyChanged.bind( this );
+
     // @private {null|string|Color|Property.<string|Color>|LinearGradient|RadialGradient|Pattern}
     // Our unwrapped fill/stroke value
     this.primary = null;
 
-    // @private {null|string|Color|Property.<string|Color>|LinearGradient|RadialGradient|Pattern}
-    // If our primary is a Property of a Color, we'll also need to attach listeners to the Color
-    this.secondary = null;
-
-    // @private {function} - To be called whenever our fill/stroke value may have changed
-    this.updateListener = this.update.bind( this );
+    // @private {function} - To be called whenever our secondary fill/stroke value may have changed
+    this.updateSecondaryListener = this.updateSecondary.bind( this );
   }
 
   scenery.register( 'PaintObserver', PaintObserver );
@@ -58,7 +58,24 @@ define( function( require ) {
       assert && assert( node !== null );
       this.node = node;
 
-      this.update();
+      this.updatePrimary();
+    },
+
+    /**
+     * Calls the change callback, and invalidates the paint itself if it's a gradient.
+     * @private
+     */
+    notifyChanged: function() {
+      sceneryLog && sceneryLog.Paints && sceneryLog.Paints( '[PaintObserver] changed ' + this.node.id + '.' + this.name );
+      sceneryLog && sceneryLog.Paints && sceneryLog.push();
+
+      var primary = this.node[ this.name ];
+      if ( primary instanceof Gradient ) {
+        primary.invalidateCanvasGradient();
+      }
+      this.changeCallback();
+
+      sceneryLog && sceneryLog.Paints && sceneryLog.pop();
     },
 
     /**
@@ -67,60 +84,112 @@ define( function( require ) {
      *
      * Should update any listeners (if necessary), and call the callback (if necessary)
      */
-    update: function() {
+    updatePrimary: function() {
       var primary = this.node[ this.name ];
       if ( primary !== this.primary ) {
+        sceneryLog && sceneryLog.Paints && sceneryLog.Paints( '[PaintObserver] primary update ' + this.node.id + '.' + this.name );
+        sceneryLog && sceneryLog.Paints && sceneryLog.push();
+
         this.detachPrimary( this.primary );
+        this.primary = primary;
         this.attachPrimary( primary );
-        this.changeCallback();
-      }
-      else if ( primary instanceof Property ) {
-        var secondary = primary.get();
-        if ( secondary !== this.secondary ) {
-          this.detachSecondary( this.secondary );
-          this.attachSecondary( secondary );
-          this.changeCallback();
-        }
+        this.notifyChangeCallback();
+
+        sceneryLog && sceneryLog.Paints && sceneryLog.pop();
       }
     },
 
     /**
-     * Attempt to attach listeners to the paint's primary (the paint itself).
+     * Called when the value of a "primary" Property (contents of one, main or as a Gradient) is potentially changed.
      * @private
+     *
+     * @param {string|Color} newPaint
+     * @param {string|Color} oldPaint
+     */
+    updateSecondary: function( newPaint, oldPaint ) {
+      sceneryLog && sceneryLog.Paints && sceneryLog.Paints( '[PaintObserver] secondary update ' + this.node.id + '.' + this.name );
+      sceneryLog && sceneryLog.Paints && sceneryLog.push();
+
+      this.detachSecondary( oldPaint );
+      this.attachSecondary( newPaint );
+      this.notifyChangeCallback();
+
+      sceneryLog && sceneryLog.Paints && sceneryLog.pop();
+    },
+
+    /**
+     * Attempt to attach listeners to the paint's primary (the paint itself), or something else that acts like the primary
+     * (properties on a gradient).
+     * @private
+     *
+     * TODO: Note that this is called for gradient colors also
      *
      * NOTE: If it's a Property, we'll also need to handle the secondary (part inside the Property).
      *
      * @param {null|string|Color|Property.<string|Color>|LinearGradient|RadialGradient|Pattern} paint
      */
     attachPrimary: function( paint ) {
-      this.primary = paint;
+      sceneryLog && sceneryLog.Paints && sceneryLog.Paints( '[PaintObserver] attachPrimary ' + this.node.id + '.' + this.name );
+      sceneryLog && sceneryLog.Paints && sceneryLog.push();
+
       if ( paint instanceof Property ) {
-        paint.lazyLink( this.updateListener );
+        sceneryLog && sceneryLog.Paints && sceneryLog.Paints( '[PaintObserver] add Property listener ' + this.node.id + '.' + this.name );
+        sceneryLog && sceneryLog.Paints && sceneryLog.push();
+        paint.lazyLink( this.updateSecondaryListener );
         this.attachSecondary( paint.get() );
+        sceneryLog && sceneryLog.Paints && sceneryLog.pop();
       }
       else if ( paint instanceof Color ) {
-        paint.addChangeListener( this.changeCallback );
+        sceneryLog && sceneryLog.Paints && sceneryLog.Paints( '[PaintObserver] add Color listener ' + this.node.id + '.' + this.name );
+        paint.addChangeListener( this.notifyChangeCallback );
       }
+      else if ( paint instanceof Gradient ) {
+        sceneryLog && sceneryLog.Paints && sceneryLog.Paints( '[PaintObserver] add Gradient listeners ' + this.node.id + '.' + this.name );
+        sceneryLog && sceneryLog.Paints && sceneryLog.push();
+        for ( var i = 0; i < paint.stops.length; i++ ) {
+          this.attachPrimary( paint.stops[ i ].color );
+        }
+        sceneryLog && sceneryLog.Paints && sceneryLog.pop();
+      }
+
+      sceneryLog && sceneryLog.Paints && sceneryLog.pop();
     },
 
     /**
      * Attempt to detach listeners from the paint's primary (the paint itself).
      * @private
      *
-     * NOTE: If it's a Property, we'll also need to handle the secondary (part inside the Property).
+     * TODO: Note that this is called for gradient colors also
+     *
+     * NOTE: If it's a Property or Gradient, we'll also need to handle the secondaries (part(s) inside the Property(ies)).
      *
      * @param {null|string|Color|Property.<string|Color>|LinearGradient|RadialGradient|Pattern} paint
      */
     detachPrimary: function( paint ) {
+      sceneryLog && sceneryLog.Paints && sceneryLog.Paints( '[PaintObserver] detachPrimary ' + this.node.id + '.' + this.name );
+      sceneryLog && sceneryLog.Paints && sceneryLog.push();
+
       if ( paint instanceof Property ) {
-        paint.unlink( this.updateListener );
+        sceneryLog && sceneryLog.Paints && sceneryLog.Paints( '[PaintObserver] remove Property listener ' + this.node.id + '.' + this.name );
+        sceneryLog && sceneryLog.Paints && sceneryLog.push();
+        paint.unlink( this.updateSecondaryListener );
         this.detachSecondary( paint.get() );
-        this.secondary = null;
+        sceneryLog && sceneryLog.Paints && sceneryLog.pop();
       }
       else if ( paint instanceof Color ) {
-        paint.removeChangeListener( this.changeCallback );
+        sceneryLog && sceneryLog.Paints && sceneryLog.Paints( '[PaintObserver] remove Color listener ' + this.node.id + '.' + this.name );
+        paint.removeChangeListener( this.notifyChangeCallback );
       }
-      this.primary = null;
+      else if ( paint instanceof Gradient ) {
+        sceneryLog && sceneryLog.Paints && sceneryLog.Paints( '[PaintObserver] remove Gradient listeners ' + this.node.id + '.' + this.name );
+        sceneryLog && sceneryLog.Paints && sceneryLog.push();
+        for ( var i = 0; i < paint.stops.length; i++ ) {
+          this.detachPrimary( paint.stops[ i ].color );
+        }
+        sceneryLog && sceneryLog.Paints && sceneryLog.pop();
+      }
+
+      sceneryLog && sceneryLog.Paints && sceneryLog.pop();
     },
 
     /**
@@ -130,10 +199,15 @@ define( function( require ) {
      * @param {string|Color} paint
      */
     attachSecondary: function( paint ) {
-      this.secondary = paint;
+      sceneryLog && sceneryLog.Paints && sceneryLog.Paints( '[PaintObserver] attachSecondary ' + this.node.id + '.' + this.name );
+      sceneryLog && sceneryLog.Paints && sceneryLog.push();
+
       if ( paint instanceof Color ) {
-        paint.addChangeListener( this.changeCallback );
+        sceneryLog && sceneryLog.Paints && sceneryLog.Paints( '[PaintObserver] add Color listener ' + this.node.id + '.' + this.name );
+        paint.addChangeListener( this.notifyChangeCallback );
       }
+
+      sceneryLog && sceneryLog.Paints && sceneryLog.pop();
     },
 
     /**
@@ -143,10 +217,15 @@ define( function( require ) {
      * @param {string|Color} paint
      */
     detachSecondary: function( paint ) {
+      sceneryLog && sceneryLog.Paints && sceneryLog.Paints( '[PaintObserver] detachSecondary ' + this.node.id + '.' + this.name );
+      sceneryLog && sceneryLog.Paints && sceneryLog.push();
+
       if ( paint instanceof Color ) {
-        paint.removeChangeListener( this.changeCallback );
+        sceneryLog && sceneryLog.Paints && sceneryLog.Paints( '[PaintObserver] remove Color listener ' + this.node.id + '.' + this.name );
+        paint.removeChangeListener( this.notifyChangeCallback );
       }
-      this.secondary = null;
+
+      sceneryLog && sceneryLog.Paints && sceneryLog.pop();
     },
 
     /**
@@ -154,8 +233,14 @@ define( function( require ) {
      * @public (scenery-internal)
      */
     clean: function() {
+      sceneryLog && sceneryLog.Paints && sceneryLog.Paints( '[PaintObserver] clean ' + this.node.id + '.' + this.name );
+      sceneryLog && sceneryLog.Paints && sceneryLog.push();
+
       this.detachPrimary( this.primary );
+      this.primary = null;
       this.node = null;
+
+      sceneryLog && sceneryLog.Paints && sceneryLog.pop();
     }
   } );
 

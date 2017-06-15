@@ -1,5 +1,4 @@
-// Copyright 2013-2016, University of Colorado Boulder
-
+// Copyright 2013-2017, University of Colorado Boulder
 
 /**
  * Handles a visual SVG layer of drawables.
@@ -51,6 +50,7 @@ define( function( require ) {
 
       this.filterRootInstance = filterRootInstance;
 
+      this.dirtyGradients = cleanArray( this.dirtyGradients );
       this.dirtyGroups = cleanArray( this.dirtyGroups );
       this.dirtyDrawables = cleanArray( this.dirtyDrawables );
 
@@ -119,17 +119,17 @@ define( function( require ) {
         this.paintMap[ paint.id ].count++;
       }
       else {
-        var def = paint.getSVGDefinition();
-        def.setAttribute( 'id', paint.id + '-' + this.id );
+        var svgPaint = paint.createSVGPaint( this );
+        svgPaint.definition.setAttribute( 'id', paint.id + '-' + this.id );
 
-        // TODO: reduce allocations?
+        // TODO: reduce allocations? (pool these)
         this.paintMap[ paint.id ] = {
           count: 1,
           paint: paint,
-          def: def
+          svgPaint: svgPaint
         };
 
-        this.defs.appendChild( def );
+        this.defs.appendChild( svgPaint.definition );
       }
     },
 
@@ -150,13 +150,19 @@ define( function( require ) {
         assert && assert( entry.count >= 1 );
 
         if ( entry.count === 1 ) {
-          this.defs.removeChild( entry.def );
+          this.defs.removeChild( entry.svgPaint.definition );
+          entry.svgPaint.dispose();
           delete this.paintMap[ paint.id ]; // delete, so we don't memory leak if we run through MANY paints
         }
         else {
           entry.count--;
         }
       }
+    },
+
+    markDirtyGradient: function( gradient ) {
+      this.dirtyGradients.push( gradient );
+      this.markDirty();
     },
 
     markDirtyGroup: function( block ) {
@@ -213,6 +219,9 @@ define( function( require ) {
             group.update();
           }
         }
+        while ( this.dirtyGradients.length ) {
+          this.dirtyGradients.pop().update();
+        }
         while ( this.dirtyDrawables.length ) {
           var drawable = this.dirtyDrawables.pop();
 
@@ -237,6 +246,7 @@ define( function( require ) {
 
       // clear references
       this.filterRootInstance = null;
+      cleanArray( this.dirtyGradients );
       cleanArray( this.dirtyGroups );
       cleanArray( this.dirtyDrawables );
       this.paintMap = {};

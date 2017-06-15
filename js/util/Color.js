@@ -357,7 +357,12 @@ define( function( require ) {
       return this; // allow chaining
     },
 
-    // to what value a Canvas's context.fillStyle should be set
+    /**
+     * Returns an object that can be passed to a Canvas context's fillStyle or strokeStyle.
+     * @public
+     *
+     * @returns {string}
+     */
     getCanvasStyle: function() {
       return this.toCSS(); // should be inlined, leave like this for future maintainability
     },
@@ -479,12 +484,13 @@ define( function( require ) {
      *----------------------------------------------------------------------------*/
 
     // listener should be a callback expecting no arguments, listener() will be called when the color changes
+    // Allows duplicate copies of listeners
     addChangeListener: function( listener ) {
       assert && assert( listener !== undefined && listener !== null, 'Verify that the listener exists' );
-      assert && assert( !_.includes( this.listeners, listener ) );
       this.listeners.push( listener );
     },
 
+    // Allows duplicate copies of listeners
     removeChangeListener: function( listener ) {
       assert && assert( _.includes( this.listeners, listener ) );
       this.listeners.splice( _.indexOf( this.listeners, listener ), 1 );

@@ -523,7 +523,7 @@ define( function( require ) {
      * @returns {boolean}
      */
     requiresSVGBoundsWorkaround: function() {
-      if ( !this._stroke || !this._stroke.getSVGDefinition || !this.hasShape() ) {
+      if ( !this._stroke || !this._stroke.isPaint || !this.hasShape() ) {
         return false;
       }
 
