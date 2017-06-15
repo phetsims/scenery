@@ -17,7 +17,21 @@ define( function( require ) {
   var SVGRadialGradient = require( 'SCENERY/display/SVGRadialGradient' );
   var Vector2 = require( 'DOT/Vector2' );
 
-  // TODO: support Vector2s for p0 and p1
+  /**
+   * @constructor
+   * @extends Gradient
+   *
+   * TODO: add the ability to specify the color-stops inline. possibly [ [0,color1], [0.5,color2], [1,color3] ]
+   *
+   * TODO: support Vector2s as p0 and p1
+   *
+   * @param {number} x0 - X coordinate of the start point (ratio 0) in the local coordinate frame
+   * @param {number} y0 - Y coordinate of the start point (ratio 0) in the local coordinate frame
+   * @param {number} r0 - Radius of the start point (ratio 0) in the local coordinate frame
+   * @param {number} x1 - X coordinate of the end point (ratio 1) in the local coordinate frame
+   * @param {number} y1 - Y coordinate of the end point (ratio 1) in the local coordinate frame
+   * @param {number} r1 - Radius of the end point (ratio 1) in the local coordinate frame
+   */
   function RadialGradient( x0, y0, r0, x1, y1, r1 ) {
     // @public {Vector2}
     this.start = new Vector2( x0, y0 );

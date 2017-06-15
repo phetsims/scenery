@@ -4,6 +4,7 @@
  * A pattern that will deliver a fill or stroke that will repeat an image in both directions (x and y).
  *
  * TODO: future support for repeat-x, repeat-y or no-repeat (needs SVG support)
+ * TODO: support scene or other various content (SVG is flexible, can backport to canvas)
  *
  * @author Jonathan Olson <jonathan.olson@colorado.edu>
  */
@@ -16,8 +17,12 @@ define( function( require ) {
   var scenery = require( 'SCENERY/scenery' );
   var SVGPattern = require( 'SCENERY/display/SVGPattern' );
 
-  // TODO: support scene or other various content (SVG is flexible, can backport to canvas)
-  // TODO: investigate options to support repeat-x, repeat-y or no-repeat in SVG (available repeat options from Canvas)
+  /**
+   * @constructor
+   * @extends Paint
+   *
+   * @param {HTMLImageElement} image - The image to use as a repeated pattern.
+   */
   function Pattern( image ) {
     Paint.call( this );
 
@@ -30,8 +35,16 @@ define( function( require ) {
   scenery.register( 'Pattern', Pattern );
 
   inherit( Paint, Pattern, {
+    // @public {boolean}
     isPattern: true,
 
+    /**
+     * Returns an object that can be passed to a Canvas context's fillStyle or strokeStyle.
+     * @public
+     * @override
+     *
+     * @returns {*}
+     */
     getCanvasStyle: function() {
       return this.canvasPattern;
     },

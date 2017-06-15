@@ -357,7 +357,12 @@ define( function( require ) {
       return this; // allow chaining
     },
 
-    // to what value a Canvas's context.fillStyle should be set
+    /**
+     * Returns an object that can be passed to a Canvas context's fillStyle or strokeStyle.
+     * @public
+     *
+     * @returns {string}
+     */
     getCanvasStyle: function() {
       return this.toCSS(); // should be inlined, leave like this for future maintainability
     },
