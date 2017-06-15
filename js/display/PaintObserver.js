@@ -9,10 +9,11 @@
 define( function( require ) {
   'use strict';
 
-  var inherit = require( 'PHET_CORE/inherit' );
-  var scenery = require( 'SCENERY/scenery' );
   var Color = require( 'SCENERY/util/Color' );
+  var Gradient = require( 'SCENERY/util/Gradient' );
+  var inherit = require( 'PHET_CORE/inherit' );
   var Property = require( 'AXON/Property' );
+  var scenery = require( 'SCENERY/scenery' );
 
   /**
    * An observer for a fill or stroke, that will be able to trigger notifications when it changes.
@@ -37,12 +38,8 @@ define( function( require ) {
     // Our unwrapped fill/stroke value
     this.primary = null;
 
-    // @private {null|string|Color|Property.<string|Color>|LinearGradient|RadialGradient|Pattern}
-    // If our primary is a Property of a Color, we'll also need to attach listeners to the Color
-    this.secondary = null;
-
-    // @private {function} - To be called whenever our fill/stroke value may have changed
-    this.updateListener = this.update.bind( this );
+    // @private {function} - To be called whenever our secondary fill/stroke value may have changed
+    this.updateSecondaryListener = this.updateSecondary.bind( this );
   }
 
   scenery.register( 'PaintObserver', PaintObserver );
@@ -58,7 +55,7 @@ define( function( require ) {
       assert && assert( node !== null );
       this.node = node;
 
-      this.update();
+      this.updatePrimary();
     },
 
     /**
@@ -67,21 +64,25 @@ define( function( require ) {
      *
      * Should update any listeners (if necessary), and call the callback (if necessary)
      */
-    update: function() {
+    updatePrimary: function() {
       var primary = this.node[ this.name ];
       if ( primary !== this.primary ) {
         this.detachPrimary( this.primary );
         this.attachPrimary( primary );
         this.changeCallback();
       }
-      else if ( primary instanceof Property ) {
-        var secondary = primary.get();
-        if ( secondary !== this.secondary ) {
-          this.detachSecondary( this.secondary );
-          this.attachSecondary( secondary );
-          this.changeCallback();
-        }
-      }
+    },
+
+    /**
+     * Called when the value of a "primary" Property (contents of one, main or as a Gradient) is potentially changed.
+     * @private
+     *
+     * @param {string|Color} newPaint
+     * @param {string|Color} oldPaint
+     */
+    updateSecondary: function( newPaint, oldPaint ) {
+      this.detachSecondary( oldPaint );
+      this.attachSecondary( newPaint );
     },
 
     /**
@@ -95,11 +96,16 @@ define( function( require ) {
     attachPrimary: function( paint ) {
       this.primary = paint;
       if ( paint instanceof Property ) {
-        paint.lazyLink( this.updateListener );
+        paint.lazyLink( this.updateSecondaryListener );
         this.attachSecondary( paint.get() );
       }
       else if ( paint instanceof Color ) {
         paint.addChangeListener( this.changeCallback );
+      }
+      else if ( paint instanceof Gradient ) {
+        for ( var i = 0; i < paint.stops.length; i++ ) {
+          this.attachSecondary( paint.stops[ i ].color );
+        }
       }
     },
 
@@ -107,18 +113,22 @@ define( function( require ) {
      * Attempt to detach listeners from the paint's primary (the paint itself).
      * @private
      *
-     * NOTE: If it's a Property, we'll also need to handle the secondary (part inside the Property).
+     * NOTE: If it's a Property or Gradient, we'll also need to handle the secondaries (part(s) inside the Property(ies)).
      *
      * @param {null|string|Color|Property.<string|Color>|LinearGradient|RadialGradient|Pattern} paint
      */
     detachPrimary: function( paint ) {
       if ( paint instanceof Property ) {
-        paint.unlink( this.updateListener );
+        paint.unlink( this.updateSecondaryListener );
         this.detachSecondary( paint.get() );
-        this.secondary = null;
       }
       else if ( paint instanceof Color ) {
         paint.removeChangeListener( this.changeCallback );
+      }
+      else if ( paint instanceof Gradient ) {
+        for ( var i = 0; i < paint.stops.length; i++ ) {
+          this.detachSecondary( paint.stops[ i ].color );
+        }
       }
       this.primary = null;
     },
@@ -130,7 +140,6 @@ define( function( require ) {
      * @param {string|Color} paint
      */
     attachSecondary: function( paint ) {
-      this.secondary = paint;
       if ( paint instanceof Color ) {
         paint.addChangeListener( this.changeCallback );
       }
@@ -146,7 +155,6 @@ define( function( require ) {
       if ( paint instanceof Color ) {
         paint.removeChangeListener( this.changeCallback );
       }
-      this.secondary = null;
     },
 
     /**

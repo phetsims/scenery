@@ -51,6 +51,7 @@ define( function( require ) {
 
       this.filterRootInstance = filterRootInstance;
 
+      this.dirtyGradients = cleanArray( this.dirtyGradients );
       this.dirtyGroups = cleanArray( this.dirtyGroups );
       this.dirtyDrawables = cleanArray( this.dirtyDrawables );
 
@@ -159,6 +160,11 @@ define( function( require ) {
       }
     },
 
+    markDirtyGradient: function( gradient ) {
+      this.dirtyGradients.push( gradient );
+      this.markDirty();
+    },
+
     markDirtyGroup: function( block ) {
       this.dirtyGroups.push( block );
       this.markDirty();
@@ -213,6 +219,9 @@ define( function( require ) {
             group.update();
           }
         }
+        while ( this.dirtyGradients.length ) {
+          this.dirtyGradients.pop().update();
+        }
         while ( this.dirtyDrawables.length ) {
           var drawable = this.dirtyDrawables.pop();
 
@@ -237,6 +246,7 @@ define( function( require ) {
 
       // clear references
       this.filterRootInstance = null;
+      cleanArray( this.dirtyGradients );
       cleanArray( this.dirtyGroups );
       cleanArray( this.dirtyDrawables );
       this.paintMap = {};

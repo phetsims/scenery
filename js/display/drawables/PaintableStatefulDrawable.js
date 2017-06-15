@@ -123,7 +123,7 @@ define( function( require ) {
 
         this.dirtyFill = true;
         this.markPaintDirty();
-        this.fillObserver.update(); // TODO: look into having the fillObserver be notified of Node changes as our source
+        this.fillObserver.updatePrimary(); // TODO: look into having the fillObserver be notified of Node changes as our source
       };
 
       /**
@@ -135,7 +135,7 @@ define( function( require ) {
 
         this.dirtyStroke = true;
         this.markPaintDirty();
-        this.strokeObserver.update(); // TODO: look into having the strokeObserver be notified of Node changes as our source
+        this.strokeObserver.updatePrimary(); // TODO: look into having the strokeObserver be notified of Node changes as our source
       };
 
       /**

@@ -20,13 +20,26 @@ define( function( require ) {
 
   // TODO: support Vector2s for p0 and p1
   function RadialGradient( x0, y0, r0, x1, y1, r1 ) {
+    // @public {Vector2}
     this.start = new Vector2( x0, y0 );
     this.end = new Vector2( x1, y1 );
+
+    // @public {number}
     this.startRadius = r0;
     this.endRadius = r1;
 
-    // linear function from radius to point on the line from start to end
+    // @public {Vector2} - linear function from radius to point on the line from start to end
     this.focalPoint = this.start.plus( this.end.minus( this.start ).times( this.startRadius / ( this.startRadius - this.endRadius ) ) );
+
+    // @public {boolean}
+    this.startIsLarger = this.startRadius > this.endRadius;
+
+    // @public {Vector2}
+    this.largePoint = this.startIsLarger ? this.start : this.end;
+
+    // @public {number}
+    this.maxRadius = Math.max( this.startRadius, this.endRadius );
+    this.minRadius = Math.min( this.startRadius, this.endRadius );
 
     // make sure that the focal point is in both circles. SVG doesn't support rendering outside of them
     if ( this.startRadius >= this.endRadius ) {
@@ -36,8 +49,7 @@ define( function( require ) {
       assert && assert( this.focalPoint.minus( this.end ).magnitude() <= this.endRadius );
     }
 
-    // use the global scratch canvas instead of creating a new Canvas
-    Gradient.call( this, scenery.scratchContext.createRadialGradient( x0, y0, r0, x1, y1, r1 ) );
+    Gradient.call( this );
   }
 
   scenery.register( 'RadialGradient', RadialGradient );
@@ -45,6 +57,64 @@ define( function( require ) {
   inherit( Gradient, RadialGradient, {
 
     isRadialGradient: true,
+
+    /**
+     * Returns a fresh gradient given the starting parameters
+     * @public
+     * @override
+     *
+     * @returns {CanvasGradient}
+     */
+    createCanvasGradient: function() {
+      // use the global scratch canvas instead of creating a new Canvas
+      return scenery.scratchContext.createRadialGradient( this.start.x, this.start.y, this.startRadius, this.end.x, this.end.y, this.endRadius );
+    },
+
+    /**
+     * Returns stops suitable for direct SVG use.
+     * @public
+     * @override
+     *
+     * NOTE: SVG has certain stop requirements, so we need to remap/reverse in some cases.
+     *
+     * @returns {Array.<{ ratio: {number}, stop: {Color|string|Property.<Color|string|null>|null} }>}
+     */
+    getSVGStops: function() {
+      var startIsLarger = this.startIsLarger;
+      var maxRadius = this.maxRadius;
+      var minRadius = this.minRadius;
+
+      //TODO: replace with dot.Util.linear
+      // maps x linearly from [a0,b0] => [a1,b1]
+      function linearMap( a0, b0, a1, b1, x ) {
+        return a1 + ( x - a0 ) * ( b1 - a1 ) / ( b0 - a0 );
+      }
+
+      function mapStop( stop ) {
+        // flip the stops if the start has a larger radius
+        var ratio = startIsLarger ? 1 - stop.ratio : stop.ratio;
+
+        // scale the stops properly if the smaller radius isn't 0
+        if ( minRadius > 0 ) {
+          // scales our ratio from [0,1] => [minRadius/maxRadius,0]
+          ratio = linearMap( 0, 1, minRadius / maxRadius, 1, ratio );
+        }
+
+        return {
+          ratio: ratio,
+          color: stop.color
+        };
+      }
+
+      var stops = this.stops.map( mapStop );
+
+      // switch the direction we apply stops in, so that the ratios always are increasing.
+      if ( startIsLarger ) {
+        stops.reverse();
+      }
+
+      return stops;
+    },
 
     getSVGDefinition: function() {
       var startIsLarger = this.startRadius > this.endRadius;

@@ -28,8 +28,7 @@ define( function( require ) {
     this.start = usesVectors ? x0 : new Vector2( x0, y0 );
     this.end = usesVectors ? y0 : new Vector2( x1, y1 );
 
-    // use the global scratch canvas instead of creating a new Canvas
-    Gradient.call( this, scenery.scratchContext.createLinearGradient( x0, y0, x1, y1 ) );
+    Gradient.call( this );
   }
 
   scenery.register( 'LinearGradient', LinearGradient );
@@ -37,6 +36,18 @@ define( function( require ) {
   inherit( Gradient, LinearGradient, {
 
     isLinearGradient: true,
+
+    /**
+     * Returns a fresh gradient given the starting parameters
+     * @public
+     * @override
+     *
+     * @returns {CanvasGradient}
+     */
+    createCanvasGradient: function() {
+      // use the global scratch canvas instead of creating a new Canvas
+      return scenery.scratchContext.createLinearGradient( this.start.x, this.start.y, this.end.x, this.end.y );
+    },
 
     // seems we need the defs: http://stackoverflow.com/questions/7614209/linear-gradients-in-svg-without-defs
     // SVG: spreadMethod 'pad' 'reflect' 'repeat' - find Canvas usage
