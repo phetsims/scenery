@@ -35,6 +35,9 @@ define( function( require ) {
      * @param {Gradient} gradient
      */
     initialize: function( svgBlock, gradient ) {
+      sceneryLog && sceneryLog.Paints && sceneryLog.Paints( '[SVGGradient] initialize ' + gradient.id );
+      sceneryLog && sceneryLog.Paints && sceneryLog.push();
+
       // @private {SVGBlock} - transient
       this.svgBlock = svgBlock;
 
@@ -71,6 +74,8 @@ define( function( require ) {
 
       // @private {boolean}
       this.dirty = false;
+
+      sceneryLog && sceneryLog.Paints && sceneryLog.pop();
     },
 
     /**
@@ -90,9 +95,14 @@ define( function( require ) {
      */
     markDirty: function() {
       if ( !this.dirty ) {
+        sceneryLog && sceneryLog.Paints && sceneryLog.Paints( '[SVGGradient] switched to dirty: ' + this.gradient.id );
+        sceneryLog && sceneryLog.Paints && sceneryLog.push();
+
         this.dirty = true;
 
         this.svgBlock.markDirtyGradient( this );
+
+        sceneryLog && sceneryLog.Paints && sceneryLog.pop();
       }
     },
 
@@ -106,9 +116,14 @@ define( function( require ) {
       }
       this.dirty = false;
 
+      sceneryLog && sceneryLog.Paints && sceneryLog.Paints( '[SVGGradient] update: ' + this.gradient.id );
+      sceneryLog && sceneryLog.Paints && sceneryLog.push();
+
       for ( var i = 0; i < this.stops.length; i++ ) {
         this.stops[ i ].update();
       }
+
+      sceneryLog && sceneryLog.Paints && sceneryLog.pop();
     },
 
     /**
@@ -116,6 +131,9 @@ define( function( require ) {
      * @public
      */
     dispose: function() {
+      sceneryLog && sceneryLog.Paints && sceneryLog.Paints( '[SVGGradient] dispose ' + this.gradient.id );
+      sceneryLog && sceneryLog.Paints && sceneryLog.push();
+
       // Dispose and clean up stops
       for ( var i = 0; i < this.stops.length; i++ ) {
         var stop = this.stops[ i ]; // SVGGradientStop
@@ -128,6 +146,8 @@ define( function( require ) {
       this.gradient = null;
 
       this.freeToPool();
+
+      sceneryLog && sceneryLog.Paints && sceneryLog.pop();
     }
   } );
 

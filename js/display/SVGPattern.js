@@ -32,6 +32,9 @@ define( function( require ) {
      * @param {Pattern} pattern
      */
     initialize: function( pattern ) {
+      sceneryLog && sceneryLog.Paints && sceneryLog.Paints( '[SVGPattern] initialize: ' + pattern.id );
+      sceneryLog && sceneryLog.Paints && sceneryLog.push();
+
       var hasPreviousDefinition = this.definition !== undefined;
 
       // @public {SVGPatternElement} - persistent
@@ -67,6 +70,8 @@ define( function( require ) {
       if ( !hasPreviousDefinition ) {
         this.definition.appendChild( this.imageElement );
       }
+
+      sceneryLog && sceneryLog.Paints && sceneryLog.pop();
 
       return this;
     },

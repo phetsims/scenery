@@ -66,11 +66,16 @@ define( function( require ) {
      * @private
      */
     notifyChanged: function() {
+      sceneryLog && sceneryLog.Paints && sceneryLog.Paints( '[PaintObserver] changed ' + this.node.id + '.' + this.name );
+      sceneryLog && sceneryLog.Paints && sceneryLog.push();
+
       var primary = this.node[ this.name ];
       if ( primary instanceof Gradient ) {
         primary.invalidateCanvasGradient();
       }
       this.changeCallback();
+
+      sceneryLog && sceneryLog.Paints && sceneryLog.pop();
     },
 
     /**
@@ -82,9 +87,14 @@ define( function( require ) {
     updatePrimary: function() {
       var primary = this.node[ this.name ];
       if ( primary !== this.primary ) {
+        sceneryLog && sceneryLog.Paints && sceneryLog.Paints( '[PaintObserver] primary update ' + this.node.id + '.' + this.name );
+        sceneryLog && sceneryLog.Paints && sceneryLog.push();
+
         this.detachPrimary( this.primary );
         this.attachPrimary( primary );
         this.notifyChangeCallback();
+
+        sceneryLog && sceneryLog.Paints && sceneryLog.pop();
       }
     },
 
@@ -96,9 +106,14 @@ define( function( require ) {
      * @param {string|Color} oldPaint
      */
     updateSecondary: function( newPaint, oldPaint ) {
+      sceneryLog && sceneryLog.Paints && sceneryLog.Paints( '[PaintObserver] secondary update ' + this.node.id + '.' + this.name );
+      sceneryLog && sceneryLog.Paints && sceneryLog.push();
+
       this.detachSecondary( oldPaint );
       this.attachSecondary( newPaint );
       this.notifyChangeCallback();
+
+      sceneryLog && sceneryLog.Paints && sceneryLog.pop();
     },
 
     /**
@@ -110,19 +125,27 @@ define( function( require ) {
      * @param {null|string|Color|Property.<string|Color>|LinearGradient|RadialGradient|Pattern} paint
      */
     attachPrimary: function( paint ) {
+      sceneryLog && sceneryLog.Paints && sceneryLog.Paints( '[PaintObserver] attachPrimary ' + this.node.id + '.' + this.name );
+      sceneryLog && sceneryLog.Paints && sceneryLog.push();
+
       this.primary = paint;
       if ( paint instanceof Property ) {
+        sceneryLog && sceneryLog.Paints && sceneryLog.Paints( '[PaintObserver] add Property listener ' + this.node.id + '.' + this.name );
         paint.lazyLink( this.updateSecondaryListener );
         this.attachSecondary( paint.get() );
       }
       else if ( paint instanceof Color ) {
+        sceneryLog && sceneryLog.Paints && sceneryLog.Paints( '[PaintObserver] add Color listener ' + this.node.id + '.' + this.name );
         paint.addChangeListener( this.notifyChangeCallback );
       }
       else if ( paint instanceof Gradient ) {
+        sceneryLog && sceneryLog.Paints && sceneryLog.Paints( '[PaintObserver] add Gradient listeners ' + this.node.id + '.' + this.name );
         for ( var i = 0; i < paint.stops.length; i++ ) {
           this.attachSecondary( paint.stops[ i ].color );
         }
       }
+
+      sceneryLog && sceneryLog.Paints && sceneryLog.pop();
     },
 
     /**
@@ -134,19 +157,27 @@ define( function( require ) {
      * @param {null|string|Color|Property.<string|Color>|LinearGradient|RadialGradient|Pattern} paint
      */
     detachPrimary: function( paint ) {
+      sceneryLog && sceneryLog.Paints && sceneryLog.Paints( '[PaintObserver] detachPrimary ' + this.node.id + '.' + this.name );
+      sceneryLog && sceneryLog.Paints && sceneryLog.push();
+
       if ( paint instanceof Property ) {
+        sceneryLog && sceneryLog.Paints && sceneryLog.Paints( '[PaintObserver] remove Property listener ' + this.node.id + '.' + this.name );
         paint.unlink( this.updateSecondaryListener );
         this.detachSecondary( paint.get() );
       }
       else if ( paint instanceof Color ) {
+        sceneryLog && sceneryLog.Paints && sceneryLog.Paints( '[PaintObserver] remove Color listener ' + this.node.id + '.' + this.name );
         paint.removeChangeListener( this.notifyChangeCallback );
       }
       else if ( paint instanceof Gradient ) {
+        sceneryLog && sceneryLog.Paints && sceneryLog.Paints( '[PaintObserver] remove Gradient listeners ' + this.node.id + '.' + this.name );
         for ( var i = 0; i < paint.stops.length; i++ ) {
           this.detachSecondary( paint.stops[ i ].color );
         }
       }
       this.primary = null;
+
+      sceneryLog && sceneryLog.Paints && sceneryLog.pop();
     },
 
     /**
@@ -156,9 +187,15 @@ define( function( require ) {
      * @param {string|Color} paint
      */
     attachSecondary: function( paint ) {
+      sceneryLog && sceneryLog.Paints && sceneryLog.Paints( '[PaintObserver] attachSecondary ' + this.node.id + '.' + this.name );
+      sceneryLog && sceneryLog.Paints && sceneryLog.push();
+
       if ( paint instanceof Color ) {
+        sceneryLog && sceneryLog.Paints && sceneryLog.Paints( '[PaintObserver] add Color listener ' + this.node.id + '.' + this.name );
         paint.addChangeListener( this.notifyChangeCallback );
       }
+
+      sceneryLog && sceneryLog.Paints && sceneryLog.pop();
     },
 
     /**
@@ -168,9 +205,15 @@ define( function( require ) {
      * @param {string|Color} paint
      */
     detachSecondary: function( paint ) {
+      sceneryLog && sceneryLog.Paints && sceneryLog.Paints( '[PaintObserver] detachSecondary ' + this.node.id + '.' + this.name );
+      sceneryLog && sceneryLog.Paints && sceneryLog.push();
+
       if ( paint instanceof Color ) {
+        sceneryLog && sceneryLog.Paints && sceneryLog.Paints( '[PaintObserver] remove Color listener ' + this.node.id + '.' + this.name );
         paint.removeChangeListener( this.notifyChangeCallback );
       }
+
+      sceneryLog && sceneryLog.Paints && sceneryLog.pop();
     },
 
     /**
@@ -178,8 +221,13 @@ define( function( require ) {
      * @public (scenery-internal)
      */
     clean: function() {
+      sceneryLog && sceneryLog.Paints && sceneryLog.Paints( '[PaintObserver] clean ' + this.node.id + '.' + this.name );
+      sceneryLog && sceneryLog.Paints && sceneryLog.push();
+
       this.detachPrimary( this.primary );
       this.node = null;
+
+      sceneryLog && sceneryLog.Paints && sceneryLog.pop();
     }
   } );
 

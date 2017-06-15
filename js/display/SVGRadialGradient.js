@@ -38,6 +38,9 @@ define( function( require ) {
      * @param {RadialGradient} radialGradient
      */
     initialize: function( svgBlock, radialGradient ) {
+      sceneryLog && sceneryLog.Paints && sceneryLog.Paints( '[SVGRadialGradient] initialize ' + radialGradient.id );
+      sceneryLog && sceneryLog.Paints && sceneryLog.push();
+
       SVGGradient.prototype.initialize.call( this, svgBlock, radialGradient );
 
       // Radial-specific setup
@@ -46,6 +49,8 @@ define( function( require ) {
       this.definition.setAttribute( 'r', radialGradient.maxRadius );
       this.definition.setAttribute( 'fx', radialGradient.focalPoint.x );
       this.definition.setAttribute( 'fy', radialGradient.focalPoint.y );
+
+      sceneryLog && sceneryLog.Paints && sceneryLog.pop();
 
       return this;
     },

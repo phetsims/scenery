@@ -38,6 +38,9 @@ define( function( require ) {
      * @param {LinearGradient} linearGradient
      */
     initialize: function( svgBlock, linearGradient ) {
+      sceneryLog && sceneryLog.Paints && sceneryLog.Paints( '[SVGLinearGradient] initialize ' + linearGradient.id );
+      sceneryLog && sceneryLog.Paints && sceneryLog.push();
+
       SVGGradient.prototype.initialize.call( this, svgBlock, linearGradient );
 
       // seems we need the defs: http://stackoverflow.com/questions/7614209/linear-gradients-in-svg-without-defs
@@ -56,6 +59,8 @@ define( function( require ) {
       this.definition.setAttribute( 'y1', linearGradient.start.y );
       this.definition.setAttribute( 'x2', linearGradient.end.x );
       this.definition.setAttribute( 'y2', linearGradient.end.y );
+
+      sceneryLog && sceneryLog.Paints && sceneryLog.pop();
 
       return this;
     },

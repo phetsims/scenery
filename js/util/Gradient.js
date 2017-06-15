@@ -99,6 +99,7 @@ define( function( require ) {
     },
 
     invalidateCanvasGradient: function() {
+      sceneryLog && sceneryLog.Paints && sceneryLog.Paints( 'Invalidated Canvas Gradient for #' + this.id );
       this.colorStopsDirty = true;
     },
 
@@ -120,6 +121,9 @@ define( function( require ) {
     getCanvasStyle: function() {
       // Check if we need to regenerate the Canvas gradient
       if ( !this.canvasGradient || ( this.colorStopsDirty && this.haveCanvasColorStopsChanged() ) ) {
+        sceneryLog && sceneryLog.Paints && sceneryLog.Paints( 'Regenerating Canvas Gradient for #' + this.id );
+        sceneryLog && sceneryLog.Paints && sceneryLog.push();
+
         this.colorStopsDirty = false;
 
         cleanArray( this.lastColorStopValues );
@@ -134,6 +138,8 @@ define( function( require ) {
           // Save it so we can compare next time whether our generated gradient would have changed
           this.lastColorStopValues.push( colorString );
         }
+
+        sceneryLog && sceneryLog.Paints && sceneryLog.pop();
       }
 
       return this.canvasGradient;

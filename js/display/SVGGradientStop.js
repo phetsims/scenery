@@ -41,11 +41,17 @@ define( function( require ) {
      * @param {Color|string|Property.<Color|string|null>|null} color
      */
     initialize: function( svgGradient, ratio, color ) {
+      sceneryLog && sceneryLog.Paints && sceneryLog.Paints( '[SVGGradientStop] initialize: ' + svgGradient.gradient.id + ' : ' + ratio );
+      sceneryLog && sceneryLog.Paints && sceneryLog.push();
+
       // @private {SVGGradient} - transient
       this.svgGradient = svgGradient;
 
       // @private {Color|string|Property.<Color|string|null>|null} - transient
       this.color = color;
+
+      // @private {number}
+      this.ratio = ratio;
 
       // @public {SVGStopElement} - persistent
       this.svgElement = this.svgElement || document.createElementNS( scenery.svgns, 'stop' );
@@ -62,14 +68,19 @@ define( function( require ) {
       this.colorListener = this.colorListener || this.update.bind( this );
 
       if ( color instanceof Property ) {
+        sceneryLog && sceneryLog.Paints && sceneryLog.Paints( '[SVGGradientStop] adding Property listener: ' + this.svgGradient.gradient.id + ' : ' + this.ratio );
         color.lazyLink( this.propertyListener );
         if ( color.value instanceof Color ) {
+          sceneryLog && sceneryLog.Paints && sceneryLog.Paints( '[SVGGradientStop] adding Color listener: ' + this.svgGradient.gradient.id + ' : ' + this.ratio );
           color.value.addChangeListener( this.colorListener );
         }
       }
       else if ( color instanceof Color ) {
+        sceneryLog && sceneryLog.Paints && sceneryLog.Paints( '[SVGGradientStop] adding Color listener: ' + this.svgGradient.gradient.id + ' : ' + this.ratio );
         color.addChangeListener( this.colorListener );
       }
+
+      sceneryLog && sceneryLog.Paints && sceneryLog.pop();
 
       return this;
     },
@@ -83,9 +94,11 @@ define( function( require ) {
      */
     onPropertyChange: function( newValue, oldValue ) {
       if ( oldValue instanceof Color ) {
+        sceneryLog && sceneryLog.Paints && sceneryLog.Paints( '[SVGGradientStop] removing Color listener: ' + this.svgGradient.gradient.id + ' : ' + this.ratio );
         oldValue.removeChangeListener( this.colorListener );
       }
       if ( newValue instanceof Color ) {
+        sceneryLog && sceneryLog.Paints && sceneryLog.Paints( '[SVGGradientStop] adding Color listener: ' + this.svgGradient.gradient.id + ' : ' + this.ratio );
         newValue.addChangeListener( this.colorListener );
       }
 
@@ -102,6 +115,9 @@ define( function( require ) {
         return;
       }
       this.dirty = false;
+
+      sceneryLog && sceneryLog.Paints && sceneryLog.Paints( '[SVGGradientStop] update: ' + this.svgGradient.gradient.id + ' : ' + this.ratio );
+      sceneryLog && sceneryLog.Paints && sceneryLog.push();
 
       // {Color|string|Property.<Color|string|null>|null}
       var color = this.color;
@@ -135,6 +151,8 @@ define( function( require ) {
       var stopColorRule = 'stop-color: ' + scratchColor.toCSS() + ';';
 
       this.svgElement.setAttribute( 'style', stopColorRule + ' ' + stopOpacityRule );
+
+      sceneryLog && sceneryLog.Paints && sceneryLog.pop();
     },
 
     /**
@@ -142,15 +160,21 @@ define( function( require ) {
      * @public
      */
     dispose: function() {
+      sceneryLog && sceneryLog.Paints && sceneryLog.Paints( '[SVGGradientStop] dispose: ' + this.svgGradient.gradient.id + ' : ' + this.ratio );
+      sceneryLog && sceneryLog.Paints && sceneryLog.push();
+
       var color = this.color;
 
       if ( color instanceof Property ) {
+        sceneryLog && sceneryLog.Paints && sceneryLog.Paints( '[SVGGradientStop] removing Property listener: ' + this.svgGradient.gradient.id + ' : ' + this.ratio );
         color.unlink( this.propertyListener );
         if ( color.value instanceof Color ) {
+          sceneryLog && sceneryLog.Paints && sceneryLog.Paints( '[SVGGradientStop] removing Color listener: ' + this.svgGradient.gradient.id + ' : ' + this.ratio );
           color.value.removeChangeListener( this.colorListener );
         }
       }
       else if ( color instanceof Color ) {
+        sceneryLog && sceneryLog.Paints && sceneryLog.Paints( '[SVGGradientStop] removing Color listener: ' + this.svgGradient.gradient.id + ' : ' + this.ratio );
         color.removeChangeListener( this.colorListener );
       }
 
@@ -158,6 +182,8 @@ define( function( require ) {
       this.svgGradient = null; // clear the reference
 
       this.freeToPool();
+
+      sceneryLog && sceneryLog.Paints && sceneryLog.pop();
     }
   } );
 
