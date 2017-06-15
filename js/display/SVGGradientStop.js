@@ -65,7 +65,7 @@ define( function( require ) {
 
       // @private {function} - persistent
       this.propertyListener = this.propertyListener || this.onPropertyChange.bind( this );
-      this.colorListener = this.colorListener || this.update.bind( this );
+      this.colorListener = this.colorListener || this.markDirty.bind( this );
 
       if ( color instanceof Property ) {
         sceneryLog && sceneryLog.Paints && sceneryLog.Paints( '[SVGGradientStop] adding Property listener: ' + this.svgGradient.gradient.id + ' : ' + this.ratio );
@@ -102,6 +102,14 @@ define( function( require ) {
         newValue.addChangeListener( this.colorListener );
       }
 
+      this.markDirty();
+    },
+
+    /**
+     * Should be called when the color stop's value may have changed.
+     * @private
+     */
+    markDirty: function() {
       this.dirty = true;
       this.svgGradient.markDirty();
     },

@@ -145,7 +145,8 @@ an UI and Display made for visual testing and debugging.
         setTimeout( function() {
           scenery.enableLogging( [ 'Paints' ] );
 
-          window.prop = new axon.Property( 'red' );
+          window.color = new scenery.Color( 255, 0, 255 );
+          window.prop = new axon.Property( color );
           window.gradient = new scenery.LinearGradient( -50, 0, 50, 0 ).addColorStop( 0, window.prop )
                                                                        .addColorStop( 1, 'blue' );
 
