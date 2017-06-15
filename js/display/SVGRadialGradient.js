@@ -29,7 +29,7 @@ define( function( require ) {
 
   scenery.register( 'SVGRadialGradient', SVGRadialGradient );
 
-  inherit( Object, SVGRadialGradient, {
+  inherit( SVGGradient, SVGRadialGradient, {
     /**
      * Poolable initializer.
      * @private
@@ -46,6 +46,8 @@ define( function( require ) {
       this.definition.setAttribute( 'r', radialGradient.maxRadius );
       this.definition.setAttribute( 'fx', radialGradient.focalPoint.x );
       this.definition.setAttribute( 'fy', radialGradient.focalPoint.y );
+
+      return this;
     },
 
     /**

@@ -70,6 +70,8 @@ define( function( require ) {
       else if ( color instanceof Color ) {
         color.addChangeListener( this.colorListener );
       }
+
+      return this;
     },
 
     /**

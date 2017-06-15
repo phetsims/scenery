@@ -59,7 +59,7 @@ define( function( require ) {
 
     /**
      * Returns a fresh gradient given the starting parameters
-     * @public
+     * @protected
      * @override
      *
      * @returns {CanvasGradient}

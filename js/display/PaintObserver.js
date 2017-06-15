@@ -34,6 +34,9 @@ define( function( require ) {
     // @private {function} - Our callback
     this.changeCallback = changeCallback;
 
+    // @private {function} - To be called when a potential change is detected
+    this.notifyChangeCallback = this.notifyChanged.bind( this );
+
     // @private {null|string|Color|Property.<string|Color>|LinearGradient|RadialGradient|Pattern}
     // Our unwrapped fill/stroke value
     this.primary = null;
@@ -59,6 +62,18 @@ define( function( require ) {
     },
 
     /**
+     * Calls the change callback, and invalidates the paint itself if it's a gradient.
+     * @private
+     */
+    notifyChanged: function() {
+      var primary = this.node[ this.name ];
+      if ( primary instanceof Gradient ) {
+        primary.invalidateCanvasGradient();
+      }
+      this.changeCallback();
+    },
+
+    /**
      * Should be called when our paint (fill/stroke) may have changed.
      * @public (scenery-internal)
      *
@@ -69,7 +84,7 @@ define( function( require ) {
       if ( primary !== this.primary ) {
         this.detachPrimary( this.primary );
         this.attachPrimary( primary );
-        this.changeCallback();
+        this.notifyChangeCallback();
       }
     },
 
@@ -100,7 +115,7 @@ define( function( require ) {
         this.attachSecondary( paint.get() );
       }
       else if ( paint instanceof Color ) {
-        paint.addChangeListener( this.changeCallback );
+        paint.addChangeListener( this.notifyChangeCallback );
       }
       else if ( paint instanceof Gradient ) {
         for ( var i = 0; i < paint.stops.length; i++ ) {
@@ -123,7 +138,7 @@ define( function( require ) {
         this.detachSecondary( paint.get() );
       }
       else if ( paint instanceof Color ) {
-        paint.removeChangeListener( this.changeCallback );
+        paint.removeChangeListener( this.notifyChangeCallback );
       }
       else if ( paint instanceof Gradient ) {
         for ( var i = 0; i < paint.stops.length; i++ ) {
@@ -141,7 +156,7 @@ define( function( require ) {
      */
     attachSecondary: function( paint ) {
       if ( paint instanceof Color ) {
-        paint.addChangeListener( this.changeCallback );
+        paint.addChangeListener( this.notifyChangeCallback );
       }
     },
 
@@ -153,7 +168,7 @@ define( function( require ) {
      */
     detachSecondary: function( paint ) {
       if ( paint instanceof Color ) {
-        paint.removeChangeListener( this.changeCallback );
+        paint.removeChangeListener( this.notifyChangeCallback );
       }
     },
 

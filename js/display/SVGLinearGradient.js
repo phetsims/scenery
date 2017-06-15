@@ -29,7 +29,7 @@ define( function( require ) {
 
   scenery.register( 'SVGLinearGradient', SVGLinearGradient );
 
-  inherit( Object, SVGLinearGradient, {
+  inherit( SVGGradient, SVGLinearGradient, {
     /**
      * Poolable initializer.
      * @private
@@ -56,6 +56,8 @@ define( function( require ) {
       this.definition.setAttribute( 'y1', linearGradient.start.y );
       this.definition.setAttribute( 'x2', linearGradient.end.x );
       this.definition.setAttribute( 'y2', linearGradient.end.y );
+
+      return this;
     },
 
     /**

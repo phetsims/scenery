@@ -119,7 +119,7 @@ define( function( require ) {
         this.paintMap[ paint.id ].count++;
       }
       else {
-        var svgPaint = paint.createSVGPaint();
+        var svgPaint = paint.createSVGPaint( this );
         svgPaint.definition.setAttribute( 'id', paint.id + '-' + this.id );
 
         // TODO: reduce allocations? (pool these)

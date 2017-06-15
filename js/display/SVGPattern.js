@@ -67,6 +67,8 @@ define( function( require ) {
       if ( !hasPreviousDefinition ) {
         this.definition.appendChild( this.imageElement );
       }
+
+      return this;
     },
 
     /**

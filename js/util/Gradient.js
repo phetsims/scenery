@@ -9,6 +9,7 @@
 define( function( require ) {
   'use strict';
 
+  var cleanArray = require( 'PHET_CORE/cleanArray' );
   var Color = require( 'SCENERY/util/Color' );
   var inherit = require( 'PHET_CORE/inherit' );
   var Paint = require( 'SCENERY/util/Paint' );
@@ -16,7 +17,7 @@ define( function( require ) {
   var scenery = require( 'SCENERY/scenery' );
 
   // TODO: add the ability to specify the color-stops inline. possibly [ [0,color1], [0.5,color2], [1,color3] ]
-  function Gradient( canvasGradientFactory ) {
+  function Gradient() {
     assert && assert( this.constructor.name !== 'Gradient',
       'Please create a LinearGradient or RadialGradient. Do not directly use the supertype Gradient.' );
 
@@ -31,8 +32,11 @@ define( function( require ) {
     // @private {CanvasGradient|null} - Lazily created
     this.canvasGradient = null;
 
-    // @private {CanvasGradient}
-    this.canvasGradientFactory = canvasGradientFactory;
+    // @private {boolean} - Whether we should force a check of whether stops have changed
+    this.colorStopsDirty = false;
+
+    // @private {Array.<string>} - Used to check to see if colors have changed since last time
+    this.lastColorStopValues = [];
   }
 
   scenery.register( 'Gradient', Gradient );
@@ -68,14 +72,14 @@ define( function( require ) {
         color: color
       } );
 
-      // construct the Canvas gradient as we go
-      this.canvasGradient.addColorStop( ratio, ( typeof color === 'string' ) ? color : color.toCSS() );
+      this.lastColorStopValues.push( '' ); // So it's the same length
+
       return this;
     },
 
     /**
      * Subtypes should return a fresh CanvasGradient type.
-     * @public
+     * @protected
      * @abstract
      *
      * @returns {CanvasGradient}
@@ -95,17 +99,72 @@ define( function( require ) {
     },
 
     invalidateCanvasGradient: function() {
-      this.canvasGradient = null;
+      this.colorStopsDirty = true;
+    },
+
+    // TODO doc @private
+    haveCanvasColorStopsChanged: function() {
+      if ( this.lastColorStopValues === null ) {
+        return true;
+      }
+
+      for ( var i = 0; i < this.stops.length; i++ ) {
+        if ( Gradient.colorToString( this.stops[ i ].color ) !== this.lastColorStopValues[ i ] ) {
+          return true;
+        }
+      }
+
+      return false;
     },
 
     getCanvasStyle: function() {
-      if ( !this.canvasGradient ) {
-        this.canvasGradient = this.canvasGradientFactory();
+      // Check if we need to regenerate the Canvas gradient
+      if ( !this.canvasGradient || ( this.colorStopsDirty && this.haveCanvasColorStopsChanged() ) ) {
+        this.colorStopsDirty = false;
 
+        cleanArray( this.lastColorStopValues );
+        this.canvasGradient = this.createCanvasGradient();
+
+        for ( var i = 0; i < this.stops.length; i++ ) {
+          var stop = this.stops[ i ];
+
+          var colorString = Gradient.colorToString( stop.color );
+          this.canvasGradient.addColorStop( stop.ratio, colorString );
+
+          // Save it so we can compare next time whether our generated gradient would have changed
+          this.lastColorStopValues.push( colorString );
+        }
       }
+
       return this.canvasGradient;
     }
   } );
+
+  /**
+   * Returns the current value of the generally-allowed color types for Gradient, as a string.
+   * @public
+   *
+   * @param {Color|string|Property.<Color|string|null>|null} color
+   * @returns {string}
+   */
+  Gradient.colorToString = function( color ) {
+    // to {Color|string|null}
+    if ( color instanceof Property ) {
+      color = color.value;
+    }
+
+    // to {Color|string}
+    if ( color === null ) {
+      color = 'transparent';
+    }
+
+    // to {string}
+    if ( color instanceof Color ) {
+      color = color.toCSS();
+    }
+
+    return color;
+  };
 
   return Gradient;
 } );
