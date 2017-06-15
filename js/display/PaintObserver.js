@@ -91,6 +91,7 @@ define( function( require ) {
         sceneryLog && sceneryLog.Paints && sceneryLog.push();
 
         this.detachPrimary( this.primary );
+        this.primary = primary;
         this.attachPrimary( primary );
         this.notifyChangeCallback();
 
@@ -117,8 +118,11 @@ define( function( require ) {
     },
 
     /**
-     * Attempt to attach listeners to the paint's primary (the paint itself).
+     * Attempt to attach listeners to the paint's primary (the paint itself), or something else that acts like the primary
+     * (properties on a gradient).
      * @private
+     *
+     * TODO: Note that this is called for gradient colors also
      *
      * NOTE: If it's a Property, we'll also need to handle the secondary (part inside the Property).
      *
@@ -128,11 +132,12 @@ define( function( require ) {
       sceneryLog && sceneryLog.Paints && sceneryLog.Paints( '[PaintObserver] attachPrimary ' + this.node.id + '.' + this.name );
       sceneryLog && sceneryLog.Paints && sceneryLog.push();
 
-      this.primary = paint;
       if ( paint instanceof Property ) {
         sceneryLog && sceneryLog.Paints && sceneryLog.Paints( '[PaintObserver] add Property listener ' + this.node.id + '.' + this.name );
+        sceneryLog && sceneryLog.Paints && sceneryLog.push();
         paint.lazyLink( this.updateSecondaryListener );
         this.attachSecondary( paint.get() );
+        sceneryLog && sceneryLog.Paints && sceneryLog.pop();
       }
       else if ( paint instanceof Color ) {
         sceneryLog && sceneryLog.Paints && sceneryLog.Paints( '[PaintObserver] add Color listener ' + this.node.id + '.' + this.name );
@@ -140,9 +145,11 @@ define( function( require ) {
       }
       else if ( paint instanceof Gradient ) {
         sceneryLog && sceneryLog.Paints && sceneryLog.Paints( '[PaintObserver] add Gradient listeners ' + this.node.id + '.' + this.name );
+        sceneryLog && sceneryLog.Paints && sceneryLog.push();
         for ( var i = 0; i < paint.stops.length; i++ ) {
-          this.attachSecondary( paint.stops[ i ].color );
+          this.attachPrimary( paint.stops[ i ].color );
         }
+        sceneryLog && sceneryLog.Paints && sceneryLog.pop();
       }
 
       sceneryLog && sceneryLog.Paints && sceneryLog.pop();
@@ -151,6 +158,8 @@ define( function( require ) {
     /**
      * Attempt to detach listeners from the paint's primary (the paint itself).
      * @private
+     *
+     * TODO: Note that this is called for gradient colors also
      *
      * NOTE: If it's a Property or Gradient, we'll also need to handle the secondaries (part(s) inside the Property(ies)).
      *
@@ -162,8 +171,10 @@ define( function( require ) {
 
       if ( paint instanceof Property ) {
         sceneryLog && sceneryLog.Paints && sceneryLog.Paints( '[PaintObserver] remove Property listener ' + this.node.id + '.' + this.name );
+        sceneryLog && sceneryLog.Paints && sceneryLog.push();
         paint.unlink( this.updateSecondaryListener );
         this.detachSecondary( paint.get() );
+        sceneryLog && sceneryLog.Paints && sceneryLog.pop();
       }
       else if ( paint instanceof Color ) {
         sceneryLog && sceneryLog.Paints && sceneryLog.Paints( '[PaintObserver] remove Color listener ' + this.node.id + '.' + this.name );
@@ -171,11 +182,12 @@ define( function( require ) {
       }
       else if ( paint instanceof Gradient ) {
         sceneryLog && sceneryLog.Paints && sceneryLog.Paints( '[PaintObserver] remove Gradient listeners ' + this.node.id + '.' + this.name );
+        sceneryLog && sceneryLog.Paints && sceneryLog.push();
         for ( var i = 0; i < paint.stops.length; i++ ) {
-          this.detachSecondary( paint.stops[ i ].color );
+          this.detachPrimary( paint.stops[ i ].color );
         }
+        sceneryLog && sceneryLog.Paints && sceneryLog.pop();
       }
-      this.primary = null;
 
       sceneryLog && sceneryLog.Paints && sceneryLog.pop();
     },
@@ -225,6 +237,7 @@ define( function( require ) {
       sceneryLog && sceneryLog.Paints && sceneryLog.push();
 
       this.detachPrimary( this.primary );
+      this.primary = null;
       this.node = null;
 
       sceneryLog && sceneryLog.Paints && sceneryLog.pop();
