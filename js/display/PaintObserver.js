@@ -98,6 +98,7 @@ define( function( require ) {
     updateSecondary: function( newPaint, oldPaint ) {
       this.detachSecondary( oldPaint );
       this.attachSecondary( newPaint );
+      this.notifyChangeCallback();
     },
 
     /**
