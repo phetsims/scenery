@@ -19,6 +19,9 @@ require.config( {
     // third-party libs
     text: '../../sherpa/lib/text-2.0.12',
 
+    // Just needed to build scenery
+    BRAND: '../../brand/noBrand/js',
+
     SCENERY: '.',
     KITE: '../../kite/js',
     DOT: '../../dot/js',
