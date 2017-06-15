@@ -143,17 +143,18 @@ an UI and Display made for visual testing and debugging.
 
       window.displayTest = function() {
         setTimeout( function() {
-          window.node = new scenery.Node();
-          window.a = new scenery.Circle( 50, { fill: 'red', x: 50, y: 50 } );
-          window.b = new scenery.Circle( 50, { fill: 'blue', x: 100, y: 50 } );
-          window.c = new scenery.Circle( 50, { fill: 'green', x: 150, y: 50 } );
-          node.addChild( a );
-          node.addChild( b );
-          node.opacity = 0.5;
-          scene.renderer = 'canvas';
-          scene.addChild( c );
-          scene.addChild( node );
-          a.clipArea = kite.Shape.rect( 0, 0, 200, 200 );
+          scenery.enableLogging( [ 'Paints' ] );
+
+          window.prop = new axon.Property( 'red' );
+          window.gradient = new scenery.LinearGradient( -50, 0, 50, 0 ).addColorStop( 0, window.prop )
+                                                                       .addColorStop( 1, 'blue' );
+
+          window.circle = new scenery.Circle( 50, {
+            leftTop: dot.Vector2.ZERO,
+            fill: gradient
+          } );
+          scene.addChild( circle );
+
           display.updateDisplay();
         }, 400 );
       };
