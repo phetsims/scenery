@@ -93,6 +93,7 @@ define( function( require ) {
     'tagName', // Sets the tag name for the DOM element representing this node in the parallel DOM
     'inputType', // Sets the input type for the representative DOM element, only relevant if tagname is 'input'
     'inputValue', // Sets the input value for the representative DOM element, only relevant if tagname is 'input'
+    'accessibleChecked', // Sets the 'checked' state for inputs of type radio and checkbox, see setAccessibleChecked()
     'parentContainerTagName', // Sets the tag name for an element that contains this node's DOM element and its peers
     'labelTagName', // Sets the tag name for the DOM element labelling this node, usually a paragraph
     'descriptionTagName', // Sets the tag name for the DOM element describing this node, usually a paragraph
@@ -169,6 +170,10 @@ define( function( require ) {
 
           // @private {string} - the value of the input, only relevant if the tag name is of type "INPUT".
           this._inputValue = null;
+
+          // @private {boolean} - whether or not the accessible input is considered 'checked', only useful for inputs of
+          // type 'radio' and 'checkbox'
+          this._accessibleChecked = false;
 
           // @private {boolean} - determines whether or not labels should be prepended above the node's DOM element. This
           // should only be used if the element has a parentContainerElement, as the labels are sorted relative to the
@@ -913,6 +918,34 @@ define( function( require ) {
         get inputValue() { return this.getInputValue(); },
 
         /**
+         * Set whether or not the checked attribute appears on the dom elements associated with this Node's
+         * accessible content.  This is only useful for inputs of type 'radio' and 'checkbox'. A 'checked' input
+         * is considered selected to the browser and assistive technology.
+         *
+         * @public
+         * @param {boolean} checked
+         */
+        setAccessibleChecked: function( checked ) {
+          this._accessibleChecked = checked;
+
+          this.updateAccessiblePeers( function( accessiblePeer ) {
+            accessiblePeer.domElement.checked = checked;
+          } );
+        },
+        set accessibleChecked( checked ) { this.setAccessibleChecked( checked ); },
+
+        /**
+         * Get whether or not the accessible input is 'checked'.
+         *
+         * @public
+         * @return {boolean}
+         */
+        getAccessibleChecked: function() {
+          return this._accessibleChecked;
+        },
+        get accessibleChecked() { return this.getAccessibleChecked(); },
+
+        /**
          * Get an array containing all accessible attributes that have been added to this node's DOM element.
          * @public
          *
@@ -1279,6 +1312,9 @@ define( function( require ) {
 
               // resetore hidden
               self.setAccessibleHidden( self._accessibleHidden );
+
+              // restore checked
+              self.setAccessibleChecked( self._accessibleChecked );
 
               // restore input value
               self._inputValue && self.setInputValue( self._inputValue );
