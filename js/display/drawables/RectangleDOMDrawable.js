@@ -127,7 +127,7 @@ define( function( require ) {
         if ( node.hasStroke() ) {
           // since we only execute these if we have a stroke, we need to redo everything if there was no stroke previously.
           // the other option would be to update stroked information when there is no stroke (major performance loss for fill-only rectangles)
-          var hadNoStrokeBefore = this.lastStroke === null;
+          var hadNoStrokeBefore = !this.hadStroke;
 
           if ( hadNoStrokeBefore || this.dirtyWidth || this.dirtyLineWidth ) {
             strokeElement.style.width = ( node._rectWidth - node.getLineWidth() ) + 'px';

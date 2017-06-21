@@ -132,7 +132,7 @@ define( function( require ) {
         if ( node.hasStroke() ) {
           // since we only execute these if we have a stroke, we need to redo everything if there was no stroke previously.
           // the other option would be to update stroked information when there is no stroke (major performance loss for fill-only Circles)
-          var hadNoStrokeBefore = this.lastStroke === null;
+          var hadNoStrokeBefore = !this.hadStroke;
 
           if ( hadNoStrokeBefore || this.dirtyLineWidth || this.dirtyRadius ) {
             strokeElement.style.width = ( 2 * node._radius - node.getLineWidth() ) + 'px';

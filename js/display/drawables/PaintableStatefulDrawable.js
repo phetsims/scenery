@@ -42,16 +42,11 @@ define( function( require ) {
        * @returns {PaintableStatefulDrawable} - Self reference for chaining
        */
       proto.initializePaintableState = function( renderer, instance ) {
-        // @protected {null|string|Color|Property.<string|Color>|LinearGradient|RadialGradient|Pattern}
-        // Stores the last used fill, so that we can determine if it has changed
-        this.lastFill = undefined;
-
         // @protected {boolean} - Whether the fill has changed since our last update.
         this.dirtyFill = true;
 
-        // @protected {null|string|Color|Property.<string|Color>|LinearGradient|RadialGradient|Pattern}
-        // Stores the last used stroke, so that we can determine if it has changed
-        this.lastStroke = undefined;
+        // @protected {boolean} - Stores whether we last had a stroke.
+        this.hadStroke = false;
 
         // @protected {boolean} - Whether the stroke has changed since our last update.
         this.dirtyStroke = true;
@@ -96,13 +91,12 @@ define( function( require ) {
       proto.cleanPaintableState = function() {
         // TODO: is this being called when we need it to be called?
         this.dirtyFill = false;
-        this.lastFill = this.node.getFill();
 
         this.dirtyStroke = false;
         this.dirtyLineWidth = false;
         this.dirtyLineOptions = false;
         this.dirtyCachedPaints = false;
-        this.lastStroke = this.node.getStroke();
+        this.hadStroke = this.node.getStroke() !== null;
       };
 
       /**
