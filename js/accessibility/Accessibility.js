@@ -1077,6 +1077,9 @@ define( function( require ) {
         focus: function() {
           assert && assert( this.focusable, 'trying to set focus on a node that is not focusable' );
           assert && assert( !this._accessibleHidden, 'trying to set focus on a node with hidden accessible content' );
+          assert && assert( this.accessibleInstances.length > 0, 'there must be accessible content for the node to receive focus' );
+          assert && assert( this.accessibleInstances.length === 1, 'focus() unsuported for Nodes using DAG, accessible conotent is not unique' );
+
           this.accessibleInstances[ 0 ].peer.domElement.focus();
         },
 
