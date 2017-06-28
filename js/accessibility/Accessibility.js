@@ -1070,17 +1070,23 @@ define( function( require ) {
 
         /**
          * Focus this node's dom element. The element must not be hidden, and it must be focusable. If the node
-         * has more than one instance, this will fail because the DOM element is not uniquely defined.
+         * has more than one instance, this will fail because the DOM element is not uniquely defined. If accessibility
+         * is not enabled, this will be a no op. When Accessibility is more widely used, the no op can be replaced
+         * with an assertion that checks for accessible content.
          * 
          * @public
          */
         focus: function() {
-          assert && assert( this.focusable, 'trying to set focus on a node that is not focusable' );
-          assert && assert( !this._accessibleHidden, 'trying to set focus on a node with hidden accessible content' );
-          assert && assert( this.accessibleInstances.length > 0, 'there must be accessible content for the node to receive focus' );
-          assert && assert( this.accessibleInstances.length === 1, 'focus() unsuported for Nodes using DAG, accessible conotent is not unique' );
+          if ( this.accessibleInstances.length > 0 ) {
 
-          this.accessibleInstances[ 0 ].peer.domElement.focus();
+            // when accessibility is widely used, this assertion can be added back in
+            // assert && assert( this.accessibleInstances.length > 0, 'there must be accessible content for the node to receive focus' );
+            assert && assert( this._focusable, 'trying to set focus on a node that is not focusable' );
+            assert && assert( !this._accessibleHidden, 'trying to set focus on a node with hidden accessible content' );
+            assert && assert( this.accessibleInstances.length === 1, 'focus() unsuported for Nodes using DAG, accessible conotent is not unique' );
+
+            this.accessibleInstances[ 0 ].peer.domElement.focus();
+          }
         },
 
         /**
