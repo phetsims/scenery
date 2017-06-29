@@ -211,6 +211,28 @@ define( function( require ) {
       this.batchedEvents.length = 0;
     },
 
+    /**
+     * Removes all non-Mouse pointers from internal tracking.
+     * @public (scenery-internal)
+     */
+    removeTemporaryPointers: function() {
+      var fakeDomEvent = {
+        // TODO: Does this break anything
+      };
+
+      for ( var i = this.pointers.length - 1; i >= 0; i-- ) {
+        var pointer = this.pointers[ i ];
+        if ( !pointer.isMouse ) {
+          this.pointers.splice( i, 1 );
+
+          // Send exit events. As we can't get a DOM event, we'll send a fake object instead.
+          //TODO: consider exit() not taking an event?
+          var exitTrail = pointer.trail || new scenery.Trail( this.rootNode );
+          this.exitEvents( pointer, fakeDomEvent, exitTrail, 0, true );
+        }
+      }
+    },
+
     connectListeners: function() {
       BrowserEvents.addDisplay( this.display, this.attachToWindow );
     },
@@ -273,7 +295,7 @@ define( function( require ) {
       }
     },
 
-    findTouchById: function( id ) {
+    findPointerById: function( id ) {
       var i = this.pointers.length;
       while ( i-- ) {
         var pointer = this.pointers[ i ];
@@ -393,7 +415,7 @@ define( function( require ) {
       sceneryLog && sceneryLog.Input && sceneryLog.push();
 
       if ( this.emitter.hasListeners() ) { this.emitter.emit1( 'touchEnd(\'' + id + '\',' + Input.serializeVector2( point ) + ',' + Input.serializeDomEvent( event ) + ');' ); }
-      var touch = this.findTouchById( id );
+      var touch = this.findPointerById( id );
       if ( touch ) {
         var pointChanged = touch.end( point, event );
         if ( pointChanged ) {
@@ -401,9 +423,6 @@ define( function( require ) {
         }
         this.removePointer( touch );
         this.upEvent( touch, event );
-      }
-      else {
-        assert && assert( false, 'Touch not found for touchEnd: ' + id );
       }
 
       sceneryLog && sceneryLog.Input && sceneryLog.pop();
@@ -414,13 +433,10 @@ define( function( require ) {
       sceneryLog && sceneryLog.Input && sceneryLog.push();
 
       if ( this.emitter.hasListeners() ) { this.emitter.emit1( 'touchMove(\'' + id + '\',' + Input.serializeVector2( point ) + ',' + Input.serializeDomEvent( event ) + ');' ); }
-      var touch = this.findTouchById( id );
+      var touch = this.findPointerById( id );
       if ( touch ) {
         touch.move( point, event );
         this.moveEvent( touch, event );
-      }
-      else {
-        assert && assert( false, 'Touch not found for touchMove: ' + id );
       }
 
       sceneryLog && sceneryLog.Input && sceneryLog.pop();
@@ -431,7 +447,7 @@ define( function( require ) {
       sceneryLog && sceneryLog.Input && sceneryLog.push();
 
       if ( this.emitter.hasListeners() ) { this.emitter.emit1( 'touchCancel(\'' + id + '\',' + Input.serializeVector2( point ) + ',' + Input.serializeDomEvent( event ) + ');' ); }
-      var touch = this.findTouchById( id );
+      var touch = this.findPointerById( id );
       if ( touch ) {
         var pointChanged = touch.cancel( point, event );
         if ( pointChanged ) {
@@ -439,9 +455,6 @@ define( function( require ) {
         }
         this.removePointer( touch );
         this.cancelEvent( touch, event );
-      }
-      else {
-        assert && assert( false, 'Touch not found for touchCancel: ' + id );
       }
 
       sceneryLog && sceneryLog.Input && sceneryLog.pop();
@@ -465,7 +478,7 @@ define( function( require ) {
       sceneryLog && sceneryLog.Input && sceneryLog.push();
 
       if ( this.emitter.hasListeners() ) { this.emitter.emit1( 'penEnd(\'' + id + '\',' + Input.serializeVector2( point ) + ',' + Input.serializeDomEvent( event ) + ');' ); }
-      var pen = this.findTouchById( id );
+      var pen = this.findPointerById( id );
       if ( pen ) {
         var pointChanged = pen.end( point, event );
         if ( pointChanged ) {
@@ -473,9 +486,6 @@ define( function( require ) {
         }
         this.removePointer( pen );
         this.upEvent( pen, event );
-      }
-      else {
-        assert && assert( false, 'Pen not found for penEnd: ' + id );
       }
 
       sceneryLog && sceneryLog.Input && sceneryLog.pop();
@@ -486,13 +496,10 @@ define( function( require ) {
       sceneryLog && sceneryLog.Input && sceneryLog.push();
 
       if ( this.emitter.hasListeners() ) { this.emitter.emit1( 'penMove(\'' + id + '\',' + Input.serializeVector2( point ) + ',' + Input.serializeDomEvent( event ) + ');' ); }
-      var pen = this.findTouchById( id );
+      var pen = this.findPointerById( id );
       if ( pen ) {
         pen.move( point, event );
         this.moveEvent( pen, event );
-      }
-      else {
-        assert && assert( false, 'Pen not found for penMove: ' + id );
       }
 
       sceneryLog && sceneryLog.Input && sceneryLog.pop();
@@ -503,7 +510,7 @@ define( function( require ) {
       sceneryLog && sceneryLog.Input && sceneryLog.push();
 
       if ( this.emitter.hasListeners() ) { this.emitter.emit1( 'penCancel(\'' + id + '\',' + Input.serializeVector2( point ) + ',' + Input.serializeDomEvent( event ) + ');' ); }
-      var pen = this.findTouchById( id );
+      var pen = this.findPointerById( id );
       if ( pen ) {
         var pointChanged = pen.cancel( point, event );
         if ( pointChanged ) {
@@ -511,9 +518,6 @@ define( function( require ) {
         }
         this.removePointer( pen );
         this.cancelEvent( pen, event );
-      }
-      else {
-        assert && assert( false, 'Pen not found for penCancel: ' + id );
       }
 
       sceneryLog && sceneryLog.Input && sceneryLog.pop();

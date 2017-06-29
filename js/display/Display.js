@@ -552,6 +552,8 @@ define( function( require ) {
       this._interactive = value;
       if ( !this._interactive && this._input ) {
         this._input.clearBatchedEvents();
+        this._input.removeTemporaryPointers();
+        this._rootNode.interruptSubtreeInput();
       }
     },
 
