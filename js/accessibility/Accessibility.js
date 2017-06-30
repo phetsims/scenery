@@ -289,7 +289,7 @@ define( function( require ) {
                 var listenerFunction = accessibleInput[ ev ];
                 addedAccessibleInput[ ev ] = function( event ) {
                     self._inputValue = event.target.value;
-                    listenerFunction();
+                    listenerFunction( event );
                 };
               }
             }
