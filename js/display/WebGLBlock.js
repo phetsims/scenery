@@ -271,6 +271,13 @@ define( function( require ) {
     removeDrawable: function( drawable ) {
       sceneryLog && sceneryLog.WebGLBlock && sceneryLog.WebGLBlock( '#' + this.id + '.removeDrawable ' + drawable.toString() );
 
+      // Ensure a removed drawable is not present in the dirtyDrawables array afterwards. Don't want to update it.
+      // See https://github.com/phetsims/scenery/issues/635
+      var index = this.dirtyDrawables.indexOf( drawable );
+      if ( index >= 0 ) {
+        this.dirtyDrawables.splice( index, 1 );
+      }
+
       // wil trigger removal from spritesheets
       drawable.onRemoveFromBlock( this );
 
