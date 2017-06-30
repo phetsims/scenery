@@ -898,11 +898,18 @@ define( function( require ) {
     KEY_J: 74,
     KEY_C: 67,
     KEY_N: 78,
+    KEY_0: 48,
+    KEY_9: 57,
 
     // returns whether or not the keyCode corresponds to pressing an arrow key
     isArrowKey: function( keyCode ) {
       return ( keyCode === Input.KEY_RIGHT_ARROW || keyCode === Input.KEY_LEFT_ARROW ||
                keyCode === Input.KEY_UP_ARROW || keyCode === Input.KEY_DOWN_ARROW );
+    },
+
+    // returns whether or not the keyCode corresponds to pressing a number key
+    isNumberKey: function( keyCode ) {
+      return ( keyCode > Input.KEY_0 && keyCode < Input.KEY_9 );
     }
   } );
 
