@@ -119,19 +119,18 @@
 define( function( require ) {
   'use strict';
 
-  var inherit = require( 'PHET_CORE/inherit' );
-  var platform = require( 'PHET_CORE/platform' );
-  var cleanArray = require( 'PHET_CORE/cleanArray' );
-  var scenery = require( 'SCENERY/scenery' );
-
-  require( 'SCENERY/util/Trail' );
-  require( 'SCENERY/input/Mouse' );
-  require( 'SCENERY/input/Touch' );
-  require( 'SCENERY/input/Pen' );
-  var Event = require( 'SCENERY/input/Event' );
   var BatchedDOMEvent = require( 'SCENERY/input/BatchedDOMEvent' );
   var BrowserEvents = require( 'SCENERY/input/BrowserEvents' );
+  var cleanArray = require( 'PHET_CORE/cleanArray' );
   var Emitter = require( 'AXON/Emitter' );
+  var Event = require( 'SCENERY/input/Event' );
+  var inherit = require( 'PHET_CORE/inherit' );
+  var Mouse = require( 'SCENERY/input/Mouse' );
+  var Pen = require( 'SCENERY/input/Pen' );
+  var platform = require( 'PHET_CORE/platform' );
+  var scenery = require( 'SCENERY/scenery' );
+  var Touch = require( 'SCENERY/input/Touch' );
+  var Trail = require( 'SCENERY/util/Trail' );
   var Vector2 = require( 'DOT/Vector2' );
 
   // Object literal makes it easy to check for the existence of an attribute (compared to [].indexOf()>=0)
@@ -227,7 +226,7 @@ define( function( require ) {
 
           // Send exit events. As we can't get a DOM event, we'll send a fake object instead.
           //TODO: consider exit() not taking an event?
-          var exitTrail = pointer.trail || new scenery.Trail( this.rootNode );
+          var exitTrail = pointer.trail || new Trail( this.rootNode );
           this.exitEvents( pointer, fakeDomEvent, exitTrail, 0, true );
         }
       }
@@ -308,7 +307,7 @@ define( function( require ) {
 
     //Init the mouse on the first mouse event (if any!)
     initMouse: function() {
-      this.mouse = new scenery.Mouse();
+      this.mouse = new Mouse();
       this.addPointer( this.mouse );
     },
 
@@ -390,7 +389,7 @@ define( function( require ) {
       // don't send mouse-wheel events if we don't yet have a mouse location!
       // TODO: Can we set the mouse location based on the wheel event?
       if ( this.mouse.point ) {
-        var trail = this.rootNode.trailUnderPointer( this.mouse ) || new scenery.Trail( this.rootNode );
+        var trail = this.rootNode.trailUnderPointer( this.mouse ) || new Trail( this.rootNode );
         this.dispatchEvent( trail, 'wheel', this.mouse, event, true );
       }
 
@@ -403,7 +402,7 @@ define( function( require ) {
       sceneryLog && sceneryLog.Input && sceneryLog.push();
 
       if ( this.emitter.hasListeners() ) { this.emitter.emit1( 'touchStart(\'' + id + '\',' + Input.serializeVector2( point ) + ',' + Input.serializeDomEvent( event ) + ');' ); }
-      var touch = new scenery.Touch( id, point, event );
+      var touch = new Touch( id, point, event );
       this.addPointer( touch );
       this.downEvent( touch, event );
 
@@ -466,7 +465,7 @@ define( function( require ) {
       sceneryLog && sceneryLog.Input && sceneryLog.push();
 
       if ( this.emitter.hasListeners() ) { this.emitter.emit1( 'penStart(\'' + id + '\',' + Input.serializeVector2( point ) + ',' + Input.serializeDomEvent( event ) + ');' ); }
-      var pen = new scenery.Pen( id, point, event );
+      var pen = new Pen( id, point, event );
       this.addPointer( pen );
       this.downEvent( pen, event );
 
@@ -622,7 +621,7 @@ define( function( require ) {
     },
 
     upEvent: function( pointer, event ) {
-      var trail = this.rootNode.trailUnderPointer( pointer ) || new scenery.Trail( this.rootNode );
+      var trail = this.rootNode.trailUnderPointer( pointer ) || new Trail( this.rootNode );
 
       this.dispatchEvent( trail, 'up', pointer, event, true );
 
@@ -635,7 +634,7 @@ define( function( require ) {
     },
 
     downEvent: function( pointer, event ) {
-      var trail = this.rootNode.trailUnderPointer( pointer ) || new scenery.Trail( this.rootNode );
+      var trail = this.rootNode.trailUnderPointer( pointer ) || new Trail( this.rootNode );
 
       // touch pointers are transient, so fire enter/over to the trail first
       if ( pointer.isTouch ) {
@@ -655,7 +654,7 @@ define( function( require ) {
     },
 
     cancelEvent: function( pointer, event ) {
-      var trail = this.rootNode.trailUnderPointer( pointer ) || new scenery.Trail( this.rootNode );
+      var trail = this.rootNode.trailUnderPointer( pointer ) || new Trail( this.rootNode );
 
       this.dispatchEvent( trail, 'cancel', pointer, event, true );
 
@@ -669,10 +668,10 @@ define( function( require ) {
 
     // return whether there was a change
     branchChangeEvents: function( pointer, event, isMove ) {
-      var trail = this.rootNode.trailUnderPointer( pointer ) || new scenery.Trail( this.rootNode );
+      var trail = this.rootNode.trailUnderPointer( pointer ) || new Trail( this.rootNode );
       sceneryLog && sceneryLog.InputEvent && sceneryLog.InputEvent(
         'checking branch change: ' + trail.toString() + ' at ' + pointer.point.toString() );
-      var oldTrail = pointer.trail || new scenery.Trail( this.rootNode ); // TODO: consider a static trail reference
+      var oldTrail = pointer.trail || new Trail( this.rootNode ); // TODO: consider a static trail reference
 
       var lastNodeChanged = oldTrail.lastNode() !== trail.lastNode();
       if ( !lastNodeChanged && !isMove ) {
@@ -680,7 +679,7 @@ define( function( require ) {
         return false;
       }
 
-      var branchIndex = scenery.Trail.branchIndex( trail, oldTrail );
+      var branchIndex = Trail.branchIndex( trail, oldTrail );
       var isBranchChange = branchIndex !== trail.length || branchIndex !== oldTrail.length;
       isBranchChange && sceneryLog && sceneryLog.InputEvent && sceneryLog.InputEvent(
         'branch change from ' + oldTrail.toString() + ' to ' + trail.toString() );
