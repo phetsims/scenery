@@ -674,10 +674,6 @@ define( function( require ) {
       var oldTrail = pointer.trail || new Trail( this.rootNode ); // TODO: consider a static trail reference
 
       var lastNodeChanged = oldTrail.lastNode() !== trail.lastNode();
-      if ( !lastNodeChanged && !isMove ) {
-        // bail out if nothing needs to be done
-        return false;
-      }
 
       var branchIndex = Trail.branchIndex( trail, oldTrail );
       var isBranchChange = branchIndex !== trail.length || branchIndex !== oldTrail.length;
@@ -691,8 +687,10 @@ define( function( require ) {
 
       // we want to approximately mimic http://www.w3.org/TR/DOM-Level-3-Events/#events-mouseevent-event-order
       // TODO: if a node gets moved down 1 depth, it may see both an exit and enter?
-      this.exitEvents( pointer, event, oldTrail, branchIndex, lastNodeChanged );
-      this.enterEvents( pointer, event, trail, branchIndex, lastNodeChanged );
+      if ( isBranchChange ) {
+        this.exitEvents( pointer, event, oldTrail, branchIndex, lastNodeChanged );
+        this.enterEvents( pointer, event, trail, branchIndex, lastNodeChanged );
+      }
 
       pointer.trail = trail;
       return isBranchChange;
