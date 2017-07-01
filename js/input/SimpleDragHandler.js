@@ -137,7 +137,7 @@ define( function( require ) {
 
   scenery.register( 'SimpleDragHandler', SimpleDragHandler );
 
-  inherit( Object, SimpleDragHandler, {
+  return inherit( Object, SimpleDragHandler, {
     startDrag: function( event ) {
       if ( this.dragging ) { return; }
 
@@ -230,9 +230,36 @@ define( function( require ) {
     touchmove: function( event ) {
       this.tryTouchToSnag( event );
     }
-  } );
+  }, {
 
-  return SimpleDragHandler;
+    /**
+     * Creates an input listener that forwards events to the specified input listener
+     * See https://github.com/phetsims/scenery/issues/639
+     * @param {Object} inputListener - input listener
+     * @param {Object} [options]
+     * @returns {Object} inputListener
+     */
+    createForwardingListener: function( inputListener, options ) {
+
+      options = _.extend( {
+        allowTouchSnag: false
+      }, options );
+
+      return {
+        down: function( event ) {
+          if ( !event.pointer.dragging && event.canStartPress() ) {
+            inputListener.down( event );
+          }
+        },
+        touchenter: function( event ) {
+          options.allowTouchSnag && this.down( event );
+        },
+        touchmove: function( event ) {
+          options.allowTouchSnag && this.down( event );
+        }
+      };
+    }
+  } );
 } );
 
 
