@@ -253,6 +253,7 @@ define( function( require ) {
       sceneryLog && sceneryLog.dirty && sceneryLog.dirty( 'markDirtyDrawable on WebGLBlock#' + this.id + ' with ' + drawable.toString() );
 
       assert && assert( drawable );
+      assert && assert( !drawable.disposed );
 
       // TODO: instance check to see if it is a canvas cache (usually we don't need to call update on our drawables)
       this.dirtyDrawables.push( drawable );
@@ -273,8 +274,8 @@ define( function( require ) {
 
       // Ensure a removed drawable is not present in the dirtyDrawables array afterwards. Don't want to update it.
       // See https://github.com/phetsims/scenery/issues/635
-      var index = this.dirtyDrawables.indexOf( drawable );
-      if ( index >= 0 ) {
+      var index = 0;
+      while ( ( index = this.dirtyDrawables.indexOf( drawable, index ) ) >= 0 ) {
         this.dirtyDrawables.splice( index, 1 );
       }
 
