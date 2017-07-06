@@ -160,7 +160,9 @@ define( function( require ) {
      *     img: {HTMLImageElement}, // preferably preloaded, but it isn't required
      *     url: {string}, // URL (usually a data URL) for the image level
      *     width: {number}, // width of the mipmap level, in pixels
-     *     height: {number} // height of the mipmap level, in pixels
+     *     height: {number} // height of the mipmap level, in pixels,
+     *     canvas: {HTMLCanvasElement} // Canvas element containing the image data for the img.
+     *     [updateCanvas]: {function} // If available, should be called before using the Canvas directly.
      *   }
      *   At least one level is required (level 0), and each mipmap level corresponds to the index in the array, e.g.:
      *   [
@@ -679,13 +681,8 @@ define( function( require ) {
           for ( var k = 0; k < this._mipmapData.length; k++ ) {
             var url = this._mipmapData[ k ].url;
             this._mipmapURLs.push( url );
-            // TODO: baseCanvas only upon demand?
-            var canvas = document.createElement( 'canvas' );
-            canvas.width = this._mipmapData[ k ].width;
-            canvas.height = this._mipmapData[ k ].height;
-            var context = canvas.getContext( '2d' );
-            context.drawImage( this._mipmapData[ k ].img, 0, 0 );
-            this._mipmapCanvases.push( canvas );
+            this._mipmapData[ k ].updateCanvas && this._mipmapData[ k ].updateCanvas();
+            this._mipmapCanvases.push( this._mipmapData[ k ].canvas );
           }
         }
         // Otherwise, we have an image (not mipmap) as our input, so we'll need to construct mipmap levels.
@@ -770,6 +767,11 @@ define( function( require ) {
                         level < this._mipmapCanvases.length &&
                         ( level % 1 ) === 0 );
 
+      // Sanity check to make sure we have copied the image data in if necessary.
+      if ( this._mipmapData ) {
+        // level may not exist (it was generated), and updateCanvas may not exist
+        this._mipmapData[ level ] && this._mipmapData[ level ].updateCanvas && this._mipmapData[ level ].updateCanvas();
+      }
       return this._mipmapCanvases[ level ];
     },
 
@@ -1037,6 +1039,7 @@ define( function( require ) {
       context.drawImage( largeCanvas, 0, 0 );
 
       // set up the image and url
+      mipmap.canvas = canvas;
       mipmap.url = canvas.toDataURL();
       mipmap.img = new window.Image();
       mipmap.img.src = mipmap.url;
