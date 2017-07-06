@@ -888,6 +888,10 @@ define( function( require ) {
     KEY_ESCAPE: 27,
     KEY_DELETE: 46,
     KEY_BACKSPACE: 8,
+    KEY_PAGE_UP: 33,
+    KEY_PAGE_DOWN: 34,
+    KEY_END: 35,
+    KEY_HOME: 36,
     KEY_S: 83,
     KEY_W: 87,
     KEY_A: 65,
@@ -902,6 +906,11 @@ define( function( require ) {
     isArrowKey: function( keyCode ) {
       return ( keyCode === Input.KEY_RIGHT_ARROW || keyCode === Input.KEY_LEFT_ARROW ||
                keyCode === Input.KEY_UP_ARROW || keyCode === Input.KEY_DOWN_ARROW );
+    },
+
+    // returns true if keycode is one of keys used for range inputs (key codes 33 - 40, inclusive)
+    isRangeKey: function( keyCode ) {
+      return ( keyCode >= Input.KEY_PAGE_UP && keyCode <= Input.KEY_DOWN_ARROW );
     },
 
     // returns whether or not the keyCode corresponds to pressing a number key
