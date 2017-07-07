@@ -33,6 +33,8 @@ define( function( require ) {
    *                             along-side options for Node
    */
   function DOM( element, options ) {
+    assert && assert( options === undefined || Object.getPrototypeOf( options ) === Object.prototype,
+        'Extra prototype on Node options object is a code smell' );
     assert && assert( element instanceof window.Element || element.jquery,
       'DOM nodes need to be passed an HTML/DOM element or a jQuery selection like $( ... )' );
 

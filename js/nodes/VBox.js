@@ -20,6 +20,9 @@ define( function( require ) {
    * @param {Object} [options] see LayoutBox
    */
   function VBox( options ) {
+    assert && assert( options === undefined || Object.getPrototypeOf( options ) === Object.prototype,
+      'Extra prototype on Node options object is a code smell' );
+
     LayoutBox.call( this, _.extend( {}, options, { orientation: 'vertical' } ) );
   }
 

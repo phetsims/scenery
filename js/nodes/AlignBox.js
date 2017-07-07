@@ -52,6 +52,8 @@ define( function( require ) {
    *                             above, and can be provided along-side options for Node
    */
   function AlignBox( content, options ) {
+    assert && assert( options === undefined || Object.getPrototypeOf( options ) === Object.prototype,
+      'Extra prototype on Node options object is a code smell' );
 
     // @private {Node} - Our actual content
     this._content = content;

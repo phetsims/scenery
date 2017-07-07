@@ -58,6 +58,9 @@ define( function( require ) {
    *                             along-side options for Node
    */
   function Text( text, options ) {
+    assert && assert( options === undefined || Object.getPrototypeOf( options ) === Object.prototype,
+      'Extra prototype on Node options object is a code smell' );
+
     // @private {string} - The text to display. We'll initialize this by mutating.
     this._text = '';
 

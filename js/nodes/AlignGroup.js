@@ -44,6 +44,9 @@ define( function( require ) {
    * @param {Object} [options]
    */
   function AlignGroup( options ) {
+    assert && assert( options === undefined || Object.getPrototypeOf( options ) === Object.prototype,
+      'Extra prototype on options object is a code smell' );
+
     options = _.extend( {
       matchHorizontal: true, // {boolean} - Whether the boxes should have all matching widths (otherwise it fits to size)
       matchVertical: true  // {boolean} - Whether the boxes should have all matching heights (otherwise it fits to size)

@@ -97,6 +97,8 @@ define( function( require ) {
             'new Rectangle( bounds, { ... } ) should only take one or two arguments' );
           assert && assert( y === undefined || typeof y === 'object',
             'new Rectangle( bounds, { ... } ) second parameter should only ever be an options object' );
+          assert && assert( y === undefined || Object.getPrototypeOf( y ) === Object.prototype,
+            'Extra prototype on Node options object is a code smell' );
 
           options = extendDefined( {
             rectBounds: x
@@ -108,6 +110,8 @@ define( function( require ) {
             'new Rectangle( bounds, cornerXRadius, cornerYRadius, { ... } ) should only take three or four arguments' );
           assert && assert( height === undefined || typeof height === 'object',
             'new Rectangle( bounds, cornerXRadius, cornerYRadius, { ... } ) fourth parameter should only ever be an options object' );
+          assert && assert( height === undefined || Object.getPrototypeOf( height ) === Object.prototype,
+            'Extra prototype on Node options object is a code smell' );
 
           options = extendDefined( {
             rectBounds: x,
@@ -127,6 +131,8 @@ define( function( require ) {
         'new Rectangle( x, y, width, height, { ... } ) should only take four or five arguments' );
       assert && assert( cornerXRadius === undefined || typeof cornerXRadius === 'object',
         'new Rectangle( x, y, width, height, { ... } ) fifth parameter should only ever be an options object' );
+      assert && assert( cornerXRadius === undefined || Object.getPrototypeOf( cornerXRadius ) === Object.prototype,
+        'Extra prototype on Node options object is a code smell' );
 
       options = extendDefined( {
         rectX: x,
@@ -141,6 +147,8 @@ define( function( require ) {
         'new Rectangle( x, y, width, height, cornerXRadius, cornerYRadius{ ... } ) should only take six or seven arguments' );
       assert && assert( options === undefined || typeof options === 'object',
         'new Rectangle( x, y, width, height, cornerXRadius, cornerYRadius{ ... } ) seventh parameter should only ever be an options object' );
+      assert && assert( options === undefined || Object.getPrototypeOf( options ) === Object.prototype,
+        'Extra prototype on Node options object is a code smell' );
 
       options = extendDefined( {
         rectX: x,

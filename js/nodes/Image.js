@@ -52,6 +52,8 @@ define( function( require ) {
    */
   function Image( image, options ) {
     assert && assert( image, 'image should be available' );
+    assert && assert( options === undefined || Object.getPrototypeOf( options ) === Object.prototype,
+      'Extra prototype on Node options object is a code smell' );
 
     // @private {number} - Internal stateful value, see setInitialWidth() for documentation.
     this._initialWidth = 0;

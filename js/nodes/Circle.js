@@ -48,9 +48,13 @@ define( function( require ) {
     // Handle new Circle( { radius: ... } )
     if ( typeof radius === 'object' ) {
       options = radius;
+      assert && assert( options === undefined || Object.getPrototypeOf( options ) === Object.prototype,
+        'Extra prototype on Node options object is a code smell' );
     }
     // Handle new Circle( radius, { ... } )
     else {
+      assert && assert( options === undefined || Object.getPrototypeOf( options ) === Object.prototype,
+        'Extra prototype on Node options object is a code smell' );
       options = extendDefined( {
         radius: radius
       }, options );

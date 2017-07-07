@@ -42,6 +42,9 @@ define( function( require ) {
    *                             along-side options for Node
    */
   function Path( shape, options ) {
+    assert && assert( options === undefined || Object.getPrototypeOf( options ) === Object.prototype,
+      'Extra prototype on Node options object is a code smell' );
+
     // @private {Shape|null} - The Shape used for displaying this Path.
     // NOTE: _shape can be lazily constructed in subtypes (may be null) if hasShape() is overridden to retun true,
     //       like in Rectangle. This is because usually the actual Shape is already implied by other parameters,
