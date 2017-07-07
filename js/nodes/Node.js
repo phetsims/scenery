@@ -492,17 +492,16 @@ define( function( require ) {
 
     // Make sure Node's prototype dispose() is called when dispose() is called, and make sure that it isn't called
     // more than once. See https://github.com/phetsims/scenery/issues/601.
+    // @private {boolean}
+    this._isDisposed = false;
     if ( assert ) {
-      // @private {boolean}
-      this.isNodeDisposed = false;
-
       // Wrap the prototype dispose method with a check. NOTE: We will not catch devious cases where the dispose() is
       // overridden after the Node constructor (which may happen).
       var protoDispose = this.dispose;
       this.dispose = function() {
-        assert && assert( !this.isNodeDisposed, 'This Node has already been disposed, and cannot be disposed again' );
+        assert && assert( !this._isDisposed, 'This Node has already been disposed, and cannot be disposed again' );
         protoDispose.call( this );
-        assert && assert( this.isNodeDisposed, 'Node.dispose() call is missing from an overridden dispose method' );
+        assert && assert( this._isDisposed, 'Node.dispose() call is missing from an overridden dispose method' );
       };
     }
 
@@ -4785,6 +4784,17 @@ define( function( require ) {
     },
 
     /**
+     * Whether this Node has been disposed.
+     * @public
+     *
+     * @returns {boolean}
+     */
+    isDisposed: function() {
+      return this._isDisposed;
+    },
+    get disposed() { return this.isDisposed(); },
+
+    /**
      * Override for extra information in the fing output (from Display.getDebugHTML()).
      * @protected (scenery-internal)
      *
@@ -4986,9 +4996,7 @@ define( function( require ) {
      */
     dispose: function() {
       // See constructor for Node disposal checks
-      if ( assert ) {
-        this.isNodeDisposed = true;
-      }
+      this._isDisposed = true;
 
       // When disposing, remove all children and parents. See https://github.com/phetsims/scenery/issues/629
       this.removeAllChildren();
