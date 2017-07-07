@@ -4988,6 +4988,21 @@ define( function( require ) {
         this.isNodeDisposed = true;
       }
 
+      // When disposing, remove all children and parents. See https://github.com/phetsims/scenery/issues/629
+      this.removeAllChildren();
+      this.detach();
+
+      // Scuttle the implementation if assert is enabled. See https://github.com/phetsims/scenery/issues/629
+      if ( assert ) {
+        this.addChild = null;
+        this.removeChild = null;
+        var self = this;
+        NODE_OPTION_KEYS.forEach( function( key ) {
+          self[ 'set' + key[ 0 ].toUpperCase() + key.slice( 1 ) ] = null;
+        } );
+        this._parents = null;
+      }
+
       Events.prototype.dispose.call( this ); // TODO: don't rely on Events
 
       if ( this._tandem ) {
