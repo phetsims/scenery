@@ -571,6 +571,7 @@ define( function( require ) {
         ( node.constructor ? node.constructor.name : 'none' ) );
       assert && assert( !_.includes( this._children, node ), 'Parent already contains child' );
       assert && assert( node !== this, 'Cannot add self as a child' );
+      assert && assert( node._parents !== null, 'Tried to insert a disposed child node?' );
 
       // needs to be early to prevent re-entrant children modifications
       this._picker.onInsertChild( node );
@@ -663,6 +664,7 @@ define( function( require ) {
       assert && assert( node && node instanceof Node, 'Need to call node.removeChildWithIndex() with a Node.' );
       assert && assert( this.hasChild( node ), 'Attempted to removeChild with a node that was not a child.' );
       assert && assert( this._children[ indexOfChild ] === node, 'Incorrect index for removeChildWithIndex' );
+      assert && assert( node._parents !== null, 'Tried to remove a disposed child node?' );
 
       var indexOfParent = _.indexOf( node._parents, this );
 
@@ -4994,11 +4996,16 @@ define( function( require ) {
 
       // Scuttle the implementation if assert is enabled. See https://github.com/phetsims/scenery/issues/629
       if ( assert ) {
-        this.addChild = null;
-        this.removeChild = null;
+        this.addChild = function(){ throw new Error( 'Tried to addChild on a disposed node.' ); };
+        this.removeChild = function(){ throw new Error( 'Tried to removeChild on a disposed node.' ); };
         var self = this;
         NODE_OPTION_KEYS.forEach( function( key ) {
-          self[ 'set' + key[ 0 ].toUpperCase() + key.slice( 1 ) ] = null;
+          self[ 'set' + key[ 0 ].toUpperCase() + key.slice( 1 ) ] = function() {
+            throw new Error( 'Tried to set ' + key + ' after disposing a Node' );
+          };
+          self[ 'get' + key[ 0 ].toUpperCase() + key.slice( 1 ) ] = function() {
+            throw new Error( 'Tried to get ' + key + ' after disposing a Node' );
+          };
         } );
         this._parents = null;
       }
