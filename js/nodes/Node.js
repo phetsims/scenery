@@ -2301,6 +2301,8 @@ define( function( require ) {
      */
     setLeft: function( left ) {
       assert && assert( typeof left === 'number' );
+      assert && assert( this.getBounds().isValid(),
+        'Setting left is invalid when the node has invalid (empty/NaN/infinite) bounds.' );
 
       this.translate( left - this.getLeft(), 0, true );
       return this; // allow chaining
@@ -2332,6 +2334,8 @@ define( function( require ) {
      */
     setRight: function( right ) {
       assert && assert( typeof right === 'number' );
+      assert && assert( this.getBounds().isValid(),
+        'Setting right is invalid when the node has invalid (empty/NaN/infinite) bounds.' );
 
       this.translate( right - this.getRight(), 0, true );
       return this; // allow chaining
@@ -2363,6 +2367,8 @@ define( function( require ) {
      */
     setCenterX: function( x ) {
       assert && assert( typeof x === 'number' );
+      assert && assert( this.getBounds().isValid(),
+        'Setting centerX is invalid when the node has invalid (empty/NaN/infinite) bounds.' );
 
       this.translate( x - this.getCenterX(), 0, true );
       return this; // allow chaining
@@ -2394,6 +2400,8 @@ define( function( require ) {
      */
     setCenterY: function( y ) {
       assert && assert( typeof y === 'number' );
+      assert && assert( this.getBounds().isValid(),
+        'Setting centerY is invalid when the node has invalid (empty/NaN/infinite) bounds.' );
 
       this.translate( 0, y - this.getCenterY(), true );
       return this; // allow chaining
@@ -2425,6 +2433,8 @@ define( function( require ) {
      */
     setTop: function( top ) {
       assert && assert( typeof top === 'number' );
+      assert && assert( this.getBounds().isValid(),
+        'Setting top is invalid when the node has invalid (empty/NaN/infinite) bounds.' );
 
       this.translate( 0, top - this.getTop(), true );
       return this; // allow chaining
@@ -2456,6 +2466,8 @@ define( function( require ) {
      */
     setBottom: function( bottom ) {
       assert && assert( typeof bottom === 'number' );
+      assert && assert( this.getBounds().isValid(),
+        'Setting bottom is invalid when the node has invalid (empty/NaN/infinite) bounds.' );
 
       this.translate( 0, bottom - this.getBottom(), true );
       return this; // allow chaining
@@ -2498,6 +2510,8 @@ define( function( require ) {
      */
     setLeftTop: function( leftTop ) {
       assert && assert( leftTop instanceof Vector2 && leftTop.isFinite(), 'leftTop should be a finite Vector2' );
+      assert && assert( this.getBounds().isValid(),
+        'Setting leftTop is invalid when the node has invalid (empty/NaN/infinite) bounds.' );
 
       this.translate( leftTop.minus( this.getLeftTop() ), true );
       return this;
@@ -2524,6 +2538,8 @@ define( function( require ) {
      */
     setCenterTop: function( centerTop ) {
       assert && assert( centerTop instanceof Vector2 && centerTop.isFinite(), 'centerTop should be a finite Vector2' );
+      assert && assert( this.getBounds().isValid(),
+        'Setting centerTop is invalid when the node has invalid (empty/NaN/infinite) bounds.' );
 
       this.translate( centerTop.minus( this.getCenterTop() ), true );
       return this;
@@ -2550,6 +2566,8 @@ define( function( require ) {
      */
     setRightTop: function( rightTop ) {
       assert && assert( rightTop instanceof Vector2 && rightTop.isFinite(), 'rightTop should be a finite Vector2' );
+      assert && assert( this.getBounds().isValid(),
+        'Setting rightTop is invalid when the node has invalid (empty/NaN/infinite) bounds.' );
 
       this.translate( rightTop.minus( this.getRightTop() ), true );
       return this;
@@ -2576,6 +2594,8 @@ define( function( require ) {
      */
     setLeftCenter: function( leftCenter ) {
       assert && assert( leftCenter instanceof Vector2 && leftCenter.isFinite(), 'leftCenter should be a finite Vector2' );
+      assert && assert( this.getBounds().isValid(),
+        'Setting leftCenter is invalid when the node has invalid (empty/NaN/infinite) bounds.' );
 
       this.translate( leftCenter.minus( this.getLeftCenter() ), true );
       return this;
@@ -2602,6 +2622,8 @@ define( function( require ) {
      */
     setCenter: function( center ) {
       assert && assert( center instanceof Vector2 && center.isFinite(), 'center should be a finite Vector2' );
+      assert && assert( this.getBounds().isValid(),
+        'Setting center is invalid when the node has invalid (empty/NaN/infinite) bounds.' );
 
       this.translate( center.minus( this.getCenter() ), true );
       return this;
@@ -2628,6 +2650,8 @@ define( function( require ) {
      */
     setRightCenter: function( rightCenter ) {
       assert && assert( rightCenter instanceof Vector2 && rightCenter.isFinite(), 'rightCenter should be a finite Vector2' );
+      assert && assert( this.getBounds().isValid(),
+        'Setting rightCenter is invalid when the node has invalid (empty/NaN/infinite) bounds.' );
 
       this.translate( rightCenter.minus( this.getRightCenter() ), true );
       return this;
@@ -2654,6 +2678,8 @@ define( function( require ) {
      */
     setLeftBottom: function( leftBottom ) {
       assert && assert( leftBottom instanceof Vector2 && leftBottom.isFinite(), 'leftBottom should be a finite Vector2' );
+      assert && assert( this.getBounds().isValid(),
+        'Setting leftBottom is invalid when the node has invalid (empty/NaN/infinite) bounds.' );
 
       this.translate( leftBottom.minus( this.getLeftBottom() ), true );
       return this;
@@ -2680,6 +2706,8 @@ define( function( require ) {
      */
     setCenterBottom: function( centerBottom ) {
       assert && assert( centerBottom instanceof Vector2 && centerBottom.isFinite(), 'centerBottom should be a finite Vector2' );
+      assert && assert( this.getBounds().isValid(),
+        'Setting centerBottom is invalid when the node has invalid (empty/NaN/infinite) bounds.' );
 
       this.translate( centerBottom.minus( this.getCenterBottom() ), true );
       return this;
@@ -2706,6 +2734,8 @@ define( function( require ) {
      */
     setRightBottom: function( rightBottom ) {
       assert && assert( rightBottom instanceof Vector2 && rightBottom.isFinite(), 'rightBottom should be a finite Vector2' );
+      assert && assert( this.getBounds().isValid(),
+        'Setting rightBottom is invalid when the node has invalid (empty/NaN/infinite) bounds.' );
 
       this.translate( rightBottom.minus( this.getRightBottom() ), true );
       return this;
