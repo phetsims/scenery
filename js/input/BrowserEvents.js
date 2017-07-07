@@ -287,8 +287,13 @@ define( function( require ) {
      * @param {Event} domEvent
      */
     onpointerdown: function onpointerdown( domEvent ) {
+      sceneryLog && sceneryLog.OnInput && sceneryLog.OnInput( 'pointerdown' );
+      sceneryLog && sceneryLog.OnInput && sceneryLog.push();
+
       // NOTE: Will be called without a proper 'this' reference. Do NOT rely on it here.
       BrowserEvents.batchWindowEvent( domEvent, BatchedDOMEvent.POINTER_TYPE, 'pointerDown', false );
+
+      sceneryLog && sceneryLog.OnInput && sceneryLog.pop();
     },
 
     /**
@@ -298,8 +303,13 @@ define( function( require ) {
      * @param {Event} domEvent
      */
     onpointerup: function onpointerup( domEvent ) {
+      sceneryLog && sceneryLog.OnInput && sceneryLog.OnInput( 'pointerup' );
+      sceneryLog && sceneryLog.OnInput && sceneryLog.push();
+
       // NOTE: Will be called without a proper 'this' reference. Do NOT rely on it here.
       BrowserEvents.batchWindowEvent( domEvent, BatchedDOMEvent.POINTER_TYPE, 'pointerUp', true );
+
+      sceneryLog && sceneryLog.OnInput && sceneryLog.pop();
     },
 
     /**
@@ -309,8 +319,13 @@ define( function( require ) {
      * @param {Event} domEvent
      */
     onpointermove: function onpointermove( domEvent ) {
+      sceneryLog && sceneryLog.OnInput && sceneryLog.OnInput( 'pointermove' );
+      sceneryLog && sceneryLog.OnInput && sceneryLog.push();
+
       // NOTE: Will be called without a proper 'this' reference. Do NOT rely on it here.
       BrowserEvents.batchWindowEvent( domEvent, BatchedDOMEvent.POINTER_TYPE, 'pointerMove', false );
+
+      sceneryLog && sceneryLog.OnInput && sceneryLog.pop();
     },
 
     /**
@@ -320,8 +335,13 @@ define( function( require ) {
      * @param {Event} domEvent
      */
     onpointerover: function onpointerover( domEvent ) {
+      sceneryLog && sceneryLog.OnInput && sceneryLog.OnInput( 'pointerover' );
+      sceneryLog && sceneryLog.OnInput && sceneryLog.push();
+
       // NOTE: Will be called without a proper 'this' reference. Do NOT rely on it here.
       BrowserEvents.batchWindowEvent( domEvent, BatchedDOMEvent.POINTER_TYPE, 'pointerOver', false );
+
+      sceneryLog && sceneryLog.OnInput && sceneryLog.pop();
     },
 
     /**
@@ -331,8 +351,13 @@ define( function( require ) {
      * @param {Event} domEvent
      */
     onpointerout: function onpointerout( domEvent ) {
+      sceneryLog && sceneryLog.OnInput && sceneryLog.OnInput( 'pointerout' );
+      sceneryLog && sceneryLog.OnInput && sceneryLog.push();
+
       // NOTE: Will be called without a proper 'this' reference. Do NOT rely on it here.
       BrowserEvents.batchWindowEvent( domEvent, BatchedDOMEvent.POINTER_TYPE, 'pointerOut', false );
+
+      sceneryLog && sceneryLog.OnInput && sceneryLog.pop();
     },
 
     /**
@@ -342,8 +367,13 @@ define( function( require ) {
      * @param {Event} domEvent
      */
     onpointercancel: function onpointercancel( domEvent ) {
+      sceneryLog && sceneryLog.OnInput && sceneryLog.OnInput( 'pointercancel' );
+      sceneryLog && sceneryLog.OnInput && sceneryLog.push();
+
       // NOTE: Will be called without a proper 'this' reference. Do NOT rely on it here.
       BrowserEvents.batchWindowEvent( domEvent, BatchedDOMEvent.POINTER_TYPE, 'pointerCancel', false );
+
+      sceneryLog && sceneryLog.OnInput && sceneryLog.pop();
     },
 
     /**
@@ -353,8 +383,13 @@ define( function( require ) {
      * @param {Event} domEvent
      */
     onMSPointerDown: function onMSPointerDown( domEvent ) {
+      sceneryLog && sceneryLog.OnInput && sceneryLog.OnInput( 'MSPointerDown' );
+      sceneryLog && sceneryLog.OnInput && sceneryLog.push();
+
       // NOTE: Will be called without a proper 'this' reference. Do NOT rely on it here.
       BrowserEvents.batchWindowEvent( domEvent, BatchedDOMEvent.MS_POINTER_TYPE, 'pointerDown', false );
+
+      sceneryLog && sceneryLog.OnInput && sceneryLog.pop();
     },
 
     /**
@@ -364,8 +399,13 @@ define( function( require ) {
      * @param {Event} domEvent
      */
     onMSPointerUp: function onMSPointerUp( domEvent ) {
+      sceneryLog && sceneryLog.OnInput && sceneryLog.OnInput( 'MSPointerUp' );
+      sceneryLog && sceneryLog.OnInput && sceneryLog.push();
+
       // NOTE: Will be called without a proper 'this' reference. Do NOT rely on it here.
       BrowserEvents.batchWindowEvent( domEvent, BatchedDOMEvent.MS_POINTER_TYPE, 'pointerUp', true );
+
+      sceneryLog && sceneryLog.OnInput && sceneryLog.pop();
     },
 
     /**
@@ -375,8 +415,13 @@ define( function( require ) {
      * @param {Event} domEvent
      */
     onMSPointerMove: function onMSPointerMove( domEvent ) {
+      sceneryLog && sceneryLog.OnInput && sceneryLog.OnInput( 'MSPointerMove' );
+      sceneryLog && sceneryLog.OnInput && sceneryLog.push();
+
       // NOTE: Will be called without a proper 'this' reference. Do NOT rely on it here.
       BrowserEvents.batchWindowEvent( domEvent, BatchedDOMEvent.MS_POINTER_TYPE, 'pointerMove', false );
+
+      sceneryLog && sceneryLog.OnInput && sceneryLog.pop();
     },
 
     /**
@@ -386,8 +431,13 @@ define( function( require ) {
      * @param {Event} domEvent
      */
     onMSPointerOver: function onMSPointerOver( domEvent ) {
+      sceneryLog && sceneryLog.OnInput && sceneryLog.OnInput( 'MSPointerOver' );
+      sceneryLog && sceneryLog.OnInput && sceneryLog.push();
+
       // NOTE: Will be called without a proper 'this' reference. Do NOT rely on it here.
       BrowserEvents.batchWindowEvent( domEvent, BatchedDOMEvent.MS_POINTER_TYPE, 'pointerOver', false );
+
+      sceneryLog && sceneryLog.OnInput && sceneryLog.pop();
     },
 
     /**
@@ -397,8 +447,13 @@ define( function( require ) {
      * @param {Event} domEvent
      */
     onMSPointerOut: function onMSPointerOut( domEvent ) {
+      sceneryLog && sceneryLog.OnInput && sceneryLog.OnInput( 'MSPointerOut' );
+      sceneryLog && sceneryLog.OnInput && sceneryLog.push();
+
       // NOTE: Will be called without a proper 'this' reference. Do NOT rely on it here.
       BrowserEvents.batchWindowEvent( domEvent, BatchedDOMEvent.MS_POINTER_TYPE, 'pointerOut', false );
+
+      sceneryLog && sceneryLog.OnInput && sceneryLog.pop();
     },
 
     /**
@@ -408,8 +463,13 @@ define( function( require ) {
      * @param {Event} domEvent
      */
     onMSPointerCancel: function onMSPointerCancel( domEvent ) {
+      sceneryLog && sceneryLog.OnInput && sceneryLog.OnInput( 'MSPointerCancel' );
+      sceneryLog && sceneryLog.OnInput && sceneryLog.push();
+
       // NOTE: Will be called without a proper 'this' reference. Do NOT rely on it here.
       BrowserEvents.batchWindowEvent( domEvent, BatchedDOMEvent.MS_POINTER_TYPE, 'pointerCancel', false );
+
+      sceneryLog && sceneryLog.OnInput && sceneryLog.pop();
     },
 
     /**
@@ -419,8 +479,13 @@ define( function( require ) {
      * @param {Event} domEvent
      */
     ontouchstart: function ontouchstart( domEvent ) {
+      sceneryLog && sceneryLog.OnInput && sceneryLog.OnInput( 'touchstart' );
+      sceneryLog && sceneryLog.OnInput && sceneryLog.push();
+
       // NOTE: Will be called without a proper 'this' reference. Do NOT rely on it here.
       BrowserEvents.batchWindowEvent( domEvent, BatchedDOMEvent.TOUCH_TYPE, 'touchStart', false );
+
+      sceneryLog && sceneryLog.OnInput && sceneryLog.pop();
     },
 
     /**
@@ -430,8 +495,13 @@ define( function( require ) {
      * @param {Event} domEvent
      */
     ontouchend: function ontouchend( domEvent ) {
+      sceneryLog && sceneryLog.OnInput && sceneryLog.OnInput( 'touchend' );
+      sceneryLog && sceneryLog.OnInput && sceneryLog.push();
+
       // NOTE: Will be called without a proper 'this' reference. Do NOT rely on it here.
       BrowserEvents.batchWindowEvent( domEvent, BatchedDOMEvent.TOUCH_TYPE, 'touchEnd', true );
+
+      sceneryLog && sceneryLog.OnInput && sceneryLog.pop();
     },
 
     /**
@@ -441,8 +511,13 @@ define( function( require ) {
      * @param {Event} domEvent
      */
     ontouchmove: function ontouchmove( domEvent ) {
+      sceneryLog && sceneryLog.OnInput && sceneryLog.OnInput( 'touchmove' );
+      sceneryLog && sceneryLog.OnInput && sceneryLog.push();
+
       // NOTE: Will be called without a proper 'this' reference. Do NOT rely on it here.
       BrowserEvents.batchWindowEvent( domEvent, BatchedDOMEvent.TOUCH_TYPE, 'touchMove', false );
+
+      sceneryLog && sceneryLog.OnInput && sceneryLog.pop();
     },
 
     /**
@@ -452,8 +527,13 @@ define( function( require ) {
      * @param {Event} domEvent
      */
     ontouchcancel: function ontouchcancel( domEvent ) {
+      sceneryLog && sceneryLog.OnInput && sceneryLog.OnInput( 'touchcancel' );
+      sceneryLog && sceneryLog.OnInput && sceneryLog.push();
+
       // NOTE: Will be called without a proper 'this' reference. Do NOT rely on it here.
       BrowserEvents.batchWindowEvent( domEvent, BatchedDOMEvent.TOUCH_TYPE, 'touchCancel', false );
+
+      sceneryLog && sceneryLog.OnInput && sceneryLog.pop();
     },
 
     /**
@@ -463,8 +543,13 @@ define( function( require ) {
      * @param {Event} domEvent
      */
     onmousedown: function onmousedown( domEvent ) {
+      sceneryLog && sceneryLog.OnInput && sceneryLog.OnInput( 'mousedown' );
+      sceneryLog && sceneryLog.OnInput && sceneryLog.push();
+
       // NOTE: Will be called without a proper 'this' reference. Do NOT rely on it here.
       BrowserEvents.batchWindowEvent( domEvent, BatchedDOMEvent.MOUSE_TYPE, 'mouseDown', false );
+
+      sceneryLog && sceneryLog.OnInput && sceneryLog.pop();
     },
 
     /**
@@ -474,8 +559,13 @@ define( function( require ) {
      * @param {Event} domEvent
      */
     onmouseup: function onmouseup( domEvent ) {
+      sceneryLog && sceneryLog.OnInput && sceneryLog.OnInput( 'mouseup' );
+      sceneryLog && sceneryLog.OnInput && sceneryLog.push();
+
       // NOTE: Will be called without a proper 'this' reference. Do NOT rely on it here.
       BrowserEvents.batchWindowEvent( domEvent, BatchedDOMEvent.MOUSE_TYPE, 'mouseUp', true );
+
+      sceneryLog && sceneryLog.OnInput && sceneryLog.pop();
     },
 
     /**
@@ -485,8 +575,13 @@ define( function( require ) {
      * @param {Event} domEvent
      */
     onmousemove: function onmousemove( domEvent ) {
+      sceneryLog && sceneryLog.OnInput && sceneryLog.OnInput( 'mousemove' );
+      sceneryLog && sceneryLog.OnInput && sceneryLog.push();
+
       // NOTE: Will be called without a proper 'this' reference. Do NOT rely on it here.
       BrowserEvents.batchWindowEvent( domEvent, BatchedDOMEvent.MOUSE_TYPE, 'mouseMove', false );
+
+      sceneryLog && sceneryLog.OnInput && sceneryLog.pop();
     },
 
     /**
@@ -496,8 +591,13 @@ define( function( require ) {
      * @param {Event} domEvent
      */
     onmouseover: function onmouseover( domEvent ) {
+      sceneryLog && sceneryLog.OnInput && sceneryLog.OnInput( 'mouseover' );
+      sceneryLog && sceneryLog.OnInput && sceneryLog.push();
+
       // NOTE: Will be called without a proper 'this' reference. Do NOT rely on it here.
       BrowserEvents.batchWindowEvent( domEvent, BatchedDOMEvent.MOUSE_TYPE, 'mouseOver', false );
+
+      sceneryLog && sceneryLog.OnInput && sceneryLog.pop();
     },
 
     /**
@@ -507,8 +607,13 @@ define( function( require ) {
      * @param {Event} domEvent
      */
     onmouseout: function onmouseout( domEvent ) {
+      sceneryLog && sceneryLog.OnInput && sceneryLog.OnInput( 'mouseout' );
+      sceneryLog && sceneryLog.OnInput && sceneryLog.push();
+
       // NOTE: Will be called without a proper 'this' reference. Do NOT rely on it here.
       BrowserEvents.batchWindowEvent( domEvent, BatchedDOMEvent.MOUSE_TYPE, 'mouseOut', false );
+
+      sceneryLog && sceneryLog.OnInput && sceneryLog.pop();
     },
 
     /**
@@ -518,8 +623,13 @@ define( function( require ) {
      * @param {Event} domEvent
      */
     onwheel: function onwheel( domEvent ) {
+      sceneryLog && sceneryLog.OnInput && sceneryLog.OnInput( 'wheel' );
+      sceneryLog && sceneryLog.OnInput && sceneryLog.push();
+
       // NOTE: Will be called without a proper 'this' reference. Do NOT rely on it here.
       BrowserEvents.batchWindowEvent( domEvent, BatchedDOMEvent.WHEEL_TYPE, 'wheel', false );
+
+      sceneryLog && sceneryLog.OnInput && sceneryLog.pop();
     }
   };
 
