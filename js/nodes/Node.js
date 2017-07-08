@@ -3819,6 +3819,7 @@ define( function( require ) {
           s.push( node );
         }
       } );
+
       function handleChild( m ) {
         delete edges[ n.id ][ m.id ];
         if ( _.every( edges, function( children ) { return !children[ m.id ]; } ) ) {
@@ -4174,8 +4175,39 @@ define( function( require ) {
     },
 
     /**
+     * Returns an Image that renders this Node. This is always synchronous, and sets initialWidth/initialHeight so that
+     * we have the bounds immediately.  Use this method if you need to reduce the number of parent Nodes.
+     *
+     * NOTE: the resultant Image should be positioned using its bounds rather than (x,y).  To create a Node that can be
+     * positioned like any other node, please use toDataURLNodeSynchronous.
+     * @public
+     *
+     * @param {number} [x] - The X offset for where the upper-left of the content drawn into the Canvas
+     * @param {number} [y] - The Y offset for where the upper-left of the content drawn into the Canvas
+     * @param {number} [width] - The width of the Canvas output
+     * @param {number} [height] - The height of the Canvas output
+     */
+    toDataURLImageSynchronous: function( x, y, width, height ) {
+      assert && assert( x === undefined || typeof x === 'number', 'If provided, x should be a number' );
+      assert && assert( y === undefined || typeof y === 'number', 'If provided, y should be a number' );
+      assert && assert( width === undefined || ( typeof width === 'number' && width >= 0 && ( width % 1 === 0 ) ),
+        'If provided, width should be a non-negative integer' );
+      assert && assert( height === undefined || ( typeof height === 'number' && height >= 0 && ( height % 1 === 0 ) ),
+        'If provided, height should be a non-negative integer' );
+
+      var result;
+      this.toDataURL( function( dataURL, x, y, width, height ) {
+        result = new scenery.Image( dataURL, { x: -x, y: -y, initialWidth: width, initialHeight: height } );
+      }, x, y, width, height );
+      assert && assert( result, 'toDataURL failed to return a result synchronously' );
+      return result;
+    },
+
+    /**
      * Returns a Node that contains this Node's subtree's visual form. This is always synchronous, and sets
-     * initialWidth/initialHeight so that we have the bounds immediately
+     * initialWidth/initialHeight so that we have the bounds immediately.  An extra wrapper Node is provided
+     * so that transforms can be done independently.  Use this method if you need to be able to transform the node
+     * the same way as if it had not been rasterized.
      * @public
      *
      * @param {number} [x] - The X offset for where the upper-left of the content drawn into the Canvas
@@ -4191,16 +4223,11 @@ define( function( require ) {
       assert && assert( height === undefined || ( typeof height === 'number' && height >= 0 && ( height % 1 === 0 ) ),
         'If provided, height should be a non-negative integer' );
 
-      var result;
-      this.toDataURL( function( dataURL, x, y, width, height ) {
-        result = new scenery.Node( {
-          children: [
-            new scenery.Image( dataURL, { x: -x, y: -y, initialWidth: width, initialHeight: height } )
-          ]
-        } );
-      }, x, y, width, height );
-      assert && assert( result, 'toDataURLNodeSynchronous requires that the node can be rendered only using Canvas' );
-      return result;
+      return new scenery.Node( {
+        children: [
+          this.toDataURLImageSynchronous( x, y, width, height )
+        ]
+      } );
     },
 
     /**
