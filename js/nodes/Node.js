@@ -4146,6 +4146,9 @@ define( function( require ) {
     /**
      * Returns an Image that renders this Node. This is always synchronous, and sets initialWidth/initialHeight so that
      * we have the bounds immediately.  Use this method if you need to reduce the number of parent Nodes.
+     *
+     * NOTE: the resultant Image should be positioned using its bounds rather than (x,y).  To create a Node that can be
+     * positioned like any other node, please use toDataURLNodeSynchronous.
      * @public
      *
      * @param {number} [x] - The X offset for where the upper-left of the content drawn into the Canvas
