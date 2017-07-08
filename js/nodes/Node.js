@@ -4168,7 +4168,7 @@ define( function( require ) {
       this.toDataURL( function( dataURL, x, y, width, height ) {
         result = new scenery.Image( dataURL, { x: -x, y: -y, initialWidth: width, initialHeight: height } );
       }, x, y, width, height );
-      assert && assert( result, 'toDataURLNodeSynchronous requires that the node can be rendered only using Canvas' );
+      assert && assert( result, 'toDataURL failed to return a result synchronously' );
       return result;
     },
 
