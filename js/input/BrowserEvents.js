@@ -97,7 +97,7 @@ define( function( require ) {
      * {boolean} - Whether pointer events in the format specified by the W3C specification are allowed.
      * @private
      */
-    canUsePointerEvents: window.navigator && window.navigator.pointerEnabled,
+    canUsePointerEvents: !!( ( window.navigator && window.navigator.pointerEnabled ) || window.PointerEvent ),
 
     /**
      * {boolean} - Whether pointer events in the format specified by the MS specification are allowed.

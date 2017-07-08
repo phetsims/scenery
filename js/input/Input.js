@@ -523,15 +523,16 @@ define( function( require ) {
     },
 
     pointerDown: function( id, type, point, event ) {
+      // In IE for pointer down events, we want to make sure than the next interactions off the page are sent to
+      // this element (it will bubble). See https://github.com/phetsims/scenery/issues/464 and
+      // http://news.qooxdoo.org/mouse-capturing.
+      var target = this.attachToWindow ? document.body : this.display.domElement;
+      if ( target.setPointerCapture && event.pointerId ) {
+        target.setPointerCapture( event.pointerId );
+      }
+
       switch( type ) {
         case 'mouse':
-          // In IE for pointer down events, we want to make sure than the next interactions off the page are sent to
-          // this element (it will bubble). See https://github.com/phetsims/scenery/issues/464 and
-          // http://news.qooxdoo.org/mouse-capturing.
-          var target = this.attachToWindow ? document.body : this.display.domElement;
-          if ( target.setPointerCapture && event.pointerId ) {
-            target.setPointerCapture( event.pointerId );
-          }
           // The actual event afterwards
           this.mouseDown( point, event );
           break;
@@ -542,8 +543,8 @@ define( function( require ) {
           this.penStart( id, point, event );
           break;
         default:
-          if ( console.log ) {
-            console.log( 'Unknown pointer type: ' + type );
+          if ( assert ) {
+            throw new Error( 'Unknown pointer type: ' + type );
           }
       }
     },
@@ -560,8 +561,8 @@ define( function( require ) {
           this.penEnd( id, point, event );
           break;
         default:
-          if ( console.log ) {
-            console.log( 'Unknown pointer type: ' + type );
+          if ( assert ) {
+            throw new Error( 'Unknown pointer type: ' + type );
           }
       }
     },
