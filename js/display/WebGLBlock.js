@@ -311,7 +311,6 @@ define( function( require ) {
         var newSpriteSheet = new SpriteSheet( true ); // use mipmaps for now?
         sprite = newSpriteSheet.addImage( image, width, height );
         newSpriteSheet.initializeContext( this.gl );
-        newSpriteSheet.createTexture();
         this.spriteSheets.push( newSpriteSheet );
         if ( !sprite ) {
           // TODO: renderer flags should change for very large images

@@ -74,6 +74,7 @@ define( function( require ) {
 
     /**
      * Allocates and creates a GL texture, configures it, and initializes it with our current Canvas.
+     * @private
      */
     createTexture: function() {
       var gl = this.gl;
