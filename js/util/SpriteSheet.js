@@ -29,6 +29,9 @@ define( function( require ) {
   // See https://github.com/phetsims/scenery/issues/539
   var MAX_DIMENSION = new Dimension2( 1024, 1024 );
 
+  // Added to the bottom and right of every texture
+  var PADDING = 1;
+
   /**
    * @constructor
    *
@@ -65,6 +68,9 @@ define( function( require ) {
   inherit( Object, SpriteSheet, {
     /**
      * Initialize (or reinitialize) ourself with a new GL context. Should be called at least once before updateTexture()
+     * @public
+     *
+     * @param {WebGLRenderingContext} gl
      */
     initializeContext: function( gl ) {
       this.gl = gl;
@@ -98,6 +104,7 @@ define( function( require ) {
 
     /**
      * Updates a pre-existing texture with our current Canvas.
+     * @public
      */
     updateTexture: function() {
       assert && assert( this.gl, 'SpriteSheet needs context to updateTexture()' );
@@ -118,12 +125,13 @@ define( function( require ) {
 
     /**
      * Adds an image (if possible) to our sprite sheet. If successful, will return a {Sprite}, otherwise null.
+     * @public
      *
-     * @param {HTMLCanvasElement | HTMLImageElement} image
-     * @param {number} width
-     * @param {number} height
+     * @param {HTMLCanvasElement|HTMLImageElement} image
+     * @param {number} width - Passed in, since it may not be fully loaded yet?
+     * @param {number} height - Passed in, since it may not be fully loaded yet?
      *
-     * @returns {Sprite | null}
+     * @returns {Sprite|null}
      */
     addImage: function( image, width, height ) {
       var i;
@@ -154,7 +162,7 @@ define( function( require ) {
       var bin;
       // Enters 'while' loop only if allocate() returns null and we have unused sprites (i.e. conditions where we will
       // want to deallocate the least recently used (LRU) unused sprite and then check for allocation again).
-      while ( !( bin = this.binPacker.allocate( width, height ) ) && this.unusedSprites.length ) {
+      while ( !( bin = this.binPacker.allocate( width + PADDING, height + PADDING ) ) && this.unusedSprites.length ) {
         var ejectedSprite = this.unusedSprites.shift(); // LRU policy by taking first item
 
         // clear its space in the Canvas
@@ -169,7 +177,7 @@ define( function( require ) {
       if ( bin ) {
         // WebGL will want UV coordinates in the [0,1] range
         var uvBounds = new Bounds2( bin.bounds.minX / this.width, bin.bounds.minY / this.height,
-          bin.bounds.maxX / this.width, bin.bounds.maxY / this.height );
+          ( bin.bounds.maxX - PADDING ) / this.width, ( bin.bounds.maxY - PADDING ) / this.height );
         var sprite = new SpriteSheet.Sprite( this, bin, uvBounds, image, 1 );
         this.context.drawImage( image, bin.bounds.x, bin.bounds.y );
         this.dirty = true;
@@ -182,6 +190,13 @@ define( function( require ) {
       }
     },
 
+    /**
+     * Removes an image from our spritesheet. (Removes one from the amount it is used, and if it is 0, gets actually
+     * removed).
+     * @public
+     *
+     * @param {HTMLCanvasElement|HTMLImageElement} image
+     */
     removeImage: function( image ) {
       // find the used sprite (and its index)
       var usedSprite;
@@ -208,6 +223,7 @@ define( function( require ) {
     /**
      * Whether the sprite for the specified image is handled by this spritesheet. It can be either used or unused, but
      * addImage() calls with the specified image should be extremely fast (no need to modify the Canvas or texture).
+     * @public
      *
      * @returns {boolean}
      */
@@ -241,7 +257,8 @@ define( function( require ) {
     // @public [read-only] {SpriteSheet} - The containing SpriteSheet
     this.spriteSheet = spriteSheet;
 
-    // @private [read-only] {BinPacker.Bin} - Contains the actual image bounds in our Canvas, and is used to deallocate.
+    // @private [read-only] {BinPacker.Bin} - Contains the actual image bounds in our Canvas (plus padding), and is
+    //                                        used to deallocate (need to clear that area).
     this.bin = bin;
 
     // @public [read-only] {Bounds2} - Normalized bounds between [0,1] for the full texture (for GLSL texture lookups).
