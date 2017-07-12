@@ -229,6 +229,18 @@ define( function( require ) {
     // touch moves over this node
     touchmove: function( event ) {
       this.tryTouchToSnag( event );
+    },
+
+    /**
+     * Disposes this listener, releasing any references it may have to a pointer.
+     * @public
+     */
+    dispose: function() {
+      if ( this.dragging ) {
+        this.pointer.dragging = false;
+        this.pointer.cursor = null;
+        this.pointer.removeInputListener( this.dragListener );
+      }
     }
   }, {
 
