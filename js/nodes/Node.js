@@ -5059,22 +5059,6 @@ define( function( require ) {
       this.removeAllChildren();
       this.detach();
 
-      // Scuttle the implementation if assert is enabled. See https://github.com/phetsims/scenery/issues/629
-      if ( assert ) {
-        this.addChild = function(){ throw new Error( 'Tried to addChild on a disposed node.' ); };
-        this.removeChild = function(){ throw new Error( 'Tried to removeChild on a disposed node.' ); };
-        var self = this;
-        NODE_OPTION_KEYS.forEach( function( key ) {
-          self[ 'set' + key[ 0 ].toUpperCase() + key.slice( 1 ) ] = function() {
-            throw new Error( 'Tried to set ' + key + ' after disposing a Node' );
-          };
-          self[ 'get' + key[ 0 ].toUpperCase() + key.slice( 1 ) ] = function() {
-            throw new Error( 'Tried to get ' + key + ' after disposing a Node' );
-          };
-        } );
-        this._parents = null;
-      }
-
       Events.prototype.dispose.call( this ); // TODO: don't rely on Events
 
       if ( this._tandem ) {

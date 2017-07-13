@@ -121,8 +121,7 @@ define( function( require ) {
      *       Path will add a listener so that it is updated when the Shape itself changes. If there is a listener
      *       added, keeping a reference to the Shape will also keep a reference to the Path object (and thus whatever
      *       Nodes are connected to the Path). For now, set path.shape = null if you need to release the reference
-     *       that the Shape would have.
-     * TODO: Add a dispose() function or equivalent, which releases the listener.
+     *       that the Shape would have, or call dispose() on the Path if it is not needed anymore.
      *
      * @param {Shape|string|null} shape
      * @returns {Path} - Returns 'this' reference, for chaining
@@ -254,8 +253,11 @@ define( function( require ) {
     attachShapeListener: function() {
       assert && assert( !this._invalidShapeListenerAttached, 'We do not want to have two listeners attached!' );
 
-      this._shape.onStatic( 'invalidated', this._invalidShapeListener );
-      this._invalidShapeListenerAttached = true;
+      // Do not attach shape listeners if we are disposed
+      if ( !this._isDisposed ) {
+        this._shape.onStatic( 'invalidated', this._invalidShapeListener );
+        this._invalidShapeListenerAttached = true;
+      }
     },
 
     /**
@@ -570,6 +572,19 @@ define( function( require ) {
       result = this.appendFillablePropString( spaces, result );
       result = this.appendStrokablePropString( spaces, result );
       return result;
+    },
+
+    /**
+     * Disposes the path, releasing shape listeners if needed (and preventing new listeners from being added).
+     * @public
+     * @override
+     */
+    dispose: function() {
+      if ( this._invalidShapeListenerAttached ) {
+        this.detachShapeListener();
+      }
+
+      Node.prototype.dispose.call( this );
     }
   } );
 

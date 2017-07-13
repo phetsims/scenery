@@ -940,8 +940,10 @@ define( function( require ) {
     attachImageLoadListener: function() {
       assert && assert( !this._imageLoadListenerAttached, 'Should only be attached to one thing at a time' );
 
-      this._image.addEventListener( 'load', this._imageLoadListener );
-      this._imageLoadListenerAttached = true;
+      if ( !this._isDisposed ) {
+        this._image.addEventListener( 'load', this._imageLoadListener );
+        this._imageLoadListenerAttached = true;
+      }
     },
 
     /**
@@ -976,6 +978,19 @@ define( function( require ) {
      */
     getBasicConstructor: function( propLines ) {
       return 'new scenery.Image( \'' + ( this._image.src ? this._image.src.replace( /'/g, '\\\'' ) : 'other' ) + '\', {' + propLines + '} )';
+    },
+
+    /**
+     * Disposes the path, releasing image listeners if needed (and preventing new listeners from being added).
+     * @public
+     * @override
+     */
+    dispose: function() {
+      if ( this._image && this._imageLoadListenerAttached ) {
+        this.detachImageLoadListener();
+      }
+
+      Node.prototype.dispose.call( this );
     }
   } );
 

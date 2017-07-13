@@ -285,6 +285,10 @@ define( function( require ) {
         this.perfDrawableNewIntervalCount = 0;
       }
 
+      if ( assert ) {
+        Display.assertSubtreeDisposed( this._rootNode );
+      }
+
       sceneryLog && sceneryLog.Display && sceneryLog.Display( 'updateDisplay frame ' + this._frameId );
       sceneryLog && sceneryLog.Display && sceneryLog.push();
 
@@ -1707,6 +1711,23 @@ define( function( require ) {
     tandem: Tandem.createStaticTandem( 'display' ).createTandem( 'focusProperty' ),
     phetioValueType: TFocus
   } );
+
+  /**
+   * Returns true when NO nodes in the subtree are disposed.
+   * @private
+   *
+   * @param {Node} node
+   * @returns {boolean}
+   */
+  Display.assertSubtreeDisposed = function( node ) {
+    assert && assert( !node.isDisposed() );
+
+    if ( assert ) {
+      for ( var i = 0; i < node.children.length; i++ ) {
+        Display.assertSubtreeDisposed( node.children[ i ] );
+      }
+    }
+  };
 
   return Display;
 } );
