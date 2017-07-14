@@ -1720,7 +1720,7 @@ define( function( require ) {
    * @returns {boolean}
    */
   Display.assertSubtreeDisposed = function( node ) {
-    assert && assert( !node.isDisposed() );
+    assert && assert( !node.isDisposed(), 'Disposed nodes should not be included in a scene graph to display.' );
 
     if ( assert ) {
       for ( var i = 0; i < node.children.length; i++ ) {
