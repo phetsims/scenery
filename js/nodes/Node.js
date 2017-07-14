@@ -5065,6 +5065,26 @@ define( function( require ) {
         this._tandem.removeInstance( this );
         this._tandem = null;
       }
+    },
+
+    /**
+     * Disposes this node and all other descendant nodes.
+     * @public
+     *
+     * NOTE: Use with caution, as you should not re-use any Node touched by this. Not compatible with most DAG
+     *       techniques.
+     */
+    disposeSubtree: function() {
+      if ( !this.isDisposed() ) {
+        // makes a copy before disposing
+        var children = this.children;
+
+        this.dispose();
+
+        for ( var i = 0; i < children.length; i++ ) {
+          children[ i ].disposeSubtree();
+        }
+      }
     }
   } ) );
 
