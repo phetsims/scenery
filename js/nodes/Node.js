@@ -777,6 +777,7 @@ define( function( require ) {
       assert && assert( this._parents.length <= 1, 'Cannot call getParent on a node with multiple parents' );
       return this._parents.length ? this._parents[ 0 ] : null;
     },
+    get parent() { return this.getParent(); },
 
     /**
      * Gets the child at a specific index into the children array.
