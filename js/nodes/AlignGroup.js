@@ -22,12 +22,13 @@
 define( function( require ) {
   'use strict';
 
-  var inherit = require( 'PHET_CORE/inherit' );
-  var arrayRemove = require( 'PHET_CORE/arrayRemove' );
-  var scenery = require( 'SCENERY/scenery' );
-  var Bounds2 = require( 'DOT/Bounds2' );
-  var Node = require( 'SCENERY/nodes/Node' );
   var AlignBox = require( 'SCENERY/nodes/AlignBox' );
+  var arrayRemove = require( 'PHET_CORE/arrayRemove' );
+  var Bounds2 = require( 'DOT/Bounds2' );
+  var inherit = require( 'PHET_CORE/inherit' );
+  var Node = require( 'SCENERY/nodes/Node' );
+  var NumberProperty = require( 'AXON/NumberProperty' );
+  var scenery = require( 'SCENERY/scenery' );
 
   var globalId = 1;
 
@@ -67,6 +68,12 @@ define( function( require ) {
     // @private {boolean} - Gets locked when certain layout is performed.
     this._resizeLock = false;
 
+    // @private {Property.<boolean>}
+    this._maxWidthProperty = new NumberProperty( 0 );
+
+    // @private {Property.<boolean>}
+    this._maxHeightProperty = new NumberProperty( 0 );
+
     // @private {number}
     this.id = globalId++;
   }
@@ -74,6 +81,50 @@ define( function( require ) {
   scenery.register( 'AlignGroup', AlignGroup );
 
   inherit( Object, AlignGroup, {
+    /**
+     * Returns the current maximum width of the grouped content.
+     * @public
+     *
+     * @returns {number} - Non-negative amount of width
+     */
+    getMaxWidth: function() {
+      return this._maxWidthProperty.value;
+    },
+    get maxWidth() { return this.getMaxWidth(); },
+
+    /**
+     * Returns the Property holding the current maximum width of the grouped content.
+     * @public
+     *
+     * @returns {Property.<number>} - Property with a non-negative amount of width
+     */
+    getMaxWidthProperty: function() {
+      return this._maxWidthProperty;
+    },
+    get maxWidthProperty() { return this.getMaxWidthProperty(); },
+
+    /**
+     * Returns the current maximum height of the grouped content.
+     * @public
+     *
+     * @returns {number} - Non-negative amount of height
+     */
+    getMaxHeight: function() {
+      return this._maxHeightProperty.value;
+    },
+    get maxHeight() { return this.getMaxHeight(); },
+
+    /**
+     * Returns the Property holding the current maximum height of the grouped content.
+     * @public
+     *
+     * @returns {Property.<number>} - Property with a non-negative amount of height
+     */
+    getMaxHeightProperty: function() {
+      return this._maxHeightProperty;
+    },
+    get maxHeightProperty() { return this.getMaxHeightProperty(); },
+
     /**
      * Creates an alignment box with the given content and options.
      * @public
@@ -205,6 +256,9 @@ define( function( require ) {
       sceneryLog && sceneryLog.AlignGroup && sceneryLog.pop();
       sceneryLog && sceneryLog.AlignGroup && sceneryLog.AlignGroup( 'AlignGroup applying to boxes' );
       sceneryLog && sceneryLog.AlignGroup && sceneryLog.push();
+
+      this._maxWidthProperty.value = maxWidth;
+      this._maxHeightProperty.value = maxHeight;
 
       if ( maxWidth > 0 && maxHeight > 0 ) {
         // Apply that maximum dimension for each alignBox
