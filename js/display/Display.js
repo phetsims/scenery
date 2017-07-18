@@ -1696,13 +1696,19 @@ define( function( require ) {
     },
 
     /**
-     * Get the currently focused Node, the leaf-most Node he value of focusProperty's Trail.
+     * Get the currently focused Node, the leaf-most Node he value of focusProperty's Trail. Null if no
+     * Node has focus.
      *
      * @public
-     * @return {Node}
+     * @return {Node|null}
      */
     getFocusedNode: function() {
-      return this.focusProperty.get().trail.lastNode();
+      var focusedNode = null;
+      var focus = this.focusProperty.get();
+      if ( focus ) {
+        focusedNode = focus.trail.lastNode();
+      }
+      return focusedNode;
     },
     get focusedNode() { return this.getFocusedNode(); }
   } );
