@@ -309,8 +309,8 @@ define( function( require ) {
     },
 
     /**
-     * Lets the group know that the alignBox has had its content resized.
-     * @private
+     * Lets the group know that the alignBox has had its content resized. Called by the AlignBox
+     * @public (scenery-internal)
      *
      * @param {AlignBox} alignBox
      */
@@ -334,7 +334,7 @@ define( function( require ) {
 
     /**
      * Removes the AlignBox from the group
-     * @private
+     * @public (scenery-internal)
      *
      * @param {AlignBox} alignBox
      */
