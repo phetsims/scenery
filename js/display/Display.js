@@ -1693,7 +1693,18 @@ define( function( require ) {
 
     get focus() {
       return this.focusProperty.value;
-    }
+    },
+
+    /**
+     * Get the currently focused Node, the leaf-most Node he value of focusProperty's Trail.
+     *
+     * @public
+     * @return {Node}
+     */
+    getFocusedNode: function() {
+      return this.focusProperty.get().trail.lastNode();
+    },
+    get focusedNode() { return this.getFocusedNode(); }
   } );
 
   Display.customCursors = {
