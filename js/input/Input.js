@@ -25,7 +25,8 @@
  *
  * *** Listeners and Events
  *
- * Event listeners are added with node.addInputListener( listener ) and pointer.addInputListener( listener ).
+ * Event listeners are added with node.addInputListener( listener ), pointer.addInputListener( listener ) and
+ * display.addInputListener( listener ).
  * This listener can be an arbitrary object, and the listener will be triggered by calling listener[eventType]( event ),
  * where eventType is one of the event types as described below, and event is a Scenery event with the
  * following properties:
@@ -98,6 +99,7 @@
  * 3. Then if the event bubbles, each Node in the Trail will be triggered, starting from the Node under the top-most
  *    (that just had listeners triggered) and all the way down to the Scene. Listeners are triggered in the order they
  *    were added for each Node.
+ * 4. Listeners on the display will be triggered (in the order they were added)
  *
  * For each listener being notified, it will fire the more specific pointerType+eventType first (e.g. 'mousemove'),
  * then eventType next (e.g. 'move').
@@ -736,6 +738,16 @@ define( function( require ) {
       }
     },
 
+    /**
+     * Dispatch to all nodes in the Trail, optionally bubbling down from the leaf to the root.
+     * @private
+     *
+     * @param {Trail} trail
+     * @param {string} type
+     * @param {Pointer} pointer
+     * @param {DOMEvent} event
+     * @param {boolean} bubbles - If bubbles is false, the event is only dispatched to the leaf node of the trail.
+     */
     dispatchEvent: function( trail, type, pointer, event, bubbles ) {
       sceneryLog && sceneryLog.InputEvent && sceneryLog.InputEvent(
         'Input: ' + type + ' on ' + trail.toString() + ' for pointer ' + pointer.toString() + ' at ' + pointer.point.toString() );
@@ -745,50 +757,54 @@ define( function( require ) {
       var inputEvent = new Event( trail, type, pointer, event );
 
       // first run through the pointer's listeners to see if one of them will handle the event
-      this.dispatchToPointer( type, pointer, inputEvent );
+      this.dispatchToListeners( pointer, pointer.getListeners(), type, inputEvent );
 
       // if not yet handled, run through the trail in order to see if one of them will handle the event
       // at the base of the trail should be the scene node, so the scene will be notified last
-      this.dispatchToTargets( trail, pointer, type, inputEvent, bubbles );
+      this.dispatchToTargets( trail, type, pointer, inputEvent, bubbles );
+
+      // Notify input listeners on the Display
+      this.dispatchToListeners( pointer, this.display.getInputListeners(), type, inputEvent );
     },
 
-    // TODO: reduce code sharing between here and dispatchToTargets!
-    dispatchToPointer: function( type, pointer, inputEvent ) {
-      if ( inputEvent.aborted || inputEvent.handled ) {
+    /**
+     * Notifies an array of listeners with a specific event.
+     * @private
+     *
+     * @param {Pointer} pointer
+     * @param {Array.<Object>} listeners - Should be a defensive array copy already.
+     * @param {string} type
+     * @param {Event}
+     */
+    dispatchToListeners: function( pointer, listeners, type, inputEvent ) {
+      if ( inputEvent.handled ) {
         return;
       }
 
       var specificType = pointer.type + type; // e.g. mouseup, touchup
 
-      var pointerListeners = pointer.getListeners(); // defensive copy
-      for ( var i = 0; i < pointerListeners.length; i++ ) {
-        var listener = pointerListeners[ i ];
+      for ( var i = 0; i < listeners.length; i++ ) {
+        var listener = listeners[ i ];
 
-        // if a listener returns true, don't handle any more
-        var aborted = false;
-
-        if ( !aborted && listener[ specificType ] ) {
-          listener[ specificType ]( inputEvent );
-          aborted = inputEvent.aborted;
-        }
-        if ( !aborted && listener[ type ] ) {
-          listener[ type ]( inputEvent );
-          aborted = inputEvent.aborted;
-        }
-
-        // bail out if the event is aborted, so no other listeners are triggered
-        if ( aborted ) {
-          return;
-        }
+        ( !inputEvent.aborted && listener[ specificType ] ) && listener[ specificType ]( inputEvent );
+        ( !inputEvent.aborted && listener[ type ] ) && listener[ type ]( inputEvent );
       }
     },
 
-    dispatchToTargets: function( trail, pointer, type, inputEvent, bubbles ) {
+    /**
+     * Dispatch to all nodes in the Trail, optionally bubbling down from the leaf to the root.
+     * @private
+     *
+     * @param {Trail} trail
+     * @param {string} type
+     * @param {Pointer} pointer
+     * @param {Event} inputEvent
+     * @param {boolean} bubbles - If bubbles is false, the event is only dispatched to the leaf node of the trail.
+     */
+    dispatchToTargets: function( trail, type, pointer, inputEvent, bubbles ) {
       if ( inputEvent.aborted || inputEvent.handled ) {
         return;
       }
-
-      var specificType = pointer.type + type; // e.g. mouseup, touchup
 
       for ( var i = trail.getLastInputEnabledIndex(); i >= 0; bubbles ? i-- : i = -1 ) {
         var target = trail.nodes[ i ];
@@ -798,31 +814,10 @@ define( function( require ) {
 
         inputEvent.currentTarget = target;
 
-        var listeners = target.getInputListeners();
+        this.dispatchToListeners( pointer, target.getInputListeners(), type, inputEvent );
 
-        for ( var k = 0; k < listeners.length; k++ ) {
-          var listener = listeners[ k ];
-
-          // if a listener returns true, don't handle any more
-          var aborted = false;
-
-          if ( !aborted && listener[ specificType ] ) {
-            listener[ specificType ]( inputEvent );
-            aborted = inputEvent.aborted;
-          }
-          if ( !aborted && listener[ type ] ) {
-            listener[ type ]( inputEvent );
-            aborted = inputEvent.aborted;
-          }
-
-          // bail out if the event is aborted, so no other listeners are triggered
-          if ( aborted ) {
-            return;
-          }
-        }
-
-        // if the input event was handled, don't follow the trail down another level
-        if ( inputEvent.handled ) {
+        // if the input event was aborted or handled, don't follow the trail down another level
+        if ( inputEvent.aborted || inputEvent.handled ) {
           return;
         }
       }

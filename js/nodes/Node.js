@@ -1630,7 +1630,7 @@ define( function( require ) {
      */
     addInputListener: function( listener ) {
       // don't allow listeners to be added multiple times
-      if ( _.indexOf( this._inputListeners, listener ) === -1 ) {
+      if ( !_.includes( this._inputListeners, listener ) ) {
         this._inputListeners.push( listener );
         this._picker.onAddInputListener();
         if ( assertSlow ) { this._picker.audit(); }
@@ -1647,7 +1647,7 @@ define( function( require ) {
      */
     removeInputListener: function( listener ) {
       // ensure the listener is in our list
-      assert && assert( _.indexOf( this._inputListeners, listener ) !== -1 );
+      assert && assert( _.includes( this._inputListeners, listener ) );
 
       this._inputListeners.splice( _.indexOf( this._inputListeners, listener ), 1 );
       this._picker.onRemoveInputListener();

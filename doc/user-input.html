@@ -84,18 +84,21 @@
     </p>
 
     <p>
-      Input event listeners can be added to <a href="./#node">nodes</a> directly, or to a <a href="./#pointer">pointer</a>. When a DOM event
+      Input event listeners can be added to <a href="./#node">nodes</a> directly, or to a <a href="./#pointer">pointer</a> or the
+      <a href="./#display">Display</a>. When a DOM event
       is received, it is first broken up into multiple events (if necessary, e.g. multiple touch points), then the dispatch is handled for
       each individual Scenery <a href="./#event">event</a>. Events are first fired for any listeners attached to the pointer that caused the event,
       then fire on the node directly under the pointer, and if applicable, bubble up the graph to the Scene from which the event was triggered.
+      Finally, listeners attached to the Display will be triggered.
       <strong>Events are not fired directly on nodes that are not under the pointer at the time of the event.</strong>.
     </p>
 
     <h2>Listeners and Events</h2>
 
     <p>
-      Event listeners are added with <a href="./#node-addInputListener">node.addInputListener( listener )</a> and
-      <a href="./#pointer-addInputListener">pointer.addInputListener( listener )</a>. This listener can be an arbitrary object, and the listener will
+      Event listeners are added with <a href="./#node-addInputListener">node.addInputListener( listener )</a>,
+      <a href="./#pointer-addInputListener">pointer.addInputListener( listener )</a> and
+      <a href="./#display-addInputListener">display.addInputListener( listener )</a>. This listener can be an arbitrary object, and the listener will
       be
       triggered by calling <code>listener[eventType]( event )</code>, where <code>eventType</code> is one of the event types as described below, and
       <code>event</code> is a Scenery <a href="./#event">event</a> with the following properties:
@@ -276,6 +279,7 @@
         triggered)
         and all the way down to the Scene. Listeners are triggered in the order they were added for each Node.
       </li>
+      <li>Listeners on the display will be triggered (in the order they were added)</li>
     </ol>
 
     <p>

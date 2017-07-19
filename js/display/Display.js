@@ -204,6 +204,7 @@ define( function( require ) {
 
     // will be filled in with a scenery.Input if event handling is enabled
     this._input = null;
+    this._inputListeners = []; // {Array.<Object>} - Listeners that will be called for every event.
     this._interactive = this.options.interactive;
     this._listenToOnlyElement = options.listenToOnlyElement; // TODO: doc
     this._batchDOMEvents = options.batchDOMEvents; // TODO: doc
@@ -1065,6 +1066,67 @@ define( function( require ) {
       this._input.disconnectListeners();
       this._input = null;
     },
+
+
+    /**
+     * Adds an input listener.
+     * @public
+     *
+     * @param {Object} listener
+     * @returns {Display} - For chaining
+     */
+    addInputListener: function( listener ) {
+      // don't allow listeners to be added multiple times
+      if ( !_.includes( this._inputListeners, listener ) ) {
+        this._inputListeners.push( listener );
+      }
+      return this;
+    },
+
+    /**
+     * Removes an input listener that was previously added with addInputListener.
+     * @public
+     *
+     * @param {Object} listener
+     * @returns {Display} - For chaining
+     */
+    removeInputListener: function( listener ) {
+      // ensure the listener is in our list
+      assert && assert( _.includes( this._inputListeners, listener ) );
+
+      this._inputListeners.splice( _.indexOf( this._inputListeners, listener ), 1 );
+
+      return this;
+    },
+
+    /**
+     * Returns whether this input listener is currently listening to this node.
+     * @public
+     *
+     * More efficient than checking node.inputListeners, as that includes a defensive copy.
+     *
+     * @param {Object} listener
+     * @returns {boolean}
+     */
+    hasInputListener: function( listener ) {
+      for ( var i = 0; i < this._inputListeners.length; i++ ) {
+        if ( this._inputListeners[ i ] === listener ) {
+          return true;
+        }
+      }
+      return false;
+    },
+
+    /**
+     * Returns a copy of all of our input listeners.
+     * @public
+     *
+     * @returns {Array.<Object>}
+     */
+    getInputListeners: function() {
+      return this._inputListeners.slice( 0 ); // defensive copy
+    },
+    get inputListeners() { return this.getInputListeners(); },
 
     /**
      * Dispose function for Display.
