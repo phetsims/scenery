@@ -1657,6 +1657,24 @@ define( function( require ) {
     },
 
     /**
+     * Returns whether this input listener is currently listening to this node.
+     * @public
+     *
+     * More efficient than checking node.inputListeners, as that includes a defensive copy.
+     *
+     * @param {Object} listener
+     * @returns {boolean}
+     */
+    hasInputListener: function( listener ) {
+      for ( var i = 0; i < this._inputListeners.length; i++ ) {
+        if ( this._inputListeners[ i ] === listener ) {
+          return true;
+        }
+      }
+      return false;
+    },
+
+    /**
      * Interrupts all input listeners that are attached to this node.
      * @public
      *
