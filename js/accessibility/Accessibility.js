@@ -263,35 +263,42 @@ define( function( require ) {
 
           // @private {Array.<Function>} - For accessibility input handling {keyboard/click/HTML form}
           this._accessibleInputListeners = [];
+
+          // @private {boolean} - if true, all accessible input will be halted on this Node.
+          this._accessibleInputEnabled = true;
         },
 
         /**
          * Adds an accessible input listener. The listener's keys should be DOM event names, and the values should be
-         * functions to be called when that event is fired on the dom element.
+         * functions to be called when that event is fired on the dom element. No input listeners will be fired
+         * if this.accessibleInputEnabled is false.
          * @public
          * 
-         *
          * @param {Object} listener
          * @returns {Object} - the actually added listener, so it can be removed via removeAccessibleInputListener
          */
         addAccessibleInputListener: function( accessibleInput ) {
           var self = this;
+          var addedAccessibleInput = {};
 
-          // event changes the input value, wrap the listener with a function that will handle this
-          var addedAccessibleInput = accessibleInput;
-          for ( var ev in accessibleInput ) {
-            if ( accessibleInput.hasOwnProperty( ev ) ) {
-              addedAccessibleInput[ ev ] = accessibleInput[ ev ];
+          var keys = Object.keys( accessibleInput );
+          for ( var i = 0; i < keys.length; i++ ) {
+            var ev = keys[ i ];
+            if ( _.includes( DOM_EVENTS, ev ) ) {
 
-              if ( _.includes( INPUT_CHANGE_EVENTS, ev ) ) {
+              // wrap the listener with another function so that we can update state of this Node's
+              // accessible content if necessary, and prevent firing when input not enabled
+              addedAccessibleInput[ ev ] = function( event ) {
+                if ( self._accessibleInputEnabled ) {
 
-                // store so that we don't call the listener recursively
-                var listenerFunction = accessibleInput[ ev ];
-                addedAccessibleInput[ ev ] = function( event ) {
+                  if ( _.includes( INPUT_CHANGE_EVENTS, event.type ) ) {
                     self._inputValue = event.target.value;
-                    listenerFunction( event );
-                };
-              }
+                  }
+
+                  // call the original input listener
+                  accessibleInput[ event.type ]( event );
+                }
+              };
             }
           }
 
@@ -341,6 +348,33 @@ define( function( require ) {
           return this._accessibleInputListeners.slice( 0 ); // defensive copy
         },
         get accessibleInputListeners() { return this.getAccessibleInputListeners(); },
+
+        /**
+         * Prevents all accessible input listeners from being called on this Node.  Should only
+         * be used internally by scenery for now.
+         * @public (scenery-internal)
+         *
+         * REVIEW: Instead of just setting all children, we should just set one Node and then
+         * traverse specific trails to see if input is enabled.
+         */
+        setAccessibleInputEnabled: function( accessibleInputEnabled ) {
+          this._accessibleInputEnabled = accessibleInputEnabled;
+
+          for ( var i = 0; i < this.children.length; i++ ) {
+            this.children[ i ].accessibleInputEnabled = accessibleInputEnabled;
+          }
+        },
+        set accessibleInputEnabled( accessibleInputEnabled ) { this.setAccessibleInputEnabled( accessibleInputEnabled ); },
+
+        /**
+         * Get whether or not we are preventing accessible input listeners from firing when this node receives
+         * accessible input events.
+         * @return {boolean}
+         */
+        getAccessibleInputEnabled: function() {
+          return this._accessibleInputEnabled;
+        },
+        get accessibleInputEnabled() { return this.getAccessibleInputEnabled(); },
 
         /**
          * Set the tag name representing this element in the DOM. DOM element tag names are read-only, so this

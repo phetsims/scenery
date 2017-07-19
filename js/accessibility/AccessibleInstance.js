@@ -308,8 +308,11 @@ define( function( require ) {
         this.peer.dispose();
 
         // remove this peer's dom element (or its parent container) from the parent peer's
-        // dom element (or its child container)
+        // dom element (or its child container), disabling input so that we do not call input listeners
+        // while the elements are removed from the DOM
+        this.node.accessibleInputEnabled = false;
         this.parent.peer.getChildContainerElement().removeChild( this.peer.getParentContainerElement() );
+        this.node.accessibleInputEnabled = true;
       }
 
       while ( this.children.length ) {
