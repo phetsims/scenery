@@ -74,7 +74,6 @@ define( function( require ) {
 
     // like DOM Event.stopImmediatePropagation(), but named differently to indicate it doesn't fire that behavior on the underlying DOM event
     abort: function() {
-      this.handled = true;
       this.aborted = true;
     },
 
