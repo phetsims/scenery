@@ -29,7 +29,13 @@ define( function( require ) {
   // See https://github.com/phetsims/scenery/issues/539
   var MAX_DIMENSION = new Dimension2( 1024, 1024 );
 
-  // Added to the bottom and right of every texture
+  // Amount of space along the edge of each image that is filled with the closest adjacent pixel value. This helps
+  // get rid of alpha fading, see https://github.com/phetsims/scenery/issues/637.
+  var GUTTER_SIZE = 1;
+
+  // Amount of blank space along the bottom and right of each image that is left transparent, to avoid graphical
+  // artifacts due to texture filtering blending the adjacent image in.
+  // See https://github.com/phetsims/scenery/issues/637.
   var PADDING = 1;
 
   /**
@@ -162,7 +168,7 @@ define( function( require ) {
       var bin;
       // Enters 'while' loop only if allocate() returns null and we have unused sprites (i.e. conditions where we will
       // want to deallocate the least recently used (LRU) unused sprite and then check for allocation again).
-      while ( !( bin = this.binPacker.allocate( width + PADDING, height + PADDING ) ) && this.unusedSprites.length ) {
+      while ( !( bin = this.binPacker.allocate( width + 2 * GUTTER_SIZE + PADDING, height + 2 * GUTTER_SIZE + PADDING ) ) && this.unusedSprites.length ) {
         var ejectedSprite = this.unusedSprites.shift(); // LRU policy by taking first item
 
         // clear its space in the Canvas
@@ -176,10 +182,16 @@ define( function( require ) {
 
       if ( bin ) {
         // WebGL will want UV coordinates in the [0,1] range
-        var uvBounds = new Bounds2( bin.bounds.minX / this.width, bin.bounds.minY / this.height,
-          ( bin.bounds.maxX - PADDING ) / this.width, ( bin.bounds.maxY - PADDING ) / this.height );
+        // We need to chop off the gutters (on all sides), and the padding (on the bottom and right)
+        var uvBounds = new Bounds2(
+          ( bin.bounds.minX + GUTTER_SIZE ) / this.width,
+          ( bin.bounds.minY + GUTTER_SIZE ) / this.height,
+          ( bin.bounds.maxX - GUTTER_SIZE - PADDING ) / this.width,
+          ( bin.bounds.maxY - GUTTER_SIZE - PADDING ) / this.height );
         var sprite = new SpriteSheet.Sprite( this, bin, uvBounds, image, 1 );
-        this.context.drawImage( image, bin.bounds.x, bin.bounds.y );
+
+        this.copyImageWithGutter( image, width, height, bin.bounds.x, bin.bounds.y );
+
         this.dirty = true;
         this.usedSprites.push( sprite );
         return sprite;
@@ -245,6 +257,51 @@ define( function( require ) {
       }
 
       return false;
+    },
+
+    /**
+     * Copes the image (width x height) centered into a bin (width+2 x height+2) at (binX,binY), where the padding
+     * along the edges is filled with the next closest pixel in the actual image.
+     * @private
+     *
+     * @param {HTMLCanvasElement|HTMLImageElement} image
+     * @param {number} width
+     * @param {number} height
+     * @param {number} binX
+     * @param {number} binY
+     */
+    copyImageWithGutter: function( image, width, height, binX, binY ) {
+      assert && assert( GUTTER_SIZE === 1 );
+
+      // Corners, all 1x1
+      this.copyImageRegion( image, 1, 1, 0, 0, binX, binY );
+      this.copyImageRegion( image, 1, 1, width - 1, 0, binX + 1 + width, binY );
+      this.copyImageRegion( image, 1, 1, width - 1, height - 1, binX + 1 + width, binY + 1 + height );
+      this.copyImageRegion( image, 1, 1, 0, height - 1, binX, binY + 1 + height );
+
+      // Edges
+      this.copyImageRegion( image, width, 1, 0, 0, binX + 1, binY );
+      this.copyImageRegion( image, width, 1, 0, height - 1, binX + 1, binY + 1 + height );
+      this.copyImageRegion( image, 1, height, 0, 0, binX, binY + 1 );
+      this.copyImageRegion( image, 1, height, width - 1, 0, binX + 1 + width, binY + 1 );
+
+      this.context.drawImage( image, binX + 1, binY + 1 );
+    },
+
+    /**
+     * Helper for drawing gutters.
+     * @private
+     *
+     * @param {HTMLCanvasElement|HTMLImageElement} image
+     * @param {number} width
+     * @param {number} height
+     * @param {number} sourceX
+     * @param {number} sourceY
+     * @param {number} destinationX
+     * @param {number} destinationY
+     */
+    copyImageRegion: function( image, width, height, sourceX, sourceY, destinationX, destinationY ) {
+      this.context.drawImage( image, sourceX, sourceY, width, height, destinationX, destinationY, width, height );
     }
   } );
 
