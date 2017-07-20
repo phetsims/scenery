@@ -1629,6 +1629,8 @@ define( function( require ) {
      * @returns {Node} - Returns 'this' reference, for chaining
      */
     addInputListener: function( listener ) {
+      assert && assert( !_.includes( this._inputListeners, listener ), 'Input listener already registered on this Node' );
+
       // don't allow listeners to be added multiple times
       if ( !_.includes( this._inputListeners, listener ) ) {
         this._inputListeners.push( listener );
