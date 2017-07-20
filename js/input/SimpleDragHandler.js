@@ -247,11 +247,11 @@ define( function( require ) {
     /**
      * Creates an input listener that forwards events to the specified input listener
      * See https://github.com/phetsims/scenery/issues/639
-     * @param {Object} inputListener - input listener
+     * @param {function(Event)} down - down function to be added to the input listener
      * @param {Object} [options]
-     * @returns {Object} inputListener
+     * @returns {Object} a scenery input listener
      */
-    createForwardingListener: function( inputListener, options ) {
+    createForwardingListener: function( down, options ) {
 
       options = _.extend( {
         allowTouchSnag: false
@@ -260,7 +260,7 @@ define( function( require ) {
       return {
         down: function( event ) {
           if ( !event.pointer.dragging && event.canStartPress() ) {
-            inputListener.down( event );
+            down( event );
           }
         },
         touchenter: function( event ) {
