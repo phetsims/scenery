@@ -160,6 +160,8 @@ define( function( require ) {
     dispose: function() {
       // TODO: disposal of buffers?
 
+      this.disposeState();
+
       // super
       WebGLSelfDrawable.prototype.dispose.call( this );
     }
