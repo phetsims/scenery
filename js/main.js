@@ -79,7 +79,6 @@ define( [
   'SCENERY/display/drawables/TextDOMDrawable',
   'SCENERY/display/drawables/TextStatefulDrawable',
   'SCENERY/display/drawables/TextSVGDrawable',
-  'SCENERY/display/drawables/TextWebGLDrawable',
   'SCENERY/display/drawables/WebGLNodeDrawable',
 
   'SCENERY/input/BatchedDOMEvent',

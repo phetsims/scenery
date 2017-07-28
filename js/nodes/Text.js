@@ -25,7 +25,6 @@ define( function( require ) {
   var TextCanvasDrawable = require( 'SCENERY/display/drawables/TextCanvasDrawable' );
   var TextDOMDrawable = require( 'SCENERY/display/drawables/TextDOMDrawable' );
   var TextSVGDrawable = require( 'SCENERY/display/drawables/TextSVGDrawable' );
-  var TextWebGLDrawable = require( 'SCENERY/display/drawables/TextWebGLDrawable' );
   var TextBounds = require( 'SCENERY/util/TextBounds' );
   var TText = require( 'SCENERY/nodes/TText' );
 
@@ -391,19 +390,6 @@ define( function( require ) {
      */
     createCanvasDrawable: function( renderer, instance ) {
       return TextCanvasDrawable.createFromPool( renderer, instance );
-    },
-
-    /**
-     * Creates a WebGL drawable for this Text.
-     * @public (scenery-internal)
-     * @override
-     *
-     * @param {number} renderer - In the bitmask format specified by Renderer, which may contain additional bit flags.
-     * @param {Instance} instance - Instance object that will be associated with the drawable
-     * @returns {WebGLSelfDrawable}
-     */
-    createWebGLDrawable: function( renderer, instance ) {
-      return TextWebGLDrawable.createFromPool( renderer, instance );
     },
 
     /**
