@@ -434,7 +434,7 @@ define( function( require ) {
       //            in scenery.js and Renderer.js.
       renderer: 0,
 
-      // {boolean} - Whether it is ancitipated that opacity will be switched on. If so, having this set to true will
+      // {boolean} - Whether it is anticipated that opacity will be switched on. If so, having this set to true will
       //             make switching back-and-forth between opacity:1 and other opacities much faster.
       usesOpacity: false,
 
