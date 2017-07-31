@@ -228,6 +228,18 @@ define( function( require ) {
         },
 
         /**
+         * Returns whether there will appear to be a stroke for this Node. Properly handles the lineWidth:0 case.
+         * @public
+         *
+         * @returns {boolean}
+         */
+        hasPaintableStroke: function() {
+          // Should not be stroked if the lineWidth is 0, see https://github.com/phetsims/scenery/issues/658
+          // and https://github.com/phetsims/scenery/issues/523
+          return this.hasStroke() && this.getLineWidth() > 0;
+        },
+
+        /**
          * Returns a property-unwrapped stroke if applicable.
          * @public
          *
