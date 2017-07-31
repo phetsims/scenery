@@ -71,7 +71,7 @@ define( function( require ) {
       context.moveTo( node._x1, node._y1 );
       context.lineTo( node._x2, node._y2 );
 
-      if ( node._stroke ) {
+      if ( node.hasPaintableStroke() ) {
         node.beforeCanvasStroke( wrapper ); // defined in Paintable
         context.stroke();
         node.afterCanvasStroke( wrapper ); // defined in Paintable

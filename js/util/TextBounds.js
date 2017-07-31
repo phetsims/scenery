@@ -85,7 +85,7 @@ define( function( require ) {
         context.font = text._font.toCSS();
         context.direction = 'ltr';
         context.fillText( text.renderedText, 0, 0 );
-        if ( text.hasStroke() ) {
+        if ( text.hasPaintableStroke() ) {
           var fakeWrapper = new CanvasContextWrapper( null, context );
           text.beforeCanvasStroke( fakeWrapper );
           context.strokeText( text.renderedText, 0, 0 );

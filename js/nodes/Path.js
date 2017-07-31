@@ -348,7 +348,7 @@ define( function( require ) {
       }
       else {
         // boundsMethod: 'unstroked', or anything without a stroke will then just use the normal shape bounds
-        if ( !this.hasStroke() || this.getLineWidth() === 0 || this._boundsMethod === 'unstroked' ) {
+        if ( !this.hasPaintableStroke() || this._boundsMethod === 'unstroked' ) {
           return this.getShape().bounds;
         }
         else {

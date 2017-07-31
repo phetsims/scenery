@@ -112,7 +112,7 @@ define( function( require ) {
           context.fill();
           node.afterCanvasFill( wrapper ); // defined in Paintable
         }
-        if ( node.hasStroke() ) {
+        if ( node.hasPaintableStroke() ) {
           node.beforeCanvasStroke( wrapper ); // defined in Paintable
           context.stroke();
           node.afterCanvasStroke( wrapper ); // defined in Paintable
@@ -135,7 +135,7 @@ define( function( require ) {
             node.afterCanvasFill( wrapper ); // defined in Paintable
           }
         }
-        if ( node.hasStroke() ) {
+        if ( node.hasPaintableStroke() ) {
           // If we need the fill pattern/gradient to have a different transformation, we can't use fillRect.
           // See https://github.com/phetsims/scenery/issues/543
           if ( node.getStrokeValue().transformMatrix ) {

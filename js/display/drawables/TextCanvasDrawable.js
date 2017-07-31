@@ -66,7 +66,7 @@ define( function( require ) {
       var context = wrapper.context;
 
       // extra parameters we need to set, but should avoid setting if we aren't drawing anything
-      if ( node.hasFill() || node.hasStroke() ) {
+      if ( node.hasFill() || node.hasPaintableStroke() ) {
         wrapper.setFont( node._font.getFont() );
         wrapper.setDirection( 'ltr' );
       }
@@ -76,7 +76,7 @@ define( function( require ) {
         context.fillText( node.renderedText, 0, 0 );
         node.afterCanvasFill( wrapper ); // defined in Paintable
       }
-      if ( node.hasStroke() ) {
+      if ( node.hasPaintableStroke() ) {
         node.beforeCanvasStroke( wrapper ); // defined in Paintable
         context.strokeText( node.renderedText, 0, 0 );
         node.afterCanvasStroke( wrapper ); // defined in Paintable

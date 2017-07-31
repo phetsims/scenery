@@ -78,7 +78,7 @@ define( function( require ) {
         context.fill();
         node.afterCanvasFill( wrapper ); // defined in Paintable
       }
-      if ( node.hasStroke() ) {
+      if ( node.hasPaintableStroke() ) {
         node.beforeCanvasStroke( wrapper ); // defined in Paintable
         context.stroke();
         node.afterCanvasStroke( wrapper ); // defined in Paintable
