@@ -86,6 +86,7 @@ define( function( require ) {
   var CanvasNodeBoundsOverlay = require( 'SCENERY/overlays/CanvasNodeBoundsOverlay' );
   var FittedBlockBoundsOverlay = require( 'SCENERY/overlays/FittedBlockBoundsOverlay' );
   var TFocus = require( 'SCENERY/accessibility/TFocus' );
+  var Util = require( 'SCENERY/util/Util' );
 
   /*
    * Constructs a Display that will show the rootNode and its subtree in a visual state. Default options provided below
@@ -1149,6 +1150,30 @@ define( function( require ) {
         'last updateDisplay() had a thrown error and it is trying to be run again (in which case, investigate that ' +
         'error), OR code was run/triggered from inside an updateDisplay() that has the potential to cause an infinite ' +
         'loop, e.g. CanvasNode paintCanvas() call manipulating another Node, or a bounds listener that Scenery missed.' );
+    },
+
+    /**
+     * Triggers a loss of context for all WebGL blocks.
+     * @public
+     *
+     * NOTE: Should generally only be used for debugging.
+     */
+    loseWebGLContexts: function() {
+      (function loseBackbone( backbone ) {
+        if ( backbone.blocks ) {
+          backbone.blocks.forEach( function( block ) {
+            if ( block.gl ) {
+              Util.loseContext( block.gl );
+            }
+
+            //TODO: pattern for this iteration
+            for ( var drawable = block.firstDrawable; drawable !== null; drawable = drawable.nextDrawable ) {
+              loseBackbone( drawable );
+              if ( drawable === block.lastDrawable ) { break; }
+            }
+          } );
+        }
+      })( this._rootBackbone );
     },
 
     /**

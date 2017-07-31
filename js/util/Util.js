@@ -556,6 +556,25 @@ define( function( require ) {
         this._extensionlessWebGLSupport = scenery.Util.checkWebGLSupport();
       }
       return this._extensionlessWebGLSupport;
+    },
+
+    /**
+     * Triggers a loss of a WebGL context, with a delayed restoration.
+     * @public
+     *
+     * NOTE: Only use this for debugging. Should not be called normally.
+     *
+     * @param {WebGLRenderingContext} gl
+     */
+    loseContext: function( gl ) {
+      var extension = gl.getExtension( 'WEBGL_lose_context' );
+      if ( extension ) {
+        extension.loseContext();
+
+        setTimeout( function() {
+          extension.restoreContext();
+        }, 5000 );
+      }
     }
   };
   scenery.register( 'Util', Util );
