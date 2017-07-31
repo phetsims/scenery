@@ -119,8 +119,9 @@ define( function( require ) {
      * @override
      *
      * @param {CanvasContextWrapper} wrapper
+     * @param {Matrix3} matrix - The transformation matrix already applied to the context.
      */
-    canvasPaintSelf: function( wrapper ) {
+    canvasPaintSelf: function( wrapper, matrix ) {
       this.paintCanvas( wrapper.context );
     },
 

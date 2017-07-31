@@ -62,8 +62,9 @@ define( function( require ) {
      *
      * @param {CanvasContextWrapper} wrapper - Contains the Canvas and its drawing context
      * @param {Node} node - Our node that is being drawn
+     * @param {Matrix3} matrix - The transformation matrix applied for this node's coordinate system.
      */
-    paintCanvas: function( wrapper, node ) {
+    paintCanvas: function( wrapper, node, matrix ) {
       assert && assert( !node.selfBounds.isEmpty(), 'CanvasNode should not be used with an empty canvasBounds. ' +
                                                     'Please set canvasBounds (or use setCanvasBounds()) on ' + node.constructor.name );
 

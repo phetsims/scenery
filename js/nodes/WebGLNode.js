@@ -152,8 +152,9 @@ define( function( require ) {
      * @override
      *
      * @param {CanvasContextWrapper} wrapper
+     * @param {Matrix3} matrix - The transformation matrix already applied to the context.
      */
-    canvasPaintSelf: function( wrapper ) {
+    canvasPaintSelf: function( wrapper, matrix ) {
       // TODO: see https://github.com/phetsims/scenery/issues/308
       assert && assert( 'unimplemented: canvasPaintSelf in WebGLNode' );
     },

@@ -779,9 +779,11 @@ define( function( require ) {
      * @override
      *
      * @param {CanvasContextWrapper} wrapper
+     * @param {Matrix3} matrix - The transformation matrix already applied to the context.
      */
-    canvasPaintSelf: function( wrapper ) {
-      RectangleCanvasDrawable.prototype.paintCanvas( wrapper, this );
+    canvasPaintSelf: function( wrapper, matrix ) {
+      //TODO: Have a separate method for this, instead of touching the prototype. Can make 'this' references too easily.
+      RectangleCanvasDrawable.prototype.paintCanvas( wrapper, this, matrix );
     },
 
     /**

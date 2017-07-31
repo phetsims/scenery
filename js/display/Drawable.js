@@ -38,7 +38,7 @@
  *   domElement: {HTMLElement}
  * }
  * Canvas: {
- *   paintCanvas: function( {CanvasContextWrapper} wrapper, {Node} node )
+ *   paintCanvas: function( {CanvasContextWrapper} wrapper, {Node} node, {Matrix3} matrix )
  * }
  * SVG: {
  *   svgElement: {SVGElement}

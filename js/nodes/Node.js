@@ -3926,8 +3926,9 @@ define( function( require ) {
      * coordinate frame of this node.
      *
      * @param {CanvasContextWrapper} wrapper
+     * @param {Matrix3} matrix - The transformation matrix already applied to the context.
      */
-    canvasPaintSelf: function( wrapper ) {
+    canvasPaintSelf: function( wrapper, matrix ) {
 
     },
 
@@ -3940,7 +3941,7 @@ define( function( require ) {
      */
     renderToCanvasSelf: function( wrapper, matrix ) {
       if ( this.isPainted() && ( this._rendererBitmask & Renderer.bitmaskCanvas ) ) {
-        this.canvasPaintSelf( wrapper );
+        this.canvasPaintSelf( wrapper, matrix );
       }
     },
 

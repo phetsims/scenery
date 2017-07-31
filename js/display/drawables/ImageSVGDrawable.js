@@ -128,12 +128,7 @@ scenery.register( 'ImageSVGDrawable', ImageSVGDrawable );
       // determine our mipmap level, if any is used
       var level = -1; // signals a default of "we are not using mipmapping"
       if ( this.node._mipmap ) {
-        var matrix = this.instance.relativeTransform.matrix;
-        // a sense of "average" scale, which should be exact if there is no asymmetric scale/shear applied
-        var approximateScale = ( Math.sqrt( matrix.m00() * matrix.m00() + matrix.m10() * matrix.m10() ) +
-                                 Math.sqrt( matrix.m01() * matrix.m01() + matrix.m11() * matrix.m11() ) ) / 2;
-        approximateScale *= ( window.devicePixelRatio || 1 ); // for retina-like devices
-        level = this.node.getMipmapLevel( approximateScale );
+        level = this.node.getMipmapLevel( this.instance.relativeTransform.matrix );
         sceneryLog && sceneryLog.ImageSVGDrawable && sceneryLog.ImageSVGDrawable( this.id + ' Mipmap level: ' + level );
       }
 

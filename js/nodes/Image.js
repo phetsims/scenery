@@ -68,7 +68,7 @@ define( function( require ) {
     this._mipmap = false;
 
     // @private {number} - Internal stateful value, see setMipmapBias() for documentation.
-    this._mipmapBias = -0.7;
+    this._mipmapBias = 0;
 
     // @private {number} - Internal stateful value, see setMipmapInitialLevel() for documentation.
     this._mipmapInitialLevel = 4;
@@ -718,12 +718,19 @@ define( function( require ) {
     },
 
     /**
-     * Returns the desired mipmap level (0-indexed) that should be used for the particular scale.
+     * Returns the desired mipmap level (0-indexed) that should be used for the particular relative transform.
      * @public (scenery-internal)
      *
-     * @param {number} scale
+     * @param {Matrix3} matrix - The relative transformation matrix of the node.
      */
-    getMipmapLevel: function( scale ) {
+    getMipmapLevel: function( matrix ) {
+      assert && assert( this._mipmap, 'Assumes mipmaps can be used' );
+
+      // a sense of "average" scale, which should be exact if there is no asymmetric scale/shear applied
+      var scale = ( Math.sqrt( matrix.m00() * matrix.m00() + matrix.m10() * matrix.m10() ) +
+                    Math.sqrt( matrix.m01() * matrix.m01() + matrix.m11() * matrix.m11() ) ) / 2;
+      scale *= ( window.devicePixelRatio || 1 ); // for retina-like devices
+
       assert && assert( typeof scale === 'number' && scale > 0, 'scale should be a positive number' );
 
       // If we are shown larger than scale, ALWAYS choose the highest resolution
@@ -732,7 +739,7 @@ define( function( require ) {
       }
 
       var level = log2( 1 / scale ); // our approximate level of detail
-      level = Math.round( level + this._mipmapBias ); // convert to an integer level
+      level = Math.round( level + this._mipmapBias - 0.7 ); // convert to an integer level (-0.7 is a good default)
 
       if ( level < 0 ) {
         level = 0;
@@ -876,9 +883,11 @@ define( function( require ) {
      * @override
      *
      * @param {CanvasContextWrapper} wrapper
+     * @param {Matrix3} matrix - The transformation matrix already applied to the context.
      */
-    canvasPaintSelf: function( wrapper ) {
-      ImageCanvasDrawable.prototype.paintCanvas( wrapper, this );
+    canvasPaintSelf: function( wrapper, matrix ) {
+      //TODO: Have a separate method for this, instead of touching the prototype. Can make 'this' references too easily.
+      ImageCanvasDrawable.prototype.paintCanvas( wrapper, this, matrix );
     },
 
     /**

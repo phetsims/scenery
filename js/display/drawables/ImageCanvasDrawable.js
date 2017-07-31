@@ -57,8 +57,9 @@ define( function( require ) {
      *
      * @param {CanvasContextWrapper} wrapper - Contains the Canvas and its drawing context
      * @param {Node} node - Our node that is being drawn
+     * @param {Matrix3} matrix - The transformation matrix applied for this node's coordinate system.
      */
-    paintCanvas: function( wrapper, node ) {
+    paintCanvas: function( wrapper, node, matrix ) {
       var hasImageOpacity = node._imageOpacity !== 1;
 
       // Ensure that the image has been loaded by checking whether it has a width or height of 0.
@@ -70,7 +71,15 @@ define( function( require ) {
           wrapper.context.globalAlpha *= node._imageOpacity;
         }
 
-        wrapper.context.drawImage( node._image, 0, 0 );
+        if ( node._mipmap && node.hasMipmaps() ) {
+          var level = node.getMipmapLevel( matrix );
+          var canvas = node.getMipmapCanvas( level );
+          var multiplier = Math.pow( 2, level );
+          wrapper.context.drawImage( canvas, 0, 0, canvas.width * multiplier, canvas.height * multiplier );
+        }
+        else {
+          wrapper.context.drawImage( node._image, 0, 0 );
+        }
 
         if ( hasImageOpacity ) {
           wrapper.context.restore();

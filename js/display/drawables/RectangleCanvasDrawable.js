@@ -76,8 +76,9 @@ define( function( require ) {
      *
      * @param {CanvasContextWrapper} wrapper - Contains the Canvas and its drawing context
      * @param {Node} node - Our node that is being drawn
+     * @param {Matrix3} matrix - The transformation matrix applied for this node's coordinate system.
      */
-    paintCanvas: function( wrapper, node ) {
+    paintCanvas: function( wrapper, node, matrix ) {
       var context = wrapper.context;
 
       // use the standard version if it's a rounded rectangle, since there is no Canvas-optimized version for that

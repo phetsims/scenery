@@ -325,7 +325,7 @@ define( function( require ) {
       }
 
       // paint using its local coordinate frame
-      drawable.paintCanvas( wrapper, drawable.instance.node );
+      drawable.paintCanvas( wrapper, drawable.instance.node, drawable.instance.relativeTransform.matrix );
 
       this.currentDrawable = drawable;
     },
