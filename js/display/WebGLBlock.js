@@ -41,6 +41,8 @@ define( function( require ) {
 
   inherit( FittedBlock, WebGLBlock, {
     initialize: function( display, renderer, transformRootInstance, filterRootInstance ) {
+      sceneryLog && sceneryLog.WebGLBlock && sceneryLog.WebGLBlock( 'initialize #' + this.id );
+      sceneryLog && sceneryLog.WebGLBlock && sceneryLog.push();
 
       // WebGLBlocks are hard-coded to take the full display size (as opposed to svg and canvas)
       // Since we saw some jitter on iPad, see #318 and generally expect WebGL layers to span the entire display
@@ -70,39 +72,34 @@ define( function( require ) {
       // (homogenized to (x,y,1))
       this.projectionMatrixArray = this.projectionMatrix.entries;
 
+      // processor for custom WebGL drawables (e.g. WebGLNode)
+      this.customProcessor = this.customProcessor || new WebGLBlock.CustomProcessor();
+
+      // processor for drawing vertex-colored triangles (e.g. Path types)
+      this.vertexColorPolygonsProcessor = this.vertexColorPolygonsProcessor || new WebGLBlock.VertexColorPolygons( this.projectionMatrixArray );
+
+      // processor for drawing textured triangles (e.g. Image)
+      this.texturedTrianglesProcessor = this.texturedTrianglesProcessor || new WebGLBlock.TexturedTrianglesProcessor( this.projectionMatrixArray );
+
       // @public {Emitter} - Called when the WebGL context changes to a new context.
       this.glChangedEmitter = new Emitter();
 
+      // @private {boolean}
+      this.isContextLost = false;
+
+      // @private {function}
+      this.contextLostListener = this.onContextLoss.bind( this );
+      this.contextRestoreListener = this.onContextRestoration.bind( this );
+
       if ( !this.domElement ) {
-        // @private {HTMLCanvasElement}
-        this.canvas = document.createElement( 'canvas' );
-        this.canvas.style.position = 'absolute';
-        this.canvas.style.left = '0';
-        this.canvas.style.top = '0';
-        this.canvas.style.pointerEvents = 'none';
+        // @public (scenery-internal) {HTMLCanvasElement} - Div wrapper used so we can switch out Canvases if necessary.
+        this.domElement = document.createElement( 'div' );
+        this.domElement.className = 'webgl-container';
+        this.domElement.style.position = 'absolute';
+        this.domElement.style.left = '0';
+        this.domElement.style.top = '0';
 
-        // unique ID so that we can support rasterization with Display.foreignObjectRasterization
-        this.canvasId = this.canvas.id = 'scenery-webgl' + this.id;
-
-        this.canvas.addEventListener( 'webglcontextlost', this.onContextLoss.bind( this ), false );
-        this.canvas.addEventListener( 'webglcontextrestored', this.onContextRestoration.bind( this ), false );
-
-        // @public (scenery-internal) {HTMLCanvasElement}
-        this.domElement = this.canvas;
-
-        // processor for custom WebGL drawables (e.g. WebGLNode)
-        this.customProcessor = new WebGLBlock.CustomProcessor();
-
-        // processor for drawing vertex-colored triangles (e.g. Path types)
-        this.vertexColorPolygonsProcessor = new WebGLBlock.VertexColorPolygons( this.projectionMatrixArray );
-
-        // processor for drawing textured triangles (e.g. Image)
-        this.texturedTrianglesProcessor = new WebGLBlock.TexturedTrianglesProcessor( this.projectionMatrixArray );
-
-        // @private {WebGLRenderingContext}
-        this.gl = this.setupContext();
-
-        this.originalBackingScale = this.backingScale;
+        this.rebuildCanvas();
       }
 
       // clear buffers when we are reinitialized
@@ -112,64 +109,88 @@ define( function( require ) {
       Util.prepareForTransform( this.canvas, false ); // Apply CSS needed for future CSS transforms to work properly.
       Util.unsetTransform( this.canvas ); // clear out any transforms that could have been previously applied
 
-      sceneryLog && sceneryLog.WebGLBlock && sceneryLog.WebGLBlock( 'initialized #' + this.id );
+      sceneryLog && sceneryLog.WebGLBlock && sceneryLog.pop();
 
       return this;
     },
 
     /**
-     * Sets up a new WebGL context.
-     * @public
+     * Forces a rebuild of the Canvas and its context (as long as a context can be obtained).
+     * @private
      *
-     * @returns {WebGLRenderingContext}
+     * This can be necessary when the browser won't restore our context that was lost (and we need to create another
+     * canvas to get a valid context).
      */
-    setupContext: function() {
-      var contextOptions = {
-        antialias: true,
-        preserveDrawingBuffer: this.preserveDrawingBuffer
-      };
+    rebuildCanvas: function() {
+      sceneryLog && sceneryLog.WebGLBlock && sceneryLog.WebGLBlock( 'rebuildCanvas #' + this.id );
+      sceneryLog && sceneryLog.WebGLBlock && sceneryLog.push();
 
-      // we've already committed to using a WebGLBlock, so no use in a try-catch around our context attempt
-      var gl = this.canvas.getContext( 'webgl', contextOptions ) || this.canvas.getContext( 'experimental-webgl', contextOptions );
-      assert && assert( gl, 'We should have a context by now' );
+      var canvas = document.createElement( 'canvas' );
+      var gl = this.getContextFromCanvas( canvas );
 
-      // {number} - How much larger our Canvas will be compared to the CSS pixel dimensions, so that our Canvas maps
-      // one of its pixels to a physical pixel (for Retina devices, etc.).
-      this.backingScale = Util.backingScale( gl );
+      // Don't assert-failure out if this is not our first attempt (we're testing to see if we can recreate)
+      assert && assert( gl || this.canvas, 'We should have a WebGL context by now' );
 
-      Util.applyWebGLContextDefaults( gl ); // blending defaults, etc.
+      // If we're aggressively trying to rebuild, we need to ignore context creation failure.
+      if ( gl ) {
+        if ( this.canvas ) {
+          this.domElement.removeChild( this.canvas );
+          this.canvas.removeEventListener( 'webglcontextlost', this.contextLostListener, false );
+          this.canvas.removeEventListener( 'webglcontextrestored', this.contextRestoreListener, false );
+        }
 
+        // @private {HTMLCanvasElement}
+        this.canvas = canvas;
+        this.canvas.style.pointerEvents = 'none';
+
+        // unique ID so that we can support rasterization with Display.foreignObjectRasterization
+        this.canvasId = this.canvas.id = 'scenery-webgl' + this.id;
+
+        this.canvas.addEventListener( 'webglcontextlost', this.contextLostListener, false );
+        this.canvas.addEventListener( 'webglcontextrestored', this.contextRestoreListener, false );
+
+        this.domElement.appendChild( this.canvas );
+
+        this.setupContext( gl );
+      }
+
+      sceneryLog && sceneryLog.WebGLBlock && sceneryLog.pop();
+    },
+
+    /**
+     * Takes a fresh WebGL context switches the WebGL block over to use it.
+     * @private
+     *
+     * @param {WebGLRenderingContext} gl
+     */
+    setupContext: function( gl ) {
+      sceneryLog && sceneryLog.WebGLBlock && sceneryLog.WebGLBlock( 'setupContext #' + this.id );
+      sceneryLog && sceneryLog.WebGLBlock && sceneryLog.push();
+
+      assert && assert( gl, 'Should have an actual context if this is called' );
+
+      this.isContextLost = false;
+
+      // @private {WebGLRenderingContext}
+      this.gl = gl;
+
+      // @private {number} - How much larger our Canvas will be compared to the CSS pixel dimensions, so that our
+      // Canvas maps one of its pixels to a physical pixel (for Retina devices, etc.).
+      this.backingScale = Util.backingScale( this.gl );
+
+      // @private {number}
+      this.originalBackingScale = this.backingScale;
+
+      Util.applyWebGLContextDefaults( this.gl ); // blending defaults, etc.
+
+      // When the context changes, we need to force certain refreshes
       this.markDirty();
+      this.dirtyFit = true; // Force re-fitting
 
-      this.customProcessor.initializeContext( gl );
-      this.vertexColorPolygonsProcessor.initializeContext( gl );
-      this.texturedTrianglesProcessor.initializeContext( gl );
-
-      return gl;
-    },
-
-    /**
-     * Callback for whenever our WebGL context is lost.
-     * @private
-     *
-     * @param {WebGLContextEvent} domEvent
-     */
-    onContextLoss: function( domEvent ) {
-      // Preventing default is super-important, otherwise it never attempts to restore the context
-      domEvent.preventDefault();
-
-      this.canvas.style.display = 'none';
-    },
-
-    /**
-     * Callback for whenever our WebGL context is restored.
-     * @private
-     *
-     * @param {WebGLContextEvent} domEvent
-     */
-    onContextRestoration: function( domEvent ) {
-      // Recreate the context (handles context initialization for processors)
-      this.gl = this.setupContext();
+      // Update the context references on the processors
+      this.customProcessor.initializeContext( this.gl );
+      this.vertexColorPolygonsProcessor.initializeContext( this.gl );
+      this.texturedTrianglesProcessor.initializeContext( this.gl );
 
       // Notify spritesheets of the new context
       for ( var i = 0; i < this.spriteSheets.length; i++ ) {
@@ -179,7 +200,87 @@ define( function( require ) {
       // Notify (e.g. WebGLNode painters need to be recreated)
       this.glChangedEmitter.emit();
 
-      this.canvas.style.display = '';
+      sceneryLog && sceneryLog.WebGLBlock && sceneryLog.pop();
+    },
+
+    /**
+     * Attempts to force a Canvas rebuild to get a new Canvas/context pair.
+     * @private
+     */
+    delayedRebuildCanvas: function() {
+      sceneryLog && sceneryLog.WebGLBlock && sceneryLog.WebGLBlock( 'Delaying rebuilding of Canvas #' + this.id );
+      var self = this;
+
+      // TODO: Can we move this to before the update() step? Could happen same-frame in that case.
+      window.setTimeout( function() {
+        sceneryLog && sceneryLog.WebGLBlock && sceneryLog.WebGLBlock( 'Executing delayed rebuilding #' + this.id );
+        sceneryLog && sceneryLog.WebGLBlock && sceneryLog.push();
+        self.rebuildCanvas();
+        sceneryLog && sceneryLog.WebGLBlock && sceneryLog.pop();
+      } );
+    },
+
+    /**
+     * Callback for whenever our WebGL context is lost.
+     * @private
+     *
+     * @param {WebGLContextEvent} domEvent
+     */
+    onContextLoss: function( domEvent ) {
+      if ( !this.isContextLost ) {
+        sceneryLog && sceneryLog.WebGLBlock && sceneryLog.WebGLBlock( 'Context lost #' + this.id );
+        sceneryLog && sceneryLog.WebGLBlock && sceneryLog.push();
+
+        this.isContextLost = true;
+
+        // Preventing default is super-important, otherwise it never attempts to restore the context
+        domEvent.preventDefault();
+
+        this.canvas.style.display = 'none';
+
+        this.markDirty();
+
+        sceneryLog && sceneryLog.WebGLBlock && sceneryLog.pop();
+      }
+    },
+
+    /**
+     * Callback for whenever our WebGL context is restored.
+     * @private
+     *
+     * @param {WebGLContextEvent} domEvent
+     */
+    onContextRestoration: function( domEvent ) {
+      if ( this.isContextLost ) {
+        sceneryLog && sceneryLog.WebGLBlock && sceneryLog.WebGLBlock( 'Context restored #' + this.id );
+        sceneryLog && sceneryLog.WebGLBlock && sceneryLog.push();
+
+        var gl = this.getContextFromCanvas( this.canvas );
+        assert && assert( gl, 'We were told the context was restored, so this should work' );
+
+        this.setupContext( gl );
+
+        this.canvas.style.display = '';
+
+        sceneryLog && sceneryLog.WebGLBlock && sceneryLog.pop();
+      }
+    },
+
+    /**
+     * Attempts to get a WebGL context from a Canvas.
+     * @private
+     *
+     * @param {HTMLCanvasElement}
+     * @returns {WebGLRenderingContext|*} - If falsy, it did not succeed.
+     */
+    getContextFromCanvas: function( canvas ) {
+      var contextOptions = {
+        antialias: true,
+        preserveDrawingBuffer: this.preserveDrawingBuffer
+      };
+
+      // we've already committed to using a WebGLBlock, so no use in a try-catch around our context attempt
+      return canvas.getContext( 'webgl', contextOptions ) || canvas.getContext( 'experimental-webgl', contextOptions );
     },
 
     setSizeFullDisplay: function() {
@@ -202,6 +303,10 @@ define( function( require ) {
 
       if ( this.dirty && !this.disposed ) {
         this.dirty = false;
+
+        if ( this.isContextLost && this.display._aggressiveContextRecreation ) {
+          this.delayedRebuildCanvas();
+        }
 
         // update drawables, so that they have vertex arrays up to date, etc.
         while ( this.dirtyDrawables.length ) {

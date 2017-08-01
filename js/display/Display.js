@@ -147,7 +147,13 @@ define( function( require ) {
       // NOTE: Rotation of the Display's DOM element (e.g. with a CSS transform) will result in an incorrect event
       //       mapping, as getBoundingClientRect() can't work with this. getBoxQuads() should fix this when browser
       //       support is available.
-      assumeFullWindow: false
+      assumeFullWindow: false,
+
+      // {boolean} - Whether Scenery will try to aggressively re-create WebGL Canvas/context instead of waiting for
+      // a context restored event. Sometimes context losses can occur without a restoration afterwards, but this can
+      // jump-start the process.
+      // See https://github.com/phetsims/scenery/issues/347.
+      aggressiveContextRecreation: true
     }, options );
 
     // TODO: don't store the options, it's an anti-pattern.
@@ -210,6 +216,9 @@ define( function( require ) {
     this._listenToOnlyElement = options.listenToOnlyElement; // TODO: doc
     this._batchDOMEvents = options.batchDOMEvents; // TODO: doc
     this._assumeFullWindow = options.assumeFullWindow; // TODO: doc
+
+    // @public (scenery-internal) {boolean}
+    this._aggressiveContextRecreation = options.aggressiveContextRecreation;
 
     // overlays currently being displayed.
     // API expected:
@@ -1636,8 +1645,8 @@ define( function( require ) {
           }
           scanForCanvases( drawable.lastDrawable ); // wasn't hit in our simplified (and safer) loop
 
-          if ( drawable.domElement && drawable.domElement instanceof window.HTMLCanvasElement ) {
-            canvasUrlMap[ drawable.canvasId ] = drawable.domElement.toDataURL();
+          if ( drawable.canvas && drawable.canvas instanceof window.HTMLCanvasElement ) {
+            canvasUrlMap[ drawable.canvasId ] = drawable.canvas.toDataURL();
           }
         }
       }
