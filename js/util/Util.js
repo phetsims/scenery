@@ -573,7 +573,7 @@ define( function( require ) {
 
         setTimeout( function() {
           extension.restoreContext();
-        }, 5000 );
+        }, 1000 );
       }
     }
   };

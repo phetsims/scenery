@@ -52,20 +52,49 @@ define( function( require ) {
      * @returns {WebGLNodeDrawable} - For chaining
      */
     initialize: function( renderer, instance ) {
+      // @private {function}
+      this.contextChangeListener = this.onWebGLContextChange.bind( this );
+
+      // @private {*} - Will be set to whatever type node.painterType is.
+      this.painter = null;
+
       return this.initializeWebGLSelfDrawable( renderer, instance );
     },
 
-    onAddToBlock: function( webGLBlock ) {
-      this.webGLBlock = webGLBlock;
-      this.backingScale = this.webGLBlock.backingScale;
-      this.gl = this.webGLBlock.gl;
-
+    /**
+     * Creates an instance of our Node's "painter" type.
+     * @private
+     *
+     * @returns {*} - Whatever node.painterType is will be the type.
+     */
+    createPainter: function() {
       var PainterType = this.node.painterType;
-      this.painter = new PainterType( this.gl, this.node );
+      return new PainterType( this.webGLBlock.gl, this.node );
+    },
+
+    /**
+     * Callback for when the WebGL context changes. We'll reconstruct the painter.
+     * @public (scenery-internal)
+     */
+    onWebGLContextChange: function() {
+      // Dispose the old painter
+      this.painter.dispose();
+
+      // Create the new painter
+      this.painter = this.createPainter();
+    },
+
+    onAddToBlock: function( webGLBlock ) {
+      // @private {WebGLBlock}
+      this.webGLBlock = webGLBlock;
+
+      this.painter = this.createPainter();
+
+      webGLBlock.glChangedEmitter.addListener( this.contextChangeListener );
     },
 
     onRemoveFromBlock: function( webGLBlock ) {
-
+      webGLBlock.glChangedEmitter.removeListener( this.contextChangeListener );
     },
 
     draw: function() {
@@ -90,6 +119,7 @@ define( function( require ) {
      */
     dispose: function() {
       this.painter.dispose();
+      this.painter = null;
 
       if ( this.webGLBlock ) {
         this.webGLBlock = null;

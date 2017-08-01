@@ -11,16 +11,17 @@ define( function( require ) {
   'use strict';
 
   // modules
-  var scenery = require( 'SCENERY/scenery' );
-  var inherit = require( 'PHET_CORE/inherit' );
-  var Poolable = require( 'PHET_CORE/Poolable' );
   var cleanArray = require( 'PHET_CORE/cleanArray' );
-  var Matrix3 = require( 'DOT/Matrix3' );
+  var Emitter = require( 'AXON/Emitter' );
   var FittedBlock = require( 'SCENERY/display/FittedBlock' );
+  var inherit = require( 'PHET_CORE/inherit' );
+  var Matrix3 = require( 'DOT/Matrix3' );
+  var Poolable = require( 'PHET_CORE/Poolable' );
   var Renderer = require( 'SCENERY/display/Renderer' );
-  var Util = require( 'SCENERY/util/Util' );
-  var SpriteSheet = require( 'SCENERY/util/SpriteSheet' );
+  var scenery = require( 'SCENERY/scenery' );
   var ShaderProgram = require( 'SCENERY/util/ShaderProgram' );
+  var SpriteSheet = require( 'SCENERY/util/SpriteSheet' );
+  var Util = require( 'SCENERY/util/Util' );
 
   /**
    * @constructor
@@ -61,7 +62,19 @@ define( function( require ) {
       // {Array.<SpriteSheet>}, permanent list of spritesheets for this block
       this.spriteSheets = this.spriteSheets || [];
 
+      // Projection {Matrix3} that maps from Scenery's global coordinate frame to normalized device coordinates,
+      // where x,y are both in the range [-1,1] from one side of the Canvas to the other.
+      this.projectionMatrix = this.projectionMatrix || new Matrix3().setTo32Bit();
+
+      // @private {Float32Array} - Column-major 3x3 array specifying our projection matrix for 2D points
+      // (homogenized to (x,y,1))
+      this.projectionMatrixArray = this.projectionMatrix.entries;
+
+      // @public {Emitter} - Called when the WebGL context changes to a new context.
+      this.glChangedEmitter = new Emitter();
+
       if ( !this.domElement ) {
+        // @private {HTMLCanvasElement}
         this.canvas = document.createElement( 'canvas' );
         this.canvas.style.position = 'absolute';
         this.canvas.style.left = '0';
@@ -71,32 +84,25 @@ define( function( require ) {
         // unique ID so that we can support rasterization with Display.foreignObjectRasterization
         this.canvasId = this.canvas.id = 'scenery-webgl' + this.id;
 
-        var contextOptions = {
-          antialias: true,
-          preserveDrawingBuffer: this.preserveDrawingBuffer
-        };
+        this.canvas.addEventListener( 'webglcontextlost', this.onContextLoss.bind( this ), false );
+        this.canvas.addEventListener( 'webglcontextrestored', this.onContextRestoration.bind( this ), false );
 
-        // we've already committed to using a WebGLBlock, so no use in a try-catch around our context attempt
-        this.gl = this.canvas.getContext( 'webgl', contextOptions ) || this.canvas.getContext( 'experimental-webgl', contextOptions );
-        assert && assert( this.gl, 'We should have a context by now' );
-        var gl = this.gl;
-
-        // {number} - How much larger our Canvas will be compared to the CSS pixel dimensions, so that our Canvas maps
-        // one of its pixels to a physical pixel (for Retina devices, etc.).
-        this.backingScale = this.originalBackingScale = Util.backingScale( gl );
-
-        Util.applyWebGLContextDefaults( gl ); // blending defaults, etc.
-
+        // @public (scenery-internal) {HTMLCanvasElement}
         this.domElement = this.canvas;
 
         // processor for custom WebGL drawables (e.g. WebGLNode)
-        this.customProcessor = new WebGLBlock.CustomProcessor( this );
+        this.customProcessor = new WebGLBlock.CustomProcessor();
 
         // processor for drawing vertex-colored triangles (e.g. Path types)
-        this.vertexColorPolygonsProcessor = new WebGLBlock.VertexColorPolygons( this );
+        this.vertexColorPolygonsProcessor = new WebGLBlock.VertexColorPolygons( this.projectionMatrixArray );
 
         // processor for drawing textured triangles (e.g. Image)
-        this.texturedTrianglesProcessor = new WebGLBlock.TexturedTrianglesProcessor( this );
+        this.texturedTrianglesProcessor = new WebGLBlock.TexturedTrianglesProcessor( this.projectionMatrixArray );
+
+        // @private {WebGLRenderingContext}
+        this.gl = this.setupContext();
+
+        this.originalBackingScale = this.backingScale;
       }
 
       // clear buffers when we are reinitialized
@@ -106,15 +112,74 @@ define( function( require ) {
       Util.prepareForTransform( this.canvas, false ); // Apply CSS needed for future CSS transforms to work properly.
       Util.unsetTransform( this.canvas ); // clear out any transforms that could have been previously applied
 
-      // Projection {Matrix3} that maps from Scenery's global coordinate frame to normalized device coordinates,
-      // where x,y are both in the range [-1,1] from one side of the Canvas to the other.
-      this.projectionMatrix = this.projectionMatrix || new Matrix3().setTo32Bit();
-      // a column-major 3x3 array specifying our projection matrix for 2D points (homogenized to (x,y,1))
-      this.projectionMatrixArray = this.projectionMatrix.entries;
-
       sceneryLog && sceneryLog.WebGLBlock && sceneryLog.WebGLBlock( 'initialized #' + this.id );
 
       return this;
+    },
+
+    /**
+     * Sets up a new WebGL context.
+     * @public
+     *
+     * @returns {WebGLRenderingContext}
+     */
+    setupContext: function() {
+      var contextOptions = {
+        antialias: true,
+        preserveDrawingBuffer: this.preserveDrawingBuffer
+      };
+
+      // we've already committed to using a WebGLBlock, so no use in a try-catch around our context attempt
+      var gl = this.canvas.getContext( 'webgl', contextOptions ) || this.canvas.getContext( 'experimental-webgl', contextOptions );
+      assert && assert( gl, 'We should have a context by now' );
+
+      // {number} - How much larger our Canvas will be compared to the CSS pixel dimensions, so that our Canvas maps
+      // one of its pixels to a physical pixel (for Retina devices, etc.).
+      this.backingScale = Util.backingScale( gl );
+
+      Util.applyWebGLContextDefaults( gl ); // blending defaults, etc.
+
+      this.markDirty();
+
+      this.customProcessor.initializeContext( gl );
+      this.vertexColorPolygonsProcessor.initializeContext( gl );
+      this.texturedTrianglesProcessor.initializeContext( gl );
+
+      return gl;
+    },
+
+    /**
+     * Callback for whenever our WebGL context is lost.
+     * @private
+     *
+     * @param {WebGLContextEvent} domEvent
+     */
+    onContextLoss: function( domEvent ) {
+      // Preventing default is super-important, otherwise it never attempts to restore the context
+      domEvent.preventDefault();
+
+      this.canvas.style.display = 'none';
+    },
+
+    /**
+     * Callback for whenever our WebGL context is restored.
+     * @private
+     *
+     * @param {WebGLContextEvent} domEvent
+     */
+    onContextRestoration: function( domEvent ) {
+      // Recreate the context (handles context initialization for processors)
+      this.gl = this.setupContext();
+
+      // Notify spritesheets of the new context
+      for ( var i = 0; i < this.spriteSheets.length; i++ ) {
+        this.spriteSheets[ i ].initializeContext( this.gl );
+      }
+
+      // Notify (e.g. WebGLNode painters need to be recreated)
+      this.glChangedEmitter.emit();
+
+      this.canvas.style.display = '';
     },
 
     setSizeFullDisplay: function() {
@@ -363,12 +428,26 @@ define( function( require ) {
 
   // TODO: Processor super-type?
 
-  WebGLBlock.CustomProcessor = function( webglBlock ) {
-    this.webglBlock = webglBlock;
-
+  /**
+   * @constructor
+   */
+  WebGLBlock.CustomProcessor = function() {
     this.drawable = null;
   };
   inherit( Object, WebGLBlock.CustomProcessor, {
+    /**
+     * Sets the WebGL context that this processor should use.
+     * @public
+     *
+     * NOTE: This can be called multiple times on a single processor, in the case where the previous context was lost.
+     *       We should not need to dispose anything from that.
+     *
+     * @param {WebGLRenderingContext} gl
+     */
+    initializeContext: function( gl ) {
+
+    },
+
     activate: function() {
       this.drawCount = 0;
     },
@@ -395,45 +474,73 @@ define( function( require ) {
     }
   } );
 
-  WebGLBlock.VertexColorPolygons = function( webglBlock ) {
-    this.webglBlock = webglBlock;
-    var gl = this.gl = webglBlock.gl;
+  /**
+   * @constructor
+   *
+   * @param {Float32Array} projectionMatrixArray - Projection matrix entries
+   */
+  WebGLBlock.VertexColorPolygons = function( projectionMatrixArray ) {
+    assert && assert( projectionMatrixArray instanceof Float32Array );
 
-    assert && assert( webglBlock.gl );
-    this.shaderProgram = new ShaderProgram( gl, [
-      // vertex shader
-      'attribute vec2 aVertex;',
-      'attribute vec4 aColor;',
-      'varying vec4 vColor;',
-      'uniform mat3 uProjectionMatrix;',
+    // @private {Float32Array}
+    this.projectionMatrixArray = projectionMatrixArray;
 
-      'void main() {',
-      '  vColor = aColor;',
-      '  vec3 ndc = uProjectionMatrix * vec3( aVertex, 1.0 );', // homogeneous map to to normalized device coordinates
-      '  gl_Position = vec4( ndc.xy, 0.0, 1.0 );',
-      '}'
-    ].join( '\n' ), [
-      // fragment shader
-      'precision mediump float;',
-      'varying vec4 vColor;',
+    // @private {number} - Initial length of the vertex buffer. May increase as needed.
+    this.lastArrayLength = 128;
 
-      'void main() {',
-      // '  gl_FragColor = vec4( 0.0, 1.0, 0.0, 1.0 );',
-      '  gl_FragColor = vColor;',
-      '}'
-    ].join( '\n' ), {
-      attributes: [ 'aVertex', 'aColor' ],
-      uniforms: [ 'uProjectionMatrix' ]
-    } );
-
-    this.vertexBuffer = gl.createBuffer();
-    this.lastArrayLength = 128; // initial vertex buffer array length
+    // @private {Float32Array}
     this.vertexArray = new Float32Array( this.lastArrayLength );
-
-    gl.bindBuffer( gl.ARRAY_BUFFER, this.vertexBuffer );
-    gl.bufferData( gl.ARRAY_BUFFER, this.vertexArray, gl.DYNAMIC_DRAW ); // fully buffer at the start
   };
   inherit( Object, WebGLBlock.VertexColorPolygons, {
+    /**
+     * Sets the WebGL context that this processor should use.
+     * @public
+     *
+     * NOTE: This can be called multiple times on a single processor, in the case where the previous context was lost.
+     *       We should not need to dispose anything from that.
+     *
+     * @param {WebGLRenderingContext} gl
+     */
+    initializeContext: function( gl ) {
+      assert && assert( gl, 'Should be an actual context' );
+
+      // @private {WebGLRenderingContext}
+      this.gl = gl;
+
+      // @private {ShaderProgram}
+      this.shaderProgram = new ShaderProgram( gl, [
+        // vertex shader
+        'attribute vec2 aVertex;',
+        'attribute vec4 aColor;',
+        'varying vec4 vColor;',
+        'uniform mat3 uProjectionMatrix;',
+
+        'void main() {',
+        '  vColor = aColor;',
+        '  vec3 ndc = uProjectionMatrix * vec3( aVertex, 1.0 );', // homogeneous map to to normalized device coordinates
+        '  gl_Position = vec4( ndc.xy, 0.0, 1.0 );',
+        '}'
+      ].join( '\n' ), [
+        // fragment shader
+        'precision mediump float;',
+        'varying vec4 vColor;',
+
+        'void main() {',
+        // '  gl_FragColor = vec4( 0.0, 1.0, 0.0, 1.0 );',
+        '  gl_FragColor = vColor;',
+        '}'
+      ].join( '\n' ), {
+        attributes: [ 'aVertex', 'aColor' ],
+        uniforms: [ 'uProjectionMatrix' ]
+      } );
+
+      // @private {WebGLBuffer}
+      this.vertexBuffer = gl.createBuffer();
+
+      gl.bindBuffer( gl.ARRAY_BUFFER, this.vertexBuffer );
+      gl.bufferData( gl.ARRAY_BUFFER, this.vertexArray, gl.DYNAMIC_DRAW ); // fully buffer at the start
+    },
+
     activate: function() {
       this.shaderProgram.use();
 
@@ -475,7 +582,7 @@ define( function( require ) {
       var gl = this.gl;
 
       // (uniform) projection transform into normalized device coordinates
-      gl.uniformMatrix3fv( this.shaderProgram.uniformLocations.uProjectionMatrix, false, this.webglBlock.projectionMatrixArray );
+      gl.uniformMatrix3fv( this.shaderProgram.uniformLocations.uProjectionMatrix, false, this.projectionMatrixArray );
 
       gl.bindBuffer( gl.ARRAY_BUFFER, this.vertexBuffer );
       // if we increased in length, we need to do a full bufferData to resize it on the GPU side
@@ -497,52 +604,80 @@ define( function( require ) {
     }
   } );
 
-  WebGLBlock.TexturedTrianglesProcessor = function( webglBlock ) {
-    this.webglBlock = webglBlock;
-    var gl = this.gl = webglBlock.gl;
+  /**
+   * @constructor
+   *
+   * @param {Float32Array} projectionMatrixArray - Projection matrix entries
+   */
+  WebGLBlock.TexturedTrianglesProcessor = function( projectionMatrixArray ) {
+    assert && assert( projectionMatrixArray instanceof Float32Array );
 
-    assert && assert( webglBlock.gl );
-    this.shaderProgram = new ShaderProgram( gl, [
-      // vertex shader
-      'attribute vec2 aVertex;',
-      'attribute vec2 aTextureCoord;',
-      'attribute float aAlpha;',
-      'varying vec2 vTextureCoord;',
-      'varying float vAlpha;',
-      'uniform mat3 uProjectionMatrix;',
+    // @private {Float32Array}
+    this.projectionMatrixArray = projectionMatrixArray;
 
-      'void main() {',
-      '  vTextureCoord = aTextureCoord;',
-      '  vAlpha = aAlpha;',
-      '  vec3 ndc = uProjectionMatrix * vec3( aVertex, 1.0 );', // homogeneous map to to normalized device coordinates
-      '  gl_Position = vec4( ndc.xy, 0.0, 1.0 );',
-      '}'
-    ].join( '\n' ), [
-      // fragment shader
-      'precision mediump float;',
-      'varying vec2 vTextureCoord;',
-      'varying float vAlpha;',
-      'uniform sampler2D uTexture;',
+    // @private {number} - Initial length of the vertex buffer. May increase as needed.
+    this.lastArrayLength = 128;
 
-      'void main() {',
-      '  vec4 color = texture2D( uTexture, vTextureCoord, -0.7 );', // mipmap LOD bias of -0.7 (for now)
-      '  color.a *= vAlpha;',
-      '  gl_FragColor = color;',
-      '}'
-    ].join( '\n' ), {
-      // attributes: [ 'aVertex', 'aTextureCoord' ],
-      attributes: [ 'aVertex', 'aTextureCoord', 'aAlpha' ],
-      uniforms: [ 'uTexture', 'uProjectionMatrix' ]
-    } );
-
-    this.vertexBuffer = gl.createBuffer();
-    this.lastArrayLength = 128; // initial vertex buffer array length
+    // @private {Float32Array}
     this.vertexArray = new Float32Array( this.lastArrayLength );
-
-    gl.bindBuffer( gl.ARRAY_BUFFER, this.vertexBuffer );
-    gl.bufferData( gl.ARRAY_BUFFER, this.vertexArray, gl.DYNAMIC_DRAW ); // fully buffer at the start
   };
   inherit( Object, WebGLBlock.TexturedTrianglesProcessor, {
+    /**
+     * Sets the WebGL context that this processor should use.
+     * @public
+     *
+     * NOTE: This can be called multiple times on a single processor, in the case where the previous context was lost.
+     *       We should not need to dispose anything from that.
+     *
+     * @param {WebGLRenderingContext} gl
+     */
+    initializeContext: function( gl ) {
+      assert && assert( gl, 'Should be an actual context' );
+
+      // @private {WebGLRenderingContext}
+      this.gl = gl;
+
+      // @private {ShaderProgram}
+      this.shaderProgram = new ShaderProgram( gl, [
+        // vertex shader
+        'attribute vec2 aVertex;',
+        'attribute vec2 aTextureCoord;',
+        'attribute float aAlpha;',
+        'varying vec2 vTextureCoord;',
+        'varying float vAlpha;',
+        'uniform mat3 uProjectionMatrix;',
+
+        'void main() {',
+        '  vTextureCoord = aTextureCoord;',
+        '  vAlpha = aAlpha;',
+        '  vec3 ndc = uProjectionMatrix * vec3( aVertex, 1.0 );', // homogeneous map to to normalized device coordinates
+        '  gl_Position = vec4( ndc.xy, 0.0, 1.0 );',
+        '}'
+      ].join( '\n' ), [
+        // fragment shader
+        'precision mediump float;',
+        'varying vec2 vTextureCoord;',
+        'varying float vAlpha;',
+        'uniform sampler2D uTexture;',
+
+        'void main() {',
+        '  vec4 color = texture2D( uTexture, vTextureCoord, -0.7 );', // mipmap LOD bias of -0.7 (for now)
+        '  color.a *= vAlpha;',
+        '  gl_FragColor = color;',
+        '}'
+      ].join( '\n' ), {
+        // attributes: [ 'aVertex', 'aTextureCoord' ],
+        attributes: [ 'aVertex', 'aTextureCoord', 'aAlpha' ],
+        uniforms: [ 'uTexture', 'uProjectionMatrix' ]
+      } );
+
+      // @private {WebGLBuffer}
+      this.vertexBuffer = gl.createBuffer();
+
+      gl.bindBuffer( gl.ARRAY_BUFFER, this.vertexBuffer );
+      gl.bufferData( gl.ARRAY_BUFFER, this.vertexArray, gl.DYNAMIC_DRAW ); // fully buffer at the start
+    },
+
     activate: function() {
       this.shaderProgram.use();
 
@@ -593,7 +728,7 @@ define( function( require ) {
       var gl = this.gl;
 
       // (uniform) projection transform into normalized device coordinates
-      gl.uniformMatrix3fv( this.shaderProgram.uniformLocations.uProjectionMatrix, false, this.webglBlock.projectionMatrixArray );
+      gl.uniformMatrix3fv( this.shaderProgram.uniformLocations.uProjectionMatrix, false, this.projectionMatrixArray );
 
       gl.bindBuffer( gl.ARRAY_BUFFER, this.vertexBuffer );
       // if we increased in length, we need to do a full bufferData to resize it on the GPU side
@@ -626,7 +761,6 @@ define( function( require ) {
       this.vertexArrayIndex = 0;
     }
   } );
-
 
   Poolable.mixin( WebGLBlock, {
     constructorDuplicateFactory: function( pool ) {

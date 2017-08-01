@@ -171,6 +171,7 @@ define( function( require ) {
       var width = wrapper.canvas.width;
       var height = wrapper.canvas.height;
 
+      // TODO: Can we reuse the same Canvas? That might save some context creations?
       var scratchCanvas = document.createElement( 'canvas' );
       scratchCanvas.width = width;
       scratchCanvas.height = height;

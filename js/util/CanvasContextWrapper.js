@@ -17,6 +17,12 @@ define( function( require ) {
   var scenery = require( 'SCENERY/scenery' );
   var Property = require( 'AXON/Property' );
 
+  /**
+   * @constructor
+   *
+   * @param {HTMLCanvasElement} canvas
+   * @param {CanvasRenderingContext2D} context
+   */
   function CanvasContextWrapper( canvas, context ) {
     this.canvas = canvas;
     this.context = context;

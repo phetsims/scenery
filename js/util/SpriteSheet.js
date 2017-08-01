@@ -8,7 +8,6 @@
  * Note that the WebGL texture part is not required to be run - the Canvas-only part can be used functionally without
  * any WebGL dependencies.
  *
- * TODO: Add padding around sprites, otherwise interpolation could cause issues!
  * TODO: How to use custom mipmap levels?
  *
  * @author Jonathan Olson <jonathan.olson@colorado.edu>
@@ -45,26 +44,40 @@ define( function( require ) {
    *                               to add images (since mipmaps need to be updated).
    */
   function SpriteSheet( useMipmaps ) {
+    // @private {boolean}
     this.useMipmaps = useMipmaps;
 
-    this.gl = null; // assume later creation of context for now
+    // @private {WebGLRenderingContext|null} - Will be passed in with initializeContext
+    this.gl = null;
 
-    // Use the max supported texture size (according to http://codeflow.org/entries/2013/feb/22/how-to-write-portable-webgl/ )
+    // @public {WebGLTexture|null} - Will be set later, once we have a context
+    this.texture = null;
+
+    // @private {Bounds2} - The top-level bounding box for texture content. All sprites will have coordinate bounding
+    // boxes that are included in these bounds.
     // TODO: potentially support larger texture sizes based on reported capabilities (could cause fewer draw calls?)
     this.bounds = new Bounds2( 0, 0, MAX_DIMENSION.width, MAX_DIMENSION.height );
     assert && assert( this.bounds.minX === 0 && this.bounds.minY === 0, 'Assumed constraint later on for transforms' );
+
+    // @private {number}
     this.width = this.bounds.width;
     this.height = this.bounds.height;
 
+    // @private {HTMLCanvasElement}
     this.canvas = document.createElement( 'canvas' );
     this.canvas.width = this.width;
     this.canvas.height = this.height;
+
+    // @private {CanvasRenderingContext2D}
     this.context = this.canvas.getContext( '2d' );
 
+    // @private {BinPacker} - Handles how our available area is partitioned into sprites.
     this.binPacker = new BinPacker( this.bounds );
 
-    this.dirty = true; // @public [read-only] - Used to check if we need to updateTexture()
+    // @private {boolean} - Whether this spritesheet needs updates.
+    this.dirty = true;
 
+    // @private {Array.<SpriteSheet.Sprite>}
     this.usedSprites = [];
     this.unusedSprites = []; // works as a LRU cache for removing items when we need to allocate new space
   }
@@ -75,6 +88,9 @@ define( function( require ) {
     /**
      * Initialize (or reinitialize) ourself with a new GL context. Should be called at least once before updateTexture()
      * @public
+     *
+     * NOTE: Should be safe to call with a different context (will recreate a different texture) should this be needed
+     *       for things like context loss.
      *
      * @param {WebGLRenderingContext} gl
      */
@@ -136,7 +152,6 @@ define( function( require ) {
      * @param {HTMLCanvasElement|HTMLImageElement} image
      * @param {number} width - Passed in, since it may not be fully loaded yet?
      * @param {number} height - Passed in, since it may not be fully loaded yet?
-     *
      * @returns {Sprite|null}
      */
     addImage: function( image, width, height ) {
