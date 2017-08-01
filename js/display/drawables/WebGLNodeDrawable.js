@@ -77,8 +77,7 @@ define( function( require ) {
      * @public (scenery-internal)
      */
     onWebGLContextChange: function() {
-      // Dispose the old painter
-      this.painter.dispose();
+      //TODO: Should a function be added for "disposeNonWebGL"?
 
       // Create the new painter
       this.painter = this.createPainter();
