@@ -1250,6 +1250,14 @@ define( function( require ) {
     },
 
     /**
+     * Makes this Display available for inspection.
+     * @public
+     */
+    inspect: function() {
+      localStorage.scenerySnapshot = JSON.stringify( scenery.serialize( this ) );
+    },
+
+    /**
      * Returns an HTML fragment {string} that includes a large amount of debugging information, including a view of the
      * instance tree and drawable tree.
      */

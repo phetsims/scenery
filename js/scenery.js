@@ -202,7 +202,14 @@ define( function( require ) {
 
     // @public
     serialize: function( value ) {
-      if ( value instanceof dot.Matrix3 ) {
+      if ( value instanceof dot.Vector2 ) {
+        return {
+          type: 'Vector2',
+          x: value.x,
+          y: value.y
+        };
+      }
+      else if ( value instanceof dot.Matrix3 ) {
         return {
           type: 'Matrix3',
           m00: value.m00(),
@@ -447,15 +454,18 @@ define( function( require ) {
             var scaleVector = drawable.instance.trail.getMatrix().getScaleVector();
             return ( scaleVector.x + scaleVector.y ) / 2;
           } ) ) ) : 1 );
+          scale = 1;
           var canvas = document.createElement( 'canvas' );
           canvas.width = Math.ceil( node.canvasBounds.width * scale );
           canvas.height = Math.ceil( node.canvasBounds.height * scale );
           var context = canvas.getContext( '2d' );
           var wrapper = new scenery.CanvasContextWrapper( canvas, context );
-          var matrix = dot.Matrix3.scale( scale ).timesMatrix( dot.Matrix3.translation( node.canvasBounds.leftTop.negated() ) );
+          var matrix = dot.Matrix3.scale( 1 / scale );
+          wrapper.context.setTransform( scale, 0, 0, scale, -node.canvasBounds.left, -node.canvasBounds.top );
           node.renderToCanvasSelf( wrapper, matrix );
           setup.url = canvas.toDataURL();
           setup.scale = scale;
+          setup.offset = scenery.serialize( node.canvasBounds.leftTop );
         }
 
         if ( scenery.DOM && node instanceof scenery.DOM ) {
@@ -502,8 +512,11 @@ define( function( require ) {
           width: value.width,
           height: value.height,
           backgroundColor: scenery.serialize( value.backgroundColor ),
-          rootNodeId: value.rootNode.id,
-          nodes: scenery.serializeConnectedNodes( value.rootNode )
+          tree: {
+            type: 'Subtree',
+            rootNodeId: value.rootNode.id,
+            nodes: scenery.serializeConnectedNodes( value.rootNode )
+          }
         };
       }
       else {
@@ -520,6 +533,9 @@ define( function( require ) {
         'Node', 'Path', 'Circle', 'Line', 'Rectangle', 'Text', 'HTMLText', 'Image', 'CanvasNode', 'WebGLNode', 'DOM'
       ];
 
+      if ( value.type === 'Vector2' ) {
+        return new dot.Vector2( value.x, value.y );
+      }
       if ( value.type === 'Matrix3' ) {
         return new dot.Matrix3().rowMajor( value.m00, value.m01, value.m02,
                                            value.m10, value.m11, value.m12,
@@ -635,6 +651,7 @@ define( function( require ) {
           node = new scenery.Node( {
             children: [
               new scenery.Image( setup.url, {
+                translation: scenery.deserialize( setup.offset ),
                 scale: 1 / setup.scale
               } )
             ]
@@ -681,33 +698,32 @@ define( function( require ) {
 
         return node;
       }
+      else if ( value.type === 'Subtree' ) {
+        var nodeMap = {};
+        var nodes = value.nodes.map( scenery.deserialize );
+
+        // Index them
+        nodes.forEach( function( node ) {
+          nodeMap[ node._serialization.id ] = node;
+        } );
+
+        // Connect children
+        nodes.forEach( function( node ) {
+          node._serialization.setup.children.forEach( function( childId ) {
+            node.addChild( nodeMap[ childId ] );
+          } );
+        } );
+
+        // The root should be the first one
+        return nodeMap[ value.rootNodeId ];
+      }
       else if ( value.type === 'value' ) {
         return value.value;
       }
     },
 
     serializeConnectedNodes: function( rootNode ) {
-      return rootNode.getTopologicallySortedNodes().map( scenery.serialize );
-    },
-
-    deserializeConnectedNodes: function( serializations, rootId ) {
-      var nodeMap = {};
-      var nodes = serializations.map( scenery.deserialize );
-
-      // Index them
-      nodes.forEach( function( node ) {
-        nodeMap[ node._serialization.id ] = node;
-      } );
-
-      // Connect children
-      nodes.forEach( function( node ) {
-        node._serialization.setup.children.forEach( function( childId ) {
-          node.addChild( nodeMap[ childId ] );
-        } );
-      } );
-
-      // The root should be the first one
-      return nodeMap[ rootId ];
+      return rootNode.getSubtreeNodes().map( scenery.serialize );
     }
   } );
 

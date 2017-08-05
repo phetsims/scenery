@@ -3744,6 +3744,26 @@ define( function( require ) {
       return result;
     },
 
+    /*
+     * Returns all nodes in the subtree with this node as its root, returned in an arbitrary order. Like
+     * getConnectedNodes, but doesn't include parents.
+     * @public
+     *
+     * @returns {Array.<Node>}
+     */
+    getSubtreeNodes: function() {
+      var result = [];
+      var fresh = this._children.concat( this );
+      while ( fresh.length ) {
+        var node = fresh.pop();
+        if ( !_.includes( result, node ) ) {
+          result.push( node );
+          fresh = fresh.concat( node._children );
+        }
+      }
+      return result;
+    },
+
     /**
      * Returns a recursive data structure that represents the nested ordering of accessible content for this Node's
      * subtree. Each "Item" will have the type { trail: {Trail}, children: {Array.<Item>} }, forming a tree-like
@@ -4904,6 +4924,18 @@ define( function( require ) {
      */
     getDebugHTMLExtras: function() {
       return '';
+    },
+
+    /**
+     * Makes this Node's subtree available for inspection.
+     * @public
+     */
+    inspect: function() {
+      localStorage.scenerySnapshot = JSON.stringify( {
+        type: 'Subtree',
+        rootNodeId: this.id,
+        nodes: scenery.serializeConnectedNodes( this )
+      } );
     },
 
     /**
