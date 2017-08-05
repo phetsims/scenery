@@ -61,6 +61,7 @@
   } );
 
   var TREE_FONT = new scenery.Font( { size: 12 } );
+  var PATH_FONT = new scenery.Font( { size: 12, weight: 'bold' } );
 
   function TreeNode( displayNode, trail ) {
     scenery.Node.call( this );
@@ -221,6 +222,7 @@
 
   var rightWidth = 500;
   var bottomHeight = 200;
+  var pathHeight = 20;
 
   // initialize our scene
   var scene = new scenery.Node();
@@ -254,7 +256,7 @@
   var treeMarginY = 5;
   var rootTreeNode = new TreeNode( displayTree, new scenery.Trail( displayTree ) );
   rootTreeNode.x = treeMarginX;
-  rootTreeNode.y = treeMarginY;
+  rootTreeNode.y = treeMarginY + pathHeight;
   var treeBackground = new scenery.Rectangle( {
     fill: '#fcfcfc',
     stroke: '#888'
@@ -280,7 +282,6 @@
       rootTreeNode.left = treeBackground.left + treeMarginX;
     }
   }
-  constrainTree();
   treeContainer.addInputListener( {
     wheel: function( event ) {
       var deltaX = event.domEvent.deltaX;
@@ -370,6 +371,41 @@
     }
   } );
 
+  var pathBackground = new scenery.Rectangle( {
+    fill: '#333'
+  } );
+  var pathContainer = new scenery.HBox( {
+    spacing: 5,
+    maxWidth: rightWidth - 10
+  } );
+  scene.addChild( pathBackground );
+  scene.addChild( pathContainer );
+
+  function layoutPathContainer() {
+    if ( pathContainer.bounds.isValid() ) {
+      pathContainer.left = pathBackground.left + 5;
+      pathContainer.centerY = pathBackground.centerY;
+    }
+  }
+
+  previewTreeNodeProperty.link( function( treeNode ) {
+    if ( treeNode ) {
+      pathContainer.children = treeNode.trail.nodes.map( function( node ) {
+        var name = node._serialization.name;
+        if ( name === 'Node' ) {
+          return new scenery.Text( '|', { font: PATH_FONT, fill: '#bbb' } );
+        }
+        else {
+          return new scenery.Text( name, { font: PATH_FONT, fill: '#fff' } );
+        }
+      } );
+    }
+    else {
+      pathContainer.children = [];
+    }
+    layoutPathContainer();
+  } );
+
   function layout() {
     var width = window.innerWidth;
     var height = window.innerHeight;
@@ -381,13 +417,17 @@
     displayNode.centerX = leftWidth / 2;
     displayNode.centerY = height / 2;
 
-    var treeLocalBounds = new dot.Bounds2( 0, 0, rightWidth, height - bottomHeight );
+    var treeLocalBounds = new dot.Bounds2( 0, pathHeight, rightWidth, height - bottomHeight - pathHeight );
     treeContainer.x = leftWidth;
     treeContainer.clipArea = kite.Shape.bounds( treeLocalBounds );
     treeBackground.rectBounds = treeLocalBounds;
+    constrainTree();
 
     previewBackground.x = width - bottomHeight;
     previewBackground.y = height - bottomHeight;
+
+    pathBackground.rectBounds = new dot.Bounds2( leftWidth, 0, width, pathHeight );
+    layoutPathContainer();
   }
   window.addEventListener( 'resize', layout );
   layout();
