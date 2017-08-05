@@ -417,7 +417,7 @@
     displayNode.centerX = leftWidth / 2;
     displayNode.centerY = height / 2;
 
-    var treeLocalBounds = new dot.Bounds2( 0, pathHeight, rightWidth, height - bottomHeight - pathHeight );
+    var treeLocalBounds = new dot.Bounds2( 0, pathHeight, rightWidth, height - bottomHeight );
     treeContainer.x = leftWidth;
     treeContainer.clipArea = kite.Shape.bounds( treeLocalBounds );
     treeBackground.rectBounds = treeLocalBounds;
