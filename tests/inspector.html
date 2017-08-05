@@ -49,6 +49,17 @@
   var selectedTreeNodeProperty = new axon.Property( null );
   var activeTreeNodeProperty = new axon.Property( null );
 
+  var previewTreeNodeProperty = new axon.DerivedProperty( [ selectedTreeNodeProperty, activeTreeNodeProperty ], function( selected, active ) {
+    return selected ? selected : active;
+  } );
+
+  document.addEventListener( 'keyup', function( event ) {
+    // Escape
+    if ( event.keyCode === 27 ) {
+      selectedTreeNodeProperty.value = null;
+    }
+  } );
+
   var TREE_FONT = new scenery.Font( { size: 12 } );
 
   function TreeNode( displayNode, trail ) {
@@ -59,14 +70,59 @@
     this.displayNode = displayNode;
     this.trail = trail;
 
+    displayNode.addInputListener( {
+      over: function( event ) {
+        if ( event.target === displayNode ) {
+          activeTreeNodeProperty.value = self;
+          focusActive();
+        }
+      },
+      out: function( event ) {
+        if ( event.target === displayNode ) {
+          activeTreeNodeProperty.value = null;
+          focusSelected();
+        }
+      },
+      down: function( event ) {
+        if ( event.target === displayNode ) {
+          selectedTreeNodeProperty.value = self;
+          focusSelected();
+        }
+      }
+    } );
+
+    var expandedProperty = new axon.Property( true );
+
     var serialization = displayNode._serialization;
+    var isVisible = _.every( trail.nodes, function( node ) {
+      return node._serialization.options.visible !== false;
+    } );
 
     var selfNode = new scenery.HBox( {
       spacing: 5
     } );
+
+    var buttonSize = 12;
+    var expandButton = new scenery.Rectangle( -buttonSize / 2, -buttonSize / 2, buttonSize, buttonSize, {
+      children: [
+        new scenery.Path( kite.Shape.regularPolygon( 3, buttonSize / 2.5 ), {
+          fill: '#444'
+        } )
+      ],
+      visible: false,
+      cursor: 'pointer'
+    } );
+    expandButton.addInputListener( new scenery.FireListener( {
+      fire: function() {
+        expandedProperty.toggle();
+      }
+    } ) );
+    selfNode.addChild( expandButton );
+
     selfNode.addChild( new scenery.Text( serialization.name, {
       font: TREE_FONT,
-      pickable: false
+      pickable: false,
+      fill: isVisible ? '#000' : '#444'
     } ) );
     if ( serialization.name !== serialization.type && serialization.type !== 'Node' ) {
       selfNode.addChild( new scenery.Text( '(' + serialization.type + ')', {
@@ -83,21 +139,35 @@
       } ) );
     }
 
-    var selfBackground = scenery.Rectangle.bounds( selfNode.bounds );
+    var selfBackground = this.selfBackground = scenery.Rectangle.bounds( selfNode.bounds, {
+      children: [ selfNode ],
+      cursor: 'pointer',
+      fill: new axon.DerivedProperty( [ selectedTreeNodeProperty, activeTreeNodeProperty ], function( selected, active ) {
+        if ( self === selected ) {
+          return 'rgba(0,128,255,0.4)';
+        }
+        else if ( self === active ) {
+          return 'rgba(0,128,255,0.2)';
+        }
+        else {
+          return 'transparent';
+        }
+      } )
+    } );
     selfBackground.addInputListener( {
       enter: function( event ) {
-        selfBackground.fill = 'rgba(0,128,255,0.2)';
         activeTreeNodeProperty.value = self;
       },
       exit: function( event ) {
         activeTreeNodeProperty.value = null;
-        selfBackground.fill = null;
       }
     } );
+    selfBackground.addInputListener( new scenery.FireListener( {
+      fire: function() {
+        selectedTreeNodeProperty.value = self;
+      }
+    } ) );
     this.addChild( selfBackground );
-
-    this.addChild( selfNode );
-
 
 
     var childrenNode = new scenery.VBox( {
@@ -119,17 +189,28 @@
     var expandedNode = new scenery.Node( {
       children: [
         childrenNode,
-        column
+        // column
       ]
     } );
 
     if ( childrenNode.bounds.isFinite() ) {
       childrenNode.left = selfNode.left + 13;
       childrenNode.top = selfNode.bottom;
-      column.left = selfNode.left;
+      column.centerX = selfNode.left + buttonSize / 2;
       column.top = selfNode.bottom;
 
+      expandButton.visible = true;
       this.addChild( expandedNode );
+
+      expandedProperty.link( function( expanded ) {
+        expandButton.rotation = expanded ? Math.PI / 2 : 0;
+        if ( expanded && !self.hasChild( expandedNode ) ) {
+          self.addChild( expandedNode );
+        }
+        if ( !expanded && self.hasChild( expandedNode ) ) {
+          self.removeChild( expandedNode );
+        }
+      } );
 
       childrenNode.onStatic( 'bounds', function() {
         column.rectHeight = childrenNode.height;
@@ -139,7 +220,7 @@
   phetCore.inherit( scenery.Node, TreeNode );
 
   var rightWidth = 500;
-  var bottomHeight = 250;
+  var bottomHeight = 200;
 
   // initialize our scene
   var scene = new scenery.Node();
@@ -175,8 +256,8 @@
   rootTreeNode.x = treeMarginX;
   rootTreeNode.y = treeMarginY;
   var treeBackground = new scenery.Rectangle( {
-    fill: '#fafafa',
-    stroke: '#aaa'
+    fill: '#fcfcfc',
+    stroke: '#888'
   } );
   var treeContainer = new scenery.Node( {
     children: [
@@ -211,9 +292,24 @@
     }
   } );
 
+  function focusTreeNode( treeNode ) {
+    var trail = treeNode.getUniqueTrailTo( rootTreeNode );
+    var deltaY = trail.localToGlobalPoint( treeNode.selfBackground.center ).y - treeBackground.centerY;
+    rootTreeNode.y -= deltaY;
+    constrainTree();
+  }
+  function focusActive() {
+    focusTreeNode( activeTreeNodeProperty.value );
+  }
+  function focusSelected() {
+    if ( selectedTreeNodeProperty.value === null ) { return; }
+
+    focusTreeNode( selectedTreeNodeProperty.value );
+  }
+
   var localBoundsHighlight = new scenery.Path( null, {
-    fill: 'rgba(0,128,255,0.2)',
-    stroke: 'rgb(0,128,255)',
+    fill: 'rgba(0,128,255,0.4)',
+    stroke: 'rgb(0,64,128)',
     lineWidth: 0.5
   } );
   overlayNode.addChild( localBoundsHighlight );
@@ -245,6 +341,35 @@
     }
   } );
 
+  var previewContainer = new scenery.Node();
+  var previewBackground = new scenery.Rectangle( {
+    rectWidth: bottomHeight,
+    rectHeight: bottomHeight,
+    children: [ previewContainer ],
+    fill: '#eee'
+  } );
+  scene.addChild( previewBackground );
+
+  previewTreeNodeProperty.link( function( treeNode ) {
+    if ( treeNode ) {
+      var node = treeNode.displayNode;
+      previewContainer.children = [ node ];
+      if ( previewContainer.bounds.isValid() ) {
+        previewContainer.visible = true;
+        var scale = Math.min( bottomHeight / node.width, bottomHeight / node.height );
+        previewContainer.setScaleMagnitude( scale * 0.9 );
+        previewContainer.centerX = bottomHeight / 2;;
+        previewContainer.centerY = bottomHeight / 2;;
+      }
+      else {
+        previewContainer.visible = false;
+      }
+    }
+    else {
+      previewContainer.visible = false;
+    }
+  } );
+
   function layout() {
     var width = window.innerWidth;
     var height = window.innerHeight;
@@ -260,6 +385,9 @@
     treeContainer.x = leftWidth;
     treeContainer.clipArea = kite.Shape.bounds( treeLocalBounds );
     treeBackground.rectBounds = treeLocalBounds;
+
+    previewBackground.x = width - bottomHeight;
+    previewBackground.y = height - bottomHeight;
   }
   window.addEventListener( 'resize', layout );
   layout();
