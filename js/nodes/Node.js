@@ -251,6 +251,29 @@ define( function( require ) {
     // is available and (b) because when tandem.addInstance is called the node becomes active in the PhET-iO API immediately
   ];
 
+  var DEFAULT_OPTIONS = {
+    visible: true,
+    opacity: 1,
+    pickable: null,
+    inputEnabled: true,
+    clipArea: null,
+    mouseArea: null,
+    touchArea: null,
+    cursor: null,
+    accessibleContent: null,
+    accessibleOrder: null,
+    transformBounds: false,
+    maxWidth: null,
+    maxHeight: null,
+    renderer: null,
+    usesOpacity: false,
+    layerSplit: false,
+    cssTransform: false,
+    excludeInvisible: false,
+    webglScale: null,
+    preventFit: false
+  };
+
   /**
    * Creates a Node with options.
    * @public
@@ -319,28 +342,28 @@ define( function( require ) {
 
     // @private {boolean} - Whether this node (and its children) will be visible when the scene is updated. Visible
     // nodes by default will not be pickable either.
-    this._visible = true;
+    this._visible = DEFAULT_OPTIONS.visible;
 
     // @private {number} - Opacity, in the range from 0 (fully transparent) to 1 (fully opaque).
-    this._opacity = 1;
+    this._opacity = DEFAULT_OPTIONS.opacity;
 
     // @private {boolean|null} - See setPickable().
-    this._pickable = null;
+    this._pickable = DEFAULT_OPTIONS.pickable;
 
-    // @private - Whether input event listeners on this node or descendants on a trail will have input listeners.
-    // triggered. Note that this does NOT effect picking, and only prevents some listeners from being fired.
-    this._inputEnabled = true;
+    // @private {boolean} - Whether input event listeners on this node or descendants on a trail will have input
+    // listeners. triggered. Note that this does NOT effect picking, and only prevents some listeners from being fired.
+    this._inputEnabled = DEFAULT_OPTIONS.inputEnabled;
 
     // @private - This node and all children will be clipped by this shape (in addition to any other clipping shapes).
     // {Shape|null} The shape should be in the local coordinate frame.
-    this._clipArea = null;
+    this._clipArea = DEFAULT_OPTIONS.clipArea;
 
     // @private - Areas for hit intersection. If set on a Node, no descendants can handle events.
-    this._mouseArea = null; // {Shape|Bounds2} for mouse position in the local coordinate frame
-    this._touchArea = null; // {Shape|Bounds2} for touch and pen position in the local coordinate frame
+    this._mouseArea = DEFAULT_OPTIONS.mouseArea; // {Shape|Bounds2} for mouse position in the local coordinate frame
+    this._touchArea = DEFAULT_OPTIONS.touchArea; // {Shape|Bounds2} for touch and pen position in the local coordinate frame
 
     // @private {string|null} - The CSS cursor to be displayed over this node. null should be the default (inherit) value.
-    this._cursor = null;
+    this._cursor = DEFAULT_OPTIONS.cursor;
 
     // @private {null|Object} - If non-null, this node will be represented in the parallel DOM by the accessible content.
     // The accessibleContent object will be of the form:
@@ -349,19 +372,19 @@ define( function( require ) {
     //   [focusHighlight]: {Bounds2|Shape|Node|string.<'invisible'>}
     // }
     // The focus highlight can be a custom Shape, Node, contain the Node's local bounds, or be invisible.
-    this._accessibleContent = null;
+    this._accessibleContent = DEFAULT_OPTIONS.accessibleContent;
 
     // @private {Array.<Node> | null} - If provided, it will override the focus order between children (and optionally
     // descendants). If not provided, the focus order will default to the rendering order (first children first, last
     // children last) determined by the children array.
-    this._accessibleOrder = null;
+    this._accessibleOrder = DEFAULT_OPTIONS.accessibleOrder;
 
     // @public (scenery-internal) - Not for public use, but used directly internally for performance.
     this._children = []; // {Array.<Node>} - Ordered array of child nodes.
     this._parents = []; // {Array.<Node>} - Unordered array of parent nodes.
 
     // @private {boolean} - Whether we will do more accurate (and tight) bounds computations for rotations and shears.
-    this._transformBounds = false;
+    this._transformBounds = DEFAULT_OPTIONS.transformBounds;
 
     /*
      * Set up the transform reference. we add a listener so that the transform itself can be modified directly
@@ -390,8 +413,8 @@ define( function( require ) {
      * change. It does happen at least once in updateDisplay() before rendering, and calling validateBounds() can force
      * a re-check and transform.
      */
-    this._maxWidth = null; // @private {number|null}
-    this._maxHeight = null; // @private {number|null}
+    this._maxWidth = DEFAULT_OPTIONS.maxWidth; // @private {number|null}
+    this._maxHeight = DEFAULT_OPTIONS.maxHeight; // @private {number|null}
     this._appliedScaleFactor = 1; // @private {number} - Scale applied due to the maximum dimension constraints.
 
     // @private {Array.<Function>} - For user input handling (mouse/touch).
@@ -432,17 +455,17 @@ define( function( require ) {
     this._hints = {
       // {number} - What type of renderer should be forced for this node. Uses the internal bitmask structure declared
       //            in scenery.js and Renderer.js.
-      renderer: 0,
+      renderer: DEFAULT_OPTIONS.renderer === null ? 0 : Renderer.fromName( DEFAULT_OPTIONS.renderer ),
 
       // {boolean} - Whether it is anticipated that opacity will be switched on. If so, having this set to true will
       //             make switching back-and-forth between opacity:1 and other opacities much faster.
-      usesOpacity: false,
+      usesOpacity: DEFAULT_OPTIONS.usesOpacity,
 
       // {boolean} - Whether layers should be split before and after this node.
-      layerSplit: false,
+      layerSplit: DEFAULT_OPTIONS.layerSplit,
 
       // {boolean} - Whether this node and its subtree should handle transforms by using a CSS transform of a div.
-      cssTransform: false,
+      cssTransform: DEFAULT_OPTIONS.cssTransform,
 
       // {boolean} - When rendered as Canvas, whether we should use full (device) resolution on retina-like devices.
       //             TODO: ensure that this is working? 0.2 may have caused a regression.
@@ -450,15 +473,15 @@ define( function( require ) {
 
       // {boolean} - Whether SVG (or other) content should be excluded from the DOM tree when invisible
       //             (instead of just being hidden)
-      excludeInvisible: false,
+      excludeInvisible: DEFAULT_OPTIONS.excludeInvisible,
 
       // {number|null} - If non-null, a multiplier to the detected pixel-to-pixel scaling of the WebGL Canvas
-      webglScale: null,
+      webglScale: DEFAULT_OPTIONS.webglScale,
 
       // {boolean} - If true, Scenery will not fit any blocks that contain drawables attached to Nodes underneath this
       //             node's subtree. This will typically prevent Scenery from triggering bounds computation for this
       //             sub-tree, and movement of this node or its descendants will never trigger the refitting of a block.
-      preventFit: false
+      preventFit: DEFAULT_OPTIONS.preventFit
     };
 
     // @public (scenery-internal) {number} - A bitmask which specifies which renderers this node (and only this node,
@@ -5109,6 +5132,8 @@ define( function( require ) {
       }
     }
   } ) );
+
+  Node.DEFAULT_OPTIONS = DEFAULT_OPTIONS;
 
   // mixin accessibility
   Accessibility.mixin( Node );

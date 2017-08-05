@@ -28,7 +28,7 @@ define( function( require ) {
 
     Paint.call( this );
 
-    // @private {Array.<{ ratio: {number}, stop: {...} }>}
+    // @private {Array.<{ ratio: {number}, color: {...} }>}
     this.stops = [];
 
     // @private {number}

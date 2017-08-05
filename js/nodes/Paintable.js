@@ -35,6 +35,20 @@ define( function( require ) {
     'cachedPaints' // Sets which paints should be cached, even if not displayed. See setCachedPaints()
   ];
 
+  var DEFAULT_OPTIONS = {
+    fill: null,
+    fillPickable: true,
+    stroke: null,
+    strokePickable: false,
+
+    // Not set initially, but they are the LineStyles defaults
+    lineWidth: LineStyles.DEFAULT_OPTIONS.lineWidth,
+    lineCap: LineStyles.DEFAULT_OPTIONS.lineCap,
+    lineJoin: LineStyles.DEFAULT_OPTIONS.lineJoin,
+    lineDashOffset: LineStyles.DEFAULT_OPTIONS.lineDashOffset,
+    miterLimit: LineStyles.DEFAULT_OPTIONS.miterLimit
+  };
+
   var Paintable = {
     /**
      * Applies the mix-in to a subtype of Node.
@@ -74,11 +88,11 @@ define( function( require ) {
          * @protected
          */
         initializePaintable: function() {
-          this._fill = null;
-          this._fillPickable = true;
+          this._fill = DEFAULT_OPTIONS.fill;
+          this._fillPickable = DEFAULT_OPTIONS.fillPickable;
 
-          this._stroke = null;
-          this._strokePickable = false;
+          this._stroke = DEFAULT_OPTIONS.stroke;
+          this._strokePickable = DEFAULT_OPTIONS.strokePickable;
 
           this._cachedPaints = [];
           this._lineDrawingStyles = new LineStyles();
@@ -949,6 +963,8 @@ define( function( require ) {
     }
   };
   scenery.register( 'Paintable', Paintable );
+
+  Paintable.DEFAULT_OPTIONS = DEFAULT_OPTIONS;
 
   return Paintable;
 } );

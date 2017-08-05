@@ -25,6 +25,11 @@ define( function( require ) {
     'shape' // Sets the shape of the Path, see  setShape() for more documentation.
   ];
 
+  var DEFAULT_OPTIONS = {
+    shape: null,
+    boundsMethod: 'accurate'
+  };
+
   /**
    * Creates a Path with a given shape specifier (a Shape, a string in the SVG path format, or null to indicate no
    * shape).
@@ -50,7 +55,7 @@ define( function( require ) {
     //       like in Rectangle. This is because usually the actual Shape is already implied by other parameters,
     //       so it is best to not have to compute it on changes.
     // NOTE: Please use hasShape() to determine if we are actually drawing things, as it is subtype-safe.
-    this._shape = null;
+    this._shape = DEFAULT_OPTIONS.shape;
 
     // @private {Shape|null}
     // This stores a stroked copy of the Shape which is lazily computed. This can be required for computing bounds
@@ -58,7 +63,7 @@ define( function( require ) {
     this._strokedShape = null;
 
     // @private {string}, one of 'accurate', 'unstroked', 'tightPadding', 'safePadding', 'none', see setBoundsMethod()
-    this._boundsMethod = 'accurate';
+    this._boundsMethod = DEFAULT_OPTIONS.boundsMethod;
 
     // @private {Function}, called with no arguments, return value not checked.
     // Used as a listener to Shapes for when they are invalidated. The listeners are not added if the Shape is
@@ -589,6 +594,9 @@ define( function( require ) {
       Node.prototype.dispose.call( this );
     }
   } );
+
+  // @public {Object} - Initial values for most Node mutator options
+  Path.DEFAULT_OPTIONS = _.extend( {}, Node.DEFAULT_OPTIONS, DEFAULT_OPTIONS );
 
   // mix in support for fills and strokes
   Paintable.mixin( Path );

@@ -38,6 +38,16 @@ define( function( require ) {
     'mipmapMaxLevel' // The maximum mipmap level to compute if needed, see setMipmapMaxLevel() for documentation
   ];
 
+  var DEFAULT_OPTIONS = {
+    imageOpacity: 1,
+    initialWidth: 0,
+    initialHeight: 0,
+    mipmap: false,
+    mipmapBias: 0,
+    mipmapInitialLevel: 4,
+    mipmapMaxLevel: 5
+  };
+
   /**
    * Constructs an Image node from a particular source.
    * @public
@@ -56,25 +66,25 @@ define( function( require ) {
       'Extra prototype on Node options object is a code smell' );
 
     // @private {number} - Internal stateful value, see setInitialWidth() for documentation.
-    this._initialWidth = 0;
+    this._initialWidth = DEFAULT_OPTIONS.initialWidth;
 
     // @private {number} - Internal stateful value, see setInitialHeight() for documentation.
-    this._initialHeight = 0;
+    this._initialHeight = DEFAULT_OPTIONS.initialHeight;
 
     // @private {number} - Internal stateful value, see setImageOpacity() for documentation.
-    this._imageOpacity = 1;
+    this._imageOpacity = DEFAULT_OPTIONS.imageOpacity;
 
     // @private {boolean} - Internal stateful value, see setMipmap() for documentation.
-    this._mipmap = false;
+    this._mipmap = DEFAULT_OPTIONS.mipmap;
 
     // @private {number} - Internal stateful value, see setMipmapBias() for documentation.
-    this._mipmapBias = 0;
+    this._mipmapBias = DEFAULT_OPTIONS.mipmapBias;
 
     // @private {number} - Internal stateful value, see setMipmapInitialLevel() for documentation.
-    this._mipmapInitialLevel = 4;
+    this._mipmapInitialLevel = DEFAULT_OPTIONS.mipmapInitialLevel;
 
     // @private {number} - Internal stateful value, see setMipmapMaxLevel() for documentation
-    this._mipmapMaxLevel = 5;
+    this._mipmapMaxLevel = DEFAULT_OPTIONS.mipmapMaxLevel;
 
     // @private {Array.<HTMLCanvasElement>} - Array of Canvases for each level, constructed internally so that
     //                                        Canvas-based drawables (Canvas, WebGL) can quickly draw mipmaps.
@@ -1076,6 +1086,9 @@ define( function( require ) {
 
     return mipmaps;
   };
+
+  // @public {Object} - Initial values for most Node mutator options
+  Image.DEFAULT_OPTIONS = _.extend( {}, Node.DEFAULT_OPTIONS, DEFAULT_OPTIONS );
 
   return Image;
 } );
