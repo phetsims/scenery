@@ -453,7 +453,8 @@ define( function( require ) {
           var context = canvas.getContext( '2d' );
           var wrapper = new scenery.CanvasContextWrapper( canvas, context );
           var matrix = dot.Matrix3.scale( scale ).timesMatrix( dot.Matrix3.translation( node.canvasBounds.leftTop.negated() ) );
-          setup.url = node.renderToCanvasSelf( wrapper, matrix );
+          node.renderToCanvasSelf( wrapper, matrix );
+          setup.url = canvas.toDataURL();
           setup.scale = scale;
         }
 
@@ -537,7 +538,7 @@ define( function( require ) {
         return new scenery.Color( value.red, value.green, value.blue, value.alpha );
       }
       else if ( value.type === 'Property' ) {
-        return new axon.Property( value.value );
+        return new axon.Property( scenery.deserialize( value.value ) );
       }
       else if ( value.type === 'Pattern' || value.type === 'LinearGradient' || value.type === 'RadialGradient' ) {
         var paint;
