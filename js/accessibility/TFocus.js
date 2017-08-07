@@ -24,8 +24,8 @@ define( function( require ) {
    * @constructor
    */
   function TFocus( focus, phetioID ) {
-    TObject.call( this, focus, phetioID );
     assertInstanceOf( focus, phet.scenery.Focus );
+    TObject.call( this, focus, phetioID );
   }
 
   phetioInherit( TObject, 'TFocus', TFocus, {}, {
