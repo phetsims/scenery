@@ -65,10 +65,10 @@ define( function( require ) {
     } );
 
     // @public (phet-io) - for phet-io event nesting
-    this.startedCallbacksForFireEmitter = new Emitter();
+    this.startedCallbacksForFireEmitter = new Emitter( { indicateCallbacks: false } );
 
     // @public (phet-io) - for phet-io event nesting
-    this.endedCallbacksForFireEmitter = new Emitter();
+    this.endedCallbacksForFireEmitter = new Emitter( { indicateCallbacks: false } );
 
     DownUpListener.call( this, {
 
