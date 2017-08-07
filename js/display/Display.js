@@ -1804,16 +1804,28 @@ define( function( require ) {
       img.src = 'data:image/svg+xml;base64,' + base64;
     },
 
+    /**
+     * Set the focus for Display.  Can set to null to clear focus from Display.
+     * @public
+     * 
+     * @param  {Focus|null} value
+     */
     set focus( value ) {
       this.focusProperty.value = value;
     },
 
+    /**
+     * Get the focus for Display. Null if nothing under a Display has focus.
+     * @public
+     * 
+     * @return {Focus|null}
+     */
     get focus() {
       return this.focusProperty.value;
     },
 
     /**
-     * Get the currently focused Node, the leaf-most Node he value of focusProperty's Trail. Null if no
+     * Get the currently focused Node, the leaf-most Node of the focusProperty value's Trail. Null if no
      * Node has focus.
      *
      * @public
@@ -1835,9 +1847,9 @@ define( function( require ) {
     'scenery-grabbing-pointer': [ 'grabbing', '-moz-grabbing', '-webkit-grabbing', 'pointer' ]
   };
 
-  // Each Display has an axon Property to indicate which component is focused (or null, if no scenery node is focused).
-  // By passing the tandem and phetioValueType, PhET-iO is able to interoperate (save/restore/control/observe) the focus rectangle
-  // When focused, the value has this type: { display: {Display}, trail: {Trail} }
+  // @public (a11y) {Focus|null} - Display has an axon Property to indicate which component is focused (or null
+  // if no scenery node has focus).  By pasing the tandem and phetioValueType, PhET-iO is able to interoperate (save,
+  // restore, control, observe what is currently focused.
   Display.focusProperty = new Property( null, {
 
     // Make this a static tandem so that it can be added to instance proxies correctly (batched and then flushed when the
