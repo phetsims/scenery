@@ -843,22 +843,6 @@ define( function( require ) {
      *----------------------------------------------------------------------------*/
 
     /**
-     * Returns a string containing constructor information for Node.string().
-     * @protected
-     * @override
-     *
-     * @param {string} propLines - A string representing the options properties that need to be set.
-     * @returns {string}
-     */
-    getBasicConstructor: function( propLines ) {
-      return 'new scenery.Rectangle( ' +
-             this._rectX + ', ' + this._rectY + ', ' +
-             this._rectWidth + ', ' + this._rectHeight + ', ' +
-             this._cornerXRadius + ', ' + this._cornerYRadius +
-             ', {' + propLines + '} )';
-    },
-
-    /**
      * It is impossible to set another shape on this Path subtype, as its effective shape is determined by other
      * parameters.
      * @public

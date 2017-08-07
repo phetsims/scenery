@@ -1586,45 +1586,6 @@ define( function( require ) {
       window.open( 'data:text/html;charset=utf-8,' + encodeURIComponent( htmlContent ) );
     },
 
-    toStringWithChildren: function( mutateRoot, rootName ) {
-      rootName = rootName || 'scene';
-      var rootNode = this._rootNode;
-      var result = '';
-
-      var nodes = this._rootNode.getTopologicallySortedNodes().slice( 0 ).reverse(); // defensive slice, in case we store the order somewhere
-
-      function name( node ) {
-        return node === rootNode ? rootName : ( ( node.constructor.name ? node.constructor.name.toLowerCase() : '(node)' ) + node.id );
-      }
-
-      _.each( nodes, function( node ) {
-        if ( result ) {
-          result += '\n';
-        }
-
-        if ( mutateRoot && node === rootNode ) {
-          var props = rootNode.getPropString( '  ', false );
-          var mutation = ( props ? ( '\n' + props + '\n' ) : '' );
-          if ( mutation !== '' ) {
-            result += rootName + '.mutate( {' + mutation + '} )';
-          }
-          else {
-            // bleh. strip off the last newline
-            result = result.slice( 0, -1 );
-          }
-        }
-        else {
-          result += 'var ' + name( node ) + ' = ' + node.toString( '', false );
-        }
-
-        _.each( node.children, function( child ) {
-          result += '\n' + name( node ) + '.addChild( ' + name( child ) + ' );';
-        } );
-      } );
-
-      return result;
-    },
-
     /**
      * Will attempt to call callback( {string} dataURI ) with the rasterization of the entire Display's DOM structure,
      * used for internal testing. Will call-back null if there was an error
@@ -1807,7 +1768,7 @@ define( function( require ) {
     /**
      * Set the focus for Display.  Can set to null to clear focus from Display.
      * @public
-     * 
+     *
      * @param  {Focus|null} value
      */
     set focus( value ) {
@@ -1817,7 +1778,7 @@ define( function( require ) {
     /**
      * Get the focus for Display. Null if nothing under a Display has focus.
      * @public
-     * 
+     *
      * @return {Focus|null}
      */
     get focus() {

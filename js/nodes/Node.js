@@ -4946,77 +4946,7 @@ define( function( require ) {
      * @param {boolean} [includeChildren]
      */
     toString: function( spaces, includeChildren ) {
-      spaces = spaces || '';
-      var props = this.getPropString( spaces + '  ', includeChildren === undefined ? true : includeChildren );
-      return spaces + this.getBasicConstructor( props ? ( '\n' + props + '\n' + spaces ) : '' );
-    },
-
-    /**
-     * Returns a constructor template for toString(). Meant to be overridden by subtypes.
-     * @protected (scenery-internal)
-     *
-     * @param {string} propLines - A string representing the options properties that need to be set.
-     */
-    getBasicConstructor: function( propLines ) {
-      return 'new scenery.Node( {' + propLines + '} )';
-    },
-
-    /**
-     * Returns the property object string for use with toString(). Meant to be overridden to add subtype-specific types.
-     * @protected (scenery-internal)
-     *
-     * @param {string} spaces - Whitespace to add
-     * @param {boolean} [includeChildren]
-     */
-    getPropString: function( spaces, includeChildren ) {
-      var result = '';
-
-      function addProp( key, value, nowrap ) {
-        if ( result ) {
-          result += ',\n';
-        }
-        if ( !nowrap && typeof value === 'string' ) {
-          result += spaces + key + ': \'' + value + '\'';
-        }
-        else {
-          result += spaces + key + ': ' + value;
-        }
-      }
-
-      if ( this._children.length && includeChildren ) {
-        var childString = '';
-        _.each( this._children, function( child ) {
-          if ( childString ) {
-            childString += ',\n';
-          }
-          childString += child.toString( spaces + '  ' );
-        } );
-        addProp( 'children', '[\n' + childString + '\n' + spaces + ']', true );
-      }
-
-      // direct copy props
-      if ( this.cursor ) { addProp( 'cursor', this.cursor ); }
-      if ( !this.visible ) { addProp( 'visible', this.visible ); }
-      if ( this.pickable !== null ) { addProp( 'pickable', this.pickable ); }
-      if ( this.opacity !== 1 ) { addProp( 'opacity', this.opacity ); }
-
-      if ( !this.transform.isIdentity() ) {
-        var m = this.transform.getMatrix();
-        addProp( 'matrix', 'dot.Matrix3.createFromPool(' +
-                           m.m00() + ', ' + m.m01() + ', ' + m.m02() + ', ' +
-                           m.m10() + ', ' + m.m11() + ', ' + m.m12() + ', ' +
-                           m.m20() + ', ' + m.m21() + ', ' + m.m22() + ' )', true );
-      }
-
-      if ( this.renderer ) {
-        addProp( 'renderer', this.renderer );
-      }
-
-      if ( this._hints.layerSplit ) {
-        addProp( 'layerSplit', true );
-      }
-
-      return result;
+      return this.constructor.name + '#' + this.id;
     },
 
     /**

@@ -228,18 +228,6 @@ define( function( require ) {
     },
 
     /**
-     * Returns a string containing constructor information for Node.string().
-     * @protected
-     * @override
-     *
-     * @param {string} propLines - A string representing the options properties that need to be set.
-     * @returns {string}
-     */
-    getBasicConstructor: function( propLines ) {
-      return 'new scenery.Circle( ' + this._radius + ', {' + propLines + '} )';
-    },
-
-    /**
      * Sets the radius of the circle.
      * @public
      *

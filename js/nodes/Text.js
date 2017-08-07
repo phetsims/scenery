@@ -664,51 +664,6 @@ define( function( require ) {
      */
     getDebugHTMLExtras: function() {
       return ' "' + escapeHTML( this.renderedText ) + '"' + ( this._isHTML ? ' (html)' : '' );
-    },
-
-    /**
-     * Returns a string containing constructor information for Node.string().
-     * @protected
-     * @override
-     *
-     * @param {string} propLines - A string representing the options properties that need to be set.
-     * @returns {string}
-     */
-    getBasicConstructor: function( propLines ) {
-      return 'new scenery.Text( \'' + escapeHTML( this._text.replace( /'/g, '\\\'' ) ) + '\', {' + propLines + '} )';
-    },
-
-    /**
-     * Returns the property object string for use with toString().
-     * @protected (scenery-internal)
-     * @override
-     *
-     * @param {string} spaces - Whitespace to add
-     * @param {boolean} [includeChildren]
-     */
-    getPropString: function( spaces, includeChildren ) {
-      var result = Node.prototype.getPropString.call( this, spaces, includeChildren );
-      result = this.appendFillablePropString( spaces, result );
-      result = this.appendStrokablePropString( spaces, result );
-
-      // TODO: if created again, deduplicate with Node's getPropString
-      function addProp( key, value, nowrap ) {
-        if ( result ) {
-          result += ',\n';
-        }
-        if ( !nowrap && typeof value === 'string' ) {
-          result += spaces + key + ': \'' + value + '\'';
-        }
-        else {
-          result += spaces + key + ': ' + value;
-        }
-      }
-
-      if ( this.font !== new scenery.Font().getFont() ) {
-        addProp( 'font', this.font.replace( /'/g, '\\\'' ) );
-      }
-
-      return result;
     }
   } );
 

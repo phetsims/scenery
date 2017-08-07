@@ -555,33 +555,6 @@ define( function( require ) {
     },
 
     /**
-     * Returns a string containing constructor information for Node.string().
-     * @protected
-     * @override
-     *
-     * @param {string} propLines - A string representing the options properties that need to be set.
-     * @returns {string}
-     */
-    getBasicConstructor: function( propLines ) {
-      return 'new scenery.Path( ' + ( this._shape ? this._shape.toString() : this._shape ) + ', {' + propLines + '} )';
-    },
-
-    /**
-     * Returns the property object string for use with toString().
-     * @protected (scenery-internal)
-     * @override
-     *
-     * @param {string} spaces - Whitespace to add
-     * @param {boolean} [includeChildren]
-     */
-    getPropString: function( spaces, includeChildren ) {
-      var result = Node.prototype.getPropString.call( this, spaces, includeChildren );
-      result = this.appendFillablePropString( spaces, result );
-      result = this.appendStrokablePropString( spaces, result );
-      return result;
-    },
-
-    /**
      * Disposes the path, releasing shape listeners if needed (and preventing new listeners from being added).
      * @public
      * @override
