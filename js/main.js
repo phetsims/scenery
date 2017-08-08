@@ -117,6 +117,7 @@ define( [
   'SCENERY/nodes/Path',
   'SCENERY/nodes/Plane',
   'SCENERY/nodes/Rectangle',
+  'SCENERY/nodes/RichText',
   'SCENERY/nodes/Spacer',
   'SCENERY/nodes/Text',
   'SCENERY/nodes/VBox',
