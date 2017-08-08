@@ -1,6 +1,5 @@
 // Copyright 2013-2016, University of Colorado Boulder
 
-
 /**
  * Basic dragging for a node.
  *
@@ -12,6 +11,11 @@ define( function( require ) {
 
   var inherit = require( 'PHET_CORE/inherit' );
   var scenery = require( 'SCENERY/scenery' );
+  var Tandem = require( 'TANDEM/Tandem' );
+  var Emitter = require( 'AXON/Emitter' );
+
+  // phet-io modules
+  var TSimpleDragHandler = require( 'SCENERY/input/TSimpleDragHandler' );
 
   /*
    * Allowed options: {
@@ -31,7 +35,8 @@ define( function( require ) {
     options = _.extend( {
       allowTouchSnag: false,
       mouseButton: 0,
-      dragCursor: 'pointer'
+      dragCursor: 'pointer',
+      tandem: Tandem.tandemRequired()
     }, options );
     this.options = options; // @private
 
@@ -45,6 +50,17 @@ define( function( require ) {
     this.mouseButton = undefined;     // tracks which mouse button was pressed, so we can handle that specifically
     this.interrupted = false;         // whether the last input was interrupted (available during endDrag)
     // TODO: consider mouse buttons as separate pointers?
+
+    // Generate all emitters in every case to minimize the number of hidden classes,
+    // see http://www.html5rocks.com/en/tutorials/speed/v8/
+    this.startedCallbacksForDragStartedEmitter = new Emitter( { indicateCallbacks: false } ); // @public (phet-io)
+    this.endedCallbacksForDragStartedEmitter = new Emitter( { indicateCallbacks: false } ); // @public (phet-io)
+
+    this.startedCallbacksForDraggedEmitter = new Emitter( { indicateCallbacks: false } ); // @public (phet-io)
+    this.endedCallbacksForDraggedEmitter = new Emitter( { indicateCallbacks: false } ); // @public (phet-io)
+
+    this.startedCallbacksForDragEndedEmitter = new Emitter( { indicateCallbacks: false } ); // @public (phet-io)
+    this.endedCallbacksForDragEndedEmitter = new Emitter( { indicateCallbacks: false } ); // @public (phet-io)
 
     // if an ancestor is transformed, pin our node
     this.transformListener = {
@@ -123,7 +139,9 @@ define( function( require ) {
         }
         self.lastDragPoint = self.pointer.point;
 
+        window.phet && phet.phetio && self.startedCallbacksForDraggedEmitter.emit2( event.pointer.point.x, event.pointer.point.y );
         if ( self.options.drag ) {
+
           // TODO: consider adding in a delta to the listener
           // TODO: add the position in to the listener
           var saveCurrentTarget = event.currentTarget;
@@ -131,7 +149,14 @@ define( function( require ) {
           self.options.drag.call( null, event, self.trail ); // new position (old position?) delta
           event.currentTarget = saveCurrentTarget; // be polite to other listeners, restore currentTarget
         }
+        window.phet && phet.phetio && self.endedCallbacksForDraggedEmitter.emit();
       }
+    };
+    options.tandem.addInstance( this, TSimpleDragHandler );
+
+    // @private
+    this.disposeSimpleDragHandler = function() {
+      options.tandem.removeInstance( self );
     };
   }
 
@@ -157,9 +182,11 @@ define( function( require ) {
       // event.domEvent may not exist if this is touch-to-snag
       this.mouseButton = event.pointer.isMouse ? event.domEvent.button : undefined;
 
+      window.phet && phet.phetio && this.startedCallbacksForDragStartedEmitter.emit2( event.pointer.point.x, event.pointer.point.y );
       if ( this.options.start ) {
         this.options.start.call( null, event, this.trail );
       }
+      window.phet && phet.phetio && this.endedCallbacksForDragStartedEmitter.emit();
     },
 
     endDrag: function( event ) {
@@ -170,9 +197,13 @@ define( function( require ) {
       this.pointer.removeInputListener( this.dragListener );
       this.dragging = false;
 
+      window.phet && phet.phetio && this.startedCallbacksForDragEndedEmitter.emit();
       if ( this.options.end ) {
+
+        // drag end may be triggered programmatically and hence event and trail may be undefined
         this.options.end.call( null, event, this.trail );
       }
+      window.phet && phet.phetio && this.endedCallbacksForDragEndedEmitter.emit();
 
       // release our reference
       this.pointer = null;
@@ -241,6 +272,7 @@ define( function( require ) {
         this.pointer.cursor = null;
         this.pointer.removeInputListener( this.dragListener );
       }
+      this.disposeSimpleDragHandler();
     }
   }, {
 
