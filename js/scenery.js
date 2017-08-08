@@ -200,7 +200,12 @@ define( function( require ) {
       return scenery.deserialize( scenery.serialize( value ) );
     },
 
-    // @public
+    /**
+     * Serializes a Scenery-related value.
+     * @public
+     *
+     * @param {*} value
+     */
     serialize: function( value ) {
       if ( value instanceof dot.Vector2 ) {
         return {
@@ -298,8 +303,18 @@ define( function( require ) {
         var node = value;
 
         var options = {};
-        var setup = {};
-        var info = {};
+        var setup = {
+          // maxWidth
+          // maxHeight
+          // clipArea
+          // mouseArea
+          // touchArea
+          // matrix
+          // localBounds
+          // children {Array.<number>} - IDs
+          // hasInputListeners {boolean}
+
+        };
 
         [
           'visible',
@@ -308,8 +323,6 @@ define( function( require ) {
           'inputEnabled',
           'cursor',
           'transformBounds',
-          // 'maxWidth', TODO: add to info (useful to know)
-          // 'maxHeight',
           'renderer',
           'usesOpacity',
           'layerSplit',
@@ -323,15 +336,17 @@ define( function( require ) {
           }
         } );
 
-        if ( node.clipArea !== scenery.Node.DEFAULT_OPTIONS.clipArea ) {
-          setup.clipArea = scenery.serialize( node.clipArea );
-        }
-        if ( node.mouseArea !== scenery.Node.DEFAULT_OPTIONS.mouseArea ) {
-          setup.mouseArea = scenery.serialize( node.mouseArea );
-        }
-        if ( node.touchArea !== scenery.Node.DEFAULT_OPTIONS.touchArea ) {
-          setup.touchArea = scenery.serialize( node.touchArea );
-        }
+        [
+          'maxWidth',
+          'maxHeight',
+          'clipArea',
+          'mouseArea',
+          'touchArea'
+        ].forEach( function( serializedKey ) {
+          if ( node[ serializedKey ] !== scenery.Node.DEFAULT_OPTIONS[ serializedKey ] ) {
+            setup[ serializedKey ] = scenery.serialize( node[ serializedKey ] );
+          }
+        } );
         if ( !node.matrix.isIdentity() ) {
           setup.matrix = scenery.serialize( node.matrix );
         }
@@ -341,16 +356,14 @@ define( function( require ) {
         setup.children = node.children.map( function( child ) {
           return child.id;
         } );
-
-        info.hasInputListeners = node.inputListeners.length > 0;
+        setup.hasInputListeners = node.inputListeners.length > 0;
 
         var serialization = {
           id: node.id,
           type: 'Node',
           name: node.constructor.name,
           options: options,
-          setup: setup,
-          info: info
+          setup: setup
         };
 
         if ( scenery.Path && node instanceof scenery.Path ) {
