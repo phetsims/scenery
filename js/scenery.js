@@ -16,6 +16,7 @@ define( function( require ) {
   var axon = require( 'AXON/axon' );
   var dot = require( 'DOT/dot' );
   var extend = require( 'PHET_CORE/extend' );
+  var inheritance = require( 'PHET_CORE/inheritance' );
   var kite = require( 'KITE/kite' );
   var Namespace = require( 'PHET_CORE/Namespace' );
 
@@ -361,6 +362,9 @@ define( function( require ) {
         var serialization = {
           id: node.id,
           type: 'Node',
+          types: inheritance( node.constructor ).map( function( type ) { return type.name } ).filter( function( name ) {
+            return name && name !== 'Object' && name !== 'Node';
+          } ),
           name: node.constructor.name,
           options: options,
           setup: setup

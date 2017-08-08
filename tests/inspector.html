@@ -322,7 +322,7 @@
   } );
 
   var rightWidth = 600;
-  var bottomHeight = 200;
+  var bottomHeight = 0.22 * window.innerHeight;
   var pathHeight = 20;
 
   // initialize our scene
@@ -383,13 +383,16 @@
       infoBox.children = [];
       var treeNode = previewTreeNodeProperty.value;
       var serialization = treeNode.displayNode._serialization;
-      infoBox.addChild( new scenery.Text( 'Self', { font: new scenery.Font( { size: 14, weight: 'bold' } ) } ) );
+      var types = serialization.types.join( ' : ' );
+      if ( types ) {
+        infoBox.addChild( new scenery.Text( types, { fontSize: 14, fontWeight: 'bold' } ) );
+      }
+
       function addRaw( key, valueNode ) {
         infoBox.addChild( new scenery.HBox( {
           spacing: 0,
           align: 'top',
           children: [
-            new scenery.Spacer( 10, 0 ),
             new scenery.Text( key + ': ', { fontSize: 12 } ),
             valueNode
           ]
@@ -519,8 +522,76 @@
       addSimple( 'height', serialization.setup.height );
       addSimple( 'imageType', serialization.setup.imageType );
 
+      infoBox.addChild( new scenery.Spacer( 5, 5 ) );
+      infoBox.addChild( new scenery.Text( 'Bounds', { font: new scenery.Font( { size: 14, weight: 'bold' } ) } ) );
+      function boxString( bounds ) {
+        return bounds.minX + ', ' + bounds.minY + ', ' + bounds.maxX + ', ' + bounds.maxY + ' (' + bounds.width + ' x ' + bounds.height + ')';
+      }
+      addSimple( 'local', boxString( treeNode.displayNode.localBounds ) );
+      addSimple( 'parent', boxString( treeNode.displayNode.bounds ) );
+
+      infoBox.addChild( new scenery.Spacer( 5, 5 ) );
       infoBox.addChild( new scenery.Text( 'Trail', { font: new scenery.Font( { size: 14, weight: 'bold' } ) } ) );
 
+      // Visibility check
+      if ( _.some( treeNode.trail.nodes, function( treeNode ) {
+        return treeNode._serialization.visible === false;
+      } ) ) {
+        addSimple( 'visible', false );
+      }
+      var opacity = 1;
+      treeNode.trail.nodes.forEach( function( treeNode ) {
+        if ( treeNode._serialization.options.opacity !== undefined ) {
+          opacity *= treeNode._serialization.options.opacity;
+        }
+      } );
+      if ( opacity !== 1 ) {
+        addSimple( 'opacity', opacity );
+      }
+
+      var hasPickableFalseEquivalent = _.some( treeNode.trail.nodes, function( treeNode ) {
+        return treeNode._serialization.options.pickable === false || treeNode._serialization.options.visible === false;
+      } );
+      var hasPickableTrueEquivalent = _.some( treeNode.trail.nodes, function( treeNode ) {
+        return treeNode._serialization.setup.hasInputListeners || treeNode._serialization.options.pickable === true;
+      } );
+      if ( !hasPickableFalseEquivalent && hasPickableTrueEquivalent ) {
+        infoBox.addChild( new scenery.Text( 'Hit Tested', { fontSize: 12, fill: '#f00' } ) );
+      }
+      addSerial( 'matrix', scenery.serialize( treeNode.trail.getMatrix() ) );
+
+      /*---------------------------------------------------------------------------*
+      * Buttons
+      *----------------------------------------------------------------------------*/
+
+      function badButton( label, action ) {
+        var text = new scenery.Text( label, { fontSize: 12 } );
+        var rect = scenery.Rectangle.bounds( text.bounds.dilatedXY( 5, 3 ), {
+          children: [ text ],
+          stroke: 'black',
+          cursor: 'pointer'
+        } );
+        rect.addInputListener( new scenery.FireListener( {
+          fire: action
+        } ) );
+        return rect;
+      }
+
+      infoBox.addChild( new scenery.Spacer( 10, 10 ) );
+
+      infoBox.addChild( new scenery.HBox( {
+        spacing: 5,
+        children: [
+          badButton( 'toggle visibility', function() {
+            treeNode.displayNode.visible = !treeNode.displayNode.visible;
+          } ),
+          badButton( 'sim path', function() {
+            window.prompt( 'Copy-paste this into a sim:', 'phet.joist.display.rootNode' + treeNode.trail.indices.map( function( index ) {
+              return '.children[ ' + index + ' ]';
+            } ).join( '' ) );
+          } )
+        ]
+      } ) );
 
       constrainInfo();
     }
