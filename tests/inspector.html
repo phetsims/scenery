@@ -210,7 +210,7 @@
     selfNode.addChild( new scenery.Text( serialization.name, {
       font: TREE_FONT,
       pickable: false,
-      fill: isVisible ? '#000' : '#444'
+      fill: isVisible ? '#000' : '#60a'
     } ) );
     if ( serialization.name !== serialization.type && serialization.type !== 'Node' ) {
       selfNode.addChild( new scenery.Text( '(' + serialization.type + ')', {
@@ -321,7 +321,7 @@
     }
   } );
 
-  var rightWidth = 500;
+  var rightWidth = 600;
   var bottomHeight = 200;
   var pathHeight = 20;
 
@@ -353,14 +353,190 @@
   } );
   scene.addChild( displayNode );
 
+  var infoBox = new scenery.VBox( {
+    align: 'left',
+    x: 1000,
+    y: 1000
+  } );
+  var infoBackground = new scenery.Rectangle( {
+    children: [ infoBox ]
+  } );
+  scene.addChild( infoBackground );
+  var infoMarginX = 8;
+  var infoMarginY = 5;
+  function constrainInfo() {
+    if ( infoBox.bottom < infoBackground.selfBounds.bottom - infoMarginY ) {
+      infoBox.bottom = infoBackground.selfBounds.bottom - infoMarginY;
+    }
+    if ( infoBox.top > infoBackground.selfBounds.top + infoMarginY ) {
+      infoBox.top = infoBackground.selfBounds.top + infoMarginY;
+    }
+    if ( infoBox.right < infoBackground.selfBounds.right - infoMarginX ) {
+      infoBox.right = infoBackground.selfBounds.right - infoMarginX;
+    }
+    if ( infoBox.left > infoBackground.selfBounds.left + infoMarginX ) {
+      infoBox.left = infoBackground.selfBounds.left + infoMarginX;
+    }
+  }
+  function updateInfo() {
+    if ( previewTreeNodeProperty.value ) {
+      infoBox.children = [];
+      var treeNode = previewTreeNodeProperty.value;
+      var serialization = treeNode.displayNode._serialization;
+      infoBox.addChild( new scenery.Text( 'Self', { font: new scenery.Font( { size: 14, weight: 'bold' } ) } ) );
+      function addRaw( key, valueNode ) {
+        infoBox.addChild( new scenery.HBox( {
+          spacing: 0,
+          align: 'top',
+          children: [
+            new scenery.Spacer( 10, 0 ),
+            new scenery.Text( key + ': ', { fontSize: 12 } ),
+            valueNode
+          ]
+        } ) );
+      }
+      function addSimple( key, value ) {
+        if ( value !== undefined ) {
+          var valueNode;
+
+          valueNode = new scenery.Text( '' + value, { fontSize: 12 } );
+
+          addRaw( key, valueNode );
+        }
+      }
+      function colorSwatch( serial ) {
+        var color = new scenery.Color( serial.red, serial.green, serial.blue, serial.alpha );
+        var hex = color.toNumber().toString( 16 );
+        while ( hex.length < 6 ) {
+          hex = '0' + hex;
+        }
+        return new scenery.HBox( {
+          spacing: 4,
+          children: [
+            new scenery.Rectangle( 0, 0, 10, 10, { fill: color, stroke: 'black', lineWidth: 0.5 } ),
+            new scenery.Text( '#' + hex, { fontSize: 12 } ),
+            new scenery.Text( color.toCSS(), { fontSize: 12 } )
+          ]
+        } );
+      }
+      function addColor( key, serialization ) {
+        if ( serialization ) {
+          if ( serialization.type === 'value' ) {
+            if ( serialization.value === null ) {
+              addSimple( key, null );
+            }
+            else {
+              addRaw( key, colorSwatch( scenery.serialize( new scenery.Color( serialization.value ) ) ) );
+            }
+          }
+          else if ( serialization.type === 'Color' ) {
+            addRaw( key, colorSwatch( serialization ) );
+          }
+          else if ( serialization.type === 'Property' && serialization.value.type === 'Color' ) {
+            addRaw( key, colorSwatch( serialization.value ) );
+          }
+          else if ( serialization.type === 'Property' && serialization.value.type === 'value' ) {
+            addRaw( key, colorSwatch( scenery.serialize( new scenery.Color( serialization.value.value ) ) ) );
+          }
+        }
+      }
+      function addSerial( key, serialization ) {
+        if ( serialization ) {
+          var value = scenery.deserialize( serialization );
+          if ( serialization.type === 'value' ) {
+            addSimple( key, value );
+          }
+          else if ( serialization.type === 'Vector2' ) {
+            addSimple( key, 'Vector2(' + serialization.x + ',' + serialization.y + ')' );
+          }
+          else if ( serialization.type === 'Matrix3' ) {
+            var matrixGroup = new scenery.AlignGroup();
+            addRaw( key, new scenery.VBox( {
+              children: [
+                new scenery.HBox( {
+                  spacing: 6,
+                  children: [
+                    new scenery.AlignBox( new scenery.Text( serialization.m00 ), { group: matrixGroup } ),
+                    new scenery.AlignBox( new scenery.Text( serialization.m01 ), { group: matrixGroup } ),
+                    new scenery.AlignBox( new scenery.Text( serialization.m02 ), { group: matrixGroup } )
+                  ]
+                } ),
+                new scenery.HBox( {
+                  spacing: 6,
+                  children: [
+                    new scenery.AlignBox( new scenery.Text( serialization.m10 ), { group: matrixGroup } ),
+                    new scenery.AlignBox( new scenery.Text( serialization.m11 ), { group: matrixGroup } ),
+                    new scenery.AlignBox( new scenery.Text( serialization.m12 ), { group: matrixGroup } )
+                  ]
+                } ),
+                new scenery.HBox( {
+                  spacing: 6,
+                  children: [
+                    new scenery.AlignBox( new scenery.Text( serialization.m20 ), { group: matrixGroup } ),
+                    new scenery.AlignBox( new scenery.Text( serialization.m21 ), { group: matrixGroup } ),
+                    new scenery.AlignBox( new scenery.Text( serialization.m22 ), { group: matrixGroup } )
+                  ]
+                } )
+              ]
+            } ) );
+          }
+          else if ( serialization.type === 'Bounds2' ) {
+            addSimple( key, 'Bounds2(' + serialization.minX + ',' + serialization.minY + ',' + serialization.maxX + ',' + serialization.maxY + ')' );
+          }
+          else {
+            addSimple( key, '{' + serialization.type + '}' );
+          }
+        }
+      }
+      addColor( 'fill', serialization.setup.fill );
+      addColor( 'stroke', serialization.setup.stroke );
+      addSerial( 'lineDash', serialization.setup.lineDash );
+      addSimple( 'visible', serialization.options.visible );
+      addSimple( 'opacity', serialization.options.opacity );
+      addSimple( 'pickable', serialization.options.pickable );
+      addSimple( 'inputEnabled', serialization.options.inputEnabled );
+      addSimple( 'cursor', serialization.options.cursor );
+      addSimple( 'transformBounds', serialization.options.transformBounds );
+      addSimple( 'renderer', serialization.options.renderer );
+      addSimple( 'usesOpacity', serialization.options.usesOpacity );
+      addSimple( 'layerSplit', serialization.options.layerSplit );
+      addSimple( 'cssTransform', serialization.options.cssTransform );
+      addSimple( 'excludeInvisible', serialization.options.excludeInvisible );
+      addSimple( 'webglScale', serialization.options.webglScale );
+      addSimple( 'preventFit', serialization.options.preventFit );
+      addSerial( 'matrix', serialization.setup.matrix );
+      addSerial( 'maxWidth', serialization.setup.maxWidth );
+      addSerial( 'maxHeight', serialization.setup.maxHeight );
+      addSerial( 'clipArea', serialization.setup.clipArea );
+      addSerial( 'mouseArea', serialization.setup.mouseArea );
+      addSerial( 'touchArea', serialization.setup.touchArea );
+      addSerial( 'localBounds', serialization.setup.localBounds );
+      if ( serialization.setup.hasInputListeners ) {
+        addSimple( 'inputListeners', '' );
+      }
+      addSerial( 'path', serialization.setup.path );
+      addSimple( 'width', serialization.setup.width );
+      addSimple( 'height', serialization.setup.height );
+      addSimple( 'imageType', serialization.setup.imageType );
+
+      infoBox.addChild( new scenery.Text( 'Trail', { font: new scenery.Font( { size: 14, weight: 'bold' } ) } ) );
+
+
+      constrainInfo();
+    }
+    else {
+      infoBox.children = [];
+    }
+  }
+  previewTreeNodeProperty.lazyLink( updateInfo );
+
   var treeMarginX = 8;
   var treeMarginY = 5;
   var rootTreeNode = new TreeNode( displayTree, new scenery.Trail( displayTree ) );
   rootTreeNode.x = treeMarginX;
   rootTreeNode.y = treeMarginY + pathHeight;
   var treeBackground = new scenery.Rectangle( {
-    fill: '#fcfcfc',
-    stroke: '#888'
+    fill: '#fcfcfc'
   } );
   var treeControls = new scenery.HBox( {
     spacing: 5,
@@ -538,6 +714,10 @@
 
   var mainBoundsProperty = new axon.Property( new dot.Bounds2( 0, 0, window.innerWidth, window.innerHeight ) );
 
+  /*---------------------------------------------------------------------------*
+  * Layout
+  *----------------------------------------------------------------------------*/
+
   var mainDivider = new Divider( mainBoundsProperty, 'horizontal', window.innerWidth - rightWidth, true );
   mainDivider.minBoundsProperty.link( function( leftBounds ) {
     displayNode.setScaleMagnitude( Math.min( leftBounds.width / snapshotBounds.width, leftBounds.height / snapshotBounds.height ) );
@@ -559,6 +739,10 @@
   } );
 
   var infoDivider = new Divider( rightDivider.maxBoundsProperty, 'horizontal', window.innerWidth - 200, true );
+  infoDivider.minBoundsProperty.link( function( leftBounds ) {
+    infoBackground.rectBounds = leftBounds;
+    updateInfo();
+  } );
   infoDivider.maxBoundsProperty.link( function( rightBounds ) {
     previewBackground.rectBounds = rightBounds;
     updatePreview();
@@ -568,14 +752,14 @@
   scene.addChild( rightDivider );
   scene.addChild( infoDivider );
 
-  function layout() {
+  function onResize() {
     var width = window.innerWidth;
     var height = window.innerHeight;
     display.setWidthHeight( width, height );
     mainBoundsProperty.value = new dot.Bounds2( 0, 0, width, height );
   }
-  window.addEventListener( 'resize', layout );
-  layout();
+  window.addEventListener( 'resize', onResize );
+  onResize();
 
   /*---------------------------------------------------------------------------*
    * main loop
