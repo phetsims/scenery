@@ -362,7 +362,7 @@ define( function( require ) {
         var serialization = {
           id: node.id,
           type: 'Node',
-          types: inheritance( node.constructor ).map( function( type ) { return type.name } ).filter( function( name ) {
+          types: inheritance( node.constructor ).map( function( type ) { return type.name; } ).filter( function( name ) {
             return name && name !== 'Object' && name !== 'Node';
           } ),
           name: node.constructor.name,
