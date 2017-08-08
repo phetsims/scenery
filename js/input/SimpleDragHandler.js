@@ -127,6 +127,8 @@ define( function( require ) {
 
         var delta = self.transform.inverseDelta2( globalDelta );
 
+        window.phet && phet.phetio && self.startedCallbacksForDraggedEmitter.emit2( event.pointer.point.x, event.pointer.point.y );
+
         // move by the delta between the previous point, using the precomputed transform
         // prepend the translation on the node, so we can ignore whatever other transform state the node has
         if ( self.options.translate ) {
@@ -139,7 +141,6 @@ define( function( require ) {
         }
         self.lastDragPoint = self.pointer.point;
 
-        window.phet && phet.phetio && self.startedCallbacksForDraggedEmitter.emit2( event.pointer.point.x, event.pointer.point.y );
         if ( self.options.drag ) {
 
           // TODO: consider adding in a delta to the listener
