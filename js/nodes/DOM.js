@@ -12,7 +12,6 @@ define( function( require ) {
   var inherit = require( 'PHET_CORE/inherit' );
   var extendDefined = require( 'PHET_CORE/extendDefined' );
   var scenery = require( 'SCENERY/scenery' );
-  var escapeHTML = require( 'PHET_CORE/escapeHTML' );
   var Bounds2 = require( 'DOT/Bounds2' );
   var Node = require( 'SCENERY/nodes/Node' ); // DOM inherits from Node
   var Renderer = require( 'SCENERY/display/Renderer' );
@@ -241,31 +240,7 @@ define( function( require ) {
     isTransformPrevented: function() {
       return this._preventTransform;
     },
-    get preventTransform() { return this.isTransformPrevented(); },
-
-    /**
-     * Returns a string containing constructor information for Node.string().
-     * @protected
-     * @override
-     *
-     * @param {string} propLines - A string representing the options properties that need to be set.
-     * @returns {string}
-     */
-    getBasicConstructor: function( propLines ) {
-      return 'new scenery.DOM( $( \'' + escapeHTML( this._container.innerHTML.replace( /'/g, '\\\'' ) ) + '\' ), {' + propLines + '} )';
-    },
-
-    /**
-     * Returns the property object string for use with toString().
-     * @protected (scenery-internal)
-     * @override
-     *
-     * @param {string} spaces - Whitespace to add
-     * @param {boolean} [includeChildren]
-     */
-    getPropString: function( spaces, includeChildren ) {
-      return Node.prototype.getPropString.call( this, spaces, includeChildren );
-    }
+    get preventTransform() { return this.isTransformPrevented(); }
   } );
 
   return DOM;

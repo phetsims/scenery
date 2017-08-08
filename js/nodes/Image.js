@@ -988,18 +988,6 @@ define( function( require ) {
     },
 
     /**
-     * Returns a string containing constructor information for Node.string().
-     * @protected
-     * @override
-     *
-     * @param {string} propLines - A string representing the options properties that need to be set.
-     * @returns {string}
-     */
-    getBasicConstructor: function( propLines ) {
-      return 'new scenery.Image( \'' + ( this._image.src ? this._image.src.replace( /'/g, '\\\'' ) : 'other' ) + '\', {' + propLines + '} )';
-    },
-
-    /**
      * Disposes the path, releasing image listeners if needed (and preventing new listeners from being added).
      * @public
      * @override

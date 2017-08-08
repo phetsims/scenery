@@ -60,8 +60,93 @@
     }
   } );
 
-  var TREE_FONT = new scenery.Font( { size: 12 } );
-  var PATH_FONT = new scenery.Font( { size: 12, weight: 'bold' } );
+  function Divider( preferredBoundsProperty, orientation, initialSeparatorLocation, pushFromMax ) {
+    var self = this;
+
+    this.minBoundsProperty = new axon.Property( new dot.Bounds2() );
+    this.maxBoundsProperty = new axon.Property( new dot.Bounds2() );
+
+    this.preferredBoundsProperty = preferredBoundsProperty;
+    this.orientation = orientation;
+    this.primaryCoordinate = orientation === 'horizontal' ? 'x' : 'y';
+    this.secondaryCoordinate = orientation === 'horizontal' ? 'y' : 'x';
+    this.primaryName = orientation === 'horizontal' ? 'width' : 'height';
+    this.secondaryName = orientation === 'horizontal' ? 'height' : 'width';
+    this.primaryRectName = orientation === 'horizontal' ? 'rectWidth' : 'rectHeight';
+    this.secondaryRectName = orientation === 'horizontal' ? 'rectHeight' : 'rectWidth';
+    this.minCoordinate = orientation === 'horizontal' ? 'left' : 'top';
+    this.maxCoordinate = orientation === 'horizontal' ? 'right' : 'bottom';
+    this.centerName = orientation === 'horizontal' ? 'centerX' : 'centerY';
+    this.minimum = 100;
+
+    this.separatorLocation = initialSeparatorLocation;
+
+    scenery.Rectangle.call( this, {
+      fill: '#666',
+      cursor: orientation === 'horizontal' ? 'w-resize' : 'n-resize'
+    } );
+    this[ this.primaryRectName ] = 2;
+
+    var dragListener = new scenery.DragListener( {
+      drag: function( event ) {
+        self.separatorLocation = dragListener.parentPoint[ self.primaryCoordinate ];
+        self.layout();
+      }
+    } );
+    this.addInputListener( dragListener );
+
+    preferredBoundsProperty.link( function( newPreferredBounds, oldPreferredBounds ) {
+      if ( pushFromMax && oldPreferredBounds ) {
+        self.separatorLocation += newPreferredBounds[ self.maxCoordinate ] - oldPreferredBounds[ self.maxCoordinate ];
+      }
+      if ( !pushFromMax && oldPreferredBounds ) {
+        self.separatorLocation += newPreferredBounds[ self.minCoordinate ] - oldPreferredBounds[ self.minCoordinate ];
+      }
+      self.layout();
+    } );
+  }
+  phetCore.inherit( scenery.Rectangle, Divider, {
+    layout: function() {
+      var preferredBounds = this.preferredBoundsProperty.value;
+      var separatorLocation = this.separatorLocation;
+
+      if ( separatorLocation < preferredBounds[ this.minCoordinate ] + this.minimum ) {
+        separatorLocation = preferredBounds[ this.minCoordinate ] + this.minimum;
+      }
+      if ( separatorLocation > preferredBounds[ this.maxCoordinate ] - this.minimum ) {
+        if ( preferredBounds[ this.primaryName ] >= this.minimum * 2 ) {
+          separatorLocation = preferredBounds[ this.maxCoordinate ] - this.minimum;
+        }
+        else {
+          separatorLocation = preferredBounds[ this.minCoordinate ] + preferredBounds[ this.primaryName ] / 2;
+        }
+      }
+
+      this[ this.centerName ] = separatorLocation;
+      this[ this.secondaryCoordinate ] = preferredBounds[ this.secondaryCoordinate ];
+      this[ this.secondaryRectName ] = preferredBounds[ this.secondaryName ];
+
+      if ( this.orientation === 'horizontal' ) {
+        this.mouseArea = this.touchArea = this.localBounds.dilatedX( 5 );
+      }
+      else {
+        this.mouseArea = this.touchArea = this.localBounds.dilatedY( 5 );
+      }
+
+      var minBounds = preferredBounds.copy();
+      var maxBounds = preferredBounds.copy();
+      if ( this.orientation === 'horizontal' ) {
+        minBounds.maxX = separatorLocation - this.width / 2;
+        maxBounds.minX = separatorLocation + this.width / 2;
+      }
+      else {
+        minBounds.maxY = separatorLocation - this.height / 2;
+        maxBounds.minY = separatorLocation + this.height / 2;
+      }
+      this.minBoundsProperty.value = minBounds;
+      this.maxBoundsProperty.value = maxBounds;
+    }
+  } );
 
   function TreeNode( displayNode, trail ) {
     scenery.Node.call( this );
@@ -92,7 +177,7 @@
       }
     } );
 
-    var expandedProperty = new axon.Property( true );
+    this.expandedProperty = new axon.Property( true );
 
     var serialization = displayNode._serialization;
     var isVisible = _.every( trail.nodes, function( node ) {
@@ -115,15 +200,17 @@
     } );
     expandButton.addInputListener( new scenery.FireListener( {
       fire: function() {
-        expandedProperty.toggle();
+        self.expandedProperty.toggle();
       }
     } ) );
     selfNode.addChild( expandButton );
 
+    var TREE_FONT = new scenery.Font( { size: 12 } );
+
     selfNode.addChild( new scenery.Text( serialization.name, {
       font: TREE_FONT,
       pickable: false,
-      fill: isVisible ? '#000' : '#444'
+      fill: isVisible ? '#000' : '#60a'
     } ) );
     if ( serialization.name !== serialization.type && serialization.type !== 'Node' ) {
       selfNode.addChild( new scenery.Text( '(' + serialization.type + ')', {
@@ -170,15 +257,16 @@
     } ) );
     this.addChild( selfBackground );
 
+    this.childTreeNodes = displayNode.children.filter( function( child ) {
+      return !!child._serialization;
+    } ).map( function( child, index ) {
+      return new TreeNode( child, trail.copy().addDescendant( child, index ) );
+    } );
 
     var childrenNode = new scenery.VBox( {
       spacing: 0,
       align: 'left',
-      children: displayNode.children.filter( function( child ) {
-        return !!child._serialization;
-      } ).map( function( child, index ) {
-        return new TreeNode( child, trail.copy().addDescendant( child, index ) );
-      } )
+      children: this.childTreeNodes
     } );
 
     var column = new scenery.Rectangle( {
@@ -203,7 +291,7 @@
       expandButton.visible = true;
       this.addChild( expandedNode );
 
-      expandedProperty.link( function( expanded ) {
+      self.expandedProperty.link( function( expanded ) {
         expandButton.rotation = expanded ? Math.PI / 2 : 0;
         if ( expanded && !self.hasChild( expandedNode ) ) {
           self.addChild( expandedNode );
@@ -218,10 +306,23 @@
       } );
     }
   }
-  phetCore.inherit( scenery.Node, TreeNode );
+  phetCore.inherit( scenery.Node, TreeNode, {
+    expandRecusively: function() {
+      this.expandedProperty.value = true;
+      this.childTreeNodes.forEach( function( treeNode ) {
+        treeNode.expandRecusively();
+      } );
+    },
+    collapseRecursively: function() {
+      this.expandedProperty.value = false;
+      this.childTreeNodes.forEach( function( treeNode ) {
+        treeNode.collapseRecursively();
+      } );
+    }
+  } );
 
-  var rightWidth = 500;
-  var bottomHeight = 200;
+  var rightWidth = 600;
+  var bottomHeight = 0.22 * window.innerHeight;
   var pathHeight = 20;
 
   // initialize our scene
@@ -252,19 +353,293 @@
   } );
   scene.addChild( displayNode );
 
+  var infoBox = new scenery.VBox( {
+    align: 'left',
+    x: 1000,
+    y: 1000
+  } );
+  var infoBackground = new scenery.Rectangle( {
+    children: [ infoBox ]
+  } );
+  scene.addChild( infoBackground );
+  var infoMarginX = 8;
+  var infoMarginY = 5;
+  function constrainInfo() {
+    if ( infoBox.bottom < infoBackground.selfBounds.bottom - infoMarginY ) {
+      infoBox.bottom = infoBackground.selfBounds.bottom - infoMarginY;
+    }
+    if ( infoBox.top > infoBackground.selfBounds.top + infoMarginY ) {
+      infoBox.top = infoBackground.selfBounds.top + infoMarginY;
+    }
+    if ( infoBox.right < infoBackground.selfBounds.right - infoMarginX ) {
+      infoBox.right = infoBackground.selfBounds.right - infoMarginX;
+    }
+    if ( infoBox.left > infoBackground.selfBounds.left + infoMarginX ) {
+      infoBox.left = infoBackground.selfBounds.left + infoMarginX;
+    }
+  }
+  function updateInfo() {
+    if ( previewTreeNodeProperty.value ) {
+      infoBox.children = [];
+      var treeNode = previewTreeNodeProperty.value;
+      var serialization = treeNode.displayNode._serialization;
+      var types = serialization.types.join( ' : ' );
+      if ( types ) {
+        infoBox.addChild( new scenery.Text( types, { fontSize: 14, fontWeight: 'bold' } ) );
+      }
+
+      function addRaw( key, valueNode ) {
+        infoBox.addChild( new scenery.HBox( {
+          spacing: 0,
+          align: 'top',
+          children: [
+            new scenery.Text( key + ': ', { fontSize: 12 } ),
+            valueNode
+          ]
+        } ) );
+      }
+      function addSimple( key, value ) {
+        if ( value !== undefined ) {
+          var valueNode;
+
+          valueNode = new scenery.Text( '' + value, { fontSize: 12 } );
+
+          addRaw( key, valueNode );
+        }
+      }
+      function colorSwatch( serial ) {
+        var color = new scenery.Color( serial.red, serial.green, serial.blue, serial.alpha );
+        var hex = color.toNumber().toString( 16 );
+        while ( hex.length < 6 ) {
+          hex = '0' + hex;
+        }
+        return new scenery.HBox( {
+          spacing: 4,
+          children: [
+            new scenery.Rectangle( 0, 0, 10, 10, { fill: color, stroke: 'black', lineWidth: 0.5 } ),
+            new scenery.Text( '#' + hex, { fontSize: 12 } ),
+            new scenery.Text( color.toCSS(), { fontSize: 12 } )
+          ]
+        } );
+      }
+      function addColor( key, serialization ) {
+        if ( serialization ) {
+          if ( serialization.type === 'value' ) {
+            if ( serialization.value === null ) {
+              addSimple( key, null );
+            }
+            else {
+              addRaw( key, colorSwatch( scenery.serialize( new scenery.Color( serialization.value ) ) ) );
+            }
+          }
+          else if ( serialization.type === 'Color' ) {
+            addRaw( key, colorSwatch( serialization ) );
+          }
+          else if ( serialization.type === 'Property' && serialization.value.type === 'Color' ) {
+            addRaw( key, colorSwatch( serialization.value ) );
+          }
+          else if ( serialization.type === 'Property' && serialization.value.type === 'value' ) {
+            addRaw( key, colorSwatch( scenery.serialize( new scenery.Color( serialization.value.value ) ) ) );
+          }
+        }
+      }
+      function addSerial( key, serialization ) {
+        if ( serialization ) {
+          var value = scenery.deserialize( serialization );
+          if ( serialization.type === 'value' ) {
+            addSimple( key, value );
+          }
+          else if ( serialization.type === 'Vector2' ) {
+            addSimple( key, 'Vector2(' + serialization.x + ',' + serialization.y + ')' );
+          }
+          else if ( serialization.type === 'Matrix3' ) {
+            var matrixGroup = new scenery.AlignGroup();
+            addRaw( key, new scenery.VBox( {
+              children: [
+                new scenery.HBox( {
+                  spacing: 6,
+                  children: [
+                    new scenery.AlignBox( new scenery.Text( serialization.m00 ), { group: matrixGroup } ),
+                    new scenery.AlignBox( new scenery.Text( serialization.m01 ), { group: matrixGroup } ),
+                    new scenery.AlignBox( new scenery.Text( serialization.m02 ), { group: matrixGroup } )
+                  ]
+                } ),
+                new scenery.HBox( {
+                  spacing: 6,
+                  children: [
+                    new scenery.AlignBox( new scenery.Text( serialization.m10 ), { group: matrixGroup } ),
+                    new scenery.AlignBox( new scenery.Text( serialization.m11 ), { group: matrixGroup } ),
+                    new scenery.AlignBox( new scenery.Text( serialization.m12 ), { group: matrixGroup } )
+                  ]
+                } ),
+                new scenery.HBox( {
+                  spacing: 6,
+                  children: [
+                    new scenery.AlignBox( new scenery.Text( serialization.m20 ), { group: matrixGroup } ),
+                    new scenery.AlignBox( new scenery.Text( serialization.m21 ), { group: matrixGroup } ),
+                    new scenery.AlignBox( new scenery.Text( serialization.m22 ), { group: matrixGroup } )
+                  ]
+                } )
+              ]
+            } ) );
+          }
+          else if ( serialization.type === 'Bounds2' ) {
+            addSimple( key, 'Bounds2(' + serialization.minX + ',' + serialization.minY + ',' + serialization.maxX + ',' + serialization.maxY + ')' );
+          }
+          else {
+            addSimple( key, '{' + serialization.type + '}' );
+          }
+        }
+      }
+      addColor( 'fill', serialization.setup.fill );
+      addColor( 'stroke', serialization.setup.stroke );
+      addSerial( 'lineDash', serialization.setup.lineDash );
+      addSimple( 'visible', serialization.options.visible );
+      addSimple( 'opacity', serialization.options.opacity );
+      addSimple( 'pickable', serialization.options.pickable );
+      addSimple( 'inputEnabled', serialization.options.inputEnabled );
+      addSimple( 'cursor', serialization.options.cursor );
+      addSimple( 'transformBounds', serialization.options.transformBounds );
+      addSimple( 'renderer', serialization.options.renderer );
+      addSimple( 'usesOpacity', serialization.options.usesOpacity );
+      addSimple( 'layerSplit', serialization.options.layerSplit );
+      addSimple( 'cssTransform', serialization.options.cssTransform );
+      addSimple( 'excludeInvisible', serialization.options.excludeInvisible );
+      addSimple( 'webglScale', serialization.options.webglScale );
+      addSimple( 'preventFit', serialization.options.preventFit );
+      addSerial( 'matrix', serialization.setup.matrix );
+      addSerial( 'maxWidth', serialization.setup.maxWidth );
+      addSerial( 'maxHeight', serialization.setup.maxHeight );
+      addSerial( 'clipArea', serialization.setup.clipArea );
+      addSerial( 'mouseArea', serialization.setup.mouseArea );
+      addSerial( 'touchArea', serialization.setup.touchArea );
+      addSerial( 'localBounds', serialization.setup.localBounds );
+      if ( serialization.setup.hasInputListeners ) {
+        addSimple( 'inputListeners', '' );
+      }
+      addSerial( 'path', serialization.setup.path );
+      addSimple( 'width', serialization.setup.width );
+      addSimple( 'height', serialization.setup.height );
+      addSimple( 'imageType', serialization.setup.imageType );
+
+      infoBox.addChild( new scenery.Spacer( 5, 5 ) );
+      infoBox.addChild( new scenery.Text( 'Bounds', { font: new scenery.Font( { size: 14, weight: 'bold' } ) } ) );
+      function boxString( bounds ) {
+        return bounds.minX + ', ' + bounds.minY + ', ' + bounds.maxX + ', ' + bounds.maxY + ' (' + bounds.width + ' x ' + bounds.height + ')';
+      }
+      addSimple( 'local', boxString( treeNode.displayNode.localBounds ) );
+      addSimple( 'parent', boxString( treeNode.displayNode.bounds ) );
+
+      infoBox.addChild( new scenery.Spacer( 5, 5 ) );
+      infoBox.addChild( new scenery.Text( 'Trail', { font: new scenery.Font( { size: 14, weight: 'bold' } ) } ) );
+
+      // Visibility check
+      if ( _.some( treeNode.trail.nodes, function( treeNode ) {
+        return treeNode._serialization.visible === false;
+      } ) ) {
+        addSimple( 'visible', false );
+      }
+      var opacity = 1;
+      treeNode.trail.nodes.forEach( function( treeNode ) {
+        if ( treeNode._serialization.options.opacity !== undefined ) {
+          opacity *= treeNode._serialization.options.opacity;
+        }
+      } );
+      if ( opacity !== 1 ) {
+        addSimple( 'opacity', opacity );
+      }
+
+      var hasPickableFalseEquivalent = _.some( treeNode.trail.nodes, function( treeNode ) {
+        return treeNode._serialization.options.pickable === false || treeNode._serialization.options.visible === false;
+      } );
+      var hasPickableTrueEquivalent = _.some( treeNode.trail.nodes, function( treeNode ) {
+        return treeNode._serialization.setup.hasInputListeners || treeNode._serialization.options.pickable === true;
+      } );
+      if ( !hasPickableFalseEquivalent && hasPickableTrueEquivalent ) {
+        infoBox.addChild( new scenery.Text( 'Hit Tested', { fontSize: 12, fill: '#f00' } ) );
+      }
+      addSerial( 'matrix', scenery.serialize( treeNode.trail.getMatrix() ) );
+
+      /*---------------------------------------------------------------------------*
+      * Buttons
+      *----------------------------------------------------------------------------*/
+
+      function badButton( label, action ) {
+        var text = new scenery.Text( label, { fontSize: 12 } );
+        var rect = scenery.Rectangle.bounds( text.bounds.dilatedXY( 5, 3 ), {
+          children: [ text ],
+          stroke: 'black',
+          cursor: 'pointer'
+        } );
+        rect.addInputListener( new scenery.FireListener( {
+          fire: action
+        } ) );
+        return rect;
+      }
+
+      infoBox.addChild( new scenery.Spacer( 10, 10 ) );
+
+      infoBox.addChild( new scenery.HBox( {
+        spacing: 5,
+        children: [
+          badButton( 'toggle visibility', function() {
+            treeNode.displayNode.visible = !treeNode.displayNode.visible;
+          } ),
+          badButton( 'sim path', function() {
+            window.prompt( 'Copy-paste this into a sim:', 'phet.joist.display.rootNode' + treeNode.trail.indices.map( function( index ) {
+              return '.children[ ' + index + ' ]';
+            } ).join( '' ) );
+          } )
+        ]
+      } ) );
+
+      constrainInfo();
+    }
+    else {
+      infoBox.children = [];
+    }
+  }
+  previewTreeNodeProperty.lazyLink( updateInfo );
+
   var treeMarginX = 8;
   var treeMarginY = 5;
   var rootTreeNode = new TreeNode( displayTree, new scenery.Trail( displayTree ) );
   rootTreeNode.x = treeMarginX;
   rootTreeNode.y = treeMarginY + pathHeight;
   var treeBackground = new scenery.Rectangle( {
-    fill: '#fcfcfc',
-    stroke: '#888'
+    fill: '#fcfcfc'
+  } );
+  var treeControls = new scenery.HBox( {
+    spacing: 5,
+    children: [
+      new scenery.Text( 'expand', {
+        font: new scenery.Font( { size: 12 } ),
+        fill: '#888',
+        pointer: 'cursor',
+        inputListeners: [ new scenery.FireListener( {
+          fire: function() {
+            rootTreeNode.expandRecusively();
+          }
+        } ) ]
+      } ),
+      new scenery.Text( 'collapse', {
+        font: new scenery.Font( { size: 12 } ),
+        fill: '#888',
+        pointer: 'cursor',
+        inputListeners: [ new scenery.FireListener( {
+          fire: function() {
+            rootTreeNode.collapseRecursively();
+          }
+        } ) ]
+      } )
+    ],
+    y: rootTreeNode.y
   } );
   var treeContainer = new scenery.Node( {
     children: [
       treeBackground,
-      rootTreeNode
+      rootTreeNode,
+      treeControls
     ]
   } );
   scene.addChild( treeContainer );
@@ -347,20 +722,19 @@
     rectWidth: bottomHeight,
     rectHeight: bottomHeight,
     children: [ previewContainer ],
-    fill: '#eee'
+    fill: '#eee',
+    pickable: false
   } );
   scene.addChild( previewBackground );
-
-  previewTreeNodeProperty.link( function( treeNode ) {
-    if ( treeNode ) {
-      var node = treeNode.displayNode;
+  function updatePreview() {
+    if ( previewTreeNodeProperty.value ) {
+      var node = previewTreeNodeProperty.value.displayNode;
       previewContainer.children = [ node ];
       if ( previewContainer.bounds.isValid() ) {
         previewContainer.visible = true;
-        var scale = Math.min( bottomHeight / node.width, bottomHeight / node.height );
+        var scale = Math.min( previewBackground.selfBounds.width / node.width, previewBackground.selfBounds.height / node.height );
         previewContainer.setScaleMagnitude( scale * 0.9 );
-        previewContainer.centerX = bottomHeight / 2;;
-        previewContainer.centerY = bottomHeight / 2;;
+        previewContainer.center = previewBackground.selfBounds.center;
       }
       else {
         previewContainer.visible = false;
@@ -369,14 +743,16 @@
     else {
       previewContainer.visible = false;
     }
+  }
+  previewTreeNodeProperty.link( function( treeNode ) {
+    updatePreview();
   } );
 
   var pathBackground = new scenery.Rectangle( {
     fill: '#333'
   } );
   var pathContainer = new scenery.HBox( {
-    spacing: 5,
-    maxWidth: rightWidth - 10
+    spacing: 5
   } );
   scene.addChild( pathBackground );
   scene.addChild( pathContainer );
@@ -388,6 +764,7 @@
     }
   }
 
+  var PATH_FONT = new scenery.Font( { size: 12, weight: 'bold' } );
   previewTreeNodeProperty.link( function( treeNode ) {
     if ( treeNode ) {
       pathContainer.children = treeNode.trail.nodes.map( function( node ) {
@@ -406,31 +783,54 @@
     layoutPathContainer();
   } );
 
-  function layout() {
+  var mainBoundsProperty = new axon.Property( new dot.Bounds2( 0, 0, window.innerWidth, window.innerHeight ) );
+
+  /*---------------------------------------------------------------------------*
+  * Layout
+  *----------------------------------------------------------------------------*/
+
+  var mainDivider = new Divider( mainBoundsProperty, 'horizontal', window.innerWidth - rightWidth, true );
+  mainDivider.minBoundsProperty.link( function( leftBounds ) {
+    displayNode.setScaleMagnitude( Math.min( leftBounds.width / snapshotBounds.width, leftBounds.height / snapshotBounds.height ) );
+    displayNode.center = leftBounds.center;
+  } );
+
+  var rightDivider = new Divider( mainDivider.maxBoundsProperty, 'vertical', window.innerHeight - bottomHeight, true );
+  rightDivider.minBoundsProperty.link( function( topBounds ) {
+    pathBackground.rectBounds = new dot.Bounds2( topBounds.minX, topBounds.minY, topBounds.maxX, topBounds.minY + pathHeight );
+    pathContainer.maxWidth = pathBackground.width - 10;
+    layoutPathContainer();
+
+    var treeLocalBounds = new dot.Bounds2( 0, pathHeight, topBounds.width, topBounds.height );
+    treeContainer.x = topBounds.left;
+    treeContainer.clipArea = kite.Shape.bounds( treeLocalBounds );
+    treeBackground.rectBounds = treeLocalBounds;
+    treeControls.right = treeLocalBounds.right - 5;
+    constrainTree();
+  } );
+
+  var infoDivider = new Divider( rightDivider.maxBoundsProperty, 'horizontal', window.innerWidth - 200, true );
+  infoDivider.minBoundsProperty.link( function( leftBounds ) {
+    infoBackground.rectBounds = leftBounds;
+    updateInfo();
+  } );
+  infoDivider.maxBoundsProperty.link( function( rightBounds ) {
+    previewBackground.rectBounds = rightBounds;
+    updatePreview();
+  } );
+
+  scene.addChild( mainDivider );
+  scene.addChild( rightDivider );
+  scene.addChild( infoDivider );
+
+  function onResize() {
     var width = window.innerWidth;
     var height = window.innerHeight;
     display.setWidthHeight( width, height );
-
-    var leftWidth = width - rightWidth;
-
-    displayNode.setScaleMagnitude( Math.min( leftWidth / snapshotBounds.width, height / snapshotBounds.height ) );
-    displayNode.centerX = leftWidth / 2;
-    displayNode.centerY = height / 2;
-
-    var treeLocalBounds = new dot.Bounds2( 0, pathHeight, rightWidth, height - bottomHeight );
-    treeContainer.x = leftWidth;
-    treeContainer.clipArea = kite.Shape.bounds( treeLocalBounds );
-    treeBackground.rectBounds = treeLocalBounds;
-    constrainTree();
-
-    previewBackground.x = width - bottomHeight;
-    previewBackground.y = height - bottomHeight;
-
-    pathBackground.rectBounds = new dot.Bounds2( leftWidth, 0, width, pathHeight );
-    layoutPathContainer();
+    mainBoundsProperty.value = new dot.Bounds2( 0, 0, width, height );
   }
-  window.addEventListener( 'resize', layout );
-  layout();
+  window.addEventListener( 'resize', onResize );
+  onResize();
 
   /*---------------------------------------------------------------------------*
    * main loop

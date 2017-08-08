@@ -213,18 +213,6 @@ define( function( require ) {
      */
     createWebGLDrawable: function( renderer, instance ) {
       return WebGLNodeDrawable.createFromPool( renderer, instance );
-    },
-
-    /**
-     * Returns a string containing constructor information for Node.string().
-     * @protected
-     * @override
-     *
-     * @param {string} propLines - A string representing the options properties that need to be set.
-     * @returns {string}
-     */
-    getBasicConstructor: function( propLines ) {
-      return 'new scenery.WebGLNode( {' + propLines + '} )'; // TODO: no real way to do this nicely?
     }
   }, {
     /**
