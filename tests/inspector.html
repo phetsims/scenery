@@ -77,7 +77,7 @@
     this.minCoordinate = orientation === 'horizontal' ? 'left' : 'top';
     this.maxCoordinate = orientation === 'horizontal' ? 'right' : 'bottom';
     this.centerName = orientation === 'horizontal' ? 'centerX' : 'centerY';
-    this.minimum = 50;
+    this.minimum = 100;
 
     this.separatorLocation = initialSeparatorLocation;
 
@@ -111,7 +111,7 @@
       var separatorLocation = this.separatorLocation;
 
       if ( separatorLocation < preferredBounds[ this.minCoordinate ] + this.minimum ) {
-        separatorLocation = this.minimum;
+        separatorLocation = preferredBounds[ this.minCoordinate ] + this.minimum;
       }
       if ( separatorLocation > preferredBounds[ this.maxCoordinate ] - this.minimum ) {
         if ( preferredBounds[ this.primaryName ] >= this.minimum * 2 ) {
@@ -475,20 +475,19 @@
     rectWidth: bottomHeight,
     rectHeight: bottomHeight,
     children: [ previewContainer ],
-    fill: '#eee'
+    fill: '#eee',
+    pickable: false
   } );
   scene.addChild( previewBackground );
-
-  previewTreeNodeProperty.link( function( treeNode ) {
-    if ( treeNode ) {
-      var node = treeNode.displayNode;
+  function updatePreview() {
+    if ( previewTreeNodeProperty.value ) {
+      var node = previewTreeNodeProperty.value.displayNode;
       previewContainer.children = [ node ];
       if ( previewContainer.bounds.isValid() ) {
         previewContainer.visible = true;
-        var scale = Math.min( bottomHeight / node.width, bottomHeight / node.height );
+        var scale = Math.min( previewBackground.selfBounds.width / node.width, previewBackground.selfBounds.height / node.height );
         previewContainer.setScaleMagnitude( scale * 0.9 );
-        previewContainer.centerX = bottomHeight / 2;;
-        previewContainer.centerY = bottomHeight / 2;;
+        previewContainer.center = previewBackground.selfBounds.center;
       }
       else {
         previewContainer.visible = false;
@@ -497,6 +496,9 @@
     else {
       previewContainer.visible = false;
     }
+  }
+  previewTreeNodeProperty.link( function( treeNode ) {
+    updatePreview();
   } );
 
   var pathBackground = new scenery.Rectangle( {
@@ -541,31 +543,36 @@
     displayNode.setScaleMagnitude( Math.min( leftBounds.width / snapshotBounds.width, leftBounds.height / snapshotBounds.height ) );
     displayNode.center = leftBounds.center;
   } );
-  mainDivider.maxBoundsProperty.link( function( rightBounds ) {
-    pathBackground.rectBounds = new dot.Bounds2( rightBounds.minX, rightBounds.minY, rightBounds.maxX, rightBounds.minY + pathHeight );
+
+  var rightDivider = new Divider( mainDivider.maxBoundsProperty, 'vertical', window.innerHeight - bottomHeight, true );
+  rightDivider.minBoundsProperty.link( function( topBounds ) {
+    pathBackground.rectBounds = new dot.Bounds2( topBounds.minX, topBounds.minY, topBounds.maxX, topBounds.minY + pathHeight );
     pathContainer.maxWidth = pathBackground.width - 10;
     layoutPathContainer();
 
-    var treeLocalBounds = new dot.Bounds2( 0, pathHeight, rightBounds.width, rightBounds.height - bottomHeight );
-    treeContainer.x = rightBounds.left;
+    var treeLocalBounds = new dot.Bounds2( 0, pathHeight, topBounds.width, topBounds.height );
+    treeContainer.x = topBounds.left;
     treeContainer.clipArea = kite.Shape.bounds( treeLocalBounds );
     treeBackground.rectBounds = treeLocalBounds;
     treeControls.right = treeLocalBounds.right - 5;
     constrainTree();
   } );
 
+  var infoDivider = new Divider( rightDivider.maxBoundsProperty, 'horizontal', window.innerWidth - 200, true );
+  infoDivider.maxBoundsProperty.link( function( rightBounds ) {
+    previewBackground.rectBounds = rightBounds;
+    updatePreview();
+  } );
+
   scene.addChild( mainDivider );
+  scene.addChild( rightDivider );
+  scene.addChild( infoDivider );
 
   function layout() {
     var width = window.innerWidth;
     var height = window.innerHeight;
     display.setWidthHeight( width, height );
     mainBoundsProperty.value = new dot.Bounds2( 0, 0, width, height );
-
-    var leftWidth = width - rightWidth;
-
-    previewBackground.x = width - bottomHeight;
-    previewBackground.y = height - bottomHeight;
   }
   window.addEventListener( 'resize', layout );
   layout();
