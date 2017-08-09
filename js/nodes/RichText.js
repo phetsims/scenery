@@ -148,19 +148,24 @@ define( function( require ) {
     // @private {Object|boolean}
     this._links = {};
 
-    // TODO: add ES5 and doc
     // @private {string}
     this._align = 'left'; // 'left', 'center', or 'right'
 
-    // TODO: add ES5 and doc
     // @private {number}
     this._leading = 0;
 
+    // @private {Array.<{ element: {*}, node: {Node}, href: {string} }>}
+    this._linkItems = [];
+
     Node.call( this );
 
-    // @private {Node} - So we don't mess with child nodes that may get added to us.
-    this.richTextContainer = new VBox( {} );
-    this.addChild( this.richTextContainer );
+    // @private {Node} - Normal layout of lines
+    this.lineContainer = new VBox( {} );
+    this.addChild( this.lineContainer );
+
+    // @private {Node} - Extracted nodes from links go here instead
+    this.linkContainer = new Node( {} );
+    this.addChild( this.linkContainer );
 
     options = extendDefined( {
       fill: '#000000',
@@ -190,9 +195,20 @@ define( function( require ) {
      * @private
      */
     rebuildRichText: function() {
-      this.richTextContainer.removeAllChildren();
-      this.richTextContainer.align = this._align;
-      this.richTextContainer.spacing = this._leading;
+      var self = this;
+
+      this.lineContainer.removeAllChildren();
+      this.lineContainer.align = this._align;
+      this.lineContainer.spacing = this._leading;
+      this.lineContainer.resize = true; // Added initially, but will be turned off later when linked nodes are moved
+
+      this.linkContainer.removeAllChildren();
+
+
+      // Bail early, particularly if we are being constructed.
+      if ( this._text === '' ) {
+        return;
+      }
 
       // Turn bidirectional marks into explicit elements, so that the nesting is applied correctly.
       var mappedText = this._text.replace( /\u202a/g, '<span dir="ltr">' )
@@ -202,13 +218,16 @@ define( function( require ) {
       // Start appending all top-level elements
       var rootElements = himalaya.parse( mappedText );
 
+      // Clear out link items, as we'll need to reconstruct them later
+      this._linkItems.length = 0;
+
       var currentLine = new Node();
       while ( rootElements.length ) {
         var element = rootElements[ 0 ];
         var lineBreakState = this.appendElement( currentLine, element, this._font, this._fill, true );
         if ( lineBreakState !== LineBreakState.NONE ) {
           if ( currentLine.bounds.isValid() ) {
-            this.richTextContainer.addChild( currentLine );
+            this.lineContainer.addChild( currentLine );
           }
           currentLine = new Node();
         }
@@ -217,8 +236,59 @@ define( function( require ) {
         }
       }
       if ( currentLine.bounds.isValid() ) {
-        this.richTextContainer.addChild( currentLine );
+        this.lineContainer.addChild( currentLine );
       }
+
+      // Now that lines are sized and added, we turn off resizing so locations don't change when we remove linked nodes.
+      this.lineContainer.resize = false;
+
+      // Handle regrouping of links
+      while ( this._linkItems.length ) {
+        var linkElement = this._linkItems[ 0 ].element;
+        var href = this._linkItems[ 0 ].href;
+        var i;
+
+        // Find all nodes that are for the same link
+        var nodes = [];
+        for ( i = this._linkItems.length - 1; i >= 0; i-- ) {
+          var item = this._linkItems[ i ];
+          if ( item.element === linkElement ) {
+            nodes.push( item.node );
+            this._linkItems.splice( i, 1 );
+          }
+        }
+
+        // a11y - open the link in the new tab when activated with a keyboard.
+        // also see https://github.com/phetsims/joist/issues/430
+        var rootNode = new Node( {
+          cursor: 'pointer',
+          tagName: 'a',
+          accessibleLabel: linkElement.accessibleLabel
+        } );
+        rootNode.addInputListener( new ButtonListener( {
+          fire: function( event ) {
+            self._linkEventsHandled && event.handle();
+            var newWindow = window.open( href, '_blank' ); // open in a new window/tab
+            newWindow.focus();
+          }
+        } ) );
+        rootNode.setAccessibleAttribute( 'href', href );
+        rootNode.setAccessibleAttribute( 'target', '_blank' );
+        this.linkContainer.addChild( rootNode );
+
+        // Detach the node from its location, adjust its transform, and reattach under the link
+        for ( i = 0; i < nodes.length; i++ ) {
+          var node = nodes[ i ];
+          var matrix = node.getUniqueTrailTo( this.lineContainer ).getMatrix();
+          node.detach();
+          node.matrix = matrix;
+          rootNode.addChild( node );
+        }
+      }
+
+      // Clear them out afterwards, for memory purposes
+      this._linkItems.length = 0;
+
     },
 
     /**
@@ -233,8 +303,6 @@ define( function( require ) {
      * @returns {LineBreakState} - Whether a line break was reached
      */
     appendElement: function( containerNode, element, font, fill, isLTR ) {
-      var self = this;
-
       var lineBreakState = LineBreakState.NONE;
 
       var nextSideName = isLTR ? 'left' : 'right';
@@ -278,20 +346,15 @@ define( function( require ) {
             if ( this._linkFill !== null ) {
               fill = this._linkFill; // Link color
             }
-            node.cursor = 'pointer';
-            node.addInputListener( new ButtonListener( {
-              fire: function( event ) {
-                self._linkEventsHandled && event.handle();
-                var newWindow = window.open( href, '_blank' ); // open in a new window/tab
-                newWindow.focus();
-              }
-            } ) );
-            // a11y - open the link in the new tab when activated with a keyboard.
-            // also see https://github.com/phetsims/joist/issues/430
-            node.tagName = 'a';
-            node.accessibleLabel = RichText.himalayaElementToAccessibleString( element, isLTR );
-            node.setAccessibleAttribute( 'href', href );
-            node.setAccessibleAttribute( 'target', '_blank' );
+            // Don't overwrite only accessibleLabels once things have been "torn down"
+            if ( !element.accessibleLabel ) {
+              element.accessibleLabel = RichText.himalayaElementToAccessibleString( element, isLTR );
+            }
+            this._linkItems.push( {
+              element: element,
+              node: node,
+              href: href
+            } );
           }
         }
         // Bold

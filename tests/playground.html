@@ -142,18 +142,12 @@ an UI and Display made for visual testing and debugging.
 
       window.displayTest = function() {
         setTimeout( function() {
-          scenery.enableLogging( [ 'Paints' ] );
-
-          window.color = new scenery.Color( 255, 0, 255 );
-          window.prop = new axon.Property( color );
-          window.gradient = new scenery.LinearGradient( -50, 0, 50, 0 ).addColorStop( 0, window.prop )
-                                                                       .addColorStop( 1, 'blue' );
-
-          window.circle = new scenery.Circle( 50, {
-            leftTop: dot.Vector2.ZERO,
-            fill: gradient
+          window.text = new scenery.RichText( 'Hi <a href="https://phet.colorado.edu">there<br>link test</a>!', {
+            x: 50,
+            y: 50,
+            links: true
           } );
-          scene.addChild( circle );
+          scene.addChild( text );
 
           display.updateDisplay();
         }, 400 );
