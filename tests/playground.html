@@ -142,10 +142,12 @@ an UI and Display made for visual testing and debugging.
 
       window.displayTest = function() {
         setTimeout( function() {
-          window.text = new scenery.RichText( 'Hi <a href="https://phet.colorado.edu">there<br>link test</a>!', {
+          scenery.enableLogging( [ 'RichText' ] );
+
+          window.text = new scenery.RichText( 'So<br><br>this alrtnkalsrtknalsntrk is getting wrapped <b>butwhatdowedoifitis</b> too long', {
             x: 50,
             y: 50,
-            links: true
+            lineWrap: 100
           } );
           scene.addChild( text );
 

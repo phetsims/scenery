@@ -56,6 +56,7 @@ define( function( require ) {
   var Tandem = require( 'TANDEM/Tandem' );
   var TRichText = require( 'SCENERY/nodes/TRichText' );
   var VBox = require( 'SCENERY/nodes/VBox' );
+  var VStrut = require( 'SCENERY/nodes/VStrut' );
 
   // constants
   var RICH_TEXT_OPTION_KEYS = [
@@ -78,6 +79,7 @@ define( function( require ) {
     'links',
     'align',
     'leading',
+    'lineWrap',
     'text'
   ];
 
@@ -154,8 +156,14 @@ define( function( require ) {
     // @private {number}
     this._leading = 0;
 
+    // @private {number|null}
+    this._lineWrap = null;
+
     // @private {Array.<{ element: {*}, node: {Node}, href: {string} }>}
     this._linkItems = [];
+
+    // @private {boolean}
+    this._hasAddedLeafToLine = false;
 
     Node.call( this );
 
@@ -210,6 +218,9 @@ define( function( require ) {
         return;
       }
 
+      sceneryLog && sceneryLog.RichText && sceneryLog.RichText( 'RichText#' + this.id + ' rebuild' );
+      sceneryLog && sceneryLog.RichText && sceneryLog.push();
+
       // Turn bidirectional marks into explicit elements, so that the nesting is applied correctly.
       var mappedText = this._text.replace( /\u202a/g, '<span dir="ltr">' )
         .replace( /\u202b/g, '<span dir="rtl">' )
@@ -221,21 +232,39 @@ define( function( require ) {
       // Clear out link items, as we'll need to reconstruct them later
       this._linkItems.length = 0;
 
+
+      var widthAvailable = this._lineWrap === null ? Number.POSITIVE_INFINITY : this._lineWrap;
+
       var currentLine = new Node();
+      this._hasAddedLeafToLine = false; // notify that if nothing has been added, the first leaf always gets added.
+
       while ( rootElements.length ) {
         var element = rootElements[ 0 ];
-        var lineBreakState = this.appendElement( currentLine, element, this._font, this._fill, true );
+
+        var currentLineWidth = currentLine.bounds.isValid() ? currentLine.width : 0;
+
+        var lineBreakState = this.appendElement( currentLine, element, this._font, this._fill, true, widthAvailable - currentLineWidth );
+        sceneryLog && sceneryLog.RichText && sceneryLog.RichText( 'lineBreakState: ' + lineBreakState );
+
         if ( lineBreakState !== LineBreakState.NONE ) {
           if ( currentLine.bounds.isValid() ) {
+            sceneryLog && sceneryLog.RichText && sceneryLog.RichText( 'Adding line due to lineBreak' );
             this.lineContainer.addChild( currentLine );
           }
+          else {
+            // If there's a blank line, add in a strut
+            this.lineContainer.addChild( new VStrut( new Text( ' ', { font: this._font } ).height ) );
+          }
           currentLine = new Node();
+          this._hasAddedLeafToLine = false;
         }
         if ( lineBreakState !== LineBreakState.INCOMPLETE ) {
+          sceneryLog && sceneryLog.RichText && sceneryLog.RichText( 'Finished root element' );
           rootElements.splice( 0, 1 );
         }
       }
       if ( currentLine.bounds.isValid() ) {
+        sceneryLog && sceneryLog.RichText && sceneryLog.RichText( 'Adding final line' );
         this.lineContainer.addChild( currentLine );
       }
 
@@ -289,6 +318,7 @@ define( function( require ) {
       // Clear them out afterwards, for memory purposes
       this._linkItems.length = 0;
 
+      sceneryLog && sceneryLog.RichText && sceneryLog.pop();
     },
 
     /**
@@ -300,9 +330,10 @@ define( function( require ) {
      * @param {Font|string} font - The font to apply at this level
      * @param {null|string|Color|Property.<string|Color>|LinearGradient|RadialGradient|Pattern} fill - Fill to apply
      * @param {boolean} isLTR - True if LTR, false if RTL (handles RTL text properly)
+     * @param {number} widthAvailable - How much width we have available before forcing a line break
      * @returns {LineBreakState} - Whether a line break was reached
      */
-    appendElement: function( containerNode, element, font, fill, isLTR ) {
+    appendElement: function( containerNode, element, font, fill, isLTR, widthAvailable ) {
       var lineBreakState = LineBreakState.NONE;
 
       var nextSideName = isLTR ? 'left' : 'right';
@@ -318,21 +349,84 @@ define( function( require ) {
 
       // If we're a leaf
       if ( element.type === 'Text' ) {
+        sceneryLog && sceneryLog.RichText && sceneryLog.RichText( 'appending leaf: ' + element.content );
+        sceneryLog && sceneryLog.RichText && sceneryLog.push();
+
+        // Strip off leading whitespace on the first leaf of every line
+        if ( !this._hasAddedLeafToLine ) {
+          while ( element.content[ 0 ] === ' ' ) {
+            element.content = element.content.slice( 1 );
+          }
+        }
+
         node = new Text( RichText.contentToString( element.content, isLTR ), {
           font: font,
           fill: fill,
           stroke: this._stroke
         } );
+
+        // Handle wrapping if required
+        if ( node.width > widthAvailable ) {
+          var words = element.content.split( ' ' );
+
+          sceneryLog && sceneryLog.RichText && sceneryLog.RichText( 'Overflow leafAdded:' + this._hasAddedLeafToLine + ', words: ' + words.length );
+
+          // If we need to add something (and there is only a single word), then add it
+          if ( this._hasAddedLeafToLine || words.length > 1 ) {
+            sceneryLog && sceneryLog.RichText && sceneryLog.RichText( 'Skipping words' );
+
+            var skippedWords = [];
+            var success = false;
+            skippedWords.unshift( words.pop() ); // We didn't fit with the last one!
+
+            while ( words.length ) {
+              node = new Text( RichText.contentToString( words.join( ' ' ), isLTR ), {
+                font: font,
+                fill: fill,
+                stroke: this._stroke
+              } );
+
+              // If we haven't added anything to the line and we are down to the first word, we need to just add it.
+              if ( node.width > widthAvailable && ( this._hasAddedLeafToLine || words.length > 1 ) ) {
+                sceneryLog && sceneryLog.RichText && sceneryLog.RichText( 'Skipping word ' + words[ words.length - 1 ] );
+                skippedWords.unshift( words.pop() );
+              }
+              else {
+                sceneryLog && sceneryLog.RichText && sceneryLog.RichText( 'Success with ' + words.join( ' ' ) );
+                success = true;
+                break;
+              }
+            }
+
+            // If we haven't added anything yet to this line, we'll permit the overflow
+            if ( success ) {
+              lineBreakState = LineBreakState.INCOMPLETE;
+              element.content = skippedWords.join( ' ' );
+              sceneryLog && sceneryLog.RichText && sceneryLog.RichText( 'Remaining content: ' + element.content );
+            }
+            else {
+              return LineBreakState.INCOMPLETE;
+            }
+          }
+        }
+
+        this._hasAddedLeafToLine = true;
+
+        sceneryLog && sceneryLog.RichText && sceneryLog.pop();
       }
       // Otherwise presumably an element with content
       else if ( element.type === 'Element' ) {
-        node = new Node();
-
-
         if ( element.tagName === 'br' ) {
+          sceneryLog && sceneryLog.RichText && sceneryLog.RichText( 'manual line break' );
           return LineBreakState.COMPLETE;
         }
-        else if ( element.tagName === 'a' ) {
+
+        node = new Node();
+
+        sceneryLog && sceneryLog.RichText && sceneryLog.RichText( 'appending element' );
+        sceneryLog && sceneryLog.RichText && sceneryLog.push();
+
+        if ( element.tagName === 'a' ) {
           var href = element.attributes.href;
           if ( this._links !== true ) {
             if ( href.indexOf( '{{' ) === 0 && href.indexOf( '}}' ) === href.length - 2 ) {
@@ -406,13 +500,24 @@ define( function( require ) {
           }
         }
 
+        // If we've added extra spacing, we'll need to subtract it off of our available width
+        widthAvailable -= extraSpacing;
+        var scale = node.getScaleVector().x;
+
         // Process children
         while ( lineBreakState === LineBreakState.NONE && element.children.length ) {
+          var widthBefore = node.bounds.isValid() ? node.width : 0;
+
           var childElement = element.children[ 0 ];
-          lineBreakState = this.appendElement( node, childElement, font, fill, isLTR );
+          lineBreakState = this.appendElement( node, childElement, font, fill, isLTR, widthAvailable / scale );
           if ( lineBreakState !== LineBreakState.INCOMPLETE ) {
             element.children.splice( 0, 1 );
           }
+
+          var widthAfter = node.bounds.isValid() ? node.width : 0;
+
+          // Remove the amount of width taken up by the
+          widthAvailable += widthBefore - widthAfter;
         }
         // If there is a line break and there are still more things to process, we are incomplete
         if ( lineBreakState === LineBreakState.COMPLETE && element.children.length ) {
@@ -451,6 +556,7 @@ define( function( require ) {
             } ) );
           }
         }
+        sceneryLog && sceneryLog.RichText && sceneryLog.pop();
       }
 
       // Only add/position the content if it has finite bounds (ignoring empty elements)
@@ -1037,7 +1143,37 @@ define( function( require ) {
     getLeading: function() {
       return this._leading;
     },
-    get leading() { return this.getLeading(); }
+    get leading() { return this.getLeading(); },
+
+    /**
+     * Sets the line wrap width for the text (or null if none is desired). Lines longer than this length will wrap
+     * automatically to the next line.
+     * @public
+     *
+     * @param {number|null} lineWrap - If it's a number, it should be greater than 0.
+     * @returns {RichText} - For chaining
+     */
+    setLineWrap: function( lineWrap ) {
+      assert && assert( lineWrap === null || ( typeof lineWrap === 'number' && isFinite( lineWrap ) && lineWrap > 0 ) );
+
+      if ( this._lineWrap !== lineWrap ) {
+        this._lineWrap = lineWrap;
+        this.rebuildRichText();
+      }
+      return this;
+    },
+    set lineWrap( value ) { this.setLineWrap( value ); },
+
+    /**
+     * Returns the line wrap width.
+     * @public
+     *
+     * @returns {number|null}
+     */
+    getLineWrap: function() {
+      return this._lineWrap;
+    },
+    get lineWrap() { return this.getLineWrap(); }
   }, {
     /**
      * Stringifies an HTML subtree defined by the given element.

@@ -97,7 +97,8 @@ define( function( require ) {
     Accessibility: { name: 'Accessibility', style: 'color: #000;' },
     AccessibleInstance: { name: 'AccessibleInstance', style: 'color: #000;' },
     AlignBox: { name: 'AlignBox', style: 'color: #000;' },
-    AlignGroup: { name: 'AlignGroup', style: 'color: #000;' }
+    AlignGroup: { name: 'AlignGroup', style: 'color: #000;' },
+    RichText: { name: 'RichText', style: 'color: #000;' }
   };
 
   // will be filled in by other modules
