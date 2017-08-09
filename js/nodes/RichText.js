@@ -67,7 +67,6 @@ define( function( require ) {
   var Text = require( 'SCENERY/nodes/Text' );
   var Tandem = require( 'TANDEM/Tandem' );
   var TRichText = require( 'SCENERY/nodes/TRichText' );
-  var VBox = require( 'SCENERY/nodes/VBox' );
   var VStrut = require( 'SCENERY/nodes/VStrut' );
 
   // constants
@@ -180,7 +179,7 @@ define( function( require ) {
     Node.call( this );
 
     // @private {Node} - Normal layout of lines
-    this.lineContainer = new VBox( {} );
+    this.lineContainer = new Node( {} );
     this.addChild( this.lineContainer );
 
     // @private {Node} - Extracted nodes from links go here instead
@@ -218,10 +217,6 @@ define( function( require ) {
       var self = this;
 
       this.lineContainer.removeAllChildren();
-      this.lineContainer.align = this._align;
-      this.lineContainer.spacing = this._leading;
-      this.lineContainer.resize = true; // Added initially, but will be turned off later when linked nodes are moved
-
       this.linkContainer.removeAllChildren();
 
 
@@ -244,7 +239,6 @@ define( function( require ) {
       // Clear out link items, as we'll need to reconstruct them later
       this._linkItems.length = 0;
 
-
       var widthAvailable = this._lineWrap === null ? Number.POSITIVE_INFINITY : this._lineWrap;
 
       var currentLine = new Node();
@@ -261,11 +255,11 @@ define( function( require ) {
         if ( lineBreakState !== LineBreakState.NONE ) {
           if ( currentLine.bounds.isValid() ) {
             sceneryLog && sceneryLog.RichText && sceneryLog.RichText( 'Adding line due to lineBreak' );
-            this.lineContainer.addChild( currentLine );
+            this.appendLine( currentLine );
           }
           else {
             // If there's a blank line, add in a strut
-            this.lineContainer.addChild( new VStrut( new Text( ' ', { font: this._font } ).height ) );
+            this.appendLine( new VStrut( new Text( ' ', { font: this._font } ).height ) );
           }
           currentLine = new Node();
           this._hasAddedLeafToLine = false;
@@ -277,11 +271,10 @@ define( function( require ) {
       }
       if ( currentLine.bounds.isValid() ) {
         sceneryLog && sceneryLog.RichText && sceneryLog.RichText( 'Adding final line' );
-        this.lineContainer.addChild( currentLine );
+        this.appendLine( currentLine );
       }
 
-      // Now that lines are sized and added, we turn off resizing so locations don't change when we remove linked nodes.
-      this.lineContainer.resize = false;
+      this.alignLines();
 
       // Handle regrouping of links
       while ( this._linkItems.length ) {
@@ -351,6 +344,34 @@ define( function( require ) {
       this._linkItems.length = 0;
 
       sceneryLog && sceneryLog.RichText && sceneryLog.pop();
+    },
+
+    /**
+     * Appends a finished line, applying any necessary leading.
+     * @private
+     *
+     * @param {Node} lineNode
+     */
+    appendLine: function( lineNode ) {
+      // Apply leading
+      if ( this.lineContainer.bounds.isValid() ) {
+        lineNode.top = this.lineContainer.bottom + this._leading;
+      }
+
+      this.lineContainer.addChild( lineNode );
+    },
+
+    /**
+     * Aligns all lines attached to the lineContainer.
+     * @private
+     */
+    alignLines: function() {
+      var coordinateName = this._align === 'center' ? 'centerX' : this._align;
+
+      var ideal = this.lineContainer[ coordinateName ];
+      for ( var i = 0; i < this.lineContainer.getChildrenCount(); i++ ) {
+        this.lineContainer.getChildAt( i )[ coordinateName ] = ideal;
+      }
     },
 
     /**
