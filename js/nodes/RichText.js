@@ -25,18 +25,30 @@
  * new RichText( 'Can do H<sub>2</sub>O (A<sub>sub</sub> and A<sup>sup</sup>), or nesting: x<sup>2<sup>2</sup></sup>' ),
  * new RichText( 'Additionally: <font color="blue">color</font>, <font size="30px">sizes</font>, <font face="serif">faces</font>, <s>strikethrough</s>, and <u>underline</u>' ),
  * new RichText( 'These <b><em>can</em> <u><font color="red">be</font> mixed<sup>1</sup></u></b>.' ),
- * new RichText( '\u202aHandles bidirectional text: \u202b<font color="#0a0">مقابض</font> النص ثنائي <b>الاتجاه</b><sub>2</sub>\u202c\u202c' )
+ * new RichText( '\u202aHandles bidirectional text: \u202b<font color="#0a0">مقابض</font> النص ثنائي <b>الاتجاه</b><sub>2</sub>\u202c\u202c' ),
  * new RichText( '\u202b\u062a\u0633\u062a (\u0632\u0628\u0627\u0646)\u202c' ),
  * new RichText( 'HTML entities need to be escaped, like &amp; and &lt;.' ),
- * new RichText( 'Supports <a href="{{phetWebsite}}"><em>links</em> with <b>markup</b></a>.', {
+ * new RichText( 'Supports <a href="{{phetWebsite}}"><em>links</em> with <b>markup</b></a>, and <a href="{{callback}}">links that call functions</a>.', {
  *   links: {
- *     phetWebsite: 'https://phet.colorado.edu'
+ *     phetWebsite: 'https://phet.colorado.edu',
+ *     callback: function() {
+ *       console.log( 'Link was clicked' );
+ *     }
  *   }
  * } ),
  * new RichText( 'Or also <a href="https://phet.colorado.edu">links directly in the string</a>.', {
  *   links: true
  * } ),
- * new RichText( 'Links not found <a href="{{bogus}}">are ignored</a> for security.' )
+ * new RichText( 'Links not found <a href="{{bogus}}">are ignored</a> for security.' ),
+ * new HBox( {
+ *   spacing: 30,
+ *   children: [
+ *     new RichText( 'Multi-line text with the<br>separator &lt;br&gt; and <a href="https://phet.colorado.edu">handles<br>links</a> and other <b>tags<br>across lines</b>', {
+ *       links: true
+ *     } ),
+ *     new RichText( 'Supposedly RichText supports line wrapping. Here is a lineWrap of 300, which should probably wrap multiple times here', { lineWrap: 300 })
+ *   ]
+ * } )
  *
  * @author Jonathan Olson <jonathan.olson@colorado.edu>
  */
@@ -273,46 +285,66 @@ define( function( require ) {
 
       // Handle regrouping of links
       while ( this._linkItems.length ) {
-        var linkElement = this._linkItems[ 0 ].element;
-        var href = this._linkItems[ 0 ].href;
-        var i;
+        // Close over the href and other references
+        (function(){
+          var linkElement = self._linkItems[ 0 ].element;
+          var href = self._linkItems[ 0 ].href;
+          var i;
 
-        // Find all nodes that are for the same link
-        var nodes = [];
-        for ( i = this._linkItems.length - 1; i >= 0; i-- ) {
-          var item = this._linkItems[ i ];
-          if ( item.element === linkElement ) {
-            nodes.push( item.node );
-            this._linkItems.splice( i, 1 );
+          // Find all nodes that are for the same link
+          var nodes = [];
+          for ( i = self._linkItems.length - 1; i >= 0; i-- ) {
+            var item = self._linkItems[ i ];
+            if ( item.element === linkElement ) {
+              nodes.push( item.node );
+              self._linkItems.splice( i, 1 );
+            }
           }
-        }
 
-        // a11y - open the link in the new tab when activated with a keyboard.
-        // also see https://github.com/phetsims/joist/issues/430
-        var rootNode = new Node( {
-          cursor: 'pointer',
-          tagName: 'a',
-          accessibleLabel: linkElement.accessibleLabel
-        } );
-        rootNode.addInputListener( new ButtonListener( {
-          fire: function( event ) {
-            self._linkEventsHandled && event.handle();
-            var newWindow = window.open( href, '_blank' ); // open in a new window/tab
-            newWindow.focus();
+          // a11y - open the link in the new tab when activated with a keyboard.
+          // also see https://github.com/phetsims/joist/issues/430
+          var rootNode = new Node( {
+            cursor: 'pointer',
+            tagName: 'a',
+            accessibleLabel: linkElement.accessibleLabel
+          } );
+
+          if ( typeof href === 'function' ) {
+            rootNode.addInputListener( new ButtonListener( {
+              fire: href
+            } ) );
+            rootNode.setAccessibleAttribute( 'href', '#' );
+            rootNode.addAccessibleInputListener( {
+              click: function( event ) {
+                event.preventDefault();
+
+                href();
+              }
+            } );
           }
-        } ) );
-        rootNode.setAccessibleAttribute( 'href', href );
-        rootNode.setAccessibleAttribute( 'target', '_blank' );
-        this.linkContainer.addChild( rootNode );
+          else {
+            rootNode.addInputListener( new ButtonListener( {
+              fire: function( event ) {
+                self._linkEventsHandled && event.handle();
+                var newWindow = window.open( href, '_blank' ); // open in a new window/tab
+                newWindow.focus();
+              }
+            } ) );
+            rootNode.setAccessibleAttribute( 'href', href );
+            rootNode.setAccessibleAttribute( 'target', '_blank' );
+          }
 
-        // Detach the node from its location, adjust its transform, and reattach under the link
-        for ( i = 0; i < nodes.length; i++ ) {
-          var node = nodes[ i ];
-          var matrix = node.getUniqueTrailTo( this.lineContainer ).getMatrix();
-          node.detach();
-          node.matrix = matrix;
-          rootNode.addChild( node );
-        }
+          self.linkContainer.addChild( rootNode );
+
+          // Detach the node from its location, adjust its transform, and reattach under the link
+          for ( i = 0; i < nodes.length; i++ ) {
+            var node = nodes[ i ];
+            var matrix = node.getUniqueTrailTo( self.lineContainer ).getMatrix();
+            node.detach();
+            node.matrix = matrix;
+            rootNode.addChild( node );
+          }
+        })();
       }
 
       // Clear them out afterwards, for memory purposes
@@ -1045,13 +1077,13 @@ define( function( require ) {
     get linkEventsHandled() { return this.getLinkEventsHandled(); },
 
     /**
-     * Sets the map of href placeholder => actual href used for links. However if set to true ({boolean}) as a full
-     * object, links in the string will not be mapped, but will be directly added.
+     * Sets the map of href placeholder => actual href/callback used for links. However if set to true ({boolean}) as a
+     * full object, links in the string will not be mapped, but will be directly added.
      * @public
      *
      * For instance, the default is to map hrefs for security purposes:
      *
-     * new RichText( '<a href="alink">content</a>', {
+     * new RichText( '<a href="{{alink}}">content</a>', {
      *   links: {
      *     alink: 'https://phet.colorado.edu'
      *   }
@@ -1061,6 +1093,14 @@ define( function( require ) {
      * embed links:
      *
      * new RichText( '<a href="https://phet.colorado.edu">content</a>', { links: true } );
+     *
+     * Callbacks (instead of a URL) are also supported, e.g.:
+     *
+     * new RichText( '<a href="{{acallback}}">content</a>', {
+     *   links: {
+     *     acallback: function() { console.log( 'clicked' ) }
+     *   }
+     * } );
      *
      * See https://github.com/phetsims/scenery-phet/issues/316 for more information.
      *
