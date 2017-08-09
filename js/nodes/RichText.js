@@ -16,6 +16,7 @@
  * - <s> for strikethrough text
  * - <font> tags with attributes color="cssString", face="familyString", size="cssSize"
  * - <span> tags with a dir="ltr" / dir="rtl" attribute
+ * - <br> for explicit line breaks
  * - Unicode bidirectional marks (present in PhET strings) for full RTL support
  *
  * Examples from the scenery-phet demo:
@@ -54,6 +55,7 @@ define( function( require ) {
   var Text = require( 'SCENERY/nodes/Text' );
   var Tandem = require( 'TANDEM/Tandem' );
   var TRichText = require( 'SCENERY/nodes/TRichText' );
+  var VBox = require( 'SCENERY/nodes/VBox' );
 
   // constants
   var RICH_TEXT_OPTION_KEYS = [
@@ -74,6 +76,8 @@ define( function( require ) {
     'linkFill',
     'linkEventsHandled',
     'links',
+    'align',
+    'leading',
     'text'
   ];
 
@@ -85,6 +89,12 @@ define( function( require ) {
   var ACCESSIBLE_TAGS = [
     'b', 'strong', 'i', 'em', 'sub', 'sup', 'u', 's'
   ];
+
+  var LineBreakState = {
+    COMPLETE: 'COMPLETE',
+    INCOMPLETE: 'INCOMPLETE',
+    NONE: 'NONE'
+  };
 
   /**
    * @public
@@ -138,10 +148,18 @@ define( function( require ) {
     // @private {Object|boolean}
     this._links = {};
 
+    // TODO: add ES5 and doc
+    // @private {string}
+    this._align = 'left'; // 'left', 'center', or 'right'
+
+    // TODO: add ES5 and doc
+    // @private {number}
+    this._leading = 0;
+
     Node.call( this );
 
     // @private {Node} - So we don't mess with child nodes that may get added to us.
-    this.richTextContainer = new Node();
+    this.richTextContainer = new VBox( {} );
     this.addChild( this.richTextContainer );
 
     options = extendDefined( {
@@ -173,6 +191,8 @@ define( function( require ) {
      */
     rebuildRichText: function() {
       this.richTextContainer.removeAllChildren();
+      this.richTextContainer.align = this._align;
+      this.richTextContainer.spacing = this._leading;
 
       // Turn bidirectional marks into explicit elements, so that the nesting is applied correctly.
       var mappedText = this._text.replace( /\u202a/g, '<span dir="ltr">' )
@@ -181,8 +201,23 @@ define( function( require ) {
 
       // Start appending all top-level elements
       var rootElements = himalaya.parse( mappedText );
-      for ( var i = 0; i < rootElements.length; i++ ) {
-        this.appendElement( this.richTextContainer, rootElements[ i ], this._font, this._fill, true );
+
+      var currentLine = new Node();
+      while ( rootElements.length ) {
+        var element = rootElements[ 0 ];
+        var lineBreakState = this.appendElement( currentLine, element, this._font, this._fill, true );
+        if ( lineBreakState !== LineBreakState.NONE ) {
+          if ( currentLine.bounds.isValid() ) {
+            this.richTextContainer.addChild( currentLine );
+          }
+          currentLine = new Node();
+        }
+        if ( lineBreakState !== LineBreakState.INCOMPLETE ) {
+          rootElements.splice( 0, 1 );
+        }
+      }
+      if ( currentLine.bounds.isValid() ) {
+        this.richTextContainer.addChild( currentLine );
       }
     },
 
@@ -195,9 +230,12 @@ define( function( require ) {
      * @param {Font|string} font - The font to apply at this level
      * @param {null|string|Color|Property.<string|Color>|LinearGradient|RadialGradient|Pattern} fill - Fill to apply
      * @param {boolean} isLTR - True if LTR, false if RTL (handles RTL text properly)
+     * @returns {LineBreakState} - Whether a line break was reached
      */
     appendElement: function( containerNode, element, font, fill, isLTR ) {
       var self = this;
+
+      var lineBreakState = LineBreakState.NONE;
 
       var nextSideName = isLTR ? 'left' : 'right';
       var previousSideName = isLTR ? 'right' : 'left';
@@ -207,6 +245,8 @@ define( function( require ) {
 
       // {Node|Text} - The main Node for the element that we are adding
       var node;
+
+      var extraSpacing = 0;
 
       // If we're a leaf
       if ( element.type === 'Text' ) {
@@ -220,7 +260,11 @@ define( function( require ) {
       else if ( element.type === 'Element' ) {
         node = new Node();
 
-        if ( element.tagName === 'a' ) {
+
+        if ( element.tagName === 'br' ) {
+          return LineBreakState.COMPLETE;
+        }
+        else if ( element.tagName === 'a' ) {
           var href = element.attributes.href;
           if ( this._links !== true ) {
             if ( href.indexOf( '{{' ) === 0 && href.indexOf( '}}' ) === href.length - 2 ) {
@@ -265,13 +309,13 @@ define( function( require ) {
         // Subscript
         else if ( element.tagName === 'sub' ) {
           node.scale( this._subScale );
-          node.x += ( isLTR ? 1 : -1 ) * this._subXSpacing;
+          extraSpacing += this._subXSpacing;
           node.y += this._subYOffset;
         }
         // Superscript
         else if ( element.tagName === 'sup' ) {
           node.scale( this._supScale );
-          node.x += ( isLTR ? 1 : -1 ) * this._supXSpacing;
+          extraSpacing += this._supXSpacing;
           node.y += this._supYOffset;
         }
         // Font (color/face/size attributes)
@@ -300,8 +344,16 @@ define( function( require ) {
         }
 
         // Process children
-        for ( var i = 0; i < element.children.length; i++ ) {
-          this.appendElement( node, element.children[ i ], font, fill, isLTR );
+        while ( lineBreakState === LineBreakState.NONE && element.children.length ) {
+          var childElement = element.children[ 0 ];
+          lineBreakState = this.appendElement( node, childElement, font, fill, isLTR );
+          if ( lineBreakState !== LineBreakState.INCOMPLETE ) {
+            element.children.splice( 0, 1 );
+          }
+        }
+        // If there is a line break and there are still more things to process, we are incomplete
+        if ( lineBreakState === LineBreakState.COMPLETE && element.children.length ) {
+          lineBreakState = LineBreakState.INCOMPLETE;
         }
 
         // Subscript positioning
@@ -340,9 +392,11 @@ define( function( require ) {
 
       // Only add/position the content if it has finite bounds (ignoring empty elements)
       if ( isFinite( node.width ) ) {
-        node[ nextSideName ] = x;
+        node[ nextSideName ] = x + ( isLTR ? 1 : -1 ) * extraSpacing;
         containerNode.addChild( node );
       }
+
+      return lineBreakState;
     },
 
     /**
@@ -862,7 +916,65 @@ define( function( require ) {
     getLinks: function() {
       return this._links;
     },
-    get links() { return this.getLinks(); }
+    get links() { return this.getLinks(); },
+
+    /**
+     * Sets the alignment of text (only relevant if there are multiple lines).
+     * @public
+     *
+     * @param {string} align
+     * @returns {RichText} - For chaining
+     */
+    setAlign: function( align ) {
+      assert && assert( align === 'left' || align === 'center' || align === 'right' );
+
+      if ( this._align !== align ) {
+        this._align = align;
+        this.rebuildRichText();
+      }
+      return this;
+    },
+    set align( value ) { this.setAlign( value ); },
+
+    /**
+     * Returns the current alignment of the text (only relevant if there are multiple lines).
+     * @public
+     *
+     * @returns {string}
+     */
+    getAlign: function() {
+      return this._align;
+    },
+    get align() { return this.getAlign(); },
+
+    /**
+     * Sets the leading (spacing between lines)
+     * @public
+     *
+     * @param {number} leading
+     * @returns {RichText} - For chaining
+     */
+    setLeading: function( leading ) {
+      assert && assert( typeof leading === 'number' && isFinite( leading ) );
+
+      if ( this._leading !== leading ) {
+        this._leading = leading;
+        this.rebuildRichText();
+      }
+      return this;
+    },
+    set leading( value ) { this.setLeading( value ); },
+
+    /**
+     * Returns the leading (spacing between lines)
+     * @public
+     *
+     * @returns {number}
+     */
+    getLeading: function() {
+      return this._leading;
+    },
+    get leading() { return this.getLeading(); }
   }, {
     /**
      * Stringifies an HTML subtree defined by the given element.
