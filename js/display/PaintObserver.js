@@ -43,6 +43,12 @@ define( function( require ) {
 
     // @private {function} - To be called whenever our secondary fill/stroke value may have changed
     this.updateSecondaryListener = this.updateSecondary.bind( this );
+
+    // Tracking needed so we don't add duplicate listeners, see https://github.com/phetsims/axon/issues/129
+    // @private {Array.<Property.<*>>} - Indexed the same as the counts.
+    this.secondaryListenedProperties = [];
+    // @private {Array.<number>}
+    this.secondaryListenedCounts = [];
   }
 
   scenery.register( 'PaintObserver', PaintObserver );
@@ -135,7 +141,7 @@ define( function( require ) {
       if ( paint instanceof Property ) {
         sceneryLog && sceneryLog.Paints && sceneryLog.Paints( '[PaintObserver] add Property listener ' + this.node.id + '.' + this.name );
         sceneryLog && sceneryLog.Paints && sceneryLog.push();
-        paint.lazyLink( this.updateSecondaryListener );
+        this.secondaryLazyLinkProperty( paint );
         this.attachSecondary( paint.get() );
         sceneryLog && sceneryLog.Paints && sceneryLog.pop();
       }
@@ -172,7 +178,7 @@ define( function( require ) {
       if ( paint instanceof Property ) {
         sceneryLog && sceneryLog.Paints && sceneryLog.Paints( '[PaintObserver] remove Property listener ' + this.node.id + '.' + this.name );
         sceneryLog && sceneryLog.Paints && sceneryLog.push();
-        paint.unlink( this.updateSecondaryListener );
+        this.secondaryUnlinkProperty( paint );
         this.detachSecondary( paint.get() );
         sceneryLog && sceneryLog.Paints && sceneryLog.pop();
       }
@@ -226,6 +232,41 @@ define( function( require ) {
       }
 
       sceneryLog && sceneryLog.Paints && sceneryLog.pop();
+    },
+
+    /**
+     * Adds our secondary listener to the Property (unless there is already one, in which case we record the counts).
+     * @private
+     *
+     * @param {Property.<*>} property
+     */
+    secondaryLazyLinkProperty: function( property ) {
+      var index = _.indexOf( this.secondaryListenedProperties, property );
+      if ( index >= 0 ) {
+        this.secondaryListenedCounts[ index ]++;
+      }
+      else {
+        this.secondaryListenedProperties.push( property );
+        this.secondaryListenedCounts.push( 1 );
+        property.lazyLink( this.updateSecondaryListener );
+      }
+    },
+
+    /**
+     * Removes our secondary listener from the Property (unless there were more than 1 time we needed to listen to it,
+     * in which case we reduce the count).
+     * @private
+     *
+     * @param {Property.<*>} property
+     */
+    secondaryUnlinkProperty: function( property ) {
+      var index = _.indexOf( this.secondaryListenedProperties, property );
+      this.secondaryListenedCounts[ index ]--;
+      if ( this.secondaryListenedCounts[ index ] === 0 ) {
+        this.secondaryListenedProperties.splice( index, 1 );
+        this.secondaryListenedCounts.splice( index, 1 );
+        property.unlink( this.updateSecondaryListener );
+      }
     },
 
     /**
