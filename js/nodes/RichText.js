@@ -7,6 +7,9 @@
  *
  * NOTE: Encoding HTML entities is required, and malformed HTML is not accepted.
  *
+ * NOTE: Currently it can line-wrap at the start and end of tags. This will probably be fixed in the future to only
+ *       potentially break on whitespace.
+ *
  * It supports the following markup and features:
  * - <a href="{{placeholder}}"> for links (pass in { links: { placeholder: ACTUAL_HREF } })
  * - <b> and <strong> for bold text
@@ -435,8 +438,9 @@ define( function( require ) {
         // If this content gets added, it will need to be pushed over by this amount
         var containerSpacing = isLTR ? containerNode.rightSpacing : containerNode.leftSpacing;
 
-        // Handle wrapping if required
+        // Handle wrapping if required. Container spacing cuts into our available width
         if ( !node.fitsIn( widthAvailable - containerSpacing, this._hasAddedLeafToLine, isLTR ) ) {
+          // Didn't fit, lets break into words to see what we can fit
           var words = element.content.split( ' ' );
 
           sceneryLog && sceneryLog.RichText && sceneryLog.RichText( 'Overflow leafAdded:' + this._hasAddedLeafToLine + ', words: ' + words.length );
@@ -449,6 +453,7 @@ define( function( require ) {
             var success = false;
             skippedWords.unshift( words.pop() ); // We didn't fit with the last one!
 
+            // Keep shortening by removing words until it fits (or if we NEED to fit it) or it doesn't fit.
             while ( words.length ) {
               node = new RichTextLeaf( words.join( ' ' ), isLTR, font, fill, this._stroke );
 
@@ -483,11 +488,12 @@ define( function( require ) {
       }
       // Otherwise presumably an element with content
       else if ( element.type === 'Element' ) {
+        // Bail out quickly for a line break
         if ( element.tagName === 'br' ) {
           sceneryLog && sceneryLog.RichText && sceneryLog.RichText( 'manual line break' );
           return LineBreakState.COMPLETE;
         }
-        // Span (dir attribute)
+        // Span (dir attribute) -- we need the LTR/RTL knowledge before most other operations
         else if ( element.tagName === 'span' ) {
           if ( element.attributes.dir ) {
             assert && assert( element.attributes.dir === 'ltr' || element.attributes.dir === 'rtl',
@@ -501,8 +507,11 @@ define( function( require ) {
         sceneryLog && sceneryLog.RichText && sceneryLog.RichText( 'appending element' );
         sceneryLog && sceneryLog.RichText && sceneryLog.push();
 
+        // Achor (link)
         if ( element.tagName === 'a' ) {
           var href = element.attributes.href;
+
+          // Try extracting the href from the links object
           if ( this._links !== true ) {
             if ( href.indexOf( '{{' ) === 0 && href.indexOf( '}}' ) === href.length - 2 ) {
               href = this._links[ href.slice( 2, -2 ) ];
@@ -511,6 +520,8 @@ define( function( require ) {
               href = null;
             }
           }
+
+          // Ignore things if there is no matching href
           if ( href ) {
             if ( this._linkFill !== null ) {
               fill = this._linkFill; // Link color
@@ -519,6 +530,8 @@ define( function( require ) {
             if ( !element.accessibleLabel ) {
               element.accessibleLabel = RichText.himalayaElementToAccessibleString( element, isLTR );
             }
+
+            // Store information about it for the "regroup links" step
             this._linkItems.push( {
               element: element,
               node: node,
@@ -576,13 +589,15 @@ define( function( require ) {
 
           var childElement = element.children[ 0 ];
           lineBreakState = this.appendElement( node, childElement, font, fill, isLTR, widthAvailable / scale );
+
+          // for COMPLETE or NONE, we'll want to remove the childElement from the tree (we fully processed it)
           if ( lineBreakState !== LineBreakState.INCOMPLETE ) {
             element.children.splice( 0, 1 );
           }
 
           var widthAfter = node.bounds.isValid() ? node.width : 0;
 
-          // Remove the amount of width taken up by the
+          // Remove the amount of width taken up by the child
           widthAvailable += widthBefore - widthAfter;
         }
         // If there is a line break and there are still more things to process, we are incomplete
@@ -757,6 +772,8 @@ define( function( require ) {
      * @returs {RichText} - For chaining
      */
     setSubScale: function( subScale ) {
+      assert && assert( typeof subScale === 'number' && isFinite( subScale ) && subScale > 0 );
+
       if ( this._subScale !== subScale ) {
         this._subScale = subScale;
         this.rebuildRichText();
@@ -784,6 +801,8 @@ define( function( require ) {
      * @returs {RichText} - For chaining
      */
     setSubXSpacing: function( subXSpacing ) {
+      assert && assert( typeof subXSpacing === 'number' && isFinite( subXSpacing ) );
+
       if ( this._subXSpacing !== subXSpacing ) {
         this._subXSpacing = subXSpacing;
         this.rebuildRichText();
@@ -811,6 +830,8 @@ define( function( require ) {
      * @returs {RichText} - For chaining
      */
     setSubYOffset: function( subYOffset ) {
+      assert && assert( typeof subYOffset === 'number' && isFinite( subYOffset ) );
+
       if ( this._subYOffset !== subYOffset ) {
         this._subYOffset = subYOffset;
         this.rebuildRichText();
@@ -838,6 +859,8 @@ define( function( require ) {
      * @returs {RichText} - For chaining
      */
     setSupScale: function( supScale ) {
+      assert && assert( typeof supScale === 'number' && isFinite( supScale ) && supScale > 0 );
+
       if ( this._supScale !== supScale ) {
         this._supScale = supScale;
         this.rebuildRichText();
@@ -865,6 +888,8 @@ define( function( require ) {
      * @returs {RichText} - For chaining
      */
     setSupXSpacing: function( supXSpacing ) {
+      assert && assert( typeof supXSpacing === 'number' && isFinite( supXSpacing ) );
+
       if ( this._supXSpacing !== supXSpacing ) {
         this._supXSpacing = supXSpacing;
         this.rebuildRichText();
@@ -892,6 +917,8 @@ define( function( require ) {
      * @returs {RichText} - For chaining
      */
     setSupYOffset: function( supYOffset ) {
+      assert && assert( typeof supYOffset === 'number' && isFinite( supYOffset ) );
+
       if ( this._supYOffset !== supYOffset ) {
         this._supYOffset = supYOffset;
         this.rebuildRichText();
@@ -920,6 +947,8 @@ define( function( require ) {
      * @returs {RichText} - For chaining
      */
     setCapHeightScale: function( capHeightScale ) {
+      assert && assert( typeof capHeightScale === 'number' && isFinite( capHeightScale ) && capHeightScale > 0 );
+
       if ( this._capHeightScale !== capHeightScale ) {
         this._capHeightScale = capHeightScale;
         this.rebuildRichText();
@@ -948,6 +977,8 @@ define( function( require ) {
      * @returs {RichText} - For chaining
      */
     setUnderlineLineWidth: function( underlineLineWidth ) {
+      assert && assert( typeof underlineLineWidth === 'number' && isFinite( underlineLineWidth ) && underlineLineWidth > 0 );
+
       if ( this._underlineLineWidth !== underlineLineWidth ) {
         this._underlineLineWidth = underlineLineWidth;
         this.rebuildRichText();
@@ -976,6 +1007,8 @@ define( function( require ) {
      * @returs {RichText} - For chaining
      */
     setUnderlineHeightScale: function( underlineHeightScale ) {
+      assert && assert( typeof underlineHeightScale === 'number' && isFinite( underlineHeightScale ) && underlineHeightScale > 0 );
+
       if ( this._underlineHeightScale !== underlineHeightScale ) {
         this._underlineHeightScale = underlineHeightScale;
         this.rebuildRichText();
@@ -1004,6 +1037,8 @@ define( function( require ) {
      * @returs {RichText} - For chaining
      */
     setStrikethroughLineWidth: function( strikethroughLineWidth ) {
+      assert && assert( typeof strikethroughLineWidth === 'number' && isFinite( strikethroughLineWidth ) && strikethroughLineWidth > 0 );
+
       if ( this._strikethroughLineWidth !== strikethroughLineWidth ) {
         this._strikethroughLineWidth = strikethroughLineWidth;
         this.rebuildRichText();
@@ -1032,6 +1067,8 @@ define( function( require ) {
      * @returs {RichText} - For chaining
      */
     setStrikethroughHeightScale: function( strikethroughHeightScale ) {
+      assert && assert( typeof strikethroughHeightScale === 'number' && isFinite( strikethroughHeightScale ) && strikethroughHeightScale > 0 );
+
       if ( this._strikethroughHeightScale !== strikethroughHeightScale ) {
         this._strikethroughHeightScale = strikethroughHeightScale;
         this.rebuildRichText();
@@ -1087,6 +1124,8 @@ define( function( require ) {
      * @returs {RichText} - For chaining
      */
     setLinkEventsHandled: function( linkEventsHandled ) {
+      assert && assert( typeof linkEventsHandled === 'boolean' );
+
       if ( this._linkEventsHandled !== linkEventsHandled ) {
         this._linkEventsHandled = linkEventsHandled;
         this.rebuildRichText();
@@ -1138,6 +1177,8 @@ define( function( require ) {
      * @returs {RichText} - For chaining
      */
     setLinks: function( links ) {
+      assert && assert( links !== false || Object.getPrototypeOf( links ) === Object.prototype );
+
       if ( this._links !== links ) {
         this._links = links;
         this.rebuildRichText();
