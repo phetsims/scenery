@@ -323,7 +323,7 @@ define( function( require ) {
           var rootNode = new Node( {
             cursor: 'pointer',
             tagName: 'a',
-            accessibleLabel: linkElement.accessibleLabel
+            accessibleLabelAsHTML: linkElement.accessibleLabel
           } );
 
           // If our href is a function, it should be called when the user clicks on the link
