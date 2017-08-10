@@ -69,7 +69,7 @@ define( function( require ) {
   var TRichText = require( 'SCENERY/nodes/TRichText' );
   var VStrut = require( 'SCENERY/nodes/VStrut' );
 
-  // constants
+  // Options that can be used in the constructor, with mutate(), or directly as setters/getters
   var RICH_TEXT_OPTION_KEYS = [
     'font',
     'fill',
@@ -103,12 +103,14 @@ define( function( require ) {
     'b', 'strong', 'i', 'em', 'sub', 'sup', 'u', 's'
   ];
 
+  // The status of whether a line
   var LineBreakState = {
     COMPLETE: 'COMPLETE',
     INCOMPLETE: 'INCOMPLETE',
     NONE: 'NONE'
   };
 
+  // We need to do some font-size tests, so we have a Text for that.
   var scratchText = new scenery.Text( '' );
 
   /**
@@ -159,7 +161,7 @@ define( function( require ) {
     // @private {boolean}
     this._linkEventsHandled = false;
 
-    // @private {Object|boolean}
+    // @private {Object|boolean} - If an object, values are either {string} or {function}
     this._links = {};
 
     // @private {string}
@@ -171,21 +173,20 @@ define( function( require ) {
     // @private {number|null}
     this._lineWrap = null;
 
-    // @private {Array.<{ element: {*}, node: {Node}, href: {string} }>}
+    // @private {Array.<{ element: {*}, node: {Node}, href: {string} }>} - We need to consolidate links (that could be
+    // split across multiple lines) under one "link" node, so we track created link fragments here so they can get
+    // pieced together later.
     this._linkItems = [];
 
-    // @private {boolean}
+    // @private {boolean} - Whether something has been added to this line yet. We don't want to infinite-loop out if
+    // something is longer than our lineWrap, so we'll place one item on its own on an otherwise empty line.
     this._hasAddedLeafToLine = false;
 
     Node.call( this );
 
-    // @private {Node} - Normal layout of lines
+    // @private {Node} - Normal layout container of lines (separate, so we can clear it easily)
     this.lineContainer = new Node( {} );
     this.addChild( this.lineContainer );
-
-    // @private {Node} - Extracted nodes from links go here instead
-    this.linkContainer = new Node( {} );
-    this.addChild( this.linkContainer );
 
     options = extendDefined( {
       fill: '#000000',
@@ -218,8 +219,6 @@ define( function( require ) {
       var self = this;
 
       this.lineContainer.removeAllChildren();
-      this.linkContainer.removeAllChildren();
-
 
       // Bail early, particularly if we are being constructed.
       if ( this._text === '' ) {
@@ -262,7 +261,7 @@ define( function( require ) {
           }
           else {
             // If there's a blank line, add in a strut
-            this.appendLine( new VStrut( new Text( ' ', { font: this._font } ).height ) );
+            this.appendLine( new VStrut( scratchText.setText( 'X' ).setFont( this._font ).height ) );
           }
           currentLine = new RichTextElement( isRootLTR );
           this._hasAddedLeafToLine = false;
@@ -330,7 +329,7 @@ define( function( require ) {
             rootNode.setAccessibleAttribute( 'target', '_blank' );
           }
 
-          self.linkContainer.addChild( rootNode );
+          self.lineContainer.addChild( rootNode );
 
           // Detach the node from its location, adjust its transform, and reattach under the link
           for ( i = 0; i < nodes.length; i++ ) {
@@ -571,7 +570,7 @@ define( function( require ) {
         // Superscript positioning
         else if ( element.tagName === 'sup' ) {
           if ( isFinite( node.height ) ) {
-            node.centerY = new Text( 'X', { font: font } ).top * this._capHeightScale;
+            node.centerY = scratchText.setText( 'X' ).setFont( font ).top * this._capHeightScale;
           }
         }
         // Underline
