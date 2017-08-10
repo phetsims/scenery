@@ -125,6 +125,20 @@ define( function( require ) {
     return nextFocusable || activeElement;
   }
 
+  /**
+   * Trims the white space from the left of the string.
+   * Solution from https://stackoverflow.com/questions/1593859/left-trim-in-javascript
+   * @param  {string} string
+   * @return {string}
+   */
+  function trimLeft( string ) {
+
+    // ^ - from the beginning of the string
+    // \s - whitespace character
+    // + - greedy
+    return string.replace(/^\s+/,'');
+  }
+
   var AccessibilityUtil = {
 
     /**
@@ -154,18 +168,15 @@ define( function( require ) {
     },
 
     /**
-     * If the text content has formatting tags (and ONLY formatting tags), return true.
+     * If the textContent has any tags that are not formatting tags, return false. Only checking for
+     * tags that are not in the whitelist FORMATTING_TAGS, if there are no tags this will still return
+     * true.
      * @public
      * 
      * @param  {string} textContent
      * @returns {boolean}
      */
     usesFormattingTagsExclusive: function( textContent ) {
-
-      // if there are no tags at all, return false immediately
-      if ( textContent.indexOf( '<' ) < 0 ) {
-        return false;
-      }
 
       var i = 0;
       var openIndices = [];
@@ -189,11 +200,6 @@ define( function( require ) {
         }
       }
 
-      // if length of open and close tags are not equal, html is invalid
-      if ( openIndices.length !== closeIndices.length ) {
-        return false;
-      }
-
       // check the name in between the open and close brackets - if anything other than formatting tags, return false
       var onlyFormatting = true;
       var upperCaseContent = textContent.toUpperCase();
@@ -202,6 +208,12 @@ define( function( require ) {
         // get the name and remove the closing slash
         var subString = upperCaseContent.substring( openIndices[ j ] + 1, closeIndices[ j ] );
         subString = subString.replace( '/', '' );
+
+        // if the left of the substring contains space, it is not a valid tag so allow
+        var trimmed = trimLeft( subString );
+        if ( subString.length - trimmed.length > 0 ) {
+          continue;
+        }
 
         if ( !_.includes( FORMATTING_TAGS, subString ) ) {
           onlyFormatting = false;

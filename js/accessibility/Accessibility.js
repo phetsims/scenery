@@ -100,7 +100,9 @@ define( function( require ) {
     'focusHighlight', // Sets the focus highlight for the node, see setFocusHighlight()
     'focusHighlightLayerable', // Flag to determine if the focus highlight node can be layered in the scene graph, see setFocusHighlightLayerable()
     'accessibleLabel', // Set the label content for the node, see setAccessibleLabel()
+    'accessibleLabelAsHTML', // Set the label content for the node as innerHTML, see setAccessibleLabelAsHTML()
     'accessibleDescription', // Set the description content for the node, see setAccessibleDescription()
+    'accessibleDescriptionAsHTML,', // Set the description content for the node as innerHTML, see setAccessibleDescriptionContentAsHTML()
     'accessibleHidden', // Sets wheter or not the node's DOM element is hidden in the parallel DOM
     'accessibleContentDisplayed', // sets whether or not the accessible content of the node (and its subtree) is displayed, see setAccessibleContentDisplayed()
     'focusable', // Sets whether or not the node can receive keyboard focus
@@ -188,8 +190,16 @@ define( function( require ) {
           // can be associated with a node's dom element, see setAccessibleLabel() for more documentation
           this._accessibleLabel = null;
 
+          // @private {string} - whether or not the label content is innerHTML.  Internal flag that is updated
+          // when the label content is set.  See setAccessibleLabelAsHTML() for more information
+          this._labelIsHTML = null;
+
           // @private {string} - the description content for this node's DOM element.
           this._accessibleDescription = null;
+
+          // @private {string} - whether or not the accessible description is set as innerHTML. Internal flag
+          // that is set when updating description content.
+          this._descriptionIsHTML = false;
 
           // @private {boolean} - if true, the aria label will be added as an inline attribute on the node's DOM
           // element.  This will determine how the label content is associated with the DOM element, see
@@ -590,31 +600,8 @@ define( function( require ) {
          * @param {string} label
          */
         setAccessibleLabel: function( label ) {
-          this._accessibleLabel = label;
-
-          if ( this._useAriaLabel ) {
-            this.setAccessibleAttribute( 'aria-label', this._accessibleLabel );
-          }
-          else if ( this._labelTagName ) {
-            var self = this;
-            this.updateAccessiblePeers( function( accessiblePeer ) {
-              if ( accessiblePeer.labelElement ) {
-                setTextContent( accessiblePeer.labelElement, self._accessibleLabel );
-
-                // if the label element happens to be a 'label', associate with 'for' attribute
-                if ( self._labelTagName.toUpperCase() === LABEL_TAG ) {
-                  accessiblePeer.labelElement.setAttribute( 'for', accessiblePeer.domElement.id );
-                }
-              }
-            } );
-          }
-          else {
-            this.updateAccessiblePeers( function( accessiblePeer ) {
-              if ( elementSupportsInnerHTML( accessiblePeer.domElement ) ) {
-                setTextContent( accessiblePeer.domElement, label );
-              }
-            } );
-          }
+          this._labelIsHTML = false;
+          this.setLabelContent( label );
         },
         set accessibleLabel( label ) { this.setAccessibleLabel( label ); },
 
@@ -629,6 +616,27 @@ define( function( require ) {
         get accessibleLabel() { return this.getAccessibleLabel(); },
 
         /**
+         * Should be used rarely and with caution, typically you should use setAccessibleLabel instead.
+         * Sets the accessible label as innerHTML instead of textContent. This allows you to include
+         * formatting tags in the label which are typically read with distinction by a screen reader.
+         * But innerHTML is less performant because it triggers DOM restyling and insertions.
+         *
+         * If the content includes anything other than styling tags or has malformed HTML, we will fallback
+         * to textContent. 
+         * 
+         * @param {string} label
+         */
+        setAccessibleLabelAsHTML: function( label ) {
+          var formattingExclusive = AccessibilityUtil.usesFormattingTagsExclusive( label );
+          assert && assert( formattingExclusive, 'trying to set label as innerHTML with non formatting tags or invalid HTML' );
+
+          // fall back to textContent if anything other than formatting tags
+          this._labelIsHTML = formattingExclusive;
+          this.setLabelContent( label );
+        },
+        set accessibleLabelAsHTML( label ) { this.setAccessibleLabelAsHTML( label ); },
+
+        /**
          * Set the description content for this node's DOM element. A description element must exist and that element
          * must support inner HTML.  If a description element does not exist yet, we assume that a default paragraph
          * should be used.
@@ -636,16 +644,8 @@ define( function( require ) {
          * @param {string} textContent
          */
         setAccessibleDescription: function( textContent ) {
-          this._accessibleDescription = textContent;
-
-          // if there is no description element, assume that a paragraph element should be used
-          if ( !this._descriptionTagName ) {
-            this.setDescriptionTagName( 'p' );
-          }
-
-          this.updateAccessiblePeers( function( accessiblePeer ) {
-            setTextContent( accessiblePeer.descriptionElement, textContent );
-          } );
+          this._descriptionIsHTML = false;
+          this.setDescriptionContent( textContent );
         },
         set accessibleDescription( textContent ) { this.setAccessibleDescription( textContent ); },
 
@@ -658,6 +658,25 @@ define( function( require ) {
           return this._accessibleDescription;
         },
         get accessibleDescription() { return this.getAccessibleDescription(); },
+
+        /**
+         * Should be used rarely and with caution, typically you should use setAccessibleDescription instead.
+         * Sets the accessible descriptions as innerHTML instead of textContent. This allows you to include
+         * formatting tags in the descriptions which are typically read with distinction by a screen reader.
+         * But innerHTML is less performant because it triggers DOM restyling and insertions.
+         *
+         * If the content includes anything other than styling tags or has malformed HTML, we will fallback
+         * to textContent. 
+         * 
+         * @param {string} label
+         */
+        setAccessibleDescriptionAsHTML: function( textContent ) {
+          var formattingExclusive = AccessibilityUtil.usesFormattingTagsExclusive( textContent );
+          assert && assert( formattingExclusive, 'trying to set description as innerHTML with non formatting tags or invalid HTML' );
+
+          this.setDescriptionContent( textContent );
+        },
+        set accessibleDescriptionAsHTML( textContent ) { this.setAccessibleDescriptionAsHTML( textContent ); },
 
         /**
          * Set the ARIA role for this node's DOM element. According to the W3C, the ARIA role is read-only for a DOM
@@ -1166,6 +1185,62 @@ define( function( require ) {
         },
 
         /**
+         * Do not use this function directly, it is private.  Updates the accessible label setting the
+         * content as innerHTML or textContent based on whether or state of this._labelIsHTML flag.
+         * 
+         * @private
+         * @param {string} label
+         */
+        setLabelContent: function( label ) {
+          this._accessibleLabel = label;
+
+          var self = this;
+          if ( this._useAriaLabel ) {
+            this.setAccessibleAttribute( 'aria-label', this._accessibleLabel );
+          }
+          else if ( this._labelTagName ) {
+            this.updateAccessiblePeers( function( accessiblePeer ) {
+              if ( accessiblePeer.labelElement ) {
+                setTextContent( accessiblePeer.labelElement, self._accessibleLabel, self._labelIsHTML );
+
+                // if the label element happens to be a 'label', associate with 'for' attribute
+                if ( self._labelTagName.toUpperCase() === LABEL_TAG ) {
+                  accessiblePeer.labelElement.setAttribute( 'for', accessiblePeer.domElement.id );
+                }
+              }
+            } );
+          }
+          else {
+            this.updateAccessiblePeers( function( accessiblePeer ) {
+              if ( elementSupportsInnerHTML( accessiblePeer.domElement ) ) {
+                setTextContent( accessiblePeer.domElement, label, self._labelIsHTML );
+              }
+            } );
+          }
+        },
+
+        /**
+         * Do not use this function directly, it is private. Updates the accessible description,
+         * setting content as innerHTML or textContent based no the state of this._descriptionIsHTML flag.
+         *
+         * @private
+         * @param {string} description
+         */
+        setDescriptionContent: function( description ) {
+          this._accessibleDescription = description;
+
+          // if there is no description element, assume that a paragraph element should be used
+          if ( !this._descriptionTagName ) {
+            this.setDescriptionTagName( 'p' );
+          }
+
+          var self = this;
+          this.updateAccessiblePeers( function( accessiblePeer ) {
+            setTextContent( accessiblePeer.descriptionElement, description, self._descriptionIsHTML );
+          } );
+        },
+
+        /**
          * Update all AccessiblePeers representing this node with the callback, which takes the AccessiblePeer 
          * as an argument.
          * @private
@@ -1185,9 +1260,10 @@ define( function( require ) {
        *
        * @param {HTMLElement} domElement
        * @param {string} textContent
+       * @param {boolean} isHTML - whether or not to set the content as HTML
        */
-      function setTextContent( domElement, textContent ) {
-        if ( textContent && AccessibilityUtil.usesFormattingTagsExclusive( textContent ) ) {
+      function setTextContent( domElement, textContent, isHTML ) {
+        if ( isHTML ) {
           domElement.innerHTML = textContent;
         }
         else {
@@ -1212,7 +1288,7 @@ define( function( require ) {
        *
        * @param  {string} tagName
        * @param {boolean} focusable - should the element be explicitly added to the focus order?
-       * @returns {HTMLElement} [description]
+       * @returns {HTMLElement}
        */
       function createElement( tagName, focusable ) {
         var domElement = document.createElement( tagName );
@@ -1346,7 +1422,14 @@ define( function( require ) {
               self.setFocusable( self._focusable );
 
               // set the accessible label now that the element has been recreated again
-              self._accessibleLabel && self.setAccessibleLabel( self._accessibleLabel );
+              if ( self._accessibleLabel ) {
+                if ( self._labelIsHTML ) {
+                  self.setAccessibleLabelAsHTML( self._accessibleLabel );
+                }
+                else {
+                  self.setAccessibleLabel( self._accessibleLabel );
+                }
+              }
 
               // set if using aria-label
               if ( self._useAriaLabel ) {
@@ -1371,7 +1454,14 @@ define( function( require ) {
               }
 
               // set the accessible description
-              self._accessibleDescription && self.setAccessibleDescription( self._accessibleDescription );
+              if ( self._accessibleDescription ) {
+                if ( self._descriptionIsHTML ) {
+                  self.setAccessibleDescriptionAsHTML( self._accessibleDescription );
+                }
+                else {
+                  self.setAccessibleDescription( self._accessibleDescription );
+                }
+              }
 
               // if element is an input element, set input type
               if ( self._tagName.toUpperCase() === INPUT_TAG && self._inputType ) {
