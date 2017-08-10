@@ -109,11 +109,12 @@ define( function( require ) {
     NONE: 'NONE'
   };
 
+  var scratchText = new scenery.Text( '' );
+
   /**
    * @public
    * @constructor
    * @extends Node
-   * @mixes Events
    *
    * @param {string|number} text
    * @param {Object} [options] - RichText-specific options are documented in RICH_TEXT_OPTION_KEYS above, and can be
@@ -198,7 +199,7 @@ define( function( require ) {
 
   scenery.register( 'RichText', RichText );
 
-  return inherit( Node, RichText, {
+  inherit( Node, RichText, {
     /**
      * {Array.<string>} - String keys for all of the allowed options that will be set by node.mutate( options ), in the
      * order they will be evaluated in.
@@ -241,7 +242,9 @@ define( function( require ) {
 
       var widthAvailable = this._lineWrap === null ? Number.POSITIVE_INFINITY : this._lineWrap;
 
-      var currentLine = new Node();
+      var isRootLTR = true;
+
+      var currentLine = new RichTextElement( isRootLTR );
       this._hasAddedLeafToLine = false; // notify that if nothing has been added, the first leaf always gets added.
 
       while ( rootElements.length ) {
@@ -249,7 +252,7 @@ define( function( require ) {
 
         var currentLineWidth = currentLine.bounds.isValid() ? currentLine.width : 0;
 
-        var lineBreakState = this.appendElement( currentLine, element, this._font, this._fill, true, widthAvailable - currentLineWidth );
+        var lineBreakState = this.appendElement( currentLine, element, this._font, this._fill, isRootLTR, widthAvailable - currentLineWidth );
         sceneryLog && sceneryLog.RichText && sceneryLog.RichText( 'lineBreakState: ' + lineBreakState );
 
         if ( lineBreakState !== LineBreakState.NONE ) {
@@ -261,7 +264,7 @@ define( function( require ) {
             // If there's a blank line, add in a strut
             this.appendLine( new VStrut( new Text( ' ', { font: this._font } ).height ) );
           }
-          currentLine = new Node();
+          currentLine = new RichTextElement( isRootLTR );
           this._hasAddedLeafToLine = false;
         }
         if ( lineBreakState !== LineBreakState.INCOMPLETE ) {
@@ -356,6 +359,9 @@ define( function( require ) {
       // Apply leading
       if ( this.lineContainer.bounds.isValid() ) {
         lineNode.top = this.lineContainer.bottom + this._leading;
+
+        // This ensures RTL lines will still be laid out properly with the main origin (handled by alignLines later)
+        lineNode.left = 0;
       }
 
       this.lineContainer.addChild( lineNode );
@@ -389,12 +395,6 @@ define( function( require ) {
     appendElement: function( containerNode, element, font, fill, isLTR, widthAvailable ) {
       var lineBreakState = LineBreakState.NONE;
 
-      var nextSideName = isLTR ? 'left' : 'right';
-      var previousSideName = isLTR ? 'right' : 'left';
-
-      // If our container has content, we want to know where to add to that on the right side.
-      var x = isFinite( containerNode.localBounds[ previousSideName ] ) ? containerNode.localBounds[ previousSideName ] : 0;
-
       // {Node|Text} - The main Node for the element that we are adding
       var node;
 
@@ -405,18 +405,7 @@ define( function( require ) {
         sceneryLog && sceneryLog.RichText && sceneryLog.RichText( 'appending leaf: ' + element.content );
         sceneryLog && sceneryLog.RichText && sceneryLog.push();
 
-        // Strip off leading whitespace on the first leaf of every line
-        if ( !this._hasAddedLeafToLine ) {
-          while ( element.content[ 0 ] === ' ' ) {
-            element.content = element.content.slice( 1 );
-          }
-        }
-
-        node = new Text( RichText.contentToString( element.content, isLTR ), {
-          font: font,
-          fill: fill,
-          stroke: this._stroke
-        } );
+        node = new RichTextLeaf( element.content, isLTR, font, fill, this._stroke );
 
         // Handle wrapping if required
         if ( node.width > widthAvailable ) {
@@ -433,11 +422,7 @@ define( function( require ) {
             skippedWords.unshift( words.pop() ); // We didn't fit with the last one!
 
             while ( words.length ) {
-              node = new Text( RichText.contentToString( words.join( ' ' ), isLTR ), {
-                font: font,
-                fill: fill,
-                stroke: this._stroke
-              } );
+              node = new RichTextLeaf( words.join( ' ' ), isLTR, font, fill, this._stroke );
 
               // If we haven't added anything to the line and we are down to the first word, we need to just add it.
               if ( node.width > widthAvailable && ( this._hasAddedLeafToLine || words.length > 1 ) ) {
@@ -473,8 +458,16 @@ define( function( require ) {
           sceneryLog && sceneryLog.RichText && sceneryLog.RichText( 'manual line break' );
           return LineBreakState.COMPLETE;
         }
+        // Span (dir attribute)
+        else if ( element.tagName === 'span' ) {
+          if ( element.attributes.dir ) {
+            assert && assert( element.attributes.dir === 'ltr' || element.attributes.dir === 'rtl',
+              'Span dir attributes should be ltr or rtl.' );
+            isLTR = element.attributes.dir === 'ltr';
+          }
+        }
 
-        node = new Node();
+        node = new RichTextElement( isLTR );
 
         sceneryLog && sceneryLog.RichText && sceneryLog.RichText( 'appending element' );
         sceneryLog && sceneryLog.RichText && sceneryLog.push();
@@ -544,14 +537,6 @@ define( function( require ) {
             } );
           }
         }
-        // Span (dir attribute)
-        else if ( element.tagName === 'span' ) {
-          if ( element.attributes.dir ) {
-            assert && assert( element.attributes.dir === 'ltr' || element.attributes.dir === 'rtl',
-              'Span dir attributes should be ltr or rtl.' );
-            isLTR = element.attributes.dir === 'ltr';
-          }
-        }
 
         // If we've added extra spacing, we'll need to subtract it off of our available width
         widthAvailable -= extraSpacing;
@@ -612,11 +597,7 @@ define( function( require ) {
         sceneryLog && sceneryLog.RichText && sceneryLog.pop();
       }
 
-      // Only add/position the content if it has finite bounds (ignoring empty elements)
-      if ( isFinite( node.width ) ) {
-        node[ nextSideName ] = x + ( isLTR ? 1 : -1 ) * extraSpacing;
-        containerNode.addChild( node );
-      }
+      containerNode.addElement( node );
 
       return lineBreakState;
     },
@@ -1313,4 +1294,122 @@ define( function( require ) {
       return isLTR ? ( '\u202a' + unescapedContent + '\u202c' ) : ( '\u202b' + unescapedContent + '\u202c' );
     }
   } );
+
+  /**
+   * A container of other RichText elements and leaves.
+   * @constructor
+   * @private
+   *
+   * @param {boolean} isLTR - Whether this container will lay out elements in the left-to-right order (if false, will be
+   *                          right-to-left).
+   */
+  function RichTextElement( isLTR ) {
+    Node.call( this );
+
+    // @private {boolean}
+    this.isLTR = isLTR;
+
+    // @protected {number} - The amount of local-coordinate spacing to apply on each side
+    this.leftSpacing = 0;
+    this.rightSpacing = 0;
+  }
+
+  inherit( Node, RichTextElement, {
+    /**
+     * Adds a child element.
+     * @private
+     *
+     * @param {RichTextElement|RichTextLeaf} element
+     */
+    addElement: function( element ) {
+
+      var hadChild = this.children.length > 0;
+      var hasElement = element.width > 0;
+
+      // May be at a different scale, which we need to handle
+      var elementScale = element.getScaleVector().x;
+      var leftElementSpacing = element.leftSpacing * elementScale;
+      var rightElementSpacing = element.rightSpacing * elementScale;
+
+      // If there is nothing, than no spacing should be handled
+      if ( !hadChild && !hasElement ) {
+        return;
+      }
+      else if ( !hadChild ) {
+        if ( this.isLTR ) {
+          element.left = 0;
+          this.rightSpacing = rightElementSpacing;
+        }
+        else {
+          element.right = 0;
+          this.leftSpacing = leftElementSpacing;
+        }
+        this.addChild( element );
+      }
+      else if ( !hasElement ) {
+        if ( this.isLTR ) {
+          this.rightSpacing += leftElementSpacing + rightElementSpacing;
+        }
+        else {
+          this.leftSpacing += leftElementSpacing + rightElementSpacing;
+        }
+      }
+      else {
+        if ( this.isLTR ) {
+          element.left = this.localBounds.right + this.rightSpacing + leftElementSpacing;
+          this.rightSpacing = rightElementSpacing;
+        }
+        else {
+          element.right = this.localBounds.left + this.leftSpacing + rightElementSpacing;
+          this.leftSpacing = leftElementSpacing;
+        }
+        this.addChild( element );
+      }
+    }
+  } );
+
+  /**
+   * A leaf (text) node.
+   * @constructor
+   *
+   * @param {string} content
+   * @param {boolean} isLTR
+   * @param {Font|string} font
+   * @param {null|string|Color|Property.<string|Color>|LinearGradient|RadialGradient|Pattern} fill
+   * @param {null|string|Color|Property.<string|Color>|LinearGradient|RadialGradient|Pattern} stroke
+   */
+  function RichTextLeaf( content, isLTR, font, fill, stroke ) {
+
+    // Grab all spaces at the (logical) start
+    var whitespaceBefore = '';
+    while ( content[ 0 ] === ' ' ) {
+      whitespaceBefore += ' ';
+      content = content.slice( 1 );
+    }
+
+    // Grab all spaces at the (logical) end
+    var whitespaceAfter = '';
+    while ( content[ content.length - 1 ] === ' ' ) {
+      whitespaceAfter = ' ';
+      content = content.slice( 0, content.length - 1 );
+    }
+
+    Text.call( this, RichText.contentToString( content, isLTR ), {
+      font: font,
+      fill: fill,
+      stroke: stroke
+    } );
+
+    var spacingBefore = whitespaceBefore.length ? scratchText.setText( whitespaceBefore ).setFont( font ).width : 0;
+    var spacingAfter = whitespaceAfter.length ? scratchText.setText( whitespaceAfter ).setFont( font ).width : 0;
+
+    // Turn logical spacing into directional
+    // @protected {number}
+    this.leftSpacing = isLTR ? spacingBefore : spacingAfter;
+    this.rightSpacing = isLTR ? spacingAfter : spacingBefore;
+  }
+
+  inherit( Text, RichTextLeaf );
+
+  return RichText;
 } );
