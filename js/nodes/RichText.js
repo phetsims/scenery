@@ -103,10 +103,16 @@ define( function( require ) {
     'b', 'strong', 'i', 'em', 'sub', 'sup', 'u', 's'
   ];
 
-  // The status of whether a line
+  // What type of line-break situations we can be in during our recursive process
   var LineBreakState = {
+    // There was a line break, but it was at the end of the element (or was a <br>). The relevant element can be fully
+    // removed from the tree.
     COMPLETE: 'COMPLETE',
+
+    // There was a line break, but there is some content left in this element after the line break. DO NOT remove it.
     INCOMPLETE: 'INCOMPLETE',
+
+    // There was NO line break
     NONE: 'NONE'
   };
 
@@ -218,6 +224,7 @@ define( function( require ) {
     rebuildRichText: function() {
       var self = this;
 
+      // Clear any existing lines or link fragments
       this.lineContainer.removeAllChildren();
 
       // Bail early, particularly if we are being constructed.
@@ -240,45 +247,57 @@ define( function( require ) {
       this._linkItems.length = 0;
 
       var widthAvailable = this._lineWrap === null ? Number.POSITIVE_INFINITY : this._lineWrap;
-
       var isRootLTR = true;
 
       var currentLine = new RichTextElement( isRootLTR );
       this._hasAddedLeafToLine = false; // notify that if nothing has been added, the first leaf always gets added.
 
+      // Himalaya can give us multiple top-level items, so we need to iterate over those
       while ( rootElements.length ) {
         var element = rootElements[ 0 ];
 
+        // How long our current line is already
         var currentLineWidth = currentLine.bounds.isValid() ? currentLine.width : 0;
 
+        // Add the element in
         var lineBreakState = this.appendElement( currentLine, element, this._font, this._fill, isRootLTR, widthAvailable - currentLineWidth );
         sceneryLog && sceneryLog.RichText && sceneryLog.RichText( 'lineBreakState: ' + lineBreakState );
 
+        // If there was a line break (we'll need to swap to a new line node)
         if ( lineBreakState !== LineBreakState.NONE ) {
+          // Add the line if it works
           if ( currentLine.bounds.isValid() ) {
             sceneryLog && sceneryLog.RichText && sceneryLog.RichText( 'Adding line due to lineBreak' );
             this.appendLine( currentLine );
           }
+          // Otherwise if it's a blank line, add in a strut (<br><br> should result in a blank line)
           else {
-            // If there's a blank line, add in a strut
             this.appendLine( new VStrut( scratchText.setText( 'X' ).setFont( this._font ).height ) );
           }
+
+          // Set up a new line
           currentLine = new RichTextElement( isRootLTR );
           this._hasAddedLeafToLine = false;
         }
+
+        // If it's COMPLETE or NONE, then we fully processed the line
         if ( lineBreakState !== LineBreakState.INCOMPLETE ) {
           sceneryLog && sceneryLog.RichText && sceneryLog.RichText( 'Finished root element' );
           rootElements.splice( 0, 1 );
         }
       }
+
+      // Only add the final line if it's valid (we don't want to add unnecessary padding at the bottom)
       if ( currentLine.bounds.isValid() ) {
         sceneryLog && sceneryLog.RichText && sceneryLog.RichText( 'Adding final line' );
         this.appendLine( currentLine );
       }
 
+      // All lines are constructed, so we can align them now
       this.alignLines();
 
-      // Handle regrouping of links
+      // Handle regrouping of links (so that all fragments of a link across multiple lines are contained under a single
+      // ancestor that has listeners and a11y)
       while ( this._linkItems.length ) {
         // Close over the href and other references
         (function(){
@@ -304,11 +323,12 @@ define( function( require ) {
             accessibleLabel: linkElement.accessibleLabel
           } );
 
+          // If our href is a function, it should be called when the user clicks on the link
           if ( typeof href === 'function' ) {
             rootNode.addInputListener( new ButtonListener( {
               fire: href
             } ) );
-            rootNode.setAccessibleAttribute( 'href', '#' );
+            rootNode.setAccessibleAttribute( 'href', '#' ); // Required so that the click listener will get called.
             rootNode.addAccessibleInputListener( {
               click: function( event ) {
                 event.preventDefault();
@@ -317,6 +337,7 @@ define( function( require ) {
               }
             } );
           }
+          // Otherwise our href is a {string}, and we should open a window pointing to it (assuming it's a URL)
           else {
             rootNode.addInputListener( new ButtonListener( {
               fire: function( event ) {
@@ -331,7 +352,8 @@ define( function( require ) {
 
           self.lineContainer.addChild( rootNode );
 
-          // Detach the node from its location, adjust its transform, and reattach under the link
+          // Detach the node from its location, adjust its transform, and reattach under the link. This should keep each
+          // fragment in the same place, but changes its parent.
           for ( i = 0; i < nodes.length; i++ ) {
             var node = nodes[ i ];
             var matrix = node.getUniqueTrailTo( self.lineContainer ).getMatrix();
@@ -352,7 +374,7 @@ define( function( require ) {
      * Appends a finished line, applying any necessary leading.
      * @private
      *
-     * @param {Node} lineNode
+     * @param {RichTextElement} lineNode
      */
     appendLine: function( lineNode ) {
       // Apply leading
@@ -371,6 +393,7 @@ define( function( require ) {
      * @private
      */
     alignLines: function() {
+      // All nodes will either share a 'left', 'centerX' or 'right'.
       var coordinateName = this._align === 'center' ? 'centerX' : this._align;
 
       var ideal = this.lineContainer[ coordinateName ];
@@ -380,15 +403,20 @@ define( function( require ) {
     },
 
     /**
+     * Main recursive function for constructing the RichText Node tree.
      * @private
      *
-     * @param {Node} containerNode - The node where child elements should be placed
+     * We'll add any relevant content to the containerNode. The element will be mutated as things are added, so that
+     * whenever content is added to the Node tree it will be removed from the element tree. This means we can pause
+     * whenever (e.g. when a line-break is encountered) and the rest will be ready for parsing the next line.
+     *
+     * @param {RichTextElement} containerNode - The node where child elements should be placed
      * @param {*} element - See Himalaya's element specification
      *                      (https://github.com/andrejewski/himalaya/blob/master/text/ast-spec-v0.md)
      * @param {Font|string} font - The font to apply at this level
      * @param {null|string|Color|Property.<string|Color>|LinearGradient|RadialGradient|Pattern} fill - Fill to apply
      * @param {boolean} isLTR - True if LTR, false if RTL (handles RTL text properly)
-     * @param {number} widthAvailable - How much width we have available before forcing a line break
+     * @param {number} widthAvailable - How much width we have available before forcing a line break (for lineWrap)
      * @returns {LineBreakState} - Whether a line break was reached
      */
     appendElement: function( containerNode, element, font, fill, isLTR, widthAvailable ) {
@@ -397,8 +425,6 @@ define( function( require ) {
       // {Node|Text} - The main Node for the element that we are adding
       var node;
 
-      var extraSpacing = 0;
-
       // If we're a leaf
       if ( element.type === 'Text' ) {
         sceneryLog && sceneryLog.RichText && sceneryLog.RichText( 'appending leaf: ' + element.content );
@@ -406,8 +432,11 @@ define( function( require ) {
 
         node = new RichTextLeaf( element.content, isLTR, font, fill, this._stroke );
 
+        // If this content gets added, it will need to be pushed over by this amount
+        var containerSpacing = isLTR ? containerNode.rightSpacing : containerNode.leftSpacing;
+
         // Handle wrapping if required
-        if ( node.width > widthAvailable ) {
+        if ( !node.fitsIn( widthAvailable - containerSpacing, this._hasAddedLeafToLine, isLTR ) ) {
           var words = element.content.split( ' ' );
 
           sceneryLog && sceneryLog.RichText && sceneryLog.RichText( 'Overflow leafAdded:' + this._hasAddedLeafToLine + ', words: ' + words.length );
@@ -424,7 +453,8 @@ define( function( require ) {
               node = new RichTextLeaf( words.join( ' ' ), isLTR, font, fill, this._stroke );
 
               // If we haven't added anything to the line and we are down to the first word, we need to just add it.
-              if ( node.width > widthAvailable && ( this._hasAddedLeafToLine || words.length > 1 ) ) {
+              if ( !node.fitsIn( widthAvailable - containerSpacing, this._hasAddedLeafToLine, isLTR ) &&
+                   ( this._hasAddedLeafToLine || words.length > 1 ) ) {
                 sceneryLog && sceneryLog.RichText && sceneryLog.RichText( 'Skipping word ' + words[ words.length - 1 ] );
                 skippedWords.unshift( words.pop() );
               }
@@ -511,13 +541,13 @@ define( function( require ) {
         // Subscript
         else if ( element.tagName === 'sub' ) {
           node.scale( this._subScale );
-          extraSpacing += this._subXSpacing;
+          node.addExtraBeforeSpacing( this._subXSpacing );
           node.y += this._subYOffset;
         }
         // Superscript
         else if ( element.tagName === 'sup' ) {
           node.scale( this._supScale );
-          extraSpacing += this._supXSpacing;
+          node.addExtraBeforeSpacing( this._supXSpacing );
           node.y += this._supYOffset;
         }
         // Font (color/face/size attributes)
@@ -538,7 +568,6 @@ define( function( require ) {
         }
 
         // If we've added extra spacing, we'll need to subtract it off of our available width
-        widthAvailable -= extraSpacing;
         var scale = node.getScaleVector().x;
 
         // Process children
@@ -1364,6 +1393,21 @@ define( function( require ) {
         }
         this.addChild( element );
       }
+    },
+
+    /**
+     * Adds an amount of spacing to the "before" side.
+     * @private
+     *
+     * @param {number} amount
+     */
+    addExtraBeforeSpacing: function( amount ) {
+      if ( this.isLTR ) {
+        this.leftSpacing += amount;
+      }
+      else {
+        this.rightSpacing += amount;
+      }
     }
   } );
 
@@ -1408,7 +1452,20 @@ define( function( require ) {
     this.rightSpacing = isLTR ? spacingAfter : spacingBefore;
   }
 
-  inherit( Text, RichTextLeaf );
+  inherit( Text, RichTextLeaf, {
+    /**
+     * Whether this leaf will fit in the specified amount of space (including, if required, the amount of spacing on
+     * the side).
+     * @private
+     *
+     * @param {number} widthAvailable
+     * @param {boolean} hasAddedLeafToLine
+     * @param {boolean} isContainerLTR
+     */
+    fitsIn: function( widthAvailable, hasAddedLeafToLine, isContainerLTR ) {
+      return this.width + ( hasAddedLeafToLine ? ( isContainerLTR ? this.leftSpacing : this.rightSpacing ) : 0 ) <= widthAvailable;
+    }
+  } );
 
   return RichText;
 } );
