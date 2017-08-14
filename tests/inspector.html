@@ -63,8 +63,8 @@
   function Divider( preferredBoundsProperty, orientation, initialSeparatorLocation, pushFromMax ) {
     var self = this;
 
-    this.minBoundsProperty = new axon.Property( new dot.Bounds2() );
-    this.maxBoundsProperty = new axon.Property( new dot.Bounds2() );
+    this.minBoundsProperty = new axon.Property( new dot.Bounds2( 0, 0, 0, 0 ) );
+    this.maxBoundsProperty = new axon.Property( new dot.Bounds2( 0, 0, 0, 0 ) );
 
     this.preferredBoundsProperty = preferredBoundsProperty;
     this.orientation = orientation;
