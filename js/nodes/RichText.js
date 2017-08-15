@@ -10,7 +10,8 @@
  * NOTE: Currently it can line-wrap at the start and end of tags. This will probably be fixed in the future to only
  *       potentially break on whitespace.
  *
- * It supports the following markup and features:
+ * It supports the following markup and features in the string content (in addition to other options as listed in
+ * RICH_TEXT_OPTIONKEYS):
  * - <a href="{{placeholder}}"> for links (pass in { links: { placeholder: ACTUAL_HREF } })
  * - <b> and <strong> for bold text
  * - <i> and <em> for italic text
