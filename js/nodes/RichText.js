@@ -1402,9 +1402,11 @@ define( function( require ) {
 
       // If there is nothing, than no spacing should be handled
       if ( !hadChild && !hasElement ) {
+        sceneryLog && sceneryLog.RichText && sceneryLog.RichText( 'No child or element, ignoring' );
         return;
       }
       else if ( !hadChild ) {
+        sceneryLog && sceneryLog.RichText && sceneryLog.RichText( 'First child, ltr:' + this.isLTR + ', spacing: ' + ( this.isLTR ? rightElementSpacing : leftElementSpacing ) );
         if ( this.isLTR ) {
           element.left = 0;
           this.rightSpacing = rightElementSpacing;
@@ -1416,6 +1418,7 @@ define( function( require ) {
         this.addChild( element );
       }
       else if ( !hasElement ) {
+        sceneryLog && sceneryLog.RichText && sceneryLog.RichText( 'No element, adding spacing, ltr:' + this.isLTR + ', spacing: ' + ( leftElementSpacing + rightElementSpacing ) );
         if ( this.isLTR ) {
           this.rightSpacing += leftElementSpacing + rightElementSpacing;
         }
@@ -1425,11 +1428,13 @@ define( function( require ) {
       }
       else {
         if ( this.isLTR ) {
+          sceneryLog && sceneryLog.RichText && sceneryLog.RichText( 'LTR add ' + this.rightSpacing + ' + ' + leftElementSpacing );
           element.left = this.localBounds.right + this.rightSpacing + leftElementSpacing;
           this.rightSpacing = rightElementSpacing;
         }
         else {
-          element.right = this.localBounds.left + this.leftSpacing + rightElementSpacing;
+          sceneryLog && sceneryLog.RichText && sceneryLog.RichText( 'RTL add ' + this.leftSpacing + ' + ' + rightElementSpacing );
+          element.right = this.localBounds.left - this.leftSpacing - rightElementSpacing;
           this.leftSpacing = leftElementSpacing;
         }
         this.addChild( element );
