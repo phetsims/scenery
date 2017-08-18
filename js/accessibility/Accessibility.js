@@ -102,7 +102,7 @@ define( function( require ) {
     'accessibleLabel', // Set the label content for the node, see setAccessibleLabel()
     'accessibleLabelAsHTML', // Set the label content for the node as innerHTML, see setAccessibleLabelAsHTML()
     'accessibleDescription', // Set the description content for the node, see setAccessibleDescription()
-    'accessibleDescriptionAsHTML,', // Set the description content for the node as innerHTML, see setAccessibleDescriptionContentAsHTML()
+    'accessibleDescriptionAsHTML', // Set the description content for the node as innerHTML, see setAccessibleDescriptionContentAsHTML()
     'accessibleHidden', // Sets wheter or not the node's DOM element is hidden in the parallel DOM
     'accessibleContentDisplayed', // sets whether or not the accessible content of the node (and its subtree) is displayed, see setAccessibleContentDisplayed()
     'focusable', // Sets whether or not the node can receive keyboard focus
@@ -674,6 +674,7 @@ define( function( require ) {
           var formattingExclusive = AccessibilityUtil.usesFormattingTagsExclusive( textContent );
           assert && assert( formattingExclusive, 'trying to set description as innerHTML with non formatting tags or invalid HTML' );
 
+          this._descriptionIsHTML = formattingExclusive;
           this.setDescriptionContent( textContent );
         },
         set accessibleDescriptionAsHTML( textContent ) { this.setAccessibleDescriptionAsHTML( textContent ); },
