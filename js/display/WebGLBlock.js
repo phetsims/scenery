@@ -178,6 +178,12 @@ define( function( require ) {
       // Canvas maps one of its pixels to a physical pixel (for Retina devices, etc.).
       this.backingScale = Util.backingScale( this.gl );
 
+      // Double the backing scale size if we detect no built-in antialiasing.
+      // See https://github.com/phetsims/circuit-construction-kit-dc/issues/139
+      if ( gl.getParameter( gl.SAMPLES ) === 0 ) {
+        this.backingScale *= 2;
+      }
+
       // @private {number}
       this.originalBackingScale = this.backingScale;
 
