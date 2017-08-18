@@ -628,7 +628,6 @@ define( function( require ) {
          */
         setAccessibleLabelAsHTML: function( label ) {
           var formattingExclusive = AccessibilityUtil.usesFormattingTagsExclusive( label );
-          assert && assert( formattingExclusive, 'trying to set label as innerHTML with non formatting tags or invalid HTML' );
 
           // fall back to textContent if anything other than formatting tags
           this._labelIsHTML = formattingExclusive;
@@ -672,7 +671,6 @@ define( function( require ) {
          */
         setAccessibleDescriptionAsHTML: function( textContent ) {
           var formattingExclusive = AccessibilityUtil.usesFormattingTagsExclusive( textContent );
-          assert && assert( formattingExclusive, 'trying to set description as innerHTML with non formatting tags or invalid HTML' );
 
           this._descriptionIsHTML = formattingExclusive;
           this.setDescriptionContent( textContent );
