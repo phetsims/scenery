@@ -33,6 +33,14 @@ define( function( require ) {
 
   phetioInherit( TObject, 'TNode', TNode, {
 
+    detach: {
+      returnType: TVoid,
+      parameterTypes: [],
+      implementation: function() {
+        this.instance.detach();
+      },
+      documentation: 'Detaches the node from its parents (if any)'
+    },
     isVisible: {
       returnType: TBoolean,
       parameterTypes: [],
