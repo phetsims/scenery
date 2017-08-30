@@ -898,6 +898,30 @@ define( function( require ) {
     },
 
     /**
+     * Replace a child in this node's children array with another node. If the old child had accessible focus and
+     * the new child is focusable, the new child will receive focus after it is added.
+     *
+     * @param {Node} oldChild
+     * @param {Node} newChild
+     */
+    replaceChild: function( oldChild, newChild ) {
+      assert && assert( oldChild && oldChild instanceof Node, 'child to replace must be a Node' );
+      assert && assert( newChild && newChild instanceof Node, 'new child must be a Node' );
+      assert && assert( this.hasChild( oldChild ), 'Attempted to replace a node that was not a child.' );
+
+      // information that needs to be restored
+      var index = this.indexOfChild( oldChild );
+      var oldChildFocused = oldChild.focused;
+
+      this.removeChild( oldChild );
+      this.insertChild( index, newChild );
+
+      if ( oldChildFocused && newChild.focusable ) {
+        newChild.focus();
+      }
+    },
+
+    /**
      * Removes this node from all of its parents.
      * @public
      *
