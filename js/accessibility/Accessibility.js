@@ -249,7 +249,7 @@ define( function( require ) {
           this._focusable = null;
 
           // @private {Shape|Node|string.<'invisible'>} - the focus highlight that will surround this node when it
-          // is focussed.  By default, the focus highlight will be a pink rectangle that surrounds the Node's local
+          // is focused.  By default, the focus highlight will be a pink rectangle that surrounds the Node's local
           // bounds.
           this._focusHighlight = null;
 
@@ -785,14 +785,14 @@ define( function( require ) {
         setFocusHighlight: function( focusHighlight ) {
           this._focusHighlight = focusHighlight;
 
-          var isFocussed = false;
-          if ( this.isFocussed() ) {
-            isFocussed = true;
+          var isFocused = false;
+          if ( this.isFocused() ) {
+            isFocused = true;
           }
           this.invalidateAccessibleContent();
 
           // Reset the focus after invalidating the content.
-          isFocussed && this.focus();
+          isFocused && this.focus();
 
         },
         set focusHighlight( focusHighlight ) { this.setFocusHighlight( focusHighlight ); },
@@ -1103,14 +1103,12 @@ define( function( require ) {
         get focusable() { return this.getFocusable(); },
 
         /**
-         * Get whether this node's dom element is currently focussed.
+         * Get whether this node's DOM element currently has focus.
          * @public
          *
-         * REVIEW: This function is not spelled correctly.
-         * 
          * @returns {boolean}
          */
-        isFocussed: function() {
+        isFocused: function() {
           var isFocused = false;
           if ( this.accessibleInstances.length > 0 ) {
             isFocused = document.activeElement === this.accessibleInstances[ 0 ].peer.domElement;
@@ -1118,7 +1116,7 @@ define( function( require ) {
 
           return isFocused;
         },
-        get focussed() { return this.isFocussed(); },
+        get focused() { return this.isFocused(); },
 
         /**
          * Focus this node's dom element. The element must not be hidden, and it must be focusable. If the node

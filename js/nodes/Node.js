@@ -3171,7 +3171,7 @@ define( function( require ) {
     },
 
     /**
-     * Sets the accessible focus order for this node. This includes not only focussed items, but elements that can be
+     * Sets the accessible focus order for this node. This includes not only focused items, but elements that can be
      * placed in the parallel DOM. If provided, it will override the focus order between children (and
      * optionally descendants). If not provided, the focus order will default to the rendering order (first children
      * first, last children last), determined by the children array.
