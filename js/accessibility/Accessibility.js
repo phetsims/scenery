@@ -109,8 +109,6 @@ define( function( require ) {
     'useAriaLabel', // Sets whether or not the label will use the 'aria-label' attribute, see setUseAriaLabel()
     'ariaRole', // Sets the ARIA role for the DOM element, see setAriaRole() for documentation
     'parentContainerAriaRole', // Sets the ARIA role for the parent container DOM element, see setParentContainerAriaRole()
-    'ariaDescribedByElement', // Sets a description relationship for this node's DOM element by id, see setAriaDescribedByElement()
-    'ariaLabelledByElement', // Sets a label relationship with another element in the DOM by id, see setAriaLabelledByElement()
     'prependLabels'// Sets whether we want to prepend labels above the node's HTML element, see setPrependLabels()
   ];
 
