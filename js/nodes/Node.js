@@ -903,10 +903,11 @@ define( function( require ) {
      *
      * @param {Node} oldChild
      * @param {Node} newChild
+     * @returns {Node} - Returns 'this' reference, for chaining
      */
     replaceChild: function( oldChild, newChild ) {
-      assert && assert( oldChild && oldChild instanceof Node, 'child to replace must be a Node' );
-      assert && assert( newChild && newChild instanceof Node, 'new child must be a Node' );
+      assert && assert( oldChild instanceof Node, 'child to replace must be a Node' );
+      assert && assert( newChild instanceof Node, 'new child must be a Node' );
       assert && assert( this.hasChild( oldChild ), 'Attempted to replace a node that was not a child.' );
 
       // information that needs to be restored
@@ -919,6 +920,8 @@ define( function( require ) {
       if ( oldChildFocused && newChild.focusable ) {
         newChild.focus();
       }
+
+      return this; // allow chaining
     },
 
     /**
