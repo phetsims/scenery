@@ -157,18 +157,18 @@ define( function( require ) {
       var htmlElement = null;
 
       if ( association === AccessiblePeer.NODE ) {
-        return this.domElement;
+        htmlElement = this.domElement;
       }
       else if ( association === AccessiblePeer.LABEL ) {
-        return this.labelElement;
+        htmlElement = this.labelElement;
       }
       else if ( association === AccessiblePeer.DESCRIPTION ) {
-        return this.descriptionElement;
+        htmlElement = this.descriptionElement;
       }
-      else if ( association === AccessiblePeer.LABEL ) {
-        return this.parentContainerElement;
+      else if ( association === AccessiblePeer.PARENT_CONTAINER ) {
+        htmlElement = this.parentContainerElement;
       }
-      assert && assert( htmlElement, 'no HTMLELement found by association ' + association );
+      
       return htmlElement;
     },
 

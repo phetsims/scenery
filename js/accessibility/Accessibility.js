@@ -109,7 +109,11 @@ define( function( require ) {
     'useAriaLabel', // Sets whether or not the label will use the 'aria-label' attribute, see setUseAriaLabel()
     'ariaRole', // Sets the ARIA role for the DOM element, see setAriaRole() for documentation
     'parentContainerAriaRole', // Sets the ARIA role for the parent container DOM element, see setParentContainerAriaRole()
-    'prependLabels'// Sets whether we want to prepend labels above the node's HTML element, see setPrependLabels()
+    'prependLabels', // Sets whether we want to prepend labels above the node's HTML element, see setPrependLabels()
+    'ariaDescriptionContent', // Sets the content that will describe another node through aria-describedby, see setAriaDescriptionContent()
+    'ariaLabelContent', // Sets the content that will label another node through aria-labelledby, see setAriaLabelledByContent()
+    'ariaDescribedContent', // Sets the content that will be described by another node through aria-describedby, see setAriaDescribedContent()
+    'ariaLabelledContent', // sets the content that will be labelled by another node through aria-labelledby, see setAriaLabelledContent()
   ];
 
   var Accessibility = {
@@ -215,30 +219,50 @@ define( function( require ) {
           // supported by browsers or assistive technologies, so use vanilla HTML for accessibility semantics where
           // possible.
           this._parentContainerAriaRole = null;
+          
+          // @private {Node|null} - A node with accessible content that labels this node through the aria-labelledby
+          // ARIA attribute.  The other node can be anywhere in the scene graph.  The behavior for aria-labelledby
+          // is such that when this node receives focus, the accessible content under the other node will be read
+          // (before any description content). Use with ariaLabelledContent to specify what portion of this node's
+          // acccessible content is labelled (DOM element, label element, description element or parent container
+          // element).
+          this._ariaLabelledByNode = null;
 
-          // @private {Node} - Another node that is described by this node.  The accessible id of this node will be
-          // added as the value of the "aria-describedby" accessible attribute.  The other node can be anywhere in
-          // the scene graph.  The behavior for "aria-describedby" is such when the other node receives focus,
-          // the accessible content under this node will be read (after any label content). Use with
-          // this._ariaDescribesAssociation to limit the amount of content under this node that describes the other
-          // node.
-          this._ariaDescribesNode = null;
+          // @private {string} - A string referenceing which portion of this node's accessible content will receive
+          // the aria-labelledby attribute.  Can be the DOM element, the label element, the description element, 
+          // or the parent container element. By default, points to this node's DOM element.
+          this._ariaLabelledContent = AccessiblePeer.NODE; 
 
-          // @private {string} - Limitation on how much of the accessible content will describe this._ariaDescribesNode.
-          // The describing content can be all the content, or just the description, label, or parent container.
-          // AccessiblePeer.NODE is all of the accessible content, see AccessiblePeer for the other flags.
-          this._ariaDescribesAssociation = AccessiblePeer.NODE;
-
-          // @private - Another node that is labelled by this node.  The id of this node's accessible content
-          // will be added as the value of the "aria-labelledby" accessible attribute. The other node can be anywhere in
-          // the scene graph.  The behavior for "aria-labelledby" is such that when the other node receives focus, the
-          // accessible content under this node will be read (before any description content).
+          // @private {Node|null} - The Node this node labels through the aria-labelledby association. See
+          // _ariaLabelledByNode for more information.
           this._ariaLabelsNode = null;
 
-          // @private {string} - Limitation on how much of the accessible content will label this._ariaLabelsNode.
-          // The describing content can be all the content, or just the description, label, or parent container.
-          // AccessiblePeer.NODE is all of this node's accessible content, see AccessiblePeer for the other flags.
-          this._ariaLabelsAssociation = AccessiblePeer.NODE;
+          // @private {string} - The content on this node that is used to label another node through the
+          // aria-labelledby ARIA attribute.  Can be the node's label, description, parent container, or DOM
+          // element.  See 
+          this._ariaLabelContent = AccessiblePeer.NODE; // element associated with the other node's content
+
+          // @private {Node|null} - A node with accessible content that describes this node through the aria-describedby
+          // ARIA attribute. The other node can be anywhere in the scene graph.  The behavior for aria-describedby
+          // is such that when this node receives focus, the accessible content under the other node will be read
+          // (after any label content). Use with ariaDescribedContent to specify what portion of this node's
+          // acccessible content is described (DOM element, label element, description element or parent container
+          // element).
+          this._ariaDescribedByNode = null;
+
+          // @private {string} - A string referenceing which portion of this node's accessible content will receive
+          // the aria-describedby attribute.  Can be the DOM element, the label element, the description element, 
+          // or the parent container element. By default, points to this node's DOM element.
+          this._ariaDescribedContent = AccessiblePeer.NODE;
+
+          // @private {Node|null} - The Node this node describes through the aria-describedby association. See
+          // _ariaLabelledByNode for more information.
+          this._ariaDescribesNode = null;
+
+          // @private {string} - The description content on this node that is used to describe another node through the
+          // aria-describedby ARIA attribute. Can be the node's label, description, parent container, or DOM
+          // element.  See ariaDescribessNodoe for more information
+          this._ariaDescriptionContent = AccessiblePeer.NODE;
 
           // @private {boolean} - whether or not this node's DOM element can receive focus from tab navigation.
           // Sets the tabIndex attribute on the node's DOM element.  Setting to false will not remove the node's DOM
@@ -829,52 +853,185 @@ define( function( require ) {
         get focusHighlightLayerable() { return this.getFocusHighlightLayerable(); },
 
         /**
-         * Set the aria-describedby relation between this node's accessible content and the accessible
-         * content of another node.  The value of the 'aria-describedby' attribute is a string id that references
-         * another HTMLElement in the DOM.  Upon focus, a screen reader should read the content under the HTML element
-         * referenced by the id, after any label content.  Exact behavior will depend on the user agent. This node must
-         * have only one accessible instance so that value for 'aria-describedby' is unique.
+         * Sets the node that labels this node through the ARIA attribute aria-labelledby. The value of the 
+         * 'aria-labelledby' attribute  is a string id that references another HTMLElement in the DOM.
+         * Upon focus, a screen reader should read the content under the HTML element referenced by the id, 
+         * before any description content. Exact behavior will depend on user agent. The specific content
+         * used for the label can be specified by using setAriaLabelledContent, see that function for more info.
+         *
          * @public
-         * 
-         * @param {Node} node
-         * @param {string} [association] 'NODE'|'LABEL'|'DESCRIPTION'|'PARENT_CONTAINER'
+         * @param {Node} node - the node with accessible content that labels this one.
          */
-        setAriaDescribesNode: function( node, association ) {
-          assert && assert( this.accessibleInstances.length < 2, 'Cannot describe another node if using DAG' );
+        setAriaLabelledByNode: function( node ) {
+          assert && assert( node.accessibleInstances.length < 2, 'cannot be labelled by a node using DAG' );
 
-          this._ariaDescribesNode = node;
-          this._ariaDescribesAssociation = association || AccessiblePeer.NODE;
+          this._ariaLabelledByNode = node;
 
-          if ( this.accessibleInstances.length > 0 ) {
-            var peer = this.accessibleInstances[ 0 ].peer;
-            var associatedElement = peer.getElementByAssociation( this._ariaDescribesAssociation );
-            node.setAccessibleAttribute( 'aria-describedby', associatedElement.id );
+          // needs to track what node it labels so when that node changes, it can trigger invalidation of this node
+          node._ariaLabelsNode = this;
+
+          //  accessible content required for both nodes
+          var thisHasContent = this.accessibleInstances.length > 0;
+          var otherHasContent = node.accessibleInstances.length > 0;
+          if ( thisHasContent && otherHasContent ) {
+            var self = this;
+            this.updateAccessiblePeers( function( accessiblePeer ) {
+              var otherPeer = node.accessibleInstances[ 0 ].peer;
+
+              var labelledElement = accessiblePeer.getElementByAssociation( self._ariaLabelledContent );
+              var labelElement = otherPeer.getElementByAssociation( node._ariaLabelContent );
+
+              // if both associated elements defined, set up the attribute, otherwise remove the attribute
+              if ( labelledElement && labelElement ) {
+                labelledElement.setAttribute( 'aria-labelledby', labelElement.id );
+              }
+              else if ( labelledElement ){
+                labelledElement.removeAttribute( 'aria-labelledby' );
+              }
+            } );
           }
         },
+        set ariaLabelledByNode( node ) { this.setAriaLabelledByNode( node ); },
 
         /**
-         * Set the aria-labelledby relation between this node's accessible content and the accessible
-         * content of another node.  The value of the 'aria-labelledby' attribute is a string id that references
-         * another HTMLElement in the DOM.  Upon focus, a screen reader should read the content under the HTML element
-         * referenced by the id, before any description content.  Exact behavior will depend on the user agent. This
-         * node must have only one accessible instance so that value for 'aria-labelledby' is unique.
-         * @public
-         * 
-         * @param {Node} node
-         * @param {string} [association] 'NODE'|'LABEL'|'DESCRIPTION'|'PARENT_CONTAINER'
+         * Get the node that labels this node through  the aria-labelledby relation. See setAriaLabelledByNode
+         * for documentation on the behavior of aria-labelledby.
+         *
+         * @return {Node}
          */
-        setAriaLabelsNode: function( node, association ) {
-          assert && assert( this.accessibleInstances.length < 2, 'Cannot describe another node if using DAG' );
+        getAriaLabelledByNode: function() {
+          return this._ariaLabelledByNode;
+        },
+        get ariaLabelledByNode() { return this.getAriaLabelledByNode(); },
 
-          this._ariaLabelsNode = node;
-          this._ariaLabelsAssociation = association || AccessiblePeer.NODE;
+        /**
+         * Set the accessible content on this node that is labelled through aria-labelledby. Can be the node's
+         * DOM element, label element, description element, or parent container element. This will determine
+         * which element of this node's accessible content will hold the aria-labelledby attribute.
+         *
+         * @public
+         * @param {string} content - 'LABEL|NODE|DESCRIPTION|PARENT_CONTAINER'
+         */
+        setAriaLabelledContent: function( content )  {
+          this._ariaLabelledContent = content;
+          this._ariaLabelledByNode && this.setAriaLabelledByNode( this._ariaLabelledByNode );
+        },
+        set ariaLabelledContent( content ) { this.setAriaLabelledContent( content ); },
 
-          if ( this.accessibleInstances.length > 0 ) {
-            var peer = this.accessibleInstances[ 0 ].peer;
-            var associatedElement = peer.getElementByAssociation( this._ariaLabelsAssociation );
-            node.setAccessibleAttribute( 'aria-labelledby', associatedElement.id );
+
+        /**
+         * Get a string the determines what element on this node has the aria-labelledby attribute. Does not return
+         * a label string. See setAriaLabelledContent for more information.
+         * 
+         * @public
+         * @return {string} - one of 'LABEL'|'DESCRIPTION'|'NODE'|'PARENT_CONTAINER'
+         */
+        getAriaLabelledContent: function() {
+          return this._ariaLabelledContent;
+        },
+        get ariaLabelledContent() { return this.getAriaLabelledContent(); },
+
+        /**
+         * Set the aria label content on this node which labels another node through the aria-labelledby
+         * association. Can be the node's DOM element, label element, description element, or parent container
+         * element. See setAriaLabelledBy for more information on aria-labelledby. This will determine the
+         * value of the aria-labelledby attribute for another node when it is labelled by this one.
+         * 
+         * @public
+         * @param {string} content - 'LABEL'|'DESCRIPTION'|'NODE'|'PARENT_CONTAINER'
+         */
+        setAriaLabelContent: function( content ) {
+          this._ariaLabelContent = content;
+          this._ariaLabelsNode && this.ariaLabelsNode.setAriaLabelledByNode( this );
+        },
+        set ariaLabelContent( content ) { this.setAriaLabelContent( content ); },
+
+        /**
+         * Sets the node that describes this node through the ARIA attribute aria-describedby. The value of the 
+         * 'aria-describedby' attribute  is a string id that references another HTMLElement in the DOM.
+         * Upon focus, a screen reader should read the content under the HTML element referenced by the id, 
+         * after any label content. Exact behavior will depend on user agent. The specific content
+         * used for the description can be specified by using setAriaDescribedContent, see that function for more info.
+         *
+         * @public
+         * @param {Node} node - the node with accessible content that labels this one.
+         */
+        setAriaDescribedByNode: function( node ) {
+          assert && assert( node.accessibleInstances.length < 2, 'cannot be described by a node using DAG' );
+
+          this._ariaDescribedByNode = node;
+
+          // the other node needs to track this one so that when it changes, it can trigger invalidation of this node
+          node._ariaDescribesNode = this;
+
+          // accessible content required for both nodes
+          var thisHasContent = this.accessibleInstances.length > 0;
+          var otherHasContent = node.accessibleInstances.length > 0;
+          if ( thisHasContent && otherHasContent ) {
+            var self = this;
+            this.updateAccessiblePeers( function( accessiblePeer ) {
+              var otherPeer = node.accessibleInstances[ 0 ].peer;
+
+              var describedElement = accessiblePeer.getElementByAssociation( self._ariaDescribedContent );
+              var descriptionElement = otherPeer.getElementByAssociation( node._ariaDescriptionContent );
+
+              // if both associated elements exist, set the attribute, otherwise make sure attribute is removed
+              if ( describedElement && descriptionElement ) {
+                describedElement.setAttribute( 'aria-describedby', descriptionElement.id );
+              }
+              else if ( describedElement ) {
+                describedElement.removeAttribute( 'aria-describedby' );
+              }
+            } );
           }
         },
+        set ariaDescribedByNode( node ) { this.setAriaDescribedByNode( node ); },
+
+        /**
+         * Set the accessible content on this node that is described through aria-describedby. Can be the node's
+         * DOM element, label element, description element, or parent container element. This will determine
+         * which element of this node's accessible content has the aria-describedby attribute.
+         *
+         * @public
+         * @param {string} content - 'LABEL|NODE|DESCRIPTION|PARENT_CONTAINER'
+         */
+        setAriaDescribedContent: function( content )  {
+          this._ariaDescribedContent = content;
+          this._ariaDescribedByNode && this.setAriaDescribedByNode( this._ariaDescribedByNode );
+        },
+        set ariaDescribedContent( content ) { this.setAriaDescribedContent( content ); },
+
+        /**
+         * Get the described content of this node's accessible content that is described through an aria-describedby
+         * association.  Doesn't return a description, but a string describing wich of this node's accessible elements 
+         * are described.
+         *
+         * @return {string} -'LABEL|NODE|DESCRIPTION|PARENT_CONTAINER'
+         */
+        getAriaDescribedContent: function() {
+          return this._ariaDescribedContent;
+        },
+        get ariaDescribedContent() { return this.getAriaDescribedContent; },
+
+        /**
+         * Set the aria description content on this node which describes another node through the aria-describedby
+         * association. Can be the node's DOM element, label element, description element, or parent container
+         * element. This will determine the value for aria-describedby when another node
+         * is described by this one.  See setAriaLabelledBy for more information on aria-labelledby.
+         * 
+         * @public
+         * @param {string} content - one of 'LABEL'|'DESCRIPTION'|'NODE'|'PARENT_CONTAINER'
+         */
+        setAriaDescriptionContent: function( content ) {
+          this._ariaDescriptionContent = content;
+          this._ariaDescribesNode && this._ariaDescribesNode.setAriaDescribedByNode( this );
+        },
+        set ariaDescriptionContent( content ) { this.setAriaDescriptionContent( content ); },
+
+        getAriaDescriptionContent: function() {
+          return this._ariaDescriptionContent;
+        },
+        get ariaDescriptionContent() { return this.getAriaDescriptionContent(); },
 
         /**
          * Hide completely from a screen reader and the browser by setting the hidden attribute on the node's
@@ -1463,9 +1620,21 @@ define( function( require ) {
                 self.setInputType( self._inputType );
               }
 
-              // restore aria-labelledby and aria-describedby associations
-              self._ariaLabelsNode && self.setAriaLabelsNode( self._ariaLabelsNode, self._ariaLabelsAssociation );
-              self._ariaDescribesNode && self.setAriaDescribesNode( self._ariaDescribesNode, self._ariaDescribesAssociation );
+              // restore aria-labelledby associations
+              var labelledByNode = self._ariaLabelledByNode;
+              labelledByNode && self.setAriaLabelledByNode( labelledByNode, self._ariaLabelledContent, labelledByNode._ariaLabelContent );
+
+              // if this node aria-labels another node, restore label associations for that node
+              var ariaLabelsNode = self._ariaLabelsNode;
+              ariaLabelsNode && ariaLabelsNode.setAriaLabelledByNode( self, ariaLabelsNode._ariaLabelledContent, self._ariaLabelContent );
+
+              // restore aria-describedby asssociations
+              var describedByNode = self._ariaDescribedByNode;
+              describedByNode && self.setAriaDescribedByNode( describedByNode, self._ariaDescribedContent, describedByNode._ariaDescribedContent );
+
+              // if this node aria-describes another node, restore description asssociations for that node
+              var ariaDescribesNode = self._ariaDescribesNode;
+              ariaDescribesNode && ariaDescribesNode.setAriaDescribedByNode( self, ariaDescribesNode._ariaDescribedContent, self._ariaDescriptionContent );
 
               // add all listeners to the dom element
               for ( i = 0; i < self._accessibleInputListeners.length; i++ ) {

@@ -132,8 +132,8 @@
     rootNode.children = [ nodeA, nodeB ];
 
     // node B describes node A
-    nodeB.setAriaDescribesNode( nodeA );
-    nodeB.setAriaLabelsNode( nodeA );
+    nodeA.setAriaDescribedByNode( nodeB );
+    nodeA.setAriaLabelledByNode( nodeB );
 
     var nodeAElement = document.getElementById( getPeerElementId( nodeA ) );
     var nodeBElement = document.getElementById( getPeerElementId( nodeB ) );
@@ -142,8 +142,8 @@
     ok( nodeAElement.getAttribute( 'aria-labelledby' ) === nodeBElement.id, 'labelledby attribute wrong in normal use case' );
 
     // set up the relation on nodes that do not have accessible content yet
-    nodeD.setAriaDescribesNode( nodeC );
-    nodeD.setAriaLabelsNode( nodeC );
+    nodeC.setAriaDescribedByNode( nodeD );
+    nodeC.setAriaLabelledByNode( nodeD );
 
     // give both accessible content
     nodeC.tagName = 'button';
@@ -160,8 +160,11 @@
     ok( nodeCElement.getAttribute( 'aria-labelledby' ) === nodeDElement.id, 'labelledby attribute wrong in case of pre-invalidation' );
 
     // change the association so that nodeA's label is the label for nodeB, and nodeA's description is the description for nodeC
-    nodeA.setAriaDescribesNode( nodeC, scenery.AccessiblePeer.DESCRIPTION );
-    nodeA.setAriaLabelsNode( nodeB, scenery.AccessiblePeer.LABEL );
+    nodeA.ariaDescriptionContent = scenery.AccessiblePeer.DESCRIPTION;
+    nodeC.setAriaDescribedByNode( nodeA );
+
+    nodeA.ariaLabelContent = scenery.AccessiblePeer.LABEL;
+    nodeB.setAriaLabelledByNode( nodeA );
 
     // order of label and description with prependLabels will be labelElement, descriptionElement, domElement
     var nodeALabel = nodeAElement.parentElement.childNodes[ 0 ];
