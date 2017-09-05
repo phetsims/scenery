@@ -435,4 +435,85 @@
     ok( document.getElementById( instances[ 1 ].peer.domElement.id ), 'peer domElement 1 should be in the DOM' );
     ok( document.getElementById( instances[ 2 ].peer.domElement.id ), 'peer domElement 2 should be in the DOM' );
   } );
+
+  test( 'replaceChild', function() {
+
+    // test the behavior of replaceChild function
+    var rootNode = new scenery.Node( { tagName: 'div' } );
+    var display = new scenery.Display( rootNode ); // eslint-disable-line
+    document.body.appendChild( display.domElement );
+
+    // a custom focus highlight (since dummy node's have no bounds)
+    var focusHighlight = new scenery.Rectangle( 0, 0, 10, 10 );
+
+    // create some nodes for testing
+    var a = new scenery.Node( { tagName: 'button', focusHighlight: focusHighlight } );
+    var b = new scenery.Node( { tagName: 'button', focusHighlight: focusHighlight } );
+    var c = new scenery.Node( { tagName: 'button', focusHighlight: focusHighlight } );
+    var d = new scenery.Node( { tagName: 'button', focusHighlight: focusHighlight } );
+    var e = new scenery.Node( { tagName: 'button', focusHighlight: focusHighlight } );
+    var f = new scenery.Node( { tagName: 'button', focusHighlight: focusHighlight } );
+
+    // a child that will be added through replaceChild()
+    var testNode = new scenery.Node( { tagName: 'button', focusHighlight: focusHighlight } );
+
+    // make sure replaceChild puts the child in the right spot
+    a.children = [ b, c, d, e, f ];
+    var initIndex = a.indexOfChild( e );
+    a.replaceChild( e, testNode );
+    var afterIndex = a.indexOfChild( testNode );
+
+    ok( a.hasChild( testNode ), 'a should have child testNode after it replaced node e' );
+    ok( !a.hasChild( e ), 'a should no longer have child node e after it was replaced by testNode' );
+    ok( initIndex === afterIndex, 'testNode should be at the same place as e was after replaceChild' );
+
+    // create a scene graph to test how scenery manages focus
+    //    a
+    //   / \
+    //  f   b
+    //     / \
+    //    c   d
+    //     \ /
+    //      e
+    a.removeAllChildren();
+    rootNode.addChild( a );
+    a.children = [ f, b ];
+    b.children = [ c, d ];
+    c.addChild( e );
+    d.addChild( e );
+
+    f.focus();
+    ok( f.focused, 'f has focus before being replaced' );
+
+    // replace f with testNode, ensure that testNode receives focus after replacing
+    a.replaceChild( f, testNode );
+    ok( !a.hasChild( f ), 'a should no longer have child f' );
+    ok( a.hasChild( testNode ), 'a should now have child testNode' );
+    ok( !f.focused, 'f no longer has focus after being replaced' );
+    ok( testNode.focused, 'testNode has focus after replacing focused node f' );
+    ok( testNode.accessibleInstances[ 0 ].peer.domElement === document.activeElement, 'browser is focusing testNode' );
+
+    testNode.blur();
+    ok( testNode, 'testNode blurred before being replaced' );
+
+    // replace testNode with f after bluring testNode, neither should have focus after the replacement
+    a.replaceChild( testNode, f );
+    ok( a.hasChild( f ), 'node f should replace node testNode' );
+    ok( !a.hasChild( testNode ), 'testNode should no longer be a child of node a' );
+    ok( !testNode.focused, 'testNode should not have focus after being replaced' );
+    ok( !f.focused, 'f should not have focus after replacing testNode, testNode did not have focus' );
+    ok( f.accessibleInstances[ 0 ].peer.domElement !== document.activeElement, 'browser should not be focusing node f' );
+
+    // focus node d and replace with non-focusable testNode, neither should have focus since testNode is not focusable
+    d.focus();
+    testNode.focusable = false;
+    ok( d.focused, 'd has focus before being replaced' );
+    ok( !testNode.focusable, 'testNode is not focusable before replacing node d' );
+
+    b.replaceChild( d, testNode );
+    ok( b.hasChild( testNode), 'testNode should be a child of node b after replacing with replaceChild' );
+    ok( !b.hasChild( d ), 'd should not be a child of b after it was replaced with replaceChild' );
+    ok( !d.focused, 'do does not have focus after being replaced by testNode' );
+    ok( !testNode.focused, 'testNode does not have focus after replacing node d (testNode is not focusable)' );
+  } );
 })();
