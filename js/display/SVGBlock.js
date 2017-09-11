@@ -9,11 +9,11 @@
 define( function( require ) {
   'use strict';
 
+  var cleanArray = require( 'PHET_CORE/cleanArray' );
+  var FittedBlock = require( 'SCENERY/display/FittedBlock' );
   var inherit = require( 'PHET_CORE/inherit' );
   var Poolable = require( 'PHET_CORE/Poolable' );
-  var cleanArray = require( 'PHET_CORE/cleanArray' );
   var scenery = require( 'SCENERY/scenery' );
-  var FittedBlock = require( 'SCENERY/display/FittedBlock' );
   var SVGGroup = require( 'SCENERY/display/SVGGroup' );
   var Util = require( 'SCENERY/util/Util' );
 

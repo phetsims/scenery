@@ -9,14 +9,14 @@
 define( function( require ) {
   'use strict';
 
-  var scenery = require( 'SCENERY/scenery' );
-  var Color = require( 'SCENERY/util/Color' );
-  var LineStyles = require( 'KITE/util/LineStyles' );
-  var Renderer = require( 'SCENERY/display/Renderer' );
-  var extend = require( 'PHET_CORE/extend' );
-  var platform = require( 'PHET_CORE/platform' );
   var arrayRemove = require( 'PHET_CORE/arrayRemove' );
+  var Color = require( 'SCENERY/util/Color' );
+  var extend = require( 'PHET_CORE/extend' );
+  var LineStyles = require( 'KITE/util/LineStyles' );
+  var platform = require( 'PHET_CORE/platform' );
   var Property = require( 'AXON/Property' );
+  var Renderer = require( 'SCENERY/display/Renderer' );
+  var scenery = require( 'SCENERY/scenery' );
 
   var isSafari5 = platform.safari5;
   var isIE9 = platform.ie9;

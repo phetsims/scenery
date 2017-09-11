@@ -21,10 +21,10 @@ define( function( require ) {
 
   var scenery = require( 'SCENERY/scenery' );
   require( 'SCENERY/util/Trail' );
-  var inherit = require( 'PHET_CORE/inherit' );
-  var Emitter = require( 'AXON/Emitter' );
-  var Tandem = require( 'TANDEM/Tandem' );
   var DownUpListener = require( 'SCENERY/input/DownUpListener' );
+  var Emitter = require( 'AXON/Emitter' );
+  var inherit = require( 'PHET_CORE/inherit' );
+  var Tandem = require( 'TANDEM/Tandem' );
   var TButtonListener = require( 'SCENERY/input/TButtonListener' );
 
   /**

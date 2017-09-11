@@ -11,9 +11,9 @@ define( function( require ) {
   'use strict';
 
   // modules
+  var Emitter = require( 'AXON/Emitter' );
   var inherit = require( 'PHET_CORE/inherit' );
   var scenery = require( 'SCENERY/scenery' );
-  var Emitter = require( 'AXON/Emitter' );
 
   /**
    * @constructor

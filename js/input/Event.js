@@ -16,9 +16,9 @@ define( function( require ) {
   'use strict';
 
   var inherit = require( 'PHET_CORE/inherit' );
+  var Pointer = require( 'SCENERY/input/Pointer' );
   var scenery = require( 'SCENERY/scenery' );
   var Trail = require( 'SCENERY/util/Trail' );
-  var Pointer = require( 'SCENERY/input/Pointer' );
 
   /**
    * @constructor

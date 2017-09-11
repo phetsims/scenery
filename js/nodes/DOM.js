@@ -9,13 +9,13 @@
 define( function( require ) {
   'use strict';
 
-  var inherit = require( 'PHET_CORE/inherit' );
-  var extendDefined = require( 'PHET_CORE/extendDefined' );
-  var scenery = require( 'SCENERY/scenery' );
   var Bounds2 = require( 'DOT/Bounds2' );
+  var DOMDrawable = require( 'SCENERY/display/drawables/DOMDrawable' );
+  var extendDefined = require( 'PHET_CORE/extendDefined' );
+  var inherit = require( 'PHET_CORE/inherit' );
   var Node = require( 'SCENERY/nodes/Node' ); // DOM inherits from Node
   var Renderer = require( 'SCENERY/display/Renderer' );
-  var DOMDrawable = require( 'SCENERY/display/drawables/DOMDrawable' );
+  var scenery = require( 'SCENERY/scenery' );
 
   var DOM_OPTION_KEYS = [
     'element', // Sets the element, see setElement() for more documentation

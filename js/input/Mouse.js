@@ -13,8 +13,8 @@ define( function( require ) {
   var inherit = require( 'PHET_CORE/inherit' );
   var scenery = require( 'SCENERY/scenery' );
 
-  var Vector3 = require( 'DOT/Vector3' );
   var Pointer = require( 'SCENERY/input/Pointer' ); // inherits from Pointer
+  var Vector3 = require( 'DOT/Vector3' );
 
   function Mouse() {
     Pointer.call( this, null, false );

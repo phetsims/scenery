@@ -68,8 +68,8 @@ define( function( require ) {
   var Line = require( 'SCENERY/nodes/Line' );
   var Node = require( 'SCENERY/nodes/Node' );
   var scenery = require( 'SCENERY/scenery' );
-  var Text = require( 'SCENERY/nodes/Text' );
   var Tandem = require( 'TANDEM/Tandem' );
+  var Text = require( 'SCENERY/nodes/Text' );
   var TRichText = require( 'SCENERY/nodes/TRichText' );
   var VStrut = require( 'SCENERY/nodes/VStrut' );
 

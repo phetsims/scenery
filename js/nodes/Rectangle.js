@@ -9,19 +9,19 @@
 define( function( require ) {
   'use strict';
 
-  var inherit = require( 'PHET_CORE/inherit' );
-  var extendDefined = require( 'PHET_CORE/extendDefined' );
-  var scenery = require( 'SCENERY/scenery' );
-  var Path = require( 'SCENERY/nodes/Path' );
-  var Shape = require( 'KITE/Shape' );
   var Bounds2 = require( 'DOT/Bounds2' );
   var Dimension2 = require( 'DOT/Dimension2' );
+  var extendDefined = require( 'PHET_CORE/extendDefined' );
   var Features = require( 'SCENERY/util/Features' );
-  var Renderer = require( 'SCENERY/display/Renderer' );
+  var inherit = require( 'PHET_CORE/inherit' );
+  var Path = require( 'SCENERY/nodes/Path' );
   var RectangleCanvasDrawable = require( 'SCENERY/display/drawables/RectangleCanvasDrawable' );
   var RectangleDOMDrawable = require( 'SCENERY/display/drawables/RectangleDOMDrawable' );
   var RectangleSVGDrawable = require( 'SCENERY/display/drawables/RectangleSVGDrawable' );
   var RectangleWebGLDrawable = require( 'SCENERY/display/drawables/RectangleWebGLDrawable' );
+  var Renderer = require( 'SCENERY/display/Renderer' );
+  var scenery = require( 'SCENERY/scenery' );
+  var Shape = require( 'KITE/Shape' );
 
   var RECTANGLE_OPTION_KEYS = [
     'rectBounds', // Sets x/y/width/height based on bounds. See setRectBounds() for more documentation.

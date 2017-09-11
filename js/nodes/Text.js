@@ -12,20 +12,20 @@ define( function( require ) {
   'use strict';
 
   // modules
-  var inherit = require( 'PHET_CORE/inherit' );
-  var extendDefined = require( 'PHET_CORE/extendDefined' );
-  var scenery = require( 'SCENERY/scenery' );
   var escapeHTML = require( 'PHET_CORE/escapeHTML' );
-  var platform = require( 'PHET_CORE/platform' );
-  var Node = require( 'SCENERY/nodes/Node' );
-  var Renderer = require( 'SCENERY/display/Renderer' );
-  var Paintable = require( 'SCENERY/nodes/Paintable' );
+  var extendDefined = require( 'PHET_CORE/extendDefined' );
   var Font = require( 'SCENERY/util/Font' );
+  var inherit = require( 'PHET_CORE/inherit' );
+  var Node = require( 'SCENERY/nodes/Node' );
+  var Paintable = require( 'SCENERY/nodes/Paintable' );
+  var platform = require( 'PHET_CORE/platform' );
+  var Renderer = require( 'SCENERY/display/Renderer' );
+  var scenery = require( 'SCENERY/scenery' );
   var Tandem = require( 'TANDEM/Tandem' );
+  var TextBounds = require( 'SCENERY/util/TextBounds' );
   var TextCanvasDrawable = require( 'SCENERY/display/drawables/TextCanvasDrawable' );
   var TextDOMDrawable = require( 'SCENERY/display/drawables/TextDOMDrawable' );
   var TextSVGDrawable = require( 'SCENERY/display/drawables/TextSVGDrawable' );
-  var TextBounds = require( 'SCENERY/util/TextBounds' );
   var TText = require( 'SCENERY/nodes/TText' );
 
   // constants

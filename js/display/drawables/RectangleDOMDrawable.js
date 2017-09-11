@@ -9,12 +9,12 @@
 define( function( require ) {
   'use strict';
 
-  var inherit = require( 'PHET_CORE/inherit' );
-  var scenery = require( 'SCENERY/scenery' );
-  var Matrix3 = require( 'DOT/Matrix3' );
-  var Features = require( 'SCENERY/util/Features' );
   var DOMSelfDrawable = require( 'SCENERY/display/DOMSelfDrawable' );
+  var Features = require( 'SCENERY/util/Features' );
+  var inherit = require( 'PHET_CORE/inherit' );
+  var Matrix3 = require( 'DOT/Matrix3' );
   var RectangleStatefulDrawable = require( 'SCENERY/display/drawables/RectangleStatefulDrawable' );
+  var scenery = require( 'SCENERY/scenery' );
   var SelfDrawable = require( 'SCENERY/display/SelfDrawable' );
 
   // TODO: change this based on memory and performance characteristics of the platform

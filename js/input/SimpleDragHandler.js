@@ -9,10 +9,10 @@
 define( function( require ) {
   'use strict';
 
+  var Emitter = require( 'AXON/Emitter' );
   var inherit = require( 'PHET_CORE/inherit' );
   var scenery = require( 'SCENERY/scenery' );
   var Tandem = require( 'TANDEM/Tandem' );
-  var Emitter = require( 'AXON/Emitter' );
 
   // phet-io modules
   var TSimpleDragHandler = require( 'SCENERY/input/TSimpleDragHandler' );

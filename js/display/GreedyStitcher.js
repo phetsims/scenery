@@ -38,10 +38,10 @@
 define( function( require ) {
   'use strict';
 
-  var inherit = require( 'PHET_CORE/inherit' );
   var cleanArray = require( 'PHET_CORE/cleanArray' );
-  var scenery = require( 'SCENERY/scenery' );
+  var inherit = require( 'PHET_CORE/inherit' );
   var Renderer = require( 'SCENERY/display/Renderer' );
+  var scenery = require( 'SCENERY/scenery' );
   var Stitcher = require( 'SCENERY/display/Stitcher' );
 
   // Returns whether the consecutive {Drawable}s 'a' and 'b' should be put into separate blocks

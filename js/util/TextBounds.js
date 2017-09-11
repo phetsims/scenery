@@ -9,11 +9,11 @@
 define( function( require ) {
   'use strict';
 
-  var scenery = require( 'SCENERY/scenery' );
-  var Font = require( 'SCENERY/util/Font' );
   var Bounds2 = require( 'DOT/Bounds2' );
-  var Util = require( 'SCENERY/util/Util' );
   var CanvasContextWrapper = require( 'SCENERY/util/CanvasContextWrapper' );
+  var Font = require( 'SCENERY/util/Font' );
+  var scenery = require( 'SCENERY/scenery' );
+  var Util = require( 'SCENERY/util/Util' );
 
   // @private {string} - ID for a container for our SVG test element (determined to find the size of text elements with SVG)
   var TEXT_SIZE_CONTAINER_ID = 'sceneryTextSizeContainer';

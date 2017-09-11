@@ -16,10 +16,10 @@ define( function( require ) {
   'use strict';
 
   var inherit = require( 'PHET_CORE/inherit' );
-  var scenery = require( 'SCENERY/scenery' );
-  var Property = require( 'AXON/Property' );
   var ObservableArray = require( 'AXON/ObservableArray' );
   var PressListener = require( 'SCENERY/listeners/PressListener' );
+  var Property = require( 'AXON/Property' );
+  var scenery = require( 'SCENERY/scenery' );
 
   /**
    * @constructor

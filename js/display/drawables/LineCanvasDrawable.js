@@ -9,11 +9,11 @@
 define( function( require ) {
   'use strict';
 
-  var inherit = require( 'PHET_CORE/inherit' );
-  var scenery = require( 'SCENERY/scenery' );
   var CanvasSelfDrawable = require( 'SCENERY/display/CanvasSelfDrawable' );
-  var SelfDrawable = require( 'SCENERY/display/SelfDrawable' );
+  var inherit = require( 'PHET_CORE/inherit' );
   var PaintableStatelessDrawable = require( 'SCENERY/display/drawables/PaintableStatelessDrawable' );
+  var scenery = require( 'SCENERY/scenery' );
+  var SelfDrawable = require( 'SCENERY/display/SelfDrawable' );
   // TODO: use LineStatelessDrawable instead of the custom stuff going on
   // var LineStatelessDrawable = require( 'SCENERY/display/drawables/LineStatelessDrawable' );
 

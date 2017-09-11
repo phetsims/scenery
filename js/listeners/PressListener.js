@@ -18,9 +18,9 @@ define( function( require ) {
   'use strict';
 
   var inherit = require( 'PHET_CORE/inherit' );
-  var scenery = require( 'SCENERY/scenery' );
   var Node = require( 'SCENERY/nodes/Node' );
   var Property = require( 'AXON/Property' );
+  var scenery = require( 'SCENERY/scenery' );
 
   /**
    * @constructor

@@ -15,10 +15,10 @@ define( function( require ) {
   var assertInstanceOf = require( 'ifphetio!PHET_IO/assertions/assertInstanceOf' );
   var phetioInherit = require( 'ifphetio!PHET_IO/phetioInherit' );
   var TBoolean = require( 'ifphetio!PHET_IO/types/TBoolean' );
+  var TFunctionWrapper = require( 'ifphetio!PHET_IO/types/TFunctionWrapper' );
   var TNumber = require( 'ifphetio!PHET_IO/types/TNumber' );
   var TObject = require( 'ifphetio!PHET_IO/types/TObject' );
   var TVoid = require( 'ifphetio!PHET_IO/types/TVoid' );
-  var TFunctionWrapper = require( 'ifphetio!PHET_IO/types/TFunctionWrapper' );
 
   /**
    * Wrapper type for phet/scenery's Node

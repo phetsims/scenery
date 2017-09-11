@@ -17,11 +17,11 @@ define( function( require ) {
   'use strict';
 
   // modules
-  var scenery = require( 'SCENERY/scenery' );
-  var inherit = require( 'PHET_CORE/inherit' );
   var BinPacker = require( 'DOT/BinPacker' );
   var Bounds2 = require( 'DOT/Bounds2' );
   var Dimension2 = require( 'DOT/Dimension2' );
+  var inherit = require( 'PHET_CORE/inherit' );
+  var scenery = require( 'SCENERY/scenery' );
 
   // constants
   // The max SpriteSheet size was selected to minimize memory overhead while still accommodating many large images

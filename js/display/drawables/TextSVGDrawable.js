@@ -10,10 +10,10 @@ define( function( require ) {
   'use strict';
 
   var inherit = require( 'PHET_CORE/inherit' );
-  var scenery = require( 'SCENERY/scenery' );
   var platform = require( 'PHET_CORE/platform' );
-  var SVGSelfDrawable = require( 'SCENERY/display/SVGSelfDrawable' );
+  var scenery = require( 'SCENERY/scenery' );
   var SelfDrawable = require( 'SCENERY/display/SelfDrawable' );
+  var SVGSelfDrawable = require( 'SCENERY/display/SVGSelfDrawable' );
   var TextStatefulDrawable = require( 'SCENERY/display/drawables/TextStatefulDrawable' );
 
   // TODO: change this based on memory and performance characteristics of the platform

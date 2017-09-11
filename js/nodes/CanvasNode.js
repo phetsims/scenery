@@ -16,9 +16,9 @@ define( function( require ) {
   var inherit = require( 'PHET_CORE/inherit' );
   var scenery = require( 'SCENERY/scenery' );
 
+  var CanvasNodeDrawable = require( 'SCENERY/display/drawables/CanvasNodeDrawable' );
   var Node = require( 'SCENERY/nodes/Node' );
   var Renderer = require( 'SCENERY/display/Renderer' );
-  var CanvasNodeDrawable = require( 'SCENERY/display/drawables/CanvasNodeDrawable' );
 
   /**
    * @public

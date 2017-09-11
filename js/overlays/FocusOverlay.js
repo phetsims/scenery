@@ -11,14 +11,14 @@ define( function( require ) {
 
   var inherit = require( 'PHET_CORE/inherit' );
 
-  var scenery = require( 'SCENERY/scenery' );
-  var Vector2 = require( 'DOT/Vector2' );
-  var Rectangle = require( 'SCENERY/nodes/Rectangle' );
   var Color = require( 'SCENERY/util/Color' );
-  var TransformTracker = require( 'SCENERY/util/TransformTracker' );
-  var Shape = require( 'KITE/Shape' );
   var Node = require( 'SCENERY/nodes/Node' );
   var Path = require( 'SCENERY/nodes/Path' );
+  var Rectangle = require( 'SCENERY/nodes/Rectangle' );
+  var scenery = require( 'SCENERY/scenery' );
+  var Shape = require( 'KITE/Shape' );
+  var TransformTracker = require( 'SCENERY/util/TransformTracker' );
+  var Vector2 = require( 'DOT/Vector2' );
 
   function FocusOverlay( display, focusRootNode ) {
     this.display = display; // @private {Display}

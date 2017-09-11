@@ -9,15 +9,15 @@
 define( function( require ) {
   'use strict';
 
-  var inherit = require( 'PHET_CORE/inherit' );
-  var scenery = require( 'SCENERY/scenery' );
-  var Vector2 = require( 'DOT/Vector2' );
-  var Property = require( 'AXON/Property' );
-  var WebGLSelfDrawable = require( 'SCENERY/display/WebGLSelfDrawable' );
-  var RectangleStatefulDrawable = require( 'SCENERY/display/drawables/RectangleStatefulDrawable' );
-  var SelfDrawable = require( 'SCENERY/display/SelfDrawable' );
-  var Renderer = require( 'SCENERY/display/Renderer' );
   var Color = require( 'SCENERY/util/Color' );
+  var inherit = require( 'PHET_CORE/inherit' );
+  var Property = require( 'AXON/Property' );
+  var RectangleStatefulDrawable = require( 'SCENERY/display/drawables/RectangleStatefulDrawable' );
+  var Renderer = require( 'SCENERY/display/Renderer' );
+  var scenery = require( 'SCENERY/scenery' );
+  var SelfDrawable = require( 'SCENERY/display/SelfDrawable' );
+  var Vector2 = require( 'DOT/Vector2' );
+  var WebGLSelfDrawable = require( 'SCENERY/display/WebGLSelfDrawable' );
 
   var scratchColor = new Color( 'transparent' );
 

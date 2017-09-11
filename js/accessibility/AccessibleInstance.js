@@ -9,12 +9,12 @@
 define( function( require ) {
   'use strict';
 
-  var inherit = require( 'PHET_CORE/inherit' );
-  var Poolable = require( 'PHET_CORE/Poolable' );
-  var Events = require( 'AXON/Events' );
-  var scenery = require( 'SCENERY/scenery' );
   // var AccessiblePeer = require( 'SCENERY/accessibility/AccessiblePeer' );
   var cleanArray = require( 'PHET_CORE/cleanArray' );
+  var Events = require( 'AXON/Events' );
+  var inherit = require( 'PHET_CORE/inherit' );
+  var Poolable = require( 'PHET_CORE/Poolable' );
+  var scenery = require( 'SCENERY/scenery' );
 
   var globalId = 1;
 

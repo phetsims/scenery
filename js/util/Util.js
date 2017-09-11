@@ -11,11 +11,11 @@ define( function( require ) {
 
   var scenery = require( 'SCENERY/scenery' );
 
+  var Bounds2 = require( 'DOT/Bounds2' );
+  var Features = require( 'SCENERY/util/Features' );
   var Matrix3 = require( 'DOT/Matrix3' );
   var Transform3 = require( 'DOT/Transform3' );
-  var Bounds2 = require( 'DOT/Bounds2' );
   var Vector2 = require( 'DOT/Vector2' );
-  var Features = require( 'SCENERY/util/Features' );
 
   // convenience function
   function p( x, y ) {

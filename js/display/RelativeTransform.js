@@ -87,8 +87,8 @@
 define( function( require ) {
   'use strict';
 
-  var inherit = require( 'PHET_CORE/inherit' );
   var cleanArray = require( 'PHET_CORE/cleanArray' );
+  var inherit = require( 'PHET_CORE/inherit' );
   var Matrix3 = require( 'DOT/Matrix3' );
   var scenery = require( 'SCENERY/scenery' );
 

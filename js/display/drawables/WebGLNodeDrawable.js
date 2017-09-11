@@ -11,11 +11,11 @@ define( function( require ) {
 
   // modules
   var inherit = require( 'PHET_CORE/inherit' );
-  var scenery = require( 'SCENERY/scenery' );
   var Matrix3 = require( 'DOT/Matrix3' );
   var Renderer = require( 'SCENERY/display/Renderer' );
-  var WebGLSelfDrawable = require( 'SCENERY/display/WebGLSelfDrawable' );
+  var scenery = require( 'SCENERY/scenery' );
   var SelfDrawable = require( 'SCENERY/display/SelfDrawable' );
+  var WebGLSelfDrawable = require( 'SCENERY/display/WebGLSelfDrawable' );
 
   // Use a Float32Array-backed matrix, as it's better for usage with WebGL
   var modelViewMatrix = new Matrix3().setTo32Bit();

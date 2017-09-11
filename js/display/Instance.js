@@ -24,18 +24,18 @@
 define( function( require ) {
   'use strict';
 
+  var arrayRemove = require( 'PHET_CORE/arrayRemove' );
+  var ChangeInterval = require( 'SCENERY/display/ChangeInterval' );
+  var cleanArray = require( 'PHET_CORE/cleanArray' );
+  var Drawable = require( 'SCENERY/display/Drawable' );
+  var Events = require( 'AXON/Events' );
+  var Fittability = require( 'SCENERY/display/Fittability' );
   var inherit = require( 'PHET_CORE/inherit' );
   var Poolable = require( 'PHET_CORE/Poolable' );
-  var cleanArray = require( 'PHET_CORE/cleanArray' );
-  var arrayRemove = require( 'PHET_CORE/arrayRemove' );
-  var scenery = require( 'SCENERY/scenery' );
-  var ChangeInterval = require( 'SCENERY/display/ChangeInterval' );
-  var Drawable = require( 'SCENERY/display/Drawable' );
-  var Renderer = require( 'SCENERY/display/Renderer' );
   var RelativeTransform = require( 'SCENERY/display/RelativeTransform' );
-  var Fittability = require( 'SCENERY/display/Fittability' );
+  var Renderer = require( 'SCENERY/display/Renderer' );
+  var scenery = require( 'SCENERY/scenery' );
   var Util = require( 'SCENERY/util/Util' );
-  var Events = require( 'AXON/Events' );
 
   var globalIdCounter = 1;
 

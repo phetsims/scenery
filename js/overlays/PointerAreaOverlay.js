@@ -10,8 +10,8 @@ define( function( require ) {
   'use strict';
 
   var inherit = require( 'PHET_CORE/inherit' );
-  var ShapeBasedOverlay = require( 'SCENERY/overlays/ShapeBasedOverlay' );
   var Shape = require( 'KITE/Shape' );
+  var ShapeBasedOverlay = require( 'SCENERY/overlays/ShapeBasedOverlay' );
 
   var scenery = require( 'SCENERY/scenery' );
   require( 'SCENERY/util/Trail' );

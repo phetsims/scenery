@@ -10,9 +10,9 @@
 define( function( require ) {
   'use strict';
 
+  var Drawable = require( 'SCENERY/display/Drawable' );
   var inherit = require( 'PHET_CORE/inherit' );
   var scenery = require( 'SCENERY/scenery' );
-  var Drawable = require( 'SCENERY/display/Drawable' );
 
   function InlineCanvasCacheDrawable( renderer, instance ) {
     Drawable.call( this, renderer );

@@ -9,10 +9,10 @@
 define( function( require ) {
   'use strict';
 
-  var inherit = require( 'PHET_CORE/inherit' );
-  var scenery = require( 'SCENERY/scenery' );
-  var Matrix3 = require( 'DOT/Matrix3' );
   var DOMSelfDrawable = require( 'SCENERY/display/DOMSelfDrawable' );
+  var inherit = require( 'PHET_CORE/inherit' );
+  var Matrix3 = require( 'DOT/Matrix3' );
+  var scenery = require( 'SCENERY/scenery' );
   var SelfDrawable = require( 'SCENERY/display/SelfDrawable' );
   var TextStatefulDrawable = require( 'SCENERY/display/drawables/TextStatefulDrawable' );
   require( 'SCENERY/util/Util' );

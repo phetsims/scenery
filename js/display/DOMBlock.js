@@ -11,10 +11,10 @@
 define( function( require ) {
   'use strict';
 
+  var Block = require( 'SCENERY/display/Block' );
   var inherit = require( 'PHET_CORE/inherit' );
   var Poolable = require( 'PHET_CORE/Poolable' );
   var scenery = require( 'SCENERY/scenery' );
-  var Block = require( 'SCENERY/display/Block' );
 
   /**
    * @constructor

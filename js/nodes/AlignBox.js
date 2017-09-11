@@ -22,10 +22,10 @@
 define( function( require ) {
   'use strict';
 
-  var inherit = require( 'PHET_CORE/inherit' );
   var Bounds2 = require( 'DOT/Bounds2' );
-  var scenery = require( 'SCENERY/scenery' );
+  var inherit = require( 'PHET_CORE/inherit' );
   var Node = require( 'SCENERY/nodes/Node' );
+  var scenery = require( 'SCENERY/scenery' );
 
   var ALIGNMENT_CONTAINER_OPTION_KEYS = [
     'alignBounds', // {Bounds2|null} - See setAlignBounds() for more documentation

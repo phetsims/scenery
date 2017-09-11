@@ -19,9 +19,9 @@ define( function( require ) {
   'use strict';
 
   var inherit = require( 'PHET_CORE/inherit' );
+  var PaintSVGState = require( 'SCENERY/display/PaintSVGState' );
   var scenery = require( 'SCENERY/scenery' );
   var SelfDrawable = require( 'SCENERY/display/SelfDrawable' );
-  var PaintSVGState = require( 'SCENERY/display/PaintSVGState' );
 
   function SVGSelfDrawable( renderer, instance ) {
     this.initializeSVGSelfDrawable( renderer, instance );

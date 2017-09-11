@@ -56,10 +56,10 @@
 define( function( require ) {
   'use strict';
 
-  var inherit = require( 'PHET_CORE/inherit' );
   var Events = require( 'AXON/Events' );
-  var scenery = require( 'SCENERY/scenery' );
+  var inherit = require( 'PHET_CORE/inherit' );
   var Renderer = require( 'SCENERY/display/Renderer' );
+  var scenery = require( 'SCENERY/scenery' );
 
   var globalId = 1;
 

@@ -9,9 +9,9 @@
 define( function( require ) {
   'use strict';
 
+  var CanvasSelfDrawable = require( 'SCENERY/display/CanvasSelfDrawable' );
   var inherit = require( 'PHET_CORE/inherit' );
   var scenery = require( 'SCENERY/scenery' );
-  var CanvasSelfDrawable = require( 'SCENERY/display/CanvasSelfDrawable' );
   var SelfDrawable = require( 'SCENERY/display/SelfDrawable' );
 
   var emptyArray = []; // constant, used for line-dash

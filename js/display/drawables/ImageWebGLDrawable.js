@@ -9,13 +9,13 @@
 define( function( require ) {
   'use strict';
 
-  var inherit = require( 'PHET_CORE/inherit' );
-  var scenery = require( 'SCENERY/scenery' );
-  var Vector2 = require( 'DOT/Vector2' );
-  var Renderer = require( 'SCENERY/display/Renderer' );
-  var SelfDrawable = require( 'SCENERY/display/SelfDrawable' );
-  var WebGLSelfDrawable = require( 'SCENERY/display/WebGLSelfDrawable' );
   var ImageStatefulDrawable = require( 'SCENERY/display/drawables/ImageStatefulDrawable' );
+  var inherit = require( 'PHET_CORE/inherit' );
+  var Renderer = require( 'SCENERY/display/Renderer' );
+  var scenery = require( 'SCENERY/scenery' );
+  var SelfDrawable = require( 'SCENERY/display/SelfDrawable' );
+  var Vector2 = require( 'DOT/Vector2' );
+  var WebGLSelfDrawable = require( 'SCENERY/display/WebGLSelfDrawable' );
 
   // For alignment, we keep things to 8 components, aligned on 4-byte boundaries.
   // See https://developer.apple.com/library/ios/documentation/3DDrawing/Conceptual/OpenGLES_ProgrammingGuide/TechniquesforWorkingwithVertexData/TechniquesforWorkingwithVertexData.html#//apple_ref/doc/uid/TP40008793-CH107-SW15

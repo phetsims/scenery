@@ -9,11 +9,11 @@
 define( function( require ) {
   'use strict';
 
+  var CircleStatefulDrawable = require( 'SCENERY/display/drawables/CircleStatefulDrawable' );
   var inherit = require( 'PHET_CORE/inherit' );
   var scenery = require( 'SCENERY/scenery' );
-  var SVGSelfDrawable = require( 'SCENERY/display/SVGSelfDrawable' );
-  var CircleStatefulDrawable = require( 'SCENERY/display/drawables/CircleStatefulDrawable' );
   var SelfDrawable = require( 'SCENERY/display/SelfDrawable' );
+  var SVGSelfDrawable = require( 'SCENERY/display/SVGSelfDrawable' );
 
   // TODO: change this based on memory and performance characteristics of the platform
   var keepSVGCircleElements = true; // whether we should pool SVG elements for the SVG rendering states, or whether we should free them when possible for memory

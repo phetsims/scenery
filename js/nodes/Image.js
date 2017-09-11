@@ -10,18 +10,18 @@
 define( function( require ) {
   'use strict';
 
-  var inherit = require( 'PHET_CORE/inherit' );
-  var extendDefined = require( 'PHET_CORE/extendDefined' );
-  var scenery = require( 'SCENERY/scenery' );
-  var cleanArray = require( 'PHET_CORE/cleanArray' );
   var Bounds2 = require( 'DOT/Bounds2' );
-  var Node = require( 'SCENERY/nodes/Node' );
-  var Renderer = require( 'SCENERY/display/Renderer' );
-  var SpriteSheet = require( 'SCENERY/util/SpriteSheet' );
+  var cleanArray = require( 'PHET_CORE/cleanArray' );
+  var extendDefined = require( 'PHET_CORE/extendDefined' );
   var ImageCanvasDrawable = require( 'SCENERY/display/drawables/ImageCanvasDrawable' );
   var ImageDOMDrawable = require( 'SCENERY/display/drawables/ImageDOMDrawable' );
   var ImageSVGDrawable = require( 'SCENERY/display/drawables/ImageSVGDrawable' );
   var ImageWebGLDrawable = require( 'SCENERY/display/drawables/ImageWebGLDrawable' );
+  var inherit = require( 'PHET_CORE/inherit' );
+  var Node = require( 'SCENERY/nodes/Node' );
+  var Renderer = require( 'SCENERY/display/Renderer' );
+  var scenery = require( 'SCENERY/scenery' );
+  var SpriteSheet = require( 'SCENERY/util/SpriteSheet' );
 
   // Need to poly-fill on some browsers
   var log2 = Math.log2 || function( x ) { return Math.log( x ) / Math.LN2; };

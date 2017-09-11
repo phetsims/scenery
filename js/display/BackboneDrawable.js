@@ -11,14 +11,14 @@ define( function( require ) {
   'use strict';
 
   // modules
+  var cleanArray = require( 'PHET_CORE/cleanArray' );
+  var Drawable = require( 'SCENERY/display/Drawable' );
+  var GreedyStitcher = require( 'SCENERY/display/GreedyStitcher' );
   var inherit = require( 'PHET_CORE/inherit' );
   var Poolable = require( 'PHET_CORE/Poolable' );
-  var cleanArray = require( 'PHET_CORE/cleanArray' );
-  var scenery = require( 'SCENERY/scenery' );
-  var Drawable = require( 'SCENERY/display/Drawable' );
-  var Stitcher = require( 'SCENERY/display/Stitcher' );
-  var GreedyStitcher = require( 'SCENERY/display/GreedyStitcher' );
   var RebuildStitcher = require( 'SCENERY/display/RebuildStitcher' );
+  var scenery = require( 'SCENERY/scenery' );
+  var Stitcher = require( 'SCENERY/display/Stitcher' );
   var Util = require( 'SCENERY/util/Util' );
 
   // constants

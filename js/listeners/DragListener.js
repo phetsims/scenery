@@ -42,10 +42,10 @@ define( function( require ) {
   'use strict';
 
   var inherit = require( 'PHET_CORE/inherit' );
-  var scenery = require( 'SCENERY/scenery' );
-  var Vector2 = require( 'DOT/Vector2' );
   var PressListener = require( 'SCENERY/listeners/PressListener' );
+  var scenery = require( 'SCENERY/scenery' );
   var TransformTracker = require( 'SCENERY/util/TransformTracker' );
+  var Vector2 = require( 'DOT/Vector2' );
 
   /**
    * @constructor

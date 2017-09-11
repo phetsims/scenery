@@ -154,26 +154,26 @@
 define( function( require ) {
   'use strict';
 
-  var inherit = require( 'PHET_CORE/inherit' );
-  var extend = require( 'PHET_CORE/extend' );
-  var Events = require( 'AXON/Events' );
+  var Accessibility = require( 'SCENERY/accessibility/Accessibility' );
   var Bounds2 = require( 'DOT/Bounds2' );
-  var Transform3 = require( 'DOT/Transform3' );
+  var Events = require( 'AXON/Events' );
+  var extend = require( 'PHET_CORE/extend' );
+  var inherit = require( 'PHET_CORE/inherit' );
   var Matrix3 = require( 'DOT/Matrix3' );
-  var Vector2 = require( 'DOT/Vector2' );
-  var Util = require( 'DOT/Util' );
-  var Shape = require( 'KITE/Shape' );
-  var scenery = require( 'SCENERY/scenery' );
+  var Picker = require( 'SCENERY/util/Picker' );
   var Renderer = require( 'SCENERY/display/Renderer' );
   var RendererSummary = require( 'SCENERY/util/RendererSummary' );
-  var Picker = require( 'SCENERY/util/Picker' );
-  var Accessibility = require( 'SCENERY/accessibility/Accessibility' );
+  var scenery = require( 'SCENERY/scenery' );
+  var Shape = require( 'KITE/Shape' );
+  var Transform3 = require( 'DOT/Transform3' );
+  var Util = require( 'DOT/Util' );
+  var Vector2 = require( 'DOT/Vector2' );
   require( 'SCENERY/util/CanvasContextWrapper' );
   // commented out so Require.js doesn't balk at the circular dependency
   // require( 'SCENERY/util/Trail' );
   // require( 'SCENERY/util/TrailPointer' );
-  var TNode = require( 'SCENERY/nodes/TNode' );
   var Tandem = require( 'TANDEM/Tandem' );
+  var TNode = require( 'SCENERY/nodes/TNode' );
   // constants
   var clamp = Util.clamp;
 

@@ -14,8 +14,8 @@
 define( function( require ) {
   'use strict';
 
-  var scenery = require( 'SCENERY/scenery' );
   var PaintableStatefulDrawable = require( 'SCENERY/display/drawables/PaintableStatefulDrawable' );
+  var scenery = require( 'SCENERY/scenery' );
 
   var PathStatefulDrawable = {
     /**

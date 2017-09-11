@@ -9,11 +9,11 @@
 define( function( require ) {
   'use strict';
 
-  var inherit = require( 'PHET_CORE/inherit' );
-  var scenery = require( 'SCENERY/scenery' );
   var CanvasSelfDrawable = require( 'SCENERY/display/CanvasSelfDrawable' );
-  var SelfDrawable = require( 'SCENERY/display/SelfDrawable' );
+  var inherit = require( 'PHET_CORE/inherit' );
   var PaintableStatelessDrawable = require( 'SCENERY/display/drawables/PaintableStatelessDrawable' );
+  var scenery = require( 'SCENERY/scenery' );
+  var SelfDrawable = require( 'SCENERY/display/SelfDrawable' );
 
   /**
    * A generated CanvasSelfDrawable whose purpose will be drawing our Circle. One of these drawables will be created

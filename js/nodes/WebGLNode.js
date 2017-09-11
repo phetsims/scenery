@@ -15,12 +15,12 @@ define( function( require ) {
 
   // modules
   var inherit = require( 'PHET_CORE/inherit' );
-  var scenery = require( 'SCENERY/scenery' );
   var Matrix3 = require( 'DOT/Matrix3' );
   var Node = require( 'SCENERY/nodes/Node' );
   var Renderer = require( 'SCENERY/display/Renderer' );
-  var WebGLNodeDrawable = require( 'SCENERY/display/drawables/WebGLNodeDrawable' );
+  var scenery = require( 'SCENERY/scenery' );
   var Util = require( 'SCENERY/util/Util' );
+  var WebGLNodeDrawable = require( 'SCENERY/display/drawables/WebGLNodeDrawable' );
 
   var WEBGL_NODE_OPTION_KEYS = [
     'canvasBounds' // Sets the available Canvas bounds that content will show up in. See setCanvasBounds()

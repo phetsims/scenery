@@ -10,10 +10,10 @@
 define( function( require ) {
   'use strict';
 
-  var inherit = require( 'PHET_CORE/inherit' );
-  var Poolable = require( 'PHET_CORE/Poolable' );
   var cleanArray = require( 'PHET_CORE/cleanArray' );
+  var inherit = require( 'PHET_CORE/inherit' );
   var platform = require( 'PHET_CORE/platform' );
+  var Poolable = require( 'PHET_CORE/Poolable' );
   var scenery = require( 'SCENERY/scenery' );
 
   /**

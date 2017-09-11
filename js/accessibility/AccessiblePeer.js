@@ -10,11 +10,11 @@
 define( function( require ) {
   'use strict';
 
+  var Events = require( 'AXON/Events' );
+  var Focus = require( 'SCENERY/accessibility/Focus' );
   var inherit = require( 'PHET_CORE/inherit' );
   var Poolable = require( 'PHET_CORE/Poolable' );
-  var Events = require( 'AXON/Events' );
   var scenery = require( 'SCENERY/scenery' );
-  var Focus = require( 'SCENERY/accessibility/Focus' );
   // so RequireJS doesn't complain about circular dependency
   // var Display = require( 'SCENERY/display/Display' );
 

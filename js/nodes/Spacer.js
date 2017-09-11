@@ -9,11 +9,11 @@
 define( function( require ) {
   'use strict';
 
-  var inherit = require( 'PHET_CORE/inherit' );
-  var scenery = require( 'SCENERY/scenery' );
   var Bounds2 = require( 'DOT/Bounds2' );
-  var Node = require( 'SCENERY/nodes/Node' );
+  var inherit = require( 'PHET_CORE/inherit' );
   var Leaf = require( 'SCENERY/nodes/Leaf' );
+  var Node = require( 'SCENERY/nodes/Node' );
+  var scenery = require( 'SCENERY/scenery' );
 
   /**
    * Creates a spacer taking up a rectangular area from x: [0,width] and y: [0,height]. Use x/y in options to control

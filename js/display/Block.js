@@ -11,10 +11,10 @@
 define( function( require ) {
   'use strict';
 
-  var inherit = require( 'PHET_CORE/inherit' );
   var cleanArray = require( 'PHET_CORE/cleanArray' );
-  var scenery = require( 'SCENERY/scenery' );
   var Drawable = require( 'SCENERY/display/Drawable' );
+  var inherit = require( 'PHET_CORE/inherit' );
+  var scenery = require( 'SCENERY/scenery' );
 
   function Block( display, renderer ) {
     throw new Error( 'Should never be called' );

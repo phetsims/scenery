@@ -12,9 +12,9 @@
 define( function( require ) {
   'use strict';
 
+  var Bounds2 = require( 'DOT/Bounds2' );
   var inherit = require( 'PHET_CORE/inherit' );
   var scenery = require( 'SCENERY/scenery' );
-  var Bounds2 = require( 'DOT/Bounds2' );
   var Vector2 = require( 'DOT/Vector2' );
 
   /**

@@ -58,10 +58,10 @@ define( function( require ) {
   'use strict';
 
   // modules
-  var scenery = require( 'SCENERY/scenery' );
-  var extend = require( 'PHET_CORE/extend' );
   var AccessibilityUtil = require( 'SCENERY/accessibility/AccessibilityUtil' );
   var AccessiblePeer = require( 'SCENERY/accessibility/AccessiblePeer' );
+  var extend = require( 'PHET_CORE/extend' );
+  var scenery = require( 'SCENERY/scenery' );
 
   // specific HTML tag names
   var INPUT_TAG = 'INPUT';

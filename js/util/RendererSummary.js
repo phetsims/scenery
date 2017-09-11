@@ -14,8 +14,8 @@ define( function( require ) {
   'use strict';
 
   var inherit = require( 'PHET_CORE/inherit' );
-  var scenery = require( 'SCENERY/scenery' );
   var Renderer = require( 'SCENERY/display/Renderer' );
+  var scenery = require( 'SCENERY/scenery' );
 
   var summaryBits = [
     // renderer bits ("Is renderer X supported by the entire sub-tree?")

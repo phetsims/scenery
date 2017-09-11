@@ -14,8 +14,8 @@ define( function( require ) {
   'use strict';
 
   var inherit = require( 'PHET_CORE/inherit' );
-  var scenery = require( 'SCENERY/scenery' );
   var MultiListener = require( 'SCENERY/listeners/MultiListener' );
+  var scenery = require( 'SCENERY/scenery' );
 
   /**
    * @constructor

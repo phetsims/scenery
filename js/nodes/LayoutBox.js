@@ -14,10 +14,10 @@ define( function( require ) {
   'use strict';
 
   // modules
-  var inherit = require( 'PHET_CORE/inherit' );
-  var scenery = require( 'SCENERY/scenery' );
-  var Node = require( 'SCENERY/nodes/Node' );
   var Bounds2 = require( 'DOT/Bounds2' );
+  var inherit = require( 'PHET_CORE/inherit' );
+  var Node = require( 'SCENERY/nodes/Node' );
+  var scenery = require( 'SCENERY/scenery' );
 
   // constants
   var DEFAULT_SPACING = 0;

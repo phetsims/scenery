@@ -10,10 +10,10 @@
 define( function( require ) {
   'use strict';
 
+  var Drawable = require( 'SCENERY/display/Drawable' );
   var inherit = require( 'PHET_CORE/inherit' );
   var Poolable = require( 'PHET_CORE/Poolable' );
   var scenery = require( 'SCENERY/scenery' );
-  var Drawable = require( 'SCENERY/display/Drawable' );
 
   /**
    * @constructor

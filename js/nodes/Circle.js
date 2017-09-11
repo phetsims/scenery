@@ -9,17 +9,17 @@
 define( function( require ) {
   'use strict';
 
-  var inherit = require( 'PHET_CORE/inherit' );
-  var extendDefined = require( 'PHET_CORE/extendDefined' );
-  var scenery = require( 'SCENERY/scenery' );
   var Bounds2 = require( 'DOT/Bounds2' );
-  var Path = require( 'SCENERY/nodes/Path' );
-  var Shape = require( 'KITE/Shape' );
-  var Features = require( 'SCENERY/util/Features' );
-  var Renderer = require( 'SCENERY/display/Renderer' );
+  var CircleCanvasDrawable = require( 'SCENERY/display/drawables/CircleCanvasDrawable' );
   var CircleDOMDrawable = require( 'SCENERY/display/drawables/CircleDOMDrawable' );
   var CircleSVGDrawable = require( 'SCENERY/display/drawables/CircleSVGDrawable' );
-  var CircleCanvasDrawable = require( 'SCENERY/display/drawables/CircleCanvasDrawable' );
+  var extendDefined = require( 'PHET_CORE/extendDefined' );
+  var Features = require( 'SCENERY/util/Features' );
+  var inherit = require( 'PHET_CORE/inherit' );
+  var Path = require( 'SCENERY/nodes/Path' );
+  var Renderer = require( 'SCENERY/display/Renderer' );
+  var scenery = require( 'SCENERY/scenery' );
+  var Shape = require( 'KITE/Shape' );
 
   var CIRCLE_OPTION_KEYS = [
     'radius' // see setRadius() for more documentation

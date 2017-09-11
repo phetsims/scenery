@@ -11,11 +11,11 @@
 define( function( require ) {
   'use strict';
 
-  var inherit = require( 'PHET_CORE/inherit' );
-  var Bounds2 = require( 'DOT/Bounds2' );
-  var Vector2 = require( 'DOT/Vector2' );
-  var scenery = require( 'SCENERY/scenery' );
   var Block = require( 'SCENERY/display/Block' );
+  var Bounds2 = require( 'DOT/Bounds2' );
+  var inherit = require( 'PHET_CORE/inherit' );
+  var scenery = require( 'SCENERY/scenery' );
+  var Vector2 = require( 'DOT/Vector2' );
 
   var scratchBounds2 = Bounds2.NOTHING.copy();
 

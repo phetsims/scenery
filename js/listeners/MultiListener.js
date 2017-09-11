@@ -13,13 +13,13 @@
 define( function( require ) {
   'use strict';
 
-  var inherit = require( 'PHET_CORE/inherit' );
   var arrayRemove = require( 'PHET_CORE/arrayRemove' );
-  var Vector2 = require( 'DOT/Vector2' );
+  var inherit = require( 'PHET_CORE/inherit' );
   var Matrix = require( 'DOT/Matrix' );
-  var SingularValueDecomposition = require( 'DOT/SingularValueDecomposition' );
   var Matrix3 = require( 'DOT/Matrix3' );
   var scenery = require( 'SCENERY/scenery' );
+  var SingularValueDecomposition = require( 'DOT/SingularValueDecomposition' );
+  var Vector2 = require( 'DOT/Vector2' );
 
   /**
    * @constructor

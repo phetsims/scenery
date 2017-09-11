@@ -25,10 +25,10 @@
 define( function( require ) {
   'use strict';
 
+  var BooleanProperty = require( 'AXON/BooleanProperty' );
   var inherit = require( 'PHET_CORE/inherit' );
   var scenery = require( 'SCENERY/scenery' );
   var Vector2 = require( 'DOT/Vector2' );
-  var BooleanProperty = require( 'AXON/BooleanProperty' );
 
   /**
    * @constructor

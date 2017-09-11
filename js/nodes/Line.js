@@ -9,17 +9,17 @@
 define( function( require ) {
   'use strict';
 
-  var inherit = require( 'PHET_CORE/inherit' );
-  var extendDefined = require( 'PHET_CORE/extendDefined' );
-  var scenery = require( 'SCENERY/scenery' );
-  var KiteLine = require( 'KITE/segments/Line' ); // eslint-disable-line require-statement-match
-  var Path = require( 'SCENERY/nodes/Path' );
-  var Shape = require( 'KITE/Shape' );
   var Bounds2 = require( 'DOT/Bounds2' );
-  var Vector2 = require( 'DOT/Vector2' );
-  var Renderer = require( 'SCENERY/display/Renderer' );
+  var extendDefined = require( 'PHET_CORE/extendDefined' );
+  var inherit = require( 'PHET_CORE/inherit' );
+  var KiteLine = require( 'KITE/segments/Line' ); // eslint-disable-line require-statement-match
   var LineCanvasDrawable = require( 'SCENERY/display/drawables/LineCanvasDrawable' );
   var LineSVGDrawable = require( 'SCENERY/display/drawables/LineSVGDrawable' );
+  var Path = require( 'SCENERY/nodes/Path' );
+  var Renderer = require( 'SCENERY/display/Renderer' );
+  var scenery = require( 'SCENERY/scenery' );
+  var Shape = require( 'KITE/Shape' );
+  var Vector2 = require( 'DOT/Vector2' );
 
   var LINE_OPTION_KEYS = [
     'p1', // {Vector2} - Start position

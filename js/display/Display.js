@@ -53,18 +53,18 @@
 define( function( require ) {
   'use strict';
 
-  var inherit = require( 'PHET_CORE/inherit' );
-  var extend = require( 'PHET_CORE/extend' );
-  var Events = require( 'AXON/Events' );
-  var Property = require( 'AXON/Property' );
   var Dimension2 = require( 'DOT/Dimension2' );
-  var Vector2 = require( 'DOT/Vector2' );
+  var Events = require( 'AXON/Events' );
+  var extend = require( 'PHET_CORE/extend' );
+  var inherit = require( 'PHET_CORE/inherit' );
   var Matrix3 = require( 'DOT/Matrix3' );
+  var Property = require( 'AXON/Property' );
   var Tandem = require( 'TANDEM/Tandem' );
+  var Vector2 = require( 'DOT/Vector2' );
 
-  var scenery = require( 'SCENERY/scenery' );
-  var Node = require( 'SCENERY/nodes/Node' );
   var Features = require( 'SCENERY/util/Features' );
+  var Node = require( 'SCENERY/nodes/Node' );
+  var scenery = require( 'SCENERY/scenery' );
   require( 'SCENERY/display/BackboneDrawable' );
   require( 'SCENERY/display/CanvasBlock' );
   require( 'SCENERY/display/CanvasSelfDrawable' );
@@ -79,12 +79,12 @@ define( function( require ) {
   var Input = require( 'SCENERY/input/Input' );
   require( 'SCENERY/util/Trail' );
   var AccessibleInstance = require( 'SCENERY/accessibility/AccessibleInstance' );
-  var SceneryStyle = require( 'SCENERY/util/SceneryStyle' );
+  var CanvasNodeBoundsOverlay = require( 'SCENERY/overlays/CanvasNodeBoundsOverlay' );
+  var FittedBlockBoundsOverlay = require( 'SCENERY/overlays/FittedBlockBoundsOverlay' );
   var FocusOverlay = require( 'SCENERY/overlays/FocusOverlay' );
   var PointerAreaOverlay = require( 'SCENERY/overlays/PointerAreaOverlay' );
   var PointerOverlay = require( 'SCENERY/overlays/PointerOverlay' );
-  var CanvasNodeBoundsOverlay = require( 'SCENERY/overlays/CanvasNodeBoundsOverlay' );
-  var FittedBlockBoundsOverlay = require( 'SCENERY/overlays/FittedBlockBoundsOverlay' );
+  var SceneryStyle = require( 'SCENERY/util/SceneryStyle' );
   var TFocus = require( 'SCENERY/accessibility/TFocus' );
   var Util = require( 'SCENERY/util/Util' );
 

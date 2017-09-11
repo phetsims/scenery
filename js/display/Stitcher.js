@@ -100,14 +100,14 @@
 define( function( require ) {
   'use strict';
 
-  var inherit = require( 'PHET_CORE/inherit' );
-  var cleanArray = require( 'PHET_CORE/cleanArray' );
-  var scenery = require( 'SCENERY/scenery' );
-  var Drawable = require( 'SCENERY/display/Drawable' );
-  var Renderer = require( 'SCENERY/display/Renderer' );
   var CanvasBlock = require( 'SCENERY/display/CanvasBlock' );
-  var SVGBlock = require( 'SCENERY/display/SVGBlock' );
+  var cleanArray = require( 'PHET_CORE/cleanArray' );
   var DOMBlock = require( 'SCENERY/display/DOMBlock' );
+  var Drawable = require( 'SCENERY/display/Drawable' );
+  var inherit = require( 'PHET_CORE/inherit' );
+  var Renderer = require( 'SCENERY/display/Renderer' );
+  var scenery = require( 'SCENERY/scenery' );
+  var SVGBlock = require( 'SCENERY/display/SVGBlock' );
   var WebGLBlock = require( 'SCENERY/display/WebGLBlock' );
 
   function Stitcher( display, renderer ) {

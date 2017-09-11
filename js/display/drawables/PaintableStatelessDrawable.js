@@ -10,9 +10,9 @@
 define( function( require ) {
   'use strict';
 
-  var scenery = require( 'SCENERY/scenery' );
-  var PaintObserver = require( 'SCENERY/display/PaintObserver' );
   var Color = require( 'SCENERY/util/Color' );
+  var PaintObserver = require( 'SCENERY/display/PaintObserver' );
+  var scenery = require( 'SCENERY/scenery' );
 
   var PaintableStatelessDrawable = {
     mixin: function( drawableType ) {

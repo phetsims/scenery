@@ -10,8 +10,8 @@ define( function( require ) {
   'use strict';
 
   var arrayRemove = require( 'PHET_CORE/arrayRemove' );
-  var scenery = require( 'SCENERY/scenery' );
   var BatchedDOMEvent = require( 'SCENERY/input/BatchedDOMEvent' );
+  var scenery = require( 'SCENERY/scenery' );
 
   // Sometimes we need to add a listener that does absolutely nothing
   var noop = function noop() {};

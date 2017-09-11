@@ -9,16 +9,16 @@
 define( function( require ) {
   'use strict';
 
-  var inherit = require( 'PHET_CORE/inherit' );
-  var extendDefined = require( 'PHET_CORE/extendDefined' );
-  var Shape = require( 'KITE/Shape' );
   var Bounds2 = require( 'DOT/Bounds2' );
-  var scenery = require( 'SCENERY/scenery' );
+  var extendDefined = require( 'PHET_CORE/extendDefined' );
+  var inherit = require( 'PHET_CORE/inherit' );
   var Node = require( 'SCENERY/nodes/Node' );
-  var Renderer = require( 'SCENERY/display/Renderer' );
   var Paintable = require( 'SCENERY/nodes/Paintable' );
   var PathCanvasDrawable = require( 'SCENERY/display/drawables/PathCanvasDrawable' );
   var PathSVGDrawable = require( 'SCENERY/display/drawables/PathSVGDrawable' );
+  var Renderer = require( 'SCENERY/display/Renderer' );
+  var scenery = require( 'SCENERY/scenery' );
+  var Shape = require( 'KITE/Shape' );
 
   var PATH_OPTION_KEYS = [
     'boundsMethod', // Sets how bounds are determined, see setBoundsMethod() for more documentation.
