@@ -975,6 +975,7 @@ define( function( require ) {
     validateBounds: function() {
       var self = this;
       var i;
+      var notificationThreshold = 1e-13;
 
       var wasDirtyBefore = this.validateSelfBounds();
 
@@ -1002,7 +1003,9 @@ define( function( require ) {
 
         if ( !this._childBounds.equals( oldChildBounds ) ) {
           // notifies only on an actual change
-          this.trigger0( 'childBounds' );
+          if ( !this._childBounds.equalsEpsilon( oldChildBounds, notificationThreshold ) ) {
+            this.trigger0( 'childBounds' );
+          }
         }
       }
 
@@ -1022,7 +1025,9 @@ define( function( require ) {
         }
 
         if ( !this._localBounds.equals( oldLocalBounds ) ) {
-          this.trigger0( 'localBounds' );
+          if ( !this._localBounds.equalsEpsilon( oldLocalBounds, notificationThreshold ) ) {
+            this.trigger0( 'localBounds' );
+          }
 
           // sanity check
           this._boundsDirty = true;
@@ -1073,7 +1078,9 @@ define( function( require ) {
           }
 
           // TODO: consider changing to parameter object (that may be a problem for the GC overhead)
-          this.trigger0( 'bounds' );
+          if ( !this._bounds.equalsEpsilon( oldBounds, notificationThreshold ) ) {
+            this.trigger0( 'bounds' );
+          }
         }
       }
 
