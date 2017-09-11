@@ -91,7 +91,7 @@ define( function( require ) {
 
     setMaxWidth: {
       returnType: TVoid,
-      parameterTypes: [ TNumber() ],
+      parameterTypes: [ TNumber ],
       implementation: function( maxWidth ) {
         this.instance.setMaxWidth( maxWidth );
       },
@@ -100,7 +100,7 @@ define( function( require ) {
     },
 
     getMaxWidth: {
-      returnType: TNumber(),
+      returnType: TNumber,
       parameterTypes: [],
       implementation: function() {
         return this.instance.maxWidth;
