@@ -119,6 +119,13 @@ define( function( require ) {
       documentation: 'Set the rotation of the node, in radians'
     }
   }, {
+    toStateObject: function( node ) {
+      return {
+        visible: node.isVisible(),
+        pickable: node.isPickable(),
+        opacity: node.opacity
+      };
+    },
     documentation: 'The base type for graphical and potentially interactive objects'
   } );
 
