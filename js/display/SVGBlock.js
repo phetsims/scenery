@@ -179,6 +179,9 @@ define( function( require ) {
     setSizeFullDisplay: function() {
       sceneryLog && sceneryLog.SVGBlock && sceneryLog.SVGBlock( 'setSizeFullDisplay #' + this.id );
 
+      this.baseTransformGroup.removeAttribute( 'transform' );
+      Util.unsetTransform( this.svg );
+
       var size = this.display.getSize();
       this.svg.setAttribute( 'width', size.width );
       this.svg.setAttribute( 'height', size.height );

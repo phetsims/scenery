@@ -133,6 +133,8 @@ define( function( require ) {
       }
 
       if ( this.fit === FittedBlock.FULL_DISPLAY ) {
+        this.fitBounds.set( Bounds2.NOTHING );
+
         this.setSizeFullDisplay();
       }
       else if ( this.fit === FittedBlock.COMMON_ANCESTOR ) {
