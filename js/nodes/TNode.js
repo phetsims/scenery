@@ -126,6 +126,9 @@ define( function( require ) {
         opacity: node.opacity
       };
     },
+    fromStateObject: function( stateObject){
+      return stateObject;
+    },
     documentation: 'The base type for graphical and potentially interactive objects'
   } );
 
