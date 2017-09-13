@@ -50,7 +50,7 @@ define( function( require ) {
       // Super-type initialization
       this.initializeDOMSelfDrawable( renderer, instance );
 
-      // @protected {HTMLElement} - Our primary DOM element. This is exposed as part of the DOMSelfDrawable API.
+      // @public {HTMLElement} - Our primary DOM element. This is exposed as part of the DOMSelfDrawable API.
       this.domElement = this.node._container;
 
       // Apply CSS needed for future CSS transforms to work properly.

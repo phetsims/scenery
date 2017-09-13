@@ -1600,6 +1600,15 @@ define( function( require ) {
       // things rendered in Canvas in our rasterization.
       var canvasUrlMap = {};
 
+      var unknownIds = 0;
+
+      function addCanvas( canvas ) {
+        if ( !canvas.id ) {
+          canvas.id = 'unknown-canvas-' + unknownIds++;
+        }
+        canvasUrlMap[ canvas.id ] = canvas.toDataURL();
+      }
+
       function scanForCanvases( drawable ) {
         if ( drawable.blocks ) {
           // we're a backbone
@@ -1615,8 +1624,17 @@ define( function( require ) {
           scanForCanvases( drawable.lastDrawable ); // wasn't hit in our simplified (and safer) loop
 
           if ( drawable.canvas && drawable.canvas instanceof window.HTMLCanvasElement ) {
-            canvasUrlMap[ drawable.canvasId ] = drawable.canvas.toDataURL();
+            addCanvas( drawable.canvas );
           }
+        }
+
+        if ( scenery.DOMDrawable && drawable instanceof scenery.DOMDrawable ) {
+          if ( drawable.domElement instanceof window.HTMLCanvasElement ) {
+            addCanvas( drawable.domElement );
+          }
+          Array.prototype.forEach.call( drawable.domElement.getElementsByTagName( 'canvas' ), function( canvas ) {
+            addCanvas( canvas );
+          } );
         }
       }
 
