@@ -1273,7 +1273,7 @@ define( function( require ) {
       var result = '';
 
       result += '<div style="' + headerStyle + '">Display Summary</div>';
-      result += this._size.toString() + ' frame:' + this._frameId + ' input:' + !!this._input + ' cursor:' + this._lastCursor + '<br>';
+      result += this._size.toString() + ' frame:' + this._frameId + ' input:' + !!this._input + ' cursor:' + this._lastCursor + '<br/>';
 
       function nodeCount( node ) {
         var count = 1; // for us
@@ -1283,7 +1283,7 @@ define( function( require ) {
         return count;
       }
 
-      result += 'Nodes: ' + nodeCount( this._rootNode ) + '<br>';
+      result += 'Nodes: ' + nodeCount( this._rootNode ) + '<br/>';
 
       function instanceCount( instance ) {
         var count = 1; // for us
@@ -1293,7 +1293,7 @@ define( function( require ) {
         return count;
       }
 
-      result += this._baseInstance ? ( 'Instances: ' + instanceCount( this._baseInstance ) + '<br>' ) : '';
+      result += this._baseInstance ? ( 'Instances: ' + instanceCount( this._baseInstance ) + '<br/>' ) : '';
 
       function drawableCount( drawable ) {
         var count = 1; // for us
@@ -1313,7 +1313,7 @@ define( function( require ) {
         return count;
       }
 
-      result += this._rootBackbone ? ( 'Drawables: ' + drawableCount( this._rootBackbone ) + '<br>' ) : '';
+      result += this._rootBackbone ? ( 'Drawables: ' + drawableCount( this._rootBackbone ) + '<br/>' ) : '';
 
       var drawableCountMap = {}; // {string} drawable constructor name => {number} count of seen
       // increment the count in our map
@@ -1347,9 +1347,9 @@ define( function( require ) {
         return count;
       }
 
-      result += this._baseInstance ? ( 'Retained Drawables: ' + retainedDrawableCount( this._baseInstance ) + '<br>' ) : '';
+      result += this._baseInstance ? ( 'Retained Drawables: ' + retainedDrawableCount( this._baseInstance ) + '<br/>' ) : '';
       for ( var drawableName in drawableCountMap ) {
-        result += '&nbsp;&nbsp;&nbsp;&nbsp;' + drawableName + ': ' + drawableCountMap[ drawableName ] + '<br>';
+        result += '&nbsp;&nbsp;&nbsp;&nbsp;' + drawableName + ': ' + drawableCountMap[ drawableName ] + '<br/>';
       }
 
       function blockSummary( block ) {
