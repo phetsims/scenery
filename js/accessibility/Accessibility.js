@@ -1044,7 +1044,7 @@ define( function( require ) {
          * @param {boolean} visible
          */
         setAccessibleVisible: function( visible ) {
-          // debugger;
+
           this._accessibleVisible = visible;
 
           this.updateAccessiblePeers( function( accessiblePeer ) {
