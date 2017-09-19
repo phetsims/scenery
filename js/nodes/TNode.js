@@ -126,8 +126,13 @@ define( function( require ) {
         opacity: node.opacity
       };
     },
-    fromStateObject: function( stateObject){
+    fromStateObject: function( stateObject ) {
       return stateObject;
+    },
+    setValue: function( instance, stateObject ) {
+      instance.visible = stateObject.visible;
+      instance.pickable = stateObject.pickable;
+      instance.opacity = stateObject.opacity;
     },
     documentation: 'The base type for graphical and potentially interactive objects'
   } );
