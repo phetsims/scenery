@@ -49,7 +49,7 @@
     var accessibleNode = new scenery.Node( {
       tagName: 'div',
       useAriaLabel: true, // use ARIA label attribute
-      accessibleHidden: true, // hidden from screen readers (and browser)
+      accessibleVisible: false, // hidden from screen readers (and browser)
       accessibleLabel: TEST_LABEL,
       labelTagName: 'p',
       descriptionTagName: 'p',
@@ -72,7 +72,7 @@
 
     ok( accessibleNode.tagName === 'div', 'Tag name' );
     ok( accessibleNode.useAriaLabel === true, 'Use aria label' );
-    ok( accessibleNode.accessibleHidden === true, 'Accessible hidden' );
+    ok( accessibleNode.accessibleVisible === false, 'Accessible visible' );
     ok( accessibleNode.accessibleLabel === TEST_LABEL, 'Accessible label' );
     ok( accessibleNode.labelTagName === null, 'Label tag name with aria label' );
     ok( accessibleNode.descriptionTagName === 'p', 'Description tag name' );
@@ -348,7 +348,7 @@
 
     // this should hide everything except a
     b.focusable = false;
-    c.accessibleHidden = true;
+    c.accessibleVisible = false;
 
     a.focus();
     util.getNextFocusable( rootElement ).focus();

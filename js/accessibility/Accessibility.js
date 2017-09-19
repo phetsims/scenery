@@ -103,7 +103,7 @@ define( function( require ) {
     'accessibleLabelAsHTML', // Set the label content for the node as innerHTML, see setAccessibleLabelAsHTML()
     'accessibleDescription', // Set the description content for the node, see setAccessibleDescription()
     'accessibleDescriptionAsHTML', // Set the description content for the node as innerHTML, see setAccessibleDescriptionContentAsHTML()
-    'accessibleHidden', // Sets wheter or not the node's DOM element is hidden in the parallel DOM
+    'accessibleVisible', // Sets whether or not the node's DOM element is visible in the parallel DOM
     'accessibleContentDisplayed', // sets whether or not the accessible content of the node (and its subtree) is displayed, see setAccessibleContentDisplayed()
     'focusable', // Sets whether or not the node can receive keyboard focus
     'useAriaLabel', // Sets whether or not the label will use the 'aria-label' attribute, see setUseAriaLabel()
@@ -113,7 +113,7 @@ define( function( require ) {
     'ariaDescriptionContent', // Sets the content that will describe another node through aria-describedby, see setAriaDescriptionContent()
     'ariaLabelContent', // Sets the content that will label another node through aria-labelledby, see setAriaLabelledByContent()
     'ariaDescribedContent', // Sets the content that will be described by another node through aria-describedby, see setAriaDescribedContent()
-    'ariaLabelledContent', // sets the content that will be labelled by another node through aria-labelledby, see setAriaLabelledContent()
+    'ariaLabelledContent' // sets the content that will be labelled by another node through aria-labelledby, see setAriaLabelledContent()
   ];
 
   var Accessibility = {
@@ -280,17 +280,17 @@ define( function( require ) {
           // for placement of the focus highlight in the scene graph.
           this._focusHighlightLayerable = false;
 
-          // @private {boolean} - Whether or not the accessible content will be hidden from the browser and assistive
-          // technologies.  When accessibleHidden is true, the node's DOM element will not be focusable, and it cannot
+          // @private {boolean} - Whether or not the accessible content will be visible from the browser and assistive
+          // technologies.  When accessibleVisible is false, the node's DOM element will not be focusable, and it cannot
           // be found by the assistive technology virtual cursor. For more information on how assistive technologies
           // read with the virtual cursor see
           // http://www.ssbbartgroup.com/blog/how-windows-screen-readers-work-on-the-web/
-          this._accessibleHidden = null;
+          this._accessibleVisible = true;
 
-          // @private {boolean} - Whether or not the accessible content will be hidden from the browser and assistive
+          // @private {boolean} - Whether or not the accessible content will be visible from the browser and assistive
           // technologies.  When accessible content is not displayed, the node will not be focusable, and it cannot
-          // be found by assistive technology with the virtual cursor.  Content should almost always be hidden with 
-          // setAccessibleHidden(), see that function and setAccessibleContentDisplayed() for more information.
+          // be found by assistive technology with the virtual cursor.  Content should almost always be set invisible with
+          // setAccessibleVisible(), see that function and setAccessibleContentDisplayed() for more information.
           this._accessibleContentDisplayed = true;
 
           // @private {Array.<Function>} - For accessibility input handling {keyboard/click/HTML form}
@@ -1041,36 +1041,37 @@ define( function( require ) {
          *
          * @public
          *
-         * @param {boolean} hidden
+         * @param {boolean} visible
          */
-        setAccessibleHidden: function( hidden ) {
-          this._accessibleHidden = hidden;
+        setAccessibleVisible: function( visible ) {
+          // debugger;
+          this._accessibleVisible = visible;
 
           this.updateAccessiblePeers( function( accessiblePeer ) {
             if ( accessiblePeer.parentContainerElement ) {
-              accessiblePeer.parentContainerElement.hidden = hidden;
+              accessiblePeer.parentContainerElement.hidden = !visible;
             }
             else if ( accessiblePeer.domElement ) {
-              accessiblePeer.domElement.hidden = hidden;
+              accessiblePeer.domElement.hidden = !visible;
             }
           } );
         },
-        set accessibleHidden( hidden ) { this.setAccessibleHidden( hidden ); },
+        set accessibleVisible( visible ) { this.setAccessibleVisible( visible ); },
 
         /**
-         * Get whether or not this node's representative DOM element is hidden.
+         * Get whether or not this node's representative DOM element is visible.
          * @public
          *
          * @returns {boolean}
          */
-        getAccessibleHidden: function() {
-          return this._accessibleHidden;
+        getAccessibleVisible: function() {
+          return this._accessibleVisible;
         },
-        get accessibleHidden() { return this.getAccessibleHidden(); },
+        get accessibleVisible() { return this.getAccessibleVisible(); },
 
         /**
-         * Sets whether or not the accessible content should be displayed in the DOM. Almost always, setAccessibleHidden
-         * should be used instead of this function.  This should behave exactly like setAccessibleHidden. If removed
+         * Sets whether or not the accessible content should be displayed in the DOM. Almost always, setAccessibleVisible
+         * should be used instead of this function.  This should behave exactly like setAccessibleVisible. If removed
          * from display, content will be removed from focus order and undiscoverable with the virtual cursor. Sometimes,
          * hidden attribute is not handled the same way across screen readers, so this function can be used to
          * completely remove the content from the DOM.
@@ -1287,8 +1288,8 @@ define( function( require ) {
             // when accessibility is widely used, this assertion can be added back in
             // assert && assert( this.accessibleInstances.length > 0, 'there must be accessible content for the node to receive focus' );
             assert && assert( this._focusable, 'trying to set focus on a node that is not focusable' );
-            assert && assert( !this._accessibleHidden, 'trying to set focus on a node with hidden accessible content' );
-            assert && assert( this.accessibleInstances.length === 1, 'focus() unsuported for Nodes using DAG, accessible conotent is not unique' );
+            assert && assert( this._accessibleVisible, 'trying to set focus on a node with invisible accessible content' );
+            assert && assert( this.accessibleInstances.length === 1, 'focus() unsupported for Nodes using DAG, accessible content is not unique' );
 
             this.accessibleInstances[ 0 ].peer.domElement.focus();
           }
@@ -1588,8 +1589,8 @@ define( function( require ) {
                 self.setUseAriaLabel( self._useAriaLabel );
               }
 
-              // resetore hidden
-              self.setAccessibleHidden( self._accessibleHidden );
+              // restore visibility
+              self.setAccessibleVisible( self._accessibleVisible );
 
               // restore checked
               self.setAccessibleChecked( self._accessibleChecked );
