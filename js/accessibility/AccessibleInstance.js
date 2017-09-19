@@ -78,8 +78,25 @@ define( function( require ) {
         this.peer = this.node.accessibleContent.createPeer( this );
         var childContainerElement = this.parent.peer.getChildContainerElement();
 
-        // insert the peer's dom element or its parent if it is contained in a parent element for structure
+        // insert the peer's DOM element or its parent if it is contained in a parent element for structure
         childContainerElement.insertBefore( this.peer.getParentContainerElement(), childContainerElement.childNodes[ 0 ] );
+
+        // get the difference between the trails of the parent and this AccessibleInstance
+        var parentTrail = this.parent.trail;
+        var thisTrail = this.trail;
+        this.trailDiff = [];
+        for ( var i = parentTrail.length; i < thisTrail.length; i++ ) {
+          this.trailDiff.push( thisTrail.get( i ) );
+        }
+
+        // when visibility or accessibleVisibility of a node in between the two trails changes, we must update
+        // visibility of this peer's DOM content
+        this.accessibleVisibilityListener = this.updateVisibility.bind( this );
+        for ( var j = 0; j < this.trailDiff.length; j++ ) {
+          this.trailDiff[ j ].onStatic( 'visibility', this.accessibleVisibilityListener );
+          this.trailDiff[ j ].accessibleVisibilityChangedEmitter.addListener( this.accessibleVisibilityListener );
+        }
+        this.accessibleVisibilityListener();
       }
 
       sceneryLog && sceneryLog.AccessibleInstance && sceneryLog.AccessibleInstance(
@@ -168,6 +185,26 @@ define( function( require ) {
         this.isSorted = false;
         this.display.markUnsortedAccessibleInstance( this );
       }
+    },
+
+    /**
+     * Update visibility of this peer's accessible DOM content. The hidden attribute will hide all of the descendant
+     * DOM content, so it is not necessary to update the subtree of AccessibleInstances since the browser
+     * will do this for us.
+     *
+     * @private
+     */
+    updateVisibility: function() {
+
+      // if all nodes in the trail diff are both visible and accessibleVisible, this AccessibleInstance will be
+      // visible for screen readers
+      var visibilityCount = 0;
+      for ( var i = 0; i < this.trailDiff.length; i++ ) {
+        if ( this.trailDiff[ i ].visible && this.trailDiff[ i ].accessibleVisible ) {
+          visibilityCount++;
+        }
+      }
+      this.peer.getParentContainerElement().hidden = !( visibilityCount === this.trailDiff.length );
     },
 
     /**
@@ -313,6 +350,12 @@ define( function( require ) {
         this.node.accessibleInputEnabled = false;
         this.parent.peer.getChildContainerElement().removeChild( this.peer.getParentContainerElement() );
         this.node.accessibleInputEnabled = true;
+
+        // remove visibility/accessibleVisibility listeners that were added
+        for ( var i = 0; i < this.trailDiff.length; i++ ) {
+          this.trailDiff[ i ].offStatic( 'visibility', this.accessibleVisibilityListener );
+          this.trailDiff[ i ].accessibleVisibilityChangedEmitter.removeListener( this.accessibleVisibilityListener );
+        }
       }
 
       while ( this.children.length ) {

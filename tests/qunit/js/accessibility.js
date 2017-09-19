@@ -517,86 +517,89 @@
     ok( !testNode.focused, 'testNode does not have focus after replacing node d (testNode is not focusable)' );
   } );
 
-  // TODO: we are still figuring out https://github.com/phetsims/scenery/issues/669, but these tests reflect
-  // our expected behavior
-  // test( 'accessibleHidden', function() {
+  test( 'accessibleVisible', function() {
 
-  //   var rootNode = new scenery.Node();
-  //   var display = new scenery.Display( rootNode );
-  //   document.body.appendChild( display.domElement );
+    var rootNode = new scenery.Node();
+    var display = new scenery.Display( rootNode );
+    document.body.appendChild( display.domElement );
 
-  //   // test with a scene graph
-  //   //       a
-  //   //      / \
-  //   //     b    c
-  //   //        / | \
-  //   //       d  e  f
-  //   //           \ /
-  //   //            g
-  //   var a = new scenery.Node();
-  //   var b = new scenery.Node();
-  //   var c = new scenery.Node();
-  //   var d = new scenery.Node();
-  //   var e = new scenery.Node();
-  //   var f = new scenery.Node();
-  //   var g = new scenery.Node();
+    // test with a scene graph
+    //       a
+    //      / \
+    //     b    c
+    //        / | \
+    //       d  e  f
+    //           \ /
+    //            g
+    var a = new scenery.Node();
+    var b = new scenery.Node();
+    var c = new scenery.Node();
+    var d = new scenery.Node();
+    var e = new scenery.Node();
+    var f = new scenery.Node();
+    var g = new scenery.Node();
 
-  //   rootNode.addChild( a );
-  //   a.children = [ b, c ];
-  //   c.children = [ d, e, f ];
-  //   e.children = [ g ];
-  //   f.children = [ g ];
+    rootNode.addChild( a );
+    a.children = [ b, c ];
+    c.children = [ d, e, f ];
+    e.children = [ g ];
+    f.children = [ g ];
 
-  //   // give some accessible content
-  //   a.tagName = 'div';
-  //   b.tagName = 'button';
-  //   e.tagName = 'div';
-  //   g.tagName = 'button';
+    // give some accessible content
+    a.tagName = 'div';
+    b.tagName = 'button';
+    e.tagName = 'div';
+    g.tagName = 'button';
 
-  //   // scenery should produce this accessible DOM tree
-  //   // <div id="a">
-  //   //   <button id="b">
-  //   //   <div id="e">
-  //   //      <button id="g1">
-  //   //   <button id="g2">
+    // scenery should produce this accessible DOM tree
+    // <div id="a">
+    //   <button id="b">
+    //   <div id="e">
+    //      <button id="g1">
+    //   <button id="g2">
     
-  //   // get the accessible DOM elements - looking into accessibleInstances for testing, there is no getter for domElement
-  //   var divA = a.accessibleInstances[ 0 ].peer.domElement;
-  //   var buttonB = b.accessibleInstances[ 0 ].peer.domElement;
-  //   var divE = e.accessibleInstances[ 0 ].peer.domElement;
-  //   var buttonG1 = g.accessibleInstances[ 0 ].peer.domElement;
-  //   var buttonG2 = g.accessibleInstances[ 1 ].peer.domElement;
+    // get the accessible DOM elements - looking into accessibleInstances for testing, there is no getter for domElement
+    var divA = a.accessibleInstances[ 0 ].peer.domElement;
+    var buttonB = b.accessibleInstances[ 0 ].peer.domElement;
+    var divE = e.accessibleInstances[ 0 ].peer.domElement;
+    var buttonG1 = g.accessibleInstances[ 0 ].peer.domElement;
+    var buttonG2 = g.accessibleInstances[ 1 ].peer.domElement;
 
-  //   var divAChildren = divA.childNodes;
-  //   var divEChildren = divE.childNodes;
+    var divAChildren = divA.childNodes;
+    var divEChildren = divE.childNodes;
 
-  //   ok( _.includes( divAChildren, buttonB ), 'button B should be an immediate child of div A' );
-  //   ok( _.includes( divAChildren, divE ), 'div E should be an immediate child of div A' );
-  //   ok( _.includes( divAChildren, buttonG2 ), 'button G2 should be an immediate child of div A' );
-  //   ok( _.includes( divEChildren, buttonG1 ), 'button G1 should be an immediate child of div E' );
+    ok( _.includes( divAChildren, buttonB ), 'button B should be an immediate child of div A' );
+    ok( _.includes( divAChildren, divE ), 'div E should be an immediate child of div A' );
+    ok( _.includes( divAChildren, buttonG2 ), 'button G2 should be an immediate child of div A' );
+    ok( _.includes( divEChildren, buttonG1 ), 'button G1 should be an immediate child of div E' );
 
-  //   // make node B accessible hidden - it should should visible, but hidden from screen readers
-  //   b.accessibleHidden = true;
-  //   ok( b.visible === true, 'b should be visible after becoming hidden for screen readers' );
-  //   ok( b.accessibleHidden === true, 'b state should reflect it is hidden for screen readers' );
-  //   ok( buttonB.hidden === true, 'buttonB should be hidden for screen readers' );
-  //   b.accessibleHidden = false;
+    // make node B invisible for accessibility - it should should visible, but hidden from screen readers
+    b.accessibleVisible = false;
+    ok( b.visible === true, 'b should be visible after becoming hidden for screen readers' );
+    ok( b.accessibleVisible === false, 'b state should reflect it is hidden for screen readers' );
+    ok( buttonB.hidden === true, 'buttonB should be hidden for screen readers' );
+    b.accessibleVisible = true;
 
-  //   // make node B invisible - it should not be visible, and it should be hidden for screen readers
-  //   b.visible = false;
-  //   ok( b.visible === false, 'state of node b is visible' );
-  //   ok( buttonB.hidden === true, 'buttonB is hidden from screen readers after becoming invisible' );
-  //   b.visible = true;
+    // make node B invisible - it should not be visible, and it should be hidden for screen readers
+    b.visible = false;
+    ok( b.visible === false, 'state of node b is visible' );
+    ok( buttonB.hidden === true, 'buttonB is hidden from screen readers after becoming invisible' );
+    ok( b.accessibleVisible === true, 'state of node b still reflects accessible visibility when invisible' );
+    b.visible = true;
 
-  //   // make a invisible - entire subtree of accessible content should be marked as hidden
-  //   a.visible = false;
-  //   ok( divA.hidden === true, 'div A should be hidden after node is made invisble' );
-  //   ok( buttonB.hidden === true, 'button B should be hidden after parent node is made invisble' );
-  //   ok( divE.hidden === true, 'div E should be hidden after parent  node is made invisble' );
-  //   ok( buttonG1.hidden === true, 'button G1 should be hidden after ancestor node is made invisble' );
-  //   ok( buttonG2.hidden === true, 'button G2 should be hidden after parent is made invisble' );
-  //   ok( b.visible === true, 'b should be visible state after parent a made invisible' );
-  //   ok( g.visible === true, 'g should be visible state after parent a made invisible' );
-  //   ok( a.accessibleHidden === false, 'node a should not be marked as hidden in state even though it is hidden from screen readers since it is invisible' );
-  // } );
+    // make node f invisible - g's trail that goes through f should be invisible to AT, the child of c should remain accessibleVisible
+    f.visible = false;
+    ok( g.getAccessibleVisible() === true, 'state of accessibleVisible should remain true on node g' );
+    ok( !buttonG1.hidden, 'buttonG1 (child of e) should not be hidden after parent node f made invisible (no accessible content on node f)' );
+    ok( buttonG2.hidden === true, 'buttonG2 should be hidden after parent node f made invisible (no accessible content on node f)' );
+    f.visible = true;
+
+    // make node c (no accessible content) invisible to screen, e should be hidden and g2 should be hidden
+    c.accessibleVisible = false;
+    ok( c.visible === true, 'c should still be visible after becoming invisible to screen readers' );
+    ok( divE.hidden === true, 'div E should be hidden after parent node c (no accessible content) is made invisible to screen readers' );
+    ok( buttonG2.hidden === true, 'buttonG2 should be hidden after ancestor node c (no accessible content) is made invisible to screen readers' );
+    ok( !buttonG1.hidden, 'buttonG1 should not NOT be hidden after ancestor node c is made invisible (parent div E already marked)' );
+    ok( !divA.hidden, 'div A should not have been hidden by making descendant c invisible to screen readers' );
+  } );
 })();

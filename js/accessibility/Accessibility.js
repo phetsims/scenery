@@ -60,6 +60,7 @@ define( function( require ) {
   // modules
   var AccessibilityUtil = require( 'SCENERY/accessibility/AccessibilityUtil' );
   var AccessiblePeer = require( 'SCENERY/accessibility/AccessiblePeer' );
+  var Emitter = require( 'AXON/Emitter' );
   var extend = require( 'PHET_CORE/extend' );
   var scenery = require( 'SCENERY/scenery' );
 
@@ -298,6 +299,9 @@ define( function( require ) {
 
           // @private {boolean} - if true, all accessible input will be halted on this Node.
           this._accessibleInputEnabled = true;
+
+          // @public (scenery-internal) - emitters for when state properties change
+          this.accessibleVisibilityChangedEmitter = new Emitter();
         },
 
         /**
@@ -1044,17 +1048,10 @@ define( function( require ) {
          * @param {boolean} visible
          */
         setAccessibleVisible: function( visible ) {
-
           this._accessibleVisible = visible;
 
-          this.updateAccessiblePeers( function( accessiblePeer ) {
-            if ( accessiblePeer.parentContainerElement ) {
-              accessiblePeer.parentContainerElement.hidden = !visible;
-            }
-            else if ( accessiblePeer.domElement ) {
-              accessiblePeer.domElement.hidden = !visible;
-            }
-          } );
+          // accessible visibility updated in each AccessibleInstane
+          this.accessibleVisibilityChangedEmitter.emit();
         },
         set accessibleVisible( visible ) { this.setAccessibleVisible( visible ); },
 
