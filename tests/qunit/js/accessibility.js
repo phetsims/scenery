@@ -516,4 +516,87 @@
     ok( !d.focused, 'do does not have focus after being replaced by testNode' );
     ok( !testNode.focused, 'testNode does not have focus after replacing node d (testNode is not focusable)' );
   } );
+
+  // TODO: we are still figuring out https://github.com/phetsims/scenery/issues/669, but these tests reflect
+  // our expected behavior
+  // test( 'accessibleHidden', function() {
+
+  //   var rootNode = new scenery.Node();
+  //   var display = new scenery.Display( rootNode );
+  //   document.body.appendChild( display.domElement );
+
+  //   // test with a scene graph
+  //   //       a
+  //   //      / \
+  //   //     b    c
+  //   //        / | \
+  //   //       d  e  f
+  //   //           \ /
+  //   //            g
+  //   var a = new scenery.Node();
+  //   var b = new scenery.Node();
+  //   var c = new scenery.Node();
+  //   var d = new scenery.Node();
+  //   var e = new scenery.Node();
+  //   var f = new scenery.Node();
+  //   var g = new scenery.Node();
+
+  //   rootNode.addChild( a );
+  //   a.children = [ b, c ];
+  //   c.children = [ d, e, f ];
+  //   e.children = [ g ];
+  //   f.children = [ g ];
+
+  //   // give some accessible content
+  //   a.tagName = 'div';
+  //   b.tagName = 'button';
+  //   e.tagName = 'div';
+  //   g.tagName = 'button';
+
+  //   // scenery should produce this accessible DOM tree
+  //   // <div id="a">
+  //   //   <button id="b">
+  //   //   <div id="e">
+  //   //      <button id="g1">
+  //   //   <button id="g2">
+    
+  //   // get the accessible DOM elements - looking into accessibleInstances for testing, there is no getter for domElement
+  //   var divA = a.accessibleInstances[ 0 ].peer.domElement;
+  //   var buttonB = b.accessibleInstances[ 0 ].peer.domElement;
+  //   var divE = e.accessibleInstances[ 0 ].peer.domElement;
+  //   var buttonG1 = g.accessibleInstances[ 0 ].peer.domElement;
+  //   var buttonG2 = g.accessibleInstances[ 1 ].peer.domElement;
+
+  //   var divAChildren = divA.childNodes;
+  //   var divEChildren = divE.childNodes;
+
+  //   ok( _.includes( divAChildren, buttonB ), 'button B should be an immediate child of div A' );
+  //   ok( _.includes( divAChildren, divE ), 'div E should be an immediate child of div A' );
+  //   ok( _.includes( divAChildren, buttonG2 ), 'button G2 should be an immediate child of div A' );
+  //   ok( _.includes( divEChildren, buttonG1 ), 'button G1 should be an immediate child of div E' );
+
+  //   // make node B accessible hidden - it should should visible, but hidden from screen readers
+  //   b.accessibleHidden = true;
+  //   ok( b.visible === true, 'b should be visible after becoming hidden for screen readers' );
+  //   ok( b.accessibleHidden === true, 'b state should reflect it is hidden for screen readers' );
+  //   ok( buttonB.hidden === true, 'buttonB should be hidden for screen readers' );
+  //   b.accessibleHidden = false;
+
+  //   // make node B invisible - it should not be visible, and it should be hidden for screen readers
+  //   b.visible = false;
+  //   ok( b.visible === false, 'state of node b is visible' );
+  //   ok( buttonB.hidden === true, 'buttonB is hidden from screen readers after becoming invisible' );
+  //   b.visible = true;
+
+  //   // make a invisible - entire subtree of accessible content should be marked as hidden
+  //   a.visible = false;
+  //   ok( divA.hidden === true, 'div A should be hidden after node is made invisble' );
+  //   ok( buttonB.hidden === true, 'button B should be hidden after parent node is made invisble' );
+  //   ok( divE.hidden === true, 'div E should be hidden after parent  node is made invisble' );
+  //   ok( buttonG1.hidden === true, 'button G1 should be hidden after ancestor node is made invisble' );
+  //   ok( buttonG2.hidden === true, 'button G2 should be hidden after parent is made invisble' );
+  //   ok( b.visible === true, 'b should be visible state after parent a made invisible' );
+  //   ok( g.visible === true, 'g should be visible state after parent a made invisible' );
+  //   ok( a.accessibleHidden === false, 'node a should not be marked as hidden in state even though it is hidden from screen readers since it is invisible' );
+  // } );
 })();
