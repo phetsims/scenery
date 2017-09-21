@@ -3217,9 +3217,11 @@ define( function( require ) {
       assert && assert( accessibleOrder === null || accessibleOrder instanceof Array,
         'Array expected, received: ' + typeof accessibleOrder );
 
+      // Only update if it has changed
       if ( this._accessibleOrder !== accessibleOrder ) {
         this._accessibleOrder = accessibleOrder;
 
+        // Get all trails where the root node of the trail has at least one rootedDisplay
         var trails = this.getTrails( hasRootedDisplayPredicate );
         for ( var i = 0; i < trails.length; i++ ) {
           var trail = trails[ i ];

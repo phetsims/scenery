@@ -53,6 +53,7 @@ define( function( require ) {
       this.node = trail.lastNode();
       this.isRootInstance = this.trail.length === 0;
 
+      // TODO: doc
       this.children = cleanArray( this.children );
 
       // If we are the root accessible instance, we won't actually have a reference to a node.
@@ -180,6 +181,9 @@ define( function( require ) {
       sceneryLog && sceneryLog.AccessibleInstance && sceneryLog.pop();
     },
 
+    /**
+     * TODO: doc
+     */
     markAsUnsorted: function() {
       if ( this.isSorted ) {
         this.isSorted = false;
@@ -208,7 +212,7 @@ define( function( require ) {
     },
 
     /**
-     * Sort our children accessible instances in the order they should appear in the parallel DOM. We do this by
+     * Sort our child accessible instances in the order they should appear in the parallel DOM. We do this by
      * creating a comparison function between two accessible instances, and sorting the array with that.
      */
     sortChildren: function() {

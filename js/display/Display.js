@@ -258,6 +258,7 @@ define( function( require ) {
       this._focusOverlay = new FocusOverlay( this, this._focusRootNode );
       this.addOverlay( this._focusOverlay );
 
+      // TODO: doc
       this._unsortedAccessibleInstances = [];
 
       // @private - the node that currently has focus when we remove an accessible trail,
@@ -728,6 +729,7 @@ define( function( require ) {
       sceneryLog && sceneryLog.Accessibility && sceneryLog.Accessibility( 'Display.changedAccessibleOrder ' + trail.toString() );
       sceneryLog && sceneryLog.Accessibility && sceneryLog.push();
 
+      // Get the closest ancestor that is an AccessibleInstance
       this.getBaseAccessibleInstance( trail ).markAsUnsorted();
 
       this.sortAccessibleInstances();
