@@ -374,7 +374,7 @@ define( function( require ) {
     // The focus highlight can be a custom Shape, Node, contain the Node's local bounds, or be invisible.
     this._accessibleContent = DEFAULT_OPTIONS.accessibleContent;
 
-    // @private {Array.<Node> | null} - If provided, it will override the focus order between children (and optionally
+    // @private {Array.<Node> | null} - (a11y) If provided, it will override the focus order between children (and optionally
     // descendants). If not provided, the focus order will default to the rendering order (first children first, last
     // children last) determined by the children array.
     this._accessibleOrder = DEFAULT_OPTIONS.accessibleOrder;
@@ -3214,7 +3214,8 @@ define( function( require ) {
      * @param {Array.<Node>|null} accessibleOrder
      */
     setAccessibleOrder: function( accessibleOrder ) {
-      assert && assert( accessibleOrder === null || accessibleOrder instanceof Array );
+      assert && assert( accessibleOrder === null || accessibleOrder instanceof Array,
+        'Array expected, received: ' + typeof accessibleOrder );
 
       if ( this._accessibleOrder !== accessibleOrder ) {
         this._accessibleOrder = accessibleOrder;
