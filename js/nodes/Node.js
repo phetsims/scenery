@@ -1682,6 +1682,8 @@ define( function( require ) {
      * Adds an input listener.
      * @public
      *
+     * See Input.js documentation for information about how event listeners are used.
+     *
      * @param {Object} listener
      * @returns {Node} - Returns 'this' reference, for chaining
      */
