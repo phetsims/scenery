@@ -633,10 +633,16 @@ define( function( require ) {
       this._unsortedAccessibleInstances.push( accessibleInstance );
     },
 
+
     sortAccessibleInstances: function() {
+
+      // keep reference so we can restore focus if browser blurs element while sorting
+      var focusedNode = Display.focusedNode;
+
       while ( this._unsortedAccessibleInstances.length ) {
         this._unsortedAccessibleInstances.pop().sortChildren();
       }
+      focusedNode && focusedNode.focus();
     },
 
     /**
@@ -716,7 +722,10 @@ define( function( require ) {
     },
 
     /**
-     * Called when an ancestor node's accessible order is changed.
+     * Called when an ancestor node's accessible order is changed. First we check to see if the leaf most node on
+     * the trail has an AccessibleInstance. If if does, we sort the accessible instances under it. Otherwise, find
+     * the closest ancestor that has an AccessibleInstance, and sort AccessibleInstances under that one.
+     * 
      * @private
      *
      * @param {Trail} trail
@@ -729,8 +738,19 @@ define( function( require ) {
       sceneryLog && sceneryLog.Accessibility && sceneryLog.Accessibility( 'Display.changedAccessibleOrder ' + trail.toString() );
       sceneryLog && sceneryLog.Accessibility && sceneryLog.push();
 
-      // Get the closest ancestor that is an AccessibleInstance
-      this.getBaseAccessibleInstance( trail ).markAsUnsorted();
+      // determine if leaf most node has an accessible instance
+      var closestAncestorInstance;
+      var lastNode = trail.lastNode();
+      for ( var i = 0; i < lastNode.accessibleInstances.length; i++ ) {
+        var accessibleInstance = lastNode.accessibleInstances[ i ];
+        if ( trail.equals( accessibleInstance.trail ) ) {
+          closestAncestorInstance = accessibleInstance;
+        }
+      }
+
+      // if our current node didn't have an accessible instance, find the closest ancestor
+      closestAncestorInstance = closestAncestorInstance || this.getBaseAccessibleInstance( trail );
+      closestAncestorInstance.markAsUnsorted();
 
       this.sortAccessibleInstances();
 

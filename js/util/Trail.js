@@ -378,7 +378,14 @@ define( function( require ) {
       return this.slice( 0, _.indexOf( this.nodes, node ) + 1 );
     },
 
-    // whether this trail contains the complete 'other' trail, but with added descendants afterwards
+    /**
+     * Whether this trail contains the complete 'other' trail, but with added descendants afterwards.
+     * 
+     * @param {Trail} other - is other a subset of this trail?
+     * @param {boolean} allowSameTrail
+     * 
+     * @returns {boolean}
+     */
     isExtensionOf: function( other, allowSameTrail ) {
       if ( this.length <= other.length - ( allowSameTrail ? 1 : 0 ) ) {
         return false;

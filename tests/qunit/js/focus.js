@@ -243,4 +243,124 @@
       { trail: new scenery.Trail( [ x, a, k ] ), children: [] }
     ] );
   } );
+
+  test( 'setting accessibleOrder', function() {
+
+    var rootNode = new scenery.Node();
+    var display = new scenery.Display( rootNode ); // eslint-disable-line
+    document.body.appendChild( display.domElement );
+    
+    var a = new scenery.Node( { tagName: 'div' } );
+    var b = new scenery.Node( { tagName: 'div' } );
+    var c = new scenery.Node( { tagName: 'div' } );
+    var d = new scenery.Node( { tagName: 'div' } );
+    rootNode.children = [ a, b, c, d ];
+
+    // reverse accessible order
+    rootNode.accessibleOrder = [ d, c, b, a ];
+
+    // debugger;
+    var divRoot = display._rootAccessibleInstance.peer.domElement;
+    var divA = a.accessibleInstances[ 0 ].peer.domElement;
+    var divB = b.accessibleInstances[ 0 ].peer.domElement;
+    var divC = c.accessibleInstances[ 0 ].peer.domElement;
+    var divD = d.accessibleInstances[ 0 ].peer.domElement;
+
+    ok( divRoot.children[ 0 ] === divD, 'divD should be first child' );
+    ok( divRoot.children[ 1 ] === divC, 'divC should be second child' );
+    ok( divRoot.children[ 2 ] === divB, 'divB should be third child' );
+    ok( divRoot.children[ 3 ] === divA, 'divA should be fourth child' );
+  } );
+
+  test( 'setting accessibleOrder before setting accessible content', function() {
+    var rootNode = new scenery.Node();
+    var display = new scenery.Display( rootNode ); // eslint-disable-line
+    document.body.appendChild( display.domElement );
+    
+    var a = new scenery.Node();
+    var b = new scenery.Node();
+    var c = new scenery.Node();
+    var d = new scenery.Node();
+    rootNode.children = [ a, b, c, d ];
+
+    // reverse accessible order
+    rootNode.accessibleOrder = [ d, c, b, a ];
+
+    a.tagName = 'div';
+    b.tagName = 'div';
+    c.tagName = 'div';
+    d.tagName = 'div';
+
+    var divRoot = display._rootAccessibleInstance.peer.domElement;
+    var divA = a.accessibleInstances[ 0 ].peer.domElement;
+    var divB = b.accessibleInstances[ 0 ].peer.domElement;
+    var divC = c.accessibleInstances[ 0 ].peer.domElement;
+    var divD = d.accessibleInstances[ 0 ].peer.domElement;
+
+    ok( divRoot.children[ 0 ] === divD, 'divD should be first child' );
+    ok( divRoot.children[ 1 ] === divC, 'divC should be second child' );
+    ok( divRoot.children[ 2 ] === divB, 'divB should be third child' );
+    ok( divRoot.children[ 3 ] === divA, 'divA should be fourth child' );
+  } );
+
+  test( 'setting accessible order on nodes with no accessible content', function() {
+    var rootNode = new scenery.Node();
+    var display = new scenery.Display( rootNode ); // eslint-disable-line
+    document.body.appendChild( display.domElement );
+
+    // root
+    //    a
+    //      b
+    //     c   e 
+    //        d  f
+    
+    var a = new scenery.Node( { tagName: 'div' } );
+    var b = new scenery.Node( { tagName: 'div' } );
+    var c = new scenery.Node( { tagName: 'div' } );
+    var d = new scenery.Node( { tagName: 'div' } );
+    var e = new scenery.Node( { tagName: 'div' } );
+    var f = new scenery.Node( { tagName: 'div' } );
+    rootNode.addChild( a );
+    a.addChild( b );
+    b.addChild( c );
+    b.addChild( e );
+    c.addChild( d ); 
+    c.addChild( f );
+
+    var divB = b.accessibleInstances[ 0 ].peer.domElement;
+    var divC = c.accessibleInstances[ 0 ].peer.domElement;
+    var divE = e.accessibleInstances[ 0 ].peer.domElement;
+
+    b.accessibleOrder = [ e, c ];
+
+    ok( divB.children[ 0 ] === divE, 'div E should be first child of div B' );
+    ok( divB.children[ 1 ] === divC, 'div C should be second child of div B' );
+  } );
+
+  test( 'setting accessible order on nodes with no accessible content', function() {
+    var rootNode = new scenery.Node();
+    var display = new scenery.Display( rootNode ); // eslint-disable-line
+    document.body.appendChild( display.domElement );
+
+    var a = new scenery.Node( { tagName: 'div' } );
+    var b = new scenery.Node();
+    var c = new scenery.Node( { tagName: 'div' } );
+    var d = new scenery.Node( { tagName: 'div' } );
+    var e = new scenery.Node( { tagName: 'div' } );
+    var f = new scenery.Node( { tagName: 'div' } );
+    rootNode.addChild( a );
+    a.addChild( b );
+    b.addChild( c );
+    b.addChild( e );
+    c.addChild( d ); 
+    c.addChild( f );
+
+    var divA = a.accessibleInstances[ 0 ].peer.domElement;
+    var divC = c.accessibleInstances[ 0 ].peer.domElement;
+    var divE = e.accessibleInstances[ 0 ].peer.domElement;
+
+    a.accessibleOrder = [ e, c ];
+    ok( divA.children[ 0 ] === divE, 'div E should be first child of div B' );
+    ok( divA.children[ 1 ] === divC, 'div C should be second child of div B' );
+  } );
 })();
