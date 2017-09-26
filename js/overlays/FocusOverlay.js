@@ -205,8 +205,8 @@ define( function( require ) {
 
     // Called when bounds change on our node when we are in "Bounds" mode
     onBoundsChange: function() {
-      this.boundsHighlight.setRectBounds( FocusOverlay.getStaticFocusHighlightBounds( this.node ) );
-      this.innerBoundsHighlight.setRectBounds( FocusOverlay.getStaticFocusHighlightBounds( this.node ) );
+      this.boundsHighlight.setRectBounds( FocusOverlay.getLocalFocusHighlightBounds( this.node ) );
+      this.innerBoundsHighlight.setRectBounds( FocusOverlay.getLocalFocusHighlightBounds( this.node ) );
     },
 
     // Called when the main Scenery focus pair (Display,Trail) changes.
