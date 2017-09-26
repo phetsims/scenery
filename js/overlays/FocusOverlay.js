@@ -20,6 +20,16 @@ define( function( require ) {
   var TransformTracker = require( 'SCENERY/util/TransformTracker' );
   var Vector2 = require( 'DOT/Vector2' );
 
+ // determined by inspection, base widths of focus highlight, transform of shape/bounds will change highlight line width
+  var INNER_LINE_WIDTH_BASE = 2.5;
+  var OUTER_LINE_WIDTH_BASE = 4;
+
+  /**
+   * @constructor
+   *
+   * @param {Display} display
+   * @param {Node} focusRootNode - the root node of our display
+   */
   function FocusOverlay( display, focusRootNode ) {
     this.display = display; // @private {Display}
     this.focusRootNode = focusRootNode; // @private {Node} - The root Node of our child display
@@ -27,7 +37,7 @@ define( function( require ) {
     // When the focus changes, all of these are modified.
     this.trail = null; // @private {Trail|null}
     this.node = null; // @private {Node|null}
-    this.mode = null; // @private {String|null}
+    this.mode = null; // @private {String|null} - defaults to bounds but can be overwritten by the node's focus highlight
     this.transformTracker = null; // @private {TransformTracker|null}
 
     // @private {boolean} - If true, the next update() will trigger an update to the highlight's transform.
@@ -178,12 +188,14 @@ define( function( require ) {
     // Called from FocusOverlay after transforming the highlight. Only called when the transform changes.
     afterTransform: function() {
       if ( this.mode === 'shape' ) {
-        this.shapeHighlight.lineWidth = 4 / this.shapeHighlight.transform.transformDelta2( Vector2.X_UNIT ).magnitude();
-        this.innerShapeHighlight.lineWidth = 2.5 / this.shapeHighlight.transform.transformDelta2( Vector2.X_UNIT ).magnitude();
+        var unitShapeWidthMagnitude = this.shapeHighlight.transform.transformDelta2( Vector2.X_UNIT ).magnitude();
+        this.shapeHighlight.lineWidth = OUTER_LINE_WIDTH_BASE / unitShapeWidthMagnitude;
+        this.innerShapeHighlight.lineWidth = INNER_LINE_WIDTH_BASE / unitShapeWidthMagnitude;
       }
       else if ( this.mode === 'bounds' ) {
-        this.boundsHighlight.lineWidth = 4 / this.boundsHighlight.transform.transformDelta2( Vector2.X_UNIT ).magnitude();
-        this.innerBoundsHighlight.lineWidth = 2.5 / this.boundsHighlight.transform.transformDelta2( Vector2.X_UNIT ).magnitude();
+        var unitBoundsWidthMagnitude = this.boundsHighlight.transform.transformDelta2( Vector2.X_UNIT ).magnitude();
+        this.boundsHighlight.lineWidth = OUTER_LINE_WIDTH_BASE / unitBoundsWidthMagnitude;
+        this.innerBoundsHighlight.lineWidth = INNER_LINE_WIDTH_BASE / unitBoundsWidthMagnitude;
       }
     },
 
@@ -193,8 +205,8 @@ define( function( require ) {
 
     // Called when bounds change on our node when we are in "Bounds" mode
     onBoundsChange: function() {
-      this.boundsHighlight.setRectBounds( this.node.localBounds );
-      this.innerBoundsHighlight.setRectBounds( this.node.localBounds );
+      this.boundsHighlight.setRectBounds( FocusOverlay.getStaticFocusHighlightBounds( this.node ) );
+      this.innerBoundsHighlight.setRectBounds( FocusOverlay.getStaticFocusHighlightBounds( this.node ) );
     },
 
     // Called when the main Scenery focus pair (Display,Trail) changes.
@@ -226,7 +238,22 @@ define( function( require ) {
     }
   }, {
     focusColor: new Color( 'rgba(212,19,106,0.5)' ),
-    innerFocusColor: new Color( 'rgba(250,40,135,0.9)' )
+    innerFocusColor: new Color( 'rgba(250,40,135,0.9)' ),
+
+    /**
+     * Get the bounds of a focus highlight for a node. The space between the inner most edge of the focus highlight
+     * and the bounds of the node will be 1 / 2 times the line width of the focus highlight. Will provide
+     * consistent spacing between node and inner edge of focus highlight, see
+     * see https://github.com/phetsims/scenery/issues/677
+     *
+     * @param {Node} node - the node that will receive the focus highlight
+     * @return {Bounds2}
+     */
+    getStaticFocusHighlightBounds: function( node ) {
+      var unitBoundsWidthMagnitude = node.transform.transformDelta2( Vector2.X_UNIT ).magnitude();
+      var outerHalfWidth = ( OUTER_LINE_WIDTH_BASE / unitBoundsWidthMagnitude ) * ( 3 / 4 );
+      return node.localBounds.dilated( outerHalfWidth );
+    } 
   } );
 
   return FocusOverlay;
