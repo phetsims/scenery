@@ -242,14 +242,14 @@ define( function( require ) {
 
     /**
      * Get the bounds of a focus highlight for a node. The space between the inner most edge of the focus highlight
-     * and the bounds of the node will be 1 / 2 times the line width of the focus highlight. Will provide
-     * consistent spacing between node and inner edge of focus highlight, see
-     * see https://github.com/phetsims/scenery/issues/677
+     * and the bounds of the node will be 1 / 2 times the line width of the focus highlight. Returns highlight bounds
+     * based on the local bounds of the Node provided.  Will provide consistent spacing between node and inner edge of
+     * focus highlight, see https://github.com/phetsims/scenery/issues/677
      *
      * @param {Node} node - the node that will receive the focus highlight
      * @return {Bounds2}
      */
-    getStaticFocusHighlightBounds: function( node ) {
+    getLocalFocusHighlightBounds: function( node ) {
       var unitBoundsWidthMagnitude = node.transform.transformDelta2( Vector2.X_UNIT ).magnitude();
       var outerHalfWidth = ( OUTER_LINE_WIDTH_BASE / unitBoundsWidthMagnitude ) * ( 3 / 4 );
       return node.localBounds.dilated( outerHalfWidth );
