@@ -20,7 +20,7 @@ define( function( require ) {
   var TransformTracker = require( 'SCENERY/util/TransformTracker' );
   var Vector2 = require( 'DOT/Vector2' );
 
- // determined by inspection, base widths of focus highlight, transform of shape/bounds will change highlight line width
+  // Determined by inspection, base widths of focus highlight, transform of shape/bounds will change highlight line width
   var INNER_LINE_WIDTH_BASE = 2.5;
   var OUTER_LINE_WIDTH_BASE = 4;
 
@@ -240,6 +240,27 @@ define( function( require ) {
     focusColor: new Color( 'rgba(212,19,106,0.5)' ),
     innerFocusColor: new Color( 'rgba(250,40,135,0.9)' ),
 
+
+    /**
+     * Given a node, return the lineWidth of the focusHighlight that would be supplied.
+     * @param {Node} node
+     * @returns {number}
+     */
+    getFocusHighlightLineWidth: function( node ) {
+      var unitBoundsWidthMagnitude = node.transform.transformDelta2( Vector2.X_UNIT ).magnitude();
+      return ( OUTER_LINE_WIDTH_BASE / unitBoundsWidthMagnitude );
+    },
+
+    /**
+     * Given a node, return the inner lineWidth of the focusHighlight that would be supplied.
+     * @param node
+     * @returns {number}
+     */
+    getFocusHighlightInnerLineWidth: function( node ) {
+      var unitBoundsWidthMagnitude = node.transform.transformDelta2( Vector2.X_UNIT ).magnitude();
+      return ( INNER_LINE_WIDTH_BASE / unitBoundsWidthMagnitude );
+    },
+
     /**
      * Get the bounds of a focus highlight for a node. The space between the inner most edge of the focus highlight
      * and the bounds of the node will be 1 / 2 times the line width of the focus highlight. Returns highlight bounds
@@ -250,10 +271,30 @@ define( function( require ) {
      * @return {Bounds2}
      */
     getLocalFocusHighlightBounds: function( node ) {
-      var unitBoundsWidthMagnitude = node.transform.transformDelta2( Vector2.X_UNIT ).magnitude();
-      var outerHalfWidth = ( OUTER_LINE_WIDTH_BASE / unitBoundsWidthMagnitude ) * ( 3 / 4 );
-      return node.localBounds.dilated( outerHalfWidth );
-    } 
+
+      var dilationCoefficient = this.getFocusHighlightLineWidth( node ) * 3 / 4;
+      return node.localBounds.dilated( dilationCoefficient );
+    },
+
+    /**
+     * Given a shape, draw the two paths of the focus highlight and return a Node to be used as the focusHighlight
+     * @param {Shape} shape
+     * @returns {Node} - the created node with proper focusHighlight style
+     */
+    getFocusHighlightNodeFromShape: function( shape ) {
+
+      var node = new Path( shape, {
+        stroke: FocusOverlay.focusColor
+      } );
+      node.lineWidth = FocusOverlay.getFocusHighlightLineWidth( node );
+
+      var innerColorNode = new Path( shape, {
+        lineWidth: FocusOverlay.getFocusHighlightInnerLineWidth( node ),
+        stroke: FocusOverlay.innerFocusColor
+      } );
+      node.addChild( innerColorNode );
+      return node;
+    }
   } );
 
   return FocusOverlay;
