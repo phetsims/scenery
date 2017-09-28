@@ -16,8 +16,9 @@ define( function( require ) {
 
   // phet-io modules
   var TSimpleDragHandler = require( 'SCENERY/input/TSimpleDragHandler' );
+  var phetioEvents = require( 'ifphetio!PHET_IO/phetioEvents' );
 
-  /*
+  /**
    * Allowed options: {
    *    allowTouchSnag: false // allow touch swipes across an object to pick it up. If a function is passed, the value allowTouchSnag( event ) is used
    *    dragCursor: 'pointer' // while dragging with the mouse, sets the cursor to this value (or use null to not override the cursor while dragging)
@@ -50,17 +51,6 @@ define( function( require ) {
     this.mouseButton = undefined;     // tracks which mouse button was pressed, so we can handle that specifically
     this.interrupted = false;         // whether the last input was interrupted (available during endDrag)
     // TODO: consider mouse buttons as separate pointers?
-
-    // Generate all emitters in every case to minimize the number of hidden classes,
-    // see http://www.html5rocks.com/en/tutorials/speed/v8/
-    this.startedCallbacksForDragStartedEmitter = new Emitter( { indicateCallbacks: false } ); // @public (phet-io)
-    this.endedCallbacksForDragStartedEmitter = new Emitter( { indicateCallbacks: false } ); // @public (phet-io)
-
-    this.startedCallbacksForDraggedEmitter = new Emitter( { indicateCallbacks: false } ); // @public (phet-io)
-    this.endedCallbacksForDraggedEmitter = new Emitter( { indicateCallbacks: false } ); // @public (phet-io)
-
-    this.startedCallbacksForDragEndedEmitter = new Emitter( { indicateCallbacks: false } ); // @public (phet-io)
-    this.endedCallbacksForDragEndedEmitter = new Emitter( { indicateCallbacks: false } ); // @public (phet-io)
 
     // if an ancestor is transformed, pin our node
     this.transformListener = {
@@ -127,7 +117,10 @@ define( function( require ) {
 
         var delta = self.transform.inverseDelta2( globalDelta );
 
-        window.phet && phet.phetio && self.startedCallbacksForDraggedEmitter.emit2( event.pointer.point.x, event.pointer.point.y );
+        var id = phetioEvents.start( 'user', self.options.tandem.id, TSimpleDragHandler, 'dragged', {
+          x: event.pointer.point.x,
+          y: event.pointer.point.y
+        } );
 
         // move by the delta between the previous point, using the precomputed transform
         // prepend the translation on the node, so we can ignore whatever other transform state the node has
@@ -150,7 +143,7 @@ define( function( require ) {
           self.options.drag.call( null, event, self.trail ); // new position (old position?) delta
           event.currentTarget = saveCurrentTarget; // be polite to other listeners, restore currentTarget
         }
-        window.phet && phet.phetio && self.endedCallbacksForDraggedEmitter.emit();
+        phetioEvents.end( id );
       }
     };
     options.tandem.addInstance( this, TSimpleDragHandler );
@@ -183,11 +176,14 @@ define( function( require ) {
       // event.domEvent may not exist if this is touch-to-snag
       this.mouseButton = event.pointer.isMouse ? event.domEvent.button : undefined;
 
-      window.phet && phet.phetio && this.startedCallbacksForDragStartedEmitter.emit2( event.pointer.point.x, event.pointer.point.y );
+      var id = phetioEvents.start( 'user', this.options.tandem.id, TSimpleDragHandler, 'dragStarted', {
+        x: event.pointer.point.x,
+        y: event.pointer.point.y
+      } );
       if ( this.options.start ) {
         this.options.start.call( null, event, this.trail );
       }
-      window.phet && phet.phetio && this.endedCallbacksForDragStartedEmitter.emit();
+      phetioEvents.end( id );
     },
 
     endDrag: function( event ) {
@@ -198,13 +194,14 @@ define( function( require ) {
       this.pointer.removeInputListener( this.dragListener );
       this.dragging = false;
 
-      window.phet && phet.phetio && this.startedCallbacksForDragEndedEmitter.emit();
+      var id = phetioEvents.start( 'user', this.options.tandem.id, TSimpleDragHandler, 'dragEnded' );
+
       if ( this.options.end ) {
 
         // drag end may be triggered programmatically and hence event and trail may be undefined
         this.options.end.call( null, event, this.trail );
       }
-      window.phet && phet.phetio && this.endedCallbacksForDragEndedEmitter.emit();
+      phetioEvents.end( id );
 
       // release our reference
       this.pointer = null;
