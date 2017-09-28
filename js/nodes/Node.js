@@ -3763,7 +3763,7 @@ define( function( require ) {
       } );
     },
 
-    /*
+    /**
      * Returns all nodes in the connected component, returned in an arbitrary order, including nodes that are ancestors
      * of this node.
      * @public
@@ -3783,7 +3783,7 @@ define( function( require ) {
       return result;
     },
 
-    /*
+    /**
      * Returns all nodes in the subtree with this node as its root, returned in an arbitrary order. Like
      * getConnectedNodes, but doesn't include parents.
      * @public
