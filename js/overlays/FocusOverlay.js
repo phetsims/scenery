@@ -134,8 +134,7 @@ define( function( require ) {
       else {
         this.mode = 'bounds';
 
-        this.boundsFocusHighlightPath.setNode( this.node );
-        this.boundsFocusHighlightPath.setShapeFromNode(  );
+        this.boundsFocusHighlightPath.setShapeFromNode( this.node );
 
         this.boundsFocusHighlightPath.visible = true;
         this.node.onStatic( 'localBounds', this.boundsListener );
