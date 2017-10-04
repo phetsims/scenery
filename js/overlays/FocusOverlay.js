@@ -11,17 +11,13 @@ define( function( require ) {
 
   var FocusHighlightPath = require( 'SCENERY/accessibility/FocusHighlightPath' );
   var inherit = require( 'PHET_CORE/inherit' );
-  var Color = require( 'SCENERY/util/Color' );
   var Node = require( 'SCENERY/nodes/Node' );
-  var Path = require( 'SCENERY/nodes/Path' );
-  var Rectangle = require( 'SCENERY/nodes/Rectangle' );
   var scenery = require( 'SCENERY/scenery' );
   var Shape = require( 'KITE/Shape' );
   var TransformTracker = require( 'SCENERY/util/TransformTracker' );
   var Vector2 = require( 'DOT/Vector2' );
 
   // Determined by inspection, base widths of focus highlight, transform of shape/bounds will change highlight line width
-  var INNER_LINE_WIDTH_BASE = 2.5;
   var OUTER_LINE_WIDTH_BASE = 4;
 
   /**
@@ -62,23 +58,12 @@ define( function( require ) {
     this.domElement = this.focusDisplay.domElement;
     this.domElement.style.pointerEvents = 'none';
 
-    // @private Bounds highlight
-    this.boundsHighlight = new Rectangle( 0, 0, 0, 0, { stroke: FocusOverlay.focusColor, visible: false } );
-    this.innerBoundsHighlight = new Rectangle( 0, 0, 0, 0, { stroke: FocusOverlay.innerFocusColor } );
-    this.boundsHighlight.addChild( this.innerBoundsHighlight );
-
-    // // @private Shape highlight
-    // this.shapeHighlight = new Path( null, { stroke: FocusOverlay.focusColor, visible: false } );
-    // this.innerShapeHighlight = new Path( null, { stroke: FocusOverlay.innerFocusColor } );
-    // this.shapeHighlight.addChild( this.innerShapeHighlight );
-
-
+    // Used as the focus highlight when the overlay is passed a shape TODO and bounds?
     this.focusHighlightPath = new FocusHighlightPath( null );
 
     // @private Node highlight
     this.nodeHighlight = null;
 
-    this.highlightNode.addChild( this.boundsHighlight );
     this.highlightNode.addChild( this.focusHighlightPath );
 
     // @private - Listeners bound once, so we can access them for removal.
@@ -148,7 +133,7 @@ define( function( require ) {
       else {
         this.mode = 'bounds';
 
-        this.boundsHighlight.visible = true;
+        this.focusHighlightPath.visible = true;
         this.node.onStatic( 'localBounds', this.boundsListener );
 
         this.onBoundsChange();
@@ -177,7 +162,7 @@ define( function( require ) {
         }
       }
       else if ( this.mode === 'bounds' ) {
-        this.boundsHighlight.visible = false;
+        this.focusHighlightPath.visible = false;
         this.node.offStatic( 'localBounds', this.boundsListener );
       }
 
@@ -191,13 +176,8 @@ define( function( require ) {
     // Called from FocusOverlay after transforming the highlight. Only called when the transform changes.
     // TODO move this whole function to focusHighlightPath?
     afterTransform: function() {
-      if ( this.mode === 'shape' ) {
+      if ( this.mode === 'shape' || this.mode === 'bounds' ) {
         this.focusHighlightPath.updateLineWidth();
-      }
-      else if ( this.mode === 'bounds' ) {
-        var unitBoundsWidthMagnitude = this.boundsHighlight.transform.transformDelta2( Vector2.X_UNIT ).magnitude();
-        this.boundsHighlight.lineWidth = OUTER_LINE_WIDTH_BASE / unitBoundsWidthMagnitude;
-        this.innerBoundsHighlight.lineWidth = INNER_LINE_WIDTH_BASE / unitBoundsWidthMagnitude;
       }
     },
 
@@ -207,8 +187,9 @@ define( function( require ) {
 
     // Called when bounds change on our node when we are in "Bounds" mode
     onBoundsChange: function() {
-      this.boundsHighlight.setRectBounds( FocusOverlay.getLocalFocusHighlightBounds( this.node ) );
-      this.innerBoundsHighlight.setRectBounds( FocusOverlay.getLocalFocusHighlightBounds( this.node ) );
+
+      // TODO performance of creating new shapes every time?
+      this.focusHighlightPath.setShape( Shape.bounds( FocusOverlay.getLocalFocusHighlightBounds( this.node )  ) );
     },
 
     // Called when the main Scenery focus pair (Display,Trail) changes.
@@ -239,9 +220,6 @@ define( function( require ) {
       this.focusDisplay.updateDisplay();
     }
   }, {
-    focusColor: new Color( 'rgba(212,19,106,0.5)' ),
-    innerFocusColor: new Color( 'rgba(250,40,135,0.9)' ),
-
 
     /**
      * Given a node, return the lineWidth of the focusHighlight that would be supplied.
@@ -251,16 +229,6 @@ define( function( require ) {
     getFocusHighlightLineWidth: function( node ) {
       var unitBoundsWidthMagnitude = node.transform.transformDelta2( Vector2.X_UNIT ).magnitude();
       return ( OUTER_LINE_WIDTH_BASE / unitBoundsWidthMagnitude );
-    },
-
-    /**
-     * Given a node, return the inner lineWidth of the focusHighlight that would be supplied.
-     * @param node
-     * @returns {number}
-     */
-    getFocusHighlightInnerLineWidth: function( node ) {
-      var unitBoundsWidthMagnitude = node.transform.transformDelta2( Vector2.X_UNIT ).magnitude();
-      return ( INNER_LINE_WIDTH_BASE / unitBoundsWidthMagnitude );
     },
 
     /**
@@ -276,26 +244,6 @@ define( function( require ) {
 
       var dilationCoefficient = this.getFocusHighlightLineWidth( node ) * 3 / 4;
       return node.localBounds.dilated( dilationCoefficient );
-    },
-
-    /**
-     * Given a shape, draw the two paths of the focus highlight and return a Node to be used as the focusHighlight
-     * @param {Shape} shape
-     * @returns {Node} - the created node with proper focusHighlight style
-     */
-    getFocusHighlightNodeFromShape: function( shape ) {
-
-      var node = new Path( shape, {
-        stroke: FocusOverlay.focusColor
-      } );
-      node.lineWidth = FocusOverlay.getFocusHighlightLineWidth( node );
-
-      var innerColorNode = new Path( shape, {
-        lineWidth: FocusOverlay.getFocusHighlightInnerLineWidth( node ),
-        stroke: FocusOverlay.innerFocusColor
-      } );
-      node.addChild( innerColorNode );
-      return node;
     }
   } );
 
