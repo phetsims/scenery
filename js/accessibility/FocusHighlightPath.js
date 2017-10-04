@@ -56,9 +56,9 @@ define( function( require ) {
 
     // create the 'inner' focus highlight, the slightly darker and more opaque path that is on the inside
     // of the outer path to give the focus highlight a 'fade-out' appearance
-    this.innerHighlightPath = new Path( shape, {
+    this.innerHighlightPath = new Path( shape, _.extend( {
       stroke: options.innerStroke
-    } );
+    }, options ) );
     this.addChild( this.innerHighlightPath );
 
     this.updateLineWidth();

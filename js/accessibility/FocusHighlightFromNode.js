@@ -29,7 +29,7 @@ define( function( require ) {
 
     this.useLocalBounds = options.useLocalBounds; // @private
 
-    FocusHighlightPath.call( this, null );
+    FocusHighlightPath.call( this, null, options );
 
     if ( node ) {
       this.setShapeFromNode( node );
