@@ -9,16 +9,13 @@
 define( function( require ) {
   'use strict';
 
+  var FocusHighlightFromNode = require( 'SCENERY/accessibility/FocusHighlightFromNode' );
   var FocusHighlightPath = require( 'SCENERY/accessibility/FocusHighlightPath' );
   var inherit = require( 'PHET_CORE/inherit' );
   var Node = require( 'SCENERY/nodes/Node' );
   var scenery = require( 'SCENERY/scenery' );
   var Shape = require( 'KITE/Shape' );
   var TransformTracker = require( 'SCENERY/util/TransformTracker' );
-  var Vector2 = require( 'DOT/Vector2' );
-
-  // Determined by inspection, base widths of focus highlight, transform of shape/bounds will change highlight line width
-  var OUTER_LINE_WIDTH_BASE = 4;
 
   /**
    * @constructor
@@ -58,13 +55,17 @@ define( function( require ) {
     this.domElement = this.focusDisplay.domElement;
     this.domElement.style.pointerEvents = 'none';
 
-    // Used as the focus highlight when the overlay is passed a shape TODO and bounds?
-    this.focusHighlightPath = new FocusHighlightPath( null );
+    // Used as the focus highlight when the overlay is passed a shape
+    this.shapeFocusHighlightPath = new FocusHighlightPath( null );
+    this.boundsFocusHighlightPath = new FocusHighlightFromNode( null, {
+      useLocalBounds: true
+    } );
 
     // @private Node highlight
     this.nodeHighlight = null;
 
-    this.highlightNode.addChild( this.focusHighlightPath );
+    this.highlightNode.addChild( this.shapeFocusHighlightPath );
+    this.highlightNode.addChild( this.boundsFocusHighlightPath );
 
     // @private - Listeners bound once, so we can access them for removal.
     this.boundsListener = this.onBoundsChange.bind( this );
@@ -111,8 +112,8 @@ define( function( require ) {
       else if ( this.node.accessibleContent.focusHighlight instanceof Shape ) {
         this.mode = 'shape';
 
-        this.focusHighlightPath.visible = true;
-        this.focusHighlightPath.setShape( this.node.accessibleContent.focusHighlight );
+        this.shapeFocusHighlightPath.visible = true;
+        this.shapeFocusHighlightPath.setShape( this.node.accessibleContent.focusHighlight );
       }
       // Node mode
       else if ( this.node.accessibleContent.focusHighlight instanceof Node ) {
@@ -133,7 +134,10 @@ define( function( require ) {
       else {
         this.mode = 'bounds';
 
-        this.focusHighlightPath.visible = true;
+        this.boundsFocusHighlightPath.setNode( this.node );
+        this.boundsFocusHighlightPath.setShapeFromNode(  );
+
+        this.boundsFocusHighlightPath.visible = true;
         this.node.onStatic( 'localBounds', this.boundsListener );
 
         this.onBoundsChange();
@@ -148,7 +152,7 @@ define( function( require ) {
      */
     deactivateHighlight: function() {
       if ( this.mode === 'shape' ) {
-        this.focusHighlightPath.visible = false;
+        this.shapeFocusHighlightPath.visible = false;
       }
       else if ( this.mode === 'node' ) {
 
@@ -162,7 +166,7 @@ define( function( require ) {
         }
       }
       else if ( this.mode === 'bounds' ) {
-        this.focusHighlightPath.visible = false;
+        this.boundsFocusHighlightPath.visible = false;
         this.node.offStatic( 'localBounds', this.boundsListener );
       }
 
@@ -174,10 +178,12 @@ define( function( require ) {
     },
 
     // Called from FocusOverlay after transforming the highlight. Only called when the transform changes.
-    // TODO move this whole function to focusHighlightPath?
     afterTransform: function() {
-      if ( this.mode === 'shape' || this.mode === 'bounds' ) {
-        this.focusHighlightPath.updateLineWidth();
+      if ( this.mode === 'shape' ) {
+        this.shapeFocusHighlightPath.updateLineWidth();
+      }
+      else if ( this.mode === 'bounds' ) {
+        this.boundsFocusHighlightPath.updateLineWidth();
       }
     },
 
@@ -187,9 +193,7 @@ define( function( require ) {
 
     // Called when bounds change on our node when we are in "Bounds" mode
     onBoundsChange: function() {
-
-      // TODO performance of creating new shapes every time?
-      this.focusHighlightPath.setShape( Shape.bounds( FocusOverlay.getLocalFocusHighlightBounds( this.node )  ) );
+      this.boundsFocusHighlightPath.setShapeFromNode( this.node );
     },
 
     // Called when the main Scenery focus pair (Display,Trail) changes.
@@ -218,32 +222,6 @@ define( function( require ) {
         this.focusDisplay.setWidthHeight( this.display.width, this.display.height );
       }
       this.focusDisplay.updateDisplay();
-    }
-  }, {
-
-    /**
-     * Given a node, return the lineWidth of the focusHighlight that would be supplied.
-     * @param {Node} node
-     * @returns {number}
-     */
-    getFocusHighlightLineWidth: function( node ) {
-      var unitBoundsWidthMagnitude = node.transform.transformDelta2( Vector2.X_UNIT ).magnitude();
-      return ( OUTER_LINE_WIDTH_BASE / unitBoundsWidthMagnitude );
-    },
-
-    /**
-     * Get the bounds of a focus highlight for a node. The space between the inner most edge of the focus highlight
-     * and the bounds of the node will be 1 / 2 times the line width of the focus highlight. Returns highlight bounds
-     * based on the local bounds of the Node provided.  Will provide consistent spacing between node and inner edge of
-     * focus highlight, see https://github.com/phetsims/scenery/issues/677
-     *
-     * @param {Node} node - the node that will receive the focus highlight
-     * @return {Bounds2}
-     */
-    getLocalFocusHighlightBounds: function( node ) {
-
-      var dilationCoefficient = this.getFocusHighlightLineWidth( node ) * 3 / 4;
-      return node.localBounds.dilated( dilationCoefficient );
     }
   } );
 

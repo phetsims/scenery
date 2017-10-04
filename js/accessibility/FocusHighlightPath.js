@@ -125,7 +125,5 @@ define( function( require ) {
       node = node || this;
       return INNER_LINE_WIDTH_BASE / this.getWidthMagnitudeFromTransform( node );
     }
-
-
   } );
 } );
