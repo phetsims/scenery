@@ -9,8 +9,8 @@
 define( function( require ) {
   'use strict';
 
+  var FocusHighlightPath = require( 'SCENERY/accessibility/FocusHighlightPath' );
   var inherit = require( 'PHET_CORE/inherit' );
-
   var Color = require( 'SCENERY/util/Color' );
   var Node = require( 'SCENERY/nodes/Node' );
   var Path = require( 'SCENERY/nodes/Path' );
@@ -67,16 +67,19 @@ define( function( require ) {
     this.innerBoundsHighlight = new Rectangle( 0, 0, 0, 0, { stroke: FocusOverlay.innerFocusColor } );
     this.boundsHighlight.addChild( this.innerBoundsHighlight );
 
-    // @private Shape highlight
-    this.shapeHighlight = new Path( null, { stroke: FocusOverlay.focusColor, visible: false } );
-    this.innerShapeHighlight = new Path( null, { stroke: FocusOverlay.innerFocusColor } );
-    this.shapeHighlight.addChild( this.innerShapeHighlight );
+    // // @private Shape highlight
+    // this.shapeHighlight = new Path( null, { stroke: FocusOverlay.focusColor, visible: false } );
+    // this.innerShapeHighlight = new Path( null, { stroke: FocusOverlay.innerFocusColor } );
+    // this.shapeHighlight.addChild( this.innerShapeHighlight );
+
+
+    this.focusHighlightPath = new FocusHighlightPath( null );
 
     // @private Node highlight
     this.nodeHighlight = null;
 
     this.highlightNode.addChild( this.boundsHighlight );
-    this.highlightNode.addChild( this.shapeHighlight );
+    this.highlightNode.addChild( this.focusHighlightPath );
 
     // @private - Listeners bound once, so we can access them for removal.
     this.boundsListener = this.onBoundsChange.bind( this );
@@ -123,8 +126,8 @@ define( function( require ) {
       else if ( this.node.accessibleContent.focusHighlight instanceof Shape ) {
         this.mode = 'shape';
 
-        this.shapeHighlight.visible = true;
-        this.shapeHighlight.shape = this.innerShapeHighlight.shape = this.node.accessibleContent.focusHighlight;
+        this.focusHighlightPath.visible = true;
+        this.focusHighlightPath.setShape( this.node.accessibleContent.focusHighlight );
       }
       // Node mode
       else if ( this.node.accessibleContent.focusHighlight instanceof Node ) {
@@ -160,7 +163,7 @@ define( function( require ) {
      */
     deactivateHighlight: function() {
       if ( this.mode === 'shape' ) {
-        this.shapeHighlight.visible = false;
+        this.focusHighlightPath.visible = false;
       }
       else if ( this.mode === 'node' ) {
 
@@ -186,11 +189,10 @@ define( function( require ) {
     },
 
     // Called from FocusOverlay after transforming the highlight. Only called when the transform changes.
+    // TODO move this whole function to focusHighlightPath?
     afterTransform: function() {
       if ( this.mode === 'shape' ) {
-        var unitShapeWidthMagnitude = this.shapeHighlight.transform.transformDelta2( Vector2.X_UNIT ).magnitude();
-        this.shapeHighlight.lineWidth = OUTER_LINE_WIDTH_BASE / unitShapeWidthMagnitude;
-        this.innerShapeHighlight.lineWidth = INNER_LINE_WIDTH_BASE / unitShapeWidthMagnitude;
+        this.focusHighlightPath.updateLineWidth();
       }
       else if ( this.mode === 'bounds' ) {
         var unitBoundsWidthMagnitude = this.boundsHighlight.transform.transformDelta2( Vector2.X_UNIT ).magnitude();
