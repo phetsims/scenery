@@ -80,13 +80,52 @@ define( function( require ) {
     },
 
     /**
+     * Get a scalar based on the node's transform excluding position.
+     * @private
+     * @param {Node} [node] - optional node to be used instead of "this"
+     * @returns {number}
+     */
+    getWidthMagnitudeFromTransform: function( node ) {
+      node = node || this;
+      return node.transform.transformDelta2( Vector2.X_UNIT ).magnitude();
+    },
+
+    /**
      * @public
-     * Update the line width of both Paths based on transform. Can be overwritten (ridden?) by options.
+     * Update the line width of both Paths based on transform. Can be overwritten (ridden?) by the options
+     * passed in the constructor.
      */
     updateLineWidth: function() {
-      var widthMagnitude = this.transform.transformDelta2( Vector2.X_UNIT ).magnitude();
-      this.lineWidth = this.options.outerLineWidth ? this.options.outerLineWidth : OUTER_LINE_WIDTH_BASE / widthMagnitude;
-      this.innerHighlightPath.lineWidth = this.options.innerLineWidth ? this.options.innerLineWidth: INNER_LINE_WIDTH_BASE / widthMagnitude;
+      this.lineWidth = this.getOuterLineWidth();
+      this.innerHighlightPath.lineWidth = this.getInnerLineWidth();
+    },
+
+    /**
+     * Given a node, return the lineWidth of the focusHighlight that would be supplied.
+     * @param {Node} [node] - optional node to base the line width off of, otherwise use "this"
+     * @returns {number}
+     */
+    getOuterLineWidth: function( node ) {
+      if ( this.options.outerLineWidth ) {
+        return this.options.outerLineWidth;
+      }
+      node = node || this;
+      return OUTER_LINE_WIDTH_BASE / this.getWidthMagnitudeFromTransform( node );
+    },
+
+    /**
+     * Given a node, return the lineWidth of the inner focusHighlight that would be supplied.
+     * @param {Node} [node] - optional node to base the line width off of, otherwise use "this"
+     * @returns {number}
+     */
+    getInnerLineWidth: function( node ) {
+      if ( this.options.innerLineWidth ) {
+        return this.options.innerLineWidth;
+      }
+      node = node || this;
+      return INNER_LINE_WIDTH_BASE / this.getWidthMagnitudeFromTransform( node );
     }
+
+
   } );
 } );
