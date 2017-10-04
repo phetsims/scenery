@@ -60,11 +60,12 @@ define( function( require ) {
     /**
      * Update the shape of the child path (inner highlight) and this path (outer highlight).
      *
+     * @override
      * @param {Shape} shape
      */
-    setHighlightShape: function( shape ) {
-      this.setShape( shape );
-      this.innerHighlightPath.setShape( shape );
+    setShape: function( shape ) {
+      Path.prototype.setShape.call( this, shape );
+      this.innerHighlightPath && this.innerHighlightPath.setShape( shape );
     }
   } );
 } );
