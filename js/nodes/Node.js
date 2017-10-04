@@ -193,10 +193,6 @@ define( function( require ) {
     return node._children.length === 0;
   }
 
-  function hasRootedDisplayPredicate( node ) {
-    return node._rootedDisplays.length > 0;
-  }
-
   var scratchBounds2 = Bounds2.NOTHING.copy(); // mutable {Bounds2} used temporarily in methods
   var scratchMatrix3 = new Matrix3();
 
@@ -245,7 +241,6 @@ define( function( require ) {
     'clipArea', // Makes things outside of a shape invisible, see setClipArea() for more documentation
     'transformBounds', // Flag that makes bounds tighter, see setTransformBounds() for more documentation
     'accessibleContent', // Sets up accessibility handling, see setAccessibleContent() for more documentation
-    'accessibleOrder', // Modifies the keyboard accessibility order, see setAccessibleOrder() for more documentation
     'phetioType', // The corresponding phet-io wrapper type
     'tandem' // For instrumenting Scenery nodes, see setTandem().  This must be last so that (a) the phetioType
     // is available and (b) because when tandem.addInstance is called the node becomes active in the PhET-iO API immediately
@@ -261,7 +256,6 @@ define( function( require ) {
     touchArea: null,
     cursor: null,
     accessibleContent: null,
-    accessibleOrder: null,
     transformBounds: false,
     maxWidth: null,
     maxHeight: null,
@@ -373,11 +367,6 @@ define( function( require ) {
     // }
     // The focus highlight can be a custom Shape, Node, contain the Node's local bounds, or be invisible.
     this._accessibleContent = DEFAULT_OPTIONS.accessibleContent;
-
-    // @private {Array.<Node> | null} - (a11y) If provided, it will override the focus order between children (and optionally
-    // descendants). If not provided, the focus order will default to the rendering order (first children first, last
-    // children last) determined by the children array.
-    this._accessibleOrder = DEFAULT_OPTIONS.accessibleOrder;
 
     // @public (scenery-internal) - Not for public use, but used directly internally for performance.
     this._children = []; // {Array.<Node>} - Ordered array of child nodes.
@@ -1779,7 +1768,7 @@ define( function( require ) {
      */
     onAccessibleAddChild: function( node ) {
       // All trails starting with nodes that have display roots, and ending with the added node.
-      var trails = node.getTrails( hasRootedDisplayPredicate );
+      var trails = node.getTrails( Node.hasRootedDisplayPredicate );
       for ( var i = 0; i < trails.length; i++ ) {
         var trail = trails[ i ];
 
@@ -1805,7 +1794,7 @@ define( function( require ) {
      */
     onAccessibleRemoveChild: function( node ) {
       // All trails starting with nodes that have display roots, and ending with the removed node.
-      var trails = node.getTrails( hasRootedDisplayPredicate );
+      var trails = node.getTrails( Node.hasRootedDisplayPredicate );
       for ( var i = 0; i < trails.length; i++ ) {
         var trail = trails[ i ];
 
@@ -3207,49 +3196,6 @@ define( function( require ) {
     },
 
     /**
-     * Sets the accessible focus order for this node. This includes not only focused items, but elements that can be
-     * placed in the parallel DOM. If provided, it will override the focus order between children (and
-     * optionally descendants). If not provided, the focus order will default to the rendering order (first children
-     * first, last children last), determined by the children array.
-     * @public
-     *
-     * @param {Array.<Node>|null} accessibleOrder
-     */
-    setAccessibleOrder: function( accessibleOrder ) {
-      assert && assert( accessibleOrder === null || accessibleOrder instanceof Array,
-        'Array expected, received: ' + typeof accessibleOrder );
-
-      // Only update if it has changed
-      if ( this._accessibleOrder !== accessibleOrder ) {
-        this._accessibleOrder = accessibleOrder;
-
-        // Get all trails where the root node of the trail has at least one rootedDisplay
-        var trails = this.getTrails( hasRootedDisplayPredicate );
-        for ( var i = 0; i < trails.length; i++ ) {
-          var trail = trails[ i ];
-          var rootedDisplays = trail.rootNode()._rootedDisplays;
-          for ( var j = 0; j < rootedDisplays.length; j++ ) {
-            rootedDisplays[ j ].changedAccessibleOrder( trail );
-          }
-        }
-
-        this.trigger0( 'accessibleOrder' );
-      }
-    },
-    set accessibleOrder( value ) { this.setAccessibleOrder( value ); },
-
-    /**
-     * Returns the accessible (focus) order for this node.
-     * @public
-     *
-     * @returns {Array.<Node>|null}
-     */
-    getAccessibleOrder: function() {
-      return this._accessibleOrder;
-    },
-    get accessibleOrder() { return this.getAccessibleOrder(); },
-
-    /**
      * Sets the accessible content for a Node. See constructor for more information.
      * @public (scenery-internal)
      *
@@ -3262,7 +3208,7 @@ define( function( require ) {
         var oldAccessibleContent = this._accessibleContent;
         this._accessibleContent = accessibleContent;
 
-        var trails = this.getTrails( hasRootedDisplayPredicate );
+        var trails = this.getTrails( Node.hasRootedDisplayPredicate );
         for ( var i = 0; i < trails.length; i++ ) {
           var trail = trails[ i ];
           var rootedDisplays = trail.rootNode()._rootedDisplays;
@@ -3800,104 +3746,6 @@ define( function( require ) {
           fresh = fresh.concat( node._children );
         }
       }
-      return result;
-    },
-
-    /**
-     * Returns a recursive data structure that represents the nested ordering of accessible content for this Node's
-     * subtree. Each "Item" will have the type { trail: {Trail}, children: {Array.<Item>} }, forming a tree-like
-     * structure.
-     * @public
-     *
-     * @returns {Array.<Item>}
-     */
-    getNestedAccessibleOrder: function() {
-      var currentTrail = new scenery.Trail( this );
-      var pruneStack = []; // {Array.<Node>} - A list of nodes to prune
-
-      // {Array.<Item>} - The main result we will be returning. It is the top-level array where child items will be
-      // inserted.
-      var result = [];
-
-      // {Array.<Array.<Item>>} A stack of children arrays, where we should be inserting items into the top array.
-      // We will start out with the result, and as nested levels are added, the children arrays of those items will be
-      // pushed and poppped, so that the top array on this stack is where we should insert our next child item.
-      var nestedChildStack = [ result ];
-
-      function addTrailsForNode( node, overridePruning ) {
-        // If subtrees were specified with accessibleOrder, they should be skipped from the ordering of ancestor subtrees,
-        // otherwise we could end up having multiple references to the same trail (which should be disallowed).
-        var pruneCount = 0;
-        // count the number of times our node appears in the pruneStack
-        _.each( pruneStack, function( pruneNode ) {
-          if ( node === pruneNode ) {
-            pruneCount++;
-          }
-        } );
-
-        // If overridePruning is set, we ignore one reference to our node in the prune stack. If there are two copies,
-        // however, it means a node was specified in a accessibleOrder that already needs to be pruned (so we skip it instead
-        // of creating duplicate references in the tab order).
-        if ( pruneCount > 1 || ( pruneCount === 1 && !overridePruning ) ) {
-          return;
-        }
-
-        // Pushing item and its children array, if accessible
-        if ( node.accessibleContent ) {
-          var item = {
-            trail: currentTrail.copy(),
-            children: []
-          };
-          nestedChildStack[ nestedChildStack.length - 1 ].push( item );
-          nestedChildStack.push( item.children );
-        }
-
-        // Pushing pruned nodes to the stack (if ordered), AND visiting trails to ordered nodes.
-        if ( node._accessibleOrder ) {
-          // push specific focused nodes to the stack
-          pruneStack = pruneStack.concat( node._accessibleOrder );
-
-          _.each( node._accessibleOrder, function( descendant ) {
-            // Find all descendant references to the node.
-            // NOTE: We are not reordering trails (due to descendant constraints) if there is more than one instance for
-            // this descendant node.
-            _.each( node.getLeafTrailsTo( descendant ), function( descendantTrail ) {
-              descendantTrail.removeAncestor(); // strip off 'node', so that we handle only children
-
-              // same as the normal order, but adding a full trail (since we may be referencing a descendant node)
-              currentTrail.addDescendantTrail( descendantTrail );
-              addTrailsForNode( descendant, true ); // 'true' overrides one reference in the prune stack (added above)
-              currentTrail.removeDescendantTrail( descendantTrail );
-            } );
-          } );
-        }
-
-        // Visit everything. If there is an accessibleOrder, those trails were already visited, and will be excluded.
-        var numChildren = node._children.length;
-        for ( var i = 0; i < numChildren; i++ ) {
-          var child = node._children[ i ];
-
-          currentTrail.addDescendant( child, i );
-          addTrailsForNode( child, false );
-          currentTrail.removeDescendant();
-        }
-
-        // Popping pruned nodes from the stack (if ordered)
-        if ( node._accessibleOrder ) {
-          // pop focused nodes from the stack (that were added above)
-          _.each( node._accessibleOrder, function( descendant ) {
-            pruneStack.pop();
-          } );
-        }
-
-        // Popping children array if accessible
-        if ( node.accessibleContent ) {
-          nestedChildStack.pop();
-        }
-      }
-
-      addTrailsForNode( this, false );
-
       return result;
     },
 
@@ -5132,7 +4980,22 @@ define( function( require ) {
         }
       }
     }
-  } ) );
+  } ), {
+
+    /*---------------------------------------------------------------------------*
+     * Static elements
+     *----------------------------------------------------------------------------*/
+
+    /**
+     * Used by the Accessibility mixin as well, so it is exported as a static
+     * @public (scenery-interal)
+     * @param {Node} node
+     * @returns {boolean}
+     */
+    hasRootedDisplayPredicate: function( node ) {
+       return node._rootedDisplays.length > 0;
+    }
+  } );
 
   Node.DEFAULT_OPTIONS = DEFAULT_OPTIONS;
 
