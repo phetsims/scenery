@@ -821,7 +821,17 @@ define( function( require ) {
           if ( this.isFocused() ) {
             isFocused = true;
           }
+
           this.invalidateAccessibleContent();
+
+          // if the focus highlight is layerable in the scene graph, update visibility so that it is only
+          // visible when associated node has focus
+          if ( this._focusHighlightLayerable ) {
+
+            // if focus highlight is layerable, it must be a node in the scene graph
+            assert && assert( focusHighlight instanceof phet.scenery.Node );
+            focusHighlight.visible = this.focused;
+          }
 
           // Reset the focus after invalidating the content.
           isFocused && this.focus();
@@ -842,11 +852,21 @@ define( function( require ) {
 
         /**
          * Setting a flag to break default and allow the focus highlight to be (z) layered into the scene graph.
-         * TODO: We may want to eventually handle the case of setting this flag while the node is currently focused.
+         * This will set the visibility of the layered focus highlight, it will always be invisible until this node has
+         * focus.
+         *
          * @param {Boolean} focusHighlightLayerable
          */
         setFocusHighlightLayerable: function( focusHighlightLayerable ) {
           this._focusHighlightLayerable = focusHighlightLayerable;
+
+          // if a focus highlight is defined (it must be a node), update its visibility so it is linked to focus
+          // of the associated node
+          if ( this._focusHighlight ) {
+            assert && assert( this._focusHighlight instanceof phet.scenery.Node );
+            this._focusHighlight.visible = this.focused;
+          }
+
           this.invalidateAccessibleContent();
         },
         set focusHighlightLayerable( focusHighlightLayerable ) { this.setFocusHighlightLayerable( focusHighlightLayerable ); },
