@@ -96,12 +96,12 @@ define( function( require ) {
         if ( this._buttonOptions[ state ] ) {
 
           // Record this event to the phet-io event stream, including all downstream events as nested children
-          var id = this.buttonListenerOptions.tandem.id.supplied && phetioEvents.start( 'user', this.buttonListenerOptions.tandem.id, TButtonListener, state );
+          var id = this.buttonListenerOptions.tandem.isLegalAndUsable() && phetioEvents.start( 'user', this.buttonListenerOptions.tandem.id, TButtonListener, state );
 
           // Then invoke the callback
           this._buttonOptions[ state ]( event, oldState );
 
-          this.buttonListenerOptions.tandem.id.supplied && phetioEvents.end( id );
+          this.buttonListenerOptions.tandem.isLegalAndUsable() && phetioEvents.end( id );
         }
 
         if ( this._buttonOptions.fire &&
@@ -109,12 +109,12 @@ define( function( require ) {
              ( this._buttonOptions.fireOnDown ? ( state === 'down' ) : ( oldState === 'down' ) ) ) {
 
           // Record this event to the phet-io event stream, including all downstream events as nested children
-          var fireID = this.buttonListenerOptions.tandem.id.supplied && phetioEvents.start( 'user', this.buttonListenerOptions.tandem.id, TButtonListener, 'fire' );
+          var fireID = this.buttonListenerOptions.tandem.isLegalAndUsable() && phetioEvents.start( 'user', this.buttonListenerOptions.tandem.id, TButtonListener, 'fire' );
 
           // Then fire the event
           this._buttonOptions.fire( event );
 
-          this.buttonListenerOptions.tandem.id.supplied && phetioEvents.end( fireID );
+          this.buttonListenerOptions.tandem.isLegalAndUsable() && phetioEvents.end( fireID );
         }
       }
     },
