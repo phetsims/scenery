@@ -421,8 +421,13 @@ define( function( require ) {
       }
 
       if ( this.node.hasClipArea() ) {
+        var clipBounds = this.node._clipArea.bounds;
         // exclude areas outside of the clipping area's bounds (for efficiency)
-        mutableBounds.constrainBounds( this.node._clipArea.bounds );
+        // Uses Bounds2.constrainBounds, but inlined to prevent https://github.com/phetsims/projectile-motion/issues/155
+        mutableBounds.minX = Math.max( mutableBounds.minX, clipBounds.minX );
+        mutableBounds.minY = Math.max( mutableBounds.minY, clipBounds.minY );
+        mutableBounds.maxX = Math.min( mutableBounds.maxX, clipBounds.maxX );
+        mutableBounds.maxY = Math.min( mutableBounds.maxY, clipBounds.maxY );
       }
 
       // transform it to the parent coordinate frame
