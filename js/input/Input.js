@@ -774,7 +774,7 @@ define( function( require ) {
      * @param {Pointer} pointer
      * @param {Array.<Object>} listeners - Should be a defensive array copy already.
      * @param {string} type
-     * @param {Event}
+     * @param {Event} inputEvent
      */
     dispatchToListeners: function( pointer, listeners, type, inputEvent ) {
       if ( inputEvent.handled ) {
