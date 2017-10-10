@@ -156,7 +156,7 @@ define( function( require ) {
       else if ( this.mode === 'node' ) {
 
         // If focusHighlightLayerable, then the focusHighlight is just a node in the scene graph, so set it invisible
-        if ( this.node.accessibleContent.focusHighlightLayerable ) {
+        if ( this.node.accessibleContent && this.node.accessibleContent.focusHighlightLayerable ) {
           this.node.accessibleContent.focusHighlight.visible = false;
         }
         else {

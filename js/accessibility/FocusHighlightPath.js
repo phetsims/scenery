@@ -80,17 +80,6 @@ define( function( require ) {
     },
 
     /**
-     * Get a scalar based on the node's transform excluding position.
-     * @private
-     * @param {Node} [node] - optional node to be used instead of "this"
-     * @returns {number}
-     */
-    getWidthMagnitudeFromTransform: function( node ) {
-      node = node || this;
-      return node.transform.transformDelta2( Vector2.X_UNIT ).magnitude();
-    },
-
-    /**
      * @public
      * Update the line width of both Paths based on transform. Can be overwritten (ridden?) by the options
      * passed in the constructor.
@@ -101,29 +90,63 @@ define( function( require ) {
     },
 
     /**
-     * Given a node, return the lineWidth of the focusHighlight that would be supplied.
-     * @param {Node} [node] - optional node to base the line width off of, otherwise use "this"
+     * Given a node, return the lineWidth of this focus highlight.
+     * @public
      * @returns {number}
      */
-    getOuterLineWidth: function( node ) {
+    getOuterLineWidth: function() {
       if ( this.options.outerLineWidth ) {
         return this.options.outerLineWidth;
       }
-      node = node || this;
-      return OUTER_LINE_WIDTH_BASE / this.getWidthMagnitudeFromTransform( node );
+      return FocusHighlightPath.getOuterLineWidthFromNode( this );
     },
 
     /**
-     * Given a node, return the lineWidth of the inner focusHighlight that would be supplied.
-     * @param {Node} [node] - optional node to base the line width off of, otherwise use "this"
+     * Given a node, return the lineWidth of this focus highlight.
      * @returns {number}
      */
-    getInnerLineWidth: function( node ) {
+    getInnerLineWidth: function() {
       if ( this.options.innerLineWidth ) {
         return this.options.innerLineWidth;
       }
-      node = node || this;
-      return INNER_LINE_WIDTH_BASE / this.getWidthMagnitudeFromTransform( node );
+      return FocusHighlightPath.getInnerLineWidthFromNode( this );
+    }
+  }, {
+
+    /**
+     * Get the outer line width of a focus highlight based on the node's scale and rotation transform information.
+     * @public
+     * @static
+     * 
+     * @param {Node} node
+     * @return {number}
+     */
+    getInnerLineWidthFromNode: function( node ) {
+      return INNER_LINE_WIDTH_BASE / FocusHighlightPath.getWidthMagnitudeFromTransform( node );
+    },
+
+    /**
+     * Get the outer line width of a node, based on its scale and rotation transformation.
+     * @public
+     * @static
+     *
+     * @param {Node} node
+     * @return {number}
+     */
+    getOuterLineWidthFromNode: function( node ) {
+      return OUTER_LINE_WIDTH_BASE / FocusHighlightPath.getWidthMagnitudeFromTransform( node );
+    },
+
+    /**
+     * Get a scalar width based on the node's transform excluding position.
+     * @private
+     * @static
+     * 
+     * @param {Node} node
+     * @returns {number}
+     */
+    getWidthMagnitudeFromTransform: function( node ) {
+      return node.transform.transformDelta2( Vector2.X_UNIT ).magnitude();
     }
   } );
 } );
