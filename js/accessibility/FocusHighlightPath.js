@@ -18,6 +18,7 @@ define( function( require ) {
   var inherit = require( 'PHET_CORE/inherit' );
   var Path = require( 'SCENERY/nodes/Path' );
   var scenery = require( 'SCENERY/scenery' );
+  var LineStyles = require( 'KITE/util/LineStyles' );
   var Vector2 = require( 'DOT/Vector2' );
 
   // constants
@@ -39,26 +40,41 @@ define( function( require ) {
     Path.call( this, shape );
 
     options = _.extend( {
+
+      // stroke options,  one for each highlight
       outerStroke: FOCUS_COLOR,
       innerStroke: INNER_FOCUS_COLOR,
 
+      // line width options, one for each highlight, will be calculated based on transform of this path unless provided
       outerLineWidth: null,
-      innerLineWidth: null
+      innerLineWidth: null,
+
+      // remaining paintable options applied to both highlights
+      lineDash: [],
+      lineCap: LineStyles.DEFAULT_OPTIONS.lineCap,
+      lineJoin: LineStyles.DEFAULT_OPTIONS.lineJoin,
+      miterLimit: LineStyles.DEFAULT_OPTIONS.miterLimit,
+      lineDashOffset: LineStyles.DEFAULT_OPTIONS.lineDashOffset
     }, options );
 
     this.options = options; // @private
 
     // options for this Path, the outer focus highlight
     var outerHighlightOptions = _.extend( {
-      stroke: options.outerStroke
+      stroke: options.outerStroke,
     }, options );
     this.mutate( outerHighlightOptions );
 
     // create the 'inner' focus highlight, the slightly darker and more opaque path that is on the inside
     // of the outer path to give the focus highlight a 'fade-out' appearance
-    this.innerHighlightPath = new Path( shape, _.extend( {
-      stroke: options.innerStroke
-    }, options ) );
+    this.innerHighlightPath = new Path( shape, {
+      stroke: options.innerStroke,
+      lineDash: options.lineDash,
+      lineCap: options.lineCap,
+      lineJoin: options.lineJoin,
+      miterLimit: options.miterLimit,
+      lineDashOffset: options.lineDashOffset
+    } );
     this.addChild( this.innerHighlightPath );
 
     this.updateLineWidth();
