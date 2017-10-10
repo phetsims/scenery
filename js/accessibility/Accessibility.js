@@ -315,8 +315,8 @@ define( function( require ) {
          * functions to be called when that event is fired on the dom element. No input listeners will be fired
          * if this.accessibleInputEnabled is false.
          * @public
-         * 
-         * @param {Object} listener
+         *
+         * @param {Object} accessibleInput
          * @returns {Object} - the actually added listener, so it can be removed via removeAccessibleInputListener
          */
         addAccessibleInputListener: function( accessibleInput ) {
@@ -699,7 +699,7 @@ define( function( require ) {
          * If the content includes anything other than styling tags or has malformed HTML, we will fallback
          * to textContent. 
          * 
-         * @param {string} label
+         * @param {string} textContent
          */
         setAccessibleDescriptionAsHTML: function( textContent ) {
           var formattingExclusive = AccessibilityUtil.usesFormattingTagsExclusive( textContent );
@@ -1477,7 +1477,7 @@ define( function( require ) {
          * @private
          *
          * @param {Object} accessibleInput
-         * @param {AccessibleInstance} accessibleInstance
+         * @param {HTMLElement} domElement
          */
         addDOMEventListeners: function( accessibleInput, domElement ) {
           for ( var event in accessibleInput ) {
@@ -1493,6 +1493,7 @@ define( function( require ) {
          * @private
          *
          * @param {Object} accessibleInput
+         * @param {HTMLElement} domElement
          */
         removeDOMEventListeners: function( accessibleInput, domElement ) {
           for ( var event in accessibleInput ) {
@@ -1632,7 +1633,7 @@ define( function( require ) {
        * see setPrependLabels().
        * @private
        *
-       * @param {AccessiblePeer} contentElement
+       * @param {AccessiblePeer} accessiblePeer
        * @param {HTMLElement} contentElement 
        * @param {boolean} prependLabels
        */
