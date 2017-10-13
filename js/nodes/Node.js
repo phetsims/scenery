@@ -242,6 +242,9 @@ define( function( require ) {
     'transformBounds', // Flag that makes bounds tighter, see setTransformBounds() for more documentation
     'accessibleContent', // Sets up accessibility handling, see setAccessibleContent() for more documentation
     'phetioType', // The corresponding phet-io wrapper type
+    'phetioState', // Flag to include in phet-io state. The properties on node default to undefined, but phet-io defaults this to true, see phetio.addInstance()
+    'phetioEvents', // Flag to include in phet-io event stream. The properties on node default to undefined, but phet-io defaults this to true, see phetio.addInstance()
+    'phetioMethods', // Flag to include in phet-io interoperability. The properties on node default to undefined, but phet-io defaults this to true, see phetio.addInstance()
     'tandem' // For instrumenting Scenery nodes, see setTandem().  This must be last so that (a) the phetioType
     // is available and (b) because when tandem.addInstance is called the node becomes active in the PhET-iO API immediately
   ];
@@ -3492,6 +3495,85 @@ define( function( require ) {
     get webglScale() { return this.getWebGLScale(); },
 
     /**
+     * Sets the phetioState flag on the node, see phetio.addInstance() for more info
+     * @public
+     *
+     * @param {boolean} phetioState
+     * @returns {Node}
+     */
+    setPhetioState: function( phetioState ) {
+      assert && assert( typeof phetioState === 'boolean', 'phetioState should be a boolean' );
+      if ( this._phetioState !== undefined ) {
+        assert && assert( phetioState === this._phetioState, 'Node\' phetioState cannot be given set more than once' );
+      }
+
+      this._phetioState = phetioState;
+
+      return this; // for chaining
+    },
+    set phetioState( phetioState ) { this.setPhetioState( phetioState ); },
+
+    /**
+     * Sets the phetioEvents flag on the node, see phetio.addInstance() for more info
+     * @public
+     *
+     * @param {boolean} phetioEvents
+     * @returns {Node}
+     */
+    setPhetioEvents: function( phetioEvents ) {
+      assert && assert( typeof phetioEvents === 'boolean', 'phetioEvents should be a boolean' );
+      if ( this._phetioEvents !== undefined ) {
+        assert && assert( phetioEvents === this._phetioEvents, 'Node\' phetioEvents cannot be given set more than once' );
+      }
+
+      this._phetioEvents = phetioEvents;
+
+      return this; // for chaining
+    },
+    set phetioEvents( phetioEvents ) { this.setPhetioEvents( phetioEvents ); },
+
+
+    /**
+     * Sets the phetioMethods flag on the node, see phetio.addInstance() for more info
+     * @public
+     *
+     * @param {boolean} phetioMethods
+     * @returns {Node}
+     */
+    setPhetioMethods: function( phetioMethods ) {
+      assert && assert( typeof phetioMethods === 'boolean', 'phetioMethods should be a boolean' );
+      if ( this._phetioMethods !== undefined ) {
+        assert && assert( phetioMethods === this._phetioMethods, 'Node\' phetioMethods cannot be given set more than once' );
+      }
+
+      this._phetioMethods = phetioMethods;
+
+      return this; // for chaining
+    },
+    set phetioMethods( phetioMethods ) { this.setPhetioMethods( phetioMethods ); },
+
+    /**
+     * Get each phetio flag needed for the tandem addInstance call. This method is explicit because it only wants
+     * keys that are defined. If undefined keys are passed in to phetio.addInstance() through options, then they will not
+     * be extended correctly with lodash.
+     * @returns {Object}
+     */
+    getPhetioFlags: function() {
+
+      var flags = {};
+      if ( typeof this._phetioState === 'boolean' ) {
+        flags.phetioState = this._phetioState;
+      }
+      if ( typeof this._phetioEvents === 'boolean' ) {
+        flags.phetioEvents = this._phetioEvents;
+      }
+      if ( typeof this._phetioMethods === 'boolean' ) {
+        flags.phetioMethods = this._phetioMethods;
+      }
+      return flags;
+    },
+
+    /**
      * Sets the phetioType of this node, a wrapper type like TCheckBox
      * @public
      *
@@ -3538,7 +3620,8 @@ define( function( require ) {
 
         this._tandem = tandem;
 
-        this._tandem.addInstance( this, this._phetioType );
+        // Pass through phet-io feature flags in options object
+        this._tandem.addInstance( this, this._phetioType, this.getPhetioFlags() );
       }
 
       return this; // for chaining
@@ -4993,7 +5076,7 @@ define( function( require ) {
      * @returns {boolean}
      */
     hasRootedDisplayPredicate: function( node ) {
-       return node._rootedDisplays.length > 0;
+      return node._rootedDisplays.length > 0;
     }
   } );
 
