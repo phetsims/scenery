@@ -16,7 +16,6 @@ define( function( require ) {
 
   // phet-io modules
   var assertInstanceOf = require( 'ifphetio!PHET_IO/assertions/assertInstanceOf' );
-  var phetioEvents = require( 'ifphetio!PHET_IO/phetioEvents' );
   var phetioInherit = require( 'ifphetio!PHET_IO/phetioInherit' );
   var TFunctionWrapper = require( 'ifphetio!PHET_IO/types/TFunctionWrapper' );
   var TNumber = require( 'ifphetio!PHET_IO/types/TNumber' );
