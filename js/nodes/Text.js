@@ -88,6 +88,8 @@ define( function( require ) {
       phetioType: TText
     }, options );
 
+    Node.call( this, options );
+
     // Handle phet-io events stream
     this.on( 'text', function( oldText, newText ) {
       options.tandem.isLegalAndUsable() && phetioEvents.trigger( 'model', options.tandem.id, TText, 'textChanged', {
@@ -95,8 +97,6 @@ define( function( require ) {
         newText: newText
       } );
     } );
-
-    Node.call( this, options );
 
     this.invalidateSupportedRenderers(); // takes care of setting up supported renderers
   }
