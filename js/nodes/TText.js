@@ -32,12 +32,6 @@ define( function( require ) {
   function TText( text, phetioID ) {
     TNode.call( this, text, phetioID );
     assertInstanceOf( text, phet.scenery.Text );
-    text.on( 'text', function( oldText, newText ) {
-      phetioEvents.trigger( 'model', phetioID, TText, 'textChanged', {
-        oldText: oldText,
-        newText: newText
-      } );
-    } );
   }
 
   phetioInherit( TNode, 'TText', TText, {

@@ -28,6 +28,9 @@ define( function( require ) {
   var TextSVGDrawable = require( 'SCENERY/display/drawables/TextSVGDrawable' );
   var TText = require( 'SCENERY/nodes/TText' );
 
+  // phet-io modules
+  var phetioEvents = require( 'ifphetio!PHET_IO/phetioEvents' );
+
   // constants
   var TEXT_OPTION_KEYS = [
     'boundsMethod', // Sets how bounds are determined for text, see setBoundsMethod() for more documentation
@@ -84,6 +87,14 @@ define( function( require ) {
       tandem: Tandem.tandemOptional(),
       phetioType: TText
     }, options );
+
+    // Handle phet-io events stream
+    this.on( 'text', function( oldText, newText ) {
+      options.tandem.isLegalAndUsable() && phetioEvents.trigger( 'model', options.tandem.id, TText, 'textChanged', {
+        oldText: oldText,
+        newText: newText
+      } );
+    } );
 
     Node.call( this, options );
 
