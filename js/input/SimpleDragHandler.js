@@ -145,7 +145,7 @@ define( function( require ) {
         phetioEvents.end( id );
       }
     };
-    options.tandem.addInstance( this, TSimpleDragHandler );
+    options.tandem.addInstance( this, TSimpleDragHandler, options );
 
     // @private
     this.disposeSimpleDragHandler = function() {

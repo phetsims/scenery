@@ -78,7 +78,7 @@ define( function( require ) {
       }
     } );
 
-    options.tandem.addInstance( this, TButtonListener );
+    options.tandem.addInstance( this, TButtonListener, options );
   }
 
   scenery.register( 'ButtonListener', ButtonListener );
