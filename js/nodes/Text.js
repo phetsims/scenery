@@ -79,6 +79,9 @@ define( function( require ) {
     // When this is null, its value needs to be recomputed
     this._cachedRenderedText = null;
 
+    // {boolean} - @private (phet-io) Has the text been set before? Used for special case for first time setText is called
+    this.firstSetText = true; // no underscore because there are no get/setters
+
     this.initializePaintable();
 
     options = extendDefined( {
@@ -88,15 +91,9 @@ define( function( require ) {
       phetioType: TText
     }, options );
 
-    Node.call( this, options );
+    this.textTandem = options.tandem; // @private (phet-io) - property name avoids namespace of the Node setter
 
-    // Handle phet-io events stream
-    this.on( 'text', function( oldText, newText ) {
-      options.tandem.isLegalAndUsable() && phetioEvents.trigger( 'model', options.tandem.id, TText, 'textChanged', {
-        oldText: oldText,
-        newText: newText
-      } );
-    } );
+    Node.call( this, options );
 
     this.invalidateSupportedRenderers(); // takes care of setting up supported renderers
   }
@@ -149,6 +146,15 @@ define( function( require ) {
 
         this.invalidateText();
         this.trigger2( 'text', oldText, text );
+
+        // avoid calling this the first time that the setText event is called, as this is the "changed" event
+        if ( this.textTandem.isLegalAndUsable() && !this.firstSetText ) {
+          phetioEvents.trigger( 'model', this.textTandem.id, TText, 'textChanged', {
+            oldText: oldText,
+            newText: text
+          } );
+        }
+        this.firstSetText = false;
       }
       return this;
     },
