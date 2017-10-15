@@ -102,7 +102,7 @@ define( function( require ) {
     }
   }, {
     documentation: 'The tandem wrapper type for the scenery Text node',
-    events: [ 'textChanged' ]
+    events: [ 'changed' ]
   } );
 
   scenery.register( 'TText', TText );

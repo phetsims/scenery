@@ -149,7 +149,7 @@ define( function( require ) {
 
         // avoid calling this the first time that the setText event is called, as this is the "changed" event
         if ( this.textTandem.isLegalAndUsable() && !this.firstSetText ) {
-          phetioEvents.trigger( 'model', this.textTandem.id, TText, 'textChanged', {
+          phetioEvents.trigger( 'model', this.textTandem.id, TText, 'changed', {
             oldText: oldText,
             newText: text
           } );
