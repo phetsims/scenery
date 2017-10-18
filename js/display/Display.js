@@ -575,6 +575,11 @@ define( function( require ) {
         this._input.removeTemporaryPointers();
         this._rootNode.interruptSubtreeInput();
       }
+
+      // when not interactive, all keyboard navigation is disabled
+      // TODO: disable keyboard nav without hiding content so that it is still readable with a screen reader,
+      // see https://github.com/phetsims/phet-io/issues/995
+      this.accessibleDOMElement.hidden = !this._interactive;
     },
 
     addOverlay: function( overlay ) {
