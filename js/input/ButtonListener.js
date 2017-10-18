@@ -49,7 +49,9 @@ define( function( require ) {
       tandem: Tandem.tandemOptional()
     }, options );
 
-    this.buttonListenerOptions = options; // @private (phet-io)
+    this.tandem = options.tandem;// @private
+
+      this.buttonListenerOptions = options; // @private (phet-io)
 
     this.buttonState = 'up'; // public: 'up', 'over', 'down' or 'out'
 
@@ -136,6 +138,10 @@ define( function( require ) {
       if ( this._overCount === 0 ) {
         this.setButtonState( event, this.isDown ? 'out' : 'up' );
       }
+    },
+
+    dispose: function() {
+      this.tandem.removeInstance( this );
     }
   } );
 
