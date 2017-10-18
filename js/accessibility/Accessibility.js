@@ -1687,8 +1687,6 @@ define( function( require ) {
         var accessibleContent = null;
         if ( contentDisplayed && this._tagName ) {
           accessibleContent = {
-            focusHighlight: this._focusHighlight,
-            focusHighlightLayerable: this._focusHighlightLayerable,
             createPeer: function( accessibleInstance ) {
 
               var uniqueId = accessibleInstance.trail.getUniqueId();

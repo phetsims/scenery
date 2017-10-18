@@ -61,9 +61,6 @@ define( function( require ) {
       useLocalBounds: true
     } );
 
-    // @private Node highlight
-    this.nodeHighlight = null;
-
     this.highlightNode.addChild( this.shapeFocusHighlightPath );
     this.highlightNode.addChild( this.boundsFocusHighlightPath );
 
@@ -105,29 +102,28 @@ define( function( require ) {
       this.transformTracker.addListener( this.transformListener );
 
       // Invisible mode - no focus highlight
-      if ( this.node.accessibleContent.focusHighlight === 'invisible' ) {
+      if ( this.node.focusHighlight === 'invisible' ) {
         this.mode = 'invisible';
       }
       // Shape mode
-      else if ( this.node.accessibleContent.focusHighlight instanceof Shape ) {
+      else if ( this.node.focusHighlight instanceof Shape ) {
         this.mode = 'shape';
 
         this.shapeFocusHighlightPath.visible = true;
-        this.shapeFocusHighlightPath.setShape( this.node.accessibleContent.focusHighlight );
+        this.shapeFocusHighlightPath.setShape( this.node.focusHighlight );
       }
       // Node mode
-      else if ( this.node.accessibleContent.focusHighlight instanceof Node ) {
+      else if ( this.node.focusHighlight instanceof Node ) {
         this.mode = 'node';
 
         // If focusHighlightLayerable, then the focusHighlight is just a node in the scene graph, so set it visible
-        if ( this.node.accessibleContent.focusHighlightLayerable ) {
-          this.node.accessibleContent.focusHighlight.visible = true;
+        if ( this.node.focusHighlightLayerable ) {
+          this.node.focusHighlight.visible = true;
         }
         else {
-          this.nodeHighlight = this.node.accessibleContent.focusHighlight;
 
           // Use the node itself as the highlight
-          this.highlightNode.addChild( this.nodeHighlight );
+          this.highlightNode.addChild( this.node.focusHighlight );
         }
       }
       // Bounds mode
@@ -156,12 +152,11 @@ define( function( require ) {
       else if ( this.mode === 'node' ) {
 
         // If focusHighlightLayerable, then the focusHighlight is just a node in the scene graph, so set it invisible
-        if ( this.node.accessibleContent && this.node.accessibleContent.focusHighlightLayerable ) {
-          this.node.accessibleContent.focusHighlight.visible = false;
+        if ( this.node.focusHighlightLayerable ) {
+          this.node.focusHighlight.visible = false;
         }
         else {
-          this.highlightNode.removeChild( this.nodeHighlight );
-          this.nodeHighlight = null;
+          this.highlightNode.removeChild( this.node.focusHighlight );
         }
       }
       else if ( this.mode === 'bounds' ) {
