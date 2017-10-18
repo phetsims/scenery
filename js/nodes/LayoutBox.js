@@ -42,17 +42,19 @@ define( function( require ) {
     horizontal: 'width'
   };
 
-  // The alignment (left/right/bottom/top/centerX/centerY) property name on the secondary axis
+  // The alignment property name on the secondary axis
   var LAYOUT_ALIGNMENT = {
     vertical: {
       left: 'left',
       center: 'centerX',
-      right: 'right'
+      right: 'right',
+      origin: 'x'
     },
     horizontal: {
       top: 'top',
       center: 'centerY',
-      bottom: 'bottom'
+      bottom: 'bottom',
+      origin: 'y'
     }
   };
 
@@ -73,9 +75,9 @@ define( function( require ) {
     // @private {number} - Spacing between nodes, see setSpacing() for more documentation.
     this._spacing = DEFAULT_SPACING;
 
-    // @private {string} - Either 'left', 'center' or 'right' for vertical layout, or 'top', 'center' or 'bottom' for
-    //                     horizontal layout, which controls positioning of nodes on the other axis.
-    //                     See setAlign() for more documentation.
+    // @private {string} - Either 'left', 'center', 'right' or 'origin' for vertical layout, or 'top', 'center',
+    //                     'bottom' or 'origin' for horizontal layout, which controls positioning of nodes on the other
+    //                     axis. See setAlign() for more documentation.
     this._align = 'center';
 
     // @private {boolean} - Whether we'll layout after children are added/removed/resized, see #116. See setResize()
@@ -162,7 +164,7 @@ define( function( require ) {
           continue; // Skip children without bounds
         }
         child[ layoutPosition ] = position;
-        child[ layoutAlignment ] = alignmentBounds[ layoutAlignment ];
+        child[ layoutAlignment ] = this._align === 'origin' ? 0 : alignmentBounds[ layoutAlignment ];
         position += child[ layoutDimension ] + this._spacing; // Move forward by the node's size, including spacing
       }
     },
@@ -331,11 +333,13 @@ define( function( require ) {
      * - left
      * - center
      * - right
+     * - origin - The x value of each child will be set to 0.
      *
      * For horizontal alignments, the following align values are allowed:
      * - top
      * - center
      * - bottom
+     * - origin - The y value of each child will be set to 0.
      *
      * @param {string} align
      * @returns {Node} - For chaining
@@ -343,11 +347,11 @@ define( function( require ) {
     setAlign: function( align ) {
       if ( assert ) {
         if ( this._orientation === 'vertical' ) {
-          assert( this._align === 'left' || this._align === 'center' || this._align === 'right',
+          assert( this._align === 'left' || this._align === 'center' || this._align === 'right' || this._align === 'origin',
             'Illegal vertical LayoutBox alignment: ' + align );
         }
         else {
-          assert( this._align === 'top' || this._align === 'center' || this._align === 'bottom',
+          assert( this._align === 'top' || this._align === 'center' || this._align === 'bottom' || this._align === 'origin',
             'Illegal horizontal LayoutBox alignment: ' + align );
         }
       }

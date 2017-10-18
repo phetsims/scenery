@@ -75,6 +75,7 @@ define( function( require ) {
 
   // Options that can be used in the constructor, with mutate(), or directly as setters/getters
   var RICH_TEXT_OPTION_KEYS = [
+    'boundsMethod', // Sets how bounds are determined for text, see Text.setBoundsMethod() for more documentation
     'font',
     'fill',
     'stroke',
@@ -139,6 +140,9 @@ define( function( require ) {
 
     // @private {Font}
     this._font = DEFAULT_FONT;
+
+    // @private {string}
+    this._boundsMethod = 'hybrid';
 
     // @private {null|string|Color|Property.<string|Color>|LinearGradient|RadialGradient|Pattern}
     this._fill = '#000000';
@@ -434,7 +438,7 @@ define( function( require ) {
         sceneryLog && sceneryLog.RichText && sceneryLog.RichText( 'appending leaf: ' + element.content );
         sceneryLog && sceneryLog.RichText && sceneryLog.push();
 
-        node = new RichTextLeaf( element.content, isLTR, font, fill, this._stroke );
+        node = new RichTextLeaf( element.content, isLTR, font, this._boundsMethod, fill, this._stroke );
 
         // If this content gets added, it will need to be pushed over by this amount
         var containerSpacing = isLTR ? containerNode.rightSpacing : containerNode.leftSpacing;
@@ -456,7 +460,7 @@ define( function( require ) {
 
             // Keep shortening by removing words until it fits (or if we NEED to fit it) or it doesn't fit.
             while ( words.length ) {
-              node = new RichTextLeaf( words.join( ' ' ), isLTR, font, fill, this._stroke );
+              node = new RichTextLeaf( words.join( ' ' ), isLTR, font, this._boundsMethod, fill, this._stroke );
 
               // If we haven't added anything to the line and we are down to the first word, we need to just add it.
               if ( !node.fitsIn( widthAvailable - containerSpacing, this._hasAddedLeafToLine, isLTR ) &&
@@ -680,6 +684,34 @@ define( function( require ) {
       return this._text;
     },
     get text() { return this.getText(); },
+
+    /**
+     * Sets the method that is used to determine bounds from the text. See Text.setBoundsMethod for details
+     * @public
+     *
+     * @param {string} method
+     * @returns {RichText} - For chaining.
+     */
+    setBoundsMethod: function( method ) {
+      assert && assert( method === 'fast' || method === 'fastCanvas' || method === 'accurate' || method === 'hybrid', 'Unknown Text boundsMethod' );
+      if ( method !== this._boundsMethod ) {
+        this._boundsMethod = method;
+        this.rebuildRichText();
+      }
+      return this;
+    },
+    set boundsMethod( value ) { this.setBoundsMethod( value ); },
+
+    /**
+     * Returns the current method to estimate the bounds of the text. See setBoundsMethod() for more information.
+     * @public
+     *
+     * @returns {string}
+     */
+    getBoundsMethod: function() {
+      return this._boundsMethod;
+    },
+    get boundsMethod() { return this.getBoundsMethod(); },
 
     /**
      * Sets the font of our node.
@@ -1465,10 +1497,11 @@ define( function( require ) {
    * @param {string} content
    * @param {boolean} isLTR
    * @param {Font|string} font
+   * @param {string} boundsMethod
    * @param {null|string|Color|Property.<string|Color>|LinearGradient|RadialGradient|Pattern} fill
    * @param {null|string|Color|Property.<string|Color>|LinearGradient|RadialGradient|Pattern} stroke
    */
-  function RichTextLeaf( content, isLTR, font, fill, stroke ) {
+  function RichTextLeaf( content, isLTR, font, boundsMethod, fill, stroke ) {
 
     // Grab all spaces at the (logical) start
     var whitespaceBefore = '';
@@ -1485,6 +1518,7 @@ define( function( require ) {
     }
 
     Text.call( this, RichText.contentToString( content, isLTR ), {
+      boundsMethod: boundsMethod,
       font: font,
       fill: fill,
       stroke: stroke
