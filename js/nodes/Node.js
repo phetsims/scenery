@@ -2912,7 +2912,7 @@ define( function( require ) {
       assert && assert( this.hasChild( visibleChild ), 'Attempted to replace visibility for a node that was not a child' );
       assert && assert( this.hasChild( invisibleChild ), 'Attempted to replace visibility for a node that was not a child' );
 
-      // if the old child had focus we will restore focus on the new child
+      // if the visible child has focus we will restore focus on the invisible child once it is made visible
       var visibleChildFocused = visibleChild.focused;
 
       visibleChild.visible = false;
