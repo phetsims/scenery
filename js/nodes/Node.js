@@ -2897,6 +2897,35 @@ define( function( require ) {
     get visible() { return this.isVisible(); },
 
     /**
+     * Swap visibility of two children. Before calling, visibleChild should be visible and invisibleChild should be
+     * invisible. When visibility is swapped, the newly visible child will receive keyboard focus if the it is focusable
+     * and the previously visible child had focus.
+     * @public
+     * 
+     * @param {Node} visibleChild
+     * @param {Node} invisibleChild
+     * @return {Node}
+     */
+    swapVisibility: function( visibleChild, invisibleChild ) {
+      assert && assert( visibleChild.visible, 'visibleChild should be visible initially' );
+      assert && assert( !invisibleChild.visible, 'invisibleChild should not be visible initially' );
+      assert && assert( this.hasChild( visibleChild ), 'Attempted to replace visibility for a node that was not a child' );
+      assert && assert( this.hasChild( invisibleChild ), 'Attempted to replace visibility for a node that was not a child' );
+
+      // if the visible child has focus we will restore focus on the invisible child once it is made visible
+      var visibleChildFocused = visibleChild.focused;
+
+      visibleChild.visible = false;
+      invisibleChild.visible = true;
+
+      if ( visibleChildFocused && invisibleChild.focusable ) {
+        invisibleChild.focus();
+      }
+
+      return this; // allow chaining
+    },
+
+    /**
      * Sets the opacity of this node (and its sub-tree), where 0 is fully transparent, and 1 is fully opaque.
      * @public
      *
@@ -4844,13 +4873,11 @@ define( function( require ) {
       assert && assert( Object.getPrototypeOf( options ) === Object.prototype,
         'Extra prototype on Node options object is a code smell' );
 
-      if ( assert ) {
-        assert && assert( _.filter( [ 'translation', 'x', 'left', 'right', 'centerX', 'centerTop', 'rightTop', 'leftCenter', 'center', 'rightCenter', 'leftBottom', 'centerBottom', 'rightBottom' ], function( key ) { return options[ key ] !== undefined; } ).length <= 1,
-          'More than one mutation on this Node set the x component, check ' + Object.keys( options ).join( ',' ) );
+      assert && assert( _.filter( [ 'translation', 'x', 'left', 'right', 'centerX', 'centerTop', 'rightTop', 'leftCenter', 'center', 'rightCenter', 'leftBottom', 'centerBottom', 'rightBottom' ], function( key ) { return options[ key ] !== undefined; } ).length <= 1,
+        'More than one mutation on this Node set the x component, check ' + Object.keys( options ).join( ',' ) );
 
-        assert && assert( _.filter( [ 'translation', 'y', 'top', 'bottom', 'centerY', 'centerTop', 'rightTop', 'leftCenter', 'center', 'rightCenter', 'leftBottom', 'centerBottom', 'rightBottom' ], function( key ) { return options[ key ] !== undefined; } ).length <= 1,
-          'More than one mutation on this Node set the y component, check ' + Object.keys( options ).join( ',' ) );
-      }
+      assert && assert( _.filter( [ 'translation', 'y', 'top', 'bottom', 'centerY', 'centerTop', 'rightTop', 'leftCenter', 'center', 'rightCenter', 'leftBottom', 'centerBottom', 'rightBottom' ], function( key ) { return options[ key ] !== undefined; } ).length <= 1,
+        'More than one mutation on this Node set the y component, check ' + Object.keys( options ).join( ',' ) );
 
       var self = this;
 
