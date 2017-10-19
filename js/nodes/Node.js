@@ -2897,6 +2897,35 @@ define( function( require ) {
     get visible() { return this.isVisible(); },
 
     /**
+     * Swap visibility of two children. Before calling, visibleChild should be visible and invisibleChild should be
+     * invisible. This function will replace visibility of the two children.  When visibility changes, the newly visible
+     * child will receive keyboard focus if it is focusable and the newly invisible child had focus.
+     * @public
+     * 
+     * @param {Node} visibleChild
+     * @param {Node} invisibleChild
+     * @return {Node}
+     */
+    swapVisibility: function( visibleChild, invisibleChild ) {
+      assert && assert( visibleChild.visible, 'visibleChild should be visible initially' );
+      assert && assert( !invisibleChild.visible, 'invisibleChild should not be visible initially' );
+      assert && assert( this.hasChild( visibleChild ), 'Attempted to replace visibility for a node that was not a child' );
+      assert && assert( this.hasChild( invisibleChild ), 'Attempted to replace visibility for a node that was not a child' );
+
+      // if the old child had focus we will restore focus on the new child
+      var visibleChildFocused = visibleChild.focused;
+
+      visibleChild.visible = false;
+      invisibleChild.visible = true;
+
+      if ( visibleChildFocused && invisibleChild.focusable ) {
+        invisibleChild.focus();
+      }
+
+      return this; // allow chaining
+    },
+
+    /**
      * Sets the opacity of this node (and its sub-tree), where 0 is fully transparent, and 1 is fully opaque.
      * @public
      *
