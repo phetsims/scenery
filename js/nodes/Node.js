@@ -2898,8 +2898,8 @@ define( function( require ) {
 
     /**
      * Swap visibility of two children. Before calling, visibleChild should be visible and invisibleChild should be
-     * invisible. This function will replace visibility of the two children.  When visibility changes, the newly visible
-     * child will receive keyboard focus if it is focusable and the newly invisible child had focus.
+     * invisible. When visibility is swapped, the newly visible child will receive keyboard focus if the it is focusable
+     * and the previously visible child had focus.
      * @public
      * 
      * @param {Node} visibleChild
