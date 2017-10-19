@@ -602,4 +602,57 @@
     ok( !buttonG1.hidden, 'buttonG1 should not NOT be hidden after ancestor node c is made invisible (parent div E already marked)' );
     ok( !divA.hidden, 'div A should not have been hidden by making descendant c invisible to screen readers' );
   } );
+  
+  test( 'swapVisibility', function() {
+
+
+    // test the behavior of replaceChild function
+    var rootNode = new scenery.Node( { tagName: 'div' } );
+    var display = new scenery.Display( rootNode ); // eslint-disable-line
+    document.body.appendChild( display.domElement );
+
+    // a custom focus highlight (since dummy node's have no bounds)
+    var focusHighlight = new scenery.Rectangle( 0, 0, 10, 10 );
+
+    // create some nodes for testing
+    var a = new scenery.Node( { tagName: 'button', focusHighlight: focusHighlight } );
+    var b = new scenery.Node( { tagName: 'button', focusHighlight: focusHighlight } );
+    var c = new scenery.Node( { tagName: 'button', focusHighlight: focusHighlight } );
+
+    rootNode.addChild( a );
+    a.children = [ b, c ];
+
+    // swap visibility between two nodes, visibility should be swapped and neither should have keyboard focus
+    b.visible = true;
+    c.visible = false;
+    a.swapVisibility( b, c );
+    ok( b.visible === false, 'b should now be invisible' );
+    ok( c.visible === true, 'c should now be visible' );
+    ok( b.focused === false, 'b should not have focus after being made invisible' );
+    ok( c.focused === false, 'c should not have  focus since b did not have focus' );
+
+    // swap visibility between two nodes where the one that is initially visible has keyboard focus, the newly visible
+    // node then receive focus
+    b.visible = true;
+    c.visible = false;
+    b.focus();
+    a.swapVisibility( b, c );
+    ok( b.visible === false, 'b should be invisible after swapVisibility' );
+    ok( c.visible === true, 'c should be visible after  swapVisibility' );
+    ok( b.focused === false, 'b should no longer have focus  after swapVisibility' );
+    ok( c.focused === true, 'c should now have focus after swapVisibility' );
+
+    // swap visibility between two nodes where the first node has focus, but the second node is not focusable. After
+    // swapping, neither should have focus
+    b.visible = true;
+    c.visible = false;
+    b.focus();
+    c.focusable = false;
+    a.swapVisibility( b, c );
+    ok( b.visible === false, 'b should be invisible after visibility is swapped' );
+    ok( c.visible === true, 'c should be visible after visibility is swapped' );
+    ok( b.focused === false, 'b should no longer have focus after visibility is swapped' );
+    ok( c.focused === false, 'c should not have focus after visibility is swapped because it is not focusable' );
+  } ); 
+
 })();
