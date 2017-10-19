@@ -221,7 +221,7 @@ define( function( require ) {
           // supported by browsers or assistive technologies, so use vanilla HTML for accessibility semantics where
           // possible.
           this._parentContainerAriaRole = null;
-          
+
           // @private {Node|null} - A node with accessible content that labels this node through the aria-labelledby
           // ARIA attribute.  The other node can be anywhere in the scene graph.  The behavior for aria-labelledby
           // is such that when this node receives focus, the accessible content under the other node will be read
@@ -231,9 +231,9 @@ define( function( require ) {
           this._ariaLabelledByNode = null;
 
           // @private {string} - A string referenceing which portion of this node's accessible content will receive
-          // the aria-labelledby attribute.  Can be the DOM element, the label element, the description element, 
+          // the aria-labelledby attribute.  Can be the DOM element, the label element, the description element,
           // or the parent container element. By default, points to this node's DOM element.
-          this._ariaLabelledContent = AccessiblePeer.NODE; 
+          this._ariaLabelledContent = AccessiblePeer.NODE;
 
           // @private {Node|null} - The Node this node labels through the aria-labelledby association. See
           // _ariaLabelledByNode for more information.
@@ -241,7 +241,7 @@ define( function( require ) {
 
           // @private {string} - The content on this node that is used to label another node through the
           // aria-labelledby ARIA attribute.  Can be the node's label, description, parent container, or DOM
-          // element.  See 
+          // element.  See
           this._ariaLabelContent = AccessiblePeer.NODE; // element associated with the other node's content
 
           // @private {Node|null} - A node with accessible content that describes this node through the aria-describedby
@@ -253,7 +253,7 @@ define( function( require ) {
           this._ariaDescribedByNode = null;
 
           // @private {string} - A string referenceing which portion of this node's accessible content will receive
-          // the aria-describedby attribute.  Can be the DOM element, the label element, the description element, 
+          // the aria-describedby attribute.  Can be the DOM element, the label element, the description element,
           // or the parent container element. By default, points to this node's DOM element.
           this._ariaDescribedContent = AccessiblePeer.NODE;
 
@@ -304,10 +304,10 @@ define( function( require ) {
           // @public (scenery-internal) - emitters for when state properties change
           this.accessibleVisibilityChangedEmitter = new Emitter();
 
-          // @private {Array.<Node> | null} - (a11y) If provided, it will override the focus order between children (and optionally
+          // @private {Array.<Node>} - (a11y) If provided, it will override the focus order between children (and optionally
           // descendants). If not provided, the focus order will default to the rendering order (first children first, last
           // children last) determined by the children array.
-          this._accessibleOrder = null;
+          this._accessibleOrder = [];
         },
 
         /**
@@ -654,8 +654,8 @@ define( function( require ) {
          * But innerHTML is less performant because it triggers DOM restyling and insertions.
          *
          * If the content includes anything other than styling tags or has malformed HTML, we will fallback
-         * to textContent. 
-         * 
+         * to textContent.
+         *
          * @param {string} label
          */
         setAccessibleLabelAsHTML: function( label ) {
@@ -697,8 +697,8 @@ define( function( require ) {
          * But innerHTML is less performant because it triggers DOM restyling and insertions.
          *
          * If the content includes anything other than styling tags or has malformed HTML, we will fallback
-         * to textContent. 
-         * 
+         * to textContent.
+         *
          * @param {string} textContent
          */
         setAccessibleDescriptionAsHTML: function( textContent ) {
@@ -883,9 +883,9 @@ define( function( require ) {
         get focusHighlightLayerable() { return this.getFocusHighlightLayerable(); },
 
         /**
-         * Sets the node that labels this node through the ARIA attribute aria-labelledby. The value of the 
+         * Sets the node that labels this node through the ARIA attribute aria-labelledby. The value of the
          * 'aria-labelledby' attribute  is a string id that references another HTMLElement in the DOM.
-         * Upon focus, a screen reader should read the content under the HTML element referenced by the id, 
+         * Upon focus, a screen reader should read the content under the HTML element referenced by the id,
          * before any description content. Exact behavior will depend on user agent. The specific content
          * used for the label can be specified by using setAriaLabelledContent, see that function for more info.
          *
@@ -915,7 +915,7 @@ define( function( require ) {
               if ( labelledElement && labelElement ) {
                 labelledElement.setAttribute( 'aria-labelledby', labelElement.id );
               }
-              else if ( labelledElement ){
+              else if ( labelledElement ) {
                 labelledElement.removeAttribute( 'aria-labelledby' );
               }
             } );
@@ -942,7 +942,7 @@ define( function( require ) {
          * @public
          * @param {string} content - 'LABEL|NODE|DESCRIPTION|PARENT_CONTAINER'
          */
-        setAriaLabelledContent: function( content )  {
+        setAriaLabelledContent: function( content ) {
           this._ariaLabelledContent = content;
           this._ariaLabelledByNode && this.setAriaLabelledByNode( this._ariaLabelledByNode );
         },
@@ -952,7 +952,7 @@ define( function( require ) {
         /**
          * Get a string the determines what element on this node has the aria-labelledby attribute. Does not return
          * a label string. See setAriaLabelledContent for more information.
-         * 
+         *
          * @public
          * @return {string} - one of 'LABEL'|'DESCRIPTION'|'NODE'|'PARENT_CONTAINER'
          */
@@ -966,7 +966,7 @@ define( function( require ) {
          * association. Can be the node's DOM element, label element, description element, or parent container
          * element. See setAriaLabelledBy for more information on aria-labelledby. This will determine the
          * value of the aria-labelledby attribute for another node when it is labelled by this one.
-         * 
+         *
          * @public
          * @param {string} content - 'LABEL'|'DESCRIPTION'|'NODE'|'PARENT_CONTAINER'
          */
@@ -977,9 +977,9 @@ define( function( require ) {
         set ariaLabelContent( content ) { this.setAriaLabelContent( content ); },
 
         /**
-         * Sets the node that describes this node through the ARIA attribute aria-describedby. The value of the 
+         * Sets the node that describes this node through the ARIA attribute aria-describedby. The value of the
          * 'aria-describedby' attribute  is a string id that references another HTMLElement in the DOM.
-         * Upon focus, a screen reader should read the content under the HTML element referenced by the id, 
+         * Upon focus, a screen reader should read the content under the HTML element referenced by the id,
          * after any label content. Exact behavior will depend on user agent. The specific content
          * used for the description can be specified by using setAriaDescribedContent, see that function for more info.
          *
@@ -1025,7 +1025,7 @@ define( function( require ) {
          * @public
          * @param {string} content - 'LABEL|NODE|DESCRIPTION|PARENT_CONTAINER'
          */
-        setAriaDescribedContent: function( content )  {
+        setAriaDescribedContent: function( content ) {
           this._ariaDescribedContent = content;
           this._ariaDescribedByNode && this.setAriaDescribedByNode( this._ariaDescribedByNode );
         },
@@ -1033,7 +1033,7 @@ define( function( require ) {
 
         /**
          * Get the described content of this node's accessible content that is described through an aria-describedby
-         * association.  Doesn't return a description, but a string describing wich of this node's accessible elements 
+         * association.  Doesn't return a description, but a string describing wich of this node's accessible elements
          * are described.
          *
          * @return {string} -'LABEL|NODE|DESCRIPTION|PARENT_CONTAINER'
@@ -1048,7 +1048,7 @@ define( function( require ) {
          * association. Can be the node's DOM element, label element, description element, or parent container
          * element. This will determine the value for aria-describedby when another node
          * is described by this one.  See setAriaLabelledBy for more information on aria-labelledby.
-         * 
+         *
          * @public
          * @param {string} content - one of 'LABEL'|'DESCRIPTION'|'NODE'|'PARENT_CONTAINER'
          */
@@ -1082,11 +1082,10 @@ define( function( require ) {
          * first, last children last), determined by the children array.
          * @public
          *
-         * @param {Array.<Node>|null} accessibleOrder
+         * @param {Array.<Node>} accessibleOrder
          */
         setAccessibleOrder: function( accessibleOrder ) {
-          assert && assert( accessibleOrder === null || accessibleOrder instanceof Array,
-            'Array expected, received: ' + typeof accessibleOrder );
+          assert && assert( accessibleOrder instanceof Array, 'Array expected, received: ' + typeof accessibleOrder );
 
           // Only update if it has changed
           if ( this._accessibleOrder !== accessibleOrder ) {
@@ -1156,25 +1155,23 @@ define( function( require ) {
               nestedChildStack.push( item.children );
             }
 
-            // Pushing pruned nodes to the stack (if ordered), AND visiting trails to ordered nodes.
-            if ( node._accessibleOrder ) {
-              // push specific focused nodes to the stack
-              pruneStack = pruneStack.concat( node._accessibleOrder );
+            // push specific focused nodes to the stack
+            pruneStack = pruneStack.concat( node._accessibleOrder );
 
-              _.each( node._accessibleOrder, function( descendant ) {
-                // Find all descendant references to the node.
-                // NOTE: We are not reordering trails (due to descendant constraints) if there is more than one instance for
-                // this descendant node.
-                _.each( node.getLeafTrailsTo( descendant ), function( descendantTrail ) {
-                  descendantTrail.removeAncestor(); // strip off 'node', so that we handle only children
+            // Visiting trails to ordered nodes.
+            _.each( node._accessibleOrder, function( descendant ) {
+              // Find all descendant references to the node.
+              // NOTE: We are not reordering trails (due to descendant constraints) if there is more than one instance for
+              // this descendant node.
+              _.each( node.getLeafTrailsTo( descendant ), function( descendantTrail ) {
+                descendantTrail.removeAncestor(); // strip off 'node', so that we handle only children
 
-                  // same as the normal order, but adding a full trail (since we may be referencing a descendant node)
-                  currentTrail.addDescendantTrail( descendantTrail );
-                  addTrailsForNode( descendant, true ); // 'true' overrides one reference in the prune stack (added above)
-                  currentTrail.removeDescendantTrail( descendantTrail );
-                } );
+                // same as the normal order, but adding a full trail (since we may be referencing a descendant node)
+                currentTrail.addDescendantTrail( descendantTrail );
+                addTrailsForNode( descendant, true ); // 'true' overrides one reference in the prune stack (added above)
+                currentTrail.removeDescendantTrail( descendantTrail );
               } );
-            }
+            } );
 
             // Visit everything. If there is an accessibleOrder, those trails were already visited, and will be excluded.
             var numChildren = node._children.length;
@@ -1186,13 +1183,10 @@ define( function( require ) {
               currentTrail.removeDescendant();
             }
 
-            // Popping pruned nodes from the stack (if ordered)
-            if ( node._accessibleOrder ) {
-              // pop focused nodes from the stack (that were added above)
-              _.each( node._accessibleOrder, function( descendant ) {
-                pruneStack.pop();
-              } );
-            }
+            // pop focused nodes from the stack (that were added above)
+            _.each( node._accessibleOrder, function( descendant ) {
+              pruneStack.pop();
+            } );
 
             // Popping children array if accessible
             if ( node.accessibleContent ) {
@@ -1444,7 +1438,7 @@ define( function( require ) {
          * has more than one instance, this will fail because the DOM element is not uniquely defined. If accessibility
          * is not enabled, this will be a no op. When Accessibility is more widely used, the no op can be replaced
          * with an assertion that checks for accessible content.
-         * 
+         *
          * @public
          */
         focus: function() {
@@ -1506,7 +1500,7 @@ define( function( require ) {
         /**
          * Do not use this function directly, it is private.  Updates the accessible label setting the
          * content as innerHTML or textContent based on whether or state of this._labelIsHTML flag.
-         * 
+         *
          * @private
          * @param {string} label
          */
@@ -1560,7 +1554,7 @@ define( function( require ) {
         },
 
         /**
-         * Update all AccessiblePeers representing this node with the callback, which takes the AccessiblePeer 
+         * Update all AccessiblePeers representing this node with the callback, which takes the AccessiblePeer
          * as an argument.
          * @private
          * @param {function} callback
@@ -1634,7 +1628,7 @@ define( function( require ) {
        * @private
        *
        * @param {AccessiblePeer} accessiblePeer
-       * @param {HTMLElement} contentElement 
+       * @param {HTMLElement} contentElement
        * @param {boolean} prependLabels
        */
       function insertContentElement( accessiblePeer, contentElement, prependLabels ) {
