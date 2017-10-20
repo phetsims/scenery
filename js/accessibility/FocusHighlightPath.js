@@ -133,7 +133,7 @@ define( function( require ) {
      * Get the outer line width of a focus highlight based on the node's scale and rotation transform information.
      * @public
      * @static
-     * 
+     *
      * @param {Node} node
      * @return {number}
      */
@@ -157,7 +157,7 @@ define( function( require ) {
      * Get a scalar width based on the node's transform excluding position.
      * @private
      * @static
-     * 
+     *
      * @param {Node} node
      * @returns {number}
      */

@@ -17,7 +17,7 @@ define( function( require ) {
 
   /**
    *
-   * @param {Node} node
+   * @param {Node|null} node
    * @param {Object} [options]
    * @constructor
    */
@@ -47,10 +47,23 @@ define( function( require ) {
     setShapeFromNode: function( node ) {
       this.nodeBounds = this.useLocalBounds ? node.localBounds : node.bounds;
 
-      var dilationCoefficient = this.getOuterLineWidth( node ) * 3 / 4;
+      // Figure out how much dialation to apply to the focus highlight around the node
+      var dilationCoefficient = FocusHighlightPath.getOuterLineWidthFromNode( node ) * 3 / 4;
       var dilatedBounds = this.nodeBounds.dilated( dilationCoefficient );
 
+      // Update the line width of the focus highlight based on the transform of the node
+      this.updateLineWidthFromNode( node );
       this.setShape( Shape.bounds( dilatedBounds ) );
+    },
+
+    /**
+     * @private
+     * Update the line width of both Paths based on transform.
+     * @param node
+     */
+    updateLineWidthFromNode: function( node ) {
+      this.lineWidth = FocusHighlightPath.getOuterLineWidthFromNode( node );
+      this.innerHighlightPath.lineWidth = FocusHighlightPath.getInnerLineWidthFromNode( node );
     }
   } );
 } );
