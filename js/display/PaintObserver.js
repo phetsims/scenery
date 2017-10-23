@@ -265,7 +265,9 @@ define( function( require ) {
       if ( this.secondaryListenedCounts[ index ] === 0 ) {
         this.secondaryListenedProperties.splice( index, 1 );
         this.secondaryListenedCounts.splice( index, 1 );
-        property.unlink( this.updateSecondaryListener );
+        if ( !property.isDisposed ) {
+          property.unlink( this.updateSecondaryListener );
+        }
       }
     },
 
