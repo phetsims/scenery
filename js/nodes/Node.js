@@ -582,7 +582,7 @@ define( function( require ) {
       assert && assert( node !== null && node !== undefined, 'insertChild cannot insert a null/undefined child' );
       assert && assert( node instanceof Node,
         'addChild/insertChild requires the child to be a Node. Constructor: ' +
-        (node.constructor ? node.constructor.name : 'none') );
+        ( node.constructor ? node.constructor.name : 'none' ) );
       assert && assert( !_.includes( this._children, node ), 'Parent already contains child' );
       assert && assert( node !== this, 'Cannot add self as a child' );
       assert && assert( node._parents !== null, 'Tried to insert a disposed child node?' );
@@ -1312,7 +1312,7 @@ define( function( require ) {
      * @returns {boolean} - Whether potentialChild is actually our child.
      */
     hasChild: function( potentialChild ) {
-      assert && assert( potentialChild && (potentialChild instanceof Node), 'hasChild needs to be called with a Node' );
+      assert && assert( potentialChild && ( potentialChild instanceof Node ), 'hasChild needs to be called with a Node' );
       var isOurChild = _.includes( this._children, potentialChild );
       assert && assert( isOurChild === _.includes( potentialChild._parents, this ), 'child-parent reference should match parent-child reference' );
       return isOurChild;
@@ -1923,7 +1923,7 @@ define( function( require ) {
     rotate: function( angle, prependInstead ) {
       assert && assert( typeof angle === 'number' && isFinite( angle ), 'angle should be a finite number' );
       assert && assert( prependInstead === undefined || typeof prependInstead === 'boolean' );
-      if ( angle % (2 * Math.PI) === 0 ) { return; } // bail out if our angle is effectively 0
+      if ( angle % ( 2 * Math.PI ) === 0 ) { return; } // bail out if our angle is effectively 0
       if ( prependInstead ) {
         this.prependMatrix( Matrix3.rotation2( angle ) );
       }
@@ -3324,7 +3324,7 @@ define( function( require ) {
       else if ( renderer === 'webgl' ) {
         newRenderer = Renderer.bitmaskWebGL;
       }
-      assert && assert( (renderer === null) === (newRenderer === 0),
+      assert && assert( ( renderer === null ) === ( newRenderer === 0 ),
         'We should only end up with no actual renderer if renderer is null' );
 
       if ( this._hints.renderer !== newRenderer ) {
@@ -3503,7 +3503,7 @@ define( function( require ) {
      * @param {number|null} webglScale
      */
     setWebGLScale: function( webglScale ) {
-      assert && assert( webglScale === null || (typeof webglScale === 'number' && isFinite( webglScale )) );
+      assert && assert( webglScale === null || ( typeof webglScale === 'number' && isFinite( webglScale ) ) );
 
       if ( webglScale !== this._hints.webglScale ) {
         this._hints.webglScale = webglScale;
@@ -3982,7 +3982,7 @@ define( function( require ) {
      * @param {Matrix3} matrix - The current transformation matrix associated with the wrapper
      */
     renderToCanvasSelf: function( wrapper, matrix ) {
-      if ( this.isPainted() && (this._rendererBitmask & Renderer.bitmaskCanvas) ) {
+      if ( this.isPainted() && ( this._rendererBitmask & Renderer.bitmaskCanvas ) ) {
         this.canvasPaintSelf( wrapper, matrix );
       }
     },
@@ -4082,9 +4082,9 @@ define( function( require ) {
       assert && assert( typeof callback === 'function' );
       assert && assert( x === undefined || typeof x === 'number', 'If provided, x should be a number' );
       assert && assert( y === undefined || typeof y === 'number', 'If provided, y should be a number' );
-      assert && assert( width === undefined || (typeof width === 'number' && width >= 0 && (width % 1 === 0)),
+      assert && assert( width === undefined || ( typeof width === 'number' && width >= 0 && ( width % 1 === 0 ) ),
         'If provided, width should be a non-negative integer' );
-      assert && assert( height === undefined || (typeof height === 'number' && height >= 0 && (height % 1 === 0)),
+      assert && assert( height === undefined ||  (typeof height === 'number' && height >= 0 && ( height % 1 === 0 ) ),
         'If provided, height should be a non-negative integer' );
 
       var padding = 2; // padding used if x and y are not set
@@ -4092,7 +4092,7 @@ define( function( require ) {
       // for now, we add an unpleasant hack around Text and safe bounds in general. We don't want to add another Bounds2 object per Node for now.
       var bounds = this.getBounds().union( this.localToParentBounds( this.getSafeSelfBounds() ) );
       assert && assert( !bounds.isEmpty() ||
-                        (x !== undefined && y !== undefined && width !== undefined && height !== undefined),
+                        ( x !== undefined && y !== undefined && width !== undefined && height !== undefined ),
         'Should not call toCanvas on a Node with empty bounds, unless all dimensions are provided' );
 
       x = x !== undefined ? x : Math.ceil( padding - bounds.minX );
@@ -4132,9 +4132,9 @@ define( function( require ) {
       assert && assert( typeof callback === 'function' );
       assert && assert( x === undefined || typeof x === 'number', 'If provided, x should be a number' );
       assert && assert( y === undefined || typeof y === 'number', 'If provided, y should be a number' );
-      assert && assert( width === undefined || (typeof width === 'number' && width >= 0 && (width % 1 === 0)),
+      assert && assert( width === undefined || ( typeof width === 'number' && width >= 0 && ( width % 1 === 0 ) ),
         'If provided, width should be a non-negative integer' );
-      assert && assert( height === undefined || (typeof height === 'number' && height >= 0 && (height % 1 === 0)),
+      assert && assert( height === undefined || ( typeof height === 'number' && height >= 0 && ( height % 1 === 0 ) ),
         'If provided, height should be a non-negative integer' );
 
       this.toCanvas( function( canvas, x, y, width, height ) {
@@ -4158,9 +4158,9 @@ define( function( require ) {
       assert && assert( typeof callback === 'function' );
       assert && assert( x === undefined || typeof x === 'number', 'If provided, x should be a number' );
       assert && assert( y === undefined || typeof y === 'number', 'If provided, y should be a number' );
-      assert && assert( width === undefined || (typeof width === 'number' && width >= 0 && (width % 1 === 0)),
+      assert && assert( width === undefined || ( typeof width === 'number' && width >= 0 && ( width % 1 === 0 ) ),
         'If provided, width should be a non-negative integer' );
-      assert && assert( height === undefined || (typeof height === 'number' && height >= 0 && (height % 1 === 0)),
+      assert && assert( height === undefined || ( typeof height === 'number' && height >= 0 && ( height % 1 === 0 ) ),
         'If provided, height should be a non-negative integer' );
 
       this.toDataURL( function( url, x, y ) {
@@ -4194,9 +4194,9 @@ define( function( require ) {
       assert && assert( typeof callback === 'function' );
       assert && assert( x === undefined || typeof x === 'number', 'If provided, x should be a number' );
       assert && assert( y === undefined || typeof y === 'number', 'If provided, y should be a number' );
-      assert && assert( width === undefined || (typeof width === 'number' && width >= 0 && (width % 1 === 0)),
+      assert && assert( width === undefined || ( typeof width === 'number' && width >= 0 && ( width % 1 === 0 ) ),
         'If provided, width should be a non-negative integer' );
-      assert && assert( height === undefined || (typeof height === 'number' && height >= 0 && (height % 1 === 0)),
+      assert && assert( height === undefined || ( typeof height === 'number' && height >= 0 && ( height % 1 === 0 ) ),
         'If provided, height should be a non-negative integer' );
 
       this.toImage( function( image, x, y ) {
@@ -4221,9 +4221,9 @@ define( function( require ) {
     toCanvasNodeSynchronous: function( x, y, width, height ) {
       assert && assert( x === undefined || typeof x === 'number', 'If provided, x should be a number' );
       assert && assert( y === undefined || typeof y === 'number', 'If provided, y should be a number' );
-      assert && assert( width === undefined || (typeof width === 'number' && width >= 0 && (width % 1 === 0)),
+      assert && assert( width === undefined || ( typeof width === 'number' && width >= 0 && ( width % 1 === 0 ) ),
         'If provided, width should be a non-negative integer' );
-      assert && assert( height === undefined || (typeof height === 'number' && height >= 0 && (height % 1 === 0)),
+      assert && assert( height === undefined || ( typeof height === 'number' && height >= 0 && ( height % 1 === 0 ) ),
         'If provided, height should be a non-negative integer' );
 
       var result = null;
@@ -4254,9 +4254,9 @@ define( function( require ) {
     toDataURLImageSynchronous: function( x, y, width, height ) {
       assert && assert( x === undefined || typeof x === 'number', 'If provided, x should be a number' );
       assert && assert( y === undefined || typeof y === 'number', 'If provided, y should be a number' );
-      assert && assert( width === undefined || (typeof width === 'number' && width >= 0 && (width % 1 === 0)),
+      assert && assert( width === undefined || ( typeof width === 'number' && width >= 0 && ( width % 1 === 0 ) ),
         'If provided, width should be a non-negative integer' );
-      assert && assert( height === undefined || (typeof height === 'number' && height >= 0 && (height % 1 === 0)),
+      assert && assert( height === undefined || ( typeof height === 'number' && height >= 0 && ( height % 1 === 0 ) ),
         'If provided, height should be a non-negative integer' );
 
       var result;
@@ -4282,9 +4282,9 @@ define( function( require ) {
     toDataURLNodeSynchronous: function( x, y, width, height ) {
       assert && assert( x === undefined || typeof x === 'number', 'If provided, x should be a number' );
       assert && assert( y === undefined || typeof y === 'number', 'If provided, y should be a number' );
-      assert && assert( width === undefined || (typeof width === 'number' && width >= 0 && (width % 1 === 0)),
+      assert && assert( width === undefined || ( typeof width === 'number' && width >= 0 && ( width % 1 === 0 ) ),
         'If provided, width should be a non-negative integer' );
-      assert && assert( height === undefined || (typeof height === 'number' && height >= 0 && (height % 1 === 0)),
+      assert && assert( height === undefined || ( typeof height === 'number' && height >= 0 && ( height % 1 === 0 ) ),
         'If provided, height should be a non-negative integer' );
 
       return new scenery.Node( {
