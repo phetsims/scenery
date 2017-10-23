@@ -268,8 +268,7 @@ define( function( require ) {
     cssTransform: false,
     excludeInvisible: false,
     webglScale: null,
-    preventFit: false,
-    phetioState: false
+    preventFit: false
   };
 
   /**
@@ -324,9 +323,6 @@ define( function( require ) {
 
     // @protected {function} - the wrapper type for phet-io
     this._phetioType = TNode;
-
-    // @protected {function} - should the instance be included in the PhET-iO state, see phetio.addInstance().
-    this._phetioState = DEFAULT_OPTIONS.phetioState;
 
     // @protected {Array.<Instance>} - All of the Instances tracking this Node
     this._instances = [];
