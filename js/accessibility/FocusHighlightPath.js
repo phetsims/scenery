@@ -22,7 +22,7 @@ define( function( require ) {
   var Vector2 = require( 'DOT/Vector2' );
 
   // constants
-  var FOCUS_COLOR = new Color( 'rgba(212,19,106,0.5)' );
+  var OUTER_FOCUS_COLOR = new Color( 'rgba(212,19,106,0.5)' );
   var INNER_FOCUS_COLOR = new Color( 'rgba(250,40,135,0.9)' );
 
   // Determined by inspection, base widths of focus highlight, transform of shape/bounds will change highlight line width
@@ -38,11 +38,10 @@ define( function( require ) {
   function FocusHighlightPath( shape, options ) {
 
     Path.call( this, shape );
-
     options = _.extend( {
 
       // stroke options,  one for each highlight
-      outerStroke: FOCUS_COLOR,
+      outerStroke: OUTER_FOCUS_COLOR,
       innerStroke: INNER_FOCUS_COLOR,
 
       // line width options, one for each highlight, will be calculated based on transform of this path unless provided
@@ -57,12 +56,12 @@ define( function( require ) {
       lineDashOffset: LineStyles.DEFAULT_OPTIONS.lineDashOffset
     }, options );
 
-    this.options = options; // @private
+    this.options = options; // @private TODO: only assign individual options to 'this'.
 
     // options for this Path, the outer focus highlight
     var outerHighlightOptions = _.extend( {
-      stroke: options.outerStroke,
-    }, options );
+      stroke: options.outerStroke
+    }, options ); // TODO: Should this overwrite the "stroke" given in the options rather than extend?
     this.mutate( outerHighlightOptions );
 
     // create the 'inner' focus highlight, the slightly darker and more opaque path that is on the inside
@@ -128,6 +127,8 @@ define( function( require ) {
       return FocusHighlightPath.getInnerLineWidthFromNode( this );
     }
   }, {
+    OUTER_FOCUS_COLOR: OUTER_FOCUS_COLOR,
+    INNER_FOCUS_COLOR: INNER_FOCUS_COLOR,
 
     /**
      * Get the outer line width of a focus highlight based on the node's scale and rotation transform information.

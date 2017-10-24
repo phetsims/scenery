@@ -24,12 +24,20 @@ define( function( require ) {
   function FocusHighlightFromNode( node, options ) {
 
     options = _.extend( {
-      useLocalBounds: false
+      useLocalBounds: false,
+
+      // line width options, one for each highlight, will be calculated based on transform of this path unless provided
+      outerLineWidth: null,
+      innerLineWidth: null
     }, options );
 
     this.useLocalBounds = options.useLocalBounds; // @private
 
     FocusHighlightPath.call( this, null, options );
+
+    // @private - from options, will override line width calculations based on the the node's size
+    this.outerLineWidth = options.outerLineWidth;
+    this.innerLineWidth = options.innerLineWidth;
 
     if ( node ) {
       this.setShapeFromNode( node );
@@ -62,8 +70,10 @@ define( function( require ) {
      * @param node
      */
     updateLineWidthFromNode: function( node ) {
-      this.lineWidth = FocusHighlightPath.getOuterLineWidthFromNode( node );
-      this.innerHighlightPath.lineWidth = FocusHighlightPath.getInnerLineWidthFromNode( node );
+
+      // Default options can override
+      this.lineWidth = this.outerLineWidth || FocusHighlightPath.getOuterLineWidthFromNode( node );
+      this.innerHighlightPath.lineWidth = this.innerLineWidth || FocusHighlightPath.getInnerLineWidthFromNode( node );
     }
   } );
 } );
