@@ -976,7 +976,7 @@ define( function( require ) {
          */
         setAriaLabelContent: function( content ) {
           this._ariaLabelContent = content;
-          this._ariaLabelsNode && this.ariaLabelsNode.setAriaLabelledByNode( this );
+          this._ariaLabelsNode && this._ariaLabelsNode.setAriaLabelledByNode( this );
         },
         set ariaLabelContent( content ) { this.setAriaLabelContent( content ); },
 
