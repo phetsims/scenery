@@ -732,7 +732,7 @@ define( function( require ) {
      * Called when an ancestor node's accessible order is changed. First we check to see if the leaf most node on
      * the trail has an AccessibleInstance. If if does, we sort the accessible instances under it. Otherwise, find
      * the closest ancestor that has an AccessibleInstance, and sort AccessibleInstances under that one.
-     * 
+     *
      * @private
      *
      * @param {Trail} trail
@@ -1819,7 +1819,14 @@ define( function( require ) {
      * @param  {Focus|null} value
      */
     set focus( value ) {
+
+      // Emit that the old focused node is no longer focused
+      this.focusProperty.value && this.focusProperty.value.trail.lastNode().focusChangedEmitter.emit1( false );
+
       this.focusProperty.value = value;
+
+      // Emit that the new node is focused
+      value && value.trail.lastNode().focusChangedEmitter.emit1( true );
     },
 
     /**

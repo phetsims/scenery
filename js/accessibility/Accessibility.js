@@ -304,6 +304,10 @@ define( function( require ) {
           // @public (scenery-internal) - emitters for when state properties change
           this.accessibleVisibilityChangedEmitter = new Emitter();
 
+          // @public - emits when focus changes. This will trigger with the 'focus' event and the 'blur' event.
+          // Listener receives 1 parameter, {boolean} - isFocused. see Display.focus
+          this.focusChangedEmitter = new Emitter();
+
           // @private {Array.<Node>} - (a11y) If provided, it will override the focus order between children (and optionally
           // descendants). If not provided, the focus order will default to the rendering order (first children first, last
           // children last) determined by the children array.
