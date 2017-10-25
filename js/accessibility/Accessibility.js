@@ -125,11 +125,11 @@ define( function( require ) {
      *
      * @param {function} type - the constructor for Node
      */
-    mixin: function( type ) {
+    compose: function( type ) {
       var proto = type.prototype;
 
       /**
-       * These properties and methods are put directly on the prototype of nodes that have Accessibility mixed in.
+       * These properties and methods are put directly on the prototype of Node.
        */
       extend( proto, {
 

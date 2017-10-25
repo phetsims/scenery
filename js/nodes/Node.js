@@ -502,7 +502,7 @@ define( function( require ) {
     // Initialize sub-components
     this._picker = new Picker( this );
 
-    // Mix in accessibility
+    // compose accessibility
     this.initializeAccessibility();
 
     // Make sure Node's prototype dispose() is called when dispose() is called, and make sure that it isn't called
@@ -5100,8 +5100,9 @@ define( function( require ) {
      *----------------------------------------------------------------------------*/
 
     /**
-     * Used by the Accessibility mixin as well, so it is exported as a static
+     * Used by the Accessibility trait as well, so it is exported as a static.
      * @public (scenery-interal)
+     *
      * @param {Node} node
      * @returns {boolean}
      */
@@ -5112,8 +5113,8 @@ define( function( require ) {
 
   Node.DEFAULT_OPTIONS = DEFAULT_OPTIONS;
 
-  // mixin accessibility
-  Accessibility.mixin( Node );
+  // Node is composed with accessibility
+  Accessibility.compose( Node );
 
   return Node;
 } );
