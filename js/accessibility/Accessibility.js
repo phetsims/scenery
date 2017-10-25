@@ -406,8 +406,8 @@ define( function( require ) {
         setAccessibleInputEnabled: function( accessibleInputEnabled ) {
           this._accessibleInputEnabled = accessibleInputEnabled;
 
-          for ( var i = 0; i < this.children.length; i++ ) {
-            this.children[ i ].accessibleInputEnabled = accessibleInputEnabled;
+          for ( var i = 0; i < this._children.length; i++ ) {
+            this._children[ i ].accessibleInputEnabled = accessibleInputEnabled;
           }
         },
         set accessibleInputEnabled( accessibleInputEnabled ) { this.setAccessibleInputEnabled( accessibleInputEnabled ); },
