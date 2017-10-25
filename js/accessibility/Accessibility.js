@@ -897,7 +897,7 @@ define( function( require ) {
          * @param {Node} node - the node with accessible content that labels this one.
          */
         setAriaLabelledByNode: function( node ) {
-          assert && assert( node.accessibleInstances.length < 2, 'cannot be labelled by a node using DAG' );
+          assert && assert( node._accessibleInstances.length < 2, 'cannot be labelled by a node using DAG' );
 
           this._ariaLabelledByNode = node;
 
@@ -905,12 +905,12 @@ define( function( require ) {
           node._ariaLabelsNode = this;
 
           //  accessible content required for both nodes
-          var thisHasContent = this.accessibleInstances.length > 0;
-          var otherHasContent = node.accessibleInstances.length > 0;
+          var thisHasContent = this._accessibleInstances.length > 0;
+          var otherHasContent = node._accessibleInstances.length > 0;
           if ( thisHasContent && otherHasContent ) {
             var self = this;
             this.updateAccessiblePeers( function( accessiblePeer ) {
-              var otherPeer = node.accessibleInstances[ 0 ].peer;
+              var otherPeer = node._accessibleInstances[ 0 ].peer;
 
               var labelledElement = accessiblePeer.getElementByAssociation( self._ariaLabelledContent );
               var labelElement = otherPeer.getElementByAssociation( node._ariaLabelContent );
@@ -991,7 +991,7 @@ define( function( require ) {
          * @param {Node} node - the node with accessible content that labels this one.
          */
         setAriaDescribedByNode: function( node ) {
-          assert && assert( node.accessibleInstances.length < 2, 'cannot be described by a node using DAG' );
+          assert && assert( node._accessibleInstances.length < 2, 'cannot be described by a node using DAG' );
 
           this._ariaDescribedByNode = node;
 
@@ -999,12 +999,12 @@ define( function( require ) {
           node._ariaDescribesNode = this;
 
           // accessible content required for both nodes
-          var thisHasContent = this.accessibleInstances.length > 0;
-          var otherHasContent = node.accessibleInstances.length > 0;
+          var thisHasContent = this._accessibleInstances.length > 0;
+          var otherHasContent = node._accessibleInstances.length > 0;
           if ( thisHasContent && otherHasContent ) {
             var self = this;
             this.updateAccessiblePeers( function( accessiblePeer ) {
-              var otherPeer = node.accessibleInstances[ 0 ].peer;
+              var otherPeer = node._accessibleInstances[ 0 ].peer;
 
               var describedElement = accessiblePeer.getElementByAssociation( self._ariaDescribedContent );
               var descriptionElement = otherPeer.getElementByAssociation( node._ariaDescriptionContent );
@@ -1429,8 +1429,8 @@ define( function( require ) {
          */
         isFocused: function() {
           var isFocused = false;
-          if ( this.accessibleInstances.length > 0 ) {
-            isFocused = document.activeElement === this.accessibleInstances[ 0 ].peer.domElement;
+          if ( this._accessibleInstances.length > 0 ) {
+            isFocused = document.activeElement === this._accessibleInstances[ 0 ].peer.domElement;
           }
 
           return isFocused;
@@ -1446,15 +1446,15 @@ define( function( require ) {
          * @public
          */
         focus: function() {
-          if ( this.accessibleInstances.length > 0 ) {
+          if ( this._accessibleInstances.length > 0 ) {
 
             // when accessibility is widely used, this assertion can be added back in
-            // assert && assert( this.accessibleInstances.length > 0, 'there must be accessible content for the node to receive focus' );
+            // assert && assert( this._accessibleInstances.length > 0, 'there must be accessible content for the node to receive focus' );
             assert && assert( this._focusable, 'trying to set focus on a node that is not focusable' );
             assert && assert( this._accessibleVisible, 'trying to set focus on a node with invisible accessible content' );
-            assert && assert( this.accessibleInstances.length === 1, 'focus() unsupported for Nodes using DAG, accessible content is not unique' );
+            assert && assert( this._accessibleInstances.length === 1, 'focus() unsupported for Nodes using DAG, accessible content is not unique' );
 
-            this.accessibleInstances[ 0 ].peer.domElement.focus();
+            this._accessibleInstances[ 0 ].peer.domElement.focus();
           }
         },
 
@@ -1464,8 +1464,8 @@ define( function( require ) {
          * @public
          */
         blur: function() {
-          if ( this.accessibleInstances.length > 0 ) {
-            this.accessibleInstances[ 0 ].peer.domElement.blur();
+          if ( this._accessibleInstances.length > 0 ) {
+            this._accessibleInstances[ 0 ].peer.domElement.blur();
           }
         },
 
@@ -1564,8 +1564,8 @@ define( function( require ) {
          * @param {function} callback
          */
         updateAccessiblePeers: function( callback ) {
-          for ( var i = 0; i < this.accessibleInstances.length; i++ ) {
-            this.accessibleInstances[ i ].peer && callback( this.accessibleInstances[ i ].peer );
+          for ( var i = 0; i < this._accessibleInstances.length; i++ ) {
+            this._accessibleInstances[ i ].peer && callback( this._accessibleInstances[ i ].peer );
           }
         }
       } );
