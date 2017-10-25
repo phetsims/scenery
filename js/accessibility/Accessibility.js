@@ -1,13 +1,13 @@
 // Copyright 2017, University of Colorado Boulder
 
 /**
- * A mixin for Node that implements accessibility by adding HTML content to the parallel DOM.
+ * A trait that is meant to be composed with Node, adding accessibility by defining content for the Parallel DOM.
  *
  * The parallel DOM is an HTML structure that provides semantics for assistive technologies. For web content to be
  * accessible, assistive technologies require HTML markup, which is something that pure graphical content does not
- * include.  This mixin implements the accessible HTML content for any node in the scene graph.
+ * include.  This trait adds the accessible HTML content for any node in the scene graph.
  *
- * Each node can have accessible content.  The structure of the accessible content will match the structure of the scene
+ * Each Node can have accessible content.  The structure of the accessible content will match the structure of the scene
  * graph.
  *
  * Say we have the following scene graph:
@@ -44,7 +44,7 @@
  * </div>
  *
  * The node is represented by the <button> DOM element, but the accessible content needs to include the parent div, and
- * a peer description paragraph.  This mixin supports this structure with the 'parentContainerElement' option.  In
+ * a peer description paragraph.  This trait supports this structure with the 'parentContainerElement' option.  In
  * this example, the parentContainerElement is the div, while the description is added as a child under the button
  * node's domElement.
  *
@@ -121,7 +121,7 @@ define( function( require ) {
   var Accessibility = {
 
     /**
-     * Given the constructor for Node, mix accessibility functions into the prototype
+     * Given the constructor for Node, add accessibility functions into the prototype.
      *
      * @param {function} type - the constructor for Node
      */
@@ -136,7 +136,7 @@ define( function( require ) {
         /**
          * {Array.<string>} - String keys for all of the allowed options that will be set by node.mutate( options ), in
          * the order they will be evaluated.  Beware that order matters for accessibility options, changing the order
-         * of ACCESSIBILITY_OPTION_KEYS could break the mixin.
+         * of ACCESSIBILITY_OPTION_KEYS could break the trait.
          * @protected
          *
          * NOTE: See Node's _mutatorKeys documentation for more information on how this operates, and potential special
