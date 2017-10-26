@@ -29,11 +29,11 @@
  * 3. (optionally) map that to a model location, and (optionally) move that model location to satisfy any constraints of
  *    where the element can be dragged (recomputing the parent/model translation as needed)
  * 4. Apply the required translation (with a provided drag callback, using the locationProperty, or directly
- *    transforming the Node if translateNode:true.
+ *    transforming the Node if translateNode:true).
+ *
+ * For example usage, see scenery/examples/input.html
  *
  * TODO: unit tests
- *
- * TODO: add example usage
  *
  * @author Jonathan Olson <jonathan.olson@colorado.edu>
  */
@@ -89,12 +89,12 @@ define( function( require ) {
       //   mapLocation: function( point ) { return dragBounds.closestPointTo( point ); }
       mapLocation: null,
 
-      // {Function|null} - Called as start( event: {Event} ) when the drag is started. This is preferred over passing
-      // press(), as the drag start hasn't been fully processed at that point.
+      // {Function|null} - Called as start( event: {Event}, listener: {DragListener} ) when the drag is started.
+      // This is preferred over passing press(), as the drag start hasn't been fully processed at that point.
       start: null,
 
-      // {Function|null} - Called as end() when the drag is ended. This is preferred over passing release(), as the
-      // drag start hasn't been fully processed at that point.
+      // {Function|null} - Called as end( listener: {DragListener} ) when the drag is ended. This is preferred over
+      // passing release(), as the drag start hasn't been fully processed at that point.
       end: null
     }, options );
 
@@ -168,7 +168,7 @@ define( function( require ) {
         this.reposition( this.pointer.point );
 
         // Notify after positioning and other changes
-        this._start && this._start( event );
+        this._start && this._start( event, this );
 
         sceneryLog && sceneryLog.InputListener && sceneryLog.pop();
       }
@@ -196,7 +196,7 @@ define( function( require ) {
 
       // Notify after the rest of release is called in order to prevent it from triggering interrupt().
       // TODO: Is this a problem that we can't access things like this.pointer here?
-      this._end && this._end();
+      this._end && this._end( this );
 
       sceneryLog && sceneryLog.InputListener && sceneryLog.pop();
     },

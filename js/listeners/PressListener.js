@@ -45,16 +45,16 @@ define( function( require ) {
       // cursor of whatever nodes the pointer may be over).
       pressCursor: 'pointer',
 
-      // {Function|null} - Called as press( event: {Event} ) when this listener's node is pressed (typically
-      // from a down event, but can be triggered by other handlers).
+      // {Function|null} - Called as press( event: {Event}, listener: {PressListener} ) when this listener's node is
+      // pressed (typically from a down event, but can be triggered by other handlers).
       press: null,
 
-      // {Function|null} - Called as release() when this listener's node is released (pointer up/cancel or interrupt
-      // when pressed).
+      // {Function|null} - Called as release( listener: {PressListener} ) when this listener's node is released
+      // (pointer up/cancel or interrupt when pressed).
       release: null,
 
-      // {Function|null} - Called as drag( event: {Event} ) when this listener's node is dragged (move events
-      // on the pointer while pressed).
+      // {Function|null} - Called as drag( event: {Event}, listener: {PressListener} ) when this listener's node is
+      //dragged (move events on the pointer while pressed).
       drag: null,
 
       // {Property.<Boolean>} - If provided, this property will be used to track whether this listener's node is
@@ -290,7 +290,7 @@ define( function( require ) {
       this.pointer.cursor = this._pressCursor;
 
       // Notify after everything else is set up
-      this._pressListener && this._pressListener( event );
+      this._pressListener && this._pressListener( event, this );
 
       sceneryLog && sceneryLog.InputListener && sceneryLog.pop();
 
@@ -325,7 +325,7 @@ define( function( require ) {
 
       // Notify after the rest of release is called in order to prevent it from triggering interrupt().
       // TODO: Is this a problem that we can't access things like this.pointer here?
-      this._releaseListener && this._releaseListener();
+      this._releaseListener && this._releaseListener( this );
 
       sceneryLog && sceneryLog.InputListener && sceneryLog.pop();
     },
@@ -344,7 +344,7 @@ define( function( require ) {
 
       assert && assert( this.isPressed, 'Can only drag while pressed' );
 
-      this._dragListener && this._dragListener( event );
+      this._dragListener && this._dragListener( event, this );
 
       sceneryLog && sceneryLog.InputListener && sceneryLog.pop();
     },
