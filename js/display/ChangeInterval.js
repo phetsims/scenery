@@ -155,7 +155,7 @@ define( function( require ) {
     }
   } );
 
-  Poolable.mixin( ChangeInterval, {
+  Poolable.mixInto( ChangeInterval, {
     constructorDuplicateFactory: function( pool ) {
       return function( drawableBefore, drawableAfter ) {
         if ( pool.length ) {

@@ -40,7 +40,7 @@ define( function( require ) {
   inherit( DOMSelfDrawable, TextDOMDrawable, {
     /**
      * Initializes this drawable, starting its "lifetime" until it is disposed. This lifecycle can happen multiple
-     * times, with instances generally created by the SelfDrawable.Poolable mixin (dirtyFromPool/createFromPool), and
+     * times, with instances generally created by the SelfDrawable.Poolable trait (dirtyFromPool/createFromPool), and
      * disposal will return this drawable to the pool.
      * @public (scenery-internal)
      *
@@ -55,7 +55,7 @@ define( function( require ) {
       // Super-type initialization
       this.initializeDOMSelfDrawable( renderer, instance );
 
-      // Stateful mix-in initialization
+      // Stateful trait initialization
       this.initializeState( renderer, instance );
 
       // only create elements if we don't already have them (we pool visual states always, and depending on the platform may also pool the actual elements to minimize
@@ -139,10 +139,10 @@ define( function( require ) {
       DOMSelfDrawable.prototype.dispose.call( this );
     }
   } );
-  TextStatefulDrawable.mixin( TextDOMDrawable );
+  TextStatefulDrawable.mixInto( TextDOMDrawable );
   // This sets up TextDOMDrawable.createFromPool/dirtyFromPool and drawable.freeToPool() for the type, so
   // that we can avoid allocations by reusing previously-used drawables.
-  SelfDrawable.Poolable.mixin( TextDOMDrawable );
+  SelfDrawable.Poolable.mixInto( TextDOMDrawable );
 
   return TextDOMDrawable;
 } );

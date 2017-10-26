@@ -1,7 +1,7 @@
 // Copyright 2013-2016, University of Colorado Boulder
 
 /**
- * Mix-in for nodes that support a standard fill and/or stroke (e.g. Text, Path and Path subtypes).
+ * Trait for nodes that support a standard fill and/or stroke (e.g. Text, Path and Path subtypes).
  *
  * @author Jonathan Olson <jonathan.olson@colorado.edu>
  */
@@ -12,7 +12,9 @@ define( function( require ) {
   var arrayRemove = require( 'PHET_CORE/arrayRemove' );
   var Color = require( 'SCENERY/util/Color' );
   var extend = require( 'PHET_CORE/extend' );
+  var inheritance = require( 'PHET_CORE/inheritance' );
   var LineStyles = require( 'KITE/util/LineStyles' );
+  var Node = require( 'SCENERY/nodes/Node' );
   var platform = require( 'PHET_CORE/platform' );
   var Property = require( 'AXON/Property' );
   var Renderer = require( 'SCENERY/display/Renderer' );
@@ -51,13 +53,15 @@ define( function( require ) {
 
   var Paintable = {
     /**
-     * Applies the mix-in to a subtype of Node.
+     * Applies the trait to a subtype of Node.
      * @public
-     * @mixin
+     * @trait
      *
      * @param {constructor} type - A constructor that inherits from Node
      */
-    mixin: function( type ) {
+    mixInto: function( type ) {
+      assert && assert( _.includes( inheritance( type ), Node ), 'Only Node subtypes should mix Paintable' );
+
       var proto = type.prototype;
 
       /**

@@ -32,7 +32,7 @@ define( function( require ) {
   inherit( CanvasSelfDrawable, PathCanvasDrawable, {
     /**
      * Initializes this drawable, starting its "lifetime" until it is disposed. This lifecycle can happen multiple
-     * times, with instances generally created by the SelfDrawable.Poolable mixin (dirtyFromPool/createFromPool), and
+     * times, with instances generally created by the SelfDrawable.Poolable trait (dirtyFromPool/createFromPool), and
      * disposal will return this drawable to the pool.
      * @public (scenery-internal)
      *
@@ -98,11 +98,11 @@ define( function( require ) {
     }
   } );
 
-  PaintableStatelessDrawable.mixin( PathCanvasDrawable );
+  PaintableStatelessDrawable.mixInto( PathCanvasDrawable );
 
   // This sets up PathCanvasDrawable.createFromPool/dirtyFromPool and drawable.freeToPool() for the type, so
   // that we can avoid allocations by reusing previously-used drawables.
-  SelfDrawable.Poolable.mixin( PathCanvasDrawable );
+  SelfDrawable.Poolable.mixInto( PathCanvasDrawable );
 
   return PathCanvasDrawable;
 } );

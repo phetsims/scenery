@@ -36,7 +36,7 @@ scenery.register( 'ImageDOMDrawable', ImageDOMDrawable );
   inherit( DOMSelfDrawable, ImageDOMDrawable, {
     /**
      * Initializes this drawable, starting its "lifetime" until it is disposed. This lifecycle can happen multiple
-     * times, with instances generally created by the SelfDrawable.Poolable mixin (dirtyFromPool/createFromPool), and
+     * times, with instances generally created by the SelfDrawable.Poolable trait (dirtyFromPool/createFromPool), and
      * disposal will return this drawable to the pool.
      * @public (scenery-internal)
      *
@@ -51,7 +51,7 @@ scenery.register( 'ImageDOMDrawable', ImageDOMDrawable );
       // Super-type initialization
       this.initializeDOMSelfDrawable( renderer, instance );
 
-      // Stateful mix-in initialization
+      // Stateful trait initialization
       this.initializeState( renderer, instance );
 
       // only create elements if we don't already have them (we pool visual states always, and depending on the platform may also pool the actual elements to minimize
@@ -127,11 +127,11 @@ scenery.register( 'ImageDOMDrawable', ImageDOMDrawable );
       DOMSelfDrawable.prototype.dispose.call( this );
     }
   } );
-  ImageStatefulDrawable.mixin( ImageDOMDrawable );
+  ImageStatefulDrawable.mixInto( ImageDOMDrawable );
 
   // This sets up ImageDOMDrawable.createFromPool/dirtyFromPool and drawable.freeToPool() for the type, so
   // that we can avoid allocations by reusing previously-used drawables.
-  SelfDrawable.Poolable.mixin( ImageDOMDrawable );
+  SelfDrawable.Poolable.mixInto( ImageDOMDrawable );
 
   return ImageDOMDrawable;
 } );

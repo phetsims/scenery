@@ -1,7 +1,7 @@
 // Copyright 2016, University of Colorado Boulder
 
 /**
- * A mixin to drawables for Line that does not store the line's state, as it just needs to track dirtyness overall.
+ * A trait for drawables for Line that does not store the line's state, as it just needs to track dirtyness overall.
  *
  * @author Jonathan Olson <jonathan.olson@colorado.edu>
  */
@@ -9,11 +9,15 @@
 define( function( require ) {
   'use strict';
 
+  var inheritance = require( 'PHET_CORE/inheritance' );
   var PaintableStatelessDrawable = require( 'SCENERY/display/drawables/PaintableStatelessDrawable' );
   var scenery = require( 'SCENERY/scenery' );
+  var SelfDrawable = require( 'SCENERY/display/SelfDrawable' );
 
   var LineStatelessDrawable = {
-    mixin: function( drawableType ) {
+    mixInto: function( drawableType ) {
+      assert && assert( _.includes( inheritance( drawableType ), SelfDrawable ) );
+
       var proto = drawableType.prototype;
 
       // initializes, and resets (so we can support pooled states)
@@ -66,7 +70,7 @@ define( function( require ) {
       };
 
       // TODO: egad! mixing in the wrong drawable???
-      PaintableStatelessDrawable.mixin( drawableType );
+      PaintableStatelessDrawable.mixInto( drawableType );
     }
   };
 

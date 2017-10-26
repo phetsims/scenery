@@ -40,7 +40,7 @@ define( function( require ) {
   inherit( SVGSelfDrawable, CircleSVGDrawable, {
     /**
      * Initializes this drawable, starting its "lifetime" until it is disposed. This lifecycle can happen multiple
-     * times, with instances generally created by the SelfDrawable.Poolable mixin (dirtyFromPool/createFromPool), and
+     * times, with instances generally created by the SelfDrawable.Poolable trait (dirtyFromPool/createFromPool), and
      * disposal will return this drawable to the pool.
      * @public (scenery-internal)
      *
@@ -79,12 +79,12 @@ define( function( require ) {
     }
   } );
 
-  // Include Circle's stateful mixin (used for dirty flags)
-  CircleStatefulDrawable.mixin( CircleSVGDrawable );
+  // Include Circle's stateful trait (used for dirty flags)
+  CircleStatefulDrawable.mixInto( CircleSVGDrawable );
 
   // This sets up CircleSVGDrawable.createFromPool/dirtyFromPool and drawable.freeToPool() for the type, so
   // that we can avoid allocations by reusing previously-used drawables.
-  SelfDrawable.Poolable.mixin( CircleSVGDrawable );
+  SelfDrawable.Poolable.mixInto( CircleSVGDrawable );
 
   return CircleSVGDrawable;
 } );

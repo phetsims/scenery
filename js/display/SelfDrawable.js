@@ -12,6 +12,7 @@ define( function( require ) {
 
   var Drawable = require( 'SCENERY/display/Drawable' );
   var inherit = require( 'PHET_CORE/inherit' );
+  var inheritance = require( 'PHET_CORE/inheritance' );
   var Poolable = require( 'PHET_CORE/Poolable' );
   var scenery = require( 'SCENERY/scenery' );
 
@@ -71,9 +72,11 @@ define( function( require ) {
   } );
 
   SelfDrawable.Poolable = {
-    mixin: function( selfDrawableType ) {
+    mixInto: function( selfDrawableType ) {
+      assert && assert( _.includes( inheritance( selfDrawableType ), SelfDrawable ) );
+
       // for pooling, allow <SelfDrawableType>.createFromPool( renderer, instance ) and drawable.freeToPool(). Creation will initialize the drawable to an initial state
-      Poolable.mixin( selfDrawableType, {
+      Poolable.mixInto( selfDrawableType, {
         defaultFactory: function() {
           return new selfDrawableType();
         },

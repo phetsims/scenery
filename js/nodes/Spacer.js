@@ -41,7 +41,7 @@ define( function( require ) {
   scenery.register( 'Spacer', Spacer );
 
   inherit( Node, Spacer );
-  Leaf.mixin( Spacer ); // prevent children from being added, since we're overriding local bounds
+  Leaf.mixInto( Spacer ); // prevent children from being added, since we're overriding local bounds
 
   return Spacer;
 } );

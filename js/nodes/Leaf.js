@@ -1,7 +1,7 @@
 // Copyright 2015-2016, University of Colorado Boulder
 
 /**
- * A mixin for subtypes of Node, used to prevent children being added/removed to that subtype of Node.
+ * A trait for subtypes of Node, used to prevent children being added/removed to that subtype of Node.
  *
  * @author Jonathan Olson <jonathan.olson@colorado.edu>
  */
@@ -9,17 +9,21 @@
 define( function( require ) {
   'use strict';
 
+  var inheritance = require( 'PHET_CORE/inheritance' );
+  var Node = require( 'SCENERY/nodes/Node' );
   var scenery = require( 'SCENERY/scenery' );
 
   var Leaf = {
     /**
      * Removes the capability to insert children when this is mixed into a type.
      * @public
-     * @mixin
+     * @trait
      *
      * @param {function} type - The type (constructor) whose prototype we'll modify so that it can't have children.
      */
-    mixin: function( type ) {
+    mixInto: function( type ) {
+      assert && assert( _.includes( inheritance( type ), Node ) );
+
       var proto = type.prototype;
 
       /**

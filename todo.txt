@@ -100,16 +100,11 @@ Browsers
         [REGRESSION] Chrome 27 context.arc( 0, 0, 100, Math.PI / 4, -Math.PI / 2, true );
         [UNKNOWN] Chrome canvas lineWidth with pattern bug (looks like half size?)
         [UNKNOWN] Chrome and Firefox treat painting with 'transparent' differently. see dynamic layering slide
-        
+
         [KNOWN] Chrome XMLSerializer.serializeToString dropping namespaces: https://code.google.com/p/chromium/issues/detail?id=88295
     For canvas, create a drawing function that exhibits all differences?
         Canvas difference examples. Set up simple node.is server to keep track of snapshots.
     measureText for webkit?
-
-Questions for SB (or others):
-    Way to side-by-side install Firefox and Aurora?
-    Preferred mixin styles?
-        One that creates a new prototype?
 
 Questions for team:
     https://travis-ci.org/ for continuous integration?
@@ -382,7 +377,7 @@ Performance:
     Piece improvements with direct piece.render calls instead of switch? -- profile
     Improved Dirty regions
         * not full union of bounding boxes
-        * Kd-tree / quadtree acceleration if child count is high? 
+        * Kd-tree / quadtree acceleration if child count is high?
     Caching nodes with off-screen canvases for performance
         Global-bounds based. Store global transform, so we can (each frame) compare the current transform and see if it is just an
         approximately integer-offset transformation. Then we can render quickly on integer boundaries with no transforms / scaling for speed.

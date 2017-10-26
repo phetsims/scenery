@@ -447,7 +447,7 @@ define( function( require ) {
     return element;
   };
 
-  Poolable.mixin( BackboneDrawable, {
+  Poolable.mixInto( BackboneDrawable, {
     constructorDuplicateFactory: function( pool ) {
       return function( display, backboneInstance, transformRootInstance, renderer, isDisplayRoot ) {
         if ( pool.length ) {

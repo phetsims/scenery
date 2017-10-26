@@ -118,11 +118,11 @@ define( function( require ) {
 
     // include stubs (stateless) for marking dirty stroke and fill (if necessary). we only want one dirty flag, not multiple ones, for Canvas (for now)
     if ( usesPaint ) {
-      PaintableStatelessDrawable.mixin( type );
+      PaintableStatelessDrawable.mixInto( type );
     }
 
     // set up pooling
-    SelfDrawable.Poolable.mixin( type );
+    SelfDrawable.Poolable.mixInto( type );
 
     if ( options.dirtyMethods ) {
       for ( var i = 0; i < options.dirtyMethods.length; i++ ) {

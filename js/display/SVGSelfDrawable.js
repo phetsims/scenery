@@ -42,7 +42,7 @@ define( function( require ) {
       this.svgElement = null; // should be filled in by subtype
       this.svgBlock = null; // will be updated by updateSVGBlock()
 
-      this.initializeState( renderer, instance ); // assumes we have a state mixin
+      this.initializeState( renderer, instance ); // assumes we have a state trait
 
       if ( this.usesPaint ) {
         if ( !this.paintState ) {

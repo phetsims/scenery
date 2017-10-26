@@ -75,7 +75,7 @@ define( function( require ) {
     }
   } );
 
-  Poolable.mixin( DOMBlock, {
+  Poolable.mixInto( DOMBlock, {
     constructorDuplicateFactory: function( pool ) {
       return function( display, domDrawable ) {
         if ( pool.length ) {

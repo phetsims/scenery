@@ -297,7 +297,7 @@ define( function( require ) {
     }
   } );
 
-  Poolable.mixin( SVGBlock, {
+  Poolable.mixInto( SVGBlock, {
     constructorDuplicateFactory: function( pool ) {
       return function( display, renderer, transformRootInstance, filterRootInstance ) {
         if ( pool.length ) {

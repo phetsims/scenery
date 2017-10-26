@@ -43,7 +43,7 @@ define( function( require ) {
   inherit( DOMSelfDrawable, CircleDOMDrawable, {
     /**
      * Initializes this drawable, starting its "lifetime" until it is disposed. This lifecycle can happen multiple
-     * times, with instances generally created by the SelfDrawable.Poolable mixin (dirtyFromPool/createFromPool), and
+     * times, with instances generally created by the SelfDrawable.Poolable trait (dirtyFromPool/createFromPool), and
      * disposal will return this drawable to the pool.
      * @public (scenery-internal)
      *
@@ -58,7 +58,7 @@ define( function( require ) {
       // Super-type initialization
       this.initializeDOMSelfDrawable( renderer, instance );
 
-      // Stateful mix-in initialization
+      // Stateful trait initialization
       this.initializeState( renderer, instance );
 
       // @protected {Matrix3} - We need to store an independent matrix, as our CSS transform actually depends on the radius.
@@ -186,12 +186,12 @@ define( function( require ) {
     }
   } );
 
-  // Include Circle's stateful mixin (used for dirty flags)
-  CircleStatefulDrawable.mixin( CircleDOMDrawable );
+  // Include Circle's stateful trait (used for dirty flags)
+  CircleStatefulDrawable.mixInto( CircleDOMDrawable );
 
   // This sets up CircleDOMDrawable.createFromPool/dirtyFromPool and drawable.freeToPool() for the type, so
   // that we can avoid allocations by reusing previously-used drawables.
-  SelfDrawable.Poolable.mixin( CircleDOMDrawable );
+  SelfDrawable.Poolable.mixInto( CircleDOMDrawable );
 
   return CircleDOMDrawable;
 } );

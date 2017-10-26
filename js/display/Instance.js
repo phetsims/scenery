@@ -1632,7 +1632,7 @@ define( function( require ) {
   } );
 
   // object pooling
-  Poolable.mixin( Instance, {
+  Poolable.mixInto( Instance, {
     constructorDuplicateFactory: function( pool ) {
       return function( display, trail, isDisplayRoot, isSharedCanvasCacheRoot ) {
         if ( pool.length ) {

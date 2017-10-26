@@ -1,7 +1,7 @@
 // Copyright 2013-2016, University of Colorado Boulder
 
 /**
- * Handles SVG <defs> and fill/stroke style for SVG elements (by composition, not a mix-in or for inheritance).
+ * Handles SVG <defs> and fill/stroke style for SVG elements (by composition, not a trait or for inheritance).
  *
  * @author Jonathan Olson <jonathan.olson@colorado.edu>
  */

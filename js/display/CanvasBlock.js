@@ -430,7 +430,7 @@ define( function( require ) {
     }
   } );
 
-  Poolable.mixin( CanvasBlock, {
+  Poolable.mixInto( CanvasBlock, {
     constructorDuplicateFactory: function( pool ) {
       return function( display, renderer, transformRootInstance, filterRootInstance ) {
         if ( pool.length ) {

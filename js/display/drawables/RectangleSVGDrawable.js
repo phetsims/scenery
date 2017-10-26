@@ -35,7 +35,7 @@ define( function( require ) {
   inherit( SVGSelfDrawable, RectangleSVGDrawable, {
     /**
      * Initializes this drawable, starting its "lifetime" until it is disposed. This lifecycle can happen multiple
-     * times, with instances generally created by the SelfDrawable.Poolable mixin (dirtyFromPool/createFromPool), and
+     * times, with instances generally created by the SelfDrawable.Poolable trait (dirtyFromPool/createFromPool), and
      * disposal will return this drawable to the pool.
      * @public (scenery-internal)
      *
@@ -106,11 +106,11 @@ define( function( require ) {
     }
   } );
 
-  RectangleStatefulDrawable.mixin( RectangleSVGDrawable );
+  RectangleStatefulDrawable.mixInto( RectangleSVGDrawable );
 
   // This sets up RectangleSVGDrawable.createFromPool/dirtyFromPool and drawable.freeToPool() for the type, so
   // that we can avoid allocations by reusing previously-used drawables.
-  SelfDrawable.Poolable.mixin( RectangleSVGDrawable );
+  SelfDrawable.Poolable.mixInto( RectangleSVGDrawable );
 
   return RectangleSVGDrawable;
 } );

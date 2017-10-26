@@ -126,6 +126,7 @@ define( function( require ) {
      * @param {function} type - the constructor for Node
      */
     compose: function( type ) {
+      // Can't avoid circular dependency, so no assertion here. Ensure that 'type' is the constructor for Node.
       var proto = type.prototype;
 
       /**

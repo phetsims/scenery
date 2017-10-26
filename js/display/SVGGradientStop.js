@@ -195,7 +195,7 @@ define( function( require ) {
     }
   } );
 
-  Poolable.mixin( SVGGradientStop, {
+  Poolable.mixInto( SVGGradientStop, {
     constructorDuplicateFactory: function( pool ) {
       return function( svgGradient, ratio, color ) {
         if ( pool.length ) {

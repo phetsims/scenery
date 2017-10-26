@@ -93,7 +93,7 @@ define( function( require ) {
     }
   } );
 
-  Poolable.mixin( SVGPattern, {
+  Poolable.mixInto( SVGPattern, {
     constructorDuplicateFactory: function( pool ) {
       return function( pattern ) {
         if ( pool.length ) {

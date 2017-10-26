@@ -416,7 +416,7 @@ define( function( require ) {
     }
   };
 
-  Poolable.mixin( SVGGroup, {
+  Poolable.mixInto( SVGGroup, {
     constructorDuplicateFactory: function( pool ) {
       return function( block, instance, parent ) {
         if ( pool.length ) {

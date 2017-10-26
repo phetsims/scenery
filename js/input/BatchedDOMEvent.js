@@ -90,7 +90,7 @@ define( function( require ) {
     return BatchedDOMEvent.createFromPool( domEvent, pointFromEvent( domEvent ), domEvent.pointerId );
   };
 
-  Poolable.mixin( BatchedDOMEvent, {
+  Poolable.mixInto( BatchedDOMEvent, {
     constructorDuplicateFactory: function( pool ) {
       return function( domEvent, type, callback ) {
         if ( pool.length ) {

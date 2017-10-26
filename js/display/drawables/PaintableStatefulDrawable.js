@@ -1,7 +1,7 @@
 // Copyright 2016, University of Colorado Boulder
 
 /**
- * A mixin to drawables for nodes that mix in Paintable that need to store state about what the current display is
+ * A trait for drawables for nodes that mix in Paintable that need to store state about what the current display is
  * currently showing, so that updates to the node's fill/stroke will only be made on attributes that specifically
  * changed (and no change will be necessary for an attribute that changed back to its original/currently-displayed
  * value). Generally, this is used for DOM and SVG drawables.
@@ -13,8 +13,10 @@ define( function( require ) {
   'use strict';
 
   var Color = require( 'SCENERY/util/Color' );
+  var inheritance = require( 'PHET_CORE/inheritance' );
   var PaintObserver = require( 'SCENERY/display/PaintObserver' );
   var scenery = require( 'SCENERY/scenery' );
+  var SelfDrawable = require( 'SCENERY/display/SelfDrawable' );
 
   var PaintableStatefulDrawable = {
     /**
@@ -29,11 +31,13 @@ define( function( require ) {
      *
      * @param {function} drawableType - The constructor for the drawable type
      */
-    mixin: function( drawableType ) {
+    mixInto: function( drawableType ) {
+      assert && assert( _.includes( inheritance( drawableType ), SelfDrawable ) );
+
       var proto = drawableType.prototype;
 
       /**
-       * Initializes the paintable part of the stateful mixin state, starting its "lifetime" until it is disposed with
+       * Initializes the paintable part of the stateful trait state, starting its "lifetime" until it is disposed with
        * disposePaintableState().
        * @protected
        *
@@ -100,7 +104,7 @@ define( function( require ) {
       };
 
       /**
-       * Disposes the paintable stateful mixin state, so it can be put into the pool to be initialized again.
+       * Disposes the paintable stateful trait state, so it can be put into the pool to be initialized again.
        * @protected
        */
       proto.disposePaintableState = function() {

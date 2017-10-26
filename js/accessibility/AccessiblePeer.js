@@ -48,7 +48,7 @@ define( function( require ) {
       options = _.extend( {
         parentContainerElement: null, // a parent container for this peer and potential siblings
         childContainerElement: null, // an child container element where nested elements can be placed
-        labelElement: null, // the element containing this node's label content 
+        labelElement: null, // the element containing this node's label content
         descriptionElement: null // the element that will contain this node's description content
       }, options );
 
@@ -149,7 +149,7 @@ define( function( require ) {
     /**
      * Get an element on this node, looked up by the association flag passed in.
      * @public (scenery-internal)
-     * 
+     *
      * @param  {string} association - see AccessibilityUtil for valid associations
      * @return {HTMLElement}
      */
@@ -168,7 +168,7 @@ define( function( require ) {
       else if ( association === AccessiblePeer.PARENT_CONTAINER ) {
         htmlElement = this.parentContainerElement;
       }
-      
+
       return htmlElement;
     },
 
@@ -190,10 +190,10 @@ define( function( require ) {
 
   // TODO: evaluate pooling, and is it OK to pool only some peers?
   AccessiblePeer.Poolable = {
-    mixin: function( selfDrawableType ) {
+    mixInto: function( selfDrawableType ) {
       // for pooling, allow <AccessiblePeerType>.createFromPool( accessibleInstance ) and accessiblePeer.freeToPool().
       // Creation will initialize the peer to an initial state.
-      Poolable.mixin( selfDrawableType, {
+      Poolable.mixInto( selfDrawableType, {
         defaultFactory: function() {
           return new selfDrawableType();
         },

@@ -339,7 +339,7 @@ define( function( require ) {
     },
 
     /**
-     * Called from (and overridden in) the Paintable mixin, invalidates our current stroke, triggering recomputation of
+     * Called from (and overridden in) the Paintable trait, invalidates our current stroke, triggering recomputation of
      * anything that depended on the old stroke's value.
      * @protected (scenery-internal)
      */
@@ -349,7 +349,7 @@ define( function( require ) {
     },
 
     /**
-     * Called from (and overridden in) the Paintable mixin, invalidates our current fill, triggering recomputation of
+     * Called from (and overridden in) the Paintable trait, invalidates our current fill, triggering recomputation of
      * anything that depended on the old fill's value.
      * @protected (scenery-internal)
      */
@@ -685,7 +685,7 @@ define( function( require ) {
   } );
 
   // mix in support for fills and strokes
-  Paintable.mixin( Text );
+  Paintable.mixInto( Text );
 
   // Unicode embedding marks that we can combine to work around the Edge issue.
   // See https://github.com/phetsims/scenery/issues/520

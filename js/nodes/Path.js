@@ -418,7 +418,7 @@ define( function( require ) {
     },
 
     /**
-     * Called from (and overridden in) the Paintable mixin, invalidates our current stroke, triggering recomputation of
+     * Called from (and overridden in) the Paintable trait, invalidates our current stroke, triggering recomputation of
      * anything that depended on the old stroke's value.
      * @protected (scenery-internal)
      */
@@ -572,7 +572,7 @@ define( function( require ) {
   Path.DEFAULT_OPTIONS = _.extend( {}, Node.DEFAULT_OPTIONS, DEFAULT_OPTIONS );
 
   // mix in support for fills and strokes
-  Paintable.mixin( Path );
+  Paintable.mixInto( Path );
 
   return Path;
 } );

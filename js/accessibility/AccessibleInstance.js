@@ -414,7 +414,7 @@ define( function( require ) {
     }
   } );
 
-  Poolable.mixin( AccessibleInstance, {
+  Poolable.mixInto( AccessibleInstance, {
     constructorDuplicateFactory: function( pool ) {
       return function( parent, display, trail ) {
         if ( pool.length ) {

@@ -67,7 +67,7 @@ define( function( require ) {
     }
   } );
 
-  Poolable.mixin( SVGRadialGradient, {
+  Poolable.mixInto( SVGRadialGradient, {
     constructorDuplicateFactory: function( pool ) {
       return function( svgBlock, radialGradient ) {
         if ( pool.length ) {

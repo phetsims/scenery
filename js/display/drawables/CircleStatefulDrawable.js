@@ -1,12 +1,12 @@
 // Copyright 2016, University of Colorado Boulder
 
 /**
- * A mixin to drawables for Circle that need to store state about what the current display is currently showing,
+ * A trait for drawables for Circle that need to store state about what the current display is currently showing,
  * so that updates to the Circle will only be made on attributes that specifically changed (and no change will be
  * necessary for an attribute that changed back to its original/currently-displayed value). Generally, this is used
  * for DOM and SVG drawables.
  *
- * This mixin assumes the PaintableStateful mixin is also mixed (always the case for Circle stateful drawables).
+ * This trait assumes the PaintableStateful trait is also mixed (always the case for Circle stateful drawables).
  *
  * @author Jonathan Olson <jonathan.olson@colorado.edu>
  */
@@ -14,8 +14,10 @@
 define( function( require ) {
   'use strict';
 
+  var inheritance = require( 'PHET_CORE/inheritance' );
   var PaintableStatefulDrawable = require( 'SCENERY/display/drawables/PaintableStatefulDrawable' );
   var scenery = require( 'SCENERY/scenery' );
+  var SelfDrawable = require( 'SCENERY/display/SelfDrawable' );
 
   var CircleStatefulDrawable = {
     /**
@@ -32,11 +34,13 @@ define( function( require ) {
      *
      * @param {function} drawableType - The constructor for the drawable type
      */
-    mixin: function( drawableType ) {
+    mixInto: function( drawableType ) {
+      assert && assert( _.includes( inheritance( drawableType ), SelfDrawable ) );
+
       var proto = drawableType.prototype;
 
       /**
-       * Initializes the stateful mixin state, starting its "lifetime" until it is disposed with disposeState().
+       * Initializes the stateful trait state, starting its "lifetime" until it is disposed with disposeState().
        * @protected
        *
        * @param {number} renderer - Renderer bitmask, see Renderer's documentation for more details.
@@ -58,7 +62,7 @@ define( function( require ) {
       };
 
       /**
-       * Disposes the stateful mixin state, so it can be put into the pool to be initialized again.
+       * Disposes the stateful trait state, so it can be put into the pool to be initialized again.
        * @protected
        */
       proto.disposeState = function() {
@@ -96,7 +100,7 @@ define( function( require ) {
         this.dirtyRadius = false;
       };
 
-      PaintableStatefulDrawable.mixin( drawableType );
+      PaintableStatefulDrawable.mixInto( drawableType );
     }
   };
 

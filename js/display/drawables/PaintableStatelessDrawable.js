@@ -1,7 +1,7 @@
 // Copyright 2016, University of Colorado Boulder
 
 /**
- * A mixin to drawables for Paintable nodes that does not store the fill/stroke state, as it just needs to track
+ * A trait for drawables for Paintable nodes that does not store the fill/stroke state, as it just needs to track
  * dirtyness overall.
  *
  * @author Jonathan Olson <jonathan.olson@colorado.edu>
@@ -11,11 +11,15 @@ define( function( require ) {
   'use strict';
 
   var Color = require( 'SCENERY/util/Color' );
+  var inheritance = require( 'PHET_CORE/inheritance' );
   var PaintObserver = require( 'SCENERY/display/PaintObserver' );
   var scenery = require( 'SCENERY/scenery' );
+  var SelfDrawable = require( 'SCENERY/display/SelfDrawable' );
 
   var PaintableStatelessDrawable = {
-    mixin: function( drawableType ) {
+    mixInto: function( drawableType ) {
+      assert && assert( _.includes( inheritance( drawableType ), SelfDrawable ) );
+
       var proto = drawableType.prototype;
 
       proto.initializePaintableStateless = function( renderer, instance ) {

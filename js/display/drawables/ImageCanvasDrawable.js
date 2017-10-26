@@ -31,7 +31,7 @@ define( function( require ) {
   inherit( CanvasSelfDrawable, ImageCanvasDrawable, {
     /**
      * Initializes this drawable, starting its "lifetime" until it is disposed. This lifecycle can happen multiple
-     * times, with instances generally created by the SelfDrawable.Poolable mixin (dirtyFromPool/createFromPool), and
+     * times, with instances generally created by the SelfDrawable.Poolable trait (dirtyFromPool/createFromPool), and
      * disposal will return this drawable to the pool.
      * @public (scenery-internal)
      *
@@ -95,7 +95,7 @@ define( function( require ) {
 
   // This sets up ImageCanvasDrawable.createFromPool/dirtyFromPool and drawable.freeToPool() for the type, so
   // that we can avoid allocations by reusing previously-used drawables.
-  SelfDrawable.Poolable.mixin( ImageCanvasDrawable );
+  SelfDrawable.Poolable.mixInto( ImageCanvasDrawable );
 
   return ImageCanvasDrawable;
 } );
