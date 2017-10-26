@@ -13,7 +13,6 @@ define( function( require ) {
   var Events = require( 'AXON/Events' );
   var Focus = require( 'SCENERY/accessibility/Focus' );
   var inherit = require( 'PHET_CORE/inherit' );
-  var Poolable = require( 'PHET_CORE/Poolable' );
   var scenery = require( 'SCENERY/scenery' );
   // so RequireJS doesn't complain about circular dependency
   // var Display = require( 'SCENERY/display/Display' );
@@ -187,29 +186,6 @@ define( function( require ) {
     DESCRIPTION: 'DESCRIPTION', // associate with just the description content of this peer
     PARENT_CONTAINER: 'PARENT_CONTAINER' // associate with everything under the parent container element of this peer
   } );
-
-  // TODO: evaluate pooling, and is it OK to pool only some peers?
-  AccessiblePeer.Poolable = {
-    mixInto: function( selfDrawableType ) {
-      // for pooling, allow <AccessiblePeerType>.createFromPool( accessibleInstance ) and accessiblePeer.freeToPool().
-      // Creation will initialize the peer to an initial state.
-      Poolable.mixInto( selfDrawableType, {
-        defaultFactory: function() {
-          return new selfDrawableType();
-        },
-        constructorDuplicateFactory: function( pool ) {
-          return function( accessibleInstance ) {
-            if ( pool.length ) {
-              return pool.pop().initialize( accessibleInstance );
-            }
-            else {
-              return new selfDrawableType( accessibleInstance );
-            }
-          };
-        }
-      } );
-    }
-  };
 
   return AccessiblePeer;
 } );
