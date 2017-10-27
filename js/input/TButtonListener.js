@@ -23,8 +23,9 @@ define( function( require ) {
    * @constructor
    */
   function TButtonListener( buttonListener, phetioID ) {
-    TObject.call( this, buttonListener, phetioID );
     assertInstanceOf( buttonListener, phet.scenery.ButtonListener );
+
+    TObject.call( this, buttonListener, phetioID );
   }
 
   phetioInherit( TObject, 'TButtonListener', TButtonListener, {}, {

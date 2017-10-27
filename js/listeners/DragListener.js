@@ -44,8 +44,13 @@ define( function( require ) {
   var inherit = require( 'PHET_CORE/inherit' );
   var PressListener = require( 'SCENERY/listeners/PressListener' );
   var scenery = require( 'SCENERY/scenery' );
+  var Tandem = require( 'TANDEM/Tandem' );
   var TransformTracker = require( 'SCENERY/util/TransformTracker' );
   var Vector2 = require( 'DOT/Vector2' );
+
+  // phet-io modules
+  var TDragListener = require( 'SCENERY/listeners/TDragListener' );
+  var phetioEvents = require( 'ifphetio!PHET_IO/phetioEvents' );
 
   /**
    * @constructor
@@ -98,8 +103,15 @@ define( function( require ) {
       end: null,
 
       // {Property.<Boolean>|null} - An alias for isPressedListener that makes more sense for dragging.
-      isUserControlledProperty: null
+      isUserControlledProperty: null,
+
+      // {Tandem} - For instrumenting
+      tandem: Tandem.tandemRequired()
     }, options );
+
+    // @private {Tandem}
+    this._dragListenerTandem = options.tandem;
+    options.tandem = this._dragListenerTandem.createSupertypeTandem();
 
     // Initialize with the alias isUserControlledProperty => isPressedProperty
     if ( options.isUserControlledProperty ) {
@@ -146,6 +158,8 @@ define( function( require ) {
 
     // @private {Function} - Listener passed to the transform tracker
     this._transformTrackerListener = this.ancestorTransformed.bind( this );
+
+    this._dragListenerTandem.addInstance( this, TDragListener, options );
   }
 
   scenery.register( 'DragListener', DragListener );
@@ -171,6 +185,10 @@ define( function( require ) {
       if ( success ) {
         sceneryLog && sceneryLog.InputListener && sceneryLog.InputListener( 'DragListener successful press' );
         sceneryLog && sceneryLog.InputListener && sceneryLog.push();
+        var eventId = phetioEvents.start( 'user', this._dragListenerTandem.id, TDragListener, 'start', {
+          x: event.pointer.point.x,
+          y: event.pointer.point.y
+        } );
 
         this.attachTransformTracker();
 
@@ -182,6 +200,7 @@ define( function( require ) {
         // Notify after positioning and other changes
         this._start && this._start( event, this );
 
+        phetioEvents.end( eventId );
         sceneryLog && sceneryLog.InputListener && sceneryLog.pop();
       }
 
@@ -201,6 +220,7 @@ define( function( require ) {
     release: function() {
       sceneryLog && sceneryLog.InputListener && sceneryLog.InputListener( 'DragListener release' );
       sceneryLog && sceneryLog.InputListener && sceneryLog.push();
+      var eventId = phetioEvents.start( 'user', this._dragListenerTandem.id, TDragListener, 'end' );
 
       PressListener.prototype.release.call( this );
 
@@ -210,6 +230,7 @@ define( function( require ) {
       // TODO: Is this a problem that we can't access things like this.pointer here?
       this._end && this._end( this );
 
+      phetioEvents.end( eventId );
       sceneryLog && sceneryLog.InputListener && sceneryLog.pop();
     },
 
@@ -484,6 +505,8 @@ define( function( require ) {
       this.detachTransformTracker();
 
       PressListener.prototype.dispose.call( this );
+
+      this._dragListenerTandem.removeInstance( this );
 
       sceneryLog && sceneryLog.InputListener && sceneryLog.pop();
     }

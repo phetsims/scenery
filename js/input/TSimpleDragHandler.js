@@ -21,8 +21,9 @@ define( function( require ) {
    * @constructor
    */
   function TSimpleDragHandler( simpleDragHandler, phetioID ) {
-    TObject.call( this, simpleDragHandler, phetioID );
     assertInstanceOf( simpleDragHandler, phet.scenery.SimpleDragHandler );
+
+    TObject.call( this, simpleDragHandler, phetioID );
   }
 
   phetioInherit( TObject, 'TSimpleDragHandler', TSimpleDragHandler, {}, {

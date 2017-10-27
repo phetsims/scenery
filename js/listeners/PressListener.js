@@ -75,6 +75,10 @@ define( function( require ) {
       // a "primary" handler of the pointer's behavior, this should be set to false.
       attach: true,
 
+      // {function} - Checks this when trying to start a press. If this function returns false, a press will not be
+      // started.
+      canStartPress: _.constant( true ),
+
       // {Tandem} - For instrumenting
       tandem: Tandem.tandemRequired()
     }, options );
@@ -117,6 +121,7 @@ define( function( require ) {
     this._dragListener = options.drag;
     this._targetNode = options.targetNode;
     this._attach = options.attach;
+    this._canStartPress = options.canStartPress;
     this._pressListenerTandem = options.tandem;
 
     // @private {boolean} - Whether our pointer listener is referenced by the pointer (need to have a flag due to
@@ -255,6 +260,11 @@ define( function( require ) {
 
       // We can't attach to a pointer that is already attached.
       if ( this._attach && event.pointer.isAttached() ) {
+        return false;
+      }
+
+      // Check whether our options prevent us from starting a press right now.
+      if ( !this._canStartPress() ) {
         return false;
       }
 
