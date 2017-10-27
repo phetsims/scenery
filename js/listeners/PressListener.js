@@ -22,6 +22,11 @@ define( function( require ) {
   var Node = require( 'SCENERY/nodes/Node' );
   var Property = require( 'AXON/Property' );
   var scenery = require( 'SCENERY/scenery' );
+  var Tandem = require( 'TANDEM/Tandem' );
+
+  // phet-io modules
+  var TPressListener = require( 'SCENERY/listeners/TPressListener' );
+  var phetioEvents = require( 'ifphetio!PHET_IO/phetioEvents' );
 
   /**
    * @constructor
@@ -68,7 +73,10 @@ define( function( require ) {
       // {boolean} - If true, this listener will not "press" while the associated pointer is attached, and when pressed,
       // will mark itself as attached to the pointer. If this listener should not be interrupted by others and isn't
       // a "primary" handler of the pointer's behavior, this should be set to false.
-      attach: true
+      attach: true,
+
+      // {Tandem} - For instrumenting
+      tandem: Tandem.tandemRequired()
     }, options );
 
     assert && assert( typeof options.mouseButton === 'number' &&
@@ -109,6 +117,7 @@ define( function( require ) {
     this._dragListener = options.drag;
     this._targetNode = options.targetNode;
     this._attach = options.attach;
+    this._pressListenerTandem = options.tandem;
 
     // @private {boolean} - Whether our pointer listener is referenced by the pointer (need to have a flag due to
     //                      handling disposal properly).
@@ -180,6 +189,8 @@ define( function( require ) {
         sceneryLog && sceneryLog.InputListener && sceneryLog.pop();
       }
     };
+
+    this._pressListenerTandem.addInstance( this, TPressListener, options );
   }
 
   scenery.register( 'PressListener', PressListener );
@@ -276,6 +287,10 @@ define( function( require ) {
 
       sceneryLog && sceneryLog.InputListener && sceneryLog.InputListener( 'PressListener successful press' );
       sceneryLog && sceneryLog.InputListener && sceneryLog.push();
+      var eventId = phetioEvents.start( 'user', this._pressListenerTandem.id, TPressListener, 'press', {
+        x: event.pointer.point.x,
+        y: event.pointer.point.y
+      } );
 
       // Set self properties before the property change, so they are visible to listeners.
       this.pointer = event.pointer;
@@ -293,6 +308,7 @@ define( function( require ) {
       // Notify after everything else is set up
       this._pressListener && this._pressListener( event, this );
 
+      phetioEvents.end( eventId );
       sceneryLog && sceneryLog.InputListener && sceneryLog.pop();
 
       return true;
@@ -310,6 +326,7 @@ define( function( require ) {
     release: function() {
       sceneryLog && sceneryLog.InputListener && sceneryLog.InputListener( 'PressListener release' );
       sceneryLog && sceneryLog.InputListener && sceneryLog.push();
+      var eventId = phetioEvents.start( 'user', this._pressListenerTandem.id, TPressListener, 'release' );
 
       assert && assert( this.isPressed, 'This listener is not pressed' );
 
@@ -328,6 +345,7 @@ define( function( require ) {
       // TODO: Is this a problem that we can't access things like this.pointer here?
       this._releaseListener && this._releaseListener( this );
 
+      phetioEvents.end( eventId );
       sceneryLog && sceneryLog.InputListener && sceneryLog.pop();
     },
 
@@ -342,11 +360,16 @@ define( function( require ) {
     drag: function( event ) {
       sceneryLog && sceneryLog.InputListener && sceneryLog.InputListener( 'PressListener drag' );
       sceneryLog && sceneryLog.InputListener && sceneryLog.push();
+      var eventId = phetioEvents.start( 'user', this._pressListenerTandem.id, TPressListener, 'drag', {
+        x: event.pointer.point.x,
+        y: event.pointer.point.y
+      } );
 
       assert && assert( this.isPressed, 'Can only drag while pressed' );
 
       this._dragListener && this._dragListener( event, this );
 
+      phetioEvents.end( eventId );
       sceneryLog && sceneryLog.InputListener && sceneryLog.pop();
     },
 
@@ -381,6 +404,8 @@ define( function( require ) {
       if ( this._listeningToPointer ) {
         this.pointer.removeInputListener( this._pointerListener );
       }
+
+      this._pressListenerTandem.removeInstance( this );
 
       // TODO: Should we dispose our properties like isPressedProperty? If so, we'll have to be more careful with
       // multilinks, and there will be more overhead.

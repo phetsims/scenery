@@ -16,8 +16,8 @@ define( function( require ) {
 
   /**
    * Wrapper type for phet/tandem's SimpleDragHandler class.
-   * @param simpleDragHandler
-   * @param phetioID
+   * @param {SimpleDragHandler} simpleDragHandler
+   * @param {string} phetioID
    * @constructor
    */
   function TSimpleDragHandler( simpleDragHandler, phetioID ) {
