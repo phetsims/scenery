@@ -95,8 +95,17 @@ define( function( require ) {
 
       // {Function|null} - Called as end( listener: {DragListener} ) when the drag is ended. This is preferred over
       // passing release(), as the drag start hasn't been fully processed at that point.
-      end: null
+      end: null,
+
+      // {Property.<Boolean>|null} - An alias for isPressedListener that makes more sense for dragging.
+      isUserControlledProperty: null
     }, options );
+
+    // Initialize with the alias isUserControlledProperty => isPressedProperty
+    if ( options.isUserControlledProperty ) {
+      assert && assert( !options.isPressedProperty );
+      options.isPressedProperty = options.isUserControlledProperty;
+    }
 
     // TODO: type checks for options
 
@@ -128,6 +137,9 @@ define( function( require ) {
 
     // @public {Vector2} - Current drag point in the model coordinate frame
     this.modelPoint = new Vector2();
+
+    // @public {Property.<boolean>} - Alias for isPressedProperty (as this name makes more sense for dragging)
+    this.isUserControlledProperty = this.isPressedProperty;
 
     // @private {TransformTracker|null} - Handles watching ancestor transforms for callbacks.
     this._transformTracker = null;

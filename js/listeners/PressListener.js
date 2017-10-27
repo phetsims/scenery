@@ -17,6 +17,7 @@
 define( function( require ) {
   'use strict';
 
+  var BooleanProperty = require( 'AXON/BooleanProperty' );
   var inherit = require( 'PHET_CORE/inherit' );
   var Node = require( 'SCENERY/nodes/Node' );
   var Property = require( 'AXON/Property' );
@@ -59,7 +60,7 @@ define( function( require ) {
 
       // {Property.<Boolean>} - If provided, this property will be used to track whether this listener's node is
       // "pressed" or not.
-      isPressedProperty: new Property( false ),
+      isPressedProperty: new BooleanProperty( false ),
 
       // {Node|null} - If provided, the pressedTrail (calculated from the down event) will be replaced with
       targetNode: null,
@@ -282,12 +283,12 @@ define( function( require ) {
                                              event.trail.subtrailTo( event.currentTarget, false );
       this.interrupted = false; // clears the flag (don't set to false before here)
 
-      this.isPressedProperty.value = true;
-
       this.pointer.addInputListener( this._pointerListener, this._attach );
       this._listeningToPointer = true;
 
       this.pointer.cursor = this._pressCursor;
+
+      this.isPressedProperty.value = true;
 
       // Notify after everything else is set up
       this._pressListener && this._pressListener( event, this );
@@ -312,8 +313,6 @@ define( function( require ) {
 
       assert && assert( this.isPressed, 'This listener is not pressed' );
 
-      this.isPressedProperty.value = false;
-
       this.pointer.removeInputListener( this._pointerListener );
       this._listeningToPointer = false;
 
@@ -322,6 +321,8 @@ define( function( require ) {
       // Unset self properties after the property change, so they are visible to listeners beforehand.
       this.pointer = null;
       this.pressedTrail = null;
+
+      this.isPressedProperty.value = false;
 
       // Notify after the rest of release is called in order to prevent it from triggering interrupt().
       // TODO: Is this a problem that we can't access things like this.pointer here?
