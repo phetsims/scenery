@@ -42,23 +42,24 @@ define( function( require ) {
         return null;
       }
       else {
-        return focus.trail.indices;
+        return { focusedPhetioID: focus.trail.lastNode().phetioID, indices: focus.trail.indices};
       }
     },
 
     /**
      * Convert the serialized instance back to a focus object
-     * @param {number[]} indices
+     * @param {Object} stateObject
      * @returns {Object} with {display,trail}
      */
-    fromStateObject: function( indices ) {
+    fromStateObject: function( stateObject ) {
 
-      if ( indices === null ) {
+      if ( stateObject === null ) {
 
         // support unfocused
         return null;
       }
       else {
+        var indices = stateObject.indices;
 
         // Follow the path of children based on their indices, starting from the root of the display.
         // There is always one more node in Trail than indices, representing the root node.
