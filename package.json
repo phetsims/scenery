@@ -10,6 +10,7 @@
     "grunt": "~1.0.0"
   },
   "phet": {
+    "requirejsNamespace": "SCENERY",
     "isJSOnly": true,
     "requiresLodash": true,
     "requiresJQuery": true,
