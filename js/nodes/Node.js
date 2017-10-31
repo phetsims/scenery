@@ -2897,29 +2897,27 @@ define( function( require ) {
     get visible() { return this.isVisible(); },
 
     /**
-     * Swap visibility of two children. Before calling, visibleChild should be visible and invisibleChild should be
-     * invisible. When visibility is swapped, the newly visible child will receive keyboard focus if the it is focusable
-     * and the previously visible child had focus.
+     * Swap the visibility of this node with another node. The node that is made visible will receive keyboard focus
+     * if it is focusable and the previously visible Node had focus.
      * @public
      *
-     * @param {Node} visibleChild
-     * @param {Node} invisibleChild
-     * @return {Node}
+     * @param {Node} otherNode
+     * @returns {Node} - Returns 'this' reference, for chaining
      */
-    swapVisibility: function( visibleChild, invisibleChild ) {
-      assert && assert( visibleChild.visible, 'visibleChild should be visible initially' );
-      assert && assert( !invisibleChild.visible, 'invisibleChild should not be visible initially' );
-      assert && assert( this.hasChild( visibleChild ), 'Attempted to replace visibility for a node that was not a child' );
-      assert && assert( this.hasChild( invisibleChild ), 'Attempted to replace visibility for a node that was not a child' );
+    swapVisibility: function( otherNode ) {
+      assert && assert( this.visible !== otherNode.visible );
 
-      // if the visible child has focus we will restore focus on the invisible child once it is made visible
-      var visibleChildFocused = visibleChild.focused;
+      var visibleNode = this.visible ? this : otherNode;
+      var invisibleNode = this.visible ? otherNode : this;
 
-      visibleChild.visible = false;
-      invisibleChild.visible = true;
+      // if the visible node has focus we will restore focus on the invisible node once it is visible
+      var visibleNodeFocused = visibleNode.focused;
 
-      if ( visibleChildFocused && invisibleChild.focusable ) {
-        invisibleChild.focus();
+      visibleNode.visible = false;
+      invisibleNode.visible = true;
+
+      if ( visibleNodeFocused && invisibleNode.focusable ) {
+        invisibleNode.focus();
       }
 
       return this; // allow chaining
