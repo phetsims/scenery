@@ -606,7 +606,7 @@
   test( 'swapVisibility', function() {
 
 
-    // test the behavior of replaceChild function
+    // test the behavior of swapVisibility function
     var rootNode = new scenery.Node( { tagName: 'div' } );
     var display = new scenery.Display( rootNode ); // eslint-disable-line
     document.body.appendChild( display.domElement );
@@ -625,7 +625,7 @@
     // swap visibility between two nodes, visibility should be swapped and neither should have keyboard focus
     b.visible = true;
     c.visible = false;
-    a.swapVisibility( b, c );
+    b.swapVisibility( c );
     ok( b.visible === false, 'b should now be invisible' );
     ok( c.visible === true, 'c should now be visible' );
     ok( b.focused === false, 'b should not have focus after being made invisible' );
@@ -636,7 +636,18 @@
     b.visible = true;
     c.visible = false;
     b.focus();
-    a.swapVisibility( b, c );
+    b.swapVisibility( c );
+    ok( b.visible === false, 'b should be invisible after swapVisibility' );
+    ok( c.visible === true, 'c should be visible after  swapVisibility' );
+    ok( b.focused === false, 'b should no longer have focus  after swapVisibility' );
+    ok( c.focused === true, 'c should now have focus after swapVisibility' );
+
+    // swap visibility between two nodes where the one that is initially visible has keyboard focus, the newly visible
+    // node then receive focus - like the previous test but c.swapVisibility( b ) is the same as b.swapVisibility( c )
+    b.visible = true;
+    c.visible = false;
+    b.focus();
+    b.swapVisibility( c );
     ok( b.visible === false, 'b should be invisible after swapVisibility' );
     ok( c.visible === true, 'c should be visible after  swapVisibility' );
     ok( b.focused === false, 'b should no longer have focus  after swapVisibility' );
@@ -648,7 +659,7 @@
     c.visible = false;
     b.focus();
     c.focusable = false;
-    a.swapVisibility( b, c );
+    b.swapVisibility( c );
     ok( b.visible === false, 'b should be invisible after visibility is swapped' );
     ok( c.visible === true, 'c should be visible after visibility is swapped' );
     ok( b.focused === false, 'b should no longer have focus after visibility is swapped' );
