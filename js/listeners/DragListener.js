@@ -41,8 +41,10 @@
 define( function( require ) {
   'use strict';
 
+  var Bounds2 = require( 'DOT/Bounds2' );
   var inherit = require( 'PHET_CORE/inherit' );
   var PressListener = require( 'SCENERY/listeners/PressListener' );
+  var Property = require( 'AXON/Property' );
   var scenery = require( 'SCENERY/scenery' );
   var Tandem = require( 'TANDEM/Tandem' );
   var TransformTracker = require( 'SCENERY/util/TransformTracker' );
@@ -88,11 +90,20 @@ define( function( require ) {
       // TODO: support mutability for this type of thing (or support Property.<Bounds2>)
       dragBounds: null,
 
+      // {Property.<Bounds2|null>} - If provided, the model location will be constrained to be inside these bounds.
+      // TODO: do we provide this AND the non-property?
+      dragBoundsProperty: null,
+
       // {Function|null} - function( modelPoint: {Vector2} ) : {Vector2}. If provided, it will allow custom mapping
       // from the desired location (i.e. where the pointer is) to the actual possible location (i.e. where the dragged
       // object ends up). For example, using dragBounds is equivalent to passing:
       //   mapLocation: function( point ) { return dragBounds.closestPointTo( point ); }
       mapLocation: null,
+
+      // {Function|null} - function( viewPoint: {Vector2}, listener: {DragListener} ) : {Vector2}. If provided, its
+      // result will be added to the parentPoint before computation continues, to allow the ability to "offset" where
+      // the pointer location seems to be. Useful for touch, where things shouldn't be under the pointer directly.
+      offsetLocation: null,
 
       // {Function|null} - Called as start( event: {Event}, listener: {DragListener} ) when the drag is started.
       // This is preferred over passing press(), as the drag start hasn't been fully processed at that point.
@@ -122,8 +133,10 @@ define( function( require ) {
     // TODO: type checks for options
 
     assert && assert(
-      !options.mapLocation || !options.dragBounds,
-      'mapLocation and dragBounds cannot both be provided, as they both handle mapping of the drag point'
+      !( options.mapLocation && options.dragBounds ) &&
+      !( options.dragBounds && options.dragBoundsProperty ) &&
+      !( options.mapLocation && options.dragBoundsProperty ),
+      'Only one of mapLocation, dragBounds and dragBoundsProperty can be provided, as they handle mapping of the drag point'
     );
 
     PressListener.call( this, options );
@@ -136,7 +149,8 @@ define( function( require ) {
     this._transform = options.transform;
     this._locationProperty = options.locationProperty;
     this._mapLocation = options.mapLocation;
-    this._dragBounds = options.dragBounds;
+    this._offsetLocation = options.offsetLocation;
+    this._dragBoundsProperty = ( options.dragBoundsProperty || new Property( options.dragBounds || null ) );
     this._start = options.start;
     this._end = options.end;
 
@@ -380,8 +394,8 @@ define( function( require ) {
       if ( this._mapLocation ) {
         return this._mapLocation( modelPoint );
       }
-      else if ( this._dragBounds ) {
-        return this._dragBounds.closestPointTo( modelPoint );
+      else if ( this._dragBoundsProperty.value ) {
+        return this._dragBoundsProperty.value.closestPointTo( modelPoint );
       }
       else {
         return modelPoint;
@@ -395,6 +409,9 @@ define( function( require ) {
      * @param {Vector2} parentPoint
      */
     applyParentOffset: function( parentPoint ) {
+      if ( this._offsetLocation ) {
+        parentPoint.add( this._offsetLocation( parentPoint, this ) );
+      }
       // Don't apply any offset if applyOffset is false
       if ( this._applyOffset ) {
         // TODO: more scratch vector handling? Will need to augment Transform3 to use things like multiplyVector2.
@@ -493,6 +510,30 @@ define( function( require ) {
         this._transformTracker = null;
       }
     },
+
+    /**
+     * Sets the drag bounds of the listener.
+     * @public
+     *
+     * @param {Bounds2} bounds
+     */
+    setDragBounds: function( bounds ) {
+      assert && assert( bounds instanceof Bounds2 );
+
+      this._dragBoundsProperty.value = bounds;
+    },
+    set dragBounds( value ) { this.setDragBounds( value ); },
+
+    /**
+     * Returns the drag bounds of the listener.
+     * @public
+     *
+     * @returns {Bounds2}
+     */
+    getDragBounds: function() {
+      return this._dragBoundsProperty.value;
+    },
+    get dragBounds() { return this.getDragBounds(); },
 
     /**
      * Disposes the listener, releasing references. It should not be used after this.
