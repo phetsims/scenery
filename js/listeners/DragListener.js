@@ -551,6 +551,34 @@ define( function( require ) {
 
       sceneryLog && sceneryLog.InputListener && sceneryLog.pop();
     }
+  }, {
+    /**
+     * Creates an input listener that forwards events to the specified input listener
+     * See https://github.com/phetsims/scenery/issues/639
+     * @param {function} down - function( {Event} ) - down function to be added to the input listener
+     * @param {Object} [options]
+     * @returns {Object} a scenery input listener
+     */
+    createForwardingListener: function( down, options ) {
+
+      options = _.extend( {
+        allowTouchSnag: false
+      }, options );
+
+      return {
+        down: function( event ) {
+          if ( event.canStartPress() ) {
+            down( event );
+          }
+        },
+        touchenter: function( event ) {
+          options.allowTouchSnag && this.down( event );
+        },
+        touchmove: function( event ) {
+          options.allowTouchSnag && this.down( event );
+        }
+      };
+    }
   } );
 
   return DragListener;
