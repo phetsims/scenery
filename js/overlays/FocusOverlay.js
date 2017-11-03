@@ -179,6 +179,11 @@ define( function( require ) {
       else if ( this.mode === 'bounds' ) {
         this.boundsFocusHighlightPath.updateLineWidth();
       }
+      else if ( this.mode === 'node' && this.node.focusHighlight.updateLineWidth ) {
+
+        // Update the transform based on the transform of the node that the focusHighlight is highlighting.
+        this.node.focusHighlight.updateLineWidth( this.node );
+      }
     },
 
     onTransformChange: function() {

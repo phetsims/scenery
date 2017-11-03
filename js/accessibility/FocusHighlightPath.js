@@ -95,36 +95,42 @@ define( function( require ) {
     },
 
     /**
-     * @public
-     * Update the line width of both Paths based on transform. Can be overwritten (ridden?) by the options
+     * Update the line width of both Paths based on transform of this Path, or another Node passed in (usually the
+     * node that is being highlighted). Can be overridden by the options
      * passed in the constructor.
+     * @param {Node} [node] - if provided, adjust the line width based on the transform of the node argument
+     * @public
      */
-    updateLineWidth: function() {
-      this.lineWidth = this.getOuterLineWidth();
-      this.innerHighlightPath.lineWidth = this.getInnerLineWidth();
+    updateLineWidth: function( node ) {
+      node = node || this; // update based on node passed in or on self.
+      this.lineWidth = this.getOuterLineWidth( node );
+      this.innerHighlightPath.lineWidth = this.getInnerLineWidth( node );
     },
 
     /**
      * Given a node, return the lineWidth of this focus highlight.
-     * @public
+     * @param {Node} node
      * @returns {number}
+     * @public
      */
-    getOuterLineWidth: function() {
+    getOuterLineWidth: function( node ) {
       if ( this.options.outerLineWidth ) {
         return this.options.outerLineWidth;
       }
-      return FocusHighlightPath.getOuterLineWidthFromNode( this );
+      return FocusHighlightPath.getOuterLineWidthFromNode( node );
     },
 
     /**
      * Given a node, return the lineWidth of this focus highlight.
+     * @param {Node} node
      * @returns {number}
+     * @public
      */
-    getInnerLineWidth: function() {
+    getInnerLineWidth: function( node ) {
       if ( this.options.innerLineWidth ) {
         return this.options.innerLineWidth;
       }
-      return FocusHighlightPath.getInnerLineWidthFromNode( this );
+      return FocusHighlightPath.getInnerLineWidthFromNode( node );
     }
   }, {
     OUTER_FOCUS_COLOR: OUTER_FOCUS_COLOR,
