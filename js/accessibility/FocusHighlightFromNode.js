@@ -56,7 +56,7 @@ define( function( require ) {
       this.nodeBounds = this.useLocalBounds ? node.localBounds : node.bounds;
 
       // Figure out how much dialation to apply to the focus highlight around the node
-      var dilationCoefficient = FocusHighlightFromNode.getDilationCoefficient( node );
+      var dilationCoefficient = FocusHighlightPath.getDilationCoefficient( node );
       var dilatedBounds = this.nodeBounds.dilated( dilationCoefficient );
 
       // Update the line width of the focus highlight based on the transform of the node
@@ -74,27 +74,6 @@ define( function( require ) {
       // Default options can override
       this.lineWidth = this.outerLineWidth || FocusHighlightPath.getOuterLineWidthFromNode( node );
       this.innerHighlightPath.lineWidth = this.innerLineWidth || FocusHighlightPath.getInnerLineWidthFromNode( node );
-    }
-  }, {
-
-    /**
-     * Get the coefficient needed to scale the highlights bounds to surround the node being highlighted elegantly.
-     * The highlight is based on a Node's bounds, so it should be scaled out a certain amount so that there is white
-     * space between the edge of the component and the beginning (inside edge) of the focusHighlight
-     * @param node
-     * @returns {number}
-     */
-    getDilationCoefficient: function( node ) {
-      var widthOfFocusHighlight = FocusHighlightPath.getOuterLineWidthFromNode( node );
-
-      // dilating half of the focus highlight width will make the inner edge of the focus highlight at the bounds of the node being highlighted;
-      var scalarToEdgeOfBounds = .5;
-
-      // dilate the focus highlight slightly more to give whitespace in between the node being highlighted's bounds and
-      // the inner edge of the highlight.
-      var whiteSpaceScalar = .25;
-
-      return widthOfFocusHighlight * (scalarToEdgeOfBounds + whiteSpaceScalar);
     }
   } );
 } );
