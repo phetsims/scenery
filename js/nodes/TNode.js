@@ -12,7 +12,7 @@ define( function( require ) {
   var scenery = require( 'SCENERY/scenery' );
 
   // phet-io modules
-  var assertInstanceOf = require( 'ifphetio!PHET_IO/assertions/assertInstanceOf' );
+  var assertInstanceOf = require( 'ifphetio!PHET_IO/assertInstanceOf' );
   var phetioInherit = require( 'ifphetio!PHET_IO/phetioInherit' );
   var TBoolean = require( 'ifphetio!PHET_IO/types/TBoolean' );
   var TFunctionWrapper = require( 'ifphetio!PHET_IO/types/TFunctionWrapper' );

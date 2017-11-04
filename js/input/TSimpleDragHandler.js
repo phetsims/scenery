@@ -9,7 +9,7 @@ define( function( require ) {
   'use strict';
 
   // modules
-  var assertInstanceOf = require( 'ifphetio!PHET_IO/assertions/assertInstanceOf' );
+  var assertInstanceOf = require( 'ifphetio!PHET_IO/assertInstanceOf' );
   var phetioInherit = require( 'ifphetio!PHET_IO/phetioInherit' );
   var scenery = require( 'SCENERY/scenery' );
   var TObject = require( 'ifphetio!PHET_IO/types/TObject' );
