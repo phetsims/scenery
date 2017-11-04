@@ -20,7 +20,7 @@ define( function( require ) {
    * @constructor
    */
   function TDragListener( dragListener, phetioID ) {
-    assertInstanceOf( dragListener, phet.scenery.DragListener );
+    assert && assertInstanceOf( dragListener, phet.scenery.DragListener );
     TPressListener.call( this, dragListener, phetioID );
   }
 

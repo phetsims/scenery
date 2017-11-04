@@ -25,7 +25,7 @@ define( function( require ) {
    * @constructor
    */
   function TImage( text, phetioID ) {
-    assertInstanceOf( text, phet.scenery.Image );
+    assert && assertInstanceOf( text, phet.scenery.Image );
     TNode.call( this, text, phetioID );
   }
 

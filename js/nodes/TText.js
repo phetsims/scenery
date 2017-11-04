@@ -29,7 +29,7 @@ define( function( require ) {
    * @constructor
    */
   function TText( text, phetioID ) {
-    assertInstanceOf( text, phet.scenery.Text );
+    assert && assertInstanceOf( text, phet.scenery.Text );
     TNode.call( this, text, phetioID );
   }
 

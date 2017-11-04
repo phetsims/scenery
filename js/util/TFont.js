@@ -22,7 +22,7 @@ define( function( require ) {
    * @param {string} phetioID - Full name of this font instance
    */
   function TFont( font, phetioID ) {
-    assertInstanceOf( font, phet.scenery.Font );
+    assert && assertInstanceOf( font, phet.scenery.Font );
     TObject.call( this, font, phetioID );
   }
 

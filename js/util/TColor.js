@@ -23,7 +23,7 @@ define( function( require ) {
    * @constructor
    */
   function TColor( color, phetioID ) {
-    assertInstanceOf( color, phet.scenery.Color );
+    assert && assertInstanceOf( color, phet.scenery.Color );
     TObject.call( this, color, phetioID );
   }
 

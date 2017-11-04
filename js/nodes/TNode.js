@@ -27,7 +27,7 @@ define( function( require ) {
    * @constructor
    */
   function TNode( node, phetioID ) {
-    assertInstanceOf( node, phet.scenery.Node );
+    assert && assertInstanceOf( node, phet.scenery.Node );
     TObject.call( this, node, phetioID );
   }
 

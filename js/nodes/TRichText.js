@@ -25,7 +25,7 @@ define( function( require ) {
    * @constructor
    */
   function TRichText( text, phetioID ) {
-    assertInstanceOf( text, scenery.RichText );
+    assert && assertInstanceOf( text, scenery.RichText );
     TNode.call( this, text, phetioID );
   }
 

@@ -20,7 +20,7 @@ define( function( require ) {
    * @constructor
    */
   function TPressListener( pressListener, phetioID ) {
-    assertInstanceOf( pressListener, phet.scenery.PressListener );
+    assert && assertInstanceOf( pressListener, phet.scenery.PressListener );
     TObject.call( this, pressListener, phetioID );
   }
 
