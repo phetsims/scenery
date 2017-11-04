@@ -29,8 +29,8 @@ define( function( require ) {
    * @constructor
    */
   function TText( text, phetioID ) {
-    TNode.call( this, text, phetioID );
     assertInstanceOf( text, phet.scenery.Text );
+    TNode.call( this, text, phetioID );
   }
 
   phetioInherit( TNode, 'TText', TText, {

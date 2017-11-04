@@ -21,7 +21,6 @@ define( function( require ) {
    */
   function TDragListener( dragListener, phetioID ) {
     assertInstanceOf( dragListener, phet.scenery.DragListener );
-
     TPressListener.call( this, dragListener, phetioID );
   }
 

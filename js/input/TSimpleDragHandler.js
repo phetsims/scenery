@@ -22,7 +22,6 @@ define( function( require ) {
    */
   function TSimpleDragHandler( simpleDragHandler, phetioID ) {
     assertInstanceOf( simpleDragHandler, phet.scenery.SimpleDragHandler );
-
     TObject.call( this, simpleDragHandler, phetioID );
   }
 

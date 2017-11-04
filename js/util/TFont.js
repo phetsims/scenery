@@ -22,8 +22,8 @@ define( function( require ) {
    * @param {string} phetioID - Full name of this font instance
    */
   function TFont( font, phetioID ) {
-    TObject.call( this, font, phetioID );
     assertInstanceOf( font, phet.scenery.Font );
+    TObject.call( this, font, phetioID );
   }
 
   phetioInherit( TObject, 'TFont', TFont, {}, {

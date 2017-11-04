@@ -21,7 +21,6 @@ define( function( require ) {
    */
   function TPressListener( pressListener, phetioID ) {
     assertInstanceOf( pressListener, phet.scenery.PressListener );
-
     TObject.call( this, pressListener, phetioID );
   }
 

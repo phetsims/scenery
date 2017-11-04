@@ -25,8 +25,8 @@ define( function( require ) {
    * @constructor
    */
   function TImage( text, phetioID ) {
-    TNode.call( this, text, phetioID );
     assertInstanceOf( text, phet.scenery.Image );
+    TNode.call( this, text, phetioID );
   }
 
   phetioInherit( TNode, 'TImage', TImage, {

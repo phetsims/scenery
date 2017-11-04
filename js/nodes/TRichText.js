@@ -25,8 +25,8 @@ define( function( require ) {
    * @constructor
    */
   function TRichText( text, phetioID ) {
-    TNode.call( this, text, phetioID );
     assertInstanceOf( text, scenery.RichText );
+    TNode.call( this, text, phetioID );
   }
 
   phetioInherit( TNode, 'TRichText', TRichText, {

@@ -27,8 +27,8 @@ define( function( require ) {
    * @constructor
    */
   function TNode( node, phetioID ) {
-    TObject.call( this, node, phetioID );
     assertInstanceOf( node, phet.scenery.Node );
+    TObject.call( this, node, phetioID );
   }
 
   phetioInherit( TObject, 'TNode', TNode, {
