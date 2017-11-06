@@ -84,10 +84,12 @@ define( function( require ) {
 
       this.disposed = false;
 
-      // @private - listener for the focus event, to be disposed
+      // @private - listener for the focus event, update Display but only if node is focusable,  but , to be disposed
       var focusEventListener = function( event ) {
         if ( event.target === self.domElement ) {
-          scenery.Display.focus = new Focus( accessibleInstance.display, accessibleInstance.trail );
+          if ( self.accessibleInstance.node.focusable ) {
+            scenery.Display.focus = new Focus( accessibleInstance.display, accessibleInstance.trail );
+          }
         }
       };
       this.domElement.addEventListener( 'focus', focusEventListener );
