@@ -51,7 +51,7 @@ define( function( require ) {
 
     this.tandem = options.tandem;// @private
 
-      this.buttonListenerOptions = options; // @private (phet-io)
+    this.buttonListenerOptions = options; // @private (phet-io)
 
     this.buttonState = 'up'; // public: 'up', 'over', 'down' or 'out'
 
