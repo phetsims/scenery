@@ -12,15 +12,15 @@
 
     node.addChild( rect );
 
-    ok( rect.trailUnderPoint( dot.v2( 10, 10 ) ), 'Rectangle intersection' );
-    ok( rect.trailUnderPoint( dot.v2( 90, 10 ) ), 'Rectangle intersection' );
-    ok( !rect.trailUnderPoint( dot.v2( -10, 10 ) ), 'Rectangle no intersection' );
+    ok( rect.hitTest( dot.v2( 10, 10 ) ), 'Rectangle intersection' );
+    ok( rect.hitTest( dot.v2( 90, 10 ) ), 'Rectangle intersection' );
+    ok( !rect.hitTest( dot.v2( -10, 10 ) ), 'Rectangle no intersection' );
 
     node.touchArea = kite.Shape.rectangle( -50, -50, 100, 100 );
 
-    ok( node.trailUnderPoint( dot.v2( 10, 10 ) ), 'Node intersection' );
-    ok( node.trailUnderPoint( dot.v2( 90, 10 ) ), 'Node intersection' );
-    ok( !node.trailUnderPoint( dot.v2( -10, 10 ) ), 'Node no intersection' );
+    ok( node.hitTest( dot.v2( 10, 10 ) ), 'Node intersection' );
+    ok( node.hitTest( dot.v2( 90, 10 ) ), 'Node intersection' );
+    ok( !node.hitTest( dot.v2( -10, 10 ) ), 'Node no intersection' );
 
     ok( node.trailUnderPointer( { isTouch: true, point: dot.v2( 10, 10 ) } ), 'Node intersection (isTouch)' );
     ok( node.trailUnderPointer( { isTouch: true, point: dot.v2( 90, 10 ) } ), 'Node intersection (isTouch)' );

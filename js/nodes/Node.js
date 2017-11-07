@@ -1520,53 +1520,73 @@ define( function( require ) {
     get visibleBounds() { return this.getVisibleBounds(); },
 
     /**
+     * Tests whether the given point is "contained" in this node's subtree (optionally using mouse/touch areas), and if
+     * so returns the Trail (rooted at this node) to the top-most (in stacking order) node that contains the given
+     * point.
+     * @public
+     *
+     * NOTE: This is optimized for the current input system (rather than what gets visually displayed on the screen), so
+     * pickability (Node's pickable property, visibility, and the presence of input listeners) all may affect the
+     * returned value.
+     *
+     * For example, hit-testing a simple shape (with no pickability) will return null:
+     * > new scenery.Circle( 20 ).hitTest( dot.v2( 0, 0 ) ); // null
+     *
+     * If the same shape is made to be pickable, it will return a trail:
+     * > new scenery.Circle( 20, { pickable: true } ).hitTest( dot.v2( 0, 0 ) );
+     * > // returns a Trail with the circle as the only node.
+     *
+     * It will return the result that is visually stacked on top, so e.g.:
+     * > new scenery.Node( {
+     * >   pickable: true,
+     * >   children: [
+     * >     new scenery.Circle( 20 ),
+     * >     new scenery.Circle( 15 )
+     * >   ]
+     * > } ).hitTest( dot.v2( 0, 0 ) ); // returns the "top-most" circle (the one with radius:15).
+     *
+     * This is used by Scenery's internal input system by calling hitTest on a Display's rootNode with the
+     * global-coordinate point.
+     *
+     * @param {Vector2} point - The point (in the parent coordinate frame) to check against this node's subtree.
+     * @param {boolean} [isMouse] - Whether mouseAreas should be used.
+     * @param {boolean} [isTouch] - Whether touchAreas should be used.
+     * @returns {Trail|null} - Returns null if the point is not contained in the subtree.
+     */
+    hitTest: function( point, isMouse, isTouch ) {
+      assert && assert( point instanceof Vector2 && point.isFinite(), 'The point should be a finite Vector2' );
+      assert && assert( isMouse === undefined || typeof isMouse === 'boolean',
+        'If isMouse is provided, it should be a boolean' );
+      assert && assert( isTouch === undefined || typeof isTouch === 'boolean',
+        'If isTouch is provided, it should be a boolean' );
+
+      return this._picker.hitTest( point, !!isMouse, !!isTouch );
+    },
+
+    /**
      * Hit-tests what is under the pointer, and returns a {Trail} to that node (or null if there is no matching node).
      * @public
+     *
+     * See hitTest() for more details about what will be returned.
      *
      * @param {Pointer} pointer
      * @returns {Trail|null}
      */
     trailUnderPointer: function( pointer ) {
-      return this._picker.hitTest( pointer.point, pointer.isMouse, pointer.isTouch || pointer.isPen );
-    },
-
-    /**
-     * Hit tests the given point, optionally using mouse and touch areas.
-     * @public
-     *
-     * @param {Vector2} point - the point to hit test
-     * @param {boolean} isMouse - true if mouse areas should be hit
-     * @param {boolean} isTouch - true if touch areas should be hit
-     *
-     * @returns {Trail|null}
-     */
-    hitTest: function( point, isMouse, isTouch ) {
-      return this._picker.hitTest( point, isMouse, isTouch );
-    },
-
-    /*
-     * Return a trail to the top node (if any, otherwise null) whose self-rendered area contains the
-     * point (in parent coordinates).
-     * @public
-     *
-     * @param {Vector2} point
-     * @returns {Trail|null}
-     */
-    trailUnderPoint: function( point ) {
-      assert && assert( point, 'trailUnderPointer requires a point' );
-
-      return this._picker.hitTest( point, false, false );
+      return this.hitTest( pointer.point, pointer.isMouse, pointer.isTouch || pointer.isPen );
     },
 
     /**
      * Returns whether a point (in parent coordinates) is contained in this node's sub-tree.
      * @public
      *
+     * See hitTest() for more details about what will be returned.
+     *
      * @param {Vector2} point
      * @returns {boolean} - Whether the point is contained.
      */
     containsPoint: function( point ) {
-      return this.trailUnderPoint( point ) !== null;
+      return this.hitTest( point ) !== null;
     },
 
     /**
