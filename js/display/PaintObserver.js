@@ -48,7 +48,11 @@ define( function( require ) {
     // @private {Array.<Property.<*>>} - Indexed the same as the counts.
     this.secondaryListenedProperties = [];
     // @private {Array.<number>}
-    this.secondaryListenedCounts = [];
+    this.secondaryListenedPropertyCounts = [];
+    // @private {Array.<Color>} - Indexed the same as the counts.
+    this.secondaryListenedColors = [];
+    // @private {Array.<number>}
+    this.secondaryListenedColorCounts = [];
   }
 
   scenery.register( 'PaintObserver', PaintObserver );
@@ -147,7 +151,7 @@ define( function( require ) {
       }
       else if ( paint instanceof Color ) {
         sceneryLog && sceneryLog.Paints && sceneryLog.Paints( '[PaintObserver] add Color listener ' + this.node.id + '.' + this.name );
-        paint.addChangeListener( this.notifyChangeCallback );
+        this.secondaryLazyLinkColor( paint );
       }
       else if ( paint instanceof Gradient ) {
         sceneryLog && sceneryLog.Paints && sceneryLog.Paints( '[PaintObserver] add Gradient listeners ' + this.node.id + '.' + this.name );
@@ -184,7 +188,7 @@ define( function( require ) {
       }
       else if ( paint instanceof Color ) {
         sceneryLog && sceneryLog.Paints && sceneryLog.Paints( '[PaintObserver] remove Color listener ' + this.node.id + '.' + this.name );
-        paint.removeChangeListener( this.notifyChangeCallback );
+        this.secondaryUnlinkColor( paint );
       }
       else if ( paint instanceof Gradient ) {
         sceneryLog && sceneryLog.Paints && sceneryLog.Paints( '[PaintObserver] remove Gradient listeners ' + this.node.id + '.' + this.name );
@@ -210,7 +214,7 @@ define( function( require ) {
 
       if ( paint instanceof Color ) {
         sceneryLog && sceneryLog.Paints && sceneryLog.Paints( '[PaintObserver] add Color listener ' + this.node.id + '.' + this.name );
-        paint.addChangeListener( this.notifyChangeCallback );
+        this.secondaryLazyLinkColor( paint );
       }
 
       sceneryLog && sceneryLog.Paints && sceneryLog.pop();
@@ -228,7 +232,7 @@ define( function( require ) {
 
       if ( paint instanceof Color ) {
         sceneryLog && sceneryLog.Paints && sceneryLog.Paints( '[PaintObserver] remove Color listener ' + this.node.id + '.' + this.name );
-        paint.removeChangeListener( this.notifyChangeCallback );
+        this.secondaryUnlinkColor( paint );
       }
 
       sceneryLog && sceneryLog.Paints && sceneryLog.pop();
@@ -243,11 +247,11 @@ define( function( require ) {
     secondaryLazyLinkProperty: function( property ) {
       var index = _.indexOf( this.secondaryListenedProperties, property );
       if ( index >= 0 ) {
-        this.secondaryListenedCounts[ index ]++;
+        this.secondaryListenedPropertyCounts[ index ]++;
       }
       else {
         this.secondaryListenedProperties.push( property );
-        this.secondaryListenedCounts.push( 1 );
+        this.secondaryListenedPropertyCounts.push( 1 );
         property.lazyLink( this.updateSecondaryListener );
       }
     },
@@ -261,13 +265,48 @@ define( function( require ) {
      */
     secondaryUnlinkProperty: function( property ) {
       var index = _.indexOf( this.secondaryListenedProperties, property );
-      this.secondaryListenedCounts[ index ]--;
-      if ( this.secondaryListenedCounts[ index ] === 0 ) {
+      this.secondaryListenedPropertyCounts[ index ]--;
+      if ( this.secondaryListenedPropertyCounts[ index ] === 0 ) {
         this.secondaryListenedProperties.splice( index, 1 );
-        this.secondaryListenedCounts.splice( index, 1 );
+        this.secondaryListenedPropertyCounts.splice( index, 1 );
         if ( !property.isDisposed ) {
           property.unlink( this.updateSecondaryListener );
         }
+      }
+    },
+
+    /**
+     * Adds our secondary listener to the Color (unless there is already one, in which case we record the counts).
+     * @private
+     *
+     * @param {Color} color
+     */
+    secondaryLazyLinkColor: function( color ) {
+      var index = _.indexOf( this.secondaryListenedColors, color );
+      if ( index >= 0 ) {
+        this.secondaryListenedColorCounts[ index ]++;
+      }
+      else {
+        this.secondaryListenedColors.push( color );
+        this.secondaryListenedColorCounts.push( 1 );
+        color.changeEmitter.addListener( this.notifyChangeCallback );
+      }
+    },
+
+    /**
+     * Removes our secondary listener from the Color (unless there were more than 1 time we needed to listen to it,
+     * in which case we reduce the count).
+     * @private
+     *
+     * @param {Color} color
+     */
+    secondaryUnlinkColor: function( color ) {
+      var index = _.indexOf( this.secondaryListenedColors, color );
+      this.secondaryListenedColorCounts[ index ]--;
+      if ( this.secondaryListenedColorCounts[ index ] === 0 ) {
+        this.secondaryListenedColors.splice( index, 1 );
+        this.secondaryListenedColorCounts.splice( index, 1 );
+        color.changeEmitter.removeListener( this.notifyChangeCallback );
       }
     },
 

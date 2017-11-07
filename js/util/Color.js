@@ -13,10 +13,10 @@
 define( function( require ) {
   'use strict';
 
+  var Emitter = require( 'AXON/Emitter' );
   var inherit = require( 'PHET_CORE/inherit' );
-  var scenery = require( 'SCENERY/scenery' );
-
   var Property = require( 'AXON/Property' );
+  var scenery = require( 'SCENERY/scenery' );
   var Util = require( 'DOT/Util' );
 
   // constants
@@ -38,8 +38,8 @@ define( function( require ) {
    */
   function Color( r, g, b, a ) {
 
-    // allow listeners to be notified on any changes. called with listener()
-    this.listeners = [];
+    // @public {Emitter}
+    this.changeEmitter = new Emitter();
 
     this.set( r, g, b, a );
 
@@ -338,13 +338,8 @@ define( function( require ) {
       this._css = this.computeCSS();
 
       // notify listeners if it changed
-      if ( oldCSS !== this._css && this.listeners.length ) {
-        var listeners = this.listeners.slice( 0 ); // defensive copy. consider removing if it's a performance bottleneck?
-        var length = listeners.length;
-
-        for ( var i = 0; i < length; i++ ) {
-          listeners[ i ]();
-        }
+      if ( oldCSS !== this._css  ) {
+        this.changeEmitter.emit();
       }
     },
 
@@ -477,27 +472,6 @@ define( function( require ) {
       else {
         return this.colorUtilsDarker( -factor );
       }
-    },
-
-    /*---------------------------------------------------------------------------*
-     * listeners TODO: consider mixing in this behavior, it's common
-     *----------------------------------------------------------------------------*/
-
-    // listener should be a callback expecting no arguments, listener() will be called when the color changes
-    // Allows duplicate copies of listeners
-    addChangeListener: function( listener ) {
-      assert && assert( listener !== undefined && listener !== null, 'Verify that the listener exists' );
-      this.listeners.push( listener );
-    },
-
-    // Allows duplicate copies of listeners
-    removeChangeListener: function( listener ) {
-      assert && assert( _.includes( this.listeners, listener ) );
-      this.listeners.splice( _.indexOf( this.listeners, listener ), 1 );
-    },
-
-    getListenerCount: function() {
-      return this.listeners.length;
     },
 
     toString: function() {
