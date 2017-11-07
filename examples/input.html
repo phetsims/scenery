@@ -152,14 +152,17 @@
     centerY: 70,
     inputListeners: [ new scenery.DragListener( { translateNode: true } ) ]
   } ) );
+  var blueListener = new scenery.DragListener( { translateNode: true } );
   simpleDragContainer.addChild( new scenery.Rectangle( 0, 0, 45, 45, {
-    fill: '#08F',
+    fill: new axon.DerivedProperty( [ blueListener.isHighlightedProperty ], function( highlighted ) {
+      return highlighted ? '#6CF' : '#08F'
+    } ),
     stroke: strokeColor,
     cursor: 'pointer',
     rotation: Math.PI / 4,
     centerX: 150,
     centerY: 70,
-    inputListeners: [ new scenery.DragListener( { translateNode: true } ) ]
+    inputListeners: [ blueListener ]
   } ) );
 
   /*---------------------------------------------------------------------------*

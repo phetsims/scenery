@@ -20,6 +20,7 @@ define( function( require ) {
   var BooleanProperty = require( 'AXON/BooleanProperty' );
   var inherit = require( 'PHET_CORE/inherit' );
   var Node = require( 'SCENERY/nodes/Node' );
+  var ObservableArray = require( 'AXON/ObservableArray' );
   var Property = require( 'AXON/Property' );
   var scenery = require( 'SCENERY/scenery' );
   var Tandem = require( 'TANDEM/Tandem' );
@@ -67,7 +68,27 @@ define( function( require ) {
       // "pressed" or not.
       isPressedProperty: new BooleanProperty( false ),
 
-      // {Node|null} - If provided, the pressedTrail (calculated from the down event) will be replaced with
+      // {Property.<boolean>} - A property that will be controlled by this listener. It will be set to true when at
+      // least one pointer is over the listener.
+      // A custom property may be passed in here, as it may be useful for hooking up to existing button models.
+      isOverProperty: new Property( false ),
+
+      // {Property.<boolean>} - A property that will be controlled by this listener. It will be set to true when either:
+      //   1. The listener is pressed and the pointer that is pressing is over the listener.
+      //   2. There is at least one unpressed pointer that is over the listener.
+      // A custom property may be passed in here, as it may be useful for hooking up to existing listener models.
+      isHoveringProperty: new Property( false ),
+
+      // {Property.<boolean>} - A property that will be controlled by this listener. It will be set to true when either:
+      //   1. The listener is pressed.
+      //   2. There is at least one unpressed pointer that is over the listener.
+      // This is essentially true when ( isPressed || isHovering ).
+      // A custom property may be passed in here, as it may be useful for hooking up to existing listener models.
+      isHighlightedProperty: new Property( false ),
+
+      // {Node|null} - If provided, the pressedTrail (calculated from the down event) will be replaced with the
+      // (sub)trail that ends with the targetNode as the leaf-most Node. This affects the parent coordinate frame
+      // computations.
       targetNode: null,
 
       // {boolean} - If true, this listener will not "press" while the associated pointer is attached, and when pressed,
@@ -99,9 +120,22 @@ define( function( require ) {
     assert && assert( options.targetNode === null || options.targetNode instanceof Node,
       'If provided, targetNode should be a Node' );
     assert && assert( typeof options.attach === 'boolean', 'attach should be a boolean' );
+    assert && assert( options.isOverProperty instanceof Property && options.isOverProperty.value === false,
+      'If a custom isOverProperty is provided, it must be a Property that is false initially' );
+    assert && assert( options.isHoveringProperty instanceof Property && options.isHoveringProperty.value === false,
+      'If a custom isHoveringProperty is provided, it must be a Property that is false initially' );
+    assert && assert( options.isHighlightedProperty instanceof Property && options.isHighlightedProperty.value === false,
+      'If a custom isHighlightedProperty is provided, it must be a Property that is false initially' );
 
-    // @public {Property.<Boolean>} [read-only] - Whether this listener is currently in the 'pressed' state or not
+    // @public {ObservableArray.<Pointer>} - Contains all pointers that are over our button. Tracked by adding with
+    // 'enter' events and removing with 'exit' events.
+    this.overPointers = new ObservableArray();
+
+    // @public {Property.<Boolean>} [read-only] - See notes in options documentation
     this.isPressedProperty = options.isPressedProperty;
+    this.isOverProperty = options.isOverProperty;
+    this.isHoveringProperty = options.isHoveringProperty;
+    this.isHighlightedProperty = options.isHighlightedProperty;
 
     // @public {Pointer|null} [read-only] - The current pointer, or null when not pressed.
     this.pointer = null;
@@ -127,6 +161,14 @@ define( function( require ) {
     // @private {boolean} - Whether our pointer listener is referenced by the pointer (need to have a flag due to
     //                      handling disposal properly).
     this._listeningToPointer = false;
+
+    // @private {function} - isHoveringProperty updates (not a DerivedProperty because we need to hook to passed-in
+    // properties)
+    this._isHoveringListener = this.invalidateHovering.bind( this );
+
+    // @private {function} - isHighlightedProperty updates (not a DerivedProperty because we need to hook to passed-in
+    // properties)
+    this._isHighlightedListener = this.invalidateHighlighted.bind( this );
 
     // @private {Object} - The listener that gets added to the pointer when we are pressed
     this._pointerListener = {
@@ -195,6 +237,26 @@ define( function( require ) {
       }
     };
 
+    // update isOverProperty (not a DerivedProperty because we need to hook to passed-in properties)
+    this.overPointers.lengthProperty.link( this.invalidateOver.bind( this ) );
+
+    // update isHoveringProperty (not a DerivedProperty because we need to hook to passed-in properties)
+    this.overPointers.lengthProperty.link( this._isHoveringListener );
+    this.isPressedProperty.link( this._isHoveringListener );
+
+    // Update isHovering when any pointer's isDownProperty changes.
+    // NOTE: overPointers is cleared on dispose, which should remove all of these (interior) listeners)
+    this.overPointers.addItemAddedListener( function( pointer ) {
+      pointer.isDownProperty.link( self._isHoveringListener );
+    } );
+    this.overPointers.addItemRemovedListener( function( pointer ) {
+      pointer.isDownProperty.unlink( self._isHoveringListener );
+    } );
+
+    // update isHighlightedProperty (not a DerivedProperty because we need to hook to passed-in properties)
+    this.isHoveringProperty.link( this._isHighlightedListener );
+    this.isPressedProperty.link( this._isHighlightedListener );
+
     this._pressListenerTandem.addInstance( this, TPressListener, options );
   }
 
@@ -236,6 +298,42 @@ define( function( require ) {
       sceneryLog && sceneryLog.InputListener && sceneryLog.push();
 
       this.press( event );
+
+      sceneryLog && sceneryLog.InputListener && sceneryLog.pop();
+    },
+
+    /**
+     * Called with 'enter' events (part of the listener API).
+     * @public (scenery-internal)
+     *
+     * NOTE: Do not call directly.
+     *
+     * @param {Event} event
+     */
+    enter: function( event ) {
+      sceneryLog && sceneryLog.InputListener && sceneryLog.InputListener( 'FireListener enter' );
+      sceneryLog && sceneryLog.InputListener && sceneryLog.push();
+
+      this.overPointers.push( event.pointer );
+
+      sceneryLog && sceneryLog.InputListener && sceneryLog.pop();
+    },
+
+    /**
+     * Called with 'exit' events (part of the listener API).
+     * @public (scenery-internal)
+     *
+     * NOTE: Do not call directly.
+     *
+     * @param {Event} event
+     */
+    exit: function( event ) {
+      sceneryLog && sceneryLog.InputListener && sceneryLog.InputListener( 'FireListener exit' );
+      sceneryLog && sceneryLog.InputListener && sceneryLog.push();
+
+      assert && assert( this.overPointers.contains( event.pointer ), 'Exit event not matched by an enter event' );
+
+      this.overPointers.remove( event.pointer );
 
       sceneryLog && sceneryLog.InputListener && sceneryLog.pop();
     },
@@ -404,6 +502,38 @@ define( function( require ) {
     },
 
     /**
+     * Recomputes the value for isOverProperty. Separate to reduce anonymous function closures.
+     * @private
+     */
+    invalidateOver: function() {
+      this.isOverProperty.value = this.overPointers.length > 0;
+    },
+
+    /**
+     * Recomputes the value for isHoveringProperty. Separate to reduce anonymous function closures.
+     * @private
+     */
+    invalidateHovering: function() {
+      var pointers = this.overPointers.getArray();
+      for ( var i = 0; i < pointers.length; i++ ) {
+        var pointer = pointers[ i ];
+        if ( !pointer.isDown || pointer === this.pointer ) {
+          this.isHoveringProperty.value = true;
+          return;
+        }
+      }
+      this.isHoveringProperty.value = false;
+    },
+
+    /**
+     * Recomputes the value for isHighlightedProperty. Separate to reduce anonymous function closures.
+     * @private
+     */
+    invalidateHighlighted: function() {
+      this.isHighlightedProperty.value = this.isHoveringProperty.value || this.isPressedProperty.value;
+    },
+
+    /**
      * Disposes the listener, releasing references. It should not be used after this.
      * @public
      */
@@ -411,9 +541,16 @@ define( function( require ) {
       sceneryLog && sceneryLog.InputListener && sceneryLog.InputListener( 'PressListener dispose' );
       sceneryLog && sceneryLog.InputListener && sceneryLog.push();
 
+      // We need to release references to any pointers that are over us.
+      this.overPointers.clear();
+
       if ( this._listeningToPointer ) {
         this.pointer.removeInputListener( this._pointerListener );
       }
+
+      this.isPressedProperty.unlink( this._isHighlightedListener );
+      this.isHoveringProperty.unlink( this._isHighlightedListener );
+      this.isPressedProperty.unlink( this._isHoveringListener );
 
       this._pressListenerTandem.removeInstance( this );
 
