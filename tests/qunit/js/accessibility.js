@@ -12,7 +12,7 @@
   /**
    * Get the id of a dom element representing a node in the DOM.  The accessible content must exist and be unique,
    * there should only be one accessible instance and one dom element for the node.
-   * 
+   *
    * @param  {Node} node
    * @return {string}
    */
@@ -123,7 +123,7 @@
     var rootNode = new scenery.Node();
     var display = new scenery.Display( rootNode ); // eslint-disable-line
     document.body.appendChild( display.domElement );
-    
+
     // two new nodes that will be related with the aria-labelledby and aria-describedby associations
     var nodeA = new scenery.Node( { tagName: 'button', labelTagName: 'p', descriptionTagName: 'p', prependLabels: true } );
     var nodeB = new scenery.Node( {tagName: 'p', accessibleLabel: TEST_LABEL } );
@@ -185,7 +185,7 @@
     // accessible instances are not sorted until added to a display
     var display = new scenery.Display( rootNode ); // eslint-disable-line
     document.body.appendChild( display.domElement );
-    
+
     rootNode.addChild( a1 );
 
     // verify that elements are in the DOM
@@ -225,7 +225,7 @@
     //  <div></div>
     //  <p id='description'></p>
     // </div>
-     
+
     // redefine the HTML elements (references will point to old elements before mutation)
     buttonElement = a1.accessibleInstances[ 0 ].peer.domElement;
     parentElement = buttonElement.parentElement;
@@ -312,7 +312,7 @@
     var bElement = document.getElementById( getPeerElementId( b ) );
     var cElement = document.getElementById( getPeerElementId( c ) );
     var dElement = document.getElementById( getPeerElementId( d ) );
-    
+
     a.focus();
     ok( document.activeElement.id === aElement.id, 'a in focus (next)' );
 
@@ -377,13 +377,13 @@
     ok( rootDOMElement.children.length === 5, 'children added' );
 
     rootNode.accessibleContentDisplayed = false;
-    ok ( rootDOMElement.children.length === 0, 'sub tree removed from DOM' );
-    ok ( dDOMElement.children.length === 0, 'sub tree removed from DOM' );
+    ok( rootDOMElement.children.length === 0, 'sub tree removed from DOM' );
+    ok( dDOMElement.children.length === 0, 'sub tree removed from DOM' );
 
     // invalidation should not add content back to the DOM
     rootNode.tagName = 'button';
     d.tagName = 'span';
-    ok ( rootDOMElement.children.length === 0, 'invalidate without addition' );
+    ok( rootDOMElement.children.length === 0, 'invalidate without addition' );
 
     window.debug_freez = true;
     rootNode.accessibleContentDisplayed = true;
@@ -511,7 +511,7 @@
     ok( !testNode.focusable, 'testNode is not focusable before replacing node d' );
 
     b.replaceChild( d, testNode );
-    ok( b.hasChild( testNode), 'testNode should be a child of node b after replacing with replaceChild' );
+    ok( b.hasChild( testNode ), 'testNode should be a child of node b after replacing with replaceChild' );
     ok( !b.hasChild( d ), 'd should not be a child of b after it was replaced with replaceChild' );
     ok( !d.focused, 'do does not have focus after being replaced by testNode' );
     ok( !testNode.focused, 'testNode does not have focus after replacing node d (testNode is not focusable)' );
@@ -557,7 +557,7 @@
     //   <div id="e">
     //      <button id="g1">
     //   <button id="g2">
-    
+
     // get the accessible DOM elements - looking into accessibleInstances for testing, there is no getter for domElement
     var divA = a.accessibleInstances[ 0 ].peer.domElement;
     var buttonB = b.accessibleInstances[ 0 ].peer.domElement;
@@ -602,7 +602,7 @@
     ok( !buttonG1.hidden, 'buttonG1 should not NOT be hidden after ancestor node c is made invisible (parent div E already marked)' );
     ok( !divA.hidden, 'div A should not have been hidden by making descendant c invisible to screen readers' );
   } );
-  
+
   test( 'swapVisibility', function() {
 
 
@@ -664,6 +664,5 @@
     ok( c.visible === true, 'c should be visible after visibility is swapped' );
     ok( b.focused === false, 'b should no longer have focus after visibility is swapped' );
     ok( c.focused === false, 'c should not have focus after visibility is swapped because it is not focusable' );
-  } ); 
-
+  } );
 })();
