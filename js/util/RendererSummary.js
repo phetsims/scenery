@@ -1,6 +1,5 @@
 // Copyright 2013-2016, University of Colorado Boulder
 
-
 /**
  * Contains information about what renderers (and a few other flags) are supported for an entire subtree.
  *
@@ -45,23 +44,32 @@ define( function( require ) {
     bitmaskAll |= summaryBits[ l ];
   }
 
+  /**
+   * @constructor
+   *
+   * @param {Node} node
+   */
   function RendererSummary( node ) {
+    assert && assert( node instanceof scenery.Node );
+
     // NOTE: assumes that we are created in the Node constructor
     assert && assert( node._rendererBitmask === Renderer.bitmaskNodeDefault, 'Node must have a default bitmask when creating a RendererSummary' );
     assert && assert( node._children.length === 0, 'Node cannot have children when creating a RendererSummary' );
 
+    // @private {Node}
     this.node = node;
 
-    // Maps stringified bitmask bit (e.g. "1" for Canvas, since Renderer.bitmaskCanvas is 0x01) to
+    // @private {Object} Maps stringified bitmask bit (e.g. "1" for Canvas, since Renderer.bitmaskCanvas is 0x01) to
     // a count of how many children (or self) have that property (e.g. can't renderer all of their contents with Canvas)
     this._counts = {};
     for ( var i = 0; i < numSummaryBits; i++ ) {
       this._counts[ summaryBits[ i ] ] = 0; // set everything to 0 at first
     }
 
-    // @public
+    // @public {number} (scenery-internal)
     this.bitmask = bitmaskAll;
 
+    // @private {number}
     this.selfBitmask = RendererSummary.summaryBitmaskForNodeSelf( node );
 
     this.summaryChange( this.bitmask, this.selfBitmask );
@@ -78,9 +86,12 @@ define( function( require ) {
   scenery.register( 'RendererSummary', RendererSummary );
 
   inherit( Object, RendererSummary, {
-    /*
-     * @public
+    /**
      * Use a bitmask of all 1s to represent 'does not exist' since we count zeros
+     * @public
+     *
+     * @param {number} oldBitmask
+     * @param {number} newBitmask
      */
     summaryChange: function( oldBitmask, newBitmask ) {
       assert && this.audit();
