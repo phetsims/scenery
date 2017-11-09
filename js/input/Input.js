@@ -172,6 +172,16 @@ define( function( require ) {
   scenery.register( 'Input', Input );
 
   inherit( Object, Input, {
+    /**
+     * Interrupts any input actions that are currently taking place (should stop drags, etc.)
+     * @public
+     */
+    interruptPointers: function() {
+      _.each( this.pointers, function( pointer ) {
+        pointer.interruptAll();
+      } );
+    },
+
     batchEvent: function( domEvent, batchType, callback, triggerImmediate ) {
       // If our display is not interactive, do not respond to any events (but still prevent default)
       if ( this.display.interactive ) {
