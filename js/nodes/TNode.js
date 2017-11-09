@@ -120,6 +120,7 @@ define( function( require ) {
     }
   }, {
     toStateObject: function( node ) {
+      assert && assertInstanceOf( node, phet.scenery.Node );
       return {
         visible: node.isVisible(),
         pickable: node.isPickable(),
@@ -129,10 +130,11 @@ define( function( require ) {
     fromStateObject: function( stateObject ) {
       return stateObject;
     },
-    setValue: function( instance, stateObject ) {
-      instance.visible = stateObject.visible;
-      instance.pickable = stateObject.pickable;
-      instance.opacity = stateObject.opacity;
+    setValue: function( node, stateObject ) {
+      assert && assertInstanceOf( node, phet.scenery.Node );
+      node.visible = stateObject.visible;
+      node.pickable = stateObject.pickable;
+      node.opacity = stateObject.opacity;
     },
     documentation: 'The base type for graphical and potentially interactive objects'
   } );
