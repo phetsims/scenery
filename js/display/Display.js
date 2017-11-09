@@ -571,6 +571,7 @@ define( function( require ) {
     set interactive( value ) {
       this._interactive = value;
       if ( !this._interactive && this._input ) {
+        this._input.interruptPointers();
         this._input.clearBatchedEvents();
         this._input.removeTemporaryPointers();
         this._rootNode.interruptSubtreeInput();
