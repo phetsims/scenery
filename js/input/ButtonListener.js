@@ -49,9 +49,8 @@ define( function( require ) {
       tandem: Tandem.tandemOptional()
     }, options );
 
-    this.tandem = options.tandem;// @private
-
-    this.buttonListenerOptions = options; // @private (phet-io)
+    // @private
+    this.buttonListenerTandem = options.tandem;
 
     this.buttonState = 'up'; // public: 'up', 'over', 'down' or 'out'
 
@@ -98,12 +97,12 @@ define( function( require ) {
         if ( this._buttonOptions[ state ] ) {
 
           // Record this event to the phet-io event stream, including all downstream events as nested children
-          var id = this.buttonListenerOptions.tandem.isLegalAndUsable() && phetioEvents.start( 'user', this.buttonListenerOptions.tandem.id, TButtonListener, state );
+          var id = this.buttonListenerTandem.isLegalAndUsable() && phetioEvents.start( 'user', this.buttonListenerTandem.id, TButtonListener, state );
 
           // Then invoke the callback
           this._buttonOptions[ state ]( event, oldState );
 
-          this.buttonListenerOptions.tandem.isLegalAndUsable() && phetioEvents.end( id );
+          this.buttonListenerTandem.isLegalAndUsable() && phetioEvents.end( id );
         }
 
         if ( this._buttonOptions.fire &&
@@ -111,12 +110,12 @@ define( function( require ) {
              ( this._buttonOptions.fireOnDown ? ( state === 'down' ) : ( oldState === 'down' ) ) ) {
 
           // Record this event to the phet-io event stream, including all downstream events as nested children
-          var fireID = this.buttonListenerOptions.tandem.isLegalAndUsable() && phetioEvents.start( 'user', this.buttonListenerOptions.tandem.id, TButtonListener, 'fire' );
+          var fireID = this.buttonListenerTandem.isLegalAndUsable() && phetioEvents.start( 'user', this.buttonListenerTandem.id, TButtonListener, 'fire' );
 
           // Then fire the event
           this._buttonOptions.fire( event );
 
-          this.buttonListenerOptions.tandem.isLegalAndUsable() && phetioEvents.end( fireID );
+          this.buttonListenerTandem.isLegalAndUsable() && phetioEvents.end( fireID );
         }
       }
     },
@@ -141,7 +140,7 @@ define( function( require ) {
     },
 
     dispose: function() {
-      this.tandem.removeInstance( this );
+      this.buttonListenerTandem.removeInstance( this );
     }
   } );
 
