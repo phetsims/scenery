@@ -245,6 +245,7 @@ define( function( require ) {
     'phetioState', // Flag to include in phet-io state. The properties on node default to undefined, but phet-io defaults this to true, see phetio.addInstance()
     'phetioEvents', // Flag to include in phet-io event stream. The properties on node default to undefined, but phet-io defaults this to true, see phetio.addInstance()
     'phetioReadOnly', // Flag to mark as read-only so instance proxies cannot control the object
+    'phetioInstanceDocumentation', // Useful notes about an instrumented instance, shown in instance-proxies
     'tandem' // For instrumenting Scenery nodes, see setTandem().  This must be last so that (a) the phetioType
     // is available and (b) because when tandem.addInstance is called the node becomes active in the PhET-iO API immediately
   ];
@@ -3599,6 +3600,25 @@ define( function( require ) {
     set phetioReadOnly( phetioReadOnly ) { this.setPhetioReadOnly( phetioReadOnly ); },
 
     /**
+     * Sets the phetioInstanceDocumentation flag on the node, see phetio.addInstance() for more info
+     * @public
+     *
+     * @param {boolean} phetioInstanceDocumentation
+     * @returns {Node}
+     */
+    setPhetioInstanceDocumentation: function( phetioInstanceDocumentation ) {
+      assert && assert( typeof phetioInstanceDocumentation === 'string', 'phetioInstanceDocumentation should be a string' );
+      if ( this._phetioInstanceDocumentation !== undefined ) {
+        assert && assert( phetioInstanceDocumentation === this._phetioInstanceDocumentation, 'Node\' phetioInstanceDocumentation cannot be given set more than once' );
+      }
+
+      this._phetioInstanceDocumentation = phetioInstanceDocumentation;
+
+      return this; // for chaining
+    },
+    set phetioInstanceDocumentation( phetioInstanceDocumentation ) { this.setPhetioInstanceDocumentation( phetioInstanceDocumentation ); },
+
+    /**
      * Get each phetio flag needed for the tandem addInstance call. This method is explicit because it only wants
      * keys that are defined. If undefined keys are passed in to phetio.addInstance() through options, then they will not
      * be extended correctly with lodash.
@@ -3615,6 +3635,9 @@ define( function( require ) {
       }
       if ( typeof this._phetioReadOnly === 'boolean' ) {
         flags.phetioReadOnly = this._phetioReadOnly;
+      }
+      if ( typeof this._phetioInstanceDocumentation === 'string' ) {
+        flags.phetioInstanceDocumentation = this._phetioInstanceDocumentation;
       }
       return flags;
     },
