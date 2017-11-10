@@ -244,7 +244,7 @@ define( function( require ) {
     'phetioType', // The corresponding phet-io wrapper type
     'phetioState', // Flag to include in phet-io state. The properties on node default to undefined, but phet-io defaults this to true, see phetio.addInstance()
     'phetioEvents', // Flag to include in phet-io event stream. The properties on node default to undefined, but phet-io defaults this to true, see phetio.addInstance()
-    'phetioMethods', // Flag to include in phet-io interoperability. The properties on node default to undefined, but phet-io defaults this to true, see phetio.addInstance()
+    'phetioReadOnly', // Flag to mark as read-only so instance proxies cannot control the object
     'tandem' // For instrumenting Scenery nodes, see setTandem().  This must be last so that (a) the phetioType
     // is available and (b) because when tandem.addInstance is called the node becomes active in the PhET-iO API immediately
   ];
@@ -3579,25 +3579,24 @@ define( function( require ) {
     },
     set phetioEvents( phetioEvents ) { this.setPhetioEvents( phetioEvents ); },
 
-
     /**
-     * Sets the phetioMethods flag on the node, see phetio.addInstance() for more info
+     * Sets the phetioReadOnly flag on the node, see phetio.addInstance() for more info
      * @public
      *
-     * @param {boolean} phetioMethods
+     * @param {boolean} phetioReadOnly
      * @returns {Node}
      */
-    setPhetioMethods: function( phetioMethods ) {
-      assert && assert( typeof phetioMethods === 'boolean', 'phetioMethods should be a boolean' );
-      if ( this._phetioMethods !== undefined ) {
-        assert && assert( phetioMethods === this._phetioMethods, 'Node\' phetioMethods cannot be given set more than once' );
+    setPhetioReadOnly: function( phetioReadOnly ) {
+      assert && assert( typeof phetioReadOnly === 'boolean', 'phetioReadOnly should be a boolean' );
+      if ( this._phetioReadOnly !== undefined ) {
+        assert && assert( phetioReadOnly === this._phetioReadOnly, 'Node\' phetioReadOnly cannot be given set more than once' );
       }
 
-      this._phetioMethods = phetioMethods;
+      this._phetioReadOnly = phetioReadOnly;
 
       return this; // for chaining
     },
-    set phetioMethods( phetioMethods ) { this.setPhetioMethods( phetioMethods ); },
+    set phetioReadOnly( phetioReadOnly ) { this.setPhetioReadOnly( phetioReadOnly ); },
 
     /**
      * Get each phetio flag needed for the tandem addInstance call. This method is explicit because it only wants
@@ -3614,8 +3613,8 @@ define( function( require ) {
       if ( typeof this._phetioEvents === 'boolean' ) {
         flags.phetioEvents = this._phetioEvents;
       }
-      if ( typeof this._phetioMethods === 'boolean' ) {
-        flags.phetioMethods = this._phetioMethods;
+      if ( typeof this._phetioReadOnly === 'boolean' ) {
+        flags.phetioReadOnly = this._phetioReadOnly;
       }
       return flags;
     },
