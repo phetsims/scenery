@@ -228,7 +228,7 @@ define( function( require ) {
       }
 
       // only start dragging if the pointer isn't dragging anything, we aren't being dragged, and if it's a mouse it's button is down
-      if ( !this.dragging && !event.pointer.dragging ) {
+      if ( !this.dragging && !event.pointer.dragging && event.canStartPress() ) {
         this.startDrag( event );
       }
     },
