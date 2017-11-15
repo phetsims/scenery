@@ -173,7 +173,7 @@ define( function( require ) {
   // require( 'SCENERY/util/Trail' );
   // require( 'SCENERY/util/TrailPointer' );
   var Tandem = require( 'TANDEM/Tandem' );
-  var TNode = require( 'SCENERY/nodes/TNode' );
+  var NodeIO = require( 'SCENERY/nodes/NodeIO' );
   // constants
   var clamp = Util.clamp;
 
@@ -323,7 +323,7 @@ define( function( require ) {
     this._tandem = null;
 
     // @protected {function} - the wrapper type for phet-io
-    this._phetioType = TNode;
+    this._phetioType = NodeIO;
 
     // @protected {Array.<Instance>} - All of the Instances tracking this Node
     this._instances = [];
@@ -3658,7 +3658,7 @@ define( function( require ) {
      */
     setPhetioType: function( phetioType ) {
       assert && assert( typeof phetioType === 'function', 'phetioValue should be a function' );
-      if ( this._phetioType !== TNode ) {
+      if ( this._phetioType !== NodeIO ) {
         assert && assert( phetioType === this._phetioType, 'Node cannot be given multiple phetioTypes' );
       }
 

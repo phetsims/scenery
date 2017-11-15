@@ -12,7 +12,7 @@ define( function( require ) {
   // modules
   var scenery = require( 'SCENERY/scenery' );
   var TFont = require( 'SCENERY/util/TFont' );
-  var TNode = require( 'SCENERY/nodes/TNode' );
+  var NodeIO = require( 'SCENERY/nodes/NodeIO' );
 
   // phet-io modules
   var assertInstanceOf = require( 'ifphetio!PHET_IO/assertInstanceOf' );
@@ -30,10 +30,10 @@ define( function( require ) {
    */
   function TText( text, phetioID ) {
     assert && assertInstanceOf( text, phet.scenery.Text );
-    TNode.call( this, text, phetioID );
+    NodeIO.call( this, text, phetioID );
   }
 
-  phetioInherit( TNode, 'TText', TText, {
+  phetioInherit( NodeIO, 'TText', TText, {
 
     addTextChangedListener: {
       returnType: VoidIO,

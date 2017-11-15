@@ -26,12 +26,12 @@ define( function( require ) {
    * @param phetioID
    * @constructor
    */
-  function TNode( node, phetioID ) {
+  function NodeIO( node, phetioID ) {
     assert && assertInstanceOf( node, phet.scenery.Node );
     ObjectIO.call( this, node, phetioID );
   }
 
-  phetioInherit( ObjectIO, 'TNode', TNode, {
+  phetioInherit( ObjectIO, 'NodeIO', NodeIO, {
 
     detach: {
       returnType: VoidIO,
@@ -139,8 +139,8 @@ define( function( require ) {
     documentation: 'The base type for graphical and potentially interactive objects'
   } );
 
-  scenery.register( 'TNode', TNode );
+  scenery.register( 'NodeIO', NodeIO );
 
-  return TNode;
+  return NodeIO;
 } );
 
