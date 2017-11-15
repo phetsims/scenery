@@ -117,12 +117,14 @@ define( function( require ) {
       isUserControlledProperty: null,
 
       // {Tandem} - For instrumenting
-      tandem: Tandem.tandemRequired()
+      tandem: Tandem.tandemRequired(),
+
+      // {TType} - PhET-iO type
+      phetioType: TDragListener
     }, options );
 
     // @private {Tandem}
     this._dragListenerTandem = options.tandem;
-    options.tandem = this._dragListenerTandem.createSupertypeTandem();
 
     // Initialize with the alias isUserControlledProperty => isPressedProperty
     if ( options.isUserControlledProperty ) {
@@ -172,8 +174,6 @@ define( function( require ) {
 
     // @private {Function} - Listener passed to the transform tracker
     this._transformTrackerListener = this.ancestorTransformed.bind( this );
-
-    this._dragListenerTandem.addInstance( this, TDragListener, options );
   }
 
   scenery.register( 'DragListener', DragListener );

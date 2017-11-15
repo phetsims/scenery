@@ -36,7 +36,8 @@ define( function( require ) {
       allowTouchSnag: false,
       mouseButton: 0,
       dragCursor: 'pointer',
-      tandem: Tandem.tandemRequired()
+      tandem: Tandem.tandemRequired(),
+      phetioType: TSimpleDragHandler
     }, options );
     this.options = options; // @private
 
@@ -145,7 +146,7 @@ define( function( require ) {
         phetioEvents.end( id );
       }
     };
-    options.tandem.addInstance( this, TSimpleDragHandler, options );
+    options.tandem.addInstance( this, options );
 
     // @private
     this.disposeSimpleDragHandler = function() {

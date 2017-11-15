@@ -101,7 +101,10 @@ define( function( require ) {
       canStartPress: _.constant( true ),
 
       // {Tandem} - For instrumenting
-      tandem: Tandem.tandemRequired()
+      tandem: Tandem.tandemRequired(),
+
+      // {TType} -
+      phetioType: TPressListener
     }, options );
 
     assert && assert( typeof options.mouseButton === 'number' &&
@@ -257,7 +260,7 @@ define( function( require ) {
     this.isHoveringProperty.link( this._isHighlightedListener );
     this.isPressedProperty.link( this._isHighlightedListener );
 
-    this._pressListenerTandem.addInstance( this, TPressListener, options );
+    this._pressListenerTandem.addInstance( this, options );
   }
 
   scenery.register( 'PressListener', PressListener );

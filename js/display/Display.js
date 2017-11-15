@@ -60,6 +60,7 @@ define( function( require ) {
   var Matrix3 = require( 'DOT/Matrix3' );
   var Property = require( 'AXON/Property' );
   var Tandem = require( 'TANDEM/Tandem' );
+  var TProperty = require( 'AXON/TProperty' );
   var Vector2 = require( 'DOT/Vector2' );
 
   var Features = require( 'SCENERY/util/Features' );
@@ -1871,7 +1872,7 @@ define( function( require ) {
     // Make this a static tandem so that it can be added to instance proxies correctly (batched and then flushed when the
     // listener is added).
     tandem: Tandem.createStaticTandem( 'display' ).createTandem( 'focusProperty' ),
-    phetioValueType: TFocus
+    phetioType: TProperty( TFocus )
   } );
 
   /**

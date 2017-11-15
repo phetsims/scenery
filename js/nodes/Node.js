@@ -3643,6 +3643,9 @@ define( function( require ) {
       if ( typeof this._phetioInstanceDocumentation === 'string' ) {
         flags.phetioInstanceDocumentation = this._phetioInstanceDocumentation;
       }
+      if ( typeof this._phetioType === 'function' ) {
+        flags.phetioType = this._phetioType;
+      }
       return flags;
     },
 
@@ -3694,7 +3697,7 @@ define( function( require ) {
         this._tandem = tandem;
 
         // Pass through phet-io feature flags in options object
-        this._tandem.addInstance( this, this._phetioType, this.getPhetioFlags() );
+        this._tandem.addInstance( this, this.getPhetioFlags() );
       }
 
       return this; // for chaining
@@ -4128,7 +4131,7 @@ define( function( require ) {
       assert && assert( y === undefined || typeof y === 'number', 'If provided, y should be a number' );
       assert && assert( width === undefined || ( typeof width === 'number' && width >= 0 && ( width % 1 === 0 ) ),
         'If provided, width should be a non-negative integer' );
-      assert && assert( height === undefined ||  (typeof height === 'number' && height >= 0 && ( height % 1 === 0 ) ),
+      assert && assert( height === undefined || (typeof height === 'number' && height >= 0 && ( height % 1 === 0 ) ),
         'If provided, height should be a non-negative integer' );
 
       var padding = 2; // padding used if x and y are not set

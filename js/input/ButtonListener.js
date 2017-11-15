@@ -46,7 +46,8 @@ define( function( require ) {
     options = _.extend( {
 
       // When running in PhET-iO brand, the tandem must be supplied
-      tandem: Tandem.tandemOptional()
+      tandem: Tandem.tandemOptional(),
+      phetioType: TButtonListener
     }, options );
 
     // @private
@@ -79,7 +80,7 @@ define( function( require ) {
       }
     } );
 
-    options.tandem.addInstance( this, TButtonListener, options );
+    options.tandem.addInstance( this, options );
   }
 
   scenery.register( 'ButtonListener', ButtonListener );
