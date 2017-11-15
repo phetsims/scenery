@@ -14,7 +14,7 @@ define( function( require ) {
   // phet-io modules
   var assertInstanceOf = require( 'ifphetio!PHET_IO/assertInstanceOf' );
   var phetioInherit = require( 'ifphetio!PHET_IO/phetioInherit' );
-  var TObject = require( 'ifphetio!PHET_IO/types/TObject' );
+  var ObjectIO = require( 'ifphetio!PHET_IO/types/ObjectIO' );
 
   /**
    * Wrapper type for phet/scenery's Color class.
@@ -24,10 +24,10 @@ define( function( require ) {
    */
   function TColor( color, phetioID ) {
     assert && assertInstanceOf( color, phet.scenery.Color );
-    TObject.call( this, color, phetioID );
+    ObjectIO.call( this, color, phetioID );
   }
 
-  phetioInherit( TObject, 'TColor', TColor, {}, {
+  phetioInherit( ObjectIO, 'TColor', TColor, {}, {
     documentation: 'A color, with rgba',
 
     /**

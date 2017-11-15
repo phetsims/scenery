@@ -15,8 +15,8 @@ define( function( require ) {
   // phet-io modules
   var assertInstanceOf = require( 'ifphetio!PHET_IO/assertInstanceOf' );
   var phetioInherit = require( 'ifphetio!PHET_IO/phetioInherit' );
-  var TString = require( 'ifphetio!PHET_IO/types/TString' );
-  var TVoid = require( 'ifphetio!PHET_IO/types/TVoid' );
+  var StringIO = require( 'ifphetio!PHET_IO/types/StringIO' );
+  var VoidIO = require( 'ifphetio!PHET_IO/types/VoidIO' );
 
   /**
    * Wrapper type for scenery's Text node.
@@ -32,8 +32,8 @@ define( function( require ) {
   phetioInherit( TNode, 'TImage', TImage, {
 
     setImage: {
-      returnType: TVoid,
-      parameterTypes: [ TString ],
+      returnType: VoidIO,
+      parameterTypes: [ StringIO ],
       implementation: function( base64Text ) {
         var im = new window.Image();
         im.src = base64Text;

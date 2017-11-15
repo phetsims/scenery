@@ -19,8 +19,8 @@ define( function( require ) {
   var phetioInherit = require( 'ifphetio!PHET_IO/phetioInherit' );
   var FunctionIO = require( 'ifphetio!PHET_IO/types/FunctionIO' );
   var NumberIO = require( 'ifphetio!PHET_IO/types/NumberIO' );
-  var TString = require( 'ifphetio!PHET_IO/types/TString' );
-  var TVoid = require( 'ifphetio!PHET_IO/types/TVoid' );
+  var StringIO = require( 'ifphetio!PHET_IO/types/StringIO' );
+  var VoidIO = require( 'ifphetio!PHET_IO/types/VoidIO' );
 
   /**
    * Wrapper type for scenery's Text node.
@@ -36,8 +36,8 @@ define( function( require ) {
   phetioInherit( TNode, 'TText', TText, {
 
     addTextChangedListener: {
-      returnType: TVoid,
-      parameterTypes: [ FunctionIO( TVoid, [ TString ] ) ],
+      returnType: VoidIO,
+      parameterTypes: [ FunctionIO( VoidIO, [ StringIO ] ) ],
       implementation: function( listener ) {
         this.instance.on( 'text', function( oldText, newText ) {
           listener( newText );
@@ -47,8 +47,8 @@ define( function( require ) {
     },
 
     setText: {
-      returnType: TVoid,
-      parameterTypes: [ TString ],
+      returnType: VoidIO,
+      parameterTypes: [ StringIO ],
       implementation: function( text ) {
         this.instance.text = text;
       },
@@ -56,7 +56,7 @@ define( function( require ) {
     },
 
     getText: {
-      returnType: TString,
+      returnType: StringIO,
       parameterTypes: [],
       implementation: function() {
         return this.instance.text;
@@ -65,7 +65,7 @@ define( function( require ) {
     },
 
     setFontOptions: {
-      returnType: TVoid,
+      returnType: VoidIO,
       parameterTypes: [ TFont ],
       implementation: function( font ) {
         this.instance.setFont( font );
@@ -83,7 +83,7 @@ define( function( require ) {
     },
 
     setMaxWidth: {
-      returnType: TVoid,
+      returnType: VoidIO,
       parameterTypes: [ NumberIO ],
       implementation: function( maxWidth ) {
         this.instance.setMaxWidth( maxWidth );

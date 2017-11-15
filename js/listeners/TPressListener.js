@@ -12,7 +12,7 @@ define( function( require ) {
   var assertInstanceOf = require( 'ifphetio!PHET_IO/assertInstanceOf' );
   var phetioInherit = require( 'ifphetio!PHET_IO/phetioInherit' );
   var scenery = require( 'SCENERY/scenery' );
-  var TObject = require( 'ifphetio!PHET_IO/types/TObject' );
+  var ObjectIO = require( 'ifphetio!PHET_IO/types/ObjectIO' );
 
   /**
    * @param {PressListener} pressListener
@@ -21,10 +21,10 @@ define( function( require ) {
    */
   function TPressListener( pressListener, phetioID ) {
     assert && assertInstanceOf( pressListener, phet.scenery.PressListener );
-    TObject.call( this, pressListener, phetioID );
+    ObjectIO.call( this, pressListener, phetioID );
   }
 
-  phetioInherit( TObject, 'TPressListener', TPressListener, {}, {
+  phetioInherit( ObjectIO, 'TPressListener', TPressListener, {}, {
     documentation: 'Input listener for something that can be pressed.',
     events: [ 'press', 'drag', 'release' ]
   } );

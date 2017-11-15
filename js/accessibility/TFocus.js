@@ -15,7 +15,7 @@ define( function( require ) {
   // phet-io modules
   var assertInstanceOf = require( 'ifphetio!PHET_IO/assertInstanceOf' );
   var phetioInherit = require( 'ifphetio!PHET_IO/phetioInherit' );
-  var TObject = require( 'ifphetio!PHET_IO/types/TObject' );
+  var ObjectIO = require( 'ifphetio!PHET_IO/types/ObjectIO' );
 
   /**
    * Wrapper type for phet/sun's Faucet class.
@@ -25,10 +25,10 @@ define( function( require ) {
    */
   function TFocus( focus, phetioID ) {
     assert && assertInstanceOf( focus, phet.scenery.Focus );
-    TObject.call( this, focus, phetioID );
+    ObjectIO.call( this, focus, phetioID );
   }
 
-  phetioInherit( TObject, 'TFocus', TFocus, {}, {
+  phetioInherit( ObjectIO, 'TFocus', TFocus, {}, {
 
     /**
      * Convert the focus region to a plain JS object for serialization.

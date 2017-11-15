@@ -12,7 +12,7 @@ define( function( require ) {
   var assertInstanceOf = require( 'ifphetio!PHET_IO/assertInstanceOf' );
   var phetioInherit = require( 'ifphetio!PHET_IO/phetioInherit' );
   var scenery = require( 'SCENERY/scenery' );
-  var TObject = require( 'ifphetio!PHET_IO/types/TObject' );
+  var ObjectIO = require( 'ifphetio!PHET_IO/types/ObjectIO' );
 
   /**
    * Wrapper type for phet/tandem's SimpleDragHandler class.
@@ -22,10 +22,10 @@ define( function( require ) {
    */
   function TSimpleDragHandler( simpleDragHandler, phetioID ) {
     assert && assertInstanceOf( simpleDragHandler, phet.scenery.SimpleDragHandler );
-    TObject.call( this, simpleDragHandler, phetioID );
+    ObjectIO.call( this, simpleDragHandler, phetioID );
   }
 
-  phetioInherit( TObject, 'TSimpleDragHandler', TSimpleDragHandler, {}, {
+  phetioInherit( ObjectIO, 'TSimpleDragHandler', TSimpleDragHandler, {}, {
     documentation: 'Drag listener for objects that can be dragged by the user.',
     events: [ 'dragStarted', 'dragged', 'dragEnded' ]
   } );

@@ -17,8 +17,8 @@ define( function( require ) {
   var BooleanIO = require( 'ifphetio!PHET_IO/types/BooleanIO' );
   var FunctionIO = require( 'ifphetio!PHET_IO/types/FunctionIO' );
   var NumberIO = require( 'ifphetio!PHET_IO/types/NumberIO' );
-  var TObject = require( 'ifphetio!PHET_IO/types/TObject' );
-  var TVoid = require( 'ifphetio!PHET_IO/types/TVoid' );
+  var ObjectIO = require( 'ifphetio!PHET_IO/types/ObjectIO' );
+  var VoidIO = require( 'ifphetio!PHET_IO/types/VoidIO' );
 
   /**
    * Wrapper type for phet/scenery's Node
@@ -28,13 +28,13 @@ define( function( require ) {
    */
   function TNode( node, phetioID ) {
     assert && assertInstanceOf( node, phet.scenery.Node );
-    TObject.call( this, node, phetioID );
+    ObjectIO.call( this, node, phetioID );
   }
 
-  phetioInherit( TObject, 'TNode', TNode, {
+  phetioInherit( ObjectIO, 'TNode', TNode, {
 
     detach: {
-      returnType: TVoid,
+      returnType: VoidIO,
       parameterTypes: [],
       implementation: function() {
         this.instance.detach();
@@ -51,7 +51,7 @@ define( function( require ) {
     },
 
     setVisible: {
-      returnType: TVoid,
+      returnType: VoidIO,
       parameterTypes: [ BooleanIO ],
       implementation: function( visible ) {
         this.instance.visible = visible;
@@ -60,7 +60,7 @@ define( function( require ) {
     },
 
     setPickable: {
-      returnType: TVoid,
+      returnType: VoidIO,
       parameterTypes: [ BooleanIO ],
       implementation: function( pickable ) {
         this.instance.pickable = pickable;
@@ -78,8 +78,8 @@ define( function( require ) {
     },
 
     addPickableListener: {
-      returnType: TVoid,
-      parameterTypes: [ FunctionIO( TVoid, [ BooleanIO ] ) ],
+      returnType: VoidIO,
+      parameterTypes: [ FunctionIO( VoidIO, [ BooleanIO ] ) ],
       implementation: function( callback ) {
         var inst = this.instance;
         this.instance.on( 'pickability', function() {
@@ -90,8 +90,8 @@ define( function( require ) {
     },
 
     addVisibleListener: {
-      returnType: TVoid,
-      parameterTypes: [ FunctionIO( TVoid, [ BooleanIO ] ) ],
+      returnType: VoidIO,
+      parameterTypes: [ FunctionIO( VoidIO, [ BooleanIO ] ) ],
       implementation: function( callback ) {
         var inst = this.instance;
         this.instance.on( 'visibility', function() {
@@ -102,7 +102,7 @@ define( function( require ) {
     },
 
     setOpacity: {
-      returnType: TVoid,
+      returnType: VoidIO,
       parameterTypes: [ NumberIO ],
       implementation: function( opacity ) {
         this.instance.opacity = opacity;
@@ -111,7 +111,7 @@ define( function( require ) {
     },
 
     setRotation: {
-      returnType: TVoid,
+      returnType: VoidIO,
       parameterTypes: [ NumberIO ],
       implementation: function( rotation ) {
         this.instance.rotation = rotation;

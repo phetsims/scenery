@@ -15,7 +15,7 @@ define( function( require ) {
   // phet-io modules
   var assertInstanceOf = require( 'ifphetio!PHET_IO/assertInstanceOf' );
   var phetioInherit = require( 'ifphetio!PHET_IO/phetioInherit' );
-  var TObject = require( 'ifphetio!PHET_IO/types/TObject' );
+  var ObjectIO = require( 'ifphetio!PHET_IO/types/ObjectIO' );
 
   /**
    * @param {ButtonListener} buttonListener
@@ -24,10 +24,10 @@ define( function( require ) {
    */
   function TButtonListener( buttonListener, phetioID ) {
     assert && assertInstanceOf( buttonListener, phet.scenery.ButtonListener );
-    TObject.call( this, buttonListener, phetioID );
+    ObjectIO.call( this, buttonListener, phetioID );
   }
 
-  phetioInherit( TObject, 'TButtonListener', TButtonListener, {}, {
+  phetioInherit( ObjectIO, 'TButtonListener', TButtonListener, {}, {
     documentation: 'Button listener',
     events: [ 'up', 'over', 'down', 'out', 'fire' ]
   } );

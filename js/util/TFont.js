@@ -13,7 +13,7 @@ define( function( require ) {
   // phet-io modules
   var assertInstanceOf = require( 'ifphetio!PHET_IO/assertInstanceOf' );
   var phetioInherit = require( 'ifphetio!PHET_IO/phetioInherit' );
-  var TObject = require( 'ifphetio!PHET_IO/types/TObject' );
+  var ObjectIO = require( 'ifphetio!PHET_IO/types/ObjectIO' );
 
   /**
    * @constructor
@@ -23,10 +23,10 @@ define( function( require ) {
    */
   function TFont( font, phetioID ) {
     assert && assertInstanceOf( font, phet.scenery.Font );
-    TObject.call( this, font, phetioID );
+    ObjectIO.call( this, font, phetioID );
   }
 
-  phetioInherit( TObject, 'TFont', TFont, {}, {
+  phetioInherit( ObjectIO, 'TFont', TFont, {}, {
 
     // Info from Font.js
     documentation: 'Font handling for text drawing. Options: <br>' +
