@@ -14,9 +14,9 @@ define( function( require ) {
   // phet-io modules
   var assertInstanceOf = require( 'ifphetio!PHET_IO/assertInstanceOf' );
   var phetioInherit = require( 'ifphetio!PHET_IO/phetioInherit' );
-  var TBoolean = require( 'ifphetio!PHET_IO/types/TBoolean' );
-  var TFunctionWrapper = require( 'ifphetio!PHET_IO/types/TFunctionWrapper' );
-  var TNumber = require( 'ifphetio!PHET_IO/types/TNumber' );
+  var BooleanIO = require( 'ifphetio!PHET_IO/types/BooleanIO' );
+  var FunctionIO = require( 'ifphetio!PHET_IO/types/FunctionIO' );
+  var NumberIO = require( 'ifphetio!PHET_IO/types/NumberIO' );
   var TObject = require( 'ifphetio!PHET_IO/types/TObject' );
   var TVoid = require( 'ifphetio!PHET_IO/types/TVoid' );
 
@@ -42,7 +42,7 @@ define( function( require ) {
       documentation: 'Detaches the node from its parents (if any)'
     },
     isVisible: {
-      returnType: TBoolean,
+      returnType: BooleanIO,
       parameterTypes: [],
       implementation: function() {
         return this.instance.visible;
@@ -52,7 +52,7 @@ define( function( require ) {
 
     setVisible: {
       returnType: TVoid,
-      parameterTypes: [ TBoolean ],
+      parameterTypes: [ BooleanIO ],
       implementation: function( visible ) {
         this.instance.visible = visible;
       },
@@ -61,7 +61,7 @@ define( function( require ) {
 
     setPickable: {
       returnType: TVoid,
-      parameterTypes: [ TBoolean ],
+      parameterTypes: [ BooleanIO ],
       implementation: function( pickable ) {
         this.instance.pickable = pickable;
       },
@@ -69,7 +69,7 @@ define( function( require ) {
     },
 
     isPickable: {
-      returnType: TBoolean,
+      returnType: BooleanIO,
       parameterTypes: [],
       implementation: function() {
         return this.instance.pickable;
@@ -79,7 +79,7 @@ define( function( require ) {
 
     addPickableListener: {
       returnType: TVoid,
-      parameterTypes: [ TFunctionWrapper( TVoid, [ TBoolean ] ) ],
+      parameterTypes: [ FunctionIO( TVoid, [ BooleanIO ] ) ],
       implementation: function( callback ) {
         var inst = this.instance;
         this.instance.on( 'pickability', function() {
@@ -91,7 +91,7 @@ define( function( require ) {
 
     addVisibleListener: {
       returnType: TVoid,
-      parameterTypes: [ TFunctionWrapper( TVoid, [ TBoolean ] ) ],
+      parameterTypes: [ FunctionIO( TVoid, [ BooleanIO ] ) ],
       implementation: function( callback ) {
         var inst = this.instance;
         this.instance.on( 'visibility', function() {
@@ -103,7 +103,7 @@ define( function( require ) {
 
     setOpacity: {
       returnType: TVoid,
-      parameterTypes: [ TNumber ],
+      parameterTypes: [ NumberIO ],
       implementation: function( opacity ) {
         this.instance.opacity = opacity;
       },
@@ -112,7 +112,7 @@ define( function( require ) {
 
     setRotation: {
       returnType: TVoid,
-      parameterTypes: [ TNumber ],
+      parameterTypes: [ NumberIO ],
       implementation: function( rotation ) {
         this.instance.rotation = rotation;
       },

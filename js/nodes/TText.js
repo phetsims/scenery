@@ -17,8 +17,8 @@ define( function( require ) {
   // phet-io modules
   var assertInstanceOf = require( 'ifphetio!PHET_IO/assertInstanceOf' );
   var phetioInherit = require( 'ifphetio!PHET_IO/phetioInherit' );
-  var TFunctionWrapper = require( 'ifphetio!PHET_IO/types/TFunctionWrapper' );
-  var TNumber = require( 'ifphetio!PHET_IO/types/TNumber' );
+  var FunctionIO = require( 'ifphetio!PHET_IO/types/FunctionIO' );
+  var NumberIO = require( 'ifphetio!PHET_IO/types/NumberIO' );
   var TString = require( 'ifphetio!PHET_IO/types/TString' );
   var TVoid = require( 'ifphetio!PHET_IO/types/TVoid' );
 
@@ -37,7 +37,7 @@ define( function( require ) {
 
     addTextChangedListener: {
       returnType: TVoid,
-      parameterTypes: [ TFunctionWrapper( TVoid, [ TString ] ) ],
+      parameterTypes: [ FunctionIO( TVoid, [ TString ] ) ],
       implementation: function( listener ) {
         this.instance.on( 'text', function( oldText, newText ) {
           listener( newText );
@@ -84,7 +84,7 @@ define( function( require ) {
 
     setMaxWidth: {
       returnType: TVoid,
-      parameterTypes: [ TNumber ],
+      parameterTypes: [ NumberIO ],
       implementation: function( maxWidth ) {
         this.instance.setMaxWidth( maxWidth );
       },
@@ -93,7 +93,7 @@ define( function( require ) {
     },
 
     getMaxWidth: {
-      returnType: TNumber,
+      returnType: NumberIO,
       parameterTypes: [],
       implementation: function() {
         return this.instance.maxWidth;
