@@ -119,7 +119,7 @@ define( function( require ) {
       // {Tandem} - For instrumenting
       tandem: Tandem.tandemRequired(),
 
-      // {TType} - PhET-iO type
+      // {TypeIO} - PhET-iO type
       phetioType: DragListenerIO
     }, options );
 

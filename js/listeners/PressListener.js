@@ -103,7 +103,7 @@ define( function( require ) {
       // {Tandem} - For instrumenting
       tandem: Tandem.tandemRequired(),
 
-      // {TType} -
+      // {TypeIO} -
       phetioType: PressListenerIO
     }, options );
 
