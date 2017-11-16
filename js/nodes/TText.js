@@ -11,7 +11,7 @@ define( function( require ) {
 
   // modules
   var scenery = require( 'SCENERY/scenery' );
-  var TFont = require( 'SCENERY/util/TFont' );
+  var FontIO = require( 'SCENERY/util/FontIO' );
   var NodeIO = require( 'SCENERY/nodes/NodeIO' );
 
   // phet-io modules
@@ -66,7 +66,7 @@ define( function( require ) {
 
     setFontOptions: {
       returnType: VoidIO,
-      parameterTypes: [ TFont ],
+      parameterTypes: [ FontIO ],
       implementation: function( font ) {
         this.instance.setFont( font );
       },
@@ -74,7 +74,7 @@ define( function( require ) {
     },
 
     getFontOptions: {
-      returnType: TFont,
+      returnType: FontIO,
       parameterTypes: [],
       implementation: function() {
         return this.instance.getFont();

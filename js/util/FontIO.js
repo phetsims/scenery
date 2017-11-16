@@ -21,12 +21,12 @@ define( function( require ) {
    * @param {Font} font - An instance of a phet.scenery.Font type
    * @param {string} phetioID - Full name of this font instance
    */
-  function TFont( font, phetioID ) {
+  function FontIO( font, phetioID ) {
     assert && assertInstanceOf( font, phet.scenery.Font );
     ObjectIO.call( this, font, phetioID );
   }
 
-  phetioInherit( ObjectIO, 'TFont', TFont, {}, {
+  phetioInherit( ObjectIO, 'FontIO', FontIO, {}, {
 
     // Info from Font.js
     documentation: 'Font handling for text drawing. Options: <br>' +
@@ -68,7 +68,7 @@ define( function( require ) {
     }
   } );
 
-  scenery.register( 'TFont', TFont );
+  scenery.register( 'FontIO', FontIO );
 
-  return TFont;
+  return FontIO;
 } );
