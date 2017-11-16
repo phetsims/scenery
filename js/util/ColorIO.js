@@ -22,12 +22,12 @@ define( function( require ) {
    * @param phetioID
    * @constructor
    */
-  function TColor( color, phetioID ) {
+  function ColorIO( color, phetioID ) {
     assert && assertInstanceOf( color, phet.scenery.Color );
     ObjectIO.call( this, color, phetioID );
   }
 
-  phetioInherit( ObjectIO, 'TColor', TColor, {}, {
+  phetioInherit( ObjectIO, 'ColorIO', ColorIO, {}, {
     documentation: 'A color, with rgba',
 
     /**
@@ -50,8 +50,8 @@ define( function( require ) {
     }
   } );
 
-  scenery.register( 'TColor', TColor );
+  scenery.register( 'ColorIO', ColorIO );
 
-  return TColor;
+  return ColorIO;
 } );
 
