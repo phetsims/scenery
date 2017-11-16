@@ -3650,7 +3650,7 @@ define( function( require ) {
     },
 
     /**
-     * Sets the phetioType of this node, a wrapper type like TCheckBox
+     * Sets the phetioType of this node, a wrapper type like CheckBoxIO
      * @public
      *
      * @param {function} phetioType
