@@ -24,7 +24,7 @@ define( function( require ) {
   var DownUpListener = require( 'SCENERY/input/DownUpListener' );
   var inherit = require( 'PHET_CORE/inherit' );
   var Tandem = require( 'TANDEM/Tandem' );
-  var TButtonListener = require( 'SCENERY/input/TButtonListener' );
+  var ButtonListenerIO = require( 'SCENERY/input/ButtonListenerIO' );
 
   // phet-io modules
   var phetioEvents = require( 'ifphetio!PHET_IO/phetioEvents' );
@@ -47,7 +47,7 @@ define( function( require ) {
 
       // When running in PhET-iO brand, the tandem must be supplied
       tandem: Tandem.tandemOptional(),
-      phetioType: TButtonListener
+      phetioType: ButtonListenerIO
     }, options );
 
     // @private
@@ -98,7 +98,7 @@ define( function( require ) {
         if ( this._buttonOptions[ state ] ) {
 
           // Record this event to the phet-io event stream, including all downstream events as nested children
-          var id = this.buttonListenerTandem.isLegalAndUsable() && phetioEvents.start( 'user', this.buttonListenerTandem.id, TButtonListener, state );
+          var id = this.buttonListenerTandem.isLegalAndUsable() && phetioEvents.start( 'user', this.buttonListenerTandem.id, ButtonListenerIO, state );
 
           // Then invoke the callback
           this._buttonOptions[ state ]( event, oldState );
@@ -111,7 +111,7 @@ define( function( require ) {
              ( this._buttonOptions.fireOnDown ? ( state === 'down' ) : ( oldState === 'down' ) ) ) {
 
           // Record this event to the phet-io event stream, including all downstream events as nested children
-          var fireID = this.buttonListenerTandem.isLegalAndUsable() && phetioEvents.start( 'user', this.buttonListenerTandem.id, TButtonListener, 'fire' );
+          var fireID = this.buttonListenerTandem.isLegalAndUsable() && phetioEvents.start( 'user', this.buttonListenerTandem.id, ButtonListenerIO, 'fire' );
 
           // Then fire the event
           this._buttonOptions.fire( event );

@@ -51,7 +51,7 @@ define( function( require ) {
   var Vector2 = require( 'DOT/Vector2' );
 
   // phet-io modules
-  var TDragListener = require( 'SCENERY/listeners/TDragListener' );
+  var DragListenerIO = require( 'SCENERY/listeners/DragListenerIO' );
   var phetioEvents = require( 'ifphetio!PHET_IO/phetioEvents' );
 
   /**
@@ -120,7 +120,7 @@ define( function( require ) {
       tandem: Tandem.tandemRequired(),
 
       // {TType} - PhET-iO type
-      phetioType: TDragListener
+      phetioType: DragListenerIO
     }, options );
 
     // @private {Tandem}
@@ -199,7 +199,7 @@ define( function( require ) {
       if ( success ) {
         sceneryLog && sceneryLog.InputListener && sceneryLog.InputListener( 'DragListener successful press' );
         sceneryLog && sceneryLog.InputListener && sceneryLog.push();
-        var eventId = phetioEvents.start( 'user', this._dragListenerTandem.id, TDragListener, 'start', {
+        var eventId = phetioEvents.start( 'user', this._dragListenerTandem.id, DragListenerIO, 'start', {
           x: event.pointer.point.x,
           y: event.pointer.point.y
         } );
@@ -234,7 +234,7 @@ define( function( require ) {
     release: function() {
       sceneryLog && sceneryLog.InputListener && sceneryLog.InputListener( 'DragListener release' );
       sceneryLog && sceneryLog.InputListener && sceneryLog.push();
-      var eventId = phetioEvents.start( 'user', this._dragListenerTandem.id, TDragListener, 'end' );
+      var eventId = phetioEvents.start( 'user', this._dragListenerTandem.id, DragListenerIO, 'end' );
 
       PressListener.prototype.release.call( this );
 

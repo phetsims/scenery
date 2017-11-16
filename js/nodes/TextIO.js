@@ -28,12 +28,12 @@ define( function( require ) {
    * @param {string} phetioID
    * @constructor
    */
-  function TText( text, phetioID ) {
+  function TextIO( text, phetioID ) {
     assert && assertInstanceOf( text, phet.scenery.Text );
     NodeIO.call( this, text, phetioID );
   }
 
-  phetioInherit( NodeIO, 'TText', TText, {
+  phetioInherit( NodeIO, 'TextIO', TextIO, {
 
     addTextChangedListener: {
       returnType: VoidIO,
@@ -70,7 +70,7 @@ define( function( require ) {
       implementation: function( font ) {
         this.instance.setFont( font );
       },
-      documentation: 'Set font options for this TText instance, e.g. {size: 16, weight: bold}'
+      documentation: 'Set font options for this TextIO instance, e.g. {size: 16, weight: bold}'
     },
 
     getFontOptions: {
@@ -79,7 +79,7 @@ define( function( require ) {
       implementation: function() {
         return this.instance.getFont();
       },
-      documentation: 'Get font options for this TText instance as an object'
+      documentation: 'Get font options for this TextIO instance as an object'
     },
 
     setMaxWidth: {
@@ -105,7 +105,7 @@ define( function( require ) {
     events: [ 'changed' ]
   } );
 
-  scenery.register( 'TText', TText );
+  scenery.register( 'TextIO', TextIO );
 
-  return TText;
+  return TextIO;
 } );

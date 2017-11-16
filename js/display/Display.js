@@ -86,7 +86,7 @@ define( function( require ) {
   var PointerAreaOverlay = require( 'SCENERY/overlays/PointerAreaOverlay' );
   var PointerOverlay = require( 'SCENERY/overlays/PointerOverlay' );
   var SceneryStyle = require( 'SCENERY/util/SceneryStyle' );
-  var TFocus = require( 'SCENERY/accessibility/TFocus' );
+  var FocusIO = require( 'SCENERY/accessibility/FocusIO' );
   var Util = require( 'SCENERY/util/Util' );
 
   /*
@@ -1872,7 +1872,7 @@ define( function( require ) {
     // Make this a static tandem so that it can be added to instance proxies correctly (batched and then flushed when the
     // listener is added).
     tandem: Tandem.createStaticTandem( 'display' ).createTandem( 'focusProperty' ),
-    phetioType: PropertyIO( TFocus )
+    phetioType: PropertyIO( FocusIO )
   } );
 
   /**

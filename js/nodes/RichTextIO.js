@@ -24,12 +24,12 @@ define( function( require ) {
    * @param {string} phetioID
    * @constructor
    */
-  function TRichText( text, phetioID ) {
+  function RichTextIO( text, phetioID ) {
     assert && assertInstanceOf( text, scenery.RichText );
     NodeIO.call( this, text, phetioID );
   }
 
-  phetioInherit( NodeIO, 'TRichText', TRichText, {
+  phetioInherit( NodeIO, 'RichTextIO', RichTextIO, {
 
     setText: {
       returnType: VoidIO,
@@ -52,7 +52,7 @@ define( function( require ) {
     documentation: 'The tandem wrapper type for the scenery RichText node'
   } );
 
-  scenery.register( 'TRichText', TRichText );
+  scenery.register( 'RichTextIO', RichTextIO );
 
-  return TRichText;
+  return RichTextIO;
 } );

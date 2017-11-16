@@ -22,17 +22,17 @@ define( function( require ) {
    * @param {string} phetioID
    * @constructor
    */
-  function TButtonListener( buttonListener, phetioID ) {
+  function ButtonListenerIO( buttonListener, phetioID ) {
     assert && assertInstanceOf( buttonListener, phet.scenery.ButtonListener );
     ObjectIO.call( this, buttonListener, phetioID );
   }
 
-  phetioInherit( ObjectIO, 'TButtonListener', TButtonListener, {}, {
+  phetioInherit( ObjectIO, 'ButtonListenerIO', ButtonListenerIO, {}, {
     documentation: 'Button listener',
     events: [ 'up', 'over', 'down', 'out', 'fire' ]
   } );
 
-  scenery.register( 'TButtonListener', TButtonListener );
+  scenery.register( 'ButtonListenerIO', ButtonListenerIO );
 
-  return TButtonListener;
+  return ButtonListenerIO;
 } );

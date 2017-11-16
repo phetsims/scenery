@@ -20,18 +20,18 @@ define( function( require ) {
    * @param {string} phetioID
    * @constructor
    */
-  function TSimpleDragHandler( simpleDragHandler, phetioID ) {
+  function SimpleDragHandlerIO( simpleDragHandler, phetioID ) {
     assert && assertInstanceOf( simpleDragHandler, phet.scenery.SimpleDragHandler );
     ObjectIO.call( this, simpleDragHandler, phetioID );
   }
 
-  phetioInherit( ObjectIO, 'TSimpleDragHandler', TSimpleDragHandler, {}, {
+  phetioInherit( ObjectIO, 'SimpleDragHandlerIO', SimpleDragHandlerIO, {}, {
     documentation: 'Drag listener for objects that can be dragged by the user.',
     events: [ 'dragStarted', 'dragged', 'dragEnded' ]
   } );
 
-  scenery.register( 'TSimpleDragHandler', TSimpleDragHandler );
+  scenery.register( 'SimpleDragHandlerIO', SimpleDragHandlerIO );
 
-  return TSimpleDragHandler;
+  return SimpleDragHandlerIO;
 } );
 

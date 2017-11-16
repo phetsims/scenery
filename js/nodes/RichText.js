@@ -70,7 +70,7 @@ define( function( require ) {
   var scenery = require( 'SCENERY/scenery' );
   var Tandem = require( 'TANDEM/Tandem' );
   var Text = require( 'SCENERY/nodes/Text' );
-  var TRichText = require( 'SCENERY/nodes/TRichText' );
+  var RichTextIO = require( 'SCENERY/nodes/RichTextIO' );
   var VStrut = require( 'SCENERY/nodes/VStrut' );
 
   // Options that can be used in the constructor, with mutate(), or directly as setters/getters
@@ -206,7 +206,7 @@ define( function( require ) {
       fill: '#000000',
       text: text,
       tandem: Tandem.tandemOptional(),
-      phetioType: TRichText
+      phetioType: RichTextIO
     }, options );
 
     this.mutate( options );

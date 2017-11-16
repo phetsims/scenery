@@ -26,7 +26,7 @@ define( function( require ) {
   var TextCanvasDrawable = require( 'SCENERY/display/drawables/TextCanvasDrawable' );
   var TextDOMDrawable = require( 'SCENERY/display/drawables/TextDOMDrawable' );
   var TextSVGDrawable = require( 'SCENERY/display/drawables/TextSVGDrawable' );
-  var TText = require( 'SCENERY/nodes/TText' );
+  var TextIO = require( 'SCENERY/nodes/TextIO' );
 
   // phet-io modules
   var phetioEvents = require( 'ifphetio!PHET_IO/phetioEvents' );
@@ -88,7 +88,7 @@ define( function( require ) {
       fill: '#000000', // Default to black filled text
       text: text,
       tandem: Tandem.tandemOptional(),
-      phetioType: TText
+      phetioType: TextIO
     }, options );
 
     this.textTandem = options.tandem; // @private (phet-io) - property name avoids namespace of the Node setter
@@ -149,7 +149,7 @@ define( function( require ) {
 
         // avoid calling this the first time that the setText event is called, as this is the "changed" event
         if ( this.textTandem.isLegalAndUsable() && !this.firstSetText ) {
-          phetioEvents.trigger( 'model', this.textTandem.id, TText, 'changed', {
+          phetioEvents.trigger( 'model', this.textTandem.id, TextIO, 'changed', {
             oldText: oldText,
             newText: text
           } );

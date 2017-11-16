@@ -14,7 +14,7 @@ define( function( require ) {
   var Tandem = require( 'TANDEM/Tandem' );
 
   // phet-io modules
-  var TSimpleDragHandler = require( 'SCENERY/input/TSimpleDragHandler' );
+  var SimpleDragHandlerIO = require( 'SCENERY/input/SimpleDragHandlerIO' );
   var phetioEvents = require( 'ifphetio!PHET_IO/phetioEvents' );
 
   /**
@@ -37,7 +37,7 @@ define( function( require ) {
       mouseButton: 0,
       dragCursor: 'pointer',
       tandem: Tandem.tandemRequired(),
-      phetioType: TSimpleDragHandler
+      phetioType: SimpleDragHandlerIO
     }, options );
     this.options = options; // @private
 
@@ -117,7 +117,7 @@ define( function( require ) {
 
         var delta = self.transform.inverseDelta2( globalDelta );
 
-        var id = phetioEvents.start( 'user', self.options.tandem.id, TSimpleDragHandler, 'dragged', {
+        var id = phetioEvents.start( 'user', self.options.tandem.id, SimpleDragHandlerIO, 'dragged', {
           x: event.pointer.point.x,
           y: event.pointer.point.y
         } );
@@ -176,7 +176,7 @@ define( function( require ) {
       // event.domEvent may not exist if this is touch-to-snag
       this.mouseButton = event.pointer.isMouse ? event.domEvent.button : undefined;
 
-      var id = phetioEvents.start( 'user', this.options.tandem.id, TSimpleDragHandler, 'dragStarted', {
+      var id = phetioEvents.start( 'user', this.options.tandem.id, SimpleDragHandlerIO, 'dragStarted', {
         x: event.pointer.point.x,
         y: event.pointer.point.y
       } );
@@ -194,7 +194,7 @@ define( function( require ) {
       this.pointer.removeInputListener( this.dragListener );
       this.dragging = false;
 
-      var id = phetioEvents.start( 'user', this.options.tandem.id, TSimpleDragHandler, 'dragEnded' );
+      var id = phetioEvents.start( 'user', this.options.tandem.id, SimpleDragHandlerIO, 'dragEnded' );
 
       if ( this.options.end ) {
 

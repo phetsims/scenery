@@ -19,18 +19,18 @@ define( function( require ) {
    * @param {string} phetioID
    * @constructor
    */
-  function TPressListener( pressListener, phetioID ) {
+  function PressListenerIO( pressListener, phetioID ) {
     assert && assertInstanceOf( pressListener, phet.scenery.PressListener );
     ObjectIO.call( this, pressListener, phetioID );
   }
 
-  phetioInherit( ObjectIO, 'TPressListener', TPressListener, {}, {
+  phetioInherit( ObjectIO, 'PressListenerIO', PressListenerIO, {}, {
     documentation: 'Input listener for something that can be pressed.',
     events: [ 'press', 'drag', 'release' ]
   } );
 
-  scenery.register( 'TPressListener', TPressListener );
+  scenery.register( 'PressListenerIO', PressListenerIO );
 
-  return TPressListener;
+  return PressListenerIO;
 } );
 

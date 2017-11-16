@@ -24,12 +24,12 @@ define( function( require ) {
    * @param {string} phetioID
    * @constructor
    */
-  function TImage( text, phetioID ) {
+  function ImageIO( text, phetioID ) {
     assert && assertInstanceOf( text, phet.scenery.Image );
     NodeIO.call( this, text, phetioID );
   }
 
-  phetioInherit( NodeIO, 'TImage', TImage, {
+  phetioInherit( NodeIO, 'ImageIO', ImageIO, {
 
     setImage: {
       returnType: VoidIO,
@@ -46,7 +46,7 @@ define( function( require ) {
     events: [ 'changed' ]
   } );
 
-  scenery.register( 'TImage', TImage );
+  scenery.register( 'ImageIO', ImageIO );
 
-  return TImage;
+  return ImageIO;
 } );

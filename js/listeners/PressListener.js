@@ -26,7 +26,7 @@ define( function( require ) {
   var Tandem = require( 'TANDEM/Tandem' );
 
   // phet-io modules
-  var TPressListener = require( 'SCENERY/listeners/TPressListener' );
+  var PressListenerIO = require( 'SCENERY/listeners/PressListenerIO' );
   var phetioEvents = require( 'ifphetio!PHET_IO/phetioEvents' );
 
   /**
@@ -104,7 +104,7 @@ define( function( require ) {
       tandem: Tandem.tandemRequired(),
 
       // {TType} -
-      phetioType: TPressListener
+      phetioType: PressListenerIO
     }, options );
 
     assert && assert( typeof options.mouseButton === 'number' &&
@@ -398,7 +398,7 @@ define( function( require ) {
 
       sceneryLog && sceneryLog.InputListener && sceneryLog.InputListener( 'PressListener successful press' );
       sceneryLog && sceneryLog.InputListener && sceneryLog.push();
-      var eventId = phetioEvents.start( 'user', this._pressListenerTandem.id, TPressListener, 'press', {
+      var eventId = phetioEvents.start( 'user', this._pressListenerTandem.id, PressListenerIO, 'press', {
         x: event.pointer.point.x,
         y: event.pointer.point.y
       } );
@@ -437,7 +437,7 @@ define( function( require ) {
     release: function() {
       sceneryLog && sceneryLog.InputListener && sceneryLog.InputListener( 'PressListener release' );
       sceneryLog && sceneryLog.InputListener && sceneryLog.push();
-      var eventId = phetioEvents.start( 'user', this._pressListenerTandem.id, TPressListener, 'release' );
+      var eventId = phetioEvents.start( 'user', this._pressListenerTandem.id, PressListenerIO, 'release' );
 
       assert && assert( this.isPressed, 'This listener is not pressed' );
 
@@ -471,7 +471,7 @@ define( function( require ) {
     drag: function( event ) {
       sceneryLog && sceneryLog.InputListener && sceneryLog.InputListener( 'PressListener drag' );
       sceneryLog && sceneryLog.InputListener && sceneryLog.push();
-      var eventId = phetioEvents.start( 'user', this._pressListenerTandem.id, TPressListener, 'drag', {
+      var eventId = phetioEvents.start( 'user', this._pressListenerTandem.id, PressListenerIO, 'drag', {
         x: event.pointer.point.x,
         y: event.pointer.point.y
       } );

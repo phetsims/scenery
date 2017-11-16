@@ -23,12 +23,12 @@ define( function( require ) {
    * @param {string} phetioID - the unique tandem assigned to the focus
    * @constructor
    */
-  function TFocus( focus, phetioID ) {
+  function FocusIO( focus, phetioID ) {
     assert && assertInstanceOf( focus, phet.scenery.Focus );
     ObjectIO.call( this, focus, phetioID );
   }
 
-  phetioInherit( ObjectIO, 'TFocus', TFocus, {}, {
+  phetioInherit( ObjectIO, 'FocusIO', FocusIO, {}, {
 
     /**
      * Convert the focus region to a plain JS object for serialization.
@@ -78,7 +78,7 @@ define( function( require ) {
     documentation: 'A wrapper type for the instance in the simulation which currently has keyboard focus.'
   } );
 
-  scenery.register( 'TFocus', TFocus );
+  scenery.register( 'FocusIO', FocusIO );
 
-  return TFocus;
+  return FocusIO;
 } );
