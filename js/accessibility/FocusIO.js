@@ -42,6 +42,7 @@ define( function( require ) {
         return null;
       }
       else {
+        assert && assertInstanceOf( focus, phet.scenery.Focus );
         var phetioIDIndices = [];
         focus.trail.nodes.forEach( function( node, i ) {
 

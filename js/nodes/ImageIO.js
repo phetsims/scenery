@@ -20,13 +20,13 @@ define( function( require ) {
 
   /**
    * Wrapper type for scenery's Text node.
-   * @param {Text} text
+   * @param {Text} image
    * @param {string} phetioID
    * @constructor
    */
-  function ImageIO( text, phetioID ) {
-    assert && assertInstanceOf( text, phet.scenery.Image );
-    NodeIO.call( this, text, phetioID );
+  function ImageIO( image, phetioID ) {
+    assert && assertInstanceOf( image, phet.scenery.Image );
+    NodeIO.call( this, image, phetioID );
   }
 
   phetioInherit( NodeIO, 'ImageIO', ImageIO, {

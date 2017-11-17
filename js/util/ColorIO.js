@@ -46,6 +46,7 @@ define( function( require ) {
      * @returns {Object}
      */
     toStateObject: function( color ) {
+      assert && assertInstanceOf( color, phet.scenery.Color );
       return color.toStateObject();
     }
   } );
