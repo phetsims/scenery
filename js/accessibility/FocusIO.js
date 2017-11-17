@@ -42,7 +42,20 @@ define( function( require ) {
         return null;
       }
       else {
-        return { focusedPhetioID: focus.trail.lastNode().phetioID, indices: focus.trail.indices};
+        var phetioIDIndices = [];
+        focus.trail.nodes.forEach( function( node, i ) {
+
+          // Don't include the last node, since it is the focused node
+          if(i < focus.trail.nodes.length -1) {
+            phetioIDIndices.push( node.phetioID || focus.trail.indices[ i ] );
+          }
+        } );
+
+        return {
+          focusedPhetioID: focus.trail.lastNode().phetioID,
+          indices: focus.trail.indices,
+          phetioIDIndices: phetioIDIndices
+        };
       }
     },
 
