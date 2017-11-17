@@ -547,8 +547,6 @@ define( function( require ) {
 
       PressListener.prototype.dispose.call( this );
 
-      this._dragListenerTandem.removeInstance( this );
-
       sceneryLog && sceneryLog.InputListener && sceneryLog.pop();
     }
   }, {
