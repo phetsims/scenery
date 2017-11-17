@@ -59,8 +59,8 @@ define( function( require ) {
   var inherit = require( 'PHET_CORE/inherit' );
   var Matrix3 = require( 'DOT/Matrix3' );
   var Property = require( 'AXON/Property' );
-  var Tandem = require( 'TANDEM/Tandem' );
   var PropertyIO = require( 'AXON/PropertyIO' );
+  var Tandem = require( 'TANDEM/Tandem' );
   var Vector2 = require( 'DOT/Vector2' );
 
   var Features = require( 'SCENERY/util/Features' );
@@ -82,12 +82,15 @@ define( function( require ) {
   var AccessibleInstance = require( 'SCENERY/accessibility/AccessibleInstance' );
   var CanvasNodeBoundsOverlay = require( 'SCENERY/overlays/CanvasNodeBoundsOverlay' );
   var FittedBlockBoundsOverlay = require( 'SCENERY/overlays/FittedBlockBoundsOverlay' );
+  var FocusIO = require( 'SCENERY/accessibility/FocusIO' );
   var FocusOverlay = require( 'SCENERY/overlays/FocusOverlay' );
   var PointerAreaOverlay = require( 'SCENERY/overlays/PointerAreaOverlay' );
   var PointerOverlay = require( 'SCENERY/overlays/PointerOverlay' );
   var SceneryStyle = require( 'SCENERY/util/SceneryStyle' );
-  var FocusIO = require( 'SCENERY/accessibility/FocusIO' );
   var Util = require( 'SCENERY/util/Util' );
+
+  // phet-io modules
+  var NullableIO = require( 'ifphetio!PHET_IO/types/NullableIO' );
 
   /*
    * Constructs a Display that will show the rootNode and its subtree in a visual state. Default options provided below
@@ -1872,7 +1875,7 @@ define( function( require ) {
     // Make this a static tandem so that it can be added to instance proxies correctly (batched and then flushed when the
     // listener is added).
     tandem: Tandem.createStaticTandem( 'display' ).createTandem( 'focusProperty' ),
-    phetioType: PropertyIO( FocusIO )
+    phetioType: PropertyIO( NullableIO( FocusIO ) )
   } );
 
   /**
