@@ -20,13 +20,13 @@ define( function( require ) {
 
   /**
    * Wrapper type for scenery's Text node.
-   * @param {Text} text
+   * @param {Text} richText
    * @param {string} phetioID
    * @constructor
    */
-  function RichTextIO( text, phetioID ) {
-    assert && assertInstanceOf( text, scenery.RichText );
-    NodeIO.call( this, text, phetioID );
+  function RichTextIO( richText, phetioID ) {
+    assert && assertInstanceOf( richText, scenery.RichText );
+    NodeIO.call( this, richText, phetioID );
   }
 
   phetioInherit( NodeIO, 'RichTextIO', RichTextIO, {

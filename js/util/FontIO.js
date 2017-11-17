@@ -56,6 +56,7 @@ define( function( require ) {
      * @returns {Object}
      */
     toStateObject: function( font ) {
+      assert && assertInstanceOf( font, phet.scenery.Font );
       return {
         style: font.getStyle(),
         variant: font.getVariant(),
