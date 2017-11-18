@@ -240,7 +240,6 @@ define( function( require ) {
     'touchArea', // Changes the area touches can interact with, see setTouchArea() for more documentation
     'clipArea', // Makes things outside of a shape invisible, see setClipArea() for more documentation
     'transformBounds', // Flag that makes bounds tighter, see setTransformBounds() for more documentation
-    'accessibleContent', // Sets up accessibility handling, see setAccessibleContent() for more documentation
     'phetioType', // The corresponding phet-io wrapper type
     'phetioState', // Flag to include in phet-io state. The properties on node default to undefined, but phet-io defaults this to true, see phetio.addInstance()
     'phetioEvents', // Flag to include in phet-io event stream. The properties on node default to undefined, but phet-io defaults this to true, see phetio.addInstance()
@@ -259,7 +258,6 @@ define( function( require ) {
     mouseArea: null,
     touchArea: null,
     cursor: null,
-    accessibleContent: null,
     transformBounds: false,
     maxWidth: null,
     maxHeight: null,
@@ -328,9 +326,6 @@ define( function( require ) {
     // @protected {Array.<Instance>} - All of the Instances tracking this Node
     this._instances = [];
 
-    // @protected {Array.<AccessibleInstance>} - Empty unless the node contains some accessible instance.
-    this._accessibleInstances = [];
-
     // @protected {Array.<Display>} - All displays where this node is the root.
     this._rootedDisplays = [];
 
@@ -363,14 +358,6 @@ define( function( require ) {
     // @private {string|null} - The CSS cursor to be displayed over this node. null should be the default (inherit) value.
     this._cursor = DEFAULT_OPTIONS.cursor;
 
-    // @private {null|Object} - If non-null, this node will be represented in the parallel DOM by the accessible content.
-    // The accessibleContent object will be of the form:
-    // {
-    //   createPeer: function( {AccessibleInstance} ): {AccessiblePeer},
-    //   [focusHighlight]: {Bounds2|Shape|Node|string.<'invisible'>}
-    // }
-    // The focus highlight can be a custom Shape, Node, contain the Node's local bounds, or be invisible.
-    this._accessibleContent = DEFAULT_OPTIONS.accessibleContent;
 
     // @public (scenery-internal) - Not for public use, but used directly internally for performance.
     this._children = []; // {Array.<Node>} - Ordered array of child nodes.
@@ -1788,58 +1775,6 @@ define( function( require ) {
     },
 
     /**
-     * Called when the node is added as a child to this node AND the node's subtree contains accessible content.
-     * We need to notify all Displays that can see this change, so that they can update the AccessibleInstance tree.
-     * @private
-     *
-     * @param {Node} node
-     */
-    onAccessibleAddChild: function( node ) {
-      // All trails starting with nodes that have display roots, and ending with the added node.
-      var trails = node.getTrails( Node.hasRootedDisplayPredicate );
-      for ( var i = 0; i < trails.length; i++ ) {
-        var trail = trails[ i ];
-
-        // Ignore trails where this node is not the child node's parent. See https://github.com/phetsims/scenery/issues/491
-        if ( trail.nodeFromTop( 1 ) !== this ) {
-          continue;
-        }
-
-        // Notify each Display of the trail
-        var rootedDisplays = trail.rootNode()._rootedDisplays;
-        for ( var j = 0; j < rootedDisplays.length; j++ ) {
-          rootedDisplays[ j ].addAccessibleTrail( trail );
-        }
-      }
-    },
-
-    /**
-     * Called when the node is removed as a child from this node AND the node's subtree contains accessible content.
-     * We need to notify all Displays that can see this change, so that they can update the AccessibleInstance tree.
-     * @private
-     *
-     * @param {Node} node
-     */
-    onAccessibleRemoveChild: function( node ) {
-      // All trails starting with nodes that have display roots, and ending with the removed node.
-      var trails = node.getTrails( Node.hasRootedDisplayPredicate );
-      for ( var i = 0; i < trails.length; i++ ) {
-        var trail = trails[ i ];
-
-        // Ignore trails where this node is not the child node's parent. See https://github.com/phetsims/scenery/issues/491
-        if ( trail.nodeFromTop( 1 ) !== this ) {
-          continue;
-        }
-
-        // Notify each Display of the trail
-        var rootedDisplays = trail.rootNode()._rootedDisplays;
-        for ( var j = 0; j < rootedDisplays.length; j++ ) {
-          rootedDisplays[ j ].removeAccessibleTrail( trail );
-        }
-      }
-    },
-
-    /**
      * Changes the transform of this node by adding a transform. The default "appends" the transform, so that it will
      * appear to happen to the node before the rest of the transform would apply, but if "prepended", the rest of the
      * transform would apply first.
@@ -1857,7 +1792,6 @@ define( function( require ) {
      *
      * @param {number} x - The x coordinate
      * @param {number} y - The y coordinate
-     * @param {Vector2} vector - If present, the y coordinate (required if x is a number)
      * @param {boolean} [prependInstead] - Whether the transform should be prepended (defaults to false)
      */
     translate: function( x, y, prependInstead ) {
@@ -3251,45 +3185,6 @@ define( function( require ) {
     },
 
     /**
-     * Sets the accessible content for a Node. See constructor for more information.
-     * @public (scenery-internal)
-     *
-     * @param {null|Object} accessibleContent
-     */
-    setAccessibleContent: function( accessibleContent ) {
-      assert && assert( accessibleContent === null || accessibleContent instanceof Object );
-
-      if ( this._accessibleContent !== accessibleContent ) {
-        var oldAccessibleContent = this._accessibleContent;
-        this._accessibleContent = accessibleContent;
-
-        var trails = this.getTrails( Node.hasRootedDisplayPredicate );
-        for ( var i = 0; i < trails.length; i++ ) {
-          var trail = trails[ i ];
-          var rootedDisplays = trail.rootNode()._rootedDisplays;
-          for ( var j = 0; j < rootedDisplays.length; j++ ) {
-            rootedDisplays[ j ].changedAccessibleContent( trail, oldAccessibleContent, accessibleContent );
-          }
-        }
-
-        this.trigger0( 'accessibleContent' );
-      }
-    },
-    set accessibleContent( value ) { this.setAccessibleContent( value ); },
-
-    /**
-     * Returns the accessible content for this node.
-     * @public (scenery-internal)
-     *
-     *
-     * @returns {null|Object}
-     */
-    getAccessibleContent: function() {
-      return this._accessibleContent;
-    },
-    get accessibleContent() { return this.getAccessibleContent(); },
-
-    /**
      * Sets what self renderers (and other bitmask flags) are supported by this node.
      * @protected
      *
@@ -4438,45 +4333,6 @@ define( function( require ) {
       var index = _.indexOf( this._instances, instance );
       assert && assert( index !== -1, 'Cannot remove a Instance from a Node if it was not there' );
       this._instances.splice( index, 1 );
-    },
-
-    /*---------------------------------------------------------------------------*
-     * Accessible Instance handling
-     *----------------------------------------------------------------------------*/
-
-    /**
-     * Returns a reference to the accessible instances array.
-     * @public (scenery-internal)
-     *
-     * @returns {Array.<AccessibleInstance>}
-     */
-    getAccessibleInstances: function() {
-      return this._accessibleInstances;
-    },
-    get accessibleInstances() { return this.getAccessibleInstances(); },
-
-    /**
-     * Adds an AccessibleInstance reference to our array.
-     * @public (scenery-internal)
-     *
-     * @param {AccessibleInstance} accessibleInstance
-     */
-    addAccessibleInstance: function( accessibleInstance ) {
-      assert && assert( accessibleInstance instanceof scenery.AccessibleInstance );
-      this._accessibleInstances.push( accessibleInstance );
-    },
-
-    /**
-     * Removes an AccessibleInstance reference from our array.
-     * @public (scenery-internal)
-     *
-     * @param {AccessibleInstance} accessibleInstance
-     */
-    removeAccessibleInstance: function( accessibleInstance ) {
-      assert && assert( accessibleInstance instanceof scenery.AccessibleInstance );
-      var index = _.indexOf( this._accessibleInstances, accessibleInstance );
-      assert && assert( index !== -1, 'Cannot remove an AccessibleInstance from a Node if it was not there' );
-      this._accessibleInstances.splice( index, 1 );
     },
 
     /*---------------------------------------------------------------------------*
