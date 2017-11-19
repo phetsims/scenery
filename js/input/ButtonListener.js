@@ -46,7 +46,7 @@ define( function( require ) {
     options = _.extend( {
 
       // When running in PhET-iO brand, the tandem must be supplied
-      tandem: Tandem.tandemOptional(),
+      tandem: Tandem.optional,
       phetioType: ButtonListenerIO
     }, options );
 

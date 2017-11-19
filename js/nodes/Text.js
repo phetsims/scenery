@@ -87,7 +87,7 @@ define( function( require ) {
     options = extendDefined( {
       fill: '#000000', // Default to black filled text
       text: text,
-      tandem: Tandem.tandemOptional(),
+      tandem: Tandem.optional,
       phetioType: TextIO
     }, options );
 

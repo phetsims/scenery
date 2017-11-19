@@ -117,7 +117,7 @@ define( function( require ) {
       isUserControlledProperty: null,
 
       // {Tandem} - For instrumenting
-      tandem: Tandem.tandemRequired(),
+      tandem: Tandem.required,
 
       // {TypeIO} - PhET-iO type
       phetioType: DragListenerIO

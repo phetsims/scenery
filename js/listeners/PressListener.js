@@ -101,7 +101,7 @@ define( function( require ) {
       canStartPress: _.constant( true ),
 
       // {Tandem} - For instrumenting
-      tandem: Tandem.tandemRequired(),
+      tandem: Tandem.required,
 
       // {TypeIO} -
       phetioType: PressListenerIO

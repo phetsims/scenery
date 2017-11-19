@@ -1874,7 +1874,7 @@ define( function( require ) {
 
     // Make this a static tandem so that it can be added to instance proxies correctly (batched and then flushed when the
     // listener is added).
-    tandem: Tandem.createStaticTandem( 'display' ).createTandem( 'focusProperty' ),
+    tandem: Tandem.rootTandem.createTandem( 'display' ).createTandem( 'focusProperty' ),
     phetioType: PropertyIO( NullableIO( FocusIO ) )
   } );
 

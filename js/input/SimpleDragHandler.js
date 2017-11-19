@@ -36,7 +36,7 @@ define( function( require ) {
       allowTouchSnag: false,
       mouseButton: 0,
       dragCursor: 'pointer',
-      tandem: Tandem.tandemRequired(),
+      tandem: Tandem.required,
       phetioType: SimpleDragHandlerIO
     }, options );
     this.options = options; // @private
