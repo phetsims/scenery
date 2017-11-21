@@ -1877,7 +1877,7 @@ define( function( require ) {
   };
 
   // Don't instrument the focusProperty if a11y is not enabled in this simulation.
-  if ( !(phet && phet.chipper && phet.chipper.a11yEnabled) ) {
+  if ( !( window.phet && phet.chipper && phet.chipper.a11yEnabled) ) {
     focusPhetioOptions = {};
   }
 
