@@ -131,7 +131,7 @@ define( function( require ) {
       backgroundColor: null,      // initial background color
       preserveDrawingBuffer: false,
       allowWebGL: true,
-      accessibility: true,
+      accessibility: true,        // enables accessibility features
       isApplication: false,      // adds the aria-role: 'application' when accessibility is enabled
       interactive: true,
 
@@ -1867,16 +1867,24 @@ define( function( require ) {
     'scenery-grabbing-pointer': [ 'grabbing', '-moz-grabbing', '-webkit-grabbing', 'pointer' ]
   };
 
-  // @public (a11y) {Focus|null} - Display has an axon Property to indicate which component is focused (or null
-  // if no scenery node has focus).  By pasing the tandem and phetioValueType, PhET-iO is able to interoperate (save,
-  // restore, control, observe what is currently focused.
-  Display.focusProperty = new Property( null, {
+  // options for the focusProperty
+  var focusPhetioOptions = {
 
     // Make this a static tandem so that it can be added to instance proxies correctly (batched and then flushed when the
     // listener is added).
     tandem: Tandem.rootTandem.createTandem( 'display' ).createTandem( 'focusProperty' ),
     phetioType: PropertyIO( NullableIO( FocusIO ) )
-  } );
+  };
+
+  // Don't instrument the focusProperty if a11y is not enabled in this simulation.
+  if ( !(phet && phet.chipper && phet.chipper.a11yEnabled) ) {
+    focusPhetioOptions = {};
+  }
+
+  // @public (a11y) {Focus|null} - Display has an axon Property to indicate which component is focused (or null
+  // if no scenery node has focus).  By pasing the tandem and phetioValueType, PhET-iO is able to interoperate (save,
+  // restore, control, observe what is currently focused.
+  Display.focusProperty = new Property( null, focusPhetioOptions );
 
   /**
    * Returns true when NO nodes in the subtree are disposed.
