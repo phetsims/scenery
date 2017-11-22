@@ -214,7 +214,7 @@ define( function( require ) {
     this._requestAnimationFrameID = 0;
 
     // will be filled in with a scenery.Input if event handling is enabled
-    this._input = null;
+    this._input = null; // @public (phet-io)
     this._inputListeners = []; // {Array.<Object>} - Listeners that will be called for every event.
     this._interactive = this.options.interactive;
     this._listenToOnlyElement = options.listenToOnlyElement; // TODO: doc
