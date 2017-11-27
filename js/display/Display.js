@@ -1825,6 +1825,13 @@ define( function( require ) {
      */
     set focus( value ) {
 
+      // If in phet-io brand, a11y is enabled, and the focus is not null
+      if( window.phet && phet.phetio && phet.chipper.a11yEnabled && value ){
+        var node = value.trail.lastNode();
+        assert && assert( node.tandem && node.tandem.isLegalAndUsable(),
+          'When running phet-io mode, all focusable instances must be instrumented.');
+      }
+
       // Emit that the old focused node is no longer focused
       this.focusProperty.value && this.focusProperty.value.trail.lastNode().focusChangedEmitter.emit1( false );
 
