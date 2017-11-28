@@ -89,6 +89,7 @@ define( function( require ) {
         if ( event.target === self.domElement ) {
           if ( self.accessibleInstance.node.focusable ) {
             scenery.Display.focus = new Focus( accessibleInstance.display, accessibleInstance.trail );
+            self.display.pointerFocus = null;
           }
         }
       };

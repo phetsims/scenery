@@ -265,9 +265,10 @@ define( function( require ) {
       // TODO: doc
       this._unsortedAccessibleInstances = [];
 
-      // @private - the node that currently has focus when we remove an accessible trail,
-      // tracked so that we can restore focus during sorting of accessible instances
-      this._focusedNodeOnRemoveTrail = null;
+      // @public (scenery-internal) {Node|null} - When this display receives a pointer event, this is the focusable
+      // node that is being interacted with. When keyboard navigation resumes after pointer interaction, this node will
+      // receive focus.
+      this.pointerFocus = null;
 
       this._rootAccessibleInstance = AccessibleInstance.createFromPool( null, this, new scenery.Trail() );
       sceneryLog && sceneryLog.AccessibleInstance && sceneryLog.AccessibleInstance(
@@ -675,12 +676,6 @@ define( function( require ) {
 
       this.sortAccessibleInstances();
 
-      // after sorting, restore focus if the browser blured while removing DOM elements
-      if ( this._focusedNodeOnRemoveTrail ) {
-        this._focusedNodeOnRemoveTrail.focusable && this._focusedNodeOnRemoveTrail.focus();
-        this._focusedNodeOnRemoveTrail = null;
-      }
-
       sceneryLog && sceneryLog.Accessibility && sceneryLog.pop();
     },
 
@@ -698,7 +693,6 @@ define( function( require ) {
       sceneryLog && sceneryLog.Accessibility && sceneryLog.Accessibility( 'Display.removeAccessibleTrail ' + trail.toString() );
       sceneryLog && sceneryLog.Accessibility && sceneryLog.push();
 
-      this._focusedNodeOnRemoveTrail = Display.focusedNode;
       this.getBaseAccessibleInstance( trail ).removeSubtree( trail );
 
       this.sortAccessibleInstances();
@@ -1834,11 +1828,18 @@ define( function( require ) {
 
       // Emit that the old focused node is no longer focused
       this.focusProperty.value && this.focusProperty.value.trail.lastNode().focusChangedEmitter.emit1( false );
-
       this.focusProperty.value = value;
 
-      // Emit that the new node is focused
-      value && value.trail.lastNode().focusChangedEmitter.emit1( true );
+      if ( value ) {
+
+        // Emit that the new node is focused
+        value.trail.lastNode().focusChangedEmitter.emit1( true );
+      }
+      else {
+
+        // if set to null, make sure that the active element is no longer focused
+        document.activeElement && document.activeElement.blur();
+      }
     },
 
     /**

@@ -13,6 +13,7 @@ define( function( require ) {
   var cleanArray = require( 'PHET_CORE/cleanArray' );
   var Events = require( 'AXON/Events' );
   var inherit = require( 'PHET_CORE/inherit' );
+  var Input = require( 'SCENERY/input/Input' );
   var Poolable = require( 'PHET_CORE/Poolable' );
   var scenery = require( 'SCENERY/scenery' );
 
@@ -74,6 +75,24 @@ define( function( require ) {
         accessibilityContainer.style.clip = 'rect(0,0,0,0)';
         accessibilityContainer.style.pointerEvents = 'none';
         this.peer = new scenery.AccessiblePeer( this, accessibilityContainer );
+
+        var self = this;
+        document.body.addEventListener( 'keydown', function( event ) {
+
+          // if an accessible node was being interacted with a mouse, this node that should receive focus upon 
+          // keyboard navigation
+          if ( self.display.pointerFocus ) {
+            var focusable = self.display.pointerFocus.focusable;
+            var inDOM = self.display.pointerFocus.getAccessibleInstances().length > 0;
+            if ( focusable && inDOM ) {
+              if ( event.keyCode === Input.KEY_TAB ) {
+                event.preventDefault();
+                self.display.pointerFocus.focus();
+                self.display.pointerFocus = null;
+              }
+            }
+          }
+        } );
       }
       else {
         this.peer = this.node.accessibleContent.createPeer( this );
