@@ -88,7 +88,10 @@ define( function( require ) {
       // @private - listener for the focus event, to be disposed
       var focusEventListener = function( event ) {
         if ( event.target === self.domElement ) {
-          scenery.Display.focus = new Focus( accessibleInstance.display, accessibleInstance.trail );
+          if ( self.accessibleInstance.node.focusable ) {
+            scenery.Display.focus = new Focus( accessibleInstance.display, accessibleInstance.trail );
+            self.display.pointerFocus = null;
+          }
         }
       };
       this.domElement.addEventListener( 'focus', focusEventListener );

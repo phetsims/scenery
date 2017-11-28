@@ -647,6 +647,24 @@ define( function( require ) {
       this.dispatchEvent( trail, 'down', pointer, event, true );
 
       pointer.trail = trail;
+
+      // a11y
+      var focusableNode = null;
+      var trailAccessible = !trail.rootNode()._rendererSummary.isNotAccessible();
+      if ( trailAccessible ) {
+
+        // if any node in the trail has accessible content, move up the trail to first focusable node under the pointer
+        for ( var i = trail.nodes.length - 1; i >= 0; i-- ) {
+          if ( trail.nodes[ i ].focusable ) {
+            focusableNode = trail.nodes[ i ];
+            break;
+          }
+        }
+
+        // remove keyboard focus, but store element that is receiving interaction in case we resume 
+        this.display.pointerFocus = focusableNode;
+        scenery.Display.focus = null;
+      }
     },
 
     moveEvent: function( pointer, event ) {
