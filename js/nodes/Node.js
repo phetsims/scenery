@@ -267,7 +267,8 @@ define( function( require ) {
     cssTransform: false,
     excludeInvisible: false,
     webglScale: null,
-    preventFit: false
+    preventFit: false,
+    phetioState: true
   };
 
   /**
@@ -357,7 +358,6 @@ define( function( require ) {
 
     // @private {string|null} - The CSS cursor to be displayed over this node. null should be the default (inherit) value.
     this._cursor = DEFAULT_OPTIONS.cursor;
-
 
     // @public (scenery-internal) - Not for public use, but used directly internally for performance.
     this._children = []; // {Array.<Node>} - Ordered array of child nodes.
@@ -3528,6 +3528,9 @@ define( function( require ) {
       var flags = {};
       if ( typeof this._phetioState === 'boolean' ) {
         flags.phetioState = this._phetioState;
+      }
+      else {
+        flags.phetioState = DEFAULT_OPTIONS.phetioState;
       }
       if ( typeof this._phetioEvents === 'boolean' ) {
         flags.phetioEvents = this._phetioEvents;
