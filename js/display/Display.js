@@ -1278,6 +1278,69 @@ define( function( require ) {
     },
 
     /**
+     * A random event creater that sends keyboard events. Based on the idea of fuzzMouse, but to test/spam accessibility
+     * related keyboard navigation and alternate input implementation.
+     *
+     * TODO: NOTE: Right now this is a very experimental implementation. Tread wearily
+     * TODO: @param keyboardPressesPerFocusedItem {number} - basically would be the same as fuzzRate, but handling
+     * TODO:     the keydown events for a focused item
+     */
+    fuzzBoardEvents: function() {
+
+      // TODO: add accessibility util functions to get a random focusable element from the tree
+      var elementWithFocus = document.activeElement;
+
+      // click something
+      eventFire( elementWithFocus, 'click' );
+
+      // TODO: A while loop of events will make us able to spam a ton of key presses per frame/per focused item,
+      // TODO:   perhaps using a parameter to control the number of events per frame
+
+      var leftOrRight = phet.joist.random.nextDouble() < .5 ? Input.KEY_LEFT_ARROW : Input.KEY_RIGHT_ARROW;
+      triggerDOMEvent( 'keydown', elementWithFocus, leftOrRight );
+
+      // TODO: can we use setTimeout here?
+      setTimeout( function() {
+        triggerDOMEvent( 'keyup', elementWithFocus, leftOrRight );
+
+      }, 1 ); // TODO: make this time variable?
+
+
+      // TODO: can't we just use the function below for the click event also? It basically looks the same
+      function eventFire( el, etype ) {
+        if ( el.fireEvent ) {
+          el.fireEvent( 'on' + etype );
+        }
+        else {
+          var evObj = document.createEvent( 'Events' );
+          evObj.initEvent( etype, true, false );
+          el.dispatchEvent( evObj );
+        }
+      }
+
+      /**
+       * Taken from example in http://output.jsbin.com/awenaq/3,
+       * @param event
+       * @param element
+       * @param keyCode
+       */
+      function triggerDOMEvent( event, element, keyCode ) {
+        var eventObj = document.createEventObject ?
+                       document.createEventObject() : document.createEvent( 'Events' );
+
+        if ( eventObj.initEvent ) {
+          eventObj.initEvent( event, true, true );
+        }
+
+        eventObj.keyCode = keyCode;
+        // eventObj.shiftKey = true; // TODO: we can add modifier keys in here with options?
+        eventObj.which = keyCode;
+
+        element.dispatchEvent ? element.dispatchEvent( eventObj ) : element.fireEvent( 'on' + event, eventObj );
+      }
+    },
+
+    /**
      * Makes this Display available for inspection.
      * @public
      */
