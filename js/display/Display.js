@@ -120,10 +120,10 @@ define( function( require ) {
 
     options = _.extend( {
       // initial display width
-      width: (options && options.container && options.container.clientWidth) || 640,
+      width: ( options && options.container && options.container.clientWidth ) || 640,
 
       // initial display height
-      height: (options && options.container && options.container.clientHeight) || 480,
+      height: ( options && options.container && options.container.clientHeight ) || 480,
 
       allowCSSHacks: true,       // applies CSS styles to the root DOM element that make it amenable to interactive content
       allowSceneOverflow: false, // usually anything displayed outside of our dom element is hidden with CSS overflow
@@ -172,7 +172,7 @@ define( function( require ) {
     this._rootNode = rootNode;
     this._rootNode.addRootedDisplay( this );
     this._rootBackbone = null; // to be filled in later
-    this._domElement = (options && options.container) ?
+    this._domElement = ( options && options.container ) ?
                        scenery.BackboneDrawable.repurposeBackboneContainer( options.container ) :
                        scenery.BackboneDrawable.createDivBackbone();
     this._sharedCanvasInstances = {}; // map from Node ID to Instance, for fast lookup
@@ -715,8 +715,8 @@ define( function( require ) {
 
       sceneryLog && sceneryLog.Accessibility && sceneryLog.Accessibility(
         'Display.changedAccessibleContent ' + trail.toString() +
-        ' old: ' + (!!oldAccessibleContent) +
-        ' new: ' + (!!newAccessibleContent) );
+        ' old: ' + ( !!oldAccessibleContent ) +
+        ' new: ' + ( !!newAccessibleContent ) );
       sceneryLog && sceneryLog.Accessibility && sceneryLog.push();
 
       this.getBaseAccessibleInstance( trail ).removeSubtree( trail );
@@ -857,9 +857,9 @@ define( function( require ) {
 
       var newBackgroundCSS = this._backgroundColor === null ?
                              '' :
-                             (this._backgroundColor.toCSS ?
-                              this._backgroundColor.toCSS() :
-                              this._backgroundColor);
+                             ( this._backgroundColor.toCSS ?
+                               this._backgroundColor.toCSS() :
+                               this._backgroundColor );
       if ( newBackgroundCSS !== this._currentBackgroundCSS ) {
         this._currentBackgroundCSS = newBackgroundCSS;
 
@@ -893,7 +893,7 @@ define( function( require ) {
           }
         }
 
-        sceneryLog && sceneryLog.Cursor && sceneryLog.Cursor( '--- for ' + (mouseTrail ? mouseTrail.toString() : '(no hit)') );
+        sceneryLog && sceneryLog.Cursor && sceneryLog.Cursor( '--- for ' + ( mouseTrail ? mouseTrail.toString() : '(no hit)' ) );
       }
 
       // fallback case
@@ -1059,19 +1059,19 @@ define( function( require ) {
       var timeElapsedInSeconds = 0;
 
       var self = this;
-      (function step() {
+      ( function step() {
         self._requestAnimationFrameID = window.requestAnimationFrame( step, self._domElement );
 
         // calculate how much time has elapsed since we rendered the last frame
         var timeNow = new Date().getTime();
         if ( lastTime !== 0 ) {
-          timeElapsedInSeconds = (timeNow - lastTime) / 1000.0;
+          timeElapsedInSeconds = ( timeNow - lastTime ) / 1000.0;
         }
         lastTime = timeNow;
 
         stepCallback && stepCallback( timeElapsedInSeconds );
         self.updateDisplay();
-      })();
+      } )();
     },
 
     cancelUpdateOnRequestAnimationFrame: function() {
@@ -1196,7 +1196,7 @@ define( function( require ) {
      * NOTE: Should generally only be used for debugging.
      */
     loseWebGLContexts: function() {
-      (function loseBackbone( backbone ) {
+      ( function loseBackbone( backbone ) {
         if ( backbone.blocks ) {
           backbone.blocks.forEach( function( block ) {
             if ( block.gl ) {
@@ -1210,7 +1210,7 @@ define( function( require ) {
             }
           } );
         }
-      })( this._rootBackbone );
+      } )( this._rootBackbone );
     },
 
     /**
@@ -1226,9 +1226,9 @@ define( function( require ) {
       // run a variable number of events, with a certain chance of bailing out (so no events are possible)
       // models a geometric distribution of events
       // See https://github.com/phetsims/joist/issues/343 for notes on the distribution.
-      while ( (chance = Math.random()) < 1 - 1 / (averageEventQuantity + 1) ) {
+      while ( ( chance = Math.random() ) < 1 - 1 / ( averageEventQuantity + 1 ) ) {
         var domEvent;
-        if ( chance < (this._fuzzMouseLastMoved ? 0.7 : 0.4) ) {
+        if ( chance < ( this._fuzzMouseLastMoved ? 0.7 : 0.4 ) ) {
           // toggle up/down
           domEvent = document.createEvent( 'MouseEvent' ); // not 'MouseEvents' according to DOM Level 3 spec
 
@@ -1384,7 +1384,7 @@ define( function( require ) {
         return count;
       }
 
-      result += this._baseInstance ? ('Instances: ' + instanceCount( this._baseInstance ) + '<br/>') : '';
+      result += this._baseInstance ? ( 'Instances: ' + instanceCount( this._baseInstance ) + '<br/>' ) : '';
 
       function drawableCount( drawable ) {
         var count = 1; // for us
@@ -1404,7 +1404,7 @@ define( function( require ) {
         return count;
       }
 
-      result += this._rootBackbone ? ('Drawables: ' + drawableCount( this._rootBackbone ) + '<br/>') : '';
+      result += this._rootBackbone ? ( 'Drawables: ' + drawableCount( this._rootBackbone ) + '<br/>' ) : '';
 
       var drawableCountMap = {}; // {string} drawable constructor name => {number} count of seen
       // increment the count in our map
@@ -1438,7 +1438,7 @@ define( function( require ) {
         return count;
       }
 
-      result += this._baseInstance ? ('Retained Drawables: ' + retainedDrawableCount( this._baseInstance ) + '<br/>') : '';
+      result += this._baseInstance ? ( 'Retained Drawables: ' + retainedDrawableCount( this._baseInstance ) + '<br/>' ) : '';
       for ( var drawableName in drawableCountMap ) {
         result += '&nbsp;&nbsp;&nbsp;&nbsp;' + drawableName + ': ' + drawableCountMap[ drawableName ] + '<br/>';
       }
@@ -1451,7 +1451,7 @@ define( function( require ) {
 
         var hasBackbone = block.domDrawable && block.domDrawable.blocks;
 
-        var div = '<div style="margin-left: ' + (depth * 20) + 'px">';
+        var div = '<div style="margin-left: ' + ( depth * 20 ) + 'px">';
 
         div += block.toString();
         if ( !hasBackbone ) {
@@ -1488,8 +1488,8 @@ define( function( require ) {
         var node = instance.node;
 
         iSummary += instance.id;
-        iSummary += ' ' + (node.constructor.name ? node.constructor.name : '?');
-        iSummary += ' <span style="font-weight: ' + (node.isPainted() ? 'bold' : 'normal') + '">' + node.id + '</span>';
+        iSummary += ' ' + ( node.constructor.name ? node.constructor.name : '?' );
+        iSummary += ' <span style="font-weight: ' + ( node.isPainted() ? 'bold' : 'normal' ) + '">' + node.id + '</span>';
         iSummary += node.getDebugHTMLExtras();
 
         if ( !node.visible ) {
@@ -1571,7 +1571,7 @@ define( function( require ) {
 
         iSummary += ' <span style="color: #888">[Trail ' + instance.trail.indices.join( '.' ) + ']</span>';
         iSummary += ' <span style="color: #c88">' + str( instance.state ) + '</span>';
-        iSummary += ' <span style="color: #8c8">' + node._rendererSummary.bitmask.toString( 16 ) + (node._rendererBitmask !== Renderer.bitmaskNodeDefault ? ' (' + node._rendererBitmask.toString( 16 ) + ')' : '') + '</span>';
+        iSummary += ' <span style="color: #8c8">' + node._rendererSummary.bitmask.toString( 16 ) + ( node._rendererBitmask !== Renderer.bitmaskNodeDefault ? ' (' + node._rendererBitmask.toString( 16 ) + ')' : '' ) + '</span>';
 
         return iSummary;
       }
@@ -1582,16 +1582,16 @@ define( function( require ) {
           drawableString = '<strong>' + drawableString + '</strong>';
         }
         if ( drawable.dirty ) {
-          drawableString += (drawable.dirty ? ' <span style="color: #c00;">[x]</span>' : '');
+          drawableString += ( drawable.dirty ? ' <span style="color: #c00;">[x]</span>' : '' );
         }
         if ( !drawable.fittable ) {
-          drawableString += (drawable.dirty ? ' <span style="color: #0c0;">[no-fit]</span>' : '');
+          drawableString += ( drawable.dirty ? ' <span style="color: #0c0;">[no-fit]</span>' : '' );
         }
         return drawableString;
       }
 
       function printInstanceSubtree( instance ) {
-        var div = '<div style="margin-left: ' + (depth * 20) + 'px">';
+        var div = '<div style="margin-left: ' + ( depth * 20 ) + 'px">';
 
         function addDrawable( name, drawable ) {
           div += ' <span style="color: #888">' + name + ':' + drawableSummary( drawable ) + '</span>';
@@ -1624,7 +1624,7 @@ define( function( require ) {
       } );
 
       function printDrawableSubtree( drawable ) {
-        var div = '<div style="margin-left: ' + (depth * 20) + 'px">';
+        var div = '<div style="margin-left: ' + ( depth * 20 ) + 'px">';
 
         div += drawableSummary( drawable );
         if ( drawable.instance ) {
@@ -1775,7 +1775,7 @@ define( function( require ) {
           replacedImages++;
           hasReplacedImages = true;
 
-          (function() {
+          ( function() {
             // Closure variables need to be stored for each individual SVG image.
             var refImage = new window.Image();
             var svgImage = displaySVGImage;
@@ -1813,7 +1813,7 @@ define( function( require ) {
 
             // Kick off loading of the image.
             refImage.src = currentHref;
-          })();
+          } )();
         }
       }
 
@@ -1883,10 +1883,10 @@ define( function( require ) {
     set focus( value ) {
 
       // If in phet-io brand, a11y is enabled, and the focus is not null
-      if( window.phet && phet.phetio && phet.chipper.a11yEnabled && value ){
+      if ( window.phet && phet.phetio && phet.chipper.a11yEnabled && value ) {
         var node = value.trail.lastNode();
         assert && assert( node.tandem && node.tandem.isLegalAndUsable(),
-          'When running phet-io mode, all focusable instances must be instrumented.');
+          'When running phet-io mode, all focusable instances must be instrumented.' );
       }
 
       // Emit that the old focused node is no longer focused
@@ -1944,7 +1944,7 @@ define( function( require ) {
   Display.focusProperty = new Property( null,
 
     // Only instrument if accessibility is enabled
-    (window.phet && phet.chipper && phet.chipper.a11yEnabled) ? {
+    ( window.phet && phet.chipper && phet.chipper.a11yEnabled ) ? {
 
       // Make this a static tandem so that it can be added to instance proxies correctly (batched and then flushed when the
       // listener is added).
