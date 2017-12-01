@@ -1,12 +1,42 @@
-// Copyright 2002-2014, University of Colorado Boulder
+// Copyright 2017, University of Colorado Boulder
 
-/*
- * Runs unit tests that compare past images of Scenery display output with the current display output.
+/**
+ * PixelComparison tests
+ *
+ * @author Sam Reid (PhET Interactive Simulations)
  */
-(function() {
+define( function( require ) {
   'use strict';
 
-  module( 'Scenery: Pixel Comparison' );
+  // modules
+  var Circle = require( 'SCENERY/nodes/Circle' );
+  var Color = require( 'SCENERY/util/Color' );
+  var Display = require( 'SCENERY/display/Display' );
+  var Image = require( 'SCENERY/nodes/Image' );
+  var LinearGradient = require( 'SCENERY/util/LinearGradient' );
+  var Matrix3 = require( 'DOT/Matrix3' );
+  var Node = require( 'SCENERY/nodes/Node' );
+  var Path = require( 'SCENERY/nodes/Path' );
+  var Pattern = require( 'SCENERY/util/Pattern' );
+  var platform = require( 'PHET_CORE/platform' );
+  var Property = require( 'AXON/Property' );
+  var RadialGradient = require( 'SCENERY/util/RadialGradient' );
+  var Rectangle = require( 'SCENERY/nodes/Rectangle' );
+  var Shape = require( 'KITE/Shape' );
+  var snapshotEquals = require( 'SCENERY/tests/snapshotEquals' );
+  var Vector2 = require( 'DOT/Vector2' );
+
+  QUnit.module( 'PixelComparison' );
+
+  function snapshotFromImage( image ) { // eslint-disable-line no-unused-vars
+
+    var canvas = document.createElement( 'canvas' );
+    canvas.width = image.width;
+    canvas.height = image.height;
+    var context = canvas.getContext( '2d' );
+    context.drawImage( image, 0, 0, image.width, image.height );
+    return context.getImageData( 0, 0, image.width, image.height );
+  }
 
   var testedRenderers = [ 'canvas', 'svg', 'dom', 'webgl' ];
 
@@ -15,7 +45,7 @@
 
   /* eslint-disable no-undef */
   // We can only guarantee comparisons for Firefox and Chrome
-  if ( !phetCore.platform.firefox && !phetCore.platform.chromium ) {
+  if ( !platform.firefox && !platform.chromium ) {
     window.console && window.console.log && window.console.log( 'Not running pixel-comparison tests' );
     return;
   }
@@ -31,10 +61,11 @@
    * @param {number} threshold - Numerical threshold to determine how much error is acceptable
    */
   function pixelTest( name, setup, dataURL, threshold, isAsync ) {
-    asyncTest( name, function() {
+    QUnit.test( name, function( assert ) {
+      var done = assert.async();
       // set up the scene/display
-      var scene = new scenery.Node();
-      var display = new scenery.Display( scene, {
+      var scene = new Node();
+      var display = new Display( scene, {
         preserveDrawingBuffer: true
       } );
 
@@ -48,10 +79,10 @@
           display.domElement.style.border = '1px solid black'; // border
 
           // the actual comparison statement
-          snapshotEquals( freshSnapshot, referenceSnapshot, threshold, name, display.domElement );
+          snapshotEquals( assert, freshSnapshot, referenceSnapshot, threshold, name, display.domElement );
 
           // tell qunit that we're done? (that's what the old version did, seems potentially wrong but working?)
-          start();
+          done();
         }
 
         // load images to compare
@@ -64,20 +95,20 @@
           }
         };
         referenceImage.onerror = function() {
-          ok( false, name + ' reference image failed to load' );
-          start();
+          assert.ok( false, name + ' reference image failed to load' );
+          done();
         };
         freshImage.onerror = function() {
-          ok( false, name + ' fresh image failed to load' );
-          start();
+          assert.ok( false, name + ' fresh image failed to load' );
+          done();
         };
 
         referenceImage.src = dataURL;
 
         display.foreignObjectRasterization( function( url ) {
           if ( !url ) {
-            ok( false, name + ' failed to rasterize the display' );
-            start();
+            assert.ok( false, name + ' failed to rasterize the display' );
+            done();
             return;
           }
           freshImage.src = url;
@@ -95,14 +126,14 @@
   // Like pixelTest, but for multiple listeners ({string[]}). Don't override the renderer on the scene.
   function multipleRendererTest( name, setup, dataURL, threshold, renderers, isAsync ) {
     for ( var i = 0; i < renderers.length; i++ ) {
-      (function(){
-        var renderer = renderers[i];
+      ( function() {
+        var renderer = renderers[ i ];
 
         pixelTest( name + ' (' + renderer + ')', function( scene, display, asyncCallback ) {
           scene.renderer = renderer;
           setup( scene, display, asyncCallback );
         }, dataURL, threshold, isAsync );
-      })();
+      } )();
     }
   }
 
@@ -111,7 +142,7 @@
     function( scene, display ) {
       display.width = 40;
       display.height = 40;
-      scene.addChild( new scenery.Rectangle( 6, 6, 28, 28, {
+      scene.addChild( new Rectangle( 6, 6, 28, 28, {
         fill: '#000000'
       } ) );
       display.updateDisplay();
@@ -123,7 +154,7 @@
     function( scene, display ) {
       display.width = 40;
       display.height = 40;
-      scene.addChild( new scenery.Rectangle( 0, 0, 28, 28, {
+      scene.addChild( new Rectangle( 0, 0, 28, 28, {
         fill: '#000000',
         x: 6,
         y: 6
@@ -137,7 +168,7 @@
     function( scene, display ) {
       display.width = 40;
       display.height = 40;
-      var rect = new scenery.Rectangle( 0, 0, 28, 28, {
+      var rect = new Rectangle( 0, 0, 28, 28, {
         fill: '#000000',
         x: 10,
         y: -10
@@ -155,7 +186,7 @@
     function( scene, display ) {
       display.width = 40;
       display.height = 40;
-      var rect = new scenery.Rectangle( 6, 6, 28, 28, {
+      var rect = new Rectangle( 6, 6, 28, 28, {
         fill: 'green'
       } );
       scene.addChild( rect );
@@ -173,7 +204,7 @@
       img.onload = function() {
         display.width = 40;
         display.height = 40;
-        scene.addChild( new scenery.Image( img ) );
+        scene.addChild( new Image( img ) );
         display.updateDisplay();
 
         asyncCallback();
@@ -190,8 +221,8 @@
     function( scene, display ) {
       display.width = 40;
       display.height = 40;
-      var color = new scenery.Color( 'red' );
-      scene.addChild( new scenery.Rectangle( 6, 6, 28, 28, {
+      var color = new Color( 'red' );
+      scene.addChild( new Rectangle( 6, 6, 28, 28, {
         fill: color
       } ) );
       display.updateDisplay();
@@ -205,8 +236,8 @@
     function( scene, display ) {
       display.width = 40;
       display.height = 40;
-      var colorProperty = new axon.Property( 'red' );
-      scene.addChild( new scenery.Rectangle( 6, 6, 28, 28, {
+      var colorProperty = new Property( 'red' );
+      scene.addChild( new Rectangle( 6, 6, 28, 28, {
         fill: colorProperty
       } ) );
       display.updateDisplay();
@@ -220,9 +251,9 @@
     function( scene, display ) {
       display.width = 40;
       display.height = 40;
-      var color = new scenery.Color( 'red' );
-      var colorProperty = new axon.Property( color );
-      scene.addChild( new scenery.Rectangle( 6, 6, 28, 28, {
+      var color = new Color( 'red' );
+      var colorProperty = new Property( color );
+      scene.addChild( new Rectangle( 6, 6, 28, 28, {
         fill: colorProperty
       } ) );
       display.updateDisplay();
@@ -238,8 +269,8 @@
     function( scene, display ) {
       display.width = 40;
       display.height = 40;
-      var color = new scenery.Color( 'red' );
-      var rect = new scenery.Rectangle( 6, 6, 28, 28, {
+      var color = new Color( 'red' );
+      var rect = new Rectangle( 6, 6, 28, 28, {
         fill: '#00ff00'
       } );
       scene.addChild( rect );
@@ -255,21 +286,21 @@
     function( scene, display ) {
       display.width = 32;
       display.height = 32;
-      var shape = kite.Shape.rectangle( 0, 0, 30, 30 );
-      scene.addChild( new scenery.Path( shape, {
+      var shape = Shape.rectangle( 0, 0, 30, 30 );
+      scene.addChild( new Path( shape, {
         fill: '#000',
         stroke: '#f00',
         lineWidth: 2,
         x: -10, y: -10
       } ) );
-      scene.addChild( new scenery.Path( shape, {
+      scene.addChild( new Path( shape, {
         fill: '#000',
         stroke: '#f00',
         lineWidth: 2,
         x: 10, y: 10,
         visible: false
       } ) );
-      scene.addChild( new scenery.Path( shape, {
+      scene.addChild( new Path( shape, {
         fill: '#000',
         stroke: '#f00',
         lineWidth: 2,
@@ -284,9 +315,9 @@
     function( scene, display ) {
       display.width = 32;
       display.height = 32;
-      var rect = new scenery.Rectangle( 0, 0, 16, 16, { fill: '#f00', visible: false } );
+      var rect = new Rectangle( 0, 0, 16, 16, { fill: '#f00', visible: false } );
       scene.addChild( rect );
-      scene.addChild( new scenery.Rectangle( 0, 0, 32, 32, { fill: 'green', visible: false } ) );
+      scene.addChild( new Rectangle( 0, 0, 32, 32, { fill: 'green', visible: false } ) );
       display.updateDisplay();
       rect.visible = true;
       display.updateDisplay();
@@ -298,7 +329,7 @@
     function( scene, display ) {
       display.width = 32;
       display.height = 32;
-      var rect = new scenery.Rectangle( 0, 0, 16, 16, { fill: '#f00' } );
+      var rect = new Rectangle( 0, 0, 16, 16, { fill: '#f00' } );
       scene.addChild( rect );
       display.updateDisplay();
       rect.visible = false;
@@ -314,7 +345,7 @@
     function( scene, display ) {
       display.width = 32;
       display.height = 32;
-      var rect = new scenery.Rectangle( 0, 0, 16, 16, { fill: '#f00', visible: false } );
+      var rect = new Rectangle( 0, 0, 16, 16, { fill: '#f00', visible: false } );
       scene.addChild( rect );
       display.updateDisplay();
     }, 'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAACAAAAAgCAYAAABzenr0AAAALUlEQVRYR+3QQREAAAABQfqXFsNnFTizzXk99+MAAQIECBAgQIAAAQIECBAgMBo/ACHo7lH9AAAAAElFTkSuQmCC',
@@ -330,7 +361,7 @@
     function( scene, display ) {
       display.width = 32;
       display.height = 32;
-      var circle = new scenery.Circle( 10, { fill: 'red', centerX: 16, centerY: 16 } );
+      var circle = new Circle( 10, { fill: 'red', centerX: 16, centerY: 16 } );
       scene.addChild( circle );
       display.updateDisplay();
     }, redCenteredCircle,
@@ -341,7 +372,7 @@
     function( scene, display ) {
       display.width = 32;
       display.height = 32;
-      var circle = new scenery.Circle( 10, { fill: 'black' } );
+      var circle = new Circle( 10, { fill: 'black' } );
       scene.addChild( circle );
       display.updateDisplay();
       circle.x = 16;
@@ -356,7 +387,7 @@
     function( scene, display ) {
       display.width = 32;
       display.height = 32;
-      var circle = new scenery.Circle( 5, { fill: 'red', scale: 2, centerX: 16, centerY: 16 } );
+      var circle = new Circle( 5, { fill: 'red', scale: 2, centerX: 16, centerY: 16 } );
       scene.addChild( circle );
       display.updateDisplay();
     }, redCenteredCircle,
@@ -367,7 +398,7 @@
     function( scene, display ) {
       display.width = 32;
       display.height = 32;
-      var circle = new scenery.Circle( 5, { fill: 'red', centerX: 16, centerY: 16 } );
+      var circle = new Circle( 5, { fill: 'red', centerX: 16, centerY: 16 } );
       scene.addChild( circle );
       display.updateDisplay();
       circle.radius = 10;
@@ -380,14 +411,14 @@
     function( scene, display ) {
       display.width = 64;
       display.height = 64;
-      scene.addChild( new scenery.Circle( 32, {
-        fill: new scenery.LinearGradient( 0, -20, 0, 20 ).addColorStop( 0, 'green' ).addColorStop( 1, 'blue' ),
+      scene.addChild( new Circle( 32, {
+        fill: new LinearGradient( 0, -20, 0, 20 ).addColorStop( 0, 'green' ).addColorStop( 1, 'blue' ),
         rotation: Math.PI / 2,
         scale: 0.7,
-        center: new dot.Vector2( 32, 32 )
+        center: new Vector2( 32, 32 )
       } ) );
-      scene.addChild( new scenery.Circle( 10, { fill: 'red', stroke: 'rgba(0,0,255,0.5)', lineWidth: 3 } ) );
-      scene.addChild( new scenery.Circle( 75, { stroke: 'black', lineWidth: 4 } ) );
+      scene.addChild( new Circle( 10, { fill: 'red', stroke: 'rgba(0,0,255,0.5)', lineWidth: 3 } ) );
+      scene.addChild( new Circle( 75, { stroke: 'black', lineWidth: 4 } ) );
       display.updateDisplay();
     }, 'data:image/png;base64,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',
     1, testedRenderers
@@ -401,7 +432,7 @@
     function( scene, display ) {
       display.width = 32;
       display.height = 32;
-      scene.addChild( new scenery.Rectangle( 0, 0, 32, 16, {
+      scene.addChild( new Rectangle( 0, 0, 32, 16, {
         opacity: 0.7,
         fill: 'rgba(0,0,0,0.7)',
         stroke: 'rgba(0,0,255,0.7)',
@@ -416,13 +447,13 @@
     function( scene, display ) {
       display.width = 32;
       display.height = 32;
-      var rect = new scenery.Rectangle( 0, 0, 32, 16, {
+      var rect = new Rectangle( 0, 0, 32, 16, {
         opacity: 0.7,
         fill: 'rgba(0,0,0,0.7)',
         stroke: 'rgba(0,0,255,0.7)',
         lineWidth: 10
       } );
-      rect.addChild( new scenery.Circle( 15, {
+      rect.addChild( new Circle( 15, {
         opacity: 0.7,
         fill: 'rgba(0,255,0,0.7)',
         stroke: 'rgba(255,0,0,0.7)',
@@ -439,9 +470,9 @@
     function( scene, display ) {
       display.width = 32;
       display.height = 32;
-      scene.addChild( new scenery.Rectangle( 2, 2, 28, 28, {
+      scene.addChild( new Rectangle( 2, 2, 28, 28, {
         fill: 'black',
-        clipArea: kite.Shape.circle( 0, 16, 12.5 ),
+        clipArea: Shape.circle( 0, 16, 12.5 ),
         x: 10,
         y: -10
       } ) );
@@ -454,16 +485,16 @@
     function( scene, display ) {
       display.width = 64;
       display.height = 40;
-      var clipShape1 = kite.Shape.regularPolygon( 6, 27 ).transformed( dot.Matrix3.translation( 32, 32 ) );
-      var clipShape2 = kite.Shape.regularPolygon( 9, 32 ).transformed( dot.Matrix3.translation( 32, 0 ) );
-      var shape = kite.Shape.circle( 32, 32, 25 );
-      var circle = new scenery.Path( shape, {
+      var clipShape1 = Shape.regularPolygon( 6, 27 ).transformed( Matrix3.translation( 32, 32 ) );
+      var clipShape2 = Shape.regularPolygon( 9, 32 ).transformed( Matrix3.translation( 32, 0 ) );
+      var shape = Shape.circle( 32, 32, 25 );
+      var circle = new Path( shape, {
         fill: '#000',
         stroke: '#f00',
         lineWidth: 3
       } );
       circle.clipArea = clipShape1;
-      var wrapper = new scenery.Node();
+      var wrapper = new Node();
       wrapper.addChild( circle );
       wrapper.clipArea = clipShape2;
       scene.addChild( wrapper );
@@ -478,30 +509,30 @@
       display.width = 200;
       display.height = 50;
       var x = 32;
-      scene.addChild( new scenery.Path( kite.Shape.ellipse( x, 25, 20, 10 ), {
+      scene.addChild( new Path( Shape.ellipse( x, 25, 20, 10 ), {
         fill: '#ff0000',
         stroke: '#000000',
         lineWidth: 3
       } ) );
 
       x += 64;
-      scene.addChild( new scenery.Path( new kite.Shape().ellipticalArc( x, 25, 20, 10, Math.PI / 6, Math.PI / 4, Math.PI * 3 / 2, false ), {
+      scene.addChild( new Path( new Shape().ellipticalArc( x, 25, 20, 10, Math.PI / 6, Math.PI / 4, Math.PI * 3 / 2, false ), {
         fill: 'rgba(255,0,0,0.5)',
         stroke: '#aa0000',
         lineWidth: 3
       } ) );
 
-      scene.addChild( new scenery.Path( new kite.Shape().ellipticalArc( x, 25, 20, 10, Math.PI / 6, Math.PI / 4, Math.PI * 3 / 2, true ), {
+      scene.addChild( new Path( new Shape().ellipticalArc( x, 25, 20, 10, Math.PI / 6, Math.PI / 4, Math.PI * 3 / 2, true ), {
         fill: 'rgba(0,0,255,0.5)',
         stroke: '#0000aa',
         lineWidth: 3
       } ) );
 
       x += 64;
-      scene.addChild( new scenery.Path( new kite.Shape().moveTo( 0, 0 )
-          .ellipticalArc( 0, 0, 20, 10, 0, 0, Math.PI / 3, false )
-          .ellipticalArc( 0, 0, 20, 10, 0, Math.PI / 3 + Math.PI, Math.PI, true )
-          .close(), {
+      scene.addChild( new Path( new Shape().moveTo( 0, 0 )
+        .ellipticalArc( 0, 0, 20, 10, 0, 0, Math.PI / 3, false )
+        .ellipticalArc( 0, 0, 20, 10, 0, Math.PI / 3 + Math.PI, Math.PI, true )
+        .close(), {
         x: x,
         y: 25.5,
         fill: '#ff0000',
@@ -518,30 +549,30 @@
       display.width = 200;
       display.height = 50;
       var x = 32;
-      scene.addChild( new scenery.Path( kite.Shape.circle( x, 25, 20 ), {
+      scene.addChild( new Path( Shape.circle( x, 25, 20 ), {
         fill: '#ff0000',
         stroke: '#000000',
         lineWidth: 3
       } ) );
 
       x += 64;
-      scene.addChild( new scenery.Path( kite.Shape.arc( x, 25, 20, Math.PI / 4, Math.PI * 3 / 2, false ), {
+      scene.addChild( new Path( Shape.arc( x, 25, 20, Math.PI / 4, Math.PI * 3 / 2, false ), {
         fill: 'rgba(255,0,0,0.5)',
         stroke: '#aa0000',
         lineWidth: 3
       } ) );
 
-      scene.addChild( new scenery.Path( kite.Shape.arc( x, 25, 20, Math.PI / 4, Math.PI * 3 / 2, true ), {
+      scene.addChild( new Path( Shape.arc( x, 25, 20, Math.PI / 4, Math.PI * 3 / 2, true ), {
         fill: 'rgba(0,0,255,0.5)',
         stroke: '#0000aa',
         lineWidth: 3
       } ) );
 
       x += 64;
-      scene.addChild( new scenery.Path( new kite.Shape().moveTo( 0, 0 )
-          .arc( 0, 0, 20, 0, Math.PI / 3, false )
-          .arc( 0, 0, 20, Math.PI / 3 + Math.PI, Math.PI, true )
-          .close(), {
+      scene.addChild( new Path( new Shape().moveTo( 0, 0 )
+        .arc( 0, 0, 20, 0, Math.PI / 3, false )
+        .arc( 0, 0, 20, Math.PI / 3 + Math.PI, Math.PI, true )
+        .close(), {
         x: x,
         y: 25.5,
         fill: '#ff0000',
@@ -557,7 +588,7 @@
     function( scene, display ) {
       display.width = 250;
       display.height = 120;
-      var square = new scenery.Path( kite.Shape.rectangle( 0, 0, 50, 50 ), {
+      var square = new Path( Shape.rectangle( 0, 0, 50, 50 ), {
         x: 0.5,
         y: 0.5,
         fill: 'rgba(0,0,0,0.5)',
@@ -565,25 +596,25 @@
         lineWidth: 3
       } );
 
-      var arrow = new scenery.Path( kite.Shape.regularPolygon( 3, 10 ), {
+      var arrow = new Path( Shape.regularPolygon( 3, 10 ), {
         fill: 'rgba(0,255,0,1)',
         stroke: '#000000'
       } );
 
-      var combined = new scenery.Node();
+      var combined = new Node();
       combined.addChild( square );
-      var leftArrow = new scenery.Node( { x: 15, y: 25 } );
+      var leftArrow = new Node( { x: 15, y: 25 } );
       leftArrow.addChild( arrow );
       combined.addChild( leftArrow );
-      var rightArrow = new scenery.Node( { x: 35, y: 25 } );
+      var rightArrow = new Node( { x: 35, y: 25 } );
       rightArrow.addChild( arrow );
       combined.addChild( rightArrow );
 
-      var a = new scenery.Node( { x: 20, y: 20 } );
+      var a = new Node( { x: 20, y: 20 } );
       a.addChild( combined );
-      var b = new scenery.Node( { x: 120, y: 30, rotation: Math.PI / 4 } );
+      var b = new Node( { x: 120, y: 30, rotation: Math.PI / 4 } );
       b.addChild( combined );
-      var c = new scenery.Node( { x: 220, y: 40, rotation: Math.PI / 2 } );
+      var c = new Node( { x: 220, y: 40, rotation: Math.PI / 2 } );
       c.addChild( combined );
       scene.addChild( a );
       scene.addChild( b );
@@ -597,14 +628,14 @@
     function( scene, display ) {
       display.width = 64;
       display.height = 44;
-      var container = new scenery.Node( {
+      var container = new Node( {
         x: 20,
         rotation: Math.PI / 12,
         scale: 0.5
       } );
       scene.addChild( container );
 
-      container.addChild( new scenery.Path( kite.Shape.rectangle( 0, 0, 44, 44 ), {
+      container.addChild( new Path( Shape.rectangle( 0, 0, 44, 44 ), {
         x: 10.5,
         y: 10.5,
         rotation: Math.PI / 4,
@@ -613,7 +644,7 @@
         lineWidth: 3
       } ) );
 
-      container.addChild( new scenery.Path( kite.Shape.rectangle( 0, 0, 44, 44 ), {
+      container.addChild( new Path( Shape.rectangle( 0, 0, 44, 44 ), {
         x: 30.5,
         y: 10.5,
         fill: '#ff0000',
@@ -634,8 +665,8 @@
       display.height = 64;
       var img = document.createElement( 'img' );
       img.onload = function() {
-        var pattern = new scenery.Pattern( img );
-        scene.addChild( new scenery.Path( kite.Shape.regularPolygon( 6, 22 ), {
+        var pattern = new Pattern( img );
+        scene.addChild( new Path( Shape.regularPolygon( 6, 22 ), {
           x: 32,
           y: 32,
           rotation: Math.PI / 4,
@@ -657,8 +688,8 @@
       display.height = 64;
       var img = document.createElement( 'img' );
       img.onload = function() {
-        var pattern = new scenery.Pattern( img ).setTransformMatrix( dot.Matrix3.rowMajor( 0.4, 0.2, 1.3, -0.2, 0.2, 7.2, 0, 0, 1 ) );
-        scene.addChild( new scenery.Path( kite.Shape.regularPolygon( 6, 22 ), {
+        var pattern = new Pattern( img ).setTransformMatrix( Matrix3.rowMajor( 0.4, 0.2, 1.3, -0.2, 0.2, 7.2, 0, 0, 1 ) );
+        scene.addChild( new Path( Shape.regularPolygon( 6, 22 ), {
           x: 32,
           y: 32,
           rotation: Math.PI / 4,
@@ -678,21 +709,21 @@
     function( scene, display, asyncCallback ) {
       display.width = 64;
       display.height = 64;
-      scene.addChild( new scenery.Path( kite.Shape.rectangle( 10, 10, 44, 44 ), {
+      scene.addChild( new Path( Shape.rectangle( 10, 10, 44, 44 ), {
         stroke: '#000',
         lineWidth: 3,
         lineDash: [ 7, 2, 3, 2 ],
         x: 0.5,
         y: 0.5
       } ) );
-      scene.addChild( new scenery.Rectangle( 5, 5, 54, 54, {
+      scene.addChild( new Rectangle( 5, 5, 54, 54, {
         stroke: '#000',
         lineWidth: 3,
         lineDash: [ 7, 2, 3, 2 ],
         x: 0.5,
         y: 0.5
       } ) );
-      scene.addChild( new scenery.Path( kite.Shape.regularPolygon( 6, 15 ), {
+      scene.addChild( new Path( Shape.regularPolygon( 6, 15 ), {
         stroke: '#000',
         lineDash: [ 5, 5 ],
         lineDashOffset: 5,
@@ -708,35 +739,35 @@
     function( scene, display, asyncCallback ) {
       display.width = 192;
       display.height = 64;
-      var fillGradient = new scenery.RadialGradient( 22, 0, 0, 22, 0, 44 );
+      var fillGradient = new RadialGradient( 22, 0, 0, 22, 0, 44 );
       fillGradient.addColorStop( 0.1, '#ff0000' );
       fillGradient.addColorStop( 0.5, '#00ff00' );
       fillGradient.addColorStop( 0.6, 'rgba(0,255,0,0.3)' );
       fillGradient.addColorStop( 0.9, '#000000' );
 
-      var mainGradient = new scenery.RadialGradient( 32, 20, 10, 32, 32, 32 );
+      var mainGradient = new RadialGradient( 32, 20, 10, 32, 32, 32 );
       mainGradient.addColorStop( 0, '#8ED6FF' );
       mainGradient.addColorStop( 0.5, '#004CB3' );
       mainGradient.addColorStop( 0.6, '#bbbbbb' );
       mainGradient.addColorStop( 1, '#ffffff' );
 
-      var transformedGradient = new scenery.RadialGradient( 0, 0, 0, 0, 0, 64 );
+      var transformedGradient = new RadialGradient( 0, 0, 0, 0, 0, 64 );
       transformedGradient.addColorStop( 0.3, '#8ED6FF' );
       transformedGradient.addColorStop( 1, '#004CB3' );
-      transformedGradient.setTransformMatrix( dot.Matrix3.translation( 32, 32 ).timesMatrix( dot.Matrix3.rotation2( Math.PI / 4 ).timesMatrix( dot.Matrix3.scaling( 1, 0.25 ) ) ) );
+      transformedGradient.setTransformMatrix( Matrix3.translation( 32, 32 ).timesMatrix( Matrix3.rotation2( Math.PI / 4 ).timesMatrix( Matrix3.scaling( 1, 0.25 ) ) ) );
 
-      scene.addChild( new scenery.Path( kite.Shape.rectangle( 0, 0, 64, 64 ), {
+      scene.addChild( new Path( Shape.rectangle( 0, 0, 64, 64 ), {
         fill: mainGradient
       } ) );
-      scene.addChild( new scenery.Path( kite.Shape.regularPolygon( 6, 22 ), {
-        x:        32 + 64,
+      scene.addChild( new Path( Shape.regularPolygon( 6, 22 ), {
+        x: 32 + 64,
         y: 32,
         rotation: Math.PI / 4,
         fill: fillGradient,
         stroke: '#000000',
         lineWidth: 3
       } ) );
-      scene.addChild( new scenery.Path( kite.Shape.rectangle( 0, 0, 64, 64 ), {
+      scene.addChild( new Path( Shape.rectangle( 0, 0, 64, 64 ), {
         x: 128,
         fill: transformedGradient
       } ) );
@@ -749,18 +780,18 @@
     function( scene, display, asyncCallback ) {
       display.width = 128;
       display.height = 64;
-      var fillGradient = new scenery.LinearGradient( -22, 0, 22, 0 );
+      var fillGradient = new LinearGradient( -22, 0, 22, 0 );
       fillGradient.addColorStop( 0.1, '#ff0000' );
       fillGradient.addColorStop( 0.5, '#00ff00' );
       fillGradient.addColorStop( 0.6, 'rgba(0,255,0,0.3)' );
       fillGradient.addColorStop( 0.9, '#000000' );
 
-      var strokeGradient = new scenery.LinearGradient( 0, -15, 0, 15 );
+      var strokeGradient = new LinearGradient( 0, -15, 0, 15 );
       strokeGradient.addColorStop( 0, '#ff0000' );
       strokeGradient.addColorStop( 0.5, '#00ff00' );
       strokeGradient.addColorStop( 1, '#0000ff' );
 
-      scene.addChild( new scenery.Path( kite.Shape.regularPolygon( 6, 22 ), {
+      scene.addChild( new Path( Shape.regularPolygon( 6, 22 ), {
         x: 32,
         y: 32,
         rotation: Math.PI / 4,
@@ -769,7 +800,7 @@
         stroke: '#000000',
         lineWidth: 3
       } ) );
-      scene.addChild( new scenery.Path( kite.Shape.regularPolygon( 6, 22 ), {
+      scene.addChild( new Path( Shape.regularPolygon( 6, 22 ), {
         x: 32 + 64,
         y: 32,
         fill: fillGradient,
@@ -785,7 +816,7 @@
     function( scene, display, asyncCallback ) {
       display.width = 64;
       display.height = 64;
-      scene.addChild( new scenery.Path( new kite.Shape().moveTo( -20, -20 ).cubicCurveTo( -20, 0, 0, 0, 20, 20 ).lineTo( 20, -20 ).close(), {
+      scene.addChild( new Path( new Shape().moveTo( -20, -20 ).cubicCurveTo( -20, 0, 0, 0, 20, 20 ).lineTo( 20, -20 ).close(), {
         x: 32,
         y: 32,
         fill: '#ff0000',
@@ -801,7 +832,7 @@
     function( scene, display, asyncCallback ) {
       display.width = 64;
       display.height = 64;
-      scene.addChild( new scenery.Path( new kite.Shape().moveTo( -20, -20 ).quadraticCurveTo( 20, -20, 20, 20 ).close(), {
+      scene.addChild( new Path( new Shape().moveTo( -20, -20 ).quadraticCurveTo( 20, -20, 20, 20 ).close(), {
         x: 32,
         y: 32,
         fill: '#ff0000',
@@ -817,13 +848,13 @@
     function( scene, display, asyncCallback ) {
       display.width = 64;
       display.height = 64;
-      scene.addChild( new scenery.Rectangle( 0, 12, 64, 20, { fill: '#000' } ) );
-      var circle = kite.Shape.circle( 0, 0, 30 );
-      scene.addChild( new scenery.Node( {
+      scene.addChild( new Rectangle( 0, 12, 64, 20, { fill: '#000' } ) );
+      var circle = Shape.circle( 0, 0, 30 );
+      scene.addChild( new Node( {
         opacity: 0.5,
         children: [
-          new scenery.Path( circle, { x: 12, y: 22, fill: '#f00' } ),
-          new scenery.Path( circle, { x: 52, y: 22, fill: '#00f' } )
+          new Path( circle, { x: 12, y: 22, fill: '#f00' } ),
+          new Path( circle, { x: 52, y: 22, fill: '#00f' } )
         ]
       } ) );
       display.updateDisplay();
@@ -837,7 +868,7 @@
       img.onload = function() {
         display.width = 40;
         display.height = 40;
-        var image = new scenery.Image( img );
+        var image = new Image( img );
         scene.addChild( image );
         display.updateDisplay();
         image.x = 10;
@@ -860,7 +891,7 @@
       img1.onload = function() {
         display.width = 32;
         display.height = 32;
-        var image = new scenery.Image( img1 );
+        var image = new Image( img1 );
         scene.addChild( image );
         display.updateDisplay();
 
@@ -890,7 +921,7 @@
       display.height = 64;
 
       var img = document.createElement( 'img' );
-      var image = new scenery.Image( img );
+      var image = new Image( img );
       scene.addChild( image );
       display.updateDisplay();
 
@@ -910,5 +941,4 @@
     }, 'data:image/png;base64,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',
     2, [ 'canvas', 'webgl' ], true // asynchronous, don't test SVG/DOM, since foreignobject doesn't work with external images
   );
-
-})();
+} );

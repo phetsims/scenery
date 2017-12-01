@@ -1,13 +1,18 @@
-// Copyright 2002-2014, University of Colorado Boulder
+// Copyright 2017, University of Colorado Boulder
 
-(function() {
+/**
+ * Miscellaneous tests
+ *
+ * @author Sam Reid (PhET Interactive Simulations)
+ */
+define( function( require ) {
   'use strict';
+
+  QUnit.module( 'Miscellaneous' );
 
   var includeBleedingEdgeCanvasTests = false;
 
-  module( 'Scenery: Miscellaneous' );
-
-  test( 'ES5 Object.defineProperty get/set', function() {
+  QUnit.test( 'ES5 Object.defineProperty get/set', function( assert ) {
     var ob = { _key: 5 };
     Object.defineProperty( ob, 'key', {
       enumerable: true,
@@ -16,20 +21,20 @@
       set: function( val ) { this._key = val; }
     } );
     ob.key += 1;
-    equal( ob._key, 6, 'incremented object value' );
+    assert.equal( ob._key, 6, 'incremented object value' );
   } );
 
-  // test( 'Canvas WebGL Context and Features', function() {
+  // QUnit.test( 'Canvas WebGL Context and Features', function(assert) {
   //   var canvas = document.createElement( 'canvas' );
   //   var context = canvas.getContext( "webgl" ) || canvas.getContext( "experimental-webgl" );
-  //   ok( context, 'context' );
+  //   assert.ok( context, 'context' );
   // } );
 
   if ( includeBleedingEdgeCanvasTests ) {
     // v5 canvas additions
-    module( 'Bleeding Edge Canvas Support' );
+    QUnit.module( 'Bleeding Edge Canvas Support' );
 
-    test( 'Canvas 2D v5 Features', function() {
+    QUnit.test( 'Canvas 2D v5 Features', function( assert ) {
       var canvas = document.createElement( 'canvas' );
       var context = canvas.getContext( '2d' );
 
@@ -40,21 +45,21 @@
         'resetTransform'
       ];
       _.each( neededMethods, function( method ) {
-        ok( context[ method ] !== undefined, 'context.' + method );
+        assert.ok( context[ method ] !== undefined, 'context.' + method );
       } );
     } );
 
-    test( 'Path object support', function() {
-      new scenery.Path( null ); // eslint-disable-line
+    QUnit.test( 'Path object support', function( assert ) {
+      new Path( null ); // eslint-disable-line
     } );
 
-    test( 'Text width measurement in canvas', function() {
+    QUnit.test( 'Text width measurement in canvas', function( assert ) {
       var canvas = document.createElement( 'canvas' );
       var context = canvas.getContext( '2d' );
       var metrics = context.measureText( 'Hello World' );
       _.each( [ 'actualBoundingBoxLeft', 'actualBoundingBoxRight', 'actualBoundingBoxAscent', 'actualBoundingBoxDescent' ], function( method ) {
-        ok( metrics[ method ] !== undefined, 'metrics.' + method );
+        assert.ok( metrics[ method ] !== undefined, 'metrics.' + method );
       } );
     } );
   }
-})();
+} );
