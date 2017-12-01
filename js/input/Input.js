@@ -738,9 +738,11 @@ define( function( require ) {
       // a11y
       var focusableNode = null;
       var trailAccessible = !trail.rootNode()._rendererSummary.isNotAccessible();
+
+      // If any node in the trail has accessible content
       if ( trailAccessible ) {
 
-        // if any node in the trail has accessible content, move up the trail to first focusable node under the pointer
+        // Starting with the leaf most node, search for the closest accessible ancestor from the node under the pointer.
         for ( var i = trail.nodes.length - 1; i >= 0; i-- ) {
           if ( trail.nodes[ i ].focusable ) {
             focusableNode = trail.nodes[ i ];
@@ -748,7 +750,7 @@ define( function( require ) {
           }
         }
 
-        // remove keyboard focus, but store element that is receiving interaction in case we resume 
+        // Remove keyboard focus, but store element that is receiving interaction in case we resume .
         this.display.pointerFocus = focusableNode;
         scenery.Display.focus = null;
       }
