@@ -761,7 +761,7 @@ define( function( require ) {
     c.addChild( e );
 
     // getUniqueTrail()
-    window.assert && throws( function() { d.getUniqueTrail(); }, 'D has no unique trail, since there are two' );
+    window.assert && assert.throws( function() { d.getUniqueTrail(); }, 'D has no unique trail, since there are two' );
     assert.ok( a.getUniqueTrail().equals( new Trail( [ a ] ) ), 'a.getUniqueTrail()' );
     assert.ok( b.getUniqueTrail().equals( new Trail( [ a, b ] ) ), 'b.getUniqueTrail()' );
     assert.ok( c.getUniqueTrail().equals( new Trail( [ a, c ] ) ), 'c.getUniqueTrail()' );
@@ -781,8 +781,8 @@ define( function( require ) {
     assert.ok( trails.length === 1 && trails[ 0 ].equals( new Trail( [ a, c, e ] ) ), 'e.getTrails()' );
 
     // getUniqueTrail( predicate )
-    window.assert && throws( function() { e.getUniqueTrail( function( node ) { return false; } ); }, 'Fails on false predicate' );
-    window.assert && throws( function() { e.getUniqueTrail( function( node ) { return false; } ); }, 'Fails on false predicate' );
+    window.assert && assert.throws( function() { e.getUniqueTrail( function( node ) { return false; } ); }, 'Fails on false predicate' );
+    window.assert && assert.throws( function() { e.getUniqueTrail( function( node ) { return false; } ); }, 'Fails on false predicate' );
     assert.ok( e.getUniqueTrail( function( node ) { return node === a; } ).equals( new Trail( [ a, c, e ] ) ) );
     assert.ok( e.getUniqueTrail( function( node ) { return node === c; } ).equals( new Trail( [ c, e ] ) ) );
     assert.ok( e.getUniqueTrail( function( node ) { return node === e; } ).equals( new Trail( [ e ] ) ) );
@@ -832,7 +832,7 @@ define( function( require ) {
     c.addChild( e );
 
     // getUniqueLeafTrail()
-    window.assert && throws( function() { a.getUniqueLeafTrail(); }, 'A has no unique leaf trail, since there are three' );
+    window.assert && assert.throws( function() { a.getUniqueLeafTrail(); }, 'A has no unique leaf trail, since there are three' );
     assert.ok( b.getUniqueLeafTrail().equals( new Trail( [ b, d ] ) ), 'a.getUniqueLeafTrail()' );
     assert.ok( d.getUniqueLeafTrail().equals( new Trail( [ d ] ) ), 'b.getUniqueLeafTrail()' );
     assert.ok( e.getUniqueLeafTrail().equals( new Trail( [ e ] ) ), 'c.getUniqueLeafTrail()' );
@@ -858,8 +858,8 @@ define( function( require ) {
     assert.ok( trails.length === 1 && trails[ 0 ].equals( new Trail( [ e ] ) ), 'e.getLeafTrails()' );
 
     // getUniqueLeafTrail( predicate )
-    window.assert && throws( function() { e.getUniqueLeafTrail( function( node ) { return false; } ); }, 'Fails on false predicate' );
-    window.assert && throws( function() { a.getUniqueLeafTrail( function( node ) { return true; } ); }, 'Fails on multiples' );
+    window.assert && assert.throws( function() { e.getUniqueLeafTrail( function( node ) { return false; } ); }, 'Fails on false predicate' );
+    window.assert && assert.throws( function() { a.getUniqueLeafTrail( function( node ) { return true; } ); }, 'Fails on multiples' );
     assert.ok( a.getUniqueLeafTrail( function( node ) { return node === e; } ).equals( new Trail( [ a, c, e ] ) ) );
 
     // getLeafTrails( predicate )
