@@ -1889,8 +1889,14 @@ define( function( require ) {
           'When running phet-io mode, all focusable instances must be instrumented.' );
       }
 
-      // Emit that the old focused node is no longer focused
-      this.focusProperty.value && this.focusProperty.value.trail.lastNode().focusChangedEmitter.emit1( false );
+      var previousFocus;
+      if ( this.focusProperty.value ) {
+        previousFocus = this.focusedNode;
+
+        // Emit that the old focused node is no longer focused
+        previousFocus.focusChangedEmitter.emit1( false );
+      }
+
       this.focusProperty.value = value;
 
       if ( value ) {
@@ -1901,7 +1907,9 @@ define( function( require ) {
       else {
 
         // if set to null, make sure that the active element is no longer focused
-        document.activeElement && document.activeElement.blur();
+        if ( previousFocus ) {
+          previousFocus.blur();
+        }
       }
     },
 
