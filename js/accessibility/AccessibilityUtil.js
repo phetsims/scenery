@@ -12,6 +12,7 @@ define( function( require ) {
 
   // modules
   var scenery = require( 'SCENERY/scenery' );
+  var Random = require( 'DOT/Random' );
 
   // constants
   var NEXT = 'NEXT';
@@ -99,30 +100,42 @@ define( function( require ) {
 
     // find the next focusable element in the DOM
     var nextIndex = activeIndex + delta;
-    var nextFocusable;
-    while ( !nextFocusable && nextIndex < linearDOM.length && nextIndex >= 0 ) {
+    while ( nextIndex < linearDOM.length && nextIndex >= 0 ) {
       var nextElement = linearDOM[ nextIndex ];
       nextIndex += delta;
 
-      // continue to next element if this one is meant to be hidden
-      if ( isElementHidden( nextElement ) ) {
-        continue;
-      }
-
-      // if element is for formatting, skipe over it - required since IE gives these tabindex="0" 
-      if ( _.includes( FORMATTING_TAGS, nextElement.tagName ) ) {
-        continue;
-      }
-
-      // if tabindex is greater than -1, the element is focusable so break
-      if ( nextElement.tabIndex > -1 ) {
-        nextFocusable = nextElement;
-        break;
+      if ( isFocusable( nextElement ) ) {
+        return nextElement;
       }
     }
 
     // if no next focusable is found, return the active DOM element
-    return nextFocusable || activeElement;
+    return activeElement;
+  }
+
+  /**
+   * Returns true if the element is focusable. Assumes that all focusable  elements have tabIndex > 0, which
+   * is only true for elements of the Parallel DOM.
+   *
+   * @param {HTMLElemnt} domElement
+   * @return {boolean} 
+   */
+  function isFocusable( domElement ) {
+    
+    // continue to next element if this one is meant to be hidden
+    if ( isElementHidden( domElement ) ) {
+      return false;
+    }
+
+    // if element is for formatting, skipe over it - required since IE gives these tabindex="0" 
+    if ( _.includes( FORMATTING_TAGS, domElement.tagName ) ) {
+      return false;
+    }
+
+    // if tabindex is greater than -1, the element is focusable so break
+    if ( domElement.tabIndex > -1 ) {
+      return true;
+    }
   }
 
   /**
@@ -165,6 +178,22 @@ define( function( require ) {
      */
     getPreviousFocusable: function( parentElement ) {
       return getNextPreviousFocusable( PREVIOUS, parentElement );
+    },
+
+    /**
+     * Return a random focusable element in the document. Particularly useful for fuzz testing.
+     * 
+     * @return {HTMLElement}
+     */
+    getRandomFocusable: function() {
+
+      var linearDOM = getLinearDOMElements( document.body );
+      var focusableElements = [];
+      for ( var i = 0; i < linearDOM.length; i++ ) {
+        isFocusable( linearDOM[ i ] ) && focusableElements.push( linearDOM[ i ] );
+      }
+
+      return focusableElements[ new Random().nextInt( focusableElements.length ) ];
     },
 
     /**

@@ -53,6 +53,7 @@
 define( function( require ) {
   'use strict';
 
+  var AccessibilityUtil = require( 'SCENERY/accessibility/AccessibilityUtil' );
   var Dimension2 = require( 'DOT/Dimension2' );
   var Events = require( 'AXON/Events' );
   var extend = require( 'PHET_CORE/extend' );
@@ -1287,42 +1288,33 @@ define( function( require ) {
      */
     fuzzBoardEvents: function() {
 
+      var nextFocusable = AccessibilityUtil.getRandomFocusable();
+      nextFocusable.focus();
+
       // TODO: add accessibility util functions to get a random focusable element from the tree
       var elementWithFocus = document.activeElement;
 
       // click something
-      eventFire( elementWithFocus, 'click' );
+      triggerDOMEvent( 'click', elementWithFocus );
 
       // TODO: A while loop of events will make us able to spam a ton of key presses per frame/per focused item,
       // TODO:   perhaps using a parameter to control the number of events per frame
-
-      var leftOrRight = phet.joist.random.nextDouble() < .5 ? Input.KEY_LEFT_ARROW : Input.KEY_RIGHT_ARROW;
-      triggerDOMEvent( 'keydown', elementWithFocus, leftOrRight );
+      var min = 9;
+      var max = 223;
+      var randomKeyCode = Math.floor( Math.random() * ( max - min ) + min );
+      triggerDOMEvent( 'keydown', elementWithFocus, randomKeyCode );
 
       // TODO: can we use setTimeout here?
       setTimeout( function() {
-        triggerDOMEvent( 'keyup', elementWithFocus, leftOrRight );
+        triggerDOMEvent( 'keyup', elementWithFocus, randomKeyCode );
 
       }, 1 ); // TODO: make this time variable?
-
-
-      // TODO: can't we just use the function below for the click event also? It basically looks the same
-      function eventFire( el, etype ) {
-        if ( el.fireEvent ) {
-          el.fireEvent( 'on' + etype );
-        }
-        else {
-          var evObj = document.createEvent( 'Events' );
-          evObj.initEvent( etype, true, false );
-          el.dispatchEvent( evObj );
-        }
-      }
 
       /**
        * Taken from example in http://output.jsbin.com/awenaq/3,
        * @param event
        * @param element
-       * @param keyCode
+       * @param [keycode]
        */
       function triggerDOMEvent( event, element, keyCode ) {
         var eventObj = document.createEventObject ?
