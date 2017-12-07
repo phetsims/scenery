@@ -262,7 +262,7 @@ define( function( require ) {
      * @private
      *
      * @param {Event} domEvent
-     * @param {BatchedDOMEvent.Type} - TODO: turn to full enumeration?
+     * @param {BatchedDOMEvent.Type} batchType - TODO: turn to full enumeration?
      * @param {string} inputCallbackName - e.g. 'mouseDown', will trigger Input.mouseDown
      * @param {boolean} triggerImmediate - Whether this will be force-executed now, causing all batched events to fire.
      *                                     Useful for events (like mouseup) that responding synchronously is
