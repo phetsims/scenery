@@ -71,6 +71,8 @@ define( function( require ) {
     // @private { [].{ isDown: {boolean}, timeDown: [boolean] } - tracks the state of the keyboard. JavaScript doesn't
     // handle multiple key presses, so we track which keys are currently down and update based on state of this
     // collection of objects
+    // TODO: Consider a global state object for this that persists across listeners so the state of the keyboard will
+    // be accurate when focus changes from one element to another, see https://github.com/phetsims/friction/issues/53
     this.keyState = [];
 
     // @private { [].{ keys: <Array.number>, callback: <Function> } } - groups of keys that have some behavior when
@@ -128,6 +130,20 @@ define( function( require ) {
      */
     this.keyup = function( event ) {
       var moveKeysDown = self.movementKeysDown;
+
+      // if the shift key is down when we navigate to the object, add it to the keystate because it won't be added until
+      // the next keydown event
+      if ( event.keyCode === Input.KEY_TAB ) {
+        if ( event.shiftKey ) {
+
+          // add 'shift' to the keystate until it is released again
+          self.keyState.push( {
+            keyDown: true,
+            keyCode: Input.KEY_SHIFT,
+            timeDown: 0 // in ms
+          } );
+        }
+      }
 
       for ( var i = 0; i < self.keyState.length; i++ ) {
         if ( event.keyCode === self.keyState[ i ].keyCode ) {
