@@ -79,16 +79,18 @@ define( function( require ) {
         var self = this;
         document.body.addEventListener( 'keydown', function( event ) {
 
-          // if an accessible node was being interacted with a mouse, this node that should receive focus upon 
-          // keyboard navigation
-          if ( self.display.pointerFocus ) {
-            var focusable = self.display.pointerFocus.focusable;
-            var inDOM = self.display.pointerFocus.getAccessibleInstances().length > 0;
+          // if an accessible node was being interacted with a mouse, or had focus when sim is made inactive, this node
+          // should receive focus upon resuming keyboard navigation
+          if ( self.display.pointerFocus || self.display.activeNode ) {
+            var active = self.display.pointerFocus || self.display.activeNode;
+            var focusable = active.focusable;
+            var inDOM = active.getAccessibleInstances().length > 0;
             if ( focusable && inDOM ) {
               if ( event.keyCode === Input.KEY_TAB ) {
                 event.preventDefault();
-                self.display.pointerFocus.focus();
+                active.focus();
                 self.display.pointerFocus = null;
+                self.display.activeNode = null;
               }
             }
           }

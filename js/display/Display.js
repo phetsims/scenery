@@ -271,6 +271,11 @@ define( function( require ) {
       // receive focus.
       this.pointerFocus = null;
 
+      // @public (scenery-internal) - {Node|null} - When  this display is made inactive, store the focused node
+      // so that when the sim becomes interactive again this node can receive focus when we resume keyboard
+      // navigation
+      this.activeNode = null;
+
       this._rootAccessibleInstance = AccessibleInstance.createFromPool( null, this, new scenery.Trail() );
       sceneryLog && sceneryLog.AccessibleInstance && sceneryLog.AccessibleInstance(
         'Display root instance: ' + this._rootAccessibleInstance.toString() );
@@ -587,6 +592,13 @@ define( function( require ) {
       // TODO: disable keyboard nav without hiding content so that it is still readable with a screen reader,
       // see https://github.com/phetsims/phet-io/issues/995
       if ( this.options.accessibility ) {
+        if ( !this._interactive ) {
+          this.activeNode = Display.focusedNode;
+
+          // prevent a FF bug where hiding the element without blurring it causes focus to get stuck in the body
+          this.activeNode && this.activeNode.blur();
+        }
+
         this.accessibleDOMElement.hidden = !this._interactive;
       }
     },
