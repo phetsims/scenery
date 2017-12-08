@@ -51,7 +51,7 @@ define( function( require ) {
       // {Function|null} - Called as start( event: {DOMEvent} ) when keyboard drag is started
       start: null,
 
-      // {Function|null} - Called as drag( event: {DOMEvent}, viewDelta: {Vector2} ) during drag
+      // {Function|null} - Called as drag( viewDelta: {Vector2} ) during drag
       drag: null,
 
       // {Function|null} - Called as end( event: {DOMEvent}, viewDelta: {Vector2} ) when keyboard drag ends
@@ -167,7 +167,7 @@ define( function( require ) {
      *
      * @param {DOMEvent} event
      */
-    this.blur = function( event) {
+    this.blur = function( event ) {
       self.reset();
     };
   }
@@ -285,7 +285,7 @@ define( function( require ) {
 
             // call our drag function
             if ( this._drag ) {
-              this._drag( event, vectorDelta );
+              this._drag( vectorDelta );
             }
           }
         }
