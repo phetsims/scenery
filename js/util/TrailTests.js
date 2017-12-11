@@ -504,7 +504,7 @@ define( function( require ) {
 
     b.validateBounds();
 
-    assert.expect( 0 );
+    assert.ok( true, 'so we have at least 1 test in this set' );
   } );
 
   QUnit.test( 'Correct bounds on rectangle', function( assert ) {
@@ -601,20 +601,16 @@ define( function( require ) {
 
   QUnit.test( 'Path with empty shape', function( assert ) {
     var scene = new Node();
-
     var node = new Path( new Shape() );
-
     scene.addChild( node );
-    assert.expect( 0 );
+    assert.ok( true, 'so we have at least 1 test in this set' );
   } );
 
   QUnit.test( 'Path with null shape', function( assert ) {
     var scene = new Node();
-
     var node = new Path( null );
-
     scene.addChild( node );
-    assert.expect( 0 );
+    assert.ok( true, 'so we have at least 1 test in this set' );
   } );
 
   QUnit.test( 'Display resize event', function( assert ) {

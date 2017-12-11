@@ -509,7 +509,7 @@ define( function( require ) {
     node4.removeChild( path2 );
     node0.removeChild( node6 );
 
-    assert.expect( 0 ); // eslint-disable-line no-undef
+    assert.ok( true, 'so we have at least 1 test in this set' );
   } );
 
   QUnit.test( 'RelativeTransform matrix mismatch #393', function( assert ) {
@@ -529,7 +529,7 @@ define( function( require ) {
     node0.renderer = 'canvas';
     display.updateDisplay();
 
-    assert.expect( 0 ); // eslint-disable-line no-undef
+    assert.ok( true, 'so we have at least 1 test in this set' );
   } );
 
   QUnit.test( 'computeShapeBounds in requiresSVGBoundsWorkaround', function( assert ) {
@@ -1319,6 +1319,6 @@ define( function( require ) {
     path3.transform.prepend( Matrix3.scaling( 0.6607098999660652 ) );
     display.updateDisplay();
 
-    assert.expect( 0 ); // eslint-disable-line no-undef
+    assert.ok( true, 'so we have at least 1 test in this set' );
   } );
 } );
