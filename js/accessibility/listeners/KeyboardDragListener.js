@@ -17,7 +17,7 @@ define( function( require ) {
 
   // modules
   var inherit = require( 'PHET_CORE/inherit' );
-  var Input = require( 'SCENERY/input/Input' );
+  var KeyboardUtil = require( 'SCENERY/accessibility/KeyboardUtil' );
   var scenery = require( 'SCENERY/scenery' );
   var Vector2 = require( 'DOT/Vector2' );
 
@@ -100,7 +100,7 @@ define( function( require ) {
     this.keydown = function( event ) {
 
       // required to work with Safari and VoiceOver, otherwise arrow keys will move virtual cursor
-      if ( Input.isArrowKey( event.keyCode ) ) {
+      if ( KeyboardUtil.isArrowKey( event.keyCode ) ) {
         event.preventDefault();
       }
 
@@ -133,13 +133,13 @@ define( function( require ) {
 
       // if the shift key is down when we navigate to the object, add it to the keystate because it won't be added until
       // the next keydown event
-      if ( event.keyCode === Input.KEY_TAB ) {
+      if ( event.keyCode === KeyboardUtil.KEY_TAB ) {
         if ( event.shiftKey ) {
 
           // add 'shift' to the keystate until it is released again
           self.keyState.push( {
             keyDown: true,
-            keyCode: Input.KEY_SHIFT,
+            keyCode: KeyboardUtil.KEY_SHIFT,
             timeDown: 0 // in ms
           } );
         }
@@ -325,7 +325,7 @@ define( function( require ) {
      * @return {boolean}
      */
     leftMovementKeysDown: function() {
-      return this.keyInListDown( [ Input.KEY_A, Input.KEY_LEFT_ARROW ] );
+      return this.keyInListDown( [ KeyboardUtil.KEY_A, KeyboardUtil.KEY_LEFT_ARROW ] );
     },
 
     /**
@@ -335,7 +335,7 @@ define( function( require ) {
      * @return {boolean}
      */
     rightMovementKeysDown: function() {
-      return this.keyInListDown( [ Input.KEY_RIGHT_ARROW, Input.KEY_D ] );
+      return this.keyInListDown( [ KeyboardUtil.KEY_RIGHT_ARROW, KeyboardUtil.KEY_D ] );
     },
 
     /**
@@ -345,7 +345,7 @@ define( function( require ) {
      * @return {boolean}
      */
     upMovementKeysDown: function() {
-      return this.keyInListDown( [ Input.KEY_UP_ARROW, Input.KEY_W ] );
+      return this.keyInListDown( [ KeyboardUtil.KEY_UP_ARROW, KeyboardUtil.KEY_W ] );
     },
 
     /**
@@ -355,7 +355,7 @@ define( function( require ) {
      * @return {boolean}
      */
     downMovementKeysDown: function() {
-      return this.keyInListDown( [ Input.KEY_DOWN_ARROW, Input.KEY_S ] );
+      return this.keyInListDown( [ KeyboardUtil.KEY_DOWN_ARROW, KeyboardUtil.KEY_S ] );
     },
 
     /**
@@ -375,7 +375,7 @@ define( function( require ) {
      * @return {boolean}
      */
     enterKeyDown: function() {
-      return this.keyInListDown( [ Input.KEY_ENTER ] );
+      return this.keyInListDown( [ KeyboardUtil.KEY_ENTER ] );
     },
 
     /**
@@ -384,7 +384,7 @@ define( function( require ) {
      * @return {boolean}
      */
     shiftKeyDown: function() {
-      return this.keyInListDown( [ Input.KEY_SHIFT ] );
+      return this.keyInListDown( [ KeyboardUtil.KEY_SHIFT ] );
     },
 
     /**
@@ -427,7 +427,7 @@ define( function( require ) {
      * @return {boolean}
      */
     isLeftMovementKey: function( keyCode ) {
-      return keyCode === Input.KEY_A || keyCode === Input.KEY_LEFT_ARROW;
+      return keyCode === KeyboardUtil.KEY_A || keyCode === KeyboardUtil.KEY_LEFT_ARROW;
     },
 
     /**
@@ -437,7 +437,7 @@ define( function( require ) {
      * @return {boolean}
      */
     isRightMovementKey: function( keyCode ) {
-      return keyCode === Input.KEY_D || keyCode === Input.KEY_RIGHT_ARROW;
+      return keyCode === KeyboardUtil.KEY_D || keyCode === KeyboardUtil.KEY_RIGHT_ARROW;
     },
 
     /**
@@ -447,7 +447,7 @@ define( function( require ) {
      * @return {boolean}
      */
     isUpMovementKey: function( keyCode ) {
-      return keyCode === Input.KEY_W || keyCode === Input.KEY_UP_ARROW;
+      return keyCode === KeyboardUtil.KEY_W || keyCode === KeyboardUtil.KEY_UP_ARROW;
     },
 
     /**
@@ -457,7 +457,7 @@ define( function( require ) {
      * @return {boolean}
      */
     isDownMovementKey: function( keyCode ) {
-      return keyCode === Input.KEY_S || keyCode === Input.KEY_DOWN_ARROW;
+      return keyCode === KeyboardUtil.KEY_S || keyCode === KeyboardUtil.KEY_DOWN_ARROW;
     },
   } );
 } );
