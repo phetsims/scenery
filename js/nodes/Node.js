@@ -159,6 +159,7 @@ define( function( require ) {
   var Events = require( 'AXON/Events' );
   var extend = require( 'PHET_CORE/extend' );
   var inherit = require( 'PHET_CORE/inherit' );
+  var IOObject = require( 'TANDEM/IOObject' );
   var Matrix3 = require( 'DOT/Matrix3' );
   var Picker = require( 'SCENERY/util/Picker' );
   var Renderer = require( 'SCENERY/display/Renderer' );
@@ -172,11 +173,9 @@ define( function( require ) {
   // commented out so Require.js doesn't balk at the circular dependency
   // require( 'SCENERY/util/Trail' );
   // require( 'SCENERY/util/TrailPointer' );
-  var Tandem = require( 'TANDEM/Tandem' );
   var NodeIO = require( 'SCENERY/nodes/NodeIO' );
-  // constants
-  var clamp = Util.clamp;
 
+  // constants
   var globalIdCounter = 1;
 
   var eventsRequiringBoundsValidation = {
@@ -239,14 +238,7 @@ define( function( require ) {
     'mouseArea', // Changes the area the mouse can interact with, see setMouseArea() for more documentation
     'touchArea', // Changes the area touches can interact with, see setTouchArea() for more documentation
     'clipArea', // Makes things outside of a shape invisible, see setClipArea() for more documentation
-    'transformBounds', // Flag that makes bounds tighter, see setTransformBounds() for more documentation
-    'phetioType', // The corresponding phet-io wrapper type
-    'phetioState', // Flag to include in phet-io state. The properties on node default to undefined, but phet-io defaults this to true, see phetio.addInstance()
-    'phetioEvents', // Flag to include in phet-io event stream. The properties on node default to undefined, but phet-io defaults this to true, see phetio.addInstance()
-    'phetioReadOnly', // Flag to mark as read-only so instance proxies cannot control the object
-    'phetioInstanceDocumentation', // Useful notes about an instrumented instance, shown in instance-proxies
-    'tandem' // For instrumenting Scenery nodes, see setTandem().  This must be last so that (a) the phetioType
-    // is available and (b) because when tandem.addInstance is called the node becomes active in the PhET-iO API immediately
+    'transformBounds' // Flag that makes bounds tighter, see setTransformBounds() for more documentation
   ];
 
   var DEFAULT_OPTIONS = {
@@ -267,8 +259,7 @@ define( function( require ) {
     cssTransform: false,
     excludeInvisible: false,
     webglScale: null,
-    preventFit: false,
-    phetioState: true
+    preventFit: false
   };
 
   /**
@@ -310,19 +301,19 @@ define( function( require ) {
    * @param {Object} [options] - Optional options object, as described above.
    */
   function Node( options ) {
+
     // supertype call to axon.Events (should just initialize a few properties here, notably _eventListeners and _staticEventListeners)
     Events.call( this );
+
+    options = _.extend( { phetioType: NodeIO }, options );
+
+    // supertype call to IOObject for PhET-iO support
+    IOObject.call( this, options );
 
     // NOTE: All member properties with names starting with '_' are assumed to be @private!
 
     // @private {number} - Assigns a unique ID to this node (allows trails to get a unique list of IDs)
     this._id = globalIdCounter++;
-
-    // @protected {Tandem|null} - Only one can be provided
-    this._tandem = null;
-
-    // @protected {function} - the wrapper type for phet-io
-    this._phetioType = NodeIO;
 
     // @protected {Array.<Instance>} - All of the Instances tracking this Node
     this._instances = [];
@@ -519,7 +510,7 @@ define( function( require ) {
 
   scenery.register( 'Node', Node );
 
-  inherit( Object, Node, extend( {
+  inherit( IOObject, Node, extend( {
     /**
      * This is an array of property (setter) names for Node.mutate(), which are also used when creating nodes with
      * parameter objects.
@@ -1108,7 +1099,7 @@ define( function( require ) {
       // double-check that all of our bounds handling has been accurate
       if ( assertSlow ) {
         // new scope for safety
-        (function() {
+        ( function() {
           var epsilon = 0.000001;
 
           var childBounds = Bounds2.NOTHING.copy();
@@ -1131,7 +1122,7 @@ define( function( require ) {
                                     self._bounds.equalsEpsilon( fullBounds, epsilon ),
             'Bounds mismatch after validateBounds: ' + self._bounds.toString() +
             ', expected: ' + fullBounds.toString() );
-        })();
+        } )();
       }
 
       return wasDirtyBefore; // whether any dirty flags were set
@@ -2893,7 +2884,7 @@ define( function( require ) {
     setOpacity: function( opacity ) {
       assert && assert( typeof opacity === 'number' && isFinite( opacity ), 'opacity should be a finite number' );
 
-      var clampedOpacity = clamp( opacity, 0, 1 );
+      var clampedOpacity = Util.clamp( opacity, 0, 1 );
       if ( clampedOpacity !== this._opacity ) {
         this._opacity = clampedOpacity;
 
@@ -3441,178 +3432,6 @@ define( function( require ) {
     },
     get webglScale() { return this.getWebGLScale(); },
 
-    /**
-     * Sets the phetioState flag on the node, see phetio.addInstance() for more info
-     * @public
-     *
-     * @param {boolean} phetioState
-     * @returns {Node}
-     */
-    setPhetioState: function( phetioState ) {
-      assert && assert( typeof phetioState === 'boolean', 'phetioState should be a boolean' );
-      if ( this._phetioState !== undefined ) {
-        assert && assert( phetioState === this._phetioState, 'Node\' phetioState cannot be given set more than once' );
-      }
-
-      this._phetioState = phetioState;
-
-      return this; // for chaining
-    },
-    set phetioState( phetioState ) { this.setPhetioState( phetioState ); },
-
-    /**
-     * Sets the phetioEvents flag on the node, see phetio.addInstance() for more info
-     * @public
-     *
-     * @param {boolean} phetioEvents
-     * @returns {Node}
-     */
-    setPhetioEvents: function( phetioEvents ) {
-      assert && assert( typeof phetioEvents === 'boolean', 'phetioEvents should be a boolean' );
-      if ( this._phetioEvents !== undefined ) {
-        assert && assert( phetioEvents === this._phetioEvents, 'Node\' phetioEvents cannot be given set more than once' );
-      }
-
-      this._phetioEvents = phetioEvents;
-
-      return this; // for chaining
-    },
-    set phetioEvents( phetioEvents ) { this.setPhetioEvents( phetioEvents ); },
-
-    /**
-     * Sets the phetioReadOnly flag on the node, see phetio.addInstance() for more info
-     * @public
-     *
-     * @param {boolean} phetioReadOnly
-     * @returns {Node}
-     */
-    setPhetioReadOnly: function( phetioReadOnly ) {
-      assert && assert( typeof phetioReadOnly === 'boolean', 'phetioReadOnly should be a boolean' );
-      if ( this._phetioReadOnly !== undefined ) {
-        assert && assert( phetioReadOnly === this._phetioReadOnly, 'Node\' phetioReadOnly cannot be given set more than once' );
-      }
-
-      this._phetioReadOnly = phetioReadOnly;
-
-      return this; // for chaining
-    },
-    set phetioReadOnly( phetioReadOnly ) { this.setPhetioReadOnly( phetioReadOnly ); },
-
-    /**
-     * Sets the phetioInstanceDocumentation flag on the node, see phetio.addInstance() for more info
-     * @public
-     *
-     * @param {boolean} phetioInstanceDocumentation
-     * @returns {Node}
-     */
-    setPhetioInstanceDocumentation: function( phetioInstanceDocumentation ) {
-      assert && assert( typeof phetioInstanceDocumentation === 'string', 'phetioInstanceDocumentation should be a string' );
-      if ( this._phetioInstanceDocumentation !== undefined ) {
-        assert && assert( phetioInstanceDocumentation === this._phetioInstanceDocumentation, 'Node\' phetioInstanceDocumentation cannot be given set more than once' );
-      }
-
-      this._phetioInstanceDocumentation = phetioInstanceDocumentation;
-
-      return this; // for chaining
-    },
-    set phetioInstanceDocumentation( phetioInstanceDocumentation ) { this.setPhetioInstanceDocumentation( phetioInstanceDocumentation ); },
-
-    /**
-     * Get each phetio flag needed for the tandem addInstance call. This method is explicit because it only wants
-     * keys that are defined. If undefined keys are passed in to phetio.addInstance() through options, then they will not
-     * be extended correctly with lodash.
-     * @returns {Object}
-     */
-    getPhetioFlags: function() {
-
-      var flags = {};
-      if ( typeof this._phetioState === 'boolean' ) {
-        flags.phetioState = this._phetioState;
-      }
-      else {
-        flags.phetioState = DEFAULT_OPTIONS.phetioState;
-      }
-      if ( typeof this._phetioEvents === 'boolean' ) {
-        flags.phetioEvents = this._phetioEvents;
-      }
-      if ( typeof this._phetioReadOnly === 'boolean' ) {
-        flags.phetioReadOnly = this._phetioReadOnly;
-      }
-      if ( typeof this._phetioInstanceDocumentation === 'string' ) {
-        flags.phetioInstanceDocumentation = this._phetioInstanceDocumentation;
-      }
-      if ( typeof this._phetioType === 'function' ) {
-        flags.phetioType = this._phetioType;
-      }
-      return flags;
-    },
-
-    /**
-     * Sets the phetioType of this node, a wrapper type like CheckBoxIO
-     * @public
-     *
-     * @param {function} phetioType
-     * @returns {Node}
-     */
-    setPhetioType: function( phetioType ) {
-      assert && assert( typeof phetioType === 'function', 'phetioValue should be a function' );
-      if ( this._phetioType !== NodeIO ) {
-        assert && assert( phetioType === this._phetioType, 'Node cannot be given multiple phetioTypes' );
-      }
-
-      this._phetioType = phetioType;
-
-      return this; // for chaining
-    },
-    set phetioType( value ) { this.setPhetioType( value ); },
-
-    /**
-     * Returns the phetioType previously set with setPhetioType().
-     * @public
-     *
-     * @returns {function}
-     */
-    getPhetioType: function() {
-      return this._phetioType;
-    },
-    get phetioType() { return this.getPhetioType(); },
-
-    /**
-     * Sets the tandem of this node. This should generally be done after the node is fully constructed, and preferably
-     * within the node.mutate() call that sets other options (which is called from the constructor).
-     * @public
-     *
-     * @param {Tandem} tandem
-     * @returns {Node}
-     */
-    setTandem: function( tandem ) {
-      assert && assert( tandem instanceof Tandem );
-
-      if ( tandem !== this._tandem ) {
-        assert && assert( !this._tandem || this._tandem.id === tandem.id,
-          'Node cannot be given multiple tandems with different IDs' );
-
-        this._tandem = tandem;
-
-        // Pass through phet-io feature flags in options object
-        this._tandem.addInstance( this, this.getPhetioFlags() );
-      }
-
-      return this; // for chaining
-    },
-    set tandem( value ) { this.setTandem( value ); },
-
-    /**
-     * Returns the tandem previously set with setTandem().
-     * @public
-     *
-     * @returns {Tandem}
-     */
-    getTandem: function() {
-      return this._tandem;
-    },
-    get tandem() { return this.getTandem(); },
-
     /*---------------------------------------------------------------------------*
      * Trail operations
      *----------------------------------------------------------------------------*/
@@ -4029,7 +3848,7 @@ define( function( require ) {
       assert && assert( y === undefined || typeof y === 'number', 'If provided, y should be a number' );
       assert && assert( width === undefined || ( typeof width === 'number' && width >= 0 && ( width % 1 === 0 ) ),
         'If provided, width should be a non-negative integer' );
-      assert && assert( height === undefined || (typeof height === 'number' && height >= 0 && ( height % 1 === 0 ) ),
+      assert && assert( height === undefined || ( typeof height === 'number' && height >= 0 && ( height % 1 === 0 ) ),
         'If provided, height should be a non-negative integer' );
 
       var padding = 2; // padding used if x and y are not set
@@ -4785,14 +4604,11 @@ define( function( require ) {
       assert && assert( _.filter( [ 'translation', 'y', 'top', 'bottom', 'centerY', 'centerTop', 'rightTop', 'leftCenter', 'center', 'rightCenter', 'leftBottom', 'centerBottom', 'rightBottom' ], function( key ) { return options[ key ] !== undefined; } ).length <= 1,
         'More than one mutation on this Node set the y component, check ' + Object.keys( options ).join( ',' ) );
 
-      // Tandem must be last so that the object is fully constructed before registration with tandem registry
-      assert && assert( this._mutatorKeys[ this._mutatorKeys.length - 1 ] === 'tandem', 'Tandem should be last in mutator keys' );
-
       var self = this;
 
       _.each( this._mutatorKeys, function( key ) {
         // See https://github.com/phetsims/scenery/issues/580 for more about passing undefined.
-        assert && assert( !options.hasOwnProperty( key ) || options[ key ] !== undefined || key === 'phetioType',
+        assert && assert( !options.hasOwnProperty( key ) || options[ key ] !== undefined,
           'Undefined not allowed for Node key: ' + key );
 
         if ( options[ key ] !== undefined ) {
@@ -4973,11 +4789,7 @@ define( function( require ) {
       this.detach();
 
       Events.prototype.dispose.call( this ); // TODO: don't rely on Events
-
-      if ( this._tandem ) {
-        this._tandem.removeInstance( this );
-        this._tandem = null;
-      }
+      IOObject.prototype.dispose.call( this );
     },
 
     /**
