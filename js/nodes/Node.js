@@ -497,7 +497,7 @@ define( function( require ) {
     if ( options ) {
       this.mutate( options );
     }
-    options = _.extend( { phetioType: NodeIO } );
+    options = _.extend( { phetioType: NodeIO }, options );
 
     IOObject.call( this, options );
 
@@ -4816,7 +4816,7 @@ define( function( require ) {
 
     /**
      * Used by the Accessibility trait as well, so it is exported as a static.
-     * @public (scenery-interal)
+     * @public (scenery-internal)
      *
      * @param {Node} node
      * @returns {boolean}
