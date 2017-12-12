@@ -994,49 +994,6 @@ define( function( require ) {
       else {
         return evt.pointerType; // hope for the best
       }
-    },
-
-    // Export some key codes for reuse in listeners.
-    // TODO: See if these can be replaced by DOM/Browser API support
-    KEY_SPACE: 32,
-    KEY_ENTER: 13,
-    KEY_TAB: 9,
-    KEY_RIGHT_ARROW: 39,
-    KEY_LEFT_ARROW: 37,
-    KEY_UP_ARROW: 38,
-    KEY_DOWN_ARROW: 40,
-    KEY_SHIFT: 16,
-    KEY_ESCAPE: 27,
-    KEY_DELETE: 46,
-    KEY_BACKSPACE: 8,
-    KEY_PAGE_UP: 33,
-    KEY_PAGE_DOWN: 34,
-    KEY_END: 35,
-    KEY_HOME: 36,
-    KEY_S: 83,
-    KEY_W: 87,
-    KEY_A: 65,
-    KEY_D: 68,
-    KEY_J: 74,
-    KEY_C: 67,
-    KEY_N: 78,
-    KEY_0: 48,
-    KEY_9: 57,
-
-    // returns whether or not the keyCode corresponds to pressing an arrow key
-    isArrowKey: function( keyCode ) {
-      return ( keyCode === Input.KEY_RIGHT_ARROW || keyCode === Input.KEY_LEFT_ARROW ||
-               keyCode === Input.KEY_UP_ARROW || keyCode === Input.KEY_DOWN_ARROW );
-    },
-
-    // returns true if keycode is one of keys used for range inputs (key codes 33 - 40, inclusive)
-    isRangeKey: function( keyCode ) {
-      return ( keyCode >= Input.KEY_PAGE_UP && keyCode <= Input.KEY_DOWN_ARROW );
-    },
-
-    // returns whether or not the keyCode corresponds to pressing a number key
-    isNumberKey: function( keyCode ) {
-      return ( keyCode > Input.KEY_0 && keyCode < Input.KEY_9 );
     }
   } );
 

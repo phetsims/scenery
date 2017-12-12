@@ -13,7 +13,7 @@ define( function( require ) {
   var cleanArray = require( 'PHET_CORE/cleanArray' );
   var Events = require( 'AXON/Events' );
   var inherit = require( 'PHET_CORE/inherit' );
-  var Input = require( 'SCENERY/input/Input' );
+  var KeyboardUtil = require( 'SCENERY/accessibility/KeyboardUtil' );
   var Poolable = require( 'PHET_CORE/Poolable' );
   var scenery = require( 'SCENERY/scenery' );
 
@@ -86,7 +86,7 @@ define( function( require ) {
             var focusable = active.focusable;
             var inDOM = active.getAccessibleInstances().length > 0;
             if ( focusable && inDOM ) {
-              if ( event.keyCode === Input.KEY_TAB ) {
+              if ( event.keyCode === KeyboardUtil.KEY_TAB ) {
                 event.preventDefault();
                 active.focus();
                 self.display.pointerFocus = null;

@@ -16,7 +16,7 @@ define( function( require ) {
   var inherit = require( 'PHET_CORE/inherit' );
   var scenery = require( 'SCENERY/scenery' );
   require( 'SCENERY/util/Trail' );
-  var Input = require( 'SCENERY/input/Input' );
+  var KeyboardUtil = require( 'SCENERY/accessibility/KeyboardUtil' );
   var Trail = require( 'SCENERY/util/Trail' );
 
   /*
@@ -70,7 +70,7 @@ define( function( require ) {
       // TODO: Only trigger this if the enter/space key went down for this node
       keyup: function( event ) {
         var keyCode = event.domEvent.keyCode;
-        if ( keyCode === Input.KEY_ENTER || keyCode === Input.KEY_SPACE ) {
+        if ( keyCode === KeyboardUtil.KEY_ENTER || keyCode === KeyboardUtil.KEY_SPACE ) {
           self.buttonUp( event );
         }
       }
@@ -156,7 +156,7 @@ define( function( require ) {
     // When enter/space pressed for this node, trigger a button down
     keydown: function( event ) {
       var keyCode = event.domEvent.keyCode;
-      if ( keyCode === Input.KEY_ENTER || keyCode === Input.KEY_SPACE ) {
+      if ( keyCode === KeyboardUtil.KEY_ENTER || keyCode === KeyboardUtil.KEY_SPACE ) {
         this.buttonDown( event );
       }
     }

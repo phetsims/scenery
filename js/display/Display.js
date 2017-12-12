@@ -276,6 +276,10 @@ define( function( require ) {
       // navigation
       this.activeNode = null;
 
+      // @private - the node that currently has focus when we remove an accessible trail, tracked so that we can
+      // restore focus after sorting accessible instances
+      this._focusedNodeOnRemoveTrail;
+
       this._rootAccessibleInstance = AccessibleInstance.createFromPool( null, this, new scenery.Trail() );
       sceneryLog && sceneryLog.AccessibleInstance && sceneryLog.AccessibleInstance(
         'Display root instance: ' + this._rootAccessibleInstance.toString() );
@@ -689,6 +693,12 @@ define( function( require ) {
 
       this.sortAccessibleInstances();
 
+      // after sorting, restore focus if the browser blurred while removing or adding DOM elements
+      if ( this._focusedNodeOnRemoveTrail ) {
+        this._focusedNodeOnRemoveTrail.focusable && this._focusedNodeOnRemoveTrail.focus();
+        this._focusedNodeOnRemoveTrail = null;
+      }
+
       sceneryLog && sceneryLog.Accessibility && sceneryLog.pop();
     },
 
@@ -706,6 +716,7 @@ define( function( require ) {
       sceneryLog && sceneryLog.Accessibility && sceneryLog.Accessibility( 'Display.removeAccessibleTrail ' + trail.toString() );
       sceneryLog && sceneryLog.Accessibility && sceneryLog.push();
 
+      this._focusedNodeOnRemoveTrail = Display.focusedNode;
       this.getBaseAccessibleInstance( trail ).removeSubtree( trail );
 
       this.sortAccessibleInstances();
