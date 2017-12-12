@@ -159,9 +159,9 @@ define( function( require ) {
   var Events = require( 'AXON/Events' );
   var extend = require( 'PHET_CORE/extend' );
   var inherit = require( 'PHET_CORE/inherit' );
-  var IOObject = require( 'TANDEM/IOObject' );
   var Matrix3 = require( 'DOT/Matrix3' );
   var Picker = require( 'SCENERY/util/Picker' );
+  var IOObject = require( 'TANDEM/IOObject' );
   var Renderer = require( 'SCENERY/display/Renderer' );
   var RendererSummary = require( 'SCENERY/util/RendererSummary' );
   var scenery = require( 'SCENERY/scenery' );
@@ -174,8 +174,9 @@ define( function( require ) {
   // require( 'SCENERY/util/Trail' );
   // require( 'SCENERY/util/TrailPointer' );
   var NodeIO = require( 'SCENERY/nodes/NodeIO' );
-
   // constants
+  var clamp = Util.clamp;
+
   var globalIdCounter = 1;
 
   var eventsRequiringBoundsValidation = {
@@ -301,14 +302,8 @@ define( function( require ) {
    * @param {Object} [options] - Optional options object, as described above.
    */
   function Node( options ) {
-
     // supertype call to axon.Events (should just initialize a few properties here, notably _eventListeners and _staticEventListeners)
     Events.call( this );
-
-    options = _.extend( { phetioType: NodeIO }, options );
-
-    // supertype call to IOObject for PhET-iO support
-    IOObject.call( this, options );
 
     // NOTE: All member properties with names starting with '_' are assumed to be @private!
 
@@ -366,7 +361,7 @@ define( function( require ) {
     this._transform.onStatic( 'change', this._transformListener ); // NOTE: Listener/transform bound to this node.
 
     /*
-     * Maximum dimensions for the node's local bounds before a corrective scaling factor is applied to maintain size.
+     * Maxmimum dimensions for the node's local bounds before a corrective scaling factor is applied to maintain size.
      * The maximum dimensions are always compared to local bounds, and applied "before" the node's transform.
      * Whenever the local bounds or maximum dimensions of this Node change and it has at least one maximum dimension
      * (width or height), an ideal scale is computed (either the smallest scale for our local bounds to fit the
@@ -502,6 +497,9 @@ define( function( require ) {
     if ( options ) {
       this.mutate( options );
     }
+    options = _.extend( { phetioType: NodeIO } );
+
+    IOObject.call( this, options );
 
     // Track allocation of nodes internally
     phetAllocation && phetAllocation( 'Node' );
@@ -2884,7 +2882,7 @@ define( function( require ) {
     setOpacity: function( opacity ) {
       assert && assert( typeof opacity === 'number' && isFinite( opacity ), 'opacity should be a finite number' );
 
-      var clampedOpacity = Util.clamp( opacity, 0, 1 );
+      var clampedOpacity = clamp( opacity, 0, 1 );
       if ( clampedOpacity !== this._opacity ) {
         this._opacity = clampedOpacity;
 
@@ -4608,8 +4606,7 @@ define( function( require ) {
 
       _.each( this._mutatorKeys, function( key ) {
         // See https://github.com/phetsims/scenery/issues/580 for more about passing undefined.
-        assert && assert( !options.hasOwnProperty( key ) || options[ key ] !== undefined,
-          'Undefined not allowed for Node key: ' + key );
+        assert && assert( !options.hasOwnProperty( key ) || options[ key ] !== undefined, 'Undefined not allowed for Node key: ' + key );
 
         if ( options[ key ] !== undefined ) {
           var descriptor = Object.getOwnPropertyDescriptor( Node.prototype, key );
