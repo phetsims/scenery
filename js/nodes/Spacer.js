@@ -11,6 +11,7 @@ define( function( require ) {
 
   var Bounds2 = require( 'DOT/Bounds2' );
   var inherit = require( 'PHET_CORE/inherit' );
+  var IOObject = require( 'TANDEM/IOObject' );
   var Leaf = require( 'SCENERY/nodes/Leaf' );
   var Node = require( 'SCENERY/nodes/Node' );
   var scenery = require( 'SCENERY/scenery' );
@@ -30,7 +31,7 @@ define( function( require ) {
     assert && assert( typeof width === 'number' && isFinite( width ), 'width should be a finite number' );
     assert && assert( typeof height === 'number' && isFinite( height ), 'height should be a finite number' );
 
-    Node.call( this );
+    Node.call( this, IOObject.getOptions( options ) );
 
     // override the local bounds to our area
     this.localBounds = new Bounds2( 0, 0, width, height );

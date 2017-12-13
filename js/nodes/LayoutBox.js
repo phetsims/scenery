@@ -16,6 +16,7 @@ define( function( require ) {
   // modules
   var Bounds2 = require( 'DOT/Bounds2' );
   var inherit = require( 'PHET_CORE/inherit' );
+  var IOObject = require( 'TANDEM/IOObject' );
   var Node = require( 'SCENERY/nodes/Node' );
   var scenery = require( 'SCENERY/scenery' );
 
@@ -84,7 +85,7 @@ define( function( require ) {
     //                      for more documentation.
     this._resize = true;
 
-    Node.call( this );
+    Node.call( this, IOObject.getOptions( options ) );
 
     // @private {function} - If resize:true, will be called whenever a child has its bounds change
     this._boundsListener = this.updateLayoutAutomatically.bind( this );

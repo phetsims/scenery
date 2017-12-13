@@ -16,9 +16,10 @@ define( function( require ) {
   // modules
   var Color = require( 'SCENERY/util/Color' );
   var inherit = require( 'PHET_CORE/inherit' );
+  var IOObject = require( 'TANDEM/IOObject' );
+  var LineStyles = require( 'KITE/util/LineStyles' );
   var Path = require( 'SCENERY/nodes/Path' );
   var scenery = require( 'SCENERY/scenery' );
-  var LineStyles = require( 'KITE/util/LineStyles' );
   var Vector2 = require( 'DOT/Vector2' );
 
   // constants
@@ -37,7 +38,6 @@ define( function( require ) {
    */
   function FocusHighlightPath( shape, options ) {
 
-    Path.call( this, shape );
     options = _.extend( {
 
       // stroke options,  one for each highlight
@@ -55,6 +55,8 @@ define( function( require ) {
       miterLimit: LineStyles.DEFAULT_OPTIONS.miterLimit,
       lineDashOffset: LineStyles.DEFAULT_OPTIONS.lineDashOffset
     }, options );
+
+    Path.call( this, shape, IOObject.getOptions( options ) );
 
     this.options = options; // @private TODO: only assign individual options to 'this'.
 

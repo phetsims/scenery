@@ -65,12 +65,13 @@ define( function( require ) {
   var extendDefined = require( 'PHET_CORE/extendDefined' );
   var Font = require( 'SCENERY/util/Font' );
   var inherit = require( 'PHET_CORE/inherit' );
+  var IOObject = require( 'TANDEM/IOObject' );
   var Line = require( 'SCENERY/nodes/Line' );
   var Node = require( 'SCENERY/nodes/Node' );
+  var RichTextIO = require( 'SCENERY/nodes/RichTextIO' );
   var scenery = require( 'SCENERY/scenery' );
   var Tandem = require( 'TANDEM/Tandem' );
   var Text = require( 'SCENERY/nodes/Text' );
-  var RichTextIO = require( 'SCENERY/nodes/RichTextIO' );
   var VStrut = require( 'SCENERY/nodes/VStrut' );
 
   // Options that can be used in the constructor, with mutate(), or directly as setters/getters
@@ -196,18 +197,18 @@ define( function( require ) {
     // something is longer than our lineWrap, so we'll place one item on its own on an otherwise empty line.
     this._hasAddedLeafToLine = false;
 
-    Node.call( this );
-
-    // @private {Node} - Normal layout container of lines (separate, so we can clear it easily)
-    this.lineContainer = new Node( {} );
-    this.addChild( this.lineContainer );
-
     options = extendDefined( {
       fill: '#000000',
       text: text,
       tandem: Tandem.optional,
       phetioType: RichTextIO
     }, options );
+
+    Node.call( this, IOObject.getOptions( options ) );
+
+    // @private {Node} - Normal layout container of lines (separate, so we can clear it easily)
+    this.lineContainer = new Node( {} );
+    this.addChild( this.lineContainer );
 
     this.mutate( options );
   }

@@ -12,6 +12,7 @@ define( function( require ) {
   var Bounds2 = require( 'DOT/Bounds2' );
   var extendDefined = require( 'PHET_CORE/extendDefined' );
   var inherit = require( 'PHET_CORE/inherit' );
+  var IOObject = require( 'TANDEM/IOObject' );
   var Node = require( 'SCENERY/nodes/Node' );
   var Paintable = require( 'SCENERY/nodes/Paintable' );
   var PathCanvasDrawable = require( 'SCENERY/display/drawables/PathCanvasDrawable' );
@@ -75,7 +76,7 @@ define( function( require ) {
 
     this.initializePaintable();
 
-    Node.call( this );
+    Node.call( this, IOObject.getOptions( options ) );
 
     this.invalidateSupportedRenderers();
 

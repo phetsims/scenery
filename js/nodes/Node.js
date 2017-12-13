@@ -494,12 +494,11 @@ define( function( require ) {
       };
     }
 
+    IOObject.call( this, _.extend( { phetioType: NodeIO }, options ) ); // supercall, but leave options falsy to skip mutate
+
     if ( options ) {
       this.mutate( options );
     }
-    options = _.extend( { phetioType: NodeIO }, options );
-
-    IOObject.call( this, options );
 
     // Track allocation of nodes internally
     phetAllocation && phetAllocation( 'Node' );
@@ -4589,6 +4588,7 @@ define( function( require ) {
      * @returns {Node} - Returns 'this' reference, for chaining
      */
     mutate: function( options ) {
+      assert && IOObject.prototype.checkOptions.call( this, options );
       if ( !options ) {
         return this;
       }
