@@ -61,8 +61,18 @@ define( function( require ) {
       useLocalBounds: true
     } );
 
+    // @private {FocusHighlightPath} - focus highlight for 'groups' of Node's, when descendant node has focus
+    // ancestor with groupFocusHighlight flag will have this extra focus highlight
+    this.groupFocusHighlightPath = new FocusHighlightFromNode( null, {
+      useLocalBounds: true,
+      useGroupDilation: true,
+      outerLineWidth: 1,
+      innerLineWidth: 1
+    } );
+
     this.highlightNode.addChild( this.shapeFocusHighlightPath );
     this.highlightNode.addChild( this.boundsFocusHighlightPath );
+    this.focusRootNode.addChild( this.groupFocusHighlightPath );
 
     // @private - Listeners bound once, so we can access them for removal.
     this.boundsListener = this.onBoundsChange.bind( this );
@@ -138,6 +148,9 @@ define( function( require ) {
         this.onBoundsChange();
       }
 
+      // handle group focus highlights
+      this.activateGroupHighlights();
+
       this.transformDirty = true;
     },
 
@@ -164,11 +177,57 @@ define( function( require ) {
         this.node.offStatic( 'localBounds', this.boundsListener );
       }
 
+      // remove all 'group' focus highlights
+      this.deactivateGroupHighlights();
+
       this.trail = null;
       this.node = null;
       this.mode = null;
       this.transformTracker.removeListener( this.transformListener );
       this.transformTracker.dispose();
+    },
+
+    /**
+     * Activate all 'group' focus highlights by searching for ancestor nodes from the node that has focus
+     * and adding a rectangle around it.
+     *
+     * TODO: Support more than one group focus highlight (multiple ancestors could have groupFocusHighlight)
+     * TODO: Support more than local bounds of ancestor, also support shapes and Node's like focusHighlight
+     * See https://github.com/phetsims/scenery/issues/708
+     *
+     * @private
+     */
+    activateGroupHighlights: function() {
+
+      var trail = this.trail;
+      for ( var i = 0; i < trail.length; i++ ) {
+        var node = trail.nodes[ i ];
+        var highlight = node.groupFocusHighlight;
+        if ( highlight ) {
+          if ( typeof highlight === 'boolean' ) {
+
+            // add a bounding rectangle around the node that uses group highlights
+            this.groupFocusHighlightPath.setShapeFromNode( node );
+            this.groupFocusHighlightPath.visible = true;
+
+            // update matrix
+            var trailToParent = trail.upToNode( node );
+            var tracker = new TransformTracker( trailToParent );
+            this.groupFocusHighlightPath.setMatrix( tracker.matrix );
+
+            // Only closest ancestor with group highlight will get the group highlight
+            break;
+          }
+        }
+      }
+    },
+
+    /**
+     * Remove all group focus highlights by making them invisible.
+     * @private
+     */
+    deactivateGroupHighlights: function() {
+      this.groupFocusHighlightPath.visible = false;
     },
 
     // Called from FocusOverlay after transforming the highlight. Only called when the transform changes.

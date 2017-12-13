@@ -24,7 +24,12 @@ define( function( require ) {
   function FocusHighlightFromNode( node, options ) {
 
     options = _.extend( {
+
+      // {boolean} - if true, highlight will surround local bounds
       useLocalBounds: false,
+
+      // {boolean} - if true, dilation for bounds around node will increase, see setShapeFromNode()
+      useGroupDilation: false,
 
       // line width options, one for each highlight, will be calculated based on transform of this path unless provided
       outerLineWidth: null,
@@ -32,6 +37,7 @@ define( function( require ) {
     }, options );
 
     this.useLocalBounds = options.useLocalBounds; // @private
+    this.useGroupDilation = options.useGroupDilation; // @private
 
     FocusHighlightPath.call( this, null, options );
 
@@ -49,14 +55,18 @@ define( function( require ) {
   return inherit( FocusHighlightPath, FocusHighlightFromNode, {
 
     /**
-     * Update the focusHighlight shape on the path given the node passed in.
+     * Update the focusHighlight shape on the path given the node passed in. Depending on options supplied to this
+     * FocusHighlightFromNode, the shape will surround the node's bounds or its local bounds, dilated by an amount
+     * that is dependent on whether or not this highlight is for group content or for the node itself. See
+     * Accessibility.setGroupFocusHighlight() for more information on group highlights.
+     * 
      * @param {Node} node
      */
     setShapeFromNode: function( node ) {
       this.nodeBounds = this.useLocalBounds ? node.localBounds : node.bounds;
 
-      // Figure out how much dialation to apply to the focus highlight around the node
-      var dilationCoefficient = FocusHighlightPath.getDilationCoefficient( node );
+      // Figure out how much dilation to apply to the focus highlight around the node
+      var dilationCoefficient = this.useGroupDilation ? FocusHighlightPath.getGroupDilationCoefficient( node ) : FocusHighlightPath.getDilationCoefficient( node );
       var dilatedBounds = this.nodeBounds.dilated( dilationCoefficient );
 
       // Update the line width of the focus highlight based on the transform of the node

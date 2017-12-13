@@ -193,6 +193,29 @@ define( function( require ) {
       var whiteSpaceScalar = .25;
 
       return widthOfFocusHighlight * ( scalarToEdgeOfBounds + whiteSpaceScalar );
+    },
+
+    /**
+     * Get the dilation coefficient for a group focus highlight, which extends even further beyond node bounds
+     * than a regular focus highlight. The group focus highlight goes around a node whenever its descendant has focus,
+     * so this will always surround the normal focus highlight.
+     *
+     * @param {Node} node
+     *
+     * @return {number}
+     */
+    getGroupDilationCoefficient: function( node ) {
+      var widthOfFocusHighlight = FocusHighlightPath.getOuterLineWidthFromNode( node );
+
+      // Dilating half of the focus highlight width will make the inner edge of the focus highlight at the bounds
+      // of the node being highlighted.
+      var scalarToEdgeOfBounds = .5;
+
+      // Dilate the group focus highlight slightly more to give whitespace in between the node being highlighted's 
+      // bounds and the inner edge of the highlight.
+      var whiteSpaceScalar = 1.2;
+
+      return widthOfFocusHighlight * ( scalarToEdgeOfBounds + whiteSpaceScalar );
     }
   } );
 } );

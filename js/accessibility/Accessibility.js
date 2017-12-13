@@ -100,6 +100,7 @@ define( function( require ) {
     'descriptionTagName', // Sets the tag name for the DOM element describing this node, usually a paragraph
     'focusHighlight', // Sets the focus highlight for the node, see setFocusHighlight()
     'focusHighlightLayerable', // Flag to determine if the focus highlight node can be layered in the scene graph, see setFocusHighlightLayerable()
+    'groupFocusHighlight', // Sets whether or not an outer focus highlight should go around this node when a descendant has focus, see setGroupFocusHighlight()
     'accessibleLabel', // Set the label content for the node, see setAccessibleLabel()
     'accessibleLabelAsHTML', // Set the label content for the node as innerHTML, see setAccessibleLabelAsHTML()
     'accessibleDescription', // Set the description content for the node, see setAccessibleDescription()
@@ -283,6 +284,11 @@ define( function( require ) {
           // If true, the focus highlight for this node will be layerable in the scene graph.  Client is responsible
           // for placement of the focus highlight in the scene graph.
           this._focusHighlightLayerable = false;
+
+          // @private {boolean} - A flag that adds a group focus highlight to go around this node's local bounds
+          // when an descendant has focus. Typically useful to indicate focus management if focus enters a group
+          // of elements
+          this._groupFocusHighlight = false;
 
           // @private {boolean} - Whether or not the accessible content will be visible from the browser and assistive
           // technologies.  When accessibleVisible is false, the node's DOM element will not be focusable, and it cannot
@@ -901,6 +907,34 @@ define( function( require ) {
           return this._focusHighlightLayerable;
         },
         get focusHighlightLayerable() { return this.getFocusHighlightLayerable(); },
+
+        /**
+         * Set whether or not this node has a group focus highlight. If this node has a group focus highlight, an extra
+         * focus highlight will surround this node's local bounds whenever a descendant node has focus. Generally
+         * useful to indicate nested keyboard navigation.
+         *
+         * TODO: Support more than one group focus highlight (multiple ancestors could have groupFocusHighlight)
+         * TODO: Support more than local bounds of ancestor, also support Shapes and Nodes like the focusHighlight
+         * See https://github.com/phetsims/scenery/issues/708
+         * 
+         * @public
+         * @param {boolean} useGroupHighlight
+         */
+        setGroupFocusHighlight: function( useGroupHighlight ) {
+          this._groupFocusHighlight = useGroupHighlight;
+        },
+        set groupFocusHighlight( useGroupHighlight ) { this.setGroupFocusHighlight( useGroupHighlight ); },
+        
+        /**
+         * Get whether or not this node has a 'group' focus highlight, see setter for more information.
+         * @public
+         *
+         * @returns {Boolean}
+         */
+        getGroupFocusHighlight: function() {
+          return this._groupFocusHighlight;
+        },
+        get groupFocusHighlight() { return this.getGroupFocusHighlight(); },   
 
         /**
          * Sets the node that labels this node through the ARIA attribute aria-labelledby. The value of the
