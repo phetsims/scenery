@@ -4593,7 +4593,7 @@ define( function( require ) {
         return this;
       }
 
-      this.initializeIOObject( options );
+      this.initializeIOObject( { phetioType: NodeIO }, options );
 
       assert && assert( Object.getPrototypeOf( options ) === Object.prototype,
         'Extra prototype on Node options object is a code smell' );
