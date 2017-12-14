@@ -673,7 +673,9 @@ define( function( require ) {
     rect.rectHeight = 30;
     node.validateBounds();
 
-    // this may change if for some reason we end up calling more events in the future
+    // Two of the 6 callbacks above should never be called, so they assert.ok( false, ...)
+    // If more tests are added here, this magic number may need to be changed.
+    // See https://github.com/phetsims/scenery/issues/720
     assert.expect( 4 );
   } );
 
