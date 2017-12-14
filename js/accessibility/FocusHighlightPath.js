@@ -16,7 +16,6 @@ define( function( require ) {
   // modules
   var Color = require( 'SCENERY/util/Color' );
   var inherit = require( 'PHET_CORE/inherit' );
-  var IOObject = require( 'TANDEM/IOObject' );
   var LineStyles = require( 'KITE/util/LineStyles' );
   var Path = require( 'SCENERY/nodes/Path' );
   var scenery = require( 'SCENERY/scenery' );
@@ -56,7 +55,7 @@ define( function( require ) {
       lineDashOffset: LineStyles.DEFAULT_OPTIONS.lineDashOffset
     }, options );
 
-    Path.call( this, shape, IOObject.getOptions( options ) );
+    Path.call( this, shape );
 
     this.options = options; // @private TODO: only assign individual options to 'this'.
 

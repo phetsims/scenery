@@ -65,7 +65,6 @@ define( function( require ) {
   var extendDefined = require( 'PHET_CORE/extendDefined' );
   var Font = require( 'SCENERY/util/Font' );
   var inherit = require( 'PHET_CORE/inherit' );
-  var IOObject = require( 'TANDEM/IOObject' );
   var Line = require( 'SCENERY/nodes/Line' );
   var Node = require( 'SCENERY/nodes/Node' );
   var RichTextIO = require( 'SCENERY/nodes/RichTextIO' );
@@ -204,7 +203,7 @@ define( function( require ) {
       phetioType: RichTextIO
     }, options );
 
-    Node.call( this, IOObject.getOptions( options ) );
+    Node.call( this );
 
     // @private {Node} - Normal layout container of lines (separate, so we can clear it easily)
     this.lineContainer = new Node( {} );

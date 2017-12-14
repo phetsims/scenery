@@ -494,7 +494,7 @@ define( function( require ) {
       };
     }
 
-    IOObject.call( this, _.extend( { phetioType: NodeIO }, options ) ); // supercall, but leave options falsy to skip mutate
+    IOObject.call( this );
 
     if ( options ) {
       this.mutate( options );
@@ -4588,10 +4588,12 @@ define( function( require ) {
      * @returns {Node} - Returns 'this' reference, for chaining
      */
     mutate: function( options ) {
-      assert && IOObject.prototype.checkOptions.call( this, options );
+
       if ( !options ) {
         return this;
       }
+
+      this.initializeIOObject( options );
 
       assert && assert( Object.getPrototypeOf( options ) === Object.prototype,
         'Extra prototype on Node options object is a code smell' );
