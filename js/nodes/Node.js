@@ -161,7 +161,7 @@ define( function( require ) {
   var inherit = require( 'PHET_CORE/inherit' );
   var Matrix3 = require( 'DOT/Matrix3' );
   var Picker = require( 'SCENERY/util/Picker' );
-  var IOObject = require( 'TANDEM/IOObject' );
+  var PhetioObject = require( 'TANDEM/PhetioObject' );
   var Renderer = require( 'SCENERY/display/Renderer' );
   var RendererSummary = require( 'SCENERY/util/RendererSummary' );
   var scenery = require( 'SCENERY/scenery' );
@@ -494,7 +494,7 @@ define( function( require ) {
       };
     }
 
-    IOObject.call( this );
+    PhetioObject.call( this );
 
     if ( options ) {
       this.mutate( options );
@@ -507,7 +507,7 @@ define( function( require ) {
 
   scenery.register( 'Node', Node );
 
-  inherit( IOObject, Node, extend( {
+  inherit( PhetioObject, Node, extend( {
     /**
      * This is an array of property (setter) names for Node.mutate(), which are also used when creating nodes with
      * parameter objects.
@@ -4593,7 +4593,7 @@ define( function( require ) {
         return this;
       }
 
-      this.initializeIOObject( { phetioType: NodeIO }, options );
+      this.initializePhetioObject( { phetioType: NodeIO }, options );
 
       assert && assert( Object.getPrototypeOf( options ) === Object.prototype,
         'Extra prototype on Node options object is a code smell' );
@@ -4788,7 +4788,7 @@ define( function( require ) {
       this.detach();
 
       Events.prototype.dispose.call( this ); // TODO: don't rely on Events
-      IOObject.prototype.dispose.call( this );
+      PhetioObject.prototype.dispose.call( this );
     },
 
     /**
