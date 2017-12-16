@@ -27,6 +27,7 @@ define( function( require ) {
   'use strict';
 
   var inherit = require( 'PHET_CORE/inherit' );
+  var PhetioObject = require( 'TANDEM/PhetioObject' );
   var scenery = require( 'SCENERY/scenery' );
 
   // @private {Array.<string>} - Valid values for the 'style' property of Font
@@ -181,11 +182,12 @@ define( function( require ) {
     this._font = this.computeShorthand();
 
     phetAllocation && phetAllocation( 'Font' );
+    PhetioObject.call( this, options );
   }
 
   scenery.register( 'Font', Font );
 
-  inherit( Object, Font, {
+  inherit( PhetioObject, Font, {
     /**
      * Returns this font's CSS shorthand, which includes all of the font's information reduced into a single string.
      * @public
