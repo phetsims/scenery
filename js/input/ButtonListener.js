@@ -135,10 +135,6 @@ define( function( require ) {
       if ( this._overCount === 0 ) {
         this.setButtonState( event, this.isDown ? 'out' : 'up' );
       }
-    },
-
-    dispose: function() {
-      this.phetioObjectTandem.removeInstance( this );
     }
   } );
 
