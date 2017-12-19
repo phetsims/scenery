@@ -14,6 +14,7 @@ define( function( require ) {
   'use strict';
 
   var inherit = require( 'PHET_CORE/inherit' );
+  var PhetioObject = require( 'TANDEM/PhetioObject' );
   var scenery = require( 'SCENERY/scenery' );
   require( 'SCENERY/util/Trail' );
   var KeyboardUtil = require( 'SCENERY/accessibility/KeyboardUtil' );
@@ -41,6 +42,8 @@ define( function( require ) {
     options = _.extend( {
       mouseButton: 0 // allow a different mouse button
     }, options );
+
+    PhetioObject.call( this, options );
     this.options = options; // @private
     this.isDown = false;   // public, whether this listener is down
     this.downCurrentTarget = null; // 'up' is handled via a pointer lister, which will have null currentTarget, so save the 'down' currentTarget
@@ -79,7 +82,7 @@ define( function( require ) {
 
   scenery.register( 'DownUpListener', DownUpListener );
 
-  inherit( Object, DownUpListener, {
+  inherit( PhetioObject, DownUpListener, {
     buttonDown: function( event ) {
       // already down from another pointer, don't do anything
       if ( this.isDown ) { return; }

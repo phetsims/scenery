@@ -50,9 +50,6 @@ define( function( require ) {
       phetioType: ButtonListenerIO
     }, options );
 
-    // @private
-    this.buttonListenerTandem = options.tandem;
-
     this.buttonState = 'up'; // public: 'up', 'over', 'down' or 'out'
 
     this._overCount = 0; // how many pointers are over us (track a count, so we can handle multiple pointers gracefully)
@@ -60,6 +57,8 @@ define( function( require ) {
     this._buttonOptions = options; // store the options object so we can call the callbacks
 
     DownUpListener.call( this, {
+      tandem: options.tandem,
+      phetioType: options.phetioType,
 
       mouseButton: options.mouseButton || 0, // forward the mouse button, default to 0 (LMB)
 
@@ -79,8 +78,6 @@ define( function( require ) {
         }
       }
     } );
-
-    options.tandem.addInstance( this, options );
   }
 
   scenery.register( 'ButtonListener', ButtonListener );
@@ -98,12 +95,12 @@ define( function( require ) {
         if ( this._buttonOptions[ state ] ) {
 
           // Record this event to the phet-io event stream, including all downstream events as nested children
-          var id = this.buttonListenerTandem.isLegalAndUsable() && phetioEvents.start( 'user', this.buttonListenerTandem.id, ButtonListenerIO, state );
+          var id = this.phetioObjectTandem.isLegalAndUsable() && phetioEvents.start( 'user', this.phetioObjectTandem.id, ButtonListenerIO, state );
 
           // Then invoke the callback
           this._buttonOptions[ state ]( event, oldState );
 
-          this.buttonListenerTandem.isLegalAndUsable() && phetioEvents.end( id );
+          this.phetioObjectTandem.isLegalAndUsable() && phetioEvents.end( id );
         }
 
         if ( this._buttonOptions.fire &&
@@ -111,12 +108,12 @@ define( function( require ) {
              ( this._buttonOptions.fireOnDown ? ( state === 'down' ) : ( oldState === 'down' ) ) ) {
 
           // Record this event to the phet-io event stream, including all downstream events as nested children
-          var fireID = this.buttonListenerTandem.isLegalAndUsable() && phetioEvents.start( 'user', this.buttonListenerTandem.id, ButtonListenerIO, 'fire' );
+          var fireID = this.phetioObjectTandem.isLegalAndUsable() && phetioEvents.start( 'user', this.phetioObjectTandem.id, ButtonListenerIO, 'fire' );
 
           // Then fire the event
           this._buttonOptions.fire( event );
 
-          this.buttonListenerTandem.isLegalAndUsable() && phetioEvents.end( fireID );
+          this.phetioObjectTandem.isLegalAndUsable() && phetioEvents.end( fireID );
         }
       }
     },
@@ -141,7 +138,7 @@ define( function( require ) {
     },
 
     dispose: function() {
-      this.buttonListenerTandem.removeInstance( this );
+      this.phetioObjectTandem.removeInstance( this );
     }
   } );
 
