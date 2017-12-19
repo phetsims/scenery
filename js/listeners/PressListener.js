@@ -21,13 +21,14 @@ define( function( require ) {
   var inherit = require( 'PHET_CORE/inherit' );
   var Node = require( 'SCENERY/nodes/Node' );
   var ObservableArray = require( 'AXON/ObservableArray' );
+  var PhetioObject = require( 'TANDEM/PhetioObject' );
   var Property = require( 'AXON/Property' );
   var scenery = require( 'SCENERY/scenery' );
   var Tandem = require( 'TANDEM/Tandem' );
 
   // phet-io modules
-  var PressListenerIO = require( 'SCENERY/listeners/PressListenerIO' );
   var phetioEvents = require( 'ifphetio!PHET_IO/phetioEvents' );
+  var PressListenerIO = require( 'SCENERY/listeners/PressListenerIO' );
 
   /**
    * @constructor
@@ -107,9 +108,11 @@ define( function( require ) {
       phetioType: PressListenerIO
     }, options );
 
+    PhetioObject.call( this, options );
+
     assert && assert( typeof options.mouseButton === 'number' &&
-                      options.mouseButton >= 0 &&
-                      options.mouseButton % 1 === 0, 'mouseButton should be a non-negative integer' );
+    options.mouseButton >= 0 &&
+    options.mouseButton % 1 === 0, 'mouseButton should be a non-negative integer' );
     assert && assert( options.pressCursor === null || typeof options.pressCursor === 'string',
       'pressCursor should either be a string or null' );
     assert && assert( options.press === null || typeof options.press === 'function',
@@ -159,7 +162,6 @@ define( function( require ) {
     this._targetNode = options.targetNode;
     this._attach = options.attach;
     this._canStartPress = options.canStartPress;
-    this._pressListenerTandem = options.tandem;
 
     // @private {boolean} - Whether our pointer listener is referenced by the pointer (need to have a flag due to
     //                      handling disposal properly).
@@ -259,13 +261,11 @@ define( function( require ) {
     // update isHighlightedProperty (not a DerivedProperty because we need to hook to passed-in properties)
     this.isHoveringProperty.link( this._isHighlightedListener );
     this.isPressedProperty.link( this._isHighlightedListener );
-
-    this._pressListenerTandem.addInstance( this, options );
   }
 
   scenery.register( 'PressListener', PressListener );
 
-  inherit( Object, PressListener, {
+  inherit( PhetioObject, PressListener, {
     /**
      * Whether this listener is currently activated with a press.
      * @public
@@ -398,7 +398,7 @@ define( function( require ) {
 
       sceneryLog && sceneryLog.InputListener && sceneryLog.InputListener( 'PressListener successful press' );
       sceneryLog && sceneryLog.InputListener && sceneryLog.push();
-      var eventId = phetioEvents.start( 'user', this._pressListenerTandem.id, PressListenerIO, 'press', {
+      var eventId = phetioEvents.start( 'user', this.phetioObjectTandem.id, PressListenerIO, 'press', {
         x: event.pointer.point.x,
         y: event.pointer.point.y
       } );
@@ -406,7 +406,7 @@ define( function( require ) {
       // Set self properties before the property change, so they are visible to listeners.
       this.pointer = event.pointer;
       this.pressedTrail = this._targetNode ? this._targetNode.getUniqueTrail() :
-                                             event.trail.subtrailTo( event.currentTarget, false );
+                          event.trail.subtrailTo( event.currentTarget, false );
       this.interrupted = false; // clears the flag (don't set to false before here)
 
       this.pointer.addInputListener( this._pointerListener, this._attach );
@@ -437,7 +437,7 @@ define( function( require ) {
     release: function() {
       sceneryLog && sceneryLog.InputListener && sceneryLog.InputListener( 'PressListener release' );
       sceneryLog && sceneryLog.InputListener && sceneryLog.push();
-      var eventId = phetioEvents.start( 'user', this._pressListenerTandem.id, PressListenerIO, 'release' );
+      var eventId = phetioEvents.start( 'user', this.phetioObjectTandem.id, PressListenerIO, 'release' );
 
       assert && assert( this.isPressed, 'This listener is not pressed' );
 
@@ -471,7 +471,7 @@ define( function( require ) {
     drag: function( event ) {
       sceneryLog && sceneryLog.InputListener && sceneryLog.InputListener( 'PressListener drag' );
       sceneryLog && sceneryLog.InputListener && sceneryLog.push();
-      var eventId = phetioEvents.start( 'user', this._pressListenerTandem.id, PressListenerIO, 'drag', {
+      var eventId = phetioEvents.start( 'user', this.phetioObjectTandem.id, PressListenerIO, 'drag', {
         x: event.pointer.point.x,
         y: event.pointer.point.y
       } );
@@ -555,7 +555,7 @@ define( function( require ) {
       this.isHoveringProperty.unlink( this._isHighlightedListener );
       this.isPressedProperty.unlink( this._isHoveringListener );
 
-      this._pressListenerTandem.removeInstance( this );
+      PhetioObject.prototype.dispose.call( this );
 
       // TODO: Should we dispose our properties like isPressedProperty? If so, we'll have to be more careful with
       // multilinks, and there will be more overhead.
