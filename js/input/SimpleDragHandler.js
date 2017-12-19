@@ -10,12 +10,13 @@ define( function( require ) {
   'use strict';
 
   var inherit = require( 'PHET_CORE/inherit' );
+  var PhetioObject = require( 'TANDEM/PhetioObject' );
   var scenery = require( 'SCENERY/scenery' );
   var Tandem = require( 'TANDEM/Tandem' );
 
   // phet-io modules
-  var SimpleDragHandlerIO = require( 'SCENERY/input/SimpleDragHandlerIO' );
   var phetioEvents = require( 'ifphetio!PHET_IO/phetioEvents' );
+  var SimpleDragHandlerIO = require( 'SCENERY/input/SimpleDragHandlerIO' );
 
   /**
    * Allowed options: {
@@ -146,17 +147,12 @@ define( function( require ) {
         phetioEvents.end( id );
       }
     };
-    options.tandem.addInstance( this, options );
-
-    // @private
-    this.disposeSimpleDragHandler = function() {
-      options.tandem.removeInstance( self );
-    };
+    PhetioObject.call( this, options );
   }
 
   scenery.register( 'SimpleDragHandler', SimpleDragHandler );
 
-  return inherit( Object, SimpleDragHandler, {
+  return inherit( PhetioObject, SimpleDragHandler, {
     startDrag: function( event ) {
       if ( this.dragging ) { return; }
 
@@ -270,7 +266,7 @@ define( function( require ) {
         this.pointer.cursor = null;
         this.pointer.removeInputListener( this.dragListener );
       }
-      this.disposeSimpleDragHandler();
+      PhetioObject.prototype.dispose.call( this );
     }
   }, {
 
