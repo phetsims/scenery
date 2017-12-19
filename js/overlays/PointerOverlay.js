@@ -6,7 +6,7 @@
  *
  * Each pointer is rendered in a different <svg> so that CSS3 transforms can be used to make performance smooth on iPad.
  *
- * @author Sam Reid
+ * @author Sam Reid (PhET Interactive Simulations)
  */
 define( function( require ) {
   'use strict';
@@ -33,7 +33,7 @@ define( function( require ) {
 
     var innerRadius = 10;
     var strokeWidth = 1;
-    var diameter = (innerRadius + strokeWidth / 2) * 2;
+    var diameter = ( innerRadius + strokeWidth / 2 ) * 2;
     var radius = diameter / 2;
 
     //Resize the parent div when the rootNode is resized
@@ -46,7 +46,7 @@ define( function( require ) {
     var scratchMatrix = Matrix3.IDENTITY.copy();
 
     //Display a pointer that was added.  Use a separate SVG layer for each pointer so it can be hardware accelerated, otherwise it is too slow just setting svg internal attributes
-    var pointerAdded = this.pointerAdded = function( pointer ) {
+    this.pointerAdded = function( pointer ) {
 
       if ( pointer.isKey ) { return; }
 
@@ -99,12 +99,12 @@ define( function( require ) {
       svg.appendChild( circle );
       self.pointerSVGContainer.appendChild( svg );
     };
-    display._input.addPointerAddedListener( pointerAdded );
+    display._input.addPointerAddedListener( this.pointerAdded );
 
     //if there is already a mouse, add it here
     //TODO: if there already other non-mouse touches, could be added here
     if ( display._input && display._input.mouse ) {
-      pointerAdded( display._input.mouse );
+      this.pointerAdded( display._input.mouse );
     }
 
     this.domElement = this.pointerSVGContainer;
@@ -118,7 +118,6 @@ define( function( require ) {
     },
 
     update: function() {
-
     }
   } );
 
