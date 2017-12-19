@@ -27,7 +27,6 @@ define( function( require ) {
   var Tandem = require( 'TANDEM/Tandem' );
 
   // phet-io modules
-  var phetioEvents = require( 'ifphetio!PHET_IO/phetioEvents' );
   var PressListenerIO = require( 'SCENERY/listeners/PressListenerIO' );
 
   /**
@@ -398,7 +397,7 @@ define( function( require ) {
 
       sceneryLog && sceneryLog.InputListener && sceneryLog.InputListener( 'PressListener successful press' );
       sceneryLog && sceneryLog.InputListener && sceneryLog.push();
-      var eventId = phetioEvents.start( 'user', this.phetioObjectTandem.id, PressListenerIO, 'press', {
+      var eventId = this.startEvent( 'user', 'press', {
         x: event.pointer.point.x,
         y: event.pointer.point.y
       } );
@@ -419,7 +418,7 @@ define( function( require ) {
       // Notify after everything else is set up
       this._pressListener && this._pressListener( event, this );
 
-      phetioEvents.end( eventId );
+      this.endEvent( eventId );
       sceneryLog && sceneryLog.InputListener && sceneryLog.pop();
 
       return true;
@@ -437,7 +436,7 @@ define( function( require ) {
     release: function() {
       sceneryLog && sceneryLog.InputListener && sceneryLog.InputListener( 'PressListener release' );
       sceneryLog && sceneryLog.InputListener && sceneryLog.push();
-      var eventId = phetioEvents.start( 'user', this.phetioObjectTandem.id, PressListenerIO, 'release' );
+      var eventId = this.startEvent( 'user', 'release' );
 
       assert && assert( this.isPressed, 'This listener is not pressed' );
 
@@ -456,7 +455,7 @@ define( function( require ) {
       // TODO: Is this a problem that we can't access things like this.pointer here?
       this._releaseListener && this._releaseListener( this );
 
-      phetioEvents.end( eventId );
+      this.endEvent( eventId );
       sceneryLog && sceneryLog.InputListener && sceneryLog.pop();
     },
 
@@ -471,7 +470,7 @@ define( function( require ) {
     drag: function( event ) {
       sceneryLog && sceneryLog.InputListener && sceneryLog.InputListener( 'PressListener drag' );
       sceneryLog && sceneryLog.InputListener && sceneryLog.push();
-      var eventId = phetioEvents.start( 'user', this.phetioObjectTandem.id, PressListenerIO, 'drag', {
+      var eventId = this.startEvent( 'user', 'drag', {
         x: event.pointer.point.x,
         y: event.pointer.point.y
       } );
@@ -480,7 +479,7 @@ define( function( require ) {
 
       this._dragListener && this._dragListener( event, this );
 
-      phetioEvents.end( eventId );
+      this.endEvent( eventId );
       sceneryLog && sceneryLog.InputListener && sceneryLog.pop();
     },
 

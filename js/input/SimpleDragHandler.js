@@ -15,7 +15,6 @@ define( function( require ) {
   var Tandem = require( 'TANDEM/Tandem' );
 
   // phet-io modules
-  var phetioEvents = require( 'ifphetio!PHET_IO/phetioEvents' );
   var SimpleDragHandlerIO = require( 'SCENERY/input/SimpleDragHandlerIO' );
 
   /**
@@ -118,7 +117,7 @@ define( function( require ) {
 
         var delta = self.transform.inverseDelta2( globalDelta );
 
-        var id = phetioEvents.start( 'user', self.options.tandem.id, SimpleDragHandlerIO, 'dragged', {
+        var id = self.startEvent( 'user', 'dragged', {
           x: event.pointer.point.x,
           y: event.pointer.point.y
         } );
@@ -144,7 +143,7 @@ define( function( require ) {
           self.options.drag.call( null, event, self.trail ); // new position (old position?) delta
           event.currentTarget = saveCurrentTarget; // be polite to other listeners, restore currentTarget
         }
-        phetioEvents.end( id );
+        self.endEvent( id );
       }
     };
     PhetioObject.call( this, options );
@@ -172,14 +171,14 @@ define( function( require ) {
       // event.domEvent may not exist if this is touch-to-snag
       this.mouseButton = event.pointer.isMouse ? event.domEvent.button : undefined;
 
-      var id = phetioEvents.start( 'user', this.options.tandem.id, SimpleDragHandlerIO, 'dragStarted', {
+      var id = this.startEvent( 'user', 'dragStarted', {
         x: event.pointer.point.x,
         y: event.pointer.point.y
       } );
       if ( this.options.start ) {
         this.options.start.call( null, event, this.trail );
       }
-      phetioEvents.end( id );
+      this.endEvent( id );
     },
 
     endDrag: function( event ) {
@@ -190,14 +189,14 @@ define( function( require ) {
       this.pointer.removeInputListener( this.dragListener );
       this.dragging = false;
 
-      var id = phetioEvents.start( 'user', this.options.tandem.id, SimpleDragHandlerIO, 'dragEnded' );
+      var id = this.startEvent( 'user', 'dragEnded' );
 
       if ( this.options.end ) {
 
         // drag end may be triggered programmatically and hence event and trail may be undefined
         this.options.end.call( null, event, this.trail );
       }
-      phetioEvents.end( id );
+      this.endEvent( id );
 
       // release our reference
       this.pointer = null;
