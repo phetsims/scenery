@@ -230,7 +230,6 @@ define( function( require ) {
     release: function() {
       sceneryLog && sceneryLog.InputListener && sceneryLog.InputListener( 'DragListener release' );
       sceneryLog && sceneryLog.InputListener && sceneryLog.push();
-      var eventId = this.startEvent( 'user', 'end' );
 
       PressListener.prototype.release.call( this );
 
@@ -240,7 +239,6 @@ define( function( require ) {
       // TODO: Is this a problem that we can't access things like this.pointer here?
       this._end && this._end( this );
 
-      this.endEvent( eventId );
       sceneryLog && sceneryLog.InputListener && sceneryLog.pop();
     },
 
