@@ -196,7 +196,9 @@ define( function( require ) {
         // drag end may be triggered programmatically and hence event and trail may be undefined
         this.options.end.call( null, event, this.trail );
       }
-      this.endEvent( id );
+
+      // guard in case the options.end call ended the event (possibly through a dispose)
+      this.eventInProgress && this.endEvent( id );
 
       // release our reference
       this.pointer = null;
@@ -264,6 +266,9 @@ define( function( require ) {
         this.pointer.dragging = false;
         this.pointer.cursor = null;
         this.pointer.removeInputListener( this.dragListener );
+      }
+      if ( this.eventInProgress ) {
+        this.endEvent();
       }
       PhetioObject.prototype.dispose.call( this );
     }
