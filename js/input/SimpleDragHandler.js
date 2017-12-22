@@ -37,7 +37,8 @@ define( function( require ) {
       mouseButton: 0,
       dragCursor: 'pointer',
       tandem: Tandem.required,
-      phetioType: SimpleDragHandlerIO
+      phetioType: SimpleDragHandlerIO,
+      phetioState: false
     }, options );
     this.options = options; // @private
 

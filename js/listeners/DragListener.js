@@ -119,7 +119,9 @@ define( function( require ) {
       tandem: Tandem.required,
 
       // {TypeIO} - PhET-iO type
-      phetioType: DragListenerIO
+      phetioType: DragListenerIO,
+
+      phetioState: false
     }, options );
 
     // Initialize with the alias isUserControlledProperty => isPressedProperty
