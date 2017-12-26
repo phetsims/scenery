@@ -20,7 +20,7 @@ define( function( require ) {
 
   /**
    * Wrapper type for scenery's Text node.
-   * @param {Text} image
+   * @param {Image} image
    * @param {string} phetioID
    * @constructor
    */

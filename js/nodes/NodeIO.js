@@ -22,8 +22,8 @@ define( function( require ) {
 
   /**
    * Wrapper type for phet/scenery's Node
-   * @param node
-   * @param phetioID
+   * @param {Node} node
+   * @param {string} phetioID
    * @constructor
    */
   function NodeIO( node, phetioID ) {

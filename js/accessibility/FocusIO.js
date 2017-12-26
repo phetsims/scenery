@@ -19,7 +19,7 @@ define( function( require ) {
 
   /**
    * Wrapper type for phet/sun's Faucet class.
-   * @param {Object} focus - the focus region which has {display,trail}
+   * @param {Focus} focus - the focus region which has {display,trail}
    * @param {string} phetioID - the unique tandem assigned to the focus
    * @constructor
    */
