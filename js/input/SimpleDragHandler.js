@@ -118,7 +118,7 @@ define( function( require ) {
 
         var delta = self.transform.inverseDelta2( globalDelta );
 
-        var id = self.startEvent( 'user', 'dragged', {
+        self.startEvent( 'user', 'dragged', {
           x: event.pointer.point.x,
           y: event.pointer.point.y
         } );
@@ -144,7 +144,7 @@ define( function( require ) {
           self.options.drag.call( null, event, self.trail ); // new position (old position?) delta
           event.currentTarget = saveCurrentTarget; // be polite to other listeners, restore currentTarget
         }
-        self.endEvent( id );
+        self.endEvent();
       }
     };
     PhetioObject.call( this, options );
@@ -172,14 +172,14 @@ define( function( require ) {
       // event.domEvent may not exist if this is touch-to-snag
       this.mouseButton = event.pointer.isMouse ? event.domEvent.button : undefined;
 
-      var id = this.startEvent( 'user', 'dragStarted', {
+      this.startEvent( 'user', 'dragStarted', {
         x: event.pointer.point.x,
         y: event.pointer.point.y
       } );
       if ( this.options.start ) {
         this.options.start.call( null, event, this.trail );
       }
-      this.endEvent( id );
+      this.endEvent();
     },
 
     endDrag: function( event ) {
@@ -190,7 +190,7 @@ define( function( require ) {
       this.pointer.removeInputListener( this.dragListener );
       this.dragging = false;
 
-      var id = this.startEvent( 'user', 'dragEnded' );
+      this.startEvent( 'user', 'dragEnded' );
 
       if ( this.options.end ) {
 
@@ -199,7 +199,7 @@ define( function( require ) {
       }
 
       // guard in case the options.end call ended the event (possibly through a dispose)
-      this.eventInProgress && this.endEvent( id );
+      this.eventInProgress && this.endEvent();
 
       // release our reference
       this.pointer = null;

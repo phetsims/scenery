@@ -93,12 +93,12 @@ define( function( require ) {
         if ( this._buttonOptions[ state ] ) {
 
           // Record this event to the phet-io event stream, including all downstream events as nested children
-          var id = this.startEvent( 'user', state );
+          this.startEvent( 'user', state );
 
           // Then invoke the callback
           this._buttonOptions[ state ]( event, oldState );
 
-          this.endEvent( id );
+          this.endEvent();
         }
 
         if ( this._buttonOptions.fire &&
