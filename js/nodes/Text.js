@@ -28,9 +28,6 @@ define( function( require ) {
   var TextSVGDrawable = require( 'SCENERY/display/drawables/TextSVGDrawable' );
   var TextIO = require( 'SCENERY/nodes/TextIO' );
 
-  // phet-io modules
-  var phetioEvents = require( 'ifphetio!PHET_IO/phetioEvents' );
-
   // constants
   var TEXT_OPTION_KEYS = [
     'boundsMethod', // Sets how bounds are determined for text, see setBoundsMethod() for more documentation
@@ -149,10 +146,11 @@ define( function( require ) {
 
         // avoid calling this the first time that the setText event is called, as this is the "changed" event
         if ( this.textTandem.isSuppliedAndEnabled() && !this.firstSetText ) {
-          phetioEvents.trigger( 'model', this.textTandem.id, TextIO, 'changed', {
+          this.startEvent( 'model', 'changed', {
             oldText: oldText,
             newText: text
           } );
+          this.endEvent();
         }
         this.firstSetText = false;
       }
