@@ -198,8 +198,7 @@ define( function( require ) {
         this.options.end.call( null, event, this.trail );
       }
 
-      // guard in case the options.end call ended the event (possibly through a dispose)
-      this.eventInProgress && this.endEvent();
+      this.endEvent();
 
       // release our reference
       this.pointer = null;
