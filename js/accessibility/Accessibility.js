@@ -100,7 +100,7 @@ define( function( require ) {
     'descriptionTagName', // Sets the tag name for the DOM element describing this node, usually a paragraph
     'focusHighlight', // Sets the focus highlight for the node, see setFocusHighlight()
     'focusHighlightLayerable', // Flag to determine if the focus highlight node can be layered in the scene graph, see setFocusHighlightLayerable()
-    'groupFocusHighlight', // Sets whether or not an outer focus highlight should go around this node when a descendant has focus, see setGroupFocusHighlight()
+    'groupFocusHighlight', // Sets the outer focus highlight for this node when a descendant has focus, see setGroupFocusHighlight()
     'accessibleLabel', // Set the label content for the node, see setAccessibleLabel()
     'accessibleLabelAsHTML', // Set the label content for the node as innerHTML, see setAccessibleLabelAsHTML()
     'accessibleDescription', // Set the description content for the node, see setAccessibleDescription()
@@ -285,9 +285,9 @@ define( function( require ) {
           // for placement of the focus highlight in the scene graph.
           this._focusHighlightLayerable = false;
 
-          // @private {boolean} - A flag that adds a group focus highlight to go around this node's local bounds
-          // when an descendant has focus. Typically useful to indicate focus management if focus enters a group
-          // of elements
+          // @private {boolean|Node} - Adds a group focus highlight that surrounds this node when a descendant has
+          // focus. Typically useful to indicate focus if focus enters a group of elements. If 'true', group
+          // highlight will go around local bounds of this node. Otherwise the custom node will be used as the highlight
           this._groupFocusHighlight = false;
 
           // @private {boolean} - Whether or not the accessible content will be visible from the browser and assistive
@@ -910,20 +910,19 @@ define( function( require ) {
 
         /**
          * Set whether or not this node has a group focus highlight. If this node has a group focus highlight, an extra
-         * focus highlight will surround this node's local bounds whenever a descendant node has focus. Generally
-         * useful to indicate nested keyboard navigation.
+         * focus highlight will surround this node whenever a descendant node has focus. Generally
+         * useful to indicate nested keyboard navigation. If true, the group focus highlight will surround
+         * this node's local bounds. Otherwise, the Node will be used.
          *
          * TODO: Support more than one group focus highlight (multiple ancestors could have groupFocusHighlight)
-         * TODO: Support more than local bounds of ancestor, also support Shapes and Nodes like the focusHighlight
-         * See https://github.com/phetsims/scenery/issues/708
          * 
          * @public
-         * @param {boolean} useGroupHighlight
+         * @param {boolean|Node} groupHighlight
          */
-        setGroupFocusHighlight: function( useGroupHighlight ) {
-          this._groupFocusHighlight = useGroupHighlight;
+        setGroupFocusHighlight: function( groupHighlight ) {
+          this._groupFocusHighlight = groupHighlight;
         },
-        set groupFocusHighlight( useGroupHighlight ) { this.setGroupFocusHighlight( useGroupHighlight ); },
+        set groupFocusHighlight( groupHighlight ) { this.setGroupFocusHighlight( groupHighlight ); },
         
         /**
          * Get whether or not this node has a 'group' focus highlight, see setter for more information.

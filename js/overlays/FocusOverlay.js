@@ -27,20 +27,38 @@ define( function( require ) {
     this.display = display; // @private {Display}
     this.focusRootNode = focusRootNode; // @private {Node} - The root Node of our child display
 
-    // When the focus changes, all of these are modified.
-    this.trail = null; // @private {Trail|null}
-    this.node = null; // @private {Node|null}
-    this.mode = null; // @private {String|null} - defaults to bounds but can be overwritten by the node's focus highlight
-    this.transformTracker = null; // @private {TransformTracker|null}
+    // @private {Trail|null} - trail to the node with focus, modified when focus changes
+    this.trail = null;
 
-    // @private {boolean} - If true, the next update() will trigger an update to the highlight's transform.
+    // @private {Node|null} - node with focus, modified when focus changes
+    this.node = null;
+
+    // @private {string|null} - signifies method of representing focus, 'bounds'|'node'|'shape'|'invisible', modified
+    // when focus changes
+    this.mode = null;
+
+    // @private {string|null} - signifies method off representing group focus, 'bounds'|'node', modified when
+    // focus changes
+    this.groupMode = null;
+
+    // @private {Node|null} - the group highlight node around an ancestor of this.node when focus changes,
+    // see Accessibility.setGroupFocusHighlight for more information on the group focus highlight, modified when
+    // focus changes
+    this.groupHighlightNode = null;
+
+    // @private {TransformTracker|null} - tracks transformations to the focused node and the node with a group
+    // focus highlight, modified when focus changes
+    this.transformTracker = null;
+    this.groupTransformTracker = null;
+
+    // @private {boolean} - if true, the next update() will trigger an update to the highlight's transform
     this.transformDirty = true;
 
-    // @private - The main node for the highlight. It will be transformed.
+    // @private {Node} - The main node for the highlight. It will be transformed.
     this.highlightNode = new Node();
     this.focusRootNode.addChild( this.highlightNode );
 
-    // @private {Display}
+    // @private {Display} - display that manages all focus highlights
     this.focusDisplay = new scenery.Display( this.focusRootNode, {
       width: this.width,
       height: this.height,
@@ -61,13 +79,14 @@ define( function( require ) {
       useLocalBounds: true
     } );
 
-    // @private {FocusHighlightPath} - focus highlight for 'groups' of Node's, when descendant node has focus
-    // ancestor with groupFocusHighlight flag will have this extra focus highlight
+    // @private {FocusHighlightPath} - Focus highlight for 'groups' of Nodes. When descendant node has focus, ancestor
+    // with groupFocusHighlight flag will have this extra focus highlight surround its local bounds
     this.groupFocusHighlightPath = new FocusHighlightFromNode( null, {
       useLocalBounds: true,
       useGroupDilation: true,
-      outerLineWidth: 1,
-      innerLineWidth: 1
+      outerLineWidth: FocusHighlightPath.GROUP_OUTER_LINE_WIDTH,
+      innerLineWidth: FocusHighlightPath.GROUP_INNER_LINE_WIDTH,
+      innerStroke: FocusHighlightPath.FOCUS_COLOR
     } );
 
     this.highlightNode.addChild( this.shapeFocusHighlightPath );
@@ -192,8 +211,6 @@ define( function( require ) {
      * and adding a rectangle around it.
      *
      * TODO: Support more than one group focus highlight (multiple ancestors could have groupFocusHighlight)
-     * TODO: Support more than local bounds of ancestor, also support shapes and Node's like focusHighlight
-     * See https://github.com/phetsims/scenery/issues/708
      *
      * @private
      */
@@ -204,30 +221,53 @@ define( function( require ) {
         var node = trail.nodes[ i ];
         var highlight = node.groupFocusHighlight;
         if ( highlight ) {
+
+          // update transform tracker
+          var trailToParent = trail.upToNode( node );
+          this.groupTransformTracker = new TransformTracker( trailToParent );
+          this.groupTransformTracker.addListener( this.transformListener );
+
           if ( typeof highlight === 'boolean' ) {
 
             // add a bounding rectangle around the node that uses group highlights
             this.groupFocusHighlightPath.setShapeFromNode( node );
             this.groupFocusHighlightPath.visible = true;
 
-            // update matrix
-            var trailToParent = trail.upToNode( node );
-            var tracker = new TransformTracker( trailToParent );
-            this.groupFocusHighlightPath.setMatrix( tracker.matrix );
-
-            // Only closest ancestor with group highlight will get the group highlight
-            break;
+            this.groupHighlightNode = this.groupFocusHighlightPath;
+            this.groupMode = 'bounds';
           }
+          else if ( highlight instanceof Node ) {
+            this.groupHighlightNode = highlight;
+            this.focusRootNode.addChild( highlight );
+
+            this.groupMode = 'node';
+          }
+
+          // Only closest ancestor with group highlight will get the group highlight
+          break;
         }
       }
     },
 
     /**
-     * Remove all group focus highlights by making them invisible.
+     * Remove all group focus highlights by making them invisible, or removing them from the root of this overlay,
+     * depending on mode.
      * @private
      */
     deactivateGroupHighlights: function() {
-      this.groupFocusHighlightPath.visible = false;
+      if ( this.groupMode )  {
+        if ( this.groupMode === 'bounds' ) {
+          this.groupFocusHighlightPath.visible = false;
+        }
+        else if ( this.groupMode === 'node' ) {
+          this.focusRootNode.removeChild( this.groupHighlightNode );
+        }
+
+        this.groupMode = null;
+        this.groupHighlightNode = null;
+        this.groupTransformTracker.removeListener( this.transformListener );
+        this.groupTransformTracker.dispose();
+      }
     },
 
     // Called from FocusOverlay after transforming the highlight. Only called when the transform changes.
@@ -273,6 +313,8 @@ define( function( require ) {
         this.transformDirty = false;
 
         this.highlightNode.setMatrix( this.transformTracker.matrix );
+        this.groupHighlightNode && this.groupHighlightNode.setMatrix( this.groupTransformTracker.matrix );
+
         this.afterTransform();
       }
 

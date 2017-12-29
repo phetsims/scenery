@@ -29,6 +29,10 @@ define( function( require ) {
   var INNER_LINE_WIDTH_BASE = 2.5;
   var OUTER_LINE_WIDTH_BASE = 4;
 
+  // determined by inspection, group focus highlights are thinner than default focus highlights
+  var GROUP_OUTER_LINE_WIDTH = 2;
+  var GROUP_INNER_LINE_WIDTH = 2;
+
   /**
    * @constructor
    *
@@ -134,8 +138,13 @@ define( function( require ) {
       return FocusHighlightPath.getInnerLineWidthFromNode( node );
     }
   }, {
+
+    // @static defaults available for custom highlights
     OUTER_FOCUS_COLOR: OUTER_FOCUS_COLOR,
     INNER_FOCUS_COLOR: INNER_FOCUS_COLOR,
+
+    GROUP_OUTER_LINE_WIDTH: GROUP_OUTER_LINE_WIDTH,
+    GROUP_INNER_LINE_WIDTH: GROUP_INNER_LINE_WIDTH,
 
     /**
      * Get the outer line width of a focus highlight based on the node's scale and rotation transform information.
@@ -212,7 +221,7 @@ define( function( require ) {
 
       // Dilate the group focus highlight slightly more to give whitespace in between the node being highlighted's 
       // bounds and the inner edge of the highlight.
-      var whiteSpaceScalar = 1.2;
+      var whiteSpaceScalar = 1.4;
 
       return widthOfFocusHighlight * ( scalarToEdgeOfBounds + whiteSpaceScalar );
     }
