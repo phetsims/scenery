@@ -1,7 +1,7 @@
 // Copyright 2016-2017, University of Colorado Boulder
 
 /**
- * Wrapper type for scenery's Text node.
+ * IO type for scenery's Text node.
  *
  * @author Sam Reid (PhET Interactive Simulations)
  * @author Denzell Barnett (PhET Interactive Simulations)
@@ -23,7 +23,7 @@ define( function( require ) {
   var VoidIO = require( 'ifphetio!PHET_IO/types/VoidIO' );
 
   /**
-   * Wrapper type for scenery's Text node.
+   * IO type for scenery's Text node.
    * @param {Text} text
    * @param {string} phetioID
    * @constructor
@@ -101,7 +101,7 @@ define( function( require ) {
       documentation: 'Get maximum width of text box in px'
     }
   }, {
-    documentation: 'The tandem wrapper type for the scenery Text node',
+    documentation: 'The tandem IO type for the scenery Text node',
     events: [ 'changed' ]
   } );
 

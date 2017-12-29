@@ -1,7 +1,7 @@
 // Copyright 2016-2017, University of Colorado Boulder
 
 /**
- * Wrapper type for scenery phet's RichText node.
+ * IO type for scenery phet's RichText node.
  *
  * @author Michael Kauzmann (PhET Interactive Simulations)
  */
@@ -19,7 +19,7 @@ define( function( require ) {
   var VoidIO = require( 'ifphetio!PHET_IO/types/VoidIO' );
 
   /**
-   * Wrapper type for scenery's Text node.
+   * IO type for scenery's Text node.
    * @param {RichText} richText
    * @param {string} phetioID
    * @constructor
@@ -49,7 +49,7 @@ define( function( require ) {
       documentation: 'Get the text content'
     }
   }, {
-    documentation: 'The tandem wrapper type for the scenery RichText node'
+    documentation: 'The tandem IO type for the scenery RichText node'
   } );
 
   scenery.register( 'RichTextIO', RichTextIO );

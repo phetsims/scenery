@@ -1,7 +1,7 @@
 // Copyright 2016, University of Colorado Boulder
 
 /**
- * Wrapper type for SCENERY ButtonListener (not SUN ButtonListener)
+ * IO type for SCENERY ButtonListener (not SUN ButtonListener)
  *
  * @author Sam Reid (PhET Interactive Simulations)
  * @author Andrew Adare (PhET Interactive Simulations)

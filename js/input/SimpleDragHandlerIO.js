@@ -15,7 +15,7 @@ define( function( require ) {
   var ObjectIO = require( 'ifphetio!PHET_IO/types/ObjectIO' );
 
   /**
-   * Wrapper type for phet/tandem's SimpleDragHandler class.
+   * IO type for phet/tandem's SimpleDragHandler class.
    * @param {SimpleDragHandler} simpleDragHandler
    * @param {string} phetioID
    * @constructor

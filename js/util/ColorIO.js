@@ -17,7 +17,7 @@ define( function( require ) {
   var ObjectIO = require( 'ifphetio!PHET_IO/types/ObjectIO' );
 
   /**
-   * Wrapper type for phet/scenery's Color class.
+   * IO type for phet/scenery's Color class.
    * @param {Color} color
    * @param phetioID
    * @constructor

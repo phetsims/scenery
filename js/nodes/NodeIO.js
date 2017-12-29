@@ -21,7 +21,7 @@ define( function( require ) {
   var VoidIO = require( 'ifphetio!PHET_IO/types/VoidIO' );
 
   /**
-   * Wrapper type for phet/scenery's Node
+   * IO type for phet/scenery's Node
    * @param {Node} node
    * @param {string} phetioID
    * @constructor

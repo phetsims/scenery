@@ -1,7 +1,7 @@
 // Copyright 2016-2017, University of Colorado Boulder
 
 /**
- * Wrapper type for scenery's Image node.
+ * IO type for scenery's Image node.
  *
  * @author Sam Reid (PhET Interactive Simulations)
  */
@@ -19,7 +19,7 @@ define( function( require ) {
   var VoidIO = require( 'ifphetio!PHET_IO/types/VoidIO' );
 
   /**
-   * Wrapper type for scenery's Text node.
+   * IO type for scenery's Text node.
    * @param {Image} image
    * @param {string} phetioID
    * @constructor
@@ -42,7 +42,7 @@ define( function( require ) {
       documentation: 'Set the image from a base64 string'
     }
   }, {
-    documentation: 'The tandem wrapper type for the scenery Text node',
+    documentation: 'The tandem IO type for the scenery Text node',
     events: [ 'changed' ]
   } );
 

@@ -1,7 +1,7 @@
 // Copyright 2016, University of Colorado Boulder
 
 /**
- * Wrapper type for scenery's Focus region.
+ * IO type for scenery's Focus region.
  *
  * @author Sam Reid (PhET Interactive Simulations)
  * @author Jesse Greenberg (PhET Interactive Simulations)
@@ -18,7 +18,7 @@ define( function( require ) {
   var ObjectIO = require( 'ifphetio!PHET_IO/types/ObjectIO' );
 
   /**
-   * Wrapper type for phet/sun's Faucet class.
+   * IO type for phet/sun's Faucet class.
    * @param {Focus} focus - the focus region which has {display,trail}
    * @param {string} phetioID - the unique tandem assigned to the focus
    * @constructor
@@ -89,7 +89,7 @@ define( function( require ) {
       }
     },
 
-    documentation: 'A wrapper type for the instance in the simulation which currently has keyboard focus.'
+    documentation: 'A IO type for the instance in the simulation which currently has keyboard focus.'
   } );
 
   scenery.register( 'FocusIO', FocusIO );

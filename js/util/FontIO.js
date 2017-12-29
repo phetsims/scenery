@@ -17,7 +17,7 @@ define( function( require ) {
 
   /**
    * @constructor
-   * Wrapper type for phet/scenery's Font class
+   * IO type for phet/scenery's Font class
    * @param {Font} font - An instance of a phet.scenery.Font type
    * @param {string} phetioID - Full name of this font instance
    */
