@@ -84,8 +84,9 @@ define( function( require ) {
           if ( self.display.pointerFocus || self.display.activeNode ) {
             var active = self.display.pointerFocus || self.display.activeNode;
             var focusable = active.focusable;
+            var visible = active.visible;
             var inDOM = active.getAccessibleInstances().length > 0;
-            if ( focusable && inDOM ) {
+            if ( focusable && visible && inDOM ) {
               if ( event.keyCode === KeyboardUtil.KEY_TAB ) {
                 event.preventDefault();
                 active.focus();
