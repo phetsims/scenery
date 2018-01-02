@@ -1,7 +1,7 @@
 // Copyright 2016-2017, University of Colorado Boulder
 
 /**
- * IO type for scenery phet's RichText node.
+ * IO type for RichText
  *
  * @author Michael Kauzmann (PhET Interactive Simulations)
  */

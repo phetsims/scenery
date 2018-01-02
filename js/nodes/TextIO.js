@@ -1,7 +1,7 @@
 // Copyright 2016-2017, University of Colorado Boulder
 
 /**
- * IO type for scenery's Text node.
+ * IO type for Text
  *
  * @author Sam Reid (PhET Interactive Simulations)
  * @author Denzell Barnett (PhET Interactive Simulations)
@@ -23,7 +23,6 @@ define( function( require ) {
   var VoidIO = require( 'ifphetio!PHET_IO/types/VoidIO' );
 
   /**
-   * IO type for scenery's Text node.
    * @param {Text} text
    * @param {string} phetioID
    * @constructor

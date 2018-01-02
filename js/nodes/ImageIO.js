@@ -1,7 +1,7 @@
 // Copyright 2016-2017, University of Colorado Boulder
 
 /**
- * IO type for scenery's Image node.
+ * IO type for SCENERY/Image (not the Image HTMLElement)
  *
  * @author Sam Reid (PhET Interactive Simulations)
  */

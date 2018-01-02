@@ -1,7 +1,8 @@
 // Copyright 2016, University of Colorado Boulder
 
 /**
- * Tandem type for the PhET Scenery Font class
+ * IO type for Font
+ *
  * @author Andrew Adare (PhET Interactive Simulations)
  */
 define( function( require ) {

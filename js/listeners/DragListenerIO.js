@@ -1,7 +1,7 @@
 // Copyright 2016, University of Colorado Boulder
 
 /**
- * phet-io handling for DragListener.
+ * IO type for DragListener.
  *
  * @author Jonathan Olson <jonathan.olson@colorado.edu>
  */
