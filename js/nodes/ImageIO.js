@@ -19,7 +19,6 @@ define( function( require ) {
   var VoidIO = require( 'ifphetio!PHET_IO/types/VoidIO' );
 
   /**
-   * IO type for scenery's Text node.
    * @param {Image} image
    * @param {string} phetioID
    * @constructor
