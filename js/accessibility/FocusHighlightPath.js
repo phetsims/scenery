@@ -22,8 +22,17 @@ define( function( require ) {
   var Vector2 = require( 'DOT/Vector2' );
 
   // constants
+  // default inner and outer strokes for the focus highlight
   var OUTER_FOCUS_COLOR = new Color( 'rgba(212,19,106,0.5)' );
   var INNER_FOCUS_COLOR = new Color( 'rgba(250,40,135,0.9)' );
+
+  // default inner and outer strokes for the group focus highlight, typically over Displays with lighter backgrounds
+  var INNER_LIGHT_GROUP_FOCUS_COLOR = new Color( 'rgba(233,113,166,1.0)' );
+  var OUTER_LIGHT_GROUP_FOCUS_COLOR = new Color( 'rgba(233,113,166,1.0)' );
+
+  // default inner and outer strokes for the group  focus highlight, typically over Displays with darker backgrounds
+  var INNER_DARK_GROUP_FOCUS_COLOR = new Color( 'rgba(159,15,80,1.0)' );
+  var OUTER_DARK_GROUP_FOCUS_COLOR = new Color( 'rgba(159,15,80,1.0)' );
 
   // Determined by inspection, base widths of focus highlight, transform of shape/bounds will change highlight line width
   var INNER_LINE_WIDTH_BASE = 2.5;
@@ -58,6 +67,10 @@ define( function( require ) {
       miterLimit: LineStyles.DEFAULT_OPTIONS.miterLimit,
       lineDashOffset: LineStyles.DEFAULT_OPTIONS.lineDashOffset
     }, options );
+
+    // @private {null|string|Color|Property.<string|Color>|LinearGradient|RadialGradient|Pattern}
+    this._innerHighlightColor = options.innerStroke;
+    this._outerHighlightColor = options.outerStroke;
 
     Path.call( this, shape );
 
@@ -136,12 +149,63 @@ define( function( require ) {
         return this.options.innerLineWidth;
       }
       return FocusHighlightPath.getInnerLineWidthFromNode( node );
-    }
+    },
+
+    /**
+     * Set the inner color of this focus highlight.
+     * @public
+     * @param {null|string|Color|Property.<string|Color>|LinearGradient|RadialGradient|Pattern} color
+     */
+    setInnerHighlightColor: function( color ) {
+      this._innerHighlightColor = color;
+      this.innerHighlightPath.setStroke( color );
+    },
+    set innerHighlightColor( color ) { this.setInnerHighlightColor( color ); },
+
+    /**
+     * Get the inner color of this focus highlight path.
+     * @public
+     *
+     * @returns {null|string|Color|Property.<string|Color>|LinearGradient|RadialGradient|Pattern}
+     */
+    getInnerHighlightColor: function() {
+      return this._innerHighlightColor;
+    },
+    get innerHighlightColor() { return this.getInnerHighlightColor(); },
+
+    /**
+     * Set the outer color of this focus highlight.
+     * @public
+     * @param {null|string|Color|Property.<string|Color>|LinearGradient|RadialGradient|Pattern} color
+     */
+    setOuterHighlightColor: function( color ) {
+      this._outerHighlightColor = color;
+      this.setStroke( color );
+    },
+    set outerHighlightColor( color ) { this.setOuterHighlightColor( color ); },
+
+    /**
+     * Get the color of the outer highlight for this FocusHighlightPath
+     * @public
+     *
+     * @returns {null|string|Color|Property.<string|Color>|LinearGradient|RadialGradient|Pattern}
+     */
+    getOuterHighlightColor: function() {
+      return this._outerHighlightColor;
+    },
+    get outerHighlightColor() { return this.getOuterHighlightColor(); },
+
   }, {
 
     // @static defaults available for custom highlights
     OUTER_FOCUS_COLOR: OUTER_FOCUS_COLOR,
     INNER_FOCUS_COLOR: INNER_FOCUS_COLOR,
+
+    INNER_LIGHT_GROUP_FOCUS_COLOR: INNER_LIGHT_GROUP_FOCUS_COLOR,
+    OUTER_LIGHT_GROUP_FOCUS_COLOR: OUTER_LIGHT_GROUP_FOCUS_COLOR,
+
+    INNER_DARK_GROUP_FOCUS_COLOR: INNER_DARK_GROUP_FOCUS_COLOR,
+    OUTER_DARK_GROUP_FOCUS_COLOR: OUTER_DARK_GROUP_FOCUS_COLOR,
 
     GROUP_OUTER_LINE_WIDTH: GROUP_OUTER_LINE_WIDTH,
     GROUP_INNER_LINE_WIDTH: GROUP_INNER_LINE_WIDTH,
