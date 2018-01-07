@@ -10,15 +10,16 @@ define( function( require ) {
   'use strict';
 
   // modules
+  var NullableIO = require( 'ifphetio!PHET_IO/types/NullableIO' );
   var scenery = require( 'SCENERY/scenery' );
 
   // phet-io modules
   var assertInstanceOf = require( 'ifphetio!PHET_IO/assertInstanceOf' );
-  var phetioInherit = require( 'ifphetio!PHET_IO/phetioInherit' );
   var BooleanIO = require( 'ifphetio!PHET_IO/types/BooleanIO' );
   var FunctionIO = require( 'ifphetio!PHET_IO/types/FunctionIO' );
   var NumberIO = require( 'ifphetio!PHET_IO/types/NumberIO' );
   var ObjectIO = require( 'ifphetio!PHET_IO/types/ObjectIO' );
+  var phetioInherit = require( 'ifphetio!PHET_IO/phetioInherit' );
   var VoidIO = require( 'ifphetio!PHET_IO/types/VoidIO' );
 
   /**
@@ -62,7 +63,7 @@ define( function( require ) {
 
     setPickable: {
       returnType: VoidIO,
-      parameterTypes: [ BooleanIO ],
+      parameterTypes: [ NullableIO( BooleanIO ) ],
       implementation: function( pickable ) {
         this.instance.pickable = pickable;
       },
