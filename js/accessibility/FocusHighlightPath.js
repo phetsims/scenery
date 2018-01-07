@@ -6,7 +6,7 @@
  * lighter in color and transparency.  It as a child 'inner' path that is darker and more opaque, which gives the
  * focus highlight the illusion that it fades out.
  *
- * @author - Michael Kauzmann (PhET Interactive Simulations)
+ * @author Michael Kauzmann (PhET Interactive Simulations)
  * @author Jesse Greenberg (PhET Interactive Simulations)
  */
 
