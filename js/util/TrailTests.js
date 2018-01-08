@@ -672,11 +672,6 @@ define( function( require ) {
 
     rect.rectHeight = 30;
     node.validateBounds();
-
-    // Two of the 6 callbacks above should never be called, so they assert.ok( false, ...)
-    // If more tests are added here, this magic number may need to be changed.
-    // See https://github.com/phetsims/scenery/issues/720
-    assert.expect( 4 );
   } );
 
   QUnit.test( 'Using a color instance', function( assert ) {
