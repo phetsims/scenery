@@ -76,9 +76,6 @@ define( function( require ) {
     // When this is null, its value needs to be recomputed
     this._cachedRenderedText = null;
 
-    // {boolean} - @private (phet-io) Has the text been set before? Used for special case for first time setText is called
-    this.firstSetText = true; // no underscore because there are no get/setters
-
     this.initializePaintable();
 
     options = extendDefined( {
@@ -143,16 +140,6 @@ define( function( require ) {
 
         this.invalidateText();
         this.trigger2( 'text', oldText, text );
-
-        // avoid calling this the first time that the setText event is called, as this is the "changed" event
-        if ( this.textTandem.isSuppliedAndEnabled() && !this.firstSetText ) {
-          this.startEvent( 'model', 'changed', {
-            oldText: oldText,
-            newText: text
-          } );
-          this.endEvent();
-        }
-        this.firstSetText = false;
       }
       return this;
     },
