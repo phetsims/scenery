@@ -132,11 +132,11 @@ define( function( require ) {
     fromStateObject: function( stateObject ) {
       return stateObject;
     },
-    setValue: function( node, stateObject ) {
+    setValue: function( node, fromStateObject ) {
       assert && assertInstanceOf( node, phet.scenery.Node );
-      node.visible = stateObject.visible;
-      node.pickable = stateObject.pickable;
-      node.opacity = stateObject.opacity;
+      node.visible = fromStateObject.visible;
+      node.pickable = fromStateObject.pickable;
+      node.opacity = fromStateObject.opacity;
     },
     documentation: 'The base type for graphical and potentially interactive objects'
   } );
