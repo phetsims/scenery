@@ -41,16 +41,6 @@ define( function( require ) {
 
 
     /**
-     * Decodes a state into a Font.
-     * Use stateObject as the Font constructor's options argument
-     * @param {Object} stateObject
-     * @returns {Font}
-     */
-    fromStateObject: function( stateObject ) {
-      return new phet.scenery.Font( stateObject );
-    },
-
-    /**
      * Encodes a Font instance to a state.
      * Serialize this font's configuration to an options object
      * @param {Font} instance
@@ -67,7 +57,17 @@ define( function( require ) {
         lineHeight: font.getLineHeight(),
         family: font.getFamily()
       };
-    }
+    },
+
+    /**
+     * Decodes a state into a Font.
+     * Use stateObject as the Font constructor's options argument
+     * @param {Object} stateObject
+     * @returns {Font}
+     */
+    fromStateObject: function( stateObject ) {
+      return new phet.scenery.Font( stateObject );
+    },
   } );
 
   scenery.register( 'FontIO', FontIO );

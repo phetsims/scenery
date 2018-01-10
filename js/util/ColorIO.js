@@ -32,16 +32,6 @@ define( function( require ) {
     documentation: 'A color, with rgba',
 
     /**
-     * Decodes a state into a Color.
-     * Use stateObject as the Font constructor's options argument
-     * @param {Object} stateObject
-     * @returns {Color}
-     */
-    fromStateObject: function( stateObject ) {
-      return new phet.scenery.Color( stateObject.r, stateObject.g, stateObject.b, stateObject.a );
-    },
-
-    /**
      * Encodes a Color into a state object.
      * @param {Color} color
      * @returns {Object}
@@ -49,6 +39,16 @@ define( function( require ) {
     toStateObject: function( color ) {
       assert && assertInstanceOf( color, phet.scenery.Color );
       return color.toStateObject();
+    },
+
+    /**
+     * Decodes a state into a Color.
+     * Use stateObject as the Font constructor's options argument
+     * @param {Object} stateObject
+     * @returns {Color}
+     */
+    fromStateObject: function( stateObject ) {
+      return new phet.scenery.Color( stateObject.r, stateObject.g, stateObject.b, stateObject.a );
     }
   } );
 
