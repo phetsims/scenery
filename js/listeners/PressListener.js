@@ -104,7 +104,8 @@ define( function( require ) {
       tandem: Tandem.required,
 
       // {TypeIO} -
-      phetioType: PressListenerIO
+      phetioType: PressListenerIO,
+      phetioState: false
     }, options );
 
     PhetioObject.call( this, options );
