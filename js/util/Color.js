@@ -672,6 +672,9 @@ define( function( require ) {
   Color.WHITE = Color.white = new Color( 255, 255, 255 ).setImmutable();
   Color.YELLOW = Color.yellow = new Color( 255, 255, 0 ).setImmutable();
 
+  // Helper for transparent colors
+  Color.TRANSPARENT = Color.transparent = new Color( 0, 0, 0, 0 ).setImmutable();
+
   /**
    * Interpolates between 2 colors in RGBA space. When distance is 0, color1
    * is returned. When distance is 1, color2 is returned. Other values of
