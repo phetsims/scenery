@@ -68,7 +68,7 @@
   <script type="text/javascript">
     var rotationRadioButton = document.getElementById( 'rotating' );
     var scalingRadioButton = document.getElementById( 'scaling' );
-    var pausedCheckBox = document.getElementById( 'paused' );
+    var pausedCheckbox = document.getElementById( 'paused' );
 
     /*---------------------------------------------------------------------------*
      * window.requestAnimationFrame polyfill, by Erik Moller (http://my.opera.com/emoller/blog/2011/12/20/requestanimationframe-for-smart-er-animating)
@@ -640,7 +640,7 @@
       ( function step() {
         requestAnimationFrame( step, document.getElementById( 'container' ) );
 
-        if ( !pausedCheckBox.checked ) {
+        if ( !pausedCheckbox.checked ) {
           rotation = rotationRadioButton.checked ? ( ( Date.now() / 1000 ) % ( 2 * Math.PI ) ) : 0;
           scale = scalingRadioButton.checked ? ( Math.pow( 10, Math.cos( Date.now() / 1770 ) ) ) : 1;
 

@@ -412,8 +412,8 @@ define( function( require ) {
         }
         if ( element.type === 'checkbox' ) {
           // the checkbox should have a label - find the correct one
-          var checkBoxLabel = this.getLabel( element.id );
-          var labelContent = checkBoxLabel.textContent;
+          var checkboxLabel = this.getLabel( element.id );
+          var labelContent = checkboxLabel.textContent;
 
           // describe as a switch if it has the role
           if ( element.getAttribute( 'role' ) === 'switch' ) {
