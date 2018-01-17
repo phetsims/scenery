@@ -233,7 +233,7 @@ define( function( require ) {
 
       for ( var i = this.pointers.length - 1; i >= 0; i-- ) {
         var pointer = this.pointers[ i ];
-        if ( !pointer.isMouse ) {
+        if ( !( pointer instanceof Mouse ) ) {
           this.pointers.splice( i, 1 );
 
           // Send exit events. As we can't get a DOM event, we'll send a fake object instead.
@@ -716,7 +716,7 @@ define( function( require ) {
       this.dispatchEvent( trail, 'up', pointer, event, true );
 
       // touch pointers are transient, so fire exit/out to the trail afterwards
-      if ( pointer.isTouch ) {
+      if ( pointer instanceof Touch ) {
         this.exitEvents( pointer, event, trail, 0, true );
       }
 
@@ -727,7 +727,7 @@ define( function( require ) {
       var trail = this.rootNode.trailUnderPointer( pointer ) || new Trail( this.rootNode );
 
       // touch pointers are transient, so fire enter/over to the trail first
-      if ( pointer.isTouch ) {
+      if ( pointer instanceof Touch ) {
         this.enterEvents( pointer, event, trail, 0, true );
       }
 
@@ -769,7 +769,7 @@ define( function( require ) {
       this.dispatchEvent( trail, 'cancel', pointer, event, true );
 
       // touch pointers are transient, so fire exit/out to the trail afterwards
-      if ( pointer.isTouch ) {
+      if ( pointer instanceof Touch ) {
         this.exitEvents( pointer, event, trail, 0, true );
       }
 

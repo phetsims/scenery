@@ -614,7 +614,7 @@ display.updateOnRequestAnimationFrame( function( timeElapsed ) {
         node.addInputListener( {
           // mousedown or touchstart (pointer pressed down over the node)
           down: function( event ) {
-            if ( !event.pointer.isMouse ) {
+            if ( !( event.pointer instanceof scenery.Mouse ) ) {
               count++;
               updatePointers();
             }
@@ -622,7 +622,7 @@ display.updateOnRequestAnimationFrame( function( timeElapsed ) {
 
           // mouseup or touchend (pointer lifted from over the node)
           up: function( event ) {
-            if ( !event.pointer.isMouse ) {
+            if ( !( event.pointer instanceof scenery.Mouse ) ) {
               count--;
               updatePointers();
             }
@@ -699,7 +699,7 @@ function updatePointers() {
 node.addInputListener( {
   // mousedown or touchstart (pointer pressed down over the node)
   down: function( event ) {
-    if ( !event.pointer.isMouse ) {
+    if ( !( event.pointer instanceof scenery.Mouse ) ) {
       count++;
       updatePointers();
     }
@@ -707,7 +707,7 @@ node.addInputListener( {
 
   // mouseup or touchend (pointer lifted from over the node)
   up: function( event ) {
-    if ( !event.pointer.isMouse ) {
+    if ( !( event.pointer instanceof scenery.Mouse ) ) {
       count--;
       updatePointers();
     }

@@ -10,6 +10,7 @@ define( function( require ) {
   'use strict';
 
   var inherit = require( 'PHET_CORE/inherit' );
+  var Mouse = require( 'SCENERY/input/Mouse' );
   var PhetioObject = require( 'TANDEM/PhetioObject' );
   var scenery = require( 'SCENERY/scenery' );
   var Tandem = require( 'TANDEM/Tandem' );
@@ -78,7 +79,7 @@ define( function( require ) {
         if ( !self.dragging ) { return; }
 
         assert && assert( event.pointer === self.pointer, 'Wrong pointer in up' );
-        if ( !event.pointer.isMouse || event.domEvent.button === self.mouseButton ) {
+        if ( !( event.pointer instanceof Mouse ) || event.domEvent.button === self.mouseButton ) {
           var saveCurrentTarget = event.currentTarget;
           event.currentTarget = self.node; // #66: currentTarget on a pointer is null, so set it to the node we're dragging
           self.endDrag( event );
@@ -170,7 +171,7 @@ define( function( require ) {
       this.lastDragPoint = event.pointer.point;
       this.startTransformMatrix = event.currentTarget.getMatrix().copy();
       // event.domEvent may not exist if this is touch-to-snag
-      this.mouseButton = event.pointer.isMouse ? event.domEvent.button : undefined;
+      this.mouseButton = event.pointer instanceof Mouse ? event.domEvent.button : undefined;
 
       this.startEvent( 'user', 'dragStarted', {
         x: event.pointer.point.x,
@@ -221,7 +222,7 @@ define( function( require ) {
 
     tryToSnag: function( event ) {
       // don't allow drag attempts that use the wrong mouse button (-1 indicates any mouse button works)
-      if ( event.pointer.isMouse && event.domEvent && this.options.mouseButton !== event.domEvent.button && this.options.mouseButton !== -1 ) {
+      if ( event.pointer instanceof Mouse && event.domEvent && this.options.mouseButton !== event.domEvent.button && this.options.mouseButton !== -1 ) {
         return;
       }
 

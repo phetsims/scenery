@@ -16,6 +16,7 @@ define( function( require ) {
   'use strict';
 
   var inherit = require( 'PHET_CORE/inherit' );
+  var Mouse = require( 'SCENERY/input/Mouse' );
   var Pointer = require( 'SCENERY/input/Pointer' );
   var scenery = require( 'SCENERY/scenery' );
   var Trail = require( 'SCENERY/util/Trail' );
@@ -61,7 +62,7 @@ define( function( require ) {
     // @public {boolean} - Whether this is the 'primary' mode for the pointer. Always true for touches, and will be true
     // for the mouse if it is the primary (left) mouse button.
     // TODO: don't require check on domEvent (seems sometimes this is passed as null as a hack?)
-    this.isPrimary = !pointer.isMouse || !domEvent || domEvent.button === 0;
+    this.isPrimary = !( pointer instanceof Mouse ) || !domEvent || domEvent.button === 0;
   }
 
   scenery.register( 'Event', Event );
@@ -99,7 +100,7 @@ define( function( require ) {
     canStartPress: function() {
       // If the pointer is already attached (some other press probably), it can't start a press.
       // Additionally, we generally want to ignore non-left mouse buttons.
-      return !this.pointer.isAttached() && ( !this.pointer.isMouse || this.domEvent.button === 0 );
+      return !this.pointer.isAttached() && ( !( this.pointer instanceof Mouse ) || this.domEvent.button === 0 );
     }
   } );
 

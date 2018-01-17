@@ -14,11 +14,12 @@ define( function( require ) {
   'use strict';
 
   var inherit = require( 'PHET_CORE/inherit' );
+  var KeyboardUtil = require( 'SCENERY/accessibility/KeyboardUtil' );
+  var Mouse = require( 'SCENERY/input/Mouse' );
   var PhetioObject = require( 'TANDEM/PhetioObject' );
+  var Trail = require( 'SCENERY/util/Trail' );
   var scenery = require( 'SCENERY/scenery' );
   require( 'SCENERY/util/Trail' );
-  var KeyboardUtil = require( 'SCENERY/accessibility/KeyboardUtil' );
-  var Trail = require( 'SCENERY/util/Trail' );
 
   /*
    * The 'trail' parameter passed to down/upInside/upOutside will end with the node to which this DownUpListener has been added.
@@ -57,7 +58,7 @@ define( function( require ) {
       up: function( event ) {
         sceneryLog && sceneryLog.InputEvent && sceneryLog.InputEvent( 'DownUpListener (pointer) up for ' + self.downTrail.toString() );
         assert && assert( event.pointer === self.pointer );
-        if ( !event.pointer.isMouse || event.domEvent.button === self.options.mouseButton ) {
+        if ( !( event.pointer instanceof Mouse ) || event.domEvent.button === self.options.mouseButton ) {
           self.buttonUp( event );
         }
       },
@@ -88,7 +89,7 @@ define( function( require ) {
       if ( this.isDown ) { return; }
 
       // ignore other mouse buttons
-      if ( event.pointer.isMouse && event.domEvent.button !== this.options.mouseButton ) { return; }
+      if ( event.pointer instanceof Mouse && event.domEvent.button !== this.options.mouseButton ) { return; }
 
       // add our listener so we catch the up wherever we are
       event.pointer.addInputListener( this.downListener );

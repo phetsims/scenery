@@ -19,6 +19,7 @@ define( function( require ) {
 
   var BooleanProperty = require( 'AXON/BooleanProperty' );
   var inherit = require( 'PHET_CORE/inherit' );
+  var Mouse = require( 'SCENERY/input/Mouse' );
   var Node = require( 'SCENERY/nodes/Node' );
   var ObservableArray = require( 'AXON/ObservableArray' );
   var PhetioObject = require( 'TANDEM/PhetioObject' );
@@ -355,7 +356,7 @@ define( function( require ) {
       }
 
       // Only let presses be started with the correct mouse button.
-      if ( event.pointer.isMouse && event.domEvent.button !== this._mouseButton ) {
+      if ( event.pointer instanceof Mouse && event.domEvent.button !== this._mouseButton ) {
         return false;
       }
 

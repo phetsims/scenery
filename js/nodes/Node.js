@@ -160,12 +160,15 @@ define( function( require ) {
   var extend = require( 'PHET_CORE/extend' );
   var inherit = require( 'PHET_CORE/inherit' );
   var Matrix3 = require( 'DOT/Matrix3' );
+  var Mouse = require( 'SCENERY/input/Mouse' );
+  var Pen = require( 'SCENERY/input/Pen' );
   var Picker = require( 'SCENERY/util/Picker' );
   var PhetioObject = require( 'TANDEM/PhetioObject' );
   var Renderer = require( 'SCENERY/display/Renderer' );
   var RendererSummary = require( 'SCENERY/util/RendererSummary' );
   var scenery = require( 'SCENERY/scenery' );
   var Shape = require( 'KITE/Shape' );
+  var Touch = require( 'SCENERY/input/Touch' );
   var Transform3 = require( 'DOT/Transform3' );
   var Util = require( 'DOT/Util' );
   var Vector2 = require( 'DOT/Vector2' );
@@ -1553,7 +1556,7 @@ define( function( require ) {
      * @returns {Trail|null}
      */
     trailUnderPointer: function( pointer ) {
-      return this.hitTest( pointer.point, pointer.isMouse, pointer.isTouch || pointer.isPen );
+      return this.hitTest( pointer.point, pointer instanceof Mouse, pointer instanceof Touch || pointer instanceof Pen );
     },
 
     /**

@@ -17,6 +17,7 @@ define( function( require ) {
   var inherit = require( 'PHET_CORE/inherit' );
   var Matrix = require( 'DOT/Matrix' );
   var Matrix3 = require( 'DOT/Matrix3' );
+  var Mouse = require( 'SCENERY/input/Mouse' );
   var scenery = require( 'SCENERY/scenery' );
   var SingularValueDecomposition = require( 'DOT/SingularValueDecomposition' );
   var Vector2 = require( 'DOT/Vector2' );
@@ -158,7 +159,7 @@ define( function( require ) {
     down: function( event ) {
       sceneryLog && sceneryLog.InputListener && sceneryLog.InputListener( 'MultiListener down' );
 
-      if ( event.pointer.isMouse && event.domEvent.button !== this._mouseButton ) {
+      if ( event.pointer instanceof Mouse && event.domEvent.button !== this._mouseButton ) {
         sceneryLog && sceneryLog.InputListener && sceneryLog.InputListener( 'MultiListener abort: wrong mouse button' );
 
         return;

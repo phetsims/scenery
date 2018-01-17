@@ -33,8 +33,6 @@ define( function( require ) {
   inherit( Pointer, Mouse, {
     type: 'mouse',
 
-    isMouse: true,
-
     down: function( point, event ) {
       var pointChanged = this.hasPointChanged( point );
       point && sceneryLog && sceneryLog.InputEvent && sceneryLog.InputEvent( 'mouse down at ' + point.toString() );

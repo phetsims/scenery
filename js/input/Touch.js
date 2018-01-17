@@ -27,8 +27,6 @@ define( function( require ) {
   inherit( Pointer, Touch, {
     type: 'touch',
 
-    isTouch: true,
-
     move: function( point, event ) {
       var pointChanged = this.hasPointChanged( point );
       // if ( this.point ) { this.point.freeToPool(); }

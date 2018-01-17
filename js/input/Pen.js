@@ -26,8 +26,6 @@ define( function( require ) {
   inherit( Pointer, Pen, {
     type: 'pen',
 
-    isPen: true,
-
     move: function( point, event ) {
       var pointChanged = this.hasPointChanged( point );
       // if ( this.point ) { this.point.freeToPool(); }

@@ -13,11 +13,10 @@ define( function( require ) {
 
   var inherit = require( 'PHET_CORE/inherit' );
   var Matrix3 = require( 'DOT/Matrix3' );
-
   var scenery = require( 'SCENERY/scenery' );
-  require( 'SCENERY/util/Trail' );
-
+  var Touch = require( 'SCENERY/input/Touch' );
   var Util = require( 'SCENERY/util/Util' );
+  require( 'SCENERY/util/Trail' );
 
   function PointerOverlay( display, rootNode ) {
     var self = this;
@@ -76,7 +75,7 @@ define( function( require ) {
       var pointerRemoved = function() {
 
         //For touches that get a touch up event, remove them.  But when the mouse button is released, don't stop showing the mouse location
-        if ( pointer.isTouch ) {
+        if ( pointer instanceof Touch ) {
           self.pointerSVGContainer.removeChild( svg );
           pointer.removeInputListener( moveListener );
         }
