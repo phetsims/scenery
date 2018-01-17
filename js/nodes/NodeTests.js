@@ -13,9 +13,14 @@ define( function( require ) {
   var Node = require( 'SCENERY/nodes/Node' );
   var Rectangle = require( 'SCENERY/nodes/Rectangle' );
   var Shape = require( 'KITE/Shape' );
+  var Touch = require( 'SCENERY/input/Touch' );
   var Vector2 = require( 'DOT/Vector2' );
 
   QUnit.module( 'Node' );
+
+  function fakeTouchPointer( vector ) {
+    return new Touch( 0, vector, {} );
+  }
 
   QUnit.test( 'Mouse and Touch areas', function( assert ) {
     var node = new Node();
@@ -34,34 +39,16 @@ define( function( require ) {
     assert.ok( node.hitTest( new Vector2( 90, 10 ) ), 'Node intersection' );
     assert.ok( !node.hitTest( new Vector2( -10, 10 ) ), 'Node no intersection' );
 
-    assert.ok( node.trailUnderPointer( {
-      isTouch: true,
-      point: new Vector2( 10, 10 )
-    } ), 'Node intersection (isTouch)' );
-    assert.ok( node.trailUnderPointer( {
-      isTouch: true,
-      point: new Vector2( 90, 10 )
-    } ), 'Node intersection (isTouch)' );
-    assert.ok( node.trailUnderPointer( {
-      isTouch: true,
-      point: new Vector2( -10, 10 )
-    } ), 'Node intersection (isTouch)' );
+    assert.ok( node.trailUnderPointer( fakeTouchPointer( new Vector2( 10, 10 ) ) ), 'Node intersection (isTouch)' );
+    assert.ok( node.trailUnderPointer( fakeTouchPointer( new Vector2( 90, 10 ) ) ), 'Node intersection (isTouch)' );
+    assert.ok( node.trailUnderPointer( fakeTouchPointer( new Vector2( -10, 10 ) ) ), 'Node intersection (isTouch)' );
 
     node.clipArea = Shape.rectangle( 0, 0, 50, 50 );
 
     // points outside the clip area shouldn't register as hits
-    assert.ok( node.trailUnderPointer( {
-      isTouch: true,
-      point: new Vector2( 10, 10 )
-    } ), 'Node intersection (isTouch with clipArea)' );
-    assert.ok( !node.trailUnderPointer( {
-      isTouch: true,
-      point: new Vector2( 90, 10 )
-    } ), 'Node no intersection (isTouch with clipArea)' );
-    assert.ok( !node.trailUnderPointer( {
-      isTouch: true,
-      point: new Vector2( -10, 10 )
-    } ), 'Node no intersection (isTouch with clipArea)' );
+    assert.ok( node.trailUnderPointer( fakeTouchPointer( new Vector2( 10, 10 ) ) ), 'Node intersection (isTouch with clipArea)' );
+    assert.ok( !node.trailUnderPointer( fakeTouchPointer( new Vector2( 90, 10 ) ) ), 'Node no intersection (isTouch with clipArea)' );
+    assert.ok( !node.trailUnderPointer( fakeTouchPointer( new Vector2( -10, 10 ) ) ), 'Node no intersection (isTouch with clipArea)' );
   } );
 
 
