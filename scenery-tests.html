@@ -7,17 +7,15 @@
   <meta name="viewport" content="initial-scale=1,user-scalable=no,maximum-scale=1"/>
   <meta name="apple-mobile-web-app-capable" content="yes">
   <meta name="phet-sim-level" content="development">
-  <link rel="stylesheet" href="../sherpa/lib/qunit-2.4.1.css">
+<link rel="stylesheet" href="../sherpa/lib/qunit-2.4.1.css">
   <title>scenery</title>
 </head>
 
 <!-- body is only made black for the loading phase so that the splash screen is black -->
-<body>
-<div id="qunit"></div>
-<div id="qunit-fixture"></div>
+<body >
+<div id="qunit"></div><div id="qunit-fixture"></div><div id="display"></div>
 <!-- a11y - aria-live attribute is used to send alerts and status updates to screen readers, otherwise invisible -->
-<div id='aria-live-elements'
-     style="position: absolute; left: 0px; top: 0px; width: 0px; height: 0px; clip: rect(0px 0px 0px 0px); pointer-events: none;">
+<div id='aria-live-elements' style="position: absolute; left: 0px; top: 0px; width: 0px; height: 0px; clip: rect(0px 0px 0px 0px); pointer-events: none;">
   <p id="assertive" aria-live="assertive"></p>
   <p id="polite" aria-live="polite"></p>
   <p id="assertive-alert" aria-live="assertive" role="alert"></p>
@@ -33,28 +31,28 @@
 
     // Preloads, with more included for phet-io brand
     var preloads = [
-      '../sherpa/lib/jquery-2.1.0.js',
-      '../sherpa/lib/lodash-4.17.4.js',
-      '../sherpa/lib/FileSaver-b8054a2.js',
-      '../sherpa/lib/himalaya-0.2.7.js',
-      '../assert/js/assert.js',
-      '../query-string-machine/js/QueryStringMachine.js',
-      '../chipper/js/initialize-globals.js',
-      '../chipper/js/getVersionForBrand.js',
-      '../sherpa/lib/seedrandom-2.4.2.js',
-      '../sherpa/lib/game-up-camera-1.0.0.js',
-      '../sherpa/lib/base64-js-1.2.0.js',
-      '../sherpa/lib/TextEncoderLite-3c9f6f0.js',
-      '../tandem/js/PhetioIDUtils.js',
+      '../sherpa/lib/jquery-2.1.0.js', 
+      '../sherpa/lib/lodash-4.17.4.js', 
+      '../sherpa/lib/FileSaver-b8054a2.js', 
+      '../sherpa/lib/himalaya-0.2.7.js', 
+      '../assert/js/assert.js', 
+      '../query-string-machine/js/QueryStringMachine.js', 
+      '../chipper/js/initialize-globals.js', 
+      '../chipper/js/getVersionForBrand.js', 
+      '../sherpa/lib/seedrandom-2.4.2.js', 
+      '../sherpa/lib/game-up-camera-1.0.0.js', 
+      '../sherpa/lib/base64-js-1.2.0.js', 
+      '../sherpa/lib/TextEncoderLite-3c9f6f0.js', 
+      '../tandem/js/PhetioIDUtils.js', 
       '../sherpa/lib/qunit-2.4.1.js', 
       '../aqua/js/qunit-connector.js'
     ];
 
     if ( brand === 'phet-io' ) {
       preloads = preloads.concat( [
-        '../sherpa/lib/jsondiffpatch-0.1.31.js',
-        '../phet-io/js/phet-io-initialize-globals.js'
-      ] );
+      '../sherpa/lib/jsondiffpatch-0.1.31.js', 
+      '../phet-io/js/phet-io-initialize-globals.js'
+    ] );
     }
 
     // Loads a synchronously-executed asynchronously-downloaded script tag, with optional data-main parameter.
@@ -76,7 +74,7 @@
     preloads.forEach( loadURL );
 
     loadURL( '../sherpa/lib/require-2.1.11.js', 'js/scenery-test-config.js' );
-  } )();
+  })();
 </script>
 </body>
 </html>
