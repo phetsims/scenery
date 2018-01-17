@@ -107,13 +107,6 @@ an UI and Display made for visual testing and debugging.
       display._domElement.id = 'display';
       document.body.insertBefore( display._domElement, document.body.firstChild );
 
-      phetCore.loadScript( {
-        src: 'qunit/js/test-utils.js',
-        callback: function() {
-          console.log( 'loaded test-utils.js' );
-        }
-      } );
-
       scenery.Util.polyfillRequestAnimationFrame();
 
       // convenience function for IE stack trackes
