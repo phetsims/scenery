@@ -55,7 +55,13 @@ define( function( require ) {
       drag: null,
 
       // {Function|null} - Called as end( event: {DOMEvent}, viewDelta: {Vector2} ) when keyboard drag ends
-      end: null // called at the end of the dragging interaction
+      end: null, // called at the end of the dragging interaction
+
+      // {number} - arrow keys must be pressed this long to begin movement set on interval below
+      moveOnHoldDelay: 0,
+
+      // {number} - time interval at which the object will change position while the arrow key is being held down
+      moveOnHoldInterval: 0
     }, options );
 
     // @private, see options for more information
@@ -67,6 +73,8 @@ define( function( require ) {
     this._locationProperty = options.locationProperty;
     this._positionDelta = options.positionDelta;
     this._shiftPositionDelta = options.shiftPositionDelta;
+    this._moveOnHoldDelay = options.moveOnHoldDelay;
+    this._moveOnHoldInterval = options.moveOnHoldInterval;
 
     // @private { [].{ isDown: {boolean}, timeDown: [boolean] } - tracks the state of the keyboard. JavaScript doesn't
     // handle multiple key presses, so we track which keys are currently down and update based on state of this
@@ -89,6 +97,17 @@ define( function( require ) {
     // @private {boolean} - when a hotkey group is pressed down, dragging will be disabled until
     // all keys are up again
     this.draggingDisabled = false;
+
+    // @private {boolean} - used to determine if the step functions updates position normally or in the 'hold to move' pattern
+    this.canMove = true;
+
+    // @private {number} - counters to allow for press-and-hold functionality that enables uses to incrementally move
+    // the draggable object or hold the movement key for continuous or stepped movement
+    this.moveOnHoldDelayCounter = 0;
+    this.moveOnHoldIntervalCounter = 0;
+
+    // @private {boolean} - variable to determine when the initial delay is complete
+    this.delayComplete = false;
 
     /**
      * Implements keyboard dragging when listener is attached to the node, public so listener is attached
@@ -120,6 +139,8 @@ define( function( require ) {
          self._start( event );
         }
       }
+
+      this.updatePosition();
     };
 
     /**
@@ -159,6 +180,12 @@ define( function( require ) {
           self._end( event );
         }
       }
+
+      // TODO: consider moving to some kind of reset function
+      // reset all press-and-hold variables on keyup
+      self.delayComplete = false;
+      self.moveOnHoldDelayCounter = 0;
+      self.moveOnHoldIntervalCounter = 0;
     };
 
     /**
@@ -187,7 +214,6 @@ define( function( require ) {
 
       // no-op unless a key is down
       if ( this.keyState.length > 0 ) {
-
         // for each key that is still down, increment the tracked time that has been down
         for ( var i = 0; i < this.keyState.length; i++ ) {
           if ( this.keyState[ i ].keyDown ) {
@@ -195,101 +221,124 @@ define( function( require ) {
           }
         }
 
-        // check to see if any hotkey combinations are down
-        for ( var j = 0; j < this.hotkeyGroups.length; j++ ) {
-          var hotkeysDownList = [];
-          var keys = this.hotkeyGroups[ j ].keys;
+        // dt is in seconds and we convert to ms
+        this.moveOnHoldDelayCounter += dt * 1000;
+        this.moveOnHoldIntervalCounter += dt * 1000;
 
-          for ( var k = 0; k < keys.length; k++ ) {
-            for ( var l = 0; l < this.keyState.length; l++ ) {
-              if ( this.keyState[ l ].keyCode === keys[ k ] ) {
-                hotkeysDownList.push( this.keyState[ l ] );
-              }
+        // logic for position updates
+        if ( this.moveOnHoldDelayCounter >= this._moveOnHoldDelay && !this.delayComplete ) {
+          this.updatePosition();
+          this.delayComplete = true;
+        }
+
+        if ( this.delayComplete && this.moveOnHoldIntervalCounter >= this._moveOnHoldInterval ) {
+          this.updatePosition();
+        }
+      }
+    },
+
+    /**
+     * Handle the actual change in position of associated object based on currently pressed keys. Called in step function
+     * and keydown listener.
+     */
+    updatePosition: function() {
+
+      // check to see if any hotkey combinations are down
+      for ( var j = 0; j < this.hotkeyGroups.length; j++ ) {
+        var hotkeysDownList = [];
+        var keys = this.hotkeyGroups[ j ].keys;
+
+        for ( var k = 0; k < keys.length; k++ ) {
+          for ( var l = 0; l < this.keyState.length; l++ ) {
+            if ( this.keyState[ l ].keyCode === keys[ k ] ) {
+              hotkeysDownList.push( this.keyState[ l ] );
             }
-          }
-
-          // the hotkeysDownList array order should match the order of the key group, so now we just need to make
-          // sure that the key down times are in the right order
-          var keysInOrder = false;
-          for ( var m = 0; m < hotkeysDownList.length - 1; m++ ) {
-            if ( hotkeysDownList[ m + 1 ] && hotkeysDownList[ m ].timeDown > hotkeysDownList[ m + 1 ].timeDown ) {
-              keysInOrder = true;
-            }
-          }
-
-          // if keys are in order, call the callback associated with the group, and disable dragging until
-          // all hotkeys associated with that group are up again
-          if ( keysInOrder ) {
-            this.keyGroupDown = this.hotkeyGroups[ j ];
-            this.hotkeyGroups[ j ].callback();
           }
         }
 
-        // if a key group is down, check to see if any of those keys are still down - if so, we will disable dragging
-        // until all of them are up
-        if ( this.keyGroupDown ) {
-          if ( this.keyInListDown( this.keyGroupDown.keys ) ) {
-            this.draggingDisabled = true;
-          }
-          else {
-            this.draggingDisabled = false;
-
-            // keys are no longer down, clear the group
-            this.keyGroupDown = null;
+        // the hotkeysDownList array order should match the order of the key group, so now we just need to make
+        // sure that the key down times are in the right order
+        var keysInOrder = false;
+        for ( var m = 0; m < hotkeysDownList.length - 1; m++ ) {
+          if ( hotkeysDownList[ m + 1 ] && hotkeysDownList[ m ].timeDown > hotkeysDownList[ m + 1 ].timeDown ) {
+            keysInOrder = true;
           }
         }
 
-        if ( !this.draggingDisabled ) {
+        // if keys are in order, call the callback associated with the group, and disable dragging until
+        // all hotkeys associated with that group are up again
+        if ( keysInOrder ) {
+          this.keyGroupDown = this.hotkeyGroups[ j ];
+          this.hotkeyGroups[ j ].callback();
+        }
+      }
 
-          // handle the change in position
-          var deltaX = 0;
-          var deltaY = 0;
-          var positionDelta = this.shiftKeyDown() ? this._shiftPositionDelta : this._positionDelta;
+      // if a key group is down, check to see if any of those keys are still down - if so, we will disable dragging
+      // until all of them are up
+      if ( this.keyGroupDown ) {
+        if ( this.keyInListDown( this.keyGroupDown.keys ) ) {
+          this.draggingDisabled = true;
+        }
+        else {
+          this.draggingDisabled = false;
 
-          if ( this.leftMovementKeysDown() ) {
-            deltaX = -positionDelta;
-          }
-          if ( this.rightMovementKeysDown() ) {
-            deltaX = positionDelta;
-          }
-          if ( this.upMovementKeysDown() ) {
-            deltaY = -positionDelta;
-          }
-          if ( this.downMovementKeysDown() ) {
-            deltaY = positionDelta;
+          // keys are no longer down, clear the group
+          this.keyGroupDown = null;
+        }
+      }
+
+      if ( !this.draggingDisabled ) {
+
+        // handle the change in position
+        var deltaX = 0;
+        var deltaY = 0;
+        var positionDelta = this.shiftKeyDown() ? this._shiftPositionDelta : this._positionDelta;
+
+        if ( this.leftMovementKeysDown() ) {
+          deltaX = -positionDelta;
+        }
+        if ( this.rightMovementKeysDown() ) {
+          deltaX = positionDelta;
+        }
+        if ( this.upMovementKeysDown() ) {
+          deltaY = -positionDelta;
+        }
+        if ( this.downMovementKeysDown() ) {
+          deltaY = positionDelta;
+        }
+
+        // only initiate move if there was some attempted keyboard drag
+        var vectorDelta = new Vector2( deltaX, deltaY );
+        if ( !vectorDelta.equals( Vector2.ZERO ) ) {
+
+          // to model coordinates
+          if ( this._transform ) {
+            vectorDelta = this._transform.viewToModelDelta( vectorDelta );
           }
 
-          // only initiate move if there was some attempted keyboard drag
-          var vectorDelta = new Vector2( deltaX, deltaY );
-          if ( !vectorDelta.equals( Vector2.ZERO ) ) {
+          // synchronize with model location
+          if ( this._locationProperty ) {
+            var newPosition = this._locationProperty.get().plus( vectorDelta );
 
-            // to model coordinates
-            if ( this._transform ) {
-              vectorDelta = this._transform.viewToModelDelta( vectorDelta );
+            // constrain to bounds in model coordinates
+            if ( this._dragBounds ) {
+              newPosition = this._dragBounds.closestPointTo( newPosition );
             }
-
-            // synchronize with model location
-            if ( this._locationProperty ) {
-              var newPosition = this._locationProperty.get().plus( vectorDelta );
-
-              // constrain to bounds in model coordinates
-              if ( this._dragBounds ) {
-                newPosition = this._dragBounds.closestPointTo( newPosition );
-              }
-          
-              // update the position if it is different
-              if ( !newPosition.equals( this._locationProperty.get() ) ) {
-                this._locationProperty.set( newPosition );
-              }
+        
+            // update the position if it is different
+            if ( !newPosition.equals( this._locationProperty.get() ) ) {
+              this._locationProperty.set( newPosition );
             }
+          }
 
-            // call our drag function
-            if ( this._drag ) {
-              this._drag( vectorDelta );
-            }
+          // call our drag function
+          if ( this._drag ) {
+            this._drag( vectorDelta );
           }
         }
       }
+      this.moveOnHoldIntervalCounter = 0;
+      this.canMove = false;
     },
 
     /**
