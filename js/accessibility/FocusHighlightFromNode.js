@@ -28,16 +28,21 @@ define( function( require ) {
       // {boolean} - if true, highlight will surround local bounds
       useLocalBounds: false,
 
-      // {boolean} - if true, dilation for bounds around node will increase, see setShapeFromNode()
-      useGroupDilation: false,
-
       // line width options, one for each highlight, will be calculated based on transform of this path unless provided
       outerLineWidth: null,
-      innerLineWidth: null
+      innerLineWidth: null,
+
+      // {null|number] - default value is function of node transform (minus translation), but can be set explicitly
+      // see FocusHighlightPath.getDilationCoefficient()
+      dilationCoefficient: null,
+
+      // {boolean} - if true, dilation for bounds around node will increase, see setShapeFromNode()
+      useGroupDilation: false
     }, options );
 
     this.useLocalBounds = options.useLocalBounds; // @private
     this.useGroupDilation = options.useGroupDilation; // @private
+    this.dilationCoefficient = options.dilationCoefficient; // @private
 
     FocusHighlightPath.call( this, null, options );
 
@@ -65,8 +70,9 @@ define( function( require ) {
     setShapeFromNode: function( node ) {
       this.nodeBounds = this.useLocalBounds ? node.localBounds : node.bounds;
 
-      // Figure out how much dilation to apply to the focus highlight around the node
-      var dilationCoefficient = this.useGroupDilation ? FocusHighlightPath.getGroupDilationCoefficient( node ) : FocusHighlightPath.getDilationCoefficient( node );
+      // Figure out how much dilation to apply to the focus highlight around the node, calculated unless specified
+      // with options
+      var dilationCoefficient = this.dilationCoefficient || ( this.useGroupDilation ? FocusHighlightPath.getGroupDilationCoefficient( node ) : FocusHighlightPath.getDilationCoefficient( node ) );
       var dilatedBounds = this.nodeBounds.dilated( dilationCoefficient );
 
       // Update the line width of the focus highlight based on the transform of the node
