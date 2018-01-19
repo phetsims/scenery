@@ -11,6 +11,7 @@ define( function( require ) {
 
   // var AccessiblePeer = require( 'SCENERY/accessibility/AccessiblePeer' );
   var cleanArray = require( 'PHET_CORE/cleanArray' );
+  // var Display = require( 'SCENERY/display/Display' );
   var Events = require( 'AXON/Events' );
   var inherit = require( 'PHET_CORE/inherit' );
   var KeyboardUtil = require( 'SCENERY/accessibility/KeyboardUtil' );
@@ -230,7 +231,16 @@ define( function( require ) {
           visibilityCount++;
         }
       }
-      this.peer.getParentContainerElement().hidden = !( visibilityCount === this.trailDiff.length );
+
+      var parentElement = this.peer.getParentContainerElement();
+      parentElement.hidden = !( visibilityCount === this.trailDiff.length );
+
+      // if we hid a parent element, blur focus if active element was an ancestor
+      if ( parentElement.hidden ) {
+        if ( parentElement.contains( document.activeElement ) ) {
+          scenery.Display.focus = null;
+        };
+      }
     },
 
     /**
