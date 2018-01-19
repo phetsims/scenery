@@ -239,7 +239,7 @@ define( function( require ) {
       if ( parentElement.hidden ) {
         if ( parentElement.contains( document.activeElement ) ) {
           scenery.Display.focus = null;
-        };
+        }
       }
     },
 
