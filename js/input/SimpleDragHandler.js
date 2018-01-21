@@ -18,6 +18,11 @@ define( function( require ) {
   // phet-io modules
   var SimpleDragHandlerIO = require( 'SCENERY/input/SimpleDragHandlerIO' );
 
+  // constants
+  var HIGH_FREQUENCY_OPTIONS = {
+    highFrequency: true
+  };
+
   /**
    * Allowed options: {
    *    allowTouchSnag: false // allow touch swipes across an object to pick it up. If a function is passed, the value allowTouchSnag( event ) is used
@@ -122,7 +127,7 @@ define( function( require ) {
         self.startEvent( 'user', 'dragged', {
           x: event.pointer.point.x,
           y: event.pointer.point.y
-        } );
+        }, HIGH_FREQUENCY_OPTIONS );
 
         // move by the delta between the previous point, using the precomputed transform
         // prepend the translation on the node, so we can ignore whatever other transform state the node has
@@ -145,7 +150,7 @@ define( function( require ) {
           self.options.drag.call( null, event, self.trail ); // new position (old position?) delta
           event.currentTarget = saveCurrentTarget; // be polite to other listeners, restore currentTarget
         }
-        self.endEvent();
+        self.endEvent( HIGH_FREQUENCY_OPTIONS );
       }
     };
     PhetioObject.call( this, options );
