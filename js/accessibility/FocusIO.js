@@ -48,12 +48,12 @@ define( function( require ) {
 
           // Don't include the last node, since it is the focused node
           if(i < focus.trail.nodes.length -1) {
-            phetioIDIndices.push( node.phetioID || focus.trail.indices[ i ] );
+            phetioIDIndices.push( node.phetioObjectTandem.phetioID || focus.trail.indices[ i ] );
           }
         } );
 
         return {
-          focusedPhetioID: focus.trail.lastNode().phetioID,
+          focusedPhetioID: focus.trail.lastNode().phetioObjectTandem.phetioID,
           indices: focus.trail.indices,
           phetioIDIndices: phetioIDIndices
         };
