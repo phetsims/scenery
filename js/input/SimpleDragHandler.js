@@ -150,7 +150,7 @@ define( function( require ) {
           self.options.drag.call( null, event, self.trail ); // new position (old position?) delta
           event.currentTarget = saveCurrentTarget; // be polite to other listeners, restore currentTarget
         }
-        self.endEvent( HIGH_FREQUENCY_OPTIONS );
+        self.endEvent();
       }
     };
     PhetioObject.call( this, options );

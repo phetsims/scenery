@@ -106,12 +106,12 @@ define( function( require ) {
              ( this._buttonOptions.fireOnDown ? ( state === 'down' ) : ( oldState === 'down' ) ) ) {
 
           // Record this event to the phet-io event stream, including all downstream events as nested children
-          var fireID = this.startEvent( 'user', 'fire' );
+          this.startEvent( 'user', 'fire' );
 
           // Then fire the event
           this._buttonOptions.fire( event );
 
-          this.endEvent( fireID );
+          this.endEvent();
         }
       }
     },

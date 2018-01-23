@@ -197,7 +197,7 @@ define( function( require ) {
       if ( success ) {
         sceneryLog && sceneryLog.InputListener && sceneryLog.InputListener( 'DragListener successful press' );
         sceneryLog && sceneryLog.InputListener && sceneryLog.push();
-        var eventId = this.startEvent( 'user', 'start', {
+        this.startEvent( 'user', 'start', {
           x: event.pointer.point.x,
           y: event.pointer.point.y
         } );
@@ -212,7 +212,7 @@ define( function( require ) {
         // Notify after positioning and other changes
         this._start && this._start( event, this );
 
-        this.endEvent( eventId );
+        this.endEvent();
         sceneryLog && sceneryLog.InputListener && sceneryLog.pop();
       }
 
