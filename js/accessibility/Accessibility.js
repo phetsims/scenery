@@ -1315,7 +1315,9 @@ define( function( require ) {
          * @param {string} value
          */
         setInputValue: function( value ) {
-          assert && assert( _.includes( FORM_ELEMENTS, this._tagName.toUpperCase() ), 'dom element must be a form element to support value' );
+          if ( this._tagName ) {
+            assert && assert( _.includes( FORM_ELEMENTS, this._tagName.toUpperCase() ), 'dom element must be a form element to support value' );
+          }
 
           value = value.toString();
           this._inputValue = value;
