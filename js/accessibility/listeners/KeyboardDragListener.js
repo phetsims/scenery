@@ -181,11 +181,7 @@ define( function( require ) {
         }
       }
 
-      // TODO: consider moving to some kind of reset function
-      // reset all press-and-hold variables on keyup
-      self.delayComplete = false;
-      self.moveOnHoldDelayCounter = 0;
-      self.moveOnHoldIntervalCounter = 0;
+      self.resetPressAndHold();
     };
 
     /**
@@ -457,6 +453,17 @@ define( function( require ) {
       for ( var i = 0; i < hotKeyGroups.length; i++ ) {
         this.addHotkeyGroup( hotKeyGroups[ i ] );
       }
+    },
+
+    /**
+     * Resets the timers and control variables for the press and hold functionality.
+     * 
+     * @public
+     */
+    resetPressAndHold: function() {
+      self.delayComplete = false;
+      self.moveOnHoldDelayCounter = 0;
+      self.moveOnHoldIntervalCounter = 0;
     },
 
     /**
