@@ -101,7 +101,7 @@ define( function( require ) {
     // @private {boolean} - used to determine if the step functions updates position normally or in the 'hold to move' pattern
     this.canMove = true;
 
-    // @private {number} - counters to allow for press-and-hold functionality that enables uses to incrementally move
+    // @private {number} - counters to allow for press-and-hold functionality that enables user to incrementally move
     // the draggable object or hold the movement key for continuous or stepped movement
     this.moveOnHoldDelayCounter = 0;
     this.moveOnHoldIntervalCounter = 0;
@@ -140,6 +140,7 @@ define( function( require ) {
         }
       }
 
+      // move object on first down before a delay
       this.updatePosition();
     };
 
