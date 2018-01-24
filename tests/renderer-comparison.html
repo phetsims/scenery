@@ -6,6 +6,9 @@
 
   <title>Scenery Rendering Renderer Comparison</title>
 
+  <!-- Before loading other things (that might error), create hooks to report errors/loads for continuous testing -->
+  <script src="../../aqua/js/pageload-connector.js"></script>
+
   <!-- jQuery and LoDash are dependencies -->
   <script src="../../assert/js/assert.js"></script>
   <script src="../../tandem/js/PhetioIDUtils.js"></script>
@@ -950,7 +953,8 @@
                 'dom',
                 'webgl'
               ]
-            }
+            },
+            defaultValue: [ 'canvas', 'svg', 'dom', 'webgl' ]
           } );
 
           // Allow selection of the tests by a query parameter ?test=...
