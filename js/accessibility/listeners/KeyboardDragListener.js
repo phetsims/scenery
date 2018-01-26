@@ -459,12 +459,12 @@ define( function( require ) {
     /**
      * Resets the timers and control variables for the press and hold functionality.
      * 
-     * @public
+     * @private
      */
     resetPressAndHold: function() {
-      self.delayComplete = false;
-      self.moveOnHoldDelayCounter = 0;
-      self.moveOnHoldIntervalCounter = 0;
+      this.delayComplete = false;
+      this.moveOnHoldDelayCounter = 0;
+      this.moveOnHoldIntervalCounter = 0;
     },
 
     /**
@@ -474,6 +474,7 @@ define( function( require ) {
      */
     reset: function() {
       this.keyState = [];
+      this.resetPressAndHold();
     }
   }, {
 
