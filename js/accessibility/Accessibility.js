@@ -1798,9 +1798,10 @@ define( function( require ) {
           domElement.tabIndex = -1;
         }
 
-        // Safari requires that certain input elements have width, otherwise it will not be keyboard accessible
+        // Safari requires that certain input elements have dimension, otherwise it will not be keyboard accessible
         if ( _.includes( ELEMENTS_REQUIRE_WIDTH, upperCaseTagName ) ) {
           domElement.style.width = '1px';
+          domElement.style.height = '1px';
         }
 
         return domElement;
