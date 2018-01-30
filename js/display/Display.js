@@ -257,8 +257,10 @@ define( function( require ) {
         this._domElement.setAttribute( 'aria-role', 'application' );
       }
 
-      SceneryStyle.addRule( '.accessibility * { position: absolute; left: 0; top: 0; width: 0; height: 0, clip: rect(0,0,0,0); }' );
-
+      // make the PDOM invisible in the browser - it has some width and is shifted off screen so that AT can read the
+      // formatting tags, see https://github.com/phetsims/scenery/issues/730
+      SceneryStyle.addRule( '.accessibility * { position: relative; left: -1000px; top: 0; width: 250px; height: 0; clip: rect(0,0,0,0); pointerEvents: none }' );
+      
       this._focusRootNode = new Node();
       this._focusOverlay = new FocusOverlay( this, this._focusRootNode );
       this.addOverlay( this._focusOverlay );

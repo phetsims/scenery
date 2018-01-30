@@ -67,14 +67,9 @@ define( function( require ) {
 
       if ( this.isRootInstance ) {
         var accessibilityContainer = document.createElement( 'div' );
+
+        // give the container a class name so it is hidden in the Display, see accessibility styling in Display.js
         accessibilityContainer.className = 'accessibility';
-        accessibilityContainer.style.position = 'absolute';
-        accessibilityContainer.style.left = '0';
-        accessibilityContainer.style.top = '0';
-        accessibilityContainer.style.width = '0';
-        accessibilityContainer.style.height = '0';
-        accessibilityContainer.style.clip = 'rect(0,0,0,0)';
-        accessibilityContainer.style.pointerEvents = 'none';
         this.peer = new scenery.AccessiblePeer( this, accessibilityContainer );
 
         var self = this;
