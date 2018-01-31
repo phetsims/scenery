@@ -26,9 +26,11 @@
 define( function( require ) {
   'use strict';
 
+  var FontIO = require( 'SCENERY/util/FontIO' );
   var inherit = require( 'PHET_CORE/inherit' );
   var PhetioObject = require( 'TANDEM/PhetioObject' );
   var scenery = require( 'SCENERY/scenery' );
+  var Tandem = require( 'TANDEM/Tandem' );
 
   // @private {Array.<string>} - Valid values for the 'style' property of Font
   var VALID_STYLES = [ 'normal', 'italic', 'oblique' ];
@@ -38,11 +40,11 @@ define( function( require ) {
 
   // @private {Array.<string>} - Valid values for the 'weight' property of Font
   var VALID_WEIGHTS = [ 'normal', 'bold', 'bolder', 'lighter',
-                        '100', '200', '300', '400', '500', '600', '700', '800', '900' ];
+    '100', '200', '300', '400', '500', '600', '700', '800', '900' ];
 
   // @private {Array.<string>} - Valid values for the 'stretch' property of Font
   var VALID_STRETCHES = [ 'normal', 'ultra-condensed', 'extra-condensed', 'condensed', 'semi-condensed',
-                          'semi-expanded', 'expanded', 'extra-expanded', 'ultra-expanded' ];
+    'semi-expanded', 'expanded', 'extra-expanded', 'ultra-expanded' ];
 
   /**
    * @public
@@ -97,7 +99,7 @@ define( function( require ) {
 
     var type = typeof options;
     assert && assert( options === undefined || type === 'string' || ( type === 'object' && Object.getPrototypeOf( options ) === Object.prototype ),
-      'options should be a string or a raw object');
+      'options should be a string or a raw object' );
 
     if ( type === 'string' ) {
       // parse a somewhat proper CSS3 form (not guaranteed to handle it precisely the same as browsers yet)
@@ -139,6 +141,9 @@ define( function( require ) {
           break;
         }
       }
+
+      // Assign to object type so it can be used for PhET-iO and for the PhetioObject supercall.
+      options = {};
     }
     else if ( type === 'object' ) {
       if ( options.style !== undefined ) {
@@ -163,6 +168,10 @@ define( function( require ) {
         this._family = options.family;
       }
     }
+    options = _.extend( {
+      phetioType: FontIO,
+      tandem: Tandem.optional
+    }, options );
 
     // sanity checks to prevent errors in interpretation or in the font shorthand usage
     assert && assert( typeof this._style === 'string' && _.includes( VALID_STYLES, this._style ),
