@@ -17,6 +17,7 @@ define( function( require ) {
   require( 'SCENERY/display/FuzzTests' );
   require( 'SCENERY/nodes/NodeTests' );
   require( 'SCENERY/nodes/ShapeTests' );
+  require( 'SCENERY/util/FontTests' );
   require( 'SCENERY/util/TrailTests' );
   require( 'SCENERY/tests/PixelComparisonTests' );
   require( 'SCENERY/tests/MiscellaneousTests' );

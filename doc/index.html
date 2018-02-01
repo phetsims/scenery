@@ -2011,7 +2011,7 @@ window.assertions.disableAssertSlow();
 
     <p>
       It can be constructed with <code>new scenery.Font()</code> initialized with the default font '10px sans-serif',
-      <code>new scenery.Font( cssFontString )</code> initialized with the specified <a href="http://www.w3.org/TR/css3-fonts/">CSS Font</a>,
+      <code>scenery.Font.fromCSS( cssFontString )</code> initialized with the specified <a href="http://www.w3.org/TR/css3-fonts/">CSS Font</a>,
       or with a property object <code>new scenery.Font( { ... } )</code>, where any of the Font's properties
       (<a href="#font-font">font</a>, <a href="#font-family">family</a>, <a href="#font-weight">weight</a>, <a href="#font-stretch">stretch</a>, <a
         href="#font-style">style</a>, <a href="#font-size">size</a>, and <a href="#font-lineHeight">lineHeight</a>)
@@ -2019,7 +2019,7 @@ window.assertions.disableAssertSlow();
     </p>
 
     <p>
-      For example, <code>new scenery.Font( { size: 16, style: 'italic' } )</code> and <code>new scenery.Font( 'italic 16px sans-serif' )</code>
+      For example, <code>new scenery.Font( { size: 16, style: 'italic' } )</code> and <code>scenery.Font.fromCSS( 'italic 16px sans-serif' )</code>
       are equivalent ways of creating that specific Font instance. In addition:
     </p>
       <pre class="brush: js">
