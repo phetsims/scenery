@@ -9,9 +9,12 @@
 define( function( require ) {
   'use strict';
 
+  var BooleanIO = require( 'ifphetio!PHET_IO/types/BooleanIO' );
   var inherit = require( 'PHET_CORE/inherit' );
   var Mouse = require( 'SCENERY/input/Mouse' );
   var PhetioObject = require( 'TANDEM/PhetioObject' );
+  var Property = require( 'AXON/Property' );
+  var PropertyIO = require( 'AXON/PropertyIO' );
   var scenery = require( 'SCENERY/scenery' );
   var Tandem = require( 'TANDEM/Tandem' );
 
@@ -48,7 +51,12 @@ define( function( require ) {
     }, options );
     this.options = options; // @private
 
-    this.dragging = false;            // whether a node is being dragged with this handler
+    // @private
+    this.isDraggedProperty = new Property( false, {
+      phetioType: PropertyIO( BooleanIO ),
+      tandem: options.tandem.createTandem( 'isDraggedProperty' )
+    } );
+
     this.pointer = null;              // the pointer doing the current dragging
     this.trail = null;                // stores the path to the node that is being dragged
     this.transform = null;            // transform of the trail to our node (but not including our node, so we can prepend the deltas)
@@ -159,6 +167,15 @@ define( function( require ) {
   scenery.register( 'SimpleDragHandler', SimpleDragHandler );
 
   return inherit( PhetioObject, SimpleDragHandler, {
+
+    // @private
+    get dragging() {
+      return this.isDraggedProperty.get();
+    },
+
+    set dragging( d ) {
+      assert && assert( 'illegal call to set dragging on SimpleDragHandler' );
+    },
     startDrag: function( event ) {
       if ( this.dragging ) { return; }
 
@@ -168,7 +185,7 @@ define( function( require ) {
       event.pointer.addInputListener( this.dragListener );
 
       // set all of our persistent information
-      this.dragging = true;
+      this.isDraggedProperty.set( true );
       this.pointer = event.pointer;
       this.trail = event.trail.subtrailTo( event.currentTarget, true );
       this.transform = this.trail.getTransform();
@@ -194,7 +211,7 @@ define( function( require ) {
       this.pointer.dragging = false;
       this.pointer.cursor = null;
       this.pointer.removeInputListener( this.dragListener );
-      this.dragging = false;
+      this.isDraggedProperty.set( false );
 
       this.startEvent( 'user', 'dragEnded' );
 
