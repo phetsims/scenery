@@ -111,9 +111,8 @@ define( function( require ) {
 
     PhetioObject.call( this, options );
 
-    assert && assert( typeof options.mouseButton === 'number' &&
-                      options.mouseButton >= 0 &&
-                      options.mouseButton % 1 === 0, 'mouseButton should be a non-negative integer' );
+    assert && assert( typeof options.mouseButton === 'number' && options.mouseButton >= 0 && options.mouseButton % 1 === 0,
+      'mouseButton should be a non-negative integer' );
     assert && assert( options.pressCursor === null || typeof options.pressCursor === 'string',
       'pressCursor should either be a string or null' );
     assert && assert( options.press === null || typeof options.press === 'function',
