@@ -47,8 +47,13 @@ define( function( require ) {
         focus.trail.nodes.forEach( function( node, i ) {
 
           // Don't include the last node, since it is the focused node
-          if(i < focus.trail.nodes.length -1) {
-            phetioIDIndices.push( node.phetioObjectTandem.phetioID || focus.trail.indices[ i ] );
+          if ( i < focus.trail.nodes.length -1 ) {
+            if ( node.phetioObjectTandem && node.phetioObjectTandem.phetioID ) {
+              phetioIDIndices.push( node.phetioObjectTandem.phetioID );
+            }
+            else {
+              phetioIDIndices.push( focus.trail.indices[ i ] );
+            }
           }
         } );
 
