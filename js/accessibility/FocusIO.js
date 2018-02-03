@@ -50,7 +50,7 @@ define( function( require ) {
           if ( i < focus.trail.nodes.length - 1 ) {
 
             // If the node was PhET-iO instrumented, include its phetioID instead of its index (because phetioID is more stable)
-            if ( node.phetioObjectTandem && node.phetioObjectTandem.phetioID ) {
+            if ( node.phetioObjectTandem ) {
               phetioIDIndices.push( node.phetioObjectTandem.phetioID );
             }
             else {
