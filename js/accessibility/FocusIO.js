@@ -47,7 +47,9 @@ define( function( require ) {
         focus.trail.nodes.forEach( function( node, i ) {
 
           // Don't include the last node, since it is the focused node
-          if ( i < focus.trail.nodes.length -1 ) {
+          if ( i < focus.trail.nodes.length - 1 ) {
+
+            // If the node was PhET-iO instrumented, include its phetioID instead of its index (because phetioID is more stable)
             if ( node.phetioObjectTandem && node.phetioObjectTandem.phetioID ) {
               phetioIDIndices.push( node.phetioObjectTandem.phetioID );
             }
