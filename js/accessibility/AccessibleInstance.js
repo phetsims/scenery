@@ -228,14 +228,21 @@ define( function( require ) {
       }
 
       var parentElement = this.peer.getParentContainerElement();
-      parentElement.hidden = !( visibilityCount === this.trailDiff.length );
 
-      // if we hid a parent element, blur focus if active element was an ancestor
-      if ( parentElement.hidden ) {
-        if ( parentElement.contains( document.activeElement ) ) {
-          scenery.Display.focus = null;
+      // for some reason, wrapping the hiding and bluring in a timeout is a workaround for an Edge bug where unhidden
+      // elements remain excluded in the navigation order, see https://github.com/phetsims/a11y-research/issues/30
+      var self = this;
+      window.setTimeout( function() {
+        parentElement.hidden = !( visibilityCount === self.trailDiff.length );
+
+        // if we hid a parent element, blur focus if active element was an ancestor
+        if ( parentElement.hidden ) {
+          if ( parentElement.contains( document.activeElement ) ) {
+            scenery.Display.focus = null;
+          }
         }
-      }
+      }, 1 );
+
     },
 
     /**
