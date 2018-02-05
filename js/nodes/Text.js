@@ -455,7 +455,7 @@ define( function( require ) {
       var changed = font !== ( ( typeof font === 'string' ) ? this._font.toCSS() : this._font );
       if ( changed ) {
         // Wrap so that our _font is of type {Font}
-        this._font = ( typeof font === 'string' ) ? new Font( font ) : font;
+        this._font = ( typeof font === 'string' ) ? Font.fromCSS( font ) : font;
 
         var stateLen = this._drawables.length;
         for ( var i = 0; i < stateLen; i++ ) {
