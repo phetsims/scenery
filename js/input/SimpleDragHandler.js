@@ -290,6 +290,7 @@ define( function( require ) {
         this.pointer.cursor = null;
         this.pointer.removeInputListener( this.dragListener );
       }
+      this.isDraggedProperty.dispose();
       PhetioObject.prototype.dispose.call( this );
     }
   }, {
