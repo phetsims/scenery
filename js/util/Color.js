@@ -255,6 +255,33 @@ define( function( require ) {
       return this; // allow chaining
     },
 
+    /**
+     * A linear (gamma-corrected) interpolation between this color (ratio=0) and another color (ratio=1).
+     * @public
+     *
+     * @param {Color} otherColor
+     * @param {number} ratio - Not necessarily constrained in [0, 1]
+     * @returns {Color}
+     */
+    blend: function( otherColor, ratio ) {
+      assert && assert( otherColor instanceof Color );
+
+      var gamma = 2.4;
+      var linearRedA = Math.pow( this.r, gamma );
+      var linearRedB = Math.pow( otherColor.r, gamma );
+      var linearGreenA = Math.pow( this.g, gamma );
+      var linearGreenB = Math.pow( otherColor.g, gamma );
+      var linearBlueA = Math.pow( this.b, gamma );
+      var linearBlueB = Math.pow( otherColor.b, gamma );
+
+      var r = Math.pow( linearRedA + ( linearRedB - linearRedA ) * ratio, 1 / gamma );
+      var g = Math.pow( linearGreenA + ( linearGreenB - linearGreenA ) * ratio, 1 / gamma );
+      var b = Math.pow( linearBlueA + ( linearBlueB - linearBlueA ) * ratio, 1 / gamma );
+      var a = this.a * ( otherColor.a - this.a ) * ratio;
+
+      return new Color( r, g, b, a );
+    },
+
     computeCSS: function() {
       if ( this.a === 1 ) {
         return 'rgb(' + this.r + ',' + this.g + ',' + this.b + ')';
