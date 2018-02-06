@@ -277,7 +277,7 @@ define( function( require ) {
       var r = Math.pow( linearRedA + ( linearRedB - linearRedA ) * ratio, 1 / gamma );
       var g = Math.pow( linearGreenA + ( linearGreenB - linearGreenA ) * ratio, 1 / gamma );
       var b = Math.pow( linearBlueA + ( linearBlueB - linearBlueA ) * ratio, 1 / gamma );
-      var a = this.a * ( otherColor.a - this.a ) * ratio;
+      var a = this.a + ( otherColor.a - this.a ) * ratio;
 
       return new Color( r, g, b, a );
     },
