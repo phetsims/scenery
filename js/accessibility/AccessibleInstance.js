@@ -240,12 +240,11 @@ define( function( require ) {
             scenery.Display.focus = null;
           }
         }
-      }
-      hideParent();
+      };
 
       // wrapping the hiding and bluring in a timeout is a workaround for an Edge bug where unhidden elements remain
       // excluded from the navigation order, see https://github.com/phetsims/a11y-research/issues/30
-      platform.edge && window.setTimeout( hideParent, 1 );
+      platform.edge ? window.setTimeout( hideParent, 1 ) : hideParent();
     },
 
     /**
