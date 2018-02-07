@@ -15,6 +15,7 @@ define( function( require ) {
   var Events = require( 'AXON/Events' );
   var inherit = require( 'PHET_CORE/inherit' );
   var KeyboardUtil = require( 'SCENERY/accessibility/KeyboardUtil' );
+  var platform = require( 'PHET_CORE/platform' );
   var Poolable = require( 'PHET_CORE/Poolable' );
   var scenery = require( 'SCENERY/scenery' );
 
@@ -229,10 +230,8 @@ define( function( require ) {
 
       var parentElement = this.peer.getParentContainerElement();
 
-      // for some reason, wrapping the hiding and bluring in a timeout is a workaround for an Edge bug where unhidden
-      // elements remain excluded in the navigation order, see https://github.com/phetsims/a11y-research/issues/30
       var self = this;
-      window.setTimeout( function() {
+      var hideParent = function() {
         parentElement.hidden = !( visibilityCount === self.trailDiff.length );
 
         // if we hid a parent element, blur focus if active element was an ancestor
@@ -241,8 +240,12 @@ define( function( require ) {
             scenery.Display.focus = null;
           }
         }
-      }, 1 );
+      }
+      hideParent();
 
+      // wrapping the hiding and bluring in a timeout is a workaround for an Edge bug where unhidden elements remain
+      // excluded from the navigation order, see https://github.com/phetsims/a11y-research/issues/30
+      platform.edge && window.setTimeout( hideParent, 1 );
     },
 
     /**
