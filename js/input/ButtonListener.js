@@ -44,7 +44,8 @@ define( function( require ) {
 
       // When running in PhET-iO brand, the tandem must be supplied
       tandem: Tandem.optional,
-      phetioType: ButtonListenerIO
+      phetioType: ButtonListenerIO,
+      phetioState: false
     }, options );
 
     this.buttonState = 'up'; // public: 'up', 'over', 'down' or 'out'
@@ -57,6 +58,7 @@ define( function( require ) {
     DownUpListener.call( this, {
       tandem: options.tandem,
       phetioType: options.phetioType,
+      phetioState: options.phetioState,
 
       mouseButton: options.mouseButton || 0, // forward the mouse button, default to 0 (LMB)
 
