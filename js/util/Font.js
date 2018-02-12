@@ -330,19 +330,19 @@ define( function( require ) {
           // nothing has to be done, everything already normal as default
         }
         else if ( _.includes( VALID_STYLES, token ) ) {
-          assert && assert( this._style === 'normal', 'Style cannot be applied twice. Already set to "' + this._style + '", attempt to replace with "' + token + '"' );
+          assert && assert( options.style === 'normal', 'Style cannot be applied twice. Already set to "' + options.style + '", attempt to replace with "' + token + '"' );
           options.style = token;
         }
         else if ( _.includes( VALID_VARIANTS, token ) ) {
-          assert && assert( this._variant === 'normal', 'Variant cannot be applied twice. Already set to "' + this._variant + '", attempt to replace with "' + token + '"' );
+          assert && assert( options.variant === 'normal', 'Variant cannot be applied twice. Already set to "' + options.variant + '", attempt to replace with "' + token + '"' );
           options.variant = token;
         }
         else if ( _.includes( VALID_WEIGHTS, token ) ) {
-          assert && assert( this._weight === 'normal', 'Weight cannot be applied twice. Already set to "' + this._weight + '", attempt to replace with "' + token + '"' );
+          assert && assert( options.weight === 'normal', 'Weight cannot be applied twice. Already set to "' + options.weight + '", attempt to replace with "' + token + '"' );
           options.weight = token;
         }
         else if ( _.includes( VALID_STRETCHES, token ) ) {
-          assert && assert( this._stretch === 'normal', 'Stretch cannot be applied twice. Already set to "' + this._stretch + '", attempt to replace with "' + token + '"' );
+          assert && assert( options.stretch === 'normal', 'Stretch cannot be applied twice. Already set to "' + options.stretch + '", attempt to replace with "' + token + '"' );
           options.stretch = token;
         }
         else {
