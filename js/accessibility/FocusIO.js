@@ -50,8 +50,8 @@ define( function( require ) {
           if ( i < focus.trail.nodes.length - 1 ) {
 
             // If the node was PhET-iO instrumented, include its phetioID instead of its index (because phetioID is more stable)
-            if ( node.phetioObjectTandem ) {
-              phetioIDIndices.push( node.phetioObjectTandem.phetioID );
+            if ( node.tandem ) {
+              phetioIDIndices.push( node.tandem.phetioID );
             }
             else {
               phetioIDIndices.push( focus.trail.indices[ i ] );
@@ -60,7 +60,7 @@ define( function( require ) {
         } );
 
         return {
-          focusedPhetioID: focus.trail.lastNode().phetioObjectTandem.phetioID,
+          focusedPhetioID: focus.trail.lastNode().tandem.phetioID,
           indices: focus.trail.indices,
           phetioIDIndices: phetioIDIndices
         };
