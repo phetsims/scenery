@@ -575,7 +575,13 @@ define( function( require ) {
           }
           if ( element.attributes.face ) {
             font = font.copy( {
-              family: element.attributes.face
+              // Handle decoding
+              family: element.attributes.face.replace( /&quot;/g, '"' )
+                                             .replace( /&#x2F;/g, '/' )
+                                             .replace( /&#x27;/g, '\'' )
+                                             .replace( /&gt;/g, '>' )
+                                             .replace( /&lt;/g, '<' )
+                                             .replace( /&amp;/g, '&' )
             } );
           }
           if ( element.attributes.size ) {
@@ -1319,6 +1325,31 @@ define( function( require ) {
     },
     get lineWrap() { return this.getLineWrap(); }
   }, {
+    /**
+     * Returns a wrapped version of the string with a font specifier that uses the given font object.
+     * @public
+     *
+     * NOTE: Does an approximation of some font values (using <b> or <i>), and cannot force the lack of those if it is
+     * included in bold/italic exterior tags.
+     *
+     * @param {string} str
+     * @param {Font} font
+     * @returns {string}
+     */
+    stringWithFont: function( str, font ) {
+      // Escaping https://stackoverflow.com/questions/9187946/escaping-inside-html-tag-attribute-value
+      var familyString = font.family.replace( /&/g, '&amp;' ).replace( /</g, '&lt;' ).replace( /"/g, '&quot;' );
+
+      var result = '<font family="' + familyString + '" size="' + font.size + '" >' + str + '</font>';
+      if ( font.style === 'italic' ) {
+        result = '<i>' + result + '</i>';
+      }
+      if ( font.weight === 'bold' ) {
+        result = '<b>' + result + '</b>';
+      }
+      return result;
+    },
+
     /**
      * Stringifies an HTML subtree defined by the given element.
      * @public
