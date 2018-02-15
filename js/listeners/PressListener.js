@@ -7,9 +7,9 @@
  * This is the base type for both DragListener and FireListener, which contains the shared logic that would be needed
  * by both.
  *
- * TODO: unit tests
+ * For example usage, see scenery/examples/input.html
  *
- * TODO: add example usage
+ * TODO: unit tests
  *
  * @author Jonathan Olson <jonathan.olson@colorado.edu>
  */
@@ -104,8 +104,10 @@ define( function( require ) {
       // {Tandem} - For instrumenting
       tandem: Tandem.required,
 
-      // {TypeIO} -
+      // {PressListenerIO} - PhET-iO type
       phetioType: PressListenerIO,
+
+      // {boolean}
       phetioState: false
     }, options );
 
