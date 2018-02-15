@@ -63,7 +63,7 @@ define( function( require ) {
     options = _.extend( {
       // {boolean} - If true, unattached touches that move across our node will trigger a press(). This helps sometimes
       // for small draggable objects.
-      allowTouchSnag: false,
+      allowTouchSnag: true,
 
       // {boolean} - If true, the initial offset of the pointer's location is taken into account, so that drags will
       // try to keep the pointer at the same local point of our dragged node.
