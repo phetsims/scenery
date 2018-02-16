@@ -118,10 +118,8 @@ define( function( require ) {
       // {Tandem} - For instrumenting
       tandem: Tandem.required,
 
-      // {TypeIO} - PhET-iO type
-      phetioType: DragListenerIO,
-
-      phetioState: false
+      // {DragListenerIO} - PhET-iO type
+      phetioType: DragListenerIO
     }, options );
 
     // Initialize with the alias isUserControlledProperty => isPressedProperty
@@ -133,9 +131,9 @@ define( function( require ) {
     // TODO: type checks for options
 
     assert && assert(
-    !( options.mapLocation && options.dragBounds ) &&
-    !( options.dragBounds && options.dragBoundsProperty ) &&
-    !( options.mapLocation && options.dragBoundsProperty ),
+      !( options.mapLocation && options.dragBounds ) &&
+      !( options.dragBounds && options.dragBoundsProperty ) &&
+      !( options.mapLocation && options.dragBoundsProperty ),
       'Only one of mapLocation, dragBounds and dragBoundsProperty can be provided, as they handle mapping of the drag point'
     );
 
