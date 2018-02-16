@@ -25,7 +25,7 @@ define( function( require ) {
    * @constructor
    * @extends Node
    *
-   * @param {Object} [options] - Can contain Node's options, and/or CanvasNode options (e.g. canvasBound)
+   * @param {Object} [options] - Can contain Node's options, and/or CanvasNode options (e.g. canvasBounds)
    */
   function CanvasNode( options ) {
     Node.call( this, options );
