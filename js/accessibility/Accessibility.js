@@ -1312,14 +1312,14 @@ define( function( require ) {
          * value is converted to string since input values are generally string for HTML.
          * @public
          *
-         * @param {string} value
+         * @param {string|number} value
          */
         setInputValue: function( value ) {
           if ( this._tagName ) {
             assert && assert( _.includes( FORM_ELEMENTS, this._tagName.toUpperCase() ), 'dom element must be a form element to support value' );
           }
 
-          value = value.toString();
+          value = '' + value;
           this._inputValue = value;
 
           this.updateAccessiblePeers( function( accessiblePeer ) {
