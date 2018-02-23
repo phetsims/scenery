@@ -86,7 +86,6 @@ define( function( require ) {
       locationProperty: null,
 
       // {Bounds2|null} - If provided, the model location will be constrained to be inside these bounds.
-      // TODO: support mutability for this type of thing (or support Property.<Bounds2>)
       dragBounds: null,
 
       // {Property.<Bounds2|null>} - If provided, the model location will be constrained to be inside these bounds.
@@ -184,13 +183,15 @@ define( function( require ) {
      * be used to determine whether this will actually start a drag.
      *
      * @param {Event} event
+     * @param {Node} [targetNode] - If provided, will take the place of the targetNode for this call. Useful for
+     *                              forwarded presses.
      * @returns {boolean} success - Returns whether the press was actually started
      */
-    press: function( event ) {
+    press: function( event, targetNode ) {
       sceneryLog && sceneryLog.InputListener && sceneryLog.InputListener( 'DragListener press' );
       sceneryLog && sceneryLog.InputListener && sceneryLog.push();
 
-      var success = PressListener.prototype.press.call( this, event );
+      var success = PressListener.prototype.press.call( this, event, targetNode );
 
       if ( success ) {
         sceneryLog && sceneryLog.InputListener && sceneryLog.InputListener( 'DragListener successful press' );

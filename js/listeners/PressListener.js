@@ -386,9 +386,11 @@ define( function( require ) {
      * a press can be started (if needed beforehand).
      *
      * @param {Event} event
+     * @param {Node} [targetNode] - If provided, will take the place of the targetNode for this call. Useful for
+     *                              forwarded presses.
      * @returns {boolean} success - Returns whether the press was actually started
      */
-    press: function( event ) {
+    press: function( event, targetNode ) {
       assert && assert( event, 'An event is required' );
 
       sceneryLog && sceneryLog.InputListener && sceneryLog.InputListener( 'PressListener press' );
@@ -405,10 +407,12 @@ define( function( require ) {
         y: event.pointer.point.y
       } );
 
+      targetNode = targetNode || this._targetNode;
+
       // Set self properties before the property change, so they are visible to listeners.
       this.pointer = event.pointer;
-      this.pressedTrail = this._targetNode ? this._targetNode.getUniqueTrail() :
-                          event.trail.subtrailTo( event.currentTarget, false );
+      this.pressedTrail = targetNode ? targetNode.getUniqueTrail() : event.trail.subtrailTo( event.currentTarget, false );
+                          
       this.interrupted = false; // clears the flag (don't set to false before here)
 
       this.pointer.addInputListener( this._pointerListener, this._attach );
