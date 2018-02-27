@@ -9,7 +9,7 @@
 define( function( require ) {
   'use strict';
 
-  var BooleanIO = require( 'ifphetio!PHET_IO/types/BooleanIO' );
+  // modules
   var inherit = require( 'PHET_CORE/inherit' );
   var Mouse = require( 'SCENERY/input/Mouse' );
   var PhetioObject = require( 'TANDEM/PhetioObject' );
@@ -19,6 +19,7 @@ define( function( require ) {
   var Tandem = require( 'TANDEM/Tandem' );
 
   // phet-io modules
+  var BooleanIO = require( 'ifphetio!PHET_IO/types/BooleanIO' );
   var SimpleDragHandlerIO = require( 'SCENERY/input/SimpleDragHandlerIO' );
 
   // constants

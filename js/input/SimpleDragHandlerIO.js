@@ -10,9 +10,11 @@ define( function( require ) {
   'use strict';
 
   // modules
+  var scenery = require( 'SCENERY/scenery' );
+  
+  // phet-io modules
   var assertInstanceOf = require( 'ifphetio!PHET_IO/assertInstanceOf' );
   var phetioInherit = require( 'ifphetio!PHET_IO/phetioInherit' );
-  var scenery = require( 'SCENERY/scenery' );
   var ObjectIO = require( 'ifphetio!PHET_IO/types/ObjectIO' );
 
   /**
