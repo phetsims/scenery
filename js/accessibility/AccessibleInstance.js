@@ -81,14 +81,27 @@ define( function( require ) {
           if ( self.display.pointerFocus || self.display.activeNode ) {
             var active = self.display.pointerFocus || self.display.activeNode;
             var focusable = active.focusable;
-            var visible = active.visible;
-            var inDOM = active.getAccessibleInstances().length > 0;
-            if ( focusable && visible && inDOM ) {
-              if ( event.keyCode === KeyboardUtil.KEY_TAB ) {
-                event.preventDefault();
-                active.focus();
-                self.display.pointerFocus = null;
-                self.display.activeNode = null;
+
+            // if there is a single accessible instance, we can restore focus
+            if ( active.getAccessibleInstances().length === 1 ) {
+
+              // if all ancestors of this node are visible, so is the active node
+              var nodeAndAncestorsVisible = true;
+              var activeTrail = active.accessibleInstances[ 0 ].trail;
+              for ( var i = activeTrail.nodes.length - 1; i >= 0; i-- ) {
+                if ( !activeTrail.nodes[ i ].visible ) {
+                  nodeAndAncestorsVisible = false;
+                  break;
+                }
+              }
+
+              if ( focusable && nodeAndAncestorsVisible ) {
+                if ( event.keyCode === KeyboardUtil.KEY_TAB ) {
+                  event.preventDefault();
+                  active.focus();
+                  self.display.pointerFocus = null;
+                  self.display.activeNode = null;
+                }
               }
             }
           }
