@@ -3,10 +3,6 @@
 /**
  * A type of listener that absorbs all 'down' events, not letting it bubble further to ancestor node listeners.
  *
- * TODO: unit tests
- *
- * TODO: add example usage
- *
  * @author Jonathan Olson <jonathan.olson@colorado.edu>
  */
 

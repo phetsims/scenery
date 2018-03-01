@@ -4,8 +4,8 @@
  * A listener for common button usage, providing the fire() method/callback and helpful properties.
  *
  * TODO: name (because ButtonListener was taken). Can we rename the old ButtonListener and have this be ButtonListener?
- * TODO: unit tests
- * TODO: add example usage
+ *
+ * For example usage, see scenery/examples/input.html. Usually you can just pass a fire callback and things work.
  *
  * @author Jonathan Olson <jonathan.olson@colorado.edu>
  */
@@ -99,7 +99,6 @@ define( function( require ) {
       PressListener.prototype.release.call( this );
 
       // Notify after the rest of release is called in order to prevent it from triggering interrupt().
-      // TODO: Is this a problem that we can't access things like this.pointer here?
       if ( !this._fireOnDown && this.isHoveringProperty.value && !this.interrupted ) {
         this.fire();
       }

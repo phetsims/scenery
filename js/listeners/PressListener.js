@@ -9,8 +9,6 @@
  *
  * For example usage, see scenery/examples/input.html
  *
- * TODO: unit tests
- *
  * @author Jonathan Olson <jonathan.olson@colorado.edu>
  */
 
