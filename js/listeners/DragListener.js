@@ -47,11 +47,15 @@ define( function( require ) {
   var Property = require( 'AXON/Property' );
   var scenery = require( 'SCENERY/scenery' );
   var Tandem = require( 'TANDEM/Tandem' );
+  var Transform3 = require( 'DOT/Transform3' );
   var TransformTracker = require( 'SCENERY/util/TransformTracker' );
   var Vector2 = require( 'DOT/Vector2' );
 
   // phet-io modules
   var DragListenerIO = require( 'SCENERY/listeners/DragListenerIO' );
+
+  // Scratch vectors used to prevent allocations
+  var scratchVector2A = new Vector2();
 
   /**
    * @constructor
@@ -67,7 +71,6 @@ define( function( require ) {
 
       // {boolean} - If true, the initial offset of the pointer's location is taken into account, so that drags will
       // try to keep the pointer at the same local point of our dragged node.
-      // TODO: how does this work if our node gets scaled/rotated during drag?
       applyOffset: true,
 
       // {boolean} - If true, ancestor transforms will be watched. If they change, it will trigger a repositioning,
@@ -127,7 +130,20 @@ define( function( require ) {
       options.isPressedProperty = options.isUserControlledProperty;
     }
 
-    // TODO: type checks for options
+    assert && assert( typeof options.allowTouchSnag === 'boolean', 'allowTouchSnag should be a boolean' );
+    assert && assert( typeof options.applyOffset === 'boolean', 'applyOffset should be a boolean' );
+    assert && assert( typeof options.trackAncestors === 'boolean', 'trackAncestors should be a boolean' );
+    assert && assert( typeof options.translateNode === 'boolean', 'translateNode should be a boolean' );
+    assert && assert( options.transform === null || options.transform instanceof Transform3, 'transform, if provided, should be a Transform3' );
+    assert && assert( options.locationProperty === null || options.locationProperty instanceof Property, 'locationProperty, if provided, should be a Property' );
+    assert && assert( options.dragBounds === null || options.dragBounds instanceof Bounds2, 'dragBounds, if provided, should be a Bounds2' );
+    assert && assert( options.dragBoundsProperty === null || options.dragBoundsProperty instanceof Property, 'dragBoundsProperty, if provided, should be a Property' );
+    assert && assert( options.mapLocation === null || typeof options.mapLocation === 'function', 'mapLocation, if provided, should be a function' );
+    assert && assert( options.offsetLocation === null || typeof options.offsetLocation === 'function', 'offsetLocation, if provided, should be a function' );
+    assert && assert( options.start === null || typeof options.start === 'function', 'start, if provided, should be a function' );
+    assert && assert( options.end === null || typeof options.end === 'function', 'end, if provided, should be a function' );
+    assert && assert( options.isUserControlledProperty === null || options.isUserControlledProperty instanceof Property, 'isUserControlledProperty, if provided, should be a Property' );
+    assert && assert( options.tandem instanceof Tandem, 'The provided tandem should be a Tandem' );
 
     assert && assert(
       !( options.mapLocation && options.dragBounds ) &&
@@ -151,18 +167,20 @@ define( function( require ) {
     this._start = options.start;
     this._end = options.end;
 
-    // TODO: scratch vectors?
-    // @public {Vector2} - Initial point of the drag in the target's local coordinate frame
-    this.initialLocalPoint = null;
-
-    // @public {Vector2} - Current drag point in the parent coordinate frame
-    this.parentPoint = new Vector2();
-
-    // @public {Vector2} - Current drag point in the model coordinate frame
-    this.modelPoint = new Vector2();
-
     // @public {Property.<boolean>} - Alias for isPressedProperty (as this name makes more sense for dragging)
     this.isUserControlledProperty = this.isPressedProperty;
+
+    // @private {Vector2} - The point of the drag in the target's global coordinate frame. Updated with mutation.
+    this._globalPoint = new Vector2();
+
+    // @private {Vector2} - The point of the drag in the target's local coordinate frame. Updated with mutation.
+    this._localPoint = new Vector2();
+
+    // @private {Vector2} - Current drag point in the parent coordinate frame. Updated with mutation.
+    this._parentPoint = new Vector2();
+
+    // @private {Vector2} - Current drag point in the model coordinate frame
+    this._modelPoint = new Vector2();
 
     // @private {TransformTracker|null} - Handles watching ancestor transforms for callbacks.
     this._transformTracker = null;
@@ -203,8 +221,8 @@ define( function( require ) {
 
         this.attachTransformTracker();
 
-        // TODO: scratch vectors
-        this.initialLocalPoint = this.parentToLocalPoint( this.globalToParentPoint( this.pointer.point ) );
+        // Set the local point
+        this.parentToLocalPoint( this.globalToParentPoint( this._localPoint.set( this.pointer.point ) ) );
 
         this.reposition( this.pointer.point );
 
@@ -237,7 +255,6 @@ define( function( require ) {
       this.detachTransformTracker();
 
       // Notify after the rest of release is called in order to prevent it from triggering interrupt().
-      // TODO: Is this a problem that we can't access things like this.pointer here?
       this._end && this._end( this );
 
       sceneryLog && sceneryLog.InputListener && sceneryLog.pop();
@@ -251,14 +268,20 @@ define( function( require ) {
      * @param {Event} event
      */
     drag: function( event ) {
+      // Ignore global moves that have zero length (Chrome might autofire, see
+      // https://code.google.com/p/chromium/issues/detail?id=327114)
+      if ( this._globalPoint.equals( this.pointer.point ) ) {
+        return;
+      }
+
       sceneryLog && sceneryLog.InputListener && sceneryLog.InputListener( 'DragListener drag' );
       sceneryLog && sceneryLog.InputListener && sceneryLog.push();
 
       // This is done first, before the drag listener is called (from the prototype drag call)
-      this.reposition( this.pointer.point );
+      if ( !this._globalPoint.equals( this.pointer.point ) ) {
+        this.reposition( this.pointer.point );
+      }
 
-      //TODO ignore global moves that have zero length (Chrome might autofire, see https://code.google.com/p/chromium/issues/detail?id=327114)
-      //TODO: should this apply in PressListener's drag?
       PressListener.prototype.drag.call( this, event );
 
       sceneryLog && sceneryLog.InputListener && sceneryLog.pop();
@@ -284,90 +307,145 @@ define( function( require ) {
     },
 
     /**
+     * Returns a defensive copy of the local-coordinate-frame point of the drag.
+     * @public
+     *
+     * @returns {Vector2}
+     */
+    getGlobalPoint: function() {
+      return this._globalPoint.copy();
+    },
+    get globalPoint() { return this.getGlobalPoint(); },
+
+    /**
+     * Returns a defensive copy of the local-coordinate-frame point of the drag.
+     * @public
+     *
+     * @returns {Vector2}
+     */
+    getLocalPoint: function() {
+      return this._localPoint.copy();
+    },
+    get localPoint() { return this.getLocalPoint(); },
+
+    /**
+     * Returns a defensive copy of the parent-coordinate-frame point of the drag.
+     * @public
+     *
+     * @returns {Vector2}
+     */
+    getParentPoint: function() {
+      return this._parentPoint.copy();
+    },
+    get parentPoint() { return this.getParentPoint(); },
+
+    /**
+     * Returns a defensive copy of the model-coordinate-frame point of the drag.
+     * @public
+     *
+     * @returns {Vector2}
+     */
+    getModelPoint: function() {
+      return this._modelPoint.copy();
+    },
+    get modelPoint() { return this.getModelPoint(); },
+
+    /**
      * Maps a point from the global coordinate frame to our drag target's parent coordinate frame.
      * @protected
      *
-     * Should be overridden if a custom transformation is needed.
+     * NOTE: This mutates the input vector (for performance)
      *
-     * TODO: Reduce allocations. Will probably require augmenting Transform3 to use Matrix3 methods like multiplyVector2
+     * Should be overridden if a custom transformation is needed.
      *
      * @param {Vector2} globalPoint
      * @returns {Vector2}
      */
     globalToParentPoint: function( globalPoint ) {
-      return this.pressedTrail.globalToParentPoint( globalPoint );
+      if ( assert ) {
+        var referenceResult = this.pressedTrail.globalToParentPoint( globalPoint );
+      }
+      this.pressedTrail.getParentTransform().getInverse().multiplyVector2( globalPoint );
+      assert && assert( globalPoint.equals( referenceResult ) );
+      return globalPoint;
     },
 
     /**
      * Maps a point from the drag target's parent coordinate frame to its local coordinate frame.
      * @protected
      *
-     * Should be overridden if a custom transformation is needed.
+     * NOTE: This mutates the input vector (for performance)
      *
-     * TODO: Reduce allocations. Will probably require augmenting Transform3 to use Matrix3 methods like multiplyVector2
+     * Should be overridden if a custom transformation is needed.
      *
      * @param {Vector2} parentPoint
      * @returns {Vector2}
      */
     parentToLocalPoint: function( parentPoint ) {
-      return this.pressedTrail.lastNode().parentToLocalPoint( parentPoint );
+      if ( assert ) {
+        var referenceResult = this.pressedTrail.lastNode().parentToLocalPoint( parentPoint );
+      }
+      this.pressedTrail.lastNode().getTransform().getInverse().multiplyVector2( parentPoint );
+      assert && assert( parentPoint.equals( referenceResult ) );
+      return parentPoint;
     },
 
     /**
      * Maps a point from the drag target's local coordinate frame to its parent coordinate frame.
      * @protected
      *
-     * Should be overridden if a custom transformation is needed.
+     * NOTE: This mutates the input vector (for performance)
      *
-     * TODO: Reduce allocations. Will probably require augmenting Transform3 to use Matrix3 methods like multiplyVector2
+     * Should be overridden if a custom transformation is needed.
      *
      * @param {Vector2} localPoint
      * @returns {Vector2}
      */
     localToParentPoint: function( localPoint ) {
-      return this.pressedTrail.lastNode().localToParentPoint( localPoint );
+      if ( assert ) {
+        var referenceResult = this.pressedTrail.lastNode().localToParentPoint( localPoint );
+      }
+      this.pressedTrail.lastNode().getMatrix().multiplyVector2( localPoint );
+      assert && assert( localPoint.equals( referenceResult ) );
+      return localPoint;
     },
 
     /**
      * Maps a point from the drag target's parent coordinate frame to the model coordinate frame.
      * @protected
      *
+     * NOTE: This mutates the input vector (for performance)
+     *
      * Should be overridden if a custom transformation is needed. Note that by default, unless a transform is provided,
      * the parent coordinate frame will be the same as the model coordinate frame.
-     *
-     * TODO: Reduce allocations. Will probably require augmenting Transform3 to use Matrix3 methods like multiplyVector2
      *
      * @param {Vector2} parentPoint
      * @returns {Vector2}
      */
     parentToModelPoint: function( parentPoint ) {
       if ( this._transform ) {
-        return this._transform.inversePosition2( parentPoint );
+        this._transform.getInverse().multiplyVector2( parentPoint );
       }
-      else {
-        return parentPoint;
-      }
+      return parentPoint;
     },
 
     /**
      * Maps a point from the model coordinate frame to the drag target's parent coordinate frame.
      * @protected
      *
+     * NOTE: This mutates the input vector (for performance)
+     *
      * Should be overridden if a custom transformation is needed. Note that by default, unless a transform is provided,
      * the parent coordinate frame will be the same as the model coordinate frame.
-     *
-     * TODO: Reduce allocations. Will probably require augmenting Transform3 to use Matrix3 methods like multiplyVector2
      *
      * @param {Vector2} modelPoint
      * @returns {Vector2}
      */
     modelToParentPoint: function( modelPoint ) {
       if ( this._transform ) {
-        return this._transform.transformPosition2( modelPoint );
+        this._transform.getMatrix().multiplyVector2( modelPoint );
       }
-      else {
-        return modelPoint;
-      }
+      return modelPoint;
     },
 
     /**
@@ -379,8 +457,6 @@ define( function( require ) {
      * general mappings can be used.
      *
      * Should be overridden (or use mapLocation) if a custom transformation is needed.
-     *
-     * TODO: consider mutating the point if possible? Can closestPointTo do that?
      *
      * @param {Vector2} modelPoint
      * @returns {Vector2} - A point in the model coordinate frame
@@ -407,14 +483,13 @@ define( function( require ) {
       if ( this._offsetLocation ) {
         parentPoint.add( this._offsetLocation( parentPoint, this ) );
       }
+
       // Don't apply any offset if applyOffset is false
       if ( this._applyOffset ) {
-        // TODO: more scratch vector handling? Will need to augment Transform3 to use things like multiplyVector2.
-        var parentLocalPoint = this.localToParentPoint( this.initialLocalPoint );
-        var parentOriginPoint = this.localToParentPoint( new Vector2() ); // usually node.translation
-        var parentOffset = parentOriginPoint.minus( parentLocalPoint );
-
-        parentPoint.add( parentOffset );
+        // Add the difference between our local origin (in the parent coordinate frame) and the local point (in the same
+        // parent coordinate frame).
+        parentPoint.subtract( this.localToParentPoint( scratchVector2A.set( this._localPoint ) ) );
+        parentPoint.add( this.localToParentPoint( scratchVector2A.setXY( 0, 0 ) ) );
       }
     },
 
@@ -431,21 +506,24 @@ define( function( require ) {
       sceneryLog && sceneryLog.InputListener && sceneryLog.InputListener( 'DragListener reposition' );
       sceneryLog && sceneryLog.InputListener && sceneryLog.push();
 
-      // TODO: scratch vectors
-      this.parentPoint = this.globalToParentPoint( globalPoint );
-      this.applyParentOffset( this.parentPoint );
-      this.modelPoint = this.mapModelPoint( this.parentToModelPoint( this.parentPoint ) );
-      this.parentPoint = this.modelToParentPoint( this.modelPoint ); // apply any mapping changes
+      this._globalPoint.set( globalPoint );
+
+      // Update parentPoint mutably.
+      this.applyParentOffset( this.globalToParentPoint( this._parentPoint.set( globalPoint ) ) );
+
+      // Compute the modelPoint from the parentPoint
+      this._modelPoint = this.mapModelPoint( this.parentToModelPoint( scratchVector2A.set( this._parentPoint ) ) );
+
+      // Apply any mapping changes back to the parent point
+      this.modelToParentPoint( this._parentPoint.set( this._modelPoint ) );
 
       if ( this._translateNode ) {
-        this.pressedTrail.lastNode().translation = this.parentPoint;
+        this.pressedTrail.lastNode().translation = this._parentPoint;
       }
 
       if ( this._locationProperty ) {
-        this._locationProperty.value = this.modelPoint;
+        this._locationProperty.value = this._modelPoint.copy(); // Include an extra reference so that it will change.
       }
-
-      // TODO: consider other options to handle here. Should deltas (global/parent/local/model) be provided?
 
       sceneryLog && sceneryLog.InputListener && sceneryLog.pop();
     },

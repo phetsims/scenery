@@ -459,7 +459,6 @@ define( function( require ) {
       this.isPressedProperty.value = false;
 
       // Notify after the rest of release is called in order to prevent it from triggering interrupt().
-      // TODO: Is this a problem that we can't access things like this.pointer here?
       this._releaseListener && this._releaseListener( this );
 
       this.endEvent();
@@ -562,9 +561,6 @@ define( function( require ) {
       this.isPressedProperty.unlink( this._isHoveringListener );
 
       PhetioObject.prototype.dispose.call( this );
-
-      // TODO: Should we dispose our properties like isPressedProperty? If so, we'll have to be more careful with
-      // multilinks, and there will be more overhead.
 
       sceneryLog && sceneryLog.InputListener && sceneryLog.pop();
     }
