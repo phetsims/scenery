@@ -55,6 +55,7 @@ define( function( require ) {
     // @private
     this.isDraggedProperty = new Property( false, {
       phetioType: PropertyIO( BooleanIO ),
+      phetioReadOnly: true,
       tandem: options.tandem.createTandem( 'isDraggedProperty' )
     } );
 
