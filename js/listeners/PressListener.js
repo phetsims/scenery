@@ -410,7 +410,7 @@ define( function( require ) {
       // Set self properties before the property change, so they are visible to listeners.
       this.pointer = event.pointer;
       this.pressedTrail = targetNode ? targetNode.getUniqueTrail() : event.trail.subtrailTo( event.currentTarget, false );
-                          
+
       this.interrupted = false; // clears the flag (don't set to false before here)
 
       this.pointer.addInputListener( this._pointerListener, this._attach );
