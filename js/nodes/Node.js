@@ -3011,7 +3011,7 @@ define( function( require ) {
      * @returns {Node} - For chaining
      */
     setInputListeners: function( inputListeners ) {
-      assert && assert( inputListeners instanceof Array );
+      assert && assert( Array.isArray(inputListeners) );
 
       // Remove all old input listeners
       while ( this._inputListeners.length ) {

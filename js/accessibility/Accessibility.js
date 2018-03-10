@@ -1138,7 +1138,7 @@ define( function( require ) {
          * @param {Array.<Node>} accessibleOrder
          */
         setAccessibleOrder: function( accessibleOrder ) {
-          assert && assert( accessibleOrder instanceof Array, 'Array expected, received: ' + typeof accessibleOrder );
+          assert && assert( Array.isArray(accessibleOrder), 'Array expected, received: ' + typeof accessibleOrder );
 
           // Only update if it has changed
           if ( this._accessibleOrder !== accessibleOrder ) {

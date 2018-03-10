@@ -493,7 +493,7 @@ define( function( require ) {
          * @returns {Paintable} - Returns 'this' reference, for chaining
          */
         setLineDash: function( lineDash ) {
-          assert && assert( lineDash instanceof Array && lineDash.every( function( n ) { return typeof n === 'number' && isFinite( n ) && n >= 0; } ),
+          assert && assert( Array.isArray(lineDash) && lineDash.every( function( n ) { return typeof n === 'number' && isFinite( n ) && n >= 0; } ),
             'lineDash should be an array of finite non-negative numbers' );
 
           if ( this._lineDrawingStyles.lineDash !== lineDash ) {
