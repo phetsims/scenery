@@ -245,7 +245,7 @@ define( function( require ) {
           path: value.getSVGPath()
         };
       }
-      else if ( Array.isArray(value) ) {
+      else if ( Array.isArray( value ) ) {
         return {
           type: 'Array',
           value: value.map( scenery.serialize )

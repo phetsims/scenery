@@ -200,7 +200,7 @@ define( function( require ) {
       assert && assert( typeof image === 'string' ||
                         image instanceof HTMLImageElement ||
                         image instanceof HTMLCanvasElement ||
-                        Array.isArray(image), 'image is not of the correct type' );
+                        Array.isArray( image ), 'image is not of the correct type' );
 
       // Generally, if a different value for image is provided, it has changed
       var hasImageChanged = this._image !== image;
@@ -241,7 +241,7 @@ define( function( require ) {
           image.src = src;
         }
         // Handle the provided mipmap
-        else if ( Array.isArray(image) ) {
+        else if ( Array.isArray( image ) ) {
           // mipmap data!
           this._mipmapData = image;
           image = image[ 0 ].img; // presumes we are already loaded
