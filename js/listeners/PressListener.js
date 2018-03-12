@@ -479,7 +479,6 @@ define( function( require ) {
 
       this._dragListener && this._dragListener( event, this );
 
-      this.endEvent();
       sceneryLog && sceneryLog.InputListener && sceneryLog.pop();
     },
 

@@ -223,7 +223,6 @@ define( function( require ) {
         // Notify after positioning and other changes
         this._start && this._start( event, this );
 
-        this.endEvent();
         sceneryLog && sceneryLog.InputListener && sceneryLog.pop();
       }
 
@@ -282,6 +281,8 @@ define( function( require ) {
       }
 
       PressListener.prototype.drag.call( this, event );
+
+      this.endEvent();
 
       sceneryLog && sceneryLog.InputListener && sceneryLog.pop();
     },
