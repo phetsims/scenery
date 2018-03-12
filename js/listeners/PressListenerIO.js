@@ -28,7 +28,7 @@ define( function( require ) {
 
   phetioInherit( ObjectIO, 'PressListenerIO', PressListenerIO, {}, {
     documentation: 'Input listener for something that can be pressed.',
-    events: [ 'press', 'drag', 'release' ]
+    events: [ 'press', 'release' ]
   } );
 
   scenery.register( 'PressListenerIO', PressListenerIO );
