@@ -212,10 +212,6 @@ define( function( require ) {
       if ( success ) {
         sceneryLog && sceneryLog.InputListener && sceneryLog.InputListener( 'DragListener successful press' );
         sceneryLog && sceneryLog.InputListener && sceneryLog.push();
-        this.startEvent( 'user', 'start', {
-          x: event.pointer.point.x,
-          y: event.pointer.point.y
-        } );
 
         this.attachTransformTracker();
 
@@ -274,6 +270,11 @@ define( function( require ) {
 
       sceneryLog && sceneryLog.InputListener && sceneryLog.InputListener( 'DragListener drag' );
       sceneryLog && sceneryLog.InputListener && sceneryLog.push();
+
+      this.startEvent( 'user', 'drag', {
+        x: event.pointer.point.x,
+        y: event.pointer.point.y
+      } );
 
       // This is done first, before the drag listener is called (from the prototype drag call)
       if ( !this._globalPoint.equals( this.pointer.point ) ) {

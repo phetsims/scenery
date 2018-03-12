@@ -474,10 +474,6 @@ define( function( require ) {
     drag: function( event ) {
       sceneryLog && sceneryLog.InputListener && sceneryLog.InputListener( 'PressListener drag' );
       sceneryLog && sceneryLog.InputListener && sceneryLog.push();
-      this.startEvent( 'user', 'drag', {
-        x: event.pointer.point.x,
-        y: event.pointer.point.y
-      } );
 
       assert && assert( this.isPressed, 'Can only drag while pressed' );
 
