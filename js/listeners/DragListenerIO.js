@@ -28,7 +28,7 @@ define( function( require ) {
 
   phetioInherit( PressListenerIO, 'DragListenerIO', DragListenerIO, {}, {
     documentation: 'Input listener for something that can be dragged.',
-    events: PressListenerIO.events.concat( [ 'drag' ] )
+    events: [ 'press', 'drag', 'release' ]
   } );
 
   scenery.register( 'DragListenerIO', DragListenerIO );
