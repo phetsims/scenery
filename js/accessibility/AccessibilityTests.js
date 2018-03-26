@@ -61,10 +61,8 @@ define( function( require ) {
 
     var accessibleNode = new Node( {
       tagName: 'div',
-      useAriaLabel: true, // use ARIA label attribute
+      ariaLabel: TEST_LABEL, // use ARIA label attribute
       accessibleVisible: false, // hidden from screen readers (and browser)
-      accessibleLabel: TEST_LABEL,
-      labelTagName: 'p',
       descriptionTagName: 'p',
       accessibleDescription: TEST_DESCRIPTION
     } );
@@ -84,10 +82,9 @@ define( function( require ) {
     assert.ok( buttonNode.inputType === 'button', 'Input type' );
 
     assert.ok( accessibleNode.tagName === 'div', 'Tag name' );
-    assert.ok( accessibleNode.useAriaLabel === true, 'Use aria label' );
+    assert.ok( accessibleNode.ariaLabel === TEST_LABEL, 'Use aria label' );
     assert.ok( accessibleNode.accessibleVisible === false, 'Accessible visible' );
-    assert.ok( accessibleNode.accessibleLabel === TEST_LABEL, 'Accessible label' );
-    assert.ok( accessibleNode.labelTagName === null, 'Label tag name with aria label' );
+    assert.ok( accessibleNode.labelTagName === null, 'Label tag name with aria label is independent' );
     assert.ok( accessibleNode.descriptionTagName === 'p', 'Description tag name' );
 
 
@@ -229,9 +226,9 @@ define( function( require ) {
 
     // make the button a div and use an inline label, and place the description below
     a1.tagName = 'div';
-    a1.accessibleLabel = TEST_LABEL;
     a1.prependLabels = false;
-    a1.useAriaLabel = true;
+    a1.labelTagName = null; // use aria label attribute instead
+    a1.ariaLabel = TEST_LABEL;
 
     // now the html should look like
     // <div id='parent-id'>
@@ -242,10 +239,9 @@ define( function( require ) {
     // redefine the HTML elements (references will point to old elements before mutation)
     buttonElement = a1.accessibleInstances[ 0 ].peer.domElement;
     parentElement = buttonElement.parentElement;
-    buttonPeers = parentElement.childNodes;
     assert.ok( parentElement.childNodes[ 0 ] === document.getElementById( getPeerElementId( a1 ) ), 'div first' );
-    assert.ok( parentElement.childNodes[ 1 ].tagName === 'P', 'description after div without prependLabels' );
-    assert.ok( parentElement.childNodes.length === 2, 'label removed' );
+    assert.ok( parentElement.childNodes[ 1 ].id.indexOf('description') >=0, 'description after div without prependLabels' );
+    assert.ok( parentElement.childNodes.length === 2, 'no label peer when using just aria-label attribute' );
 
     var elementInDom = document.getElementById( a1.accessibleInstances[ 0 ].peer.domElement.id );
     assert.ok( elementInDom.getAttribute( 'aria-label' ) === TEST_LABEL, 'aria-label set' );
@@ -678,4 +674,24 @@ define( function( require ) {
     assert.ok( b.focused === false, 'b should no longer have focus after visibility is swapped' );
     assert.ok( c.focused === false, 'c should not have focus after visibility is swapped because it is not focusable' );
   } );
-} );
+
+  QUnit.test( 'Aria Label Setter', function( assert ) {
+
+
+    // test the behavior of swapVisibility function
+    var rootNode = new Node( { tagName: 'div' } );
+    var display = new Display( rootNode ); // eslint-disable-line
+    document.body.appendChild( display.domElement );
+
+    // create some nodes for testing
+    var a = new Node( { tagName: 'button', ariaLabel: TEST_LABEL_2 } );
+
+    assert.ok( a.ariaLabel === TEST_LABEL_2, 'aria-label getter/setter');
+    assert.ok( a.accessibleLabel === null, 'no other label set with aria-label' );
+
+    rootNode.addChild( a);
+    var buttonA = a.accessibleInstances[ 0 ].peer.domElement;
+    assert.ok( buttonA.getAttribute( 'aria-label' ) === TEST_LABEL_2, 'setter on dom element');
+  });
+
+  } );

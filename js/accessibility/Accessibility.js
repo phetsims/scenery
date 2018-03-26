@@ -108,7 +108,7 @@ define( function( require ) {
     'accessibleVisible', // Sets whether or not the node's DOM element is visible in the parallel DOM
     'accessibleContentDisplayed', // sets whether or not the accessible content of the node (and its subtree) is displayed, see setAccessibleContentDisplayed()
     'focusable', // Sets whether or not the node can receive keyboard focus
-    'useAriaLabel', // Sets whether or not the label will use the 'aria-label' attribute, see setUseAriaLabel()
+    'ariaLabel', // Sets the value of the 'aria-label' attribute, see setAriaLabel()
     'ariaRole', // Sets the ARIA role for the DOM element, see setAriaRole() for documentation
     'parentContainerAriaRole', // Sets the ARIA role for the parent container DOM element, see setParentContainerAriaRole()
     'prependLabels', // Sets whether we want to prepend labels above the node's HTML element, see setPrependLabels()
@@ -208,11 +208,9 @@ define( function( require ) {
           // that is set when updating description content.
           this._descriptionIsHTML = false;
 
-          // @private {boolean} - if true, the aria label will be added as an inline attribute on the node's DOM
-          // element.  This will determine how the label content is associated with the DOM element, see
-          // setAccessibleLabel() for more information
-          this._useAriaLabel = null;
-          //REVIEW: This is marked as boolean, but initialized to null?
+          // @private {string} - if provided, "aria-label" will be added as an inline attribute on the node's DOM
+          // element and set to this value. This will determine how the Accessible Name is provided for the DOM element.
+          this._ariaLabel = null;
 
           // @private {string} - the ARIA role for this node's DOM element, added as an HTML attribute.  For a complete
           // list of ARIA roles, see https://www.w3.org/TR/wai-aria/roles.  Beware that many roles are not supported
@@ -370,7 +368,7 @@ define( function( require ) {
             }
           }
 
-          var listenerAlreadyAdded = (_.indexOf( this._accessibleInputListeners, addedAccessibleInput ) > 0);
+          var listenerAlreadyAdded = ( _.indexOf( this._accessibleInputListeners, addedAccessibleInput ) > 0 );
           assert && assert( !listenerAlreadyAdded, 'accessibleInput listener already added' );
 
           // add the listener directly to any AccessiblePeers that are representing this node
@@ -791,46 +789,29 @@ define( function( require ) {
         get parentcontainerAriaRole() { return this.getParentContainerAriaRole(); },
 
         /**
-         * Sets whether or not to use the 'aria-label' attribute for labelling  the node's DOM element. By using the
-         * 'aria-label' attribute, the label will be read on focus, but will can not be found with the
+         * Sets the 'aria-label' attribute for labelling the node's DOM element. By using the
+         * 'aria-label' attribute, the label will be read on focus, but can not be found with the
          * virtual cursor.
          * @public
          *
-         * @param {string} useAriaLabel
+         * @param {string} ariaLabel - the text for the aria label attribute
          */
-        setUseAriaLabel: function( useAriaLabel ) {
-          this._useAriaLabel = useAriaLabel;
+        setAriaLabel: function( ariaLabel ) {
+          this._ariaLabel = ariaLabel;
 
-          var self = this;
-
-          if ( useAriaLabel && this._labelTagName ) {
-            self.setLabelTagName( null );
-          }
-          this.updateAccessiblePeers( function( accessiblePeer ) {
-            if ( accessiblePeer.labelElement ) {
-
-              // if we previously had a label element, remove it
-              self.setLabelTagName( null );
-              accessiblePeer.labelElement.parentNode && accessiblePeer.labelElement.parentNode.removeChild( accessiblePeer.labelElement );
-            }
-          } );
-
-          // if a label is defined, reset the label content
-          if ( this._accessibleLabel ) {
-            this.setAccessibleLabel( this._accessibleLabel );
-          }
+          this.setAccessibleAttribute( 'aria-label', ariaLabel );
         },
-        set useAriaLabel( useAriaLabel ) { this.setUseAriaLabel( useAriaLabel ); },
+        set ariaLabel( ariaLabel ) { this.setAriaLabel( ariaLabel ); },
 
         /**
-         * Get whether or not we are using an aria-label to label this node's HTML element.
+         * Get the value of the aria-label attribute for this node's DOM element.
          *
-         * @returns {boolean}
+         * @returns {string}
          */
-        getUseAriaLabel: function() {
-          return this._useAriaLabel;
+        getAriaLabel: function() {
+          return this._ariaLabel;
         },
-        get useAriaLabel() { return this.getUseAriaLabel(); },
+        get ariaLabel() { return this.getAriaLabel(); },
 
         /**
          * Set the focus highlight for this node. By default, the focus highlight will be a pink rectangle that
@@ -915,7 +896,7 @@ define( function( require ) {
          * this node's local bounds. Otherwise, the Node will be used.
          *
          * TODO: Support more than one group focus highlight (multiple ancestors could have groupFocusHighlight)
-         * 
+         *
          * @public
          * @param {boolean|Node} groupHighlight
          */
@@ -923,7 +904,7 @@ define( function( require ) {
           this._groupFocusHighlight = groupHighlight;
         },
         set groupFocusHighlight( groupHighlight ) { this.setGroupFocusHighlight( groupHighlight ); },
-        
+
         /**
          * Get whether or not this node has a 'group' focus highlight, see setter for more information.
          * @public
@@ -933,7 +914,7 @@ define( function( require ) {
         getGroupFocusHighlight: function() {
           return this._groupFocusHighlight;
         },
-        get groupFocusHighlight() { return this.getGroupFocusHighlight(); },   
+        get groupFocusHighlight() { return this.getGroupFocusHighlight(); },
 
         /**
          * Sets the node that labels this node through the ARIA attribute aria-labelledby. The value of the
@@ -1194,7 +1175,7 @@ define( function( require ) {
             // If overridePruning is set, we ignore one reference to our node in the prune stack. If there are two copies,
             // however, it means a node was specified in a accessibleOrder that already needs to be pruned (so we skip it instead
             // of creating duplicate references in the tab order).
-            if ( pruneCount > 1 || (pruneCount === 1 && !overridePruning) ) {
+            if ( pruneCount > 1 || ( pruneCount === 1 && !overridePruning ) ) {
               return;
             }
 
@@ -1563,10 +1544,7 @@ define( function( require ) {
           this._accessibleLabel = label;
 
           var self = this;
-          if ( this._useAriaLabel ) {
-            this.setAccessibleAttribute( 'aria-label', this._accessibleLabel );
-          }
-          else if ( this._labelTagName ) {
+          if ( this._labelTagName ) {
             this.updateAccessiblePeers( function( accessiblePeer ) {
               if ( accessiblePeer.labelElement ) {
                 setTextContent( accessiblePeer.labelElement, self._accessibleLabel, self._labelIsHTML );
@@ -1930,8 +1908,8 @@ define( function( require ) {
               }
 
               // set if using aria-label
-              if ( self._useAriaLabel ) {
-                self.setUseAriaLabel( self._useAriaLabel );
+              if ( self._ariaLabel ) {
+                self.setAriaLabel( self._ariaLabel );
               }
 
               // restore visibility
