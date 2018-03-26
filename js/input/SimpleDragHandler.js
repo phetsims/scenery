@@ -10,16 +10,14 @@ define( function( require ) {
   'use strict';
 
   // modules
+  var BooleanProperty = require( 'AXON/BooleanProperty' );
   var inherit = require( 'PHET_CORE/inherit' );
   var Mouse = require( 'SCENERY/input/Mouse' );
   var PhetioObject = require( 'TANDEM/PhetioObject' );
-  var Property = require( 'AXON/Property' );
-  var PropertyIO = require( 'AXON/PropertyIO' );
   var scenery = require( 'SCENERY/scenery' );
   var Tandem = require( 'TANDEM/Tandem' );
 
   // phet-io modules
-  var BooleanIO = require( 'ifphetio!PHET_IO/types/BooleanIO' );
   var SimpleDragHandlerIO = require( 'SCENERY/input/SimpleDragHandlerIO' );
 
   // constants
@@ -53,10 +51,10 @@ define( function( require ) {
     this.options = options; // @private
 
     // @private
-    this.isDraggedProperty = new Property( false, {
-      phetioType: PropertyIO( BooleanIO ),
+    this.isDraggedProperty = new BooleanProperty( false, {
       phetioReadOnly: true,
-      tandem: options.tandem.createTandem( 'isDraggedProperty' )
+      tandem: options.tandem.createTandem( 'isDraggedProperty' ),
+      phetioInstanceDocumentation: 'Indicates whether the object is dragging.'
     } );
 
     this.pointer = null;              // the pointer doing the current dragging
