@@ -106,7 +106,10 @@ define( function( require ) {
       phetioType: PressListenerIO,
 
       // {boolean}
-      phetioState: false
+      phetioState: false,
+
+      // {string}
+      phetioInstanceDocumentation: 'Emits press and release events.'
     }, options );
 
     PhetioObject.call( this, options );
