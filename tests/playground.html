@@ -315,13 +315,17 @@ an UI and Display made for visual testing and debugging.
   <textarea rows="20" cols="40" placeholder="scenery.Node() structure here and add it to the root node `window.scene`"
             id="a11y-input">window.scene.addChild(  new window.scenery.Node( { tagName: 'button' } ) );</textarea>
   <textarea rows="20" cols="40" readonly="readonly" placeholder="HTML will appear here" id="a11y-output"></textarea>
-  <br>
+  <br/>
+  <input type="checkbox" id="keep-previous" /><label for="keep-previous">Keep previous children of the root node</label><br/>
   <button id="getHTML">Get HTML from Nodes</button>
   <script>
     document.getElementById( 'getHTML' ).addEventListener( 'click', function() {
       var inputText = document.getElementById( 'a11y-input' ).value;
 
       if ( inputText ) {
+        if( !document.getElementById( 'keep-previous').checked ){
+          window.scene.children = [];
+        }
         eval( inputText );
         var pdomRoot = document.querySelector( 'div.accessibility' );
         document.getElementById( 'a11y-output' ).textContent = pdomRoot.outerHTML;
