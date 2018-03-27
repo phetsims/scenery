@@ -58,6 +58,10 @@ an UI and Display made for visual testing and debugging.
       top: 0;
       right: 0;
     }
+
+    .hidden {
+      display: none;
+    }
   </style>
 
 </head>
@@ -81,6 +85,8 @@ an UI and Display made for visual testing and debugging.
   <button onclick="display.updateDisplay();">Update</button>
   <br>
   <button onclick="display.popupDebug();">Popup Debug</button>
+  <br>
+  <button onclick="window.togglePDOMPlayground();">Show pDOM Playground</button>
   <br>
 </div>
 
@@ -303,5 +309,30 @@ an UI and Display made for visual testing and debugging.
     } );
   } );
 </script>
+
+<!--UI for showing the HTML from a given Node hierarchy/option structure-->
+<div id="pdom-playground" class="hidden">
+  <textarea rows="20" cols="40" placeholder="scenery.Node() structure here and add it to the root node `window.scene`"
+            id="a11y-input">window.scene.addChild(  new window.scenery.Node( { tagName: 'button' } ) );</textarea>
+  <textarea rows="20" cols="40" readonly="readonly" placeholder="HTML will appear here" id="a11y-output"></textarea>
+  <br>
+  <button id="getHTML">Get HTML from Nodes</button>
+  <script>
+    document.getElementById( 'getHTML' ).addEventListener( 'click', function() {
+      var inputText = document.getElementById( 'a11y-input' ).value;
+
+      if ( inputText ) {
+        eval( inputText );
+        var pdomRoot = document.querySelector( 'div.accessibility' );
+        document.getElementById( 'a11y-output' ).textContent = pdomRoot.outerHTML;
+      }
+
+    } );
+
+    window.togglePDOMPlayground = function(){
+      document.getElementById( 'pdom-playground' ).classList.toggle( 'hidden');
+    }
+  </script>
+</div>
 </body>
 </html>
