@@ -95,7 +95,7 @@ define( function( require ) {
     'inputType', // Sets the input type for the representative DOM element, only relevant if tagname is 'input'
     'inputValue', // Sets the input value for the representative DOM element, only relevant if tagname is 'input'
     'accessibleChecked', // Sets the 'checked' state for inputs of type radio and checkbox, see setAccessibleChecked()
-    'parentContainerTagName', // Sets the tag name for an element that contains this node's DOM element and its peers
+    'containerTagName', // Sets the tag name for an element that contains this node's DOM element and its peers
     'labelTagName', // Sets the tag name for the DOM element labelling this node, usually a paragraph
     'descriptionTagName', // Sets the tag name for the DOM element describing this node, usually a paragraph
     'focusHighlight', // Sets the focus highlight for the node, see setFocusHighlight()
@@ -160,8 +160,8 @@ define( function( require ) {
 
           // @private {string} - the HTML tag name for a parent container element for this node in the DOM. This
           // parent container will contain the node's DOM element, as well as peer elements for any label or description
-          // content. See setParentContainerTagName() for more documentation.
-          this._parentContainerTagName = null;
+          // content. See setcontainerTagName() for more documentation.
+          this._containerTagName = null;
 
           // @private {string} - the HTML tag name for the label element that will contain the label content for
           // this dom element. There are ways in which you can have a label without specifying a label tag name,
@@ -589,8 +589,8 @@ define( function( require ) {
           this._prependLabels = prependLabels;
 
           // if there isn't a parent container element, create one so labels can be prepended
-          if ( !this._parentContainerTagName ) {
-            this.setParentContainerTagName( 'div' );
+          if ( !this._containerTagName ) {
+            this.setcontainerTagName( 'div' );
           }
 
           // TODO: can we do this without recomputing everything?
@@ -623,23 +623,23 @@ define( function( require ) {
          *
          * @param {string} tagName
          */
-        setParentContainerTagName: function( tagName ) {
+        setcontainerTagName: function( tagName ) {
           assert && assert( tagName === null || typeof tagName === 'string' );
 
-          this._parentContainerTagName = tagName;
+          this._containerTagName = tagName;
           this.invalidateAccessibleContent();
         },
-        set parentContainerTagName( tagName ) { this.setParentContainerTagName( tagName ); },
+        set containerTagName( tagName ) { this.setcontainerTagName( tagName ); },
 
         /**
          * Get the tag name for the parent container element.
          *
          * @returns {string}
          */
-        getParentContainerTagName: function() {
-          return this._parentContainerTagName;
+        getcontainerTagName: function() {
+          return this._containerTagName;
         },
-        get parentContainerTagName() { return this.getParentContainerTagName(); },
+        get containerTagName() { return this.getcontainerTagName(); },
 
         /**
          * Set the label for the this node.  The label can be added in one of four ways:
@@ -1856,8 +1856,8 @@ define( function( require ) {
 
               // create the parent container element for the dom element and label description elements
               var parentContainerElement = null;
-              if ( self._parentContainerTagName ) {
-                parentContainerElement = createElement( self._parentContainerTagName, false );
+              if ( self._containerTagName ) {
+                parentContainerElement = createElement( self._containerTagName, false );
                 parentContainerElement.id = 'container-' + uniqueId;
 
                 // provide the aria-role if it is specified

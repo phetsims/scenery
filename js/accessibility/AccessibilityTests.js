@@ -46,7 +46,7 @@ define( function( require ) {
     // test setting of accessible content through options
     var buttonNode = new Node( {
       focusHighlight: new Circle( 5 ),
-      parentContainerTagName: 'div', // contained in parent element 'div'
+      containerTagName: 'div', // contained in parent element 'div'
       tagName: 'input', // dom element with tag name 'input'
       inputType: 'button', // input type 'button'
       labelTagName: 'label', // label with tagname 'label'
@@ -70,7 +70,7 @@ define( function( require ) {
 
     // verify that setters and getters worked correctly
     assert.ok( buttonNode.labelTagName === 'label', 'Label tag name' );
-    assert.ok( buttonNode.parentContainerTagName === 'div', 'Parent container tag name' );
+    assert.ok( buttonNode.containerTagName === 'div', 'Parent container tag name' );
     assert.ok( buttonNode.accessibleLabel === TEST_LABEL, 'Accessible label' );
     assert.ok( buttonNode.descriptionTagName === 'p', 'Description tag name' );
     assert.ok( buttonNode.focusable === false, 'Focusable' );
@@ -204,7 +204,7 @@ define( function( require ) {
     assert.ok( document.getElementById( a1ElementId ).tagName === 'BUTTON', 'button tag name set' );
 
     // give the button a parent container and some prepended empty labels
-    a1.parentContainerTagName = 'div';
+    a1.containerTagName = 'div';
     a1.prependLabels = true;
     a1.labelTagName = 'div';
     a1.descriptionTagName = 'p';
