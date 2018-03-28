@@ -282,8 +282,6 @@ define( function( require ) {
     var display = new Display( a1 ); // eslint-disable-line
     document.body.appendChild( display.domElement );
 
-    var a1Element = document.getElementById( getPeerElementId( a1 ) );
-
     assert.ok( a1.accessibleInputListeners.length === 0, 'no input accessible listeners on instantiation' );
     assert.ok( a1.accessibleLabel === null, 'no label on instantiation' );
 
