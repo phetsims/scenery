@@ -45,8 +45,8 @@
  *
  * The node is represented by the <button> DOM element, but the accessible content needs to include the parent div, and
  * a peer description paragraph.  This trait supports this structure with the 'parentContainerElement' option.  In
- * this example, the parentContainerElement is the div, while the description is added as a child under the button
- * node's domElement.
+ * this example, the parentContainerElement is the div, while the description is added as a child of the parent after the
+ * button node's domElement.
  *
  * For additional accessibility options, please see the options listed in ACCESSIBILITY_OPTION_KEYS. For more
  * documentation on Scenery, Nodes, and the scene graph, please see http://phetsims.github.io/scenery/
@@ -79,13 +79,18 @@ define( function( require ) {
   var FORM_ELEMENTS = [ INPUT_TAG, BUTTON_TAG, TEXTAREA_TAG, SELECT_TAG, OPTGROUP_TAG, DATALIST_TAG, OUTPUT_TAG, A_TAG ];
 
   // these elements do not have a closing tag, so they won't support features like innerHTML
-  var ELEMENTS_WITHOUT_CLOSING_TAG = [ INPUT_TAG ];
+  // var ELEMENTS_WITHOUT_CLOSING_TAG = [ INPUT_TAG ];
 
   // these elements require a minimum width to be visible in Safari
   var ELEMENTS_REQUIRE_WIDTH = [ INPUT_TAG, A_TAG ];
 
   // these events change the input value on the dom element
   var INPUT_CHANGE_EVENTS = [ 'input', 'change' ];
+
+  // default tag names for siblings
+  var DEFAULT_CONTAINER_TAG_NAME = 'div';
+  var DEFAULT_DESCRIPTION_TAG_NAME = 'p';
+  var DEFAULT_LABEL_TAG_NAME = 'label';
 
   // valid types of DOM events that can be added to a node
   var DOM_EVENTS = [ 'input', 'change', 'click', 'keydown', 'keyup', 'focus', 'blur' ];
@@ -117,7 +122,7 @@ define( function( require ) {
     'ariaDescribedContent', // Sets the content that will be described by another node through aria-describedby, see setAriaDescribedContent()
     'ariaLabelledContent', // sets the content that will be labelled by another node through aria-labelledby, see setAriaLabelledContent()
     'accessibleOrder', // Modifies the keyboard accessibility order, see setAccessibleOrder() for more documentation
-    'accessibleContent', // Sets up accessibility handling, see setAccessibleContent() for more documentation
+    'accessibleContent' // Sets up accessibility handling, see setAccessibleContent() for more documentation
   ];
 
   var Accessibility = {
@@ -160,7 +165,8 @@ define( function( require ) {
 
           // @private {string} - the HTML tag name for a parent container element for this node in the DOM. This
           // parent container will contain the node's DOM element, as well as peer elements for any label or description
-          // content. See setcontainerTagName() for more documentation.
+          // content. See setContainerTagName() for more documentation. If this option is needed (like to
+          // contain multiple siblings with the primary sibling), it will default to the value of DEFAULT_CONTAINER_TAG_NAME.
           this._containerTagName = null;
 
           // @private {string} - the HTML tag name for the label element that will contain the label content for
@@ -184,9 +190,9 @@ define( function( require ) {
           // type 'radio' and 'checkbox'
           this._accessibleChecked = false;
 
-          // @private {boolean} - determines whether or not labels should be prepended above the node's DOM element. This
-          // should only be used if the element has a parentContainerElement, as the labels are sorted relative to the
-          // node's DOM element under the parent container.
+          // @private {boolean} - determines whether or not labels should be prepended above the node's DOM element.
+          // All labels will be placed inside parentContainerElement, which will be automatically created if option
+          // not provided. The labels are sorted relative to the node's DOM element under the parent container.
           this._prependLabels = null;
 
           // @private {array.<Object> - array of attributes that are on the node's DOM element.  Objects will have the
@@ -242,7 +248,7 @@ define( function( require ) {
 
           // @private {string} - The content on this node that is used to label another node through the
           // aria-labelledby ARIA attribute.  Can be the node's label, description, parent container, or DOM
-          // element.  See
+          // element.  See setAriaLabelContent()
           this._ariaLabelContent = AccessiblePeer.NODE; // element associated with the other node's content
 
           // @private {Node|null} - A node with accessible content that describes this node through the aria-describedby
@@ -588,11 +594,6 @@ define( function( require ) {
         setPrependLabels: function( prependLabels ) {
           this._prependLabels = prependLabels;
 
-          // if there isn't a parent container element, create one so labels can be prepended
-          if ( !this._containerTagName ) {
-            this.setcontainerTagName( 'div' );
-          }
-
           // TODO: can we do this without recomputing everything?
           this.invalidateAccessibleContent();
         },
@@ -623,13 +624,13 @@ define( function( require ) {
          *
          * @param {string} tagName
          */
-        setcontainerTagName: function( tagName ) {
-          assert && assert( tagName === null || typeof tagName === 'string' );
+        setContainerTagName: function( tagName ) {
+          assert && assert( tagName === null || typeof tagName === 'string', 'invalid tagName argument: ' + tagName );
 
           this._containerTagName = tagName;
           this.invalidateAccessibleContent();
         },
-        set containerTagName( tagName ) { this.setcontainerTagName( tagName ); },
+        set containerTagName( tagName ) { this.setContainerTagName( tagName ); },
 
         /**
          * Get the tag name for the parent container element.
@@ -1544,25 +1545,27 @@ define( function( require ) {
           this._accessibleLabel = label;
 
           var self = this;
-          if ( this._labelTagName ) {
-            this.updateAccessiblePeers( function( accessiblePeer ) {
-              if ( accessiblePeer.labelElement ) {
-                setTextContent( accessiblePeer.labelElement, self._accessibleLabel, self._labelIsHTML );
 
-                // if the label element happens to be a 'label', associate with 'for' attribute
-                if ( self._labelTagName.toUpperCase() === LABEL_TAG ) {
-                  accessiblePeer.labelElement.setAttribute( 'for', accessiblePeer.domElement.id );
-                }
-              }
-            } );
+          // if trying to set labelContent, make sure that there is a labelTagName default
+          if ( !this._labelTagName ) {
+            this._labelTagName = DEFAULT_LABEL_TAG_NAME;
           }
-          else {
-            this.updateAccessiblePeers( function( accessiblePeer ) {
-              if ( elementSupportsInnerHTML( accessiblePeer.domElement ) ) {
-                setTextContent( accessiblePeer.domElement, label, self._labelIsHTML );
-              }
-            } );
+
+          // to have a label sibling, you need a container
+          if( !this._containerTagName){
+            this.setContainerTagName( DEFAULT_CONTAINER_TAG_NAME );
           }
+
+          this.updateAccessiblePeers( function( accessiblePeer ) {
+            if ( accessiblePeer.labelElement ) {
+              setTextContent( accessiblePeer.labelElement, self._accessibleLabel, self._labelIsHTML );
+
+              // if the label element happens to be a 'label', associate with 'for' attribute
+              if ( self._labelTagName.toUpperCase() === LABEL_TAG ) {
+                accessiblePeer.labelElement.setAttribute( 'for', accessiblePeer.domElement.id );
+              }
+            }
+          } );
         },
 
         /**
@@ -1577,7 +1580,13 @@ define( function( require ) {
 
           // if there is no description element, assume that a paragraph element should be used
           if ( !this._descriptionTagName ) {
-            this.setDescriptionTagName( 'p' );
+            this.setDescriptionTagName( DEFAULT_DESCRIPTION_TAG_NAME );
+          }
+
+
+          // to have a description sibling, you need a container
+          if( !this._containerTagName){
+            this.setContainerTagName( DEFAULT_CONTAINER_TAG_NAME );
           }
 
           var self = this;
@@ -1753,10 +1762,11 @@ define( function( require ) {
        * @private
        * @param {HTMLElement} domElement
        * @returns {boolean}
+       * TODO: uncomment this, it will be needed later in https://github.com/phetsims/scenery/issues/748
        */
-      function elementSupportsInnerHTML( domElement ) {
-        return !_.includes( ELEMENTS_WITHOUT_CLOSING_TAG, domElement.tagName );
-      }
+      // function elementSupportsInnerHTML( domElement ) {
+      //   return !_.includes( ELEMENTS_WITHOUT_CLOSING_TAG, domElement.tagName );
+      // }
 
       /**
        * Create an HTML element.  Unless this is a form element or explicitly marked as focusable, add a negative
@@ -1797,9 +1807,7 @@ define( function( require ) {
        * @param {boolean} prependLabels
        */
       function insertContentElement( accessiblePeer, contentElement, prependLabels ) {
-
-        // if we have a parent container, add the element as a child of the container - otherwise, add as child of the
-        // node's DOM element
+        assert && assert( accessiblePeer.parentContainerElement, 'Cannot add sibling if there is no container element');
         if ( accessiblePeer.parentContainerElement ) {
           if ( prependLabels && accessiblePeer.parentContainerElement === accessiblePeer.domElement.parentNode ) {
             accessiblePeer.parentContainerElement.insertBefore( contentElement, accessiblePeer.domElement );
@@ -1854,7 +1862,7 @@ define( function( require ) {
               var domElement = createElement( self._tagName, self._focusable );
               domElement.id = uniqueId;
 
-              // create the parent container element for the dom element and label description elements
+              // create the container parent for the dom siblings
               var parentContainerElement = null;
               if ( self._containerTagName ) {
                 parentContainerElement = createElement( self._containerTagName, false );
