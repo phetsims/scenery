@@ -32,12 +32,19 @@ define( function( require ) {
 
     options = _.extend( {
 
-      // {number} - while direction key is down, this will be the 1D delta for movement in view coordinates
-      positionDelta: 5,
+      // {number} - On initial key press, how much the position Property will change in view coordinates
+      downDelta: 10,
 
-      // {number} - if shift key down while pressing direction key, this will be the 1D delta for movement in view
-      // coordinates
-      shiftPositionDelta: 2,
+      // {number} - On initial key press if shift is held down, amount PositionPropertychanges in view coordinates
+      shiftDownDelta: 5,
+
+      // {number|null} - while direction key is down, this will be the 1D velocity for movement, the position will
+      // change this much in view coordinates every second. If null, will default to downDelta * 60 assuming 60 fps
+      dragVelocity: null,
+
+      // {number|null} - if shift key down while pressing direction key, this will be the 1D delta for movement in view
+      // coordinates every second. If null, will default to shiftDownDelta * 60 assuming 60 fps
+      shiftDragVelocity: null,
 
       // {Property.<Vector2>|null} - if provided, it will be synchronized with the drag location in the model
       // frame, applying provided transforms as needed
@@ -73,8 +80,10 @@ define( function( require ) {
     this._dragBounds = options.dragBounds;
     this._transform = options.transform;
     this._locationProperty = options.locationProperty;
-    this._positionDelta = options.positionDelta;
-    this._shiftPositionDelta = options.shiftPositionDelta;
+    this._dragVelocity = options.dragVelocity || options.downDelta * 60; // assuming same delta at 60 fps
+    this._shiftDragVelocity = options.shiftDragVelocity || options.shiftDownDelta * 60; // assuming same delta at 60 fps
+    this._downDelta = options.downDelta;
+    this._shiftDownDelta = options.shiftDownDelta;
     this._moveOnHoldDelay = options.moveOnHoldDelay;
     this._moveOnHoldInterval = options.moveOnHoldInterval;
 
@@ -143,7 +152,8 @@ define( function( require ) {
       }
 
       // move object on first down before a delay
-      this.updatePosition();
+      var positionDelta = self.shiftKeyDown() ? self._shiftDownDelta : self._downDelta;
+      this.updatePosition( positionDelta );
     };
 
     /**
@@ -233,14 +243,17 @@ define( function( require ) {
         this.moveOnHoldDelayCounter += dt * 1000;
         this.moveOnHoldIntervalCounter += dt * 1000;
 
-        // logic for position updates
+        // calculate change in position from time step
+        var positionVelocity = this.shiftKeyDown() ? this._shiftDragVelocity : this._dragVelocity;
+        var positionDelta = dt * positionVelocity;
+
         if ( this.moveOnHoldDelayCounter >= this._moveOnHoldDelay && !this.delayComplete ) {
-          this.updatePosition();
+          this.updatePosition( positionDelta );
           this.delayComplete = true;
         }
 
         if ( this.delayComplete && this.moveOnHoldIntervalCounter >= this._moveOnHoldInterval ) {
-          this.updatePosition();
+          this.updatePosition( positionDelta );
         }
       }
     },
@@ -248,8 +261,10 @@ define( function( require ) {
     /**
      * Handle the actual change in position of associated object based on currently pressed keys. Called in step function
      * and keydown listener.
+     *
+     * @param {number} delta - potential change in position in x and y for the position Property
      */
-    updatePosition: function() {
+    updatePosition: function( delta ) {
 
       // check to see if any hotkey combinations are down
       for ( var j = 0; j < this.hotkeyGroups.length; j++ ) {
@@ -300,19 +315,18 @@ define( function( require ) {
         // handle the change in position
         var deltaX = 0;
         var deltaY = 0;
-        var positionDelta = this.shiftKeyDown() ? this._shiftPositionDelta : this._positionDelta;
 
         if ( this.leftMovementKeysDown() ) {
-          deltaX = -positionDelta;
+          deltaX = -delta;
         }
         if ( this.rightMovementKeysDown() ) {
-          deltaX = positionDelta;
+          deltaX = delta;
         }
         if ( this.upMovementKeysDown() ) {
-          deltaY = -positionDelta;
+          deltaY = -delta;
         }
         if ( this.downMovementKeysDown() ) {
-          deltaY = positionDelta;
+          deltaY = delta;
         }
 
         // only initiate move if there was some attempted keyboard drag
