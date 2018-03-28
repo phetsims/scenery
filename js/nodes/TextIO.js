@@ -36,13 +36,14 @@ define( function( require ) {
 
     addTextChangedListener: {
       returnType: VoidIO,
-      parameterTypes: [ FunctionIO( VoidIO, [ StringIO ] ) ],
+      parameterTypes: [ FunctionIO( VoidIO, [ StringIO, StringIO ] ) ],
       implementation: function( listener ) {
         this.instance.on( 'text', function( oldText, newText ) {
-          listener( newText );
+          listener( newText, oldText );
         } );
       },
-      documentation: 'Add a listener for when the text has changed.'
+      documentation: 'Add a listener for when the text has changed. The listener takes two arguments, the new ' +
+                     'value and the previous value.'
     },
 
     setText: {
@@ -69,7 +70,8 @@ define( function( require ) {
       implementation: function( font ) {
         this.instance.setFont( font );
       },
-      documentation: 'Set font options for this TextIO instance, e.g. {size: 16, weight: bold}'
+      documentation: 'Set font options for this TextIO instance, e.g. {size: 16, weight: bold}. If increasing the font ' +
+                     'size does not make the text size larger, you may need to increase the maxWidth of the TextIO also.'
     },
 
     getFontOptions: {
@@ -100,7 +102,7 @@ define( function( require ) {
       documentation: 'Get maximum width of text box in px'
     }
   }, {
-    documentation: 'The tandem IO type for the scenery Text node',
+    documentation: 'Text that is displayed in the simulation.',
     events: [ 'changed' ]
   } );
 

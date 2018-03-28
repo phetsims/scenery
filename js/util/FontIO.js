@@ -43,7 +43,7 @@ define( function( require ) {
     /**
      * Encodes a Font instance to a state.
      * Serialize this font's configuration to an options object
-     * @param {Font} instance
+     * @param {Font} font
      * @returns {Object}
      */
     toStateObject: function( font ) {
@@ -67,7 +67,7 @@ define( function( require ) {
      */
     fromStateObject: function( stateObject ) {
       return new phet.scenery.Font( stateObject );
-    },
+    }
   } );
 
   scenery.register( 'FontIO', FontIO );
