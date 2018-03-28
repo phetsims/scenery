@@ -33,8 +33,15 @@ define( function( require ) {
    * @return {string}
    */
   function getPeerElementId( node ) {
-    if ( node.accessibleInstances.length > 0 && !node.accessibleInstances[ 0 ] && !node.accessibleInstances[ 0 ].peer ) {
-      throw new Error( 'There should one and only one accessible instance for the node, and the peer should exist' );
+    if ( node.accessibleInstances.length === 0 ){
+      throw new Error( 'No accessibleInstances. Was your node added to the scene graph?' );
+    }
+
+    else if ( node.accessibleInstances.length > 1 ){
+      throw new Error( 'There should one and only one accessible instance for the node' );
+    }
+    else if( !node.accessibleInstances[ 0 ].peer ) {
+      throw new Error( 'accessibleInstance\'s peer should exist.' );
     }
 
     return node.accessibleInstances[ 0 ].peer.domElement.id;
@@ -723,27 +730,30 @@ define( function( require ) {
 
     var b = new Node( { tagName: 'button', labelTagName: 'div', accessibleLabel: TEST_LABEL } );
 
-    rootNode.addChild( b);
+    rootNode.addChild( b );
     var buttonElement = b.accessibleInstances[ 0 ].peer.domElement;
     var parentElement = buttonElement.parentElement;
 
     assert.ok( parentElement, 'parent element must be created with label option' );
-    assert.ok( parentElement.childNodes.length === 2, 'only contain label and primary siblings');
+    assert.ok( parentElement.childNodes.length === 2, 'only contain label and primary siblings' );
 
-    // TODO: prependlabels --> appendLabel
+    // TODO: prependlabels --> appendLabel, see https://github.com/phetsims/scenery/issues/748
     // assert.ok( parentElement.childNodes[ 0 ] === document.getElementById( getPeerElementId( b ) ), '' );
 
 
     var c = new Node( { tagName: 'button', descriptionTagName: 'div', accessibleDescription: TEST_DESCRIPTION } );
 
-    rootNode.addChild( c);
+    rootNode.addChild( c );
     buttonElement = c.accessibleInstances[ 0 ].peer.domElement;
     parentElement = buttonElement.parentElement;
 
 
     assert.ok( parentElement, 'parent element must be created with description option' );
-    assert.ok( parentElement.childNodes.length === 2, 'only contain description and primary siblings');
+    assert.ok( parentElement.childNodes.length === 2, 'only contain description and primary siblings' );
 
+    var d = new Node( { tagName: 'button', labelTagName: 'p', descriptionTagName: 'p', prependLabels: true } );
+    rootNode.addChild( d );
+    assert.ok( document.getElementById( getPeerElementId( d ) ).parentElement.childNodes.length === 3, 'correct children' );
   } );
 
 } );

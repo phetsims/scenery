@@ -504,6 +504,12 @@ define( function( require ) {
           assert && assert( tagName === null || typeof tagName === 'string' );
 
           this._labelTagName = tagName;
+
+          // to have a label sibling, you need a container
+          if ( !this._containerTagName ) {
+            this.setContainerTagName( DEFAULT_CONTAINER_TAG_NAME );
+          }
+
           this.invalidateAccessibleContent();
         },
         set labelTagName( tagName ) { this.setLabelTagName( tagName ); },
@@ -534,6 +540,12 @@ define( function( require ) {
           assert && assert( tagName === null || typeof tagName === 'string' );
 
           this._descriptionTagName = tagName;
+
+          // to have a description sibling, you need a container
+          if ( !this._containerTagName ) {
+            this.setContainerTagName( DEFAULT_CONTAINER_TAG_NAME );
+          }
+
           this.invalidateAccessibleContent();
         },
         set descriptionTagName( tagName ) { this.setDescriptionTagName( tagName ); },
@@ -1548,12 +1560,7 @@ define( function( require ) {
 
           // if trying to set labelContent, make sure that there is a labelTagName default
           if ( !this._labelTagName ) {
-            this._labelTagName = DEFAULT_LABEL_TAG_NAME;
-          }
-
-          // to have a label sibling, you need a container
-          if( !this._containerTagName){
-            this.setContainerTagName( DEFAULT_CONTAINER_TAG_NAME );
+            this.setLabelTagName( DEFAULT_LABEL_TAG_NAME );
           }
 
           this.updateAccessiblePeers( function( accessiblePeer ) {
@@ -1581,12 +1588,6 @@ define( function( require ) {
           // if there is no description element, assume that a paragraph element should be used
           if ( !this._descriptionTagName ) {
             this.setDescriptionTagName( DEFAULT_DESCRIPTION_TAG_NAME );
-          }
-
-
-          // to have a description sibling, you need a container
-          if( !this._containerTagName){
-            this.setContainerTagName( DEFAULT_CONTAINER_TAG_NAME );
           }
 
           var self = this;
@@ -1807,7 +1808,7 @@ define( function( require ) {
        * @param {boolean} prependLabels
        */
       function insertContentElement( accessiblePeer, contentElement, prependLabels ) {
-        assert && assert( accessiblePeer.parentContainerElement, 'Cannot add sibling if there is no container element');
+        assert && assert( accessiblePeer.parentContainerElement, 'Cannot add sibling if there is no container element' );
         if ( accessiblePeer.parentContainerElement ) {
           if ( prependLabels && accessiblePeer.parentContainerElement === accessiblePeer.domElement.parentNode ) {
             accessiblePeer.parentContainerElement.insertBefore( contentElement, accessiblePeer.domElement );
