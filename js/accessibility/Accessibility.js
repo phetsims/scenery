@@ -108,6 +108,7 @@ define( function( require ) {
     'groupFocusHighlight', // Sets the outer focus highlight for this node when a descendant has focus, see setGroupFocusHighlight()
     'accessibleLabel', // Set the label content for the node, see setAccessibleLabel()
     'accessibleLabelAsHTML', // Set the label content for the node as innerHTML, see setAccessibleLabelAsHTML()
+    'innerContent', // set the inner text or HTML for a node's primary sibling element, see setInnerContent()
     'accessibleDescription', // Set the description content for the node, see setAccessibleDescription()
     'accessibleDescriptionAsHTML', // Set the description content for the node as innerHTML, see setAccessibleDescriptionContentAsHTML()
     'accessibleVisible', // Sets whether or not the node's DOM element is visible in the parallel DOM
@@ -202,6 +203,10 @@ define( function( require ) {
           // @private {string} - the label content for this node's DOM element.  There are multiple ways that a label
           // can be associated with a node's dom element, see setAccessibleLabel() for more documentation
           this._accessibleLabel = null;
+
+          // @private {null|string} - the inner label content for this node's primary sibling. Set as inner HTML
+          // or text content of the actual DOM element. If this is used, the node should not have children.
+          this._innerContent = null;
 
           // @private {string} - whether or not the label content is innerHTML.  Internal flag that is updated
           // when the label content is set.  See setAccessibleLabelAsHTML() for more information
@@ -683,6 +688,39 @@ define( function( require ) {
           return this._accessibleLabel;
         },
         get accessibleLabel() { return this.getAccessibleLabel(); },
+
+        /**
+         * Set the inner content for the primary sibling of the AccessiblePeers of this node. Will be set as innerHTML
+         * unless content includes markup that is not a formatting tag. A node with inner content cannot
+         * have accessible descendants because this content will override the the HTML of descendants of this node.
+         *
+         * @param {string|null} content
+         * @public
+         */
+        setInnerContent: function( content ) {
+          this._innerContent = content;
+
+          // make sure HTML is exclusively text or formatting tags
+          var useHTML = AccessibilityUtil.usesFormattingTagsExclusive( content );
+
+          var self = this;
+          this.updateAccessiblePeers( function( accessiblePeer ) {
+            assert && assert( accessiblePeer.accessibleInstance.children.length === 0, 'descendants exist with accessible content, innerContent cannot be used' );
+            setTextContent( accessiblePeer.domElement, self._innerContent, useHTML );
+          } );
+        },
+        set innerContent( content ) { this.setInnerContent( content ); },
+
+        /**
+         * Get the inner content, the string that is the innerHTML or innerText for the node's primary sibling element.
+         *
+         * @return {string|null}
+         * @public
+         */
+        getInnerContent: function() {
+          return this._innerContent;
+        },
+        get innerContent() { return this.getInnerContent(); },
 
         /**
          * Should be used rarely and with caution, typically you should use setAccessibleLabel instead.
@@ -1914,6 +1952,11 @@ define( function( require ) {
                 else {
                   self.setAccessibleLabel( self._accessibleLabel );
                 }
+              }
+
+              // restore the innerContent
+              if ( self._innerContent ) {
+                self.setInnerContent( self._innerContent );
               }
 
               // set if using aria-label
