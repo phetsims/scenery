@@ -103,7 +103,7 @@ define( function( require ) {
     size: 20
   } );
 
-  // Tags that should be included in accessibleLabel, see https://github.com/phetsims/joist/issues/430
+  // Tags that should be included in accessible innerContent, see https://github.com/phetsims/joist/issues/430
   var ACCESSIBLE_TAGS = [
     'b', 'strong', 'i', 'em', 'sub', 'sup', 'u', 's'
   ];
@@ -328,7 +328,7 @@ define( function( require ) {
           var rootNode = new Node( {
             cursor: 'pointer',
             tagName: 'a',
-            accessibleLabelAsHTML: linkElement.accessibleLabel
+            innerContent: linkElement.innerContent
           } );
 
           // If our href is a function, it should be called when the user clicks on the link
@@ -531,9 +531,9 @@ define( function( require ) {
             if ( this._linkFill !== null ) {
               fill = this._linkFill; // Link color
             }
-            // Don't overwrite only accessibleLabels once things have been "torn down"
-            if ( !element.accessibleLabel ) {
-              element.accessibleLabel = RichText.himalayaElementToAccessibleString( element, isLTR );
+            // Don't overwrite only innerContents once things have been "torn down"
+            if ( !element.innerContent ) {
+              element.innerContent = RichText.himalayaElementToAccessibleString( element, isLTR );
             }
 
             // Store information about it for the "regroup links" step

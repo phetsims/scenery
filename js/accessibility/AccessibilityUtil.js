@@ -118,10 +118,10 @@ define( function( require ) {
    * is only true for elements of the Parallel DOM.
    *
    * @param {HTMLElemnt} domElement
-   * @return {boolean} 
+   * @return {boolean}
    */
   function isFocusable( domElement ) {
-    
+
     // continue to next element if this one is meant to be hidden
     if ( isElementHidden( domElement ) ) {
       return false;
@@ -149,14 +149,14 @@ define( function( require ) {
     // ^ - from the beginning of the string
     // \s - whitespace character
     // + - greedy
-    return string.replace(/^\s+/,'');
+    return string.replace( /^\s+/, '' );
   }
 
   var AccessibilityUtil = {
 
     /**
      * Get the next focusable element. This should very rarely be used.  The next focusable element can almost
-     * always be focused automatically with 'Tab'.  However, if the 'Tab' key needs to be emulated this can be 
+     * always be focused automatically with 'Tab'.  However, if the 'Tab' key needs to be emulated this can be
      * helpful. If no next focusable can be found, it will return the currently focused element.
      * @public
      *
@@ -182,7 +182,7 @@ define( function( require ) {
 
     /**
      * Return a random focusable element in the document. Particularly useful for fuzz testing.
-     * 
+     *
      * @return {HTMLElement}
      */
     getRandomFocusable: function() {
@@ -201,11 +201,17 @@ define( function( require ) {
      * tags that are not in the whitelist FORMATTING_TAGS, if there are no tags this will still return
      * true.
      * @public
-     * 
+     *
      * @param  {string} textContent
      * @returns {boolean}
      */
     usesFormattingTagsExclusive: function( textContent ) {
+
+      // no-op for null case
+      if ( textContent === null ) {
+        return false;
+      }
+      assert && assert( typeof textContent === 'string', 'unsupported type for textContent.' );
 
       var i = 0;
       var openIndices = [];

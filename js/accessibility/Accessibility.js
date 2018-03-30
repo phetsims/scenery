@@ -73,7 +73,9 @@ define( function( require ) {
   var OPTGROUP_TAG = 'OPTGROUP';
   var DATALIST_TAG = 'DATALIST';
   var OUTPUT_TAG = 'OUTPUT';
+  var DIV_TAG = 'DIV';
   var A_TAG = 'A';
+  var P_TAG = 'P';
 
   // these elements are typically associated with forms, and support certain attributes
   var FORM_ELEMENTS = [ INPUT_TAG, BUTTON_TAG, TEXTAREA_TAG, SELECT_TAG, OPTGROUP_TAG, DATALIST_TAG, OUTPUT_TAG, A_TAG ];
@@ -88,9 +90,9 @@ define( function( require ) {
   var INPUT_CHANGE_EVENTS = [ 'input', 'change' ];
 
   // default tag names for siblings
-  var DEFAULT_CONTAINER_TAG_NAME = 'div';
-  var DEFAULT_DESCRIPTION_TAG_NAME = 'p';
-  var DEFAULT_LABEL_TAG_NAME = 'label';
+  var DEFAULT_CONTAINER_TAG_NAME = DIV_TAG;
+  var DEFAULT_DESCRIPTION_TAG_NAME = P_TAG;
+  var DEFAULT_LABEL_TAG_NAME = LABEL_TAG;
 
   // valid types of DOM events that can be added to a node
   var DOM_EVENTS = [ 'input', 'change', 'click', 'keydown', 'keyup', 'focus', 'blur' ];
@@ -660,22 +662,38 @@ define( function( require ) {
         get containerTagName() { return this.getcontainerTagName(); },
 
         /**
-         * Set the label for the this node.  The label can be added in one of four ways:
-         *   - As an inline text with the 'aria-label' attribute.
-         *   - As a 'label' ellement with the 'for' attribute pointing to the
-         *     node's DOM element.
-         *   - As inner text on the Node's DOM element itself.
-         *   - As a separate DOM element positioned as a peer or child of this
-         *     node's DOM element.
+         * Set the content of the label sibling for the this node.  The label sibling will default to a
+         * <label> tag if no `labelTagName` is provided. If the label sibling is a `label` html element,
+         * then the `for` attribute will automatically be added, pointing to the node's primary sibling DOM Element.
          *
-         * The way in which the label is added to the Node is dependent on the label tag name, whether we use the
-         * aria-label attribute, and whether the node's DOM element supports inner HTML.
-         *
-         * @param {string} label
+         * This method supports adding content in two ways, with HTMLElement.textContent and HTMLElement.innerHTML.
+         * The DOM setter is chosen based on if the label passes the `usesFormatting
+         * @param {string|null} label
          */
         setAccessibleLabel: function( label ) {
-          this._labelIsHTML = false;
-          this.setLabelContent( label );
+          this._accessibleLabel = label;
+
+          // If there
+          var useHTML = AccessibilityUtil.usesFormattingTagsExclusive( label );
+
+          var self = this;
+
+          // if trying to set labelContent, make sure that there is a labelTagName default
+          if ( !this._labelTagName ) {
+            this.setLabelTagName( DEFAULT_LABEL_TAG_NAME );
+          }
+
+          this.updateAccessiblePeers( function( accessiblePeer ) {
+            if ( accessiblePeer.labelElement ) {
+              setTextContent( accessiblePeer.labelElement, self._accessibleLabel, useHTML );
+
+              // if the label element happens to be a 'label', associate with 'for' attribute
+              if ( self._labelTagName.toUpperCase() === LABEL_TAG ) {
+                accessiblePeer.labelElement.setAttribute( 'for', accessiblePeer.domElement.id );
+              }
+            }
+          } );
+
         },
         set accessibleLabel( label ) { this.setAccessibleLabel( label ); },
 
@@ -721,26 +739,6 @@ define( function( require ) {
           return this._innerContent;
         },
         get innerContent() { return this.getInnerContent(); },
-
-        /**
-         * Should be used rarely and with caution, typically you should use setAccessibleLabel instead.
-         * Sets the accessible label as innerHTML instead of textContent. This allows you to include
-         * formatting tags in the label which are typically read with distinction by a screen reader.
-         * But innerHTML is less performant because it triggers DOM restyling and insertions.
-         *
-         * If the content includes anything other than styling tags or has malformed HTML, we will fallback
-         * to textContent.
-         *
-         * @param {string} label
-         */
-        setAccessibleLabelAsHTML: function( label ) {
-          var formattingExclusive = AccessibilityUtil.usesFormattingTagsExclusive( label );
-
-          // fall back to textContent if anything other than formatting tags
-          this._labelIsHTML = formattingExclusive;
-          this.setLabelContent( label );
-        },
-        set accessibleLabelAsHTML( label ) { this.setAccessibleLabelAsHTML( label ); },
 
         /**
          * Set the description content for this node's DOM element. A description element must exist and that element
@@ -1585,35 +1583,6 @@ define( function( require ) {
         },
 
         /**
-         * Do not use this function directly, it is private.  Updates the accessible label setting the
-         * content as innerHTML or textContent based on whether or state of this._labelIsHTML flag.
-         *
-         * @private
-         * @param {string} label
-         */
-        setLabelContent: function( label ) {
-          this._accessibleLabel = label;
-
-          var self = this;
-
-          // if trying to set labelContent, make sure that there is a labelTagName default
-          if ( !this._labelTagName ) {
-            this.setLabelTagName( DEFAULT_LABEL_TAG_NAME );
-          }
-
-          this.updateAccessiblePeers( function( accessiblePeer ) {
-            if ( accessiblePeer.labelElement ) {
-              setTextContent( accessiblePeer.labelElement, self._accessibleLabel, self._labelIsHTML );
-
-              // if the label element happens to be a 'label', associate with 'for' attribute
-              if ( self._labelTagName.toUpperCase() === LABEL_TAG ) {
-                accessiblePeer.labelElement.setAttribute( 'for', accessiblePeer.domElement.id );
-              }
-            }
-          } );
-        },
-
-        /**
          * Do not use this function directly, it is private. Updates the accessible description,
          * setting content as innerHTML or textContent based no the state of this._descriptionIsHTML flag.
          *
@@ -1946,12 +1915,7 @@ define( function( require ) {
 
               // set the accessible label now that the element has been recreated again
               if ( self._accessibleLabel ) {
-                if ( self._labelIsHTML ) {
-                  self.setAccessibleLabelAsHTML( self._accessibleLabel );
-                }
-                else {
-                  self.setAccessibleLabel( self._accessibleLabel );
-                }
+                self.setAccessibleLabel( self._accessibleLabel );
               }
 
               // restore the innerContent
