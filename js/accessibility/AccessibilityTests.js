@@ -62,7 +62,7 @@ define( function( require ) {
       tagName: 'input', // dom element with tag name 'input'
       inputType: 'button', // input type 'button'
       labelTagName: 'label', // label with tagname 'label'
-      accessibleLabel: TEST_LABEL, // label text content
+      labelContent: TEST_LABEL, // label text content
       descriptionTagName: 'p', // description tag name
       accessibleDescription: TEST_DESCRIPTION, // description text content
       focusable: false, // remove from focus order
@@ -730,7 +730,7 @@ define( function( require ) {
 
     assert.ok( a.accessibleInstances[ 0 ].peer.parentContainerElement.id.indexOf( 'container' ) >= 0, 'parentContainer is div if specified' );
 
-    var b = new Node( { tagName: 'button', labelTagName: 'div', accessibleLabel: TEST_LABEL } );
+    var b = new Node( { tagName: 'button', labelTagName: 'div', labelContent: TEST_LABEL } );
 
     rootNode.addChild( b );
     var buttonElement = b.accessibleInstances[ 0 ].peer.domElement;
@@ -766,7 +766,7 @@ define( function( require ) {
     document.body.appendChild( display.domElement );
 
     // create some nodes for testing
-    var a = new Node( { tagName: 'button', accessibleLabel: TEST_LABEL } );
+    var a = new Node( { tagName: 'button', labelContent: TEST_LABEL } );
 
     rootNode.addChild( a );
 
