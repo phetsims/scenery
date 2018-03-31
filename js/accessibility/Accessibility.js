@@ -743,12 +743,12 @@ define( function( require ) {
           }
 
           this.updateAccessiblePeers( function( accessiblePeer ) {
-            if ( accessiblePeer.labelElement ) {
-              setTextContent( accessiblePeer.labelElement, self._labelContent, useHTML );
+            if ( accessiblePeer.labelSibling ) {
+              setTextContent( accessiblePeer.labelSibling, self._labelContent, useHTML );
 
               // if the label element happens to be a 'label', associate with 'for' attribute
               if ( self._labelTagName.toUpperCase() === LABEL_TAG ) {
-                accessiblePeer.labelElement.setAttribute( 'for', accessiblePeer.domElement.id );
+                accessiblePeer.labelSibling.setAttribute( 'for', accessiblePeer.domElement.id );
               }
             }
           } );
@@ -1051,11 +1051,11 @@ define( function( require ) {
               var otherPeer = node._accessibleInstances[ 0 ].peer;
 
               var labelledElement = accessiblePeer.getElementByAssociation( self._ariaLabelledContent );
-              var labelElement = otherPeer.getElementByAssociation( node._ariaLabelContent );
+              var labelSibling = otherPeer.getElementByAssociation( node._ariaLabelContent );
 
               // if both associated elements defined, set up the attribute, otherwise remove the attribute
-              if ( labelledElement && labelElement ) {
-                labelledElement.setAttribute( 'aria-labelledby', labelElement.id );
+              if ( labelledElement && labelSibling ) {
+                labelledElement.setAttribute( 'aria-labelledby', labelSibling.id );
               }
               else if ( labelledElement ) {
                 labelledElement.removeAttribute( 'aria-labelledby' );
@@ -1942,13 +1942,13 @@ define( function( require ) {
               }
 
               // create the label DOM element representing this instance
-              var labelElement = null;
+              var labelSibling = null;
               if ( self._labelTagName ) {
-                labelElement = createElement( self._labelTagName, false );
-                labelElement.id = 'label-' + uniqueId;
+                labelSibling = createElement( self._labelTagName, false );
+                labelSibling.id = 'label-' + uniqueId;
 
                 if ( self._labelTagName.toUpperCase() === LABEL_TAG ) {
-                  labelElement.setAttribute( 'for', uniqueId );
+                  labelSibling.setAttribute( 'for', uniqueId );
                 }
               }
 
@@ -1961,7 +1961,7 @@ define( function( require ) {
 
               var accessiblePeer = new AccessiblePeer( accessibleInstance, domElement, {
                 containerParent: containerElement,
-                labelElement: labelElement,
+                labelSibling: labelSibling,
                 descriptionElement: descriptionElement
               } );
               accessibleInstance.peer = accessiblePeer;
@@ -2041,7 +2041,7 @@ define( function( require ) {
               }
 
               // insert the label and description elements in the correct location if they exist
-              labelElement && insertContentElement( accessiblePeer, labelElement, self._prependLabels );
+              labelSibling && insertContentElement( accessiblePeer, labelSibling, self._prependLabels );
               descriptionElement && insertContentElement( accessiblePeer, descriptionElement, self._prependLabels );
 
               // Default the focus highlight in this special case to be invisible until selected.

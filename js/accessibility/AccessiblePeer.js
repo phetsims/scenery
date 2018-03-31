@@ -47,7 +47,7 @@ define( function( require ) {
       options = _.extend( {
         containerParent: null, // a parent container for this peer and potential siblings
         childContainerElement: null, // an child container element where nested elements can be placed
-        labelElement: null, // the element containing this node's label content
+        labelSibling: null, // the element containing this node's label content
         descriptionElement: null // the element that will contain this node's description content
       }, options );
 
@@ -65,7 +65,7 @@ define( function( require ) {
 
       // @public, the DOM elements associated with this peer
       this.domElement = domElement;
-      this.labelElement = options.labelElement;
+      this.labelSibling = options.labelSibling;
       this.descriptionElement = options.descriptionElement;
 
       // @private - descendent of domElement that can be used to hold nested children
@@ -162,7 +162,7 @@ define( function( require ) {
         htmlElement = this.domElement;
       }
       else if ( association === AccessiblePeer.LABEL ) {
-        htmlElement = this.labelElement;
+        htmlElement = this.labelSibling;
       }
       else if ( association === AccessiblePeer.DESCRIPTION ) {
         htmlElement = this.descriptionElement;
