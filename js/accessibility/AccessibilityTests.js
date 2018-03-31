@@ -185,7 +185,7 @@ define( function( require ) {
     nodeA.ariaDescriptionContent = AccessiblePeer.DESCRIPTION;
     nodeC.setAriaDescribedByNode( nodeA );
 
-    nodeA.ariaLabelContent = AccessiblePeer.LABEL;
+    nodeA.ariaLabelContent = AccessiblePeer.LABEL_SIBLING;
     nodeB.setAriaLabelledByNode( nodeA );
 
     // reset references after Node.invalidateAccessibleContent() was called while setting options above.
