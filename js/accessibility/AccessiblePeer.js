@@ -158,7 +158,7 @@ define( function( require ) {
     getElementByAssociation: function( association ) {
       var htmlElement = null;
 
-      if ( association === AccessiblePeer.NODE ) {
+      if ( association === AccessiblePeer.PRIMARY_SIBLING ) {
         htmlElement = this.primarySibling;
       }
       else if ( association === AccessiblePeer.LABEL ) {
@@ -184,7 +184,7 @@ define( function( require ) {
   }, {
 
     // @static - specifies valid associations between related AccessiblePeers in the DOM
-    NODE: 'NODE', // associate with all accessible content related to this peer
+    PRIMARY_SIBLING: 'PRIMARY_SIBLING', // associate with all accessible content related to this peer
     LABEL: 'LABEL', // associate with just the label content of this peer
     DESCRIPTION: 'DESCRIPTION', // associate with just the description content of this peer
     CONTAINER_PARENT: 'CONTAINER_PARENT' // associate with everything under the container parent of this peer

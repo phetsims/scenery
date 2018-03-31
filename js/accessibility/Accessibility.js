@@ -306,7 +306,7 @@ define( function( require ) {
           // @private {string} - A string referenceing which portion of this node's accessible content will receive
           // the aria-labelledby attribute.  Can be the DOM element, the label element, the description element,
           // or the container parent element. By default, points to this node's DOM element.
-          this._ariaLabelledContent = AccessiblePeer.NODE;
+          this._ariaLabelledContent = AccessiblePeer.PRIMARY_SIBLING;
 
           // @private {Node|null} - The Node this node labels through the aria-labelledby association. See
           // _ariaLabelledByNode for more information.
@@ -315,7 +315,7 @@ define( function( require ) {
           // @private {string} - The content on this node that is used to label another node through the
           // aria-labelledby ARIA attribute.  Can be the node's label, description, container parent, or DOM
           // element.  See setAriaLabelContent()
-          this._ariaLabelContent = AccessiblePeer.NODE; // element associated with the other node's content
+          this._ariaLabelContent = AccessiblePeer.PRIMARY_SIBLING; // element associated with the other node's content
 
           // @private {Node|null} - A node with accessible content that describes this node through the aria-describedby
           // ARIA attribute. The other node can be anywhere in the scene graph.  The behavior for aria-describedby
@@ -328,7 +328,7 @@ define( function( require ) {
           // @private {string} - A string referenceing which portion of this node's accessible content will receive
           // the aria-describedby attribute.  Can be the DOM element, the label element, the description element,
           // or the container parent element. By default, points to this node's DOM element.
-          this._ariaDescribedContent = AccessiblePeer.NODE;
+          this._ariaDescribedContent = AccessiblePeer.PRIMARY_SIBLING;
 
           // @private {Node|null} - The Node this node describes through the aria-describedby association. See
           // _ariaLabelledByNode for more information.
@@ -337,7 +337,7 @@ define( function( require ) {
           // @private {string} - The description content on this node that is used to describe another node through the
           // aria-describedby ARIA attribute. Can be the node's label, description, container parent, or DOM
           // element.  See ariaDescribessNodoe for more information
-          this._ariaDescriptionContent = AccessiblePeer.NODE;
+          this._ariaDescriptionContent = AccessiblePeer.PRIMARY_SIBLING;
 
           // @private {boolean} - whether or not this node's DOM element can receive focus from tab navigation.
           // Sets the tabIndex attribute on the node's DOM element.  Setting to false will not remove the node's DOM
