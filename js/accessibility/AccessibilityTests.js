@@ -23,6 +23,8 @@ define( function( require ) {
   var TEST_DESCRIPTION = 'Test description';
   var TEST_LABEL_HTML = '<strong>I ROCK as a LABEL</strong>';
   var TEST_LABEL_HTML_2 = '<strong>I ROCK as a LABEL 2</strong>';
+  var TEST_DESCRIPTION_HTML = '<strong>I ROCK as a DESCRIPTION</strong>';
+  var TEST_DESCRIPTION_HTML_2 = '<strong>I ROCK as a DESCRIPTION 2</strong>';
 
   /**
    * Get the id of a dom element representing a node in the DOM.  The accessible content must exist and be unique,
@@ -64,7 +66,7 @@ define( function( require ) {
       labelTagName: 'label', // label with tagname 'label'
       labelContent: TEST_LABEL, // label text content
       descriptionTagName: 'p', // description tag name
-      accessibleDescription: TEST_DESCRIPTION, // description text content
+      descriptionContent: TEST_DESCRIPTION, // description text content
       focusable: false, // remove from focus order
       ariaRole: 'button', // uses the ARIA button role
       prependLabels: true // labels placed above DOM element in read order
@@ -76,7 +78,7 @@ define( function( require ) {
       ariaLabel: TEST_LABEL, // use ARIA label attribute
       accessibleVisible: false, // hidden from screen readers (and browser)
       descriptionTagName: 'p',
-      accessibleDescription: TEST_DESCRIPTION
+      descriptionContent: TEST_DESCRIPTION
     } );
     rootNode.addChild( divNode );
 
@@ -87,7 +89,7 @@ define( function( require ) {
     assert.ok( buttonNode.descriptionTagName === 'p', 'Description tag name' );
     assert.ok( buttonNode.focusable === false, 'Focusable' );
     assert.ok( buttonNode.ariaRole === 'button', 'Aria role' );
-    assert.ok( buttonNode.accessibleDescription === TEST_DESCRIPTION, 'Accessible Description' );
+    assert.ok( buttonNode.descriptionContent === TEST_DESCRIPTION, 'Accessible Description' );
     assert.ok( buttonNode.prependLabels === true, 'prepend labels' );
     assert.ok( buttonNode.focusHighlight instanceof Circle, 'Focus highlight' );
     assert.ok( buttonNode.tagName === 'input', 'Tag name' );
@@ -743,7 +745,7 @@ define( function( require ) {
     // assert.ok( parentElement.childNodes[ 0 ] === document.getElementById( getPeerElementId( b ) ), '' );
 
 
-    var c = new Node( { tagName: 'button', descriptionTagName: 'div', accessibleDescription: TEST_DESCRIPTION } );
+    var c = new Node( { tagName: 'button', descriptionTagName: 'div', descriptionContent: TEST_DESCRIPTION } );
 
     rootNode.addChild( c );
     buttonElement = c.accessibleInstances[ 0 ].peer.primarySibling;
@@ -782,6 +784,33 @@ define( function( require ) {
 
     a.labelContent = TEST_LABEL_HTML_2;
     assert.ok( labelSibling.innerHTML === TEST_LABEL_HTML_2, 'html label should use innerHTML, overwrite from html');
+
+  });
+
+  QUnit.test( 'descriptionContent option', function( assert ) {
+
+    // test the behavior of swapVisibility function
+    var rootNode = new Node( { tagName: 'div' } );
+    var display = new Display( rootNode ); // eslint-disable-line
+    document.body.appendChild( display.domElement );
+
+    // create some nodes for testing
+    var a = new Node( { tagName: 'button', descriptionContent: TEST_DESCRIPTION } );
+
+    rootNode.addChild( a );
+
+    var aElement = document.getElementById( getPeerElementId( a ) );
+    var descriptionSibling = aElement.parentElement.childNodes[1];
+    assert.ok( a.accessibleInstances.length === 1, 'only 1 instance' );
+    assert.ok( aElement.parentElement.childNodes.length === 2, 'parent contains two siblings' );
+    assert.ok( descriptionSibling.tagName === 'P', 'default label tagName' );
+    assert.ok( descriptionSibling.textContent === TEST_DESCRIPTION, 'no html should use textContent');
+
+    a.descriptionContent = TEST_DESCRIPTION_HTML;
+    assert.ok( descriptionSibling.innerHTML === TEST_DESCRIPTION_HTML, 'html label should use innerHTML');
+
+    a.descriptionContent = TEST_DESCRIPTION_HTML_2;
+    assert.ok( descriptionSibling.innerHTML === TEST_DESCRIPTION_HTML_2, 'html label should use innerHTML, overwrite from html');
 
   });
 

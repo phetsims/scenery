@@ -173,8 +173,7 @@ define( function( require ) {
     'groupFocusHighlight', // Sets the outer focus highlight for this node when a descendant has focus, see setGroupFocusHighlight()
     'labelContent', // Set the label content for the node, see setLabelContent()
     'innerContent', // set the inner text or HTML for a node's primary sibling element, see setInnerContent()
-    'accessibleDescription', // Set the description content for the node, see setAccessibleDescription()
-    'accessibleDescriptionAsHTML', // Set the description content for the node as innerHTML, see setAccessibleDescriptionContentAsHTML()
+    'descriptionContent', // Set the description content for the node, see setDescriptionContent()
     'accessibleVisible', // Sets whether or not the node's DOM element is visible in the parallel DOM
     'accessibleContentDisplayed', // sets whether or not the accessible content of the node (and its subtree) is displayed, see setAccessibleContentDisplayed()
     'focusable', // Sets whether or not the node can receive keyboard focus
@@ -274,11 +273,7 @@ define( function( require ) {
           this._innerContent = null;
 
           // @private {string} - the description content for this node's DOM element.
-          this._accessibleDescription = null;
-
-          // @private {string} - whether or not the accessible description is set as innerHTML. Internal flag
-          // that is set when updating description content.
-          this._descriptionIsHTML = false;
+          this._descriptionContent = null;
 
           // @private {string} - if provided, "aria-label" will be added as an inline attribute on the node's DOM
           // element and set to this value. This will determine how the Accessible Name is provided for the DOM element.
@@ -800,46 +795,38 @@ define( function( require ) {
         get innerContent() { return this.getInnerContent(); },
 
         /**
-         * Set the description content for this node's DOM element. A description element must exist and that element
-         * must support inner HTML.  If a description element does not exist yet, we assume that a default paragraph
-         * should be used.
+         * Set the description content for this node's DOM element. If no description tag name is specified, it will use
+         * a default. The description sibling tag name must support innerHTML and textContent.  If a description
+         * element does not exist yet, we assume that a default paragraph should be used.
          *
-         * @param {string} textContent
+         * @param {string} descriptionContent
          */
-        setAccessibleDescription: function( textContent ) {
-          this._descriptionIsHTML = false;
-          this.setDescriptionContent( textContent );
+        setDescriptionContent: function( descriptionContent ) {
+          var useHTML = AccessibilityUtil.usesFormattingTagsExclusive( descriptionContent );
+
+          this._descriptionContent = descriptionContent;
+
+          // if there is no description element, assume that a paragraph element should be used
+          if ( !this._descriptionTagName ) {
+            this.setDescriptionTagName( DEFAULT_DESCRIPTION_TAG_NAME );
+          }
+
+          this.updateAccessiblePeers( function( accessiblePeer ) {
+            setTextContent( accessiblePeer.descriptionSibling, descriptionContent, useHTML  );
+          } );
+
         },
-        set accessibleDescription( textContent ) { this.setAccessibleDescription( textContent ); },
+        set descriptionContent( textContent ) { this.setDescriptionContent( textContent ); },
 
         /**
          * Get the accessible description content that is describing this Node.
          *
          * @returns {string}
          */
-        getAccessibleDescription: function() {
-          return this._accessibleDescription;
+        getDescriptionContent: function() {
+          return this._descriptionContent;
         },
-        get accessibleDescription() { return this.getAccessibleDescription(); },
-
-        /**
-         * Should be used rarely and with caution, typically you should use setAccessibleDescription instead.
-         * Sets the accessible descriptions as innerHTML instead of textContent. This allows you to include
-         * formatting tags in the descriptions which are typically read with distinction by a screen reader.
-         * But innerHTML is less performant because it triggers DOM restyling and insertions.
-         *
-         * If the content includes anything other than styling tags or has malformed HTML, we will fallback
-         * to textContent.
-         *
-         * @param {string} textContent
-         */
-        setAccessibleDescriptionAsHTML: function( textContent ) {
-          var formattingExclusive = AccessibilityUtil.usesFormattingTagsExclusive( textContent );
-
-          this._descriptionIsHTML = formattingExclusive;
-          this.setDescriptionContent( textContent );
-        },
-        set accessibleDescriptionAsHTML( textContent ) { this.setAccessibleDescriptionAsHTML( textContent ); },
+        get descriptionContent() { return this.getDescriptionContent(); },
 
         /**
          * Set the ARIA role for this node's DOM element. According to the W3C, the ARIA role is read-only for a DOM
@@ -1642,27 +1629,6 @@ define( function( require ) {
         },
 
         /**
-         * Do not use this function directly, it is private. Updates the accessible description,
-         * setting content as innerHTML or textContent based no the state of this._descriptionIsHTML flag.
-         *
-         * @private
-         * @param {string} description
-         */
-        setDescriptionContent: function( description ) {
-          this._accessibleDescription = description;
-
-          // if there is no description element, assume that a paragraph element should be used
-          if ( !this._descriptionTagName ) {
-            this.setDescriptionTagName( DEFAULT_DESCRIPTION_TAG_NAME );
-          }
-
-          var self = this;
-          this.updateAccessiblePeers( function( accessiblePeer ) {
-            setTextContent( accessiblePeer.descriptionSibling, description, self._descriptionIsHTML );
-          } );
-        },
-
-        /**
          * Update all AccessiblePeers representing this node with the callback, which takes the AccessiblePeer
          * as an argument.
          * @private
@@ -2005,12 +1971,12 @@ define( function( require ) {
               }
 
               // set the accessible description
-              if ( self._accessibleDescription ) {
+              if ( self._descriptionContent ) {
                 if ( self._descriptionIsHTML ) {
-                  self.setAccessibleDescriptionAsHTML( self._accessibleDescription );
+                  self.setAccessibleDescriptionAsHTML( self._descriptionContent );
                 }
                 else {
-                  self.setAccessibleDescription( self._accessibleDescription );
+                  self.setDescriptionContent( self._descriptionContent );
                 }
               }
 
