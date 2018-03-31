@@ -1082,7 +1082,7 @@ define( function( require ) {
          * which element of this node's accessible content will hold the aria-labelledby attribute.
          *
          * @public
-         * @param {string} content - 'LABEL|NODE|DESCRIPTION|PARENT_CONTAINER'
+         * @param {string} content - 'LABEL|NODE|DESCRIPTION|CONTAINER_PARENT'
          */
         setAriaLabelledContent: function( content ) {
           this._ariaLabelledContent = content;
@@ -1096,7 +1096,7 @@ define( function( require ) {
          * a label string. See setAriaLabelledContent for more information.
          *
          * @public
-         * @return {string} - one of 'LABEL'|'DESCRIPTION'|'NODE'|'PARENT_CONTAINER'
+         * @return {string} - one of 'LABEL'|'DESCRIPTION'|'NODE'|'CONTAINER_PARENT'
          */
         getAriaLabelledContent: function() {
           return this._ariaLabelledContent;
@@ -1110,7 +1110,7 @@ define( function( require ) {
          * value of the aria-labelledby attribute for another node when it is labelled by this one.
          *
          * @public
-         * @param {string} content - 'LABEL'|'DESCRIPTION'|'NODE'|'PARENT_CONTAINER'
+         * @param {string} content - 'LABEL'|'DESCRIPTION'|'NODE'|'CONTAINER_PARENT'
          */
         setAriaLabelContent: function( content ) {
           this._ariaLabelContent = content;
@@ -1165,7 +1165,7 @@ define( function( require ) {
          * which element of this node's accessible content has the aria-describedby attribute.
          *
          * @public
-         * @param {string} content - 'LABEL|NODE|DESCRIPTION|PARENT_CONTAINER'
+         * @param {string} content - 'LABEL|NODE|DESCRIPTION|CONTAINER_PARENT'
          */
         setAriaDescribedContent: function( content ) {
           this._ariaDescribedContent = content;
@@ -1178,7 +1178,7 @@ define( function( require ) {
          * association.  Doesn't return a description, but a string describing wich of this node's accessible elements
          * are described.
          *
-         * @return {string} -'LABEL|NODE|DESCRIPTION|PARENT_CONTAINER'
+         * @return {string} -'LABEL|NODE|DESCRIPTION|CONTAINER_PARENT'
          */
         getAriaDescribedContent: function() {
           return this._ariaDescribedContent;
@@ -1192,7 +1192,7 @@ define( function( require ) {
          * is described by this one.  See setAriaLabelledBy for more information on aria-labelledby.
          *
          * @public
-         * @param {string} content - one of 'LABEL'|'DESCRIPTION'|'NODE'|'PARENT_CONTAINER'
+         * @param {string} content - one of 'LABEL'|'DESCRIPTION'|'NODE'|'CONTAINER_PARENT'
          */
         setAriaDescriptionContent: function( content ) {
           this._ariaDescriptionContent = content;

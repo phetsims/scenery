@@ -167,7 +167,7 @@ define( function( require ) {
       else if ( association === AccessiblePeer.DESCRIPTION ) {
         htmlElement = this.descriptionSibling;
       }
-      else if ( association === AccessiblePeer.PARENT_CONTAINER ) {
+      else if ( association === AccessiblePeer.CONTAINER_PARENT ) {
         htmlElement = this.containerParent;
       }
 
@@ -187,7 +187,7 @@ define( function( require ) {
     NODE: 'NODE', // associate with all accessible content related to this peer
     LABEL: 'LABEL', // associate with just the label content of this peer
     DESCRIPTION: 'DESCRIPTION', // associate with just the description content of this peer
-    PARENT_CONTAINER: 'PARENT_CONTAINER' // associate with everything under the parent container element of this peer
+    CONTAINER_PARENT: 'CONTAINER_PARENT' // associate with everything under the container parent of this peer
   } );
 
   return AccessiblePeer;
