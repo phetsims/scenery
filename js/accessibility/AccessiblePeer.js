@@ -45,10 +45,10 @@ define( function( require ) {
       var self = this;
 
       options = _.extend( {
-        containerParent: null, // a parent container for this peer and potential siblings
+        containerParent: null, // a container parent for this peer and potential siblings
         childContainerElement: null, // an child container element where nested elements can be placed
         labelSibling: null, // the element containing this node's label content
-        descriptionElement: null // the element that will contain this node's description content
+        descriptionSibling: null // the element that will contain this node's description content
       }, options );
 
       Events.call( this ); // TODO: is Events worth mixing in by default? Will we need to listen to events?
@@ -66,7 +66,7 @@ define( function( require ) {
       // @public, the DOM elements associated with this peer
       this.domElement = domElement;
       this.labelSibling = options.labelSibling;
-      this.descriptionElement = options.descriptionElement;
+      this.descriptionSibling = options.descriptionSibling;
 
       // @private - descendent of domElement that can be used to hold nested children
       this.childContainerElement = options.childContainerElement ? options.childContainerElement : ( this.childContainerElement || null );
@@ -165,7 +165,7 @@ define( function( require ) {
         htmlElement = this.labelSibling;
       }
       else if ( association === AccessiblePeer.DESCRIPTION ) {
-        htmlElement = this.descriptionElement;
+        htmlElement = this.descriptionSibling;
       }
       else if ( association === AccessiblePeer.PARENT_CONTAINER ) {
         htmlElement = this.containerParent;

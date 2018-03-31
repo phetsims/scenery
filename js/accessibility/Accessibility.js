@@ -1145,11 +1145,11 @@ define( function( require ) {
               var otherPeer = node._accessibleInstances[ 0 ].peer;
 
               var describedElement = accessiblePeer.getElementByAssociation( self._ariaDescribedContent );
-              var descriptionElement = otherPeer.getElementByAssociation( node._ariaDescriptionContent );
+              var descriptionSibling = otherPeer.getElementByAssociation( node._ariaDescriptionContent );
 
               // if both associated elements exist, set the attribute, otherwise make sure attribute is removed
-              if ( describedElement && descriptionElement ) {
-                describedElement.setAttribute( 'aria-describedby', descriptionElement.id );
+              if ( describedElement && descriptionSibling ) {
+                describedElement.setAttribute( 'aria-describedby', descriptionSibling.id );
               }
               else if ( describedElement ) {
                 describedElement.removeAttribute( 'aria-describedby' );
@@ -1658,7 +1658,7 @@ define( function( require ) {
 
           var self = this;
           this.updateAccessiblePeers( function( accessiblePeer ) {
-            setTextContent( accessiblePeer.descriptionElement, description, self._descriptionIsHTML );
+            setTextContent( accessiblePeer.descriptionSibling, description, self._descriptionIsHTML );
           } );
         },
 
@@ -1953,16 +1953,16 @@ define( function( require ) {
               }
 
               // create the description DOM element representing this instance
-              var descriptionElement = null;
+              var descriptionSibling = null;
               if ( self._descriptionTagName ) {
-                descriptionElement = createElement( self._descriptionTagName, false );
-                descriptionElement.id = 'description-' + uniqueId;
+                descriptionSibling = createElement( self._descriptionTagName, false );
+                descriptionSibling.id = 'description-' + uniqueId;
               }
 
               var accessiblePeer = new AccessiblePeer( accessibleInstance, domElement, {
                 containerParent: containerElement,
                 labelSibling: labelSibling,
-                descriptionElement: descriptionElement
+                descriptionSibling: descriptionSibling
               } );
               accessibleInstance.peer = accessiblePeer;
 
@@ -2042,7 +2042,7 @@ define( function( require ) {
 
               // insert the label and description elements in the correct location if they exist
               labelSibling && insertContentElement( accessiblePeer, labelSibling, self._prependLabels );
-              descriptionElement && insertContentElement( accessiblePeer, descriptionElement, self._prependLabels );
+              descriptionSibling && insertContentElement( accessiblePeer, descriptionSibling, self._prependLabels );
 
               // Default the focus highlight in this special case to be invisible until selected.
               if ( self._focusHighlightLayerable ) {

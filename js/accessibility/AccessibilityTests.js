@@ -192,7 +192,7 @@ define( function( require ) {
     // NOTE: See warning in getPeerElementId() jsDoc for more info.
     nodeAElement = document.getElementById( getPeerElementId( nodeA ) );
 
-    // order of label and description with prependLabels will be labelSibling, descriptionElement, primary sibling
+    // order of label and description with prependLabels will be labelSibling, descriptionSibling, primary sibling
     var nodeALabel = nodeAElement.parentElement.childNodes[ 0 ];
     var nodeADescription = nodeAElement.parentElement.childNodes[ 1 ];
 
