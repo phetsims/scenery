@@ -112,7 +112,7 @@ define( function( require ) {
         var childContainerElement = this.parent.peer.getChildContainerElement();
 
         // insert the peer's DOM element or its parent if it is contained in a parent element for structure
-        childContainerElement.insertBefore( this.peer.getParentContainerElement(), childContainerElement.childNodes[ 0 ] );
+        childContainerElement.insertBefore( this.peer.getContainerParent(), childContainerElement.childNodes[ 0 ] );
 
         // get the difference between the trails of the parent and this AccessibleInstance
         var parentTrail = this.parent.trail;
@@ -241,7 +241,7 @@ define( function( require ) {
         }
       }
 
-      var parentElement = this.peer.getParentContainerElement();
+      var parentElement = this.peer.getContainerParent();
 
       var self = this;
       var hideParent = function() {
@@ -377,8 +377,8 @@ define( function( require ) {
         var peerDOMElement = this.children[ n ].peer.domElement;
 
         // if the peer has a parent container element, this structure containing the peerDOMElement should be inserted
-        if ( this.children[ n ].peer.hasParentContainer() ) {
-          peerDOMElement = this.children[ n ].peer.getParentContainerElement();
+        if ( this.children[ n ].peer.hasContainerParent() ) {
+          peerDOMElement = this.children[ n ].peer.getContainerParent();
         }
         if ( peerDOMElement === containerElement.childNodes[ n ] ) {
           continue;
@@ -401,7 +401,7 @@ define( function( require ) {
         // dom element (or its child container), disabling input so that we do not call input listeners
         // while the elements are removed from the DOM
         this.node.accessibleInputEnabled = false;
-        this.parent.peer.getChildContainerElement().removeChild( this.peer.getParentContainerElement() );
+        this.parent.peer.getChildContainerElement().removeChild( this.peer.getContainerParent() );
         this.node.accessibleInputEnabled = true;
 
         // remove visibility/accessibleVisibility listeners that were added

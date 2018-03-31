@@ -96,7 +96,7 @@
  * 4. Finally, the example above doesn't utilize the default tags that we have in place for the parent and siblings.
  *      default labelTagName: 'label'
  *      default descriptionTagName: 'p'
- *      default parentContainerTagName: 'div'
+ *      default containerTagName: 'div'
  *    so the following will yield the same pDOM structure:
  *
  *    new Node( {
@@ -180,7 +180,7 @@ define( function( require ) {
     'focusable', // Sets whether or not the node can receive keyboard focus
     'ariaLabel', // Sets the value of the 'aria-label' attribute, see setAriaLabel()
     'ariaRole', // Sets the ARIA role for the DOM element, see setAriaRole() for documentation
-    'parentContainerAriaRole', // Sets the ARIA role for the container parent DOM element, see setParentContainerAriaRole()
+    'containerAriaRole', // Sets the ARIA role for the container parent DOM element, see setContainerAriaRole()
     'prependLabels', // Sets whether we want to prepend labels above the node's HTML element, see setPrependLabels()
     'ariaDescriptionContent', // Sets the content that will describe another node through aria-describedby, see setAriaDescriptionContent()
     'ariaLabelContent', // Sets the content that will label another node through aria-labelledby, see setAriaLabelledByContent()
@@ -258,6 +258,7 @@ define( function( require ) {
           // @private {boolean} - determines whether or not labels should be prepended above the node's DOM element.
           // All labels will be placed inside parentContainerElement, which will be automatically created if option
           // not provided. The labels are sorted relative to the node's DOM element under the container parent.
+          // TODO: document this, https://github.com/phetsims/scenery/issues/748
           this._prependLabels = null;
 
           // @private {array.<Object> - array of attributes that are on the node's DOM element.  Objects will have the
@@ -292,7 +293,7 @@ define( function( require ) {
           // complete list of ARIA roles, see https://www.w3.org/TR/wai-aria/roles. Beware that many roles are not
           // supported by browsers or assistive technologies, so use vanilla HTML for accessibility semantics where
           // possible.
-          this._parentContainerAriaRole = null;
+          this._containerAriaRole = null;
 
           // @private {Node|null} - A node with accessible content that labels this node through the aria-labelledby
           // ARIA attribute.  The other node can be anywhere in the scene graph.  The behavior for aria-labelledby
@@ -879,21 +880,21 @@ define( function( require ) {
          *                            https://www.w3.org/TR/html-aria/#allowed-aria-roles-states-and-properties
          *                            for a lsit of roles, states, and properties.
          */
-        setParentContainerAriaRole: function( ariaRole ) {
-          this._parentContainerAriaRole = ariaRole;
+        setContainerAriaRole: function( ariaRole ) {
+          this._containerAriaRole = ariaRole;
           this.invalidateAccessibleContent();
         },
-        set parentContainerAriaRole( ariaRole ) { this.setParentContainerAriaRole( ariaRole ); },
+        set containerAriaRole( ariaRole ) { this.setContainerAriaRole( ariaRole ); },
 
         /**
          * Get the ARIA role assigned to the container parent element.
          * @public
          * @returns {string|null}
          */
-        getParentContainerAriaRole: function() {
-          return this._parentContainerAriaRole;
+        getContainerAriaRole: function() {
+          return this._containerAriaRole;
         },
-        get parentcontainerAriaRole() { return this.getParentContainerAriaRole(); },
+        get containerAriaRole() { return this.getContainerAriaRole(); },
 
         /**
          * Sets the 'aria-label' attribute for labelling the node's DOM element. By using the
@@ -1903,9 +1904,9 @@ define( function( require ) {
         // for each accessible peer, clear the container parent if it exists since we will be reinserting labels and
         // the dom element in createPeer
         this.updateAccessiblePeers( function( accessiblePeer ) {
-          var parentContainerElement = accessiblePeer.parentContainerElement;
-          while ( parentContainerElement && parentContainerElement.hasChildNodes() ) {
-            parentContainerElement.removeChild( parentContainerElement.lastChild );
+          var containerElement = accessiblePeer.parentContainerElement;
+          while ( containerElement && containerElement.hasChildNodes() ) {
+            containerElement.removeChild( containerElement.lastChild );
           }
         } );
 
@@ -1929,14 +1930,14 @@ define( function( require ) {
               domElement.id = uniqueId;
 
               // create the container parent for the dom siblings
-              var parentContainerElement = null;
+              var containerElement = null;
               if ( self._containerTagName ) {
-                parentContainerElement = createElement( self._containerTagName, false );
-                parentContainerElement.id = 'container-' + uniqueId;
+                containerElement = createElement( self._containerTagName, false );
+                containerElement.id = 'container-' + uniqueId;
 
                 // provide the aria-role if it is specified
-                if ( self._parentContainerAriaRole ) {
-                  parentContainerElement.setAttribute( 'role', self._parentContainerAriaRole );
+                if ( self._containerAriaRole ) {
+                  containerElement.setAttribute( 'role', self._containerAriaRole );
                 }
               }
 
@@ -1959,7 +1960,7 @@ define( function( require ) {
               }
 
               var accessiblePeer = new AccessiblePeer( accessibleInstance, domElement, {
-                parentContainerElement: parentContainerElement,
+                parentContainerElement: containerElement,
                 labelElement: labelElement,
                 descriptionElement: descriptionElement
               } );

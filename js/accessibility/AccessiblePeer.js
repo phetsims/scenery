@@ -126,7 +126,7 @@ define( function( require ) {
      *
      * @returns {boolean}
      */
-    hasParentContainer: function() {
+    hasContainerParent: function() {
       return !!this.parentContainerElement;
     },
 
@@ -135,7 +135,7 @@ define( function( require ) {
      *
      * @returns {type}  description
      */
-    getParentContainerElement: function() {
+    getContainerParent: function() {
       return this.parentContainerElement || this.domElement;
     },
 
