@@ -812,7 +812,7 @@ define( function( require ) {
           }
 
           this.updateAccessiblePeers( function( accessiblePeer ) {
-            setTextContent( accessiblePeer.descriptionSibling, descriptionContent, useHTML  );
+            setTextContent( accessiblePeer.descriptionSibling, descriptionContent, useHTML );
           } );
 
         },
@@ -1972,12 +1972,7 @@ define( function( require ) {
 
               // set the accessible description
               if ( self._descriptionContent ) {
-                if ( self._descriptionIsHTML ) {
-                  self.setAccessibleDescriptionAsHTML( self._descriptionContent );
-                }
-                else {
-                  self.setDescriptionContent( self._descriptionContent );
-                }
+                self.setDescriptionContent( self._descriptionContent );
               }
 
               // if element is an input element, set input type
