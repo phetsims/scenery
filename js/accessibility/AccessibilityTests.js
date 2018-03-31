@@ -37,14 +37,14 @@ define( function( require ) {
    * @return {string}
    */
   function getPeerElementId( node ) {
-    if ( node.accessibleInstances.length === 0 ){
+    if ( node.accessibleInstances.length === 0 ) {
       throw new Error( 'No accessibleInstances. Was your node added to the scene graph?' );
     }
 
-    else if ( node.accessibleInstances.length > 1 ){
+    else if ( node.accessibleInstances.length > 1 ) {
       throw new Error( 'There should one and only one accessible instance for the node' );
     }
-    else if( !node.accessibleInstances[ 0 ].peer ) {
+    else if ( !node.accessibleInstances[ 0 ].peer ) {
       throw new Error( 'accessibleInstance\'s peer should exist.' );
     }
 
@@ -773,19 +773,27 @@ define( function( require ) {
     rootNode.addChild( a );
 
     var aElement = document.getElementById( getPeerElementId( a ) );
-    var labelSibling = aElement.parentElement.childNodes[1];
+    var labelSibling = aElement.parentElement.childNodes[ 1 ];
     assert.ok( a.accessibleInstances.length === 1, 'only 1 instance' );
     assert.ok( aElement.parentElement.childNodes.length === 2, 'parent contains two siblings' );
     assert.ok( labelSibling.tagName === 'LABEL', 'default label tagName' );
-    assert.ok( labelSibling.textContent === TEST_LABEL, 'no html should use textContent');
+    assert.ok( labelSibling.textContent === TEST_LABEL, 'no html should use textContent' );
 
     a.labelContent = TEST_LABEL_HTML;
-    assert.ok( labelSibling.innerHTML === TEST_LABEL_HTML, 'html label should use innerHTML');
+    assert.ok( labelSibling.innerHTML === TEST_LABEL_HTML, 'html label should use innerHTML' );
 
     a.labelContent = TEST_LABEL_HTML_2;
-    assert.ok( labelSibling.innerHTML === TEST_LABEL_HTML_2, 'html label should use innerHTML, overwrite from html');
+    assert.ok( labelSibling.innerHTML === TEST_LABEL_HTML_2, 'html label should use innerHTML, overwrite from html' );
 
-  });
+
+    a.tagName = 'div';
+
+    var newAElement = document.getElementById( getPeerElementId( a ) );
+    var newLabelSibling = newAElement.parentElement.childNodes[ 1 ];
+
+    assert.ok( newLabelSibling.innerHTML === TEST_LABEL_HTML_2, 'tagName independent of: html label should use innerHTML, overwrite from html' );
+
+  } );
 
   QUnit.test( 'descriptionContent option', function( assert ) {
 
@@ -800,19 +808,19 @@ define( function( require ) {
     rootNode.addChild( a );
 
     var aElement = document.getElementById( getPeerElementId( a ) );
-    var descriptionSibling = aElement.parentElement.childNodes[1];
+    var descriptionSibling = aElement.parentElement.childNodes[ 1 ];
     assert.ok( a.accessibleInstances.length === 1, 'only 1 instance' );
     assert.ok( aElement.parentElement.childNodes.length === 2, 'parent contains two siblings' );
     assert.ok( descriptionSibling.tagName === 'P', 'default label tagName' );
-    assert.ok( descriptionSibling.textContent === TEST_DESCRIPTION, 'no html should use textContent');
+    assert.ok( descriptionSibling.textContent === TEST_DESCRIPTION, 'no html should use textContent' );
 
     a.descriptionContent = TEST_DESCRIPTION_HTML;
-    assert.ok( descriptionSibling.innerHTML === TEST_DESCRIPTION_HTML, 'html label should use innerHTML');
+    assert.ok( descriptionSibling.innerHTML === TEST_DESCRIPTION_HTML, 'html label should use innerHTML' );
 
     a.descriptionContent = TEST_DESCRIPTION_HTML_2;
-    assert.ok( descriptionSibling.innerHTML === TEST_DESCRIPTION_HTML_2, 'html label should use innerHTML, overwrite from html');
+    assert.ok( descriptionSibling.innerHTML === TEST_DESCRIPTION_HTML_2, 'html label should use innerHTML, overwrite from html' );
 
-  });
+  } );
 
 
   QUnit.test( 'innerContent option', function( assert ) {
@@ -831,12 +839,34 @@ define( function( require ) {
     assert.ok( a.accessibleInstances.length === 1, 'only 1 instance' );
     assert.ok( aElement.parentElement.childNodes.length === 1, 'parent contains one primary siblings' );
     assert.ok( aElement.tagName === 'BUTTON', 'default label tagName' );
-    assert.ok( aElement.textContent === TEST_LABEL, 'no html should use textContent');
+    assert.ok( aElement.textContent === TEST_LABEL, 'no html should use textContent' );
 
     a.innerContent = TEST_LABEL_HTML;
-    assert.ok( aElement.innerHTML === TEST_LABEL_HTML, 'html label should use innerHTML');
+    assert.ok( aElement.innerHTML === TEST_LABEL_HTML, 'html label should use innerHTML' );
 
     a.innerContent = TEST_LABEL_HTML_2;
-    assert.ok( aElement.innerHTML === TEST_LABEL_HTML_2, 'html label should use innerHTML, overwrite from html');
-  });
+    assert.ok( aElement.innerHTML === TEST_LABEL_HTML_2, 'html label should use innerHTML, overwrite from html' );
+  } );
+
+  QUnit.test( 'focusable option', function( assert ) {
+
+    // test the behavior of focusable function
+    var rootNode = new Node( { tagName: 'div' } );
+    var display = new Display( rootNode ); // eslint-disable-line
+    document.body.appendChild( display.domElement );
+
+    var a = new Node( { tagName: 'div', focusable: true } );
+    rootNode.addChild( a );
+
+    assert.ok( a.focusable === true, 'focusable option setter' );
+    assert.ok( document.getElementById( getPeerElementId( a ) ).tabIndex === 0,
+      'tab index on primary sibling with setter' );
+
+    // change the tag name, but focusable should stay the same
+    a.tagName = 'p';
+
+    assert.ok( a.focusable === true, 'tagName option should not change focusable value' );
+    assert.ok( document.getElementById( getPeerElementId( a ) ).tabIndex === 0,
+      'tagName option should not change tab index on primary sibling' );
+  } );
 } );

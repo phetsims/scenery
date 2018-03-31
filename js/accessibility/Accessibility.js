@@ -110,8 +110,9 @@
  *
  * --------------------------------------------------------------------------------------------------------------------
  *
- * For additional accessibility options, please see the options listed in ACCESSIBILITY_OPTION_KEYS. For more
- * documentation on Scenery, Nodes, and the scene graph, please see http://phetsims.github.io/scenery/
+ * For additional accessibility options, please see the options listed in ACCESSIBILITY_OPTION_KEYS. To understand the
+ * pDOM more, see AccessiblePeer, which manages the DOM Elements for a node. For more documentation on Scenery, Nodes,
+ * and the scene graph, please see http://phetsims.github.io/scenery/
  *
  * @author Jesse Greenberg (PhET Interactive Simulations)
  * @author Sam Reid (PhET Interactive Simulations)
@@ -160,33 +161,34 @@ define( function( require ) {
   // valid types of DOM events that can be added to a node
   var DOM_EVENTS = [ 'input', 'change', 'click', 'keydown', 'keyup', 'focus', 'blur' ];
 
+  // The options for the Accessibility API. In general, most default to null; to clear, set back to null.
   var ACCESSIBILITY_OPTION_KEYS = [
     'tagName', // Sets the tag name for the primary sibling DOM element in the parallel DOM
     'inputType', // Sets the input type for the primary sibling DOM element, only relevant if tagName is 'input'
     'inputValue', // Sets the input value for the primary sibling DOM element, only relevant if tagName is 'input'
-    'accessibleChecked', // Sets the 'checked' state for inputs of type radio and checkbox, see setAccessibleChecked()
-    'containerTagName', // Sets the tag name for an element that contains this node's DOM element and its peers
-    'labelTagName', // Sets the tag name for the DOM element labelling this node, usually a paragraph
-    'descriptionTagName', // Sets the tag name for the DOM element describing this node, usually a paragraph
+    'accessibleChecked', // Sets the 'checked' state for inputs of type 'radio' and 'checkbox', see setAccessibleChecked()
+    'containerTagName', // Sets the tag name for an element that contains this Node's siblings, see setContainerTagName()
+    'labelTagName', // Sets the tag name for the DOM element sibling labelling this node, see setLabelTagName()
+    'descriptionTagName', // Sets the tag name for the DOM element sibling describing this node, see setDescriptionTagName()
+    'innerContent', // Sets the inner text or HTML for a node's primary sibling element, see setInnerContent()
+    'labelContent', // Sets the label content for the node, see setLabelContent()
+    'descriptionContent', // Sets the description content for the node, see setDescriptionContent()
     'focusHighlight', // Sets the focus highlight for the node, see setFocusHighlight()
     'focusHighlightLayerable', // Flag to determine if the focus highlight node can be layered in the scene graph, see setFocusHighlightLayerable()
     'groupFocusHighlight', // Sets the outer focus highlight for this node when a descendant has focus, see setGroupFocusHighlight()
-    'labelContent', // Set the label content for the node, see setLabelContent()
-    'innerContent', // set the inner text or HTML for a node's primary sibling element, see setInnerContent()
-    'descriptionContent', // Set the description content for the node, see setDescriptionContent()
-    'accessibleVisible', // Sets whether or not the node's DOM element is visible in the parallel DOM
-    'accessibleContentDisplayed', // sets whether or not the accessible content of the node (and its subtree) is displayed, see setAccessibleContentDisplayed()
-    'focusable', // Sets whether or not the node can receive keyboard focus
-    'ariaLabel', // Sets the value of the 'aria-label' attribute, see setAriaLabel()
-    'ariaRole', // Sets the ARIA role for the DOM element, see setAriaRole() for documentation
+    'accessibleVisible', // Sets whether or not the node's DOM element is visible in the parallel DOM, see setAccessibleVisible()
+    'accessibleContentDisplayed', // Sets whether or not the accessible content of the node (and its subtree) is displayed, see setAccessibleContentDisplayed()
+    'focusable', // Sets whether or not the node can receive keyboard focus, see setFocusable()
+    'ariaLabel', // Sets the value of the 'aria-label' attribute on the primary sibling of this Node, see setAriaLabel()
+    'ariaRole', // Sets the ARIA role for the primary sibling of this Node, see setAriaRole()
     'containerAriaRole', // Sets the ARIA role for the container parent DOM element, see setContainerAriaRole()
     'prependLabels', // Sets whether we want to prepend labels above the node's HTML element, see setPrependLabels()
     'ariaDescriptionContent', // Sets the content that will describe another node through aria-describedby, see setAriaDescriptionContent()
     'ariaLabelContent', // Sets the content that will label another node through aria-labelledby, see setAriaLabelledByContent()
     'ariaDescribedContent', // Sets the content that will be described by another node through aria-describedby, see setAriaDescribedContent()
     'ariaLabelledContent', // sets the content that will be labelled by another node through aria-labelledby, see setAriaLabelledContent()
-    'accessibleOrder', // Modifies the keyboard accessibility order, see setAccessibleOrder() for more documentation
-    'accessibleContent' // Sets up accessibility handling, see setAccessibleContent() for more documentation
+    'accessibleOrder', // Modifies the order of accessible  navigation, see setAccessibleOrder()
+    'accessibleContent' // Sets up accessibility handling (probably don't need to use this), see setAccessibleContent()
   ];
 
   var Accessibility = {
@@ -222,32 +224,31 @@ define( function( require ) {
          */
         initializeAccessibility: function() {
 
-          //REVIEW: Including the 'null' case in type documentation here would help.
-
-          // @private {string} - the HTML tag name of the element representing this node in the DOM
+          // @private {string|null} - the HTML tag name of the element representing this node in the DOM
           this._tagName = null;
 
-          // @private {string} - the HTML tag name for a container parent element for this node in the DOM. This
+          // @private {string|null} - the HTML tag name for a container parent element for this node in the DOM. This
           // container parent will contain the node's DOM element, as well as peer elements for any label or description
           // content. See setContainerTagName() for more documentation. If this option is needed (like to
           // contain multiple siblings with the primary sibling), it will default to the value of DEFAULT_CONTAINER_TAG_NAME.
           this._containerTagName = null;
 
-          // @private {string} - the HTML tag name for the label element that will contain the label content for
+          // @private {string|null} - the HTML tag name for the label element that will contain the label content for
           // this dom element. There are ways in which you can have a label without specifying a label tag name,
           // see setLabelContent() for the list of ways.
           this._labelTagName = null;
 
-          // @private {string} - the HTML tag name for the description element that will contain descsription content
+          // @private {string|null} - the HTML tag name for the description element that will contain descsription content
           // for this dom element. If a description is set before a tag name is defined, a paragraph element
           // will be created for the description.
           this._descriptionTagName = null;
 
-          // @private {string} - the type for an element with tag name of INPUT.  This should only be used
+          // @private {string|null} - the type for an element with tag name of INPUT.  This should only be used
           // if the element has a tag name INPUT.
           this._inputType = null;
 
           // @private {string} - the value of the input, only relevant if the tag name is of type "INPUT".
+          // TODO: does this support null?  https://github.com/phetsims/scenery/issues/748
           this._inputValue = null;
 
           // @private {boolean} - whether or not the accessible input is considered 'checked', only useful for inputs of
@@ -257,34 +258,34 @@ define( function( require ) {
           // @private {boolean} - determines whether or not labels should be prepended above the node's DOM element.
           // All labels will be placed inside containerParent, which will be automatically created if option
           // not provided. The labels are sorted relative to the node's DOM element under the container parent.
-          // TODO: document this, https://github.com/phetsims/scenery/issues/748
+          // TODO: document this why default to NULL?, https://github.com/phetsims/scenery/issues/748
           this._prependLabels = null;
 
           // @private {array.<Object> - array of attributes that are on the node's DOM element.  Objects will have the
           // form { attribute:{string}, value:{string|number} }
           this._accessibleAttributes = [];
 
-          // @private {string} - the label content for this node's DOM element.  There are multiple ways that a label
+          // @private {string|null} - the label content for this node's DOM element.  There are multiple ways that a label
           // can be associated with a node's dom element, see setLabelContent() for more documentation
           this._labelContent = null;
 
-          // @private {null|string} - the inner label content for this node's primary sibling. Set as inner HTML
+          // @private {string|null} - the inner label content for this node's primary sibling. Set as inner HTML
           // or text content of the actual DOM element. If this is used, the node should not have children.
           this._innerContent = null;
 
-          // @private {string} - the description content for this node's DOM element.
+          // @private {string|null} - the description content for this node's DOM element.
           this._descriptionContent = null;
 
-          // @private {string} - if provided, "aria-label" will be added as an inline attribute on the node's DOM
+          // @private {string|null} - if provided, "aria-label" will be added as an inline attribute on the node's DOM
           // element and set to this value. This will determine how the Accessible Name is provided for the DOM element.
           this._ariaLabel = null;
 
-          // @private {string} - the ARIA role for this node's DOM element, added as an HTML attribute.  For a complete
+          // @private {string|null} - the ARIA role for this node's DOM element, added as an HTML attribute.  For a complete
           // list of ARIA roles, see https://www.w3.org/TR/wai-aria/roles.  Beware that many roles are not supported
           // by browsers or assistive technologies, so use vanilla HTML for accessibility semantics where possible.
           this._ariaRole = null;
 
-          // @private {string} - the ARIA role for the container parent element, added as an HTML attribute. For a
+          // @private {string|null} - the ARIA role for the container parent element, added as an HTML attribute. For a
           // complete list of ARIA roles, see https://www.w3.org/TR/wai-aria/roles. Beware that many roles are not
           // supported by browsers or assistive technologies, so use vanilla HTML for accessibility semantics where
           // possible.
@@ -338,9 +339,10 @@ define( function( require ) {
           // Sets the tabIndex attribute on the node's DOM element.  Setting to false will not remove the node's DOM
           // from the document, but will ensure that it cannot receive focus by pressing 'tab'.  Several HTMLElements
           // (such as HTML form elements) can be focusable by default, without setting this property.
+          // TODO: why null? why not boolean, https://github.com/phetsims/scenery/issues/748
           this._focusable = null;
 
-          // @private {Shape|Node|string.<'invisible'>} - the focus highlight that will surround this node when it
+          // @private {Shape|Node|String.<'invisible'>} - the focus highlight that will surround this node when it
           // is focused.  By default, the focus highlight will be a pink rectangle that surrounds the Node's local
           // bounds.
           this._focusHighlight = null;
@@ -352,7 +354,8 @@ define( function( require ) {
 
           // @private {boolean|Node} - Adds a group focus highlight that surrounds this node when a descendant has
           // focus. Typically useful to indicate focus if focus enters a group of elements. If 'true', group
-          // highlight will go around local bounds of this node. Otherwise the custom node will be used as the highlight
+          // highlight will go around local bounds of this node. Otherwise the custom node will be used as the highlight/
+          // TODO: this is weird, why boolean or Node, https://github.com/phetsims/scenery/issues/748
           this._groupFocusHighlight = false;
 
           // @private {boolean} - Whether or not the accessible content will be visible from the browser and assistive
@@ -387,7 +390,7 @@ define( function( require ) {
           this._accessibleOrder = [];
 
 
-          // @private {null|Object} - If non-null, this node will be represented in the parallel DOM by the accessible content.
+          // @private {Object|null} - If non-null, this node will be represented in the parallel DOM by the accessible content.
           // The accessibleContent object will be of the form:
           // {
           //   createPeer: function( {AccessibleInstance} ): {AccessiblePeer},
@@ -510,16 +513,9 @@ define( function( require ) {
         get accessibleInputEnabled() { return this.getAccessibleInputEnabled(); },
 
         /**
-         * Set the tag name representing this element in the DOM. DOM element tag names are read-only, so this
-         * function will create a new DOM element for the Node and reset the accessible content.
-         * TODO: fix doc, https://github.com/phetsims/scenery/issues/748
-         * REVIEW: Setting the tag name multiple times results in incorrect behavior with many functions, e.g.:
-         *   var node = new scenery.Node();
-         *   node.tagName = 'div';
-         *   node.focusable = true;
-         *   node.primarySibling.tabIndex // 0 (as expected)
-         *   node.tagName = 'p';
-         *   node.primarySibling.tabIndex // -1 (yikes!, even when node.focusable returns true)
+         * Set the tag name for the primary sibling in the pDOM. DOM element tag names are read-only, so this
+         * function will create a new DOM element each time it is called for the Node's AccessiblePeer and
+         * reset the accessible content.
          *
          * @param {string} tagName
          */
@@ -545,19 +541,10 @@ define( function( require ) {
         get tagName() { return this.getTagName(); },
 
         /**
-         * Set the tag name for the accessible label for this Node.  DOM element tag names are read-only, so this will
-         * require creating a new label element.
-         *
-         * REVIEW: Same problem with after-the-fact modification as tagName:
-         *   var node = new scenery.Node()
-         *   node.tagName = 'div';
-         *   node.labelTagName = 'p'
-         *   node.labelContent = 'Label';
-         *   node.getLabelElement() // <p>Label</p>
-         *   node.labelTagName = 'div';
-         *   node.getLabelElement() // <div></div> -- NO label specified, even though accessibleLabel is still set
-         * TODO: fix this doc, https://github.com/phetsims/scenery/issues/748
-         * REVIEW: null used in unit tests, so this should be marked as accepting null
+         * Set the tag name for the accessible label sibling for this Node. DOM element tag names are read-only,
+         * so this will require creating a new AccessiblePeer for this Node (reconstructing all DOM Elements). If
+         * labelContent is specified without calling this method, then the DEFAULT_LABEL_TAG_NAME will be used as the
+         * tag name for the label sibling. Use null to clear the label sibling element from the pDOM.
          *
          * @param {string|null} tagName
          */
@@ -576,12 +563,10 @@ define( function( require ) {
         set labelTagName( tagName ) { this.setLabelTagName( tagName ); },
 
         /**
-         * Get the label element HTML tag name.
+         * Get the label sibling HTML tag name.
          * @public
          *
-         * REVIEW: Return type should include null, since new scenery.Node().labelTagName is null.
-         *
-         * @returns {string}
+         * @returns {string|null}
          */
         getLabelTagName: function() {
           return this._labelTagName;
@@ -589,13 +574,14 @@ define( function( require ) {
         get labelTagName() { return this.getLabelTagName(); },
 
         /**
-         * Set the tag name for the description. HTML element tag names are read-only, so this will require creating
-         * a new HTML element, and inserting it into the DOM.
+         * Set the tag name for the description sibling. HTML element tag names are read-only, so this will require creating
+         * a new HTML element, and inserting it into the DOM. The tag name provided must support
+         * innerHTML and textContent. If descriptionContent is specified without this option,
+         * then descriptionTagName will be set to DEFAULT_DESCRIPTION_TAG_NAME.
+         * Passing 'null' will clear away the description sibling.
+         *
          * @public
-         *
-         * REVIEW: Has same issue with setting tagName and labelTagName (see those review comments)
-         *
-         * @param {string} tagName
+         * @param {string|null} tagName
          */
         setDescriptionTagName: function( tagName ) {
           assert && assert( tagName === null || typeof tagName === 'string' );
@@ -612,7 +598,7 @@ define( function( require ) {
         set descriptionTagName( tagName ) { this.setDescriptionTagName( tagName ); },
 
         /**
-         * Get the HTML get name for the description element.
+         * Get the HTML tag name for the description sibling.
          * @public
          *
          * @returns {string|null}
@@ -626,7 +612,7 @@ define( function( require ) {
          * Sets the type for an input element.  Element must have the INPUT tag name. The input attribute is not
          * specified as readonly, so invalidating accessible content is not necessary.
          *
-         * @param {string} inputType
+         * @param {string|null} inputType
          */
         setInputType: function( inputType ) {
           assert && assert( this._tagName.toUpperCase() === INPUT_TAG, 'tag name must be INPUT to support inputType' );
@@ -642,7 +628,7 @@ define( function( require ) {
          * Get the input type. Input type is only relevant if this node's DOM element has tag name "INPUT".
          * @public
          *
-         * @returns {string}
+         * @returns {string|null}
          */
         getInputType: function() {
           return this._inputType;
@@ -684,10 +670,14 @@ define( function( require ) {
         get prependLabels() { return this.getPrependLabels(); },
 
         /**
-         * Set the container parent tag name.  By specifying this container parent, an element will be created that
-         * acts as a container for this node's DOM element and its label and description peers.  For instance, a button
-         * element with a label and description will be contained like the following if the container parent tag name
-         * is specified as 'section'.
+         * Set the container parent tag name. By specifying this container parent, an element will be created that
+         * acts as a container for this Node's primary sibling DOM Element and its label and description siblings.
+         * This containerTagName will default to DEFAULT_LABEL_TAG_NAME, and be added to the pDOM automatically if
+         * more than just the primary sibling is created.
+         *
+         *
+         * For instance, a button element with a label and description will be contained like the following
+         * if the containerTagName is specified as 'section'.
          *
          * <section id='parent-container-trail-id'>
          *   <button>Press me!</button>
@@ -695,7 +685,8 @@ define( function( require ) {
          *   <p>Button description</p>
          * </section>
          *
-         * @param {string} tagName
+         *
+         * @param {string|null} tagName
          */
         setContainerTagName: function( tagName ) {
           assert && assert( tagName === null || typeof tagName === 'string', 'invalid tagName argument: ' + tagName );
@@ -708,20 +699,22 @@ define( function( require ) {
         /**
          * Get the tag name for the container parent element.
          *
-         * @returns {string}
+         * @returns {string|null}
          */
-        getcontainerTagName: function() {
+        getContainerTagName: function() {
           return this._containerTagName;
         },
-        get containerTagName() { return this.getcontainerTagName(); },
+        get containerTagName() { return this.getContainerTagName(); },
 
         /**
-         * Set the content of the label sibling for the this node.  The label sibling will default to a
-         * <label> tag if no `labelTagName` is provided. If the label sibling is a `label` html element,
+         * Set the content of the label sibling for the this node.  The label sibling will default to the value of
+         * DEFAULT_LABEL_TAG_NAME if no `labelTagName` is provided. If the label sibling is a `LABEL` html element,
          * then the `for` attribute will automatically be added, pointing to the node's primary sibling DOM Element.
          *
          * This method supports adding content in two ways, with HTMLElement.textContent and HTMLElement.innerHTML.
-         * The DOM setter is chosen based on if the label passes the `usesFormatting
+         * The DOM setter is chosen based on if the label passes the `usesFormatting.
+         *
+         * Passing a null label value will not clear the whole label sibling, just the inner content of the DOM Element.
          * @param {string|null} label
          */
         setLabelContent: function( label ) {
@@ -752,9 +745,9 @@ define( function( require ) {
         set labelContent( label ) { this.setLabelContent( label ); },
 
         /**
-         * Get the label content for this node's DOM element.
+         * Get the content for this Node's label sibling DOM element.
          *
-         * @returns {string}
+         * @returns {string|null}
          */
         getLabelContent: function() {
           return this._labelContent;
@@ -795,11 +788,11 @@ define( function( require ) {
         get innerContent() { return this.getInnerContent(); },
 
         /**
-         * Set the description content for this node's DOM element. If no description tag name is specified, it will use
-         * a default. The description sibling tag name must support innerHTML and textContent.  If a description
-         * element does not exist yet, we assume that a default paragraph should be used.
+         * Set the description content for this node's DOM element. The description sibling tag name must support
+         * innerHTML and textContent. If a description element does not exist yet, a default
+         * DEFAULT_LABEL_TAG_NAME will be assigned to the descriptionTagName.
          *
-         * @param {string} descriptionContent
+         * @param {string|null} descriptionContent
          */
         setDescriptionContent: function( descriptionContent ) {
           var useHTML = AccessibilityUtil.usesFormattingTagsExclusive( descriptionContent );
@@ -819,9 +812,9 @@ define( function( require ) {
         set descriptionContent( textContent ) { this.setDescriptionContent( textContent ); },
 
         /**
-         * Get the accessible description content that is describing this Node.
+         * Get the content for this Node's description sibling DOM Element.
          *
-         * @returns {string}
+         * @returns {string|null}
          */
         getDescriptionContent: function() {
           return this._descriptionContent;
@@ -834,7 +827,7 @@ define( function( require ) {
          * element in the DOM.
          * @public
          *
-         * @param {string} ariaRole - role for the element, see
+         * @param {string|null} ariaRole - role for the element, see
          *                            https://www.w3.org/TR/html-aria/#allowed-aria-roles-states-and-properties
          *                            for a list of roles, states, and properties.
          */
@@ -850,7 +843,7 @@ define( function( require ) {
          * Get the ARIA role representing this node.
          * @public
          *
-         * @returns {string}
+         * @returns {string|null}
          */
         getAriaRole: function() {
           return this._ariaRole;
@@ -863,7 +856,7 @@ define( function( require ) {
          * replace it in the DOM.
          * @public
          *
-         * @param {string} ariaRole - role for the element, see
+         * @param {string|null} ariaRole - role for the element, see
          *                            https://www.w3.org/TR/html-aria/#allowed-aria-roles-states-and-properties
          *                            for a lsit of roles, states, and properties.
          */
@@ -886,10 +879,10 @@ define( function( require ) {
         /**
          * Sets the 'aria-label' attribute for labelling the node's DOM element. By using the
          * 'aria-label' attribute, the label will be read on focus, but can not be found with the
-         * virtual cursor.
+         * virtual cursor. This is one way to set a DOM Element's Accessible Name.
          * @public
          *
-         * @param {string} ariaLabel - the text for the aria label attribute
+         * @param {string|null} ariaLabel - the text for the aria label attribute
          */
         setAriaLabel: function( ariaLabel ) {
           this._ariaLabel = ariaLabel;
@@ -901,7 +894,7 @@ define( function( require ) {
         /**
          * Get the value of the aria-label attribute for this node's DOM element.
          *
-         * @returns {string}
+         * @returns {string|null}
          */
         getAriaLabel: function() {
           return this._ariaLabel;
@@ -1017,6 +1010,7 @@ define( function( require ) {
          * Upon focus, a screen reader should read the content under the HTML element referenced by the id,
          * before any description content. Exact behavior will depend on user agent. The specific content
          * used for the label can be specified by using setAriaLabelledContent, see that function for more info.
+         * This is one way to set this Node's primary sibling's Accessible Name.
          *
          * @public
          * @param {Node} node - the node with accessible content that labels this one.
@@ -1641,7 +1635,8 @@ define( function( require ) {
         },
 
         /**
-         * Sets the accessible content for a Node. See constructor for more information.
+         * Sets the accessible content for a Node. See constructor for more information. Not part of the Accessibility
+         * API
          * @public (scenery-internal)
          *
          * @param {null|Object} accessibleContent
@@ -1769,7 +1764,7 @@ define( function( require ) {
           var index = _.indexOf( this._accessibleInstances, accessibleInstance );
           assert && assert( index !== -1, 'Cannot remove an AccessibleInstance from a Node if it was not there' );
           this._accessibleInstances.splice( index, 1 );
-        },
+        }
       } );
 
       /**
