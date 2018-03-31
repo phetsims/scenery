@@ -45,7 +45,7 @@ define( function( require ) {
       var self = this;
 
       options = _.extend( {
-        parentContainerElement: null, // a parent container for this peer and potential siblings
+        containerParent: null, // a parent container for this peer and potential siblings
         childContainerElement: null, // an child container element where nested elements can be placed
         labelElement: null, // the element containing this node's label content
         descriptionElement: null // the element that will contain this node's description content
@@ -72,14 +72,14 @@ define( function( require ) {
       this.childContainerElement = options.childContainerElement ? options.childContainerElement : ( this.childContainerElement || null );
 
       // @private - a parent element that can contain this domElement and other siblings, usually label and description content
-      this.parentContainerElement = options.parentContainerElement ? options.parentContainerElement : ( this.parentContainerElement || null );
-      if ( this.parentContainerElement ) {
+      this.containerParent = options.containerParent ? options.containerParent : ( this.containerParent || null );
+      if ( this.containerParent ) {
 
         // The first child of the parent container element should be the peer dom element
         // if undefined, the insertBefore method will insert the peerDOMElement as the first child
         var peerDOMElement = this.domElement;
-        var firstChild = this.parentContainerElement.children[ 0 ];
-        this.parentContainerElement.insertBefore( peerDOMElement, firstChild );
+        var firstChild = this.containerParent.children[ 0 ];
+        this.containerParent.insertBefore( peerDOMElement, firstChild );
       }
 
       this.disposed = false;
@@ -127,7 +127,7 @@ define( function( require ) {
      * @returns {boolean}
      */
     hasContainerParent: function() {
-      return !!this.parentContainerElement;
+      return !!this.containerParent;
     },
 
     /**
@@ -136,7 +136,7 @@ define( function( require ) {
      * @returns {type}  description
      */
     getContainerParent: function() {
-      return this.parentContainerElement || this.domElement;
+      return this.containerParent || this.domElement;
     },
 
     /**
@@ -168,7 +168,7 @@ define( function( require ) {
         htmlElement = this.descriptionElement;
       }
       else if ( association === AccessiblePeer.PARENT_CONTAINER ) {
-        htmlElement = this.parentContainerElement;
+        htmlElement = this.containerParent;
       }
 
       return htmlElement;

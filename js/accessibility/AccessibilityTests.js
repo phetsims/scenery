@@ -724,11 +724,11 @@ define( function( require ) {
 
     rootNode.addChild( a );
     assert.ok( a.accessibleInstances.length === 1, 'only 1 instance' );
-    assert.ok( a.accessibleInstances[ 0 ].peer.parentContainerElement === null, 'no container parent for just button' );
+    assert.ok( a.accessibleInstances[ 0 ].peer.containerParent === null, 'no container parent for just button' );
 
     a.containerTagName = 'div';
 
-    assert.ok( a.accessibleInstances[ 0 ].peer.parentContainerElement.id.indexOf( 'container' ) >= 0, 'container parent is div if specified' );
+    assert.ok( a.accessibleInstances[ 0 ].peer.containerParent.id.indexOf( 'container' ) >= 0, 'container parent is div if specified' );
 
     var b = new Node( { tagName: 'button', labelTagName: 'div', labelContent: TEST_LABEL } );
 

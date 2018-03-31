@@ -256,7 +256,7 @@ define( function( require ) {
           this._accessibleChecked = false;
 
           // @private {boolean} - determines whether or not labels should be prepended above the node's DOM element.
-          // All labels will be placed inside parentContainerElement, which will be automatically created if option
+          // All labels will be placed inside containerParent, which will be automatically created if option
           // not provided. The labels are sorted relative to the node's DOM element under the container parent.
           // TODO: document this, https://github.com/phetsims/scenery/issues/748
           this._prependLabels = null;
@@ -1865,7 +1865,7 @@ define( function( require ) {
       /**
        * Called by invalidateAccessibleContent.  'this' will be bound by call. The contentElement will either be a
        * label or description element.  The contentElement will be sorted relative to this node's DOM element or its
-       * parentContainerElement.  Its placement will also depend on whether or not this node wants to prepend labels,
+       * containerParent.  Its placement will also depend on whether or not this node wants to prepend labels,
        * see setPrependLabels().
        * @private
        *
@@ -1874,13 +1874,13 @@ define( function( require ) {
        * @param {boolean} prependLabels
        */
       function insertContentElement( accessiblePeer, contentElement, prependLabels ) {
-        assert && assert( accessiblePeer.parentContainerElement, 'Cannot add sibling if there is no container element' );
-        if ( accessiblePeer.parentContainerElement ) {
-          if ( prependLabels && accessiblePeer.parentContainerElement === accessiblePeer.domElement.parentNode ) {
-            accessiblePeer.parentContainerElement.insertBefore( contentElement, accessiblePeer.domElement );
+        assert && assert( accessiblePeer.containerParent, 'Cannot add sibling if there is no container element' );
+        if ( accessiblePeer.containerParent ) {
+          if ( prependLabels && accessiblePeer.containerParent === accessiblePeer.domElement.parentNode ) {
+            accessiblePeer.containerParent.insertBefore( contentElement, accessiblePeer.domElement );
           }
           else {
-            accessiblePeer.parentContainerElement.appendChild( contentElement );
+            accessiblePeer.containerParent.appendChild( contentElement );
           }
         }
         else if ( accessiblePeer.domElement ) {
@@ -1904,7 +1904,7 @@ define( function( require ) {
         // for each accessible peer, clear the container parent if it exists since we will be reinserting labels and
         // the dom element in createPeer
         this.updateAccessiblePeers( function( accessiblePeer ) {
-          var containerElement = accessiblePeer.parentContainerElement;
+          var containerElement = accessiblePeer.containerParent;
           while ( containerElement && containerElement.hasChildNodes() ) {
             containerElement.removeChild( containerElement.lastChild );
           }
@@ -1960,7 +1960,7 @@ define( function( require ) {
               }
 
               var accessiblePeer = new AccessiblePeer( accessibleInstance, domElement, {
-                parentContainerElement: containerElement,
+                containerParent: containerElement,
                 labelElement: labelElement,
                 descriptionElement: descriptionElement
               } );
