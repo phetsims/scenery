@@ -108,8 +108,7 @@ define( function( require ) {
     'focusHighlight', // Sets the focus highlight for the node, see setFocusHighlight()
     'focusHighlightLayerable', // Flag to determine if the focus highlight node can be layered in the scene graph, see setFocusHighlightLayerable()
     'groupFocusHighlight', // Sets the outer focus highlight for this node when a descendant has focus, see setGroupFocusHighlight()
-    'accessibleLabel', // Set the label content for the node, see setAccessibleLabel()
-    'accessibleLabelAsHTML', // Set the label content for the node as innerHTML, see setAccessibleLabelAsHTML()
+    'labelContent', // Set the label content for the node, see setLabelContent()
     'innerContent', // set the inner text or HTML for a node's primary sibling element, see setInnerContent()
     'accessibleDescription', // Set the description content for the node, see setAccessibleDescription()
     'accessibleDescriptionAsHTML', // Set the description content for the node as innerHTML, see setAccessibleDescriptionContentAsHTML()
@@ -174,7 +173,7 @@ define( function( require ) {
 
           // @private {string} - the HTML tag name for the label element that will contain the label content for
           // this dom element. There are ways in which you can have a label without specifying a label tag name,
-          // see setAccessibleLabel() for the list of ways.
+          // see setLabelContent() for the list of ways.
           this._labelTagName = null;
 
           // @private {string} - the HTML tag name for the description element that will contain descsription content
@@ -203,16 +202,12 @@ define( function( require ) {
           this._accessibleAttributes = [];
 
           // @private {string} - the label content for this node's DOM element.  There are multiple ways that a label
-          // can be associated with a node's dom element, see setAccessibleLabel() for more documentation
-          this._accessibleLabel = null;
+          // can be associated with a node's dom element, see setLabelContent() for more documentation
+          this._labelContent = null;
 
           // @private {null|string} - the inner label content for this node's primary sibling. Set as inner HTML
           // or text content of the actual DOM element. If this is used, the node should not have children.
           this._innerContent = null;
-
-          // @private {string} - whether or not the label content is innerHTML.  Internal flag that is updated
-          // when the label content is set.  See setAccessibleLabelAsHTML() for more information
-          this._labelIsHTML = null;
 
           // @private {string} - the description content for this node's DOM element.
           this._accessibleDescription = null;
@@ -498,11 +493,11 @@ define( function( require ) {
          *   var node = new scenery.Node()
          *   node.tagName = 'div';
          *   node.labelTagName = 'p'
-         *   node.accessibleLabel = 'Label';
+         *   node.labelContent = 'Label';
          *   node.getLabelElement() // <p>Label</p>
          *   node.labelTagName = 'div';
          *   node.getLabelElement() // <div></div> -- NO label specified, even though accessibleLabel is still set
-         *
+         * TODO: fix this doc, https://github.com/phetsims/scenery/issues/748
          * REVIEW: null used in unit tests, so this should be marked as accepting null
          *
          * @param {string|null} tagName
@@ -670,8 +665,8 @@ define( function( require ) {
          * The DOM setter is chosen based on if the label passes the `usesFormatting
          * @param {string|null} label
          */
-        setAccessibleLabel: function( label ) {
-          this._accessibleLabel = label;
+        setLabelContent: function( label ) {
+          this._labelContent = label;
 
           // If there
           var useHTML = AccessibilityUtil.usesFormattingTagsExclusive( label );
@@ -685,7 +680,7 @@ define( function( require ) {
 
           this.updateAccessiblePeers( function( accessiblePeer ) {
             if ( accessiblePeer.labelElement ) {
-              setTextContent( accessiblePeer.labelElement, self._accessibleLabel, useHTML );
+              setTextContent( accessiblePeer.labelElement, self._labelContent, useHTML );
 
               // if the label element happens to be a 'label', associate with 'for' attribute
               if ( self._labelTagName.toUpperCase() === LABEL_TAG ) {
@@ -695,17 +690,17 @@ define( function( require ) {
           } );
 
         },
-        set accessibleLabel( label ) { this.setAccessibleLabel( label ); },
+        set labelContent( label ) { this.setLabelContent( label ); },
 
         /**
          * Get the label content for this node's DOM element.
          *
          * @returns {string}
          */
-        getAccessibleLabel: function() {
-          return this._accessibleLabel;
+        getLabelContent: function() {
+          return this._labelContent;
         },
-        get accessibleLabel() { return this.getAccessibleLabel(); },
+        get labelContent() { return this.getLabelContent(); },
 
         /**
          * Set the inner content for the primary sibling of the AccessiblePeers of this node. Will be set as innerHTML
@@ -1914,8 +1909,8 @@ define( function( require ) {
               self.setFocusable( self._focusable );
 
               // set the accessible label now that the element has been recreated again
-              if ( self._accessibleLabel ) {
-                self.setAccessibleLabel( self._accessibleLabel );
+              if ( self._labelContent ) {
+                self.setLabelContent( self._labelContent );
               }
 
               // restore the innerContent

@@ -83,7 +83,7 @@ define( function( require ) {
     // verify that setters and getters worked correctly
     assert.ok( buttonNode.labelTagName === 'label', 'Label tag name' );
     assert.ok( buttonNode.containerTagName === 'div', 'Parent container tag name' );
-    assert.ok( buttonNode.accessibleLabel === TEST_LABEL, 'Accessible label' );
+    assert.ok( buttonNode.labelContent === TEST_LABEL, 'Accessible label' );
     assert.ok( buttonNode.descriptionTagName === 'p', 'Description tag name' );
     assert.ok( buttonNode.focusable === false, 'Focusable' );
     assert.ok( buttonNode.ariaRole === 'button', 'Aria role' );
@@ -292,16 +292,16 @@ define( function( require ) {
     document.body.appendChild( display.domElement );
 
     assert.ok( a1.accessibleInputListeners.length === 0, 'no input accessible listeners on instantiation' );
-    assert.ok( a1.accessibleLabel === null, 'no label on instantiation' );
+    assert.ok( a1.labelContent === null, 'no label on instantiation' );
 
     // add a listener
-    var listener = { click: function() { a1.accessibleLabel = TEST_LABEL; } };
+    var listener = { click: function() { a1.labelContent = TEST_LABEL; } };
     var addedListener = a1.addAccessibleInputListener( listener );
     assert.ok( a1.accessibleInputListeners.length === 1, 'accessible listener added' );
 
     // fire the event
     document.getElementById( getPeerElementId( a1 ) ).click();
-    assert.ok( a1.accessibleLabel === TEST_LABEL, 'click fired, label set' );
+    assert.ok( a1.labelContent === TEST_LABEL, 'click fired, label set' );
 
     // remove the listener
     a1.removeAccessibleInputListener( addedListener );
@@ -309,12 +309,12 @@ define( function( require ) {
 
     // make sure event listener was also removed from DOM element
     // click should not change the label
-    a1.accessibleLabel = TEST_LABEL_2;
-    assert.ok( a1.accessibleLabel === TEST_LABEL_2, 'before click' );
+    a1.labelContent = TEST_LABEL_2;
+    assert.ok( a1.labelContent === TEST_LABEL_2, 'before click' );
 
     // setting the label redrew the pdom, so get a reference to the new dom element.
     document.getElementById( getPeerElementId( a1 ) ).click();
-    assert.ok( a1.accessibleLabel === TEST_LABEL_2, 'click should not change label' );
+    assert.ok( a1.labelContent === TEST_LABEL_2, 'click should not change label' );
 
   } );
 
@@ -704,7 +704,7 @@ define( function( require ) {
     var a = new Node( { tagName: 'button', ariaLabel: TEST_LABEL_2 } );
 
     assert.ok( a.ariaLabel === TEST_LABEL_2, 'aria-label getter/setter' );
-    assert.ok( a.accessibleLabel === null, 'no other label set with aria-label' );
+    assert.ok( a.labelContent === null, 'no other label set with aria-label' );
 
     rootNode.addChild( a );
     var buttonA = a.accessibleInstances[ 0 ].peer.domElement;
@@ -777,10 +777,10 @@ define( function( require ) {
     assert.ok( labelSibling.tagName === 'LABEL', 'default label tagName' );
     assert.ok( labelSibling.textContent === TEST_LABEL, 'no html should use textContent');
 
-    a.accessibleLabel = TEST_LABEL_HTML;
+    a.labelContent = TEST_LABEL_HTML;
     assert.ok( labelSibling.innerHTML === TEST_LABEL_HTML, 'html label should use innerHTML');
 
-    a.accessibleLabel = TEST_LABEL_HTML_2;
+    a.labelContent = TEST_LABEL_HTML_2;
     assert.ok( labelSibling.innerHTML === TEST_LABEL_HTML_2, 'html label should use innerHTML, overwrite from html');
 
   });
