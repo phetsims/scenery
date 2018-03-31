@@ -51,6 +51,146 @@ define( function( require ) {
     return node.accessibleInstances[ 0 ].peer.primarySibling.id;
   }
 
+
+  QUnit.test( 'tagName/innerContent option', function( assert ) {
+
+    // test the behavior of swapVisibility function
+    var rootNode = new Node( { tagName: 'div' } );
+    var display = new Display( rootNode ); // eslint-disable-line
+    document.body.appendChild( display.domElement );
+
+    // create some nodes for testing
+    var a = new Node( { tagName: 'button', innerContent: TEST_LABEL } );
+
+    rootNode.addChild( a );
+
+    var aElement = document.getElementById( getPeerElementId( a ) );
+    assert.ok( a.accessibleInstances.length === 1, 'only 1 instance' );
+    assert.ok( aElement.parentElement.childNodes.length === 1, 'parent contains one primary siblings' );
+    assert.ok( aElement.tagName === 'BUTTON', 'default label tagName' );
+    assert.ok( aElement.textContent === TEST_LABEL, 'no html should use textContent' );
+
+    a.innerContent = TEST_LABEL_HTML;
+    assert.ok( aElement.innerHTML === TEST_LABEL_HTML, 'html label should use innerHTML' );
+
+    a.innerContent = TEST_LABEL_HTML_2;
+    assert.ok( aElement.innerHTML === TEST_LABEL_HTML_2, 'html label should use innerHTML, overwrite from html' );
+
+    a.tagName = null;
+    assert.ok( a.accessibleInstances.length === 0, 'set to null should clear accessible instances' );
+
+  } );
+
+
+  QUnit.test( 'containerTagName, container created if needed', function( assert ) {
+
+
+    // test the behavior of swapVisibility function
+    var rootNode = new Node( { tagName: 'div' } );
+    var display = new Display( rootNode ); // eslint-disable-line
+    document.body.appendChild( display.domElement );
+
+    // create some nodes for testing
+    var a = new Node( { tagName: 'button' } );
+
+    rootNode.addChild( a );
+    assert.ok( a.accessibleInstances.length === 1, 'only 1 instance' );
+    assert.ok( a.accessibleInstances[ 0 ].peer.containerParent === null, 'no container parent for just button' );
+
+    a.containerTagName = 'div';
+
+    assert.ok( a.accessibleInstances[ 0 ].peer.containerParent.id.indexOf( 'container' ) >= 0, 'container parent is div if specified' );
+
+    var b = new Node( { tagName: 'button', labelTagName: 'div', labelContent: TEST_LABEL } );
+
+    rootNode.addChild( b );
+    var buttonElement = b.accessibleInstances[ 0 ].peer.primarySibling;
+    var parentElement = buttonElement.parentElement;
+
+    assert.ok( parentElement, 'parent element must be created with label option' );
+    assert.ok( parentElement.childNodes.length === 2, 'only contain label and primary siblings' );
+
+    // TODO: prependlabels --> appendLabel, see https://github.com/phetsims/scenery/issues/748
+    // assert.ok( parentElement.childNodes[ 0 ] === document.getElementById( getPeerElementId( b ) ), '' );
+
+
+    var c = new Node( { tagName: 'button', descriptionTagName: 'div', descriptionContent: TEST_DESCRIPTION } );
+
+    rootNode.addChild( c );
+    buttonElement = c.accessibleInstances[ 0 ].peer.primarySibling;
+    parentElement = buttonElement.parentElement;
+
+
+    assert.ok( parentElement, 'parent element must be created with description option' );
+    assert.ok( parentElement.childNodes.length === 2, 'only contain description and primary siblings' );
+
+    var d = new Node( { tagName: 'button', labelTagName: 'p', descriptionTagName: 'p', prependLabels: true } );
+    rootNode.addChild( d );
+    assert.ok( document.getElementById( getPeerElementId( d ) ).parentElement.childNodes.length === 3, 'correct children' );
+  } );
+
+  QUnit.test( 'labelTagName/labelContent option', function( assert ) {
+
+    // test the behavior of swapVisibility function
+    var rootNode = new Node( { tagName: 'div' } );
+    var display = new Display( rootNode ); // eslint-disable-line
+    document.body.appendChild( display.domElement );
+
+    // create some nodes for testing
+    var a = new Node( { tagName: 'button', labelContent: TEST_LABEL } );
+
+    rootNode.addChild( a );
+
+    var aElement = document.getElementById( getPeerElementId( a ) );
+    var labelSibling = aElement.parentElement.childNodes[ 1 ];
+    assert.ok( a.accessibleInstances.length === 1, 'only 1 instance' );
+    assert.ok( aElement.parentElement.childNodes.length === 2, 'parent contains two siblings' );
+    assert.ok( labelSibling.tagName === 'LABEL', 'default label tagName' );
+    assert.ok( labelSibling.textContent === TEST_LABEL, 'no html should use textContent' );
+
+    a.labelContent = TEST_LABEL_HTML;
+    assert.ok( labelSibling.innerHTML === TEST_LABEL_HTML, 'html label should use innerHTML' );
+
+    a.labelContent = TEST_LABEL_HTML_2;
+    assert.ok( labelSibling.innerHTML === TEST_LABEL_HTML_2, 'html label should use innerHTML, overwrite from html' );
+
+
+    a.tagName = 'div';
+
+    var newAElement = document.getElementById( getPeerElementId( a ) );
+    var newLabelSibling = newAElement.parentElement.childNodes[ 1 ];
+
+    assert.ok( newLabelSibling.innerHTML === TEST_LABEL_HTML_2, 'tagName independent of: html label should use innerHTML, overwrite from html' );
+
+  } );
+
+  QUnit.test( 'descriptionTagName/descriptionContent option', function( assert ) {
+
+    // test the behavior of swapVisibility function
+    var rootNode = new Node( { tagName: 'div' } );
+    var display = new Display( rootNode ); // eslint-disable-line
+    document.body.appendChild( display.domElement );
+
+    // create some nodes for testing
+    var a = new Node( { tagName: 'button', descriptionContent: TEST_DESCRIPTION } );
+
+    rootNode.addChild( a );
+
+    var aElement = document.getElementById( getPeerElementId( a ) );
+    var descriptionSibling = aElement.parentElement.childNodes[ 1 ];
+    assert.ok( a.accessibleInstances.length === 1, 'only 1 instance' );
+    assert.ok( aElement.parentElement.childNodes.length === 2, 'parent contains two siblings' );
+    assert.ok( descriptionSibling.tagName === 'P', 'default label tagName' );
+    assert.ok( descriptionSibling.textContent === TEST_DESCRIPTION, 'no html should use textContent' );
+
+    a.descriptionContent = TEST_DESCRIPTION_HTML;
+    assert.ok( descriptionSibling.innerHTML === TEST_DESCRIPTION_HTML, 'html label should use innerHTML' );
+
+    a.descriptionContent = TEST_DESCRIPTION_HTML_2;
+    assert.ok( descriptionSibling.innerHTML === TEST_DESCRIPTION_HTML_2, 'html label should use innerHTML, overwrite from html' );
+
+  } );
+
   QUnit.test( 'Accessibility options', function( assert ) {
 
     var rootNode = new Node();
@@ -711,141 +851,6 @@ define( function( require ) {
     rootNode.addChild( a );
     var buttonA = a.accessibleInstances[ 0 ].peer.primarySibling;
     assert.ok( buttonA.getAttribute( 'aria-label' ) === TEST_LABEL_2, 'setter on dom element' );
-  } );
-
-  QUnit.test( 'Container Parent created if needed', function( assert ) {
-
-
-    // test the behavior of swapVisibility function
-    var rootNode = new Node( { tagName: 'div' } );
-    var display = new Display( rootNode ); // eslint-disable-line
-    document.body.appendChild( display.domElement );
-
-    // create some nodes for testing
-    var a = new Node( { tagName: 'button' } );
-
-    rootNode.addChild( a );
-    assert.ok( a.accessibleInstances.length === 1, 'only 1 instance' );
-    assert.ok( a.accessibleInstances[ 0 ].peer.containerParent === null, 'no container parent for just button' );
-
-    a.containerTagName = 'div';
-
-    assert.ok( a.accessibleInstances[ 0 ].peer.containerParent.id.indexOf( 'container' ) >= 0, 'container parent is div if specified' );
-
-    var b = new Node( { tagName: 'button', labelTagName: 'div', labelContent: TEST_LABEL } );
-
-    rootNode.addChild( b );
-    var buttonElement = b.accessibleInstances[ 0 ].peer.primarySibling;
-    var parentElement = buttonElement.parentElement;
-
-    assert.ok( parentElement, 'parent element must be created with label option' );
-    assert.ok( parentElement.childNodes.length === 2, 'only contain label and primary siblings' );
-
-    // TODO: prependlabels --> appendLabel, see https://github.com/phetsims/scenery/issues/748
-    // assert.ok( parentElement.childNodes[ 0 ] === document.getElementById( getPeerElementId( b ) ), '' );
-
-
-    var c = new Node( { tagName: 'button', descriptionTagName: 'div', descriptionContent: TEST_DESCRIPTION } );
-
-    rootNode.addChild( c );
-    buttonElement = c.accessibleInstances[ 0 ].peer.primarySibling;
-    parentElement = buttonElement.parentElement;
-
-
-    assert.ok( parentElement, 'parent element must be created with description option' );
-    assert.ok( parentElement.childNodes.length === 2, 'only contain description and primary siblings' );
-
-    var d = new Node( { tagName: 'button', labelTagName: 'p', descriptionTagName: 'p', prependLabels: true } );
-    rootNode.addChild( d );
-    assert.ok( document.getElementById( getPeerElementId( d ) ).parentElement.childNodes.length === 3, 'correct children' );
-  } );
-
-  QUnit.test( 'labelContent option', function( assert ) {
-
-    // test the behavior of swapVisibility function
-    var rootNode = new Node( { tagName: 'div' } );
-    var display = new Display( rootNode ); // eslint-disable-line
-    document.body.appendChild( display.domElement );
-
-    // create some nodes for testing
-    var a = new Node( { tagName: 'button', labelContent: TEST_LABEL } );
-
-    rootNode.addChild( a );
-
-    var aElement = document.getElementById( getPeerElementId( a ) );
-    var labelSibling = aElement.parentElement.childNodes[ 1 ];
-    assert.ok( a.accessibleInstances.length === 1, 'only 1 instance' );
-    assert.ok( aElement.parentElement.childNodes.length === 2, 'parent contains two siblings' );
-    assert.ok( labelSibling.tagName === 'LABEL', 'default label tagName' );
-    assert.ok( labelSibling.textContent === TEST_LABEL, 'no html should use textContent' );
-
-    a.labelContent = TEST_LABEL_HTML;
-    assert.ok( labelSibling.innerHTML === TEST_LABEL_HTML, 'html label should use innerHTML' );
-
-    a.labelContent = TEST_LABEL_HTML_2;
-    assert.ok( labelSibling.innerHTML === TEST_LABEL_HTML_2, 'html label should use innerHTML, overwrite from html' );
-
-
-    a.tagName = 'div';
-
-    var newAElement = document.getElementById( getPeerElementId( a ) );
-    var newLabelSibling = newAElement.parentElement.childNodes[ 1 ];
-
-    assert.ok( newLabelSibling.innerHTML === TEST_LABEL_HTML_2, 'tagName independent of: html label should use innerHTML, overwrite from html' );
-
-  } );
-
-  QUnit.test( 'descriptionContent option', function( assert ) {
-
-    // test the behavior of swapVisibility function
-    var rootNode = new Node( { tagName: 'div' } );
-    var display = new Display( rootNode ); // eslint-disable-line
-    document.body.appendChild( display.domElement );
-
-    // create some nodes for testing
-    var a = new Node( { tagName: 'button', descriptionContent: TEST_DESCRIPTION } );
-
-    rootNode.addChild( a );
-
-    var aElement = document.getElementById( getPeerElementId( a ) );
-    var descriptionSibling = aElement.parentElement.childNodes[ 1 ];
-    assert.ok( a.accessibleInstances.length === 1, 'only 1 instance' );
-    assert.ok( aElement.parentElement.childNodes.length === 2, 'parent contains two siblings' );
-    assert.ok( descriptionSibling.tagName === 'P', 'default label tagName' );
-    assert.ok( descriptionSibling.textContent === TEST_DESCRIPTION, 'no html should use textContent' );
-
-    a.descriptionContent = TEST_DESCRIPTION_HTML;
-    assert.ok( descriptionSibling.innerHTML === TEST_DESCRIPTION_HTML, 'html label should use innerHTML' );
-
-    a.descriptionContent = TEST_DESCRIPTION_HTML_2;
-    assert.ok( descriptionSibling.innerHTML === TEST_DESCRIPTION_HTML_2, 'html label should use innerHTML, overwrite from html' );
-
-  } );
-
-
-  QUnit.test( 'innerContent option', function( assert ) {
-
-    // test the behavior of swapVisibility function
-    var rootNode = new Node( { tagName: 'div' } );
-    var display = new Display( rootNode ); // eslint-disable-line
-    document.body.appendChild( display.domElement );
-
-    // create some nodes for testing
-    var a = new Node( { tagName: 'button', innerContent: TEST_LABEL } );
-
-    rootNode.addChild( a );
-
-    var aElement = document.getElementById( getPeerElementId( a ) );
-    assert.ok( a.accessibleInstances.length === 1, 'only 1 instance' );
-    assert.ok( aElement.parentElement.childNodes.length === 1, 'parent contains one primary siblings' );
-    assert.ok( aElement.tagName === 'BUTTON', 'default label tagName' );
-    assert.ok( aElement.textContent === TEST_LABEL, 'no html should use textContent' );
-
-    a.innerContent = TEST_LABEL_HTML;
-    assert.ok( aElement.innerHTML === TEST_LABEL_HTML, 'html label should use innerHTML' );
-
-    a.innerContent = TEST_LABEL_HTML_2;
-    assert.ok( aElement.innerHTML === TEST_LABEL_HTML_2, 'html label should use innerHTML, overwrite from html' );
   } );
 
   QUnit.test( 'focusable option', function( assert ) {
