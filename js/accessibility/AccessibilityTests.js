@@ -182,7 +182,7 @@ define( function( require ) {
     assert.ok( nodeCElement.getAttribute( 'aria-labelledby' ) === nodeDElement.id, 'labelledby attribute wrong in case of pre-invalidation' );
 
     // change the association so that nodeA's label is the label for nodeB, and nodeA's description is the description for nodeC
-    nodeA.ariaDescriptionContent = AccessiblePeer.DESCRIPTION;
+    nodeA.ariaDescriptionContent = AccessiblePeer.DESCRIPTION_SIBLING;
     nodeC.setAriaDescribedByNode( nodeA );
 
     nodeA.ariaLabelContent = AccessiblePeer.LABEL_SIBLING;

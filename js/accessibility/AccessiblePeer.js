@@ -164,7 +164,7 @@ define( function( require ) {
       else if ( association === AccessiblePeer.LABEL_SIBLING ) {
         htmlElement = this.labelSibling;
       }
-      else if ( association === AccessiblePeer.DESCRIPTION ) {
+      else if ( association === AccessiblePeer.DESCRIPTION_SIBLING ) {
         htmlElement = this.descriptionSibling;
       }
       else if ( association === AccessiblePeer.CONTAINER_PARENT ) {
@@ -186,7 +186,7 @@ define( function( require ) {
     // @static - specifies valid associations between related AccessiblePeers in the DOM
     PRIMARY_SIBLING: 'PRIMARY_SIBLING', // associate with all accessible content related to this peer
     LABEL_SIBLING: 'LABEL_SIBLING', // associate with just the label content of this peer
-    DESCRIPTION: 'DESCRIPTION', // associate with just the description content of this peer
+    DESCRIPTION_SIBLING: 'DESCRIPTION_SIBLING', // associate with just the description content of this peer
     CONTAINER_PARENT: 'CONTAINER_PARENT' // associate with everything under the container parent of this peer
   } );
 
