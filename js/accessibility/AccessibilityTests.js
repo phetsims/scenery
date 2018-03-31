@@ -52,7 +52,7 @@ define( function( require ) {
   }
 
 
-  QUnit.test( 'tagName/innerContent option', function( assert ) {
+  QUnit.test( 'tagName/innerContent options', function( assert ) {
 
     // test the behavior of swapVisibility function
     var rootNode = new Node( { tagName: 'div' } );
@@ -79,10 +79,13 @@ define( function( require ) {
     a.tagName = null;
     assert.ok( a.accessibleInstances.length === 0, 'set to null should clear accessible instances' );
 
+    a.tagName = 'button';
+    assert.ok( document.getElementById( getPeerElementId( a ) ).innerHTML === TEST_LABEL_HTML_2,
+      'innerContent not cleared when tagName set to null.' );
   } );
 
 
-  QUnit.test( 'containerTagName, container created if needed', function( assert ) {
+  QUnit.test( 'containerTagName option, container created if needed', function( assert ) {
 
 
     // test the behavior of swapVisibility function
@@ -154,13 +157,20 @@ define( function( require ) {
     a.labelContent = TEST_LABEL_HTML_2;
     assert.ok( labelSibling.innerHTML === TEST_LABEL_HTML_2, 'html label should use innerHTML, overwrite from html' );
 
-
     a.tagName = 'div';
 
     var newAElement = document.getElementById( getPeerElementId( a ) );
     var newLabelSibling = newAElement.parentElement.childNodes[ 1 ];
 
     assert.ok( newLabelSibling.innerHTML === TEST_LABEL_HTML_2, 'tagName independent of: html label should use innerHTML, overwrite from html' );
+
+    a.labelTagName = null;
+
+    // make sure label was cleared from pDOM
+    assert.ok( document.getElementById( getPeerElementId( a ) ).parentElement.childNodes.length === 1,
+      'Only one element after clearing label');
+
+    assert.ok( a.labelContent === TEST_LABEL_HTML_2, 'clearing labelTagName should not change content, even  though it is not displayed' );
 
   } );
 
@@ -188,6 +198,14 @@ define( function( require ) {
 
     a.descriptionContent = TEST_DESCRIPTION_HTML_2;
     assert.ok( descriptionSibling.innerHTML === TEST_DESCRIPTION_HTML_2, 'html label should use innerHTML, overwrite from html' );
+
+    a.descriptionTagName = null;
+
+    // make sure description was cleared from pDOM
+    assert.ok( document.getElementById( getPeerElementId( a ) ).parentElement.childNodes.length === 1,
+      'Only one element after clearing description');
+
+    assert.ok( a.descriptionContent === TEST_DESCRIPTION_HTML_2, 'clearing descriptionTagName should not change content, even  though it is not displayed' );
 
   } );
 

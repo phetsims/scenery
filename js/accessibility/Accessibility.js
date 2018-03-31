@@ -770,6 +770,7 @@ define( function( require ) {
 
           var self = this;
           this.updateAccessiblePeers( function( accessiblePeer ) {
+            // TODO: are we sure this assert is safe? what if tagName was set to null to disable accessible content? https://github.com/phetsims/scenery/issues/748
             assert && assert( accessiblePeer.accessibleInstance.children.length === 0, 'descendants exist with accessible content, innerContent cannot be used' );
             setTextContent( accessiblePeer.primarySibling, self._innerContent, useHTML );
           } );
@@ -1933,8 +1934,9 @@ define( function( require ) {
               }
               self.setFocusable( self._focusable );
 
-              // set the accessible label now that the element has been recreated again
-              if ( self._labelContent ) {
+              // set the accessible label now that the element has been recreated again, but not if the tagName
+              // has been cleared out
+              if ( self._labelContent && self._labelTagName !== null ) {
                 self.setLabelContent( self._labelContent );
               }
 
@@ -1965,8 +1967,8 @@ define( function( require ) {
                 self.setAccessibleAttribute( attribute, value );
               }
 
-              // set the accessible description
-              if ( self._descriptionContent ) {
+              // set the accessible description, but not if the tagName has been cleared out.
+              if ( self._descriptionContent && self._descriptionTagName !== null) {
                 self.setDescriptionContent( self._descriptionContent );
               }
 
