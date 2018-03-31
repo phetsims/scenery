@@ -46,7 +46,7 @@ define( function( require ) {
       throw new Error( 'accessibleInstance\'s peer should exist.' );
     }
 
-    return node.accessibleInstances[ 0 ].peer.domElement.id;
+    return node.accessibleInstances[ 0 ].peer.primarySibling.id;
   }
 
   QUnit.test( 'Accessibility options', function( assert ) {
@@ -225,7 +225,7 @@ define( function( require ) {
     a1.labelTagName = 'div';
     a1.descriptionTagName = 'p';
 
-    var buttonElement = a1.accessibleInstances[ 0 ].peer.domElement;
+    var buttonElement = a1.accessibleInstances[ 0 ].peer.primarySibling;
     var parentElement = buttonElement.parentElement;
     var buttonPeers = parentElement.childNodes;
 
@@ -238,7 +238,7 @@ define( function( require ) {
     assert.ok( document.getElementById( parentElement.id ), 'container parent in DOM' );
     assert.ok( buttonPeers[ 0 ].tagName === 'DIV', 'label first for prependLabels' );
     assert.ok( buttonPeers[ 1 ].tagName === 'P', 'description second for prependLabels' );
-    assert.ok( buttonPeers[ 2 ].tagName === 'BUTTON', 'domElement third for prependLabels' );
+    assert.ok( buttonPeers[ 2 ].tagName === 'BUTTON', 'primarySibling third for prependLabels' );
 
     // make the button a div and use an inline label, and place the description below
     a1.tagName = 'div';
@@ -253,13 +253,13 @@ define( function( require ) {
     // </div>
 
     // redefine the HTML elements (references will point to old elements before mutation)
-    buttonElement = a1.accessibleInstances[ 0 ].peer.domElement;
+    buttonElement = a1.accessibleInstances[ 0 ].peer.primarySibling;
     parentElement = buttonElement.parentElement;
     assert.ok( parentElement.childNodes[ 0 ] === document.getElementById( getPeerElementId( a1 ) ), 'div first' );
     assert.ok( parentElement.childNodes[ 1 ].id.indexOf( 'description' ) >= 0, 'description after div without prependLabels' );
     assert.ok( parentElement.childNodes.length === 2, 'no label peer when using just aria-label attribute' );
 
-    var elementInDom = document.getElementById( a1.accessibleInstances[ 0 ].peer.domElement.id );
+    var elementInDom = document.getElementById( a1.accessibleInstances[ 0 ].peer.primarySibling.id );
     assert.ok( elementInDom.getAttribute( 'aria-label' ) === TEST_LABEL, 'aria-label set' );
 
   } );
@@ -454,12 +454,12 @@ define( function( require ) {
     //       <div id="e-instance2">
     var instances = e.accessibleInstances;
     assert.ok( e.accessibleInstances.length === 3, 'node e should have 3 accessible instances' );
-    assert.ok( ( instances[ 0 ].peer.domElement.id !== instances[ 1 ].peer.domElement.id ) &&
-               ( instances[ 1 ].peer.domElement.id !== instances[ 2 ].peer.domElement.id ) &&
-               ( instances[ 0 ].peer.domElement.id !== instances[ 2 ].peer.domElement.id ), 'each dom element should be unique' );
-    assert.ok( document.getElementById( instances[ 0 ].peer.domElement.id ), 'peer domElement 0 should be in the DOM' );
-    assert.ok( document.getElementById( instances[ 1 ].peer.domElement.id ), 'peer domElement 1 should be in the DOM' );
-    assert.ok( document.getElementById( instances[ 2 ].peer.domElement.id ), 'peer domElement 2 should be in the DOM' );
+    assert.ok( ( instances[ 0 ].peer.primarySibling.id !== instances[ 1 ].peer.primarySibling.id ) &&
+               ( instances[ 1 ].peer.primarySibling.id !== instances[ 2 ].peer.primarySibling.id ) &&
+               ( instances[ 0 ].peer.primarySibling.id !== instances[ 2 ].peer.primarySibling.id ), 'each dom element should be unique' );
+    assert.ok( document.getElementById( instances[ 0 ].peer.primarySibling.id ), 'peer primarySibling 0 should be in the DOM' );
+    assert.ok( document.getElementById( instances[ 1 ].peer.primarySibling.id ), 'peer primarySibling 1 should be in the DOM' );
+    assert.ok( document.getElementById( instances[ 2 ].peer.primarySibling.id ), 'peer primarySibling 2 should be in the DOM' );
   } );
 
   QUnit.test( 'replaceChild', function( assert ) {
@@ -517,7 +517,7 @@ define( function( require ) {
     assert.ok( a.hasChild( testNode ), 'a should now have child testNode' );
     assert.ok( !f.focused, 'f no longer has focus after being replaced' );
     assert.ok( testNode.focused, 'testNode has focus after replacing focused node f' );
-    assert.ok( testNode.accessibleInstances[ 0 ].peer.domElement === document.activeElement, 'browser is focusing testNode' );
+    assert.ok( testNode.accessibleInstances[ 0 ].peer.primarySibling === document.activeElement, 'browser is focusing testNode' );
 
     testNode.blur();
     assert.ok( testNode, 'testNode blurred before being replaced' );
@@ -528,7 +528,7 @@ define( function( require ) {
     assert.ok( !a.hasChild( testNode ), 'testNode should no longer be a child of node a' );
     assert.ok( !testNode.focused, 'testNode should not have focus after being replaced' );
     assert.ok( !f.focused, 'f should not have focus after replacing testNode, testNode did not have focus' );
-    assert.ok( f.accessibleInstances[ 0 ].peer.domElement !== document.activeElement, 'browser should not be focusing node f' );
+    assert.ok( f.accessibleInstances[ 0 ].peer.primarySibling !== document.activeElement, 'browser should not be focusing node f' );
 
     // focus node d and replace with non-focusable testNode, neither should have focus since testNode is not focusable
     d.focus();
@@ -584,12 +584,12 @@ define( function( require ) {
     //      <button id="g1">
     //   <button id="g2">
 
-    // get the accessible DOM elements - looking into accessibleInstances for testing, there is no getter for domElement
-    var divA = a.accessibleInstances[ 0 ].peer.domElement;
-    var buttonB = b.accessibleInstances[ 0 ].peer.domElement;
-    var divE = e.accessibleInstances[ 0 ].peer.domElement;
-    var buttonG1 = g.accessibleInstances[ 0 ].peer.domElement;
-    var buttonG2 = g.accessibleInstances[ 1 ].peer.domElement;
+    // get the accessible primary siblings - looking into accessibleInstances for testing, there is no getter for primarySibling
+    var divA = a.accessibleInstances[ 0 ].peer.primarySibling;
+    var buttonB = b.accessibleInstances[ 0 ].peer.primarySibling;
+    var divE = e.accessibleInstances[ 0 ].peer.primarySibling;
+    var buttonG1 = g.accessibleInstances[ 0 ].peer.primarySibling;
+    var buttonG2 = g.accessibleInstances[ 1 ].peer.primarySibling;
 
     var divAChildren = divA.childNodes;
     var divEChildren = divE.childNodes;
@@ -707,7 +707,7 @@ define( function( require ) {
     assert.ok( a.labelContent === null, 'no other label set with aria-label' );
 
     rootNode.addChild( a );
-    var buttonA = a.accessibleInstances[ 0 ].peer.domElement;
+    var buttonA = a.accessibleInstances[ 0 ].peer.primarySibling;
     assert.ok( buttonA.getAttribute( 'aria-label' ) === TEST_LABEL_2, 'setter on dom element' );
   } );
 
@@ -733,7 +733,7 @@ define( function( require ) {
     var b = new Node( { tagName: 'button', labelTagName: 'div', labelContent: TEST_LABEL } );
 
     rootNode.addChild( b );
-    var buttonElement = b.accessibleInstances[ 0 ].peer.domElement;
+    var buttonElement = b.accessibleInstances[ 0 ].peer.primarySibling;
     var parentElement = buttonElement.parentElement;
 
     assert.ok( parentElement, 'parent element must be created with label option' );
@@ -746,7 +746,7 @@ define( function( require ) {
     var c = new Node( { tagName: 'button', descriptionTagName: 'div', accessibleDescription: TEST_DESCRIPTION } );
 
     rootNode.addChild( c );
-    buttonElement = c.accessibleInstances[ 0 ].peer.domElement;
+    buttonElement = c.accessibleInstances[ 0 ].peer.primarySibling;
     parentElement = buttonElement.parentElement;
 
 

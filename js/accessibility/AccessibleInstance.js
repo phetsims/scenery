@@ -39,7 +39,7 @@ define( function( require ) {
     /**
      * @param {AccessibleInstance|null} parent
      * @param {Display} display
-     * @param {HTMLElement} [domElement] - If not included here, subtype is responsible for setting it in the constructor.
+     * @param {HTMLElement} [primarySibling] - If not included here, subtype is responsible for setting it in the constructor.
      * @returns {AccessibleInstance} - Returns 'this' reference, for chaining
      */
     initializeAccessibleInstance: function( parent, display, trail ) {
@@ -374,7 +374,7 @@ define( function( require ) {
 
       var containerElement = this.peer.getChildContainerElement();
       for ( var n = this.children.length - 1; n >= 0; n-- ) {
-        var peerDOMElement = this.children[ n ].peer.domElement;
+        var peerDOMElement = this.children[ n ].peer.primarySibling;
 
         // if the peer has a parent container element, this structure containing the peerDOMElement should be inserted
         if ( this.children[ n ].peer.hasContainerParent() ) {

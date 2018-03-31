@@ -446,7 +446,7 @@ define( function( require ) {
           // add the listener directly to any AccessiblePeers that are representing this node
           this._accessibleInputListeners.push( addedAccessibleInput );
           this.updateAccessiblePeers( function( accessiblePeer ) {
-            self.addDOMEventListeners( addedAccessibleInput, accessiblePeer.domElement );
+            self.addDOMEventListeners( addedAccessibleInput, accessiblePeer.primarySibling );
           } );
 
           return addedAccessibleInput;
@@ -470,7 +470,7 @@ define( function( require ) {
           // remove the event listeners from any peers
           var self = this;
           this.updateAccessiblePeers( function( accessiblePeer ) {
-            self.removeDOMEventListeners( accessibleInput, accessiblePeer.domElement );
+            self.removeDOMEventListeners( accessibleInput, accessiblePeer.primarySibling );
           } );
 
           return this;
@@ -517,14 +517,14 @@ define( function( require ) {
         /**
          * Set the tag name representing this element in the DOM. DOM element tag names are read-only, so this
          * function will create a new DOM element for the Node and reset the accessible content.
-         *
+         * TODO: fix doc, https://github.com/phetsims/scenery/issues/748
          * REVIEW: Setting the tag name multiple times results in incorrect behavior with many functions, e.g.:
          *   var node = new scenery.Node();
          *   node.tagName = 'div';
          *   node.focusable = true;
-         *   node.domElement.tabIndex // 0 (as expected)
+         *   node.primarySibling.tabIndex // 0 (as expected)
          *   node.tagName = 'p';
-         *   node.domElement.tabIndex // -1 (yikes!, even when node.focusable returns true)
+         *   node.primarySibling.tabIndex // -1 (yikes!, even when node.focusable returns true)
          *
          * @param {string} tagName
          */
@@ -638,7 +638,7 @@ define( function( require ) {
 
           this._inputType = inputType;
           this.updateAccessiblePeers( function( accessiblePeer ) {
-            accessiblePeer.domElement.type = inputType;
+            accessiblePeer.primarySibling.type = inputType;
           } );
         },
         set inputType( inputType ) { this.setInputType( inputType ); },
@@ -748,7 +748,7 @@ define( function( require ) {
 
               // if the label element happens to be a 'label', associate with 'for' attribute
               if ( self._labelTagName.toUpperCase() === LABEL_TAG ) {
-                accessiblePeer.labelSibling.setAttribute( 'for', accessiblePeer.domElement.id );
+                accessiblePeer.labelSibling.setAttribute( 'for', accessiblePeer.primarySibling.id );
               }
             }
           } );
@@ -783,7 +783,7 @@ define( function( require ) {
           var self = this;
           this.updateAccessiblePeers( function( accessiblePeer ) {
             assert && assert( accessiblePeer.accessibleInstance.children.length === 0, 'descendants exist with accessible content, innerContent cannot be used' );
-            setTextContent( accessiblePeer.domElement, self._innerContent, useHTML );
+            setTextContent( accessiblePeer.primarySibling, self._innerContent, useHTML );
           } );
         },
         set innerContent( content ) { this.setInnerContent( content ); },
@@ -1343,7 +1343,7 @@ define( function( require ) {
 
         /**
          * Hide completely from a screen reader and the browser by setting the hidden attribute on the node's
-         * representative DOM element. If this domElement and its peers have a container parent, the container
+         * representative DOM element. If the sibling DOM Elements have a container parent, the container
          * should be hidden so that all peers are hidden as well.  Hiding the element will remove it from the focus
          * order.
          *
@@ -1412,7 +1412,7 @@ define( function( require ) {
           this._inputValue = value;
 
           this.updateAccessiblePeers( function( accessiblePeer ) {
-            accessiblePeer.domElement.value = value;
+            accessiblePeer.primarySibling.value = value;
           } );
         },
         set inputValue( value ) { this.setInputValue( value ); },
@@ -1440,7 +1440,7 @@ define( function( require ) {
           this._accessibleChecked = checked;
 
           this.updateAccessiblePeers( function( accessiblePeer ) {
-            accessiblePeer.domElement.checked = checked;
+            accessiblePeer.primarySibling.checked = checked;
           } );
         },
         set accessibleChecked( checked ) { this.setAccessibleChecked( checked ); },
@@ -1487,7 +1487,7 @@ define( function( require ) {
 
           this._accessibleAttributes.push( { attribute: attribute, value: value } );
           this.updateAccessiblePeers( function( accessiblePeer ) {
-            accessiblePeer.domElement.setAttribute( attribute, value );
+            accessiblePeer.primarySibling.setAttribute( attribute, value );
           } );
         },
 
@@ -1509,7 +1509,7 @@ define( function( require ) {
           assert && assert( attributeRemoved, 'Node does not have accessible attribute ' + attribute );
 
           this.updateAccessiblePeers( function( accessiblePeer ) {
-            accessiblePeer.domElement.removeAttribute( attribute );
+            accessiblePeer.primarySibling.removeAttribute( attribute );
           } );
         },
 
@@ -1541,8 +1541,8 @@ define( function( require ) {
           this._focusable = isFocusable;
 
           this.updateAccessiblePeers( function( accessiblePeer ) {
-            if ( accessiblePeer.domElement ) {
-              accessiblePeer.domElement.tabIndex = isFocusable ? 0 : -1;
+            if ( accessiblePeer.primarySibling ) {
+              accessiblePeer.primarySibling.tabIndex = isFocusable ? 0 : -1;
             }
           } );
         },
@@ -1570,7 +1570,7 @@ define( function( require ) {
         isFocused: function() {
           var isFocused = false;
           if ( this._accessibleInstances.length > 0 ) {
-            isFocused = document.activeElement === this._accessibleInstances[ 0 ].peer.domElement;
+            isFocused = document.activeElement === this._accessibleInstances[ 0 ].peer.primarySibling;
           }
 
           return isFocused;
@@ -1594,7 +1594,7 @@ define( function( require ) {
             assert && assert( this._accessibleVisible, 'trying to set focus on a node with invisible accessible content' );
             assert && assert( this._accessibleInstances.length === 1, 'focus() unsupported for Nodes using DAG, accessible content is not unique' );
 
-            this._accessibleInstances[ 0 ].peer.domElement.focus();
+            this._accessibleInstances[ 0 ].peer.primarySibling.focus();
           }
         },
 
@@ -1605,7 +1605,7 @@ define( function( require ) {
          */
         blur: function() {
           if ( this._accessibleInstances.length > 0 ) {
-            this._accessibleInstances[ 0 ].peer.domElement.blur();
+            this._accessibleInstances[ 0 ].peer.primarySibling.blur();
           }
         },
 
@@ -1876,15 +1876,15 @@ define( function( require ) {
       function insertContentElement( accessiblePeer, contentElement, prependLabels ) {
         assert && assert( accessiblePeer.containerParent, 'Cannot add sibling if there is no container element' );
         if ( accessiblePeer.containerParent ) {
-          if ( prependLabels && accessiblePeer.containerParent === accessiblePeer.domElement.parentNode ) {
-            accessiblePeer.containerParent.insertBefore( contentElement, accessiblePeer.domElement );
+          if ( prependLabels && accessiblePeer.containerParent === accessiblePeer.primarySibling.parentNode ) {
+            accessiblePeer.containerParent.insertBefore( contentElement, accessiblePeer.primarySibling );
           }
           else {
             accessiblePeer.containerParent.appendChild( contentElement );
           }
         }
-        else if ( accessiblePeer.domElement ) {
-          accessiblePeer.domElement.appendChild( contentElement );
+        else if ( accessiblePeer.primarySibling ) {
+          accessiblePeer.primarySibling.appendChild( contentElement );
         }
       }
 
@@ -1926,8 +1926,8 @@ define( function( require ) {
               var uniqueId = accessibleInstance.trail.getUniqueId();
 
               // create the base DOM element representing this accessible instance
-              var domElement = createElement( self._tagName, self._focusable );
-              domElement.id = uniqueId;
+              var primarySibling = createElement( self._tagName, self._focusable );
+              primarySibling.id = uniqueId;
 
               // create the container parent for the dom siblings
               var containerElement = null;
@@ -1959,7 +1959,7 @@ define( function( require ) {
                 descriptionSibling.id = 'description-' + uniqueId;
               }
 
-              var accessiblePeer = new AccessiblePeer( accessibleInstance, domElement, {
+              var accessiblePeer = new AccessiblePeer( accessibleInstance, primarySibling, {
                 containerParent: containerElement,
                 labelSibling: labelSibling,
                 descriptionSibling: descriptionSibling
@@ -2037,7 +2037,7 @@ define( function( require ) {
 
               // add all listeners to the dom element
               for ( i = 0; i < self._accessibleInputListeners.length; i++ ) {
-                self.addDOMEventListeners( self._accessibleInputListeners[ i ], domElement );
+                self.addDOMEventListeners( self._accessibleInputListeners[ i ], primarySibling );
               }
 
               // insert the label and description elements in the correct location if they exist

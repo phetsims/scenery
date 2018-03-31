@@ -288,7 +288,7 @@ define( function( require ) {
       this._rootAccessibleInstance.addSubtree( new scenery.Trail( this._rootNode ) );
 
       // add the accessible DOM as a child of this DOM element
-      this._domElement.appendChild( this._rootAccessibleInstance.peer.domElement );
+      this._domElement.appendChild( this._rootAccessibleInstance.peer.primarySibling );
     }
   }
 
@@ -796,7 +796,7 @@ define( function( require ) {
      * @returns {HTMLElement}
      */
     getAccessibleDOMElement: function() {
-      return this._rootAccessibleInstance.peer.domElement;
+      return this._rootAccessibleInstance.peer.primarySibling;
     },
     get accessibleDOMElement() { return this.getAccessibleDOMElement(); },
 

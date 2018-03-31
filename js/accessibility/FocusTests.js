@@ -275,11 +275,11 @@ define( function( require ) {
     rootNode.accessibleOrder = [ d, c, b, a ];
 
     // debugger;
-    var divRoot = display._rootAccessibleInstance.peer.domElement;
-    var divA = a.accessibleInstances[ 0 ].peer.domElement;
-    var divB = b.accessibleInstances[ 0 ].peer.domElement;
-    var divC = c.accessibleInstances[ 0 ].peer.domElement;
-    var divD = d.accessibleInstances[ 0 ].peer.domElement;
+    var divRoot = display._rootAccessibleInstance.peer.primarySibling;
+    var divA = a.accessibleInstances[ 0 ].peer.primarySibling;
+    var divB = b.accessibleInstances[ 0 ].peer.primarySibling;
+    var divC = c.accessibleInstances[ 0 ].peer.primarySibling;
+    var divD = d.accessibleInstances[ 0 ].peer.primarySibling;
 
     assert.ok( divRoot.children[ 0 ] === divD, 'divD should be first child' );
     assert.ok( divRoot.children[ 1 ] === divC, 'divC should be second child' );
@@ -306,11 +306,11 @@ define( function( require ) {
     c.tagName = 'div';
     d.tagName = 'div';
 
-    var divRoot = display._rootAccessibleInstance.peer.domElement;
-    var divA = a.accessibleInstances[ 0 ].peer.domElement;
-    var divB = b.accessibleInstances[ 0 ].peer.domElement;
-    var divC = c.accessibleInstances[ 0 ].peer.domElement;
-    var divD = d.accessibleInstances[ 0 ].peer.domElement;
+    var divRoot = display._rootAccessibleInstance.peer.primarySibling;
+    var divA = a.accessibleInstances[ 0 ].peer.primarySibling;
+    var divB = b.accessibleInstances[ 0 ].peer.primarySibling;
+    var divC = c.accessibleInstances[ 0 ].peer.primarySibling;
+    var divD = d.accessibleInstances[ 0 ].peer.primarySibling;
 
     assert.ok( divRoot.children[ 0 ] === divD, 'divD should be first child' );
     assert.ok( divRoot.children[ 1 ] === divC, 'divC should be second child' );
@@ -342,9 +342,9 @@ define( function( require ) {
     c.addChild( d );
     c.addChild( f );
 
-    var divB = b.accessibleInstances[ 0 ].peer.domElement;
-    var divC = c.accessibleInstances[ 0 ].peer.domElement;
-    var divE = e.accessibleInstances[ 0 ].peer.domElement;
+    var divB = b.accessibleInstances[ 0 ].peer.primarySibling;
+    var divC = c.accessibleInstances[ 0 ].peer.primarySibling;
+    var divE = e.accessibleInstances[ 0 ].peer.primarySibling;
 
     b.accessibleOrder = [ e, c ];
 
@@ -370,9 +370,9 @@ define( function( require ) {
     c.addChild( d );
     c.addChild( f );
 
-    var divA = a.accessibleInstances[ 0 ].peer.domElement;
-    var divC = c.accessibleInstances[ 0 ].peer.domElement;
-    var divE = e.accessibleInstances[ 0 ].peer.domElement;
+    var divA = a.accessibleInstances[ 0 ].peer.primarySibling;
+    var divC = c.accessibleInstances[ 0 ].peer.primarySibling;
+    var divE = e.accessibleInstances[ 0 ].peer.primarySibling;
 
     a.accessibleOrder = [ e, c ];
     assert.ok( divA.children[ 0 ] === divE, 'div E should be first child of div B' );

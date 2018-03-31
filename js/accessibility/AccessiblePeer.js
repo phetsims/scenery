@@ -23,12 +23,12 @@ define( function( require ) {
    * Constructor.
    *
    * @param  {AccessibleInstance} accessibleInstance
-   * @param  {HTMLElement} domElement - The main DOM element used for this peer.
+   * @param  {HTMLElement} primarySibling - The main DOM element used for this peer.
    * @param  {Object} options
    * @constructor
    */
-  function AccessiblePeer( accessibleInstance, domElement, options ) {
-    this.initializeAccessiblePeer( accessibleInstance, domElement, options );
+  function AccessiblePeer( accessibleInstance, primarySibling, options ) {
+    this.initializeAccessiblePeer( accessibleInstance, primarySibling, options );
   }
 
   scenery.register( 'AccessiblePeer', AccessiblePeer );
@@ -37,11 +37,11 @@ define( function( require ) {
 
     /**
      * @param {AccessibleInstance} accessibleInstance
-     * @param {HTMLElement} domElement - The main DOM element used for this peer.
+     * @param {HTMLElement} primarySibling - The main DOM element used for this peer.
      * @param {Object} [options]
      * @returns {AccessiblePeer} - Returns 'this' reference, for chaining
      */
-    initializeAccessiblePeer: function( accessibleInstance, domElement, options ) {
+    initializeAccessiblePeer: function( accessibleInstance, primarySibling, options ) {
       var self = this;
 
       options = _.extend( {
@@ -64,20 +64,20 @@ define( function( require ) {
       this.trail = accessibleInstance.trail;
 
       // @public, the DOM elements associated with this peer
-      this.domElement = domElement;
+      this.primarySibling = primarySibling;
       this.labelSibling = options.labelSibling;
       this.descriptionSibling = options.descriptionSibling;
 
-      // @private - descendent of domElement that can be used to hold nested children
+      // @private - descendent of the primarySibling that can be used to hold nested children
       this.childContainerElement = options.childContainerElement ? options.childContainerElement : ( this.childContainerElement || null );
 
-      // @private - a parent element that can contain this domElement and other siblings, usually label and description content
+      // @private - a parent element that can contain this primarySibling and other siblings, usually label and description content
       this.containerParent = options.containerParent ? options.containerParent : ( this.containerParent || null );
       if ( this.containerParent ) {
 
         // The first child of the parent container element should be the peer dom element
         // if undefined, the insertBefore method will insert the peerDOMElement as the first child
-        var peerDOMElement = this.domElement;
+        var peerDOMElement = this.primarySibling;
         var firstChild = this.containerParent.children[ 0 ];
         this.containerParent.insertBefore( peerDOMElement, firstChild );
       }
@@ -86,22 +86,22 @@ define( function( require ) {
 
       // @private - listener for the focus event, update Display but only if node is focusable,  but , to be disposed
       var focusEventListener = function( event ) {
-        if ( event.target === self.domElement ) {
+        if ( event.target === self.primarySibling ) {
           if ( self.accessibleInstance.node.focusable ) {
             scenery.Display.focus = new Focus( accessibleInstance.display, accessibleInstance.trail );
             self.display.pointerFocus = null;
           }
         }
       };
-      this.domElement.addEventListener( 'focus', focusEventListener );
+      this.primarySibling.addEventListener( 'focus', focusEventListener );
 
       // @private - listener for the blur event, to be disposed
       var blurEventListener = function( event ) {
-        if ( event.target === self.domElement ) {
+        if ( event.target === self.primarySibling ) {
           scenery.Display.focus = null;
         }
       };
-      this.domElement.addEventListener( 'blur', blurEventListener );
+      this.primarySibling.addEventListener( 'blur', blurEventListener );
 
       // make AccessiblePeer eligible for garabage collection
       this.disposeAccessiblePeer = function() {
@@ -114,8 +114,8 @@ define( function( require ) {
             scenery.Display.focus = null;
         }
 
-        self.domElement.removeEventListener( 'blur', blurEventListener );
-        self.domElement.removeEventListener( 'focus', focusEventListener );
+        self.primarySibling.removeEventListener( 'blur', blurEventListener );
+        self.primarySibling.removeEventListener( 'focus', focusEventListener );
       };
 
       return this;
@@ -136,7 +136,7 @@ define( function( require ) {
      * @returns {type}  description
      */
     getContainerParent: function() {
-      return this.containerParent || this.domElement;
+      return this.containerParent || this.primarySibling;
     },
 
     /**
@@ -145,7 +145,7 @@ define( function( require ) {
      * @returns {type}  description
      */
     getChildContainerElement: function() {
-      return this.childContainerElement || this.domElement;
+      return this.childContainerElement || this.primarySibling;
     },
 
     /**
@@ -159,7 +159,7 @@ define( function( require ) {
       var htmlElement = null;
 
       if ( association === AccessiblePeer.NODE ) {
-        htmlElement = this.domElement;
+        htmlElement = this.primarySibling;
       }
       else if ( association === AccessiblePeer.LABEL ) {
         htmlElement = this.labelSibling;

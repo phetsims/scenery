@@ -78,7 +78,7 @@ define( function( require ) {
   }
 
   /**
-   * Get the next or previous focusable element in the parallel DOM, relative to this Node's domElement
+   * Get the next or previous focusable element in the parallel DOM, relative to this Node's primarySibling
    * depending on the direction. Useful if you need to set focus dynamically or need to prevent default behavior
    * when focus changes. If no next or previous focusable is found, it returns the currently focused element.
    * This function should not be used directly, use getNextFocusable() or getPreviousFocusable() instead.
