@@ -76,10 +76,10 @@ define( function( require ) {
       if ( this.containerParent ) {
 
         // The first child of the container parent element should be the peer dom element
-        // if undefined, the insertBefore method will insert the peerDOMElement as the first child
-        var peerDOMElement = this.primarySibling;
+        // if undefined, the insertBefore method will insert the primarySiblingDOMElement as the first child
+        var primarySiblingDOMElement = this.primarySibling;
         var firstChild = this.containerParent.children[ 0 ];
-        this.containerParent.insertBefore( peerDOMElement, firstChild );
+        this.containerParent.insertBefore( primarySiblingDOMElement, firstChild );
       }
 
       this.disposed = false;
