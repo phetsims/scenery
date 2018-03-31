@@ -5,10 +5,10 @@
  *
  * The parallel DOM is an HTML structure that provides semantics for assistive technologies. For web content to be
  * accessible, assistive technologies require HTML markup, which is something that pure graphical content does not
- * include.  This trait adds the accessible HTML content for any node in the scene graph.
+ * include. This trait adds the accessible HTML content for any Node in the scene graph.
  *
- * Each Node can have accessible content.  The structure of the accessible content will match the structure of the scene
- * graph.
+ * Any Node can have accessible content, but they have to opt into it. The structure of the accessible content will
+ * match the structure of the scene graph.
  *
  * Say we have the following scene graph:
  *
@@ -35,24 +35,87 @@
  * node E did not specify accessible content, so node F was added as a child under node C.  If node E had specified
  * accessible content, content for node F would have been added as a child under the content for node E.
  *
- * It is possible to add additional structure to the accessible content if necessary.  For instance, consider the
- * following accessible content for a button node:
+ * --------------------------------------------------------------------------------------------------------------------
+ * #BASIC EXAMPLE
+ *
+ * In a basic example let's say that we want to make a Node an unordered list. To do this, add the `tagName` option to
+ * the Node, and assign it to the string "ul". Here is what the code could look like:
+ *
+ * var myUnorderedList = new Node( { tagName: 'ul' } );
+ *
+ * To get the desired list html, we can assign the `li` `tagName` to children Nodes, like:
+ *
+ * var listItem1 = new Node( { tagName: 'li' } );
+ * myUnorderedList.addChild( listItem1 );
+ *
+ * Now we have a single list element in the unordered list. To assign content to this <li>, use the `innerContent`
+ * option (all of these Node options have getters and setters, just like any other Node option):
+ *
+ * listItem1.innerContent = 'I am a list item number 1';
+ *
+ * The above operations will create the following pDOM structure (note that actual ids will be different):
+ *
+ * <ul id='myUnorderedList'>
+ *   <li>I am a list item number 1</li>
+ * </ul
+ *
+ * --------------------------------------------------------------------------------------------------------------------
+ * #DOM SIBLINGS
+ *
+ * The api in this trait allows you to add additional structure to the accessible DOM content if necessary. Each node
+ * can have multiple DOM Elements associated with it. A Node can have a label DOM Element, and a description DOM Element.
+ * These are called siblings. The Node's direct DOM Element (the DOM element you create with the `tagName` option)
+ * is called the "primary sibling." You can also have a container parent DOM Elmenet that surrounds all of these
+ * siblings. With three siblings and a parent container, each Node can have up to 4 DOM Elements representing it in the
+ * pDOM. Here is an example of how a Node may use these features:
  *
  * <div>
- *   <button>Button label</button>
- *   <p>This is a description for the button</p>
+ *   <label for="myInput">This great label for input</label
+ *   <input id="myInput"/>
+ *   <p>This is a description for the input</p>
  * </div>
  *
- * The node is represented by the <button> DOM element, but the accessible content needs to include the parent div, and
- * a peer description paragraph.  This trait supports this structure with the 'parentContainerElement' option.  In
- * this example, the parentContainerElement is the div, while the description is added as a child of the parent after the
- * button node's domElement.
+ * Although you can create this structure with four nodes (`input` A, `label B, and `p` C children to `div` D),
+ * this structure can be created with one single Node. It is often preferable to do this to limit the number of new
+ * Nodes that have to be created just for accessibility purposes. To accomplish this we have the following Node code.
+ *
+ * new Node( {
+ *  tagName: 'input'
+ *  labelTagName: 'label',
+ *  labelContent: 'This great label for input'
+ *  descriptionTagName: 'p',
+ *  descriptionContent: 'This is a description for the input',
+ *  containerTagName: 'div'
+ * });
+ *
+ * A few notes:
+ * 1. Notice the names of the content setters for siblings parallel the `innerContent` option for setting the primary
+ *    sibling.
+ * 2. To make this example actually work, you would need the `inputType` option to set the "type" attribute on the `input`.
+ * 3. When you specify the  <label> tag for the label sibling, the "for" attribute is automatically added to the sibling.
+ * 4. Finally, the example above doesn't utilize the default tags that we have in place for the parent and siblings.
+ *      default labelTagName: 'label'
+ *      default descriptionTagName: 'p'
+ *      default parentContainerTagName: 'div'
+ *    so the following will yield the same pDOM structure:
+ *
+ *    new Node( {
+ *     tagName: 'input'
+ *     labelContent: 'This great label for input'
+ *     descriptionContent: 'This is a description for the input',
+ *    });
+ *
+ * The Accessibility trait is smart enough to know when there needs to be a container parent to wrap multiple siblings, we
+ * don't need that here either.
+ *
+ * --------------------------------------------------------------------------------------------------------------------
  *
  * For additional accessibility options, please see the options listed in ACCESSIBILITY_OPTION_KEYS. For more
  * documentation on Scenery, Nodes, and the scene graph, please see http://phetsims.github.io/scenery/
  *
  * @author Jesse Greenberg (PhET Interactive Simulations)
  * @author Sam Reid (PhET Interactive Simulations)
+ * @author Michael Kauzmann (PhET Interactive Simulations)
  */
 define( function( require ) {
   'use strict';
@@ -77,6 +140,11 @@ define( function( require ) {
   var A_TAG = 'A';
   var P_TAG = 'P';
 
+  // default tag names for siblings
+  var DEFAULT_CONTAINER_TAG_NAME = DIV_TAG;
+  var DEFAULT_DESCRIPTION_TAG_NAME = P_TAG;
+  var DEFAULT_LABEL_TAG_NAME = LABEL_TAG;
+
   // these elements are typically associated with forms, and support certain attributes
   var FORM_ELEMENTS = [ INPUT_TAG, BUTTON_TAG, TEXTAREA_TAG, SELECT_TAG, OPTGROUP_TAG, DATALIST_TAG, OUTPUT_TAG, A_TAG ];
 
@@ -89,18 +157,13 @@ define( function( require ) {
   // these events change the input value on the dom element
   var INPUT_CHANGE_EVENTS = [ 'input', 'change' ];
 
-  // default tag names for siblings
-  var DEFAULT_CONTAINER_TAG_NAME = DIV_TAG;
-  var DEFAULT_DESCRIPTION_TAG_NAME = P_TAG;
-  var DEFAULT_LABEL_TAG_NAME = LABEL_TAG;
-
   // valid types of DOM events that can be added to a node
   var DOM_EVENTS = [ 'input', 'change', 'click', 'keydown', 'keyup', 'focus', 'blur' ];
 
   var ACCESSIBILITY_OPTION_KEYS = [
-    'tagName', // Sets the tag name for the DOM element representing this node in the parallel DOM
-    'inputType', // Sets the input type for the representative DOM element, only relevant if tagname is 'input'
-    'inputValue', // Sets the input value for the representative DOM element, only relevant if tagname is 'input'
+    'tagName', // Sets the tag name for the primary sibling DOM element in the parallel DOM
+    'inputType', // Sets the input type for the primary sibling DOM element, only relevant if tagName is 'input'
+    'inputValue', // Sets the input value for the primary sibling DOM element, only relevant if tagName is 'input'
     'accessibleChecked', // Sets the 'checked' state for inputs of type radio and checkbox, see setAccessibleChecked()
     'containerTagName', // Sets the tag name for an element that contains this node's DOM element and its peers
     'labelTagName', // Sets the tag name for the DOM element labelling this node, usually a paragraph
@@ -117,7 +180,7 @@ define( function( require ) {
     'focusable', // Sets whether or not the node can receive keyboard focus
     'ariaLabel', // Sets the value of the 'aria-label' attribute, see setAriaLabel()
     'ariaRole', // Sets the ARIA role for the DOM element, see setAriaRole() for documentation
-    'parentContainerAriaRole', // Sets the ARIA role for the parent container DOM element, see setParentContainerAriaRole()
+    'parentContainerAriaRole', // Sets the ARIA role for the container parent DOM element, see setParentContainerAriaRole()
     'prependLabels', // Sets whether we want to prepend labels above the node's HTML element, see setPrependLabels()
     'ariaDescriptionContent', // Sets the content that will describe another node through aria-describedby, see setAriaDescriptionContent()
     'ariaLabelContent', // Sets the content that will label another node through aria-labelledby, see setAriaLabelledByContent()
@@ -165,8 +228,8 @@ define( function( require ) {
           // @private {string} - the HTML tag name of the element representing this node in the DOM
           this._tagName = null;
 
-          // @private {string} - the HTML tag name for a parent container element for this node in the DOM. This
-          // parent container will contain the node's DOM element, as well as peer elements for any label or description
+          // @private {string} - the HTML tag name for a container parent element for this node in the DOM. This
+          // container parent will contain the node's DOM element, as well as peer elements for any label or description
           // content. See setContainerTagName() for more documentation. If this option is needed (like to
           // contain multiple siblings with the primary sibling), it will default to the value of DEFAULT_CONTAINER_TAG_NAME.
           this._containerTagName = null;
@@ -194,7 +257,7 @@ define( function( require ) {
 
           // @private {boolean} - determines whether or not labels should be prepended above the node's DOM element.
           // All labels will be placed inside parentContainerElement, which will be automatically created if option
-          // not provided. The labels are sorted relative to the node's DOM element under the parent container.
+          // not provided. The labels are sorted relative to the node's DOM element under the container parent.
           this._prependLabels = null;
 
           // @private {array.<Object> - array of attributes that are on the node's DOM element.  Objects will have the
@@ -225,7 +288,7 @@ define( function( require ) {
           // by browsers or assistive technologies, so use vanilla HTML for accessibility semantics where possible.
           this._ariaRole = null;
 
-          // @private {string} - the ARIA role for the parent container element, added as an HTML attribute. For a
+          // @private {string} - the ARIA role for the container parent element, added as an HTML attribute. For a
           // complete list of ARIA roles, see https://www.w3.org/TR/wai-aria/roles. Beware that many roles are not
           // supported by browsers or assistive technologies, so use vanilla HTML for accessibility semantics where
           // possible.
@@ -235,13 +298,13 @@ define( function( require ) {
           // ARIA attribute.  The other node can be anywhere in the scene graph.  The behavior for aria-labelledby
           // is such that when this node receives focus, the accessible content under the other node will be read
           // (before any description content). Use with ariaLabelledContent to specify what portion of this node's
-          // acccessible content is labelled (DOM element, label element, description element or parent container
+          // acccessible content is labelled (DOM element, label element, description element or container parent
           // element).
           this._ariaLabelledByNode = null;
 
           // @private {string} - A string referenceing which portion of this node's accessible content will receive
           // the aria-labelledby attribute.  Can be the DOM element, the label element, the description element,
-          // or the parent container element. By default, points to this node's DOM element.
+          // or the container parent element. By default, points to this node's DOM element.
           this._ariaLabelledContent = AccessiblePeer.NODE;
 
           // @private {Node|null} - The Node this node labels through the aria-labelledby association. See
@@ -249,7 +312,7 @@ define( function( require ) {
           this._ariaLabelsNode = null;
 
           // @private {string} - The content on this node that is used to label another node through the
-          // aria-labelledby ARIA attribute.  Can be the node's label, description, parent container, or DOM
+          // aria-labelledby ARIA attribute.  Can be the node's label, description, container parent, or DOM
           // element.  See setAriaLabelContent()
           this._ariaLabelContent = AccessiblePeer.NODE; // element associated with the other node's content
 
@@ -257,13 +320,13 @@ define( function( require ) {
           // ARIA attribute. The other node can be anywhere in the scene graph.  The behavior for aria-describedby
           // is such that when this node receives focus, the accessible content under the other node will be read
           // (after any label content). Use with ariaDescribedContent to specify what portion of this node's
-          // acccessible content is described (DOM element, label element, description element or parent container
+          // acccessible content is described (DOM element, label element, description element or container parent
           // element).
           this._ariaDescribedByNode = null;
 
           // @private {string} - A string referenceing which portion of this node's accessible content will receive
           // the aria-describedby attribute.  Can be the DOM element, the label element, the description element,
-          // or the parent container element. By default, points to this node's DOM element.
+          // or the container parent element. By default, points to this node's DOM element.
           this._ariaDescribedContent = AccessiblePeer.NODE;
 
           // @private {Node|null} - The Node this node describes through the aria-describedby association. See
@@ -271,7 +334,7 @@ define( function( require ) {
           this._ariaDescribesNode = null;
 
           // @private {string} - The description content on this node that is used to describe another node through the
-          // aria-describedby ARIA attribute. Can be the node's label, description, parent container, or DOM
+          // aria-describedby ARIA attribute. Can be the node's label, description, container parent, or DOM
           // element.  See ariaDescribessNodoe for more information
           this._ariaDescriptionContent = AccessiblePeer.NODE;
 
@@ -592,7 +655,7 @@ define( function( require ) {
 
         /**
          * Set whether or not we want to prepend labels above the node's HTML element.  If the node does not have
-         * a parent container element, one will be created. If prepending labels, the label and description elements
+         * a container parent element, one will be created. If prepending labels, the label and description elements
          * will be located above the HTML element like:
          *
          * <div id='parent-container'>
@@ -625,9 +688,9 @@ define( function( require ) {
         get prependLabels() { return this.getPrependLabels(); },
 
         /**
-         * Set the parent container tag name.  By specifying this parent container, an element will be created that
+         * Set the container parent tag name.  By specifying this container parent, an element will be created that
          * acts as a container for this node's DOM element and its label and description peers.  For instance, a button
-         * element with a label and description will be contained like the following if the parent container tag name
+         * element with a label and description will be contained like the following if the container parent tag name
          * is specified as 'section'.
          *
          * <section id='parent-container-trail-id'>
@@ -647,7 +710,7 @@ define( function( require ) {
         set containerTagName( tagName ) { this.setContainerTagName( tagName ); },
 
         /**
-         * Get the tag name for the parent container element.
+         * Get the tag name for the container parent element.
          *
          * @returns {string}
          */
@@ -703,8 +766,8 @@ define( function( require ) {
         get labelContent() { return this.getLabelContent(); },
 
         /**
-         * Set the inner content for the primary sibling of the AccessiblePeers of this node. Will be set as innerHTML
-         * unless content includes markup that is not a formatting tag. A node with inner content cannot
+         * Set the inner content for the primary sibling of the AccessiblePeers of this node. Will be set as textContent
+         * unless content is html which uses exclusively formatting tags. A node with inner content cannot
          * have accessible descendants because this content will override the the HTML of descendants of this node.
          *
          * @param {string|null} content
@@ -807,8 +870,8 @@ define( function( require ) {
         get ariaRole() { return this.getAriaRole(); },
 
         /**
-         * Set the ARIA role for this node's parent container element.  According to the W3C, the ARIA role is read-only
-         * for a DOM element. This will create a new DOM element for the parent container with the desired role, and
+         * Set the ARIA role for this node's container parent element.  According to the W3C, the ARIA role is read-only
+         * for a DOM element. This will create a new DOM element for the container parent with the desired role, and
          * replace it in the DOM.
          * @public
          *
@@ -823,7 +886,7 @@ define( function( require ) {
         set parentContainerAriaRole( ariaRole ) { this.setParentContainerAriaRole( ariaRole ); },
 
         /**
-         * Get the ARIA role assigned to the parent container element.
+         * Get the ARIA role assigned to the container parent element.
          * @public
          * @returns {string|null}
          */
@@ -1014,7 +1077,7 @@ define( function( require ) {
 
         /**
          * Set the accessible content on this node that is labelled through aria-labelledby. Can be the node's
-         * DOM element, label element, description element, or parent container element. This will determine
+         * DOM element, label element, description element, or container parent element. This will determine
          * which element of this node's accessible content will hold the aria-labelledby attribute.
          *
          * @public
@@ -1041,7 +1104,7 @@ define( function( require ) {
 
         /**
          * Set the aria label content on this node which labels another node through the aria-labelledby
-         * association. Can be the node's DOM element, label element, description element, or parent container
+         * association. Can be the node's DOM element, label element, description element, or container parent
          * element. See setAriaLabelledBy for more information on aria-labelledby. This will determine the
          * value of the aria-labelledby attribute for another node when it is labelled by this one.
          *
@@ -1097,7 +1160,7 @@ define( function( require ) {
 
         /**
          * Set the accessible content on this node that is described through aria-describedby. Can be the node's
-         * DOM element, label element, description element, or parent container element. This will determine
+         * DOM element, label element, description element, or container parent element. This will determine
          * which element of this node's accessible content has the aria-describedby attribute.
          *
          * @public
@@ -1123,7 +1186,7 @@ define( function( require ) {
 
         /**
          * Set the aria description content on this node which describes another node through the aria-describedby
-         * association. Can be the node's DOM element, label element, description element, or parent container
+         * association. Can be the node's DOM element, label element, description element, or container parent
          * element. This will determine the value for aria-describedby when another node
          * is described by this one.  See setAriaLabelledBy for more information on aria-labelledby.
          *
@@ -1279,7 +1342,7 @@ define( function( require ) {
 
         /**
          * Hide completely from a screen reader and the browser by setting the hidden attribute on the node's
-         * representative DOM element. If this domElement and its peers have a parent container, the container
+         * representative DOM element. If this domElement and its peers have a container parent, the container
          * should be hidden so that all peers are hidden as well.  Hiding the element will remove it from the focus
          * order.
          *
@@ -1837,7 +1900,7 @@ define( function( require ) {
         // iteration variable used through this function
         var i = 0;
 
-        // for each accessible peer, clear the parent container if it exists since we will be reinserting labels and
+        // for each accessible peer, clear the container parent if it exists since we will be reinserting labels and
         // the dom element in createPeer
         this.updateAccessiblePeers( function( accessiblePeer ) {
           var parentContainerElement = accessiblePeer.parentContainerElement;

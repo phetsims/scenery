@@ -82,7 +82,7 @@ define( function( require ) {
 
     // verify that setters and getters worked correctly
     assert.ok( buttonNode.labelTagName === 'label', 'Label tag name' );
-    assert.ok( buttonNode.containerTagName === 'div', 'Parent container tag name' );
+    assert.ok( buttonNode.containerTagName === 'div', 'container tag name' );
     assert.ok( buttonNode.labelContent === TEST_LABEL, 'Accessible label' );
     assert.ok( buttonNode.descriptionTagName === 'p', 'Description tag name' );
     assert.ok( buttonNode.focusable === false, 'Focusable' );
@@ -219,7 +219,7 @@ define( function( require ) {
     assert.ok( document.getElementById( a1ElementId ), 'button in DOM' );
     assert.ok( document.getElementById( a1ElementId ).tagName === 'BUTTON', 'button tag name set' );
 
-    // give the button a parent container and some prepended empty labels
+    // give the button a container parent and some prepended empty labels
     a1.containerTagName = 'div';
     a1.prependLabels = true;
     a1.labelTagName = 'div';
@@ -235,7 +235,7 @@ define( function( require ) {
     //  <p id='description'></p>
     //  <button></button>
     // </div>
-    assert.ok( document.getElementById( parentElement.id ), 'parent container in DOM' );
+    assert.ok( document.getElementById( parentElement.id ), 'container parent in DOM' );
     assert.ok( buttonPeers[ 0 ].tagName === 'DIV', 'label first for prependLabels' );
     assert.ok( buttonPeers[ 1 ].tagName === 'P', 'description second for prependLabels' );
     assert.ok( buttonPeers[ 2 ].tagName === 'BUTTON', 'domElement third for prependLabels' );
@@ -724,11 +724,11 @@ define( function( require ) {
 
     rootNode.addChild( a );
     assert.ok( a.accessibleInstances.length === 1, 'only 1 instance' );
-    assert.ok( a.accessibleInstances[ 0 ].peer.parentContainerElement === null, 'no parentContainer for just button' );
+    assert.ok( a.accessibleInstances[ 0 ].peer.parentContainerElement === null, 'no container parent for just button' );
 
     a.containerTagName = 'div';
 
-    assert.ok( a.accessibleInstances[ 0 ].peer.parentContainerElement.id.indexOf( 'container' ) >= 0, 'parentContainer is div if specified' );
+    assert.ok( a.accessibleInstances[ 0 ].peer.parentContainerElement.id.indexOf( 'container' ) >= 0, 'container parent is div if specified' );
 
     var b = new Node( { tagName: 'button', labelTagName: 'div', labelContent: TEST_LABEL } );
 
