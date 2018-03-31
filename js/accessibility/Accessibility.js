@@ -66,7 +66,7 @@
  * can have multiple DOM Elements associated with it. A Node can have a label DOM Element, and a description DOM Element.
  * These are called siblings. The Node's direct DOM Element (the DOM element you create with the `tagName` option)
  * is called the "primary sibling." You can also have a container parent DOM Elmenet that surrounds all of these
- * siblings. With three siblings and a parent container, each Node can have up to 4 DOM Elements representing it in the
+ * siblings. With three siblings and a container parent, each Node can have up to 4 DOM Elements representing it in the
  * pDOM. Here is an example of how a Node may use these features:
  *
  * <div>

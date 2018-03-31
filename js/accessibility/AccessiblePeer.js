@@ -75,7 +75,7 @@ define( function( require ) {
       this.containerParent = options.containerParent ? options.containerParent : ( this.containerParent || null );
       if ( this.containerParent ) {
 
-        // The first child of the parent container element should be the peer dom element
+        // The first child of the container parent element should be the peer dom element
         // if undefined, the insertBefore method will insert the peerDOMElement as the first child
         var peerDOMElement = this.primarySibling;
         var firstChild = this.containerParent.children[ 0 ];
@@ -122,7 +122,7 @@ define( function( require ) {
     },
 
     /**
-     * Check to see if this peer is contained in a parent container.
+     * Check to see if this peer is contained in a container parent.
      *
      * @returns {boolean}
      */
@@ -131,7 +131,7 @@ define( function( require ) {
     },
 
     /**
-     * Get the parent container or the peer's dom element direclty.  Used for sorting.
+     * Get the container parent or the peer's dom element direclty.  Used for sorting.
      *
      * @returns {type}  description
      */

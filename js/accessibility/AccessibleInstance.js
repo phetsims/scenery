@@ -376,7 +376,7 @@ define( function( require ) {
       for ( var n = this.children.length - 1; n >= 0; n-- ) {
         var peerDOMElement = this.children[ n ].peer.primarySibling;
 
-        // if the peer has a parent container element, this structure containing the peerDOMElement should be inserted
+        // if the peer has a container parent, this structure containing the peerDOMElement should be inserted
         if ( this.children[ n ].peer.hasContainerParent() ) {
           peerDOMElement = this.children[ n ].peer.getContainerParent();
         }
@@ -397,8 +397,8 @@ define( function( require ) {
       if ( !this.isRootInstance ) {
         this.peer.dispose();
 
-        // remove this peer's dom element (or its parent container) from the parent peer's
-        // dom element (or its child container), disabling input so that we do not call input listeners
+        // remove this peer's primary sibling DOM Element (or its container parent) from the parent peer's
+        // primary sibling (or its child container), disabling input so that we do not call input listeners
         // while the elements are removed from the DOM
         this.node.accessibleInputEnabled = false;
         this.parent.peer.getChildContainerElement().removeChild( this.peer.getContainerParent() );
