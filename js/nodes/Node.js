@@ -3911,6 +3911,8 @@ define( function( require ) {
      * Calls the callback with an HTMLImageElement that contains this Node's subtree's visual form.
      * Will always be asynchronous.
      * @public
+     * @deprecated - Use node.rasterized() for creating a rasterized copy, or generally it's best to get the data
+     *               URL instead directly.
      *
      * @param {Function} callback - callback( image {HTMLImageElement}, x, y ) is called
      * @param {number} [x] - The X offset for where the upper-left of the content drawn into the Canvas
@@ -3947,6 +3949,7 @@ define( function( require ) {
      * Calls the callback with an Image node that contains this Node's subtree's visual form. This is always
      * asynchronous, but the resulting image node can be used with any back-end (Canvas/WebGL/SVG/etc.)
      * @public
+     * @deprecated - Use node.rasterized() instead (should avoid the asynchronous-ness)
      *
      * @param {Function} callback - callback( imageNode {Image} ) is called
      * @param {number} [x] - The X offset for where the upper-left of the content drawn into the Canvas
@@ -3976,6 +3979,7 @@ define( function( require ) {
      * Creates a Node containing an Image node that contains this Node's subtree's visual form. This is always
      * synchronous, but the resulting image node can ONLY used with Canvas/WebGL (NOT SVG).
      * @public
+     * @deprecated - Use node.rasterized() instead, should be mostly equivalent if useCanvas:true is provided.
      *
      * @param {number} [x] - The X offset for where the upper-left of the content drawn into the Canvas
      * @param {number} [y] - The Y offset for where the upper-left of the content drawn into the Canvas
@@ -4009,6 +4013,7 @@ define( function( require ) {
      * NOTE: the resultant Image should be positioned using its bounds rather than (x,y).  To create a Node that can be
      * positioned like any other node, please use toDataURLNodeSynchronous.
      * @public
+     * @deprecated - Use node.rasterized() instead, should be mostly equivalent if wrap:false is provided.
      *
      * @param {number} [x] - The X offset for where the upper-left of the content drawn into the Canvas
      * @param {number} [y] - The Y offset for where the upper-left of the content drawn into the Canvas
@@ -4037,6 +4042,7 @@ define( function( require ) {
      * so that transforms can be done independently.  Use this method if you need to be able to transform the node
      * the same way as if it had not been rasterized.
      * @public
+     * @deprecated - Use node.rasterized() instead, should be mostly equivalent
      *
      * @param {number} [x] - The X offset for where the upper-left of the content drawn into the Canvas
      * @param {number} [y] - The Y offset for where the upper-left of the content drawn into the Canvas
@@ -4079,7 +4085,12 @@ define( function( require ) {
         // {boolean} - If true, the created Image node gets wrapped in an extra Node so that it can be transformed
         // independently. If there is no need to transform the resulting node, wrap:false can be passed so that no extra
         // node is created.
-        wrap: true
+        wrap: true,
+
+        // {boolean} - If true, it will directly use the <canvas> element (only works with canvas/webgl renderers)
+        // instead of converting this into a form that can be used with any renderer. May have slightly better
+        // performance if svg/dom renderers do not need to be used.
+        useCanvas: false
       }, options );
 
       var resolution = options.resolution;
@@ -4114,8 +4125,10 @@ define( function( require ) {
       var image;
 
       // NOTE: This callback is executed SYNCHRONOUSLY
-      function callback( dataURL, x, y, width, height ) {
-        image = new scenery.Image( dataURL, _.extend( options, { x: -x, y: -y, initialWidth: width, initialHeight: height } ) );
+      function callback( canvas, x, y, width, height ) {
+        var imageSource = options.useCanvas ? canvas : canvas.toDataURL();
+
+        image = new scenery.Image( imageSource, _.extend( options, { x: -x, y: -y, initialWidth: width, initialHeight: height } ) );
 
         // We need to prepend the scale due to order of operations
         image.scale( 1 / resolution, 1 / resolution, true );
@@ -4123,14 +4136,14 @@ define( function( require ) {
 
       // If we have sourceBounds, provide the x/y/width/height.
       if ( sourceBounds ) {
-        wrapperNode.toDataURL( callback, -sourceBounds.minX, -sourceBounds.minY, sourceBounds.width, sourceBounds.height );
+        wrapperNode.toCanvas( callback, -sourceBounds.minX, -sourceBounds.minY, sourceBounds.width, sourceBounds.height );
       }
       // otherwise we don't want to pass in any extra parameters
       else {
-        wrapperNode.toDataURL( callback );
+        wrapperNode.toCanvas( callback );
       }
 
-      assert && assert( image, 'The toDataURL should have executed synchronously' );
+      assert && assert( image, 'The toCanvas should have executed synchronously' );
 
       wrapperNode.dispose();
 
