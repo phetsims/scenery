@@ -4065,10 +4065,11 @@ define( function( require ) {
      * @param {Object} [options] - See below options. This is also passed directly to the created Image object.
      * @returns {Node}
      */
-    toImageNode: function( options ) {
+    rasterized: function( options ) {
       options = _.extend( {
-        // {number} - Controls the relative resolution of the image. For example, if our node is ~100 view units across
-        // but you want the image to actually have a ~200-pixel resolution, provide resolution:2
+        // {number} - Controls the resolution of the image relative to the local view units. For example, if our node is
+        // ~100 view units across (in the local coordinate frame) but you want the image to actually have a ~200-pixel
+        // resolution, provide resolution:2.
         resolution: 1,
 
         // {Bounds2|null} - If provided, it will control the x/y/width/height of the toCanvas call. See toCanvas for
@@ -4084,8 +4085,17 @@ define( function( require ) {
       var resolution = options.resolution;
       var sourceBounds = options.sourceBounds;
 
-      assert && assert( typeof resolution === 'number' && resolution > 0 );
+      if ( assert ) {
+        assert( typeof resolution === 'number' && resolution > 0, 'resolution should be a positive number' );
+        assert( sourceBounds === null || sourceBounds instanceof Bounds2, 'sourceBounds should be null or a Bounds2' );
+        if ( sourceBounds ) {
+          assert( sourceBounds.isValid(), 'sourceBounds should be valid (finite non-negative)' );
+          assert( Util.isInteger( sourceBounds.width ), 'sourceBounds.width should be an integer' );
+          assert( Util.isInteger( sourceBounds.height ), 'sourceBounds.height should be an integer' );
+        }
+      }
 
+      // We'll need to wrap it in a container node temporarily (while rasterizing) for the scale
       var wrapperNode = new Node( {
         scale: resolution,
         children: [ this ]
