@@ -4059,6 +4059,82 @@ define( function( require ) {
     },
 
     /**
+     * Returns a node (backed by a scenery Image) that is a rasterized version of this node.
+     * @public
+     *
+     * @param {Object} [options] - See below options. This is also passed directly to the created Image object.
+     * @returns {Node}
+     */
+    toImageNode: function( options ) {
+      options = _.extend( {
+        // {number} - Controls the relative resolution of the image. For example, if our node is ~100 view units across
+        // but you want the image to actually have a ~200-pixel resolution, provide resolution:2
+        resolution: 1,
+
+        // {Bounds2|null} - If provided, it will control the x/y/width/height of the toCanvas call. See toCanvas for
+        // details on how this controls the rasterization.
+        sourceBounds: null,
+
+        // {boolean} - If true, the created Image node gets wrapped in an extra Node so that it can be transformed
+        // independently. If there is no need to transform the resulting node, wrap:false can be passed so that no extra
+        // node is created.
+        wrap: true
+      }, options );
+
+      var resolution = options.resolution;
+      var sourceBounds = options.sourceBounds;
+
+      assert && assert( typeof resolution === 'number' && resolution > 0 );
+
+      var wrapperNode = new Node( {
+        scale: resolution,
+        children: [ this ]
+      } );
+
+      // Unfortunately if we provide a resolution AND bounds, we can't use the source bounds directly.
+      if ( sourceBounds && resolution !== 1 ) {
+        sourceBounds = new Bounds2(
+          resolution * sourceBounds.minX,
+          resolution * sourceBounds.minY,
+          resolution * sourceBounds.maxX,
+          resolution * sourceBounds.maxY
+        );
+      }
+
+      var image;
+
+      // NOTE: This callback is executed SYNCHRONOUSLY
+      function callback( dataURL, x, y, width, height ) {
+        image = new scenery.Image( dataURL, _.extend( options, { x: -x, y: -y, initialWidth: width, initialHeight: height } ) );
+
+        // We need to prepend the scale due to order of operations
+        image.scale( 1 / resolution, 1 / resolution, true );
+      }
+
+      // If we have sourceBounds, provide the x/y/width/height.
+      if ( sourceBounds ) {
+        wrapperNode.toDataURL( callback, -sourceBounds.minX, -sourceBounds.minY, sourceBounds.width, sourceBounds.height );
+      }
+      // otherwise we don't want to pass in any extra parameters
+      else {
+        wrapperNode.toDataURL( callback );
+      }
+
+      assert && assert( image, 'The toDataURL should have executed synchronously' );
+
+      wrapperNode.dispose();
+
+      if ( options.wrap ) {
+        return new Node( {
+          children: [ image ]
+        } );
+      }
+      else {
+        return image;        
+      }
+    },
+
+    /**
      * Creates a DOM drawable for this Node's self representation.
      * @public (scenery-internal)
      *
