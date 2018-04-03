@@ -22,12 +22,13 @@ define( function( require ) {
   var globalId = 1;
 
   /**
+   * Constructor for AccessibleInstance, uses an initialize method for pooling.
+   * 
+   * @param {AccessibleInstance|null} parent - parent of this instance, null if root of AccessibleInstance tree
+   * @param {Display}
+   * @param {Trail} trail - trail to the node for this AccessibleInstance 
    * @constructor
    * @mixes Poolable
-   *
-   * @param parent
-   * @param display
-   * @param trail
    */
   function AccessibleInstance( parent, display, trail ) {
     this.initializeAccessibleInstance( parent, display, trail );
@@ -36,10 +37,13 @@ define( function( require ) {
   scenery.register( 'AccessibleInstance', AccessibleInstance );
 
   inherit( Events, AccessibleInstance, {
+
     /**
-     * @param {AccessibleInstance|null} parent
+     * Initializes an AccessibleInstance, implements construction for pooling.
+     * 
+     * @param {AccessibleInstance|null} parent - null if this AccessibleInstance is root of AccessibleInstance tree
      * @param {Display} display
-     * @param {HTMLElement} [primarySibling] - If not included here, subtype is responsible for setting it in the constructor.
+     * @param {Trail} trail - trail to node for this AccessibleInstance
      * @returns {AccessibleInstance} - Returns 'this' reference, for chaining
      */
     initializeAccessibleInstance: function( parent, display, trail ) {
