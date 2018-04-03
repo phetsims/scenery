@@ -255,11 +255,10 @@ define( function( require ) {
           // type 'radio' and 'checkbox'
           this._accessibleChecked = false;
 
-          // @private {boolean} - determines whether or not labels should be prepended above the node's DOM element.
-          // All labels will be placed inside containerParent, which will be automatically created if option
-          // not provided. The labels are sorted relative to the node's DOM element under the container parent.
-          // TODO: document this why default to NULL?, https://github.com/phetsims/scenery/issues/748
-          this._prependLabels = null;
+          // @private {boolean} - determines whether or not labels should be prepended above the node's primary
+          // sibling element. All labels will be placed inside containerParent, which will be automatically created if
+          // option not provided. The labels are sorted relative to the node's DOM element under the container parent.
+          this._prependLabels = false;
 
           // @private {array.<Object> - array of attributes that are on the node's DOM element.  Objects will have the
           // form { attribute:{string}, value:{string|number} }
