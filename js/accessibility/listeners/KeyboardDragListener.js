@@ -19,9 +19,10 @@ define( function( require ) {
   // modules
   var inherit = require( 'PHET_CORE/inherit' );
   var KeyboardUtil = require( 'SCENERY/accessibility/KeyboardUtil' );
+  var platform = require( 'PHET_CORE/platform' );
   var sceneryPhet = require( 'SCENERY_PHET/sceneryPhet' );
   var Timer = require( 'PHET_CORE/Timer' );
-  var Vector2 = require( 'DOT/Vector2' );
+  var Vector2 =      require( 'DOT/Vector2' );
 
   /**
    * @constructor
@@ -137,6 +138,19 @@ define( function( require ) {
       // if the key is already down, don't do anything else (we don't want to create a new keystate object
       // for a key that is already being tracked and down, nor call startDrag every keydown event)
       if ( self.keyInListDown( [ event.keyCode ] ) ) { return; }
+
+      // Prevent a VoiceOver bug where pressing multiple arrow keys at once causes the AT to send the wrong keycodes
+      // through the keyup event - as a workaround, we only allow one arrow key to be down at a time. If two are pressed
+      // down, we immediately clear the keystate and return
+      // see https://github.com/phetsims/balloons-and-static-electricity/issues/384
+      if ( platform.safari ) {
+        if ( KeyboardUtil.isArrowKey( event.keyCode ) ) {
+          if ( self.keyInListDown( [ KeyboardUtil.KEY_RIGHT_ARROW, KeyboardUtil.KEY_LEFT_ARROW, KeyboardUtil.KEY_UP_ARROW, KeyboardUtil.KEY_DOWN_ARROW ] ) )  {
+            self.reset();
+            return;
+          }
+        }
+      }
 
       // update the key state
       self.keyState.push( {
