@@ -143,6 +143,8 @@ define( function( require ) {
     },
 
     /**
+     * Add a subtree of AccessibleInstances to this AccessibleInstance.
+     * 
      * Consider the following example:
      *
      * We have a node structure:
@@ -170,6 +172,10 @@ define( function( require ) {
      *       ABCDE.addSubtree( ABCDEG )
      *     ABC.addSubtree( ABCDF )
      *       ABC.addSubtree( ABCDFH )
+     *
+     * @param {Trail} trail - the AccessibleInstances under the trail's last node will be added as descendants of this
+     *                        AccessibleInstance.
+     * @public (scenery-internal)
      */
     addSubtree: function( trail ) {
       sceneryLog && sceneryLog.AccessibleInstance && sceneryLog.AccessibleInstance(
@@ -197,6 +203,13 @@ define( function( require ) {
       sceneryLog && sceneryLog.AccessibleInstance && sceneryLog.pop();
     },
 
+    /**
+     * Remove a subtree of AccessibleInstances from this AccessibleInstance
+     *
+     * @param {Trail} trail - children of this AccessibleInstance will be removed if the child trails are extensions
+     *                        of the trail.
+     * @public (scenery-internal)
+     */
     removeSubtree: function( trail ) {
       sceneryLog && sceneryLog.AccessibleInstance && sceneryLog.AccessibleInstance(
         'removeSubtree on ' + this.toString() + ' with trail ' + trail.toString() );
@@ -218,7 +231,8 @@ define( function( require ) {
     },
 
     /**
-     * TODO: doc
+     * Mark as unsorted so that the display will sort the subtree of AccessibleInstances under this one.
+     * @public (scenery-internal)
      */
     markAsUnsorted: function() {
       if ( this.isSorted ) {
@@ -266,7 +280,11 @@ define( function( require ) {
 
     /**
      * Sort our child accessible instances in the order they should appear in the parallel DOM. We do this by
-     * creating a comparison function between two accessible instances, and sorting the array with that.
+     * creating a comparison function between two accessible instances. The function walks along the trails
+     * of the children, looking for specified accessible orders that would determine the ordering for the two
+     * AccessibleInstances.
+     * 
+     * @public (scenery-internal)
      */
     sortChildren: function() {
       assert && assert( !this.isSorted, 'No need to sort children if it is already marked as sorted' );
@@ -391,7 +409,11 @@ define( function( require ) {
       }
     },
 
-    // Recursive disposal
+    /**
+     * Recursive disposal, to make eligible for garbage collection.
+     * 
+     * @public (scenery-internal)
+     */
     dispose: function() {
       sceneryLog && sceneryLog.AccessibleInstance && sceneryLog.AccessibleInstance(
         'Disposing ' + this.toString() );
@@ -435,10 +457,20 @@ define( function( require ) {
       sceneryLog && sceneryLog.AccessibleInstance && sceneryLog.pop();
     },
 
+    /**
+     * For debugging purposes.
+     *
+     * @return {string}
+     */
     toString: function() {
       return this.id + '#{' + this.trail.toString() + '}';
     },
 
+    /**
+     * For debugging purposes, inspect the tree of AccessibleInstances from the root.
+     * 
+     * @public (scenery-internal)
+     */
     auditRoot: function() {
       assert && assert( this.trail.length === 0,
         'Should only call auditRoot() on the root AccessibleInstance for a display' );
