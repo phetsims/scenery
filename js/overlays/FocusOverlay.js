@@ -138,7 +138,7 @@ define( function( require ) {
       } );
       this.transformTracker.addListener( this.transformListener );
 
-      // Invisible mode - no focus highlight
+      // Invisible mode - no focus highlight; this is only for testing mode, when Nodes rarely have bounds.
       if ( this.node.focusHighlight === 'invisible' ) {
         this.mode = 'invisible';
       }
@@ -268,7 +268,7 @@ define( function( require ) {
      */
     updateHighlightColors: function() {
 
-      if ( this.mode === 'shape' )  {
+      if ( this.mode === 'shape' ) {
         if ( this.shapeFocusHighlightPath.innerHighlightColor !== FocusOverlay.innerHighlightColor ) {
           this.shapeFocusHighlightPath.setInnerHighlightColor( FocusOverlay.innerHighlightColor );
         }
@@ -302,7 +302,7 @@ define( function( require ) {
      * @private
      */
     deactivateGroupHighlights: function() {
-      if ( this.groupMode )  {
+      if ( this.groupMode ) {
         if ( this.groupMode === 'bounds' ) {
           this.groupFocusHighlightPath.visible = false;
         }
@@ -376,7 +376,7 @@ define( function( require ) {
     /**
      * Set the inner color of all focus highlights.
      * @public
-     * 
+     *
      * @param {null|string|Color|Property.<string|Color>|LinearGradient|RadialGradient|Pattern} color
      */
     setInnerHighlightColor: function( color ) {
@@ -398,11 +398,11 @@ define( function( require ) {
     /**
      * Set the outer color of all focus highlights.
      * @public
-     * 
+     *
      * @param {null|string|Color|Property.<string|Color>|LinearGradient|RadialGradient|Pattern} color
      */
     setOuterHilightColor: function( color ) {
-      outerHighlightColor =  color;
+      outerHighlightColor = color;
     },
     set outerHighlightColor( color ) { this.setOuterHilightColor( color ); },
 
@@ -420,7 +420,7 @@ define( function( require ) {
     /**
      * Set the inner color of all group focus highlights.
      * @public
-     * 
+     *
      * @param {null|string|Color|Property.<string|Color>|LinearGradient|RadialGradient|Pattern} color
      */
     setInnerGroupHighlightColor: function( color ) {
@@ -442,7 +442,7 @@ define( function( require ) {
     /**
      * Set the outer color of all group focus highlight.
      * @public
-     * 
+     *
      * @param {null|string|Color|Property.<string|Color>|LinearGradient|RadialGradient|Pattern} color
      */
     setOuterGroupHighlightColor: function( color ) {

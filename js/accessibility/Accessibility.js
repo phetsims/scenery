@@ -351,7 +351,7 @@ define( function( require ) {
           // TODO: why null? why not boolean, https://github.com/phetsims/scenery/issues/748
           this._focusable = null;
 
-          // @private {Shape|Node|String.<'invisible'>} - the focus highlight that will surround this node when it
+          // @private {Shape|Node} - the focus highlight that will surround this node when it
           // is focused.  By default, the focus highlight will be a pink rectangle that surrounds the Node's local
           // bounds.
           this._focusHighlight = null;

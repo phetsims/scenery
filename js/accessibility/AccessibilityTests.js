@@ -493,6 +493,7 @@ define( function( require ) {
     var display = new Display( rootNode ); // eslint-disable-line
     document.body.appendChild( display.domElement );
 
+    // invisible is deprecated don't use in future, this is a workaround for Nodes without bounds
     var a = new Node( { tagName: 'div', focusable: true, focusHighlight: 'invisible' } );
     var b = new Node( { tagName: 'div', focusable: true, focusHighlight: 'invisible' } );
     var c = new Node( { tagName: 'div', focusable: true, focusHighlight: 'invisible' } );
