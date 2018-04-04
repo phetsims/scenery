@@ -9,9 +9,7 @@
 define( function( require ) {
   'use strict';
 
-  // var AccessiblePeer = require( 'SCENERY/accessibility/AccessiblePeer' );
   var cleanArray = require( 'PHET_CORE/cleanArray' );
-  // var Display = require( 'SCENERY/display/Display' );
   var Events = require( 'AXON/Events' );
   var inherit = require( 'PHET_CORE/inherit' );
   var KeyboardUtil = require( 'SCENERY/accessibility/KeyboardUtil' );
@@ -25,7 +23,7 @@ define( function( require ) {
    * Constructor for AccessibleInstance, uses an initialize method for pooling.
    * 
    * @param {AccessibleInstance|null} parent - parent of this instance, null if root of AccessibleInstance tree
-   * @param {Display}
+   * @param {Display} display
    * @param {Trail} trail - trail to the node for this AccessibleInstance 
    * @constructor
    * @mixes Poolable
