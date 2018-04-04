@@ -93,12 +93,11 @@ define( function( require ) {
   // phet-io modules
   var NullableIO = require( 'ifphetio!PHET_IO/types/NullableIO' );
 
-  /*
+  /**
    * Constructs a Display that will show the rootNode and its subtree in a visual state. Default options provided below
    *
    * @param {Node} rootNode - Displays this node and all of its descendants
-   *
-   * Valid parameters in the parameter object:
+   * @param {Object} options - Valid parameters in the parameter object:
    * {
    *   allowSceneOverflow: false,           // Usually anything displayed outside of this $main (DOM/CSS3 transformed SVG) is hidden with CSS overflow
    *   allowCSSHacks: true,                 // Applies styling that prevents mobile browser graphical issues
@@ -109,7 +108,8 @@ define( function( require ) {
    *   allowWebGL: true,                    // Boolean flag that indicates whether scenery is allowed to use WebGL for rendering
    *                                        // Makes it possible to disable WebGL for ease of testing on non-WebGL platforms, see #289
    *   accessibility: true                  // Whether accessibility enhancements is enabled
-   *   interactive: true                    // Whether mouse/touch/keyboard inputs are enabled (if input has been added)
+   *   interactive: true                    // Whether mouse/touch/keyboard inputs are enabled (if input has been added). Simulation will still step.
+   * @constructor
    */
   function Display( rootNode, options ) {
     assert && assert( rootNode, 'rootNode is a required parameter' );
@@ -134,7 +134,7 @@ define( function( require ) {
       allowWebGL: true,
       accessibility: true,        // enables accessibility features
       isApplication: false,      // adds the aria-role: 'application' when accessibility is enabled
-      interactive: true,
+      interactive: true,         // Whether mouse/touch/keyboard inputs are enabled (if input has been added). Simulation will still step.
 
       // {boolean} - If true, input event listeners will be attached to the Display's DOM element instead of the window.
       // Normally, attaching listeners to the window is preferred (it will see mouse moves/ups outside of the browser
@@ -217,7 +217,7 @@ define( function( require ) {
     // will be filled in with a scenery.Input if event handling is enabled
     this._input = null; // @public (phet-io)
     this._inputListeners = []; // {Array.<Object>} - Listeners that will be called for every event.
-    this._interactive = this.options.interactive;
+    this._interactive = this.options.interactive; // {boolean} - Whether mouse/touch/keyboard inputs are enabled (if input has been added). Simulation will still step.
     this._listenToOnlyElement = options.listenToOnlyElement; // TODO: doc
     this._batchDOMEvents = options.batchDOMEvents; // TODO: doc
     this._assumeFullWindow = options.assumeFullWindow; // TODO: doc
@@ -260,7 +260,7 @@ define( function( require ) {
       // make the PDOM invisible in the browser - it has some width and is shifted off screen so that AT can read the
       // formatting tags, see https://github.com/phetsims/scenery/issues/730
       SceneryStyle.addRule( '.accessibility * { position: relative; left: -1000px; top: 0; width: 250px; height: 0; clip: rect(0,0,0,0); pointerEvents: none }' );
-      
+
       this._focusRootNode = new Node();
       this._focusOverlay = new FocusOverlay( this, this._focusRootNode );
       this.addOverlay( this._focusOverlay );
