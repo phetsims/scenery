@@ -18,6 +18,7 @@ define( function( require ) {
 
   QUnit.module( 'Accessibility' );
 
+  var TEST_INNER_CONTENT = 'Test Inner Content Here please^&*. Thanks you so very mucho.';
   var TEST_LABEL = 'Test label';
   var TEST_LABEL_2 = 'Test label 2';
   var TEST_DESCRIPTION = 'Test description';
@@ -25,6 +26,10 @@ define( function( require ) {
   var TEST_LABEL_HTML_2 = '<strong>I ROCK as a LABEL 2</strong>';
   var TEST_DESCRIPTION_HTML = '<strong>I ROCK as a DESCRIPTION</strong>';
   var TEST_DESCRIPTION_HTML_2 = '<strong>I ROCK as a DESCRIPTION 2</strong>';
+
+  // These should manually match the defaults in the Accessibility.js trait
+  var DEFAULT_DESCRIPTION_TAG = 'P';
+  var DEFAULT_CONTAINER_TAG = 'DIV';
 
   /**
    * Get the id of a dom element representing a node in the DOM.  The accessible content must exist and be unique,
@@ -36,7 +41,7 @@ define( function( require ) {
    * @param  {Node} node
    * @return {string}
    */
-  function getPrimarySiblingIDByNode( node ) {
+  function getPrimarySiblingElementByNode( node ) {
     if ( node.accessibleInstances.length === 0 ) {
       throw new Error( 'No accessibleInstances. Was your node added to the scene graph?' );
     }
@@ -48,7 +53,7 @@ define( function( require ) {
       throw new Error( 'accessibleInstance\'s peer should exist.' );
     }
 
-    return node.accessibleInstances[ 0 ].peer.primarySibling.id;
+    return document.getElementById( node.accessibleInstances[ 0 ].peer.primarySibling.id );
   }
 
 
@@ -64,7 +69,7 @@ define( function( require ) {
 
     rootNode.addChild( a );
 
-    var aElement = document.getElementById( getPrimarySiblingIDByNode( a ) );
+    var aElement = getPrimarySiblingElementByNode( a );
     assert.ok( a.accessibleInstances.length === 1, 'only 1 instance' );
     assert.ok( aElement.parentElement.childNodes.length === 1, 'parent contains one primary siblings' );
     assert.ok( aElement.tagName === 'BUTTON', 'default label tagName' );
@@ -80,8 +85,7 @@ define( function( require ) {
     assert.ok( a.accessibleInstances.length === 0, 'set to null should clear accessible instances' );
 
     a.tagName = 'button';
-    assert.ok( document.getElementById( getPrimarySiblingIDByNode( a ) ).innerHTML === TEST_LABEL_HTML_2,
-      'innerContent not cleared when tagName set to null.' );
+    assert.ok( getPrimarySiblingElementByNode( a ).innerHTML === TEST_LABEL_HTML_2, 'innerContent not cleared when tagName set to null.' );
   } );
 
 
@@ -110,10 +114,12 @@ define( function( require ) {
     var buttonElement = b.accessibleInstances[ 0 ].peer.primarySibling;
     var parentElement = buttonElement.parentElement;
 
+    assert.ok( b.containerTagName === DEFAULT_CONTAINER_TAG, 'container automatically created for label' );
+
     assert.ok( parentElement, 'parent element must be created with label option' );
     assert.ok( parentElement.childNodes.length === 2, 'only contain label and primary siblings' );
 
-    assert.ok( parentElement.childNodes[ 1 ] === document.getElementById( getPrimarySiblingIDByNode( b ) ), 'primary sibling after label sibling.' );
+    assert.ok( parentElement.childNodes[ 1 ] === getPrimarySiblingElementByNode( b ), 'primary sibling after label sibling.' );
 
 
     var c = new Node( { tagName: 'button', descriptionTagName: 'div', descriptionContent: TEST_DESCRIPTION } );
@@ -126,9 +132,20 @@ define( function( require ) {
     assert.ok( parentElement, 'parent element must be created with description option' );
     assert.ok( parentElement.childNodes.length === 2, 'only contain description and primary siblings' );
 
-    var d = new Node( { tagName: 'button', labelTagName: 'p', descriptionTagName: 'p', prependLabels: true } );
+    c.containerTagName = 'SECTION';
+    assert.ok( getPrimarySiblingElementByNode( c ).parentElement.tagName === 'SECTION', 'containerTagName should update default' );
+
+    var d = new Node( { tagName: 'button', labelTagName: 'p', descriptionTagName: 'p' } );
     rootNode.addChild( d );
-    assert.ok( document.getElementById( getPrimarySiblingIDByNode( d ) ).parentElement.childNodes.length === 3, 'correct children' );
+    assert.ok( getPrimarySiblingElementByNode( d ).parentElement.childNodes.length === 3, 'correct children' );
+
+    var e = new Node( {
+      tagName: 'div',
+      labelContent: TEST_LABEL,
+      containerTagName: 'SECTION'
+    } );
+    rootNode.addChild( e );
+    assert.ok( getPrimarySiblingElementByNode( e ).parentElement.tagName === 'SECTION', 'containerTagName should update default in options block' );
   } );
 
   QUnit.test( 'labelTagName/labelContent option', function( assert ) {
@@ -143,8 +160,8 @@ define( function( require ) {
 
     rootNode.addChild( a );
 
-    var aElement = document.getElementById( getPrimarySiblingIDByNode( a ) );
-    var labelSibling = aElement.parentElement.childNodes[ 1 ];
+    var aElement = getPrimarySiblingElementByNode( a );
+    var labelSibling = aElement.parentElement.childNodes[ 0 ];
     assert.ok( a.accessibleInstances.length === 1, 'only 1 instance' );
     assert.ok( aElement.parentElement.childNodes.length === 2, 'parent contains two siblings' );
     assert.ok( labelSibling.tagName === 'LABEL', 'default label tagName' );
@@ -158,16 +175,16 @@ define( function( require ) {
 
     a.tagName = 'div';
 
-    var newAElement = document.getElementById( getPrimarySiblingIDByNode( a ) );
-    var newLabelSibling = newAElement.parentElement.childNodes[ 1 ];
+    var newAElement = getPrimarySiblingElementByNode( a );
+    var newLabelSibling = newAElement.parentElement.childNodes[ 0 ];
 
     assert.ok( newLabelSibling.innerHTML === TEST_LABEL_HTML_2, 'tagName independent of: html label should use innerHTML, overwrite from html' );
 
     a.labelTagName = null;
 
     // make sure label was cleared from pDOM
-    assert.ok( document.getElementById( getPrimarySiblingIDByNode( a ) ).parentElement.childNodes.length === 1,
-      'Only one element after clearing label');
+    assert.ok( getPrimarySiblingElementByNode( a ).parentElement.childNodes.length === 1,
+      'Only one element after clearing label' );
 
     assert.ok( a.labelContent === TEST_LABEL_HTML_2, 'clearing labelTagName should not change content, even  though it is not displayed' );
 
@@ -185,11 +202,11 @@ define( function( require ) {
 
     rootNode.addChild( a );
 
-    var aElement = document.getElementById( getPrimarySiblingIDByNode( a ) );
-    var descriptionSibling = aElement.parentElement.childNodes[ 1 ];
+    var aElement = getPrimarySiblingElementByNode( a );
+    var descriptionSibling = aElement.parentElement.childNodes[ 0 ];
     assert.ok( a.accessibleInstances.length === 1, 'only 1 instance' );
     assert.ok( aElement.parentElement.childNodes.length === 2, 'parent contains two siblings' );
-    assert.ok( descriptionSibling.tagName === 'P', 'default label tagName' );
+    assert.ok( descriptionSibling.tagName === DEFAULT_DESCRIPTION_TAG, 'default label tagName' );
     assert.ok( descriptionSibling.textContent === TEST_DESCRIPTION, 'no html should use textContent' );
 
     a.descriptionContent = TEST_DESCRIPTION_HTML;
@@ -201,8 +218,8 @@ define( function( require ) {
     a.descriptionTagName = null;
 
     // make sure description was cleared from pDOM
-    assert.ok( document.getElementById( getPrimarySiblingIDByNode( a ) ).parentElement.childNodes.length === 1,
-      'Only one element after clearing description');
+    assert.ok( getPrimarySiblingElementByNode( a ).parentElement.childNodes.length === 1,
+      'Only one element after clearing description' );
 
     assert.ok( a.descriptionContent === TEST_DESCRIPTION_HTML_2, 'clearing descriptionTagName should not change content, even  though it is not displayed' );
 
@@ -222,11 +239,9 @@ define( function( require ) {
       inputType: 'button', // input type 'button'
       labelTagName: 'label', // label with tagname 'label'
       labelContent: TEST_LABEL, // label text content
-      descriptionTagName: 'p', // description tag name
       descriptionContent: TEST_DESCRIPTION, // description text content
       focusable: false, // remove from focus order
-      ariaRole: 'button', // uses the ARIA button role
-      prependLabels: true // labels placed above DOM element in read order
+      ariaRole: 'button' // uses the ARIA button role
     } );
     rootNode.addChild( buttonNode );
 
@@ -234,8 +249,7 @@ define( function( require ) {
       tagName: 'div',
       ariaLabel: TEST_LABEL, // use ARIA label attribute
       accessibleVisible: false, // hidden from screen readers (and browser)
-      descriptionTagName: 'p',
-      descriptionContent: TEST_DESCRIPTION
+      descriptionContent: TEST_DESCRIPTION // default to a <p> tag
     } );
     rootNode.addChild( divNode );
 
@@ -243,11 +257,10 @@ define( function( require ) {
     assert.ok( buttonNode.labelTagName === 'label', 'Label tag name' );
     assert.ok( buttonNode.containerTagName === 'div', 'container tag name' );
     assert.ok( buttonNode.labelContent === TEST_LABEL, 'Accessible label' );
-    assert.ok( buttonNode.descriptionTagName === 'p', 'Description tag name' );
+    assert.ok( buttonNode.descriptionTagName.toUpperCase() === DEFAULT_DESCRIPTION_TAG, 'Description tag name' );
     assert.ok( buttonNode.focusable === false, 'Focusable' );
     assert.ok( buttonNode.ariaRole === 'button', 'Aria role' );
     assert.ok( buttonNode.descriptionContent === TEST_DESCRIPTION, 'Accessible Description' );
-    assert.ok( buttonNode.prependLabels === true, 'prepend labels' );
     assert.ok( buttonNode.focusHighlight instanceof Circle, 'Focus highlight' );
     assert.ok( buttonNode.tagName === 'input', 'Tag name' );
     assert.ok( buttonNode.inputType === 'button', 'Input type' );
@@ -256,7 +269,7 @@ define( function( require ) {
     assert.ok( divNode.ariaLabel === TEST_LABEL, 'Use aria label' );
     assert.ok( divNode.accessibleVisible === false, 'Accessible visible' );
     assert.ok( divNode.labelTagName === null, 'Label tag name with aria label is independent' );
-    assert.ok( divNode.descriptionTagName === 'p', 'Description tag name' );
+    assert.ok( divNode.descriptionTagName.toUpperCase() === DEFAULT_DESCRIPTION_TAG, 'Description tag name' );
 
 
     // verify DOM structure - options above should create something like:
@@ -271,31 +284,30 @@ define( function( require ) {
     //    <p>Test Description</p>
     //  </div>
     // </div>
-    var buttonElementId = getPrimarySiblingIDByNode( buttonNode );
-    var buttonElement = document.getElementById( buttonElementId );
+    var buttonElement = getPrimarySiblingElementByNode( buttonNode );
 
     var buttonParent = buttonElement.parentNode;
     var buttonPeers = buttonParent.childNodes;
     var buttonLabel = buttonPeers[ 0 ];
     var buttonDescription = buttonPeers[ 1 ];
-    var divElement = document.getElementById( getPrimarySiblingIDByNode( divNode ) );
-    var divDescription = divElement.parentElement.childNodes[ 1 ];
+    var divElement = getPrimarySiblingElementByNode( divNode );
+    var pDescription = divElement.parentElement.childNodes[ 0 ]; // description before primary div
 
     assert.ok( buttonParent.tagName === 'DIV', 'parent container' );
-    assert.ok( buttonLabel.tagName === 'LABEL', 'Label first with prependLabels' );
-    assert.ok( buttonLabel.getAttribute( 'for' ) === buttonElementId, 'label for attribute' );
+    assert.ok( buttonLabel.tagName === 'LABEL', 'Label first' );
+    assert.ok( buttonLabel.getAttribute( 'for' ) === buttonElement.id, 'label for attribute' );
     assert.ok( buttonLabel.textContent === TEST_LABEL, 'label content' );
-    assert.ok( buttonDescription.tagName === 'P', 'description second with prependLabels' );
+    assert.ok( buttonDescription.tagName === DEFAULT_DESCRIPTION_TAG, 'description second' );
     assert.ok( buttonDescription.textContent, TEST_DESCRIPTION, 'description content' );
-    assert.ok( buttonPeers[ 2 ] === buttonElement, 'Button third for prepend labels' );
+    assert.ok( buttonPeers[ 2 ] === buttonElement, 'Button third' );
     assert.ok( buttonElement.type === 'button', 'input type set' );
     assert.ok( buttonElement.getAttribute( 'role' ) === 'button', 'button role set' );
     assert.ok( buttonElement.tabIndex === -1, 'not focusable' );
 
     assert.ok( divElement.getAttribute( 'aria-label' ) === TEST_LABEL, 'aria label set' );
     assert.ok( divElement.parentElement.hidden === true, 'hidden set should act on parent' );
-    assert.ok( divDescription.textContent === TEST_DESCRIPTION, 'description content' );
-    assert.ok( divDescription.parentElement === divElement.parentElement, 'description is sibling to primary' );
+    assert.ok( pDescription.textContent === TEST_DESCRIPTION, 'description content' );
+    assert.ok( pDescription.parentElement === divElement.parentElement, 'description is sibling to primary' );
     assert.ok( divElement.parentElement.childNodes.length === 2, 'no label element for aria-label, just description and primary siblings' );
 
   } );
@@ -306,7 +318,7 @@ define( function( require ) {
     document.body.appendChild( display.domElement );
 
     // two new nodes that will be related with the aria-labelledby and aria-describedby associations
-    var nodeA = new Node( { tagName: 'button', labelTagName: 'p', descriptionTagName: 'p', prependLabels: true } );
+    var nodeA = new Node( { tagName: 'button', labelTagName: 'p', descriptionTagName: 'p' } );
     var nodeB = new Node( { tagName: 'p', innerContent: TEST_LABEL } );
     var nodeC = new Node();
     var nodeD = new Node();
@@ -316,8 +328,8 @@ define( function( require ) {
     nodeA.setAriaDescribedByNode( nodeB );
     nodeA.setAriaLabelledByNode( nodeB );
 
-    var nodeAElement = document.getElementById( getPrimarySiblingIDByNode( nodeA ) );
-    var nodeBElement = document.getElementById( getPrimarySiblingIDByNode( nodeB ) );
+    var nodeAElement = getPrimarySiblingElementByNode( nodeA );
+    var nodeBElement = getPrimarySiblingElementByNode( nodeB );
 
     assert.ok( nodeAElement.getAttribute( 'aria-describedby' ) === nodeBElement.id, 'describedby attribute wrong in normal use case' );
     assert.ok( nodeAElement.getAttribute( 'aria-labelledby' ) === nodeBElement.id, 'labelledby attribute wrong in normal use case' );
@@ -334,8 +346,8 @@ define( function( require ) {
     rootNode.addChild( nodeC );
     rootNode.addChild( nodeD );
 
-    var nodeCElement = document.getElementById( getPrimarySiblingIDByNode( nodeC ) );
-    var nodeDElement = document.getElementById( getPrimarySiblingIDByNode( nodeD ) );
+    var nodeCElement = getPrimarySiblingElementByNode( nodeC );
+    var nodeDElement = getPrimarySiblingElementByNode( nodeD );
 
     assert.ok( nodeCElement.getAttribute( 'aria-describedby' ) === nodeDElement.id, 'describedby attribute wrong in case of pre-invalidation' );
     assert.ok( nodeCElement.getAttribute( 'aria-labelledby' ) === nodeDElement.id, 'labelledby attribute wrong in case of pre-invalidation' );
@@ -348,15 +360,15 @@ define( function( require ) {
     nodeB.setAriaLabelledByNode( nodeA );
 
     // reset references after Node.invalidateAccessibleContent() was called while setting options above.
-    // NOTE: See warning in getPrimarySiblingIDByNode() jsDoc for more info.
-    nodeAElement = document.getElementById( getPrimarySiblingIDByNode( nodeA ) );
+    // NOTE: See warning in getPrimarySiblingElementByNode() jsDoc for more info.
+    nodeAElement = getPrimarySiblingElementByNode( nodeA );
 
-    // order of label and description with prependLabels will be labelSibling, descriptionSibling, primary sibling
+    // order of label and description will be labelSibling, descriptionSibling, primary sibling
     var nodeALabel = nodeAElement.parentElement.childNodes[ 0 ];
     var nodeADescription = nodeAElement.parentElement.childNodes[ 1 ];
 
-    assert.ok( document.getElementById( getPrimarySiblingIDByNode( nodeC ) ).getAttribute( 'aria-describedby' ) === nodeADescription.id, 'aria-describedby wrong using explicit association' );
-    assert.ok( document.getElementById( getPrimarySiblingIDByNode( nodeB ) ).getAttribute( 'aria-labelledby' ) === nodeALabel.id, 'aria-labelledby wrong using explicit association' );
+    assert.ok( getPrimarySiblingElementByNode( nodeC ).getAttribute( 'aria-describedby' ) === nodeADescription.id, 'aria-describedby wrong using explicit association' );
+    assert.ok( getPrimarySiblingElementByNode( nodeB ).getAttribute( 'aria-labelledby' ) === nodeALabel.id, 'aria-labelledby wrong using explicit association' );
   } );
 
   QUnit.test( 'Accessibility invalidation', function( assert ) {
@@ -374,13 +386,11 @@ define( function( require ) {
     rootNode.addChild( a1 );
 
     // verify that elements are in the DOM
-    var a1ElementId = getPrimarySiblingIDByNode( a1 );
-    assert.ok( document.getElementById( a1ElementId ), 'button in DOM' );
-    assert.ok( document.getElementById( a1ElementId ).tagName === 'BUTTON', 'button tag name set' );
+    var a1Element = getPrimarySiblingElementByNode( a1 );
+    assert.ok( a1Element, 'button in DOM' );
+    assert.ok( a1Element.tagName === 'BUTTON', 'button tag name set' );
 
-    // give the button a container parent and some prepended empty labels
-    a1.containerTagName = 'div';
-    a1.prependLabels = true;
+    // give the button a container parent and some empty siblings
     a1.labelTagName = 'div';
     a1.descriptionTagName = 'p';
 
@@ -395,13 +405,14 @@ define( function( require ) {
     //  <button></button>
     // </div>
     assert.ok( document.getElementById( parentElement.id ), 'container parent in DOM' );
-    assert.ok( buttonPeers[ 0 ].tagName === 'DIV', 'label first for prependLabels' );
-    assert.ok( buttonPeers[ 1 ].tagName === 'P', 'description second for prependLabels' );
-    assert.ok( buttonPeers[ 2 ].tagName === 'BUTTON', 'primarySibling third for prependLabels' );
+    assert.ok( buttonPeers[ 0 ].tagName === 'DIV', 'label first' );
+    assert.ok( buttonPeers[ 1 ].tagName === 'P', 'description second' );
+    assert.ok( buttonPeers[ 2 ].tagName === 'BUTTON', 'primarySibling third' );
 
     // make the button a div and use an inline label, and place the description below
     a1.tagName = 'div';
-    a1.prependLabels = false;
+    a1.appendLabel = true;
+    a1.appendDescription = true;
     a1.labelTagName = null; // use aria label attribute instead
     a1.ariaLabel = TEST_LABEL;
 
@@ -414,13 +425,12 @@ define( function( require ) {
     // redefine the HTML elements (references will point to old elements before mutation)
     buttonElement = a1.accessibleInstances[ 0 ].peer.primarySibling;
     parentElement = buttonElement.parentElement;
-    assert.ok( parentElement.childNodes[ 0 ] === document.getElementById( getPrimarySiblingIDByNode( a1 ) ), 'div first' );
-    assert.ok( parentElement.childNodes[ 1 ].id.indexOf( 'description' ) >= 0, 'description after div without prependLabels' );
+    assert.ok( parentElement.childNodes[ 0 ] === getPrimarySiblingElementByNode( a1 ), 'div first' );
+    assert.ok( parentElement.childNodes[ 1 ].id.indexOf( 'description' ) >= 0, 'description after div when appending both elements' );
     assert.ok( parentElement.childNodes.length === 2, 'no label peer when using just aria-label attribute' );
 
     var elementInDom = document.getElementById( a1.accessibleInstances[ 0 ].peer.primarySibling.id );
     assert.ok( elementInDom.getAttribute( 'aria-label' ) === TEST_LABEL, 'aria-label set' );
-
   } );
 
   QUnit.test( 'Accessibility setters/getters', function( assert ) {
@@ -432,7 +442,7 @@ define( function( require ) {
     document.body.appendChild( display.domElement );
 
     // set/get attributes
-    var a1Element = document.getElementById( getPrimarySiblingIDByNode( a1 ) );
+    var a1Element = getPrimarySiblingElementByNode( a1 );
     a1.setAccessibleAttribute( 'role', 'switch' );
     assert.ok( a1.getAccessibleAttributes()[ 0 ].attribute === 'role', 'attribute set' );
     assert.ok( a1Element.getAttribute( 'role' ) === 'switch', 'HTML attribute set' );
@@ -459,7 +469,7 @@ define( function( require ) {
     assert.ok( a1.accessibleInputListeners.length === 1, 'accessible listener added' );
 
     // fire the event
-    document.getElementById( getPrimarySiblingIDByNode( a1 ) ).click();
+    getPrimarySiblingElementByNode( a1 ).click();
     assert.ok( a1.labelContent === TEST_LABEL, 'click fired, label set' );
 
     // remove the listener
@@ -472,9 +482,8 @@ define( function( require ) {
     assert.ok( a1.labelContent === TEST_LABEL_2, 'before click' );
 
     // setting the label redrew the pdom, so get a reference to the new dom element.
-    document.getElementById( getPrimarySiblingIDByNode( a1 ) ).click();
+    getPrimarySiblingElementByNode( a1 ).click();
     assert.ok( a1.labelContent === TEST_LABEL_2, 'click should not change label' );
-
   } );
 
   QUnit.test( 'Next/Previous focusable', function( assert ) {
@@ -492,11 +501,11 @@ define( function( require ) {
     rootNode.children = [ a, b, c, d ];
 
     // get dom elements from the body
-    var rootElement = document.getElementById( getPrimarySiblingIDByNode( rootNode ) );
-    var aElement = document.getElementById( getPrimarySiblingIDByNode( a ) );
-    var bElement = document.getElementById( getPrimarySiblingIDByNode( b ) );
-    var cElement = document.getElementById( getPrimarySiblingIDByNode( c ) );
-    var dElement = document.getElementById( getPrimarySiblingIDByNode( d ) );
+    var rootElement = getPrimarySiblingElementByNode( rootNode );
+    var aElement = getPrimarySiblingElementByNode( a );
+    var bElement = getPrimarySiblingElementByNode( b );
+    var cElement = getPrimarySiblingElementByNode( c );
+    var dElement = getPrimarySiblingElementByNode( d );
 
     a.focus();
     assert.ok( document.activeElement.id === aElement.id, 'a in focus (next)' );
@@ -555,8 +564,8 @@ define( function( require ) {
     rootNode.children = [ a, b, c, d, e ];
     d.addChild( f );
 
-    var rootDOMElement = document.getElementById( getPrimarySiblingIDByNode( rootNode ) );
-    var dDOMElement = document.getElementById( getPrimarySiblingIDByNode( d ) );
+    var rootDOMElement = getPrimarySiblingElementByNode( rootNode );
+    var dDOMElement = getPrimarySiblingElementByNode( d );
 
     // verify the dom
     assert.ok( rootDOMElement.children.length === 5, 'children added' );
@@ -574,8 +583,8 @@ define( function( require ) {
     rootNode.accessibleContentDisplayed = true;
 
     // redefine because the dom element references above have become stale
-    rootDOMElement = document.getElementById( getPrimarySiblingIDByNode( rootNode ) );
-    dDOMElement = document.getElementById( getPrimarySiblingIDByNode( d ) );
+    rootDOMElement = getPrimarySiblingElementByNode( rootNode );
+    dDOMElement = getPrimarySiblingElementByNode( d );
     assert.ok( rootDOMElement.children.length === 5, 'children added back' );
     assert.ok( dDOMElement.children.length === 1, 'descendant child added back' );
 
@@ -881,14 +890,58 @@ define( function( require ) {
     rootNode.addChild( a );
 
     assert.ok( a.focusable === true, 'focusable option setter' );
-    assert.ok( document.getElementById( getPrimarySiblingIDByNode( a ) ).tabIndex === 0,
-      'tab index on primary sibling with setter' );
+    assert.ok( getPrimarySiblingElementByNode( a ).tabIndex === 0, 'tab index on primary sibling with setter' );
 
     // change the tag name, but focusable should stay the same
     a.tagName = 'p';
 
     assert.ok( a.focusable === true, 'tagName option should not change focusable value' );
-    assert.ok( document.getElementById( getPrimarySiblingIDByNode( a ) ).tabIndex === 0,
-      'tagName option should not change tab index on primary sibling' );
+    assert.ok( getPrimarySiblingElementByNode( a ).tabIndex === 0, 'tagName option should not change tab index on primary sibling' );
   } );
+
+  QUnit.test( 'append siblings/appendLabel/appendDescription setters', function( assert ) {
+
+
+    // test the behavior of focusable function
+    var rootNode = new Node( { tagName: 'div' } );
+    var display = new Display( rootNode );
+    document.body.appendChild( display.domElement );
+
+    var a = new Node( {
+      tagName: 'li',
+      innerContent: TEST_INNER_CONTENT,
+      labelTagName: 'h3',
+      labelContent: TEST_LABEL,
+      descriptionContent: TEST_DESCRIPTION,
+      containerTagName: 'section',
+      appendLabel: true
+    } );
+    rootNode.addChild( a );
+
+    var aElement = getPrimarySiblingElementByNode( a );
+    var containerElement = aElement.parentElement;
+    assert.ok( containerElement.tagName.toUpperCase() === 'SECTION', 'container parent is set to right tag' );
+
+
+    assert.ok( containerElement.childNodes.length === 3, 'expected three siblings' );
+    assert.ok( containerElement.childNodes[ 0 ].tagName.toUpperCase() === DEFAULT_DESCRIPTION_TAG, 'description first sibling' );
+    assert.ok( containerElement.childNodes[ 1 ].tagName.toUpperCase() === 'LI', 'primary sibling second sibling' );
+    assert.ok( containerElement.childNodes[ 2 ].tagName.toUpperCase() === 'H3', 'label sibling last' );
+
+    a.appendDescription = true;
+    containerElement = getPrimarySiblingElementByNode( a ).parentElement;
+    assert.ok( containerElement.childNodes.length === 3, 'expected three siblings' );
+    assert.ok( containerElement.childNodes[ 0 ].tagName.toUpperCase() === 'LI', 'primary sibling first sibling' );
+    assert.ok( containerElement.childNodes[ 1 ].tagName.toUpperCase() === 'H3', 'label sibling second' );
+    assert.ok( containerElement.childNodes[ 2 ].tagName.toUpperCase() === DEFAULT_DESCRIPTION_TAG, 'description last sibling' );
+
+    // clear it out back to defaults should work with setters
+    a.appendDescription = false;
+    a.appendLabel = false;
+    containerElement = getPrimarySiblingElementByNode( a ).parentElement;
+    assert.ok( containerElement.childNodes.length === 3, 'expected three siblings' );
+    assert.ok( containerElement.childNodes[ 0 ].tagName.toUpperCase() === 'H3', 'label sibling first' );
+    assert.ok( containerElement.childNodes[ 1 ].tagName.toUpperCase() === DEFAULT_DESCRIPTION_TAG, 'description sibling second' );
+    assert.ok( containerElement.childNodes[ 2 ].tagName.toUpperCase() === 'LI', 'primary sibling last' );
+    } );
 } );

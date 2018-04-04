@@ -173,6 +173,8 @@ define( function( require ) {
     'innerContent', // Sets the inner text or HTML for a node's primary sibling element, see setInnerContent()
     'labelContent', // Sets the label content for the node, see setLabelContent()
     'descriptionContent', // Sets the description content for the node, see setDescriptionContent()
+    'appendLabel', // Sets the label sibling to come after the primary sibling in the pDOM, see setAppendLabel()
+    'appendDescription', // Sets the description sibling to come after the primary sibling in the pDOM, see setAppendDescription()
     'focusHighlight', // Sets the focus highlight for the node, see setFocusHighlight()
     'focusHighlightLayerable', // Flag to determine if the focus highlight node can be layered in the scene graph, see setFocusHighlightLayerable()
     'groupFocusHighlight', // Sets the outer focus highlight for this node when a descendant has focus, see setGroupFocusHighlight()
@@ -182,7 +184,6 @@ define( function( require ) {
     'ariaLabel', // Sets the value of the 'aria-label' attribute on the primary sibling of this Node, see setAriaLabel()
     'ariaRole', // Sets the ARIA role for the primary sibling of this Node, see setAriaRole()
     'containerAriaRole', // Sets the ARIA role for the container parent DOM element, see setContainerAriaRole()
-    'prependLabels', // Sets whether we want to prepend labels above the node's HTML element, see setPrependLabels()
     'ariaDescriptionContent', // Sets the content that will describe another node through aria-describedby, see setAriaDescriptionContent()
     'ariaLabelContent', // Sets the content that will label another node through aria-labelledby, see setAriaLabelledByContent()
     'ariaDescribedContent', // Sets the content that will be described by another node through aria-describedby, see setAriaDescribedContent()
@@ -255,10 +256,19 @@ define( function( require ) {
           // type 'radio' and 'checkbox'
           this._accessibleChecked = false;
 
-          // @private {boolean} - determines whether or not labels should be prepended above the node's primary
-          // sibling element. All labels will be placed inside containerParent, which will be automatically created if
-          // option not provided. The labels are sorted relative to the node's DOM element under the container parent.
-          this._prependLabels = false;
+          // @private {boolean} - By default the label will be prepended before the primary sibling in the pDOM. This
+          // option allows you to instead have the label added after the primary sibling. Note: The label will always
+          // be in front of the description sibling. If this flag is set with `appendDescription: true`, the order will be
+          // (1) primary sibling, (2) label sibling, (3) description sibling. All siblings will be placed within the
+          // containerParent.
+          this._appendLabel = false;
+
+          // @private {boolean} - By default the description will be prepended before the primary sibling in the pDOM. This
+          // option allows you to instead have the description added after the primary sibling. Note: The description
+          // will always be after the label sibling. If this flag is set with `appendLabel: true`, the order will be
+          // (1) primary sibling, (2) label sibling, (3) description sibling. All siblings will be placed within the
+          // containerParent.
+          this._appendDescription = false;
 
           // @private {array.<Object> - array of attributes that are on the node's DOM element.  Objects will have the
           // form { attribute:{string}, value:{string|number} }
@@ -635,38 +645,67 @@ define( function( require ) {
         get inputType() { return this.getInputType(); },
 
         /**
-         * Set whether or not we want to prepend labels above the node's HTML element.  If the node does not have
-         * a container parent element, one will be created. If prepending labels, the label and description elements
-         * will be located above the HTML element like:
+         * By default the label will be prepended before the primary sibling in the pDOM. This
+         * option allows you to instead have the label added after the primary sibling. Note: The label will always
+         * be in front of the description sibling. If this flag is set with `appendDescription`, the order will be
          *
-         * <div id='parent-container'>
-         *   <p>Label</p>
-         *   <p>Description</p>
-         *   <div id="node-content"></div>
-         * </div>
+         * <container>
+         *   <primary sibling/>
+         *   <label sibling/>
+         *   <description sibling/>
+         * </container>
+         * @public
          *
-         * By default, label and description elements are placed below the node's HTML element.
-         *
-         * @param {boolean} prependLabels
+         * @param {boolean} appendLabel
          */
-        setPrependLabels: function( prependLabels ) {
-          this._prependLabels = prependLabels;
+        setAppendLabel: function( appendLabel ) {
+          this._appendLabel = appendLabel;
 
           // TODO: can we do this without recomputing everything?
           this.invalidateAccessibleContent();
         },
-        set prependLabels( prependLabels ) { this.setPrependLabels( prependLabels ); },
+        set appendLabel( appendLabel ) { this.setAppendLabel( appendLabel ); },
 
         /**
-         * Get whether or not this node adds labels and descriptions above the representative DOM element.
-         * @public
-         *
+         * Get whether the label sibling should be appended after the primary sibling.
          * @returns {boolean}
          */
-        getPrependLabels: function() {
-          return this._prependLabels;
+        getAppendLabel: function(){
+          return this._appendLabel;
         },
-        get prependLabels() { return this.getPrependLabels(); },
+        get appendLabel() { this.getAppendLabel(); },
+
+        /**
+         * By default the label will be prepended before the primary sibling in the pDOM. This
+         * option allows you to instead have the label added after the primary sibling. Note: The label will always
+         * be in front of the description sibling. If this flag is set with `appendLabel`, the order will be
+         *
+         * <container>
+         *   <primary sibling/>
+         *   <label sibling/>
+         *   <description sibling/>
+         * </container>
+         * @public
+         *
+         * @param {boolean} appendDescription
+         */
+        setAppendDescription: function( appendDescription ) {
+          this._appendDescription = appendDescription;
+
+          // TODO: can we do this without recomputing everything?
+          this.invalidateAccessibleContent();
+        },
+        set appendDescription( appendDescription ) { this.setAppendDescription( appendDescription ); },
+
+        /**
+         * Get whether the description sibling should be appended after the primary sibling.
+         * @returns {boolean}
+         */
+        getAppendDescription: function(){
+          return this._appendDescription;
+        },
+        get appendDescription() { this.getAppendDescription(); },
+
 
         /**
          * Set the container parent tag name. By specifying this container parent, an element will be created that
@@ -1824,28 +1863,26 @@ define( function( require ) {
       }
 
       /**
-       * Called by invalidateAccessibleContent.  'this' will be bound by call. The contentElement will either be a
-       * label or description element.  The contentElement will be sorted relative to this node's DOM element or its
-       * containerParent.  Its placement will also depend on whether or not this node wants to prepend labels,
-       * see setPrependLabels().
-       * @private
+       * Called by invalidateAccessibleContent. "this" will be bound by call. The contentElement will either be a
+       * label or description element. The contentElement will be sorted relative to the primary sibling in its
+       * containerParent. Its placement will also depend on whether or not this node wants to append this element,
+       * see setAppendLabel() and setAppendDescription(). By default, the "content" element will be placed before the
+       * primary sibling.
        *
        * @param {AccessiblePeer} accessiblePeer
        * @param {HTMLElement} contentElement
-       * @param {boolean} prependLabels
+       * @param {boolean} appendElement
        */
-      function insertContentElement( accessiblePeer, contentElement, prependLabels ) {
+      function insertContentElement( accessiblePeer, contentElement, appendElement ) {
         assert && assert( accessiblePeer.containerParent, 'Cannot add sibling if there is no container element' );
-        if ( accessiblePeer.containerParent ) {
-          if ( prependLabels && accessiblePeer.containerParent === accessiblePeer.primarySibling.parentNode ) {
-            accessiblePeer.containerParent.insertBefore( contentElement, accessiblePeer.primarySibling );
-          }
-          else {
-            accessiblePeer.containerParent.appendChild( contentElement );
-          }
+        if ( appendElement ) {
+          accessiblePeer.containerParent.appendChild( contentElement );
         }
-        else if ( accessiblePeer.primarySibling ) {
-          accessiblePeer.primarySibling.appendChild( contentElement );
+        else if ( accessiblePeer.containerParent === accessiblePeer.primarySibling.parentNode ) {
+          accessiblePeer.containerParent.insertBefore( contentElement, accessiblePeer.primarySibling );
+        }
+        else {
+          assert && assert( false, 'no append flag for DOM Element, and container parent did not match primary sibling' );
         }
       }
 
@@ -1967,7 +2004,7 @@ define( function( require ) {
               }
 
               // set the accessible description, but not if the tagName has been cleared out.
-              if ( self._descriptionContent && self._descriptionTagName !== null) {
+              if ( self._descriptionContent && self._descriptionTagName !== null ) {
                 self.setDescriptionContent( self._descriptionContent );
               }
 
@@ -1998,8 +2035,8 @@ define( function( require ) {
               }
 
               // insert the label and description elements in the correct location if they exist
-              labelSibling && insertContentElement( accessiblePeer, labelSibling, self._prependLabels );
-              descriptionSibling && insertContentElement( accessiblePeer, descriptionSibling, self._prependLabels );
+              labelSibling && insertContentElement( accessiblePeer, labelSibling, self._appendLabel );
+              descriptionSibling && insertContentElement( accessiblePeer, descriptionSibling, self._appendDescription );
 
               // Default the focus highlight in this special case to be invisible until selected.
               if ( self._focusHighlightLayerable ) {
