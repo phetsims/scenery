@@ -132,6 +132,7 @@ define( [
 
   'SCENERY/util/CanvasContextWrapper',
   'SCENERY/util/Color',
+  'SCENERY/util/DisplayedProperty',
   'SCENERY/util/Features',
   'SCENERY/util/Font',
   'SCENERY/util/Gradient',

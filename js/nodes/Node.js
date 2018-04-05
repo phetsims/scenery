@@ -4241,6 +4241,8 @@ define( function( require ) {
     addInstance: function( instance ) {
       assert && assert( instance instanceof scenery.Instance );
       this._instances.push( instance );
+
+      this.trigger1( 'addedInstance', instance );
     },
 
     /**
@@ -4254,6 +4256,8 @@ define( function( require ) {
       var index = _.indexOf( this._instances, instance );
       assert && assert( index !== -1, 'Cannot remove a Instance from a Node if it was not there' );
       this._instances.splice( index, 1 );
+
+      this.trigger1( 'removedInstance', instance );
     },
 
     /**
