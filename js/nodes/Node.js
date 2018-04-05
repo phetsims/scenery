@@ -4907,7 +4907,7 @@ define( function( require ) {
       this.removeAllChildren();
       this.detach();
 
-      Events.prototype.dispose.call( this ); // TODO: don't rely on Events
+      Events.prototype.dispose.call( this ); // TODO: don't rely on Events, see https://github.com/phetsims/scenery/issues/490
       PhetioObject.prototype.dispose.call( this );
     },
 
