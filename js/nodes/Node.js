@@ -4256,6 +4256,24 @@ define( function( require ) {
       this._instances.splice( index, 1 );
     },
 
+    /**
+     * Returns whether this node was visually rendered/displayed by a Display in the last updateDisplay() call.
+     * @public
+     *
+     * @param {Display} display
+     * @returns {boolean}
+     */
+    wasDisplayed: function( display ) {
+      for ( var i = 0; i < this._instances.length; i++ ) {
+        var instance = this._instances[ i ];
+
+        if ( instance.display === display && instance.visible ) {
+          return true;
+        }
+      }
+      return false;
+    },
+
     /*---------------------------------------------------------------------------*
      * Display handling
      *----------------------------------------------------------------------------*/
