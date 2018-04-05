@@ -244,20 +244,23 @@ define( function( require ) {
       var parentElement = this.peer.getParentContainerElement();
 
       var self = this;
-      var hideParent = function() {
-        parentElement.hidden = !( visibilityCount === self.trailDiff.length );
+      parentElement.hidden = !( visibilityCount === self.trailDiff.length );
 
-        // if we hid a parent element, blur focus if active element was an ancestor
-        if ( parentElement.hidden ) {
-          if ( parentElement.contains( document.activeElement ) ) {
-            scenery.Display.focus = null;
-          }
+      // if we hid a parent element, blur focus if active element was an ancestor
+      if ( parentElement.hidden ) {
+        if ( parentElement.contains( document.activeElement ) ) {
+          scenery.Display.focus = null;
         }
-      };
-
-      // wrapping the hiding and bluring in a timeout is a workaround for an Edge bug where unhidden elements remain
-      // excluded from the navigation order, see https://github.com/phetsims/a11y-research/issues/30
-      platform.edge ? window.setTimeout( hideParent, 1 ) : hideParent();
+      }
+      
+      // Edge has a bug where removing the hidden attribute on an ancestor doesn't add elements back to the navigation
+      // order. As a workaround, forcing the browser to redraw the PDOM seems to fix the issue. Forced redraw method
+      // recommended by https://stackoverflow.com/questions/8840580/force-dom-redraw-refresh-on-chrome-mac, also see
+      // https://github.com/phetsims/a11y-research/issues/30
+      if ( platform.edge ) {
+        this.display.getAccessibleDOMElement().style.display = 'none';
+        this.display.getAccessibleDOMElement().style.display = 'block';
+      }
     },
 
     /**
