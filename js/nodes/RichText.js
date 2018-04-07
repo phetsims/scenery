@@ -66,6 +66,7 @@ define( function( require ) {
   var Font = require( 'SCENERY/util/Font' );
   var inherit = require( 'PHET_CORE/inherit' );
   var Line = require( 'SCENERY/nodes/Line' );
+  var Matrix3 = require( 'DOT/Matrix3' );
   var Node = require( 'SCENERY/nodes/Node' );
   var Poolable = require( 'PHET_CORE/Poolable' );
   var RichTextIO = require( 'SCENERY/nodes/RichTextIO' );
@@ -1463,7 +1464,7 @@ define( function( require ) {
         child.clean();
       }
 
-      this.setScaleMagnitude( 1 );
+      this.matrix = Matrix3.IDENTITY;
 
       this.freeToPool();
     },
@@ -1624,6 +1625,8 @@ define( function( require ) {
       this.fill = null;
       this.stroke = null;
 
+      this.matrix = Matrix3.IDENTITY;
+
       this.freeToPool();
     },
 
@@ -1739,6 +1742,8 @@ define( function( require ) {
         this.removeAccessibleInputListener( this.accessibleInputListener );
         this.accessibleInputListener = null;
       }
+
+      this.matrix = Matrix3.IDENTITY;
 
       this.freeToPool();
     }
