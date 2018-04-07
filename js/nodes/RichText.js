@@ -67,6 +67,7 @@ define( function( require ) {
   var inherit = require( 'PHET_CORE/inherit' );
   var Line = require( 'SCENERY/nodes/Line' );
   var Node = require( 'SCENERY/nodes/Node' );
+  var Poolable = require( 'PHET_CORE/Poolable' );
   var RichTextIO = require( 'SCENERY/nodes/RichTextIO' );
   var scenery = require( 'SCENERY/scenery' );
   var Tandem = require( 'TANDEM/Tandem' );
@@ -232,8 +233,7 @@ define( function( require ) {
     rebuildRichText: function() {
       var self = this;
 
-      // Clear any existing lines or link fragments
-      this.lineContainer.removeAllChildren();
+      this.freeChildrenToPool();
 
       // Bail early, particularly if we are being constructed.
       if ( this._text === '' ) {
@@ -257,7 +257,7 @@ define( function( require ) {
       var widthAvailable = this._lineWrap === null ? Number.POSITIVE_INFINITY : this._lineWrap;
       var isRootLTR = true;
 
-      var currentLine = new RichTextElement( isRootLTR );
+      var currentLine = RichTextElement.createFromPool( isRootLTR );
       this._hasAddedLeafToLine = false; // notify that if nothing has been added, the first leaf always gets added.
 
       // Himalaya can give us multiple top-level items, so we need to iterate over those
@@ -284,7 +284,7 @@ define( function( require ) {
           }
 
           // Set up a new line
-          currentLine = new RichTextElement( isRootLTR );
+          currentLine = RichTextElement.createFromPool( isRootLTR );
           this._hasAddedLeafToLine = false;
         }
 
@@ -323,42 +323,8 @@ define( function( require ) {
             }
           }
 
-          // a11y - open the link in the new tab when activated with a keyboard.
-          // also see https://github.com/phetsims/joist/issues/430
-          var rootNode = new Node( {
-            cursor: 'pointer',
-            tagName: 'a',
-            innerContent: linkElement.innerContent
-          } );
-
-          // If our href is a function, it should be called when the user clicks on the link
-          if ( typeof href === 'function' ) {
-            rootNode.addInputListener( new ButtonListener( {
-              fire: href
-            } ) );
-            rootNode.setAccessibleAttribute( 'href', '#' ); // Required so that the click listener will get called.
-            rootNode.addAccessibleInputListener( {
-              click: function( event ) {
-                event.preventDefault();
-
-                href();
-              }
-            } );
-          }
-          // Otherwise our href is a {string}, and we should open a window pointing to it (assuming it's a URL)
-          else {
-            rootNode.addInputListener( new ButtonListener( {
-              fire: function( event ) {
-                self._linkEventsHandled && event.handle();
-                var newWindow = window.open( href, '_blank' ); // open in a new window/tab
-                newWindow.focus();
-              }
-            } ) );
-            rootNode.setAccessibleAttribute( 'href', href );
-            rootNode.setAccessibleAttribute( 'target', '_blank' );
-          }
-
-          self.lineContainer.addChild( rootNode );
+          var linkRootNode = RichTextLink.createFromPool( linkElement.innerContent, href );
+          self.lineContainer.addChild( linkRootNode );
 
           // Detach the node from its location, adjust its transform, and reattach under the link. This should keep each
           // fragment in the same place, but changes its parent.
@@ -367,7 +333,7 @@ define( function( require ) {
             var matrix = node.getUniqueTrailTo( self.lineContainer ).getMatrix();
             node.detach();
             node.matrix = matrix;
-            rootNode.addChild( node );
+            linkRootNode.addChild( node );
           }
         })();
       }
@@ -376,6 +342,30 @@ define( function( require ) {
       this._linkItems.length = 0;
 
       sceneryLog && sceneryLog.RichText && sceneryLog.pop();
+    },
+
+    /**
+     * Cleans "recursively temporary disposes" the children.
+     * @private
+     */
+    freeChildrenToPool: function() {
+      // Clear any existing lines or link fragments (higher performance, and return them to pools also)
+      while ( this.lineContainer._children.length ) {
+        var child = this.lineContainer._children[ this.lineContainer._children.length - 1 ];
+        this.lineContainer.removeChild( child );
+        child.clean();
+      }
+    },
+
+    /**
+     * Releases references.
+     * @public
+     * @override
+     */
+    dispose: function() {
+      this.freeChildrenToPool();
+
+      Node.prototype.dispose.call( this );
     },
 
     /**
@@ -438,7 +428,7 @@ define( function( require ) {
         sceneryLog && sceneryLog.RichText && sceneryLog.RichText( 'appending leaf: ' + element.content );
         sceneryLog && sceneryLog.RichText && sceneryLog.push();
 
-        node = new RichTextLeaf( element.content, isLTR, font, this._boundsMethod, fill, this._stroke );
+        node = RichTextLeaf.createFromPool( element.content, isLTR, font, this._boundsMethod, fill, this._stroke );
 
         // If this content gets added, it will need to be pushed over by this amount
         var containerSpacing = isLTR ? containerNode.rightSpacing : containerNode.leftSpacing;
@@ -460,7 +450,7 @@ define( function( require ) {
 
             // Keep shortening by removing words until it fits (or if we NEED to fit it) or it doesn't fit.
             while ( words.length ) {
-              node = new RichTextLeaf( words.join( ' ' ), isLTR, font, this._boundsMethod, fill, this._stroke );
+              node = RichTextLeaf.createFromPool( words.join( ' ' ), isLTR, font, this._boundsMethod, fill, this._stroke );
 
               // If we haven't added anything to the line and we are down to the first word, we need to just add it.
               if ( !node.fitsIn( widthAvailable - containerSpacing, this._hasAddedLeafToLine, isLTR ) &&
@@ -507,7 +497,7 @@ define( function( require ) {
           }
         }
 
-        node = new RichTextElement( isLTR );
+        node = RichTextElement.createFromPool( isLTR );
 
         sceneryLog && sceneryLog.RichText && sceneryLog.RichText( 'appending element' );
         sceneryLog && sceneryLog.RichText && sceneryLog.push();
@@ -1439,15 +1429,43 @@ define( function( require ) {
   function RichTextElement( isLTR ) {
     Node.call( this );
 
-    // @private {boolean}
-    this.isLTR = isLTR;
-
-    // @protected {number} - The amount of local-coordinate spacing to apply on each side
-    this.leftSpacing = 0;
-    this.rightSpacing = 0;
+    this.initialize( isLTR );
   }
 
   inherit( Node, RichTextElement, {
+    /**
+     * Sets up state
+     * @public
+     *
+     * @param {boolean} isLTR
+     * @returns {RichTextElement} - Self reference
+     */
+    initialize: function( isLTR ) {
+      // @private {boolean}
+      this.isLTR = isLTR;
+
+      // @protected {number} - The amount of local-coordinate spacing to apply on each side
+      this.leftSpacing = 0;
+      this.rightSpacing = 0;
+
+      return this;
+    },
+
+    /**
+     * Releases references
+     * @public
+     */
+    clean: function() {
+      // Remove all children (and recursively clean)
+      while ( this._children.length ) {
+        var child = this._children[ this._children.length - 1 ];
+        this.removeChild( child );
+        child.clean();
+      }
+
+      this.freeToPool();
+    },
+
     /**
      * Adds a child element.
      * @private
@@ -1521,6 +1539,19 @@ define( function( require ) {
     }
   } );
 
+  Poolable.mixInto( RichTextElement, {
+    constructorDuplicateFactory: function( pool ) {
+      return function( isLTR ) {
+        if ( pool.length ) {
+          return pool.pop().initialize( isLTR );
+        }
+        else {
+          return new RichTextElement( isLTR );
+        }
+      };
+    }
+  } );
+
   /**
    * A leaf (text) node.
    * @constructor
@@ -1533,38 +1564,67 @@ define( function( require ) {
    * @param {null|string|Color|Property.<string|Color>|LinearGradient|RadialGradient|Pattern} stroke
    */
   function RichTextLeaf( content, isLTR, font, boundsMethod, fill, stroke ) {
+    Text.call( this, '' );
 
-    // Grab all spaces at the (logical) start
-    var whitespaceBefore = '';
-    while ( content[ 0 ] === ' ' ) {
-      whitespaceBefore += ' ';
-      content = content.slice( 1 );
-    }
-
-    // Grab all spaces at the (logical) end
-    var whitespaceAfter = '';
-    while ( content[ content.length - 1 ] === ' ' ) {
-      whitespaceAfter = ' ';
-      content = content.slice( 0, content.length - 1 );
-    }
-
-    Text.call( this, RichText.contentToString( content, isLTR ), {
-      boundsMethod: boundsMethod,
-      font: font,
-      fill: fill,
-      stroke: stroke
-    } );
-
-    var spacingBefore = whitespaceBefore.length ? scratchText.setText( whitespaceBefore ).setFont( font ).width : 0;
-    var spacingAfter = whitespaceAfter.length ? scratchText.setText( whitespaceAfter ).setFont( font ).width : 0;
-
-    // Turn logical spacing into directional
-    // @protected {number}
-    this.leftSpacing = isLTR ? spacingBefore : spacingAfter;
-    this.rightSpacing = isLTR ? spacingAfter : spacingBefore;
+    this.initialize( content, isLTR, font, boundsMethod, fill, stroke );
   }
 
   inherit( Text, RichTextLeaf, {
+    /**
+     * Set up this text's state
+     * @public
+     *
+     * @param {string} content
+     * @param {boolean} isLTR
+     * @param {Font|string} font
+     * @param {string} boundsMethod
+     * @param {null|string|Color|Property.<string|Color>|LinearGradient|RadialGradient|Pattern} fill
+     * @param {null|string|Color|Property.<string|Color>|LinearGradient|RadialGradient|Pattern} stroke
+     * @returns {RichTextLeaf} - Self reference
+     */
+    initialize: function( content, isLTR, font, boundsMethod, fill, stroke ) {
+
+      // Grab all spaces at the (logical) start
+      var whitespaceBefore = '';
+      while ( content[ 0 ] === ' ' ) {
+        whitespaceBefore += ' ';
+        content = content.slice( 1 );
+      }
+
+      // Grab all spaces at the (logical) end
+      var whitespaceAfter = '';
+      while ( content[ content.length - 1 ] === ' ' ) {
+        whitespaceAfter = ' ';
+        content = content.slice( 0, content.length - 1 );
+      }
+
+      this.text = RichText.contentToString( content, isLTR );
+      this.boundsMethod = boundsMethod;
+      this.font = font;
+      this.fill = fill;
+      this.stroke = stroke;
+
+      var spacingBefore = whitespaceBefore.length ? scratchText.setText( whitespaceBefore ).setFont( font ).width : 0;
+      var spacingAfter = whitespaceAfter.length ? scratchText.setText( whitespaceAfter ).setFont( font ).width : 0;
+
+      // Turn logical spacing into directional
+      // @protected {number}
+      this.leftSpacing = isLTR ? spacingBefore : spacingAfter;
+      this.rightSpacing = isLTR ? spacingAfter : spacingBefore;
+
+      return this;
+    },
+
+    /**
+     * Cleans references that could cause memory leaks (as those things may contain other references).
+     */
+    clean: function() {
+      this.fill = null;
+      this.stroke = null;
+
+      this.freeToPool();
+    },
+
     /**
      * Whether this leaf will fit in the specified amount of space (including, if required, the amount of spacing on
      * the side).
@@ -1576,6 +1636,122 @@ define( function( require ) {
      */
     fitsIn: function( widthAvailable, hasAddedLeafToLine, isContainerLTR ) {
       return this.width + ( hasAddedLeafToLine ? ( isContainerLTR ? this.leftSpacing : this.rightSpacing ) : 0 ) <= widthAvailable;
+    }
+  } );
+
+  Poolable.mixInto( RichTextLeaf, {
+    constructorDuplicateFactory: function( pool ) {
+      return function( content, isLTR, font, boundsMethod, fill, stroke ) {
+        if ( pool.length ) {
+          return pool.pop().initialize( content, isLTR, font, boundsMethod, fill, stroke );
+        }
+        else {
+          return new RichTextLeaf( content, isLTR, font, boundsMethod, fill, stroke );
+        }
+      };
+    }
+  } );
+
+  /**
+   * A link node
+   * @constructor
+   *
+   * @param {string} innerContent
+   * @param {function|string} href
+   */
+  function RichTextLink( innerContent, href ) {
+    Node.call( this, {
+      cursor: 'pointer',
+      tagName: 'a'
+    } );
+
+    // @private {ButtonListener|null}
+    this.buttonListener = null;
+
+    // @private {function|null}
+    this.accessibleInputListener = null;
+
+    this.initialize( innerContent, href );
+  }
+
+  inherit( Node, RichTextLink, {
+    /**
+     * Set up this state
+     * @public
+     *
+     * @param {string} innerContent
+     * @param {function|string} href
+     * @returns {RichTextLink} - Self reference
+     */
+    initialize: function( innerContent, href ) {
+      // a11y - open the link in the new tab when activated with a keyboard.
+      // also see https://github.com/phetsims/joist/issues/430
+      this.innerContent = innerContent;
+
+      // If our href is a function, it should be called when the user clicks on the link
+      if ( typeof href === 'function' ) {
+        this.buttonListener = new ButtonListener( {
+          fire: href
+        } );
+        this.addInputListener( this.buttonListener );
+        this.setAccessibleAttribute( 'href', '#' ); // Required so that the click listener will get called.
+        this.setAccessibleAttribute( 'target', '_self' ); // This is the default (easier than conditionally removing)
+        this.accessibleInputListener = {
+          click: function( event ) {
+            event.preventDefault();
+
+            href();
+          }
+        };
+        var tmp = this.addAccessibleInputListener( this.accessibleInputListener );
+
+        // "safe?" workaround for https://github.com/phetsims/scenery/issues/764
+        if ( this.getAccessibleInputListeners().contains( tmp ) ) {
+          this.accessibleInputListener = tmp;
+        }
+      }
+      // Otherwise our href is a {string}, and we should open a window pointing to it (assuming it's a URL)
+      else {
+        this.buttonListener = new ButtonListener( {
+          fire: function( event ) {
+            self._linkEventsHandled && event.handle();
+            var newWindow = window.open( href, '_blank' ); // open in a new window/tab
+            newWindow.focus();
+          }
+        } );
+        this.addInputListener( this.buttonListener );
+        this.setAccessibleAttribute( 'href', href );
+        this.setAccessibleAttribute( 'target', '_blank' );
+      }
+
+      return this;
+    },
+
+    /**
+     * Cleans references that could cause memory leaks (as those things may contain other references).
+     */
+    clean: function() {
+      this.removeInputListener( this.buttonListener );
+      this.buttonListener = null;
+      if ( this.accessibleInputListener ) {
+        this.removeAccessibleInputListener( this.accessibleInputListener );
+        this.accessibleInputListener = null;
+      }
+
+      this.freeToPool();
+    }
+  } );
+
+  Poolable.mixInto( RichTextLink, {
+    constructorDuplicateFactory: function( pool ) {
+      return function( innerContent, href ) {
+        if ( pool.length ) {
+          return pool.pop().initialize( innerContent, href );
+        }
+        else {
+          return new RichTextLink( innerContent, href );
+        }
+      };
     }
   } );
 
