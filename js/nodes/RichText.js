@@ -1463,6 +1463,8 @@ define( function( require ) {
         child.clean();
       }
 
+      this.setScaleMagnitude( 1 );
+
       this.freeToPool();
     },
 
