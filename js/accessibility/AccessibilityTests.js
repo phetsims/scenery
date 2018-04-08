@@ -28,6 +28,7 @@ define( function( require ) {
   var TEST_DESCRIPTION_HTML_2 = '<strong>I ROCK as a DESCRIPTION 2</strong>';
 
   // These should manually match the defaults in the Accessibility.js trait
+  var DEFAULT_LABEL_TAG = 'P';
   var DEFAULT_DESCRIPTION_TAG = 'P';
   var DEFAULT_CONTAINER_TAG = 'DIV';
 
@@ -164,7 +165,7 @@ define( function( require ) {
     var labelSibling = aElement.parentElement.childNodes[ 0 ];
     assert.ok( a.accessibleInstances.length === 1, 'only 1 instance' );
     assert.ok( aElement.parentElement.childNodes.length === 2, 'parent contains two siblings' );
-    assert.ok( labelSibling.tagName === 'LABEL', 'default label tagName' );
+    assert.ok( labelSibling.tagName === DEFAULT_LABEL_TAG, 'default label tagName' );
     assert.ok( labelSibling.textContent === TEST_LABEL, 'no html should use textContent' );
 
     a.labelContent = TEST_LABEL_HTML;
@@ -944,5 +945,5 @@ define( function( require ) {
     assert.ok( containerElement.childNodes[ 0 ].tagName.toUpperCase() === 'H3', 'label sibling first' );
     assert.ok( containerElement.childNodes[ 1 ].tagName.toUpperCase() === DEFAULT_DESCRIPTION_TAG, 'description sibling second' );
     assert.ok( containerElement.childNodes[ 2 ].tagName.toUpperCase() === 'LI', 'primary sibling last' );
-    } );
+  } );
 } );

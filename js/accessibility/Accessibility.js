@@ -144,7 +144,7 @@ define( function( require ) {
   // default tag names for siblings
   var DEFAULT_CONTAINER_TAG_NAME = DIV_TAG;
   var DEFAULT_DESCRIPTION_TAG_NAME = P_TAG;
-  var DEFAULT_LABEL_TAG_NAME = LABEL_TAG;
+  var DEFAULT_LABEL_TAG_NAME = P_TAG;
 
   // these elements are typically associated with forms, and support certain attributes
   var FORM_ELEMENTS = [ INPUT_TAG, BUTTON_TAG, TEXTAREA_TAG, SELECT_TAG, OPTGROUP_TAG, DATALIST_TAG, OUTPUT_TAG, A_TAG ];
