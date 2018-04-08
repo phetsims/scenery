@@ -85,7 +85,11 @@ define( function( require ) {
     a.tagName = null;
     assert.ok( a.accessibleInstances.length === 0, 'set to null should clear accessible instances' );
 
+    // make sure that no errors when setting innerContent with tagName null.
+    a.innerContent = 'hello';
+
     a.tagName = 'button';
+    a.innerContent = TEST_LABEL_HTML_2;
     assert.ok( getPrimarySiblingElementByNode( a ).innerHTML === TEST_LABEL_HTML_2, 'innerContent not cleared when tagName set to null.' );
   } );
 

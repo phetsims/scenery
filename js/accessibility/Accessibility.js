@@ -149,8 +149,9 @@ define( function( require ) {
   // these elements are typically associated with forms, and support certain attributes
   var FORM_ELEMENTS = [ INPUT_TAG, BUTTON_TAG, TEXTAREA_TAG, SELECT_TAG, OPTGROUP_TAG, DATALIST_TAG, OUTPUT_TAG, A_TAG ];
 
-  // these elements do not have a closing tag, so they won't support features like innerHTML
-  // var ELEMENTS_WITHOUT_CLOSING_TAG = [ INPUT_TAG ];
+  // these elements do not have a closing tag, so they won't support features like innerHTML. This is how PhET treats
+  // these elements, not necessary what is legal html.
+  var ELEMENTS_WITHOUT_CLOSING_TAG = [ INPUT_TAG ];
 
   // these elements require a minimum width to be visible in Safari
   var ELEMENTS_REQUIRE_WIDTH = [ INPUT_TAG, A_TAG ];
@@ -670,7 +671,7 @@ define( function( require ) {
          * Get whether the label sibling should be appended after the primary sibling.
          * @returns {boolean}
          */
-        getAppendLabel: function(){
+        getAppendLabel: function() {
           return this._appendLabel;
         },
         get appendLabel() { this.getAppendLabel(); },
@@ -701,7 +702,7 @@ define( function( require ) {
          * Get whether the description sibling should be appended after the primary sibling.
          * @returns {boolean}
          */
-        getAppendDescription: function(){
+        getAppendDescription: function() {
           return this._appendDescription;
         },
         get appendDescription() { this.getAppendDescription(); },
@@ -759,7 +760,7 @@ define( function( require ) {
           this._labelContent = label;
 
           // If there
-          var useHTML = AccessibilityUtil.usesFormattingTagsExclusive( label );
+          var useHTML = AccessibilityUtil.usesExclusivelyFormattingTags( label );
 
           var self = this;
 
@@ -804,11 +805,11 @@ define( function( require ) {
           this._innerContent = content;
 
           // make sure HTML is exclusively text or formatting tags
-          var useHTML = AccessibilityUtil.usesFormattingTagsExclusive( content );
+          var useHTML = AccessibilityUtil.usesExclusivelyFormattingTags( content );
 
           var self = this;
+
           this.updateAccessiblePeers( function( accessiblePeer ) {
-            // TODO: are we sure this assert is safe? what if tagName was set to null to disable accessible content? https://github.com/phetsims/scenery/issues/748
             assert && assert( accessiblePeer.accessibleInstance.children.length === 0, 'descendants exist with accessible content, innerContent cannot be used' );
             setTextContent( accessiblePeer.primarySibling, self._innerContent, useHTML );
           } );
@@ -834,7 +835,7 @@ define( function( require ) {
          * @param {string|null} descriptionContent
          */
         setDescriptionContent: function( descriptionContent ) {
-          var useHTML = AccessibilityUtil.usesFormattingTagsExclusive( descriptionContent );
+          var useHTML = AccessibilityUtil.usesExclusivelyFormattingTags( descriptionContent );
 
           this._descriptionContent = descriptionContent;
 
@@ -1816,24 +1817,26 @@ define( function( require ) {
        * @param {boolean} isHTML - whether or not to set the content as HTML
        */
       function setTextContent( domElement, textContent, isHTML ) {
-        if ( isHTML ) {
-          domElement.innerHTML = textContent;
+        if ( elementSupportsContent( domElement ) ) {
+          if ( isHTML ) {
+            domElement.innerHTML = textContent;
+          }
+          else {
+            domElement.textContent = textContent;
+          }
         }
-        else {
-          domElement.textContent = textContent;
-        }
+
       }
 
       /**
-       * Returns whether or not the element supports innerHTML.
+       * Returns whether or not the element supports innerHTML or textContent in PhET.
        * @private
        * @param {HTMLElement} domElement
        * @returns {boolean}
-       * TODO: uncomment this, it will be needed later in https://github.com/phetsims/scenery/issues/748
        */
-      // function elementSupportsInnerHTML( domElement ) {
-      //   return !_.includes( ELEMENTS_WITHOUT_CLOSING_TAG, domElement.tagName );
-      // }
+      function elementSupportsContent( domElement ) {
+        return !_.includes( ELEMENTS_WITHOUT_CLOSING_TAG, domElement.tagName );
+      }
 
       /**
        * Create an HTML element.  Unless this is a form element or explicitly marked as focusable, add a negative

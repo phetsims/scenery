@@ -205,7 +205,7 @@ define( function( require ) {
      * @param  {string} textContent
      * @returns {boolean}
      */
-    usesFormattingTagsExclusive: function( textContent ) {
+    usesExclusivelyFormattingTags: function( textContent ) {
 
       // no-op for null case
       if ( textContent === null ) {
