@@ -250,7 +250,6 @@ define( function( require ) {
           this._inputType = null;
 
           // @private {string} - the value of the input, only relevant if the tag name is of type "INPUT".
-          // TODO: does this support null?  https://github.com/phetsims/scenery/issues/748
           this._inputValue = null;
 
           // @private {boolean} - whether or not the accessible input is considered 'checked', only useful for inputs of
@@ -349,7 +348,6 @@ define( function( require ) {
           // Sets the tabIndex attribute on the node's DOM element.  Setting to false will not remove the node's DOM
           // from the document, but will ensure that it cannot receive focus by pressing 'tab'.  Several HTMLElements
           // (such as HTML form elements) can be focusable by default, without setting this property.
-          // TODO: why null? why not boolean, https://github.com/phetsims/scenery/issues/748
           this._focusable = null;
 
           // @private {Shape|Node} - the focus highlight that will surround this node when it
@@ -365,7 +363,6 @@ define( function( require ) {
           // @private {boolean|Node} - Adds a group focus highlight that surrounds this node when a descendant has
           // focus. Typically useful to indicate focus if focus enters a group of elements. If 'true', group
           // highlight will go around local bounds of this node. Otherwise the custom node will be used as the highlight/
-          // TODO: this is weird, why boolean or Node, https://github.com/phetsims/scenery/issues/748
           this._groupFocusHighlight = false;
 
           // @private {boolean} - Whether or not the accessible content will be visible from the browser and assistive
