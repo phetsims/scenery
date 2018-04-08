@@ -309,7 +309,7 @@ define( function( require ) {
       // ancestor that has listeners and a11y)
       while ( this._linkItems.length ) {
         // Close over the href and other references
-        (function(){
+        ( function() {
           var linkElement = self._linkItems[ 0 ].element;
           var href = self._linkItems[ 0 ].href;
           var i;
@@ -336,7 +336,7 @@ define( function( require ) {
             node.matrix = matrix;
             linkRootNode.addChild( node );
           }
-        })();
+        } )();
       }
 
       // Clear them out afterwards, for memory purposes
@@ -568,11 +568,11 @@ define( function( require ) {
             font = font.copy( {
               // Handle decoding
               family: element.attributes.face.replace( /&quot;/g, '"' )
-                                             .replace( /&#x2F;/g, '/' )
-                                             .replace( /&#x27;/g, '\'' )
-                                             .replace( /&gt;/g, '>' )
-                                             .replace( /&lt;/g, '<' )
-                                             .replace( /&amp;/g, '&' )
+                .replace( /&#x2F;/g, '/' )
+                .replace( /&#x27;/g, '\'' )
+                .replace( /&gt;/g, '>' )
+                .replace( /&lt;/g, '<' )
+                .replace( /&amp;/g, '&' )
             } );
           }
           if ( element.attributes.size ) {
@@ -1711,7 +1711,7 @@ define( function( require ) {
         var tmp = this.addAccessibleInputListener( this.accessibleInputListener );
 
         // "safe?" workaround for https://github.com/phetsims/scenery/issues/764
-        if ( this.getAccessibleInputListeners().contains( tmp ) ) {
+        if ( this.getAccessibleInputListeners() && this.getAccessibleInputListeners().contains( tmp ) ) {
           this.accessibleInputListener = tmp;
         }
       }
