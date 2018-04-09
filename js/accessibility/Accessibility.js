@@ -249,7 +249,8 @@ define( function( require ) {
           // if the element has a tag name INPUT.
           this._inputType = null;
 
-          // @private {string} - the value of the input, only relevant if the tag name is of type "INPUT".
+          // @private {string|null} - the value of the input, only relevant if the tag name is of type "INPUT". Is a 
+          // string because the `value` attribute is a DOMString. null value indicates no value.
           this._inputValue = null;
 
           // @private {boolean} - whether or not the accessible input is considered 'checked', only useful for inputs of
