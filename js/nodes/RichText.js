@@ -1711,7 +1711,7 @@ define( function( require ) {
         var tmp = this.addAccessibleInputListener( this.accessibleInputListener );
 
         // "safe?" workaround for https://github.com/phetsims/scenery/issues/764
-        if ( this.getAccessibleInputListeners() && this.getAccessibleInputListeners().contains( tmp ) ) {
+        if ( this.getAccessibleInputListeners() && this.getAccessibleInputListeners().includes( tmp ) ) {
           this.accessibleInputListener = tmp;
         }
       }
