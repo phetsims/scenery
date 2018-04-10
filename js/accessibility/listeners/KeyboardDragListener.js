@@ -71,7 +71,10 @@ define( function( require ) {
       moveOnHoldDelay: 0,
 
       // {number} - time interval at which the object will change position while the arrow key is being held down
-      moveOnHoldInterval: 0
+      moveOnHoldInterval: 0,
+
+      // {number} - time interval at which holding down a hotkey group will trigger an associated listener
+      hotkeyInterval: 800
     }, options );
 
     // @private, see options for more information
@@ -87,6 +90,7 @@ define( function( require ) {
     this._shiftDownDelta = options.shiftDownDelta;
     this._moveOnHoldDelay = options.moveOnHoldDelay;
     this._moveOnHoldInterval = options.moveOnHoldInterval;
+    this._hotkeyInterval = options.hotkeyInterval;
 
     // @private { [].{ isDown: {boolean}, timeDown: [boolean] } - tracks the state of the keyboard. JavaScript doesn't
     // handle multiple key presses, so we track which keys are currently down and update based on state of this
@@ -109,6 +113,10 @@ define( function( require ) {
     // @private {boolean} - when a hotkey group is pressed down, dragging will be disabled until
     // all keys are up again
     this.draggingDisabled = false;
+
+    // @private {number} - delay before calling a keygroup listener (if keygroup is being held down), incremented in
+    // step
+    this.groupDownTimer = this._hotkeyInterval;
 
     // @private {boolean} - used to determine if the step functions updates position normally or in the 'hold to move' pattern
     this.canMove = true;
@@ -208,6 +216,15 @@ define( function( require ) {
         }
       }
 
+      // if keygroup keys are no longer down, clear the keygroup and reset timer
+      if ( self.keyGroupDown ) {
+        if ( !self.keyInListDown( self.keyGroupDown.keys ) ) {
+          self.keyGroupDown = null;
+          self.groupDownTimer = self._hotkeyInterval;
+          self.draggingDisabled = false;
+        }
+      }
+
       self.resetPressAndHold();
     };
 
@@ -256,6 +273,11 @@ define( function( require ) {
         // dt is in seconds and we convert to ms
         this.moveOnHoldDelayCounter += dt * 1000;
         this.moveOnHoldIntervalCounter += dt * 1000;
+
+        // update timer for keygroup if one is being held down
+        if ( this.keyGroupDown ) {
+          this.groupDownTimer += dt * 1000;
+        }
 
         // calculate change in position from time step
         var positionVelocity = this.shiftKeyDown() ? this._shiftDragVelocity : this._dragVelocity;
@@ -306,7 +328,12 @@ define( function( require ) {
         // all hotkeys associated with that group are up again
         if ( keysInOrder ) {
           this.keyGroupDown = this.hotkeyGroups[ j ];
-          this.hotkeyGroups[ j ].callback();
+          if ( this.groupDownTimer >= this._hotkeyInterval ) {
+            this.hotkeyGroups[ j ].callback();
+
+            // reset timer for delay between group keygroup commands
+            this.groupDownTimer = 0;
+          }
         }
       }
 
@@ -476,7 +503,7 @@ define( function( require ) {
      * Add a set of hotkeys that behave such that the desired callback will be called when
      * all keys listed in the array are pressed down in order.
      *
-     * @param {Object} hotKeyGroup - { keys: [].<number>, callback: function }
+     * @param {Object} hotKeyGroup - { keys: [].<number>, callback: {function}, interval: {number} }
      */
     addHotkeyGroup: function( hotKeyGroup ) {
       this.hotkeyGroups.push( hotKeyGroup );
