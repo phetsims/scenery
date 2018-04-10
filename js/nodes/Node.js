@@ -4079,8 +4079,16 @@ define( function( require ) {
         resolution: 1,
 
         // {Bounds2|null} - If provided, it will control the x/y/width/height of the toCanvas call. See toCanvas for
-        // details on how this controls the rasterization.
+        // details on how this controls the rasterization. This is in the "parent" coordinate frame, similar to
+        // node.bounds.
         sourceBounds: null,
+
+        // {boolean} - If true, the localBounds of the result will be set in a way such that it will precisely match
+        // the bounds of the original node (this). Note that antialiased content (with a much lower resolution) may
+        // somewhat spill outside of these bounds if this is set to true. Usually this is fine and should be the
+        // recommended option. If sourceBounds are provided, they will restrict the used bounds (so it will just
+        // represent the bounds of the sliced part of the image).
+        useTargetBounds: true,
 
         // {boolean} - If true, the created Image node gets wrapped in an extra Node so that it can be transformed
         // independently. If there is no need to transform the resulting node, wrap:false can be passed so that no extra
@@ -4113,13 +4121,21 @@ define( function( require ) {
       } );
 
       // Unfortunately if we provide a resolution AND bounds, we can't use the source bounds directly.
-      if ( sourceBounds && resolution !== 1 ) {
-        sourceBounds = new Bounds2(
-          resolution * sourceBounds.minX,
-          resolution * sourceBounds.minY,
-          resolution * sourceBounds.maxX,
-          resolution * sourceBounds.maxY
+      var transformedBounds = sourceBounds;
+      if ( transformedBounds && resolution !== 1 ) {
+        transformedBounds = new Bounds2(
+          resolution * transformedBounds.minX,
+          resolution * transformedBounds.minY,
+          resolution * transformedBounds.maxX,
+          resolution * transformedBounds.maxY
         );
+        // Compensate for non-integral transformedBounds after our resolution transform
+        if ( transformedBounds.width % 1 !== 0 ) {
+          transformedBounds.maxX += 1 - ( transformedBounds.width % 1 );
+        }
+        if ( transformedBounds.height % 1 !== 0 ) {
+          transformedBounds.maxY += 1 - ( transformedBounds.height % 1 );
+        }
       }
 
       var image;
@@ -4128,15 +4144,20 @@ define( function( require ) {
       function callback( canvas, x, y, width, height ) {
         var imageSource = options.useCanvas ? canvas : canvas.toDataURL();
 
-        image = new scenery.Image( imageSource, _.extend( options, { x: -x, y: -y, initialWidth: width, initialHeight: height } ) );
+        image = new scenery.Image( imageSource, _.extend( options, {
+          x: -x,
+          y: -y,
+          initialWidth: width,
+          initialHeight: height
+        } ) );
 
         // We need to prepend the scale due to order of operations
         image.scale( 1 / resolution, 1 / resolution, true );
       }
 
-      // If we have sourceBounds, provide the x/y/width/height.
-      if ( sourceBounds ) {
-        wrapperNode.toCanvas( callback, -sourceBounds.minX, -sourceBounds.minY, sourceBounds.width, sourceBounds.height );
+      // If we have transformedBounds, provide the x/y/width/height.
+      if ( transformedBounds ) {
+        wrapperNode.toCanvas( callback, -transformedBounds.minX, -transformedBounds.minY, transformedBounds.width, transformedBounds.height );
       }
       // otherwise we don't want to pass in any extra parameters
       else {
@@ -4147,12 +4168,23 @@ define( function( require ) {
 
       wrapperNode.dispose();
 
+      var finalParentBounds = this.bounds;
+      if ( sourceBounds ) {
+        // If we provide sourceBounds, don't have resulting bounds that go outside.
+        finalParentBounds = sourceBounds.intersection( finalParentBounds );
+      }
+
       if ( options.wrap ) {
-        return new Node( {
-          children: [ image ]
-        } );
+        var wrappedNode = new Node( { children: [ image ] } );
+        if ( options.useTargetBounds ) {
+          wrappedNode.localBounds = finalParentBounds;
+        }
+        return wrappedNode;
       }
       else {
+        if ( options.useTargetBounds ) {
+          image.localBounds = image.parentToLocalBounds( finalParentBounds );
+        }
         return image;        
       }
     },
