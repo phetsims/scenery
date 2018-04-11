@@ -552,7 +552,16 @@ define( function( require ) {
          * Set the tag name for the accessible label sibling for this Node. DOM element tag names are read-only,
          * so this will require creating a new AccessiblePeer for this Node (reconstructing all DOM Elements). If
          * labelContent is specified without calling this method, then the DEFAULT_LABEL_TAG_NAME will be used as the
-         * tag name for the label sibling. Use null to clear the label sibling element from the pDOM.
+         * tag name for the label sibling.
+         *
+         * Use null to clear the label sibling element from the pDOM.
+         *
+         * NOTE: This method will create a container parent tagName if none has been specified. This is because all siblings
+         * must be help in the container parent HTML element. If you clear the labelTagName and no longer want any
+         * content save the primary sibling (this means the container parent as well), then you must manually null out
+         * the containerTagName option as well. Although this isn't the greatest strategy, it works for now, and
+         * @zepumph and @jessegreenberg can't think of another way to handle this. See for details: https://github.com/phetsims/scenery/issues/761
+         *
          *
          * @param {string|null} tagName
          */
@@ -586,7 +595,14 @@ define( function( require ) {
          * a new HTML element, and inserting it into the DOM. The tag name provided must support
          * innerHTML and textContent. If descriptionContent is specified without this option,
          * then descriptionTagName will be set to DEFAULT_DESCRIPTION_TAG_NAME.
+         *
          * Passing 'null' will clear away the description sibling.
+         *
+         * NOTE: This method will create a container parent tagName if none has been specified. This is because all siblings
+         * must be help in the container parent HTML element. If you clear the descriptionTagName and no longer want any
+         * content save the primary sibling (this means the container parent as well), then you must manually null out
+         * the containerTagName option as well. Although this isn't the greatest strategy, it works for now, and
+         * @zepumph and @jessegreenberg can't think of another way to handle this. See for details: https://github.com/phetsims/scenery/issues/761
          *
          * @public
          * @param {string|null} tagName
@@ -722,6 +738,11 @@ define( function( require ) {
          *   <p>Button description</p>
          * </section>
          *
+         * Setting the containerTagName to null directly will result in a no-op if there are still siblings defined for
+         * the peer. This is because labelTagName and descriptionTagName will create a parent automatically if one isn't
+         * specified. This can result in some weird logic, and @zepumph and @jessegreenberg aren't sure if this is the
+         * best way, but it is the way it works for now. See https://github.com/phetsims/scenery/issues/761 for details
+         * and if you have opinions to share.
          *
          * @param {string|null} tagName
          */
@@ -749,7 +770,7 @@ define( function( require ) {
          * then the `for` attribute will automatically be added, pointing to the node's primary sibling DOM Element.
          *
          * This method supports adding content in two ways, with HTMLElement.textContent and HTMLElement.innerHTML.
-         * The DOM setter is chosen based on if the label passes the `usesFormatting.
+         * The DOM setter is chosen based on if the label passes the `usesExclusivelyFormattingTags`.
          *
          * Passing a null label value will not clear the whole label sibling, just the inner content of the DOM Element.
          * @param {string|null} label
