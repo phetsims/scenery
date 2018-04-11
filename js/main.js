@@ -135,6 +135,7 @@ define( [
   'SCENERY/util/DisplayedProperty',
   'SCENERY/util/Features',
   'SCENERY/util/Font',
+  'SCENERY/util/FullScreen',
   'SCENERY/util/Gradient',
   'SCENERY/util/LinearGradient',
   'SCENERY/util/Pattern',
