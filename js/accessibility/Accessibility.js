@@ -1292,7 +1292,7 @@ define( function( require ) {
          * Returns a recursive data structure that represents the nested ordering of accessible content for this Node's
          * subtree. Each "Item" will have the type { trail: {Trail}, children: {Array.<Item>} }, forming a tree-like
          * structure.
-         * @public
+         * @public (scenery-internal)
          *
          * @returns {Array.<Item>}
          */
