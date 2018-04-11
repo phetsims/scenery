@@ -1900,7 +1900,7 @@ define( function( require ) {
     set focus( value ) {
 
       // If in phet-io brand, a11y is enabled, and the focus is not null
-      if ( window.phet && phet.phetio && phet.chipper.a11yEnabled && value ) {
+      if ( window.phet && phet.phetio && phet.chipper.accessibility && value ) {
         var node = value.trail.lastNode();
         assert && assert( node.tandem && node.tandem.isSuppliedAndEnabled(),
           'When running phet-io mode, all focusable instances must be instrumented.' );
@@ -1969,7 +1969,7 @@ define( function( require ) {
   Display.focusProperty = new Property( null,
 
     // Only instrument if accessibility is enabled
-    ( window.phet && phet.chipper && phet.chipper.a11yEnabled ) ? {
+    ( window.phet && phet.chipper && phet.chipper.accessibility ) ? {
 
       // Make this a static tandem so that it can be added to studio correctly (batched and then flushed when the
       // listener is added).
