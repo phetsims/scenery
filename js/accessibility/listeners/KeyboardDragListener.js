@@ -218,7 +218,7 @@ define( function( require ) {
 
       // if keygroup keys are no longer down, clear the keygroup and reset timer
       if ( self.keyGroupDown ) {
-        if ( !self.keyInListDown( self.keyGroupDown.keys ) ) {
+        if ( !self.allKeysInListDown( self.keyGroupDown.keys ) ) {
           self.keyGroupDown = null;
           self.groupDownTimer = self._hotkeyInterval;
           self.draggingDisabled = false;
@@ -428,6 +428,31 @@ define( function( require ) {
       }
 
       return keyIsDown;
+    },
+
+    /**
+     * Return true if all keys in the list are currently held down.
+     *
+     * @param {Array.<number>} keys
+     * @return {boolean}
+     */
+    allKeysInListDown: function( keys ) {
+      var allKeysDown = true;
+      for ( var i = 0; i < keys.length; i++ ) {
+        for ( var j = 0; j < this.keyState.length; j++ ) {
+          if ( this.keyState[ j ].keyDown ) {
+            if ( keys[ j ] !== this.keyState ) {
+
+              // not all keys are down, return false right away
+              allKeysDown = false;
+              return allKeysDown;
+            }
+          }
+        }
+      }
+
+      // all keys must be down
+      return allKeysDown;
     },
 
     /**
