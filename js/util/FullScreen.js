@@ -17,8 +17,6 @@ define( function( require ) {
   var scenery = require( 'SCENERY/scenery' );
 
   // get prefixed (and properly capitalized) property names
-  var requestFullscreenPropertyName = detectPrefix( document.body, 'requestFullscreen' ) ||
-                                      detectPrefix( document.body, 'requestFullScreen' ); // Firefox capitalization
   var exitFullscreenPropertyName = detectPrefix( document, 'exitFullscreen' ) ||
                                    detectPrefix( document, 'cancelFullScreen' ); // Firefox
   var fullscreenElementPropertyName = detectPrefix( document, 'fullscreenElement' ) ||
@@ -49,6 +47,9 @@ define( function( require ) {
      * @param {Display} display
      */
     enterFullScreen: function( display ) {
+      var requestFullscreenPropertyName = detectPrefix( document.body, 'requestFullscreen' ) ||
+                                          detectPrefix( document.body, 'requestFullScreen' ); // Firefox capitalization
+                                          
       if ( !platform.ie9 && !platform.ie10 ) {
         display.domElement[ requestFullscreenPropertyName ] && display.domElement[ requestFullscreenPropertyName ]();
       }
