@@ -185,7 +185,6 @@ define( function( require ) {
       event.pointer.addInputListener( this.dragListener );
 
       // set all of our persistent information
-      console.log( 'start drag' );
       this.isDraggedProperty.set( true );
       this.pointer = event.pointer;
       this.trail = event.trail.subtrailTo( event.currentTarget, true );
@@ -212,7 +211,6 @@ define( function( require ) {
       this.pointer.dragging = false;
       this.pointer.cursor = null;
       this.pointer.removeInputListener( this.dragListener );
-      console.log( 'end drag' );
 
       this.isDraggedProperty.set( false );
 
