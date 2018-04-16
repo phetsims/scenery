@@ -50,10 +50,10 @@ define( function( require ) {
     }, options );
     this.options = options; // @private
 
-    // @private
-    this.isDraggedProperty = new BooleanProperty( false, {
+    // @public (read-only) {BooleanProperty} - indicates whether dragging is in progress
+    this.isDraggingProperty = new BooleanProperty( false, {
       phetioReadOnly: true,
-      tandem: options.tandem.createTandem( 'isDraggedProperty' ),
+      tandem: options.tandem.createTandem( 'isDraggingProperty' ),
       phetioInstanceDocumentation: 'Indicates whether the object is dragging.'
     } );
 
@@ -170,7 +170,7 @@ define( function( require ) {
 
     // @private
     get dragging() {
-      return this.isDraggedProperty.get();
+      return this.isDraggingProperty.get();
     },
 
     set dragging( d ) {
@@ -185,7 +185,7 @@ define( function( require ) {
       event.pointer.addInputListener( this.dragListener );
 
       // set all of our persistent information
-      this.isDraggedProperty.set( true );
+      this.isDraggingProperty.set( true );
       this.pointer = event.pointer;
       this.trail = event.trail.subtrailTo( event.currentTarget, true );
       this.transform = this.trail.getTransform();
@@ -212,7 +212,7 @@ define( function( require ) {
       this.pointer.cursor = null;
       this.pointer.removeInputListener( this.dragListener );
 
-      this.isDraggedProperty.set( false );
+      this.isDraggingProperty.set( false );
 
       this.startEvent( 'user', 'dragEnded' );
 
@@ -291,7 +291,7 @@ define( function( require ) {
         this.pointer.cursor = null;
         this.pointer.removeInputListener( this.dragListener );
       }
-      this.isDraggedProperty.dispose();
+      this.isDraggingProperty.dispose();
       PhetioObject.prototype.dispose.call( this );
     }
   }, {
