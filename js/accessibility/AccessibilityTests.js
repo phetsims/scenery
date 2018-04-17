@@ -470,7 +470,7 @@ define( function( require ) {
 
     // add a listener
     var listener = { click: function() { a1.labelContent = TEST_LABEL; } };
-    var addedListener = a1.addAccessibleInputListener( listener );
+    a1.addAccessibleInputListener( listener );
     assert.ok( a1.accessibleInputListeners.length === 1, 'accessible listener added' );
 
     // fire the event
@@ -478,7 +478,7 @@ define( function( require ) {
     assert.ok( a1.labelContent === TEST_LABEL, 'click fired, label set' );
 
     // remove the listener
-    a1.removeAccessibleInputListener( addedListener );
+    a1.removeAccessibleInputListener( listener );
     assert.ok( a1.accessibleInputListeners.length === 0, 'accessible listener removed' );
 
     // make sure event listener was also removed from DOM element
