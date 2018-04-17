@@ -425,11 +425,8 @@ define( function( require ) {
         this.peer.dispose();
 
         // remove this peer's primary sibling DOM Element (or its container parent) from the parent peer's
-        // primary sibling (or its child container), disabling input so that we do not call input listeners
-        // while the elements are removed from the DOM
-        this.node.accessibleInputEnabled = false;
+        // primary sibling (or its child container)
         this.parent.peer.getChildContainerElement().removeChild( this.peer.getContainerParent() );
-        this.node.accessibleInputEnabled = true;
 
         // remove visibility/accessibleVisibility listeners that were added
         for ( var i = 0; i < this.trailDiff.length; i++ ) {

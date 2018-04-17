@@ -697,7 +697,7 @@ define( function( require ) {
 
       // after sorting, restore focus if the browser blurred while removing or adding DOM elements
       if ( this._focusedNodeOnRemoveTrail ) {
-        this._focusedNodeOnRemoveTrail.focusable && this._focusedNodeOnRemoveTrail.focus();
+        this._focusedNodeOnRemoveTrail.focusable && this._focusedNodeOnRemoveTrail.accessibleVisible && this._focusedNodeOnRemoveTrail.focus();
         this._focusedNodeOnRemoveTrail = null;
       }
 

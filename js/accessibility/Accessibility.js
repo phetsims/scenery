@@ -156,9 +156,6 @@ define( function( require ) {
   // these elements require a minimum width to be visible in Safari
   var ELEMENTS_REQUIRE_WIDTH = [ INPUT_TAG, A_TAG ];
 
-  // these events change the input value on the dom element
-  var INPUT_CHANGE_EVENTS = [ 'input', 'change' ];
-
   // valid types of DOM events that can be added to a node
   var DOM_EVENTS = [ 'input', 'change', 'click', 'keydown', 'keyup', 'focus', 'blur' ];
 
@@ -414,48 +411,25 @@ define( function( require ) {
 
         /**
          * Adds an accessible input listener. The listener's keys should be DOM event names, and the values should be
-         * functions to be called when that event is fired on the dom element. No input listeners will be fired
-         * if this.accessibleInputEnabled is false.
+         * functions to be called when that event is fired on the DOM element.
          * @public
          *
          * @param {Object} accessibleInput
          * @returns {Object} - the actually added listener, so it can be removed via removeAccessibleInputListener
          */
         addAccessibleInputListener: function( accessibleInput ) {
-          var self = this;
-          var addedAccessibleInput = {};
-
-          var keys = Object.keys( accessibleInput );
-          for ( var i = 0; i < keys.length; i++ ) {
-            var ev = keys[ i ];
-            if ( _.includes( DOM_EVENTS, ev ) ) {
-
-              // wrap the listener with another function so that we can update state of this Node's
-              // accessible content if necessary, and prevent firing when input not enabled
-              addedAccessibleInput[ ev ] = function( event ) {
-                if ( self._accessibleInputEnabled ) {
-
-                  if ( _.includes( INPUT_CHANGE_EVENTS, event.type ) ) {
-                    self._inputValue = event.target.value;
-                  }
-
-                  // call the original input listener
-                  accessibleInput[ event.type ]( event );
-                }
-              };
-            }
-          }
-
-          var listenerAlreadyAdded = ( _.indexOf( this._accessibleInputListeners, addedAccessibleInput ) > 0 );
+          var listenerAlreadyAdded = ( _.indexOf( this._accessibleInputListeners, accessibleInput ) > 0 );
           assert && assert( !listenerAlreadyAdded, 'accessibleInput listener already added' );
 
+          this._accessibleInputListeners.push( accessibleInput );
+
           // add the listener directly to any AccessiblePeers that are representing this node
-          this._accessibleInputListeners.push( addedAccessibleInput );
+          var self = this;
           this.updateAccessiblePeers( function( accessiblePeer ) {
-            self.addDOMEventListeners( addedAccessibleInput, accessiblePeer.primarySibling );
+            self.addDOMEventListeners( accessibleInput, accessiblePeer.primarySibling );
           } );
 
-          return addedAccessibleInput;
+          return accessibleInput;
         },
 
         /**
