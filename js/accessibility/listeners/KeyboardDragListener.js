@@ -175,7 +175,7 @@ define( function( require ) {
 
       // move object on first down before a delay
       var positionDelta = self.shiftKeyDown() ? self._shiftDownDelta : self._downDelta;
-      this.updatePosition( positionDelta );
+      self.updatePosition( positionDelta );
     };
 
     /**
