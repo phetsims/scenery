@@ -134,7 +134,7 @@ define( function( require ) {
       allowWebGL: true,
       accessibility: true,        // enables accessibility features
       isApplication: false,      // adds the aria-role: 'application' when accessibility is enabled
-      interactive: true,         // Whether mouse/touch/keyboard inputs are enabled (if input has been added). Simulation will still step.
+      interactive: true,         // Whether mouse/touch/keyboard inputs are enabled (if input has been added).
 
       // {boolean} - If true, input event listeners will be attached to the Display's DOM element instead of the window.
       // Normally, attaching listeners to the window is preferred (it will see mouse moves/ups outside of the browser
@@ -158,7 +158,11 @@ define( function( require ) {
       // a context restored event. Sometimes context losses can occur without a restoration afterwards, but this can
       // jump-start the process.
       // See https://github.com/phetsims/scenery/issues/347.
-      aggressiveContextRecreation: true
+      aggressiveContextRecreation: true,
+
+      // {boolean} - Whether the `passive` flag should be set when adding and removing DOM event listeners.
+      // See https://github.com/phetsims/scenery/issues/770 for more details.
+      passiveEvents: true
     }, options );
 
     // TODO: don't store the options, it's an anti-pattern.
@@ -221,6 +225,7 @@ define( function( require ) {
     this._listenToOnlyElement = options.listenToOnlyElement; // TODO: doc
     this._batchDOMEvents = options.batchDOMEvents; // TODO: doc
     this._assumeFullWindow = options.assumeFullWindow; // TODO: doc
+    this._passiveEvents = options.passiveEvents; // TODO: doc
 
     // @public (scenery-internal) {boolean}
     this._aggressiveContextRecreation = options.aggressiveContextRecreation;
@@ -1114,7 +1119,7 @@ define( function( require ) {
       assert && assert( !this._input, 'Events cannot be attached twice to a display (for now)' );
 
       // TODO: refactor here
-      var input = new Input( this, !this._listenToOnlyElement, this._batchDOMEvents, this._assumeFullWindow );
+      var input = new Input( this, !this._listenToOnlyElement, this._batchDOMEvents, this._assumeFullWindow, this._passiveEvents );
       this._input = input;
 
       input.connectListeners();

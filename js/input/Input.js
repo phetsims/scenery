@@ -138,7 +138,7 @@ define( function( require ) {
   // constants
   var NORMAL_FREQUENCY = { highFrequency: false };
   var HIGH_FREQUENCY = { highFrequency: true };
-  
+
   // Object literal makes it easy to check for the existence of an attribute (compared to [].indexOf()>=0)
   var domEventPropertiesToSerialize = {
     button: true, keyCode: true,
@@ -146,7 +146,7 @@ define( function( require ) {
     pointerType: true, charCode: true, which: true, clientX: true, clientY: true, changedTouches: true
   };
 
-  function Input( display, attachToWindow, batchDOMEvents, assumeFullWindow ) {
+  function Input( display, attachToWindow, batchDOMEvents, assumeFullWindow, passiveEvents ) {
     assert && assert( display instanceof scenery.Display );
     assert && assert( typeof attachToWindow === 'boolean' );
     assert && assert( typeof batchDOMEvents === 'boolean' );
@@ -157,6 +157,7 @@ define( function( require ) {
     this.attachToWindow = attachToWindow;
     this.batchDOMEvents = batchDOMEvents;
     this.assumeFullWindow = assumeFullWindow;
+    this.passiveEvents = passiveEvents;
     this.displayUpdateOnEvent = false;
 
     this.batchedEvents = [];
@@ -202,7 +203,8 @@ define( function( require ) {
       // http://www.html5rocks.com/en/mobile/touchandmouse/ for more information.
       // Additionally, IE had some issues with skipping prevent default, see
       // https://github.com/phetsims/scenery/issues/464 for mouse handling.
-      if ( callback !== this.mouseDown || platform.ie || platform.edge ) {
+      if ( !this.passiveEvents && ( callback !== this.mouseDown || platform.ie || platform.edge ) ) {
+        // We cannot prevent a passive event, so don't try
         domEvent.preventDefault();
       }
     },
@@ -249,11 +251,11 @@ define( function( require ) {
     },
 
     connectListeners: function() {
-      BrowserEvents.addDisplay( this.display, this.attachToWindow );
+      BrowserEvents.addDisplay( this.display, this.attachToWindow, this.passiveEvents );
     },
 
     disconnectListeners: function() {
-      BrowserEvents.removeDisplay( this.display, this.attachToWindow );
+      BrowserEvents.removeDisplay( this.display, this.attachToWindow, this.passiveEvents );
     },
 
     pointFromEvent: function( domEvent ) {
