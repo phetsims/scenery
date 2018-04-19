@@ -128,18 +128,17 @@ define( function( require ) {
   var extend = require( 'PHET_CORE/extend' );
   var scenery = require( 'SCENERY/scenery' );
 
-  // specific HTML tag names
-  var INPUT_TAG = 'INPUT';
-  var LABEL_TAG = 'LABEL';
-  var BUTTON_TAG = 'BUTTON';
-  var TEXTAREA_TAG = 'TEXTAREA';
-  var SELECT_TAG = 'SELECT';
-  var OPTGROUP_TAG = 'OPTGROUP';
-  var DATALIST_TAG = 'DATALIST';
-  var OUTPUT_TAG = 'OUTPUT';
-  var DIV_TAG = 'DIV';
-  var A_TAG = 'A';
-  var P_TAG = 'P';
+  var INPUT_TAG = AccessibilityUtil.TAGS.INPUT;
+  var LABEL_TAG = AccessibilityUtil.TAGS.LABEL;
+  var BUTTON_TAG = AccessibilityUtil.TAGS.BUTTON;
+  var TEXTAREA_TAG = AccessibilityUtil.TAGS.TEXTAREA;
+  var SELECT_TAG = AccessibilityUtil.TAGS.SELECT;
+  var OPTGROUP_TAG = AccessibilityUtil.TAGS.OPTGROUP;
+  var DATALIST_TAG = AccessibilityUtil.TAGS.DATALIST;
+  var OUTPUT_TAG = AccessibilityUtil.TAGS.OUTPUT;
+  var DIV_TAG = AccessibilityUtil.TAGS.DIV;
+  var A_TAG = AccessibilityUtil.TAGS.A;
+  var P_TAG = AccessibilityUtil.TAGS.P;
 
   // default tag names for siblings
   var DEFAULT_CONTAINER_TAG_NAME = DIV_TAG;

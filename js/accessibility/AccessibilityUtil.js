@@ -18,6 +18,19 @@ define( function( require ) {
   var NEXT = 'NEXT';
   var PREVIOUS = 'PREVIOUS';
 
+  // HTML tag names
+  var INPUT_TAG = 'INPUT';
+  var LABEL_TAG = 'LABEL';
+  var BUTTON_TAG = 'BUTTON';
+  var TEXTAREA_TAG = 'TEXTAREA';
+  var SELECT_TAG = 'SELECT';
+  var OPTGROUP_TAG = 'OPTGROUP';
+  var DATALIST_TAG = 'DATALIST';
+  var OUTPUT_TAG = 'OUTPUT';
+  var DIV_TAG = 'DIV';
+  var A_TAG = 'A';
+  var P_TAG = 'P';
+
   // tag names with special behavior
   var BOLD_TAG = 'B';
   var STRONG_TAG = 'STRONG';
@@ -256,7 +269,36 @@ define( function( require ) {
       }
 
       return onlyFormatting;
-    }
+    },
+
+    TAGS: {
+      INPUT: INPUT_TAG,
+      LABEL: LABEL_TAG,
+      BUTTON: BUTTON_TAG,
+      TEXTAREA: TEXTAREA_TAG,
+      SELECT: SELECT_TAG,
+      OPTGROUP: OPTGROUP_TAG,
+      DATALIST: DATALIST_TAG,
+      OUTPUT: OUTPUT_TAG,
+      DIV: DIV_TAG,
+      A: A_TAG,
+      P: P_TAG,
+      B: BOLD_TAG,
+      STRONG: STRONG_TAG,
+      I: I_TAG,
+      EM: EM_TAG,
+      MARK: MARK_TAG,
+      SMALL: SMALL_TAG,
+      DEL: DEL_TAG,
+      INS: INS_TAG,
+      SUB: SUB_TAG,
+      SUP: SUP_TAG
+    },
+
+    // default tags for html elements of the Node.
+    DEFAULT_CONTAINER_TAG_NAME: DIV_TAG,
+    DEFAULT_DESCRIPTION_TAG_NAME: P_TAG,
+    DEFAULT_LABEL_TAG_NAME: P_TAG
   };
 
   scenery.register( 'AccessibilityUtil', AccessibilityUtil );

@@ -28,9 +28,9 @@ define( function( require ) {
   var TEST_DESCRIPTION_HTML_2 = '<strong>I ROCK as a DESCRIPTION 2</strong>';
 
   // These should manually match the defaults in the Accessibility.js trait
-  var DEFAULT_LABEL_TAG = 'P';
-  var DEFAULT_DESCRIPTION_TAG = 'P';
-  var DEFAULT_CONTAINER_TAG = 'DIV';
+  var DEFAULT_LABEL_TAG_NAME = AccessibilityUtil.DEFAULT_LABEL_TAG_NAME;
+  var DEFAULT_DESCRIPTION_TAG_NAME = AccessibilityUtil.DEFAULT_DESCRIPTION_TAG_NAME;
+  var DEFAULT_CONTAINER_TAG_NAME = AccessibilityUtil.DEFAULT_CONTAINER_TAG_NAME;
 
   /**
    * Get the id of a dom element representing a node in the DOM.  The accessible content must exist and be unique,
@@ -119,7 +119,7 @@ define( function( require ) {
     var buttonElement = b.accessibleInstances[ 0 ].peer.primarySibling;
     var parentElement = buttonElement.parentElement;
 
-    assert.ok( b.containerTagName === DEFAULT_CONTAINER_TAG, 'container automatically created for label' );
+    assert.ok( b.containerTagName === DEFAULT_CONTAINER_TAG_NAME, 'container automatically created for label' );
 
     assert.ok( parentElement, 'parent element must be created with label option' );
     assert.ok( parentElement.childNodes.length === 2, 'only contain label and primary siblings' );
@@ -169,7 +169,7 @@ define( function( require ) {
     var labelSibling = aElement.parentElement.childNodes[ 0 ];
     assert.ok( a.accessibleInstances.length === 1, 'only 1 instance' );
     assert.ok( aElement.parentElement.childNodes.length === 2, 'parent contains two siblings' );
-    assert.ok( labelSibling.tagName === DEFAULT_LABEL_TAG, 'default label tagName' );
+    assert.ok( labelSibling.tagName === DEFAULT_LABEL_TAG_NAME, 'default label tagName' );
     assert.ok( labelSibling.textContent === TEST_LABEL, 'no html should use textContent' );
 
     a.labelContent = TEST_LABEL_HTML;
@@ -211,7 +211,7 @@ define( function( require ) {
     var descriptionSibling = aElement.parentElement.childNodes[ 0 ];
     assert.ok( a.accessibleInstances.length === 1, 'only 1 instance' );
     assert.ok( aElement.parentElement.childNodes.length === 2, 'parent contains two siblings' );
-    assert.ok( descriptionSibling.tagName === DEFAULT_DESCRIPTION_TAG, 'default label tagName' );
+    assert.ok( descriptionSibling.tagName === DEFAULT_DESCRIPTION_TAG_NAME, 'default label tagName' );
     assert.ok( descriptionSibling.textContent === TEST_DESCRIPTION, 'no html should use textContent' );
 
     a.descriptionContent = TEST_DESCRIPTION_HTML;
@@ -262,7 +262,7 @@ define( function( require ) {
     assert.ok( buttonNode.labelTagName === 'label', 'Label tag name' );
     assert.ok( buttonNode.containerTagName === 'div', 'container tag name' );
     assert.ok( buttonNode.labelContent === TEST_LABEL, 'Accessible label' );
-    assert.ok( buttonNode.descriptionTagName.toUpperCase() === DEFAULT_DESCRIPTION_TAG, 'Description tag name' );
+    assert.ok( buttonNode.descriptionTagName.toUpperCase() === DEFAULT_DESCRIPTION_TAG_NAME, 'Description tag name' );
     assert.ok( buttonNode.focusable === false, 'Focusable' );
     assert.ok( buttonNode.ariaRole === 'button', 'Aria role' );
     assert.ok( buttonNode.descriptionContent === TEST_DESCRIPTION, 'Accessible Description' );
@@ -274,7 +274,7 @@ define( function( require ) {
     assert.ok( divNode.ariaLabel === TEST_LABEL, 'Use aria label' );
     assert.ok( divNode.accessibleVisible === false, 'Accessible visible' );
     assert.ok( divNode.labelTagName === null, 'Label tag name with aria label is independent' );
-    assert.ok( divNode.descriptionTagName.toUpperCase() === DEFAULT_DESCRIPTION_TAG, 'Description tag name' );
+    assert.ok( divNode.descriptionTagName.toUpperCase() === DEFAULT_DESCRIPTION_TAG_NAME, 'Description tag name' );
 
 
     // verify DOM structure - options above should create something like:
@@ -302,7 +302,7 @@ define( function( require ) {
     assert.ok( buttonLabel.tagName === 'LABEL', 'Label first' );
     assert.ok( buttonLabel.getAttribute( 'for' ) === buttonElement.id, 'label for attribute' );
     assert.ok( buttonLabel.textContent === TEST_LABEL, 'label content' );
-    assert.ok( buttonDescription.tagName === DEFAULT_DESCRIPTION_TAG, 'description second' );
+    assert.ok( buttonDescription.tagName === DEFAULT_DESCRIPTION_TAG_NAME, 'description second' );
     assert.ok( buttonDescription.textContent, TEST_DESCRIPTION, 'description content' );
     assert.ok( buttonPeers[ 2 ] === buttonElement, 'Button third' );
     assert.ok( buttonElement.type === 'button', 'input type set' );
@@ -879,10 +879,12 @@ define( function( require ) {
 
     assert.ok( a.ariaLabel === TEST_LABEL_2, 'aria-label getter/setter' );
     assert.ok( a.labelContent === null, 'no other label set with aria-label' );
+    assert.ok( a.innerContent === null, 'no inner content set with aria-label' );
 
     rootNode.addChild( a );
     var buttonA = a.accessibleInstances[ 0 ].peer.primarySibling;
     assert.ok( buttonA.getAttribute( 'aria-label' ) === TEST_LABEL_2, 'setter on dom element' );
+    assert.ok( buttonA.innerHTML === '', 'no inner html with aria-label setter' );
   } );
 
   QUnit.test( 'focusable option', function( assert ) {
@@ -930,7 +932,7 @@ define( function( require ) {
 
 
     assert.ok( containerElement.childNodes.length === 3, 'expected three siblings' );
-    assert.ok( containerElement.childNodes[ 0 ].tagName.toUpperCase() === DEFAULT_DESCRIPTION_TAG, 'description first sibling' );
+    assert.ok( containerElement.childNodes[ 0 ].tagName.toUpperCase() === DEFAULT_DESCRIPTION_TAG_NAME, 'description first sibling' );
     assert.ok( containerElement.childNodes[ 1 ].tagName.toUpperCase() === 'LI', 'primary sibling second sibling' );
     assert.ok( containerElement.childNodes[ 2 ].tagName.toUpperCase() === 'H3', 'label sibling last' );
 
@@ -939,7 +941,7 @@ define( function( require ) {
     assert.ok( containerElement.childNodes.length === 3, 'expected three siblings' );
     assert.ok( containerElement.childNodes[ 0 ].tagName.toUpperCase() === 'LI', 'primary sibling first sibling' );
     assert.ok( containerElement.childNodes[ 1 ].tagName.toUpperCase() === 'H3', 'label sibling second' );
-    assert.ok( containerElement.childNodes[ 2 ].tagName.toUpperCase() === DEFAULT_DESCRIPTION_TAG, 'description last sibling' );
+    assert.ok( containerElement.childNodes[ 2 ].tagName.toUpperCase() === DEFAULT_DESCRIPTION_TAG_NAME, 'description last sibling' );
 
     // clear it out back to defaults should work with setters
     a.appendDescription = false;
@@ -947,7 +949,7 @@ define( function( require ) {
     containerElement = getPrimarySiblingElementByNode( a ).parentElement;
     assert.ok( containerElement.childNodes.length === 3, 'expected three siblings' );
     assert.ok( containerElement.childNodes[ 0 ].tagName.toUpperCase() === 'H3', 'label sibling first' );
-    assert.ok( containerElement.childNodes[ 1 ].tagName.toUpperCase() === DEFAULT_DESCRIPTION_TAG, 'description sibling second' );
+    assert.ok( containerElement.childNodes[ 1 ].tagName.toUpperCase() === DEFAULT_DESCRIPTION_TAG_NAME, 'description sibling second' );
     assert.ok( containerElement.childNodes[ 2 ].tagName.toUpperCase() === 'LI', 'primary sibling last' );
   } );
 } );
