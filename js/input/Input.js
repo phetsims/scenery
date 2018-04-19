@@ -203,7 +203,7 @@ define( function( require ) {
       // http://www.html5rocks.com/en/mobile/touchandmouse/ for more information.
       // Additionally, IE had some issues with skipping prevent default, see
       // https://github.com/phetsims/scenery/issues/464 for mouse handling.
-      if ( !this.passiveEvents && ( callback !== this.mouseDown || platform.ie || platform.edge ) ) {
+      if ( !( this.passiveEvents === true ) && ( callback !== this.mouseDown || platform.ie || platform.edge ) ) {
         // We cannot prevent a passive event, so don't try
         domEvent.preventDefault();
       }

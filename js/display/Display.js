@@ -85,6 +85,7 @@ define( function( require ) {
   var FittedBlockBoundsOverlay = require( 'SCENERY/overlays/FittedBlockBoundsOverlay' );
   var FocusIO = require( 'SCENERY/accessibility/FocusIO' );
   var FocusOverlay = require( 'SCENERY/overlays/FocusOverlay' );
+  var platform = require( 'PHET_CORE/platform' );
   var PointerAreaOverlay = require( 'SCENERY/overlays/PointerAreaOverlay' );
   var PointerOverlay = require( 'SCENERY/overlays/PointerOverlay' );
   var SceneryStyle = require( 'SCENERY/util/SceneryStyle' );
@@ -160,9 +161,17 @@ define( function( require ) {
       // See https://github.com/phetsims/scenery/issues/347.
       aggressiveContextRecreation: true,
 
-      // {boolean} - Whether the `passive` flag should be set when adding and removing DOM event listeners.
+      // {boolean|null} - Whether the `passive` flag should be set when adding and removing DOM event listeners.
       // See https://github.com/phetsims/scenery/issues/770 for more details.
-      passiveEvents: true
+      // If it is true or false, that is the value of the passive flag that will be used. If it is null, the default
+      // behavior of the browser will be used.
+      //
+      // Safari doesn't support touch-action: none, so we NEED to not use passive events (which would not allow
+      // preventDefault to do anything, so drags actually can scroll the sim).
+      // Chrome also did the same "passive by default", but because we have `touch-action: none` in place, it doesn't
+      // affect us, and we can potentially get performance improvements by allowing passive events.
+      // See https://github.com/phetsims/scenery/issues/770 for more information.
+      passiveEvents: platform.safari ? false : null
     }, options );
 
     // TODO: don't store the options, it's an anti-pattern.
@@ -225,7 +234,7 @@ define( function( require ) {
     this._listenToOnlyElement = options.listenToOnlyElement; // TODO: doc
     this._batchDOMEvents = options.batchDOMEvents; // TODO: doc
     this._assumeFullWindow = options.assumeFullWindow; // TODO: doc
-    this._passiveEvents = options.passiveEvents; // TODO: doc
+    this._passiveEvents = options.passiveEvents; // @private {boolean|null}
 
     // @public (scenery-internal) {boolean}
     this._aggressiveContextRecreation = options.aggressiveContextRecreation;

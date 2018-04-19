@@ -25,7 +25,7 @@ define( function( require ) {
      * @param {Display} display
      * @param {boolean} attachToWindow - Whether events should be attached to the window. If false, they will be
      *                                   attached to the Display's domElement.
-     * @param {boolean} passiveEvents - The value of the `passive` option for adding/removing DOM event listeners
+     * @param {boolean|null} passiveEvents - The value of the `passive` option for adding/removing DOM event listeners
      */
     addDisplay: function( display, attachToWindow, passiveEvents ) {
       assert && assert( display instanceof scenery.Display );
@@ -55,7 +55,7 @@ define( function( require ) {
      *
      * @param {Display} display
      * @param {boolean} attachToWindow - The value provided to addDisplay
-     * @param {boolean} passiveEvents - The value of the `passive` option for adding/removing DOM event listeners
+     * @param {boolean|null} passiveEvents - The value of the `passive` option for adding/removing DOM event listeners
      */
     removeDisplay: function( display, attachToWindow, passiveEvents ) {
       assert && assert( display instanceof scenery.Display );
@@ -203,7 +203,7 @@ define( function( require ) {
      * Connects event listeners directly to the window.
      * @private
      *
-     * @param {boolean} passiveEvents - The value of the `passive` option for adding/removing DOM event listeners
+     * @param {boolean|null} passiveEvents - The value of the `passive` option for adding/removing DOM event listeners
      */
     connectWindowListeners: function( passiveEvents ) {
       this.addOrRemoveListeners( window, true, passiveEvents );
@@ -213,7 +213,7 @@ define( function( require ) {
      * Disconnects event listeners from the window.
      * @private
      *
-     * @param {boolean} passiveEvents - The value of the `passive` option for adding/removing DOM event listeners
+     * @param {boolean|null} passiveEvents - The value of the `passive` option for adding/removing DOM event listeners
      */
     disconnectWindowListeners: function( passiveEvents ) {
       this.addOrRemoveListeners( window, false, passiveEvents );
@@ -225,11 +225,13 @@ define( function( require ) {
      *
      * @param {*} element - The element (window or DOM element) to add listeners to.
      * @param {boolean} addOrRemove - If true, listeners will be added. If false, listeners will be removed.
-     * @param {boolean} passiveEvents - The value of the `passive` option for adding/removing DOM event listeners
+     * @param {boolean|null} passiveEvents - The value of the `passive` option for adding/removing DOM event listeners
+     *                                       NOTE: if it is passed in as null, the default value for the browser will be
+     *                                       used.
      */
     addOrRemoveListeners: function( element, addOrRemove, passiveEvents ) {
       assert && assert( typeof addOrRemove === 'boolean' );
-      assert && assert( typeof passiveEvents === 'boolean' );
+      assert && assert( typeof passiveEvents === 'boolean' || passiveEvents === null );
 
       var forWindow = element === window;
       assert && assert( !forWindow || ( this.listenersAttachedToWindow > 0 ) === !addOrRemove,
@@ -250,6 +252,8 @@ define( function( require ) {
       // {Array.<string>}
       var eventTypes = this.getNonWheelUsedTypes();
 
+      var passDirectPassiveFlag = Features.passive && passiveEvents !== null;
+
       for ( var i = 0; i < eventTypes.length; i++ ) {
         var type = eventTypes[ i ];
 
@@ -258,7 +262,7 @@ define( function( require ) {
         if ( forWindow ) {
           // Workaround for older browsers needed,
           // see https://developer.mozilla.org/en-US/docs/Web/API/EventTarget/addEventListener#Improving_scrolling_performance_with_passive_listeners
-          var documentOptions = Features.passive ? { passive: passiveEvents } : false;
+          var documentOptions = passDirectPassiveFlag ? { passive: passiveEvents } : false;
           document[ method ]( type, noop, documentOptions );
         }
 
@@ -267,7 +271,7 @@ define( function( require ) {
 
         // Workaround for older browsers needed,
         // see https://developer.mozilla.org/en-US/docs/Web/API/EventTarget/addEventListener#Improving_scrolling_performance_with_passive_listeners
-        var mainOptions = Features.passive ? {
+        var mainOptions = passDirectPassiveFlag ? {
           useCapture: false,
           passive: passiveEvents
         } : false;
