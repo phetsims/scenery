@@ -46,7 +46,11 @@ define( function( require ) {
       dragCursor: 'pointer',
       tandem: Tandem.required,
       phetioType: SimpleDragHandlerIO,
-      phetioState: false
+      phetioState: false,
+
+      // when set to true, the handler will get "attached" to a pointer during use, preventing the pointer from starting
+      // a drag via something like PressListener
+      attach: false
     }, options );
     this.options = options; // @private
 
@@ -182,7 +186,7 @@ define( function( require ) {
       // set a flag on the pointer so it won't pick up other nodes
       event.pointer.dragging = true;
       event.pointer.cursor = this.options.dragCursor;
-      event.pointer.addInputListener( this.dragListener );
+      event.pointer.addInputListener( this.dragListener, this.options.attach );
 
       // set all of our persistent information
       this.isDraggingProperty.set( true );
