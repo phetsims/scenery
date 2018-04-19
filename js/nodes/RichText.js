@@ -1708,12 +1708,7 @@ define( function( require ) {
             href();
           }
         };
-        var tmp = this.addAccessibleInputListener( this.accessibleInputListener );
-
-        // "safe?" workaround for https://github.com/phetsims/scenery/issues/764
-        if ( this.getAccessibleInputListeners().includes( tmp ) ) {
-          this.accessibleInputListener = tmp;
-        }
+        this.addAccessibleInputListener( this.accessibleInputListener );
       }
       // Otherwise our href is a {string}, and we should open a window pointing to it (assuming it's a URL)
       else {
