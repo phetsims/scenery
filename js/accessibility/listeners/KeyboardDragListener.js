@@ -299,6 +299,7 @@ define( function( require ) {
      * and keydown listener.
      *
      * @param {number} delta - potential change in position in x and y for the position Property
+     * @private
      */
     updatePosition: function( delta ) {
 
@@ -409,6 +410,7 @@ define( function( require ) {
      *
      * @param  {Array.<number>} keys
      * @return {boolean}
+     * @public
      */
     keyInListDown: function( keys ) {
       var keyIsDown = false;
@@ -435,6 +437,7 @@ define( function( require ) {
      *
      * @param {Array.<number>} keys
      * @return {boolean}
+     * @public
      */
     allKeysInListDown: function( keys ) {
       var allKeysDown = true;
@@ -458,7 +461,7 @@ define( function( require ) {
     /**
      * Returns true if the keystate indicates that a key is down that should move the object to the left.
      *
-     * @private
+     * @public
      * @return {boolean}
      */
     leftMovementKeysDown: function() {
@@ -499,6 +502,7 @@ define( function( require ) {
      * Returns true if any of the movement keys are down (arrow keys or WASD keys).
      *
      * @return {boolean}
+     * @public
      */
     getMovementKeysDown: function() {
       return this.rightMovementKeysDown() || this.leftMovementKeysDown() ||
@@ -510,6 +514,7 @@ define( function( require ) {
      * Returns true if the enter key is currently pressed down.
      *
      * @return {boolean}
+     * @public
      */
     enterKeyDown: function() {
       return this.keyInListDown( [ KeyboardUtil.KEY_ENTER ] );
@@ -519,6 +524,7 @@ define( function( require ) {
      * Returns true if the keystate indicates that the shift key is currently down.
      *
      * @return {boolean}
+     * @public
      */
     shiftKeyDown: function() {
       return this.keyInListDown( [ KeyboardUtil.KEY_SHIFT ] );
@@ -529,6 +535,7 @@ define( function( require ) {
      * all keys listed in the array are pressed down in order.
      *
      * @param {Object} hotKeyGroup - { keys: [].<number>, callback: {function}, interval: {number} }
+     * @public
      */
     addHotkeyGroup: function( hotKeyGroup ) {
       this.hotkeyGroups.push( hotKeyGroup );
@@ -540,6 +547,7 @@ define( function( require ) {
      * but allows you to add multiple groups at one time.
      *
      * @param {[].<string>} hotKeyGroups
+     * @public
      */
     addHotkeyGroups: function( hotKeyGroups ) {
       for ( var i = 0; i < hotKeyGroups.length; i++ ) {
