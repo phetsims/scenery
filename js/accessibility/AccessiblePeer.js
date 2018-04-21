@@ -22,9 +22,9 @@ define( function( require ) {
   /**
    * Constructor.
    *
-   * @param  {AccessibleInstance} accessibleInstance
-   * @param  {HTMLElement} primarySibling - The main DOM element used for this peer.
-   * @param  {Object} options
+   * @param {AccessibleInstance} accessibleInstance
+   * @param {HTMLElement} primarySibling - The main DOM element used for this peer.
+   * @param {Object} [options]
    * @constructor
    */
   function AccessiblePeer( accessibleInstance, primarySibling, options ) {

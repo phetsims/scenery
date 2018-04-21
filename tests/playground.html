@@ -128,15 +128,10 @@ an UI and Display made for visual testing and debugging.
         }
       };
 
-      window.testContent = {
-        createPeer: function( accessibleInstance ) {
-          return new scenery.AccessiblePeer( accessibleInstance, document.createElement( 'div' ) );
-        }
-      };
       window.accessibleTest = function() {
         setTimeout( function() {
           scenery.enableLogging( [ 'AccessibleInstance' ] )
-          window.a = new scenery.Node( { accessibleContent: testContent } );
+          window.a = new scenery.Node();
           scene.addChild( a );
           window.b = new scenery.Node();
           b.addChild( a );

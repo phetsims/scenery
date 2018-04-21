@@ -9,6 +9,7 @@
 define( function( require ) {
   'use strict';
 
+  var AccessiblePeer = require( 'SCENERY/accessibility/AccessiblePeer' );
   var cleanArray = require( 'PHET_CORE/cleanArray' );
   var Events = require( 'AXON/Events' );
   var inherit = require( 'PHET_CORE/inherit' );
@@ -21,12 +22,12 @@ define( function( require ) {
 
   /**
    * Constructor for AccessibleInstance, uses an initialize method for pooling.
-   * 
-   * @param {AccessibleInstance|null} parent - parent of this instance, null if root of AccessibleInstance tree
-   * @param {Display} display
-   * @param {Trail} trail - trail to the node for this AccessibleInstance 
    * @constructor
    * @mixes Poolable
+   *
+   * @param {AccessibleInstance|null} parent - parent of this instance, null if root of AccessibleInstance tree
+   * @param {Display} display
+   * @param {Trail} trail - trail to the node for this AccessibleInstance
    */
   function AccessibleInstance( parent, display, trail ) {
     this.initializeAccessibleInstance( parent, display, trail );
@@ -38,7 +39,8 @@ define( function( require ) {
 
     /**
      * Initializes an AccessibleInstance, implements construction for pooling.
-     * 
+     * @private
+     *
      * @param {AccessibleInstance|null} parent - null if this AccessibleInstance is root of AccessibleInstance tree
      * @param {Display} display
      * @param {Trail} trail - trail to node for this AccessibleInstance
@@ -53,27 +55,39 @@ define( function( require ) {
       this.id = this.id || globalId++;
 
       this.parent = parent;
-      this.display = display;
-      this.trail = trail;
-      this.node = trail.lastNode();
-      this.isRootInstance = this.trail.length === 0;
 
-      // TODO: doc
+      // @public {Display}
+      this.display = display;
+
+      // @public {Trail}
+      this.trail = trail;
+
+      // @public {boolean}
+      this.isRootInstance = parent === null;
+
+      // @public {Node|null}
+      this.node = this.isRootInstance ? null : trail.lastNode();
+
+      // @public {Array.<AccessibleInstance>}
       this.children = cleanArray( this.children );
+
+      // @private {boolean}
+      this.isSorted = true;
 
       // If we are the root accessible instance, we won't actually have a reference to a node.
       if ( this.node ) {
         this.node.addAccessibleInstance( this );
       }
 
-      this.isSorted = true;
+      // @public {AccessiblePeer}
+      this.peer = null; // Filled in below
 
       if ( this.isRootInstance ) {
         var accessibilityContainer = document.createElement( 'div' );
 
         // give the container a class name so it is hidden in the Display, see accessibility styling in Display.js
         accessibilityContainer.className = 'accessibility';
-        this.peer = new scenery.AccessiblePeer( this, accessibilityContainer );
+        this.peer = new AccessiblePeer( this, accessibilityContainer );
 
         var self = this;
         document.body.addEventListener( 'keydown', function( event ) {
@@ -142,7 +156,7 @@ define( function( require ) {
 
     /**
      * Add a subtree of AccessibleInstances to this AccessibleInstance.
-     * 
+     *
      * Consider the following example:
      *
      * We have a node structure:
@@ -268,7 +282,7 @@ define( function( require ) {
           scenery.Display.focus = null;
         }
       }
-      
+
       // Edge has a bug where removing the hidden attribute on an ancestor doesn't add elements back to the navigation
       // order. As a workaround, forcing the browser to redraw the PDOM seems to fix the issue. Forced redraw method
       // recommended by https://stackoverflow.com/questions/8840580/force-dom-redraw-refresh-on-chrome-mac, also see
@@ -284,7 +298,7 @@ define( function( require ) {
      * creating a comparison function between two accessible instances. The function walks along the trails
      * of the children, looking for specified accessible orders that would determine the ordering for the two
      * AccessibleInstances.
-     * 
+     *
      * @public (scenery-internal)
      */
     sortChildren: function() {
@@ -412,7 +426,7 @@ define( function( require ) {
 
     /**
      * Recursive disposal, to make eligible for garbage collection.
-     * 
+     *
      * @public (scenery-internal)
      */
     dispose: function() {
@@ -457,6 +471,7 @@ define( function( require ) {
 
     /**
      * For debugging purposes.
+     * @public
      *
      * @return {string}
      */
@@ -466,7 +481,7 @@ define( function( require ) {
 
     /**
      * For debugging purposes, inspect the tree of AccessibleInstances from the root.
-     * 
+     *
      * @public (scenery-internal)
      */
     auditRoot: function() {
