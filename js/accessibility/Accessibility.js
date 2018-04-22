@@ -414,7 +414,7 @@ define( function( require ) {
          * @public
          *
          * @param {Object} accessibleInput
-         * @returns {Object} - the actually added listener, so it can be removed via removeAccessibleInputListener
+         * @returns {Object} - the listener, so it can be easily removed via removeAccessibleInputListener
          */
         addAccessibleInputListener: function( accessibleInput ) {
           var listenerAlreadyAdded = ( _.indexOf( this._accessibleInputListeners, accessibleInput ) > 0 );
