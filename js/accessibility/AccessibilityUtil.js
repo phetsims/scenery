@@ -295,6 +295,10 @@ define( function( require ) {
       SUP: SUP_TAG
     },
 
+    // these elements are typically associated with forms, and support certain attributes
+    FORM_ELEMENTS: [ INPUT_TAG, BUTTON_TAG, TEXTAREA_TAG, SELECT_TAG, OPTGROUP_TAG, DATALIST_TAG, OUTPUT_TAG, A_TAG ],
+
+
     // default tags for html elements of the Node.
     DEFAULT_CONTAINER_TAG_NAME: DIV_TAG,
     DEFAULT_DESCRIPTION_TAG_NAME: P_TAG,

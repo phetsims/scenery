@@ -126,18 +126,12 @@ define( function( require ) {
   var AccessiblePeer = require( 'SCENERY/accessibility/AccessiblePeer' );
   var Emitter = require( 'AXON/Emitter' );
   var extend = require( 'PHET_CORE/extend' );
+  var invalidateAccessibleContent = require( 'SCENERY/accessibility/invalidateAccessibleContent' );
   var scenery = require( 'SCENERY/scenery' );
 
   var INPUT_TAG = AccessibilityUtil.TAGS.INPUT;
   var LABEL_TAG = AccessibilityUtil.TAGS.LABEL;
-  var BUTTON_TAG = AccessibilityUtil.TAGS.BUTTON;
-  var TEXTAREA_TAG = AccessibilityUtil.TAGS.TEXTAREA;
-  var SELECT_TAG = AccessibilityUtil.TAGS.SELECT;
-  var OPTGROUP_TAG = AccessibilityUtil.TAGS.OPTGROUP;
-  var DATALIST_TAG = AccessibilityUtil.TAGS.DATALIST;
-  var OUTPUT_TAG = AccessibilityUtil.TAGS.OUTPUT;
   var DIV_TAG = AccessibilityUtil.TAGS.DIV;
-  var A_TAG = AccessibilityUtil.TAGS.A;
   var P_TAG = AccessibilityUtil.TAGS.P;
 
   // default tag names for siblings
@@ -146,14 +140,11 @@ define( function( require ) {
   var DEFAULT_LABEL_TAG_NAME = P_TAG;
 
   // these elements are typically associated with forms, and support certain attributes
-  var FORM_ELEMENTS = [ INPUT_TAG, BUTTON_TAG, TEXTAREA_TAG, SELECT_TAG, OPTGROUP_TAG, DATALIST_TAG, OUTPUT_TAG, A_TAG ];
+  var FORM_ELEMENTS = AccessibilityUtil.FORM_ELEMENTS;
 
   // these elements do not have a closing tag, so they won't support features like innerHTML. This is how PhET treats
   // these elements, not necessary what is legal html.
   var ELEMENTS_WITHOUT_CLOSING_TAG = [ INPUT_TAG ];
-
-  // these elements require a minimum width to be visible in Safari
-  var ELEMENTS_REQUIRE_WIDTH = [ INPUT_TAG, A_TAG ];
 
   // valid types of DOM events that can be added to a node
   var DOM_EVENTS = [ 'input', 'change', 'click', 'keydown', 'keyup', 'focus', 'blur' ];
@@ -408,6 +399,11 @@ define( function( require ) {
 
         },
 
+
+        /***********************************************************************************************************/
+        // PUBLIC METHODS
+        /***********************************************************************************************************/
+
         /**
          * Adds an accessible input listener. The listener's keys should be DOM event names, and the values should be
          * functions to be called when that event is fired on the DOM element.
@@ -492,6 +488,59 @@ define( function( require ) {
           return this._accessibleInputEnabled;
         },
         get accessibleInputEnabled() { return this.getAccessibleInputEnabled(); },
+
+        /**
+         * Get whether this node's primary DOM element currently has focus.
+         * @public
+         *
+         * @returns {boolean}
+         */
+        isFocused: function() {
+          var isFocused = false;
+          if ( this._accessibleInstances.length > 0 ) {
+            isFocused = document.activeElement === this._accessibleInstances[ 0 ].peer.primarySibling;
+          }
+
+          return isFocused;
+        },
+        get focused() { return this.isFocused(); },
+
+        /**
+         * Focus this node's primary dom element. The element must not be hidden, and it must be focusable. If the node
+         * has more than one instance, this will fail because the DOM element is not uniquely defined. If accessibility
+         * is not enabled, this will be a no op. When Accessibility is more widely used, the no op can be replaced
+         * with an assertion that checks for accessible content.
+         *
+         * @public
+         */
+        focus: function() {
+          if ( this._accessibleInstances.length > 0 ) {
+
+            // when accessibility is widely used, this assertion can be added back in
+            // assert && assert( this._accessibleInstances.length > 0, 'there must be accessible content for the node to receive focus' );
+            assert && assert( this._focusable, 'trying to set focus on a node that is not focusable' );
+            assert && assert( this._accessibleVisible, 'trying to set focus on a node with invisible accessible content' );
+            assert && assert( this._accessibleInstances.length === 1, 'focus() unsupported for Nodes using DAG, accessible content is not unique' );
+
+            this._accessibleInstances[ 0 ].peer.primarySibling.focus();
+          }
+        },
+
+        /**
+         * Remove focus from this node's primary DOM element.  The focus highlight will disappear, and the element will not receive
+         * keyboard events when it doesn't have focus.
+         * @public
+         */
+        blur: function() {
+          if ( this._accessibleInstances.length > 0 ) {
+            this._accessibleInstances[ 0 ].peer.primarySibling.blur();
+          }
+        },
+
+
+        /***********************************************************************************************************/
+        // GETTERS AND SETTERS FOR A11y API OPTIONS
+        /***********************************************************************************************************/
 
         /**
          * Set the tag name for the primary sibling in the pDOM. DOM element tag names are read-only, so this
@@ -1262,99 +1311,6 @@ define( function( require ) {
         set accessibleOrder( value ) { this.setAccessibleOrder( value ); },
 
         /**
-         * Returns a recursive data structure that represents the nested ordering of accessible content for this Node's
-         * subtree. Each "Item" will have the type { trail: {Trail}, children: {Array.<Item>} }, forming a tree-like
-         * structure.
-         * @public (scenery-internal)
-         *
-         * @returns {Array.<Item>}
-         */
-        getNestedAccessibleOrder: function() {
-          var currentTrail = new scenery.Trail( this );
-          var pruneStack = []; // {Array.<Node>} - A list of nodes to prune
-
-          // {Array.<Item>} - The main result we will be returning. It is the top-level array where child items will be
-          // inserted.
-          var result = [];
-
-          // {Array.<Array.<Item>>} A stack of children arrays, where we should be inserting items into the top array.
-          // We will start out with the result, and as nested levels are added, the children arrays of those items will be
-          // pushed and poppped, so that the top array on this stack is where we should insert our next child item.
-          var nestedChildStack = [ result ];
-
-          function addTrailsForNode( node, overridePruning ) {
-            // If subtrees were specified with accessibleOrder, they should be skipped from the ordering of ancestor subtrees,
-            // otherwise we could end up having multiple references to the same trail (which should be disallowed).
-            var pruneCount = 0;
-            // count the number of times our node appears in the pruneStack
-            _.each( pruneStack, function( pruneNode ) {
-              if ( node === pruneNode ) {
-                pruneCount++;
-              }
-            } );
-
-            // If overridePruning is set, we ignore one reference to our node in the prune stack. If there are two copies,
-            // however, it means a node was specified in a accessibleOrder that already needs to be pruned (so we skip it instead
-            // of creating duplicate references in the tab order).
-            if ( pruneCount > 1 || ( pruneCount === 1 && !overridePruning ) ) {
-              return;
-            }
-
-            // Pushing item and its children array, if accessible
-            if ( node.accessibleContent ) {
-              var item = {
-                trail: currentTrail.copy(),
-                children: []
-              };
-              nestedChildStack[ nestedChildStack.length - 1 ].push( item );
-              nestedChildStack.push( item.children );
-            }
-
-            // push specific focused nodes to the stack
-            pruneStack = pruneStack.concat( node._accessibleOrder );
-
-            // Visiting trails to ordered nodes.
-            _.each( node._accessibleOrder, function( descendant ) {
-              // Find all descendant references to the node.
-              // NOTE: We are not reordering trails (due to descendant constraints) if there is more than one instance for
-              // this descendant node.
-              _.each( node.getLeafTrailsTo( descendant ), function( descendantTrail ) {
-                descendantTrail.removeAncestor(); // strip off 'node', so that we handle only children
-
-                // same as the normal order, but adding a full trail (since we may be referencing a descendant node)
-                currentTrail.addDescendantTrail( descendantTrail );
-                addTrailsForNode( descendant, true ); // 'true' overrides one reference in the prune stack (added above)
-                currentTrail.removeDescendantTrail( descendantTrail );
-              } );
-            } );
-
-            // Visit everything. If there is an accessibleOrder, those trails were already visited, and will be excluded.
-            var numChildren = node._children.length;
-            for ( var i = 0; i < numChildren; i++ ) {
-              var child = node._children[ i ];
-
-              currentTrail.addDescendant( child, i );
-              addTrailsForNode( child, false );
-              currentTrail.removeDescendant();
-            }
-
-            // pop focused nodes from the stack (that were added above)
-            _.each( node._accessibleOrder, function( descendant ) {
-              pruneStack.pop();
-            } );
-
-            // Popping children array if accessible
-            if ( node.accessibleContent ) {
-              nestedChildStack.pop();
-            }
-          }
-
-          addTrailsForNode( this, false );
-
-          return result;
-        },
-
-        /**
          * Hide completely from a screen reader and the browser by setting the hidden attribute on the node's
          * representative DOM element. If the sibling DOM Elements have a container parent, the container
          * should be hidden so that all peers are hidden as well.  Hiding the element will remove it from the focus
@@ -1574,53 +1530,9 @@ define( function( require ) {
         },
         get focusable() { return this.getFocusable(); },
 
-        /**
-         * Get whether this node's DOM element currently has focus.
-         * @public
-         *
-         * @returns {boolean}
-         */
-        isFocused: function() {
-          var isFocused = false;
-          if ( this._accessibleInstances.length > 0 ) {
-            isFocused = document.activeElement === this._accessibleInstances[ 0 ].peer.primarySibling;
-          }
-
-          return isFocused;
-        },
-        get focused() { return this.isFocused(); },
-
-        /**
-         * Focus this node's dom element. The element must not be hidden, and it must be focusable. If the node
-         * has more than one instance, this will fail because the DOM element is not uniquely defined. If accessibility
-         * is not enabled, this will be a no op. When Accessibility is more widely used, the no op can be replaced
-         * with an assertion that checks for accessible content.
-         *
-         * @public
-         */
-        focus: function() {
-          if ( this._accessibleInstances.length > 0 ) {
-
-            // when accessibility is widely used, this assertion can be added back in
-            // assert && assert( this._accessibleInstances.length > 0, 'there must be accessible content for the node to receive focus' );
-            assert && assert( this._focusable, 'trying to set focus on a node that is not focusable' );
-            assert && assert( this._accessibleVisible, 'trying to set focus on a node with invisible accessible content' );
-            assert && assert( this._accessibleInstances.length === 1, 'focus() unsupported for Nodes using DAG, accessible content is not unique' );
-
-            this._accessibleInstances[ 0 ].peer.primarySibling.focus();
-          }
-        },
-
-        /**
-         * Remove focus from this DOM element.  The focus highlight will dissapear, and the element will not receive
-         * keyboard events when it doesn't have focus.
-         * @public
-         */
-        blur: function() {
-          if ( this._accessibleInstances.length > 0 ) {
-            this._accessibleInstances[ 0 ].peer.primarySibling.blur();
-          }
-        },
+        /***********************************************************************************************************/
+        // SCENERY-INTERNAL AND PRIVATE METHODS
+        /***********************************************************************************************************/
 
         /**
          * Add DOM event listeners contained in the accessibleInput directly to the DOM elements on each
@@ -1654,16 +1566,98 @@ define( function( require ) {
           }
         },
 
+
         /**
-         * Update all AccessiblePeers representing this node with the callback, which takes the AccessiblePeer
-         * as an argument.
-         * @private
-         * @param {function} callback
+         * Returns a recursive data structure that represents the nested ordering of accessible content for this Node's
+         * subtree. Each "Item" will have the type { trail: {Trail}, children: {Array.<Item>} }, forming a tree-like
+         * structure.
+         * @public (scenery-internal)
+         *
+         * @returns {Array.<Item>}
          */
-        updateAccessiblePeers: function( callback ) {
-          for ( var i = 0; i < this._accessibleInstances.length; i++ ) {
-            this._accessibleInstances[ i ].peer && callback( this._accessibleInstances[ i ].peer );
+        getNestedAccessibleOrder: function() {
+          var currentTrail = new scenery.Trail( this );
+          var pruneStack = []; // {Array.<Node>} - A list of nodes to prune
+
+          // {Array.<Item>} - The main result we will be returning. It is the top-level array where child items will be
+          // inserted.
+          var result = [];
+
+          // {Array.<Array.<Item>>} A stack of children arrays, where we should be inserting items into the top array.
+          // We will start out with the result, and as nested levels are added, the children arrays of those items will be
+          // pushed and poppped, so that the top array on this stack is where we should insert our next child item.
+          var nestedChildStack = [ result ];
+
+          function addTrailsForNode( node, overridePruning ) {
+            // If subtrees were specified with accessibleOrder, they should be skipped from the ordering of ancestor subtrees,
+            // otherwise we could end up having multiple references to the same trail (which should be disallowed).
+            var pruneCount = 0;
+            // count the number of times our node appears in the pruneStack
+            _.each( pruneStack, function( pruneNode ) {
+              if ( node === pruneNode ) {
+                pruneCount++;
+              }
+            } );
+
+            // If overridePruning is set, we ignore one reference to our node in the prune stack. If there are two copies,
+            // however, it means a node was specified in a accessibleOrder that already needs to be pruned (so we skip it instead
+            // of creating duplicate references in the tab order).
+            if ( pruneCount > 1 || ( pruneCount === 1 && !overridePruning ) ) {
+              return;
+            }
+
+            // Pushing item and its children array, if accessible
+            if ( node.accessibleContent ) {
+              var item = {
+                trail: currentTrail.copy(),
+                children: []
+              };
+              nestedChildStack[ nestedChildStack.length - 1 ].push( item );
+              nestedChildStack.push( item.children );
+            }
+
+            // push specific focused nodes to the stack
+            pruneStack = pruneStack.concat( node._accessibleOrder );
+
+            // Visiting trails to ordered nodes.
+            _.each( node._accessibleOrder, function( descendant ) {
+              // Find all descendant references to the node.
+              // NOTE: We are not reordering trails (due to descendant constraints) if there is more than one instance for
+              // this descendant node.
+              _.each( node.getLeafTrailsTo( descendant ), function( descendantTrail ) {
+                descendantTrail.removeAncestor(); // strip off 'node', so that we handle only children
+
+                // same as the normal order, but adding a full trail (since we may be referencing a descendant node)
+                currentTrail.addDescendantTrail( descendantTrail );
+                addTrailsForNode( descendant, true ); // 'true' overrides one reference in the prune stack (added above)
+                currentTrail.removeDescendantTrail( descendantTrail );
+              } );
+            } );
+
+            // Visit everything. If there is an accessibleOrder, those trails were already visited, and will be excluded.
+            var numChildren = node._children.length;
+            for ( var i = 0; i < numChildren; i++ ) {
+              var child = node._children[ i ];
+
+              currentTrail.addDescendant( child, i );
+              addTrailsForNode( child, false );
+              currentTrail.removeDescendant();
+            }
+
+            // pop focused nodes from the stack (that were added above)
+            _.each( node._accessibleOrder, function( descendant ) {
+              pruneStack.pop();
+            } );
+
+            // Popping children array if accessible
+            if ( node.accessibleContent ) {
+              nestedChildStack.pop();
+            }
           }
+
+          addTrailsForNode( this, false );
+
+          return result;
         },
 
         /**
@@ -1759,9 +1753,9 @@ define( function( require ) {
           }
         },
 
-        /*---------------------------------------------------------------------------*
-        * Accessible Instance handling
-        *----------------------------------------------------------------------------*/
+
+        /*---------------------------------------------------------------------------*/
+        // Accessible Instance handling
 
         /**
          * Returns a reference to the accessible instances array.
@@ -1796,7 +1790,20 @@ define( function( require ) {
           var index = _.indexOf( this._accessibleInstances, accessibleInstance );
           assert && assert( index !== -1, 'Cannot remove an AccessibleInstance from a Node if it was not there' );
           this._accessibleInstances.splice( index, 1 );
+        },
+
+        /**
+         * Update all AccessiblePeers representing this node with the callback, which takes the AccessiblePeer
+         * as an argument.
+         * @private
+         * @param {function} callback
+         */
+        updateAccessiblePeers: function( callback ) {
+          for ( var i = 0; i < this._accessibleInstances.length; i++ ) {
+            this._accessibleInstances[ i ].peer && callback( this._accessibleInstances[ i ].peer );
+          }
         }
+
       } );
 
       /**
@@ -1830,223 +1837,7 @@ define( function( require ) {
         return !_.includes( ELEMENTS_WITHOUT_CLOSING_TAG, domElement.tagName );
       }
 
-      /**
-       * Create an HTML element.  Unless this is a form element or explicitly marked as focusable, add a negative
-       * tab index. IE gives all elements a tabIndex of 0 and handles tab navigation internally, so this marks
-       * which elements should not be in the focus order.
-       *
-       * @param  {string} tagName
-       * @param {boolean} focusable - should the element be explicitly added to the focus order?
-       * @returns {HTMLElement}
-       */
-      function createElement( tagName, focusable ) {
-        var domElement = document.createElement( tagName );
-        var upperCaseTagName = tagName.toUpperCase();
-
-        // give all non-focusable elements a tabindex of -1 for browser consistency
-        if ( !_.includes( FORM_ELEMENTS, upperCaseTagName ) && !focusable ) {
-          domElement.tabIndex = -1;
-        }
-
-        // Safari requires that certain input elements have dimension, otherwise it will not be keyboard accessible
-        if ( _.includes( ELEMENTS_REQUIRE_WIDTH, upperCaseTagName ) ) {
-          domElement.style.width = '1px';
-          domElement.style.height = '1px';
-        }
-
-        return domElement;
-      }
-
-      /**
-       * Called by invalidateAccessibleContent. "this" will be bound by call. The contentElement will either be a
-       * label or description element. The contentElement will be sorted relative to the primary sibling in its
-       * containerParent. Its placement will also depend on whether or not this node wants to append this element,
-       * see setAppendLabel() and setAppendDescription(). By default, the "content" element will be placed before the
-       * primary sibling.
-       *
-       * @param {AccessiblePeer} accessiblePeer
-       * @param {HTMLElement} contentElement
-       * @param {boolean} appendElement
-       */
-      function insertContentElement( accessiblePeer, contentElement, appendElement ) {
-        assert && assert( accessiblePeer.containerParent, 'Cannot add sibling if there is no container element' );
-        if ( appendElement ) {
-          accessiblePeer.containerParent.appendChild( contentElement );
-        }
-        else if ( accessiblePeer.containerParent === accessiblePeer.primarySibling.parentNode ) {
-          accessiblePeer.containerParent.insertBefore( contentElement, accessiblePeer.primarySibling );
-        }
-        else {
-          assert && assert( false, 'no append flag for DOM Element, and container parent did not match primary sibling' );
-        }
-      }
-
-      /**
-       * Invalidate our current accessible content, triggering recomputation
-       * of anything that depended on the old accessible content. This can be
-       * combined with a client implementation of invalidateAccessibleContent.
-       *
-       * @protected
-       */
-      function invalidateAccessibleContent() {
-        var self = this;
-
-        // iteration variable used through this function
-        var i = 0;
-
-        // for each accessible peer, clear the container parent if it exists since we will be reinserting labels and
-        // the dom element in createPeer
-        this.updateAccessiblePeers( function( accessiblePeer ) {
-          var containerElement = accessiblePeer.containerParent;
-          while ( containerElement && containerElement.hasChildNodes() ) {
-            containerElement.removeChild( containerElement.lastChild );
-          }
-        } );
-
-        // if any parents are flagged as removed from the accessibility tree, set content to null
-        var contentDisplayed = this._accessibleContentDisplayed;
-        for ( i = 0; i < this._parents.length; i++ ) {
-          if ( !this._parents[ i ].accessibleContentDisplayed ) {
-            contentDisplayed = false;
-          }
-        }
-
-        var accessibleContent = null;
-        if ( contentDisplayed && this._tagName ) {
-          accessibleContent = {
-            createPeer: function( accessibleInstance ) {
-
-              var uniqueId = accessibleInstance.trail.getUniqueId();
-
-              // create the base DOM element representing this accessible instance
-              var primarySibling = createElement( self._tagName, self._focusable );
-              primarySibling.id = uniqueId;
-
-              // create the container parent for the dom siblings
-              var containerElement = null;
-              if ( self._containerTagName ) {
-                containerElement = createElement( self._containerTagName, false );
-                containerElement.id = 'container-' + uniqueId;
-
-                // provide the aria-role if it is specified
-                if ( self._containerAriaRole ) {
-                  containerElement.setAttribute( 'role', self._containerAriaRole );
-                }
-              }
-
-              // create the label DOM element representing this instance
-              var labelSibling = null;
-              if ( self._labelTagName ) {
-                labelSibling = createElement( self._labelTagName, false );
-                labelSibling.id = 'label-' + uniqueId;
-
-                if ( self._labelTagName.toUpperCase() === LABEL_TAG ) {
-                  labelSibling.setAttribute( 'for', uniqueId );
-                }
-              }
-
-              // create the description DOM element representing this instance
-              var descriptionSibling = null;
-              if ( self._descriptionTagName ) {
-                descriptionSibling = createElement( self._descriptionTagName, false );
-                descriptionSibling.id = 'description-' + uniqueId;
-              }
-
-              var accessiblePeer = new AccessiblePeer( accessibleInstance, primarySibling, {
-                containerParent: containerElement,
-                labelSibling: labelSibling,
-                descriptionSibling: descriptionSibling
-              } );
-              accessibleInstance.peer = accessiblePeer;
-
-              // restore whether or not this element is focusable
-              if ( self._focusable === null ) {
-                self._focusable = _.includes( FORM_ELEMENTS, self._tagName.toUpperCase() );
-              }
-              self.setFocusable( self._focusable );
-
-              // set the accessible label now that the element has been recreated again, but not if the tagName
-              // has been cleared out
-              if ( self._labelContent && self._labelTagName !== null ) {
-                self.setLabelContent( self._labelContent );
-              }
-
-              // restore the innerContent
-              if ( self._innerContent ) {
-                self.setInnerContent( self._innerContent );
-              }
-
-              // set if using aria-label
-              if ( self._ariaLabel ) {
-                self.setAriaLabel( self._ariaLabel );
-              }
-
-              // restore visibility
-              self.setAccessibleVisible( self._accessibleVisible );
-
-              // restore checked
-              self.setAccessibleChecked( self._accessibleChecked );
-
-              // restore input value
-              self._inputValue && self.setInputValue( self._inputValue );
-
-              // set the accessible attributes, restoring from a defenseive copy
-              var defensiveAttributes = self.accessibleAttributes;
-              for ( i = 0; i < defensiveAttributes.length; i++ ) {
-                var attribute = defensiveAttributes[ i ].attribute;
-                var value = defensiveAttributes[ i ].value;
-                self.setAccessibleAttribute( attribute, value );
-              }
-
-              // set the accessible description, but not if the tagName has been cleared out.
-              if ( self._descriptionContent && self._descriptionTagName !== null ) {
-                self.setDescriptionContent( self._descriptionContent );
-              }
-
-              // if element is an input element, set input type
-              if ( self._tagName.toUpperCase() === INPUT_TAG && self._inputType ) {
-                self.setInputType( self._inputType );
-              }
-
-              // restore aria-labelledby associations
-              var labelledByNode = self._ariaLabelledByNode;
-              labelledByNode && self.setAriaLabelledByNode( labelledByNode, self._ariaLabelledContent, labelledByNode._ariaLabelContent );
-
-              // if this node aria-labels another node, restore label associations for that node
-              var ariaLabelsNode = self._ariaLabelsNode;
-              ariaLabelsNode && ariaLabelsNode.setAriaLabelledByNode( self, ariaLabelsNode._ariaLabelledContent, self._ariaLabelContent );
-
-              // restore aria-describedby asssociations
-              var describedByNode = self._ariaDescribedByNode;
-              describedByNode && self.setAriaDescribedByNode( describedByNode, self._ariaDescribedContent, describedByNode._ariaDescribedContent );
-
-              // if this node aria-describes another node, restore description asssociations for that node
-              var ariaDescribesNode = self._ariaDescribesNode;
-              ariaDescribesNode && ariaDescribesNode.setAriaDescribedByNode( self, ariaDescribesNode._ariaDescribedContent, self._ariaDescriptionContent );
-
-              // add all listeners to the dom element
-              for ( i = 0; i < self._accessibleInputListeners.length; i++ ) {
-                self.addDOMEventListeners( self._accessibleInputListeners[ i ], primarySibling );
-              }
-
-              // insert the label and description elements in the correct location if they exist
-              labelSibling && insertContentElement( accessiblePeer, labelSibling, self._appendLabel );
-              descriptionSibling && insertContentElement( accessiblePeer, descriptionSibling, self._appendDescription );
-
-              // Default the focus highlight in this special case to be invisible until selected.
-              if ( self._focusHighlightLayerable ) {
-                self._focusHighlight.visible = false;
-              }
-
-              return accessiblePeer;
-            }
-          };
-        }
-
-        this.accessibleContent = accessibleContent;
-      }
-
-      // Patch in a sub-type call if it already exists on the prototype
+      // Add invalidateAccessibleContent to the prototype. Patch in a sub-type call if it already exists on the prototype
       if ( proto.invalidateAccessibleContent ) {
         var subtypeInvalidateAccesssibleContent = proto.invalidateAccessibleContent;
         proto.invalidateAccessibleContent = function() {
@@ -2055,6 +1846,8 @@ define( function( require ) {
         };
       }
       else {
+
+        // assign a function from a separate file to this prototype. That file's exported function assumes this file's "this"
         proto.invalidateAccessibleContent = invalidateAccessibleContent;
       }
     }
