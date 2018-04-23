@@ -114,6 +114,15 @@ define( function( require ) {
     // supertype call to axon.Events (should just initialize a few properties here, notably _eventListeners and _staticEventListeners)
     Events.call( this );
 
+    // Inline platform detection in maintenance release, since usually we won't need to hit phet-core
+    var ua = navigator.userAgent;
+    // Whether the browser is most likely Safari running on iOS
+    // See http://stackoverflow.com/questions/3007480/determine-if-user-navigated-from-mobile-safari
+    function isMobileSafari() {
+      return !!( ua.match( /(iPod|iPhone|iPad)/ ) && ua.match( /AppleWebKit/ ) );
+    }
+    var safari = isMobileSafari() || !!( ua.match( /Version\// ) && ua.match( /Safari\// ) && ua.match( /AppleWebKit/ ) );
+
     options = _.extend( {
       // initial display width
       width: ( options && options.container && options.container.clientWidth ) || 640,
@@ -132,7 +141,8 @@ define( function( require ) {
       allowWebGL: true,
       accessibility: true,
       isApplication: false,      // adds the aria-role: 'application' when accessibility is enabled
-      interactive: true
+      interactive: true,
+      passiveEvents: safari ? false : null
     }, options );
     this.options = options; // @private
 
@@ -187,6 +197,7 @@ define( function( require ) {
     // will be filled in with a scenery.Input if event handling is enabled
     this._input = null;
     this._interactive = this.options.interactive;
+    this._passiveEvents = options.passiveEvents;
 
     // overlays currently being displayed.
     // API expected:
@@ -1026,7 +1037,7 @@ define( function( require ) {
       var listenerTarget = parameters.listenerTarget;
       var batchDOMEvents = parameters.batchDOMEvents; //OHTWO TODO: hybrid batching (option to batch until an event like 'up' that might be needed for security issues)
 
-      var input = new scenery.Input( this, listenerTarget, !!batchDOMEvents, this.options.enablePointerEvents, pointFromEvent );
+      var input = new scenery.Input( this, listenerTarget, !!batchDOMEvents, this.options.enablePointerEvents, pointFromEvent, this._passiveEvents );
       this._input = input;
 
       input.connectListeners();
