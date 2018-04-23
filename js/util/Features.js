@@ -129,5 +129,14 @@ define( function( require ) {
     }
   };
 
+  // Whether passive is a supported option for adding event listeners,
+  // see https://developer.mozilla.org/en-US/docs/Web/API/EventTarget/addEventListener#Improving_scrolling_performance_with_passive_listeners
+  Features.passive = false;
+  window.addEventListener( 'test', null, Object.defineProperty( {}, 'passive', {
+    get: function() {
+      Features.passive = true;
+    }
+  } ) );
+
   return Features;
 } );
