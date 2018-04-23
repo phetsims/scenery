@@ -46,6 +46,13 @@ define( function( require ) {
   // collection of tags that are used for formatting text
   var FORMATTING_TAGS = [ BOLD_TAG, STRONG_TAG, I_TAG, EM_TAG, MARK_TAG, SMALL_TAG, DEL_TAG, INS_TAG, SUB_TAG, SUP_TAG ];
 
+  // these elements do not have a closing tag, so they won't support features like innerHTML. This is how PhET treats
+  // these elements, not necessary what is legal html.
+  var ELEMENTS_WITHOUT_CLOSING_TAG = [ INPUT_TAG ];
+
+  // valid types of DOM events that can be added to a node
+  var DOM_EVENTS = [ 'input', 'change', 'click', 'keydown', 'keyup', 'focus', 'blur' ];
+
   /**
    * Get all 'element' nodes off the parent element, placing them in an array for easy traversal.  Note that this
    * includes all elements, even those that are 'hidden' or purely for structure.
@@ -165,6 +172,17 @@ define( function( require ) {
     return string.replace( /^\s+/, '' );
   }
 
+
+  /**
+   * Returns whether or not the element supports innerHTML or textContent in PhET.
+   * @private
+   * @param {HTMLElement} domElement
+   * @returns {boolean}
+   */
+  function elementSupportsContent( domElement ) {
+    return !_.includes( ELEMENTS_WITHOUT_CLOSING_TAG, domElement.tagName );
+  }
+
   var AccessibilityUtil = {
 
     /**
@@ -271,6 +289,60 @@ define( function( require ) {
       return onlyFormatting;
     },
 
+    /**
+     * If the text content uses formatting tags, set the content as innerHTML. Otherwise, set as textContent.
+     * In general, textContent is more secure and more performant because it doesn't trigger DOM styling and
+     * element insertions.
+     *
+     * @param {HTMLElement} domElement
+     * @param {string} textContent
+     * @param {boolean} isHTML - whether or not to set the content as HTML
+     */
+    setTextContent: function( domElement, textContent, isHTML ) {
+    if ( elementSupportsContent( domElement ) ) {
+      if ( isHTML ) {
+        domElement.innerHTML = textContent;
+      }
+      else {
+        domElement.textContent = textContent;
+      }
+    }
+
+  },
+
+    /**
+     * Add DOM event listeners contained in the accessibleInput directly to the DOM elements on each
+     * accessibleInstance.  Never use this directly, use addAccessibleInputListener()
+     * @private
+     *
+     * @param {Object} accessibleInput
+     * @param {HTMLElement} domElement
+     */
+    addDOMEventListeners: function( accessibleInput, domElement ) {
+      for ( var event in accessibleInput ) {
+        if ( accessibleInput.hasOwnProperty( event ) && _.includes( DOM_EVENTS, event ) ) {
+          domElement.addEventListener( event, accessibleInput[ event ] );
+        }
+      }
+    },
+
+    /**
+     * Remove a DOM event listener contained in an accesssibleInput.  Never to be used directly, see
+     * removeAccessibilityInputListener().
+     * @private
+     *
+     * @param {Object} accessibleInput
+     * @param {HTMLElement} domElement
+     */
+    removeDOMEventListeners: function( accessibleInput, domElement ) {
+      for ( var event in accessibleInput ) {
+        if ( accessibleInput.hasOwnProperty( event ) && _.includes( DOM_EVENTS, event ) ) {
+          domElement.removeEventListener( event, accessibleInput[ event ] );
+        }
+      }
+    },
+
+
     TAGS: {
       INPUT: INPUT_TAG,
       LABEL: LABEL_TAG,
@@ -297,7 +369,6 @@ define( function( require ) {
 
     // these elements are typically associated with forms, and support certain attributes
     FORM_ELEMENTS: [ INPUT_TAG, BUTTON_TAG, TEXTAREA_TAG, SELECT_TAG, OPTGROUP_TAG, DATALIST_TAG, OUTPUT_TAG, A_TAG ],
-
 
     // default tags for html elements of the Node.
     DEFAULT_CONTAINER_TAG_NAME: DIV_TAG,

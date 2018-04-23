@@ -142,13 +142,6 @@ define( function( require ) {
   // these elements are typically associated with forms, and support certain attributes
   var FORM_ELEMENTS = AccessibilityUtil.FORM_ELEMENTS;
 
-  // these elements do not have a closing tag, so they won't support features like innerHTML. This is how PhET treats
-  // these elements, not necessary what is legal html.
-  var ELEMENTS_WITHOUT_CLOSING_TAG = [ INPUT_TAG ];
-
-  // valid types of DOM events that can be added to a node
-  var DOM_EVENTS = [ 'input', 'change', 'click', 'keydown', 'keyup', 'focus', 'blur' ];
-
   // The options for the Accessibility API. In general, most default to null; to clear, set back to null.
   var ACCESSIBILITY_OPTION_KEYS = [
     'tagName', // Sets the tag name for the primary sibling DOM element in the parallel DOM
@@ -419,9 +412,8 @@ define( function( require ) {
           this._accessibleInputListeners.push( accessibleInput );
 
           // add the listener directly to any AccessiblePeers that are representing this node
-          var self = this;
           this.updateAccessiblePeers( function( accessiblePeer ) {
-            self.addDOMEventListeners( accessibleInput, accessiblePeer.primarySibling );
+            AccessibilityUtil.addDOMEventListeners( accessibleInput, accessiblePeer.primarySibling );
           } );
 
           return accessibleInput;
@@ -443,9 +435,8 @@ define( function( require ) {
           this._accessibleInputListeners.splice( addedIndex, 1 );
 
           // remove the event listeners from any peers
-          var self = this;
           this.updateAccessiblePeers( function( accessiblePeer ) {
-            self.removeDOMEventListeners( accessibleInput, accessiblePeer.primarySibling );
+            AccessibilityUtil.removeDOMEventListeners( accessibleInput, accessiblePeer.primarySibling );
           } );
 
           return this;
@@ -812,7 +803,7 @@ define( function( require ) {
 
           this.updateAccessiblePeers( function( accessiblePeer ) {
             if ( accessiblePeer.labelSibling ) {
-              setTextContent( accessiblePeer.labelSibling, self._labelContent, useHTML );
+              AccessibilityUtil.setTextContent( accessiblePeer.labelSibling, self._labelContent, useHTML );
 
               // if the label element happens to be a 'label', associate with 'for' attribute
               if ( self._labelTagName.toUpperCase() === LABEL_TAG ) {
@@ -852,7 +843,7 @@ define( function( require ) {
 
           this.updateAccessiblePeers( function( accessiblePeer ) {
             assert && assert( accessiblePeer.accessibleInstance.children.length === 0, 'descendants exist with accessible content, innerContent cannot be used' );
-            setTextContent( accessiblePeer.primarySibling, self._innerContent, useHTML );
+            AccessibilityUtil.setTextContent( accessiblePeer.primarySibling, self._innerContent, useHTML );
           } );
         },
         set innerContent( content ) { this.setInnerContent( content ); },
@@ -886,7 +877,7 @@ define( function( require ) {
           }
 
           this.updateAccessiblePeers( function( accessiblePeer ) {
-            setTextContent( accessiblePeer.descriptionSibling, descriptionContent, useHTML );
+            AccessibilityUtil.setTextContent( accessiblePeer.descriptionSibling, descriptionContent, useHTML );
           } );
 
         },
@@ -1534,38 +1525,6 @@ define( function( require ) {
         // SCENERY-INTERNAL AND PRIVATE METHODS
         /***********************************************************************************************************/
 
-        /**
-         * Add DOM event listeners contained in the accessibleInput directly to the DOM elements on each
-         * accessibleInstance.  Never use this directly, use addAccessibleInputListener()
-         * @private
-         *
-         * @param {Object} accessibleInput
-         * @param {HTMLElement} domElement
-         */
-        addDOMEventListeners: function( accessibleInput, domElement ) {
-          for ( var event in accessibleInput ) {
-            if ( accessibleInput.hasOwnProperty( event ) && _.includes( DOM_EVENTS, event ) ) {
-              domElement.addEventListener( event, accessibleInput[ event ] );
-            }
-          }
-        },
-
-        /**
-         * Remove a DOM event listener contained in an accesssibleInput.  Never to be used directly, see
-         * removeAccessibilityInputListener().
-         * @private
-         *
-         * @param {Object} accessibleInput
-         * @param {HTMLElement} domElement
-         */
-        removeDOMEventListeners: function( accessibleInput, domElement ) {
-          for ( var event in accessibleInput ) {
-            if ( accessibleInput.hasOwnProperty( event ) && _.includes( DOM_EVENTS, event ) ) {
-              domElement.removeEventListener( event, accessibleInput[ event ] );
-            }
-          }
-        },
-
 
         /**
          * Returns a recursive data structure that represents the nested ordering of accessible content for this Node's
@@ -1803,39 +1762,7 @@ define( function( require ) {
             this._accessibleInstances[ i ].peer && callback( this._accessibleInstances[ i ].peer );
           }
         }
-
       } );
-
-      /**
-       * If the text content uses formatting tags, set the content as innerHTML. Otherwise, set as textContent.
-       * In general, textContent is more secure and more performant because it doesn't trigger DOM styling and
-       * element insertions.
-       *
-       * @param {HTMLElement} domElement
-       * @param {string} textContent
-       * @param {boolean} isHTML - whether or not to set the content as HTML
-       */
-      function setTextContent( domElement, textContent, isHTML ) {
-        if ( elementSupportsContent( domElement ) ) {
-          if ( isHTML ) {
-            domElement.innerHTML = textContent;
-          }
-          else {
-            domElement.textContent = textContent;
-          }
-        }
-
-      }
-
-      /**
-       * Returns whether or not the element supports innerHTML or textContent in PhET.
-       * @private
-       * @param {HTMLElement} domElement
-       * @returns {boolean}
-       */
-      function elementSupportsContent( domElement ) {
-        return !_.includes( ELEMENTS_WITHOUT_CLOSING_TAG, domElement.tagName );
-      }
 
       // Add invalidateAccessibleContent to the prototype. Patch in a sub-type call if it already exists on the prototype
       if ( proto.invalidateAccessibleContent ) {

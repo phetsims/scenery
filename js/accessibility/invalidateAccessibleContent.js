@@ -178,7 +178,7 @@ define( function( require ) {
 
           // add all listeners to the dom element
           for ( i = 0; i < self._accessibleInputListeners.length; i++ ) {
-            self.addDOMEventListeners( self._accessibleInputListeners[ i ], primarySibling );
+            AccessibilityUtil.addDOMEventListeners( self._accessibleInputListeners[ i ], primarySibling );
           }
 
           // insert the label and description elements in the correct location if they exist
