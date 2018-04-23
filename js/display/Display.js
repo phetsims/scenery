@@ -115,6 +115,15 @@ define( function( require ) {
     // supertype call to axon.Events (should just initialize a few properties here, notably _eventListeners and _staticEventListeners)
     Events.call( this );
 
+    // Inline platform detection in maintenance release, since usually we won't need to hit phet-core
+    var ua = navigator.userAgent;
+    // Whether the browser is most likely Safari running on iOS
+    // See http://stackoverflow.com/questions/3007480/determine-if-user-navigated-from-mobile-safari
+    function isMobileSafari() {
+      return !!( ua.match( /(iPod|iPhone|iPad)/ ) && ua.match( /AppleWebKit/ ) );
+    }
+    var safari = isMobileSafari() || !!( ua.match( /Version\// ) && ua.match( /Safari\// ) && ua.match( /AppleWebKit/ ) );
+
     options = _.extend( {
       // initial display width
       width: ( options && options.container && options.container.clientWidth ) || 640,
@@ -148,7 +157,8 @@ define( function( require ) {
       // NOTE: Rotation of the Display's DOM element (e.g. with a CSS transform) will result in an incorrect event
       //       mapping, as getBoundingClientRect() can't work with this. getBoxQuads() should fix this when browser
       //       support is available.
-      assumeFullWindow: false
+      assumeFullWindow: false,
+      passiveEvents: safari ? false : null
     }, options );
 
     // TODO: don't store the options, it's an anti-pattern.
@@ -208,6 +218,7 @@ define( function( require ) {
     this._listenToOnlyElement = options.listenToOnlyElement; // TODO: doc
     this._batchDOMEvents = options.batchDOMEvents; // TODO: doc
     this._assumeFullWindow = options.assumeFullWindow; // TODO: doc
+    this._passiveEvents = options.passiveEvents;
 
     // overlays currently being displayed.
     // API expected:
@@ -1016,7 +1027,7 @@ define( function( require ) {
       assert && assert( !this._input, 'Events cannot be attached twice to a display (for now)' );
 
       // TODO: refactor here
-      var input = new Input( this, !this._listenToOnlyElement, this._batchDOMEvents, this._assumeFullWindow );
+      var input = new Input( this, !this._listenToOnlyElement, this._batchDOMEvents, this._assumeFullWindow, this._passiveEvents );
       this._input = input;
 
       input.connectListeners();
