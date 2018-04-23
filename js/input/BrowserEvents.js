@@ -46,7 +46,7 @@ define( function( require ) {
       }
 
       // Only add the wheel listeners directly on the elements, so it won't trigger outside
-      display.domElement.addEventListener( 'wheel', this.onwheel, false );
+      display.domElement.addEventListener( 'wheel', this.onwheel, BrowserEvents.getEventOptions( passiveEvents, true ) );
     },
 
     /**
@@ -75,7 +75,33 @@ define( function( require ) {
         this.addOrRemoveListeners( display.domElement, false, passiveEvents );
       }
 
-      display.domElement.removeEventListener( 'wheel', this.onwheel, false );
+      display.domElement.removeEventListener( 'wheel', this.onwheel, BrowserEvents.getEventOptions( passiveEvents, true ) );
+    },
+
+    /**
+     * Returns the value to provide as the 3rd parameter to addEventListener/removeEventListener.
+     * @private
+     *
+     * @param {boolean|null} passiveEvents
+     * @param {boolean} isMain - If false, it is used on the "document" for workarounds.
+     * @returns {Object|boolean}
+     */
+    getEventOptions: function( passiveEvents, isMain ) {
+      var passDirectPassiveFlag = Features.passive && passiveEvents !== null;
+      if ( !passDirectPassiveFlag ) {
+        return false;
+      }
+      if ( isMain ) {
+        return {
+          useCapture: false,
+          passive: passiveEvents
+        };
+      }
+      else {
+        return {
+          passive: passiveEvents
+        };
+      }
     },
 
     /**
@@ -252,8 +278,6 @@ define( function( require ) {
       // {Array.<string>}
       var eventTypes = this.getNonWheelUsedTypes();
 
-      var passDirectPassiveFlag = Features.passive && passiveEvents !== null;
-
       for ( var i = 0; i < eventTypes.length; i++ ) {
         var type = eventTypes[ i ];
 
@@ -262,8 +286,7 @@ define( function( require ) {
         if ( forWindow ) {
           // Workaround for older browsers needed,
           // see https://developer.mozilla.org/en-US/docs/Web/API/EventTarget/addEventListener#Improving_scrolling_performance_with_passive_listeners
-          var documentOptions = passDirectPassiveFlag ? { passive: passiveEvents } : false;
-          document[ method ]( type, noop, documentOptions );
+          document[ method ]( type, noop, BrowserEvents.getEventOptions( passiveEvents, false ) );
         }
 
         var callback = this[ 'on' + type ];
@@ -271,11 +294,7 @@ define( function( require ) {
 
         // Workaround for older browsers needed,
         // see https://developer.mozilla.org/en-US/docs/Web/API/EventTarget/addEventListener#Improving_scrolling_performance_with_passive_listeners
-        var mainOptions = passDirectPassiveFlag ? {
-          useCapture: false,
-          passive: passiveEvents
-        } : false;
-        element[ method ]( type, callback, mainOptions );
+        element[ method ]( type, callback, BrowserEvents.getEventOptions( passiveEvents, true ) );
       }
     },
 
