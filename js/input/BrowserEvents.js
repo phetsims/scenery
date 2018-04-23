@@ -10,6 +10,7 @@ define( function( require ) {
   'use strict';
 
   var arrayRemove = require( 'PHET_CORE/arrayRemove' );
+  var Features = require( 'SCENERY/util/Features' );
   var scenery = require( 'SCENERY/scenery' );
   var BatchedDOMEvent = require( 'SCENERY/input/BatchedDOMEvent' );
 
@@ -25,7 +26,7 @@ define( function( require ) {
      * @param {boolean} attachToWindow - Whether events should be attached to the window. If false, they will be
      *                                   attached to the Display's domElement.
      */
-    addDisplay: function( display, attachToWindow ) {
+    addDisplay: function( display, attachToWindow, passiveEvents ) {
       assert && assert( display instanceof scenery.Display );
       assert && assert( typeof attachToWindow === 'boolean' );
       assert && assert( !_.includes( this.attachedDisplays, display ),
@@ -36,15 +37,15 @@ define( function( require ) {
       if ( attachToWindow ) {
         // lazily connect listeners
         if ( this.attachedDisplays.length === 1 ) {
-          this.connectWindowListeners();
+          this.connectWindowListeners( passiveEvents );
         }
       }
       else {
-        this.addOrRemoveListeners( display.domElement, true );
+        this.addOrRemoveListeners( display.domElement, true, passiveEvents );
       }
 
       // Only add the wheel listeners directly on the elements, so it won't trigger outside
-      display.domElement.addEventListener( 'wheel', this.onwheel, false );
+      display.domElement.addEventListener( 'wheel', this.onwheel, BrowserEvents.getEventOptions( passiveEvents, true ) );
     },
 
     /**
@@ -54,7 +55,7 @@ define( function( require ) {
      * @param {Display} display
      * @param {boolean} attachToWindow - The value provided to addDisplay
      */
-    removeDisplay: function( display, attachToWindow ) {
+    removeDisplay: function( display, attachToWindow, passiveEvents ) {
       assert && assert( display instanceof scenery.Display );
       assert && assert( typeof attachToWindow === 'boolean' );
       assert && assert( _.includes( this.attachedDisplays, display ),
@@ -65,14 +66,32 @@ define( function( require ) {
       // lazily disconnect listeners
       if ( attachToWindow ) {
         if ( this.attachedDisplays.length === 0 ) {
-          this.disconnectWindowListeners();
+          this.disconnectWindowListeners( passiveEvents );
         }
       }
       else {
-        this.addOrRemoveListeners( display.domElement, false );
+        this.addOrRemoveListeners( display.domElement, false, passiveEvents );
       }
 
-      display.domElement.removeEventListener( 'wheel', this.onwheel, false );
+      display.domElement.removeEventListener( 'wheel', this.onwheel, BrowserEvents.getEventOptions( passiveEvents, true ) );
+    },
+
+    getEventOptions: function( passiveEvents, isMain ) {
+      var passDirectPassiveFlag = Features.passive && passiveEvents !== null;
+      if ( !passDirectPassiveFlag ) {
+        return false;
+      }
+      if ( isMain ) {
+        return {
+          useCapture: false,
+          passive: passiveEvents
+        };
+      }
+      else {
+        return {
+          passive: passiveEvents
+        };
+      }
     },
 
     /**
@@ -200,16 +219,16 @@ define( function( require ) {
      * Connects event listeners directly to the window.
      * @private
      */
-    connectWindowListeners: function() {
-      this.addOrRemoveListeners( window, true );
+    connectWindowListeners: function( passiveEvents ) {
+      this.addOrRemoveListeners( window, true, passiveEvents );
     },
 
     /**
      * Disconnects event listeners from the window.
      * @private
      */
-    disconnectWindowListeners: function() {
-      this.addOrRemoveListeners( window, false );
+    disconnectWindowListeners: function( passiveEvents ) {
+      this.addOrRemoveListeners( window, false, passiveEvents );
     },
 
     /**
@@ -219,7 +238,10 @@ define( function( require ) {
      * @param {*} element - The element (window or DOM element) to add listeners to.
      * @param {boolean} addOrRemove - If true, listeners will be added. If false, listeners will be removed.
      */
-    addOrRemoveListeners: function( element, addOrRemove ) {
+    addOrRemoveListeners: function( element, addOrRemove, passiveEvents ) {
+      var documentOptions = BrowserEvents.getEventOptions( passiveEvents, false );
+      var mainOptions = BrowserEvents.getEventOptions( passiveEvents, true );
+
       assert && assert( typeof addOrRemove === 'boolean' );
 
       var forWindow = element === window;
@@ -247,13 +269,13 @@ define( function( require ) {
         // If we add input listeners to the window itself, iOS Safari 7 won't send touch events to displays in an
         // iframe unless we also add dummy listeners to the document.
         if ( forWindow ) {
-          document[ method ]( type, noop );
+          document[ method ]( type, noop, documentOptions );
         }
 
         var callback = this[ 'on' + type ];
         assert && assert( !!callback );
 
-        element[ method ]( type, callback, false ); // false: don't use event capture for now
+        element[ method ]( type, callback, mainOptions ); // false: don't use event capture for now
       }
     },
 
