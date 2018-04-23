@@ -27,6 +27,7 @@ define( function( require ) {
   var inherit = require( 'PHET_CORE/inherit' );
   var platform = require( 'PHET_CORE/platform' );
   var cleanArray = require( 'PHET_CORE/cleanArray' );
+  var Features = require( 'SCENERY/util/Features' );
   var scenery = require( 'SCENERY/scenery' );
 
   require( 'SCENERY/util/Trail' );
@@ -65,13 +66,14 @@ define( function( require ) {
   var globalDisplay = null;
 
   // listenerTarget is the DOM node (window/document/element) to which DOM event listeners will be attached
-  function Input( display, listenerTarget, batchDOMEvents, enablePointerEvents, pointFromEvent ) {
+  function Input( display, listenerTarget, batchDOMEvents, enablePointerEvents, pointFromEvent, passiveEvents ) {
     this.display = display;
     this.rootNode = display.rootNode;
     this.listenerTarget = listenerTarget;
     this.batchDOMEvents = batchDOMEvents;
     this.enablePointerEvents = enablePointerEvents;
     this.pointFromEvent = pointFromEvent;
+    this.passiveEvents = passiveEvents;
     this.displayUpdateOnEvent = false;
     globalDisplay = display;
 
@@ -141,7 +143,7 @@ define( function( require ) {
           // http://www.html5rocks.com/en/mobile/touchandmouse/ for more information.
           // Additionally, IE had some issues with skipping prevent default, see
           // https://github.com/phetsims/scenery/issues/464 for mouse handling.
-          if ( callback !== this.mouseDown || platform.ie || platform.edge ) {
+          if ( !( this.passiveEvents === true ) && ( callback !== this.mouseDown || platform.ie || platform.edge ) ) {
             domEvent.preventDefault();
           }
         }
@@ -219,6 +221,12 @@ define( function( require ) {
 
       // @param addOrRemove: true if adding, false if removing
       processListeners: function( addOrRemove ) {
+        var passDirectPassiveFlag = Features.passive && this.passiveEvents !== null;
+        var documentOptions = passDirectPassiveFlag ? { passive: this.passiveEvents } : false;
+        var mainOptions = passDirectPassiveFlag ? {
+           useCapture: false,
+           passive: this.passiveEvents
+         } : false;
         var eventTypes = this.getUsedEventTypes();
 
         for ( var i = 0; i < eventTypes.length; i++ ) {
@@ -227,10 +235,10 @@ define( function( require ) {
           // work around iOS Safari 7 not sending touch events to Scenes contained in an iframe
           if ( this.listenerTarget === window ) {
             if ( addOrRemove ) {
-              document.addEventListener( type, this.uselessListener );
+              document.addEventListener( type, this.uselessListener, documentOptions );
             }
             else {
-              document.removeEventListener( type, this.uselessListener );
+              document.removeEventListener( type, this.uselessListener, documentOptions );
             }
           }
 
@@ -238,10 +246,10 @@ define( function( require ) {
           assert && assert( !!callback );
 
           if ( addOrRemove ) {
-            this.listenerTarget.addEventListener( type, callback, false ); // don't use capture for now
+            this.listenerTarget.addEventListener( type, callback, mainOptions ); // don't use capture for now
           }
           else {
-            this.listenerTarget.removeEventListener( type, callback, false ); // don't use capture for now
+            this.listenerTarget.removeEventListener( type, callback, mainOptions ); // don't use capture for now
           }
         }
       },
