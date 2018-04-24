@@ -522,10 +522,8 @@ define( function( require ) {
         /**
          * Get the tag name of the DOM element representing this node for accessibility.
          * @public
-         *
-         * REVIEW: Return type should include null, since new scenery.Node().tagName is null.
-         *
-         * @returns {string}
+         *         *
+         * @returns {string|null}
          */
         getTagName: function() {
           return this._tagName;
