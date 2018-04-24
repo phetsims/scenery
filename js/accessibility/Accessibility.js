@@ -363,9 +363,6 @@ define( function( require ) {
           // @private {Array.<Function>} - For accessibility input handling {keyboard/click/HTML form}
           this._accessibleInputListeners = [];
 
-          // @private {boolean} - if true, all accessible input will be halted on this Node.
-          this._accessibleInputEnabled = true;
-
           // @public (scenery-internal) - emitters for when state properties change
           this.accessibleVisibilityChangedEmitter = new Emitter();
 
@@ -453,33 +450,6 @@ define( function( require ) {
           return this._accessibleInputListeners.slice( 0 ); // defensive copy
         },
         get accessibleInputListeners() { return this.getAccessibleInputListeners(); },
-
-        /**
-         * Prevents all accessible input listeners from being called on this Node.  Should only
-         * be used internally by scenery for now.
-         * @public (scenery-internal)
-         *
-         * REVIEW: Instead of just setting all children, we should just set one Node and then
-         * traverse specific trails to see if input is enabled.
-         */
-        setAccessibleInputEnabled: function( accessibleInputEnabled ) {
-          this._accessibleInputEnabled = accessibleInputEnabled;
-
-          for ( var i = 0; i < this._children.length; i++ ) {
-            this._children[ i ].accessibleInputEnabled = accessibleInputEnabled;
-          }
-        },
-        set accessibleInputEnabled( accessibleInputEnabled ) { this.setAccessibleInputEnabled( accessibleInputEnabled ); },
-
-        /**
-         * Get whether or not we are preventing accessible input listeners from firing when this node receives
-         * accessible input events.
-         * @return {boolean}
-         */
-        getAccessibleInputEnabled: function() {
-          return this._accessibleInputEnabled;
-        },
-        get accessibleInputEnabled() { return this.getAccessibleInputEnabled(); },
 
         /**
          * Get whether this node's primary DOM element currently has focus.
