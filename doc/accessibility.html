@@ -42,6 +42,9 @@
 
 
 
+
+
+
   </script>
 
   <script type="text/javascript"
@@ -182,17 +185,21 @@
     <div class="sublink"><a href="#append-siblings">appendDescription</a></div>
 
     <div class="navlink"><a href="#keyboard-nav">Keyboard Navigation</a></div>
-    <div class="sublink"><a href="#keyboard-nav">inputType</a></div>
-    <div class="sublink"><a href="#keyboard-nav">inputValue</a></div>
-    <div class="sublink"><a href="#keyboard-nav">accessibleChecked</a></div>
-    <div class="sublink"><a href="#keyboard-nav">focusable</a></div>
-    <div class="sublink"><a href="#keyboard-nav">accessibleVisible</a></div>
-    <div class="sublink"><a href="#keyboard-nav">accessibleContentDisplayed</a></div>
-    <div class="sublink"><a href="#keyboard-nav">focus()</a></div>
-    <div class="sublink"><a href="#keyboard-nav">blur()</a></div>
-    <div class="sublink"><a href="#keyboard-nav">addAccessibleInputListener()</a></div>
+    <div class="sublink"><a href="#input">inputType</a></div>
+    <div class="sublink"><a href="#input">inputValue</a></div>
+    <div class="sublink"><a href="#input">accessibleChecked</a></div>
+    <div class="sublink"><a href="#input">addAccessibleInputListener()</a></div>
+    <div class="sublink"><a href="#focus">focusable</a></div>
+    <div class="sublink"><a href="#focus">accessibleVisible</a></div>
+    <div class="sublink"><a href="#focus">accessibleContentDisplayed</a></div>
+    <div class="sublink"><a href="#focus">focus()</a></div>
+    <div class="sublink"><a href="#focus">blur()</a></div>
 
     <div class="navlink"><a href="#static-descriptions">Static Descriptions</a></div>
+    <div class="sublink"><a href="#accessible-name">Accessible Name</a></div>
+    <div class="sublink"><a href="#accessible-name">ariaLabel</a></div>
+    <div class="sublink"><a href="#accessible-name">aria-labelledby</a></div>
+    <div class="sublink"><a href="#ordering">accessibleOrder</a></div>
 
     <div class="navlink"><a href="#dynamic-descriptions">Dynamic Descriptions</a></div>
     <div class="sublink"><a href="#dynamic-descriptions">UtteranceQueue</a></div>
@@ -339,9 +346,122 @@
 
 
     <h3 id="keyboard-nav">Keyboard Navigation</h3>
+    <p>Part of making a PhET simulation accessible is adding keyboard navigation to it. This is an essential part
+      of the process because it vastly increased the number of input devices that can interact with a phetsim.
+      The a11y api supports keyboard navigation only on the Node's primary sibling.
+      A general philosophy to follow is to have the DOM Element hold as much semantic information as possible.
+      For example, if there is a button in the sim, it is an obvious choice to use a "button" element as the
+      Node's primary sibling tag. Another solution that works, although it is much worse, would be to choose
+      a div, and then add listeners manually to control that div like a button. In general try to pick
+      semantic html elements that will assist in conveying as much meaning as possible to the user. Although
+      it is possible to use the ARIA spec to improve accessible experience, it should not be thought of as
+      the first answer (<a href="https://developer.mozilla.org/en-US/docs/Web/Accessibility/ARIA">further
+        reading</a> on ARIA will be useful to know). Addressing semantics any further goes beyond
+      the scope of this document.
+    </p>
+
+    <h4 id="input">Input types</h4>
+    <p>If you specify a <code>tagName: 'input'</code>, then use the <code>inputType</code> option to fill in the "type"
+      attribute of the element. There are also <code>inputValue</code> and <code>accesibleChecked</code> options to
+      manipulate specific and common (that we found) attributes of input tags. If you need more control of the primary
+      DOM element's attributes, see <code>Node.setAccessibleAttribute()</code>.
+    </p>
+    <p></p>
+    <div id="example-input-type" class="exampleScene" style="width: 64px; height: 64px; margin: 0 auto;"></div>
+    <script type="text/javascript">
+      docExample( 'example-input-type', function( scene, display ) {
+        /*START*/
+        var a11yNode = new scenery.Node( {
+          fill: 'blue',
+
+          // a11y
+          tagName: 'input',
+          inputType: 'checkbox',
+          labelContent: 'Toggle sim state'
+        } );
+
+        scene.addChild( a11yNode );
+        display.updateOnRequestAnimationFrame();
+        /*END*/
+      } );
+    </script>
+
+    <p>The above example is a Node whose pDOM representation is that of a basic checkbox. In order to give it
+      interactive
+      functionality, use <code>Node.addAccessibleInputListener()</code>. The function takes in type
+      <code>Object.&lt;string, function&gt;</code> where the key is the name of the DOM Event you want to listen to.
+      This
+      event is often different than the listener needed for a mouse. Don't forget to remove the listener the listener
+      when the <code>Node</code> is disposed with <code>Node.removeAccessibleInputListener()</code>.
+    </p>
+
+    <h4 id="focus">Focus</h4>
+
+    <p>
+      When an element in the pDOM is focused, a focus highlight is rendered in the simulation to support
+      keyboard navigation. For more complex interactions, type <code>input</code>, or other native, focusable
+      elements may not work. Other tag names can be focussed with the <code>focusable</code> option. This
+      will add a tab index of 0 to the element. Focusable elements can be manually focussed and blurred using the
+      <code>Node.focus()</code> and <code>Node.blur()</code> functions. If a specific focus highlight is desired, a
+      <code>Node</code> or <code>Shape</code> can be passed into the <code>focusHighlight</code> option.
+    </p>
+
+    <p>
+      Visibility in the pDOM and the focus order is directly effected by <code>Node.visible</code>, but can
+      also be toggled independently with the option <code>Node.accessibleVisible</code>. When set to true this
+      will hide content from screen readers and remove the element from focus order.
+    </p>
+
+
     <h3 id="static-descriptions">Static Descriptions</h3>
 
+    <h4 id="accessible-name">A Note About Accessible Name</h4>
+    <p>The Accessible Name of an element is how assistive technology identifies an element in the browser's
+      accessibility tree. Diving into the nuance of this idea goes beyond the scope of this document, but
+      understanding this is imperative to successfully creating the "static" descriptions in PhET Sims.
+      <a href="https://developer.paciellogroup.com/blog/2017/04/what-is-an-accessible-name/">Here</a> is a
+      short article that describes very simple an briefly the different ways an element gets an accessible name.
+    </p>
+    <p>Here is an overview about the various ways to set the accessible name. As the sim developer, it is your
+      responsibility to make sure that each interactive element has an accessible name.
+    </p>
+    <ul>
+      <li>Element's Content: Example <code>&lt;button&gt;My Button&lt;/button&gt;</code>. The inner text within the
+        button's opening and closing tags is the button element's accessible name.
+      </li>
+      <li><code>label</code> Element: a label element can be associated with an interactive input type that does
+        not have inner content in order to provide the input with an accessible name. A label is preferred naming
+        method when the sim interaction has visible text-based identifying it on screen. A label element can only
+        be associated with "labelable" elements like
+        <a href="http://w3c.github.io/html/sec-forms.html#labelable-element.">typical interactive HTML elements</a>.
+        It cannot, for example, be associated with a div with role="checkbox". When a visible text-based label does
+        not exist on screen, other labeling options can be considered.
+      </li>
+      <li><code>aria-label</code> Attribute: is an ARIA attribute that can provide an accessible name. For the a11y
+        api use the <code>ariaLabel</code> option to set the value of said attribute on the primary sibling.
+      </li>
+      <li>
+        <code>aria-labelledby</code> Attribute: <code>aria-labelledby</code> can be used to associate an HTML
+        element other than the label element to another element. The elements do not have to be right beside each
+        other. In a PhET Sim one might want to associate a heading element with a region or group. For example,
+        an H2 heading is associated with the Play Area region through an <code>aria-labelledby</code> attribute.
+        With this association the H2's content, "Play Area", provides the region with an accessible name in the
+        Accessibility Tree which is accessed by assistive technology. <strong>TODO: the a11y api docs to come. Also
+        add describedby?</strong>
+      </li>
+    </ul>
+
+    <h4 id="ordering">Ordering</h4>
+    To manipulate the order in the pDOM, use <code>Node.accessibleOrder = []</code>. As of this writing,
+    <code>accessibleOrder</code> only supports ordering of direct children. Whatever is specified by the option will go
+    first, followed by all of children in scene graph rendering order. Currently there is work in progress to support
+    the ordering of accessible subtrees, not just children, see
+    <a href="https://github.com/phetsims/scenery-phet/issues/365">this github issue</a> for more information.
+    <strong>TODO: update doc on completiong of that issue</strong>
+
     <h3 id="dynamic-descriptions">Dynamic Descriptions</h3>
+    <p>All interactive alerts are powered with the <code>aria-live</code> attribute. PhET uses the UtteranceQueue
+      singleton to manage alerts and send them to assistive technology.</p>
 
     <h2 id="a11y-strings">A11y Specific Strings</h2>
     <p>Accessibility specific strings are not yet translatable. That being said PhET has every intention of getting to
@@ -367,8 +487,10 @@
     </ul>
     <h2 id="a11y-resources">Resources for Further Understanding</h2>
 
-    <p>Please discuss questions or problems with @jessegreenberg, @zepumph, or @mbarlow12 and update this document
-      accordingly to help those who follow in your footsteps!</p>
+    <p>Please discuss developer related questions or problems with @jessegreenberg, @zepumph, or @mbarlow12 and
+      update this document accordingly to help those who follow in your footsteps. Also @terracoda is a great
+      resource on questions about ARIA and accessibility in general.
+    </p>
     <ul>
       <li><a href="https://drive.google.com/file/d/0B44Uycdx6JGdRFpXcDJqZl9BUk0/view">Screen Reader Support for a
         Complex Interactive Science Simulation</a></li>
