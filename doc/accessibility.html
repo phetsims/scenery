@@ -31,22 +31,6 @@
   <script type="text/x-mathjax-config">
   MathJax.Hub.Config({tex2jax: {inlineMath: [['$','$'], ['\\(','\\)']]}});
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
   </script>
 
   <script type="text/javascript"
@@ -72,6 +56,12 @@
       var $code = $( '<pre class="brush: js"></pre>' );
       $code.text( draw.toString().match( /\/\*START\*\/((.|\n)*)\/\*END\*\// )[ 1 ] );
       $container.after( $code );
+
+      var pdomHTMLBlock = $( display.domElement ).find( '.accessibility' )[ 0 ].outerHTML; // get the pDOM
+      var formattedPDOM = pdomHTMLBlock.replace( new RegExp( '<[/]?\\w*[ >]', 'g' ), '\n$&' ); // add breaks in the string
+      var $PDOMcode = $( '<pre class="brush: js"></pre>' ).text( formattedPDOM );
+
+      $code.after( $PDOMcode ).after( $( '<br/><p>And the pDOM representation</p>' ) );
     }
   </script>
 
@@ -150,198 +140,86 @@
   <div class="span6">
     <div class="page-header" style="text-align: center;">
       <h1>Accessible Content in Scenery</h1>
+      <div class="span3"></div>
+
     </div>
 
+  </div>
+</div>
+<div class="row-fluid">
+  <div class="span3" id="apiList">
+    <div class="navlink"><a href="#pDOM">The Parallel DOM</a></div>
+    <div class="navlink"><a href="#overall-structure">Type Structure</a></div>
+    <div class="navlink"><a href="#a11y-api">The Accessibility API</a></div>
+  </div>
+  <div class="span6">
+
     <p>
-      Any node in scenery, even those that are not visible or pickable, can have accessible content. The accessible
+      Any Node in scenery, even those that are not visible or pickable, can have accessible content. The accessible
       content will represent the node in the parallel DOM tree.
     </p>
 
-    <h2>The Parallel DOM</h2>
+    <h2 id="pDOM">The Parallel DOM</h2>
 
+    <p>
+      The traditional renderings of PhET sims (svg, canvas, webgl) hold very little semantic data as to what is inside
+      the rendered graphic. They are a single, graphical element in the html. The pDOM ( parallel DOM (document object
+      model)) pulls semantic data from the Scenery scene graph and adds it to an separate html structure that is
+      accessible to assistive technologies. When we say pDOM, think an html manifestation of the graphical Node
+      content in the phetsim.
+    </p>
+    <p>
+      This html acts as just another input/output modality to a simulation's model. You can interact with it to control
+      the simulation, and you can get information out of it, as the pDOM is updated in real time in response to changes
+      in the model.
+    </p>
     <p>
       The parallel DOM is an invisible structure that runs alongside scenery. It is a basic HTML document that
       represents active scenery elements. It provides an interface to accessible technologies so that they receive
       a snapshot of the display at a given state. It is dynamic and the DOM tree will update with changes to the
-      scene. Any node that has accessibleContent specified will be represented in the parallel DOM. The HTML structure
+      scene. Any node that has accessible content specified will be represented in the parallel DOM. The HTML structure
       is used so that scenery can rely on semantic HTML accessibility conventions. This way, scenery can push some of
       the accessibility work load to the browser and AT for providing keyboard navigation and auditory descriptions.
     </p>
 
-    <h2>Adding accessible content to a scenery node</h2>
+    <h2 id="overall-structure">Overall Code structure</h2>
 
-    <p>
-      Below is an example of adding accessible content to a node.
-      The corresponding element in the parallel DOM is an input type button, and toggles the fill on the html button
-      'click' event.
-    </p>
+    <p>Note: <i>a11y</i> is a synonym for accessibility.</p>
 
-    <div id="example-accessibleButton" class="exampleScene" style="width: 64px; height: 64px; margin: 0 auto;"></div>
+    <p>Accessibility.js is a trait that is added to Node.js, so all we have to do is pass in a11y specific options
+      like normal into the Parent.call() or mutate() function calls.</p>
+
+    <p>The DAG features of the a11y side of Scenery are handled parallel to Nodes in Scenery. Each Node with the
+      Accessibility trait added to its prototype has N AccessibleInstances based on the number of times it has been
+      added to the scene graph. The pDOM elements of each Node are created and handled with AccessiblePeer. There is
+      a 1x1 relationship of AccessibleInstance and AccessiblePeer.</p>
+
+
+    <h2 id="a11y-api">The Accessible Node API</h2>
+
+    <p>The primary way that developers will interact with a11y is through options passed through to Node.js. First off,
+      each Node that wants content in the pDOM will need an html element in the pDOM to represent it. To do this, use
+      the "tagName" option:</p>
+    <div id="example-accessibleTag" class="exampleScene" style="width: 64px; height: 64px; margin: 0 auto;"></div>
     <script type="text/javascript">
-      docExample( 'example-accessibleButton', function( scene, display ) {
+      docExample( 'example-accessibleTag', function( scene, display ) {
         /*START*/
-        var exampleRectangle = new scenery.Rectangle( 0, 0, 64, 64, {
-          fill: 'red',
-          accessibleContent: {
-            // create the accessible peer in the parallel DOM
-            createPeer: function( accessibleInstance ) {
-              // The element in the parallel DOM will look like:
-              // <input type="button">Rectangle Button</input>
-              var domElement = document.createElement( 'input' );
-              domElement.type = 'button';
-              domElement.value = 'Rectangle Button';
+        var a11yNode = new scenery.Rectangle( 0, 0, 64, 64, {
+          fill: 'blue',
 
-              // Add an event listener to the dom element which listens to a button press.
-              domElement.addEventListener( 'click', function() {
-                exampleRectangle.fill = exampleRectangle.fill === 'red' ? 'blue' : 'red';
-              } );
-
-              return new scenery.AccessiblePeer( accessibleInstance, domElement );
-            }
-          }
+          // a11y
+          tagName: 'p',
+          innerContent: 'I am a beautiful, blue rectangle.'
         } );
-        scene.addChild( exampleRectangle );
+        scene.addChild( a11yNode );
         display.updateOnRequestAnimationFrame();
         /*END*/
       } );
     </script>
 
-    <p>
-      The accessibleContent wraps around a createPeer function. The createPeer function handles the creation of the
-      node's parallel DOM element and the setting of its attributes. In addition, you can add any event listener
-      to the dom element for handling user input or other model events.
-    </p>
-
-    <h2>
-      Setting the focus order
-    </h2>
-
-    <p>
-      A node can also have a specified focus order. This defines the order of navigation for the children and
-      descendants of a node. If not provided, the focus order defaults to the rendering order determined by the
-      node's children array.
-    </p>
-
-    <div id="example-accessibleOrder" class="exampleScene" style="width: 64px; height: 64px; margin: 0 auto;"></div>
-    <script type="text/javascript">
-      docExample( 'example-accessibleOrder', function( scene, display ) {
-        /*START*/
-        var exampleChild1 = new scenery.Circle( 0, 10, 15 );
-        var exampleChild2 = new scenery.Circle( 20, 10, 15 );
-        var exampleParent = new scenery.Rectangle( 0, 0, 64, 64, {
-          accessibleOrder: [ exampleChild2, exampleChild1 ]
-        } );
-
-        exampleParent.children = [ exampleChild1, exampleChild2 ];
-        scene.addChild( exampleParent );
-        display.updateOnRequestAnimationFrame();
-        /*END*/
-      } );
-    </script>
-
-    <p>
-      In addition, to setting attributes of the accessible peer, one can also set the focus highlight. This is an
-      optional key to the accessibleContent object, which can be passed through to a node. This focus highlight that is
-      passed in to the accessible content can be a Node or a Shape. If no focus highlight is passed into the
-      node's accessibleContent, the default highlight is a blue-ish rectangle that surrounds the node's bounds.
-    </p>
-
-    <p>
-      The following is an example of setting a rectangular node's focus highlight to a circular shape.
-    </p>
-
-    <div id="example-focusHighlight" class="exampleScene" style="width: 64px; height: 64px; margin: 0 auto;"></div>
-    <script type="text/javascript">
-      docExample( 'example-focusHighlight', function( scene, display ) {
-        /*START*/
-        var exampleRectangle = new scenery.Rectangle( 0, 0, 32, 32, {
-          fill: 'red',
-          accessibleContent: {
-            // Specify shape for the focus highlight.
-            focusHighlight: kite.Shape.circle( 0, 0, 48 ),
-
-            // create the accessible peer in the parallel DOM
-            createPeer: function( accessibleInstance ) {
-              // The element in the parallel DOM will look like:
-              // <input type="button">Rectangle Button</input>
-              var domElement = document.createElement( 'input' );
-              domElement.type = 'button';
-              domElement.value = 'Rectangle Button';
-
-              // Add an event listener to the dom element which listens to a button press.
-              domElement.addEventListener( 'click', function() {
-                exampleRectangle.fill = exampleRectangle.fill === 'red' ? 'blue' : 'red';
-              } );
-
-              domElement.addEventListener( 'focus', function() {
-                console.log( 'here' );
-              } );
-
-              return new scenery.AccessiblePeer( accessibleInstance, domElement );
-            }
-          }
-        } );
-        scene.addChild( exampleRectangle );
-        display.updateOnRequestAnimationFrame();
-        /*END*/
-      } );
-    </script>
-
-    <h2>
-      Remaining Work for Accessible Content
-    </h2>
-
-    <p>
-      The accessible content API has some remaining issues to resolve and features to add. The following outlines
-      features that we know we would like to implement in the near future.
-      <strong>This list is likely to change as we test the API and make design decisions.</strong>
-    </p>
-
-    <table class="table">
-      <tr>
-        <td><strong>Focus API / tabindex</strong></td>
-        <td>
-          I would like to see scenery handle setting of tab indicies for invisible content and nested groups of
-          elements. Scenery could provide an API for handling the passing of focus for nested elements or elements
-          that toggle visibility.
-        </td>
-      </tr>
-      <tr>
-        <td><strong>Dom Element Convenience Construcors</strong></td>
-        <td>
-          Scenery could provide convenience constructors of accessible peers of a given type.
-        </td>
-      </tr>
-      <tr>
-        <td><strong>Focus API</strong></td>
-        <td>
-          Scenery could provide convenience constructors of accessible peers of a given type.
-        </td>
-      </tr>
-      <tr>
-        <td><strong>Update focus highlight</strong></td>
-        <td>
-          The focus highligt needs to be updated when the focused element changes position. In addition, we could
-          potentially add animations to the focus highlight itself.
-        </td>
-      </tr>
-      <tr>
-        <td><strong>Pooling</strong></td>
-        <td>
-          We need to add pooling for AccessibleInstance and consider whether AccessiblePeer should be pooled at all.
-        </td>
-      </tr>
-      <tr>
-        <td><strong>Move DOM Elements out of Accessible Peer wrappers</strong></td>
-        <td>
-          It could be convenient for accessible content to just include creation of the DOM element and its attributes.
-          The wrapper could be handled in scenery. This would also remove the need for AccessiblePeer to be inclued
-          in so many scenery nodes.
-        </td>
-      </tr>
-    </table>
-
+    <p>Above is a simple Rectangle, that is represented as a paragraph tag in the pDOM. I also gave the "p" content.</p>
   </div>
+
 </div>
 
 

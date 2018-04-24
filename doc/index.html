@@ -165,7 +165,6 @@
     <a class="sublink" href="#node-removeChild">removeChild</a><br>
     <a class="sublink" href="#node-removeChildAt">removeChildAt</a><br>
     <a class="sublink" href="#node-removeAllChildren">removeAllChildren</a><br>
-    <a class="sublink" href="#node-addPeer">addPeer</a><br>
     <a class="sublink" href="#node-detach">detach</a><br>
     <a class="sublink" href="#node-cursor">cursor</a><br>
     <a class="sublink" href="#node-mouseArea">mouseArea</a><br>
@@ -386,6 +385,10 @@ window.assertions.disableAssertSlow();
     </p>
 
     <p>
+      Take a look at <a href="accessibility.html">Accessibility in Scenery</a>
+    </p>
+
+    <p>
       For information on Scenery's internal code, see the <a href="implementation-notes">Implementation Notes</a>.
     </p>
 
@@ -557,23 +560,6 @@ window.assertions.disableAssertSlow();
 
     <p>
       Removes all of the Node's children.
-    </p>
-
-    <h4 id="node-addPeer">node.addPeer( <span class="args">element, options</span> )</h4>
-
-    <p>
-      Adds an accessibility peer described by the element and options to the tab order (handled for each instance). <code>element</code> can be either
-      a DOM element (it is used directly, and tabindex is set on it), or an HTML string (which will be duplicated for each instance). The peer can be
-      focused,
-      and peers can be modified to reflect the current state of the node.
-    </p>
-
-    <p>
-      Currently if it exists, options.click is called when the peer is activated by the keyboard while focused.
-    </p>
-
-    <p>
-      For instance, a toggle button or checkbox should generally use <code>'&lt;input type="checkbox"&gt;'</code> for its element.
     </p>
 
     <h4 id="node-detach">node.detach()</h4>
