@@ -51,7 +51,7 @@
  * Now we have a single list element in the unordered list. To assign content to this <li>, use the `innerContent`
  * option (all of these Node options have getters and setters, just like any other Node option):
  *
- * listItem1.innerContent = 'I am a list item number 1';
+ * listItem1.innerContent = 'I am list item number 1';
  *
  * The above operations will create the following pDOM structure (note that actual ids will be different):
  *
@@ -63,9 +63,9 @@
  * #DOM SIBLINGS
  *
  * The api in this trait allows you to add additional structure to the accessible DOM content if necessary. Each node
- * can have multiple DOM Elements associated with it. A Node can have a label DOM Element, and a description DOM Element.
- * These are called siblings. The Node's direct DOM Element (the DOM element you create with the `tagName` option)
- * is called the "primary sibling." You can also have a container parent DOM Elmenet that surrounds all of these
+ * can have multiple DOM Elements associated with it. A Node can have a label DOM element, and a description DOM element.
+ * These are called siblings. The Node's direct DOM element (the DOM element you create with the `tagName` option)
+ * is called the "primary sibling." You can also have a container parent DOM element that surrounds all of these
  * siblings. With three siblings and a container parent, each Node can have up to 4 DOM Elements representing it in the
  * pDOM. Here is an example of how a Node may use these features:
  *
@@ -94,19 +94,20 @@
  * 2. To make this example actually work, you would need the `inputType` option to set the "type" attribute on the `input`.
  * 3. When you specify the  <label> tag for the label sibling, the "for" attribute is automatically added to the sibling.
  * 4. Finally, the example above doesn't utilize the default tags that we have in place for the parent and siblings.
- *      default labelTagName: 'label'
+ *      default labelTagName: 'p'
  *      default descriptionTagName: 'p'
  *      default containerTagName: 'div'
  *    so the following will yield the same pDOM structure:
  *
  *    new Node( {
- *     tagName: 'input'
+ *     tagName: 'input',
+ *     labelTagName: 'label',
  *     labelContent: 'This great label for input'
  *     descriptionContent: 'This is a description for the input',
  *    });
  *
- * The Accessibility trait is smart enough to know when there needs to be a container parent to wrap multiple siblings, we
- * don't need that here either.
+ * The Accessibility trait is smart enough to know when there needs to be a container parent to wrap multiple siblings,
+ * it is not necessary to use that option unless the desired tag name is  something other than 'div'.
  *
  * --------------------------------------------------------------------------------------------------------------------
  *
