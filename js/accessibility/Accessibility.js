@@ -522,7 +522,7 @@ define( function( require ) {
         /**
          * Get the tag name of the DOM element representing this node for accessibility.
          * @public
-         *         *
+         *
          * @returns {string|null}
          */
         getTagName: function() {
