@@ -31,6 +31,12 @@
   <script type="text/x-mathjax-config">
   MathJax.Hub.Config({tex2jax: {inlineMath: [['$','$'], ['\\(','\\)']]}});
 
+
+
+
+
+
+
   </script>
 
   <script type="text/javascript"
@@ -59,7 +65,7 @@
 
       var pdomHTMLBlock = $( display.domElement ).find( '.accessibility' )[ 0 ].outerHTML; // get the pDOM
       var formattedPDOM = pdomHTMLBlock.replace( new RegExp( '<[/]?\\w*[ >]', 'g' ), '\n$&' ); // add breaks in the string
-      var $PDOMcode = $( '<pre class="brush: js"></pre>' ).text( formattedPDOM );
+      var $PDOMcode = $( '<pre class="brush: html"></pre>' ).text( formattedPDOM );
 
       $code.after( $PDOMcode ).after( $( '<br/><p>And the pDOM representation</p>' ) );
     }
@@ -118,6 +124,10 @@
       font-weight: normal;
       font-size: 80%;
     }
+    footer{
+      maring-left: 2em;
+      background-color: #191919;
+    }
   </style>
 
 </head>
@@ -148,9 +158,11 @@
 </div>
 <div class="row-fluid">
   <div class="span3" id="apiList">
-    <div class="navlink"><a href="#pDOM">The Parallel DOM</a></div>
-    <div class="navlink"><a href="#overall-structure">Type Structure</a></div>
-    <div class="navlink"><a href="#a11y-api">The Accessibility API</a></div>
+    <div class="ph2"><a href="#pDOM">The Parallel DOM</a></div>
+    <div class="ph2"><a href="#overall-structure">Type Structure</a></div>
+    <div class="ph2"><a href="#a11y-api">The Accessibility API</a></div>
+    <div class="navlink"><a href="#ex-basic">A Basic Example</a></div>
+    <div class="navlink"><a href="#ex-all-siblings">Multiple DOM Elements per Node</a></div>
   </div>
   <div class="span6">
 
@@ -197,6 +209,14 @@
 
     <h2 id="a11y-api">The Accessible Node API</h2>
 
+    <p>Below explains how to use the accessibility functionality of scenery. For more information and up-to-date api
+      documentation, see <a href="https://github.com/phetsims/scenery/blob/master/js/accessibility/Accessibility.js#L4">
+        the source code</a>. The source file for the Accessibility trait is also a good resource for further information
+      about some of the options introduced below.
+    </p>
+
+    <h3 id="ex-basic">A Basic Example</h3>
+
     <p>The primary way that developers will interact with a11y is through options passed through to Node.js. First off,
       each Node that wants content in the pDOM will need an html element in the pDOM to represent it. To do this, use
       the "tagName" option:</p>
@@ -217,11 +237,68 @@
       } );
     </script>
 
-    <p>Above is a simple Rectangle, that is represented as a paragraph tag in the pDOM. I also gave the "p" content.</p>
+    <p>Above is a simple Rectangle, that is represented as a paragraph tag in the pDOM. I also gave the "p" text content
+      inside the html element.</p>
+
+    <h3 id="ex-all-siblings">Multiple DOM Elements per Node</h3>
+
+    <p>Although a Node has a primary DOM element that represents it in the pDOM, other DOM Elements can provide
+      supplemental information to convey to assistive technology. Label and Description elements can be added, as well
+      as a parent element to contain all DOM Element siblings for a node. In total a Node can have up to four DOM
+      Elements:
+      the primary sibling, label sibling, description sibling, and the container parent. Here is an example of a Node
+      that uses all of it's elements to provide the fullest semantic picture of the sim to the pDOM.
+    </p>
+
+    <div id="example-all-siblings" class="exampleScene" style="width: 64px; height: 64px; margin: 0 auto;"></div>
+    <script type="text/javascript">
+      docExample( 'example-all-siblings', function( scene, display ) {
+        /*START*/
+        var a11yNode = new scenery.Rectangle( 0, 0, 64, 64, {
+          fill: 'blue',
+
+          // a11y
+          tagName: 'button',
+          innerContent: 'Remove Wall',
+          labelTagName: 'h3',
+          labelContent: 'Press the remove wall button below.',
+          descriptionTagName: 'p',
+          descriptionContent: 'Play with or without the wall.'
+        } );
+
+        scene.addChild( a11yNode );
+        a11yNode.addChild( new scenery.Text( 'Remove Wall', { stroke: 'white', center: a11yNode.center } ) );
+        display.updateOnRequestAnimationFrame();
+        /*END*/
+      } );
+    </script>
+
+    <p>A few notes here:</p>
+    <ul>
+      <li>Although a container parent wasn't explicitly added, the a11y api automatically adds a container when there is
+        more than one sibling. The default "containerTagName" is stored in AccessibilityUtil.
+      </li>
+      <li>Taking the above bullet one step further, description and label tags have defaults too (see
+        AccessibilityUtil).
+        Specifying a "*Content" option without the "*TagName" option will produce an element of the default.
+      </li>
+      <li>Having a label, and inner content here is a bit redundant, but the API is flexible enough to work for many
+        cases.
+      </li>
+      <li>By default the description and label tags come before the primary sibling, you can change this with
+        "appendLabel" and "appendDescription" options.
+      </li>
+    </ul>
+
+
   </div>
+
 
 </div>
 
+<footer style="background-color: #191919;">
+    <a class="brand" href="/scenery">Scenery</a>
+</footer>
 
 <script type="text/javascript">
   SyntaxHighlighter.all();
