@@ -538,8 +538,8 @@ define( function( require ) {
          *
          * Use null to clear the label sibling element from the pDOM.
          *
-         * NOTE: This method will create a container parent tagName if none has been specified. This is because all siblings
-         * must be help in the container parent HTML element. If you clear the labelTagName and no longer want any
+         * NOTE: This method will create a container parent tagName if none has been specified, because all sibling
+         * elements must be children of the container. If you clear the labelTagName and no longer want any
          * content save the primary sibling (this means the container parent as well), then you must manually null out
          * the containerTagName option as well. Although this isn't the greatest strategy, it works for now, and
          * @zepumph and @jessegreenberg can't think of another way to handle this. See for details: https://github.com/phetsims/scenery/issues/761
@@ -580,11 +580,12 @@ define( function( require ) {
          *
          * Passing 'null' will clear away the description sibling.
          *
-         * NOTE: This method will create a container parent tagName if none has been specified. This is because all siblings
-         * must be help in the container parent HTML element. If you clear the descriptionTagName and no longer want any
-         * content save the primary sibling (this means the container parent as well), then you must manually null out
-         * the containerTagName option as well. Although this isn't the greatest strategy, it works for now, and
-         * @zepumph and @jessegreenberg can't think of another way to handle this. See for details: https://github.com/phetsims/scenery/issues/761
+         * NOTE: This method will create a container parent tagName if none has been specified. This is because all
+         * siblings must be children of the parent container element to appear in the DOM. If you clear
+         * the descriptionTagName and no longer want any content other than the primary sibling, you must manually
+         * null out the containerTagName option. Although this isn't the greatest strategy, it works for now, and
+         * @zepumph and @jessegreenberg can't think of another way to handle this. See for
+         * details: https://github.com/phetsims/scenery/issues/761
          *
          * @public
          * @param {string|null} tagName
@@ -1228,18 +1229,6 @@ define( function( require ) {
         get ariaDescriptionContent() { return this.getAriaDescriptionContent(); },
 
         /**
-         * Returns the accessible (focus) order for this node.
-         * @public
-         *
-         * @returns {Array.<Node>|null}
-         */
-        getAccessibleOrder: function() {
-          return this._accessibleOrder;
-        },
-        get accessibleOrder() { return this.getAccessibleOrder(); },
-
-
-        /**
          * Sets the accessible focus order for this node. This includes not only focused items, but elements that can be
          * placed in the parallel DOM. If provided, it will override the focus order between children (and
          * optionally descendants). If not provided, the focus order will default to the rendering order (first children
@@ -1269,6 +1258,17 @@ define( function( require ) {
           }
         },
         set accessibleOrder( value ) { this.setAccessibleOrder( value ); },
+
+        /**
+         * Returns the accessible (focus) order for this node.
+         * @public
+         *
+         * @returns {Array.<Node>|null}
+         */
+        getAccessibleOrder: function() {
+          return this._accessibleOrder;
+        },
+        get accessibleOrder() { return this.getAccessibleOrder(); },
 
         /**
          * Hide completely from a screen reader and the browser by setting the hidden attribute on the node's
