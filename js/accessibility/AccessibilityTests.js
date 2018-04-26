@@ -91,6 +91,13 @@ define( function( require ) {
     a.tagName = 'button';
     a.innerContent = TEST_LABEL_HTML_2;
     assert.ok( getPrimarySiblingElementByNode( a ).innerHTML === TEST_LABEL_HTML_2, 'innerContent not cleared when tagName set to null.' );
+
+    var b = new Node( { tagName: 'input' } );
+
+    assert.throws( function() {
+      b.innerContent = 'this should fail';
+
+    }, /.*/, 'cannot set inner content on input' );
   } );
 
 

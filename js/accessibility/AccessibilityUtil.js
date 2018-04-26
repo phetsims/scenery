@@ -174,13 +174,13 @@ define( function( require ) {
 
 
   /**
-   * Returns whether or not the element supports innerHTML or textContent in PhET.
+   * Returns whether or not the tagName supports innerHTML or textContent in PhET.
    * @private
-   * @param {HTMLElement} domElement
+   * @param {string} tagName
    * @returns {boolean}
    */
-  function elementSupportsContent( domElement ) {
-    return !_.includes( ELEMENTS_WITHOUT_CLOSING_TAG, domElement.tagName );
+  function tagNameSupportsContent( tagName ) {
+    return !_.includes( ELEMENTS_WITHOUT_CLOSING_TAG, tagName.toUpperCase() );
   }
 
   var AccessibilityUtil = {
@@ -299,16 +299,15 @@ define( function( require ) {
      * @param {boolean} isHTML - whether or not to set the content as HTML
      */
     setTextContent: function( domElement, textContent, isHTML ) {
-    if ( elementSupportsContent( domElement ) ) {
-      if ( isHTML ) {
-        domElement.innerHTML = textContent;
+      if ( tagNameSupportsContent( domElement.tagName ) ) {
+        if ( isHTML ) {
+          domElement.innerHTML = textContent;
+        }
+        else {
+          domElement.textContent = textContent;
+        }
       }
-      else {
-        domElement.textContent = textContent;
-      }
-    }
-
-  },
+    },
 
     /**
      * Add DOM event listeners contained in the accessibleInput directly to the DOM elements on each
@@ -342,6 +341,14 @@ define( function( require ) {
       }
     },
 
+    /**
+     *
+     * @param {string} tagName
+     * @returns {boolean} - true if the tag does support inner content
+     */
+    tagNameSupportsContent: function( tagName ) {
+      return tagNameSupportsContent( tagName );
+    },
 
     TAGS: {
       INPUT: INPUT_TAG,

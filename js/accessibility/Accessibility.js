@@ -811,6 +811,12 @@ define( function( require ) {
 
           var self = this;
 
+          // guard against option order, but if there is a tagName, validate that it accepts inner content.
+          if ( this._tagName ) {
+            assert && assert( AccessibilityUtil.tagNameSupportsContent( this._tagName ),
+              'tagName: ' + this._tagName + ' does not support inner content' );
+          }
+
           this.updateAccessiblePeers( function( accessiblePeer ) {
             assert && assert( accessiblePeer.accessibleInstance.children.length === 0, 'descendants exist with accessible content, innerContent cannot be used' );
             AccessibilityUtil.setTextContent( accessiblePeer.primarySibling, self._innerContent, useHTML );
