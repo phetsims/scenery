@@ -94,9 +94,8 @@ define( function( require ) {
 
     var b = new Node( { tagName: 'input' } );
 
-    assert.throws( function() {
+    window.assert && assert.throws( function() {
       b.innerContent = 'this should fail';
-
     }, /.*/, 'cannot set inner content on input' );
   } );
 
