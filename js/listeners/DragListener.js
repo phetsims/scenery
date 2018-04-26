@@ -86,17 +86,13 @@ define( function( require ) {
       // frame (applying any provided transforms as needed).
       locationProperty: null,
 
-      // {Bounds2|null} - If provided, the model location will be constrained to be inside these bounds.
-      dragBounds: null,
-
       // {Property.<Bounds2|null>} - If provided, the model location will be constrained to be inside these bounds.
-      // TODO: do we provide this AND the non-property?
       dragBoundsProperty: null,
 
       // {Function|null} - function( modelPoint: {Vector2} ) : {Vector2}. If provided, it will allow custom mapping
       // from the desired location (i.e. where the pointer is) to the actual possible location (i.e. where the dragged
-      // object ends up). For example, using dragBounds is equivalent to passing:
-      //   mapLocation: function( point ) { return dragBounds.closestPointTo( point ); }
+      // object ends up). For example, using dragBoundsProperty is equivalent to passing:
+      //   mapLocation: function( point ) { return dragBoundsProperty.value.closestPointTo( point ); }
       mapLocation: null,
 
       // {Function|null} - function( viewPoint: {Vector2}, listener: {DragListener} ) : {Vector2}. If provided, its
@@ -134,7 +130,7 @@ define( function( require ) {
     assert && assert( typeof options.translateNode === 'boolean', 'translateNode should be a boolean' );
     assert && assert( options.transform === null || options.transform instanceof Transform3, 'transform, if provided, should be a Transform3' );
     assert && assert( options.locationProperty === null || options.locationProperty instanceof Property, 'locationProperty, if provided, should be a Property' );
-    assert && assert( options.dragBounds === null || options.dragBounds instanceof Bounds2, 'dragBounds, if provided, should be a Bounds2' );
+    assert && assert( !options.dragBounds, 'options.dragBounds was removed in favor of options.dragBoundsProperty' );
     assert && assert( options.dragBoundsProperty === null || options.dragBoundsProperty instanceof Property, 'dragBoundsProperty, if provided, should be a Property' );
     assert && assert( options.mapLocation === null || typeof options.mapLocation === 'function', 'mapLocation, if provided, should be a function' );
     assert && assert( options.offsetLocation === null || typeof options.offsetLocation === 'function', 'offsetLocation, if provided, should be a function' );
@@ -144,10 +140,8 @@ define( function( require ) {
     assert && assert( options.tandem instanceof Tandem, 'The provided tandem should be a Tandem' );
 
     assert && assert(
-      !( options.mapLocation && options.dragBounds ) &&
-      !( options.dragBounds && options.dragBoundsProperty ) &&
       !( options.mapLocation && options.dragBoundsProperty ),
-      'Only one of mapLocation, dragBounds and dragBoundsProperty can be provided, as they handle mapping of the drag point'
+      'Only one of mapLocation and dragBoundsProperty can be provided, as they handle mapping of the drag point'
     );
 
     PressListener.call( this, options );
@@ -161,7 +155,7 @@ define( function( require ) {
     this._locationProperty = options.locationProperty;
     this._mapLocation = options.mapLocation;
     this._offsetLocation = options.offsetLocation;
-    this._dragBoundsProperty = ( options.dragBoundsProperty || new Property( options.dragBounds || null ) );
+    this._dragBoundsProperty = ( options.dragBoundsProperty || new Property( null ) );
     this._start = options.start;
     this._end = options.end;
 

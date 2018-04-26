@@ -93,7 +93,6 @@ define( [
   'SCENERY/input/SimpleDragHandler',
   'SCENERY/input/Touch',
 
-  // TODO: move to SCENERY/input?
   'SCENERY/listeners/DragListener',
   'SCENERY/listeners/FireListener',
   'SCENERY/listeners/HandleDownListener',

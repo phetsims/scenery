@@ -124,7 +124,7 @@ define( function( require ) {
 
       var listener = new DragListener( {
         locationProperty: locationProperty,
-        dragBounds: new Bounds2( 0, 0, 5, 5 )
+        dragBoundsProperty: new Property( new Bounds2( 0, 0, 5, 5 ) )
       } );
       rect.addInputListener( listener );
 
