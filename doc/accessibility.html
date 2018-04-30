@@ -195,16 +195,22 @@
     <h2>Background Information</h2>
 
     <p>
-      Prior to reading through the following documentation, please familiarize yourself with the this background
-      information about accessible HTML, the accessibility tree, and accessible names. The rest of this document will
-      assume you have knowledge of these concepts.
+      Prior to reading through the following documentation, please familiarize yourself with this background
+      information about accessible HTML, the accessibility tree, accessible names, and ARIA. The rest of this
+      document will assume you have knowledge of these concepts.
     </p>
 
     <ul>
       <li><a href="https://developer.mozilla.org/en-US/docs/Learn/Accessibility/HTML">Accessible HTML</a></li>
       <li><a href="https://developers.google.com/web/fundamentals/accessibility/semantics-builtin/the-accessibility-tree">The accessibility tree</a></li>
       <li><a href="https://developer.paciellogroup.com/blog/2017/04/what-is-an-accessible-name/">Accessible name</a></li>
+      <li><a href="https://developer.mozilla.org/en-US/docs/Web/Accessibility/ARIA">ARIA</a></li>
     </ul>
+
+    <h2>In-Depth Information</h2>
+    <p>
+      For more information on the implementation of accessibility in Scenery, see the <a href="accessibility-implementation">Accessibility Implementation Notes</a>.
+    </p>
 
     <h2 id="PDOM">The Parallel DOM</h2>
 
@@ -217,17 +223,17 @@
 
     <p>
       The parallel DOM is an invisible structure that runs alongside the graphics. It is a basic HTML document that
-      represents active scenery elements. It provides an interface to accessible technologies so that they receive
-      a snapshot of the display at a given state. It is dynamic and the DOM tree will update with changes to the
-      scene. Any node that has accessible content specified will be represented in the parallel DOM. The HTML structure
-      is used so that scenery can rely on semantic HTML accessibility conventions. This way, scenery can push some of
+      represents active scenery elements. It provides an interface to assistive technologies so that they have
+      a representation of the display at a given state. It is dynamic and the DOM tree will update with changes to the
+      scene. Any node that has accessible content specified will be represented in the parallel DOM. HTML
+      is used so that scenery can rely on semantic HTML and accessibility conventions. This way, scenery can push some of
       the accessibility work load to the browser and AT for providing keyboard navigation and auditory descriptions.
     </p>
 
     <p>
       This html acts as just another input/output modality to a simulation's model. You can interact with it to control
       the simulation, and you can get information out of it, as the PDOM can be updated in real time in response to changes
-      in the application.
+      in the simulation.
     </p>
 
     <p>
@@ -235,25 +241,17 @@
       content will represent the node in the parallel DOM tree.
     </p>
 
-    <h2 id="overall-structure">Overall Code structure</h2>
+    <h2 id="a11y-api">Scenery's Accessibility API</h2>
 
-    <p>Note: <i>a11y</i> is a synonym for accessibility.</p>
+    <p>
+      Most of Scenery's accessibility features are defined and implemented in <code>Accessibility.js</code>.
+      <code>Accessibility.js</code> is a trait that is mixed in to <code>Node.js</code>. It adds getters and setters
+      for accessibility properties, so all we have to do is pass in a11y specific options like normal into the
+      Parent.call() or mutate() function calls.
+    </p>
 
-    <p>Accessibility.js is a trait that is mixed in to <code>Node.js</code>, so all we have to do is pass in a11y specific
-      options
-      like normal into the Parent.call() or mutate() function calls.</p>
-
-    <p>The DAG features of the a11y side of Scenery are handled parallel to <code>Node</code>s in Scenery. Each <code>Node</code>
-      with the
-      Accessibility trait added to its prototype has N AccessibleInstances based on the number of times it has been
-      added to the scene graph. The PDOM elements of each <code>Node</code> are created and handled with AccessiblePeer.
-      There is
-      a 1x1 relationship of AccessibleInstance and AccessiblePeer.</p>
-
-
-    <h2 id="a11y-api">The Accessible Node API</h2>
-
-    <p>Below explains how to use the accessibility functionality of scenery. For more information and up-to-date api
+    <p>
+      The following explains how to use the accessibility functionality of scenery. For more information and up-to-date api
       documentation, see <a href="https://github.com/phetsims/scenery/blob/master/js/accessibility/Accessibility.js#L4">
         the source code</a>. On the side bar, options are categorized by
       where they are introduced and explained. In this file there is little "traditional" documentation, rather
@@ -262,8 +260,8 @@
 
     <h3 id="ex-basic">A Basic Example</h3>
 
-    <p>The primary way that developers will interact with a11y is through options passed through to <code>Node.js</code>.
-      First off, each <code>Node</code> that wants content in the PDOM will need an html element in the PDOM to
+    <p>The primary way that developers will implement a11y is through options passed through to <code>Node.js</code>.
+      First off, each <code>Node</code> that wants content in the PDOM will need an HTML element in the PDOM to
       represent it.
       To do this, use the <code>tagName</code> option:</p>
     <div id="example-accessibleTag" class="exampleScene" style="width: 64px; height: 64px; margin: 0 auto;"></div>
