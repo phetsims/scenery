@@ -209,18 +209,12 @@
     <h2 id="PDOM">The Parallel DOM</h2>
 
     <p>
-      The traditional renderings of PhET sims (svg, canvas, webgl) hold very little semantic data as to what is inside
-      the rendered graphic. They are a single, graphical element in the html. The PDOM ( parallel DOM (document object
-      model)) pulls semantic data from the Scenery scene graph and adds it to an separate html structure that is
-      accessible to assistive technologies. When we say PDOM, think an html manifestation of the graphical
-      <code>Node</code>
-      content in the phetsim.
+      Scenery uses HTML5 technologies (svg, canvas, webgl) to draw the display. These have very little semantic
+      data as to what is inside the rendered graphic. The PDOM ( parallel DOM (document object model)) pulls semantic
+      data from the scene graph and adds it to a separate html structure that is available for assistive technologies.
+      When we say PDOM, think an html manifestation of the graphical <code>Node</code> content in the display.
     </p>
-    <p>
-      This html acts as just another input/output modality to a simulation's model. You can interact with it to control
-      the simulation, and you can get information out of it, as the PDOM is updated in real time in response to changes
-      in the model.
-    </p>
+
     <p>
       The parallel DOM is an invisible structure that runs alongside the graphics. It is a basic HTML document that
       represents active scenery elements. It provides an interface to accessible technologies so that they receive
@@ -228,6 +222,12 @@
       scene. Any node that has accessible content specified will be represented in the parallel DOM. The HTML structure
       is used so that scenery can rely on semantic HTML accessibility conventions. This way, scenery can push some of
       the accessibility work load to the browser and AT for providing keyboard navigation and auditory descriptions.
+    </p>
+
+    <p>
+      This html acts as just another input/output modality to a simulation's model. You can interact with it to control
+      the simulation, and you can get information out of it, as the PDOM can be updated in real time in response to changes
+      in the application.
     </p>
 
     <p>
