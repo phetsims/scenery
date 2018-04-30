@@ -45,6 +45,12 @@
 
 
 
+
+
+
+
+
+
   </script>
 
   <script type="text/javascript"
@@ -362,7 +368,7 @@
 
     <h4 id="input">Input types</h4>
     <p>If you specify a <code>tagName: 'input'</code>, then use the <code>inputType</code> option to fill in the "type"
-      attribute of the element. There are also <code>inputValue</code> and <code>accesibleChecked</code> options to
+      attribute of the element. There are also <code>inputValue</code> and <code>accessibleChecked</code> options to
       manipulate specific and common (that we found) attributes of input tags. If you need more control of the primary
       DOM element's attributes, see <code>Node.setAccessibleAttribute()</code>.
     </p>
@@ -391,12 +397,16 @@
       functionality, use <code>Node.addAccessibleInputListener()</code>. The function takes in type
       <code>Object.&lt;string, function&gt;</code> where the key is the name of the DOM Event you want to listen to.
       This
-      event is often different than the listener needed for a mouse. Don't forget to remove the listener the listener
+      event is more often than not different than the listener needed for a mouse. Don't forget to remove the listener
+      the listener
       when the <code>Node</code> is disposed with <code>Node.removeAccessibleInputListener()</code>.
     </p>
 
     <h4 id="focus">Focus</h4>
 
+    <p>All interactive elements in the pDOM receive keyboard focus, but not all sim objects are interactive. For
+      example, the Sweater in BASE is a dynamic content object because it's electrons can be transferred to
+      a balloon. Even so it is not directly interacted with by the user, thus the sweater never receives focus.</p>
     <p>
       When an element in the pDOM is focused, a focus highlight is rendered in the simulation to support
       keyboard navigation. For more complex interactions, type <code>input</code>, or other native, focusable
@@ -460,8 +470,13 @@
     <strong>TODO: update doc on completiong of that issue</strong>
 
     <h3 id="dynamic-descriptions">Dynamic Descriptions</h3>
+
     <p>All interactive alerts are powered with the <code>aria-live</code> attribute. PhET uses the UtteranceQueue
       singleton to manage alerts and send them to assistive technology.</p>
+
+    <p>TODO: make sure it is clear the difference between dynamic state information (conveyed in the pDOM), and dynamic
+      interactive alerts.
+    </p>
 
     <h2 id="a11y-strings">A11y Specific Strings</h2>
     <p>Accessibility specific strings are not yet translatable. That being said PhET has every intention of getting to
