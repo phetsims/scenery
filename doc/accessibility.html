@@ -196,7 +196,7 @@
 
     <p>
       Prior to reading through the following documentation, please familiarize yourself with the this background
-      information about accessible HTML, the accessibility tree, and accessible names. The following content will
+      information about accessible HTML, the accessibility tree, and accessible names. The rest of this document will
       assume you have knowledge of these concepts.
     </p>
 
@@ -239,7 +239,7 @@
 
     <p>Note: <i>a11y</i> is a synonym for accessibility.</p>
 
-    <p>Accessibility.js is a trait that is added to <code>Node.js</code>, so all we have to do is pass in a11y specific
+    <p>Accessibility.js is a trait that is mixed in to <code>Node.js</code>, so all we have to do is pass in a11y specific
       options
       like normal into the Parent.call() or mutate() function calls.</p>
 
@@ -411,15 +411,7 @@
     </p>
 
 
-    <h3 id="static-descriptions">Static Descriptions</h3>
-
-    <h4 id="accessible-name">A Note About Accessible Name</h4>
-    <p>The Accessible Name of an element is how assistive technology identifies an element in the browser's
-      accessibility tree. Diving into the nuance of this idea goes beyond the scope of this document, but
-      understanding this is imperative to successfully creating the "static" descriptions in PhET Sims.
-      <a href="https://developer.paciellogroup.com/blog/2017/04/what-is-an-accessible-name/">Here</a> is a
-      short article that describes very simple an briefly the different ways an element gets an accessible name.
-    </p>
+    <h3 id="static-descriptions">Manipulating the Parallel DOM</h3>
     <p>Here is an overview about the various ways to set the accessible name. As the sim developer, it is your
       responsibility to make sure that each interactive element has an accessible name.
     </p>
@@ -457,10 +449,9 @@
     <a href="https://github.com/phetsims/scenery-phet/issues/365">this github issue</a> for more information.
     <strong>TODO: update doc on completiong of that issue</strong>
 
-    <h3 id="dynamic-descriptions">Dynamic Descriptions</h3>
+    <h4 id="dynamic-descriptions">Alerts</h4>
 
-    <p>All interactive alerts are powered with the <code>aria-live</code> attribute. PhET uses the UtteranceQueue
-      singleton to manage alerts and send them to assistive technology.</p>
+    <p>All interactive alerts are powered with the <a href="https://developer.mozilla.org/en-US/docs/Web/Accessibility/ARIA/ARIA_Live_Regions">aria-live attribute</a>. PhET manages alerts in a custom queue, see <a href="https://github.com/phetsims/scenery-phet/blob/master/js/accessibility/utteranceQueue.js">utteranceQueue.js</a> (note this is in repo scenery-phet) for more information.</p>
 
     <p>TODO: make sure it is clear the difference between dynamic state information (conveyed in the PDOM), and dynamic
       interactive alerts.
