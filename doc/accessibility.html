@@ -192,10 +192,19 @@
   </div>
   <div class="span6">
 
+    <h2>Background Information</h2>
+
     <p>
-      Any Node in scenery, even those that are not visible or pickable, can have accessible content. The accessible
-      content will represent the node in the parallel DOM tree.
+      Prior to reading through the following documentation, please familiarize yourself with the this background
+      information about accessible HTML, the accessibility tree, and accessible names. The following content will
+      assume you have knowledge of these concepts.
     </p>
+
+    <ul>
+      <li><a href="https://developer.mozilla.org/en-US/docs/Learn/Accessibility/HTML">Accessible HTML</a></li>
+      <li><a href="https://developers.google.com/web/fundamentals/accessibility/semantics-builtin/the-accessibility-tree">The accessibility tree</a></li>
+      <li><a href="https://developer.paciellogroup.com/blog/2017/04/what-is-an-accessible-name/">Accessible name</a></li>
+    </ul>
 
     <h2 id="PDOM">The Parallel DOM</h2>
 
@@ -213,12 +222,17 @@
       in the model.
     </p>
     <p>
-      The parallel DOM is an invisible structure that runs alongside scenery. It is a basic HTML document that
+      The parallel DOM is an invisible structure that runs alongside the graphics. It is a basic HTML document that
       represents active scenery elements. It provides an interface to accessible technologies so that they receive
       a snapshot of the display at a given state. It is dynamic and the DOM tree will update with changes to the
       scene. Any node that has accessible content specified will be represented in the parallel DOM. The HTML structure
       is used so that scenery can rely on semantic HTML accessibility conventions. This way, scenery can push some of
       the accessibility work load to the browser and AT for providing keyboard navigation and auditory descriptions.
+    </p>
+
+    <p>
+      Any Node in scenery, even those that are not visible or pickable, can have accessible content. The accessible
+      content will represent the node in the parallel DOM tree.
     </p>
 
     <h2 id="overall-structure">Overall Code structure</h2>
