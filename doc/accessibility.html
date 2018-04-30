@@ -77,11 +77,11 @@
       $code.text( draw.toString().match( /\/\*START\*\/((.|\n)*)\/\*END\*\// )[ 1 ] );
       $container.after( $code );
 
-      var pdomHTMLBlock = $( display.domElement ).find( '.accessibility' )[ 0 ].outerHTML; // get the pDOM
+      var pdomHTMLBlock = $( display.domElement ).find( '.accessibility' )[ 0 ].outerHTML; // get the PDOM
       var formattedPDOM = pdomHTMLBlock.replace( new RegExp( '<[/]?\\w*[ >]', 'g' ), '\n$&' ); // add breaks in the string
       var $PDOMcode = $( '<pre class="brush: html"></pre>' ).text( formattedPDOM );
 
-      $code.after( $PDOMcode ).after( $( '<br/><p>And the pDOM representation</p>' ) );
+      $code.after( $PDOMcode ).after( $( '<br/><p>And the PDOM representation</p>' ) );
     }
   </script>
 
@@ -173,7 +173,7 @@
 </div>
 <div class="row-fluid">
   <div class="span3" id="apiList">
-    <!--<div class="ph2"><a href="#pDOM">The Parallel DOM</a></div>-->
+    <!--<div class="ph2"><a href="#PDOM">The Parallel DOM</a></div>-->
     <!--<div class="ph2"><a href="#overall-structure">Type Structure</a></div>-->
 
     <div class="ph2"><a href="#a11y-api">The Accessibility API</a></div>
@@ -223,19 +223,19 @@
       content will represent the node in the parallel DOM tree.
     </p>
 
-    <h2 id="pDOM">The Parallel DOM</h2>
+    <h2 id="PDOM">The Parallel DOM</h2>
 
     <p>
       The traditional renderings of PhET sims (svg, canvas, webgl) hold very little semantic data as to what is inside
-      the rendered graphic. They are a single, graphical element in the html. The pDOM ( parallel DOM (document object
+      the rendered graphic. They are a single, graphical element in the html. The PDOM ( parallel DOM (document object
       model)) pulls semantic data from the Scenery scene graph and adds it to an separate html structure that is
-      accessible to assistive technologies. When we say pDOM, think an html manifestation of the graphical
+      accessible to assistive technologies. When we say PDOM, think an html manifestation of the graphical
       <code>Node</code>
       content in the phetsim.
     </p>
     <p>
       This html acts as just another input/output modality to a simulation's model. You can interact with it to control
-      the simulation, and you can get information out of it, as the pDOM is updated in real time in response to changes
+      the simulation, and you can get information out of it, as the PDOM is updated in real time in response to changes
       in the model.
     </p>
     <p>
@@ -258,7 +258,7 @@
     <p>The DAG features of the a11y side of Scenery are handled parallel to <code>Node</code>s in Scenery. Each <code>Node</code>
       with the
       Accessibility trait added to its prototype has N AccessibleInstances based on the number of times it has been
-      added to the scene graph. The pDOM elements of each <code>Node</code> are created and handled with AccessiblePeer.
+      added to the scene graph. The PDOM elements of each <code>Node</code> are created and handled with AccessiblePeer.
       There is
       a 1x1 relationship of AccessibleInstance and AccessiblePeer.</p>
 
@@ -275,7 +275,7 @@
     <h3 id="ex-basic">A Basic Example</h3>
 
     <p>The primary way that developers will interact with a11y is through options passed through to <code>Node.js</code>.
-      First off, each <code>Node</code> that wants content in the pDOM will need an html element in the pDOM to
+      First off, each <code>Node</code> that wants content in the PDOM will need an html element in the PDOM to
       represent it.
       To do this, use the <code>tagName</code> option:</p>
     <div id="example-accessibleTag" class="exampleScene" style="width: 64px; height: 64px; margin: 0 auto;"></div>
@@ -295,17 +295,17 @@
       } );
     </script>
 
-    <p>Above is a simple scenery <code>Rectangle</code>, that is represented as a paragraph tag in the pDOM.
+    <p>Above is a simple scenery <code>Rectangle</code>, that is represented as a paragraph tag in the PDOM.
       I also gave the <code>&lt;p&gt;</code> text content inside the html element.</p>
 
     <h3 id="ex-all-siblings">Multiple DOM Elements per Node</h3>
 
-    <p>Although a Node has a primary DOM element that represents it in the pDOM, other DOM Elements can provide
+    <p>Although a Node has a primary DOM element that represents it in the PDOM, other DOM Elements can provide
       supplemental information to convey to assistive technology. Label and Description elements can be added, as well
       as a parent element to contain all DOM Element siblings for a node. In total a Node can have up to four DOM
       Elements: the primary sibling, label sibling, description sibling, and the container parent. Here is an
       example of a <code>Node</code> that uses all of it's elements to provide the fullest semantic picture of the sim
-      to the pDOM.
+      to the PDOM.
     </p>
 
     <div id="example-all-siblings" class="exampleScene" style="width: 64px; height: 64px; margin: 0 auto;"></div>
@@ -392,7 +392,7 @@
       } );
     </script>
 
-    <p>The above example is a Node whose pDOM representation is that of a basic checkbox. In order to give it
+    <p>The above example is a Node whose PDOM representation is that of a basic checkbox. In order to give it
       interactive
       functionality, use <code>Node.addAccessibleInputListener()</code>. The function takes in type
       <code>Object.&lt;string, function&gt;</code> where the key is the name of the DOM Event you want to listen to.
@@ -404,11 +404,11 @@
 
     <h4 id="focus">Focus</h4>
 
-    <p>All interactive elements in the pDOM receive keyboard focus, but not all sim objects are interactive. For
+    <p>All interactive elements in the PDOM receive keyboard focus, but not all sim objects are interactive. For
       example, the Sweater in BASE is a dynamic content object because it's electrons can be transferred to
       a balloon. Even so it is not directly interacted with by the user, thus the sweater never receives focus.</p>
     <p>
-      When an element in the pDOM is focused, a focus highlight is rendered in the simulation to support
+      When an element in the PDOM is focused, a focus highlight is rendered in the simulation to support
       keyboard navigation. For more complex interactions, type <code>input</code>, or other native, focusable
       elements may not work. Other tag names can be focussed with the <code>focusable</code> option. This
       will add a tab index of 0 to the element. Focusable elements can be manually focussed and blurred using the
@@ -417,7 +417,7 @@
     </p>
 
     <p>
-      Visibility in the pDOM and the focus order is directly effected by <code>Node.visible</code>, but can
+      Visibility in the PDOM and the focus order is directly effected by <code>Node.visible</code>, but can
       also be toggled independently with the option <code>Node.accessibleVisible</code>. When set to true this
       will hide content from screen readers and remove the element from focus order.
     </p>
@@ -462,7 +462,7 @@
     </ul>
 
     <h4 id="ordering">Ordering</h4>
-    To manipulate the order in the pDOM, use <code>Node.accessibleOrder = []</code>. As of this writing,
+    To manipulate the order in the PDOM, use <code>Node.accessibleOrder = []</code>. As of this writing,
     <code>accessibleOrder</code> only supports ordering of direct children. Whatever is specified by the option will go
     first, followed by all of children in scene graph rendering order. Currently there is work in progress to support
     the ordering of accessible subtrees, not just children, see
@@ -474,7 +474,7 @@
     <p>All interactive alerts are powered with the <code>aria-live</code> attribute. PhET uses the UtteranceQueue
       singleton to manage alerts and send them to assistive technology.</p>
 
-    <p>TODO: make sure it is clear the difference between dynamic state information (conveyed in the pDOM), and dynamic
+    <p>TODO: make sure it is clear the difference between dynamic state information (conveyed in the PDOM), and dynamic
       interactive alerts.
     </p>
 
