@@ -348,13 +348,18 @@
       <li>Note that the Text node "North South Magnet" has no accessible content and so it does not appear anywhere in the PDOM.</li>
     </ul>
 
-    <h3 id="scene-graph">Leveraging the scene graph</h3>
+    <h2 id="pdom-structure">The Structure of the PDOM</h2>
 
     <p>
       By default, the PDOM hierarchy will match the hierarchy of the scene graph. This is an important feature to consider
-      and leverage. Consider the following example where we have a box filled with circles and the desired a11y
-      representation is an unordered list filled with list items.
+      and leverage. If a parent Node and child Node both have accessible content, the accessible HTML of the child node
+      will be added as a child of the primary sibling parent's AccessiblePeer.
+      Consider the following example where we have a box filled with circles and the desired a11y representation is an
+      unordered list filled with list items.
     </p>
+
+    <h3 id="scene-graph">Leveraging the scene graph</h3>
+
     <div id="example-accessible-graph" class="exampleScene" style="width: 64px; height: 64px; margin: 0 auto;"></div>
     <script type="text/javascript">
       docExample( 'example-accessible-graph', function( scene, display ) {
