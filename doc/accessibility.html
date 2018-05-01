@@ -179,18 +179,17 @@
     <div class="sublink"><a href="#focus">focus()</a></div>
     <div class="sublink"><a href="#focus">blur()</a></div>
 
-    <div class="navlink"><a href="#manipulating-pdom">Static Descriptions</a></div>
+    <div class="navlink"><a href="#manipulating-pdom">PDOM Manipulation</a></div>
+    <div class="sublink"><a href="#manipulating-pdom">es5 getters and setters</a></div>
     <div class="sublink"><a href="#accessible-name">Accessible Name</a></div>
     <div class="sublink"><a href="#accessible-name">ariaLabel</a></div>
     <div class="sublink"><a href="#accessible-name">aria-labelledby</a></div>
     <div class="sublink"><a href="#ordering">accessibleOrder</a></div>
-
-    <div class="navlink"><a href="#interactive-alerts">Interactive Alerts</a></div>
     <div class="sublink"><a href="#interactive-alerts">UtteranceQueue</a></div>
 
     <div class="navlink"><a href="#phet-info">PhET Specific Info</a></div>
-    <div class="sublink"><a href="#a11y-strings">Handling A11y Specific strings</a></div>
     <div class="sublink"><a href="#enable-a11y">Enabling A11y</a></div>
+    <div class="sublink"><a href="#a11y-strings">Handling A11y Specific strings</a></div>
     <div class="sublink"><a href="#a11y-view">The A11y View</a></div>
 
     <div class="navlink"><a href="#a11y-resources">Next Steps for Understanding</a></div>
@@ -233,30 +232,26 @@
 
     <p>
       Scenery uses HTML5 technologies (svg, canvas, webgl) to draw the display. These have very little semantic
-      data as to what is inside the rendered graphic. The PDOM ( parallel DOM (document object model)) pulls semantic
-      data from the scene graph and adds it to a separate html structure that is available for assistive technologies.
-      When we say PDOM, think an html manifestation of the graphical <code>Node</code> content in the display.
+      data as to what is inside the rendered graphic. The PDOM (parallel DOM (document object model)) pulls semantic
+      data from the scene graph and adds it to a separate HTML structure that is available for assistive technologies
+      (AT).
+      When we say PDOM, think the HTML manifestation of the graphical <code>Node</code> content in the display.
     </p>
 
     <p>
       The parallel DOM is an invisible structure that runs alongside the graphics. It is a basic HTML document that
       represents active scenery elements. It provides an interface to assistive technologies so that they have
-      a representation of the display at a given state. It is dynamic and the DOM tree will update with changes to the
-      scene. Any node that has accessible content specified will be represented in the parallel DOM. HTML
+      a representation of the display at a given state. The PDOM is dynamic and its DOM tree will update with changes
+      to the scene. Any <code>Node</code> that has accessible content specified will be represented in the parallel DOM.
+      HTML
       is used so that scenery can rely on semantic HTML and accessibility conventions of the web. This way, scenery can
       push some of
       the accessibility work load to the browser and AT for providing keyboard navigation and auditory descriptions.
     </p>
 
     <p>
-      This html acts as just another input/output modality to a simulation's model. You can interact with it to control
-      the simulation, and you can get information out of it, as the PDOM can be updated in real time in response to
-      changes
-      in the simulation.
-    </p>
-
-    <p>
-      Any Node in scenery, even those that are not visible or pickable, can have accessible content. The accessible
+      Any <code>Node</code> in scenery, even those that are not visible or pickable, can have accessible content. The
+      accessible
       content will represent the node in the parallel DOM tree.
     </p>
 
@@ -270,7 +265,7 @@
     </p>
 
     <p>
-      The following explains how to use the accessibility functionality of scenery. For more information and up-to-date
+      The following explains how to use the accessibility functionality of Scenery. For more information and up-to-date
       api
       documentation, see <a href="https://github.com/phetsims/scenery/blob/master/js/accessibility/Accessibility.js#L4">
       the source code</a>. On the side bar, options are categorized by
@@ -308,14 +303,13 @@
 
     <p>Up to this point there has been a one to one correlation of Nodes to HTML elements,
       but the a11y api supports a richer architecture to represent a <code>Node</code> in the PDOM: each node can have
-      multiple DOM Elments. A Node's HTML Elements, or the <code>Node</code>'s peer, can be thought of
+      multiple DOM Elments. A <code>Node</code>'s HTML Elements, or the <code>Node</code>'s peer, can be thought of
       as collectively equating to the <code>Node</code>. Although a <code>Node</code> has a primary DOM element, this
       is only a single element of the peer. Other DOM Elements can provide supplemental information to be conveyed
       to assistive technology. Label and description elements can be added, as well as a parent element
       to contain all DOM Element "siblings" for a Node's peer. In total a peer can have up to
       four DOM Elements: the primary sibling, label sibling, description sibling, and the container parent of these
-      siblings. Here is an example of a <code>Node</code> that uses all of it's elements to provide the fullest
-      semantic picture of the sim component to the PDOM.
+      siblings.
     </p>
 
     <p>From here on, when speaking about "siblings," we are speaking about the relationship between HTML elements in
@@ -323,6 +317,9 @@
       with an HTML Element parent called the "containerParent". Terminology is key in understanding the specifics in
       creating a PDOM.
     </p>
+
+    <p>Here is an example of a <code>Node</code> that uses all of it's elements to provide the fullest
+      semantic picture of the sim component to the PDOM.</p>
 
     <div id="example-all-siblings" class="exampleScene" style="width: 96px; height: 64px; margin: 0 auto;"></div>
     <script type="text/javascript">
@@ -353,7 +350,7 @@
     </script>
 
     <p>
-      In this example, the rectangle's primary sibling is a button with an accessible name of "Grab Magnet". It has a
+      In this example, the rectangle's primary sibling is a button with an Accessible Name of "Grab Magnet". It has a
       label
       sibling with an <code>h3</code> tag with inner content "Grab Magnet", and a description sibling with a
       <code>tagName</code> of "p" with the specified sentence.
@@ -432,11 +429,11 @@
     <h4 id="text-in-pdom">Flexibility</h4>
 
     <p>
-      The a11y api can provide lots of flexibility in how to display content in the PDOM. Each sibling of the peer is
-      has a name, but at its core it is still just an HTML element, and it can be any tag name specified. Below is an
-      example of a <code>Node</code> that is used just to add text content to the PDOM. In looking at the example,
-      remember that there are default tag names for supplementary peer Elements. (Note, as of writing this, sibling
-      tag names default to "p").
+      The a11y api can provide lots of flexibility in how to display content in the PDOM. Each sibling of the peer
+      has a name (like label or description), but at its core it is still just an HTML element, and it can be any
+      tag name specified. Below is an example of a <code>Node</code> that is used just to add text content to the
+      PDOM. In looking at the example, remember that there are default tag names for supplementary peer
+      Elements. (Note: as of writing this, sibling tag names default to "p").
     </p>
     <div id="example-lots-of-text" class="exampleScene" style="width: 64px; height: 64px; margin: 0 auto;"></div>
     <script type="text/javascript">
@@ -457,8 +454,8 @@
     </script>
 
     <p>
-      In this sense, the naming of each sibling in a bit "arbitrary," because you can use the api for what will work
-      best for the situation. Every Node does not necessarily require all four HTML
+      In this sense, the naming of the options to control each sibling in a bit "arbitrary," because you can use
+      the api for what will work best for the situation. Every Node does not necessarily require all four HTML
       Elements of its peer in the PDOM, use your judgement.
     </p>
 
@@ -512,14 +509,17 @@
 
     <h4 id="focus">Focus</h4>
 
-    <p>All interactive elements in the PDOM receive keyboard focus, but not all sim objects are interactive. For
-      example, the Sweater in BASE is a dynamic content object because it's electrons can be transferred to
-      a balloon. Even so it is not directly interacted with by the user, thus the sweater never receives focus.</p>
+    <p>All interactive elements in the PDOM receive keyboard focus, but not all objects in the display are interactive.
+      For example, using PhET Interactive Simulations, the Sweater in Balloons and Static Electricity is a dynamic
+      content object because its electrons can be transferred to a balloon. Even so it is not directly interacted
+      with by the user, thus the sweater never receives focus.</p>
     <p>
-      When an element in the PDOM is focused, a focus highlight is rendered in the simulation to support
-      keyboard navigation. For more complex interactions, type <code>input</code>, or other native, focusable
-      elements may not work. Other tag names can be focussed with the <code>focusable</code> option. This
-      will add a tab index of 0 to the element. Focusable elements can be manually focussed and blurred using the
+      When an element in the PDOM is focused, a focus highlight is automatically rendered in the display to support
+      keyboard navigation. For more complex interactions, type <code>input</code>, or other native and focusable
+      elements, may not work. Other tag names can be focused with the <code>focusable</code> option. The ARIA attribute
+      <code>role</code> can help inform the user to the custom interaction (use the <code>ariaRole</code> option). For
+      example using the ARIA "application" role has worked well for freely moving, draggable objects.
+      This will add a tab index of 0 to the element. Focusable elements can be manually focussed and blurred using the
       <code>Node.focus()</code> and <code>Node.blur()</code> functions. If a specific focus highlight is desired, a
       <code>Node</code> or <code>Shape</code> can be passed into the <code>focusHighlight</code> option.
     </p>
@@ -545,10 +545,12 @@
     </ul>
     <p>
       Up to this point these have only been offered as options, but each of these can be dynamically set also. Setting
-      any of the tagName setters to <code>null</code> will clear that element from the PDOM. If you set the
-      <code>Node.tagName = null</code>, this will clear all accessible content of the node. Please see
-      <a href="https://github.com/phetsims/scenery/blob/master/js/accessibility/Accessibility.js">the
-        Accessibility trait</a> for a complete and up-to-date list of getters/setters.
+      any of the <code>.*[tT]agName</code> setters to <code>null</code> will clear that element from the PDOM. If you
+      set the
+      <code>Node.tagName = null</code>, this will clear all accessible content of the node.</p>
+    <p>
+      Please see <a href="https://github.com/phetsims/scenery/blob/master/js/accessibility/Accessibility.js">the
+      Accessibility trait</a> for a complete and up-to-date list of getters/setters.
     </p>
 
     <h4 id="accessible-name">A note about Accessible Name</h4>
@@ -557,7 +559,7 @@
       understanding this is imperative to successfully creating an accessible PDOM. For more info see
       <a href="#accessible-name-link">background reading</a> about the topic.
     </p>
-    <p>Here is an overview about the various ways to set the accessible name via the Scenery a11y api.
+    <p>Here is an overview about the various ways to set the Accessible Name via the Scenery a11y api.
     </p>
     <ul>
       <li>Element's Content: Example <code>&lt;button&gt;My Button&lt;/button&gt;</code>. To accomplish this with the
@@ -565,8 +567,8 @@
       </li>
       <li><code>label</code> Element: a label element can be associated with an interactive <code>input</code> type
         that does not have inner content in order to provide the input with an
-        accessible name. A label is preferred naming
-        method when the display interaction has visible text-based identifying it on screen. A label element can only
+        accessible name. A label is the preferred naming
+        method when the display's interaction has visible text-based identifying it on screen. A label element can only
         be associated with "labelable" elements like
         <a href="http://w3c.github.io/html/sec-forms.html#labelable-element.">typical interactive HTML elements</a>.
         To add an Accessible Name via a <code>label</code>, set the <code>labelTagName</code> to "label" and the "for"
@@ -668,6 +670,13 @@
         Conventionally, it is preferred to specify a11y parameters as options whenever possible, and only use the
         setters if the situation requires it. Please label a11y specific options separately with a <code>&#47;&#47;
         a11y</code> comment as a header.
+      </li>
+      <li>
+        The HTML of the PDOM acts as just another input/output modality to a PhET sim's model. You can interact with it
+        to control
+        the simulation, and you can get information out of it, as the PDOM can be updated in real time in response to
+        changes
+        in the simulation.
       </li>
     </ul>
 
