@@ -609,7 +609,7 @@
     <h2 id="phet-info">PhET Specific Information</h2>
     <p>The following information is specific to PhET's work with accessibility and this api.</p>
 
-    <h3 id="enable-a11y">Enabling A11y</h3>
+    <h4 id="enable-a11y">Enabling A11y</h4>
     <p>
       Accessibility features are hidden behind an <code>?accessibility</code> query parameter. This hides a11y features
       until they are ready for production. When ready, accessibility can be enabled by default by adding
@@ -617,9 +617,9 @@
       option <code>accessibility: true</code> to <code>{{sim}}-main.js</code>.
     </p>
 
-    <h3 id="a11y-strings">A11y Specific Strings</h3>
+    <h4 id="a11y-strings">A11y Specific Strings</h4>
     <p>Accessibility specific strings are not yet translatable. That being said PhET has every intention of getting to
-      the point where they are, we just don't have the infrastructure set up yet. Keeping that in mind, please follow
+      the point, we just don't have the infrastructure set up yet. Keeping that in mind, please follow
       the
       following conventions. This will help us greatly when it comes time to move these a11y strings into the
       translatable
@@ -634,20 +634,21 @@
           <li>Have variable names that end in "String" when declaring.</li>
           <li>Declare all a11y strings at the top of the file (like their own module)</li>
           <li>String keys should hold an object with a "value" key that stores the a11y string. This is the same
-            convention as with other PhET strings, but see <code>OhmsLawA11yStrings.js</code> for an example.
+            convention as with other PhET strings.
           </li>
         </ul>
       </li>
+      <li>See <code>OhmsLawA11yStrings.js</code> for an model example.</li>
     </ul>
 
-    <h3>Flag an a11y sim</h3>
+    <h4>Beginning a11y work on a sim</h4>
     <p>
       When beginning a11y work in a simulation, add <code>"accessible": true</code> to the sim's package.json.
-      Bayes will then add the simulation to perennial/data/accessibility list, and generate an a11y-view HTML document
-      to assist with development.
+      Then regenerate the lists to add the simulation to perennial/data/accessibility list, and generate an
+      a11y-view HTML document to assist with development (<code>grunt generate-a11y-view-html</code>).
     </p>
 
-    <h3 id="a11y-view">The a11y-view</h3>
+    <h4 id="a11y-view">The a11y-view</h4>
     <p>
       The 'A11y view' is an HTML page that runs the simulation in an iframe and shows an up-to-date copy of the PDOM
       next to the sim. It can be used to assist in development of accessibility features by allowing you to see the
@@ -655,16 +656,10 @@
       by Bayes, but it can be generated manually with <code>grunt generate-a11y-view-html</code> in the sim repo.
     </p>
 
-    <h3>Other misc notes for PhET Devs</h3>
+    <h4>Other misc notes for PhET Devs</h4>
     <ul>
       <li>As a sim developer, it is your responsibility to make sure that each interactive
         element has an accessible name.
-      </li>
-      <li>About aria-labelledby: In a PhET Sim one might want to associate a heading element with a region or
-        group. For example, an H2 heading is associated with the Play Area region through an
-        <code>aria-labelledby</code> attribute.
-        With this association the H2's content, "Play Area", provides the region with an accessible name in the
-        Accessibility Tree which is accessed by assistive technology.
       </li>
       <li>
         Conventionally, it is preferred to specify a11y parameters as options whenever possible, and only use the
@@ -678,6 +673,13 @@
         changes
         in the simulation.
       </li>
+      <li>About aria-labelledby: In a PhET Sim one might want to associate a heading element with a region or
+        group. For example, an H2 heading is associated with the Play Area region through an
+        <code>aria-labelledby</code> attribute.
+        With this association the H2's content, "Play Area", provides the region with an accessible name in the
+        Accessibility Tree which is accessed by assistive technology.
+      </li>
+
     </ul>
 
     <h2 id="a11y-resources">Next Steps for Understanding</h2>
@@ -685,16 +687,18 @@
       update this document accordingly to help those who follow in your footsteps. Also @terracoda is a great
       resource on questions about ARIA and accessibility in general.
     </p>
-    <h3>PhET Published Resources</h3>
+    <h4>PhET Published Resources</h4>
     <ul>
       <li><a href="https://drive.google.com/file/d/0B44Uycdx6JGdRFpXcDJqZl9BUk0/view">Screen Reader Support for a
         Complex Interactive Science Simulation</a></li>
       <li><a href="http://scholarworks.csun.edu/handle/10211.3/190214">Description Strategies to Make an Interactive
         Science Simulation Accessible</a></li>
     </ul>
-    <h3>Source Code</h3>
+    <h4>Source Code</h4>
     <p>For up-to-date documentation and the latest API for accessibility in Scenery, please visit <a
       href="https://github.com/phetsims/scenery/blob/master/js/accessibility/Accessibility.js">the source code</a>.
+
+    <p>Good luck and happy coding!</p>
   </div>
 
 </div>
