@@ -316,7 +316,7 @@
         a11yNode.children = [ southPole, northPole ];
 
         scene.addChild( a11yNode );
-        a11yNode.addChild( new scenery.Text( 'Magnet', { stroke: 'black', center: a11yNode.center } ) );
+        a11yNode.addChild( new scenery.Text( 'North South Magnet', { stroke: 'black', center: a11yNode.center } ) );
         display.updateOnRequestAnimationFrame();
         /*END*/
       } );
@@ -342,6 +342,7 @@
         this with
         <code>appendLabel</code> and <code>appendDescription</code> options.
       </li>
+      <li>Note that the Text node "Magnet" has no accessible content and so it does not appear anywhere in the PDOM.</li>
     </ul>
 
     <h3 id="ex-basic">Leveraging the scene graph</h3>
