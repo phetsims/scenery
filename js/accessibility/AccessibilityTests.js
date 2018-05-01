@@ -107,7 +107,7 @@ define( function( require ) {
     // revert tag name to input, should throw an error
     window.assert && assert.throws( function() {
       b.tagName = 'input';
-    }, /.*/, 'error thrown after reverting tag name to input' );
+    }, /.*/, 'error thrown after setting tagName to input on Node with innerContent.' );
   } );
 
 
