@@ -148,7 +148,7 @@
 <div class="row-fluid">
 
   <p style="text-align: center; color: #d00;">NOTE: This document is still a work in progress!</p>
-  
+
   <div class="span3" id="apiList">
     <div class="ph2"><a href="#overall-structure">Overall Code Structure</a></div>
   </div>
@@ -162,6 +162,11 @@
       added to the scene graph. The PDOM elements of each <code>Node</code> are created and handled with AccessiblePeer.
       There is
       a 1x1 relationship of AccessibleInstance and AccessiblePeer.</p>
+
+    <p>
+      The AccessiblePeer is the type that manages all HTML Elements. The Node is then thought to be "represented" in the
+      PDOM by the AccessiblePeer's HTML Elements.
+    </p>
   </div>
 </div>
 

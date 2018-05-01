@@ -177,14 +177,14 @@
     <div class="sublink"><a href="#focus">focus()</a></div>
     <div class="sublink"><a href="#focus">blur()</a></div>
 
-    <div class="navlink"><a href="#static-descriptions">Static Descriptions</a></div>
+    <div class="navlink"><a href="#manipulating-pdom">Static Descriptions</a></div>
     <div class="sublink"><a href="#accessible-name">Accessible Name</a></div>
     <div class="sublink"><a href="#accessible-name">ariaLabel</a></div>
     <div class="sublink"><a href="#accessible-name">aria-labelledby</a></div>
     <div class="sublink"><a href="#ordering">accessibleOrder</a></div>
 
     <div class="navlink"><a href="#interactive-alerts">Interactive Alerts</a></div>
-    <div class="sublink"><a href="#dynamic-descriptions">UtteranceQueue</a></div>
+    <div class="sublink"><a href="#interactive-alerts">UtteranceQueue</a></div>
 
     <div class="navlink"><a href="#phet-info">PhET Specific Info</a></div>
     <div class="sublink"><a href="#a11y-strings">Handling A11y Specific strings</a></div>
@@ -204,16 +204,27 @@
     </p>
 
     <ul>
-      <li><a href="https://developer.mozilla.org/en-US/docs/Learn/Accessibility/HTML">Accessible HTML</a></li>
-      <li><a href="https://developers.google.com/web/fundamentals/accessibility/semantics-builtin/the-accessibility-tree">The accessibility tree</a></li>
-      <li><a href="https://developer.paciellogroup.com/blog/2017/04/what-is-an-accessible-name/">Accessible name</a></li>
-      <li><a href="https://developer.mozilla.org/en-US/docs/Web/Accessibility/ARIA">ARIA</a></li>
+      <li><a href="https://developer.mozilla.org/en-US/docs/Learn/Accessibility/HTML">Accessible HTML</a> &ndash; a
+        general overview
+      </li>
+      <li><a
+        href="https://developers.google.com/web/fundamentals/accessibility/semantics-builtin/the-accessibility-tree">The
+        Accessibility Tree</a> &ndash; in the browser
+      </li>
+      <li><a id="accessible-name-link"
+             href="https://developer.paciellogroup.com/blog/2017/04/what-is-an-accessible-name/">Accessible Name</a>
+        &ndash; element identification
+      </li>
+      <li><a href="https://developer.mozilla.org/en-US/docs/Web/Accessibility/ARIA">ARIA</a> &ndash; Accessible Rich
+        Internet Applications
+      </li>
     </ul>
     <p>Please note that some of the information in this document is specific to PhET Interactive Simulations.</p>
 
     <h2>In-Depth Information</h2>
     <p>
-      For more information on the implementation of accessibility in Scenery, see the <a href="accessibility-implementation">Accessibility Implementation Notes</a>.
+      For more information on the implementation of accessibility in Scenery, see the <a
+      href="accessibility-implementation">Accessibility Implementation Notes</a>.
     </p>
 
     <h2 id="PDOM">The Parallel DOM</h2>
@@ -230,13 +241,15 @@
       represents active scenery elements. It provides an interface to assistive technologies so that they have
       a representation of the display at a given state. It is dynamic and the DOM tree will update with changes to the
       scene. Any node that has accessible content specified will be represented in the parallel DOM. HTML
-      is used so that scenery can rely on semantic HTML and accessibility conventions of the web. This way, scenery can push some of
+      is used so that scenery can rely on semantic HTML and accessibility conventions of the web. This way, scenery can
+      push some of
       the accessibility work load to the browser and AT for providing keyboard navigation and auditory descriptions.
     </p>
 
     <p>
       This html acts as just another input/output modality to a simulation's model. You can interact with it to control
-      the simulation, and you can get information out of it, as the PDOM can be updated in real time in response to changes
+      the simulation, and you can get information out of it, as the PDOM can be updated in real time in response to
+      changes
       in the simulation.
     </p>
 
@@ -255,9 +268,10 @@
     </p>
 
     <p>
-      The following explains how to use the accessibility functionality of scenery. For more information and up-to-date api
+      The following explains how to use the accessibility functionality of scenery. For more information and up-to-date
+      api
       documentation, see <a href="https://github.com/phetsims/scenery/blob/master/js/accessibility/Accessibility.js#L4">
-        the source code</a>. On the side bar, options are categorized by
+      the source code</a>. On the side bar, options are categorized by
       where they are introduced and explained. In this file there is little "traditional" documentation, rather
       example based explanation. The source code is the best place for specifics and implementation.
     </p>
@@ -290,15 +304,25 @@
 
     <h3 id="ex-all-siblings">Multiple DOM Elements per Node</h3>
 
-    <p>Although a Node has a primary DOM element that represents it in the PDOM, other DOM Elements can provide
-      supplemental information to convey to assistive technology. Label and Description elements can be added, as well
-      as a parent element to contain all DOM Element siblings for a node. In total a Node can have up to four DOM
-      Elements: the primary sibling, label sibling, description sibling, and the container parent. Here is an
-      example of a <code>Node</code> that uses all of it's elements to provide the fullest semantic picture of the sim
-      to the PDOM.
+    <p>Up to this point there has been a one to one correlation of Nodes to HTML elements,
+      but the a11y api supports a richer architecture to represent a <code>Node</code> in the PDOM: each node can have
+      multiple DOM Elments. A Node's HTML Elements, or the <code>Node</code>'s peer, can be thought of
+      as collectively equating to the <code>Node</code>. Although a <code>Node</code> has a primary DOM element, this
+      is only a single element of the peer. Other DOM Elements can provide supplemental information to be conveyed
+      to assistive technology. Label and description elements can be added, as well as a parent element
+      to contain all DOM Element "siblings" for a Node's peer. In total a peer can have up to
+      four DOM Elements: the primary sibling, label sibling, description sibling, and the container parent of these
+      siblings. Here is an example of a <code>Node</code> that uses all of it's elements to provide the fullest
+      semantic picture of the sim component to the PDOM.
     </p>
 
-    <div id="example-all-siblings" class="exampleScene" style="width: 64px; height: 64px; margin: 0 auto;"></div>
+    <p>From here on, when speaking about "siblings," we are speaking about the relationship between HTML elements in
+      the PDOM. These Elements are not "siblings to the <code>Node</code>," but instead only siblings to each other,
+      with an HTML Element parent called the "containerParent". Terminology is key in understanding the specifics in
+      creating a PDOM.
+    </p>
+
+    <div id="example-all-siblings" class="exampleScene" style="width: 96px; height: 64px; margin: 0 auto;"></div>
     <script type="text/javascript">
       docExample( 'example-all-siblings', function( scene, display ) {
         /*START*/
@@ -310,12 +334,13 @@
           labelTagName: 'h3',
           labelContent: 'Magnet',
           descriptionTagName: 'p',
-          descriptionContent: 'Magnet has a grey south pole on the left and a red north pole on the right.'
+          descriptionContent: 'Magnet has a grey south pole on the left and a red north pole on the right.',
+          containerTagName: 'section'
         } );
 
         // the visual representation of the magnet
-        var southPole = new scenery.Rectangle( 0, 0, 32, 64, { fill: 'grey' } );
-        var northPole = new scenery.Rectangle( 32, 0, 32, 64, { fill: 'red' } );
+        var southPole = new scenery.Rectangle( 0, 0, 48, 64, { fill: 'grey' } );
+        var northPole = new scenery.Rectangle( 48, 0, 48, 64, { fill: 'red' } );
         a11yNode.children = [ southPole, northPole ];
 
         scene.addChild( a11yNode );
@@ -326,40 +351,44 @@
     </script>
 
     <p>
-      In this example, the rectangle is represented as a button with accessible name of "Grab Magnet". It has a label
-      sibling with an h3 tag with inner content "Grab Magnet", and a description sibling with tagname "p" with the
-      specified sentence.
+      In this example, the rectangle's primary sibling is a button with an accessible name of "Grab Magnet". It has a
+      label
+      sibling with an <code>h3</code> tag with inner content "Grab Magnet", and a description sibling with a
+      <code>tagName</code> of "p" with the specified sentence.
     </p>
 
     <p>A few notes here:</p>
     <ul>
-      <li id="container-tag">Although a container parent wasn't explicitly added, the a11y api automatically adds a
-        container when there is
-        more than one sibling. The default <code>containerTagName</code> is stored in <code>AccessibilityUtil</code>.
-      </li>
-      <li>Taking the above bullet one step further, description and label tags have defaults too (see
-        <code>AccessibilityUtil</code>).
-        Specifying a "*Content" option without the "*TagName" option will produce an element of the default.
+      <li>All supplemental HTML Elements (container, description and label) have default tags in the a11y api.
+        Specifying a "*Content" option without the "*TagName" option will produce an element of the default. See
+        <code>AccessibilityUtil</code> for the default tag names.
       </li>
       <li id="append-siblings">By default the description and label tags come before the primary sibling, you can change
         this with
         <code>appendLabel</code> and <code>appendDescription</code> options.
       </li>
-      <li>Note that the Text node "North South Magnet" has no accessible content and so it does not appear anywhere in the PDOM.</li>
+      <li>The <code>Text</code> node "North South Magnet" has no accessible content and so it does not appear anywhere
+        in the PDOM.
+      </li>
     </ul>
 
-    <h2 id="pdom-structure">The Structure of the PDOM</h2>
+    <h3 id="pdom-structure">The Structure of the PDOM</h3>
 
     <p>
-      By default, the PDOM hierarchy will match the hierarchy of the scene graph. This is an important feature to consider
-      and leverage. If a parent Node and child Node both have accessible content, the accessible HTML of the child node
-      will be added as a child of the primary sibling parent's AccessiblePeer.
+      By default, the PDOM hierarchy will match the hierarchy of the scene graph. This is an important feature to
+      consider. If a parent <code>Node</code> and child <code>Node</code> both have accessible content, then, in the
+      PDOM, the accessible HTML
+      of the child node will be added as a child of the parent's primary sibling. In scenery code, this is
+      managed by <code>AccessiblePeer</code>, a type that stores and controls all HTML Elements for a given
+      <code>Node</code>.
+    </p>
+
+    <h4 id="scene-graph">Leveraging the Scene Graph</h4>
+
+    <p>
       Consider the following example where we have a box filled with circles and the desired a11y representation is an
       unordered list filled with list items.
     </p>
-
-    <h3 id="scene-graph">Leveraging the scene graph</h3>
-
     <div id="example-accessible-graph" class="exampleScene" style="width: 64px; height: 64px; margin: 0 auto;"></div>
     <script type="text/javascript">
       docExample( 'example-accessible-graph', function( scene, display ) {
@@ -371,7 +400,7 @@
           fill: 'lightblue',
 
           // a11y
-          tagName: 'ul',
+          tagName: 'ul'
         } );
         scene.addChild( rectangle );
 
@@ -380,7 +409,7 @@
           var innerContent = 'Circle ' + i;
           rectangle.addChild( new scenery.Circle( 3, {
             fill: 'red',
-            center: new dot.Vector2( Math.random() * dimension,  Math.random() * dimension ),
+            center: new dot.Vector2( Math.random() * dimension, Math.random() * dimension ),
 
             // a11y
             tagName: 'li',
@@ -393,8 +422,8 @@
     </script>
 
     <p>
-      In this example, scenery automatically structured the PDOM such that the list items are children of the unordered list to
-      match the hierarchy of the scene graph.
+      In this example, scenery automatically structured the PDOM such that the list items are children of the unordered
+      list to match the hierarchy of the scene graph.
     </p>
 
     <h3 id="keyboard-nav">Keyboard Navigation</h3>
@@ -466,44 +495,86 @@
     </p>
 
 
-    <h3 id="static-descriptions">Manipulating the Parallel DOM</h3>
+    <h3 id="manipulating-pdom">Manipulating the Parallel DOM</h3>
     <p>Most properties of the <code>Accessibility.js</code> trait are mutable so that the Parallel DOM can update
-    with the graphical scene. Here are a few examples:</p>
+      with the graphical scene. Here are a few examples:</p>
     <ul>
-      <li><code>setTagName</code>: set the tag name of the primary DOM sibling of a node</li>
-      <li><code>setLabelTagName</code>: set the tag name of the label DOM sibling for a node</li>
-      <li><code>setDescriptionTagName</code>: set the tag name for the description DOM sibling of a node</li>
-      <li><code>setInnerContent</code>: set the accessible name of primary DOM element of a node</li>
-      <li><code>setLabelContent</code>: set the accessible name of label sibling for a node</li>
-      <li><code>setDescriptionContent</code>: set the accessible name of description sibling for a node</li>
-      <li><code>setAriaRole</code>: set the ARIA role for the primary DOM sibling for a node</li>
+      <li><code>tagName</code>: set&#47;get the tag name of the primary DOM sibling of a node</li>
+      <li><code>labelTagName</code>: set&#47;get the tag name of the label DOM sibling for a node</li>
+      <li><code>descriptionTagName</code>: set&#47;get the tag name for the description DOM sibling of a node</li>
+      <li><code>innerContent</code>: set&#47;get the text content of primary sibling of a node</li>
+      <li><code>labelContent</code>: set&#47;get the text content of label sibling for a node</li>
+      <li><code>descriptionContent</code>: set&#47;get the text content of description sibling for a node</li>
+      <li><code>ariaRole</code>: set&#47;get the ARIA role for the primary DOM sibling for a node</li>
     </ul>
     <p>
-      Please see <a href="https://github.com/phetsims/scenery/blob/master/js/accessibility/Accessibility.js">the Accessibility trait</a> for a complete and up-to-date list of getters/setters.
+      Setting any of the tagName setters to <code>null</code> will clear that element from the PDOM. If you set the
+      <code>Node.tagName = null</code>, this will clear all accessible content of the node. Please see
+      <a href="https://github.com/phetsims/scenery/blob/master/js/accessibility/Accessibility.js">the
+        Accessibility trait</a> for a complete and up-to-date list of getters/setters.
     </p>
+
+    <h4 id="accessible-name">A note about Accessible Name</h4>
+    <p>The Accessible Name of an element is how assistive technology identifies an element in the browser's
+      accessibility tree. Diving into the nuance of this idea goes beyond the scope of this document, but
+      understanding this is imperative to successfully creating an accessible PDOM. For more info see
+      <a href="#accessible-name-link">background reading</a> about the topic.
+    </p>
+    <p>Here is an overview about the various ways to set the accessible name via the Scenery a11y api.
+    </p>
+    <ul>
+      <li>Element's Content: Example <code>&lt;button&gt;My Button&lt;/button&gt;</code>. To accomplish this with the
+        a11y api use <code>innerContent</code>.
+      </li>
+      <li><code>label</code> Element: a label element can be associated with an interactive <code>input</code> type
+        that does not have inner content in order to provide the input with an
+        accessible name. A label is preferred naming
+        method when the display interaction has visible text-based identifying it on screen. A label element can only
+        be associated with "labelable" elements like
+        <a href="http://w3c.github.io/html/sec-forms.html#labelable-element.">typical interactive HTML elements</a>.
+        To add an Accessible Name via a <code>label</code>, set the <code>labelTagName</code> to "label" and the "for"
+        attribute will automatically be filled in to point to the primary sibling.
+      </li>
+      <li><code>aria-label</code> Attribute: an ARIA attribute that can provide an accessible name. For the a11y
+        api use the <code>ariaLabel</code> option to set the value of said attribute on the primary DOM Element.
+      </li>
+      <li>
+        <code>aria-labelledby</code> Attribute: this can be used to associate an HTML
+        element other than the label element to another element. The elements do not have to be right beside each
+        other. <strong>TODO: the a11y api docs to come. Also
+        add describedby? see <a href="https://github.com/phetsims/scenery/issues/701">phetsims&#47;scenery&#35;701</a>
+      </strong>
+      </li>
+    </ul>
 
     <h4 id="ordering">Ordering</h4>
     To manipulate the order in the PDOM, use <code>Node.accessibleOrder = []</code>. As of this writing,
     <code>accessibleOrder</code> only supports ordering of direct children. Whatever is specified by the option will go
     first, followed by all of children in scene graph rendering order. Currently there is work in progress to support
     the ordering of accessible subtrees, not just children, see
-    <a href="https://github.com/phetsims/scenery-phet/issues/365">this github issue</a> for more information.
+    <a href="https://github.com/phetsims/scenery-phet/issues/365">phetsims&#47;scenery&#35;365</a> for more information.
     <strong>TODO: update doc on completiong of that issue</strong>
 
     <h4 id="interactive-alerts">Interactive Alerts</h4>
 
     <p>
-      All interactive alerts are powered with the <a href="https://developer.mozilla.org/en-US/docs/Web/Accessibility/ARIA/ARIA_Live_Regions">aria-live attribute</a>. PhET manages alerts in a custom queue, see <a href="https://github.com/phetsims/scenery-phet/blob/master/js/accessibility/utteranceQueue.js">utteranceQueue.js</a> (note this is in repo scenery-phet) for more information. All
-      PhET alerts should go through utteranceQueue, <code>aria-live</code> should not be added to elements in the parallel DOM.
+      All interactive alerts are powered with the <a
+      href="https://developer.mozilla.org/en-US/docs/Web/Accessibility/ARIA/ARIA_Live_Regions">aria-live attribute</a>.
+      PhET manages alerts in a custom queue, see <a
+      href="https://github.com/phetsims/scenery-phet/blob/master/js/accessibility/utteranceQueue.js">utteranceQueue.js</a>
+      (note this is in repo scenery-phet) for more information. All
+      PhET alerts should go through utteranceQueue, <code>aria-live</code> should not be added to elements in the
+      parallel DOM.
     </p>
 
     <h2 id="phet-info">PhET Specific Information</h2>
-    <p>The following information is specific to PhET's work with accessibility.</p>
+    <p>The following information is specific to PhET's work with accessibility and this api.</p>
 
     <h3 id="enable-a11y">Enabling A11y</h3>
     <p>
       Accessibility features are hidden behind an <code>?accessibility</code> query parameter. This hides a11y features
-      until they are ready for production. When ready, accessibility can be enabled by default by adding <code>Sim</code>
+      until they are ready for production. When ready, accessibility can be enabled by default by adding
+      <code>Sim</code>
       option <code>accessibility: true</code> to <code>{{sim}}-main.js</code>.
     </p>
 
@@ -545,6 +616,24 @@
       by Bayes, but it can be generated manually with <code>grunt generate-a11y-view-html</code> in the sim repo.
     </p>
 
+    <h3>Other misc notes for PhET Devs</h3>
+    <ul>
+      <li>As a sim developer, it is your responsibility to make sure that each interactive
+        element has an accessible name.
+      </li>
+      <li>About aria-labelledby: In a PhET Sim one might want to associate a heading element with a region or
+        group. For example, an H2 heading is associated with the Play Area region through an
+        <code>aria-labelledby</code> attribute.
+        With this association the H2's content, "Play Area", provides the region with an accessible name in the
+        Accessibility Tree which is accessed by assistive technology.
+      </li>
+      <li>
+        Conventionally, it is preferred to specify a11y parameters as options whenever possible, and only use the
+        setters if the situation requires it. Please label a11y specific options separately with a <code>&#47;&#47;
+        a11y</code> comment as a header.
+      </li>
+    </ul>
+
     <h2 id="a11y-resources">Next Steps for Understanding</h2>
     <p>Please discuss developer related questions or problems with @jessegreenberg, @zepumph, or @mbarlow12 and
       update this document accordingly to help those who follow in your footsteps. Also @terracoda is a great
@@ -558,7 +647,8 @@
         Science Simulation Accessible</a></li>
     </ul>
     <h3>Source Code</h3>
-    <p>For up-to-date documentation and the latest API for accessibility in Scenery, please visit <a href="https://github.com/phetsims/scenery/blob/master/js/accessibility/Accessibility.js">the source code</a>.
+    <p>For up-to-date documentation and the latest API for accessibility in Scenery, please visit <a
+      href="https://github.com/phetsims/scenery/blob/master/js/accessibility/Accessibility.js">the source code</a>.
   </div>
 
 </div>
