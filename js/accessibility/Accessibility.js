@@ -469,6 +469,25 @@ define( function( require ) {
         get accessibleInputListeners() { return this.getAccessibleInputListeners(); },
 
         /**
+         * Remove all listeners on the node observing accessible input.
+         * @public
+         */
+        removeAllAccessibleInputListeners: function() {
+          while ( this._accessibleInputListeners.length > 0 ) {
+            this.removeAccessibleInputListener( this._accessibleInputListeners[ 0 ] );
+          }
+        },
+
+        /**
+         * Dispose accessibility by removing all listeners on this node for accessible input. Accessibility is disposed
+         * by calling Node.dispose(), so this function is scenery-internal.
+         * @public (scenery-internal)
+         */
+        disposeAccessibility: function() {
+          this.removeAllAccessibleInputListeners();
+        },
+
+        /**
          * Get whether this node's primary DOM element currently has focus.
          * @public
          *
