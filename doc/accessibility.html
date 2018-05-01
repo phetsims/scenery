@@ -164,6 +164,8 @@
     <div class="sublink"><a href="#append-siblings">appendLabel</a></div>
     <div class="sublink"><a href="#append-siblings">appendDescription</a></div>
 
+    <div class="navlink"><a href="#scene-graph">Leveraging the Scene Graph</a></div>
+
     <div class="navlink"><a href="#keyboard-nav">Keyboard Navigation</a></div>
     <div class="sublink"><a href="#input">inputType</a></div>
     <div class="sublink"><a href="#input">inputValue</a></div>
@@ -345,7 +347,7 @@
       <li>Note that the Text node "Magnet" has no accessible content and so it does not appear anywhere in the PDOM.</li>
     </ul>
 
-    <h3 id="ex-basic">Leveraging the scene graph</h3>
+    <h3 id="scene-graph">Leveraging the scene graph</h3>
 
     <p>
       By default, the PDOM hierarchy will match the hierarchy of the scene graph. This is an important feature to consider
@@ -415,7 +417,7 @@
     <script type="text/javascript">
       docExample( 'example-input-type', function( scene, display ) {
         /*START*/
-        var a11yNode = new scenery.Node( {
+        var a11yNode = new scenery.Rectangle( 0, 0, 64, 64, {
           fill: 'blue',
 
           // a11y
