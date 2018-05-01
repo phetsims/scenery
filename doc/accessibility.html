@@ -160,11 +160,13 @@
     <div class="sublink"><a href="#ex-all-siblings">labelContent</a></div>
     <div class="sublink"><a href="#ex-all-siblings">descriptionTagName</a></div>
     <div class="sublink"><a href="#ex-all-siblings">descriptionContent</a></div>
-    <div class="sublink"><a href="#container-tag">containerTagName</a></div>
+    <div class="sublink"><a href="#ex-all-siblings">containerTagName</a></div>
     <div class="sublink"><a href="#append-siblings">appendLabel</a></div>
     <div class="sublink"><a href="#append-siblings">appendDescription</a></div>
 
-    <div class="navlink"><a href="#scene-graph">Leveraging the Scene Graph</a></div>
+    <div class="navlink"><a href="#pdom-structure">The Structure Of The PDOM</a></div>
+    <div class="sublink"><a href="#scene-graph">example: leveraging the scene graph</a></div>
+    <div class="sublink"><a href="#text-in-pdom">example: PDOM flexibility</a></div>
 
     <div class="navlink"><a href="#keyboard-nav">Keyboard Navigation</a></div>
     <div class="sublink"><a href="#input">inputType</a></div>
@@ -426,6 +428,40 @@
       list to match the hierarchy of the scene graph.
     </p>
 
+
+    <h4 id="text-in-pdom">Flexibility</h4>
+
+    <p>
+      The a11y api can provide lots of flexibility in how to display content in the PDOM. Each sibling of the peer is
+      has a name, but at its core it is still just an HTML element, and it can be any tag name specified. Below is an
+      example of a <code>Node</code> that is used just to add text content to the PDOM. In looking at the example,
+      remember that there are default tag names for supplementary peer Elements. (Note, as of writing this, sibling
+      tag names default to "p").
+    </p>
+    <div id="example-lots-of-text" class="exampleScene" style="width: 64px; height: 64px; margin: 0 auto;"></div>
+    <script type="text/javascript">
+      docExample( 'example-lots-of-text', function( scene, display ) {
+        /*START*/
+        var a11yNode = new scenery.Node( {
+
+          // a11y
+          tagName: 'p',
+          innerContent: 'Don\'t forget about Chemistry too!',
+          labelContent: 'This is paragraph 1. Physics is the best, and this Node is going to tell the world!',
+          descriptionContent: 'This is paragraph 2. Math is also pretty cool.'
+        } );
+        scene.addChild( a11yNode );
+        display.updateOnRequestAnimationFrame();
+        /*END*/
+      } );
+    </script>
+
+    <p>
+      In this sense, the naming of each sibling in a bit "arbitrary," because you can use the api for what will work
+      best for the situation. Every Node does not necessarily require all four HTML
+      Elements of its peer in the PDOM, use your judgement.
+    </p>
+
     <h3 id="keyboard-nav">Keyboard Navigation</h3>
     <p>
       The a11y api supports keyboard navigation only on the Node's primary sibling.
@@ -508,7 +544,8 @@
       <li><code>ariaRole</code>: set&#47;get the ARIA role for the primary DOM sibling for a node</li>
     </ul>
     <p>
-      Setting any of the tagName setters to <code>null</code> will clear that element from the PDOM. If you set the
+      Up to this point these have only been offered as options, but each of these can be dynamically set also. Setting
+      any of the tagName setters to <code>null</code> will clear that element from the PDOM. If you set the
       <code>Node.tagName = null</code>, this will clear all accessible content of the node. Please see
       <a href="https://github.com/phetsims/scenery/blob/master/js/accessibility/Accessibility.js">the
         Accessibility trait</a> for a complete and up-to-date list of getters/setters.
