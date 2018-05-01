@@ -392,18 +392,16 @@
     </p>
 
     <h3 id="keyboard-nav">Keyboard Navigation</h3>
-    <p>Part of making a PhET simulation accessible is adding keyboard navigation to it. This is an essential part
-      of the process because it vastly increased the number of input devices that can interact with a phetsim.
+    <p>
       The a11y api supports keyboard navigation only on the Node's primary sibling.
       A general philosophy to follow is to have the DOM Element hold as much semantic information as possible.
       For example, if there is a button in the sim, it is an obvious choice to use a "button" element as the
       Node's primary sibling tag. Another solution that works, although it is much worse, would be to choose
-      a div, and then add listeners manually to control that div like a button. In general try to pick
-      semantic html elements that will assist in conveying as much meaning as possible to the user. Although
-      it is possible to use the ARIA spec to improve accessible experience, it should not be thought of as
-      the first answer (<a href="https://developer.mozilla.org/en-US/docs/Web/Accessibility/ARIA">further
-        reading</a> on ARIA will be useful to know). Addressing semantics any further goes beyond
-      the scope of this document.
+      a div, and then add listeners manually to control that div like a button. As a "div", an AT will not be able to
+      tell the user what the element is. In general try to pick semantic html elements that will assist in conveying
+      as much meaning as possible to the user. Although it is possible to use the ARIA spec to improve accessible
+      experience, it should be used as little as possible because it has minimal support.
+      Addressing semantics any further goes beyond the scope of this document.
     </p>
 
     <h4 id="input">Input types</h4>
