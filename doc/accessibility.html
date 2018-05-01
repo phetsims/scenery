@@ -186,11 +186,12 @@
     <div class="navlink"><a href="#interactive-alerts">Interactive Alerts</a></div>
     <div class="sublink"><a href="#dynamic-descriptions">UtteranceQueue</a></div>
 
+    <div class="navlink"><a href="#phet-info">PhET Specific Info</a></div>
+    <div class="sublink"><a href="#a11y-strings">Handling A11y Specific strings</a></div>
+    <div class="sublink"><a href="#enable-a11y">Enabling A11y</a></div>
+    <div class="sublink"><a href="#a11y-view">The A11y View</a></div>
 
-    <div class="ph2"><a href="#a11y-strings">Handling A11y Specific strings</a></div>
-    <div class="ph2"><a href="#a11y-resources">Resources for Further Understanding</a></div>
-
-
+    <div class="navlink"><a href="#a11y-resources">Next Steps for Understanding</a></div>
   </div>
   <div class="span6">
 
@@ -492,10 +493,10 @@
       PhET alerts should go through utteranceQueue, <code>aria-live</code> should not be added to elements in the parallel DOM.
     </p>
 
-    <h2>PhET Specific Information</h2>
+    <h2 id="phet-info">PhET Specific Information</h2>
     <p>The following information is specific to PhET's work with accessibility.</p>
 
-    <h3>Enabling A11y</h3>
+    <h3 id="enable-a11y">Enabling A11y</h3>
     <p>
       Accessibility features are hidden behind an <code>?accessibility</code> query parameter. This hides a11y features
       until they are ready for production. When ready, accessibility can be enabled by default by adding <code>Sim</code>
@@ -532,7 +533,7 @@
       to assist with development.
     </p>
 
-    <h3>The a11y-view</h3>
+    <h3 id="a11y-view">The a11y-view</h3>
     <p>
       The 'A11y view' is an HTML page that runs the simulation in an iframe and shows an up-to-date copy of the PDOM
       next to the sim. It can be used to assist in development of accessibility features by allowing you to see the
