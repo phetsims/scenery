@@ -501,6 +501,11 @@ define( function( require ) {
     // setting the label redrew the pdom, so get a reference to the new dom element.
     getPrimarySiblingElementByNode( a1 ).click();
     assert.ok( a1.labelContent === TEST_LABEL_2, 'click should not change label' );
+
+    // verify disposal removes accessible input listeners
+    a1.addAccessibleInputListener( listener );
+    a1.dispose();
+    assert.ok( a1.hasAccessibleInputListener( listener ) === false, 'disposal removed accessible input listeners' );
   } );
 
   QUnit.test( 'Next/Previous focusable', function( assert ) {

@@ -4939,6 +4939,9 @@ define( function( require ) {
       // See constructor for Node disposal checks
       this._isDisposed = true;
 
+      // remove all accessibility input listeners
+      this.disposeAccessibility();
+
       // When disposing, remove all children and parents. See https://github.com/phetsims/scenery/issues/629
       this.removeAllChildren();
       this.detach();
