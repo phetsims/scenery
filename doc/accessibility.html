@@ -337,6 +337,47 @@
       </li>
     </ul>
 
+    <h3 id="ex-basic">Leveraging the scene graph</h3>
+
+    <p>
+      By default, the PDOM hierarchy will match the hierarchy of the scene graph. This is an important feature to consider
+      and leverage. Consider the following example where we have a box filled with circles and the desired a11y
+      representation is an unordered list filled with list items.
+    </p>
+    <div id="example-accessible-graph" class="exampleScene" style="width: 64px; height: 64px; margin: 0 auto;"></div>
+    <script type="text/javascript">
+      docExample( 'example-accessible-graph', function( scene, display ) {
+        /*START*/
+        var dimension = 64;
+
+        // add a parent rectangle, represented as an unordered list
+        var rectangle = new scenery.Rectangle( 0, 0, dimension, dimension, {
+          fill: 'lightblue',
+
+          // a11y
+          tagName: 'ul',
+        } );
+        scene.addChild( rectangle );
+
+        // add child circles, each represented as a list item
+        for ( var i = 0; i < 5; i++ ) {
+          var innerContent = 'Circle ' + i;
+          rectangle.addChild( new scenery.Circle( 3, {
+            fill: 'red',
+            center: new dot.Vector2( Math.random() * dimension,  Math.random() * dimension ),
+
+            // a11y
+            tagName: 'li',
+            innerContent: innerContent
+          } ) );
+        }
+        display.updateOnRequestAnimationFrame();
+        /*END*/
+      } );
+    </script>
+
+    <p>In this example, scenery automatically structured the PDOM such that the list items are children unordered list to
+    match the hierarchy of the scene graph.</p>
 
     <h3 id="keyboard-nav">Keyboard Navigation</h3>
     <p>Part of making a PhET simulation accessible is adding keyboard navigation to it. This is an essential part
