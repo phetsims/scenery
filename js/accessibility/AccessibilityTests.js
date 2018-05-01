@@ -92,11 +92,22 @@ define( function( require ) {
     a.innerContent = TEST_LABEL_HTML_2;
     assert.ok( getPrimarySiblingElementByNode( a ).innerHTML === TEST_LABEL_HTML_2, 'innerContent not cleared when tagName set to null.' );
 
+    // verify that setting inner content on an input is not allowed
     var b = new Node( { tagName: 'input' } );
-
+    rootNode.addChild( b );
     window.assert && assert.throws( function() {
       b.innerContent = 'this should fail';
     }, /.*/, 'cannot set inner content on input' );
+
+    // now that it is a div, innerContent is allowed
+    b.tagName = 'div';
+    b.innerContent = TEST_LABEL;
+    assert.ok( b.innerContent === TEST_LABEL, 'inner content allowed' );
+
+    // revert tag name to input, should throw an error
+    window.assert && assert.throws( function() {
+      b.tagName = 'input';
+    }, /.*/, 'error thrown after reverting tag name to input' );
   } );
 
 
