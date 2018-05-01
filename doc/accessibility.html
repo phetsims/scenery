@@ -455,7 +455,17 @@
       interactive alerts.
     </p>
 
-    <h2 id="a11y-strings">A11y Specific Strings</h2>
+    <h2>PhET Specific Information</h2>
+    <p>The following information is specific to PhET's work with accessibility.</p>
+
+    <h3>Enabling A11y</h3>
+    <p>
+      Accessibility features are hidden behind an <code>?accessibility</code> query parameter. This hides a11y features
+      until they are ready for production. When ready, accessibility can be enabled by default by adding <code>Sim</code>
+      option <code>accessibility: true</code> to <code>{{sim}}-main.js</code>.
+    </p>
+
+    <h3 id="a11y-strings">A11y Specific Strings</h3>
     <p>Accessibility specific strings are not yet translatable. That being said PhET has every intention of getting to
       the point where they are, we just don't have the infrastructure set up yet. Keeping that in mind, please follow
       the
@@ -477,6 +487,22 @@
         </ul>
       </li>
     </ul>
+
+    <h3>Flag an a11y sim</h3>
+    <p>
+      When beginning a11y work in a simulation, add <code>"accessible": true</code> to the sim's package.json.
+      Bayes will then add the simulation to perennial/data/accessibility list, and generate an a11y-view HTML document
+      to assist with development.
+    </p>
+
+    <h3>The a11y-view</h3>
+    <p>
+      The 'A11y view' is an HTML page that runs the simulation in an iframe and shows an up-to-date copy of the PDOM
+      next to the sim. It can be used to assist in development of accessibility features by allowing you to see the
+      accessible labels, descriptions, and alerts without requiring screen reader testing. This should be generated
+      by Bayes, but it can be generated manually with <code>grunt generate-a11y-view-html</code> in the sim repo.
+    </p>
+
     <h2 id="a11y-resources">Next Steps for Understanding</h2>
     <p>Please discuss developer related questions or problems with @jessegreenberg, @zepumph, or @mbarlow12 and
       update this document accordingly to help those who follow in your footsteps. Also @terracoda is a great
@@ -492,7 +518,6 @@
     <h3>Source Code</h3>
     <p>For up-to-date documentation and the latest API for accessibility in Scenery, please visit <a href="https://github.com/phetsims/scenery/blob/master/js/accessibility/Accessibility.js">the source code</a>.
   </div>
-
 
 </div>
 
