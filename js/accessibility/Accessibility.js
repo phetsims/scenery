@@ -441,6 +441,23 @@ define( function( require ) {
         },
 
         /**
+         * Returns whether this listener is currently listening to accessible input on this node. More efficient
+         * than directly checking getAccessibleInputListeners, as that includes a defensive copy.
+         * @public
+         *
+         * @param {Object} listener
+         * @return {boolean}
+         */
+        hasAccessibleInputListener: function( listener ) {
+          for ( var i = 0; i < this._accessibleInputListeners.length; i++ ) {
+            if ( this._accessibleInputListeners[ i ] === listener ) {
+              return  true;
+            }
+          }
+          return false;
+        },
+
+        /**
          * Returns a copy of all input listeners related to accessibility.
          * @public
          *

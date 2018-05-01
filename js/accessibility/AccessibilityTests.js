@@ -479,6 +479,9 @@ define( function( require ) {
     a1.addAccessibleInputListener( listener );
     assert.ok( a1.accessibleInputListeners.length === 1, 'accessible listener added' );
 
+    // verify added with hasAccessibleInputListener
+    assert.ok( a1.hasAccessibleInputListener( listener ) === true, 'found with hasAccessibleInputListener' );
+
     // fire the event
     getPrimarySiblingElementByNode( a1 ).click();
     assert.ok( a1.labelContent === TEST_LABEL, 'click fired, label set' );
@@ -486,6 +489,9 @@ define( function( require ) {
     // remove the listener
     a1.removeAccessibleInputListener( listener );
     assert.ok( a1.accessibleInputListeners.length === 0, 'accessible listener removed' );
+
+    // verify removed with hasAccessibleInputListener
+    assert.ok( a1.hasAccessibleInputListener( listener ) === false, 'not found with hasAccessibleInputListener' );
 
     // make sure event listener was also removed from DOM element
     // click should not change the label
