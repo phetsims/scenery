@@ -299,24 +299,34 @@
     <script type="text/javascript">
       docExample( 'example-all-siblings', function( scene, display ) {
         /*START*/
-        var a11yNode = new scenery.Rectangle( 0, 0, 64, 64, {
-          fill: 'blue',
+        var a11yNode = new scenery.Node( {
 
           // a11y
           tagName: 'button',
-          innerContent: 'Remove Wall',
+          innerContent: 'Grab Magnet',
           labelTagName: 'h3',
-          labelContent: 'Press the remove wall button below.',
+          labelContent: 'Magnet',
           descriptionTagName: 'p',
-          descriptionContent: 'Play with or without the wall.'
+          descriptionContent: 'Magnet has a grey south pole on the left and a red north pole on the right.'
         } );
 
+        // the visual representation of the magnet
+        var southPole = new scenery.Rectangle( 0, 0, 32, 64, { fill: 'grey' } );
+        var northPole = new scenery.Rectangle( 32, 0, 32, 64, { fill: 'red' } );
+        a11yNode.children = [ southPole, northPole ];
+
         scene.addChild( a11yNode );
-        a11yNode.addChild( new scenery.Text( 'Remove Wall', { stroke: 'white', center: a11yNode.center } ) );
+        a11yNode.addChild( new scenery.Text( 'Magnet', { stroke: 'black', center: a11yNode.center } ) );
         display.updateOnRequestAnimationFrame();
         /*END*/
       } );
     </script>
+
+    <p>
+      In this example, the rectangle is represented as a button with accessible name of "Grab Magnet". It has a label
+      sibling with an h3 tag with inner content "Grab Magnet", and a description sibling with tagname "p" with the
+      specified sentence.
+    </p>
 
     <p>A few notes here:</p>
     <ul>
@@ -327,9 +337,6 @@
       <li>Taking the above bullet one step further, description and label tags have defaults too (see
         <code>AccessibilityUtil</code>).
         Specifying a "*Content" option without the "*TagName" option will produce an element of the default.
-      </li>
-      <li>Having a label, and inner content here is a bit redundant, but the API is flexible enough to work for many
-        cases.
       </li>
       <li id="append-siblings">By default the description and label tags come before the primary sibling, you can change
         this with
