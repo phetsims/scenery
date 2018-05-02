@@ -42,7 +42,7 @@ define( function( require ) {
           listener( newText, oldText );
         } );
       },
-      documentation: 'Add a listener for when the text has changed. The listener takes two arguments, the new ' +
+      documentation: 'Adds a listener for when the text has changed. The listener takes two arguments, the new ' +
                      'value and the previous value.'
     },
 
@@ -52,7 +52,7 @@ define( function( require ) {
       implementation: function( text ) {
         this.instance.text = text;
       },
-      documentation: 'Set the text content'
+      documentation: 'Sets the text content'
     },
 
     getText: {
@@ -61,7 +61,7 @@ define( function( require ) {
       implementation: function() {
         return this.instance.text;
       },
-      documentation: 'Get the text content'
+      documentation: 'Gets the text content'
     },
 
     setFontOptions: {
@@ -70,7 +70,7 @@ define( function( require ) {
       implementation: function( font ) {
         this.instance.setFont( font );
       },
-      documentation: 'Set font options for this TextIO instance, e.g. {size: 16, weight: bold}. If increasing the font ' +
+      documentation: 'Sets font options for this TextIO instance, e.g. {size: 16, weight: bold}. If increasing the font ' +
                      'size does not make the text size larger, you may need to increase the maxWidth of the TextIO also.'
     },
 
@@ -80,7 +80,7 @@ define( function( require ) {
       implementation: function() {
         return this.instance.getFont();
       },
-      documentation: 'Get font options for this TextIO instance as an object'
+      documentation: 'Gets font options for this TextIO instance as an object'
     },
 
     setMaxWidth: {
@@ -89,8 +89,8 @@ define( function( require ) {
       implementation: function( maxWidth ) {
         this.instance.setMaxWidth( maxWidth );
       },
-      documentation: 'Set maximum width of text box in px. ' +
-                     'If text is wider than maxWidth at its default font size, it is scaled down to fit.'
+      documentation: 'Sets the maximum width of text box. ' +
+                     'If the text width exceeds maxWidth, it is scaled down to fit.'
     },
 
     getMaxWidth: {
@@ -99,7 +99,7 @@ define( function( require ) {
       implementation: function() {
         return this.instance.maxWidth;
       },
-      documentation: 'Get maximum width of text box in px'
+      documentation: 'Gets the maximum width of text box'
     }
   }, {
     documentation: 'Text that is displayed in the simulation.',

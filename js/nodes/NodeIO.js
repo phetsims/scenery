@@ -34,15 +34,6 @@ define( function( require ) {
   }
 
   phetioInherit( ObjectIO, 'NodeIO', NodeIO, {
-
-    detach: {
-      returnType: VoidIO,
-      parameterTypes: [],
-      implementation: function() {
-        this.instance.detach();
-      },
-      documentation: 'Detaches the node from its parents (if any)'
-    },
     isVisible: {
       returnType: BooleanIO,
       parameterTypes: [],
@@ -142,7 +133,7 @@ define( function( require ) {
       node.pickable = fromStateObject.pickable;
       node.opacity = fromStateObject.opacity;
     },
-    documentation: 'The base type for graphical and potentially interactive objects'
+    documentation: 'The base type for graphical and potentially interactive objects.'
   } );
 
   scenery.register( 'NodeIO', NodeIO );
