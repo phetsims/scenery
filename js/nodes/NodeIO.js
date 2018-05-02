@@ -67,7 +67,11 @@ define( function( require ) {
       implementation: function( pickable ) {
         this.instance.pickable = pickable;
       },
-      documentation: 'Set whether the node will be pickable (and hence interactive)'
+      documentation: 'Set whether the node will be pickable (and hence interactive). Pickable can take one of three values:<br><ul>' +
+                     '<li>null: pass-through behavior. Nodes with input listeners are pickable, but it won\'t block events for nodes behind it.</li>' +
+                     '<li>false: The node cannot be interacted with, and it blocks events for nodes behind it.</li>' +
+                     '<li>true: The node can be interacted with (if it has an input listener).</li></ul>' +
+                     'For more about Scenery node pickability, please see <a href="http://phetsims.github.io/scenery/doc/implementation-notes#pickability">http://phetsims.github.io/scenery/doc/implementation-notes#pickability</a>.'
     },
 
     isPickable: {

@@ -2918,7 +2918,7 @@ define( function( require ) {
      * Hit testing is accomplished mainly with node.trailUnderPointer() and node.trailUnderPoint(), following the
      * above rules. Nodes that are not pickable (pruned) will not have input events targeted to them.
      *
-     * Thus in order for a Node (really, a Trail) to be able to receive input events:
+     * The following rules (applied in the given order) determine whether a Node (really, a Trail) will receive input events:
      * 1. If the node or one of its ancestors has pickable: false OR is invisible, the node *will not* receive events
      *    or hit testing.
      * 2. If the node or one of its ancestors or descendants is pickable: true OR has an input listener attached, it
