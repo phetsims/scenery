@@ -301,23 +301,41 @@
 
     <h3 id="ex-all-siblings">Multiple DOM Elements per Node</h3>
 
-    <p>Up to this point there has been a one to one correlation of Nodes to HTML elements,
-      but the a11y api supports a richer architecture to represent a <code>Node</code> in the PDOM: each node can have
-      multiple DOM Elements. A <code>Node</code>'s HTML Elements, or the <code>Node</code>'s peer, can be thought of
-      as collectively equating to the <code>Node</code>. Although a <code>Node</code> has a primary DOM element, this
-      is only a single element of the peer. Other DOM Elements can provide supplemental information to be conveyed
+    <p>Up to this point there has been a one to one correlation of Nodes to HTML elements in the PDOM,
+      but the a11y api supports a richer architecture to represent a <code>Node</code> to AT: each
+      <code>Node</code> can have multiple DOM Elements. A <code>Node</code>'s HTML Elements, or the
+      <code>Node</code>'s peer, can be thought of
+      as collectively equating to the <code>Node</code>. (Note: a "peer" is of type <code>AccessiblePeer</code>).
+      Although a <code>Node</code> has a primary HTML element (the <code>HTMLElement</code> that is created with the
+      <code>tagName</code> option), this is only a single element of the peer. Other HTML Elements can
+      provide supplemental information to be conveyed
       to assistive technology. Label and description elements can be added, as well as a parent element
-      to contain all DOM Element "siblings" for a Node's peer. In total a peer can have up to
-      four DOM Elements: the primary sibling, label sibling, description sibling, and the container parent of these
+      to contain all HTML Element "siblings" for a Node's peer. In total a peer can have up to
+      four HTML Elements: the primary sibling, label sibling, description sibling, and the container parent of these
       siblings.
     </p>
 
-    <p>From here on, when speaking about "siblings," we are speaking about the relationship between HTML elements in
+    <h4>Terminology</h4>
+
+    <p>
+      Terminology is key in understanding the specifics of creating the PDOM. From here on, when speaking
+      about "siblings," we are speaking about the relationship between HTML elements in
       the PDOM. These Elements are not "siblings to the <code>Node</code>," but instead only siblings to each other,
-      with an HTML Element parent called the "containerParent". Terminology is key in understanding the specifics in
-      creating a PDOM.
+      with an HTML Element parent called the "containerParent".
     </p>
 
+    <p>
+      <strong>Summary:</strong> Each <code>Node</code> has an <code>AccessiblePeer</code> (aka “peer”) that
+      manages the <code>HTMLElement</code>s (aka “elements”) that are related to that <code>Node</code>
+      in the PDOM. A <code>Node</code> has one or more associated elements, one
+      of which is the “primary element”, whose tag is specified by option <code>tagName</code>. There are two other
+      optional “supplementary elements”, whose tags are specified via options <code>labelTagName</code> and
+      <code>descriptionTagName</code>. If more than the primary element is specified, they are all referred to as
+      “sibling elements” (including the "primary sibling") and are automatically grouped together under a
+      “container element”. The container element is given a default tag, which can be overridden with
+      option <code>containerTagName</code>.
+    </p>
+    <h4>Example</h4>
     <p>Here is an example of a <code>Node</code> that uses all of its elements to provide the fullest
       semantic picture of the sim component to the PDOM.</p>
 
