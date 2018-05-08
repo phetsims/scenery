@@ -98,7 +98,8 @@ define( function( require ) {
     AccessibleInstance: { name: 'AccessibleInstance', style: '' },
     AlignBox: { name: 'AlignBox', style: '' },
     AlignGroup: { name: 'AlignGroup', style: '' },
-    RichText: { name: 'RichText', style: '' }
+    RichText: { name: 'RichText', style: '' },
+    AccessibilityTree: { name: 'AccessibilityTree', style: '' }
   };
 
   // will be filled in by other modules

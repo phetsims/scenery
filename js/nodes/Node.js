@@ -453,6 +453,9 @@ define( function( require ) {
       preventFit: DEFAULT_OPTIONS.preventFit
     };
 
+    // compose accessibility
+    this.initializeAccessibility();
+
     // @public (scenery-internal) {number} - A bitmask which specifies which renderers this node (and only this node,
     // not its subtree) supports.
     this._rendererBitmask = Renderer.bitmaskNodeDefault;
@@ -478,9 +481,6 @@ define( function( require ) {
 
     // Initialize sub-components
     this._picker = new Picker( this );
-
-    // compose accessibility
-    this.initializeAccessibility();
 
     // Make sure Node's prototype dispose() is called when dispose() is called, and make sure that it isn't called
     // more than once. See https://github.com/phetsims/scenery/issues/601.
@@ -4185,7 +4185,7 @@ define( function( require ) {
         if ( options.useTargetBounds ) {
           image.localBounds = image.parentToLocalBounds( finalParentBounds );
         }
-        return image;        
+        return image;
       }
     },
 
@@ -4969,23 +4969,7 @@ define( function( require ) {
         }
       }
     }
-  } ), {
-
-    /*---------------------------------------------------------------------------*
-     * Static elements
-     *----------------------------------------------------------------------------*/
-
-    /**
-     * Used by the Accessibility trait as well, so it is exported as a static.
-     * @public (scenery-internal)
-     *
-     * @param {Node} node
-     * @returns {boolean}
-     */
-    hasRootedDisplayPredicate: function( node ) {
-      return node._rootedDisplays.length > 0;
-    }
-  } );
+  } ) );
 
   Node.DEFAULT_OPTIONS = DEFAULT_OPTIONS;
 

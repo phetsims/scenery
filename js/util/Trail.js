@@ -380,10 +380,10 @@ define( function( require ) {
 
     /**
      * Whether this trail contains the complete 'other' trail, but with added descendants afterwards.
-     * 
+     *
      * @param {Trail} other - is other a subset of this trail?
      * @param {boolean} allowSameTrail
-     * 
+     *
      * @returns {boolean}
      */
     isExtensionOf: function( other, allowSameTrail ) {

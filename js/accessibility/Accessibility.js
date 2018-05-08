@@ -123,6 +123,7 @@ define( function( require ) {
   'use strict';
 
   // modules
+  var AccessibilityTree = require( 'SCENERY/accessibility/AccessibilityTree' );
   var AccessibilityUtil = require( 'SCENERY/accessibility/AccessibilityUtil' );
   var AccessiblePeer = require( 'SCENERY/accessibility/AccessiblePeer' );
   var Emitter = require( 'AXON/Emitter' );
@@ -375,6 +376,9 @@ define( function( require ) {
           // children last) determined by the children array.
           this._accessibleOrder = [];
 
+          // @public (scenery-internal) {Node|null} - (a11y) If this node is specified in another node's
+          // accessibleOrder, then this will have the value of that other (accessible parent) node. Otherwise it's null.
+          this._accessibleParent = null;
 
           // @private {Object|null} - If non-null, this node will be represented in the parallel DOM by the accessible content.
           // The accessibleContent object will be of the form:
@@ -484,6 +488,8 @@ define( function( require ) {
          * @public (scenery-internal)
          */
         disposeAccessibility: function() {
+          this.accessibleOrder = [];
+
           this.removeAllAccessibleInputListeners();
         },
 
@@ -1277,24 +1283,20 @@ define( function( require ) {
          * first, last children last), determined by the children array.
          * @public
          *
-         * @param {Array.<Node>} accessibleOrder
+         * @param {Array.<Node|null>} accessibleOrder
          */
         setAccessibleOrder: function( accessibleOrder ) {
           assert && assert( Array.isArray( accessibleOrder ), 'Array expected, received: ' + typeof accessibleOrder );
+          assert && accessibleOrder.forEach( function( node ) {
+            assert( node === null || node instanceof scenery.Node );
+          } );
 
           // Only update if it has changed
           if ( this._accessibleOrder !== accessibleOrder ) {
+            var oldAccessibleOrder = this._accessibleOrder;
             this._accessibleOrder = accessibleOrder;
 
-            // Get all trails where the root node of the trail has at least one rootedDisplay
-            var trails = this.getTrails( Node.hasRootedDisplayPredicate );
-            for ( var i = 0; i < trails.length; i++ ) {
-              var trail = trails[ i ];
-              var rootedDisplays = trail.rootNode()._rootedDisplays;
-              for ( var j = 0; j < rootedDisplays.length; j++ ) {
-                rootedDisplays[ j ].changedAccessibleOrder( trail );
-              }
-            }
+            AccessibilityTree.accessibleOrderChange( this, oldAccessibleOrder, accessibleOrder );
 
             this.trigger0( 'accessibleOrder' );
           }
@@ -1644,14 +1646,7 @@ define( function( require ) {
             var oldAccessibleContent = this._accessibleContent;
             this._accessibleContent = accessibleContent;
 
-            var trails = this.getTrails( Node.hasRootedDisplayPredicate );
-            for ( var i = 0; i < trails.length; i++ ) {
-              var trail = trails[ i ];
-              var rootedDisplays = trail.rootNode()._rootedDisplays;
-              for ( var j = 0; j < rootedDisplays.length; j++ ) {
-                rootedDisplays[ j ].changedAccessibleContent( trail, oldAccessibleContent, accessibleContent );
-              }
-            }
+            AccessibilityTree.accessibleContentChange( this, oldAccessibleContent, accessibleContent );
 
             this.trigger0( 'accessibleContent' );
           }
@@ -1679,22 +1674,7 @@ define( function( require ) {
          * @param {Node} node
          */
         onAccessibleAddChild: function( node ) {
-          // All trails starting with nodes that have display roots, and ending with the added node.
-          var trails = node.getTrails( Node.hasRootedDisplayPredicate );
-          for ( var i = 0; i < trails.length; i++ ) {
-            var trail = trails[ i ];
-
-            // Ignore trails where this node is not the child node's parent. See https://github.com/phetsims/scenery/issues/491
-            if ( trail.nodeFromTop( 1 ) !== this ) {
-              continue;
-            }
-
-            // Notify each Display of the trail
-            var rootedDisplays = trail.rootNode()._rootedDisplays;
-            for ( var j = 0; j < rootedDisplays.length; j++ ) {
-              rootedDisplays[ j ].addAccessibleTrail( trail );
-            }
-          }
+          AccessibilityTree.addChild( this, node );
         },
 
         /**
@@ -1705,22 +1685,7 @@ define( function( require ) {
          * @param {Node} node
          */
         onAccessibleRemoveChild: function( node ) {
-          // All trails starting with nodes that have display roots, and ending with the removed node.
-          var trails = node.getTrails( Node.hasRootedDisplayPredicate );
-          for ( var i = 0; i < trails.length; i++ ) {
-            var trail = trails[ i ];
-
-            // Ignore trails where this node is not the child node's parent. See https://github.com/phetsims/scenery/issues/491
-            if ( trail.nodeFromTop( 1 ) !== this ) {
-              continue;
-            }
-
-            // Notify each Display of the trail
-            var rootedDisplays = trail.rootNode()._rootedDisplays;
-            for ( var j = 0; j < rootedDisplays.length; j++ ) {
-              rootedDisplays[ j ].removeAccessibleTrail( trail );
-            }
-          }
+          AccessibilityTree.removeChild( this, node );
         },
 
 

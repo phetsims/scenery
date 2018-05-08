@@ -266,6 +266,9 @@ define( function( require ) {
     // global reference if we have a Display (useful)
     this.scenery = scenery;
 
+    // @public (scenery-internal) {boolean}
+    this._accessible = this.options.accessibility;
+
     if ( this.options.accessibility ) {
       if ( this.options.isApplication ) {
         this._domElement.setAttribute( 'aria-role', 'application' );
@@ -296,6 +299,7 @@ define( function( require ) {
       // restore focus after sorting accessible instances
       this._focusedNodeOnRemoveTrail;
 
+      // @public (scenery-internal) {AccessibleInstance}
       this._rootAccessibleInstance = AccessibleInstance.createFromPool( null, this, new scenery.Trail() );
       sceneryLog && sceneryLog.AccessibleInstance && sceneryLog.AccessibleInstance(
         'Display root instance: ' + this._rootAccessibleInstance.toString() );
@@ -689,118 +693,6 @@ define( function( require ) {
         this._unsortedAccessibleInstances.pop().sortChildren();
       }
       focusedNode && focusedNode.focus();
-    },
-
-    /**
-     * Called when a subtree with accessible content is added.
-     * @private
-     *
-     * @param {Trail} trail
-     */
-    addAccessibleTrail: function( trail ) {
-      if ( !this.options.accessibility ) {
-        return;
-      }
-
-      sceneryLog && sceneryLog.Accessibility && sceneryLog.Accessibility( 'Display.addAccessibleTrail ' + trail.toString() );
-      sceneryLog && sceneryLog.Accessibility && sceneryLog.push();
-
-      this.getBaseAccessibleInstance( trail ).addSubtree( trail );
-
-      this.sortAccessibleInstances();
-
-      // after sorting, restore focus if the browser blurred while removing or adding DOM elements
-      if ( this._focusedNodeOnRemoveTrail ) {
-        this._focusedNodeOnRemoveTrail.focusable && this._focusedNodeOnRemoveTrail.accessibleVisible && this._focusedNodeOnRemoveTrail.focus();
-        this._focusedNodeOnRemoveTrail = null;
-      }
-
-      sceneryLog && sceneryLog.Accessibility && sceneryLog.pop();
-    },
-
-    /**
-     * Called when a subtree with accessible content is removed.
-     * @private
-     *
-     * @param {Trail} trail
-     */
-    removeAccessibleTrail: function( trail ) {
-      if ( !this.options.accessibility ) {
-        return;
-      }
-
-      sceneryLog && sceneryLog.Accessibility && sceneryLog.Accessibility( 'Display.removeAccessibleTrail ' + trail.toString() );
-      sceneryLog && sceneryLog.Accessibility && sceneryLog.push();
-
-      this._focusedNodeOnRemoveTrail = Display.focusedNode;
-      this.getBaseAccessibleInstance( trail ).removeSubtree( trail );
-
-      this.sortAccessibleInstances();
-
-      sceneryLog && sceneryLog.Accessibility && sceneryLog.pop();
-    },
-
-    /**
-     * Called when an ancestor node's accessible content is changed.
-     * @private
-     *
-     * @param {Trail} trail
-     * @param {Object} oldAccessibleContent
-     * @param {Object} newAccessibleContent
-     */
-    changedAccessibleContent: function( trail, oldAccessibleContent, newAccessibleContent ) {
-      if ( !this.options.accessibility ) {
-        return;
-      }
-
-      sceneryLog && sceneryLog.Accessibility && sceneryLog.Accessibility(
-        'Display.changedAccessibleContent ' + trail.toString() +
-        ' old: ' + ( !!oldAccessibleContent ) +
-        ' new: ' + ( !!newAccessibleContent ) );
-      sceneryLog && sceneryLog.Accessibility && sceneryLog.push();
-
-      this.getBaseAccessibleInstance( trail ).removeSubtree( trail );
-      this.getBaseAccessibleInstance( trail ).addSubtree( trail );
-
-      this.sortAccessibleInstances();
-
-      sceneryLog && sceneryLog.Accessibility && sceneryLog.pop();
-    },
-
-    /**
-     * Called when an ancestor node's accessible order is changed. First we check to see if the leaf most node on
-     * the trail has an AccessibleInstance. If if does, we sort the accessible instances under it. Otherwise, find
-     * the closest ancestor that has an AccessibleInstance, and sort AccessibleInstances under that one.
-     *
-     * @private
-     *
-     * @param {Trail} trail
-     */
-    changedAccessibleOrder: function( trail ) {
-      if ( !this.options.accessibility ) {
-        return;
-      }
-
-      sceneryLog && sceneryLog.Accessibility && sceneryLog.Accessibility( 'Display.changedAccessibleOrder ' + trail.toString() );
-      sceneryLog && sceneryLog.Accessibility && sceneryLog.push();
-
-      // determine if leaf most node has an accessible instance
-      var closestAncestorInstance;
-      var lastNode = trail.lastNode();
-      for ( var i = 0; i < lastNode.accessibleInstances.length; i++ ) {
-        var accessibleInstance = lastNode.accessibleInstances[ i ];
-        if ( trail.equals( accessibleInstance.trail ) ) {
-          closestAncestorInstance = accessibleInstance;
-        }
-      }
-
-      // if our current node didn't have an accessible instance, find the closest ancestor
-      closestAncestorInstance = closestAncestorInstance || this.getBaseAccessibleInstance( trail );
-      closestAncestorInstance.markAsUnsorted();
-
-      this.sortAccessibleInstances();
-
-      sceneryLog && sceneryLog.Accessibility && sceneryLog.pop();
     },
 
     /**

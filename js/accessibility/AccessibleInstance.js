@@ -154,6 +154,14 @@ define( function( require ) {
       return this;
     },
 
+    addConsecutiveInstances: function( accessibleInstances ) {
+      throw new Error( 'unimplemented' );
+    },
+
+    removeInstancesForTrail: function( trail ) {
+      throw new Error( 'unimplemented' );
+    },
+
     /**
      * Add a subtree of AccessibleInstances to this AccessibleInstance.
      *

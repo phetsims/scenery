@@ -81,6 +81,7 @@ define( function( require ) {
     this.node.onStatic( 'clip', listener );
     this.node.onStatic( 'selfBoundsValid', listener ); // e.g. Text, may change based on boundsMethod
     this.node.onStatic( 'accessibleContent', listener );
+    this.node.onStatic( 'accessibleOrder', listener );
   }
 
   scenery.register( 'RendererSummary', RendererSummary );
@@ -348,7 +349,7 @@ define( function( require ) {
       if ( node.areSelfBoundsValid() ) {
         bitmask |= Renderer.bitmaskBoundsValid;
       }
-      if ( !node.accessibleContent ) {
+      if ( !node.accessibleContent && node.accessibleOrder.length === 0 ) {
         bitmask |= Renderer.bitmaskNotAccessible;
       }
 
