@@ -53,6 +53,7 @@
 define( function( require ) {
   'use strict';
 
+  var AccessibilityTree = require( 'SCENERY/accessibility/AccessibilityTree' );
   var AccessibilityUtil = require( 'SCENERY/accessibility/AccessibilityUtil' );
   var Dimension2 = require( 'DOT/Dimension2' );
   var Events = require( 'AXON/Events' );
@@ -303,7 +304,7 @@ define( function( require ) {
       this._rootAccessibleInstance = AccessibleInstance.createFromPool( null, this, new scenery.Trail() );
       sceneryLog && sceneryLog.AccessibleInstance && sceneryLog.AccessibleInstance(
         'Display root instance: ' + this._rootAccessibleInstance.toString() );
-      this._rootAccessibleInstance.addSubtree( new scenery.Trail( this._rootNode ) );
+      AccessibilityTree.initializeRoot( this._rootAccessibleInstance, this._rootNode );
 
       // add the accessible DOM as a child of this DOM element
       this._domElement.appendChild( this._rootAccessibleInstance.peer.primarySibling );
@@ -1111,6 +1112,10 @@ define( function( require ) {
         this.detachEvents();
       }
       this._rootNode.removeRootedDisplay( this );
+
+      if ( this._accessible ) {
+        this._rootAccessibleInstance.dispose();
+      }
     },
 
     ensureNotPainting: function() {

@@ -3,6 +3,27 @@
 /**
  * An instance that is synchronously created, for handling accessibility needs.
  *
+ * Consider the following example:
+ *
+ * We have a node structure:
+ * A
+ *  B ( accessible )
+ *    C (accessible )
+ *      D
+ *        E (accessible)
+ *         G (accessible)
+ *        F
+ *          H (accessible)
+ *
+ *
+ * Which has an equivalent accessible instance tree:
+ * root
+ *  AB
+ *    ABC
+ *      ABCDE
+ *        ABCDEG
+ *      ABCDFH
+ *
  * @author Jonathan Olson <jonathan.olson@colorado.edu>
  */
 
@@ -154,73 +175,50 @@ define( function( require ) {
       return this;
     },
 
+    /**
+     * Adds a series of (sorted) accessible instances as children.
+     * @public
+     *
+     * @param {Array.<AccessibleInstance>} accessibleInstances
+     */
     addConsecutiveInstances: function( accessibleInstances ) {
-      throw new Error( 'unimplemented' );
-    },
+      var hadChildren = this.children.length > 0;
 
-    removeInstancesForTrail: function( trail ) {
-      throw new Error( 'unimplemented' );
+      Array.prototype.push.apply( this.children, accessibleInstances );
+
+      if ( hadChildren ) {
+        this.sortChildren();
+      }
     },
 
     /**
-     * Add a subtree of AccessibleInstances to this AccessibleInstance.
+     * Removes any child instances that are based on the provided trail.
+     * @public
      *
-     * Consider the following example:
-     *
-     * We have a node structure:
-     * A
-     *  B ( accessible )
-     *    C (accessible )
-     *      D
-     *        E (accessible)
-     *         G (accessible)
-     *        F
-     *          H (accessible)
-     *
-     *
-     * Which has an equivalent accessible instance tree:
-     * root
-     *  AB
-     *    ABC
-     *      ABCDE
-     *        ABCDEG
-     *      ABCDFH
-     *
-     * Produces the call tree for adding instances to the accessible instance tree:
-     * ABC.addSubtree( ABCD ) - not accessible
-     *     ABC.addSubtree( ABCDE)
-     *       ABCDE.addSubtree( ABCDEG )
-     *     ABC.addSubtree( ABCDF )
-     *       ABC.addSubtree( ABCDFH )
-     *
-     * @param {Trail} trail - the AccessibleInstances under the trail's last node will be added as descendants of this
-     *                        AccessibleInstance.
-     * @public (scenery-internal)
+     * @param {Trail} trail
      */
-    addSubtree: function( trail ) {
-      sceneryLog && sceneryLog.AccessibleInstance && sceneryLog.AccessibleInstance(
-        'addSubtree on ' + this.toString() + ' with trail ' + trail.toString() );
-      sceneryLog && sceneryLog.AccessibleInstance && sceneryLog.push();
+    removeInstancesForTrail: function( trail ) {
+      for ( var i = 0; i < this.children.length; i++ ) {
+        var childInstance = this.children[ i ];
+        var childTrail = childInstance.trail;
 
-      var node = trail.lastNode();
-      var nextInstance = this; // eslint-disable-line consistent-this
-      if ( node.accessibleContent ) {
-        var accessibleInstance = AccessibleInstance.createFromPool( this, this.display, trail.copy() ); // TODO: Pooling
-        sceneryLog && sceneryLog.AccessibleInstance && sceneryLog.AccessibleInstance(
-          'Insert parent: ' + this.toString() + ', (new) child: ' + accessibleInstance.toString() );
-        this.children.push( accessibleInstance ); // TODO: Mark us as dirty for performance.
-        this.markAsUnsorted();
+        // Not worth it to inspect before our trail ends, since it should be (!) guaranteed to be equal
+        var differs = childTrail.length < trail.length;
+        if ( !differs ) {
+          for ( var j = this.trail.length; j < trail.length; j++ ) {
+            if ( trail.nodes[ j ] !== childTrail.nodes[ j ] ) {
+              differs = true;
+              break;
+            }
+          }
+        }
 
-        nextInstance = accessibleInstance;
+        if ( !differs ) {
+          this.children.splice( i, 1 );
+          childInstance.dispose();
+          i -= 1;
+        }
       }
-      var children = node._children;
-      for ( var i = 0; i < children.length; i++ ) {
-        trail.addDescendant( children[ i ], i );
-        nextInstance.addSubtree( trail );
-        trail.removeDescendant();
-      }
-
-      sceneryLog && sceneryLog.AccessibleInstance && sceneryLog.pop();
     },
 
     /**

@@ -138,9 +138,6 @@ define( function( require ) {
         }
       }
 
-      // Reorder what we have now (anything that isn't added or removed)
-      AccessibilityTree.reorder( node, accessibleTrails );
-
       // Add subtrees to their parents (that were removed from our order)
       for ( i = 0; i < removedItems; i++ ) {
         var removedItemToAdd = removedItems[ i ];
@@ -157,6 +154,8 @@ define( function( require ) {
         var addedItemToAdd = addedItems[ i ];
         addedItemToAdd && AccessibilityTree.addTree( node, addedItemToAdd, accessibleTrails );
       }
+
+      AccessibilityTree.reorder( node, accessibleTrails );
 
       AccessibilityTree.afterOp();
 
@@ -195,6 +194,17 @@ define( function( require ) {
       AccessibilityTree.afterOp();
 
       sceneryLog && sceneryLog.AccessibilityTree && sceneryLog.pop();
+    },
+
+    /**
+     * Sets up a root instance with a given root node.
+     * @public
+     *
+     * @param {AccessibleInstance} rootInstance
+     * @param {Node} rootNode
+     */
+    initializeRoot: function( rootInstance, rootNode ) {
+      rootInstance.addConsecutiveInstances( AccessibilityTree.createTree( new scenery.Trail( rootNode ), rootInstance.display, rootInstance ) );
     },
 
     /**
@@ -279,40 +289,7 @@ define( function( require ) {
      */
     createTree: function( trail, display, parentInstance ) {
       var node = trail.lastNode();
-      var i;
-
-      // Find all children without accessible parents.
-      var nonOrderedChildren = [];
-      for ( i = 0; i < node._children.length; i++ ) {
-        var child = node._children[ i ];
-
-        if ( !child._accessibleParent ) {
-          nonOrderedChildren.push( child );
-        }
-      }
-
-      var effectiveChildren;
-
-      // Override the order, and replace the placeholder if it exists.
-      if ( node.accessibleOrder ) {
-        effectiveChildren = node.accessibleOrder.slice();
-
-        var placeholderIndex = effectiveChildren.indexOf( null );
-
-        // If we have a placeholder, replace its content with the children
-        if ( placeholderIndex >= 0 ) {
-          // for efficiency
-          nonOrderedChildren.unshift( placeholderIndex, 1 );
-          Array.prototype.splice.apply( effectiveChildren, nonOrderedChildren );
-        }
-        // Otherwise, just add the normal things at the end
-        else {
-          Array.prototype.push.apply( effectiveChildren, nonOrderedChildren );
-        }
-      }
-      else {
-        effectiveChildren = nonOrderedChildren;
-      }
+      var effectiveChildren = node.getEffectiveChildren();
 
       // If we are accessible ourself, we need to create the instance (so we can provide it to child instances).
       var instance = null;
@@ -323,7 +300,7 @@ define( function( require ) {
 
       // Create all of the direct-child instances.
       var childInstances = [];
-      for ( i = 0; i < effectiveChildren.length; i++ ) {
+      for ( var i = 0; i < effectiveChildren.length; i++ ) {
         trail.addDescendant( effectiveChildren[ i ], i );
         Array.prototype.push.apply( childInstances, AccessibilityTree.createTree( trail, display, parentInstance ) );
         trail.removeDescendant();
@@ -391,8 +368,9 @@ define( function( require ) {
             bOnly.splice( j, 1 );
             j = 0;
             if ( i === aOnly.length ) {
-              continue outerLoop;
+              break outerLoop;
             }
+            i -= 1;
           }
         }
       }

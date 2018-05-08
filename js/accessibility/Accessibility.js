@@ -1315,6 +1315,48 @@ define( function( require ) {
         get accessibleOrder() { return this.getAccessibleOrder(); },
 
         /**
+         * Returns the "effective" a11y children for the node (which may be different based on the order or other
+         * excluded subtrees).
+         * @public
+         *
+         * @returns {Array.<Node>}
+         */
+        getEffectiveChildren: function() {
+          // Find all children without accessible parents.
+          var nonOrderedChildren = [];
+          for ( var i = 0; i < this._children.length; i++ ) {
+            var child = this._children[ i ];
+
+            if ( !child._accessibleParent ) {
+              nonOrderedChildren.push( child );
+            }
+          }
+
+          // Override the order, and replace the placeholder if it exists.
+          if ( this.accessibleOrder ) {
+            var effectiveChildren = this.accessibleOrder.slice();
+
+            var placeholderIndex = effectiveChildren.indexOf( null );
+
+            // If we have a placeholder, replace its content with the children
+            if ( placeholderIndex >= 0 ) {
+              // for efficiency
+              nonOrderedChildren.unshift( placeholderIndex, 1 );
+              Array.prototype.splice.apply( effectiveChildren, nonOrderedChildren );
+            }
+            // Otherwise, just add the normal things at the end
+            else {
+              Array.prototype.push.apply( effectiveChildren, nonOrderedChildren );
+            }
+
+            return effectiveChildren;
+          }
+          else {
+            return nonOrderedChildren;
+          }
+        },
+
+        /**
          * Hide completely from a screen reader and the browser by setting the hidden attribute on the node's
          * representative DOM element. If the sibling DOM Elements have a container parent, the container
          * should be hidden so that all peers are hidden as well.  Hiding the element will remove it from the focus
