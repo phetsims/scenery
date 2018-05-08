@@ -92,9 +92,6 @@ define( function( require ) {
       // @public {Array.<AccessibleInstance>}
       this.children = cleanArray( this.children );
 
-      // @private {boolean}
-      this.isSorted = true;
-
       // If we are the root accessible instance, we won't actually have a reference to a node.
       if ( this.node ) {
         this.node.addAccessibleInstance( this );
@@ -249,17 +246,6 @@ define( function( require ) {
     },
 
     /**
-     * Mark as unsorted so that the display will sort the subtree of AccessibleInstances under this one.
-     * @public (scenery-internal)
-     */
-    markAsUnsorted: function() {
-      if ( this.isSorted ) {
-        this.isSorted = false;
-        this.display.markUnsortedAccessibleInstance( this );
-      }
-    },
-
-    /**
      * Update visibility of this peer's accessible DOM content. The hidden attribute will hide all of the descendant
      * DOM content, so it is not necessary to update the subtree of AccessibleInstances since the browser
      * will do this for us.
@@ -300,6 +286,51 @@ define( function( require ) {
     },
 
     /**
+     * Returns what our list of children (after sorting) should be.
+     * @private
+     *
+     * @param {Trail} trail - A partial trail, "ending" (with its root) at this.node.
+     * @returns {Array.<AccessibleInstance>}
+     */
+    getChildOrdering: function( trail ) {
+      var node = trail.lastNode();
+      var effectiveChildren = node.getEffectiveChildren();
+      var i;
+      var instances = [];
+
+      if ( node.accessibleContent && node !== this.node ) {
+        var potentialInstances = node.accessibleInstances;
+
+        instanceLoop:
+        for ( i = 0; i < potentialInstances.length; i++ ) {
+          var potentialInstance = potentialInstances[ i ];
+          if ( potentialInstance.parent !== this ) {
+            continue instanceLoop;
+          }
+
+          for ( var j = 0; j < trail.length; j++ ) {
+            if ( trail.nodes[ j ] !== potentialInstance.trail.nodes[ j + potentialInstance.trail.length - trail.length ] ) {
+              continue instanceLoop;
+            }
+          }
+
+          instances.push( potentialInstance );
+        }
+
+        assert && assert( instances.length >= 1, 'If we select more than one this way, we have problems' );
+      }
+      else {
+        for ( i = 0; i < effectiveChildren.length; i++ ) {
+          trail.addDescendant( effectiveChildren[ i ], i );
+          Array.prototype.push.apply( instances, this.getChildOrdering( trail ) );
+          trail.removeDescendant();
+        }
+      }
+
+      return instances;
+    },
+
+    /**
      * Sort our child accessible instances in the order they should appear in the parallel DOM. We do this by
      * creating a comparison function between two accessible instances. The function walks along the trails
      * of the children, looking for specified accessible orders that would determine the ordering for the two
@@ -308,112 +339,10 @@ define( function( require ) {
      * @public (scenery-internal)
      */
     sortChildren: function() {
-      assert && assert( !this.isSorted, 'No need to sort children if it is already marked as sorted' );
-      this.isSorted = true;
+      var targetChildren = this.getChildOrdering( new scenery.Trail( this.node ) );
 
-      var parentInstance = this; // eslint-disable-line consistent-this
-
-      // Reindex trails in preparation for sorting
-      for ( var m = 0; m < this.children.length; m++ ) {
-        this.children[ m ].trail.reindex();
-      }
-
-      this.children.sort( function( a, b ) {
-        // Sort between a {AccessibleInstance} and b {AccessibleInstance}. This is a process where we start at our
-        // "parent" accessible instance's location in the trail, and walk down looking for accessible orders that may
-        // determine the order between these two instances.
-        // This allows ancestor orders (for instance, an order on this instance) to override descendant orders.
-        var aNodes = a.trail.nodes;
-        var bNodes = b.trail.nodes;
-
-        // Starting at the Node for this accessible instance, and walking down until the trails diverge. If our loop
-        // here reaches a place where they diverge, we can use document order to determine which comes first (since
-        // that means we didn't hit any relevant accessible orders). If our parentInstance is the root instance, its
-        // trail will have length 0 (nothing shared), so our starting index should be set to 0.
-        for ( var i = Math.max( 0, parentInstance.trail.length - 1 ); aNodes[ i ] === bNodes[ i ]; i++ ) {
-          var currentNode = aNodes[ i ];
-          var order = currentNode.accessibleOrder;
-
-          // If there is no order specified on this node, we want to continue to the next children in the trails.
-          if ( !order ) {
-            continue;
-          }
-
-          // Loop through items in the order, since the first elements in the order are the most significant.
-          for ( var j = 0; j < order.length; j++ ) {
-            var orderedNode = order[ j ];
-            // Find where (if at all) our Node in the order is present in the trails.
-            var aIndex = aNodes.indexOf( orderedNode );
-            var bIndex = bNodes.indexOf( orderedNode );
-
-            // If the ordered node is present in both trails, we need to first determine whether the trail to those
-            // nodes is the same. If they are the same, we will jump ahead to that ordered node (deliberately skipping
-            // any orders on nodes in-between), and continuing on from there. If they are different, the document order
-            // between the two trails to the ordered node will determine which of our instances comes first.
-            if ( aIndex >= 0 && bIndex >= 0 ) {
-              // Determine the index at where our two trails diverge.
-              var branchIndex = i + 1;
-              while ( aNodes[ branchIndex ] === bNodes[ branchIndex ] ) {
-                branchIndex++;
-              }
-
-              // If the index of our ordered node in one of the trails is before our branch index, it means the trails
-              // to the ordered node are the same. We want to jump ahead to the ordered node's location and continue
-              // with our outer for loop.
-              if ( aIndex < branchIndex ) {
-                // We want the next iteration of the outer for loop to start at the index of the ordered node. Since i
-                // will be incremented before the next loop begins, we subtract 1 here.
-                i = aIndex - 1;
-
-                // Exit the inner for loop
-                break;
-              }
-              // The trails to the ordered node are different. We use the document order between the two trails to
-              // determine which instance is first. This can be done by inspecting just the difference at the branch
-              // index.
-              else {
-                // Since branchIndex is the index in the trail of two different children, we want to compare the indices
-                // for the parent node of the branch nodes, thus we need to subtract 1 from our branch index.
-                var aChildIndex = a.trail.indices[ branchIndex - 1 ];
-                var bChildIndex = b.trail.indices[ branchIndex - 1 ];
-                if ( aChildIndex < bChildIndex ) {
-                  return -1;
-                }
-                else if ( aChildIndex > bChildIndex ) {
-                  return 1;
-                }
-                else {
-                  throw new Error( 'Two different children have the same child index' );
-                }
-              }
-            }
-            // If only the first trail is under an ordered node, it is first
-            else if ( aIndex >= 0 ) {
-              return -1;
-            }
-            // If only the second trail is under an ordered node, it is first
-            else if ( bIndex >= 0 ) {
-              return 1;
-            }
-          }
-        }
-
-        // If we reach here and haven't returned, it should be a document order comparison AND the index i determines
-        // the current index where the nodes are different (branch index).
-        // Since i is the index in the trail of two different children, we want to compare the indices
-        // for the parent node of the branch nodes, thus we need to subtract 1 from our branch index.
-        var aEndChildIndex = a.trail.indices[ i - 1 ];
-        var bEndChildIndex = b.trail.indices[ i - 1 ];
-        if ( aEndChildIndex < bEndChildIndex ) {
-          return -1;
-        }
-        else if ( aEndChildIndex > bEndChildIndex ) {
-          return 1;
-        }
-        else {
-          throw new Error( 'Two different children have the same child index' );
-        }
-      } );
+      assert && assert( targetChildren.length === this.children.length );
+      this.children = targetChildren;
 
       var containerElement = this.peer.getChildContainerElement();
       for ( var n = this.children.length - 1; n >= 0; n-- ) {
