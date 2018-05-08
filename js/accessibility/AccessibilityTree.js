@@ -391,7 +391,7 @@ define( function( require ) {
             bOnly.splice( j, 1 );
             j = 0;
             if ( i === aOnly.length ) {
-              break outerLoop;
+              continue outerLoop;
             }
           }
         }
