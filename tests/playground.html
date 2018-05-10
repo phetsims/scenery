@@ -130,12 +130,49 @@ an UI and Display made for visual testing and debugging.
 
       window.accessibleTest = function() {
         setTimeout( function() {
-          scenery.enableLogging( [ 'AccessibleInstance' ] )
-          window.a = new scenery.Node();
+          scenery.enableLogging( [ 'AccessibleInstance', 'AccessibilityTree' ] )
+          window.a = new scenery.Node( { tagName: 'a' } );
+          window.b = new scenery.Node( { tagName: 'b' } );
+          window.c = new scenery.Node( { tagName: 'c' } );
+
           scene.addChild( a );
-          window.b = new scenery.Node();
-          b.addChild( a );
+          a.addChild( b );
+          b.addChild( c );
+
+          debugAccessibleInstances();
+          debugDOM();
         } )
+      };
+
+      window.debugAccessibleInstances = function() {
+        recurse( display._rootAccessibleInstance, '' );
+        function recurse( instance, indentation ) {
+          console.log( indentation + ( instance.isRootInstance ? '' : instance.node.tagName ) + ' ' + instance.toString() );
+          instance.children.forEach( child => recurse( child, indentation + '  ' ) );
+        }
+      };
+
+      window.debugDOM = function() {
+        var parallelDOM = display._rootAccessibleInstance.peer.primarySibling.outerHTML;
+        parallelDOM = parallelDOM.replace( /\>\</g, '>\n<' );
+        var lines = parallelDOM.split( '\n' );
+
+        var indentation = '';
+        var indentedLines = [];
+        for ( var i = 0; i < lines.length; i++ ) {
+          var line = lines[ i ];
+          var isEndTag = line.slice( 0, 2 ) === '</';
+
+          if ( isEndTag ) {
+            indentation = indentation.slice( 2 );
+          }
+          indentedLines.push( indentation + line );
+          if ( !isEndTag ) {
+            indentation += '  ';
+          }
+        }
+
+        console.log( indentedLines.join( '\n' ) );
       };
 
       window.displayTest = function() {
