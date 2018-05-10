@@ -277,7 +277,7 @@ define( function( require ) {
 
         var wasVisible = this.invisibleCount === 0;
 
-        this.invisibleCount += ( isNodeVisible ? 1 : -1 );
+        this.invisibleCount += ( isNodeVisible ? -1 : 1 );
         assert && assert( this.invisibleCount >= 0 && this.invisibleCount <= this.relativeNodes.length );
 
         var isVisible = this.invisibleCount === 0;
