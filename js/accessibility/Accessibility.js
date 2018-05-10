@@ -1887,7 +1887,7 @@ define( function( require ) {
 
           // Concatenation of our parents' accessibleDisplays
           for ( i = 0; i < this._parents.length; i++ ) {
-            Array.prototype.push.apply( displays, this._parents._accessibleDisplays );
+            Array.prototype.push.apply( displays, this._parents[ i ]._accessibleDisplays );
           }
 
           // AND any acessible displays rooted at this node

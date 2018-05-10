@@ -460,6 +460,53 @@ define( function( require ) {
         AccessibilityTree.recursiveAccessibleTrailSearch( trailResults, trail );
         trail.removeAncestor();
       }
+    },
+
+    /**
+     * Ensures that the _accessibleDisplays on the node (and its subtree) are accurate.
+     * @public
+     */
+    auditAccessibleDisplays: function( node ) {
+      if ( assertSlow ) {
+        if ( node.canHaveAccessibleDisplays() ) {
+
+          var i;
+          var displays = [];
+
+          // Concatenation of our parents' accessibleDisplays
+          for ( i = 0; i < node._parents.length; i++ ) {
+            Array.prototype.push.apply( displays, node._parents[ i ]._accessibleDisplays );
+          }
+
+          // And concatenation of any rooted displays (that are a11y)
+          for ( i = 0; i < node._rootedDisplays.length; i++ ) {
+            var display = node._rootedDisplays[ i ];
+            if ( display._accessible ) {
+              displays.push( display );
+            }
+          }
+
+          var actualArray = node._accessibleDisplays.slice();
+          var expectedArray = displays.slice(); // slice helps in debugging
+          assertSlow( actualArray.length === expectedArray.length );
+
+          for ( i = 0; i < expectedArray.length; i++ ) {
+            for ( var j = 0; j < actualArray.length; j++ ) {
+              if ( expectedArray[ i ] === actualArray[ j ] ) {
+                expectedArray.splice( i, 1 );
+                actualArray.splice( j, 1 );
+                i--;
+                break;
+              }
+            }
+          }
+
+          assertSlow( actualArray.length === 0 && expectedArray.length === 0, 'Mismatch with accessible displays' );
+        }
+        else {
+          assertSlow( node._accessibleDisplays.length === 0, 'Invisible/nonaccessible things should have no displays' );
+        }
+      }
     }
   };
 
