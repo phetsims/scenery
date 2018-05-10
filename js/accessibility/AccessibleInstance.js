@@ -156,10 +156,6 @@ define( function( require ) {
       }
       else {
         this.peer = this.node.accessibleContent.createPeer( this );
-        var childContainerElement = this.parent.peer.getChildContainerElement();
-
-        // insert the peer's DOM element or its parent if it is contained in a parent element for structure
-        childContainerElement.insertBefore( this.peer.getContainerParent(), childContainerElement.childNodes[ 0 ] );
 
         // Scan over all of the nodes in our trail (that are NOT in our parent's trail) to check for accessibleDisplays
         // so we can initialize our invisibleCount and add listeners.
@@ -199,6 +195,14 @@ define( function( require ) {
       var hadChildren = this.children.length > 0;
 
       Array.prototype.push.apply( this.children, accessibleInstances );
+
+      for ( var i = 0; i < accessibleInstances.length; i++ ) {
+        var childContainerElement = this.peer.getChildContainerElement();
+
+        // Append the container parent to the end (so that, when provided in order, we don't have to resort below
+        // when initializing).
+        childContainerElement.insertBefore( accessibleInstances[ i ].peer.getContainerParent(), null );
+      }
 
       if ( hadChildren ) {
         this.sortChildren();
@@ -386,12 +390,7 @@ define( function( require ) {
 
       var containerElement = this.peer.getChildContainerElement();
       for ( var n = this.children.length - 1; n >= 0; n-- ) {
-        var peerDOMElement = this.children[ n ].peer.primarySibling;
-
-        // if the peer has a container parent, this structure containing the peerDOMElement should be inserted
-        if ( this.children[ n ].peer.hasContainerParent() ) {
-          peerDOMElement = this.children[ n ].peer.getContainerParent();
-        }
+        var peerDOMElement = this.children[ n ].peer.getContainerParent();
         if ( peerDOMElement === containerElement.childNodes[ n ] ) {
           continue;
         }
