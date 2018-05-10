@@ -347,7 +347,7 @@ define( function( require ) {
           instances.push( potentialInstance );
         }
 
-        assert && assert( instances.length >= 1, 'If we select more than one this way, we have problems' );
+        assert && assert( instances.length <= 1, 'If we select more than one this way, we have problems' );
       }
       else {
         for ( i = 0; i < effectiveChildren.length; i++ ) {
