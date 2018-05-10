@@ -341,12 +341,11 @@ define( function( require ) {
     b.addChild( e );
     c.addChild( d );
     c.addChild( f );
+    b.accessibleOrder = [ e, c ];
 
     var divB = b.accessibleInstances[ 0 ].peer.primarySibling;
     var divC = c.accessibleInstances[ 0 ].peer.primarySibling;
     var divE = e.accessibleInstances[ 0 ].peer.primarySibling;
-
-    b.accessibleOrder = [ e, c ];
 
     assert.ok( divB.children[ 0 ] === divE, 'div E should be first child of div B' );
     assert.ok( divB.children[ 1 ] === divC, 'div C should be second child of div B' );
@@ -369,12 +368,12 @@ define( function( require ) {
     b.addChild( e );
     c.addChild( d );
     c.addChild( f );
+    a.accessibleOrder = [ e, c ];
 
     var divA = a.accessibleInstances[ 0 ].peer.primarySibling;
     var divC = c.accessibleInstances[ 0 ].peer.primarySibling;
     var divE = e.accessibleInstances[ 0 ].peer.primarySibling;
 
-    a.accessibleOrder = [ e, c ];
     assert.ok( divA.children[ 0 ] === divE, 'div E should be first child of div B' );
     assert.ok( divA.children[ 1 ] === divC, 'div C should be second child of div B' );
   } );
