@@ -135,8 +135,11 @@ an UI and Display made for visual testing and debugging.
           window.b = new scenery.Node( { tagName: 'b' } );
           window.c = new scenery.Node( { tagName: 'c' } );
 
+          console.log( 'scene a' );
           scene.addChild( a );
+          console.log( 'a b' );
           a.addChild( b );
+          console.log( 'b c' );
           b.addChild( c );
 
           debugAccessibleInstances();

@@ -35,7 +35,7 @@ define( function( require ) {
      * @param {Node} child
      */
     addChild: function( parent, child ) {
-      sceneryLog && sceneryLog.AccessibilityTree && sceneryLog.AccessibilityTree( 'addChild ' + parent._id + ',' + child._id );
+      sceneryLog && sceneryLog.AccessibilityTree && sceneryLog.AccessibilityTree( 'addChild parent:n#' + parent._id + ', child:n#' + child._id );
       sceneryLog && sceneryLog.AccessibilityTree && sceneryLog.push();
 
       assert && assert( parent instanceof scenery.Node );
@@ -61,7 +61,7 @@ define( function( require ) {
      * @param {Node} child
      */
     removeChild: function( parent, child ) {
-      sceneryLog && sceneryLog.AccessibilityTree && sceneryLog.AccessibilityTree( 'removeChild ' + parent._id + ',' + child._id );
+      sceneryLog && sceneryLog.AccessibilityTree && sceneryLog.AccessibilityTree( 'removeChild parent:n#' + parent._id + ', child:n#' + child._id );
       sceneryLog && sceneryLog.AccessibilityTree && sceneryLog.push();
 
       assert && assert( parent instanceof scenery.Node );
@@ -88,7 +88,7 @@ define( function( require ) {
      * @param {Array.<Node|null>} newOrder
      */
     accessibleOrderChange: function( node, oldOrder, newOrder ) {
-      sceneryLog && sceneryLog.AccessibilityTree && sceneryLog.AccessibilityTree( 'accessibleOrderChange ' + node._id + ': ' + DEBUG_ORDER( oldOrder ) + ',' + DEBUG_ORDER( newOrder ) );
+      sceneryLog && sceneryLog.AccessibilityTree && sceneryLog.AccessibilityTree( 'accessibleOrderChange n#' + node._id + ': ' + DEBUG_ORDER( oldOrder ) + ',' + DEBUG_ORDER( newOrder ) );
       sceneryLog && sceneryLog.AccessibilityTree && sceneryLog.push();
 
       assert && assert( node instanceof scenery.Node );
@@ -171,7 +171,7 @@ define( function( require ) {
      * @param {Object|null} newContent
      */
     accessibleContentChange: function( node, oldContent, newContent ) {
-      sceneryLog && sceneryLog.AccessibilityTree && sceneryLog.AccessibilityTree( 'accessibleContentChange ' + node._id + ': ' + ( oldContent !== null ) + ',' + ( newContent !== null ) );
+      sceneryLog && sceneryLog.AccessibilityTree && sceneryLog.AccessibilityTree( 'accessibleContentChange n#' + node._id + ': had:' + ( oldContent !== null ) + ', has:' + ( newContent !== null ) );
       sceneryLog && sceneryLog.AccessibilityTree && sceneryLog.push();
 
       assert && assert( node instanceof scenery.Node );
@@ -216,17 +216,26 @@ define( function( require ) {
      * @param {Array.<PartialAccessibleTrail>} [accessibleTrails] - Will be computed if needed
      */
     addTree: function( parent, child, accessibleTrails ) {
-      sceneryLog && sceneryLog.AccessibilityTree && sceneryLog.AccessibilityTree( 'addTree ' + parent._id + ',' + child._id );
+      sceneryLog && sceneryLog.AccessibilityTree && sceneryLog.AccessibilityTree( 'addTree parent:n#' + parent._id + ', child:n#' + child._id );
       sceneryLog && sceneryLog.AccessibilityTree && sceneryLog.push();
 
       accessibleTrails = accessibleTrails || AccessibilityTree.findAccessibleTrails( parent );
 
       for ( var i = 0; i < accessibleTrails.length; i++ ) {
+        sceneryLog && sceneryLog.AccessibilityTree && sceneryLog.AccessibilityTree( 'trail: ' + accessibleTrails[ i ].trail.toString() + ' full:' + accessibleTrails[ i ].fullTrail.toString() + ' for ' + accessibleTrails[ i ].accessibleInstance.toString() + ' root:' + accessibleTrails[ i ].isRoot );
+        sceneryLog && sceneryLog.AccessibilityTree && sceneryLog.push();
+
         var partialTrail = accessibleTrails[ i ];
         var parentInstance = partialTrail.accessibleInstance;
 
+        // The full trail doesn't have the child in it, so we temporarily add that for tree creation
+        partialTrail.fullTrail.addDescendant( child );
         var childInstances = AccessibilityTree.createTree( partialTrail.fullTrail, parentInstance.display, parentInstance );
+        partialTrail.fullTrail.removeDescendant( child );
+
         parentInstance.addConsecutiveInstances( childInstances );
+
+        sceneryLog && sceneryLog.AccessibilityTree && sceneryLog.pop();
       }
 
       sceneryLog && sceneryLog.AccessibilityTree && sceneryLog.pop();
@@ -241,7 +250,7 @@ define( function( require ) {
      * @param {Array.<PartialAccessibleTrail>} [accessibleTrails] - Will be computed if needed
      */
     removeTree: function( parent, child, accessibleTrails ) {
-      sceneryLog && sceneryLog.AccessibilityTree && sceneryLog.AccessibilityTree( 'removeTree ' + parent._id + ',' + child._id );
+      sceneryLog && sceneryLog.AccessibilityTree && sceneryLog.AccessibilityTree( 'removeTree parent:n#' + parent._id + ', child:n#' + child._id );
       sceneryLog && sceneryLog.AccessibilityTree && sceneryLog.push();
 
       accessibleTrails = accessibleTrails || AccessibilityTree.findAccessibleTrails( parent );
@@ -263,7 +272,7 @@ define( function( require ) {
      * @param {Array.<PartialAccessibleTrail>} [accessibleTrails] - Will be computed if needed
      */
     reorder: function( node, accessibleTrails ) {
-      sceneryLog && sceneryLog.AccessibilityTree && sceneryLog.AccessibilityTree( 'reorder ' + node._id );
+      sceneryLog && sceneryLog.AccessibilityTree && sceneryLog.AccessibilityTree( 'reorder n#' + node._id );
       sceneryLog && sceneryLog.AccessibilityTree && sceneryLog.push();
 
       accessibleTrails = accessibleTrails || AccessibilityTree.findAccessibleTrails( node );
@@ -288,8 +297,13 @@ define( function( require ) {
      * @returns {Array.<AccessibleInstance>}
      */
     createTree: function( trail, display, parentInstance ) {
+      sceneryLog && sceneryLog.AccessibilityTree && sceneryLog.AccessibilityTree( 'createTree ' + trail.toString() + ' parent:' + ( parentInstance ? parentInstance.toString() : 'null' ) );
+      sceneryLog && sceneryLog.AccessibilityTree && sceneryLog.push();
+
       var node = trail.lastNode();
       var effectiveChildren = node.getEffectiveChildren();
+
+      sceneryLog && sceneryLog.AccessibilityTree && sceneryLog.AccessibilityTree( 'effectiveChildren: ' + DEBUG_ORDER( effectiveChildren ) );
 
       // If we are accessible ourself, we need to create the instance (so we can provide it to child instances).
       var instance = null;
@@ -309,10 +323,13 @@ define( function( require ) {
       // If we have an instance, hook things up, and return just it.
       if ( instance ) {
         instance.addConsecutiveInstances( childInstances );
+
+        sceneryLog && sceneryLog.AccessibilityTree && sceneryLog.pop();
         return [ instance ];
       }
       // Otherwise pass things forward so they can be added as children by the parentInstance
       else {
+        sceneryLog && sceneryLog.AccessibilityTree && sceneryLog.pop();
         return childInstances;
       }
     },
