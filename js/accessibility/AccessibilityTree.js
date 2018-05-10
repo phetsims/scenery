@@ -11,6 +11,7 @@ define( function( require ) {
 
   // modules
   var AccessibleInstance = require( 'SCENERY/accessibility/AccessibleInstance' );
+  var arrayDifference = require( 'PHET_CORE/arrayDifference' );
   var PartialAccessibleTrail = require( 'SCENERY/accessibility/PartialAccessibleTrail' );
   var scenery = require( 'SCENERY/scenery' );
   // commented out so Require.js doesn't balk at the circular dependency
@@ -98,7 +99,7 @@ define( function( require ) {
       var removedItems = []; // {Array.<Node|null>} - May contain the placeholder null
       var addedItems = []; // {Array.<Node|null>} - May contain the placeholder null
 
-      AccessibilityTree.arrayDifference( oldOrder, newOrder, removedItems, addedItems );
+      arrayDifference( oldOrder, newOrder, removedItems, addedItems );
 
       sceneryLog && sceneryLog.AccessibilityTree && sceneryLog.AccessibilityTree( 'removed: ' + DEBUG_ORDER( removedItems ) );
       sceneryLog && sceneryLog.AccessibilityTree && sceneryLog.AccessibilityTree( 'added: ' + DEBUG_ORDER( addedItems ) );
@@ -369,48 +370,6 @@ define( function( require ) {
      */
     afterOp: function() {
       focusedNode && focusedNode.focus();
-    },
-
-    /**
-     * Given two arrays, find the items that are only in one of them (mutates the aOnly and bOnly parameters)
-     * @public
-     *
-     * NOTE: Assumes there are no duplicate values in the arrays.
-     *
-     * TODO: Consider using this type of thing for Node children for setChildren, etc.
-     *
-     * @param {Array.<*>} a
-     * @param {Array.<*>} b
-     * @param {Array.<*>} aOnly
-     * @param {Array.<*>} bOnly
-     */
-    arrayDifference: function( a, b, aOnly, bOnly ) {
-      assert && assert( Array.isArray( a ) );
-      assert && assert( Array.isArray( b ) );
-      assert && assert( Array.isArray( aOnly ) && aOnly.length === 0 );
-      assert && assert( Array.isArray( bOnly ) && bOnly.length === 0 );
-
-      Array.prototype.push.apply( aOnly, a );
-      Array.prototype.push.apply( bOnly, b );
-
-      outerLoop:
-      for ( var i = 0; i < aOnly.length; i++ ) {
-        var aItem = aOnly[ i ];
-
-        for ( var j = 0; j < bOnly.length; j++ ) {
-          var bItem = bOnly[ j ];
-
-          if ( aItem === bItem ) {
-            aOnly.splice( i, 1 );
-            bOnly.splice( j, 1 );
-            j = 0;
-            if ( i === aOnly.length ) {
-              break outerLoop;
-            }
-            i -= 1;
-          }
-        }
-      }
     },
 
     /**
