@@ -131,15 +131,31 @@ an UI and Display made for visual testing and debugging.
       window.accessibleTest = function() {
         setTimeout( function() {
           scenery.enableLogging( [ 'AccessibleInstance', 'AccessibilityTree' ] )
-          window.a = new scenery.Node( { tagName: 'a' } );
-          window.b = new scenery.Node( { tagName: 'b' } );
-          window.c = new scenery.Node( { tagName: 'c' } );
-          window.d = new scenery.Node( { tagName: 'd' } );
-          b.accessibleOrder = [ c ];
 
-          scene.addChild( a );
-          scene.addChild( b );
-          a.addChild( c );
+          // TODO: Add initial tree remapping example here as a unit test
+
+          // window.a = new scenery.Node( { tagName: 'a' } );
+          // window.b = new scenery.Node( { tagName: 'b' } );
+          // window.c = new scenery.Node( { tagName: 'c' } );
+          // window.d = new scenery.Node( { tagName: 'd' } );
+          // b.accessibleOrder = [ c ];
+
+          // scene.addChild( a );
+          // scene.addChild( b );
+          // a.addChild( c );
+
+          window.a = new scenery.Node();
+          window.b = new scenery.Node();
+          window.c = new scenery.Node();
+
+          scene.children = [ a, b, c ];
+          scene.accessibleOrder = [ c, b, a ];
+
+          console.log( 'tag a' );
+          a.tagName = 'a';
+          console.log( 'tag b' );
+          b.tagName = 'b';
+          // c.tagName = 'c';
 
           debugAccessibleInstances();
           debugDOM();

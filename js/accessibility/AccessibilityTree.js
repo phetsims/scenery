@@ -190,8 +190,12 @@ define( function( require ) {
 
         // For now, just regenerate the full tree. Could optimize in the future, if we can swap the content for an
         // AccessibleInstance.
-        AccessibilityTree.removeTree( parent, node, accessibleTrails );
-        AccessibilityTree.addTree( parent, node, accessibleTrails );
+        if ( oldContent ) {
+          AccessibilityTree.removeTree( parent, node, accessibleTrails );
+        }
+        if ( newContent ) {
+          AccessibilityTree.addTree( parent, node, accessibleTrails );
+        }
       }
 
       AccessibilityTree.afterOp();
