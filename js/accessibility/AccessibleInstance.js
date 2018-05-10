@@ -175,7 +175,7 @@ define( function( require ) {
             this.invisibleCount++;
           }
 
-          var listener = this.checkAccessibleDisplayVisibility.bind( this, i );
+          var listener = this.checkAccessibleDisplayVisibility.bind( this, i - parentTrail.length );
           relativeNode.onStatic( 'accessibleDisplays', listener );
           this.relativeListeners.push( listener );
         }
