@@ -56,6 +56,7 @@ define( function( require ) {
   var AccessibilityTree = require( 'SCENERY/accessibility/AccessibilityTree' );
   var AccessibilityUtil = require( 'SCENERY/accessibility/AccessibilityUtil' );
   var Dimension2 = require( 'DOT/Dimension2' );
+  var escapeHTML = require( 'PHET_CORE/escapeHTML' );
   var Events = require( 'AXON/Events' );
   var extend = require( 'PHET_CORE/extend' );
   var inherit = require( 'PHET_CORE/inherit' );
@@ -1603,6 +1604,44 @@ define( function( require ) {
                         '<body style="font-size: 12px;">' + this.getDebugHTML() + '</body>' +
                         '</html>';
       window.open( 'data:text/html;charset=utf-8,' + encodeURIComponent( htmlContent ) );
+    },
+
+    getAccessibleDebugHTML: function() {
+      var result = '';
+
+      var headerStyle = 'font-weight: bold; font-size: 120%; margin-top: 5px;';
+      var indent = '&nbsp;&nbsp;&nbsp;&nbsp;';
+
+      result += '<div style="' + headerStyle + '">Accessible Instances</div><br>';
+
+      recurse( this._rootAccessibleInstance, '' );
+      function recurse( instance, indentation ) {
+        result += indentation + escapeHTML( ( instance.isRootInstance ? '' : instance.node.tagName ) + ' ' + instance.toString() ) + '<br>';
+        instance.children.forEach( function( child ) {
+          recurse( child, indentation + indent );
+        } );
+      }
+
+      result += '<br><div style="' + headerStyle + '">Parallel DOM</div><br>';
+
+      var parallelDOM = this._rootAccessibleInstance.peer.primarySibling.outerHTML;
+      parallelDOM = parallelDOM.replace( /\>\</g, '>\n<' );
+      var lines = parallelDOM.split( '\n' );
+
+      var indentation = '';
+      for ( var i = 0; i < lines.length; i++ ) {
+        var line = lines[ i ];
+        var isEndTag = line.slice( 0, 2 ) === '</';
+
+        if ( isEndTag ) {
+          indentation = indentation.slice( indent.length );
+        }
+        result += indentation + escapeHTML( line ) + '<br>';
+        if ( !isEndTag ) {
+          indentation += indent;
+        }
+      }
+      return result;
     },
 
     /**
