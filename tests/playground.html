@@ -152,12 +152,32 @@ an UI and Display made for visual testing and debugging.
           // debugAccessibleInstances();
           // debugDOM();
 
-          window.a = new scenery.Node();
-          window.b = new scenery.Node( { tagName: 'div' } );
-          scene.addChild( a );
-          a.addChild( b );
-          console.log( 'removeChild' );
-          a.removeChild( b );
+
+          // window.a = new scenery.Node();
+          // window.b = new scenery.Node( { tagName: 'button', focusHighlight: new scenery.Rectangle( 0, 0, 10, 10 ) } );
+          // scene.addChild( a );
+          // a.addChild( b );
+
+          // display.updateDisplay();
+
+          // b.focus();
+          // console.log( b.focused );
+          // console.log( scenery.Display.focusProperty.value );
+
+          scene.tagName = 'div';
+          scene.focusable = true;
+
+          // invisible is deprecated don't use in future, this is a workaround for Nodes without bounds
+          var a = new scenery.Node( { tagName: 'div', focusable: true, focusHighlight: 'invisible' } );
+          var b = new scenery.Node( { tagName: 'div', focusable: true, focusHighlight: 'invisible' } );
+          var c = new scenery.Node( { tagName: 'div', focusable: true, focusHighlight: 'invisible' } );
+          var d = new scenery.Node( { tagName: 'div', focusable: true, focusHighlight: 'invisible' } );
+          var e = new scenery.Node( { tagName: 'div', focusable: true, focusHighlight: 'invisible' } );
+          scene.children = [ a, b, c, d ];
+
+          debugger;
+          a.focus();
+          console.log( a.focused );
         } )
       };
 
