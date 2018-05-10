@@ -88,7 +88,7 @@ define( function( require ) {
       var focusEventListener = function( event ) {
         if ( event.target === self.primarySibling ) {
           if ( self.accessibleInstance.node.focusable ) {
-            scenery.Display.focus = new Focus( accessibleInstance.display, accessibleInstance.trail );
+            scenery.Display.focus = new Focus( accessibleInstance.display, accessibleInstance.guessVisualTrail() );
             self.display.pointerFocus = null;
           }
         }

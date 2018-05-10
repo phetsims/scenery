@@ -442,6 +442,43 @@ define( function( require ) {
     },
 
     /**
+     * Since our "Trail" can have discontinuous jumps (due to accessibleOrder), this finds the best actual visual
+     * Trail to use.
+     * @public
+     *
+     * @returns {Trail}
+     */
+    guessVisualTrail: function() {
+      this.trail.reindex();
+      var lastBadIndex = this.trail.indices.lastIndexOf( -1 );
+
+      // If we have no bad indices, just return our trail immediately.
+      if ( lastBadIndex < 0 ) {
+        return this.trail;
+      }
+
+      var firstGoodIndex = lastBadIndex + 1;
+      var firstGoodNode = this.trail.nodes[ firstGoodIndex ];
+      var baseTrails = firstGoodNode.getTrailsTo( this.display.rootNode );
+      assert && assert( baseTrails.length > 0 );
+
+      // fail gracefully-ish?
+      if ( baseTrails.length === 0 ) {
+        return this.trail;
+      }
+
+      // Add the rest of the trail back in
+      var trail = baseTrails[ 0 ];
+      for ( var i = firstGoodIndex + 1; i < this.trail.length; i++ ) {
+        trail.addDescendant( this.trail.nodes[ i ] );
+      }
+
+      assert && assert( trail.isValid() );
+
+      return trail;
+    },
+
+    /**
      * For debugging purposes.
      * @public
      *
