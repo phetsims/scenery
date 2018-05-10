@@ -125,6 +125,9 @@ define( function( require ) {
       }
 
       if ( ancestorOldMask || ancestorNewMask ) {
+
+        var oldSubtreeBitmask = this.bitmask;
+
         for ( var j = 0; j < numSummaryBits; j++ ) {
           var ancestorBit = summaryBits[ j ];
           // Check for added bits
@@ -146,6 +149,8 @@ define( function( require ) {
         for ( var k = 0; k < len; k++ ) {
           this.node._parents[ k ]._rendererSummary.summaryChange( ancestorOldMask, ancestorNewMask );
         }
+
+        this.node.onSummaryChange( oldSubtreeBitmask, this.bitmask );
 
         assert && assert( this.bitmask === this.computeBitmask(), 'Sanity check' );
       }

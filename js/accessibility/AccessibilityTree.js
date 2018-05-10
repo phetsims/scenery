@@ -249,7 +249,7 @@ define( function( require ) {
       for ( var i = 0; i < accessibleTrails.length; i++ ) {
         var partialTrail = accessibleTrails[ i ];
 
-        partialTrail.removeInstancesForTrail( partialTrail.fullTrail );
+        partialTrail.accessibleInstance.removeInstancesForTrail( partialTrail.fullTrail );
       }
 
       sceneryLog && sceneryLog.AccessibilityTree && sceneryLog.pop();

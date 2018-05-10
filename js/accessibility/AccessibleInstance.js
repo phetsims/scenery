@@ -100,6 +100,19 @@ define( function( require ) {
       // @public {AccessiblePeer}
       this.peer = null; // Filled in below
 
+      // @private {number} - The number of nodes in our trail that are NOT in our parent's trail and do NOT have our
+      // display in their _accessibleDisplays. For non-root instances, this is initialized later in the constructor.
+      this.invisibleCount = 0;
+
+      // @private {Array.<Node>} - Nodes that are in our trail (but not those of our parent)
+      this.relativeNodes = [];
+
+      // @private {Array.<boolean>} - Whether our display is in the respective relativeNodes' accessibleDisplays
+      this.relativeVisibilities = [];
+
+      // @private {function} - The listeners added to the respective relativeNodes
+      this.relativeListeners = [];
+
       if ( this.isRootInstance ) {
         var accessibilityContainer = document.createElement( 'div' );
 
@@ -148,22 +161,26 @@ define( function( require ) {
         // insert the peer's DOM element or its parent if it is contained in a parent element for structure
         childContainerElement.insertBefore( this.peer.getContainerParent(), childContainerElement.childNodes[ 0 ] );
 
-        // get the difference between the trails of the parent and this AccessibleInstance
+        // Scan over all of the nodes in our trail (that are NOT in our parent's trail) to check for accessibleDisplays
+        // so we can initialize our invisibleCount and add listeners.
         var parentTrail = this.parent.trail;
-        var thisTrail = this.trail;
-        this.trailDiff = [];
-        for ( var i = parentTrail.length; i < thisTrail.length; i++ ) {
-          this.trailDiff.push( thisTrail.get( i ) );
+        for ( var i = parentTrail.length; i < trail.length; i++ ) {
+          var relativeNode = trail.nodes[ i ];
+          this.relativeNodes.push( relativeNode );
+
+          var accessibleDisplays = relativeNode._accessibleDisplays;
+          var isVisible = _.includes( accessibleDisplays, display );
+          this.relativeVisibilities.push( isVisible );
+          if ( !isVisible ) {
+            this.invisibleCount++;
+          }
+
+          var listener = this.checkAccessibleDisplayVisibility.bind( this, i );
+          relativeNode.onStatic( 'accessibleDisplays', listener );
+          this.relativeListeners.push( listener );
         }
 
-        // when visibility or accessibleVisibility of a node in between the two trails changes, we must update
-        // visibility of this peer's DOM content
-        this.accessibleVisibilityListener = this.updateVisibility.bind( this );
-        for ( var j = 0; j < this.trailDiff.length; j++ ) {
-          this.trailDiff[ j ].onStatic( 'visibility', this.accessibleVisibilityListener );
-          this.trailDiff[ j ].accessibleVisibilityChangedEmitter.addListener( this.accessibleVisibilityListener );
-        }
-        this.accessibleVisibilityListener();
+        this.updateVisibility();
       }
 
       sceneryLog && sceneryLog.AccessibleInstance && sceneryLog.AccessibleInstance(
@@ -246,27 +263,40 @@ define( function( require ) {
     },
 
     /**
+     * Checks to see whether our visibility needs an update based on an accessibleDisplays change.
+     * @private
+     *
+     * @param {number} index - Index into the relativeNodes array (which node had the notification)
+     */
+    checkAccessibleDisplayVisibility: function( index ) {
+      var isNodeVisible = _.includes( this.relativeNodes[ index ]._accessibleDisplays, this.display );
+      var wasNodeVisible = this.relativeVisibilities[ index ];
+
+      if ( isNodeVisible !== wasNodeVisible ) {
+        this.relativeVisibilities[ index ] = isNodeVisible;
+
+        var wasVisible = this.invisibleCount === 0;
+
+        this.invisibleCount += ( isNodeVisible ? 1 : -1 );
+        assert && assert( this.invisibleCount >= 0 && this.invisibleCount <= this.relativeNodes.length );
+
+        var isVisible = this.invisibleCount === 0;
+
+        if ( isVisible !== wasVisible ) {
+          this.updateVisibility();
+        }
+      }
+    },
+
+    /**
      * Update visibility of this peer's accessible DOM content. The hidden attribute will hide all of the descendant
      * DOM content, so it is not necessary to update the subtree of AccessibleInstances since the browser
      * will do this for us.
-     *
      * @private
      */
     updateVisibility: function() {
-
-      // if all nodes in the trail diff are both visible and accessibleVisible, this AccessibleInstance will be
-      // visible for screen readers
-      var visibilityCount = 0;
-      for ( var i = 0; i < this.trailDiff.length; i++ ) {
-        if ( this.trailDiff[ i ].visible && this.trailDiff[ i ].accessibleVisible ) {
-          visibilityCount++;
-        }
-      }
-
       var parentElement = this.peer.getContainerParent();
-
-      var self = this;
-      parentElement.hidden = !( visibilityCount === self.trailDiff.length );
+      parentElement.hidden = this.invisibleCount > 0;
 
       // if we hid a parent element, blur focus if active element was an ancestor
       if ( parentElement.hidden ) {
@@ -339,7 +369,7 @@ define( function( require ) {
      * @public (scenery-internal)
      */
     sortChildren: function() {
-      var targetChildren = this.getChildOrdering( new scenery.Trail( this.node ) );
+      var targetChildren = this.getChildOrdering( new scenery.Trail( this.isRootInstance ? this.display.rootNode : this.node ) );
 
       assert && assert( targetChildren.length === this.children.length );
       this.children = targetChildren;
@@ -377,10 +407,8 @@ define( function( require ) {
         // primary sibling (or its child container)
         this.parent.peer.getChildContainerElement().removeChild( this.peer.getContainerParent() );
 
-        // remove visibility/accessibleVisibility listeners that were added
-        for ( var i = 0; i < this.trailDiff.length; i++ ) {
-          this.trailDiff[ i ].offStatic( 'visibility', this.accessibleVisibilityListener );
-          this.trailDiff[ i ].accessibleVisibilityChangedEmitter.removeListener( this.accessibleVisibilityListener );
+        for ( var i = 0; i < this.relativeNodes.length; i++ ) {
+          this.relativeNodes[ i ].offStatic( 'accessibleDisplays', this.relativeListeners[ i ] );
         }
       }
 

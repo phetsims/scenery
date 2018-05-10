@@ -129,6 +129,7 @@ define( function( require ) {
   var Emitter = require( 'AXON/Emitter' );
   var extend = require( 'PHET_CORE/extend' );
   var invalidateAccessibleContent = require( 'SCENERY/accessibility/invalidateAccessibleContent' );
+  var Renderer = require( 'SCENERY/display/Renderer' );
   var scenery = require( 'SCENERY/scenery' );
 
   var INPUT_TAG = AccessibilityUtil.TAGS.INPUT;
@@ -379,6 +380,17 @@ define( function( require ) {
           // @public (scenery-internal) {Node|null} - (a11y) If this node is specified in another node's
           // accessibleOrder, then this will have the value of that other (accessible parent) node. Otherwise it's null.
           this._accessibleParent = null;
+
+          // @public (scenery-internal) {Array.<Display>} - (duplicates allowed) - There is one copy of each accessible
+          // Display for each trail (from its root node to this node) that is fully visible (assuming this subtree is
+          // accessible).
+          // Thus, the value of this is:
+          // - If this node is invisible OR the subtree has no accessibleContent/accessibleOrder: []
+          // - Otherwise, it is the concatenation of our parents' accessibleDisplays (AND any accessible displays rooted
+          //   at this node).
+          // This value is synchronously updated, and supports accessibleInstances by letting them know when certain
+          // nodes are visible on the display.
+          this._accessibleDisplays = [];
 
           // @private {Object|null} - If non-null, this node will be represented in the parallel DOM by the accessible content.
           // The accessibleContent object will be of the form:
@@ -1716,6 +1728,10 @@ define( function( require ) {
          * @param {Node} node
          */
         onAccessibleAddChild: function( node ) {
+          if ( node.canHaveAccessibleDisplays() ) {
+            node.addAccessibleDisplays( this._accessibleDisplays );
+          }
+
           AccessibilityTree.addChild( this, node );
         },
 
@@ -1727,9 +1743,76 @@ define( function( require ) {
          * @param {Node} node
          */
         onAccessibleRemoveChild: function( node ) {
+          if ( node.canHaveAccessibleDisplays() ) {
+            node.removeAccessibleDisplays( this._accessibleDisplays );
+          }
+
           AccessibilityTree.removeChild( this, node );
         },
 
+        /**
+         * Called when our summary bitmask changes
+         * @public (scenery-internal)
+         *
+         * @param {number} oldBitmask
+         * @param {number} newBitmask
+         */
+        onAccessibleSummaryChange: function( oldBitmask, newBitmask ) {
+          // If we are invisible, our accessibleDisplays would not have changed ([] => [])
+          if ( this.visible ) {
+            var wasAccessible = !( Renderer.bitmaskNotAccessible & oldBitmask );
+            var isAccessible = !( Renderer.bitmaskNotAccessible & newBitmask );
+
+            if ( isAccessible && !wasAccessible ) {
+              this.addAllAccessibleDisplays();
+            }
+            if ( !isAccessible && wasAccessible ) {
+              this.removeAllAccessibleDisplays();
+            }
+          }
+        },
+
+        /**
+         * Called when our visibility changes.
+         * @public (scenery-internal)
+         *
+         * @param {boolean} visible
+         */
+        onAccessibleVisibilityChange: function( visible ) {
+          // If we are not accessible, our accessibleDisplays would not have changed ([] => [])
+          if ( !this._rendererSummary.isNotAccessible() ) {
+            if ( visible ) {
+              this.addAllAccessibleDisplays();
+            }
+            else {
+              this.removeAllAccessibleDisplays();
+            }
+          }
+        },
+
+        /**
+         * Called when we have a rooted display added to this node.
+         * @public (scenery-internal)
+         *
+         * @param {Display} display
+         */
+        onAccessibleAddedRootedDisplay: function( display ) {
+          if ( display._accessible && this.canHaveAccessibleDisplays() ) {
+            this.addAccessibleDisplays( [ display ] );
+          }
+        },
+
+        /**
+         * Called when we have a rooted display removed from this node.
+         * @public (scenery-internal)
+         *
+         * @param {Display} display
+         */
+        onAccessibleRemovedRootedDisplay: function( display ) {
+          if ( display._accessible && this.canHaveAccessibleDisplays() ) {
+            this.removeAccessibleDisplays( [ display ] );
+          }
+        },
 
         /*---------------------------------------------------------------------------*/
         // Accessible Instance handling
@@ -1779,6 +1862,112 @@ define( function( require ) {
           for ( var i = 0; i < this._accessibleInstances.length; i++ ) {
             this._accessibleInstances[ i ].peer && callback( this._accessibleInstances[ i ].peer );
           }
+        },
+
+        /**
+         * Returns whether we can have accessibleDisplays specified in our array.
+         * @public (scenery-internal)
+         *
+         * @returns {boolean}
+         */
+        canHaveAccessibleDisplays: function() {
+          return this.visible && !this._rendererSummary.isNotAccessible();
+        },
+
+        /**
+         * Adds all of our accessible displays to our array (and propagates).
+         * @private
+         */
+        addAllAccessibleDisplays: function() {
+          assert && assert( this._accessibleDisplays.length === 0, 'Should be empty before adding everything' );
+          assert && assert( this.canHaveAccessibleDisplays(), 'Should happen when we can store accessibleDisplays' );
+
+          var i;
+          var displays = [];
+
+          // Concatenation of our parents' accessibleDisplays
+          for ( i = 0; i < this._parents.length; i++ ) {
+            Array.prototype.push.apply( displays, this._parents._accessibleDisplays );
+          }
+
+          // AND any acessible displays rooted at this node
+          for ( i = 0; i < this._rootedDisplays.length; i++ ) {
+            var display = this._rootedDisplays[ i ];
+            if ( display._accessible ) {
+              displays.push( display );
+            }
+          }
+
+          this.addAccessibleDisplays( displays );
+        },
+
+        /**
+         * Removes all of our accessible displays from our array (and propagates).
+         * @private
+         */
+        removeAllAccessibleDisplays: function() {
+          assert && assert( !this.canHaveAccessibleDisplays(), 'Should happen when we cannot store accessibleDisplays' );
+
+          // TODO: is there a way to avoid a copy?
+          this.removeAccessibleDisplays( this._accessibleDisplays.slice() );
+
+          assert && assert( this._accessibleDisplays.length === 0, 'Should be empty after removing everything' );
+        },
+
+        /**
+         * Adds a list of accessible displays to our internal list. See _accessibleDisplays documentation.
+         * @public (scenery-internal)
+         *
+         * @param {Array.<Display>} displays
+         */
+        addAccessibleDisplays: function( displays ) {
+          assert && assert( Array.isArray( displays ) );
+
+          if ( displays.length === 0 ) {
+            return;
+          }
+
+          Array.prototype.push.apply( this._accessibleDisplays, displays );
+
+          for ( var i = 0; i < this._children.length; i++ ) {
+            var child = this._children[ i ];
+            if ( child.canHaveAccessibleDisplays() ) {
+              this._children[ i ].addAccessibleDisplays( displays );
+            }
+          }
+
+          this.trigger0( 'accessibleDisplays' );
+        },
+
+        /**
+         * Removes a list of accessible displays from our internal list. See _accessibleDisplays documentation.
+         * @public (scenery-internal)
+         *
+         * @param {Array.<Display>} displays
+         */
+        removeAccessibleDisplays: function( displays ) {
+          assert && assert( Array.isArray( displays ) );
+
+          if ( displays.length === 0 ) {
+            return;
+          }
+
+          var i;
+
+          for ( i = displays.length - 1; i >= 0; i-- ) {
+            var index = this._accessibleDisplays.lastIndexOf( displays[ i ] );
+            assert && assert( index >= 0 );
+            this._accessibleDisplays.splice( i, 1 );
+          }
+
+          for ( i = 0; i < this._children.length; i++ ) {
+            var child = this._children[ i ];
+            if ( child.canHaveAccessibleDisplays() ) {
+              this._children[ i ].removeAccessibleDisplays( displays );
+            }
+          }
+
+          this.trigger0( 'accessibleDisplays' );
         }
       } );
 

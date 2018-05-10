@@ -2195,6 +2195,17 @@ define( function( require ) {
     },
 
     /**
+     * Called when our summary bitmask changes
+     * @public (scenery-internal)
+     *
+     * @param {number} oldBitmask
+     * @param {number} newBitmask
+     */
+    onSummaryChange: function( oldBitmask, newBitmask ) {
+      this.onAccessibleSummaryChange( oldBitmask, newBitmask );
+    },
+
+    /**
      * Updates our node's scale and applied scale factor if we need to change our scale to fit within the maximum
      * dimensions (maxWidth and maxHeight). See documentation in constructor for detailed behavior.
      * @private
@@ -2828,6 +2839,8 @@ define( function( require ) {
         // changing visibility can affect pickability pruning, which affects mouse/touch bounds
         this._picker.onVisibilityChange();
         if ( assertSlow ) { this._picker.audit(); }
+
+        this.onAccessibleVisibilityChange( visible );
 
         this.trigger0( 'visibility' );
       }
@@ -4334,6 +4347,8 @@ define( function( require ) {
     addRootedDisplay: function( display ) {
       assert && assert( display instanceof scenery.Display );
       this._rootedDisplays.push( display );
+
+      this.onAccessibleAddedRootedDisplay( display );
     },
 
     /**
@@ -4347,6 +4362,8 @@ define( function( require ) {
       var index = _.indexOf( this._rootedDisplays, display );
       assert && assert( index !== -1, 'Cannot remove a Display from a Node if it was not there' );
       this._rootedDisplays.splice( index, 1 );
+
+      this.onAccessibleRemovedRootedDisplay( display );
     },
 
     /*---------------------------------------------------------------------------*
