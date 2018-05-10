@@ -497,6 +497,11 @@ define( function( require ) {
       };
     }
 
+    // @public (scenery-internal) {boolean} - There are certain specific cases (in this case due to a11y) where we need
+    // to know that a node is getting removed from its parent BUT that process has not completed yet. It would be ideal
+    // to not need this.
+    this._isGettingRemovedFromParent = false;
+
     PhetioObject.call( this );
 
     if ( options ) {
@@ -661,6 +666,8 @@ define( function( require ) {
 
       var indexOfParent = _.indexOf( node._parents, this );
 
+      node._isGettingRemovedFromParent = true;
+
       // If this added subtree contains accessible content, we need to notify any relevant displays
       // NOTE: Potentially removes bounds listeners here!
       if ( !node._rendererSummary.isNotAccessible() ) {
@@ -674,6 +681,7 @@ define( function( require ) {
 
       node._parents.splice( indexOfParent, 1 );
       this._children.splice( indexOfChild, 1 );
+      node._isGettingRemovedFromParent = false; // It is "complete"
 
       this.invalidateBounds();
       this._childBoundsDirty = true; // force recomputation of child bounds after removing a child

@@ -1726,11 +1726,16 @@ define( function( require ) {
          * @param {Node} node
          */
         onAccessibleAddChild: function( node ) {
+          sceneryLog && sceneryLog.Accessibility && sceneryLog.Accessibility( 'onAccessibleAddChild n#' + node.id + ' (parent:n#' + this.id + ')' );
+          sceneryLog && sceneryLog.Accessibility && sceneryLog.push();
+
           if ( node.canHaveAccessibleDisplays() ) {
             node.addAccessibleDisplays( this._accessibleDisplays );
           }
 
           AccessibilityTree.addChild( this, node );
+
+          sceneryLog && sceneryLog.Accessibility && sceneryLog.pop();
         },
 
         /**
@@ -1741,11 +1746,16 @@ define( function( require ) {
          * @param {Node} node
          */
         onAccessibleRemoveChild: function( node ) {
+          sceneryLog && sceneryLog.Accessibility && sceneryLog.Accessibility( 'onAccessibleRemoveChild n#' + node.id + ' (parent:n#' + this.id + ')' );
+          sceneryLog && sceneryLog.Accessibility && sceneryLog.push();
+
           if ( node.canHaveAccessibleDisplays() ) {
             node.removeAccessibleDisplays( this._accessibleDisplays );
           }
 
           AccessibilityTree.removeChild( this, node );
+
+          sceneryLog && sceneryLog.Accessibility && sceneryLog.pop();
         },
 
         /**
@@ -1756,6 +1766,9 @@ define( function( require ) {
          * @param {number} newBitmask
          */
         onAccessibleSummaryChange: function( oldBitmask, newBitmask ) {
+          sceneryLog && sceneryLog.Accessibility && sceneryLog.Accessibility( 'onAccessibleSummaryChange n#' + this.id + ' wasA11y:' + !( Renderer.bitmaskNotAccessible & oldBitmask ) + ', isA11y:' + !( Renderer.bitmaskNotAccessible & newBitmask ) );
+          sceneryLog && sceneryLog.Accessibility && sceneryLog.push();
+
           // If we are invisible, our accessibleDisplays would not have changed ([] => [])
           if ( this.visible && this.accessibleVisible ) {
             var wasAccessible = !( Renderer.bitmaskNotAccessible & oldBitmask );
@@ -1768,6 +1781,8 @@ define( function( require ) {
               this.removeAllAccessibleDisplays();
             }
           }
+
+          sceneryLog && sceneryLog.Accessibility && sceneryLog.pop();
         },
 
         /**
@@ -1777,6 +1792,9 @@ define( function( require ) {
          * @param {boolean} visible
          */
         onAccessibleVisibilityChange: function( visible ) {
+          sceneryLog && sceneryLog.Accessibility && sceneryLog.Accessibility( 'onAccessibleVisibilityChange n#' + this.id + ' visible:' + visible );
+          sceneryLog && sceneryLog.Accessibility && sceneryLog.push();
+
           // If we are not accessible (or accessibleVisible), our accessibleDisplays would not have changed ([] => [])
           if ( this.accessibleVisible && !this._rendererSummary.isNotAccessible() ) {
             if ( visible ) {
@@ -1786,6 +1804,8 @@ define( function( require ) {
               this.removeAllAccessibleDisplays();
             }
           }
+
+          sceneryLog && sceneryLog.Accessibility && sceneryLog.pop();
         },
 
         /**
@@ -1797,6 +1817,9 @@ define( function( require ) {
          * @param {boolean} visible
          */
         onAccessibleAccessibleVisibilityChange: function( visible ) {
+          sceneryLog && sceneryLog.Accessibility && sceneryLog.Accessibility( 'onAccessibleAccessibleVisibilityChange n#' + this.id + ' accessibleVisible:' + visible );
+          sceneryLog && sceneryLog.Accessibility && sceneryLog.push();
+
           // If we are not accessible, our accessibleDisplays would not have changed ([] => [])
           if ( this.visible && !this._rendererSummary.isNotAccessible() ) {
             if ( visible ) {
@@ -1806,6 +1829,8 @@ define( function( require ) {
               this.removeAllAccessibleDisplays();
             }
           }
+
+          sceneryLog && sceneryLog.Accessibility && sceneryLog.pop();
         },
 
         /**
@@ -1815,9 +1840,14 @@ define( function( require ) {
          * @param {Display} display
          */
         onAccessibleAddedRootedDisplay: function( display ) {
+          sceneryLog && sceneryLog.Accessibility && sceneryLog.Accessibility( 'onAccessibleAddedRootedDisplay n#' + this.id );
+          sceneryLog && sceneryLog.Accessibility && sceneryLog.push();
+
           if ( display._accessible && this.canHaveAccessibleDisplays() ) {
             this.addAccessibleDisplays( [ display ] );
           }
+
+          sceneryLog && sceneryLog.Accessibility && sceneryLog.pop();
         },
 
         /**
@@ -1827,9 +1857,14 @@ define( function( require ) {
          * @param {Display} display
          */
         onAccessibleRemovedRootedDisplay: function( display ) {
+          sceneryLog && sceneryLog.Accessibility && sceneryLog.Accessibility( 'onAccessibleRemovedRootedDisplay n#' + this.id );
+          sceneryLog && sceneryLog.Accessibility && sceneryLog.push();
+
           if ( display._accessible && this.canHaveAccessibleDisplays() ) {
             this.removeAccessibleDisplays( [ display ] );
           }
+
+          sceneryLog && sceneryLog.Accessibility && sceneryLog.pop();
         },
 
         /*---------------------------------------------------------------------------*/
@@ -1897,6 +1932,9 @@ define( function( require ) {
          * @private
          */
         addAllAccessibleDisplays: function() {
+          sceneryLog && sceneryLog.Accessibility && sceneryLog.Accessibility( 'addAllAccessibleDisplays n#' + this.id );
+          sceneryLog && sceneryLog.Accessibility && sceneryLog.push();
+
           assert && assert( this._accessibleDisplays.length === 0, 'Should be empty before adding everything' );
           assert && assert( this.canHaveAccessibleDisplays(), 'Should happen when we can store accessibleDisplays' );
 
@@ -1917,6 +1955,8 @@ define( function( require ) {
           }
 
           this.addAccessibleDisplays( displays );
+
+          sceneryLog && sceneryLog.Accessibility && sceneryLog.pop();
         },
 
         /**
@@ -1924,12 +1964,17 @@ define( function( require ) {
          * @private
          */
         removeAllAccessibleDisplays: function() {
+          sceneryLog && sceneryLog.Accessibility && sceneryLog.Accessibility( 'removeAllAccessibleDisplays n#' + this.id );
+          sceneryLog && sceneryLog.Accessibility && sceneryLog.push();
+
           assert && assert( !this.canHaveAccessibleDisplays(), 'Should happen when we cannot store accessibleDisplays' );
 
           // TODO: is there a way to avoid a copy?
           this.removeAccessibleDisplays( this._accessibleDisplays.slice() );
 
           assert && assert( this._accessibleDisplays.length === 0, 'Should be empty after removing everything' );
+
+          sceneryLog && sceneryLog.Accessibility && sceneryLog.pop();
         },
 
         /**
@@ -1939,6 +1984,9 @@ define( function( require ) {
          * @param {Array.<Display>} displays
          */
         addAccessibleDisplays: function( displays ) {
+          sceneryLog && sceneryLog.Accessibility && sceneryLog.Accessibility( 'addAccessibleDisplays n#' + this.id + ' numDisplays:' + displays.length );
+          sceneryLog && sceneryLog.Accessibility && sceneryLog.push();
+
           assert && assert( Array.isArray( displays ) );
 
           if ( displays.length === 0 ) {
@@ -1955,6 +2003,8 @@ define( function( require ) {
           }
 
           this.trigger0( 'accessibleDisplays' );
+
+          sceneryLog && sceneryLog.Accessibility && sceneryLog.pop();
         },
 
         /**
@@ -1964,6 +2014,9 @@ define( function( require ) {
          * @param {Array.<Display>} displays
          */
         removeAccessibleDisplays: function( displays ) {
+          sceneryLog && sceneryLog.Accessibility && sceneryLog.Accessibility( 'removeAccessibleDisplays n#' + this.id + ' numDisplays:' + displays.length );
+          sceneryLog && sceneryLog.Accessibility && sceneryLog.push();
+
           assert && assert( Array.isArray( displays ) );
           assert && assert( this._accessibleDisplays.length >= displays.length );
 
@@ -1981,12 +2034,17 @@ define( function( require ) {
 
           for ( i = 0; i < this._children.length; i++ ) {
             var child = this._children[ i ];
-            if ( child.canHaveAccessibleDisplays() ) {
+            // NOTE: Since this gets called many times from the RendererSummary (which happens before the actual child
+            // modification happens), we DO NOT want to traverse to the child node getting removed. Ideally a better
+            // solution than this flag should be found.
+            if ( child.canHaveAccessibleDisplays() && !child._isGettingRemovedFromParent ) {
               child.removeAccessibleDisplays( displays );
             }
           }
 
           this.trigger0( 'accessibleDisplays' );
+
+          sceneryLog && sceneryLog.Accessibility && sceneryLog.pop();
         }
       } );
 

@@ -132,7 +132,7 @@ an UI and Display made for visual testing and debugging.
 
       window.accessibleTest = function() {
         setTimeout( function() {
-          scenery.enableLogging( [ 'AccessibleInstance', 'AccessibilityTree' ] );
+          scenery.enableLogging( [ 'Accessibility', 'AccessibleInstance', 'AccessibilityTree' ] );
           toggleA11yDebug();
           toggleUpdates();
 
@@ -156,6 +156,7 @@ an UI and Display made for visual testing and debugging.
           window.b = new scenery.Node( { tagName: 'div' } );
           scene.addChild( a );
           a.addChild( b );
+          console.log( 'removeChild' );
           a.removeChild( b );
         } )
       };
