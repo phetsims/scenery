@@ -100,6 +100,9 @@ define( function( require ) {
 
       AccessibilityTree.arrayDifference( oldOrder, newOrder, removedItems, addedItems );
 
+      sceneryLog && sceneryLog.AccessibilityTree && sceneryLog.AccessibilityTree( 'removed: ' + DEBUG_ORDER( removedItems ) );
+      sceneryLog && sceneryLog.AccessibilityTree && sceneryLog.AccessibilityTree( 'added: ' + DEBUG_ORDER( addedItems ) );
+
       var i;
       var j;
 
@@ -118,7 +121,7 @@ define( function( require ) {
       var accessibleTrails = AccessibilityTree.findAccessibleTrails( node );
 
       // Remove subtrees from us (that were removed)
-      for ( i = 0; i < removedItems; i++ ) {
+      for ( i = 0; i < removedItems.length; i++ ) {
         var removedItemToRemove = removedItems[ i ];
         if ( removedItemToRemove ) {
           AccessibilityTree.removeTree( node, removedItemToRemove, accessibleTrails );
@@ -127,7 +130,7 @@ define( function( require ) {
       }
 
       // Remove subtrees from their parents (that will be added here instead)
-      for ( i = 0; i < addedItems; i++ ) {
+      for ( i = 0; i < addedItems.length; i++ ) {
         var addedItemToRemove = addedItems[ i ];
         if ( addedItemToRemove ) {
           var removedParents = addedItemToRemove._parents;
@@ -139,7 +142,7 @@ define( function( require ) {
       }
 
       // Add subtrees to their parents (that were removed from our order)
-      for ( i = 0; i < removedItems; i++ ) {
+      for ( i = 0; i < removedItems.length; i++ ) {
         var removedItemToAdd = removedItems[ i ];
         if ( removedItemToAdd ) {
           var addedParents = removedItemToAdd._parents;
@@ -150,7 +153,7 @@ define( function( require ) {
       }
 
       // Add subtrees to us (that were added in this order change)
-      for ( i = 0; i < addedItems; i++ ) {
+      for ( i = 0; i < addedItems.length; i++ ) {
         var addedItemToAdd = addedItems[ i ];
         addedItemToAdd && AccessibilityTree.addTree( node, addedItemToAdd, accessibleTrails );
       }
