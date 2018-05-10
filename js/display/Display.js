@@ -497,7 +497,7 @@ define( function( require ) {
         }
       }
 
-      if ( assertSlow ) { AccessibilityTree.auditAccessibleDisplays( this.rootNode ); }
+      AccessibilityTree.auditAccessibleDisplays( this.rootNode );
 
       sceneryLog && sceneryLog.Display && sceneryLog.pop();
     },

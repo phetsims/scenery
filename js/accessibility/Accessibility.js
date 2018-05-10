@@ -365,9 +365,6 @@ define( function( require ) {
           // @private {Array.<Function>} - For accessibility input handling {keyboard/click/HTML form}
           this._accessibleInputListeners = [];
 
-          // @public (scenery-internal) - emitters for when state properties change
-          this.accessibleVisibilityChangedEmitter = new Emitter();
-
           // @public - emits when focus changes. This will trigger with the 'focus' event and the 'blur' event.
           // Listener receives 1 parameter, {boolean} - isFocused. see Display.focus
           this.focusChangedEmitter = new Emitter();
@@ -1379,10 +1376,11 @@ define( function( require ) {
          * @param {boolean} visible
          */
         setAccessibleVisible: function( visible ) {
-          this._accessibleVisible = visible;
+          if ( this._accessibleVisible !== visible ) {
+            this._accessibleVisible = visible;
 
-          // accessible visibility updated in each AccessibleInstane
-          this.accessibleVisibilityChangedEmitter.emit();
+            this.onAccessibleAccessibleVisibilityChange( visible );
+          }
         },
         set accessibleVisible( visible ) { this.setAccessibleVisible( visible ); },
 
@@ -1759,7 +1757,7 @@ define( function( require ) {
          */
         onAccessibleSummaryChange: function( oldBitmask, newBitmask ) {
           // If we are invisible, our accessibleDisplays would not have changed ([] => [])
-          if ( this.visible ) {
+          if ( this.visible && this.accessibleVisible ) {
             var wasAccessible = !( Renderer.bitmaskNotAccessible & oldBitmask );
             var isAccessible = !( Renderer.bitmaskNotAccessible & newBitmask );
 
@@ -1779,8 +1777,28 @@ define( function( require ) {
          * @param {boolean} visible
          */
         onAccessibleVisibilityChange: function( visible ) {
+          // If we are not accessible (or accessibleVisible), our accessibleDisplays would not have changed ([] => [])
+          if ( this.accessibleVisible && !this._rendererSummary.isNotAccessible() ) {
+            if ( visible ) {
+              this.addAllAccessibleDisplays();
+            }
+            else {
+              this.removeAllAccessibleDisplays();
+            }
+          }
+        },
+
+        /**
+         * Called when our accessibleVisibility changes.
+         * @public (scenery-internal)
+         *
+         * TODO: figure out a good renaming, we were following a pattern earlier.
+         *
+         * @param {boolean} visible
+         */
+        onAccessibleAccessibleVisibilityChange: function( visible ) {
           // If we are not accessible, our accessibleDisplays would not have changed ([] => [])
-          if ( !this._rendererSummary.isNotAccessible() ) {
+          if ( this.visible && !this._rendererSummary.isNotAccessible() ) {
             if ( visible ) {
               this.addAllAccessibleDisplays();
             }
@@ -1871,7 +1889,7 @@ define( function( require ) {
          * @returns {boolean}
          */
         canHaveAccessibleDisplays: function() {
-          return this.visible && !this._rendererSummary.isNotAccessible();
+          return this.visible && this.accessibleVisible && !this._rendererSummary.isNotAccessible();
         },
 
         /**
@@ -1947,6 +1965,7 @@ define( function( require ) {
          */
         removeAccessibleDisplays: function( displays ) {
           assert && assert( Array.isArray( displays ) );
+          assert && assert( this._accessibleDisplays.length >= displays.length );
 
           if ( displays.length === 0 ) {
             return;
@@ -1963,7 +1982,7 @@ define( function( require ) {
           for ( i = 0; i < this._children.length; i++ ) {
             var child = this._children[ i ];
             if ( child.canHaveAccessibleDisplays() ) {
-              this._children[ i ].removeAccessibleDisplays( displays );
+              child.removeAccessibleDisplays( displays );
             }
           }
 
