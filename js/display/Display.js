@@ -305,7 +305,7 @@ define( function( require ) {
       this._rootAccessibleInstance = AccessibleInstance.createFromPool( null, this, new scenery.Trail() );
       sceneryLog && sceneryLog.AccessibleInstance && sceneryLog.AccessibleInstance(
         'Display root instance: ' + this._rootAccessibleInstance.toString() );
-      AccessibilityTree.initializeRoot( this._rootAccessibleInstance, this._rootNode );
+      AccessibilityTree.rebuildInstanceTree( this._rootAccessibleInstance );
 
       // add the accessible DOM as a child of this DOM element
       this._domElement.appendChild( this._rootAccessibleInstance.peer.primarySibling );

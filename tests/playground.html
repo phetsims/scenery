@@ -132,7 +132,9 @@ an UI and Display made for visual testing and debugging.
 
       window.accessibleTest = function() {
         setTimeout( function() {
-          scenery.enableLogging( [ 'AccessibleInstance', 'AccessibilityTree' ] )
+          scenery.enableLogging( [ 'AccessibleInstance', 'AccessibilityTree' ] );
+          toggleA11yDebug();
+          toggleUpdates();
 
           // TODO: Add initial tree remapping example here as a unit test
 
@@ -146,24 +148,22 @@ an UI and Display made for visual testing and debugging.
           // scene.addChild( b );
           // a.addChild( c );
 
-          window.a = new scenery.Node( { tagName: 'a' } );
-          window.b = new scenery.Node( { tagName: 'b' } );
-          window.c = new scenery.Node( { tagName: 'c' } );
-          window.d = new scenery.Node( { tagName: 'd' } );
-          window.e = new scenery.Node( { tagName: 'e' } );
-          window.f = new scenery.Node( { tagName: 'f' } );
 
-          scene.addChild( a );
-          a.addChild( b );
-          b.addChild( c );
-          b.addChild( e );
-          c.addChild( d );
-          c.addChild( f );
+          // debugAccessibleInstances();
+          // debugDOM();
 
-          b.accessibleOrder = [ e, c ];
+          scene.tagName = 'div';
+          scene.focusable = true;
 
-          debugAccessibleInstances();
-          debugDOM();
+          // invisible is deprecated don't use in future, this is a workaround for Nodes without bounds
+          window.a = new scenery.Node( { tagName: 'div', focusable: true, focusHighlight: 'invisible' } );
+          window.b = new scenery.Node( { tagName: 'div', focusable: true, focusHighlight: 'invisible' } );
+          window.c = new scenery.Node( { tagName: 'div', focusable: true, focusHighlight: 'invisible' } );
+          window.d = new scenery.Node( { tagName: 'div', focusable: true, focusHighlight: 'invisible' } );
+          window.e = new scenery.Node( { tagName: 'div', focusable: true, focusHighlight: 'invisible' } );
+          scene.children = [ a, b, c, d ];
+
+          a.focus();
         } )
       };
 

@@ -181,9 +181,10 @@ define( function( require ) {
 
       AccessibilityTree.beforeOp();
 
+      var i;
       var parents = node._accessibleParent ? [ node._accessibleParent ] : node._parents;
 
-      for ( var i = 0; i < parents.length; i++ ) {
+      for ( i = 0; i < parents.length; i++ ) {
         var parent = parents[ i ];
 
         var accessibleTrails = AccessibilityTree.findAccessibleTrails( parent );
@@ -198,6 +199,14 @@ define( function( require ) {
         }
       }
 
+      // An edge case is where we change the rootNode of the display (and don't have an effective parent)
+      for ( i = 0; i < node._rootedDisplays.length; i++ ) {
+        var display = node._rootedDisplays[ i ];
+        if ( display._accessible ) {
+          AccessibilityTree.rebuildInstanceTree( display._rootAccessibleInstance );
+        }
+      }
+
       AccessibilityTree.afterOp();
 
       sceneryLog && sceneryLog.AccessibilityTree && sceneryLog.pop();
@@ -208,9 +217,13 @@ define( function( require ) {
      * @public
      *
      * @param {AccessibleInstance} rootInstance
-     * @param {Node} rootNode
      */
-    initializeRoot: function( rootInstance, rootNode ) {
+    rebuildInstanceTree: function( rootInstance ) {
+      var rootNode = rootInstance.display.rootNode;
+      assert && assert( rootNode );
+
+      rootInstance.removeAllChildren();
+
       rootInstance.addConsecutiveInstances( AccessibilityTree.createTree( new scenery.Trail( rootNode ), rootInstance.display, rootInstance ) );
     },
 

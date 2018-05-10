@@ -236,6 +236,16 @@ define( function( require ) {
     },
 
     /**
+     * Removes all of the children.
+     * @public
+     */
+    removeAllChildren: function() {
+      while ( this.children.length ) {
+        this.children.pop().dispose();
+      }
+    },
+
+    /**
      * Remove a subtree of AccessibleInstances from this AccessibleInstance
      *
      * @param {Trail} trail - children of this AccessibleInstance will be removed if the child trails are extensions
@@ -451,27 +461,43 @@ define( function( require ) {
       assert && assert( this.trail.length === 0,
         'Should only call auditRoot() on the root AccessibleInstance for a display' );
 
-      function audit( nestedOrderArray, accessibleInstance ) {
-        assert && assert( nestedOrderArray.length === accessibleInstance.children.length,
+      function audit( fakeInstance, accessibleInstance ) {
+        assert && assert( fakeInstance.children.length === accessibleInstance.children.length,
           'Different number of children in accessible instance' );
 
-        _.each( nestedOrderArray, function( nestedChild ) {
-          var instance = _.find( accessibleInstance.children, function( childInstance ) {
-            return childInstance.trail.equals( nestedChild.trail );
-          } );
-          assert && assert( instance, 'Missing child accessible instance' );
+        assert && assert( fakeInstance.node === accessibleInstance.node, 'Node mismatch for AccessibleInstance' );
 
-          audit( nestedChild.children, instance );
-        } );
-
-        // Exact Order checks
-        for ( var i = 0; i < nestedOrderArray.length; i++ ) {
-          assert && assert( nestedOrderArray[ i ].trail.lastNode() === accessibleInstance.children[ i ].node,
-            'Accessible order mismatch' );
+        for ( var i = 0; i < accessibleInstance.children.length; i++ ) {
+          audit( fakeInstance.children[ i ], accessibleInstance.children[ i ] );
         }
       }
 
-      audit( this.display.rootNode.getNestedAccessibleOrder(), this );
+      audit( AccessibleInstance.createFakeAccessibleTree( this.display.rootNode ), this );
+    }
+  }, {
+    /**
+     * Creates a fake AccessibleInstance-like tree structure (with the equivalent nodes and children structure).
+     * For debugging.
+     * @private
+     *
+     * @param {Node} rootNode
+     * @return {Object} - Type FakeAccessibleInstance: { node: {Node}, children: {Array.<FakeAccessibleInstance>} }
+     */
+    createFakeAccessibleTree: function( rootNode ) {
+      function createFakeTree( node ) {
+        var fakeInstances = _.flatten( node.getEffectiveChildren().map( createFakeTree ) );
+        if ( node.accessibleContent ) {
+          fakeInstances = [ {
+            node: node,
+            children: fakeInstances
+          } ];
+        }
+        return fakeInstances;
+      }
+      return {
+        node: null,
+        children: createFakeTree( rootNode )
+      };
     }
   } );
 
