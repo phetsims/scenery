@@ -375,8 +375,9 @@ define( function( require ) {
           this.focusChangedEmitter = new Emitter();
 
           // @private {Array.<Node>} - (a11y) If provided, it will override the focus order between children (and optionally
-          // descendants). If not provided, the focus order will default to the rendering order (first children first, last
-          // children last) determined by the children array.
+          // aribitrary subtrees). If not provided, the focus order will default to the rendering order (first children
+          // first, last children last) determined by the children array.
+          // See setAccessibleOrder() for more documentation.
           this._accessibleOrder = [];
 
           // @public (scenery-internal) {Node|null} - (a11y) If this node is specified in another node's
@@ -1293,9 +1294,53 @@ define( function( require ) {
         /**
          * Sets the accessible focus order for this node. This includes not only focused items, but elements that can be
          * placed in the parallel DOM. If provided, it will override the focus order between children (and
-         * optionally descendants). If not provided, the focus order will default to the rendering order (first children
-         * first, last children last), determined by the children array.
+         * optionally arbitrary subtrees). If not provided, the focus order will default to the rendering order
+         * (first children first, last children last), determined by the children array.
          * @public
+         *
+         * In the general case, when an accessible order is specified, it's an array of nodes, with optionally one
+         * element being a placeholder for "the rest of the children", signified by null. This means that, for
+         * accessibility, it will act as if the children for this node WERE the accessibleOrder (potentially
+         * supplemented with other children via the placeholder).
+         *
+         * For example, if you have the tree:
+         *   a
+         *     b
+         *       d
+         *       e
+         *     c
+         *       g
+         *       f
+         *         h
+         *
+         * and we specify b.accessibleOrder = [ e, f, d, c ], then the accessible structure will act as if the tree is:
+         *  a
+         *    b
+         *      e
+         *      f <--- the entire subtree of `f` gets placed here under `b`, pulling it out from where it was before.
+         *        h
+         *      d
+         *      c <--- note that `g` is NOT under `c` anymore, because it got pulled out under b directly
+         *        g
+         *
+         * The placeholder (`null`) will get filled in with all direct children that are NOT in any accessibleOrder.
+         * If there is no placeholder specified, it will act as if the placeholder is at the end of the order.
+         * An empty order (`[]`), the default, acts as consistently, as if only the placeholder (`[null]`) was
+         * specified.
+         *
+         * Some general constraints for the orders are:
+         * - You can't specify a node in more than one accessibleOrder, and you can't specify duplicates of a value
+         *   in an accessibleOrder.
+         * - You can't specify an ancestor of a node in that node's accessibleOrder
+         *   (e.g. this.accessibleOrder = this.parents ).
+         *
+         * Note that specifying something in an accessibleOrder will effectively remove it from all of its parents for
+         * the accessible tree (so if you create `tmpNode.accessibleOrder = [ a ]` then toss the tmpNode without
+         * disposing it, `a` won't show up in the parallel DOM). If there is a need for that, disposing a Node
+         * effectively removes its accessibleOrder.
+         *
+         * See https://github.com/phetsims/scenery-phet/issues/365#issuecomment-381302583 for more information on the
+         * decisions and design for this feature.
          *
          * @param {Array.<Node|null>} accessibleOrder
          */
