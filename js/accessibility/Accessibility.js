@@ -149,12 +149,18 @@ define( function( require ) {
   var ACCESSIBILITY_OPTION_KEYS = [
 
     'containerTagName', // Sets the tag name for an [optional] element that contains this Node's siblings, see setContainerTagName()
+    'containerAriaRole', // Sets the ARIA role for the container parent DOM element, see setContainerAriaRole()
 
     'tagName', // Sets the tag name for the primary sibling DOM element in the parallel DOM
     'innerContent', // Sets the inner text or HTML for a node's primary sibling element, see setInnerContent()
     'inputType', // Sets the input type for the primary sibling DOM element, only relevant if tagName is 'input'
     'inputValue', // Sets the input value for the primary sibling DOM element, only relevant if tagName is 'input'
     'accessibleChecked', // Sets the 'checked' state for inputs of type 'radio' and 'checkbox', see setAccessibleChecked()
+    'ariaLabel', // Sets the value of the 'aria-label' attribute on the primary sibling of this Node, see setAriaLabel()
+    'ariaRole', // Sets the ARIA role for the primary sibling of this Node, see setAriaRole()
+    'ariaLabelContent', // Sets the content that will label another node through aria-labelledby, see setAriaLabelledByContent()
+    'ariaDescribedContent', // Sets the content that will be described by another node through aria-describedby, see setAriaDescribedContent()
+    'ariaLabelledContent', // sets the content that will be labelled by another node through aria-labelledby, see setAriaLabelledContent()
 
     'labelTagName', // Sets the tag name for the DOM element sibling labelling this node, see setLabelTagName()
     'labelContent', // Sets the label content for the node, see setLabelContent()
@@ -163,6 +169,7 @@ define( function( require ) {
     'descriptionTagName', // Sets the tag name for the DOM element sibling describing this node, see setDescriptionTagName()
     'descriptionContent', // Sets the description content for the node, see setDescriptionContent()
     'appendDescription', // Sets the description sibling to come after the primary sibling in the pDOM, see setAppendDescription()
+    'ariaDescriptionContent', // Sets the content that will describe another node through aria-describedby, see setAriaDescriptionContent()
 
     'focusHighlight', // Sets the focus highlight for the node, see setFocusHighlight()
     'focusHighlightLayerable', // Flag to determine if the focus highlight node can be layered in the scene graph, see setFocusHighlightLayerable()
@@ -170,13 +177,6 @@ define( function( require ) {
     'accessibleVisible', // Sets whether or not the node's DOM element is visible in the parallel DOM, see setAccessibleVisible()
     'accessibleContentDisplayed', // Sets whether or not the accessible content of the node (and its subtree) is displayed, see setAccessibleContentDisplayed()
     'focusable', // Sets whether or not the node can receive keyboard focus, see setFocusable()
-    'ariaLabel', // Sets the value of the 'aria-label' attribute on the primary sibling of this Node, see setAriaLabel()
-    'ariaRole', // Sets the ARIA role for the primary sibling of this Node, see setAriaRole()
-    'containerAriaRole', // Sets the ARIA role for the container parent DOM element, see setContainerAriaRole()
-    'ariaDescriptionContent', // Sets the content that will describe another node through aria-describedby, see setAriaDescriptionContent()
-    'ariaLabelContent', // Sets the content that will label another node through aria-labelledby, see setAriaLabelledByContent()
-    'ariaDescribedContent', // Sets the content that will be described by another node through aria-describedby, see setAriaDescribedContent()
-    'ariaLabelledContent', // sets the content that will be labelled by another node through aria-labelledby, see setAriaLabelledContent()
     'accessibleOrder', // Modifies the order of accessible  navigation, see setAccessibleOrder()
     'accessibleContent' // Sets up accessibility handling (probably don't need to use this), see setAccessibleContent()
   ];
