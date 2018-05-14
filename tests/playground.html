@@ -181,6 +181,31 @@ an UI and Display made for visual testing and debugging.
         } )
       };
 
+      window.focusTest = function() {
+        setTimeout( function() {
+          toggleUpdates();
+          display.initializeEvents();
+
+          var button = new scenery.Rectangle( 10, 10, 100, 60, {
+            fill: 'gray',
+            tagName: 'div',
+            focusable: true
+          } );
+          button.addAccessibleInputListener( {
+            click: function( domEvent, trail ) {
+              console.log( param1, param2 );
+            }
+          } );
+          scene.addChild( new scenery.Node( {
+            children: [ button ]
+          } ) );
+          scene.addChild( new scenery.Node( {
+            children: [ button ],
+            y: 100
+          } ) );
+        } );
+      };
+
       window.debugAccessibleInstances = function() {
         recurse( display._rootAccessibleInstance, '' );
         function recurse( instance, indentation ) {

@@ -517,12 +517,12 @@ define( function( require ) {
          * @returns {boolean}
          */
         isFocused: function() {
-          var isFocused = false;
-          if ( this._accessibleInstances.length > 0 ) {
-            isFocused = document.activeElement === this._accessibleInstances[ 0 ].peer.primarySibling;
+          for ( var i = 0; i < this._accessibleInstances.length; i++ ) {
+            if ( document.activeElement === this._accessibleInstances[ i ].peer.primarySibling ) {
+              return true;
+            }
           }
-
-          return isFocused;
+          return false;
         },
         get focused() { return this.isFocused(); },
 
