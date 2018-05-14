@@ -1356,7 +1356,10 @@ define( function( require ) {
           // Only update if it has changed
           if ( this._accessibleOrder !== accessibleOrder ) {
             var oldAccessibleOrder = this._accessibleOrder;
-            this._accessibleOrder = accessibleOrder;
+
+            // Store our own reference to this, so client modifications to the input array won't silently break things.
+            // See https://github.com/phetsims/scenery/issues/786
+            this._accessibleOrder = accessibleOrder.slice();
 
             AccessibilityTree.accessibleOrderChange( this, oldAccessibleOrder, accessibleOrder );
 
