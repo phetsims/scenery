@@ -383,11 +383,14 @@ define( function( require ) {
      * @public (scenery-internal)
      */
     sortChildren: function() {
+      // It's simpler/faster to just grab our order directly with one recursion, rather than specifying a sorting
+      // function (since a lot gets re-evaluated in that case).
       var targetChildren = this.getChildOrdering( new scenery.Trail( this.isRootInstance ? this.display.rootNode : this.node ) );
 
       assert && assert( targetChildren.length === this.children.length );
       this.children = targetChildren;
 
+      // Reorder DOM elements in a way that doesn't do any work if they are already in a sorted order.
       var containerElement = this.peer.getChildContainerElement();
       for ( var n = this.children.length - 1; n >= 0; n-- ) {
         var peerDOMElement = this.children[ n ].peer.getContainerParent();

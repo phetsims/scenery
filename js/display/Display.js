@@ -268,7 +268,7 @@ define( function( require ) {
     // global reference if we have a Display (useful)
     this.scenery = scenery;
 
-    // @public (scenery-internal) {boolean}
+    // @public (scenery-internal) {boolean} - Whether accessibility is enabled for this particular display.
     this._accessible = this.options.accessibility;
 
     if ( this.options.accessibility ) {
