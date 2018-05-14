@@ -503,6 +503,8 @@ define( function( require ) {
          * @public (scenery-internal)
          */
         disposeAccessibility: function() {
+          // To prevent memory leaks, we want to clear our order (since otherwise nodes in our order will reference
+          // this node).
           this.accessibleOrder = [];
 
           this.removeAllAccessibleInputListeners();
@@ -1346,8 +1348,9 @@ define( function( require ) {
          */
         setAccessibleOrder: function( accessibleOrder ) {
           assert && assert( Array.isArray( accessibleOrder ), 'Array expected, received: ' + typeof accessibleOrder );
-          assert && accessibleOrder.forEach( function( node ) {
-            assert( node === null || node instanceof scenery.Node );
+          assert && accessibleOrder.forEach( function( node, index ) {
+            assert( node === null || node instanceof scenery.Node,
+              'Elements of accessibleOrder should be either a Node or null. Element at index ' + index + ' is: ' + node );
           } );
 
           // Only update if it has changed
@@ -1374,9 +1377,30 @@ define( function( require ) {
         get accessibleOrder() { return this.getAccessibleOrder(); },
 
         /**
+         * Returns our "accessible parent" if available: the node that specifies this node in its accessibleOrder.
+         * @public
+         *
+         * @returns {Node|null}
+         */
+        getAccessibleParent: function() {
+          return this._accessibleParent;
+        },
+        get accessibleParent() { return this.getAccessibleParent(); },
+
+        /**
          * Returns the "effective" a11y children for the node (which may be different based on the order or other
          * excluded subtrees).
          * @public
+         *
+         * If there is no accessibleOrder specified, this is basically "all children that don't have accessible panrets"
+         * (a node has an "accessible parent" if it is specified in an accessibleOrder).
+         *
+         * Otherwise (if it has an accessibleOrder), it is the accessibleOrder, with the above list of nodes placed
+         * in at the location of the placeholder. If there is no placeholder, it acts like a placeholder was the last
+         * element of the accessibleOrder (see setAccessibleOrder for more documentation information).
+         *
+         * NOTE: If you specify a child in the accessibleOrder, it will NOT be double-included (since it will have an
+         * accessible parent).
          *
          * @returns {Array.<Node>}
          */
@@ -1824,9 +1848,12 @@ define( function( require ) {
             var wasAccessible = !( Renderer.bitmaskNotAccessible & oldBitmask );
             var isAccessible = !( Renderer.bitmaskNotAccessible & newBitmask );
 
+            // If we changed to be accessible, we need to recursively add accessible displays.
             if ( isAccessible && !wasAccessible ) {
               this.addAllAccessibleDisplays();
             }
+
+            // If we changed to NOT be accessible, we need to recursively remove accessible displays.
             if ( !isAccessible && wasAccessible ) {
               this.removeAllAccessibleDisplays();
             }
@@ -1959,6 +1986,7 @@ define( function( require ) {
          * Update all AccessiblePeers representing this node with the callback, which takes the AccessiblePeer
          * as an argument.
          * @private
+         *
          * @param {function} callback
          */
         updateAccessiblePeers: function( callback ) {
@@ -2039,12 +2067,14 @@ define( function( require ) {
 
           assert && assert( Array.isArray( displays ) );
 
+          // Simplifies things if we can stop no-ops here.
           if ( displays.length === 0 ) {
             return;
           }
 
           Array.prototype.push.apply( this._accessibleDisplays, displays );
 
+          // Propagate the change to our children
           for ( var i = 0; i < this._children.length; i++ ) {
             var child = this._children[ i ];
             if ( child.canHaveAccessibleDisplays() ) {
@@ -2070,6 +2100,7 @@ define( function( require ) {
           assert && assert( Array.isArray( displays ) );
           assert && assert( this._accessibleDisplays.length >= displays.length );
 
+          // Simplifies things if we can stop no-ops here.
           if ( displays.length === 0 ) {
             return;
           }
@@ -2082,6 +2113,7 @@ define( function( require ) {
             this._accessibleDisplays.splice( i, 1 );
           }
 
+          // Propagate the change to our children
           for ( i = 0; i < this._children.length; i++ ) {
             var child = this._children[ i ];
             // NOTE: Since this gets called many times from the RendererSummary (which happens before the actual child

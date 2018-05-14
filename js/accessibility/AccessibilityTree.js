@@ -17,13 +17,6 @@ define( function( require ) {
   // commented out so Require.js doesn't balk at the circular dependency
   // var Trail = require( 'SCENERY/util/Trail' );
 
-  // constants
-  var DEBUG_ORDER = function( accessibleOrder ) {
-    return '[' + accessibleOrder.map( function( nodeOrNull ) {
-      return nodeOrNull === null ? 'null' : nodeOrNull._id;
-    } ).join( ',' ) + ']';
-  };
-
   // globals (for restoring focus)
   var focusedNode = null;
 
@@ -89,7 +82,7 @@ define( function( require ) {
      * @param {Array.<Node|null>} newOrder
      */
     accessibleOrderChange: function( node, oldOrder, newOrder ) {
-      sceneryLog && sceneryLog.AccessibilityTree && sceneryLog.AccessibilityTree( 'accessibleOrderChange n#' + node._id + ': ' + DEBUG_ORDER( oldOrder ) + ',' + DEBUG_ORDER( newOrder ) );
+      sceneryLog && sceneryLog.AccessibilityTree && sceneryLog.AccessibilityTree( 'accessibleOrderChange n#' + node._id + ': ' + AccessibilityTree.debugOrder( oldOrder ) + ',' + AccessibilityTree.debugOrder( newOrder ) );
       sceneryLog && sceneryLog.AccessibilityTree && sceneryLog.push();
 
       assert && assert( node instanceof scenery.Node );
@@ -101,8 +94,8 @@ define( function( require ) {
 
       arrayDifference( oldOrder, newOrder, removedItems, addedItems );
 
-      sceneryLog && sceneryLog.AccessibilityTree && sceneryLog.AccessibilityTree( 'removed: ' + DEBUG_ORDER( removedItems ) );
-      sceneryLog && sceneryLog.AccessibilityTree && sceneryLog.AccessibilityTree( 'added: ' + DEBUG_ORDER( addedItems ) );
+      sceneryLog && sceneryLog.AccessibilityTree && sceneryLog.AccessibilityTree( 'removed: ' + AccessibilityTree.debugOrder( removedItems ) );
+      sceneryLog && sceneryLog.AccessibilityTree && sceneryLog.AccessibilityTree( 'added: ' + AccessibilityTree.debugOrder( addedItems ) );
 
       var i;
       var j;
@@ -324,7 +317,7 @@ define( function( require ) {
       var node = trail.lastNode();
       var effectiveChildren = node.getEffectiveChildren();
 
-      sceneryLog && sceneryLog.AccessibilityTree && sceneryLog.AccessibilityTree( 'effectiveChildren: ' + DEBUG_ORDER( effectiveChildren ) );
+      sceneryLog && sceneryLog.AccessibilityTree && sceneryLog.AccessibilityTree( 'effectiveChildren: ' + AccessibilityTree.debugOrder( effectiveChildren ) );
 
       // If we are accessible ourself, we need to create the instance (so we can provide it to child instances).
       var instance = null;
@@ -479,6 +472,19 @@ define( function( require ) {
           assertSlow( node._accessibleDisplays.length === 0, 'Invisible/nonaccessible things should have no displays' );
         }
       }
+    },
+
+    /**
+     * Returns a string representation of an order (using Node ids) for debugging.
+     * @private
+     *
+     * @param {Array.<Node|null>} accessibleOrder
+     * @returns {string}
+     */
+    debugOrder: function( accessibleOrder ) {
+      return '[' + accessibleOrder.map( function( nodeOrNull ) {
+        return nodeOrNull === null ? 'null' : nodeOrNull._id;
+      } ).join( ',' ) + ']';
     }
   };
 
