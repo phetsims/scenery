@@ -32,7 +32,7 @@ define( function( require ) {
 
   var accessibleContent = {
     createPeer: function( accessibleInstance ) {
-      return new AccessiblePeer( accessibleInstance, document.createElement( 'div' ) );
+      return AccessiblePeer.createFromPool( accessibleInstance, document.createElement( 'div' ) );
     }
   };
 

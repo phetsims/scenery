@@ -118,7 +118,7 @@ define( function( require ) {
 
         // give the container a class name so it is hidden in the Display, see accessibility styling in Display.js
         accessibilityContainer.className = 'accessibility';
-        this.peer = new AccessiblePeer( this, accessibilityContainer );
+        this.peer = AccessiblePeer.createFromPool( this, accessibilityContainer );
 
         var self = this;
         document.body.addEventListener( 'keydown', function( event ) {
@@ -411,8 +411,6 @@ define( function( require ) {
 
       // Disconnect DOM and remove listeners
       if ( !this.isRootInstance ) {
-        this.peer.dispose();
-
         // remove this peer's primary sibling DOM Element (or its container parent) from the parent peer's
         // primary sibling (or its child container)
         this.parent.peer.primarySibling.removeChild( this.peer.getContainerParent() );
@@ -425,6 +423,10 @@ define( function( require ) {
       while ( this.children.length ) {
         this.children.pop().dispose();
       }
+
+      // NOTE: We dispose OUR peer after disposing children, so our peer can be available for our children during
+      // disposal.
+      this.peer.dispose();
 
       // If we are the root accessible instance, we won't actually have a reference to a node.
       if ( this.node ) {

@@ -104,7 +104,7 @@ define( function( require ) {
             descriptionSibling.id = 'description-' + uniqueId;
           }
 
-          var accessiblePeer = new AccessiblePeer( accessibleInstance, primarySibling, {
+          var accessiblePeer = AccessiblePeer.createFromPool( accessibleInstance, primarySibling, {
             containerParent: containerElement,
             labelSibling: labelSibling,
             descriptionSibling: descriptionSibling
