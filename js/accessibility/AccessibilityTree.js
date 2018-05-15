@@ -272,7 +272,10 @@ define( function( require ) {
       for ( var i = 0; i < accessibleTrails.length; i++ ) {
         var partialTrail = accessibleTrails[ i ];
 
+        // The full trail doesn't have the child in it, so we temporarily add that for tree removal
+        partialTrail.fullTrail.addDescendant( child );
         partialTrail.accessibleInstance.removeInstancesForTrail( partialTrail.fullTrail );
+        partialTrail.fullTrail.removeDescendant( child );
       }
 
       sceneryLog && sceneryLog.AccessibilityTree && sceneryLog.pop();

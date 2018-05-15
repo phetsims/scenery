@@ -192,6 +192,10 @@ define( function( require ) {
      * @param {Array.<AccessibleInstance>} accessibleInstances
      */
     addConsecutiveInstances: function( accessibleInstances ) {
+      sceneryLog && sceneryLog.AccessibleInstance && sceneryLog.AccessibleInstance(
+        'addConsecutiveInstances on ' + this.toString() + ' with: ' + accessibleInstances.map( function( inst ) { return inst.toString(); } ).join( ',' ) );
+      sceneryLog && sceneryLog.AccessibleInstance && sceneryLog.push();
+
       var hadChildren = this.children.length > 0;
 
       Array.prototype.push.apply( this.children, accessibleInstances );
@@ -205,6 +209,8 @@ define( function( require ) {
       if ( hadChildren ) {
         this.sortChildren();
       }
+
+      sceneryLog && sceneryLog.AccessibleInstance && sceneryLog.pop();
     },
 
     /**
@@ -214,6 +220,10 @@ define( function( require ) {
      * @param {Trail} trail
      */
     removeInstancesForTrail: function( trail ) {
+      sceneryLog && sceneryLog.AccessibleInstance && sceneryLog.AccessibleInstance(
+        'removeInstancesForTrail on ' + this.toString() + ' with trail ' + trail.toString() );
+      sceneryLog && sceneryLog.AccessibleInstance && sceneryLog.push();
+
       for ( var i = 0; i < this.children.length; i++ ) {
         var childInstance = this.children[ i ];
         var childTrail = childInstance.trail;
@@ -235,6 +245,8 @@ define( function( require ) {
           i -= 1;
         }
       }
+
+      sceneryLog && sceneryLog.AccessibleInstance && sceneryLog.pop();
     },
 
     /**
@@ -242,9 +254,14 @@ define( function( require ) {
      * @public
      */
     removeAllChildren: function() {
+      sceneryLog && sceneryLog.AccessibleInstance && sceneryLog.AccessibleInstance( 'removeAllChildren on ' + this.toString() );
+      sceneryLog && sceneryLog.AccessibleInstance && sceneryLog.push();
+
       while ( this.children.length ) {
         this.children.pop().dispose();
       }
+
+      sceneryLog && sceneryLog.AccessibleInstance && sceneryLog.pop();
     },
 
     /**
