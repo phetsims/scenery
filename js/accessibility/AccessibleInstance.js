@@ -101,7 +101,7 @@ define( function( require ) {
       this.peer = null; // Filled in below
 
       // @private {number} - The number of nodes in our trail that are NOT in our parent's trail and do NOT have our
-      // display in their _accessibleDisplays. For non-root instances, this is initialized later in the constructor.
+      // display in their accessibleDisplays. For non-root instances, this is initialized later in the constructor.
       this.invisibleCount = 0;
 
       // @private {Array.<Node>} - Nodes that are in our trail (but not those of our parent)
@@ -164,7 +164,7 @@ define( function( require ) {
           var relativeNode = trail.nodes[ i ];
           this.relativeNodes.push( relativeNode );
 
-          var accessibleDisplays = relativeNode._accessibleDisplays;
+          var accessibleDisplays = relativeNode._accessibleDisplaysInfo.accessibleDisplays;
           var isVisible = _.includes( accessibleDisplays, display );
           this.relativeVisibilities.push( isVisible );
           if ( !isVisible ) {
@@ -281,7 +281,7 @@ define( function( require ) {
      * @param {number} index - Index into the relativeNodes array (which node had the notification)
      */
     checkAccessibleDisplayVisibility: function( index ) {
-      var isNodeVisible = _.includes( this.relativeNodes[ index ]._accessibleDisplays, this.display );
+      var isNodeVisible = _.includes( this.relativeNodes[ index ]._accessibleDisplaysInfo.accessibleDisplays, this.display );
       var wasNodeVisible = this.relativeVisibilities[ index ];
 
       if ( isNodeVisible !== wasNodeVisible ) {

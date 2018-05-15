@@ -125,6 +125,7 @@ define( function( require ) {
   // modules
   var AccessibilityTree = require( 'SCENERY/accessibility/AccessibilityTree' );
   var AccessibilityUtil = require( 'SCENERY/accessibility/AccessibilityUtil' );
+  var AccessibleDisplaysInfo = require( 'SCENERY/accessibility/AccessibleDisplaysInfo' );
   var AccessiblePeer = require( 'SCENERY/accessibility/AccessiblePeer' );
   var Emitter = require( 'AXON/Emitter' );
   var extend = require( 'PHET_CORE/extend' );
@@ -384,16 +385,9 @@ define( function( require ) {
           // accessibleOrder, then this will have the value of that other (accessible parent) node. Otherwise it's null.
           this._accessibleParent = null;
 
-          // @public (scenery-internal) {Array.<Display>} - (duplicates allowed) - There is one copy of each accessible
-          // Display for each trail (from its root node to this node) that is fully visible (assuming this subtree is
-          // accessible).
-          // Thus, the value of this is:
-          // - If this node is invisible OR the subtree has no accessibleContent/accessibleOrder: []
-          // - Otherwise, it is the concatenation of our parents' accessibleDisplays (AND any accessible displays rooted
-          //   at this node).
-          // This value is synchronously updated, and supports accessibleInstances by letting them know when certain
-          // nodes are visible on the display.
-          this._accessibleDisplays = [];
+          // @public (scenery-internal) {AccessibleDisplaysInfo} - Contains information about what accessible displays
+          // this node is "visible" for, see AccessibleDisplaysInfo.js for more information.
+          this._accessibleDisplaysInfo = new AccessibleDisplaysInfo( this );
 
           // @private {Object|null} - If non-null, this node will be represented in the parallel DOM by the accessible content.
           // The accessibleContent object will be of the form:
@@ -1825,9 +1819,7 @@ define( function( require ) {
           sceneryLog && sceneryLog.Accessibility && sceneryLog.Accessibility( 'onAccessibleAddChild n#' + node.id + ' (parent:n#' + this.id + ')' );
           sceneryLog && sceneryLog.Accessibility && sceneryLog.push();
 
-          if ( node.canHaveAccessibleDisplays() ) {
-            node.addAccessibleDisplays( this._accessibleDisplays );
-          }
+          this._accessibleDisplaysInfo.onAddChild( node );
 
           AccessibilityTree.addChild( this, node );
 
@@ -1845,9 +1837,7 @@ define( function( require ) {
           sceneryLog && sceneryLog.Accessibility && sceneryLog.Accessibility( 'onAccessibleRemoveChild n#' + node.id + ' (parent:n#' + this.id + ')' );
           sceneryLog && sceneryLog.Accessibility && sceneryLog.push();
 
-          if ( node.canHaveAccessibleDisplays() ) {
-            node.removeAccessibleDisplays( this._accessibleDisplays );
-          }
+          this._accessibleDisplaysInfo.onRemoveChild( node );
 
           AccessibilityTree.removeChild( this, node );
 
@@ -1865,21 +1855,7 @@ define( function( require ) {
           sceneryLog && sceneryLog.Accessibility && sceneryLog.Accessibility( 'onAccessibleSummaryChange n#' + this.id + ' wasA11y:' + !( Renderer.bitmaskNotAccessible & oldBitmask ) + ', isA11y:' + !( Renderer.bitmaskNotAccessible & newBitmask ) );
           sceneryLog && sceneryLog.Accessibility && sceneryLog.push();
 
-          // If we are invisible, our accessibleDisplays would not have changed ([] => [])
-          if ( this.visible && this.accessibleVisible ) {
-            var wasAccessible = !( Renderer.bitmaskNotAccessible & oldBitmask );
-            var isAccessible = !( Renderer.bitmaskNotAccessible & newBitmask );
-
-            // If we changed to be accessible, we need to recursively add accessible displays.
-            if ( isAccessible && !wasAccessible ) {
-              this.addAllAccessibleDisplays();
-            }
-
-            // If we changed to NOT be accessible, we need to recursively remove accessible displays.
-            if ( !isAccessible && wasAccessible ) {
-              this.removeAllAccessibleDisplays();
-            }
-          }
+          this._accessibleDisplaysInfo.onSummaryChange( oldBitmask, newBitmask );
 
           sceneryLog && sceneryLog.Accessibility && sceneryLog.pop();
         },
@@ -1894,15 +1870,7 @@ define( function( require ) {
           sceneryLog && sceneryLog.Accessibility && sceneryLog.Accessibility( 'onAccessibleVisibilityChange n#' + this.id + ' visible:' + visible );
           sceneryLog && sceneryLog.Accessibility && sceneryLog.push();
 
-          // If we are not accessible (or accessibleVisible), our accessibleDisplays would not have changed ([] => [])
-          if ( this.accessibleVisible && !this._rendererSummary.isNotAccessible() ) {
-            if ( visible ) {
-              this.addAllAccessibleDisplays();
-            }
-            else {
-              this.removeAllAccessibleDisplays();
-            }
-          }
+          this._accessibleDisplaysInfo.onVisibilityChange( visible );
 
           sceneryLog && sceneryLog.Accessibility && sceneryLog.pop();
         },
@@ -1919,15 +1887,7 @@ define( function( require ) {
           sceneryLog && sceneryLog.Accessibility && sceneryLog.Accessibility( 'onAccessibleAccessibleVisibilityChange n#' + this.id + ' accessibleVisible:' + visible );
           sceneryLog && sceneryLog.Accessibility && sceneryLog.push();
 
-          // If we are not accessible, our accessibleDisplays would not have changed ([] => [])
-          if ( this.visible && !this._rendererSummary.isNotAccessible() ) {
-            if ( visible ) {
-              this.addAllAccessibleDisplays();
-            }
-            else {
-              this.removeAllAccessibleDisplays();
-            }
-          }
+          this._accessibleDisplaysInfo.onAccessibleVisibilityChange( visible );
 
           sceneryLog && sceneryLog.Accessibility && sceneryLog.pop();
         },
@@ -1942,9 +1902,7 @@ define( function( require ) {
           sceneryLog && sceneryLog.Accessibility && sceneryLog.Accessibility( 'onAccessibleAddedRootedDisplay n#' + this.id );
           sceneryLog && sceneryLog.Accessibility && sceneryLog.push();
 
-          if ( display._accessible && this.canHaveAccessibleDisplays() ) {
-            this.addAccessibleDisplays( [ display ] );
-          }
+          this._accessibleDisplaysInfo.onAddedRootedDisplay( display );
 
           sceneryLog && sceneryLog.Accessibility && sceneryLog.pop();
         },
@@ -1959,9 +1917,7 @@ define( function( require ) {
           sceneryLog && sceneryLog.Accessibility && sceneryLog.Accessibility( 'onAccessibleRemovedRootedDisplay n#' + this.id );
           sceneryLog && sceneryLog.Accessibility && sceneryLog.push();
 
-          if ( display._accessible && this.canHaveAccessibleDisplays() ) {
-            this.removeAccessibleDisplays( [ display ] );
-          }
+          this._accessibleDisplaysInfo.onRemovedRootedDisplay( display );
 
           sceneryLog && sceneryLog.Accessibility && sceneryLog.pop();
         },
@@ -2015,140 +1971,6 @@ define( function( require ) {
           for ( var i = 0; i < this._accessibleInstances.length; i++ ) {
             this._accessibleInstances[ i ].peer && callback( this._accessibleInstances[ i ].peer );
           }
-        },
-
-        /**
-         * Returns whether we can have accessibleDisplays specified in our array.
-         * @public (scenery-internal)
-         *
-         * @returns {boolean}
-         */
-        canHaveAccessibleDisplays: function() {
-          return this.visible && this.accessibleVisible && !this._rendererSummary.isNotAccessible();
-        },
-
-        /**
-         * Adds all of our accessible displays to our array (and propagates).
-         * @private
-         */
-        addAllAccessibleDisplays: function() {
-          sceneryLog && sceneryLog.Accessibility && sceneryLog.Accessibility( 'addAllAccessibleDisplays n#' + this.id );
-          sceneryLog && sceneryLog.Accessibility && sceneryLog.push();
-
-          assert && assert( this._accessibleDisplays.length === 0, 'Should be empty before adding everything' );
-          assert && assert( this.canHaveAccessibleDisplays(), 'Should happen when we can store accessibleDisplays' );
-
-          var i;
-          var displays = [];
-
-          // Concatenation of our parents' accessibleDisplays
-          for ( i = 0; i < this._parents.length; i++ ) {
-            Array.prototype.push.apply( displays, this._parents[ i ]._accessibleDisplays );
-          }
-
-          // AND any acessible displays rooted at this node
-          for ( i = 0; i < this._rootedDisplays.length; i++ ) {
-            var display = this._rootedDisplays[ i ];
-            if ( display._accessible ) {
-              displays.push( display );
-            }
-          }
-
-          this.addAccessibleDisplays( displays );
-
-          sceneryLog && sceneryLog.Accessibility && sceneryLog.pop();
-        },
-
-        /**
-         * Removes all of our accessible displays from our array (and propagates).
-         * @private
-         */
-        removeAllAccessibleDisplays: function() {
-          sceneryLog && sceneryLog.Accessibility && sceneryLog.Accessibility( 'removeAllAccessibleDisplays n#' + this.id );
-          sceneryLog && sceneryLog.Accessibility && sceneryLog.push();
-
-          assert && assert( !this.canHaveAccessibleDisplays(), 'Should happen when we cannot store accessibleDisplays' );
-
-          // TODO: is there a way to avoid a copy?
-          this.removeAccessibleDisplays( this._accessibleDisplays.slice() );
-
-          assert && assert( this._accessibleDisplays.length === 0, 'Should be empty after removing everything' );
-
-          sceneryLog && sceneryLog.Accessibility && sceneryLog.pop();
-        },
-
-        /**
-         * Adds a list of accessible displays to our internal list. See _accessibleDisplays documentation.
-         * @public (scenery-internal)
-         *
-         * @param {Array.<Display>} displays
-         */
-        addAccessibleDisplays: function( displays ) {
-          sceneryLog && sceneryLog.Accessibility && sceneryLog.Accessibility( 'addAccessibleDisplays n#' + this.id + ' numDisplays:' + displays.length );
-          sceneryLog && sceneryLog.Accessibility && sceneryLog.push();
-
-          assert && assert( Array.isArray( displays ) );
-
-          // Simplifies things if we can stop no-ops here.
-          if ( displays.length === 0 ) {
-            return;
-          }
-
-          Array.prototype.push.apply( this._accessibleDisplays, displays );
-
-          // Propagate the change to our children
-          for ( var i = 0; i < this._children.length; i++ ) {
-            var child = this._children[ i ];
-            if ( child.canHaveAccessibleDisplays() ) {
-              this._children[ i ].addAccessibleDisplays( displays );
-            }
-          }
-
-          this.trigger0( 'accessibleDisplays' );
-
-          sceneryLog && sceneryLog.Accessibility && sceneryLog.pop();
-        },
-
-        /**
-         * Removes a list of accessible displays from our internal list. See _accessibleDisplays documentation.
-         * @public (scenery-internal)
-         *
-         * @param {Array.<Display>} displays
-         */
-        removeAccessibleDisplays: function( displays ) {
-          sceneryLog && sceneryLog.Accessibility && sceneryLog.Accessibility( 'removeAccessibleDisplays n#' + this.id + ' numDisplays:' + displays.length );
-          sceneryLog && sceneryLog.Accessibility && sceneryLog.push();
-
-          assert && assert( Array.isArray( displays ) );
-          assert && assert( this._accessibleDisplays.length >= displays.length );
-
-          // Simplifies things if we can stop no-ops here.
-          if ( displays.length === 0 ) {
-            return;
-          }
-
-          var i;
-
-          for ( i = displays.length - 1; i >= 0; i-- ) {
-            var index = this._accessibleDisplays.lastIndexOf( displays[ i ] );
-            assert && assert( index >= 0 );
-            this._accessibleDisplays.splice( i, 1 );
-          }
-
-          // Propagate the change to our children
-          for ( i = 0; i < this._children.length; i++ ) {
-            var child = this._children[ i ];
-            // NOTE: Since this gets called many times from the RendererSummary (which happens before the actual child
-            // modification happens), we DO NOT want to traverse to the child node getting removed. Ideally a better
-            // solution than this flag should be found.
-            if ( child.canHaveAccessibleDisplays() && !child._isGettingRemovedFromParent ) {
-              child.removeAccessibleDisplays( displays );
-            }
-          }
-
-          this.trigger0( 'accessibleDisplays' );
-
-          sceneryLog && sceneryLog.Accessibility && sceneryLog.pop();
         }
       } );
 
