@@ -1346,6 +1346,9 @@ define( function( require ) {
             assert( node === null || node instanceof scenery.Node,
               'Elements of accessibleOrder should be either a Node or null. Element at index ' + index + ' is: ' + node );
           } );
+          assert && accessibleOrder && assert( this.getTrails( function( node ) {
+            return _.includes( accessibleOrder, node );
+          } ).length === 0, 'accessibleOrder should not include any ancestors or the node itself' );
 
           // Only update if it has changed
           if ( this._accessibleOrder !== accessibleOrder ) {
@@ -1817,6 +1820,16 @@ define( function( require ) {
         onAccessibleAddChild: function( node ) {
           sceneryLog && sceneryLog.Accessibility && sceneryLog.Accessibility( 'onAccessibleAddChild n#' + node.id + ' (parent:n#' + this.id + ')' );
           sceneryLog && sceneryLog.Accessibility && sceneryLog.push();
+
+          // Find descendants with accessibleOrders and check them against all of their ancestors/self
+          assert && ( function recur( descendant ) {
+            // Prune the search (because milliseconds don't grow on trees, even if we do have assertions enabled)
+            if ( descendant._rendererSummary.isNotAccessible() ) { return; }
+
+            descendant.accessibleOrder && assert( descendant.getTrails( function( node ) {
+              return _.includes( descendant.accessibleOrder, node );
+            } ).length === 0, 'accessibleOrder should not include any ancestors or the node itself' );
+          } )( node );
 
           this._accessibleDisplaysInfo.onAddChild( node );
 
