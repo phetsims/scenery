@@ -46,7 +46,6 @@ define( function( require ) {
 
       options = _.extend( {
         containerParent: null, // a container parent for this peer and potential siblings
-        childContainerElement: null, // an child container element where nested elements can be placed
         labelSibling: null, // the element containing this node's label content
         descriptionSibling: null // the element that will contain this node's description content
       }, options );
@@ -67,9 +66,6 @@ define( function( require ) {
       this.primarySibling = primarySibling;
       this.labelSibling = options.labelSibling;
       this.descriptionSibling = options.descriptionSibling;
-
-      // @private - descendent of the primarySibling that can be used to hold nested children
-      this.childContainerElement = options.childContainerElement ? options.childContainerElement : ( this.childContainerElement || null );
 
       // @private - a parent element that can contain this primarySibling and other siblings, usually label and description content
       this.containerParent = options.containerParent ? options.containerParent : ( this.containerParent || null );
@@ -137,15 +133,6 @@ define( function( require ) {
      */
     getContainerParent: function() {
       return this.containerParent || this.primarySibling;
-    },
-
-    /**
-     * Get the child container or the peer's DOM element, used for sorting.
-     *
-     * @returns {type}  description
-     */
-    getChildContainerElement: function() {
-      return this.childContainerElement || this.primarySibling;
     },
 
     /**

@@ -197,11 +197,9 @@ define( function( require ) {
       Array.prototype.push.apply( this.children, accessibleInstances );
 
       for ( var i = 0; i < accessibleInstances.length; i++ ) {
-        var childContainerElement = this.peer.getChildContainerElement();
-
         // Append the container parent to the end (so that, when provided in order, we don't have to resort below
         // when initializing).
-        childContainerElement.insertBefore( accessibleInstances[ i ].peer.getContainerParent(), null );
+        this.peer.primarySibling.insertBefore( accessibleInstances[ i ].peer.getContainerParent(), null );
       }
 
       if ( hadChildren ) {
@@ -391,13 +389,13 @@ define( function( require ) {
       this.children = targetChildren;
 
       // Reorder DOM elements in a way that doesn't do any work if they are already in a sorted order.
-      var containerElement = this.peer.getChildContainerElement();
+      var primarySibling = this.peer.primarySibling;
       for ( var n = this.children.length - 1; n >= 0; n-- ) {
         var peerDOMElement = this.children[ n ].peer.getContainerParent();
-        if ( peerDOMElement === containerElement.childNodes[ n ] ) {
+        if ( peerDOMElement === primarySibling.childNodes[ n ] ) {
           continue;
         }
-        containerElement.insertBefore( peerDOMElement, containerElement.childNodes[ n + 1 ] );
+        primarySibling.insertBefore( peerDOMElement, primarySibling.childNodes[ n + 1 ] );
       }
     },
 
@@ -417,7 +415,7 @@ define( function( require ) {
 
         // remove this peer's primary sibling DOM Element (or its container parent) from the parent peer's
         // primary sibling (or its child container)
-        this.parent.peer.getChildContainerElement().removeChild( this.peer.getContainerParent() );
+        this.parent.peer.primarySibling.removeChild( this.peer.getContainerParent() );
 
         for ( var i = 0; i < this.relativeNodes.length; i++ ) {
           this.relativeNodes[ i ].offStatic( 'accessibleDisplays', this.relativeListeners[ i ] );
