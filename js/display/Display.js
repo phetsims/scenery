@@ -1104,23 +1104,6 @@ define( function( require ) {
     },
     get inputListeners() { return this.getInputListeners(); },
 
-    /**
-     * Dispose function for Display.
-     *
-     * TODO: this dispose function is not complete.
-     * @public
-     */
-    dispose: function() {
-      if ( this._input ) {
-        this.detachEvents();
-      }
-      this._rootNode.removeRootedDisplay( this );
-
-      if ( this._accessible ) {
-        this._rootAccessibleInstance.dispose();
-      }
-    },
-
     ensureNotPainting: function() {
       assert && assert( !this._isPainting,
         'This should not be run in the call tree of updateDisplay(). If you see this, it is likely that either the ' +
@@ -1909,6 +1892,25 @@ define( function( require ) {
     },
     get focusedNode() { return this.getFocusedNode(); }
   } );
+
+  /**
+   * Dispose function for Display.
+   *
+   * TODO: this dispose function is not complete.
+   * TODO: Don't require overriding like this. Events prototype and non-standard inheritance forces us right now, but
+   * ideally we'll stop using Events for Display and this should just work.
+   * @public
+   */
+  Display.prototype.dispose = function() {
+    if ( this._input ) {
+      this.detachEvents();
+    }
+    this._rootNode.removeRootedDisplay( this );
+
+    if ( this._accessible ) {
+      this._rootAccessibleInstance.dispose();
+    }
+  };
 
   Display.customCursors = {
     'scenery-grab-pointer': [ 'grab', '-moz-grab', '-webkit-grab', 'pointer' ],
