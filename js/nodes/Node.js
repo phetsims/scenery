@@ -188,14 +188,6 @@ define( function( require ) {
     'bounds': true
   };
 
-  function defaultTrailPredicate( node ) {
-    return node._parents.length === 0;
-  }
-
-  function defaultLeafTrailPredicate( node ) {
-    return node._children.length === 0;
-  }
-
   var scratchBounds2 = Bounds2.NOTHING.copy(); // mutable {Bounds2} used temporarily in methods
   var scratchMatrix3 = new Matrix3();
 
@@ -3522,7 +3514,7 @@ define( function( require ) {
      * @returns {Array.<Trail>}
      */
     getTrails: function( predicate ) {
-      predicate = predicate || defaultTrailPredicate;
+      predicate = predicate || Node.defaultTrailPredicate;
 
       var trails = [];
       var trail = new scenery.Trail( this );
@@ -3554,7 +3546,7 @@ define( function( require ) {
      * @returns {Array.<Trail>}
      */
     getLeafTrails: function( predicate ) {
-      predicate = predicate || defaultLeafTrailPredicate;
+      predicate = predicate || Node.defaultLeafTrailPredicate;
 
       var trails = [];
       var trail = new scenery.Trail( this );
@@ -4998,9 +4990,25 @@ define( function( require ) {
         }
       }
     }
-  } ) );
+  } ), {
+    // @public {Object} - A mapping of all of the default options provided to Node
+    DEFAULT_OPTIONS: DEFAULT_OPTIONS,
 
-  Node.DEFAULT_OPTIONS = DEFAULT_OPTIONS;
+    /**
+     * A default for getTrails() searches, returns whether the node has no parents.
+     * @public
+     *
+     * @param {Node} node
+     * @returns {boolean}
+     */
+    defaultTrailPredicate: function( node ) {
+      return node._parents.length === 0;
+    },
+
+    defaultLeafTrailPredicate: function( node ) {
+      return node._children.length === 0;
+    }
+  } );
 
   // Node is composed with accessibility
   Accessibility.compose( Node );

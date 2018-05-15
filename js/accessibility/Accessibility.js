@@ -1831,6 +1831,8 @@ define( function( require ) {
             } ).length === 0, 'accessibleOrder should not include any ancestors or the node itself' );
           } )( node );
 
+          assert && AccessibilityTree.auditNodeForAccessibleCycles( this );
+
           this._accessibleDisplaysInfo.onAddChild( node );
 
           AccessibilityTree.addChild( this, node );

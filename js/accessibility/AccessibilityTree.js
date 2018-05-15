@@ -233,6 +233,8 @@ define( function( require ) {
       sceneryLog && sceneryLog.AccessibilityTree && sceneryLog.AccessibilityTree( 'addTree parent:n#' + parent._id + ', child:n#' + child._id );
       sceneryLog && sceneryLog.AccessibilityTree && sceneryLog.push();
 
+      assert && AccessibilityTree.auditNodeForAccessibleCycles( parent );
+
       accessibleTrails = accessibleTrails || AccessibilityTree.findAccessibleTrails( parent );
 
       for ( var i = 0; i < accessibleTrails.length; i++ ) {
@@ -474,6 +476,46 @@ define( function( require ) {
         else {
           assertSlow( node._accessibleDisplaysInfo.accessibleDisplays.length === 0, 'Invisible/nonaccessible things should have no displays' );
         }
+      }
+    },
+
+    /**
+     * Checks a given Node (with assertions) to ensure it is not part of a cycle in the combined graph with edges
+     * defined by "there is a parent-child or accessibleParent-accessibleOrder" relationship between the two nodes.
+     * @public (scenery-internal)
+     *
+     * See https://github.com/phetsims/scenery/issues/787 for more information (and for some detail on the cases
+     * that we want to catch).
+     *
+     * @param {Node} node
+     */
+    auditNodeForAccessibleCycles: function( node ) {
+      if ( assert ) {
+        var trail = new scenery.Trail( node );
+
+        ( function recursiveSearch() {
+          var root = trail.rootNode();
+
+          assert( trail.length <= 1 || root !== node,
+            'Accessible graph cycle detected. The combined scene-graph DAG with accessibleOrder defining additional ' +
+            'parent-child relationships should still be a DAG. Cycle detected with the trail: ' + trail.toString() +
+            ' path: ' + trail.toPathString() );
+
+          var parentCount = root._parents.length;
+          for ( var i = 0; i < parentCount; i++ ) {
+            var parent = root._parents[ i ];
+
+            trail.addAncestor( parent );
+            recursiveSearch();
+            trail.removeAncestor();
+          }
+          // Only visit the accessibleParent if we didn't already visit it as a parent.
+          if ( root._accessibleParent && !root._accessibleParent.hasChild( root ) ) {
+            trail.addAncestor( root._accessibleParent );
+            recursiveSearch();
+            trail.removeAncestor();
+          }
+        } )();
       }
     },
 
