@@ -2210,7 +2210,8 @@ define( function( require ) {
      * @param {number} newBitmask
      */
     onSummaryChange: function( oldBitmask, newBitmask ) {
-      this.onAccessibleSummaryChange( oldBitmask, newBitmask );
+      // Defined in Accessibility.js
+      this._accessibleDisplaysInfo.onSummaryChange( oldBitmask, newBitmask );
     },
 
     /**
@@ -2848,7 +2849,8 @@ define( function( require ) {
         this._picker.onVisibilityChange();
         if ( assertSlow ) { this._picker.audit(); }
 
-        this.onAccessibleVisibilityChange( visible );
+        // Defined in Accessibility.js
+        this._accessibleDisplaysInfo.onVisibilityChange( visible );
 
         this.trigger0( 'visibility' );
       }
@@ -4356,7 +4358,8 @@ define( function( require ) {
       assert && assert( display instanceof scenery.Display );
       this._rootedDisplays.push( display );
 
-      this.onAccessibleAddedRootedDisplay( display );
+      // Defined in Accessibility.js
+      this._accessibleDisplaysInfo.onAddedRootedDisplay( display );
     },
 
     /**
@@ -4371,7 +4374,8 @@ define( function( require ) {
       assert && assert( index !== -1, 'Cannot remove a Display from a Node if it was not there' );
       this._rootedDisplays.splice( index, 1 );
 
-      this.onAccessibleRemovedRootedDisplay( display );
+      // Defined in Accessibility.js
+      this._accessibleDisplaysInfo.onRemovedRootedDisplay( display );
     },
 
     /*---------------------------------------------------------------------------*

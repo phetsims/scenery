@@ -130,7 +130,6 @@ define( function( require ) {
   var Emitter = require( 'AXON/Emitter' );
   var extend = require( 'PHET_CORE/extend' );
   var invalidateAccessibleContent = require( 'SCENERY/accessibility/invalidateAccessibleContent' );
-  var Renderer = require( 'SCENERY/display/Renderer' );
   var scenery = require( 'SCENERY/scenery' );
 
   var INPUT_TAG = AccessibilityUtil.TAGS.INPUT;
@@ -1467,7 +1466,7 @@ define( function( require ) {
           if ( this._accessibleVisible !== visible ) {
             this._accessibleVisible = visible;
 
-            this.onAccessibleAccessibleVisibilityChange( visible );
+            this._accessibleDisplaysInfo.onAccessibleVisibilityChange( visible );
           }
         },
         set accessibleVisible( visible ) { this.setAccessibleVisible( visible ); },
@@ -1840,84 +1839,6 @@ define( function( require ) {
           this._accessibleDisplaysInfo.onRemoveChild( node );
 
           AccessibilityTree.removeChild( this, node );
-
-          sceneryLog && sceneryLog.Accessibility && sceneryLog.pop();
-        },
-
-        /**
-         * Called when our summary bitmask changes
-         * @public (scenery-internal)
-         *
-         * @param {number} oldBitmask
-         * @param {number} newBitmask
-         */
-        onAccessibleSummaryChange: function( oldBitmask, newBitmask ) {
-          sceneryLog && sceneryLog.Accessibility && sceneryLog.Accessibility( 'onAccessibleSummaryChange n#' + this.id + ' wasA11y:' + !( Renderer.bitmaskNotAccessible & oldBitmask ) + ', isA11y:' + !( Renderer.bitmaskNotAccessible & newBitmask ) );
-          sceneryLog && sceneryLog.Accessibility && sceneryLog.push();
-
-          this._accessibleDisplaysInfo.onSummaryChange( oldBitmask, newBitmask );
-
-          sceneryLog && sceneryLog.Accessibility && sceneryLog.pop();
-        },
-
-        /**
-         * Called when our visibility changes.
-         * @public (scenery-internal)
-         *
-         * @param {boolean} visible
-         */
-        onAccessibleVisibilityChange: function( visible ) {
-          sceneryLog && sceneryLog.Accessibility && sceneryLog.Accessibility( 'onAccessibleVisibilityChange n#' + this.id + ' visible:' + visible );
-          sceneryLog && sceneryLog.Accessibility && sceneryLog.push();
-
-          this._accessibleDisplaysInfo.onVisibilityChange( visible );
-
-          sceneryLog && sceneryLog.Accessibility && sceneryLog.pop();
-        },
-
-        /**
-         * Called when our accessibleVisibility changes.
-         * @public (scenery-internal)
-         *
-         * TODO: figure out a good renaming, we were following a pattern earlier.
-         *
-         * @param {boolean} visible
-         */
-        onAccessibleAccessibleVisibilityChange: function( visible ) {
-          sceneryLog && sceneryLog.Accessibility && sceneryLog.Accessibility( 'onAccessibleAccessibleVisibilityChange n#' + this.id + ' accessibleVisible:' + visible );
-          sceneryLog && sceneryLog.Accessibility && sceneryLog.push();
-
-          this._accessibleDisplaysInfo.onAccessibleVisibilityChange( visible );
-
-          sceneryLog && sceneryLog.Accessibility && sceneryLog.pop();
-        },
-
-        /**
-         * Called when we have a rooted display added to this node.
-         * @public (scenery-internal)
-         *
-         * @param {Display} display
-         */
-        onAccessibleAddedRootedDisplay: function( display ) {
-          sceneryLog && sceneryLog.Accessibility && sceneryLog.Accessibility( 'onAccessibleAddedRootedDisplay n#' + this.id );
-          sceneryLog && sceneryLog.Accessibility && sceneryLog.push();
-
-          this._accessibleDisplaysInfo.onAddedRootedDisplay( display );
-
-          sceneryLog && sceneryLog.Accessibility && sceneryLog.pop();
-        },
-
-        /**
-         * Called when we have a rooted display removed from this node.
-         * @public (scenery-internal)
-         *
-         * @param {Display} display
-         */
-        onAccessibleRemovedRootedDisplay: function( display ) {
-          sceneryLog && sceneryLog.Accessibility && sceneryLog.Accessibility( 'onAccessibleRemovedRootedDisplay n#' + this.id );
-          sceneryLog && sceneryLog.Accessibility && sceneryLog.push();
-
-          this._accessibleDisplaysInfo.onRemovedRootedDisplay( display );
 
           sceneryLog && sceneryLog.Accessibility && sceneryLog.pop();
         },
