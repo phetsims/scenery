@@ -164,91 +164,24 @@ an UI and Display made for visual testing and debugging.
           // console.log( b.focused );
           // console.log( scenery.Display.focusProperty.value );
 
+          window.a = new scenery.Node();
+          window.b = new scenery.Node();
+          window.c = new scenery.Node();
+          window.d = new scenery.Node();
+          window.e = new scenery.Node();
+          window.f = new scenery.Node();
+          window.g = new scenery.Node( { tagName: 'div' } );
 
-          // test the behavior of replaceChild function
-          scene.tagName = 'div';
-
-          // a custom focus highlight (since dummy node's have no bounds)
-          var focusHighlight = new scenery.Rectangle( 0, 0, 10, 10 );
-
-          // create some nodes for testing
-          window.a = new scenery.Node( { tagName: 'a', focusHighlight: focusHighlight, focusable: true } );
-          window.b = new scenery.Node( { tagName: 'b', focusHighlight: focusHighlight, focusable: true } );
-          window.c = new scenery.Node( { tagName: 'c', focusHighlight: focusHighlight, focusable: true } );
-          window.d = new scenery.Node( { tagName: 'd', focusHighlight: focusHighlight, focusable: true } );
-          window.e = new scenery.Node( { tagName: 'e', focusHighlight: focusHighlight, focusable: true } );
-          window.f = new scenery.Node( { tagName: 'f', focusHighlight: focusHighlight, focusable: true } );
-
-          // a child that will be added through replaceChild()
-          window.testNode = new scenery.Node( { tagName: 'test', focusHighlight: focusHighlight, focusable: true } );
-
-          // make sure replaceChild puts the child in the right spot
-          a.children = [ b, c, d, e, f ];
-          var initIndex = a.indexOfChild( e );
-          a.replaceChild( e, testNode );
-          var afterIndex = a.indexOfChild( testNode );
-
-          assert && assert( a.hasChild( testNode ), 'a should have child testNode after it replaced node e' );
-          assert && assert( !a.hasChild( e ), 'a should no longer have child node e after it was replaced by testNode' );
-          assert && assert( initIndex === afterIndex, 'testNode should be at the same place as e was after replaceChild' );
-
-          // create a scene graph to test how scenery manages focus
-          //    a
-          //   / \
-          //  f   b
-          //     / \
-          //    c   d
-          //     \ /
-          //      e
-          a.removeAllChildren();
+          a.children = [ b, c, d ];
+          b.children = [ e ];
+          c.children = [ e ];
+          d.children = [ f ];
+          e.children = [ g ];
+          f.children = [ g ];
           scene.addChild( a );
-          a.children = [ f, b ];
-          b.children = [ c, d ];
-          c.addChild( e );
-          d.addChild( e );
 
-
-
-          f.focus();
-          assert && assert( f.focused, 'f has focus before being replaced' );
-
-          a11yDebug.innerHTML = display.getAccessibleDebugHTML();
-
-          console.log( 'before' );
-          // replace f with testNode, ensure that testNode receives focus after replacing
-          a.replaceChild( f, testNode );
-          console.log( 'after' );
-          assert && assert( !a.hasChild( f ), 'a should no longer have child f' );
-          assert && assert( a.hasChild( testNode ), 'a should now have child testNode' );
-          assert && assert( !f.focused, 'f no longer has focus after being replaced' );
-          assert && assert( testNode.focused, 'testNode has focus after replacing focused node f' );
-          assert && assert( testNode.accessibleInstances[ 0 ].peer.primarySibling === document.activeElement, 'browser is focusing testNode' );
-
-          a11yDebug.innerHTML = display.getAccessibleDebugHTML();
-          debugger;
-
-          testNode.blur();
-          assert && assert( testNode, 'testNode blurred before being replaced' );
-
-          // replace testNode with f after bluring testNode, neither should have focus after the replacement
-          a.replaceChild( testNode, f );
-          assert && assert( a.hasChild( f ), 'node f should replace node testNode' );
-          assert && assert( !a.hasChild( testNode ), 'testNode should no longer be a child of node a' );
-          assert && assert( !testNode.focused, 'testNode should not have focus after being replaced' );
-          assert && assert( !f.focused, 'f should not have focus after replacing testNode, testNode did not have focus' );
-          assert && assert( f.accessibleInstances[ 0 ].peer.primarySibling !== document.activeElement, 'browser should not be focusing node f' );
-
-          // focus node d and replace with non-focusable testNode, neither should have focus since testNode is not focusable
-          d.focus();
-          testNode.focusable = false;
-          assert && assert( d.focused, 'd has focus before being replaced' );
-          assert && assert( !testNode.focusable, 'testNode is not focusable before replacing node d' );
-
-          b.replaceChild( d, testNode );
-          assert && assert( b.hasChild( testNode ), 'testNode should be a child of node b after replacing with replaceChild' );
-          assert && assert( !b.hasChild( d ), 'd should not be a child of b after it was replaced with replaceChild' );
-          assert && assert( !d.focused, 'do does not have focus after being replaced by testNode' );
-          assert && assert( !testNode.focused, 'testNode does not have focus after replacing node d (testNode is not focusable)' );
+          e.accessibleOrder = [ d ];
+          f.accessibleOrder = [ b ];
         } )
       };
 
