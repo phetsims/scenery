@@ -374,11 +374,11 @@ define( function( require ) {
           // Listener receives 1 parameter, {boolean} - isFocused. see Display.focus
           this.focusChangedEmitter = new Emitter();
 
-          // @private {Array.<Node>} - (a11y) If provided, it will override the focus order between children (and optionally
-          // aribitrary subtrees). If not provided, the focus order will default to the rendering order (first children
-          // first, last children last) determined by the children array.
+          // @private {Array.<Node|null>|null} - (a11y) If provided, it will override the focus order between children
+          // (and optionally aribitrary subtrees). If not provided, the focus order will default to the rendering order
+          // (first children first, last children last) determined by the children array.
           // See setAccessibleOrder() for more documentation.
-          this._accessibleOrder = [];
+          this._accessibleOrder = null;
 
           // @public (scenery-internal) {Node|null} - (a11y) If this node is specified in another node's
           // accessibleOrder, then this will have the value of that other (accessible parent) node. Otherwise it's null.
@@ -505,7 +505,7 @@ define( function( require ) {
         disposeAccessibility: function() {
           // To prevent memory leaks, we want to clear our order (since otherwise nodes in our order will reference
           // this node).
-          this.accessibleOrder = [];
+          this.accessibleOrder = null;
 
           this.removeAllAccessibleInputListeners();
         },
@@ -1327,8 +1327,8 @@ define( function( require ) {
          *
          * The placeholder (`null`) will get filled in with all direct children that are NOT in any accessibleOrder.
          * If there is no placeholder specified, it will act as if the placeholder is at the end of the order.
-         * An empty order (`[]`), the default, acts as consistently, as if only the placeholder (`[null]`) was
-         * specified.
+         * The value `null` (the default) and the empty array (`[]`) both act as if the only order is the placeholder,
+         * i.e. `[null]`.
          *
          * Some general constraints for the orders are:
          * - You can't specify a node in more than one accessibleOrder, and you can't specify duplicates of a value
@@ -1344,11 +1344,12 @@ define( function( require ) {
          * See https://github.com/phetsims/scenery-phet/issues/365#issuecomment-381302583 for more information on the
          * decisions and design for this feature.
          *
-         * @param {Array.<Node|null>} accessibleOrder
+         * @param {Array.<Node|null>|null} accessibleOrder
          */
         setAccessibleOrder: function( accessibleOrder ) {
-          assert && assert( Array.isArray( accessibleOrder ), 'Array expected, received: ' + typeof accessibleOrder );
-          assert && accessibleOrder.forEach( function( node, index ) {
+          assert && assert( Array.isArray( accessibleOrder ) || accessibleOrder === null,
+            'Array or null expected, received: ' + accessibleOrder );
+          assert && accessibleOrder && accessibleOrder.forEach( function( node, index ) {
             assert( node === null || node instanceof scenery.Node,
               'Elements of accessibleOrder should be either a Node or null. Element at index ' + index + ' is: ' + node );
           } );
@@ -1359,7 +1360,7 @@ define( function( require ) {
 
             // Store our own reference to this, so client modifications to the input array won't silently break things.
             // See https://github.com/phetsims/scenery/issues/786
-            this._accessibleOrder = accessibleOrder.slice();
+            this._accessibleOrder = accessibleOrder === null ? null : accessibleOrder.slice();
 
             AccessibilityTree.accessibleOrderChange( this, oldAccessibleOrder, accessibleOrder );
 
@@ -1372,12 +1373,28 @@ define( function( require ) {
          * Returns the accessible (focus) order for this node.
          * @public
          *
-         * @returns {Array.<Node>|null}
+         * @returns {Array.<Node|null>|null}
          */
         getAccessibleOrder: function() {
           return this._accessibleOrder;
         },
         get accessibleOrder() { return this.getAccessibleOrder(); },
+
+        /**
+         * Returns whether this node has an accessibleOrder that is effectively different than the default.
+         * @public
+         *
+         * NOTE: `null`, `[]` and `[null]` are all effectively the same thing, so this will return true for any of
+         * those. Usage of `null` is recommended, as it doesn't create the extra object reference (but some code
+         * that generates arrays may be more convenient).
+         *
+         * @returns {boolean}
+         */
+        hasAccessibleOrder: function() {
+          return this._accessibleOrder !== null &&
+                 this._accessibleOrder.length !== 0 &&
+                 this._accessibleOrder[ 0 ] !== null;
+        },
 
         /**
          * Returns our "accessible parent" if available: the node that specifies this node in its accessibleOrder.
@@ -1419,7 +1436,7 @@ define( function( require ) {
           }
 
           // Override the order, and replace the placeholder if it exists.
-          if ( this.accessibleOrder ) {
+          if ( this.hasAccessibleOrder() ) {
             var effectiveChildren = this.accessibleOrder.slice();
 
             var placeholderIndex = effectiveChildren.indexOf( null );
@@ -1717,11 +1734,13 @@ define( function( require ) {
               nestedChildStack.push( item.children );
             }
 
+            var arrayAccessibleOrder = node._accessibleOrder === null ? [] : node._accessibleOrder;
+
             // push specific focused nodes to the stack
-            pruneStack = pruneStack.concat( node._accessibleOrder );
+            pruneStack = pruneStack.concat( arrayAccessibleOrder );
 
             // Visiting trails to ordered nodes.
-            _.each( node._accessibleOrder, function( descendant ) {
+            _.each( arrayAccessibleOrder, function( descendant ) {
               // Find all descendant references to the node.
               // NOTE: We are not reordering trails (due to descendant constraints) if there is more than one instance for
               // this descendant node.
@@ -1746,7 +1765,7 @@ define( function( require ) {
             }
 
             // pop focused nodes from the stack (that were added above)
-            _.each( node._accessibleOrder, function( descendant ) {
+            _.each( arrayAccessibleOrder, function( descendant ) {
               pruneStack.pop();
             } );
 

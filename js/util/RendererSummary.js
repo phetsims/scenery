@@ -354,7 +354,7 @@ define( function( require ) {
       if ( node.areSelfBoundsValid() ) {
         bitmask |= Renderer.bitmaskBoundsValid;
       }
-      if ( !node.accessibleContent && node.accessibleOrder.length === 0 ) {
+      if ( !node.accessibleContent && !node.hasAccessibleOrder() ) {
         bitmask |= Renderer.bitmaskNotAccessible;
       }
 
