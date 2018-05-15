@@ -179,6 +179,9 @@ define( function( require ) {
     // TODO: don't store the options, it's an anti-pattern.
     this.options = options; // @private
 
+    // @public (scenery-internal) {boolean} - Whether accessibility is enabled for this particular display.
+    this._accessible = options.accessibility;
+
     this._allowWebGL = options.allowWebGL;
 
     // The (integral, > 0) dimensions of the Display's DOM element (only updates the DOM element on updateDisplay())
@@ -267,9 +270,6 @@ define( function( require ) {
 
     // global reference if we have a Display (useful)
     this.scenery = scenery;
-
-    // @public (scenery-internal) {boolean} - Whether accessibility is enabled for this particular display.
-    this._accessible = this.options.accessibility;
 
     if ( this.options.accessibility ) {
       if ( this.options.isApplication ) {

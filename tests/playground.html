@@ -164,20 +164,28 @@ an UI and Display made for visual testing and debugging.
           // console.log( b.focused );
           // console.log( scenery.Display.focusProperty.value );
 
-          scene.tagName = 'div';
-          scene.focusable = true;
 
-          // invisible is deprecated don't use in future, this is a workaround for Nodes without bounds
-          var a = new scenery.Node( { tagName: 'div', focusable: true, focusHighlight: 'invisible' } );
-          var b = new scenery.Node( { tagName: 'div', focusable: true, focusHighlight: 'invisible' } );
-          var c = new scenery.Node( { tagName: 'div', focusable: true, focusHighlight: 'invisible' } );
-          var d = new scenery.Node( { tagName: 'div', focusable: true, focusHighlight: 'invisible' } );
-          var e = new scenery.Node( { tagName: 'div', focusable: true, focusHighlight: 'invisible' } );
-          scene.children = [ a, b, c, d ];
 
-          debugger;
-          a.focus();
-          console.log( a.focused );
+
+          // scene.tagName = 'div';
+          // scene.focusable = true;
+
+          // // invisible is deprecated don't use in future, this is a workaround for Nodes without bounds
+          // var a = new scenery.Node( { tagName: 'div', focusable: true, focusHighlight: 'invisible' } );
+          // var b = new scenery.Node( { tagName: 'div', focusable: true, focusHighlight: 'invisible' } );
+          // var c = new scenery.Node( { tagName: 'div', focusable: true, focusHighlight: 'invisible' } );
+          // var d = new scenery.Node( { tagName: 'div', focusable: true, focusHighlight: 'invisible' } );
+          // var e = new scenery.Node( { tagName: 'div', focusable: true, focusHighlight: 'invisible' } );
+          // scene.children = [ a, b, c, d ];
+
+          // debugger;
+          // a.focus();
+          // console.log( a.focused );
+
+          window.node = new scenery.Node();
+          window.button = new scenery.Node( { tagName: 'div', focusable: true } );
+          node.addChild( button );
+          window.disp = new scenery.Display( node );
         } )
       };
 
