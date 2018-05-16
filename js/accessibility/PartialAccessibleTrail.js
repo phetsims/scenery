@@ -24,6 +24,8 @@ define( function( require ) {
     // @public
     this.accessibleInstance = accessibleInstance;
     this.trail = trail;
+
+    // TODO: remove this, since it can be computed from the accessibleInstance
     this.isRoot = isRoot;
 
     // @public {Trail} - a full Trail (rooted at our display) to our trail's final node.

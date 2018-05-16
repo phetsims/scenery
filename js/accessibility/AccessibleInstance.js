@@ -470,6 +470,11 @@ define( function( require ) {
      */
     guessVisualTrail: function() {
       this.trail.reindex();
+
+      // Search for places in the trail where adjacent nodes do NOT have a parent-child relationship, i.e.
+      // !nodes[ n ].hasChild( nodes[ n + 1 ] ).
+      // NOTE: This index points to the parent where this is the case, because the indices in the trail are such that:
+      // trail.nodes[ n ].children[ trail.indices[ n ] ] = trail.nodes[ n + 1 ]
       var lastBadIndex = this.trail.indices.lastIndexOf( -1 );
 
       // If we have no bad indices, just return our trail immediately.
