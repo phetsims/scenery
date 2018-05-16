@@ -103,7 +103,7 @@ define( function( require ) {
     }
   }, {
     documentation: 'Text that is displayed in the simulation.',
-    events: [ 'changed' ]
+    events: [ 'textChanged' ]
   } );
 
   scenery.register( 'TextIO', TextIO );

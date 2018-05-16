@@ -130,6 +130,8 @@ define( function( require ) {
 
       if ( text !== this._text ) {
         var oldText = this._text;
+        this.startEvent( 'user', 'textChanged', { oldText: oldText, newText: text } );
+
         this._text = text;
         this._cachedRenderedText = null;
 
@@ -140,6 +142,7 @@ define( function( require ) {
 
         this.invalidateText();
         this.trigger2( 'text', oldText, text );
+        this.endEvent();
       }
       return this;
     },
