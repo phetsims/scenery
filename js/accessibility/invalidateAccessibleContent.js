@@ -71,7 +71,9 @@ define( function( require ) {
           var uniqueId = accessibleInstance.trail.getUniqueId();
 
           // create the base DOM element representing this accessible instance
-          var primarySibling = createElement( self._tagName, self._focusable );
+          var primarySibling = createElement( self._tagName, self._focusable, {
+            namespace: self._accessibleNamespace
+          } );
           primarySibling.id = uniqueId;
 
           // create the container parent for the dom siblings
@@ -206,10 +208,17 @@ define( function( require ) {
    *
    * @param  {string} tagName
    * @param {boolean} focusable - should the element be explicitly added to the focus order?
+   * @param {Object} [options]
    * @returns {HTMLElement}
    */
-  function createElement( tagName, focusable ) {
-    var domElement = document.createElement( tagName );
+  function createElement( tagName, focusable, options ) {
+    options = _.extend( {
+      namespace: null
+    }, options );
+
+    var domElement = options.namespace
+      ? document.createElementNS( options.namespace, tagName )
+      : document.createElement( tagName );
     var upperCaseTagName = tagName.toUpperCase();
 
     // give all non-focusable elements a tabindex of -1 for browser consistency

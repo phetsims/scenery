@@ -156,6 +156,7 @@ define( function( require ) {
     'inputType', // Sets the input type for the primary sibling DOM element, only relevant if tagName is 'input'
     'inputValue', // Sets the input value for the primary sibling DOM element, only relevant if tagName is 'input'
     'accessibleChecked', // Sets the 'checked' state for inputs of type 'radio' and 'checkbox', see setAccessibleChecked()
+    'accessibleNamespace', // Sets the namespace for the primary element, see setAccessibleNamespace()
     'ariaLabel', // Sets the value of the 'aria-label' attribute on the primary sibling of this Node, see setAriaLabel()
     'ariaRole', // Sets the ARIA role for the primary sibling of this Node, see setAriaRole()
     'ariaLabelContent', // Sets the content that will label another node through aria-labelledby, see setAriaLabelledByContent()
@@ -273,6 +274,10 @@ define( function( require ) {
 
           // @private {string|null} - the description content for this node's DOM element.
           this._descriptionContent = null;
+
+          // @private {string|null} - If provided, it will create the primary DOM element with the specified namespace.
+          // This may be needed, for example, with MathML/SVG/etc.
+          this._accessibleNamespace = null;
 
           // @private {string|null} - if provided, "aria-label" will be added as an inline attribute on the node's DOM
           // element and set to this value. This will determine how the Accessible Name is provided for the DOM element.
@@ -975,6 +980,32 @@ define( function( require ) {
           return this._containerAriaRole;
         },
         get containerAriaRole() { return this.getContainerAriaRole(); },
+
+        /**
+         * Sets the namespace for the primary element (relevant for MathML/SVG/etc.)
+         * @public
+         *
+         * @param {string|null} accessibleNamespace - Null indicates no namespace.
+         */
+        setAccessibleNamespace: function( accessibleNamespace ) {
+          if ( this._accessibleNamespace !== accessibleNamespace ) {
+            this._accessibleNamespace = accessibleNamespace;
+
+            this.invalidateAccessibleContent();
+          }
+        },
+        set accessibleNamespace( value ) { this.setAccessibleNamespace( value ); },
+
+        /**
+         * Returns the accessible namespace (see setAccessibleNamespace for more information).
+         * @public
+         *
+         * @returns {string|null}
+         */
+        getAccessibleNamespace: function() {
+          return this._accessibleNamespace;
+        },
+        get accessibleNamespace() { return this.getAccessibleNamespace(); },
 
         /**
          * Sets the 'aria-label' attribute for labelling the node's DOM element. By using the
