@@ -363,7 +363,7 @@ define( function( require ) {
       }
       if ( !this.mouse ) { this.initMouse(); }
       var pointChanged = this.mouse.down( point, event );
-      this.moveEvent( this.mouse, event, pointChanged );
+      this.branchChangeEvents( this.mouse, event, pointChanged );
       this.downEvent( this.mouse, event );
 
       sceneryLog && sceneryLog.Input && sceneryLog.pop();
@@ -381,7 +381,7 @@ define( function( require ) {
       }
       if ( !this.mouse ) { this.initMouse(); }
       var pointChanged = this.mouse.up( point, event );
-      this.moveEvent( this.mouse, event, pointChanged );
+      this.branchChangeEvents( this.mouse, event, pointChanged );
       this.upEvent( this.mouse, event );
 
       sceneryLog && sceneryLog.Input && sceneryLog.pop();
@@ -399,7 +399,7 @@ define( function( require ) {
       }
       if ( !this.mouse ) { this.initMouse(); }
       this.mouse.move( point, event );
-      this.moveEvent( this.mouse, event, true );
+      this.branchChangeEvents( this.mouse, event, true );
 
       sceneryLog && sceneryLog.Input && sceneryLog.pop();
     },
@@ -475,7 +475,7 @@ define( function( require ) {
       }
       var touch = new Touch( id, point, event );
       this.addPointer( touch );
-      this.moveEvent( touch, event, false );
+      this.branchChangeEvents( touch, event, false );
       this.downEvent( touch, event );
 
       sceneryLog && sceneryLog.Input && sceneryLog.pop();
@@ -495,7 +495,7 @@ define( function( require ) {
       var touch = this.findPointerById( id );
       if ( touch ) {
         var pointChanged = touch.end( point, event );
-        this.moveEvent( touch, event, pointChanged );
+        this.branchChangeEvents( touch, event, pointChanged );
         this.removePointer( touch );
         this.upEvent( touch, event );
       }
@@ -517,7 +517,7 @@ define( function( require ) {
       var touch = this.findPointerById( id );
       if ( touch ) {
         touch.move( point, event );
-        this.moveEvent( touch, event, true );
+        this.branchChangeEvents( touch, event, true );
       }
 
       sceneryLog && sceneryLog.Input && sceneryLog.pop();
@@ -537,7 +537,7 @@ define( function( require ) {
       var touch = this.findPointerById( id );
       if ( touch ) {
         var pointChanged = touch.cancel( point, event );
-        this.moveEvent( touch, event, pointChanged );
+        this.branchChangeEvents( touch, event, pointChanged );
         this.removePointer( touch );
         this.cancelEvent( touch, event );
       }
@@ -559,7 +559,7 @@ define( function( require ) {
       }
       var pen = new Pen( id, point, event );
       this.addPointer( pen );
-      this.moveEvent( pen, event, false );
+      this.branchChangeEvents( pen, event, false );
       this.downEvent( pen, event );
 
       sceneryLog && sceneryLog.Input && sceneryLog.pop();
@@ -579,7 +579,7 @@ define( function( require ) {
       var pen = this.findPointerById( id );
       if ( pen ) {
         var pointChanged = pen.end( point, event );
-        this.moveEvent( pen, event, pointChanged );
+        this.branchChangeEvents( pen, event, pointChanged );
         this.removePointer( pen );
         this.upEvent( pen, event );
       }
@@ -601,7 +601,7 @@ define( function( require ) {
       var pen = this.findPointerById( id );
       if ( pen ) {
         pen.move( point, event );
-        this.moveEvent( pen, event, true );
+        this.branchChangeEvents( pen, event, true );
       }
 
       sceneryLog && sceneryLog.Input && sceneryLog.pop();
@@ -621,7 +621,7 @@ define( function( require ) {
       var pen = this.findPointerById( id );
       if ( pen ) {
         var pointChanged = pen.cancel( point, event );
-        this.moveEvent( pen, event, pointChanged );
+        this.branchChangeEvents( pen, event, pointChanged );
         this.removePointer( pen );
         this.cancelEvent( pen, event );
       }
@@ -769,13 +769,6 @@ define( function( require ) {
         // Remove keyboard focus, but store element that is receiving interaction in case we resume .
         this.display.pointerFocus = focusableNode;
         scenery.Display.focus = null;
-      }
-    },
-
-    moveEvent: function( pointer, event, isMove ) {
-      var changed = this.branchChangeEvents( pointer, event, isMove );
-      if ( changed ) {
-        sceneryLog && sceneryLog.InputEvent && sceneryLog.InputEvent( 'branch change due to move event' );
       }
     },
 
