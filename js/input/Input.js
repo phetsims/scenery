@@ -172,6 +172,10 @@ define( function( require ) {
     this.emitter = new Emitter();
 
     this.pointerAddedListeners = [];
+
+    // @public {boolean} - Whether we are currently firing events. We need to track this to handle re-entrant cases
+    // like https://github.com/phetsims/balloons-and-static-electricity/issues/406.
+    this.currentlyFiringEvents = false;
   }
 
   scenery.register( 'Input', Input );
@@ -188,6 +192,9 @@ define( function( require ) {
     },
 
     batchEvent: function( domEvent, batchType, callback, triggerImmediate ) {
+      sceneryLog && sceneryLog.OnInput && sceneryLog.InputEvent( 'Input.batchEvent' );
+      sceneryLog && sceneryLog.OnInput && sceneryLog.push();
+
       // If our display is not interactive, do not respond to any events (but still prevent default)
       if ( this.display.interactive ) {
         this.batchedEvents.push( BatchedDOMEvent.createFromPool( domEvent, batchType, callback ) );
@@ -206,20 +213,36 @@ define( function( require ) {
       if ( !( this.passiveEvents === true ) && ( callback !== this.mouseDown || platform.ie || platform.edge ) ) {
         domEvent.preventDefault();
       }
+
+      sceneryLog && sceneryLog.OnInput && sceneryLog.pop();
     },
 
     fireBatchedEvents: function() {
-      if ( this.batchedEvents.length ) {
+      sceneryLog && sceneryLog.InputEvent && this.currentlyFiringEvents && sceneryLog.InputEvent(
+        'REENTRANCE DETECTED' );
+      // Don't re-entrantly enter our loop, see https://github.com/phetsims/balloons-and-static-electricity/issues/406
+      if ( !this.currentlyFiringEvents && this.batchedEvents.length ) {
         sceneryLog && sceneryLog.InputEvent && sceneryLog.InputEvent( 'Input.fireBatchedEvents length:' + this.batchedEvents.length );
+        sceneryLog && sceneryLog.InputEvent && sceneryLog.push();
+
+        this.currentlyFiringEvents = true;
 
         // needs to be done in order
-        var len = this.batchedEvents.length;
-        for ( var i = 0; i < len; i++ ) {
-          var batchedEvent = this.batchedEvents[ i ];
+        var batchedEvents = this.batchedEvents;
+        // IMPORTANT: We need to check the length of the array at every iteration, as it can change due to re-entrant
+        // event handling, see https://github.com/phetsims/balloons-and-static-electricity/issues/406.
+        // Events may be appended to this (synchronously) as part of firing initial events, so we want to FULLY run all
+        // events before clearing our array.
+        for ( var i = 0; i < batchedEvents.length; i++ ) {
+          var batchedEvent = batchedEvents[ i ];
           batchedEvent.run( this );
           batchedEvent.dispose();
         }
-        cleanArray( this.batchedEvents );
+        cleanArray( batchedEvents );
+
+        this.currentlyFiringEvents = false;
+
+        sceneryLog && sceneryLog.InputEvent && sceneryLog.pop();
       }
     },
 

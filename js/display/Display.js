@@ -341,6 +341,10 @@ define( function( require ) {
       // check to see whether contents under pointers changed (and if so, send the enter/exit events) to
       // maintain consistent state
       if ( this._input ) {
+        // As a graceful fallback, don't stall out ALL input on a single error.
+        // See https://github.com/phetsims/balloons-and-static-electricity/issues/406
+        this._input.currentlyFiringEvents = false;
+
         // TODO: Should this be handled elsewhere?
         this._input.validatePointers();
       }
