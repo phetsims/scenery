@@ -260,8 +260,8 @@ define( function( require ) {
           // containerParent.
           this._appendDescription = false;
 
-          // @private {array.<Object> - array of attributes that are on the node's DOM element.  Objects will have the
-          // form { attribute:{string}, value:{string|number} }
+          // @private {Array.<Object> - array of attributes that are on the node's DOM element.  Objects will have the
+          // form { attribute:{string}, value:{*}, namespace:{string|null} }
           this._accessibleAttributes = [];
 
           // @private {string|null} - the label content for this node's DOM element.  There are multiple ways that a label
@@ -985,7 +985,14 @@ define( function( require ) {
          * Sets the namespace for the primary element (relevant for MathML/SVG/etc.)
          * @public
          *
+         * For example, to create a MathML element:
+         * { tagName: 'math', accessibleNamespace: 'http://www.w3.org/1998/Math/MathML' }
+         *
+         * or for SVG:
+         * { tagName: 'svg', accessibleNamespace: 'http://www.w3.org/2000/svg' }
+         *
          * @param {string|null} accessibleNamespace - Null indicates no namespace.
+         * @returns {Node} - For chaining
          */
         setAccessibleNamespace: function( accessibleNamespace ) {
           if ( this._accessibleNamespace !== accessibleNamespace ) {
@@ -993,6 +1000,8 @@ define( function( require ) {
 
             this.invalidateAccessibleContent();
           }
+
+          return this;
         },
         set accessibleNamespace( value ) { this.setAccessibleNamespace( value ); },
 
@@ -1606,7 +1615,11 @@ define( function( require ) {
          * Get an array containing all accessible attributes that have been added to this node's DOM element.
          * @public
          *
-         * @returns {string[]}
+         * @returns {Array.<Object>} - Returns objects with: {
+         *   attribute: {string} // the name of the attribute
+         *   value: {*} // the value of the attribute
+         *   namespace: {string|null} // the (optional) namespace of the attribute
+         * }
          */
         getAccessibleAttributes: function() {
           return this._accessibleAttributes.slice( 0 ); // defensive copy
@@ -1619,21 +1632,37 @@ define( function( require ) {
          *
          * @param {string} attribute - string naming the attribute
          * @param {string|boolean} value - the value for the attribute
+         * @param {Object} [options]
          * @public
          */
-        setAccessibleAttribute: function( attribute, value ) {
+        setAccessibleAttribute: function( attribute, value, options ) {
+          options = _.extend( {
+            // {string|null} - If non-null, will set the attribute with the specified namespace. This can be required
+            // for setting certain attributes (e.g. MathML).
+            namespace: null
+          }, options );
 
           // if the accessible attribute already exists in the list, remove it - no need
           // to remove from the peers, existing attributes will simply be replaced in the DOM
           for ( var i = 0; i < this._accessibleAttributes.length; i++ ) {
-            if ( this._accessibleAttributes[ i ].attribute === attribute ) {
+            if ( this._accessibleAttributes[ i ].attribute === attribute &&
+                 this._accessibleAttributes[ i ].namespace === options.namespace ) {
               this._accessibleAttributes.splice( i, 1 );
             }
           }
 
-          this._accessibleAttributes.push( { attribute: attribute, value: value } );
+          this._accessibleAttributes.push( {
+            attribute: attribute,
+            value: value,
+            namespace: options.namespace
+          } );
           this.updateAccessiblePeers( function( accessiblePeer ) {
-            accessiblePeer.primarySibling.setAttribute( attribute, value );
+            if ( options.namespace ) {
+              accessiblePeer.primarySibling.setAttributeNS( options.namespace, attribute, value );
+            }
+            else {
+              accessiblePeer.primarySibling.setAttribute( attribute, value );
+            }
           } );
         },
 
@@ -1641,13 +1670,20 @@ define( function( require ) {
          * Remove a particular attribute, removing the associated semantic information from the DOM element.
          *
          * @param {string} attribute - name of the attribute to remove
+         * @param {Object} [options]
          * @public
          */
-        removeAccessibleAttribute: function( attribute ) {
+        removeAccessibleAttribute: function( attribute, options ) {
+          options = _.extend( {
+            // {string|null} - If non-null, will remove the attribute with the specified namespace. This can be required
+            // for removing certain attributes (e.g. MathML).
+            namespace: null
+          }, options );
 
           var attributeRemoved = false;
           for ( var i = 0; i < this._accessibleAttributes.length; i++ ) {
-            if ( this._accessibleAttributes[ i ].attribute === attribute ) {
+            if ( this._accessibleAttributes[ i ].attribute === attribute &&
+                 this._accessibleAttributes[ i ].namespace === options.namespace ) {
               this._accessibleAttributes.splice( i, 1 );
               attributeRemoved = true;
             }
@@ -1655,7 +1691,12 @@ define( function( require ) {
           assert && assert( attributeRemoved, 'Node does not have accessible attribute ' + attribute );
 
           this.updateAccessiblePeers( function( accessiblePeer ) {
-            accessiblePeer.primarySibling.removeAttribute( attribute );
+            if ( options.namespace ) {
+              accessiblePeer.primarySibling.removeAttributeNS( options.namespace, attribute );
+            }
+            else {
+              accessiblePeer.primarySibling.removeAttribute( attribute );
+            }
           } );
         },
 

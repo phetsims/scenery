@@ -149,7 +149,10 @@ define( function( require ) {
           for ( i = 0; i < defensiveAttributes.length; i++ ) {
             var attribute = defensiveAttributes[ i ].attribute;
             var value = defensiveAttributes[ i ].value;
-            self.setAccessibleAttribute( attribute, value );
+            var namespace = defensiveAttributes[ i ].namespace;
+            self.setAccessibleAttribute( attribute, value, {
+              namespace: namespace
+            } );
           }
 
           // set the accessible description, but not if the tagName has been cleared out.
@@ -213,7 +216,7 @@ define( function( require ) {
    */
   function createElement( tagName, focusable, options ) {
     options = _.extend( {
-      namespace: null
+      namespace: null // {string|null} - If non-null, the element will be created with the specific namespace
     }, options );
 
     var domElement = options.namespace
