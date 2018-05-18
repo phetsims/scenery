@@ -476,6 +476,7 @@ define( function( require ) {
       }
       var touch = new Touch( id, point, event );
       this.addPointer( touch );
+      this.moveEvent( touch, event, false );
       this.downEvent( touch, event );
 
       sceneryLog && sceneryLog.Input && sceneryLog.pop();
@@ -559,6 +560,7 @@ define( function( require ) {
       }
       var pen = new Pen( id, point, event );
       this.addPointer( pen );
+      this.moveEvent( pen, event, false );
       this.downEvent( pen, event );
 
       sceneryLog && sceneryLog.Input && sceneryLog.pop();
@@ -729,7 +731,7 @@ define( function( require ) {
 
     upEvent: function( pointer, event ) {
       var trail = this.rootNode.trailUnderPointer( pointer ) || new Trail( this.rootNode );
-      pointer.trail = trail;
+      assert && assert( trail.equals( pointer.trail ) );
 
       this.dispatchEvent( trail, 'up', pointer, event, true );
 
@@ -741,6 +743,7 @@ define( function( require ) {
 
     downEvent: function( pointer, event ) {
       var trail = this.rootNode.trailUnderPointer( pointer ) || new Trail( this.rootNode );
+      assert && assert( trail.equals( pointer.trail ) );
 
       // touch pointers are transient, so fire enter/over to the trail first
       if ( pointer instanceof Touch ) {
@@ -748,8 +751,6 @@ define( function( require ) {
       }
 
       this.dispatchEvent( trail, 'down', pointer, event, true );
-
-      pointer.trail = trail;
 
       // a11y
       var focusableNode = null;
@@ -781,6 +782,7 @@ define( function( require ) {
 
     cancelEvent: function( pointer, event ) {
       var trail = this.rootNode.trailUnderPointer( pointer ) || new Trail( this.rootNode );
+      assert && assert( trail.equals( pointer.trail ) );
 
       this.dispatchEvent( trail, 'cancel', pointer, event, true );
 
@@ -788,8 +790,6 @@ define( function( require ) {
       if ( pointer instanceof Touch ) {
         this.exitEvents( pointer, event, trail, 0, true );
       }
-
-      pointer.trail = trail;
     },
 
     // return whether there was a change
