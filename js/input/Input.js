@@ -826,8 +826,10 @@ define( function( require ) {
       // we want to approximately mimic http://www.w3.org/TR/DOM-Level-3-Events/#events-mouseevent-event-order
       // TODO: if a node gets moved down 1 depth, it may see both an exit and enter?
       if ( isBranchChange ) {
+        sceneryLog && sceneryLog.InputEvent && sceneryLog.push();
         this.exitEvents( pointer, event, oldTrail, branchIndex, lastNodeChanged );
         this.enterEvents( pointer, event, trail, branchIndex, lastNodeChanged );
+        sceneryLog && sceneryLog.InputEvent && sceneryLog.pop();
       }
 
       pointer.trail = trail;
