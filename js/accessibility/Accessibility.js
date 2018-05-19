@@ -1429,7 +1429,7 @@ define( function( require ) {
         hasAccessibleOrder: function() {
           return this._accessibleOrder !== null &&
                  this._accessibleOrder.length !== 0 &&
-                 this._accessibleOrder[ 0 ] !== null;
+                 ( this._accessibleOrder.length > 1 || this._accessibleOrder[ 0 ] !== null );
         },
 
         /**
