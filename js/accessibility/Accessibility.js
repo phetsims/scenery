@@ -1517,6 +1517,7 @@ define( function( require ) {
         /**
          * Get whether or not this node's representative DOM element is visible.
          * @public
+         * TODO: rename isAccessibleVisible()
          *
          * @returns {boolean}
          */

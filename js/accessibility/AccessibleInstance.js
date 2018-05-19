@@ -560,7 +560,7 @@ define( function( require ) {
         for ( i = 0; i < accessibleInstance.trail.length; i++ ) {
           var node = accessibleInstance.trail.nodes[ i ];
           var trails = node.getTrailsTo( rootNode ).filter( function( trail ) {
-            return trail.isVisible();
+            return trail.isAccessibleVisible();
           } );
           if ( trails.length === 0 ) {
             shouldBeVisible = false;

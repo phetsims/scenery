@@ -127,6 +127,17 @@ define( function( require ) {
       return true;
     },
 
+    // this trail is visible only if all nodes on it are marked as visible
+    isAccessibleVisible: function() {
+      var i = this.nodes.length;
+      while ( i-- ) {
+        if ( !this.nodes[ i ].isVisible() || !this.nodes[ i ].getAccessibleVisible() ) {
+          return false;
+        }
+      }
+      return true;
+    },
+
     getOpacity: function() {
       var opacity = 1;
       var i = this.nodes.length;
