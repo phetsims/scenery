@@ -345,6 +345,24 @@ define( function( require ) {
     },
 
     /**
+     * Returns whether the parallel DOM for this instance and its ancestors are not hidden.
+     * @public
+     *
+     * @returns {boolean}
+     */
+    isGloballyVisible: function() {
+      if ( this.peer.getContainerParent().hidden ) {
+        return false;
+      }
+      if ( this.parent ) {
+        return this.parent.isGloballyVisible();
+      }
+      else {
+        return true;
+      }
+    },
+
+    /**
      * Returns what our list of children (after sorting) should be.
      * @private
      *
@@ -519,21 +537,41 @@ define( function( require ) {
      * @public (scenery-internal)
      */
     auditRoot: function() {
-      assert && assert( this.trail.length === 0,
+      if ( !assert ) { return; }
+
+      var rootNode = this.display.rootNode;
+
+      assert( this.trail.length === 0,
         'Should only call auditRoot() on the root AccessibleInstance for a display' );
 
       function audit( fakeInstance, accessibleInstance ) {
-        assert && assert( fakeInstance.children.length === accessibleInstance.children.length,
+        assert( fakeInstance.children.length === accessibleInstance.children.length,
           'Different number of children in accessible instance' );
 
-        assert && assert( fakeInstance.node === accessibleInstance.node, 'Node mismatch for AccessibleInstance' );
+        assert( fakeInstance.node === accessibleInstance.node, 'Node mismatch for AccessibleInstance' );
 
         for ( var i = 0; i < accessibleInstance.children.length; i++ ) {
           audit( fakeInstance.children[ i ], accessibleInstance.children[ i ] );
         }
+
+        var isVisible = accessibleInstance.isGloballyVisible();
+
+        var shouldBeVisible = true;
+        for ( i = 0; i < accessibleInstance.trail.length; i++ ) {
+          var node = accessibleInstance.trail.nodes[ i ];
+          var trails = node.getTrailsTo( rootNode ).filter( function( trail ) {
+            return trail.isVisible();
+          } );
+          if ( trails.length === 0 ) {
+            shouldBeVisible = false;
+            break;
+          }
+        }
+
+        assert( isVisible === shouldBeVisible, 'Instance visibility mismatch' );
       }
 
-      audit( AccessibleInstance.createFakeAccessibleTree( this.display.rootNode ), this );
+      audit( AccessibleInstance.createFakeAccessibleTree( rootNode ), this );
     }
   }, {
     /**

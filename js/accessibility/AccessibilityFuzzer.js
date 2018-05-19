@@ -57,6 +57,8 @@ define( function( require ) {
       console.log( action.text );
       this.actionsTaken.push( action );
       action.execute();
+      this.display._rootAccessibleInstance.auditRoot();
+      AccessibilityTree.auditAccessibleDisplays( this.display.rootNode );
       for ( var i = 0; i < this.nodes.length; i++ ) {
         var node = this.nodes[ i ];
         console.log( i + '#' + node.id + ' ' + node.tagName + ' ch:' + AccessibilityTree.debugOrder( node.children ) + ' or:' + AccessibilityTree.debugOrder( node.accessibleOrder ) + ' vis:' + node.visible + ' avis:' + node.accessibleVisible );
