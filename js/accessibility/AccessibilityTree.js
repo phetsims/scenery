@@ -187,12 +187,8 @@ define( function( require ) {
 
         // For now, just regenerate the full tree. Could optimize in the future, if we can swap the content for an
         // AccessibleInstance.
-        if ( oldContent ) {
-          AccessibilityTree.removeTree( parent, node, accessibleTrails );
-        }
-        if ( newContent ) {
-          AccessibilityTree.addTree( parent, node, accessibleTrails );
-        }
+        AccessibilityTree.removeTree( parent, node, accessibleTrails );
+        AccessibilityTree.addTree( parent, node, accessibleTrails );
       }
 
       // An edge case is where we change the rootNode of the display (and don't have an effective parent)

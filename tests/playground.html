@@ -136,7 +136,21 @@ an UI and Display made for visual testing and debugging.
           toggleA11yDebug();
           toggleUpdates();
 
-          var fuzzer = new scenery.AccessibilityFuzzer( 2 );
+          // var a = new scenery.Node();
+          // var b = new scenery.Node( { tagName: 'div' } );
+          // scene.addChild( a );
+          // a.addChild( b );
+          // a.tagName = 'span';
+
+          // var a = new scenery.Node( { tagName: 'span' } );
+          // var b = new scenery.Node( { tagName: 'div' } );
+          // scene.addChild( a );
+          // a.addChild( b );
+          // a.tagName = null;
+
+          // display.updateDisplay();
+
+          var fuzzer = new scenery.AccessibilityFuzzer( 3 );
           while ( true ) { fuzzer.step(); }
         } )
       };
