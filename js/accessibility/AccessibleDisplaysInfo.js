@@ -258,21 +258,19 @@ define( function( require ) {
       assert && assert( Array.isArray( displays ) );
 
       // Simplifies things if we can stop no-ops here.
-      if ( displays.length === 0 ) {
-        return;
-      }
+      if ( displays.length !== 0 ) {
+        Array.prototype.push.apply( this.accessibleDisplays, displays );
 
-      Array.prototype.push.apply( this.accessibleDisplays, displays );
-
-      // Propagate the change to our children
-      for ( var i = 0; i < this.node._children.length; i++ ) {
-        var child = this.node._children[ i ];
-        if ( child._accessibleDisplaysInfo.canHaveAccessibleDisplays() ) {
-          this.node._children[ i ]._accessibleDisplaysInfo.addAccessibleDisplays( displays );
+        // Propagate the change to our children
+        for ( var i = 0; i < this.node._children.length; i++ ) {
+          var child = this.node._children[ i ];
+          if ( child._accessibleDisplaysInfo.canHaveAccessibleDisplays() ) {
+            this.node._children[ i ]._accessibleDisplaysInfo.addAccessibleDisplays( displays );
+          }
         }
-      }
 
-      this.node.trigger0( 'accessibleDisplays' );
+        this.node.trigger0( 'accessibleDisplays' );
+      }
 
       sceneryLog && sceneryLog.AccessibleDisplaysInfo && sceneryLog.pop();
     },
@@ -291,30 +289,28 @@ define( function( require ) {
       assert && assert( this.accessibleDisplays.length >= displays.length );
 
       // Simplifies things if we can stop no-ops here.
-      if ( displays.length === 0 ) {
-        return;
-      }
+      if ( displays.length !== 0 ) {
+        var i;
 
-      var i;
-
-      for ( i = displays.length - 1; i >= 0; i-- ) {
-        var index = this.accessibleDisplays.lastIndexOf( displays[ i ] );
-        assert && assert( index >= 0 );
-        this.accessibleDisplays.splice( i, 1 );
-      }
-
-      // Propagate the change to our children
-      for ( i = 0; i < this.node._children.length; i++ ) {
-        var child = this.node._children[ i ];
-        // NOTE: Since this gets called many times from the RendererSummary (which happens before the actual child
-        // modification happens), we DO NOT want to traverse to the child node getting removed. Ideally a better
-        // solution than this flag should be found.
-        if ( child._accessibleDisplaysInfo.canHaveAccessibleDisplays() && !child._isGettingRemovedFromParent ) {
-          child._accessibleDisplaysInfo.removeAccessibleDisplays( displays );
+        for ( i = displays.length - 1; i >= 0; i-- ) {
+          var index = this.accessibleDisplays.lastIndexOf( displays[ i ] );
+          assert && assert( index >= 0 );
+          this.accessibleDisplays.splice( i, 1 );
         }
-      }
 
-      this.node.trigger0( 'accessibleDisplays' );
+        // Propagate the change to our children
+        for ( i = 0; i < this.node._children.length; i++ ) {
+          var child = this.node._children[ i ];
+          // NOTE: Since this gets called many times from the RendererSummary (which happens before the actual child
+          // modification happens), we DO NOT want to traverse to the child node getting removed. Ideally a better
+          // solution than this flag should be found.
+          if ( child._accessibleDisplaysInfo.canHaveAccessibleDisplays() && !child._isGettingRemovedFromParent ) {
+            child._accessibleDisplaysInfo.removeAccessibleDisplays( displays );
+          }
+        }
+
+        this.node.trigger0( 'accessibleDisplays' );
+      }
 
       sceneryLog && sceneryLog.AccessibleDisplaysInfo && sceneryLog.pop();
     }
