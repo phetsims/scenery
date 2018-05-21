@@ -364,7 +364,7 @@ define( function( require ) {
     this._transform.onStatic( 'change', this._transformListener ); // NOTE: Listener/transform bound to this node.
 
     /*
-     * Maxmimum dimensions for the node's local bounds before a corrective scaling factor is applied to maintain size.
+     * Maximum dimensions for the node's local bounds before a corrective scaling factor is applied to maintain size.
      * The maximum dimensions are always compared to local bounds, and applied "before" the node's transform.
      * Whenever the local bounds or maximum dimensions of this Node change and it has at least one maximum dimension
      * (width or height), an ideal scale is computed (either the smallest scale for our local bounds to fit the
