@@ -83,7 +83,6 @@ define( function( require ) {
     DOMBlock: { name: 'DOM', style: '' },
     Drawable: { name: '', style: '' },
     FittedBlock: { name: 'FittedBlock', style: '' },
-    Input: { name: 'Input', style: '' },
     InputEvent: { name: 'InputEvent', style: '' },
     OnInput: { name: 'OnInput', style: '' },
     InputListener: { name: 'InputListener', style: '' },
@@ -98,7 +97,10 @@ define( function( require ) {
     AccessibleInstance: { name: 'AccessibleInstance', style: '' },
     AlignBox: { name: 'AlignBox', style: '' },
     AlignGroup: { name: 'AlignGroup', style: '' },
-    RichText: { name: 'RichText', style: '' }
+    RichText: { name: 'RichText', style: '' },
+
+    Input: { name: 'Input', style: '' }, // When "logical" input functions are called.
+    EventDispatch: { name: 'EventDispatch', style: '' } // When an event is dispatched, and when listeners are triggered
   };
 
   // will be filled in by other modules
