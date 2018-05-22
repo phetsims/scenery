@@ -28,7 +28,9 @@ define( function( require ) {
     Renderer.bitmaskSingleSVG,
     Renderer.bitmaskNotPainted,
     Renderer.bitmaskBoundsValid,
-    Renderer.bitmaskNotAccessible,
+    Renderer.bitmaskNotAccessible, // NOTE: This could be separated out into its own implementation for this flag, since
+    // there are cases where we actually have nothing accessible DUE to things being pulled out by another order.
+    // This is generally NOT the case, so I've left this in here because it significantly simplifies the implementation.
 
     // inverse renderer bits ("Do all painted nodes NOT support renderer X in this sub-tree?")
     Renderer.bitmaskLacksCanvas,
