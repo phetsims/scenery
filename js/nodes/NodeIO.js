@@ -10,6 +10,7 @@ define( function( require ) {
   'use strict';
 
   // modules
+  var BooleanProperty = require( 'AXON/BooleanProperty' );
   var scenery = require( 'SCENERY/scenery' );
 
   // phet-io modules
@@ -31,27 +32,22 @@ define( function( require ) {
   function NodeIO( node, phetioID ) {
     assert && assertInstanceOf( node, phet.scenery.Node );
     ObjectIO.call( this, node, phetioID );
+
+    var visibleProperty = new BooleanProperty( node.visible, {
+      tandem: node.tandem.createTandem( 'visibleProperty' ),
+      instanceDocumentation: 'Property that controls whether the Node will be visible (and interactive).'
+    } );
+
+    visibleProperty.link( function( visible ) {
+      node.visible = visible;
+    } );
+    node.on( 'visibility', function() {
+      visibleProperty.value = node.visible;
+    } );
+
   }
 
   phetioInherit( ObjectIO, 'NodeIO', NodeIO, {
-    isVisible: {
-      returnType: BooleanIO,
-      parameterTypes: [],
-      implementation: function() {
-        return this.instance.visible;
-      },
-      documentation: 'Gets a Boolean value indicating whether the node can be seen and interacted with'
-    },
-
-    setVisible: {
-      returnType: VoidIO,
-      parameterTypes: [ BooleanIO ],
-      implementation: function( visible ) {
-        this.instance.visible = visible;
-      },
-      documentation: 'Set whether the node will be visible (and interactive)'
-    },
-
     setPickable: {
       returnType: VoidIO,
       parameterTypes: [ NullableIO( BooleanIO ) ],
@@ -85,19 +81,6 @@ define( function( require ) {
       },
       documentation: 'Adds a listener for when pickability of the node changes'
     },
-
-    addVisibleListener: {
-      returnType: VoidIO,
-      parameterTypes: [ FunctionIO( VoidIO, [ BooleanIO ] ) ],
-      implementation: function( callback ) {
-        var inst = this.instance;
-        this.instance.on( 'visibility', function() {
-          callback( inst.isVisible() );
-        } );
-      },
-      documentation: 'Adds a listener for when visibility of the node changes'
-    },
-
     setOpacity: {
       returnType: VoidIO,
       parameterTypes: [ NumberIO ],
@@ -119,7 +102,6 @@ define( function( require ) {
     toStateObject: function( node ) {
       assert && assertInstanceOf( node, phet.scenery.Node );
       return {
-        visible: node.isVisible(),
         pickable: node.isPickable(),
         opacity: node.opacity
       };
@@ -129,7 +111,6 @@ define( function( require ) {
     },
     setValue: function( node, fromStateObject ) {
       assert && assertInstanceOf( node, phet.scenery.Node );
-      node.visible = fromStateObject.visible;
       node.pickable = fromStateObject.pickable;
       node.opacity = fromStateObject.opacity;
     },
