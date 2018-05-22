@@ -47,6 +47,7 @@ define( function( require ) {
     //Display a pointer that was added.  Use a separate SVG layer for each pointer so it can be hardware accelerated, otherwise it is too slow just setting svg internal attributes
     this.pointerAdded = function( pointer ) {
 
+      // TODO: I believe this can be removed? Double-check
       if ( pointer.isKey ) { return; }
 
       var svg = document.createElementNS( scenery.svgns, 'svg' );
