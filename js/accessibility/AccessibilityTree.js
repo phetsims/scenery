@@ -179,16 +179,21 @@ define( function( require ) {
 
       var i;
       var parents = node._accessibleParent ? [ node._accessibleParent ] : node._parents;
+      var accessibleTrailsList = []; // accessibleTrailsList[ i ] := AccessibilityTree.findAccessibleTrails( parents[ i ] )
 
+      // For now, just regenerate the full tree. Could optimize in the future, if we can swap the content for an
+      // AccessibleInstance.
       for ( i = 0; i < parents.length; i++ ) {
         var parent = parents[ i ];
 
         var accessibleTrails = AccessibilityTree.findAccessibleTrails( parent );
+        accessibleTrailsList.push( accessibleTrails );
 
-        // For now, just regenerate the full tree. Could optimize in the future, if we can swap the content for an
-        // AccessibleInstance.
         AccessibilityTree.removeTree( parent, node, accessibleTrails );
-        AccessibilityTree.addTree( parent, node, accessibleTrails );
+      }
+      // Do all removals before adding anything back in.
+      for ( i = 0; i < parents.length; i++ ) {
+        AccessibilityTree.addTree( parents[ i ], node, accessibleTrailsList[ i ] );
       }
 
       // An edge case is where we change the rootNode of the display (and don't have an effective parent)
