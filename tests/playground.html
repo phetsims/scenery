@@ -227,13 +227,12 @@ an UI and Display made for visual testing and debugging.
 
       window.displayTest = function() {
         setTimeout( function() {
-          scenery.enableLogging( [ 'RichText' ] );
-
-          window.text = new scenery.RichText( '‫تطوير البرمجيات: ‪Michael Dubson, John Blanco‬‬', {
-            x: 50,
-            y: 50
-          } );
-          scene.addChild( text );
+          window.shape = new kite.Shape( 'M 397.00000000000000000000 317.84609028105006700571 L 397.00000000000000000000 328.72090884305322333603 L 407.00000000000000000000 328.72090884305322333603 L 407.00000000000000000000 308.15927466097383558008 L 417.00000000000000000000 308.15927466097383558008 L 417.00000000000000000000 308.23195711190078327490' );
+          window.path = new scenery.Path( shape, { stroke: 'red' } );
+          scene.addChild( path );
+          path.left = 50;
+          path.top = 50;
+          path.lineWidth = 5;
 
           display.updateDisplay();
         }, 400 );

@@ -100,7 +100,7 @@ define( function( require ) {
     RichText: { name: 'RichText', style: '' },
     AccessibilityTree: { name: 'AccessibilityTree', style: '' },
     AccessibleDisplaysInfo: { name: 'AccessibleDisplaysInfo', style: '' },
-    Input: { name: 'Input', style: '' }, // When "logical" input functions are called.
+    Input: { name: 'Input', style: '' }, // When "logical" input functions are called, and related tasks
     EventDispatch: { name: 'EventDispatch', style: '' } // When an event is dispatched, and when listeners are triggered
   };
 
