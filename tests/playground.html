@@ -163,8 +163,9 @@ an UI and Display made for visual testing and debugging.
 
           // display.updateDisplay();
 
-          var fuzzer = new scenery.AccessibilityFuzzer( 3 );
-          while ( true ) { fuzzer.step(); }
+          var fuzzer = new scenery.AccessibilityFuzzer( 5 );
+          var count = 0;
+          while ( true ) { fuzzer.step(); console.log( ++count ); }
         } )
       };
 
