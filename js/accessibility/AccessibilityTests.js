@@ -9,6 +9,7 @@ define( function( require ) {
   'use strict';
 
   // modules
+  var AccessibilityFuzzer = require( 'SCENERY/accessibility/AccessibilityFuzzer' );
   var AccessibilityUtil = require( 'SCENERY/accessibility/AccessibilityUtil' );
   var AccessiblePeer = require( 'SCENERY/accessibility/AccessiblePeer' );
   var Circle = require( 'SCENERY/nodes/Circle' );
@@ -979,5 +980,29 @@ define( function( require ) {
     assert.ok( containerElement.childNodes[ 0 ].tagName.toUpperCase() === 'H3', 'label sibling first' );
     assert.ok( containerElement.childNodes[ 1 ].tagName.toUpperCase() === DEFAULT_DESCRIPTION_TAG_NAME, 'description sibling second' );
     assert.ok( containerElement.childNodes[ 2 ].tagName.toUpperCase() === 'LI', 'primary sibling last' );
+  } );
+
+  QUnit.test( 'AccessibilityFuzzer with 3 nodes', function( assert ) {
+    var fuzzer = new AccessibilityFuzzer( 3, false );
+    for ( var i = 0; i < 5000; i++ ) {
+      fuzzer.step();
+    }
+    assert.expect( 0 );
+  } );
+
+  QUnit.test( 'AccessibilityFuzzer with 4 nodes', function( assert ) {
+    var fuzzer = new AccessibilityFuzzer( 4, false );
+    for ( var i = 0; i < 1000; i++ ) {
+      fuzzer.step();
+    }
+    assert.expect( 0 );
+  } );
+
+  QUnit.test( 'AccessibilityFuzzer with 5 nodes', function( assert ) {
+    var fuzzer = new AccessibilityFuzzer( 5, false );
+    for ( var i = 0; i < 300; i++ ) {
+      fuzzer.step();
+    }
+    assert.expect( 0 );
   } );
 } );

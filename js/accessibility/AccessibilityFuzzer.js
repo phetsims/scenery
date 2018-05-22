@@ -23,12 +23,16 @@ define( function( require ) {
    * @constructor
    *
    * @param {number} nodeCount
+   * @param {boolean} logToConsole
    */
-  function AccessibilityFuzzer( nodeCount ) {
+  function AccessibilityFuzzer( nodeCount, logToConsole ) {
     assert && assert( nodeCount >= 2 );
 
     // @private {number}
     this.nodeCount = nodeCount;
+
+    // @private {boolean}
+    this.logToConsole = logToConsole;
 
     // @private {Array.<Node>}
     this.nodes = _.range( 0, nodeCount ).map( function() {
@@ -54,14 +58,16 @@ define( function( require ) {
      */
     step: function() {
       var action = this.random.sample( this.enumerateActions() );
-      console.log( action.text );
+      this.logToConsole && console.log( action.text );
       this.actionsTaken.push( action );
       action.execute();
       this.display._rootAccessibleInstance.auditRoot();
       AccessibilityTree.auditAccessibleDisplays( this.display.rootNode );
-      for ( var i = 0; i < this.nodes.length; i++ ) {
-        var node = this.nodes[ i ];
-        console.log( i + '#' + node.id + ' ' + node.tagName + ' ch:' + AccessibilityTree.debugOrder( node.children ) + ' or:' + AccessibilityTree.debugOrder( node.accessibleOrder ) + ' vis:' + node.visible + ' avis:' + node.accessibleVisible );
+      if ( this.logToConsole ) {
+        for ( var i = 0; i < this.nodes.length; i++ ) {
+          var node = this.nodes[ i ];
+          console.log( i + '#' + node.id + ' ' + node.tagName + ' ch:' + AccessibilityTree.debugOrder( node.children ) + ' or:' + AccessibilityTree.debugOrder( node.accessibleOrder ) + ' vis:' + node.visible + ' avis:' + node.accessibleVisible );
+        }
       }
     },
 
