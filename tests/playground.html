@@ -38,7 +38,7 @@ an UI and Display made for visual testing and debugging.
       background-color: #fff;
     }
 
-    #debug {
+    #debug, #a11yDebug {
       position: relative;
       top: 320px;
       padding: 0.5em;
@@ -69,6 +69,8 @@ an UI and Display made for visual testing and debugging.
 
 <div id="controls">
   <button onclick="toggleDebug();">Toggle Debug</button>
+  <br>
+  <button onclick="toggleA11yDebug();">Toggle A11y</button>
   <br>
   <button onclick="toggleLogging();">Toggle Logging</button>
   <br>
@@ -128,19 +130,99 @@ an UI and Display made for visual testing and debugging.
         }
       };
 
-      window.testContent = {
-        createPeer: function( accessibleInstance ) {
-          return new scenery.AccessiblePeer( accessibleInstance, document.createElement( 'div' ) );
-        }
-      };
       window.accessibleTest = function() {
         setTimeout( function() {
-          scenery.enableLogging( [ 'AccessibleInstance' ] )
-          window.a = new scenery.Node( { accessibleContent: testContent } );
-          scene.addChild( a );
-          window.b = new scenery.Node();
-          b.addChild( a );
+          scenery.enableLogging( [ 'Accessibility', 'AccessibleInstance', 'AccessibilityTree', 'AccessibleDisplaysInfo' ] );
+          toggleA11yDebug();
+          toggleUpdates();
+
+          // var a = new scenery.Node();
+          // var b = new scenery.Node( { tagName: 'div' } );
+          // scene.addChild( a );
+          // a.addChild( b );
+          // a.tagName = 'span';
+
+          // var a = new scenery.Node( { tagName: 'span' } );
+          // var b = new scenery.Node( { tagName: 'div' } );
+          // scene.addChild( a );
+          // a.addChild( b );
+          // a.tagName = null;
+
+          // display.updateDisplay();
+
+
+          // window.a = new scenery.Node( { tagName: 'div' } );
+          // window.b = new scenery.Node();
+          // window.c = new scenery.Node( { tagName: 'span' } );
+
+          // a.children = [ b, c ];
+          // a.accessibleOrder = [ c, b ];
+          // b.children = [ c ];
+          // scene.addChild( a );
+          // a.accessibleOrder = null;
+
+          // display.updateDisplay();
+
+          var fuzzer = new scenery.AccessibilityFuzzer( 5, false );
+          var count = 0;
+          while ( true ) { fuzzer.step(); console.log( ++count ); }
         } )
+      };
+
+      window.focusTest = function() {
+        setTimeout( function() {
+          toggleUpdates();
+          display.initializeEvents();
+
+          var button = new scenery.Rectangle( 10, 10, 100, 60, {
+            fill: 'gray',
+            tagName: 'div',
+            focusable: true
+          } );
+          button.addAccessibleInputListener( {
+            click: function( domEvent, trail ) {
+              console.log( param1, param2 );
+            }
+          } );
+          scene.addChild( new scenery.Node( {
+            children: [ button ]
+          } ) );
+          scene.addChild( new scenery.Node( {
+            children: [ button ],
+            y: 100
+          } ) );
+        } );
+      };
+
+      window.debugAccessibleInstances = function() {
+        recurse( display._rootAccessibleInstance, '' );
+        function recurse( instance, indentation ) {
+          console.log( indentation + ( instance.isRootInstance ? '' : instance.node.tagName ) + ' ' + instance.toString() );
+          instance.children.forEach( child => recurse( child, indentation + '  ' ) );
+        }
+      };
+
+      window.debugDOM = function() {
+        var parallelDOM = display._rootAccessibleInstance.peer.primarySibling.outerHTML;
+        parallelDOM = parallelDOM.replace( /\>\</g, '>\n<' );
+        var lines = parallelDOM.split( '\n' );
+
+        var indentation = '';
+        var indentedLines = [];
+        for ( var i = 0; i < lines.length; i++ ) {
+          var line = lines[ i ];
+          var isEndTag = line.slice( 0, 2 ) === '</';
+
+          if ( isEndTag ) {
+            indentation = indentation.slice( 2 );
+          }
+          indentedLines.push( indentation + line );
+          if ( !isEndTag ) {
+            indentation += '  ';
+          }
+        }
+
+        console.log( indentedLines.join( '\n' ) );
       };
 
       window.displayTest = function() {
@@ -269,6 +351,37 @@ an UI and Display made for visual testing and debugging.
         }
 
         playgroundDebugging = !playgroundDebugging;
+      };
+
+      /*---------------------------------------------------------------------------*
+       * A11y Debug
+       *----------------------------------------------------------------------------*/
+
+      var a11yDebugging = false;
+      var a11yDebuggingRequestID = 0;
+
+      var a11yDebug = document.createElement( 'div' );
+      a11yDebug.id = 'a11yDebug';
+      a11yDebug.style.display = 'none';
+      document.body.appendChild( a11yDebug );
+
+      function a11yDebugStep() {
+        a11yDebuggingRequestID = window.requestAnimationFrame( a11yDebugStep, a11yDebug );
+
+        a11yDebug.style.display = '';
+        a11yDebug.innerHTML = display.getAccessibleDebugHTML();
+      }
+
+      window.toggleA11yDebug = function() {
+        if ( a11yDebugging ) {
+          window.cancelAnimationFrame( a11yDebuggingRequestID );
+          a11yDebug.style.display = 'none';
+        }
+        else {
+          a11yDebugStep();
+        }
+
+        a11yDebugging = !a11yDebugging;
       };
 
       /*---------------------------------------------------------------------------*

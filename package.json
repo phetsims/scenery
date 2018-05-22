@@ -10,6 +10,7 @@
     "grunt": "~1.0.0"
   },
   "phet": {
+    "generatedUnitTests": true,
     "requirejsNamespace": "SCENERY",
     "buildStandalone": true,
     "isJSOnly": true,

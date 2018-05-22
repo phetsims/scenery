@@ -28,7 +28,9 @@ define( function( require ) {
     Renderer.bitmaskSingleSVG,
     Renderer.bitmaskNotPainted,
     Renderer.bitmaskBoundsValid,
-    Renderer.bitmaskNotAccessible,
+    Renderer.bitmaskNotAccessible, // NOTE: This could be separated out into its own implementation for this flag, since
+    // there are cases where we actually have nothing accessible DUE to things being pulled out by another order.
+    // This is generally NOT the case, so I've left this in here because it significantly simplifies the implementation.
 
     // inverse renderer bits ("Do all painted nodes NOT support renderer X in this sub-tree?")
     Renderer.bitmaskLacksCanvas,
@@ -81,6 +83,7 @@ define( function( require ) {
     this.node.onStatic( 'clip', listener );
     this.node.onStatic( 'selfBoundsValid', listener ); // e.g. Text, may change based on boundsMethod
     this.node.onStatic( 'accessibleContent', listener );
+    this.node.onStatic( 'accessibleOrder', listener );
   }
 
   scenery.register( 'RendererSummary', RendererSummary );
@@ -124,6 +127,10 @@ define( function( require ) {
       }
 
       if ( ancestorOldMask || ancestorNewMask ) {
+
+        var oldSubtreeBitmask = this.bitmask;
+        assert && assert( oldSubtreeBitmask !== undefined );
+
         for ( var j = 0; j < numSummaryBits; j++ ) {
           var ancestorBit = summaryBits[ j ];
           // Check for added bits
@@ -140,6 +147,7 @@ define( function( require ) {
         }
 
         this.node.trigger0( 'rendererSummary' ); // please don't change children when listening to this!
+        this.node.onSummaryChange( oldSubtreeBitmask, this.bitmask );
 
         var len = this.node._parents.length;
         for ( var k = 0; k < len; k++ ) {
@@ -348,7 +356,7 @@ define( function( require ) {
       if ( node.areSelfBoundsValid() ) {
         bitmask |= Renderer.bitmaskBoundsValid;
       }
-      if ( !node.accessibleContent ) {
+      if ( !node.accessibleContent && !node.hasAccessibleOrder() ) {
         bitmask |= Renderer.bitmaskNotAccessible;
       }
 

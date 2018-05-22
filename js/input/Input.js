@@ -192,8 +192,8 @@ define( function( require ) {
     },
 
     batchEvent: function( domEvent, batchType, callback, triggerImmediate ) {
-      sceneryLog && sceneryLog.OnInput && sceneryLog.InputEvent( 'Input.batchEvent' );
-      sceneryLog && sceneryLog.OnInput && sceneryLog.push();
+      sceneryLog && sceneryLog.InputEvent && sceneryLog.InputEvent( 'Input.batchEvent' );
+      sceneryLog && sceneryLog.InputEvent && sceneryLog.push();
 
       // If our display is not interactive, do not respond to any events (but still prevent default)
       if ( this.display.interactive ) {
@@ -215,7 +215,7 @@ define( function( require ) {
         domEvent.preventDefault();
       }
 
-      sceneryLog && sceneryLog.OnInput && sceneryLog.pop();
+      sceneryLog && sceneryLog.InputEvent && sceneryLog.pop();
     },
 
     fireBatchedEvents: function() {
@@ -731,7 +731,7 @@ define( function( require ) {
 
     upEvent: function( pointer, event ) {
       var trail = this.rootNode.trailUnderPointer( pointer ) || new Trail( this.rootNode );
-      assert && assert( trail.equals( pointer.trail ) );
+      // assert && assert( trail.equals( pointer.trail ) );
 
       this.dispatchEvent( trail, 'up', pointer, event, true );
 
@@ -743,12 +743,7 @@ define( function( require ) {
 
     downEvent: function( pointer, event ) {
       var trail = this.rootNode.trailUnderPointer( pointer ) || new Trail( this.rootNode );
-      assert && assert( trail.equals( pointer.trail ) );
-
-      // touch pointers are transient, so fire enter/over to the trail first
-      if ( pointer instanceof Touch ) {
-        this.enterEvents( pointer, event, trail, 0, true );
-      }
+      // assert && assert( trail.equals( pointer.trail ) );
 
       this.dispatchEvent( trail, 'down', pointer, event, true );
 
@@ -775,7 +770,7 @@ define( function( require ) {
 
     cancelEvent: function( pointer, event ) {
       var trail = this.rootNode.trailUnderPointer( pointer ) || new Trail( this.rootNode );
-      assert && assert( trail.equals( pointer.trail ) );
+      // assert && assert( trail.equals( pointer.trail ) );
 
       this.dispatchEvent( trail, 'cancel', pointer, event, true );
 
@@ -785,11 +780,24 @@ define( function( require ) {
       }
     },
 
-    // return whether there was a change
+    /**
+     * Dispatches any necessary events that would result from the pointer's trail changing.
+     * @private
+     *
+     * This will send the necessary exit/enter events (on subtrails that have diverged between before/after), the
+     * out/over events, and if flagged a move event.
+     *
+     * @param {Pointer} pointer
+     * @param {DOMEvent} event
+     * @param {boolean} isMove - Whether to send move events
+     * @returns {boolean} - Whether there was a branch change.
+     */
     branchChangeEvents: function( pointer, event, isMove ) {
-      var trail = this.rootNode.trailUnderPointer( pointer ) || new Trail( this.rootNode );
       sceneryLog && sceneryLog.InputEvent && sceneryLog.InputEvent(
-        'checking branch change: ' + trail.toString() + ' at ' + pointer.point.toString() );
+        'branchChangeEvents: ' + pointer.toString() + ' isMove:' + isMove );
+      sceneryLog && sceneryLog.InputEvent && sceneryLog.push();
+
+      var trail = this.rootNode.trailUnderPointer( pointer ) || new Trail( this.rootNode );
       var oldTrail = pointer.trail || new Trail( this.rootNode ); // TODO: consider a static trail reference
 
       var lastNodeChanged = oldTrail.lastNode() !== trail.lastNode();
@@ -797,7 +805,7 @@ define( function( require ) {
       var branchIndex = Trail.branchIndex( trail, oldTrail );
       var isBranchChange = branchIndex !== trail.length || branchIndex !== oldTrail.length;
       isBranchChange && sceneryLog && sceneryLog.InputEvent && sceneryLog.InputEvent(
-        'branch change from ' + oldTrail.toString() + ' to ' + trail.toString() );
+        'changed from ' + oldTrail.toString() + ' to ' + trail.toString() );
 
       // event order matches http://www.w3.org/TR/DOM-Level-3-Events/#events-mouseevent-event-order
       if ( isMove ) {
@@ -807,13 +815,13 @@ define( function( require ) {
       // we want to approximately mimic http://www.w3.org/TR/DOM-Level-3-Events/#events-mouseevent-event-order
       // TODO: if a node gets moved down 1 depth, it may see both an exit and enter?
       if ( isBranchChange ) {
-        sceneryLog && sceneryLog.InputEvent && sceneryLog.push();
         this.exitEvents( pointer, event, oldTrail, branchIndex, lastNodeChanged );
         this.enterEvents( pointer, event, trail, branchIndex, lastNodeChanged );
-        sceneryLog && sceneryLog.InputEvent && sceneryLog.pop();
       }
 
       pointer.trail = trail;
+
+      sceneryLog && sceneryLog.InputEvent && sceneryLog.pop();
       return isBranchChange;
     },
 
@@ -841,19 +849,23 @@ define( function( require ) {
       }
     },
 
+    /**
+     * Checks all pointers to see whether they are still "over" the same nodes (trail). If not, it will fire the usual
+     * enter/exit eevents.
+     */
     validatePointers: function() {
-      var self = this;
+      sceneryLog && sceneryLog.InputEvent && sceneryLog.InputEvent( 'validatePointers' );
+      sceneryLog && sceneryLog.InputEvent && sceneryLog.push();
 
       var i = this.pointers.length;
       while ( i-- ) {
         var pointer = this.pointers[ i ];
         if ( pointer.point ) {
-          var changed = self.branchChangeEvents( pointer, null, false );
-          if ( changed ) {
-            sceneryLog && sceneryLog.InputEvent && sceneryLog.InputEvent( 'branch change due validatePointers' );
-          }
+          this.branchChangeEvents( pointer, null, false );
         }
       }
+
+      sceneryLog && sceneryLog.InputEvent && sceneryLog.pop();
     },
 
     /**
@@ -869,6 +881,11 @@ define( function( require ) {
     dispatchEvent: function( trail, type, pointer, event, bubbles ) {
       sceneryLog && sceneryLog.InputEvent && sceneryLog.InputEvent(
         'Input: ' + type + ' on ' + trail.toString() + ' for pointer ' + pointer.toString() + ' at ' + pointer.point.toString() );
+
+      sceneryLog && sceneryLog.EventDispatch && sceneryLog.EventDispatch(
+        type + ' trail:' + trail.toString() + ' pointer:' + pointer.toString() + ' at ' + pointer.point.toString() );
+      sceneryLog && sceneryLog.EventDispatch && sceneryLog.push();
+
       assert && assert( trail, 'Falsy trail for dispatchEvent' );
 
       // NOTE: event is not immutable, as its currentTarget changes
@@ -883,6 +900,8 @@ define( function( require ) {
 
       // Notify input listeners on the Display
       this.dispatchToListeners( pointer, this.display.getInputListeners(), type, inputEvent );
+
+      sceneryLog && sceneryLog.EventDispatch && sceneryLog.pop();
     },
 
     /**
@@ -904,8 +923,23 @@ define( function( require ) {
       for ( var i = 0; i < listeners.length; i++ ) {
         var listener = listeners[ i ];
 
-        ( !inputEvent.aborted && listener[ specificType ] ) && listener[ specificType ]( inputEvent );
-        ( !inputEvent.aborted && listener[ type ] ) && listener[ type ]( inputEvent );
+        if ( !inputEvent.aborted && listener[ specificType ] ) {
+          sceneryLog && sceneryLog.EventDispatch && sceneryLog.EventDispatch( specificType );
+          sceneryLog && sceneryLog.EventDispatch && sceneryLog.push();
+
+          listener[ specificType ]( inputEvent );
+
+          sceneryLog && sceneryLog.EventDispatch && sceneryLog.pop();
+        }
+
+        if ( !inputEvent.aborted && listener[ type ] ) {
+          sceneryLog && sceneryLog.EventDispatch && sceneryLog.EventDispatch( type );
+          sceneryLog && sceneryLog.EventDispatch && sceneryLog.push();
+
+          listener[ type ]( inputEvent );
+
+          sceneryLog && sceneryLog.EventDispatch && sceneryLog.pop();
+        }
       }
     },
 

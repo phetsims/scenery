@@ -13,6 +13,9 @@
 define( [
   'SCENERY/scenery',
 
+  'SCENERY/accessibility/AccessibilityFuzzer',
+  'SCENERY/accessibility/AccessibilityTree',
+  'SCENERY/accessibility/AccessibilityUtil',
   'SCENERY/accessibility/AccessibleInstance',
   'SCENERY/accessibility/AccessiblePeer',
   'SCENERY/accessibility/Accessibility',

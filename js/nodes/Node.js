@@ -188,14 +188,6 @@ define( function( require ) {
     'bounds': true
   };
 
-  function defaultTrailPredicate( node ) {
-    return node._parents.length === 0;
-  }
-
-  function defaultLeafTrailPredicate( node ) {
-    return node._children.length === 0;
-  }
-
   var scratchBounds2 = Bounds2.NOTHING.copy(); // mutable {Bounds2} used temporarily in methods
   var scratchMatrix3 = new Matrix3();
 
@@ -364,7 +356,7 @@ define( function( require ) {
     this._transform.onStatic( 'change', this._transformListener ); // NOTE: Listener/transform bound to this node.
 
     /*
-     * Maxmimum dimensions for the node's local bounds before a corrective scaling factor is applied to maintain size.
+     * Maximum dimensions for the node's local bounds before a corrective scaling factor is applied to maintain size.
      * The maximum dimensions are always compared to local bounds, and applied "before" the node's transform.
      * Whenever the local bounds or maximum dimensions of this Node change and it has at least one maximum dimension
      * (width or height), an ideal scale is computed (either the smallest scale for our local bounds to fit the
@@ -453,6 +445,9 @@ define( function( require ) {
       preventFit: DEFAULT_OPTIONS.preventFit
     };
 
+    // compose accessibility
+    this.initializeAccessibility();
+
     // @public (scenery-internal) {number} - A bitmask which specifies which renderers this node (and only this node,
     // not its subtree) supports.
     this._rendererBitmask = Renderer.bitmaskNodeDefault;
@@ -479,9 +474,6 @@ define( function( require ) {
     // Initialize sub-components
     this._picker = new Picker( this );
 
-    // compose accessibility
-    this.initializeAccessibility();
-
     // Make sure Node's prototype dispose() is called when dispose() is called, and make sure that it isn't called
     // more than once. See https://github.com/phetsims/scenery/issues/601.
     // @private {boolean}
@@ -496,6 +488,11 @@ define( function( require ) {
         assert && assert( this._isDisposed, 'Node.dispose() call is missing from an overridden dispose method' );
       };
     }
+
+    // @public (scenery-internal) {boolean} - There are certain specific cases (in this case due to a11y) where we need
+    // to know that a node is getting removed from its parent BUT that process has not completed yet. It would be ideal
+    // to not need this.
+    this._isGettingRemovedFromParent = false;
 
     PhetioObject.call( this );
 
@@ -661,6 +658,8 @@ define( function( require ) {
 
       var indexOfParent = _.indexOf( node._parents, this );
 
+      node._isGettingRemovedFromParent = true;
+
       // If this added subtree contains accessible content, we need to notify any relevant displays
       // NOTE: Potentially removes bounds listeners here!
       if ( !node._rendererSummary.isNotAccessible() ) {
@@ -674,6 +673,7 @@ define( function( require ) {
 
       node._parents.splice( indexOfParent, 1 );
       this._children.splice( indexOfChild, 1 );
+      node._isGettingRemovedFromParent = false; // It is "complete"
 
       this.invalidateBounds();
       this._childBoundsDirty = true; // force recomputation of child bounds after removing a child
@@ -2195,6 +2195,18 @@ define( function( require ) {
     },
 
     /**
+     * Called when our summary bitmask changes
+     * @public (scenery-internal)
+     *
+     * @param {number} oldBitmask
+     * @param {number} newBitmask
+     */
+    onSummaryChange: function( oldBitmask, newBitmask ) {
+      // Defined in Accessibility.js
+      this._accessibleDisplaysInfo.onSummaryChange( oldBitmask, newBitmask );
+    },
+
+    /**
      * Updates our node's scale and applied scale factor if we need to change our scale to fit within the maximum
      * dimensions (maxWidth and maxHeight). See documentation in constructor for detailed behavior.
      * @private
@@ -2828,6 +2840,9 @@ define( function( require ) {
         // changing visibility can affect pickability pruning, which affects mouse/touch bounds
         this._picker.onVisibilityChange();
         if ( assertSlow ) { this._picker.audit(); }
+
+        // Defined in Accessibility.js
+        this._accessibleDisplaysInfo.onVisibilityChange( visible );
 
         this.trigger0( 'visibility' );
       }
@@ -3499,7 +3514,7 @@ define( function( require ) {
      * @returns {Array.<Trail>}
      */
     getTrails: function( predicate ) {
-      predicate = predicate || defaultTrailPredicate;
+      predicate = predicate || Node.defaultTrailPredicate;
 
       var trails = [];
       var trail = new scenery.Trail( this );
@@ -3531,7 +3546,7 @@ define( function( require ) {
      * @returns {Array.<Trail>}
      */
     getLeafTrails: function( predicate ) {
-      predicate = predicate || defaultLeafTrailPredicate;
+      predicate = predicate || Node.defaultLeafTrailPredicate;
 
       var trails = [];
       var trail = new scenery.Trail( this );
@@ -4185,7 +4200,7 @@ define( function( require ) {
         if ( options.useTargetBounds ) {
           image.localBounds = image.parentToLocalBounds( finalParentBounds );
         }
-        return image;        
+        return image;
       }
     },
 
@@ -4334,6 +4349,9 @@ define( function( require ) {
     addRootedDisplay: function( display ) {
       assert && assert( display instanceof scenery.Display );
       this._rootedDisplays.push( display );
+
+      // Defined in Accessibility.js
+      this._accessibleDisplaysInfo.onAddedRootedDisplay( display );
     },
 
     /**
@@ -4347,6 +4365,9 @@ define( function( require ) {
       var index = _.indexOf( this._rootedDisplays, display );
       assert && assert( index !== -1, 'Cannot remove a Display from a Node if it was not there' );
       this._rootedDisplays.splice( index, 1 );
+
+      // Defined in Accessibility.js
+      this._accessibleDisplaysInfo.onRemovedRootedDisplay( display );
     },
 
     /*---------------------------------------------------------------------------*
@@ -4970,24 +4991,24 @@ define( function( require ) {
       }
     }
   } ), {
-
-    /*---------------------------------------------------------------------------*
-     * Static elements
-     *----------------------------------------------------------------------------*/
+    // @public {Object} - A mapping of all of the default options provided to Node
+    DEFAULT_OPTIONS: DEFAULT_OPTIONS,
 
     /**
-     * Used by the Accessibility trait as well, so it is exported as a static.
-     * @public (scenery-internal)
+     * A default for getTrails() searches, returns whether the node has no parents.
+     * @public
      *
      * @param {Node} node
      * @returns {boolean}
      */
-    hasRootedDisplayPredicate: function( node ) {
-      return node._rootedDisplays.length > 0;
+    defaultTrailPredicate: function( node ) {
+      return node._parents.length === 0;
+    },
+
+    defaultLeafTrailPredicate: function( node ) {
+      return node._children.length === 0;
     }
   } );
-
-  Node.DEFAULT_OPTIONS = DEFAULT_OPTIONS;
 
   // Node is composed with accessibility
   Accessibility.compose( Node );

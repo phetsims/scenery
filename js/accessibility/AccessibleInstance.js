@@ -3,12 +3,34 @@
 /**
  * An instance that is synchronously created, for handling accessibility needs.
  *
+ * Consider the following example:
+ *
+ * We have a node structure:
+ * A
+ *  B ( accessible )
+ *    C (accessible )
+ *      D
+ *        E (accessible)
+ *         G (accessible)
+ *        F
+ *          H (accessible)
+ *
+ *
+ * Which has an equivalent accessible instance tree:
+ * root
+ *  AB
+ *    ABC
+ *      ABCDE
+ *        ABCDEG
+ *      ABCDFH
+ *
  * @author Jonathan Olson <jonathan.olson@colorado.edu>
  */
 
 define( function( require ) {
   'use strict';
 
+  var AccessiblePeer = require( 'SCENERY/accessibility/AccessiblePeer' );
   var cleanArray = require( 'PHET_CORE/cleanArray' );
   var Events = require( 'AXON/Events' );
   var inherit = require( 'PHET_CORE/inherit' );
@@ -21,12 +43,12 @@ define( function( require ) {
 
   /**
    * Constructor for AccessibleInstance, uses an initialize method for pooling.
-   * 
-   * @param {AccessibleInstance|null} parent - parent of this instance, null if root of AccessibleInstance tree
-   * @param {Display} display
-   * @param {Trail} trail - trail to the node for this AccessibleInstance 
    * @constructor
    * @mixes Poolable
+   *
+   * @param {AccessibleInstance|null} parent - parent of this instance, null if root of AccessibleInstance tree
+   * @param {Display} display
+   * @param {Trail} trail - trail to the node for this AccessibleInstance
    */
   function AccessibleInstance( parent, display, trail ) {
     this.initializeAccessibleInstance( parent, display, trail );
@@ -38,7 +60,8 @@ define( function( require ) {
 
     /**
      * Initializes an AccessibleInstance, implements construction for pooling.
-     * 
+     * @private
+     *
      * @param {AccessibleInstance|null} parent - null if this AccessibleInstance is root of AccessibleInstance tree
      * @param {Display} display
      * @param {Trail} trail - trail to node for this AccessibleInstance
@@ -53,12 +76,20 @@ define( function( require ) {
       this.id = this.id || globalId++;
 
       this.parent = parent;
-      this.display = display;
-      this.trail = trail;
-      this.node = trail.lastNode();
-      this.isRootInstance = this.trail.length === 0;
 
-      // TODO: doc
+      // @public {Display}
+      this.display = display;
+
+      // @public {Trail}
+      this.trail = trail;
+
+      // @public {boolean}
+      this.isRootInstance = parent === null;
+
+      // @public {Node|null}
+      this.node = this.isRootInstance ? null : trail.lastNode();
+
+      // @public {Array.<AccessibleInstance>}
       this.children = cleanArray( this.children );
 
       // If we are the root accessible instance, we won't actually have a reference to a node.
@@ -66,14 +97,28 @@ define( function( require ) {
         this.node.addAccessibleInstance( this );
       }
 
-      this.isSorted = true;
+      // @public {AccessiblePeer}
+      this.peer = null; // Filled in below
+
+      // @private {number} - The number of nodes in our trail that are NOT in our parent's trail and do NOT have our
+      // display in their accessibleDisplays. For non-root instances, this is initialized later in the constructor.
+      this.invisibleCount = 0;
+
+      // @private {Array.<Node>} - Nodes that are in our trail (but not those of our parent)
+      this.relativeNodes = [];
+
+      // @private {Array.<boolean>} - Whether our display is in the respective relativeNodes' accessibleDisplays
+      this.relativeVisibilities = [];
+
+      // @private {function} - The listeners added to the respective relativeNodes
+      this.relativeListeners = [];
 
       if ( this.isRootInstance ) {
         var accessibilityContainer = document.createElement( 'div' );
 
         // give the container a class name so it is hidden in the Display, see accessibility styling in Display.js
         accessibilityContainer.className = 'accessibility';
-        this.peer = new scenery.AccessiblePeer( this, accessibilityContainer );
+        this.peer = AccessiblePeer.createFromPool( this, accessibilityContainer );
 
         var self = this;
         document.body.addEventListener( 'keydown', function( event ) {
@@ -111,27 +156,27 @@ define( function( require ) {
       }
       else {
         this.peer = this.node.accessibleContent.createPeer( this );
-        var childContainerElement = this.parent.peer.getChildContainerElement();
 
-        // insert the peer's DOM element or its parent if it is contained in a parent element for structure
-        childContainerElement.insertBefore( this.peer.getContainerParent(), childContainerElement.childNodes[ 0 ] );
-
-        // get the difference between the trails of the parent and this AccessibleInstance
+        // Scan over all of the nodes in our trail (that are NOT in our parent's trail) to check for accessibleDisplays
+        // so we can initialize our invisibleCount and add listeners.
         var parentTrail = this.parent.trail;
-        var thisTrail = this.trail;
-        this.trailDiff = [];
-        for ( var i = parentTrail.length; i < thisTrail.length; i++ ) {
-          this.trailDiff.push( thisTrail.get( i ) );
+        for ( var i = parentTrail.length; i < trail.length; i++ ) {
+          var relativeNode = trail.nodes[ i ];
+          this.relativeNodes.push( relativeNode );
+
+          var accessibleDisplays = relativeNode._accessibleDisplaysInfo.accessibleDisplays;
+          var isVisible = _.includes( accessibleDisplays, display );
+          this.relativeVisibilities.push( isVisible );
+          if ( !isVisible ) {
+            this.invisibleCount++;
+          }
+
+          var listener = this.checkAccessibleDisplayVisibility.bind( this, i - parentTrail.length );
+          relativeNode.onStatic( 'accessibleDisplays', listener );
+          this.relativeListeners.push( listener );
         }
 
-        // when visibility or accessibleVisibility of a node in between the two trails changes, we must update
-        // visibility of this peer's DOM content
-        this.accessibleVisibilityListener = this.updateVisibility.bind( this );
-        for ( var j = 0; j < this.trailDiff.length; j++ ) {
-          this.trailDiff[ j ].onStatic( 'visibility', this.accessibleVisibilityListener );
-          this.trailDiff[ j ].accessibleVisibilityChangedEmitter.addListener( this.accessibleVisibilityListener );
-        }
-        this.accessibleVisibilityListener();
+        this.updateVisibility();
       }
 
       sceneryLog && sceneryLog.AccessibleInstance && sceneryLog.AccessibleInstance(
@@ -141,64 +186,99 @@ define( function( require ) {
     },
 
     /**
-     * Add a subtree of AccessibleInstances to this AccessibleInstance.
-     * 
-     * Consider the following example:
+     * Adds a series of (sorted) accessible instances as children.
+     * @public
      *
-     * We have a node structure:
-     * A
-     *  B ( accessible )
-     *    C (accessible )
-     *      D
-     *        E (accessible)
-     *         G (accessible)
-     *        F
-     *          H (accessible)
-     *
-     *
-     * Which has an equivalent accessible instance tree:
-     * root
-     *  AB
-     *    ABC
-     *      ABCDE
-     *        ABCDEG
-     *      ABCDFH
-     *
-     * Produces the call tree for adding instances to the accessible instance tree:
-     * ABC.addSubtree( ABCD ) - not accessible
-     *     ABC.addSubtree( ABCDE)
-     *       ABCDE.addSubtree( ABCDEG )
-     *     ABC.addSubtree( ABCDF )
-     *       ABC.addSubtree( ABCDFH )
-     *
-     * @param {Trail} trail - the AccessibleInstances under the trail's last node will be added as descendants of this
-     *                        AccessibleInstance.
-     * @public (scenery-internal)
+     * @param {Array.<AccessibleInstance>} accessibleInstances
      */
-    addSubtree: function( trail ) {
+    addConsecutiveInstances: function( accessibleInstances ) {
       sceneryLog && sceneryLog.AccessibleInstance && sceneryLog.AccessibleInstance(
-        'addSubtree on ' + this.toString() + ' with trail ' + trail.toString() );
+        'addConsecutiveInstances on ' + this.toString() + ' with: ' + accessibleInstances.map( function( inst ) { return inst.toString(); } ).join( ',' ) );
       sceneryLog && sceneryLog.AccessibleInstance && sceneryLog.push();
 
-      var node = trail.lastNode();
-      var nextInstance = this; // eslint-disable-line consistent-this
-      if ( node.accessibleContent ) {
-        var accessibleInstance = AccessibleInstance.createFromPool( this, this.display, trail.copy() ); // TODO: Pooling
-        sceneryLog && sceneryLog.AccessibleInstance && sceneryLog.AccessibleInstance(
-          'Insert parent: ' + this.toString() + ', (new) child: ' + accessibleInstance.toString() );
-        this.children.push( accessibleInstance ); // TODO: Mark us as dirty for performance.
-        this.markAsUnsorted();
+      var hadChildren = this.children.length > 0;
 
-        nextInstance = accessibleInstance;
+      Array.prototype.push.apply( this.children, accessibleInstances );
+
+      for ( var i = 0; i < accessibleInstances.length; i++ ) {
+        // Append the container parent to the end (so that, when provided in order, we don't have to resort below
+        // when initializing).
+        this.peer.primarySibling.insertBefore( accessibleInstances[ i ].peer.getContainerParent(), null );
       }
-      var children = node._children;
-      for ( var i = 0; i < children.length; i++ ) {
-        trail.addDescendant( children[ i ], i );
-        nextInstance.addSubtree( trail );
-        trail.removeDescendant();
+
+      if ( hadChildren ) {
+        this.sortChildren();
       }
 
       sceneryLog && sceneryLog.AccessibleInstance && sceneryLog.pop();
+    },
+
+    /**
+     * Removes any child instances that are based on the provided trail.
+     * @public
+     *
+     * @param {Trail} trail
+     */
+    removeInstancesForTrail: function( trail ) {
+      sceneryLog && sceneryLog.AccessibleInstance && sceneryLog.AccessibleInstance(
+        'removeInstancesForTrail on ' + this.toString() + ' with trail ' + trail.toString() );
+      sceneryLog && sceneryLog.AccessibleInstance && sceneryLog.push();
+
+      for ( var i = 0; i < this.children.length; i++ ) {
+        var childInstance = this.children[ i ];
+        var childTrail = childInstance.trail;
+
+        // Not worth it to inspect before our trail ends, since it should be (!) guaranteed to be equal
+        var differs = childTrail.length < trail.length;
+        if ( !differs ) {
+          for ( var j = this.trail.length; j < trail.length; j++ ) {
+            if ( trail.nodes[ j ] !== childTrail.nodes[ j ] ) {
+              differs = true;
+              break;
+            }
+          }
+        }
+
+        if ( !differs ) {
+          this.children.splice( i, 1 );
+          childInstance.dispose();
+          i -= 1;
+        }
+      }
+
+      sceneryLog && sceneryLog.AccessibleInstance && sceneryLog.pop();
+    },
+
+    /**
+     * Removes all of the children.
+     * @public
+     */
+    removeAllChildren: function() {
+      sceneryLog && sceneryLog.AccessibleInstance && sceneryLog.AccessibleInstance( 'removeAllChildren on ' + this.toString() );
+      sceneryLog && sceneryLog.AccessibleInstance && sceneryLog.push();
+
+      while ( this.children.length ) {
+        this.children.pop().dispose();
+      }
+
+      sceneryLog && sceneryLog.AccessibleInstance && sceneryLog.pop();
+    },
+
+    /**
+     * Returns an AccessibleInstance child (if one exists with the given Trail), or null otherwise.
+     * @public
+     *
+     * @param {Trail} trail
+     * @returns {AccessibleInstance|null}
+     */
+    findChildWithTrail: function( trail ) {
+      for ( var i = 0; i < this.children.length; i++ ) {
+        var child = this.children[ i ];
+        if ( child.trail.equals( trail ) ) {
+          return child;
+        }
+      }
+      return null;
     },
 
     /**
@@ -229,13 +309,28 @@ define( function( require ) {
     },
 
     /**
-     * Mark as unsorted so that the display will sort the subtree of AccessibleInstances under this one.
-     * @public (scenery-internal)
+     * Checks to see whether our visibility needs an update based on an accessibleDisplays change.
+     * @private
+     *
+     * @param {number} index - Index into the relativeNodes array (which node had the notification)
      */
-    markAsUnsorted: function() {
-      if ( this.isSorted ) {
-        this.isSorted = false;
-        this.display.markUnsortedAccessibleInstance( this );
+    checkAccessibleDisplayVisibility: function( index ) {
+      var isNodeVisible = _.includes( this.relativeNodes[ index ]._accessibleDisplaysInfo.accessibleDisplays, this.display );
+      var wasNodeVisible = this.relativeVisibilities[ index ];
+
+      if ( isNodeVisible !== wasNodeVisible ) {
+        this.relativeVisibilities[ index ] = isNodeVisible;
+
+        var wasVisible = this.invisibleCount === 0;
+
+        this.invisibleCount += ( isNodeVisible ? -1 : 1 );
+        assert && assert( this.invisibleCount >= 0 && this.invisibleCount <= this.relativeNodes.length );
+
+        var isVisible = this.invisibleCount === 0;
+
+        if ( isVisible !== wasVisible ) {
+          this.updateVisibility();
+        }
       }
     },
 
@@ -243,24 +338,11 @@ define( function( require ) {
      * Update visibility of this peer's accessible DOM content. The hidden attribute will hide all of the descendant
      * DOM content, so it is not necessary to update the subtree of AccessibleInstances since the browser
      * will do this for us.
-     *
      * @private
      */
     updateVisibility: function() {
-
-      // if all nodes in the trail diff are both visible and accessibleVisible, this AccessibleInstance will be
-      // visible for screen readers
-      var visibilityCount = 0;
-      for ( var i = 0; i < this.trailDiff.length; i++ ) {
-        if ( this.trailDiff[ i ].visible && this.trailDiff[ i ].accessibleVisible ) {
-          visibilityCount++;
-        }
-      }
-
       var parentElement = this.peer.getContainerParent();
-
-      var self = this;
-      parentElement.hidden = !( visibilityCount === self.trailDiff.length );
+      parentElement.hidden = this.invisibleCount > 0;
 
       // if we hid a parent element, blur focus if active element was an ancestor
       if ( parentElement.hidden ) {
@@ -268,7 +350,7 @@ define( function( require ) {
           scenery.Display.focus = null;
         }
       }
-      
+
       // Edge has a bug where removing the hidden attribute on an ancestor doesn't add elements back to the navigation
       // order. As a workaround, forcing the browser to redraw the PDOM seems to fix the issue. Forced redraw method
       // recommended by https://stackoverflow.com/questions/8840580/force-dom-redraw-refresh-on-chrome-mac, also see
@@ -280,139 +362,98 @@ define( function( require ) {
     },
 
     /**
+     * Returns whether the parallel DOM for this instance and its ancestors are not hidden.
+     * @public
+     *
+     * @returns {boolean}
+     */
+    isGloballyVisible: function() {
+      if ( this.peer.getContainerParent().hidden ) {
+        return false;
+      }
+      if ( this.parent ) {
+        return this.parent.isGloballyVisible();
+      }
+      else {
+        return true;
+      }
+    },
+
+    /**
+     * Returns what our list of children (after sorting) should be.
+     * @private
+     *
+     * @param {Trail} trail - A partial trail, "ending" (with its root) at this.node.
+     * @returns {Array.<AccessibleInstance>}
+     */
+    getChildOrdering: function( trail ) {
+      var node = trail.lastNode();
+      var effectiveChildren = node.getEffectiveChildren();
+      var i;
+      var instances = [];
+
+      if ( node.accessibleContent && node !== this.node ) {
+        var potentialInstances = node.accessibleInstances;
+
+        instanceLoop:
+        for ( i = 0; i < potentialInstances.length; i++ ) {
+          var potentialInstance = potentialInstances[ i ];
+          if ( potentialInstance.parent !== this ) {
+            continue instanceLoop;
+          }
+
+          for ( var j = 0; j < trail.length; j++ ) {
+            if ( trail.nodes[ j ] !== potentialInstance.trail.nodes[ j + potentialInstance.trail.length - trail.length ] ) {
+              continue instanceLoop;
+            }
+          }
+
+          instances.push( potentialInstance );
+        }
+
+        assert && assert( instances.length <= 1, 'If we select more than one this way, we have problems' );
+      }
+      else {
+        for ( i = 0; i < effectiveChildren.length; i++ ) {
+          trail.addDescendant( effectiveChildren[ i ], i );
+          Array.prototype.push.apply( instances, this.getChildOrdering( trail ) );
+          trail.removeDescendant();
+        }
+      }
+
+      return instances;
+    },
+
+    /**
      * Sort our child accessible instances in the order they should appear in the parallel DOM. We do this by
      * creating a comparison function between two accessible instances. The function walks along the trails
      * of the children, looking for specified accessible orders that would determine the ordering for the two
      * AccessibleInstances.
-     * 
+     *
      * @public (scenery-internal)
      */
     sortChildren: function() {
-      assert && assert( !this.isSorted, 'No need to sort children if it is already marked as sorted' );
-      this.isSorted = true;
+      // It's simpler/faster to just grab our order directly with one recursion, rather than specifying a sorting
+      // function (since a lot gets re-evaluated in that case).
+      var targetChildren = this.getChildOrdering( new scenery.Trail( this.isRootInstance ? this.display.rootNode : this.node ) );
 
-      var parentInstance = this; // eslint-disable-line consistent-this
+      assert && assert( targetChildren.length === this.children.length );
+      this.children = targetChildren;
 
-      // Reindex trails in preparation for sorting
-      for ( var m = 0; m < this.children.length; m++ ) {
-        this.children[ m ].trail.reindex();
-      }
-
-      this.children.sort( function( a, b ) {
-        // Sort between a {AccessibleInstance} and b {AccessibleInstance}. This is a process where we start at our
-        // "parent" accessible instance's location in the trail, and walk down looking for accessible orders that may
-        // determine the order between these two instances.
-        // This allows ancestor orders (for instance, an order on this instance) to override descendant orders.
-        var aNodes = a.trail.nodes;
-        var bNodes = b.trail.nodes;
-
-        // Starting at the Node for this accessible instance, and walking down until the trails diverge. If our loop
-        // here reaches a place where they diverge, we can use document order to determine which comes first (since
-        // that means we didn't hit any relevant accessible orders). If our parentInstance is the root instance, its
-        // trail will have length 0 (nothing shared), so our starting index should be set to 0.
-        for ( var i = Math.max( 0, parentInstance.trail.length - 1 ); aNodes[ i ] === bNodes[ i ]; i++ ) {
-          var currentNode = aNodes[ i ];
-          var order = currentNode.accessibleOrder;
-
-          // If there is no order specified on this node, we want to continue to the next children in the trails.
-          if ( !order ) {
-            continue;
-          }
-
-          // Loop through items in the order, since the first elements in the order are the most significant.
-          for ( var j = 0; j < order.length; j++ ) {
-            var orderedNode = order[ j ];
-            // Find where (if at all) our Node in the order is present in the trails.
-            var aIndex = aNodes.indexOf( orderedNode );
-            var bIndex = bNodes.indexOf( orderedNode );
-
-            // If the ordered node is present in both trails, we need to first determine whether the trail to those
-            // nodes is the same. If they are the same, we will jump ahead to that ordered node (deliberately skipping
-            // any orders on nodes in-between), and continuing on from there. If they are different, the document order
-            // between the two trails to the ordered node will determine which of our instances comes first.
-            if ( aIndex >= 0 && bIndex >= 0 ) {
-              // Determine the index at where our two trails diverge.
-              var branchIndex = i + 1;
-              while ( aNodes[ branchIndex ] === bNodes[ branchIndex ] ) {
-                branchIndex++;
-              }
-
-              // If the index of our ordered node in one of the trails is before our branch index, it means the trails
-              // to the ordered node are the same. We want to jump ahead to the ordered node's location and continue
-              // with our outer for loop.
-              if ( aIndex < branchIndex ) {
-                // We want the next iteration of the outer for loop to start at the index of the ordered node. Since i
-                // will be incremented before the next loop begins, we subtract 1 here.
-                i = aIndex - 1;
-
-                // Exit the inner for loop
-                break;
-              }
-              // The trails to the ordered node are different. We use the document order between the two trails to
-              // determine which instance is first. This can be done by inspecting just the difference at the branch
-              // index.
-              else {
-                // Since branchIndex is the index in the trail of two different children, we want to compare the indices
-                // for the parent node of the branch nodes, thus we need to subtract 1 from our branch index.
-                var aChildIndex = a.trail.indices[ branchIndex - 1 ];
-                var bChildIndex = b.trail.indices[ branchIndex - 1 ];
-                if ( aChildIndex < bChildIndex ) {
-                  return -1;
-                }
-                else if ( aChildIndex > bChildIndex ) {
-                  return 1;
-                }
-                else {
-                  throw new Error( 'Two different children have the same child index' );
-                }
-              }
-            }
-            // If only the first trail is under an ordered node, it is first
-            else if ( aIndex >= 0 ) {
-              return -1;
-            }
-            // If only the second trail is under an ordered node, it is first
-            else if ( bIndex >= 0 ) {
-              return 1;
-            }
-          }
-        }
-
-        // If we reach here and haven't returned, it should be a document order comparison AND the index i determines
-        // the current index where the nodes are different (branch index).
-        // Since i is the index in the trail of two different children, we want to compare the indices
-        // for the parent node of the branch nodes, thus we need to subtract 1 from our branch index.
-        var aEndChildIndex = a.trail.indices[ i - 1 ];
-        var bEndChildIndex = b.trail.indices[ i - 1 ];
-        if ( aEndChildIndex < bEndChildIndex ) {
-          return -1;
-        }
-        else if ( aEndChildIndex > bEndChildIndex ) {
-          return 1;
-        }
-        else {
-          throw new Error( 'Two different children have the same child index' );
-        }
-      } );
-
-      var containerElement = this.peer.getChildContainerElement();
+      // Reorder DOM elements in a way that doesn't do any work if they are already in a sorted order.
+      var primarySibling = this.peer.primarySibling;
       for ( var n = this.children.length - 1; n >= 0; n-- ) {
-        var peerDOMElement = this.children[ n ].peer.primarySibling;
-
-        // if the peer has a container parent, this structure containing the peerDOMElement should be inserted
-        if ( this.children[ n ].peer.hasContainerParent() ) {
-          peerDOMElement = this.children[ n ].peer.getContainerParent();
-        }
-        if ( peerDOMElement === containerElement.childNodes[ n ] ) {
+        var peerDOMElement = this.children[ n ].peer.getContainerParent();
+        if ( peerDOMElement === primarySibling.childNodes[ n ] ) {
           continue;
         }
-        containerElement.insertBefore( peerDOMElement, containerElement.childNodes[ n + 1 ] );
+        primarySibling.insertBefore( peerDOMElement, primarySibling.childNodes[ n + 1 ] );
       }
     },
 
     /**
      * Recursive disposal, to make eligible for garbage collection.
-     * 
+     *
      * @public (scenery-internal)
      */
     dispose: function() {
@@ -422,22 +463,22 @@ define( function( require ) {
 
       // Disconnect DOM and remove listeners
       if ( !this.isRootInstance ) {
-        this.peer.dispose();
-
         // remove this peer's primary sibling DOM Element (or its container parent) from the parent peer's
         // primary sibling (or its child container)
-        this.parent.peer.getChildContainerElement().removeChild( this.peer.getContainerParent() );
+        this.parent.peer.primarySibling.removeChild( this.peer.getContainerParent() );
 
-        // remove visibility/accessibleVisibility listeners that were added
-        for ( var i = 0; i < this.trailDiff.length; i++ ) {
-          this.trailDiff[ i ].offStatic( 'visibility', this.accessibleVisibilityListener );
-          this.trailDiff[ i ].accessibleVisibilityChangedEmitter.removeListener( this.accessibleVisibilityListener );
+        for ( var i = 0; i < this.relativeNodes.length; i++ ) {
+          this.relativeNodes[ i ].offStatic( 'accessibleDisplays', this.relativeListeners[ i ] );
         }
       }
 
       while ( this.children.length ) {
         this.children.pop().dispose();
       }
+
+      // NOTE: We dispose OUR peer after disposing children, so our peer can be available for our children during
+      // disposal.
+      this.peer.dispose();
 
       // If we are the root accessible instance, we won't actually have a reference to a node.
       if ( this.node ) {
@@ -456,7 +497,50 @@ define( function( require ) {
     },
 
     /**
+     * Since our "Trail" can have discontinuous jumps (due to accessibleOrder), this finds the best actual visual
+     * Trail to use.
+     * @public
+     *
+     * @returns {Trail}
+     */
+    guessVisualTrail: function() {
+      this.trail.reindex();
+
+      // Search for places in the trail where adjacent nodes do NOT have a parent-child relationship, i.e.
+      // !nodes[ n ].hasChild( nodes[ n + 1 ] ).
+      // NOTE: This index points to the parent where this is the case, because the indices in the trail are such that:
+      // trail.nodes[ n ].children[ trail.indices[ n ] ] = trail.nodes[ n + 1 ]
+      var lastBadIndex = this.trail.indices.lastIndexOf( -1 );
+
+      // If we have no bad indices, just return our trail immediately.
+      if ( lastBadIndex < 0 ) {
+        return this.trail;
+      }
+
+      var firstGoodIndex = lastBadIndex + 1;
+      var firstGoodNode = this.trail.nodes[ firstGoodIndex ];
+      var baseTrails = firstGoodNode.getTrailsTo( this.display.rootNode );
+      assert && assert( baseTrails.length > 0 );
+
+      // fail gracefully-ish?
+      if ( baseTrails.length === 0 ) {
+        return this.trail;
+      }
+
+      // Add the rest of the trail back in
+      var trail = baseTrails[ 0 ];
+      for ( var i = firstGoodIndex + 1; i < this.trail.length; i++ ) {
+        trail.addDescendant( this.trail.nodes[ i ] );
+      }
+
+      assert && assert( trail.isValid() );
+
+      return trail;
+    },
+
+    /**
      * For debugging purposes.
+     * @public
      *
      * @return {string}
      */
@@ -466,34 +550,70 @@ define( function( require ) {
 
     /**
      * For debugging purposes, inspect the tree of AccessibleInstances from the root.
-     * 
+     *
      * @public (scenery-internal)
      */
     auditRoot: function() {
-      assert && assert( this.trail.length === 0,
+      if ( !assert ) { return; }
+
+      var rootNode = this.display.rootNode;
+
+      assert( this.trail.length === 0,
         'Should only call auditRoot() on the root AccessibleInstance for a display' );
 
-      function audit( nestedOrderArray, accessibleInstance ) {
-        assert && assert( nestedOrderArray.length === accessibleInstance.children.length,
+      function audit( fakeInstance, accessibleInstance ) {
+        assert( fakeInstance.children.length === accessibleInstance.children.length,
           'Different number of children in accessible instance' );
 
-        _.each( nestedOrderArray, function( nestedChild ) {
-          var instance = _.find( accessibleInstance.children, function( childInstance ) {
-            return childInstance.trail.equals( nestedChild.trail );
-          } );
-          assert && assert( instance, 'Missing child accessible instance' );
+        assert( fakeInstance.node === accessibleInstance.node, 'Node mismatch for AccessibleInstance' );
 
-          audit( nestedChild.children, instance );
-        } );
-
-        // Exact Order checks
-        for ( var i = 0; i < nestedOrderArray.length; i++ ) {
-          assert && assert( nestedOrderArray[ i ].trail.lastNode() === accessibleInstance.children[ i ].node,
-            'Accessible order mismatch' );
+        for ( var i = 0; i < accessibleInstance.children.length; i++ ) {
+          audit( fakeInstance.children[ i ], accessibleInstance.children[ i ] );
         }
+
+        var isVisible = accessibleInstance.isGloballyVisible();
+
+        var shouldBeVisible = true;
+        for ( i = 0; i < accessibleInstance.trail.length; i++ ) {
+          var node = accessibleInstance.trail.nodes[ i ];
+          var trails = node.getTrailsTo( rootNode ).filter( function( trail ) {
+            return trail.isAccessibleVisible();
+          } );
+          if ( trails.length === 0 ) {
+            shouldBeVisible = false;
+            break;
+          }
+        }
+
+        assert( isVisible === shouldBeVisible, 'Instance visibility mismatch' );
       }
 
-      audit( this.display.rootNode.getNestedAccessibleOrder(), this );
+      audit( AccessibleInstance.createFakeAccessibleTree( rootNode ), this );
+    }
+  }, {
+    /**
+     * Creates a fake AccessibleInstance-like tree structure (with the equivalent nodes and children structure).
+     * For debugging.
+     * @private
+     *
+     * @param {Node} rootNode
+     * @return {Object} - Type FakeAccessibleInstance: { node: {Node}, children: {Array.<FakeAccessibleInstance>} }
+     */
+    createFakeAccessibleTree: function( rootNode ) {
+      function createFakeTree( node ) {
+        var fakeInstances = _.flatten( node.getEffectiveChildren().map( createFakeTree ) );
+        if ( node.accessibleContent ) {
+          fakeInstances = [ {
+            node: node,
+            children: fakeInstances
+          } ];
+        }
+        return fakeInstances;
+      }
+      return {
+        node: null,
+        children: createFakeTree( rootNode )
+      };
     }
   } );
 
