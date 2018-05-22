@@ -112,6 +112,11 @@ define( function( require ) {
         }
       }
 
+      // NOTE: Performance could be improved in some cases if we can avoid rebuilding an a11y tree for DIRECT children
+      // when changing whether they are present in the accessibleOrder. Basically, if something is a child and NOT
+      // in an accessibleOrder, changing its parent's order to include it (or vice versa) triggers a rebuild when it
+      // would not strictly be necessary.
+
       var accessibleTrails = AccessibilityTree.findAccessibleTrails( node );
 
       // Remove subtrees from us (that were removed)
