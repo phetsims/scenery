@@ -308,6 +308,10 @@ define( function( require ) {
      * Creates accessible instances, returning an array of instances that should be added to the next level.
      * @private
      *
+     * NOTE: Trails for which an already-existing instance exists will NOT create a new instance here. We only want to
+     * fill in the "missing" structure. There are cases (a.children=[b,c], b.children=[c]) where removing an
+     * accessibleOrder can trigger addTree(a,b) AND addTree(b,c), and we can't create duplicate content.
+     *
      * @param {Trail} trail
      * @param {Display} display
      * @param {AccessibleInstance} parentInstance - Since we don't create the root here, can't be null
@@ -323,9 +327,16 @@ define( function( require ) {
       sceneryLog && sceneryLog.AccessibilityTree && sceneryLog.AccessibilityTree( 'effectiveChildren: ' + AccessibilityTree.debugOrder( effectiveChildren ) );
 
       // If we are accessible ourself, we need to create the instance (so we can provide it to child instances).
-      var instance = null;
+      var instance;
+      var existed = false;
       if ( node.accessibleContent ) {
-        instance = AccessibleInstance.createFromPool( parentInstance, display, trail.copy() );
+        instance = parentInstance.findChildWithTrail( trail );
+        if ( instance ) {
+          existed = true;
+        }
+        else {
+          instance = AccessibleInstance.createFromPool( parentInstance, display, trail.copy() );
+        }
         parentInstance = instance;
       }
 
@@ -342,7 +353,7 @@ define( function( require ) {
         instance.addConsecutiveInstances( childInstances );
 
         sceneryLog && sceneryLog.AccessibilityTree && sceneryLog.pop();
-        return [ instance ];
+        return existed ? [] : [ instance ];
       }
       // Otherwise pass things forward so they can be added as children by the parentInstance
       else {

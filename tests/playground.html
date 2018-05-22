@@ -151,18 +151,20 @@ an UI and Display made for visual testing and debugging.
           // display.updateDisplay();
 
 
-          window.a = new scenery.Node( { tagName: 'div' } );
-          window.b = new scenery.Node();
-          window.c = new scenery.Node( { tagName: 'span' } );
+          // window.a = new scenery.Node( { tagName: 'div' } );
+          // window.b = new scenery.Node();
+          // window.c = new scenery.Node( { tagName: 'span' } );
 
-          a.children = [ b, c ];
-          a.accessibleOrder = [ c, b ];
-          b.children = [ c ];
-          scene.addChild( a );
-          a.accessibleOrder = null;
+          // a.children = [ b, c ];
+          // a.accessibleOrder = [ c, b ];
+          // b.children = [ c ];
+          // scene.addChild( a );
+          // a.accessibleOrder = null;
 
-          // var fuzzer = new scenery.AccessibilityFuzzer( 3 );
-          // while ( true ) { fuzzer.step(); }
+          // display.updateDisplay();
+
+          var fuzzer = new scenery.AccessibilityFuzzer( 3 );
+          while ( true ) { fuzzer.step(); }
         } )
       };
 

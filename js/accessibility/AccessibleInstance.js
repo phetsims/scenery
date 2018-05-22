@@ -265,6 +265,23 @@ define( function( require ) {
     },
 
     /**
+     * Returns an AccessibleInstance child (if one exists with the given Trail), or null otherwise.
+     * @public
+     *
+     * @param {Trail} trail
+     * @returns {AccessibleInstance|null}
+     */
+    findChildWithTrail: function( trail ) {
+      for ( var i = 0; i < this.children.length; i++ ) {
+        var child = this.children[ i ];
+        if ( child.trail.equals( trail ) ) {
+          return child;
+        }
+      }
+      return null;
+    },
+
+    /**
      * Remove a subtree of AccessibleInstances from this AccessibleInstance
      *
      * @param {Trail} trail - children of this AccessibleInstance will be removed if the child trails are extensions
