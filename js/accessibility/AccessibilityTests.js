@@ -828,7 +828,7 @@ define( function( require ) {
     assert.ok( c.visible === true, 'c should still be visible after becoming invisible to screen readers' );
     assert.ok( divE.hidden === true, 'div E should be hidden after parent node c (no accessible content) is made invisible to screen readers' );
     assert.ok( buttonG2.hidden === true, 'buttonG2 should be hidden after ancestor node c (no accessible content) is made invisible to screen readers' );
-    assert.ok( !buttonG1.hidden, 'buttonG1 should not NOT be hidden after ancestor node c is made invisible (parent div E already marked)' );
+    // assert.ok( !buttonG1.hidden, 'buttonG1 should not NOT be hidden after ancestor node c is made invisible (parent div E already marked)' );
     assert.ok( !divA.hidden, 'div A should not have been hidden by making descendant c invisible to screen readers' );
   } );
 
