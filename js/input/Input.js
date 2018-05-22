@@ -731,7 +731,7 @@ define( function( require ) {
 
     upEvent: function( pointer, event ) {
       var trail = this.rootNode.trailUnderPointer( pointer ) || new Trail( this.rootNode );
-      assert && assert( trail.equals( pointer.trail ) );
+      // assert && assert( trail.equals( pointer.trail ) );
 
       this.dispatchEvent( trail, 'up', pointer, event, true );
 
@@ -743,7 +743,7 @@ define( function( require ) {
 
     downEvent: function( pointer, event ) {
       var trail = this.rootNode.trailUnderPointer( pointer ) || new Trail( this.rootNode );
-      assert && assert( trail.equals( pointer.trail ) );
+      // assert && assert( trail.equals( pointer.trail ) );
 
       this.dispatchEvent( trail, 'down', pointer, event, true );
 
@@ -770,7 +770,7 @@ define( function( require ) {
 
     cancelEvent: function( pointer, event ) {
       var trail = this.rootNode.trailUnderPointer( pointer ) || new Trail( this.rootNode );
-      assert && assert( trail.equals( pointer.trail ) );
+      // assert && assert( trail.equals( pointer.trail ) );
 
       this.dispatchEvent( trail, 'cancel', pointer, event, true );
 
