@@ -53,8 +53,10 @@
 define( function( require ) {
   'use strict';
 
+  var AccessibilityTree = require( 'SCENERY/accessibility/AccessibilityTree' );
   var AccessibilityUtil = require( 'SCENERY/accessibility/AccessibilityUtil' );
   var Dimension2 = require( 'DOT/Dimension2' );
+  var escapeHTML = require( 'PHET_CORE/escapeHTML' );
   var Events = require( 'AXON/Events' );
   var extend = require( 'PHET_CORE/extend' );
   var inherit = require( 'PHET_CORE/inherit' );
@@ -177,6 +179,9 @@ define( function( require ) {
     // TODO: don't store the options, it's an anti-pattern.
     this.options = options; // @private
 
+    // @public (scenery-internal) {boolean} - Whether accessibility is enabled for this particular display.
+    this._accessible = options.accessibility;
+
     this._allowWebGL = options.allowWebGL;
 
     // The (integral, > 0) dimensions of the Display's DOM element (only updates the DOM element on updateDisplay())
@@ -296,10 +301,11 @@ define( function( require ) {
       // restore focus after sorting accessible instances
       this._focusedNodeOnRemoveTrail;
 
+      // @public (scenery-internal) {AccessibleInstance}
       this._rootAccessibleInstance = AccessibleInstance.createFromPool( null, this, new scenery.Trail() );
       sceneryLog && sceneryLog.AccessibleInstance && sceneryLog.AccessibleInstance(
         'Display root instance: ' + this._rootAccessibleInstance.toString() );
-      this._rootAccessibleInstance.addSubtree( new scenery.Trail( this._rootNode ) );
+      AccessibilityTree.rebuildInstanceTree( this._rootAccessibleInstance );
 
       // add the accessible DOM as a child of this DOM element
       this._domElement.appendChild( this._rootAccessibleInstance.peer.primarySibling );
@@ -490,6 +496,8 @@ define( function( require ) {
           sceneryLog.PerfVerbose && sceneryLog.PerfVerbose( drawableBlockCountMessage );
         }
       }
+
+      AccessibilityTree.auditAccessibleDisplays( this.rootNode );
 
       sceneryLog && sceneryLog.Display && sceneryLog.pop();
     },
@@ -689,118 +697,6 @@ define( function( require ) {
         this._unsortedAccessibleInstances.pop().sortChildren();
       }
       focusedNode && focusedNode.focus();
-    },
-
-    /**
-     * Called when a subtree with accessible content is added.
-     * @private
-     *
-     * @param {Trail} trail
-     */
-    addAccessibleTrail: function( trail ) {
-      if ( !this.options.accessibility ) {
-        return;
-      }
-
-      sceneryLog && sceneryLog.Accessibility && sceneryLog.Accessibility( 'Display.addAccessibleTrail ' + trail.toString() );
-      sceneryLog && sceneryLog.Accessibility && sceneryLog.push();
-
-      this.getBaseAccessibleInstance( trail ).addSubtree( trail );
-
-      this.sortAccessibleInstances();
-
-      // after sorting, restore focus if the browser blurred while removing or adding DOM elements
-      if ( this._focusedNodeOnRemoveTrail ) {
-        this._focusedNodeOnRemoveTrail.focusable && this._focusedNodeOnRemoveTrail.accessibleVisible && this._focusedNodeOnRemoveTrail.focus();
-        this._focusedNodeOnRemoveTrail = null;
-      }
-
-      sceneryLog && sceneryLog.Accessibility && sceneryLog.pop();
-    },
-
-    /**
-     * Called when a subtree with accessible content is removed.
-     * @private
-     *
-     * @param {Trail} trail
-     */
-    removeAccessibleTrail: function( trail ) {
-      if ( !this.options.accessibility ) {
-        return;
-      }
-
-      sceneryLog && sceneryLog.Accessibility && sceneryLog.Accessibility( 'Display.removeAccessibleTrail ' + trail.toString() );
-      sceneryLog && sceneryLog.Accessibility && sceneryLog.push();
-
-      this._focusedNodeOnRemoveTrail = Display.focusedNode;
-      this.getBaseAccessibleInstance( trail ).removeSubtree( trail );
-
-      this.sortAccessibleInstances();
-
-      sceneryLog && sceneryLog.Accessibility && sceneryLog.pop();
-    },
-
-    /**
-     * Called when an ancestor node's accessible content is changed.
-     * @private
-     *
-     * @param {Trail} trail
-     * @param {Object} oldAccessibleContent
-     * @param {Object} newAccessibleContent
-     */
-    changedAccessibleContent: function( trail, oldAccessibleContent, newAccessibleContent ) {
-      if ( !this.options.accessibility ) {
-        return;
-      }
-
-      sceneryLog && sceneryLog.Accessibility && sceneryLog.Accessibility(
-        'Display.changedAccessibleContent ' + trail.toString() +
-        ' old: ' + ( !!oldAccessibleContent ) +
-        ' new: ' + ( !!newAccessibleContent ) );
-      sceneryLog && sceneryLog.Accessibility && sceneryLog.push();
-
-      this.getBaseAccessibleInstance( trail ).removeSubtree( trail );
-      this.getBaseAccessibleInstance( trail ).addSubtree( trail );
-
-      this.sortAccessibleInstances();
-
-      sceneryLog && sceneryLog.Accessibility && sceneryLog.pop();
-    },
-
-    /**
-     * Called when an ancestor node's accessible order is changed. First we check to see if the leaf most node on
-     * the trail has an AccessibleInstance. If if does, we sort the accessible instances under it. Otherwise, find
-     * the closest ancestor that has an AccessibleInstance, and sort AccessibleInstances under that one.
-     *
-     * @private
-     *
-     * @param {Trail} trail
-     */
-    changedAccessibleOrder: function( trail ) {
-      if ( !this.options.accessibility ) {
-        return;
-      }
-
-      sceneryLog && sceneryLog.Accessibility && sceneryLog.Accessibility( 'Display.changedAccessibleOrder ' + trail.toString() );
-      sceneryLog && sceneryLog.Accessibility && sceneryLog.push();
-
-      // determine if leaf most node has an accessible instance
-      var closestAncestorInstance;
-      var lastNode = trail.lastNode();
-      for ( var i = 0; i < lastNode.accessibleInstances.length; i++ ) {
-        var accessibleInstance = lastNode.accessibleInstances[ i ];
-        if ( trail.equals( accessibleInstance.trail ) ) {
-          closestAncestorInstance = accessibleInstance;
-        }
-      }
-
-      // if our current node didn't have an accessible instance, find the closest ancestor
-      closestAncestorInstance = closestAncestorInstance || this.getBaseAccessibleInstance( trail );
-      closestAncestorInstance.markAsUnsorted();
-
-      this.sortAccessibleInstances();
-
-      sceneryLog && sceneryLog.Accessibility && sceneryLog.pop();
     },
 
     /**
@@ -1207,19 +1103,6 @@ define( function( require ) {
       return this._inputListeners.slice( 0 ); // defensive copy
     },
     get inputListeners() { return this.getInputListeners(); },
-
-    /**
-     * Dispose function for Display.
-     *
-     * TODO: this dispose function is not complete.
-     * @public
-     */
-    dispose: function() {
-      if ( this._input ) {
-        this.detachEvents();
-      }
-      this._rootNode.removeRootedDisplay( this );
-    },
 
     ensureNotPainting: function() {
       assert && assert( !this._isPainting,
@@ -1708,6 +1591,44 @@ define( function( require ) {
       window.open( 'data:text/html;charset=utf-8,' + encodeURIComponent( htmlContent ) );
     },
 
+    getAccessibleDebugHTML: function() {
+      var result = '';
+
+      var headerStyle = 'font-weight: bold; font-size: 120%; margin-top: 5px;';
+      var indent = '&nbsp;&nbsp;&nbsp;&nbsp;';
+
+      result += '<div style="' + headerStyle + '">Accessible Instances</div><br>';
+
+      recurse( this._rootAccessibleInstance, '' );
+      function recurse( instance, indentation ) {
+        result += indentation + escapeHTML( ( instance.isRootInstance ? '' : instance.node.tagName ) + ' ' + instance.toString() ) + '<br>';
+        instance.children.forEach( function( child ) {
+          recurse( child, indentation + indent );
+        } );
+      }
+
+      result += '<br><div style="' + headerStyle + '">Parallel DOM</div><br>';
+
+      var parallelDOM = this._rootAccessibleInstance.peer.primarySibling.outerHTML;
+      parallelDOM = parallelDOM.replace( /\>\</g, '>\n<' );
+      var lines = parallelDOM.split( '\n' );
+
+      var indentation = '';
+      for ( var i = 0; i < lines.length; i++ ) {
+        var line = lines[ i ];
+        var isEndTag = line.slice( 0, 2 ) === '</';
+
+        if ( isEndTag ) {
+          indentation = indentation.slice( indent.length );
+        }
+        result += indentation + escapeHTML( line ) + '<br>';
+        if ( !isEndTag ) {
+          indentation += indent;
+        }
+      }
+      return result;
+    },
+
     /**
      * Will attempt to call callback( {string} dataURI ) with the rasterization of the entire Display's DOM structure,
      * used for internal testing. Will call-back null if there was an error
@@ -1971,6 +1892,25 @@ define( function( require ) {
     },
     get focusedNode() { return this.getFocusedNode(); }
   } );
+
+  /**
+   * Dispose function for Display.
+   *
+   * TODO: this dispose function is not complete.
+   * TODO: Don't require overriding like this. Events prototype and non-standard inheritance forces us right now, but
+   * ideally we'll stop using Events for Display and this should just work.
+   * @public
+   */
+  Display.prototype.dispose = function() {
+    if ( this._input ) {
+      this.detachEvents();
+    }
+    this._rootNode.removeRootedDisplay( this );
+
+    if ( this._accessible ) {
+      this._rootAccessibleInstance.dispose();
+    }
+  };
 
   Display.customCursors = {
     'scenery-grab-pointer': [ 'grab', '-moz-grab', '-webkit-grab', 'pointer' ],

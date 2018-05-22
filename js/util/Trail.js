@@ -127,6 +127,17 @@ define( function( require ) {
       return true;
     },
 
+    // this trail is visible only if all nodes on it are marked as visible
+    isAccessibleVisible: function() {
+      var i = this.nodes.length;
+      while ( i-- ) {
+        if ( !this.nodes[ i ].isVisible() || !this.nodes[ i ].getAccessibleVisible() ) {
+          return false;
+        }
+      }
+      return true;
+    },
+
     getOpacity: function() {
       var opacity = 1;
       var i = this.nodes.length;
@@ -380,10 +391,10 @@ define( function( require ) {
 
     /**
      * Whether this trail contains the complete 'other' trail, but with added descendants afterwards.
-     * 
+     *
      * @param {Trail} other - is other a subset of this trail?
      * @param {boolean} allowSameTrail
-     * 
+     *
      * @returns {boolean}
      */
     isExtensionOf: function( other, allowSameTrail ) {

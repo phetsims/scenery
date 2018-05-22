@@ -13,6 +13,7 @@ define( function( require ) {
   var Events = require( 'AXON/Events' );
   var Focus = require( 'SCENERY/accessibility/Focus' );
   var inherit = require( 'PHET_CORE/inherit' );
+  var Poolable = require( 'PHET_CORE/Poolable' );
   var scenery = require( 'SCENERY/scenery' );
   // so RequireJS doesn't complain about circular dependency
   // var Display = require( 'SCENERY/display/Display' );
@@ -22,9 +23,9 @@ define( function( require ) {
   /**
    * Constructor.
    *
-   * @param  {AccessibleInstance} accessibleInstance
-   * @param  {HTMLElement} primarySibling - The main DOM element used for this peer.
-   * @param  {Object} options
+   * @param {AccessibleInstance} accessibleInstance
+   * @param {HTMLElement} primarySibling - The main DOM element used for this peer.
+   * @param {Object} [options]
    * @constructor
    */
   function AccessiblePeer( accessibleInstance, primarySibling, options ) {
@@ -36,17 +37,18 @@ define( function( require ) {
   inherit( Events, AccessiblePeer, {
 
     /**
+     * Initializes the object (either from a freshly-created state, or from a "disposed" state brought back from a
+     * pool)
+     * @private
+     *
      * @param {AccessibleInstance} accessibleInstance
      * @param {HTMLElement} primarySibling - The main DOM element used for this peer.
      * @param {Object} [options]
      * @returns {AccessiblePeer} - Returns 'this' reference, for chaining
      */
     initializeAccessiblePeer: function( accessibleInstance, primarySibling, options ) {
-      var self = this;
-
       options = _.extend( {
         containerParent: null, // a container parent for this peer and potential siblings
-        childContainerElement: null, // an child container element where nested elements can be placed
         labelSibling: null, // the element containing this node's label content
         descriptionSibling: null // the element that will contain this node's description content
       }, options );
@@ -58,23 +60,28 @@ define( function( require ) {
       // unique ID
       this.id = this.id || globalId++;
 
-      // @public
+      // @public {AccessibleInstance}
       this.accessibleInstance = accessibleInstance;
+
+      // @public {Display} - Each peer is associated with a specific Display.
       this.display = accessibleInstance.display;
+
+      // @public {Trail} - NOTE: May have "gaps" due to accessibleOrder usage.
       this.trail = accessibleInstance.trail;
 
-      // @public, the DOM elements associated with this peer
+      // @public {HTMLElement} - The main element associated with this peer. If focusable, this is the element that gets
+      // the focus. It also will contain any children.
       this.primarySibling = primarySibling;
+
+      // @public {HTMLElement|null} - Optional label/description elements
       this.labelSibling = options.labelSibling;
       this.descriptionSibling = options.descriptionSibling;
 
-      // @private - descendent of the primarySibling that can be used to hold nested children
-      this.childContainerElement = options.childContainerElement ? options.childContainerElement : ( this.childContainerElement || null );
+      // @private {HTMLElement|null} - A parent element that can contain this primarySibling and other siblings, usually
+      // the label and description content.
+      this.containerParent = options.containerParent;
 
-      // @private - a parent element that can contain this primarySibling and other siblings, usually label and description content
-      this.containerParent = options.containerParent ? options.containerParent : ( this.containerParent || null );
       if ( this.containerParent ) {
-
         // The first child of the container parent element should be the peer dom element
         // if undefined, the insertBefore method will insert the primarySiblingDOMElement as the first child
         var primarySiblingDOMElement = this.primarySibling;
@@ -82,77 +89,64 @@ define( function( require ) {
         this.containerParent.insertBefore( primarySiblingDOMElement, firstChild );
       }
 
+      // @private {boolean} - Whether we are currently in a "disposed" (in the pool) state, or are available to be
+      // interacted with.
       this.disposed = false;
 
-      // @private - listener for the focus event, update Display but only if node is focusable,  but , to be disposed
-      var focusEventListener = function( event ) {
-        if ( event.target === self.primarySibling ) {
-          if ( self.accessibleInstance.node.focusable ) {
-            scenery.Display.focus = new Focus( accessibleInstance.display, accessibleInstance.trail );
-            self.display.pointerFocus = null;
-          }
-        }
-      };
-      this.primarySibling.addEventListener( 'focus', focusEventListener );
+      // @private {function} - Referenced for disposal
+      this.focusEventListener = this.focusEventListener || this.onFocus.bind( this );
+      this.blurEventListener = this.blurEventListener || this.onBlur.bind( this );
 
-      // @private - listener for the blur event, to be disposed
-      var blurEventListener = function( event ) {
-        if ( event.target === self.primarySibling ) {
-          scenery.Display.focus = null;
-        }
-      };
-      this.primarySibling.addEventListener( 'blur', blurEventListener );
-
-      // make AccessiblePeer eligible for garabage collection
-      this.disposeAccessiblePeer = function() {
-
-        // remove focus if the disposed peer currently has a focus highlight
-        if ( scenery.Display.focus &&
-            scenery.Display.focus.trail &&
-              scenery.Display.focus.trail.equals( self.trail ) ) {
-
-            scenery.Display.focus = null;
-        }
-
-        self.primarySibling.removeEventListener( 'blur', blurEventListener );
-        self.primarySibling.removeEventListener( 'focus', focusEventListener );
-      };
+      // Hook up listeners for when our primary element is focused or blurred.
+      this.primarySibling.addEventListener( 'blur', this.blurEventListener );
+      this.primarySibling.addEventListener( 'focus', this.focusEventListener );
 
       return this;
     },
 
     /**
-     * Check to see if this peer is contained in a container parent.
+     * Called when our parallel DOM element gets focused.
+     * @private
      *
-     * @returns {boolean}
+     * @param {DOM Event} event
      */
-    hasContainerParent: function() {
-      return !!this.containerParent;
+    onFocus: function( event ) {
+      if ( event.target === this.primarySibling ) {
+        // NOTE: The "root" peer can't be focused (so it doesn't matter if it doesn't have a node).
+        if ( this.accessibleInstance.node.focusable ) {
+          scenery.Display.focus = new Focus( this.accessibleInstance.display, this.accessibleInstance.guessVisualTrail() );
+          this.display.pointerFocus = null;
+        }
+      }
+    },
+
+    /**
+     * Called when our parallel DOM element gets blurred (loses focus).
+     * @private
+     *
+     * @param {DOM Event} event
+     */
+    onBlur: function( event ) {
+      if ( event.target === this.primarySibling ) {
+        scenery.Display.focus = null;
+      }
     },
 
     /**
      * Get the container parent or the peer's dom element direclty.  Used for sorting.
+     * @public (scenery-internal)
      *
-     * @returns {type}  description
+     * @returns {HTMLElement}
      */
     getContainerParent: function() {
       return this.containerParent || this.primarySibling;
     },
 
     /**
-     * Get the child container or the peer's DOM element, used for sorting.
-     *
-     * @returns {type}  description
-     */
-    getChildContainerElement: function() {
-      return this.childContainerElement || this.primarySibling;
-    },
-
-    /**
      * Get an element on this node, looked up by the association flag passed in.
      * @public (scenery-internal)
      *
-     * @param  {string} association - see AccessibilityUtil for valid associations
+     * @param {string} association - see AccessibilityUtil for valid associations
      * @return {HTMLElement}
      */
     getElementByAssociation: function( association ) {
@@ -174,12 +168,36 @@ define( function( require ) {
       return htmlElement;
     },
 
+    /**
+     * Removes external references from this peer, and places it in the pool.
+     * @public (scenery-internal)
+     */
     dispose: function() {
       this.disposed = true;
-      this.disposeAccessiblePeer();
+
+      // remove focus if the disposed peer currently has a focus highlight
+      if ( scenery.Display.focus &&
+           scenery.Display.focus.trail &&
+           scenery.Display.focus.trail.equals( this.trail ) ) {
+
+        scenery.Display.focus = null;
+      }
+
+      // remove listeners
+      this.primarySibling.removeEventListener( 'blur', this.blurEventListener );
+      this.primarySibling.removeEventListener( 'focus', this.focusEventListener );
+
+      // zero-out references
+      this.accessibleInstance = null;
+      this.display = null;
+      this.trail = null;
+      this.primarySibling = null;
+      this.labelSibling = null;
+      this.descriptionSibling = null;
+      this.containerParent = null;
 
       // for now
-      this.freeToPool && this.freeToPool();
+      this.freeToPool();
     }
   }, {
 
@@ -188,6 +206,20 @@ define( function( require ) {
     LABEL_SIBLING: 'LABEL_SIBLING', // associate with just the label content of this peer
     DESCRIPTION_SIBLING: 'DESCRIPTION_SIBLING', // associate with just the description content of this peer
     CONTAINER_PARENT: 'CONTAINER_PARENT' // associate with everything under the container parent of this peer
+  } );
+
+  // Set up pooling
+  Poolable.mixInto( AccessiblePeer, {
+    constructorDuplicateFactory: function( pool ) {
+      return function( accessibleInstance, primarySibling, options ) {
+        if ( pool.length ) {
+          return pool.pop().initializeAccessiblePeer( accessibleInstance, primarySibling, options );
+        }
+        else {
+          return new AccessiblePeer( accessibleInstance, primarySibling, options );
+        }
+      };
+    }
   } );
 
   return AccessiblePeer;

@@ -123,7 +123,9 @@ define( function( require ) {
   'use strict';
 
   // modules
+  var AccessibilityTree = require( 'SCENERY/accessibility/AccessibilityTree' );
   var AccessibilityUtil = require( 'SCENERY/accessibility/AccessibilityUtil' );
+  var AccessibleDisplaysInfo = require( 'SCENERY/accessibility/AccessibleDisplaysInfo' );
   var AccessiblePeer = require( 'SCENERY/accessibility/AccessiblePeer' );
   var Emitter = require( 'AXON/Emitter' );
   var extend = require( 'PHET_CORE/extend' );
@@ -145,31 +147,37 @@ define( function( require ) {
 
   // The options for the Accessibility API. In general, most default to null; to clear, set back to null.
   var ACCESSIBILITY_OPTION_KEYS = [
+
+    'containerTagName', // Sets the tag name for an [optional] element that contains this Node's siblings, see setContainerTagName()
+    'containerAriaRole', // Sets the ARIA role for the container parent DOM element, see setContainerAriaRole()
+
     'tagName', // Sets the tag name for the primary sibling DOM element in the parallel DOM
+    'innerContent', // Sets the inner text or HTML for a node's primary sibling element, see setInnerContent()
     'inputType', // Sets the input type for the primary sibling DOM element, only relevant if tagName is 'input'
     'inputValue', // Sets the input value for the primary sibling DOM element, only relevant if tagName is 'input'
     'accessibleChecked', // Sets the 'checked' state for inputs of type 'radio' and 'checkbox', see setAccessibleChecked()
-    'containerTagName', // Sets the tag name for an element that contains this Node's siblings, see setContainerTagName()
+    'accessibleNamespace', // Sets the namespace for the primary element, see setAccessibleNamespace()
+    'ariaLabel', // Sets the value of the 'aria-label' attribute on the primary sibling of this Node, see setAriaLabel()
+    'ariaRole', // Sets the ARIA role for the primary sibling of this Node, see setAriaRole()
+    'ariaLabelContent', // Sets the content that will label another node through aria-labelledby, see setAriaLabelledByContent()
+    'ariaDescribedContent', // Sets the content that will be described by another node through aria-describedby, see setAriaDescribedContent()
+    'ariaLabelledContent', // sets the content that will be labelled by another node through aria-labelledby, see setAriaLabelledContent()
+
     'labelTagName', // Sets the tag name for the DOM element sibling labelling this node, see setLabelTagName()
-    'descriptionTagName', // Sets the tag name for the DOM element sibling describing this node, see setDescriptionTagName()
-    'innerContent', // Sets the inner text or HTML for a node's primary sibling element, see setInnerContent()
     'labelContent', // Sets the label content for the node, see setLabelContent()
-    'descriptionContent', // Sets the description content for the node, see setDescriptionContent()
     'appendLabel', // Sets the label sibling to come after the primary sibling in the pDOM, see setAppendLabel()
+
+    'descriptionTagName', // Sets the tag name for the DOM element sibling describing this node, see setDescriptionTagName()
+    'descriptionContent', // Sets the description content for the node, see setDescriptionContent()
     'appendDescription', // Sets the description sibling to come after the primary sibling in the pDOM, see setAppendDescription()
+    'ariaDescriptionContent', // Sets the content that will describe another node through aria-describedby, see setAriaDescriptionContent()
+
     'focusHighlight', // Sets the focus highlight for the node, see setFocusHighlight()
     'focusHighlightLayerable', // Flag to determine if the focus highlight node can be layered in the scene graph, see setFocusHighlightLayerable()
     'groupFocusHighlight', // Sets the outer focus highlight for this node when a descendant has focus, see setGroupFocusHighlight()
     'accessibleVisible', // Sets whether or not the node's DOM element is visible in the parallel DOM, see setAccessibleVisible()
     'accessibleContentDisplayed', // Sets whether or not the accessible content of the node (and its subtree) is displayed, see setAccessibleContentDisplayed()
     'focusable', // Sets whether or not the node can receive keyboard focus, see setFocusable()
-    'ariaLabel', // Sets the value of the 'aria-label' attribute on the primary sibling of this Node, see setAriaLabel()
-    'ariaRole', // Sets the ARIA role for the primary sibling of this Node, see setAriaRole()
-    'containerAriaRole', // Sets the ARIA role for the container parent DOM element, see setContainerAriaRole()
-    'ariaDescriptionContent', // Sets the content that will describe another node through aria-describedby, see setAriaDescriptionContent()
-    'ariaLabelContent', // Sets the content that will label another node through aria-labelledby, see setAriaLabelledByContent()
-    'ariaDescribedContent', // Sets the content that will be described by another node through aria-describedby, see setAriaDescribedContent()
-    'ariaLabelledContent', // sets the content that will be labelled by another node through aria-labelledby, see setAriaLabelledContent()
     'accessibleOrder', // Modifies the order of accessible  navigation, see setAccessibleOrder()
     'accessibleContent' // Sets up accessibility handling (probably don't need to use this), see setAccessibleContent()
   ];
@@ -230,7 +238,7 @@ define( function( require ) {
           // if the element has a tag name INPUT.
           this._inputType = null;
 
-          // @private {string|null} - the value of the input, only relevant if the tag name is of type "INPUT". Is a 
+          // @private {string|null} - the value of the input, only relevant if the tag name is of type "INPUT". Is a
           // string because the `value` attribute is a DOMString. null value indicates no value.
           this._inputValue = null;
 
@@ -252,8 +260,8 @@ define( function( require ) {
           // containerParent.
           this._appendDescription = false;
 
-          // @private {array.<Object> - array of attributes that are on the node's DOM element.  Objects will have the
-          // form { attribute:{string}, value:{string|number} }
+          // @private {Array.<Object> - array of attributes that are on the node's DOM element.  Objects will have the
+          // form { attribute:{string}, value:{*}, namespace:{string|null} }
           this._accessibleAttributes = [];
 
           // @private {string|null} - the label content for this node's DOM element.  There are multiple ways that a label
@@ -266,6 +274,10 @@ define( function( require ) {
 
           // @private {string|null} - the description content for this node's DOM element.
           this._descriptionContent = null;
+
+          // @private {string|null} - If provided, it will create the primary DOM element with the specified namespace.
+          // This may be needed, for example, with MathML/SVG/etc.
+          this._accessibleNamespace = null;
 
           // @private {string|null} - if provided, "aria-label" will be added as an inline attribute on the node's DOM
           // element and set to this value. This will determine how the Accessible Name is provided for the DOM element.
@@ -363,18 +375,23 @@ define( function( require ) {
           // @private {Array.<Function>} - For accessibility input handling {keyboard/click/HTML form}
           this._accessibleInputListeners = [];
 
-          // @public (scenery-internal) - emitters for when state properties change
-          this.accessibleVisibilityChangedEmitter = new Emitter();
-
           // @public - emits when focus changes. This will trigger with the 'focus' event and the 'blur' event.
           // Listener receives 1 parameter, {boolean} - isFocused. see Display.focus
           this.focusChangedEmitter = new Emitter();
 
-          // @private {Array.<Node>} - (a11y) If provided, it will override the focus order between children (and optionally
-          // descendants). If not provided, the focus order will default to the rendering order (first children first, last
-          // children last) determined by the children array.
-          this._accessibleOrder = [];
+          // @private {Array.<Node|null>|null} - (a11y) If provided, it will override the focus order between children
+          // (and optionally aribitrary subtrees). If not provided, the focus order will default to the rendering order
+          // (first children first, last children last) determined by the children array.
+          // See setAccessibleOrder() for more documentation.
+          this._accessibleOrder = null;
 
+          // @public (scenery-internal) {Node|null} - (a11y) If this node is specified in another node's
+          // accessibleOrder, then this will have the value of that other (accessible parent) node. Otherwise it's null.
+          this._accessibleParent = null;
+
+          // @public (scenery-internal) {AccessibleDisplaysInfo} - Contains information about what accessible displays
+          // this node is "visible" for, see AccessibleDisplaysInfo.js for more information.
+          this._accessibleDisplaysInfo = new AccessibleDisplaysInfo( this );
 
           // @private {Object|null} - If non-null, this node will be represented in the parallel DOM by the accessible content.
           // The accessibleContent object will be of the form:
@@ -484,6 +501,10 @@ define( function( require ) {
          * @public (scenery-internal)
          */
         disposeAccessibility: function() {
+          // To prevent memory leaks, we want to clear our order (since otherwise nodes in our order will reference
+          // this node).
+          this.accessibleOrder = null;
+
           this.removeAllAccessibleInputListeners();
         },
 
@@ -494,12 +515,12 @@ define( function( require ) {
          * @returns {boolean}
          */
         isFocused: function() {
-          var isFocused = false;
-          if ( this._accessibleInstances.length > 0 ) {
-            isFocused = document.activeElement === this._accessibleInstances[ 0 ].peer.primarySibling;
+          for ( var i = 0; i < this._accessibleInstances.length; i++ ) {
+            if ( document.activeElement === this._accessibleInstances[ i ].peer.primarySibling ) {
+              return true;
+            }
           }
-
-          return isFocused;
+          return false;
         },
         get focused() { return this.isFocused(); },
 
@@ -961,6 +982,41 @@ define( function( require ) {
         get containerAriaRole() { return this.getContainerAriaRole(); },
 
         /**
+         * Sets the namespace for the primary element (relevant for MathML/SVG/etc.)
+         * @public
+         *
+         * For example, to create a MathML element:
+         * { tagName: 'math', accessibleNamespace: 'http://www.w3.org/1998/Math/MathML' }
+         *
+         * or for SVG:
+         * { tagName: 'svg', accessibleNamespace: 'http://www.w3.org/2000/svg' }
+         *
+         * @param {string|null} accessibleNamespace - Null indicates no namespace.
+         * @returns {Node} - For chaining
+         */
+        setAccessibleNamespace: function( accessibleNamespace ) {
+          if ( this._accessibleNamespace !== accessibleNamespace ) {
+            this._accessibleNamespace = accessibleNamespace;
+
+            this.invalidateAccessibleContent();
+          }
+
+          return this;
+        },
+        set accessibleNamespace( value ) { this.setAccessibleNamespace( value ); },
+
+        /**
+         * Returns the accessible namespace (see setAccessibleNamespace for more information).
+         * @public
+         *
+         * @returns {string|null}
+         */
+        getAccessibleNamespace: function() {
+          return this._accessibleNamespace;
+        },
+        get accessibleNamespace() { return this.getAccessibleNamespace(); },
+
+        /**
          * Sets the 'aria-label' attribute for labelling the node's DOM element. By using the
          * 'aria-label' attribute, the label will be read on focus, but can not be found with the
          * virtual cursor. This is one way to set a DOM Element's Accessible Name.
@@ -1273,28 +1329,76 @@ define( function( require ) {
         /**
          * Sets the accessible focus order for this node. This includes not only focused items, but elements that can be
          * placed in the parallel DOM. If provided, it will override the focus order between children (and
-         * optionally descendants). If not provided, the focus order will default to the rendering order (first children
-         * first, last children last), determined by the children array.
+         * optionally arbitrary subtrees). If not provided, the focus order will default to the rendering order
+         * (first children first, last children last), determined by the children array.
          * @public
          *
-         * @param {Array.<Node>} accessibleOrder
+         * In the general case, when an accessible order is specified, it's an array of nodes, with optionally one
+         * element being a placeholder for "the rest of the children", signified by null. This means that, for
+         * accessibility, it will act as if the children for this node WERE the accessibleOrder (potentially
+         * supplemented with other children via the placeholder).
+         *
+         * For example, if you have the tree:
+         *   a
+         *     b
+         *       d
+         *       e
+         *     c
+         *       g
+         *       f
+         *         h
+         *
+         * and we specify b.accessibleOrder = [ e, f, d, c ], then the accessible structure will act as if the tree is:
+         *  a
+         *    b
+         *      e
+         *      f <--- the entire subtree of `f` gets placed here under `b`, pulling it out from where it was before.
+         *        h
+         *      d
+         *      c <--- note that `g` is NOT under `c` anymore, because it got pulled out under b directly
+         *        g
+         *
+         * The placeholder (`null`) will get filled in with all direct children that are NOT in any accessibleOrder.
+         * If there is no placeholder specified, it will act as if the placeholder is at the end of the order.
+         * The value `null` (the default) and the empty array (`[]`) both act as if the only order is the placeholder,
+         * i.e. `[null]`.
+         *
+         * Some general constraints for the orders are:
+         * - You can't specify a node in more than one accessibleOrder, and you can't specify duplicates of a value
+         *   in an accessibleOrder.
+         * - You can't specify an ancestor of a node in that node's accessibleOrder
+         *   (e.g. this.accessibleOrder = this.parents ).
+         *
+         * Note that specifying something in an accessibleOrder will effectively remove it from all of its parents for
+         * the accessible tree (so if you create `tmpNode.accessibleOrder = [ a ]` then toss the tmpNode without
+         * disposing it, `a` won't show up in the parallel DOM). If there is a need for that, disposing a Node
+         * effectively removes its accessibleOrder.
+         *
+         * See https://github.com/phetsims/scenery-phet/issues/365#issuecomment-381302583 for more information on the
+         * decisions and design for this feature.
+         *
+         * @param {Array.<Node|null>|null} accessibleOrder
          */
         setAccessibleOrder: function( accessibleOrder ) {
-          assert && assert( Array.isArray( accessibleOrder ), 'Array expected, received: ' + typeof accessibleOrder );
+          assert && assert( Array.isArray( accessibleOrder ) || accessibleOrder === null,
+            'Array or null expected, received: ' + accessibleOrder );
+          assert && accessibleOrder && accessibleOrder.forEach( function( node, index ) {
+            assert( node === null || node instanceof scenery.Node,
+              'Elements of accessibleOrder should be either a Node or null. Element at index ' + index + ' is: ' + node );
+          } );
+          assert && accessibleOrder && assert( this.getTrails( function( node ) {
+            return _.includes( accessibleOrder, node );
+          } ).length === 0, 'accessibleOrder should not include any ancestors or the node itself' );
 
           // Only update if it has changed
           if ( this._accessibleOrder !== accessibleOrder ) {
-            this._accessibleOrder = accessibleOrder;
+            var oldAccessibleOrder = this._accessibleOrder;
 
-            // Get all trails where the root node of the trail has at least one rootedDisplay
-            var trails = this.getTrails( Node.hasRootedDisplayPredicate );
-            for ( var i = 0; i < trails.length; i++ ) {
-              var trail = trails[ i ];
-              var rootedDisplays = trail.rootNode()._rootedDisplays;
-              for ( var j = 0; j < rootedDisplays.length; j++ ) {
-                rootedDisplays[ j ].changedAccessibleOrder( trail );
-              }
-            }
+            // Store our own reference to this, so client modifications to the input array won't silently break things.
+            // See https://github.com/phetsims/scenery/issues/786
+            this._accessibleOrder = accessibleOrder === null ? null : accessibleOrder.slice();
+
+            AccessibilityTree.accessibleOrderChange( this, oldAccessibleOrder, accessibleOrder );
 
             this.trigger0( 'accessibleOrder' );
           }
@@ -1305,12 +1409,91 @@ define( function( require ) {
          * Returns the accessible (focus) order for this node.
          * @public
          *
-         * @returns {Array.<Node>|null}
+         * @returns {Array.<Node|null>|null}
          */
         getAccessibleOrder: function() {
           return this._accessibleOrder;
         },
         get accessibleOrder() { return this.getAccessibleOrder(); },
+
+        /**
+         * Returns whether this node has an accessibleOrder that is effectively different than the default.
+         * @public
+         *
+         * NOTE: `null`, `[]` and `[null]` are all effectively the same thing, so this will return true for any of
+         * those. Usage of `null` is recommended, as it doesn't create the extra object reference (but some code
+         * that generates arrays may be more convenient).
+         *
+         * @returns {boolean}
+         */
+        hasAccessibleOrder: function() {
+          return this._accessibleOrder !== null &&
+                 this._accessibleOrder.length !== 0 &&
+                 ( this._accessibleOrder.length > 1 || this._accessibleOrder[ 0 ] !== null );
+        },
+
+        /**
+         * Returns our "accessible parent" if available: the node that specifies this node in its accessibleOrder.
+         * @public
+         *
+         * @returns {Node|null}
+         */
+        getAccessibleParent: function() {
+          return this._accessibleParent;
+        },
+        get accessibleParent() { return this.getAccessibleParent(); },
+
+        /**
+         * Returns the "effective" a11y children for the node (which may be different based on the order or other
+         * excluded subtrees).
+         * @public
+         *
+         * If there is no accessibleOrder specified, this is basically "all children that don't have accessible panrets"
+         * (a node has an "accessible parent" if it is specified in an accessibleOrder).
+         *
+         * Otherwise (if it has an accessibleOrder), it is the accessibleOrder, with the above list of nodes placed
+         * in at the location of the placeholder. If there is no placeholder, it acts like a placeholder was the last
+         * element of the accessibleOrder (see setAccessibleOrder for more documentation information).
+         *
+         * NOTE: If you specify a child in the accessibleOrder, it will NOT be double-included (since it will have an
+         * accessible parent).
+         *
+         * @returns {Array.<Node>}
+         */
+        getEffectiveChildren: function() {
+          // Find all children without accessible parents.
+          var nonOrderedChildren = [];
+          for ( var i = 0; i < this._children.length; i++ ) {
+            var child = this._children[ i ];
+
+            if ( !child._accessibleParent ) {
+              nonOrderedChildren.push( child );
+            }
+          }
+
+          // Override the order, and replace the placeholder if it exists.
+          if ( this.hasAccessibleOrder() ) {
+            var effectiveChildren = this.accessibleOrder.slice();
+
+            var placeholderIndex = effectiveChildren.indexOf( null );
+
+            // If we have a placeholder, replace its content with the children
+            if ( placeholderIndex >= 0 ) {
+              // for efficiency
+              nonOrderedChildren.unshift( placeholderIndex, 1 );
+              Array.prototype.splice.apply( effectiveChildren, nonOrderedChildren );
+            }
+            // Otherwise, just add the normal things at the end
+            else {
+              Array.prototype.push.apply( effectiveChildren, nonOrderedChildren );
+            }
+
+            return effectiveChildren;
+          }
+          else {
+            return nonOrderedChildren;
+          }
+        },
 
         /**
          * Hide completely from a screen reader and the browser by setting the hidden attribute on the node's
@@ -1323,16 +1506,18 @@ define( function( require ) {
          * @param {boolean} visible
          */
         setAccessibleVisible: function( visible ) {
-          this._accessibleVisible = visible;
+          if ( this._accessibleVisible !== visible ) {
+            this._accessibleVisible = visible;
 
-          // accessible visibility updated in each AccessibleInstane
-          this.accessibleVisibilityChangedEmitter.emit();
+            this._accessibleDisplaysInfo.onAccessibleVisibilityChange( visible );
+          }
         },
         set accessibleVisible( visible ) { this.setAccessibleVisible( visible ); },
 
         /**
          * Get whether or not this node's representative DOM element is visible.
          * @public
+         * TODO: rename isAccessibleVisible()
          *
          * @returns {boolean}
          */
@@ -1431,7 +1616,11 @@ define( function( require ) {
          * Get an array containing all accessible attributes that have been added to this node's DOM element.
          * @public
          *
-         * @returns {string[]}
+         * @returns {Array.<Object>} - Returns objects with: {
+         *   attribute: {string} // the name of the attribute
+         *   value: {*} // the value of the attribute
+         *   namespace: {string|null} // the (optional) namespace of the attribute
+         * }
          */
         getAccessibleAttributes: function() {
           return this._accessibleAttributes.slice( 0 ); // defensive copy
@@ -1444,21 +1633,37 @@ define( function( require ) {
          *
          * @param {string} attribute - string naming the attribute
          * @param {string|boolean} value - the value for the attribute
+         * @param {Object} [options]
          * @public
          */
-        setAccessibleAttribute: function( attribute, value ) {
+        setAccessibleAttribute: function( attribute, value, options ) {
+          options = _.extend( {
+            // {string|null} - If non-null, will set the attribute with the specified namespace. This can be required
+            // for setting certain attributes (e.g. MathML).
+            namespace: null
+          }, options );
 
           // if the accessible attribute already exists in the list, remove it - no need
           // to remove from the peers, existing attributes will simply be replaced in the DOM
           for ( var i = 0; i < this._accessibleAttributes.length; i++ ) {
-            if ( this._accessibleAttributes[ i ].attribute === attribute ) {
+            if ( this._accessibleAttributes[ i ].attribute === attribute &&
+                 this._accessibleAttributes[ i ].namespace === options.namespace ) {
               this._accessibleAttributes.splice( i, 1 );
             }
           }
 
-          this._accessibleAttributes.push( { attribute: attribute, value: value } );
+          this._accessibleAttributes.push( {
+            attribute: attribute,
+            value: value,
+            namespace: options.namespace
+          } );
           this.updateAccessiblePeers( function( accessiblePeer ) {
-            accessiblePeer.primarySibling.setAttribute( attribute, value );
+            if ( options.namespace ) {
+              accessiblePeer.primarySibling.setAttributeNS( options.namespace, attribute, value );
+            }
+            else {
+              accessiblePeer.primarySibling.setAttribute( attribute, value );
+            }
           } );
         },
 
@@ -1466,13 +1671,20 @@ define( function( require ) {
          * Remove a particular attribute, removing the associated semantic information from the DOM element.
          *
          * @param {string} attribute - name of the attribute to remove
+         * @param {Object} [options]
          * @public
          */
-        removeAccessibleAttribute: function( attribute ) {
+        removeAccessibleAttribute: function( attribute, options ) {
+          options = _.extend( {
+            // {string|null} - If non-null, will remove the attribute with the specified namespace. This can be required
+            // for removing certain attributes (e.g. MathML).
+            namespace: null
+          }, options );
 
           var attributeRemoved = false;
           for ( var i = 0; i < this._accessibleAttributes.length; i++ ) {
-            if ( this._accessibleAttributes[ i ].attribute === attribute ) {
+            if ( this._accessibleAttributes[ i ].attribute === attribute &&
+                 this._accessibleAttributes[ i ].namespace === options.namespace ) {
               this._accessibleAttributes.splice( i, 1 );
               attributeRemoved = true;
             }
@@ -1480,7 +1692,12 @@ define( function( require ) {
           assert && assert( attributeRemoved, 'Node does not have accessible attribute ' + attribute );
 
           this.updateAccessiblePeers( function( accessiblePeer ) {
-            accessiblePeer.primarySibling.removeAttribute( attribute );
+            if ( options.namespace ) {
+              accessiblePeer.primarySibling.removeAttributeNS( options.namespace, attribute );
+            }
+            else {
+              accessiblePeer.primarySibling.removeAttribute( attribute );
+            }
           } );
         },
 
@@ -1586,11 +1803,13 @@ define( function( require ) {
               nestedChildStack.push( item.children );
             }
 
+            var arrayAccessibleOrder = node._accessibleOrder === null ? [] : node._accessibleOrder;
+
             // push specific focused nodes to the stack
-            pruneStack = pruneStack.concat( node._accessibleOrder );
+            pruneStack = pruneStack.concat( arrayAccessibleOrder );
 
             // Visiting trails to ordered nodes.
-            _.each( node._accessibleOrder, function( descendant ) {
+            _.each( arrayAccessibleOrder, function( descendant ) {
               // Find all descendant references to the node.
               // NOTE: We are not reordering trails (due to descendant constraints) if there is more than one instance for
               // this descendant node.
@@ -1615,7 +1834,7 @@ define( function( require ) {
             }
 
             // pop focused nodes from the stack (that were added above)
-            _.each( node._accessibleOrder, function( descendant ) {
+            _.each( arrayAccessibleOrder, function( descendant ) {
               pruneStack.pop();
             } );
 
@@ -1644,14 +1863,7 @@ define( function( require ) {
             var oldAccessibleContent = this._accessibleContent;
             this._accessibleContent = accessibleContent;
 
-            var trails = this.getTrails( Node.hasRootedDisplayPredicate );
-            for ( var i = 0; i < trails.length; i++ ) {
-              var trail = trails[ i ];
-              var rootedDisplays = trail.rootNode()._rootedDisplays;
-              for ( var j = 0; j < rootedDisplays.length; j++ ) {
-                rootedDisplays[ j ].changedAccessibleContent( trail, oldAccessibleContent, accessibleContent );
-              }
-            }
+            AccessibilityTree.accessibleContentChange( this, oldAccessibleContent, accessibleContent );
 
             this.trigger0( 'accessibleContent' );
           }
@@ -1679,22 +1891,26 @@ define( function( require ) {
          * @param {Node} node
          */
         onAccessibleAddChild: function( node ) {
-          // All trails starting with nodes that have display roots, and ending with the added node.
-          var trails = node.getTrails( Node.hasRootedDisplayPredicate );
-          for ( var i = 0; i < trails.length; i++ ) {
-            var trail = trails[ i ];
+          sceneryLog && sceneryLog.Accessibility && sceneryLog.Accessibility( 'onAccessibleAddChild n#' + node.id + ' (parent:n#' + this.id + ')' );
+          sceneryLog && sceneryLog.Accessibility && sceneryLog.push();
 
-            // Ignore trails where this node is not the child node's parent. See https://github.com/phetsims/scenery/issues/491
-            if ( trail.nodeFromTop( 1 ) !== this ) {
-              continue;
-            }
+          // Find descendants with accessibleOrders and check them against all of their ancestors/self
+          assert && ( function recur( descendant ) {
+            // Prune the search (because milliseconds don't grow on trees, even if we do have assertions enabled)
+            if ( descendant._rendererSummary.isNotAccessible() ) { return; }
 
-            // Notify each Display of the trail
-            var rootedDisplays = trail.rootNode()._rootedDisplays;
-            for ( var j = 0; j < rootedDisplays.length; j++ ) {
-              rootedDisplays[ j ].addAccessibleTrail( trail );
-            }
-          }
+            descendant.accessibleOrder && assert( descendant.getTrails( function( node ) {
+              return _.includes( descendant.accessibleOrder, node );
+            } ).length === 0, 'accessibleOrder should not include any ancestors or the node itself' );
+          } )( node );
+
+          assert && AccessibilityTree.auditNodeForAccessibleCycles( this );
+
+          this._accessibleDisplaysInfo.onAddChild( node );
+
+          AccessibilityTree.addChild( this, node );
+
+          sceneryLog && sceneryLog.Accessibility && sceneryLog.pop();
         },
 
         /**
@@ -1705,24 +1921,15 @@ define( function( require ) {
          * @param {Node} node
          */
         onAccessibleRemoveChild: function( node ) {
-          // All trails starting with nodes that have display roots, and ending with the removed node.
-          var trails = node.getTrails( Node.hasRootedDisplayPredicate );
-          for ( var i = 0; i < trails.length; i++ ) {
-            var trail = trails[ i ];
+          sceneryLog && sceneryLog.Accessibility && sceneryLog.Accessibility( 'onAccessibleRemoveChild n#' + node.id + ' (parent:n#' + this.id + ')' );
+          sceneryLog && sceneryLog.Accessibility && sceneryLog.push();
 
-            // Ignore trails where this node is not the child node's parent. See https://github.com/phetsims/scenery/issues/491
-            if ( trail.nodeFromTop( 1 ) !== this ) {
-              continue;
-            }
+          this._accessibleDisplaysInfo.onRemoveChild( node );
 
-            // Notify each Display of the trail
-            var rootedDisplays = trail.rootNode()._rootedDisplays;
-            for ( var j = 0; j < rootedDisplays.length; j++ ) {
-              rootedDisplays[ j ].removeAccessibleTrail( trail );
-            }
-          }
+          AccessibilityTree.removeChild( this, node );
+
+          sceneryLog && sceneryLog.Accessibility && sceneryLog.pop();
         },
-
 
         /*---------------------------------------------------------------------------*/
         // Accessible Instance handling
@@ -1766,6 +1973,7 @@ define( function( require ) {
          * Update all AccessiblePeers representing this node with the callback, which takes the AccessiblePeer
          * as an argument.
          * @private
+         *
          * @param {function} callback
          */
         updateAccessiblePeers: function( callback ) {

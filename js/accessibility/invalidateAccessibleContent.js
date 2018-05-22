@@ -71,7 +71,9 @@ define( function( require ) {
           var uniqueId = accessibleInstance.trail.getUniqueId();
 
           // create the base DOM element representing this accessible instance
-          var primarySibling = createElement( self._tagName, self._focusable );
+          var primarySibling = createElement( self._tagName, self._focusable, {
+            namespace: self._accessibleNamespace
+          } );
           primarySibling.id = uniqueId;
 
           // create the container parent for the dom siblings
@@ -104,7 +106,7 @@ define( function( require ) {
             descriptionSibling.id = 'description-' + uniqueId;
           }
 
-          var accessiblePeer = new AccessiblePeer( accessibleInstance, primarySibling, {
+          var accessiblePeer = AccessiblePeer.createFromPool( accessibleInstance, primarySibling, {
             containerParent: containerElement,
             labelSibling: labelSibling,
             descriptionSibling: descriptionSibling
@@ -147,7 +149,10 @@ define( function( require ) {
           for ( i = 0; i < defensiveAttributes.length; i++ ) {
             var attribute = defensiveAttributes[ i ].attribute;
             var value = defensiveAttributes[ i ].value;
-            self.setAccessibleAttribute( attribute, value );
+            var namespace = defensiveAttributes[ i ].namespace;
+            self.setAccessibleAttribute( attribute, value, {
+              namespace: namespace
+            } );
           }
 
           // set the accessible description, but not if the tagName has been cleared out.
@@ -206,10 +211,17 @@ define( function( require ) {
    *
    * @param  {string} tagName
    * @param {boolean} focusable - should the element be explicitly added to the focus order?
+   * @param {Object} [options]
    * @returns {HTMLElement}
    */
-  function createElement( tagName, focusable ) {
-    var domElement = document.createElement( tagName );
+  function createElement( tagName, focusable, options ) {
+    options = _.extend( {
+      namespace: null // {string|null} - If non-null, the element will be created with the specific namespace
+    }, options );
+
+    var domElement = options.namespace
+      ? document.createElementNS( options.namespace, tagName )
+      : document.createElement( tagName );
     var upperCaseTagName = tagName.toUpperCase();
 
     // give all non-focusable elements a tabindex of -1 for browser consistency

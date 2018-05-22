@@ -81,6 +81,7 @@ define( function( require ) {
     this.node.onStatic( 'clip', listener );
     this.node.onStatic( 'selfBoundsValid', listener ); // e.g. Text, may change based on boundsMethod
     this.node.onStatic( 'accessibleContent', listener );
+    this.node.onStatic( 'accessibleOrder', listener );
   }
 
   scenery.register( 'RendererSummary', RendererSummary );
@@ -124,6 +125,10 @@ define( function( require ) {
       }
 
       if ( ancestorOldMask || ancestorNewMask ) {
+
+        var oldSubtreeBitmask = this.bitmask;
+        assert && assert( oldSubtreeBitmask !== undefined );
+
         for ( var j = 0; j < numSummaryBits; j++ ) {
           var ancestorBit = summaryBits[ j ];
           // Check for added bits
@@ -140,6 +145,7 @@ define( function( require ) {
         }
 
         this.node.trigger0( 'rendererSummary' ); // please don't change children when listening to this!
+        this.node.onSummaryChange( oldSubtreeBitmask, this.bitmask );
 
         var len = this.node._parents.length;
         for ( var k = 0; k < len; k++ ) {
@@ -348,7 +354,7 @@ define( function( require ) {
       if ( node.areSelfBoundsValid() ) {
         bitmask |= Renderer.bitmaskBoundsValid;
       }
-      if ( !node.accessibleContent ) {
+      if ( !node.accessibleContent && !node.hasAccessibleOrder() ) {
         bitmask |= Renderer.bitmaskNotAccessible;
       }
 

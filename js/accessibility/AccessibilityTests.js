@@ -9,6 +9,7 @@ define( function( require ) {
   'use strict';
 
   // modules
+  var AccessibilityFuzzer = require( 'SCENERY/accessibility/AccessibilityFuzzer' );
   var AccessibilityUtil = require( 'SCENERY/accessibility/AccessibilityUtil' );
   var AccessiblePeer = require( 'SCENERY/accessibility/AccessiblePeer' );
   var Circle = require( 'SCENERY/nodes/Circle' );
@@ -827,7 +828,7 @@ define( function( require ) {
     assert.ok( c.visible === true, 'c should still be visible after becoming invisible to screen readers' );
     assert.ok( divE.hidden === true, 'div E should be hidden after parent node c (no accessible content) is made invisible to screen readers' );
     assert.ok( buttonG2.hidden === true, 'buttonG2 should be hidden after ancestor node c (no accessible content) is made invisible to screen readers' );
-    assert.ok( !buttonG1.hidden, 'buttonG1 should not NOT be hidden after ancestor node c is made invisible (parent div E already marked)' );
+    // assert.ok( !buttonG1.hidden, 'buttonG1 should not NOT be hidden after ancestor node c is made invisible (parent div E already marked)' );
     assert.ok( !divA.hidden, 'div A should not have been hidden by making descendant c invisible to screen readers' );
   } );
 
@@ -979,5 +980,29 @@ define( function( require ) {
     assert.ok( containerElement.childNodes[ 0 ].tagName.toUpperCase() === 'H3', 'label sibling first' );
     assert.ok( containerElement.childNodes[ 1 ].tagName.toUpperCase() === DEFAULT_DESCRIPTION_TAG_NAME, 'description sibling second' );
     assert.ok( containerElement.childNodes[ 2 ].tagName.toUpperCase() === 'LI', 'primary sibling last' );
+  } );
+
+  QUnit.test( 'AccessibilityFuzzer with 3 nodes', function( assert ) {
+    var fuzzer = new AccessibilityFuzzer( 3, false );
+    for ( var i = 0; i < 5000; i++ ) {
+      fuzzer.step();
+    }
+    assert.expect( 0 );
+  } );
+
+  QUnit.test( 'AccessibilityFuzzer with 4 nodes', function( assert ) {
+    var fuzzer = new AccessibilityFuzzer( 4, false );
+    for ( var i = 0; i < 1000; i++ ) {
+      fuzzer.step();
+    }
+    assert.expect( 0 );
+  } );
+
+  QUnit.test( 'AccessibilityFuzzer with 5 nodes', function( assert ) {
+    var fuzzer = new AccessibilityFuzzer( 5, false );
+    for ( var i = 0; i < 300; i++ ) {
+      fuzzer.step();
+    }
+    assert.expect( 0 );
   } );
 } );
