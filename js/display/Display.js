@@ -64,8 +64,8 @@ define( function( require ) {
   var Property = require( 'AXON/Property' );
   var PropertyIO = require( 'AXON/PropertyIO' );
   var Tandem = require( 'TANDEM/Tandem' );
-  var Vector2 = require( 'DOT/Vector2' );
 
+  // TODO: Order these, and see which ones we can require?
   var Features = require( 'SCENERY/util/Features' );
   var Node = require( 'SCENERY/nodes/Node' );
   var scenery = require( 'SCENERY/scenery' );
@@ -253,11 +253,6 @@ define( function( require ) {
     this._pointerAreaOverlay = null;
     this._canvasAreaBoundsOverlay = null;
     this._fittedBlockBoundsOverlay = null;
-
-    // properties for fuzzMouseEvents, so that we can track the status of a persistent mouse pointer
-    this._fuzzMouseIsDown = false;
-    this._fuzzMousePosition = new Vector2(); // start at 0,0
-    this._fuzzMouseLastMoved = false; // whether the last mouse event was a move (we skew probabilities based on this)
 
     if ( assert ) {
       // @private @assertion-only {boolean} - Whether we are running the paint phase of updateDisplay() for this Display.
@@ -1134,70 +1129,6 @@ define( function( require ) {
           } );
         }
       } )( this._rootBackbone );
-    },
-
-    /**
-     * Sends a number of random mouse events through the input system
-     *
-     * @param {number} averageEventQuantity - The average number of mouse events
-     */
-    fuzzMouseEvents: function( averageEventQuantity ) {
-      var chance;
-
-      assert && assert( averageEventQuantity > 0, 'averageEventQuantity must be positive: ' + averageEventQuantity );
-
-      // run a variable number of events, with a certain chance of bailing out (so no events are possible)
-      // models a geometric distribution of events
-      // See https://github.com/phetsims/joist/issues/343 for notes on the distribution.
-      while ( ( chance = Math.random() ) < 1 - 1 / ( averageEventQuantity + 1 ) ) {
-        var domEvent;
-        if ( chance < ( this._fuzzMouseLastMoved ? 0.7 : 0.4 ) ) {
-          // toggle up/down
-          domEvent = document.createEvent( 'MouseEvent' ); // not 'MouseEvents' according to DOM Level 3 spec
-
-          // technically deprecated, but DOM4 event constructors not out yet. people on #whatwg said to use it
-          domEvent.initMouseEvent( this._fuzzMouseIsDown ? 'mouseup' : 'mousedown', true, true, window, 1, // click count
-            this._fuzzMousePosition.x, this._fuzzMousePosition.y, this._fuzzMousePosition.x, this._fuzzMousePosition.y,
-            false, false, false, false,
-            0, // button
-            null );
-
-          this._input.validatePointers();
-
-          if ( this._fuzzMouseIsDown ) {
-            this._input.mouseUp( this._fuzzMousePosition, domEvent );
-            this._fuzzMouseIsDown = false;
-          }
-          else {
-            this._input.mouseDown( this._fuzzMousePosition, domEvent );
-            this._fuzzMouseIsDown = true;
-          }
-
-          this._fuzzMouseLastMoved = false;
-        }
-        else {
-          // change the mouse position
-          this._fuzzMousePosition = new Vector2(
-            Math.floor( Math.random() * this.width ),
-            Math.floor( Math.random() * this.height )
-          );
-
-          // our move event
-          domEvent = document.createEvent( 'MouseEvent' ); // not 'MouseEvents' according to DOM Level 3 spec
-
-          // technically deprecated, but DOM4 event constructors not out yet. people on #whatwg said to use it
-          domEvent.initMouseEvent( 'mousemove', true, true, window, 0, // click count
-            this._fuzzMousePosition.x, this._fuzzMousePosition.y, this._fuzzMousePosition.x, this._fuzzMousePosition.y,
-            false, false, false, false,
-            0, // button
-            null );
-
-          this._input.validatePointers();
-          this._input.mouseMove( this._fuzzMousePosition, domEvent );
-
-          this._fuzzMouseLastMoved = true;
-        }
-      }
     },
 
     /**
