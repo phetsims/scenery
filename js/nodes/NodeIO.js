@@ -33,6 +33,7 @@ define( function( require ) {
     assert && assertInstanceOf( node, phet.scenery.Node );
     ObjectIO.call( this, node, phetioID );
 
+    // TODO: This is in-progress work to convert object properties to Axon Properties, see https://github.com/phetsims/phet-io/issues/1326
     var visibleProperty = new BooleanProperty( node.visible, {
       tandem: node.tandem.createTandem( 'visibleProperty' ),
       instanceDocumentation: 'Property that controls whether the Node will be visible (and interactive).'
