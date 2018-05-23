@@ -102,6 +102,7 @@ define( function( require ) {
 
     // now that it is a div, innerContent is allowed
     b.tagName = 'div';
+    assert.ok( b.tagName === 'div', 'expect tagName setter to work.' );
     b.innerContent = TEST_LABEL;
     assert.ok( b.innerContent === TEST_LABEL, 'inner content allowed' );
 
@@ -211,6 +212,9 @@ define( function( require ) {
 
     assert.ok( a.labelContent === TEST_LABEL_HTML_2, 'clearing labelTagName should not change content, even  though it is not displayed' );
 
+    a.labelTagName = 'p';
+    assert.ok( a.labelTagName === 'p', 'expect labelTagName setter to work.' );
+
   } );
 
   QUnit.test( 'descriptionTagName/descriptionContent option', function( assert ) {
@@ -246,6 +250,10 @@ define( function( require ) {
 
     assert.ok( a.descriptionContent === TEST_DESCRIPTION_HTML_2, 'clearing descriptionTagName should not change content, even  though it is not displayed' );
 
+    assert.ok( a.descriptionTagName === null, 'expect descriptionTagName setter to work.' );
+
+    a.descriptionTagName = 'p';
+    assert.ok( a.descriptionTagName === 'p', 'expect descriptionTagName setter to work.' );
   } );
 
   QUnit.test( 'Accessibility options', function( assert ) {

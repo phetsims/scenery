@@ -238,7 +238,7 @@ define( function( require ) {
           // if the element has a tag name INPUT.
           this._inputType = null;
 
-          // @private {string|null} - the value of the input, only relevant if the tag name is of type "INPUT". Is a
+          // @private {string|number|null} - the value of the input, only relevant if the tag name is of type "INPUT". Is a
           // string because the `value` attribute is a DOMString. null value indicates no value.
           this._inputValue = null;
 
@@ -344,7 +344,7 @@ define( function( require ) {
           // (such as HTML form elements) can be focusable by default, without setting this property.
           this._focusable = null;
 
-          // @private {Shape|Node} - the focus highlight that will surround this node when it
+          // @private {Shape|Node|string.<'invisible'>|null} - the focus highlight that will surround this node when it
           // is focused.  By default, the focus highlight will be a pink rectangle that surrounds the Node's local
           // bounds.
           this._focusHighlight = null;
@@ -468,7 +468,7 @@ define( function( require ) {
         hasAccessibleInputListener: function( listener ) {
           for ( var i = 0; i < this._accessibleInputListeners.length; i++ ) {
             if ( this._accessibleInputListeners[ i ] === listener ) {
-              return  true;
+              return true;
             }
           }
           return false;
@@ -571,8 +571,10 @@ define( function( require ) {
         setTagName: function( tagName ) {
           assert && assert( tagName === null || typeof tagName === 'string' );
 
-          this._tagName = tagName;
-          this.invalidateAccessibleContent();
+          if ( tagName !== this._tagName ) {
+            this._tagName = tagName;
+            this.invalidateAccessibleContent();
+          }
         },
         set tagName( tagName ) { this.setTagName( tagName ); },
 
@@ -607,14 +609,16 @@ define( function( require ) {
         setLabelTagName: function( tagName ) {
           assert && assert( tagName === null || typeof tagName === 'string' );
 
-          this._labelTagName = tagName;
+          if ( tagName !== this._labelTagName ) {
+            this._labelTagName = tagName;
 
-          // to have a label sibling, you need a container
-          if ( !this._containerTagName ) {
-            this.setContainerTagName( DEFAULT_CONTAINER_TAG_NAME );
+            // to have a label sibling, you need a container
+            if ( !this._containerTagName ) {
+              this.setContainerTagName( DEFAULT_CONTAINER_TAG_NAME );
+            }
+
+            this.invalidateAccessibleContent();
           }
-
-          this.invalidateAccessibleContent();
         },
         set labelTagName( tagName ) { this.setLabelTagName( tagName ); },
 
@@ -650,14 +654,17 @@ define( function( require ) {
         setDescriptionTagName: function( tagName ) {
           assert && assert( tagName === null || typeof tagName === 'string' );
 
-          this._descriptionTagName = tagName;
+          if ( tagName !== this._descriptionTagName ) {
 
-          // to have a description sibling, you need a container
-          if ( !this._containerTagName ) {
-            this.setContainerTagName( DEFAULT_CONTAINER_TAG_NAME );
+            this._descriptionTagName = tagName;
+
+            // to have a description sibling, you need a container
+            if ( !this._containerTagName ) {
+              this.setContainerTagName( DEFAULT_CONTAINER_TAG_NAME );
+            }
+
+            this.invalidateAccessibleContent();
           }
-
-          this.invalidateAccessibleContent();
         },
         set descriptionTagName( tagName ) { this.setDescriptionTagName( tagName ); },
 
@@ -816,6 +823,8 @@ define( function( require ) {
          * @param {string|null} label
          */
         setLabelContent: function( label ) {
+          assert && assert( label === null || typeof label === 'string' );
+
           this._labelContent = label;
 
           // If there
@@ -861,6 +870,8 @@ define( function( require ) {
          * @public
          */
         setInnerContent: function( content ) {
+          assert && assert( content === null || typeof content === 'string' );
+
           this._innerContent = content;
 
           // make sure HTML is exclusively text or formatting tags
@@ -900,6 +911,8 @@ define( function( require ) {
          * @param {string|null} descriptionContent
          */
         setDescriptionContent: function( descriptionContent ) {
+          assert && assert( descriptionContent === null || typeof descriptionContent === 'string' );
+
           var useHTML = AccessibilityUtil.usesExclusivelyFormattingTags( descriptionContent );
 
           this._descriptionContent = descriptionContent;
@@ -937,6 +950,7 @@ define( function( require ) {
          *                            for a list of roles, states, and properties.
          */
         setAriaRole: function( ariaRole ) {
+          assert && assert( ariaRole === null || typeof ariaRole === 'string' );
           this._ariaRole = ariaRole;
           this.setAccessibleAttribute( 'role', ariaRole );
 
@@ -966,6 +980,7 @@ define( function( require ) {
          *                            for a lsit of roles, states, and properties.
          */
         setContainerAriaRole: function( ariaRole ) {
+          assert && assert( ariaRole === null || typeof ariaRole === 'string' );
           this._containerAriaRole = ariaRole;
           this.invalidateAccessibleContent();
         },
@@ -995,6 +1010,8 @@ define( function( require ) {
          * @returns {Node} - For chaining
          */
         setAccessibleNamespace: function( accessibleNamespace ) {
+          assert && assert( accessibleNamespace === null || typeof accessibleNamespace === 'string' );
+
           if ( this._accessibleNamespace !== accessibleNamespace ) {
             this._accessibleNamespace = accessibleNamespace;
 
@@ -1025,6 +1042,8 @@ define( function( require ) {
          * @param {string|null} ariaLabel - the text for the aria label attribute
          */
         setAriaLabel: function( ariaLabel ) {
+          assert && assert( ariaLabel === null || typeof ariaLabel === 'string' );
+
           this._ariaLabel = ariaLabel;
 
           this.setAccessibleAttribute( 'aria-label', ariaLabel );
@@ -1050,6 +1069,11 @@ define( function( require ) {
          * @param {Node|Shape|string.<'invisible'>} focusHighlight
          */
         setFocusHighlight: function( focusHighlight ) {
+          assert && assert( focusHighlight === null ||
+                            focusHighlight instanceof phet.scenery.Node ||
+                            focusHighlight instanceof phet.kite.Shape ||
+                            focusHighlight === 'invisible' );
+
           this._focusHighlight = focusHighlight;
 
           var isFocused = false;
@@ -1506,6 +1530,7 @@ define( function( require ) {
          * @param {boolean} visible
          */
         setAccessibleVisible: function( visible ) {
+          assert && assert( typeof visible === 'boolean' );
           if ( this._accessibleVisible !== visible ) {
             this._accessibleVisible = visible;
 
@@ -1560,6 +1585,8 @@ define( function( require ) {
          * @param {string|number} value
          */
         setInputValue: function( value ) {
+          assert && assert( value === null || typeof value === 'string' || typeof value === 'number' );
+
           if ( this._tagName ) {
             assert && assert( _.includes( FORM_ELEMENTS, this._tagName.toUpperCase() ), 'dom element must be a form element to support value' );
           }
@@ -1593,6 +1620,8 @@ define( function( require ) {
          * @param {boolean} checked
          */
         setAccessibleChecked: function( checked ) {
+          assert && assert( typeof checked === 'boolean' );
+
           this._accessibleChecked = checked;
 
           this.updateAccessiblePeers( function( accessiblePeer ) {
@@ -1675,7 +1704,10 @@ define( function( require ) {
          * @public
          */
         removeAccessibleAttribute: function( attribute, options ) {
+          assert && assert( typeof attribute === 'string' );
+
           options = _.extend( {
+
             // {string|null} - If non-null, will remove the attribute with the specified namespace. This can be required
             // for removing certain attributes (e.g. MathML).
             namespace: null
@@ -1726,6 +1758,8 @@ define( function( require ) {
          * @param {boolean} isFocusable
          */
         setFocusable: function( isFocusable ) {
+          assert && assert( typeof isFocusable === 'boolean' );
+
           this._focusable = isFocusable;
 
           this.updateAccessiblePeers( function( accessiblePeer ) {
