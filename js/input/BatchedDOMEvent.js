@@ -44,11 +44,13 @@ define( function( require ) {
 
   inherit( Object, BatchedDOMEvent, {
     run: function( input ) {
+      sceneryLog && sceneryLog.InputEvent && sceneryLog.InputEvent( 'Running batched event' );
+      sceneryLog && sceneryLog.InputEvent && sceneryLog.push();
+
       var domEvent = this.domEvent;
       var callback = this.callback;
 
       // process whether anything under the pointers changed before running additional input events
-      sceneryLog && sceneryLog.InputEvent && sceneryLog.InputEvent( 'validatePointers from batched event' );
       input.validatePointers();
       if ( input.logEvents ) { input.emitter.emit3( 'validatePointers', {}, { highFrequency: true } );}
 
@@ -76,6 +78,8 @@ define( function( require ) {
       else {
         throw new Error( 'bad type value: ' + this.type );
       }
+
+      sceneryLog && sceneryLog.InputEvent && sceneryLog.pop();
     },
 
     dispose: function() {

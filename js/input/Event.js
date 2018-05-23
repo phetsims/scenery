@@ -70,11 +70,13 @@ define( function( require ) {
   inherit( Object, Event, {
     // like DOM Event.stopPropagation(), but named differently to indicate it doesn't fire that behavior on the underlying DOM event
     handle: function() {
+      sceneryLog && sceneryLog.InputEvent && sceneryLog.InputEvent( 'handled event' );
       this.handled = true;
     },
 
     // like DOM Event.stopImmediatePropagation(), but named differently to indicate it doesn't fire that behavior on the underlying DOM event
     abort: function() {
+      sceneryLog && sceneryLog.InputEvent && sceneryLog.InputEvent( 'aborted event' );
       this.aborted = true;
     },
 

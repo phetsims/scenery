@@ -16,6 +16,7 @@ define( function( require ) {
   var PhetioObject = require( 'TANDEM/PhetioObject' );
   var scenery = require( 'SCENERY/scenery' );
   var Tandem = require( 'TANDEM/Tandem' );
+  var Touch = require( 'SCENERY/input/Touch' );
 
   // phet-io modules
   var SimpleDragHandlerIO = require( 'SCENERY/input/SimpleDragHandlerIO' );
@@ -70,6 +71,12 @@ define( function( require ) {
     this.mouseButton = undefined;     // tracks which mouse button was pressed, so we can handle that specifically
     this.interrupted = false;         // whether the last input was interrupted (available during endDrag)
     // TODO: consider mouse buttons as separate pointers?
+
+    // @private {Pointer|null} - There are cases like https://github.com/phetsims/equality-explorer/issues/97 where if
+    // a touchenter starts a drag that is IMMEDIATELY interrupted, the touchdown would start another drag. We record
+    // interruptions here so that we can prevent future enter/down events from the same touch pointer from triggering
+    // another startDrag.
+    this.lastInterruptedTouchPointer = null;
 
     // if an ancestor is transformed, pin our node
     this.transformListener = {
@@ -237,6 +244,10 @@ define( function( require ) {
       if ( this.dragging ) {
         this.interrupted = true;
 
+        if ( this.pointer instanceof Touch ) {
+          this.lastInterruptedTouchPointer = this.pointer;
+        }
+
         // We create a synthetic event here, as there is no available event here.
         this.endDrag( {
           pointer: this.pointer,
@@ -249,12 +260,18 @@ define( function( require ) {
 
     tryToSnag: function( event ) {
       // don't allow drag attempts that use the wrong mouse button (-1 indicates any mouse button works)
-      if ( event.pointer instanceof Mouse && event.domEvent && this.options.mouseButton !== event.domEvent.button && this.options.mouseButton !== -1 ) {
+      if ( event.pointer instanceof Mouse &&
+           event.domEvent &&
+           this.options.mouseButton !== event.domEvent.button &&
+           this.options.mouseButton !== -1 ) {
         return;
       }
 
       // only start dragging if the pointer isn't dragging anything, we aren't being dragged, and if it's a mouse it's button is down
-      if ( !this.dragging && !event.pointer.dragging && event.canStartPress() ) {
+      if ( !this.dragging &&
+           !event.pointer.dragging &&
+           event.pointer !== this.lastInterruptedTouchPointer &&
+           event.canStartPress() ) {
         this.startDrag( event );
       }
     },
