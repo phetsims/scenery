@@ -45,6 +45,7 @@ define( function( require ) {
   var Property = require( 'AXON/Property' );
   var scenery = require( 'SCENERY/scenery' );
   var Tandem = require( 'TANDEM/Tandem' );
+  var Touch = require( 'SCENERY/input/Touch' );
   var Transform3 = require( 'DOT/Transform3' );
   var TransformTracker = require( 'SCENERY/util/TransformTracker' );
   var Vector2 = require( 'DOT/Vector2' );
@@ -185,6 +186,12 @@ define( function( require ) {
 
     // @private {Function} - Listener passed to the transform tracker
     this._transformTrackerListener = this.ancestorTransformed.bind( this );
+
+    // @private {Pointer|null} - There are cases like https://github.com/phetsims/equality-explorer/issues/97 where if
+    // a touchenter starts a drag that is IMMEDIATELY interrupted, the touchdown would start another drag. We record
+    // interruptions here so that we can prevent future enter/down events from the same touch pointer from triggering
+    // another startDrag.
+    this._lastInterruptedTouchPointer = null;
   }
 
   scenery.register( 'DragListener', DragListener );
@@ -605,6 +612,37 @@ define( function( require ) {
       return this._dragBoundsProperty.value;
     },
     get dragBounds() { return this.getDragBounds(); },
+
+    /**
+     * Interrupts the listener, releasing it (canceling behavior).
+     * @public
+     * @override
+     *
+     * This can be called manually, but can also be called through node.interruptSubtreeInput().
+     */
+    interrupt: function() {
+      if ( this.pointer && this.pointer instanceof Touch ) {
+        this._lastInterruptedTouchPointer = this.pointer;
+      }
+
+      PressListener.prototype.interrupt.call( this );
+    },
+
+    /**
+     * Returns whether a press can be started with a particular event.
+     * @public
+     * @override
+     *
+     * @param {Event} event
+     * @returns {boolean}
+     */
+    canPress: function( event ) {
+      if ( event.pointer === this._lastInterruptedTouchPointer ) {
+        return false;
+      }
+
+      return PressListener.prototype.canPress.call( this, event );
+    },
 
     /**
      * Disposes the listener, releasing references. It should not be used after this.
