@@ -215,30 +215,30 @@ define( function( require ) {
          */
         initializeAccessibility: function() {
 
-          // @private {?string} - the HTML tag name of the element representing this node in the DOM
+          // @private {string|null} - the HTML tag name of the element representing this node in the DOM
           this._tagName = null;
 
-          // @private {?string} - the HTML tag name for a container parent element for this node in the DOM. This
+          // @private {string|null} - the HTML tag name for a container parent element for this node in the DOM. This
           // container parent will contain the node's DOM element, as well as peer elements for any label or description
           // content. See setContainerTagName() for more documentation. If this option is needed (like to
           // contain multiple siblings with the primary sibling), it will default to the value of DEFAULT_CONTAINER_TAG_NAME.
           this._containerTagName = null;
 
-          // @private {?string} - the HTML tag name for the label element that will contain the label content for
+          // @private {string|null} - the HTML tag name for the label element that will contain the label content for
           // this dom element. There are ways in which you can have a label without specifying a label tag name,
           // see setLabelContent() for the list of ways.
           this._labelTagName = null;
 
-          // @private {?string} - the HTML tag name for the description element that will contain descsription content
+          // @private {string|null} - the HTML tag name for the description element that will contain descsription content
           // for this dom element. If a description is set before a tag name is defined, a paragraph element
           // will be created for the description.
           this._descriptionTagName = null;
 
-          // @private {?string} - the type for an element with tag name of INPUT.  This should only be used
+          // @private {string|null} - the type for an element with tag name of INPUT.  This should only be used
           // if the element has a tag name INPUT.
           this._inputType = null;
 
-          // @private {?string|number} - the value of the input, only relevant if the tag name is of type "INPUT". Is a
+          // @private {string|number|null} - the value of the input, only relevant if the tag name is of type "INPUT". Is a
           // string because the `value` attribute is a DOMString. null value indicates no value.
           this._inputValue = null;
 
@@ -261,40 +261,40 @@ define( function( require ) {
           this._appendDescription = false;
 
           // @private {Array.<Object> - array of attributes that are on the node's DOM element.  Objects will have the
-          // form { attribute:{string}, value:{*}, namespace:{?string} }
+          // form { attribute:{string}, value:{*}, namespace:{string|null} }
           this._accessibleAttributes = [];
 
-          // @private {?string} - the label content for this node's DOM element.  There are multiple ways that a label
+          // @private {string|null} - the label content for this node's DOM element.  There are multiple ways that a label
           // can be associated with a node's dom element, see setLabelContent() for more documentation
           this._labelContent = null;
 
-          // @private {?string} - the inner label content for this node's primary sibling. Set as inner HTML
+          // @private {string|null} - the inner label content for this node's primary sibling. Set as inner HTML
           // or text content of the actual DOM element. If this is used, the node should not have children.
           this._innerContent = null;
 
-          // @private {?string} - the description content for this node's DOM element.
+          // @private {string|null} - the description content for this node's DOM element.
           this._descriptionContent = null;
 
-          // @private {?string} - If provided, it will create the primary DOM element with the specified namespace.
+          // @private {string|null} - If provided, it will create the primary DOM element with the specified namespace.
           // This may be needed, for example, with MathML/SVG/etc.
           this._accessibleNamespace = null;
 
-          // @private {?string} - if provided, "aria-label" will be added as an inline attribute on the node's DOM
+          // @private {string|null} - if provided, "aria-label" will be added as an inline attribute on the node's DOM
           // element and set to this value. This will determine how the Accessible Name is provided for the DOM element.
           this._ariaLabel = null;
 
-          // @private {?string} - the ARIA role for this node's DOM element, added as an HTML attribute.  For a complete
+          // @private {string|null} - the ARIA role for this node's DOM element, added as an HTML attribute.  For a complete
           // list of ARIA roles, see https://www.w3.org/TR/wai-aria/roles.  Beware that many roles are not supported
           // by browsers or assistive technologies, so use vanilla HTML for accessibility semantics where possible.
           this._ariaRole = null;
 
-          // @private {?string} - the ARIA role for the container parent element, added as an HTML attribute. For a
+          // @private {string|null} - the ARIA role for the container parent element, added as an HTML attribute. For a
           // complete list of ARIA roles, see https://www.w3.org/TR/wai-aria/roles. Beware that many roles are not
           // supported by browsers or assistive technologies, so use vanilla HTML for accessibility semantics where
           // possible.
           this._containerAriaRole = null;
 
-          // @private {?Node} - A node with accessible content that labels this node through the aria-labelledby
+          // @private {Node|null} - A node with accessible content that labels this node through the aria-labelledby
           // ARIA attribute.  The other node can be anywhere in the scene graph.  The behavior for aria-labelledby
           // is such that when this node receives focus, the accessible content under the other node will be read
           // (before any description content). Use with ariaLabelledContent to specify what portion of this node's
@@ -307,7 +307,7 @@ define( function( require ) {
           // or the container parent element. By default, points to this node's DOM element.
           this._ariaLabelledContent = AccessiblePeer.PRIMARY_SIBLING;
 
-          // @private {?Node} - The Node this node labels through the aria-labelledby association. See
+          // @private {Node|null} - The Node this node labels through the aria-labelledby association. See
           // _ariaLabelledByNode for more information.
           this._ariaLabelsNode = null;
 
@@ -316,7 +316,7 @@ define( function( require ) {
           // element.  See setAriaLabelContent()
           this._ariaLabelContent = AccessiblePeer.PRIMARY_SIBLING; // element associated with the other node's content
 
-          // @private {?Node} - A node with accessible content that describes this node through the aria-describedby
+          // @private {Node|null} - A node with accessible content that describes this node through the aria-describedby
           // ARIA attribute. The other node can be anywhere in the scene graph.  The behavior for aria-describedby
           // is such that when this node receives focus, the accessible content under the other node will be read
           // (after any label content). Use with ariaDescribedContent to specify what portion of this node's
@@ -329,7 +329,7 @@ define( function( require ) {
           // or the container parent element. By default, points to this node's DOM element.
           this._ariaDescribedContent = AccessiblePeer.PRIMARY_SIBLING;
 
-          // @private {?Node} - The Node this node describes through the aria-describedby association. See
+          // @private {Node|null} - The Node this node describes through the aria-describedby association. See
           // _ariaLabelledByNode for more information.
           this._ariaDescribesNode = null;
 
@@ -338,14 +338,14 @@ define( function( require ) {
           // element.  See ariaDescribessNodoe for more information
           this._ariaDescriptionContent = AccessiblePeer.PRIMARY_SIBLING;
 
-          // @private {?boolean} - whether or not this node's DOM element has been explicitely set to receive focus from
+          // @private {?boolean} - whether or not this node's DOM element has been explicitly set to receive focus from
           // tab navigation. Sets the tabIndex attribute on the node's DOM element. Setting to false will not remove the
           // node's DOM from the document, but will ensure that it cannot receive focus by pressing 'tab'.  Several
           // HTMLElements (such as HTML form elements) can be focusable by default, without setting this property. The
           // native HTML function from these form elements can be overridden with this property.
           this._focusableOverride = null;
 
-          // @private {?Shape|Node|string.<'invisible'>} - the focus highlight that will surround this node when it
+          // @private {Shape|Node|string.<'invisible'>|null} - the focus highlight that will surround this node when it
           // is focused.  By default, the focus highlight will be a pink rectangle that surrounds the Node's local
           // bounds.
           this._focusHighlight = null;
@@ -380,13 +380,13 @@ define( function( require ) {
           // Listener receives 1 parameter, {boolean} - isFocused. see Display.focus
           this.focusChangedEmitter = new Emitter();
 
-          // @private {?Array.<?Node>} - (a11y) If provided, it will override the focus order between children
+          // @private {Array.<Node|null>|null} - (a11y) If provided, it will override the focus order between children
           // (and optionally aribitrary subtrees). If not provided, the focus order will default to the rendering order
           // (first children first, last children last) determined by the children array.
           // See setAccessibleOrder() for more documentation.
           this._accessibleOrder = null;
 
-          // @public (scenery-internal) {?Node} - (a11y) If this node is specified in another node's
+          // @public (scenery-internal) {Node|null} - (a11y) If this node is specified in another node's
           // accessibleOrder, then this will have the value of that other (accessible parent) node. Otherwise it's null.
           this._accessibleParent = null;
 
@@ -394,7 +394,7 @@ define( function( require ) {
           // this node is "visible" for, see AccessibleDisplaysInfo.js for more information.
           this._accessibleDisplaysInfo = new AccessibleDisplaysInfo( this );
 
-          // @private {?Object} - If non-null, this node will be represented in the parallel DOM by the accessible content.
+          // @private {Object|null} - If non-null, this node will be represented in the parallel DOM by the accessible content.
           // The accessibleContent object will be of the form:
           // {
           //   createPeer: function( {AccessibleInstance} ): {AccessiblePeer},
@@ -583,7 +583,7 @@ define( function( require ) {
          * Get the tag name of the DOM element representing this node for accessibility.
          * @public
          *
-         * @returns {?string}
+         * @returns {string|null}
          */
         getTagName: function() {
           return this._tagName;
@@ -605,7 +605,7 @@ define( function( require ) {
          * @zepumph and @jessegreenberg can't think of another way to handle this. See for details: https://github.com/phetsims/scenery/issues/761
          *
          *
-         * @param {?string} tagName
+         * @param {string|null} tagName
          */
         setLabelTagName: function( tagName ) {
           assert && assert( tagName === null || typeof tagName === 'string' );
@@ -627,7 +627,7 @@ define( function( require ) {
          * Get the label sibling HTML tag name.
          * @public
          *
-         * @returns {?string}
+         * @returns {string|null}
          */
         getLabelTagName: function() {
           return this._labelTagName;
@@ -650,7 +650,7 @@ define( function( require ) {
          * details: https://github.com/phetsims/scenery/issues/761
          *
          * @public
-         * @param {?string} tagName
+         * @param {string|null} tagName
          */
         setDescriptionTagName: function( tagName ) {
           assert && assert( tagName === null || typeof tagName === 'string' );
@@ -673,7 +673,7 @@ define( function( require ) {
          * Get the HTML tag name for the description sibling.
          * @public
          *
-         * @returns {?string}
+         * @returns {string|null}
          */
         getDescriptionTagName: function() {
           return this._descriptionTagName;
@@ -684,7 +684,7 @@ define( function( require ) {
          * Sets the type for an input element.  Element must have the INPUT tag name. The input attribute is not
          * specified as readonly, so invalidating accessible content is not necessary.
          *
-         * @param {?string} inputType
+         * @param {string|null} inputType
          */
         setInputType: function( inputType ) {
           assert && assert( this._tagName.toUpperCase() === INPUT_TAG, 'tag name must be INPUT to support inputType' );
@@ -700,7 +700,7 @@ define( function( require ) {
          * Get the input type. Input type is only relevant if this node's DOM element has tag name "INPUT".
          * @public
          *
-         * @returns {?string}
+         * @returns {string|null}
          */
         getInputType: function() {
           return this._inputType;
@@ -792,7 +792,7 @@ define( function( require ) {
          * best way, but it is the way it works for now. See https://github.com/phetsims/scenery/issues/761 for details
          * and if you have opinions to share.
          *
-         * @param {?string} tagName
+         * @param {string|null} tagName
          */
         setContainerTagName: function( tagName ) {
           assert && assert( tagName === null || typeof tagName === 'string', 'invalid tagName argument: ' + tagName );
@@ -805,7 +805,7 @@ define( function( require ) {
         /**
          * Get the tag name for the container parent element.
          *
-         * @returns {?string}
+         * @returns {string|null}
          */
         getContainerTagName: function() {
           return this._containerTagName;
@@ -821,7 +821,7 @@ define( function( require ) {
          * The DOM setter is chosen based on if the label passes the `usesExclusivelyFormattingTags`.
          *
          * Passing a null label value will not clear the whole label sibling, just the inner content of the DOM Element.
-         * @param {?string} label
+         * @param {string|null} label
          */
         setLabelContent: function( label ) {
           assert && assert( label === null || typeof label === 'string' );
@@ -855,7 +855,7 @@ define( function( require ) {
         /**
          * Get the content for this Node's label sibling DOM element.
          *
-         * @returns {?string}
+         * @returns {string|null}
          */
         getLabelContent: function() {
           return this._labelContent;
@@ -867,7 +867,7 @@ define( function( require ) {
          * unless content is html which uses exclusively formatting tags. A node with inner content cannot
          * have accessible descendants because this content will override the the HTML of descendants of this node.
          *
-         * @param {?string} content
+         * @param {string|null} content
          * @public
          */
         setInnerContent: function( content ) {
@@ -896,7 +896,7 @@ define( function( require ) {
         /**
          * Get the inner content, the string that is the innerHTML or innerText for the node's primary sibling element.
          *
-         * @return {?string}
+         * @return {string|null}
          * @public
          */
         getInnerContent: function() {
@@ -909,7 +909,7 @@ define( function( require ) {
          * innerHTML and textContent. If a description element does not exist yet, a default
          * DEFAULT_LABEL_TAG_NAME will be assigned to the descriptionTagName.
          *
-         * @param {?string} descriptionContent
+         * @param {string|null} descriptionContent
          */
         setDescriptionContent: function( descriptionContent ) {
           assert && assert( descriptionContent === null || typeof descriptionContent === 'string' );
@@ -933,7 +933,7 @@ define( function( require ) {
         /**
          * Get the content for this Node's description sibling DOM Element.
          *
-         * @returns {?string}
+         * @returns {string|null}
          */
         getDescriptionContent: function() {
           return this._descriptionContent;
@@ -946,7 +946,7 @@ define( function( require ) {
          * element in the DOM.
          * @public
          *
-         * @param {?string} ariaRole - role for the element, see
+         * @param {string|null} ariaRole - role for the element, see
          *                            https://www.w3.org/TR/html-aria/#allowed-aria-roles-states-and-properties
          *                            for a list of roles, states, and properties.
          */
@@ -963,7 +963,7 @@ define( function( require ) {
          * Get the ARIA role representing this node.
          * @public
          *
-         * @returns {?string}
+         * @returns {string|null}
          */
         getAriaRole: function() {
           return this._ariaRole;
@@ -976,7 +976,7 @@ define( function( require ) {
          * replace it in the DOM.
          * @public
          *
-         * @param {?string} ariaRole - role for the element, see
+         * @param {string|null} ariaRole - role for the element, see
          *                            https://www.w3.org/TR/html-aria/#allowed-aria-roles-states-and-properties
          *                            for a lsit of roles, states, and properties.
          */
@@ -990,7 +990,7 @@ define( function( require ) {
         /**
          * Get the ARIA role assigned to the container parent element.
          * @public
-         * @returns {?string}
+         * @returns {string|null}
          */
         getContainerAriaRole: function() {
           return this._containerAriaRole;
@@ -1007,7 +1007,7 @@ define( function( require ) {
          * or for SVG:
          * { tagName: 'svg', accessibleNamespace: 'http://www.w3.org/2000/svg' }
          *
-         * @param {?string} accessibleNamespace - Null indicates no namespace.
+         * @param {string|null} accessibleNamespace - Null indicates no namespace.
          * @returns {Node} - For chaining
          */
         setAccessibleNamespace: function( accessibleNamespace ) {
@@ -1027,7 +1027,7 @@ define( function( require ) {
          * Returns the accessible namespace (see setAccessibleNamespace for more information).
          * @public
          *
-         * @returns {?string}
+         * @returns {string|null}
          */
         getAccessibleNamespace: function() {
           return this._accessibleNamespace;
@@ -1040,7 +1040,7 @@ define( function( require ) {
          * virtual cursor. This is one way to set a DOM Element's Accessible Name.
          * @public
          *
-         * @param {?string} ariaLabel - the text for the aria label attribute
+         * @param {string|null} ariaLabel - the text for the aria label attribute
          */
         setAriaLabel: function( ariaLabel ) {
           assert && assert( ariaLabel === null || typeof ariaLabel === 'string' );
@@ -1054,7 +1054,7 @@ define( function( require ) {
         /**
          * Get the value of the aria-label attribute for this node's DOM element.
          *
-         * @returns {?string}
+         * @returns {string|null}
          */
         getAriaLabel: function() {
           return this._ariaLabel;
@@ -1402,7 +1402,7 @@ define( function( require ) {
          * See https://github.com/phetsims/scenery-phet/issues/365#issuecomment-381302583 for more information on the
          * decisions and design for this feature.
          *
-         * @param {?Array.<?Node>} accessibleOrder
+         * @param {Array.<Node|null>|null} accessibleOrder
          */
         setAccessibleOrder: function( accessibleOrder ) {
           assert && assert( Array.isArray( accessibleOrder ) || accessibleOrder === null,
@@ -1434,7 +1434,7 @@ define( function( require ) {
          * Returns the accessible (focus) order for this node.
          * @public
          *
-         * @returns {?Array.<?Node>}
+         * @returns {Array.<Node|null>|null}
          */
         getAccessibleOrder: function() {
           return this._accessibleOrder;
@@ -1461,7 +1461,7 @@ define( function( require ) {
          * Returns our "accessible parent" if available: the node that specifies this node in its accessibleOrder.
          * @public
          *
-         * @returns {?Node}
+         * @returns {Node|null}
          */
         getAccessibleParent: function() {
           return this._accessibleParent;
@@ -1649,7 +1649,7 @@ define( function( require ) {
          * @returns {Array.<Object>} - Returns objects with: {
          *   attribute: {string} // the name of the attribute
          *   value: {*} // the value of the attribute
-         *   namespace: {?string} // the (optional) namespace of the attribute
+         *   namespace: {string|null} // the (optional) namespace of the attribute
          * }
          */
         getAccessibleAttributes: function() {
@@ -1668,7 +1668,7 @@ define( function( require ) {
          */
         setAccessibleAttribute: function( attribute, value, options ) {
           options = _.extend( {
-            // {?string} - If non-null, will set the attribute with the specified namespace. This can be required
+            // {string|null} - If non-null, will set the attribute with the specified namespace. This can be required
             // for setting certain attributes (e.g. MathML).
             namespace: null
           }, options );
@@ -1709,7 +1709,7 @@ define( function( require ) {
 
           options = _.extend( {
 
-            // {?string} - If non-null, will remove the attribute with the specified namespace. This can be required
+            // {string|null} - If non-null, will remove the attribute with the specified namespace. This can be required
             // for removing certain attributes (e.g. MathML).
             namespace: null
           }, options );
@@ -1900,7 +1900,7 @@ define( function( require ) {
          * API
          * @public (scenery-internal)
          *
-         * @param {?Object} accessibleContent
+         * @param {null|Object} accessibleContent
          */
         setAccessibleContent: function( accessibleContent ) {
           assert && assert( accessibleContent === null || accessibleContent instanceof Object );
@@ -1921,7 +1921,7 @@ define( function( require ) {
          * @public (scenery-internal)
          *
          *
-         * @returns {?Object}
+         * @returns {null|Object}
          */
         getAccessibleContent: function() {
           return this._accessibleContent;
