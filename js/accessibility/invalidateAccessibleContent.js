@@ -70,7 +70,7 @@ define( function( require ) {
           var uniqueId = accessibleInstance.trail.getUniqueId();
 
           // create the base DOM element representing this accessible instance
-          var primarySibling = createElement( self._tagName, self._focusable, {
+          var primarySibling = createElement( self._tagName, self.focusable, {
             namespace: self._accessibleNamespace
           } );
           primarySibling.id = uniqueId;

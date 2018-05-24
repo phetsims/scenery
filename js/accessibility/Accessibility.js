@@ -1785,7 +1785,7 @@ define( function( require ) {
             return this._focusableOverride;
           }
           else {
-            return AccessibilityUtil.tagIsFocusable( this._tagName );
+            return AccessibilityUtil.tagIsDefaultFocusable( this._tagName );
           }
         },
         get focusable() { return this.isFocusable(); },

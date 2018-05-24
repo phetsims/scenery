@@ -29,7 +29,9 @@ define( function( require ) {
   var OUTPUT_TAG = 'OUTPUT';
   var DIV_TAG = 'DIV';
   var A_TAG = 'A';
+  var AREA_TAG = 'A';
   var P_TAG = 'P';
+  var IFRAME_TAG = 'IFRAME';
 
   // tag names with special behavior
   var BOLD_TAG = 'B';
@@ -43,9 +45,8 @@ define( function( require ) {
   var SUB_TAG = 'SUB';
   var SUP_TAG = 'SUP';
 
-  // These browser types are the definition of default focusable elements, see https://stackoverflow.com/questions/1599660/which-html-elements-can-receive-focus
-  var FOCUSABLE_TYPES = [ 'HTMLAnchorElement', 'HTMLAreaElement', 'HTMLInputElement', 'HTMLSelectElement',
-    'HTMLTextAreaElement', 'HTMLButtonElement', 'HTMLIFrameElement' ];
+  // These browser tags are a definition of default focusable elements, converted from Javascript types, see https://stackoverflow.com/questions/1599660/which-html-elements-can-receive-focus
+  var DEFAULT_FOCUSABLE_TAGS = [ A_TAG, AREA_TAG, INPUT_TAG, SELECT_TAG, TEXTAREA_TAG, BUTTON_TAG, IFRAME_TAG ];
 
   // collection of tags that are used for formatting text
   var FORMATTING_TAGS = [ BOLD_TAG, STRONG_TAG, I_TAG, EM_TAG, MARK_TAG, SMALL_TAG, DEL_TAG, INS_TAG, SUB_TAG, SUP_TAG ];
@@ -128,7 +129,7 @@ define( function( require ) {
       var nextElement = linearDOM[ nextIndex ];
       nextIndex += delta;
 
-      if ( isFocusable( nextElement ) ) {
+      if ( isElementFocusable( nextElement ) ) {
         return nextElement;
       }
     }
@@ -138,13 +139,13 @@ define( function( require ) {
   }
 
   /**
-   * Returns true if the element is focusable. Assumes that all focusable  elements have tabIndex > 0, which
+   * Returns true if the element is focusable. Assumes that all focusable  elements have tabIndex >= 0, which
    * is only true for elements of the Parallel DOM.
    *
-   * @param {HTMLElemnt} domElement
+   * @param {HTMLElement} domElement
    * @return {boolean}
    */
-  function isFocusable( domElement ) {
+  function isElementFocusable( domElement ) {
 
     // continue to next element if this one is meant to be hidden
     if ( isElementHidden( domElement ) ) {
@@ -157,9 +158,7 @@ define( function( require ) {
     }
 
     // if tabindex is greater than -1, the element is focusable so break
-    if ( domElement.tabIndex > -1 ) {
-      return true;
-    }
+    return domElement.tabIndex >= 0;
   }
 
   /**
@@ -225,7 +224,7 @@ define( function( require ) {
       var linearDOM = getLinearDOMElements( document.body );
       var focusableElements = [];
       for ( var i = 0; i < linearDOM.length; i++ ) {
-        isFocusable( linearDOM[ i ] ) && focusableElements.push( linearDOM[ i ] );
+        isElementFocusable( linearDOM[ i ] ) && focusableElements.push( linearDOM[ i ] );
       }
 
       return focusableElements[ new Random().nextInt( focusableElements.length ) ];
@@ -347,6 +346,8 @@ define( function( require ) {
 
     /**
      * Given a tagName, test if the element will be focuable by default by the browser.
+     * Different from isElementFocusable, because this only looks at tags that the browser will automatically put
+     * a >=0 tab index on.
      *
      * NOTE: Uses a set of browser types as the definition of default focusable elements,
      * see https://stackoverflow.com/questions/1599660/which-html-elements-can-receive-focus
@@ -354,19 +355,8 @@ define( function( require ) {
      * @param tagName
      * @returns {boolean}
      */
-    tagIsFocusable: function( tagName ) {
-      var element = document.createElement( tagName );
-
-      var focusable = false;
-
-      // iterate through types to figure out if our element is focusable by the browser.
-      FOCUSABLE_TYPES.forEach( function( focusableType ) {
-        if ( element instanceof window[ focusableType ] ) {
-          focusable = true;
-        }
-      } );
-
-      return focusable;
+    tagIsDefaultFocusable: function( tagName ) {
+      return _.includes( DEFAULT_FOCUSABLE_TAGS, tagName.toUpperCase() );
     },
 
     /**

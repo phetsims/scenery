@@ -543,6 +543,8 @@ define( function( require ) {
     var e = new Node( { tagName: 'div', focusable: true, focusHighlight: 'invisible' } );
     rootNode.children = [ a, b, c, d ];
 
+    assert.ok( a.focusable, 'should be focusable' );
+
     // get dom elements from the body
     var rootElement = getPrimarySiblingElementByNode( rootNode );
     var aElement = getPrimarySiblingElementByNode( a );
@@ -942,6 +944,18 @@ define( function( require ) {
 
     assert.ok( a.focusable === true, 'tagName option should not change focusable value' );
     assert.ok( getPrimarySiblingElementByNode( a ).tabIndex === 0, 'tagName option should not change tab index on primary sibling' );
+
+
+    a.focusable = false;
+    assert.ok( getPrimarySiblingElementByNode( a ).tabIndex === -1, 'set focusable false' );
+
+    var b = new Node( { tagName: 'p' } );
+    rootNode.addChild( b );
+
+    b.focusable = true;
+
+    assert.ok( b.focusable, 'set focusable as setter' );
+    assert.ok( getPrimarySiblingElementByNode( b ).tabIndex === 0, 'set focusable as setter' );
   } );
 
   QUnit.test( 'append siblings/appendLabel/appendDescription setters', function( assert ) {
