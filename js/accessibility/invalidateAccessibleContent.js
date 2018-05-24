@@ -24,7 +24,6 @@ define( function( require ) {
 
   // constants
   var A_TAG = AccessibilityUtil.TAGS.A;
-  var FORM_ELEMENTS = AccessibilityUtil.FORM_ELEMENTS;
   var INPUT_TAG = AccessibilityUtil.TAGS.INPUT;
   var LABEL_TAG = AccessibilityUtil.TAGS.LABEL;
 
