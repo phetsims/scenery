@@ -113,12 +113,6 @@ define( function( require ) {
           } );
           accessibleInstance.peer = accessiblePeer;
 
-          // restore whether or not this element is focusable
-          if ( self._focusable === null ) {
-            self._focusable = _.includes( FORM_ELEMENTS, self._tagName.toUpperCase() );
-          }
-          self.setFocusable( self._focusable );
-
           // set the accessible label now that the element has been recreated again, but not if the tagName
           // has been cleared out
           if ( self._labelContent && self._labelTagName !== null ) {
@@ -220,14 +214,11 @@ define( function( require ) {
     }, options );
 
     var domElement = options.namespace
-      ? document.createElementNS( options.namespace, tagName )
-      : document.createElement( tagName );
+                     ? document.createElementNS( options.namespace, tagName )
+                     : document.createElement( tagName );
     var upperCaseTagName = tagName.toUpperCase();
 
-    // give all non-focusable elements a tabindex of -1 for browser consistency
-    if ( !_.includes( FORM_ELEMENTS, upperCaseTagName ) && !focusable ) {
-      domElement.tabIndex = -1;
-    }
+    domElement.tabIndex = focusable ? 0 : -1;
 
     // Safari requires that certain input elements have dimension, otherwise it will not be keyboard accessible
     if ( _.includes( ELEMENTS_REQUIRE_WIDTH, upperCaseTagName ) ) {

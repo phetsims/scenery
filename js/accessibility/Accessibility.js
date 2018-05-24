@@ -338,11 +338,12 @@ define( function( require ) {
           // element.  See ariaDescribessNodoe for more information
           this._ariaDescriptionContent = AccessiblePeer.PRIMARY_SIBLING;
 
-          // @private {?boolean} - whether or not this node's DOM element can receive focus from tab navigation.
-          // Sets the tabIndex attribute on the node's DOM element.  Setting to false will not remove the node's DOM
-          // from the document, but will ensure that it cannot receive focus by pressing 'tab'.  Several HTMLElements
-          // (such as HTML form elements) can be focusable by default, without setting this property.
-          this._focusable = null;
+          // @private {?boolean} - whether or not this node's DOM element has been explicitely set to receive focus from
+          // tab navigation. Sets the tabIndex attribute on the node's DOM element. Setting to false will not remove the
+          // node's DOM from the document, but will ensure that it cannot receive focus by pressing 'tab'.  Several
+          // HTMLElements (such as HTML form elements) can be focusable by default, without setting this property. The
+          // native HTML function from these form elements can be overridden with this property.
+          this._focusableOverride = null;
 
           // @private {?Shape|Node|string.<'invisible'>} - the focus highlight that will surround this node when it
           // is focused.  By default, the focus highlight will be a pink rectangle that surrounds the Node's local
@@ -537,7 +538,7 @@ define( function( require ) {
 
             // when accessibility is widely used, this assertion can be added back in
             // assert && assert( this._accessibleInstances.length > 0, 'there must be accessible content for the node to receive focus' );
-            assert && assert( this._focusable, 'trying to set focus on a node that is not focusable' );
+            assert && assert( this.focusable, 'trying to set focus on a node that is not focusable' );
             assert && assert( this._accessibleVisible, 'trying to set focus on a node with invisible accessible content' );
             assert && assert( this._accessibleInstances.length === 1, 'focus() unsupported for Nodes using DAG, accessible content is not unique' );
 
@@ -1755,33 +1756,39 @@ define( function( require ) {
          * assistive technology.
          * @public
          *
-         * @param {boolean} isFocusable
+         * @param {?boolean} focusable - null to use the default browser focus for the primary element
          */
-        setFocusable: function( isFocusable ) {
-          assert && assert( typeof isFocusable === 'boolean' );
+        setFocusable: function( focusable ) {
+          assert && assert( focusable === null || typeof focusable === 'boolean' );
 
-          this._focusable = isFocusable;
+          var self = this;
+
+          this._focusableOverride = focusable;
 
           this.updateAccessiblePeers( function( accessiblePeer ) {
             if ( accessiblePeer.primarySibling ) {
-              accessiblePeer.primarySibling.tabIndex = isFocusable ? 0 : -1;
+              accessiblePeer.primarySibling.tabIndex = self.focusable ? 0 : -1;
             }
           } );
         },
         set focusable( isFocusable ) { this.setFocusable( isFocusable ); },
 
         /**
-         * Get whether or not the node is focusable.
+         * Get whether or not the node is focusable. Use the focusOverride, and then default to browser defined
+         * focusable elements.
          * @public
-         *
-         * REVIEW: Usually boolean getters would be called something like isFocusable().
          *
          * @returns {boolean}
          */
-        getFocusable: function() {
-          return this._focusable;
+        isFocusable: function() {
+          if ( this._focusableOverride !== null ) {
+            return this._focusableOverride;
+          }
+          else {
+            return AccessibilityUtil.tagIsFocusable( this._tagName );
+          }
         },
-        get focusable() { return this.getFocusable(); },
+        get focusable() { return this.isFocusable(); },
 
         /***********************************************************************************************************/
         // SCENERY-INTERNAL AND PRIVATE METHODS

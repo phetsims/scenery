@@ -43,6 +43,10 @@ define( function( require ) {
   var SUB_TAG = 'SUB';
   var SUP_TAG = 'SUP';
 
+  // These browser types are the definition of default focusable elements, see https://stackoverflow.com/questions/1599660/which-html-elements-can-receive-focus
+  var FOCUSABLE_TYPES = [ 'HTMLAnchorElement', 'HTMLAreaElement', 'HTMLInputElement', 'HTMLSelectElement',
+    'HTMLTextAreaElement', 'HTMLButtonElement', 'HTMLIFrameElement' ];
+
   // collection of tags that are used for formatting text
   var FORMATTING_TAGS = [ BOLD_TAG, STRONG_TAG, I_TAG, EM_TAG, MARK_TAG, SMALL_TAG, DEL_TAG, INS_TAG, SUB_TAG, SUP_TAG ];
 
@@ -339,6 +343,30 @@ define( function( require ) {
           domElement.removeEventListener( event, accessibleInput[ event ] );
         }
       }
+    },
+
+    /**
+     * Given a tagName, test if the element will be focuable by default by the browser.
+     *
+     * NOTE: Uses a set of browser types as the definition of default focusable elements,
+     * see https://stackoverflow.com/questions/1599660/which-html-elements-can-receive-focus
+     *
+     * @param tagName
+     * @returns {boolean}
+     */
+    tagIsFocusable: function( tagName ) {
+      var element = document.createElement( tagName );
+
+      var focusable = false;
+
+      // iterate through types to figure out if our element is focusable by the browser.
+      FOCUSABLE_TYPES.forEach( function( focusableType ) {
+        if ( element instanceof window[ focusableType ] ) {
+          focusable = true;
+        }
+      } );
+
+      return focusable;
     },
 
     /**
