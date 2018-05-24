@@ -123,6 +123,8 @@ define( function( require ) {
         var self = this;
         document.body.addEventListener( 'keydown', function( event ) {
 
+          scenery.Display.userGestureEmitter.emit();
+
           // if an accessible node was being interacted with a mouse, or had focus when sim is made inactive, this node
           // should receive focus upon resuming keyboard navigation
           if ( self.display.pointerFocus || self.display.activeNode ) {
