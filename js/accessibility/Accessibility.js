@@ -1784,6 +1784,11 @@ define( function( require ) {
           if ( this._focusableOverride !== null ) {
             return this._focusableOverride;
           }
+
+          // if there isn't a tagName yet, then there isn't an element, so we aren't focusable. To support option order.
+          else if ( this._tagName === null ) {
+            return false;
+          }
           else {
             return AccessibilityUtil.tagIsDefaultFocusable( this._tagName );
           }
