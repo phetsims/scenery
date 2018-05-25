@@ -870,15 +870,8 @@ define( function( require ) {
 
           var self = this;
 
-          // guard against option order, but if there is a tagName, validate that it accepts inner content.
-          if ( this._tagName ) {
-            assert && assert( AccessibilityUtil.tagNameSupportsContent( this._tagName ),
-              'tagName: ' + this._tagName + ' does not support inner content' );
-          }
-
           this.updateAccessiblePeers( function( accessiblePeer ) {
-            assert && assert( accessiblePeer.accessibleInstance.children.length === 0, 'descendants exist with accessible content, innerContent cannot be used' );
-            AccessibilityUtil.setTextContent( accessiblePeer.primarySibling, self._innerContent );
+            accessiblePeer && accessiblePeer.setPrimarySiblingContent( self._innerContent );
           } );
         },
         set innerContent( content ) { this.setInnerContent( content ); },
@@ -904,6 +897,8 @@ define( function( require ) {
         setDescriptionContent: function( descriptionContent ) {
           assert && assert( descriptionContent === null || typeof descriptionContent === 'string' );
 
+          var self = this;
+
           this._descriptionContent = descriptionContent;
 
           // if there is no description element, assume that a paragraph element should be used
@@ -912,7 +907,7 @@ define( function( require ) {
           }
 
           this.updateAccessiblePeers( function( accessiblePeer ) {
-            AccessibilityUtil.setTextContent( accessiblePeer.descriptionSibling, descriptionContent );
+            accessiblePeer && accessiblePeer.setDescriptionSiblingContent( self._descriptionContent );
           } );
 
         },

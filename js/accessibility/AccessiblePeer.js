@@ -209,13 +209,38 @@ define( function( require ) {
      */
     setLabelSiblingContent: function( content, isLabelTag ) {
       assert && assert( this.labelSibling, 'must have a label sibling to set its content' );
-      assert && assert( content === null || typeof content === 'string' );
+      assert && assert( typeof content === 'string', 'incorrect label content type' );
       AccessibilityUtil.setTextContent( this.labelSibling, content );
 
       // if the label element happens to be a 'label', associate with 'for' attribute
       if ( isLabelTag ) {
         this.labelSibling.setAttribute( 'for', this.primarySibling.id );
       }
+    },
+    /**
+     * Responsible for setting the content for the description sibling
+     * @param {string} content - the content for the label sibling.
+     * the primary sibling.
+     */
+    setDescriptionSiblingContent: function( content ) {
+      assert && assert( this.descriptionSibling, 'must have a description sibling to set its content' );
+      assert && assert( typeof content === 'string', 'incorrect description content type' );
+      AccessibilityUtil.setTextContent( this.descriptionSibling, content );
+    },
+
+    /**
+     * Responsible for setting the content for the primary sibling
+     * @param {string} content - the content for the label sibling.
+     * the primary sibling.
+     */
+    setPrimarySiblingContent: function( content ) {
+      assert && assert( this.primarySibling, 'must have a primary sibling to set its content' );
+      assert && assert( typeof content === 'string', 'incorrect inner content type' );
+      assert && assert( this.accessibleInstance.children.length === 0, 'descendants exist with accessible content, innerContent cannot be used' );
+      assert && assert( AccessibilityUtil.tagNameSupportsContent( this.primarySibling.tagName ),
+        'tagName: ' + this._tagName + ' does not support inner content' );
+
+      AccessibilityUtil.setTextContent( this.primarySibling, content );
     }
 
   }, {

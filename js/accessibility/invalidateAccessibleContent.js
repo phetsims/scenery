@@ -120,8 +120,13 @@ define( function( require ) {
           }
 
           // restore the innerContent
-          if ( self._innerContent ) {
-            self.setInnerContent( self._innerContent );
+          if ( self._innerContent && self._descriptionTagName !== null ) {
+            accessiblePeer.setPrimarySiblingContent( self._innerContent );
+          }
+
+          // set the accessible description, but not if the tagName has been cleared out.
+          if ( self._descriptionContent && self._descriptionTagName !== null ) {
+            accessiblePeer.setDescriptionSiblingContent( self._descriptionContent );
           }
 
           // set if using aria-label
@@ -147,11 +152,6 @@ define( function( require ) {
             self.setAccessibleAttribute( attribute, value, {
               namespace: namespace
             } );
-          }
-
-          // set the accessible description, but not if the tagName has been cleared out.
-          if ( self._descriptionContent && self._descriptionTagName !== null ) {
-            self.setDescriptionContent( self._descriptionContent );
           }
 
           // if element is an input element, set input type
