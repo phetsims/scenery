@@ -624,7 +624,6 @@ define( function( require ) {
     d.tagName = 'span';
     assert.ok( rootDOMElement.children.length === 0, 'invalidate without addition' );
 
-    window.debug_freez = true;
     rootNode.accessibleContentDisplayed = true;
 
     // redefine because the dom element references above have become stale
