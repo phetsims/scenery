@@ -113,6 +113,9 @@ define( function( require ) {
       // @private {function} - The listeners added to the respective relativeNodes
       this.relativeListeners = [];
 
+      // @private {function|null} - Added to document.body for the keydown event. Only set if it was added.
+      this.globalKeyListener = null;
+
       if ( this.isRootInstance ) {
         var accessibilityContainer = document.createElement( 'div' );
 
@@ -121,7 +124,7 @@ define( function( require ) {
         this.peer = AccessiblePeer.createFromPool( this, accessibilityContainer );
 
         var self = this;
-        document.body.addEventListener( 'keydown', function( event ) {
+        this.globalKeyListener = function( event ) {
 
           scenery.Display.userGestureEmitter.emit();
 
@@ -154,7 +157,8 @@ define( function( require ) {
               }
             }
           }
-        } );
+        };
+        document.body.addEventListener( 'keydown', this.globalKeyListener );
       }
       else {
         this.peer = this.node.accessibleContent.createPeer( this );
@@ -485,6 +489,11 @@ define( function( require ) {
       // If we are the root accessible instance, we won't actually have a reference to a node.
       if ( this.node ) {
         this.node.removeAccessibleInstance( this );
+      }
+
+      if ( this.globalKeyListener ) {
+        document.body.removeEventListener( 'keydown', this.globalKeyListener );
+        this.globalKeyListener = null;
       }
 
       this.display = null;
