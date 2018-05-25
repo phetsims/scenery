@@ -214,7 +214,7 @@ define( function( require ) {
       };
       img.src = simpleRectangleDataURL;
     }, simpleRectangleDataURL,
-    0, testedRenderers, true // asynchronous
+    1.5, testedRenderers, true // asynchronous
   );
 
   multipleRendererTest( 'Color change after display',
@@ -882,7 +882,7 @@ define( function( require ) {
       };
       img.src = simpleRectangleDataURL;
     }, 'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAACgAAAAoCAYAAACM/rhtAAAAb0lEQVRYR+3VQQrAIAwEQP3/o1sKvVYWtwcP4zmBOMZkjsPPPLy+ocD2hQgSbAXafD1IMBC4gpjtkD96UIHb/G8iQYKNgF/c6D25BAkGAgZ1gLQMIUiwETCoGz2rrtUjSDAUsOpCqM+w4wXbCy7zb6TwHA3a1+y0AAAAAElFTkSuQmCC',
-    0, testedRenderers, true // asynchronous
+    1.5, testedRenderers, true // asynchronous
   );
 
   multipleRendererTest( 'Image changed after display',
@@ -912,7 +912,7 @@ define( function( require ) {
       };
       img1.src = simpleRectangleDataURL;
     }, redCenteredCircle,
-    0, testedRenderers, true // asynchronous
+    1.5, testedRenderers, true // asynchronous
   );
 
   multipleRendererTest( 'External image displayed before load, then after load',
