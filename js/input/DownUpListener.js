@@ -56,27 +56,40 @@ define( function( require ) {
     this.downListener = {
       // mouse/touch up
       up: function( event ) {
-        sceneryLog && sceneryLog.InputEvent && sceneryLog.InputEvent( 'DownUpListener (pointer) up for ' + self.downTrail.toString() );
+        sceneryLog && sceneryLog.InputListener && sceneryLog.InputListener( 'DownUpListener (pointer) up for ' + self.downTrail.toString() );
+        sceneryLog && sceneryLog.InputListener && sceneryLog.push();
+
         assert && assert( event.pointer === self.pointer );
         if ( !( event.pointer instanceof Mouse ) || event.domEvent.button === self.options.mouseButton ) {
           self.buttonUp( event );
         }
+
+        sceneryLog && sceneryLog.InputListener && sceneryLog.pop();
       },
 
       // touch cancel
       cancel: function( event ) {
-        sceneryLog && sceneryLog.InputEvent && sceneryLog.InputEvent( 'DownUpListener (pointer) cancel for ' + self.downTrail.toString() );
+        sceneryLog && sceneryLog.InputListener && sceneryLog.InputListener( 'DownUpListener (pointer) cancel for ' + self.downTrail.toString() );
+        sceneryLog && sceneryLog.InputListener && sceneryLog.push();
+
         assert && assert( event.pointer === self.pointer );
         self.buttonUp( event );
+
+        sceneryLog && sceneryLog.InputListener && sceneryLog.pop();
       },
 
       // When the enter or space key is released, trigger an up event
       // TODO: Only trigger this if the enter/space key went down for this node
       keyup: function( event ) {
+        sceneryLog && sceneryLog.InputListener && sceneryLog.InputListener( 'DownUpListener (pointer) keyup for ' + self.downTrail.toString() );
+        sceneryLog && sceneryLog.InputListener && sceneryLog.push();
+
         var keyCode = event.domEvent.keyCode;
         if ( keyCode === KeyboardUtil.KEY_ENTER || keyCode === KeyboardUtil.KEY_SPACE ) {
           self.buttonUp( event );
         }
+
+        sceneryLog && sceneryLog.InputListener && sceneryLog.pop();
       }
     };
   }
@@ -91,6 +104,9 @@ define( function( require ) {
       // ignore other mouse buttons
       if ( event.pointer instanceof Mouse && event.domEvent.button !== this.options.mouseButton ) { return; }
 
+      sceneryLog && sceneryLog.InputListener && sceneryLog.InputListener( 'DownUpListener buttonDown' );
+      sceneryLog && sceneryLog.InputListener && sceneryLog.push();
+
       // add our listener so we catch the up wherever we are
       event.pointer.addInputListener( this.downListener );
 
@@ -99,13 +115,17 @@ define( function( require ) {
       this.downTrail = event.trail.subtrailTo( event.currentTarget, false );
       this.pointer = event.pointer;
 
-      sceneryLog && sceneryLog.InputEvent && sceneryLog.InputEvent( 'DownUpListener buttonDown for ' + this.downTrail.toString() );
       if ( this.options.down ) {
         this.options.down( event, this.downTrail );
       }
+
+      sceneryLog && sceneryLog.InputListener && sceneryLog.pop();
     },
 
     buttonUp: function( event ) {
+      sceneryLog && sceneryLog.InputListener && sceneryLog.InputListener( 'DownUpListener buttonUp' );
+      sceneryLog && sceneryLog.InputListener && sceneryLog.push();
+
       this.isDown = false;
       this.pointer.removeInputListener( this.downListener );
 
@@ -124,11 +144,13 @@ define( function( require ) {
           this.options.upOutside( event, this.downTrail );
         }
       }
-      sceneryLog && sceneryLog.InputEvent && sceneryLog.InputEvent( 'DownUpListener buttonUp for ' + this.downTrail.toString() );
+
       if ( this.options.up ) {
         this.options.up( event, this.downTrail );
       }
       event.currentTarget = currentTargetSave; // be polite to other listeners, restore currentTarget
+
+      sceneryLog && sceneryLog.InputListener && sceneryLog.pop();
     },
 
     /*---------------------------------------------------------------------------*
@@ -143,6 +165,9 @@ define( function( require ) {
     // Called when input is interrupted on this listener, see https://github.com/phetsims/scenery/issues/218
     interrupt: function() {
       if ( this.isDown ) {
+        sceneryLog && sceneryLog.InputListener && sceneryLog.InputListener( 'DownUpListener interrupt' );
+        sceneryLog && sceneryLog.InputListener && sceneryLog.push();
+
         this.interrupted = true;
 
         // We create a synthetic event here, as there is no available event here.
@@ -154,15 +179,22 @@ define( function( require ) {
         } );
 
         this.interrupted = false;
+
+        sceneryLog && sceneryLog.InputListener && sceneryLog.pop();
       }
     },
 
     // When enter/space pressed for this node, trigger a button down
     keydown: function( event ) {
+      sceneryLog && sceneryLog.InputListener && sceneryLog.InputListener( 'DownUpListener keydown' );
+      sceneryLog && sceneryLog.InputListener && sceneryLog.push();
+
       var keyCode = event.domEvent.keyCode;
       if ( keyCode === KeyboardUtil.KEY_ENTER || keyCode === KeyboardUtil.KEY_SPACE ) {
         this.buttonDown( event );
       }
+
+      sceneryLog && sceneryLog.InputListener && sceneryLog.pop();
     }
   } );
 

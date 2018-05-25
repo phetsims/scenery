@@ -112,6 +112,9 @@ define( function( require ) {
       up: function( event ) {
         if ( !self.dragging ) { return; }
 
+        sceneryLog && sceneryLog.InputListener && sceneryLog.InputListener( 'SimpleDragHandler (pointer) up for ' + self.trail.toString() );
+        sceneryLog && sceneryLog.InputListener && sceneryLog.push();
+
         assert && assert( event.pointer === self.pointer, 'Wrong pointer in up' );
         if ( !( event.pointer instanceof Mouse ) || event.domEvent.button === self.mouseButton ) {
           var saveCurrentTarget = event.currentTarget;
@@ -119,11 +122,16 @@ define( function( require ) {
           self.endDrag( event );
           event.currentTarget = saveCurrentTarget; // be polite to other listeners, restore currentTarget
         }
+
+        sceneryLog && sceneryLog.InputListener && sceneryLog.pop();
       },
 
       // touch cancel
       cancel: function( event ) {
         if ( !self.dragging ) { return; }
+
+        sceneryLog && sceneryLog.InputListener && sceneryLog.InputListener( 'SimpleDragHandler (pointer) cancel for ' + self.trail.toString() );
+        sceneryLog && sceneryLog.InputListener && sceneryLog.push();
 
         assert && assert( event.pointer === self.pointer, 'Wrong pointer in cancel' );
 
@@ -136,6 +144,8 @@ define( function( require ) {
         if ( !self.transform ) {
           self.node.setMatrix( self.startTransformMatrix );
         }
+
+        sceneryLog && sceneryLog.InputListener && sceneryLog.pop();
       },
 
       // mouse/touch move
@@ -150,6 +160,9 @@ define( function( require ) {
         if ( globalDelta.magnitudeSquared() === 0 ) {
           return;
         }
+
+        sceneryLog && sceneryLog.InputListener && sceneryLog.InputListener( 'SimpleDragHandler (pointer) move for ' + self.trail.toString() );
+        sceneryLog && sceneryLog.InputListener && sceneryLog.push();
 
         var delta = self.transform.inverseDelta2( globalDelta );
 
@@ -180,6 +193,8 @@ define( function( require ) {
           event.currentTarget = saveCurrentTarget; // be polite to other listeners, restore currentTarget
         }
         self.endEvent();
+
+        sceneryLog && sceneryLog.InputListener && sceneryLog.pop();
       }
     };
     PhetioObject.call( this, options );
@@ -199,6 +214,9 @@ define( function( require ) {
     },
     startDrag: function( event ) {
       if ( this.dragging ) { return; }
+
+      sceneryLog && sceneryLog.InputListener && sceneryLog.InputListener( 'SimpleDragHandler startDrag' );
+      sceneryLog && sceneryLog.InputListener && sceneryLog.push();
 
       // set a flag on the pointer so it won't pick up other nodes
       event.pointer.dragging = true;
@@ -224,10 +242,15 @@ define( function( require ) {
         this.options.start.call( null, event, this.trail );
       }
       this.endEvent();
+
+      sceneryLog && sceneryLog.InputListener && sceneryLog.pop();
     },
 
     endDrag: function( event ) {
       if ( !this.dragging ) { return; }
+
+      sceneryLog && sceneryLog.InputListener && sceneryLog.InputListener( 'SimpleDragHandler endDrag' );
+      sceneryLog && sceneryLog.InputListener && sceneryLog.push();
 
       this.pointer.dragging = false;
       this.pointer.cursor = null;
@@ -247,11 +270,16 @@ define( function( require ) {
 
       // release our reference
       this.pointer = null;
+
+      sceneryLog && sceneryLog.InputListener && sceneryLog.pop();
     },
 
     // Called when input is interrupted on this listener, see https://github.com/phetsims/scenery/issues/218
     interrupt: function() {
       if ( this.dragging ) {
+        sceneryLog && sceneryLog.InputListener && sceneryLog.InputListener( 'SimpleDragHandler interrupt' );
+        sceneryLog && sceneryLog.InputListener && sceneryLog.push();
+
         this.interrupted = true;
 
         if ( this.pointer instanceof Touch ) {
@@ -265,6 +293,8 @@ define( function( require ) {
         } );
 
         this.interrupted = false;
+
+        sceneryLog && sceneryLog.InputListener && sceneryLog.pop();
       }
     },
 
@@ -317,6 +347,9 @@ define( function( require ) {
      * @public
      */
     dispose: function() {
+      sceneryLog && sceneryLog.InputListener && sceneryLog.InputListener( 'SimpleDragHandler dispose' );
+      sceneryLog && sceneryLog.InputListener && sceneryLog.push();
+
       if ( this.dragging ) {
         this.pointer.dragging = false;
         this.pointer.cursor = null;
@@ -324,6 +357,8 @@ define( function( require ) {
       }
       this.isDraggingProperty.dispose();
       PhetioObject.prototype.dispose.call( this );
+
+      sceneryLog && sceneryLog.InputListener && sceneryLog.pop();
     }
   }, {
 

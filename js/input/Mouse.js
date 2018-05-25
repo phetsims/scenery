@@ -1,6 +1,5 @@
 // Copyright 2013-2016, University of Colorado Boulder
 
-
 /**
  * Tracks the mouse state
  *
@@ -19,6 +18,7 @@ define( function( require ) {
   function Mouse() {
     Pointer.call( this, null, false );
 
+    // @deprecated, see https://github.com/phetsims/scenery/issues/803
     this.leftDown = false;
     this.middleDown = false;
     this.rightDown = false;
@@ -26,6 +26,8 @@ define( function( require ) {
     // mouse wheel delta and mode for the last event, see https://developer.mozilla.org/en-US/docs/Web/Events/wheel
     this.wheelDelta = new Vector3();
     this.wheelDeltaMode = 0; // 0: pixels, 1: lines, 2: pages
+
+    sceneryLog && sceneryLog.Pointer && sceneryLog.Pointer( 'Created ' + this.toString() );
   }
 
   scenery.register( 'Mouse', Mouse );

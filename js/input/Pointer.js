@@ -125,6 +125,9 @@ define( function( require ) {
      * @param {boolean} [attach]
      */
     addInputListener: function( listener, attach ) {
+      sceneryLog && sceneryLog.Pointer && sceneryLog.Pointer( 'addInputListener to ' + this.toString() + ' attach:' + attach );
+      sceneryLog && sceneryLog.Pointer && sceneryLog.push();
+
       assert && assert( listener, 'A listener must be provided' );
       assert && assert( attach === undefined || typeof attach === 'boolean',
         'If provided, the attach parameter should be a boolean value' );
@@ -137,6 +140,8 @@ define( function( require ) {
       if ( attach ) {
         this.attach( listener );
       }
+
+      sceneryLog && sceneryLog.Pointer && sceneryLog.pop();
     },
 
     /**
@@ -146,6 +151,9 @@ define( function( require ) {
      * @param {Object} listener - See top-level documentation for description of the listener API
      */
     removeInputListener: function( listener ) {
+      sceneryLog && sceneryLog.Pointer && sceneryLog.Pointer( 'removeInputListener to ' + this.toString() );
+      sceneryLog && sceneryLog.Pointer && sceneryLog.push();
+
       assert && assert( listener, 'A listener must be provided' );
 
       var index = _.indexOf( this._listeners, listener );
@@ -157,6 +165,8 @@ define( function( require ) {
       }
 
       this._listeners.splice( index, 1 );
+
+      sceneryLog && sceneryLog.Pointer && sceneryLog.pop();
     },
 
     /**
@@ -226,6 +236,8 @@ define( function( require ) {
      * @param {Object} listener
      */
     attach: function( listener ) {
+      sceneryLog && sceneryLog.Pointer && sceneryLog.Pointer( 'Attaching to ' + this.toString() );
+
       assert && assert( !this.isAttached(), 'Attempted to attach to an already attached pointer' );
 
       this.attachedProperty.value = true;
@@ -239,6 +251,8 @@ define( function( require ) {
      * @param {Object} listener
      */
     detach: function( listener ) {
+      sceneryLog && sceneryLog.Pointer && sceneryLog.Pointer( 'Detaching from ' + this.toString() );
+
       assert && assert( this.isAttached(), 'Cannot detach a listener if one is not attached' );
       assert && assert( this._attachedListener === listener, 'Cannot detach a different listener' );
 
@@ -255,6 +269,17 @@ define( function( require ) {
      */
     hasPointChanged: function( point ) {
       return this.point !== point && ( !point || !this.point || !this.point.equals( point ) );
+    },
+
+    /**
+     * Releases references so it can be garbage collected.
+     * @public
+     */
+    dispose: function() {
+      sceneryLog && sceneryLog.Pointer && sceneryLog.Pointer( 'Disposing ' + this.toString() );
+
+      assert && assert( this._attachedListener === null, 'Attached listeners should be cleared before pointer disposal' );
+      assert && assert( this._listeners.length === 0, 'Should not have listeners when a pointer is disposed' );
     }
   } );
 

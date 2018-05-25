@@ -20,6 +20,8 @@ define( function( require ) {
     Pointer.call( this, point, true ); // true: touches always start in the down state
 
     this.id = id;
+
+    sceneryLog && sceneryLog.Pointer && sceneryLog.Pointer( 'Created ' + this.toString() );
   }
 
   scenery.register( 'Touch', Touch );
