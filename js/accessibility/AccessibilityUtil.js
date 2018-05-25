@@ -45,7 +45,8 @@ define( function( require ) {
   var SUB_TAG = 'SUB';
   var SUP_TAG = 'SUP';
 
-  // These browser tags are a definition of default focusable elements, converted from Javascript types, see https://stackoverflow.com/questions/1599660/which-html-elements-can-receive-focus
+  // These browser tags are a definition of default focusable elements, converted from Javascript types,
+  // see https://stackoverflow.com/questions/1599660/which-html-elements-can-receive-focus
   var DEFAULT_FOCUSABLE_TAGS = [ A_TAG, AREA_TAG, INPUT_TAG, SELECT_TAG, TEXTAREA_TAG, BUTTON_TAG, IFRAME_TAG ];
 
   // collection of tags that are used for formatting text
