@@ -837,12 +837,8 @@ define( function( require ) {
 
           this.updateAccessiblePeers( function( accessiblePeer ) {
             if ( accessiblePeer.labelSibling ) {
-              AccessibilityUtil.setTextContent( accessiblePeer.labelSibling, self._labelContent );
-
-              // if the label element happens to be a 'label', associate with 'for' attribute
-              if ( self._labelTagName.toUpperCase() === LABEL_TAG ) {
-                accessiblePeer.labelSibling.setAttribute( 'for', accessiblePeer.primarySibling.id );
-              }
+              var isLabelTag = self._labelTagName.toUpperCase() === LABEL_TAG;
+              accessiblePeer.setLabelSiblingContent( self._labelContent, isLabelTag );
             }
           } );
 

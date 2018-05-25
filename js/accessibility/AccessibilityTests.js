@@ -215,6 +215,20 @@ define( function( require ) {
     a.labelTagName = 'p';
     assert.ok( a.labelTagName === 'p', 'expect labelTagName setter to work.' );
 
+    var b = new Node( { tagName: 'p', labelContent: 'I am groot' } );
+    rootNode.addChild( b );
+    var bLabelElement = document.getElementById( b.accessibleInstances[ 0 ].peer.labelSibling.id );
+    assert.ok( !bLabelElement.getAttribute( 'for' ), 'for attribute should not be on non label label sibling.' );
+    b.labelTagName = 'label';
+    bLabelElement = document.getElementById( b.accessibleInstances[ 0 ].peer.labelSibling.id );
+    assert.ok( bLabelElement.getAttribute( 'for' ) !== null, 'for attribute should be on "label" tag for label sibling.' );
+
+    var c = new Node( { tagName: 'p' } );
+    rootNode.addChild( c );
+    c.labelTagName = 'label';
+    c.labelContent = TEST_LABEL;
+    var cLabelElement = document.getElementById( c.accessibleInstances[ 0 ].peer.labelSibling.id );
+    assert.ok( cLabelElement.getAttribute( 'for' ) !== null, 'order should not matter' );
   } );
 
   QUnit.test( 'descriptionTagName/descriptionContent option', function( assert ) {

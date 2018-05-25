@@ -115,7 +115,8 @@ define( function( require ) {
           // set the accessible label now that the element has been recreated again, but not if the tagName
           // has been cleared out
           if ( self._labelContent && self._labelTagName !== null ) {
-            self.setLabelContent( self._labelContent );
+            var isLabelTag = self._labelTagName.toUpperCase() === LABEL_TAG;
+            accessiblePeer.setLabelSiblingContent( self._labelContent, isLabelTag );
           }
 
           // restore the innerContent

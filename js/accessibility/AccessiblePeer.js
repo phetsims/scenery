@@ -10,6 +10,7 @@
 define( function( require ) {
   'use strict';
 
+  var AccessibilityUtil = require( 'SCENERY/accessibility/AccessibilityUtil' );
   var Events = require( 'AXON/Events' );
   var Focus = require( 'SCENERY/accessibility/Focus' );
   var inherit = require( 'PHET_CORE/inherit' );
@@ -198,7 +199,25 @@ define( function( require ) {
 
       // for now
       this.freeToPool();
+    },
+
+    /**
+     * Responsible for setting the content for the label sibling
+     * @param {string} content - the content for the label sibling.
+     * @param {boolean} isLabelTag - special treatment is given for a "label" tagName, as the "for" attribute is set to
+     * the primary sibling.
+     */
+    setLabelSiblingContent: function( content, isLabelTag ) {
+      assert && assert( this.labelSibling, 'must have a label sibling to set its content' );
+      assert && assert( content === null || typeof content === 'string' );
+      AccessibilityUtil.setTextContent( this.labelSibling, content );
+
+      // if the label element happens to be a 'label', associate with 'for' attribute
+      if ( isLabelTag ) {
+        this.labelSibling.setAttribute( 'for', this.primarySibling.id );
+      }
     }
+
   }, {
 
     // @static - specifies valid associations between related AccessiblePeers in the DOM
