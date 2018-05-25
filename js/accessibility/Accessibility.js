@@ -828,9 +828,6 @@ define( function( require ) {
 
           this._labelContent = label;
 
-          // If there
-          var useHTML = AccessibilityUtil.usesExclusivelyFormattingTags( label );
-
           var self = this;
 
           // if trying to set labelContent, make sure that there is a labelTagName default
@@ -840,7 +837,7 @@ define( function( require ) {
 
           this.updateAccessiblePeers( function( accessiblePeer ) {
             if ( accessiblePeer.labelSibling ) {
-              AccessibilityUtil.setTextContent( accessiblePeer.labelSibling, self._labelContent, useHTML );
+              AccessibilityUtil.setTextContent( accessiblePeer.labelSibling, self._labelContent );
 
               // if the label element happens to be a 'label', associate with 'for' attribute
               if ( self._labelTagName.toUpperCase() === LABEL_TAG ) {
@@ -875,9 +872,6 @@ define( function( require ) {
 
           this._innerContent = content;
 
-          // make sure HTML is exclusively text or formatting tags
-          var useHTML = AccessibilityUtil.usesExclusivelyFormattingTags( content );
-
           var self = this;
 
           // guard against option order, but if there is a tagName, validate that it accepts inner content.
@@ -888,7 +882,7 @@ define( function( require ) {
 
           this.updateAccessiblePeers( function( accessiblePeer ) {
             assert && assert( accessiblePeer.accessibleInstance.children.length === 0, 'descendants exist with accessible content, innerContent cannot be used' );
-            AccessibilityUtil.setTextContent( accessiblePeer.primarySibling, self._innerContent, useHTML );
+            AccessibilityUtil.setTextContent( accessiblePeer.primarySibling, self._innerContent );
           } );
         },
         set innerContent( content ) { this.setInnerContent( content ); },
@@ -914,8 +908,6 @@ define( function( require ) {
         setDescriptionContent: function( descriptionContent ) {
           assert && assert( descriptionContent === null || typeof descriptionContent === 'string' );
 
-          var useHTML = AccessibilityUtil.usesExclusivelyFormattingTags( descriptionContent );
-
           this._descriptionContent = descriptionContent;
 
           // if there is no description element, assume that a paragraph element should be used
@@ -924,7 +916,7 @@ define( function( require ) {
           }
 
           this.updateAccessiblePeers( function( accessiblePeer ) {
-            AccessibilityUtil.setTextContent( accessiblePeer.descriptionSibling, descriptionContent, useHTML );
+            AccessibilityUtil.setTextContent( accessiblePeer.descriptionSibling, descriptionContent );
           } );
 
         },

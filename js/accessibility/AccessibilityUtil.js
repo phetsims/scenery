@@ -298,12 +298,13 @@ define( function( require ) {
      * element insertions.
      *
      * @param {HTMLElement} domElement
-     * @param {string} textContent
-     * @param {boolean} isHTML - whether or not to set the content as HTML
+     * @param {string} textContent - could have acceptable HTML "formatting" tags in it
      */
-    setTextContent: function( domElement, textContent, isHTML ) {
+    setTextContent: function( domElement, textContent ) {
       if ( tagNameSupportsContent( domElement.tagName ) ) {
-        if ( isHTML ) {
+
+        // returns true if there are no brackets at all
+        if ( AccessibilityUtil.usesExclusivelyFormattingTags( textContent ) ) {
           domElement.innerHTML = textContent;
         }
         else {
