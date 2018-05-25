@@ -27,31 +27,41 @@ define( function( require ) {
   };
 
   /**
-   * Allowed options: {
-   *    allowTouchSnag: false // allow touch swipes across an object to pick it up. If a function is passed, the value allowTouchSnag( event ) is used
-   *    dragCursor: 'pointer' // while dragging with the mouse, sets the cursor to this value (or use null to not override the cursor while dragging)
-   *    mouseButton: 0        // allow changing the mouse button that activates the drag listener. -1 should activate on any mouse button, 0 on left, 1 for middle, 2 for right, etc.
-   *    start: null           // if non-null, called when a drag is started. start( event, trail )
-   *    drag: null            // if non-null, called when the user moves something with a drag (not a start or end event).
-   *                                                                         drag( event, trail )
-   *    end: null             // if non-null, called when a drag is ended.   end( event, trail )
-   *    translate:            // if this exists, translate( { delta: _, oldPosition: _, position: _ } ) will be called.
-   * }
+   * @param {Object} [options]
+   * @constructor
    */
   function SimpleDragHandler( options ) {
     var self = this;
 
     options = _.extend( {
+
+      start: null, // {null|function(Event,Trail)} called when a drag is started
+      drag: null, // {null|function(Event,Trail)} called when pointer moves
+      end: null,  // {null|function(Event,Trail)} called when a drag is ended
+
+      // {null|function} Called when the pointer moves.
+      // Signature is translate( delta: Vector2, oldPosition: Vector2, position: Vector2 )
+      translate: null, //
+
       allowTouchSnag: false,
+
+      // allow changing the mouse button that activates the drag listener.
+      // -1 should activate on any mouse button, 0 on left, 1 for middle, 2 for right, etc.
       mouseButton: 0,
+
+      // while dragging with the mouse, sets the cursor to this value
+      // (or use null to not override the cursor while dragging)
       dragCursor: 'pointer',
-      tandem: Tandem.required,
-      phetioType: SimpleDragHandlerIO,
-      phetioState: false,
 
       // when set to true, the handler will get "attached" to a pointer during use, preventing the pointer from starting
       // a drag via something like PressListener
-      attach: false
+      attach: false,
+
+      // phetio
+      tandem: Tandem.required,
+      phetioType: SimpleDragHandlerIO,
+      phetioState: false
+
     }, options );
     this.options = options; // @private
 
