@@ -39,6 +39,7 @@
 define( function( require ) {
   'use strict';
 
+  // modules
   var Bounds2 = require( 'DOT/Bounds2' );
   var inherit = require( 'PHET_CORE/inherit' );
   var PressListener = require( 'SCENERY/listeners/PressListener' );
