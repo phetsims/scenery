@@ -958,7 +958,6 @@ define( function( require ) {
     assert.ok( a.focusable === true, 'tagName option should not change focusable value' );
     assert.ok( getPrimarySiblingElementByNode( a ).tabIndex === 0, 'tagName option should not change tab index on primary sibling' );
 
-
     a.focusable = false;
     assert.ok( getPrimarySiblingElementByNode( a ).tabIndex === -1, 'set focusable false' );
 
@@ -969,6 +968,14 @@ define( function( require ) {
 
     assert.ok( b.focusable, 'set focusable as setter' );
     assert.ok( getPrimarySiblingElementByNode( b ).tabIndex === 0, 'set focusable as setter' );
+
+    // HTML elements that are natively focusable are focusable by default
+    var c = new Node( { tagName: 'button' } );
+    assert.ok( c.focusable, 'button is focusable by default' );
+
+    // change tagName to something that is not focusable, focusable should be false
+    c.tagName = 'p';
+    assert.ok( !c.focusable, 'button changed to paragraph, should no longer be focusable' );
   } );
 
   QUnit.test( 'append siblings/appendLabel/appendDescription setters', function( assert ) {
