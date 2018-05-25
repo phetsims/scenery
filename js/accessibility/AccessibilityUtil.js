@@ -29,7 +29,7 @@ define( function( require ) {
   var OUTPUT_TAG = 'OUTPUT';
   var DIV_TAG = 'DIV';
   var A_TAG = 'A';
-  var AREA_TAG = 'A';
+  var AREA_TAG = 'AREA';
   var P_TAG = 'P';
   var IFRAME_TAG = 'IFRAME';
 
