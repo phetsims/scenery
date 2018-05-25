@@ -120,7 +120,7 @@ define( function( require ) {
           }
 
           // restore the innerContent
-          if ( self._innerContent && self._descriptionTagName !== null ) {
+          if ( self._innerContent && self._innerContent !== null ) {
             accessiblePeer.setPrimarySiblingContent( self._innerContent );
           }
 
