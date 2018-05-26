@@ -79,7 +79,11 @@ define( function( require ) {
     this.lastDragPoint = null;        // the location of the drag at the previous event (so we can calculate a delta)
     this.startTransformMatrix = null; // the node's transform at the start of the drag, so we can reset on a touch cancel
     this.mouseButton = undefined;     // tracks which mouse button was pressed, so we can handle that specifically
-    this.interrupted = false;         // whether the last input was interrupted (available during endDrag)
+
+    // @public {boolean} - This will be set to true for endDrag calls that are the result of the listener being
+    // interrupted. It will be set back to false after the endDrag is finished.
+    this.interrupted = false;
+
     // TODO: consider mouse buttons as separate pointers?
 
     // @private {Pointer|null} - There are cases like https://github.com/phetsims/equality-explorer/issues/97 where if
@@ -87,6 +91,9 @@ define( function( require ) {
     // interruptions here so that we can prevent future enter/down events from the same touch pointer from triggering
     // another startDrag.
     this.lastInterruptedTouchPointer = null;
+
+    // @private {boolean}
+    this.disposed = false;
 
     // if an ancestor is transformed, pin our node
     this.transformListener = {
@@ -110,7 +117,7 @@ define( function( require ) {
     this.dragListener = {
       // mouse/touch up
       up: function( event ) {
-        if ( !self.dragging ) { return; }
+        if ( !self.dragging || self.disposed ) { return; }
 
         sceneryLog && sceneryLog.InputListener && sceneryLog.InputListener( 'SimpleDragHandler (pointer) up for ' + self.trail.toString() );
         sceneryLog && sceneryLog.InputListener && sceneryLog.push();
@@ -128,7 +135,7 @@ define( function( require ) {
 
       // touch cancel
       cancel: function( event ) {
-        if ( !self.dragging ) { return; }
+        if ( !self.dragging || self.disposed ) { return; }
 
         sceneryLog && sceneryLog.InputListener && sceneryLog.InputListener( 'SimpleDragHandler (pointer) cancel for ' + self.trail.toString() );
         sceneryLog && sceneryLog.InputListener && sceneryLog.push();
@@ -150,7 +157,7 @@ define( function( require ) {
 
       // mouse/touch move
       move: function( event ) {
-        if ( !self.dragging ) { return; }
+        if ( !self.dragging || self.disposed ) { return; }
 
         assert && assert( event.pointer === self.pointer, 'Wrong pointer in move' );
 
@@ -307,6 +314,11 @@ define( function( require ) {
         return;
       }
 
+      // If we're disposed, we can't start new drags.
+      if ( this.disposed ) {
+        return;
+      }
+
       // only start dragging if the pointer isn't dragging anything, we aren't being dragged, and if it's a mouse it's button is down
       if ( !this.dragging &&
            !event.pointer.dragging &&
@@ -349,6 +361,8 @@ define( function( require ) {
     dispose: function() {
       sceneryLog && sceneryLog.InputListener && sceneryLog.InputListener( 'SimpleDragHandler dispose' );
       sceneryLog && sceneryLog.InputListener && sceneryLog.push();
+
+      this.disposed = true;
 
       if ( this.dragging ) {
         this.pointer.dragging = false;
