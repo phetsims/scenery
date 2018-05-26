@@ -64,7 +64,7 @@ define( function( require ) {
      * FocusHighlightFromNode, the shape will surround the node's bounds or its local bounds, dilated by an amount
      * that is dependent on whether or not this highlight is for group content or for the node itself. See
      * Accessibility.setGroupFocusHighlight() for more information on group highlights.
-     * 
+     *
      * @param {Node} node
      */
     setShapeFromNode: function( node ) {
@@ -72,7 +72,9 @@ define( function( require ) {
 
       // Figure out how much dilation to apply to the focus highlight around the node, calculated unless specified
       // with options
-      var dilationCoefficient = this.dilationCoefficient || ( this.useGroupDilation ? FocusHighlightPath.getGroupDilationCoefficient( node ) : FocusHighlightPath.getDilationCoefficient( node ) );
+      var defaultDilationCoefficient = ( this.useGroupDilation ? FocusHighlightPath.getGroupDilationCoefficient( node ) :
+                                         FocusHighlightPath.getDilationCoefficient( node ) );
+      var dilationCoefficient = this.dilationCoefficient || defaultDilationCoefficient;
       var dilatedBounds = this.nodeBounds.dilated( dilationCoefficient );
 
       // Update the line width of the focus highlight based on the transform of the node
