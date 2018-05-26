@@ -27,31 +27,41 @@ define( function( require ) {
   };
 
   /**
-   * Allowed options: {
-   *    allowTouchSnag: false // allow touch swipes across an object to pick it up. If a function is passed, the value allowTouchSnag( event ) is used
-   *    dragCursor: 'pointer' // while dragging with the mouse, sets the cursor to this value (or use null to not override the cursor while dragging)
-   *    mouseButton: 0        // allow changing the mouse button that activates the drag listener. -1 should activate on any mouse button, 0 on left, 1 for middle, 2 for right, etc.
-   *    start: null           // if non-null, called when a drag is started. start( event, trail )
-   *    drag: null            // if non-null, called when the user moves something with a drag (not a start or end event).
-   *                                                                         drag( event, trail )
-   *    end: null             // if non-null, called when a drag is ended.   end( event, trail )
-   *    translate:            // if this exists, translate( { delta: _, oldPosition: _, position: _ } ) will be called.
-   * }
+   * @param {Object} [options]
+   * @constructor
    */
   function SimpleDragHandler( options ) {
     var self = this;
 
     options = _.extend( {
+
+      start: null, // {null|function(Event,Trail)} called when a drag is started
+      drag: null, // {null|function(Event,Trail)} called when pointer moves
+      end: null,  // {null|function(Event,Trail)} called when a drag is ended
+
+      // {null|function} Called when the pointer moves.
+      // Signature is translate( delta: Vector2, oldPosition: Vector2, position: Vector2 )
+      translate: null, //
+
       allowTouchSnag: false,
+
+      // allow changing the mouse button that activates the drag listener.
+      // -1 should activate on any mouse button, 0 on left, 1 for middle, 2 for right, etc.
       mouseButton: 0,
+
+      // while dragging with the mouse, sets the cursor to this value
+      // (or use null to not override the cursor while dragging)
       dragCursor: 'pointer',
-      tandem: Tandem.required,
-      phetioType: SimpleDragHandlerIO,
-      phetioState: false,
 
       // when set to true, the handler will get "attached" to a pointer during use, preventing the pointer from starting
       // a drag via something like PressListener
-      attach: false
+      attach: false,
+
+      // phetio
+      tandem: Tandem.required,
+      phetioType: SimpleDragHandlerIO,
+      phetioState: false
+
     }, options );
     this.options = options; // @private
 
@@ -69,7 +79,11 @@ define( function( require ) {
     this.lastDragPoint = null;        // the location of the drag at the previous event (so we can calculate a delta)
     this.startTransformMatrix = null; // the node's transform at the start of the drag, so we can reset on a touch cancel
     this.mouseButton = undefined;     // tracks which mouse button was pressed, so we can handle that specifically
-    this.interrupted = false;         // whether the last input was interrupted (available during endDrag)
+
+    // @public {boolean} - This will be set to true for endDrag calls that are the result of the listener being
+    // interrupted. It will be set back to false after the endDrag is finished.
+    this.interrupted = false;
+
     // TODO: consider mouse buttons as separate pointers?
 
     // @private {Pointer|null} - There are cases like https://github.com/phetsims/equality-explorer/issues/97 where if
@@ -77,6 +91,9 @@ define( function( require ) {
     // interruptions here so that we can prevent future enter/down events from the same touch pointer from triggering
     // another startDrag.
     this.lastInterruptedTouchPointer = null;
+
+    // @private {boolean}
+    this.disposed = false;
 
     // if an ancestor is transformed, pin our node
     this.transformListener = {
@@ -100,7 +117,10 @@ define( function( require ) {
     this.dragListener = {
       // mouse/touch up
       up: function( event ) {
-        if ( !self.dragging ) { return; }
+        if ( !self.dragging || self.disposed ) { return; }
+
+        sceneryLog && sceneryLog.InputListener && sceneryLog.InputListener( 'SimpleDragHandler (pointer) up for ' + self.trail.toString() );
+        sceneryLog && sceneryLog.InputListener && sceneryLog.push();
 
         assert && assert( event.pointer === self.pointer, 'Wrong pointer in up' );
         if ( !( event.pointer instanceof Mouse ) || event.domEvent.button === self.mouseButton ) {
@@ -109,11 +129,16 @@ define( function( require ) {
           self.endDrag( event );
           event.currentTarget = saveCurrentTarget; // be polite to other listeners, restore currentTarget
         }
+
+        sceneryLog && sceneryLog.InputListener && sceneryLog.pop();
       },
 
       // touch cancel
       cancel: function( event ) {
-        if ( !self.dragging ) { return; }
+        if ( !self.dragging || self.disposed ) { return; }
+
+        sceneryLog && sceneryLog.InputListener && sceneryLog.InputListener( 'SimpleDragHandler (pointer) cancel for ' + self.trail.toString() );
+        sceneryLog && sceneryLog.InputListener && sceneryLog.push();
 
         assert && assert( event.pointer === self.pointer, 'Wrong pointer in cancel' );
 
@@ -126,11 +151,13 @@ define( function( require ) {
         if ( !self.transform ) {
           self.node.setMatrix( self.startTransformMatrix );
         }
+
+        sceneryLog && sceneryLog.InputListener && sceneryLog.pop();
       },
 
       // mouse/touch move
       move: function( event ) {
-        if ( !self.dragging ) { return; }
+        if ( !self.dragging || self.disposed ) { return; }
 
         assert && assert( event.pointer === self.pointer, 'Wrong pointer in move' );
 
@@ -140,6 +167,9 @@ define( function( require ) {
         if ( globalDelta.magnitudeSquared() === 0 ) {
           return;
         }
+
+        sceneryLog && sceneryLog.InputListener && sceneryLog.InputListener( 'SimpleDragHandler (pointer) move for ' + self.trail.toString() );
+        sceneryLog && sceneryLog.InputListener && sceneryLog.push();
 
         var delta = self.transform.inverseDelta2( globalDelta );
 
@@ -170,6 +200,8 @@ define( function( require ) {
           event.currentTarget = saveCurrentTarget; // be polite to other listeners, restore currentTarget
         }
         self.endEvent();
+
+        sceneryLog && sceneryLog.InputListener && sceneryLog.pop();
       }
     };
     PhetioObject.call( this, options );
@@ -189,6 +221,9 @@ define( function( require ) {
     },
     startDrag: function( event ) {
       if ( this.dragging ) { return; }
+
+      sceneryLog && sceneryLog.InputListener && sceneryLog.InputListener( 'SimpleDragHandler startDrag' );
+      sceneryLog && sceneryLog.InputListener && sceneryLog.push();
 
       // set a flag on the pointer so it won't pick up other nodes
       event.pointer.dragging = true;
@@ -214,10 +249,15 @@ define( function( require ) {
         this.options.start.call( null, event, this.trail );
       }
       this.endEvent();
+
+      sceneryLog && sceneryLog.InputListener && sceneryLog.pop();
     },
 
     endDrag: function( event ) {
       if ( !this.dragging ) { return; }
+
+      sceneryLog && sceneryLog.InputListener && sceneryLog.InputListener( 'SimpleDragHandler endDrag' );
+      sceneryLog && sceneryLog.InputListener && sceneryLog.push();
 
       this.pointer.dragging = false;
       this.pointer.cursor = null;
@@ -237,11 +277,16 @@ define( function( require ) {
 
       // release our reference
       this.pointer = null;
+
+      sceneryLog && sceneryLog.InputListener && sceneryLog.pop();
     },
 
     // Called when input is interrupted on this listener, see https://github.com/phetsims/scenery/issues/218
     interrupt: function() {
       if ( this.dragging ) {
+        sceneryLog && sceneryLog.InputListener && sceneryLog.InputListener( 'SimpleDragHandler interrupt' );
+        sceneryLog && sceneryLog.InputListener && sceneryLog.push();
+
         this.interrupted = true;
 
         if ( this.pointer instanceof Touch ) {
@@ -255,6 +300,8 @@ define( function( require ) {
         } );
 
         this.interrupted = false;
+
+        sceneryLog && sceneryLog.InputListener && sceneryLog.pop();
       }
     },
 
@@ -264,6 +311,11 @@ define( function( require ) {
            event.domEvent &&
            this.options.mouseButton !== event.domEvent.button &&
            this.options.mouseButton !== -1 ) {
+        return;
+      }
+
+      // If we're disposed, we can't start new drags.
+      if ( this.disposed ) {
         return;
       }
 
@@ -307,6 +359,11 @@ define( function( require ) {
      * @public
      */
     dispose: function() {
+      sceneryLog && sceneryLog.InputListener && sceneryLog.InputListener( 'SimpleDragHandler dispose' );
+      sceneryLog && sceneryLog.InputListener && sceneryLog.push();
+
+      this.disposed = true;
+
       if ( this.dragging ) {
         this.pointer.dragging = false;
         this.pointer.cursor = null;
@@ -314,6 +371,8 @@ define( function( require ) {
       }
       this.isDraggingProperty.dispose();
       PhetioObject.prototype.dispose.call( this );
+
+      sceneryLog && sceneryLog.InputListener && sceneryLog.pop();
     }
   }, {
 

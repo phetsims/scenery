@@ -83,9 +83,6 @@ define( function( require ) {
     DOMBlock: { name: 'DOM', style: '' },
     Drawable: { name: '', style: '' },
     FittedBlock: { name: 'FittedBlock', style: '' },
-    InputEvent: { name: 'InputEvent', style: '' },
-    OnInput: { name: 'OnInput', style: '' },
-    InputListener: { name: 'InputListener', style: '' },
     Instance: { name: 'Instance', style: '' },
     InstanceTree: { name: 'InstanceTree', style: '' },
     ChangeInterval: { name: 'ChangeInterval', style: 'color: #0a0;' },
@@ -93,13 +90,21 @@ define( function( require ) {
     SVGGroup: { name: 'SVGGroup', style: '' },
     ImageSVGDrawable: { name: 'ImageSVGDrawable', style: '' },
     Paints: { name: 'Paints', style: '' },
-    Accessibility: { name: 'Accessibility', style: '' },
-    AccessibleInstance: { name: 'AccessibleInstance', style: '' },
     AlignBox: { name: 'AlignBox', style: '' },
     AlignGroup: { name: 'AlignGroup', style: '' },
     RichText: { name: 'RichText', style: '' },
+
+    // Accessibility-related
+    Accessibility: { name: 'Accessibility', style: '' },
+    AccessibleInstance: { name: 'AccessibleInstance', style: '' },
     AccessibilityTree: { name: 'AccessibilityTree', style: '' },
     AccessibleDisplaysInfo: { name: 'AccessibleDisplaysInfo', style: '' },
+
+    // Input-related
+    InputListener: { name: 'InputListener', style: '' },
+    InputEvent: { name: 'InputEvent', style: '' },
+    OnInput: { name: 'OnInput', style: '' },
+    Pointer: { name: 'Pointer', style: '' },
     Input: { name: 'Input', style: '' }, // When "logical" input functions are called, and related tasks
     EventDispatch: { name: 'EventDispatch', style: '' } // When an event is dispatched, and when listeners are triggered
   };
@@ -141,6 +146,16 @@ define( function( require ) {
         this.enableIndividualLog( 'PerfMajor' );
         this.enableIndividualLog( 'PerfMinor' );
         this.enableIndividualLog( 'PerfVerbose' );
+        return;
+      }
+
+      if ( name === 'input' ) {
+        this.enableIndividualLog( 'InputListener' );
+        this.enableIndividualLog( 'InputEvent' );
+        this.enableIndividualLog( 'OnInput' );
+        this.enableIndividualLog( 'Pointer' );
+        this.enableIndividualLog( 'Input' );
+        this.enableIndividualLog( 'EventDispatch' );
         return;
       }
 

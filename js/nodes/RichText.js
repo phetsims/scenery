@@ -211,6 +211,10 @@ define( function( require ) {
     this.lineContainer = new Node( {} );
     this.addChild( this.lineContainer );
 
+    // Initialize to an empty state, so we are immediately valid (since now we need to create an empty leaf even if we
+    // have empty text).
+    this.rebuildRichText();
+
     this.mutate( options );
   }
 
@@ -238,6 +242,7 @@ define( function( require ) {
 
       // Bail early, particularly if we are being constructed.
       if ( this._text === '' ) {
+        this.appendEmptyLeaf();
         return;
       }
 
@@ -300,6 +305,12 @@ define( function( require ) {
       if ( currentLine.bounds.isValid() ) {
         sceneryLog && sceneryLog.RichText && sceneryLog.RichText( 'Adding final line' );
         this.appendLine( currentLine );
+      }
+
+      // If we reached here and have no children, we probably ran into a degenerate "no layout" case like `' '`. Add in
+      // the empty leaf.
+      if ( this.lineContainer.getChildrenCount() === 0 ) {
+        this.appendEmptyLeaf();
       }
 
       // All lines are constructed, so we can align them now
@@ -385,6 +396,17 @@ define( function( require ) {
       }
 
       this.lineContainer.addChild( lineNode );
+    },
+
+    /**
+     * If we end up with the equivalent of "no" content, toss in a basically empty leaf so that we get valid bounds
+     * (0 width, correctly-positioned height). See https://github.com/phetsims/scenery/issues/769.
+     * @private
+     */
+    appendEmptyLeaf: function() {
+      assert && assert( this.lineContainer.getChildrenCount() === 0 );
+
+      this.appendLine( RichTextLeaf.createFromPool( '', true, this._font, this._boundsMethod, this._fill, this._stroke ) );
     },
 
     /**

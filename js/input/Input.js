@@ -425,6 +425,8 @@ define( function( require ) {
           this.pointers.splice( i, 1 );
         }
       }
+
+      pointer.dispose();
     },
 
     /**
@@ -668,8 +670,8 @@ define( function( require ) {
       var touch = this.findPointerById( id );
       if ( touch ) {
         var pointChanged = touch.end( point, event );
-        this.removePointer( touch );
         this.upEvent( touch, event, pointChanged );
+        this.removePointer( touch );
       }
 
       sceneryLog && sceneryLog.Input && sceneryLog.pop();
@@ -731,8 +733,8 @@ define( function( require ) {
       var touch = this.findPointerById( id );
       if ( touch ) {
         var pointChanged = touch.cancel( point, event );
-        this.removePointer( touch );
         this.cancelEvent( touch, event, pointChanged );
+        this.removePointer( touch );
       }
 
       sceneryLog && sceneryLog.Input && sceneryLog.pop();
@@ -792,8 +794,8 @@ define( function( require ) {
       var pen = this.findPointerById( id );
       if ( pen ) {
         var pointChanged = pen.end( point, event );
-        this.removePointer( pen );
         this.upEvent( pen, event, pointChanged );
+        this.removePointer( pen );
       }
 
       sceneryLog && sceneryLog.Input && sceneryLog.pop();
@@ -855,8 +857,8 @@ define( function( require ) {
       var pen = this.findPointerById( id );
       if ( pen ) {
         var pointChanged = pen.cancel( point, event );
-        this.removePointer( pen );
         this.cancelEvent( pen, event, pointChanged );
+        this.removePointer( pen );
       }
 
       sceneryLog && sceneryLog.Input && sceneryLog.pop();
@@ -1285,9 +1287,6 @@ define( function( require ) {
      * @param {boolean} bubbles - If bubbles is false, the event is only dispatched to the leaf node of the trail.
      */
     dispatchEvent: function( trail, type, pointer, event, bubbles ) {
-      sceneryLog && sceneryLog.Input && sceneryLog.Input(
-        'Input: ' + type + ' on ' + trail.toString() + ' for pointer ' + pointer.toString() + ' at ' + pointer.point.toString() );
-
       sceneryLog && sceneryLog.EventDispatch && sceneryLog.EventDispatch(
         type + ' trail:' + trail.toString() + ' pointer:' + pointer.toString() + ' at ' + pointer.point.toString() );
       sceneryLog && sceneryLog.EventDispatch && sceneryLog.push();
