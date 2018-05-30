@@ -50,7 +50,9 @@ define( function( require ) {
     //                        specific trail, then a trail with only the display's rootNode will be set.
     this.trail = null;
 
-    // @public {BooleanProperty} - Whether this pointer is 'down' (pressed).
+    // @deprecated @public {BooleanProperty} - Whether this pointer is 'down' (pressed).
+    // Will be phased out in https://github.com/phetsims/scenery/issues/803 to something that is specific for the actual
+    // mouse/pen button (since this doesn't generalize well to the left/right mouse buttons).
     this.isDownProperty = new BooleanProperty( initialDownState );
 
     // @public {BooleanProperty} - Whether there is a main listener "attached" to this pointer. This signals that the
