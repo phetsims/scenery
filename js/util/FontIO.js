@@ -30,14 +30,16 @@ define( function( require ) {
   phetioInherit( ObjectIO, 'FontIO', FontIO, {}, {
 
     // Info from Font.js
-    documentation: 'Font handling for text drawing. Options: <br>' +
-                   'style: normal      // normal | italic | oblique <br>' +
-                   'variant: normal    // normal | small-caps <br>' +
-                   'weight: normal     // normal | bold | bolder | lighter | 100 | 200 | 300 | 400 | 500 | 600 | 700 | 800 | 900 <br>' +
-                   'stretch: normal    // normal | ultra-condensed | extra-condensed | condensed | semi-condensed | semi-expanded | expanded | extra-expanded | ultra-expanded <br>' +
-                   'size: 10px         // absolute-size | relative-size | length | percentage -- unitless number interpreted as px. absolute suffixes: cm, mm, in, pt, pc, px. relative suffixes: em, ex, ch, rem, vw, vh, vmin, vmax. <br>' +
-                   'lineHeight: normal // normal | number | length | percentage -- NOTE: Canvas spec forces line-height to normal <br>' +
-                   'family: sans-serif // comma-separated list of families, including generic families (serif, sans-serif, cursive, fantasy, monospace). ideally escape with double-quotes',
+    documentation: 'Font handling for text drawing. Options:' +
+                   '<ul>' +
+                   '<li><strong>style:</strong> normal      &mdash; normal | italic | oblique </li>' +
+                   '<li><strong>variant:</strong> normal    &mdash; normal | small-caps </li>' +
+                   '<li><strong>weight:</strong> normal     &mdash; normal | bold | bolder | lighter | 100 | 200 | 300 | 400 | 500 | 600 | 700 | 800 | 900 </li>' +
+                   '<li><strong>stretch:</strong> normal    &mdash; normal | ultra-condensed | extra-condensed | condensed | semi-condensed | semi-expanded | expanded | extra-expanded | ultra-expanded </li>' +
+                   '<li><strong>size:</strong> 10px         &mdash; absolute-size | relative-size | length | percentage -- unitless number interpreted as px. absolute suffixes: cm, mm, in, pt, pc, px. relative suffixes: em, ex, ch, rem, vw, vh, vmin, vmax. </li>' +
+                   '<li><strong>lineHeight:</strong> normal &mdash; normal | number | length | percentage -- NOTE: Canvas spec forces line-height to normal </li>' +
+                   '<li><strong>family:</strong> sans-serif &mdash; comma-separated list of families, including generic families (serif, sans-serif, cursive, fantasy, monospace). ideally escape with double-quotes</li>' +
+                   '</ul>',
 
 
     /**
