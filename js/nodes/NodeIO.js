@@ -11,6 +11,7 @@ define( function( require ) {
 
   // modules
   var BooleanProperty = require( 'AXON/BooleanProperty' );
+  var NumberProperty = require( 'AXON/NumberProperty' );
   var Property = require( 'AXON/Property' );
   var PropertyIO = require( 'AXON/PropertyIO' );
   var scenery = require( 'SCENERY/scenery' );
@@ -19,10 +20,8 @@ define( function( require ) {
   var assertInstanceOf = require( 'ifphetio!PHET_IO/assertInstanceOf' );
   var BooleanIO = require( 'ifphetio!PHET_IO/types/BooleanIO' );
   var NullableIO = require( 'ifphetio!PHET_IO/types/NullableIO' );
-  var NumberIO = require( 'ifphetio!PHET_IO/types/NumberIO' );
   var ObjectIO = require( 'ifphetio!PHET_IO/types/ObjectIO' );
   var phetioInherit = require( 'ifphetio!PHET_IO/phetioInherit' );
-  var VoidIO = require( 'ifphetio!PHET_IO/types/VoidIO' );
 
   /**
    * IO type for phet/scenery's Node
@@ -40,29 +39,30 @@ define( function( require ) {
       phetioInstanceDocumentation: 'Property that controls whether the Node will be visible (and interactive), see the NodeIO documentation for more details.'
     } );
 
-    visibleProperty.link( function( visible ) {
-      node.visible = visible;
-    } );
-    node.on( 'visibility', function() {
-      visibleProperty.value = node.visible;
-    } );
+    visibleProperty.link( function( visible ) { node.visible = visible; } );
+    node.on( 'visibility', function() { visibleProperty.value = node.visible; } );
 
     var pickableProperty = new Property( node.pickable, {
       tandem: node.tandem.createTandem( 'pickableProperty' ),
       phetioType: PropertyIO( NullableIO( BooleanIO ) ),
       phetioInstanceDocumentation: 'Set whether the node will be pickable (and hence interactive), see the NodeIO documentation for more details.'
     } );
-    pickableProperty.link( function( pickable ) {
-      node.pickable = pickable;
+    pickableProperty.link( function( pickable ) { node.pickable = pickable; } );
+    node.on( 'pickability', function() { pickableProperty.value = node.pickable; } );
+
+    var opacityProperty = new NumberProperty( node.opacity, {
+      tandem: node.tandem.createTandem( 'opacityProperty' ),
+      range: { min: 0, max: 1 },
+      phetioInstanceDocumentation: 'Opacity of the parent NodeIO, between 0 (invisible) and 1 (fully visible).'
     } );
-    node.on( 'pickability', function() {
-      pickableProperty.value = node.pickable;
-    } );
+    opacityProperty.link( function( opacity ) { node.opacity = opacity; } );
+    node.on( 'opacity', function() { opacityProperty.value = node.opacity; } );
 
     // @private
     this.disposeNodeIO = function() {
       visibleProperty.dispose();
       pickableProperty.dispose();
+      opacityProperty.dispose();
     };
   }
 
@@ -73,39 +73,25 @@ define( function( require ) {
      */
     dispose: function() {
       this.disposeNodeIO();
-    },
-    setOpacity: {
-      returnType: VoidIO,
-      parameterTypes: [ NumberIO ],
-      implementation: function( opacity ) {
-        this.instance.opacity = opacity;
-      },
-      documentation: 'Set opacity between 0-1 (inclusive)'
-    },
-
-    setRotation: {
-      returnType: VoidIO,
-      parameterTypes: [ NumberIO ],
-      implementation: function( rotation ) {
-        this.instance.rotation = rotation;
-      },
-      documentation: 'Set the rotation of the node, in radians'
     }
   }, {
-    toStateObject: function( node ) {
-      assert && assertInstanceOf( node, phet.scenery.Node );
-      return {
-        pickable: node.isPickable(),
-        opacity: node.opacity
-      };
+
+    /**
+     * @param {Node} o
+     * @returns {Object}
+     * @override - to prevent attempted JSON serialization of circular Node
+     */
+    toStateObject: function( o ) {
+      return {};
     },
-    fromStateObject: function( stateObject ) {
-      return stateObject;
-    },
-    setValue: function( node, fromStateObject ) {
-      assert && assertInstanceOf( node, phet.scenery.Node );
-      node.pickable = fromStateObject.pickable;
-      node.opacity = fromStateObject.opacity;
+
+    /**
+     * @param {Node} o
+     * @returns {Object}
+     * @override - to prevent attempted JSON serialization of circular Node
+     */
+    fromStateObject: function( o ) {
+      return {};
     },
     documentation: 'The base type for graphical and potentially interactive objects.  NodeIO has nested PropertyIO values' +
                    'for visibility, pickability and opacity.<br>' +
@@ -113,8 +99,7 @@ define( function( require ) {
                    '<li>null: pass-through behavior. Nodes with input listeners are pickable, but nodes without input listeners won\\\'t block events for nodes behind it.</li>\' +\n' +
                    '<li>false: The node cannot be interacted with, and it blocks events for nodes behind it.</li>\' +\n' +
                    '<li>true: The node can be interacted with (if it has an input listener).</li></ul>\' +\n' +
-                   'For more about Scenery node pickability, please see <a href="http://phetsims.github.io/scenery/doc/implementation-notes#pickability">http://phetsims.github.io/scenery/doc/implementation-notes#pickability</a>.\'\n' +
-                   '},'
+                   'For more about Scenery node pickability, please see <a href="http://phetsims.github.io/scenery/doc/implementation-notes#pickability">http://phetsims.github.io/scenery/doc/implementation-notes#pickability</a>'
   } );
 
   scenery.register( 'NodeIO', NodeIO );
