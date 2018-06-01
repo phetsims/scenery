@@ -522,7 +522,7 @@ define( function( require ) {
      * The order below is important! Don't change this without knowing the implications.
      *
      * NOTE: Translation-based mutators come before rotation/scale, since typically we think of their operations
-     *       occuring "after" the rotation / scaling
+     *       occurring "after" the rotation / scaling
      * NOTE: left/right/top/bottom/centerX/centerY are at the end, since they rely potentially on rotation / scaling
      *       changes of bounds that may happen beforehand
      */
