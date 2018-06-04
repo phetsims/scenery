@@ -93,6 +93,14 @@ define( function( require ) {
     fromStateObject: function( o ) {
       return {};
     },
+
+    /**
+     * @override - to prevent attempted JSON serialization of circular Node
+     */
+    setValue: function() {
+      // intentional no-op to support serialization, even though now the state is saved from nested sub-Properties
+    },
+
     documentation: 'The base type for graphical and potentially interactive objects.  NodeIO has nested PropertyIO values' +
                    'for visibility, pickability and opacity.<br>' +
                    'Pickable can take one of three values:<br><ul>' +
