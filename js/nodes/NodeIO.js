@@ -91,7 +91,7 @@ define( function( require ) {
      * @override - to prevent attempted JSON serialization of circular Node
      */
     fromStateObject: function( o ) {
-      return {};
+      return o; // Pass through values defined by subclasses, such as AquaRadioButtonIO.enabled
     },
 
     /**
