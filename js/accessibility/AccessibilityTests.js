@@ -33,6 +33,9 @@ define( function( require ) {
   var DEFAULT_DESCRIPTION_TAG_NAME = AccessibilityUtil.DEFAULT_DESCRIPTION_TAG_NAME;
   var DEFAULT_CONTAINER_TAG_NAME = AccessibilityUtil.DEFAULT_CONTAINER_TAG_NAME;
 
+  // a focus highlight for testing, since dummy nodes tend to have no bounds
+  var TEST_HIGHLIGHT = new Circle( 5 );
+
   /**
    * Get the id of a dom element representing a node in the DOM.  The accessible content must exist and be unique,
    * there should only be one accessible instance and one dom element for the node.
@@ -1022,6 +1025,27 @@ define( function( require ) {
     assert.ok( containerElement.childNodes[ 0 ].tagName.toUpperCase() === 'H3', 'label sibling first' );
     assert.ok( containerElement.childNodes[ 1 ].tagName.toUpperCase() === DEFAULT_DESCRIPTION_TAG_NAME, 'description sibling second' );
     assert.ok( containerElement.childNodes[ 2 ].tagName.toUpperCase() === 'LI', 'primary sibling last' );
+  } );
+
+  QUnit.test( 'move to front/move to back', function( assert ) {
+
+    // make sure state is restored after moving children to front and back    
+    var rootNode = new Node( { tagName: 'div' } );
+    var display = new Display( rootNode );
+    document.body.appendChild( display.domElement );
+
+    var a = new Node( { tagName: 'button', focusHighlight: TEST_HIGHLIGHT } );
+    var b = new Node( { tagName: 'button', focusHighlight: TEST_HIGHLIGHT } );
+    rootNode.children =  [ a, b ];
+    b.focus();
+
+    // after moving a to front, b should still have focus
+    a.moveToFront();
+    assert.ok( b.focused, 'b should have focus after a moved to front' );
+
+    // after moving a to back, b should still have focus
+    a.moveToBack();
+    assert.ok( b.focused, 'b should have focus after a moved to back' );
   } );
 
   QUnit.test( 'AccessibilityFuzzer with 3 nodes', function( assert ) {
