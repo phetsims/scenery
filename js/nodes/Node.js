@@ -829,10 +829,16 @@ define( function( require ) {
      * @returns {Node} - Returns 'this' reference, for chaining
      */
     moveChildToFront: function( child ) {
+
+      // adding and removing children might cause loss of focus, needs to be restored after operation
+      Accessibility.beforeOp();
+
       if ( this.indexOfChild( child ) !== this._children.length - 1 ) {
         this.removeChild( child );
         this.addChild( child );
       }
+
+      Accessibility.afterOp();
 
       return this; // allow chaining
     },
@@ -860,10 +866,16 @@ define( function( require ) {
      * @returns {Node} - Returns 'this' reference, for chaining
      */
     moveChildToBack: function( child ) {
+
+      // adding and removing children might cause loss of focus, needs to be restored after operation
+      Accessibility.beforeOp();
+
       if ( this.indexOfChild( child ) !== 0 ) {
         this.removeChild( child );
         this.insertChild( 0, child );
       }
+
+      Accessibility.afterOp();
 
       return this; // allow chaining
     },
