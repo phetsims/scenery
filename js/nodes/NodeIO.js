@@ -77,12 +77,21 @@ define( function( require ) {
   }, {
 
     /**
-     * @param {Node} o
-     * @returns {Object}
-     * @override - to prevent attempted JSON serialization of circular Node
+     * Since NodeIO has no intrinsic state, we must signify to the PhET-iO serialization engine that this Node should
+     * opt out of appearing in the state. We can't achieve this by removing this method, since NodeIO's parent type has
+     * a `toStateObject` that causes a cyclical JSON reference.
+     *
+     * We also don't need matching `fromStateObject` and `setValue` methods because this type won't be added to the state
+     * object, and thus setState will never be called on instances of NodeIO.
+     *
+     * Subtypes can still override this method, and implement their own `fromStateObject` and `setValue` if there is desired
+     * serializable data for that type to hold in the state.
+     *
+     * @returns {undefined} - We don't use null because other types want that value in the state, see `NullableIO` for example.
+     * @override
      */
-    toStateObject: function( o ) {
-      return {};
+    toStateObject: function() {
+      return undefined;
     },
 
     /**
@@ -92,13 +101,6 @@ define( function( require ) {
      */
     fromStateObject: function( o ) {
       return o; // Pass through values defined by subclasses, such as AquaRadioButtonIO.enabled
-    },
-
-    /**
-     * @override - to prevent attempted JSON serialization of circular Node
-     */
-    setValue: function() {
-      // intentional no-op to support serialization, even though now the state is saved from nested sub-Properties
     },
 
     documentation: 'The base type for graphical and potentially interactive objects.  NodeIO has nested PropertyIO values' +
