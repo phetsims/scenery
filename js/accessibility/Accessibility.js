@@ -1277,8 +1277,8 @@ define( function( require ) {
             this.updateAccessiblePeers( function( accessiblePeer ) {
               var otherPeer = node._accessibleInstances[ 0 ].peer;
 
-              var labelledElement = accessiblePeer.getElementByAssociation( self._ariaLabelledContent );
-              var labelSibling = otherPeer.getElementByAssociation( node._ariaLabelContent );
+              var labelledElement = accessiblePeer.getElementByName( self._ariaLabelledContent );
+              var labelSibling = otherPeer.getElementByName( node._ariaLabelContent );
 
               // if both associated elements defined, set up the attribute, otherwise remove the attribute
               if ( labelledElement && labelSibling ) {
@@ -1371,8 +1371,8 @@ define( function( require ) {
             this.updateAccessiblePeers( function( accessiblePeer ) {
               var otherPeer = node._accessibleInstances[ 0 ].peer;
 
-              var describedElement = accessiblePeer.getElementByAssociation( self._ariaDescribedContent );
-              var descriptionSibling = otherPeer.getElementByAssociation( node._ariaDescriptionContent );
+              var describedElement = accessiblePeer.getElementByName( self._ariaDescribedContent );
+              var descriptionSibling = otherPeer.getElementByName( node._ariaDescriptionContent );
 
               // if both associated elements exist, set the attribute, otherwise make sure attribute is removed
               if ( describedElement && descriptionSibling ) {

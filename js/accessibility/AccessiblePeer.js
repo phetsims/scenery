@@ -150,7 +150,7 @@ define( function( require ) {
      * @param {string} association - see AccessibilityUtil for valid associations
      * @return {HTMLElement}
      */
-    getElementByAssociation: function( association ) {
+    getElementByName: function( association ) {
       var htmlElement = null;
 
       if ( association === AccessiblePeer.PRIMARY_SIBLING ) {
