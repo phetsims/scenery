@@ -67,6 +67,11 @@ define( function( require ) {
       accessibleContent = {
         createPeer: function( accessibleInstance ) {
 
+          // higher level api first, because it will effect the lower level setters.
+          if ( self.accessibleName ) {
+            self.accessibleNameImplementation( self.accessibleName ); // set it again to support any option order
+          }
+
           var uniqueId = accessibleInstance.trail.getUniqueId();
 
           // create the base DOM element representing this accessible instance

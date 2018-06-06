@@ -33,6 +33,10 @@ define( function( require ) {
   var DEFAULT_DESCRIPTION_TAG_NAME = AccessibilityUtil.DEFAULT_DESCRIPTION_TAG_NAME;
   var DEFAULT_CONTAINER_TAG_NAME = AccessibilityUtil.DEFAULT_CONTAINER_TAG_NAME;
 
+  // given the parent container element for a node, this value is the index of the label sibling in the
+  // parent's array of children HTMLElements.
+  // var DEFAULT_LABEL_SIBLING_INDEX = 0;
+
   /**
    * Get the id of a dom element representing a node in the DOM.  The accessible content must exist and be unique,
    * there should only be one accessible instance and one dom element for the node.
@@ -1024,6 +1028,39 @@ define( function( require ) {
     assert.ok( containerElement.childNodes[ 2 ].tagName.toUpperCase() === 'LI', 'primary sibling last' );
   } );
 
+
+  // Higher level setter/getter options
+  QUnit.test( 'accessibleName option', function( assert ) {
+
+
+    // test the behavior of focusable function
+    var rootNode = new Node( { tagName: 'div' } );
+    var display = new Display( rootNode ); // eslint-disable-line
+    document.body.appendChild( display.domElement );
+
+    var a = new Node( { tagName: 'div', accessibleName: TEST_LABEL } );
+    rootNode.addChild( a );
+
+    assert.ok( a.accessibleName === TEST_LABEL, 'accessibleName getter' );
+
+    var aElement = getPrimarySiblingElementByNode( a );
+    assert.ok( aElement.textContent === TEST_LABEL, 'accessibleName setter on div' );
+
+
+    // TODO: this should be passing,see
+    // var b = new Node( { tagName: 'input', accessibleName: TEST_LABEL } );
+    // a.addChild( b );
+    // var bElement = getPrimarySiblingElementByNode( b );
+ //   var bParent = getPrimarySiblingElementByNode( b ).parentElement;
+    // var bLabelSibling = bParent.children[ DEFAULT_LABEL_SIBLING_INDEX ];
+    // assert.ok( bLabelSibling.textContent === TEST_LABEL, 'accessibleName sets label sibling' );
+    // assert.ok( bLabelSibling.getAttribute( 'for' ).indexOf( bElement.id ) >= 0, 'accessibleName sets label\'s "for" attribute' );
+
+
+  } );
+
+
+  // these fuzzers take time, so it is nice when they are last
   QUnit.test( 'AccessibilityFuzzer with 3 nodes', function( assert ) {
     var fuzzer = new AccessibilityFuzzer( 3, false );
     for ( var i = 0; i < 5000; i++ ) {

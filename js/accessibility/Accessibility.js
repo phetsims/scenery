@@ -148,6 +148,16 @@ define( function( require ) {
   // The options for the Accessibility API. In general, most default to null; to clear, set back to null.
   var ACCESSIBILITY_OPTION_KEYS = [
 
+    /* 
+     * Higher Level API Functions
+     */
+
+    'accessibleName',
+
+    /*
+     * Lower Level API Functions
+     */
+
     'containerTagName', // Sets the tag name for an [optional] element that contains this Node's siblings, see setContainerTagName()
     'containerAriaRole', // Sets the ARIA role for the container parent DOM element, see setContainerAriaRole()
 
@@ -406,6 +416,10 @@ define( function( require ) {
           // @protected {Array.<AccessibleInstance>} - Empty unless the node contains some accessible instance.
           this._accessibleInstances = [];
 
+          // HIGHER LEVEL API INITIALIZATION\
+
+          // {string|null} - sets the "Accessible Name" of the Nodes, as defined by the Browser's Accessibility Tree
+          this._accessibleName = null;
         },
 
 
@@ -557,9 +571,90 @@ define( function( require ) {
           }
         },
 
+        /***********************************************************************************************************/
+        // HIGHER LEVEL API: GETTERS AND SETTERS FOR A11Y API OPTIONS
+        //
+        // These functions utilize the lower level API to achieve a consistence, and convenient API for adding
+        // accessible content to the PDOM. See https://github.com/phetsims/scenery/issues/795
+        /***********************************************************************************************************/
+
+        /**
+         * Set the Node's accessible content in a way that will define the Accessible Name for the browser. Different
+         * HTML components and code situations require different methods of setting the Accessible Name.
+         *
+         * This method does the best it can to create a general method to set the Accessible Name for a variety of
+         * different Node types and configurations, but if a Node is more complicated, then this method will not
+         * properly set the Accessible Name for the Node's HTML content. In this situation this setter needs to be
+         * overridden by the subtype to meet its specific constraints. When doing this make sure that the Accessible
+         * Name is properly being set and conveyed to AT.
+         *
+         * NOTE: By Accessible Name (capitalized), we mean the proper title of the HTML element that will be set in
+         * the browser Accessibility Tree and then interpreted by AT. This is necessily different from scenery internal
+         * names of HTML elements like "label sibling" (even though, in certain circumstances, an Accessible Name could
+         * be set by using the "label sibling" with tag name "label" and a "for" attribute).
+         *
+         * For more information about setting an Accessible Name on HTML see the scenery docs for accessibility,
+         * and see https://developer.paciellogroup.com/blog/2017/04/what-is-an-accessible-name/
+         *
+         * @param {string} accessibleName
+         */
+        setAccessibleName: function( accessibleName ) {
+          assert && assert( accessibleName === null || typeof accessibleName === 'string' );
+
+          if ( this._accessibleName !== accessibleName ) {
+            this._accessibleName = accessibleName;
+
+            this.accessibleNameImplementation( accessibleName );
+
+            this.invalidateAccessibleContent();
+
+          }
+        },
+        set accessibleName( accessibleName ) { this.setAccessibleName( accessibleName ); },
+
+        /**
+         * This function is to manage the public accessiblName setter and invalidateAccessibleContent wanting to do the
+         * same accessibleName setting work, but setAccessibleName wants to do a few more Client side error checks first
+         * that causes an infinite loop if called from invalidateAccessibleContent.
+         * @public (scenery-internal) - should only be called from setAccessibleName and invalidateAccessibleContent
+         * @param {string} accessibleName
+         */
+        accessibleNameImplementation: function( accessibleName ) {
+          assert && assert( accessibleName === null || typeof accessibleName === 'string' );
+
+          if ( this._tagName ) {
+
+            // input tag with a label tag that has a "for" attribute
+            if ( this._tagName === 'input' ) {
+              this.labelTagName = 'label';
+              this.labelContent = accessibleName;
+            }
+
+            // if you can put inner content on the element, then do so
+            else if ( AccessibilityUtil.tagNameSupportsContent( this._tagName ) ) {
+              this.innerContent = accessibleName;
+
+            }
+            else {
+              this.ariaLabel = accessibleName;
+            }
+          }
+        },
+
+        /**
+         * Get the tag name of the DOM element representing this node for accessibility.
+         * @public
+         *
+         * @returns {string|null}
+         */
+        getAccessibleName: function() {
+          return this._accessibleName;
+        },
+        get accessibleName() { return this.getAccessibleName(); },
+
 
         /***********************************************************************************************************/
-        // GETTERS AND SETTERS FOR A11y API OPTIONS
+        // LOWER LEVEL GETTERS AND SETTERS FOR A11Y API OPTIONS
         /***********************************************************************************************************/
 
         /**
@@ -567,7 +662,7 @@ define( function( require ) {
          * function will create a new DOM element each time it is called for the Node's AccessiblePeer and
          * reset the accessible content.
          *
-         * @param {string} tagName
+         * @param {string|null} tagName
          */
         setTagName: function( tagName ) {
           assert && assert( tagName === null || typeof tagName === 'string' );
