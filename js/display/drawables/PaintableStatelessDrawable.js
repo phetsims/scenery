@@ -25,11 +25,11 @@ define( function( require ) {
       proto.initializePaintableStateless = function( renderer, instance ) {
         this.fillCallback = this.fillCallback || this.markDirtyFill.bind( this );
         this.strokeCallback = this.strokeCallback || this.markDirtyStroke.bind( this );
-        this.fillObserver = this.fillObserver || new PaintObserver( 'fill', this.fillCallback );
-        this.strokeObserver = this.strokeObserver || new PaintObserver( 'stroke', this.strokeCallback );
+        this.fillObserver = this.fillObserver || new PaintObserver( this.fillCallback );
+        this.strokeObserver = this.strokeObserver || new PaintObserver( this.strokeCallback );
 
-        this.fillObserver.initialize( instance.node );
-        this.strokeObserver.initialize( instance.node );
+        this.fillObserver.setPrimary( instance.node._fill );
+        this.strokeObserver.setPrimary( instance.node._stroke );
 
         return this;
       };
@@ -43,14 +43,16 @@ define( function( require ) {
         assert && Color.checkPaint( this.instance.node._fill );
 
         this.markPaintDirty();
-        this.fillObserver.updatePrimary(); // TODO: look into having the fillObserver be notified of Node changes as our source
+        this.fillObserver.setPrimary( this.instance.node._fill);
+        // TODO: look into having the fillObserver be notified of Node changes as our source
       };
 
       proto.markDirtyStroke = function() {
         assert && Color.checkPaint( this.instance.node._stroke );
 
         this.markPaintDirty();
-        this.strokeObserver.updatePrimary(); // TODO: look into having the strokeObserver be notified of Node changes as our source
+        this.strokeObserver.setPrimary( this.instance.node._stroke );
+        // TODO: look into having the strokeObserver be notified of Node changes as our source
       };
 
       proto.markDirtyLineWidth = function() {

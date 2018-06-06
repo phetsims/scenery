@@ -76,14 +76,14 @@ define( function( require ) {
         this.strokeCallback = this.strokeCallback || this.markDirtyStroke.bind( this );
 
         // @private {PaintObserver} - Observers the fill property for nodes
-        this.fillObserver = this.fillObserver || new PaintObserver( 'fill', this.fillCallback );
+        this.fillObserver = this.fillObserver || new PaintObserver( this.fillCallback );
 
         // @private {PaintObserver} - Observers the stroke property for nodes
-        this.strokeObserver = this.strokeObserver || new PaintObserver( 'stroke', this.strokeCallback );
+        this.strokeObserver = this.strokeObserver || new PaintObserver( this.strokeCallback );
 
         // Hook up our fill/stroke observers to this node
-        this.fillObserver.initialize( instance.node );
-        this.strokeObserver.initialize( instance.node );
+        this.fillObserver.setPrimary( instance.node._fill );
+        this.strokeObserver.setPrimary( instance.node._stroke );
 
         return this;
       };
@@ -121,7 +121,8 @@ define( function( require ) {
 
         this.dirtyFill = true;
         this.markPaintDirty();
-        this.fillObserver.updatePrimary(); // TODO: look into having the fillObserver be notified of Node changes as our source
+        this.fillObserver.setPrimary( this.instance.node._fill );
+        // TODO: look into having the fillObserver be notified of Node changes as our source
       };
 
       /**
@@ -133,7 +134,8 @@ define( function( require ) {
 
         this.dirtyStroke = true;
         this.markPaintDirty();
-        this.strokeObserver.updatePrimary(); // TODO: look into having the strokeObserver be notified of Node changes as our source
+        this.strokeObserver.setPrimary( this.instance.node._stroke );
+        // TODO: look into having the strokeObserver be notified of Node changes as our source
       };
 
       /**
