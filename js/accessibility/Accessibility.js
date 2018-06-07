@@ -351,6 +351,10 @@ define( function( require ) {
           // element.  See ariaDescribessNodoe for more information
           this._ariaDescriptionContent = AccessiblePeer.PRIMARY_SIBLING;
 
+          // @private {Array.<Object>} - See addAriaLabelledByAssociation for more info...
+          // TODO: Add more docs, see https://github.com/phetsims/scenery/issues/701
+          this._ariaLabelledbyAssociations = [];
+
           // @private {?boolean} - whether or not this node's DOM element has been explicitly set to receive focus from
           // tab navigation. Sets the tabIndex attribute on the node's DOM element. Setting to false will not remove the
           // node's DOM from the document, but will ensure that it cannot receive focus by pressing 'tab'.  Several
@@ -1249,6 +1253,56 @@ define( function( require ) {
           return this._groupFocusHighlight;
         },
         get groupFocusHighlight() { return this.getGroupFocusHighlight(); },
+
+
+        /**
+         * TODO: docs, see https://github.com/phetsims/scenery/issues/701
+         *
+         * @param {Object} association - with key value pairs like
+         *                               { otherNode: {Node}, otherElementName: {string}, thisElementName: {string } }
+         */
+        addAriaLabelledByAssociation: function( associationObject ) {
+          this._ariaLabelledbyAssociations.push( associationObject );
+
+          // flag that this node is is being labelled by the other nodes, so that if the other node changes we can
+          // restore the associations
+          associationObject.otherNode._ariaLabellingNodes.push( this );
+        },
+
+        /**
+         * Update
+         *
+         * @param {Node} [node] TODO: Add this optional node, if exists, only update association objects that
+         * are related to that node
+         *
+         * @private
+         */
+        updateAriaLabelledByAssociations: function( node ) {
+          for ( var i = 0; i < this._ariaLabelledbyAssociations.length; i++ ) {
+            var associationObject = this._ariaLabelledbyAssociations[ i ];
+            this.addAriaLabelledByAssociationImplementation( associationObject );
+          }
+        },
+
+        /**
+         * Implementation for addAriaLabelledbyAssociation. Called in addAriaLabelledByAssociation, as well as
+         * invalidateAccessibleContent when we recreate the accessible content for a Node.
+         *
+         * @param {Object} assocation
+         */
+        addAriaLabelledByAssociationImplementation: function( associationObject ) {
+          this.updateAccessiblePeers( function( peer ) {
+
+            // We are just using the first AccessibleInstance for simplicity, but it is OK because the accessible
+            // content for all AccessibleInstances will be the same, so the Accessible Names (in the browser's
+            // accessibility tree) of elements that are referenced by aria-labelledby will all have the same content
+            var firstAccessibleInstance = associationObject.otherNode.getAccessibleInstances()[ 0 ];
+
+            var otherPeerElement = firstAccessibleInstance.peer.getElementByName( associationObject.otherElementName );
+            var thisPeerElement = peer.getElementByName( associationObject.thisElementName );
+            thisPeerElement.setAttribute( 'aria-labelledby', otherPeerElement.id );
+          } );
+        },
 
         /**
          * Sets the node that labels this node through the ARIA attribute aria-labelledby. The value of the
