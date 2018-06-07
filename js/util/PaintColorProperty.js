@@ -28,7 +28,7 @@ define( function( require ) {
     options = _.extend( {
       // {number} - 0 applies no change. Positive numbers brighten the color up to 1 (white). Negative numbers darken
       // the color up to -1 (black).
-      brightnessAdjustment: 0
+      factor: 0
     }, options );
 
     Property.call( this, initialColor, options );
@@ -37,7 +37,7 @@ define( function( require ) {
     this._paint = null;
 
     // @private {number}
-    this._brightnessAdjustment = options.brightnessAdjustment;
+    this._factor = options.factor;
 
     // @private {function} - Our "paint changed" listener, will update the value of this Property.
     this._changeListener = this.invalidatePaint.bind( this );
@@ -77,42 +77,42 @@ define( function( require ) {
     get paint() { return this.getPaint(); },
 
     /**
-     * Sets the current brightness adjustment.
+     * Sets the current value used for adjusting the brightness or darkness (luminance) of the color.
      * @public
      *
      * 0 applies no change. Positive numbers brighten the color up to 1 (white). Negative numbers darken the color up
      * to -1 (black).
      *
-     * @param {number} brightnessAdjustment
+     * @param {number} factor
      */
-    setBrightnessAdjustment: function( brightnessAdjustment ) {
-      assert && assert( typeof brightnessAdjustment === 'number' && brightnessAdjustment >= -1 && brightnessAdjustment <= 1 );
+    setFactor: function( factor ) {
+      assert && assert( typeof factor === 'number' && factor >= -1 && factor <= 1 );
 
-      if ( this.brightnessAdjustment !== brightnessAdjustment ) {
-        this._brightnessAdjustment = brightnessAdjustment;
+      if ( this.factor !== factor ) {
+        this._factor = factor;
 
         this.invalidatePaint();
       }
     },
-    set brightnessAdjustment( value ) { this.setBrightnessAdjustment( value ); },
+    set factor( value ) { this.setFactor( value ); },
 
     /**
-     * Returns the current brightness adjustment.
+     * Returns the current value used for adjusting the brightness or darkness (luminance) of the color.
      * @public
      *
      * @returns {number}
      */
-    getBrightnessAdjustment: function() {
-      return this._brightnessAdjustment;
+    getFactor: function() {
+      return this._factor;
     },
-    get brightnessAdjustment() { return this.getBrightnessAdjustment(); },
+    get factor() { return this.getFactor(); },
 
     /**
      * Updates the value of this property.
      * @private
      */
     invalidatePaint: function() {
-      this.value = Paint.toColor( this._paint ).colorUtilsBrightness( this._brightnessAdjustment );
+      this.value = Paint.toColor( this._paint ).colorUtilsBrightness( this._factor );
     },
 
     /**
