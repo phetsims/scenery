@@ -136,36 +136,14 @@ an UI and Display made for visual testing and debugging.
           toggleA11yDebug();
           toggleUpdates();
 
-          // var a = new scenery.Node();
-          // var b = new scenery.Node( { tagName: 'div' } );
-          // scene.addChild( a );
-          // a.addChild( b );
-          // a.tagName = 'span';
+          scene.tagName = 'div';
 
-          // var a = new scenery.Node( { tagName: 'span' } );
-          // var b = new scenery.Node( { tagName: 'div' } );
-          // scene.addChild( a );
-          // a.addChild( b );
-          // a.tagName = null;
+          var a = new scenery.Node( { tagName: 'div', accessibleName: 'Test label' } );
+          scene.addChild( a );
 
-          // display.updateDisplay();
-
-
-          // window.a = new scenery.Node( { tagName: 'div' } );
-          // window.b = new scenery.Node();
-          // window.c = new scenery.Node( { tagName: 'span' } );
-
-          // a.children = [ b, c ];
-          // a.accessibleOrder = [ c, b ];
-          // b.children = [ c ];
-          // scene.addChild( a );
-          // a.accessibleOrder = null;
-
-          // display.updateDisplay();
-
-          var fuzzer = new scenery.AccessibilityFuzzer( 5, false );
-          var count = 0;
-          while ( true ) { fuzzer.step(); console.log( ++count ); }
+          // TODO: this should be passing,see
+          var b = new scenery.Node( { tagName: 'input', accessibleName: 'Test label' } );
+          a.addChild( b );
         } )
       };
 
