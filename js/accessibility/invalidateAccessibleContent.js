@@ -164,6 +164,15 @@ define( function( require ) {
             self.setInputType( self._inputType );
           }
 
+          // restore this nodes aria-labelledby associations
+          self.updateAriaLabelledbyAssociations();
+
+          // if any other nodes are aria-labelledby this Node, update those associations too. Since this node's
+          // accessible content needs to be recreated, they need to update their aria-labelledby associations accordingly.
+          for ( i = 0; i < self._nodesThatAreAriaLabelledByThisNode.length; i++ ) {
+            self._nodesThatAreAriaLabelledByThisNode[ i ].updateAriaLabelledbyAssociations();
+          }
+
           // restore aria-labelledby associations
           var labelledByNode = self._ariaLabelledByNode;
           labelledByNode && self.setAriaLabelledByNode( labelledByNode, self._ariaLabelledContent, labelledByNode._ariaLabelContent );

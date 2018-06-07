@@ -351,6 +351,17 @@ define( function( require ) {
           // element.  See ariaDescribessNodoe for more information
           this._ariaDescriptionContent = AccessiblePeer.PRIMARY_SIBLING;
 
+          // @private {Array.<Object>} - Keep track of what this Node is aria-labelledby via "associationObjects"
+          // see addAriaLabelledbyAssociation for why we support more than one association.
+          this._ariaLabelledbyAssociations = [];
+
+          // Keep a reference to all nodes that are aria-labelledby this node, i.e. that have store one of this Node's
+          // peer HTMLElement's id in their peer HTMLElement's aria-labelledby attribute. This way we can tell other
+          // nodes to update their aria-labelledby associations when this Node rebuilds its accessible content.
+          // @public (scenery-internal) - only used by Accessibility.js and invalidateAccessibleContent.js
+          // {Array.<Node>}
+          this._nodesThatAreAriaLabelledByThisNode = [];
+
           // @private {?boolean} - whether or not this node's DOM element has been explicitly set to receive focus from
           // tab navigation. Sets the tabIndex attribute on the node's DOM element. Setting to false will not remove the
           // node's DOM from the document, but will ensure that it cannot receive focus by pressing 'tab'.  Several
@@ -1250,6 +1261,83 @@ define( function( require ) {
         },
         get groupFocusHighlight() { return this.getGroupFocusHighlight(); },
 
+
+        /**
+         * Add an aria-labelledby association to this node. The data in the associationObject will be implemented like
+         * "a peer's HTMLElement of this Node (specified with the string constant stored in `thisElementName`) will have an
+         * aria-labelledby attribute with a value that includes the `otherNode`'s peer HTMLElement's id (specified with
+         * `otherElementName`)."
+         *
+         * There can be more than one association because an aria-labelledby attribute's value can be a space separated
+         * list of HTML ids, and not just a single id, see https://www.w3.org/WAI/GL/wiki/Using_aria-labelledby_to_concatenate_a_label_from_several_text_nodes
+         *
+         * @param {Object} associationObject - with key value pairs like
+         *                               { otherNode: {Node}, otherElementName: {string}, thisElementName: {string } }
+         *                               see AccessiblePeer for valid element names.
+         */
+        addAriaLabelledbyAssociation: function( associationObject ) {
+
+          this._ariaLabelledbyAssociations.push( associationObject ); // Keep track of this association.
+
+          // Flag that this node is is being labelled by the other node, so that if the other node changes it can tell
+          // this node to restore the association appropriately, see invalidateAccessibleContent for implementation.
+          associationObject.otherNode._nodesThatAreAriaLabelledByThisNode.push( this );
+
+
+          // update the accessiblePeers with this aria-labelledby association
+          this.addAriaLabelledbyAssociationImplementation( associationObject );
+        },
+
+
+        /**
+         * Implementation for addAriaLabelledbyAssociation. Called in addAriaLabelledByAssociation, as well as
+         * invalidateAccessibleContent when we recreate the accessible content for a Node.
+         *
+         * Update accessible peers with this aria-labelledby association.
+         *
+         * @param {Object} associationObject - see addAriaLabelledbyAssociation doc
+         */
+        addAriaLabelledbyAssociationImplementation: function( associationObject ) {
+          this.updateAccessiblePeers( function( peer ) {
+
+            // We are just using the first AccessibleInstance for simplicity, but it is OK because the accessible
+            // content for all AccessibleInstances will be the same, so the Accessible Names (in the browser's
+            // accessibility tree) of elements that are referenced by aria-labelledby will all have the same content
+            var firstAccessibleInstance = associationObject.otherNode.getAccessibleInstances()[ 0 ];
+
+            var otherPeerElement = firstAccessibleInstance.peer.getElementByName( associationObject.otherElementName );
+            var thisPeerElement = peer.getElementByName( associationObject.thisElementName );
+            var previousAriaLabelledbyValue = thisPeerElement.getAttribute( 'aria-labelledby' ) || '';
+            assert && assert( typeof previousAriaLabelledbyValue === 'string' );
+
+            // add the id from the new association to the value of the HTMLElement's attribute.
+            thisPeerElement.setAttribute( 'aria-labelledby', [ previousAriaLabelledbyValue, otherPeerElement.id ].join( ' ' ) );
+          } );
+        },
+        /**
+         * Update all of the aria-labelledby associations for this Node. This involves clearing out the current aria-labelledby
+         * values in the AccessiblePeer, to be restored to the value of the state stored by this Node
+         *
+         * @public (scenery-internal) only used by invalidateAccessibleContent.js
+         */
+        updateAriaLabelledbyAssociations: function() {
+
+          // clear the current aria-labelledby attribute and recreate it from stored associations
+          // TODO: make this more efficient
+          this.updateAccessiblePeers( function( peer ) {
+            peer.primarySibling && peer.primarySibling.setAttribute( 'aria-labelledby', '' );
+            peer.labelSibling && peer.labelSibling.setAttribute( 'aria-labelledby', '' );
+            peer.descriptionSibling && peer.descriptionSibling.setAttribute( 'aria-labelledby', '' );
+            peer.containerParent && peer.containerParent.setAttribute( 'aria-labelledby', '' );
+          } );
+
+          for ( var i = 0; i < this._ariaLabelledbyAssociations.length; i++ ) {
+            var associationObject = this._ariaLabelledbyAssociations[ i ];
+
+            this.addAriaLabelledbyAssociationImplementation( associationObject );
+          }
+        },
+
         /**
          * Sets the node that labels this node through the ARIA attribute aria-labelledby. The value of the
          * 'aria-labelledby' attribute  is a string id that references another HTMLElement in the DOM.
@@ -2139,12 +2227,12 @@ define( function( require ) {
   Accessibility.beforeOp = function() {
 
     // paranoia about initialization order (should be safe)
-    focusedNode = scenery.Display && scenery.Display.focusedNode;   
+    focusedNode = scenery.Display && scenery.Display.focusedNode;
   };
 
   /**
    * Restores state after an operation that might have caused cause state to be lost.
-   * 
+   *
    * @public
    * @static
    */

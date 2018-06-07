@@ -364,6 +364,57 @@ define( function( require ) {
 
   } );
 
+  // new aria-labelledby api
+  QUnit.test( 'aria-labelledby', function( assert ) {
+
+    var rootNode = new Node();
+    var display = new Display( rootNode ); // eslint-disable-line
+    document.body.appendChild( display.domElement );
+
+    // two new nodes that will be related with the aria-labelledby and aria-describedby associations
+    var a = new Node( { tagName: 'button', labelTagName: 'p', descriptionTagName: 'p' } );
+    var b = new Node( { tagName: 'p', innerContent: TEST_LABEL_2 } );
+    rootNode.children = [ a, b ];
+
+    a.addAriaLabelledbyAssociation( {
+      otherNode: b,
+      thisElementName: AccessiblePeer.PRIMARY_SIBLING,
+      otherElementName: AccessiblePeer.PRIMARY_SIBLING
+    } );
+
+    var aElement = getPrimarySiblingElementByNode( a );
+    var bElement = getPrimarySiblingElementByNode( b );
+    assert.ok( aElement.getAttribute( 'aria-labelledby' ).indexOf( bElement.id ) >= 0, 'aria-labelledby for one node.' );
+
+    var c = new Node( { tagName: 'div', innerContent: TEST_LABEL } );
+    rootNode.addChild( c );
+
+    a.addAriaLabelledbyAssociation( {
+      otherNode: c,
+      thisElementName: AccessiblePeer.PRIMARY_SIBLING,
+      otherElementName: AccessiblePeer.PRIMARY_SIBLING
+    } );
+
+    aElement = getPrimarySiblingElementByNode( a );
+    bElement = getPrimarySiblingElementByNode( b );
+    var cElement = getPrimarySiblingElementByNode( c );
+    var expectedValue = [ bElement.id, cElement.id ].join( ' ' );
+    assert.ok( aElement.getAttribute( 'aria-labelledby' ).trim() === expectedValue,
+      'aria-labelledby two nodes' );
+
+    // Make c invalidate
+    rootNode.removeChild( c );
+    rootNode.addChild( new Node( { children: [ c ] } ) );
+
+    var oldValue = expectedValue;
+
+    aElement = getPrimarySiblingElementByNode( a );
+    cElement = getPrimarySiblingElementByNode( c );
+    assert.ok( aElement.getAttribute( 'aria-labelledby' ).trim() !== oldValue, 'should have invalidated on tree change' );
+    assert.ok( aElement.getAttribute( 'aria-labelledby' ).trim() === [ bElement.id, cElement.id ].join( ' ' ),
+      'should have invalidated on tree change' );
+
+  } );
   QUnit.test( 'aria-labelledby, aria-describedby', function( assert ) {
     var rootNode = new Node();
     var display = new Display( rootNode ); // eslint-disable-line
@@ -1030,7 +1081,7 @@ define( function( require ) {
     assert.ok( containerElement.childNodes[ 1 ].tagName.toUpperCase() === DEFAULT_DESCRIPTION_TAG_NAME, 'description sibling second' );
     assert.ok( containerElement.childNodes[ 2 ].tagName.toUpperCase() === 'LI', 'primary sibling last' );
   } );
-  
+
   // Higher level setter/getter options
   QUnit.test( 'accessibleName option', function( assert ) {
 
@@ -1053,7 +1104,7 @@ define( function( require ) {
     // var b = new Node( { tagName: 'input', accessibleName: TEST_LABEL } );
     // a.addChild( b );
     // var bElement = getPrimarySiblingElementByNode( b );
- //   var bParent = getPrimarySiblingElementByNode( b ).parentElement;
+    //   var bParent = getPrimarySiblingElementByNode( b ).parentElement;
     // var bLabelSibling = bParent.children[ DEFAULT_LABEL_SIBLING_INDEX ];
     // assert.ok( bLabelSibling.textContent === TEST_LABEL, 'accessibleName sets label sibling' );
     // assert.ok( bLabelSibling.getAttribute( 'for' ).indexOf( bElement.id ) >= 0, 'accessibleName sets label\'s "for" attribute' );
@@ -1070,7 +1121,7 @@ define( function( require ) {
 
     var a = new Node( { tagName: 'button', focusHighlight: TEST_HIGHLIGHT } );
     var b = new Node( { tagName: 'button', focusHighlight: TEST_HIGHLIGHT } );
-    rootNode.children =  [ a, b ];
+    rootNode.children = [ a, b ];
     b.focus();
 
     // after moving a to front, b should still have focus
