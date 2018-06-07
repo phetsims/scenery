@@ -162,8 +162,8 @@ define( function( require ) {
   var Matrix3 = require( 'DOT/Matrix3' );
   var Mouse = require( 'SCENERY/input/Mouse' );
   var Pen = require( 'SCENERY/input/Pen' );
-  var Picker = require( 'SCENERY/util/Picker' );
   var PhetioObject = require( 'TANDEM/PhetioObject' );
+  var Picker = require( 'SCENERY/util/Picker' );
   var Renderer = require( 'SCENERY/display/Renderer' );
   var RendererSummary = require( 'SCENERY/util/RendererSummary' );
   var scenery = require( 'SCENERY/scenery' );
