@@ -1104,17 +1104,25 @@ define( function( require ) {
       // If any node in the trail has accessible content
       if ( trailAccessible ) {
 
-        // Starting with the leaf most node, search for the closest accessible ancestor from the node under the pointer.
-        for ( var i = eventTrail.nodes.length - 1; i >= 0; i-- ) {
-          if ( eventTrail.nodes[ i ].focusable ) {
-            focusableNode = eventTrail.nodes[ i ];
-            break;
-          }
-        }
+        // an AT might have sent a down event at the location of the PDOM element (outside of the display), if this
+        // happened we will not remove focus
+        var inDisplay = this.display.bounds.containsPoint( pointer.point );
+        if ( inDisplay ) {
 
-        // Remove keyboard focus, but store element that is receiving interaction in case we resume .
-        this.display.pointerFocus = focusableNode;
-        scenery.Display.focus = null;
+          // Starting with the leaf most node, search for the closest accessible ancestor from the node under the
+          // pointer.
+          for ( var i = eventTrail.nodes.length - 1; i >= 0; i-- ) {
+            if ( eventTrail.nodes[ i ].focusable ) {
+              focusableNode = eventTrail.nodes[ i ];
+              break;
+            }
+          }
+
+          // Remove keyboard focus, but store element that is receiving interaction in case we resume .
+          this.display.pointerFocus = focusableNode;
+          scenery.Display.focus = null;
+
+        }
       }
 
       sceneryLog && sceneryLog.Input && sceneryLog.pop();
