@@ -18,7 +18,7 @@ define( function( require ) {
   var Tandem = require( 'TANDEM/Tandem' );
   var Touch = require( 'SCENERY/input/Touch' );
 
-  // phet-io modules
+  // ifphetio
   var SimpleDragHandlerIO = require( 'SCENERY/input/SimpleDragHandlerIO' );
 
   // constants

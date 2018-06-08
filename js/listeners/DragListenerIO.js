@@ -12,7 +12,7 @@ define( function( require ) {
   var scenery = require( 'SCENERY/scenery' );
   var PressListenerIO = require( 'SCENERY/listeners/PressListenerIO' );
 
-  // phet-io modules
+  // ifphetio
   var assertInstanceOf = require( 'ifphetio!PHET_IO/assertInstanceOf' );
   var phetioInherit = require( 'ifphetio!PHET_IO/phetioInherit' );
 

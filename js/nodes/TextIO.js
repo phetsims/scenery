@@ -14,7 +14,7 @@ define( function( require ) {
   var FontIO = require( 'SCENERY/util/FontIO' );
   var NodeIO = require( 'SCENERY/nodes/NodeIO' );
 
-  // phet-io modules
+  // ifphetio
   var assertInstanceOf = require( 'ifphetio!PHET_IO/assertInstanceOf' );
   var phetioInherit = require( 'ifphetio!PHET_IO/phetioInherit' );
   var FunctionIO = require( 'ifphetio!PHET_IO/types/FunctionIO' );

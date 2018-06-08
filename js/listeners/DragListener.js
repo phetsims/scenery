@@ -51,7 +51,7 @@ define( function( require ) {
   var TransformTracker = require( 'SCENERY/util/TransformTracker' );
   var Vector2 = require( 'DOT/Vector2' );
 
-  // phet-io modules
+  // ifphetio
   var DragListenerIO = require( 'SCENERY/listeners/DragListenerIO' );
 
   // Scratch vectors used to prevent allocations

@@ -94,7 +94,7 @@ define( function( require ) {
   var SceneryStyle = require( 'SCENERY/util/SceneryStyle' );
   var Util = require( 'SCENERY/util/Util' );
 
-  // phet-io modules
+  // ifphetio
   var NullableIO = require( 'ifphetio!PHET_IO/types/NullableIO' );
 
   /**

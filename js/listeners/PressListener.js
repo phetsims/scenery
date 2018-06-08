@@ -25,7 +25,7 @@ define( function( require ) {
   var scenery = require( 'SCENERY/scenery' );
   var Tandem = require( 'TANDEM/Tandem' );
 
-  // phet-io modules
+  // ifphetio
   var PressListenerIO = require( 'SCENERY/listeners/PressListenerIO' );
 
   /**
