@@ -18,18 +18,18 @@
  * - <sub> and <sup> for subscripts / superscripts
  * - <u> for underlined text
  * - <s> for strikethrough text
- * - <font> tags with attributes color="cssString", face="familyString", size="cssSize"
  * - <span> tags with a dir="ltr" / dir="rtl" attribute
  * - <br> for explicit line breaks
  * - Unicode bidirectional marks (present in PhET strings) for full RTL support
+ * - CSS style="..." attributes, with color and font settings, see https://github.com/phetsims/scenery/issues/807
  *
  * Examples from the scenery-phet demo:
  *
  * new RichText( 'RichText can have <b>bold</b> and <i>italic</i> text.' ),
  * new RichText( 'Can do H<sub>2</sub>O (A<sub>sub</sub> and A<sup>sup</sup>), or nesting: x<sup>2<sup>2</sup></sup>' ),
- * new RichText( 'Additionally: <font color="blue">color</font>, <font size="30px">sizes</font>, <font face="serif">faces</font>, <s>strikethrough</s>, and <u>underline</u>' ),
- * new RichText( 'These <b><em>can</em> <u><font color="red">be</font> mixed<sup>1</sup></u></b>.' ),
- * new RichText( '\u202aHandles bidirectional text: \u202b<font color="#0a0">مقابض</font> النص ثنائي <b>الاتجاه</b><sub>2</sub>\u202c\u202c' ),
+ * new RichText( 'Additionally: <span style="color: blue;">color</span>, <span style="font-size: 30px;">sizes</span>, <span style="font-family: serif;">faces</span>, <s>strikethrough</s>, and <u>underline</u>' ),
+ * new RichText( 'These <b><em>can</em> <u><span style="color: red;">be</span> mixed<sup>1</sup></u></b>.' ),
+ * new RichText( '\u202aHandles bidirectional text: \u202b<span style="color: #0a0;">مقابض</span> النص ثنائي <b>الاتجاه</b><sub>2</sub>\u202c\u202c' ),
  * new RichText( '\u202b\u062a\u0633\u062a (\u0632\u0628\u0627\u0646)\u202c' ),
  * new RichText( 'HTML entities need to be escaped, like &amp; and &lt;.' ),
  * new RichText( 'Supports <a href="{{phetWebsite}}"><em>links</em> with <b>markup</b></a>, and <a href="{{callback}}">links that call functions</a>.', {
@@ -50,7 +50,7 @@
  *     new RichText( 'Multi-line text with the<br>separator &lt;br&gt; and <a href="https://phet.colorado.edu">handles<br>links</a> and other <b>tags<br>across lines</b>', {
  *       links: true
  *     } ),
- *     new RichText( 'Supposedly RichText supports line wrapping. Here is a lineWrap of 300, which should probably wrap multiple times here', { lineWrap: 300 })
+ *     new RichText( 'Supposedly RichText supports line wrapping. Here is a lineWrap of 300, which should probably wrap multiple times here', { lineWrap: 300 } )
  *   ]
  * } )
  *
@@ -125,6 +125,19 @@ define( function( require ) {
 
   // We need to do some font-size tests, so we have a Text for that.
   var scratchText = new scenery.Text( '' );
+
+  var FONT_STYLE_MAP = {
+    'fontFamily': 'family',
+    'fontSize': 'size',
+    'fontStretch': 'stretch',
+    'fontStyle': 'style',
+    'fontVariant': 'variant',
+    'fontWeight': 'weight',
+    'lineHeight': 'lineHeight'
+  };
+
+  var FONT_STYLE_KEYS = Object.keys( FONT_STYLE_MAP );
+  var STYLE_KEYS = [ 'color' ].concat( FONT_STYLE_KEYS );
 
   /**
    * @public
@@ -525,6 +538,28 @@ define( function( require ) {
         sceneryLog && sceneryLog.RichText && sceneryLog.RichText( 'appending element' );
         sceneryLog && sceneryLog.RichText && sceneryLog.push();
 
+        if ( element.attributes.style ) {
+          var css = element.attributes.style;
+          assert && Object.keys( css ).forEach( function( key ) {
+            assert( _.includes( STYLE_KEYS, key ), 'See supported style CSS keys' );
+          } );
+
+          // Fill
+          if ( css.color ) {
+            fill = new Color( css.color );
+          }
+
+          // Font
+          var fontOptions = {};
+          for ( var i = 0; i < FONT_STYLE_KEYS.length; i++ ) {
+            var styleKey = FONT_STYLE_KEYS[ i ];
+            if ( css[ styleKey ] ) {
+              fontOptions[ FONT_STYLE_MAP[ styleKey ] ] = css[ styleKey ];
+            }
+          }
+          font = font.copy( fontOptions );
+        }
+
         // Achor (link)
         if ( element.tagName === 'a' ) {
           var href = element.attributes.href;
@@ -580,28 +615,6 @@ define( function( require ) {
           node.scale( this._supScale );
           node.addExtraBeforeSpacing( this._supXSpacing );
           node.y += this._supYOffset;
-        }
-        // Font (color/face/size attributes)
-        else if ( element.tagName === 'font' ) {
-          if ( element.attributes.color ) {
-            fill = new Color( element.attributes.color );
-          }
-          if ( element.attributes.face ) {
-            font = font.copy( {
-              // Handle decoding
-              family: element.attributes.face.replace( /&quot;/g, '"' )
-                .replace( /&#x2F;/g, '/' )
-                .replace( /&#x27;/g, '\'' )
-                .replace( /&gt;/g, '>' )
-                .replace( /&lt;/g, '<' )
-                .replace( /&amp;/g, '&' )
-            } );
-          }
-          if ( element.attributes.size ) {
-            font = font.copy( {
-              size: element.attributes.size
-            } );
-          }
         }
 
         // If we've added extra spacing, we'll need to subtract it off of our available width
@@ -1350,17 +1363,16 @@ define( function( require ) {
      * @returns {string}
      */
     stringWithFont: function( str, font ) {
-      // Escaping https://stackoverflow.com/questions/9187946/escaping-inside-html-tag-attribute-value
-      var familyString = font.family.replace( /&/g, '&amp;' ).replace( /</g, '&lt;' ).replace( /"/g, '&quot;' );
-
-      var result = '<font family="' + familyString + '" size="' + font.size + '" >' + str + '</font>';
-      if ( font.style === 'italic' ) {
-        result = '<i>' + result + '</i>';
-      }
-      if ( font.weight === 'bold' ) {
-        result = '<b>' + result + '</b>';
-      }
-      return result;
+      // TODO: ES6 string interpolation.
+      return '<span style=\'' +
+             'font-style: ' + font.style + ';' +
+             'font-variant: ' + font.variant + ';' +
+             'font-weight: ' + font.weight + ';' +
+             'font-stretch: ' + font.stretch + ';' +
+             'font-size: ' + font.size + ';' +
+             'font-family: ' + font.family + ';' +
+             'line-height: ' + font.lineHeight + ';' +
+             '\'>' + str + '</span>';
     },
 
     /**
@@ -1392,7 +1404,7 @@ define( function( require ) {
 
     /**
      * Stringifies an HTML subtree defined by the given element, but removing certain tags that we don't need for
-     * accessibility (like <a>, <font>, <span>, etc.), and adding in tags we do want (see ACCESSIBLE_TAGS).
+     * accessibility (like <a>, <span>, etc.), and adding in tags we do want (see ACCESSIBLE_TAGS).
      * @public
      *
      * @param {*} element - See himalaya
@@ -1438,6 +1450,31 @@ define( function( require ) {
     contentToString: function( content, isLTR ) {
       var unescapedContent = _.unescape( content );
       return isLTR ? ( '\u202a' + unescapedContent + '\u202c' ) : ( '\u202b' + unescapedContent + '\u202c' );
+    },
+
+    /**
+     * Creates an object with key-value pairs for the CSS declarations.
+     * @private
+     *
+     * @param {string} str - CSS declaration list
+     * @returns {Object}
+     */
+    parseCSSDeclarations: function( str ) {
+      var result = {};
+
+      // Somewhat simplified parsing, but should work for the vast majority of cases.
+      var declarations = str.split( ';' );
+
+      for ( var i = 0; i < declarations.length; i++ ) {
+        var declaration = declarations[ i ].trim();
+        if ( declaration.length < 2 ) { continue; }
+        var bits = declaration.split( ':' );
+        assert && assert( bits.length === 2, 'Each declaration should have a key and value' );
+
+        result[ bits[ 0 ].trim() ] = bits[ 1 ].trim();
+      }
+
+      return result;
     }
   } );
 
