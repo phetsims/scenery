@@ -403,7 +403,7 @@ define( function( require ) {
 
       sceneryLog && sceneryLog.InputListener && sceneryLog.InputListener( 'PressListener successful press' );
       sceneryLog && sceneryLog.InputListener && sceneryLog.push();
-      this.startEvent( 'user', 'press', {
+      this.startEvent( 'user', 'pressed', {
         x: event.pointer.point.x,
         y: event.pointer.point.y
       } );
@@ -444,7 +444,7 @@ define( function( require ) {
     release: function() {
       sceneryLog && sceneryLog.InputListener && sceneryLog.InputListener( 'PressListener release' );
       sceneryLog && sceneryLog.InputListener && sceneryLog.push();
-      this.startEvent( 'user', 'release' );
+      this.startEvent( 'user', 'released' );
 
       assert && assert( this.isPressed, 'This listener is not pressed' );
 
