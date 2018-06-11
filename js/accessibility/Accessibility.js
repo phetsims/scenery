@@ -1325,10 +1325,10 @@ define( function( require ) {
           // clear the current aria-labelledby attribute and recreate it from stored associations
           // TODO: make this more efficient
           this.updateAccessiblePeers( function( peer ) {
-            peer.primarySibling && peer.primarySibling.setAttribute( 'aria-labelledby', '' );
-            peer.labelSibling && peer.labelSibling.setAttribute( 'aria-labelledby', '' );
-            peer.descriptionSibling && peer.descriptionSibling.setAttribute( 'aria-labelledby', '' );
-            peer.containerParent && peer.containerParent.setAttribute( 'aria-labelledby', '' );
+            peer.primarySibling && peer.primarySibling.removeAttribute( 'aria-labelledby' );
+            peer.labelSibling && peer.labelSibling.removeAttribute( 'aria-labelledby' );
+            peer.descriptionSibling && peer.descriptionSibling.removeAttribute( 'aria-labelledby' );
+            peer.containerParent && peer.containerParent.removeAttribute( 'aria-labelledby' );
           } );
 
           for ( var i = 0; i < this._ariaLabelledbyAssociations.length; i++ ) {
