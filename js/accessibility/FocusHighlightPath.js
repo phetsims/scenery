@@ -193,7 +193,7 @@ define( function( require ) {
     getOuterHighlightColor: function() {
       return this._outerHighlightColor;
     },
-    get outerHighlightColor() { return this.getOuterHighlightColor(); },
+    get outerHighlightColor() { return this.getOuterHighlightColor(); }
 
   }, {
 

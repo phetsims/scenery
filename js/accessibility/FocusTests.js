@@ -235,13 +235,13 @@ define( function( require ) {
       {
         trail: new Trail( [ x, a, b, e, f ] ), children: [
           { trail: new Trail( [ x, a, b, e, f, h ] ), children: [] },
-          { trail: new Trail( [ x, a, b, e, f, i ] ), children: [] },
+          { trail: new Trail( [ x, a, b, e, f, i ] ), children: [] }
         ]
       },
       {
         trail: new Trail( [ x, a, c, e, f ] ), children: [
           { trail: new Trail( [ x, a, c, e, f, h ] ), children: [] },
-          { trail: new Trail( [ x, a, c, e, f, i ] ), children: [] },
+          { trail: new Trail( [ x, a, c, e, f, i ] ), children: [] }
         ]
       },
 
