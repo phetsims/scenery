@@ -619,6 +619,6 @@ define( function( require ) {
      */
     isDownMovementKey: function( keyCode ) {
       return keyCode === KeyboardUtil.KEY_S || keyCode === KeyboardUtil.KEY_DOWN_ARROW;
-    },
+    }
   } );
 } );
