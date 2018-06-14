@@ -816,7 +816,7 @@ define( function( require ) {
         var desired = inBoth[ i ];
         if ( this._children[ i ] !== desired ) {
           this._children[ i ] = desired;
-          if ( minChangeIndex !== -1 ) {
+          if ( minChangeIndex === -1 ) {
             minChangeIndex = i;
           }
           maxChangeIndex = i;
