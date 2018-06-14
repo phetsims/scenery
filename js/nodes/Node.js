@@ -148,6 +148,46 @@
  * The trails above are in order from bottom to top (visually), due to the order of children. Thus since A's children
  * are [B,C] in that order, F with the trail [A,B,D,F] is displayed below [A,C,D,F], because C is after B.
  *
+ * ## Events
+ *
+ * There are a number of events that can be triggered on a Node (usually when something changes or happens). Currently
+ * Node effectively inherits the Events type, and thus has the on()/off() and onStatic()/offStatic() methods for
+ * handling these types of event listeners. It is generally preferred to use the "static" forms, which have improved
+ * performance (but come with the restriction that a listener being fired should NOT trigger any listeners getting
+ * added or removed as a side-effect).
+ *
+ * The following events are exposed non-Scenery usage:
+ *
+ * - childrenChanged - This is fired only once for any single operation that may change the children of a Node. For
+ *                     example, if a Node's children are [ a, b ] and setChildren( [ a, x, y, z ] ) is called on it,
+ *                     the childrenChanged event will only be fired once after the entire operation of changing the
+ *                     children is completed.
+ * - selfBounds - This event can be fired synchronously, and happens with the self-bounds of a Node is changed.
+ * - childBounds - This is fired asynchronously (usually as part of a Display.updateDisplay()) when the childBounds of
+ *                 the node is changed.
+ * - localBounds - This is fired asynchronously (usually as part of a Display.updateDisplay()) when the localBounds of
+ *                 the node is changed.
+ * - bounds - This is fired asynchronously (usually as part of a Display.updateDisplay()) when the bounds of the node is
+ *            changed.
+ * - transform - Fired synchronously when the transform (transformation matrix) of a Node is changed. Any change to a
+ *               Node's translation/rotation/scale/etc. will trigger this event.
+ * - visibility - Fired synchronously when the visibility of the Node is toggled.
+ * - opacity - Fired synchronously when the opacity of the Node is changed.
+ * - pickability - Fired synchronously when the pickability of the Node is changed
+ * - clip - Fired synchronously when the clipArea of the Node is changed.
+ *
+ * While the following are considered scenery-internal and should not be used externally:
+ *
+ * - childInserted - For a single added child Node.
+ * - childRemoved - For a single removed child Node.
+ * - childrenReordered - Provides a given range that may be affected by the reordering
+ * - localBoundsOverride - When the presence/value of the localBounds override is changed.
+ * - inputEnabled - When the inputEnabled property is changed.
+ * - rendererBitmask - When this node's bitmask changes (generally happens synchronously to other changes)
+ * - hint - Fired synchronously when various hints change
+ * - addedInstance - Fires when an Instance is added to the Node.
+ * - removedInstance - Fires when an Instance is removed from the Node.
+ *
  * @author Jonathan Olson <jonathan.olson@colorado.edu>
  */
 
@@ -155,6 +195,7 @@ define( function( require ) {
   'use strict';
 
   var Accessibility = require( 'SCENERY/accessibility/Accessibility' );
+  var arrayDifference = require( 'PHET_CORE/arrayDifference' );
   var Bounds2 = require( 'DOT/Bounds2' );
   var Events = require( 'AXON/Events' );
   var extend = require( 'PHET_CORE/extend' );
@@ -552,9 +593,10 @@ define( function( require ) {
      *
      * @param {number} index - Index where the inserted child node will be after this operation.
      * @param {Node} node - The new child to insert.
+     * @param {boolean} [isComposite] - (scenery-internal) If true, the childrenChanged event will not be sent out.
      * @returns {Node} - Returns 'this' reference, for chaining
      */
-    insertChild: function( index, node ) {
+    insertChild: function( index, node, isComposite ) {
       assert && assert( node !== null && node !== undefined, 'insertChild cannot insert a null/undefined child' );
       assert && assert( node instanceof Node,
         'addChild/insertChild requires the child to be a Node. Constructor: ' +
@@ -583,6 +625,8 @@ define( function( require ) {
 
       this.trigger2( 'childInserted', node, index );
 
+      !isComposite && this.trigger0( 'childrenChanged' );
+
       if ( assertSlow ) { this._picker.audit(); }
 
       return this; // allow chaining
@@ -595,10 +639,11 @@ define( function( require ) {
      * The new child node will be displayed in front (on top) of all of this node's other children.
      *
      * @param {Node} node
+     * @param {boolean} [isComposite] - (scenery-internal) If true, the childrenChanged event will not be sent out.
      * @returns {Node} - Returns 'this' reference, for chaining
      */
-    addChild: function( node ) {
-      this.insertChild( this._children.length, node );
+    addChild: function( node, isComposite ) {
+      this.insertChild( this._children.length, node, isComposite );
 
       return this; // allow chaining
     },
@@ -609,15 +654,16 @@ define( function( require ) {
      * @public
      *
      * @param {Node} node
+     * @param {boolean} [isComposite] - (scenery-internal) If true, the childrenChanged event will not be sent out.
      * @returns {Node} - Returns 'this' reference, for chaining
      */
-    removeChild: function( node ) {
+    removeChild: function( node, isComposite ) {
       assert && assert( node && node instanceof Node, 'Need to call node.removeChild() with a Node.' );
       assert && assert( this.hasChild( node ), 'Attempted to removeChild with a node that was not a child.' );
 
       var indexOfChild = _.indexOf( this._children, node );
 
-      this.removeChildWithIndex( node, indexOfChild );
+      this.removeChildWithIndex( node, indexOfChild, isComposite );
 
       return this; // allow chaining
     },
@@ -628,15 +674,16 @@ define( function( require ) {
      * @public
      *
      * @param {number} index
+     * @param {boolean} [isComposite] - (scenery-internal) If true, the childrenChanged event will not be sent out.
      * @returns {Node} - Returns 'this' reference, for chaining
      */
-    removeChildAt: function( index ) {
+    removeChildAt: function( index, isComposite ) {
       assert && assert( index >= 0 );
       assert && assert( index < this._children.length );
 
       var node = this._children[ index ];
 
-      this.removeChildWithIndex( node, index );
+      this.removeChildWithIndex( node, index, isComposite );
 
       return this; // allow chaining
     },
@@ -649,8 +696,9 @@ define( function( require ) {
      *
      * @param {Node} node - The child node to remove from this node (it's parent)
      * @param {number} indexOfChild - Should satisfy this.children[ indexOfChild ] === node
+     * @param {boolean} [isComposite] - (scenery-internal) If true, the childrenChanged event will not be sent out.
      */
-    removeChildWithIndex: function( node, indexOfChild ) {
+    removeChildWithIndex: function( node, indexOfChild, isComposite ) {
       assert && assert( node && node instanceof Node, 'Need to call node.removeChildWithIndex() with a Node.' );
       assert && assert( this.hasChild( node ), 'Attempted to removeChild with a node that was not a child.' );
       assert && assert( this._children[ indexOfChild ] === node, 'Incorrect index for removeChildWithIndex' );
@@ -680,7 +728,42 @@ define( function( require ) {
 
       this.trigger2( 'childRemoved', node, indexOfChild );
 
+      !isComposite && this.trigger0( 'childrenChanged' );
+
       if ( assertSlow ) { this._picker.audit(); }
+    },
+
+    /**
+     * If a child is not at the given index, it is moved to the given index. This reorders the children of this node so
+     * that `this.children[ index ] === node`.
+     * @public
+     *
+     * @param {Node} node - The child node to move in the order
+     * @param {number} index - The desired index (into the children array) of the child.
+     * @returns {Node} - Returns 'this' reference, for chaining
+     */
+    moveChildToIndex: function( node, index ) {
+      assert && assert( node && node instanceof Node, 'Need to call node.moveChildToIndex() with a Node.' );
+      assert && assert( this.hasChild( node ), 'Attempted to moveChildToIndex with a node that was not a child.' );
+      assert && assert( typeof index === 'number' && index % 1 === 0 && index >= 0 && index < this._children.length,
+        'Invalid index: ' + index );
+
+      var currentIndex = this.indexOfChild( node );
+      if ( this._children[ index ] !== node ) {
+
+        // Apply the actual children change
+        this._children.splice( currentIndex, 1 );
+        this._children.splice( index, 0, node );
+
+        if ( !this._rendererSummary.isNotAccessible() ) {
+          this.onAccessibleReorderedChildren();
+        }
+
+        this.trigger2( 'childrenReordered', Math.min( currentIndex, index ), Math.max( currentIndex, index ) );
+        this.trigger0( 'childrenChanged' );
+      }
+
+      return this;
     },
 
     /**
@@ -696,8 +779,7 @@ define( function( require ) {
     },
 
     /**
-     * Sets the children of the Node to be equivalent to the passed-in array of Nodes. Does this by removing all current
-     * children, and adding in children from the array.
+     * Sets the children of the Node to be equivalent to the passed-in array of Nodes.
      * @public
      *
      * NOTE: Overridden in LayoutBox
@@ -706,19 +788,84 @@ define( function( require ) {
      * @returns {Node} - Returns 'this' reference, for chaining
      */
     setChildren: function( children ) {
-      if ( this._children !== children ) {
-        // remove all children in a way where we don't have to copy the child array for safety
-        while ( this._children.length ) {
-          this.removeChild( this._children[ this._children.length - 1 ] );
+      // The implementation is split into basically three stages:
+      // 1. Remove current children that are not in the new children array.
+      // 2. Reorder children that exist both before/after the change.
+      // 3. Insert in new children
+
+      var beforeOnly = []; // Will hold all nodes that will be removed.
+      var afterOnly = []; // Will hold all nodes that will be "new" children (added)
+      var inBoth = []; // Child nodes that "stay". Will be ordered for the "after" case.
+      var i;
+
+      // Compute what things were added, removed, or stay.
+      arrayDifference( children, this._children, afterOnly, beforeOnly, inBoth );
+
+      // Remove any nodes that are not in the new children.
+      for ( i = beforeOnly.length - 1; i >= 0; i-- ) {
+        this.removeChild( beforeOnly[ i ], true );
+      }
+
+      assert && assert( this._children.length === inBoth.length,
+        'Removing children should not have triggered other children changes' );
+
+      // Handle the main reordering (of nodes that "stay")
+      var minChangeIndex = -1; // What is the smallest index where this._children[ index ] !== inBoth[ index ]
+      var maxChangeIndex = -1; // What is the largest index where this._children[ index ] !== inBoth[ index ]
+      for ( i = 0; i < inBoth.length; i++ ) {
+        var desired = inBoth[ i ];
+        if ( this._children[ i ] !== desired ) {
+          this._children[ i ] = desired;
+          if ( minChangeIndex !== -1 ) {
+            minChangeIndex = i;
+          }
+          maxChangeIndex = i;
+        }
+      }
+      // If our minChangeIndex is still -1, then none of those nodes that "stay" were reordered. It's important to check
+      // for this case, so that `node.children = node.children` is effectively a no-op performance-wise.
+      var hasReorderingChange = minChangeIndex !== -1;
+
+      // Immediate consequences/updates from reordering
+      if ( hasReorderingChange ) {
+        if ( !this._rendererSummary.isNotAccessible() ) {
+          this.onAccessibleReorderedChildren();
         }
 
-        var len = children.length;
-        for ( var i = 0; i < len; i++ ) {
-          this.addChild( children[ i ] );
+        this.trigger2( 'childrenReordered', minChangeIndex, maxChangeIndex );
+      }
+
+      // Add in "new" children.
+      // Scan through the "ending" children indices, adding in things that were in the "afterOnly" part. This scan is
+      // done through the children array instead of the afterOnly array (as determining the index in children would
+      // then be quadratic in time, which would be unacceptable here). At this point, a forward scan should be
+      // sufficient to insert in-place, and should move the least amount of nodes in the array.
+      if ( afterOnly.length ) {
+        var afterIndex = 0;
+        var after = afterOnly[ afterIndex ];
+        for ( i = 0; i < children.length; i++ ) {
+          if ( children[ i ] === after ) {
+            this.insertChild( i, after, true );
+            after = afterOnly[ ++afterIndex ];
+          }
         }
       }
 
-      return this; // allow chaining
+      // If we had any changes, send the generic "changed" event.
+      if ( beforeOnly.length !== 0 || afterOnly.length !== 0 || hasReorderingChange ) {
+        this.trigger0( 'childrenChanged' );
+      }
+
+      // Sanity checks to make sure our resulting children array is correct.
+      if ( assert ) {
+        for ( var j = 0; j < this._children.length; j++ ) {
+          assert( children[ j ] === this._children[ j ],
+            'Incorrect child after setChildren, possibly a reentrancy issue' );
+        }
+      }
+
+      // allow chaining
+      return this;
     },
     set children( value ) { this.setChildren( value ); },
 
@@ -814,7 +961,7 @@ define( function( require ) {
      */
     moveToFront: function() {
       var self = this;
-      _.each( this._parents.slice( 0 ), function( parent ) {
+      _.each( this._parents.slice(), function( parent ) {
         parent.moveChildToFront( self );
       } );
 
@@ -829,18 +976,7 @@ define( function( require ) {
      * @returns {Node} - Returns 'this' reference, for chaining
      */
     moveChildToFront: function( child ) {
-
-      // adding and removing children might cause loss of focus, needs to be restored after operation
-      Accessibility.beforeOp();
-
-      if ( this.indexOfChild( child ) !== this._children.length - 1 ) {
-        this.removeChild( child );
-        this.addChild( child );
-      }
-
-      Accessibility.afterOp();
-
-      return this; // allow chaining
+      return this.moveChildToIndex( child, this._children.length - 1 );
     },
 
     /**
@@ -851,7 +987,7 @@ define( function( require ) {
      */
     moveToBack: function() {
       var self = this;
-      _.each( this._parents.slice( 0 ), function( parent ) {
+      _.each( this._parents.slice(), function( parent ) {
         parent.moveChildToBack( self );
       } );
 
@@ -866,18 +1002,7 @@ define( function( require ) {
      * @returns {Node} - Returns 'this' reference, for chaining
      */
     moveChildToBack: function( child ) {
-
-      // adding and removing children might cause loss of focus, needs to be restored after operation
-      Accessibility.beforeOp();
-
-      if ( this.indexOfChild( child ) !== 0 ) {
-        this.removeChild( child );
-        this.insertChild( 0, child );
-      }
-
-      Accessibility.afterOp();
-
-      return this; // allow chaining
+      return this.moveChildToIndex( child, 0 );
     },
 
     /**
@@ -897,8 +1022,10 @@ define( function( require ) {
       var index = this.indexOfChild( oldChild );
       var oldChildFocused = oldChild.focused;
 
-      this.removeChild( oldChild );
-      this.insertChild( index, newChild );
+      this.removeChild( oldChild, true );
+      this.insertChild( index, newChild, true );
+
+      this.trigger0( 'childrenChanged' );
 
       if ( oldChildFocused && newChild.focusable ) {
         newChild.focus();

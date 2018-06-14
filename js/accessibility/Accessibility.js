@@ -148,7 +148,7 @@ define( function( require ) {
   // The options for the Accessibility API. In general, most default to null; to clear, set back to null.
   var ACCESSIBILITY_OPTION_KEYS = [
 
-    /* 
+    /*
      * Higher Level API Functions
      */
 
@@ -191,9 +191,6 @@ define( function( require ) {
     'accessibleOrder', // Modifies the order of accessible  navigation, see setAccessibleOrder()
     'accessibleContent' // Sets up accessibility handling (probably don't need to use this), see setAccessibleContent()
   ];
-
-  // globals (for restoring focus)
-  var focusedNode = null;
 
   var Accessibility = {
 
@@ -2146,6 +2143,19 @@ define( function( require ) {
           sceneryLog && sceneryLog.Accessibility && sceneryLog.pop();
         },
 
+        /**
+         * Called when this node's children are reordered (with nothing added/removed).
+         * @private
+         */
+        onAccessibleReorderedChildren: function() {
+          sceneryLog && sceneryLog.Accessibility && sceneryLog.Accessibility( 'onAccessibleReorderedChildren (parent:n#' + this.id + ')' );
+          sceneryLog && sceneryLog.Accessibility && sceneryLog.push();
+
+          AccessibilityTree.childrenOrderChange( this );
+
+          sceneryLog && sceneryLog.Accessibility && sceneryLog.pop();
+        },
+
         /*---------------------------------------------------------------------------*/
         // Accessible Instance handling
 
@@ -2212,32 +2222,6 @@ define( function( require ) {
         proto.invalidateAccessibleContent = invalidateAccessibleContent;
       }
     }
-  };
-
-  //--------------------------------------------------------------------------
-  // Statics
-  //--------------------------------------------------------------------------
-
-  /**
-   * Prepares Accessibility for an operation that might cause state to be lost.
-   *
-   * @public
-   * @static
-   */
-  Accessibility.beforeOp = function() {
-
-    // paranoia about initialization order (should be safe)
-    focusedNode = scenery.Display && scenery.Display.focusedNode;
-  };
-
-  /**
-   * Restores state after an operation that might have caused cause state to be lost.
-   *
-   * @public
-   * @static
-   */
-  Accessibility.afterOp = function() {
-    focusedNode && focusedNode.focus();
   };
 
   scenery.register( 'Accessibility', Accessibility );

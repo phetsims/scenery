@@ -129,6 +129,7 @@ define( function( require ) {
       // Node listeners for tracking children. Listeners should be added only when we become stateful
       this.childInsertedListener = this.childInsertedListener || this.onChildInserted.bind( this );
       this.childRemovedListener = this.childRemovedListener || this.onChildRemoved.bind( this );
+      this.childrenReorderedListener = this.childrenReorderedListener || this.onChildrenReordered.bind( this );
       this.visibilityListener = this.visibilityListener || this.onVisibilityChange.bind( this );
       this.markRenderStateDirtyListener = this.markRenderStateDirtyListener || this.markRenderStateDirty.bind( this );
 
@@ -1074,7 +1075,7 @@ define( function( require ) {
       // maintain fittable flags
       this.fittability.onInsert( instance.fittability );
 
-      this.relativeTransform.insertInstance( instance, index );
+      this.relativeTransform.addInstance( instance );
 
       this.markChildVisibilityDirty();
 
@@ -1127,7 +1128,7 @@ define( function( require ) {
       // maintain fittable flags
       this.fittability.onRemove( instance.fittability );
 
-      this.relativeTransform.removeInstanceWithIndex( instance, index );
+      this.relativeTransform.removeInstance( instance );
 
       sceneryLog && sceneryLog.InstanceTree && sceneryLog.pop();
     },
@@ -1136,6 +1137,52 @@ define( function( require ) {
       // TODO: optimization? hopefully it won't happen often, so we just do this for now
       this.removeInstanceWithIndex( childInstance, index );
       this.insertInstance( replacementInstance, index );
+    },
+
+    /**
+     * For handling potential reordering of child instances inclusively between the min and max indices.
+     * @private
+     *
+     * @param {number} minChangeIndex
+     * @param {number} maxChangeIndex
+     */
+    reorderInstances: function( minChangeIndex, maxChangeIndex ) {
+      assert && assert( typeof minChangeIndex === 'number' );
+      assert && assert( typeof maxChangeIndex === 'number' );
+      assert && assert( minChangeIndex <= maxChangeIndex );
+
+      sceneryLog && sceneryLog.InstanceTree && sceneryLog.InstanceTree( 'Reordering ' + this.toString() );
+      sceneryLog && sceneryLog.InstanceTree && sceneryLog.push();
+
+      // NOTE: For implementation, we've basically set parameters as if we removed all of the relevant instances and
+      // then added them back in. There may be more efficient ways to do this, but the stitching and change interval
+      // process is a bit complicated right now.
+
+      var frameId = this.display._frameId;
+
+      // Remove the old ordering of instances
+      this.children.splice( minChangeIndex, maxChangeIndex - minChangeIndex + 1 );
+
+      // Add the instances back in the correct order
+      for ( var i = minChangeIndex; i <= maxChangeIndex; i++ ) {
+        var child = this.findChildInstanceOnNode( this.node._children[ i ] );
+        this.children.splice( i, 0, child );
+        child.stitchChangeFrame = frameId;
+
+        // mark neighbors so that we can add a change interval for our change area
+        if ( i > minChangeIndex ) {
+          child.stitchChangeAfter = frameId;
+        }
+        if ( i < maxChangeIndex ) {
+          child.stitchChangeBefore = frameId;
+        }
+      }
+
+      this.stitchChangeOnChildren = frameId;
+      this.beforeStableIndex = Math.min( this.beforeStableIndex, minChangeIndex - 1 );
+      this.afterStableIndex = Math.max( this.afterStableIndex, maxChangeIndex + 1 );
+
+      sceneryLog && sceneryLog.InstanceTree && sceneryLog.pop();
     },
 
     // if we have a child instance that corresponds to this node, return it (otherwise null)
@@ -1200,6 +1247,20 @@ define( function( require ) {
       this.instanceRemovalCheckList.push( instance );
 
       this.removeInstanceWithIndex( instance, index );
+
+      // make sure we are visited for syncTree()
+      this.markSkipPruning();
+
+      sceneryLog && sceneryLog.Instance && sceneryLog.pop();
+    },
+
+    // event callback for Node's 'childrenReordered' event
+    onChildrenReordered: function( minChangeIndex, maxChangeIndex ) {
+      sceneryLog && sceneryLog.Instance && sceneryLog.Instance(
+        'reordering children for ' + this.toString() );
+      sceneryLog && sceneryLog.Instance && sceneryLog.push();
+
+      this.reorderInstances( minChangeIndex, maxChangeIndex );
 
       // make sure we are visited for syncTree()
       this.markSkipPruning();
@@ -1368,6 +1429,7 @@ define( function( require ) {
       if ( !this.isSharedCanvasCachePlaceholder ) {
         this.node.onStatic( 'childInserted', this.childInsertedListener );
         this.node.onStatic( 'childRemoved', this.childRemovedListener );
+        this.node.onStatic( 'childrenReordered', this.childrenReorderedListener );
         this.node.onStatic( 'visibility', this.visibilityListener );
 
         this.node.onStatic( 'opacity', this.markRenderStateDirtyListener );
@@ -1384,6 +1446,7 @@ define( function( require ) {
       if ( !this.isSharedCanvasCachePlaceholder ) {
         this.node.offStatic( 'childInserted', this.childInsertedListener );
         this.node.offStatic( 'childRemoved', this.childRemovedListener );
+        this.node.offStatic( 'childrenReordered', this.childrenReorderedListener );
         this.node.offStatic( 'visibility', this.visibilityListener );
 
         this.node.offStatic( 'opacity', this.markRenderStateDirtyListener );

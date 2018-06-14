@@ -153,8 +153,7 @@ define( function( require ) {
       return this.instance.parent ? this.instance.parent.relativeTransform : null;
     },
 
-    // NOTE: different parameter order compared to Node
-    insertInstance: function( instance, index ) {
+    addInstance: function( instance ) {
       if ( instance.stateless ) {
         assert && assert( !instance.relativeTransform.hasAncestorListenerNeed(),
           'We only track changes properly if stateless instances do not have needs' );
@@ -174,7 +173,7 @@ define( function( require ) {
       instance.relativeTransform.forceMarkTransformDirty();
     },
 
-    removeInstanceWithIndex: function( instance, index ) {
+    removeInstance: function( instance ) {
       if ( instance.relativeTransform.hasAncestorListenerNeed() ) {
         this.decrementTransformListenerChildren();
       }

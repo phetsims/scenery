@@ -74,6 +74,28 @@ define( function( require ) {
     },
 
     /**
+     * Called when a node's children are reordered (no additions/removals).
+     * @public
+     *
+     * @param {Node} node
+     */
+    childrenOrderChange: function( node ) {
+      sceneryLog && sceneryLog.AccessibilityTree && sceneryLog.AccessibilityTree( 'childrenOrderChange node:n#' + node._id );
+      sceneryLog && sceneryLog.AccessibilityTree && sceneryLog.push();
+
+      assert && assert( node instanceof scenery.Node );
+      assert && assert( !node._rendererSummary.isNotAccessible() );
+
+      AccessibilityTree.beforeOp();
+
+      AccessibilityTree.reorder( node );
+
+      AccessibilityTree.afterOp();
+
+      sceneryLog && sceneryLog.AccessibilityTree && sceneryLog.pop();
+    },
+
+    /**
      * Called when a node has an accessibleOrder change.
      * @public
      *

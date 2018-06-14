@@ -87,13 +87,14 @@ define( function( require ) {
     Node.call( this );
 
     // @private {function} - If resize:true, will be called whenever a child has its bounds change
-    this._boundsListener = this.updateLayoutAutomatically.bind( this );
+    this._updateLayoutListener = this.updateLayoutAutomatically.bind( this );
 
     // @private {boolean} - Prevents layout() from running while true. Generally will be unlocked and laid out.
     this._updateLayoutLocked = false;
 
     this.onStatic( 'childInserted', this.onLayoutBoxChildInserted.bind( this ) );
     this.onStatic( 'childRemoved', this.onLayoutBoxChildRemoved.bind( this ) );
+    this.onStatic( 'childrenChanged', this.onLayoutBoxChildrenChanged.bind( this ) );
 
     // @private {boolean} - We'll ignore the resize flag while running the initial mutate.
     this._layoutMutating = true;
@@ -202,9 +203,7 @@ define( function( require ) {
      */
     onLayoutBoxChildInserted: function( node ) {
       if ( this._resize ) {
-        node.onStatic( 'bounds', this._boundsListener );
-
-        this.updateLayoutAutomatically();
+        node.onStatic( 'bounds', this._updateLayoutListener );
       }
     },
 
@@ -216,8 +215,12 @@ define( function( require ) {
      */
     onLayoutBoxChildRemoved: function( node ) {
       if ( this._resize ) {
-        node.offStatic( 'bounds', this._boundsListener );
+        node.offStatic( 'bounds', this._updateLayoutListener );
+      }
+    },
 
+    onLayoutBoxChildrenChanged: function() {
+      if ( this._resize ) {
         this.updateLayoutAutomatically();
       }
     },
@@ -400,11 +403,11 @@ define( function( require ) {
 
           // If we are now resizable, we need to add listeners to every child
           if ( resize ) {
-            child.onStatic( 'bounds', this._boundsListener );
+            child.onStatic( 'bounds', this._updateLayoutListener );
           }
           // Otherwise we are now not resizeable, and need to remove the listeners
           else {
-            child.offStatic( 'bounds', this._boundsListener );
+            child.offStatic( 'bounds', this._updateLayoutListener );
           }
         }
 

@@ -81,8 +81,7 @@ define( function( require ) {
       // for tracking the order of child groups, we use a flag and update (reorder) once per updateDisplay if necessary.
       this.orderDirty = true;
       this.orderDirtyListener = this.orderDirtyListener || this.markOrderDirty.bind( this );
-      this.node.onStatic( 'childInserted', this.orderDirtyListener );
-      this.node.onStatic( 'childRemoved', this.orderDirtyListener );
+      this.node.onStatic( 'childrenChanged', this.orderDirtyListener );
 
       if ( !this.svgGroup ) {
         this.svgGroup = document.createElementNS( scenery.svgns, 'g' );
@@ -334,8 +333,7 @@ define( function( require ) {
       //OHTWO TODO: remove clip workaround
       this.node.offStatic( 'clip', this.clipDirtyListener );
 
-      this.node.offStatic( 'childInserted', this.orderDirtyListener );
-      this.node.offStatic( 'childRemoved', this.orderDirtyListener );
+      this.node.offStatic( 'childrenChanged', this.orderDirtyListener );
 
       // if our Instance has been disposed, it has already had the reference removed
       if ( this.instance.active ) {
