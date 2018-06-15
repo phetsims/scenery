@@ -22,7 +22,7 @@ define( function( require ) {
   var platform = require( 'PHET_CORE/platform' );
   var sceneryPhet = require( 'SCENERY_PHET/sceneryPhet' );
   var Timer = require( 'PHET_CORE/Timer' );
-  var Vector2 =      require( 'DOT/Vector2' );
+  var Vector2 = require( 'DOT/Vector2' );
 
   /**
    * @constructor
@@ -153,7 +153,7 @@ define( function( require ) {
       // see https://github.com/phetsims/balloons-and-static-electricity/issues/384
       if ( platform.safari ) {
         if ( KeyboardUtil.isArrowKey( event.keyCode ) ) {
-          if ( self.keyInListDown( [ KeyboardUtil.KEY_RIGHT_ARROW, KeyboardUtil.KEY_LEFT_ARROW, KeyboardUtil.KEY_UP_ARROW, KeyboardUtil.KEY_DOWN_ARROW ] ) )  {
+          if ( self.keyInListDown( [ KeyboardUtil.KEY_RIGHT_ARROW, KeyboardUtil.KEY_LEFT_ARROW, KeyboardUtil.KEY_UP_ARROW, KeyboardUtil.KEY_DOWN_ARROW ] ) ) {
             self.reset();
             return;
           }
@@ -169,7 +169,7 @@ define( function( require ) {
 
       if ( self._start ) {
         if ( self.movementKeysDown ) {
-         self._start( event );
+          self._start( event );
         }
       }
 
