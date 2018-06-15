@@ -324,6 +324,7 @@ git clone https://github.com/phetsims/sherpa.git
 git clone https://github.com/phetsims/chipper.git
 git clone https://github.com/phetsims/assert.git
 git clone https://github.com/phetsims/axon.git
+git clone https://github.com/phetsims/tandem.git
 git clone https://github.com/phetsims/phet-core.git
 git clone https://github.com/phetsims/dot.git
 git clone https://github.com/phetsims/kite.git
@@ -337,9 +338,11 @@ git clone https://github.com/phetsims/scenery.git</pre>
     </p>
 
       <pre>
-cd scenery
-npm update
-grunt build</pre>
+cd chipper
+npm install
+cd ../scenery
+npm install
+grunt</pre>
 
     <p>
       You will now have the built files under build/, and all of the documentation/examples should work locally.
