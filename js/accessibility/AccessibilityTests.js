@@ -36,6 +36,7 @@ define( function( require ) {
   // given the parent container element for a node, this value is the index of the label sibling in the
   // parent's array of children HTMLElements.
   // var DEFAULT_LABEL_SIBLING_INDEX = 0;
+  // var DEFAULT_LABEL_SIBLING_INDEX = 0;
 
   // a focus highlight for testing, since dummy nodes tend to have no bounds
   var TEST_HIGHLIGHT = new Circle( 5 );
@@ -1100,7 +1101,7 @@ define( function( require ) {
     assert.ok( aElement.textContent === TEST_LABEL, 'accessibleName setter on div' );
 
 
-    // TODO: this should be passing,see
+    // TODO: this should be passing,see https://github.com/phetsims/scenery/issues/811
     // var b = new Node( { tagName: 'input', accessibleName: TEST_LABEL } );
     // a.addChild( b );
     // var bElement = getPrimarySiblingElementByNode( b );
@@ -1109,6 +1110,38 @@ define( function( require ) {
     // assert.ok( bLabelSibling.textContent === TEST_LABEL, 'accessibleName sets label sibling' );
     // assert.ok( bLabelSibling.getAttribute( 'for' ).indexOf( bElement.id ) >= 0, 'accessibleName sets label\'s "for" attribute' );
 
+
+  } );
+
+  QUnit.test( 'helpText option', function( assert ) {
+
+
+    assert.ok( true);
+    //
+    // TODO: this is failing, but ideally it wouldn't see https://github.com/phetsims/scenery/issues/811
+    // // test the behavior of focusable function
+    // var rootNode = new Node( { tagName: 'div' } );
+    // var display = new Display( rootNode ); // eslint-disable-line
+    // document.body.appendChild( display.domElement );
+    //
+    // var a = new Node( { tagName: 'div', helpText: TEST_DESCRIPTION } );
+    // rootNode.addChild( a );
+    //
+    // rootNode.addChild( new Node( { tagName: 'input'}));
+    // assert.ok( a.helpText === TEST_DESCRIPTION, 'helpText getter' );
+    //
+    // var aElement = getPrimarySiblingElementByNode( a );
+    // assert.ok( aElement.textContent === TEST_DESCRIPTION, 'helpText setter on div' );
+    //
+    //
+    // var b = new Node( { tagName: 'button' } );
+    // rootNode.addChild( b );
+    // var bElement = getPrimarySiblingElementByNode( b );
+    // var bParent = getPrimarySiblingElementByNode( b ).parentElement;
+    // var bDescriptionSibling = bParent.children[ DEFAULT_DESCRIPTION_SIBLING_INDEX ];
+    // assert.ok( bDescriptionSibling.textContent === TEST_DESCRIPTION, 'helpText sets label sibling' );
+    // assert.ok( bDescriptionSibling.getAttribute( 'for' ).indexOf( bElement.id ) >= 0, 'helpText sets label\'s "for" attribute' );
+    //
 
   } );
 

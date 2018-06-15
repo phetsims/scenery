@@ -69,7 +69,11 @@ define( function( require ) {
 
           // higher level api first, because it will effect the lower level setters.
           if ( self.accessibleName ) {
-            self.accessibleNameImplementation( self.accessibleName ); // set it again to support any option order
+            self.setAccessibleNameImplementation( self.accessibleName ); // set it again to support any option order
+          }
+
+          if ( self.helpText ) {
+            self.setHelpTextImplementation( self.helpText ); // set it again to support any option order
           }
 
           var uniqueId = accessibleInstance.trail.getUniqueId();

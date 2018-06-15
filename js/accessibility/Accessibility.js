@@ -153,6 +153,7 @@ define( function( require ) {
      */
 
     'accessibleName',
+    'helpText',
 
     /*
      * Lower Level API Functions
@@ -429,8 +430,11 @@ define( function( require ) {
 
           // HIGHER LEVEL API INITIALIZATION\
 
-          // {string|null} - sets the "Accessible Name" of the Nodes, as defined by the Browser's Accessibility Tree
+          // {string|null} - sets the "Accessible Name" of the Node, as defined by the Browser's Accessibility Tree
           this._accessibleName = null;
+
+          // {string|null} - sets the help text of the Node, this most often corresponds to description text.
+          this._helpText = null;
         },
 
 
@@ -607,7 +611,7 @@ define( function( require ) {
          * For more information about setting an Accessible Name on HTML see the scenery docs for accessibility,
          * and see https://developer.paciellogroup.com/blog/2017/04/what-is-an-accessible-name/
          *
-         * @param {string} accessibleName
+         * @param {string|null} accessibleName
          */
         setAccessibleName: function( accessibleName ) {
           assert && assert( accessibleName === null || typeof accessibleName === 'string' );
@@ -615,7 +619,7 @@ define( function( require ) {
           if ( this._accessibleName !== accessibleName ) {
             this._accessibleName = accessibleName;
 
-            this.accessibleNameImplementation( accessibleName );
+            this.setAccessibleNameImplementation( accessibleName );
 
             this.invalidateAccessibleContent();
 
@@ -630,7 +634,7 @@ define( function( require ) {
          * @public (scenery-internal) - should only be called from setAccessibleName and invalidateAccessibleContent
          * @param {string} accessibleName
          */
-        accessibleNameImplementation: function( accessibleName ) {
+        setAccessibleNameImplementation: function( accessibleName ) {
           assert && assert( accessibleName === null || typeof accessibleName === 'string' );
 
           if ( this._tagName ) {
@@ -662,6 +666,56 @@ define( function( require ) {
           return this._accessibleName;
         },
         get accessibleName() { return this.getAccessibleName(); },
+
+
+        /**
+         * Set the help text for a Node
+         * @param {string|null} helpText
+         */
+        setHelpText: function( helpText ) {
+          assert && assert( helpText === null || typeof helpText === 'string' );
+
+          if ( this._helpText !== helpText ) {
+
+            // TODO: helptext should only be set on interactive Elements? see https://github.com/phetsims/scenery/issues/795
+
+            this._helpText = helpText;
+
+            this.setHelpTextImplementation( helpText );
+
+            this.invalidateAccessibleContent();
+
+          }
+        },
+        set helpText( helpText ) { this.setHelpText( helpText ); },
+
+        /**
+         * This function is to manage the public helpText setter and invalidateAccessibleContent both wanting to do the
+         * same helpText setting work, but setHelpText wants to do a few more client side error checks first
+         * that causes an infinite loop if called from invalidateAccessibleContent.
+         * @public (scenery-internal) - should only be called from setHelpText and invalidateAccessibleContent
+         * @param {string} helpText
+         */
+        setHelpTextImplementation: function( helpText ) {
+          assert && assert( helpText === null || typeof helpText === 'string' );
+
+          // no-op if there is no tagName
+          if ( this._tagName ) {
+
+            this.descriptionContent = helpText;
+          }
+        },
+
+        /**
+         * Get the help text of the interactive element.
+         * @public
+         *
+         * @returns {string|null}
+         */
+        getHelpText: function() {
+          return this._helpText;
+        },
+        get helpText() { return this.getHelpText(); },
 
 
         /***********************************************************************************************************/
