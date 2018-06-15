@@ -228,16 +228,6 @@ define( function( require ) {
       self.resetPressAndHold();
     };
 
-    /**
-     * Behavior on blur, reset the listener when this happens, public for addAccessibleInputListener()
-     * @public
-     *
-     * @param {DOMEvent} event
-     */
-    this.blur = function( event ) {
-      self.reset();
-    };
-
     // step the drag listener, must be removed in dispose
     var stepListener = this.step.bind( this );
     Timer.addStepListener( stepListener );
@@ -571,7 +561,7 @@ define( function( require ) {
      *
      * @public
      */
-    reset: function() {
+    interrupt: function() {
       this.keyState = [];
       this.resetPressAndHold();
     },
