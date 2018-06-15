@@ -526,6 +526,22 @@ define( function( require ) {
         },
 
         /**
+         * Interrupt all accessibility related input listeners that are attached to this Node.
+         * @returns {Node} - For chaining
+         */
+        interruptAccessibleInput: function() {
+          var listenersCopy = this._accessibleInputListeners;
+
+          for ( var i = 0; i < listenersCopy.length; i++ ) {
+            var listener = listenersCopy[ i ];
+
+            listener.interrupt && listener.interrupt();
+          }
+
+          return this;
+        },
+
+        /**
          * Dispose accessibility by removing all listeners on this node for accessible input. Accessibility is disposed
          * by calling Node.dispose(), so this function is scenery-internal.
          * @public (scenery-internal)
@@ -584,6 +600,7 @@ define( function( require ) {
           if ( this._accessibleInstances.length > 0 ) {
             this._accessibleInstances[ 0 ].peer.primarySibling.blur();
           }
+          this.interruptSubtreeInput(); // interrupt any listeners that attached to this Node
         },
 
         /***********************************************************************************************************/

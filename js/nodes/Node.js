@@ -1884,6 +1884,9 @@ define( function( require ) {
         listener.interrupt && listener.interrupt(); // TODO: get rid of the event?
       }
 
+      // If there are any accessibleInput listeners, interrupt them as well.
+      this.interruptAccessibleInput();
+
       return this;
     },
 
