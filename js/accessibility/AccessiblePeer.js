@@ -86,8 +86,8 @@ define( function( require ) {
         // The first child of the container parent element should be the peer dom element
         // if undefined, the insertBefore method will insert the primarySiblingDOMElement as the first child
         var primarySiblingDOMElement = this.primarySibling;
-        var firstChild = this.containerParent.children[ 0 ];
-        this.containerParent.insertBefore( primarySiblingDOMElement, firstChild );
+        var firstChild = this.containerParent.children[ 0 ] || null;
+        this.containerParent.insertBefore( primarySiblingDOMElement, firstChild  );
       }
 
       // @private {boolean} - Whether we are currently in a "disposed" (in the pool) state, or are available to be
@@ -141,6 +141,9 @@ define( function( require ) {
      */
     getContainerParent: function() {
       return this.containerParent || this.primarySibling;
+    },
+
+    getTopLevelElements: function(){
     },
 
     /**
