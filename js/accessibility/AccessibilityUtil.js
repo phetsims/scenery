@@ -378,20 +378,9 @@ define( function( require ) {
     removeElements: function( element, childrenToRemove ) {
 
       for ( var i = 0; i < childrenToRemove.length; i++ ) {
-        var childToRemove = element[ i ];
+        var childToRemove = childrenToRemove[ i ];
 
-        // TODO: very inefficient error checking, n^2 time, uh oh
-        if ( assert ) {
-
-          var hasChild = false;
-          for ( var j = 0; j < element.childNodes; j++ ) {
-            var child = element[ j ];
-            if ( child === childToRemove ) {
-              hasChild = true;
-            }
-          }
-          assert( hasChild, 'element does not contain child to be removed: ', child );
-        }
+        assert && assert( element.contains( childToRemove), 'element does not contain child to be removed: ', childToRemove );
 
         element.removeChild( childToRemove );
       }

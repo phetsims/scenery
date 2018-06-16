@@ -134,11 +134,9 @@ define( function( require ) {
 
   var INPUT_TAG = AccessibilityUtil.TAGS.INPUT;
   var LABEL_TAG = AccessibilityUtil.TAGS.LABEL;
-  var DIV_TAG = AccessibilityUtil.TAGS.DIV;
   var P_TAG = AccessibilityUtil.TAGS.P;
 
   // default tag names for siblings
-  var DEFAULT_CONTAINER_TAG_NAME = DIV_TAG;
   var DEFAULT_DESCRIPTION_TAG_NAME = P_TAG;
   var DEFAULT_LABEL_TAG_NAME = P_TAG;
 
@@ -790,11 +788,6 @@ define( function( require ) {
           if ( tagName !== this._labelTagName ) {
             this._labelTagName = tagName;
 
-            // to have a label sibling, you need a container
-            if ( !this._containerTagName ) {
-              this.setContainerTagName( DEFAULT_CONTAINER_TAG_NAME );
-            }
-
             this.invalidateAccessibleContent();
           }
         },
@@ -835,11 +828,6 @@ define( function( require ) {
           if ( tagName !== this._descriptionTagName ) {
 
             this._descriptionTagName = tagName;
-
-            // to have a description sibling, you need a container
-            if ( !this._containerTagName ) {
-              this.setContainerTagName( DEFAULT_CONTAINER_TAG_NAME );
-            }
 
             this.invalidateAccessibleContent();
           }
