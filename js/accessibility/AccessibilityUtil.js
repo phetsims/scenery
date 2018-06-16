@@ -370,6 +370,48 @@ define( function( require ) {
       return tagNameSupportsContent( tagName );
     },
 
+    /**
+     * Helper function to remove multiple HTMLElements from another HTMLElement
+     * @param {HTMLElement} element
+     * @param {Array.<HTMLElement>} childrenToRemove
+     */
+    removeElements: function( element, childrenToRemove ) {
+
+      for ( var i = 0; i < childrenToRemove.length; i++ ) {
+        var childToRemove = element[ i ];
+
+        // TODO: very inefficient error checking, n^2 time, uh oh
+        if ( assert ) {
+
+          var hasChild = false;
+          for ( var j = 0; j < element.childNodes; j++ ) {
+            var child = element[ j ];
+            if ( child === childToRemove ) {
+              hasChild = true;
+            }
+          }
+          assert( hasChild, 'element does not contain child to be removed: ', child );
+        }
+
+        element.removeChild( childToRemove );
+      }
+
+    },
+
+    /**
+     * Helper function to add multiple elements as children to a parent
+     * @param {HTMLElement} element - to add children to
+     * @param {Array.<HTMLElement>} childrenToAdd
+     * @param {HTMLElement} [beforeThisElement] - if not supplied, the insertBefore call will just use 'null'
+     */
+    insertElements: function( element, childrenToAdd, beforeThisElement ) {
+
+      for ( var i = 0; i < childrenToAdd.length; i++ ) {
+        var childToAdd = childrenToAdd[ i ];
+        element.insertBefore( childToAdd, beforeThisElement || null );
+      }
+    },
+
     TAGS: {
       INPUT: INPUT_TAG,
       LABEL: LABEL_TAG,
