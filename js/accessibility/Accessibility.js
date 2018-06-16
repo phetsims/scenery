@@ -600,7 +600,7 @@ define( function( require ) {
           if ( this._accessibleInstances.length > 0 ) {
             this._accessibleInstances[ 0 ].peer.primarySibling.blur();
           }
-          this.interruptSubtreeInput(); // interrupt any listeners that attached to this Node
+          this.interruptAccessibleInput(); // interrupt any a11y listeners that attached to this Node
         },
 
         /***********************************************************************************************************/
