@@ -82,12 +82,23 @@ define( function( require ) {
       // the label and description content.
       this.containerParent = options.containerParent;
 
+      // @public {Array.<HTMLElement>} Rather than guarantee that a peer is a tree with a root DOMElement,
+      // allow multiple HTMLElements at the top level of the peer. This is used for sorting the instance
+      this.topLevelElements = [];
+
       if ( this.containerParent ) {
         // The first child of the container parent element should be the peer dom element
         // if undefined, the insertBefore method will insert the primarySiblingDOMElement as the first child
         var primarySiblingDOMElement = this.primarySibling;
         var firstChild = this.containerParent.children[ 0 ] || null;
-        this.containerParent.insertBefore( primarySiblingDOMElement, firstChild  );
+        this.containerParent.insertBefore( primarySiblingDOMElement, firstChild );
+
+        this.topLevelElements = [ this.containerParent ];
+      }
+      else {
+
+        // Wean out any null siblings
+        this.topLevelElements = [ this.labelSibling, this.descriptionSibling, this.primarySibling ].filter( function( i ) { return i; } );
       }
 
       // @private {boolean} - Whether we are currently in a "disposed" (in the pool) state, or are available to be
@@ -134,19 +145,6 @@ define( function( require ) {
     },
 
     /**
-     * Get the container parent or the peer's dom element direclty.  Used for sorting.
-     * @public (scenery-internal)
-     *
-     * @returns {HTMLElement}
-     */
-    getContainerParent: function() {
-      return this.containerParent || this.primarySibling;
-    },
-
-    getTopLevelElements: function(){
-    },
-
-    /**
      * Get an element on this node, looked up by the association flag passed in.
      * @public (scenery-internal)
      *
@@ -170,6 +168,83 @@ define( function( require ) {
       }
 
       return htmlElement;
+    },
+    /**
+     * Called by invalidateAccessibleContent. The contentElement will either be a
+     * label or description element. The contentElement will be sorted relative to the primarySibling. Its placement
+     * will also depend on whether or not this node wants to append this element,
+     * see setAppendLabel() and setAppendDescription(). By default, the "content" element will be placed before the
+     * primarySibling.
+     *
+     *
+     * @param {HTMLElement} contentElement
+     * @param {boolean} appendElement
+     */
+    arrangeContentElement: function( contentElement, appendElement ) {
+
+      // if there is a containerParent
+      if ( this.topLevelElements[ 0 ] === this.containerParent ) {
+        assert && assert( this.topLevelElements.length === 1 );
+
+        if ( appendElement ) {
+          this.containerParent.appendChild( contentElement );
+        }
+        else {
+          this.containerParent.insertBefore( contentElement, this.primarySibling );
+        }
+      }
+
+      // If there are multiple top level nodes
+      else {
+        assert && assert( this.topLevelElements.indexOf( contentElement ) >= 0, 'element is not part of this peer, thus cannot be arranged' );
+
+        // keep this.topLevelElements in sync
+        this.topLevelElements = this.topLevelElements.splice( this.topLevelElements.indexOf( contentElement ), 1 );
+
+        var indexOffset = appendElement ? 1 : -1;
+        indexOffset = indexOffset < 0 ? 0 : indexOffset; //support primarySibling in the first position
+        this.topLevelElements = this.topLevelElements.splice( this.topLevelElements.indexOf( this.primarySibling ) + indexOffset, contentElement );
+
+
+        // TODO tell the parent that things changed. DO WE NEED TO DO THIS? BECAUSE I THINK THAT THIS IS ALWAYS CALLED BEFORE THE PEER IS ADDED TO THE INSTANCE AND SORTED
+
+      }
+    },
+
+
+    /**
+     * Is this peer hidden in the PDOM
+     * @returns {boolean}
+     */
+    isVisible: function() {
+
+      // TODO: assert if some visible and some are not
+
+      var visibleElements = 0;
+      this.topLevelElements.forEach( function( element ) {
+        if ( !element.hidden ) {
+          visibleElements += 1;
+        }
+      } );
+
+      return visibleElements === this.topLevelElements.length;
+    },
+
+    /**
+     *
+     * @param {boolean} visible
+     */
+    setVisible: function( visible ) {
+
+      this.topLevelElements.forEach( function( element ) {
+
+        if ( visible ) {
+          element.removeAttribute( 'hidden' );
+        }
+        else {
+          element.setAttribute( 'hidden', '' );
+        }
+      } );
     },
 
     /**

@@ -199,8 +199,8 @@ define( function( require ) {
           }
 
           // insert the label and description elements in the correct location if they exist
-          labelSibling && insertContentElement( accessiblePeer, labelSibling, self._appendLabel );
-          descriptionSibling && insertContentElement( accessiblePeer, descriptionSibling, self._appendDescription );
+          labelSibling && accessiblePeer.arrangeContentElement( labelSibling, self._appendLabel );
+          descriptionSibling && accessiblePeer.arrangeContentElement( descriptionSibling, self._appendDescription );
 
           // Default the focus highlight in this special case to be invisible until selected.
           if ( self._focusHighlightLayerable ) {
@@ -245,31 +245,6 @@ define( function( require ) {
     }
 
     return domElement;
-  }
-
-  /**
-   * Called by invalidateAccessibleContent. "this" will be bound by call. The contentElement will either be a
-   * label or description element. The contentElement will be sorted relative to the primary sibling in its
-   * containerParent. Its placement will also depend on whether or not this node wants to append this element,
-   * see setAppendLabel() and setAppendDescription(). By default, the "content" element will be placed before the
-   * primary sibling.
-   *
-   *
-   * @param {AccessiblePeer} accessiblePeer
-   * @param {HTMLElement} contentElement
-   * @param {boolean} appendElement
-   */
-  function insertContentElement( accessiblePeer, contentElement, appendElement ) {
-    assert && assert( accessiblePeer.containerParent, 'Cannot add sibling if there is no container element' );
-    if ( appendElement ) {
-      accessiblePeer.containerParent.appendChild( contentElement );
-    }
-    else if ( accessiblePeer.containerParent === accessiblePeer.primarySibling.parentNode ) {
-      accessiblePeer.containerParent.insertBefore( contentElement, accessiblePeer.primarySibling );
-    }
-    else {
-      assert && assert( false, 'no append flag for DOM Element, and container parent did not match primary sibling' );
-    }
   }
 
   scenery.register( 'invalidateAccessibleContent', invalidateAccessibleContent );

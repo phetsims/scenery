@@ -30,6 +30,7 @@
 define( function( require ) {
   'use strict';
 
+  var AccessibilityUtil = require( 'SCENERY/accessibility/AccessibilityUtil' );
   var AccessiblePeer = require( 'SCENERY/accessibility/AccessiblePeer' );
   var cleanArray = require( 'PHET_CORE/cleanArray' );
   var Events = require( 'AXON/Events' );
@@ -209,7 +210,7 @@ define( function( require ) {
       for ( var i = 0; i < accessibleInstances.length; i++ ) {
         // Append the container parent to the end (so that, when provided in order, we don't have to resort below
         // when initializing).
-        this.peer.primarySibling.insertBefore( accessibleInstances[ i ].peer.getContainerParent(), null );
+        AccessibilityUtil.insertElements( this.peer.primarySibling, accessibleInstances[ i ].peer.topLevelElements );
       }
 
       if ( hadChildren ) {
@@ -347,13 +348,12 @@ define( function( require ) {
      * @private
      */
     updateVisibility: function() {
-      var parentElement = this.peer.getContainerParent();
-      parentElement.hidden = this.invisibleCount > 0;
+      this.peer.setVisible( this.invisibleCount <= 0 );
 
       // if we hid a parent element, blur focus if active element was an ancestor
-      if ( parentElement.hidden ) {
-        if ( parentElement.contains( document.activeElement ) ) {
-          scenery.Display.focus = null;
+      if ( !this.peer.isVisible() ) {
+        if ( this.peer.primarySibling.contains( document.activeElement ) ) { // still true if activeElement is this primary sibling
+          scenery.Display.focus = null; // TODO is this the best way to blur a focus? shouldn't we `document.activeElement.blur()` or something?
         }
       }
 
@@ -374,8 +374,8 @@ define( function( require ) {
      * @returns {boolean}
      */
     isGloballyVisible: function() {
-      if ( this.peer.getContainerParent().hidden ) {
-        return false;
+      if ( this.peer.isVisible() ) {
+        return true;
       }
       if ( this.parent ) {
         return this.parent.isGloballyVisible();
@@ -402,20 +402,20 @@ define( function( require ) {
         var potentialInstances = node.accessibleInstances;
 
         instanceLoop:
-        for ( i = 0; i < potentialInstances.length; i++ ) {
-          var potentialInstance = potentialInstances[ i ];
-          if ( potentialInstance.parent !== this ) {
-            continue instanceLoop;
-          }
-
-          for ( var j = 0; j < trail.length; j++ ) {
-            if ( trail.nodes[ j ] !== potentialInstance.trail.nodes[ j + potentialInstance.trail.length - trail.length ] ) {
+          for ( i = 0; i < potentialInstances.length; i++ ) {
+            var potentialInstance = potentialInstances[ i ];
+            if ( potentialInstance.parent !== this ) {
               continue instanceLoop;
             }
-          }
 
-          instances.push( potentialInstance );
-        }
+            for ( var j = 0; j < trail.length; j++ ) {
+              if ( trail.nodes[ j ] !== potentialInstance.trail.nodes[ j + potentialInstance.trail.length - trail.length ] ) {
+                continue instanceLoop;
+              }
+            }
+
+            instances.push( potentialInstance );
+          }
 
         assert && assert( instances.length <= 1, 'If we select more than one this way, we have problems' );
       }
@@ -448,12 +448,21 @@ define( function( require ) {
 
       // Reorder DOM elements in a way that doesn't do any work if they are already in a sorted order.
       var primarySibling = this.peer.primarySibling;
+
+      // Since there isn't a 1x1 correlation between a peer and an HTMLElement to be added to the parent, keep track of how many children you've added to the parent
+      var totalElementChildren = 0;
       for ( var n = this.children.length - 1; n >= 0; n-- ) {
-        var peerDOMElement = this.children[ n ].peer.getContainerParent();
-        if ( peerDOMElement === primarySibling.childNodes[ n ] ) {
+        var peerDOMElements = this.children[ n ].peer.topLevelElements;
+
+
+        // TODO: we can't make this assumption anymore, because there isn't a 1X1 correlation to peer's and top level HTMLElements for the peer
+        if ( peerDOMElements[ 0 ] === primarySibling.childNodes[ totalElementChildren + 1 ] ) {
+          totalElementChildren += peerDOMElements.length;
           continue;
         }
-        primarySibling.insertBefore( peerDOMElement, primarySibling.childNodes[ n + 1 ] );
+        totalElementChildren += peerDOMElements.length;
+        AccessibilityUtil.insertElements( primarySibling, peerDOMElements, primarySibling.childNodes[ totalElementChildren + 1 ] );
+        // primarySibling.insertBefore( peerDOMElements,  primarySibling.childNodes[ n + 1 ]);
       }
     },
 
@@ -469,9 +478,10 @@ define( function( require ) {
 
       // Disconnect DOM and remove listeners
       if ( !this.isRootInstance ) {
+
         // remove this peer's primary sibling DOM Element (or its container parent) from the parent peer's
         // primary sibling (or its child container)
-        this.parent.peer.primarySibling.removeChild( this.peer.getContainerParent() );
+        AccessibilityUtil.removeElements( this.parent.peer.primarySibling, this.peer.topLevelElements );
 
         for ( var i = 0; i < this.relativeNodes.length; i++ ) {
           this.relativeNodes[ i ].offStatic( 'accessibleDisplays', this.relativeListeners[ i ] );
@@ -621,6 +631,7 @@ define( function( require ) {
         }
         return fakeInstances;
       }
+
       return {
         node: null,
         children: createFakeTree( rootNode )
