@@ -199,15 +199,12 @@ define( function( require ) {
         assert && assert( this.topLevelElements.indexOf( contentElement ) >= 0, 'element is not part of this peer, thus cannot be arranged' );
 
         // keep this.topLevelElements in sync
-        this.topLevelElements = this.topLevelElements.splice( this.topLevelElements.indexOf( contentElement ), 1 );
+        this.topLevelElements.splice( this.topLevelElements.indexOf( contentElement ), 1 );
 
-        var indexOffset = appendElement ? 1 : -1;
-        indexOffset = indexOffset < 0 ? 0 : indexOffset; //support primarySibling in the first position
-        this.topLevelElements = this.topLevelElements.splice( this.topLevelElements.indexOf( this.primarySibling ) + indexOffset, contentElement );
-
-
-        // TODO tell the parent that things changed. DO WE NEED TO DO THIS? BECAUSE I THINK THAT THIS IS ALWAYS CALLED BEFORE THE PEER IS ADDED TO THE INSTANCE AND SORTED
-
+        var indexOffset = appendElement ? 1 : 0;
+        var indexOfContentElement = this.topLevelElements.indexOf( this.primarySibling ) + indexOffset;
+        indexOfContentElement = indexOfContentElement < 0 ? 0 : indexOfContentElement; //support primarySibling in the first position
+        this.topLevelElements.splice( indexOfContentElement, 0, contentElement );
       }
     },
 
