@@ -219,10 +219,9 @@ define( function( require ) {
 
     /**
      * Activate all 'group' focus highlights by searching for ancestor nodes from the node that has focus
-     * and adding a rectangle around it.
-     *
-     * TODO: Support more than one group focus highlight (multiple ancestors could have groupFocusHighlight)
-     *
+     * and adding a rectangle around it if it has a "groupFocusHighlight". A group highlight will only appear around
+     * the closest ancestor that has a one.
+;    *
      * @private
      */
     activateGroupHighlights: function() {
