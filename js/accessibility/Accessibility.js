@@ -530,7 +530,7 @@ define( function( require ) {
          * @returns {Node} - For chaining
          */
         interruptAccessibleInput: function() {
-          var listenersCopy = this._accessibleInputListeners;
+          var listenersCopy = this.accessibleInputListeners;
 
           for ( var i = 0; i < listenersCopy.length; i++ ) {
             var listener = listenersCopy[ i ];
