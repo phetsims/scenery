@@ -35,6 +35,7 @@ define( function( require ) {
 
     // TODO: This is in-progress work to convert object properties to Axon Properties, see https://github.com/phetsims/phet-io/issues/1326
     var visibleProperty = new BooleanProperty( node.visible, {
+      phetioReadOnly: node.phetioReadOnly,
       tandem: node.tandem.createTandem( 'visibleProperty' ),
       phetioInstanceDocumentation: 'Property that controls whether the Node will be visible (and interactive), see the NodeIO documentation for more details.'
     } );
@@ -43,6 +44,7 @@ define( function( require ) {
     node.on( 'visibility', function() { visibleProperty.value = node.visible; } );
 
     var pickableProperty = new Property( node.pickable, {
+      phetioReadOnly: node.phetioReadOnly,
       tandem: node.tandem.createTandem( 'pickableProperty' ),
       phetioType: PropertyIO( NullableIO( BooleanIO ) ),
       phetioInstanceDocumentation: 'Set whether the node will be pickable (and hence interactive), see the NodeIO documentation for more details.'
@@ -51,6 +53,7 @@ define( function( require ) {
     node.on( 'pickability', function() { pickableProperty.value = node.pickable; } );
 
     var opacityProperty = new NumberProperty( node.opacity, {
+      phetioReadOnly: node.phetioReadOnly,
       tandem: node.tandem.createTandem( 'opacityProperty' ),
       range: { min: 0, max: 1 },
       phetioInstanceDocumentation: 'Opacity of the parent NodeIO, between 0 (invisible) and 1 (fully visible).'
