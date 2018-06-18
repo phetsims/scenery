@@ -219,6 +219,10 @@ define( function( require ) {
       }
     },
 
+    /**
+     * Called on change of children (child added, removed, order changed, etc.)
+     * @private
+     */
     onLayoutBoxChildrenChanged: function() {
       if ( this._resize ) {
         this.updateLayoutAutomatically();
