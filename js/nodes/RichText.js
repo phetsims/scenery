@@ -1448,7 +1448,7 @@ define( function( require ) {
      * @returns {string}
      */
     contentToString: function( content, isLTR ) {
-      var unescapedContent = _.unescape( content );
+      var unescapedContent = he.decode( content );
       return isLTR ? ( '\u202a' + unescapedContent + '\u202c' ) : ( '\u202b' + unescapedContent + '\u202c' );
     },
 
