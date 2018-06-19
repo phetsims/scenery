@@ -1450,31 +1450,6 @@ define( function( require ) {
     contentToString: function( content, isLTR ) {
       var unescapedContent = he.decode( content );
       return isLTR ? ( '\u202a' + unescapedContent + '\u202c' ) : ( '\u202b' + unescapedContent + '\u202c' );
-    },
-
-    /**
-     * Creates an object with key-value pairs for the CSS declarations.
-     * @private
-     *
-     * @param {string} str - CSS declaration list
-     * @returns {Object}
-     */
-    parseCSSDeclarations: function( str ) {
-      var result = {};
-
-      // Somewhat simplified parsing, but should work for the vast majority of cases.
-      var declarations = str.split( ';' );
-
-      for ( var i = 0; i < declarations.length; i++ ) {
-        var declaration = declarations[ i ].trim();
-        if ( declaration.length < 2 ) { continue; }
-        var bits = declaration.split( ':' );
-        assert && assert( bits.length === 2, 'Each declaration should have a key and value' );
-
-        result[ bits[ 0 ].trim() ] = bits[ 1 ].trim();
-      }
-
-      return result;
     }
   } );
 
