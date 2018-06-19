@@ -302,7 +302,8 @@ define( function( require ) {
       tagName: 'div',
       ariaLabel: TEST_LABEL, // use ARIA label attribute
       accessibleVisible: false, // hidden from screen readers (and browser)
-      descriptionContent: TEST_DESCRIPTION // default to a <p> tag
+      descriptionContent: TEST_DESCRIPTION, // default to a <p> tag
+      containerTagName: 'div'
     } );
     rootNode.addChild( divNode );
 
@@ -497,6 +498,7 @@ define( function( require ) {
     // give the button a container parent and some empty siblings
     a1.labelTagName = 'div';
     a1.descriptionTagName = 'p';
+    a1.containerTagName = 'div';
 
     var buttonElement = a1.accessibleInstances[ 0 ].peer.primarySibling;
     var parentElement = buttonElement.parentElement;
