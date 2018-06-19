@@ -449,11 +449,19 @@ define( function( require ) {
       // Reorder DOM elements in a way that doesn't do any work if they are already in a sorted order.
       var primarySibling = this.peer.primarySibling;
 
-      for ( var i = 0; i < this.children.length; i++ ) {
-        var peerDOMElements = this.children[ i ].peer.topLevelElements;
+      var i = primarySibling.childNodes.length - 1;
+      for ( var peerIndex = this.children.length - 1; peerIndex >= 0; peerIndex-- ) {
+        var peer = this.children[ peerIndex ].peer;
+        for ( var elementIndex = peer.topLevelElements.length - 1; elementIndex >= 0; elementIndex-- ) {
+          var element = peer.topLevelElements[ elementIndex ];
 
-        // TODO: effeciency check, will this hold up a scenery code review? see https://github.com/phetsims/scenery/issues/715
-        AccessibilityUtil.insertElements( primarySibling, peerDOMElements );
+          // no need to reinsert if `element` is already in the right order
+          if ( primarySibling.childNodes[ i ] !== element ) {
+            primarySibling.insertBefore( element, primarySibling.childNodes[ i + 1 ] );
+          }
+
+          i--;
+        }
       }
     },
 
