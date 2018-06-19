@@ -449,20 +449,11 @@ define( function( require ) {
       // Reorder DOM elements in a way that doesn't do any work if they are already in a sorted order.
       var primarySibling = this.peer.primarySibling;
 
-      // Since there isn't a 1x1 correlation between a peer and an HTMLElement to be added to the parent, keep track of how many children you've added to the parent
-      var totalElementChildren = 0;
-      for ( var n = this.children.length - 1; n >= 0; n-- ) {
-        var peerDOMElements = this.children[ n ].peer.topLevelElements;
+      for ( var i = 0; i < this.children.length; i++ ) {
+        var peerDOMElements = this.children[ i ].peer.topLevelElements;
 
-
-        // TODO: we can't make this assumption anymore, because there isn't a 1X1 correlation to peer's and top level HTMLElements for the peer
-        if ( peerDOMElements[ 0 ] === primarySibling.childNodes[ totalElementChildren + 1 ] ) {
-          totalElementChildren += peerDOMElements.length;
-          continue;
-        }
-        totalElementChildren += peerDOMElements.length;
-        AccessibilityUtil.insertElements( primarySibling, peerDOMElements, primarySibling.childNodes[ totalElementChildren + 1 ] );
-        // primarySibling.insertBefore( peerDOMElements,  primarySibling.childNodes[ n + 1 ]);
+        // TODO: effeciency check, will this hold up a scenery code review? see https://github.com/phetsims/scenery/issues/715
+        AccessibilityUtil.insertElements( primarySibling, peerDOMElements );
       }
     },
 
