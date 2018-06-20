@@ -34,6 +34,8 @@ define( function( require ) {
 
     // @private {*} - Will be set to whatever type node.painterType is.
     this.painter = null;
+
+    this.initializeWebGLSelfDrawable( renderer, instance );
   }
 
   scenery.register( 'WebGLNodeDrawable', WebGLNodeDrawable );
