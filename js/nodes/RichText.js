@@ -126,6 +126,7 @@ define( function( require ) {
   // We need to do some font-size tests, so we have a Text for that.
   var scratchText = new scenery.Text( '' );
 
+  // himalaya converts dash separated CSS to camel case - use CSS compatible style with dashes, see above for examples
   var FONT_STYLE_MAP = {
     'fontFamily': 'family',
     'fontSize': 'size',
