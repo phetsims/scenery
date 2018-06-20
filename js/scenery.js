@@ -158,6 +158,13 @@ define( function( require ) {
         this.enableIndividualLog( 'EventDispatch' );
         return;
       }
+      if ( name === 'a11y' ) {
+        this.enableIndividualLog( 'Accessibility' );
+        this.enableIndividualLog( 'AccessibleInstance' );
+        this.enableIndividualLog( 'AccessibilityTree' );
+        this.enableIndividualLog( 'AccessibleDisplaysInfo' );
+        return;
+      }
 
       if ( name ) {
         assert && assert( logProperties[ name ],

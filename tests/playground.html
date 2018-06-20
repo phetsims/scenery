@@ -132,8 +132,9 @@ an UI and Display made for visual testing and debugging.
 
       window.accessibleTest = function() {
         setTimeout( function() {
-          scenery.enableLogging( [ 'Accessibility', 'AccessibleInstance', 'AccessibilityTree', 'AccessibleDisplaysInfo' ] );
-          toggleA11yDebug();
+
+          // with scenery logging for a11y
+          toggleA11yDebug( true );
           toggleUpdates();
 
           scene.tagName = 'div';
@@ -174,9 +175,10 @@ an UI and Display made for visual testing and debugging.
 
       window.debugAccessibleInstances = function() {
         recurse( display._rootAccessibleInstance, '' );
+
         function recurse( instance, indentation ) {
           console.log( indentation + ( instance.isRootInstance ? '' : instance.node.tagName ) + ' ' + instance.toString() );
-          instance.children.forEach( child => recurse( child, indentation + '  ' ) );
+          instance.children.forEach( function( child ) { recurse( child, indentation + '  ' ) } );
         }
       };
 
@@ -349,12 +351,23 @@ an UI and Display made for visual testing and debugging.
         a11yDebug.innerHTML = display.getAccessibleDebugHTML();
       }
 
-      window.toggleA11yDebug = function() {
+      /**
+       * @param {boolean} withSceneryLog
+       */
+      window.toggleA11yDebug = function( withSceneryLog ) {
         if ( a11yDebugging ) {
+          if ( window.location.search.indexOf( 'a11yLog' ) >= 0 || withSceneryLog ) {
+            scenery.disableLogging();
+          }
+
           window.cancelAnimationFrame( a11yDebuggingRequestID );
           a11yDebug.style.display = 'none';
         }
         else {
+          if ( window.location.search.indexOf( 'a11yLog' ) >= 0 || withSceneryLog ) {
+            scenery.enableLogging( [ 'a11y' ] );
+          }
+
           a11yDebugStep();
         }
 
@@ -406,14 +419,15 @@ an UI and Display made for visual testing and debugging.
             id="a11y-input">window.scene.addChild(  new window.scenery.Node( { tagName: 'button' } ) );</textarea>
   <textarea rows="20" cols="40" placeholder="HTML will appear here" id="a11y-output"></textarea>
   <br/>
-  <input type="checkbox" id="keep-previous" /><label for="keep-previous">Keep previous children of the root node</label><br/>
+  <input type="checkbox" id="keep-previous"/><label for="keep-previous">Keep previous children of the root
+  node</label><br/>
   <button id="getHTML">Get HTML from Nodes</button>
   <script>
     document.getElementById( 'getHTML' ).addEventListener( 'click', function() {
       var inputText = document.getElementById( 'a11y-input' ).value;
 
       if ( inputText ) {
-        if( !document.getElementById( 'keep-previous').checked ){
+        if ( !document.getElementById( 'keep-previous' ).checked ) {
           window.scene.children = [];
         }
         eval( inputText );
@@ -423,8 +437,8 @@ an UI and Display made for visual testing and debugging.
 
     } );
 
-    window.togglePDOMPlayground = function(){
-      document.getElementById( 'pdom-playground' ).classList.toggle( 'hidden');
+    window.togglePDOMPlayground = function() {
+      document.getElementById( 'pdom-playground' ).classList.toggle( 'hidden' );
     }
   </script>
 </div>
