@@ -159,44 +159,10 @@ define( function( require ) {
 
     assert.ok( a.accessibleInstances[ 0 ].peer.containerParent.id.indexOf( 'container' ) >= 0, 'container parent is div if specified' );
 
-    var b = new Node( { tagName: 'button', labelTagName: 'div', labelContent: TEST_LABEL } );
+    a.containerTagName = null;
 
-    rootNode.addChild( b );
-    var buttonElement = b.accessibleInstances[ 0 ].peer.primarySibling;
-    var parentElement = buttonElement.parentElement;
+    assert.ok( !a.accessibleInstances[ 0 ].peer.containerParent, 'container parent is cleared if specified' );
 
-    assert.ok( b.containerTagName === DEFAULT_CONTAINER_TAG_NAME, 'container automatically created for label' );
-
-    assert.ok( parentElement, 'parent element must be created with label option' );
-    assert.ok( parentElement.childNodes.length === 2, 'only contain label and primary siblings' );
-
-    assert.ok( parentElement.childNodes[ 1 ] === getPrimarySiblingElementByNode( b ), 'primary sibling after label sibling.' );
-
-
-    var c = new Node( { tagName: 'button', descriptionTagName: 'div', descriptionContent: TEST_DESCRIPTION } );
-
-    rootNode.addChild( c );
-    buttonElement = c.accessibleInstances[ 0 ].peer.primarySibling;
-    parentElement = buttonElement.parentElement;
-
-
-    assert.ok( parentElement, 'parent element must be created with description option' );
-    assert.ok( parentElement.childNodes.length === 2, 'only contain description and primary siblings' );
-
-    c.containerTagName = 'SECTION';
-    assert.ok( getPrimarySiblingElementByNode( c ).parentElement.tagName === 'SECTION', 'containerTagName should update default' );
-
-    var d = new Node( { tagName: 'button', labelTagName: 'p', descriptionTagName: 'p' } );
-    rootNode.addChild( d );
-    assert.ok( getPrimarySiblingElementByNode( d ).parentElement.childNodes.length === 3, 'correct children' );
-
-    var e = new Node( {
-      tagName: 'div',
-      labelContent: TEST_LABEL,
-      containerTagName: 'SECTION'
-    } );
-    rootNode.addChild( e );
-    assert.ok( getPrimarySiblingElementByNode( e ).parentElement.tagName === 'SECTION', 'containerTagName should update default in options block' );
   } );
 
   QUnit.test( 'labelTagName/labelContent option', function( assert ) {
