@@ -11,14 +11,14 @@
 define( function( require ) {
   'use strict';
 
+  var ExperimentalPoolable = require( 'PHET_CORE/ExperimentalPoolable' );
   var inherit = require( 'PHET_CORE/inherit' );
-  var Poolable = require( 'PHET_CORE/Poolable' );
   var scenery = require( 'SCENERY/scenery' );
   var SVGGradient = require( 'SCENERY/display/SVGGradient' );
 
   /**
    * @constructor
-   * @mixes Poolable
+   * @mixes ExperimentalPoolable
    *
    * @param {SVGBlock} svgBlock
    * @param {RadialGradient} radialGradient
@@ -31,7 +31,7 @@ define( function( require ) {
 
   inherit( SVGGradient, SVGRadialGradient, {
     /**
-     * Poolable initializer.
+     * ExperimentalPoolable initializer.
      * @private
      *
      * @param {SVGBlock} svgBlock
@@ -67,17 +67,8 @@ define( function( require ) {
     }
   } );
 
-  Poolable.mixInto( SVGRadialGradient, {
-    constructorDuplicateFactory: function( pool ) {
-      return function( svgBlock, radialGradient ) {
-        if ( pool.length ) {
-          return pool.pop().initialize( svgBlock, radialGradient );
-        }
-        else {
-          return new SVGRadialGradient( svgBlock, radialGradient );
-        }
-      };
-    }
+  ExperimentalPoolable.mixInto( SVGRadialGradient, {
+    initialize: SVGRadialGradient.prototype.initialize
   } );
 
   return SVGRadialGradient;

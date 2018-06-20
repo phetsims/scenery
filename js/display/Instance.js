@@ -29,9 +29,9 @@ define( function( require ) {
   var cleanArray = require( 'PHET_CORE/cleanArray' );
   var Drawable = require( 'SCENERY/display/Drawable' );
   var Events = require( 'AXON/Events' );
+  var ExperimentalPoolable = require( 'PHET_CORE/ExperimentalPoolable' );
   var Fittability = require( 'SCENERY/display/Fittability' );
   var inherit = require( 'PHET_CORE/inherit' );
-  var Poolable = require( 'PHET_CORE/Poolable' );
   var RelativeTransform = require( 'SCENERY/display/RelativeTransform' );
   var Renderer = require( 'SCENERY/display/Renderer' );
   var scenery = require( 'SCENERY/scenery' );
@@ -45,7 +45,7 @@ define( function( require ) {
 
   /**
    * @constructor
-   * @mixes Poolable
+   * @mixes ExperimentalPoolable
    *
    * See initialize() for documentation
    *
@@ -1695,19 +1695,8 @@ define( function( require ) {
   } );
 
   // object pooling
-  Poolable.mixInto( Instance, {
-    constructorDuplicateFactory: function( pool ) {
-      return function( display, trail, isDisplayRoot, isSharedCanvasCacheRoot ) {
-        if ( pool.length ) {
-          sceneryLog && sceneryLog.Instance && sceneryLog.Instance( 'new from pool' );
-          return pool.pop().initialize( display, trail, isDisplayRoot, isSharedCanvasCacheRoot );
-        }
-        else {
-          sceneryLog && sceneryLog.Instance && sceneryLog.Instance( 'new from constructor' );
-          return new Instance( display, trail, isDisplayRoot, isSharedCanvasCacheRoot );
-        }
-      };
-    }
+  ExperimentalPoolable.mixInto( Instance, {
+    initialize: Instance.prototype.initialize
   } );
 
   return Instance;

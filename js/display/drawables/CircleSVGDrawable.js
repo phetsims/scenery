@@ -10,9 +10,9 @@ define( function( require ) {
   'use strict';
 
   var CircleStatefulDrawable = require( 'SCENERY/display/drawables/CircleStatefulDrawable' );
+  var ExperimentalPoolable = require( 'PHET_CORE/ExperimentalPoolable' );
   var inherit = require( 'PHET_CORE/inherit' );
   var scenery = require( 'SCENERY/scenery' );
-  var SelfDrawable = require( 'SCENERY/display/SelfDrawable' );
   var SVGSelfDrawable = require( 'SCENERY/display/SVGSelfDrawable' );
 
   // TODO: change this based on memory and performance characteristics of the platform
@@ -82,9 +82,9 @@ define( function( require ) {
   // Include Circle's stateful trait (used for dirty flags)
   CircleStatefulDrawable.mixInto( CircleSVGDrawable );
 
-  // This sets up CircleSVGDrawable.createFromPool/dirtyFromPool and drawable.freeToPool() for the type, so
-  // that we can avoid allocations by reusing previously-used drawables.
-  SelfDrawable.Poolable.mixInto( CircleSVGDrawable );
+  ExperimentalPoolable.mixInto( CircleSVGDrawable, {
+    initialize: CircleSVGDrawable.prototype.initialize
+  } );
 
   return CircleSVGDrawable;
 } );

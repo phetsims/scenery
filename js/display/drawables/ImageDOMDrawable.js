@@ -10,10 +10,10 @@ define( function( require ) {
   'use strict';
 
   var DOMSelfDrawable = require( 'SCENERY/display/DOMSelfDrawable' );
+  var ExperimentalPoolable = require( 'PHET_CORE/ExperimentalPoolable' );
   var ImageStatefulDrawable = require( 'SCENERY/display/drawables/ImageStatefulDrawable' );
   var inherit = require( 'PHET_CORE/inherit' );
   var scenery = require( 'SCENERY/scenery' );
-  var SelfDrawable = require( 'SCENERY/display/SelfDrawable' );
   require( 'SCENERY/util/Util' );
 
   // TODO: change this based on memory and performance characteristics of the platform
@@ -129,9 +129,9 @@ scenery.register( 'ImageDOMDrawable', ImageDOMDrawable );
   } );
   ImageStatefulDrawable.mixInto( ImageDOMDrawable );
 
-  // This sets up ImageDOMDrawable.createFromPool/dirtyFromPool and drawable.freeToPool() for the type, so
-  // that we can avoid allocations by reusing previously-used drawables.
-  SelfDrawable.Poolable.mixInto( ImageDOMDrawable );
+  ExperimentalPoolable.mixInto( ImageDOMDrawable, {
+    initialize: ImageDOMDrawable.prototype.initialize
+  } );
 
   return ImageDOMDrawable;
 } );

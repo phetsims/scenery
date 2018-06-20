@@ -9,10 +9,10 @@
 define( function( require ) {
   'use strict';
 
+  var ExperimentalPoolable = require( 'PHET_CORE/ExperimentalPoolable' );
   var inherit = require( 'PHET_CORE/inherit' );
   var RectangleStatefulDrawable = require( 'SCENERY/display/drawables/RectangleStatefulDrawable' );
   var scenery = require( 'SCENERY/scenery' );
-  var SelfDrawable = require( 'SCENERY/display/SelfDrawable' );
   var SVGSelfDrawable = require( 'SCENERY/display/SVGSelfDrawable' );
 
   // TODO: change this based on memory and performance characteristics of the platform
@@ -108,9 +108,9 @@ define( function( require ) {
 
   RectangleStatefulDrawable.mixInto( RectangleSVGDrawable );
 
-  // This sets up RectangleSVGDrawable.createFromPool/dirtyFromPool and drawable.freeToPool() for the type, so
-  // that we can avoid allocations by reusing previously-used drawables.
-  SelfDrawable.Poolable.mixInto( RectangleSVGDrawable );
+  ExperimentalPoolable.mixInto( RectangleSVGDrawable, {
+    initialize: RectangleSVGDrawable.prototype.initialize
+  } );
 
   return RectangleSVGDrawable;
 } );

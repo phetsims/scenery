@@ -9,11 +9,11 @@
 define( function( require ) {
   'use strict';
 
+  var ExperimentalPoolable = require( 'PHET_CORE/ExperimentalPoolable' );
   var ImageStatefulDrawable = require( 'SCENERY/display/drawables/ImageStatefulDrawable' );
   var inherit = require( 'PHET_CORE/inherit' );
   var Renderer = require( 'SCENERY/display/Renderer' );
   var scenery = require( 'SCENERY/scenery' );
-  var SelfDrawable = require( 'SCENERY/display/SelfDrawable' );
   var Vector2 = require( 'DOT/Vector2' );
   var WebGLSelfDrawable = require( 'SCENERY/display/WebGLSelfDrawable' );
 
@@ -243,9 +243,10 @@ define( function( require ) {
     }
   } );
   ImageStatefulDrawable.mixInto( ImageWebGLDrawable );
-  // This sets up ImageWebGLDrawable.createFromPool/dirtyFromPool and drawable.freeToPool() for the type, so
-  // that we can avoid allocations by reusing previously-used drawables.
-  SelfDrawable.Poolable.mixInto( ImageWebGLDrawable );
+
+  ExperimentalPoolable.mixInto( ImageWebGLDrawable, {
+    initialize: ImageWebGLDrawable.prototype.initialize
+  } );
 
   return ImageWebGLDrawable;
 } );

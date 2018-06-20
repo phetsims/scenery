@@ -10,9 +10,9 @@ define( function( require ) {
   'use strict';
 
   var cleanArray = require( 'PHET_CORE/cleanArray' );
+  var ExperimentalPoolable = require( 'PHET_CORE/ExperimentalPoolable' );
   var FittedBlock = require( 'SCENERY/display/FittedBlock' );
   var inherit = require( 'PHET_CORE/inherit' );
-  var Poolable = require( 'PHET_CORE/Poolable' );
   var scenery = require( 'SCENERY/scenery' );
   var SVGGroup = require( 'SCENERY/display/SVGGroup' );
   var Util = require( 'SCENERY/util/Util' );
@@ -20,7 +20,7 @@ define( function( require ) {
   /**
    * @constructor
    * @extends FittedBlock
-   * @mixes Poolable
+   * @mixes ExperimentalPoolable
    *
    * @param {Display} display - the scenery Display this SVGBlock will appear in
    * @param {number} renderer - the bitmask for the renderer, see Renderer.js
@@ -297,19 +297,8 @@ define( function( require ) {
     }
   } );
 
-  Poolable.mixInto( SVGBlock, {
-    constructorDuplicateFactory: function( pool ) {
-      return function( display, renderer, transformRootInstance, filterRootInstance ) {
-        if ( pool.length ) {
-          sceneryLog && sceneryLog.SVGBlock && sceneryLog.SVGBlock( 'new from pool' );
-          return pool.pop().initialize( display, renderer, transformRootInstance, filterRootInstance );
-        }
-        else {
-          sceneryLog && sceneryLog.SVGBlock && sceneryLog.SVGBlock( 'new from constructor' );
-          return new SVGBlock( display, renderer, transformRootInstance, filterRootInstance );
-        }
-      };
-    }
+  ExperimentalPoolable.mixInto( SVGBlock, {
+    initialize: SVGBlock.prototype.initialize
   } );
 
   return SVGBlock;

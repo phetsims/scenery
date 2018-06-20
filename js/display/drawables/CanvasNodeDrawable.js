@@ -10,9 +10,9 @@ define( function( require ) {
   'use strict';
 
   var CanvasSelfDrawable = require( 'SCENERY/display/CanvasSelfDrawable' );
+  var ExperimentalPoolable = require( 'PHET_CORE/ExperimentalPoolable' );
   var inherit = require( 'PHET_CORE/inherit' );
   var scenery = require( 'SCENERY/scenery' );
-  var SelfDrawable = require( 'SCENERY/display/SelfDrawable' );
 
   var emptyArray = []; // constant, used for line-dash
 
@@ -90,9 +90,9 @@ define( function( require ) {
     }
   } );
 
-  // This sets up CanvasNodeDrawable.createFromPool/dirtyFromPool and drawable.freeToPool() for the type, so
-  // that we can avoid allocations by reusing previously-used drawables.
-  SelfDrawable.Poolable.mixInto( CanvasNodeDrawable );
+  ExperimentalPoolable.mixInto( CanvasNodeDrawable, {
+    initialize: CanvasNodeDrawable.prototype.initialize
+  } );
 
   return CanvasNodeDrawable;
 } );

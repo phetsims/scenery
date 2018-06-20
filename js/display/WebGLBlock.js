@@ -13,10 +13,10 @@ define( function( require ) {
   // modules
   var cleanArray = require( 'PHET_CORE/cleanArray' );
   var Emitter = require( 'AXON/Emitter' );
+  var ExperimentalPoolable = require( 'PHET_CORE/ExperimentalPoolable' );
   var FittedBlock = require( 'SCENERY/display/FittedBlock' );
   var inherit = require( 'PHET_CORE/inherit' );
   var Matrix3 = require( 'DOT/Matrix3' );
-  var Poolable = require( 'PHET_CORE/Poolable' );
   var Renderer = require( 'SCENERY/display/Renderer' );
   var scenery = require( 'SCENERY/scenery' );
   var ShaderProgram = require( 'SCENERY/util/ShaderProgram' );
@@ -26,7 +26,7 @@ define( function( require ) {
   /**
    * @constructor
    * @extends FittedBlock
-   * @mixes Poolable
+   * @mixes ExperimentalPoolable
    *
    * @param display
    * @param renderer
@@ -873,19 +873,8 @@ define( function( require ) {
     }
   } );
 
-  Poolable.mixInto( WebGLBlock, {
-    constructorDuplicateFactory: function( pool ) {
-      return function( display, renderer, transformRootInstance, filterRootInstance ) {
-        if ( pool.length ) {
-          sceneryLog && sceneryLog.WebGLBlock && sceneryLog.WebGLBlock( 'new from pool' );
-          return pool.pop().initialize( display, renderer, transformRootInstance, filterRootInstance );
-        }
-        else {
-          sceneryLog && sceneryLog.WebGLBlock && sceneryLog.WebGLBlock( 'new from constructor' );
-          return new WebGLBlock( display, renderer, transformRootInstance, filterRootInstance );
-        }
-      };
-    }
+  ExperimentalPoolable.mixInto( WebGLBlock, {
+    initialize: WebGLBlock.prototype.initialize
   } );
 
   return WebGLBlock;

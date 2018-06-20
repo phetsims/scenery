@@ -11,13 +11,13 @@
 define( function( require ) {
   'use strict';
 
+  var ExperimentalPoolable = require( 'PHET_CORE/ExperimentalPoolable' );
   var inherit = require( 'PHET_CORE/inherit' );
-  var Poolable = require( 'PHET_CORE/Poolable' );
   var scenery = require( 'SCENERY/scenery' );
 
   /**
    * @constructor
-   * @mixes Poolable
+   * @mixes ExperimentalPoolable
    *
    * @param domEvent
    * @param type
@@ -94,20 +94,7 @@ define( function( require ) {
     return BatchedDOMEvent.createFromPool( domEvent, pointFromEvent( domEvent ), domEvent.pointerId );
   };
 
-  Poolable.mixInto( BatchedDOMEvent, {
-    constructorDuplicateFactory: function( pool ) {
-      return function( domEvent, type, callback ) {
-        if ( pool.length ) {
-          var result = pool.pop();
-          BatchedDOMEvent.call( result, domEvent, type, callback );
-          return result;
-        }
-        else {
-          return new BatchedDOMEvent( domEvent, type, callback );
-        }
-      };
-    }
-  } );
+  ExperimentalPoolable.mixInto( BatchedDOMEvent );
 
   return BatchedDOMEvent;
 } );

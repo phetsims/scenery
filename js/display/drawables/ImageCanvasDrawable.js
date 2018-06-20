@@ -10,9 +10,9 @@ define( function( require ) {
   'use strict';
 
   var CanvasSelfDrawable = require( 'SCENERY/display/CanvasSelfDrawable' );
+  var ExperimentalPoolable = require( 'PHET_CORE/ExperimentalPoolable' );
   var inherit = require( 'PHET_CORE/inherit' );
   var scenery = require( 'SCENERY/scenery' );
-  var SelfDrawable = require( 'SCENERY/display/SelfDrawable' );
 
   /**
    * A generated CanvasSelfDrawable whose purpose will be drawing our Image. One of these drawables will be created
@@ -93,9 +93,9 @@ define( function( require ) {
     markDirtyImageOpacity: function() { this.markPaintDirty(); }
   } );
 
-  // This sets up ImageCanvasDrawable.createFromPool/dirtyFromPool and drawable.freeToPool() for the type, so
-  // that we can avoid allocations by reusing previously-used drawables.
-  SelfDrawable.Poolable.mixInto( ImageCanvasDrawable );
+  ExperimentalPoolable.mixInto( ImageCanvasDrawable, {
+    initialize: ImageCanvasDrawable.prototype.initialize
+  } );
 
   return ImageCanvasDrawable;
 } );

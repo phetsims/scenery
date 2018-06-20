@@ -10,10 +10,10 @@ define( function( require ) {
   'use strict';
 
   var CanvasSelfDrawable = require( 'SCENERY/display/CanvasSelfDrawable' );
+  var ExperimentalPoolable = require( 'PHET_CORE/ExperimentalPoolable' );
   var inherit = require( 'PHET_CORE/inherit' );
   var PaintableStatelessDrawable = require( 'SCENERY/display/drawables/PaintableStatelessDrawable' );
   var scenery = require( 'SCENERY/scenery' );
-  var SelfDrawable = require( 'SCENERY/display/SelfDrawable' );
   // TODO: use LineStatelessDrawable instead of the custom stuff going on
   // var LineStatelessDrawable = require( 'SCENERY/display/drawables/LineStatelessDrawable' );
 
@@ -100,9 +100,9 @@ define( function( require ) {
 
   PaintableStatelessDrawable.mixInto( LineCanvasDrawable );
 
-  // This sets up LineCanvasDrawable.createFromPool/dirtyFromPool and drawable.freeToPool() for the type, so
-  // that we can avoid allocations by reusing previously-used drawables.
-  SelfDrawable.Poolable.mixInto( LineCanvasDrawable );
+  ExperimentalPoolable.mixInto( LineCanvasDrawable, {
+    initialize: LineCanvasDrawable.prototype.initialize
+  } );
 
   return LineCanvasDrawable;
 } );

@@ -12,13 +12,13 @@ define( function( require ) {
   'use strict';
 
   var Block = require( 'SCENERY/display/Block' );
+  var ExperimentalPoolable = require( 'PHET_CORE/ExperimentalPoolable' );
   var inherit = require( 'PHET_CORE/inherit' );
-  var Poolable = require( 'PHET_CORE/Poolable' );
   var scenery = require( 'SCENERY/scenery' );
 
   /**
    * @constructor
-   * @mixes Poolable
+   * @mixes ExperimentalPoolable
    *
    * @param display
    * @param domDrawable
@@ -75,17 +75,8 @@ define( function( require ) {
     }
   } );
 
-  Poolable.mixInto( DOMBlock, {
-    constructorDuplicateFactory: function( pool ) {
-      return function( display, domDrawable ) {
-        if ( pool.length ) {
-          return pool.pop().initialize( display, domDrawable );
-        }
-        else {
-          return new DOMBlock( display, domDrawable );
-        }
-      };
-    }
+  ExperimentalPoolable.mixInto( DOMBlock, {
+    initialize: DOMBlock.prototype.initialize
   } );
 
   return DOMBlock;

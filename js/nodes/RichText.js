@@ -62,13 +62,13 @@ define( function( require ) {
   // modules
   var ButtonListener = require( 'SCENERY/input/ButtonListener' );
   var Color = require( 'SCENERY/util/Color' );
+  var ExperimentalPoolable = require( 'PHET_CORE/ExperimentalPoolable' );
   var extendDefined = require( 'PHET_CORE/extendDefined' );
   var Font = require( 'SCENERY/util/Font' );
   var inherit = require( 'PHET_CORE/inherit' );
   var Line = require( 'SCENERY/nodes/Line' );
   var Matrix3 = require( 'DOT/Matrix3' );
   var Node = require( 'SCENERY/nodes/Node' );
-  var Poolable = require( 'PHET_CORE/Poolable' );
   var RichTextIO = require( 'SCENERY/nodes/RichTextIO' );
   var scenery = require( 'SCENERY/scenery' );
   var Tandem = require( 'TANDEM/Tandem' );
@@ -1577,17 +1577,8 @@ define( function( require ) {
     }
   } );
 
-  Poolable.mixInto( RichTextElement, {
-    constructorDuplicateFactory: function( pool ) {
-      return function( isLTR ) {
-        if ( pool.length ) {
-          return pool.pop().initialize( isLTR );
-        }
-        else {
-          return new RichTextElement( isLTR );
-        }
-      };
-    }
+  ExperimentalPoolable.mixInto( RichTextElement, {
+    initialize: RichTextElement.prototype.initialize
   } );
 
   /**
@@ -1679,17 +1670,8 @@ define( function( require ) {
     }
   } );
 
-  Poolable.mixInto( RichTextLeaf, {
-    constructorDuplicateFactory: function( pool ) {
-      return function( content, isLTR, font, boundsMethod, fill, stroke ) {
-        if ( pool.length ) {
-          return pool.pop().initialize( content, isLTR, font, boundsMethod, fill, stroke );
-        }
-        else {
-          return new RichTextLeaf( content, isLTR, font, boundsMethod, fill, stroke );
-        }
-      };
-    }
+  ExperimentalPoolable.mixInto( RichTextLeaf, {
+    initialize: RichTextLeaf.prototype.initialize
   } );
 
   /**
@@ -1779,17 +1761,8 @@ define( function( require ) {
     }
   } );
 
-  Poolable.mixInto( RichTextLink, {
-    constructorDuplicateFactory: function( pool ) {
-      return function( innerContent, href ) {
-        if ( pool.length ) {
-          return pool.pop().initialize( innerContent, href );
-        }
-        else {
-          return new RichTextLink( innerContent, href );
-        }
-      };
-    }
+  ExperimentalPoolable.mixInto( RichTextLink, {
+    initialize: RichTextLink.prototype.initialize
   } );
 
   return RichText;

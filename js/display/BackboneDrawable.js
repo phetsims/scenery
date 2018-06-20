@@ -13,9 +13,9 @@ define( function( require ) {
   // modules
   var cleanArray = require( 'PHET_CORE/cleanArray' );
   var Drawable = require( 'SCENERY/display/Drawable' );
+  var ExperimentalPoolable = require( 'PHET_CORE/ExperimentalPoolable' );
   var GreedyStitcher = require( 'SCENERY/display/GreedyStitcher' );
   var inherit = require( 'PHET_CORE/inherit' );
-  var Poolable = require( 'PHET_CORE/Poolable' );
   var RebuildStitcher = require( 'SCENERY/display/RebuildStitcher' );
   var scenery = require( 'SCENERY/scenery' );
   var Stitcher = require( 'SCENERY/display/Stitcher' );
@@ -26,7 +26,7 @@ define( function( require ) {
 
   /**
    * @constructor
-   * @mixes Poolable
+   * @mixes ExperimentalPoolable
    *
    * @param {Display} display
    * @param {Instance} backboneInstance
@@ -447,19 +447,8 @@ define( function( require ) {
     return element;
   };
 
-  Poolable.mixInto( BackboneDrawable, {
-    constructorDuplicateFactory: function( pool ) {
-      return function( display, backboneInstance, transformRootInstance, renderer, isDisplayRoot ) {
-        if ( pool.length ) {
-          sceneryLog && sceneryLog.BackboneDrawable && sceneryLog.BackboneDrawable( 'new from pool' );
-          return pool.pop().initialize( display, backboneInstance, transformRootInstance, renderer, isDisplayRoot );
-        }
-        else {
-          sceneryLog && sceneryLog.BackboneDrawable && sceneryLog.BackboneDrawable( 'new from constructor' );
-          return new BackboneDrawable( display, backboneInstance, transformRootInstance, renderer, isDisplayRoot );
-        }
-      };
-    }
+  ExperimentalPoolable.mixInto( BackboneDrawable, {
+    initialize: BackboneDrawable.prototype.initialize
   } );
 
   return BackboneDrawable;

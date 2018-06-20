@@ -10,11 +10,11 @@ define( function( require ) {
   'use strict';
 
   // modules
+  var ExperimentalPoolable = require( 'PHET_CORE/ExperimentalPoolable' );
   var inherit = require( 'PHET_CORE/inherit' );
   var Matrix3 = require( 'DOT/Matrix3' );
   var Renderer = require( 'SCENERY/display/Renderer' );
   var scenery = require( 'SCENERY/scenery' );
-  var SelfDrawable = require( 'SCENERY/display/SelfDrawable' );
   var WebGLSelfDrawable = require( 'SCENERY/display/WebGLSelfDrawable' );
 
   // Use a Float32Array-backed matrix, as it's better for usage with WebGL
@@ -150,9 +150,9 @@ define( function( require ) {
     }
   } );
 
-  // This sets up WebGLNodeDrawable.createFromPool/dirtyFromPool and drawable.freeToPool() for the type, so
-  // that we can avoid allocations by reusing previously-used drawables.
-  SelfDrawable.Poolable.mixInto( WebGLNodeDrawable ); // pooling
+  ExperimentalPoolable.mixInto( WebGLNodeDrawable, {
+    initialize: WebGLNodeDrawable.prototype.initialize
+  } );
 
   return WebGLNodeDrawable;
 } );

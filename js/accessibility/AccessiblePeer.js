@@ -12,9 +12,9 @@ define( function( require ) {
 
   var AccessibilityUtil = require( 'SCENERY/accessibility/AccessibilityUtil' );
   var Events = require( 'AXON/Events' );
+  var ExperimentalPoolable = require( 'PHET_CORE/ExperimentalPoolable' );
   var Focus = require( 'SCENERY/accessibility/Focus' );
   var inherit = require( 'PHET_CORE/inherit' );
-  var Poolable = require( 'PHET_CORE/Poolable' );
   var scenery = require( 'SCENERY/scenery' );
   // so RequireJS doesn't complain about circular dependency
   // var Display = require( 'SCENERY/display/Display' );
@@ -256,17 +256,8 @@ define( function( require ) {
   } );
 
   // Set up pooling
-  Poolable.mixInto( AccessiblePeer, {
-    constructorDuplicateFactory: function( pool ) {
-      return function( accessibleInstance, primarySibling, options ) {
-        if ( pool.length ) {
-          return pool.pop().initializeAccessiblePeer( accessibleInstance, primarySibling, options );
-        }
-        else {
-          return new AccessiblePeer( accessibleInstance, primarySibling, options );
-        }
-      };
-    }
+  ExperimentalPoolable.mixInto( AccessiblePeer, {
+    initalize: AccessiblePeer.prototype.initializeAccessiblePeer
   } );
 
   return AccessiblePeer;

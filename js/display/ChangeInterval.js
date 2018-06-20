@@ -23,12 +23,12 @@ define( function( require ) {
 
   var Drawable = require( 'SCENERY/display/Drawable' );
   var inherit = require( 'PHET_CORE/inherit' );
-  var Poolable = require( 'PHET_CORE/Poolable' );
+  var ExperimentalPoolable = require( 'PHET_CORE/ExperimentalPoolable' );
   var scenery = require( 'SCENERY/scenery' );
 
   /**
    * @constructor
-   * @mixes Poolable
+   * @mixes ExperimentalPoolable
    *
    * @param drawableBefore
    * @param drawableAfter
@@ -68,7 +68,7 @@ define( function( require ) {
       // correct "change nothing".
       this.collapsedEmpty = false;
 
-      // chaining for PoolableMixin
+      // chaining for ExperimentalPoolableMixin
       return this;
     },
 
@@ -155,19 +155,8 @@ define( function( require ) {
     }
   } );
 
-  Poolable.mixInto( ChangeInterval, {
-    constructorDuplicateFactory: function( pool ) {
-      return function( drawableBefore, drawableAfter ) {
-        if ( pool.length ) {
-          sceneryLog && sceneryLog.ChangeInterval && sceneryLog.ChangeInterval( 'new from pool' );
-          return pool.pop().initialize( drawableBefore, drawableAfter );
-        }
-        else {
-          sceneryLog && sceneryLog.ChangeInterval && sceneryLog.ChangeInterval( 'new from constructor' );
-          return new ChangeInterval( drawableBefore, drawableAfter );
-        }
-      };
-    }
+  ExperimentalPoolable.mixInto( ChangeInterval, {
+    initialize: ChangeInterval.prototype.initialize
   } );
 
   // creates a ChangeInterval that will be disposed after syncTree is complete (see Display phases)
