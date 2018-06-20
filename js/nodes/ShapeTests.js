@@ -10,12 +10,12 @@ define( function( require ) {
 
   // modules
   var LineStyles = require( 'KITE/util/LineStyles' );
+  var Matrix3 = require( 'DOT/Matrix3' );
   var Node = require( 'SCENERY/nodes/Node' );
   var Path = require( 'SCENERY/nodes/Path' );
   var Shape = require( 'KITE/Shape' );
-  var Vector2 = require( 'DOT/Vector2' );
-  var Matrix3 = require( 'DOT/Matrix3' );
   var snapshotEquals = require( 'SCENERY/tests/snapshotEquals' );
+  var Vector2 = require( 'DOT/Vector2' );
 
   QUnit.module( 'Shape' );
 

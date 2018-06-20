@@ -23,12 +23,12 @@ define( function( require ) {
 
   var Drawable = require( 'SCENERY/display/Drawable' );
   var inherit = require( 'PHET_CORE/inherit' );
-  var ExperimentalPoolable = require( 'PHET_CORE/ExperimentalPoolable' );
+  var Poolable = require( 'PHET_CORE/Poolable' );
   var scenery = require( 'SCENERY/scenery' );
 
   /**
    * @constructor
-   * @mixes ExperimentalPoolable
+   * @mixes Poolable
    *
    * @param drawableBefore
    * @param drawableAfter
@@ -68,7 +68,7 @@ define( function( require ) {
       // correct "change nothing".
       this.collapsedEmpty = false;
 
-      // chaining for ExperimentalPoolableMixin
+      // chaining for PoolableMixin
       return this;
     },
 
@@ -155,7 +155,7 @@ define( function( require ) {
     }
   } );
 
-  ExperimentalPoolable.mixInto( ChangeInterval, {
+  Poolable.mixInto( ChangeInterval, {
     initialize: ChangeInterval.prototype.initialize
   } );
 

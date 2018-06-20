@@ -10,9 +10,9 @@ define( function( require ) {
   'use strict';
 
   var cleanArray = require( 'PHET_CORE/cleanArray' );
-  var ExperimentalPoolable = require( 'PHET_CORE/ExperimentalPoolable' );
   var FittedBlock = require( 'SCENERY/display/FittedBlock' );
   var inherit = require( 'PHET_CORE/inherit' );
+  var Poolable = require( 'PHET_CORE/Poolable' );
   var scenery = require( 'SCENERY/scenery' );
   var SVGGroup = require( 'SCENERY/display/SVGGroup' );
   var Util = require( 'SCENERY/util/Util' );
@@ -20,7 +20,7 @@ define( function( require ) {
   /**
    * @constructor
    * @extends FittedBlock
-   * @mixes ExperimentalPoolable
+   * @mixes Poolable
    *
    * @param {Display} display - the scenery Display this SVGBlock will appear in
    * @param {number} renderer - the bitmask for the renderer, see Renderer.js
@@ -297,7 +297,7 @@ define( function( require ) {
     }
   } );
 
-  ExperimentalPoolable.mixInto( SVGBlock, {
+  Poolable.mixInto( SVGBlock, {
     initialize: SVGBlock.prototype.initialize
   } );
 

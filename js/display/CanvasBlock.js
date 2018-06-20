@@ -12,10 +12,10 @@ define( function( require ) {
 
   var CanvasContextWrapper = require( 'SCENERY/util/CanvasContextWrapper' );
   var cleanArray = require( 'PHET_CORE/cleanArray' );
-  var ExperimentalPoolable = require( 'PHET_CORE/ExperimentalPoolable' );
   var FittedBlock = require( 'SCENERY/display/FittedBlock' );
   var inherit = require( 'PHET_CORE/inherit' );
   var Matrix3 = require( 'DOT/Matrix3' );
+  var Poolable = require( 'PHET_CORE/Poolable' );
   var Renderer = require( 'SCENERY/display/Renderer' );
   var scenery = require( 'SCENERY/scenery' );
   var Util = require( 'SCENERY/util/Util' );
@@ -26,7 +26,7 @@ define( function( require ) {
 
   /**
    * @constructor
-   * @mixes ExperimentalPoolable
+   * @mixes Poolable
    *
    * @param display
    * @param renderer
@@ -430,7 +430,7 @@ define( function( require ) {
     }
   } );
 
-  ExperimentalPoolable.mixInto( CanvasBlock, {
+  Poolable.mixInto( CanvasBlock, {
     initialize: CanvasBlock.prototype.initialize
   } );
 

@@ -12,13 +12,13 @@ define( function( require ) {
   'use strict';
 
   var Block = require( 'SCENERY/display/Block' );
-  var ExperimentalPoolable = require( 'PHET_CORE/ExperimentalPoolable' );
   var inherit = require( 'PHET_CORE/inherit' );
+  var Poolable = require( 'PHET_CORE/Poolable' );
   var scenery = require( 'SCENERY/scenery' );
 
   /**
    * @constructor
-   * @mixes ExperimentalPoolable
+   * @mixes Poolable
    *
    * @param display
    * @param domDrawable
@@ -75,7 +75,7 @@ define( function( require ) {
     }
   } );
 
-  ExperimentalPoolable.mixInto( DOMBlock, {
+  Poolable.mixInto( DOMBlock, {
     initialize: DOMBlock.prototype.initialize
   } );
 

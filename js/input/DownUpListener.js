@@ -17,8 +17,8 @@ define( function( require ) {
   var KeyboardUtil = require( 'SCENERY/accessibility/KeyboardUtil' );
   var Mouse = require( 'SCENERY/input/Mouse' );
   var PhetioObject = require( 'TANDEM/PhetioObject' );
-  var Trail = require( 'SCENERY/util/Trail' );
   var scenery = require( 'SCENERY/scenery' );
+  var Trail = require( 'SCENERY/util/Trail' );
   require( 'SCENERY/util/Trail' );
 
   /*

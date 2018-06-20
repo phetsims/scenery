@@ -9,8 +9,8 @@
 define( function( require ) {
   'use strict';
 
-  var ExperimentalPoolable = require( 'PHET_CORE/ExperimentalPoolable' );
   var inherit = require( 'PHET_CORE/inherit' );
+  var Poolable = require( 'PHET_CORE/Poolable' );
   var scenery = require( 'SCENERY/scenery' );
 
   /**
@@ -26,7 +26,7 @@ define( function( require ) {
 
   inherit( Object, SVGPattern, {
     /**
-     * ExperimentalPoolable initializer.
+     * Poolable initializer.
      * @private
      *
      * @param {Pattern} pattern
@@ -93,7 +93,7 @@ define( function( require ) {
     }
   } );
 
-  ExperimentalPoolable.mixInto( SVGPattern, {
+  Poolable.mixInto( SVGPattern, {
     initialize: SVGPattern.prototype.initialize
   } );
 

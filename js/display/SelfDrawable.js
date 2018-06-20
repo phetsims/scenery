@@ -17,7 +17,7 @@ define( function( require ) {
   /**
    * @constructor
    * @extends Drawable
-   * @mixes ExperimentalPoolable
+   * @mixes Poolable
    *
    * @param renderer
    * @param instance

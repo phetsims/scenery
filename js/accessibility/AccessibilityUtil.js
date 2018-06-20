@@ -11,8 +11,8 @@ define( function( require ) {
   'use strict';
 
   // modules
-  var scenery = require( 'SCENERY/scenery' );
   var Random = require( 'DOT/Random' );
+  var scenery = require( 'SCENERY/scenery' );
 
   // constants
   var NEXT = 'NEXT';

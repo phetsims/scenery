@@ -10,9 +10,9 @@ define( function( require ) {
   'use strict';
 
   // modules
-  var ExperimentalPoolable = require( 'PHET_CORE/ExperimentalPoolable' );
   var inherit = require( 'PHET_CORE/inherit' );
   var Matrix3 = require( 'DOT/Matrix3' );
+  var Poolable = require( 'PHET_CORE/Poolable' );
   var Renderer = require( 'SCENERY/display/Renderer' );
   var scenery = require( 'SCENERY/scenery' );
   var WebGLSelfDrawable = require( 'SCENERY/display/WebGLSelfDrawable' );
@@ -150,7 +150,7 @@ define( function( require ) {
     }
   } );
 
-  ExperimentalPoolable.mixInto( WebGLNodeDrawable, {
+  Poolable.mixInto( WebGLNodeDrawable, {
     initialize: WebGLNodeDrawable.prototype.initialize
   } );
 

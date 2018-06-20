@@ -10,9 +10,9 @@
 define( function( require ) {
   'use strict';
 
-  var ExperimentalPoolable = require( 'PHET_CORE/ExperimentalPoolable' );
   var inherit = require( 'PHET_CORE/inherit' );
   var PaintableStatelessDrawable = require( 'SCENERY/display/drawables/PaintableStatelessDrawable' );
+  var Poolable = require( 'PHET_CORE/Poolable' );
   var scenery = require( 'SCENERY/scenery' );
   var SelfDrawable = require( 'SCENERY/display/SelfDrawable' );
 
@@ -123,7 +123,7 @@ define( function( require ) {
     }
 
     // set up pooling
-    ExperimentalPoolable.mixInto( type, {
+    Poolable.mixInto( type, {
       initialize: type.prototype.initialize
     } );
 

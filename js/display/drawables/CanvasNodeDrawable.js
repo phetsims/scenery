@@ -10,8 +10,8 @@ define( function( require ) {
   'use strict';
 
   var CanvasSelfDrawable = require( 'SCENERY/display/CanvasSelfDrawable' );
-  var ExperimentalPoolable = require( 'PHET_CORE/ExperimentalPoolable' );
   var inherit = require( 'PHET_CORE/inherit' );
+  var Poolable = require( 'PHET_CORE/Poolable' );
   var scenery = require( 'SCENERY/scenery' );
 
   var emptyArray = []; // constant, used for line-dash
@@ -90,7 +90,7 @@ define( function( require ) {
     }
   } );
 
-  ExperimentalPoolable.mixInto( CanvasNodeDrawable, {
+  Poolable.mixInto( CanvasNodeDrawable, {
     initialize: CanvasNodeDrawable.prototype.initialize
   } );
 

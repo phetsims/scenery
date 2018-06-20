@@ -10,15 +10,15 @@ define( function( require ) {
   'use strict';
 
   // modules
-  var scenery = require( 'SCENERY/scenery' );
   var FontIO = require( 'SCENERY/util/FontIO' );
   var NodeIO = require( 'SCENERY/nodes/NodeIO' );
+  var scenery = require( 'SCENERY/scenery' );
 
   // ifphetio
   var assertInstanceOf = require( 'ifphetio!PHET_IO/assertInstanceOf' );
-  var phetioInherit = require( 'ifphetio!PHET_IO/phetioInherit' );
   var FunctionIO = require( 'ifphetio!PHET_IO/types/FunctionIO' );
   var NumberIO = require( 'ifphetio!PHET_IO/types/NumberIO' );
+  var phetioInherit = require( 'ifphetio!PHET_IO/phetioInherit' );
   var StringIO = require( 'ifphetio!PHET_IO/types/StringIO' );
   var VoidIO = require( 'ifphetio!PHET_IO/types/VoidIO' );
 

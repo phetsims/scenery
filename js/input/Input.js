@@ -129,8 +129,8 @@ define( function( require ) {
   var inherit = require( 'PHET_CORE/inherit' );
   var Mouse = require( 'SCENERY/input/Mouse' );
   var Pen = require( 'SCENERY/input/Pen' );
-  var Pointer = require( 'SCENERY/input/Pointer' );
   var platform = require( 'PHET_CORE/platform' );
+  var Pointer = require( 'SCENERY/input/Pointer' );
   var scenery = require( 'SCENERY/scenery' );
   var Touch = require( 'SCENERY/input/Touch' );
   var Trail = require( 'SCENERY/util/Trail' );

@@ -9,9 +9,9 @@
 define( function( require ) {
   'use strict';
 
-  var ExperimentalPoolable = require( 'PHET_CORE/ExperimentalPoolable' );
   var ImageStatefulDrawable = require( 'SCENERY/display/drawables/ImageStatefulDrawable' );
   var inherit = require( 'PHET_CORE/inherit' );
+  var Poolable = require( 'PHET_CORE/Poolable' );
   var Renderer = require( 'SCENERY/display/Renderer' );
   var scenery = require( 'SCENERY/scenery' );
   var Vector2 = require( 'DOT/Vector2' );
@@ -244,7 +244,7 @@ define( function( require ) {
   } );
   ImageStatefulDrawable.mixInto( ImageWebGLDrawable );
 
-  ExperimentalPoolable.mixInto( ImageWebGLDrawable, {
+  Poolable.mixInto( ImageWebGLDrawable, {
     initialize: ImageWebGLDrawable.prototype.initialize
   } );
 

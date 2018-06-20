@@ -56,8 +56,8 @@ define( function( require ) {
   var AccessibilityTree = require( 'SCENERY/accessibility/AccessibilityTree' );
   var AccessibilityUtil = require( 'SCENERY/accessibility/AccessibilityUtil' );
   var Dimension2 = require( 'DOT/Dimension2' );
-  var escapeHTML = require( 'PHET_CORE/escapeHTML' );
   var Emitter = require( 'AXON/Emitter' );
+  var escapeHTML = require( 'PHET_CORE/escapeHTML' );
   var Events = require( 'AXON/Events' );
   var extend = require( 'PHET_CORE/extend' );
   var inherit = require( 'PHET_CORE/inherit' );

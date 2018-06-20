@@ -9,8 +9,8 @@ define( function( require ) {
   'use strict';
 
   // modules
-  var scenery = require( 'SCENERY/scenery' );
   var NodeIO = require( 'SCENERY/nodes/NodeIO' );
+  var scenery = require( 'SCENERY/scenery' );
 
   // ifphetio
   var assertInstanceOf = require( 'ifphetio!PHET_IO/assertInstanceOf' );

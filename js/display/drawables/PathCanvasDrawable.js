@@ -10,9 +10,9 @@ define( function( require ) {
   'use strict';
 
   var CanvasSelfDrawable = require( 'SCENERY/display/CanvasSelfDrawable' );
-  var ExperimentalPoolable = require( 'PHET_CORE/ExperimentalPoolable' );
   var inherit = require( 'PHET_CORE/inherit' );
   var PaintableStatelessDrawable = require( 'SCENERY/display/drawables/PaintableStatelessDrawable' );
+  var Poolable = require( 'PHET_CORE/Poolable' );
   var scenery = require( 'SCENERY/scenery' );
 
   /**
@@ -100,7 +100,7 @@ define( function( require ) {
 
   PaintableStatelessDrawable.mixInto( PathCanvasDrawable );
 
-  ExperimentalPoolable.mixInto( PathCanvasDrawable, {
+  Poolable.mixInto( PathCanvasDrawable, {
     initialize: PathCanvasDrawable.prototype.initialize
   } );
 

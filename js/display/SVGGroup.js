@@ -11,14 +11,14 @@ define( function( require ) {
   'use strict';
 
   var cleanArray = require( 'PHET_CORE/cleanArray' );
-  var ExperimentalPoolable = require( 'PHET_CORE/ExperimentalPoolable' );
   var inherit = require( 'PHET_CORE/inherit' );
   var platform = require( 'PHET_CORE/platform' );
+  var Poolable = require( 'PHET_CORE/Poolable' );
   var scenery = require( 'SCENERY/scenery' );
 
   /**
    * @constructor
-   * @mixes ExperimentalPoolable
+   * @mixes Poolable
    *
    * @param block
    * @param instance
@@ -414,7 +414,7 @@ define( function( require ) {
     }
   };
 
-  ExperimentalPoolable.mixInto( SVGGroup, {
+  Poolable.mixInto( SVGGroup, {
     initialize: SVGGroup.prototype.initialize
   } );
 

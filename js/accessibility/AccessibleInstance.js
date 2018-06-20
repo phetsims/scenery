@@ -33,10 +33,10 @@ define( function( require ) {
   var AccessiblePeer = require( 'SCENERY/accessibility/AccessiblePeer' );
   var cleanArray = require( 'PHET_CORE/cleanArray' );
   var Events = require( 'AXON/Events' );
-  var ExperimentalPoolable = require( 'PHET_CORE/ExperimentalPoolable' );
   var inherit = require( 'PHET_CORE/inherit' );
   var KeyboardUtil = require( 'SCENERY/accessibility/KeyboardUtil' );
   var platform = require( 'PHET_CORE/platform' );
+  var Poolable = require( 'PHET_CORE/Poolable' );
   var scenery = require( 'SCENERY/scenery' );
 
   var globalId = 1;
@@ -44,7 +44,7 @@ define( function( require ) {
   /**
    * Constructor for AccessibleInstance, uses an initialize method for pooling.
    * @constructor
-   * @mixes ExperimentalPoolable
+   * @mixes Poolable
    *
    * @param {AccessibleInstance|null} parent - parent of this instance, null if root of AccessibleInstance tree
    * @param {Display} display
@@ -628,7 +628,7 @@ define( function( require ) {
     }
   } );
 
-  ExperimentalPoolable.mixInto( AccessibleInstance, {
+  Poolable.mixInto( AccessibleInstance, {
     initialize: AccessibleInstance.prototype.initializeAccessibleInstance
   } );
 

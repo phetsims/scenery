@@ -13,9 +13,9 @@ define( function( require ) {
   // modules
   var cleanArray = require( 'PHET_CORE/cleanArray' );
   var Drawable = require( 'SCENERY/display/Drawable' );
-  var ExperimentalPoolable = require( 'PHET_CORE/ExperimentalPoolable' );
   var GreedyStitcher = require( 'SCENERY/display/GreedyStitcher' );
   var inherit = require( 'PHET_CORE/inherit' );
+  var Poolable = require( 'PHET_CORE/Poolable' );
   var RebuildStitcher = require( 'SCENERY/display/RebuildStitcher' );
   var scenery = require( 'SCENERY/scenery' );
   var Stitcher = require( 'SCENERY/display/Stitcher' );
@@ -26,7 +26,7 @@ define( function( require ) {
 
   /**
    * @constructor
-   * @mixes ExperimentalPoolable
+   * @mixes Poolable
    *
    * @param {Display} display
    * @param {Instance} backboneInstance
@@ -447,7 +447,7 @@ define( function( require ) {
     return element;
   };
 
-  ExperimentalPoolable.mixInto( BackboneDrawable, {
+  Poolable.mixInto( BackboneDrawable, {
     initialize: BackboneDrawable.prototype.initialize
   } );
 

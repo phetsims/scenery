@@ -13,10 +13,10 @@ define( function( require ) {
   // modules
   var cleanArray = require( 'PHET_CORE/cleanArray' );
   var Emitter = require( 'AXON/Emitter' );
-  var ExperimentalPoolable = require( 'PHET_CORE/ExperimentalPoolable' );
   var FittedBlock = require( 'SCENERY/display/FittedBlock' );
   var inherit = require( 'PHET_CORE/inherit' );
   var Matrix3 = require( 'DOT/Matrix3' );
+  var Poolable = require( 'PHET_CORE/Poolable' );
   var Renderer = require( 'SCENERY/display/Renderer' );
   var scenery = require( 'SCENERY/scenery' );
   var ShaderProgram = require( 'SCENERY/util/ShaderProgram' );
@@ -26,7 +26,7 @@ define( function( require ) {
   /**
    * @constructor
    * @extends FittedBlock
-   * @mixes ExperimentalPoolable
+   * @mixes Poolable
    *
    * @param display
    * @param renderer
@@ -873,7 +873,7 @@ define( function( require ) {
     }
   } );
 
-  ExperimentalPoolable.mixInto( WebGLBlock, {
+  Poolable.mixInto( WebGLBlock, {
     initialize: WebGLBlock.prototype.initialize
   } );
 

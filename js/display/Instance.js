@@ -29,9 +29,9 @@ define( function( require ) {
   var cleanArray = require( 'PHET_CORE/cleanArray' );
   var Drawable = require( 'SCENERY/display/Drawable' );
   var Events = require( 'AXON/Events' );
-  var ExperimentalPoolable = require( 'PHET_CORE/ExperimentalPoolable' );
   var Fittability = require( 'SCENERY/display/Fittability' );
   var inherit = require( 'PHET_CORE/inherit' );
+  var Poolable = require( 'PHET_CORE/Poolable' );
   var RelativeTransform = require( 'SCENERY/display/RelativeTransform' );
   var Renderer = require( 'SCENERY/display/Renderer' );
   var scenery = require( 'SCENERY/scenery' );
@@ -45,7 +45,7 @@ define( function( require ) {
 
   /**
    * @constructor
-   * @mixes ExperimentalPoolable
+   * @mixes Poolable
    *
    * See initialize() for documentation
    *
@@ -1695,7 +1695,7 @@ define( function( require ) {
   } );
 
   // object pooling
-  ExperimentalPoolable.mixInto( Instance, {
+  Poolable.mixInto( Instance, {
     initialize: Instance.prototype.initialize
   } );
 

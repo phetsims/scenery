@@ -10,8 +10,8 @@ define( function( require ) {
   'use strict';
 
   var Color = require( 'SCENERY/util/Color' );
-  var ExperimentalPoolable = require( 'PHET_CORE/ExperimentalPoolable' );
   var inherit = require( 'PHET_CORE/inherit' );
+  var Poolable = require( 'PHET_CORE/Poolable' );
   var Property = require( 'AXON/Property' );
   var RectangleStatefulDrawable = require( 'SCENERY/display/drawables/RectangleStatefulDrawable' );
   var Renderer = require( 'SCENERY/display/Renderer' );
@@ -169,7 +169,7 @@ define( function( require ) {
 
   RectangleStatefulDrawable.mixInto( RectangleWebGLDrawable );
 
-  ExperimentalPoolable.mixInto( RectangleWebGLDrawable, {
+  Poolable.mixInto( RectangleWebGLDrawable, {
     initialize: RectangleWebGLDrawable.prototype.initialize
   } );
 

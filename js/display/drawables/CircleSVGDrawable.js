@@ -10,8 +10,8 @@ define( function( require ) {
   'use strict';
 
   var CircleStatefulDrawable = require( 'SCENERY/display/drawables/CircleStatefulDrawable' );
-  var ExperimentalPoolable = require( 'PHET_CORE/ExperimentalPoolable' );
   var inherit = require( 'PHET_CORE/inherit' );
+  var Poolable = require( 'PHET_CORE/Poolable' );
   var scenery = require( 'SCENERY/scenery' );
   var SVGSelfDrawable = require( 'SCENERY/display/SVGSelfDrawable' );
 
@@ -82,7 +82,7 @@ define( function( require ) {
   // Include Circle's stateful trait (used for dirty flags)
   CircleStatefulDrawable.mixInto( CircleSVGDrawable );
 
-  ExperimentalPoolable.mixInto( CircleSVGDrawable, {
+  Poolable.mixInto( CircleSVGDrawable, {
     initialize: CircleSVGDrawable.prototype.initialize
   } );
 

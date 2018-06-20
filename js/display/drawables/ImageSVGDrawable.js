@@ -9,10 +9,10 @@
 define( function( require ) {
   'use strict';
 
-  var ExperimentalPoolable = require( 'PHET_CORE/ExperimentalPoolable' );
   var ImageStatefulDrawable = require( 'SCENERY/display/drawables/ImageStatefulDrawable' );
   var inherit = require( 'PHET_CORE/inherit' );
   var platform = require( 'PHET_CORE/platform' );
+  var Poolable = require( 'PHET_CORE/Poolable' );
   var scenery = require( 'SCENERY/scenery' );
   var SVGSelfDrawable = require( 'SCENERY/display/SVGSelfDrawable' );
 
@@ -202,7 +202,7 @@ scenery.register( 'ImageSVGDrawable', ImageSVGDrawable );
   } );
   ImageStatefulDrawable.mixInto( ImageSVGDrawable );
 
-  ExperimentalPoolable.mixInto( ImageSVGDrawable, {
+  Poolable.mixInto( ImageSVGDrawable, {
     initialize: ImageSVGDrawable.prototype.initialize
   } );
 

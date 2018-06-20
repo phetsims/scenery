@@ -25,8 +25,8 @@ define( function( require ) {
   var TextBounds = require( 'SCENERY/util/TextBounds' );
   var TextCanvasDrawable = require( 'SCENERY/display/drawables/TextCanvasDrawable' );
   var TextDOMDrawable = require( 'SCENERY/display/drawables/TextDOMDrawable' );
-  var TextSVGDrawable = require( 'SCENERY/display/drawables/TextSVGDrawable' );
   var TextIO = require( 'SCENERY/nodes/TextIO' );
+  var TextSVGDrawable = require( 'SCENERY/display/drawables/TextSVGDrawable' );
 
   // constants
   var TEXT_OPTION_KEYS = [

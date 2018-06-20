@@ -11,13 +11,13 @@
 define( function( require ) {
   'use strict';
 
-  var ExperimentalPoolable = require( 'PHET_CORE/ExperimentalPoolable' );
   var inherit = require( 'PHET_CORE/inherit' );
+  var Poolable = require( 'PHET_CORE/Poolable' );
   var scenery = require( 'SCENERY/scenery' );
 
   /**
    * @constructor
-   * @mixes ExperimentalPoolable
+   * @mixes Poolable
    *
    * @param domEvent
    * @param type
@@ -94,7 +94,7 @@ define( function( require ) {
     return BatchedDOMEvent.createFromPool( domEvent, pointFromEvent( domEvent ), domEvent.pointerId );
   };
 
-  ExperimentalPoolable.mixInto( BatchedDOMEvent );
+  Poolable.mixInto( BatchedDOMEvent );
 
   return BatchedDOMEvent;
 } );

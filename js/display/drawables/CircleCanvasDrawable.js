@@ -10,9 +10,9 @@ define( function( require ) {
   'use strict';
 
   var CanvasSelfDrawable = require( 'SCENERY/display/CanvasSelfDrawable' );
-  var ExperimentalPoolable = require( 'PHET_CORE/ExperimentalPoolable' );
   var inherit = require( 'PHET_CORE/inherit' );
   var PaintableStatelessDrawable = require( 'SCENERY/display/drawables/PaintableStatelessDrawable' );
+  var Poolable = require( 'PHET_CORE/Poolable' );
   var scenery = require( 'SCENERY/scenery' );
 
   /**
@@ -107,7 +107,7 @@ define( function( require ) {
   // Since we're not using Circle's stateful trait, we'll need to mix in the Paintable trait here (of the stateless variety).
   PaintableStatelessDrawable.mixInto( CircleCanvasDrawable );
 
-  ExperimentalPoolable.mixInto( CircleCanvasDrawable, {
+  Poolable.mixInto( CircleCanvasDrawable, {
     initialize: CircleCanvasDrawable.prototype.initialize
   } );
 
