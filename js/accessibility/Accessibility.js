@@ -526,7 +526,7 @@ define( function( require ) {
         /**
          * Interrupt all accessibility related input listeners that are attached to this Node.
          * @public
-         * 
+         *
          * @returns {Node} - For chaining
          */
         interruptAccessibleInput: function() {
