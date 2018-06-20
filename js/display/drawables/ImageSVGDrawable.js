@@ -28,62 +28,43 @@ define( function( require ) {
    * @param {Instance} instance
    */
   function ImageSVGDrawable( renderer, instance ) {
-    this.initialize( renderer, instance );
+    // Super-type initialization
+    this.initializeSVGSelfDrawable( renderer, instance, false, keepSVGImageElements ); // usesPaint: false
+
+    sceneryLog && sceneryLog.ImageSVGDrawable && sceneryLog.ImageSVGDrawable( this.id + ' initialized for ' + instance.toString() );
+    var self = this;
+
+    // @protected {SVGImageElement} - Sole SVG element for this drawable, implementing API for SVGSelfDrawable
+    this.svgElement = this.svgElement || document.createElementNS( scenery.svgns, 'image' );
+    this.svgElement.setAttribute( 'x', 0 );
+    this.svgElement.setAttribute( 'y', 0 );
+
+    // Whether we have an opacity attribute specified on the DOM element.
+    this.hasOpacity = false;
+
+    this._usingMipmap = false;
+    this._mipmapLevel = -1; // will always be invalidated
+
+    // if mipmaps are enabled, this listener will be added to when our relative transform changes
+    this._mipmapTransformListener = this._mipmapTransformListener || function() {
+        sceneryLog && sceneryLog.ImageSVGDrawable && sceneryLog.ImageSVGDrawable( self.id + ' Transform dirties mipmap' );
+        self.markDirtyMipmap();
+      };
+
+    this._mipmapListener = this._mipmapListener || function() {
+        // sanity check
+        self.markDirtyMipmap();
+
+        // update our mipmap usage status
+        self.updateMipmapStatus( self.node._mipmap );
+      };
+    this.node.onStatic( 'mipmap', this._mipmapListener );
+    this.updateMipmapStatus( instance.node._mipmap );
   }
 
 scenery.register( 'ImageSVGDrawable', ImageSVGDrawable );
 
   inherit( SVGSelfDrawable, ImageSVGDrawable, {
-    /**
-     * Initializes this drawable, starting its "lifetime" until it is disposed. This lifecycle can happen multiple
-     * times, with instances generally created by the SelfDrawable.Poolable trait (dirtyFromPool/createFromPool), and
-     * disposal will return this drawable to the pool.
-     * @public (scenery-internal)
-     *
-     * This acts as a pseudo-constructor that can be called multiple times, and effectively creates/resets the state
-     * of the drawable to the initial state.
-     *
-     * @param {number} renderer - Renderer bitmask, see Renderer's documentation for more details.
-     * @param {Instance} instance
-     * @returns {ImageSVGDrawable} - Self reference for chaining
-     */
-    initialize: function( renderer, instance ) {
-      // Super-type initialization
-      this.initializeSVGSelfDrawable( renderer, instance, false, keepSVGImageElements ); // usesPaint: false
-
-      sceneryLog && sceneryLog.ImageSVGDrawable && sceneryLog.ImageSVGDrawable( this.id + ' initialized for ' + instance.toString() );
-      var self = this;
-
-      // @protected {SVGImageElement} - Sole SVG element for this drawable, implementing API for SVGSelfDrawable
-      this.svgElement = this.svgElement || document.createElementNS( scenery.svgns, 'image' );
-      this.svgElement.setAttribute( 'x', 0 );
-      this.svgElement.setAttribute( 'y', 0 );
-
-      // Whether we have an opacity attribute specified on the DOM element.
-      this.hasOpacity = false;
-
-      this._usingMipmap = false;
-      this._mipmapLevel = -1; // will always be invalidated
-
-      // if mipmaps are enabled, this listener will be added to when our relative transform changes
-      this._mipmapTransformListener = this._mipmapTransformListener || function() {
-          sceneryLog && sceneryLog.ImageSVGDrawable && sceneryLog.ImageSVGDrawable( self.id + ' Transform dirties mipmap' );
-          self.markDirtyMipmap();
-        };
-
-      this._mipmapListener = this._mipmapListener || function() {
-          // sanity check
-          self.markDirtyMipmap();
-
-          // update our mipmap usage status
-          self.updateMipmapStatus( self.node._mipmap );
-        };
-      this.node.onStatic( 'mipmap', this._mipmapListener );
-      this.updateMipmapStatus( instance.node._mipmap );
-
-      return this;
-    },
-
     /**
      * Updates the SVG elements so that they will appear like the current node's representation.
      * @protected
@@ -202,9 +183,7 @@ scenery.register( 'ImageSVGDrawable', ImageSVGDrawable );
   } );
   ImageStatefulDrawable.mixInto( ImageSVGDrawable );
 
-  Poolable.mixInto( ImageSVGDrawable, {
-    initialize: ImageSVGDrawable.prototype.initialize
-  } );
+  Poolable.mixInto( ImageSVGDrawable );
 
   return ImageSVGDrawable;
 } );

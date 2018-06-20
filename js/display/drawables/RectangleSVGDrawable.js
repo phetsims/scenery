@@ -27,38 +27,19 @@ define( function( require ) {
    * @param {Instance} instance
    */
   function RectangleSVGDrawable( renderer, instance ) {
-    this.initialize( renderer, instance );
+    // Super-type initialization
+    this.initializeSVGSelfDrawable( renderer, instance, true, keepSVGRectangleElements ); // usesPaint: true
+
+    this.lastArcW = -1; // invalid on purpose
+    this.lastArcH = -1; // invalid on purpose
+
+    // @protected {SVGRectElement} - Sole SVG element for this drawable, implementing API for SVGSelfDrawable
+    this.svgElement = this.svgElement || document.createElementNS( scenery.svgns, 'rect' );
   }
 
   scenery.register( 'RectangleSVGDrawable', RectangleSVGDrawable );
 
   inherit( SVGSelfDrawable, RectangleSVGDrawable, {
-    /**
-     * Initializes this drawable, starting its "lifetime" until it is disposed. This lifecycle can happen multiple
-     * times, with instances generally created by the SelfDrawable.Poolable trait (dirtyFromPool/createFromPool), and
-     * disposal will return this drawable to the pool.
-     * @public (scenery-internal)
-     *
-     * This acts as a pseudo-constructor that can be called multiple times, and effectively creates/resets the state
-     * of the drawable to the initial state.
-     *
-     * @param {number} renderer - Renderer bitmask, see Renderer's documentation for more details.
-     * @param {Instance} instance
-     * @returns {RectangleSVGDrawable} - Returns 'this' reference, for chaining
-     */
-    initialize: function( renderer, instance ) {
-      // Super-type initialization
-      this.initializeSVGSelfDrawable( renderer, instance, true, keepSVGRectangleElements ); // usesPaint: true
-
-      this.lastArcW = -1; // invalid on purpose
-      this.lastArcH = -1; // invalid on purpose
-
-      // @protected {SVGRectElement} - Sole SVG element for this drawable, implementing API for SVGSelfDrawable
-      this.svgElement = this.svgElement || document.createElementNS( scenery.svgns, 'rect' );
-
-      return this;
-    },
-
     /**
      * Updates the SVG elements so that they will appear like the current node's representation.
      * @protected
@@ -108,9 +89,7 @@ define( function( require ) {
 
   RectangleStatefulDrawable.mixInto( RectangleSVGDrawable );
 
-  Poolable.mixInto( RectangleSVGDrawable, {
-    initialize: RectangleSVGDrawable.prototype.initialize
-  } );
+  Poolable.mixInto( RectangleSVGDrawable );
 
   return RectangleSVGDrawable;
 } );

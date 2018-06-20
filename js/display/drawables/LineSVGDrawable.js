@@ -31,35 +31,16 @@ define( function( require ) {
    * @param {Instance} instance
    */
   function LineSVGDrawable( renderer, instance ) {
-    this.initialize( renderer, instance );
+    // Super-type initialization
+    this.initializeSVGSelfDrawable( renderer, instance, true, keepSVGLineElements ); // usesPaint: true
+
+    // @protected {SVGLineElement} - Sole SVG element for this drawable, implementing API for SVGSelfDrawable
+    this.svgElement = this.svgElement || document.createElementNS( scenery.svgns, 'line' );
   }
 
   scenery.register( 'LineSVGDrawable', LineSVGDrawable );
 
   inherit( SVGSelfDrawable, LineSVGDrawable, {
-    /**
-     * Initializes this drawable, starting its "lifetime" until it is disposed. This lifecycle can happen multiple
-     * times, with instances generally created by the SelfDrawable.Poolable trait (dirtyFromPool/createFromPool), and
-     * disposal will return this drawable to the pool.
-     * @public (scenery-internal)
-     *
-     * This acts as a pseudo-constructor that can be called multiple times, and effectively creates/resets the state
-     * of the drawable to the initial state.
-     *
-     * @param {number} renderer - Renderer bitmask, see Renderer's documentation for more details.
-     * @param {Instance} instance
-     * @returns {LineSVGDrawable} - Self reference for chaining
-     */
-    initialize: function( renderer, instance ) {
-      // Super-type initialization
-      this.initializeSVGSelfDrawable( renderer, instance, true, keepSVGLineElements ); // usesPaint: true
-
-      // @protected {SVGLineElement} - Sole SVG element for this drawable, implementing API for SVGSelfDrawable
-      this.svgElement = this.svgElement || document.createElementNS( scenery.svgns, 'line' );
-
-      return this;
-    },
-
     /**
      * Updates the SVG elements so that they will appear like the current node's representation.
      * @protected
@@ -88,9 +69,7 @@ define( function( require ) {
   } );
   LineStatefulDrawable.mixInto( LineSVGDrawable );
 
-  Poolable.mixInto( LineSVGDrawable, {
-    initialize: LineSVGDrawable.prototype.initialize
-  } );
+  Poolable.mixInto( LineSVGDrawable );
 
   return LineSVGDrawable;
 } );

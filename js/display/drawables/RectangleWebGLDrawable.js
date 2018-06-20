@@ -32,49 +32,30 @@ define( function( require ) {
    * @param {Instance} instance
    */
   function RectangleWebGLDrawable( renderer, instance ) {
-    this.initialize( renderer, instance );
+    this.initializeWebGLSelfDrawable( renderer, instance );
+
+    // Stateful trait initialization
+    this.initializeState( renderer, instance );
+
+    if ( !this.vertexArray ) {
+      // format [X Y R G B A] for all vertices
+      this.vertexArray = new Float32Array( 6 * 6 ); // 6-length components for 6 vertices (2 tris).
+    }
+
+    // corner vertices in the relative transform root coordinate space
+    this.upperLeft = new Vector2();
+    this.lowerLeft = new Vector2();
+    this.upperRight = new Vector2();
+    this.lowerRight = new Vector2();
+
+    this.transformDirty = true;
+    this.includeVertices = true; // used by the processor
   }
 
   scenery.register( 'RectangleWebGLDrawable', RectangleWebGLDrawable );
 
   inherit( WebGLSelfDrawable, RectangleWebGLDrawable, {
     webglRenderer: Renderer.webglVertexColorPolygons,
-
-    /**
-     * Initializes this drawable, starting its "lifetime" until it is disposed. This lifecycle can happen multiple
-     * times, with instances generally created by the SelfDrawable.Poolable trait (dirtyFromPool/createFromPool), and
-     * disposal will return this drawable to the pool.
-     * @public (scenery-internal)
-     *
-     * This acts as a pseudo-constructor that can be called multiple times, and effectively creates/resets the state
-     * of the drawable to the initial state.
-     *
-     * @param {number} renderer - Renderer bitmask, see Renderer's documentation for more details.
-     * @param {Instance} instance
-     * @returns {RectangleWebGLDrawable} - Returns 'this' reference, for chaining
-     */
-    initialize: function( renderer, instance ) {
-      this.initializeWebGLSelfDrawable( renderer, instance );
-
-      // Stateful trait initialization
-      this.initializeState( renderer, instance );
-
-      if ( !this.vertexArray ) {
-        // format [X Y R G B A] for all vertices
-        this.vertexArray = new Float32Array( 6 * 6 ); // 6-length components for 6 vertices (2 tris).
-      }
-
-      // corner vertices in the relative transform root coordinate space
-      this.upperLeft = new Vector2();
-      this.lowerLeft = new Vector2();
-      this.upperRight = new Vector2();
-      this.lowerRight = new Vector2();
-
-      this.transformDirty = true;
-      this.includeVertices = true; // used by the processor
-
-      return this;
-    },
 
     onAddToBlock: function( webglBlock ) {
       this.webglBlock = webglBlock; // TODO: do we need this reference?
@@ -169,9 +150,7 @@ define( function( require ) {
 
   RectangleStatefulDrawable.mixInto( RectangleWebGLDrawable );
 
-  Poolable.mixInto( RectangleWebGLDrawable, {
-    initialize: RectangleWebGLDrawable.prototype.initialize
-  } );
+  Poolable.mixInto( RectangleWebGLDrawable );
 
   return RectangleWebGLDrawable;
 } );

@@ -24,31 +24,13 @@ define( function( require ) {
    * @param {Instance} instance
    */
   function RectangleCanvasDrawable( renderer, instance ) {
-    this.initialize( renderer, instance );
+    this.initializeCanvasSelfDrawable( renderer, instance );
+    this.initializePaintableStateless( renderer, instance );
   }
 
   scenery.register( 'RectangleCanvasDrawable', RectangleCanvasDrawable );
 
   inherit( CanvasSelfDrawable, RectangleCanvasDrawable, {
-    /**
-     * Initializes this drawable, starting its "lifetime" until it is disposed. This lifecycle can happen multiple
-     * times, with instances generally created by the SelfDrawable.Poolable trait (dirtyFromPool/createFromPool), and
-     * disposal will return this drawable to the pool.
-     * @public (scenery-internal)
-     *
-     * This acts as a pseudo-constructor that can be called multiple times, and effectively creates/resets the state
-     * of the drawable to the initial state.
-     *
-     * @param {number} renderer - Renderer bitmask, see Renderer's documentation for more details.
-     * @param {Instance} instance
-     * @returns {RectangleCanvasDrawable} - Returns 'this' reference, for chaining
-     */
-    initialize: function( renderer, instance ) {
-      this.initializeCanvasSelfDrawable( renderer, instance );
-      this.initializePaintableStateless( renderer, instance );
-      return this;
-    },
-
     /**
      * Convenience function for drawing a rectangular path (with our Rectangle node's parameters) to the Canvas context.
      * @private
@@ -189,9 +171,7 @@ define( function( require ) {
 
   PaintableStatelessDrawable.mixInto( RectangleCanvasDrawable );
 
-  Poolable.mixInto( RectangleCanvasDrawable, {
-    initialize: RectangleCanvasDrawable.prototype.initialize
-  } );
+  Poolable.mixInto( RectangleCanvasDrawable );
 
   return RectangleCanvasDrawable;
 } );

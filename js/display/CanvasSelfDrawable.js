@@ -11,8 +11,6 @@ define( function( require ) {
   'use strict';
 
   var inherit = require( 'PHET_CORE/inherit' );
-  var PaintableStatelessDrawable = require( 'SCENERY/display/drawables/PaintableStatelessDrawable' );
-  var Poolable = require( 'PHET_CORE/Poolable' );
   var scenery = require( 'SCENERY/scenery' );
   var SelfDrawable = require( 'SCENERY/display/SelfDrawable' );
 
@@ -73,68 +71,6 @@ define( function( require ) {
       SelfDrawable.prototype.dispose.call( this );
     }
   } );
-
-  // methods for forwarding dirty messages
-  function canvasSelfDirty() {
-    // we pass this method and it is only called with blah.call( ... ), where the 'this' reference is set.
-    this.markDirty();
-  }
-
-  // options takes: type, paintCanvas( wrapper ), usesPaint, and dirtyMethods (array of string names of methods that make the state dirty)
-  CanvasSelfDrawable.createDrawable = function( options ) {
-    var type = options.type;
-    var paintCanvas = options.paintCanvas;
-    var usesPaint = options.usesPaint;
-
-    assert && assert( typeof type === 'function' );
-    assert && assert( typeof paintCanvas === 'function' );
-    assert && assert( typeof usesPaint === 'boolean' );
-
-    inherit( CanvasSelfDrawable, type, {
-      initialize: function( renderer, instance ) {
-        this.initializeCanvasSelfDrawable( renderer, instance );
-
-        if ( usesPaint ) {
-          this.initializePaintableStateless( renderer, instance );
-        }
-
-        return this; // allow for chaining
-      },
-
-      paintCanvas: paintCanvas,
-
-      update: function() {
-        // no action directly needed for the self-drawable case, as we will be repainted in the block
-        this.dirty = false;
-      },
-
-      dispose: function() {
-        CanvasSelfDrawable.prototype.dispose.call( this );
-
-        if ( usesPaint ) {
-          this.disposePaintableStateless();
-        }
-      }
-    } );
-
-    // include stubs (stateless) for marking dirty stroke and fill (if necessary). we only want one dirty flag, not multiple ones, for Canvas (for now)
-    if ( usesPaint ) {
-      PaintableStatelessDrawable.mixInto( type );
-    }
-
-    // set up pooling
-    Poolable.mixInto( type, {
-      initialize: type.prototype.initialize
-    } );
-
-    if ( options.dirtyMethods ) {
-      for ( var i = 0; i < options.dirtyMethods.length; i++ ) {
-        type.prototype[ options.dirtyMethods[ i ] ] = canvasSelfDirty;
-      }
-    }
-
-    return type;
-  };
 
   return CanvasSelfDrawable;
 } );

@@ -29,7 +29,11 @@ define( function( require ) {
    * @param {Instance} instance
    */
   function WebGLNodeDrawable( renderer, instance ) {
-    this.initialize( renderer, instance );
+    // @private {function}
+    this.contextChangeListener = this.onWebGLContextChange.bind( this );
+
+    // @private {*} - Will be set to whatever type node.painterType is.
+    this.painter = null;
   }
 
   scenery.register( 'WebGLNodeDrawable', WebGLNodeDrawable );
@@ -37,29 +41,6 @@ define( function( require ) {
   inherit( WebGLSelfDrawable, WebGLNodeDrawable, {
     // What type of WebGL renderer/processor should be used. TODO: doc
     webglRenderer: Renderer.webglCustom,
-
-    /**
-     * Initializes this drawable, starting its "lifetime" until it is disposed. This lifecycle can happen multiple
-     * times, with instances generally created by the SelfDrawable.Poolable trait (dirtyFromPool/createFromPool), and
-     * disposal will return this drawable to the pool.
-     * @public (scenery-internal)
-     *
-     * This acts as a pseudo-constructor that can be called multiple times, and effectively creates/resets the state
-     * of the drawable to the initial state.
-     *
-     * @param {number} renderer - Renderer bitmask, see Renderer's documentation for more details.
-     * @param {Instance} instance
-     * @returns {WebGLNodeDrawable} - For chaining
-     */
-    initialize: function( renderer, instance ) {
-      // @private {function}
-      this.contextChangeListener = this.onWebGLContextChange.bind( this );
-
-      // @private {*} - Will be set to whatever type node.painterType is.
-      this.painter = null;
-
-      return this.initializeWebGLSelfDrawable( renderer, instance );
-    },
 
     /**
      * Creates an instance of our Node's "painter" type.
@@ -150,9 +131,7 @@ define( function( require ) {
     }
   } );
 
-  Poolable.mixInto( WebGLNodeDrawable, {
-    initialize: WebGLNodeDrawable.prototype.initialize
-  } );
+  Poolable.mixInto( WebGLNodeDrawable );
 
   return WebGLNodeDrawable;
 } );
