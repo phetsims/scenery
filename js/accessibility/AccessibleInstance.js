@@ -443,23 +443,33 @@ define( function( require ) {
       // function (since a lot gets re-evaluated in that case).
       var targetChildren = this.getChildOrdering( new scenery.Trail( this.isRootInstance ? this.display.rootNode : this.node ) );
 
-      assert && assert( targetChildren.length === this.children.length );
+      assert && assert( targetChildren.length === this.children.length, 'sorting should not change number of children' );
+
+      // {Array.<AccessibleInstance>}
       this.children = targetChildren;
 
-      // Reorder DOM elements in a way that doesn't do any work if they are already in a sorted order.
+      // the DOMElement to add the child DOMElements to.
       var primarySibling = this.peer.primarySibling;
 
+      // "i" will keep track of the "collapsed" index when all DOMElements for all AccessibleInstance children are
+      // added to a single parent DOMElement (this AccessibleInstance's AccessiblePeer's primarySibling)
       var i = primarySibling.childNodes.length - 1;
+
+      // Iterate through all AccessibleInstance children
       for ( var peerIndex = this.children.length - 1; peerIndex >= 0; peerIndex-- ) {
         var peer = this.children[ peerIndex ].peer;
+
+        // Iterate through all top level elements of an AccessibleInstance's peer
         for ( var elementIndex = peer.topLevelElements.length - 1; elementIndex >= 0; elementIndex-- ) {
           var element = peer.topLevelElements[ elementIndex ];
 
-          // no need to reinsert if `element` is already in the right order
+          // Reorder DOM elements in a way that doesn't do any work if they are already in a sorted order.
+          // No need to reinsert if `element` is already in the right order
           if ( primarySibling.childNodes[ i ] !== element ) {
             primarySibling.insertBefore( element, primarySibling.childNodes[ i + 1 ] );
           }
 
+          // Decrement so that it is easier to place elements using the browser's Node.insertBefore api
           i--;
         }
       }
