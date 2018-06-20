@@ -374,8 +374,11 @@ define( function( require ) {
      * @returns {boolean}
      */
     isGloballyVisible: function() {
-      if ( this.peer.isVisible() ) {
-        return true;
+
+      // If this peer is hidden, then return because that attribute will bubble down to children,
+      // otherwise recurse to parent.
+      if ( !this.peer.isVisible() ) {
+        return false;
       }
       if ( this.parent ) {
         return this.parent.isGloballyVisible();
