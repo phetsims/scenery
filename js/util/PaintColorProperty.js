@@ -1,7 +1,36 @@
 // Copyright 2018, University of Colorado Boulder
 
 /**
- * TODO: doc
+ * A Property that will always hold a `Color` object representing the current value of a given paint (and can be set to
+ * different paints).
+ *
+ * This is valuable, since:
+ * ```
+ *   var color = new scenery.Color( 'red' );
+ *   var fill = new axon.Property( color );
+ *   var paintColorProperty = new scenery.PaintColorProperty( fill );
+ *
+ *   // value is converted to a {Color}
+ *   paintColorProperty.value; // r: 255, g: 0, b: 0, a: 1
+ *
+ *   // watches direct Color mutation
+ *   color.red = 128;
+ *   paintColorProperty.value; // r: 128, g: 0, b: 0, a: 1
+ *
+ *   // watches the Property mutation
+ *   fill.value = 'green';
+ *   paintColorProperty.value; // r: 0, g: 128, b: 0, a: 1
+ *
+ *   // can switch to a different paint
+ *   paintColorProperty.paint = 'blue';
+ *   paintColorProperty.value; // r: 0, g: 0, b: 255, a: 1
+ * ```
+ *
+ * Basically, you don't have to add your own listeners to both (optionally) any Properties in a paint and (optionally)
+ * any Color objects (since it's all handled).
+ *
+ * This is particularly helpful to create paints that are either lighter or darker than an original paint (where it
+ * will update its color value when the original is updated).
  *
  * @author Jonathan Olson <jonathan.olson@colorado.edu>
  */
