@@ -175,7 +175,9 @@ define( function( require ) {
 
       if ( color instanceof Property ) {
         sceneryLog && sceneryLog.Paints && sceneryLog.Paints( '[SVGGradientStop] removing Property listener: ' + this.svgGradient.gradient.id + ' : ' + this.ratio );
-        color.unlink( this.propertyListener );
+        if ( color.hasListener( this.propertyListener ) ) {
+          color.unlink( this.propertyListener );
+        }
         if ( color.value instanceof Color ) {
           sceneryLog && sceneryLog.Paints && sceneryLog.Paints( '[SVGGradientStop] removing Color listener: ' + this.svgGradient.gradient.id + ' : ' + this.ratio );
           color.value.changeEmitter.removeListener( this.colorListener );
