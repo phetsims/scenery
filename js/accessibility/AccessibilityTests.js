@@ -415,7 +415,91 @@ define( function( require ) {
     assert.ok( aElement.getAttribute( 'aria-labelledby' ).trim() === [ bElement.id, cElement.id ].join( ' ' ),
       'should have invalidated on tree change' );
 
+    var d = new Node( { tagName: 'div', descriptionTagName: 'p', innerContent: TEST_LABEL } );
+    rootNode.addChild( d );
+
+    b.addAriaLabelledbyAssociation( {
+      otherNode: d,
+      thisElementName: AccessiblePeer.CONTAINER_PARENT,
+      otherElementName: AccessiblePeer.DESCRIPTION_SIBLING
+    } );
+    b.containerTagName = 'div';
+
+    var bParentContainer = getPrimarySiblingElementByNode( b ).parentElement;
+    var dDescriptionElement = getPrimarySiblingElementByNode( d ).parentElement.childNodes[ 0 ];
+    assert.ok( bParentContainer.getAttribute( 'aria-labelledby' ).trim() !== oldValue, 'should have invalidated on tree change' );
+    assert.ok( bParentContainer.getAttribute( 'aria-labelledby' ).trim() === dDescriptionElement.id,
+      'b parent container element is aria-labelledby d description sibling' );
+
+
+    // say we have a scene graph that looks like:
+    //    e
+    //     \
+    //      f
+    //       \
+    //        g
+    //         \
+    //          h
+    // we want to make sure 
+    var e = new Node( { tagName: 'div', innerContent: TEST_LABEL } );
+    var f = new Node( { tagName: 'div', innerContent: TEST_LABEL } );
+    var g = new Node( { tagName: 'div', innerContent: TEST_LABEL } );
+    var h = new Node( { tagName: 'div', innerContent: TEST_LABEL } );
+    e.addChild( f );
+    f.addChild( g );
+    g.addChild( h );
+    rootNode.addChild( e );
+
+    e.addAriaLabelledbyAssociation( {
+      otherNode: f,
+      thisElementName: AccessiblePeer.PRIMARY_SIBLING,
+      otherElementName: AccessiblePeer.PRIMARY_SIBLING
+    } );
+
+    f.addAriaLabelledbyAssociation( {
+      otherNode: g,
+      thisElementName: AccessiblePeer.PRIMARY_SIBLING,
+      otherElementName: AccessiblePeer.PRIMARY_SIBLING
+    } );
+
+    g.addAriaLabelledbyAssociation( {
+      otherNode: h,
+      thisElementName: AccessiblePeer.PRIMARY_SIBLING,
+      otherElementName: AccessiblePeer.PRIMARY_SIBLING
+    } );
+
+    var eElement = getPrimarySiblingElementByNode( e );
+    var fElement = getPrimarySiblingElementByNode( f );
+    var gElement = getPrimarySiblingElementByNode( g );
+    var hElement = getPrimarySiblingElementByNode( h );
+    assert.ok( eElement.getAttribute( 'aria-labelledby' ).trim() === fElement.id, 'eElement should be aria-labelledby fElement' );
+    assert.ok( fElement.getAttribute( 'aria-labelledby' ).trim() === gElement.id, 'fElement should be aria-labelledby gElement' );
+    assert.ok( gElement.getAttribute( 'aria-labelledby' ).trim() === hElement.id, 'gElement should be aria-labelledby hElement' );
+
+    // re-arrange the scene graph and make sure that the aria-labelledby ids remain up to date
+    //    e
+    //     \
+    //      h
+    //       \
+    //        g
+    //         \
+    //          f
+    e.removeChild( f );
+    f.removeChild( g );
+    g.removeChild( h );
+
+    e.addChild( h );
+    h.addChild( g );
+    g.addChild( f );
+    eElement = getPrimarySiblingElementByNode( e );
+    fElement = getPrimarySiblingElementByNode( f );
+    gElement = getPrimarySiblingElementByNode( g );
+    hElement = getPrimarySiblingElementByNode( h );
+    assert.ok( eElement.getAttribute( 'aria-labelledby' ).trim() === fElement.id, 'eElement should still be aria-labelledby fElement' );
+    assert.ok( fElement.getAttribute( 'aria-labelledby' ).trim() === gElement.id, 'fElement should still be aria-labelledby gElement' );
+    assert.ok( gElement.getAttribute( 'aria-labelledby' ).trim() === hElement.id, 'gElement should still be aria-labelledby hElement' );
   } );
+
   QUnit.test( 'aria-labelledby, aria-describedby', function( assert ) {
     var rootNode = new Node();
     var display = new Display( rootNode ); // eslint-disable-line
