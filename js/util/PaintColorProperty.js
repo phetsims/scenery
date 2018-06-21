@@ -154,7 +154,7 @@ define( function( require ) {
     get factor() { return this.getFactor(); },
 
     /**
-     * Updates the value of this property.
+     * Updates the value of this Property.
      * @private
      */
     invalidatePaint: function() {
