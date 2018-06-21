@@ -56,7 +56,7 @@ define( function( require ) {
 
     options = _.extend( {
       // {number} - 0 applies no change. Positive numbers brighten the color up to 1 (white). Negative numbers darken
-      // the color up to -1 (black).
+      // the color up to -1 (black). See setFactor() for more information.
       factor: 0
     }, options );
 
@@ -65,7 +65,7 @@ define( function( require ) {
     // @private {null|string|Color|Property.<string|Color>|LinearGradient|RadialGradient|Pattern}
     this._paint = null;
 
-    // @private {number}
+    // @private {number} - See setFactor() for more information.
     this._factor = options.factor;
 
     // @private {function} - Our "paint changed" listener, will update the value of this Property.
@@ -109,8 +109,20 @@ define( function( require ) {
      * Sets the current value used for adjusting the brightness or darkness (luminance) of the color.
      * @public
      *
-     * 0 applies no change. Positive numbers brighten the color up to 1 (white). Negative numbers darken the color up
-     * to -1 (black).
+     * If this factor is a non-zero value, the value of this Property will be either a brightened or darkened version of
+     * the paint (depending on the value of the factor). 0 applies no change. Positive numbers brighten the color up to
+     * 1 (white). Negative numbers darken the color up to -1 (black).
+     *
+     * For example, if the given paint is blue, the below factors will result in:
+     *
+     *   -1: black
+     * -0.5: dark blue
+     *    0: blue
+     *  0.5: light blue
+     *    1: white
+     *
+     * With intermediate values basically "interpolated". This uses the `Color` colorUtilsBrightness method to adjust
+     * the paint.
      *
      * @param {number} factor
      */
@@ -128,6 +140,8 @@ define( function( require ) {
     /**
      * Returns the current value used for adjusting the brightness or darkness (luminance) of the color.
      * @public
+     *
+     * See setFactor() for more information.
      *
      * @returns {number}
      */
