@@ -1358,7 +1358,6 @@ define( function( require ) {
           this.addAriaLabelledbyAssociationImplementation( associationObject );
         },
 
-
         /**
          * Implementation for addAriaLabelledbyAssociation. Called in addAriaLabelledByAssociation, as well as
          * invalidateAccessibleContent when we recreate the accessible content for a Node.
@@ -1377,11 +1376,17 @@ define( function( require ) {
 
             var otherPeerElement = firstAccessibleInstance.peer.getElementByName( associationObject.otherElementName );
             var thisPeerElement = peer.getElementByName( associationObject.thisElementName );
-            var previousAriaLabelledbyValue = thisPeerElement.getAttribute( 'aria-labelledby' ) || '';
-            assert && assert( typeof previousAriaLabelledbyValue === 'string' );
 
-            // add the id from the new association to the value of the HTMLElement's attribute.
-            thisPeerElement.setAttribute( 'aria-labelledby', [ previousAriaLabelledbyValue, otherPeerElement.id ].join( ' ' ) );
+            // only update associations if the requested peer element has been created
+            // NOTE: in the future, we would like to verify that the association exists but can't do that yet because
+            // we have to support cases where we set label association prior to setting the sibling/parent tagName
+            if ( thisPeerElement ) {
+              var previousAriaLabelledbyValue = thisPeerElement.getAttribute( 'aria-labelledby' ) || '';
+              assert && assert( typeof previousAriaLabelledbyValue === 'string' );
+
+              // add the id from the new association to the value of the HTMLElement's attribute.
+              thisPeerElement.setAttribute( 'aria-labelledby', [ previousAriaLabelledbyValue, otherPeerElement.id ].join( ' ' ) );
+            }
           } );
         },
         /**
