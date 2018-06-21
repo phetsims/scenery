@@ -52,7 +52,7 @@ define( function( require ) {
           this.rightDown = true;
           break;
         default:
-          throw new Error( 'invalid button: ' + event.button );
+          // no-op until we refactor things, see https://github.com/phetsims/scenery/issues/813
       }
       return pointChanged;
     },
@@ -74,7 +74,7 @@ define( function( require ) {
           this.rightDown = false;
           break;
         default:
-          throw new Error( 'invalid button: ' + event.button );
+          // no-op until we refactor things, see https://github.com/phetsims/scenery/issues/813
       }
       return pointChanged;
     },
