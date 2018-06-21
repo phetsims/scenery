@@ -57,7 +57,10 @@ define( function( require ) {
     options = _.extend( {
       // {number} - 0 applies no change. Positive numbers brighten the color up to 1 (white). Negative numbers darken
       // the color up to -1 (black). See setFactor() for more information.
-      factor: 0
+      factor: 0,
+
+      // Property options
+      useDeepEquality: true // We don't need to renotify for equivalent colors
     }, options );
 
     Property.call( this, initialColor, options );
