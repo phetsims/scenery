@@ -35,8 +35,8 @@ define( function( require ) {
 
   // given the parent container element for a node, this value is the index of the label sibling in the
   // parent's array of children HTMLElements.
-  // var DEFAULT_LABEL_SIBLING_INDEX = 0;
-  // var DEFAULT_LABEL_SIBLING_INDEX = 0;
+  var DEFAULT_LABEL_SIBLING_INDEX = 0;
+  var DEFAULT_DESCRIPTION_SIBLING_INDEX = 1;
 
   // a focus highlight for testing, since dummy nodes tend to have no bounds
   var TEST_HIGHLIGHT = new Circle( 5 );
@@ -440,7 +440,7 @@ define( function( require ) {
     //        g
     //         \
     //          h
-    // we want to make sure 
+    // we want to make sure
     var e = new Node( { tagName: 'div', innerContent: TEST_LABEL } );
     var f = new Node( { tagName: 'div', innerContent: TEST_LABEL } );
     var g = new Node( { tagName: 'div', innerContent: TEST_LABEL } );
@@ -498,6 +498,61 @@ define( function( require ) {
     assert.ok( eElement.getAttribute( 'aria-labelledby' ).trim() === fElement.id, 'eElement should still be aria-labelledby fElement' );
     assert.ok( fElement.getAttribute( 'aria-labelledby' ).trim() === gElement.id, 'fElement should still be aria-labelledby gElement' );
     assert.ok( gElement.getAttribute( 'aria-labelledby' ).trim() === hElement.id, 'gElement should still be aria-labelledby hElement' );
+
+    // test aria labelled by your self, but a different peer Element, multiple aria-labelledby ids included in the test.
+    var containerTagName = 'div';
+    var j = new Node( {
+      tagName: 'button',
+      labelTagName: 'label',
+      descriptionTagName: 'p',
+      containerTagName: containerTagName
+    } );
+    rootNode.children = [ j ];
+
+    j.addAriaLabelledbyAssociation( {
+      otherNode: j,
+      thisElementName: AccessiblePeer.PRIMARY_SIBLING,
+      otherElementName: AccessiblePeer.LABEL_SIBLING
+    } );
+
+    j.addAriaLabelledbyAssociation( {
+      otherNode: j,
+      thisElementName: AccessiblePeer.CONTAINER_PARENT,
+      otherElementName: AccessiblePeer.DESCRIPTION_SIBLING
+    } );
+
+    j.addAriaLabelledbyAssociation( {
+      otherNode: j,
+      thisElementName: AccessiblePeer.CONTAINER_PARENT,
+      otherElementName: AccessiblePeer.LABEL_SIBLING
+    } );
+
+    var checkOnYourOwnAriaLabelledByAssociations = function( node ) {
+
+      var instance = node._accessibleInstances[0];
+      var nodePrimaryElement = instance.peer.primarySibling;
+      var nodeParent = nodePrimaryElement.parentElement;
+      var nodeLabelElement = nodeParent.childNodes[ DEFAULT_LABEL_SIBLING_INDEX ];
+      var nodeDescriptionElement = nodeParent.childNodes[ DEFAULT_DESCRIPTION_SIBLING_INDEX ];
+
+      assert.ok( nodePrimaryElement.getAttribute( 'aria-labelledby' ).indexOf( nodeLabelElement.id ) >= 0, 'aria-labelledby your own label element.' );
+      assert.ok( nodeParent.getAttribute( 'aria-labelledby' ).indexOf( nodeDescriptionElement.id ) >= 0, 'parent aria-labelledby your own description.' );
+
+      assert.ok( nodeParent.getAttribute( 'aria-labelledby' ).indexOf( nodeLabelElement.id ) >= 0, 'parent aria-labelledby your own description.' );
+
+    };
+
+    // Moving this node around the scene graph should not change it's aria labelled by associations.
+    checkOnYourOwnAriaLabelledByAssociations( j );
+    rootNode.addChild( new Node( { children: [ j ] } ) );
+    checkOnYourOwnAriaLabelledByAssociations( j );
+    rootNode.removeChild( j );
+
+    // TODO: remove this manual call once bug is fixed in removeChild, see https://github.com/phetsims/scenery/issues/816
+    j.invalidateAccessibleContent();
+    checkOnYourOwnAriaLabelledByAssociations( j );
+
+
   } );
 
   QUnit.test( 'aria-labelledby, aria-describedby', function( assert ) {
@@ -1200,7 +1255,7 @@ define( function( require ) {
   QUnit.test( 'helpText option', function( assert ) {
 
 
-    assert.ok( true);
+    assert.ok( true );
     //
     // TODO: this is failing, but ideally it wouldn't see https://github.com/phetsims/scenery/issues/811
     // // test the behavior of focusable function
