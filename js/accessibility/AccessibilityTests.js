@@ -365,8 +365,17 @@ define( function( require ) {
 
   } );
 
-  // new aria-labelledby api
-  QUnit.test( 'aria-labelledby', function( assert ) {
+  // tests for aria-labelledby and aria-describedby should be the same, since both support the same feature set
+  function testAriaLabelledOrDescribedBy( assert, attribute ) {
+
+    // use a different setter depending on if testing labelledby or describedby
+    var addAssociationFunction = attribute === 'aria-labelledby' ? 'addAriaLabelledbyAssociation' :
+                                 attribute === 'aria-describedby' ? 'addAriaDescribedbyAssociation' : null;
+
+    if ( !addAssociationFunction ) {
+      throw new Error( 'incorrect attribute name while in testAriaLabelledOrDescribedBy' );
+    }
+
 
     var rootNode = new Node();
     var display = new Display( rootNode ); // eslint-disable-line
@@ -377,7 +386,7 @@ define( function( require ) {
     var b = new Node( { tagName: 'p', innerContent: TEST_LABEL_2 } );
     rootNode.children = [ a, b ];
 
-    a.addAriaLabelledbyAssociation( {
+    a[ addAssociationFunction ]( {
       otherNode: b,
       thisElementName: AccessiblePeer.PRIMARY_SIBLING,
       otherElementName: AccessiblePeer.PRIMARY_SIBLING
@@ -385,12 +394,12 @@ define( function( require ) {
 
     var aElement = getPrimarySiblingElementByNode( a );
     var bElement = getPrimarySiblingElementByNode( b );
-    assert.ok( aElement.getAttribute( 'aria-labelledby' ).indexOf( bElement.id ) >= 0, 'aria-labelledby for one node.' );
+    assert.ok( aElement.getAttribute( attribute ).indexOf( bElement.id ) >= 0, attribute + ' for one node.' );
 
     var c = new Node( { tagName: 'div', innerContent: TEST_LABEL } );
     rootNode.addChild( c );
 
-    a.addAriaLabelledbyAssociation( {
+    a[ addAssociationFunction ]( {
       otherNode: c,
       thisElementName: AccessiblePeer.PRIMARY_SIBLING,
       otherElementName: AccessiblePeer.PRIMARY_SIBLING
@@ -400,8 +409,7 @@ define( function( require ) {
     bElement = getPrimarySiblingElementByNode( b );
     var cElement = getPrimarySiblingElementByNode( c );
     var expectedValue = [ bElement.id, cElement.id ].join( ' ' );
-    assert.ok( aElement.getAttribute( 'aria-labelledby' ).trim() === expectedValue,
-      'aria-labelledby two nodes' );
+    assert.ok( aElement.getAttribute( attribute ).trim() === expectedValue, attribute + ' two nodes' );
 
     // Make c invalidate
     rootNode.removeChild( c );
@@ -411,14 +419,15 @@ define( function( require ) {
 
     aElement = getPrimarySiblingElementByNode( a );
     cElement = getPrimarySiblingElementByNode( c );
-    assert.ok( aElement.getAttribute( 'aria-labelledby' ).trim() !== oldValue, 'should have invalidated on tree change' );
-    assert.ok( aElement.getAttribute( 'aria-labelledby' ).trim() === [ bElement.id, cElement.id ].join( ' ' ),
+
+    assert.ok( aElement.getAttribute( attribute ).trim() !== oldValue, 'should have invalidated on tree change' );
+    assert.ok( aElement.getAttribute( attribute ).trim() === [ bElement.id, cElement.id ].join( ' ' ),
       'should have invalidated on tree change' );
 
     var d = new Node( { tagName: 'div', descriptionTagName: 'p', innerContent: TEST_LABEL } );
     rootNode.addChild( d );
 
-    b.addAriaLabelledbyAssociation( {
+    b[ addAssociationFunction ]( {
       otherNode: d,
       thisElementName: AccessiblePeer.CONTAINER_PARENT,
       otherElementName: AccessiblePeer.DESCRIPTION_SIBLING
@@ -427,9 +436,9 @@ define( function( require ) {
 
     var bParentContainer = getPrimarySiblingElementByNode( b ).parentElement;
     var dDescriptionElement = getPrimarySiblingElementByNode( d ).parentElement.childNodes[ 0 ];
-    assert.ok( bParentContainer.getAttribute( 'aria-labelledby' ).trim() !== oldValue, 'should have invalidated on tree change' );
-    assert.ok( bParentContainer.getAttribute( 'aria-labelledby' ).trim() === dDescriptionElement.id,
-      'b parent container element is aria-labelledby d description sibling' );
+    assert.ok( bParentContainer.getAttribute( attribute ).trim() !== oldValue, 'should have invalidated on tree change' );
+    assert.ok( bParentContainer.getAttribute( attribute ).trim() === dDescriptionElement.id,
+      'b parent container element is ' + attribute + ' d description sibling' );
 
 
     // say we have a scene graph that looks like:
@@ -450,19 +459,19 @@ define( function( require ) {
     g.addChild( h );
     rootNode.addChild( e );
 
-    e.addAriaLabelledbyAssociation( {
+    e[ addAssociationFunction ]( {
       otherNode: f,
       thisElementName: AccessiblePeer.PRIMARY_SIBLING,
       otherElementName: AccessiblePeer.PRIMARY_SIBLING
     } );
 
-    f.addAriaLabelledbyAssociation( {
+    f[ addAssociationFunction ]( {
       otherNode: g,
       thisElementName: AccessiblePeer.PRIMARY_SIBLING,
       otherElementName: AccessiblePeer.PRIMARY_SIBLING
     } );
 
-    g.addAriaLabelledbyAssociation( {
+    g[ addAssociationFunction ]( {
       otherNode: h,
       thisElementName: AccessiblePeer.PRIMARY_SIBLING,
       otherElementName: AccessiblePeer.PRIMARY_SIBLING
@@ -472,11 +481,11 @@ define( function( require ) {
     var fElement = getPrimarySiblingElementByNode( f );
     var gElement = getPrimarySiblingElementByNode( g );
     var hElement = getPrimarySiblingElementByNode( h );
-    assert.ok( eElement.getAttribute( 'aria-labelledby' ).trim() === fElement.id, 'eElement should be aria-labelledby fElement' );
-    assert.ok( fElement.getAttribute( 'aria-labelledby' ).trim() === gElement.id, 'fElement should be aria-labelledby gElement' );
-    assert.ok( gElement.getAttribute( 'aria-labelledby' ).trim() === hElement.id, 'gElement should be aria-labelledby hElement' );
+    assert.ok( eElement.getAttribute( attribute ).trim() === fElement.id, 'eElement should be ' + attribute + ' fElement' );
+    assert.ok( fElement.getAttribute( attribute ).trim() === gElement.id, 'fElement should be ' + attribute + ' gElement' );
+    assert.ok( gElement.getAttribute( attribute ).trim() === hElement.id, 'gElement should be ' + attribute + ' hElement' );
 
-    // re-arrange the scene graph and make sure that the aria-labelledby ids remain up to date
+    // re-arrange the scene graph and make sure that the attribute ids remain up to date
     //    e
     //     \
     //      h
@@ -495,11 +504,11 @@ define( function( require ) {
     fElement = getPrimarySiblingElementByNode( f );
     gElement = getPrimarySiblingElementByNode( g );
     hElement = getPrimarySiblingElementByNode( h );
-    assert.ok( eElement.getAttribute( 'aria-labelledby' ).trim() === fElement.id, 'eElement should still be aria-labelledby fElement' );
-    assert.ok( fElement.getAttribute( 'aria-labelledby' ).trim() === gElement.id, 'fElement should still be aria-labelledby gElement' );
-    assert.ok( gElement.getAttribute( 'aria-labelledby' ).trim() === hElement.id, 'gElement should still be aria-labelledby hElement' );
+    assert.ok( eElement.getAttribute( attribute ).trim() === fElement.id, 'eElement should still be ' + attribute + ' fElement' );
+    assert.ok( fElement.getAttribute( attribute ).trim() === gElement.id, 'fElement should still be ' + attribute + ' gElement' );
+    assert.ok( gElement.getAttribute( attribute ).trim() === hElement.id, 'gElement should still be ' + attribute + ' hElement' );
 
-    // test aria labelled by your self, but a different peer Element, multiple aria-labelledby ids included in the test.
+    // test aria labelled by your self, but a different peer Element, multiple attribute ids included in the test.
     var containerTagName = 'div';
     var j = new Node( {
       tagName: 'button',
@@ -509,19 +518,19 @@ define( function( require ) {
     } );
     rootNode.children = [ j ];
 
-    j.addAriaLabelledbyAssociation( {
+    j[ addAssociationFunction ]( {
       otherNode: j,
       thisElementName: AccessiblePeer.PRIMARY_SIBLING,
       otherElementName: AccessiblePeer.LABEL_SIBLING
     } );
 
-    j.addAriaLabelledbyAssociation( {
+    j[ addAssociationFunction ]( {
       otherNode: j,
       thisElementName: AccessiblePeer.CONTAINER_PARENT,
       otherElementName: AccessiblePeer.DESCRIPTION_SIBLING
     } );
 
-    j.addAriaLabelledbyAssociation( {
+    j[ addAssociationFunction ]( {
       otherNode: j,
       thisElementName: AccessiblePeer.CONTAINER_PARENT,
       otherElementName: AccessiblePeer.LABEL_SIBLING
@@ -529,16 +538,16 @@ define( function( require ) {
 
     var checkOnYourOwnAriaLabelledByAssociations = function( node ) {
 
-      var instance = node._accessibleInstances[0];
+      var instance = node._accessibleInstances[ 0 ];
       var nodePrimaryElement = instance.peer.primarySibling;
       var nodeParent = nodePrimaryElement.parentElement;
       var nodeLabelElement = nodeParent.childNodes[ DEFAULT_LABEL_SIBLING_INDEX ];
       var nodeDescriptionElement = nodeParent.childNodes[ DEFAULT_DESCRIPTION_SIBLING_INDEX ];
 
-      assert.ok( nodePrimaryElement.getAttribute( 'aria-labelledby' ).indexOf( nodeLabelElement.id ) >= 0, 'aria-labelledby your own label element.' );
-      assert.ok( nodeParent.getAttribute( 'aria-labelledby' ).indexOf( nodeDescriptionElement.id ) >= 0, 'parent aria-labelledby your own description.' );
+      assert.ok( nodePrimaryElement.getAttribute( attribute ).indexOf( nodeLabelElement.id ) >= 0, attribute + ' your own label element.' );
+      assert.ok( nodeParent.getAttribute( attribute ).indexOf( nodeDescriptionElement.id ) >= 0, 'parent ' + attribute + ' your own description.' );
 
-      assert.ok( nodeParent.getAttribute( 'aria-labelledby' ).indexOf( nodeLabelElement.id ) >= 0, 'parent aria-labelledby your own description.' );
+      assert.ok( nodeParent.getAttribute( attribute ).indexOf( nodeLabelElement.id ) >= 0, 'parent ' + attribute + ' your own description.' );
 
     };
 
@@ -552,6 +561,16 @@ define( function( require ) {
     j.invalidateAccessibleContent();
     checkOnYourOwnAriaLabelledByAssociations( j );
 
+  }
+
+  QUnit.test( 'aria-labelledby', function( assert ) {
+
+    testAriaLabelledOrDescribedBy( assert, 'aria-labelledby' );
+
+  } );
+  QUnit.test( 'aria-describedby', function( assert ) {
+
+    testAriaLabelledOrDescribedBy( assert, 'aria-describedby' );
 
   } );
 

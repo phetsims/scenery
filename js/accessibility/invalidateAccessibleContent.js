@@ -169,12 +169,23 @@ define( function( require ) {
           }
 
           // restore this nodes aria-labelledby associations
-          self.updateAriaLabelledbyAssociations();
+          var ariaLabelledbyAtrributeName = 'aria-labelledby';
+          self.updateAssociationsForAttribute( ariaLabelledbyAtrributeName );
 
           // if any other nodes are aria-labelledby this Node, update those associations too. Since this node's
           // accessible content needs to be recreated, they need to update their aria-labelledby associations accordingly.
           for ( i = 0; i < self._nodesThatAreAriaLabelledByThisNode.length; i++ ) {
-            self._nodesThatAreAriaLabelledByThisNode[ i ].updateAriaLabelledbyAssociations();
+            self._nodesThatAreAriaLabelledByThisNode[ i ].updateAssociationsForAttribute( ariaLabelledbyAtrributeName );
+          }
+
+          // restore this nodes aria-describedby associations
+          var ariaDescribedbyAttributeName = 'aria-describedby';
+          self.updateAssociationsForAttribute( ariaDescribedbyAttributeName );
+
+          // if any other nodes are aria-describedby this Node, update those associations too. Since this node's
+          // accessible content needs to be recreated, they need to update their aria-describedby associations accordingly.
+          for ( i = 0; i < self._nodesThatAreAriaDescribedByThisNode.length; i++ ) {
+            self._nodesThatAreAriaDescribedByThisNode[ i ].updateAssociationsForAttribute( ariaDescribedbyAttributeName );
           }
 
           // restore aria-labelledby associations
