@@ -574,65 +574,6 @@ define( function( require ) {
 
   } );
 
-  QUnit.test( 'aria-labelledby, aria-describedby', function( assert ) {
-    var rootNode = new Node();
-    var display = new Display( rootNode ); // eslint-disable-line
-    document.body.appendChild( display.domElement );
-
-    // two new nodes that will be related with the aria-labelledby and aria-describedby associations
-    var nodeA = new Node( { tagName: 'button', labelTagName: 'p', descriptionTagName: 'p' } );
-    var nodeB = new Node( { tagName: 'p', innerContent: TEST_LABEL } );
-    var nodeC = new Node();
-    var nodeD = new Node();
-    rootNode.children = [ nodeA, nodeB ];
-
-    // node B describes node A
-    nodeA.setAriaDescribedByNode( nodeB );
-    nodeA.setAriaLabelledByNode( nodeB );
-
-    var nodeAElement = getPrimarySiblingElementByNode( nodeA );
-    var nodeBElement = getPrimarySiblingElementByNode( nodeB );
-
-    assert.ok( nodeAElement.getAttribute( 'aria-describedby' ) === nodeBElement.id, 'describedby attribute wrong in normal use case' );
-    assert.ok( nodeAElement.getAttribute( 'aria-labelledby' ) === nodeBElement.id, 'labelledby attribute wrong in normal use case' );
-
-    // set up the relation on nodes that do not have accessible content yet
-    nodeC.setAriaDescribedByNode( nodeD );
-    nodeC.setAriaLabelledByNode( nodeD );
-
-    // give both accessible content
-    nodeC.tagName = 'button';
-    nodeD.tagName = 'p';
-
-    // add to DOM so elements can be queried
-    rootNode.addChild( nodeC );
-    rootNode.addChild( nodeD );
-
-    var nodeCElement = getPrimarySiblingElementByNode( nodeC );
-    var nodeDElement = getPrimarySiblingElementByNode( nodeD );
-
-    assert.ok( nodeCElement.getAttribute( 'aria-describedby' ) === nodeDElement.id, 'describedby attribute wrong in case of pre-invalidation' );
-    assert.ok( nodeCElement.getAttribute( 'aria-labelledby' ) === nodeDElement.id, 'labelledby attribute wrong in case of pre-invalidation' );
-
-    // change the association so that nodeA's label is the label for nodeB, and nodeA's description is the description for nodeC
-    nodeA.ariaDescriptionContent = AccessiblePeer.DESCRIPTION_SIBLING;
-    nodeC.setAriaDescribedByNode( nodeA );
-
-    nodeA.ariaLabelContent = AccessiblePeer.LABEL_SIBLING;
-    nodeB.setAriaLabelledByNode( nodeA );
-
-    // reset references after Node.invalidateAccessibleContent() was called while setting options above.
-    // NOTE: See warning in getPrimarySiblingElementByNode() jsDoc for more info.
-    nodeAElement = getPrimarySiblingElementByNode( nodeA );
-
-    // order of label and description will be labelSibling, descriptionSibling, primary sibling
-    var nodeALabel = nodeAElement.parentElement.childNodes[ 0 ];
-    var nodeADescription = nodeAElement.parentElement.childNodes[ 1 ];
-
-    assert.ok( getPrimarySiblingElementByNode( nodeC ).getAttribute( 'aria-describedby' ) === nodeADescription.id, 'aria-describedby wrong using explicit association' );
-    assert.ok( getPrimarySiblingElementByNode( nodeB ).getAttribute( 'aria-labelledby' ) === nodeALabel.id, 'aria-labelledby wrong using explicit association' );
-  } );
-
   QUnit.test( 'Accessibility invalidation', function( assert ) {
 
     // test invalidation of accessibility (changing content which requires )

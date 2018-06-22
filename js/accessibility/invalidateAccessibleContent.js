@@ -188,22 +188,6 @@ define( function( require ) {
             self._nodesThatAreAriaDescribedByThisNode[ i ].updateAssociationsForAttribute( ariaDescribedbyAttributeName );
           }
 
-          // restore aria-labelledby associations
-          var labelledByNode = self._ariaLabelledByNode;
-          labelledByNode && self.setAriaLabelledByNode( labelledByNode, self._ariaLabelledContent, labelledByNode._ariaLabelContent );
-
-          // if this node aria-labels another node, restore label associations for that node
-          var ariaLabelsNode = self._ariaLabelsNode;
-          ariaLabelsNode && ariaLabelsNode.setAriaLabelledByNode( self, ariaLabelsNode._ariaLabelledContent, self._ariaLabelContent );
-
-          // restore aria-describedby associations
-          var describedByNode = self._ariaDescribedByNode;
-          describedByNode && self.setAriaDescribedByNode( describedByNode, self._ariaDescribedContent, describedByNode._ariaDescribedContent );
-
-          // if this node aria-describes another node, restore description asssociations for that node
-          var ariaDescribesNode = self._ariaDescribesNode;
-          ariaDescribesNode && ariaDescribesNode.setAriaDescribedByNode( self, ariaDescribesNode._ariaDescribedContent, self._ariaDescriptionContent );
-
           // add all listeners to the dom element
           for ( i = 0; i < self._accessibleInputListeners.length; i++ ) {
             AccessibilityUtil.addDOMEventListeners( self._accessibleInputListeners[ i ], primarySibling );
