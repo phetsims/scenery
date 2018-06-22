@@ -370,6 +370,25 @@ define( function( require ) {
       return tagNameSupportsContent( tagName );
     },
 
+    /**
+     * Given an associationObject for either aria-labelledby or aria-describedby, make sure it has the right signature.
+     * @param associationObject
+     */
+    validateAssociationObject: function( associationObject ) {
+
+      var expectedKeys = [ 'thisElementName', 'otherNode', 'otherElementName' ];
+
+      var objectKeys = Object.keys( associationObject );
+
+      assert && assert( objectKeys.length === 3, 'wrong number of keys in associationObject, expected:', expectedKeys, ' got:', objectKeys );
+
+
+      for ( var i = 0; i < objectKeys.length; i++ ) {
+        var objectKey = objectKeys[ i ];
+        assert && assert( expectedKeys.indexOf( objectKey ) >= 0, 'unexpected key: ' + objectKey );
+      }
+    },
+
     TAGS: {
       INPUT: INPUT_TAG,
       LABEL: LABEL_TAG,

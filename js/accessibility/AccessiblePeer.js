@@ -87,7 +87,7 @@ define( function( require ) {
         // if undefined, the insertBefore method will insert the primarySiblingDOMElement as the first child
         var primarySiblingDOMElement = this.primarySibling;
         var firstChild = this.containerParent.children[ 0 ] || null;
-        this.containerParent.insertBefore( primarySiblingDOMElement, firstChild  );
+        this.containerParent.insertBefore( primarySiblingDOMElement, firstChild );
       }
 
       // @private {boolean} - Whether we are currently in a "disposed" (in the pool) state, or are available to be
@@ -143,9 +143,6 @@ define( function( require ) {
       return this.containerParent || this.primarySibling;
     },
 
-    getTopLevelElements: function(){
-    },
-
     /**
      * Get an element on this node, looked up by the association flag passed in.
      * @public (scenery-internal)
@@ -154,22 +151,20 @@ define( function( require ) {
      * @return {HTMLElement}
      */
     getElementByName: function( association ) {
-      var htmlElement = null;
-
       if ( association === AccessiblePeer.PRIMARY_SIBLING ) {
-        htmlElement = this.primarySibling;
+        return this.primarySibling;
       }
       else if ( association === AccessiblePeer.LABEL_SIBLING ) {
-        htmlElement = this.labelSibling;
+        return this.labelSibling;
       }
       else if ( association === AccessiblePeer.DESCRIPTION_SIBLING ) {
-        htmlElement = this.descriptionSibling;
+        return this.descriptionSibling;
       }
       else if ( association === AccessiblePeer.CONTAINER_PARENT ) {
-        htmlElement = this.containerParent;
+        return this.containerParent;
       }
 
-      return htmlElement;
+      assert && assert( false, 'invalid association name: ' + association );
     },
 
     /**

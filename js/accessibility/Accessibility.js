@@ -1308,6 +1308,7 @@ define( function( require ) {
          *                               see AccessiblePeer for valid element names.
          */
         addAriaLabelledbyAssociation: function( associationObject ) {
+          assert && AccessibilityUtil.validateAssociationObject( associationObject );
 
           this._ariaLabelledbyAssociations.push( associationObject ); // Keep track of this association.
 
@@ -1334,6 +1335,7 @@ define( function( require ) {
          *                               see AccessiblePeer for valid element names.
          */
         addAriaDescribedbyAssociation: function( associationObject ) {
+          assert && AccessibilityUtil.validateAssociationObject( associationObject );
 
           this._ariaDescribedbyAssociations.push( associationObject ); // Keep track of this association.
 
@@ -1398,23 +1400,30 @@ define( function( require ) {
           assert && assert( attribute === 'aria-describedby' || attribute === 'aria-labelledby', 'unsupported attribute name: ' + attribute );
           this.updateAccessiblePeers( function( peer ) {
 
-            // We are just using the first AccessibleInstance for simplicity, but it is OK because the accessible
-            // content for all AccessibleInstances will be the same, so the Accessible Names (in the browser's
-            // accessibility tree) of elements that are referenced by the attribute value id will all have the same content
-            var firstAccessibleInstance = associationObject.otherNode.getAccessibleInstances()[ 0 ];
+            var otherNodeAccessibleInstances = associationObject.otherNode.getAccessibleInstances();
 
-            var otherPeerElement = firstAccessibleInstance.peer.getElementByName( associationObject.otherElementName );
-            var thisPeerElement = peer.getElementByName( associationObject.thisElementName );
+            // if the other node hasn't been added to the scene graph yet, it won't have any accessible instances, so no op.
+            // This will be recalculated when that node is added to the scene graph
+            if ( otherNodeAccessibleInstances.length > 0 ) {
 
-            // only update associations if the requested peer element has been created
-            // NOTE: in the future, we would like to verify that the association exists but can't do that yet because
-            // we have to support cases where we set label association prior to setting the sibling/parent tagName
-            if ( thisPeerElement ) {
-              var previousAttributeValue = thisPeerElement.getAttribute( attribute ) || '';
-              assert && assert( typeof previousAttributeValue === 'string' );
+              // We are just using the first AccessibleInstance for simplicity, but it is OK because the accessible
+              // content for all AccessibleInstances will be the same, so the Accessible Names (in the browser's
+              // accessibility tree) of elements that are referenced by the attribute value id will all have the same content
+              var firstAccessibleInstance = otherNodeAccessibleInstances[ 0 ];
 
-              // add the id from the new association to the value of the HTMLElement's attribute.
-              thisPeerElement.setAttribute( attribute, [ previousAttributeValue.trim(), otherPeerElement.id ].join( ' ' ) );
+              var otherPeerElement = firstAccessibleInstance.peer.getElementByName( associationObject.otherElementName );
+              var thisPeerElement = peer.getElementByName( associationObject.thisElementName );
+
+              // only update associations if the requested peer element has been created
+              // NOTE: in the future, we would like to verify that the association exists but can't do that yet because
+              // we have to support cases where we set label association prior to setting the sibling/parent tagName
+              if ( thisPeerElement && otherPeerElement ) {
+                var previousAttributeValue = thisPeerElement.getAttribute( attribute ) || '';
+                assert && assert( typeof previousAttributeValue === 'string' );
+
+                // add the id from the new association to the value of the HTMLElement's attribute.
+                thisPeerElement.setAttribute( attribute, [ previousAttributeValue.trim(), otherPeerElement.id ].join( ' ' ) );
+              }
             }
           } );
         },
