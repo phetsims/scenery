@@ -54,7 +54,9 @@ define( function( require ) {
     this.boundsChangeListener = function() {
       self.set( locationGetter() );
     };
-    node.on( 'bounds', this.boundsChangeListener );
+
+    // onStatic (as opposed to 'on') avoids array allocation, but means the listener cannot cause disposal of this node.
+    node.onStatic( 'bounds', this.boundsChangeListener );
   }
 
   scenery.register( 'NodePositionProperty', NodePositionProperty );
@@ -66,7 +68,7 @@ define( function( require ) {
      * @public
      */
     dispose: function() {
-      this.node.off( 'bounds', this.boundsChangeListener );
+      this.node.offStatic( 'bounds', this.boundsChangeListener );
       Property.prototype.dispose.call( this );
     }
   } );
