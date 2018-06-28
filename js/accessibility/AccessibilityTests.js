@@ -556,9 +556,6 @@ define( function( require ) {
     rootNode.addChild( new Node( { children: [ j ] } ) );
     checkOnYourOwnAriaLabelledByAssociations( j );
     rootNode.removeChild( j );
-
-    // TODO: remove this manual call once bug is fixed in removeChild, see https://github.com/phetsims/scenery/issues/816
-    j.invalidateAccessibleContent();
     checkOnYourOwnAriaLabelledByAssociations( j );
 
   }
