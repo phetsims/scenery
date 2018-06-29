@@ -1429,6 +1429,38 @@ define( function( require ) {
         },
 
         /**
+         * Update the associations for aria-labelledby and aria-describedby. This needs to be done when we re-create
+         * the accessible content (invalidateAccessibleContent), but also when we remove a Node from the scene graph
+         * because we need to make sure that when the Node's accessible content is no longer in the PDOM, other Nodes
+         * that are associated with the removed Node have their associations updated correctly.
+         *
+         * @public (scenery-internal)
+         */
+        updateLabelledbyDescribebyAssociations: function() {
+
+          // restore this nodes aria-labelledby associations
+          var ariaLabelledbyAtrributeName = 'aria-labelledby';
+          this.updateAssociationsForAttribute( ariaLabelledbyAtrributeName );
+
+          // if any other nodes are aria-labelledby this Node, update those associations too. Since this node's
+          // accessible content needs to be recreated, they need to update their aria-labelledby associations accordingly.
+          var i;
+          for ( i = 0; i < this._nodesThatAreAriaLabelledByThisNode.length; i++ ) {
+            this._nodesThatAreAriaLabelledByThisNode[ i ].updateAssociationsForAttribute( ariaLabelledbyAtrributeName );
+          }
+
+          // restore this nodes aria-describedby associations
+          var ariaDescribedbyAttributeName = 'aria-describedby';
+          this.updateAssociationsForAttribute( ariaDescribedbyAttributeName );
+
+          // if any other nodes are aria-describedby this Node, update those associations too. Since this node's
+          // accessible content needs to be recreated, they need to update their aria-describedby associations accordingly.
+          for ( i = 0; i < this._nodesThatAreAriaDescribedByThisNode.length; i++ ) {
+            this._nodesThatAreAriaDescribedByThisNode[ i ].updateAssociationsForAttribute( ariaDescribedbyAttributeName );
+          }
+        },
+
+        /**
          * Sets the accessible focus order for this node. This includes not only focused items, but elements that can be
          * placed in the parallel DOM. If provided, it will override the focus order between children (and
          * optionally arbitrary subtrees). If not provided, the focus order will default to the rendering order
@@ -2050,6 +2082,10 @@ define( function( require ) {
           this._accessibleDisplaysInfo.onRemoveChild( node );
 
           AccessibilityTree.removeChild( this, node );
+
+          // make sure that the associations for aria-labelledby and aria-describedby are updated when a child is
+          // removed from the scene graph, see https://github.com/phetsims/scenery/issues/816
+          node.updateLabelledbyDescribebyAssociations();
 
           sceneryLog && sceneryLog.Accessibility && sceneryLog.pop();
         },

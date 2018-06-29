@@ -28,6 +28,9 @@ define( function( require ) {
   // ifphetio
   var PressListenerIO = require( 'SCENERY/listeners/PressListenerIO' );
 
+  // global
+  var globalID = 0;
+
   /**
    * @constructor
    *
@@ -136,6 +139,11 @@ define( function( require ) {
     assert && assert( options.isHighlightedProperty instanceof Property && options.isHighlightedProperty.value === false,
       'If a custom isHighlightedProperty is provided, it must be a Property that is false initially' );
 
+    // @private {number} - Unique global ID for this listener
+    this._id = globalID++;
+
+    sceneryLog && sceneryLog.InputListener && sceneryLog.InputListener( 'PressListener#' + this._id + ' construction' );
+
     // @public {ObservableArray.<Pointer>} - Contains all pointers that are over our button. Tracked by adding with
     // 'enter' events and removing with 'exit' events.
     this.overPointers = new ObservableArray();
@@ -187,7 +195,7 @@ define( function( require ) {
        * @param {Event} event
        */
       up: function( event ) {
-        sceneryLog && sceneryLog.InputListener && sceneryLog.InputListener( 'PressListener pointer up' );
+        sceneryLog && sceneryLog.InputListener && sceneryLog.InputListener( 'PressListener#' + self._id + ' pointer up' );
         sceneryLog && sceneryLog.InputListener && sceneryLog.push();
 
         assert && assert( event.pointer === self.pointer );
@@ -204,7 +212,7 @@ define( function( require ) {
        * @param {Event} event
        */
       cancel: function( event ) {
-        sceneryLog && sceneryLog.InputListener && sceneryLog.InputListener( 'PressListener pointer cancel' );
+        sceneryLog && sceneryLog.InputListener && sceneryLog.InputListener( 'PressListener#' + self._id + ' pointer cancel' );
         sceneryLog && sceneryLog.InputListener && sceneryLog.push();
 
         assert && assert( event.pointer === self.pointer );
@@ -221,7 +229,7 @@ define( function( require ) {
        * @param {Event} event
        */
       move: function( event ) {
-        sceneryLog && sceneryLog.InputListener && sceneryLog.InputListener( 'PressListener pointer move' );
+        sceneryLog && sceneryLog.InputListener && sceneryLog.InputListener( 'PressListener#' + self._id + ' pointer move' );
         sceneryLog && sceneryLog.InputListener && sceneryLog.push();
 
         assert && assert( event.pointer === self.pointer );
@@ -236,7 +244,7 @@ define( function( require ) {
        * @public (scenery-internal)
        */
       interrupt: function() {
-        sceneryLog && sceneryLog.InputListener && sceneryLog.InputListener( 'PressListener pointer interrupt' );
+        sceneryLog && sceneryLog.InputListener && sceneryLog.InputListener( 'PressListener#' + self._id + ' pointer interrupt' );
         sceneryLog && sceneryLog.InputListener && sceneryLog.push();
 
         self.interrupt();
@@ -300,7 +308,7 @@ define( function( require ) {
      * @param {Event} event
      */
     down: function( event ) {
-      sceneryLog && sceneryLog.InputListener && sceneryLog.InputListener( 'PressListener down' );
+      sceneryLog && sceneryLog.InputListener && sceneryLog.InputListener( 'PressListener#' + this._id + ' down' );
       sceneryLog && sceneryLog.InputListener && sceneryLog.push();
 
       this.press( event );
@@ -317,7 +325,7 @@ define( function( require ) {
      * @param {Event} event
      */
     enter: function( event ) {
-      sceneryLog && sceneryLog.InputListener && sceneryLog.InputListener( 'FireListener enter' );
+      sceneryLog && sceneryLog.InputListener && sceneryLog.InputListener( 'PressListener#' + this._id + ' enter' );
       sceneryLog && sceneryLog.InputListener && sceneryLog.push();
 
       this.overPointers.push( event.pointer );
@@ -334,11 +342,12 @@ define( function( require ) {
      * @param {Event} event
      */
     exit: function( event ) {
-      sceneryLog && sceneryLog.InputListener && sceneryLog.InputListener( 'FireListener exit' );
+      sceneryLog && sceneryLog.InputListener && sceneryLog.InputListener( 'PressListener#' + this._id + ' exit' );
       sceneryLog && sceneryLog.InputListener && sceneryLog.push();
 
-      assert && assert( this.overPointers.contains( event.pointer ), 'Exit event not matched by an enter event' );
-
+      // NOTE: We don't require the pointer to be included here, since we may have added the listener after the 'enter'
+      // was fired. See https://github.com/phetsims/area-model-common/issues/159 for more details. This may be a
+      // no-op, which ObservableArray allows.
       this.overPointers.remove( event.pointer );
 
       sceneryLog && sceneryLog.InputListener && sceneryLog.pop();
@@ -394,14 +403,14 @@ define( function( require ) {
     press: function( event, targetNode ) {
       assert && assert( event, 'An event is required' );
 
-      sceneryLog && sceneryLog.InputListener && sceneryLog.InputListener( 'PressListener press' );
+      sceneryLog && sceneryLog.InputListener && sceneryLog.InputListener( 'PressListener#' + this._id + ' press' );
 
       if ( !this.canPress( event ) ) {
-        sceneryLog && sceneryLog.InputListener && sceneryLog.InputListener( 'PressListener could not press' );
+        sceneryLog && sceneryLog.InputListener && sceneryLog.InputListener( 'PressListener#' + this._id + ' could not press' );
         return false;
       }
 
-      sceneryLog && sceneryLog.InputListener && sceneryLog.InputListener( 'PressListener successful press' );
+      sceneryLog && sceneryLog.InputListener && sceneryLog.InputListener( 'PressListener#' + this._id + ' successful press' );
       sceneryLog && sceneryLog.InputListener && sceneryLog.push();
       this.startEvent( 'user', 'pressed', {
         x: event.pointer.point.x,
@@ -442,7 +451,7 @@ define( function( require ) {
      * events. If the cancel/interrupt behavior is more preferable, call interrupt() on this listener instead.
      */
     release: function() {
-      sceneryLog && sceneryLog.InputListener && sceneryLog.InputListener( 'PressListener release' );
+      sceneryLog && sceneryLog.InputListener && sceneryLog.InputListener( 'PressListener#' + this._id + ' release' );
       sceneryLog && sceneryLog.InputListener && sceneryLog.push();
       this.startEvent( 'user', 'released' );
 
@@ -475,7 +484,7 @@ define( function( require ) {
      * @param {Event} event
      */
     drag: function( event ) {
-      sceneryLog && sceneryLog.InputListener && sceneryLog.InputListener( 'PressListener drag' );
+      sceneryLog && sceneryLog.InputListener && sceneryLog.InputListener( 'PressListener#' + this._id + ' drag' );
       sceneryLog && sceneryLog.InputListener && sceneryLog.push();
 
       assert && assert( this.isPressed, 'Can only drag while pressed' );
@@ -492,11 +501,11 @@ define( function( require ) {
      * This can be called manually, but can also be called through node.interruptSubtreeInput().
      */
     interrupt: function() {
-      sceneryLog && sceneryLog.InputListener && sceneryLog.InputListener( 'PressListener interrupt' );
+      sceneryLog && sceneryLog.InputListener && sceneryLog.InputListener( 'PressListener#' + this._id + ' interrupt' );
       sceneryLog && sceneryLog.InputListener && sceneryLog.push();
 
       if ( this.isPressed ) {
-        sceneryLog && sceneryLog.InputListener && sceneryLog.InputListener( 'PressListener interrupting' );
+        sceneryLog && sceneryLog.InputListener && sceneryLog.InputListener( 'PressListener#' + this._id + ' interrupting' );
         this.interrupted = true;
 
         this.release();
@@ -542,7 +551,7 @@ define( function( require ) {
      * @public
      */
     dispose: function() {
-      sceneryLog && sceneryLog.InputListener && sceneryLog.InputListener( 'PressListener dispose' );
+      sceneryLog && sceneryLog.InputListener && sceneryLog.InputListener( 'PressListener#' + this._id + ' dispose' );
       sceneryLog && sceneryLog.InputListener && sceneryLog.push();
 
       // We need to release references to any pointers that are over us.
