@@ -91,7 +91,6 @@ define( function( require ) {
   var platform = require( 'PHET_CORE/platform' );
   var PointerAreaOverlay = require( 'SCENERY/overlays/PointerAreaOverlay' );
   var PointerOverlay = require( 'SCENERY/overlays/PointerOverlay' );
-  var SceneryStyle = require( 'SCENERY/util/SceneryStyle' );
   var Util = require( 'SCENERY/util/Util' );
 
   // ifphetio
@@ -271,10 +270,6 @@ define( function( require ) {
       if ( this.options.isApplication ) {
         this._domElement.setAttribute( 'aria-role', 'application' );
       }
-
-      // make the PDOM invisible in the browser - it has some width and is shifted off screen so that AT can read the
-      // formatting tags, see https://github.com/phetsims/scenery/issues/730
-      SceneryStyle.addRule( '.accessibility * { position: relative; left: -1000px; top: 0; width: 250px; height: 0; clip: rect(0,0,0,0); pointerEvents: none }' );
 
       this._focusRootNode = new Node();
       this._focusOverlay = new FocusOverlay( this, this._focusRootNode );
