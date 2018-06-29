@@ -51,7 +51,7 @@
       $code.text( draw.toString().match( /\/\*START\*\/((.|\n)*)\/\*END\*\// )[ 1 ] );
       $container.after( $code );
 
-      var pdomHTMLBlock = $( display.domElement ).find( '.accessibility' )[ 0 ].outerHTML; // get the PDOM
+      var pdomHTMLBlock = display.accessibleDOMElement.outerHTML; // get the PDOM
       var formattedPDOM = pdomHTMLBlock.replace( new RegExp( '<[/]?\\w*[ >]', 'g' ), '\n$&' ); // add breaks in the string
       var $PDOMcode = $( '<pre class="brush: html"></pre>' ).text( formattedPDOM );
 
