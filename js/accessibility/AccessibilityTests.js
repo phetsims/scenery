@@ -551,13 +551,55 @@ define( function( require ) {
 
     };
 
-    // Moving this node around the scene graph should not change it's aria labelled by associations.
+    // add k into the mix
+    var k = new Node( { tagName: 'div' } );
+    k[ addAssociationFunction ]( {
+      otherNode: j,
+      thisElementName: AccessiblePeer.PRIMARY_SIBLING,
+      otherElementName: AccessiblePeer.LABEL_SIBLING
+    } );
+    rootNode.addChild( k );
+    var testK = function(){
+      var kValue = k._accessibleInstances[ 0 ].peer.primarySibling.getAttribute( attribute ).trim();
+      var jID = j._accessibleInstances[ 0 ].peer.labelSibling.getAttribute( 'id' ).trim();
+      assert.ok( jID === kValue, 'k pointing to j' );
+    };
+
+
+    // Check basic associations within single node
     checkOnYourOwnAriaLabelledByAssociations( j );
+    testK();
+
+    // Moving this node around the scene graph should not change it's aria labelled by associations.
     rootNode.addChild( new Node( { children: [ j ] } ) );
     checkOnYourOwnAriaLabelledByAssociations( j );
+    testK();
+
+    // check remove child
     rootNode.removeChild( j );
     checkOnYourOwnAriaLabelledByAssociations( j );
+    testK();
 
+    // check dispose
+    var jParent = new Node( { children: [ j ] } );
+    rootNode.children = [];
+    rootNode.addChild( jParent );
+    rootNode.addChild( j );
+    rootNode.addChild( k );
+    checkOnYourOwnAriaLabelledByAssociations( j );
+    testK();
+    jParent.dispose();
+    checkOnYourOwnAriaLabelledByAssociations( j );
+    testK();
+
+    // check removeChild with dag
+    var jParent2 = new Node( { children: [ j ] } );
+    rootNode.insertChild( 0, jParent2 );
+    checkOnYourOwnAriaLabelledByAssociations( j );
+    testK();
+    rootNode.removeChild( jParent2 );
+    checkOnYourOwnAriaLabelledByAssociations( j );
+    testK();
   }
 
   QUnit.test( 'aria-labelledby', function( assert ) {
