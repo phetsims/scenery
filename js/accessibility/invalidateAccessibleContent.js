@@ -104,10 +104,6 @@ define( function( require ) {
           if ( self._labelTagName ) {
             labelSibling = createElement( self._labelTagName, false );
             labelSibling.id = 'label-' + uniqueId;
-
-            if ( self._labelTagName.toUpperCase() === LABEL_TAG ) {
-              labelSibling.setAttribute( 'for', uniqueId );
-            }
           }
 
           // create the description DOM element representing this instance
@@ -141,40 +137,40 @@ define( function( require ) {
           }
 
           // set if using aria-label
-          if ( self._ariaLabel ) {
-            self.setAriaLabel( self._ariaLabel );
-          }
+          self._ariaLabel && accessiblePeer.setAttributeToElement( 'aria-label', self._ariaLabel );
 
           // restore visibility
           self.setAccessibleVisible( self._accessibleVisible );
 
           // restore checked
-          self.setAccessibleChecked( self._accessibleChecked );
+          accessiblePeer.setAttributeToElement( 'checked', self._accessibleChecked );
 
           // restore input value
-          self._inputValue && self.setInputValue( self._inputValue );
+          self._inputValue && accessiblePeer.setAttributeToElement( 'value', self._inputValue );
 
-          // set the accessible attributes, restoring from a defenseive copy
+
+          // set the accessible attributes, restoring from a defensive copy
           var defensiveAttributes = self.accessibleAttributes;
           for ( i = 0; i < defensiveAttributes.length; i++ ) {
             var attribute = defensiveAttributes[ i ].attribute;
             var value = defensiveAttributes[ i ].value;
             var namespace = defensiveAttributes[ i ].namespace;
-            self.setAccessibleAttribute( attribute, value, {
+            accessiblePeer.setAttributeToElement( attribute, value, {
               namespace: namespace
             } );
           }
 
           // if element is an input element, set input type
           if ( self._tagName.toUpperCase() === INPUT_TAG && self._inputType ) {
-            self.setInputType( self._inputType );
+            accessiblePeer.setAttributeToElement( 'type', self._inputType );
           }
 
+          // recompute and assign the association attributes that link two elements (like aria-labelledby)
           self.updateLabelledbyDescribebyAssociations();
 
           // add all listeners to the dom element
           for ( i = 0; i < self._accessibleInputListeners.length; i++ ) {
-            AccessibilityUtil.addDOMEventListeners( self._accessibleInputListeners[ i ], primarySibling );
+            accessiblePeer.addDOMEventListeners( self._accessibleInputListeners[ i ] );
           }
 
           // insert the label and description elements in the correct location if they exist
