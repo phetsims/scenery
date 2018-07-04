@@ -133,7 +133,6 @@ define( function( require ) {
   var scenery = require( 'SCENERY/scenery' );
 
   var INPUT_TAG = AccessibilityUtil.TAGS.INPUT;
-  var LABEL_TAG = AccessibilityUtil.TAGS.LABEL;
   var DIV_TAG = AccessibilityUtil.TAGS.DIV;
   var P_TAG = AccessibilityUtil.TAGS.P;
 
@@ -983,13 +982,10 @@ define( function( require ) {
             this.setLabelTagName( DEFAULT_LABEL_TAG_NAME );
           }
 
-          this.updateAccessiblePeers( function( accessiblePeer ) {
-            if ( accessiblePeer.labelSibling ) {
-              var isLabelTag = self._labelTagName.toUpperCase() === LABEL_TAG;
-              accessiblePeer.setLabelSiblingContent( self._labelContent, isLabelTag );
-            }
-          } );
-
+          for ( var i = 0; i < this._accessibleInstances.length; i++ ) {
+            var peer = this._accessibleInstances[ i ].peer;
+            peer && peer.setLabelSiblingContent( self._labelContent );
+          }
         },
         set labelContent( label ) { this.setLabelContent( label ); },
 
@@ -1018,9 +1014,10 @@ define( function( require ) {
 
           var self = this;
 
-          this.updateAccessiblePeers( function( accessiblePeer ) {
-            accessiblePeer && accessiblePeer.setPrimarySiblingContent( self._innerContent );
-          } );
+          for ( var i = 0; i < this._accessibleInstances.length; i++ ) {
+            var peer = this._accessibleInstances[ i ].peer;
+            peer && peer.setPrimarySiblingContent( self._innerContent );
+          }
         },
         set innerContent( content ) { this.setInnerContent( content ); },
 
@@ -1054,10 +1051,10 @@ define( function( require ) {
             this.setDescriptionTagName( DEFAULT_DESCRIPTION_TAG_NAME );
           }
 
-          this.updateAccessiblePeers( function( accessiblePeer ) {
-            accessiblePeer && accessiblePeer.setDescriptionSiblingContent( self._descriptionContent );
-          } );
-
+          for ( var i = 0; i < this._accessibleInstances.length; i++ ) {
+            var peer = this._accessibleInstances[ i ].peer;
+            peer && peer.setDescriptionSiblingContent( self._descriptionContent );
+          }
         },
         set descriptionContent( textContent ) { this.setDescriptionContent( textContent ); },
 

@@ -302,6 +302,8 @@ define( function( require ) {
      * @param {string} textContent - could have acceptable HTML "formatting" tags in it
      */
     setTextContent: function( domElement, textContent ) {
+      assert && assert( domElement instanceof HTMLElement );
+      assert && assert( typeof textContent === 'string' );
       if ( tagNameSupportsContent( domElement.tagName ) ) {
 
         // returns true if there are no brackets at all
