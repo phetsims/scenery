@@ -410,7 +410,7 @@ define( function( require ) {
     assert.ok( aElement.getAttribute( attribute ) === [ bElement.id, cElement.id ].join( ' ' ),
       'should have invalidated on tree change' );
 
-    var d = new Node( { tagName: 'div', descriptionTagName: 'p', innerContent: TEST_LABEL } );
+    var d = new Node( { tagName: 'div', descriptionTagName: 'p', innerContent: TEST_LABEL, containerTagName: 'div' } );
     rootNode.addChild( d );
 
     b[ addAssociationFunction ]( {

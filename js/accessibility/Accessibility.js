@@ -133,7 +133,6 @@ define( function( require ) {
   var scenery = require( 'SCENERY/scenery' );
 
   var INPUT_TAG = AccessibilityUtil.TAGS.INPUT;
-  var DIV_TAG = AccessibilityUtil.TAGS.DIV;
   var P_TAG = AccessibilityUtil.TAGS.P;
 
   // default tag names for siblings
