@@ -31,7 +31,6 @@ define( function( require ) {
   // These should manually match the defaults in the Accessibility.js trait
   var DEFAULT_LABEL_TAG_NAME = AccessibilityUtil.DEFAULT_LABEL_TAG_NAME;
   var DEFAULT_DESCRIPTION_TAG_NAME = AccessibilityUtil.DEFAULT_DESCRIPTION_TAG_NAME;
-  var DEFAULT_CONTAINER_TAG_NAME = AccessibilityUtil.DEFAULT_CONTAINER_TAG_NAME;
 
   // given the parent container element for a node, this value is the index of the label sibling in the
   // parent's array of children HTMLElements.
