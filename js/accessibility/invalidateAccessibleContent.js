@@ -25,7 +25,6 @@ define( function( require ) {
   // constants
   var A_TAG = AccessibilityUtil.TAGS.A;
   var INPUT_TAG = AccessibilityUtil.TAGS.INPUT;
-  var LABEL_TAG = AccessibilityUtil.TAGS.LABEL;
 
   // these elements require a minimum width to be visible in Safari
   var ELEMENTS_REQUIRE_WIDTH = [ INPUT_TAG, A_TAG ];
