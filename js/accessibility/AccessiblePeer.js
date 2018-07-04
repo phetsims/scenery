@@ -168,6 +168,22 @@ define( function( require ) {
     },
 
     /**
+     * Add DOM Event listeners to the peer's primary sibling.
+     * @param {Object} accessibleInput - see Accessibility.addAccessibleInputListener
+     */
+    addDOMEventListeners: function( accessibleInput ){
+      AccessibilityUtil.addDOMEventListeners( accessibleInput, this.primarySibling );
+    },
+    /**
+     * Remove DOM Event listeners from the peer's primary sibling.
+     * @param {Object} accessibleInput - see Accessibility.addAccessibleInputListener
+     */
+    removeDOMEventListeners: function( accessibleInput ){
+      AccessibilityUtil.removeDOMEventListeners( accessibleInput, this.primarySibling );
+      },
+
+
+  /**
      * Removes external references from this peer, and places it in the pool.
      * @public (scenery-internal)
      */

@@ -423,9 +423,10 @@ define( function( require ) {
           this._accessibleInputListeners.push( accessibleInput );
 
           // add the listener directly to any AccessiblePeers that are representing this node
-          this.updateAccessiblePeers( function( accessiblePeer ) {
-            AccessibilityUtil.addDOMEventListeners( accessibleInput, accessiblePeer.primarySibling );
-          } );
+          for ( var i = 0; i < this._accessibleInstances.length; i++ ) {
+            var peer = this._accessibleInstances[ i ].peer;
+            peer && peer.addDOMEventListeners( accessibleInput );
+          }
 
           return accessibleInput;
         },
@@ -434,7 +435,7 @@ define( function( require ) {
          * Removes an input listener that was previously added with addAccessibleInputListener.
          * @public
          *
-         * @param {Object} accessibleInput
+         * @param {Object} accessibleInput - to be removed
          * @returns {Node} - Returns 'this' reference, for chaining
          */
         removeAccessibleInputListener: function( accessibleInput ) {
@@ -446,9 +447,10 @@ define( function( require ) {
           this._accessibleInputListeners.splice( addedIndex, 1 );
 
           // remove the event listeners from any peers
-          this.updateAccessiblePeers( function( accessiblePeer ) {
-            AccessibilityUtil.removeDOMEventListeners( accessibleInput, accessiblePeer.primarySibling );
-          } );
+          for ( var i = 0; i < this._accessibleInstances.length; i++ ) {
+            var peer = this._accessibleInstances[ i ].peer;
+            peer && peer.removeDOMEventListeners( accessibleInput );
+          }
 
           return this;
         },
