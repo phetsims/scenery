@@ -561,7 +561,9 @@ define( function( require ) {
             assert && assert( this._accessibleVisible, 'trying to set focus on a node with invisible accessible content' );
             assert && assert( this._accessibleInstances.length === 1, 'focus() unsupported for Nodes using DAG, accessible content is not unique' );
 
-            this._accessibleInstances[ 0 ].peer.primarySibling.focus();
+            var peer = this._accessibleInstances[ 0 ].peer;
+            assert && assert( peer, 'must have a peer to focus' );
+            peer.focus();
           }
         },
 

@@ -291,6 +291,14 @@ define( function( require ) {
       return document.activeElement === this.primarySibling;
     },
 
+    /**
+     * Focus the primary sibling of the peer.
+     */
+    focus: function() {
+      assert && assert( this.primarySibling, 'must have a primary sibling to focus' );
+      this.primarySibling.focus();
+    },
+
 
     /**
      * Removes external references from this peer, and places it in the pool.
