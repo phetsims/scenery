@@ -299,6 +299,14 @@ define( function( require ) {
       this.primarySibling.focus();
     },
 
+    /**
+     * Blur the primary sibling of the peer.
+     */
+    blur: function() {
+      assert && assert( this.primarySibling, 'must have a primary sibling to blur' );
+      this.primarySibling.blur();
+    },
+
 
     /**
      * Removes external references from this peer, and places it in the pool.

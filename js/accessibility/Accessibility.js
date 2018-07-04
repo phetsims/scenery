@@ -574,7 +574,10 @@ define( function( require ) {
          */
         blur: function() {
           if ( this._accessibleInstances.length > 0 ) {
-            this._accessibleInstances[ 0 ].peer.primarySibling.blur();
+            assert && assert( this._accessibleInstances.length === 1, 'blur() unsupported for Nodes using DAG, accessible content is not unique' );
+            var peer = this._accessibleInstances[ 0 ].peer;
+            assert && assert( peer, 'must have a peer to blur' );
+            peer.blur();
           }
           this.interruptAccessibleInput(); // interrupt any a11y listeners that attached to this Node
         },
