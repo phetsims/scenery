@@ -520,6 +520,10 @@ define( function( require ) {
           // this node).
           this.accessibleOrder = null;
 
+          // Clear out aria association attributes, which hold references to other nodes.
+          this.setAriaLabelledbyAssociations( [] );
+          this.setAriaDescribedbyAssociations( [] );
+
           this.removeAllAccessibleInputListeners();
         },
 

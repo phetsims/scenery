@@ -672,6 +672,10 @@ define( function( require ) {
 
     m[ associationsArrayName ] = [];
     assert.ok( getPrimarySiblingElementByNode( m ).getAttribute( attribute ) === null, 'clear with setter' );
+
+    m[ associationsArrayName ] = options[ associationsArrayName ];
+    m.dispose();
+    assert.ok( m[ associationsArrayName ].length === 0, 'cleared when disposed' );
   }
 
   QUnit.test( 'aria-labelledby', function( assert ) {
