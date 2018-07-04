@@ -147,6 +147,7 @@ define( function( require ) {
 
   // The options for the Accessibility API. In general, most default to null; to clear, set back to null.
   var ACCESSIBILITY_OPTION_KEYS = [
+    'tagName', // Sets the tag name for the primary sibling DOM element in the parallel DOM, should be first
 
     /*
      * Higher Level API Functions
@@ -162,7 +163,6 @@ define( function( require ) {
     'containerTagName', // Sets the tag name for an [optional] element that contains this Node's siblings, see setContainerTagName()
     'containerAriaRole', // Sets the ARIA role for the container parent DOM element, see setContainerAriaRole()
 
-    'tagName', // Sets the tag name for the primary sibling DOM element in the parallel DOM
     'innerContent', // Sets the inner text or HTML for a node's primary sibling element, see setInnerContent()
     'inputType', // Sets the input type for the primary sibling DOM element, only relevant if tagName is 'input'
     'inputValue', // Sets the input value for the primary sibling DOM element, only relevant if tagName is 'input'
