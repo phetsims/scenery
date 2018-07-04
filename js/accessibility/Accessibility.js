@@ -535,7 +535,8 @@ define( function( require ) {
          */
         isFocused: function() {
           for ( var i = 0; i < this._accessibleInstances.length; i++ ) {
-            if ( document.activeElement === this._accessibleInstances[ i ].peer.primarySibling ) {
+            var peer = this._accessibleInstances[ i ].peer;
+            if ( peer && peer.isFocused() ) {
               return true;
             }
           }

@@ -283,6 +283,14 @@ define( function( require ) {
       }
     },
 
+    /**
+     * Returns if this peer is focused. A peer is focused if its primarySibling is focused.
+     * @returns {boolean}
+     */
+    isFocused: function() {
+      return document.activeElement === this.primarySibling;
+    },
+
 
     /**
      * Removes external references from this peer, and places it in the pool.
