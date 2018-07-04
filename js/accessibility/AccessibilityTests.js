@@ -765,6 +765,11 @@ define( function( require ) {
 
     a1.removeAccessibleAttribute( 'role' );
     assert.ok( !a1Element.getAttribute( 'role' ), 'attribute removed' );
+
+    var b = new Node( { focusable: true } );
+    a1.addChild( b );
+    b.tagName = 'div';
+    assert.ok( getPrimarySiblingElementByNode( b ).tabIndex >= 0, 'set tagName after focusable' );
   } );
 
   QUnit.test( 'Accessibility input listeners', function( assert ) {

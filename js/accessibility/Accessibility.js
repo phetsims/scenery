@@ -837,9 +837,10 @@ define( function( require ) {
           assert && assert( this._tagName.toUpperCase() === INPUT_TAG, 'tag name must be INPUT to support inputType' );
 
           this._inputType = inputType;
-          this.updateAccessiblePeers( function( accessiblePeer ) {
-            accessiblePeer.primarySibling.type = inputType;
-          } );
+          for ( var i = 0; i < this._accessibleInstances.length; i++ ) {
+            var peer = this._accessibleInstances[ i ].peer;
+            peer && peer.setAttributeToElement( 'type', inputType );
+          }
         },
         set inputType( inputType ) { this.setInputType( inputType ); },
 
@@ -1898,9 +1899,10 @@ define( function( require ) {
           value = '' + value;
           this._inputValue = value;
 
-          this.updateAccessiblePeers( function( accessiblePeer ) {
-            accessiblePeer.primarySibling.value = value;
-          } );
+          for ( var i = 0; i < this._accessibleInstances.length; i++ ) {
+            var peer = this._accessibleInstances[ i ].peer;
+            peer && peer.setAttributeToElement( 'value', value );
+          }
         },
         set inputValue( value ) { this.setInputValue( value ); },
 
@@ -1928,9 +1930,10 @@ define( function( require ) {
 
           this._accessibleChecked = checked;
 
-          this.updateAccessiblePeers( function( accessiblePeer ) {
-            accessiblePeer.primarySibling.checked = checked;
-          } );
+          for ( var i = 0; i < this._accessibleInstances.length; i++ ) {
+            var peer = this._accessibleInstances[ i ].peer;
+            peer && peer.setAttributeToElement( 'checked', checked );
+          }
         },
         set accessibleChecked( checked ) { this.setAccessibleChecked( checked ); },
 
@@ -1990,14 +1993,11 @@ define( function( require ) {
             value: value,
             namespace: options.namespace
           } );
-          this.updateAccessiblePeers( function( accessiblePeer ) {
-            if ( options.namespace ) {
-              accessiblePeer.primarySibling.setAttributeNS( options.namespace, attribute, value );
-            }
-            else {
-              accessiblePeer.primarySibling.setAttribute( attribute, value );
-            }
-          } );
+
+          for ( var j = 0; j < this._accessibleInstances.length; j++ ) {
+            var peer = this._accessibleInstances[ j ].peer;
+            peer && peer.setAttributeToElement( attribute, value, options );
+          }
         },
 
         /**
@@ -2027,14 +2027,10 @@ define( function( require ) {
           }
           assert && assert( attributeRemoved, 'Node does not have accessible attribute ' + attribute );
 
-          this.updateAccessiblePeers( function( accessiblePeer ) {
-            if ( options.namespace ) {
-              accessiblePeer.primarySibling.removeAttributeNS( options.namespace, attribute );
-            }
-            else {
-              accessiblePeer.primarySibling.removeAttribute( attribute );
-            }
-          } );
+          for ( var j = 0; j < this._accessibleInstances.length; j++ ) {
+            var peer = this._accessibleInstances[ j ].peer;
+            peer && peer.removeAttributeFromElement( attribute, options );
+          }
         },
 
         /**
@@ -2068,11 +2064,10 @@ define( function( require ) {
 
           this._focusableOverride = focusable;
 
-          this.updateAccessiblePeers( function( accessiblePeer ) {
-            if ( accessiblePeer.primarySibling ) {
-              accessiblePeer.primarySibling.tabIndex = self.focusable ? 0 : -1;
-            }
-          } );
+          for ( var i = 0; i < this._accessibleInstances.length; i++ ) {
+            var peer = this._accessibleInstances[ i ].peer;
+            peer && peer.setAttributeToElement( 'tabIndex', self.focusable ? 0 : -1 );
+          }
         },
         set focusable( isFocusable ) { this.setFocusable( isFocusable ); },
 

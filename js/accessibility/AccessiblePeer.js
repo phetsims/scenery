@@ -21,6 +21,12 @@ define( function( require ) {
 
   var globalId = 1;
 
+  // constants
+  var PRIMARY_SIBLING = 'PRIMARY_SIBLING';
+  var LABEL_SIBLING = 'LABEL_SIBLING';
+  var DESCRIPTION_SIBLING = 'DESCRIPTION_SIBLING';
+  var CONTAINER_PARENT = 'CONTAINER_PARENT';
+
   /**
    * Constructor.
    *
@@ -144,46 +150,96 @@ define( function( require ) {
     },
 
     /**
-     * Get an element on this node, looked up by the association flag passed in.
+     * Get an element on this node, looked up by the elementName flag passed in.
      * @public (scenery-internal)
      *
-     * @param {string} association - see AccessibilityUtil for valid associations
+     * @param {string} elementName - see AccessibilityUtil for valid associations
      * @return {HTMLElement}
      */
-    getElementByName: function( association ) {
-      if ( association === AccessiblePeer.PRIMARY_SIBLING ) {
+    getElementByName: function( elementName ) {
+      if ( elementName === AccessiblePeer.PRIMARY_SIBLING ) {
         return this.primarySibling;
       }
-      else if ( association === AccessiblePeer.LABEL_SIBLING ) {
+      else if ( elementName === AccessiblePeer.LABEL_SIBLING ) {
         return this.labelSibling;
       }
-      else if ( association === AccessiblePeer.DESCRIPTION_SIBLING ) {
+      else if ( elementName === AccessiblePeer.DESCRIPTION_SIBLING ) {
         return this.descriptionSibling;
       }
-      else if ( association === AccessiblePeer.CONTAINER_PARENT ) {
+      else if ( elementName === AccessiblePeer.CONTAINER_PARENT ) {
         return this.containerParent;
       }
 
-      assert && assert( false, 'invalid association name: ' + association );
+      assert && assert( false, 'invalid elementName name: ' + elementName );
     },
 
     /**
      * Add DOM Event listeners to the peer's primary sibling.
      * @param {Object} accessibleInput - see Accessibility.addAccessibleInputListener
      */
-    addDOMEventListeners: function( accessibleInput ){
+    addDOMEventListeners: function( accessibleInput ) {
       AccessibilityUtil.addDOMEventListeners( accessibleInput, this.primarySibling );
     },
     /**
      * Remove DOM Event listeners from the peer's primary sibling.
      * @param {Object} accessibleInput - see Accessibility.addAccessibleInputListener
      */
-    removeDOMEventListeners: function( accessibleInput ){
+    removeDOMEventListeners: function( accessibleInput ) {
       AccessibilityUtil.removeDOMEventListeners( accessibleInput, this.primarySibling );
-      },
+    },
+
+    /**
+     * Sets a attribute on one of the peer's HTMLElements.
+     * @param {string} attribute
+     * @param {*} attributeValue
+     * @param {Object} [options]
+     */
+    setAttributeToElement: function( attribute, attributeValue, options ) {
+
+      options = _.extend( {
+        // {string|null} - If non-null, will set the attribute with the specified namespace. This can be required
+        // for setting certain attributes (e.g. MathML).
+        namespace: null,
+
+        elementName: PRIMARY_SIBLING // see this.getElementName() for valid values, default to the primary sibling
+      }, options );
+
+      var element = this.getElementByName( options.elementName );
+
+      if ( options.namespace ) {
+        element.setAttributeNS( options.namespace, attribute, attributeValue );
+      }
+      else {
+        element.setAttribute( attribute, attributeValue );
+      }
+    },
+    /**
+     * Remove attribute from one of the peer's HTMLElements.
+     * @param {string} attribute
+     * @param {Object} [options]
+     */
+    removeAttributeFromElement: function( attribute, options ) {
+
+      options = _.extend( {
+        // {string|null} - If non-null, will set the attribute with the specified namespace. This can be required
+        // for setting certain attributes (e.g. MathML).
+        namespace: null,
+
+        elementName: PRIMARY_SIBLING // see this.getElementName() for valid values, default to the primary sibling
+      }, options );
+
+      var element = this.getElementByName( options.elementName );
+
+      if ( options.namespace ) {
+        element.removeAttributeNS( options.namespace, attribute );
+      }
+      else {
+        element.removeAttribute( attribute );
+      }
+    },
 
 
-  /**
+    /**
      * Removes external references from this peer, and places it in the pool.
      * @public (scenery-internal)
      */
@@ -260,10 +316,10 @@ define( function( require ) {
   }, {
 
     // @static - specifies valid associations between related AccessiblePeers in the DOM
-    PRIMARY_SIBLING: 'PRIMARY_SIBLING', // associate with all accessible content related to this peer
-    LABEL_SIBLING: 'LABEL_SIBLING', // associate with just the label content of this peer
-    DESCRIPTION_SIBLING: 'DESCRIPTION_SIBLING', // associate with just the description content of this peer
-    CONTAINER_PARENT: 'CONTAINER_PARENT' // associate with everything under the container parent of this peer
+    PRIMARY_SIBLING: PRIMARY_SIBLING, // associate with all accessible content related to this peer
+    LABEL_SIBLING: LABEL_SIBLING, // associate with just the label content of this peer
+    DESCRIPTION_SIBLING: DESCRIPTION_SIBLING, // associate with just the description content of this peer
+    CONTAINER_PARENT: CONTAINER_PARENT // associate with everything under the container parent of this peer
   } );
 
   // Set up pooling
