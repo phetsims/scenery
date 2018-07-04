@@ -547,7 +547,7 @@ define( function( require ) {
       assert.ok( nodePrimaryElement.getAttribute( attribute ).indexOf( nodeLabelElement.id ) >= 0, attribute + ' your own label element.' );
       assert.ok( nodeParent.getAttribute( attribute ).indexOf( nodeDescriptionElement.id ) >= 0, 'parent ' + attribute + ' your own description.' );
 
-      assert.ok( nodeParent.getAttribute( attribute ).indexOf( nodeLabelElement.id ) >= 0, 'parent ' + attribute + ' your own description.' );
+      assert.ok( nodeParent.getAttribute( attribute ).indexOf( nodeLabelElement.id ) >= 0, 'parent ' + attribute + ' your own label.' );
 
     };
 
@@ -559,7 +559,7 @@ define( function( require ) {
       otherElementName: AccessiblePeer.LABEL_SIBLING
     } );
     rootNode.addChild( k );
-    var testK = function(){
+    var testK = function() {
       var kValue = k._accessibleInstances[ 0 ].peer.primarySibling.getAttribute( attribute ).trim();
       var jID = j._accessibleInstances[ 0 ].peer.labelSibling.getAttribute( 'id' ).trim();
       assert.ok( jID === kValue, 'k pointing to j' );
@@ -602,14 +602,88 @@ define( function( require ) {
     testK();
   }
 
+  function testAriaLabelledOrDescribedBySetters( assert, attribute ) {
+
+
+    var rootNode = new Node();
+    var display = new Display( rootNode ); // eslint-disable-line
+    document.body.appendChild( display.domElement );
+
+
+    // use a different setter depending on if testing labelledby or describedby
+    var associationsArrayName = attribute === 'aria-labelledby' ? 'ariaLabelledbyAssociations' :
+                                attribute === 'aria-describedby' ? 'ariaDescribedbyAssociations' : null;
+
+    // use a different setter depending on if testing labelledby or describedby
+    var associationRemovalFunction = attribute === 'aria-labelledby' ? 'removeAriaLabelledbyAssociation' :
+                                     attribute === 'aria-describedby' ? 'removeAriaDescribedbyAssociation' : null;
+
+
+    var options = {
+      tagName: 'p',
+      labelContent: 'hi',
+      descriptionContent: 'hello',
+      containerTagName: 'div'
+    };
+    var n = new Node( options );
+    rootNode.addChild( n );
+    options[ associationsArrayName ] = [
+      {
+        otherNode: n,
+        thisElementName: AccessiblePeer.PRIMARY_SIBLING,
+        otherElementName: AccessiblePeer.LABEL_SIBLING
+      }
+    ];
+    var o = new Node( options );
+    rootNode.addChild( o );
+
+    var nElement = getPrimarySiblingElementByNode( n );
+    var oElement = getPrimarySiblingElementByNode( o );
+    assert.ok( oElement.getAttribute( attribute ).indexOf( nElement.id ) >= 0, attribute + ' for two nodes with setter.' );
+
+
+    // make a list of associations to test as a setter
+    var randomAssociationObject = {
+      otherNode: new Node(),
+      thisElementName: AccessiblePeer.CONTAINER_PARENT,
+      otherElementName: AccessiblePeer.LABEL_SIBLING
+    };
+    options[ associationsArrayName ] = [
+      {
+        otherNode: new Node(),
+        thisElementName: AccessiblePeer.CONTAINER_PARENT,
+        otherElementName: AccessiblePeer.DESCRIPTION_SIBLING
+      },
+      randomAssociationObject,
+      {
+        otherNode: new Node(),
+        thisElementName: AccessiblePeer.PRIMARY_SIBLING,
+        otherElementName: AccessiblePeer.LABEL_SIBLING
+      }
+    ];
+
+    // test getters and setters
+    var m = new Node( options );
+    rootNode.addChild( m );
+    assert.ok( _.isEqual( m[ associationsArrayName ], options[ associationsArrayName ] ), 'test association object getter' );
+    m[ associationRemovalFunction ]( randomAssociationObject );
+    options[ associationsArrayName ].splice( options[ associationsArrayName ].indexOf( randomAssociationObject ), 1 );
+    assert.ok( _.isEqual( m[ associationsArrayName ], options[ associationsArrayName ] ), 'test association object getter after removal' );
+
+    m[ associationsArrayName ] = [];
+    assert.ok( getPrimarySiblingElementByNode( m ).getAttribute( attribute ) === null, 'clear with setter' );
+  }
+
   QUnit.test( 'aria-labelledby', function( assert ) {
 
     testAriaLabelledOrDescribedBy( assert, 'aria-labelledby' );
+    testAriaLabelledOrDescribedBySetters( assert, 'aria-labelledby' );
 
   } );
   QUnit.test( 'aria-describedby', function( assert ) {
 
     testAriaLabelledOrDescribedBy( assert, 'aria-describedby' );
+    testAriaLabelledOrDescribedBySetters( assert, 'aria-describedby' );
 
   } );
 

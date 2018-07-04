@@ -126,6 +126,7 @@ define( function( require ) {
   var AccessibilityTree = require( 'SCENERY/accessibility/AccessibilityTree' );
   var AccessibilityUtil = require( 'SCENERY/accessibility/AccessibilityUtil' );
   var AccessibleDisplaysInfo = require( 'SCENERY/accessibility/AccessibleDisplaysInfo' );
+  var arrayDifference = require( 'PHET_CORE/arrayDifference' );
   var Emitter = require( 'AXON/Emitter' );
   var extend = require( 'PHET_CORE/extend' );
   var invalidateAccessibleContent = require( 'SCENERY/accessibility/invalidateAccessibleContent' );
@@ -185,7 +186,10 @@ define( function( require ) {
     'accessibleContentDisplayed', // Sets whether or not the accessible content of the node (and its subtree) is displayed, see setAccessibleContentDisplayed()
     'focusable', // Sets whether or not the node can receive keyboard focus, see setFocusable()
     'accessibleOrder', // Modifies the order of accessible  navigation, see setAccessibleOrder()
-    'accessibleContent' // Sets up accessibility handling (probably don't need to use this), see setAccessibleContent()
+    'accessibleContent', // Sets up accessibility handling (probably don't need to use this), see setAccessibleContent()
+
+    'ariaLabelledbyAssociations', // sets the list of aria-labelledby associations between from this node to others (including itself), see setAriaLabelledbyAssociations
+    'ariaDescribedbyAssociations' // sets the list of aria-describedby associations between from this node to others (including itself), see setAriaDescribedbyAssociations
   ];
 
   var Accessibility = {
@@ -309,7 +313,7 @@ define( function( require ) {
           // nodes to update their aria-labelledby associations when this Node rebuilds its accessible content.
           // @public (scenery-internal) - only used by Accessibility.js and invalidateAccessibleContent.js
           // {Array.<Node>}
-          this._nodesThatAreAriaLabelledByThisNode = [];
+          this._nodesThatAreAriaLabelledbyThisNode = [];
 
           // @private {Array.<Object>} - Keep track of what this Node is aria-descripbedby via "associationObjects"
           // see addAriaDescribedbyAssociation for why we support more than one association.
@@ -320,7 +324,7 @@ define( function( require ) {
           // nodes to update their aria-describedby associations when this Node rebuilds its accessible content.
           // @public (scenery-internal) - only used by Accessibility.js and invalidateAccessibleContent.js
           // {Array.<Node>}
-          this._nodesThatAreAriaDescribedByThisNode = [];
+          this._nodesThatAreAriaDescribedbyThisNode = [];
 
           // @private {?boolean} - whether or not this node's DOM element has been explicitly set to receive focus from
           // tab navigation. Sets the tabIndex attribute on the node's DOM element. Setting to false will not remove the
@@ -1295,6 +1299,65 @@ define( function( require ) {
 
 
         /**
+         * Very similar algorithm to setChildren in Node.js
+         * @public
+         * @param {Array.<Object>} ariaLabelledbyAssociations - list of associationObjects, see this._ariaLabelledbyAssociations.
+         */
+        setAriaLabelledbyAssociations: function( ariaLabelledbyAssociations ) {
+          var associationObject;
+          var i;
+
+          // validation if assert is enabled
+          if ( assert ) {
+            for ( i = 0; i < ariaLabelledbyAssociations.length; i++ ) {
+              associationObject = ariaLabelledbyAssociations[ i ];
+              assert && AccessibilityUtil.validateAssociationObject( associationObject );
+            }
+          }
+
+          // if the list isn't the same, TODO: make order in the list not matter
+          if ( !_.isEqual( ariaLabelledbyAssociations, this._ariaLabelledbyAssociations ) ) {
+
+
+            var beforeOnly = []; // Will hold all nodes that will be removed.
+            var afterOnly = []; // Will hold all nodes that will be "new" children (added)
+            var inBoth = []; // Child nodes that "stay". Will be ordered for the "after" case.
+
+            // get a difference of the desired new list, and the old
+            arrayDifference( ariaLabelledbyAssociations, this._ariaLabelledbyAssociations, afterOnly, beforeOnly, inBoth );
+
+
+            // remove each current associationObject that isn't in the new list
+            for ( i = 0; i < beforeOnly.length; i++ ) {
+              associationObject = beforeOnly[ i ];
+              this.removeAriaLabelledbyAssociation( associationObject );
+            }
+
+            assert && assert( this._ariaLabelledbyAssociations.length === inBoth.length,
+              'Removing associations should not have triggered other association changes' );
+
+
+            // add each association from the new list that hasn't been added yet
+            for ( i = 0; i < afterOnly.length; i++ ) {
+              var ariaLabelledbyAssociation = ariaLabelledbyAssociations[ i ];
+              this.addAriaLabelledbyAssociation( ariaLabelledbyAssociation );
+            }
+
+            // TODO maybe reorder them, but right now order doesn't seem to matter
+          }
+        },
+        set ariaLabelledbyAssociations( ariaLabelledbyAssociations ) { return this.setAriaLabelledbyAssociations( ariaLabelledbyAssociations ); },
+
+        /**
+         * @public
+         * @returns {Array.<Object>} - the list of current association objects
+         */
+        getAriaLabelledbyAssociations: function() {
+          return this._ariaLabelledbyAssociations;
+        },
+        get ariaLabelledbyAssociations() { return this.getAriaLabelledbyAssociations(); },
+
+        /**
          * Add an aria-labelledby association to this node. The data in the associationObject will be implemented like
          * "a peer's HTMLElement of this Node (specified with the string constant stored in `thisElementName`) will have an
          * aria-labelledby attribute with a value that includes the `otherNode`'s peer HTMLElement's id (specified with
@@ -1314,12 +1377,93 @@ define( function( require ) {
 
           // Flag that this node is is being labelled by the other node, so that if the other node changes it can tell
           // this node to restore the association appropriately, see invalidateAccessibleContent for implementation.
-          associationObject.otherNode._nodesThatAreAriaLabelledByThisNode.push( this );
+          associationObject.otherNode._nodesThatAreAriaLabelledbyThisNode.push( this );
 
           // update the accessiblePeers with this aria-labelledby association
           this.addAssociationImplementationForAttribute( 'aria-labelledby', associationObject );
         },
 
+        /**
+         * Remove an aria-labelledby association object, see addAriaLabelledbyAssociation for more details
+         * @public
+         */
+        removeAriaLabelledbyAssociation: function( associationObject ) {
+          assert && assert( _.includes( this._ariaLabelledbyAssociations, associationObject ) );
+
+          // remove the
+          var removedObject = this._ariaLabelledbyAssociations.splice( _.indexOf( this._ariaLabelledbyAssociations, associationObject ), 1 );
+
+          // remove the reference from the other node back to this node because we don't need it anymore
+          removedObject[ 0 ].otherNode.removeNodeThatIsAriaLabelledByThisNode( this );
+        },
+
+        /**
+         * Remove the reference to the node that is using this Node's ID as an aria-labelledby value
+         * @param {Node} node
+         * @public (scenery-internal)
+         */
+        removeNodeThatIsAriaLabelledByThisNode: function( node ) {
+          assert && phet && phet.scenery && assert( node instanceof phet.scenery.Node );
+          var indexOfNode = _.indexOf( this._nodesThatAreAriaLabelledbyThisNode, node );
+          assert && assert( indexOfNode >= 0 );
+          this._nodesThatAreAriaLabelledbyThisNode.splice( indexOfNode, 1 );
+        },
+
+        /**
+         * @public
+         * @param {Array.<Object>} ariaDescribedbyAssociations - list of associationObjects, see this._ariaDescribedbyAssociations.
+         */
+        setAriaDescribedbyAssociations: function( ariaDescribedbyAssociations ) {
+          var associationObject;
+          if ( assert ) {
+            for ( var j = 0; j < ariaDescribedbyAssociations.length; j++ ) {
+              associationObject = ariaDescribedbyAssociations[ j ];
+              assert && AccessibilityUtil.validateAssociationObject( associationObject );
+            }
+          }
+
+          // if the list isn't the same, TODO: make order in the list not matter
+          if ( !_.isEqual( ariaDescribedbyAssociations, this._ariaDescribedbyAssociations ) ) {
+
+
+            var beforeOnly = []; // Will hold all nodes that will be removed.
+            var afterOnly = []; // Will hold all nodes that will be "new" children (added)
+            var inBoth = []; // Child nodes that "stay". Will be ordered for the "after" case.
+            var i;
+
+            // get a difference of the desired new list, and the old
+            arrayDifference( ariaDescribedbyAssociations, this._ariaDescribedbyAssociations, afterOnly, beforeOnly, inBoth );
+
+
+            // remove each current associationObject that isn't in the new list
+            for ( i = 0; i < beforeOnly.length; i++ ) {
+              associationObject = beforeOnly[ i ];
+              this.removeAriaDescribedbyAssociation( associationObject );
+            }
+
+            assert && assert( this._ariaDescribedbyAssociations.length === inBoth.length,
+              'Removing associations should not have triggered other association changes' );
+
+
+            // add each association from the new list that hasn't been added yet
+            for ( i = 0; i < afterOnly.length; i++ ) {
+              var ariaDescribedbyAssociation = ariaDescribedbyAssociations[ i ];
+              this.addAriaDescribedbyAssociation( ariaDescribedbyAssociation );
+            }
+
+            // TODO maybe reorder them, but right now order doesn't seem to matter
+          }
+        },
+        set ariaDescribedbyAssociations( ariaDescribedbyAssociations ) { return this.setAriaDescribedbyAssociations( ariaDescribedbyAssociations ); },
+
+        /**
+         * @public
+         * @returns {Array.<Object>} - the list of current association objects
+         */
+        getAriaDescribedbyAssociations: function() {
+          return this._ariaDescribedbyAssociations;
+        },
+        get ariaDescribedbyAssociations() { return this.getAriaDescribedbyAssociations(); },
 
         /**
          * Add an aria-describedby association to this node. The data in the associationObject will be implemented like
@@ -1341,11 +1485,38 @@ define( function( require ) {
 
           // Flag that this node is is being described by the other node, so that if the other node changes it can tell
           // this node to restore the association appropriately, see invalidateAccessibleContent for implementation.
-          associationObject.otherNode._nodesThatAreAriaDescribedByThisNode.push( this );
-
+          associationObject.otherNode._nodesThatAreAriaDescribedbyThisNode.push( this );
 
           // update the accessiblePeers with this aria-describedby association
           this.addAssociationImplementationForAttribute( 'aria-describedby', associationObject );
+        },
+
+
+        /**
+         * Remove an aria-describedby association object, see addAriaDescribedbyAssociation for more details
+         * @public
+         */
+        removeAriaDescribedbyAssociation: function( associationObject ) {
+          assert && assert( _.includes( this._ariaDescribedbyAssociations, associationObject ) );
+
+          // remove the
+          var removedObject = this._ariaDescribedbyAssociations.splice( _.indexOf( this._ariaDescribedbyAssociations, associationObject ), 1 );
+
+          // remove the reference from the other node back to this node because we don't need it anymore
+          removedObject[ 0 ].otherNode.removeNodeThatIsAriaDescribedByThisNode( this );
+        },
+
+        /**
+         * Remove the reference to the node that is using this Node's ID as an aria-describedby value
+         * @param {Node} node
+         * @public (scenery-internal)
+         */
+        removeNodeThatIsAriaDescribedByThisNode: function( node ) {
+          assert && phet && phet.scenery && assert( node instanceof phet.scenery.Node );
+          var indexOfNode = _.indexOf( this._nodesThatAreAriaDescribedbyThisNode, node );
+          assert && assert( indexOfNode >= 0 );
+          this._nodesThatAreAriaDescribedbyThisNode.splice( indexOfNode, 1 );
+
         },
 
         /**
@@ -1414,6 +1585,11 @@ define( function( require ) {
               var otherPeerElement = firstAccessibleInstance.peer.getElementByName( associationObject.otherElementName );
               var thisPeerElement = peer.getElementByName( associationObject.thisElementName );
 
+              // no op if things aren't created yet. TODO: I wish I could assert here, but we need to maintain any option order
+              if ( !otherPeerElement || !thisPeerElement ) {
+                return;
+              }
+
               // only update associations if the requested peer element has been created
               // NOTE: in the future, we would like to verify that the association exists but can't do that yet because
               // we have to support cases where we set label association prior to setting the sibling/parent tagName
@@ -1429,6 +1605,40 @@ define( function( require ) {
         },
 
         /**
+         * Update the associations for aria-labelledby
+         * @private
+         */
+        updateAriaLabelledbyAssociations: function() {
+          // restore this nodes aria-labelledby associations
+          var ariaLabelledbyAtrributeName = 'aria-labelledby';
+          this.updateAssociationsForAttribute( ariaLabelledbyAtrributeName );
+
+          // if any other nodes are aria-labelledby this Node, update those associations too. Since this node's
+          // accessible content needs to be recreated, they need to update their aria-labelledby associations accordingly.
+          for ( var i = 0; i < this._nodesThatAreAriaLabelledbyThisNode.length; i++ ) {
+            this._nodesThatAreAriaLabelledbyThisNode[ i ].updateAssociationsForAttribute( ariaLabelledbyAtrributeName );
+          }
+        },
+
+        /**
+         *
+         * Update the associations for aria-describedby
+         * @private
+         */
+        updateAriaDescribedbyAssociations: function() {
+
+          // restore this nodes aria-describedby associations
+          var ariaDescribedbyAttributeName = 'aria-describedby';
+          this.updateAssociationsForAttribute( ariaDescribedbyAttributeName );
+
+          // if any other nodes are aria-describedby this Node, update those associations too. Since this node's
+          // accessible content needs to be recreated, they need to update their aria-describedby associations accordingly.
+          for ( var i = 0; i < this._nodesThatAreAriaDescribedbyThisNode.length; i++ ) {
+            this._nodesThatAreAriaDescribedbyThisNode[ i ].updateAssociationsForAttribute( ariaDescribedbyAttributeName );
+          }
+        },
+
+        /**
          * Update the associations for aria-labelledby and aria-describedby. This needs to be done when we re-create
          * the accessible content (invalidateAccessibleContent), but also when we remove a Node from the scene graph
          * because we need to make sure that when the Node's accessible content is no longer in the PDOM, other Nodes
@@ -1438,26 +1648,8 @@ define( function( require ) {
          */
         updateLabelledbyDescribebyAssociations: function() {
 
-          // restore this nodes aria-labelledby associations
-          var ariaLabelledbyAtrributeName = 'aria-labelledby';
-          this.updateAssociationsForAttribute( ariaLabelledbyAtrributeName );
-
-          // if any other nodes are aria-labelledby this Node, update those associations too. Since this node's
-          // accessible content needs to be recreated, they need to update their aria-labelledby associations accordingly.
-          var i;
-          for ( i = 0; i < this._nodesThatAreAriaLabelledByThisNode.length; i++ ) {
-            this._nodesThatAreAriaLabelledByThisNode[ i ].updateAssociationsForAttribute( ariaLabelledbyAtrributeName );
-          }
-
-          // restore this nodes aria-describedby associations
-          var ariaDescribedbyAttributeName = 'aria-describedby';
-          this.updateAssociationsForAttribute( ariaDescribedbyAttributeName );
-
-          // if any other nodes are aria-describedby this Node, update those associations too. Since this node's
-          // accessible content needs to be recreated, they need to update their aria-describedby associations accordingly.
-          for ( i = 0; i < this._nodesThatAreAriaDescribedByThisNode.length; i++ ) {
-            this._nodesThatAreAriaDescribedByThisNode[ i ].updateAssociationsForAttribute( ariaDescribedbyAttributeName );
-          }
+          this.updateAriaLabelledbyAssociations();
+          this.updateAriaDescribedbyAssociations();
         },
 
         /**
