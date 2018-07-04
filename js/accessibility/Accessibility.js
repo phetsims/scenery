@@ -1543,15 +1543,13 @@ define( function( require ) {
 
           // clear the current aria-labelledby attribute and recreate it from stored associations
           // TODO: make this more efficient
-          this.updateAccessiblePeers( function( peer ) {
-            peer.primarySibling && peer.primarySibling.removeAttribute( attribute );
-            peer.labelSibling && peer.labelSibling.removeAttribute( attribute );
-            peer.descriptionSibling && peer.descriptionSibling.removeAttribute( attribute );
-            peer.containerParent && peer.containerParent.removeAttribute( attribute );
-          } );
+          for ( var i = 0; i < this._accessibleInstances.length; i++ ) {
+            var peer = this._accessibleInstances[ i ].peer;
+            peer && peer.removeAttributeFromAllElements( attribute );
+          }
 
-          for ( var i = 0; i < associationList.length; i++ ) {
-            var associationObject = associationList[ i ];
+          for ( var j = 0; j < associationList.length; j++ ) {
+            var associationObject = associationList[ j ];
 
             this.addAssociationImplementationForAttribute( attribute, associationObject );
           }
@@ -1564,44 +1562,36 @@ define( function( require ) {
          * Update accessible peers with this specific attribute association object reference.
          *
          * @param {string} attribute - "aria-labelledby"|"aria-describedby"
-         * @param {Object} associationObject - see addAriaLabelledbyAssociation or describedby doc
+         * @param {Object} associationObject - see addAriaLabelledbyAssociation() doc
          * @private
          */
         addAssociationImplementationForAttribute: function( attribute, associationObject ) {
           assert && assert( attribute === 'aria-describedby' || attribute === 'aria-labelledby', 'unsupported attribute name: ' + attribute );
-          this.updateAccessiblePeers( function( peer ) {
 
-            var otherNodeAccessibleInstances = associationObject.otherNode.getAccessibleInstances();
 
-            // if the other node hasn't been added to the scene graph yet, it won't have any accessible instances, so no op.
-            // This will be recalculated when that node is added to the scene graph
-            if ( otherNodeAccessibleInstances.length > 0 ) {
+          var otherNodeAccessibleInstances = associationObject.otherNode.getAccessibleInstances();
 
-              // We are just using the first AccessibleInstance for simplicity, but it is OK because the accessible
-              // content for all AccessibleInstances will be the same, so the Accessible Names (in the browser's
-              // accessibility tree) of elements that are referenced by the attribute value id will all have the same content
-              var firstAccessibleInstance = otherNodeAccessibleInstances[ 0 ];
+          // if the other node hasn't been added to the scene graph yet, it won't have any accessible instances, so no op.
+          // This will be recalculated when that node is added to the scene graph
+          if ( otherNodeAccessibleInstances.length > 0 ) {
 
-              var otherPeerElement = firstAccessibleInstance.peer.getElementByName( associationObject.otherElementName );
-              var thisPeerElement = peer.getElementByName( associationObject.thisElementName );
+            // We are just using the first AccessibleInstance for simplicity, but it is OK because the accessible
+            // content for all AccessibleInstances will be the same, so the Accessible Names (in the browser's
+            // accessibility tree) of elements that are referenced by the attribute value id will all have the same content
+            var firstAccessibleInstance = otherNodeAccessibleInstances[ 0 ];
 
-              // no op if things aren't created yet. TODO: I wish I could assert here, but we need to maintain any option order
-              if ( !otherPeerElement || !thisPeerElement ) {
-                return;
-              }
+            // we can use the same element's id to update all of this Node's peers
+            var otherPeerElement = firstAccessibleInstance.peer.getElementByName( associationObject.otherElementName );
 
-              // only update associations if the requested peer element has been created
-              // NOTE: in the future, we would like to verify that the association exists but can't do that yet because
-              // we have to support cases where we set label association prior to setting the sibling/parent tagName
-              if ( thisPeerElement && otherPeerElement ) {
-                var previousAttributeValue = thisPeerElement.getAttribute( attribute ) || '';
-                assert && assert( typeof previousAttributeValue === 'string' );
+            // be flexible enough if the other Node has not been created yet.
+            if ( otherPeerElement ) {
+              for ( var i = 0; i < this._accessibleInstances.length; i++ ) {
+                var peer = this._accessibleInstances[ i ].peer;
 
-                // add the id from the new association to the value of the HTMLElement's attribute.
-                thisPeerElement.setAttribute( attribute, [ previousAttributeValue.trim(), otherPeerElement.id ].join( ' ' ) );
+                peer && peer.setAssociationAttribute( attribute, associationObject, otherPeerElement.id );
               }
             }
-          } );
+          }
         },
 
         /**
@@ -2325,19 +2315,6 @@ define( function( require ) {
           var index = _.indexOf( this._accessibleInstances, accessibleInstance );
           assert && assert( index !== -1, 'Cannot remove an AccessibleInstance from a Node if it was not there' );
           this._accessibleInstances.splice( index, 1 );
-        },
-
-        /**
-         * Update all AccessiblePeers representing this node with the callback, which takes the AccessiblePeer
-         * as an argument.
-         * @private
-         *
-         * @param {function} callback
-         */
-        updateAccessiblePeers: function( callback ) {
-          for ( var i = 0; i < this._accessibleInstances.length; i++ ) {
-            this._accessibleInstances[ i ].peer && callback( this._accessibleInstances[ i ].peer );
-          }
         }
       } );
 

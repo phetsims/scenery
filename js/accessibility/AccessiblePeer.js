@@ -239,6 +239,50 @@ define( function( require ) {
       }
     },
 
+    /**
+     * Remove the given attribute from all peer elements
+     * @param {string} attribute
+     */
+    removeAttributeFromAllElements: function( attribute ) {
+      assert && assert( typeof attribute === 'string' );
+      this.primarySibling && this.primarySibling.removeAttribute( attribute );
+      this.labelSibling && this.labelSibling.removeAttribute( attribute );
+      this.descriptionSibling && this.descriptionSibling.removeAttribute( attribute );
+      this.containerParent && this.containerParent.removeAttribute( attribute );
+    },
+
+    /**
+     * Set either association attribute (aria-labelledby/describedby) on one of this peer's Elements
+     * @param {string} attribute - either aria-labelledby or aria-describedby
+     * @param {Object} associationObject - see addAriaLabelledbyAssociation() for schema
+     * @param {string} otherElementId - the id to be added to this peer element's attribute
+     */
+    setAssociationAttribute: function( attribute, associationObject, otherElementId ) {
+      assert && assert( attribute === 'aria-labelledby' || attribute === 'aria-describedby',
+        'unsupported attribute for setting with association object' );
+      assert && assert( typeof otherElementId === 'string' );
+      assert && AccessibilityUtil.validateAssociationObject( associationObject );
+
+      var element = this.getElementByName( associationObject.thisElementName );
+
+      // to support any option order, no-op if the peer element has not been created yet.
+      if ( element ) {
+
+        // only update associations if the requested peer element has been created
+        // NOTE: in the future, we would like to verify that the association exists but can't do that yet because
+        // we have to support cases where we set label association prior to setting the sibling/parent tagName
+        var previousAttributeValue = element.getAttribute( attribute ) || '';
+        assert && assert( typeof previousAttributeValue === 'string' );
+
+        var newAttributeValue = [ previousAttributeValue.trim(), otherElementId ].join( ' ' ).trim();
+
+        // add the id from the new association to the value of the HTMLElement's attribute.
+        this.setAttributeToElement( attribute, newAttributeValue, {
+          elementName: associationObject.thisElementName
+        } );
+      }
+    },
+
 
     /**
      * Removes external references from this peer, and places it in the pool.

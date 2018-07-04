@@ -47,12 +47,15 @@ define( function( require ) {
 
     // for each accessible peer, clear the container parent if it exists since we will be reinserting labels and
     // the dom element in createPeer
-    this.updateAccessiblePeers( function( accessiblePeer ) {
-      var containerElement = accessiblePeer.containerParent;
-      while ( containerElement && containerElement.hasChildNodes() ) {
-        containerElement.removeChild( containerElement.lastChild );
+    for ( var j = 0; j < this._accessibleInstances.length; j++ ) {
+      var peer = this._accessibleInstances[ j ].peer;
+      if ( peer ) {
+        var containerElement = peer.containerParent;
+        while ( containerElement && containerElement.hasChildNodes() ) {
+          containerElement.removeChild( containerElement.lastChild );
+        }
       }
-    } );
+    }
 
     // if any parents are flagged as removed from the accessibility tree, set content to null
     var contentDisplayed = this._accessibleContentDisplayed;
