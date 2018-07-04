@@ -298,11 +298,11 @@ define( function( require ) {
      * In general, textContent is more secure and more performant because it doesn't trigger DOM styling and
      * element insertions.
      *
-     * @param {HTMLElement} domElement
+     * @param {Element} domElement
      * @param {string} textContent - could have acceptable HTML "formatting" tags in it
      */
     setTextContent: function( domElement, textContent ) {
-      assert && assert( domElement instanceof HTMLElement );
+      assert && assert( domElement instanceof Element ); // parent to HTMLElement, to support other namespaces
       assert && assert( typeof textContent === 'string' );
       if ( tagNameSupportsContent( domElement.tagName ) ) {
 
