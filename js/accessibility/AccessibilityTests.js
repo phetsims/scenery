@@ -409,7 +409,7 @@ define( function( require ) {
     bElement = getPrimarySiblingElementByNode( b );
     var cElement = getPrimarySiblingElementByNode( c );
     var expectedValue = [ bElement.id, cElement.id ].join( ' ' );
-    assert.ok( aElement.getAttribute( attribute ).trim() === expectedValue, attribute + ' two nodes' );
+    assert.ok( aElement.getAttribute( attribute ) === expectedValue, attribute + ' two nodes' );
 
     // Make c invalidate
     rootNode.removeChild( c );
@@ -420,8 +420,8 @@ define( function( require ) {
     aElement = getPrimarySiblingElementByNode( a );
     cElement = getPrimarySiblingElementByNode( c );
 
-    assert.ok( aElement.getAttribute( attribute ).trim() !== oldValue, 'should have invalidated on tree change' );
-    assert.ok( aElement.getAttribute( attribute ).trim() === [ bElement.id, cElement.id ].join( ' ' ),
+    assert.ok( aElement.getAttribute( attribute ) !== oldValue, 'should have invalidated on tree change' );
+    assert.ok( aElement.getAttribute( attribute ) === [ bElement.id, cElement.id ].join( ' ' ),
       'should have invalidated on tree change' );
 
     var d = new Node( { tagName: 'div', descriptionTagName: 'p', innerContent: TEST_LABEL } );
@@ -436,8 +436,8 @@ define( function( require ) {
 
     var bParentContainer = getPrimarySiblingElementByNode( b ).parentElement;
     var dDescriptionElement = getPrimarySiblingElementByNode( d ).parentElement.childNodes[ 0 ];
-    assert.ok( bParentContainer.getAttribute( attribute ).trim() !== oldValue, 'should have invalidated on tree change' );
-    assert.ok( bParentContainer.getAttribute( attribute ).trim() === dDescriptionElement.id,
+    assert.ok( bParentContainer.getAttribute( attribute ) !== oldValue, 'should have invalidated on tree change' );
+    assert.ok( bParentContainer.getAttribute( attribute ) === dDescriptionElement.id,
       'b parent container element is ' + attribute + ' d description sibling' );
 
 
@@ -481,9 +481,9 @@ define( function( require ) {
     var fElement = getPrimarySiblingElementByNode( f );
     var gElement = getPrimarySiblingElementByNode( g );
     var hElement = getPrimarySiblingElementByNode( h );
-    assert.ok( eElement.getAttribute( attribute ).trim() === fElement.id, 'eElement should be ' + attribute + ' fElement' );
-    assert.ok( fElement.getAttribute( attribute ).trim() === gElement.id, 'fElement should be ' + attribute + ' gElement' );
-    assert.ok( gElement.getAttribute( attribute ).trim() === hElement.id, 'gElement should be ' + attribute + ' hElement' );
+    assert.ok( eElement.getAttribute( attribute ) === fElement.id, 'eElement should be ' + attribute + ' fElement' );
+    assert.ok( fElement.getAttribute( attribute ) === gElement.id, 'fElement should be ' + attribute + ' gElement' );
+    assert.ok( gElement.getAttribute( attribute ) === hElement.id, 'gElement should be ' + attribute + ' hElement' );
 
     // re-arrange the scene graph and make sure that the attribute ids remain up to date
     //    e
@@ -504,9 +504,9 @@ define( function( require ) {
     fElement = getPrimarySiblingElementByNode( f );
     gElement = getPrimarySiblingElementByNode( g );
     hElement = getPrimarySiblingElementByNode( h );
-    assert.ok( eElement.getAttribute( attribute ).trim() === fElement.id, 'eElement should still be ' + attribute + ' fElement' );
-    assert.ok( fElement.getAttribute( attribute ).trim() === gElement.id, 'fElement should still be ' + attribute + ' gElement' );
-    assert.ok( gElement.getAttribute( attribute ).trim() === hElement.id, 'gElement should still be ' + attribute + ' hElement' );
+    assert.ok( eElement.getAttribute( attribute ) === fElement.id, 'eElement should still be ' + attribute + ' fElement' );
+    assert.ok( fElement.getAttribute( attribute ) === gElement.id, 'fElement should still be ' + attribute + ' gElement' );
+    assert.ok( gElement.getAttribute( attribute ) === hElement.id, 'gElement should still be ' + attribute + ' hElement' );
 
     // test aria labelled by your self, but a different peer Element, multiple attribute ids included in the test.
     var containerTagName = 'div';
@@ -560,8 +560,8 @@ define( function( require ) {
     } );
     rootNode.addChild( k );
     var testK = function() {
-      var kValue = k._accessibleInstances[ 0 ].peer.primarySibling.getAttribute( attribute ).trim();
-      var jID = j._accessibleInstances[ 0 ].peer.labelSibling.getAttribute( 'id' ).trim();
+      var kValue = k._accessibleInstances[ 0 ].peer.primarySibling.getAttribute( attribute );
+      var jID = j._accessibleInstances[ 0 ].peer.labelSibling.getAttribute( 'id' );
       assert.ok( jID === kValue, 'k pointing to j' );
     };
 
