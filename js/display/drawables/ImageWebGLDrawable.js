@@ -11,9 +11,9 @@ define( function( require ) {
 
   var ImageStatefulDrawable = require( 'SCENERY/display/drawables/ImageStatefulDrawable' );
   var inherit = require( 'PHET_CORE/inherit' );
+  var Poolable = require( 'PHET_CORE/Poolable' );
   var Renderer = require( 'SCENERY/display/Renderer' );
   var scenery = require( 'SCENERY/scenery' );
-  var SelfDrawable = require( 'SCENERY/display/SelfDrawable' );
   var Vector2 = require( 'DOT/Vector2' );
   var WebGLSelfDrawable = require( 'SCENERY/display/WebGLSelfDrawable' );
 
@@ -43,7 +43,25 @@ define( function( require ) {
    * @param {Instance} instance
    */
   function ImageWebGLDrawable( renderer, instance ) {
-    this.initialize( renderer, instance );
+    this.initializeWebGLSelfDrawable( renderer, instance );
+
+    if ( !this.vertexArray ) {
+      // for 6 vertices
+      this.vertexArray = new Float32Array( WEBGL_COMPONENTS * 6 ); // 5-length components for 6 vertices (2 tris).
+    }
+
+    // corner vertices in the relative transform root coordinate space
+    this.upperLeft = new Vector2();
+    this.lowerLeft = new Vector2();
+    this.upperRight = new Vector2();
+    this.lowerRight = new Vector2();
+
+    this.xyDirty = true; // is our vertex position information out of date?
+    this.uvDirty = true; // is our UV information out of date?
+    this.updatedOnce = false;
+
+    // {SpriteSheet.Sprite} exported for WebGLBlock's rendering loop
+    this.sprite = null;
   }
 
   scenery.register( 'ImageWebGLDrawable', ImageWebGLDrawable );
@@ -51,43 +69,6 @@ define( function( require ) {
   inherit( WebGLSelfDrawable, ImageWebGLDrawable, {
     // TODO: doc
     webglRenderer: Renderer.webglTexturedTriangles,
-
-    /**
-     * Initializes this drawable, starting its "lifetime" until it is disposed. This lifecycle can happen multiple
-     * times, with instances generally created by the SelfDrawable.Poolable trait (dirtyFromPool/createFromPool), and
-     * disposal will return this drawable to the pool.
-     * @public (scenery-internal)
-     *
-     * This acts as a pseudo-constructor that can be called multiple times, and effectively creates/resets the state
-     * of the drawable to the initial state.
-     *
-     * @param {number} renderer - Renderer bitmask, see Renderer's documentation for more details.
-     * @param {Instance} instance
-     * @returns {ImageWebGLDrawable} - Self reference for chaining
-     */
-    initialize: function( renderer, instance ) {
-      this.initializeWebGLSelfDrawable( renderer, instance );
-
-      if ( !this.vertexArray ) {
-        // for 6 vertices
-        this.vertexArray = new Float32Array( WEBGL_COMPONENTS * 6 ); // 5-length components for 6 vertices (2 tris).
-      }
-
-      // corner vertices in the relative transform root coordinate space
-      this.upperLeft = new Vector2();
-      this.lowerLeft = new Vector2();
-      this.upperRight = new Vector2();
-      this.lowerRight = new Vector2();
-
-      this.xyDirty = true; // is our vertex position information out of date?
-      this.uvDirty = true; // is our UV information out of date?
-      this.updatedOnce = false;
-
-      // {SpriteSheet.Sprite} exported for WebGLBlock's rendering loop
-      this.sprite = null;
-
-      return this;
-    },
 
     onAddToBlock: function( webglBlock ) {
       this.webglBlock = webglBlock; // TODO: do we need this reference?
@@ -243,9 +224,8 @@ define( function( require ) {
     }
   } );
   ImageStatefulDrawable.mixInto( ImageWebGLDrawable );
-  // This sets up ImageWebGLDrawable.createFromPool/dirtyFromPool and drawable.freeToPool() for the type, so
-  // that we can avoid allocations by reusing previously-used drawables.
-  SelfDrawable.Poolable.mixInto( ImageWebGLDrawable );
+
+  Poolable.mixInto( ImageWebGLDrawable );
 
   return ImageWebGLDrawable;
 } );

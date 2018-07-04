@@ -10,9 +10,8 @@ define( function( require ) {
   'use strict';
 
   // modules
-  var BooleanProperty = require( 'AXON/BooleanProperty' );
+  var NodeProperty = require( 'SCENERY/util/NodeProperty' );
   var NumberProperty = require( 'AXON/NumberProperty' );
-  var Property = require( 'AXON/Property' );
   var PropertyIO = require( 'AXON/PropertyIO' );
   var scenery = require( 'SCENERY/scenery' );
 
@@ -34,20 +33,18 @@ define( function( require ) {
     ObjectIO.call( this, node, phetioID );
 
     // TODO: This is in-progress work to convert object properties to Axon Properties, see https://github.com/phetsims/phet-io/issues/1326
-    var visibleProperty = new BooleanProperty( node.visible, {
+    var visibleProperty = new NodeProperty( node, 'visibility', 'visible', {
 
       // pick the following values from the parent Node
       phetioReadOnly: node.phetioReadOnly,
       phetioState: node.phetioState,
+      phetioType: PropertyIO( BooleanIO ),
 
       tandem: node.tandem.createTandem( 'visibleProperty' ),
       phetioInstanceDocumentation: 'Property that controls whether the Node will be visible (and interactive), see the NodeIO documentation for more details.'
     } );
 
-    visibleProperty.link( function( visible ) { node.visible = visible; } );
-    node.on( 'visibility', function() { visibleProperty.value = node.visible; } );
-
-    var pickableProperty = new Property( node.pickable, {
+    var pickableProperty = new NodeProperty( node, 'pickability', 'pickable', {
 
       // pick the following values from the parent Node
       phetioReadOnly: node.phetioReadOnly,
@@ -57,9 +54,9 @@ define( function( require ) {
       phetioType: PropertyIO( NullableIO( BooleanIO ) ),
       phetioInstanceDocumentation: 'Set whether the node will be pickable (and hence interactive), see the NodeIO documentation for more details.'
     } );
-    pickableProperty.link( function( pickable ) { node.pickable = pickable; } );
-    node.on( 'pickability', function() { pickableProperty.value = node.pickable; } );
 
+    // Adapter for the opacity.  Cannot use NodeProperty at the moment because it doesn't handle numeric types
+    // properly--we may address this by moving to a mixin pattern.
     var opacityProperty = new NumberProperty( node.opacity, {
 
       // pick the following values from the parent Node

@@ -1,8 +1,8 @@
 // Copyright 2014-2016, University of Colorado Boulder
 
 /**
- * PoolableMixin wrapper for SVG <group> elements. We store state and add listeners directly to the corresponding Node, so that we can set dirty flags and
- * smartly update only things that have changed. This takes a load off of SVGBlock.
+ * Poolable wrapper for SVG <group> elements. We store state and add listeners directly to the corresponding Node,
+ * so that we can set dirty flags and smartly update only things that have changed. This takes a load off of SVGBlock.
  *
  * @author Jonathan Olson <jonathan.olson@colorado.edu>
  */
@@ -415,18 +415,7 @@ define( function( require ) {
   };
 
   Poolable.mixInto( SVGGroup, {
-    constructorDuplicateFactory: function( pool ) {
-      return function( block, instance, parent ) {
-        if ( pool.length ) {
-          sceneryLog && sceneryLog.SVGGroup && sceneryLog.SVGGroup( 'new from pool' );
-          return pool.pop().initialize( block, instance, parent );
-        }
-        else {
-          sceneryLog && sceneryLog.SVGGroup && sceneryLog.SVGGroup( 'new from constructor' );
-          return new SVGGroup( block, instance, parent );
-        }
-      };
-    }
+    initialize: SVGGroup.prototype.initialize
   } );
 
   return SVGGroup;

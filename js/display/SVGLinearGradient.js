@@ -78,16 +78,7 @@ define( function( require ) {
   } );
 
   Poolable.mixInto( SVGLinearGradient, {
-    constructorDuplicateFactory: function( pool ) {
-      return function( svgBlock, linearGradient ) {
-        if ( pool.length ) {
-          return pool.pop().initialize( svgBlock, linearGradient );
-        }
-        else {
-          return new SVGLinearGradient( svgBlock, linearGradient );
-        }
-      };
-    }
+    initialize: SVGLinearGradient.prototype.initialize
   } );
 
   return SVGLinearGradient;

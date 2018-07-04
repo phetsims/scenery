@@ -175,7 +175,9 @@ define( function( require ) {
 
       if ( color instanceof Property ) {
         sceneryLog && sceneryLog.Paints && sceneryLog.Paints( '[SVGGradientStop] removing Property listener: ' + this.svgGradient.gradient.id + ' : ' + this.ratio );
-        color.unlink( this.propertyListener );
+        if ( color.hasListener( this.propertyListener ) ) {
+          color.unlink( this.propertyListener );
+        }
         if ( color.value instanceof Color ) {
           sceneryLog && sceneryLog.Paints && sceneryLog.Paints( '[SVGGradientStop] removing Color listener: ' + this.svgGradient.gradient.id + ' : ' + this.ratio );
           color.value.changeEmitter.removeListener( this.colorListener );
@@ -196,16 +198,7 @@ define( function( require ) {
   } );
 
   Poolable.mixInto( SVGGradientStop, {
-    constructorDuplicateFactory: function( pool ) {
-      return function( svgGradient, ratio, color ) {
-        if ( pool.length ) {
-          return pool.pop().initialize( svgGradient, ratio, color );
-        }
-        else {
-          return new SVGGradientStop( svgGradient, ratio, color );
-        }
-      };
-    }
+    initialize: SVGGradientStop.prototype.initialize
   } );
 
   return SVGGradientStop;

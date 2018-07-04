@@ -126,14 +126,14 @@ define( function( require ) {
   var AccessibilityTree = require( 'SCENERY/accessibility/AccessibilityTree' );
   var AccessibilityUtil = require( 'SCENERY/accessibility/AccessibilityUtil' );
   var AccessibleDisplaysInfo = require( 'SCENERY/accessibility/AccessibleDisplaysInfo' );
-  var AccessiblePeer = require( 'SCENERY/accessibility/AccessiblePeer' );
+  var arrayDifference = require( 'PHET_CORE/arrayDifference' );
   var Emitter = require( 'AXON/Emitter' );
   var extend = require( 'PHET_CORE/extend' );
   var invalidateAccessibleContent = require( 'SCENERY/accessibility/invalidateAccessibleContent' );
   var scenery = require( 'SCENERY/scenery' );
 
   var INPUT_TAG = AccessibilityUtil.TAGS.INPUT;
-  var LABEL_TAG = AccessibilityUtil.TAGS.LABEL;
+  var DIV_TAG = AccessibilityUtil.TAGS.DIV;
   var P_TAG = AccessibilityUtil.TAGS.P;
 
   // default tag names for siblings
@@ -145,6 +145,7 @@ define( function( require ) {
 
   // The options for the Accessibility API. In general, most default to null; to clear, set back to null.
   var ACCESSIBILITY_OPTION_KEYS = [
+    'tagName', // Sets the tag name for the primary sibling DOM element in the parallel DOM, should be first
 
     /*
      * Higher Level API Functions
@@ -160,7 +161,6 @@ define( function( require ) {
     'containerTagName', // Sets the tag name for an [optional] element that contains this Node's siblings, see setContainerTagName()
     'containerAriaRole', // Sets the ARIA role for the container parent DOM element, see setContainerAriaRole()
 
-    'tagName', // Sets the tag name for the primary sibling DOM element in the parallel DOM
     'innerContent', // Sets the inner text or HTML for a node's primary sibling element, see setInnerContent()
     'inputType', // Sets the input type for the primary sibling DOM element, only relevant if tagName is 'input'
     'inputValue', // Sets the input value for the primary sibling DOM element, only relevant if tagName is 'input'
@@ -168,9 +168,6 @@ define( function( require ) {
     'accessibleNamespace', // Sets the namespace for the primary element, see setAccessibleNamespace()
     'ariaLabel', // Sets the value of the 'aria-label' attribute on the primary sibling of this Node, see setAriaLabel()
     'ariaRole', // Sets the ARIA role for the primary sibling of this Node, see setAriaRole()
-    'ariaLabelContent', // Sets the content that will label another node through aria-labelledby, see setAriaLabelledByContent()
-    'ariaDescribedContent', // Sets the content that will be described by another node through aria-describedby, see setAriaDescribedContent()
-    'ariaLabelledContent', // sets the content that will be labelled by another node through aria-labelledby, see setAriaLabelledContent()
 
     'labelTagName', // Sets the tag name for the DOM element sibling labelling this node, see setLabelTagName()
     'labelContent', // Sets the label content for the node, see setLabelContent()
@@ -179,7 +176,6 @@ define( function( require ) {
     'descriptionTagName', // Sets the tag name for the DOM element sibling describing this node, see setDescriptionTagName()
     'descriptionContent', // Sets the description content for the node, see setDescriptionContent()
     'appendDescription', // Sets the description sibling to come after the primary sibling in the pDOM, see setAppendDescription()
-    'ariaDescriptionContent', // Sets the content that will describe another node through aria-describedby, see setAriaDescriptionContent()
 
     'focusHighlight', // Sets the focus highlight for the node, see setFocusHighlight()
     'focusHighlightLayerable', // Flag to determine if the focus highlight node can be layered in the scene graph, see setFocusHighlightLayerable()
@@ -188,7 +184,10 @@ define( function( require ) {
     'accessibleContentDisplayed', // Sets whether or not the accessible content of the node (and its subtree) is displayed, see setAccessibleContentDisplayed()
     'focusable', // Sets whether or not the node can receive keyboard focus, see setFocusable()
     'accessibleOrder', // Modifies the order of accessible  navigation, see setAccessibleOrder()
-    'accessibleContent' // Sets up accessibility handling (probably don't need to use this), see setAccessibleContent()
+    'accessibleContent', // Sets up accessibility handling (probably don't need to use this), see setAccessibleContent()
+
+    'ariaLabelledbyAssociations', // sets the list of aria-labelledby associations between from this node to others (including itself), see setAriaLabelledbyAssociations
+    'ariaDescribedbyAssociations' // sets the list of aria-describedby associations between from this node to others (including itself), see setAriaDescribedbyAssociations
   ];
 
   var Accessibility = {
@@ -303,50 +302,6 @@ define( function( require ) {
           // possible.
           this._containerAriaRole = null;
 
-          // @private {Node|null} - A node with accessible content that labels this node through the aria-labelledby
-          // ARIA attribute.  The other node can be anywhere in the scene graph.  The behavior for aria-labelledby
-          // is such that when this node receives focus, the accessible content under the other node will be read
-          // (before any description content). Use with ariaLabelledContent to specify what portion of this node's
-          // acccessible content is labelled (DOM element, label element, description element or container parent
-          // element).
-          this._ariaLabelledByNode = null;
-
-          // @private {string} - A string referenceing which portion of this node's accessible content will receive
-          // the aria-labelledby attribute.  Can be the DOM element, the label element, the description element,
-          // or the container parent element. By default, points to this node's DOM element.
-          this._ariaLabelledContent = AccessiblePeer.PRIMARY_SIBLING;
-
-          // @private {Node|null} - The Node this node labels through the aria-labelledby association. See
-          // _ariaLabelledByNode for more information.
-          this._ariaLabelsNode = null;
-
-          // @private {string} - The content on this node that is used to label another node through the
-          // aria-labelledby ARIA attribute.  Can be the node's label, description, container parent, or DOM
-          // element.  See setAriaLabelContent()
-          this._ariaLabelContent = AccessiblePeer.PRIMARY_SIBLING; // element associated with the other node's content
-
-          // @private {Node|null} - A node with accessible content that describes this node through the aria-describedby
-          // ARIA attribute. The other node can be anywhere in the scene graph.  The behavior for aria-describedby
-          // is such that when this node receives focus, the accessible content under the other node will be read
-          // (after any label content). Use with ariaDescribedContent to specify what portion of this node's
-          // acccessible content is described (DOM element, label element, description element or container parent
-          // element).
-          this._ariaDescribedByNode = null;
-
-          // @private {string} - A string referenceing which portion of this node's accessible content will receive
-          // the aria-describedby attribute.  Can be the DOM element, the label element, the description element,
-          // or the container parent element. By default, points to this node's DOM element.
-          this._ariaDescribedContent = AccessiblePeer.PRIMARY_SIBLING;
-
-          // @private {Node|null} - The Node this node describes through the aria-describedby association. See
-          // _ariaLabelledByNode for more information.
-          this._ariaDescribesNode = null;
-
-          // @private {string} - The description content on this node that is used to describe another node through the
-          // aria-describedby ARIA attribute. Can be the node's label, description, container parent, or DOM
-          // element.  See ariaDescribessNodoe for more information
-          this._ariaDescriptionContent = AccessiblePeer.PRIMARY_SIBLING;
-
           // @private {Array.<Object>} - Keep track of what this Node is aria-labelledby via "associationObjects"
           // see addAriaLabelledbyAssociation for why we support more than one association.
           this._ariaLabelledbyAssociations = [];
@@ -356,7 +311,18 @@ define( function( require ) {
           // nodes to update their aria-labelledby associations when this Node rebuilds its accessible content.
           // @public (scenery-internal) - only used by Accessibility.js and invalidateAccessibleContent.js
           // {Array.<Node>}
-          this._nodesThatAreAriaLabelledByThisNode = [];
+          this._nodesThatAreAriaLabelledbyThisNode = [];
+
+          // @private {Array.<Object>} - Keep track of what this Node is aria-descripbedby via "associationObjects"
+          // see addAriaDescribedbyAssociation for why we support more than one association.
+          this._ariaDescribedbyAssociations = [];
+
+          // Keep a reference to all nodes that are aria-describedby this node, i.e. that have store one of this Node's
+          // peer HTMLElement's id in their peer HTMLElement's aria-describedby attribute. This way we can tell other
+          // nodes to update their aria-describedby associations when this Node rebuilds its accessible content.
+          // @public (scenery-internal) - only used by Accessibility.js and invalidateAccessibleContent.js
+          // {Array.<Node>}
+          this._nodesThatAreAriaDescribedbyThisNode = [];
 
           // @private {?boolean} - whether or not this node's DOM element has been explicitly set to receive focus from
           // tab navigation. Sets the tabIndex attribute on the node's DOM element. Setting to false will not remove the
@@ -455,9 +421,10 @@ define( function( require ) {
           this._accessibleInputListeners.push( accessibleInput );
 
           // add the listener directly to any AccessiblePeers that are representing this node
-          this.updateAccessiblePeers( function( accessiblePeer ) {
-            AccessibilityUtil.addDOMEventListeners( accessibleInput, accessiblePeer.primarySibling );
-          } );
+          for ( var i = 0; i < this._accessibleInstances.length; i++ ) {
+            var peer = this._accessibleInstances[ i ].peer;
+            peer && peer.addDOMEventListeners( accessibleInput );
+          }
 
           return accessibleInput;
         },
@@ -466,7 +433,7 @@ define( function( require ) {
          * Removes an input listener that was previously added with addAccessibleInputListener.
          * @public
          *
-         * @param {Object} accessibleInput
+         * @param {Object} accessibleInput - to be removed
          * @returns {Node} - Returns 'this' reference, for chaining
          */
         removeAccessibleInputListener: function( accessibleInput ) {
@@ -478,9 +445,10 @@ define( function( require ) {
           this._accessibleInputListeners.splice( addedIndex, 1 );
 
           // remove the event listeners from any peers
-          this.updateAccessiblePeers( function( accessiblePeer ) {
-            AccessibilityUtil.removeDOMEventListeners( accessibleInput, accessiblePeer.primarySibling );
-          } );
+          for ( var i = 0; i < this._accessibleInstances.length; i++ ) {
+            var peer = this._accessibleInstances[ i ].peer;
+            peer && peer.removeDOMEventListeners( accessibleInput );
+          }
 
           return this;
         },
@@ -857,9 +825,10 @@ define( function( require ) {
           assert && assert( this._tagName.toUpperCase() === INPUT_TAG, 'tag name must be INPUT to support inputType' );
 
           this._inputType = inputType;
-          this.updateAccessiblePeers( function( accessiblePeer ) {
-            accessiblePeer.primarySibling.type = inputType;
-          } );
+          for ( var i = 0; i < this._accessibleInstances.length; i++ ) {
+            var peer = this._accessibleInstances[ i ].peer;
+            peer && peer.setAttributeToElement( 'type', inputType );
+          }
         },
         set inputType( inputType ) { this.setInputType( inputType ); },
 
@@ -1002,13 +971,10 @@ define( function( require ) {
             this.setLabelTagName( DEFAULT_LABEL_TAG_NAME );
           }
 
-          this.updateAccessiblePeers( function( accessiblePeer ) {
-            if ( accessiblePeer.labelSibling ) {
-              var isLabelTag = self._labelTagName.toUpperCase() === LABEL_TAG;
-              accessiblePeer.setLabelSiblingContent( self._labelContent, isLabelTag );
-            }
-          } );
-
+          for ( var i = 0; i < this._accessibleInstances.length; i++ ) {
+            var peer = this._accessibleInstances[ i ].peer;
+            peer && peer.setLabelSiblingContent( self._labelContent );
+          }
         },
         set labelContent( label ) { this.setLabelContent( label ); },
 
@@ -1037,9 +1003,10 @@ define( function( require ) {
 
           var self = this;
 
-          this.updateAccessiblePeers( function( accessiblePeer ) {
-            accessiblePeer && accessiblePeer.setPrimarySiblingContent( self._innerContent );
-          } );
+          for ( var i = 0; i < this._accessibleInstances.length; i++ ) {
+            var peer = this._accessibleInstances[ i ].peer;
+            peer && peer.setPrimarySiblingContent( self._innerContent );
+          }
         },
         set innerContent( content ) { this.setInnerContent( content ); },
 
@@ -1073,10 +1040,10 @@ define( function( require ) {
             this.setDescriptionTagName( DEFAULT_DESCRIPTION_TAG_NAME );
           }
 
-          this.updateAccessiblePeers( function( accessiblePeer ) {
-            accessiblePeer && accessiblePeer.setDescriptionSiblingContent( self._descriptionContent );
-          } );
-
+          for ( var i = 0; i < this._accessibleInstances.length; i++ ) {
+            var peer = this._accessibleInstances[ i ].peer;
+            peer && peer.setDescriptionSiblingContent( self._descriptionContent );
+          }
         },
         set descriptionContent( textContent ) { this.setDescriptionContent( textContent ); },
 
@@ -1321,6 +1288,65 @@ define( function( require ) {
 
 
         /**
+         * Very similar algorithm to setChildren in Node.js
+         * @public
+         * @param {Array.<Object>} ariaLabelledbyAssociations - list of associationObjects, see this._ariaLabelledbyAssociations.
+         */
+        setAriaLabelledbyAssociations: function( ariaLabelledbyAssociations ) {
+          var associationObject;
+          var i;
+
+          // validation if assert is enabled
+          if ( assert ) {
+            for ( i = 0; i < ariaLabelledbyAssociations.length; i++ ) {
+              associationObject = ariaLabelledbyAssociations[ i ];
+              assert && AccessibilityUtil.validateAssociationObject( associationObject );
+            }
+          }
+
+          // if the list isn't the same, TODO: make order in the list not matter
+          if ( !_.isEqual( ariaLabelledbyAssociations, this._ariaLabelledbyAssociations ) ) {
+
+
+            var beforeOnly = []; // Will hold all nodes that will be removed.
+            var afterOnly = []; // Will hold all nodes that will be "new" children (added)
+            var inBoth = []; // Child nodes that "stay". Will be ordered for the "after" case.
+
+            // get a difference of the desired new list, and the old
+            arrayDifference( ariaLabelledbyAssociations, this._ariaLabelledbyAssociations, afterOnly, beforeOnly, inBoth );
+
+
+            // remove each current associationObject that isn't in the new list
+            for ( i = 0; i < beforeOnly.length; i++ ) {
+              associationObject = beforeOnly[ i ];
+              this.removeAriaLabelledbyAssociation( associationObject );
+            }
+
+            assert && assert( this._ariaLabelledbyAssociations.length === inBoth.length,
+              'Removing associations should not have triggered other association changes' );
+
+
+            // add each association from the new list that hasn't been added yet
+            for ( i = 0; i < afterOnly.length; i++ ) {
+              var ariaLabelledbyAssociation = ariaLabelledbyAssociations[ i ];
+              this.addAriaLabelledbyAssociation( ariaLabelledbyAssociation );
+            }
+
+            // TODO maybe reorder them, but right now order doesn't seem to matter
+          }
+        },
+        set ariaLabelledbyAssociations( ariaLabelledbyAssociations ) { return this.setAriaLabelledbyAssociations( ariaLabelledbyAssociations ); },
+
+        /**
+         * @public
+         * @returns {Array.<Object>} - the list of current association objects
+         */
+        getAriaLabelledbyAssociations: function() {
+          return this._ariaLabelledbyAssociations;
+        },
+        get ariaLabelledbyAssociations() { return this.getAriaLabelledbyAssociations(); },
+
+        /**
          * Add an aria-labelledby association to this node. The data in the associationObject will be implemented like
          * "a peer's HTMLElement of this Node (specified with the string constant stored in `thisElementName`) will have an
          * aria-labelledby attribute with a value that includes the `otherNode`'s peer HTMLElement's id (specified with
@@ -1334,249 +1360,276 @@ define( function( require ) {
          *                               see AccessiblePeer for valid element names.
          */
         addAriaLabelledbyAssociation: function( associationObject ) {
+          assert && AccessibilityUtil.validateAssociationObject( associationObject );
 
           this._ariaLabelledbyAssociations.push( associationObject ); // Keep track of this association.
 
           // Flag that this node is is being labelled by the other node, so that if the other node changes it can tell
           // this node to restore the association appropriately, see invalidateAccessibleContent for implementation.
-          associationObject.otherNode._nodesThatAreAriaLabelledByThisNode.push( this );
-
+          associationObject.otherNode._nodesThatAreAriaLabelledbyThisNode.push( this );
 
           // update the accessiblePeers with this aria-labelledby association
-          this.addAriaLabelledbyAssociationImplementation( associationObject );
+          this.addAssociationImplementationForAttribute( 'aria-labelledby', associationObject );
         },
 
-
         /**
-         * Implementation for addAriaLabelledbyAssociation. Called in addAriaLabelledByAssociation, as well as
-         * invalidateAccessibleContent when we recreate the accessible content for a Node.
-         *
-         * Update accessible peers with this aria-labelledby association.
-         *
-         * @param {Object} associationObject - see addAriaLabelledbyAssociation doc
+         * Remove an aria-labelledby association object, see addAriaLabelledbyAssociation for more details
+         * @public
          */
-        addAriaLabelledbyAssociationImplementation: function( associationObject ) {
-          this.updateAccessiblePeers( function( peer ) {
+        removeAriaLabelledbyAssociation: function( associationObject ) {
+          assert && assert( _.includes( this._ariaLabelledbyAssociations, associationObject ) );
 
-            // We are just using the first AccessibleInstance for simplicity, but it is OK because the accessible
-            // content for all AccessibleInstances will be the same, so the Accessible Names (in the browser's
-            // accessibility tree) of elements that are referenced by aria-labelledby will all have the same content
-            var firstAccessibleInstance = associationObject.otherNode.getAccessibleInstances()[ 0 ];
+          // remove the
+          var removedObject = this._ariaLabelledbyAssociations.splice( _.indexOf( this._ariaLabelledbyAssociations, associationObject ), 1 );
 
-            var otherPeerElement = firstAccessibleInstance.peer.getElementByName( associationObject.otherElementName );
-            var thisPeerElement = peer.getElementByName( associationObject.thisElementName );
-            var previousAriaLabelledbyValue = thisPeerElement.getAttribute( 'aria-labelledby' ) || '';
-            assert && assert( typeof previousAriaLabelledbyValue === 'string' );
-
-            // add the id from the new association to the value of the HTMLElement's attribute.
-            thisPeerElement.setAttribute( 'aria-labelledby', [ previousAriaLabelledbyValue, otherPeerElement.id ].join( ' ' ) );
-          } );
+          // remove the reference from the other node back to this node because we don't need it anymore
+          removedObject[ 0 ].otherNode.removeNodeThatIsAriaLabelledByThisNode( this );
         },
+
         /**
-         * Update all of the aria-labelledby associations for this Node. This involves clearing out the current aria-labelledby
-         * values in the AccessiblePeer, to be restored to the value of the state stored by this Node
+         * Remove the reference to the node that is using this Node's ID as an aria-labelledby value
+         * @param {Node} node
+         * @public (scenery-internal)
+         */
+        removeNodeThatIsAriaLabelledByThisNode: function( node ) {
+          assert && phet && phet.scenery && assert( node instanceof phet.scenery.Node );
+          var indexOfNode = _.indexOf( this._nodesThatAreAriaLabelledbyThisNode, node );
+          assert && assert( indexOfNode >= 0 );
+          this._nodesThatAreAriaLabelledbyThisNode.splice( indexOfNode, 1 );
+        },
+
+        /**
+         * @public
+         * @param {Array.<Object>} ariaDescribedbyAssociations - list of associationObjects, see this._ariaDescribedbyAssociations.
+         */
+        setAriaDescribedbyAssociations: function( ariaDescribedbyAssociations ) {
+          var associationObject;
+          if ( assert ) {
+            for ( var j = 0; j < ariaDescribedbyAssociations.length; j++ ) {
+              associationObject = ariaDescribedbyAssociations[ j ];
+              assert && AccessibilityUtil.validateAssociationObject( associationObject );
+            }
+          }
+
+          // if the list isn't the same, TODO: make order in the list not matter
+          if ( !_.isEqual( ariaDescribedbyAssociations, this._ariaDescribedbyAssociations ) ) {
+
+
+            var beforeOnly = []; // Will hold all nodes that will be removed.
+            var afterOnly = []; // Will hold all nodes that will be "new" children (added)
+            var inBoth = []; // Child nodes that "stay". Will be ordered for the "after" case.
+            var i;
+
+            // get a difference of the desired new list, and the old
+            arrayDifference( ariaDescribedbyAssociations, this._ariaDescribedbyAssociations, afterOnly, beforeOnly, inBoth );
+
+
+            // remove each current associationObject that isn't in the new list
+            for ( i = 0; i < beforeOnly.length; i++ ) {
+              associationObject = beforeOnly[ i ];
+              this.removeAriaDescribedbyAssociation( associationObject );
+            }
+
+            assert && assert( this._ariaDescribedbyAssociations.length === inBoth.length,
+              'Removing associations should not have triggered other association changes' );
+
+
+            // add each association from the new list that hasn't been added yet
+            for ( i = 0; i < afterOnly.length; i++ ) {
+              var ariaDescribedbyAssociation = ariaDescribedbyAssociations[ i ];
+              this.addAriaDescribedbyAssociation( ariaDescribedbyAssociation );
+            }
+
+            // TODO maybe reorder them, but right now order doesn't seem to matter
+          }
+        },
+        set ariaDescribedbyAssociations( ariaDescribedbyAssociations ) { return this.setAriaDescribedbyAssociations( ariaDescribedbyAssociations ); },
+
+        /**
+         * @public
+         * @returns {Array.<Object>} - the list of current association objects
+         */
+        getAriaDescribedbyAssociations: function() {
+          return this._ariaDescribedbyAssociations;
+        },
+        get ariaDescribedbyAssociations() { return this.getAriaDescribedbyAssociations(); },
+
+        /**
+         * Add an aria-describedby association to this node. The data in the associationObject will be implemented like
+         * "a peer's HTMLElement of this Node (specified with the string constant stored in `thisElementName`) will have an
+         * aria-describedby attribute with a value that includes the `otherNode`'s peer HTMLElement's id (specified with
+         * `otherElementName`)."
          *
+         * There can be more than one association because an aria-describedby attribute's value can be a space separated
+         * list of HTML ids, and not just a single id, see https://www.w3.org/WAI/GL/wiki/Using_aria-labelledby_to_concatenate_a_label_from_several_text_nodes
+         *
+         * @param {Object} associationObject - with key value pairs like
+         *                               { otherNode: {Node}, otherElementName: {string}, thisElementName: {string } }
+         *                               see AccessiblePeer for valid element names.
+         */
+        addAriaDescribedbyAssociation: function( associationObject ) {
+          assert && AccessibilityUtil.validateAssociationObject( associationObject );
+
+          this._ariaDescribedbyAssociations.push( associationObject ); // Keep track of this association.
+
+          // Flag that this node is is being described by the other node, so that if the other node changes it can tell
+          // this node to restore the association appropriately, see invalidateAccessibleContent for implementation.
+          associationObject.otherNode._nodesThatAreAriaDescribedbyThisNode.push( this );
+
+          // update the accessiblePeers with this aria-describedby association
+          this.addAssociationImplementationForAttribute( 'aria-describedby', associationObject );
+        },
+
+
+        /**
+         * Remove an aria-describedby association object, see addAriaDescribedbyAssociation for more details
+         * @public
+         */
+        removeAriaDescribedbyAssociation: function( associationObject ) {
+          assert && assert( _.includes( this._ariaDescribedbyAssociations, associationObject ) );
+
+          // remove the
+          var removedObject = this._ariaDescribedbyAssociations.splice( _.indexOf( this._ariaDescribedbyAssociations, associationObject ), 1 );
+
+          // remove the reference from the other node back to this node because we don't need it anymore
+          removedObject[ 0 ].otherNode.removeNodeThatIsAriaDescribedByThisNode( this );
+        },
+
+        /**
+         * Remove the reference to the node that is using this Node's ID as an aria-describedby value
+         * @param {Node} node
+         * @public (scenery-internal)
+         */
+        removeNodeThatIsAriaDescribedByThisNode: function( node ) {
+          assert && phet && phet.scenery && assert( node instanceof phet.scenery.Node );
+          var indexOfNode = _.indexOf( this._nodesThatAreAriaDescribedbyThisNode, node );
+          assert && assert( indexOfNode >= 0 );
+          this._nodesThatAreAriaDescribedbyThisNode.splice( indexOfNode, 1 );
+
+        },
+
+        /**
+         * Update all of the aria-*edby associations for this Node. Depending on the parameter, either aria-labelledby
+         * or aria-describedby. This involves clearing out the current values of the attribute in the AccessiblePeer,
+         * to be restored to the value of the state stored by this Node
+         *
+         * @param {string} attribute - "aria-labelledby"|"aria-describedby"
          * @public (scenery-internal) only used by invalidateAccessibleContent.js
          */
-        updateAriaLabelledbyAssociations: function() {
+        updateAssociationsForAttribute: function( attribute ) {
+          assert && assert( attribute === 'aria-describedby' || attribute === 'aria-labelledby', 'unsupported attribute name: ' + attribute );
+
+          // get the proper list of associations depending on what attribute we are updating
+          var associationList = attribute === 'aria-labelledby' ? this._ariaLabelledbyAssociations :
+                                attribute === 'aria-describedby' ? this._ariaDescribedbyAssociations : null;
+
+          assert && assert( associationList ); // extra safe
+
+          // no-op if there are no associations
+          if ( associationList.length === 0 ) {
+            return;
+          }
 
           // clear the current aria-labelledby attribute and recreate it from stored associations
           // TODO: make this more efficient
-          this.updateAccessiblePeers( function( peer ) {
-            peer.primarySibling && peer.primarySibling.removeAttribute( 'aria-labelledby' );
-            peer.labelSibling && peer.labelSibling.removeAttribute( 'aria-labelledby' );
-            peer.descriptionSibling && peer.descriptionSibling.removeAttribute( 'aria-labelledby' );
-            peer.containerParent && peer.containerParent.removeAttribute( 'aria-labelledby' );
-          } );
+          for ( var i = 0; i < this._accessibleInstances.length; i++ ) {
+            var peer = this._accessibleInstances[ i ].peer;
+            peer && peer.removeAttributeFromAllElements( attribute );
+          }
 
-          for ( var i = 0; i < this._ariaLabelledbyAssociations.length; i++ ) {
-            var associationObject = this._ariaLabelledbyAssociations[ i ];
+          for ( var j = 0; j < associationList.length; j++ ) {
+            var associationObject = associationList[ j ];
 
-            this.addAriaLabelledbyAssociationImplementation( associationObject );
+            this.addAssociationImplementationForAttribute( attribute, associationObject );
           }
         },
 
         /**
-         * Sets the node that labels this node through the ARIA attribute aria-labelledby. The value of the
-         * 'aria-labelledby' attribute  is a string id that references another HTMLElement in the DOM.
-         * Upon focus, a screen reader should read the content under the HTML element referenced by the id,
-         * before any description content. Exact behavior will depend on user agent. The specific content
-         * used for the label can be specified by using setAriaLabelledContent, see that function for more info.
-         * This is one way to set this Node's primary sibling's Accessible Name.
+         * Implementation for aria-labelledby and aria-describedby associations. Called in a11y api setters , as well as
+         * invalidateAccessibleContent when we recreate the accessible content for a Node.
          *
-         * @public
-         * @param {Node} node - the node with accessible content that labels this one.
+         * Update accessible peers with this specific attribute association object reference.
+         *
+         * @param {string} attribute - "aria-labelledby"|"aria-describedby"
+         * @param {Object} associationObject - see addAriaLabelledbyAssociation() doc
+         * @private
          */
-        setAriaLabelledByNode: function( node ) {
-          assert && assert( node._accessibleInstances.length < 2, 'cannot be labelled by a node using DAG' );
+        addAssociationImplementationForAttribute: function( attribute, associationObject ) {
+          assert && assert( attribute === 'aria-describedby' || attribute === 'aria-labelledby', 'unsupported attribute name: ' + attribute );
 
-          this._ariaLabelledByNode = node;
 
-          // needs to track what node it labels so when that node changes, it can trigger invalidation of this node
-          node._ariaLabelsNode = this;
+          var otherNodeAccessibleInstances = associationObject.otherNode.getAccessibleInstances();
 
-          //  accessible content required for both nodes
-          var thisHasContent = this._accessibleInstances.length > 0;
-          var otherHasContent = node._accessibleInstances.length > 0;
-          if ( thisHasContent && otherHasContent ) {
-            var self = this;
-            this.updateAccessiblePeers( function( accessiblePeer ) {
-              var otherPeer = node._accessibleInstances[ 0 ].peer;
+          // if the other node hasn't been added to the scene graph yet, it won't have any accessible instances, so no op.
+          // This will be recalculated when that node is added to the scene graph
+          if ( otherNodeAccessibleInstances.length > 0 ) {
 
-              var labelledElement = accessiblePeer.getElementByName( self._ariaLabelledContent );
-              var labelSibling = otherPeer.getElementByName( node._ariaLabelContent );
+            // We are just using the first AccessibleInstance for simplicity, but it is OK because the accessible
+            // content for all AccessibleInstances will be the same, so the Accessible Names (in the browser's
+            // accessibility tree) of elements that are referenced by the attribute value id will all have the same content
+            var firstAccessibleInstance = otherNodeAccessibleInstances[ 0 ];
 
-              // if both associated elements defined, set up the attribute, otherwise remove the attribute
-              if ( labelledElement && labelSibling ) {
-                labelledElement.setAttribute( 'aria-labelledby', labelSibling.id );
+            // we can use the same element's id to update all of this Node's peers
+            var otherPeerElement = firstAccessibleInstance.peer.getElementByName( associationObject.otherElementName );
+
+            // be flexible enough if the other Node has not been created yet.
+            if ( otherPeerElement ) {
+              for ( var i = 0; i < this._accessibleInstances.length; i++ ) {
+                var peer = this._accessibleInstances[ i ].peer;
+
+                peer && peer.setAssociationAttribute( attribute, associationObject, otherPeerElement.id );
               }
-              else if ( labelledElement ) {
-                labelledElement.removeAttribute( 'aria-labelledby' );
-              }
-            } );
+            }
           }
         },
-        set ariaLabelledByNode( node ) { this.setAriaLabelledByNode( node ); },
 
         /**
-         * Get the node that labels this node through  the aria-labelledby relation. See setAriaLabelledByNode
-         * for documentation on the behavior of aria-labelledby.
-         *
-         * @return {Node}
+         * Update the associations for aria-labelledby
+         * @private
          */
-        getAriaLabelledByNode: function() {
-          return this._ariaLabelledByNode;
-        },
-        get ariaLabelledByNode() { return this.getAriaLabelledByNode(); },
+        updateAriaLabelledbyAssociations: function() {
+          // restore this nodes aria-labelledby associations
+          var ariaLabelledbyAtrributeName = 'aria-labelledby';
+          this.updateAssociationsForAttribute( ariaLabelledbyAtrributeName );
 
-        /**
-         * Set the accessible content on this node that is labelled through aria-labelledby. Can be the node's
-         * DOM element, label element, description element, or container parent element. This will determine
-         * which element of this node's accessible content will hold the aria-labelledby attribute.
-         *
-         * @public
-         * @param {string} content - 'LABEL|NODE|DESCRIPTION|CONTAINER_PARENT'
-         */
-        setAriaLabelledContent: function( content ) {
-          this._ariaLabelledContent = content;
-          this._ariaLabelledByNode && this.setAriaLabelledByNode( this._ariaLabelledByNode );
-        },
-        set ariaLabelledContent( content ) { this.setAriaLabelledContent( content ); },
-
-
-        /**
-         * Get a string the determines what element on this node has the aria-labelledby attribute. Does not return
-         * a label string. See setAriaLabelledContent for more information.
-         *
-         * @public
-         * @return {string} - one of 'LABEL'|'DESCRIPTION'|'NODE'|'CONTAINER_PARENT'
-         */
-        getAriaLabelledContent: function() {
-          return this._ariaLabelledContent;
-        },
-        get ariaLabelledContent() { return this.getAriaLabelledContent(); },
-
-        /**
-         * Set the aria label content on this node which labels another node through the aria-labelledby
-         * association. Can be the node's DOM element, label element, description element, or container parent
-         * element. See setAriaLabelledBy for more information on aria-labelledby. This will determine the
-         * value of the aria-labelledby attribute for another node when it is labelled by this one.
-         *
-         * @public
-         * @param {string} content - 'LABEL'|'DESCRIPTION'|'NODE'|'CONTAINER_PARENT'
-         */
-        setAriaLabelContent: function( content ) {
-          this._ariaLabelContent = content;
-          this._ariaLabelsNode && this._ariaLabelsNode.setAriaLabelledByNode( this );
-        },
-        set ariaLabelContent( content ) { this.setAriaLabelContent( content ); },
-
-        /**
-         * Sets the node that describes this node through the ARIA attribute aria-describedby. The value of the
-         * 'aria-describedby' attribute  is a string id that references another HTMLElement in the DOM.
-         * Upon focus, a screen reader should read the content under the HTML element referenced by the id,
-         * after any label content. Exact behavior will depend on user agent. The specific content
-         * used for the description can be specified by using setAriaDescribedContent, see that function for more info.
-         *
-         * @public
-         * @param {Node} node - the node with accessible content that labels this one.
-         */
-        setAriaDescribedByNode: function( node ) {
-          assert && assert( node._accessibleInstances.length < 2, 'cannot be described by a node using DAG' );
-
-          this._ariaDescribedByNode = node;
-
-          // the other node needs to track this one so that when it changes, it can trigger invalidation of this node
-          node._ariaDescribesNode = this;
-
-          // accessible content required for both nodes
-          var thisHasContent = this._accessibleInstances.length > 0;
-          var otherHasContent = node._accessibleInstances.length > 0;
-          if ( thisHasContent && otherHasContent ) {
-            var self = this;
-            this.updateAccessiblePeers( function( accessiblePeer ) {
-              var otherPeer = node._accessibleInstances[ 0 ].peer;
-
-              var describedElement = accessiblePeer.getElementByName( self._ariaDescribedContent );
-              var descriptionSibling = otherPeer.getElementByName( node._ariaDescriptionContent );
-
-              // if both associated elements exist, set the attribute, otherwise make sure attribute is removed
-              if ( describedElement && descriptionSibling ) {
-                describedElement.setAttribute( 'aria-describedby', descriptionSibling.id );
-              }
-              else if ( describedElement ) {
-                describedElement.removeAttribute( 'aria-describedby' );
-              }
-            } );
+          // if any other nodes are aria-labelledby this Node, update those associations too. Since this node's
+          // accessible content needs to be recreated, they need to update their aria-labelledby associations accordingly.
+          for ( var i = 0; i < this._nodesThatAreAriaLabelledbyThisNode.length; i++ ) {
+            this._nodesThatAreAriaLabelledbyThisNode[ i ].updateAssociationsForAttribute( ariaLabelledbyAtrributeName );
           }
         },
-        set ariaDescribedByNode( node ) { this.setAriaDescribedByNode( node ); },
 
         /**
-         * Set the accessible content on this node that is described through aria-describedby. Can be the node's
-         * DOM element, label element, description element, or container parent element. This will determine
-         * which element of this node's accessible content has the aria-describedby attribute.
          *
-         * @public
-         * @param {string} content - 'LABEL|NODE|DESCRIPTION|CONTAINER_PARENT'
+         * Update the associations for aria-describedby
+         * @private
          */
-        setAriaDescribedContent: function( content ) {
-          this._ariaDescribedContent = content;
-          this._ariaDescribedByNode && this.setAriaDescribedByNode( this._ariaDescribedByNode );
+        updateAriaDescribedbyAssociations: function() {
+
+          // restore this nodes aria-describedby associations
+          var ariaDescribedbyAttributeName = 'aria-describedby';
+          this.updateAssociationsForAttribute( ariaDescribedbyAttributeName );
+
+          // if any other nodes are aria-describedby this Node, update those associations too. Since this node's
+          // accessible content needs to be recreated, they need to update their aria-describedby associations accordingly.
+          for ( var i = 0; i < this._nodesThatAreAriaDescribedbyThisNode.length; i++ ) {
+            this._nodesThatAreAriaDescribedbyThisNode[ i ].updateAssociationsForAttribute( ariaDescribedbyAttributeName );
+          }
         },
-        set ariaDescribedContent( content ) { this.setAriaDescribedContent( content ); },
 
         /**
-         * Get the described content of this node's accessible content that is described through an aria-describedby
-         * association.  Doesn't return a description, but a string describing wich of this node's accessible elements
-         * are described.
+         * Update the associations for aria-labelledby and aria-describedby. This needs to be done when we re-create
+         * the accessible content (invalidateAccessibleContent), but also when we remove a Node from the scene graph
+         * because we need to make sure that when the Node's accessible content is no longer in the PDOM, other Nodes
+         * that are associated with the removed Node have their associations updated correctly.
          *
-         * @return {string} -'LABEL|NODE|DESCRIPTION|CONTAINER_PARENT'
+         * @public (scenery-internal)
          */
-        getAriaDescribedContent: function() {
-          return this._ariaDescribedContent;
-        },
-        get ariaDescribedContent() { return this.getAriaDescribedContent; },
+        updateLabelledbyDescribebyAssociations: function() {
 
-        /**
-         * Set the aria description content on this node which describes another node through the aria-describedby
-         * association. Can be the node's DOM element, label element, description element, or container parent
-         * element. This will determine the value for aria-describedby when another node
-         * is described by this one.  See setAriaLabelledBy for more information on aria-labelledby.
-         *
-         * @public
-         * @param {string} content - one of 'LABEL'|'DESCRIPTION'|'NODE'|'CONTAINER_PARENT'
-         */
-        setAriaDescriptionContent: function( content ) {
-          this._ariaDescriptionContent = content;
-          this._ariaDescribesNode && this._ariaDescribesNode.setAriaDescribedByNode( this );
+          this.updateAriaLabelledbyAssociations();
+          this.updateAriaDescribedbyAssociations();
         },
-        set ariaDescriptionContent( content ) { this.setAriaDescriptionContent( content ); },
-
-        getAriaDescriptionContent: function() {
-          return this._ariaDescriptionContent;
-        },
-        get ariaDescriptionContent() { return this.getAriaDescriptionContent(); },
 
         /**
          * Sets the accessible focus order for this node. This includes not only focused items, but elements that can be
@@ -1822,9 +1875,10 @@ define( function( require ) {
           value = '' + value;
           this._inputValue = value;
 
-          this.updateAccessiblePeers( function( accessiblePeer ) {
-            accessiblePeer.primarySibling.value = value;
-          } );
+          for ( var i = 0; i < this._accessibleInstances.length; i++ ) {
+            var peer = this._accessibleInstances[ i ].peer;
+            peer && peer.setAttributeToElement( 'value', value );
+          }
         },
         set inputValue( value ) { this.setInputValue( value ); },
 
@@ -1852,9 +1906,10 @@ define( function( require ) {
 
           this._accessibleChecked = checked;
 
-          this.updateAccessiblePeers( function( accessiblePeer ) {
-            accessiblePeer.primarySibling.checked = checked;
-          } );
+          for ( var i = 0; i < this._accessibleInstances.length; i++ ) {
+            var peer = this._accessibleInstances[ i ].peer;
+            peer && peer.setAttributeToElement( 'checked', checked );
+          }
         },
         set accessibleChecked( checked ) { this.setAccessibleChecked( checked ); },
 
@@ -1914,14 +1969,11 @@ define( function( require ) {
             value: value,
             namespace: options.namespace
           } );
-          this.updateAccessiblePeers( function( accessiblePeer ) {
-            if ( options.namespace ) {
-              accessiblePeer.primarySibling.setAttributeNS( options.namespace, attribute, value );
-            }
-            else {
-              accessiblePeer.primarySibling.setAttribute( attribute, value );
-            }
-          } );
+
+          for ( var j = 0; j < this._accessibleInstances.length; j++ ) {
+            var peer = this._accessibleInstances[ j ].peer;
+            peer && peer.setAttributeToElement( attribute, value, options );
+          }
         },
 
         /**
@@ -1951,14 +2003,10 @@ define( function( require ) {
           }
           assert && assert( attributeRemoved, 'Node does not have accessible attribute ' + attribute );
 
-          this.updateAccessiblePeers( function( accessiblePeer ) {
-            if ( options.namespace ) {
-              accessiblePeer.primarySibling.removeAttributeNS( options.namespace, attribute );
-            }
-            else {
-              accessiblePeer.primarySibling.removeAttribute( attribute );
-            }
-          } );
+          for ( var j = 0; j < this._accessibleInstances.length; j++ ) {
+            var peer = this._accessibleInstances[ j ].peer;
+            peer && peer.removeAttributeFromElement( attribute, options );
+          }
         },
 
         /**
@@ -1992,11 +2040,10 @@ define( function( require ) {
 
           this._focusableOverride = focusable;
 
-          this.updateAccessiblePeers( function( accessiblePeer ) {
-            if ( accessiblePeer.primarySibling ) {
-              accessiblePeer.primarySibling.tabIndex = self.focusable ? 0 : -1;
-            }
-          } );
+          for ( var i = 0; i < this._accessibleInstances.length; i++ ) {
+            var peer = this._accessibleInstances[ i ].peer;
+            peer && peer.setAttributeToElement( 'tabIndex', self.focusable ? 0 : -1 );
+          }
         },
         set focusable( isFocusable ) { this.setFocusable( isFocusable ); },
 
@@ -2201,6 +2248,10 @@ define( function( require ) {
 
           AccessibilityTree.removeChild( this, node );
 
+          // make sure that the associations for aria-labelledby and aria-describedby are updated when a child is
+          // removed from the scene graph, see https://github.com/phetsims/scenery/issues/816
+          node.updateLabelledbyDescribebyAssociations();
+
           sceneryLog && sceneryLog.Accessibility && sceneryLog.pop();
         },
 
@@ -2253,19 +2304,6 @@ define( function( require ) {
           var index = _.indexOf( this._accessibleInstances, accessibleInstance );
           assert && assert( index !== -1, 'Cannot remove an AccessibleInstance from a Node if it was not there' );
           this._accessibleInstances.splice( index, 1 );
-        },
-
-        /**
-         * Update all AccessiblePeers representing this node with the callback, which takes the AccessiblePeer
-         * as an argument.
-         * @private
-         *
-         * @param {function} callback
-         */
-        updateAccessiblePeers: function( callback ) {
-          for ( var i = 0; i < this._accessibleInstances.length; i++ ) {
-            this._accessibleInstances[ i ].peer && callback( this._accessibleInstances[ i ].peer );
-          }
         }
       } );
 

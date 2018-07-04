@@ -76,16 +76,7 @@ define( function( require ) {
   } );
 
   Poolable.mixInto( DOMBlock, {
-    constructorDuplicateFactory: function( pool ) {
-      return function( display, domDrawable ) {
-        if ( pool.length ) {
-          return pool.pop().initialize( display, domDrawable );
-        }
-        else {
-          return new DOMBlock( display, domDrawable );
-        }
-      };
-    }
+    initialize: DOMBlock.prototype.initialize
   } );
 
   return DOMBlock;

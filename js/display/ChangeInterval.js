@@ -156,18 +156,7 @@ define( function( require ) {
   } );
 
   Poolable.mixInto( ChangeInterval, {
-    constructorDuplicateFactory: function( pool ) {
-      return function( drawableBefore, drawableAfter ) {
-        if ( pool.length ) {
-          sceneryLog && sceneryLog.ChangeInterval && sceneryLog.ChangeInterval( 'new from pool' );
-          return pool.pop().initialize( drawableBefore, drawableAfter );
-        }
-        else {
-          sceneryLog && sceneryLog.ChangeInterval && sceneryLog.ChangeInterval( 'new from constructor' );
-          return new ChangeInterval( drawableBefore, drawableAfter );
-        }
-      };
-    }
+    initialize: ChangeInterval.prototype.initialize
   } );
 
   // creates a ChangeInterval that will be disposed after syncTree is complete (see Display phases)

@@ -11,8 +11,8 @@ define( function( require ) {
 
   var inherit = require( 'PHET_CORE/inherit' );
   var platform = require( 'PHET_CORE/platform' );
+  var Poolable = require( 'PHET_CORE/Poolable' );
   var scenery = require( 'SCENERY/scenery' );
-  var SelfDrawable = require( 'SCENERY/display/SelfDrawable' );
   var SVGSelfDrawable = require( 'SCENERY/display/SVGSelfDrawable' );
   var TextStatefulDrawable = require( 'SCENERY/display/drawables/TextStatefulDrawable' );
 
@@ -33,47 +33,28 @@ define( function( require ) {
    * @param {Instance} instance
    */
   function TextSVGDrawable( renderer, instance ) {
-    this.initialize( renderer, instance );
+    // Super-type initialization
+    this.initializeSVGSelfDrawable( renderer, instance, true, keepSVGTextElements ); // usesPaint: true
+
+    if ( !this.svgElement ) {
+      // @protected {SVGTextElement} - Sole SVG element for this drawable, implementing API for SVGSelfDrawable
+      var text = this.svgElement = document.createElementNS( scenery.svgns, 'text' );
+      text.appendChild( document.createTextNode( '' ) );
+
+      // TODO: flag adjustment for SVG qualities
+      text.setAttribute( 'dominant-baseline', 'alphabetic' ); // to match Canvas right now
+      text.setAttribute( 'text-rendering', 'geometricPrecision' );
+      if ( useSVGTextLengthAdjustments ) {
+        text.setAttribute( 'lengthAdjust', 'spacingAndGlyphs' );
+      }
+      text.setAttributeNS( 'http://www.w3.org/XML/1998/namespace', 'xml:space', 'preserve' );
+      text.setAttribute( 'direction', 'ltr' );
+    }
   }
 
   scenery.register( 'TextSVGDrawable', TextSVGDrawable );
 
   inherit( SVGSelfDrawable, TextSVGDrawable, {
-    /**
-     * Initializes this drawable, starting its "lifetime" until it is disposed. This lifecycle can happen multiple
-     * times, with instances generally created by the SelfDrawable.Poolable trait (dirtyFromPool/createFromPool), and
-     * disposal will return this drawable to the pool.
-     * @public (scenery-internal)
-     *
-     * This acts as a pseudo-constructor that can be called multiple times, and effectively creates/resets the state
-     * of the drawable to the initial state.
-     *
-     * @param {number} renderer - Renderer bitmask, see Renderer's documentation for more details.
-     * @param {Instance} instance
-     * @returns {TextSVGDrawable} - Returns 'this' reference, for chaining
-     */
-    initialize: function( renderer, instance ) {
-      // Super-type initialization
-      this.initializeSVGSelfDrawable( renderer, instance, true, keepSVGTextElements ); // usesPaint: true
-
-      if ( !this.svgElement ) {
-        // @protected {SVGTextElement} - Sole SVG element for this drawable, implementing API for SVGSelfDrawable
-        var text = this.svgElement = document.createElementNS( scenery.svgns, 'text' );
-        text.appendChild( document.createTextNode( '' ) );
-
-        // TODO: flag adjustment for SVG qualities
-        text.setAttribute( 'dominant-baseline', 'alphabetic' ); // to match Canvas right now
-        text.setAttribute( 'text-rendering', 'geometricPrecision' );
-        if ( useSVGTextLengthAdjustments ) {
-          text.setAttribute( 'lengthAdjust', 'spacingAndGlyphs' );
-        }
-        text.setAttributeNS( 'http://www.w3.org/XML/1998/namespace', 'xml:space', 'preserve' );
-        text.setAttribute( 'direction', 'ltr' );
-      }
-
-      return this;
-    },
-
     /**
      * Updates the SVG elements so that they will appear like the current node's representation.
      * @protected
@@ -109,9 +90,7 @@ define( function( require ) {
 
   TextStatefulDrawable.mixInto( TextSVGDrawable );
 
-  // This sets up TextSVGDrawable.createFromPool/dirtyFromPool and drawable.freeToPool() for the type, so
-  // that we can avoid allocations by reusing previously-used drawables.
-  SelfDrawable.Poolable.mixInto( TextSVGDrawable );
+  Poolable.mixInto( TextSVGDrawable );
 
   return TextSVGDrawable;
 } );

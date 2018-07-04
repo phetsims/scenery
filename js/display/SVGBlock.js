@@ -298,18 +298,7 @@ define( function( require ) {
   } );
 
   Poolable.mixInto( SVGBlock, {
-    constructorDuplicateFactory: function( pool ) {
-      return function( display, renderer, transformRootInstance, filterRootInstance ) {
-        if ( pool.length ) {
-          sceneryLog && sceneryLog.SVGBlock && sceneryLog.SVGBlock( 'new from pool' );
-          return pool.pop().initialize( display, renderer, transformRootInstance, filterRootInstance );
-        }
-        else {
-          sceneryLog && sceneryLog.SVGBlock && sceneryLog.SVGBlock( 'new from constructor' );
-          return new SVGBlock( display, renderer, transformRootInstance, filterRootInstance );
-        }
-      };
-    }
+    initialize: SVGBlock.prototype.initialize
   } );
 
   return SVGBlock;

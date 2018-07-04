@@ -13,9 +13,9 @@ define( function( require ) {
   var Features = require( 'SCENERY/util/Features' );
   var inherit = require( 'PHET_CORE/inherit' );
   var Matrix3 = require( 'DOT/Matrix3' );
+  var Poolable = require( 'PHET_CORE/Poolable' );
   var RectangleStatefulDrawable = require( 'SCENERY/display/drawables/RectangleStatefulDrawable' );
   var scenery = require( 'SCENERY/scenery' );
-  var SelfDrawable = require( 'SCENERY/display/SelfDrawable' );
 
   // TODO: change this based on memory and performance characteristics of the platform
   var keepDOMRectangleElements = true; // whether we should pool DOM elements for the DOM rendering states, or whether we should free them when possible for memory
@@ -32,60 +32,41 @@ define( function( require ) {
    * @param {Instance} instance
    */
   function RectangleDOMDrawable( renderer, instance ) {
-    this.initialize( renderer, instance );
+    // Super-type initialization
+    this.initializeDOMSelfDrawable( renderer, instance );
+
+    // Stateful trait initialization
+    this.initializeState( renderer, instance );
+
+    // only create elements if we don't already have them (we pool visual states always, and depending on the platform may also pool the actual elements to minimize
+    // allocation and performance costs)
+    if ( !this.fillElement || !this.strokeElement ) {
+      var fillElement = this.fillElement = document.createElement( 'div' );
+      fillElement.style.display = 'block';
+      fillElement.style.position = 'absolute';
+      fillElement.style.left = '0';
+      fillElement.style.top = '0';
+      fillElement.style.pointerEvents = 'none';
+
+      var strokeElement = this.strokeElement = document.createElement( 'div' );
+      strokeElement.style.display = 'block';
+      strokeElement.style.position = 'absolute';
+      strokeElement.style.left = '0';
+      strokeElement.style.top = '0';
+      strokeElement.style.pointerEvents = 'none';
+      fillElement.appendChild( strokeElement );
+    }
+
+    // @protected {HTMLElement} - Our primary DOM element. This is exposed as part of the DOMSelfDrawable API.
+    this.domElement = this.fillElement;
+
+    // Apply CSS needed for future CSS transforms to work properly.
+    scenery.Util.prepareForTransform( this.domElement, this.forceAcceleration );
   }
 
   scenery.register( 'RectangleDOMDrawable', RectangleDOMDrawable );
 
   inherit( DOMSelfDrawable, RectangleDOMDrawable, {
-    /**
-     * Initializes this drawable, starting its "lifetime" until it is disposed. This lifecycle can happen multiple
-     * times, with instances generally created by the SelfDrawable.Poolable trait (dirtyFromPool/createFromPool), and
-     * disposal will return this drawable to the pool.
-     * @public (scenery-internal)
-     *
-     * This acts as a pseudo-constructor that can be called multiple times, and effectively creates/resets the state
-     * of the drawable to the initial state.
-     *
-     * @param {number} renderer - Renderer bitmask, see Renderer's documentation for more details.
-     * @param {Instance} instance
-     * @returns {RectangleDOMDrawable} - Returns 'this' reference, for chaining
-     */
-    initialize: function( renderer, instance ) {
-      // Super-type initialization
-      this.initializeDOMSelfDrawable( renderer, instance );
-
-      // Stateful trait initialization
-      this.initializeState( renderer, instance );
-
-      // only create elements if we don't already have them (we pool visual states always, and depending on the platform may also pool the actual elements to minimize
-      // allocation and performance costs)
-      if ( !this.fillElement || !this.strokeElement ) {
-        var fillElement = this.fillElement = document.createElement( 'div' );
-        fillElement.style.display = 'block';
-        fillElement.style.position = 'absolute';
-        fillElement.style.left = '0';
-        fillElement.style.top = '0';
-        fillElement.style.pointerEvents = 'none';
-
-        var strokeElement = this.strokeElement = document.createElement( 'div' );
-        strokeElement.style.display = 'block';
-        strokeElement.style.position = 'absolute';
-        strokeElement.style.left = '0';
-        strokeElement.style.top = '0';
-        strokeElement.style.pointerEvents = 'none';
-        fillElement.appendChild( strokeElement );
-      }
-
-      // @protected {HTMLElement} - Our primary DOM element. This is exposed as part of the DOMSelfDrawable API.
-      this.domElement = this.fillElement;
-
-      // Apply CSS needed for future CSS transforms to work properly.
-      scenery.Util.prepareForTransform( this.domElement, this.forceAcceleration );
-
-      return this; // allow for chaining
-    },
-
     /**
      * Updates our DOM element so that its appearance matches our node's representation.
      * @protected
@@ -187,9 +168,7 @@ define( function( require ) {
 
   RectangleStatefulDrawable.mixInto( RectangleDOMDrawable );
 
-  // This sets up RectangleDOMDrawable.createFromPool/dirtyFromPool and drawable.freeToPool() for the type, so
-  // that we can avoid allocations by reusing previously-used drawables.
-  SelfDrawable.Poolable.mixInto( RectangleDOMDrawable );
+  Poolable.mixInto( RectangleDOMDrawable );
 
   return RectangleDOMDrawable;
 } );

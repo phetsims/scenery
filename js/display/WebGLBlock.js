@@ -874,18 +874,7 @@ define( function( require ) {
   } );
 
   Poolable.mixInto( WebGLBlock, {
-    constructorDuplicateFactory: function( pool ) {
-      return function( display, renderer, transformRootInstance, filterRootInstance ) {
-        if ( pool.length ) {
-          sceneryLog && sceneryLog.WebGLBlock && sceneryLog.WebGLBlock( 'new from pool' );
-          return pool.pop().initialize( display, renderer, transformRootInstance, filterRootInstance );
-        }
-        else {
-          sceneryLog && sceneryLog.WebGLBlock && sceneryLog.WebGLBlock( 'new from constructor' );
-          return new WebGLBlock( display, renderer, transformRootInstance, filterRootInstance );
-        }
-      };
-    }
+    initialize: WebGLBlock.prototype.initialize
   } );
 
   return WebGLBlock;

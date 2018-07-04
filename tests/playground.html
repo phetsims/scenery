@@ -432,7 +432,7 @@ an UI and Display made for visual testing and debugging.
           window.scene.children = [];
         }
         eval( inputText );
-        var pdomRoot = document.querySelector( 'div.accessibility' );
+        var pdomRoot = display.accessibleDOMElement;
         document.getElementById( 'a11y-output' ).textContent = pdomRoot.outerHTML;
       }
 

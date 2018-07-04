@@ -20,11 +20,11 @@ define( function( require ) {
   'use strict';
 
   // modules
-  var scenery = require( 'SCENERY/scenery' );
+  var ButtonListenerIO = require( 'SCENERY/input/ButtonListenerIO' );
   var DownUpListener = require( 'SCENERY/input/DownUpListener' );
   var inherit = require( 'PHET_CORE/inherit' );
+  var scenery = require( 'SCENERY/scenery' );
   var Tandem = require( 'TANDEM/Tandem' );
-  var ButtonListenerIO = require( 'SCENERY/input/ButtonListenerIO' );
 
   /**
    * Options for the ButtonListener:

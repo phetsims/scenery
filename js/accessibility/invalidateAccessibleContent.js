@@ -47,12 +47,15 @@ define( function( require ) {
 
     // for each accessible peer, clear the container parent if it exists since we will be reinserting labels and
     // the dom element in createPeer
-    this.updateAccessiblePeers( function( accessiblePeer ) {
-      var containerElement = accessiblePeer.containerParent;
-      while ( containerElement && containerElement.hasChildNodes() ) {
-        containerElement.removeChild( containerElement.lastChild );
+    for ( var j = 0; j < this._accessibleInstances.length; j++ ) {
+      var peer = this._accessibleInstances[ j ].peer;
+      if ( peer ) {
+        var containerElement = peer.containerParent;
+        while ( containerElement && containerElement.hasChildNodes() ) {
+          containerElement.removeChild( containerElement.lastChild );
+        }
       }
-    } );
+    }
 
     // if any parents are flagged as removed from the accessibility tree, set content to null
     var contentDisplayed = this._accessibleContentDisplayed;
@@ -124,12 +127,11 @@ define( function( require ) {
           // set the accessible label now that the element has been recreated again, but not if the tagName
           // has been cleared out
           if ( self._labelContent && self._labelTagName !== null ) {
-            var isLabelTag = self._labelTagName.toUpperCase() === LABEL_TAG;
-            accessiblePeer.setLabelSiblingContent( self._labelContent, isLabelTag );
+            accessiblePeer.setLabelSiblingContent( self._labelContent );
           }
 
           // restore the innerContent
-          if ( self._innerContent && self._innerContent !== null ) {
+          if ( self._innerContent && self._tagName !== null ) {
             accessiblePeer.setPrimarySiblingContent( self._innerContent );
           }
 
@@ -168,30 +170,7 @@ define( function( require ) {
             self.setInputType( self._inputType );
           }
 
-          // restore this nodes aria-labelledby associations
-          self.updateAriaLabelledbyAssociations();
-
-          // if any other nodes are aria-labelledby this Node, update those associations too. Since this node's
-          // accessible content needs to be recreated, they need to update their aria-labelledby associations accordingly.
-          for ( i = 0; i < self._nodesThatAreAriaLabelledByThisNode.length; i++ ) {
-            self._nodesThatAreAriaLabelledByThisNode[ i ].updateAriaLabelledbyAssociations();
-          }
-
-          // restore aria-labelledby associations
-          var labelledByNode = self._ariaLabelledByNode;
-          labelledByNode && self.setAriaLabelledByNode( labelledByNode, self._ariaLabelledContent, labelledByNode._ariaLabelContent );
-
-          // if this node aria-labels another node, restore label associations for that node
-          var ariaLabelsNode = self._ariaLabelsNode;
-          ariaLabelsNode && ariaLabelsNode.setAriaLabelledByNode( self, ariaLabelsNode._ariaLabelledContent, self._ariaLabelContent );
-
-          // restore aria-describedby associations
-          var describedByNode = self._ariaDescribedByNode;
-          describedByNode && self.setAriaDescribedByNode( describedByNode, self._ariaDescribedContent, describedByNode._ariaDescribedContent );
-
-          // if this node aria-describes another node, restore description asssociations for that node
-          var ariaDescribesNode = self._ariaDescribesNode;
-          ariaDescribesNode && ariaDescribesNode.setAriaDescribedByNode( self, ariaDescribesNode._ariaDescribedContent, self._ariaDescriptionContent );
+          self.updateLabelledbyDescribebyAssociations();
 
           // add all listeners to the dom element
           for ( i = 0; i < self._accessibleInputListeners.length; i++ ) {

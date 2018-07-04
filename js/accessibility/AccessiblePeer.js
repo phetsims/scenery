@@ -21,6 +21,13 @@ define( function( require ) {
 
   var globalId = 1;
 
+  // constants
+  var PRIMARY_SIBLING = 'PRIMARY_SIBLING';
+  var LABEL_SIBLING = 'LABEL_SIBLING';
+  var DESCRIPTION_SIBLING = 'DESCRIPTION_SIBLING';
+  var CONTAINER_PARENT = 'CONTAINER_PARENT';
+  var LABEL_TAG = AccessibilityUtil.TAGS.LABEL;
+
   /**
    * Constructor.
    *
@@ -92,7 +99,6 @@ define( function( require ) {
         var primarySiblingDOMElement = this.primarySibling;
         var firstChild = this.containerParent.children[ 0 ] || null;
         this.containerParent.insertBefore( primarySiblingDOMElement, firstChild );
-
         this.topLevelElements = [ this.containerParent ];
       }
       else {
@@ -145,29 +151,136 @@ define( function( require ) {
     },
 
     /**
-     * Get an element on this node, looked up by the association flag passed in.
+     * Get an element on this node, looked up by the elementName flag passed in.
      * @public (scenery-internal)
      *
-     * @param {string} association - see AccessibilityUtil for valid associations
+     * @param {string} elementName - see AccessibilityUtil for valid associations
      * @return {HTMLElement}
      */
-    getElementByName: function( association ) {
-      var htmlElement = null;
-
-      if ( association === AccessiblePeer.PRIMARY_SIBLING ) {
-        htmlElement = this.primarySibling;
+    getElementByName: function( elementName ) {
+      if ( elementName === AccessiblePeer.PRIMARY_SIBLING ) {
+        return this.primarySibling;
       }
-      else if ( association === AccessiblePeer.LABEL_SIBLING ) {
-        htmlElement = this.labelSibling;
+      else if ( elementName === AccessiblePeer.LABEL_SIBLING ) {
+        return this.labelSibling;
       }
-      else if ( association === AccessiblePeer.DESCRIPTION_SIBLING ) {
-        htmlElement = this.descriptionSibling;
+      else if ( elementName === AccessiblePeer.DESCRIPTION_SIBLING ) {
+        return this.descriptionSibling;
       }
-      else if ( association === AccessiblePeer.CONTAINER_PARENT ) {
-        htmlElement = this.containerParent;
+      else if ( elementName === AccessiblePeer.CONTAINER_PARENT ) {
+        return this.containerParent;
       }
 
-      return htmlElement;
+      assert && assert( false, 'invalid elementName name: ' + elementName );
+    },
+
+    /**
+     * Add DOM Event listeners to the peer's primary sibling.
+     * @param {Object} accessibleInput - see Accessibility.addAccessibleInputListener
+     */
+    addDOMEventListeners: function( accessibleInput ) {
+      AccessibilityUtil.addDOMEventListeners( accessibleInput, this.primarySibling );
+    },
+    /**
+     * Remove DOM Event listeners from the peer's primary sibling.
+     * @param {Object} accessibleInput - see Accessibility.addAccessibleInputListener
+     */
+    removeDOMEventListeners: function( accessibleInput ) {
+      AccessibilityUtil.removeDOMEventListeners( accessibleInput, this.primarySibling );
+    },
+
+    /**
+     * Sets a attribute on one of the peer's HTMLElements.
+     * @param {string} attribute
+     * @param {*} attributeValue
+     * @param {Object} [options]
+     */
+    setAttributeToElement: function( attribute, attributeValue, options ) {
+
+      options = _.extend( {
+        // {string|null} - If non-null, will set the attribute with the specified namespace. This can be required
+        // for setting certain attributes (e.g. MathML).
+        namespace: null,
+
+        elementName: PRIMARY_SIBLING // see this.getElementName() for valid values, default to the primary sibling
+      }, options );
+
+      var element = this.getElementByName( options.elementName );
+
+      if ( options.namespace ) {
+        element.setAttributeNS( options.namespace, attribute, attributeValue );
+      }
+      else {
+        element.setAttribute( attribute, attributeValue );
+      }
+    },
+    /**
+     * Remove attribute from one of the peer's HTMLElements.
+     * @param {string} attribute
+     * @param {Object} [options]
+     */
+    removeAttributeFromElement: function( attribute, options ) {
+
+      options = _.extend( {
+        // {string|null} - If non-null, will set the attribute with the specified namespace. This can be required
+        // for setting certain attributes (e.g. MathML).
+        namespace: null,
+
+        elementName: PRIMARY_SIBLING // see this.getElementName() for valid values, default to the primary sibling
+      }, options );
+
+      var element = this.getElementByName( options.elementName );
+
+      if ( options.namespace ) {
+        element.removeAttributeNS( options.namespace, attribute );
+      }
+      else {
+        element.removeAttribute( attribute );
+      }
+    },
+
+    /**
+     * Remove the given attribute from all peer elements
+     * @param {string} attribute
+     */
+    removeAttributeFromAllElements: function( attribute ) {
+      assert && assert( typeof attribute === 'string' );
+      this.primarySibling && this.primarySibling.removeAttribute( attribute );
+      this.labelSibling && this.labelSibling.removeAttribute( attribute );
+      this.descriptionSibling && this.descriptionSibling.removeAttribute( attribute );
+      this.containerParent && this.containerParent.removeAttribute( attribute );
+    },
+
+    /**
+     * Set either association attribute (aria-labelledby/describedby) on one of this peer's Elements
+     * @param {string} attribute - either aria-labelledby or aria-describedby
+     * @param {Object} associationObject - see addAriaLabelledbyAssociation() for schema
+     * @param {string} otherElementId - the id to be added to this peer element's attribute
+     */
+    setAssociationAttribute: function( attribute, associationObject, otherElementId ) {
+      assert && assert( attribute === 'aria-labelledby' || attribute === 'aria-describedby',
+        'unsupported attribute for setting with association object' );
+      assert && assert( typeof otherElementId === 'string' );
+      assert && AccessibilityUtil.validateAssociationObject( associationObject );
+
+      var element = this.getElementByName( associationObject.thisElementName );
+
+      // to support any option order, no-op if the peer element has not been created yet.
+      if ( element ) {
+
+        // only update associations if the requested peer element has been created
+        // NOTE: in the future, we would like to verify that the association exists but can't do that yet because
+        // we have to support cases where we set label association prior to setting the sibling/parent tagName
+        var previousAttributeValue = element.getAttribute( attribute ) || '';
+        assert && assert( typeof previousAttributeValue === 'string' );
+
+        var newAttributeValue = [ previousAttributeValue.trim(), otherElementId ].join( ' ' ).trim();
+
+        // add the id from the new association to the value of the HTMLElement's attribute.
+        this.setAttributeToElement( attribute, newAttributeValue, {
+          elementName: associationObject.thisElementName
+        } );
+      }
     },
     /**
      * Called by invalidateAccessibleContent. The contentElement will either be a
@@ -279,16 +392,20 @@ define( function( require ) {
     /**
      * Responsible for setting the content for the label sibling
      * @param {string} content - the content for the label sibling.
-     * @param {boolean} isLabelTag - special treatment is given for a "label" tagName, as the "for" attribute is set to
      * the primary sibling.
      */
-    setLabelSiblingContent: function( content, isLabelTag ) {
-      assert && assert( this.labelSibling, 'must have a label sibling to set its content' );
+    setLabelSiblingContent: function( content ) {
       assert && assert( typeof content === 'string', 'incorrect label content type' );
+
+      // no-op to support any option order
+      if ( !this.labelSibling ) {
+        return;
+      }
+
       AccessibilityUtil.setTextContent( this.labelSibling, content );
 
       // if the label element happens to be a 'label', associate with 'for' attribute
-      if ( isLabelTag ) {
+      if ( this.labelSibling.tagName.toUpperCase() === LABEL_TAG ) {
         this.labelSibling.setAttribute( 'for', this.primarySibling.id );
       }
     },
@@ -298,8 +415,12 @@ define( function( require ) {
      * the primary sibling.
      */
     setDescriptionSiblingContent: function( content ) {
-      assert && assert( this.descriptionSibling, 'must have a description sibling to set its content' );
       assert && assert( typeof content === 'string', 'incorrect description content type' );
+
+      // no-op to support any option order
+      if ( !this.descriptionSibling ) {
+        return;
+      }
       AccessibilityUtil.setTextContent( this.descriptionSibling, content );
     },
 
@@ -309,36 +430,30 @@ define( function( require ) {
      * the primary sibling.
      */
     setPrimarySiblingContent: function( content ) {
-      assert && assert( this.primarySibling, 'must have a primary sibling to set its content' );
       assert && assert( typeof content === 'string', 'incorrect inner content type' );
       assert && assert( this.accessibleInstance.children.length === 0, 'descendants exist with accessible content, innerContent cannot be used' );
       assert && assert( AccessibilityUtil.tagNameSupportsContent( this.primarySibling.tagName ),
         'tagName: ' + this._tagName + ' does not support inner content' );
 
+      // no-op to support any option order
+      if ( !this.primarySibling ) {
+        return;
+      }
       AccessibilityUtil.setTextContent( this.primarySibling, content );
     }
 
   }, {
 
     // @static - specifies valid associations between related AccessiblePeers in the DOM
-    PRIMARY_SIBLING: 'PRIMARY_SIBLING', // associate with all accessible content related to this peer
-    LABEL_SIBLING: 'LABEL_SIBLING', // associate with just the label content of this peer
-    DESCRIPTION_SIBLING: 'DESCRIPTION_SIBLING', // associate with just the description content of this peer
-    CONTAINER_PARENT: 'CONTAINER_PARENT' // associate with everything under the container parent of this peer
+    PRIMARY_SIBLING: PRIMARY_SIBLING, // associate with all accessible content related to this peer
+    LABEL_SIBLING: LABEL_SIBLING, // associate with just the label content of this peer
+    DESCRIPTION_SIBLING: DESCRIPTION_SIBLING, // associate with just the description content of this peer
+    CONTAINER_PARENT: CONTAINER_PARENT // associate with everything under the container parent of this peer
   } );
 
   // Set up pooling
   Poolable.mixInto( AccessiblePeer, {
-    constructorDuplicateFactory: function( pool ) {
-      return function( accessibleInstance, primarySibling, options ) {
-        if ( pool.length ) {
-          return pool.pop().initializeAccessiblePeer( accessibleInstance, primarySibling, options );
-        }
-        else {
-          return new AccessiblePeer( accessibleInstance, primarySibling, options );
-        }
-      };
-    }
+    initalize: AccessiblePeer.prototype.initializeAccessiblePeer
   } );
 
   return AccessiblePeer;

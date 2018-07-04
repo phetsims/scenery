@@ -431,18 +431,7 @@ define( function( require ) {
   } );
 
   Poolable.mixInto( CanvasBlock, {
-    constructorDuplicateFactory: function( pool ) {
-      return function( display, renderer, transformRootInstance, filterRootInstance ) {
-        if ( pool.length ) {
-          sceneryLog && sceneryLog.CanvasBlock && sceneryLog.CanvasBlock( 'new from pool' );
-          return pool.pop().initialize( display, renderer, transformRootInstance, filterRootInstance );
-        }
-        else {
-          sceneryLog && sceneryLog.CanvasBlock && sceneryLog.CanvasBlock( 'new from constructor' );
-          return new CanvasBlock( display, renderer, transformRootInstance, filterRootInstance );
-        }
-      };
-    }
+    initialize: CanvasBlock.prototype.initialize
   } );
 
   return CanvasBlock;

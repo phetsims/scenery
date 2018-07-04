@@ -448,18 +448,7 @@ define( function( require ) {
   };
 
   Poolable.mixInto( BackboneDrawable, {
-    constructorDuplicateFactory: function( pool ) {
-      return function( display, backboneInstance, transformRootInstance, renderer, isDisplayRoot ) {
-        if ( pool.length ) {
-          sceneryLog && sceneryLog.BackboneDrawable && sceneryLog.BackboneDrawable( 'new from pool' );
-          return pool.pop().initialize( display, backboneInstance, transformRootInstance, renderer, isDisplayRoot );
-        }
-        else {
-          sceneryLog && sceneryLog.BackboneDrawable && sceneryLog.BackboneDrawable( 'new from constructor' );
-          return new BackboneDrawable( display, backboneInstance, transformRootInstance, renderer, isDisplayRoot );
-        }
-      };
-    }
+    initialize: BackboneDrawable.prototype.initialize
   } );
 
   return BackboneDrawable;

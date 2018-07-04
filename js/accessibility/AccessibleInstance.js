@@ -120,8 +120,17 @@ define( function( require ) {
       if ( this.isRootInstance ) {
         var accessibilityContainer = document.createElement( 'div' );
 
-        // give the container a class name so it is hidden in the Display, see accessibility styling in Display.js
-        accessibilityContainer.className = 'accessibility';
+        // Hide the PDOM with by shifting to the left and clipping. Has some width so that AT read formatting tags in 
+        // a single line, see  https://github.com/phetsims/scenery/issues/730. Cannot use SceneryStyle because of
+        // compatibility with Chromebooks, see https://github.com/phetsims/scenery/issues/822. 
+        accessibilityContainer.style.position = 'relative';
+        accessibilityContainer.style.left = '-1000px';
+        accessibilityContainer.style.top = '0';
+        accessibilityContainer.style.width = '250px';
+        accessibilityContainer.style.height = '0';
+        accessibilityContainer.style.clip = 'rect(0,0,0,0)';
+        accessibilityContainer.style.pointerEvents = 'none';
+        
         this.peer = AccessiblePeer.createFromPool( this, accessibilityContainer );
 
         var self = this;
@@ -652,16 +661,7 @@ define( function( require ) {
   } );
 
   Poolable.mixInto( AccessibleInstance, {
-    constructorDuplicateFactory: function( pool ) {
-      return function( parent, display, trail ) {
-        if ( pool.length ) {
-          return pool.pop().initializeAccessibleInstance( parent, display, trail );
-        }
-        else {
-          return new AccessibleInstance( parent, display, trail );
-        }
-      };
-    }
+    initialize: AccessibleInstance.prototype.initializeAccessibleInstance
   } );
 
   return AccessibleInstance;

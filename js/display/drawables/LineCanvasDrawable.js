@@ -12,8 +12,8 @@ define( function( require ) {
   var CanvasSelfDrawable = require( 'SCENERY/display/CanvasSelfDrawable' );
   var inherit = require( 'PHET_CORE/inherit' );
   var PaintableStatelessDrawable = require( 'SCENERY/display/drawables/PaintableStatelessDrawable' );
+  var Poolable = require( 'PHET_CORE/Poolable' );
   var scenery = require( 'SCENERY/scenery' );
-  var SelfDrawable = require( 'SCENERY/display/SelfDrawable' );
   // TODO: use LineStatelessDrawable instead of the custom stuff going on
   // var LineStatelessDrawable = require( 'SCENERY/display/drawables/LineStatelessDrawable' );
 
@@ -26,31 +26,13 @@ define( function( require ) {
    * @param {Instance} instance
    */
   function LineCanvasDrawable( renderer, instance ) {
-    this.initialize( renderer, instance );
+    this.initializeCanvasSelfDrawable( renderer, instance );
+    this.initializePaintableStateless( renderer, instance );
   }
 
   scenery.register( 'LineCanvasDrawable', LineCanvasDrawable );
 
   inherit( CanvasSelfDrawable, LineCanvasDrawable, {
-    /**
-     * Initializes this drawable, starting its "lifetime" until it is disposed. This lifecycle can happen multiple
-     * times, with instances generally created by the SelfDrawable.Poolable trait (dirtyFromPool/createFromPool), and
-     * disposal will return this drawable to the pool.
-     * @public (scenery-internal)
-     *
-     * This acts as a pseudo-constructor that can be called multiple times, and effectively creates/resets the state
-     * of the drawable to the initial state.
-     *
-     * @param {number} renderer - Renderer bitmask, see Renderer's documentation for more details.
-     * @param {Instance} instance
-     * @returns {LineCanvasDrawable} - Self reference for chaining
-     */
-    initialize: function( renderer, instance ) {
-      this.initializeCanvasSelfDrawable( renderer, instance );
-      this.initializePaintableStateless( renderer, instance );
-      return this;
-    },
-
     /**
      * Paints this drawable to a Canvas (the wrapper contains both a Canvas reference and its drawing context).
      * @public
@@ -100,9 +82,7 @@ define( function( require ) {
 
   PaintableStatelessDrawable.mixInto( LineCanvasDrawable );
 
-  // This sets up LineCanvasDrawable.createFromPool/dirtyFromPool and drawable.freeToPool() for the type, so
-  // that we can avoid allocations by reusing previously-used drawables.
-  SelfDrawable.Poolable.mixInto( LineCanvasDrawable );
+  Poolable.mixInto( LineCanvasDrawable );
 
   return LineCanvasDrawable;
 } );

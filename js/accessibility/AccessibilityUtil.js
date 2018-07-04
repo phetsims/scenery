@@ -11,8 +11,8 @@ define( function( require ) {
   'use strict';
 
   // modules
-  var scenery = require( 'SCENERY/scenery' );
   var Random = require( 'DOT/Random' );
+  var scenery = require( 'SCENERY/scenery' );
 
   // constants
   var NEXT = 'NEXT';
@@ -298,10 +298,12 @@ define( function( require ) {
      * In general, textContent is more secure and more performant because it doesn't trigger DOM styling and
      * element insertions.
      *
-     * @param {HTMLElement} domElement
+     * @param {Element} domElement
      * @param {string} textContent - could have acceptable HTML "formatting" tags in it
      */
     setTextContent: function( domElement, textContent ) {
+      assert && assert( domElement instanceof Element ); // parent to HTMLElement, to support other namespaces
+      assert && assert( typeof textContent === 'string' );
       if ( tagNameSupportsContent( domElement.tagName ) ) {
 
         // returns true if there are no brackets at all
@@ -398,6 +400,25 @@ define( function( require ) {
       for ( var i = 0; i < childrenToAdd.length; i++ ) {
         var childToAdd = childrenToAdd[ i ];
         element.insertBefore( childToAdd, beforeThisElement || null );
+      }
+    },
+
+    /**
+     * Given an associationObject for either aria-labelledby or aria-describedby, make sure it has the right signature.
+     * @param associationObject
+     */
+    validateAssociationObject: function( associationObject ) {
+
+      var expectedKeys = [ 'thisElementName', 'otherNode', 'otherElementName' ];
+
+      var objectKeys = Object.keys( associationObject );
+
+      assert && assert( objectKeys.length === 3, 'wrong number of keys in associationObject, expected:', expectedKeys, ' got:', objectKeys );
+
+
+      for ( var i = 0; i < objectKeys.length; i++ ) {
+        var objectKey = objectKeys[ i ];
+        assert && assert( expectedKeys.indexOf( objectKey ) >= 0, 'unexpected key: ' + objectKey );
       }
     },
 

@@ -1696,18 +1696,7 @@ define( function( require ) {
 
   // object pooling
   Poolable.mixInto( Instance, {
-    constructorDuplicateFactory: function( pool ) {
-      return function( display, trail, isDisplayRoot, isSharedCanvasCacheRoot ) {
-        if ( pool.length ) {
-          sceneryLog && sceneryLog.Instance && sceneryLog.Instance( 'new from pool' );
-          return pool.pop().initialize( display, trail, isDisplayRoot, isSharedCanvasCacheRoot );
-        }
-        else {
-          sceneryLog && sceneryLog.Instance && sceneryLog.Instance( 'new from constructor' );
-          return new Instance( display, trail, isDisplayRoot, isSharedCanvasCacheRoot );
-        }
-      };
-    }
+    initialize: Instance.prototype.initialize
   } );
 
   return Instance;

@@ -126,6 +126,7 @@ define( function( require ) {
   // We need to do some font-size tests, so we have a Text for that.
   var scratchText = new scenery.Text( '' );
 
+  // himalaya converts dash separated CSS to camel case - use CSS compatible style with dashes, see above for examples
   var FONT_STYLE_MAP = {
     'fontFamily': 'family',
     'fontSize': 'size',
@@ -1577,16 +1578,7 @@ define( function( require ) {
   } );
 
   Poolable.mixInto( RichTextElement, {
-    constructorDuplicateFactory: function( pool ) {
-      return function( isLTR ) {
-        if ( pool.length ) {
-          return pool.pop().initialize( isLTR );
-        }
-        else {
-          return new RichTextElement( isLTR );
-        }
-      };
-    }
+    initialize: RichTextElement.prototype.initialize
   } );
 
   /**
@@ -1679,16 +1671,7 @@ define( function( require ) {
   } );
 
   Poolable.mixInto( RichTextLeaf, {
-    constructorDuplicateFactory: function( pool ) {
-      return function( content, isLTR, font, boundsMethod, fill, stroke ) {
-        if ( pool.length ) {
-          return pool.pop().initialize( content, isLTR, font, boundsMethod, fill, stroke );
-        }
-        else {
-          return new RichTextLeaf( content, isLTR, font, boundsMethod, fill, stroke );
-        }
-      };
-    }
+    initialize: RichTextLeaf.prototype.initialize
   } );
 
   /**
@@ -1779,16 +1762,7 @@ define( function( require ) {
   } );
 
   Poolable.mixInto( RichTextLink, {
-    constructorDuplicateFactory: function( pool ) {
-      return function( innerContent, href ) {
-        if ( pool.length ) {
-          return pool.pop().initialize( innerContent, href );
-        }
-        else {
-          return new RichTextLink( innerContent, href );
-        }
-      };
-    }
+    initialize: RichTextLink.prototype.initialize
   } );
 
   return RichText;

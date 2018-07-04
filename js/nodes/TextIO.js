@@ -10,15 +10,17 @@ define( function( require ) {
   'use strict';
 
   // modules
-  var scenery = require( 'SCENERY/scenery' );
   var FontIO = require( 'SCENERY/util/FontIO' );
   var NodeIO = require( 'SCENERY/nodes/NodeIO' );
+  var NodeProperty = require( 'SCENERY/util/NodeProperty' );
+  var PropertyIO = require( 'AXON/PropertyIO' );
+  var scenery = require( 'SCENERY/scenery' );
 
   // ifphetio
   var assertInstanceOf = require( 'ifphetio!PHET_IO/assertInstanceOf' );
-  var phetioInherit = require( 'ifphetio!PHET_IO/phetioInherit' );
   var FunctionIO = require( 'ifphetio!PHET_IO/types/FunctionIO' );
   var NumberIO = require( 'ifphetio!PHET_IO/types/NumberIO' );
+  var phetioInherit = require( 'ifphetio!PHET_IO/phetioInherit' );
   var StringIO = require( 'ifphetio!PHET_IO/types/StringIO' );
   var VoidIO = require( 'ifphetio!PHET_IO/types/VoidIO' );
 
@@ -30,9 +32,33 @@ define( function( require ) {
   function TextIO( text, phetioID ) {
     assert && assertInstanceOf( text, phet.scenery.Text );
     NodeIO.call( this, text, phetioID );
+
+    // this uses a sub Property adapter as described in https://github.com/phetsims/phet-io/issues/1326
+    var textProperty = new NodeProperty( text, 'text', 'text', {
+
+      // pick the following values from the parent Node
+      phetioReadOnly: text.phetioReadOnly,
+      phetioState: text.phetioState,
+      phetioType: PropertyIO( StringIO ),
+
+      tandem: text.tandem.createTandem( 'textProperty' ),
+      phetioInstanceDocumentation: 'Property for the displayed text.'
+    } );
+
+    // @private
+    this.disposeTextIO = function() {
+      textProperty.dispose();
+    };
   }
 
   phetioInherit( NodeIO, 'TextIO', TextIO, {
+
+    /**
+     * @public - called by PhetioObject when the wrapper is done
+     */
+    dispose: function() {
+      this.disposeTextIO();
+    },
 
     addTextChangedListener: {
       returnType: VoidIO,
