@@ -139,7 +139,7 @@ define( function( require ) {
   } );
 
 
-  QUnit.test( 'containerTagName option, container created if needed', function( assert ) {
+  QUnit.test( 'containerTagName option', function( assert ) {
 
 
     // test the behavior of swapVisibility function
@@ -221,6 +221,101 @@ define( function( require ) {
     c.labelContent = TEST_LABEL;
     var cLabelElement = document.getElementById( c.accessibleInstances[ 0 ].peer.labelSibling.id );
     assert.ok( cLabelElement.getAttribute( 'for' ) !== null, 'order should not matter' );
+  } );
+
+  QUnit.test( 'container element not needed for multiple siblings', function( assert ) {
+
+    // test the behavior of swapVisibility function
+    var rootNode = new Node( { tagName: 'div' } );
+    var display = new Display( rootNode ); // eslint-disable-line
+    document.body.appendChild( display.domElement );
+
+    // test containerTag is not needed
+    var b = new Node( {
+      tagName: 'div',
+      labelContent: 'hello'
+    } );
+    var c = new Node( {
+      tagName: 'section',
+      labelContent: 'hi'
+    } );
+    var d = new Node( {
+      tagName: 'p',
+      innerContent: 'PPPP',
+      containerTagName: 'div'
+    } );
+    rootNode.addChild( b );
+    b.addChild( c );
+    b.addChild( d );
+    var bElement = getPrimarySiblingElementByNode( b );
+    var cPeer = c.accessibleInstances[ 0 ].peer;
+    var dPeer = d.accessibleInstances[ 0 ].peer;
+    assert.ok( bElement.children.length === 3, 'c.p, c.section, d.div should all be on the same level' );
+    var confirmOriginalOrder = function() {
+      assert.ok( bElement.children[ 0 ].tagName === 'P', 'p first' );
+      assert.ok( bElement.children[ 1 ].tagName === 'SECTION', 'section 2nd' );
+      assert.ok( bElement.children[ 2 ].tagName === 'DIV', 'div 3rd' );
+      assert.ok( bElement.children[ 0 ] === cPeer.labelSibling, 'c label first' );
+      assert.ok( bElement.children[ 1 ] === cPeer.primarySibling, 'c primary 2nd' );
+      assert.ok( bElement.children[ 2 ] === dPeer.containerParent, 'd container 3rd' );
+    };
+    confirmOriginalOrder();
+
+    // add a few more
+    var e = new Node( {
+      tagName: 'span',
+      descriptionContent: '<br>sweet and cool things</br>'
+    } );
+    b.addChild( e );
+    bElement = getPrimarySiblingElementByNode( b ); // refresh the DOM Elements
+    cPeer = c.accessibleInstances[ 0 ].peer; // refresh the DOM Elements
+    dPeer = d.accessibleInstances[ 0 ].peer; // refresh the DOM Elements
+    var ePeer = e.accessibleInstances[ 0 ].peer;
+    assert.ok( bElement.children.length === 5, 'e children should be added to the same pDOM level.' );
+    confirmOriginalOrder();
+
+    var confirmOriginalWithE = function() {
+      assert.ok( bElement.children[ 3 ].tagName === 'P', 'P 4rd' );
+      assert.ok( bElement.children[ 4 ].tagName === 'SPAN', 'SPAN 3rd' );
+      assert.ok( bElement.children[ 3 ] === ePeer.descriptionSibling, 'e description 4th' );
+      assert.ok( bElement.children[ 4 ] === ePeer.primarySibling, 'e primary 5th' );
+    };
+
+    // dynamically adding parent
+    e.containerTagName = 'article';
+    bElement = getPrimarySiblingElementByNode( b ); // refresh the DOM Elements
+    cPeer = c.accessibleInstances[ 0 ].peer; // refresh the DOM Elements
+    dPeer = d.accessibleInstances[ 0 ].peer; // refresh the DOM Elements
+    ePeer = e.accessibleInstances[ 0 ].peer;
+    assert.ok( bElement.children.length === 4, 'e children should now be under e\'s container.' );
+    confirmOriginalOrder();
+    assert.ok( bElement.children[ 3 ].tagName === 'ARTICLE', 'SPAN 3rd' );
+    assert.ok( bElement.children[ 3 ] === ePeer.containerParent, 'e parent 3rd' );
+
+    // clear container
+    e.containerTagName = null;
+    bElement = getPrimarySiblingElementByNode( b ); // refresh the DOM Elements
+    cPeer = c.accessibleInstances[ 0 ].peer; // refresh the DOM Elements
+    dPeer = d.accessibleInstances[ 0 ].peer; // refresh the DOM Elements
+    ePeer = e.accessibleInstances[ 0 ].peer;
+    assert.ok( bElement.children.length === 5, 'e children should be added to the same pDOM level again.' );
+    confirmOriginalOrder();
+    confirmOriginalWithE();
+
+    // proper disposal
+    e.dispose();
+    bElement = getPrimarySiblingElementByNode( b );
+    assert.ok( bElement.children.length === 3, 'e children should have been removed' );
+    assert.ok( e.accessibleInstances.length === 0, 'e is disposed' );
+    confirmOriginalOrder();
+
+    // reorder d correctly when c removed
+    b.removeChild( c );
+    assert.ok( bElement.children.length === 1, 'c children should have been removed, only d container' );
+    bElement = getPrimarySiblingElementByNode( b );
+    dPeer = d.accessibleInstances[ 0 ].peer;
+    assert.ok( bElement.children[ 0 ].tagName === 'DIV', 'DIV first' );
+    assert.ok( bElement.children[ 0 ] === dPeer.containerParent, 'd container first' );
   } );
 
   QUnit.test( 'descriptionTagName/descriptionContent option', function( assert ) {
