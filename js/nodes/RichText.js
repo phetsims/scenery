@@ -700,8 +700,12 @@ define( function( require ) {
       text = '' + text;
 
       if ( text !== this._text ) {
+        var oldText = this._text;
+
         this._text = text;
         this.rebuildRichText();
+
+        this.trigger2( 'text', oldText, text );
       }
       return this;
     },
