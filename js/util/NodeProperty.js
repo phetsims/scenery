@@ -27,19 +27,19 @@ define( function( require ) {
     assert && assert( typeof attribute === 'string', 'wrong type for getLocation' );
     var self = this;
 
-    // @private
+    // @private {Node}
     this.node = node;
 
-    // @private - for disposal
+    // @private {string} - for disposal
     this.trigger = trigger;
 
-    // @private
+    // @private {string}
     this.attribute = attribute;
 
     // Read-only Property that describes a part relative to the bounds of the node.
     Property.call( this, node[ attribute ], options );
 
-    // @private - When the node event is triggered, get the new value and set it to this Property
+    // @private {function} - When the node event is triggered, get the new value and set it to this Property
     this.changeListener = function() {
       self.set( node[ attribute ] );
     };
