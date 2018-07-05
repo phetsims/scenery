@@ -65,7 +65,7 @@ define( function( require ) {
         // @protected {boolean} - Whether the cached paints has changed since our last update.
         this.dirtyCachedPaints = true;
 
-        // @protected {Array.<null|string|Color|Property.<string|Color>|LinearGradient|RadialGradient|Pattern>}
+        // @protected {Array.<PaintDef>}
         // Stores the last seen cached paints, so we can update our listeners/etc.
         this.lastCachedPaints = [];
 

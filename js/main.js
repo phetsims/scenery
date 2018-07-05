@@ -142,6 +142,7 @@ define( [
   'SCENERY/util/LinearGradient',
   'SCENERY/util/Paint',
   'SCENERY/util/PaintColorProperty',
+  'SCENERY/util/PaintDef',
   'SCENERY/util/Pattern',
   'SCENERY/util/Picker',
   'SCENERY/util/RadialGradient',

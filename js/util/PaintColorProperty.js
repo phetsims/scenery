@@ -39,7 +39,7 @@ define( function( require ) {
   'use strict';
 
   var inherit = require( 'PHET_CORE/inherit' );
-  var Paint = require( 'SCENERY/util/Paint' );
+  var PaintDef = require( 'SCENERY/util/PaintDef' );
   var PaintObserver = require( 'SCENERY/display/PaintObserver' );
   var Property = require( 'AXON/Property' );
   var scenery = require( 'SCENERY/scenery' );
@@ -48,11 +48,11 @@ define( function( require ) {
    * @constructor
    * @extends {Property.<Color>}
    *
-   * @param {null|string|Color|Property.<string|Color>|LinearGradient|RadialGradient|Pattern} paint
+   * @param {PaintDef} paint
    * @param {Object} [options]
    */
   function PaintColorProperty( paint, options ) {
-    var initialColor = Paint.toColor( paint );
+    var initialColor = PaintDef.toColor( paint );
 
     options = _.extend( {
       // {number} - 0 applies no change. Positive numbers brighten the color up to 1 (white). Negative numbers darken
@@ -65,7 +65,7 @@ define( function( require ) {
 
     Property.call( this, initialColor, options );
 
-    // @private {null|string|Color|Property.<string|Color>|LinearGradient|RadialGradient|Pattern}
+    // @private {PaintDef}
     this._paint = null;
 
     // @private {number} - See setFactor() for more information.
@@ -87,10 +87,10 @@ define( function( require ) {
      * Sets the current paint of the PaintColorProperty.
      * @public
      *
-     * @param {null|string|Color|Property.<string|Color>|LinearGradient|RadialGradient|Pattern} paint
+     * @param {PaintDef} paint
      */
     setPaint: function( paint ) {
-      assert && assert( Paint.isPaint( paint ) );
+      assert && assert( PaintDef.isPaintDef( paint ) );
 
       this._paint = paint;
       this._paintObserver.setPrimary( paint );
@@ -101,7 +101,7 @@ define( function( require ) {
      * Returns the current paint.
      * @public
      *
-     * @returns {null|string|Color|Property.<string|Color>|LinearGradient|RadialGradient|Pattern}
+     * @returns {PaintDef}
      */
     getPaint: function() {
       return this._paint;
@@ -158,7 +158,7 @@ define( function( require ) {
      * @private
      */
     invalidatePaint: function() {
-      this.value = Paint.toColor( this._paint ).colorUtilsBrightness( this._factor );
+      this.value = PaintDef.toColor( this._paint ).colorUtilsBrightness( this._factor );
     },
 
     /**

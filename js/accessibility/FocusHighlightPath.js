@@ -68,7 +68,7 @@ define( function( require ) {
       lineDashOffset: LineStyles.DEFAULT_OPTIONS.lineDashOffset
     }, options );
 
-    // @private {null|string|Color|Property.<string|Color>|LinearGradient|RadialGradient|Pattern}
+    // @private {PaintDef}
     this._innerHighlightColor = options.innerStroke;
     this._outerHighlightColor = options.outerStroke;
 
@@ -154,7 +154,7 @@ define( function( require ) {
     /**
      * Set the inner color of this focus highlight.
      * @public
-     * @param {null|string|Color|Property.<string|Color>|LinearGradient|RadialGradient|Pattern} color
+     * @param {PaintDef} color
      */
     setInnerHighlightColor: function( color ) {
       this._innerHighlightColor = color;
@@ -166,7 +166,7 @@ define( function( require ) {
      * Get the inner color of this focus highlight path.
      * @public
      *
-     * @returns {null|string|Color|Property.<string|Color>|LinearGradient|RadialGradient|Pattern}
+     * @returns {PaintDef}
      */
     getInnerHighlightColor: function() {
       return this._innerHighlightColor;
@@ -176,7 +176,7 @@ define( function( require ) {
     /**
      * Set the outer color of this focus highlight.
      * @public
-     * @param {null|string|Color|Property.<string|Color>|LinearGradient|RadialGradient|Pattern} color
+     * @param {PaintDef} color
      */
     setOuterHighlightColor: function( color ) {
       this._outerHighlightColor = color;
@@ -188,7 +188,7 @@ define( function( require ) {
      * Get the color of the outer highlight for this FocusHighlightPath
      * @public
      *
-     * @returns {null|string|Color|Property.<string|Color>|LinearGradient|RadialGradient|Pattern}
+     * @returns {PaintDef}
      */
     getOuterHighlightColor: function() {
       return this._outerHighlightColor;

@@ -376,7 +376,7 @@ define( function( require ) {
      * Set the inner color of all focus highlights.
      * @public
      *
-     * @param {null|string|Color|Property.<string|Color>|LinearGradient|RadialGradient|Pattern} color
+     * @param {PaintDef} color
      */
     setInnerHighlightColor: function( color ) {
       innerHighlightColor = color;
@@ -387,7 +387,7 @@ define( function( require ) {
      * Get the inner color of all focus highlights.
      * @public
      *
-     * @returns {null|string|Color|Property.<string|Color>|LinearGradient|RadialGradient|Pattern}
+     * @returns {PaintDef}
      */
     getInnerHighlightColor: function() {
       return innerHighlightColor;
@@ -398,7 +398,7 @@ define( function( require ) {
      * Set the outer color of all focus highlights.
      * @public
      *
-     * @param {null|string|Color|Property.<string|Color>|LinearGradient|RadialGradient|Pattern} color
+     * @param {PaintDef} color
      */
     setOuterHilightColor: function( color ) {
       outerHighlightColor = color;
@@ -409,7 +409,7 @@ define( function( require ) {
      * Get the outer color of all focus highlights.
      * @public
      *
-     * @returns {null|string|Color|Property.<string|Color>|LinearGradient|RadialGradient|Pattern} color
+     * @returns {PaintDef} color
      */
     getOuterHighlightColor: function() {
       return outerHighlightColor;
@@ -420,7 +420,7 @@ define( function( require ) {
      * Set the inner color of all group focus highlights.
      * @public
      *
-     * @param {null|string|Color|Property.<string|Color>|LinearGradient|RadialGradient|Pattern} color
+     * @param {PaintDef} color
      */
     setInnerGroupHighlightColor: function( color ) {
       innerGroupHighlightColor = color;
@@ -431,7 +431,7 @@ define( function( require ) {
      * Get the inner color of all group focus highlights
      * @public
      *
-     * @returns {null|string|Color|Property.<string|Color>|LinearGradient|RadialGradient|Pattern} color
+     * @returns {PaintDef} color
      */
     getInnerGroupHighlightColor: function() {
       return innerGroupHighlightColor;
@@ -442,7 +442,7 @@ define( function( require ) {
      * Set the outer color of all group focus highlight.
      * @public
      *
-     * @param {null|string|Color|Property.<string|Color>|LinearGradient|RadialGradient|Pattern} color
+     * @param {PaintDef} color
      */
     setOuterGroupHighlightColor: function( color ) {
       outerGroupHighlightColor = color;
@@ -453,7 +453,7 @@ define( function( require ) {
      * Get the outer color of all group focus highlights.
      * @public
      *
-     * @returns {null|string|Color|Property.<string|Color>|LinearGradient|RadialGradient|Pattern} color
+     * @returns {PaintDef} color
      */
     getOuterGroupHighlightColor: function() {
       return outerGroupHighlightColor;

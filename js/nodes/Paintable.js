@@ -112,7 +112,7 @@ define( function( require ) {
          * provided for a single-color flat appearance, and can be wrapped with an Axon Property. Gradients and patterns
          * can also be provided.
          *
-         * @param {null|string|Color|Property.<string|Color>|LinearGradient|RadialGradient|Pattern} fill
+         * @param {PaintDef} fill
          * @returns {Paintable} - Returns 'this' reference, for chaining
          */
         setFill: function( fill ) {
@@ -146,7 +146,7 @@ define( function( require ) {
          * Returns the fill (if any) for this Node.
          * @public
          *
-         * @returns {null|string|Color|Property.<string|Color>|LinearGradient|RadialGradient|Pattern}
+         * @returns {PaintDef}
          */
         getFill: function() {
           return this._fill;
@@ -194,7 +194,7 @@ define( function( require ) {
          * provided for a single-color flat appearance, and can be wrapped with an Axon Property. Gradients and patterns
          * can also be provided.
          *
-         * @param {null|string|Color|Property.<string|Color>|LinearGradient|RadialGradient|Pattern} stroke
+         * @param {PaintDef} stroke
          * @returns {Paintable} - Returns 'this' reference, for chaining
          */
         setStroke: function( stroke ) {
@@ -228,7 +228,7 @@ define( function( require ) {
          * Returns the stroke (if any) for this Node.
          * @public
          *
-         * @returns {null|string|Color|Property.<string|Color>|LinearGradient|RadialGradient|Pattern}
+         * @returns {PaintDef}
          */
         getStroke: function() {
           return this._stroke;

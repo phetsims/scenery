@@ -160,7 +160,7 @@ define( function( require ) {
     // @private {string}
     this._boundsMethod = 'hybrid';
 
-    // @private {null|string|Color|Property.<string|Color>|LinearGradient|RadialGradient|Pattern}
+    // @private {PaintDef}
     this._fill = '#000000';
     this._stroke = null;
 
@@ -449,7 +449,7 @@ define( function( require ) {
      * @param {*} element - See Himalaya's element specification
      *                      (https://github.com/andrejewski/himalaya/blob/master/text/ast-spec-v0.md)
      * @param {Font|string} font - The font to apply at this level
-     * @param {null|string|Color|Property.<string|Color>|LinearGradient|RadialGradient|Pattern} fill - Fill to apply
+     * @param {PaintDef} fill - Fill to apply
      * @param {boolean} isLTR - True if LTR, false if RTL (handles RTL text properly)
      * @param {number} widthAvailable - How much width we have available before forcing a line break (for lineWrap)
      * @returns {LineBreakState} - Whether a line break was reached
@@ -784,7 +784,7 @@ define( function( require ) {
      * Sets the fill of our text.
      * @public
      *
-     * @param {null|string|Color|Property.<string|Color>|LinearGradient|RadialGradient|Pattern} fill
+     * @param {PaintDef} fill
      * @returns {RichText} - For chaining.
      */
     setFill: function( fill ) {
@@ -811,7 +811,7 @@ define( function( require ) {
      * Sets the stroke of our text.
      * @public
      *
-     * @param {null|string|Color|Property.<string|Color>|LinearGradient|RadialGradient|Pattern} stroke
+     * @param {PaintDef} stroke
      * @returns {RichText} - For chaining.
      */
     setStroke: function( stroke ) {
@@ -1593,8 +1593,8 @@ define( function( require ) {
    * @param {boolean} isLTR
    * @param {Font|string} font
    * @param {string} boundsMethod
-   * @param {null|string|Color|Property.<string|Color>|LinearGradient|RadialGradient|Pattern} fill
-   * @param {null|string|Color|Property.<string|Color>|LinearGradient|RadialGradient|Pattern} stroke
+   * @param {PaintDef} fill
+   * @param {PaintDef} stroke
    */
   function RichTextLeaf( content, isLTR, font, boundsMethod, fill, stroke ) {
     Text.call( this, '' );
@@ -1611,8 +1611,8 @@ define( function( require ) {
      * @param {boolean} isLTR
      * @param {Font|string} font
      * @param {string} boundsMethod
-     * @param {null|string|Color|Property.<string|Color>|LinearGradient|RadialGradient|Pattern} fill
-     * @param {null|string|Color|Property.<string|Color>|LinearGradient|RadialGradient|Pattern} stroke
+     * @param {PaintDef} fill
+     * @param {PaintDef} stroke
      * @returns {RichTextLeaf} - Self reference
      */
     initialize: function( content, isLTR, font, boundsMethod, fill, stroke ) {
