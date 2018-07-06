@@ -60,15 +60,6 @@ define( function( require ) {
       this.disposeTextIO();
     },
 
-    getText: {
-      returnType: StringIO,
-      parameterTypes: [],
-      implementation: function() {
-        return this.instance.text;
-      },
-      documentation: 'Gets the text content'
-    },
-
     setFontOptions: {
       returnType: VoidIO,
       parameterTypes: [ FontIO ],
