@@ -10,6 +10,8 @@ define( function( require ) {
 
   // modules
   var NodeIO = require( 'SCENERY/nodes/NodeIO' );
+  var NodeProperty = require( 'SCENERY/util/NodeProperty' );
+  var PropertyIO = require( 'AXON/PropertyIO' );
   var scenery = require( 'SCENERY/scenery' );
 
   // ifphetio
@@ -27,27 +29,34 @@ define( function( require ) {
   function RichTextIO( richText, phetioID ) {
     assert && assertInstanceOf( richText, scenery.RichText );
     NodeIO.call( this, richText, phetioID );
+
+    // this uses a sub Property adapter as described in https://github.com/phetsims/phet-io/issues/1326
+    var textProperty = new NodeProperty( richText, 'text', 'text', {
+
+      // pick the following values from the parent Node
+      phetioReadOnly: richText.phetioReadOnly,
+      phetioState: richText.phetioState,
+      phetioType: PropertyIO( StringIO ),
+
+      tandem: richText.tandem.createTandem( 'textProperty' ),
+      phetioInstanceDocumentation: 'Property for the displayed text.'
+    } );
+
+    // @private
+    this.disposeRichTextIO = function() {
+      textProperty.dispose();
+    };
   }
 
   phetioInherit( NodeIO, 'RichTextIO', RichTextIO, {
 
-    setText: {
-      returnType: VoidIO,
-      parameterTypes: [ StringIO ],
-      implementation: function( text ) {
-        this.instance.text = text;
-      },
-      documentation: 'Set the text content'
-    },
-
-    getText: {
-      returnType: StringIO,
-      parameterTypes: [],
-      implementation: function() {
-        return this.instance.text;
-      },
-      documentation: 'Get the text content'
+    /**
+     * @public - called by PhetioObject when the wrapper is done
+     */
+    dispose: function() {
+      this.disposeRichTextIO();
     }
+
   }, {
     documentation: 'The tandem IO type for the scenery RichText node'
   } );
