@@ -60,27 +60,6 @@ define( function( require ) {
       this.disposeTextIO();
     },
 
-    addTextChangedListener: {
-      returnType: VoidIO,
-      parameterTypes: [ FunctionIO( VoidIO, [ StringIO, StringIO ] ) ],
-      implementation: function( listener ) {
-        this.instance.on( 'text', function( oldText, newText ) {
-          listener( newText, oldText );
-        } );
-      },
-      documentation: 'Adds a listener for when the text has changed. The listener takes two arguments, the new ' +
-                     'value and the previous value.'
-    },
-
-    setText: {
-      returnType: VoidIO,
-      parameterTypes: [ StringIO ],
-      implementation: function( text ) {
-        this.instance.text = text;
-      },
-      documentation: 'Sets the text content'
-    },
-
     getText: {
       returnType: StringIO,
       parameterTypes: [],
