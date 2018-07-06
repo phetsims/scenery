@@ -1578,7 +1578,6 @@ define( function( require ) {
         addAssociationImplementationForAttribute: function( attribute, associationObject ) {
           assert && assert( attribute === 'aria-describedby' || attribute === 'aria-labelledby', 'unsupported attribute name: ' + attribute );
 
-
           var otherNodeAccessibleInstances = associationObject.otherNode.getAccessibleInstances();
 
           // if the other node hasn't been added to the scene graph yet, it won't have any accessible instances, so no op.

@@ -119,17 +119,8 @@ define( function( require ) {
       if ( this.isRootInstance ) {
         var accessibilityContainer = document.createElement( 'div' );
 
-        // Hide the PDOM with by shifting to the left and clipping. Has some width so that AT read formatting tags in 
-        // a single line, see  https://github.com/phetsims/scenery/issues/730. Cannot use SceneryStyle because of
-        // compatibility with Chromebooks, see https://github.com/phetsims/scenery/issues/822. 
-        accessibilityContainer.style.position = 'relative';
-        accessibilityContainer.style.left = '-1000px';
-        accessibilityContainer.style.top = '0';
-        accessibilityContainer.style.width = '250px';
-        accessibilityContainer.style.height = '0';
-        accessibilityContainer.style.clip = 'rect(0,0,0,0)';
-        accessibilityContainer.style.pointerEvents = 'none';
-        
+        // give the container a class name so it is hidden in the Display, see accessibility styling in Display.js
+        accessibilityContainer.className = 'accessibility';
         this.peer = AccessiblePeer.createFromPool( this, accessibilityContainer );
 
         var self = this;
