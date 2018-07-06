@@ -57,6 +57,7 @@ define( function( require ) {
      */
     dispose: function() {
       this.disposeTextIO();
+      NodeIO.prototype.dispose.call( this );
     },
 
     setFontOptions: {

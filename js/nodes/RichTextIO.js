@@ -55,6 +55,7 @@ define( function( require ) {
      */
     dispose: function() {
       this.disposeRichTextIO();
+      NodeIO.prototype.dispose.call( this );
     }
 
   }, {
