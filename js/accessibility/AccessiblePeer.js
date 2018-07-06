@@ -77,6 +77,10 @@ define( function( require ) {
       // @public {Trail} - NOTE: May have "gaps" due to accessibleOrder usage.
       this.trail = accessibleInstance.trail;
 
+      // @private {boolean|null} - whether or not this AccessiblePeer is visible in the PDOM
+      // Only initialized to null, should not be set to it. isVisible() will return true if this.visible is null (because it hasn't been set yet).
+      this.visible = null;
+
       // @public {HTMLElement} - The main element associated with this peer. If focusable, this is the element that gets
       // the focus. It also will contain any children.
       this.primarySibling = primarySibling;
@@ -327,34 +331,40 @@ define( function( require ) {
      * @returns {boolean}
      */
     isVisible: function() {
+      if ( assert ) {
 
-      // TODO: assert if some visible and some are not
+        var visibleElements = 0;
+        this.topLevelElements.forEach( function( element ) {
+          if ( !element.hidden ) {
+            visibleElements += 1;
+          }
+        } );
+        assert( visibleElements === this.visible ? 0 : this.topLevelElements.length,
+          'some of the peer\'s elements are visible and some are not' );
 
-      var visibleElements = 0;
-      this.topLevelElements.forEach( function( element ) {
-        if ( !element.hidden ) {
-          visibleElements += 1;
-        }
-      } );
-
-      return visibleElements === this.topLevelElements.length;
+      }
+      return this.visible === null ? true: this.visible; // default to true if visibility hasn't been set yet.
     },
 
     /**
-     *
+     * Set whether or not the peer is visible in the PDOM
      * @param {boolean} visible
      */
     setVisible: function( visible ) {
+      assert && assert( typeof visible === 'boolean' );
+      if ( this.visible !== visible ) {
 
-      this.topLevelElements.forEach( function( element ) {
-
-        if ( visible ) {
-          element.removeAttribute( 'hidden' );
+        this.visible = visible;
+        for ( var i = 0; i < this.topLevelElements.length; i++ ) {
+          var element = this.topLevelElements[ i ];
+          if ( visible ) {
+            element.removeAttribute( 'hidden' );
+          }
+          else {
+            element.setAttribute( 'hidden', '' );
+          }
         }
-        else {
-          element.setAttribute( 'hidden', '' );
-        }
-      } );
+      }
     },
 
     /**

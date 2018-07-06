@@ -274,7 +274,6 @@ define( function( require ) {
     // reverse accessible order
     rootNode.accessibleOrder = [ d, c, b, a ];
 
-    // debugger;
     var divRoot = display._rootAccessibleInstance.peer.primarySibling;
     var divA = a.accessibleInstances[ 0 ].peer.primarySibling;
     var divB = b.accessibleInstances[ 0 ].peer.primarySibling;

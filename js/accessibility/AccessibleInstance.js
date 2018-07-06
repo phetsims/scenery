@@ -392,7 +392,7 @@ define( function( require ) {
       if ( this.parent ) {
         return this.parent.isGloballyVisible();
       }
-      else {
+      else { // base case at root
         return true;
       }
     },
