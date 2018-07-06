@@ -130,7 +130,7 @@ define( function( require ) {
      * Called when our parallel DOM element gets focused.
      * @private
      *
-     * @param {DOM Event} event
+     * @param {DOMEvent} event
      */
     onFocus: function( event ) {
       if ( event.target === this.primarySibling ) {
@@ -146,7 +146,7 @@ define( function( require ) {
      * Called when our parallel DOM element gets blurred (loses focus).
      * @private
      *
-     * @param {DOM Event} event
+     * @param {DOMEvent} event
      */
     onBlur: function( event ) {
       if ( event.target === this.primarySibling ) {
@@ -180,6 +180,8 @@ define( function( require ) {
 
     /**
      * Add DOM Event listeners to the peer's primary sibling.
+     * @public (scenery-internal)
+     *
      * @param {Object} accessibleInput - see Accessibility.addAccessibleInputListener
      */
     addDOMEventListeners: function( accessibleInput ) {
@@ -187,6 +189,7 @@ define( function( require ) {
     },
     /**
      * Remove DOM Event listeners from the peer's primary sibling.
+     * @public (scenery-internal)
      * @param {Object} accessibleInput - see Accessibility.addAccessibleInputListener
      */
     removeDOMEventListeners: function( accessibleInput ) {
@@ -195,6 +198,7 @@ define( function( require ) {
 
     /**
      * Sets a attribute on one of the peer's HTMLElements.
+     * @public (scenery-internal)
      * @param {string} attribute
      * @param {*} attributeValue
      * @param {Object} [options]
@@ -220,6 +224,7 @@ define( function( require ) {
     },
     /**
      * Remove attribute from one of the peer's HTMLElements.
+     * @public (scenery-internal)
      * @param {string} attribute
      * @param {Object} [options]
      */
@@ -245,6 +250,7 @@ define( function( require ) {
 
     /**
      * Remove the given attribute from all peer elements
+     * @public (scenery-internal)
      * @param {string} attribute
      */
     removeAttributeFromAllElements: function( attribute ) {
@@ -257,6 +263,7 @@ define( function( require ) {
 
     /**
      * Set either association attribute (aria-labelledby/describedby) on one of this peer's Elements
+     * @public (scenery-internal)
      * @param {string} attribute - either aria-labelledby or aria-describedby
      * @param {Object} associationObject - see addAriaLabelledbyAssociation() for schema
      * @param {string} otherElementId - the id to be added to this peer element's attribute
@@ -368,6 +375,90 @@ define( function( require ) {
     },
 
     /**
+     * Returns if this peer is focused. A peer is focused if its primarySibling is focused.
+     * @public (scenery-internal)
+     * @returns {boolean}
+     */
+    isFocused: function() {
+      return document.activeElement === this.primarySibling;
+    },
+
+    /**
+     * Focus the primary sibling of the peer.
+     * @public (scenery-internal)
+     */
+    focus: function() {
+      assert && assert( this.primarySibling, 'must have a primary sibling to focus' );
+      this.primarySibling.focus();
+    },
+
+    /**
+     * Blur the primary sibling of the peer.
+     * @public (scenery-internal)
+     */
+    blur: function() {
+      assert && assert( this.primarySibling, 'must have a primary sibling to blur' );
+      this.primarySibling.blur();
+    },
+
+
+    /**
+     * Responsible for setting the content for the label sibling
+     * @public (scenery-internal)
+     * @param {string} content - the content for the label sibling.
+     * the primary sibling.
+     */
+    setLabelSiblingContent: function( content ) {
+      assert && assert( typeof content === 'string', 'incorrect label content type' );
+
+      // no-op to support any option order
+      if ( !this.labelSibling ) {
+        return;
+      }
+
+      AccessibilityUtil.setTextContent( this.labelSibling, content );
+
+      // if the label element happens to be a 'label', associate with 'for' attribute
+      if ( this.labelSibling.tagName.toUpperCase() === LABEL_TAG ) {
+        this.labelSibling.setAttribute( 'for', this.primarySibling.id );
+      }
+    },
+    /**
+     * Responsible for setting the content for the description sibling
+     * @public (scenery-internal)
+     * @param {string} content - the content for the label sibling.
+     * the primary sibling.
+     */
+    setDescriptionSiblingContent: function( content ) {
+      assert && assert( typeof content === 'string', 'incorrect description content type' );
+
+      // no-op to support any option order
+      if ( !this.descriptionSibling ) {
+        return;
+      }
+      AccessibilityUtil.setTextContent( this.descriptionSibling, content );
+    },
+
+    /**
+     * Responsible for setting the content for the primary sibling
+     * @public (scenery-internal)
+     * @param {string} content - the content for the label sibling.
+     * the primary sibling.
+     */
+    setPrimarySiblingContent: function( content ) {
+      assert && assert( typeof content === 'string', 'incorrect inner content type' );
+      assert && assert( this.accessibleInstance.children.length === 0, 'descendants exist with accessible content, innerContent cannot be used' );
+      assert && assert( AccessibilityUtil.tagNameSupportsContent( this.primarySibling.tagName ),
+        'tagName: ' + this._tagName + ' does not support inner content' );
+
+      // no-op to support any option order
+      if ( !this.primarySibling ) {
+        return;
+      }
+      AccessibilityUtil.setTextContent( this.primarySibling, content );
+    },
+
+    /**
      * Removes external references from this peer, and places it in the pool.
      * @public (scenery-internal)
      */
@@ -397,61 +488,7 @@ define( function( require ) {
 
       // for now
       this.freeToPool();
-    },
-
-    /**
-     * Responsible for setting the content for the label sibling
-     * @param {string} content - the content for the label sibling.
-     * the primary sibling.
-     */
-    setLabelSiblingContent: function( content ) {
-      assert && assert( typeof content === 'string', 'incorrect label content type' );
-
-      // no-op to support any option order
-      if ( !this.labelSibling ) {
-        return;
-      }
-
-      AccessibilityUtil.setTextContent( this.labelSibling, content );
-
-      // if the label element happens to be a 'label', associate with 'for' attribute
-      if ( this.labelSibling.tagName.toUpperCase() === LABEL_TAG ) {
-        this.labelSibling.setAttribute( 'for', this.primarySibling.id );
-      }
-    },
-    /**
-     * Responsible for setting the content for the description sibling
-     * @param {string} content - the content for the label sibling.
-     * the primary sibling.
-     */
-    setDescriptionSiblingContent: function( content ) {
-      assert && assert( typeof content === 'string', 'incorrect description content type' );
-
-      // no-op to support any option order
-      if ( !this.descriptionSibling ) {
-        return;
-      }
-      AccessibilityUtil.setTextContent( this.descriptionSibling, content );
-    },
-
-    /**
-     * Responsible for setting the content for the primary sibling
-     * @param {string} content - the content for the label sibling.
-     * the primary sibling.
-     */
-    setPrimarySiblingContent: function( content ) {
-      assert && assert( typeof content === 'string', 'incorrect inner content type' );
-      assert && assert( this.accessibleInstance.children.length === 0, 'descendants exist with accessible content, innerContent cannot be used' );
-      assert && assert( AccessibilityUtil.tagNameSupportsContent( this.primarySibling.tagName ),
-        'tagName: ' + this._tagName + ' does not support inner content' );
-
-      // no-op to support any option order
-      if ( !this.primarySibling ) {
-        return;
-      }
-      AccessibilityUtil.setTextContent( this.primarySibling, content );
     }
-
   }, {
 
     // @static - specifies valid associations between related AccessiblePeers in the DOM

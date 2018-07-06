@@ -518,6 +518,10 @@ define( function( require ) {
           // this node).
           this.accessibleOrder = null;
 
+          // Clear out aria association attributes, which hold references to other nodes.
+          this.setAriaLabelledbyAssociations( [] );
+          this.setAriaDescribedbyAssociations( [] );
+
           this.removeAllAccessibleInputListeners();
         },
 
@@ -529,7 +533,8 @@ define( function( require ) {
          */
         isFocused: function() {
           for ( var i = 0; i < this._accessibleInstances.length; i++ ) {
-            if ( document.activeElement === this._accessibleInstances[ i ].peer.primarySibling ) {
+            var peer = this._accessibleInstances[ i ].peer;
+            if ( peer && peer.isFocused() ) {
               return true;
             }
           }
@@ -554,7 +559,9 @@ define( function( require ) {
             assert && assert( this._accessibleVisible, 'trying to set focus on a node with invisible accessible content' );
             assert && assert( this._accessibleInstances.length === 1, 'focus() unsupported for Nodes using DAG, accessible content is not unique' );
 
-            this._accessibleInstances[ 0 ].peer.primarySibling.focus();
+            var peer = this._accessibleInstances[ 0 ].peer;
+            assert && assert( peer, 'must have a peer to focus' );
+            peer.focus();
           }
         },
 
@@ -565,7 +572,10 @@ define( function( require ) {
          */
         blur: function() {
           if ( this._accessibleInstances.length > 0 ) {
-            this._accessibleInstances[ 0 ].peer.primarySibling.blur();
+            assert && assert( this._accessibleInstances.length === 1, 'blur() unsupported for Nodes using DAG, accessible content is not unique' );
+            var peer = this._accessibleInstances[ 0 ].peer;
+            assert && assert( peer, 'must have a peer to blur' );
+            peer.blur();
           }
           this.interruptAccessibleInput(); // interrupt any a11y listeners that attached to this Node
         },
