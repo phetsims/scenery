@@ -98,8 +98,8 @@ define( function( require ) {
       documentation: 'Gets the maximum width of text box'
     }
   }, {
-    documentation: 'Text that is displayed in the simulation.',
-    events: [ 'textChanged' ]
+    documentation: 'Text that is displayed in the simulation. TextIO has a nested PropertyIO.&lt;String&gt; for ' +
+                   'the current string value.'
   } );
 
   scenery.register( 'TextIO', TextIO );
