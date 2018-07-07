@@ -422,7 +422,7 @@ define( function( require ) {
           // add the listener directly to any AccessiblePeers that are representing this node
           for ( var i = 0; i < this._accessibleInstances.length; i++ ) {
             var peer = this._accessibleInstances[ i ].peer;
-            peer && peer.addDOMEventListeners( accessibleInput );
+            peer.addDOMEventListeners( accessibleInput );
           }
 
           return accessibleInput;
@@ -446,7 +446,7 @@ define( function( require ) {
           // remove the event listeners from any peers
           for ( var i = 0; i < this._accessibleInstances.length; i++ ) {
             var peer = this._accessibleInstances[ i ].peer;
-            peer && peer.removeDOMEventListeners( accessibleInput );
+            peer.removeDOMEventListeners( accessibleInput );
           }
 
           return this;
@@ -534,7 +534,7 @@ define( function( require ) {
         isFocused: function() {
           for ( var i = 0; i < this._accessibleInstances.length; i++ ) {
             var peer = this._accessibleInstances[ i ].peer;
-            if ( peer && peer.isFocused() ) {
+            if ( peer.isFocused() ) {
               return true;
             }
           }
@@ -836,7 +836,7 @@ define( function( require ) {
           this._inputType = inputType;
           for ( var i = 0; i < this._accessibleInstances.length; i++ ) {
             var peer = this._accessibleInstances[ i ].peer;
-            peer && peer.setAttributeToElement( 'type', inputType );
+            peer.setAttributeToElement( 'type', inputType );
           }
         },
         set inputType( inputType ) { this.setInputType( inputType ); },
@@ -982,7 +982,7 @@ define( function( require ) {
 
           for ( var i = 0; i < this._accessibleInstances.length; i++ ) {
             var peer = this._accessibleInstances[ i ].peer;
-            peer && peer.setLabelSiblingContent( self._labelContent );
+            peer.setLabelSiblingContent( self._labelContent );
           }
         },
         set labelContent( label ) { this.setLabelContent( label ); },
@@ -1014,7 +1014,7 @@ define( function( require ) {
 
           for ( var i = 0; i < this._accessibleInstances.length; i++ ) {
             var peer = this._accessibleInstances[ i ].peer;
-            peer && peer.setPrimarySiblingContent( self._innerContent );
+            peer.setPrimarySiblingContent( self._innerContent );
           }
         },
         set innerContent( content ) { this.setInnerContent( content ); },
@@ -1051,7 +1051,7 @@ define( function( require ) {
 
           for ( var i = 0; i < this._accessibleInstances.length; i++ ) {
             var peer = this._accessibleInstances[ i ].peer;
-            peer && peer.setDescriptionSiblingContent( self._descriptionContent );
+            peer.setDescriptionSiblingContent( self._descriptionContent );
           }
         },
         set descriptionContent( textContent ) { this.setDescriptionContent( textContent ); },
@@ -1543,7 +1543,7 @@ define( function( require ) {
           // TODO: make this more efficient
           for ( var i = 0; i < this._accessibleInstances.length; i++ ) {
             var peer = this._accessibleInstances[ i ].peer;
-            peer && peer.removeAttributeFromAllElements( attribute );
+            peer.removeAttributeFromAllElements( attribute );
           }
 
           for ( var j = 0; j < associationList.length; j++ ) {
@@ -1585,7 +1585,7 @@ define( function( require ) {
               for ( var i = 0; i < this._accessibleInstances.length; i++ ) {
                 var peer = this._accessibleInstances[ i ].peer;
 
-                peer && peer.setAssociationAttribute( attribute, associationObject, otherPeerElement.id );
+                peer.setAssociationAttribute( attribute, associationObject, otherPeerElement.id );
               }
             }
           }
@@ -1885,7 +1885,7 @@ define( function( require ) {
 
           for ( var i = 0; i < this._accessibleInstances.length; i++ ) {
             var peer = this._accessibleInstances[ i ].peer;
-            peer && peer.setAttributeToElement( 'value', value );
+            peer.setAttributeToElement( 'value', value );
           }
         },
         set inputValue( value ) { this.setInputValue( value ); },
@@ -1916,7 +1916,7 @@ define( function( require ) {
 
           for ( var i = 0; i < this._accessibleInstances.length; i++ ) {
             var peer = this._accessibleInstances[ i ].peer;
-            peer && peer.setAttributeToElement( 'checked', checked );
+            peer.setAttributeToElement( 'checked', checked );
           }
         },
         set accessibleChecked( checked ) { this.setAccessibleChecked( checked ); },
@@ -1980,7 +1980,7 @@ define( function( require ) {
 
           for ( var j = 0; j < this._accessibleInstances.length; j++ ) {
             var peer = this._accessibleInstances[ j ].peer;
-            peer && peer.setAttributeToElement( attribute, value, options );
+            peer.setAttributeToElement( attribute, value, options );
           }
         },
 
@@ -2013,7 +2013,7 @@ define( function( require ) {
 
           for ( var j = 0; j < this._accessibleInstances.length; j++ ) {
             var peer = this._accessibleInstances[ j ].peer;
-            peer && peer.removeAttributeFromElement( attribute, options );
+            peer.removeAttributeFromElement( attribute, options );
           }
         },
 
@@ -2050,7 +2050,7 @@ define( function( require ) {
 
           for ( var i = 0; i < this._accessibleInstances.length; i++ ) {
             var peer = this._accessibleInstances[ i ].peer;
-            peer && peer.setAttributeToElement( 'tabIndex', self.focusable ? 0 : -1 );
+            peer.setAttributeToElement( 'tabIndex', self.focusable ? 0 : -1 );
           }
         },
         set focusable( isFocusable ) { this.setFocusable( isFocusable ); },
