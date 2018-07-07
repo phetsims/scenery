@@ -18,7 +18,6 @@ define( function( require ) {
 
   // ifphetio
   var assertInstanceOf = require( 'ifphetio!PHET_IO/assertInstanceOf' );
-  var FunctionIO = require( 'ifphetio!PHET_IO/types/FunctionIO' );
   var NumberIO = require( 'ifphetio!PHET_IO/types/NumberIO' );
   var phetioInherit = require( 'ifphetio!PHET_IO/phetioInherit' );
   var StringIO = require( 'ifphetio!PHET_IO/types/StringIO' );
@@ -58,36 +57,7 @@ define( function( require ) {
      */
     dispose: function() {
       this.disposeTextIO();
-    },
-
-    addTextChangedListener: {
-      returnType: VoidIO,
-      parameterTypes: [ FunctionIO( VoidIO, [ StringIO, StringIO ] ) ],
-      implementation: function( listener ) {
-        this.instance.on( 'text', function( oldText, newText ) {
-          listener( newText, oldText );
-        } );
-      },
-      documentation: 'Adds a listener for when the text has changed. The listener takes two arguments, the new ' +
-                     'value and the previous value.'
-    },
-
-    setText: {
-      returnType: VoidIO,
-      parameterTypes: [ StringIO ],
-      implementation: function( text ) {
-        this.instance.text = text;
-      },
-      documentation: 'Sets the text content'
-    },
-
-    getText: {
-      returnType: StringIO,
-      parameterTypes: [],
-      implementation: function() {
-        return this.instance.text;
-      },
-      documentation: 'Gets the text content'
+      NodeIO.prototype.dispose.call( this );
     },
 
     setFontOptions: {

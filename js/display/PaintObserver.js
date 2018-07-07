@@ -23,7 +23,7 @@ define( function( require ) {
    */
   function PaintObserver( changeCallback ) {
 
-    // @private {null|string|Color|Property.<string|Color>|LinearGradient|RadialGradient|Pattern}
+    // @private {PaintDef}
     // Our unwrapped fill/stroke value
     this.primary = null;
 
@@ -58,7 +58,7 @@ define( function( require ) {
      *
      * NOTE: To clean state, set this to null.
      *
-     * @param {null|string|Color|Property.<string|Color>|LinearGradient|RadialGradient|Pattern} primary
+     * @param {PaintDef} primary
      */
     setPrimary: function( primary ) {
       if ( primary !== this.primary ) {
@@ -115,7 +115,7 @@ define( function( require ) {
      *
      * NOTE: If it's a Property, we'll also need to handle the secondary (part inside the Property).
      *
-     * @param {null|string|Color|Property.<string|Color>|LinearGradient|RadialGradient|Pattern} paint
+     * @param {PaintDef} paint
      */
     attachPrimary: function( paint ) {
       sceneryLog && sceneryLog.Paints && sceneryLog.Paints( '[PaintObserver] attachPrimary' );
@@ -152,7 +152,7 @@ define( function( require ) {
      *
      * NOTE: If it's a Property or Gradient, we'll also need to handle the secondaries (part(s) inside the Property(ies)).
      *
-     * @param {null|string|Color|Property.<string|Color>|LinearGradient|RadialGradient|Pattern} paint
+     * @param {PaintDef} paint
      */
     detachPrimary: function( paint ) {
       sceneryLog && sceneryLog.Paints && sceneryLog.Paints( '[PaintObserver] detachPrimary' );

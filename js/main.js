@@ -134,6 +134,7 @@ define( [
 
   'SCENERY/util/CanvasContextWrapper',
   'SCENERY/util/Color',
+  'SCENERY/util/ColorDef',
   'SCENERY/util/DisplayedProperty',
   'SCENERY/util/Features',
   'SCENERY/util/Font',
@@ -142,6 +143,7 @@ define( [
   'SCENERY/util/LinearGradient',
   'SCENERY/util/Paint',
   'SCENERY/util/PaintColorProperty',
+  'SCENERY/util/PaintDef',
   'SCENERY/util/Pattern',
   'SCENERY/util/Picker',
   'SCENERY/util/RadialGradient',

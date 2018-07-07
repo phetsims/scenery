@@ -9,9 +9,7 @@
 define( function( require ) {
   'use strict';
 
-  var Color = require( 'SCENERY/util/Color' );
   var inherit = require( 'PHET_CORE/inherit' );
-  var Property = require( 'AXON/Property' );
   var scenery = require( 'SCENERY/scenery' );
 
   var globalId = 1;
@@ -60,53 +58,6 @@ define( function( require ) {
         this.transformMatrix = transformMatrix;
       }
       return this;
-    }
-  }, {
-    /**
-     * Returns whether the given object is a general "paint" (something that can be provided to a fill/stroke).
-     * @public
-     *
-     * @param {*}
-     * @returns {boolean}
-     */
-    isPaint: function( paint ) {
-      return paint === null ||
-             typeof paint === 'string' ||
-             paint instanceof Color ||
-             paint instanceof Paint ||
-             ( paint instanceof Property && ( typeof paint.value === 'string' || paint.value instanceof Color ) );
-
-    },
-
-    /**
-     * Takes a snapshot of the given paint, returning the current color where possible.
-     * @public
-     *
-     * @param {null|string|Color|Property.<string|Color>|LinearGradient|RadialGradient|Pattern} paint
-     * @returns {Color}
-     */
-    toColor: function( paint ) {
-      if ( typeof paint === 'string' ) {
-        return new Color( paint );
-      }
-      if ( paint instanceof Color ) {
-        return paint.copy();
-      }
-      if ( paint instanceof Property ) {
-        return Paint.toColor( paint.value );
-      }
-      if ( paint instanceof scenery.Gradient ) {
-        // Average the stops
-        var color = Color.TRANSPARENT;
-        var quantity = 0;
-        paint.stops.forEach( function( stop ) {
-          color = color.blend( Paint.toColor( stop.color ), 1 / ( quantity + 1 ) );
-        } );
-        return color;
-      }
-
-      // Fall-through value (null, Pattern, etc.)
-      return Color.TRANSPARENT;
     }
   } );
 
