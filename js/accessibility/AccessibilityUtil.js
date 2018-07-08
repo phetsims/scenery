@@ -59,6 +59,9 @@ define( function( require ) {
   // valid types of DOM events that can be added to a node
   var DOM_EVENTS = [ 'input', 'change', 'click', 'keydown', 'keyup', 'focus', 'blur' ];
 
+  // these elements require a minimum width to be visible in Safari, see https://github.com/phetsims/john-travoltage/issues/204
+  var ELEMENTS_REQUIRE_WIDTH = [ INPUT_TAG, A_TAG ];
+
   /**
    * Get all 'element' nodes off the parent element, placing them in an array for easy traversal.  Note that this
    * includes all elements, even those that are 'hidden' or purely for structure.
@@ -382,7 +385,7 @@ define( function( require ) {
       for ( var i = 0; i < childrenToRemove.length; i++ ) {
         var childToRemove = childrenToRemove[ i ];
 
-        assert && assert( element.contains( childToRemove), 'element does not contain child to be removed: ', childToRemove );
+        assert && assert( element.contains( childToRemove ), 'element does not contain child to be removed: ', childToRemove );
 
         element.removeChild( childToRemove );
       }
@@ -420,6 +423,38 @@ define( function( require ) {
         var objectKey = objectKeys[ i ];
         assert && assert( expectedKeys.indexOf( objectKey ) >= 0, 'unexpected key: ' + objectKey );
       }
+    },
+
+    /**
+     * Create an HTML element.  Unless this is a form element or explicitly marked as focusable, add a negative
+     * tab index. IE gives all elements a tabIndex of 0 and handles tab navigation internally, so this marks
+     * which elements should not be in the focus order.
+     *
+     * @public
+     * @param  {string} tagName
+     * @param {boolean} focusable - should the element be explicitly added to the focus order?
+     * @param {Object} [options]
+     * @returns {HTMLElement}
+     */
+    createElement: function( tagName, focusable, options ) {
+      options = _.extend( {
+        namespace: null // {string|null} - If non-null, the element will be created with the specific namespace
+      }, options );
+
+      var domElement = options.namespace
+                       ? document.createElementNS( options.namespace, tagName )
+                       : document.createElement( tagName );
+      var upperCaseTagName = tagName.toUpperCase();
+
+      domElement.tabIndex = focusable ? 0 : -1;
+
+      // Safari requires that certain input elements have dimension, otherwise it will not be keyboard accessible
+      if ( _.includes( ELEMENTS_REQUIRE_WIDTH, upperCaseTagName ) ) {
+        domElement.style.width = '1px';
+        domElement.style.height = '1px';
+      }
+
+      return domElement;
     },
 
     TAGS: {

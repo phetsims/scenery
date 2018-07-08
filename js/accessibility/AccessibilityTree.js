@@ -220,7 +220,9 @@ define( function( require ) {
       }
       // Do all removals before adding anything back in.
       for ( i = 0; i < parents.length; i++ ) {
-        AccessibilityTree.addTree( parents[ i ], node, accessibleTrailsList[ i ] );
+
+        // only add the subtree if the node has accessibleContent
+        node.accessibleContent && AccessibilityTree.addTree( parents[ i ], node, accessibleTrailsList[ i ] );
       }
 
       // An edge case is where we change the rootNode of the display (and don't have an effective parent)

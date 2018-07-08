@@ -27,17 +27,17 @@ define( function( require ) {
   var DESCRIPTION_SIBLING = 'DESCRIPTION_SIBLING';
   var CONTAINER_PARENT = 'CONTAINER_PARENT';
   var LABEL_TAG = AccessibilityUtil.TAGS.LABEL;
+  var INPUT_TAG = AccessibilityUtil.TAGS.INPUT;
 
   /**
    * Constructor.
    *
    * @param {AccessibleInstance} accessibleInstance
-   * @param {HTMLElement} primarySibling - The main DOM element used for this peer.
    * @param {Object} [options]
    * @constructor
    */
-  function AccessiblePeer( accessibleInstance, primarySibling, options ) {
-    this.initializeAccessiblePeer( accessibleInstance, primarySibling, options );
+  function AccessiblePeer( accessibleInstance, options ) {
+    this.initializeAccessiblePeer( accessibleInstance, options );
   }
 
   scenery.register( 'AccessiblePeer', AccessiblePeer );
@@ -50,15 +50,15 @@ define( function( require ) {
      * @private
      *
      * @param {AccessibleInstance} accessibleInstance
-     * @param {HTMLElement} primarySibling - The main DOM element used for this peer.
      * @param {Object} [options]
      * @returns {AccessiblePeer} - Returns 'this' reference, for chaining
      */
-    initializeAccessiblePeer: function( accessibleInstance, primarySibling, options ) {
+    initializeAccessiblePeer: function( accessibleInstance, options ) {
       options = _.extend( {
-        containerParent: null, // a container parent for this peer and potential siblings
-        labelSibling: null, // the element containing this node's label content
-        descriptionSibling: null // the element that will contain this node's description content
+        primarySibling: null // {HTMLElement} primarySibling - The main DOM element used for this peer
+        // containerParent: null, // a container parent for this peer and potential siblings
+        // labelSibling: null, // the element containing this node's label content
+        // descriptionSibling: null // the element that will contain this node's description content
       }, options );
 
       Events.call( this ); // TODO: is Events worth mixing in by default? Will we need to listen to events?
@@ -81,49 +81,279 @@ define( function( require ) {
       // Only initialized to null, should not be set to it. isVisible() will return true if this.visible is null (because it hasn't been set yet).
       this.visible = null;
 
-      // @public {HTMLElement} - The main element associated with this peer. If focusable, this is the element that gets
-      // the focus. It also will contain any children.
-      this.primarySibling = primarySibling;
-
-      // @public {HTMLElement|null} - Optional label/description elements
-      this.labelSibling = options.labelSibling;
-      this.descriptionSibling = options.descriptionSibling;
-
-      // @private {HTMLElement|null} - A parent element that can contain this primarySibling and other siblings, usually
-      // the label and description content.
-      this.containerParent = options.containerParent;
+      //
+      // // @public {HTMLElement|null} - Optional label/description elements
+      this.labelSibling = null;
+      this.descriptionSibling = null;
+      //
+      // // @private {HTMLElement|null} - A parent element that can contain this primarySibling and other siblings, usually
+      // // the label and description content.
+      this.containerParent = null;
 
       // @public {Array.<HTMLElement>} Rather than guarantee that a peer is a tree with a root DOMElement,
       // allow multiple HTMLElements at the top level of the peer. This is used for sorting the instance
       this.topLevelElements = [];
 
-      if ( this.containerParent ) {
-        // The first child of the container parent element should be the peer dom element
-        // if undefined, the insertBefore method will insert the primarySiblingDOMElement as the first child
-        var primarySiblingDOMElement = this.primarySibling;
-        var firstChild = this.containerParent.children[ 0 ] || null;
-        this.containerParent.insertBefore( primarySiblingDOMElement, firstChild );
-        this.topLevelElements = [ this.containerParent ];
-      }
-      else {
-
-        // Wean out any null siblings
-        this.topLevelElements = [ this.labelSibling, this.descriptionSibling, this.primarySibling ].filter( function( i ) { return i; } );
-      }
-
       // @private {boolean} - Whether we are currently in a "disposed" (in the pool) state, or are available to be
       // interacted with.
       this.disposed = false;
 
-      // @private {function} - Referenced for disposal
-      this.focusEventListener = this.focusEventListener || this.onFocus.bind( this );
-      this.blurEventListener = this.blurEventListener || this.onBlur.bind( this );
+      // edge case for root accessibility
+      if ( options.primarySibling ) {
+        // // @public {HTMLElement} - The main element associated with this peer. If focusable, this is the element that gets
+        // // the focus. It also will contain any children.
+        this.primarySibling = options.primarySibling;
+        return this;
+      }
 
-      // Hook up listeners for when our primary element is focused or blurred.
-      this.primarySibling.addEventListener( 'blur', this.blurEventListener );
-      this.primarySibling.addEventListener( 'focus', this.focusEventListener );
+      // redraw view from the AccessibleInstance's Node data.
+      this.updateEntirePeer();
+
 
       return this;
+    },
+
+    /**
+     * Temporary function to use as a placeholder for invalidateAccessibleContent
+     * @public
+     */
+    updateEntirePeer: function() {
+      var node = this.accessibleInstance.node;
+
+      // for each accessible peer, clear the container parent if it exists since we will be reinserting labels and
+      // the dom element in createPeer
+      while ( this.containerParent && this.containerParent.hasChildNodes() ) {
+        this.containerParent.removeChild( this.containerParent.lastChild );
+      }
+
+      // if any parents are flagged as removed from the accessibility tree, set content to null
+      var contentDisplayed = node._accessibleContentDisplayed;
+      for ( var i = 0; i < node._parents.length; i++ ) {
+        if ( !node._parents[ i ].accessibleContentDisplayed ) {
+          contentDisplayed = false;
+        }
+      }
+
+
+      if ( contentDisplayed && node._tagName ) {
+
+
+        // clear out elements to be recreated below
+        this.primarySibling = null;
+        this.labelSibling = null;
+        this.descriptionSibling = null;
+        this.containerParent = null;
+
+
+        // higher level api first, because it will effect the lower level setters.
+        // if ( node.accessibleName ) {
+        //   node.setAccessibleNameImplementation( node.accessibleName ); // set it again to support any option order
+        // }
+        //
+        // if ( node.helpText ) {
+        //   node.setHelpTextImplementation( node.helpText ); // set it again to support any option order
+        // }
+
+        var uniqueId = this.accessibleInstance.trail.getUniqueId();
+
+        // create the base DOM element representing this accessible instance
+        var primarySibling = AccessibilityUtil.createElement( node._tagName, node.focusable, {
+          namespace: node._accessibleNamespace
+        } );
+        primarySibling.id = uniqueId;
+
+        // create the container parent for the dom siblings
+        var containerParent = null;
+        if ( node._containerTagName ) {
+          containerParent = AccessibilityUtil.createElement( node._containerTagName, false );
+          containerParent.id = 'container-' + uniqueId;
+
+          // provide the aria-role if it is specified
+          if ( node._containerAriaRole ) {
+            containerParent.setAttribute( 'role', node._containerAriaRole );
+          }
+        }
+
+        // create the label DOM element representing this instance
+        var labelSibling = null;
+        if ( node._labelTagName ) {
+          labelSibling = AccessibilityUtil.createElement( node._labelTagName, false );
+          labelSibling.id = 'label-' + uniqueId;
+        }
+
+        // create the description DOM element representing this instance
+        var descriptionSibling = null;
+        if ( node._descriptionTagName ) {
+          descriptionSibling = AccessibilityUtil.createElement( node._descriptionTagName, false );
+          descriptionSibling.id = 'description-' + uniqueId;
+        }
+
+
+        this.primarySibling = primarySibling;
+        this.labelSibling = labelSibling;
+        this.descriptionSibling = descriptionSibling;
+        this.containerParent = containerParent;
+
+        if ( this.containerParent ) {
+          // The first child of the container parent element should be the peer dom element
+          // if undefined, the insertBefore method will insert the primarySiblingDOMElement as the first child
+          var primarySiblingDOMElement = this.primarySibling;
+          var firstChild = this.containerParent.children[ 0 ] || null;
+          this.containerParent.insertBefore( primarySiblingDOMElement, firstChild );
+          this.topLevelElements = [ this.containerParent ];
+        }
+        else {
+
+          // Wean out any null siblings
+          this.topLevelElements = [ this.labelSibling, this.descriptionSibling, this.primarySibling ].filter( function( i ) { return i; } );
+        }
+
+        // @private {function} - Referenced for disposal
+        this.focusEventListener = this.focusEventListener || this.onFocus.bind( this );
+        this.blurEventListener = this.blurEventListener || this.onBlur.bind( this );
+
+        // Hook up listeners for when our primary element is focused or blurred.
+        this.primarySibling.addEventListener( 'blur', this.blurEventListener );
+        this.primarySibling.addEventListener( 'focus', this.focusEventListener );
+
+
+        // set the accessible label now that the element has been recreated again, but not if the tagName
+        // has been cleared out
+        if ( node._labelContent && node._labelTagName !== null ) {
+          this.setLabelSiblingContent( node._labelContent );
+        }
+
+        // restore the innerContent
+        if ( node._innerContent && node._tagName !== null ) {
+          this.setPrimarySiblingContent( node._innerContent );
+        }
+
+        // set the accessible description, but not if the tagName has been cleared out.
+        if ( node._descriptionContent && node._descriptionTagName !== null ) {
+          this.setDescriptionSiblingContent( node._descriptionContent );
+        }
+
+        // set if using aria-label
+        node._ariaLabel && this.setAttributeToElement( 'aria-label', node._ariaLabel );
+
+        // restore checked
+        this.setAttributeToElement( 'checked', node._accessibleChecked );
+
+        // restore input value
+        node._inputValue && this.setAttributeToElement( 'value', node._inputValue );
+
+
+        // set the accessible attributes, restoring from a defensive copy
+        var defensiveAttributes = node.accessibleAttributes;
+        for ( i = 0; i < defensiveAttributes.length; i++ ) {
+          var attribute = defensiveAttributes[ i ].attribute;
+          var value = defensiveAttributes[ i ].value;
+          var namespace = defensiveAttributes[ i ].namespace;
+          this.setAttributeToElement( attribute, value, {
+            namespace: namespace
+          } );
+        }
+
+        // if element is an input element, set input type
+        if ( node._tagName.toUpperCase() === INPUT_TAG && node._inputType ) {
+          this.setAttributeToElement( 'type', node._inputType );
+        }
+
+        // TODO: factor this out to be in peer instead of node
+        // recompute and assign the association attributes that link two elements (like aria-labelledby)
+        // node.updateLabelledbyDescribebyAssociations();
+
+        // add all listeners to the dom element
+        for ( i = 0; i < node._accessibleInputListeners.length; i++ ) {
+          this.addDOMEventListeners( node._accessibleInputListeners[ i ] );
+        }
+
+        // insert the label and description elements in the correct location if they exist
+        labelSibling && this.arrangeContentElement( labelSibling, node._appendLabel );
+        descriptionSibling && this.arrangeContentElement( descriptionSibling, node._appendDescription );
+
+        // Default the focus highlight in this special case to be invisible until selected.
+        if ( node._focusHighlightLayerable ) {
+          node._focusHighlight.visible = false;
+        }
+
+        assert && assert( this.primarySibling );
+
+      }
+      else {
+        node.accessibleContent = false; // otherwise clear the accessibleContent
+      }
+
+    },
+
+    onTagNameChange: function() {
+
+      this.setHasAccessibleContent();
+    },
+
+    onLabelTagNameChange: function() {
+
+      this.setHasAccessibleContent();
+    },
+    onDescriptionTagNameChange: function() {
+
+      this.setHasAccessibleContent();
+    },
+    onAppendLabelChange: function() {
+
+      this.setHasAccessibleContent();
+    },
+    onAppendDescriptionChange: function() {
+
+      this.setHasAccessibleContent();
+    },
+    onContainerTagNameChange: function() {
+
+      this.setHasAccessibleContent();
+    },
+    onAriaRoleChange: function() {
+
+      this.setHasAccessibleContent();
+    },
+    onContainerAriaRoleChange: function() {
+
+      this.setHasAccessibleContent();
+    },
+    onAccessibleNamespaceChange: function() {
+
+      this.setHasAccessibleContent();
+    },
+    onFocusHighlightChange: function() {
+
+      this.setHasAccessibleContent();
+    },
+    onFocusHighlightLayerableChange: function() {
+
+      this.setHasAccessibleContent();
+    },
+    onAccessibleContentDisplayedChange: function() {
+
+      this.setHasAccessibleContent();
+    },
+
+    setHasAccessibleContent: function() {
+      var node = this.accessibleInstance.node;
+
+      // if any parents are flagged as removed from the accessibility tree, set content to null
+      var contentDisplayed = node._accessibleContentDisplayed;
+      for ( var i = 0; i < node._parents.length; i++ ) {
+        if ( !node._parents[ i ].accessibleContentDisplayed ) {
+          contentDisplayed = false;
+        }
+      }
+
+
+      if ( contentDisplayed && node._tagName ) {
+        node.accessibleContent = true;
+      }
+      else {
+        node.accessibleContent = false;
+      }
     },
 
     /**
@@ -346,11 +576,11 @@ define( function( require ) {
             visibleElements += 1;
           }
         } );
-        assert( visibleElements === this.visible ? 0 : this.topLevelElements.length,
+        assert( this.visible ? visibleElements === this.topLevelElements.length : visibleElements === 0,
           'some of the peer\'s elements are visible and some are not' );
 
       }
-      return this.visible === null ? true: this.visible; // default to true if visibility hasn't been set yet.
+      return this.visible === null ? true : this.visible; // default to true if visibility hasn't been set yet.
     },
 
     /**

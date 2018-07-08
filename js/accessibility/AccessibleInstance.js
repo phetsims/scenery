@@ -122,7 +122,9 @@ define( function( require ) {
 
         // give the container a class name so it is hidden in the Display, see accessibility styling in Display.js
         accessibilityContainer.className = 'accessibility';
-        this.peer = AccessiblePeer.createFromPool( this, accessibilityContainer );
+        this.peer = AccessiblePeer.createFromPool( this, {
+          primarySibling: accessibilityContainer
+        } );
 
         var self = this;
         this.globalKeyListener = function( event ) {
@@ -162,7 +164,9 @@ define( function( require ) {
         document.body.addEventListener( 'keydown', this.globalKeyListener );
       }
       else {
-        this.peer = this.node.accessibleContent.createPeer( this );
+        this.peer = AccessiblePeer.createFromPool( this );
+
+        assert && assert( this.peer.primarySibling, 'accessible peer must have a primarySibling upon completion of construction' );
 
         // Scan over all of the nodes in our trail (that are NOT in our parent's trail) to check for accessibleDisplays
         // so we can initialize our invisibleCount and add listeners.
@@ -583,6 +587,8 @@ define( function( require ) {
 
     /**
      * For debugging purposes, inspect the tree of AccessibleInstances from the root.
+     *
+     * Only ever called from the _rootAccessibleInstance of the display.
      *
      * @public (scenery-internal)
      */
