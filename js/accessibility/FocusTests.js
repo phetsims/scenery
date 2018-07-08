@@ -30,19 +30,13 @@ define( function( require ) {
     }
   }
 
-  var accessibleContent = {
-    createPeer: function( accessibleInstance ) {
-      return AccessiblePeer.createFromPool( accessibleInstance, document.createElement( 'div' ) );
-    }
-  };
-
   QUnit.test( 'Simple Test', function( assert ) {
 
-    var a1 = new Node( { accessibleContent: accessibleContent } );
-    var a2 = new Node( { accessibleContent: accessibleContent } );
+    var a1 = new Node( { tagName: 'div' } );
+    var a2 = new Node( { tagName: 'div' } );
 
-    var b1 = new Node( { accessibleContent: accessibleContent } );
-    var b2 = new Node( { accessibleContent: accessibleContent } );
+    var b1 = new Node( { tagName: 'div' } );
+    var b2 = new Node( { tagName: 'div' } );
 
     var a = new Node( { children: [ a1, a2 ] } );
     var b = new Node( { children: [ b1, b2 ] } );
@@ -61,11 +55,11 @@ define( function( require ) {
 
   QUnit.test( 'accessibleOrder Simple Test', function( assert ) {
 
-    var a1 = new Node( { accessibleContent: accessibleContent } );
-    var a2 = new Node( { accessibleContent: accessibleContent } );
+    var a1 = new Node( { tagName: 'div' } );
+    var a2 = new Node( { tagName: 'div' } );
 
-    var b1 = new Node( { accessibleContent: accessibleContent } );
-    var b2 = new Node( { accessibleContent: accessibleContent } );
+    var b1 = new Node( { tagName: 'div' } );
+    var b2 = new Node( { tagName: 'div' } );
 
     var a = new Node( { children: [ a1, a2 ] } );
     var b = new Node( { children: [ b1, b2 ] } );
@@ -84,11 +78,11 @@ define( function( require ) {
 
   QUnit.test( 'accessibleOrder Descendant Test', function( assert ) {
 
-    var a1 = new Node( { accessibleContent: accessibleContent } );
-    var a2 = new Node( { accessibleContent: accessibleContent } );
+    var a1 = new Node( { tagName: 'div' } );
+    var a2 = new Node( { tagName: 'div' } );
 
-    var b1 = new Node( { accessibleContent: accessibleContent } );
-    var b2 = new Node( { accessibleContent: accessibleContent } );
+    var b1 = new Node( { tagName: 'div' } );
+    var b2 = new Node( { tagName: 'div' } );
 
     var a = new Node( { children: [ a1, a2 ] } );
     var b = new Node( { children: [ b1, b2 ] } );
@@ -107,14 +101,14 @@ define( function( require ) {
 
   QUnit.test( 'accessibleOrder Descendant Pruning Test', function( assert ) {
 
-    var a1 = new Node( { accessibleContent: accessibleContent } );
-    var a2 = new Node( { accessibleContent: accessibleContent } );
+    var a1 = new Node( { tagName: 'div' } );
+    var a2 = new Node( { tagName: 'div' } );
 
-    var b1 = new Node( { accessibleContent: accessibleContent } );
-    var b2 = new Node( { accessibleContent: accessibleContent } );
+    var b1 = new Node( { tagName: 'div' } );
+    var b2 = new Node( { tagName: 'div' } );
 
-    var c1 = new Node( { accessibleContent: accessibleContent } );
-    var c2 = new Node( { accessibleContent: accessibleContent } );
+    var c1 = new Node( { tagName: 'div' } );
+    var c2 = new Node( { tagName: 'div' } );
 
     var c = new Node( { children: [ c1, c2 ] } );
 
@@ -137,11 +131,11 @@ define( function( require ) {
 
   QUnit.test( 'accessibleOrder Descendant Override', function( assert ) {
 
-    var a1 = new Node( { accessibleContent: accessibleContent } );
-    var a2 = new Node( { accessibleContent: accessibleContent } );
+    var a1 = new Node( { tagName: 'div' } );
+    var a2 = new Node( { tagName: 'div' } );
 
-    var b1 = new Node( { accessibleContent: accessibleContent } );
-    var b2 = new Node( { accessibleContent: accessibleContent } );
+    var b1 = new Node( { tagName: 'div' } );
+    var b2 = new Node( { tagName: 'div' } );
 
     var a = new Node( { children: [ a1, a2 ] } );
     var b = new Node( { children: [ b1, b2 ], accessibleOrder: [ b1, b2 ] } );
@@ -160,11 +154,11 @@ define( function( require ) {
 
   QUnit.test( 'accessibleOrder Hierarchy', function( assert ) {
 
-    var a1 = new Node( { accessibleContent: accessibleContent } );
-    var a2 = new Node( { accessibleContent: accessibleContent } );
+    var a1 = new Node( { tagName: 'div' } );
+    var a2 = new Node( { tagName: 'div' } );
 
-    var b1 = new Node( { accessibleContent: accessibleContent } );
-    var b2 = new Node( { accessibleContent: accessibleContent } );
+    var b1 = new Node( { tagName: 'div' } );
+    var b2 = new Node( { tagName: 'div' } );
 
     var a = new Node( { children: [ a1, a2 ], accessibleOrder: [ a2 ] } );
     var b = new Node( { children: [ b1, b2 ], accessibleOrder: [ b2, b1 ] } );
@@ -183,8 +177,8 @@ define( function( require ) {
 
   QUnit.test( 'accessibleOrder DAG test', function( assert ) {
 
-    var a1 = new Node( { accessibleContent: accessibleContent } );
-    var a2 = new Node( { accessibleContent: accessibleContent } );
+    var a1 = new Node( { tagName: 'div' } );
+    var a2 = new Node( { tagName: 'div' } );
 
     var a = new Node( { children: [ a1, a2 ], accessibleOrder: [ a2, a1 ] } );
     var b = new Node( { children: [ a1, a2 ], accessibleOrder: [ a1, a2 ] } );
@@ -207,14 +201,14 @@ define( function( require ) {
     var a = new Node();
     var b = new Node();
     var c = new Node();
-    var d = new Node( { accessibleContent: accessibleContent } );
+    var d = new Node( { tagName: 'div' } );
     var e = new Node();
-    var f = new Node( { accessibleContent: accessibleContent } );
-    var g = new Node( { accessibleContent: accessibleContent } );
-    var h = new Node( { accessibleContent: accessibleContent } );
-    var i = new Node( { accessibleContent: accessibleContent } );
-    var j = new Node( { accessibleContent: accessibleContent } );
-    var k = new Node( { accessibleContent: accessibleContent } );
+    var f = new Node( { tagName: 'div' } );
+    var g = new Node( { tagName: 'div' } );
+    var h = new Node( { tagName: 'div' } );
+    var i = new Node( { tagName: 'div' } );
+    var j = new Node( { tagName: 'div' } );
+    var k = new Node( { tagName: 'div' } );
     var l = new Node();
 
     x.children = [ a ];
