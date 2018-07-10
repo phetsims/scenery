@@ -576,8 +576,8 @@ define( function( require ) {
             var peer = this._accessibleInstances[ 0 ].peer;
             assert && assert( peer, 'must have a peer to blur' );
             peer.blur();
+            this.interruptAccessibleInput(); // interrupt any a11y listeners that attached to this Node
           }
-          this.interruptAccessibleInput(); // interrupt any a11y listeners that attached to this Node
         },
 
         /***********************************************************************************************************/
