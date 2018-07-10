@@ -382,7 +382,7 @@ define( function( require ) {
       for ( var i = 0; i < childrenToRemove.length; i++ ) {
         var childToRemove = childrenToRemove[ i ];
 
-        assert && assert( element.contains( childToRemove), 'element does not contain child to be removed: ', childToRemove );
+        assert && assert( element.contains( childToRemove ), 'element does not contain child to be removed: ', childToRemove );
 
         element.removeChild( childToRemove );
       }

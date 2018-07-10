@@ -350,7 +350,7 @@ define( function( require ) {
           'some of the peer\'s elements are visible and some are not' );
 
       }
-      return this.visible === null ? true: this.visible; // default to true if visibility hasn't been set yet.
+      return this.visible === null ? true : this.visible; // default to true if visibility hasn't been set yet.
     },
 
     /**
