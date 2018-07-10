@@ -53,7 +53,7 @@
  *
  * listItem1.innerContent = 'I am list item number 1';
  *
- * The above operations will create the following pDOM structure (note that actual ids will be different):
+ * The above operations will create the following PDOM structure (note that actual ids will be different):
  *
  * <ul id='myUnorderedList'>
  *   <li>I am a list item number 1</li>
@@ -67,7 +67,7 @@
  * These are called siblings. The Node's direct DOM element (the DOM element you create with the `tagName` option)
  * is called the "primary sibling." You can also have a container parent DOM element that surrounds all of these
  * siblings. With three siblings and a container parent, each Node can have up to 4 DOM Elements representing it in the
- * pDOM. Here is an example of how a Node may use these features:
+ * PDOM. Here is an example of how a Node may use these features:
  *
  * <div>
  *   <label for="myInput">This great label for input</label
@@ -97,7 +97,7 @@
  *      default labelTagName: 'p'
  *      default descriptionTagName: 'p'
  *      default containerTagName: 'div'
- *    so the following will yield the same pDOM structure:
+ *    so the following will yield the same PDOM structure:
  *
  *    new Node( {
  *     tagName: 'input',
@@ -112,7 +112,7 @@
  * --------------------------------------------------------------------------------------------------------------------
  *
  * For additional accessibility options, please see the options listed in ACCESSIBILITY_OPTION_KEYS. To understand the
- * pDOM more, see AccessiblePeer, which manages the DOM Elements for a node. For more documentation on Scenery, Nodes,
+ * PDOM more, see AccessiblePeer, which manages the DOM Elements for a node. For more documentation on Scenery, Nodes,
  * and the scene graph, please see http://phetsims.github.io/scenery/
  *
  * @author Jesse Greenberg (PhET Interactive Simulations)
@@ -170,11 +170,11 @@ define( function( require ) {
 
     'labelTagName', // Sets the tag name for the DOM element sibling labelling this node, see setLabelTagName()
     'labelContent', // Sets the label content for the node, see setLabelContent()
-    'appendLabel', // Sets the label sibling to come after the primary sibling in the pDOM, see setAppendLabel()
+    'appendLabel', // Sets the label sibling to come after the primary sibling in the PDOM, see setAppendLabel()
 
     'descriptionTagName', // Sets the tag name for the DOM element sibling describing this node, see setDescriptionTagName()
     'descriptionContent', // Sets the description content for the node, see setDescriptionContent()
-    'appendDescription', // Sets the description sibling to come after the primary sibling in the pDOM, see setAppendDescription()
+    'appendDescription', // Sets the description sibling to come after the primary sibling in the PDOM, see setAppendDescription()
 
     'focusHighlight', // Sets the focus highlight for the node, see setFocusHighlight()
     'focusHighlightLayerable', // Flag to determine if the focus highlight node can be layered in the scene graph, see setFocusHighlightLayerable()
@@ -253,14 +253,14 @@ define( function( require ) {
           // type 'radio' and 'checkbox'
           this._accessibleChecked = false;
 
-          // @private {boolean} - By default the label will be prepended before the primary sibling in the pDOM. This
+          // @private {boolean} - By default the label will be prepended before the primary sibling in the PDOM. This
           // option allows you to instead have the label added after the primary sibling. Note: The label will always
           // be in front of the description sibling. If this flag is set with `appendDescription: true`, the order will be
           // (1) primary sibling, (2) label sibling, (3) description sibling. All siblings will be placed within the
           // containerParent.
           this._appendLabel = false;
 
-          // @private {boolean} - By default the description will be prepended before the primary sibling in the pDOM. This
+          // @private {boolean} - By default the description will be prepended before the primary sibling in the PDOM. This
           // option allows you to instead have the description added after the primary sibling. Note: The description
           // will always be after the label sibling. If this flag is set with `appendLabel: true`, the order will be
           // (1) primary sibling, (2) label sibling, (3) description sibling. All siblings will be placed within the
@@ -576,8 +576,8 @@ define( function( require ) {
             var peer = this._accessibleInstances[ 0 ].peer;
             assert && assert( peer, 'must have a peer to blur' );
             peer.blur();
+            this.interruptAccessibleInput(); // interrupt any a11y listeners that attached to this Node
           }
-          this.interruptAccessibleInput(); // interrupt any a11y listeners that attached to this Node
         },
 
         /***********************************************************************************************************/
@@ -713,7 +713,7 @@ define( function( require ) {
         /***********************************************************************************************************/
 
         /**
-         * Set the tag name for the primary sibling in the pDOM. DOM element tag names are read-only, so this
+         * Set the tag name for the primary sibling in the PDOM. DOM element tag names are read-only, so this
          * function will create a new DOM element each time it is called for the Node's AccessiblePeer and
          * reset the accessible content.
          *
@@ -755,7 +755,7 @@ define( function( require ) {
          * labelContent is specified without calling this method, then the DEFAULT_LABEL_TAG_NAME will be used as the
          * tag name for the label sibling.
          *
-         * Use null to clear the label sibling element from the pDOM.
+         * Use null to clear the label sibling element from the PDOM.
          *
          * NOTE: This method will create a container parent tagName if none has been specified, because all sibling
          * elements must be children of the container. If you clear the labelTagName and no longer want any
@@ -864,7 +864,7 @@ define( function( require ) {
         get inputType() { return this.getInputType(); },
 
         /**
-         * By default the label will be prepended before the primary sibling in the pDOM. This
+         * By default the label will be prepended before the primary sibling in the PDOM. This
          * option allows you to instead have the label added after the primary sibling. Note: The label will always
          * be in front of the description sibling. If this flag is set with `appendDescription`, the order will be
          *
@@ -898,7 +898,7 @@ define( function( require ) {
         get appendLabel() { this.getAppendLabel(); },
 
         /**
-         * By default the label will be prepended before the primary sibling in the pDOM. This
+         * By default the label will be prepended before the primary sibling in the PDOM. This
          * option allows you to instead have the label added after the primary sibling. Note: The label will always
          * be in front of the description sibling. If this flag is set with `appendLabel`, the order will be
          *
@@ -935,7 +935,7 @@ define( function( require ) {
         /**
          * Set the container parent tag name. By specifying this container parent, an element will be created that
          * acts as a container for this Node's primary sibling DOM Element and its label and description siblings.
-         * This containerTagName will default to DEFAULT_LABEL_TAG_NAME, and be added to the pDOM automatically if
+         * This containerTagName will default to DEFAULT_LABEL_TAG_NAME, and be added to the PDOM automatically if
          * more than just the primary sibling is created.
          *
          *
