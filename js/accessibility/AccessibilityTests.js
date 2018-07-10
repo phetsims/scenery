@@ -198,7 +198,7 @@ define( function( require ) {
 
     a.labelTagName = null;
 
-    // make sure label was cleared from pDOM
+    // make sure label was cleared from PDOM
     assert.ok( getPrimarySiblingElementByNode( a ).parentElement.childNodes.length === 1,
       'Only one element after clearing label' );
 
@@ -271,7 +271,7 @@ define( function( require ) {
     cPeer = c.accessibleInstances[ 0 ].peer; // refresh the DOM Elements
     dPeer = d.accessibleInstances[ 0 ].peer; // refresh the DOM Elements
     var ePeer = e.accessibleInstances[ 0 ].peer;
-    assert.ok( bElement.children.length === 5, 'e children should be added to the same pDOM level.' );
+    assert.ok( bElement.children.length === 5, 'e children should be added to the same PDOM level.' );
     confirmOriginalOrder();
 
     var confirmOriginalWithE = function() {
@@ -298,7 +298,7 @@ define( function( require ) {
     cPeer = c.accessibleInstances[ 0 ].peer; // refresh the DOM Elements
     dPeer = d.accessibleInstances[ 0 ].peer; // refresh the DOM Elements
     ePeer = e.accessibleInstances[ 0 ].peer;
-    assert.ok( bElement.children.length === 5, 'e children should be added to the same pDOM level again.' );
+    assert.ok( bElement.children.length === 5, 'e children should be added to the same PDOM level again.' );
     confirmOriginalOrder();
     confirmOriginalWithE();
 
@@ -345,7 +345,7 @@ define( function( require ) {
 
     a.descriptionTagName = null;
 
-    // make sure description was cleared from pDOM
+    // make sure description was cleared from PDOM
     assert.ok( getPrimarySiblingElementByNode( a ).parentElement.childNodes.length === 1,
       'Only one element after clearing description' );
 
