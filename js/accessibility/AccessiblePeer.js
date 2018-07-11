@@ -543,7 +543,9 @@ define( function( require ) {
 
         var visibleElements = 0;
         this.topLevelElements.forEach( function( element ) {
-          if ( !element.hidden ) {
+
+          // support property or attribute
+          if ( !element.hidden && !element.hasAttribute( 'hidden' ) ) {
             visibleElements += 1;
           }
         } );
