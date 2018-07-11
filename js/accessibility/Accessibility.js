@@ -725,15 +725,15 @@ define( function( require ) {
           if ( tagName !== this._tagName ) {
             this._tagName = tagName;
 
-            // TODO: manage a better way to say a node has accessibleContent
-            // default case, set accessibleContent true
-            if ( tagName && this.accessibleContentDisplayed ) {
-              this.accessibleContent = true;
+            // TODO: this could be setting a11y content twice
+            this.onAccessibleContentChange();
+            if ( this._accessibleInstances.length > 0 ) {
+              for ( var i = 0; i < this._accessibleInstances.length; i++ ) {
+                var peer = this._accessibleInstances[ i ].peer;
+                peer.onTagNameChange();
+              }
             }
-            for ( var i = 0; i < this._accessibleInstances.length; i++ ) {
-              var peer = this._accessibleInstances[ i ].peer;
-              peer.onTagNameChange();
-            }
+
           }
         },
         set tagName( tagName ) { this.setTagName( tagName ); },
@@ -772,10 +772,12 @@ define( function( require ) {
           if ( tagName !== this._labelTagName ) {
             this._labelTagName = tagName;
 
-            for ( var i = 0; i < this._accessibleInstances.length; i++ ) {
-              var peer = this._accessibleInstances[ i ].peer;
-              peer.onLabelTagNameChange();
-            }
+            this.onAccessibleContentChange();
+
+            // for ( var i = 0; i < this._accessibleInstances.length; i++ ) {
+            //   var peer = this._accessibleInstances[ i ].peer;
+            //   peer.onLabelTagNameChange();
+            // }
           }
         },
         set labelTagName( tagName ) { this.setLabelTagName( tagName ); },
@@ -816,10 +818,12 @@ define( function( require ) {
 
             this._descriptionTagName = tagName;
 
-            for ( var i = 0; i < this._accessibleInstances.length; i++ ) {
-              var peer = this._accessibleInstances[ i ].peer;
-              peer.onDescriptionTagNameChange();
-            }
+            this.onAccessibleContentChange();
+
+            // for ( var i = 0; i < this._accessibleInstances.length; i++ ) {
+            //   var peer = this._accessibleInstances[ i ].peer;
+            //   peer.onDescriptionTagNameChange();
+            // }
           }
         },
         set descriptionTagName( tagName ) { this.setDescriptionTagName( tagName ); },
@@ -881,10 +885,11 @@ define( function( require ) {
           this._appendLabel = appendLabel;
 
           // TODO: can we do this without recomputing everything?
-          for ( var i = 0; i < this._accessibleInstances.length; i++ ) {
-            var peer = this._accessibleInstances[ i ].peer;
-            peer.onAppendLabelChange();
-          }
+          this.onAccessibleContentChange();
+          // for ( var i = 0; i < this._accessibleInstances.length; i++ ) {
+          //   var peer = this._accessibleInstances[ i ].peer;
+          //   peer.onAppendLabelChange();
+          // }
         },
         set appendLabel( appendLabel ) { this.setAppendLabel( appendLabel ); },
 
@@ -915,10 +920,11 @@ define( function( require ) {
           this._appendDescription = appendDescription;
 
           // TODO: can we do this without recomputing everything?
-          for ( var i = 0; i < this._accessibleInstances.length; i++ ) {
-            var peer = this._accessibleInstances[ i ].peer;
-            peer.onAppendDescriptionChange();
-          }
+          this.onAccessibleContentChange();
+          // for ( var i = 0; i < this._accessibleInstances.length; i++ ) {
+          //   var peer = this._accessibleInstances[ i ].peer;
+          //   peer.onAppendDescriptionChange();
+          // }
         },
         set appendDescription( appendDescription ) { this.setAppendDescription( appendDescription ); },
 
@@ -960,10 +966,11 @@ define( function( require ) {
           assert && assert( tagName === null || typeof tagName === 'string', 'invalid tagName argument: ' + tagName );
 
           this._containerTagName = tagName;
-          for ( var i = 0; i < this._accessibleInstances.length; i++ ) {
-            var peer = this._accessibleInstances[ i ].peer;
-            peer.onContainerTagNameChange();
-          }
+          this.onAccessibleContentChange();
+          // for ( var i = 0; i < this._accessibleInstances.length; i++ ) {
+          //   var peer = this._accessibleInstances[ i ].peer;
+          //   peer.onContainerTagNameChange();
+          // }
         },
         set containerTagName( tagName ) { this.setContainerTagName( tagName ); },
 
@@ -1101,10 +1108,11 @@ define( function( require ) {
           this._ariaRole = ariaRole;
           this.setAccessibleAttribute( 'role', ariaRole );
 
-          for ( var i = 0; i < this._accessibleInstances.length; i++ ) {
-            var peer = this._accessibleInstances[ i ].peer;
-            peer.onAriaRoleChange();
-          }
+          this.onAccessibleContentChange();
+          // for ( var i = 0; i < this._accessibleInstances.length; i++ ) {
+          //   var peer = this._accessibleInstances[ i ].peer;
+          //   peer.onAriaRoleChange();
+          // }
         },
         set ariaRole( ariaRole ) { this.setAriaRole( ariaRole ); },
 
@@ -1133,10 +1141,11 @@ define( function( require ) {
           assert && assert( ariaRole === null || typeof ariaRole === 'string' );
           this._containerAriaRole = ariaRole;
 
-          for ( var i = 0; i < this._accessibleInstances.length; i++ ) {
-            var peer = this._accessibleInstances[ i ].peer;
-            peer.onContainerAriaRoleChange();
-          }
+          this.onAccessibleContentChange();
+          // for ( var i = 0; i < this._accessibleInstances.length; i++ ) {
+          //   var peer = this._accessibleInstances[ i ].peer;
+          //   peer.onContainerAriaRoleChange();
+          // }
         },
         set containerAriaRole( ariaRole ) { this.setContainerAriaRole( ariaRole ); },
 
@@ -1169,10 +1178,11 @@ define( function( require ) {
           if ( this._accessibleNamespace !== accessibleNamespace ) {
             this._accessibleNamespace = accessibleNamespace;
 
-            for ( var i = 0; i < this._accessibleInstances.length; i++ ) {
-              var peer = this._accessibleInstances[ i ].peer;
-              peer.onAccessibleNamespaceChange();
-            }
+            this.onAccessibleContentChange();
+            // for ( var i = 0; i < this._accessibleInstances.length; i++ ) {
+            //   var peer = this._accessibleInstances[ i ].peer;
+            //   peer.onAccessibleNamespaceChange();
+            // }
           }
 
           return this;
@@ -1238,10 +1248,11 @@ define( function( require ) {
             isFocused = true;
           }
 
-          for ( var i = 0; i < this._accessibleInstances.length; i++ ) {
-            var peer = this._accessibleInstances[ i ].peer;
-            peer.onFocusHighlightChange();
-          }
+          this.onAccessibleContentChange();
+          // for ( var i = 0; i < this._accessibleInstances.length; i++ ) {
+          //   var peer = this._accessibleInstances[ i ].peer;
+          //   peer.onFocusHighlightChange();
+          // }
 
           // if the focus highlight is layerable in the scene graph, update visibility so that it is only
           // visible when associated node has focus
@@ -1286,10 +1297,11 @@ define( function( require ) {
             this._focusHighlight.visible = this.focused;
           }
 
-          for ( var i = 0; i < this._accessibleInstances.length; i++ ) {
-            var peer = this._accessibleInstances[ i ].peer;
-            peer.onFocusHighlightLayerableChange();
-          }
+          this.onAccessibleContentChange();
+          // for ( var i = 0; i < this._accessibleInstances.length; i++ ) {
+          //   var peer = this._accessibleInstances[ i ].peer;
+          //   peer.onFocusHighlightLayerableChange();
+          // }
         },
         set focusHighlightLayerable( focusHighlightLayerable ) { this.setFocusHighlightLayerable( focusHighlightLayerable ); },
 
@@ -1889,21 +1901,34 @@ define( function( require ) {
         setAccessibleContentDisplayed: function( contentDisplayed ) {
           this._accessibleContentDisplayed = contentDisplayed;
 
-          for ( var j = 0; j < this._children.length; j++ ) {
-            var child = this._children[ j ];
-            child.setAccessibleContentDisplayed( contentDisplayed );
-          }
+          //TODO: we shouldn't need to set our children too, would it be better to have getters keep track of parents' values too???
+          // for ( var j = 0; j < this._children.length; j++ ) {
+          //   var child = this._children[ j ];
+          //   child.setAccessibleContentDisplayed( contentDisplayed );
+          // }
 
-          this.accessibleContent = this.accessibleContent;
-          for ( var i = 0; i < this._accessibleInstances.length; i++ ) {
-            var peer = this._accessibleInstances[ i ].peer;
-            peer.onAccessibleContentDisplayedChange();
-          }
+          this.onAccessibleContentChange();
+          // for ( var i = 0; i < this._accessibleInstances.length; i++ ) {
+          //   var peer = this._accessibleInstances[ i ].peer;
+          //   peer.onAccessibleContentDisplayedChange();
+          // }
         },
         set accessibleContentDisplayed( contentDisplayed ) { this.setAccessibleContentDisplayed( contentDisplayed ); },
 
+        /**
+         * Get whether or not this Node is displayed in the PDOM, NOT just its this._accessibleContentDisplayed boolean value
+         * @returns {boolean|*}
+         */
         getAccessibleContentDisplayed: function() {
-          return this._accessibleContentDisplayed;
+          // {boolean} if any parents are flagged as removed from the accessibility tree, set content to null
+          var contentDisplayed = this._accessibleContentDisplayed;
+          for ( var i = 0; i < this._parents.length; i++ ) {
+            if ( !this._parents[ i ].accessibleContentDisplayed ) {
+              contentDisplayed = false;
+            }
+          }
+
+          return contentDisplayed;
         },
         get accessibleContentDisplayed() { return this.getAccessibleContentDisplayed(); },
 
@@ -2222,24 +2247,14 @@ define( function( require ) {
          * Sets the accessible content for a Node. See constructor for more information. Not part of the Accessibility
          * API
          * @public (scenery-internal)
-         * TODO: this method should probably be renamed to just be a boolean
-         * @param {null|Object} accessibleContent
          */
-        setAccessibleContent: function( accessibleContent ) {
-          assert && assert( accessibleContent === null || accessibleContent instanceof Object || typeof accessibleContent === 'boolean' );
+        onAccessibleContentChange: function() {
 
-
-          // remove guard and treat accessibleContent more like a boolean saying "I've changed my accessible content."
-          // if ( this._accessibleContent !== accessibleContent || accessibleContent === true ) {
-          var oldAccessibleContent = this._accessibleContent;
-          this._accessibleContent = accessibleContent;
-
-          AccessibilityTree.accessibleContentChange( this, oldAccessibleContent, accessibleContent );
+          AccessibilityTree.accessibleContentChange( this );
 
           this.trigger0( 'accessibleContent' );
-          // }
         },
-        set accessibleContent( value ) { this.setAccessibleContent( value ); },
+        set accessibleContent( value ) { this.onAccessibleContentChange( value ); },
 
         /**
          * Returns the accessible content for this node.
@@ -2249,15 +2264,8 @@ define( function( require ) {
          * @returns {null|Object}
          */
         getAccessibleContent: function() {
-          // if any parents are flagged as removed from the accessibility tree, set content to null
-          var contentDisplayed = this._accessibleContentDisplayed;
-          for ( var i = 0; i < this._parents.length; i++ ) {
-            if ( !this._parents[ i ].accessibleContentDisplayed ) {
-              contentDisplayed = false;
-            }
-          }
 
-          return contentDisplayed && !!this._tagName;
+          return this._accessibleContentDisplayed && !!this._tagName;
 
         },
         get accessibleContent() { return this.getAccessibleContent(); },

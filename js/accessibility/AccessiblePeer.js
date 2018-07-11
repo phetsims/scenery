@@ -126,164 +126,148 @@ define( function( require ) {
         this.containerParent.removeChild( this.containerParent.lastChild );
       }
 
-      // if any parents are flagged as removed from the accessibility tree, set content to null
-      var contentDisplayed = node._accessibleContentDisplayed;
-      for ( var i = 0; i < node._parents.length; i++ ) {
-        if ( !node._parents[ i ].accessibleContentDisplayed ) {
-          contentDisplayed = false;
+      var i;
+
+      // clear out elements to be recreated below
+      this.primarySibling = null;
+      this.labelSibling = null;
+      this.descriptionSibling = null;
+      this.containerParent = null;
+
+
+      // higher level api first, because it will effect the lower level setters.
+      // if ( node.accessibleName ) {
+      //   node.setAccessibleNameImplementation( node.accessibleName ); // set it again to support any option order
+      // }
+      //
+      // if ( node.helpText ) {
+      //   node.setHelpTextImplementation( node.helpText ); // set it again to support any option order
+      // }
+
+      var uniqueId = this.accessibleInstance.trail.getUniqueId();
+
+      // create the base DOM element representing this accessible instance
+      var primarySibling = AccessibilityUtil.createElement( node._tagName, node.focusable, {
+        namespace: node._accessibleNamespace
+      } );
+      primarySibling.id = uniqueId;
+
+      // create the container parent for the dom siblings
+      var containerParent = null;
+      if ( node._containerTagName ) {
+        containerParent = AccessibilityUtil.createElement( node._containerTagName, false );
+        containerParent.id = 'container-' + uniqueId;
+
+        // provide the aria-role if it is specified
+        if ( node._containerAriaRole ) {
+          containerParent.setAttribute( 'role', node._containerAriaRole );
         }
       }
 
+      // create the label DOM element representing this instance
+      var labelSibling = null;
+      if ( node._labelTagName ) {
+        labelSibling = AccessibilityUtil.createElement( node._labelTagName, false );
+        labelSibling.id = 'label-' + uniqueId;
+      }
 
-      if ( contentDisplayed && node._tagName ) {
-
-
-        // clear out elements to be recreated below
-        this.primarySibling = null;
-        this.labelSibling = null;
-        this.descriptionSibling = null;
-        this.containerParent = null;
-
-
-        // higher level api first, because it will effect the lower level setters.
-        // if ( node.accessibleName ) {
-        //   node.setAccessibleNameImplementation( node.accessibleName ); // set it again to support any option order
-        // }
-        //
-        // if ( node.helpText ) {
-        //   node.setHelpTextImplementation( node.helpText ); // set it again to support any option order
-        // }
-
-        var uniqueId = this.accessibleInstance.trail.getUniqueId();
-
-        // create the base DOM element representing this accessible instance
-        var primarySibling = AccessibilityUtil.createElement( node._tagName, node.focusable, {
-          namespace: node._accessibleNamespace
-        } );
-        primarySibling.id = uniqueId;
-
-        // create the container parent for the dom siblings
-        var containerParent = null;
-        if ( node._containerTagName ) {
-          containerParent = AccessibilityUtil.createElement( node._containerTagName, false );
-          containerParent.id = 'container-' + uniqueId;
-
-          // provide the aria-role if it is specified
-          if ( node._containerAriaRole ) {
-            containerParent.setAttribute( 'role', node._containerAriaRole );
-          }
-        }
-
-        // create the label DOM element representing this instance
-        var labelSibling = null;
-        if ( node._labelTagName ) {
-          labelSibling = AccessibilityUtil.createElement( node._labelTagName, false );
-          labelSibling.id = 'label-' + uniqueId;
-        }
-
-        // create the description DOM element representing this instance
-        var descriptionSibling = null;
-        if ( node._descriptionTagName ) {
-          descriptionSibling = AccessibilityUtil.createElement( node._descriptionTagName, false );
-          descriptionSibling.id = 'description-' + uniqueId;
-        }
+      // create the description DOM element representing this instance
+      var descriptionSibling = null;
+      if ( node._descriptionTagName ) {
+        descriptionSibling = AccessibilityUtil.createElement( node._descriptionTagName, false );
+        descriptionSibling.id = 'description-' + uniqueId;
+      }
 
 
-        this.primarySibling = primarySibling;
-        this.labelSibling = labelSibling;
-        this.descriptionSibling = descriptionSibling;
-        this.containerParent = containerParent;
+      this.primarySibling = primarySibling;
+      this.labelSibling = labelSibling;
+      this.descriptionSibling = descriptionSibling;
+      this.containerParent = containerParent;
 
-        if ( this.containerParent ) {
-          // The first child of the container parent element should be the peer dom element
-          // if undefined, the insertBefore method will insert the primarySiblingDOMElement as the first child
-          var primarySiblingDOMElement = this.primarySibling;
-          var firstChild = this.containerParent.children[ 0 ] || null;
-          this.containerParent.insertBefore( primarySiblingDOMElement, firstChild );
-          this.topLevelElements = [ this.containerParent ];
-        }
-        else {
-
-          // Wean out any null siblings
-          this.topLevelElements = [ this.labelSibling, this.descriptionSibling, this.primarySibling ].filter( function( i ) { return i; } );
-        }
-
-        // @private {function} - Referenced for disposal
-        this.focusEventListener = this.focusEventListener || this.onFocus.bind( this );
-        this.blurEventListener = this.blurEventListener || this.onBlur.bind( this );
-
-        // Hook up listeners for when our primary element is focused or blurred.
-        this.primarySibling.addEventListener( 'blur', this.blurEventListener );
-        this.primarySibling.addEventListener( 'focus', this.focusEventListener );
-
-
-        // set the accessible label now that the element has been recreated again, but not if the tagName
-        // has been cleared out
-        if ( node._labelContent && node._labelTagName !== null ) {
-          this.setLabelSiblingContent( node._labelContent );
-        }
-
-        // restore the innerContent
-        if ( node._innerContent && node._tagName !== null ) {
-          this.setPrimarySiblingContent( node._innerContent );
-        }
-
-        // set the accessible description, but not if the tagName has been cleared out.
-        if ( node._descriptionContent && node._descriptionTagName !== null ) {
-          this.setDescriptionSiblingContent( node._descriptionContent );
-        }
-
-        // set if using aria-label
-        node._ariaLabel && this.setAttributeToElement( 'aria-label', node._ariaLabel );
-
-        // restore checked
-        this.setAttributeToElement( 'checked', node._accessibleChecked );
-
-        // restore input value
-        node._inputValue && this.setAttributeToElement( 'value', node._inputValue );
-
-
-        // set the accessible attributes, restoring from a defensive copy
-        var defensiveAttributes = node.accessibleAttributes;
-        for ( i = 0; i < defensiveAttributes.length; i++ ) {
-          var attribute = defensiveAttributes[ i ].attribute;
-          var value = defensiveAttributes[ i ].value;
-          var namespace = defensiveAttributes[ i ].namespace;
-          this.setAttributeToElement( attribute, value, {
-            namespace: namespace
-          } );
-        }
-
-        // if element is an input element, set input type
-        if ( node._tagName.toUpperCase() === INPUT_TAG && node._inputType ) {
-          this.setAttributeToElement( 'type', node._inputType );
-        }
-
-        // TODO: factor this out to be in peer instead of node
-        // recompute and assign the association attributes that link two elements (like aria-labelledby)
-        // node.updateLabelledbyDescribebyAssociations();
-
-        // add all listeners to the dom element
-        for ( i = 0; i < node._accessibleInputListeners.length; i++ ) {
-          this.addDOMEventListeners( node._accessibleInputListeners[ i ] );
-        }
-
-        // insert the label and description elements in the correct location if they exist
-        labelSibling && this.arrangeContentElement( labelSibling, node._appendLabel );
-        descriptionSibling && this.arrangeContentElement( descriptionSibling, node._appendDescription );
-
-        // Default the focus highlight in this special case to be invisible until selected.
-        if ( node._focusHighlightLayerable ) {
-          node._focusHighlight.visible = false;
-        }
-
-        assert && assert( this.primarySibling );
-
+      if ( this.containerParent ) {
+        // The first child of the container parent element should be the peer dom element
+        // if undefined, the insertBefore method will insert the primarySiblingDOMElement as the first child
+        var primarySiblingDOMElement = this.primarySibling;
+        var firstChild = this.containerParent.children[ 0 ] || null;
+        this.containerParent.insertBefore( primarySiblingDOMElement, firstChild );
+        this.topLevelElements = [ this.containerParent ];
       }
       else {
-        node.accessibleContent = false; // otherwise clear the accessibleContent
+
+        // Wean out any null siblings
+        this.topLevelElements = [ this.labelSibling, this.descriptionSibling, this.primarySibling ].filter( function( i ) { return i; } );
       }
 
+      // @private {function} - Referenced for disposal
+      this.focusEventListener = this.focusEventListener || this.onFocus.bind( this );
+      this.blurEventListener = this.blurEventListener || this.onBlur.bind( this );
+
+      // Hook up listeners for when our primary element is focused or blurred.
+      this.primarySibling.addEventListener( 'blur', this.blurEventListener );
+      this.primarySibling.addEventListener( 'focus', this.focusEventListener );
+
+
+      // set the accessible label now that the element has been recreated again, but not if the tagName
+      // has been cleared out
+      if ( node._labelContent && node._labelTagName !== null ) {
+        this.setLabelSiblingContent( node._labelContent );
+      }
+
+      // restore the innerContent
+      if ( node._innerContent && node._tagName !== null ) {
+        this.setPrimarySiblingContent( node._innerContent );
+      }
+
+      // set the accessible description, but not if the tagName has been cleared out.
+      if ( node._descriptionContent && node._descriptionTagName !== null ) {
+        this.setDescriptionSiblingContent( node._descriptionContent );
+      }
+
+      // set if using aria-label
+      node._ariaLabel && this.setAttributeToElement( 'aria-label', node._ariaLabel );
+
+      // restore checked
+      this.setAttributeToElement( 'checked', node._accessibleChecked );
+
+      // restore input value
+      node._inputValue && this.setAttributeToElement( 'value', node._inputValue );
+
+
+      // set the accessible attributes, restoring from a defensive copy
+      var defensiveAttributes = node.accessibleAttributes;
+      for ( i = 0; i < defensiveAttributes.length; i++ ) {
+        var attribute = defensiveAttributes[ i ].attribute;
+        var value = defensiveAttributes[ i ].value;
+        var namespace = defensiveAttributes[ i ].namespace;
+        this.setAttributeToElement( attribute, value, {
+          namespace: namespace
+        } );
+      }
+
+      // if element is an input element, set input type
+      if ( node._tagName.toUpperCase() === INPUT_TAG && node._inputType ) {
+        this.setAttributeToElement( 'type', node._inputType );
+      }
+
+      // TODO: factor this out to be in peer instead of node
+      // recompute and assign the association attributes that link two elements (like aria-labelledby)
+      // node.updateLabelledbyDescribebyAssociations();
+
+      // add all listeners to the dom element
+      for ( i = 0; i < node._accessibleInputListeners.length; i++ ) {
+        this.addDOMEventListeners( node._accessibleInputListeners[ i ] );
+      }
+
+      // insert the label and description elements in the correct location if they exist
+      labelSibling && this.arrangeContentElement( labelSibling, node._appendLabel );
+      descriptionSibling && this.arrangeContentElement( descriptionSibling, node._appendDescription );
+
+      // Default the focus highlight in this special case to be invisible until selected.
+      if ( node._focusHighlightLayerable ) {
+        node._focusHighlight.visible = false;
+      }
+
+      assert && assert( this.primarySibling );
     },
 
     onTagNameChange: function() {
@@ -337,23 +321,10 @@ define( function( require ) {
     },
 
     setHasAccessibleContent: function() {
-      var node = this.accessibleInstance.node;
-
-      // if any parents are flagged as removed from the accessibility tree, set content to null
-      var contentDisplayed = node._accessibleContentDisplayed;
-      for ( var i = 0; i < node._parents.length; i++ ) {
-        if ( !node._parents[ i ].accessibleContentDisplayed ) {
-          contentDisplayed = false;
-        }
-      }
-
-
-      if ( contentDisplayed && node._tagName ) {
-        node.accessibleContent = true;
-      }
-      else {
-        node.accessibleContent = false;
-      }
+      // no op, this should be handled in the view, and updated here when AccessiblePeer is constructed.
+      // if ( this.accessibleInstance.node.accessibleContent ) {
+      //   this.updateEntirePeer();
+      // }
     },
 
     /**

@@ -396,7 +396,8 @@ define( function( require ) {
      * Returns what our list of children (after sorting) should be.
      * @private
      *
-     * @param {Trail} trail - A partial trail, "ending" (with its root) at this.node.
+     * @param {Trail} trail - A partial trail, where the root of the trail is either this.node or the display's root
+     *                        node (if we are the root AccessibleInstance)
      * @returns {Array.<AccessibleInstance>}
      */
     getChildOrdering: function( trail ) {
@@ -405,6 +406,7 @@ define( function( require ) {
       var i;
       var instances = [];
 
+      // base case, node has accessible content, but don't match the "root" node of this accessible instance
       if ( node.accessibleContent && node !== this.node ) {
         var potentialInstances = node.accessibleInstances;
 
@@ -421,7 +423,7 @@ define( function( require ) {
               }
             }
 
-            instances.push( potentialInstance );
+            instances.push( potentialInstance ); // length will always be 1
           }
 
         assert && assert( instances.length <= 1, 'If we select more than one this way, we have problems' );

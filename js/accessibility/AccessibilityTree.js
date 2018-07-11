@@ -193,11 +193,9 @@ define( function( require ) {
      * NOTE: Due to the accessibleContent guard, this will not be called with oldContent and newContent equal to `null`.
      *
      * @param {Node} node
-     * @param {Object|null} oldContent
-     * @param {Object|null} newContent
      */
-    accessibleContentChange: function( node, oldContent, newContent ) {
-      sceneryLog && sceneryLog.AccessibilityTree && sceneryLog.AccessibilityTree( 'accessibleContentChange n#' + node._id + ': had:' + ( oldContent !== null ) + ', has:' + ( newContent !== null ) );
+    accessibleContentChange: function( node ) {
+      sceneryLog && sceneryLog.AccessibilityTree && sceneryLog.AccessibilityTree( 'accessibleContentChange n#' + node._id );
       sceneryLog && sceneryLog.AccessibilityTree && sceneryLog.push();
 
       assert && assert( node instanceof scenery.Node );
@@ -220,9 +218,7 @@ define( function( require ) {
       }
       // Do all removals before adding anything back in.
       for ( i = 0; i < parents.length; i++ ) {
-
-        // only add the subtree if the node has accessibleContent
-        node.accessibleContent && AccessibilityTree.addTree( parents[ i ], node, accessibleTrailsList[ i ] );
+        AccessibilityTree.addTree( parents[ i ], node, accessibleTrailsList[ i ] );
       }
 
       // An edge case is where we change the rootNode of the display (and don't have an effective parent)
@@ -363,7 +359,7 @@ define( function( require ) {
       // If we are accessible ourself, we need to create the instance (so we can provide it to child instances).
       var instance;
       var existed = false;
-      if ( node.accessibleContent ) {
+      if ( node.accessibleContent && node.accessibleContentDisplayed ) {
         instance = parentInstance.findChildWithTrail( trail );
         if ( instance ) {
           existed = true;

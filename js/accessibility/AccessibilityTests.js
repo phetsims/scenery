@@ -153,10 +153,14 @@ define( function( require ) {
     rootNode.addChild( a );
     assert.ok( a.accessibleInstances.length === 1, 'only 1 instance' );
     assert.ok( a.accessibleInstances[ 0 ].peer.containerParent === null, 'no container parent for just button' );
+    assert.ok( rootNode._accessibleInstances[ 0 ].peer.primarySibling.children[ 0 ] === a._accessibleInstances[ 0 ].peer.primarySibling,
+      'rootNode peer should hold node a\'s peer in the PDOM' );
 
     a.containerTagName = 'div';
 
     assert.ok( a.accessibleInstances[ 0 ].peer.containerParent.id.indexOf( 'container' ) >= 0, 'container parent is div if specified' );
+    assert.ok( rootNode._accessibleInstances[ 0 ].peer.primarySibling.children[ 0 ] === a._accessibleInstances[ 0 ].peer.containerParent,
+      'container parent is div if specified' );
 
     a.containerTagName = null;
 
@@ -446,7 +450,7 @@ define( function( require ) {
   } );
 
   // tests for aria-labelledby and aria-describedby should be the same, since both support the same feature set
-  function testAriaLabelledOrDescribedBy( assert, attribute ) {
+  function testAriaLabelledOrDescribedBy( assert, attribute ) { // eslint-disable-line
 
     // use a different setter depending on if testing labelledby or describedby
     var addAssociationFunction = attribute === 'aria-labelledby' ? 'addAriaLabelledbyAssociation' :
@@ -682,7 +686,7 @@ define( function( require ) {
     testK();
   }
 
-  function testAriaLabelledOrDescribedBySetters( assert, attribute ) {
+  function testAriaLabelledOrDescribedBySetters( assert, attribute ) { // eslint-disable-line
 
 
     var rootNode = new Node();
