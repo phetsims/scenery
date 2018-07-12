@@ -56,8 +56,8 @@ define( function( require ) {
 
     options = _.extend( {
       // {number} - 0 applies no change. Positive numbers brighten the color up to 1 (white). Negative numbers darken
-      // the color up to -1 (black). See setFactor() for more information.
-      factor: 0,
+      // the color up to -1 (black). See setLuminanceFactor() for more information.
+      luminanceFactor: 0,
 
       // Property options
       useDeepEquality: true // We don't need to renotify for equivalent colors
@@ -68,8 +68,8 @@ define( function( require ) {
     // @private {PaintDef}
     this._paint = null;
 
-    // @private {number} - See setFactor() for more information.
-    this._factor = options.factor;
+    // @private {number} - See setLuminanceFactor() for more information.
+    this._luminanceFactor = options.luminanceFactor;
 
     // @private {function} - Our "paint changed" listener, will update the value of this Property.
     this._changeListener = this.invalidatePaint.bind( this );
@@ -127,38 +127,38 @@ define( function( require ) {
      * With intermediate values basically "interpolated". This uses the `Color` colorUtilsBrightness method to adjust
      * the paint.
      *
-     * @param {number} factor
+     * @param {number} luminanceFactor
      */
-    setFactor: function( factor ) {
-      assert && assert( typeof factor === 'number' && factor >= -1 && factor <= 1 );
+    setLuminanceFactor: function( luminanceFactor ) {
+      assert && assert( typeof luminanceFactor === 'number' && luminanceFactor >= -1 && luminanceFactor <= 1 );
 
-      if ( this.factor !== factor ) {
-        this._factor = factor;
+      if ( this.luminanceFactor !== luminanceFactor ) {
+        this._luminanceFactor = luminanceFactor;
 
         this.invalidatePaint();
       }
     },
-    set factor( value ) { this.setFactor( value ); },
+    set luminanceFactor( value ) { this.setLuminanceFactor( value ); },
 
     /**
      * Returns the current value used for adjusting the brightness or darkness (luminance) of the color.
      * @public
      *
-     * See setFactor() for more information.
+     * See setLuminanceFactor() for more information.
      *
      * @returns {number}
      */
-    getFactor: function() {
-      return this._factor;
+    getLuminanceFactor: function() {
+      return this._luminanceFactor;
     },
-    get factor() { return this.getFactor(); },
+    get luminanceFactor() { return this.getLuminanceFactor(); },
 
     /**
      * Updates the value of this Property.
      * @private
      */
     invalidatePaint: function() {
-      this.value = PaintDef.toColor( this._paint ).colorUtilsBrightness( this._factor );
+      this.value = PaintDef.toColor( this._paint ).colorUtilsBrightness( this._luminanceFactor );
     },
 
     /**
