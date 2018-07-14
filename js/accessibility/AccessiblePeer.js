@@ -315,10 +315,6 @@ define( function( require ) {
 
       this.setHasAccessibleContent();
     },
-    onAccessibleContentDisplayedChange: function() {
-
-      this.setHasAccessibleContent();
-    },
 
     setHasAccessibleContent: function() {
       // no op, this should be handled in the view, and updated here when AccessiblePeer is constructed.

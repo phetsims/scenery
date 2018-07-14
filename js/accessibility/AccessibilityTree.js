@@ -359,7 +359,7 @@ define( function( require ) {
       // If we are accessible ourself, we need to create the instance (so we can provide it to child instances).
       var instance;
       var existed = false;
-      if ( node.accessibleContent && node.accessibleContentDisplayed ) {
+      if ( node.accessibleContent ) {
         instance = parentInstance.findChildWithTrail( trail );
         if ( instance ) {
           existed = true;

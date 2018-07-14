@@ -9,7 +9,6 @@ define( function( require ) {
   'use strict';
 
   // modules
-  var AccessiblePeer = require( 'SCENERY/accessibility/AccessiblePeer' );
   var Display = require( 'SCENERY/display/Display' );
   var Node = require( 'SCENERY/nodes/Node' );
   var Trail = require( 'SCENERY/util/Trail' );

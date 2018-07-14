@@ -180,7 +180,6 @@ define( function( require ) {
     'focusHighlightLayerable', // Flag to determine if the focus highlight node can be layered in the scene graph, see setFocusHighlightLayerable()
     'groupFocusHighlight', // Sets the outer focus highlight for this node when a descendant has focus, see setGroupFocusHighlight()
     'accessibleVisible', // Sets whether or not the node's DOM element is visible in the parallel DOM, see setAccessibleVisible()
-    'accessibleContentDisplayed', // Sets whether or not the accessible content of the node (and its subtree) is displayed, see setAccessibleContentDisplayed()
     'focusable', // Sets whether or not the node can receive keyboard focus, see setFocusable()
     'accessibleOrder', // Modifies the order of accessible  navigation, see setAccessibleOrder()
     'accessibleContent', // Sets up accessibility handling (probably don't need to use this), see setAccessibleContent()
@@ -351,12 +350,6 @@ define( function( require ) {
           // read with the virtual cursor see
           // http://www.ssbbartgroup.com/blog/how-windows-screen-readers-work-on-the-web/
           this._accessibleVisible = true;
-
-          // @private {boolean} - Whether or not the accessible content will be visible from the browser and assistive
-          // technologies.  When accessible content is not displayed, the node will not be focusable, and it cannot
-          // be found by assistive technology with the virtual cursor.  Content should almost always be set invisible with
-          // setAccessibleVisible(), see that function and setAccessibleContentDisplayed() for more information.
-          this._accessibleContentDisplayed = true;
 
           // @private {Array.<Function>} - For accessibility input handling {keyboard/click/HTML form}
           this._accessibleInputListeners = [];
@@ -727,12 +720,12 @@ define( function( require ) {
 
             // TODO: this could be setting a11y content twice
             this.onAccessibleContentChange();
-            if ( this._accessibleInstances.length > 0 ) {
-              for ( var i = 0; i < this._accessibleInstances.length; i++ ) {
-                var peer = this._accessibleInstances[ i ].peer;
-                peer.onTagNameChange();
-              }
-            }
+            // if ( this._accessibleInstances.length > 0 ) {
+            //   for ( var i = 0; i < this._accessibleInstances.length; i++ ) {
+            //     var peer = this._accessibleInstances[ i ].peer;
+            //     peer.onTagNameChange();
+            //   }
+            // }
 
           }
         },
@@ -1889,50 +1882,6 @@ define( function( require ) {
         get accessibleVisible() { return this.getAccessibleVisible(); },
 
         /**
-         * Sets whether or not the accessible content should be displayed in the DOM. Almost always, setAccessibleVisible
-         * should be used instead of this function.  This should behave exactly like setAccessibleVisible. If removed
-         * from display, content will be removed from focus order and undiscoverable with the virtual cursor. Sometimes,
-         * hidden attribute is not handled the same way across screen readers, so this function can be used to
-         * completely remove the content from the DOM.
-         * @public
-         *
-         * @param {boolean} contentDisplayed
-         */
-        setAccessibleContentDisplayed: function( contentDisplayed ) {
-          this._accessibleContentDisplayed = contentDisplayed;
-
-          //TODO: we shouldn't need to set our children too, would it be better to have getters keep track of parents' values too???
-          // for ( var j = 0; j < this._children.length; j++ ) {
-          //   var child = this._children[ j ];
-          //   child.setAccessibleContentDisplayed( contentDisplayed );
-          // }
-
-          this.onAccessibleContentChange();
-          // for ( var i = 0; i < this._accessibleInstances.length; i++ ) {
-          //   var peer = this._accessibleInstances[ i ].peer;
-          //   peer.onAccessibleContentDisplayedChange();
-          // }
-        },
-        set accessibleContentDisplayed( contentDisplayed ) { this.setAccessibleContentDisplayed( contentDisplayed ); },
-
-        /**
-         * Get whether or not this Node is displayed in the PDOM, NOT just its this._accessibleContentDisplayed boolean value
-         * @returns {boolean|*}
-         */
-        getAccessibleContentDisplayed: function() {
-          // {boolean} if any parents are flagged as removed from the accessibility tree, set content to null
-          var contentDisplayed = this._accessibleContentDisplayed;
-          for ( var i = 0; i < this._parents.length; i++ ) {
-            if ( !this._parents[ i ].accessibleContentDisplayed ) {
-              contentDisplayed = false;
-            }
-          }
-
-          return contentDisplayed;
-        },
-        get accessibleContentDisplayed() { return this.getAccessibleContentDisplayed(); },
-
-        /**
          * Set the value of an input element.  Element must be a form element to support the value attribute. The input
          * value is converted to string since input values are generally string for HTML.
          * @public
@@ -2265,7 +2214,7 @@ define( function( require ) {
          */
         getAccessibleContent: function() {
 
-          return this._accessibleContentDisplayed && !!this._tagName;
+          return !!this._tagName;
 
         },
         get accessibleContent() { return this.getAccessibleContent(); },

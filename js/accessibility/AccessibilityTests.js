@@ -862,72 +862,6 @@ define( function( require ) {
     assert.ok( getPrimarySiblingElementByNode( b ).tabIndex >= 0, 'set tagName after focusable' );
   } );
 
-  QUnit.test( 'accessibleContentDisplayed', function( assert ) {
-
-    var rootNode = new Node();
-    var display = new Display( rootNode ); // eslint-disable-line
-    document.body.appendChild( display.domElement );
-
-    var e = new Node( { tagName: 'div', innerContent: TEST_LABEL } );
-    var f = new Node( { tagName: 'div', innerContent: TEST_LABEL } );
-    var g = new Node( { tagName: 'div', innerContent: TEST_LABEL } );
-    var h = new Node( { tagName: 'div', innerContent: TEST_LABEL } );
-    e.addChild( f );
-    f.addChild( g );
-    g.addChild( h );
-    rootNode.addChild( e );
-
-
-    var existenceCorrect = function( node, shouldExist ) {
-      if ( shouldExist ) {
-        return !!node.accessibleInstances[ 0 ];
-      }
-      return node.accessibleInstances.length === 0;
-    };
-
-    var assertAccessibleInstanceExistence = function( shouldExist ) {
-      var message = ' should' + ( shouldExist ? '' : ' not' ) + ' exist';
-      assert.ok( existenceCorrect( e, shouldExist ), 'e' + message );
-      assert.ok( existenceCorrect( f, shouldExist ), 'f' + message );
-      assert.ok( existenceCorrect( g, shouldExist ), 'g' + message );
-      assert.ok( existenceCorrect( h, shouldExist ), 'h' + message );
-    };
-    assertAccessibleInstanceExistence( true );
-
-    e.accessibleContentDisplayed = false;
-    assertAccessibleInstanceExistence( false );
-
-    e.accessibleContentDisplayed = true;
-    assertAccessibleInstanceExistence( true );
-
-    g.accessibleContentDisplayed = false;
-    assert.ok( existenceCorrect( e, true ), 'e should exist' );
-    assert.ok( existenceCorrect( f, true ), 'f should exist' );
-    assert.ok( existenceCorrect( g, false ), 'g should not exist' );
-    assert.ok( existenceCorrect( h, false ), 'h should not exist' );
-
-    e.accessibleContentDisplayed = true;
-    assertAccessibleInstanceExistence( true );
-
-
-    var i = new Node();
-    f.removeChild( g );
-    i.addChild( g );
-    f.addChild( i );
-
-    e.accessibleContentDisplayed = false;
-    assertAccessibleInstanceExistence( false );
-
-    // TODO: Do we want to support this? setting accessibleContentDisplayed on a node without accessibleContent,
-    // TODO: but with children that have accessibleContent?
-    // i.accessibleContentDisplayed = true;
-    // assert.ok( existenceCorrect( e, false ), 'e should not exist' );
-    // assert.ok( existenceCorrect( f, false ), 'f should not exist' );
-    // assert.ok( existenceCorrect( g, true ), 'g should exist' );
-    // assert.ok( existenceCorrect( h, true ), 'h should exist' );
-
-  } );
-
   QUnit.test( 'Accessibility input listeners', function( assert ) {
 
     // create a node
@@ -1060,17 +994,6 @@ define( function( require ) {
 
     // verify the dom
     assert.ok( rootDOMElement.children.length === 5, 'children added' );
-
-    rootNode.accessibleContentDisplayed = false;
-    assert.ok( rootDOMElement.children.length === 0, 'sub tree removed from DOM' );
-    assert.ok( dDOMElement.children.length === 0, 'sub tree removed from DOM' );
-
-    // invalidation should not add content back to the DOM
-    rootNode.tagName = 'button';
-    d.tagName = 'span';
-    assert.ok( rootDOMElement.children.length === 0, 'invalidate without addition' );
-
-    rootNode.accessibleContentDisplayed = true;
 
     // redefine because the dom element references above have become stale
     rootDOMElement = getPrimarySiblingElementByNode( rootNode );
