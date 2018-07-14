@@ -2011,13 +2011,16 @@ define( function( require ) {
 
             // {string|null} - If non-null, will remove the attribute with the specified namespace. This can be required
             // for removing certain attributes (e.g. MathML).
-            namespace: null
+            namespace: null,
+
+            elementName: AccessiblePeer.PRIMARY_SIBLING // see AccessiblePeer.getElementName() for valid values, default to the primary sibling
           }, options );
 
           var attributeRemoved = false;
           for ( var i = 0; i < this._accessibleAttributes.length; i++ ) {
             if ( this._accessibleAttributes[ i ].attribute === attribute &&
-                 this._accessibleAttributes[ i ].options.namespace === options.namespace ) {
+                 this._accessibleAttributes[ i ].options.namespace === options.namespace &&
+                 this._accessibleAttributes[ i ].options.elementName === options.elementName ) {
               this._accessibleAttributes.splice( i, 1 );
               attributeRemoved = true;
             }
