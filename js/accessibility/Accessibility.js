@@ -1980,7 +1980,8 @@ define( function( require ) {
           // to remove from the peers, existing attributes will simply be replaced in the DOM
           for ( var i = 0; i < this._accessibleAttributes.length; i++ ) {
             if ( this._accessibleAttributes[ i ].attribute === attribute &&
-                 this._accessibleAttributes[ i ].options.namespace === options.namespace ) {
+                 this._accessibleAttributes[ i ].options.namespace === options.namespace &&
+                 this._accessibleAttributes[ i ].options.elementName === options.elementName ) {
               this._accessibleAttributes.splice( i, 1 );
             }
           }
