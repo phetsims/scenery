@@ -1210,6 +1210,48 @@ define( function( require ) {
     assert.ok( !divA.hidden, 'div A should not have been hidden by making descendant c invisible to screen readers' );
   } );
 
+  QUnit.test( 'inputValue', function( assert ) {
+
+    var rootNode = new Node();
+    var display = new Display( rootNode );
+    document.body.appendChild( display.domElement );
+
+    var a = new Node( { tagName: 'input', inputType: 'radio', inputValue: 'i am value' } );
+    rootNode.addChild( a );
+    var aElement = getPrimarySiblingElementByNode( a );
+    assert.ok( aElement.getAttribute( 'value' ) === 'i am value', 'should have correct value' );
+
+    var differentValue = 'i am different value';
+    a.inputValue = differentValue;
+    aElement = getPrimarySiblingElementByNode( a );
+    assert.ok( aElement.getAttribute( 'value' ) === differentValue, 'should have different value' );
+
+    rootNode.addChild( new Node( { children: [ a ] } ) );
+    aElement = a.accessibleInstances[ 1 ].peer.primarySibling;
+    assert.ok( aElement.getAttribute( 'value' ) === differentValue, 'should have the same different value' );
+  } );
+
+  QUnit.test( 'accessibleChecked', function( assert ) {
+
+    var rootNode = new Node();
+    var display = new Display( rootNode );
+    document.body.appendChild( display.domElement );
+
+    var a = new Node( { tagName: 'input', inputType: 'radio', accessibleChecked: true } );
+    rootNode.addChild( a );
+    var aElement = getPrimarySiblingElementByNode( a );
+    assert.ok( aElement.checked, 'should be checked' );
+
+    a.accessibleChecked = false;
+    aElement = getPrimarySiblingElementByNode( a );
+    assert.ok( !aElement.checked, 'should not be checked' );
+
+    a.inputType = 'range';
+    window.assert && assert.throws( function() {
+      a.accessibleChecked = true;
+    }, /.*/, 'should fail if inputType range' );
+  } );
+
   QUnit.test( 'swapVisibility', function( assert ) {
 
 

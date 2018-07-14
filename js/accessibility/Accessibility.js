@@ -126,6 +126,7 @@ define( function( require ) {
   var AccessibilityTree = require( 'SCENERY/accessibility/AccessibilityTree' );
   var AccessibilityUtil = require( 'SCENERY/accessibility/AccessibilityUtil' );
   var AccessibleDisplaysInfo = require( 'SCENERY/accessibility/AccessibleDisplaysInfo' );
+  var AccessiblePeer = require( 'SCENERY/accessibility/AccessiblePeer' );
   var arrayDifference = require( 'PHET_CORE/arrayDifference' );
   var Emitter = require( 'AXON/Emitter' );
   var extend = require( 'PHET_CORE/extend' );
@@ -1100,12 +1101,6 @@ define( function( require ) {
           assert && assert( ariaRole === null || typeof ariaRole === 'string' );
           this._ariaRole = ariaRole;
           this.setAccessibleAttribute( 'role', ariaRole );
-
-          this.onAccessibleContentChange();
-          // for ( var i = 0; i < this._accessibleInstances.length; i++ ) {
-          //   var peer = this._accessibleInstances[ i ].peer;
-          //   peer.onAriaRoleChange();
-          // }
         },
         set ariaRole( ariaRole ) { this.setAriaRole( ariaRole ); },
 
@@ -1898,10 +1893,7 @@ define( function( require ) {
           value = '' + value;
           this._inputValue = value;
 
-          for ( var i = 0; i < this._accessibleInstances.length; i++ ) {
-            var peer = this._accessibleInstances[ i ].peer;
-            peer.setAttributeToElement( 'value', value );
-          }
+          this.setAccessibleAttribute( 'value', value );
         },
         set inputValue( value ) { this.setInputValue( value ); },
 
@@ -1927,12 +1919,16 @@ define( function( require ) {
         setAccessibleChecked: function( checked ) {
           assert && assert( typeof checked === 'boolean' );
 
+          if ( this._tagName ) {
+            assert && assert( this._tagName === 'input', 'cannot set checked on a non input tag.' );
+          }
+          if ( this._inputType ) {
+            assert && assert( [ 'radio', 'checkbox' ].indexOf( this._inputType ) >= 0, 'Invalid inputType: ' + this._inputType );
+          }
+
           this._accessibleChecked = checked;
 
-          for ( var i = 0; i < this._accessibleInstances.length; i++ ) {
-            var peer = this._accessibleInstances[ i ].peer;
-            peer.setAttributeToElement( 'checked', checked );
-          }
+          this.setAccessibleAttribute( 'checked', checked );
         },
         set accessibleChecked( checked ) { this.setAccessibleChecked( checked ); },
 
@@ -1954,7 +1950,7 @@ define( function( require ) {
          * @returns {Array.<Object>} - Returns objects with: {
          *   attribute: {string} // the name of the attribute
          *   value: {*} // the value of the attribute
-         *   namespace: {string|null} // the (optional) namespace of the attribute
+         *   options: {options} see options in setAccessibleAttribute
          * }
          */
         getAccessibleAttributes: function() {
@@ -1963,11 +1959,11 @@ define( function( require ) {
         get accessibleAttributes() { return this.getAccessibleAttributes(); },
 
         /**
-         * Set a particular attribute for this node's DOM element, generally to provide extra semantic information for
+         * Set a particular attribute or property for this node's DOM element, generally to provide extra semantic information for
          * a screen reader.
          *
          * @param {string} attribute - string naming the attribute
-         * @param {string|boolean} value - the value for the attribute
+         * @param {string|boolean} value - the value for the attribute, if boolean, then it will be set as a javascript property on the HTMLElement rather than an attribute
          * @param {Object} [options]
          * @public
          */
@@ -1975,14 +1971,16 @@ define( function( require ) {
           options = _.extend( {
             // {string|null} - If non-null, will set the attribute with the specified namespace. This can be required
             // for setting certain attributes (e.g. MathML).
-            namespace: null
+            namespace: null,
+
+            elementName: AccessiblePeer.PRIMARY_SIBLING // see AccessiblePeer.getElementName() for valid values, default to the primary sibling
           }, options );
 
           // if the accessible attribute already exists in the list, remove it - no need
           // to remove from the peers, existing attributes will simply be replaced in the DOM
           for ( var i = 0; i < this._accessibleAttributes.length; i++ ) {
             if ( this._accessibleAttributes[ i ].attribute === attribute &&
-                 this._accessibleAttributes[ i ].namespace === options.namespace ) {
+                 this._accessibleAttributes[ i ].options.namespace === options.namespace ) {
               this._accessibleAttributes.splice( i, 1 );
             }
           }
@@ -1990,7 +1988,7 @@ define( function( require ) {
           this._accessibleAttributes.push( {
             attribute: attribute,
             value: value,
-            namespace: options.namespace
+            options: options
           } );
 
           for ( var j = 0; j < this._accessibleInstances.length; j++ ) {
@@ -2019,7 +2017,7 @@ define( function( require ) {
           var attributeRemoved = false;
           for ( var i = 0; i < this._accessibleAttributes.length; i++ ) {
             if ( this._accessibleAttributes[ i ].attribute === attribute &&
-                 this._accessibleAttributes[ i ].namespace === options.namespace ) {
+                 this._accessibleAttributes[ i ].options.namespace === options.namespace ) {
               this._accessibleAttributes.splice( i, 1 );
               attributeRemoved = true;
             }

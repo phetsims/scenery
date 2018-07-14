@@ -71,6 +71,9 @@ define( function( require ) {
       // @public {AccessibleInstance}
       this.accessibleInstance = accessibleInstance;
 
+      // @public {Node}
+      this.node = this.accessibleInstance.node;
+
       // @public {Display} - Each peer is associated with a specific Display.
       this.display = accessibleInstance.display;
 
@@ -223,16 +226,6 @@ define( function( require ) {
         this.setDescriptionSiblingContent( node._descriptionContent );
       }
 
-      // set if using aria-label
-      node._ariaLabel && this.setAttributeToElement( 'aria-label', node._ariaLabel );
-
-      // restore checked
-      this.setAttributeToElement( 'checked', node._accessibleChecked );
-
-      // restore input value
-      node._inputValue && this.setAttributeToElement( 'value', node._inputValue );
-
-
       // set the accessible attributes, restoring from a defensive copy
       var defensiveAttributes = node.accessibleAttributes;
       for ( i = 0; i < defensiveAttributes.length; i++ ) {
@@ -261,6 +254,9 @@ define( function( require ) {
       // insert the label and description elements in the correct location if they exist
       labelSibling && this.arrangeContentElement( labelSibling, node._appendLabel );
       descriptionSibling && this.arrangeContentElement( descriptionSibling, node._appendDescription );
+
+      // update all attributes for the peer, should cover aria-label, role, input value and others
+      this.onAttributeChange();
 
       // Default the focus highlight in this special case to be invisible until selected.
       if ( node._focusHighlightLayerable ) {
@@ -295,9 +291,16 @@ define( function( require ) {
 
       this.setHasAccessibleContent();
     },
-    onAriaRoleChange: function() {
 
-      this.setHasAccessibleContent();
+    /**
+     * Set all accessible attributes onto the peer elements from the model's stored data objects
+     */
+    onAttributeChange: function() {
+
+      for ( var i = 0; i < this.node.accessibleAttributes.length; i++ ) {
+        var dataObject = this.node.accessibleAttributes[ i ];
+        this.setAttributeToElement( dataObject.attribute, dataObject.value, dataObject.options );
+      }
     },
     onContainerAriaRoleChange: function() {
 
@@ -317,10 +320,6 @@ define( function( require ) {
     },
 
     setHasAccessibleContent: function() {
-      // no op, this should be handled in the view, and updated here when AccessiblePeer is constructed.
-      // if ( this.accessibleInstance.node.accessibleContent ) {
-      //   this.updateEntirePeer();
-      // }
     },
 
     /**
@@ -395,6 +394,7 @@ define( function( require ) {
 
     /**
      * Sets a attribute on one of the peer's HTMLElements.
+     * NOTE: If the attributeValue is a boolean, then it will be set as a javascript property on the HTMLElement rather than an attribute
      * @public (scenery-internal)
      * @param {string} attribute
      * @param {*} attributeValue
@@ -414,6 +414,11 @@ define( function( require ) {
 
       if ( options.namespace ) {
         element.setAttributeNS( options.namespace, attribute, attributeValue );
+      }
+
+      // treat it like a property
+      else if ( typeof attributeValue === 'boolean' ) {
+        element[ attribute ] = attributeValue;
       }
       else {
         element.setAttribute( attribute, attributeValue );
