@@ -99,6 +99,10 @@ define( function( require ) {
      * Subtypes can still override this method, and implement their own `fromStateObject` and `setValue` if there is desired
      * serializable data for that type to hold in the state.
      *
+     * We can't declare the Node phetioState: false, like the general pattern that we want to use ( see, because that property
+     * bubbles to children, and we want things like visibleProperty to be in the state by default, just not the NodeIO
+     * type itself.
+     *
      * @returns {undefined} - We don't use null because other types want that value in the state, see `NullableIO` for example.
      * @override
      */
