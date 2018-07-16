@@ -115,7 +115,7 @@ define( function( require ) {
       return o; // Pass through values defined by subclasses, such as AquaRadioButtonIO.enabled
     },
 
-    documentation: 'The base type for graphical and potentially interactive objects.  NodeIO has nested PropertyIO values' +
+    documentation: 'The base type for graphical and potentially interactive objects.  NodeIO has nested PropertyIO values ' +
                    'for visibility, pickability and opacity.' +
                    '<br>' +
                    '<br>' +
