@@ -771,12 +771,12 @@ define( function( require ) {
     testAriaLabelledOrDescribedBySetters( assert, 'aria-labelledby' );
 
   } );
-  // QUnit.test( 'aria-describedby', function( assert ) {
-  //
-  //   testAriaLabelledOrDescribedBy( assert, 'aria-describedby' );
-  //   testAriaLabelledOrDescribedBySetters( assert, 'aria-describedby' );
-  //
-  // } );
+  QUnit.test( 'aria-describedby', function( assert ) {
+
+    testAriaLabelledOrDescribedBy( assert, 'aria-describedby' );
+    testAriaLabelledOrDescribedBySetters( assert, 'aria-describedby' );
+
+  } );
 
   QUnit.test( 'Accessibility invalidation', function( assert ) {
 

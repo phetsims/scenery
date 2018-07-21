@@ -1560,7 +1560,7 @@ define( function( require ) {
           associationObject.otherNode._nodesThatAreAriaDescribedbyThisNode.push( this );
 
           // update the accessiblePeers with this aria-describedby association
-          this.addAssociationImplementationForAttribute( 'aria-describedby', associationObject );
+          this.updateAriaDescribedbyAssociationsInPeers();
         },
 
         /**
@@ -1575,6 +1575,8 @@ define( function( require ) {
 
           // remove the reference from the other node back to this node because we don't need it anymore
           removedObject[ 0 ].otherNode.removeNodeThatIsAriaDescribedByThisNode( this );
+
+          this.updateAriaDescribedbyAssociationsInPeers();
         },
 
         /**
@@ -1591,48 +1593,40 @@ define( function( require ) {
         },
 
         /**
-         *
-         * Update the associations for aria-describedby
-         * @private
+         * Trigger the view update for each AccessiblePeer
+         * @public
          */
-        updateAriaDescribedbyAssociations: function() {
-
-          // restore this nodes aria-describedby associations
-          var ariaDescribedbyAttributeName = 'aria-describedby';
-          this.updateAssociationsForAttribute( ariaDescribedbyAttributeName );
-
-          // if any other nodes are aria-describedby this Node, update those associations too. Since this node's
-          // accessible content needs to be recreated, they need to update their aria-describedby associations accordingly.
-          for ( var i = 0; i < this._nodesThatAreAriaDescribedbyThisNode.length; i++ ) {
-            this._nodesThatAreAriaDescribedbyThisNode[ i ].updateAssociationsForAttribute( ariaDescribedbyAttributeName );
+        updateAriaDescribedbyAssociationsInPeers: function() {
+          for ( var i = 0; i < this.accessibleInstances.length; i++ ) {
+            var peer = this.accessibleInstances[ i ].peer;
+            peer.onAriaDescribedbyAssociationChange();
           }
         },
 
         /**
-         * Update the associations for aria-labelledby and aria-describedby. This needs to be done when we re-create
-         * the accessible content (invalidateAccessibleContent), but also when we remove a Node from the scene graph
-         * because we need to make sure that when the Node's accessible content is no longer in the PDOM, other Nodes
-         * that are associated with the removed Node have their associations updated correctly.
-         *
+         * Update the associations for aria-describedby
          * @public (scenery-internal)
          */
-        updateLabelledbyDescribedbyAssociations: function() {
-
-          // restore this nodes aria-labelledby associations
-          var ariaLabelledbyAtrributeName = 'aria-labelledby';
-          this.updateAssociationsForAttribute( ariaLabelledbyAtrributeName );
-
-
-          // restore this nodes aria-describedby associations
-          var ariaDescribedbyAttributeName = 'aria-describedby';
-          this.updateAssociationsForAttribute( ariaDescribedbyAttributeName );
+        updateOtherNodesAriaDescribedby: function() {
 
           // if any other nodes are aria-describedby this Node, update those associations too. Since this node's
           // accessible content needs to be recreated, they need to update their aria-describedby associations accordingly.
-          for ( var j = 0; j < this._nodesThatAreAriaDescribedbyThisNode.length; j++ ) {
-            this._nodesThatAreAriaDescribedbyThisNode[ j ].updateAssociationsForAttribute( ariaDescribedbyAttributeName );
+          for ( var i = 0; i < this._nodesThatAreAriaDescribedbyThisNode.length; i++ ) {
+            var otherNode = this._nodesThatAreAriaDescribedbyThisNode[ i ];
+            otherNode.updateAriaDescribedbyAssociationsInPeers();
           }
         },
+
+        /**
+         * The list of Nodes that are aria-describedby this node (other node's peer element will have this Node's Peer element's
+         * id in the aria-describedby attribute
+         * @public
+         * @returns {Array.<Node>}
+         */
+        getNodesThatAreAriaDescribedbyThisNode: function() {
+          return this._nodesThatAreAriaDescribedbyThisNode;
+        },
+        get nodesThatAreAriaDescribedbyThisNode() { return this.getNodesThatAreAriaDescribedbyThisNode(); },
 
         /**
          * Sets the accessible focus order for this node. This includes not only focused items, but elements that can be
@@ -2229,6 +2223,7 @@ define( function( require ) {
           // make sure that the associations for aria-labelledby and aria-describedby are updated for nodes associated
           // to this Node (they are pointing to this Node's IDs). https://github.com/phetsims/scenery/issues/816
           node.updateOtherNodesAriaLabelledby();
+          node.updateOtherNodesAriaDescribedby();
 
           sceneryLog && sceneryLog.Accessibility && sceneryLog.pop();
         },

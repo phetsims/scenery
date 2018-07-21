@@ -232,6 +232,7 @@ define( function( require ) {
 
       // recompute and assign the association attributes that link two elements (like aria-labelledby)
       this.onAriaLabelledbyAssociationChange();
+      this.onAriaDescribedbyAssociationChange();
 
 
       // add all listeners to the dom element
@@ -251,6 +252,7 @@ define( function( require ) {
       // TODO: this is hacky, because updateOtherNodes. . . could try to access this peer from its accessibleInstance.
       this.accessibleInstance.peer = this;
       this.node.updateOtherNodesAriaLabelledby();
+      this.node.updateOtherNodesAriaDescribedby();
     },
 
     /**
@@ -322,6 +324,25 @@ define( function( require ) {
 
 
         this.setAssociationAttribute( 'aria-labelledby', associationObject );
+      }
+    },
+
+    /**
+     * Recompute the aria-describedby attributes for all of the peer's elements
+     * @public
+     */
+    onAriaDescribedbyAssociationChange: function() {
+      this.removeAttributeFromAllElements( 'aria-describedby' );
+
+      for ( var i = 0; i < this.node.ariaDescribedbyAssociations.length; i++ ) {
+        var associationObject = this.node.ariaDescribedbyAssociations[ i ];
+
+        // Assert out if the model list is different than the data held in the associationObject
+        assert && assert( associationObject.otherNode.nodesThatAreAriaDescribedbyThisNode.indexOf( this.node ) >= 0,
+          'unexpected otherNode' );
+
+
+        this.setAssociationAttribute( 'aria-describedby', associationObject );
       }
     },
 
@@ -531,7 +552,7 @@ define( function( require ) {
         var element = this.getElementByName( associationObject.thisElementName );
 
         // to support any option order, no-op if the peer element has not been created yet.
-        if ( element ) {
+        if ( element && otherPeerElement ) {
 
           // only update associations if the requested peer element has been created
           // NOTE: in the future, we would like to verify that the association exists but can't do that yet because
