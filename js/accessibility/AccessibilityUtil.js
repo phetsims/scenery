@@ -423,6 +423,10 @@ define( function( require ) {
         var objectKey = objectKeys[ i ];
         assert && assert( expectedKeys.indexOf( objectKey ) >= 0, 'unexpected key: ' + objectKey );
       }
+
+      assert && phet && phet.scenery && assert( associationObject.otherNode instanceof phet.scenery.Node );
+      assert && assert( typeof associationObject.thisElementName === 'string' );
+      assert && assert( typeof associationObject.otherElementName === 'string' );
     },
 
     /**

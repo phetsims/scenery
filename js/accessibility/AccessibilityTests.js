@@ -668,7 +668,9 @@ define( function( require ) {
     var jParent = new Node( { children: [ j ] } );
     rootNode.children = [];
     rootNode.addChild( jParent );
+    checkOnYourOwnAriaLabelledByAssociations( j );
     rootNode.addChild( j );
+    checkOnYourOwnAriaLabelledByAssociations( j );
     rootNode.addChild( k );
     checkOnYourOwnAriaLabelledByAssociations( j );
     testK();
@@ -763,12 +765,12 @@ define( function( require ) {
   }
 
   // TODO: comment these back in once aria-labelledby is working again
-  // QUnit.test( 'aria-labelledby', function( assert ) {
-  //
-  //   testAriaLabelledOrDescribedBy( assert, 'aria-labelledby' );
-  //   testAriaLabelledOrDescribedBySetters( assert, 'aria-labelledby' );
-  //
-  // } );
+  QUnit.test( 'aria-labelledby', function( assert ) {
+
+    testAriaLabelledOrDescribedBy( assert, 'aria-labelledby' );
+    testAriaLabelledOrDescribedBySetters( assert, 'aria-labelledby' );
+
+  } );
   // QUnit.test( 'aria-describedby', function( assert ) {
   //
   //   testAriaLabelledOrDescribedBy( assert, 'aria-describedby' );

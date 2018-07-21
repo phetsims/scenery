@@ -187,19 +187,7 @@ define( function( require ) {
       this.descriptionSibling = descriptionSibling;
       this.containerParent = containerParent;
 
-      if ( this.containerParent ) {
-        // The first child of the container parent element should be the peer dom element
-        // if undefined, the insertBefore method will insert the primarySiblingDOMElement as the first child
-        var primarySiblingDOMElement = this.primarySibling;
-        var firstChild = this.containerParent.children[ 0 ] || null;
-        this.containerParent.insertBefore( primarySiblingDOMElement, firstChild );
-        this.topLevelElements = [ this.containerParent ];
-      }
-      else {
-
-        // Wean out any null siblings
-        this.topLevelElements = [ this.labelSibling, this.descriptionSibling, this.primarySibling ].filter( function( i ) { return i; } );
-      }
+      this.orderElements();
 
       // @private {function} - Referenced for disposal
       this.focusEventListener = this.focusEventListener || this.onFocus.bind( this );
@@ -242,18 +230,14 @@ define( function( require ) {
         this.setAttributeToElement( 'type', node._inputType );
       }
 
-      // TODO: factor this out to be in peer instead of node
       // recompute and assign the association attributes that link two elements (like aria-labelledby)
-      // node.updateLabelledbyDescribebyAssociations();
+      this.onAriaLabelledbyAssociationChange();
+
 
       // add all listeners to the dom element
       for ( i = 0; i < node._accessibleInputListeners.length; i++ ) {
         this.addDOMEventListeners( node._accessibleInputListeners[ i ] );
       }
-
-      // insert the label and description elements in the correct location if they exist
-      labelSibling && this.arrangeContentElement( labelSibling, node._appendLabel );
-      descriptionSibling && this.arrangeContentElement( descriptionSibling, node._appendDescription );
 
       // update all attributes for the peer, should cover aria-label, role, input value and others
       this.onAttributeChange();
@@ -263,7 +247,37 @@ define( function( require ) {
         node._focusHighlight.visible = false;
       }
 
-      assert && assert( this.primarySibling );
+
+      // TODO: this is hacky, because updateOtherNodes. . . could try to access this peer from its accessibleInstance.
+      this.accessibleInstance.peer = this;
+      this.node.updateOtherNodesAriaLabelledby();
+    },
+
+    /**
+     * Handle the internal ordering of the elements in the peer
+     * @private
+     */
+    orderElements: function() {
+
+      var truthySiblings = [ this.labelSibling, this.descriptionSibling, this.primarySibling ].filter( function( i ) { return i; } );
+
+      if ( this.containerParent ) {
+        // The first child of the container parent element should be the peer dom element
+        // if undefined, the insertBefore method will insert the primarySiblingDOMElement as the first child
+        var primarySiblingDOMElement = this.primarySibling;
+        var firstChild = this.containerParent.children[ 0 ] || null;
+        this.containerParent.insertBefore( primarySiblingDOMElement, firstChild );
+        this.topLevelElements = [ this.containerParent ];
+      }
+      else {
+
+        // Wean out any null siblings
+        this.topLevelElements = truthySiblings;
+      }
+      // insert the label and description elements in the correct location if they exist
+      this.labelSibling && this.arrangeContentElement( this.labelSibling, this.node._appendLabel );
+      this.descriptionSibling && this.arrangeContentElement( this.descriptionSibling, this.node._appendDescription );
+
     },
 
     onTagNameChange: function() {
@@ -290,6 +304,25 @@ define( function( require ) {
     onContainerTagNameChange: function() {
 
       this.setHasAccessibleContent();
+    },
+
+    /**
+     * Recompute the aria-labelledby attributes for all of the peer's elements
+     * @public
+     */
+    onAriaLabelledbyAssociationChange: function() {
+      this.removeAttributeFromAllElements( 'aria-labelledby' );
+
+      for ( var i = 0; i < this.node.ariaLabelledbyAssociations.length; i++ ) {
+        var associationObject = this.node.ariaLabelledbyAssociations[ i ];
+
+        // Assert out if the model list is different than the data held in the associationObject
+        assert && assert( associationObject.otherNode.nodesThatAreAriaLabelledbyThisNode.indexOf( this.node ) >= 0,
+          'unexpected otherNode' );
+
+
+        this.setAssociationAttribute( 'aria-labelledby', associationObject );
+      }
     },
 
     /**
@@ -468,31 +501,51 @@ define( function( require ) {
      * @public (scenery-internal)
      * @param {string} attribute - either aria-labelledby or aria-describedby
      * @param {Object} associationObject - see addAriaLabelledbyAssociation() for schema
-     * @param {string} otherElementId - the id to be added to this peer element's attribute
      */
-    setAssociationAttribute: function( attribute, associationObject, otherElementId ) {
+    setAssociationAttribute: function( attribute, associationObject ) {
       assert && assert( attribute === 'aria-labelledby' || attribute === 'aria-describedby',
-        'unsupported attribute for setting with association object' );
-      assert && assert( typeof otherElementId === 'string' );
+        'unsupported attribute for setting with association object: ' + attribute );
       assert && AccessibilityUtil.validateAssociationObject( associationObject );
 
-      var element = this.getElementByName( associationObject.thisElementName );
+      var otherNodeAccessibleInstances = associationObject.otherNode.getAccessibleInstances();
 
-      // to support any option order, no-op if the peer element has not been created yet.
-      if ( element ) {
+      // If the other node hasn't been added to the scene graph yet, it won't have any accessible instances, so no op.
+      // This will be recalculated when that node is added to the scene graph
+      if ( otherNodeAccessibleInstances.length > 0 ) {
 
-        // only update associations if the requested peer element has been created
-        // NOTE: in the future, we would like to verify that the association exists but can't do that yet because
-        // we have to support cases where we set label association prior to setting the sibling/parent tagName
-        var previousAttributeValue = element.getAttribute( attribute ) || '';
-        assert && assert( typeof previousAttributeValue === 'string' );
+        // We are just using the first AccessibleInstance for simplicity, but it is OK because the accessible
+        // content for all AccessibleInstances will be the same, so the Accessible Names (in the browser's
+        // accessibility tree) of elements that are referenced by the attribute value id will all have the same content
+        var firstAccessibleInstance = otherNodeAccessibleInstances[ 0 ];
 
-        var newAttributeValue = [ previousAttributeValue.trim(), otherElementId ].join( ' ' ).trim();
+        // Handle a case where you are associating to yourself, and the peer has not been constructed yet.
+        if ( firstAccessibleInstance === this.accessibleInstance ) {
+          firstAccessibleInstance.peer = this;
+        }
 
-        // add the id from the new association to the value of the HTMLElement's attribute.
-        this.setAttributeToElement( attribute, newAttributeValue, {
-          elementName: associationObject.thisElementName
-        } );
+        assert && assert( firstAccessibleInstance.peer, 'peer should exist' );
+
+        // we can use the same element's id to update all of this Node's peers
+        var otherPeerElement = firstAccessibleInstance.peer.getElementByName( associationObject.otherElementName );
+
+        var element = this.getElementByName( associationObject.thisElementName );
+
+        // to support any option order, no-op if the peer element has not been created yet.
+        if ( element ) {
+
+          // only update associations if the requested peer element has been created
+          // NOTE: in the future, we would like to verify that the association exists but can't do that yet because
+          // we have to support cases where we set label association prior to setting the sibling/parent tagName
+          var previousAttributeValue = element.getAttribute( attribute ) || '';
+          assert && assert( typeof previousAttributeValue === 'string' );
+
+          var newAttributeValue = [ previousAttributeValue.trim(), otherPeerElement.id ].join( ' ' ).trim();
+
+          // add the id from the new association to the value of the HTMLElement's attribute.
+          this.setAttributeToElement( attribute, newAttributeValue, {
+            elementName: associationObject.thisElementName
+          } );
+        }
       }
     },
     /**
@@ -683,6 +736,7 @@ define( function( require ) {
 
       // zero-out references
       this.accessibleInstance = null;
+      this.node = null;
       this.display = null;
       this.trail = null;
       this.primarySibling = null;

@@ -165,7 +165,7 @@ define( function( require ) {
           }
 
           // recompute and assign the association attributes that link two elements (like aria-labelledby)
-          self.updateLabelledbyDescribebyAssociations();
+          self.updateLabelledbyDescribedbyAssociations();
 
           // add all listeners to the dom element
           for ( i = 0; i < self._accessibleInputListeners.length; i++ ) {
