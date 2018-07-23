@@ -1505,7 +1505,12 @@ define( function( require ) {
 
     // after moving a to back, b should still have focus
     a.moveToBack();
-    assert.ok( b.focused, 'b should have focus after a moved to back' );
+
+    // add a guard where we don't check this if focus has been moved somewhere else. This happens sometimes with
+    // dev tools or other windows opened, see https://github.com/phetsims/scenery/issues/827
+    if ( document.body.contains( document.activeElement ) && document.body !== document.activeElement ) {
+      assert.ok( b.focused, 'b should have focus after a moved to back' );
+    }
   } );
 
   // these fuzzers take time, so it is nice when they are last
