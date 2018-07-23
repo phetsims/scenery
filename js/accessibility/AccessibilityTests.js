@@ -64,7 +64,7 @@ define( function( require ) {
    * there should only be one accessible instance and one dom element for the node.
    *
    * NOTE: Be careful about getting references to dom Elements, the reference will be stale each time
-   * Node.invalidateAccessibleContent is called, which is quite often when setting options.
+   * the view (AccessiblePeer) is redrawn, which is quite often when setting options.
    *
    * @param  {Node} node
    * @return {string}

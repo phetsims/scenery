@@ -94,7 +94,8 @@ define( function( require ) {
       this.containerParent = null;
 
       // @public {Array.<HTMLElement>} Rather than guarantee that a peer is a tree with a root DOMElement,
-      // allow multiple HTMLElements at the top level of the peer. This is used for sorting the instance
+      // allow multiple HTMLElements at the top level of the peer. This is used for sorting the instance.
+      // See this.orderElements for more info.
       this.topLevelElements = [];
 
       // @private {boolean} - Whether we are currently in a "disposed" (in the pool) state, or are available to be
@@ -108,20 +109,6 @@ define( function( require ) {
         this.primarySibling = options.primarySibling;
         return this;
       }
-
-      // redraw view from the AccessibleInstance's Node data.
-      this.updateEntirePeer();
-
-
-      return this;
-    },
-
-    /**
-     * Temporary function to use as a placeholder for invalidateAccessibleContent
-     * @public
-     */
-    updateEntirePeer: function() {
-      var node = this.accessibleInstance.node;
 
       // for each accessible peer, clear the container parent if it exists since we will be reinserting labels and
       // the dom element in createPeer
@@ -150,34 +137,34 @@ define( function( require ) {
       var uniqueId = this.accessibleInstance.trail.getUniqueId();
 
       // create the base DOM element representing this accessible instance
-      var primarySibling = AccessibilityUtil.createElement( node._tagName, node.focusable, {
-        namespace: node._accessibleNamespace
+      var primarySibling = AccessibilityUtil.createElement( this.node._tagName, this.node.focusable, {
+        namespace: this.node._accessibleNamespace
       } );
       primarySibling.id = uniqueId;
 
       // create the container parent for the dom siblings
       var containerParent = null;
-      if ( node._containerTagName ) {
-        containerParent = AccessibilityUtil.createElement( node._containerTagName, false );
+      if ( this.node._containerTagName ) {
+        containerParent = AccessibilityUtil.createElement( this.node._containerTagName, false );
         containerParent.id = 'container-' + uniqueId;
 
         // provide the aria-role if it is specified
-        if ( node._containerAriaRole ) {
-          containerParent.setAttribute( 'role', node._containerAriaRole );
+        if ( this.node._containerAriaRole ) {
+          containerParent.setAttribute( 'role', this.node._containerAriaRole );
         }
       }
 
       // create the label DOM element representing this instance
       var labelSibling = null;
-      if ( node._labelTagName ) {
-        labelSibling = AccessibilityUtil.createElement( node._labelTagName, false );
+      if ( this.node._labelTagName ) {
+        labelSibling = AccessibilityUtil.createElement( this.node._labelTagName, false );
         labelSibling.id = 'label-' + uniqueId;
       }
 
       // create the description DOM element representing this instance
       var descriptionSibling = null;
-      if ( node._descriptionTagName ) {
-        descriptionSibling = AccessibilityUtil.createElement( node._descriptionTagName, false );
+      if ( this.node._descriptionTagName ) {
+        descriptionSibling = AccessibilityUtil.createElement( this.node._descriptionTagName, false );
         descriptionSibling.id = 'description-' + uniqueId;
       }
 
@@ -200,22 +187,22 @@ define( function( require ) {
 
       // set the accessible label now that the element has been recreated again, but not if the tagName
       // has been cleared out
-      if ( node._labelContent && node._labelTagName !== null ) {
-        this.setLabelSiblingContent( node._labelContent );
+      if ( this.node._labelContent && this.node._labelTagName !== null ) {
+        this.setLabelSiblingContent( this.node._labelContent );
       }
 
       // restore the innerContent
-      if ( node._innerContent && node._tagName !== null ) {
-        this.setPrimarySiblingContent( node._innerContent );
+      if ( this.node._innerContent && this.node._tagName !== null ) {
+        this.setPrimarySiblingContent( this.node._innerContent );
       }
 
       // set the accessible description, but not if the tagName has been cleared out.
-      if ( node._descriptionContent && node._descriptionTagName !== null ) {
-        this.setDescriptionSiblingContent( node._descriptionContent );
+      if ( this.node._descriptionContent && this.node._descriptionTagName !== null ) {
+        this.setDescriptionSiblingContent( this.node._descriptionContent );
       }
 
       // set the accessible attributes, restoring from a defensive copy
-      var defensiveAttributes = node.accessibleAttributes;
+      var defensiveAttributes = this.node.accessibleAttributes;
       for ( i = 0; i < defensiveAttributes.length; i++ ) {
         var attribute = defensiveAttributes[ i ].attribute;
         var value = defensiveAttributes[ i ].value;
@@ -226,8 +213,8 @@ define( function( require ) {
       }
 
       // if element is an input element, set input type
-      if ( node._tagName.toUpperCase() === INPUT_TAG && node._inputType ) {
-        this.setAttributeToElement( 'type', node._inputType );
+      if ( this.node._tagName.toUpperCase() === INPUT_TAG && this.node._inputType ) {
+        this.setAttributeToElement( 'type', this.node._inputType );
       }
 
       // recompute and assign the association attributes that link two elements (like aria-labelledby)
@@ -236,16 +223,16 @@ define( function( require ) {
 
 
       // add all listeners to the dom element
-      for ( i = 0; i < node._accessibleInputListeners.length; i++ ) {
-        this.addDOMEventListeners( node._accessibleInputListeners[ i ] );
+      for ( i = 0; i < this.node._accessibleInputListeners.length; i++ ) {
+        this.addDOMEventListeners( this.node._accessibleInputListeners[ i ] );
       }
 
       // update all attributes for the peer, should cover aria-label, role, input value and others
       this.onAttributeChange();
 
       // Default the focus highlight in this special case to be invisible until selected.
-      if ( node._focusHighlightLayerable ) {
-        node._focusHighlight.visible = false;
+      if ( this.node._focusHighlightLayerable ) {
+        this.node._focusHighlight.visible = false;
       }
 
 
@@ -253,10 +240,13 @@ define( function( require ) {
       this.accessibleInstance.peer = this;
       this.node.updateOtherNodesAriaLabelledby();
       this.node.updateOtherNodesAriaDescribedby();
+
+      return this;
     },
 
     /**
-     * Handle the internal ordering of the elements in the peer
+     * Handle the internal ordering of the elements in the peer, this involves setting the proper value of
+     * this.topLevelElements
      * @private
      */
     orderElements: function() {
@@ -570,7 +560,7 @@ define( function( require ) {
       }
     },
     /**
-     * Called by invalidateAccessibleContent. The contentElement will either be a
+     * The contentElement will either be a
      * label or description element. The contentElement will be sorted relative to the primarySibling. Its placement
      * will also depend on whether or not this node wants to append this element,
      * see setAppendLabel() and setAppendDescription(). By default, the "content" element will be placed before the

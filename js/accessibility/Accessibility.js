@@ -130,7 +130,6 @@ define( function( require ) {
   var arrayDifference = require( 'PHET_CORE/arrayDifference' );
   var Emitter = require( 'AXON/Emitter' );
   var extend = require( 'PHET_CORE/extend' );
-  var invalidateAccessibleContent = require( 'SCENERY/accessibility/invalidateAccessibleContent' );
   var scenery = require( 'SCENERY/scenery' );
 
   var INPUT_TAG = AccessibilityUtil.TAGS.INPUT;
@@ -308,7 +307,7 @@ define( function( require ) {
           // Keep a reference to all nodes that are aria-labelledby this node, i.e. that have store one of this Node's
           // peer HTMLElement's id in their peer HTMLElement's aria-labelledby attribute. This way we can tell other
           // nodes to update their aria-labelledby associations when this Node rebuilds its accessible content.
-          // @public (scenery-internal) - only used by Accessibility.js and invalidateAccessibleContent.js
+          // @private
           // {Array.<Node>}
           this._nodesThatAreAriaLabelledbyThisNode = [];
 
@@ -319,7 +318,7 @@ define( function( require ) {
           // Keep a reference to all nodes that are aria-describedby this node, i.e. that have store one of this Node's
           // peer HTMLElement's id in their peer HTMLElement's aria-describedby attribute. This way we can tell other
           // nodes to update their aria-describedby associations when this Node rebuilds its accessible content.
-          // @public (scenery-internal) - only used by Accessibility.js and invalidateAccessibleContent.js
+          // @private
           // {Array.<Node>}
           this._nodesThatAreAriaDescribedbyThisNode = [];
 
@@ -1410,7 +1409,7 @@ define( function( require ) {
           this._ariaLabelledbyAssociations.push( associationObject ); // Keep track of this association.
 
           // Flag that this node is is being labelled by the other node, so that if the other node changes it can tell
-          // this node to restore the association appropriately, see invalidateAccessibleContent for implementation.
+          // this node to restore the association appropriately.
           associationObject.otherNode._nodesThatAreAriaLabelledbyThisNode.push( this );
 
           this.updateAriaLabelledbyAssociationsInPeers();
@@ -1556,7 +1555,7 @@ define( function( require ) {
           this._ariaDescribedbyAssociations.push( associationObject ); // Keep track of this association.
 
           // Flag that this node is is being described by the other node, so that if the other node changes it can tell
-          // this node to restore the association appropriately, see invalidateAccessibleContent for implementation.
+          // this node to restore the association appropriately.
           associationObject.otherNode._nodesThatAreAriaDescribedbyThisNode.push( this );
 
           // update the accessiblePeers with this aria-describedby association
@@ -2279,20 +2278,6 @@ define( function( require ) {
           this._accessibleInstances.splice( index, 1 );
         }
       } );
-
-      // Add invalidateAccessibleContent to the prototype. Patch in a sub-type call if it already exists on the prototype
-      if ( proto.invalidateAccessibleContent ) {
-        var subtypeInvalidateAccesssibleContent = proto.invalidateAccessibleContent;
-        proto.invalidateAccessibleContent = function() {
-          subtypeInvalidateAccesssibleContent.call( this );
-          invalidateAccessibleContent.call( this );
-        };
-      }
-      else {
-
-        // assign a function from a separate file to this prototype. That file's exported function assumes this file's "this"
-        proto.invalidateAccessibleContent = invalidateAccessibleContent;
-      }
     }
   };
 
