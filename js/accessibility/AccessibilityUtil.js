@@ -62,6 +62,12 @@ define( function( require ) {
   // these elements require a minimum width to be visible in Safari, see https://github.com/phetsims/john-travoltage/issues/204
   var ELEMENTS_REQUIRE_WIDTH = [ INPUT_TAG, A_TAG ];
 
+  var ARIA_LABELLEDBY = 'aria-labelledby';
+  var ARIA_DESCRIBEDBY = 'aria-describedby';
+
+  // {Array.<String>} attributes that put an ID of another attribute as the value, see https://github.com/phetsims/scenery/issues/819
+  var ASSOCIATION_ATTRIBUTES = [ ARIA_LABELLEDBY, ARIA_DESCRIBEDBY ];
+
   /**
    * Get all 'element' nodes off the parent element, placing them in an array for easy traversal.  Note that this
    * includes all elements, even those that are 'hidden' or purely for structure.
@@ -491,7 +497,9 @@ define( function( require ) {
     // default tags for html elements of the Node.
     DEFAULT_CONTAINER_TAG_NAME: DIV_TAG,
     DEFAULT_DESCRIPTION_TAG_NAME: P_TAG,
-    DEFAULT_LABEL_TAG_NAME: P_TAG
+    DEFAULT_LABEL_TAG_NAME: P_TAG,
+
+    ASSOCIATION_ATTRIBUTES: ASSOCIATION_ATTRIBUTES
   };
 
   scenery.register( 'AccessibilityUtil', AccessibilityUtil );

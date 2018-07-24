@@ -142,6 +142,9 @@ define( function( require ) {
   // these elements are typically associated with forms, and support certain attributes
   var FORM_ELEMENTS = AccessibilityUtil.FORM_ELEMENTS;
 
+  // HTMLElement attributes whose value is an ID of another element
+  var ASSOCIATION_ATTRIBUTES = AccessibilityUtil.ASSOCIATION_ATTRIBUTES;
+
   // The options for the Accessibility API. In general, most default to null; to clear, set back to null.
   var ACCESSIBILITY_OPTION_KEYS = [
     'tagName', // Sets the tag name for the primary sibling DOM element in the parallel DOM, should be first
@@ -1905,6 +1908,8 @@ define( function( require ) {
 
             elementName: AccessiblePeer.PRIMARY_SIBLING // see AccessiblePeer.getElementName() for valid values, default to the primary sibling
           }, options );
+
+          assert && assert( ASSOCIATION_ATTRIBUTES.indexOf( attribute ) < 0, 'setAccessibleAttribute does not support association attributes' );
 
           // if the accessible attribute already exists in the list, remove it - no need
           // to remove from the peers, existing attributes will simply be replaced in the DOM

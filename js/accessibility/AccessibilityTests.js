@@ -470,6 +470,12 @@ define( function( require ) {
     var b = new Node( { tagName: 'p', innerContent: TEST_LABEL_2 } );
     rootNode.children = [ a, b ];
 
+
+    window.assert && assert.throws( function() {
+      a.setAccessibleAttribute( attribute, 'hello' );
+    }, /.*/, 'cannot set association attributes with setAccessibleAttribute' );
+
+
     a[ addAssociationFunction ]( {
       otherNode: b,
       thisElementName: AccessiblePeer.PRIMARY_SIBLING,
