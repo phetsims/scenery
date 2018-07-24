@@ -57,9 +57,6 @@ define( function( require ) {
     initializeAccessiblePeer: function( accessibleInstance, options ) {
       options = _.extend( {
         primarySibling: null // {HTMLElement} primarySibling - The main DOM element used for this peer
-        // containerParent: null, // a container parent for this peer and potential siblings
-        // labelSibling: null, // the element containing this node's label content
-        // descriptionSibling: null // the element that will contain this node's description content
       }, options );
 
       Events.call( this ); // TODO: is Events worth mixing in by default? Will we need to listen to events?
@@ -85,14 +82,13 @@ define( function( require ) {
       // Only initialized to null, should not be set to it. isVisible() will return true if this.visible is null (because it hasn't been set yet).
       this.visible = null;
 
-      //
-      // // @public {HTMLElement|null} - Optional label/description elements
-      this.labelSibling = null;
-      this.descriptionSibling = null;
-      //
-      // // @private {HTMLElement|null} - A parent element that can contain this primarySibling and other siblings, usually
-      // // the label and description content.
-      this.containerParent = null;
+      // @private {HTMLElement|null} - Optional label/description elements
+      this._labelSibling = null;
+      this._descriptionSibling = null;
+
+      // @private {HTMLElement|null} - A parent element that can contain this primarySibling and other siblings, usually
+      // the label and description content.
+      this._containerParent = null;
 
       // @public {Array.<HTMLElement>} Rather than guarantee that a peer is a tree with a root DOMElement,
       // allow multiple HTMLElements at the top level of the peer. This is used for sorting the instance.
@@ -105,25 +101,26 @@ define( function( require ) {
 
       // edge case for root accessibility
       if ( options.primarySibling ) {
-        // // @public {HTMLElement} - The main element associated with this peer. If focusable, this is the element that gets
-        // // the focus. It also will contain any children.
+
+        // @private {HTMLElement} - The main element associated with this peer. If focusable, this is the element that gets
+        // the focus. It also will contain any children.
         this._primarySibling = options.primarySibling;
         return this;
       }
 
       // for each accessible peer, clear the container parent if it exists since we will be reinserting labels and
       // the dom element in createPeer
-      while ( this.containerParent && this.containerParent.hasChildNodes() ) {
-        this.containerParent.removeChild( this.containerParent.lastChild );
+      while ( this._containerParent && this._containerParent.hasChildNodes() ) {
+        this._containerParent.removeChild( this._containerParent.lastChild );
       }
 
       var i;
 
       // clear out elements to be recreated below
       this._primarySibling = null;
-      this.labelSibling = null;
-      this.descriptionSibling = null;
-      this.containerParent = null;
+      this._labelSibling = null;
+      this._descriptionSibling = null;
+      this._containerParent = null;
 
       var uniqueId = this.accessibleInstance.trail.getUniqueId();
 
@@ -147,23 +144,23 @@ define( function( require ) {
 
       // create the label DOM element representing this instance
       var labelSibling = null;
-      if ( this.node._labelTagName ) {
-        labelSibling = AccessibilityUtil.createElement( this.node._labelTagName, false );
+      if ( this.node.labelTagName ) {
+        labelSibling = AccessibilityUtil.createElement( this.node.labelTagName, false );
         labelSibling.id = 'label-' + uniqueId;
       }
 
       // create the description DOM element representing this instance
       var descriptionSibling = null;
-      if ( this.node._descriptionTagName ) {
-        descriptionSibling = AccessibilityUtil.createElement( this.node._descriptionTagName, false );
+      if ( this.node.descriptionTagName ) {
+        descriptionSibling = AccessibilityUtil.createElement( this.node.descriptionTagName, false );
         descriptionSibling.id = 'description-' + uniqueId;
       }
 
 
       this._primarySibling = primarySibling;
-      this.labelSibling = labelSibling;
-      this.descriptionSibling = descriptionSibling;
-      this.containerParent = containerParent;
+      this._labelSibling = labelSibling;
+      this._descriptionSibling = descriptionSibling;
+      this._containerParent = containerParent;
 
       this.orderElements();
 
@@ -244,15 +241,15 @@ define( function( require ) {
      */
     orderElements: function() {
 
-      var truthySiblings = [ this.labelSibling, this.descriptionSibling, this._primarySibling ].filter( function( i ) { return i; } );
+      var truthySiblings = [ this._labelSibling, this._descriptionSibling, this._primarySibling ].filter( function( i ) { return i; } );
 
-      if ( this.containerParent ) {
+      if ( this._containerParent ) {
         // The first child of the container parent element should be the peer dom element
         // if undefined, the insertBefore method will insert the primarySiblingDOMElement as the first child
         var primarySiblingDOMElement = this._primarySibling;
-        var firstChild = this.containerParent.children[ 0 ] || null;
-        this.containerParent.insertBefore( primarySiblingDOMElement, firstChild );
-        this.topLevelElements = [ this.containerParent ];
+        var firstChild = this._containerParent.children[ 0 ] || null;
+        this._containerParent.insertBefore( primarySiblingDOMElement, firstChild );
+        this.topLevelElements = [ this._containerParent ];
       }
       else {
 
@@ -261,8 +258,8 @@ define( function( require ) {
       }
 
       // insert the label and description elements in the correct location if they exist
-      this.labelSibling && this.arrangeContentElement( this.labelSibling, this.node.appendLabel );
-      this.descriptionSibling && this.arrangeContentElement( this.descriptionSibling, this.node.appendDescription );
+      this._labelSibling && this.arrangeContentElement( this._labelSibling, this.node.appendLabel );
+      this._descriptionSibling && this.arrangeContentElement( this._descriptionSibling, this.node.appendDescription );
 
     },
 
@@ -274,7 +271,35 @@ define( function( require ) {
     getPrimarySibling: function() {
       return this._primarySibling;
     },
+
     get primarySibling() { return this.getPrimarySibling(); },
+    /**
+     * Get the primary sibling element for the peer
+     * @public
+     * @returns {HTMLElement|null}
+     */
+    getLabelSibling: function() {
+      return this._labelSibling;
+    },
+    get labelSibling() { return this.getLabelSibling(); },
+    /**
+     * Get the primary sibling element for the peer
+     * @public
+     * @returns {HTMLElement|null}
+     */
+    getDescriptionSibling: function() {
+      return this._descriptionSibling;
+    },
+    get descriptionSibling() { return this.getDescriptionSibling(); },
+    /**
+     * Get the primary sibling element for the peer
+     * @public
+     * @returns {HTMLElement|null}
+     */
+    getContainerParent: function() {
+      return this._containerParent;
+    },
+    get containerParent() { return this.getContainerParent(); },
 
     /**
      * Recompute the aria-labelledby attributes for all of the peer's elements
@@ -365,13 +390,13 @@ define( function( require ) {
         return this._primarySibling;
       }
       else if ( elementName === AccessiblePeer.LABEL_SIBLING ) {
-        return this.labelSibling;
+        return this._labelSibling;
       }
       else if ( elementName === AccessiblePeer.DESCRIPTION_SIBLING ) {
-        return this.descriptionSibling;
+        return this._descriptionSibling;
       }
       else if ( elementName === AccessiblePeer.CONTAINER_PARENT ) {
-        return this.containerParent;
+        return this._containerParent;
       }
 
       assert && assert( false, 'invalid elementName name: ' + elementName );
@@ -461,9 +486,9 @@ define( function( require ) {
     removeAttributeFromAllElements: function( attribute ) {
       assert && assert( typeof attribute === 'string' );
       this._primarySibling && this._primarySibling.removeAttribute( attribute );
-      this.labelSibling && this.labelSibling.removeAttribute( attribute );
-      this.descriptionSibling && this.descriptionSibling.removeAttribute( attribute );
-      this.containerParent && this.containerParent.removeAttribute( attribute );
+      this._labelSibling && this._labelSibling.removeAttribute( attribute );
+      this._descriptionSibling && this._descriptionSibling.removeAttribute( attribute );
+      this._containerParent && this._containerParent.removeAttribute( attribute );
     },
 
     /**
@@ -532,14 +557,14 @@ define( function( require ) {
     arrangeContentElement: function( contentElement, appendElement ) {
 
       // if there is a containerParent
-      if ( this.topLevelElements[ 0 ] === this.containerParent ) {
+      if ( this.topLevelElements[ 0 ] === this._containerParent ) {
         assert && assert( this.topLevelElements.length === 1 );
 
         if ( appendElement ) {
-          this.containerParent.appendChild( contentElement );
+          this._containerParent.appendChild( contentElement );
         }
         else {
-          this.containerParent.insertBefore( contentElement, this._primarySibling );
+          this._containerParent.insertBefore( contentElement, this._primarySibling );
         }
       }
 
@@ -638,15 +663,15 @@ define( function( require ) {
       assert && assert( typeof content === 'string', 'incorrect label content type' );
 
       // no-op to support any option order
-      if ( !this.labelSibling ) {
+      if ( !this._labelSibling ) {
         return;
       }
 
-      AccessibilityUtil.setTextContent( this.labelSibling, content );
+      AccessibilityUtil.setTextContent( this._labelSibling, content );
 
       // if the label element happens to be a 'label', associate with 'for' attribute
-      if ( this.labelSibling.tagName.toUpperCase() === LABEL_TAG ) {
-        this.labelSibling.setAttribute( 'for', this._primarySibling.id );
+      if ( this._labelSibling.tagName.toUpperCase() === LABEL_TAG ) {
+        this._labelSibling.setAttribute( 'for', this._primarySibling.id );
       }
     },
     /**
@@ -659,10 +684,10 @@ define( function( require ) {
       assert && assert( typeof content === 'string', 'incorrect description content type' );
 
       // no-op to support any option order
-      if ( !this.descriptionSibling ) {
+      if ( !this._descriptionSibling ) {
         return;
       }
-      AccessibilityUtil.setTextContent( this.descriptionSibling, content );
+      AccessibilityUtil.setTextContent( this._descriptionSibling, content );
     },
 
     /**
@@ -709,9 +734,9 @@ define( function( require ) {
       this.display = null;
       this.trail = null;
       this._primarySibling = null;
-      this.labelSibling = null;
-      this.descriptionSibling = null;
-      this.containerParent = null;
+      this._labelSibling = null;
+      this._descriptionSibling = null;
+      this._containerParent = null;
 
       // for now
       this.freeToPool();
