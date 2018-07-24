@@ -123,6 +123,7 @@ define( function( require ) {
   'use strict';
 
   // modules
+  var A11yBehaviorFunctionDef = require( 'SCENERY/accessibility/A11yBehaviorFunctionDef' );
   var AccessibilityTree = require( 'SCENERY/accessibility/AccessibilityTree' );
   var AccessibilityUtil = require( 'SCENERY/accessibility/AccessibilityUtil' );
   var AccessibleDisplaysInfo = require( 'SCENERY/accessibility/AccessibleDisplaysInfo' );
@@ -155,6 +156,7 @@ define( function( require ) {
 
     'accessibleName',
     'helpText',
+    'helpTextBehavior',
 
     /*
      * Lower Level API Functions
@@ -394,6 +396,16 @@ define( function( require ) {
 
           // {string|null} - sets the help text of the Node, this most often corresponds to description text.
           this._helpText = null;
+
+          // {function} - sets the help text of the Node, this most often corresponds to description text.
+          // TODO: for efficiency maybe don't set this on all nodes always, https://github.com/phetsims/scenery/issues/795
+          this._helpTextBehavior = function( node, options, helpText ) {
+
+            //TODO: assertions for if using lower api too? https://github.com/phetsims/scenery/issues/795
+            options.descriptionTagName = AccessibilityUtil.DEFAULT_DESCRIPTION_TAG_NAME;
+            options.descriptionContent = helpText;
+            return options;
+          };
         },
 
 
@@ -669,28 +681,10 @@ define( function( require ) {
 
             this._helpText = helpText;
 
-            this.setHelpTextImplementation( helpText );
-
+            this.onAccessibleContentChange();
           }
         },
         set helpText( helpText ) { this.setHelpText( helpText ); },
-
-        /**
-         * This function is to manage the public helpText setter and invalidateAccessibleContent both wanting to do the
-         * same helpText setting work, but setHelpText wants to do a few more client side error checks first
-         * that causes an infinite loop if called from invalidateAccessibleContent.
-         * @public (scenery-internal) - should only be called from setHelpText and invalidateAccessibleContent
-         * @param {string} helpText
-         */
-        setHelpTextImplementation: function( helpText ) {
-          assert && assert( helpText === null || typeof helpText === 'string' );
-
-          // no-op if there is no tagName
-          if ( this._tagName ) {
-
-            this.descriptionContent = helpText;
-          }
-        },
 
         /**
          * Get the help text of the interactive element.
@@ -702,6 +696,36 @@ define( function( require ) {
           return this._helpText;
         },
         get helpText() { return this.getHelpText(); },
+
+        /**
+         * helpTextBehavior is a function that will set the appropriate options on this node to get the desired
+         * "Help Text"
+         *
+         * @param {A11yBehaviorFunctionDef|function} helpTextBehavior - a function that takes
+         */
+        setHelpTextBehavior: function( helpTextBehavior ) {
+          assert && assert( typeof helpTextBehavior === 'function' );
+          assert && A11yBehaviorFunctionDef.validateA11yBehaviorFunctionDef( helpTextBehavior );
+
+          if ( this._helpTextBehavior !== helpTextBehavior ) {
+
+            this._helpTextBehavior = helpTextBehavior;
+
+            this.onAccessibleContentChange();
+          }
+        },
+        set helpTextBehavior( helpTextBehavior ) { this.setHelpTextBehavior( helpTextBehavior ); },
+
+        /**
+         * Get the help text of the interactive element.
+         * @public
+         *
+         * @returns {function}
+         */
+        getHelpTextBehavior: function() {
+          return this._helpTextBehavior;
+        },
+        get helpTextBehavior() { return this.getHelpTextBehavior(); },
 
 
         /***********************************************************************************************************/
@@ -2033,6 +2057,23 @@ define( function( require ) {
         // SCENERY-INTERNAL AND PRIVATE METHODS
         /***********************************************************************************************************/
 
+        /**
+         * Used to get a list of all settable options and their current values.
+         * @public (scenery-internal)
+         * @returns {Object} - keys are all accessibility option keys, and the values are the values of those properties
+         * on this node.
+         */
+        getBaseOptions: function() {
+
+          var currentOptions = {};
+
+          for ( var i = 0; i < ACCESSIBILITY_OPTION_KEYS.length; i++ ) {
+            var optionName = ACCESSIBILITY_OPTION_KEYS[ i ];
+            currentOptions[ optionName ] = this[ optionName ];
+          }
+
+          return currentOptions;
+        },
 
         /**
          * Returns a recursive data structure that represents the nested ordering of accessible content for this Node's

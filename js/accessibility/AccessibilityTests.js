@@ -1559,32 +1559,57 @@ define( function( require ) {
 
 
     assert.ok( true );
-    //
-    // TODO: this is failing, but ideally it wouldn't see https://github.com/phetsims/scenery/issues/811
-    // // test the behavior of focusable function
-    // var rootNode = new Node( { tagName: 'div' } );
-    // var display = new Display( rootNode ); // eslint-disable-line
-    // document.body.appendChild( display.domElement );
-    //
-    // var a = new Node( { tagName: 'div', helpText: TEST_DESCRIPTION } );
-    // rootNode.addChild( a );
-    //
-    // rootNode.addChild( new Node( { tagName: 'input'}));
-    // assert.ok( a.helpText === TEST_DESCRIPTION, 'helpText getter' );
-    //
-    // var aElement = getPrimarySiblingElementByNode( a );
-    // assert.ok( aElement.textContent === TEST_DESCRIPTION, 'helpText setter on div' );
-    //
-    //
-    // var b = new Node( { tagName: 'button' } );
-    // rootNode.addChild( b );
-    // var bElement = getPrimarySiblingElementByNode( b );
-    // var bParent = getPrimarySiblingElementByNode( b ).parentElement;
-    // var bDescriptionSibling = bParent.children[ DEFAULT_DESCRIPTION_SIBLING_INDEX ];
-    // assert.ok( bDescriptionSibling.textContent === TEST_DESCRIPTION, 'helpText sets label sibling' );
-    // assert.ok( bDescriptionSibling.getAttribute( 'for' ).indexOf( bElement.id ) >= 0, 'helpText sets label\'s "for" attribute' );
-    //
 
+    // test the behavior of focusable function
+    var rootNode = new Node( { tagName: 'div' } );
+    var display = new Display( rootNode ); // eslint-disable-line
+    document.body.appendChild( display.domElement );
+
+    // label tag needed for default sibling indices to work
+    var a = new Node( {
+      containerTagName: 'div',
+      tagName: 'div',
+      labelTagName: 'div',
+      helpText: TEST_DESCRIPTION
+    } );
+    rootNode.addChild( a );
+
+    rootNode.addChild( new Node( { tagName: 'input' } ) );
+    assert.ok( a.helpText === TEST_DESCRIPTION, 'helpText getter' );
+
+    var aDescriptionElement = getPrimarySiblingElementByNode( a ).parentElement.children[ DEFAULT_DESCRIPTION_SIBLING_INDEX ];
+    assert.ok( aDescriptionElement.textContent === TEST_DESCRIPTION, 'helpText setter on div' );
+
+    var b = new Node( {
+      containerTagName: 'div',
+      tagName: 'button',
+      descriptionContent: 'overrideThis',
+      labelTagName: 'div'
+    } );
+    rootNode.addChild( b );
+
+    b.helpTextBehavior = function( node, options, helpText ) {
+
+      options.descriptionTagName = 'p';
+      options.descriptionContent = helpText;
+      return options;
+    };
+
+    var bDescriptionElement = getPrimarySiblingElementByNode( b ).parentElement.children[ DEFAULT_DESCRIPTION_SIBLING_INDEX ];
+    assert.ok( bDescriptionElement.textContent === 'overrideThis', 'helpTextBehavior should not work until there is help text' );
+    b.helpText = 'help text description';
+    bDescriptionElement = getPrimarySiblingElementByNode( b ).parentElement.children[ DEFAULT_DESCRIPTION_SIBLING_INDEX ];
+    assert.ok( bDescriptionElement.textContent === 'help text description', 'help text setter' );
+
+    b.helpText = '';
+
+    bDescriptionElement = getPrimarySiblingElementByNode( b ).parentElement.children[ DEFAULT_DESCRIPTION_SIBLING_INDEX ];
+    assert.ok( bDescriptionElement.textContent === '', 'helpTextBehavior should not work for empty string' );
+
+
+    b.helpText = null
+    bDescriptionElement = getPrimarySiblingElementByNode( b ).parentElement.children[ DEFAULT_DESCRIPTION_SIBLING_INDEX ];
+    assert.ok( bDescriptionElement.textContent === 'overrideThis', 'helpTextBehavior should not work until there is help text' );
   } );
 
   QUnit.test( 'move to front/move to back', function( assert ) {

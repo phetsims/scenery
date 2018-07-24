@@ -122,37 +122,59 @@ define( function( require ) {
       this._descriptionSibling = null;
       this._containerParent = null;
 
+      this.update();
+
+      return this;
+    },
+
+    /**
+     * Update the content of the peer
+     * @private
+     */
+    update: function() {
+      var i;
       var uniqueId = this.accessibleInstance.trail.getUniqueId();
 
+      var options = this.node.getBaseOptions();
+
+      // if( this.node.accessibleName){
+      //   options = this.node.accessibleNameBehavior( this.node, options, this.accessibleName );
+      // }
+
+      if ( this.node.helpText !== null ) {
+        options = this.node.helpTextBehavior( this.node, options, this.node.helpText );
+      }
+
+
       // create the base DOM element representing this accessible instance
-      var primarySibling = AccessibilityUtil.createElement( this.node._tagName, this.node.focusable, {
-        namespace: this.node._accessibleNamespace
+      var primarySibling = AccessibilityUtil.createElement( options.tagName, this.node.focusable, {
+        namespace: options.accessibleNamespace
       } );
       primarySibling.id = uniqueId;
 
       // create the container parent for the dom siblings
       var containerParent = null;
-      if ( this.node._containerTagName ) {
-        containerParent = AccessibilityUtil.createElement( this.node._containerTagName, false );
+      if ( options.containerTagName ) {
+        containerParent = AccessibilityUtil.createElement( options.containerTagName, false );
         containerParent.id = 'container-' + uniqueId;
 
         // provide the aria-role if it is specified
-        if ( this.node._containerAriaRole ) {
-          containerParent.setAttribute( 'role', this.node._containerAriaRole );
+        if ( options.containerAriaRole ) {
+          containerParent.setAttribute( 'role', options.containerAriaRole );
         }
       }
 
       // create the label DOM element representing this instance
       var labelSibling = null;
-      if ( this.node.labelTagName ) {
-        labelSibling = AccessibilityUtil.createElement( this.node.labelTagName, false );
+      if ( options.labelTagName ) {
+        labelSibling = AccessibilityUtil.createElement( options.labelTagName, false );
         labelSibling.id = 'label-' + uniqueId;
       }
 
       // create the description DOM element representing this instance
       var descriptionSibling = null;
-      if ( this.node.descriptionTagName ) {
-        descriptionSibling = AccessibilityUtil.createElement( this.node.descriptionTagName, false );
+      if ( options.descriptionTagName ) {
+        descriptionSibling = AccessibilityUtil.createElement( options.descriptionTagName, false );
         descriptionSibling.id = 'description-' + uniqueId;
       }
 
@@ -175,23 +197,23 @@ define( function( require ) {
 
       // set the accessible label now that the element has been recreated again, but not if the tagName
       // has been cleared out
-      if ( this.node.labelContent && this.node.labelTagName !== null ) {
-        this.setLabelSiblingContent( this.node.labelContent );
+      if ( options.labelContent && options.labelTagName !== null ) {
+        this.setLabelSiblingContent( options.labelContent );
       }
 
       // restore the innerContent
-      if ( this.node.innerContent && this.node.tagName !== null ) {
-        this.setPrimarySiblingContent( this.node.innerContent );
+      if ( options.innerContent && options.tagName !== null ) {
+        this.setPrimarySiblingContent( options.innerContent );
       }
 
       // set the accessible description, but not if the tagName has been cleared out.
-      if ( this.node.descriptionContent && this.node.descriptionTagName !== null ) {
-        this.setDescriptionSiblingContent( this.node.descriptionContent );
+      if ( options.descriptionContent && options.descriptionTagName !== null ) {
+        this.setDescriptionSiblingContent( options.descriptionContent );
       }
 
       // if element is an input element, set input type
-      if ( this.node.tagName.toUpperCase() === INPUT_TAG && this.node.inputType ) {
-        this.setAttributeToElement( 'type', this.node.inputType );
+      if ( options.tagName.toUpperCase() === INPUT_TAG && options.inputType ) {
+        this.setAttributeToElement( 'type', options.inputType );
       }
 
       // recompute and assign the association attributes that link two elements (like aria-labelledby)
@@ -219,8 +241,6 @@ define( function( require ) {
       this.accessibleInstance.peer = this;
       this.node.updateOtherNodesAriaLabelledby();
       this.node.updateOtherNodesAriaDescribedby();
-
-      return this;
     },
 
     /**
