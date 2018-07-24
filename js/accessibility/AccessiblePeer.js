@@ -228,7 +228,7 @@ define( function( require ) {
         this.node.focusHighlight.visible = false;
       }
 
-      // TODO: this is hacky, because updateOtherNodes. . . could try to access this peer from its accessibleInstance.
+      // TODO: this is hacky, because updateOtherNodes functions could try to access this peer from their accessibleInstance.
       this.accessibleInstance.peer = this;
       this.node.updateOtherNodesAriaLabelledby();
       this.node.updateOtherNodesAriaDescribedby();
