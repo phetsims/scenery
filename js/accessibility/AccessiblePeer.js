@@ -189,17 +189,6 @@ define( function( require ) {
         this.setDescriptionSiblingContent( this.node.descriptionContent );
       }
 
-      // set the accessible attributes, restoring from a defensive copy
-      var defensiveAttributes = this.node.accessibleAttributes;
-      for ( i = 0; i < defensiveAttributes.length; i++ ) {
-        var attribute = defensiveAttributes[ i ].attribute;
-        var value = defensiveAttributes[ i ].value;
-        var namespace = defensiveAttributes[ i ].namespace;
-        this.setAttributeToElement( attribute, value, {
-          namespace: namespace
-        } );
-      }
-
       // if element is an input element, set input type
       if ( this.node.tagName.toUpperCase() === INPUT_TAG && this.node.inputType ) {
         this.setAttributeToElement( 'type', this.node.inputType );

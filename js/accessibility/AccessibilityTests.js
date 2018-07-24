@@ -1239,6 +1239,52 @@ define( function( require ) {
     assert.ok( aElement.getAttribute( 'value' ) === differentValue, 'should have the same different value' );
   } );
 
+
+  QUnit.test( 'setAccessibleAttribute', function( assert ) {
+
+    var rootNode = new Node();
+    var display = new Display( rootNode );
+    document.body.appendChild( display.domElement );
+
+    var a = new Node( { tagName: 'div', labelContent: 'hello' } );
+    rootNode.addChild( a );
+
+    a.setAccessibleAttribute( 'test', 'test1' );
+    var aElement = getPrimarySiblingElementByNode( a );
+    assert.ok( aElement.getAttribute( 'test' ) === 'test1', 'setAccessibleAttribute for primary sibling' );
+
+    a.removeAccessibleAttribute( 'test' );
+    aElement = getPrimarySiblingElementByNode( a );
+    assert.ok( aElement.getAttribute( 'test' ) === null, 'removeAccessibleAttribute for primary sibling' );
+
+    a.setAccessibleAttribute( 'test', 'testValue' );
+    a.setAccessibleAttribute( 'test', 'testValueLabel', {
+      elementName: AccessiblePeer.LABEL_SIBLING
+    } );
+
+    var testBothAttributes = function() {
+      aElement = getPrimarySiblingElementByNode( a );
+      var aLabelElement = aElement.parentElement.children[ DEFAULT_LABEL_SIBLING_INDEX ];
+      assert.ok( aElement.getAttribute( 'test' ) === 'testValue', 'setAccessibleAttribute for primary sibling 2' );
+      assert.ok( aLabelElement.getAttribute( 'test' ) === 'testValueLabel', 'setAccessibleAttribute for label sibling' );
+    };
+    testBothAttributes();
+
+
+    rootNode.removeChild( a );
+    rootNode.addChild( new Node( { children: [ a ] } ) );
+    testBothAttributes();
+
+
+    a.removeAccessibleAttribute( 'test', {
+      elementName: AccessiblePeer.LABEL_SIBLING
+    } );
+    aElement = getPrimarySiblingElementByNode( a );
+    var aLabelElement = aElement.parentElement.children[ DEFAULT_LABEL_SIBLING_INDEX ];
+    assert.ok( aElement.getAttribute( 'test' ) === 'testValue', 'removeAccessibleAttribute for label should not effect primary sibling ' );
+    assert.ok( aLabelElement.getAttribute( 'test' ) === null, 'removeAccessibleAttribute for label sibling' );
+  } );
+
   QUnit.test( 'accessibleChecked', function( assert ) {
 
     var rootNode = new Node();
@@ -1543,7 +1589,7 @@ define( function( require ) {
 
   QUnit.test( 'move to front/move to back', function( assert ) {
 
-    // make sure state is restored after moving children to front and back    
+    // make sure state is restored after moving children to front and back
     var rootNode = new Node( { tagName: 'div' } );
     var display = new Display( rootNode );
     document.body.appendChild( display.domElement );
