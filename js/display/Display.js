@@ -641,44 +641,6 @@ define( function( require ) {
       this._overlays.splice( _.indexOf( this._overlays, overlay ), 1 );
     },
 
-    /**
-     * Returns the AccessibleInstance which has the longest trail that is an ancestor of the passed in trail. It will
-     * fall back to the root accessible instance if there is no other available one.
-     * @private
-     *
-     * @param {Trail} trail
-     * @returns {AccessibleInstance}
-     */
-    getBaseAccessibleInstance: function( trail ) {
-      // Search through trail to find longest trail extension where the leafmost node has accessible content, but does
-      // not include the node that was just added.
-      var i;
-      for ( i = trail.length - 2; i >= 0; i-- ) {
-        // break if there is accessible content for nodes along the trail, including root.
-        if ( trail.nodes[ i ].accessibleContent ) {
-          break;
-        }
-      }
-      // no ancestor of the added node was accessible, so add things directly to root accessible instance.
-      if ( i < 0 ) {
-        return this._rootAccessibleInstance;
-      }
-      // otherwise, we encountered an accessible instance and i points to the leaf most node for the sub trail.
-      else {
-        var leafMostAccessibleNode = trail.nodes[ i ];
-        var accessibleInstances = leafMostAccessibleNode._accessibleInstances;
-        // look up the accessible instance given the leaf most accessible node.
-        for ( var j = 0; j < accessibleInstances.length; j++ ) {
-          var accessibleInstance = accessibleInstances[ j ];
-          if ( trail.isExtensionOf( accessibleInstance.trail ) ) {
-            return accessibleInstance;
-          }
-        }
-      }
-
-      throw new Error( 'A base accessible instance must be defined.' );
-    },
-
     markUnsortedAccessibleInstance: function( accessibleInstance ) {
       this._unsortedAccessibleInstances.push( accessibleInstance );
     },
