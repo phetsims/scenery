@@ -1607,7 +1607,7 @@ define( function( require ) {
     assert.ok( bDescriptionElement.textContent === '', 'helpTextBehavior should not work for empty string' );
 
 
-    b.helpText = null
+    b.helpText = null;
     bDescriptionElement = getPrimarySiblingElementByNode( b ).parentElement.children[ DEFAULT_DESCRIPTION_SIBLING_INDEX ];
     assert.ok( bDescriptionElement.textContent === 'overrideThis', 'helpTextBehavior should not work until there is help text' );
   } );
