@@ -1,7 +1,8 @@
 // Copyright 2015-2016, University of Colorado Boulder
 
 /**
- * An accessible peer controls the appearance of an accessible Node's instance in the parallel DOM.
+ * An accessible peer controls the appearance of an accessible Node's instance in the parallel DOM. An AccessiblePeer can
+ * have up to four HTMLElements displayed in the PDOM, see constructor for details.
  *
  * @author Jonathan Olson <jonathan.olson@colorado.edu>
  * @author Jesse Greenberg
@@ -106,7 +107,7 @@ define( function( require ) {
       if ( options.primarySibling ) {
         // // @public {HTMLElement} - The main element associated with this peer. If focusable, this is the element that gets
         // // the focus. It also will contain any children.
-        this.primarySibling = options.primarySibling;
+        this._primarySibling = options.primarySibling;
         return this;
       }
 
@@ -119,7 +120,7 @@ define( function( require ) {
       var i;
 
       // clear out elements to be recreated below
-      this.primarySibling = null;
+      this._primarySibling = null;
       this.labelSibling = null;
       this.descriptionSibling = null;
       this.containerParent = null;
@@ -159,7 +160,7 @@ define( function( require ) {
       }
 
 
-      this.primarySibling = primarySibling;
+      this._primarySibling = primarySibling;
       this.labelSibling = labelSibling;
       this.descriptionSibling = descriptionSibling;
       this.containerParent = containerParent;
@@ -171,8 +172,8 @@ define( function( require ) {
       this.blurEventListener = this.blurEventListener || this.onBlur.bind( this );
 
       // Hook up listeners for when our primary element is focused or blurred.
-      this.primarySibling.addEventListener( 'blur', this.blurEventListener );
-      this.primarySibling.addEventListener( 'focus', this.focusEventListener );
+      this._primarySibling.addEventListener( 'blur', this.blurEventListener );
+      this._primarySibling.addEventListener( 'focus', this.focusEventListener );
 
 
       // set the accessible label now that the element has been recreated again, but not if the tagName
@@ -243,12 +244,12 @@ define( function( require ) {
      */
     orderElements: function() {
 
-      var truthySiblings = [ this.labelSibling, this.descriptionSibling, this.primarySibling ].filter( function( i ) { return i; } );
+      var truthySiblings = [ this.labelSibling, this.descriptionSibling, this._primarySibling ].filter( function( i ) { return i; } );
 
       if ( this.containerParent ) {
         // The first child of the container parent element should be the peer dom element
         // if undefined, the insertBefore method will insert the primarySiblingDOMElement as the first child
-        var primarySiblingDOMElement = this.primarySibling;
+        var primarySiblingDOMElement = this._primarySibling;
         var firstChild = this.containerParent.children[ 0 ] || null;
         this.containerParent.insertBefore( primarySiblingDOMElement, firstChild );
         this.topLevelElements = [ this.containerParent ];
@@ -264,6 +265,16 @@ define( function( require ) {
       this.descriptionSibling && this.arrangeContentElement( this.descriptionSibling, this.node.appendDescription );
 
     },
+
+    /**
+     * Get the primary sibling element for the peer
+     * @public
+     * @returns {HTMLElement|null}
+     */
+    getPrimarySibling: function() {
+      return this._primarySibling;
+    },
+    get primarySibling() { return this.getPrimarySibling(); },
 
     /**
      * Recompute the aria-labelledby attributes for all of the peer's elements
@@ -321,7 +332,7 @@ define( function( require ) {
      * @param {DOMEvent} event
      */
     onFocus: function( event ) {
-      if ( event.target === this.primarySibling ) {
+      if ( event.target === this._primarySibling ) {
         // NOTE: The "root" peer can't be focused (so it doesn't matter if it doesn't have a node).
         if ( this.accessibleInstance.node.focusable ) {
           scenery.Display.focus = new Focus( this.accessibleInstance.display, this.accessibleInstance.guessVisualTrail() );
@@ -337,7 +348,7 @@ define( function( require ) {
      * @param {DOMEvent} event
      */
     onBlur: function( event ) {
-      if ( event.target === this.primarySibling ) {
+      if ( event.target === this._primarySibling ) {
         scenery.Display.focus = null;
       }
     },
@@ -351,7 +362,7 @@ define( function( require ) {
      */
     getElementByName: function( elementName ) {
       if ( elementName === AccessiblePeer.PRIMARY_SIBLING ) {
-        return this.primarySibling;
+        return this._primarySibling;
       }
       else if ( elementName === AccessiblePeer.LABEL_SIBLING ) {
         return this.labelSibling;
@@ -373,7 +384,7 @@ define( function( require ) {
      * @param {Object} accessibleInput - see Accessibility.addAccessibleInputListener
      */
     addDOMEventListeners: function( accessibleInput ) {
-      AccessibilityUtil.addDOMEventListeners( accessibleInput, this.primarySibling );
+      AccessibilityUtil.addDOMEventListeners( accessibleInput, this._primarySibling );
     },
     /**
      * Remove DOM Event listeners from the peer's primary sibling.
@@ -381,7 +392,7 @@ define( function( require ) {
      * @param {Object} accessibleInput - see Accessibility.addAccessibleInputListener
      */
     removeDOMEventListeners: function( accessibleInput ) {
-      AccessibilityUtil.removeDOMEventListeners( accessibleInput, this.primarySibling );
+      AccessibilityUtil.removeDOMEventListeners( accessibleInput, this._primarySibling );
     },
 
     /**
@@ -449,7 +460,7 @@ define( function( require ) {
      */
     removeAttributeFromAllElements: function( attribute ) {
       assert && assert( typeof attribute === 'string' );
-      this.primarySibling && this.primarySibling.removeAttribute( attribute );
+      this._primarySibling && this._primarySibling.removeAttribute( attribute );
       this.labelSibling && this.labelSibling.removeAttribute( attribute );
       this.descriptionSibling && this.descriptionSibling.removeAttribute( attribute );
       this.containerParent && this.containerParent.removeAttribute( attribute );
@@ -528,7 +539,7 @@ define( function( require ) {
           this.containerParent.appendChild( contentElement );
         }
         else {
-          this.containerParent.insertBefore( contentElement, this.primarySibling );
+          this.containerParent.insertBefore( contentElement, this._primarySibling );
         }
       }
 
@@ -540,7 +551,7 @@ define( function( require ) {
         this.topLevelElements.splice( this.topLevelElements.indexOf( contentElement ), 1 );
 
         var indexOffset = appendElement ? 1 : 0;
-        var indexOfContentElement = this.topLevelElements.indexOf( this.primarySibling ) + indexOffset;
+        var indexOfContentElement = this.topLevelElements.indexOf( this._primarySibling ) + indexOffset;
         indexOfContentElement = indexOfContentElement < 0 ? 0 : indexOfContentElement; //support primarySibling in the first position
         this.topLevelElements.splice( indexOfContentElement, 0, contentElement );
       }
@@ -596,7 +607,7 @@ define( function( require ) {
      * @returns {boolean}
      */
     isFocused: function() {
-      return document.activeElement === this.primarySibling;
+      return document.activeElement === this._primarySibling;
     },
 
     /**
@@ -604,8 +615,8 @@ define( function( require ) {
      * @public (scenery-internal)
      */
     focus: function() {
-      assert && assert( this.primarySibling, 'must have a primary sibling to focus' );
-      this.primarySibling.focus();
+      assert && assert( this._primarySibling, 'must have a primary sibling to focus' );
+      this._primarySibling.focus();
     },
 
     /**
@@ -613,8 +624,8 @@ define( function( require ) {
      * @public (scenery-internal)
      */
     blur: function() {
-      assert && assert( this.primarySibling, 'must have a primary sibling to blur' );
-      this.primarySibling.blur();
+      assert && assert( this._primarySibling, 'must have a primary sibling to blur' );
+      this._primarySibling.blur();
     },
 
     /**
@@ -635,7 +646,7 @@ define( function( require ) {
 
       // if the label element happens to be a 'label', associate with 'for' attribute
       if ( this.labelSibling.tagName.toUpperCase() === LABEL_TAG ) {
-        this.labelSibling.setAttribute( 'for', this.primarySibling.id );
+        this.labelSibling.setAttribute( 'for', this._primarySibling.id );
       }
     },
     /**
@@ -663,14 +674,14 @@ define( function( require ) {
     setPrimarySiblingContent: function( content ) {
       assert && assert( typeof content === 'string', 'incorrect inner content type' );
       assert && assert( this.accessibleInstance.children.length === 0, 'descendants exist with accessible content, innerContent cannot be used' );
-      assert && assert( AccessibilityUtil.tagNameSupportsContent( this.primarySibling.tagName ),
+      assert && assert( AccessibilityUtil.tagNameSupportsContent( this._primarySibling.tagName ),
         'tagName: ' + this._tagName + ' does not support inner content' );
 
       // no-op to support any option order
-      if ( !this.primarySibling ) {
+      if ( !this._primarySibling ) {
         return;
       }
-      AccessibilityUtil.setTextContent( this.primarySibling, content );
+      AccessibilityUtil.setTextContent( this._primarySibling, content );
     },
 
     /**
@@ -689,15 +700,15 @@ define( function( require ) {
       }
 
       // remove listeners
-      this.primarySibling.removeEventListener( 'blur', this.blurEventListener );
-      this.primarySibling.removeEventListener( 'focus', this.focusEventListener );
+      this._primarySibling.removeEventListener( 'blur', this.blurEventListener );
+      this._primarySibling.removeEventListener( 'focus', this.focusEventListener );
 
       // zero-out references
       this.accessibleInstance = null;
       this.node = null;
       this.display = null;
       this.trail = null;
-      this.primarySibling = null;
+      this._primarySibling = null;
       this.labelSibling = null;
       this.descriptionSibling = null;
       this.containerParent = null;
