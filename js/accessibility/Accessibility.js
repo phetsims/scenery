@@ -720,13 +720,6 @@ define( function( require ) {
 
             // TODO: this could be setting a11y content twice
             this.onAccessibleContentChange();
-            // if ( this._accessibleInstances.length > 0 ) {
-            //   for ( var i = 0; i < this._accessibleInstances.length; i++ ) {
-            //     var peer = this._accessibleInstances[ i ].peer;
-            //     peer.onTagNameChange();
-            //   }
-            // }
-
           }
         },
         set tagName( tagName ) { this.setTagName( tagName ); },
@@ -766,11 +759,6 @@ define( function( require ) {
             this._labelTagName = tagName;
 
             this.onAccessibleContentChange();
-
-            // for ( var i = 0; i < this._accessibleInstances.length; i++ ) {
-            //   var peer = this._accessibleInstances[ i ].peer;
-            //   peer.onLabelTagNameChange();
-            // }
           }
         },
         set labelTagName( tagName ) { this.setLabelTagName( tagName ); },
@@ -812,11 +800,6 @@ define( function( require ) {
             this._descriptionTagName = tagName;
 
             this.onAccessibleContentChange();
-
-            // for ( var i = 0; i < this._accessibleInstances.length; i++ ) {
-            //   var peer = this._accessibleInstances[ i ].peer;
-            //   peer.onDescriptionTagNameChange();
-            // }
           }
         },
         set descriptionTagName( tagName ) { this.setDescriptionTagName( tagName ); },
@@ -879,10 +862,6 @@ define( function( require ) {
 
           // TODO: can we do this without recomputing everything?
           this.onAccessibleContentChange();
-          // for ( var i = 0; i < this._accessibleInstances.length; i++ ) {
-          //   var peer = this._accessibleInstances[ i ].peer;
-          //   peer.onAppendLabelChange();
-          // }
         },
         set appendLabel( appendLabel ) { this.setAppendLabel( appendLabel ); },
 
@@ -893,7 +872,7 @@ define( function( require ) {
         getAppendLabel: function() {
           return this._appendLabel;
         },
-        get appendLabel() { this.getAppendLabel(); },
+        get appendLabel() { return this.getAppendLabel(); },
 
         /**
          * By default the label will be prepended before the primary sibling in the PDOM. This
@@ -914,10 +893,6 @@ define( function( require ) {
 
           // TODO: can we do this without recomputing everything?
           this.onAccessibleContentChange();
-          // for ( var i = 0; i < this._accessibleInstances.length; i++ ) {
-          //   var peer = this._accessibleInstances[ i ].peer;
-          //   peer.onAppendDescriptionChange();
-          // }
         },
         set appendDescription( appendDescription ) { this.setAppendDescription( appendDescription ); },
 
@@ -928,7 +903,7 @@ define( function( require ) {
         getAppendDescription: function() {
           return this._appendDescription;
         },
-        get appendDescription() { this.getAppendDescription(); },
+        get appendDescription() { return this.getAppendDescription(); },
 
 
         /**
@@ -960,10 +935,6 @@ define( function( require ) {
 
           this._containerTagName = tagName;
           this.onAccessibleContentChange();
-          // for ( var i = 0; i < this._accessibleInstances.length; i++ ) {
-          //   var peer = this._accessibleInstances[ i ].peer;
-          //   peer.onContainerTagNameChange();
-          // }
         },
         set containerTagName( tagName ) { this.setContainerTagName( tagName ); },
 
@@ -1098,8 +1069,18 @@ define( function( require ) {
          */
         setAriaRole: function( ariaRole ) {
           assert && assert( ariaRole === null || typeof ariaRole === 'string' );
-          this._ariaRole = ariaRole;
-          this.setAccessibleAttribute( 'role', ariaRole );
+
+          if ( this._ariaRole !== ariaRole ) {
+
+            this._ariaRole = ariaRole;
+
+            if ( ariaRole !== null ) {
+              this.setAccessibleAttribute( 'role', ariaRole );
+            }
+            else {
+              this.removeAccessibleAttribute( 'role' );
+            }
+          }
         },
         set ariaRole( ariaRole ) { this.setAriaRole( ariaRole ); },
 
@@ -1122,17 +1103,29 @@ define( function( require ) {
          *
          * @param {string|null} ariaRole - role for the element, see
          *                            https://www.w3.org/TR/html-aria/#allowed-aria-roles-states-and-properties
-         *                            for a lsit of roles, states, and properties.
+         *                            for a list of roles, states, and properties.
          */
         setContainerAriaRole: function( ariaRole ) {
           assert && assert( ariaRole === null || typeof ariaRole === 'string' );
-          this._containerAriaRole = ariaRole;
 
-          this.onAccessibleContentChange();
-          // for ( var i = 0; i < this._accessibleInstances.length; i++ ) {
-          //   var peer = this._accessibleInstances[ i ].peer;
-          //   peer.onContainerAriaRoleChange();
-          // }
+          if ( this._containerAriaRole !== ariaRole ) {
+
+            this._containerAriaRole = ariaRole;
+
+            // clear out the attribute
+            if ( this._containerAriaRole === null ) {
+              this.removeAccessibleAttribute( 'role', {
+                elementName: AccessiblePeer.CONTAINER_PARENT
+              } );
+            }
+
+            // add the attribute
+            else {
+              this.setAccessibleAttribute( 'role', ariaRole, {
+                elementName: AccessiblePeer.CONTAINER_PARENT
+              } );
+            }
+          }
         },
         set containerAriaRole( ariaRole ) { this.setContainerAriaRole( ariaRole ); },
 
@@ -1165,11 +1158,8 @@ define( function( require ) {
           if ( this._accessibleNamespace !== accessibleNamespace ) {
             this._accessibleNamespace = accessibleNamespace;
 
+            // If the namespace changes, tear down the view and redraw the whole thing, there is no easy mutable solution here.
             this.onAccessibleContentChange();
-            // for ( var i = 0; i < this._accessibleInstances.length; i++ ) {
-            //   var peer = this._accessibleInstances[ i ].peer;
-            //   peer.onAccessibleNamespaceChange();
-            // }
           }
 
           return this;
@@ -1235,12 +1225,6 @@ define( function( require ) {
             isFocused = true;
           }
 
-          this.onAccessibleContentChange();
-          // for ( var i = 0; i < this._accessibleInstances.length; i++ ) {
-          //   var peer = this._accessibleInstances[ i ].peer;
-          //   peer.onFocusHighlightChange();
-          // }
-
           // if the focus highlight is layerable in the scene graph, update visibility so that it is only
           // visible when associated node has focus
           if ( this._focusHighlightLayerable ) {
@@ -1283,12 +1267,6 @@ define( function( require ) {
             assert && assert( this._focusHighlight instanceof phet.scenery.Node );
             this._focusHighlight.visible = this.focused;
           }
-
-          this.onAccessibleContentChange();
-          // for ( var i = 0; i < this._accessibleInstances.length; i++ ) {
-          //   var peer = this._accessibleInstances[ i ].peer;
-          //   peer.onFocusHighlightLayerableChange();
-          // }
         },
         set focusHighlightLayerable( focusHighlightLayerable ) { this.setFocusHighlightLayerable( focusHighlightLayerable ); },
 

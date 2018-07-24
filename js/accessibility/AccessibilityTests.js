@@ -1423,6 +1423,54 @@ define( function( require ) {
     assert.ok( containerElement.childNodes[ 2 ].tagName.toUpperCase() === 'LI', 'primary sibling last' );
   } );
 
+  QUnit.test( 'containerAriaRole option', function( assert ) {
+
+    // test the behavior of focusable function
+    var rootNode = new Node( { tagName: 'div' } );
+    var display = new Display( rootNode );
+    document.body.appendChild( display.domElement );
+
+    var a = new Node( {
+      tagName: 'div',
+      containerTagName: 'div',
+      containerAriaRole: 'application'
+    } );
+
+    rootNode.addChild( a );
+    assert.ok( a.containerAriaRole === 'application', 'role attribute should be on node property' );
+    var aElement = getPrimarySiblingElementByNode( a );
+    assert.ok( aElement.parentElement.getAttribute( 'role' ) === 'application', 'role attribute should be on parent element' );
+
+    a.containerAriaRole = null;
+    assert.ok( a.containerAriaRole === null, 'role attribute should be cleared on node' );
+    aElement = getPrimarySiblingElementByNode( a );
+    assert.ok( aElement.parentElement.getAttribute( 'role' ) === null, 'role attribute should be cleared on parent element' );
+  } );
+
+  QUnit.test( 'ariaRole option', function( assert ) {
+
+    // test the behavior of focusable function
+    var rootNode = new Node( { tagName: 'div' } );
+    var display = new Display( rootNode );
+    document.body.appendChild( display.domElement );
+
+    var a = new Node( {
+      tagName: 'div',
+      ariaRole: 'application'
+    } );
+
+    rootNode.addChild( a );
+    assert.ok( a.ariaRole === 'application', 'role attribute should be on node property' );
+    var aElement = getPrimarySiblingElementByNode( a );
+    assert.ok( aElement.getAttribute( 'role' ) === 'application', 'role attribute should be on element' );
+
+    a.ariaRole = null;
+    assert.ok( a.ariaRole === null, 'role attribute should be cleared on node' );
+    aElement = getPrimarySiblingElementByNode( a );
+    assert.ok( aElement.getAttribute( 'role' ) === null, 'role attribute should be cleared on element' );
+  } );
+
+
   // Higher level setter/getter options
   QUnit.test( 'accessibleName option', function( assert ) {
 

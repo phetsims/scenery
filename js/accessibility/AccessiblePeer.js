@@ -124,16 +124,6 @@ define( function( require ) {
       this.descriptionSibling = null;
       this.containerParent = null;
 
-
-      // higher level api first, because it will effect the lower level setters.
-      // if ( node.accessibleName ) {
-      //   node.setAccessibleNameImplementation( node.accessibleName ); // set it again to support any option order
-      // }
-      //
-      // if ( node.helpText ) {
-      //   node.setHelpTextImplementation( node.helpText ); // set it again to support any option order
-      // }
-
       var uniqueId = this.accessibleInstance.trail.getUniqueId();
 
       // create the base DOM element representing this accessible instance
@@ -187,18 +177,18 @@ define( function( require ) {
 
       // set the accessible label now that the element has been recreated again, but not if the tagName
       // has been cleared out
-      if ( this.node._labelContent && this.node._labelTagName !== null ) {
-        this.setLabelSiblingContent( this.node._labelContent );
+      if ( this.node.labelContent && this.node.labelTagName !== null ) {
+        this.setLabelSiblingContent( this.node.labelContent );
       }
 
       // restore the innerContent
-      if ( this.node._innerContent && this.node._tagName !== null ) {
-        this.setPrimarySiblingContent( this.node._innerContent );
+      if ( this.node.innerContent && this.node.tagName !== null ) {
+        this.setPrimarySiblingContent( this.node.innerContent );
       }
 
       // set the accessible description, but not if the tagName has been cleared out.
-      if ( this.node._descriptionContent && this.node._descriptionTagName !== null ) {
-        this.setDescriptionSiblingContent( this.node._descriptionContent );
+      if ( this.node.descriptionContent && this.node.descriptionTagName !== null ) {
+        this.setDescriptionSiblingContent( this.node.descriptionContent );
       }
 
       // set the accessible attributes, restoring from a defensive copy
@@ -213,8 +203,8 @@ define( function( require ) {
       }
 
       // if element is an input element, set input type
-      if ( this.node._tagName.toUpperCase() === INPUT_TAG && this.node._inputType ) {
-        this.setAttributeToElement( 'type', this.node._inputType );
+      if ( this.node.tagName.toUpperCase() === INPUT_TAG && this.node.inputType ) {
+        this.setAttributeToElement( 'type', this.node.inputType );
       }
 
       // recompute and assign the association attributes that link two elements (like aria-labelledby)
@@ -223,18 +213,20 @@ define( function( require ) {
 
 
       // add all listeners to the dom element
-      for ( i = 0; i < this.node._accessibleInputListeners.length; i++ ) {
-        this.addDOMEventListeners( this.node._accessibleInputListeners[ i ] );
+      for ( i = 0; i < this.node.accessibleInputListeners.length; i++ ) {
+        this.addDOMEventListeners( this.node.accessibleInputListeners[ i ] );
       }
 
       // update all attributes for the peer, should cover aria-label, role, input value and others
       this.onAttributeChange();
 
       // Default the focus highlight in this special case to be invisible until selected.
-      if ( this.node._focusHighlightLayerable ) {
-        this.node._focusHighlight.visible = false;
-      }
+      if ( this.node.focusHighlightLayerable ) {
 
+        // if focus highlight is layerable, it must be a node in the scene graph
+        assert && assert( this.node.focusHighlight instanceof phet.scenery.Node );
+        this.node.focusHighlight.visible = false;
+      }
 
       // TODO: this is hacky, because updateOtherNodes. . . could try to access this peer from its accessibleInstance.
       this.accessibleInstance.peer = this;
@@ -266,36 +258,11 @@ define( function( require ) {
         // Wean out any null siblings
         this.topLevelElements = truthySiblings;
       }
+
       // insert the label and description elements in the correct location if they exist
-      this.labelSibling && this.arrangeContentElement( this.labelSibling, this.node._appendLabel );
-      this.descriptionSibling && this.arrangeContentElement( this.descriptionSibling, this.node._appendDescription );
+      this.labelSibling && this.arrangeContentElement( this.labelSibling, this.node.appendLabel );
+      this.descriptionSibling && this.arrangeContentElement( this.descriptionSibling, this.node.appendDescription );
 
-    },
-
-    onTagNameChange: function() {
-
-      this.setHasAccessibleContent();
-    },
-
-    onLabelTagNameChange: function() {
-
-      this.setHasAccessibleContent();
-    },
-    onDescriptionTagNameChange: function() {
-
-      this.setHasAccessibleContent();
-    },
-    onAppendLabelChange: function() {
-
-      this.setHasAccessibleContent();
-    },
-    onAppendDescriptionChange: function() {
-
-      this.setHasAccessibleContent();
-    },
-    onContainerTagNameChange: function() {
-
-      this.setHasAccessibleContent();
     },
 
     /**
@@ -345,25 +312,6 @@ define( function( require ) {
         var dataObject = this.node.accessibleAttributes[ i ];
         this.setAttributeToElement( dataObject.attribute, dataObject.value, dataObject.options );
       }
-    },
-    onContainerAriaRoleChange: function() {
-
-      this.setHasAccessibleContent();
-    },
-    onAccessibleNamespaceChange: function() {
-
-      this.setHasAccessibleContent();
-    },
-    onFocusHighlightChange: function() {
-
-      this.setHasAccessibleContent();
-    },
-    onFocusHighlightLayerableChange: function() {
-
-      this.setHasAccessibleContent();
-    },
-
-    setHasAccessibleContent: function() {
     },
 
     /**
@@ -668,7 +616,6 @@ define( function( require ) {
       assert && assert( this.primarySibling, 'must have a primary sibling to blur' );
       this.primarySibling.blur();
     },
-
 
     /**
      * Responsible for setting the content for the label sibling
