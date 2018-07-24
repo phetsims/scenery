@@ -114,8 +114,6 @@ define( function( require ) {
         this._containerParent.removeChild( this._containerParent.lastChild );
       }
 
-      var i;
-
       // clear out elements to be recreated below
       this._primarySibling = null;
       this._labelSibling = null;
