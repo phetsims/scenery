@@ -692,7 +692,7 @@ define( function( require ) {
     rootNode.removeChild( jParent2 );
     checkOnYourOwnAriaLabelledByAssociations( j );
     testK();
-  };
+  }
 
   function testAriaLabelledOrDescribedBySetters( assert, attribute ) { // eslint-disable-line
 
