@@ -15,11 +15,9 @@ define( function( require ) {
   var Mouse = require( 'SCENERY/input/Mouse' );
   var PhetioObject = require( 'TANDEM/PhetioObject' );
   var scenery = require( 'SCENERY/scenery' );
+  var SimpleDragHandlerIO = require( 'SCENERY/input/SimpleDragHandlerIO' );
   var Tandem = require( 'TANDEM/Tandem' );
   var Touch = require( 'SCENERY/input/Touch' );
-
-  // ifphetio
-  var SimpleDragHandlerIO = require( 'SCENERY/input/SimpleDragHandlerIO' );
 
   // constants
   var HIGH_FREQUENCY_OPTIONS = {
@@ -68,6 +66,7 @@ define( function( require ) {
     // @public (read-only) {BooleanProperty} - indicates whether dragging is in progress
     this.isDraggingProperty = new BooleanProperty( false, {
       phetioReadOnly: true,
+      phetioState: false,
       tandem: options.tandem.createTandem( 'isDraggingProperty' ),
       phetioInstanceDocumentation: 'Indicates whether the object is dragging.'
     } );
