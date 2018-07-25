@@ -19,6 +19,7 @@ define( function( require ) {
    * @param {Node} node - the node that the a11y behavior is being applied to
    * @param {Object} options - options to mutate within the function
    * @param {string} value - the value that you are setting the behavior of, like the accessibleName
+   * @returns {Object} - the options that have been mutated by the behavior function.
    */
   var A11yBehaviorFunctionDef = {
 
