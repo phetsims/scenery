@@ -135,9 +135,9 @@ define( function( require ) {
 
       var options = this.node.getBaseOptions();
 
-      // if( this.node.accessibleName){
-      //   options = this.node.accessibleNameBehavior( this.node, options, this.accessibleName );
-      // }
+      if ( this.node.accessibleName !== null ) {
+        options = this.node.accessibleNameBehavior( this.node, options, this.node.accessibleName );
+      }
 
       if ( this.node.helpText !== null ) {
         options = this.node.helpTextBehavior( this.node, options, this.node.helpText );
@@ -225,7 +225,7 @@ define( function( require ) {
       }
 
       // update all attributes for the peer, should cover aria-label, role, input value and others
-      this.onAttributeChange();
+      this.onAttributeChange( options );
 
       // Default the focus highlight in this special case to be invisible until selected.
       if ( this.node.focusHighlightLayerable ) {
@@ -348,12 +348,21 @@ define( function( require ) {
 
     /**
      * Set all accessible attributes onto the peer elements from the model's stored data objects
+     * @param {Object} [a11yOptions] - these can override the values of the node, see this.update()
      */
-    onAttributeChange: function() {
+    onAttributeChange: function( a11yOptions ) {
 
       for ( var i = 0; i < this.node.accessibleAttributes.length; i++ ) {
         var dataObject = this.node.accessibleAttributes[ i ];
-        this.setAttributeToElement( dataObject.attribute, dataObject.value, dataObject.options );
+        var attribute = dataObject.attribute;
+        var value = dataObject.value;
+
+        // allow overriding of aria-label for accessibleName setter
+        // TODO: this is a specific workaround, it would be nice to sort out a general case for this, #795
+        if ( attribute === 'aria-label' && a11yOptions && typeof a11yOptions.ariaLabel === 'string' && dataObject.options.elementName === PRIMARY_SIBLING ) {
+          value = a11yOptions.ariaLabel;
+        }
+        this.setAttributeToElement( attribute, value, dataObject.options );
       }
     },
 

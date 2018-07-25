@@ -394,10 +394,25 @@ define( function( require ) {
           // {string|null} - sets the "Accessible Name" of the Node, as defined by the Browser's Accessibility Tree
           this._accessibleName = null;
 
+          // {A11yBehaviorFunctionDef} - function that returns the options needed to set the appropriate accessible name for the Node
+          this._accessibleNameBehavior = function( node, options, accessibleName ) {
+            if ( node.tagName === 'input' ) {
+              options.labelTagName = 'label';
+              options.labelContent = accessibleName;
+            }
+            else if ( AccessibilityUtil.tagNameSupportsContent( node.tagName ) ) {
+              options.innerContent = accessibleName;
+            }
+            else {
+              options.ariaLabel = accessibleName;
+            }
+            return options;
+          };
+
           // {string|null} - sets the help text of the Node, this most often corresponds to description text.
           this._helpText = null;
 
-          // {function} - sets the help text of the Node, this most often corresponds to description text.
+          // {A11yBehaviorFunctionDef} - sets the help text of the Node, this most often corresponds to description text.
           // TODO: for efficiency maybe don't set this on all nodes always, https://github.com/phetsims/scenery/issues/795
           this._helpTextBehavior = function( node, options, helpText ) {
 
@@ -599,20 +614,6 @@ define( function( require ) {
          * Set the Node's accessible content in a way that will define the Accessible Name for the browser. Different
          * HTML components and code situations require different methods of setting the Accessible Name.
          *
-         * This method does the best it can to create a general method to set the Accessible Name for a variety of
-         * different Node types and configurations, but if a Node is more complicated, then this method will not
-         * properly set the Accessible Name for the Node's HTML content. In this situation this setter needs to be
-         * overridden by the subtype to meet its specific constraints. When doing this make sure that the Accessible
-         * Name is properly being set and conveyed to AT.
-         *
-         * NOTE: By Accessible Name (capitalized), we mean the proper title of the HTML element that will be set in
-         * the browser Accessibility Tree and then interpreted by AT. This is necessily different from scenery internal
-         * names of HTML elements like "label sibling" (even though, in certain circumstances, an Accessible Name could
-         * be set by using the "label sibling" with tag name "label" and a "for" attribute).
-         *
-         * For more information about setting an Accessible Name on HTML see the scenery docs for accessibility,
-         * and see https://developer.paciellogroup.com/blog/2017/04/what-is-an-accessible-name/
-         *
          * @param {string|null} accessibleName
          */
         setAccessibleName: function( accessibleName ) {
@@ -621,40 +622,10 @@ define( function( require ) {
           if ( this._accessibleName !== accessibleName ) {
             this._accessibleName = accessibleName;
 
-            this.setAccessibleNameImplementation( accessibleName );
-
+            this.onAccessibleContentChange();
           }
         },
         set accessibleName( accessibleName ) { this.setAccessibleName( accessibleName ); },
-
-        /**
-         * This function is to manage the public accessiblName setter and invalidateAccessibleContent wanting to do the
-         * same accessibleName setting work, but setAccessibleName wants to do a few more Client side error checks first
-         * that causes an infinite loop if called from invalidateAccessibleContent.
-         * @public (scenery-internal) - should only be called from setAccessibleName and invalidateAccessibleContent
-         * @param {string} accessibleName
-         */
-        setAccessibleNameImplementation: function( accessibleName ) {
-          assert && assert( accessibleName === null || typeof accessibleName === 'string' );
-
-          if ( this._tagName ) {
-
-            // input tag with a label tag that has a "for" attribute
-            if ( this._tagName === 'input' ) {
-              this.labelTagName = 'label';
-              this.labelContent = accessibleName;
-            }
-
-            // if you can put inner content on the element, then do so
-            else if ( AccessibilityUtil.tagNameSupportsContent( this._tagName ) ) {
-              this.innerContent = accessibleName;
-
-            }
-            else {
-              this.ariaLabel = accessibleName;
-            }
-          }
-        },
 
         /**
          * Get the tag name of the DOM element representing this node for accessibility.
@@ -666,6 +637,52 @@ define( function( require ) {
           return this._accessibleName;
         },
         get accessibleName() { return this.getAccessibleName(); },
+
+
+        /**
+         * accessibleNameBehavior is a function that will set the appropriate options on this node to get the desired
+         * "Accessible Name"
+         *
+         * This accessibleNameBehavior's default does the best it can to create a general method to set the Accessible
+         * Name for a variety of different Node types and configurations, but if a Node is more complicated, then this
+         * method will not properly set the Accessible Name for the Node's HTML content. In this situation this function
+         * needs to be overridden by the subtype to meet its specific constraints. When doing this make it is up to the
+         * usage site to make sure that the Accessible Name is properly being set and conveyed to AT, as it is very hard
+         * to validate this function.
+         *
+         * NOTE: By Accessible Name (capitalized), we mean the proper title of the HTML element that will be set in
+         * the browser Accessibility Tree and then interpreted by AT. This is necessily different from scenery internal
+         * names of HTML elements like "label sibling" (even though, in certain circumstances, an Accessible Name could
+         * be set by using the "label sibling" with tag name "label" and a "for" attribute).
+         *
+         * For more information about setting an Accessible Name on HTML see the scenery docs for accessibility,
+         * and see https://developer.paciellogroup.com/blog/2017/04/what-is-an-accessible-name/
+         *
+         *
+         * @param {A11yBehaviorFunctionDef|function} accessibleNameBehavior
+         */
+        setAccessibleNameBehavior: function( accessibleNameBehavior ) {
+          assert && A11yBehaviorFunctionDef.validateA11yBehaviorFunctionDef( accessibleNameBehavior );
+
+          if ( this._accessibleNameBehavior !== accessibleNameBehavior ) {
+
+            this._accessibleNameBehavior = accessibleNameBehavior;
+
+            this.onAccessibleContentChange();
+          }
+        },
+        set accessibleNameBehavior( accessibleNameBehavior ) { this.setAccessibleNameBehavior( accessibleNameBehavior ); },
+
+        /**
+         * Get the help text of the interactive element.
+         * @public
+         *
+         * @returns {function}
+         */
+        getAccessibleNameBehavior: function() {
+          return this._accessibleNameBehavior;
+        },
+        get accessibleNameBehavior() { return this.getAccessibleNameBehavior(); },
 
 
         /**
@@ -701,10 +718,9 @@ define( function( require ) {
          * helpTextBehavior is a function that will set the appropriate options on this node to get the desired
          * "Help Text"
          *
-         * @param {A11yBehaviorFunctionDef|function} helpTextBehavior - a function that takes
+         * @param {A11yBehaviorFunctionDef|function} helpTextBehavior
          */
         setHelpTextBehavior: function( helpTextBehavior ) {
-          assert && assert( typeof helpTextBehavior === 'function' );
           assert && A11yBehaviorFunctionDef.validateA11yBehaviorFunctionDef( helpTextBehavior );
 
           if ( this._helpTextBehavior !== helpTextBehavior ) {

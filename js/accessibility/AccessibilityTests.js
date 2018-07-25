@@ -1530,28 +1530,56 @@ define( function( require ) {
     // TODO: this should be passing,see https://github.com/phetsims/scenery/issues/811
 
     // test the behavior of focusable function
-    // var rootNode = new Node( { tagName: 'div' } );
-    // var display = new Display( rootNode ); // eslint-disable-line
-    // document.body.appendChild( display.domElement );
-    //
-    // var a = new Node( { tagName: 'div', accessibleName: TEST_LABEL } );
-    // rootNode.addChild( a );
-    //
-    // assert.ok( a.accessibleName === TEST_LABEL, 'accessibleName getter' );
-    //
-    // var aElement = getPrimarySiblingElementByNode( a );
-    // assert.ok( aElement.textContent === TEST_LABEL, 'accessibleName setter on div' );
+    var rootNode = new Node( { tagName: 'div' } );
+    var display = new Display( rootNode ); // eslint-disable-line
+    document.body.appendChild( display.domElement );
+
+    var a = new Node( { tagName: 'div', accessibleName: TEST_LABEL } );
+    rootNode.addChild( a );
+
+    assert.ok( a.accessibleName === TEST_LABEL, 'accessibleName getter' );
+
+    var aElement = getPrimarySiblingElementByNode( a );
+    assert.ok( aElement.textContent === TEST_LABEL, 'accessibleName setter on div' );
 
     // TODO: this should be passing,see https://github.com/phetsims/scenery/issues/811
 
-    // var b = new Node( { tagName: 'input', accessibleName: TEST_LABEL } );
-    // a.addChild( b );
-    // var bElement = getPrimarySiblingElementByNode( b );
-    //   var bParent = getPrimarySiblingElementByNode( b ).parentElement;
-    // var bLabelSibling = bParent.children[ DEFAULT_LABEL_SIBLING_INDEX ];
-    // assert.ok( bLabelSibling.textContent === TEST_LABEL, 'accessibleName sets label sibling' );
-    // assert.ok( bLabelSibling.getAttribute( 'for' ).indexOf( bElement.id ) >= 0, 'accessibleName sets label\'s "for" attribute' );
+    var b = new Node( { tagName: 'input', accessibleName: TEST_LABEL } );
+    a.addChild( b );
+    var bElement = getPrimarySiblingElementByNode( b );
+    var bParent = getPrimarySiblingElementByNode( b ).parentElement;
+    var bLabelSibling = bParent.children[ DEFAULT_LABEL_SIBLING_INDEX ];
+    assert.ok( bLabelSibling.textContent === TEST_LABEL, 'accessibleName sets label sibling' );
+    assert.ok( bLabelSibling.getAttribute( 'for' ).indexOf( bElement.id ) >= 0, 'accessibleName sets label\'s "for" attribute' );
 
+
+    var c = new Node( { containerTagName: 'div', tagName: 'div', ariaLabel: 'overrideThis' } );
+    rootNode.addChild( c );
+    var accessibleNameBehavior = function( node, options, accessibleName ) {
+
+      options.ariaLabel = accessibleName;
+      return options;
+    };
+    c.accessibleNameBehavior = accessibleNameBehavior;
+
+    assert.ok( c.accessibleNameBehavior === accessibleNameBehavior, 'getter works' );
+
+    var cLabelElement = getPrimarySiblingElementByNode( c ).parentElement.children[ DEFAULT_LABEL_SIBLING_INDEX ];
+    assert.ok( cLabelElement.getAttribute( 'aria-label' ) === 'overrideThis', 'accessibleNameBehavior should not work until there is accessible name' );
+    c.accessibleName = 'accessible name description';
+    cLabelElement = getPrimarySiblingElementByNode( c ).parentElement.children[ DEFAULT_LABEL_SIBLING_INDEX ];
+    assert.ok( cLabelElement.getAttribute( 'aria-label' ) === 'accessible name description', 'accessible name setter' );
+
+    c.accessibleName = '';
+
+    cLabelElement = getPrimarySiblingElementByNode( c ).parentElement.children[ DEFAULT_LABEL_SIBLING_INDEX ];
+    debugger;
+    assert.ok( cLabelElement.getAttribute( 'aria-label' ) === '', 'accessibleNameBehavior should work for empty string' );
+
+
+    c.accessibleName = null;
+    cLabelElement = getPrimarySiblingElementByNode( c ).parentElement.children[ DEFAULT_LABEL_SIBLING_INDEX ];
+    assert.ok( cLabelElement.getAttribute( 'aria-label' ) === 'overrideThis', 'accessibleNameBehavior should not work until there is accessible name' );
 
   } );
 
@@ -1604,10 +1632,10 @@ define( function( require ) {
     b.helpText = '';
 
     bDescriptionElement = getPrimarySiblingElementByNode( b ).parentElement.children[ DEFAULT_DESCRIPTION_SIBLING_INDEX ];
-    assert.ok( bDescriptionElement.textContent === '', 'helpTextBehavior should not work for empty string' );
+    assert.ok( bDescriptionElement.textContent === '', 'helpTextBehavior should work for empty string' );
 
 
-    b.helpText = null
+    b.helpText = null;
     bDescriptionElement = getPrimarySiblingElementByNode( b ).parentElement.children[ DEFAULT_DESCRIPTION_SIBLING_INDEX ];
     assert.ok( bDescriptionElement.textContent === 'overrideThis', 'helpTextBehavior should not work until there is help text' );
   } );

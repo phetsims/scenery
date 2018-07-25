@@ -27,7 +27,7 @@ define( function( require ) {
      * @param {function} behaviorFunction
      */
     validateA11yBehaviorFunctionDef: function( behaviorFunction ) {
-
+      assert && assert( typeof behaviorFunction === 'function' );
       assert && assert( behaviorFunction.length === 3, 'behavior function should take three args' );
       var options = behaviorFunction( new phet.scenery.Node(), {}, '' );
       assert && assert( typeof options === 'object', 'behavior function should return an object' );
