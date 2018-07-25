@@ -1573,7 +1573,6 @@ define( function( require ) {
     c.accessibleName = '';
 
     cLabelElement = getPrimarySiblingElementByNode( c ).parentElement.children[ DEFAULT_LABEL_SIBLING_INDEX ];
-    debugger;
     assert.ok( cLabelElement.getAttribute( 'aria-label' ) === '', 'accessibleNameBehavior should work for empty string' );
 
 
