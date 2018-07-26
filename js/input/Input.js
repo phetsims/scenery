@@ -71,8 +71,8 @@ define( function( require ) {
     var self = this;
 
     // unique to this input instance
-    this.onpointerdown = function onpointerdown( domEvent ) { self.batchEvent( domEvent, BatchedDOMEvent.POINTER_TYPE, self.pointerDown, false ); };
-    this.onpointerup = function onpointerup( domEvent ) { self.batchEvent( domEvent, BatchedDOMEvent.POINTER_TYPE, self.pointerUp, true ); };
+    this.onpointerdown = function onpointerdown( domEvent ) { self.batchEvent( domEvent, BatchedDOMEvent.POINTER_TYPE, self.pointerDown, false ); if ( domEvent.pointerType === 'mouse' ) { scenery.Display.userGestureEmitter.emit(); } };
+    this.onpointerup = function onpointerup( domEvent ) { self.batchEvent( domEvent, BatchedDOMEvent.POINTER_TYPE, self.pointerUp, true ); scenery.Display.userGestureEmitter.emit(); };
     this.onpointermove = function onpointermove( domEvent ) { self.batchEvent( domEvent, BatchedDOMEvent.POINTER_TYPE, self.pointerMove, false ); };
     this.onpointerover = function onpointerover( domEvent ) { self.batchEvent( domEvent, BatchedDOMEvent.POINTER_TYPE, self.pointerOver, false ); };
     this.onpointerout = function onpointerout( domEvent ) { self.batchEvent( domEvent, BatchedDOMEvent.POINTER_TYPE, self.pointerOut, false ); };
@@ -84,15 +84,15 @@ define( function( require ) {
     this.onMSPointerOut = function onMSPointerOut( domEvent ) { self.batchEvent( domEvent, BatchedDOMEvent.MS_POINTER_TYPE, self.pointerOut, false ); };
     this.onMSPointerCancel = function onMSPointerCancel( domEvent ) { self.batchEvent( domEvent, BatchedDOMEvent.MS_POINTER_TYPE, self.pointerCancel, false ); };
     this.ontouchstart = function ontouchstart( domEvent ) { self.batchEvent( domEvent, BatchedDOMEvent.TOUCH_TYPE, self.touchStart, false ); };
-    this.ontouchend = function ontouchend( domEvent ) { self.batchEvent( domEvent, BatchedDOMEvent.TOUCH_TYPE, self.touchEnd, true ); };
+    this.ontouchend = function ontouchend( domEvent ) { self.batchEvent( domEvent, BatchedDOMEvent.TOUCH_TYPE, self.touchEnd, true ); scenery.Display.userGestureEmitter.emit(); };
     this.ontouchmove = function ontouchmove( domEvent ) { self.batchEvent( domEvent, BatchedDOMEvent.TOUCH_TYPE, self.touchMove, false ); };
     this.ontouchcancel = function ontouchcancel( domEvent ) { self.batchEvent( domEvent, BatchedDOMEvent.TOUCH_TYPE, self.touchCancel, false ); };
-    this.onmousedown = function onmousedown( domEvent ) { self.batchEvent( domEvent, BatchedDOMEvent.MOUSE_TYPE, self.mouseDown, false ); };
-    this.onmouseup = function onmouseup( domEvent ) { self.batchEvent( domEvent, BatchedDOMEvent.MOUSE_TYPE, self.mouseUp, true ); };
+    this.onmousedown = function onmousedown( domEvent ) { self.batchEvent( domEvent, BatchedDOMEvent.MOUSE_TYPE, self.mouseDown, false ); scenery.Display.userGestureEmitter.emit(); };
+    this.onmouseup = function onmouseup( domEvent ) { self.batchEvent( domEvent, BatchedDOMEvent.MOUSE_TYPE, self.mouseUp, true ); scenery.Display.userGestureEmitter.emit(); };
     this.onmousemove = function onmousemove( domEvent ) { self.batchEvent( domEvent, BatchedDOMEvent.MOUSE_TYPE, self.mouseMove, false ); };
     this.onmouseover = function onmouseover( domEvent ) { self.batchEvent( domEvent, BatchedDOMEvent.MOUSE_TYPE, self.mouseOver, false ); };
     this.onmouseout = function onmouseout( domEvent ) { self.batchEvent( domEvent, BatchedDOMEvent.MOUSE_TYPE, self.mouseOut, false ); };
-    this.onkeydown = function onkeydown( domEvent ) { self.batchEvent( domEvent, BatchedDOMEvent.KEY_TYPE, self.keyDown, false ); };
+    this.onkeydown = function onkeydown( domEvent ) { self.batchEvent( domEvent, BatchedDOMEvent.KEY_TYPE, self.keyDown, false ); scenery.Display.userGestureEmitter.emit(); };
     this.onkeyup = function onkeyup( domEvent ) { self.batchEvent( domEvent, BatchedDOMEvent.KEY_TYPE, self.keyUp, false ); };
     this.onwheel = function onwheel( domEvent ) { self.batchEvent( domEvent, BatchedDOMEvent.WHEEL_TYPE, self.wheel, false ); };
     this.uselessListener = function uselessListener( domEvent ) {};
