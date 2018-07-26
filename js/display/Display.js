@@ -54,6 +54,7 @@ define( function( require ) {
   'use strict';
 
   var inherit = require( 'PHET_CORE/inherit' );
+  var Emitter = require( 'AXON/Emitter' );
   var extend = require( 'PHET_CORE/extend' );
   var Events = require( 'AXON/Events' );
   var Property = require( 'AXON/Property' );
@@ -1846,6 +1847,12 @@ define( function( require ) {
       }
     }
   };
+
+  // @public {Emitter} - Fires when we detect an input event that would be considered a "user gesture" by Chrome, so
+  // that we can trigger browser actions that are only allowed as a result.
+  // See https://github.com/phetsims/scenery/issues/802 and https://github.com/phetsims/vibe/issues/32 for more
+  // information.
+  Display.userGestureEmitter = new Emitter();
 
   return Display;
 } );
