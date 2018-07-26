@@ -21,10 +21,10 @@ define( function( require ) {
 
   /**
    * Constructor for AccessibleInstance, uses an initialize method for pooling.
-   * 
+   *
    * @param {AccessibleInstance|null} parent - parent of this instance, null if root of AccessibleInstance tree
    * @param {Display} display
-   * @param {Trail} trail - trail to the node for this AccessibleInstance 
+   * @param {Trail} trail - trail to the node for this AccessibleInstance
    * @constructor
    * @mixes Poolable
    */
@@ -38,7 +38,7 @@ define( function( require ) {
 
     /**
      * Initializes an AccessibleInstance, implements construction for pooling.
-     * 
+     *
      * @param {AccessibleInstance|null} parent - null if this AccessibleInstance is root of AccessibleInstance tree
      * @param {Display} display
      * @param {Trail} trail - trail to node for this AccessibleInstance
@@ -77,6 +77,8 @@ define( function( require ) {
 
         var self = this;
         document.body.addEventListener( 'keydown', function( event ) {
+
+          scenery.Display.userGestureEmitter.emit();
 
           // if an accessible node was being interacted with a mouse, or had focus when sim is made inactive, this node
           // should receive focus upon resuming keyboard navigation
@@ -142,7 +144,7 @@ define( function( require ) {
 
     /**
      * Add a subtree of AccessibleInstances to this AccessibleInstance.
-     * 
+     *
      * Consider the following example:
      *
      * We have a node structure:
@@ -268,7 +270,7 @@ define( function( require ) {
           scenery.Display.focus = null;
         }
       }
-      
+
       // Edge has a bug where removing the hidden attribute on an ancestor doesn't add elements back to the navigation
       // order. As a workaround, forcing the browser to redraw the PDOM seems to fix the issue. Forced redraw method
       // recommended by https://stackoverflow.com/questions/8840580/force-dom-redraw-refresh-on-chrome-mac, also see
@@ -284,7 +286,7 @@ define( function( require ) {
      * creating a comparison function between two accessible instances. The function walks along the trails
      * of the children, looking for specified accessible orders that would determine the ordering for the two
      * AccessibleInstances.
-     * 
+     *
      * @public (scenery-internal)
      */
     sortChildren: function() {
@@ -412,7 +414,7 @@ define( function( require ) {
 
     /**
      * Recursive disposal, to make eligible for garbage collection.
-     * 
+     *
      * @public (scenery-internal)
      */
     dispose: function() {
@@ -466,7 +468,7 @@ define( function( require ) {
 
     /**
      * For debugging purposes, inspect the tree of AccessibleInstances from the root.
-     * 
+     *
      * @public (scenery-internal)
      */
     auditRoot: function() {
