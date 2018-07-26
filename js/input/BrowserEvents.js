@@ -309,6 +309,9 @@ define( function( require ) {
      * @param {Event} domEvent
      */
     onpointerdown: function onpointerdown( domEvent ) {
+      if ( domEvent.pointerType === 'mouse' ) {
+        scenery.Display.userGestureEmitter.emit();
+      }
       // NOTE: Will be called without a proper 'this' reference. Do NOT rely on it here.
       BrowserEvents.batchWindowEvent( domEvent, BatchedDOMEvent.POINTER_TYPE, 'pointerDown', false );
     },
@@ -320,6 +323,7 @@ define( function( require ) {
      * @param {Event} domEvent
      */
     onpointerup: function onpointerup( domEvent ) {
+      scenery.Display.userGestureEmitter.emit();
       // NOTE: Will be called without a proper 'this' reference. Do NOT rely on it here.
       BrowserEvents.batchWindowEvent( domEvent, BatchedDOMEvent.POINTER_TYPE, 'pointerUp', true );
     },
@@ -452,6 +456,7 @@ define( function( require ) {
      * @param {Event} domEvent
      */
     ontouchend: function ontouchend( domEvent ) {
+      scenery.Display.userGestureEmitter.emit();
       // NOTE: Will be called without a proper 'this' reference. Do NOT rely on it here.
       BrowserEvents.batchWindowEvent( domEvent, BatchedDOMEvent.TOUCH_TYPE, 'touchEnd', true );
     },
@@ -485,6 +490,7 @@ define( function( require ) {
      * @param {Event} domEvent
      */
     onmousedown: function onmousedown( domEvent ) {
+      scenery.Display.userGestureEmitter.emit();
       // NOTE: Will be called without a proper 'this' reference. Do NOT rely on it here.
       BrowserEvents.batchWindowEvent( domEvent, BatchedDOMEvent.MOUSE_TYPE, 'mouseDown', false );
     },
@@ -496,6 +502,7 @@ define( function( require ) {
      * @param {Event} domEvent
      */
     onmouseup: function onmouseup( domEvent ) {
+      scenery.Display.userGestureEmitter.emit();
       // NOTE: Will be called without a proper 'this' reference. Do NOT rely on it here.
       BrowserEvents.batchWindowEvent( domEvent, BatchedDOMEvent.MOUSE_TYPE, 'mouseUp', true );
     },
