@@ -12,6 +12,7 @@ define( function( require ) {
   var arrayRemove = require( 'PHET_CORE/arrayRemove' );
   var BatchedDOMEvent = require( 'SCENERY/input/BatchedDOMEvent' );
   var Features = require( 'SCENERY/util/Features' );
+  var platform = require( 'PHET_CORE/platform' );
   var scenery = require( 'SCENERY/scenery' );
 
   // Sometimes we need to add a listener that does absolutely nothing
@@ -125,8 +126,10 @@ define( function( require ) {
     /**
      * {boolean} - Whether pointer events in the format specified by the W3C specification are allowed.
      * @private
+     *
+     * NOTE: Pointer events are currently disabled for Firefox due to https://github.com/phetsims/scenery/issues/837.
      */
-    canUsePointerEvents: !!( ( window.navigator && window.navigator.pointerEnabled ) || window.PointerEvent ),
+    canUsePointerEvents: !!( ( window.navigator && window.navigator.pointerEnabled ) || window.PointerEvent ) && !platform.firefox,
 
     /**
      * {boolean} - Whether pointer events in the format specified by the MS specification are allowed.
