@@ -92,8 +92,8 @@ define( function( require ) {
     var input = this;
 
     // unique to this input instance
-    this.onpointerdown = function onpointerdown( domEvent ) { input.batchEvent( domEvent, BatchedDOMEvent.POINTER_TYPE, input.pointerDown, false ); };
-    this.onpointerup = function onpointerup( domEvent ) { input.batchEvent( domEvent, BatchedDOMEvent.POINTER_TYPE, input.pointerUp, true ); };
+    this.onpointerdown = function onpointerdown( domEvent ) { input.batchEvent( domEvent, BatchedDOMEvent.POINTER_TYPE, input.pointerDown, false ); scenery.Display.userGestureEmitter.emit(); };
+    this.onpointerup = function onpointerup( domEvent ) { input.batchEvent( domEvent, BatchedDOMEvent.POINTER_TYPE, input.pointerUp, true ); scenery.Display.userGestureEmitter.emit(); };
     this.onpointermove = function onpointermove( domEvent ) { input.batchEvent( domEvent, BatchedDOMEvent.POINTER_TYPE, input.pointerMove, false ); };
     this.onpointerover = function onpointerover( domEvent ) { input.batchEvent( domEvent, BatchedDOMEvent.POINTER_TYPE, input.pointerOver, false ); };
     this.onpointerout = function onpointerout( domEvent ) { input.batchEvent( domEvent, BatchedDOMEvent.POINTER_TYPE, input.pointerOut, false ); };
@@ -105,15 +105,15 @@ define( function( require ) {
     this.onMSPointerOut = function onMSPointerOut( domEvent ) { input.batchEvent( domEvent, BatchedDOMEvent.MS_POINTER_TYPE, input.pointerOut, false ); };
     this.onMSPointerCancel = function onMSPointerCancel( domEvent ) { input.batchEvent( domEvent, BatchedDOMEvent.MS_POINTER_TYPE, input.pointerCancel, false ); };
     this.ontouchstart = function ontouchstart( domEvent ) { input.batchEvent( domEvent, BatchedDOMEvent.TOUCH_TYPE, input.touchStart, false ); };
-    this.ontouchend = function ontouchend( domEvent ) { input.batchEvent( domEvent, BatchedDOMEvent.TOUCH_TYPE, input.touchEnd, true ); };
+    this.ontouchend = function ontouchend( domEvent ) { input.batchEvent( domEvent, BatchedDOMEvent.TOUCH_TYPE, input.touchEnd, true ); scenery.Display.userGestureEmitter.emit(); };
     this.ontouchmove = function ontouchmove( domEvent ) { input.batchEvent( domEvent, BatchedDOMEvent.TOUCH_TYPE, input.touchMove, false ); };
     this.ontouchcancel = function ontouchcancel( domEvent ) { input.batchEvent( domEvent, BatchedDOMEvent.TOUCH_TYPE, input.touchCancel, false ); };
-    this.onmousedown = function onmousedown( domEvent ) { input.batchEvent( domEvent, BatchedDOMEvent.MOUSE_TYPE, input.mouseDown, false ); };
-    this.onmouseup = function onmouseup( domEvent ) { input.batchEvent( domEvent, BatchedDOMEvent.MOUSE_TYPE, input.mouseUp, true ); };
+    this.onmousedown = function onmousedown( domEvent ) { input.batchEvent( domEvent, BatchedDOMEvent.MOUSE_TYPE, input.mouseDown, false ); scenery.Display.userGestureEmitter.emit(); };
+    this.onmouseup = function onmouseup( domEvent ) { input.batchEvent( domEvent, BatchedDOMEvent.MOUSE_TYPE, input.mouseUp, true ); scenery.Display.userGestureEmitter.emit(); };
     this.onmousemove = function onmousemove( domEvent ) { input.batchEvent( domEvent, BatchedDOMEvent.MOUSE_TYPE, input.mouseMove, false ); };
     this.onmouseover = function onmouseover( domEvent ) { input.batchEvent( domEvent, BatchedDOMEvent.MOUSE_TYPE, input.mouseOver, false ); };
     this.onmouseout = function onmouseout( domEvent ) { input.batchEvent( domEvent, BatchedDOMEvent.MOUSE_TYPE, input.mouseOut, false ); };
-    this.onkeydown = function onkeydown( domEvent ) { input.batchEvent( domEvent, BatchedDOMEvent.KEY_TYPE, input.keyDown, false ); };
+    this.onkeydown = function onkeydown( domEvent ) { input.batchEvent( domEvent, BatchedDOMEvent.KEY_TYPE, input.keyDown, false ); scenery.Display.userGestureEmitter.emit(); };
     this.onkeyup = function onkeyup( domEvent ) { input.batchEvent( domEvent, BatchedDOMEvent.KEY_TYPE, input.keyUp, false ); };
     this.onwheel = function onwheel( domEvent ) { input.batchEvent( domEvent, BatchedDOMEvent.WHEEL_TYPE, input.wheel, false ); };
     this.uselessListener = function uselessListener( domEvent ) {};
