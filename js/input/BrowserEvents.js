@@ -312,6 +312,10 @@ define( function( require ) {
       sceneryLog && sceneryLog.OnInput && sceneryLog.OnInput( 'pointerdown' );
       sceneryLog && sceneryLog.OnInput && sceneryLog.push();
 
+      if ( domEvent.pointerType === 'mouse' ) {
+        scenery.Display.userGestureEmitter.emit();
+      }
+
       // NOTE: Will be called without a proper 'this' reference. Do NOT rely on it here.
       BrowserEvents.batchWindowEvent( domEvent, BatchedDOMEvent.POINTER_TYPE, 'pointerDown', false );
 
@@ -327,6 +331,8 @@ define( function( require ) {
     onpointerup: function onpointerup( domEvent ) {
       sceneryLog && sceneryLog.OnInput && sceneryLog.OnInput( 'pointerup' );
       sceneryLog && sceneryLog.OnInput && sceneryLog.push();
+
+      scenery.Display.userGestureEmitter.emit();
 
       // NOTE: Will be called without a proper 'this' reference. Do NOT rely on it here.
       BrowserEvents.batchWindowEvent( domEvent, BatchedDOMEvent.POINTER_TYPE, 'pointerUp', true );
@@ -520,6 +526,8 @@ define( function( require ) {
       sceneryLog && sceneryLog.OnInput && sceneryLog.OnInput( 'touchend' );
       sceneryLog && sceneryLog.OnInput && sceneryLog.push();
 
+      scenery.Display.userGestureEmitter.emit();
+
       // NOTE: Will be called without a proper 'this' reference. Do NOT rely on it here.
       BrowserEvents.batchWindowEvent( domEvent, BatchedDOMEvent.TOUCH_TYPE, 'touchEnd', true );
 
@@ -568,6 +576,8 @@ define( function( require ) {
       sceneryLog && sceneryLog.OnInput && sceneryLog.OnInput( 'mousedown' );
       sceneryLog && sceneryLog.OnInput && sceneryLog.push();
 
+      scenery.Display.userGestureEmitter.emit();
+
       // NOTE: Will be called without a proper 'this' reference. Do NOT rely on it here.
       BrowserEvents.batchWindowEvent( domEvent, BatchedDOMEvent.MOUSE_TYPE, 'mouseDown', false );
 
@@ -583,6 +593,8 @@ define( function( require ) {
     onmouseup: function onmouseup( domEvent ) {
       sceneryLog && sceneryLog.OnInput && sceneryLog.OnInput( 'mouseup' );
       sceneryLog && sceneryLog.OnInput && sceneryLog.push();
+
+      scenery.Display.userGestureEmitter.emit();
 
       // NOTE: Will be called without a proper 'this' reference. Do NOT rely on it here.
       BrowserEvents.batchWindowEvent( domEvent, BatchedDOMEvent.MOUSE_TYPE, 'mouseUp', true );
