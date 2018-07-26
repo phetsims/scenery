@@ -92,7 +92,7 @@ define( function( require ) {
     var input = this;
 
     // unique to this input instance
-    this.onpointerdown = function onpointerdown( domEvent ) { input.batchEvent( domEvent, BatchedDOMEvent.POINTER_TYPE, input.pointerDown, false ); scenery.Display.userGestureEmitter.emit(); };
+    this.onpointerdown = function onpointerdown( domEvent ) { input.batchEvent( domEvent, BatchedDOMEvent.POINTER_TYPE, input.pointerDown, false ); if ( domEvent.pointerType === 'mouse' ) { scenery.Display.userGestureEmitter.emit(); } };
     this.onpointerup = function onpointerup( domEvent ) { input.batchEvent( domEvent, BatchedDOMEvent.POINTER_TYPE, input.pointerUp, true ); scenery.Display.userGestureEmitter.emit(); };
     this.onpointermove = function onpointermove( domEvent ) { input.batchEvent( domEvent, BatchedDOMEvent.POINTER_TYPE, input.pointerMove, false ); };
     this.onpointerover = function onpointerover( domEvent ) { input.batchEvent( domEvent, BatchedDOMEvent.POINTER_TYPE, input.pointerOver, false ); };
