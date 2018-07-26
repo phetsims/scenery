@@ -78,7 +78,7 @@ define( function( require ) {
 
       // Maps node ID => count of how many listeners we WOULD have attached to it. We only attach at most one listener
       // to each node. We need to listen to all ancestors up to our filter root, so that we can pick up opacity changes.
-      this.opacityListenerCountMap = this.opacityListenerCountMap || {};
+      this.filterListenerCountMap = this.filterListenerCountMap || {};
 
       // reset any fit transforms that were applied
       Util.prepareForTransform( this.canvas, this.forceAcceleration ); // Apply CSS needed for future CSS transforms to work properly.
@@ -96,7 +96,6 @@ define( function( require ) {
       this.clipDirtyListener = this.markDirty.bind( this );
       this.opacityDirtyListener = this.markDirty.bind( this );
       this.filterRootNode = this.filterRootInstance.node;
-      this.filterRootNode.onStatic( 'clip', this.clipDirtyListener );
 
       sceneryLog && sceneryLog.CanvasBlock && sceneryLog.CanvasBlock( 'initialized #' + this.id );
       // TODO: dirty list of nodes (each should go dirty only once, easier than scanning all?)
@@ -333,7 +332,6 @@ define( function( require ) {
     dispose: function() {
       sceneryLog && sceneryLog.CanvasBlock && sceneryLog.CanvasBlock( 'dispose #' + this.id );
 
-      this.filterRootNode.offStatic( 'clip', this.clipDirtyListener );
       this.filterRootNode = null;
 
       // clear references
@@ -372,13 +370,14 @@ define( function( require ) {
         var node = instance.node;
 
         // Only add the listener if we don't already have one
-        if ( this.opacityListenerCountMap[ node.id ] ) {
-          this.opacityListenerCountMap[ node.id ]++;
+        if ( this.filterListenerCountMap[ node.id ] ) {
+          this.filterListenerCountMap[ node.id ]++;
         }
         else {
-          this.opacityListenerCountMap[ node.id ] = 1;
+          this.filterListenerCountMap[ node.id ] = 1;
 
           node.onStatic( 'opacity', this.opacityDirtyListener );
+          node.onStatic( 'clip', this.clipDirtyListener );
         }
       }
     },
@@ -389,10 +388,12 @@ define( function( require ) {
       // Remove opacity listeners (from this node up to the filter root)
       for ( var instance = drawable.instance; instance && instance !== this.filterRootInstance; instance = instance.parent ) {
         var node = instance.node;
-        assert && assert( this.opacityListenerCountMap[ node.id ] > 0 );
-        this.opacityListenerCountMap[ node.id ]--;
-        if ( this.opacityListenerCountMap[ node.id ] === 0 ) {
-          delete this.opacityListenerCountMap[ node.id ];
+        assert && assert( this.filterListenerCountMap[ node.id ] > 0 );
+        this.filterListenerCountMap[ node.id ]--;
+        if ( this.filterListenerCountMap[ node.id ] === 0 ) {
+          delete this.filterListenerCountMap[ node.id ];
+
+          node.offStatic( 'clip', this.clipDirtyListener );
           node.offStatic( 'opacity', this.opacityDirtyListener );
         }
       }
