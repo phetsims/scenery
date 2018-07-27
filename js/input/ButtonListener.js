@@ -95,12 +95,12 @@ define( function( require ) {
         if ( this._buttonOptions[ state ] ) {
 
           // Record this event to the phet-io event stream, including all downstream events as nested children
-          this.startEvent( 'user', state );
+          this.phetioStartEvent( 'user', state );
 
           // Then invoke the callback
           this._buttonOptions[ state ]( event, oldState );
 
-          this.endEvent();
+          this.phetioEndEvent();
         }
 
         if ( this._buttonOptions.fire &&
@@ -108,12 +108,12 @@ define( function( require ) {
              ( this._buttonOptions.fireOnDown ? ( state === 'down' ) : ( oldState === 'down' ) ) ) {
 
           // Record this event to the phet-io event stream, including all downstream events as nested children
-          this.startEvent( 'user', 'fire' );
+          this.phetioStartEvent( 'user', 'fire' );
 
           // Then fire the event
           this._buttonOptions.fire( event );
 
-          this.endEvent();
+          this.phetioEndEvent();
         }
       }
     },

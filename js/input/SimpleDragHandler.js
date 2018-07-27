@@ -172,7 +172,7 @@ define( function( require ) {
 
         var delta = self.transform.inverseDelta2( globalDelta );
 
-        self.startEvent( 'user', 'dragged', {
+        self.phetioStartEvent( 'user', 'dragged', {
           x: event.pointer.point.x,
           y: event.pointer.point.y
         }, HIGH_FREQUENCY_OPTIONS );
@@ -198,7 +198,7 @@ define( function( require ) {
           self.options.drag.call( null, event, self.trail ); // new position (old position?) delta
           event.currentTarget = saveCurrentTarget; // be polite to other listeners, restore currentTarget
         }
-        self.endEvent();
+        self.phetioEndEvent();
 
         sceneryLog && sceneryLog.InputListener && sceneryLog.pop();
       }
@@ -240,14 +240,14 @@ define( function( require ) {
       // event.domEvent may not exist if this is touch-to-snag
       this.mouseButton = event.pointer instanceof Mouse ? event.domEvent.button : undefined;
 
-      this.startEvent( 'user', 'dragStarted', {
+      this.phetioStartEvent( 'user', 'dragStarted', {
         x: event.pointer.point.x,
         y: event.pointer.point.y
       } );
       if ( this.options.start ) {
         this.options.start.call( null, event, this.trail );
       }
-      this.endEvent();
+      this.phetioEndEvent();
 
       sceneryLog && sceneryLog.InputListener && sceneryLog.pop();
     },
@@ -264,7 +264,7 @@ define( function( require ) {
 
       this.isDraggingProperty.set( false );
 
-      this.startEvent( 'user', 'dragEnded' );
+      this.phetioStartEvent( 'user', 'dragEnded' );
 
       if ( this.options.end ) {
 
@@ -272,7 +272,7 @@ define( function( require ) {
         this.options.end.call( null, event, this.trail );
       }
 
-      this.endEvent();
+      this.phetioEndEvent();
 
       // release our reference
       this.pointer = null;

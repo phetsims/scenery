@@ -409,7 +409,7 @@ define( function( require ) {
 
       sceneryLog && sceneryLog.InputListener && sceneryLog.InputListener( 'PressListener#' + this._id + ' successful press' );
       sceneryLog && sceneryLog.InputListener && sceneryLog.push();
-      this.startEvent( 'user', 'pressed', {
+      this.phetioStartEvent( 'user', 'pressed', {
         x: event.pointer.point.x,
         y: event.pointer.point.y
       } );
@@ -432,7 +432,7 @@ define( function( require ) {
       // Notify after everything else is set up
       this._pressListener && this._pressListener( event, this );
 
-      this.endEvent();
+      this.phetioEndEvent();
       sceneryLog && sceneryLog.InputListener && sceneryLog.pop();
 
       return true;
@@ -450,7 +450,7 @@ define( function( require ) {
     release: function() {
       sceneryLog && sceneryLog.InputListener && sceneryLog.InputListener( 'PressListener#' + this._id + ' release' );
       sceneryLog && sceneryLog.InputListener && sceneryLog.push();
-      this.startEvent( 'user', 'released' );
+      this.phetioStartEvent( 'user', 'released' );
 
       assert && assert( this.isPressed, 'This listener is not pressed' );
 
@@ -468,7 +468,7 @@ define( function( require ) {
       // Notify after the rest of release is called in order to prevent it from triggering interrupt().
       this._releaseListener && this._releaseListener( this );
 
-      this.endEvent();
+      this.phetioEndEvent();
       sceneryLog && sceneryLog.InputListener && sceneryLog.pop();
     },
 

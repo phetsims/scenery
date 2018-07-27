@@ -272,7 +272,7 @@ define( function( require ) {
       sceneryLog && sceneryLog.InputListener && sceneryLog.InputListener( 'DragListener drag' );
       sceneryLog && sceneryLog.InputListener && sceneryLog.push();
 
-      this.startEvent( 'user', 'drag', {
+      this.phetioStartEvent( 'user', 'drag', {
         x: event.pointer.point.x,
         y: event.pointer.point.y
       } );
@@ -284,7 +284,7 @@ define( function( require ) {
 
       PressListener.prototype.drag.call( this, event );
 
-      this.endEvent();
+      this.phetioEndEvent();
 
       sceneryLog && sceneryLog.InputListener && sceneryLog.pop();
     },
