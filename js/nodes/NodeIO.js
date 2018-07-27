@@ -52,7 +52,7 @@ define( function( require ) {
 
       tandem: node.tandem.createTandem( 'pickableProperty' ),
       phetioType: PropertyIO( NullableIO( BooleanIO ) ),
-      phetioInstanceDocumentation: 'Set whether the node will be pickable (and hence interactive), see the NodeIO documentation for more details.'
+      phetioInstanceDocumentation: 'Set whether the node will be pickable (and hence interactive), see the NodeIO documentation for more details'
     } );
 
     // Adapter for the opacity.  Cannot use NodeProperty at the moment because it doesn't handle numeric types
@@ -65,7 +65,7 @@ define( function( require ) {
 
       tandem: node.tandem.createTandem( 'opacityProperty' ),
       range: { min: 0, max: 1 },
-      phetioInstanceDocumentation: 'Opacity of the parent NodeIO, between 0 (invisible) and 1 (fully visible).'
+      phetioInstanceDocumentation: 'Opacity of the parent NodeIO, between 0 (invisible) and 1 (fully visible)'
     } );
     opacityProperty.link( function( opacity ) { node.opacity = opacity; } );
     node.on( 'opacity', function() { opacityProperty.value = node.opacity; } );

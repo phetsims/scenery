@@ -68,7 +68,7 @@ define( function( require ) {
       phetioReadOnly: true,
       phetioState: false,
       tandem: options.tandem.createTandem( 'isDraggingProperty' ),
-      phetioInstanceDocumentation: 'Indicates whether the object is dragging.'
+      phetioInstanceDocumentation: 'Indicates whether the object is dragging'
     } );
 
     this.pointer = null;              // the pointer doing the current dragging
