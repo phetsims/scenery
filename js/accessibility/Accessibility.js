@@ -419,6 +419,7 @@ define( function( require ) {
             //TODO: assertions for if using lower api too? https://github.com/phetsims/scenery/issues/795
             options.descriptionTagName = AccessibilityUtil.DEFAULT_DESCRIPTION_TAG_NAME;
             options.descriptionContent = helpText;
+            options.appendDescription = true;
             return options;
           };
         },

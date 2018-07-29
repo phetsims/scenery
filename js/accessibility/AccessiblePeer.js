@@ -182,7 +182,7 @@ define( function( require ) {
       this._descriptionSibling = descriptionSibling;
       this._containerParent = containerParent;
 
-      this.orderElements();
+      this.orderElements( options );
 
       // @private {function} - Referenced for disposal
       this.focusEventListener = this.focusEventListener || this.onFocus.bind( this );
@@ -244,9 +244,10 @@ define( function( require ) {
     /**
      * Handle the internal ordering of the elements in the peer, this involves setting the proper value of
      * this.topLevelElements
+     * @param {Object} options - the computed mixin options to be applied to the peer.
      * @private
      */
-    orderElements: function() {
+    orderElements: function( options ) {
 
       var truthySiblings = [ this._labelSibling, this._descriptionSibling, this._primarySibling ].filter( function( i ) { return i; } );
 
@@ -265,8 +266,8 @@ define( function( require ) {
       }
 
       // insert the label and description elements in the correct location if they exist
-      this._labelSibling && this.arrangeContentElement( this._labelSibling, this.node.appendLabel );
-      this._descriptionSibling && this.arrangeContentElement( this._descriptionSibling, this.node.appendDescription );
+      this._labelSibling && this.arrangeContentElement( this._labelSibling, options.appendLabel );
+      this._descriptionSibling && this.arrangeContentElement( this._descriptionSibling, options.appendDescription );
 
     },
 
