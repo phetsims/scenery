@@ -15,6 +15,7 @@ define( function( require ) {
   var inheritance = require( 'PHET_CORE/inheritance' );
   var LineStyles = require( 'KITE/util/LineStyles' );
   var Node = require( 'SCENERY/nodes/Node' );
+  var PaintDef = require( 'SCENERY/util/PaintDef' );
   var platform = require( 'PHET_CORE/platform' );
   var Property = require( 'AXON/Property' );
   var Renderer = require( 'SCENERY/display/Renderer' );
@@ -116,15 +117,7 @@ define( function( require ) {
          * @returns {Paintable} - Returns 'this' reference, for chaining
          */
         setFill: function( fill ) {
-          assert && assert( fill === null ||
-                            typeof fill === 'string' ||
-                            fill instanceof Color ||
-                            fill.isPaint ||
-                            ( ( fill instanceof Property ) && (
-                              typeof fill.value === 'string' ||
-                              fill.value instanceof Color
-                            ) ),
-            'Invalid fill type' );
+          assert && assert( PaintDef.isPaintDef( fill ), 'Invalid fill type' );
 
           if ( assert && typeof fill === 'string' ) {
             Color.checkPaintString( fill );
@@ -198,15 +191,7 @@ define( function( require ) {
          * @returns {Paintable} - Returns 'this' reference, for chaining
          */
         setStroke: function( stroke ) {
-          assert && assert( stroke === null ||
-                            typeof stroke === 'string' ||
-                            stroke instanceof Color ||
-                            stroke.isPaint ||
-                            ( ( stroke instanceof Property ) && (
-                              typeof stroke.value === 'string' ||
-                              stroke.value instanceof Color
-                            ) ),
-            'Invalid stroke type' );
+          assert && assert( PaintDef.isPaintDef( stroke ), 'Invalid stroke type' );
 
           if ( assert && typeof stroke === 'string' ) {
             Color.checkPaintString( stroke );
