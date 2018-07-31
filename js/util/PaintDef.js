@@ -27,7 +27,11 @@ define( function( require ) {
              typeof paint === 'string' ||
              paint instanceof Color ||
              paint instanceof Paint ||
-             ( paint instanceof Property && ( typeof paint.value === 'string' || paint.value instanceof Color ) );
+             ( paint instanceof Property && (
+               paint.value === null ||
+               typeof paint.value === 'string' ||
+               paint.value instanceof Color
+             ) );
     },
 
     /**
