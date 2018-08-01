@@ -558,9 +558,11 @@ define( function( require ) {
         this.pointer.removeInputListener( this._pointerListener );
       }
 
-      this.isPressedProperty.unlink( this._isHighlightedListener );
-      this.isHoveringProperty.unlink( this._isHighlightedListener );
-      this.isPressedProperty.unlink( this._isHoveringListener );
+      if ( !this.isPressedProperty.isDisposed ) {
+        this.isPressedProperty.unlink( this._isHighlightedListener );
+        this.isPressedProperty.unlink( this._isHoveringListener );
+      }
+      !this.isHoveringProperty.isDisposed && this.isHoveringProperty.unlink( this._isHighlightedListener );
 
       PhetioObject.prototype.dispose.call( this );
 
