@@ -558,6 +558,7 @@ define( function( require ) {
         this.pointer.removeInputListener( this._pointerListener );
       }
 
+      // These Properties could have already been disposed, for example in the sun button hierarchy, see https://github.com/phetsims/sun/issues/372
       if ( !this.isPressedProperty.isDisposed ) {
         this.isPressedProperty.unlink( this._isHighlightedListener );
         this.isPressedProperty.unlink( this._isHoveringListener );
