@@ -109,7 +109,10 @@ define( function( require ) {
       phetioType: PressListenerIO,
 
       // {boolean}
-      phetioState: false
+      phetioState: false,
+
+      // {string}
+      phetioEventType: 'user'
     }, options );
 
     PhetioObject.call( this, options );
@@ -409,7 +412,7 @@ define( function( require ) {
 
       sceneryLog && sceneryLog.InputListener && sceneryLog.InputListener( 'PressListener#' + this._id + ' successful press' );
       sceneryLog && sceneryLog.InputListener && sceneryLog.push();
-      this.phetioStartEvent( 'user', 'pressed', {
+      this.phetioStartEvent( 'pressed', {
         x: event.pointer.point.x,
         y: event.pointer.point.y
       } );
@@ -450,7 +453,7 @@ define( function( require ) {
     release: function() {
       sceneryLog && sceneryLog.InputListener && sceneryLog.InputListener( 'PressListener#' + this._id + ' release' );
       sceneryLog && sceneryLog.InputListener && sceneryLog.push();
-      this.phetioStartEvent( 'user', 'released' );
+      this.phetioStartEvent( 'released' );
 
       assert && assert( this.isPressed, 'This listener is not pressed' );
 

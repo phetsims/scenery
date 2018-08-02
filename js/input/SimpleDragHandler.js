@@ -58,7 +58,8 @@ define( function( require ) {
       // phetio
       tandem: Tandem.required,
       phetioType: SimpleDragHandlerIO,
-      phetioState: false
+      phetioState: false,
+      phetioEventType: 'user'
 
     }, options );
     this.options = options; // @private
@@ -172,7 +173,7 @@ define( function( require ) {
 
         var delta = self.transform.inverseDelta2( globalDelta );
 
-        self.phetioStartEvent( 'user', 'dragged', {
+        self.phetioStartEvent( 'dragged', {
           x: event.pointer.point.x,
           y: event.pointer.point.y
         }, HIGH_FREQUENCY_OPTIONS );
@@ -240,7 +241,7 @@ define( function( require ) {
       // event.domEvent may not exist if this is touch-to-snag
       this.mouseButton = event.pointer instanceof Mouse ? event.domEvent.button : undefined;
 
-      this.phetioStartEvent( 'user', 'dragStarted', {
+      this.phetioStartEvent( 'dragStarted', {
         x: event.pointer.point.x,
         y: event.pointer.point.y
       } );
@@ -264,7 +265,7 @@ define( function( require ) {
 
       this.isDraggingProperty.set( false );
 
-      this.phetioStartEvent( 'user', 'dragEnded' );
+      this.phetioStartEvent( 'dragEnded' );
 
       if ( this.options.end ) {
 

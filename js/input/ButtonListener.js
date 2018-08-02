@@ -45,7 +45,8 @@ define( function( require ) {
       // When running in PhET-iO brand, the tandem must be supplied
       tandem: Tandem.optional,
       phetioType: ButtonListenerIO,
-      phetioState: false
+      phetioState: false,
+      phetioEventType: 'user'
     }, options );
 
     this.buttonState = 'up'; // public: 'up', 'over', 'down' or 'out'
@@ -95,7 +96,7 @@ define( function( require ) {
         if ( this._buttonOptions[ state ] ) {
 
           // Record this event to the phet-io event stream, including all downstream events as nested children
-          this.phetioStartEvent( 'user', state );
+          this.phetioStartEvent( state );
 
           // Then invoke the callback
           this._buttonOptions[ state ]( event, oldState );
@@ -108,7 +109,7 @@ define( function( require ) {
              ( this._buttonOptions.fireOnDown ? ( state === 'down' ) : ( oldState === 'down' ) ) ) {
 
           // Record this event to the phet-io event stream, including all downstream events as nested children
-          this.phetioStartEvent( 'user', 'fire' );
+          this.phetioStartEvent( 'fire' );
 
           // Then fire the event
           this._buttonOptions.fire( event );

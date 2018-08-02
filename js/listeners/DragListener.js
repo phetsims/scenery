@@ -117,7 +117,8 @@ define( function( require ) {
       tandem: Tandem.required,
 
       // {DragListenerIO} - PhET-iO type
-      phetioType: DragListenerIO
+      phetioType: DragListenerIO,
+      phetioEventType: 'user'
     }, options );
 
     // Initialize with the alias isUserControlledProperty => isPressedProperty
@@ -272,7 +273,7 @@ define( function( require ) {
       sceneryLog && sceneryLog.InputListener && sceneryLog.InputListener( 'DragListener drag' );
       sceneryLog && sceneryLog.InputListener && sceneryLog.push();
 
-      this.phetioStartEvent( 'user', 'drag', {
+      this.phetioStartEvent( 'drag', {
         x: event.pointer.point.x,
         y: event.pointer.point.y
       } );
