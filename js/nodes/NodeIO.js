@@ -41,7 +41,7 @@ define( function( require ) {
       phetioType: PropertyIO( BooleanIO ),
 
       tandem: node.tandem.createTandem( 'visibleProperty' ),
-      phetioInstanceDocumentation: 'Property that controls whether the Node will be visible (and interactive), see the NodeIO documentation for more details.'
+      phetioInstanceDocumentation: 'Controls whether the Node will be visible (and interactive), see the NodeIO documentation for more details.'
     } );
 
     var pickableProperty = new NodeProperty( node, 'pickability', 'pickable', {
@@ -52,7 +52,7 @@ define( function( require ) {
 
       tandem: node.tandem.createTandem( 'pickableProperty' ),
       phetioType: PropertyIO( NullableIO( BooleanIO ) ),
-      phetioInstanceDocumentation: 'Set whether the node will be pickable (and hence interactive), see the NodeIO documentation for more details'
+      phetioInstanceDocumentation: 'Sets whether the node will be pickable (and hence interactive), see the NodeIO documentation for more details'
     } );
 
     // Adapter for the opacity.  Cannot use NodeProperty at the moment because it doesn't handle numeric types
