@@ -154,7 +154,7 @@ define( function( require ) {
       if ( platform.safari ) {
         if ( KeyboardUtil.isArrowKey( event.keyCode ) ) {
           if ( self.keyInListDown( [ KeyboardUtil.KEY_RIGHT_ARROW, KeyboardUtil.KEY_LEFT_ARROW, KeyboardUtil.KEY_UP_ARROW, KeyboardUtil.KEY_DOWN_ARROW ] ) ) {
-            self.reset();
+            self.interrupt();
             return;
           }
         }
