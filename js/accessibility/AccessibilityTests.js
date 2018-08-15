@@ -36,6 +36,7 @@ define( function( require ) {
   // parent's array of children HTMLElements.
   var DEFAULT_LABEL_SIBLING_INDEX = 0;
   var DEFAULT_DESCRIPTION_SIBLING_INDEX = 1;
+  var APPENDED_DESCRIPTION_SIBLING_INDEX = 2;
 
   // a focus highlight for testing, since dummy nodes tend to have no bounds
   var TEST_HIGHLIGHT = new Circle( 5 );
@@ -1604,7 +1605,8 @@ define( function( require ) {
     rootNode.addChild( new Node( { tagName: 'input' } ) );
     assert.ok( a.helpText === TEST_DESCRIPTION, 'helpText getter' );
 
-    var aDescriptionElement = getPrimarySiblingElementByNode( a ).parentElement.children[ DEFAULT_DESCRIPTION_SIBLING_INDEX ];
+    // default for help text is to append description after the primary sibling
+    var aDescriptionElement = getPrimarySiblingElementByNode( a ).parentElement.children[ APPENDED_DESCRIPTION_SIBLING_INDEX ];
     assert.ok( aDescriptionElement.textContent === TEST_DESCRIPTION, 'helpText setter on div' );
 
     var b = new Node( {
