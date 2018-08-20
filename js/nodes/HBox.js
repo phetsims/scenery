@@ -1,4 +1,4 @@
-// Copyright 2013-2016, University of Colorado Boulder
+// Copyright 2013-2018, University of Colorado Boulder
 
 /**
  * HBox is a convenience specialization of LayoutBox with horizontal orientation.
@@ -20,10 +20,12 @@ define( function( require ) {
    * @param {Object} [options] see LayoutBox
    */
   function HBox( options ) {
-    assert && assert( options === undefined || Object.getPrototypeOf( options ) === Object.prototype,
-      'Extra prototype on Node options object is a code smell' );
 
     options = options || {};
+
+    assert && assert( Object.getPrototypeOf( options ) === Object.prototype,
+      'Extra prototype on Node options object is a code smell' );
+
     assert && assert( !options.orientation, 'HBox sets orientation' );
     options.orientation = 'horizontal';
 
