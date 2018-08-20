@@ -23,7 +23,11 @@ define( function( require ) {
     assert && assert( options === undefined || Object.getPrototypeOf( options ) === Object.prototype,
       'Extra prototype on Node options object is a code smell' );
 
-    LayoutBox.call( this, _.extend( {}, options, { orientation: 'horizontal' } ) );
+    options = options || {};
+    assert && assert( !options.orientation, 'HBox sets orientation' );
+    options.orientation = 'horizontal';
+
+    LayoutBox.call( this, options );
   }
 
   scenery.register( 'HBox', HBox );
