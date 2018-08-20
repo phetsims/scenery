@@ -106,8 +106,8 @@ Will copy it to the console so it can be copy-pasted to reproduce elsewhere.
         nodes[ 'node' + i ] = new scenery.Node();
       }
       for ( i = 0; i < Math.ceil( 6 * NODE_COUNT_MULTIPLIER ); i++ ) {
-        fuzzLog.push( 'var path' + i + ' = new scenery.Path();' );
-        paths[ 'path' + i ] = paintables[ 'path' + i ] = nodes[ 'path' + i ] = new scenery.Path();
+        fuzzLog.push( 'var path' + i + ' = new scenery.Path( null );' );
+        paths[ 'path' + i ] = paintables[ 'path' + i ] = nodes[ 'path' + i ] = new scenery.Path( null );
       }
       for ( i = 0; i < Math.ceil( 4 * NODE_COUNT_MULTIPLIER ); i++ ) {
         fuzzLog.push( 'var text' + i + ' = new scenery.Text( \'' + i + '!\' );' );

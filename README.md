@@ -33,7 +33,6 @@ Examples:
 For testing purposes, the following are currently being worked on:
 * [Unit Tests / Linter](http://phetsims.github.io/scenery/scenery-tests.html)
 * [Renderer Comparison](http://phetsims.github.io/scenery/tests/renderer-comparison.html)
-* [Performance Improvement/Regression](http://phetsims.github.io/scenery/tests/benchmarks/performance-tests.html)
 * [Canvas Browser Differences](http://jonathan-olson.com/canvas-diff/canvas-diff.html)
 
 The [PhET Development Overview](http://bit.ly/phet-html5-development-overview) is the most complete guide to PhET Simulation Development. This guide includes how
