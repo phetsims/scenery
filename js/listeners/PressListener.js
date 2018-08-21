@@ -68,7 +68,7 @@ define( function( require ) {
 
       // {Property.<Boolean>} - If provided, this property will be used to track whether this listener's node is
       // "pressed" or not.
-      isPressedProperty: new BooleanProperty( false ),
+      isPressedProperty: new BooleanProperty( false, { reentrant: true } ),
 
       // {Property.<boolean>} - A property that will be controlled by this listener. It will be set to true when at
       // least one pointer is over the listener.
