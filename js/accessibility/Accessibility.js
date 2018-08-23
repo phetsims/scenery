@@ -1035,7 +1035,7 @@ define( function( require ) {
         /**
          * Set the inner content for the primary sibling of the AccessiblePeers of this node. Will be set as textContent
          * unless content is html which uses exclusively formatting tags. A node with inner content cannot
-         * have accessible descendants because this content will override the the HTML of descendants of this node.
+         * have accessible descendants because this content will override the HTML of descendants of this node.
          *
          * @param {string|null} content
          * @public

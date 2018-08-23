@@ -46,7 +46,7 @@ define( function( require ) {
 
     FocusHighlightPath.call( this, null, options );
 
-    // @private - from options, will override line width calculations based on the the node's size
+    // @private - from options, will override line width calculations based on the node's size
     this.outerLineWidth = options.outerLineWidth;
     this.innerLineWidth = options.innerLineWidth;
 

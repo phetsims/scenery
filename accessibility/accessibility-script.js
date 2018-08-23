@@ -1,7 +1,7 @@
 // Copyright 2015, University of Colorado Boulder
 
 /**
- * Some scripting for the the prototype parallel DOM.  This mimics some dynamic content for the parallel DOM that would
+ * Some scripting for the prototype parallel DOM.  This mimics some dynamic content for the parallel DOM that would
  * occur in a simulation to test complex tab navigation and aria-live.
  *
  * @author Jesse Greenberg
