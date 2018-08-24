@@ -103,6 +103,9 @@ define( function( require ) {
       // started.
       canStartPress: _.constant( true ),
 
+      // a11y - interval between a11y click presses. Same default as ButtonModel.js
+      fireOnHoldInterval: 100,
+
       // {Tandem} - For instrumenting
       tandem: Tandem.required,
 
@@ -174,6 +177,7 @@ define( function( require ) {
     this._targetNode = options.targetNode;
     this._attach = options.attach;
     this._canStartPress = options.canStartPress;
+    this._fireOnHoldInterval = options.fireOnHoldInterval;
 
     // @private {boolean} - Whether our pointer listener is referenced by the pointer (need to have a flag due to
     //                      handling disposal properly).
@@ -593,11 +597,10 @@ define( function( require ) {
           // no longer down, don't reset 'over' so button can be styled as long as it has focus
           self.isPressedProperty.set( false );
 
-          // TODO: define this a11y interval for press and hold delay? see https://github.com/phetsims/scenery/issues/831
           // TODO: how to define the delay for click interval, see https://github.com/phetsims/scenery/issues/831
           // how to handle a11y end listener?
           // endListener && endListener();
-        }, 100 );
+        }, this._fireOnHoldInterval );
       }
     },
 
