@@ -576,8 +576,8 @@ define( function( require ) {
      * Clicks by setting the over and pressed Properties behind a timeout. When assistive technology is
      * used, the browser may not receive 'down' or 'up' events on buttons - only a single 'click' event. For a11y we
      * need to toggle the pressed state from the single 'click' event.
-     * 
-     * @private
+     *
+     * @public - In general not needed to be public, but just used in edge cases to get proper click logic for a11y.
      * @a11y
      */
     click: function( event ) {
