@@ -24,6 +24,7 @@ define( function( require ) {
   var Property = require( 'AXON/Property' );
   var scenery = require( 'SCENERY/scenery' );
   var Tandem = require( 'TANDEM/Tandem' );
+  var Timer = require( 'PHET_CORE/Timer' );
 
   // ifphetio
   var PressListenerIO = require( 'SCENERY/listeners/PressListenerIO' );
@@ -251,6 +252,14 @@ define( function( require ) {
 
         sceneryLog && sceneryLog.InputListener && sceneryLog.pop();
       }
+    };
+
+    // @public - the collection of event listeners that can be added to a Node through addAccessibleInputListener,
+    // typical usage could look like node.addAccessibleInputListener( pressListener.a11yListener )
+    this.a11yListener = {
+      click: this.click.bind( this ),
+      focus: this.focus.bind( this ),
+      blur: this.blur.bind( this )
     };
 
     // update isOverProperty (not a DerivedProperty because we need to hook to passed-in properties)
@@ -544,6 +553,56 @@ define( function( require ) {
      */
     invalidateHighlighted: function() {
       this.isHighlightedProperty.value = this.isHoveringProperty.value || this.isPressedProperty.value;
+    },
+
+    /**
+     * Handle the click event from DOM for a11y, see PressListener.a11yListener for more information in this usage.
+     * Clicks by setting the over and pressed Properties behind a timeout. When assistive technology is
+     * used, the browser may not receive 'down' or 'up' events on buttons - only a single 'click' event. For a11y we
+     * need to toggle the pressed state from the single 'click' event.
+     * 
+     * @private
+     * @a11y
+     */
+    click: function() {
+      if ( this.canPress() ) {
+
+        // ensure that button is 'over' so listener can be called while button is down
+        this.isOverProperty.set( true );
+        this.isPressedProperty.set( true );
+
+        var self = this;
+        Timer.setTimeout( function() {
+
+          // no longer down, don't reset 'over' so button can be styled as long as it has focus
+          self.isPressedProperty.set( false );
+
+          // TODO: define this a11y interval for press and hold delay? see https://github.com/phetsims/scenery/issues/831
+          // TODO: how to define the delay for click interval, see https://github.com/phetsims/scenery/issues/831
+          // how to handle a11y end listener?
+          // endListener && endListener();
+        }, 100 );
+      }
+    },
+
+    /**
+     * On focus, button should look 'over'.
+     * @private
+     * @a11y
+     */
+    focus: function() {
+      this.isOverProperty.value = true;
+    },
+
+    /**
+     * On blur, the button should no longer look 'over'.
+     * @private
+     * @a11y
+     */
+    blur: function() {
+      if ( !this.isPressedProperty.get() ) {
+        this.isOverProperty.value = false;
+      }
     },
 
     /**
