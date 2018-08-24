@@ -370,8 +370,9 @@ define( function( require ) {
      * @returns {boolean}
      */
     canPress: function( event ) {
-      // If this listener is already involved in pressing something, we can't press something
-      if ( this.isPressed ) {
+
+      // canClick is a subset of canPress, start by checking a11y state that doesn't involve pointers
+      if ( !this.canClick() ) {
         return false;
       }
 
@@ -385,6 +386,20 @@ define( function( require ) {
         return false;
       }
 
+      return true;
+    },
+
+    /**
+     * Returns whether this PressListener can be clicked from keyboard input.
+     * @return {boolean}
+     */
+    canClick: function() {
+
+      // If this listener is already involved in pressing something, we can't press something
+      if ( this.isPressed ) {
+        return false;
+      }
+
       // Check whether our options prevent us from starting a press right now.
       if ( !this._canStartPress() ) {
         return false;
@@ -392,6 +407,7 @@ define( function( require ) {
 
       return true;
     },
+
 
     /**
      * Moves the listener to the 'pressed' state if possible (attaches listeners and initializes press-related
@@ -564,8 +580,8 @@ define( function( require ) {
      * @private
      * @a11y
      */
-    click: function() {
-      if ( this.canPress() ) {
+    click: function( event ) {
+      if ( this.canClick() ) {
 
         // ensure that button is 'over' so listener can be called while button is down
         this.isOverProperty.set( true );
