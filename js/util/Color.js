@@ -42,8 +42,6 @@ define( function( require ) {
     this.changeEmitter = new Emitter();
 
     this.set( r, g, b, a );
-
-    phetAllocation && phetAllocation( 'Color' );
   }
 
   scenery.register( 'Color', Color );

@@ -26,10 +26,7 @@ define( function( require ) {
   function CanvasContextWrapper( canvas, context ) {
     this.canvas = canvas;
     this.context = context;
-
     this.resetStyles();
-
-    phetAllocation && phetAllocation( 'CanvasContextWrapper' );
   }
 
   scenery.register( 'CanvasContextWrapper', CanvasContextWrapper );

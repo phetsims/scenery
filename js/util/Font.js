@@ -128,7 +128,6 @@ define( function( require ) {
     // @private {string} - Initialize the shorthand font property (stored as _font)
     this._font = this.computeShorthand();
 
-    phetAllocation && phetAllocation( 'Font' );
     PhetioObject.call( this, options );
   }
 

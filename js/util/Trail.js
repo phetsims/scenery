@@ -75,8 +75,6 @@ define( function( require ) {
         }
       }
     }
-
-    phetAllocation && phetAllocation( 'Trail' );
   }
 
   scenery.register( 'Trail', Trail );

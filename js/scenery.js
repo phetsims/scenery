@@ -24,9 +24,6 @@ define( function( require ) {
   window.sceneryLog = null;
   window.sceneryAccessibilityLog = null;
 
-  // Object allocation tracking - Set here so we can use a global reference that gets stripped out by uglify.
-  window.phetAllocation = require( 'PHET_CORE/phetAllocation' );
-
   var scratchCanvas = document.createElement( 'canvas' );
   var scratchContext = scratchCanvas.getContext( '2d' );
 

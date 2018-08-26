@@ -540,10 +540,6 @@ define( function( require ) {
     if ( options ) {
       this.mutate( options );
     }
-
-    // Track allocation of nodes internally
-    phetAllocation && phetAllocation( 'Node' );
-
   }
 
   scenery.register( 'Node', Node );

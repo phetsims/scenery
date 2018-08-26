@@ -69,8 +69,6 @@ define( function( require ) {
 
     // @private {string|null} - See setCursor() for more information.
     this._cursor = null;
-
-    phetAllocation && phetAllocation( 'Pointer' );
   }
 
   scenery.register( 'Pointer', Pointer );

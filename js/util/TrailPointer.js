@@ -25,10 +25,7 @@ define( function( require ) {
   function TrailPointer( trail, isBefore ) {
     assert && assert( trail instanceof scenery.Trail, 'trail is not a trail' );
     this.trail = trail;
-
     this.setBefore( isBefore );
-
-    phetAllocation && phetAllocation( 'TrailPointer' );
   }
 
   scenery.register( 'TrailPointer', TrailPointer );
