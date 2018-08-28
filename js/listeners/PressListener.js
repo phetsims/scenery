@@ -108,7 +108,7 @@ define( function( require ) {
 
       // a11y {function} - called at the end of a press ("click") that was a result of a keyboard action. This will not
       // be called for a mouse/pointer interaction.
-      a11yEndListener: null,
+      onAccessibleClick: null,
 
       // {Tandem} - For instrumenting
       tandem: Tandem.required,
@@ -146,8 +146,8 @@ define( function( require ) {
       'If a custom isHoveringProperty is provided, it must be a Property that is false initially' );
     assert && assert( options.isHighlightedProperty instanceof Property && options.isHighlightedProperty.value === false,
       'If a custom isHighlightedProperty is provided, it must be a Property that is false initially' );
-    assert && assert( options.a11yEndListener === null || typeof options.a11yEndListener === 'function',
-      'If provided, a11yEndListener should be a function' );
+    assert && assert( options.onAccessibleClick === null || typeof options.onAccessibleClick === 'function',
+      'If provided, onAccessibleClick should be a function' );
     assert && assert( options.fireOnHoldInterval === null || typeof options.fireOnHoldInterval === 'number',
       'If provided, fireOnHoldInterval should be a number' );
 
@@ -186,7 +186,7 @@ define( function( require ) {
     this._attach = options.attach;
     this._canStartPress = options.canStartPress;
     this._fireOnHoldInterval = options.fireOnHoldInterval; // used for a11y
-    this._a11yEndListener = options.a11yEndListener; // used for a11y
+    this._onAccessibleClick = options.onAccessibleClick; // used for a11y
 
     // @private {boolean} - Whether our pointer listener is referenced by the pointer (need to have a flag due to
     //                      handling disposal properly).
@@ -607,7 +607,7 @@ define( function( require ) {
           self.isPressedProperty.set( false );
 
           // call the a11y click specific listener?
-          self._a11yEndListener && self._a11yEndListener();
+          self._onAccessibleClick && self._onAccessibleClick();
         }, this._fireOnHoldInterval );
       }
     },
