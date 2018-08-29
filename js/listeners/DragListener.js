@@ -230,9 +230,7 @@ define( function( require ) {
       sceneryLog && sceneryLog.InputListener && sceneryLog.InputListener( 'DragListener press' );
       sceneryLog && sceneryLog.InputListener && sceneryLog.push();
 
-      var success = PressListener.prototype.press.call( this, event, targetNode );
-
-      if ( success ) {
+      var success = PressListener.prototype.press.call( this, event, targetNode, () => {
         sceneryLog && sceneryLog.InputListener && sceneryLog.InputListener( 'DragListener successful press' );
         sceneryLog && sceneryLog.InputListener && sceneryLog.push();
 
@@ -247,7 +245,7 @@ define( function( require ) {
         this._start && this._start( event, this );
 
         sceneryLog && sceneryLog.InputListener && sceneryLog.pop();
-      }
+      } );
 
       sceneryLog && sceneryLog.InputListener && sceneryLog.pop();
 
@@ -266,12 +264,12 @@ define( function( require ) {
       sceneryLog && sceneryLog.InputListener && sceneryLog.InputListener( 'DragListener release' );
       sceneryLog && sceneryLog.InputListener && sceneryLog.push();
 
-      PressListener.prototype.release.call( this );
+      PressListener.prototype.release.call( this, () => {
+        this.detachTransformTracker();
 
-      this.detachTransformTracker();
-
-      // Notify after the rest of release is called in order to prevent it from triggering interrupt().
-      this._end && this._end( this );
+        // Notify after the rest of release is called in order to prevent it from triggering interrupt().
+        this._end && this._end( this );
+      } );
 
       sceneryLog && sceneryLog.InputListener && sceneryLog.pop();
     },
