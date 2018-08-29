@@ -23,12 +23,10 @@ define( function( require ) {
   var EventIO = require( 'SCENERY/input/EventIO' );
   var Node = require( 'SCENERY/nodes/Node' );
   var ObservableArray = require( 'AXON/ObservableArray' );
-  var PhetioObject = require( 'TANDEM/PhetioObject' );
   var Property = require( 'AXON/Property' );
   var scenery = require( 'SCENERY/scenery' );
   var Tandem = require( 'TANDEM/Tandem' );
   var Timer = require( 'PHET_CORE/Timer' );
-  var PressListenerIO = require( 'SCENERY/listeners/PressListenerIO' );
 
   // ifphetio
   var VoidIO = require( 'ifphetio!PHET_IO/types/VoidIO' );
@@ -115,22 +113,8 @@ define( function( require ) {
       onAccessibleClick: null,
 
       // {Tandem} - For instrumenting
-      tandem: Tandem.required,
-
-      // {PressListenerIO} - PhET-iO type
-      phetioType: PressListenerIO,
-
-      // {boolean}
-      phetioState: false,
-
-      // {string}
-      phetioEventType: 'user',
-
-      phetioReadOnly: PhetioObject.DEFAULT_OPTIONS.phetioReadOnly // to support properly passing this to children, see https://github.com/phetsims/tandem/issues/60
-
+      tandem: Tandem.required
     }, options );
-
-    PhetioObject.call( this, options );
 
     assert && assert( typeof options.mouseButton === 'number' && options.mouseButton >= 0 && options.mouseButton % 1 === 0,
       'mouseButton should be a non-negative integer' );
@@ -365,7 +349,7 @@ define( function( require ) {
 
   scenery.register( 'PressListener', PressListener );
 
-  inherit( PhetioObject, PressListener, {
+  inherit( Object, PressListener, {
     /**
      * Whether this listener is currently activated with a press.
      * @public
@@ -689,8 +673,6 @@ define( function( require ) {
 
       this._pressedEmitter.dispose();
       this._releasedEmitter.dispose();
-
-      PhetioObject.prototype.dispose.call( this );
 
       sceneryLog && sceneryLog.InputListener && sceneryLog.pop();
     }
