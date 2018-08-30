@@ -23,6 +23,7 @@ define( function( require ) {
   var EventIO = require( 'SCENERY/input/EventIO' );
   var Node = require( 'SCENERY/nodes/Node' );
   var ObservableArray = require( 'AXON/ObservableArray' );
+  var PhetioObject = require( 'TANDEM/PhetioObject' );
   var Property = require( 'AXON/Property' );
   var scenery = require( 'SCENERY/scenery' );
   var Tandem = require( 'TANDEM/Tandem' );
@@ -113,7 +114,9 @@ define( function( require ) {
       onAccessibleClick: null,
 
       // {Tandem} - For instrumenting
-      tandem: Tandem.required
+      tandem: Tandem.required,
+
+      phetioReadOnly: PhetioObject.DEFAULT_OPTIONS.phetioReadOnly // to support properly passing this to children, see https://github.com/phetsims/tandem/issues/60
     }, options );
 
     assert && assert( typeof options.mouseButton === 'number' && options.mouseButton >= 0 && options.mouseButton % 1 === 0,
