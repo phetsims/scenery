@@ -130,10 +130,13 @@ define( function( require ) {
     this.delayComplete = false;
 
     /**
-     * Implements keyboard dragging when listener is attached to the node, public so listener is attached
+     * Implements keyboard dragging when listener is attached to the Node, public so listener is attached
      * with addAccessibleInputListener()
-     * @public
      *
+     * Note that this event is assigned in the constructor, and not to the prototype. As of writing this,
+     * `Node.addAccessibleInputListener` only supports type properties as event listeners, and not the event keys as
+     * prototype methods. Please see https://github.com/phetsims/scenery/issues/851 for more information.
+     * @public
      * @param {DOMEvent} event
      */
     this.keydown = function( event ) {
@@ -179,9 +182,13 @@ define( function( require ) {
     };
 
     /**
-     * Behavior for keyboard 'up', public so it can be attached with addAccessibleInputListener()
-     * @public
+     * Behavior for keyboard 'up' DOM event. Public so it can be attached with addAccessibleInputListener()
      *
+     * Note that this event is assigned in the constructor, and not to the prototype. As of writing this,
+     * `Node.addAccessibleInputListener` only supports type properties as event listeners, and not the event keys as
+     * prototype methods. Please see https://github.com/phetsims/scenery/issues/851 for more information.
+     *
+     * @public
      * @param {DOMEvent} event
      */
     this.keyup = function( event ) {
