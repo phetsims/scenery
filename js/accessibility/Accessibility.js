@@ -140,6 +140,30 @@ define( function( require ) {
   var DEFAULT_DESCRIPTION_TAG_NAME = P_TAG;
   var DEFAULT_LABEL_TAG_NAME = P_TAG;
 
+  // see setAccessibleNameBehavior for more details
+  var DEFAULT_ACCESSIBLE_NAME_BEHAVIOR = function( node, options, accessibleName ) {
+    if ( node.tagName === 'input' ) {
+      options.labelTagName = 'label';
+      options.labelContent = accessibleName;
+    }
+    else if ( AccessibilityUtil.tagNameSupportsContent( node.tagName ) ) {
+      options.innerContent = accessibleName;
+    }
+    else {
+      options.ariaLabel = accessibleName;
+    }
+    return options;
+  };
+
+  // see setHelpTextBehavior for more details
+  var DEFAULT_HELP_TEXT_BEHAVIOR = function( node, options, helpText ) {
+
+    options.descriptionTagName = AccessibilityUtil.DEFAULT_DESCRIPTION_TAG_NAME;
+    options.descriptionContent = helpText;
+    options.appendDescription = true;
+    return options;
+  };
+
   // these elements are typically associated with forms, and support certain attributes
   var FORM_ELEMENTS = AccessibilityUtil.FORM_ELEMENTS;
 
@@ -395,33 +419,13 @@ define( function( require ) {
           this._accessibleName = null;
 
           // {A11yBehaviorFunctionDef} - function that returns the options needed to set the appropriate accessible name for the Node
-          this._accessibleNameBehavior = function( node, options, accessibleName ) {
-            if ( node.tagName === 'input' ) {
-              options.labelTagName = 'label';
-              options.labelContent = accessibleName;
-            }
-            else if ( AccessibilityUtil.tagNameSupportsContent( node.tagName ) ) {
-              options.innerContent = accessibleName;
-            }
-            else {
-              options.ariaLabel = accessibleName;
-            }
-            return options;
-          };
+          this._accessibleNameBehavior = DEFAULT_ACCESSIBLE_NAME_BEHAVIOR;
 
           // {string|null} - sets the help text of the Node, this most often corresponds to description text.
           this._helpText = null;
 
           // {A11yBehaviorFunctionDef} - sets the help text of the Node, this most often corresponds to description text.
-          // TODO: for efficiency maybe don't set this on all nodes always, https://github.com/phetsims/scenery/issues/795
-          this._helpTextBehavior = function( node, options, helpText ) {
-
-            //TODO: assertions for if using lower api too? https://github.com/phetsims/scenery/issues/795
-            options.descriptionTagName = AccessibilityUtil.DEFAULT_DESCRIPTION_TAG_NAME;
-            options.descriptionContent = helpText;
-            options.appendDescription = true;
-            return options;
-          };
+          this._helpTextBehavior = DEFAULT_HELP_TEXT_BEHAVIOR;
         },
 
 
@@ -617,7 +621,9 @@ define( function( require ) {
 
         /**
          * Set the Node's accessible content in a way that will define the Accessible Name for the browser. Different
-         * HTML components and code situations require different methods of setting the Accessible Name.
+         * HTML components and code situations require different methods of setting the Accessible Name. See
+         * setAccessibleNameBehavior for details on how this string is rendered in the PDOM. Setting to null will clear
+         * this Node's accessibleName
          *
          * @param {string|null} accessibleName
          */
@@ -691,7 +697,8 @@ define( function( require ) {
 
 
         /**
-         * Set the help text for a Node
+         * Set the help text for a Node. See setAccessibleNameBehavior for details on how this string is
+         * rendered in the PDOM. Null will clear the help text for this Node.
          * @param {string|null} helpText
          */
         setHelpText: function( helpText ) {
@@ -721,7 +728,7 @@ define( function( require ) {
 
         /**
          * helpTextBehavior is a function that will set the appropriate options on this node to get the desired
-         * "Help Text"
+         * "Help Text".
          *
          * @param {A11yBehaviorFunctionDef|function} helpTextBehavior
          */
