@@ -183,7 +183,7 @@ define( function( require ) {
     this._onAccessibleClick = options.onAccessibleClick; // used for a11y
 
     // @private {boolean} - marks that the accessibility click listener is currently firing.
-    this._a11yClickInProgress = true;
+    this._a11yClickInProgress = false;
 
     // @private {boolean} - Whether our pointer listener is referenced by the pointer (need to have a flag due to
     //                      handling disposal properly).
@@ -616,7 +616,7 @@ define( function( require ) {
      * @a11y
      */
     click: function() {
-      if ( this.canClick() ) {
+      if ( this.canClick() && !this._a11yClickInProgress ) {
 
         // ensure that button is 'over' so listener can be called while button is down
         this.isOverProperty.set( true );
