@@ -616,7 +616,7 @@ define( function( require ) {
      * @a11y
      */
     click: function() {
-      if ( this.canClick() && !this._a11yClickInProgress ) {
+      if ( this.canClick() ) {
 
         // ensure that button is 'over' so listener can be called while button is down
         this.isOverProperty.set( true );
