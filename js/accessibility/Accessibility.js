@@ -431,7 +431,11 @@ define( function( require ) {
 
         /**
          * Adds an accessible input listener. The listener's keys should be DOM event names, and the values should be
-         * functions to be called when that event is fired on the DOM element.
+         * functions to be called when that event is fired on the DOM element. A list of valid DOM event names can be
+         * found in AccessibilityUtil.js.
+         *
+         * NOTE: Currently this method doesn't support adding listeners that are declared on an object's prototype, only
+         * as an object property, see https://github.com/phetsims/scenery/issues/851 for more information.
          * @public
          *
          * @param {Object} accessibleInput
