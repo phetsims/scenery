@@ -182,6 +182,9 @@ define( function( require ) {
     this._fireOnHoldInterval = options.fireOnHoldInterval; // used for a11y
     this._onAccessibleClick = options.onAccessibleClick; // used for a11y
 
+    // @private {boolean} - marks that the accessibility click listener is currently firing.
+    this._a11yClickInProgress = true;
+
     // @private {boolean} - Whether our pointer listener is referenced by the pointer (need to have a flag due to
     //                      handling disposal properly).
     this._listeningToPointer = false;
@@ -561,7 +564,7 @@ define( function( require ) {
       sceneryLog && sceneryLog.InputListener && sceneryLog.InputListener( 'PressListener#' + this._id + ' interrupt' );
       sceneryLog && sceneryLog.InputListener && sceneryLog.push();
 
-      if ( this.isPressed ) {
+      if ( this.isPressed && !this._a11yClickInProgress ) {
         sceneryLog && sceneryLog.InputListener && sceneryLog.InputListener( 'PressListener#' + this._id + ' interrupting' );
         this.interrupted = true;
 
@@ -619,6 +622,8 @@ define( function( require ) {
         this.isOverProperty.set( true );
         this.isPressedProperty.set( true );
 
+        this._a11yClickInProgress = true;
+
         var self = this;
         Timer.setTimeout( function() {
 
@@ -627,6 +632,8 @@ define( function( require ) {
 
           // call the a11y click specific listener?
           self._onAccessibleClick && self._onAccessibleClick();
+
+          self._a11yClickInProgress = false;
         }, this._fireOnHoldInterval );
       }
     },
