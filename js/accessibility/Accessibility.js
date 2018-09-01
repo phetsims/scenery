@@ -404,15 +404,6 @@ define( function( require ) {
           // this node is "visible" for, see AccessibleDisplaysInfo.js for more information.
           this._accessibleDisplaysInfo = new AccessibleDisplaysInfo( this );
 
-          // @private {Object|null} - If non-null, this node will be represented in the parallel DOM by the accessible content.
-          // The accessibleContent object will be of the form:
-          // {
-          //   createPeer: function( {AccessibleInstance} ): {AccessiblePeer},
-          //   [focusHighlight]: {Bounds2|Shape|Node|string.<'invisible'>}
-          // }
-          // The focus highlight can be a custom Shape, Node, contain the Node's local bounds, or be invisible.
-          this._accessibleContent = null;
-
           // @protected {Array.<AccessibleInstance>} - Empty unless the node contains some accessible instance.
           this._accessibleInstances = [];
 
