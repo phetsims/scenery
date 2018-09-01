@@ -167,6 +167,9 @@ define( function( require ) {
   // these elements are typically associated with forms, and support certain attributes
   var FORM_ELEMENTS = AccessibilityUtil.FORM_ELEMENTS;
 
+  // list of input "type" attribute values that support the "checked" attribute
+  var INPUT_TYPES_THAT_SUPPORT_CHECKED = AccessibilityUtil.INPUT_TYPES_THAT_SUPPORT_CHECKED;
+
   // HTMLElement attributes whose value is an ID of another element
   var ASSOCIATION_ATTRIBUTES = AccessibilityUtil.ASSOCIATION_ATTRIBUTES;
 
@@ -612,6 +615,27 @@ define( function( require ) {
           }
         },
 
+        /**
+         * Called when assertions are enabled and once the Node has been completely constructed. This is the time to
+         * make sure that options are saet up the way they are expected to be. For example. you don't want accessibleName
+         * and labelContent declared
+         */
+        accessibleAudit: function() {
+
+          if ( this.accessibleContent && assert ) {
+
+            this._inputType && assert( this._tagName.toUpperCase() === INPUT_TAG, 'tagName must be INPUT to support inputType' );
+            this._accessibleChecked && assert( this._tagName.toUpperCase() === INPUT_TAG, 'tagName must be INPUT to support accessibleChecked.' );
+            this._inputValue && assert( this._tagName.toUpperCase() === INPUT_TAG, 'tagName must be INPUT to support inputValue' );
+            this._accessibleChecked && assert( INPUT_TYPES_THAT_SUPPORT_CHECKED.indexOf( this._inputType.toUpperCase() ) >= 0, 'inputType does not support checked attribute: ' + this._inputType );
+            this._focusHighlightLayerable && assert( this.focusHighlight instanceof phet.scenery.Node, 'focusHighlight must be Node if highlight is layerable' );
+          }
+
+          for ( let i = 0; i < this.children.length; i++ ) {
+            this.children[ i ].accessibleAudit();
+          }
+        },
+
         /***********************************************************************************************************/
         // HIGHER LEVEL API: GETTERS AND SETTERS FOR A11Y API OPTIONS
         //
@@ -877,7 +901,8 @@ define( function( require ) {
          * @param {string|null} inputType
          */
         setInputType: function( inputType ) {
-          assert && assert( this._tagName.toUpperCase() === INPUT_TAG, 'tag name must be INPUT to support inputType' );
+          assert && assert( inputType === null || typeof inputType === 'string' );
+          assert && this.tagName && assert( this._tagName.toUpperCase() === INPUT_TAG, 'tag name must be INPUT to support inputType' );
 
           this._inputType = inputType;
           for ( var i = 0; i < this._accessibleInstances.length; i++ ) {
@@ -913,6 +938,8 @@ define( function( require ) {
          * @param {boolean} appendLabel
          */
         setAppendLabel: function( appendLabel ) {
+          assert && assert( typeof appendLabel === 'boolean' );
+
           this._appendLabel = appendLabel;
 
           // TODO: can we do this without recomputing everything?
@@ -944,6 +971,8 @@ define( function( require ) {
          * @param {boolean} appendDescription
          */
         setAppendDescription: function( appendDescription ) {
+          assert && assert( typeof appendDescription === 'boolean' );
+
           this._appendDescription = appendDescription;
 
           // TODO: can we do this without recomputing everything?
@@ -1286,7 +1315,7 @@ define( function( require ) {
 
             // if focus highlight is layerable, it must be a node in the scene graph
             assert && assert( focusHighlight instanceof phet.scenery.Node );
-            focusHighlight.visible = this.focused;
+            focusHighlight.visible = isFocused;
           }
 
           // Reset the focus after invalidating the content.
@@ -1348,6 +1377,7 @@ define( function( require ) {
          * @param {boolean|Node} groupHighlight
          */
         setGroupFocusHighlight: function( groupHighlight ) {
+          assert && assert( typeof groupHighlight === 'boolean' || groupHighlight instanceof phet.scenery.Node );
           this._groupFocusHighlight = groupHighlight;
         },
         set groupFocusHighlight( groupHighlight ) { this.setGroupFocusHighlight( groupHighlight ); },
@@ -1375,15 +1405,15 @@ define( function( require ) {
 
           // validation if assert is enabled
           if ( assert ) {
+            assert( Array.isArray( ariaLabelledbyAssociations ) );
             for ( i = 0; i < ariaLabelledbyAssociations.length; i++ ) {
               associationObject = ariaLabelledbyAssociations[ i ];
-              assert && AccessibilityUtil.validateAssociationObject( associationObject );
+              AccessibilityUtil.validateAssociationObject( associationObject );
             }
           }
 
-          // if the list isn't the same, TODO: make order in the list not matter
+          // if the list isn't the same, TODO: make order in the list not matter, perhaps with sorting? https://stackoverflow.com/questions/29951293/using-lodash-to-compare-arrays-items-existence-without-order
           if ( !_.isEqual( ariaLabelledbyAssociations, this._ariaLabelledbyAssociations ) ) {
-
 
             var beforeOnly = []; // Will hold all nodes that will be removed.
             var afterOnly = []; // Will hold all nodes that will be "new" children (added)
@@ -1391,7 +1421,6 @@ define( function( require ) {
 
             // get a difference of the desired new list, and the old
             arrayDifference( ariaLabelledbyAssociations, this._ariaLabelledbyAssociations, afterOnly, beforeOnly, inBoth );
-
 
             // remove each current associationObject that isn't in the new list
             for ( i = 0; i < beforeOnly.length; i++ ) {
@@ -1401,7 +1430,6 @@ define( function( require ) {
 
             assert && assert( this._ariaLabelledbyAssociations.length === inBoth.length,
               'Removing associations should not have triggered other association changes' );
-
 
             // add each association from the new list that hasn't been added yet
             for ( i = 0; i < afterOnly.length; i++ ) {
@@ -1470,7 +1498,7 @@ define( function( require ) {
          * @public (scenery-internal)
          */
         removeNodeThatIsAriaLabelledByThisNode: function( node ) {
-          assert && phet && phet.scenery && assert( node instanceof phet.scenery.Node );
+          assert && assert( node instanceof phet.scenery.Node );
           var indexOfNode = _.indexOf( this._nodesThatAreAriaLabelledbyThisNode, node );
           assert && assert( indexOfNode >= 0 );
           this._nodesThatAreAriaLabelledbyThisNode.splice( indexOfNode, 1 );
@@ -1520,6 +1548,7 @@ define( function( require ) {
         setAriaDescribedbyAssociations: function( ariaDescribedbyAssociations ) {
           var associationObject;
           if ( assert ) {
+            assert( Array.isArray( ariaDescribedbyAssociations ) );
             for ( var j = 0; j < ariaDescribedbyAssociations.length; j++ ) {
               associationObject = ariaDescribedbyAssociations[ j ];
               assert && AccessibilityUtil.validateAssociationObject( associationObject );
@@ -1529,7 +1558,6 @@ define( function( require ) {
           // if the list isn't the same, TODO: make order in the list not matter
           if ( !_.isEqual( ariaDescribedbyAssociations, this._ariaDescribedbyAssociations ) ) {
 
-
             var beforeOnly = []; // Will hold all nodes that will be removed.
             var afterOnly = []; // Will hold all nodes that will be "new" children (added)
             var inBoth = []; // Child nodes that "stay". Will be ordered for the "after" case.
@@ -1537,7 +1565,6 @@ define( function( require ) {
 
             // get a difference of the desired new list, and the old
             arrayDifference( ariaDescribedbyAssociations, this._ariaDescribedbyAssociations, afterOnly, beforeOnly, inBoth );
-
 
             // remove each current associationObject that isn't in the new list
             for ( i = 0; i < beforeOnly.length; i++ ) {
@@ -1547,7 +1574,6 @@ define( function( require ) {
 
             assert && assert( this._ariaDescribedbyAssociations.length === inBoth.length,
               'Removing associations should not have triggered other association changes' );
-
 
             // add each association from the new list that hasn't been added yet
             for ( i = 0; i < afterOnly.length; i++ ) {
@@ -1870,10 +1896,7 @@ define( function( require ) {
          */
         setInputValue: function( value ) {
           assert && assert( value === null || typeof value === 'string' || typeof value === 'number' );
-
-          if ( this._tagName ) {
-            assert && assert( _.includes( FORM_ELEMENTS, this._tagName.toUpperCase() ), 'dom element must be a form element to support value' );
-          }
+          assert && this._tagName && assert( _.includes( FORM_ELEMENTS, this._tagName.toUpperCase() ), 'dom element must be a form element to support value' );
 
           value = '' + value;
           this._inputValue = value;
@@ -1905,10 +1928,10 @@ define( function( require ) {
           assert && assert( typeof checked === 'boolean' );
 
           if ( this._tagName ) {
-            assert && assert( this._tagName === 'input', 'cannot set checked on a non input tag.' );
+            assert && assert( this._tagName.toUpperCase() === INPUT_TAG, 'Cannot set checked on a non input tag.' );
           }
           if ( this._inputType ) {
-            assert && assert( [ 'radio', 'checkbox' ].indexOf( this._inputType ) >= 0, 'Invalid inputType: ' + this._inputType );
+            assert && assert( INPUT_TYPES_THAT_SUPPORT_CHECKED.indexOf( this._inputType.toUpperCase() ) >= 0, 'inputType does not support checked: ' + this._inputType );
           }
 
           this._accessibleChecked = checked;
@@ -1948,12 +1971,18 @@ define( function( require ) {
          * a screen reader.
          *
          * @param {string} attribute - string naming the attribute
-         * @param {string|boolean} value - the value for the attribute, if boolean, then it will be set as a javascript property on the HTMLElement rather than an attribute
+         * @param {string|boolean|number} value - the value for the attribute, if boolean, then it will be set as a javascript property on the HTMLElement rather than an attribute
          * @param {Object} [options]
          * @public
          */
         setAccessibleAttribute: function( attribute, value, options ) {
+          assert && assert( typeof attribute === 'string' );
+          assert && assert( typeof value === 'string' || typeof value === 'boolean' || typeof value === 'number' );
+          assert && options && assert( Object.getPrototypeOf( options ) === Object.prototype,
+            'Extra prototype on accessibleAttribute options object is a code smell' );
+
           options = _.extend( {
+
             // {string|null} - If non-null, will set the attribute with the specified namespace. This can be required
             // for setting certain attributes (e.g. MathML).
             namespace: null,
@@ -1994,6 +2023,8 @@ define( function( require ) {
          */
         removeAccessibleAttribute: function( attribute, options ) {
           assert && assert( typeof attribute === 'string' );
+          assert && options && assert( Object.getPrototypeOf( options ) === Object.prototype,
+            'Extra prototype on accessibleAttribute options object is a code smell' );
 
           options = _.extend( {
 
@@ -2183,7 +2214,7 @@ define( function( require ) {
             }
 
             // pop focused nodes from the stack (that were added above)
-            _.each( arrayAccessibleOrder, function( descendant ) {
+            _.each( arrayAccessibleOrder, function() {
               pruneStack.pop();
             } );
 
@@ -2212,18 +2243,15 @@ define( function( require ) {
         set accessibleContent( value ) { this.onAccessibleContentChange( value ); },
 
         /**
-         * Returns the accessible content for this node.
+         * Returns whether or not this Node has any accessibleContent defined.
          * @public (scenery-internal)
          *
-         * TODO: this should be better named
-         * @returns {null|Object}
+         * @returns {boolean}
          */
-        getAccessibleContent: function() {
-
+        hasAccessibleContent: function() {
           return !!this._tagName;
-
         },
-        get accessibleContent() { return this.getAccessibleContent(); },
+        get accessibleContent() { return this.hasAccessibleContent(); },
 
 
         /**

@@ -414,9 +414,10 @@ define( function( require ) {
 
     /**
      * Given an associationObject for either aria-labelledby or aria-describedby, make sure it has the right signature.
-     * @param associationObject
+     * @param {Object} associationObject
      */
     validateAssociationObject: function( associationObject ) {
+      assert && assert( typeof associationObject === 'object' );
 
       var expectedKeys = [ 'thisElementName', 'otherNode', 'otherElementName' ];
 
@@ -499,7 +500,10 @@ define( function( require ) {
     DEFAULT_DESCRIPTION_TAG_NAME: P_TAG,
     DEFAULT_LABEL_TAG_NAME: P_TAG,
 
-    ASSOCIATION_ATTRIBUTES: ASSOCIATION_ATTRIBUTES
+    ASSOCIATION_ATTRIBUTES: ASSOCIATION_ATTRIBUTES,
+
+    // valid input types that support the "checked" property/attribute for input elements
+    INPUT_TYPES_THAT_SUPPORT_CHECKED: [ 'RADIO', 'CHECKBOX' ]
   };
 
   scenery.register( 'AccessibilityUtil', AccessibilityUtil );
