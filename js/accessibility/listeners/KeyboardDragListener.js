@@ -237,11 +237,11 @@ define( function( require ) {
 
     // step the drag listener, must be removed in dispose
     var stepListener = this.step.bind( this );
-    Timer.addStepListener( stepListener );
+    Timer.addListener( stepListener );
 
     // @private - called in dispose
     this._disposeKeyboardDragListener = function() {
-      Timer.removeStepListener( stepListener );
+      Timer.removeListener( stepListener );
     };
   }
 
