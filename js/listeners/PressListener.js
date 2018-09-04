@@ -27,7 +27,7 @@ define( function( require ) {
   var Property = require( 'AXON/Property' );
   var scenery = require( 'SCENERY/scenery' );
   var Tandem = require( 'TANDEM/Tandem' );
-  var Timer = require( 'PHET_CORE/Timer' );
+  var timer = require( 'PHET_CORE/timer' );
 
   // ifphetio
   var VoidIO = require( 'ifphetio!PHET_IO/types/VoidIO' );
@@ -625,7 +625,7 @@ define( function( require ) {
         this._a11yClickInProgress = true;
 
         var self = this;
-        Timer.setTimeout( function() {
+        timer.setTimeout( function() {
 
           // no longer down, don't reset 'over' so button can be styled as long as it has focus
           self.isPressedProperty.set( false );
