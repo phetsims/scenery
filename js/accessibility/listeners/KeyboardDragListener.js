@@ -77,7 +77,7 @@ define( function( require ) {
       hotkeyInterval: 800
     }, options );
 
-    // @private, see options for more information
+    // @private, mutable attributes declared from options, see options for info, as well as getters and setters
     this._start = options.start;
     this._drag = options.drag;
     this._end = options.end;
@@ -248,6 +248,164 @@ define( function( require ) {
   sceneryPhet.register( 'KeyboardDragListener', KeyboardDragListener );
 
   return inherit( Object, KeyboardDragListener, {
+
+
+    /**
+     * Getter for the start property, see options.start for more info.
+     * @returns {function|null}
+     */
+    get start() { return this._start; },
+
+    /**
+     * Setter for the start property, see options.start for more info.
+     * @param {function|null} start
+     */
+    set start( start ) { this._start = start; },
+
+    /**
+     * Getter for the drag property, see options.drag for more info.
+     * @returns {function|null}
+     */
+    get drag() { return this._drag; },
+
+    /**
+     * Setter for the drag property, see options.drag for more info.
+     * @param {function|null} drag
+     */
+    set drag( drag ) { this._drag = drag; },
+
+    /**
+     * Getter for the end property, see options.end for more info.
+     * @returns {function|null}
+     */
+    get end() { return this._end; },
+
+    /**
+     * Setter for the end property, see options.end for more info.
+     * @param {function|null} end
+     */
+    set end( end ) { this._end = end; },
+
+    /**
+     * Getter for the dragBounds property, see options.dragBounds for more info.
+     * @returns {Bounds2|null}
+     */
+    get dragBounds() { return this._dragBounds; },
+
+    /**
+     * Setter for the dragBounds property, see options.dragBounds for more info.
+     * @param {Bounds2|null} dragBounds
+     */
+    set dragBounds( dragBounds ) { this._dragBounds = dragBounds; },
+
+    /**
+     * Getter for the transform property, see options.transform for more info.
+     * @returns {Transform3|null}
+     */
+    get transform() { return this._transform; },
+
+    /**
+     * Setter for the transform property, see options.transform for more info.
+     * @param {Transform3|null}transform
+     */
+    set transform( transform ) { this._transform = transform; },
+
+    /**
+     * Getter for the locationProperty property, see options.locationProperty for more info.
+     * @returns {Property.<Vector2>|null}
+     */
+    get locationProperty() { return this._locationProperty; },
+
+    /**
+     * Setter for the locationProperty property, see options.locationProperty for more info.
+     * @param {Property.<Vector2>|null} locationProperty
+     */
+    set locationProperty( locationProperty ) { this._locationProperty = locationProperty; },
+
+    /**
+     * Getter for the dragVelocity property, see options.dragVelocity for more info.
+     * @returns {number|null}
+     */
+    get dragVelocity() { return this._dragVelocity; },
+
+    /**
+     * Setter for the dragVelocity property, see options.dragVelocity for more info.
+     * @param {number|null} dragVelocity
+     */
+    set dragVelocity( dragVelocity ) { this._dragVelocity = dragVelocity; },
+
+    /**
+     * Getter for the shiftDragVelocity property, see options.shiftDragVelocity for more info.
+     * @returns {number|null}
+     */
+    get shiftDragVelocity() { return this._shiftDragVelocity; },
+
+    /**
+     * Setter for the shiftDragVelocity property, see options.shiftDragVelocity for more info.
+     * @param {number|null} shiftDragVelocity
+     */
+    set shiftDragVelocity( shiftDragVelocity ) { this._shiftDragVelocity = shiftDragVelocity; },
+
+    /**
+     * Getter for the downDelta property, see options.downDelta for more info.
+     * @returns {number|null}
+     */
+    get downDelta() { return this._downDelta; },
+
+    /**
+     * Setter for the downDelta property, see options.downDelta for more info.
+     * @param {number|null} downDelta
+     */
+    set downDelta( downDelta ) { this._downDelta = downDelta; },
+
+    /**
+     * Getter for the shiftDownDelta property, see options.shiftDownDelta for more info.
+     * @returns {number|null}
+     */
+    get shiftDownDelta() { return this._shiftDownDelta; },
+
+    /**
+     * Setter for the shiftDownDelta property, see options.shiftDownDelta for more info.
+     * @param {number|null} shiftDownDelta
+     */
+    set shiftDownDelta( shiftDownDelta ) { this._shiftDownDelta = shiftDownDelta; },
+
+    /**
+     * Getter for the moveOnHoldDelay property, see options.moveOnHoldDelay for more info.
+     * @returns {number}
+     */
+    get moveOnHoldDelay() { return this._moveOnHoldDelay; },
+
+    /**
+     * Setter for the moveOnHoldDelay property, see options.moveOnHoldDelay for more info.
+     * @param {number} moveOnHoldDelay
+     */
+    set moveOnHoldDelay( moveOnHoldDelay ) { this._moveOnHoldDelay = moveOnHoldDelay; },
+
+    /**
+     * Getter for the moveOnHoldInterval property, see options.moveOnHoldInterval for more info.
+     * @returns {number}
+     */
+    get moveOnHoldInterval() { return this._moveOnHoldInterval; },
+
+    /**
+     * Setter for the moveOnHoldInterval property, see options.moveOnHoldInterval for more info.
+     * @param {number} moveOnHoldInterval
+     */
+    set moveOnHoldInterval( moveOnHoldInterval ) { this._moveOnHoldInterval = moveOnHoldInterval; },
+
+    /**
+     * Getter for the hotkeyInterval property, see options.hotkeyInterval for more info.
+     * @returns {number}
+     */
+    get hotkeyInterval() { return this._hotkeyInterval; },
+
+    /**
+     * Setter for the hotkeyInterval property, see options.hotkeyInterval for more info.
+     * @param {number} hotkeyInterval
+     */
+    set hotkeyInterval( hotkeyInterval ) { this._hotkeyInterval = hotkeyInterval; },
+
 
     /**
      * Step function for the drag handler. JavaScript does not natively handle multiple keydown events at once,
