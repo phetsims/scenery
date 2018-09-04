@@ -7,7 +7,7 @@
  *
  * JavaScript does not natively handle multiple 'keydown' events at once, so we have a custom implementation that
  * tracks which keys are down and for how long in a step() function. This type is in scenery-phet because
- * phet-core/Timer drives the updates with step().
+ * phet-core/timer drives the updates with step().
  *
  * @author Jesse Greenberg
  * @author Michael Barlow
@@ -21,7 +21,7 @@ define( function( require ) {
   var KeyboardUtil = require( 'SCENERY/accessibility/KeyboardUtil' );
   var platform = require( 'PHET_CORE/platform' );
   var sceneryPhet = require( 'SCENERY_PHET/sceneryPhet' );
-  var Timer = require( 'PHET_CORE/Timer' );
+  var timer = require( 'PHET_CORE/timer' );
   var Vector2 = require( 'DOT/Vector2' );
 
   /**
@@ -237,11 +237,11 @@ define( function( require ) {
 
     // step the drag listener, must be removed in dispose
     var stepListener = this.step.bind( this );
-    Timer.addListener( stepListener );
+    timer.addListener( stepListener );
 
     // @private - called in dispose
     this._disposeKeyboardDragListener = function() {
-      Timer.removeListener( stepListener );
+      timer.removeListener( stepListener );
     };
   }
 
