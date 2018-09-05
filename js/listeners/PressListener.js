@@ -275,7 +275,8 @@ define( function( require ) {
     // @private - emitted on press event
     this._pressedEmitter = new Emitter( {
       tandem: options.tandem.createTandem( 'pressedEmitter' ),
-      phetioInstanceDocumentation: 'Emits whenever a press occurs with a single EventIO argument.',
+      phetioInstanceDocumentation: 'Emits whenever a press occurs. The first argument when emitting can be ' +
+                                   'used to convey info about the Event.',
       phetioReadOnly: options.phetioReadOnly,
       phetioEventType: 'user',
       phetioType: EmitterIO( [ EventIO, VoidIO, VoidIO ] )
@@ -307,7 +308,7 @@ define( function( require ) {
     // @private - emitted on release event
     this._releasedEmitter = new Emitter( {
       tandem: options.tandem.createTandem( 'releasedEmitter' ),
-      phetioInstanceDocumentation: 'Emits whenever a press occurs with a single EventIO argument.',
+      phetioInstanceDocumentation: 'Emits whenever a release occurs.',
       phetioReadOnly: options.phetioReadOnly,
       phetioEventType: 'user',
       phetioType: EmitterIO( [ VoidIO ] )

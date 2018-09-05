@@ -193,7 +193,7 @@ define( function( require ) {
     // @private {Emitter} - emitted on drag. Used for triggering phet-io events, see https://github.com/phetsims/scenery/issues/842
     this._draggedEmitter = new Emitter( {
       tandem: options.tandem.createTandem( 'draggedEmitter' ),
-      phetioInstanceDocumentation: 'Emits whenever a drag occurs with a single EventIO argument.',
+      phetioInstanceDocumentation: 'Emits whenever a drag occurs with an EventIO argument.',
       phetioReadOnly: options.phetioReadOnly,
       phetioEventType: 'user',
       phetioType: EmitterIO( [ EventIO ] )
