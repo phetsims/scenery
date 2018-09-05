@@ -227,22 +227,23 @@ define( function( require ) {
      * @returns {boolean} success - Returns whether the press was actually started
      */
     press: function( event, targetNode ) {
+      var self = this;
       sceneryLog && sceneryLog.InputListener && sceneryLog.InputListener( 'DragListener press' );
       sceneryLog && sceneryLog.InputListener && sceneryLog.push();
 
-      var success = PressListener.prototype.press.call( this, event, targetNode, () => {
+      var success = PressListener.prototype.press.call( this, event, targetNode, function() {
         sceneryLog && sceneryLog.InputListener && sceneryLog.InputListener( 'DragListener successful press' );
         sceneryLog && sceneryLog.InputListener && sceneryLog.push();
 
-        this.attachTransformTracker();
+        self.attachTransformTracker();
 
         // Set the local point
-        this.parentToLocalPoint( this.globalToParentPoint( this._localPoint.set( this.pointer.point ) ) );
+        self.parentToLocalPoint( self.globalToParentPoint( self._localPoint.set( self.pointer.point ) ) );
 
-        this.reposition( this.pointer.point );
+        self.reposition( self.pointer.point );
 
         // Notify after positioning and other changes
-        this._start && this._start( event, this );
+        self._start && self._start( event, self );
 
         sceneryLog && sceneryLog.InputListener && sceneryLog.pop();
       } );
@@ -261,14 +262,16 @@ define( function( require ) {
      * events. If the cancel/interrupt behavior is more preferable, call interrupt() on this listener instead.
      */
     release: function() {
+      var self = this;
+
       sceneryLog && sceneryLog.InputListener && sceneryLog.InputListener( 'DragListener release' );
       sceneryLog && sceneryLog.InputListener && sceneryLog.push();
 
-      PressListener.prototype.release.call( this, () => {
-        this.detachTransformTracker();
+      PressListener.prototype.release.call( this, function() {
+        self.detachTransformTracker();
 
         // Notify after the rest of release is called in order to prevent it from triggering interrupt().
-        this._end && this._end( this );
+        self._end && self._end( self );
       } );
 
       sceneryLog && sceneryLog.InputListener && sceneryLog.pop();

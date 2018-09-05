@@ -272,6 +272,7 @@ define( function( require ) {
       blur: this.blur.bind( this )
     };
 
+    // @private - emitted on press event
     this._pressedEmitter = new Emitter( {
       tandem: options.tandem.createTandem( 'pressedEmitter' ),
       phetioInstanceDocumentation: 'Emits whenever a press occurs with a single EventIO argument.',
@@ -280,29 +281,30 @@ define( function( require ) {
       phetioType: EmitterIO( [ EventIO, VoidIO, VoidIO ] )
     } );
 
-    this._pressedEmitter.addListener( ( event, targetNode, callback ) => {
+    this._pressedEmitter.addListener( function( event, targetNode, callback ) {
 
-      targetNode = targetNode || this._targetNode;
+      targetNode = targetNode || self._targetNode;
 
       // Set self properties before the property change, so they are visible to listeners.
-      this.pointer = event.pointer;
-      this.pressedTrail = targetNode ? targetNode.getUniqueTrail() : event.trail.subtrailTo( event.currentTarget, false );
+      self.pointer = event.pointer;
+      self.pressedTrail = targetNode ? targetNode.getUniqueTrail() : event.trail.subtrailTo( event.currentTarget, false );
 
-      this.interrupted = false; // clears the flag (don't set to false before here)
+      self.interrupted = false; // clears the flag (don't set to false before here)
 
-      this.pointer.addInputListener( this._pointerListener, this._attach );
-      this._listeningToPointer = true;
+      self.pointer.addInputListener( self._pointerListener, self._attach );
+      self._listeningToPointer = true;
 
-      this.pointer.cursor = this._pressCursor;
+      self.pointer.cursor = self._pressCursor;
 
-      this.isPressedProperty.value = true;
+      self.isPressedProperty.value = true;
 
       // Notify after everything else is set up
-      this._pressListener && this._pressListener( event, this );
+      self._pressListener && self._pressListener( event, self );
 
       callback && callback();
     } );
 
+    // @private - emitted on release event
     this._releasedEmitter = new Emitter( {
       tandem: options.tandem.createTandem( 'releasedEmitter' ),
       phetioInstanceDocumentation: 'Emits whenever a press occurs with a single EventIO argument.',
@@ -311,23 +313,23 @@ define( function( require ) {
       phetioType: EmitterIO( [ VoidIO ] )
     } );
 
-    this._releasedEmitter.addListener( ( callback ) => {
+    this._releasedEmitter.addListener( function( callback ) {
 
-      assert && assert( this.isPressed, 'This listener is not pressed' );
+      assert && assert( self.isPressed, 'This listener is not pressed' );
 
-      this.pointer.removeInputListener( this._pointerListener );
-      this._listeningToPointer = false;
+      self.pointer.removeInputListener( self._pointerListener );
+      self._listeningToPointer = false;
 
-      this.pointer.cursor = null;
+      self.pointer.cursor = null;
 
       // Unset self properties after the property change, so they are visible to listeners beforehand.
-      this.pointer = null;
-      this.pressedTrail = null;
+      self.pointer = null;
+      self.pressedTrail = null;
 
-      this.isPressedProperty.value = false;
+      self.isPressedProperty.value = false;
 
       // Notify after the rest of release is called in order to prevent it from triggering interrupt().
-      this._releaseListener && this._releaseListener( this );
+      self._releaseListener && self._releaseListener( self );
 
       callback && callback();
     } );
