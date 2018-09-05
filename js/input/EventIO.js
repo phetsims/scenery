@@ -39,7 +39,10 @@ define( function( require ) {
     toStateObject( event ) {
       assert && assertInstanceOf( event, phet.scenery.Event );
 
-      var eventObject = {};
+      var eventObject = {
+        type: event.type,
+        domEventType: event.domEvent.type
+      };
       if ( event.pointer && event.pointer.point ) {
         eventObject.point = Vector2IO.toStateObject( event.pointer.point );
       }
