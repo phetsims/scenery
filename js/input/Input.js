@@ -190,8 +190,9 @@ define( function( require ) {
     this.pointers = [];
 
     // For PhET-iO
-    // TODO: this could be made a general thing
-    this.emitter = new Emitter();
+    // @public (scenery, phet-io) {Emitter} - emits scenery input events that can be recorded and played back
+    // through PhET-iO.  @private outside of scenery and phet-io
+    this.phetioEmitter = new Emitter();
 
     // TODO: replace this with an emitter
     this.pointerAddedListeners = [];
@@ -473,8 +474,8 @@ define( function( require ) {
       sceneryLog && sceneryLog.Input && sceneryLog.Input( 'mouseDown(' + Input.debugText( point, event ) + ');' );
       sceneryLog && sceneryLog.Input && sceneryLog.push();
 
-      if ( this.emitter.hasListeners() ) {
-        this.emitter.emit3( 'mouseDown', {
+      if ( this.phetioEmitter.hasListeners() ) {
+        this.phetioEmitter.emit3( 'mouseDown', {
           point: { x: point.x, y: point.y },
           event: Input.serializeDomEvent( event )
         }, NORMAL_FREQUENCY );
@@ -500,8 +501,8 @@ define( function( require ) {
       sceneryLog && sceneryLog.Input && sceneryLog.Input( 'mouseUp(' + Input.debugText( point, event ) + ');' );
       sceneryLog && sceneryLog.Input && sceneryLog.push();
 
-      if ( this.emitter.hasListeners() ) {
-        this.emitter.emit3( 'mouseUp', {
+      if ( this.phetioEmitter.hasListeners() ) {
+        this.phetioEmitter.emit3( 'mouseUp', {
           point: point.toStateObject(),
           event: Input.serializeDomEvent( event )
         }, NORMAL_FREQUENCY );
@@ -527,8 +528,8 @@ define( function( require ) {
       sceneryLog && sceneryLog.Input && sceneryLog.Input( 'mouseMove(' + Input.debugText( point, event ) + ');' );
       sceneryLog && sceneryLog.Input && sceneryLog.push();
 
-      if ( this.emitter.hasListeners() ) {
-        this.emitter.emit3( 'mouseMove', {
+      if ( this.phetioEmitter.hasListeners() ) {
+        this.phetioEmitter.emit3( 'mouseMove', {
           point: point.toStateObject(),
           event: Input.serializeDomEvent( event )
         }, HIGH_FREQUENCY );
@@ -551,8 +552,8 @@ define( function( require ) {
       sceneryLog && sceneryLog.Input && sceneryLog.Input( 'mouseOver(' + Input.debugText( point, event ) + ');' );
       sceneryLog && sceneryLog.Input && sceneryLog.push();
 
-      if ( this.emitter.hasListeners() ) {
-        this.emitter.emit3( 'mouseOver', {
+      if ( this.phetioEmitter.hasListeners() ) {
+        this.phetioEmitter.emit3( 'mouseOver', {
           point: point.toStateObject(),
           event: Input.serializeDomEvent( event )
         }, NORMAL_FREQUENCY );
@@ -575,8 +576,8 @@ define( function( require ) {
       sceneryLog && sceneryLog.Input && sceneryLog.Input( 'mouseOut(' + Input.debugText( point, event ) + ');' );
       sceneryLog && sceneryLog.Input && sceneryLog.push();
 
-      if ( this.emitter.hasListeners() ) {
-        this.emitter.emit3( 'mouseOut', {
+      if ( this.phetioEmitter.hasListeners() ) {
+        this.phetioEmitter.emit3( 'mouseOut', {
           point: point.toStateObject(),
           event: Input.serializeDomEvent( event )
         }, NORMAL_FREQUENCY );
@@ -598,8 +599,8 @@ define( function( require ) {
       sceneryLog && sceneryLog.Input && sceneryLog.Input( 'wheel(' + Input.debugText( null, event ) + ');' );
       sceneryLog && sceneryLog.Input && sceneryLog.push();
 
-      if ( this.emitter.hasListeners() ) {
-        this.emitter.emit3( 'wheel', {
+      if ( this.phetioEmitter.hasListeners() ) {
+        this.phetioEmitter.emit3( 'wheel', {
           event: Input.serializeDomEvent( event )
         }, HIGH_FREQUENCY );
       }
@@ -631,8 +632,8 @@ define( function( require ) {
       sceneryLog && sceneryLog.Input && sceneryLog.Input( 'touchStart(\'' + id + '\',' + Input.debugText( point, event ) + ');' );
       sceneryLog && sceneryLog.Input && sceneryLog.push();
 
-      if ( this.emitter.hasListeners() ) {
-        this.emitter.emit3( 'touchStart', {
+      if ( this.phetioEmitter.hasListeners() ) {
+        this.phetioEmitter.emit3( 'touchStart', {
           id: id,
           point: point.toStateObject(),
           event: Input.serializeDomEvent( event )
@@ -660,8 +661,8 @@ define( function( require ) {
       sceneryLog && sceneryLog.Input && sceneryLog.Input( 'touchEnd(\'' + id + '\',' + Input.debugText( point, event ) + ');' );
       sceneryLog && sceneryLog.Input && sceneryLog.push();
 
-      if ( this.emitter.hasListeners() ) {
-        this.emitter.emit3( 'touchEnd', {
+      if ( this.phetioEmitter.hasListeners() ) {
+        this.phetioEmitter.emit3( 'touchEnd', {
           id: id,
           point: point.toStateObject(),
           event: Input.serializeDomEvent( event )
@@ -692,8 +693,8 @@ define( function( require ) {
       sceneryLog && sceneryLog.Input && sceneryLog.Input( 'touchMove(\'' + id + '\',' + Input.debugText( point, event ) + ');' );
       sceneryLog && sceneryLog.Input && sceneryLog.push();
 
-      if ( this.emitter.hasListeners() ) {
-        this.emitter.emit3( 'touchMove', {
+      if ( this.phetioEmitter.hasListeners() ) {
+        this.phetioEmitter.emit3( 'touchMove', {
           id: id,
           point: point.toStateObject(),
           event: Input.serializeDomEvent( event )
@@ -723,8 +724,8 @@ define( function( require ) {
       sceneryLog && sceneryLog.Input && sceneryLog.Input( 'touchCancel(\'' + id + '\',' + Input.debugText( point, event ) + ');' );
       sceneryLog && sceneryLog.Input && sceneryLog.push();
 
-      if ( this.emitter.hasListeners() ) {
-        this.emitter.emit3( 'touchCancel', {
+      if ( this.phetioEmitter.hasListeners() ) {
+        this.phetioEmitter.emit3( 'touchCancel', {
           id: id,
           point: point.toStateObject(),
           event: Input.serializeDomEvent( event )
@@ -755,8 +756,8 @@ define( function( require ) {
       sceneryLog && sceneryLog.Input && sceneryLog.Input( 'penStart(\'' + id + '\',' + Input.debugText( point, event ) + ');' );
       sceneryLog && sceneryLog.Input && sceneryLog.push();
 
-      if ( this.emitter.hasListeners() ) {
-        this.emitter.emit3( 'penStart', {
+      if ( this.phetioEmitter.hasListeners() ) {
+        this.phetioEmitter.emit3( 'penStart', {
           id: id,
           point: point.toStateObject(),
           event: Input.serializeDomEvent( event )
@@ -784,8 +785,8 @@ define( function( require ) {
       sceneryLog && sceneryLog.Input && sceneryLog.Input( 'penEnd(\'' + id + '\',' + Input.debugText( point, event ) + ');' );
       sceneryLog && sceneryLog.Input && sceneryLog.push();
 
-      if ( this.emitter.hasListeners() ) {
-        this.emitter.emit3( 'penEnd', {
+      if ( this.phetioEmitter.hasListeners() ) {
+        this.phetioEmitter.emit3( 'penEnd', {
           id: id,
           point: point.toStateObject(),
           event: Input.serializeDomEvent( event )
@@ -816,8 +817,8 @@ define( function( require ) {
       sceneryLog && sceneryLog.Input && sceneryLog.Input( 'penMove(\'' + id + '\',' + Input.debugText( point, event ) + ');' );
       sceneryLog && sceneryLog.Input && sceneryLog.push();
 
-      if ( this.emitter.hasListeners() ) {
-        this.emitter.emit3( 'penMove', {
+      if ( this.phetioEmitter.hasListeners() ) {
+        this.phetioEmitter.emit3( 'penMove', {
           id: id,
           point: point.toStateObject(),
           event: Input.serializeDomEvent( event )
@@ -847,8 +848,8 @@ define( function( require ) {
       sceneryLog && sceneryLog.Input && sceneryLog.Input( 'penCancel(\'' + id + '\',' + Input.debugText( point, event ) + ');' );
       sceneryLog && sceneryLog.Input && sceneryLog.push();
 
-      if ( this.emitter.hasListeners() ) {
-        this.emitter.emit3( 'penCancel', {
+      if ( this.phetioEmitter.hasListeners() ) {
+        this.phetioEmitter.emit3( 'penCancel', {
           id: id,
           point: point.toStateObject(),
           event: Input.serializeDomEvent( event )
