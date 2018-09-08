@@ -4,7 +4,7 @@
  * Collection of utility constants and functions for managing keyboard input. Constants are keycodes. Keycode is marked
  * as deprecated, but alternatives do not have browser support. Once they do, consider replacing Event.keyCode
  * with Event.code.
- * 
+ *
  * @author Jesse Greenberg
  */
 define( function( require ) {
@@ -56,6 +56,12 @@ define( function( require ) {
     // returns whether or not the keyCode corresponds to pressing a number key
     isNumberKey: function( keyCode ) {
       return ( keyCode > KeyboardUtil.KEY_0 && keyCode < KeyboardUtil.KEY_9 );
+    },
+
+    // returns whether or not the keyCode corresponds to one of the WASD movement keys
+    isWASDKey: function( keyCode ) {
+      return ( keyCode === KeyboardUtil.KEY_W || keyCode === KeyboardUtil.KEY_A ||
+               keyCode === KeyboardUtil.KEY_S || keyCode === KeyboardUtil.KEY_D );
     }
   };
 
