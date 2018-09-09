@@ -1819,6 +1819,8 @@ define( function( require ) {
      */
     addInputListener: function( listener ) {
       assert && assert( !_.includes( this._inputListeners, listener ), 'Input listener already registered on this Node' );
+      assert && assert( listener !== null, 'Input listener cannot be null' );
+      assert && assert( listener !== undefined, 'Input listener cannot be undefined' );
 
       // don't allow listeners to be added multiple times
       if ( !_.includes( this._inputListeners, listener ) ) {
