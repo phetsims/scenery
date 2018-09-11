@@ -224,8 +224,11 @@ define( function( require ) {
         this.addDOMEventListeners( this.node.accessibleInputListeners[ i ] );
       }
 
-      // update all attributes for the peer, should cover aria-label, role, input value and others
+      // update all attributes for the peer, should cover aria-label, role, and others
       this.onAttributeChange( options );
+
+      // update input value attribute for the peer
+      this.onInputValueChange();
 
       // Default the focus highlight in this special case to be invisible until selected.
       if ( this.node.focusHighlightLayerable ) {
