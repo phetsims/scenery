@@ -368,6 +368,14 @@ define( function( require ) {
     },
 
     /**
+     * Set the input value on the peer's primary sibling element. Using the value setter seems to be the only way
+     * to have the value be set correctly so we cannot use onAttributeChange for this.
+     */
+    onInputValueChange: function() {
+      this.primarySibling.value = this.node.inputValue;
+    },
+
+    /**
      * Called when our parallel DOM element gets focused.
      * @private
      *

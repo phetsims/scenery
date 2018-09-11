@@ -1892,7 +1892,10 @@ define( function( require ) {
           value = '' + value;
           this._inputValue = value;
 
-          this.setAccessibleAttribute( 'value', value );
+          for ( var i = 0; i < this.accessibleInstances.length; i++ ) {
+            var peer = this.accessibleInstances[ i ].peer;
+            peer.onInputValueChange();
+          }
         },
         set inputValue( value ) { this.setInputValue( value ); },
 
