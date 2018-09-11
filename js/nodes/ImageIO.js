@@ -38,7 +38,8 @@ define( function( require ) {
         im.src = base64Text;
         this.instance.image = im;
       },
-      documentation: 'Set the image from a base64 string'
+      documentation: 'Set the image from a base64 string',
+      canBeInvokedForReadOnlyInstances: false
     }
   }, {
     documentation: 'The tandem IO type for the scenery Text node',
