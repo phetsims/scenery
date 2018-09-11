@@ -214,8 +214,6 @@ define( function( require ) {
     'accessibleVisible', // Sets whether or not the node's DOM element is visible in the parallel DOM, see setAccessibleVisible()
     'focusable', // Sets whether or not the node can receive keyboard focus, see setFocusable()
     'accessibleOrder', // Modifies the order of accessible  navigation, see setAccessibleOrder()
-    'accessibleContent', // Sets up accessibility handling (probably don't need to use this), see setAccessibleContent()
-
     'ariaLabelledbyAssociations', // sets the list of aria-labelledby associations between from this node to others (including itself), see setAriaLabelledbyAssociations
     'ariaDescribedbyAssociations' // sets the list of aria-describedby associations between from this node to others (including itself), see setAriaDescribedbyAssociations
   ];
@@ -2234,7 +2232,6 @@ define( function( require ) {
 
           this.trigger0( 'accessibleContent' );
         },
-        set accessibleContent( value ) { this.onAccessibleContentChange( value ); },
 
         /**
          * Returns whether or not this Node has any accessibleContent defined.
