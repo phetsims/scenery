@@ -75,14 +75,13 @@ define( function( require ) {
      * @returns {boolean} success - Returns whether the press was actually started
      */
     press: function( event ) {
-      var success = PressListener.prototype.press.call( this, event );
+      var success = PressListener.prototype.press.call( this, event, function( success ) {
 
-      if ( success ) {
+        // This function is only called on success
         if ( this._fireOnDown ) {
           this.fire( event );
         }
-      }
-
+      } );
       return success;
     },
 
