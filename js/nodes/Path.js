@@ -418,6 +418,17 @@ define( function( require ) {
     },
 
     /**
+     * Returns our safe self bounds when our rendered self is transformed by the matrix.
+     * @public
+     *
+     * @param {Matrix3} matrix
+     * @returns {Bounds2}
+     */
+    getTransformedSafeSelfBounds: function( matrix ) {
+      return this.getTransformedSelfBounds( matrix );
+    },
+
+    /**
      * Called from (and overridden in) the Paintable trait, invalidates our current stroke, triggering recomputation of
      * anything that depended on the old stroke's value.
      * @protected (scenery-internal)

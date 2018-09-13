@@ -650,18 +650,6 @@ define( function( require ) {
     },
 
     /**
-     * Returns our self bounds when our rendered self is transformed by the matrix.
-     * @public
-     * @override
-     *
-     * @param {Matrix3} matrix
-     * @returns {Bounds2}
-     */
-    getTransformedSelfBounds: function( matrix ) {
-      return this.selfBounds.transformed( matrix );
-    },
-
-    /**
      * Returns a Shape that is equivalent to our rendered display. Generally used to lazily create a Shape instance
      * when one is needed, without having to do so beforehand.
      * @private
