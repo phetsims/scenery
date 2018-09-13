@@ -179,8 +179,9 @@ define( function( require ) {
       this.backingScale = Util.backingScale( this.gl );
 
       // Double the backing scale size if we detect no built-in antialiasing.
-      // See https://github.com/phetsims/circuit-construction-kit-dc/issues/139
-      if ( gl.getParameter( gl.SAMPLES ) === 0 ) {
+      // See https://github.com/phetsims/circuit-construction-kit-dc/issues/139 and
+      // https://github.com/phetsims/scenery/issues/859.
+      if ( this.display._allowBackingScaleAntialiasing && gl.getParameter( gl.SAMPLES ) === 0 ) {
         this.backingScale *= 2;
       }
 

@@ -174,7 +174,11 @@ define( function( require ) {
       // Chrome also did the same "passive by default", but because we have `touch-action: none` in place, it doesn't
       // affect us, and we can potentially get performance improvements by allowing passive events.
       // See https://github.com/phetsims/scenery/issues/770 for more information.
-      passiveEvents: platform.safari ? false : null
+      passiveEvents: platform.safari ? false : null,
+
+      // {boolean} - Whether, if no WebGL antialiasing is detected, the backing scale can be increased so as to
+      //             provide some antialiasing benefit. See https://github.com/phetsims/scenery/issues/859.
+      allowBackingScaleAntialiasing: true
     }, options );
 
     // TODO: don't store the options, it's an anti-pattern.
@@ -244,6 +248,9 @@ define( function( require ) {
 
     // @public (scenery-internal) {boolean}
     this._aggressiveContextRecreation = options.aggressiveContextRecreation;
+
+    // @public (scenery-internal) {boolean}
+    this._allowBackingScaleAntialiasing = options.allowBackingScaleAntialiasing;
 
     // overlays currently being displayed.
     // API expected:
