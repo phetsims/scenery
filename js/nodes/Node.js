@@ -1886,12 +1886,15 @@ define( function( require ) {
      * @returns {Node} - Returns 'this' reference, for chaining
      */
     removeInputListener: function( listener ) {
-      // ensure the listener is in our list
-      assert && assert( _.includes( this._inputListeners, listener ) );
+      var index = _.indexOf( this._inputListeners, listener );
 
-      this._inputListeners.splice( _.indexOf( this._inputListeners, listener ), 1 );
-      this._picker.onRemoveInputListener();
-      if ( assertSlow ) { this._picker.audit(); }
+      // ensure the listener is in our list (ignore assertion for disposal, see https://github.com/phetsims/sun/issues/394)
+      assert && assert( this._isDisposed || index >= 0, 'Could not find input listener to remove' );
+      if ( index >= 0 ) {
+        this._inputListeners.splice( index, 1 );
+        this._picker.onRemoveInputListener();
+        if ( assertSlow ) { this._picker.audit(); }
+      }
 
       return this;
     },
