@@ -139,6 +139,10 @@ define( function( require ) {
         options = this.node.accessibleNameBehavior( this.node, options, this.node.accessibleName );
       }
 
+      if ( this.node.accessibleHeading !== null ) {
+        options = this.node.accessibleHeadingBehavior( this.node, options, this.node.accessibleHeading );
+      }
+
       if ( this.node.helpText !== null ) {
         options = this.node.helpTextBehavior( this.node, options, this.node.helpText );
       }

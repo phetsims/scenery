@@ -190,8 +190,6 @@ define( function( require ) {
      * Called when a node has an accessibleContent change.
      * @public
      *
-     * NOTE: Due to the accessibleContent guard, this will not be called with oldContent and newContent equal to `null`.
-     *
      * @param {Node} node
      */
     accessibleContentChange: function( node ) {

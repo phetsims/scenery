@@ -164,6 +164,17 @@ define( function( require ) {
     return options;
   };
 
+  // see setAccessibleHeadingBehavior for more details
+  var DEFAULT_ACCESSIBLE_HEADING_BEHAVIOR = function( node, options, heading ) {
+
+// assert no accessibleName;
+// assert no labelTagName/Content already on node
+
+    options.labelTagName = 'h' + node.headingLevel;
+    options.labelContent = heading;
+    return options;
+  };
+
   // these elements are typically associated with forms, and support certain attributes
   var FORM_ELEMENTS = AccessibilityUtil.FORM_ELEMENTS;
 
@@ -182,8 +193,11 @@ define( function( require ) {
      */
 
     'accessibleName',
+    // TODO: add accessibleNameBehavior
     'helpText',
     'helpTextBehavior',
+    'accessibleHeading',
+    'accessibleHeadingBehavior',
 
     /*
      * Lower Level API Functions
@@ -418,6 +432,16 @@ define( function( require ) {
 
           // {A11yBehaviorFunctionDef} - sets the help text of the Node, this most often corresponds to description text.
           this._helpTextBehavior = DEFAULT_HELP_TEXT_BEHAVIOR;
+
+          // {string|null} - sets the help text of the Node, this most often corresponds to description text.
+          this._accessibleHeading = null;
+
+          // TODO: implement headingLevel override, see https://github.com/phetsims/scenery/issues/855
+          // {number|null} - the number that corresponds to the heading tag the node will get if using the accessibleHeading api,.
+          this._headingLevel = null;
+
+          // {A11yBehaviorFunctionDef} - sets the help text of the Node, this most often corresponds to description text.
+          this._accessibleHeadingBehavior = DEFAULT_ACCESSIBLE_HEADING_BEHAVIOR;
         },
 
 
@@ -708,6 +732,105 @@ define( function( require ) {
         },
         get accessibleNameBehavior() { return this.getAccessibleNameBehavior(); },
 
+
+        /**
+         * Set the Node heading content. This by default will be a heading tag whose level is dependent on how many parents
+         * Nodes are heading nodes. See computeHeadingLevel() for more info
+         *
+         * @param {string|null} accessibleHeading
+         */
+        setAccessibleHeading: function( accessibleHeading ) {
+          assert && assert( accessibleHeading === null || typeof accessibleHeading === 'string' );
+
+          if ( this._accessibleHeading !== accessibleHeading ) {
+            this._accessibleHeading = accessibleHeading;
+
+            this.onAccessibleContentChange();
+          }
+        },
+        set accessibleHeading( accessibleHeading ) { this.setAccessibleHeading( accessibleHeading ); },
+
+        /**
+         * Get the value of this Node's heading. Use null to clear the heading
+         * @public
+         *
+         * @returns {string|null}
+         */
+        getAccessibleHeading: function() {
+          return this._accessibleHeading;
+        },
+        get accessibleHeading() { return this.getAccessibleHeading(); },
+
+
+        /**
+         * Set the behavior of how `this.accessibleHeading` is set in the PDOM. See default behavior function for more
+         * information.
+         *
+         * @param {A11yBehaviorFunctionDef|function} accessibleHeadingBehavior
+         */
+        setAccessibleHeadingBehavior: function( accessibleHeadingBehavior ) {
+          assert && A11yBehaviorFunctionDef.validateA11yBehaviorFunctionDef( accessibleHeadingBehavior );
+
+          if ( this._accessibleHeadingBehavior !== accessibleHeadingBehavior ) {
+
+            this._accessibleHeadingBehavior = accessibleHeadingBehavior;
+
+            this.onAccessibleContentChange();
+          }
+        },
+        set accessibleHeadingBehavior( accessibleHeadingBehavior ) { this.setAccessibleHeadingBehavior( accessibleHeadingBehavior ); },
+
+        /**
+         * Get the help text of the interactive element.
+         * @public
+         *
+         * @returns {function}
+         */
+        getAccessibleHeadingBehavior: function() {
+          return this._accessibleHeadingBehavior;
+        },
+        get accessibleHeadingBehavior() { return this.getAccessibleHeadingBehavior(); },
+
+
+        /**
+         * Get the tag name of the DOM element representing this node for accessibility.
+         * @public
+         *
+         * @returns {number|null}
+         */
+        getHeadingLevel: function() {
+          return this._headingLevel;
+        },
+        get headingLevel() { return this.getHeadingLevel(); },
+
+
+        /**
+         // TODO: what if ancestor changes, see https://github.com/phetsims/scenery/issues/855
+         * Sets this Node's heading level, by recursing up the accessibility tree to find headings this Node
+         * is nested under.
+         * @returns {number}
+         */
+        computeHeadingLevel: function() {
+          // TODO: assert??? assert( this.headingLevel || this._accessibleParent); see https://github.com/phetsims/scenery/issues/855
+          // Either ^ which may break during construction, or V (below)
+          //  base case to heading level 1
+          if ( !this._accessibleParent ) {
+            if ( this._accessibleHeading ) {
+              this._headingLevel = 1;
+              return 1;
+            }
+            return 0; // so that the first node with a heading is headingLevel 1
+          }
+
+          if ( this._accessibleHeading ) {
+            var level = this._accessibleParent.computeHeadingLevel() + 1;
+            this._headingLevel = level;
+            return level;
+          }
+          else {
+            return this._accessibleParent.computeHeadingLevel();
+          }
+        },
 
         /**
          * Set the help text for a Node. See setAccessibleNameBehavior for details on how this string is
@@ -2229,6 +2352,10 @@ define( function( require ) {
         onAccessibleContentChange: function() {
 
           AccessibilityTree.accessibleContentChange( this );
+
+          // recompute the heading level for this node if it is using the accessibleHeading API.
+          this._accessibleHeading && this.computeHeadingLevel();
+
 
           this.trigger0( 'accessibleContent' );
         },

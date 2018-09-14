@@ -1528,7 +1528,6 @@ define( function( require ) {
   QUnit.test( 'accessibleName option', function( assert ) {
 
     assert.ok( true );
-    // TODO: this should be passing,see https://github.com/phetsims/scenery/issues/811
 
     // test the behavior of focusable function
     var rootNode = new Node( { tagName: 'div' } );
@@ -1542,8 +1541,6 @@ define( function( require ) {
 
     var aElement = getPrimarySiblingElementByNode( a );
     assert.ok( aElement.textContent === TEST_LABEL, 'accessibleName setter on div' );
-
-    // TODO: this should be passing,see https://github.com/phetsims/scenery/issues/811
 
     var b = new Node( { tagName: 'input', accessibleName: TEST_LABEL } );
     a.addChild( b );
@@ -1576,11 +1573,30 @@ define( function( require ) {
     cLabelElement = getPrimarySiblingElementByNode( c ).parentElement.children[ DEFAULT_LABEL_SIBLING_INDEX ];
     assert.ok( cLabelElement.getAttribute( 'aria-label' ) === '', 'accessibleNameBehavior should work for empty string' );
 
-
     c.accessibleName = null;
     cLabelElement = getPrimarySiblingElementByNode( c ).parentElement.children[ DEFAULT_LABEL_SIBLING_INDEX ];
     assert.ok( cLabelElement.getAttribute( 'aria-label' ) === 'overrideThis', 'accessibleNameBehavior should not work until there is accessible name' );
 
+  } );
+
+
+  QUnit.test( 'accessibleHeading option', function( assert ) {
+
+    assert.ok( true );
+
+    // test the behavior of focusable function
+    var rootNode = new Node( { tagName: 'div' } );
+    var display = new Display( rootNode ); // eslint-disable-line
+    document.body.appendChild( display.domElement );
+
+    var a = new Node( { tagName: 'div', accessibleHeading: TEST_LABEL, containerTagName: 'div' } );
+    rootNode.addChild( a );
+
+    assert.ok( a.accessibleHeading === TEST_LABEL, 'accessibleName getter' );
+
+    var aLabelSibling = getPrimarySiblingElementByNode( a ).parentElement.children[ DEFAULT_LABEL_SIBLING_INDEX ];
+    assert.ok( aLabelSibling.textContent === TEST_LABEL, 'accessibleHeading setter on div' );
+    assert.ok( aLabelSibling.tagName === 'H1', 'accessibleHeading setter should be h1' );
   } );
 
   QUnit.test( 'helpText option', function( assert ) {
