@@ -678,7 +678,16 @@ define( function( require ) {
         sceneryLog && sceneryLog.RichText && sceneryLog.pop();
       }
 
-      containerNode.addElement( node );
+      var wasAdded = containerNode.addElement( node );
+      if ( !wasAdded ) {
+        // Remove it from the linkItems if we didn't actually add it.
+        this._linkItems = this._linkItems.filter( function( item ) {
+          return item.node !== node;
+        } );
+
+        // And since we won't dispose it (since it's not a child), clean it here
+        node.clean();
+      }
 
       return lineBreakState;
     },
@@ -1513,6 +1522,7 @@ define( function( require ) {
      * @private
      *
      * @param {RichTextElement|RichTextLeaf} element
+     * @returns {boolean} - Whether the item was actually added.
      */
     addElement: function( element ) {
 
@@ -1540,6 +1550,7 @@ define( function( require ) {
           this.leftSpacing = leftElementSpacing;
         }
         this.addChild( element );
+        return true;
       }
       else if ( !hasElement ) {
         sceneryLog && sceneryLog.RichText && sceneryLog.RichText( 'No element, adding spacing, ltr:' + this.isLTR + ', spacing: ' + ( leftElementSpacing + rightElementSpacing ) );
@@ -1562,7 +1573,9 @@ define( function( require ) {
           this.leftSpacing = leftElementSpacing;
         }
         this.addChild( element );
+        return true;
       }
+      return false;
     },
 
     /**
