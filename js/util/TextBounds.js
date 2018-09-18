@@ -81,7 +81,7 @@ define( function( require ) {
       }
 
       // NOTE: should return new instance, so that it can be mutated later
-      return Util.canvasAccurateBounds( function( context ) {
+      var accurateBounds = Util.canvasAccurateBounds( function( context ) {
         context.font = text._font.toCSS();
         context.direction = 'ltr';
         context.fillText( text.renderedText, 0, 0 );
@@ -96,6 +96,8 @@ define( function( require ) {
         resolution: 128,
         initialScale: 32 / Math.max( Math.abs( svgBounds.minX ), Math.abs( svgBounds.minY ), Math.abs( svgBounds.maxX ), Math.abs( svgBounds.maxY ) )
       } );
+      // Try falling back to SVG bounds if our accurate bounds are not finite
+      return accurateBounds.isFinite() ? accurateBounds : svgBounds;
     },
 
     /**

@@ -412,10 +412,11 @@ define( function( require ) {
       }
 
       var result = new Bounds2(
-        ( minBounds.minX + maxBounds.minX ) / 2,
-        ( minBounds.minY + maxBounds.minY ) / 2,
-        ( minBounds.maxX + maxBounds.maxX ) / 2,
-        ( minBounds.maxY + maxBounds.maxY ) / 2
+        // Do finite checks so we don't return NaN
+        ( isFinite( minBounds.minX ) && isFinite( maxBounds.minX ) ) ? ( minBounds.minX + maxBounds.minX ) / 2 : Number.POSITIVE_INFINITY,
+        ( isFinite( minBounds.minY ) && isFinite( maxBounds.minY ) ) ? ( minBounds.minY + maxBounds.minY ) / 2 : Number.POSITIVE_INFINITY,
+        ( isFinite( minBounds.maxX ) && isFinite( maxBounds.maxX ) ) ? ( minBounds.maxX + maxBounds.maxX ) / 2 : Number.NEGATIVE_INFINITY,
+        ( isFinite( minBounds.maxY ) && isFinite( maxBounds.maxY ) ) ? ( minBounds.maxY + maxBounds.maxY ) / 2 : Number.NEGATIVE_INFINITY
       );
 
       // extra data about our bounds
