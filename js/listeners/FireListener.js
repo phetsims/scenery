@@ -13,9 +13,11 @@
 define( function( require ) {
   'use strict';
 
+  var Emitter = require( 'AXON/Emitter' );
   var inherit = require( 'PHET_CORE/inherit' );
   var PressListener = require( 'SCENERY/listeners/PressListener' );
   var scenery = require( 'SCENERY/scenery' );
+  var Tandem = require( 'TANDEM/Tandem' );
 
   /**
    * @constructor
@@ -30,7 +32,9 @@ define( function( require ) {
 
       // {boolean} - If true, the button will fire when the button is pressed. If false, the button will fire when the
       // button is released while the pointer is over the button.
-      fireOnDown: false
+      fireOnDown: false,
+
+      tandem: Tandem.optional
     }, options );
 
     assert && assert( options.fire === null || typeof options.fire === 'function',
@@ -41,7 +45,13 @@ define( function( require ) {
 
     // @private - See options for documentation.
     this._fireOnDown = options.fireOnDown;
-    this._fireCallback = options.fire;
+
+    // @private - for PhET-iO events
+    this.firedEmitter = new Emitter( {
+      tandem: options.tandem.createTandem( 'firedEmitter' ),
+      phetioEventType: 'user'
+    } );
+    options.fire && this.firedEmitter.addListener( options.fire );
   }
 
   scenery.register( 'FireListener', FireListener );
@@ -52,13 +62,14 @@ define( function( require ) {
      * Fires any associated button fire callback.
      * @public
      *
+     * @param {Event|null} event
      * NOTE: This is safe to call on the listener externally.
      */
-    fire: function() {
+    fire: function( event ) {
       sceneryLog && sceneryLog.InputListener && sceneryLog.InputListener( 'FireListener fire' );
       sceneryLog && sceneryLog.InputListener && sceneryLog.push();
 
-      this._fireCallback && this._fireCallback();
+      this.firedEmitter.emit();
 
       sceneryLog && sceneryLog.InputListener && sceneryLog.pop();
     },
@@ -96,12 +107,14 @@ define( function( require ) {
      * on this listener instead.
      */
     release: function() {
-      PressListener.prototype.release.call( this );
+      var self = this;
+      PressListener.prototype.release.call( this, function() {
 
-      // Notify after the rest of release is called in order to prevent it from triggering interrupt().
-      if ( !this._fireOnDown && this.isHoveringProperty.value && !this.interrupted ) {
-        this.fire();
-      }
+        // Notify after the rest of release is called in order to prevent it from triggering interrupt().
+        if ( !self._fireOnDown && self.isHoveringProperty.value && !self.interrupted ) {
+          self.fire();
+        }
+      } );
     }
   } );
 

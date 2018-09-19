@@ -116,7 +116,7 @@ define( function( require ) {
      * @override - to prevent attempted JSON serialization of circular Node
      */
     fromStateObject: function( o ) {
-      return o; // Pass through values defined by subclasses, such as AquaRadioButtonIO.enabled
+      return o; // Pass through values defined by subclasses
     },
 
     documentation: 'The base type for graphical and potentially interactive objects.  NodeIO has nested PropertyIO values ' +
