@@ -984,12 +984,15 @@ define( function( require ) {
      * @public
      *
      * NOTE: This can be reversed with detachEvents().
+     * @param {Tandem} [tandem]
      */
-    initializeEvents: function() {
+    initializeEvents: function( tandem ) {
       assert && assert( !this._input, 'Events cannot be attached twice to a display (for now)' );
 
       // TODO: refactor here
-      var input = new Input( this, !this._listenToOnlyElement, this._batchDOMEvents, this._assumeFullWindow, this._passiveEvents );
+      var input = new Input( this, !this._listenToOnlyElement, this._batchDOMEvents, this._assumeFullWindow, this._passiveEvents, {
+        tandem: tandem
+      } );
       this._input = input;
 
       input.connectListeners();

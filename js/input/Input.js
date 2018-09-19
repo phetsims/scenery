@@ -125,16 +125,20 @@ define( function( require ) {
   var BrowserEvents = require( 'SCENERY/input/BrowserEvents' );
   var cleanArray = require( 'PHET_CORE/cleanArray' );
   var Emitter = require( 'AXON/Emitter' );
+  var EmitterIO = require( 'AXON/EmitterIO' );
   var Event = require( 'SCENERY/input/Event' );
+  var DOMEventIO = require( 'SCENERY/input/DOMEventIO' );
   var inherit = require( 'PHET_CORE/inherit' );
   var Mouse = require( 'SCENERY/input/Mouse' );
   var Pen = require( 'SCENERY/input/Pen' );
   var platform = require( 'PHET_CORE/platform' );
   var Pointer = require( 'SCENERY/input/Pointer' );
   var scenery = require( 'SCENERY/scenery' );
+  var Tandem = require( 'TANDEM/Tandem' );
   var Touch = require( 'SCENERY/input/Touch' );
   var Trail = require( 'SCENERY/util/Trail' );
   var Vector2 = require( 'DOT/Vector2' );
+  var Vector2IO = require( 'DOT/Vector2IO' );
 
   // constants
   var NORMAL_FREQUENCY = { highFrequency: false };
@@ -158,12 +162,19 @@ define( function( require ) {
    *                                     fills the entire window.
    * @param {boolean|null} passiveEvents - See Display's documentation (controls the presence of the passive flag for
    *                                       events, which has some advanced considerations).
+   *
+   * @param {Object} [options]
    */
-  function Input( display, attachToWindow, batchDOMEvents, assumeFullWindow, passiveEvents ) {
+  function Input( display, attachToWindow, batchDOMEvents, assumeFullWindow, passiveEvents, options ) {
     assert && assert( display instanceof scenery.Display );
     assert && assert( typeof attachToWindow === 'boolean' );
     assert && assert( typeof batchDOMEvents === 'boolean' );
     assert && assert( typeof assumeFullWindow === 'boolean' );
+    var self = this;
+
+    options = _.extend( {
+      tandem: Tandem.optional
+    }, options );
 
     // @public {Display}
     this.display = display;
@@ -200,6 +211,20 @@ define( function( require ) {
     // @public {boolean} - Whether we are currently firing events. We need to track this to handle re-entrant cases
     // like https://github.com/phetsims/balloons-and-static-electricity/issues/406.
     this.currentlyFiringEvents = false;
+
+    this.mouseUpEmitter = new Emitter( {
+      tandem: options.tandem.createTandem( 'mouseUpEmitter' ),
+      phetioType: EmitterIO( [ Vector2IO, DOMEventIO ] ),
+      phetioMessageType: 'user'
+      // TODO: instance doc and phetioReadOnly??!?
+    } );
+
+    this.mouseUpEmitter.addListener( function( point, event ) {
+      if ( !self.mouse ) { self.initMouse(); }
+      var pointChanged = self.mouse.up( point, event );
+      self.upEvent( self.mouse, event, pointChanged );
+    } );
+
   }
 
   scenery.register( 'Input', Input );
@@ -501,15 +526,7 @@ define( function( require ) {
       sceneryLog && sceneryLog.Input && sceneryLog.Input( 'mouseUp(' + Input.debugText( point, event ) + ');' );
       sceneryLog && sceneryLog.Input && sceneryLog.push();
 
-      if ( this.phetioEmitter.hasListeners() ) {
-        this.phetioEmitter.emit3( 'mouseUp', {
-          point: point.toStateObject(),
-          event: Input.serializeDomEvent( event )
-        }, NORMAL_FREQUENCY );
-      }
-      if ( !this.mouse ) { this.initMouse(); }
-      var pointChanged = this.mouse.up( point, event );
-      this.upEvent( this.mouse, event, pointChanged );
+      this.mouseUpEmitter.emit2( point, event );
 
       sceneryLog && sceneryLog.Input && sceneryLog.pop();
     },
