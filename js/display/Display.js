@@ -984,15 +984,13 @@ define( function( require ) {
      * @public
      *
      * NOTE: This can be reversed with detachEvents().
-     * @param {Tandem} [tandem]
+     * @param {Object} [options] - for PhET-iO
      */
-    initializeEvents: function( tandem ) {
+    initializeEvents: function( options ) {
       assert && assert( !this._input, 'Events cannot be attached twice to a display (for now)' );
 
       // TODO: refactor here
-      var input = new Input( this, !this._listenToOnlyElement, this._batchDOMEvents, this._assumeFullWindow, this._passiveEvents, {
-        tandem: tandem
-      } );
+      var input = new Input( this, !this._listenToOnlyElement, this._batchDOMEvents, this._assumeFullWindow, this._passiveEvents, options );
       this._input = input;
 
       input.connectListeners();
@@ -1504,6 +1502,7 @@ define( function( require ) {
       result += '<div style="' + headerStyle + '">Accessible Instances</div><br>';
 
       recurse( this._rootAccessibleInstance, '' );
+
       function recurse( instance, indentation ) {
         result += indentation + escapeHTML( ( instance.isRootInstance ? '' : instance.node.tagName ) + ' ' + instance.toString() ) + '<br>';
         instance.children.forEach( function( child ) {
