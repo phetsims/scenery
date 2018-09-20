@@ -4367,7 +4367,7 @@ define( function( require ) {
 
       wrapperNode.dispose();
 
-      var finalParentBounds = this.bounds;
+      var finalParentBounds = this.getVisualBounds();
       if ( sourceBounds ) {
         // If we provide sourceBounds, don't have resulting bounds that go outside.
         finalParentBounds = sourceBounds.intersection( finalParentBounds );
