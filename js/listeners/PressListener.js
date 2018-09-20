@@ -160,6 +160,9 @@ define( function( require ) {
     this.isHoveringProperty = options.isHoveringProperty;
     this.isHighlightedProperty = options.isHighlightedProperty;
 
+    // @public {Property.<boolean>} [read-only] - Whether the listener has focus (should appear to be over)
+    this.isFocusedProperty = new BooleanProperty( false );
+
     // @public {Pointer|null} [read-only] - The current pointer, or null when not pressed.
     this.pointer = null;
 
@@ -264,15 +267,16 @@ define( function( require ) {
       }
     };
 
-    // @public - the collection of event listeners that can be added to a Node through addAccessibleInputListener,
-    // typical usage could look like node.addAccessibleInputListener( pressListener.a11yListener )
+    // @public {Object} - the collection of event listeners that can be added to a Node through
+    // addAccessibleInputListener, typical usage could look like
+    // node.addAccessibleInputListener( pressListener.a11yListener )
     this.a11yListener = {
       click: this.click.bind( this ),
       focus: this.focus.bind( this ),
       blur: this.blur.bind( this )
     };
 
-    // @private - emitted on press event
+    // @private {Emitter} - emitted on press event
     this._pressedEmitter = new Emitter( {
       tandem: options.tandem.createTandem( 'pressedEmitter' ),
       phetioInstanceDocumentation: 'Emits whenever a press occurs. The first argument when emitting can be ' +
@@ -337,6 +341,7 @@ define( function( require ) {
 
     // update isOverProperty (not a DerivedProperty because we need to hook to passed-in properties)
     this.overPointers.lengthProperty.link( this.invalidateOver.bind( this ) );
+    this.isFocusedProperty.link( this.invalidateOver.bind( this ) );
 
     // update isHoveringProperty (not a DerivedProperty because we need to hook to passed-in properties)
     this.overPointers.lengthProperty.link( this._isHoveringListener );
@@ -443,44 +448,25 @@ define( function( require ) {
      * @returns {boolean}
      */
     canPress: function( event ) {
-
-      // canClick is a subset of canPress, start by checking a11y state that doesn't involve pointers
-      if ( !this.canClick() ) {
-        return false;
-      }
-
-      // Only let presses be started with the correct mouse button.
-      if ( event.pointer instanceof Mouse && event.domEvent.button !== this._mouseButton ) {
-        return false;
-      }
-
-      // We can't attach to a pointer that is already attached.
-      if ( this._attach && event.pointer.isAttached() ) {
-        return false;
-      }
-
-      return true;
+      // canClick is a subset of canPress (checks a11y state)
+      return this.canClick() &&
+             // Only let presses be started with the correct mouse button.
+             ( !( event.pointer instanceof Mouse ) || event.domEvent.button === this._mouseButton ) &&
+             // We can't attach to a pointer that is already attached.
+             ( !this._attach || !event.pointer.isAttached() );
     },
 
     /**
      * Returns whether this PressListener can be clicked from keyboard input.
+     * @public
+     *
      * @return {boolean}
      */
     canClick: function() {
-
-      // If this listener is already involved in pressing something, we can't press something
-      if ( this.isPressed ) {
-        return false;
-      }
-
-      // Check whether our options prevent us from starting a press right now.
-      if ( !this._canStartPress() ) {
-        return false;
-      }
-
-      return true;
+      // If this listener is already involved in pressing something (or our options predicate returns false) we can't
+      // press something.
+      return !this.isPressed && this._canStartPress();
     },
-
 
     /**
      * Moves the listener to the 'pressed' state if possible (attaches listeners and initializes press-related
@@ -567,6 +553,7 @@ define( function( require ) {
       sceneryLog && sceneryLog.InputListener && sceneryLog.InputListener( 'PressListener#' + this._id + ' interrupt' );
       sceneryLog && sceneryLog.InputListener && sceneryLog.push();
 
+      // REVIEW: Why can't we interrupt an a11y click? That sounds very buggy!
       if ( this.isPressed && !this._a11yClickInProgress ) {
         sceneryLog && sceneryLog.InputListener && sceneryLog.InputListener( 'PressListener#' + this._id + ' interrupting' );
         this.interrupted = true;
@@ -582,7 +569,7 @@ define( function( require ) {
      * @private
      */
     invalidateOver: function() {
-      this.isOverProperty.value = this.overPointers.length > 0;
+      this.isOverProperty.value = this.isFocusedProperty.value || this.overPointers.length > 0;
     },
 
     /**
@@ -620,10 +607,9 @@ define( function( require ) {
      */
     click: function() {
       if ( this.canClick() ) {
-
         // ensure that button is 'over' so listener can be called while button is down
-        this.isOverProperty.set( true );
-        this.isPressedProperty.set( true );
+        this.isFocusedProperty.value = true;
+        this.isPressedProperty.value = true;
 
         this._a11yClickInProgress = true;
 
@@ -631,9 +617,9 @@ define( function( require ) {
         timer.setTimeout( function() {
 
           // no longer down, don't reset 'over' so button can be styled as long as it has focus
-          self.isPressedProperty.set( false );
+          self.isPressedProperty.value = false;
 
-          // call the a11y click specific listener?
+          // call the a11y click specific listener
           self._onAccessibleClick && self._onAccessibleClick();
 
           self._a11yClickInProgress = false;
@@ -647,7 +633,7 @@ define( function( require ) {
      * @a11y
      */
     focus: function() {
-      this.isOverProperty.value = true;
+      this.isFocusedProperty.value = true;
     },
 
     /**
@@ -656,9 +642,7 @@ define( function( require ) {
      * @a11y
      */
     blur: function() {
-      if ( !this.isPressedProperty.get() ) {
-        this.isOverProperty.value = false;
-      }
+      this.isFocusedProperty.value = false;
     },
 
     /**
