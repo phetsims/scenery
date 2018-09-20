@@ -13,9 +13,12 @@
   <link rel="stylesheet" href="../../sherpa/lib/syntaxhighlighter-3.0.83/shThemeDefault.css">
   <link rel="stylesheet" href="../assets/scenery.css">
 
+  <!-- Before loading other things (that might error), create hooks to report errors/loads for continuous testing -->
+  <script src="../../aqua/js/pageload-connector.js"></script>
+
   <!-- jQuery and LoDash are dependencies -->
   <script src="../../sherpa/lib/jquery-2.1.0.min.js"></script>
-  <script src="../../sherpa/lib/lodash-2.4.1.min.js"></script>
+  <script src="../../sherpa/lib/lodash-4.17.4.min.js"></script>
 
   <!-- For the styling -->
   <script src="../../sherpa/lib/bootstrap-2.2.2.js"></script>
@@ -29,11 +32,11 @@
   MathJax.Hub.Config({tex2jax: {inlineMath: [['$','$'], ['\\(','\\)']]}});
 
   </script>
-  <script type="text/javascript" src="http://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+  <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.1/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
 
   <!-- Our code, in either the concatenated 'with comments' version or the minified version -->
-  <script src="../build/development/scenery.js"></script>
-  <!-- <script src="../build/standalone/scenery.min.js"></script> -->
+  <script src="../build/scenery.min.js"></script>
+
 
   <style type="text/css">
 
@@ -534,8 +537,7 @@ display.updateOnRequestAnimationFrame( function( timeElapsed ) {
     </p>
 
     <p>
-      An instance of scenery.Input is created and hooked to an event source with functions like Scene.initializeFullscreenEvents()
-      and Scene.initializeStandaloneEvents(). The Input object tracks the principal abstraction of a <strong>pointer</strong>. A
+      An instance of scenery.Input is created and hooked to an event source with functions like Scene.initializeEvents(). The Input object tracks the principal abstraction of a <strong>pointer</strong>. A
       pointer represents either the mouse or a single touch as it is tracked across the screen. The mouse 'pointer' always exists, but
       touch pointers are transient, created when an actual pointer is pressed on a touchscreen and detached when it is lifted (or
       canceled). Input event listeners can be added to nodes, the scene, or actual pointers themselves. Attaching a listener to a pointer
@@ -581,7 +583,7 @@ display.updateOnRequestAnimationFrame( function( timeElapsed ) {
         } );
 
         // hook up event listeners just on this scene (not the whole document)
-        display.initializeStandaloneEvents();
+        display.initializeEvents();
 
         var count = 0;
         var colors = [ '#000000', '#ff0000', '#00ff00', '#0000ff', '#ffff00', '#00ffff', '#ff00ff', '#ffffff' ];
@@ -615,7 +617,7 @@ display.updateOnRequestAnimationFrame( function( timeElapsed ) {
         node.addInputListener( {
           // mousedown or touchstart (pointer pressed down over the node)
           down: function( event ) {
-            if ( !event.pointer.isMouse ) {
+            if ( !( event.pointer instanceof scenery.Mouse ) ) {
               count++;
               updatePointers();
             }
@@ -623,7 +625,7 @@ display.updateOnRequestAnimationFrame( function( timeElapsed ) {
 
           // mouseup or touchend (pointer lifted from over the node)
           up: function( event ) {
-            if ( !event.pointer.isMouse ) {
+            if ( !( event.pointer instanceof scenery.Mouse ) ) {
               count--;
               updatePointers();
             }
@@ -666,7 +668,7 @@ var display = new scenery.Display( scene, {
 } );
 
 // hook up event listeners just on this scene (not the whole document)
-display.initializeStandaloneEvents();
+display.initializeEvents();
 
 var count = 0;
 var colors = [ '000000', 'ff0000', '00ff00', '0000ff', 'ffff00', '00ffff', 'ff00ff', 'ffffff' ];
@@ -700,7 +702,7 @@ function updatePointers() {
 node.addInputListener( {
   // mousedown or touchstart (pointer pressed down over the node)
   down: function( event ) {
-    if ( !event.pointer.isMouse ) {
+    if ( !( event.pointer instanceof scenery.Mouse ) ) {
       count++;
       updatePointers();
     }
@@ -708,7 +710,7 @@ node.addInputListener( {
 
   // mouseup or touchend (pointer lifted from over the node)
   up: function( event ) {
-    if ( !event.pointer.isMouse ) {
+    if ( !( event.pointer instanceof scenery.Mouse ) ) {
       count--;
       updatePointers();
     }
@@ -760,6 +762,10 @@ display.updateOnRequestAnimationFrame();
   <div class="span2"></div>
 </div>
 
+
+<footer style="background-color: #191919;">
+  <a class="brand" href="/scenery">Scenery</a>
+</footer>
 
 <script type="text/javascript">
   SyntaxHighlighter.all();

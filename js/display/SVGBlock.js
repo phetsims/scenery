@@ -1,5 +1,4 @@
-// Copyright 2013-2015, University of Colorado Boulder
-
+// Copyright 2013-2017, University of Colorado Boulder
 
 /**
  * Handles a visual SVG layer of drawables.
@@ -10,16 +9,18 @@
 define( function( require ) {
   'use strict';
 
+  var cleanArray = require( 'PHET_CORE/cleanArray' );
+  var FittedBlock = require( 'SCENERY/display/FittedBlock' );
   var inherit = require( 'PHET_CORE/inherit' );
   var Poolable = require( 'PHET_CORE/Poolable' );
-  var cleanArray = require( 'PHET_CORE/cleanArray' );
   var scenery = require( 'SCENERY/scenery' );
-  var FittedBlock = require( 'SCENERY/display/FittedBlock' );
   var SVGGroup = require( 'SCENERY/display/SVGGroup' );
   var Util = require( 'SCENERY/util/Util' );
 
   /**
-   * Main constructor for SVGBlock.
+   * @constructor
+   * @extends FittedBlock
+   * @mixes Poolable
    *
    * @param {Display} display - the scenery Display this SVGBlock will appear in
    * @param {number} renderer - the bitmask for the renderer, see Renderer.js
@@ -49,6 +50,7 @@ define( function( require ) {
 
       this.filterRootInstance = filterRootInstance;
 
+      this.dirtyGradients = cleanArray( this.dirtyGradients );
       this.dirtyGroups = cleanArray( this.dirtyGroups );
       this.dirtyDrawables = cleanArray( this.dirtyDrawables );
 
@@ -66,6 +68,9 @@ define( function( require ) {
         this.svg.style.left = '0';
         this.svg.style.top = '0';
 
+        // a11y - make sure the element is not focusable (it is focusable by default in IE11 full screen mode)
+        this.svg.setAttribute( 'focusable', false );
+
         //OHTWO TODO: why would we clip the individual layers also? Seems like a potentially useless performance loss
         // this.svg.style.clip = 'rect(0px,' + width + 'px,' + height + 'px,0px)';
         this.svg.style[ 'pointer-events' ] = 'none';
@@ -81,7 +86,7 @@ define( function( require ) {
       }
 
       // reset what layer fitting can do (this.forceAcceleration set in fitted block initialization)
-      Util.prepareForTransform( this.svg, this.forceAcceleration );
+      Util.prepareForTransform( this.svg, this.forceAcceleration ); // Apply CSS needed for future CSS transforms to work properly.
 
       Util.unsetTransform( this.svg ); // clear out any transforms that could have been previously applied
       this.baseTransformGroup.setAttribute( 'transform', '' ); // no base transform
@@ -114,17 +119,17 @@ define( function( require ) {
         this.paintMap[ paint.id ].count++;
       }
       else {
-        var def = paint.getSVGDefinition();
-        def.setAttribute( 'id', paint.id + '-' + this.id );
+        var svgPaint = paint.createSVGPaint( this );
+        svgPaint.definition.setAttribute( 'id', paint.id + '-' + this.id );
 
-        // TODO: reduce allocations?
+        // TODO: reduce allocations? (pool these)
         this.paintMap[ paint.id ] = {
           count: 1,
           paint: paint,
-          def: def
+          svgPaint: svgPaint
         };
 
-        this.defs.appendChild( def );
+        this.defs.appendChild( svgPaint.definition );
       }
     },
 
@@ -145,13 +150,19 @@ define( function( require ) {
         assert && assert( entry.count >= 1 );
 
         if ( entry.count === 1 ) {
-          this.defs.removeChild( entry.def );
+          this.defs.removeChild( entry.svgPaint.definition );
+          entry.svgPaint.dispose();
           delete this.paintMap[ paint.id ]; // delete, so we don't memory leak if we run through MANY paints
         }
         else {
           entry.count--;
         }
       }
+    },
+
+    markDirtyGradient: function( gradient ) {
+      this.dirtyGradients.push( gradient );
+      this.markDirty();
     },
 
     markDirtyGroup: function( block ) {
@@ -167,6 +178,9 @@ define( function( require ) {
 
     setSizeFullDisplay: function() {
       sceneryLog && sceneryLog.SVGBlock && sceneryLog.SVGBlock( 'setSizeFullDisplay #' + this.id );
+
+      this.baseTransformGroup.removeAttribute( 'transform' );
+      Util.unsetTransform( this.svg );
 
       var size = this.display.getSize();
       this.svg.setAttribute( 'width', size.width );
@@ -208,6 +222,9 @@ define( function( require ) {
             group.update();
           }
         }
+        while ( this.dirtyGradients.length ) {
+          this.dirtyGradients.pop().update();
+        }
         while ( this.dirtyDrawables.length ) {
           var drawable = this.dirtyDrawables.pop();
 
@@ -232,6 +249,7 @@ define( function( require ) {
 
       // clear references
       this.filterRootInstance = null;
+      cleanArray( this.dirtyGradients );
       cleanArray( this.dirtyGroups );
       cleanArray( this.dirtyDrawables );
       this.paintMap = {};
@@ -279,19 +297,8 @@ define( function( require ) {
     }
   } );
 
-  Poolable.mixin( SVGBlock, {
-    constructorDuplicateFactory: function( pool ) {
-      return function( display, renderer, transformRootInstance, filterRootInstance ) {
-        if ( pool.length ) {
-          sceneryLog && sceneryLog.SVGBlock && sceneryLog.SVGBlock( 'new from pool' );
-          return pool.pop().initialize( display, renderer, transformRootInstance, filterRootInstance );
-        }
-        else {
-          sceneryLog && sceneryLog.SVGBlock && sceneryLog.SVGBlock( 'new from constructor' );
-          return new SVGBlock( display, renderer, transformRootInstance, filterRootInstance );
-        }
-      };
-    }
+  Poolable.mixInto( SVGBlock, {
+    initialize: SVGBlock.prototype.initialize
   } );
 
   return SVGBlock;

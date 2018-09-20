@@ -1,5 +1,4 @@
-// Copyright 2013-2015, University of Colorado Boulder
-
+// Copyright 2013-2016, University of Colorado Boulder
 
 /**
  * Tracks the mouse state
@@ -13,48 +12,28 @@ define( function( require ) {
   var inherit = require( 'PHET_CORE/inherit' );
   var scenery = require( 'SCENERY/scenery' );
 
-  var Vector3 = require( 'DOT/Vector3' );
   var Pointer = require( 'SCENERY/input/Pointer' ); // inherits from Pointer
+  var Vector3 = require( 'DOT/Vector3' );
 
   function Mouse() {
-    Pointer.call( this );
+    Pointer.call( this, null, false );
 
-    this.point = null;
-
+    // @deprecated, see https://github.com/phetsims/scenery/issues/803
     this.leftDown = false;
     this.middleDown = false;
     this.rightDown = false;
-
-    this.isMouse = true;
-
-    this.trail = null;
-
-    this.isDown = false;
 
     // mouse wheel delta and mode for the last event, see https://developer.mozilla.org/en-US/docs/Web/Events/wheel
     this.wheelDelta = new Vector3();
     this.wheelDeltaMode = 0; // 0: pixels, 1: lines, 2: pages
 
-    // overrides the cursor of whatever is under it when set
-    this._cursor = null;
-
-    this.type = 'mouse';
+    sceneryLog && sceneryLog.Pointer && sceneryLog.Pointer( 'Created ' + this.toString() );
   }
 
   scenery.register( 'Mouse', Mouse );
 
   inherit( Pointer, Mouse, {
-    set cursor( value ) { return this.setCursor( value ); },
-    get cursor() { return this._cursor; },
-
-    setCursor: function( value ) {
-      this._cursor = value;
-      return this; // allow chaining
-    },
-
-    clearCursor: function() {
-      this.setCursor( null );
-    },
+    type: 'mouse',
 
     down: function( point, event ) {
       var pointChanged = this.hasPointChanged( point );
@@ -72,6 +51,8 @@ define( function( require ) {
         case 2:
           this.rightDown = true;
           break;
+        default:
+          // no-op until we refactor things, see https://github.com/phetsims/scenery/issues/813
       }
       return pointChanged;
     },
@@ -92,6 +73,8 @@ define( function( require ) {
         case 2:
           this.rightDown = false;
           break;
+        default:
+          // no-op until we refactor things, see https://github.com/phetsims/scenery/issues/813
       }
       return pointChanged;
     },

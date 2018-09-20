@@ -1,4 +1,4 @@
-// Copyright 2013-2015, University of Colorado Boulder
+// Copyright 2013-2016, University of Colorado Boulder
 
 
 /**
@@ -168,6 +168,14 @@ define( function( require ) {
     }
     else {
       throw new Error( 'Unrecognized renderer: ' + selfRenderer );
+    }
+
+    // Check to make sure that all of the drawables have the required mark-dirty methods available.
+    if ( assert ) {
+      _.each( node.drawableMarkFlags, function( flag ) {
+        var methodName = 'markDirty' + flag[ 0 ].toUpperCase() + flag.slice( 1 );
+        assert( typeof drawable[ methodName ] === 'function', 'Did not find ' + methodName );
+      } );
     }
 
     // Initialize its fittable flag

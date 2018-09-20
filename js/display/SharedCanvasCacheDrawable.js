@@ -1,4 +1,4 @@
-// Copyright 2013-2014, University of Colorado Boulder
+// Copyright 2013-2015, University of Colorado Boulder
 
 
 /**
@@ -10,9 +10,9 @@
 define( function( require ) {
   'use strict';
 
+  var Drawable = require( 'SCENERY/display/Drawable' );
   var inherit = require( 'PHET_CORE/inherit' );
   var scenery = require( 'SCENERY/scenery' );
-  var Drawable = require( 'SCENERY/display/Drawable' );
 
   function SharedCanvasCacheDrawable( trail, renderer, instance, sharedInstance ) {
     Drawable.call( this, renderer );

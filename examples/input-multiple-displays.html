@@ -1,0 +1,98 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8"/>
+  <meta http-equiv="X-UA-Compatible" content="IE=edge"/>
+
+  <title>Input - Scenery Example</title>
+
+  <!-- Before loading other things (that might error), create hooks to report errors/loads for continuous testing -->
+  <script src="../../aqua/js/pageload-connector.js"></script>
+
+  <!-- jQuery and LoDash are dependencies -->
+  <script src="../../sherpa/lib/jquery-2.1.0.min.js"></script>
+  <script src="../../sherpa/lib/lodash-4.17.4.min.js"></script>
+
+  <!-- Scenery code -->
+  <script src="../build/scenery.min.js"></script>
+
+  <style type="text/css">
+    html, body {
+      background-color: #eee;
+    }
+  </style>
+</head>
+
+<body>
+
+  <h1>Multiple displays in a single page</h1>
+
+  <p>First display:</p>
+
+  <div id="display1"></div>
+
+  <p>Second display:</p>
+
+  <div id="display2"></div>
+
+<script>
+
+  var scene1 = new scenery.Node();
+  var display1 = new scenery.Display( scene1, {
+    container: document.getElementById( 'display1' ),
+    width: 200,
+    height: 400,
+    backgroundColor: '#fff'
+  } );
+  display1.initializeEvents();
+  display1.updateOnRequestAnimationFrame();
+
+  var scene2 = new scenery.Node();
+  var display2 = new scenery.Display( scene2, {
+    container: document.getElementById( 'display2' ),
+    width: 200,
+    height: 400,
+    backgroundColor: '#fff'
+  } );
+  display2.initializeEvents();
+  display2.updateOnRequestAnimationFrame();
+
+  var inactiveColor = '#ccc';
+  var activeColor = '#eee';
+  var armedColor = '#aaa';
+  var strokeColor = '#000';
+
+  // creates a minimally stylized button
+  function createButton( label, callback, options ) {
+    var label = new scenery.Text( label, {
+      fontSize: 12,
+      center: new dot.Vector2()
+    } );
+    var buttonListener = new scenery.FireListener( {
+      fire: callback
+    } );
+    var background = scenery.Rectangle.bounds( label.bounds.dilatedXY( 5, 5 ), {
+      stroke: strokeColor,
+      fill: ( options.color && options.color( buttonListener ) ) || new axon.DerivedProperty( [ buttonListener.isHighlightedProperty, buttonListener.isPressedProperty ], function( isHighlighted, isPressed ) {
+        return isPressed ? armedColor : ( isHighlighted ? activeColor : inactiveColor );
+      } )
+    } );
+    return new scenery.Node( _.extend( {
+      children: [ background, label ],
+      cursor: 'pointer',
+      inputListeners: [ buttonListener ]
+    }, options ) );
+  }
+
+  scene1.addChild( createButton( 'Scene 1', function() {}, {
+    center: display1.bounds.center
+  } ) );
+
+  scene2.addChild( createButton( 'Scene 2', function() {}, {
+    center: display2.bounds.center
+  } ) );
+
+</script>
+
+</body>
+</html>

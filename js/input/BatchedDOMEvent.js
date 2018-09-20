@@ -1,4 +1,4 @@
-// Copyright 2014-2015, University of Colorado Boulder
+// Copyright 2014-2016, University of Colorado Boulder
 
 
 /**
@@ -15,6 +15,14 @@ define( function( require ) {
   var Poolable = require( 'PHET_CORE/Poolable' );
   var scenery = require( 'SCENERY/scenery' );
 
+  /**
+   * @constructor
+   * @mixes Poolable
+   *
+   * @param domEvent
+   * @param type
+   * @param callback
+   */
   function BatchedDOMEvent( domEvent, type, callback ) {
     assert && assert( domEvent, 'for some reason, there is no DOM event?' );
 
@@ -27,22 +35,24 @@ define( function( require ) {
   scenery.register( 'BatchedDOMEvent', BatchedDOMEvent );
 
   // enum for type
+  // TODO: Create a specific enumeration type for this?
   BatchedDOMEvent.POINTER_TYPE = 1;
   BatchedDOMEvent.MS_POINTER_TYPE = 2;
   BatchedDOMEvent.TOUCH_TYPE = 3;
   BatchedDOMEvent.MOUSE_TYPE = 4;
-  BatchedDOMEvent.KEY_TYPE = 5; //TODO: Or are Keys Pointers, as they were in previous sceneries?
-  BatchedDOMEvent.WHEEL_TYPE = 6;
+  BatchedDOMEvent.WHEEL_TYPE = 5;
 
   inherit( Object, BatchedDOMEvent, {
     run: function( input ) {
+      sceneryLog && sceneryLog.InputEvent && sceneryLog.InputEvent( 'Running batched event' );
+      sceneryLog && sceneryLog.InputEvent && sceneryLog.push();
+
       var domEvent = this.domEvent;
       var callback = this.callback;
 
       // process whether anything under the pointers changed before running additional input events
-      sceneryLog && sceneryLog.InputEvent && sceneryLog.InputEvent( 'validatePointers from batched event' );
       input.validatePointers();
-      if ( input.logEvents ) { input.emitter.emit1( 'validatePointers();' );}
+      if ( input.logEvents ) { input.phetioEmitter.emit3( 'validatePointers', {}, { highFrequency: true } );}
 
       //OHTWO TODO: switch?
       if ( this.type === BatchedDOMEvent.POINTER_TYPE ) {
@@ -62,15 +72,14 @@ define( function( require ) {
       else if ( this.type === BatchedDOMEvent.MOUSE_TYPE ) {
         callback.call( input, input.pointFromEvent( domEvent ), domEvent );
       }
-      else if ( this.type === BatchedDOMEvent.KEY_TYPE ) { //TODO: or should keys be handled with the other Pointers?
-        callback.call( input, domEvent );
-      }
       else if ( this.type === BatchedDOMEvent.WHEEL_TYPE ) {
         callback.call( input, domEvent );
       }
       else {
         throw new Error( 'bad type value: ' + this.type );
       }
+
+      sceneryLog && sceneryLog.InputEvent && sceneryLog.pop();
     },
 
     dispose: function() {
@@ -85,20 +94,7 @@ define( function( require ) {
     return BatchedDOMEvent.createFromPool( domEvent, pointFromEvent( domEvent ), domEvent.pointerId );
   };
 
-  Poolable.mixin( BatchedDOMEvent, {
-    constructorDuplicateFactory: function( pool ) {
-      return function( domEvent, type, callback ) {
-        if ( pool.length ) {
-          var result = pool.pop();
-          BatchedDOMEvent.call( result, domEvent, type, callback );
-          return result;
-        }
-        else {
-          return new BatchedDOMEvent( domEvent, type, callback );
-        }
-      };
-    }
-  } );
+  Poolable.mixInto( BatchedDOMEvent );
 
   return BatchedDOMEvent;
 } );

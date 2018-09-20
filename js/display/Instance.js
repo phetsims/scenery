@@ -1,4 +1,4 @@
-// Copyright 2013-2015, University of Colorado Boulder
+// Copyright 2013-2016, University of Colorado Boulder
 
 
 /**
@@ -24,27 +24,36 @@
 define( function( require ) {
   'use strict';
 
+  var arrayRemove = require( 'PHET_CORE/arrayRemove' );
+  var ChangeInterval = require( 'SCENERY/display/ChangeInterval' );
+  var cleanArray = require( 'PHET_CORE/cleanArray' );
+  var Drawable = require( 'SCENERY/display/Drawable' );
+  var Events = require( 'AXON/Events' );
+  var Fittability = require( 'SCENERY/display/Fittability' );
   var inherit = require( 'PHET_CORE/inherit' );
   var Poolable = require( 'PHET_CORE/Poolable' );
-  var cleanArray = require( 'PHET_CORE/cleanArray' );
-  var scenery = require( 'SCENERY/scenery' );
-  var ChangeInterval = require( 'SCENERY/display/ChangeInterval' );
-  var Drawable = require( 'SCENERY/display/Drawable' );
-  var Renderer = require( 'SCENERY/display/Renderer' );
   var RelativeTransform = require( 'SCENERY/display/RelativeTransform' );
-  var Fittability = require( 'SCENERY/display/Fittability' );
+  var Renderer = require( 'SCENERY/display/Renderer' );
+  var scenery = require( 'SCENERY/scenery' );
   var Util = require( 'SCENERY/util/Util' );
-  var Events = require( 'AXON/Events' );
 
   var globalIdCounter = 1;
-
-  var isWebGLSupported = Util.isWebGLSupported;
 
   // preferences top to bottom in general
   var defaultPreferredRenderers = Renderer.createOrderBitmask(
     Renderer.bitmaskSVG, Renderer.bitmaskCanvas, Renderer.bitmaskDOM, Renderer.bitmaskWebGL );
 
-  // see initialize() for documentation
+  /**
+   * @constructor
+   * @mixes Poolable
+   *
+   * See initialize() for documentation
+   *
+   * @param display
+   * @param trail
+   * @param isDisplayRoot
+   * @param isSharedCanvasCacheRoot
+   */
   function Instance( display, trail, isDisplayRoot, isSharedCanvasCacheRoot ) {
     Events.call( this );
 
@@ -72,6 +81,8 @@ define( function( require ) {
 
       this.id = this.id || globalIdCounter++;
 
+      this.isWebGLSupported = display._allowWebGL && Util.isWebGLSupported;
+
       // {RelativeTransform}, provides high-performance access to 'relative' transforms (from our nearest
       // transform root), and allows for listening to when our relative transform changes (called during
       // a phase of Display.updateDisplay()).
@@ -87,6 +98,12 @@ define( function( require ) {
       this.selfVisible = true; // like relative visibility, but is always true if we are a visibility root
       this.visibilityDirty = true; // entire subtree of visibility will need to be updated
       this.childVisibilityDirty = true; // an ancestor needs its visibility updated
+
+      // Maps Instance.id => branch index (first index where the two trails are different)
+      this.branchIndexMap = {}; // TODO: Can we not recreate an object?
+
+      // {Array.<Instance>} All instances where we have entries in our map
+      this.branchIndexReferences = cleanArray( this.branchIndexReferences );
 
       // In the range (-1,0), to help us track insertions and removals of this instance's node to its parent
       // (did we get removed but added back?).
@@ -112,6 +129,7 @@ define( function( require ) {
       // Node listeners for tracking children. Listeners should be added only when we become stateful
       this.childInsertedListener = this.childInsertedListener || this.onChildInserted.bind( this );
       this.childRemovedListener = this.childRemovedListener || this.onChildRemoved.bind( this );
+      this.childrenReorderedListener = this.childrenReorderedListener || this.onChildrenReordered.bind( this );
       this.visibilityListener = this.visibilityListener || this.onVisibilityChange.bind( this );
       this.markRenderStateDirtyListener = this.markRenderStateDirtyListener || this.markRenderStateDirty.bind( this );
 
@@ -304,10 +322,13 @@ define( function( require ) {
       var hasTransparency = this.node.opacity !== 1 || hints.usesOpacity;
       var requiresSplit = hints.requireElement || hints.cssTransform || hints.layerSplit;
       var backboneRequired = this.isDisplayRoot || ( !this.isUnderCanvasCache && requiresSplit );
-      var applyTransparencyWithSVG = !backboneRequired &&
-                                     ( hasTransparency || hasClip ) &&
-                                     this.node._rendererSummary.isSubtreeRenderedExclusivelySVG( this.preferredRenderers );
-      var useBackbone = applyTransparencyWithSVG ? false : ( backboneRequired || hasTransparency || hasClip );
+
+      // Support either "all Canvas" or "all SVG" opacity/clip
+      var applyTransparencyWithBlock = !backboneRequired &&
+                                       ( hasTransparency || hasClip ) &&
+                                       ( this.node._rendererSummary.isSubtreeRenderedExclusivelySVG( this.preferredRenderers ) ||
+                                         this.node._rendererSummary.isSubtreeRenderedExclusivelyCanvas( this.preferredRenderers ) );
+      var useBackbone = applyTransparencyWithBlock ? false : ( backboneRequired || hasTransparency || hasClip );
 
       // check if we need a backbone or cache
       // if we are under a canvas cache, we will NEVER have a backbone
@@ -321,7 +342,7 @@ define( function( require ) {
         //OHTWO TODO: check whether the force acceleration hint is being used by our DOMBlock
         this.groupRenderer = Renderer.bitmaskDOM; // probably won't be used
       }
-      else if ( !applyTransparencyWithSVG && ( hasTransparency || hasClip || hints.canvasCache ) ) {
+      else if ( !applyTransparencyWithBlock && ( hasTransparency || hasClip || hints.canvasCache ) ) {
         // everything underneath needs to be renderable with Canvas, otherwise we cannot cache
         assert && assert( this.node._rendererSummary.isSingleCanvasSupported(),
           'hints.canvasCache provided, but not all node contents can be rendered with Canvas under ' +
@@ -332,7 +353,7 @@ define( function( require ) {
           if ( this.isSharedCanvasCacheRoot ) {
             this.isSharedCanvasCacheSelf = true;
 
-            this.sharedCacheRenderer = isWebGLSupported ? Renderer.bitmaskWebGL : Renderer.bitmaskCanvas;
+            this.sharedCacheRenderer = this.isWebGLSupported ? Renderer.bitmaskWebGL : Renderer.bitmaskCanvas;
           }
           else {
             // everything underneath needs to guarantee that its bounds are valid
@@ -347,7 +368,7 @@ define( function( require ) {
         else {
           this.isInstanceCanvasCache = true;
           this.isUnderCanvasCache = true;
-          this.groupRenderer = isWebGLSupported ? Renderer.bitmaskWebGL : Renderer.bitmaskCanvas;
+          this.groupRenderer = this.isWebGLSupported ? Renderer.bitmaskWebGL : Renderer.bitmaskCanvas;
         }
       }
 
@@ -357,7 +378,7 @@ define( function( require ) {
         }
         else {
           var supportedNodeBitmask = this.node._rendererBitmask;
-          if ( !isWebGLSupported ) {
+          if ( !this.isWebGLSupported ) {
             var invalidBitmasks = Renderer.bitmaskWebGL;
             supportedNodeBitmask = supportedNodeBitmask ^ ( supportedNodeBitmask & invalidBitmasks );
           }
@@ -1054,7 +1075,7 @@ define( function( require ) {
       // maintain fittable flags
       this.fittability.onInsert( instance.fittability );
 
-      this.relativeTransform.insertInstance( instance, index );
+      this.relativeTransform.addInstance( instance );
 
       this.markChildVisibilityDirty();
 
@@ -1107,7 +1128,7 @@ define( function( require ) {
       // maintain fittable flags
       this.fittability.onRemove( instance.fittability );
 
-      this.relativeTransform.removeInstanceWithIndex( instance, index );
+      this.relativeTransform.removeInstance( instance );
 
       sceneryLog && sceneryLog.InstanceTree && sceneryLog.pop();
     },
@@ -1116,6 +1137,52 @@ define( function( require ) {
       // TODO: optimization? hopefully it won't happen often, so we just do this for now
       this.removeInstanceWithIndex( childInstance, index );
       this.insertInstance( replacementInstance, index );
+    },
+
+    /**
+     * For handling potential reordering of child instances inclusively between the min and max indices.
+     * @private
+     *
+     * @param {number} minChangeIndex
+     * @param {number} maxChangeIndex
+     */
+    reorderInstances: function( minChangeIndex, maxChangeIndex ) {
+      assert && assert( typeof minChangeIndex === 'number' );
+      assert && assert( typeof maxChangeIndex === 'number' );
+      assert && assert( minChangeIndex <= maxChangeIndex );
+
+      sceneryLog && sceneryLog.InstanceTree && sceneryLog.InstanceTree( 'Reordering ' + this.toString() );
+      sceneryLog && sceneryLog.InstanceTree && sceneryLog.push();
+
+      // NOTE: For implementation, we've basically set parameters as if we removed all of the relevant instances and
+      // then added them back in. There may be more efficient ways to do this, but the stitching and change interval
+      // process is a bit complicated right now.
+
+      var frameId = this.display._frameId;
+
+      // Remove the old ordering of instances
+      this.children.splice( minChangeIndex, maxChangeIndex - minChangeIndex + 1 );
+
+      // Add the instances back in the correct order
+      for ( var i = minChangeIndex; i <= maxChangeIndex; i++ ) {
+        var child = this.findChildInstanceOnNode( this.node._children[ i ] );
+        this.children.splice( i, 0, child );
+        child.stitchChangeFrame = frameId;
+
+        // mark neighbors so that we can add a change interval for our change area
+        if ( i > minChangeIndex ) {
+          child.stitchChangeAfter = frameId;
+        }
+        if ( i < maxChangeIndex ) {
+          child.stitchChangeBefore = frameId;
+        }
+      }
+
+      this.stitchChangeOnChildren = frameId;
+      this.beforeStableIndex = Math.min( this.beforeStableIndex, minChangeIndex - 1 );
+      this.afterStableIndex = Math.max( this.afterStableIndex, maxChangeIndex + 1 );
+
+      sceneryLog && sceneryLog.InstanceTree && sceneryLog.pop();
     },
 
     // if we have a child instance that corresponds to this node, return it (otherwise null)
@@ -1180,6 +1247,20 @@ define( function( require ) {
       this.instanceRemovalCheckList.push( instance );
 
       this.removeInstanceWithIndex( instance, index );
+
+      // make sure we are visited for syncTree()
+      this.markSkipPruning();
+
+      sceneryLog && sceneryLog.Instance && sceneryLog.pop();
+    },
+
+    // event callback for Node's 'childrenReordered' event
+    onChildrenReordered: function( minChangeIndex, maxChangeIndex ) {
+      sceneryLog && sceneryLog.Instance && sceneryLog.Instance(
+        'reordering children for ' + this.toString() );
+      sceneryLog && sceneryLog.Instance && sceneryLog.push();
+
+      this.reorderInstances( minChangeIndex, maxChangeIndex );
 
       // make sure we are visited for syncTree()
       this.markSkipPruning();
@@ -1348,6 +1429,7 @@ define( function( require ) {
       if ( !this.isSharedCanvasCachePlaceholder ) {
         this.node.onStatic( 'childInserted', this.childInsertedListener );
         this.node.onStatic( 'childRemoved', this.childRemovedListener );
+        this.node.onStatic( 'childrenReordered', this.childrenReorderedListener );
         this.node.onStatic( 'visibility', this.visibilityListener );
 
         this.node.onStatic( 'opacity', this.markRenderStateDirtyListener );
@@ -1364,6 +1446,7 @@ define( function( require ) {
       if ( !this.isSharedCanvasCachePlaceholder ) {
         this.node.offStatic( 'childInserted', this.childInsertedListener );
         this.node.offStatic( 'childRemoved', this.childRemovedListener );
+        this.node.offStatic( 'childrenReordered', this.childrenReorderedListener );
         this.node.offStatic( 'visibility', this.visibilityListener );
 
         this.node.offStatic( 'opacity', this.markRenderStateDirtyListener );
@@ -1390,6 +1473,21 @@ define( function( require ) {
       this.parent && this.parent.markSkipPruning();
     },
 
+    getBranchIndexTo: function( instance ) {
+      var cachedValue = this.branchIndexMap[ instance.id ];
+      if ( cachedValue !== undefined ) {
+        return cachedValue;
+      }
+
+      var branchIndex = this.trail.getBranchIndexTo( instance.trail );
+      this.branchIndexMap[ instance.id ] = branchIndex;
+      instance.branchIndexMap[ this.id ] = branchIndex;
+      this.branchIndexReferences.push( instance );
+      instance.branchIndexReferences.push( this );
+
+      return branchIndex;
+    },
+
     // clean up listeners and garbage, so that we can be recycled (or pooled)
     dispose: function() {
       sceneryLog && sceneryLog.Instance && sceneryLog.Instance( 'dispose ' + this.toString() );
@@ -1398,6 +1496,14 @@ define( function( require ) {
       assert && assert( this.active, 'Seems like we tried to dispose this Instance twice, it is not active' );
 
       this.active = false;
+
+      // Release branch index references (see getBranchIndexTo)
+      while ( this.branchIndexReferences.length ) {
+        var branchIndexReference = this.branchIndexReferences.pop(); // {Instance}
+        delete this.branchIndexMap[ branchIndexReference.id ];
+        delete branchIndexReference.branchIndexMap[ this.id ];
+        arrayRemove( branchIndexReference.branchIndexReferences, this );
+      }
 
       // order is somewhat important
       this.groupDrawable && this.groupDrawable.disposeImmediately( this.display );
@@ -1589,19 +1695,8 @@ define( function( require ) {
   } );
 
   // object pooling
-  Poolable.mixin( Instance, {
-    constructorDuplicateFactory: function( pool ) {
-      return function( display, trail, isDisplayRoot, isSharedCanvasCacheRoot ) {
-        if ( pool.length ) {
-          sceneryLog && sceneryLog.Instance && sceneryLog.Instance( 'new from pool' );
-          return pool.pop().initialize( display, trail, isDisplayRoot, isSharedCanvasCacheRoot );
-        }
-        else {
-          sceneryLog && sceneryLog.Instance && sceneryLog.Instance( 'new from constructor' );
-          return new Instance( display, trail, isDisplayRoot, isSharedCanvasCacheRoot );
-        }
-      };
-    }
+  Poolable.mixInto( Instance, {
+    initialize: Instance.prototype.initialize
   } );
 
   return Instance;

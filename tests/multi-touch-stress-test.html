@@ -15,7 +15,7 @@
 
   <!-- jQuery and LoDash are dependencies -->
   <script src="../../sherpa/lib/jquery-2.1.0.min.js"></script>
-  <script src="../../sherpa/lib/lodash-2.4.1.min.js"></script>
+  <script src="../../sherpa/lib/lodash-4.17.4.min.js"></script>
 
   <!-- Bootstrap not necessarily needed -->
   <script src="../../sherpa/lib/bootstrap-2.2.2.js"></script>
@@ -24,8 +24,8 @@
   <script src="../../sherpa/lib/stats-r12.js"></script>
 
   <!-- Our code, in either the concatenated 'with comments' version or the minified version -->
-  <script src="../build/development/scenery.js"></script>
-  <!-- <script src="../build/standalone/scenery.min.js"></script> -->
+  <script src="../build/scenery.min.js"></script>
+
 
   <style type="text/css">
     /* Let content go to the edges */
@@ -63,7 +63,7 @@
 
   // initialize our scene
   var scene = new scenery.Scene( main );
-  scene.initializeFullscreenEvents(); // sets up listeners on the document with preventDefault(), and forwards those events to our scene
+  scene.initializeEvents(); // sets up listeners on the document with preventDefault(), and forwards those events to our scene
   scene.resizeOnWindowResize(); // the scene gets resized to the full screen size
 
   var container = new scenery.Node();

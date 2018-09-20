@@ -6,14 +6,18 @@
 
   <title>Scenery Rendering Renderer Comparison</title>
 
+  <!-- Before loading other things (that might error), create hooks to report errors/loads for continuous testing -->
+  <script src="../../aqua/js/pageload-connector.js"></script>
+
   <!-- jQuery and LoDash are dependencies -->
   <script src="../../assert/js/assert.js"></script>
+  <script src="../../tandem/js/PhetioIDUtils.js"></script>
   <script src="../../sherpa/lib/jquery-2.1.0.min.js"></script>
-  <script src="../../sherpa/lib/lodash-2.4.1.min.js"></script>
+  <script src="../../sherpa/lib/lodash-4.17.4.min.js"></script>
+  <script src="../../sherpa/lib/himalaya-0.2.7.js"></script>
+  <script src="../../sherpa/lib/he-1.1.1.js"></script>
+  <script src="../../query-string-machine/js/QueryStringMachine.js"></script>
   <script src="../../chipper/js/initialize-globals.js"></script>
-
-  <!-- Parse query parameters, so we can easily subset the tests.-->
-  <script type="text/javascript" src="../chipper/js/initialize-globals.js"></script>
 
   <script type="text/javascript">
     window.assertions.enableAssert();
@@ -287,76 +291,81 @@
               draw: function( scene, updateDisplayCallback ) {
 
                 function LinesNode( options ) {
-                  scenery.WebGLNode.call( this, options );
+                  scenery.WebGLNode.call( this, LinesPainter, options );
                 }
 
-                var LinesNode = phetCore.inherit( scenery.WebGLNode, LinesNode, {
-                  initializeWebGLDrawable: function( drawable ) {
-                    var gl = drawable.gl;
+                var LinesNode = phetCore.inherit( scenery.WebGLNode, LinesNode, {} );
 
-                    // Simple example for custom shader
-                    var lineVertexShaderSource = [
-                      // Position
-                      'attribute vec3 aPosition;',
-                      'uniform mat3 uModelViewMatrix;',
-                      'uniform mat3 uProjectionMatrix;',
+                function LinesPainter( gl, node ) {
+                  this.gl = gl;
+                  this.node = node;
 
-                      'void main( void ) {',
-                      // homogeneous model-view transformation
-                      '  vec3 view = uModelViewMatrix * vec3( aPosition.xy, 1 );',
-                      // homogeneous map to to normalized device coordinates
-                      '  vec3 ndc = uProjectionMatrix * vec3( view.xy, 1 );',
-                      // combine with the z coordinate specified
-                      '  gl_Position = vec4( ndc.xy, aPosition.z, 1.0 );',
-                      '}'
-                    ].join( '\n' );
+                  // Simple example for custom shader
+                  var lineVertexShaderSource = [
+                    // Position
+                    'attribute vec3 aPosition;',
+                    'uniform mat3 uModelViewMatrix;',
+                    'uniform mat3 uProjectionMatrix;',
 
-                    // Simple demo for custom shader
-                    var lineFragmentShaderSource = [
-                      'precision mediump float;',
+                    'void main( void ) {',
+                    // homogeneous model-view transformation
+                    '  vec3 view = uModelViewMatrix * vec3( aPosition.xy, 1 );',
+                    // homogeneous map to to normalized device coordinates
+                    '  vec3 ndc = uProjectionMatrix * vec3( view.xy, 1 );',
+                    // combine with the z coordinate specified
+                    '  gl_Position = vec4( ndc.xy, aPosition.z, 1.0 );',
+                    '}'
+                  ].join( '\n' );
 
-                      // Returns the color from the vertex shader
-                      'void main( void ) {',
-                      '  gl_FragColor = vec4( 1.0, 0.0, 0.0, 1.0 );',
-                      '}'
-                    ].join( '\n' );
+                  // Simple demo for custom shader
+                  var lineFragmentShaderSource = [
+                    'precision mediump float;',
 
-                    drawable.shaderProgram = new ShaderProgram( gl, lineVertexShaderSource, lineFragmentShaderSource, {
-                      attributes: [ 'aPosition' ],
-                      uniforms: [ 'uModelViewMatrix', 'uProjectionMatrix' ]
-                    } );
+                    // Returns the color from the vertex shader
+                    'void main( void ) {',
+                    '  gl_FragColor = vec4( 1.0, 0.0, 0.0, 1.0 );',
+                    '}'
+                  ].join( '\n' );
 
-                    drawable.vertexBuffer = gl.createBuffer();
+                  this.shaderProgram = new ShaderProgram( gl, lineVertexShaderSource, lineFragmentShaderSource, {
+                    attributes: [ 'aPosition' ],
+                    uniforms: [ 'uModelViewMatrix', 'uProjectionMatrix' ]
+                  } );
 
-                    gl.bindBuffer( gl.ARRAY_BUFFER, drawable.vertexBuffer );
-                    gl.bufferData( gl.ARRAY_BUFFER, new Float32Array( [
-                      0, 0, 0.1,
-                      50, 30, 0.1
-                    ] ), gl.STATIC_DRAW );
-                  },
+                  this.vertexBuffer = gl.createBuffer();
 
-                  paintWebGLDrawable: function( drawable, matrix ) {
-                    var gl = drawable.gl;
-                    var shaderProgram = drawable.shaderProgram;
+                  gl.bindBuffer( gl.ARRAY_BUFFER, this.vertexBuffer );
+                  gl.bufferData( gl.ARRAY_BUFFER, new Float32Array( [
+                    0, 0, 0.1,
+                    50, 30, 0.1
+                  ] ), gl.STATIC_DRAW );
+                }
+
+                phetCore.inherit( Object, LinesPainter, {
+                  paint: function( modelViewMatrix, projectionMatrix ) {
+                    var gl = this.gl;
+                    var shaderProgram = this.shaderProgram;
 
                     shaderProgram.use();
 
-                    gl.uniformMatrix3fv( shaderProgram.uniformLocations.uModelViewMatrix, false, matrix.entries );
-                    gl.uniformMatrix3fv( shaderProgram.uniformLocations.uProjectionMatrix, false, drawable.webGLBlock.projectionMatrixArray );
+                    gl.uniformMatrix3fv( shaderProgram.uniformLocations.uModelViewMatrix, false, modelViewMatrix.entries );
+                    gl.uniformMatrix3fv( shaderProgram.uniformLocations.uProjectionMatrix, false, projectionMatrix.entries );
 
-                    gl.bindBuffer( gl.ARRAY_BUFFER, drawable.vertexBuffer );
+                    gl.bindBuffer( gl.ARRAY_BUFFER, this.vertexBuffer );
                     gl.vertexAttribPointer( shaderProgram.attributeLocations.aPosition, 3, gl.FLOAT, false, 0, 0 );
 
                     gl.drawArrays( gl.LINES, 0, 2 );
 
                     shaderProgram.unuse();
+
+                    return scenery.WebGLNode.PAINTED_SOMETHING;
                   },
 
-                  disposeWebGLDrawable: function( drawable ) {
-                    drawable.shaderProgram.dispose();
-                    drawable.gl.deleteBuffer( drawable.vertexBuffer );
+                  dispose: function() {
+                    this.shaderProgram.dispose();
+                    this.gl.deleteBuffer( this.vertexBuffer );
 
-                    drawable.shaderProgram = null;
+                    this.shaderProgram = null;
                   }
                 } );
 
@@ -515,7 +524,7 @@
                   fill: mainGradient
                 } ) );
                 scene.addChild( new scenery.Path( kite.Shape.regularPolygon( 6, 22 ), {
-                  x:        32 + 64,
+                  x: 32 + 64,
                   y: 32,
                   rotation: Math.PI / 4,
                   fill: fillGradient,
@@ -914,11 +923,14 @@
             }
           ];
 
-          var filterSubset = function( array, queryParameterKey ) {
-            if ( phet.chipper.getQueryParameter( queryParameterKey ) ) {
-              var test = phet.chipper.getQueryParameter( queryParameterKey );
-              var testIndices = test.split( '.' ).map( function( test ) {
-                return parseInt( test, 10 );
+          var selectTestCases = function( array, queryParameterKey ) {
+            if ( QueryStringMachine.containsKey( queryParameterKey ) ) {
+              var testIndices = QueryStringMachine.get( queryParameterKey, {
+                type: 'array',
+                elementSchema: {
+                  type: 'number'
+                },
+                defaultValue: []
               } );
               var result = [];
               for ( var i = 0; i < testIndices.length; i++ ) {
@@ -931,17 +943,25 @@
           };
 
           // Select the renderers to be compared (for tests that declare support for them).
-          var renderers = filterSubset( [
-            'canvas',
-            'svg',
-            'dom',
-            'webgl'
-          ], 'renderer' );
+          var renderers = QueryStringMachine.get( 'renderers', {
+            type: 'array',
+            elementSchema: {
+              type: 'string',
+
+              validValues: [
+                'canvas',
+                'svg',
+                'dom',
+                'webgl'
+              ]
+            },
+            defaultValue: [ 'canvas', 'svg', 'dom', 'webgl' ]
+          } );
 
           // Allow selection of the tests by a query parameter ?test=...
           // For instance, when test=0 is specified, only show the 0th test.
-          // When test=0.1.2 is specified, show tests 0,1,2
-          testCases = filterSubset( testCases, 'test' );
+          // When test=0,1,2 is specified, show tests 0,1,2
+          testCases = selectTestCases( testCases, 'tests' );
 
           _.each( testCases, function( testCase, index ) {
             var $testTitle = $( document.createElement( 'h2' ) );
@@ -951,7 +971,7 @@
 
             _.each( renderers, function( renderer ) {
               // don't render unsupported renderers for specific test cases
-              if ( !_.contains( testCase.renderers, renderer ) ) {
+              if ( !_.includes( testCase.renderers, renderer ) ) {
                 return;
               }
 

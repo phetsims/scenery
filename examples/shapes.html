@@ -8,11 +8,14 @@
 
   <title>Shapes - Scenery Example</title>
 
+  <!-- Before loading other things (that might error), create hooks to report errors/loads for continuous testing -->
+  <script src="../../aqua/js/pageload-connector.js"></script>
+
   <!-- jQuery and lodash are dependencies -->
   <script src="../../sherpa/lib/jquery-2.1.0.min.js"></script>
-  <script src="../../sherpa/lib/lodash-2.4.1.min.js"></script>
+  <script src="../../sherpa/lib/lodash-4.17.4.min.js"></script>
 
-  <script src="../build/development/scenery.js"></script>
+  <script src="../build/scenery.min.js"></script>
 
   <style>
     /* so the centering of the text is obvious */

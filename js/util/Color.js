@@ -1,4 +1,4 @@
-// Copyright 2012-2015, University of Colorado Boulder
+// Copyright 2012-2016, University of Colorado Boulder
 
 /**
  * A color with RGBA values, assuming the sRGB color space is used.
@@ -13,11 +13,15 @@
 define( function( require ) {
   'use strict';
 
+  var Emitter = require( 'AXON/Emitter' );
   var inherit = require( 'PHET_CORE/inherit' );
+  var Property = require( 'AXON/Property' );
   var scenery = require( 'SCENERY/scenery' );
+  var Util = require( 'DOT/Util' );
 
-  var clamp = require( 'DOT/Util' ).clamp;
-  var linear = require( 'DOT/Util' ).linear;
+  // constants
+  var clamp = Util.clamp;
+  var linear = Util.linear;
 
   /**
    * Creates a Color with an initial value. Multiple different types of parameters are supported:
@@ -34,12 +38,10 @@ define( function( require ) {
    */
   function Color( r, g, b, a ) {
 
-    // allow listeners to be notified on any changes. called with listener()
-    this.listeners = [];
+    // @public {Emitter}
+    this.changeEmitter = new Emitter();
 
     this.set( r, g, b, a );
-
-    phetAllocation && phetAllocation( 'Color' );
   }
 
   scenery.register( 'Color', Color );
@@ -251,6 +253,33 @@ define( function( require ) {
       return this; // allow chaining
     },
 
+    /**
+     * A linear (gamma-corrected) interpolation between this color (ratio=0) and another color (ratio=1).
+     * @public
+     *
+     * @param {Color} otherColor
+     * @param {number} ratio - Not necessarily constrained in [0, 1]
+     * @returns {Color}
+     */
+    blend: function( otherColor, ratio ) {
+      assert && assert( otherColor instanceof Color );
+
+      var gamma = 2.4;
+      var linearRedA = Math.pow( this.r, gamma );
+      var linearRedB = Math.pow( otherColor.r, gamma );
+      var linearGreenA = Math.pow( this.g, gamma );
+      var linearGreenB = Math.pow( otherColor.g, gamma );
+      var linearBlueA = Math.pow( this.b, gamma );
+      var linearBlueB = Math.pow( otherColor.b, gamma );
+
+      var r = Math.pow( linearRedA + ( linearRedB - linearRedA ) * ratio, 1 / gamma );
+      var g = Math.pow( linearGreenA + ( linearGreenB - linearGreenA ) * ratio, 1 / gamma );
+      var b = Math.pow( linearBlueA + ( linearBlueB - linearBlueA ) * ratio, 1 / gamma );
+      var a = this.a + ( otherColor.a - this.a ) * ratio;
+
+      return new Color( r, g, b, a );
+    },
+
     computeCSS: function() {
       if ( this.a === 1 ) {
         return 'rgb(' + this.r + ',' + this.g + ',' + this.b + ')';
@@ -315,20 +344,27 @@ define( function( require ) {
     updateColor: function() {
       assert && assert( !this.immutable, 'Cannot modify an immutable color' );
 
+      assert && assert( typeof this.red === 'number' &&
+                        typeof this.green === 'number' &&
+                        typeof this.blue === 'number' &&
+                        typeof this.alpha === 'number',
+        'Ensure color components are numeric: ' + this.toString() );
+
       assert && assert( isFinite( this.red ) && isFinite( this.green ) && isFinite( this.blue ) && isFinite( this.alpha ),
         'Ensure color components are finite and not NaN' );
+
+      assert && assert( this.red >= 0 && this.red <= 255 &&
+                        this.green >= 0 && this.green <= 255 &&
+                        this.red >= 0 && this.red <= 255 &&
+                        this.alpha >= 0 && this.alpha <= 1,
+        'Ensure color components are in the proper ranges: ' + this.toString() );
 
       var oldCSS = this._css;
       this._css = this.computeCSS();
 
       // notify listeners if it changed
-      if ( oldCSS !== this._css && this.listeners.length ) {
-        var listeners = this.listeners.slice( 0 ); // defensive copy. consider removing if it's a performance bottleneck?
-        var length = listeners.length;
-
-        for ( var i = 0; i < length; i++ ) {
-          listeners[ i ]();
-        }
+      if ( oldCSS !== this._css  ) {
+        this.changeEmitter.emit();
       }
     },
 
@@ -341,7 +377,12 @@ define( function( require ) {
       return this; // allow chaining
     },
 
-    // to what value a Canvas's context.fillStyle should be set
+    /**
+     * Returns an object that can be passed to a Canvas context's fillStyle or strokeStyle.
+     * @public
+     *
+     * @returns {string}
+     */
     getCanvasStyle: function() {
       return this.toCSS(); // should be inlined, leave like this for future maintainability
     },
@@ -456,26 +497,6 @@ define( function( require ) {
       else {
         return this.colorUtilsDarker( -factor );
       }
-    },
-
-    /*---------------------------------------------------------------------------*
-     * listeners TODO: consider mixing in this behavior, it's common
-     *----------------------------------------------------------------------------*/
-
-    // listener should be a callback expecting no arguments, listener() will be called when the color changes
-    addChangeListener: function( listener ) {
-      assert && assert( listener !== undefined && listener !== null, 'Verify that the listener exists' );
-      assert && assert( !_.contains( this.listeners, listener ) );
-      this.listeners.push( listener );
-    },
-
-    removeChangeListener: function( listener ) {
-      assert && assert( _.contains( this.listeners, listener ) );
-      this.listeners.splice( _.indexOf( this.listeners, listener ), 1 );
-    },
-
-    getListenerCount: function() {
-      return this.listeners.length;
     },
 
     toString: function() {
@@ -676,6 +697,9 @@ define( function( require ) {
   Color.WHITE = Color.white = new Color( 255, 255, 255 ).setImmutable();
   Color.YELLOW = Color.yellow = new Color( 255, 255, 0 ).setImmutable();
 
+  // Helper for transparent colors
+  Color.TRANSPARENT = Color.transparent = new Color( 0, 0, 0, 0 ).setImmutable();
+
   /**
    * Interpolates between 2 colors in RGBA space. When distance is 0, color1
    * is returned. When distance is 1, color2 is returned. Other values of
@@ -684,8 +708,8 @@ define( function( require ) {
    *
    * @param {Color} color1
    * @param {Color} color2
-   * @param {Number} distance distance between color1 and color2, 0 <= distance <= 1
-   * @return {Color}
+   * @param {number} distance distance between color1 and color2, 0 <= distance <= 1
+   * @returns {Color}
    */
   Color.interpolateRGBA = function( color1, color2, distance ) {
     if ( distance < 0 || distance > 1 ) {
@@ -700,6 +724,32 @@ define( function( require ) {
 
   Color.fromStateObject = function( stateObject ) {
     return new Color( stateObject.r, stateObject.g, stateObject.b, stateObject.a );
+  };
+
+  Color.hsla = function( hue, saturation, lightness, alpha ) {
+    return new Color( 0, 0, 0, 1 ).setHSLA( hue, saturation, lightness, alpha );
+  };
+
+  var scratchColor = new Color( 'blue' );
+  Color.checkPaintString = function( cssString ) {
+    if ( assert ) {
+      try {
+        scratchColor.setCSS( cssString );
+      }
+      catch( e ) {
+        assert( false, 'The CSS string is an invalid color: ' + cssString );
+      }
+    }
+  };
+
+  // a Paint of the type that Paintable accepts as fills or strokes
+  Color.checkPaint = function( paint ) {
+    if ( typeof paint === 'string' ) {
+      Color.checkPaintString( paint );
+    }
+    else if ( ( paint instanceof Property ) && ( typeof paint.value === 'string' ) ) {
+      Color.checkPaintString( paint.value );
+    }
   };
 
   return Color;

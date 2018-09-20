@@ -7,10 +7,22 @@
     "url": "https://github.com/phetsims/scenery.git"
   },
   "devDependencies": {
-    "grunt": "~0.4.1",
-    "grunt-requirejs": "~0.4.0",
-    "grunt-eslint": "~17.2.0",
-    "uglify-js": "~2.4.0",
-    "requirejs": "~2.1.8"
+    "grunt": "~1.0.0"
+  },
+  "phet": {
+    "generatedUnitTests": true,
+    "requirejsNamespace": "SCENERY",
+    "buildStandalone": true,
+    "isJSOnly": true,
+    "requiresLodash": true,
+    "requiresJQuery": true,
+    "assignGlobals": {
+      "scenery": "main",
+      "kite": "KITE/main",
+      "dot": "DOT/main",
+      "axon": "AXON/main",
+      "phetCore": "PHET_CORE/main"
+    },
+    "finalizeJS": "scenery.Util.polyfillRequestAnimationFrame();"
   }
 }

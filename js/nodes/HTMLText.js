@@ -1,4 +1,4 @@
-// Copyright 2013-2015, University of Colorado Boulder
+// Copyright 2013-2016, University of Colorado Boulder
 
 /**
  * HTML Text, with the same interface as Text
@@ -14,8 +14,15 @@ define( function( require ) {
   var Text = require( 'SCENERY/nodes/Text' ); // inherits from Text
 
   /**
+   * @public
+   * @constructor
+   * @extends Text
+   *
    * NOTE: Currently does not properly handle multi-line (<br>) text height, since it expects DOM text that will be an
    * inline element
+   *
+   * @param {string} text - The HTML-styled text to display
+   * @param {Object} [options] - Passed to Text/Node
    */
   function HTMLText( text, options ) {
     // internal flag for Text
@@ -26,9 +33,7 @@ define( function( require ) {
 
   scenery.register( 'HTMLText', HTMLText );
 
-  inherit( Text, HTMLText, {} );
+  inherit( Text, HTMLText );
 
   return HTMLText;
 } );
-
-

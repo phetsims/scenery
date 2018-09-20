@@ -1,4 +1,4 @@
-// Copyright 2013-2015, University of Colorado Boulder
+// Copyright 2013-2016, University of Colorado Boulder
 
 /**
  * Something that can be displayed with a specific renderer.
@@ -38,7 +38,7 @@
  *   domElement: {HTMLElement}
  * }
  * Canvas: {
- *   paintCanvas: function( {CanvasContextWrapper} wrapper, {Node} node )
+ *   paintCanvas: function( {CanvasContextWrapper} wrapper, {Node} node, {Matrix3} matrix )
  * }
  * SVG: {
  *   svgElement: {SVGElement}
@@ -56,10 +56,10 @@
 define( function( require ) {
   'use strict';
 
-  var inherit = require( 'PHET_CORE/inherit' );
   var Events = require( 'AXON/Events' );
-  var scenery = require( 'SCENERY/scenery' );
+  var inherit = require( 'PHET_CORE/inherit' );
   var Renderer = require( 'SCENERY/display/Renderer' );
+  var scenery = require( 'SCENERY/scenery' );
 
   var globalId = 1;
 
@@ -213,7 +213,7 @@ define( function( require ) {
       this.pendingRemoval = true;
     },
 
-    // returns {Boolean} whether we changed our block
+    // returns {boolean} whether we changed our block
     updateBlock: function() {
       sceneryLog && sceneryLog.Drawable && sceneryLog.Drawable( '[' + this.constructor.name + '*] updateBlock ' + this.toString() +
                                                                 ' with add:' + this.pendingAddition +

@@ -18,8 +18,11 @@ Will copy it to the console so it can be copy-pasted to reproduce elsewhere.
   <title>Scenery Display Fuzzer</title>
 
   <script src="../../assert/js/assert.js"></script>
+  <script src="../../tandem/js/PhetioIDUtils.js"></script>
   <script src="../../sherpa/lib/jquery-2.1.0.js"></script>
-  <script src="../../sherpa/lib/lodash-2.4.1.min.js"></script>
+  <script src="../../sherpa/lib/lodash-4.17.4.min.js"></script>
+  <script src="../../sherpa/lib/himalaya-0.2.7.js"></script>
+  <script src="../../sherpa/lib/he-1.1.1.js"></script>
 
   <script type="text/javascript">
     // We want to trigger any assertions we can
@@ -103,8 +106,8 @@ Will copy it to the console so it can be copy-pasted to reproduce elsewhere.
         nodes[ 'node' + i ] = new scenery.Node();
       }
       for ( i = 0; i < Math.ceil( 6 * NODE_COUNT_MULTIPLIER ); i++ ) {
-        fuzzLog.push( 'var path' + i + ' = new scenery.Path();' );
-        paths[ 'path' + i ] = paintables[ 'path' + i ] = nodes[ 'path' + i ] = new scenery.Path();
+        fuzzLog.push( 'var path' + i + ' = new scenery.Path( null );' );
+        paths[ 'path' + i ] = paintables[ 'path' + i ] = nodes[ 'path' + i ] = new scenery.Path( null );
       }
       for ( i = 0; i < Math.ceil( 4 * NODE_COUNT_MULTIPLIER ); i++ ) {
         fuzzLog.push( 'var text' + i + ' = new scenery.Text( \'' + i + '!\' );' );

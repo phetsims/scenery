@@ -1,4 +1,4 @@
-// Copyright 2014-2015, University of Colorado Boulder
+// Copyright 2014-2016, University of Colorado Boulder
 
 
 /**
@@ -10,11 +10,18 @@
 define( function( require ) {
   'use strict';
 
-  var inherit = require( 'PHET_CORE/inherit' );
-  var Poolable = require( 'PHET_CORE/Poolable' );
-  var scenery = require( 'SCENERY/scenery' );
   var Drawable = require( 'SCENERY/display/Drawable' );
+  var inherit = require( 'PHET_CORE/inherit' );
+  var scenery = require( 'SCENERY/scenery' );
 
+  /**
+   * @constructor
+   * @extends Drawable
+   * @mixes Poolable
+   *
+   * @param renderer
+   * @param instance
+   */
   function SelfDrawable( renderer, instance ) {
     this.initializeSelfDrawable( renderer, instance );
   }
@@ -61,27 +68,6 @@ define( function( require ) {
       return this.toString() + ' (' + this.instance.trail.toPathString() + ')';
     }
   } );
-
-  SelfDrawable.Poolable = {
-    mixin: function( selfDrawableType ) {
-      // for pooling, allow <SelfDrawableType>.createFromPool( renderer, instance ) and drawable.freeToPool(). Creation will initialize the drawable to an initial state
-      Poolable.mixin( selfDrawableType, {
-        defaultFactory: function() {
-          return new selfDrawableType();
-        },
-        constructorDuplicateFactory: function( pool ) {
-          return function( renderer, instance ) {
-            if ( pool.length ) {
-              return pool.pop().initialize( renderer, instance );
-            }
-            else {
-              return new selfDrawableType( renderer, instance );
-            }
-          };
-        }
-      } );
-    }
-  };
 
   return SelfDrawable;
 } );

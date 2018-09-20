@@ -1,4 +1,4 @@
-// Copyright 2013-2015, University of Colorado Boulder
+// Copyright 2013-2016, University of Colorado Boulder
 
 
 /**
@@ -59,34 +59,43 @@ define( function( require ) {
     // indices[x] stores the index of nodes[x] in nodes[x-1]'s children, e.g. nodes[i].children[ indices[i] ] === nodes[i+1]
     this.indices = [];
 
-    var trail = this;
+    var self = this;
     if ( nodes ) {
       if ( nodes instanceof scenery.Node ) {
         var node = nodes;
 
         // add just a single node in
-        trail.addDescendant( node );
+        self.addDescendant( node );
       }
       else {
         // process it as an array
         var len = nodes.length;
         for ( var i = 0; i < len; i++ ) {
-          trail.addDescendant( nodes[ i ] );
+          self.addDescendant( nodes[ i ] );
         }
       }
     }
-
-    phetAllocation && phetAllocation( 'Trail' );
   }
 
   scenery.register( 'Trail', Trail );
 
   inherit( Object, Trail, {
+    /**
+     * Returns a copy of this Trail that can be modified independently
+     * @public
+     *
+     * @returns {Trail}
+     */
     copy: function() {
       return new Trail( this );
     },
 
-    // convenience function to determine whether this trail will render something
+    /**
+     * Whether the leaf-most Node in our trail will render something
+     * @public (scenery-internal)
+     *
+     * @returns {boolean}
+     */
     isPainted: function() {
       return this.lastNode().isPainted();
     },
@@ -116,8 +125,15 @@ define( function( require ) {
       return true;
     },
 
-    isFocusable: function() {
-      return this.isVisible() && this.lastNode().focusable === true;
+    // this trail is visible only if all nodes on it are marked as visible
+    isAccessibleVisible: function() {
+      var i = this.nodes.length;
+      while ( i-- ) {
+        if ( !this.nodes[ i ].isVisible() || !this.nodes[ i ].getAccessibleVisible() ) {
+          return false;
+        }
+      }
+      return true;
     },
 
     getOpacity: function() {
@@ -135,9 +151,10 @@ define( function( require ) {
       if ( _.some( this.nodes, function( node ) { return node.pickable === false || node.visible === false; } ) ) { return false; }
 
       // if there is any listener or pickable: true, it will be pickable
-      if ( _.some( this.nodes, function( node ) { return node.hasInputListenerEquivalent(); } ) ) { return true; }
+      if ( _.some( this.nodes, function( node ) { return node._inputListeners.length > 0 || node._pickable === true; } ) ) { return true; }
 
-      if ( this.lastNode()._subtreePickableCount > 0 ) {
+      // TODO: Is this even necessary?
+      if ( this.lastNode()._picker._subtreePickableCount > 0 ) {
         return true;
       }
 
@@ -159,6 +176,7 @@ define( function( require ) {
       return new Trail( this.nodes.slice( startIndex, endIndex ) );
     },
 
+    // TODO: consider renaming to subtrailToExcluding and subtrailToIncluding?
     subtrailTo: function( node, excludeNode ) {
       return this.slice( 0, _.indexOf( this.nodes, node ) + ( excludeNode ? 0 : 1 ) );
     },
@@ -369,7 +387,14 @@ define( function( require ) {
       return this.slice( 0, _.indexOf( this.nodes, node ) + 1 );
     },
 
-    // whether this trail contains the complete 'other' trail, but with added descendants afterwards
+    /**
+     * Whether this trail contains the complete 'other' trail, but with added descendants afterwards.
+     *
+     * @param {Trail} other - is other a subset of this trail?
+     * @param {boolean} allowSameTrail
+     *
+     * @returns {boolean}
+     */
     isExtensionOf: function( other, allowSameTrail ) {
       if ( this.length <= other.length - ( allowSameTrail ? 1 : 0 ) ) {
         return false;
@@ -418,13 +443,52 @@ define( function( require ) {
 
       var branchIndex;
 
-      for ( branchIndex = 0; branchIndex < Math.min( this.length, otherTrail.length ); branchIndex++ ) {
+      var min = Math.min( this.length, otherTrail.length );
+      for ( branchIndex = 0; branchIndex < min; branchIndex++ ) {
         if ( this.nodes[ branchIndex ] !== otherTrail.nodes[ branchIndex ] ) {
           break;
         }
       }
 
       return branchIndex;
+    },
+
+    /**
+     * Returns the last (largest) index into the trail's nodes that has inputEnabled=true.
+     * @public
+     *
+     * @returns {number}
+     */
+    getLastInputEnabledIndex: function() {
+      // Determine how far up the Trail input is determined. The first node with !inputEnabled and after will not have
+      // events fired (see https://github.com/phetsims/sun/issues/257)
+      var trailStartIndex = -1;
+      for ( var j = 0; j < this.length; j++ ) {
+        if ( !this.nodes[ j ]._inputEnabled ) {
+          break;
+        }
+
+        trailStartIndex = j;
+      }
+
+      return trailStartIndex;
+    },
+
+    /**
+     * Returns the leaf-most index, unless there is a Node with inputEnabled=false (in which case, the lowest index
+     * for those matching Nodes are returned).
+     * @public
+     *
+     * @returns {number}
+     */
+    getCursorCheckIndex: function() {
+      var lastInputEnabledIndex = this.getLastInputEnabledIndex();
+      if ( lastInputEnabledIndex + 1 < this.length ) {
+        return lastInputEnabledIndex + 1;
+      }
+      else {
+        return lastInputEnabledIndex;
+      }
     },
 
     // TODO: phase out in favor of get()

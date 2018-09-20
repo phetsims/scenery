@@ -1,8 +1,13 @@
-// Copyright 2013-2015, University of Colorado Boulder
-
+// Copyright 2013-2016, University of Colorado Boulder
 
 /**
  * DOM drawable for a single painted node.
+ *
+ * Subtypes should expose the following API that is used by DOMSelfDrawable:
+ * - drawable.domElement {HTMLElement} - The primary DOM element that will get transformed and added.
+ * - drawable.updateDOM() {function} - Called with no arguments in order to update the domElement's view.
+ *
+ * TODO: make abstract subtype methods for improved documentation
  *
  * @author Jonathan Olson <jonathan.olson@colorado.edu>
  */

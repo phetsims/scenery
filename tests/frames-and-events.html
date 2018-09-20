@@ -1,0 +1,87 @@
+<!DOCTYPE html>
+<html>
+<!--
+Test for https://github.com/phetsims/scenery/issues/644
+-->
+<head>
+  <meta charset="utf-8"/>
+  <meta http-equiv="X-UA-Compatible" content="IE=edge"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+  <title>Scenery Playground</title>
+
+  <script src="../../assert/js/assert.js"></script>
+  <script src="../../tandem/js/PhetioIDUtils.js"></script>
+  <script src="../../sherpa/lib/jquery-2.1.0.js"></script>
+  <script src="../../sherpa/lib/lodash-4.17.4.min.js"></script>
+  <script src="../../sherpa/lib/himalaya-0.2.7.js"></script>
+  <script src="../../sherpa/lib/he-1.1.1.js"></script>
+
+  <script type="text/javascript">
+    window.assertions.enableAssert();
+  </script>
+
+  <script data-main="../js/config.js" src="../../sherpa/lib/require-2.1.11.js"></script>
+</head>
+<body>
+
+<script>
+
+  require( [ 'config' ], function() {
+    require( [ 'main', 'KITE/main', 'DOT/main', 'PHET_CORE/main', 'AXON/main' ], function( scenery, kite, dot, phetCore, axon ) {
+      window.scenery = scenery;
+      window.kite = kite;
+      window.dot = dot;
+      window.phetCore = phetCore;
+      window.axon = axon;
+
+      window.scene = new scenery.Node();
+
+
+      var display = window.display = new scenery.Display( scene, {
+        width: 640,
+        height: 320
+      } );
+      document.body.insertBefore( display.domElement, document.body.firstChild );
+
+      scenery.Util.polyfillRequestAnimationFrame();
+      display.initializeEvents();
+
+      var cellSize = 10;
+      var numColumns = Math.ceil( display.width / cellSize );
+      var numRows = Math.ceil( display.height / cellSize );
+
+      var cells = _.flatten( _.range( 0, numRows ).map( function( row ) {
+        return _.range( 0, numColumns ).map( function( column ) {
+          return new scenery.Rectangle( 0, 0, cellSize, cellSize, {
+            x: column * cellSize,
+            y: row * cellSize
+          } );
+        } );
+      } ) );
+      scene.children = cells;
+
+      var index = 0;
+
+      scene.addInputListener( {
+        move: function() {
+          cells[ index ].fill = 'red';
+
+          index = ( index + 1 ) % cells.length;
+        }
+      } );
+
+      (function loop(){
+        requestAnimationFrame( loop, display.domElement );
+
+        cells[ index ].fill = 'blue';
+
+        index = ( index + 1 ) % cells.length;
+
+        display.updateDisplay();
+      })();
+    } );
+  } );
+</script>
+</body>
+</html>

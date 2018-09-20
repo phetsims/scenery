@@ -1,4 +1,4 @@
-// Copyright 2014-2015, University of Colorado Boulder
+// Copyright 2015-2016, University of Colorado Boulder
 
 /**
  * A sub-component of an Instance that handles matters relating to whether fitted blocks should not fit if possible.
@@ -11,8 +11,8 @@
 define( function( require ) {
   'use strict';
 
-  var inherit = require( 'PHET_CORE/inherit' );
   var Emitter = require( 'AXON/Emitter' );
+  var inherit = require( 'PHET_CORE/inherit' );
   var scenery = require( 'SCENERY/scenery' );
 
   /**
@@ -138,7 +138,7 @@ define( function( require ) {
 
       var children = this.instance.children;
       for ( var i = 0; i < children.length; i++ ) {
-        children[ i ].markSubtreeUnfittable();
+        children[ i ].fittability.markSubtreeUnfittable();
       }
 
       // Update the Instance's drawables, so that their blocks can potentially now be prevented from being fitted.

@@ -1,8 +1,7 @@
-// Copyright 2014, University of Colorado Boulder
-
+// Copyright 2014-2016, University of Colorado Boulder
 
 /**
- * @deprecated Stitcher that rebuilds all of the blocks and reattaches drawables. Simple, but inefficient.
+ * Stitcher that rebuilds all of the blocks and reattaches drawables. Simple, but inefficient.
  *
  * Kept for now as a run-time comparison and baseline for the GreedyStitcher or any other more advanced (but
  * more error-prone) stitching process.
@@ -14,8 +13,8 @@ define( function( require ) {
   'use strict';
 
   var inherit = require( 'PHET_CORE/inherit' );
-  var scenery = require( 'SCENERY/scenery' );
   var Renderer = require( 'SCENERY/display/Renderer' );
+  var scenery = require( 'SCENERY/scenery' );
   var Stitcher = require( 'SCENERY/display/Stitcher' );
 
   var prototype = {

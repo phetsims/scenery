@@ -1,4 +1,4 @@
-// Copyright 2014-2015, University of Colorado Boulder
+// Copyright 2014-2016, University of Colorado Boulder
 
 
 /**
@@ -11,11 +11,18 @@
 define( function( require ) {
   'use strict';
 
+  var Block = require( 'SCENERY/display/Block' );
   var inherit = require( 'PHET_CORE/inherit' );
   var Poolable = require( 'PHET_CORE/Poolable' );
   var scenery = require( 'SCENERY/scenery' );
-  var Block = require( 'SCENERY/display/Block' );
 
+  /**
+   * @constructor
+   * @mixes Poolable
+   *
+   * @param display
+   * @param domDrawable
+   */
   function DOMBlock( display, domDrawable ) {
     this.initialize( display, domDrawable );
   }
@@ -68,17 +75,8 @@ define( function( require ) {
     }
   } );
 
-  Poolable.mixin( DOMBlock, {
-    constructorDuplicateFactory: function( pool ) {
-      return function( display, domDrawable ) {
-        if ( pool.length ) {
-          return pool.pop().initialize( display, domDrawable );
-        }
-        else {
-          return new DOMBlock( display, domDrawable );
-        }
-      };
-    }
+  Poolable.mixInto( DOMBlock, {
+    initialize: DOMBlock.prototype.initialize
   } );
 
   return DOMBlock;

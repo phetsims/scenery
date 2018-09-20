@@ -13,9 +13,12 @@
   <link rel="stylesheet" href="../../sherpa/lib/syntaxhighlighter-3.0.83/shThemeDefault.css">
   <link rel="stylesheet" href="../assets/scenery.css">
 
+  <!-- Before loading other things (that might error), create hooks to report errors/loads for continuous testing -->
+  <script src="../../aqua/js/pageload-connector.js"></script>
+
   <!-- jQuery and LoDash are dependencies -->
   <script src="../../sherpa/lib/jquery-2.1.0.min.js"></script>
-  <script src="../../sherpa/lib/lodash-2.4.1.min.js"></script>
+  <script src="../../sherpa/lib/lodash-4.17.4.min.js"></script>
 
   <!-- For the styling -->
   <script src="../../sherpa/lib/bootstrap-2.2.2.js"></script>
@@ -29,10 +32,10 @@
   MathJax.Hub.Config({tex2jax: {inlineMath: [['$','$'], ['\\(','\\)']]}});
 
   </script>
-  <script type="text/javascript" src="http://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+  <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.1/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
 
   <!-- Our code, in either the concatenated 'with comments' version or the minified version -->
-  <script src="../build/development/scenery.js"></script>
+  <script src="../build/scenery.min.js"></script>
 
   <script type="text/javascript">
     scenery.Util.polyfillRequestAnimationFrame();
@@ -162,7 +165,6 @@
     <a class="sublink" href="#node-removeChild">removeChild</a><br>
     <a class="sublink" href="#node-removeChildAt">removeChildAt</a><br>
     <a class="sublink" href="#node-removeAllChildren">removeAllChildren</a><br>
-    <a class="sublink" href="#node-addPeer">addPeer</a><br>
     <a class="sublink" href="#node-detach">detach</a><br>
     <a class="sublink" href="#node-cursor">cursor</a><br>
     <a class="sublink" href="#node-mouseArea">mouseArea</a><br>
@@ -192,7 +194,6 @@
     <a class="sublink" href="#node-centerX">centerX</a><br>
     <a class="sublink" href="#node-centerY">centerY</a><br>
     <a class="sublink" href="#node-renderer">renderer</a><br>
-    <a class="sublink" href="#node-rendererOptions">rendererOptions</a><br>
     <a class="sublink" href="#node-layerSplit">layerSplit</a><br>
 
     <a class="navlink" href="#display">Display</a><br>
@@ -323,10 +324,13 @@ git clone https://github.com/phetsims/sherpa.git
 git clone https://github.com/phetsims/chipper.git
 git clone https://github.com/phetsims/assert.git
 git clone https://github.com/phetsims/axon.git
+git clone https://github.com/phetsims/tandem.git
 git clone https://github.com/phetsims/phet-core.git
 git clone https://github.com/phetsims/dot.git
 git clone https://github.com/phetsims/kite.git
 git clone https://github.com/phetsims/scenery.git</pre>
+
+    <h2 id="building">Building</h2>
 
     <p>
       For some examples and tests, and to build a custom version, you'll need to install <a href="http://nodejs.org/">node.js</a>, and <a
@@ -334,7 +338,9 @@ git clone https://github.com/phetsims/scenery.git</pre>
     </p>
 
       <pre>
-cd scenery
+cd chipper
+npm install
+cd ../scenery
 npm install
 grunt</pre>
 
@@ -379,6 +385,10 @@ window.assertions.disableAssertSlow();
 
     <p>
       See the <a href="user-input">User Input documentation</a> for handling user-generated events.
+    </p>
+
+    <p>
+      Take a look at <a href="accessibility.html">Accessibility in Scenery</a>
     </p>
 
     <p>
@@ -441,9 +451,6 @@ window.assertions.disableAssertSlow();
       </li>
       <li><a href="#node-renderer">renderer</a>: Forces Scenery to use the specific renderer (canvas/svg) to display this node (and if possible,
         children). Accepts both strings (e.g. 'canvas', 'svg', etc.) or actual Renderer objects (e.g. Renderer.Canvas, Renderer.SVG, etc.)
-      </li>
-      <li><a href="#node-rendererOptions">rendererOptions</a>: Parameter object that is passed to the created layer, and can affect how the layering
-        process works.
       </li>
       <li><a href="#node-layerSplit">layerSplit</a>: Forces a split between layers before and after this node (and its children) have been rendered.
         Useful for performance with Canvas-based renderers.
@@ -558,23 +565,6 @@ window.assertions.disableAssertSlow();
       Removes all of the Node's children.
     </p>
 
-    <h4 id="node-addPeer">node.addPeer( <span class="args">element, options</span> )</h4>
-
-    <p>
-      Adds an accessibility peer described by the element and options to the tab order (handled for each instance). <code>element</code> can be either
-      a DOM element (it is used directly, and tabindex is set on it), or an HTML string (which will be duplicated for each instance). The peer can be
-      focused,
-      and peers can be modified to reflect the current state of the node.
-    </p>
-
-    <p>
-      Currently if it exists, options.click is called when the peer is activated by the keyboard while focused.
-    </p>
-
-    <p>
-      For instance, a toggle button or checkbox should generally use <code>'&lt;input type="checkbox"&gt;'</code> for its element.
-    </p>
-
     <h4 id="node-detach">node.detach()</h4>
 
     <p>
@@ -593,7 +583,7 @@ window.assertions.disableAssertSlow();
 
     <p>
       The cursor is updated whenever <a href="#display-updateDisplay">display.updateDisplay</a> is called, and event initialization like <a
-        href="#display-initializeStandaloneEvents">display.initializeStandaloneEvents</a> should be added so Scenery can track the mouse input.
+        href="#display-initializeEvents">display.initializeEvents</a> should be added so Scenery can track the mouse input.
     </p>
 
     <p>
@@ -619,7 +609,7 @@ window.assertions.disableAssertSlow();
         } ) );
         /*END*/
 // event initialization needed for cursor to work
-        display.initializeStandaloneEvents();
+        display.initializeEvents();
 
 // and update on every frame
         display.updateOnRequestAnimationFrame();
@@ -973,22 +963,6 @@ window.assertions.disableAssertSlow();
       renderer that is compatible, or the scene default.
     </p>
 
-    <p>
-      <code>node.hasRenderer()</code> is a convenience function to determine if this is set on the node.
-    </p>
-
-    <h4 id="node-rendererOptions">node.rendererOptions</h4>
-
-    <p>
-      <code>node.rendererOptions</code> gets or sets options for the specified <a href="#node-renderer">renderer</a> using
-      <code>node.getRendererOptions()</code> or <code>node.setRendererOptions( renderer )</code>.
-      Setting <a href="#node-rendererOptions">rendererOptions</a> without setting <a href="#node-renderer">renderer</a> will have no effect, and may
-      in future
-      versions throw an error. If this option and the <a href="#node-renderer">renderer</a> is set, this node will have layer boundaries inserted
-      before and after.
-      <!-- TODO: docs of rendererOptions for different layers -->
-    </p>
-
     <h4 id="node-layerSplit">node.layerSplit</h4>
 
     <p>
@@ -1013,9 +987,6 @@ window.assertions.disableAssertSlow();
         transformed SVG) is hidden with CSS overflow
       </li>
       <li><a href="#display-allowCSSHacks">allowCSSHacks</a> (default true): applies styling that prevents mobile browser graphical issues</li>
-      <li><a href="#display-enablePointerEvents">enablePointerEvents</a> (default true): allows pointer events / MSPointerEvent to be used on
-        supported platforms.
-      </li>
       <li><a href="#display-allowWebGL">allowWebGL</a> (default true): sets whether WebGL can be used.</li>
       <li><a href="#display-width">width</a> (default currentWidth): override the main container's width</li>
       <li><a href="#display-height">height</a> (default currentHeight): override the main container's height</li>
@@ -1079,7 +1050,7 @@ window.assertions.disableAssertSlow();
     <h3 id="paintable" class="section">Paintable</h3>
 
     <p>
-      A mix-in for <a href="#node">Node</a> subtypes that can be filled and/or stroked with a color/gradient/pattern.
+      A trait for <a href="#node">Node</a> subtypes that can be filled and/or stroked with a color/gradient/pattern.
     </p>
 
     <h4 id="paintable-fill">fill</h4>
@@ -1373,7 +1344,7 @@ window.assertions.disableAssertSlow();
     <h3 id="path" class="section">Path</h3>
 
     <p>
-      Path is a <a href="#node">Node</a> subtype that includes the <a href="#paintable">Paintable</a> mixin.
+      Path is a <a href="#node">Node</a> subtype that includes the <a href="#paintable">Paintable</a> trait.
       The main displayed behavior is controlled by its single
       additional option <a href="#path-shape">shape</a> along with the <a href="#paintable-fill">fill</a>
       and <a href="#paintable-stroke">stroke</a> options.
@@ -2029,7 +2000,7 @@ window.assertions.disableAssertSlow();
 
     <p>
       It can be constructed with <code>new scenery.Font()</code> initialized with the default font '10px sans-serif',
-      <code>new scenery.Font( cssFontString )</code> initialized with the specified <a href="http://www.w3.org/TR/css3-fonts/">CSS Font</a>,
+      <code>scenery.Font.fromCSS( cssFontString )</code> initialized with the specified <a href="http://www.w3.org/TR/css3-fonts/">CSS Font</a>,
       or with a property object <code>new scenery.Font( { ... } )</code>, where any of the Font's properties
       (<a href="#font-font">font</a>, <a href="#font-family">family</a>, <a href="#font-weight">weight</a>, <a href="#font-stretch">stretch</a>, <a
         href="#font-style">style</a>, <a href="#font-size">size</a>, and <a href="#font-lineHeight">lineHeight</a>)
@@ -2037,7 +2008,7 @@ window.assertions.disableAssertSlow();
     </p>
 
     <p>
-      For example, <code>new scenery.Font( { size: 16, style: 'italic' } )</code> and <code>new scenery.Font( 'italic 16px sans-serif' )</code>
+      For example, <code>new scenery.Font( { size: 16, style: 'italic' } )</code> and <code>scenery.Font.fromCSS( 'italic 16px sans-serif' )</code>
       are equivalent ways of creating that specific Font instance. In addition:
     </p>
       <pre class="brush: js">
@@ -2165,6 +2136,10 @@ font.weight;                                 // 400 (the default)
   </div>
   <div class="span3"></div>
 </div>
+
+<footer style="background-color: #191919;">
+  <a class="brand" href="/scenery">Scenery</a>
+</footer>
 
 <script type="text/javascript">
   SyntaxHighlighter.all();

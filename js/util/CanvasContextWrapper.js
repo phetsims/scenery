@@ -1,4 +1,4 @@
-// Copyright 2013-2015, University of Colorado Boulder
+// Copyright 2013-2016, University of Colorado Boulder
 
 
 /**
@@ -14,15 +14,19 @@ define( function( require ) {
   'use strict';
 
   var inherit = require( 'PHET_CORE/inherit' );
+  var Property = require( 'AXON/Property' );
   var scenery = require( 'SCENERY/scenery' );
 
+  /**
+   * @constructor
+   *
+   * @param {HTMLCanvasElement} canvas
+   * @param {CanvasRenderingContext2D} context
+   */
   function CanvasContextWrapper( canvas, context ) {
     this.canvas = canvas;
     this.context = context;
-
     this.resetStyles();
-
-    phetAllocation && phetAllocation( 'CanvasContextWrapper' );
   }
 
   scenery.register( 'CanvasContextWrapper', CanvasContextWrapper );
@@ -60,6 +64,11 @@ define( function( require ) {
     },
 
     setFillStyle: function( style ) {
+      // turn {Property}s into their values when necessary
+      if ( style && style instanceof Property ) {
+        style = style.value;
+      }
+
       // turn {Color}s into strings when necessary
       if ( style && style.getCanvasStyle ) {
         style = style.getCanvasStyle();
@@ -74,6 +83,11 @@ define( function( require ) {
     },
 
     setStrokeStyle: function( style ) {
+      // turn {Property}s into their values when necessary
+      if ( style && style instanceof Property ) {
+        style = style.value;
+      }
+
       // turn {Color}s into strings when necessary
       if ( style && style.getCanvasStyle ) {
         style = style.getCanvasStyle();

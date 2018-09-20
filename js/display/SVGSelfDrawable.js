@@ -1,4 +1,4 @@
-// Copyright 2013-2015, University of Colorado Boulder
+// Copyright 2013-2016, University of Colorado Boulder
 
 /**
  * Represents an SVG visual element, and is responsible for tracking changes to the visual element, and then applying
@@ -10,6 +10,8 @@
  *   initializeState( renderer, instance )
  *   disposeState()
  *
+ * Subtypes should also implement drawable.svgElement, as the actual SVG element to be used.
+ *
  * @author Jonathan Olson <jonathan.olson@colorado.edu>
  */
 
@@ -17,9 +19,9 @@ define( function( require ) {
   'use strict';
 
   var inherit = require( 'PHET_CORE/inherit' );
+  var PaintSVGState = require( 'SCENERY/display/PaintSVGState' );
   var scenery = require( 'SCENERY/scenery' );
   var SelfDrawable = require( 'SCENERY/display/SelfDrawable' );
-  var Paintable = require( 'SCENERY/nodes/Paintable' );
 
   function SVGSelfDrawable( renderer, instance ) {
     this.initializeSVGSelfDrawable( renderer, instance );
@@ -40,11 +42,11 @@ define( function( require ) {
       this.svgElement = null; // should be filled in by subtype
       this.svgBlock = null; // will be updated by updateSVGBlock()
 
-      this.initializeState( renderer, instance ); // assumes we have a state mixin
+      this.initializeState( renderer, instance ); // assumes we have a state trait
 
       if ( this.usesPaint ) {
         if ( !this.paintState ) {
-          this.paintState = new Paintable.PaintSVGState();
+          this.paintState = new PaintSVGState();
         }
         else {
           this.paintState.initialize();
@@ -107,7 +109,7 @@ define( function( require ) {
       }
 
       // clear all of the dirty flags
-      this.setToClean();
+      this.setToCleanState();
     },
 
     // to be used by our passed in options.updateSVG
@@ -177,10 +179,6 @@ define( function( require ) {
       this.svgBlock = null;
 
       SelfDrawable.prototype.dispose.call( this );
-    },
-
-    setToClean: function() {
-      this.setToCleanState();
     }
   } );
 

@@ -1,4 +1,4 @@
-// Copyright 2014, University of Colorado Boulder
+// Copyright 2014-2016, University of Colorado Boulder
 
 /**
  * A specialized drawable for a layer of drawables with the same renderer (basically, it's a Canvas element, SVG
@@ -11,10 +11,10 @@
 define( function( require ) {
   'use strict';
 
-  var inherit = require( 'PHET_CORE/inherit' );
   var cleanArray = require( 'PHET_CORE/cleanArray' );
-  var scenery = require( 'SCENERY/scenery' );
   var Drawable = require( 'SCENERY/display/Drawable' );
+  var inherit = require( 'PHET_CORE/inherit' );
+  var scenery = require( 'SCENERY/scenery' );
 
   function Block( display, renderer ) {
     throw new Error( 'Should never be called' );
@@ -27,6 +27,7 @@ define( function( require ) {
     /**
      * @param {Display} display
      * @param {number} renderer
+     * @returns {Block} - Returns 'this' reference, for chaining
      */
     initializeBlock: function( display, renderer ) {
       this.initializeDrawable( renderer );
@@ -88,6 +89,7 @@ define( function( require ) {
 
     removeDrawable: function( drawable ) {
       this.drawableCount--;
+      this.markDirty();
 
       if ( assertSlow ) {
         var idx = _.indexOf( this.drawableList, drawable );

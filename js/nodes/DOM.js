@@ -1,7 +1,7 @@
-// Copyright 2013-2015, University of Colorado Boulder
+// Copyright 2013-2016, University of Colorado Boulder
 
 /**
- * DOM nodes. Currently lightweight handling
+ * Displays a DOM element directly in a node, so that it can be positioned/transformed properly, and bounds are handled properly in Scenery.
  *
  * @author Jonathan Olson <jonathan.olson@colorado.edu>
  */
@@ -9,63 +9,113 @@
 define( function( require ) {
   'use strict';
 
-  var inherit = require( 'PHET_CORE/inherit' );
-  var escapeHTML = require( 'PHET_CORE/escapeHTML' );
   var Bounds2 = require( 'DOT/Bounds2' );
-
-  var scenery = require( 'SCENERY/scenery' );
-
+  var DOMDrawable = require( 'SCENERY/display/drawables/DOMDrawable' );
+  var extendDefined = require( 'PHET_CORE/extendDefined' );
+  var inherit = require( 'PHET_CORE/inherit' );
   var Node = require( 'SCENERY/nodes/Node' ); // DOM inherits from Node
   var Renderer = require( 'SCENERY/display/Renderer' );
-  require( 'SCENERY/util/Util' );
+  var scenery = require( 'SCENERY/scenery' );
 
-  var DOMSelfDrawable = require( 'SCENERY/display/DOMSelfDrawable' );
-  var SelfDrawable = require( 'SCENERY/display/SelfDrawable' );
+  var DOM_OPTION_KEYS = [
+    'element', // Sets the element, see setElement() for more documentation
+    'preventTransform' // Sets whether Scenery is allowed to transform the element. see setPreventTransform() for docs
+  ];
 
+  /**
+   * @public
+   * @constructor
+   * @extends Node
+   *
+   * @param {Element|Object} element - The HTML element, or a jQuery selector result.
+   * @param {Object} [options] - DOM-specific options are documented in DOM_OPTION_KEYS above, and can be provided
+   *                             along-side options for Node
+   */
   function DOM( element, options ) {
-    options = options || {};
-
-    this._interactive = false;
+    assert && assert( options === undefined || Object.getPrototypeOf( options ) === Object.prototype,
+        'Extra prototype on Node options object is a code smell' );
+    assert && assert( element instanceof window.Element || element.jquery,
+      'DOM nodes need to be passed an HTML/DOM element or a jQuery selection like $( ... )' );
 
     // unwrap from jQuery if that is passed in, for consistency
     if ( element && element.jquery ) {
       element = element[ 0 ];
+      assert && assert( element instanceof window.Element );
     }
 
+    // @public (scenery-internal) {HTMLDivElement} - Container div that will have our main element as a child (so we can position and mutate it).
     this._container = document.createElement( 'div' );
+
+    // @private {Object} - jQuery selection so that we can properly determine size information
     this._$container = $( this._container );
     this._$container.css( 'position', 'absolute' );
     this._$container.css( 'left', 0 );
     this._$container.css( 'top', 0 );
 
+    // @private {boolean} - Flag that indicates whether we are updating/invalidating ourself due to changes to the DOM element. The flag is needed so
+    //                      that updates to our element that we make in the update/invalidate section doesn't trigger an infinite loop with another
+    //                      update.
     this.invalidateDOMLock = false;
 
-    // don't let Scenery apply a transform directly (the DOM element will take care of that)
+    // @private {boolean} - Flag that when true won't let Scenery apply a transform directly (the client will take care of that).
     this._preventTransform = false;
 
-    // so that the mutator will call setElement()
-    options.element = element;
+    // Have mutate() call setElement() in the proper order
+    options = extendDefined( {
+      element: element
+    }, options );
 
     // will set the element after initializing
     Node.call( this, options );
+
+    // Only renderer supported, no need to dynamically compute
     this.setRendererBitmask( Renderer.bitmaskDOM );
   }
 
   scenery.register( 'DOM', DOM );
 
   inherit( Node, DOM, {
-    // we use a single DOM instance, so this flag should indicate that we don't support duplicating it
-    allowsMultipleDOMInstances: false,
+    /**
+     * {Array.<string>} - String keys for all of the allowed options that will be set by node.mutate( options ), in the
+     * order they will be evaluated in.
+     * @protected
+     *
+     * NOTE: See Node's _mutatorKeys documentation for more information on how this operates, and potential special
+     *       cases that may apply.
+     */
+    _mutatorKeys: DOM_OPTION_KEYS.concat( Node.prototype._mutatorKeys ),
 
-    // needs to be attached to the DOM tree for this to work
+    /**
+     * Computes the bounds of our current DOM element (using jQuery, as replacing this with other things seems a bit
+     * bug-prone and has caused issues in the past).
+     * @private
+     *
+     * The dom element needs to be attached to the DOM tree in order for this to work.
+     *
+     * Alternative getBoundingClientRect explored, but did not seem sufficient (possibly due to CSS transforms)?
+     *
+     * @returns {Bounds2}
+     */
     calculateDOMBounds: function() {
-      // var boundingRect = this._element.getBoundingClientRect();
-      // return new Bounds2( 0, 0, boundingRect.width, boundingRect.height );
       var $element = $( this._element );
       return new Bounds2( 0, 0, $element.width(), $element.height() );
     },
 
-    createTemporaryContainer: function() {
+    /**
+     * Triggers recomputation of our DOM element's bounds.
+     * @public
+     *
+     * This should be called after the DOM element's bounds may have changed, to properly update the bounding box
+     * in Scenery.
+     */
+    invalidateDOM: function() {
+      // prevent this from being executed as a side-effect from inside one of its own calls
+      if ( this.invalidateDOMLock ) {
+        return;
+      }
+      this.invalidateDOMLock = true;
+
+      // we will place ourselves in a temporary container to get our real desired bounds
       var temporaryContainer = document.createElement( 'div' );
       $( temporaryContainer ).css( {
         display: 'hidden',
@@ -77,18 +127,6 @@ define( function( require ) {
         width: 65535,
         height: 65535
       } );
-      return temporaryContainer;
-    },
-
-    invalidateDOM: function() {
-      // prevent this from being executed as a side-effect from inside one of its own calls
-      if ( this.invalidateDOMLock ) {
-        return;
-      }
-      this.invalidateDOMLock = true;
-
-      // we will place ourselves in a temporary container to get our real desired bounds
-      var temporaryContainer = this.createTemporaryContainer();
 
       // move to the temporary container
       this._container.removeChild( this._element );
@@ -106,21 +144,42 @@ define( function( require ) {
       temporaryContainer.removeChild( this._element );
       this._container.appendChild( this._element );
 
+      // unlock
       this.invalidateDOMLock = false;
     },
 
-    getDOMElement: function() {
-      return this._container;
-    },
-
+    /**
+     * Creates a DOM drawable for this DOM node.
+     * @public (scenery-internal)
+     * @override
+     *
+     * @param {number} renderer - In the bitmask format specified by Renderer, which may contain additional bit flags.
+     * @param {Instance} instance - Instance object that will be associated with the drawable
+     * @returns {DOMSelfDrawable}
+     */
     createDOMDrawable: function( renderer, instance ) {
-      return DOM.DOMDrawable.createFromPool( renderer, instance );
+      return DOMDrawable.createFromPool( renderer, instance );
     },
 
+    /**
+     * Whether this Node itself is painted (displays something itself).
+     * @public
+     * @override
+     *
+     * @returns {boolean}
+     */
     isPainted: function() {
+      // Always true for DOM nodes
       return true;
     },
 
+    /**
+     * Changes the DOM element of this DOM node to another element.
+     * @public
+     *
+     * @param {Element} element
+     * @returns {DOM} - For chaining
+     */
     setElement: function( element ) {
       assert && assert( !this._element, 'We should only ever attach one DOMElement to a DOM node' );
 
@@ -130,115 +189,59 @@ define( function( require ) {
         }
 
         this._element = element;
-        this._$element = $( element );
 
         this._container.appendChild( this._element );
 
-        // TODO: bounds issue, since this will probably set to empty bounds and thus a repaint may not draw over it
         this.invalidateDOM();
       }
 
       return this; // allow chaining
     },
+    set element( value ) { this.setElement( value ); },
 
+    /**
+     * Returns the DOM element being displayed by this DOM node.
+     * @public
+     *
+     * @returns {Element}
+     */
     getElement: function() {
       return this._element;
     },
+    get element() { return this.getElement(); },
 
-    setInteractive: function( interactive ) {
-      if ( this._interactive !== interactive ) {
-        this._interactive = interactive;
-
-        // TODO: anything needed here?
-      }
-    },
-
-    isInteractive: function() {
-      return this._interactive;
-    },
-
+    /**
+     * Sets the value of the preventTransform flag.
+     * @public
+     *
+     * When the preventTransform flag is set to true, Scenery will not reposition (CSS transform) the DOM element, but
+     * instead it will be at the upper-left (0,0) of the Scenery Display. The client will be responsible for sizing or
+     * positioning this element instead.
+     *
+     * @param {boolean} preventTransform
+     */
     setPreventTransform: function( preventTransform ) {
       assert && assert( typeof preventTransform === 'boolean' );
 
       if ( this._preventTransform !== preventTransform ) {
         this._preventTransform = preventTransform;
-
-        // TODO: anything needed here?
       }
     },
+    set preventTransform( value ) { this.setPreventTransform( value ); },
 
+    /**
+     * Returns the value of the preventTransform flag.
+     * @public
+     *
+     * See the setPreventTransform documentation for more information on the flag.
+     *
+     * @returns {boolean}
+     */
     isTransformPrevented: function() {
       return this._preventTransform;
     },
-
-    set element( value ) { this.setElement( value ); },
-    get element() { return this.getElement(); },
-
-    set interactive( value ) { this.setInteractive( value ); },
-    get interactive() { return this.isInteractive(); },
-
-    set preventTransform( value ) { this.setPreventTransform( value ); },
-    get preventTransform() { return this.isTransformPrevented(); },
-
-    getBasicConstructor: function( propLines ) {
-      return 'new scenery.DOM( $( \'' + escapeHTML( this._container.innerHTML.replace( /'/g, '\\\'' ) ) + '\' ), {' + propLines + '} )';
-    },
-
-    getPropString: function( spaces, includeChildren ) {
-      var result = Node.prototype.getPropString.call( this, spaces, includeChildren );
-      if ( this.interactive ) {
-        if ( result ) {
-          result += ',\n';
-        }
-        result += spaces + 'interactive: true';
-      }
-      return result;
-    }
+    get preventTransform() { return this.isTransformPrevented(); }
   } );
-
-  DOM.prototype._mutatorKeys = [ 'element', 'interactive', 'preventTransform' ].concat( Node.prototype._mutatorKeys );
-
-  /*---------------------------------------------------------------------------*
-   * DOM rendering
-   *----------------------------------------------------------------------------*/
-
-  DOM.DOMDrawable = inherit( DOMSelfDrawable, function DOMDrawable( renderer, instance ) {
-    this.initialize( renderer, instance );
-  }, {
-    // initializes, and resets (so we can support pooled states)
-    initialize: function( renderer, instance ) {
-      this.initializeDOMSelfDrawable( renderer, instance );
-
-      this.domElement = this.node._container;
-
-      scenery.Util.prepareForTransform( this.domElement, this.forceAcceleration );
-
-      return this; // allow for chaining
-    },
-
-    updateDOM: function() {
-      if ( this.transformDirty && !this.node._preventTransform ) {
-        scenery.Util.applyPreparedTransform( this.getTransformMatrix(), this.domElement, this.forceAcceleration );
-      }
-
-      // clear all of the dirty flags
-      this.setToClean();
-    },
-
-    setToClean: function() {
-      this.transformDirty = false;
-    },
-
-    dispose: function() {
-      DOMSelfDrawable.prototype.dispose.call( this );
-
-      this.domElement = null;
-    }
-  } );
-
-  SelfDrawable.Poolable.mixin( DOM.DOMDrawable );
 
   return DOM;
 } );
-
-

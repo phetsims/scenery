@@ -1,0 +1,46 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8"/>
+  <meta http-equiv="X-UA-Compatible" content="IE=edge"/>
+
+  <title>Loop Blinn rendering proof of concept</title>
+
+  <script src="../../../sherpa/lib/jquery-2.1.0.js"></script>
+  <script src="../../../sherpa/lib/lodash-4.17.4.min.js"></script>
+  <script src="../../../sherpa/lib/base64-js-1.2.0.js"></script>
+  <script src="../../../sherpa/lib/TextEncoderLite-3c9f6f0.js"></script>
+  <script src="../../../sherpa/lib/himalaya-0.2.7.js"></script>
+  <script src="../../../sherpa/lib/he-1.1.1.js"></script>
+  <script src="../../../assert/js/assert.js"></script>
+  <script src="../../../tandem/js/PhetioIDUtils.js"></script>
+  <script type="text/javascript">
+    window.assertions.enableAssert();
+  </script>
+
+  <!-- Canvg and dependencies -->
+  <script src="../../../sherpa/lib/canvg-rgbcolor-1.3.js"></script>
+  <script src="../../../sherpa/lib/canvg-1.3.js"></script>
+
+  <script data-main="../../js/config.js" src="../../../sherpa/lib/require-2.1.11.js"></script>
+
+</head>
+<body>
+
+<script>
+  require( [ 'config' ], function() {
+    require( [ 'main', 'KITE/main', 'DOT/main', 'AXON/main', 'PHET_CORE/main' ], function( scenery, kite, dot, axon, phetCore ) {
+
+      window.scenery = scenery;
+      window.kite = kite;
+      window.dot = dot;
+      window.axon = axon;
+      window.phetCore = phetCore;
+
+      window.cubic = new kite.Cubic( new dot.Vector2( 0, 0 ), new dot.Vector2( 10, 0 ), new dot.Vector2( 10, 10 ), new dot.Vector2( 0, 10 ) );
+
+    } );
+  } );
+</script>
+</body>
+</html>

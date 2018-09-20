@@ -1,4 +1,4 @@
-// Copyright 2013-2015, University of Colorado Boulder
+// Copyright 2013-2016, University of Colorado Boulder
 
 
 /**
@@ -14,9 +14,12 @@ define( function( require ) {
   'use strict';
 
   var inherit = require( 'PHET_CORE/inherit' );
+  var KeyboardUtil = require( 'SCENERY/accessibility/KeyboardUtil' );
+  var Mouse = require( 'SCENERY/input/Mouse' );
+  var PhetioObject = require( 'TANDEM/PhetioObject' );
   var scenery = require( 'SCENERY/scenery' );
+  var Trail = require( 'SCENERY/util/Trail' );
   require( 'SCENERY/util/Trail' );
-  var Input = require( 'SCENERY/input/Input' );
 
   /*
    * The 'trail' parameter passed to down/upInside/upOutside will end with the node to which this DownUpListener has been added.
@@ -35,55 +38,74 @@ define( function( require ) {
    * }
    */
   function DownUpListener( options ) {
-    var handler = this;
+    var self = this;
 
     options = _.extend( {
       mouseButton: 0 // allow a different mouse button
     }, options );
+
+    PhetioObject.call( this, options );
     this.options = options; // @private
     this.isDown = false;   // public, whether this listener is down
     this.downCurrentTarget = null; // 'up' is handled via a pointer lister, which will have null currentTarget, so save the 'down' currentTarget
     this.downTrail = null;
     this.pointer = null;
+    this.interrupted = false;
 
     // this listener gets added to the pointer on a 'down'
     this.downListener = {
       // mouse/touch up
       up: function( event ) {
-        sceneryLog && sceneryLog.InputEvent && sceneryLog.InputEvent( 'DownUpListener (pointer) up for ' + handler.downTrail.toString() );
-        assert && assert( event.pointer === handler.pointer );
-        if ( !event.pointer.isMouse || event.domEvent.button === handler.options.mouseButton ) {
-          handler.buttonUp( event );
+        sceneryLog && sceneryLog.InputListener && sceneryLog.InputListener( 'DownUpListener (pointer) up for ' + self.downTrail.toString() );
+        sceneryLog && sceneryLog.InputListener && sceneryLog.push();
+
+        assert && assert( event.pointer === self.pointer );
+        if ( !( event.pointer instanceof Mouse ) || event.domEvent.button === self.options.mouseButton ) {
+          self.buttonUp( event );
         }
+
+        sceneryLog && sceneryLog.InputListener && sceneryLog.pop();
       },
 
       // touch cancel
       cancel: function( event ) {
-        sceneryLog && sceneryLog.InputEvent && sceneryLog.InputEvent( 'DownUpListener (pointer) cancel for ' + handler.downTrail.toString() );
-        assert && assert( event.pointer === handler.pointer );
-        handler.buttonUp( event );
+        sceneryLog && sceneryLog.InputListener && sceneryLog.InputListener( 'DownUpListener (pointer) cancel for ' + self.downTrail.toString() );
+        sceneryLog && sceneryLog.InputListener && sceneryLog.push();
+
+        assert && assert( event.pointer === self.pointer );
+        self.buttonUp( event );
+
+        sceneryLog && sceneryLog.InputListener && sceneryLog.pop();
       },
 
       // When the enter or space key is released, trigger an up event
       // TODO: Only trigger this if the enter/space key went down for this node
       keyup: function( event ) {
+        sceneryLog && sceneryLog.InputListener && sceneryLog.InputListener( 'DownUpListener (pointer) keyup for ' + self.downTrail.toString() );
+        sceneryLog && sceneryLog.InputListener && sceneryLog.push();
+
         var keyCode = event.domEvent.keyCode;
-        if ( keyCode === Input.KEY_ENTER || keyCode === Input.KEY_SPACE ) {
-          handler.buttonUp( event );
+        if ( keyCode === KeyboardUtil.KEY_ENTER || keyCode === KeyboardUtil.KEY_SPACE ) {
+          self.buttonUp( event );
         }
+
+        sceneryLog && sceneryLog.InputListener && sceneryLog.pop();
       }
     };
   }
 
   scenery.register( 'DownUpListener', DownUpListener );
 
-  inherit( Object, DownUpListener, {
+  inherit( PhetioObject, DownUpListener, {
     buttonDown: function( event ) {
       // already down from another pointer, don't do anything
       if ( this.isDown ) { return; }
 
       // ignore other mouse buttons
-      if ( event.pointer.isMouse && event.domEvent.button !== this.options.mouseButton ) { return; }
+      if ( event.pointer instanceof Mouse && event.domEvent.button !== this.options.mouseButton ) { return; }
+
+      sceneryLog && sceneryLog.InputListener && sceneryLog.InputListener( 'DownUpListener buttonDown' );
+      sceneryLog && sceneryLog.InputListener && sceneryLog.push();
 
       // add our listener so we catch the up wherever we are
       event.pointer.addInputListener( this.downListener );
@@ -93,13 +115,17 @@ define( function( require ) {
       this.downTrail = event.trail.subtrailTo( event.currentTarget, false );
       this.pointer = event.pointer;
 
-      sceneryLog && sceneryLog.InputEvent && sceneryLog.InputEvent( 'DownUpListener buttonDown for ' + this.downTrail.toString() );
       if ( this.options.down ) {
         this.options.down( event, this.downTrail );
       }
+
+      sceneryLog && sceneryLog.InputListener && sceneryLog.pop();
     },
 
     buttonUp: function( event ) {
+      sceneryLog && sceneryLog.InputListener && sceneryLog.InputListener( 'DownUpListener buttonUp' );
+      sceneryLog && sceneryLog.InputListener && sceneryLog.push();
+
       this.isDown = false;
       this.pointer.removeInputListener( this.downListener );
 
@@ -109,7 +135,7 @@ define( function( require ) {
         var trailUnderPointer = event.trail;
 
         // TODO: consider changing this so that it just does a hit check and ignores anything in front?
-        var isInside = trailUnderPointer.isExtensionOf( this.downTrail, true );
+        var isInside = trailUnderPointer.isExtensionOf( this.downTrail, true ) && !this.interrupted;
 
         if ( isInside && this.options.upInside ) {
           this.options.upInside( event, this.downTrail );
@@ -118,11 +144,13 @@ define( function( require ) {
           this.options.upOutside( event, this.downTrail );
         }
       }
-      sceneryLog && sceneryLog.InputEvent && sceneryLog.InputEvent( 'DownUpListener buttonUp for ' + this.downTrail.toString() );
+
       if ( this.options.up ) {
         this.options.up( event, this.downTrail );
       }
       event.currentTarget = currentTargetSave; // be polite to other listeners, restore currentTarget
+
+      sceneryLog && sceneryLog.InputListener && sceneryLog.pop();
     },
 
     /*---------------------------------------------------------------------------*
@@ -134,12 +162,39 @@ define( function( require ) {
       this.buttonDown( event );
     },
 
+    // Called when input is interrupted on this listener, see https://github.com/phetsims/scenery/issues/218
+    interrupt: function() {
+      if ( this.isDown ) {
+        sceneryLog && sceneryLog.InputListener && sceneryLog.InputListener( 'DownUpListener interrupt' );
+        sceneryLog && sceneryLog.InputListener && sceneryLog.push();
+
+        this.interrupted = true;
+
+        // We create a synthetic event here, as there is no available event here.
+        this.buttonUp( {
+          // Empty trail, so that it for-sure isn't under our downTrail (guaranteeing that isInside will be false).
+          trail: new Trail(),
+          currentTarget: this.downCurrentTarget,
+          pointer: this.pointer
+        } );
+
+        this.interrupted = false;
+
+        sceneryLog && sceneryLog.InputListener && sceneryLog.pop();
+      }
+    },
+
     // When enter/space pressed for this node, trigger a button down
     keydown: function( event ) {
+      sceneryLog && sceneryLog.InputListener && sceneryLog.InputListener( 'DownUpListener keydown' );
+      sceneryLog && sceneryLog.InputListener && sceneryLog.push();
+
       var keyCode = event.domEvent.keyCode;
-      if ( keyCode === Input.KEY_ENTER || keyCode === Input.KEY_SPACE ) {
+      if ( keyCode === KeyboardUtil.KEY_ENTER || keyCode === KeyboardUtil.KEY_SPACE ) {
         this.buttonDown( event );
       }
+
+      sceneryLog && sceneryLog.InputListener && sceneryLog.pop();
     }
   } );
 

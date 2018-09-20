@@ -1,4 +1,4 @@
-// Copyright 2013-2015, University of Colorado Boulder
+// Copyright 2013-2016, University of Colorado Boulder
 
 
 /**
@@ -19,11 +19,12 @@
 define( function( require ) {
   'use strict';
 
-  var scenery = require( 'SCENERY/scenery' );
-  require( 'SCENERY/util/Trail' );
-  var inherit = require( 'PHET_CORE/inherit' );
-
+  // modules
+  var ButtonListenerIO = require( 'SCENERY/input/ButtonListenerIO' );
   var DownUpListener = require( 'SCENERY/input/DownUpListener' );
+  var inherit = require( 'PHET_CORE/inherit' );
+  var scenery = require( 'SCENERY/scenery' );
+  var Tandem = require( 'TANDEM/Tandem' );
 
   /**
    * Options for the ButtonListener:
@@ -39,14 +40,26 @@ define( function( require ) {
   function ButtonListener( options ) {
     var self = this;
 
+    options = _.extend( {
+
+      // When running in PhET-iO brand, the tandem must be supplied
+      tandem: Tandem.optional,
+      phetioType: ButtonListenerIO,
+      phetioState: false,
+      phetioEventType: 'user'
+    }, options );
+
     this.buttonState = 'up'; // public: 'up', 'over', 'down' or 'out'
 
     this._overCount = 0; // how many pointers are over us (track a count, so we can handle multiple pointers gracefully)
 
     this._buttonOptions = options; // store the options object so we can call the callbacks
 
-    var buttonListener = this;
+    // TODO: pass through options
     DownUpListener.call( this, {
+      tandem: options.tandem,
+      phetioType: options.phetioType,
+      phetioState: options.phetioState,
 
       mouseButton: options.mouseButton || 0, // forward the mouse button, default to 0 (LMB)
 
@@ -55,12 +68,12 @@ define( function( require ) {
         if ( event.pointer.isKey ) {
           self.enter( event );
         }
-        buttonListener.setButtonState( event, 'down' );
+        self.setButtonState( event, 'down' );
       },
 
       // parameter to DownUpListener, NOT an input listener itself
       up: function( event, trail ) {
-        buttonListener.setButtonState( event, buttonListener._overCount > 0 ? 'over' : 'up' );
+        self.setButtonState( event, self._overCount > 0 ? 'over' : 'up' );
         if ( event.pointer.isKey ) {
           self.exit( event );
         }
@@ -81,13 +94,27 @@ define( function( require ) {
         this.buttonState = state;
 
         if ( this._buttonOptions[ state ] ) {
+
+          // Record this event to the phet-io event stream, including all downstream events as nested children
+          this.phetioStartEvent( state );
+
+          // Then invoke the callback
           this._buttonOptions[ state ]( event, oldState );
+
+          this.phetioEndEvent();
         }
 
         if ( this._buttonOptions.fire &&
              this._overCount > 0 &&
              ( this._buttonOptions.fireOnDown ? ( state === 'down' ) : ( oldState === 'down' ) ) ) {
+
+          // Record this event to the phet-io event stream, including all downstream events as nested children
+          this.phetioStartEvent( 'fire' );
+
+          // Then fire the event
           this._buttonOptions.fire( event );
+
+          this.phetioEndEvent();
         }
       }
     },

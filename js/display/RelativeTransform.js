@@ -1,4 +1,4 @@
-// Copyright 2014-2015, University of Colorado Boulder
+// Copyright 2014-2016, University of Colorado Boulder
 
 /**
  * RelativeTransform is a component of an Instance. It is responsible for tracking changes to "relative" transforms, and
@@ -87,8 +87,8 @@
 define( function( require ) {
   'use strict';
 
-  var inherit = require( 'PHET_CORE/inherit' );
   var cleanArray = require( 'PHET_CORE/cleanArray' );
+  var inherit = require( 'PHET_CORE/inherit' );
   var Matrix3 = require( 'DOT/Matrix3' );
   var scenery = require( 'SCENERY/scenery' );
 
@@ -153,8 +153,7 @@ define( function( require ) {
       return this.instance.parent ? this.instance.parent.relativeTransform : null;
     },
 
-    // NOTE: different parameter order compared to Node
-    insertInstance: function( instance, index ) {
+    addInstance: function( instance ) {
       if ( instance.stateless ) {
         assert && assert( !instance.relativeTransform.hasAncestorListenerNeed(),
           'We only track changes properly if stateless instances do not have needs' );
@@ -174,7 +173,7 @@ define( function( require ) {
       instance.relativeTransform.forceMarkTransformDirty();
     },
 
-    removeInstanceWithIndex: function( instance, index ) {
+    removeInstance: function( instance ) {
       if ( instance.relativeTransform.hasAncestorListenerNeed() ) {
         this.decrementTransformListenerChildren();
       }
@@ -203,7 +202,6 @@ define( function( require ) {
       else {
         return this.relativeChildrenListenersCount > 0 || this.relativeTransformListeners.length > 0;
       }
-      return;
     },
     // @private: Only for ancestors need, ignores child need on isTransformed
     hasAncestorListenerNeed: function() {
@@ -281,7 +279,6 @@ define( function( require ) {
       else {
         return this.relativeChildrenPrecomputeCount > 0 || this.relativePrecomputeCount > 0;
       }
-      return;
     },
     // @private: Only for ancestors need, ignores child need on isTransformed
     hasAncestorComputeNeed: function() {
@@ -578,7 +575,9 @@ define( function( require ) {
           'If we have a parent, we need to hold the invariant ' +
           'this.relativeChildDirtyFrame => parent.relativeChildDirtyFrame' );
 
-        if ( !hasRelativeSelfDirty( this ) ) {
+        // Since we check to see if something is not dirty, we need to handle this when we are actually reporting
+        // what is dirty. See https://github.com/phetsims/scenery/issues/512
+        if ( !allowValidationNotNeededChecks && !hasRelativeSelfDirty( this ) ) {
           var matrix = currentRelativeMatrix( this );
           assertSlow( matrix.equals( this.matrix ), 'If there is no relativeSelfDirty flag set here or in our' +
                                                     ' ancestors, our matrix should be up-to-date' );

@@ -1,8 +1,8 @@
-// Copyright 2014-2015, University of Colorado Boulder
+// Copyright 2014-2016, University of Colorado Boulder
 
 /**
- * PoolableMixin wrapper for SVG <group> elements. We store state and add listeners directly to the corresponding Node, so that we can set dirty flags and
- * smartly update only things that have changed. This takes a load off of SVGBlock.
+ * Poolable wrapper for SVG <group> elements. We store state and add listeners directly to the corresponding Node,
+ * so that we can set dirty flags and smartly update only things that have changed. This takes a load off of SVGBlock.
  *
  * @author Jonathan Olson <jonathan.olson@colorado.edu>
  */
@@ -10,12 +10,20 @@
 define( function( require ) {
   'use strict';
 
-  var inherit = require( 'PHET_CORE/inherit' );
-  var Poolable = require( 'PHET_CORE/Poolable' );
   var cleanArray = require( 'PHET_CORE/cleanArray' );
+  var inherit = require( 'PHET_CORE/inherit' );
   var platform = require( 'PHET_CORE/platform' );
+  var Poolable = require( 'PHET_CORE/Poolable' );
   var scenery = require( 'SCENERY/scenery' );
 
+  /**
+   * @constructor
+   * @mixes Poolable
+   *
+   * @param block
+   * @param instance
+   * @param parent
+   */
   function SVGGroup( block, instance, parent ) {
     this.initialize( block, instance, parent );
   }
@@ -73,8 +81,7 @@ define( function( require ) {
       // for tracking the order of child groups, we use a flag and update (reorder) once per updateDisplay if necessary.
       this.orderDirty = true;
       this.orderDirtyListener = this.orderDirtyListener || this.markOrderDirty.bind( this );
-      this.node.onStatic( 'childInserted', this.orderDirtyListener );
-      this.node.onStatic( 'childRemoved', this.orderDirtyListener );
+      this.node.onStatic( 'childrenChanged', this.orderDirtyListener );
 
       if ( !this.svgGroup ) {
         this.svgGroup = document.createElementNS( scenery.svgns, 'g' );
@@ -326,8 +333,7 @@ define( function( require ) {
       //OHTWO TODO: remove clip workaround
       this.node.offStatic( 'clip', this.clipDirtyListener );
 
-      this.node.offStatic( 'childInserted', this.orderDirtyListener );
-      this.node.offStatic( 'childRemoved', this.orderDirtyListener );
+      this.node.offStatic( 'childrenChanged', this.orderDirtyListener );
 
       // if our Instance has been disposed, it has already had the reference removed
       if ( this.instance.active ) {
@@ -408,19 +414,8 @@ define( function( require ) {
     }
   };
 
-  Poolable.mixin( SVGGroup, {
-    constructorDuplicateFactory: function( pool ) {
-      return function( block, instance, parent ) {
-        if ( pool.length ) {
-          sceneryLog && sceneryLog.SVGGroup && sceneryLog.SVGGroup( 'new from pool' );
-          return pool.pop().initialize( block, instance, parent );
-        }
-        else {
-          sceneryLog && sceneryLog.SVGGroup && sceneryLog.SVGGroup( 'new from constructor' );
-          return new SVGGroup( block, instance, parent );
-        }
-      };
-    }
+  Poolable.mixInto( SVGGroup, {
+    initialize: SVGGroup.prototype.initialize
   } );
 
   return SVGGroup;

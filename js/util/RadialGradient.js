@@ -1,5 +1,4 @@
-// Copyright 2013-2015, University of Colorado Boulder
-
+// Copyright 2013-2017, University of Colorado Boulder
 
 /**
  * A radial gradient that can be passed into the 'fill' or 'stroke' parameters.
@@ -12,21 +11,48 @@
 define( function( require ) {
   'use strict';
 
-  var scenery = require( 'SCENERY/scenery' );
-
-  var inherit = require( 'PHET_CORE/inherit' );
-  var Vector2 = require( 'DOT/Vector2' );
   var Gradient = require( 'SCENERY/util/Gradient' );
+  var inherit = require( 'PHET_CORE/inherit' );
+  var scenery = require( 'SCENERY/scenery' );
+  var SVGRadialGradient = require( 'SCENERY/display/SVGRadialGradient' );
+  var Vector2 = require( 'DOT/Vector2' );
 
-  // TODO: support Vector2s for p0 and p1
+  /**
+   * @constructor
+   * @extends Gradient
+   *
+   * TODO: add the ability to specify the color-stops inline. possibly [ [0,color1], [0.5,color2], [1,color3] ]
+   *
+   * TODO: support Vector2s as p0 and p1
+   *
+   * @param {number} x0 - X coordinate of the start point (ratio 0) in the local coordinate frame
+   * @param {number} y0 - Y coordinate of the start point (ratio 0) in the local coordinate frame
+   * @param {number} r0 - Radius of the start point (ratio 0) in the local coordinate frame
+   * @param {number} x1 - X coordinate of the end point (ratio 1) in the local coordinate frame
+   * @param {number} y1 - Y coordinate of the end point (ratio 1) in the local coordinate frame
+   * @param {number} r1 - Radius of the end point (ratio 1) in the local coordinate frame
+   */
   function RadialGradient( x0, y0, r0, x1, y1, r1 ) {
+    // @public {Vector2}
     this.start = new Vector2( x0, y0 );
     this.end = new Vector2( x1, y1 );
+
+    // @public {number}
     this.startRadius = r0;
     this.endRadius = r1;
 
-    // linear function from radius to point on the line from start to end
+    // @public {Vector2} - linear function from radius to point on the line from start to end
     this.focalPoint = this.start.plus( this.end.minus( this.start ).times( this.startRadius / ( this.startRadius - this.endRadius ) ) );
+
+    // @public {boolean}
+    this.startIsLarger = this.startRadius > this.endRadius;
+
+    // @public {Vector2}
+    this.largePoint = this.startIsLarger ? this.start : this.end;
+
+    // @public {number}
+    this.maxRadius = Math.max( this.startRadius, this.endRadius );
+    this.minRadius = Math.min( this.startRadius, this.endRadius );
 
     // make sure that the focal point is in both circles. SVG doesn't support rendering outside of them
     if ( this.startRadius >= this.endRadius ) {
@@ -36,8 +62,7 @@ define( function( require ) {
       assert && assert( this.focalPoint.minus( this.end ).magnitude() <= this.endRadius );
     }
 
-    // use the global scratch canvas instead of creating a new Canvas
-    Gradient.call( this, scenery.scratchContext.createRadialGradient( x0, y0, r0, x1, y1, r1 ) );
+    Gradient.call( this );
   }
 
   scenery.register( 'RadialGradient', RadialGradient );
@@ -46,24 +71,42 @@ define( function( require ) {
 
     isRadialGradient: true,
 
-    getSVGDefinition: function() {
-      var startIsLarger = this.startRadius > this.endRadius;
-      var largePoint = startIsLarger ? this.start : this.end;
-      // var smallPoint = startIsLarger ? this.end : this.start;
-      var maxRadius = Math.max( this.startRadius, this.endRadius );
-      var minRadius = Math.min( this.startRadius, this.endRadius );
+    /**
+     * Returns a fresh gradient given the starting parameters
+     * @protected
+     * @override
+     *
+     * @returns {CanvasGradient}
+     */
+    createCanvasGradient: function() {
+      // use the global scratch canvas instead of creating a new Canvas
+      return scenery.scratchContext.createRadialGradient( this.start.x, this.start.y, this.startRadius, this.end.x, this.end.y, this.endRadius );
+    },
 
-      var definition = document.createElementNS( scenery.svgns, 'radialGradient' );
+    /**
+     * Creates an SVG paint object for creating/updating the SVG equivalent definition.
+     * @public
+     *
+     * @param {SVGBlock} svgBlock
+     * @returns {SVGGradient|SVGPattern}
+     */
+    createSVGPaint: function( svgBlock ) {
+      return SVGRadialGradient.createFromPool( svgBlock, this );
+    },
 
-      definition.setAttribute( 'gradientUnits', 'userSpaceOnUse' ); // so we don't depend on the bounds of the object being drawn with the gradient
-      definition.setAttribute( 'cx', largePoint.x );
-      definition.setAttribute( 'cy', largePoint.y );
-      definition.setAttribute( 'r', maxRadius );
-      definition.setAttribute( 'fx', this.focalPoint.x );
-      definition.setAttribute( 'fy', this.focalPoint.y );
-      if ( this.transformMatrix ) {
-        definition.setAttribute( 'gradientTransform', this.transformMatrix.getSVGTransform() );
-      }
+    /**
+     * Returns stops suitable for direct SVG use.
+     * @public
+     * @override
+     *
+     * NOTE: SVG has certain stop requirements, so we need to remap/reverse in some cases.
+     *
+     * @returns {Array.<{ ratio: {number}, stop: {Color|string|Property.<Color|string|null>|null} }>}
+     */
+    getSVGStops: function() {
+      var startIsLarger = this.startIsLarger;
+      var maxRadius = this.maxRadius;
+      var minRadius = this.minRadius;
 
       //TODO: replace with dot.Util.linear
       // maps x linearly from [a0,b0] => [a1,b1]
@@ -71,7 +114,7 @@ define( function( require ) {
         return a1 + ( x - a0 ) * ( b1 - a1 ) / ( b0 - a0 );
       }
 
-      function applyStop( stop ) {
+      function mapStop( stop ) {
         // flip the stops if the start has a larger radius
         var ratio = startIsLarger ? 1 - stop.ratio : stop.ratio;
 
@@ -81,31 +124,20 @@ define( function( require ) {
           ratio = linearMap( 0, 1, minRadius / maxRadius, 1, ratio );
         }
 
-        // TODO: store color in our stops array, so we don't have to create additional objects every time?
-        var stopElement = document.createElementNS( scenery.svgns, 'stop' );
-        stopElement.setAttribute( 'offset', ratio );
-        // Since SVG doesn't support parsing scientific notation (e.g. 7e5), we need to output fixed decimal-point strings.
-        // Since this needs to be done quickly, and we don't particularly care about slight rounding differences (it's
-        // being used for display purposes only, and is never shown to the user), we use the built-in JS toFixed instead of
-        // Dot's version of toFixed. See https://github.com/phetsims/kite/issues/50
-        stopElement.setAttribute( 'style', 'stop-color: ' + stop.color.withAlpha( 1 ).toCSS() + '; stop-opacity: ' + stop.color.a.toFixed( 20 ) + ';' );
-        definition.appendChild( stopElement );
+        return {
+          ratio: ratio,
+          color: stop.color
+        };
       }
 
-      var i;
+      var stops = this.stops.map( mapStop );
+
       // switch the direction we apply stops in, so that the ratios always are increasing.
       if ( startIsLarger ) {
-        for ( i = this.stops.length - 1; i >= 0; i-- ) {
-          applyStop( this.stops[ i ] );
-        }
-      }
-      else {
-        for ( i = 0; i < this.stops.length; i++ ) {
-          applyStop( this.stops[ i ] );
-        }
+        stops.reverse();
       }
 
-      return definition;
+      return stops;
     },
 
     toString: function() {

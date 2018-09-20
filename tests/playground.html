@@ -11,9 +11,15 @@ an UI and Display made for visual testing and debugging.
 
   <title>Scenery Playground</title>
 
+  <!-- Before loading other things (that might error), create hooks to report errors/loads for continuous testing -->
+  <script src="../../aqua/js/pageload-connector.js"></script>
+
   <script src="../../assert/js/assert.js"></script>
+  <script src="../../tandem/js/PhetioIDUtils.js"></script>
   <script src="../../sherpa/lib/jquery-2.1.0.js"></script>
-  <script src="../../sherpa/lib/lodash-2.4.1.min.js"></script>
+  <script src="../../sherpa/lib/lodash-4.17.4.min.js"></script>
+  <script src="../../sherpa/lib/himalaya-0.2.7.js"></script>
+  <script src="../../sherpa/lib/he-1.1.1.js"></script>
 
   <script type="text/javascript">
     window.assertions.enableAssert();
@@ -33,7 +39,7 @@ an UI and Display made for visual testing and debugging.
       background-color: #fff;
     }
 
-    #debug {
+    #debug, #a11yDebug {
       position: relative;
       top: 320px;
       padding: 0.5em;
@@ -61,7 +67,7 @@ an UI and Display made for visual testing and debugging.
 <div id="controls">
   <button onclick="toggleDebug();">Toggle Debug</button>
   <br>
-  <button onclick="toggleSerialize();">Toggle Serialization</button>
+  <button onclick="toggleA11yDebug();">Toggle A11y</button>
   <br>
   <button onclick="toggleLogging();">Toggle Logging</button>
   <br>
@@ -72,7 +78,7 @@ an UI and Display made for visual testing and debugging.
   <br>
   <button onclick="toggleUpdates();">Toggle Update</button>
   <br>
-  <button onclick="display.initializeStandaloneEvents();">Standalone Events</button>
+  <button onclick="display.initializeEvents();">Events</button>
   <br>
   <br>
   <button onclick="display.updateDisplay();">Update</button>
@@ -107,13 +113,6 @@ an UI and Display made for visual testing and debugging.
       display._domElement.id = 'display';
       document.body.insertBefore( display._domElement, document.body.firstChild );
 
-      phetCore.loadScript( {
-        src: 'qunit/js/test-utils.js',
-        callback: function() {
-          console.log( 'loaded test-utils.js' );
-        }
-      } );
-
       scenery.Util.polyfillRequestAnimationFrame();
 
       // convenience function for IE stack trackes
@@ -126,42 +125,90 @@ an UI and Display made for visual testing and debugging.
         }
       };
 
-      window.testContent = {
-        createPeer: function( accessibleInstance ) {
-          return new scenery.AccessiblePeer( accessibleInstance, document.createElement( 'div' ) );
-        }
-      };
       window.accessibleTest = function() {
         setTimeout( function() {
-          scenery.enableLogging( [ 'AccessibleInstance' ] )
-          window.a = new scenery.Node( { accessibleContent: testContent } );
+
+          // with scenery logging for a11y
+          toggleA11yDebug( true );
+          toggleUpdates();
+
+          scene.tagName = 'div';
+
+          var a = new scenery.Node( { tagName: 'div', accessibleName: 'Test label' } );
           scene.addChild( a );
-          window.b = new scenery.Node();
-          b.addChild( a );
+
+          // TODO: this should be passing,see
+          var b = new scenery.Node( { tagName: 'input', accessibleName: 'Test label' } );
+          a.addChild( b );
         } )
       };
 
-      window.displayTest = function() {
-        window.img = new Image();
-        img.src = 'data:image/png;base64,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';
-        window.img2 = new Image();
-        img2.src = 'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAPoAAAB4CAYAAADblO/uAAAMGklEQVR4Xu2df4gdVxXHP2l+bH41JinBoIKLrTG2WJSqYKskKlYRretPxGKMjT/QP2wpUkoVSUCptIK/wKoULYqxam2tCG0VqlAxIqmI2lZaiEVEQ02zSZom2ZdNInf2TfOy+3Zn5s65d+68+Q4EAnvvued8z/m8O2/m3vsWoUsKSIGRV2DRyEeoAKWAFECgqwikQAcUEOgdSLJClAICXTUgBTqggEDvQJIVohQQ6KoBKdABBQR6B5KsEKWAQFcNSIEOKCDQO5BkhSgFBLpqQAp0QAGB3oEkK0QpINBVA1KgAwoI9A4kWSFKAYGuGpACHVBAoHcgyQpRCgh01YAU6IACAr0DSVaIUkCgqwakQAcUsAb9zAhqZq3RCEqkkFJXwLqIBXrqGZd/nVRAoBen3Vqj4hHVQgoYK2BdxIMz+k5jX2OaG/TdWqOYcWgsKZApYF3EAl2FJQUSVECgD0+KZvQEi1Uu+Ssg0AW6f/WoZ2sUEOgCvTXFKkf9FRDoAt2/etSzNQoI9NEGfW0/vEOtqUg5GkQBgT66oDvIf9sP742AYA+CUDuMCvTRBD2H/JX98P4CCPZ2MBnES4E+eqDPhjyPULAHQagdRgX6aIE+H+SCvR08BvNSoI8O6MMg/0U/vImBMDWzB8MpXcMCfTRAnw9yB7W73Hd1wZ4uh8E9E+jtB70I8jxCwR4cp3QHaAr0ixljginuAh43kMfaXlvWupeFXLAbFFmbTTQF+hauZSsPc5zHOMTTGfAHawhpba8NoFeFXLDXKLC2d20O9C+wlV0s4tfAR5jiRIZ8/vCoqq5bsLWXOui+kAv2qpU1Iu2bBz0X8iuc5AaWsooHOMqeivqeBd3GXsqg14W8bbDreLKKMAxrng7ozrvTwDVMcQ9THOFu4MmSMc4FvZ69VEG3grxNsAv0khAs1Cwt0HNPHwW2cYJ9/IfJDPijBbEOB93fXoqgW0PeFtgF+siCngfmEN/BNFP8iePZt/n5roVBr24vNdBDQd4G2HU82ciDnge4k2luBnr8EvjrkLjLgV7eXkqgh4Y8ddgFemdAd4Eeyb6/97ifYzzL12bFXg30YnupgB4L8pRhF+idA30HPe4zBH1+eymAHhvyVGEX6J0BvXu37k1BniLsAn3kQf95/2Fcz+hhXHl7Tc7odSBfDpwwqAtnIpW18QLdIKFpvl57pP967Z9Gr9eq22sK9DqQb2QR2znDlw3qIqWZXaAbJDQt0Kf7D9zu5ThHuKf2ghl/e02AXg/yZexgGYs5yg8q6FamhJqe2a1AvxjYUCbgBdo8BTzmaaOJmnrO1XRAv5WT3MgSTvMr4OGKYs596l7PXuyk1If8OyzN1hHu4o/A/RX1K2reJOw2oI9xE59iGc8rCnWev08C3832ZLgXvT5X7Jo6x8fmQb8P2E6PkzzCJPf6KAicBd3GXsyk2EC+Hfgd8G4mOcTXPXVcqFtTsNuADpt4PRM8xEovba7gOH/IVmk+4dUfYtbUHBebA/0zbGUvJ3icpzmAe0zmPjN9ry3Y2ouVFDvIc+VWcorj3Gr4UG4wJ03AbgU6XMAn2M0LuLJimbnJYxv/5gC3V+w52DxWTQ11sSnQX85y3sWJDHDfT8jBgKztxUiKPeROkTczxYPZ841/1CjKlGZ2O9BhPRv5JP9lrJI2z6fHU9xWczKKUVPzhtUU6JV0bqBx6KSEgdwJ5dYM3sjfmMo+RENdMWd2S9BhLRN8jkv4LEtLieOe9dzM32t8rcyHCV1TC4Yj0IfLEzIp4SB3sbjjIN/AMY5yS6lC9m8UC3Zb0F28i3BLsOC8guBdmzHOcJpd/jI91zNkTRW6J9Djgh4W8jyWDfQ4wLci/AxTDNjtQV/N63gvW7mj4BZ+Gz1+yAMeb4GGVZVAL/w4it8gRFLiQO60+gA9fsaDkL1qC32Fht0edKfIGq5nD2twb9eHXW6R1eUc5ghfNRIwRE2Vdk0zepwZPR7kLp47gOt5ksnsfzGukLCHAR3GuYwPshe3bHjudRkn+DN3Gi4+EugxKrHiGJZJiQu5C9T9burG7MCOL1aMu07zULCHAh3WsY3beQnvmRW2e4z5cfYxma0ytLosa6qyT5rRw87o9SH/EEuzm0dnqcp1IVPs4/vA/irdarYNAXs40GE1a7mOSZacE/dapjmcvb8oOsKsilwCvYpakdpaJKUO5C7Mjbjby3VsZpJxXkqPq1nG1mwdYPH1aU5xGw/118sVtU9511tI0GEFV3IDr2VnH3b3PP6Wwt2SRXoO+7tFTfmMm/XRjB5mRq8L+TCvxjPwz+dSnmF9tjDmnYxl0Oe/gj7Yy52Qv4P9HOTbBdWxnMV8lFP82PApveXMHhZ0J84yPs//+qBvYJpekK88At37YypcxzpJCQH57EjdDDzOGJewlAtZzhLeBLydZRn47iPh7Mf4YCxz7azkY5zHBRzN9hnkP8pooawV7OFBh0t5H+/Igr4r21Q17FzCuprUqam6Y2tGn0dB36TEgHyYy27ccVbzCk7yYl7IKd7GEu7mDPuzn7sathx2OQ7yCdbxFhZzLY9yhJ/WrqhzDVjAHgN0WMV1metzzyO0ksS3pkzG16273a17U5APi2Dm+/3Mbf6/hmxbPQv5j1icbW99GSfp8SWTqrKFPQ7oAQKfZVKgh9e48gg+SXGzl9somu94dkc6uffYMZ96lwn0XMjzHjOr6b4XwF/3oeM20ebvqw9D9kix7NcEgV4mqwVtNKPbzejOUuqwD4fceX41p9jNb4xX09WF3Hkm0AW6gQK2oKcM+/yQO6/dU/prTFfTWUAu0I1KPOSMbuRi42Z8NEptZl8YciexW023LtN6oaf0ZZNhBbkl6Dozrmz2SrTTD+KdFSkV2Ishz33eRI8n2F1zfbcl5Hag68y4EviWbyLQz9WqadjLQ57P5buyB4run89lDbkd6Dozzief6lNBgaZgrwa5C8jhfRUHeYZvVIgvbxoCckvQdWacR1LVpZoCsWGvDnkez8wTCfcjEFV+8SUU5Lag68y4alWr1l4KxIJ9BvJXsZ7fFx6WNDeQ6odLhoTcGnSdGedVuupUVYEYsG9kBa9mjIuY4nwuZ5oP9ze/5GvgF/Labc68ib0cz9Z8F12hIbcH3VnUmXFFedXfDRSIAXvupluNtpk1bOI049nml7eymPezONv8MmyPu1uvdgXPciw7G36hKwbkYUDXmXEGZSwTZRSICfugP2f3uB/jRdnml6sYY2LWHvdVnOIY31xg22osyMOA7qzqzLgydao2Bgo0Bfug6zN73NezmYNs5DX9wy1+wjR7slv3YevRY0IeDnSdGWdQwjJRVoEUYB+8zR9nBRdl3+8PZZtx3OGIs+8I6mxQKavLYLtwa911ZpxPPtTHU4GUYB8MYfbxUrFn8tyXcKDrzDjPklU3XwVShT2PpynIQ966z8SmM+N8a1b9PBVIFfYmIQ8PuhtBZ8Z5lqy6+SqQGuxNQx4HdJ0Z51uv6ldDgVRgTwHyWKDrzLgaBauu/go0DXsqkMcD3T9XZXv6HE9W1nZhO59DFQqNqoGJAk3BnhLkAt2klOx/wMHILZnpKxAb9tQgF+hGKGhGNxIyoJlYsKcIuUA3KiyBbiRkYDOhYU8V8tmgB5Y5mvno3EUfMJqUozdQKNhThlygG9WxQDcSMpIZa9hTh1ygGxWWQDcSMqIZK9jbAHlEWUd7KIHezvzWhV2QtzPv3l4LdG/pGu/oC7sgbzx18R0Q6PE1txyxKuyC3FL9FtkS6C1K1jyuloVdkLc/194RCHRv6ZLqWAS7IE8qXfGdEejxNQ814nywu/FiH/8UKkbZ9VRAoHsKl2i3YbA7V92xUO46DGyd59DHREOSWxYKCHQLFdOyMRv23DtBnlaeonoj0KPKHW2w2bAL8mjSpzmQQE8zLxZe5bA7W7pdt1C0xTYEeouTV8J1B7u7hv0QQ4nuajIqCgj0Ucmk4pACCygg0FUeUqADCgj0DiRZIUoBga4akAIdUECgdyDJClEKCHTVgBTogAICvQNJVohSQKCrBqRABxQQ6B1IskKUAgJdNSAFOqCAQO9AkhWiFBDoqgEp0AEFBHoHkqwQpYBAVw1IgQ4oINA7kGSFKAUEumpACnRAgf8D9Cl1tc9vjOYAAAAASUVORK5CYII=';
+      window.focusTest = function() {
         setTimeout( function() {
-          window.image = new scenery.Image( img, { renderer: 'webgl' } );
-          window.image2 = new scenery.Image( img2, { renderer: 'webgl' } );
-          for ( var i = 0; i < 300; i += 20 ) {
-            scene.addChild( new scenery.Node( {
-              children: [ image ],
-              y: i
-            } ) );
+          toggleUpdates();
+          display.initializeEvents();
+
+          var button = new scenery.Rectangle( 10, 10, 100, 60, {
+            fill: 'gray',
+            tagName: 'div',
+            focusable: true
+          } );
+          button.addAccessibleInputListener( {
+            click: function( domEvent, trail ) {
+              console.log( param1, param2 );
+            }
+          } );
+          scene.addChild( new scenery.Node( {
+            children: [ button ]
+          } ) );
+          scene.addChild( new scenery.Node( {
+            children: [ button ],
+            y: 100
+          } ) );
+        } );
+      };
+
+      window.debugAccessibleInstances = function() {
+        recurse( display._rootAccessibleInstance, '' );
+
+        function recurse( instance, indentation ) {
+          console.log( indentation + ( instance.isRootInstance ? '' : instance.node.tagName ) + ' ' + instance.toString() );
+          instance.children.forEach( function( child ) { recurse( child, indentation + '  ' ) } );
+        }
+      };
+
+      window.debugDOM = function() {
+        var parallelDOM = display._rootAccessibleInstance.peer.primarySibling.outerHTML;
+        parallelDOM = parallelDOM.replace( /\>\</g, '>\n<' );
+        var lines = parallelDOM.split( '\n' );
+
+        var indentation = '';
+        var indentedLines = [];
+        for ( var i = 0; i < lines.length; i++ ) {
+          var line = lines[ i ];
+          var isEndTag = line.slice( 0, 2 ) === '</';
+
+          if ( isEndTag ) {
+            indentation = indentation.slice( 2 );
           }
-          for ( var i = 0; i < 300; i += 20 ) {
-            scene.addChild( new scenery.Node( {
-              children: [ image2 ],
-              x: 200,
-              y: i
-            } ) );
+          indentedLines.push( indentation + line );
+          if ( !isEndTag ) {
+            indentation += '  ';
           }
+        }
+
+        console.log( indentedLines.join( '\n' ) );
+      };
+
+      window.displayTest = function() {
+        setTimeout( function() {
+          window.shape = new kite.Shape( 'M 397.00000000000000000000 317.84609028105006700571 L 397.00000000000000000000 328.72090884305322333603 L 407.00000000000000000000 328.72090884305322333603 L 407.00000000000000000000 308.15927466097383558008 L 417.00000000000000000000 308.15927466097383558008 L 417.00000000000000000000 308.23195711190078327490' );
+          window.path = new scenery.Path( shape, { stroke: 'red' } );
+          scene.addChild( path );
+          path.left = 50;
+          path.top = 50;
+          path.lineWidth = 5;
+
           display.updateDisplay();
         }, 400 );
       };
@@ -183,6 +230,28 @@ an UI and Display made for visual testing and debugging.
         } );
       };
 
+      window.inputTest = function() {
+        display.initializeEvents();
+        toggleUpdates();
+
+        var circle = new scenery.Circle( 30, { fill: 'red', cursor: 'pointer' } );
+        scene.addChild( circle );
+        circle.addInputListener( new scenery.DragListener( {
+          translateNode: true,
+          press: function() { console.log( 'press' ); },
+          release: function() { console.log( 'release' ); },
+          drag: function() { console.log( 'drag' ); }
+        } ) );
+
+        var square = new scenery.Rectangle( 0, 0, 60, 60, { fill: 'blue', cursor: 'pointer', x: -30, y: 90 } );
+        scene.addChild( square );
+        square.addInputListener( new scenery.SimpleDragHandler( {
+          start: function() { console.log( 'start' ); },
+          end: function() { console.log( 'end' ); },
+          drag: function() { console.log( 'drag' ); }
+        } ) );
+      };
+
       window.cssTest = function() {
         window.assertSlow = window.assert;
         setTimeout( function() {
@@ -196,7 +265,6 @@ an UI and Display made for visual testing and debugging.
           window.a = new scenery.Node( {} );
           window.b = new scenery.Node( { y: 100 } );
           b._hints.cssTransform = true;
-          // window.node.rendererOptions = { cssTransform: true };
           a.addChild( back );
           a.addChild( rect );
           b.addChild( back );
@@ -260,34 +328,45 @@ an UI and Display made for visual testing and debugging.
       };
 
       /*---------------------------------------------------------------------------*
-       * Serialization
+       * A11y Debug
        *----------------------------------------------------------------------------*/
 
-      var playgroundSerializing = false;
-      var playgroundSerializingRequestID = 0;
+      var a11yDebugging = false;
+      var a11yDebuggingRequestID = 0;
 
-      var serialized = document.createElement( 'pre' );
-      serialized.id = 'serialized';
-      serialized.style.display = 'none';
-      document.body.appendChild( serialized );
+      var a11yDebug = document.createElement( 'div' );
+      a11yDebug.id = 'a11yDebug';
+      a11yDebug.style.display = 'none';
+      document.body.appendChild( a11yDebug );
 
-      function serializeStep() {
-        playgroundSerializingRequestID = window.requestAnimationFrame( serializeStep, serialized );
+      function a11yDebugStep() {
+        a11yDebuggingRequestID = window.requestAnimationFrame( a11yDebugStep, a11yDebug );
 
-        serialized.style.display = '';
-        serialized.innerHTML = display.toStringWithChildren( true, 'scene' );
+        a11yDebug.style.display = '';
+        a11yDebug.innerHTML = display.getAccessibleDebugHTML();
       }
 
-      window.toggleSerialize = function() {
-        if ( playgroundSerializing ) {
-          window.cancelAnimationFrame( playgroundSerializingRequestID );
-          serialized.style.display = 'none';
+      /**
+       * @param {boolean} withSceneryLog
+       */
+      window.toggleA11yDebug = function( withSceneryLog ) {
+        if ( a11yDebugging ) {
+          if ( window.location.search.indexOf( 'a11yLog' ) >= 0 || withSceneryLog ) {
+            scenery.disableLogging();
+          }
+
+          window.cancelAnimationFrame( a11yDebuggingRequestID );
+          a11yDebug.style.display = 'none';
         }
         else {
-          serializeStep();
+          if ( window.location.search.indexOf( 'a11yLog' ) >= 0 || withSceneryLog ) {
+            scenery.enableLogging( [ 'a11y' ] );
+          }
+
+          a11yDebugStep();
         }
 
-        playgroundSerializing = !playgroundSerializing;
+        a11yDebugging = !a11yDebugging;
       };
 
       /*---------------------------------------------------------------------------*

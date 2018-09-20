@@ -13,9 +13,12 @@
   <link rel="stylesheet" href="../../sherpa/lib/syntaxhighlighter-3.0.83/shThemeDefault.css">
   <link rel="stylesheet" href="../assets/scenery.css">
 
+  <!-- Before loading other things (that might error), create hooks to report errors/loads for continuous testing -->
+  <script src="../../aqua/js/pageload-connector.js"></script>
+
   <!-- jQuery and LoDash are dependencies -->
   <script src="../../sherpa/lib/jquery-2.1.0.min.js"></script>
-  <script src="../../sherpa/lib/lodash-2.4.1.min.js"></script>
+  <script src="../../sherpa/lib/lodash-4.17.4.min.js"></script>
 
   <!-- For the styling -->
   <script src="../../sherpa/lib/bootstrap-2.2.2.js"></script>
@@ -29,11 +32,11 @@
   MathJax.Hub.Config({tex2jax: {inlineMath: [['$','$'], ['\\(','\\)']]}});
 
   </script>
-  <script type="text/javascript" src="http://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+  <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.1/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
 
   <!-- Our code, in either the concatenated 'with comments' version or the minified version -->
-  <script src="../build/development/scenery.js"></script>
-  <!-- <script src="../build/standalone/scenery.min.js"></script> -->
+  <script src="../build/scenery.min.js"></script>
+
 
   <style type="text/css">
 
@@ -71,10 +74,7 @@
     <p>
       <a href="./#scene">Scenes</a> do not have event listeners attached by default. To initialize the event system (that will attach and set up
       listeners),
-      call either <a href="./#scene-initializeStandaloneEvents">scene.initializeStandaloneEvents()</a> (for attaching listeners to the Scene's
-      containing
-      block-level element), or <a href="./#scene-initializeFullscreenEvents">scene.initializeFullscreenEvents()</a> (for attaching listeners to the
-      document).
+      call <a href="./#scene-initializeEvents">scene.initializeEvents()</a>.
     </p>
 
     <h2>Pointers</h2>
@@ -87,18 +87,21 @@
     </p>
 
     <p>
-      Input event listeners can be added to <a href="./#node">nodes</a> directly, or to a <a href="./#pointer">pointer</a>. When a DOM event
+      Input event listeners can be added to <a href="./#node">nodes</a> directly, or to a <a href="./#pointer">pointer</a> or the
+      <a href="./#display">Display</a>. When a DOM event
       is received, it is first broken up into multiple events (if necessary, e.g. multiple touch points), then the dispatch is handled for
       each individual Scenery <a href="./#event">event</a>. Events are first fired for any listeners attached to the pointer that caused the event,
       then fire on the node directly under the pointer, and if applicable, bubble up the graph to the Scene from which the event was triggered.
+      Finally, listeners attached to the Display will be triggered.
       <strong>Events are not fired directly on nodes that are not under the pointer at the time of the event.</strong>.
     </p>
 
     <h2>Listeners and Events</h2>
 
     <p>
-      Event listeners are added with <a href="./#node-addInputListener">node.addInputListener( listener )</a> and
-      <a href="./#pointer-addInputListener">pointer.addInputListener( listener )</a>. This listener can be an arbitrary object, and the listener will
+      Event listeners are added with <a href="./#node-addInputListener">node.addInputListener( listener )</a>,
+      <a href="./#pointer-addInputListener">pointer.addInputListener( listener )</a> and
+      <a href="./#display-addInputListener">display.addInputListener( listener )</a>. This listener can be an arbitrary object, and the listener will
       be
       triggered by calling <code>listener[eventType]( event )</code>, where <code>eventType</code> is one of the event types as described below, and
       <code>event</code> is a Scenery <a href="./#event">event</a> with the following properties:
@@ -279,6 +282,7 @@
         triggered)
         and all the way down to the Scene. Listeners are triggered in the order they were added for each Node.
       </li>
+      <li>Listeners on the display will be triggered (in the order they were added)</li>
     </ol>
 
     <p>
@@ -303,6 +307,10 @@
   <div class="span3"></div>
 </div>
 
+
+<footer style="background-color: #191919;">
+  <a class="brand" href="/scenery">Scenery</a>
+</footer>
 
 <script type="text/javascript">
   SyntaxHighlighter.all();

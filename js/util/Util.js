@@ -1,4 +1,4 @@
-// Copyright 2013-2015, University of Colorado Boulder
+// Copyright 2013-2016, University of Colorado Boulder
 
 /**
  * General utility functions for Scenery
@@ -11,11 +11,11 @@ define( function( require ) {
 
   var scenery = require( 'SCENERY/scenery' );
 
+  var Bounds2 = require( 'DOT/Bounds2' );
+  var Features = require( 'SCENERY/util/Features' );
   var Matrix3 = require( 'DOT/Matrix3' );
   var Transform3 = require( 'DOT/Transform3' );
-  var Bounds2 = require( 'DOT/Bounds2' );
   var Vector2 = require( 'DOT/Vector2' );
-  var Features = require( 'SCENERY/util/Features' );
 
   // convenience function
   function p( x, y ) {
@@ -35,33 +35,11 @@ define( function( require ) {
      *---------------------------------------------------------------------------*/
 
     /**
-     * @deprecated (bad performance since it is setting multiple properties). see applyPreparedTransform
-     * Applies the transformation matrix to the passed-in DOM element via a CSS transform.
-     * @public
-     *
-     * @param {Matrix3} matrix - Assumed to be affine
-     * @param {DOMElement} element - Any DOM element
-     * @param {boolean} forceAcceleration - Whether to add flags to force graphical acceleration (can slow things down!)
-     */
-    applyCSSTransform: function( matrix, element, forceAcceleration ) {
-      var transformCSS = matrix.getCSSTransform();
-      // notes on triggering hardware acceleration: http://creativejs.com/2011/12/day-2-gpu-accelerate-your-dom-elements/
-
-      if ( forceAcceleration ) {
-        element.style.webkitBackfaceVisibility = 'hidden';
-        transformCSS += ' translateZ(0)';
-      }
-
-      element.style[ transformProperty ] = transformCSS;
-      element.style[ transformOriginProperty ] = 'top left'; //OHTWO TODO: performance: this only needs to be set once!
-    },
-
-    /**
      * Prepares a DOM element for use with applyPreparedTransform(). Applies some CSS styles that are required, but
      * that we don't want to set while animating.
      * @public
      *
-     * @param {DOMElement} element
+     * @param {Element} element
      * @param {boolean} forceAcceleration - Whether graphical acceleration should be forced (may slow things down!)
      */
     prepareForTransform: function( element, forceAcceleration ) {
@@ -78,7 +56,7 @@ define( function( require ) {
      * Apply CSS styles that will potentially trigger graphical acceleration. Use at your own risk.
      * @private
      *
-     * @param {DOMElement} element
+     * @param {Element} element
      */
     setTransformAcceleration: function( element ) {
       element.style.webkitBackfaceVisibility = 'hidden';
@@ -88,7 +66,7 @@ define( function( require ) {
      * Unapply CSS styles (from setTransformAcceleration) that would potentially trigger graphical acceleration.
      * @private
      *
-     * @param {DOMElement} element
+     * @param {Element} element
      */
     unsetTransformAcceleration: function( element ) {
       element.style.webkitBackfaceVisibility = '';
@@ -100,7 +78,7 @@ define( function( require ) {
      * @public
      *
      * @param {Matrix3} matrix
-     * @param {DOMElement} element
+     * @param {Element} element
      * @param {boolean} forceAcceleration
      */
     applyPreparedTransform: function( matrix, element, forceAcceleration ) {
@@ -114,7 +92,7 @@ define( function( require ) {
      * @public
      *
      * @param {string} transformString
-     * @param {DOMElement} element
+     * @param {Element} element
      * @param {boolean} forceAcceleration
      */
     setTransform: function( transformString, element, forceAcceleration ) {
@@ -127,7 +105,7 @@ define( function( require ) {
      * Removes a CSS transform from a DOM element.
      * @public
      *
-     * @param {DOMElement} element
+     * @param {Element} element
      */
     unsetTransform: function( element ) {
       element.style[ transformProperty ] = '';
@@ -252,6 +230,7 @@ define( function( require ) {
      * @public
      *
      * @param {function} renderToContext - Called with the Canvas 2D context as a parameter, should draw to it.
+     * @param {Object} options
      */
     canvasAccurateBounds: function( renderToContext, options ) {
       // how close to the actual bounds do we need to be?
@@ -433,10 +412,11 @@ define( function( require ) {
       }
 
       var result = new Bounds2(
-        ( minBounds.minX + maxBounds.minX ) / 2,
-        ( minBounds.minY + maxBounds.minY ) / 2,
-        ( minBounds.maxX + maxBounds.maxX ) / 2,
-        ( minBounds.maxY + maxBounds.maxY ) / 2
+        // Do finite checks so we don't return NaN
+        ( isFinite( minBounds.minX ) && isFinite( maxBounds.minX ) ) ? ( minBounds.minX + maxBounds.minX ) / 2 : Number.POSITIVE_INFINITY,
+        ( isFinite( minBounds.minY ) && isFinite( maxBounds.minY ) ) ? ( minBounds.minY + maxBounds.minY ) / 2 : Number.POSITIVE_INFINITY,
+        ( isFinite( minBounds.maxX ) && isFinite( maxBounds.maxX ) ) ? ( minBounds.maxX + maxBounds.maxX ) / 2 : Number.NEGATIVE_INFINITY,
+        ( isFinite( minBounds.maxY ) && isFinite( maxBounds.maxY ) ) ? ( minBounds.maxY + maxBounds.maxY ) / 2 : Number.NEGATIVE_INFINITY
       );
 
       // extra data about our bounds
@@ -497,6 +477,16 @@ define( function( require ) {
       }
 
       return shader;
+    },
+
+    applyWebGLContextDefaults: function( gl ) {
+      // What color gets set when we call gl.clear()
+      gl.clearColor( 0, 0, 0, 0 );
+
+      // Blending similar to http://localhost/phet/git/webgl-blendfunctions/blendfuncseparate.html
+      gl.enable( gl.BLEND );
+      gl.blendEquationSeparate( gl.FUNC_ADD, gl.FUNC_ADD );
+      gl.blendFuncSeparate( gl.SRC_ALPHA, gl.ONE_MINUS_SRC_ALPHA, gl.ONE, gl.ONE_MINUS_SRC_ALPHA );
     },
 
     /**
@@ -568,6 +558,25 @@ define( function( require ) {
         this._extensionlessWebGLSupport = scenery.Util.checkWebGLSupport();
       }
       return this._extensionlessWebGLSupport;
+    },
+
+    /**
+     * Triggers a loss of a WebGL context, with a delayed restoration.
+     * @public
+     *
+     * NOTE: Only use this for debugging. Should not be called normally.
+     *
+     * @param {WebGLRenderingContext} gl
+     */
+    loseContext: function( gl ) {
+      var extension = gl.getExtension( 'WEBGL_lose_context' );
+      if ( extension ) {
+        extension.loseContext();
+
+        setTimeout( function() {
+          extension.restoreContext();
+        }, 1000 );
+      }
     }
   };
   scenery.register( 'Util', Util );

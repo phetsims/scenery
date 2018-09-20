@@ -1,4 +1,4 @@
-// Copyright 2014-2015, University of Colorado Boulder
+// Copyright 2014-2016, University of Colorado Boulder
 
 /**
  * LayoutBox lays out its children in a row, either horizontally or vertically (based on an optional parameter).
@@ -8,139 +8,165 @@
  * @author Sam Reid
  * @author Aaron Davis
  * @author Chris Malley (PixelZoom, Inc.)
+ * @author Jonathan Olson <jonathan.olson@colorado.edu>
  */
 define( function( require ) {
   'use strict';
 
   // modules
+  var Bounds2 = require( 'DOT/Bounds2' );
   var inherit = require( 'PHET_CORE/inherit' );
-  var scenery = require( 'SCENERY/scenery' );
   var Node = require( 'SCENERY/nodes/Node' );
+  var scenery = require( 'SCENERY/scenery' );
 
   // constants
   var DEFAULT_SPACING = 0;
 
+  // LayoutBox-specific options that can be passed in the constructor or mutate() call.
+  var LAYOUT_BOX_OPTION_KEYS = [
+    'orientation', // 'horizontal' or 'vertical', see setOrientation for documentation
+    'spacing', // Spacing between each Node, see setSpacing for documentation
+    'align', // How to line up items, see setAlign for documentation
+    'resize' // Whether we should update the layout when children change, see setResize for documentation
+  ];
+
+  // The position (left/top) property name on the primary axis
+  var LAYOUT_POSITION = {
+    vertical: 'top',
+    horizontal: 'left'
+  };
+
+  // The size (width/height) property name on the primary axis
+  var LAYOUT_DIMENSION = {
+    vertical: 'height',
+    horizontal: 'width'
+  };
+
+  // The alignment property name on the secondary axis
+  var LAYOUT_ALIGNMENT = {
+    vertical: {
+      left: 'left',
+      center: 'centerX',
+      right: 'right',
+      origin: 'x'
+    },
+    horizontal: {
+      top: 'top',
+      center: 'centerY',
+      bottom: 'bottom',
+      origin: 'y'
+    }
+  };
+
   /**
-   * @param {Object} [options] Same as Node.constructor.options with the following additions:
+   * @public
    * @constructor
+   * @extends Node
+   *
+   * @param {Object} [options] - LayoutBox-specific options are documented in LAYOUT_BOX_OPTION_KEYS above, and can be
+   *                             provided along-side options for Node.
    */
   function LayoutBox( options ) {
 
-    if ( options && options.spacing ) {
-      assert && assert( typeof options.spacing === 'number', 'LayoutBox requires spacing to be a number, if it is provided' );
-    }
+    // @private {string} - Either 'vertical' or 'horizontal'. The default chosen by popular vote (with more references).
+    //                     see setOrientation() for more documentation.
+    this._orientation = 'vertical';
 
-    options = _.extend( {
+    // @private {number} - Spacing between nodes, see setSpacing() for more documentation.
+    this._spacing = DEFAULT_SPACING;
 
-      //The default orientation, chosen by popular vote.  At the moment there are around 436 VBox references and 338 HBox references
-      orientation: 'vertical',
+    // @private {string} - Either 'left', 'center', 'right' or 'origin' for vertical layout, or 'top', 'center',
+    //                     'bottom' or 'origin' for horizontal layout, which controls positioning of nodes on the other
+    //                     axis. See setAlign() for more documentation.
+    this._align = 'center';
 
-      // The spacing between each Node (a number)
-      spacing: DEFAULT_SPACING,
-
-      //How to line up the items
-      align: 'center',
-
-      //By default, update the layout when children are added/removed/resized, see #116
-      resize: true
-    }, options ); // @private
-
-    // validate options
-    assert && assert( options.orientation === 'vertical' || options.orientation === 'horizontal' );
-    if ( options.orientation === 'vertical' ) {
-      assert && assert( options.align === 'center' || options.align === 'left' || options.align === 'right', 'illegal alignment: ' + options.align );
-    }
-    else {
-      assert && assert( options.align === 'center' || options.align === 'top' || options.align === 'bottom', 'illegal alignment: ' + options.align );
-    }
-
-    this.orientation = options.orientation; // @private
-    this.align = options.align; // @private
-    this.resize = options.resize; // @private
-    this._spacing = options.spacing; // @private {number}
+    // @private {boolean} - Whether we'll layout after children are added/removed/resized, see #116. See setResize()
+    //                      for more documentation.
+    this._resize = true;
 
     Node.call( this );
 
-    this.boundsListener = this.updateLayout.bind( this ); // @private
-    this.updatingLayout = false; // @private flag used to short-circuit updateLayout and prevent stackoverflow
+    // @private {function} - If resize:true, will be called whenever a child has its bounds change
+    this._updateLayoutListener = this.updateLayoutAutomatically.bind( this );
 
-    // Apply the supplied options, including children.
-    // The layout calls are triggered if (a) options.resize is set to true or (b) during initialization
-    // When true, the this.inited flag signifies that the initial layout is being done.
-    this.inited = false; // @private
+    // @private {boolean} - Prevents layout() from running while true. Generally will be unlocked and laid out.
+    this._updateLayoutLocked = false;
+
+    this.onStatic( 'childInserted', this.onLayoutBoxChildInserted.bind( this ) );
+    this.onStatic( 'childRemoved', this.onLayoutBoxChildRemoved.bind( this ) );
+    this.onStatic( 'childrenChanged', this.onLayoutBoxChildrenChanged.bind( this ) );
+
+    // @private {boolean} - We'll ignore the resize flag while running the initial mutate.
+    this._layoutMutating = true;
+
     this.mutate( options );
-    this.inited = true;
+
+    this._layoutMutating = false;
   }
 
   scenery.register( 'LayoutBox', LayoutBox );
 
   return inherit( Node, LayoutBox, {
+    /**
+     * {Array.<string>} - String keys for all of the allowed options that will be set by node.mutate( options ), in the
+     * order they will be evaluated in.
+     * @protected
+     *
+     * NOTE: See Node's _mutatorKeys documentation for more information on how this operates, and potential special
+     *       cases that may apply.
+     */
+    _mutatorKeys: LAYOUT_BOX_OPTION_KEYS.concat( Node.prototype._mutatorKeys ),
+
+    /**
+     * Given the current children, determines what bounds should they be aligned inside of.
+     * @private
+     *
+     * Triggers bounds validation for all children
+     *
+     * @returns {Bounds2}
+     */
+    getAlignmentBounds: function() {
+      // Construct a Bounds2 at the origin, but with the maximum width/height of the children.
+      var maxWidth = Number.NEGATIVE_INFINITY;
+      var maxHeight = Number.NEGATIVE_INFINITY;
+
+      for ( var i = 0; i < this._children.length; i++ ) {
+        var child = this._children[ i ];
+        maxWidth = Math.max( maxWidth, child.width );
+        maxHeight = Math.max( maxHeight, child.height );
+      }
+      return new Bounds2( 0, 0, maxWidth, maxHeight );
+    },
 
     /**
      * The actual layout logic, typically run from the constructor OR updateLayout().
      * @private
      */
     layout: function() {
+      var children = this._children;
 
-      var children = this.getChildren(); // call this once, since it returns a copy
-      var i;
-      var child;
+      // The position (left/top) property name on the primary axis
+      var layoutPosition = LAYOUT_POSITION[ this._orientation ];
 
-      // Get the smallest Bounds2 that contains all of our children (triggers bounds validation for all of them)
-      var childBounds = this.childBounds;
+      // The size (width/height) property name on the primary axis
+      var layoutDimension = LAYOUT_DIMENSION[ this._orientation ];
 
-      // Logic for layout out the components.
-      // Aaron and Sam looked at factoring this out, but the result looked less readable since each attribute
-      // would have to be abstracted over.
-      if ( this.orientation === 'vertical' ) {
-        // Start at y=0 in the coordinate frame of this node.  Not possible to set this through the spacing option, instead just set it with the {y:number} option.
-        var y = 0;
-        for ( i = 0; i < children.length; i++ ) {
-          child = children[ i ];
-          if ( !child.bounds.isValid() ) {
-            continue;
-          }
-          child.top = y;
+      // The alignment (left/right/bottom/top/centerX/centerY) property name on the secondary axis
+      var layoutAlignment = LAYOUT_ALIGNMENT[ this._orientation ][ this._align ];
 
-          // Set the position horizontally
-          if ( this.align === 'left' ) {
-            child.left = childBounds.minX;
-          }
-          else if ( this.align === 'right' ) {
-            child.right = childBounds.maxX;
-          }
-          else { // 'center'
-            child.centerX = childBounds.centerX;
-          }
+      // The bounds that children will be aligned in (on the secondary axis)
+      var alignmentBounds = this.getAlignmentBounds();
 
-          // Move to the next vertical position.
-          y += child.height + this._spacing;
+      // Starting at 0, position the children
+      var position = 0;
+      for ( var i = 0; i < children.length; i++ ) {
+        var child = children[ i ];
+        if ( !child.bounds.isValid() ) {
+          continue; // Skip children without bounds
         }
-      }
-      else {
-        // Start at x=0 in the coordinate frame of this node.  Not possible to set this through the spacing option, instead just set it with the {x:number} option.
-        var x = 0;
-        for ( i = 0; i < children.length; i++ ) {
-          child = children[ i ];
-          if ( !child.bounds.isValid() ) {
-            continue;
-          }
-          child.left = x;
-
-          // Set the position horizontally
-          if ( this.align === 'top' ) {
-            child.top = childBounds.minY;
-          }
-          else if ( this.align === 'bottom' ) {
-            child.bottom = childBounds.maxY;
-          }
-          else { // 'center'
-            child.centerY = childBounds.centerY;
-          }
-
-          // Move to the next horizontal position.
-          x += child.width + this._spacing;
-        }
+        child[ layoutPosition ] = position;
+        child[ layoutAlignment ] = this._align === 'origin' ? 0 : alignmentBounds[ layoutAlignment ];
+        position += child[ layoutDimension ] + this._spacing; // Move forward by the node's size, including spacing
       }
     },
 
@@ -150,88 +176,264 @@ define( function( require ) {
      * @public
      */
     updateLayout: function() {
-      // Bounds of children are changed in updateLayout, we don't want to stackoverflow, so bail if already updating layout
-      if ( !this.updatingLayout ) {
-        this.updatingLayout = true;
+      // Since we trigger bounds changes in our children during layout, we don't want to trigger layout off of those
+      // changes, causing a stack overflow.
+      if ( !this._updateLayoutLocked ) {
+        this._updateLayoutLocked = true;
         this.layout();
-        this.updatingLayout = false;
+        this._updateLayoutLocked = false;
       }
     },
 
     /**
-     * @override - Overrides from Node, so we can listen for bounds changes.
-     * We have to listen to the bounds of each child individually, since individual child bounds changes might not
-     * trigger an overall bounds change.
+     * Called when we attempt to automatically layout components.
+     * @private
      */
-    insertChild: function( index, node ) {
-
-      // Super call
-      Node.prototype.insertChild.call( this, index, node );
-
-      // Update the layout (a) if it should be dynamic or (b) during initialization
-      if ( this.resize || !this.inited ) {
+    updateLayoutAutomatically: function() {
+      if ( this._layoutMutating || this._resize ) {
         this.updateLayout();
       }
-
-      if ( this.resize ) {
-        node.onStatic( 'bounds', this.boundsListener );
-      }
     },
 
     /**
-     * @override - Overrides from Node, so we can listen for bounds changes.
+     * Called when a child is inserted.
+     * @private
      *
      * @param {Node} node
-     * @param {number} indexOfChild
      */
-    removeChildWithIndex: function( node, indexOfChild ) {
-
-      if ( this.resize ) {
-        node.offStatic( 'bounds', this.boundsListener );
-      }
-
-      // Super call
-      Node.prototype.removeChildWithIndex.call( this, node, indexOfChild );
-
-      // Update the layout (a) if it should be dynamic or (b) during initialization
-      if ( this.resize || !this.inited ) {
-        this.updateLayout();
+    onLayoutBoxChildInserted: function( node ) {
+      if ( this._resize ) {
+        node.onStatic( 'bounds', this._updateLayoutListener );
       }
     },
 
     /**
-     * Sets spacing between items in the box.
+     * Called when a child is removed.
+     * @private
+     *
+     * @param {Node} node
+     */
+    onLayoutBoxChildRemoved: function( node ) {
+      if ( this._resize ) {
+        node.offStatic( 'bounds', this._updateLayoutListener );
+      }
+    },
+
+    /**
+     * Called on change of children (child added, removed, order changed, etc.)
+     * @private
+     */
+    onLayoutBoxChildrenChanged: function() {
+      if ( this._resize ) {
+        this.updateLayoutAutomatically();
+      }
+    },
+
+    /**
+     * Sets the children of the Node to be equivalent to the passed-in array of Nodes. Does this by removing all current
+     * children, and adding in children from the array.
+     * @public
+     * @override
+     *
+     * Overridden so we can group together setChildren() and only update layout (a) at the end, and (b) if there
+     * are changes.
+     *
+     * @param {Array.<Node>} children
+     * @returns {LayoutBox} - Returns 'this' reference, for chaining
+     */
+    setChildren: function( children ) {
+      // If the layout is already locked, we need to bail and only call Node's setChildren.
+      if ( this._updateLayoutLocked ) {
+        return Node.prototype.setChildren.call( this, children );
+      }
+
+      var oldChildren = this.getChildren(); // defensive copy
+
+      // Lock layout while the children are removed and added
+      this._updateLayoutLocked = true;
+      Node.prototype.setChildren.call( this, children );
+      this._updateLayoutLocked = false;
+
+      // Determine if the children array has changed. We'll gain a performance benefit by not triggering layout when
+      // the children haven't changed.
+      if ( !_.isEqual( oldChildren, children ) ) {
+        this.updateLayoutAutomatically();
+      }
+
+      return this;
+    },
+
+    /**
+     * Sets the orientation of the LayoutBox (the axis along which nodes will be placed, separated by spacing).
+     * @public
+     *
+     * @param {string} orientation - Should be either 'vertical' or 'horizontal'
+     * @returns {Node} - For chaining
+     */
+    setOrientation: function( orientation ) {
+      assert && assert( this._orientation === 'vertical' || this._orientation === 'horizontal' );
+
+      if ( this._orientation !== orientation ) {
+        this._orientation = orientation;
+
+        this.updateLayout();
+      }
+
+      return this;
+    },
+    set orientation( value ) { this.setOrientation( value ); },
+
+    /**
+     * Returns the current orientation.
+     * @public
+     *
+     * See setOrientation for more documentation on the orientation.
+     *
+     * @returns {string}
+     */
+    getOrientation: function() {
+      return this._orientation;
+    },
+    get orientation() { return this.getOrientation(); },
+
+    /**
+     * Sets spacing between items in the LayoutBox.
      * @public
      *
      * @param {number} spacing
+     * @returns {Node} - For chaining
      */
     setSpacing: function( spacing ) {
-
-      // Make sure the provided spacing is a number (since we previously allowed number | function here
-      assert && assert( typeof spacing === 'number', 'spacing must be a number' );
+      assert && assert( typeof spacing === 'number' && isFinite( spacing ),
+        'spacing must be a finite number' );
 
       if ( this._spacing !== spacing ) {
         this._spacing = spacing;
 
-        // TODO: Do we need to check for if we are resizing?
         this.updateLayout();
       }
+
+      return this;
     },
-    set spacing( value ) {
-      this.setSpacing( value );
-    },
+    set spacing( value ) { this.setSpacing( value ); },
 
     /**
-     * Gets the spacing between items in the box.
+     * Gets the spacing between items in the LayoutBox.
      * @public
+     *
+     * See setSpacing() for more documentation on spacing.
      *
      * @returns {number}
      */
     getSpacing: function() {
       return this._spacing;
     },
-    get spacing() {
-      return this.getSpacing();
-    }
+    get spacing() { return this.getSpacing(); },
+
+    /**
+     * Sets the alignment of the LayoutBox.
+     * @public
+     *
+     * Determines how children of this LayoutBox will be positioned along the opposite axis from the orientation.
+     *
+     * For vertical alignments (the default), the following align values are allowed:
+     * - left
+     * - center
+     * - right
+     * - origin - The x value of each child will be set to 0.
+     *
+     * For horizontal alignments, the following align values are allowed:
+     * - top
+     * - center
+     * - bottom
+     * - origin - The y value of each child will be set to 0.
+     *
+     * @param {string} align
+     * @returns {Node} - For chaining
+     */
+    setAlign: function( align ) {
+      if ( assert ) {
+        if ( this._orientation === 'vertical' ) {
+          assert( this._align === 'left' || this._align === 'center' || this._align === 'right' || this._align === 'origin',
+            'Illegal vertical LayoutBox alignment: ' + align );
+        }
+        else {
+          assert( this._align === 'top' || this._align === 'center' || this._align === 'bottom' || this._align === 'origin',
+            'Illegal horizontal LayoutBox alignment: ' + align );
+        }
+      }
+
+      if ( this._align !== align ) {
+        this._align = align;
+
+        this.updateLayout();
+      }
+
+      return this;
+    },
+    set align( value ) { this.setAlign( value ); },
+
+    /**
+     * Returns the current alignment.
+     * @public
+     *
+     * See setAlign for more documentation on the orientation.
+     *
+     * @returns {string}
+     */
+    getAlign: function() {
+      return this._align;
+    },
+    get align() { return this.getAlign(); },
+
+    /**
+     * Sets whether this LayoutBox will trigger layout when children are added/removed/resized.
+     * @public
+     *
+     * Layout will always still be triggered on orientation/align/spacing changes.
+     *
+     * @param {boolean} resize
+     * @returns {Node} - For chaining
+     */
+    setResize: function( resize ) {
+      assert && assert( typeof resize === 'boolean', 'resize should be a boolean' );
+
+      if ( this._resize !== resize ) {
+        this._resize = resize;
+
+        // Add or remove listeners, based on how resize switched
+        for ( var i = 0; i < this._children.length; i++ ) {
+          var child = this._children[ i ];
+
+          // If we are now resizable, we need to add listeners to every child
+          if ( resize ) {
+            child.onStatic( 'bounds', this._updateLayoutListener );
+          }
+          // Otherwise we are now not resizeable, and need to remove the listeners
+          else {
+            child.offStatic( 'bounds', this._updateLayoutListener );
+          }
+        }
+
+        // Only trigger an update if we switched TO resizing
+        this.updateLayoutAutomatically();
+      }
+
+      return this;
+    },
+    set resize( value ) { this.setResize( value ); },
+
+    /**
+     * Returns whether this LayoutBox will trigger layout when children are added/removed/resized.
+     * @public
+     *
+     * See setResize() for more documentation on spacing.
+     *
+     * @returns {boolean}
+     */
+    isResize: function() {
+      return this._resize;
+    },
+    get resize() { return this.isResize(); }
   } );
 } );

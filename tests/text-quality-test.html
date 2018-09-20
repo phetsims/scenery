@@ -14,6 +14,9 @@
 </head>
 <body>
 
+<!-- Before loading other things (that might error), create hooks to report errors/loads for continuous testing -->
+<script src="../../aqua/js/pageload-connector.js"></script>
+
 <script type="text/javascript">
   var mode = window.location.search ? window.location.search.slice( 1 ) : 'medium';
   var animating = false;
@@ -241,7 +244,7 @@
    * Canvas
    *----------------------------------------------------------------------------*/
 
-  // backingScale {Number, 1}, evenBacking {Boolean, false}, upScale {Number, 1}, cssTransforms {Boolean}
+  // backingScale {Number, 1}, evenBacking {Boolean, false}, upScale {Number, 1}, cssTransforms {boolean}
   function canvasDraw( backingScale, evenBacking, upScale, cssTransforms ) {
     var canvas = document.createElement( 'canvas' );
     position( canvas );

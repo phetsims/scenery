@@ -10,9 +10,12 @@
 
   <link rel="stylesheet" href="../../sherpa/lib/bootstrap-2.2.2.css">
 
+  <!-- Before loading other things (that might error), create hooks to report errors/loads for continuous testing -->
+  <script src="../../aqua/js/pageload-connector.js"></script>
+
   <!-- jQuery and LoDash are dependencies -->
   <script src="../../sherpa/lib/jquery-2.1.0.min.js"></script>
-  <script src="../../sherpa/lib/lodash-2.4.1.min.js"></script>
+  <script src="../../sherpa/lib/lodash-4.17.4.min.js"></script>
 
   <!-- Bootstrap not necessarily needed -->
   <script src="../../sherpa/lib/bootstrap-2.2.2.js"></script>
@@ -21,8 +24,8 @@
   <script src="../../sherpa/lib/stats-r12.js"></script>
 
   <!-- Our code, in either the concatenated 'with comments' version or the minified version -->
-  <script src="../build/development/scenery.js"></script>
-  <!-- <script src="../build/standalone/scenery.min.js"></script> -->
+  <script src="../build/scenery.min.js"></script>
+
 
   <style type="text/css">
     /* Let content go to the edges */
@@ -56,11 +59,12 @@
 
 <script>
 
-  var main = $( '#main' );
-
   // initialize our scene
-  var scene = new scenery.Scene( main );
-  scene.resizeOnWindowResize(); // the scene gets resized to the full screen size
+  var scene = new scenery.Node();
+  var display = new scenery.Display( scene, {
+    container: document.getElementById( 'main' )
+  } );
+  display.resizeOnWindowResize(); // the scene gets resized to the full screen size
 
   var container = new scenery.Node();
   scene.addChild( container );
@@ -112,10 +116,10 @@
 
   var imageSource = document.createElement( 'img' );
   imageSource.onload = function( e ) {
-    container.insertChild( new scenery.Image( imageSource, {
+    container.insertChild( 0, new scenery.Image( imageSource, {
       x: 20,
       y: 200
-    } ), 0 );
+    } ) );
   };
   imageSource.src = 'http://phet.colorado.edu/images/phet-logo.gif';
 
@@ -178,7 +182,7 @@
 
     stats.begin();
     try {
-      scene.updateScene(); // repaints dirty regions. use renderScene() to render everything
+      display.updateDisplay(); // repaints dirty regions.
     }
     catch( e ) {
       window.cancelAnimationFrame( id );

@@ -1,5 +1,4 @@
-// Copyright 2013-2015, University of Colorado Boulder
-
+// Copyright 2013-2016, University of Colorado Boulder
 
 /**
  * Basic dragging for a node.
@@ -10,32 +9,69 @@
 define( function( require ) {
   'use strict';
 
+  // modules
+  var BooleanProperty = require( 'AXON/BooleanProperty' );
   var inherit = require( 'PHET_CORE/inherit' );
+  var Mouse = require( 'SCENERY/input/Mouse' );
+  var PhetioObject = require( 'TANDEM/PhetioObject' );
   var scenery = require( 'SCENERY/scenery' );
+  var SimpleDragHandlerIO = require( 'SCENERY/input/SimpleDragHandlerIO' );
+  var Tandem = require( 'TANDEM/Tandem' );
+  var Touch = require( 'SCENERY/input/Touch' );
 
-  /*
-   * Allowed options: {
-   *    allowTouchSnag: false // allow touch swipes across an object to pick it up. If a function is passed, the value allowTouchSnag( event ) is used
-   *    dragCursor: 'pointer' // while dragging with the mouse, sets the cursor to this value (or use null to not override the cursor while dragging)
-   *    mouseButton: 0        // allow changing the mouse button that activates the drag listener. -1 should activate on any mouse button, 0 on left, 1 for middle, 2 for right, etc.
-   *    start: null           // if non-null, called when a drag is started. start( event, trail )
-   *    drag: null            // if non-null, called when the user moves something with a drag (not a start or end event).
-   *                                                                         drag( event, trail )
-   *    end: null             // if non-null, called when a drag is ended.   end( event, trail )
-   *    translate:            // if this exists, translate( { delta: _, oldPosition: _, position: _ } ) will be called.
-   * }
+  // constants
+  var HIGH_FREQUENCY_OPTIONS = {
+    highFrequency: true
+  };
+
+  /**
+   * @param {Object} [options]
+   * @constructor
    */
   function SimpleDragHandler( options ) {
-    var handler = this;
+    var self = this;
 
     options = _.extend( {
+
+      start: null, // {null|function(Event,Trail)} called when a drag is started
+      drag: null, // {null|function(Event,Trail)} called when pointer moves
+      end: null,  // {null|function(Event,Trail)} called when a drag is ended
+
+      // {null|function} Called when the pointer moves.
+      // Signature is translate( delta: Vector2, oldPosition: Vector2, position: Vector2 )
+      translate: null, //
+
       allowTouchSnag: false,
+
+      // allow changing the mouse button that activates the drag listener.
+      // -1 should activate on any mouse button, 0 on left, 1 for middle, 2 for right, etc.
       mouseButton: 0,
-      dragCursor: 'pointer'
+
+      // while dragging with the mouse, sets the cursor to this value
+      // (or use null to not override the cursor while dragging)
+      dragCursor: 'pointer',
+
+      // when set to true, the handler will get "attached" to a pointer during use, preventing the pointer from starting
+      // a drag via something like PressListener
+      attach: false,
+
+      // phetio
+      tandem: Tandem.required,
+      phetioType: SimpleDragHandlerIO,
+      phetioState: false,
+      phetioEventType: 'user'
+
     }, options );
     this.options = options; // @private
 
-    this.dragging = false;            // whether a node is being dragged with this handler
+    // @public (read-only) {BooleanProperty} - indicates whether dragging is in progress
+    this.isDraggingProperty = new BooleanProperty( false, {
+      phetioReadOnly: true,
+      phetioState: false,
+      tandem: options.tandem.createTandem( 'isDraggingProperty' ),
+      phetioInstanceDocumentation: 'Indicates whether the object is dragging'
+    } );
+
     this.pointer = null;              // the pointer doing the current dragging
     this.trail = null;                // stores the path to the node that is being dragged
     this.transform = null;            // transform of the trail to our node (but not including our node, so we can prepend the deltas)
@@ -43,23 +79,37 @@ define( function( require ) {
     this.lastDragPoint = null;        // the location of the drag at the previous event (so we can calculate a delta)
     this.startTransformMatrix = null; // the node's transform at the start of the drag, so we can reset on a touch cancel
     this.mouseButton = undefined;     // tracks which mouse button was pressed, so we can handle that specifically
+
+    // @public {boolean} - This will be set to true for endDrag calls that are the result of the listener being
+    // interrupted. It will be set back to false after the endDrag is finished.
+    this.interrupted = false;
+
     // TODO: consider mouse buttons as separate pointers?
+
+    // @private {Pointer|null} - There are cases like https://github.com/phetsims/equality-explorer/issues/97 where if
+    // a touchenter starts a drag that is IMMEDIATELY interrupted, the touchdown would start another drag. We record
+    // interruptions here so that we can prevent future enter/down events from the same touch pointer from triggering
+    // another startDrag.
+    this.lastInterruptedTouchPointer = null;
+
+    // @private {boolean}
+    this.disposed = false;
 
     // if an ancestor is transformed, pin our node
     this.transformListener = {
       transform: function( args ) {
-        if ( !handler.trail.isExtensionOf( args.trail, true ) ) {
+        if ( !self.trail.isExtensionOf( args.trail, true ) ) {
           return;
         }
 
         var newMatrix = args.trail.getMatrix();
-        var oldMatrix = handler.transform.getMatrix();
+        var oldMatrix = self.transform.getMatrix();
 
         // if A was the trail's old transform, B is the trail's new transform, we need to apply (B^-1 A) to our node
-        handler.node.prependMatrix( newMatrix.inverted().timesMatrix( oldMatrix ) );
+        self.node.prependMatrix( newMatrix.inverted().timesMatrix( oldMatrix ) );
 
         // store the new matrix so we can do deltas using it now
-        handler.transform.setMatrix( newMatrix );
+        self.transform.setMatrix( newMatrix );
       }
     };
 
@@ -67,79 +117,121 @@ define( function( require ) {
     this.dragListener = {
       // mouse/touch up
       up: function( event ) {
-        assert && assert( event.pointer === handler.pointer );
-        if ( !event.pointer.isMouse || event.domEvent.button === handler.mouseButton ) {
+        if ( !self.dragging || self.disposed ) { return; }
+
+        sceneryLog && sceneryLog.InputListener && sceneryLog.InputListener( 'SimpleDragHandler (pointer) up for ' + self.trail.toString() );
+        sceneryLog && sceneryLog.InputListener && sceneryLog.push();
+
+        assert && assert( event.pointer === self.pointer, 'Wrong pointer in up' );
+        if ( !( event.pointer instanceof Mouse ) || event.domEvent.button === self.mouseButton ) {
           var saveCurrentTarget = event.currentTarget;
-          event.currentTarget = handler.node; // #66: currentTarget on a pointer is null, so set it to the node we're dragging
-          handler.endDrag( event );
+          event.currentTarget = self.node; // #66: currentTarget on a pointer is null, so set it to the node we're dragging
+          self.endDrag( event );
           event.currentTarget = saveCurrentTarget; // be polite to other listeners, restore currentTarget
         }
+
+        sceneryLog && sceneryLog.InputListener && sceneryLog.pop();
       },
 
       // touch cancel
       cancel: function( event ) {
-        assert && assert( event.pointer === handler.pointer );
+        if ( !self.dragging || self.disposed ) { return; }
+
+        sceneryLog && sceneryLog.InputListener && sceneryLog.InputListener( 'SimpleDragHandler (pointer) cancel for ' + self.trail.toString() );
+        sceneryLog && sceneryLog.InputListener && sceneryLog.push();
+
+        assert && assert( event.pointer === self.pointer, 'Wrong pointer in cancel' );
 
         var saveCurrentTarget = event.currentTarget;
-        event.currentTarget = handler.node; // #66: currentTarget on a pointer is null, so set it to the node we're dragging
-        handler.endDrag( event );
+        event.currentTarget = self.node; // #66: currentTarget on a pointer is null, so set it to the node we're dragging
+        self.endDrag( event );
         event.currentTarget = saveCurrentTarget; // be polite to other listeners, restore currentTarget
 
         // since it's a cancel event, go back!
-        if ( !handler.transform ) {
-          handler.node.setMatrix( handler.startTransformMatrix );
+        if ( !self.transform ) {
+          self.node.setMatrix( self.startTransformMatrix );
         }
+
+        sceneryLog && sceneryLog.InputListener && sceneryLog.pop();
       },
 
       // mouse/touch move
       move: function( event ) {
-        assert && assert( event.pointer === handler.pointer );
+        if ( !self.dragging || self.disposed ) { return; }
 
-        var globalDelta = handler.pointer.point.minus( handler.lastDragPoint );
+        assert && assert( event.pointer === self.pointer, 'Wrong pointer in move' );
+
+        var globalDelta = self.pointer.point.minus( self.lastDragPoint );
 
         // ignore move events that have 0-length (Chrome seems to be auto-firing these on Windows, see https://code.google.com/p/chromium/issues/detail?id=327114)
         if ( globalDelta.magnitudeSquared() === 0 ) {
           return;
         }
 
-        var delta = handler.transform.inverseDelta2( globalDelta );
+        sceneryLog && sceneryLog.InputListener && sceneryLog.InputListener( 'SimpleDragHandler (pointer) move for ' + self.trail.toString() );
+        sceneryLog && sceneryLog.InputListener && sceneryLog.push();
+
+        var delta = self.transform.inverseDelta2( globalDelta );
+
+        self.phetioStartEvent( 'dragged', {
+          x: event.pointer.point.x,
+          y: event.pointer.point.y
+        }, HIGH_FREQUENCY_OPTIONS );
 
         // move by the delta between the previous point, using the precomputed transform
         // prepend the translation on the node, so we can ignore whatever other transform state the node has
-        if ( handler.options.translate ) {
-          var translation = handler.node.getMatrix().getTranslation();
-          handler.options.translate.call( null, {
+        if ( self.options.translate ) {
+          var translation = self.node.getMatrix().getTranslation();
+          self.options.translate.call( null, {
             delta: delta,
             oldPosition: translation,
             position: translation.plus( delta )
           } );
         }
-        handler.lastDragPoint = handler.pointer.point;
+        self.lastDragPoint = self.pointer.point;
 
-        if ( handler.options.drag ) {
+        if ( self.options.drag ) {
+
           // TODO: consider adding in a delta to the listener
           // TODO: add the position in to the listener
           var saveCurrentTarget = event.currentTarget;
-          event.currentTarget = handler.node; // #66: currentTarget on a pointer is null, so set it to the node we're dragging
-          handler.options.drag.call( null, event, handler.trail ); // new position (old position?) delta
+          event.currentTarget = self.node; // #66: currentTarget on a pointer is null, so set it to the node we're dragging
+          self.options.drag.call( null, event, self.trail ); // new position (old position?) delta
           event.currentTarget = saveCurrentTarget; // be polite to other listeners, restore currentTarget
         }
+        self.phetioEndEvent();
+
+        sceneryLog && sceneryLog.InputListener && sceneryLog.pop();
       }
     };
+    PhetioObject.call( this, options );
   }
 
   scenery.register( 'SimpleDragHandler', SimpleDragHandler );
 
-  inherit( Object, SimpleDragHandler, {
+  return inherit( PhetioObject, SimpleDragHandler, {
+
+    // @private
+    get dragging() {
+      return this.isDraggingProperty.get();
+    },
+
+    set dragging( d ) {
+      assert && assert( 'illegal call to set dragging on SimpleDragHandler' );
+    },
     startDrag: function( event ) {
+      if ( this.dragging ) { return; }
+
+      sceneryLog && sceneryLog.InputListener && sceneryLog.InputListener( 'SimpleDragHandler startDrag' );
+      sceneryLog && sceneryLog.InputListener && sceneryLog.push();
+
       // set a flag on the pointer so it won't pick up other nodes
       event.pointer.dragging = true;
       event.pointer.cursor = this.options.dragCursor;
-      event.pointer.addInputListener( this.dragListener );
-      // event.trail.rootNode().addEventListener( this.transformListener ); // TODO: replace with new parent transform listening solution
+      event.pointer.addInputListener( this.dragListener, this.options.attach );
 
       // set all of our persistent information
-      this.dragging = true;
+      this.isDraggingProperty.set( true );
       this.pointer = event.pointer;
       this.trail = event.trail.subtrailTo( event.currentTarget, true );
       this.transform = this.trail.getTransform();
@@ -147,36 +239,91 @@ define( function( require ) {
       this.lastDragPoint = event.pointer.point;
       this.startTransformMatrix = event.currentTarget.getMatrix().copy();
       // event.domEvent may not exist if this is touch-to-snag
-      this.mouseButton = event.pointer.isMouse ? event.domEvent.button : undefined;
+      this.mouseButton = event.pointer instanceof Mouse ? event.domEvent.button : undefined;
 
+      this.phetioStartEvent( 'dragStarted', {
+        x: event.pointer.point.x,
+        y: event.pointer.point.y
+      } );
       if ( this.options.start ) {
         this.options.start.call( null, event, this.trail );
       }
+      this.phetioEndEvent();
+
+      sceneryLog && sceneryLog.InputListener && sceneryLog.pop();
     },
 
     endDrag: function( event ) {
+      if ( !this.dragging ) { return; }
+
+      sceneryLog && sceneryLog.InputListener && sceneryLog.InputListener( 'SimpleDragHandler endDrag' );
+      sceneryLog && sceneryLog.InputListener && sceneryLog.push();
+
       this.pointer.dragging = false;
       this.pointer.cursor = null;
       this.pointer.removeInputListener( this.dragListener );
-      // this.trail.rootNode().removeEventListener( this.transformListener ); // TODO: replace with new parent transform listening solution
-      this.dragging = false;
+
+      this.isDraggingProperty.set( false );
+
+      this.phetioStartEvent( 'dragEnded' );
 
       if ( this.options.end ) {
+
+        // drag end may be triggered programmatically and hence event and trail may be undefined
         this.options.end.call( null, event, this.trail );
       }
 
+      this.phetioEndEvent();
+
       // release our reference
       this.pointer = null;
+
+      sceneryLog && sceneryLog.InputListener && sceneryLog.pop();
+    },
+
+    // Called when input is interrupted on this listener, see https://github.com/phetsims/scenery/issues/218
+    interrupt: function() {
+      if ( this.dragging ) {
+        sceneryLog && sceneryLog.InputListener && sceneryLog.InputListener( 'SimpleDragHandler interrupt' );
+        sceneryLog && sceneryLog.InputListener && sceneryLog.push();
+
+        this.interrupted = true;
+
+        if ( this.pointer instanceof Touch ) {
+          this.lastInterruptedTouchPointer = this.pointer;
+        }
+
+        // We create a synthetic event here, as there is no available event here.
+        this.endDrag( {
+          pointer: this.pointer,
+          currentTarget: this.node
+        } );
+
+        this.interrupted = false;
+
+        sceneryLog && sceneryLog.InputListener && sceneryLog.pop();
+      }
     },
 
     tryToSnag: function( event ) {
       // don't allow drag attempts that use the wrong mouse button (-1 indicates any mouse button works)
-      if ( event.pointer.isMouse && event.domEvent && this.options.mouseButton !== event.domEvent.button && this.options.mouseButton !== -1 ) {
+      if ( event.pointer instanceof Mouse &&
+           event.domEvent &&
+           this.options.mouseButton !== event.domEvent.button &&
+           this.options.mouseButton !== -1 ) {
+        return;
+      }
+
+      // If we're disposed, we can't start new drags.
+      if ( this.disposed ) {
         return;
       }
 
       // only start dragging if the pointer isn't dragging anything, we aren't being dragged, and if it's a mouse it's button is down
-      if ( !this.dragging && !event.pointer.dragging ) {
+      if ( !this.dragging &&
+           !event.pointer.dragging &&
+           event.pointer !== this.lastInterruptedTouchPointer &&
+           event.canStartPress() ) {
         this.startDrag( event );
       }
     },
@@ -205,10 +352,58 @@ define( function( require ) {
     // touch moves over this node
     touchmove: function( event ) {
       this.tryTouchToSnag( event );
+    },
+
+    /**
+     * Disposes this listener, releasing any references it may have to a pointer.
+     * @public
+     */
+    dispose: function() {
+      sceneryLog && sceneryLog.InputListener && sceneryLog.InputListener( 'SimpleDragHandler dispose' );
+      sceneryLog && sceneryLog.InputListener && sceneryLog.push();
+
+      this.disposed = true;
+
+      if ( this.dragging ) {
+        this.pointer.dragging = false;
+        this.pointer.cursor = null;
+        this.pointer.removeInputListener( this.dragListener );
+      }
+      this.isDraggingProperty.dispose();
+      PhetioObject.prototype.dispose.call( this );
+
+      sceneryLog && sceneryLog.InputListener && sceneryLog.pop();
+    }
+  }, {
+
+    /**
+     * Creates an input listener that forwards events to the specified input listener
+     * See https://github.com/phetsims/scenery/issues/639
+     * @param {function(Event)} down - down function to be added to the input listener
+     * @param {Object} [options]
+     * @returns {Object} a scenery input listener
+     */
+    createForwardingListener: function( down, options ) {
+
+      options = _.extend( {
+        allowTouchSnag: false
+      }, options );
+
+      return {
+        down: function( event ) {
+          if ( !event.pointer.dragging && event.canStartPress() ) {
+            down( event );
+          }
+        },
+        touchenter: function( event ) {
+          options.allowTouchSnag && this.down( event );
+        },
+        touchmove: function( event ) {
+          options.allowTouchSnag && this.down( event );
+        }
+      };
     }
   } );
-
-  return SimpleDragHandler;
 } );
 
 

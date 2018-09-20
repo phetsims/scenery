@@ -1,0 +1,181 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8"/>
+  <meta http-equiv="X-UA-Compatible" content="IE=edge"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+  <title>Accessibility Implementation in Scenery</title>
+
+  <link rel="stylesheet" href="../../sherpa/lib/bootstrap-2.2.2.css">
+  <link rel="stylesheet" href="../../sherpa/lib/bootstrap-responsive-2.2.2.css">
+  <link rel="stylesheet" href="../../sherpa/lib/syntaxhighlighter-3.0.83/shCore.css">
+  <link rel="stylesheet" href="../../sherpa/lib/syntaxhighlighter-3.0.83/shThemeDefault.css">
+  <link rel="stylesheet" href="../assets/scenery.css">
+
+  <!-- Before loading other things (that might error), create hooks to report errors/loads for continuous testing -->
+  <script src="../../aqua/js/pageload-connector.js"></script>
+
+  <!-- jQuery and LoDash are dependencies -->
+  <script src="../../sherpa/lib/jquery-2.1.0.min.js"></script>
+  <script src="../../sherpa/lib/lodash-4.17.4.min.js"></script>
+
+  <!-- For the styling -->
+  <script src="../../sherpa/lib/bootstrap-2.2.2.js"></script>
+
+  <script src="../../sherpa/lib/syntaxhighlighter-3.0.83/shCore.js"></script>
+  <script src="../../sherpa/lib/syntaxhighlighter-3.0.83/shBrushJScript.js"></script>
+  <script src="../../sherpa/lib/syntaxhighlighter-3.0.83/shBrushXml.js"></script>
+
+  <script type="text/javascript"
+          src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.1/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+
+  <!-- Our code, in either the concatenated 'with comments' version or the minified version -->
+  <script src="../build/scenery.min.js"></script>
+
+
+  <script type="text/javascript">
+    scenery.Util.polyfillRequestAnimationFrame();
+
+    function docExample( id, draw ) {
+      var $container = $( '#' + id );
+      var scene = new scenery.Node();
+      var display = new scenery.Display( scene, {
+        width: $container.width(),
+        height: $container.height()
+      } );
+      $container[ 0 ].appendChild( display.domElement );
+      draw( scene, display );
+      display.updateDisplay();
+      var $code = $( '<pre class="brush: js"></pre>' );
+      $code.text( draw.toString().match( /\/\*START\*\/((.|\n)*)\/\*END\*\// )[ 1 ] );
+      $container.after( $code );
+
+      var pdomHTMLBlock = display.accessibleDOMElement.outerHTML; // get the PDOM
+      var formattedPDOM = pdomHTMLBlock.replace( new RegExp( '<[/]?\\w*[ >]', 'g' ), '\n$&' ); // add breaks in the string
+      var $PDOMcode = $( '<pre class="brush: html"></pre>' ).text( formattedPDOM );
+
+      $code.after( $PDOMcode ).after( $( '<br/><p>And the PDOM representation</p>' ) );
+    }
+  </script>
+
+  <style type="text/css">
+
+    .exampleScene {
+      margin: 15px auto;
+      border: 1px solid black;
+      position: relative;
+      left: 0;
+      top: 0;
+    }
+
+    #sidebar {
+      background-color: #eee;
+      position: fixed;
+      z-index: 10;
+      top: 41px;
+      left: 0;
+      bottom: 0;
+      width: 200px;
+      overflow-y: auto;
+      overflow-x: hidden;
+      -webkit-overflow-scrolling: touch;
+      padding: 15px 0 30px 30px;
+      border-right: 1px solid #bbb;
+      box-shadow: 0 0 20px #ccc;
+      -webkit-box-shadow: 0 0 20px #ccc;
+      -moz-box-shadow: 0 0 20px #ccc;
+    }
+
+    #apiList {
+      background-color: #eee;
+      position: relative;
+      border: 1px solid #bbb;
+      border-left: none;
+      padding: 10px;
+    }
+
+    .ph2 {
+      font-weight: bold;
+      font-size: 18px;
+    }
+
+    .navlink {
+      font-weight: bold;
+    }
+
+    .sublink {
+      padding-left: 1em;
+    }
+
+    .args {
+      font-weight: normal;
+      font-size: 80%;
+    }
+
+    footer {
+      maring-left: 2em;
+      background-color: #191919;
+    }
+  </style>
+
+</head>
+
+<body>
+<div class="navbar navbar-inverse navbar-static-top">
+  <div class="navbar-inner">
+    <a class="brand" href="/scenery">Scenery</a>
+    <ul class="nav">
+      <li><a href="../">Home</a></li>
+      <li class="active"><a href="../doc">Documentation</a></li>
+      <li><a href="../examples">Examples</a></li>
+      <li><a href="../tests">Tests</a></li>
+    </ul>
+  </div>
+</div>
+
+<div class="row-fluid">
+  <div class="span3"></div>
+  <div class="span6">
+    <div class="page-header" style="text-align: center;">
+      <h1>Accessibility Implementation Notes</h1>
+      <div class="span3"></div>
+
+    </div>
+
+  </div>
+</div>
+<div class="row-fluid">
+
+  <p style="text-align: center; color: #d00;">NOTE: This document is still a work in progress!</p>
+
+  <div class="span3" id="apiList">
+    <div class="ph2"><a href="#overall-structure">Overall Code Structure</a></div>
+  </div>
+  <div class="span6">
+    <h2 id="overall-structure">Overall Code structure</h2>
+    <p>Note: <i>a11y</i> is a synonym for accessibility.</p>
+
+    <p>The DAG features of the a11y side of Scenery are handled parallel to <code>Node</code>s in Scenery. Each <code>Node</code>
+      with the
+      Accessibility trait added to its prototype has N AccessibleInstances based on the number of times it has been
+      added to the scene graph. The PDOM elements of each <code>Node</code> are created and handled with AccessiblePeer.
+      There is
+      a 1x1 relationship of AccessibleInstance and AccessiblePeer.</p>
+
+    <p>
+      The AccessiblePeer is the type that manages all HTML Elements. The Node is then thought to be "represented" in the
+      PDOM by the AccessiblePeer's HTML Elements.
+    </p>
+  </div>
+</div>
+
+<footer style="background-color: #191919;">
+  <a class="brand" href="/scenery">Scenery</a>
+</footer>
+
+<script type="text/javascript">
+  SyntaxHighlighter.all();
+</script>
+</body>
+</html>

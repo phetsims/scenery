@@ -11,11 +11,11 @@
 define( function( require ) {
   'use strict';
 
-  var inherit = require( 'PHET_CORE/inherit' );
-  var Bounds2 = require( 'DOT/Bounds2' );
-  var Vector2 = require( 'DOT/Vector2' );
-  var scenery = require( 'SCENERY/scenery' );
   var Block = require( 'SCENERY/display/Block' );
+  var Bounds2 = require( 'DOT/Bounds2' );
+  var inherit = require( 'PHET_CORE/inherit' );
+  var scenery = require( 'SCENERY/scenery' );
+  var Vector2 = require( 'DOT/Vector2' );
 
   var scratchBounds2 = Bounds2.NOTHING.copy();
 
@@ -87,8 +87,8 @@ define( function( require ) {
         this.oldFitBounds.set( Bounds2.NOTHING );
 
         // If we switched to the common-ancestor fit, we need to compute the common-ancestor instance.
-        if ( fit === FittedBlock.COMMON_ANCESTOR && this.firstDrawable && this.lastDrawable ) {
-          this.updateCommonAncestorInstance( this.firstDrawable, this.lastDrawable );
+        if ( fit === FittedBlock.COMMON_ANCESTOR ) {
+          this.removeCommonFitInstance();
         }
       }
     },
@@ -117,6 +117,10 @@ define( function( require ) {
 
       this.dirtyFit = false;
 
+      if ( this.fit === FittedBlock.COMMON_ANCESTOR && this.commonFitInstance === null ) {
+        this.addCommonFitInstance( this.computeCommonAncestorInstance() );
+      }
+
       // If our fit WAS common-ancestor and our common fit instance's subtree as something unfittable, switch to
       // full-display fit.
       if ( this.fit === FittedBlock.COMMON_ANCESTOR &&
@@ -129,6 +133,8 @@ define( function( require ) {
       }
 
       if ( this.fit === FittedBlock.FULL_DISPLAY ) {
+        this.fitBounds.set( Bounds2.NOTHING );
+
         this.setSizeFullDisplay();
       }
       else if ( this.fit === FittedBlock.COMMON_ANCESTOR ) {
@@ -180,15 +186,19 @@ define( function( require ) {
       // override in subtypes, use this.fitBounds
     },
 
-    setCommonFitInstance: function( instance ) {
-      if ( instance !== this.commonFitInstance ) {
-        if ( this.commonFitInstance ) {
-          this.commonFitInstance.fittability.subtreeFittabilityChange.removeListener( this.dirtyFitListener );
-        }
+    addCommonFitInstance: function( instance ) {
+      assert && assert( this.commonFitInstance === null );
+
+      if ( instance ) {
         this.commonFitInstance = instance;
-        if ( this.commonFitInstance ) {
-          this.commonFitInstance.fittability.subtreeFittabilityChange.addListener( this.dirtyFitListener );
-        }
+        this.commonFitInstance.fittability.subtreeFittabilityChange.addListener( this.dirtyFitListener );
+      }
+    },
+
+    removeCommonFitInstance: function() {
+      if ( this.commonFitInstance ) {
+        this.commonFitInstance.fittability.subtreeFittabilityChange.removeListener( this.dirtyFitListener );
+        this.commonFitInstance = null;
       }
     },
 
@@ -197,7 +207,7 @@ define( function( require ) {
 
       this.display.offStatic( 'displaySize', this.dirtyFitListener );
 
-      this.setCommonFitInstance( null );
+      this.removeCommonFitInstance();
 
       // clear references
       this.transformRootInstance = null;
@@ -293,21 +303,12 @@ define( function( require ) {
       }
     },
 
-    /**
-     * Assuming our first and last drawables have instance references (very likely!), we can identify the leaf-most
-     * common ancestor of both the first/last instance. We'll record this instance, so we can use its bounds to fit
-     * using the common-ancestor fit strategy.
-     * @private
-     *
-     * @param {Drawable} firstDrawable
-     * @param {Drawable} secondDrawable
-     */
-    updateCommonAncestorInstance: function( firstDrawable, lastDrawable ) {
-      assert && assert( firstDrawable.instance && lastDrawable.instance,
+    computeCommonAncestorInstance: function() {
+      assert && assert( this.firstDrawable.instance && this.lastDrawable.instance,
         'For common-ancestor fits, we need the first and last drawables to have direct instance references' );
 
-      var firstInstance = firstDrawable.instance;
-      var lastInstance = lastDrawable.instance;
+      var firstInstance = this.firstDrawable.instance;
+      var lastInstance = this.lastDrawable.instance;
 
       // walk down the longest one until they are a common length
       var minLength = Math.min( firstInstance.trail.length, lastInstance.trail.length );
@@ -324,10 +325,11 @@ define( function( require ) {
         lastInstance = lastInstance.parent;
       }
 
-      this.setCommonFitInstance( firstInstance );
-      sceneryLog && sceneryLog.FittedBlock && sceneryLog.FittedBlock( '   common fit instance: ' + this.commonFitInstance.toString() );
+      var commonFitInstance = firstInstance;
 
-      assert && assert( this.commonFitInstance.trail.length >= this.transformRootInstance.trail.length );
+      assert && assert( commonFitInstance.trail.length >= this.transformRootInstance.trail.length );
+
+      return commonFitInstance;
     },
 
     onIntervalChange: function( firstDrawable, lastDrawable ) {
@@ -337,7 +339,7 @@ define( function( require ) {
 
       // if we use a common ancestor fit, find the common ancestor instance
       if ( this.fit === FittedBlock.COMMON_ANCESTOR ) {
-        this.updateCommonAncestorInstance( firstDrawable, lastDrawable );
+        this.removeCommonFitInstance();
         this.markDirtyFit();
       }
     }

@@ -1,4 +1,8 @@
+// Copyright 2016, University of Colorado Boulder
+
 $( window ).ready( function() {
+  'use strict';
+  
   var element;
 
   function newElement() {
@@ -39,18 +43,18 @@ $( window ).ready( function() {
   string( 'Kéo phân tử của bạn đến đây' ); // vi (from other string)
   string( '过氧化氢' ); // zh_CN
   string( '過氧化氫' ); // zh_TW
-  string( "∫" );
-  string( "ﷺ" );
-  string( "§" );
-  string( "Á" );
-  string( "ÿ" );
-  string( "Ω" );
-  string( "आ" );
-  string( "私" );
-  string( "達" );
-  string( "Å̳̥͓͚͒͞͞" );
-  string( "0҉" );
-  string( "█" );
+  string( '∫' );
+  string( 'ﷺ' );
+  string( '§' );
+  string( 'Á' );
+  string( 'ÿ' );
+  string( 'Ω' );
+  string( 'आ' );
+  string( '私' );
+  string( '達' );
+  string( 'Å̳̥͓͚͒͞͞' );
+  string( '0҉' );
+  string( '█' );
 
   // encoded
   newElement();
@@ -79,17 +83,17 @@ $( window ).ready( function() {
   string( 'K\u00E9o ph\u00E2n t\u1EED c\u1EE7a b\u1EA1n \u0111\u1EBFn \u0111\u00E2y' ); // vi (from other string)
   string( '\u8FC7\u6C27\u5316\u6C22' ); // zh_CN
   string( '\u904E\u6C27\u5316\u6C2B' ); // zh_TW
-  string( "\u222b" );
-  string( "\ufdfa" );
-  string( "\u00a7" );
-  string( "\u00C1" );
-  string( "\u00FF" );
-  string( "\u03A9" );
-  string( "\u0906" );
-  string( "\u79C1" );
-  string( "\u9054" );
-  string( "A\u030a\u0352\u0333\u0325\u0353\u035a\u035e\u035e" );
-  string( "0\u0489" );
-  string( "\u2588" );
+  string( '\u222b' );
+  string( '\ufdfa' );
+  string( '\u00a7' );
+  string( '\u00C1' );
+  string( '\u00FF' );
+  string( '\u03A9' );
+  string( '\u0906' );
+  string( '\u79C1' );
+  string( '\u9054' );
+  string( 'A\u030a\u0352\u0333\u0325\u0353\u035a\u035e\u035e' );
+  string( '0\u0489' );
+  string( '\u2588' );
 
 } );

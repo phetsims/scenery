@@ -1,4 +1,4 @@
-// Copyright 2013-2015, University of Colorado Boulder
+// Copyright 2013-2016, University of Colorado Boulder
 
 
 /**
@@ -22,14 +22,10 @@ define( function( require ) {
   /*
    * isBefore: whether this points to before the node (and its children) have been rendered, or after
    */
-  //@deprecated
   function TrailPointer( trail, isBefore ) {
     assert && assert( trail instanceof scenery.Trail, 'trail is not a trail' );
     this.trail = trail;
-
     this.setBefore( isBefore );
-
-    phetAllocation && phetAllocation( 'TrailPointer' );
   }
 
   scenery.register( 'TrailPointer', TrailPointer );

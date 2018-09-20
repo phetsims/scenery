@@ -1,0 +1,471 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8"/>
+  <meta http-equiv="X-UA-Compatible" content="IE=edge"/>
+  <meta name="viewport" content="initial-scale=1,user-scalable=no,maximum-scale=1"/>
+  <meta name="apple-mobile-web-app-capable" content="yes">
+
+  <title>Input - Scenery Example</title>
+
+  <!-- Before loading other things (that might error), create hooks to report errors/loads for continuous testing -->
+  <script src="../../aqua/js/pageload-connector.js"></script>
+
+  <!-- jQuery and LoDash are dependencies -->
+  <script src="../../sherpa/lib/jquery-2.1.0.min.js"></script>
+  <script src="../../sherpa/lib/lodash-4.17.4.min.js"></script>
+
+  <!-- Scenery code -->
+  <script src="../build/scenery.min.js"></script>
+
+  <style type="text/css">
+    /* Let content go to the edges */
+    html, body {
+      width: 100%;
+      height: 100%;
+      margin: 0;
+      padding: 0;
+      background-color: #fff;
+      overflow: hidden;
+    }
+
+    /* Have the #main div cover the entire viewport */
+    #main {
+      position: absolute;
+      left: 0;
+      top: 0;
+      background-color: #fff;
+      z-index: 0;
+    }
+
+  </style>
+</head>
+
+<body>
+
+<!-- our scene graph will be in this div -->
+<div id="main">
+</div>
+
+<script>
+
+  /*---------------------------------------------------------------------------*
+  * Initialization and utility
+  *----------------------------------------------------------------------------*/
+
+  window.assertions.enableAssert();
+  // scenery.enableLogging( [ 'Input', 'InputListener' ] );
+
+  // Set up the display
+  var scene = new scenery.Node();
+  var display = new scenery.Display( scene, {
+    container: document.getElementById( 'main' )
+  } );
+  display.initializeEvents();
+  display.resizeOnWindowResize(); // keep the display size linked to the window size
+
+  var inactiveColor = '#ccc';
+  var activeColor = '#eee';
+  var armedColor = '#aaa';
+  var strokeColor = '#000';
+
+  // creates a minimally stylized button
+  function createButton( labelString, callback, options ) {
+    var label = new scenery.Text( labelString, {
+      fontSize: 12,
+      center: new dot.Vector2()
+    } );
+    var buttonListener = new scenery.FireListener( {
+      fire: callback
+    } );
+    var background = scenery.Rectangle.bounds( label.bounds.dilatedXY( 5, 5 ), {
+      stroke: strokeColor,
+      fill: ( options.color && options.color( buttonListener ) ) || new axon.DerivedProperty( [ buttonListener.isHighlightedProperty, buttonListener.isPressedProperty ], function( isHighlighted, isPressed ) {
+        return isPressed ? armedColor : ( isHighlighted ? activeColor : inactiveColor );
+      } )
+    } );
+    return new scenery.Node( _.extend( {
+      children: [ background, label ],
+      cursor: 'pointer',
+      inputListeners: [ buttonListener ]
+    }, options ) );
+  }
+
+  // Handle tabs (each 'tab' is a Node)
+  var tabProperty = new axon.Property( null );
+  var tabs = [];
+  tabProperty.lazyLink( function( selectedTab ) {
+    tabs.forEach( function( tab ) {
+      var isVisible = tab === selectedTab;
+      tab.visible = isVisible;
+      if ( !isVisible ) {
+        tab.interruptSubtreeInput();
+      }
+    } );
+  } );
+  var tabContent = new scenery.Node( {
+    x: 10,
+    y: 120
+  } );
+  scene.addChild( tabContent );
+  var tabBox = new scenery.HBox( {
+    spacing: -1,
+    x: 10,
+    y: 30
+  } );
+  scene.addChild( tabBox );
+  function createTab( label, value ) {
+    value.visible = false;
+    tabs.push( value );
+    if ( !tabProperty.value ) { tabProperty.value = value; }
+    var button = createButton( label, function() {
+      tabProperty.value = value;
+    }, {
+      color: function( buttonListener ) {
+        // handle highlighting of the active tab (on top of what the button above does)
+        return new axon.DerivedProperty( [ tabProperty, buttonListener.isHighlightedProperty, buttonListener.isPressedProperty ], function( tabValue, isHighlighted, isPressed ) {
+          return isPressed ? armedColor : ( ( isHighlighted || tabValue === value ) ? activeColor : inactiveColor );
+        } );
+      }
+    } );
+    tabBox.addChild( button );
+    tabContent.addChild( value );
+  }
+
+  // Interrupt button should interrupt every listener attached to a Node
+  scene.addChild( createButton( 'Interrupt Input', function() {
+    scene.interruptSubtreeInput();
+  }, {
+    top: 70,
+    left: 10
+  } ) );
+
+  /*---------------------------------------------------------------------------*
+  * "Drag" tab
+  * Uses new DragListener( { translateNode: true } )
+  *----------------------------------------------------------------------------*/
+
+  var simpleDragContainer = new scenery.Node();
+  createTab( 'Drag', simpleDragContainer );
+  simpleDragContainer.addChild( new scenery.Circle( 30, {
+    fill: 'red',
+    stroke: strokeColor,
+    cursor: 'pointer',
+    centerX: 70,
+    centerY: 70,
+    inputListeners: [ new scenery.DragListener( { translateNode: true } ) ]
+  } ) );
+  var blueListener = new scenery.DragListener( { translateNode: true } );
+  simpleDragContainer.addChild( new scenery.Rectangle( 0, 0, 45, 45, {
+    fill: new axon.DerivedProperty( [ blueListener.isHighlightedProperty ], function( highlighted ) {
+      return highlighted ? '#6CF' : '#08F'
+    } ),
+    stroke: strokeColor,
+    cursor: 'pointer',
+    rotation: Math.PI / 4,
+    centerX: 150,
+    centerY: 70,
+    inputListeners: [ blueListener ]
+  } ) );
+
+  /*---------------------------------------------------------------------------*
+  * "Button" tab
+  * Uses FireListener (naming?)
+  *----------------------------------------------------------------------------*/
+
+  var buttonExample = new scenery.Node();
+  createTab( 'Button', buttonExample );
+  var buttonText = new scenery.Text( 'outside released', {
+    fontSize: 14,
+    centerX: 0,
+    centerY: 0
+  } );
+  var buttonBackground = scenery.Rectangle.bounds( buttonText.bounds.dilatedXY( 20, 10 ), {
+    stroke: strokeColor
+  } );
+  var buttonNode = new scenery.Node( {
+    children: [ buttonBackground, buttonText ],
+    cursor: 'pointer',
+    left: 40,
+    top: 40
+  } );
+  buttonExample.addChild( buttonNode );
+
+  var fireNode = new scenery.Rectangle( 0, 0, buttonNode.height, buttonNode.height, {
+    opacity: 0,
+    fill: 'red',
+    left: buttonNode.right + 10,
+    top: buttonNode.top
+  } );
+  buttonExample.addChild( fireNode );
+
+  var buttonListener = new scenery.FireListener( {
+    press: function() { console.log( 'press' ); },
+    release: function() { console.log( 'release' ); },
+    drag: function() { console.log( 'drag' ); },
+    fire: function() { console.log( 'fire' ); fireNode.opacity = 1; }
+  } );
+  buttonNode.addInputListener( buttonListener );
+
+  axon.Property.multilink( [ buttonListener.isHoveringProperty, buttonListener.isPressedProperty ], function( isHovering, isPressed ) {
+    var isActive = isHovering || isPressed;
+    buttonBackground.fill = isActive ? activeColor : inactiveColor;
+    buttonText.text = ( isHovering ? 'hovering' : 'no-hover' ) + ' ' + ( isPressed ? 'pressed' : 'released' );
+    buttonText.center = new dot.Vector2();
+  } );
+
+  /*---------------------------------------------------------------------------*
+  * "Bound+Transform" tab
+  * DragListener with dragBounds, with a parent that is rotated and scaled.
+  *----------------------------------------------------------------------------*/
+
+  var transformContainer = new scenery.Node( {
+    scale: 1.5,
+    rotation: Math.PI / 4,
+    x: 100,
+    y: -50
+  } );
+  createTab( 'Bound+Transform', transformContainer );
+
+  var constrainBounds = new dot.Bounds2( 50, 0, 150, 75 );
+  transformContainer.addChild( scenery.Rectangle.bounds( constrainBounds, {
+    stroke: strokeColor,
+    lineDash: [ 5, 5 ]
+  } ) );
+  var constrainedNode = new scenery.Circle( 20, {
+    fill: '#2f2',
+    cursor: 'pointer',
+    stroke: strokeColor,
+    center: constrainBounds.center
+  } );
+  transformContainer.addChild( constrainedNode );
+  constrainedNode.addInputListener( new scenery.DragListener( {
+    translateNode: true,
+    dragBounds: constrainBounds.eroded( constrainedNode.radius )
+  } ) );
+
+  /*---------------------------------------------------------------------------*
+  * "Panel+Model" tab
+  * Typical PhET model-view setup, with an MVT, model location property, observable array of draggables, and
+  * hook-ups for dragging things from a panel (removing when dragged back).
+  *----------------------------------------------------------------------------*/
+
+  var modelContainer = new scenery.Node();
+  createTab( 'Panel+Model', modelContainer );
+  var objectGraphic = new scenery.Path( kite.Shape.regularPolygon( 6, 20 ), {
+    fill: '#f3f',
+    stroke: strokeColor
+  } );
+
+  var objectTransform = new dot.Transform3( dot.Matrix3.scaling( 2 ).timesMatrix( dot.Matrix3.translation( 100, 50 ) ) );
+  var objects = new axon.ObservableArray(); // {ObservableArray.<Property.<Vector2>>}
+  var objectNodes = []; // Node with { model: {Property.<Vector2>}, dragListener: {DragListener} }
+  function getObjectNode( object ) {
+    return objectNodes.filter( function( objectNode ) { return objectNode.model === object; } )[ 0 ];
+  }
+  objects.addItemAddedListener( function( newObject ) {
+    var objectNode = new scenery.Node( {
+      children: [ objectGraphic ],
+      cursor: 'pointer',
+      scale: 1.3
+    } );
+    objectNode.model = newObject;
+    newObject.link( function( position ) {
+      objectNode.translation = objectTransform.transformPosition2( position );
+    } );
+    objectNodes.push( objectNode );
+    modelContainer.addChild( objectNode );
+
+    var dragListener = new scenery.DragListener( {
+      transform: objectTransform,
+      locationProperty: newObject,
+      targetNode: objectNode,
+      release: function() {
+        if ( objectButton.containsPoint( objectNode.center ) ) {
+          objects.remove( newObject );
+        }
+      }
+    } );
+    objectNode.addInputListener( dragListener );
+    objectNode.dragListener = dragListener;
+  } );
+  objects.addItemRemovedListener( function( removedObject ) {
+    var objectNode = getObjectNode( removedObject );
+    modelContainer.removeChild( objectNode );
+    objectNode.interruptSubtreeInput(); // Removing it, so we interrupt any drags that it is involved in
+    phetCore.arrayRemove( objectNodes, objectNode );
+  } );
+
+  var objectButton = scenery.Rectangle.roundedBounds( objectGraphic.bounds.dilated( 10 ), 10, 10, {
+    children: [ objectGraphic ],
+    left: fireNode.left,
+    top: fireNode.bottom + 10,
+    fill: '#eee',
+    stroke: strokeColor,
+    cursor: 'pointer'
+  } );
+  modelContainer.addChild( objectButton );
+
+  objectButton.addInputListener( {
+    down: function( event ) {
+      // Don't try to start drags with a right mouse button
+      if ( !event.canStartPress() ) { return; }
+
+      // Put the initial model location right where the pointer is
+      var modelPosition = objectTransform.inversePosition2( modelContainer.getUniqueTrail().globalToLocalPoint( event.pointer.point ) );
+      var newObject = new axon.Property( modelPosition );
+      objects.push( newObject );
+
+      // pass it off to the drag listener
+      getObjectNode( newObject ).dragListener.press( event );
+    }
+  } );
+
+  /*---------------------------------------------------------------------------*
+  * "Rotation" tab
+  *----------------------------------------------------------------------------*/
+
+  var innerRadius = 40;
+  var outerRadius = 80;
+  var halfAngle = Math.PI / 8;
+  var rotationShape = new kite.Shape().arc( 0, 0, innerRadius, -halfAngle, halfAngle, false )
+                                      .arc( 0, 0, outerRadius, halfAngle, -halfAngle, true )
+                                      .close();
+  var touchAmount = 10;
+  var touchCenterOffset = touchAmount * Math.sqrt( 2 ) * 1.5;
+  var rotationTouchShape = new kite.Shape().arc( -touchCenterOffset, 0, touchCenterOffset + innerRadius - touchAmount, -halfAngle, halfAngle, false )
+                                           .arc( -touchCenterOffset, 0, touchCenterOffset + outerRadius + touchAmount, halfAngle, -halfAngle, true )
+                                           .close();
+  var rotationNode = new scenery.Path( rotationShape, {
+    fill: '#f80',
+    stroke: strokeColor,
+    cursor: 'pointer',
+    touchArea: rotationTouchShape
+  } );
+  var rotationProperty = new axon.Property( 0 );
+  rotationProperty.linkAttribute( rotationNode, 'rotation' );
+  rotationNode.addInputListener( new scenery.DragListener( {
+    applyOffset: false, // Tracking the initial rotation needs to be done, have our model point ignore local location.
+    drag: function( event ) {
+      rotationProperty.value = this.modelPoint.angle() - this.localPoint.angle();
+    }
+  } ) );
+
+  var rotationContainer = new scenery.Node( {
+    children: [
+      new scenery.Circle( 3, { fill: 'black' } ),
+      new scenery.Circle( 0.5 * ( innerRadius + outerRadius ), { stroke: strokeColor, lineWidth: 0.25 } ),
+      rotationNode
+    ],
+    x: 210,
+    y: 60
+  } );
+  createTab( 'Rotation', rotationContainer );
+
+  /*---------------------------------------------------------------------------*
+  * "Ancestor+Move" tab
+  * Handle tracking ancestors so that a drag pins the node on the screen (ignores ancestor transform)
+  *----------------------------------------------------------------------------*/
+
+  var trackerNode = new scenery.Path( kite.Shape.regularPolygon( 5, 40 ), {
+    fill: '#08F',
+    stroke: strokeColor,
+    rotation: -Math.PI / 2,
+    cursor: 'pointer'
+  } );
+  trackerNode.addInputListener( new scenery.DragListener( {
+    trackAncestors: true,
+    translateNode: true
+  } ) );
+
+  var trackerContainer = new scenery.Circle( 60, {
+    children: [ trackerNode ],
+    stroke: strokeColor,
+    lineWidth: 0.25,
+    lineDash: [ 2, 2 ]
+  } );
+  createTab( 'Ancestor+Move', trackerContainer );
+
+  /*---------------------------------------------------------------------------*
+  * Multitouch tabs (use 2+ fingers)
+  * "M+SR" tab: Multi-touch drag with scaling and rotation enabled (rigid + zoom).
+  * "M+R" tab: Multi-touch drag with rotation enabled (rigid transformations).
+  * "M+S" tab: Multi-touch drag with scaling enabled (pan-zoom transformations).
+  * "M" tab: Multi-touch drag (just translation)
+  *----------------------------------------------------------------------------*/
+
+  function addMulti( allowScale, allowRotation, label ) {
+    var multiNode = new scenery.Path( kite.Shape.regularPolygon( 3, 100 ), {
+      fill: '#F08',
+      stroke: strokeColor,
+      cursor: 'pointer',
+      x: 130,
+      y: 130
+    } );
+    multiNode.addInputListener( new scenery.MultiListener( multiNode, {
+      allowScale: allowScale,
+      allowRotation: allowRotation
+    } ) );
+    createTab( label, multiNode );
+  }
+
+  addMulti( true, true, 'M+SR' );
+  addMulti( false, true, 'M+R' );
+  addMulti( true, false, 'M+S' );
+  addMulti( false, false, 'M' );
+
+  /*---------------------------------------------------------------------------*
+  * Pan + zoom prototype
+  *----------------------------------------------------------------------------*/
+
+  var panBounds = new dot.Bounds2( 0, 0, 400, 200 );
+  var panGridShape = new kite.Shape();
+  for ( var x = panBounds.left + 20; x <= panBounds.right - 10; x += 20 ) {
+    panGridShape.moveTo( x, panBounds.top + 1 )
+                .lineTo( x, panBounds.bottom - 1 )
+  }
+  for ( var y = panBounds.top + 20; y <= panBounds.bottom - 10; y += 20 ) {
+    panGridShape.moveTo( panBounds.left + 1, y )
+                .lineTo( panBounds.right - 1, y )
+  }
+  var panContent = new scenery.Node( {
+    children: [
+      scenery.Rectangle.bounds( panBounds ),
+      new scenery.Path( panGridShape, { stroke: strokeColor, lineWidth: 0.25 } ),
+      new scenery.Text( 'pan and zoom?', { fill: '#606', fontSize: 50, center: panBounds.center } ),
+      createButton( 'button can stick!', function(){}, { centerX: panBounds.centerX, centerY: panBounds.height * 4 / 5 } ),
+      new scenery.Rectangle( 0, 0, 20, 20, { fill: 'red' } ),
+      new scenery.Rectangle( 380, 0, 20, 20, { fill: 'red' } ),
+      new scenery.Rectangle( 0, 180, 20, 20, { fill: 'red' } ),
+      new scenery.Rectangle( 380, 180, 20, 20, { fill: 'red' } )
+    ]
+  } );
+  panContent.addInputListener( new scenery.PanZoomListener( panContent, panBounds, {
+    allowMultitouchInterruption: true
+  } ) );
+  var panContainer = new scenery.Node( {
+    children: [
+      panContent,
+      scenery.Rectangle.bounds( panBounds, { stroke: strokeColor } )
+    ],
+    clipArea: kite.Shape.bounds( panBounds.dilated( 0.5 ) )
+  } );
+  createTab( 'Pan', panContainer );
+
+
+  /*---------------------------------------------------------------------------*
+   * main loop
+   *----------------------------------------------------------------------------*/
+
+  var elapsedTime = 0;
+  display.updateOnRequestAnimationFrame( function( dt ) {
+    elapsedTime += dt;
+
+    fireNode.opacity *= Math.pow( 0.2, dt );
+    trackerContainer.translation = dot.Vector2.createPolar( 20, elapsedTime ).plusXY( 150, 75 );
+  } );
+
+</script>
+
+</body>
+</html>

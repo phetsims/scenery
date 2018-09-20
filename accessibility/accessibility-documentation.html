@@ -15,7 +15,9 @@
 
   <!-- jQuery and LoDash are dependencies -->
   <script src="../../sherpa/lib/jquery-2.1.0.min.js"></script>
-  <script src="../../sherpa/lib/lodash-2.4.1.min.js"></script>
+  <script src="../../sherpa/lib/lodash-4.17.4.min.js"></script>
+  <script src="../../sherpa/lib/himalaya-0.2.7.js"></script>
+  <script src="../../sherpa/lib/he-1.1.1.js"></script>
 
   <!-- For the styling -->
   <script src="../../sherpa/lib/bootstrap-2.2.2.js"></script>
@@ -25,8 +27,8 @@
   <script src="../../sherpa/lib/syntaxhighlighter-3.0.83/shBrushXml.js"></script>
 
   <!-- Our code, in either the concatenated 'with comments' version or the minified version -->
-  <script src="scenery.js"></script>
-  <!-- <script src="../build/standalone/scenery.min.js"></script> -->
+  <script src="../build/scenery.min.js"></script>
+
 
   <!-- MathJax config -->
   <script type="text/x-mathjax-config">
@@ -54,7 +56,7 @@
   </script>
 
   <script type="text/javascript"
-          src="http://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+          src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.1/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
 
   <style type="text/css">
 
@@ -135,7 +137,12 @@
     <h2>The Parallel DOM</h2>
 
     <p>
-      To accomplish this, we generated a parallel HTML structure that sits on top of the Scenery visual element.  Any visual node in the simulation can be represented in this parallel HTML DOM.  In this way, both the browser and assistive technologies have access to the the accessible representations of the elements on screen.  Since the DOM is written in HTML, any user can navigate to the various elements in the browser with a keyboard or assistive technology. This could include using 'tab' or any other keys that are handled by the screen reader that moves focus to various landmarks defined in the document.
+      To accomplish this, we generated a parallel HTML structure that sits on top of the Scenery visual element. Any
+      visual node in the simulation can be represented in this parallel HTML DOM. In this way, both the browser and
+      assistive technologies have access to the accessible representations of the elements on screen. Since the DOM is
+      written in HTML, any user can navigate to the various elements in the browser with a keyboard or assistive
+      technology. This could include using 'tab' or any other keys that are handled by the screen reader that moves
+      focus to various landmarks defined in the document.
     </p>
 
     <p>
@@ -162,7 +169,7 @@
       &lt;input tabindex="0" type='button' value='Left pullers' aria-labelledby="leftPullerGroupDescription" id="leftPullerGroupButton"&gt;
       &lt;p id="leftPullerGroupDescription"&gt;Left pullers standing near rope.  Press enter to select a puller for drag and drop.&lt;/p&gt;
       &lt;ul id="leftPullerGroup" hidden&gt;
-        &lt;li tabindex="0" draggable="true" aria-grabbed="false"&gt;Left group, Large puller standing near rope&lt;/li&gt;      
+        &lt;li tabindex="0" draggable="true" aria-grabbed="false"&gt;Left group, Large puller standing near rope&lt;/li&gt;
         &lt;li tabindex="0" draggable="true" aria-grabbed="false"&gt;Left group, medium puller standing near rope&lt;/li&gt;
         &lt;li tabindex="0" draggable="true" aria-grabbed="false"&gt;Left group, first small puller standing near rope&lt;/li&gt;
         &lt;li tabindex="0" draggable="true" aria-grabbed="false"&gt;Left group, second small puller standing near rope&lt;/li&gt;
@@ -172,13 +179,13 @@
       &lt;input tabindex="0" type='button' value='Right pullers' aria-labelledby="rightPullerGroupDescription" id="rightPullerGroupDescription"&gt;
       &lt;p id="rightPullerGroupDescription"&gt;Right pullers standing near rope.  Press enter to select a puller for drag and drop.&lt;/p&gt;
       &lt;ul id="rightPullerGroup" hidden&gt;
-        &lt;li tabindex="0" draggable="true" aria-grabbed="false"&gt;Right group, Large puller standing near rope&lt;/li&gt;      
+        &lt;li tabindex="0" draggable="true" aria-grabbed="false"&gt;Right group, Large puller standing near rope&lt;/li&gt;
         &lt;li tabindex="0" draggable="true" aria-grabbed="false"&gt;Right group, medium puller standing near rope&lt;/li&gt;
         &lt;li tabindex="0" draggable="true" aria-grabbed="false"&gt;Right group, first small puller standing near rope&lt;/li&gt;
         &lt;li tabindex="0" draggable="true" aria-grabbed="false"&gt;Right group, second small puller standing near rope&lt;/li&gt;
       &lt;/ul&gt;
 
-      &lt;!-- List of knots along the left side of the rope, using the aria-dropeffect to signify that these are potential locations for a puller --&gt; 
+      &lt;!-- List of knots along the left side of the rope, using the aria-dropeffect to signify that these are potential locations for a puller --&gt;
       &lt;h4 id="leftKnotGroupDescription" hidden&gt;Left knots.  Press enter to place selected puller on knot.&lt;/h4&gt;
       &lt;ul tabindex="0" id="leftKnotGroup" aria-labelledby='leftKnotGroupDescription' hidden&gt;
         &lt;li tabindex="0" aria-dropeffect="move"&gt;First knot, closest to the cart&lt;/li&gt;
@@ -187,7 +194,7 @@
         &lt;li tabindex="0" aria-dropeffect="move"&gt;Fourth knot, farthest from the cart&lt;/li&gt;
       &lt;/ul&gt;
 
-      &lt;!-- List of knots along the right side of the rope, using the aria-dropeffect to signify that these are potential locations for a puller --&gt; 
+      &lt;!-- List of knots along the right side of the rope, using the aria-dropeffect to signify that these are potential locations for a puller --&gt;
       &lt;h4 id="rightKnotDescription" hidden&gt;Right knots.  Press enter to place selected puller on knot.&lt;/h4&gt;
       &lt;ul tabindex="0" id="rightKnotGroup" aria-labelledby='rightKnotDescription' hidden&gt;
         &lt;li tabindex="0" aria-dropeffect="move"&gt;First knot, closest to the cart&lt;/li&gt;
@@ -223,7 +230,7 @@
 
       &lt;!--Element used to alert the user that an action or event has occured in the simulation--&gt;
       &lt;p&gt;&lt;span id="ariaActionElement" aria-live="polite" aria-atomic="true"&gt;&lt;/span&gt;&lt;/p&gt;
-  
+
      &lt;/div&gt;
 
     </pre>
@@ -261,7 +268,7 @@
     </pre>
 
     <p>
-      A screen reader such as NVDA will read the above list item as: 
+      A screen reader such as NVDA will read the above list item as:
     </p>
 
     <p>
@@ -294,7 +301,7 @@
           createPeer: function( accessibleInstance ) {
 
             /* Element should look like the following in the accessibility tree:
-             * <li tabindex="0" draggable="true" aria-grabbed="false" class='Puller' id='uniqueValue'>Left group, Large puller standing near rope</li> 
+             * <li tabindex="0" draggable="true" aria-grabbed="false" class='Puller' id='uniqueValue'>Left group, Large puller standing near rope</li>
              */
             var domElement = document.createElement( 'li' );
             domElement.tabIndex = '0';

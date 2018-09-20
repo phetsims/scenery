@@ -1,11 +1,22 @@
-// Copyright 2013-2015, University of Colorado Boulder
+// Copyright 2013-2016, University of Colorado Boulder
 
 /**
  * A persistent display of a specific Node and its descendants, which is updated at discrete points in time.
- * Unlike Scenery's old Scene type, a Display is not itself a Node.
  *
  * Use display.getDOMElement or display.domElement to retrieve the Display's DOM representation.
  * Use display.updateDisplay() to trigger the visual update in the Display's DOM element.
+ *
+ * A standard way of using a Display with Scenery is to:
+ * 1. Create a Node that will be the root
+ * 2. Create a Display, referencing that node
+ * 3. Make changes to the scene graph
+ * 4. Call display.updateDisplay() to draw the scene graph into the Display
+ * 5. Go to (3)
+ *
+ * Common ways to simplify the change/update loop would be to:
+ * - Use Node-based events. Initialize it with Display.initializeEvents(), then
+ *   add input listeners to parts of the scene graph (see Node.addInputListener).
+ * - Execute code (and update the display afterwards) by using Display.updateOnRequestAnimationFrame.
  *
  * Internal documentation:
  *
@@ -42,17 +53,23 @@
 define( function( require ) {
   'use strict';
 
-  var inherit = require( 'PHET_CORE/inherit' );
-  var extend = require( 'PHET_CORE/extend' );
-  var Events = require( 'AXON/Events' );
-  var Property = require( 'AXON/Property' );
+  var AccessibilityTree = require( 'SCENERY/accessibility/AccessibilityTree' );
+  var AccessibilityUtil = require( 'SCENERY/accessibility/AccessibilityUtil' );
   var Dimension2 = require( 'DOT/Dimension2' );
-  var Vector2 = require( 'DOT/Vector2' );
+  var Emitter = require( 'AXON/Emitter' );
+  var escapeHTML = require( 'PHET_CORE/escapeHTML' );
+  var Events = require( 'AXON/Events' );
+  var extend = require( 'PHET_CORE/extend' );
+  var inherit = require( 'PHET_CORE/inherit' );
   var Matrix3 = require( 'DOT/Matrix3' );
+  var Property = require( 'AXON/Property' );
+  var PropertyIO = require( 'AXON/PropertyIO' );
+  var Tandem = require( 'TANDEM/Tandem' );
 
-  var scenery = require( 'SCENERY/scenery' );
-  var Node = require( 'SCENERY/nodes/Node' );
+  // TODO: Order these, and see which ones we can require?
   var Features = require( 'SCENERY/util/Features' );
+  var Node = require( 'SCENERY/nodes/Node' );
+  var scenery = require( 'SCENERY/scenery' );
   require( 'SCENERY/display/BackboneDrawable' );
   require( 'SCENERY/display/CanvasBlock' );
   require( 'SCENERY/display/CanvasSelfDrawable' );
@@ -64,29 +81,30 @@ define( function( require ) {
   var Renderer = require( 'SCENERY/display/Renderer' );
   require( 'SCENERY/display/SharedCanvasCacheDrawable' );
   require( 'SCENERY/display/SVGSelfDrawable' );
-  require( 'SCENERY/input/Input' );
+  var Input = require( 'SCENERY/input/Input' );
   require( 'SCENERY/util/Trail' );
   var AccessibleInstance = require( 'SCENERY/accessibility/AccessibleInstance' );
-  var SceneryStyle = require( 'SCENERY/util/SceneryStyle' );
-  var FocusOverlay = require( 'SCENERY/overlays/FocusOverlay' );
-  var PointerAreaOverlay = require( 'SCENERY/overlays/PointerAreaOverlay' );
-  var PointerOverlay = require( 'SCENERY/overlays/PointerOverlay' );
   var CanvasNodeBoundsOverlay = require( 'SCENERY/overlays/CanvasNodeBoundsOverlay' );
   var FittedBlockBoundsOverlay = require( 'SCENERY/overlays/FittedBlockBoundsOverlay' );
+  var FocusIO = require( 'SCENERY/accessibility/FocusIO' );
+  var FocusOverlay = require( 'SCENERY/overlays/FocusOverlay' );
+  var platform = require( 'PHET_CORE/platform' );
+  var PointerAreaOverlay = require( 'SCENERY/overlays/PointerAreaOverlay' );
+  var PointerOverlay = require( 'SCENERY/overlays/PointerOverlay' );
+  var SceneryStyle = require( 'SCENERY/util/SceneryStyle' );
+  var Util = require( 'SCENERY/util/Util' );
 
-  // flags object used for determining what the cursor should be underneath a mouse
-  var isMouseFlags = { isMouse: true };
+  // ifphetio
+  var NullableIO = require( 'ifphetio!PHET_IO/types/NullableIO' );
 
-  /*
+  /**
    * Constructs a Display that will show the rootNode and its subtree in a visual state. Default options provided below
    *
    * @param {Node} rootNode - Displays this node and all of its descendants
-   *
-   * Valid parameters in the parameter object:
+   * @param {Object} options - Valid parameters in the parameter object:
    * {
    *   allowSceneOverflow: false,           // Usually anything displayed outside of this $main (DOM/CSS3 transformed SVG) is hidden with CSS overflow
    *   allowCSSHacks: true,                 // Applies styling that prevents mobile browser graphical issues
-   *   enablePointerEvents: true,           // Allows pointer events / MSPointerEvent to be used on supported platforms.
    *   width: <current main width>,         // Override the main container's width
    *   height: <current main height>,       // Override the main container's height
    *   preserveDrawingBuffer: false,        // Whether WebGL Canvases should preserve their drawing buffer.
@@ -94,10 +112,13 @@ define( function( require ) {
    *   allowWebGL: true,                    // Boolean flag that indicates whether scenery is allowed to use WebGL for rendering
    *                                        // Makes it possible to disable WebGL for ease of testing on non-WebGL platforms, see #289
    *   accessibility: true                  // Whether accessibility enhancements is enabled
-   *   interactive: true                    // Whether mouse/touch/keyboard inputs are enabled (if input has been added)
+   *   interactive: true                    // Whether mouse/touch/keyboard inputs are enabled (if input has been added). Simulation will still step.
+   * @constructor
    */
   function Display( rootNode, options ) {
     assert && assert( rootNode, 'rootNode is a required parameter' );
+
+    //OHTWO TODO: hybrid batching (option to batch until an event like 'up' that might be needed for security issues)
 
     // supertype call to axon.Events (should just initialize a few properties here, notably _eventListeners and _staticEventListeners)
     Events.call( this );
@@ -109,20 +130,64 @@ define( function( require ) {
       // initial display height
       height: ( options && options.container && options.container.clientHeight ) || 480,
 
-      //OHTWO TODO: hook up allowCSSHacks
       allowCSSHacks: true,       // applies CSS styles to the root DOM element that make it amenable to interactive content
       allowSceneOverflow: false, // usually anything displayed outside of our dom element is hidden with CSS overflow
-      //OHTWO TODO: hook up enablePointerEvents
-      enablePointerEvents: true, // whether we should specifically listen to pointer events if we detect support
       defaultCursor: 'default',  // what cursor is used when no other cursor is specified
       backgroundColor: null,      // initial background color
       preserveDrawingBuffer: false,
       allowWebGL: true,
-      accessibility: true,
+      accessibility: true,        // enables accessibility features
       isApplication: false,      // adds the aria-role: 'application' when accessibility is enabled
-      interactive: true
+      interactive: true,         // Whether mouse/touch/keyboard inputs are enabled (if input has been added).
+
+      // {boolean} - If true, input event listeners will be attached to the Display's DOM element instead of the window.
+      // Normally, attaching listeners to the window is preferred (it will see mouse moves/ups outside of the browser
+      // window, allowing correct button tracking), however there may be instances where a global listener is not
+      // preferred.
+      listenToOnlyElement: false,
+
+      // TODO: doc
+      batchDOMEvents: false,
+
+      // {boolean} - If true, the input event location (based on the top-left of the browser tab's viewport, with no
+      // scaling applied) will be used. Usually, this is not a safe assumption, so when false the location of the
+      // display's DOM element will be used to get the correct event location. There is a slight performance hit to
+      // doing so, thus this option is provided if the top-left location can be guaranteed.
+      // NOTE: Rotation of the Display's DOM element (e.g. with a CSS transform) will result in an incorrect event
+      //       mapping, as getBoundingClientRect() can't work with this. getBoxQuads() should fix this when browser
+      //       support is available.
+      assumeFullWindow: false,
+
+      // {boolean} - Whether Scenery will try to aggressively re-create WebGL Canvas/context instead of waiting for
+      // a context restored event. Sometimes context losses can occur without a restoration afterwards, but this can
+      // jump-start the process.
+      // See https://github.com/phetsims/scenery/issues/347.
+      aggressiveContextRecreation: true,
+
+      // {boolean|null} - Whether the `passive` flag should be set when adding and removing DOM event listeners.
+      // See https://github.com/phetsims/scenery/issues/770 for more details.
+      // If it is true or false, that is the value of the passive flag that will be used. If it is null, the default
+      // behavior of the browser will be used.
+      //
+      // Safari doesn't support touch-action: none, so we NEED to not use passive events (which would not allow
+      // preventDefault to do anything, so drags actually can scroll the sim).
+      // Chrome also did the same "passive by default", but because we have `touch-action: none` in place, it doesn't
+      // affect us, and we can potentially get performance improvements by allowing passive events.
+      // See https://github.com/phetsims/scenery/issues/770 for more information.
+      passiveEvents: platform.safari ? false : null,
+
+      // {boolean} - Whether, if no WebGL antialiasing is detected, the backing scale can be increased so as to
+      //             provide some antialiasing benefit. See https://github.com/phetsims/scenery/issues/859.
+      allowBackingScaleAntialiasing: true
     }, options );
+
+    // TODO: don't store the options, it's an anti-pattern.
     this.options = options; // @private
+
+    // @public (scenery-internal) {boolean} - Whether accessibility is enabled for this particular display.
+    this._accessible = options.accessibility;
+
+    this._allowWebGL = options.allowWebGL;
 
     // The (integral, > 0) dimensions of the Display's DOM element (only updates the DOM element on updateDisplay())
     this._size = new Dimension2( this.options.width, this.options.height );
@@ -140,7 +205,7 @@ define( function( require ) {
     // We have a monotonically-increasing frame ID, generally for use with a pattern where we can mark objects with this
     // to note that they are either up-to-date or need refreshing due to this particular frame (without having to clear
     // that information after use). This is incremented every frame
-    this._frameId = 0; // {Number}
+    this._frameId = 0; // {number}
 
     this._dirtyTransformRoots = [];
     this._dirtyTransformRootsWithoutPass = [];
@@ -173,8 +238,19 @@ define( function( require ) {
     this._requestAnimationFrameID = 0;
 
     // will be filled in with a scenery.Input if event handling is enabled
-    this._input = null;
-    this._interactive = this.options.interactive;
+    this._input = null; // @public (phet-io)
+    this._inputListeners = []; // {Array.<Object>} - Listeners that will be called for every event.
+    this._interactive = this.options.interactive; // {boolean} - Whether mouse/touch/keyboard inputs are enabled (if input has been added). Simulation will still step.
+    this._listenToOnlyElement = options.listenToOnlyElement; // TODO: doc
+    this._batchDOMEvents = options.batchDOMEvents; // TODO: doc
+    this._assumeFullWindow = options.assumeFullWindow; // TODO: doc
+    this._passiveEvents = options.passiveEvents; // @private {boolean|null}
+
+    // @public (scenery-internal) {boolean}
+    this._aggressiveContextRecreation = options.aggressiveContextRecreation;
+
+    // @public (scenery-internal) {boolean}
+    this._allowBackingScaleAntialiasing = options.allowBackingScaleAntialiasing;
 
     // overlays currently being displayed.
     // API expected:
@@ -185,11 +261,6 @@ define( function( require ) {
     this._pointerAreaOverlay = null;
     this._canvasAreaBoundsOverlay = null;
     this._fittedBlockBoundsOverlay = null;
-
-    // properties for fuzzMouseEvents, so that we can track the status of a persistent mouse pointer
-    this._fuzzMouseIsDown = false;
-    this._fuzzMousePosition = new Vector2(); // start at 0,0
-    this._fuzzMouseLastMoved = false; // whether the last mouse event was a move (we skew probabilities based on this)
 
     if ( assert ) {
       // @private @assertion-only {boolean} - Whether we are running the paint phase of updateDisplay() for this Display.
@@ -208,20 +279,39 @@ define( function( require ) {
         this._domElement.setAttribute( 'aria-role', 'application' );
       }
 
-      SceneryStyle.addRule( '.accessibility * { position: absolute; left: 0; top: 0; width: 0; height: 0, clip: rect(0,0,0,0); }' );
+      // make the PDOM invisible in the browser - it has some width and is shifted off screen so that AT can read the
+      // formatting tags, see https://github.com/phetsims/scenery/issues/730
+      SceneryStyle.addRule( '.accessibility * { position: relative; left: -1000px; top: 0; width: 250px; height: 0; clip: rect(0,0,0,0); pointerEvents: none }' );
 
       this._focusRootNode = new Node();
       this._focusOverlay = new FocusOverlay( this, this._focusRootNode );
       this.addOverlay( this._focusOverlay );
 
+      // TODO: doc
+      this._unsortedAccessibleInstances = [];
+
+      // @public (scenery-internal) {Node|null} - When this display receives a pointer event, this is the focusable
+      // node that is being interacted with. When keyboard navigation resumes after pointer interaction, this node will
+      // receive focus.
+      this.pointerFocus = null;
+
+      // @public (scenery-internal) - {Node|null} - When  this display is made inactive, store the focused node
+      // so that when the sim becomes interactive again this node can receive focus when we resume keyboard
+      // navigation
+      this.activeNode = null;
+
+      // @private - the node that currently has focus when we remove an accessible trail, tracked so that we can
+      // restore focus after sorting accessible instances
+      this._focusedNodeOnRemoveTrail;
+
+      // @public (scenery-internal) {AccessibleInstance}
       this._rootAccessibleInstance = AccessibleInstance.createFromPool( null, this, new scenery.Trail() );
       sceneryLog && sceneryLog.AccessibleInstance && sceneryLog.AccessibleInstance(
         'Display root instance: ' + this._rootAccessibleInstance.toString() );
-      this._rootAccessibleInstance.addSubtree( new scenery.Trail( this._rootNode ) );
+      AccessibilityTree.rebuildInstanceTree( this._rootAccessibleInstance );
 
-      document.body.appendChild( this._rootAccessibleInstance.peer.domElement );
-
-      this._unsortedAccessibleInstances = [];
+      // add the accessible DOM as a child of this DOM element
+      this._domElement.appendChild( this._rootAccessibleInstance.peer.primarySibling );
     }
   }
 
@@ -251,6 +341,10 @@ define( function( require ) {
         this.perfDrawableNewIntervalCount = 0;
       }
 
+      if ( assert ) {
+        Display.assertSubtreeDisposed( this._rootNode );
+      }
+
       sceneryLog && sceneryLog.Display && sceneryLog.Display( 'updateDisplay frame ' + this._frameId );
       sceneryLog && sceneryLog.Display && sceneryLog.push();
 
@@ -259,6 +353,7 @@ define( function( require ) {
       // check to see whether contents under pointers changed (and if so, send the enter/exit events) to
       // maintain consistent state
       if ( this._input ) {
+        // TODO: Should this be handled elsewhere?
         this._input.validatePointers();
       }
 
@@ -267,6 +362,8 @@ define( function( require ) {
       this._rootNode.validateWatchedBounds();
 
       if ( assertSlow ) { this.options.accessibility && this._rootAccessibleInstance.auditRoot(); }
+
+      if ( assertSlow ) { this._rootNode._picker.audit(); }
 
       this._baseInstance = this._baseInstance || scenery.Instance.createFromPool( this, new scenery.Trail( this._rootNode ), true, false );
       this._baseInstance.baseSyncTree();
@@ -403,6 +500,8 @@ define( function( require ) {
         }
       }
 
+      AccessibilityTree.auditAccessibleDisplays( this.rootNode );
+
       sceneryLog && sceneryLog.Display && sceneryLog.pop();
     },
 
@@ -496,7 +595,7 @@ define( function( require ) {
     },
     set height( value ) { this.setHeight( value ); },
 
-    // {String} (CSS), {Color} instance, or null (no background color).
+    // {string} (CSS), {Color} instance, or null (no background color).
     // Will be applied to the root DOM element on updateDisplay(), and no sooner.
     setBackgroundColor: function( color ) {
       assert && assert( color === null || typeof color === 'string' || color instanceof scenery.Color );
@@ -514,13 +613,34 @@ define( function( require ) {
     set interactive( value ) {
       this._interactive = value;
       if ( !this._interactive && this._input ) {
+        this._input.interruptPointers();
         this._input.clearBatchedEvents();
+        this._input.removeTemporaryPointers();
+        this._rootNode.interruptSubtreeInput();
+      }
+
+      // when not interactive, all keyboard navigation is disabled
+      // TODO: disable keyboard nav without hiding content so that it is still readable with a screen reader,
+      // see https://github.com/phetsims/phet-io/issues/995
+      if ( this.options.accessibility ) {
+        if ( !this._interactive ) {
+          this.activeNode = Display.focusedNode;
+
+          // prevent a FF bug where hiding the element without blurring it causes focus to get stuck in the body
+          this.activeNode && this.activeNode.blur();
+        }
+
+        this.accessibleDOMElement.hidden = !this._interactive;
       }
     },
 
     addOverlay: function( overlay ) {
       this._overlays.push( overlay );
       this._domElement.appendChild( overlay.domElement );
+
+      // ensure that the overlay is hidden from screen readers, all accessible content should be in the dom element
+      // of the this._rootAccessibleInstance
+      overlay.domElement.setAttribute( 'aria-hidden', true );
     },
 
     removeOverlay: function( overlay ) {
@@ -528,143 +648,32 @@ define( function( require ) {
       this._overlays.splice( _.indexOf( this._overlays, overlay ), 1 );
     },
 
-    /**
-     * Returns the AccessibleInstance which has the longest trail that is an ancestor of the passed in trail. It will
-     * fall back to the root accessible instance if there is no other available one.
-     * @private
-     *
-     * @param {Trail} trail
-     * @returns {AccessibleInstance}
-     */
-    getBaseAccessibleInstance: function( trail ) {
-      // Search through trail to find longest trail extension where the leafmost node has accessible content, but does
-      // not include the node that was just added.
-      var i;
-      for ( i = trail.length - 2; i >= 0; i-- ) {
-        // break if there is accessible content for nodes along the trail, including root.
-        if ( trail.nodes[ i ].accessibleContent ) {
-          break;
-        }
-      }
-      // no ancestor of the added node was accessible, so add things directly to root accessible instance.
-      if ( i < 0 ) {
-        return this._rootAccessibleInstance;
-      }
-      // otherwise, we encountered an accessible instance and i points to the leaf most node for the sub trail.
-      else {
-        var leafMostAccessibleNode = trail.nodes[ i ];
-        var accessibleInstances = leafMostAccessibleNode._accessibleInstances;
-        // look up the accessible instance given the leaf most accessible node.
-        for ( var j = 0; j < accessibleInstances.length; j++ ) {
-          var accessibleInstance = accessibleInstances[ j ];
-          if ( trail.isExtensionOf( accessibleInstance.trail ) ) {
-            return accessibleInstance;
-          }
-        }
-      }
-
-      throw new Error( 'A base accessible instance must be defined.' );
-    },
-
     markUnsortedAccessibleInstance: function( accessibleInstance ) {
       this._unsortedAccessibleInstances.push( accessibleInstance );
     },
 
+
     sortAccessibleInstances: function() {
+
+      // keep reference so we can restore focus if browser blurs element while sorting
+      var focusedNode = Display.focusedNode;
+
       while ( this._unsortedAccessibleInstances.length ) {
         this._unsortedAccessibleInstances.pop().sortChildren();
       }
+      focusedNode && focusedNode.focus();
     },
 
     /**
-     * Called when a subtree with accessible content is added.
-     * @private
-     *
-     * @param {Trail} trail
+     * Get the root accessible DOM element which represents this display and provides semantics for assistive
+     * technology.
+     * @public
+     * @returns {HTMLElement}
      */
-    addAccessibleTrail: function( trail ) {
-      if ( !this.options.accessibility ) {
-        return;
-      }
-
-      sceneryLog && sceneryLog.Accessibility && sceneryLog.Accessibility( 'Display.addAccessibleTrail ' + trail.toString() );
-      sceneryLog && sceneryLog.Accessibility && sceneryLog.push();
-
-      this.getBaseAccessibleInstance( trail ).addSubtree( trail );
-
-      this.sortAccessibleInstances();
-
-      sceneryLog && sceneryLog.Accessibility && sceneryLog.pop();
+    getAccessibleDOMElement: function() {
+      return this._rootAccessibleInstance.peer.primarySibling;
     },
-
-    /**
-     * Called when a subtree with accessible content is removed.
-     * @private
-     *
-     * @param {Trail} trail
-     */
-    removeAccessibleTrail: function( trail ) {
-      if ( !this.options.accessibility ) {
-        return;
-      }
-
-      sceneryLog && sceneryLog.Accessibility && sceneryLog.Accessibility( 'Display.removeAccessibleTrail ' + trail.toString() );
-      sceneryLog && sceneryLog.Accessibility && sceneryLog.push();
-
-      this.getBaseAccessibleInstance( trail ).removeSubtree( trail );
-
-      this.sortAccessibleInstances();
-
-      sceneryLog && sceneryLog.Accessibility && sceneryLog.pop();
-    },
-
-    /**
-     * Called when an ancestor node's accessible content is changed.
-     * @private
-     *
-     * @param {Trail} trail
-     * @param {object} oldAccessibleContent
-     * @param {object} newAccessibleContent
-     */
-    changedAccessibleContent: function( trail, oldAccessibleContent, newAccessibleContent ) {
-      if ( !this.options.accessibility ) {
-        return;
-      }
-
-      sceneryLog && sceneryLog.Accessibility && sceneryLog.Accessibility(
-        'Display.changedAccessibleContent ' + trail.toString() +
-        ' old: ' + ( !!oldAccessibleContent ) +
-        ' new: ' + ( !!newAccessibleContent ) );
-      sceneryLog && sceneryLog.Accessibility && sceneryLog.push();
-
-      this.getBaseAccessibleInstance( trail ).removeSubtree( trail );
-      this.getBaseAccessibleInstance( trail ).addSubtree( trail );
-
-      this.sortAccessibleInstances();
-
-      sceneryLog && sceneryLog.Accessibility && sceneryLog.pop();
-    },
-
-    /**
-     * Called when an ancestor node's accessible order is changed.
-     * @private
-     *
-     * @param {Trail} trail
-     */
-    changedAccessibleOrder: function( trail ) {
-      if ( !this.options.accessibility ) {
-        return;
-      }
-
-      sceneryLog && sceneryLog.Accessibility && sceneryLog.Accessibility( 'Display.changedAccessibleOrder ' + trail.toString() );
-      sceneryLog && sceneryLog.Accessibility && sceneryLog.push();
-
-      this.getBaseAccessibleInstance( trail ).markAsUnsorted();
-
-      this.sortAccessibleInstances();
-
-      sceneryLog && sceneryLog.Accessibility && sceneryLog.pop();
-    },
+    get accessibleDOMElement() { return this.getAccessibleDOMElement(); },
 
     /*
      * Returns the bitmask union of all renderers (canvas/svg/dom/webgl) that are used for display, excluding
@@ -690,7 +699,7 @@ define( function( require ) {
 
     /*
      * Called from Instances that will need a transform update (for listeners and precomputation).
-     * @param passTransform {Boolean} - Whether we should pass the first transform root when validating transforms (should be true if the instance is transformed)
+     * @param passTransform {boolean} - Whether we should pass the first transform root when validating transforms (should be true if the instance is transformed)
      */
     markTransformRootDirty: function( instance, passTransform ) {
       passTransform ? this._dirtyTransformRoots.push( instance ) : this._dirtyTransformRootsWithoutPass.push( instance );
@@ -771,10 +780,10 @@ define( function( require ) {
         }
 
         //OHTWO TODO: For a display, just return an instance and we can avoid the garbage collection/mutation at the cost of the linked-list traversal instead of an array
-        var mouseTrail = this._rootNode.trailUnderPoint( this._input.mouse.point, isMouseFlags );
+        var mouseTrail = this._rootNode.trailUnderPointer( this._input.mouse );
 
         if ( mouseTrail ) {
-          for ( var i = mouseTrail.length - 1; i >= 0; i-- ) {
+          for ( var i = mouseTrail.getCursorCheckIndex(); i >= 0; i-- ) {
             var node = mouseTrail.nodes[ i ];
             var cursor = node.getCursor();
 
@@ -859,11 +868,6 @@ define( function( require ) {
 
     //TODO: reduce code duplication for handling overlays
     setPointerDisplayVisible: function( visibility ) {
-      // @deprecated, Joist code calls us with undefined first....
-      if ( visibility === undefined ) {
-        return;
-      }
-
       assert && assert( typeof visibility === 'boolean' );
 
       var hasOverlay = !!this._pointerOverlay;
@@ -883,11 +887,6 @@ define( function( require ) {
 
     //TODO: reduce code duplication for handling overlays
     setPointerAreaDisplayVisible: function( visibility ) {
-      // @deprecated, Joist code calls us with undefined first....
-      if ( visibility === undefined ) {
-        return;
-      }
-
       assert && assert( typeof visibility === 'boolean' );
 
       var hasOverlay = !!this._pointerAreaOverlay;
@@ -907,11 +906,6 @@ define( function( require ) {
 
     //TODO: reduce code duplication for handling overlays
     setCanvasNodeBoundsVisible: function( visibility ) {
-      // @deprecated, Joist code calls us with undefined first....
-      if ( visibility === undefined ) {
-        return;
-      }
-
       assert && assert( typeof visibility === 'boolean' );
 
       var hasOverlay = !!this._canvasAreaBoundsOverlay;
@@ -931,11 +925,6 @@ define( function( require ) {
 
     //TODO: reduce code duplication for handling overlays
     setFittedBlockBoundsVisible: function( visibility ) {
-      // @deprecated, Joist code calls us with undefined first....
-      if ( visibility === undefined ) {
-        return;
-      }
-
       assert && assert( typeof visibility === 'boolean' );
 
       var hasOverlay = !!this._fittedBlockBoundsOverlay;
@@ -954,10 +943,10 @@ define( function( require ) {
     },
 
     resizeOnWindowResize: function() {
-      var display = this;
+      var self = this;
 
       var resizer = function() {
-        display.setWidthHeight( window.innerWidth, window.innerHeight );
+        self.setWidthHeight( window.innerWidth, window.innerHeight );
       };
       window.addEventListener( 'resize', resizer );
       resizer();
@@ -970,9 +959,9 @@ define( function( require ) {
       var lastTime = 0;
       var timeElapsedInSeconds = 0;
 
-      var display = this;
-      (function step() {
-        display._requestAnimationFrameID = window.requestAnimationFrame( step, display._domElement );
+      var self = this;
+      ( function step() {
+        self._requestAnimationFrameID = window.requestAnimationFrame( step, self._domElement );
 
         // calculate how much time has elapsed since we rendered the last frame
         var timeNow = new Date().getTime();
@@ -982,61 +971,35 @@ define( function( require ) {
         lastTime = timeNow;
 
         stepCallback && stepCallback( timeElapsedInSeconds );
-        display.updateDisplay();
-      })();
+        self.updateDisplay();
+      } )();
     },
 
     cancelUpdateOnRequestAnimationFrame: function() {
       window.cancelAnimationFrame( this._requestAnimationFrameID );
     },
 
-    initializeStandaloneEvents: function( parameters ) {
-      // TODO extract similarity between standalone and fullscreen!
-      var element = this._domElement;
-      this.initializeEvents( _.extend( {}, {
-        listenerTarget: element,
-        pointFromEvent: function pointFromEvent( evt ) {
-          var mainBounds = element.getBoundingClientRect();
-          return Vector2.createFromPool( evt.clientX - mainBounds.left, evt.clientY - mainBounds.top );
-        }
-      }, parameters ) );
-    },
-
-    initializeFullscreenEvents: function( parameters ) {
-      var element = this._domElement;
-      this.initializeEvents( _.extend( {}, {
-        listenerTarget: document,
-        pointFromEvent: function pointFromEvent( evt ) {
-          var mainBounds = element.getBoundingClientRect();
-          return Vector2.createFromPool( evt.clientX - mainBounds.left, evt.clientY - mainBounds.top );
-        }
-      }, parameters ) );
-    },
-
-    initializeWindowEvents: function( parameters ) {
-      this.initializeEvents( _.extend( {}, {
-        listenerTarget: window,
-        pointFromEvent: function pointFromEvent( evt ) {
-          return Vector2.createFromPool( evt.clientX, evt.clientY );
-        }
-      }, parameters ) );
-    },
-
-    //OHTWO TODO: ability to disconnect event handling (useful for playground debugging)
-    initializeEvents: function( parameters ) {
+    /**
+     * Initializes event handling, and connects the browser's input event handlers to notify this Display of events.
+     * @public
+     *
+     * NOTE: This can be reversed with detachEvents().
+     * @param {Object} [options] - for PhET-iO
+     */
+    initializeEvents: function( options ) {
       assert && assert( !this._input, 'Events cannot be attached twice to a display (for now)' );
 
-      // TODO: come up with more parameter names that have the same string length, so it looks creepier
-      var pointFromEvent = parameters.pointFromEvent;
-      var listenerTarget = parameters.listenerTarget;
-      var batchDOMEvents = parameters.batchDOMEvents; //OHTWO TODO: hybrid batching (option to batch until an event like 'up' that might be needed for security issues)
-
-      var input = new scenery.Input( this, listenerTarget, !!batchDOMEvents, this.options.enablePointerEvents, pointFromEvent );
+      // TODO: refactor here
+      var input = new Input( this, !this._listenToOnlyElement, this._batchDOMEvents, this._assumeFullWindow, this._passiveEvents, options );
       this._input = input;
 
       input.connectListeners();
     },
 
+    /**
+     * Detach already-attached input event handling (from initializeEvents()).
+     * @public
+     */
     detachEvents: function() {
       assert && assert( this._input, 'detachEvents() should be called only when events are attached' );
 
@@ -1044,15 +1007,68 @@ define( function( require ) {
       this._input = null;
     },
 
+
     /**
-     * Dispose function for Display.
-     *
-     * TODO: this dispose function is not complete.
+     * Adds an input listener.
      * @public
+     *
+     * @param {Object} listener
+     * @returns {Display} - For chaining
      */
-    dispose: function() {
-      this._rootNode.removeRootedDisplay( this );
+    addInputListener: function( listener ) {
+      assert && assert( !_.includes( this._inputListeners, listener ), 'Input listener already registered on this Node' );
+
+      // don't allow listeners to be added multiple times
+      if ( !_.includes( this._inputListeners, listener ) ) {
+        this._inputListeners.push( listener );
+      }
+      return this;
     },
+
+    /**
+     * Removes an input listener that was previously added with addInputListener.
+     * @public
+     *
+     * @param {Object} listener
+     * @returns {Display} - For chaining
+     */
+    removeInputListener: function( listener ) {
+      // ensure the listener is in our list
+      assert && assert( _.includes( this._inputListeners, listener ) );
+
+      this._inputListeners.splice( _.indexOf( this._inputListeners, listener ), 1 );
+
+      return this;
+    },
+
+    /**
+     * Returns whether this input listener is currently listening to this node.
+     * @public
+     *
+     * More efficient than checking node.inputListeners, as that includes a defensive copy.
+     *
+     * @param {Object} listener
+     * @returns {boolean}
+     */
+    hasInputListener: function( listener ) {
+      for ( var i = 0; i < this._inputListeners.length; i++ ) {
+        if ( this._inputListeners[ i ] === listener ) {
+          return true;
+        }
+      }
+      return false;
+    },
+
+    /**
+     * Returns a copy of all of our input listeners.
+     * @public
+     *
+     * @returns {Array.<Object>}
+     */
+    getInputListeners: function() {
+      return this._inputListeners.slice( 0 ); // defensive copy
+    },
+    get inputListeners() { return this.getInputListeners(); },
 
     ensureNotPainting: function() {
       assert && assert( !this._isPainting,
@@ -1063,64 +1079,89 @@ define( function( require ) {
     },
 
     /**
-     * Sends a number of random mouse events through the input system
+     * Triggers a loss of context for all WebGL blocks.
+     * @public
      *
-     * @param {number} averageEventQuantity - The average number of mouse events
+     * NOTE: Should generally only be used for debugging.
      */
-    fuzzMouseEvents: function( averageEventQuantity ) {
-      var chance;
+    loseWebGLContexts: function() {
+      ( function loseBackbone( backbone ) {
+        if ( backbone.blocks ) {
+          backbone.blocks.forEach( function( block ) {
+            if ( block.gl ) {
+              Util.loseContext( block.gl );
+            }
 
-      // run a variable number of events, with a certain chance of bailing out (so no events are possible)
-      // models a geometric distribution of events
-      while ( ( chance = Math.random() ) < 1 - 1 / averageEventQuantity ) {
-        var domEvent;
-        if ( chance < ( this._fuzzMouseLastMoved ? 0.7 : 0.4 ) ) {
-          // toggle up/down
-          domEvent = document.createEvent( 'MouseEvent' ); // not 'MouseEvents' according to DOM Level 3 spec
-
-          // technically deprecated, but DOM4 event constructors not out yet. people on #whatwg said to use it
-          domEvent.initMouseEvent( this._fuzzMouseIsDown ? 'mouseup' : 'mousedown', true, true, window, 1, // click count
-            this._fuzzMousePosition.x, this._fuzzMousePosition.y, this._fuzzMousePosition.x, this._fuzzMousePosition.y,
-            false, false, false, false,
-            0, // button
-            null );
-
-          this._input.validatePointers();
-
-          if ( this._fuzzMouseIsDown ) {
-            this._input.mouseUp( this._fuzzMousePosition, domEvent );
-            this._fuzzMouseIsDown = false;
-          }
-          else {
-            this._input.mouseDown( this._fuzzMousePosition, domEvent );
-            this._fuzzMouseIsDown = true;
-          }
-
-          this._fuzzMouseLastMoved = false;
+            //TODO: pattern for this iteration
+            for ( var drawable = block.firstDrawable; drawable !== null; drawable = drawable.nextDrawable ) {
+              loseBackbone( drawable );
+              if ( drawable === block.lastDrawable ) { break; }
+            }
+          } );
         }
-        else {
-          // change the mouse position
-          this._fuzzMousePosition = new Vector2(
-            Math.floor( Math.random() * this.width ),
-            Math.floor( Math.random() * this.height )
-          );
+      } )( this._rootBackbone );
+    },
 
-          // our move event
-          domEvent = document.createEvent( 'MouseEvent' ); // not 'MouseEvents' according to DOM Level 3 spec
+    /**
+     * A random event creater that sends keyboard events. Based on the idea of fuzzMouse, but to test/spam accessibility
+     * related keyboard navigation and alternate input implementation.
+     *
+     * TODO: NOTE: Right now this is a very experimental implementation. Tread wearily
+     * TODO: @param keyboardPressesPerFocusedItem {number} - basically would be the same as fuzzRate, but handling
+     * TODO:     the keydown events for a focused item
+     */
+    fuzzBoardEvents: function() {
 
-          // technically deprecated, but DOM4 event constructors not out yet. people on #whatwg said to use it
-          domEvent.initMouseEvent( 'mousemove', true, true, window, 0, // click count
-            this._fuzzMousePosition.x, this._fuzzMousePosition.y, this._fuzzMousePosition.x, this._fuzzMousePosition.y,
-            false, false, false, false,
-            0, // button
-            null );
+      var nextFocusable = AccessibilityUtil.getRandomFocusable();
+      nextFocusable.focus();
 
-          this._input.validatePointers();
-          this._input.mouseMove( this._fuzzMousePosition, domEvent );
+      // TODO: add accessibility util functions to get a random focusable element from the tree
+      var elementWithFocus = document.activeElement;
 
-          this._fuzzMouseLastMoved = true;
+      // click something
+      triggerDOMEvent( 'click', elementWithFocus );
+
+      // TODO: A while loop of events will make us able to spam a ton of key presses per frame/per focused item,
+      // TODO:   perhaps using a parameter to control the number of events per frame
+      var min = 9;
+      var max = 223;
+      var randomKeyCode = Math.floor( Math.random() * ( max - min ) + min );
+      triggerDOMEvent( 'keydown', elementWithFocus, randomKeyCode );
+
+      // TODO: can we use setTimeout here?
+      setTimeout( function() {
+        triggerDOMEvent( 'keyup', elementWithFocus, randomKeyCode );
+
+      }, 1 ); // TODO: make this time variable?
+
+      /**
+       * Taken from example in http://output.jsbin.com/awenaq/3,
+       * @param event
+       * @param element
+       * @param [keycode]
+       */
+      function triggerDOMEvent( event, element, keyCode ) {
+        var eventObj = document.createEventObject ?
+                       document.createEventObject() : document.createEvent( 'Events' );
+
+        if ( eventObj.initEvent ) {
+          eventObj.initEvent( event, true, true );
         }
+
+        eventObj.keyCode = keyCode;
+        // eventObj.shiftKey = true; // TODO: we can add modifier keys in here with options?
+        eventObj.which = keyCode;
+
+        element.dispatchEvent ? element.dispatchEvent( eventObj ) : element.fireEvent( 'on' + event, eventObj );
       }
+    },
+
+    /**
+     * Makes this Display available for inspection.
+     * @public
+     */
+    inspect: function() {
+      localStorage.scenerySnapshot = JSON.stringify( scenery.serialize( this ) );
     },
 
     /**
@@ -1139,7 +1180,7 @@ define( function( require ) {
       var result = '';
 
       result += '<div style="' + headerStyle + '">Display Summary</div>';
-      result += this._size.toString() + ' frame:' + this._frameId + ' input:' + !!this._input + ' cursor:' + this._lastCursor + '<br>';
+      result += this._size.toString() + ' frame:' + this._frameId + ' input:' + !!this._input + ' cursor:' + this._lastCursor + '<br/>';
 
       function nodeCount( node ) {
         var count = 1; // for us
@@ -1149,7 +1190,7 @@ define( function( require ) {
         return count;
       }
 
-      result += 'Nodes: ' + nodeCount( this._rootNode ) + '<br>';
+      result += 'Nodes: ' + nodeCount( this._rootNode ) + '<br/>';
 
       function instanceCount( instance ) {
         var count = 1; // for us
@@ -1159,7 +1200,7 @@ define( function( require ) {
         return count;
       }
 
-      result += this._baseInstance ? ( 'Instances: ' + instanceCount( this._baseInstance ) + '<br>' ) : '';
+      result += this._baseInstance ? ( 'Instances: ' + instanceCount( this._baseInstance ) + '<br/>' ) : '';
 
       function drawableCount( drawable ) {
         var count = 1; // for us
@@ -1179,7 +1220,7 @@ define( function( require ) {
         return count;
       }
 
-      result += this._rootBackbone ? ( 'Drawables: ' + drawableCount( this._rootBackbone ) + '<br>' ) : '';
+      result += this._rootBackbone ? ( 'Drawables: ' + drawableCount( this._rootBackbone ) + '<br/>' ) : '';
 
       var drawableCountMap = {}; // {string} drawable constructor name => {number} count of seen
       // increment the count in our map
@@ -1213,9 +1254,9 @@ define( function( require ) {
         return count;
       }
 
-      result += this._baseInstance ? ( 'Retained Drawables: ' + retainedDrawableCount( this._baseInstance ) + '<br>' ) : '';
+      result += this._baseInstance ? ( 'Retained Drawables: ' + retainedDrawableCount( this._baseInstance ) + '<br/>' ) : '';
       for ( var drawableName in drawableCountMap ) {
-        result += '&nbsp;&nbsp;&nbsp;&nbsp;' + drawableName + ': ' + drawableCountMap[ drawableName ] + '<br>';
+        result += '&nbsp;&nbsp;&nbsp;&nbsp;' + drawableName + ': ' + drawableCountMap[ drawableName ] + '<br/>';
       }
 
       function blockSummary( block ) {
@@ -1337,6 +1378,8 @@ define( function( require ) {
           case Matrix3.Types.OTHER:
             transformType = 'other';
             break;
+          default:
+            throw new Error( 'invalid matrix type: ' + node.transform.getMatrix().type );
         }
         if ( transformType ) {
           iSummary += ' <span style="color: #88f" title="' + node.transform.getMatrix().toString().replace( '\n', '&#10;' ) + '">' + transformType + '</span>';
@@ -1450,42 +1493,42 @@ define( function( require ) {
       window.open( 'data:text/html;charset=utf-8,' + encodeURIComponent( htmlContent ) );
     },
 
-    toStringWithChildren: function( mutateRoot, rootName ) {
-      rootName = rootName || 'scene';
-      var rootNode = this._rootNode;
+    getAccessibleDebugHTML: function() {
       var result = '';
 
-      var nodes = this._rootNode.getTopologicallySortedNodes().slice( 0 ).reverse(); // defensive slice, in case we store the order somewhere
+      var headerStyle = 'font-weight: bold; font-size: 120%; margin-top: 5px;';
+      var indent = '&nbsp;&nbsp;&nbsp;&nbsp;';
 
-      function name( node ) {
-        return node === rootNode ? rootName : ( ( node.constructor.name ? node.constructor.name.toLowerCase() : '(node)' ) + node.id );
+      result += '<div style="' + headerStyle + '">Accessible Instances</div><br>';
+
+      recurse( this._rootAccessibleInstance, '' );
+
+      function recurse( instance, indentation ) {
+        result += indentation + escapeHTML( ( instance.isRootInstance ? '' : instance.node.tagName ) + ' ' + instance.toString() ) + '<br>';
+        instance.children.forEach( function( child ) {
+          recurse( child, indentation + indent );
+        } );
       }
 
-      _.each( nodes, function( node ) {
-        if ( result ) {
-          result += '\n';
-        }
+      result += '<br><div style="' + headerStyle + '">Parallel DOM</div><br>';
 
-        if ( mutateRoot && node === rootNode ) {
-          var props = rootNode.getPropString( '  ', false );
-          var mutation = ( props ? ( '\n' + props + '\n' ) : '' );
-          if ( mutation !== '' ) {
-            result += rootName + '.mutate( {' + mutation + '} )';
-          }
-          else {
-            // bleh. strip off the last newline
-            result = result.slice( 0, -1 );
-          }
-        }
-        else {
-          result += 'var ' + name( node ) + ' = ' + node.toString( '', false );
-        }
+      var parallelDOM = this._rootAccessibleInstance.peer.primarySibling.outerHTML;
+      parallelDOM = parallelDOM.replace( /\>\</g, '>\n<' );
+      var lines = parallelDOM.split( '\n' );
 
-        _.each( node.children, function( child ) {
-          result += '\n' + name( node ) + '.addChild( ' + name( child ) + ' );';
-        } );
-      } );
+      var indentation = '';
+      for ( var i = 0; i < lines.length; i++ ) {
+        var line = lines[ i ];
+        var isEndTag = line.slice( 0, 2 ) === '</';
 
+        if ( isEndTag ) {
+          indentation = indentation.slice( indent.length );
+        }
+        result += indentation + escapeHTML( line ) + '<br>';
+        if ( !isEndTag ) {
+          indentation += indent;
+        }
+      }
       return result;
     },
 
@@ -1503,6 +1546,15 @@ define( function( require ) {
       // things rendered in Canvas in our rasterization.
       var canvasUrlMap = {};
 
+      var unknownIds = 0;
+
+      function addCanvas( canvas ) {
+        if ( !canvas.id ) {
+          canvas.id = 'unknown-canvas-' + unknownIds++;
+        }
+        canvasUrlMap[ canvas.id ] = canvas.toDataURL();
+      }
+
       function scanForCanvases( drawable ) {
         if ( drawable.blocks ) {
           // we're a backbone
@@ -1517,18 +1569,22 @@ define( function( require ) {
           }
           scanForCanvases( drawable.lastDrawable ); // wasn't hit in our simplified (and safer) loop
 
-          if ( drawable.domElement && drawable.domElement instanceof window.HTMLCanvasElement ) {
-            canvasUrlMap[ drawable.canvasId ] = drawable.domElement.toDataURL();
+          if ( drawable.canvas && drawable.canvas instanceof window.HTMLCanvasElement ) {
+            addCanvas( drawable.canvas );
           }
+        }
+
+        if ( scenery.DOMDrawable && drawable instanceof scenery.DOMDrawable ) {
+          if ( drawable.domElement instanceof window.HTMLCanvasElement ) {
+            addCanvas( drawable.domElement );
+          }
+          Array.prototype.forEach.call( drawable.domElement.getElementsByTagName( 'canvas' ), function( canvas ) {
+            addCanvas( canvas );
+          } );
         }
       }
 
       scanForCanvases( this._rootBackbone );
-
-      var canvas = document.createElement( 'canvas' );
-      var context = canvas.getContext( '2d' );
-      canvas.width = this.width;
-      canvas.height = this.height;
 
       // Create a new document, so that we can (1) serialize it to XHTML, and (2) manipulate it independently.
       // Inspired by http://cburgmer.github.io/rasterizeHTML.js/
@@ -1554,11 +1610,99 @@ define( function( require ) {
         displayCanvas.parentNode.replaceChild( displayImg, displayCanvas );
       }
 
+      var displayWidth = this.width;
+      var displayHeight = this.height;
+      var completeFunction = function() {
+        Display.elementToSVGDataURL( doc.documentElement, displayWidth, displayHeight, callback );
+      };
+
+      // Convert each <image>'s xlink:href so that it's a data URL with the relevant data, e.g.
+      // <image ... xlink:href="http://localhost:8080/scenery-phet/images/battery-D-cell.png?bust=1476308407988"/>
+      // gets replaced with a data URL.
+      // See https://github.com/phetsims/scenery/issues/573
+      var replacedImages = 0; // Count how many images get replaced. We'll decrement with each finished image.
+      var hasReplacedImages = false; // Whether any images are replaced
+      var displaySVGImages = Array.prototype.slice.call( doc.documentElement.getElementsByTagName( 'image' ) );
+      for ( var j = 0; j < displaySVGImages.length; j++ ) {
+        var displaySVGImage = displaySVGImages[ j ];
+        var currentHref = displaySVGImage.getAttribute( 'xlink:href' );
+        if ( currentHref.slice( 0, 5 ) !== 'data:' ) {
+          replacedImages++;
+          hasReplacedImages = true;
+
+          ( function() {
+            // Closure variables need to be stored for each individual SVG image.
+            var refImage = new window.Image();
+            var svgImage = displaySVGImage;
+
+            refImage.onload = function() {
+              // Get a Canvas
+              var refCanvas = document.createElement( 'canvas' );
+              refCanvas.width = refImage.width;
+              refCanvas.height = refImage.height;
+              var refContext = refCanvas.getContext( '2d' );
+
+              // Draw the (now loaded) image into the Canvas
+              refContext.drawImage( refImage, 0, 0 );
+
+              // Replace the <image>'s href with the Canvas' data.
+              svgImage.setAttribute( 'xlink:href', refCanvas.toDataURL() );
+
+              // If it's the last replaced image, go to the next step
+              if ( --replacedImages === 0 ) {
+                completeFunction();
+              }
+
+              assert && assert( replacedImages >= 0 );
+            };
+            refImage.onerror = function() {
+              // NOTE: not much we can do, leave this element alone.
+
+              // If it's the last replaced image, go to the next step
+              if ( --replacedImages === 0 ) {
+                completeFunction();
+              }
+
+              assert && assert( replacedImages >= 0 );
+            };
+
+            // Kick off loading of the image.
+            refImage.src = currentHref;
+          } )();
+        }
+      }
+
+      // If no images are replaced, we need to call our callback through this route.
+      if ( !hasReplacedImages ) {
+        completeFunction();
+      }
+    },
+
+    popupRasterization: function() {
+      this.foreignObjectRasterization( window.open );
+    }
+  }, Events.prototype ), {
+    /**
+     * Takes a given DOM element, and asynchronously renders it to a string that is a data URL representing an SVG
+     * file.
+     * @public
+     *
+     * @param {HTMLElement} domElement
+     * @param {number} width - The width of the output SVG
+     * @param {number} height - The height of the output SVG
+     * @param {function} callback - Called as callback( url: {string} ), where the URL will be the encoded SVG file.
+     */
+    elementToSVGDataURL: function( domElement, width, height, callback ) {
+      var canvas = document.createElement( 'canvas' );
+      var context = canvas.getContext( '2d' );
+      canvas.width = width;
+      canvas.height = height;
+
       // Serialize it to XHTML that can be used in foreignObject (HTML can't be)
-      var xhtml = new window.XMLSerializer().serializeToString( doc.documentElement );
+      var xhtml = new window.XMLSerializer().serializeToString( domElement );
 
       // Create an SVG container with a foreignObject.
-      var data = '<svg xmlns="http://www.w3.org/2000/svg" width="' + this.width + '" height="' + this.height + '">' +
+      var data = '<svg xmlns="http://www.w3.org/2000/svg" width="' + width + '" height="' + height + '">' +
                  '<foreignObject width="100%" height="100%">' +
                  '<div xmlns="http://www.w3.org/1999/xhtml">' +
                  xhtml +
@@ -1567,7 +1711,7 @@ define( function( require ) {
                  '</svg>';
 
       // Load an <img> with the SVG data URL, and when loaded draw it into our Canvas
-      var img = new Image();
+      var img = new window.Image();
       img.onload = function() {
         context.drawImage( img, 0, 0 );
         callback( canvas.toDataURL() ); // Endpoint here
@@ -1575,21 +1719,144 @@ define( function( require ) {
       img.onerror = function() {
         callback( null );
       };
+
+      // We can't btoa() arbitrary unicode, so we need another solution,
+      // see https://developer.mozilla.org/en-US/docs/Web/API/WindowBase64/Base64_encoding_and_decoding#The_.22Unicode_Problem.22
+      var uint8array = new window.TextEncoderLite( 'utf-8' ).encode( data );
+      var base64 = window.fromByteArray( uint8array );
+
       // turn it to base64 and wrap it in the data URL format
-      img.src = 'data:image/svg+xml;base64,' + window.btoa( data );
+      img.src = 'data:image/svg+xml;base64,' + base64;
     },
 
-    popupRasterization: function() {
-      this.foreignObjectRasterization( window.open );
+    /**
+     * Set the focus for Display.  Can set to null to clear focus from Display.
+     * @public
+     *
+     * @param  {Focus|null} value
+     */
+    set focus( value ) {
+
+      // If in phet-io brand, a11y is enabled, and the focus is not null
+      if ( window.phet && phet.phetio && phet.chipper.accessibility && value ) {
+        var node = value.trail.lastNode();
+        assert && assert( node.tandem && node.tandem.isSuppliedAndEnabled(),
+          'When running phet-io mode, all focusable instances must be instrumented.' );
+      }
+
+      var previousFocus;
+      if ( this.focusProperty.value ) {
+        previousFocus = this.focusedNode;
+
+        // Emit that the old focused node is no longer focused
+        previousFocus.focusChangedEmitter.emit1( false );
+      }
+
+      this.focusProperty.value = value;
+
+      if ( value ) {
+
+        // Emit that the new node is focused
+        value.trail.lastNode().focusChangedEmitter.emit1( true );
+      }
+      else {
+
+        // if set to null, make sure that the active element is no longer focused
+        if ( previousFocus ) {
+          previousFocus.blur();
+        }
+      }
+    },
+
+    /**
+     * Get the focus for Display. Null if nothing under a Display has focus.
+     * @public
+     *
+     * @return {Focus|null}
+     */
+    get focus() {
+      return this.focusProperty.value;
+    },
+
+    /**
+     * Get the currently focused Node, the leaf-most Node of the focusProperty value's Trail. Null if no
+     * Node has focus.
+     *
+     * @public
+     * @return {Node|null}
+     */
+    getFocusedNode: function() {
+      var focusedNode = null;
+      var focus = this.focusProperty.get();
+      if ( focus ) {
+        focusedNode = focus.trail.lastNode();
+      }
+      return focusedNode;
+    },
+    get focusedNode() { return this.getFocusedNode(); }
+  } );
+
+  /**
+   * Dispose function for Display.
+   *
+   * TODO: this dispose function is not complete.
+   * TODO: Don't require overriding like this. Events prototype and non-standard inheritance forces us right now, but
+   * ideally we'll stop using Events for Display and this should just work.
+   * @public
+   */
+  Display.prototype.dispose = function() {
+    if ( this._input ) {
+      this.detachEvents();
     }
-  }, Events.prototype ) );
+    this._rootNode.removeRootedDisplay( this );
+
+    if ( this._accessible ) {
+      this._rootAccessibleInstance.dispose();
+    }
+  };
 
   Display.customCursors = {
     'scenery-grab-pointer': [ 'grab', '-moz-grab', '-webkit-grab', 'pointer' ],
     'scenery-grabbing-pointer': [ 'grabbing', '-moz-grabbing', '-webkit-grabbing', 'pointer' ]
   };
 
-  Property.addProperty( Display, 'focus', null ); // { display: {Display}, trail: {Trail} }
+  // @public (a11y) {Focus|null} - Display has an axon Property to indicate which component is focused (or null
+  // if no scenery node has focus).  By passing the tandem and phetioValueType, PhET-iO is able to interoperate (save,
+  // restore, control, observe what is currently focused.
+  Display.focusProperty = new Property( null,
+
+    // Only instrument if accessibility is enabled
+    ( window.phet && phet.chipper && phet.chipper.accessibility ) ? {
+
+      // Make this a static tandem so that it can be added to studio correctly (batched and then flushed when the
+      // listener is added).
+      tandem: Tandem.rootTandem.createTandem( 'display' ).createTandem( 'focusProperty' ),
+      phetioType: PropertyIO( NullableIO( FocusIO ) )
+    } : {}
+  );
+
+  // @public {Emitter} - Fires when we detect an input event that would be considered a "user gesture" by Chrome, so
+  // that we can trigger browser actions that are only allowed as a result.
+  // See https://github.com/phetsims/scenery/issues/802 and https://github.com/phetsims/vibe/issues/32 for more
+  // information.
+  Display.userGestureEmitter = new Emitter();
+
+  /**
+   * Returns true when NO nodes in the subtree are disposed.
+   * @private
+   *
+   * @param {Node} node
+   * @returns {boolean}
+   */
+  Display.assertSubtreeDisposed = function( node ) {
+    assert && assert( !node.isDisposed(), 'Disposed nodes should not be included in a scene graph to display.' );
+
+    if ( assert ) {
+      for ( var i = 0; i < node.children.length; i++ ) {
+        Display.assertSubtreeDisposed( node.children[ i ] );
+      }
+    }
+  };
 
   return Display;
 } );

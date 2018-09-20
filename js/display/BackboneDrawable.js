@@ -1,4 +1,4 @@
-// Copyright 2013-2015, University of Colorado Boulder
+// Copyright 2013-2016, University of Colorado Boulder
 
 /**
  * A DOM drawable (div element) that contains child blocks (and is placed in the main DOM tree when visible). It should
@@ -11,26 +11,28 @@ define( function( require ) {
   'use strict';
 
   // modules
+  var cleanArray = require( 'PHET_CORE/cleanArray' );
+  var Drawable = require( 'SCENERY/display/Drawable' );
+  var GreedyStitcher = require( 'SCENERY/display/GreedyStitcher' );
   var inherit = require( 'PHET_CORE/inherit' );
   var Poolable = require( 'PHET_CORE/Poolable' );
-  var cleanArray = require( 'PHET_CORE/cleanArray' );
-  var scenery = require( 'SCENERY/scenery' );
-  var Drawable = require( 'SCENERY/display/Drawable' );
-  var Stitcher = require( 'SCENERY/display/Stitcher' );
-  var GreedyStitcher = require( 'SCENERY/display/GreedyStitcher' );
   var RebuildStitcher = require( 'SCENERY/display/RebuildStitcher' );
+  var scenery = require( 'SCENERY/scenery' );
+  var Stitcher = require( 'SCENERY/display/Stitcher' );
   var Util = require( 'SCENERY/util/Util' );
 
   // constants
   var useGreedyStitcher = true;
 
   /**
+   * @constructor
+   * @mixes Poolable
+   *
    * @param {Display} display
    * @param {Instance} backboneInstance
    * @param {Instance} transformRootInstance
    * @param {number} renderer
    * @param {boolean} isDisplayRoot
-   * @constructor
    */
   function BackboneDrawable( display, backboneInstance, transformRootInstance, renderer, isDisplayRoot ) {
     this.initialize( display, backboneInstance, transformRootInstance, renderer, isDisplayRoot );
@@ -46,6 +48,7 @@ define( function( require ) {
      * @param {Instance} transformRootInstance
      * @param {number} renderer
      * @param {boolean} isDisplayRoot
+     * @returns {BackboneDrawable} - Returns 'this' reference, for chaining
      */
     initialize: function( display, backboneInstance, transformRootInstance, renderer, isDisplayRoot ) {
       Drawable.call( this, renderer );
@@ -85,6 +88,7 @@ define( function( require ) {
       this.isDisplayRoot = isDisplayRoot;
       this.dirtyDrawables = cleanArray( this.dirtyDrawables );
 
+      // Apply CSS needed for future CSS transforms to work properly.
       Util.prepareForTransform( this.domElement, this.forceAcceleration );
 
       // if we need to, watch nodes below us (and including us) and apply their filters (opacity/visibility/clip) to the backbone.
@@ -260,10 +264,10 @@ define( function( require ) {
         if ( this.clipDirty ) {
           this.clipDirty = false;
 
-          var clip = this.willApplyFilters ? this.getFilterClip() : '';
+          // var clip = this.willApplyFilters ? this.getFilterClip() : '';
 
           //OHTWO TODO: CSS clip-path/mask support here. see http://www.html5rocks.com/en/tutorials/masking/adobe/
-          this.domElement.style.clipPath = clip; // yikes! temporary, since we already threw something?
+          // this.domElement.style.clipPath = clip; // yikes! temporary, since we already threw something?
         }
       }
     },
@@ -443,19 +447,8 @@ define( function( require ) {
     return element;
   };
 
-  Poolable.mixin( BackboneDrawable, {
-    constructorDuplicateFactory: function( pool ) {
-      return function( display, backboneInstance, transformRootInstance, renderer, isDisplayRoot ) {
-        if ( pool.length ) {
-          sceneryLog && sceneryLog.BackboneDrawable && sceneryLog.BackboneDrawable( 'new from pool' );
-          return pool.pop().initialize( display, backboneInstance, transformRootInstance, renderer, isDisplayRoot );
-        }
-        else {
-          sceneryLog && sceneryLog.BackboneDrawable && sceneryLog.BackboneDrawable( 'new from constructor' );
-          return new BackboneDrawable( display, backboneInstance, transformRootInstance, renderer, isDisplayRoot );
-        }
-      };
-    }
+  Poolable.mixInto( BackboneDrawable, {
+    initialize: BackboneDrawable.prototype.initialize
   } );
 
   return BackboneDrawable;

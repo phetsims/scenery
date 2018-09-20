@@ -11,6 +11,9 @@
   <link rel="stylesheet" href="../sherpa/lib/bootstrap-responsive-2.2.2.css">
   <link rel="stylesheet" href="assets/scenery.css">
 
+  <!-- Before loading other things (that might error), create hooks to report errors/loads for continuous testing -->
+  <script src="../aqua/js/pageload-connector.js"></script>
+
   <script src="../sherpa/lib/jquery-2.1.0.min.js"></script>
   <script src="../sherpa/lib/bootstrap-2.2.2.js"></script>
 
@@ -63,7 +66,7 @@
     <p>by <a href="http://phet.colorado.edu">PhET Interactive Simulations</a></p>
 
     <div style="text-align: center; padding-top: 10px;">
-      <a class="btn btn-primary" type="button" href="build/production/scenery.min.js">Download latest version</a>
+      <a class="btn btn-primary" type="button" href="build/scenery.min.js">Download latest version</a>
     </div>
     <div style="text-align: center; padding-top: 10px;">
       <a class="btn" type="button" href="doc">Documentation</a>

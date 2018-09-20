@@ -1,4 +1,4 @@
-// Copyright 2013-2015, University of Colorado Boulder
+// Copyright 2013-2016, University of Colorado Boulder
 
 /**
  * The PointerOverlay shows pointer locations in the scene.  This is useful when recording a session for interviews or when a teacher is broadcasting
@@ -6,21 +6,20 @@
  *
  * Each pointer is rendered in a different <svg> so that CSS3 transforms can be used to make performance smooth on iPad.
  *
- * @author Sam Reid
+ * @author Sam Reid (PhET Interactive Simulations)
  */
 define( function( require ) {
   'use strict';
 
   var inherit = require( 'PHET_CORE/inherit' );
   var Matrix3 = require( 'DOT/Matrix3' );
-
   var scenery = require( 'SCENERY/scenery' );
+  var Touch = require( 'SCENERY/input/Touch' );
+  var Util = require( 'SCENERY/util/Util' );
   require( 'SCENERY/util/Trail' );
 
-  var Util = require( 'SCENERY/util/Util' );
-
   function PointerOverlay( display, rootNode ) {
-    var pointerOverlay = this;
+    var self = this;
     this.display = display;
     this.rootNode = rootNode;
 
@@ -33,19 +32,22 @@ define( function( require ) {
 
     var innerRadius = 10;
     var strokeWidth = 1;
-    var diameter = (innerRadius + strokeWidth / 2) * 2;
+    var diameter = ( innerRadius + strokeWidth / 2 ) * 2;
     var radius = diameter / 2;
 
     //Resize the parent div when the rootNode is resized
     display.onStatic( 'displaySize', function( dimension ) {
-      pointerOverlay.pointerSVGContainer.setAttribute( 'width', dimension.width );
-      pointerOverlay.pointerSVGContainer.setAttribute( 'height', dimension.height );
-      pointerOverlay.pointerSVGContainer.style.clip = 'rect(0px,' + dimension.width + 'px,' + dimension.height + 'px,0px)';
+      self.pointerSVGContainer.setAttribute( 'width', dimension.width );
+      self.pointerSVGContainer.setAttribute( 'height', dimension.height );
+      self.pointerSVGContainer.style.clip = 'rect(0px,' + dimension.width + 'px,' + dimension.height + 'px,0px)';
     } );
 
-    //Display a pointer that was added.  Use a separate SVG layer for each pointer so it can be hardware accelerated, otherwise it is too slow just setting svg internal attributes
-    var pointerAdded = this.pointerAdded = function( pointer ) {
+    var scratchMatrix = Matrix3.IDENTITY.copy();
 
+    //Display a pointer that was added.  Use a separate SVG layer for each pointer so it can be hardware accelerated, otherwise it is too slow just setting svg internal attributes
+    this.pointerAdded = function( pointer ) {
+
+      // TODO: I believe this can be removed? Double-check
       if ( pointer.isKey ) { return; }
 
       var svg = document.createElementNS( scenery.svgns, 'svg' );
@@ -53,6 +55,8 @@ define( function( require ) {
       svg.style.top = 0;
       svg.style.left = 0;
       svg.style[ 'pointer-events' ] = 'none';
+
+      Util.prepareForTransform( svg, false );
 
       //Fit the size to the display
       svg.setAttribute( 'width', diameter );
@@ -72,19 +76,17 @@ define( function( require ) {
       var pointerRemoved = function() {
 
         //For touches that get a touch up event, remove them.  But when the mouse button is released, don't stop showing the mouse location
-        if ( pointer.isTouch ) {
-          pointerOverlay.pointerSVGContainer.removeChild( svg );
+        if ( pointer instanceof Touch ) {
+          self.pointerSVGContainer.removeChild( svg );
           pointer.removeInputListener( moveListener );
         }
       };
       var moveListener = {
         move: function() {
-
           //TODO: Why is point sometimes null?
           if ( pointer.point ) {
 
-            //TODO: this allocates memory when pointers are dragging, perhaps rewrite to remove allocations
-            Util.applyCSSTransform( Matrix3.translation( pointer.point.x - radius, pointer.point.y - radius ), svg );
+            Util.applyPreparedTransform( scratchMatrix.setToTranslation( pointer.point.x - radius, pointer.point.y - radius ), svg, false );
           }
         },
 
@@ -95,14 +97,14 @@ define( function( require ) {
 
       moveListener.move();
       svg.appendChild( circle );
-      pointerOverlay.pointerSVGContainer.appendChild( svg );
+      self.pointerSVGContainer.appendChild( svg );
     };
-    display._input.addPointerAddedListener( pointerAdded );
+    display._input.addPointerAddedListener( this.pointerAdded );
 
     //if there is already a mouse, add it here
     //TODO: if there already other non-mouse touches, could be added here
     if ( display._input && display._input.mouse ) {
-      pointerAdded( display._input.mouse );
+      this.pointerAdded( display._input.mouse );
     }
 
     this.domElement = this.pointerSVGContainer;
@@ -116,7 +118,6 @@ define( function( require ) {
     },
 
     update: function() {
-
     }
   } );
 

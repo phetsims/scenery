@@ -1,4 +1,4 @@
-// Copyright 2013-2015, University of Colorado Boulder
+// Copyright 2015, University of Colorado Boulder
 
 /**
  * Shows the bounds of current fitted blocks.
@@ -10,9 +10,9 @@ define( function( require ) {
   'use strict';
 
   var inherit = require( 'PHET_CORE/inherit' );
-  var ShapeBasedOverlay = require( 'SCENERY/overlays/ShapeBasedOverlay' );
-  var Shape = require( 'KITE/Shape' );
   var Matrix3 = require( 'DOT/Matrix3' );
+  var Shape = require( 'KITE/Shape' );
+  var ShapeBasedOverlay = require( 'SCENERY/overlays/ShapeBasedOverlay' );
 
   var scenery = require( 'SCENERY/scenery' );
   require( 'SCENERY/util/Trail' );
