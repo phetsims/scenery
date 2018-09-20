@@ -24,7 +24,7 @@ define( function( require ) {
    * @constructor
    */
   function ColorIO( color, phetioID ) {
-    assert && assertInstanceOf( color, phet.scenery.Color );
+    assert && assertInstanceOf( color, scenery.Color );
     ObjectIO.call( this, color, phetioID );
   }
 
@@ -37,7 +37,7 @@ define( function( require ) {
      * @returns {Object}
      */
     toStateObject: function( color ) {
-      assert && assertInstanceOf( color, phet.scenery.Color );
+      assert && assertInstanceOf( color, scenery.Color );
       return color.toStateObject();
     },
 
@@ -48,7 +48,7 @@ define( function( require ) {
      * @returns {Color}
      */
     fromStateObject: function( stateObject ) {
-      return new phet.scenery.Color( stateObject.r, stateObject.g, stateObject.b, stateObject.a );
+      return new scenery.Color( stateObject.r, stateObject.g, stateObject.b, stateObject.a );
     }
   } );
 

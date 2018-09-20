@@ -357,6 +357,7 @@ define( function( require ) {
       // if we hid a parent element, blur focus if active element was an ancestor
       if ( !this.peer.isVisible() ) {
         if ( this.peer.primarySibling.contains( document.activeElement ) ) { // still true if activeElement is this primary sibling
+          // REVIEW: Code recently related to this was changed. Can we handle the following TODO?
           scenery.Display.focus = null; // TODO is this the best way to blur a focus? shouldn't we `document.activeElement.blur()` or something?
         }
       }
@@ -384,6 +385,7 @@ define( function( require ) {
       if ( !this.peer.isVisible() ) {
         return false;
       }
+      // REVIEW: I'm tired at the moment, but is there a reason to not have an "else if" here? It should be the same logic.
       if ( this.parent ) {
         return this.parent.isGloballyVisible();
       }

@@ -39,7 +39,7 @@ define( require => {
      * @returns {Object} - a state object
      */
     toStateObject( domEvent ) {
-      return phet.scenery.Input.serializeDomEvent( domEvent );
+      return scenery.Input.serializeDomEvent( domEvent );
     }
   } );
 

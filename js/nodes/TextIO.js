@@ -29,7 +29,7 @@ define( function( require ) {
    * @constructor
    */
   function TextIO( text, phetioID ) {
-    assert && assertInstanceOf( text, phet.scenery.Text );
+    assert && assertInstanceOf( text, scenery.Text );
     NodeIO.call( this, text, phetioID );
 
     // this uses a sub Property adapter as described in https://github.com/phetsims/phet-io/issues/1326

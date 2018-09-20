@@ -19,11 +19,11 @@ define( function( require ) {
   /**
    * @constructor
    * IO type for phet/scenery's Font class
-   * @param {Font} font - An instance of a phet.scenery.Font type
+   * @param {Font} font - An instance of a scenery.Font type
    * @param {string} phetioID - Full name of this font instance
    */
   function FontIO( font, phetioID ) {
-    assert && assertInstanceOf( font, phet.scenery.Font );
+    assert && assertInstanceOf( font, scenery.Font );
     ObjectIO.call( this, font, phetioID );
   }
 
@@ -49,7 +49,7 @@ define( function( require ) {
      * @returns {Object}
      */
     toStateObject: function( font ) {
-      assert && assertInstanceOf( font, phet.scenery.Font );
+      assert && assertInstanceOf( font, scenery.Font );
       return {
         style: font.getStyle(),
         variant: font.getVariant(),
@@ -68,7 +68,7 @@ define( function( require ) {
      * @returns {Font}
      */
     fromStateObject: function( stateObject ) {
-      return new phet.scenery.Font( stateObject );
+      return new scenery.Font( stateObject );
     }
   } );
 

@@ -23,7 +23,7 @@ define( function( require ) {
    * @constructor
    */
   function ButtonListenerIO( buttonListener, phetioID ) {
-    assert && assertInstanceOf( buttonListener, phet.scenery.ButtonListener );
+    assert && assertInstanceOf( buttonListener, scenery.ButtonListener );
     ObjectIO.call( this, buttonListener, phetioID );
   }
 

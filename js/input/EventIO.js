@@ -24,7 +24,7 @@ define( function( require ) {
    * @constructor
    */
   function EventIO( event, phetioID ) {
-    assert && assertInstanceOf( event, phet.scenery.Event );
+    assert && assertInstanceOf( event, scenery.Event );
     ObjectIO.call( this, event, phetioID );
   }
 
@@ -37,7 +37,7 @@ define( function( require ) {
      * @returns {Object}
      */
     toStateObject( event ) {
-      assert && assertInstanceOf( event, phet.scenery.Event );
+      assert && assertInstanceOf( event, scenery.Event );
 
       var eventObject = {
         type: event.type,

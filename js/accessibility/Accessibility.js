@@ -115,6 +115,11 @@
  * PDOM more, see AccessiblePeer, which manages the DOM Elements for a node. For more documentation on Scenery, Nodes,
  * and the scene graph, please see http://phetsims.github.io/scenery/
  *
+ * REVIEW: I added method visibilities as I thought they should be. Please see if they all look ok.
+ *
+ * REVIEW: I tried to fix up usages of the `phet.{{LIB}}` namespace usage. That doesn't exist everywhere, and we use
+ * REVIEW: scenery in docs that do NOT include that.
+ *
  * @author Jesse Greenberg (PhET Interactive Simulations)
  * @author Sam Reid (PhET Interactive Simulations)
  * @author Michael Kauzmann (PhET Interactive Simulations)
@@ -132,6 +137,7 @@ define( function( require ) {
   var Emitter = require( 'AXON/Emitter' );
   var extend = require( 'PHET_CORE/extend' );
   var scenery = require( 'SCENERY/scenery' );
+  var Shape = require( 'KITE/Shape' );
 
   var INPUT_TAG = AccessibilityUtil.TAGS.INPUT;
   var P_TAG = AccessibilityUtil.TAGS.P;
@@ -167,6 +173,7 @@ define( function( require ) {
   // see setAccessibleHeadingBehavior for more details
   var DEFAULT_ACCESSIBLE_HEADING_BEHAVIOR = function( node, options, heading ) {
 
+    // REVIEW: Can we handle these? They look like TODOs, but aren't labeled as such, and have weird indentation.
 // assert no accessibleName;
 // assert no labelTagName/Content already on node
 
@@ -419,7 +426,7 @@ define( function( require ) {
           // @protected {Array.<AccessibleInstance>} - Empty unless the node contains some accessible instance.
           this._accessibleInstances = [];
 
-          // HIGHER LEVEL API INITIALIZATION\
+          // HIGHER LEVEL API INITIALIZATION
 
           // {string|null} - sets the "Accessible Name" of the Node, as defined by the Browser's Accessibility Tree
           this._accessibleName = null;
@@ -434,6 +441,7 @@ define( function( require ) {
           this._helpTextBehavior = DEFAULT_HELP_TEXT_BEHAVIOR;
 
           // {string|null} - sets the help text of the Node, this most often corresponds to description text.
+          // REVIEW: This... sets the help text according to the documentation above? Presumably not correct?
           this._accessibleHeading = null;
 
           // TODO: implement headingLevel override, see https://github.com/phetsims/scenery/issues/855
@@ -632,6 +640,7 @@ define( function( require ) {
          * Called when assertions are enabled and once the Node has been completely constructed. This is the time to
          * make sure that options are saet up the way they are expected to be. For example. you don't want accessibleName
          * and labelContent declared
+         * @private
          */
         accessibleAudit: function() {
 
@@ -641,7 +650,7 @@ define( function( require ) {
             this._accessibleChecked && assert( this._tagName.toUpperCase() === INPUT_TAG, 'tagName must be INPUT to support accessibleChecked.' );
             this._inputValue && assert( this._tagName.toUpperCase() === INPUT_TAG, 'tagName must be INPUT to support inputValue' );
             this._accessibleChecked && assert( INPUT_TYPES_THAT_SUPPORT_CHECKED.indexOf( this._inputType.toUpperCase() ) >= 0, 'inputType does not support checked attribute: ' + this._inputType );
-            this._focusHighlightLayerable && assert( this.focusHighlight instanceof phet.scenery.Node, 'focusHighlight must be Node if highlight is layerable' );
+            this._focusHighlightLayerable && assert( this.focusHighlight instanceof scenery.Node, 'focusHighlight must be Node if highlight is layerable' );
           }
 
           for ( let i = 0; i < this.children.length; i++ ) {
@@ -661,6 +670,7 @@ define( function( require ) {
          * HTML components and code situations require different methods of setting the Accessible Name. See
          * setAccessibleNameBehavior for details on how this string is rendered in the PDOM. Setting to null will clear
          * this Node's accessibleName
+         * @public
          *
          * @param {string|null} accessibleName
          */
@@ -690,6 +700,7 @@ define( function( require ) {
         /**
          * accessibleNameBehavior is a function that will set the appropriate options on this node to get the desired
          * "Accessible Name"
+         * @public
          *
          * This accessibleNameBehavior's default does the best it can to create a general method to set the Accessible
          * Name for a variety of different Node types and configurations, but if a Node is more complicated, then this
@@ -706,7 +717,7 @@ define( function( require ) {
          * For more information about setting an Accessible Name on HTML see the scenery docs for accessibility,
          * and see https://developer.paciellogroup.com/blog/2017/04/what-is-an-accessible-name/
          *
-         *
+         * REVIEW: It seems like it should just be {A11yBehaviorFunctionDef}. Is a general {function} ever desired?
          * @param {A11yBehaviorFunctionDef|function} accessibleNameBehavior
          */
         setAccessibleNameBehavior: function( accessibleNameBehavior ) {
@@ -736,6 +747,7 @@ define( function( require ) {
         /**
          * Set the Node heading content. This by default will be a heading tag whose level is dependent on how many parents
          * Nodes are heading nodes. See computeHeadingLevel() for more info
+         * @public
          *
          * @param {string|null} accessibleHeading
          */
@@ -765,11 +777,25 @@ define( function( require ) {
         /**
          * Set the behavior of how `this.accessibleHeading` is set in the PDOM. See default behavior function for more
          * information.
+         * @public
          *
          * @param {A11yBehaviorFunctionDef|function} accessibleHeadingBehavior
          */
         setAccessibleHeadingBehavior: function( accessibleHeadingBehavior ) {
           assert && A11yBehaviorFunctionDef.validateA11yBehaviorFunctionDef( accessibleHeadingBehavior );
+
+          // REVIEW: Note that this doesn't seem to trigger updating the heading levels of siblings correctly:
+          // REVIEW: For example, do the following:
+          // REVIEW:   var a = new scenery.Node();
+          // REVIEW:   var b = new scenery.Node();
+          // REVIEW:   scene.addChild( a );
+          // REVIEW:   a.addChild( b );
+          // REVIEW:   b.accessibleHeading = 'B';
+          // REVIEW:   b.tagName = 'p';
+          // REVIEW:   a.accessibleHeading = 'A';
+          // REVIEW:   a.tagName = 'p';
+          // REVIEW: You will end up with two nested H1s. Presumably this should cascade properly and update the child
+          // REVIEW: to a H2 in this case.
 
           if ( this._accessibleHeadingBehavior !== accessibleHeadingBehavior ) {
 
@@ -808,9 +834,14 @@ define( function( require ) {
          // TODO: what if ancestor changes, see https://github.com/phetsims/scenery/issues/855
          * Sets this Node's heading level, by recursing up the accessibility tree to find headings this Node
          * is nested under.
+         * @private
+         *
          * @returns {number}
          */
         computeHeadingLevel: function() {
+          // REVIEW: I'd recommend looking at how node handles this with things. Usually it has an invalidate pattern
+          // REVIEW: but in this case, it may be easier to just update the entire subtree whenever an ancestor changes.
+
           // TODO: assert??? assert( this.headingLevel || this._accessibleParent); see https://github.com/phetsims/scenery/issues/855
           // Either ^ which may break during construction, or V (below)
           //  base case to heading level 1
@@ -835,6 +866,8 @@ define( function( require ) {
         /**
          * Set the help text for a Node. See setAccessibleNameBehavior for details on how this string is
          * rendered in the PDOM. Null will clear the help text for this Node.
+         * @public
+         *
          * @param {string|null} helpText
          */
         setHelpText: function( helpText ) {
@@ -842,6 +875,7 @@ define( function( require ) {
 
           if ( this._helpText !== helpText ) {
 
+            // REVIEW: Should this be handled as part of this review?
             // TODO: helptext should only be set on interactive Elements? see https://github.com/phetsims/scenery/issues/795
 
             this._helpText = helpText;
@@ -865,6 +899,7 @@ define( function( require ) {
         /**
          * helpTextBehavior is a function that will set the appropriate options on this node to get the desired
          * "Help Text".
+         * @public
          *
          * @param {A11yBehaviorFunctionDef|function} helpTextBehavior
          */
@@ -900,6 +935,7 @@ define( function( require ) {
          * Set the tag name for the primary sibling in the PDOM. DOM element tag names are read-only, so this
          * function will create a new DOM element each time it is called for the Node's AccessiblePeer and
          * reset the accessible content.
+         * @public
          *
          * @param {string|null} tagName
          */
@@ -931,6 +967,7 @@ define( function( require ) {
          * so this will require creating a new AccessiblePeer for this Node (reconstructing all DOM Elements). If
          * labelContent is specified without calling this method, then the DEFAULT_LABEL_TAG_NAME will be used as the
          * tag name for the label sibling.
+         * @public
          *
          * Use null to clear the label sibling element from the PDOM.
          *
@@ -1009,6 +1046,7 @@ define( function( require ) {
         /**
          * Sets the type for an input element.  Element must have the INPUT tag name. The input attribute is not
          * specified as readonly, so invalidating accessible content is not necessary.
+         * @public
          *
          * @param {string|null} inputType
          */
@@ -1016,9 +1054,15 @@ define( function( require ) {
           assert && assert( inputType === null || typeof inputType === 'string' );
           assert && this.tagName && assert( this._tagName.toUpperCase() === INPUT_TAG, 'tag name must be INPUT to support inputType' );
 
+          // REVIEW: Should have a guard, so that if it's called with no change it's a no-op.
+
           this._inputType = inputType;
           for ( var i = 0; i < this._accessibleInstances.length; i++ ) {
             var peer = this._accessibleInstances[ i ].peer;
+            // REVIEW: Does it need to removeAttribute when `null` is used? What happens if you switch from an
+            // REVIEW: inputType='checkbox' to inputType=null?
+            // REVIEW: I checked. It shows `type="null"` in the DOM. I can't imagine this causing much bugginess, but
+            // REVIEW: it feels weird.
             peer.setAttributeToElement( 'type', inputType );
           }
         },
@@ -1039,6 +1083,7 @@ define( function( require ) {
          * By default the label will be prepended before the primary sibling in the PDOM. This
          * option allows you to instead have the label added after the primary sibling. Note: The label will always
          * be in front of the description sibling. If this flag is set with `appendDescription`, the order will be
+         * @public
          *
          * <container>
          *   <primary sibling/>
@@ -1051,6 +1096,9 @@ define( function( require ) {
          */
         setAppendLabel: function( appendLabel ) {
           assert && assert( typeof appendLabel === 'boolean' );
+          // REVIEW: Should have a guard here presumably? (so spurious changes don't result in a full peer rebuild)
+
+          // REVIEW: Should have a guard, so that if it's called with no change it's a no-op.
 
           this._appendLabel = appendLabel;
 
@@ -1061,6 +1109,8 @@ define( function( require ) {
 
         /**
          * Get whether the label sibling should be appended after the primary sibling.
+         * @public
+         *
          * @returns {boolean}
          */
         getAppendLabel: function() {
@@ -1072,6 +1122,7 @@ define( function( require ) {
          * By default the label will be prepended before the primary sibling in the PDOM. This
          * option allows you to instead have the label added after the primary sibling. Note: The label will always
          * be in front of the description sibling. If this flag is set with `appendLabel`, the order will be
+         * @public
          *
          * <container>
          *   <primary sibling/>
@@ -1084,6 +1135,7 @@ define( function( require ) {
          */
         setAppendDescription: function( appendDescription ) {
           assert && assert( typeof appendDescription === 'boolean' );
+          // REVIEW: Should have a guard here presumably? (so spurious changes don't result in a full peer rebuild)
 
           this._appendDescription = appendDescription;
 
@@ -1094,6 +1146,8 @@ define( function( require ) {
 
         /**
          * Get whether the description sibling should be appended after the primary sibling.
+         * @public
+         *
          * @returns {boolean}
          */
         getAppendDescription: function() {
@@ -1107,7 +1161,7 @@ define( function( require ) {
          * acts as a container for this Node's primary sibling DOM Element and its label and description siblings.
          * This containerTagName will default to DEFAULT_LABEL_TAG_NAME, and be added to the PDOM automatically if
          * more than just the primary sibling is created.
-         *
+         * @public
          *
          * For instance, a button element with a label and description will be contained like the following
          * if the containerTagName is specified as 'section'.
@@ -1128,6 +1182,7 @@ define( function( require ) {
          */
         setContainerTagName: function( tagName ) {
           assert && assert( tagName === null || typeof tagName === 'string', 'invalid tagName argument: ' + tagName );
+          // REVIEW: Should have a guard here presumably? (so spurious changes don't result in a full peer rebuild)
 
           this._containerTagName = tagName;
           this.onAccessibleContentChange();
@@ -1136,6 +1191,7 @@ define( function( require ) {
 
         /**
          * Get the tag name for the container parent element.
+         * @public
          *
          * @returns {string|null}
          */
@@ -1148,6 +1204,7 @@ define( function( require ) {
          * Set the content of the label sibling for the this node.  The label sibling will default to the value of
          * DEFAULT_LABEL_TAG_NAME if no `labelTagName` is provided. If the label sibling is a `LABEL` html element,
          * then the `for` attribute will automatically be added, pointing to the node's primary sibling DOM Element.
+         * @public
          *
          * This method supports adding content in two ways, with HTMLElement.textContent and HTMLElement.innerHTML.
          * The DOM setter is chosen based on if the label passes the `usesExclusivelyFormattingTags`.
@@ -1157,6 +1214,19 @@ define( function( require ) {
          */
         setLabelContent: function( label ) {
           assert && assert( label === null || typeof label === 'string' );
+
+          // REVIEW: This could use a guard, to see if it's changed.
+          // REVIEW: It's also concerning that setting this ends up changing another field (especially when it's set to
+          // REVIEW: the same value!). Can't we handle some of this in the with an accessible*Behavior pattern?
+          // REVIEW: It seems setting and unsetting the labelContent (from null to something to null) makes permanent
+          // REVIEW: changes to the labelTagName, which is weird.
+          // REVIEW: Can we just have a behavior that does this instead?
+
+          // REVIEW: Also this is really weird:
+          // REVIEW:   var n = new scenery.Node();
+          // REVIEW:   n.labelTagName; // null
+          // REVIEW:   n.labelContent = n.labelContent;
+          // REVIEW:   n.labelTagName; // "P" !!!
 
           this._labelContent = label;
 
@@ -1176,6 +1246,7 @@ define( function( require ) {
 
         /**
          * Get the content for this Node's label sibling DOM element.
+         * @public
          *
          * @returns {string|null}
          */
@@ -1196,6 +1267,8 @@ define( function( require ) {
           assert && assert( content === null || typeof content === 'string' );
 
           this._innerContent = content;
+
+          // REVIEW: Should have a guard, so that if it's called with no change it's a no-op.
 
           var self = this;
 
@@ -1221,6 +1294,7 @@ define( function( require ) {
          * Set the description content for this node's DOM element. The description sibling tag name must support
          * innerHTML and textContent. If a description element does not exist yet, a default
          * DEFAULT_LABEL_TAG_NAME will be assigned to the descriptionTagName.
+         * @public
          *
          * @param {string|null} descriptionContent
          */
@@ -1230,6 +1304,9 @@ define( function( require ) {
           var self = this;
 
           this._descriptionContent = descriptionContent;
+
+          // REVIEW: See notes in setLabelContent. should have a guard, and setting the descriptionTagName feels wrong,
+          // REVIEW: where a behavior would be better.
 
           // if there is no description element, assume that a paragraph element should be used
           if ( !this._descriptionTagName ) {
@@ -1245,6 +1322,7 @@ define( function( require ) {
 
         /**
          * Get the content for this Node's description sibling DOM Element.
+         * @public
          *
          * @returns {string|null}
          */
@@ -1384,6 +1462,8 @@ define( function( require ) {
         setAriaLabel: function( ariaLabel ) {
           assert && assert( ariaLabel === null || typeof ariaLabel === 'string' );
 
+          // REVIEW: Should have a guard, so that if it's called with no change it's a no-op.
+
           this._ariaLabel = ariaLabel;
 
           this.setAccessibleAttribute( 'aria-label', ariaLabel );
@@ -1392,6 +1472,7 @@ define( function( require ) {
 
         /**
          * Get the value of the aria-label attribute for this node's DOM element.
+         * @public
          *
          * @returns {string|null}
          */
@@ -1410,9 +1491,11 @@ define( function( require ) {
          */
         setFocusHighlight: function( focusHighlight ) {
           assert && assert( focusHighlight === null ||
-                            focusHighlight instanceof phet.scenery.Node ||
-                            focusHighlight instanceof phet.kite.Shape ||
+                            focusHighlight instanceof scenery.Node ||
+                            focusHighlight instanceof Shape ||
                             focusHighlight === 'invisible' );
+
+          // REVIEW: Should have a guard, so that if it's called with no change it's a no-op.
 
           this._focusHighlight = focusHighlight;
 
@@ -1426,12 +1509,15 @@ define( function( require ) {
           if ( this._focusHighlightLayerable ) {
 
             // if focus highlight is layerable, it must be a node in the scene graph
-            assert && assert( focusHighlight instanceof phet.scenery.Node );
+            assert && assert( focusHighlight instanceof scenery.Node );
             focusHighlight.visible = isFocused;
           }
 
           // Reset the focus after invalidating the content.
           isFocused && this.focus();
+
+          // REVIEW: This value is used by AccessiblePeer's update (creation), but changing this doesn't seem to
+          // REVIEW: update the peers. Should it call onAccessibleContentChange(), or do a more fine-grained change?
 
         },
         set focusHighlight( focusHighlight ) { this.setFocusHighlight( focusHighlight ); },
@@ -1451,18 +1537,23 @@ define( function( require ) {
          * Setting a flag to break default and allow the focus highlight to be (z) layered into the scene graph.
          * This will set the visibility of the layered focus highlight, it will always be invisible until this node has
          * focus.
+         * @public
          *
          * @param {Boolean} focusHighlightLayerable
          */
         setFocusHighlightLayerable: function( focusHighlightLayerable ) {
+          // REVIEW: Should have a guard, so that if it's called with no change it's a no-op.
           this._focusHighlightLayerable = focusHighlightLayerable;
 
           // if a focus highlight is defined (it must be a node), update its visibility so it is linked to focus
           // of the associated node
           if ( this._focusHighlight ) {
-            assert && assert( this._focusHighlight instanceof phet.scenery.Node );
+            assert && assert( this._focusHighlight instanceof scenery.Node );
             this._focusHighlight.visible = this.focused;
           }
+
+          // REVIEW: This value is used by AccessiblePeer's update (creation), but changing this doesn't seem to
+          // REVIEW: update the peers. Should it call onAccessibleContentChange(), or do a more fine-grained change?
         },
         set focusHighlightLayerable( focusHighlightLayerable ) { this.setFocusHighlightLayerable( focusHighlightLayerable ); },
 
@@ -1489,7 +1580,7 @@ define( function( require ) {
          * @param {boolean|Node} groupHighlight
          */
         setGroupFocusHighlight: function( groupHighlight ) {
-          assert && assert( typeof groupHighlight === 'boolean' || groupHighlight instanceof phet.scenery.Node );
+          assert && assert( typeof groupHighlight === 'boolean' || groupHighlight instanceof scenery.Node );
           this._groupFocusHighlight = groupHighlight;
         },
         set groupFocusHighlight( groupHighlight ) { this.setGroupFocusHighlight( groupHighlight ); },
@@ -1568,6 +1659,7 @@ define( function( require ) {
          * "a peer's HTMLElement of this Node (specified with the string constant stored in `thisElementName`) will have an
          * aria-labelledby attribute with a value that includes the `otherNode`'s peer HTMLElement's id (specified with
          * `otherElementName`)."
+         * @public)
          *
          * There can be more than one association because an aria-labelledby attribute's value can be a space separated
          * list of HTML ids, and not just a single id, see https://www.w3.org/WAI/GL/wiki/Using_aria-labelledby_to_concatenate_a_label_from_several_text_nodes
@@ -1575,6 +1667,8 @@ define( function( require ) {
          * @param {Object} associationObject - with key value pairs like
          *                               { otherNode: {Node}, otherElementName: {string}, thisElementName: {string } }
          *                               see AccessiblePeer for valid element names.
+         * REVIEW: Can we typedef (or create a type) for this? Took a bit of bouncing around to find the docs for the
+         * REVIEW type.
          */
         addAriaLabelledbyAssociation: function( associationObject ) {
           assert && AccessibilityUtil.validateAssociationObject( associationObject );
@@ -1610,7 +1704,7 @@ define( function( require ) {
          * @public (scenery-internal)
          */
         removeNodeThatIsAriaLabelledByThisNode: function( node ) {
-          assert && assert( node instanceof phet.scenery.Node );
+          assert && assert( node instanceof scenery.Node );
           var indexOfNode = _.indexOf( this._nodesThatAreAriaLabelledbyThisNode, node );
           assert && assert( indexOfNode >= 0 );
           this._nodesThatAreAriaLabelledbyThisNode.splice( indexOfNode, 1 );
@@ -1755,7 +1849,7 @@ define( function( require ) {
          * @public (scenery-internal)
          */
         removeNodeThatIsAriaDescribedByThisNode: function( node ) {
-          assert && phet && phet.scenery && assert( node instanceof phet.scenery.Node );
+          assert && assert( node instanceof scenery.Node );
           var indexOfNode = _.indexOf( this._nodesThatAreAriaDescribedbyThisNode, node );
           assert && assert( indexOfNode >= 0 );
           this._nodesThatAreAriaDescribedbyThisNode.splice( indexOfNode, 1 );
@@ -2013,6 +2107,8 @@ define( function( require ) {
           value = '' + value;
           this._inputValue = value;
 
+          // REVIEW: Should have a guard, so that if it's called with no change it's a no-op.
+
           for ( var i = 0; i < this.accessibleInstances.length; i++ ) {
             var peer = this.accessibleInstances[ i ].peer;
             peer.onInputValueChange();
@@ -2049,6 +2145,8 @@ define( function( require ) {
             assert && assert( INPUT_TYPES_THAT_SUPPORT_CHECKED.indexOf( this._inputType.toUpperCase() ) >= 0, 'inputType does not support checked: ' + this._inputType );
           }
 
+          // REVIEW: Should have a guard, so that if it's called with no change it's a no-op.
+
           this._accessibleChecked = checked;
 
           this.setAccessibleAttribute( 'checked', checked );
@@ -2070,6 +2168,7 @@ define( function( require ) {
          * Get an array containing all accessible attributes that have been added to this node's DOM element.
          * @public
          *
+         * REVIEW: This could potentially use its own type, so it would have {Array.<AccessibleAttribute>}?
          * @returns {Array.<Object>} - Returns objects with: {
          *   attribute: {string} // the name of the attribute
          *   value: {*} // the value of the attribute
@@ -2196,6 +2295,8 @@ define( function( require ) {
 
           var self = this;
 
+          // REVIEW: Should have a guard, so that if it's called with no change it's a no-op.
+
           this._focusableOverride = focusable;
 
           for ( var i = 0; i < this._accessibleInstances.length; i++ ) {
@@ -2234,6 +2335,7 @@ define( function( require ) {
         /**
          * Used to get a list of all settable options and their current values.
          * @public (scenery-internal)
+         *
          * @returns {Object} - keys are all accessibility option keys, and the values are the values of those properties
          * on this node.
          */
@@ -2376,6 +2478,7 @@ define( function( require ) {
          * Called when the node is added as a child to this node AND the node's subtree contains accessible content.
          * We need to notify all Displays that can see this change, so that they can update the AccessibleInstance tree.
          * @private
+         * REVIEW: This is... called from Node. Do we need this to be @protected instead?
          *
          * @param {Node} node
          */

@@ -29,7 +29,7 @@ define( function( require ) {
    * @constructor
    */
   function NodeIO( node, phetioID ) {
-    assert && assertInstanceOf( node, phet.scenery.Node );
+    assert && assertInstanceOf( node, scenery.Node );
     ObjectIO.call( this, node, phetioID );
 
     // TODO: This is in-progress work to convert object properties to Axon Properties, see https://github.com/phetsims/phet-io/issues/1326

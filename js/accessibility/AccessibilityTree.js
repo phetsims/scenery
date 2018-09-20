@@ -214,6 +214,7 @@ define( function( require ) {
 
         AccessibilityTree.removeTree( parent, node, accessibleTrails );
       }
+
       // Do all removals before adding anything back in.
       for ( i = 0; i < parents.length; i++ ) {
         AccessibilityTree.addTree( parents[ i ], node, accessibleTrailsList[ i ] );

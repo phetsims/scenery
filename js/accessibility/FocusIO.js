@@ -24,7 +24,7 @@ define( function( require ) {
    * @constructor
    */
   function FocusIO( focus, phetioID ) {
-    assert && assertInstanceOf( focus, phet.scenery.Focus );
+    assert && assertInstanceOf( focus, scenery.Focus );
     ObjectIO.call( this, focus, phetioID );
   }
 
@@ -42,7 +42,7 @@ define( function( require ) {
         return null;
       }
       else {
-        assert && assertInstanceOf( focus, phet.scenery.Focus );
+        assert && assertInstanceOf( focus, scenery.Focus );
         var phetioIDIndices = [];
         focus.trail.nodes.forEach( function( node, i ) {
 
@@ -84,6 +84,10 @@ define( function( require ) {
 
         // Follow the path of children based on their indices, starting from the root of the display.
         // There is always one more node in Trail than indices, representing the root node.
+        // REVIEW: What is joist-related code doing in Scenery? I'd definitely prefer if there is a better way to hook
+        // REVIEW: things together. Scenery could expose an API that would allow this behavior?
+        // REVIEW: This will HARD-fail out if ever called in most non-sim use cases (e.g. presentations, documentation,
+        // REVIEW: or anything that isn't phet-related).
         var currentNode = phet.joist.sim.display.rootNode;
         var nodes = [ currentNode ];
         for ( var i = 0; i < indices.length; i++ ) {

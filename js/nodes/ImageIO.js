@@ -24,7 +24,7 @@ define( function( require ) {
    * @constructor
    */
   function ImageIO( image, phetioID ) {
-    assert && assertInstanceOf( image, phet.scenery.Image );
+    assert && assertInstanceOf( image, scenery.Image );
     NodeIO.call( this, image, phetioID );
   }
 

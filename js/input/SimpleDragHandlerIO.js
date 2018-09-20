@@ -24,7 +24,7 @@ define( function( require ) {
    * @constructor
    */
   function SimpleDragHandlerIO( simpleDragHandler, phetioID ) {
-    assert && assertInstanceOf( simpleDragHandler, phet.scenery.SimpleDragHandler );
+    assert && assertInstanceOf( simpleDragHandler, scenery.SimpleDragHandler );
     ObjectIO.call( this, simpleDragHandler, phetioID );
   }
 

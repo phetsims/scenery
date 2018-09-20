@@ -31,8 +31,6 @@ define( function( require ) {
   var INPUT_TAG = AccessibilityUtil.TAGS.INPUT;
 
   /**
-   * Constructor.
-   *
    * @param {AccessibleInstance} accessibleInstance
    * @param {Object} [options]
    * @constructor
@@ -43,6 +41,7 @@ define( function( require ) {
 
   scenery.register( 'AccessiblePeer', AccessiblePeer );
 
+  // REVIEW: I don't actually see any usage of the Events part of AccessiblePeer. Can we remove that now?
   inherit( Events, AccessiblePeer, {
 
     /**
@@ -56,20 +55,20 @@ define( function( require ) {
      */
     initializeAccessiblePeer: function( accessibleInstance, options ) {
       options = _.extend( {
-        primarySibling: null // {HTMLElement} primarySibling - The main DOM element used for this peer
+        primarySibling: null // {HTMLElement|null} primarySibling - The main DOM element used for this peer
       }, options );
 
       Events.call( this ); // TODO: is Events worth mixing in by default? Will we need to listen to events?
 
       assert && assert( !this.id || this.disposed, 'If we previously existed, we need to have been disposed' );
 
-      // unique ID
+      // @public {number} - unique ID
       this.id = this.id || globalId++;
 
       // @public {AccessibleInstance}
       this.accessibleInstance = accessibleInstance;
 
-      // @public {Node}
+      // @public {Node} REVIEW: This is {null} for the root peer, correct?
       this.node = this.accessibleInstance.node;
 
       // @public {Display} - Each peer is associated with a specific Display.
@@ -79,7 +78,8 @@ define( function( require ) {
       this.trail = accessibleInstance.trail;
 
       // @private {boolean|null} - whether or not this AccessiblePeer is visible in the PDOM
-      // Only initialized to null, should not be set to it. isVisible() will return true if this.visible is null (because it hasn't been set yet).
+      // Only initialized to null, should not be set to it. isVisible() will return true if this.visible is null
+      // (because it hasn't been set yet).
       this.visible = null;
 
       // @private {HTMLElement|null} - Optional label/description elements
@@ -108,18 +108,22 @@ define( function( require ) {
         return this;
       }
 
+      //REVIEW: Why doesn't this need to be done for "root" peers where the primarySibling is passed in? Seems like
+      //REVIEW: it would still be needed.
       // for each accessible peer, clear the container parent if it exists since we will be reinserting labels and
       // the dom element in createPeer
       while ( this._containerParent && this._containerParent.hasChildNodes() ) {
         this._containerParent.removeChild( this._containerParent.lastChild );
       }
 
+      //REVIEW: Most of these are cleared on disposal and declared above. What is the purpose of clearing them here?
       // clear out elements to be recreated below
       this._primarySibling = null;
       this._labelSibling = null;
       this._descriptionSibling = null;
       this._containerParent = null;
 
+      // REVIEW: Why is this a separate function call? It's never called to "update" things.
       this.update();
 
       return this;
@@ -128,6 +132,9 @@ define( function( require ) {
     /**
      * Update the content of the peer
      * @private
+     *
+     * REVIEW: This appears to be only called from initializeAccessiblePeer, and never from anywhere else. Is that
+     * REVIEW: correct, and if so could they be combined?
      */
     update: function() {
       var i;
@@ -135,6 +142,30 @@ define( function( require ) {
 
       var options = this.node.getBaseOptions();
 
+      // REVIEW: Since this includes rewriting of options, does the long-term order matter? I could imagine writing code.
+      // REVIEW:
+      // REVIEW: Ahh yup, found one where it creates buggy behavior with defaults. heading/accessibleName both mess with
+      // REVIEW: labelTagName/labelContent.
+      // REVIEW: In the scenery playground:
+      // REVIEW:   var n = new scenery.Node();
+      // REVIEW:   n.accessibleName = 'aname';
+      // REVIEW:   n.tagName = 'input';
+      // REVIEW:   scene.addChild( n );
+      // REVIEW:   n.accessibleHeading = 'header';
+      // REVIEW: The accessible name (executed here first) then gets overwritten with the header. I'm also not quite sure
+      // REVIEW: why, but the tag is 'hnull', e.g.:
+      // REVIEW:   <div class="accessibility">
+      // REVIEW:     <hnull tabindex="-1" id="label-2-11">header</hnull>
+      // REVIEW:     <input tabindex="0" id="2-11" style="width: 1px; height: 1px;">
+      // REVIEW:   </div>
+      // REVIEW: Ideally the order is "what is best", and hopefully the defaults (with normal usage) would not run into
+      // REVIEW: this. But think about what may happen in the future (all settings), and about all the potential ways
+      // REVIEW: we would want to overwrite behaviors.
+      // REVIEW:
+      // REVIEW: As a generalization, how would we handle "arbitrary" behaviors that don't depend on one parameter?
+      // REVIEW: What if there was a "pipeline" of behaviors that the client could insert general things into?
+      // REVIEW: It's probably overkill and just brainstorming but if you have this._behaviors = [ b1, b2, b3 ],
+      // REVIEW: then options = b3( node, b2( node, b1( node, options ) ) )?
       if ( this.node.accessibleName !== null ) {
         options = this.node.accessibleNameBehavior( this.node, options, this.node.accessibleName );
       }
@@ -149,6 +180,8 @@ define( function( require ) {
 
 
       // create the base DOM element representing this accessible instance
+      //REVIEW: Do we want to check options.focusable instead? Should no accessibleNameBehavior/helpTextBehavior be
+      //REVIEW: able to modify whether something is focusable?
       var primarySibling = AccessibilityUtil.createElement( options.tagName, this.node.focusable, {
         namespace: options.accessibleNamespace
       } );
@@ -161,6 +194,11 @@ define( function( require ) {
         containerParent.id = 'container-' + uniqueId;
 
         // provide the aria-role if it is specified
+        // REVIEW: What happens when this is set after the containerTagName? Also setContainerAriaRole seems to do work
+        // REVIEW: with removeAccessibleAttribute/setAccessibleAttribute. Does handling it as an accessible attribute not
+        // REVIEW: apply here?
+        // REVIEW: After further review, I don't see why this is needed. Doesn't the onAttributeChange call below update
+        // REVIEW: this? Why the special case here?
         if ( options.containerAriaRole ) {
           containerParent.setAttribute( 'role', options.containerAriaRole );
         }
@@ -180,7 +218,7 @@ define( function( require ) {
         descriptionSibling.id = 'description-' + uniqueId;
       }
 
-
+      // REVIEW: These could potentially just be set above where the values are known? Why is the assignment delayed?
       this._primarySibling = primarySibling;
       this._labelSibling = labelSibling;
       this._descriptionSibling = descriptionSibling;
@@ -215,6 +253,7 @@ define( function( require ) {
 
       // if element is an input element, set input type
       if ( options.tagName.toUpperCase() === INPUT_TAG && options.inputType ) {
+        // REVIEW: This looks like something that should be a behavior?
         this.setAttributeToElement( 'type', options.inputType );
       }
 
@@ -229,6 +268,12 @@ define( function( require ) {
       }
 
       // update all attributes for the peer, should cover aria-label, role, and others
+      // REVIEW: Maybe it's unlikely, but I can TOTALLY see our behaviors above wanting to adjust arbitrary attributes.
+      // REVIEW: Since this ONLY inspects things directly on the node (not the overridden a11y options above), this is
+      // REVIEW: not possible. Is that something to consider?
+      // REVIEW: Upon further review, this totally seems like the case (since it's already being kinda done for aria-label).
+      // REVIEW: Can the accessible attributes be included with the "options" object, and can behaviors adjust them as
+      // REVIEW: they see fit?
       this.onAttributeChange( options );
 
       // update input value attribute for the peer
@@ -238,11 +283,16 @@ define( function( require ) {
       if ( this.node.focusHighlightLayerable ) {
 
         // if focus highlight is layerable, it must be a node in the scene graph
-        assert && assert( this.node.focusHighlight instanceof phet.scenery.Node );
+        assert && assert( this.node.focusHighlight instanceof scenery.Node );
+
+        // REVIEW: Wait, why are we changing something assigned to the node here? Do we control this focus highlight now?
         this.node.focusHighlight.visible = false;
       }
 
       // TODO: this is hacky, because updateOtherNodes functions could try to access this peer from their accessibleInstance.
+      // REVIEW: What if, instead of calling update() from inside AccessiblePeer (in the initialization), it was called
+      // REVIEW: in AccessibleInstance after `this.peer = AccessiblePeer.createFromPool( ... )` happens? Then this
+      // REVIEW: field would already be set, and we wouldn't need the workaround here?
       this.accessibleInstance.peer = this;
       this.node.updateOtherNodesAriaLabelledby();
       this.node.updateOtherNodesAriaDescribedby();
@@ -251,25 +301,22 @@ define( function( require ) {
     /**
      * Handle the internal ordering of the elements in the peer, this involves setting the proper value of
      * this.topLevelElements
+     * REVIEW: Maybe change the parameter name a bit? I can see someone saying "but options should be optional" and
+     * REVIEW: the object isn't optional here. Or actually make it optional.
      * @param {Object} options - the computed mixin options to be applied to the peer.
      * @private
      */
     orderElements: function( options ) {
-
-      var truthySiblings = [ this._labelSibling, this._descriptionSibling, this._primarySibling ].filter( function( i ) { return i; } );
-
       if ( this._containerParent ) {
         // The first child of the container parent element should be the peer dom element
-        // if undefined, the insertBefore method will insert the primarySiblingDOMElement as the first child
-        var primarySiblingDOMElement = this._primarySibling;
-        var firstChild = this._containerParent.children[ 0 ] || null;
-        this._containerParent.insertBefore( primarySiblingDOMElement, firstChild );
+        // if undefined, the insertBefore method will insert the this._primarySibling as the first child
+        this._containerParent.insertBefore( this._primarySibling, this._containerParent.children[ 0 ] || null );
         this.topLevelElements = [ this._containerParent ];
       }
       else {
 
         // Wean out any null siblings
-        this.topLevelElements = truthySiblings;
+        this.topLevelElements = [ this._labelSibling, this._descriptionSibling, this._primarySibling ].filter( _.identity );
       }
 
       // insert the label and description elements in the correct location if they exist
@@ -286,8 +333,8 @@ define( function( require ) {
     getPrimarySibling: function() {
       return this._primarySibling;
     },
-
     get primarySibling() { return this.getPrimarySibling(); },
+
     /**
      * Get the primary sibling element for the peer
      * @public
@@ -297,6 +344,7 @@ define( function( require ) {
       return this._labelSibling;
     },
     get labelSibling() { return this.getLabelSibling(); },
+
     /**
      * Get the primary sibling element for the peer
      * @public
@@ -306,6 +354,7 @@ define( function( require ) {
       return this._descriptionSibling;
     },
     get descriptionSibling() { return this.getDescriptionSibling(); },
+
     /**
      * Get the primary sibling element for the peer
      * @public
@@ -321,6 +370,9 @@ define( function( require ) {
      * @public
      */
     onAriaLabelledbyAssociationChange: function() {
+      // REVIEW: Is there a good list of attributes for which should NOT be set by the node (because it will be buggy)?
+      // REVIEW: It seems like it's just a11y-dev knowledge that you shouldn't node.setAccessibleAttribute( 'aria-labelledby' ).
+      // REVIEW: It probably is the best to keep it that way?
       this.removeAttributeFromAllElements( 'aria-labelledby' );
 
       for ( var i = 0; i < this.node.ariaLabelledbyAssociations.length; i++ ) {
@@ -356,6 +408,8 @@ define( function( require ) {
 
     /**
      * Set all accessible attributes onto the peer elements from the model's stored data objects
+     * @private
+     *
      * @param {Object} [a11yOptions] - these can override the values of the node, see this.update()
      */
     onAttributeChange: function( a11yOptions ) {
@@ -367,16 +421,23 @@ define( function( require ) {
 
         // allow overriding of aria-label for accessibleName setter
         // TODO: this is a specific workaround, it would be nice to sort out a general case for this, #795
+        // REVIEW: See note in update() above, handling the general case of this seems nice. We're likely to run into
+        // REVIEW: other cases in the future.
+        // REVIEW: ALSO we run into weird cases right now of "did you update the aria-label attribute or something that
+        // REVIEW: ran update() last?" -- the attribute could potentially change unpredictably.
         if ( attribute === 'aria-label' && a11yOptions && typeof a11yOptions.ariaLabel === 'string' && dataObject.options.elementName === PRIMARY_SIBLING ) {
           value = a11yOptions.ariaLabel;
         }
         this.setAttributeToElement( attribute, value, dataObject.options );
       }
+
+      // REVIEW: How are "removed" attributes handled here? Do we never need to worry about it?
     },
 
     /**
      * Set the input value on the peer's primary sibling element. Using the value setter seems to be the only way
      * to have the value be set correctly so we cannot use onAttributeChange for this.
+     * @public (scenery-internal)
      */
     onInputValueChange: function() {
       this.primarySibling.value = this.node.inputValue;
@@ -443,6 +504,7 @@ define( function( require ) {
     addDOMEventListeners: function( accessibleInput ) {
       AccessibilityUtil.addDOMEventListeners( accessibleInput, this._primarySibling );
     },
+
     /**
      * Remove DOM Event listeners from the peer's primary sibling.
      * @public (scenery-internal)
@@ -475,7 +537,6 @@ define( function( require ) {
       if ( options.namespace ) {
         element.setAttributeNS( options.namespace, attribute, attributeValue );
       }
-
       // treat it like a property
       else if ( typeof attributeValue === 'boolean' ) {
         element[ attribute ] = attributeValue;
@@ -484,6 +545,7 @@ define( function( require ) {
         element.setAttribute( attribute, attributeValue );
       }
     },
+
     /**
      * Remove attribute from one of the peer's HTMLElements.
      * @public (scenery-internal)
@@ -575,13 +637,13 @@ define( function( require ) {
         }
       }
     },
+
     /**
-     * The contentElement will either be a
-     * label or description element. The contentElement will be sorted relative to the primarySibling. Its placement
-     * will also depend on whether or not this node wants to append this element,
+     * The contentElement will either be a label or description element. The contentElement will be sorted relative to
+     * the primarySibling. Its placement will also depend on whether or not this node wants to append this element,
      * see setAppendLabel() and setAppendDescription(). By default, the "content" element will be placed before the
      * primarySibling.
-     *
+     * @private
      *
      * @param {HTMLElement} contentElement
      * @param {boolean} appendElement
@@ -605,18 +667,21 @@ define( function( require ) {
         assert && assert( this.topLevelElements.indexOf( contentElement ) >= 0, 'element is not part of this peer, thus cannot be arranged' );
 
         // keep this.topLevelElements in sync
+        // REVIEW: PHET_CORE/arrayRemove could help?
         this.topLevelElements.splice( this.topLevelElements.indexOf( contentElement ), 1 );
 
         var indexOffset = appendElement ? 1 : 0;
         var indexOfContentElement = this.topLevelElements.indexOf( this._primarySibling ) + indexOffset;
+        // REVIEW: I'm confused, how could this come up? If the primarySibling was not found?
         indexOfContentElement = indexOfContentElement < 0 ? 0 : indexOfContentElement; //support primarySibling in the first position
         this.topLevelElements.splice( indexOfContentElement, 0, contentElement );
       }
     },
 
-
     /**
      * Is this peer hidden in the PDOM
+     * @public
+     *
      * @returns {boolean}
      */
     isVisible: function() {
@@ -639,6 +704,8 @@ define( function( require ) {
 
     /**
      * Set whether or not the peer is visible in the PDOM
+     * @public
+     *
      * @param {boolean} visible
      */
     setVisible: function( visible ) {
@@ -689,7 +756,6 @@ define( function( require ) {
      * Responsible for setting the content for the label sibling
      * @public (scenery-internal)
      * @param {string} content - the content for the label sibling.
-     * the primary sibling.
      */
     setLabelSiblingContent: function( content ) {
       assert && assert( typeof content === 'string', 'incorrect label content type' );
@@ -702,15 +768,16 @@ define( function( require ) {
       AccessibilityUtil.setTextContent( this._labelSibling, content );
 
       // if the label element happens to be a 'label', associate with 'for' attribute
+      // REVIEW: Should we check _labelTagName directly? Or use a behavior-like strategy for this?
       if ( this._labelSibling.tagName.toUpperCase() === LABEL_TAG ) {
         this._labelSibling.setAttribute( 'for', this._primarySibling.id );
       }
     },
+
     /**
      * Responsible for setting the content for the description sibling
      * @public (scenery-internal)
-     * @param {string} content - the content for the label sibling.
-     * the primary sibling.
+     * @param {string} content - the content for the description sibling.
      */
     setDescriptionSiblingContent: function( content ) {
       assert && assert( typeof content === 'string', 'incorrect description content type' );
@@ -725,8 +792,7 @@ define( function( require ) {
     /**
      * Responsible for setting the content for the primary sibling
      * @public (scenery-internal)
-     * @param {string} content - the content for the label sibling.
-     * the primary sibling.
+     * @param {string} content - the content for the primary sibling.
      */
     setPrimarySiblingContent: function( content ) {
       assert && assert( typeof content === 'string', 'incorrect inner content type' );
@@ -775,7 +841,7 @@ define( function( require ) {
     }
   }, {
 
-    // @static - specifies valid associations between related AccessiblePeers in the DOM
+    // @public {string} - specifies valid associations between related AccessiblePeers in the DOM
     PRIMARY_SIBLING: PRIMARY_SIBLING, // associate with all accessible content related to this peer
     LABEL_SIBLING: LABEL_SIBLING, // associate with just the label content of this peer
     DESCRIPTION_SIBLING: DESCRIPTION_SIBLING, // associate with just the description content of this peer
