@@ -200,6 +200,9 @@ define( function( require ) {
     // properties)
     this._isHighlightedListener = this.invalidateHighlighted.bind( this );
 
+    // @public (read-only) {BooleanProperty} - Whether or not a press is being processed from an a11y click input event.
+    this.a11yClickingProperty = new BooleanProperty( false );
+
     // @private {Object} - The listener that gets added to the pointer when we are pressed
     this._pointerListener = {
       /**
@@ -602,27 +605,35 @@ define( function( require ) {
      * used, the browser may not receive 'down' or 'up' events on buttons - only a single 'click' event. For a11y we
      * need to toggle the pressed state from the single 'click' event.
      *
+     * This will fire listeners immediately, but adds a delay for the a11yClickingProperty so that you can make a 
+     * button look pressed from a single DOM click event. For example usage, see sun/ButtonModel.looksPressedProperty.
+     *
      * @public - In general not needed to be public, but just used in edge cases to get proper click logic for a11y.
      * @a11y
      */
     click: function() {
       if ( this.canClick() ) {
+
+        // TODO: This can be deleted right? see https://github.com/phetsims/scenery/issues/831
+        this._a11yClickInProgress = true;
+
+        this.a11yClickingProperty.value = true;
+
         // ensure that button is 'over' so listener can be called while button is down
         this.isFocusedProperty.value = true;
         this.isPressedProperty.value = true;
 
-        this._a11yClickInProgress = true;
+        // no longer down, don't reset 'over' so button can be styled as long as it has focus
+        this.isPressedProperty.value = false;
+
+        // call the a11y click specific listener
+        this._onAccessibleClick && this._onAccessibleClick();
+
+        this._a11yClickInProgress = false;
 
         var self = this;
         timer.setTimeout( function() {
-
-          // no longer down, don't reset 'over' so button can be styled as long as it has focus
-          self.isPressedProperty.value = false;
-
-          // call the a11y click specific listener
-          self._onAccessibleClick && self._onAccessibleClick();
-
-          self._a11yClickInProgress = false;
+          self.a11yClickingProperty.value = false;
         }, this._fireOnHoldInterval );
       }
     },
