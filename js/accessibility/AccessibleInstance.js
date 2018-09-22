@@ -357,8 +357,7 @@ define( function( require ) {
       // if we hid a parent element, blur focus if active element was an ancestor
       if ( !this.peer.isVisible() ) {
         if ( this.peer.primarySibling.contains( document.activeElement ) ) { // still true if activeElement is this primary sibling
-          // REVIEW: Code recently related to this was changed. Can we handle the following TODO?
-          scenery.Display.focus = null; // TODO is this the best way to blur a focus? shouldn't we `document.activeElement.blur()` or something?
+          scenery.Display.focus = null;
         }
       }
 
