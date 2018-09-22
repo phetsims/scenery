@@ -1574,7 +1574,7 @@ define( function( require ) {
          * useful to indicate nested keyboard navigation. If true, the group focus highlight will surround
          * this node's local bounds. Otherwise, the Node will be used.
          *
-         * TODO: Support more than one group focus highlight (multiple ancestors could have groupFocusHighlight)
+         * TODO: Support more than one group focus highlight (multiple ancestors could have groupFocusHighlight), see https://github.com/phetsims/scenery/issues/708
          *
          * @public
          * @param {boolean|Node} groupHighlight
