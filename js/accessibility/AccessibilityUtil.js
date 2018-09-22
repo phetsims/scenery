@@ -4,6 +4,9 @@
  * Utility functions for scenery that are specifically useful for Accessibility.
  * These generally pertain to DOM traversal and manipulation.
  *
+ * For the most part this file's methods are public in a scenery-internal context. Some exceptions apply. Please
+ * consult @jessegreenberg and/or @zepumph before using this outside of scenery.
+ *
  * @author Jesse Greenberg
  */
 
@@ -74,7 +77,6 @@ define( function( require ) {
    *
    * @param  {HTMLElement} domElement - parent whose children will be linearized
    * @returns {HTMLElement[]}
-   * @private
    */
   function getLinearDOMElements( domElement ) {
 
@@ -95,7 +97,6 @@ define( function( require ) {
   /**
    * Determine if an element is hidden.  An element is considered 'hidden' if it (or any of its ancestors) has the
    * 'hidden' attribute.
-   * @private
    *
    * @param {HTMLElement} domElement
    * @returns {Boolean}
@@ -117,7 +118,6 @@ define( function( require ) {
    * depending on the direction. Useful if you need to set focus dynamically or need to prevent default behavior
    * when focus changes. If no next or previous focusable is found, it returns the currently focused element.
    * This function should not be used directly, use getNextFocusable() or getPreviousFocusable() instead.
-   * @private
    *
    * @param {string} direction - direction of traversal, one of 'NEXT' | 'PREVIOUS'
    * @param {HTMLElement} [parentElement] - optional, search will be limited to children of this element
@@ -330,7 +330,7 @@ define( function( require ) {
     /**
      * Add DOM event listeners contained in the accessibleInput directly to the DOM elements on each
      * accessibleInstance.  Never use this directly, use addAccessibleInputListener()
-     * @private
+     * @public
      *
      * @param {Object} accessibleInput
      * @param {HTMLElement} domElement
@@ -346,7 +346,7 @@ define( function( require ) {
     /**
      * Remove a DOM event listener contained in an accesssibleInput.  Never to be used directly, see
      * removeAccessibilityInputListener().
-     * @private
+     * @public
      *
      * @param {Object} accessibleInput
      * @param {HTMLElement} domElement

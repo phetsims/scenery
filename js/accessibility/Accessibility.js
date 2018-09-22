@@ -115,11 +115,6 @@
  * PDOM more, see AccessiblePeer, which manages the DOM Elements for a node. For more documentation on Scenery, Nodes,
  * and the scene graph, please see http://phetsims.github.io/scenery/
  *
- * REVIEW: I added method visibilities as I thought they should be. Please see if they all look ok.
- *
- * REVIEW: I tried to fix up usages of the `phet.{{LIB}}` namespace usage. That doesn't exist everywhere, and we use
- * REVIEW: scenery in docs that do NOT include that.
- *
  * @author Jesse Greenberg (PhET Interactive Simulations)
  * @author Sam Reid (PhET Interactive Simulations)
  * @author Michael Kauzmann (PhET Interactive Simulations)
@@ -172,10 +167,6 @@ define( function( require ) {
 
   // see setAccessibleHeadingBehavior for more details
   var DEFAULT_ACCESSIBLE_HEADING_BEHAVIOR = function( node, options, heading ) {
-
-    // REVIEW: Can we handle these? They look like TODOs, but aren't labeled as such, and have weird indentation.
-// assert no accessibleName;
-// assert no labelTagName/Content already on node
 
     options.labelTagName = 'h' + node.headingLevel;
     options.labelContent = heading;
@@ -440,8 +431,7 @@ define( function( require ) {
           // {A11yBehaviorFunctionDef} - sets the help text of the Node, this most often corresponds to description text.
           this._helpTextBehavior = DEFAULT_HELP_TEXT_BEHAVIOR;
 
-          // {string|null} - sets the help text of the Node, this most often corresponds to description text.
-          // REVIEW: This... sets the help text according to the documentation above? Presumably not correct?
+          // {string|null} - sets the help text of the Node, this most often corresponds to label sibling text.
           this._accessibleHeading = null;
 
           // TODO: implement headingLevel override, see https://github.com/phetsims/scenery/issues/855
@@ -717,8 +707,7 @@ define( function( require ) {
          * For more information about setting an Accessible Name on HTML see the scenery docs for accessibility,
          * and see https://developer.paciellogroup.com/blog/2017/04/what-is-an-accessible-name/
          *
-         * REVIEW: It seems like it should just be {A11yBehaviorFunctionDef}. Is a general {function} ever desired?
-         * @param {A11yBehaviorFunctionDef|function} accessibleNameBehavior
+         * @param {A11yBehaviorFunctionDef} accessibleNameBehavior
          */
         setAccessibleNameBehavior: function( accessibleNameBehavior ) {
           assert && A11yBehaviorFunctionDef.validateA11yBehaviorFunctionDef( accessibleNameBehavior );
@@ -779,7 +768,7 @@ define( function( require ) {
          * information.
          * @public
          *
-         * @param {A11yBehaviorFunctionDef|function} accessibleHeadingBehavior
+         * @param {A11yBehaviorFunctionDef} accessibleHeadingBehavior
          */
         setAccessibleHeadingBehavior: function( accessibleHeadingBehavior ) {
           assert && A11yBehaviorFunctionDef.validateA11yBehaviorFunctionDef( accessibleHeadingBehavior );
@@ -875,9 +864,6 @@ define( function( require ) {
 
           if ( this._helpText !== helpText ) {
 
-            // REVIEW: Should this be handled as part of this review?
-            // TODO: helptext should only be set on interactive Elements? see https://github.com/phetsims/scenery/issues/795
-
             this._helpText = helpText;
 
             this.onAccessibleContentChange();
@@ -901,7 +887,7 @@ define( function( require ) {
          * "Help Text".
          * @public
          *
-         * @param {A11yBehaviorFunctionDef|function} helpTextBehavior
+         * @param {A11yBehaviorFunctionDef} helpTextBehavior
          */
         setHelpTextBehavior: function( helpTextBehavior ) {
           assert && A11yBehaviorFunctionDef.validateA11yBehaviorFunctionDef( helpTextBehavior );
@@ -1054,16 +1040,20 @@ define( function( require ) {
           assert && assert( inputType === null || typeof inputType === 'string' );
           assert && this.tagName && assert( this._tagName.toUpperCase() === INPUT_TAG, 'tag name must be INPUT to support inputType' );
 
-          // REVIEW: Should have a guard, so that if it's called with no change it's a no-op.
+          if ( inputType !== this._inputType ) {
 
-          this._inputType = inputType;
-          for ( var i = 0; i < this._accessibleInstances.length; i++ ) {
-            var peer = this._accessibleInstances[ i ].peer;
-            // REVIEW: Does it need to removeAttribute when `null` is used? What happens if you switch from an
-            // REVIEW: inputType='checkbox' to inputType=null?
-            // REVIEW: I checked. It shows `type="null"` in the DOM. I can't imagine this causing much bugginess, but
-            // REVIEW: it feels weird.
-            peer.setAttributeToElement( 'type', inputType );
+            this._inputType = inputType;
+            for ( var i = 0; i < this._accessibleInstances.length; i++ ) {
+              var peer = this._accessibleInstances[ i ].peer;
+
+              // remove the attribute if cleared by setting to 'null'
+              if ( inputType === null ) {
+                peer.removeAttributeFromElement( 'type' );
+              }
+              else {
+                peer.setAttributeToElement( 'type', inputType );
+              }
+            }
           }
         },
         set inputType( inputType ) { this.setInputType( inputType ); },

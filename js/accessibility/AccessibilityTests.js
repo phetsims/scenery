@@ -448,6 +448,10 @@ define( function( require ) {
     assert.ok( pDescription.parentElement === divElement.parentElement, 'description is sibling to primary' );
     assert.ok( divElement.parentElement.childNodes.length === 2, 'no label element for aria-label, just description and primary siblings' );
 
+    // clear values
+    buttonNode.inputType = null;
+    var buttonElement = getPrimarySiblingElementByNode( buttonNode );
+    assert.ok( buttonElement.getAttribute( 'type' ) === null, 'input type cleared' );
   } );
 
   // tests for aria-labelledby and aria-describedby should be the same, since both support the same feature set

@@ -384,8 +384,7 @@ define( function( require ) {
       if ( !this.peer.isVisible() ) {
         return false;
       }
-      // REVIEW: I'm tired at the moment, but is there a reason to not have an "else if" here? It should be the same logic.
-      if ( this.parent ) {
+      else if ( this.parent ) {
         return this.parent.isGloballyVisible();
       }
       else { // base case at root
