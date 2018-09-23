@@ -450,7 +450,7 @@ define( function( require ) {
 
     // clear values
     buttonNode.inputType = null;
-    var buttonElement = getPrimarySiblingElementByNode( buttonNode );
+    buttonElement = getPrimarySiblingElementByNode( buttonNode );
     assert.ok( buttonElement.getAttribute( 'type' ) === null, 'input type cleared' );
   } );
 
