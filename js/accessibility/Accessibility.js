@@ -364,7 +364,7 @@ define( function( require ) {
           // {Array.<Node>}
           this._nodesThatAreAriaDescribedbyThisNode = [];
 
-          // @private {?boolean} - whether or not this node's DOM element has been explicitly set to receive focus from
+          // @private {boolean|null} - whether or not this node's DOM element has been explicitly set to receive focus from
           // tab navigation. Sets the tabIndex attribute on the node's DOM element. Setting to false will not remove the
           // node's DOM from the document, but will ensure that it cannot receive focus by pressing 'tab'.  Several
           // HTMLElements (such as HTML form elements) can be focusable by default, without setting this property. The
@@ -2266,7 +2266,7 @@ define( function( require ) {
          * assistive technology.
          * @public
          *
-         * @param {?boolean} focusable - null to use the default browser focus for the primary element
+         * @param {boolean|null} focusable - null to use the default browser focus for the primary element
          */
         setFocusable: function( focusable ) {
           assert && assert( focusable === null || typeof focusable === 'boolean' );

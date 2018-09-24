@@ -41,6 +41,7 @@
  * REVIEW:                    // behaviors were checked/executed.
  * REVIEW: So to have some usages of setters called from update() where things can be overridden, and others called
  * REVIEW: directly WITHOUT behaviors seems to get into really buggy behavior.
+ * //ZEPUMPH: Let's talk about this more as part of https://github.com/phetsims/scenery/issues/867
  *
  * REVIEW: I sorted through a lot of the logic, and here's my current assessment. "ok" basically means that the value
  * REVIEW: always gets set, and in a consistent way. So all of the "options" on the node that the update uses:
@@ -64,6 +65,8 @@
  * REVIEW:   node.focusable (looks like updates to this are completely broken)
  * REVIEW: It would be nice to have all of these consistent, and have one path for setting if needed (that can both be
  * REVIEW: used by setters in Accessibility.js AND the "update()" for good performance).
+ * //ZEPUMPH: Let's talk about this more as part of https://github.com/phetsims/scenery/issues/867
+ *
  *
  * @author Michael Kauzmann (PhET Interactive Simulations)
  */
