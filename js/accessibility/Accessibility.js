@@ -1086,14 +1086,12 @@ define( function( require ) {
          */
         setAppendLabel: function( appendLabel ) {
           assert && assert( typeof appendLabel === 'boolean' );
-          // REVIEW: Should have a guard here presumably? (so spurious changes don't result in a full peer rebuild)
 
-          // REVIEW: Should have a guard, so that if it's called with no change it's a no-op.
+          if ( this._appendLabel !== appendLabel ) {
+            this._appendLabel = appendLabel;
 
-          this._appendLabel = appendLabel;
-
-          // TODO: can we do this without recomputing everything?
-          this.onAccessibleContentChange();
+            this.onAccessibleContentChange();
+          }
         },
         set appendLabel( appendLabel ) { this.setAppendLabel( appendLabel ); },
 
@@ -1125,12 +1123,12 @@ define( function( require ) {
          */
         setAppendDescription: function( appendDescription ) {
           assert && assert( typeof appendDescription === 'boolean' );
-          // REVIEW: Should have a guard here presumably? (so spurious changes don't result in a full peer rebuild)
 
-          this._appendDescription = appendDescription;
+          if ( this._appendDescription !== appendDescription ) {
+            this._appendDescription = appendDescription;
 
-          // TODO: can we do this without recomputing everything?
-          this.onAccessibleContentChange();
+            this.onAccessibleContentChange();
+          }
         },
         set appendDescription( appendDescription ) { this.setAppendDescription( appendDescription ); },
 
@@ -1172,10 +1170,11 @@ define( function( require ) {
          */
         setContainerTagName: function( tagName ) {
           assert && assert( tagName === null || typeof tagName === 'string', 'invalid tagName argument: ' + tagName );
-          // REVIEW: Should have a guard here presumably? (so spurious changes don't result in a full peer rebuild)
 
-          this._containerTagName = tagName;
-          this.onAccessibleContentChange();
+          if ( this._containerTagName !== tagName ) {
+            this._containerTagName = tagName;
+            this.onAccessibleContentChange();
+          }
         },
         set containerTagName( tagName ) { this.setContainerTagName( tagName ); },
 
@@ -1205,7 +1204,6 @@ define( function( require ) {
         setLabelContent: function( label ) {
           assert && assert( label === null || typeof label === 'string' );
 
-          // REVIEW: This could use a guard, to see if it's changed.
           // REVIEW: It's also concerning that setting this ends up changing another field (especially when it's set to
           // REVIEW: the same value!). Can't we handle some of this in the with an accessible*Behavior pattern?
           // REVIEW: It seems setting and unsetting the labelContent (from null to something to null) makes permanent
@@ -1218,18 +1216,18 @@ define( function( require ) {
           // REVIEW:   n.labelContent = n.labelContent;
           // REVIEW:   n.labelTagName; // "P" !!!
 
-          this._labelContent = label;
+          if ( this._labelContent !== label ) {
+            this._labelContent = label;
 
-          var self = this;
+            // if trying to set labelContent, make sure that there is a labelTagName default
+            if ( !this._labelTagName ) {
+              this.setLabelTagName( DEFAULT_LABEL_TAG_NAME );
+            }
 
-          // if trying to set labelContent, make sure that there is a labelTagName default
-          if ( !this._labelTagName ) {
-            this.setLabelTagName( DEFAULT_LABEL_TAG_NAME );
-          }
-
-          for ( var i = 0; i < this._accessibleInstances.length; i++ ) {
-            var peer = this._accessibleInstances[ i ].peer;
-            peer.setLabelSiblingContent( self._labelContent );
+            for ( var i = 0; i < this._accessibleInstances.length; i++ ) {
+              var peer = this._accessibleInstances[ i ].peer;
+              peer.setLabelSiblingContent( this._labelContent );
+            }
           }
         },
         set labelContent( label ) { this.setLabelContent( label ); },
@@ -1256,15 +1254,13 @@ define( function( require ) {
         setInnerContent: function( content ) {
           assert && assert( content === null || typeof content === 'string' );
 
-          this._innerContent = content;
+          if ( this._innerContent !== content ) {
+            this._innerContent = content;
 
-          // REVIEW: Should have a guard, so that if it's called with no change it's a no-op.
-
-          var self = this;
-
-          for ( var i = 0; i < this._accessibleInstances.length; i++ ) {
-            var peer = this._accessibleInstances[ i ].peer;
-            peer.setPrimarySiblingContent( self._innerContent );
+            for ( var i = 0; i < this._accessibleInstances.length; i++ ) {
+              var peer = this._accessibleInstances[ i ].peer;
+              peer.setPrimarySiblingContent( this._innerContent );
+            }
           }
         },
         set innerContent( content ) { this.setInnerContent( content ); },
@@ -1291,21 +1287,21 @@ define( function( require ) {
         setDescriptionContent: function( descriptionContent ) {
           assert && assert( descriptionContent === null || typeof descriptionContent === 'string' );
 
-          var self = this;
+          if ( this._descriptionContent !== descriptionContent ) {
+            this._descriptionContent = descriptionContent;
 
-          this._descriptionContent = descriptionContent;
+            // REVIEW: See notes in setLabelContent. Setting the descriptionTagName feels wrong,
+            // REVIEW: where a behavior would be better.
 
-          // REVIEW: See notes in setLabelContent. should have a guard, and setting the descriptionTagName feels wrong,
-          // REVIEW: where a behavior would be better.
+            // if there is no description element, assume that a paragraph element should be used
+            if ( !this._descriptionTagName ) {
+              this.setDescriptionTagName( DEFAULT_DESCRIPTION_TAG_NAME );
+            }
 
-          // if there is no description element, assume that a paragraph element should be used
-          if ( !this._descriptionTagName ) {
-            this.setDescriptionTagName( DEFAULT_DESCRIPTION_TAG_NAME );
-          }
-
-          for ( var i = 0; i < this._accessibleInstances.length; i++ ) {
-            var peer = this._accessibleInstances[ i ].peer;
-            peer.setDescriptionSiblingContent( self._descriptionContent );
+            for ( var i = 0; i < this._accessibleInstances.length; i++ ) {
+              var peer = this._accessibleInstances[ i ].peer;
+              peer.setDescriptionSiblingContent( this._descriptionContent );
+            }
           }
         },
         set descriptionContent( textContent ) { this.setDescriptionContent( textContent ); },
@@ -1452,11 +1448,11 @@ define( function( require ) {
         setAriaLabel: function( ariaLabel ) {
           assert && assert( ariaLabel === null || typeof ariaLabel === 'string' );
 
-          // REVIEW: Should have a guard, so that if it's called with no change it's a no-op.
+          if ( this._ariaLabel !== ariaLabel ) {
+            this._ariaLabel = ariaLabel;
 
-          this._ariaLabel = ariaLabel;
-
-          this.setAccessibleAttribute( 'aria-label', ariaLabel );
+            this.setAccessibleAttribute( 'aria-label', ariaLabel );
+          }
         },
         set ariaLabel( ariaLabel ) { this.setAriaLabel( ariaLabel ); },
 
@@ -1485,30 +1481,24 @@ define( function( require ) {
                             focusHighlight instanceof Shape ||
                             focusHighlight === 'invisible' );
 
-          // REVIEW: Should have a guard, so that if it's called with no change it's a no-op.
+          if ( this._focusHighlight !== focusHighlight ) {
+            this._focusHighlight = focusHighlight;
 
-          this._focusHighlight = focusHighlight;
+            // if the focus highlight is layerable in the scene graph, update visibility so that it is only
+            // visible when associated node has focus
+            if ( this._focusHighlightLayerable ) {
 
-          var isFocused = false;
-          if ( this.isFocused() ) {
-            isFocused = true;
+              // if focus highlight is layerable, it must be a node in the scene graph
+              assert && assert( focusHighlight instanceof scenery.Node );
+              focusHighlight.visible = this.focused;
+            }
+
+            // REVIEW: This value is used by AccessiblePeer's update (creation), but changing this doesn't seem to
+            // REVIEW: update the peers. Should it call onAccessibleContentChange(), or do a more fine-grained change?
+            // ZEPUMPH: I deleted the usage in update because it is covered here in node. I don't think this needs
+            // ZEPUMPH: to effect the peer at all.
+            // ZEPUMPH: NOTE: this should apply to setFocusHighlightLayerable too.
           }
-
-          // if the focus highlight is layerable in the scene graph, update visibility so that it is only
-          // visible when associated node has focus
-          if ( this._focusHighlightLayerable ) {
-
-            // if focus highlight is layerable, it must be a node in the scene graph
-            assert && assert( focusHighlight instanceof scenery.Node );
-            focusHighlight.visible = isFocused;
-          }
-
-          // Reset the focus after invalidating the content.
-          isFocused && this.focus();
-
-          // REVIEW: This value is used by AccessiblePeer's update (creation), but changing this doesn't seem to
-          // REVIEW: update the peers. Should it call onAccessibleContentChange(), or do a more fine-grained change?
-
         },
         set focusHighlight( focusHighlight ) { this.setFocusHighlight( focusHighlight ); },
 
@@ -1532,18 +1522,17 @@ define( function( require ) {
          * @param {Boolean} focusHighlightLayerable
          */
         setFocusHighlightLayerable: function( focusHighlightLayerable ) {
-          // REVIEW: Should have a guard, so that if it's called with no change it's a no-op.
-          this._focusHighlightLayerable = focusHighlightLayerable;
 
-          // if a focus highlight is defined (it must be a node), update its visibility so it is linked to focus
-          // of the associated node
-          if ( this._focusHighlight ) {
-            assert && assert( this._focusHighlight instanceof scenery.Node );
-            this._focusHighlight.visible = this.focused;
+          if ( this._focusHighlightLayerable !== focusHighlightLayerable ) {
+            this._focusHighlightLayerable = focusHighlightLayerable;
+
+            // if a focus highlight is defined (it must be a node), update its visibility so it is linked to focus
+            // of the associated node
+            if ( this._focusHighlight ) {
+              assert && assert( this._focusHighlight instanceof scenery.Node );
+              this._focusHighlight.visible = this.focused;
+            }
           }
-
-          // REVIEW: This value is used by AccessiblePeer's update (creation), but changing this doesn't seem to
-          // REVIEW: update the peers. Should it call onAccessibleContentChange(), or do a more fine-grained change?
         },
         set focusHighlightLayerable( focusHighlightLayerable ) { this.setFocusHighlightLayerable( focusHighlightLayerable ); },
 
@@ -1657,8 +1646,6 @@ define( function( require ) {
          * @param {Object} associationObject - with key value pairs like
          *                               { otherNode: {Node}, otherElementName: {string}, thisElementName: {string } }
          *                               see AccessiblePeer for valid element names.
-         * REVIEW: Can we typedef (or create a type) for this? Took a bit of bouncing around to find the docs for the
-         * REVIEW type.
          */
         addAriaLabelledbyAssociation: function( associationObject ) {
           assert && AccessibilityUtil.validateAssociationObject( associationObject );
@@ -2094,14 +2081,16 @@ define( function( require ) {
           assert && assert( value === null || typeof value === 'string' || typeof value === 'number' );
           assert && this._tagName && assert( _.includes( FORM_ELEMENTS, this._tagName.toUpperCase() ), 'dom element must be a form element to support value' );
 
+          // type cast
           value = '' + value;
-          this._inputValue = value;
 
-          // REVIEW: Should have a guard, so that if it's called with no change it's a no-op.
+          if ( value !== this._inputValue ) {
+            this._inputValue = value;
 
-          for ( var i = 0; i < this.accessibleInstances.length; i++ ) {
-            var peer = this.accessibleInstances[ i ].peer;
-            peer.onInputValueChange();
+            for ( var i = 0; i < this.accessibleInstances.length; i++ ) {
+              var peer = this.accessibleInstances[ i ].peer;
+              peer.onInputValueChange();
+            }
           }
         },
         set inputValue( value ) { this.setInputValue( value ); },
@@ -2135,11 +2124,11 @@ define( function( require ) {
             assert && assert( INPUT_TYPES_THAT_SUPPORT_CHECKED.indexOf( this._inputType.toUpperCase() ) >= 0, 'inputType does not support checked: ' + this._inputType );
           }
 
-          // REVIEW: Should have a guard, so that if it's called with no change it's a no-op.
+          if ( this._accessibleChecked !== checked ) {
+            this._accessibleChecked = checked;
 
-          this._accessibleChecked = checked;
-
-          this.setAccessibleAttribute( 'checked', checked );
+            this.setAccessibleAttribute( 'checked', checked );
+          }
         },
         set accessibleChecked( checked ) { this.setAccessibleChecked( checked ); },
 
@@ -2158,7 +2147,6 @@ define( function( require ) {
          * Get an array containing all accessible attributes that have been added to this node's DOM element.
          * @public
          *
-         * REVIEW: This could potentially use its own type, so it would have {Array.<AccessibleAttribute>}?
          * @returns {Array.<Object>} - Returns objects with: {
          *   attribute: {string} // the name of the attribute
          *   value: {*} // the value of the attribute
@@ -2283,15 +2271,13 @@ define( function( require ) {
         setFocusable: function( focusable ) {
           assert && assert( focusable === null || typeof focusable === 'boolean' );
 
-          var self = this;
+          if ( this._focusableOverride !== focusable ) {
+            this._focusableOverride = focusable;
 
-          // REVIEW: Should have a guard, so that if it's called with no change it's a no-op.
-
-          this._focusableOverride = focusable;
-
-          for ( var i = 0; i < this._accessibleInstances.length; i++ ) {
-            var peer = this._accessibleInstances[ i ].peer;
-            peer.setAttributeToElement( 'tabIndex', self.focusable ? 0 : -1 );
+            for ( var i = 0; i < this._accessibleInstances.length; i++ ) {
+              var peer = this._accessibleInstances[ i ].peer;
+              peer.setAttributeToElement( 'tabIndex', this.focusable ? 0 : -1 );
+            }
           }
         },
         set focusable( isFocusable ) { this.setFocusable( isFocusable ); },
@@ -2467,8 +2453,7 @@ define( function( require ) {
         /**
          * Called when the node is added as a child to this node AND the node's subtree contains accessible content.
          * We need to notify all Displays that can see this change, so that they can update the AccessibleInstance tree.
-         * @private
-         * REVIEW: This is... called from Node. Do we need this to be @protected instead?
+         * @protected (called from Node.js)
          *
          * @param {Node} node
          */
