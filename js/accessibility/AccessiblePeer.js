@@ -114,9 +114,6 @@ define( function( require ) {
         this._containerParent.removeChild( this._containerParent.lastChild );
       }
 
-      // REVIEW: Why is this a separate function call? It's never called to "update" things.
-      this.update();
-
       return this;
     },
 
@@ -264,11 +261,6 @@ define( function( require ) {
       // update input value attribute for the peer
       this.onInputValueChange();
 
-      // TODO: this is hacky, because updateOtherNodes functions could try to access this peer from their accessibleInstance.
-      // REVIEW: What if, instead of calling update() from inside AccessiblePeer (in the initialization), it was called
-      // REVIEW: in AccessibleInstance after `this.peer = AccessiblePeer.createFromPool( ... )` happens? Then this
-      // REVIEW: field would already be set, and we wouldn't need the workaround here?
-      this.accessibleInstance.peer = this;
       this.node.updateOtherNodesAriaLabelledby();
       this.node.updateOtherNodesAriaDescribedby();
     },

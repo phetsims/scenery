@@ -166,6 +166,12 @@ define( function( require ) {
       else {
         this.peer = AccessiblePeer.createFromPool( this );
 
+        // ZEPUMPH:
+        // TODO: This function constructs the peer and must be called with createFromPool, are we
+        // sure that we want the "constructor" for the peer (this function) to be outside of the constructor for the type?
+        // https://github.com/phetsims/scenery/issues/832
+        this.peer.update();
+
         assert && assert( this.peer.primarySibling, 'accessible peer must have a primarySibling upon completion of construction' );
 
         // Scan over all of the nodes in our trail (that are NOT in our parent's trail) to check for accessibleDisplays
