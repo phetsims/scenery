@@ -12,7 +12,6 @@ define( function( require ) {
   'use strict';
 
   var AccessibilityUtil = require( 'SCENERY/accessibility/AccessibilityUtil' );
-  var Events = require( 'AXON/Events' );
   var Focus = require( 'SCENERY/accessibility/Focus' );
   var inherit = require( 'PHET_CORE/inherit' );
   var Poolable = require( 'PHET_CORE/Poolable' );
@@ -41,8 +40,7 @@ define( function( require ) {
 
   scenery.register( 'AccessiblePeer', AccessiblePeer );
 
-  // REVIEW: I don't actually see any usage of the Events part of AccessiblePeer. Can we remove that now?
-  inherit( Events, AccessiblePeer, {
+  inherit( Object, AccessiblePeer, {
 
     /**
      * Initializes the object (either from a freshly-created state, or from a "disposed" state brought back from a
@@ -57,8 +55,6 @@ define( function( require ) {
       options = _.extend( {
         primarySibling: null // {HTMLElement|null} primarySibling - The main DOM element used for this peer
       }, options );
-
-      Events.call( this ); // TODO: is Events worth mixing in by default? Will we need to listen to events?
 
       assert && assert( !this.id || this.disposed, 'If we previously existed, we need to have been disposed' );
 
@@ -278,16 +274,6 @@ define( function( require ) {
 
       // update input value attribute for the peer
       this.onInputValueChange();
-
-      // Default the focus highlight in this special case to be invisible until selected.
-      if ( this.node.focusHighlightLayerable ) {
-
-        // if focus highlight is layerable, it must be a node in the scene graph
-        assert && assert( this.node.focusHighlight instanceof scenery.Node );
-
-        // REVIEW: Wait, why are we changing something assigned to the node here? Do we control this focus highlight now?
-        this.node.focusHighlight.visible = false;
-      }
 
       // TODO: this is hacky, because updateOtherNodes functions could try to access this peer from their accessibleInstance.
       // REVIEW: What if, instead of calling update() from inside AccessiblePeer (in the initialization), it was called
