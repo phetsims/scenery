@@ -12,6 +12,7 @@ define( function( require ) {
   'use strict';
 
   var AccessibilityUtil = require( 'SCENERY/accessibility/AccessibilityUtil' );
+  var arrayRemove = require( 'PHET_CORE/arrayRemove' );
   var Focus = require( 'SCENERY/accessibility/Focus' );
   var inherit = require( 'PHET_CORE/inherit' );
   var Poolable = require( 'PHET_CORE/Poolable' );
@@ -337,9 +338,6 @@ define( function( require ) {
      * @public
      */
     onAriaLabelledbyAssociationChange: function() {
-      // REVIEW: Is there a good list of attributes for which should NOT be set by the node (because it will be buggy)?
-      // REVIEW: It seems like it's just a11y-dev knowledge that you shouldn't node.setAccessibleAttribute( 'aria-labelledby' ).
-      // REVIEW: It probably is the best to keep it that way?
       this.removeAttributeFromAllElements( 'aria-labelledby' );
 
       for ( var i = 0; i < this.node.ariaLabelledbyAssociations.length; i++ ) {
@@ -387,11 +385,12 @@ define( function( require ) {
         var value = dataObject.value;
 
         // allow overriding of aria-label for accessibleName setter
-        // TODO: this is a specific workaround, it would be nice to sort out a general case for this, #795
+        // TODO: this is a specific workaround, it would be nice to sort out a general case for this, https://github.com/phetsims/scenery/issues/832#issuecomment-423770701
         // REVIEW: See note in update() above, handling the general case of this seems nice. We're likely to run into
         // REVIEW: other cases in the future.
         // REVIEW: ALSO we run into weird cases right now of "did you update the aria-label attribute or something that
         // REVIEW: ran update() last?" -- the attribute could potentially change unpredictably.
+
         if ( attribute === 'aria-label' && a11yOptions && typeof a11yOptions.ariaLabel === 'string' && dataObject.options.elementName === PRIMARY_SIBLING ) {
           value = a11yOptions.ariaLabel;
         }
@@ -399,6 +398,10 @@ define( function( require ) {
       }
 
       // REVIEW: How are "removed" attributes handled here? Do we never need to worry about it?
+      // ZEPUMPH: right now this is only called from `update()` (basically from AccessiblePeer constructor). When
+      // ZEPUMPH: removing attributes, we use removeAttributeFromElement, see setInputType or removeAccessibleAttribute.
+      // ZEPUMPH: This is a little confusing (since it is called onAttribute"Change"), but it is less expensive to run
+      // ZEPUMPH: this loop for every individual change. Right now it is messy though.
     },
 
     /**
@@ -631,16 +634,12 @@ define( function( require ) {
 
       // If there are multiple top level nodes
       else {
-        assert && assert( this.topLevelElements.indexOf( contentElement ) >= 0, 'element is not part of this peer, thus cannot be arranged' );
 
         // keep this.topLevelElements in sync
-        // REVIEW: PHET_CORE/arrayRemove could help?
-        this.topLevelElements.splice( this.topLevelElements.indexOf( contentElement ), 1 );
+        arrayRemove( this.topLevelElements, contentElement );
 
         var indexOffset = appendElement ? 1 : 0;
         var indexOfContentElement = this.topLevelElements.indexOf( this._primarySibling ) + indexOffset;
-        // REVIEW: I'm confused, how could this come up? If the primarySibling was not found?
-        indexOfContentElement = indexOfContentElement < 0 ? 0 : indexOfContentElement; //support primarySibling in the first position
         this.topLevelElements.splice( indexOfContentElement, 0, contentElement );
       }
     },
@@ -736,6 +735,7 @@ define( function( require ) {
 
       // if the label element happens to be a 'label', associate with 'for' attribute
       // REVIEW: Should we check _labelTagName directly? Or use a behavior-like strategy for this?
+      // ZEPUMPH: perhaps implemented with https://github.com/phetsims/scenery/issues/867
       if ( this._labelSibling.tagName.toUpperCase() === LABEL_TAG ) {
         this._labelSibling.setAttribute( 'for', this._primarySibling.id );
       }

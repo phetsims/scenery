@@ -1209,6 +1209,7 @@ define( function( require ) {
           // REVIEW: It seems setting and unsetting the labelContent (from null to something to null) makes permanent
           // REVIEW: changes to the labelTagName, which is weird.
           // REVIEW: Can we just have a behavior that does this instead?
+          // ZEPUMPH: perhaps worked on as part of https://github.com/phetsims/scenery/issues/867
 
           // REVIEW: Also this is really weird:
           // REVIEW:   var n = new scenery.Node();
