@@ -1569,7 +1569,8 @@ define( function( require ) {
     /**
      * Returns the visual "safe" bounds that are taken up by this node and its subtree. Notably, this is essentially the
      * combined effects of the "visible" bounds (i.e. invisible nodes do not contribute to bounds), and "safe" bounds
-     * (e.g. Text, where we need a larger bounds area to guarantee there is nothing outside).
+     * (e.g. Text, where we need a larger bounds area to guarantee there is nothing outside). It also tries to "fit"
+     * transformed bounds more tightly, where it will handle rotated Path bounds in an improved way.
      * @public
      *
      * NOTE: This method is not optimized, and may create garbage and not be the fastest.
@@ -1578,7 +1579,7 @@ define( function( require ) {
      *                             given matrix.
      * @returns {Bounds2}
      */
-    getVisualBounds: function( matrix ) {
+    getSafeTransformedVisibleBounds: function( matrix ) {
       const localMatrix = ( matrix || Matrix3.IDENTITY ).timesMatrix( this.matrix );
 
       const bounds = Bounds2.NOTHING.copy();
@@ -1590,13 +1591,14 @@ define( function( require ) {
 
         if ( this._children.length ) {
           for ( var i = 0; i < this._children.length; i++ ) {
-            bounds.includeBounds( this._children[ i ].getVisualBounds( localMatrix ) );
+            bounds.includeBounds( this._children[ i ].getSafeTransformedVisibleBounds( localMatrix ) );
           }
         }
       }
 
       return bounds;
     },
+    get safeTransformedVisibleBounds() { return this.getSafeTransformedVisibleBounds(); },
 
     /**
      * Sets the flag that determines whether we will require more accurate (and expensive) bounds computation for this
@@ -4289,8 +4291,8 @@ define( function( require ) {
         sourceBounds: null,
 
         // {boolean} - If true, the localBounds of the result will be set in a way such that it will precisely match
-        // the bounds of the original node (this). Note that antialiased content (with a much lower resolution) may
-        // somewhat spill outside of these bounds if this is set to true. Usually this is fine and should be the
+        // the visible bounds of the original node (this). Note that antialiased content (with a much lower resolution)
+        // may somewhat spill outside of these bounds if this is set to true. Usually this is fine and should be the
         // recommended option. If sourceBounds are provided, they will restrict the used bounds (so it will just
         // represent the bounds of the sliced part of the image).
         useTargetBounds: true,
@@ -4325,7 +4327,7 @@ define( function( require ) {
         children: [ this ]
       } );
 
-      var transformedBounds = sourceBounds || this.getVisualBounds().dilated( 2 ).roundedOut();
+      var transformedBounds = sourceBounds || this.getSafeTransformedVisibleBounds().dilated( 2 ).roundedOut();
 
       // Unfortunately if we provide a resolution AND bounds, we can't use the source bounds directly.
       if ( resolution !== 1 ) {
@@ -4367,7 +4369,9 @@ define( function( require ) {
 
       wrapperNode.dispose();
 
-      var finalParentBounds = this.getVisualBounds();
+      // For our useTargetBounds option, we do NOT want to include any "safe" bounds, and instead want to stay true to
+      // the original bounds. We do filter out invisible subtrees to set the bounds.
+      var finalParentBounds = this.getVisibleBounds();
       if ( sourceBounds ) {
         // If we provide sourceBounds, don't have resulting bounds that go outside.
         finalParentBounds = sourceBounds.intersection( finalParentBounds );
