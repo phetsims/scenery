@@ -39,7 +39,7 @@ define( function( require ) {
         this.instance.image = im;
       },
       documentation: 'Set the image from a base64 string',
-      canBeInvokedForReadOnlyInstances: false
+      invocableForReadOnlyInstances: false
     }
   }, {
     documentation: 'The tandem IO type for the scenery Text node',
