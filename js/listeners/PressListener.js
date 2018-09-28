@@ -18,6 +18,7 @@ define( function( require ) {
   var BooleanProperty = require( 'AXON/BooleanProperty' );
   var Emitter = require( 'AXON/Emitter' );
   var EmitterIO = require( 'AXON/EmitterIO' );
+  var DerivedProperty = require( 'AXON/DerivedProperty' );
   var inherit = require( 'PHET_CORE/inherit' );
   var Mouse = require( 'SCENERY/input/Mouse' );
   var EventIO = require( 'SCENERY/input/EventIO' );
@@ -199,6 +200,12 @@ define( function( require ) {
 
     // @public (read-only) {BooleanProperty} - Whether or not a press is being processed from an a11y click input event.
     this.a11yClickingProperty = new BooleanProperty( false );
+
+    // @public (read-only) {BooleanProperty} - This Property was added for a11y. It tracks whether or not the button
+    // should "look" down. This will be true if downProperty is true or if an a11y click is in progress. For an a11y
+    // click, the listeners are fired right away but the button will look down for as long as fireOnHoldInterval.
+    // See PressListener.click() for more details.
+    this.looksPressedProperty = DerivedProperty.or( [ this.a11yClickingProperty, this.isPressedProperty ] );
 
     // @private {Object} - The listener that gets added to the pointer when we are pressed
     this._pointerListener = {
@@ -670,6 +677,8 @@ define( function( require ) {
       }
       !this.isHoveringProperty.isDisposed && this.isHoveringProperty.unlink( this._isHighlightedListener );
 
+      this.a11yClickingProperty.dispose();
+      this.looksPressedProperty.dispose();
 
       this._pressedEmitter.dispose();
       this._releasedEmitter.dispose();
