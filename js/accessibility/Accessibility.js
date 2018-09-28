@@ -168,7 +168,7 @@ define( function( require ) {
   // see setAccessibleHeadingBehavior for more details
   var DEFAULT_ACCESSIBLE_HEADING_BEHAVIOR = function( node, options, heading ) {
 
-    options.labelTagName = 'h' + node.headingLevel;
+    options.labelTagName = 'h' + node.headingLevel; // TODO: make sure heading level change fires a full peer rebuild, see https://github.com/phetsims/scenery/issues/867
     options.labelContent = heading;
     return options;
   };
@@ -1494,11 +1494,7 @@ define( function( require ) {
               focusHighlight.visible = this.focused;
             }
 
-            // REVIEW: This value is used by AccessiblePeer's update (creation), but changing this doesn't seem to
-            // REVIEW: update the peers. Should it call onAccessibleContentChange(), or do a more fine-grained change?
-            // ZEPUMPH: I deleted the usage in update because it is covered here in node. I don't think this needs
-            // ZEPUMPH: to effect the peer at all.
-            // ZEPUMPH: NOTE: this should apply to setFocusHighlightLayerable too.
+            // REVIEW: Should it call onAccessibleContentChange()
           }
         },
         set focusHighlight( focusHighlight ) { this.setFocusHighlight( focusHighlight ); },
@@ -1651,6 +1647,8 @@ define( function( require ) {
         addAriaLabelledbyAssociation: function( associationObject ) {
           assert && AccessibilityUtil.validateAssociationObject( associationObject );
 
+          // TODO: assert if this associationObject is already in the association objects list! https://github.com/phetsims/scenery/issues/832
+
           this._ariaLabelledbyAssociations.push( associationObject ); // Keep track of this association.
 
           // Flag that this node is is being labelled by the other node, so that if the other node changes it can tell
@@ -1795,6 +1793,7 @@ define( function( require ) {
         addAriaDescribedbyAssociation: function( associationObject ) {
           assert && AccessibilityUtil.validateAssociationObject( associationObject );
 
+          // TODO: assert if this associationObject is already in the association objects list! https://github.com/phetsims/scenery/issues/832
           this._ariaDescribedbyAssociations.push( associationObject ); // Keep track of this association.
 
           // Flag that this node is is being described by the other node, so that if the other node changes it can tell
@@ -1853,6 +1852,7 @@ define( function( require ) {
 
           // if any other nodes are aria-describedby this Node, update those associations too. Since this node's
           // accessible content needs to be recreated, they need to update their aria-describedby associations accordingly.
+          // TODO: only use unique elements of the array (_.unique)
           for ( var i = 0; i < this._nodesThatAreAriaDescribedbyThisNode.length; i++ ) {
             var otherNode = this._nodesThatAreAriaDescribedbyThisNode[ i ];
             otherNode.updateAriaDescribedbyAssociationsInPeers();

@@ -45,7 +45,9 @@ define( function( require ) {
 
     /**
      * Initializes the object (either from a freshly-created state, or from a "disposed" state brought back from a
-     * pool)
+     * pool).
+     *
+     * NOTE: the AccessiblePeer is not fully constructed until calling AccessiblePeer.update() after creating from pool.
      * @private
      *
      * @param {AccessibleInstance} accessibleInstance
@@ -102,28 +104,15 @@ define( function( require ) {
         // @private {HTMLElement} - The main element associated with this peer. If focusable, this is the element that gets
         // the focus. It also will contain any children.
         this._primarySibling = options.primarySibling;
-        return this;
-      }
-
-      //REVIEW: Why doesn't this need to be done for "root" peers where the primarySibling is passed in? Seems like
-      //REVIEW: it would still be needed.
-      //ZEPUMPH: Since the root doesn't have a node, it couldn't have a container or sibling elements, so this all isn't
-      //ZEPUMPH: needed I think.
-      // for each accessible peer, clear the container parent if it exists since we will be reinserting labels and
-      // the dom element in createPeer
-      while ( this._containerParent && this._containerParent.hasChildNodes() ) {
-        this._containerParent.removeChild( this._containerParent.lastChild );
       }
 
       return this;
     },
 
     /**
-     * Update the content of the peer
+     * Update the content of the peer. This must be called after the AccessibePeer is constructed from pool.
      * @private
      *
-     * REVIEW: This appears to be only called from initializeAccessiblePeer, and never from anywhere else. Is that
-     * REVIEW: correct, and if so could they be combined?
      */
     update: function() {
       var i;
@@ -181,6 +170,7 @@ define( function( require ) {
       //REVIEW: able to modify whether something is focusable?
       //ZEPUMPH: I think we need to have a larger discussion about what behavior functions' role should be, I totally
       //ZEPUMPH: understand your thought here.
+      // TODO: why not just options.focusable?
       this._primarySibling = AccessibilityUtil.createElement( options.tagName, this.node.focusable, {
         namespace: options.accessibleNamespace
       } );
@@ -234,7 +224,7 @@ define( function( require ) {
       // if element is an input element, set input type
       if ( options.tagName.toUpperCase() === INPUT_TAG && options.inputType ) {
         // REVIEW: This looks like something that should be a behavior?
-        //ZEPUMPH: I'm not sure I understand
+        //ZEPUMPH: TODO: Let's talk about this more as part of https://github.com/phetsims/scenery/issues/867
         this.setAttributeToElement( 'type', options.inputType );
       }
 
@@ -396,12 +386,6 @@ define( function( require ) {
         }
         this.setAttributeToElement( attribute, value, dataObject.options );
       }
-
-      // REVIEW: How are "removed" attributes handled here? Do we never need to worry about it?
-      // ZEPUMPH: right now this is only called from `update()` (basically from AccessiblePeer constructor). When
-      // ZEPUMPH: removing attributes, we use removeAttributeFromElement, see setInputType or removeAccessibleAttribute.
-      // ZEPUMPH: This is a little confusing (since it is called onAttribute"Change"), but it is less expensive to run
-      // ZEPUMPH: this loop for every individual change. Right now it is messy though.
     },
 
     /**
