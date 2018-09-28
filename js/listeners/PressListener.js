@@ -185,9 +185,6 @@ define( function( require ) {
     this._fireOnHoldInterval = options.fireOnHoldInterval; // used for a11y
     this._onAccessibleClick = options.onAccessibleClick; // used for a11y
 
-    // @private {boolean} - marks that the accessibility click listener is currently firing.
-    this._a11yClickInProgress = false;
-
     // @private {boolean} - Whether our pointer listener is referenced by the pointer (need to have a flag due to
     //                      handling disposal properly).
     this._listeningToPointer = false;
@@ -557,7 +554,7 @@ define( function( require ) {
       sceneryLog && sceneryLog.InputListener && sceneryLog.push();
 
       // REVIEW: Why can't we interrupt an a11y click? That sounds very buggy!
-      if ( this.isPressed && !this._a11yClickInProgress ) {
+      if ( this.isPressed ) {
         sceneryLog && sceneryLog.InputListener && sceneryLog.InputListener( 'PressListener#' + this._id + ' interrupting' );
         this.interrupted = true;
 
@@ -614,9 +611,6 @@ define( function( require ) {
     click: function() {
       if ( this.canClick() ) {
 
-        // TODO: This can be deleted right? see https://github.com/phetsims/scenery/issues/831
-        this._a11yClickInProgress = true;
-
         this.a11yClickingProperty.value = true;
 
         // ensure that button is 'over' so listener can be called while button is down
@@ -628,8 +622,6 @@ define( function( require ) {
 
         // call the a11y click specific listener
         this._onAccessibleClick && this._onAccessibleClick();
-
-        this._a11yClickInProgress = false;
 
         var self = this;
         timer.setTimeout( function() {
