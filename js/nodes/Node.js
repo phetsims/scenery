@@ -4958,8 +4958,6 @@ define( function( require ) {
         return this;
       }
 
-      this.initializePhetioObject( { phetioType: NodeIO }, options );
-
       assert && assert( Object.getPrototypeOf( options ) === Object.prototype,
         'Extra prototype on Node options object is a code smell' );
 
@@ -4988,6 +4986,8 @@ define( function( require ) {
           }
         }
       } );
+
+      this.initializePhetioObject( { phetioType: NodeIO }, options );
 
       return this; // allow chaining
     },
