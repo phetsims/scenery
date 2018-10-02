@@ -107,8 +107,8 @@ define( function( require ) {
       // started.
       canStartPress: _.constant( true ),
 
-      // a11y {number} - interval between a11y click presses. Same default as ButtonModel.js
-      fireOnHoldInterval: 100,
+      // a11y {number} - how long something should 'look' pressed after an accessible click input event
+      a11yLooksPressedInterval: 100,
 
       // a11y {function} - called at the end of a press ("click") that was a result of a keyboard action. This will not
       // be called for a mouse/pointer interaction.
@@ -143,8 +143,8 @@ define( function( require ) {
       'If a custom isHighlightedProperty is provided, it must be a Property that is false initially' );
     assert && assert( options.onAccessibleClick === null || typeof options.onAccessibleClick === 'function',
       'If provided, onAccessibleClick should be a function' );
-    assert && assert( options.fireOnHoldInterval === null || typeof options.fireOnHoldInterval === 'number',
-      'If provided, fireOnHoldInterval should be a number' );
+    assert && assert( options.a11yLooksPressedInterval === null || typeof options.a11yLooksPressedInterval === 'number',
+      'If provided, a11yLooksPressedInterval should be a number' );
 
     // @private {number} - Unique global ID for this listener
     this._id = globalID++;
@@ -183,7 +183,7 @@ define( function( require ) {
     this._targetNode = options.targetNode;
     this._attach = options.attach;
     this._canStartPress = options.canStartPress;
-    this._fireOnHoldInterval = options.fireOnHoldInterval; // used for a11y
+    this._a11yLooksPressedInterval = options.a11yLooksPressedInterval; // used for a11y
     this._onAccessibleClick = options.onAccessibleClick; // used for a11y
 
     // @private {boolean} - Whether our pointer listener is referenced by the pointer (need to have a flag due to
@@ -203,7 +203,7 @@ define( function( require ) {
 
     // @public (read-only) {BooleanProperty} - This Property was added for a11y. It tracks whether or not the button
     // should "look" down. This will be true if downProperty is true or if an a11y click is in progress. For an a11y
-    // click, the listeners are fired right away but the button will look down for as long as fireOnHoldInterval.
+    // click, the listeners are fired right away but the button will look down for as long as a11yLooksPressedInterval.
     // See PressListener.click() for more details.
     this.looksPressedProperty = DerivedProperty.or( [ this.a11yClickingProperty, this.isPressedProperty ] );
 
@@ -643,7 +643,7 @@ define( function( require ) {
         var self = this;
         this._a11yClickingTimeoutListener = timer.setTimeout( function() {
           self.a11yClickingProperty.value = false;
-        }, this._fireOnHoldInterval );
+        }, this._a11yLooksPressedInterval );
       }
     },
 
