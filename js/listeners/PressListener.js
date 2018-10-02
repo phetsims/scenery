@@ -207,6 +207,12 @@ define( function( require ) {
     // See PressListener.click() for more details.
     this.looksPressedProperty = DerivedProperty.or( [ this.a11yClickingProperty, this.isPressedProperty ] );
 
+    // @private {function|null } - When a11y clicking begins, this will be added to a timeout so that the
+    // a11yClickingProperty is updated after some delay. This is required since an assistive device (like a switch) may
+    // send "click" events directly instead of keydown/keyup pairs. If a click initiates while already in progress,
+    // this listener will be removed to start the timeout over. null until timout is added.
+    this._a11yClickingTimeoutListener = null;
+
     // @private {Object} - The listener that gets added to the pointer when we are pressed
     this._pointerListener = {
       /**
@@ -629,8 +635,13 @@ define( function( require ) {
         // call the a11y click specific listener
         this._onAccessibleClick && this._onAccessibleClick();
 
+        // if we are already clicking, remove the previous timeout - this assumes that clearTimeout is a noop if the
+        // listener is no longer attached
+        timer.clearTimeout( this._a11yClickingTimeoutListener );
+
+        // now add the timeout back to start over, saving so that it can be removed later
         var self = this;
-        timer.setTimeout( function() {
+        this._a11yClickingTimeoutListener = timer.setTimeout( function() {
           self.a11yClickingProperty.value = false;
         }, this._fireOnHoldInterval );
       }
