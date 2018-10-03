@@ -1494,6 +1494,7 @@ define( function( require ) {
               focusHighlight.visible = this.focused;
             }
 
+            this.trigger( 'focusHighlightChanged' );
             // REVIEW: Should it call onAccessibleContentChange()
           }
         },

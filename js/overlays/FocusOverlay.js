@@ -59,6 +59,10 @@ define( function( require ) {
     this.transformTracker = null;
     this.groupTransformTracker = null;
 
+    // @private {Node|null} - If a node is using a custom focus highlight, a reference is kept so that it can be
+    // removed from the overlay when node focus changes.
+    this.nodeFocusHighlight = null;
+
     // @private {boolean} - if true, the next update() will trigger an update to the highlight's transform
     this.transformDirty = true;
 
@@ -105,6 +109,7 @@ define( function( require ) {
     this.boundsListener = this.onBoundsChange.bind( this );
     this.transformListener = this.onTransformChange.bind( this );
     this.focusListener = this.onFocusChange.bind( this );
+    this.focusHighlightListener = this.onFocusHighlightChange.bind( this );
 
     scenery.Display.focusProperty.link( this.focusListener );
   }
@@ -153,14 +158,17 @@ define( function( require ) {
       else if ( this.node.focusHighlight instanceof Node ) {
         this.mode = 'node';
 
+        // store the focus highlight so that it can be removed later
+        this.nodeFocusHighlight = this.node.focusHighlight;
+
         // If focusHighlightLayerable, then the focusHighlight is just a node in the scene graph, so set it visible
         if ( this.node.focusHighlightLayerable ) {
-          this.node.focusHighlight.visible = true;
+          this.nodeFocusHighlight.visible = true;
         }
         else {
 
           // Use the node itself as the highlight
-          this.highlightNode.addChild( this.node.focusHighlight );
+          this.highlightNode.addChild( this.nodeFocusHighlight );
         }
       }
       // Bounds mode
@@ -174,6 +182,9 @@ define( function( require ) {
 
         this.onBoundsChange();
       }
+
+      // handle any changes to the focus highlight while the node has focus
+      this.node.onStatic( 'focusHighlightChanged', this.focusHighlightListener );
 
       // handle group focus highlights
       this.activateGroupHighlights();
@@ -199,13 +210,17 @@ define( function( require ) {
           this.node.focusHighlight.visible = false;
         }
         else {
-          this.highlightNode.removeChild( this.node.focusHighlight );
+          this.highlightNode.removeChild( this.nodeFocusHighlight );
+          this.nodeFocusHighlight = null;
         }
       }
       else if ( this.mode === 'bounds' ) {
         this.boundsFocusHighlightPath.visible = false;
         this.node.offStatic( 'localBounds', this.boundsListener );
       }
+
+      // remove listener that updated focus highlight while this node had focus
+      this.node.offStatic( 'focusHighlightChanged', this.focusHighlightListener );
 
       // remove all 'group' focus highlights
       this.deactivateGroupHighlights();
@@ -221,7 +236,7 @@ define( function( require ) {
      * Activate all 'group' focus highlights by searching for ancestor nodes from the node that has focus
      * and adding a rectangle around it if it has a "groupFocusHighlight". A group highlight will only appear around
      * the closest ancestor that has a one.
-;    *
+     *
      * @private
      */
     activateGroupHighlights: function() {
@@ -351,6 +366,17 @@ define( function( require ) {
       if ( newTrail ) {
         this.activateHighlight( newTrail );
       }
+    },
+
+    /**
+     * If the focused node has an updated focus highlight, we must do all the work of highlight deactivation/activation
+     * as if the application focus changed. If focus highlight mode changed, we need to add/remove static listeners,
+     * add/remove highlight children, and so on. Called when focus highlight changes, but should only ever be
+     * necessary when the node has focus.
+     */
+    onFocusHighlightChange: function() {
+      assert && assert( this.node.focused, 'update should only be necessary if node already has focus' );
+      this.onFocusChange( scenery.Display.focusProperty.get() );
     },
 
     update: function() {
