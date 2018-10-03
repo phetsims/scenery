@@ -25,7 +25,6 @@ define( function( require ) {
   var Node = require( 'SCENERY/nodes/Node' );
   var ObservableArray = require( 'AXON/ObservableArray' );
   var PhetioObject = require( 'TANDEM/PhetioObject' );
-  var Property = require( 'AXON/Property' );
   var scenery = require( 'SCENERY/scenery' );
   var Tandem = require( 'TANDEM/Tandem' );
   var timer = require( 'PHET_CORE/timer' );
@@ -59,39 +58,17 @@ define( function( require ) {
       // cursor of whatever nodes the pointer may be over).
       pressCursor: 'pointer',
 
-      // {Function|null} - Called as press( event: {Event}, listener: {PressListener} ) when this listener's node is
-      // pressed (typically from a down event, but can be triggered by other handlers).
-      press: null,
+      // {function} - Called as press( event: {Event}, listener: {PressListener} ) when this listener's node is pressed
+      // (typically from a down event, but can be triggered by other handlers).
+      press: _.noop,
 
-      // {Function|null} - Called as release( listener: {PressListener} ) when this listener's node is released
+      // {function} - Called as release( listener: {PressListener} ) when this listener's node is released
       // (pointer up/cancel or interrupt when pressed).
-      release: null,
+      release: _.noop,
 
-      // {Function|null} - Called as drag( event: {Event}, listener: {PressListener} ) when this listener's node is
-      //dragged (move events on the pointer while pressed).
-      drag: null,
-
-      // {Property.<Boolean>} - If provided, this property will be used to track whether this listener's node is
-      // "pressed" or not.
-      isPressedProperty: new BooleanProperty( false, { reentrant: true } ),
-
-      // {Property.<boolean>} - A property that will be controlled by this listener. It will be set to true when at
-      // least one pointer is over the listener.
-      // A custom property may be passed in here, as it may be useful for hooking up to existing button models.
-      isOverProperty: new Property( false ),
-
-      // {Property.<boolean>} - A property that will be controlled by this listener. It will be set to true when either:
-      //   1. The listener is pressed and the pointer that is pressing is over the listener.
-      //   2. There is at least one unpressed pointer that is over the listener.
-      // A custom property may be passed in here, as it may be useful for hooking up to existing listener models.
-      isHoveringProperty: new Property( false ),
-
-      // {Property.<boolean>} - A property that will be controlled by this listener. It will be set to true when either:
-      //   1. The listener is pressed.
-      //   2. There is at least one unpressed pointer that is over the listener.
-      // This is essentially true when ( isPressed || isHovering ).
-      // A custom property may be passed in here, as it may be useful for hooking up to existing listener models.
-      isHighlightedProperty: new Property( false ),
+      // {function} - Called as drag( event: {Event}, listener: {PressListener} ) when this listener's node is
+      // dragged (move events on the pointer while pressed).
+      drag: _.noop,
 
       // {Node|null} - If provided, the pressedTrail (calculated from the down event) will be replaced with the
       // (sub)trail that ends with the targetNode as the leaf-most Node. This affects the parent coordinate frame
@@ -130,17 +107,9 @@ define( function( require ) {
       'The release callback, if provided, should be a function' );
     assert && assert( options.drag === null || typeof options.drag === 'function',
       'The drag callback, if provided, should be a function' );
-    assert && assert( options.isPressedProperty instanceof Property && options.isPressedProperty.value === false,
-      'If a custom isPressedProperty is provided, it must be a Property that is false initially' );
     assert && assert( options.targetNode === null || options.targetNode instanceof Node,
       'If provided, targetNode should be a Node' );
     assert && assert( typeof options.attach === 'boolean', 'attach should be a boolean' );
-    assert && assert( options.isOverProperty instanceof Property && options.isOverProperty.value === false,
-      'If a custom isOverProperty is provided, it must be a Property that is false initially' );
-    assert && assert( options.isHoveringProperty instanceof Property && options.isHoveringProperty.value === false,
-      'If a custom isHoveringProperty is provided, it must be a Property that is false initially' );
-    assert && assert( options.isHighlightedProperty instanceof Property && options.isHighlightedProperty.value === false,
-      'If a custom isHighlightedProperty is provided, it must be a Property that is false initially' );
     assert && assert( options.onAccessibleClick === null || typeof options.onAccessibleClick === 'function',
       'If provided, onAccessibleClick should be a function' );
     assert && assert( options.a11yLooksPressedInterval === null || typeof options.a11yLooksPressedInterval === 'number',
@@ -155,11 +124,22 @@ define( function( require ) {
     // 'enter' events and removing with 'exit' events.
     this.overPointers = new ObservableArray();
 
-    // @public {Property.<Boolean>} [read-only] - See notes in options documentation
-    this.isPressedProperty = options.isPressedProperty;
-    this.isOverProperty = options.isOverProperty;
-    this.isHoveringProperty = options.isHoveringProperty;
-    this.isHighlightedProperty = options.isHighlightedProperty;
+    // @public {Property.<Boolean>} [read-only] - Tracks whether this listener's node is "pressed" or not
+    this.isPressedProperty = new BooleanProperty( false, { reentrant: true } ),
+
+    // @public {Property.<boolean>} ]read-only] - It will be set to true when at least one pointer is over the listener.
+    this.isOverProperty = new BooleanProperty( false );
+
+    // @public {Property.<boolean>} [read-only] - It will be set to true when either:
+    //   1. The listener is pressed and the pointer that is pressing is over the listener.
+    //   2. There is at least one unpressed pointer that is over the listener.
+    this.isHoveringProperty = new BooleanProperty( false );
+
+    // @public {Property.<Boolean>} [read-only] - It will be set to true when either:
+    //   1. The listener is pressed.
+    //   2. There is at least one unpressed pointer that is over the listener.
+    // This is essentially true when ( isPressed || isHovering ).
+    this.isHighlightedProperty = new BooleanProperty( false );
 
     // @public {Property.<boolean>} [read-only] - Whether the listener has focus (should appear to be over)
     this.isFocusedProperty = new BooleanProperty( false );
@@ -317,7 +297,7 @@ define( function( require ) {
       self.isPressedProperty.value = true;
 
       // Notify after everything else is set up
-      self._pressListener && self._pressListener( event, self );
+      self._pressListener( event, self );
 
       callback && callback();
     } );
@@ -347,7 +327,7 @@ define( function( require ) {
       self.isPressedProperty.value = false;
 
       // Notify after the rest of release is called in order to prevent it from triggering interrupt().
-      self._releaseListener && self._releaseListener( self );
+      self._releaseListener( self );
 
       callback && callback();
     } );
@@ -495,7 +475,7 @@ define( function( require ) {
      * @param {Event} event
      * @param {Node} [targetNode] - If provided, will take the place of the targetNode for this call. Useful for
      *                              forwarded presses.
-     * @param {function} [callback]- to be run at the end of the function, but only on success
+     * @param {function} [callback] - to be run at the end of the function, but only on success
      * @returns {boolean} success - Returns whether the press was actually started
      */
     press: function( event, targetNode, callback ) {
@@ -551,7 +531,7 @@ define( function( require ) {
 
       assert && assert( this.isPressed, 'Can only drag while pressed' );
 
-      this._dragListener && this._dragListener( event, this );
+      this._dragListener( event, this );
 
       sceneryLog && sceneryLog.InputListener && sceneryLog.pop();
     },
@@ -614,7 +594,7 @@ define( function( require ) {
      * used, the browser may not receive 'down' or 'up' events on buttons - only a single 'click' event. For a11y we
      * need to toggle the pressed state from the single 'click' event.
      *
-     * This will fire listeners immediately, but adds a delay for the a11yClickingProperty so that you can make a 
+     * This will fire listeners immediately, but adds a delay for the a11yClickingProperty so that you can make a
      * button look pressed from a single DOM click event. For example usage, see sun/ButtonModel.looksPressedProperty.
      *
      * @public - In general not needed to be public, but just used in edge cases to get proper click logic for a11y.

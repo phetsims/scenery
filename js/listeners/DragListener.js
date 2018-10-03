@@ -669,8 +669,11 @@ define( function( require ) {
     }
   }, {
     /**
-     * Creates an input listener that forwards events to the specified input listener
+     * Creates an input listener that forwards events to the specified input listener.
+     * @public
+     *
      * See https://github.com/phetsims/scenery/issues/639
+     *
      * @param {function} down - function( {Event} ) - down function to be added to the input listener
      * @param {Object} [options]
      * @returns {Object} a scenery input listener
