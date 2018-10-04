@@ -113,20 +113,12 @@ define( function( require ) {
       // passing release(), as the drag start hasn't been fully processed at that point.
       end: null,
 
-      // {Property.<Boolean>|null} - An alias for isPressedListener that makes more sense for dragging.
-      isUserControlledProperty: null,
-
       // {Tandem} - For instrumenting
       tandem: Tandem.required,
 
-      phetioReadOnly: PhetioObject.DEFAULT_OPTIONS.phetioReadOnly // to support properly passing this to children, see https://github.com/phetsims/tandem/issues/60
+      // to support properly passing this to children, see https://github.com/phetsims/tandem/issues/60
+      phetioReadOnly: PhetioObject.DEFAULT_OPTIONS.phetioReadOnly
     }, options );
-
-    // Initialize with the alias isUserControlledProperty => isPressedProperty
-    if ( options.isUserControlledProperty ) {
-      assert && assert( !options.isPressedProperty );
-      options.isPressedProperty = options.isUserControlledProperty;
-    }
 
     assert && assert( typeof options.allowTouchSnag === 'boolean', 'allowTouchSnag should be a boolean' );
     assert && assert( typeof options.applyOffset === 'boolean', 'applyOffset should be a boolean' );
@@ -140,7 +132,6 @@ define( function( require ) {
     assert && assert( options.offsetLocation === null || typeof options.offsetLocation === 'function', 'offsetLocation, if provided, should be a function' );
     assert && assert( options.start === null || typeof options.start === 'function', 'start, if provided, should be a function' );
     assert && assert( options.end === null || typeof options.end === 'function', 'end, if provided, should be a function' );
-    assert && assert( options.isUserControlledProperty === null || options.isUserControlledProperty instanceof Property, 'isUserControlledProperty, if provided, should be a Property' );
     assert && assert( options.tandem instanceof Tandem, 'The provided tandem should be a Tandem' );
 
     assert && assert(
@@ -224,9 +215,10 @@ define( function( require ) {
      * @param {Event} event
      * @param {Node} [targetNode] - If provided, will take the place of the targetNode for this call. Useful for
      *                              forwarded presses.
+     * @param {function} [callback] - to be run at the end of the function, but only on success
      * @returns {boolean} success - Returns whether the press was actually started
      */
-    press: function( event, targetNode ) {
+    press: function( event, targetNode, callback ) {
       var self = this;
       sceneryLog && sceneryLog.InputListener && sceneryLog.InputListener( 'DragListener press' );
       sceneryLog && sceneryLog.InputListener && sceneryLog.push();
@@ -245,6 +237,8 @@ define( function( require ) {
         // Notify after positioning and other changes
         self._start && self._start( event, self );
 
+        callback && callback();
+
         sceneryLog && sceneryLog.InputListener && sceneryLog.pop();
       } );
 
@@ -260,8 +254,10 @@ define( function( require ) {
      *
      * This can be called from the outside to stop the drag without the pointer having actually fired any 'up'
      * events. If the cancel/interrupt behavior is more preferable, call interrupt() on this listener instead.
+     *
+     * @param {function} [callback] - called at the end of the release
      */
-    release: function() {
+    release: function( callback ) {
       var self = this;
 
       sceneryLog && sceneryLog.InputListener && sceneryLog.InputListener( 'DragListener release' );
@@ -272,6 +268,8 @@ define( function( require ) {
 
         // Notify after the rest of release is called in order to prevent it from triggering interrupt().
         self._end && self._end( self );
+
+        callback && callback();
       } );
 
       sceneryLog && sceneryLog.InputListener && sceneryLog.pop();

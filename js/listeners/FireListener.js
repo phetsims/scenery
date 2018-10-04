@@ -3,8 +3,6 @@
 /**
  * A listener for common button usage, providing the fire() method/callback and helpful properties.
  *
- * TODO: name (because ButtonListener was taken). Can we rename the old ButtonListener and have this be ButtonListener?
- *
  * For example usage, see scenery/examples/input.html. Usually you can just pass a fire callback and things work.
  *
  * @author Jonathan Olson <jonathan.olson@colorado.edu>
@@ -27,31 +25,31 @@ define( function( require ) {
    */
   function FireListener( options ) {
     options = _.extend( {
-      // {Function|null} - Called as fire() when the button is fired.
-      fire: null,
+      // {Function} - Called as fire() when the button is fired.
+      fire: _.noop,
 
       // {boolean} - If true, the button will fire when the button is pressed. If false, the button will fire when the
       // button is released while the pointer is over the button.
       fireOnDown: false,
 
+      // {Tandem}
       tandem: Tandem.optional
     }, options );
 
-    assert && assert( options.fire === null || typeof options.fire === 'function',
-      'The fire callback, if provided, should be a function' );
+    assert && assert( typeof options.fire === 'function', 'The fire callback should be a function' );
     assert && assert( typeof options.fireOnDown === 'boolean', 'fireOnDown should be a boolean' );
 
     PressListener.call( this, options );
 
-    // @private - See options for documentation.
+    // @private {boolean}
     this._fireOnDown = options.fireOnDown;
 
-    // @private - for PhET-iO events
+    // @private {Emitter}
     this.firedEmitter = new Emitter( {
       tandem: options.tandem.createTandem( 'firedEmitter' ),
       phetioEventType: 'user'
     } );
-    options.fire && this.firedEmitter.addListener( options.fire );
+    this.firedEmitter.addListener( options.fire );
   }
 
   scenery.register( 'FireListener', FireListener );
@@ -83,18 +81,21 @@ define( function( require ) {
      * be used to determine whether this will actually start a press.
      *
      * @param {Event} event
+     * @param {Node} [targetNode] - If provided, will take the place of the targetNode for this call. Useful for
+     *                              forwarded presses.
+     * @param {function} [callback] - to be run at the end of the function, but only on success
      * @returns {boolean} success - Returns whether the press was actually started
      */
-    press: function( event ) {
+    press: function( event, targetNode, callback ) {
       var self = this;
 
-      var success = PressListener.prototype.press.call( this, event, undefined, function( success ) {
+      return PressListener.prototype.press.call( this, event, targetNode, function() {
         // This function is only called on success
         if ( self._fireOnDown ) {
           self.fire( event );
         }
+        callback && callback();
       } );
-      return success;
     },
 
     /**
@@ -105,15 +106,18 @@ define( function( require ) {
      * NOTE: This can be safely called externally in order to force a release of this button (no actual 'up' event is
      * needed). If the cancel/interrupt behavior is more preferable (will not fire the button), then call interrupt()
      * on this listener instead.
+     *
+     * @param {function} [callback] - called at the end of the release
      */
-    release: function() {
+    release: function( callback ) {
       var self = this;
-      PressListener.prototype.release.call( this, function() {
 
+      PressListener.prototype.release.call( this, function() {
         // Notify after the rest of release is called in order to prevent it from triggering interrupt().
         if ( !self._fireOnDown && self.isHoveringProperty.value && !self.interrupted ) {
           self.fire();
         }
+        callback && callback();
       } );
     }
   } );
