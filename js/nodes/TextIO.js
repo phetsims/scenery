@@ -41,7 +41,7 @@ define( function( require ) {
       phetioType: PropertyIO( StringIO ),
 
       tandem: text.tandem.createTandem( 'textProperty' ),
-      phetioInstanceDocumentation: 'Property for the displayed text'
+      phetioDocumentation: 'Property for the displayed text'
     } );
 
     // @private
