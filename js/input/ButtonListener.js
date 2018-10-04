@@ -95,7 +95,7 @@ define( function( require ) {
 
         if ( this._buttonOptions[ state ] ) {
 
-          // Record this event to the phet-io event stream, including all downstream events as nested children
+          // Record this event to the phet-io data stream, including all downstream events as nested children
           this.phetioStartEvent( state );
 
           // Then invoke the callback
@@ -108,7 +108,7 @@ define( function( require ) {
              this._overCount > 0 &&
              ( this._buttonOptions.fireOnDown ? ( state === 'down' ) : ( oldState === 'down' ) ) ) {
 
-          // Record this event to the phet-io event stream, including all downstream events as nested children
+          // Record this event to the phet-io data stream, including all downstream events as nested children
           this.phetioStartEvent( 'fire' );
 
           // Then fire the event
