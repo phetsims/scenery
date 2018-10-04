@@ -113,21 +113,12 @@ define( function( require ) {
       // passing release(), as the drag start hasn't been fully processed at that point.
       end: null,
 
-      // {Property.<Boolean>|null} - An alias for isPressedListener that makes more sense for dragging.
-      isUserControlledProperty: null,
-
       // {Tandem} - For instrumenting
       tandem: Tandem.required,
 
       // to support properly passing this to children, see https://github.com/phetsims/tandem/issues/60
       phetioReadOnly: PhetioObject.DEFAULT_OPTIONS.phetioReadOnly
     }, options );
-
-    // Initialize with the alias isUserControlledProperty => isPressedProperty
-    if ( options.isUserControlledProperty ) {
-      assert && assert( !options.isPressedProperty );
-      options.isPressedProperty = options.isUserControlledProperty;
-    }
 
     assert && assert( typeof options.allowTouchSnag === 'boolean', 'allowTouchSnag should be a boolean' );
     assert && assert( typeof options.applyOffset === 'boolean', 'applyOffset should be a boolean' );
@@ -141,7 +132,6 @@ define( function( require ) {
     assert && assert( options.offsetLocation === null || typeof options.offsetLocation === 'function', 'offsetLocation, if provided, should be a function' );
     assert && assert( options.start === null || typeof options.start === 'function', 'start, if provided, should be a function' );
     assert && assert( options.end === null || typeof options.end === 'function', 'end, if provided, should be a function' );
-    assert && assert( options.isUserControlledProperty === null || options.isUserControlledProperty instanceof Property, 'isUserControlledProperty, if provided, should be a Property' );
     assert && assert( options.tandem instanceof Tandem, 'The provided tandem should be a Tandem' );
 
     assert && assert(
