@@ -215,9 +215,10 @@ define( function( require ) {
      * @param {Event} event
      * @param {Node} [targetNode] - If provided, will take the place of the targetNode for this call. Useful for
      *                              forwarded presses.
+     * @param {function} [callback] - to be run at the end of the function, but only on success
      * @returns {boolean} success - Returns whether the press was actually started
      */
-    press: function( event, targetNode ) {
+    press: function( event, targetNode, callback ) {
       var self = this;
       sceneryLog && sceneryLog.InputListener && sceneryLog.InputListener( 'DragListener press' );
       sceneryLog && sceneryLog.InputListener && sceneryLog.push();
@@ -236,6 +237,8 @@ define( function( require ) {
         // Notify after positioning and other changes
         self._start && self._start( event, self );
 
+        callback && callback();
+
         sceneryLog && sceneryLog.InputListener && sceneryLog.pop();
       } );
 
@@ -251,8 +254,10 @@ define( function( require ) {
      *
      * This can be called from the outside to stop the drag without the pointer having actually fired any 'up'
      * events. If the cancel/interrupt behavior is more preferable, call interrupt() on this listener instead.
+     *
+     * @param {function} [callback] - called at the end of the release
      */
-    release: function() {
+    release: function( callback ) {
       var self = this;
 
       sceneryLog && sceneryLog.InputListener && sceneryLog.InputListener( 'DragListener release' );
@@ -263,6 +268,8 @@ define( function( require ) {
 
         // Notify after the rest of release is called in order to prevent it from triggering interrupt().
         self._end && self._end( self );
+
+        callback && callback();
       } );
 
       sceneryLog && sceneryLog.InputListener && sceneryLog.pop();
