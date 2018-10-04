@@ -3,8 +3,6 @@
 /**
  * A listener for common button usage, providing the fire() method/callback and helpful properties.
  *
- * TODO: name (because ButtonListener was taken). Can we rename the old ButtonListener and have this be ButtonListener?
- *
  * For example usage, see scenery/examples/input.html. Usually you can just pass a fire callback and things work.
  *
  * @author Jonathan Olson <jonathan.olson@colorado.edu>

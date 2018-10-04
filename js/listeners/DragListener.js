@@ -119,7 +119,8 @@ define( function( require ) {
       // {Tandem} - For instrumenting
       tandem: Tandem.required,
 
-      phetioReadOnly: PhetioObject.DEFAULT_OPTIONS.phetioReadOnly // to support properly passing this to children, see https://github.com/phetsims/tandem/issues/60
+      // to support properly passing this to children, see https://github.com/phetsims/tandem/issues/60
+      phetioReadOnly: PhetioObject.DEFAULT_OPTIONS.phetioReadOnly
     }, options );
 
     // Initialize with the alias isUserControlledProperty => isPressedProperty
