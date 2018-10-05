@@ -14,7 +14,9 @@ define( function( require ) {
   var AccessibilityUtil = require( 'SCENERY/accessibility/AccessibilityUtil' );
   var arrayRemove = require( 'PHET_CORE/arrayRemove' );
   var Focus = require( 'SCENERY/accessibility/Focus' );
+  var FullScreen = require( 'SCENERY/util/FullScreen' );
   var inherit = require( 'PHET_CORE/inherit' );
+  var platform = require( 'PHET_CORE/platform' );
   var Poolable = require( 'PHET_CORE/Poolable' );
   var scenery = require( 'SCENERY/scenery' );
   // so RequireJS doesn't complain about circular dependency
@@ -699,7 +701,22 @@ define( function( require ) {
      */
     blur: function() {
       assert && assert( this._primarySibling, 'must have a primary sibling to blur' );
-      this._primarySibling.blur();
+
+      // no op if primary sibling does not have focus
+      if ( document.activeElement === this._primarySibling ) {
+
+        // Workaround for a bug in IE11 in Fullscreen mode where document.activeElement.blur() errors out with
+        // "Invalid Function". A delay seems to be a common workaround for IE11, see
+        // https://stackoverflow.com/questions/2600186/focus-doesnt-work-in-ie
+        if ( platform.ie11 && FullScreen.isFullScreen() ) {
+          window.setTimeout( function() {
+            this._primarySibling.blur();
+          }, 0 );
+        }
+        else {
+          this._primarySibling.blur();
+        }
+      }
     },
 
     /**
