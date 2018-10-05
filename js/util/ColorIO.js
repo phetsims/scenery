@@ -35,6 +35,7 @@ define( function( require ) {
      * Encodes a Color into a state object.
      * @param {Color} color
      * @returns {Object}
+     * @override
      */
     toStateObject: function( color ) {
       assert && assertInstanceOf( color, scenery.Color );
@@ -46,6 +47,7 @@ define( function( require ) {
      * Use stateObject as the Font constructor's options argument
      * @param {Object} stateObject
      * @returns {Color}
+     * @override
      */
     fromStateObject: function( stateObject ) {
       return new scenery.Color( stateObject.r, stateObject.g, stateObject.b, stateObject.a );
