@@ -37,6 +37,7 @@ define( require => {
      * Encodes a DOMEvent instance to a state.
      * @param {Event} domEvent
      * @returns {Object} - a state object
+     * @override
      */
     toStateObject( domEvent ) {
       return scenery.Input.serializeDomEvent( domEvent );
