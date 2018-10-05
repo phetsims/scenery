@@ -34,6 +34,7 @@ define( function( require ) {
      * Convert the focus region to a plain JS object for serialization.
      * @param {Object} focus - the focus region which has {display,trail}
      * @returns {Object} - the serialized object
+     * @override
      */
     toStateObject: function( focus ) {
 
@@ -71,6 +72,7 @@ define( function( require ) {
      * Convert the serialized instance back to a focus object
      * @param {Object} stateObject
      * @returns {Object} with {display,trail}
+     * @override
      */
     fromStateObject: function( stateObject ) {
 
