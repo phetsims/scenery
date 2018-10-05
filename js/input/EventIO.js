@@ -35,6 +35,7 @@ define( function( require ) {
      * Encodes a Color into a state object.
      * @param {Event} event
      * @returns {Object}
+     * @override
      */
     toStateObject( event ) {
       assert && assertInstanceOf( event, scenery.Event );
