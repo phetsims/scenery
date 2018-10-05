@@ -47,6 +47,7 @@ define( function( require ) {
      * Serialize this font's configuration to an options object
      * @param {Font} font
      * @returns {Object}
+     * @override
      */
     toStateObject: function( font ) {
       assert && assertInstanceOf( font, scenery.Font );
@@ -66,6 +67,7 @@ define( function( require ) {
      * Use stateObject as the Font constructor's options argument
      * @param {Object} stateObject
      * @returns {Font}
+     * @override
      */
     fromStateObject: function( stateObject ) {
       return new scenery.Font( stateObject );
