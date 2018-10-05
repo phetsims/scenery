@@ -87,10 +87,6 @@ define( function( require ) {
       // {number} (a11y) - How long something should 'look' pressed after an accessible click input event
       a11yLooksPressedInterval: 100,
 
-      // {function} (a11y) - Called at the end of a press ("click") that was a result of a keyboard action. This will
-      // not be called for a mouse/pointer interaction.
-      accessibleClick: _.noop,
-
       // {Tandem} - For instrumenting
       tandem: Tandem.required,
 
@@ -111,8 +107,6 @@ define( function( require ) {
     assert && assert( options.targetNode === null || options.targetNode instanceof Node,
       'If provided, targetNode should be a Node' );
     assert && assert( typeof options.attach === 'boolean', 'attach should be a boolean' );
-    assert && assert( typeof options.accessibleClick === 'function',
-      'accessibleClick should be a function' );
     assert && assert( typeof options.a11yLooksPressedInterval === 'number',
       'a11yLooksPressedInterval should be a number' );
 
@@ -133,7 +127,6 @@ define( function( require ) {
     this._releaseListener = options.release;
     this._dragListener = options.drag;
     this._canStartPress = options.canStartPress;
-    this._accessibleClickListener = options.accessibleClick;
 
     // @private {Node|null}
     this._targetNode = options.targetNode;
@@ -148,8 +141,8 @@ define( function( require ) {
     // @public {Property.<Boolean>} [read-only] - Tracks whether this listener's node is "pressed" or not
     this.isPressedProperty = new BooleanProperty( false, { reentrant: true } ),
 
-    // @public {Property.<boolean>} ]read-only] - It will be set to true when at least one pointer is over the listener.
-    this.isOverProperty = new BooleanProperty( false );
+      // @public {Property.<boolean>} ]read-only] - It will be set to true when at least one pointer is over the listener.
+      this.isOverProperty = new BooleanProperty( false );
 
     // @public {Property.<boolean>} [read-only] - It will be set to true when either:
     //   1. The listener is pressed and the pointer that is pressing is over the listener.
@@ -656,9 +649,6 @@ define( function( require ) {
 
         // no longer down, don't reset 'over' so button can be styled as long as it has focus
         this.isPressedProperty.value = false;
-
-        // call the a11y click specific listener
-        this._accessibleClickListener();
 
         // if we are already clicking, remove the previous timeout - this assumes that clearTimeout is a noop if the
         // listener is no longer attached
