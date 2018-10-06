@@ -215,7 +215,7 @@ define( function( require ) {
     this.mouseUpEmitter = new Emitter( {
       tandem: options.tandem.createTandem( 'mouseUpEmitter' ),
       phetioType: EmitterIO( [ Vector2IO, DOMEventIO ] ),
-      phetioMessageType: 'user'
+      phetioEventType: 'user'
       // TODO: instance doc and phetioReadOnly??!?
     } );
 
