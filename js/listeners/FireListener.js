@@ -33,7 +33,7 @@ define( function( require ) {
       fireOnDown: false,
 
       // {Tandem}
-      tandem: Tandem.optional
+      tandem: Tandem.optional // Call sites typically do not need to call `tandem.createTandem` when creating this.
     }, options );
 
     assert && assert( typeof options.fire === 'function', 'The fire callback should be a function' );
