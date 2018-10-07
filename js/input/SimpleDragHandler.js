@@ -21,7 +21,7 @@ define( function( require ) {
 
   // constants
   var HIGH_FREQUENCY_OPTIONS = {
-    highFrequency: true
+    phetioHighFrequency: true
   };
 
   /**

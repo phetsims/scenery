@@ -52,7 +52,7 @@ define( function( require ) {
 
       // process whether anything under the pointers changed before running additional input events
       input.validatePointers();
-      if ( input.logEvents ) { input.phetioEmitter.emit3( 'validatePointers', {}, { highFrequency: true } );}
+      if ( input.logEvents ) { input.phetioEmitter.emit3( 'validatePointers', {}, { phetioHighFrequency: true } );}
 
       //OHTWO TODO: switch?
       if ( this.type === BatchedDOMEvent.POINTER_TYPE ) {
