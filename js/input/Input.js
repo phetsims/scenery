@@ -211,18 +211,23 @@ define( function( require ) {
     // TODO: Make the press/release events are low frequency and the move events are high frequency.
 
     // @private {Emitter} Emits pointer validation to the input stream for playback
-    this.validatePointersEmitter = new Emitter( {
-      tandem: options.tandem.createTandem( 'validatePointersEmitter' ),
-      phetioHighFrequency: true,
-      listener: function() {
-        var i = self.pointers.length;
-        while ( i-- ) {
-          var pointer = self.pointers[ i ];
-          if ( pointer.point ) {
-            self.branchChangeEvents( pointer, null, false );
-          }
+    const validatePointers = function() {
+      var i = self.pointers.length;
+      while ( i-- ) {
+        var pointer = self.pointers[ i ];
+        if ( pointer.point ) {
+          self.branchChangeEvents( pointer, null, false );
         }
       }
+    };
+
+    // Only emit events if phetioEmitInputEvents is turned on so we don't spam the data stream unnecessarily
+    this.validatePointersEmitter = new Emitter( phet.phetio && phet.phetio.queryParameters.phetioEmitInputEvents ? {
+      tandem: options.tandem.createTandem( 'validatePointersEmitter' ),
+      phetioHighFrequency: true,
+      listener: validatePointers
+    } : {
+      listener: validatePointers
     } );
 
     // @private {Emitter} - Emits to the PhET-iO data stream.  
