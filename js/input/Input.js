@@ -199,11 +199,6 @@ define( function( require ) {
     // @public {Array.<Pointer>} - All active pointers.
     this.pointers = [];
 
-    // For PhET-iO
-    // @public (scenery, phet-io) {Emitter} - emits scenery input events that can be recorded and played back
-    // through PhET-iO.  @private outside of scenery and phet-io
-    this.phetioEmitter = new Emitter();
-
     // TODO: replace this with an emitter
     this.pointerAddedListeners = [];
 
@@ -214,6 +209,21 @@ define( function( require ) {
     // Declare the Emitters that send scenery input events to the PhET-iO data stream.  Note they use the default value
     // of phetioReadOnly false, in case a client wants to synthesize events.
     // TODO: Make the press/release events are low frequency and the move events are high frequency.
+
+    // @private {Emitter} Emits pointer validation to the input stream for playback
+    this.validatePointersEmitter = new Emitter( {
+      tandem: options.tandem.createTandem( 'validatePointersEmitter' ),
+      phetioHighFrequency: true,
+      listener: function() {
+        var i = self.pointers.length;
+        while ( i-- ) {
+          var pointer = self.pointers[ i ];
+          if ( pointer.point ) {
+            self.branchChangeEvents( pointer, null, false );
+          }
+        }
+      }
+    } );
 
     // @private {Emitter} - Emits to the PhET-iO data stream.  
     this.mouseUpEmitter = new Emitter( {
@@ -247,6 +257,7 @@ define( function( require ) {
       phetioType: EmitterIO( [ Vector2IO, DOMEventIO ] ),
       phetioEventType: 'user',
       phetioDocumentation: 'Emits when the mouse is moved',
+      phetioHighFrequency: true,
       listener: function( point, event ) {
         if ( !self.mouse ) { self.initMouse(); }
         self.mouse.move( point, event );
@@ -286,6 +297,7 @@ define( function( require ) {
       phetioType: EmitterIO( [ DOMEventIO ] ),
       phetioEventType: 'user',
       phetioDocumentation: 'Emits when the mouse wheel scrolls',
+      phetioHighFrequency: true,
       listener: function( event ) {
         if ( !self.mouse ) { self.initMouse(); }
         self.mouse.wheel( event );
@@ -334,6 +346,7 @@ define( function( require ) {
       phetioType: EmitterIO( [ NumberIO, Vector2IO, DOMEventIO ] ),
       phetioEventType: 'user',
       phetioDocumentation: 'Emits when a touch moves',
+      phetioHighFrequency: true,
       listener: function( id, point, event ) {
         var touch = self.findPointerById( id );
         if ( touch ) {
@@ -394,6 +407,7 @@ define( function( require ) {
       phetioType: EmitterIO( [ NumberIO, Vector2IO, DOMEventIO ] ),
       phetioEventType: 'user',
       phetioDocumentation: 'Emits when a pen is moved',
+      phetioHighFrequency: true,
       listener: function( id, point, event ) {
         var pen = self.findPointerById( id );
         if ( pen ) {
@@ -522,15 +536,7 @@ define( function( require ) {
     validatePointers: function() {
       sceneryLog && sceneryLog.Input && sceneryLog.Input( 'validatePointers' );
       sceneryLog && sceneryLog.Input && sceneryLog.push();
-
-      var i = this.pointers.length;
-      while ( i-- ) {
-        var pointer = this.pointers[ i ];
-        if ( pointer.point ) {
-          this.branchChangeEvents( pointer, null, false );
-        }
-      }
-
+      this.validatePointersEmitter.emit();
       sceneryLog && sceneryLog.Input && sceneryLog.pop();
     },
 
@@ -1446,7 +1452,7 @@ define( function( require ) {
      */
     invokeControllerInputEvent: function( event ) {
 
-      var args = event.parameters.args;
+      var args = event.parameters && event.parameters.args;
 
       if ( event.phetioID === this.mouseMovedEmitter.tandem.phetioID ) {
         this.mouseMovedEmitter.emit( Vector2.fromStateObject( args[ 0 ] ), args[ 1 ] );
@@ -1489,6 +1495,9 @@ define( function( require ) {
       }
       else if ( event.phetioID === this.penCanceledEmitter.tandem.phetioID ) {
         this.penCanceledEmitter.emit( args[ 0 ], Vector2.fromStateObject( args[ 1 ] ), args[ 2 ] );
+      }
+      else if ( event.phetioID === this.validatePointersEmitter.tandem.phetioID ) {
+        this.validatePointersEmitter.emit();
       }
       else {
         throw new Error( 'Input Emitter not found: ' + event.phetioID );

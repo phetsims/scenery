@@ -19,11 +19,6 @@ define( function( require ) {
   var Tandem = require( 'TANDEM/Tandem' );
   var Touch = require( 'SCENERY/input/Touch' );
 
-  // constants
-  var HIGH_FREQUENCY_OPTIONS = {
-    phetioHighFrequency: true
-  };
-
   /**
    * @param {Object} [options]
    * @constructor
@@ -173,10 +168,11 @@ define( function( require ) {
 
         var delta = self.transform.inverseDelta2( globalDelta );
 
+        // TODO: Convert to phtioHighFrequency Emitter
         self.phetioStartEvent( 'dragged', {
           x: event.pointer.point.x,
           y: event.pointer.point.y
-        }, HIGH_FREQUENCY_OPTIONS );
+        } );
 
         // move by the delta between the previous point, using the precomputed transform
         // prepend the translation on the node, so we can ignore whatever other transform state the node has

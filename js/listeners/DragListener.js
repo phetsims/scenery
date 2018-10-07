@@ -184,6 +184,7 @@ define( function( require ) {
     // @private {Emitter} - emitted on drag. Used for triggering phet-io events, see https://github.com/phetsims/scenery/issues/842
     this._draggedEmitter = new Emitter( {
       tandem: options.tandem.createTandem( 'draggedEmitter' ),
+      phetioHighFrequency: true,
       phetioDocumentation: 'Emits whenever a drag occurs with an EventIO argument.',
       phetioReadOnly: options.phetioReadOnly,
       phetioEventType: 'user',
