@@ -1491,7 +1491,7 @@ define( function( require ) {
         this.penCanceledEmitter.emit( args[ 0 ], Vector2.fromStateObject( args[ 1 ] ), args[ 2 ] );
       }
       else {
-        throw new Error( 'Input Emitter not found: ' + event.phetioID )
+        throw new Error( 'Input Emitter not found: ' + event.phetioID );
       }
     }
   }, {
