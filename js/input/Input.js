@@ -140,9 +140,8 @@ define( function( require ) {
   var Vector2 = require( 'DOT/Vector2' );
   var Vector2IO = require( 'DOT/Vector2IO' );
 
-  // constants
-  var NORMAL_FREQUENCY = { highFrequency: false };
-  var HIGH_FREQUENCY = { highFrequency: true };
+  // ifphetio
+  var NumberIO = require( 'ifphetio!PHET_IO/types/NumberIO' );
 
   // Object literal makes it easy to check for the existence of an attribute (compared to [].indexOf()>=0)
   var domEventPropertiesToSerialize = {
@@ -212,17 +211,212 @@ define( function( require ) {
     // like https://github.com/phetsims/balloons-and-static-electricity/issues/406.
     this.currentlyFiringEvents = false;
 
-    // @private {Emitter} - Emits to the PhET-iO data stream.
+    // Declare the Emitters that send scenery input events to the PhET-iO data stream.  Note they use the default value
+    // of phetioReadOnly false, in case a client wants to synthesize events.
+    // TODO: Make the press/release events are low frequency and the move events are high frequency.
+
+    // @private {Emitter} - Emits to the PhET-iO data stream.  
     this.mouseUpEmitter = new Emitter( {
       tandem: options.tandem.createTandem( 'mouseUpEmitter' ),
       phetioType: EmitterIO( [ Vector2IO, DOMEventIO ] ),
       phetioEventType: 'user',
+      phetioDocumentation: 'Emits when a mouse button is released',
       listener: function( point, event ) {
         if ( !self.mouse ) { self.initMouse(); }
         var pointChanged = self.mouse.up( point, event );
         self.upEvent( self.mouse, event, pointChanged );
       }
-      // TODO: instance doc and phetioReadOnly??!?
+    } );
+
+    // @private {Emitter} - Emits to the PhET-iO data stream.  
+    this.mouseDownEmitter = new Emitter( {
+      tandem: options.tandem.createTandem( 'mouseDownEmitter' ),
+      phetioType: EmitterIO( [ Vector2IO, DOMEventIO ] ),
+      phetioEventType: 'user',
+      phetioDocumentation: 'Emits when a mouse button is pressed',
+      listener: function( point, event ) {
+        if ( !self.mouse ) { self.initMouse(); }
+        var pointChanged = self.mouse.down( point, event );
+        self.downEvent( self.mouse, event, pointChanged );
+      }
+    } );
+
+    // @private {Emitter} - Emits to the PhET-iO data stream.  
+    this.mouseMovedEmitter = new Emitter( {
+      tandem: options.tandem.createTandem( 'mouseMovedEmitter' ),
+      phetioType: EmitterIO( [ Vector2IO, DOMEventIO ] ),
+      phetioEventType: 'user',
+      phetioDocumentation: 'Emits when the mouse is moved',
+      listener: function( point, event ) {
+        if ( !self.mouse ) { self.initMouse(); }
+        self.mouse.move( point, event );
+        self.moveEvent( self.mouse, event );
+      }
+    } );
+
+    // @private {Emitter} - Emits to the PhET-iO data stream.  
+    this.mouseOverEmitter = new Emitter( {
+      tandem: options.tandem.createTandem( 'mouseOverEmitter' ),
+      phetioType: EmitterIO( [ Vector2IO, DOMEventIO ] ),
+      phetioEventType: 'user',
+      phetioDocumentation: 'Emits when the mouse is moved over a Node',
+      listener: function( point, event ) {
+        if ( !self.mouse ) { self.initMouse(); }
+        self.mouse.over( point, event );
+        // TODO: how to handle mouse-over (and log it)... are we changing the pointer.point without a branch change?
+      }
+    } );
+
+    // @private {Emitter} - Emits to the PhET-iO data stream.  
+    this.mouseOutEmitter = new Emitter( {
+      tandem: options.tandem.createTandem( 'mouseOutEmitter' ),
+      phetioType: EmitterIO( [ Vector2IO, DOMEventIO ] ),
+      phetioEventType: 'user',
+      phetioDocumentation: 'Emits when the mouse moves out of the display',
+      listener: function( point, event ) {
+        if ( !self.mouse ) { self.initMouse(); }
+        self.mouse.out( point, event );
+        // TODO: how to handle mouse-out (and log it)... are we changing the pointer.point without a branch change?
+      }
+    } );
+
+    // @private {Emitter} - Emits to the PhET-iO data stream.  
+    this.wheelScrolledEmitter = new Emitter( {
+      tandem: options.tandem.createTandem( 'wheelScrolledEmitter' ),
+      phetioType: EmitterIO( [ DOMEventIO ] ),
+      phetioEventType: 'user',
+      phetioDocumentation: 'Emits when the mouse wheel scrolls',
+      listener: function( event ) {
+        if ( !self.mouse ) { self.initMouse(); }
+        self.mouse.wheel( event );
+
+        // don't send mouse-wheel events if we don't yet have a mouse location!
+        // TODO: Can we set the mouse location based on the wheel event?
+        if ( self.mouse.point ) {
+          var trail = self.rootNode.trailUnderPointer( self.mouse ) || new Trail( self.rootNode );
+          self.dispatchEvent( trail, 'wheel', self.mouse, event, true );
+        }
+      }
+    } );
+
+    // @private {Emitter} - Emits to the PhET-iO data stream.
+    this.touchStartedEmitter = new Emitter( {
+      tandem: options.tandem.createTandem( 'touchStartedEmitter' ),
+      phetioType: EmitterIO( [ NumberIO, Vector2IO, DOMEventIO ] ),
+      phetioEventType: 'user',
+      phetioDocumentation: 'Emits when a touch begins',
+      listener: function( id, point, event ) {
+        var touch = new Touch( id, point, event );
+        self.addPointer( touch );
+        self.downEvent( touch, event, false );
+      }
+    } );
+
+    // @private {Emitter} - Emits to the PhET-iO data stream.
+    this.touchEndedEmitter = new Emitter( {
+      tandem: options.tandem.createTandem( 'touchEndedEmitter' ),
+      phetioType: EmitterIO( [ NumberIO, Vector2IO, DOMEventIO ] ),
+      phetioEventType: 'user',
+      phetioDocumentation: 'Emits when a touch ends',
+      listener: function( id, point, event ) {
+        var touch = self.findPointerById( id );
+        if ( touch ) {
+          var pointChanged = touch.end( point, event );
+          self.upEvent( touch, event, pointChanged );
+          self.removePointer( touch );
+        }
+      }
+    } );
+
+    // @private {Emitter} - Emits to the PhET-iO data stream.
+    this.touchMovedEmitter = new Emitter( {
+      tandem: options.tandem.createTandem( 'touchMovedEmitter' ),
+      phetioType: EmitterIO( [ NumberIO, Vector2IO, DOMEventIO ] ),
+      phetioEventType: 'user',
+      phetioDocumentation: 'Emits when a touch moves',
+      listener: function( id, point, event ) {
+        var touch = self.findPointerById( id );
+        if ( touch ) {
+          touch.move( point, event );
+          self.moveEvent( touch, event );
+        }
+      }
+    } );
+
+    // @private {Emitter} - Emits to the PhET-iO data stream.
+    this.touchCanceledEmitter = new Emitter( {
+      tandem: options.tandem.createTandem( 'touchCanceledEmitter' ),
+      phetioType: EmitterIO( [ NumberIO, Vector2IO, DOMEventIO ] ),
+      phetioEventType: 'user',
+      phetioDocumentation: 'Emits when a touch is canceled',
+      listener: function( id, point, event ) {
+        var touch = self.findPointerById( id );
+        if ( touch ) {
+          var pointChanged = touch.cancel( point, event );
+          self.cancelEvent( touch, event, pointChanged );
+          self.removePointer( touch );
+        }
+      }
+    } );
+
+    // @private {Emitter} - Emits to the PhET-iO data stream.
+    this.penStartedEmitter = new Emitter( {
+      tandem: options.tandem.createTandem( 'penStartedEmitter' ),
+      phetioType: EmitterIO( [ NumberIO, Vector2IO, DOMEventIO ] ),
+      phetioEventType: 'user',
+      phetioDocumentation: 'Emits when a pen touches the screen',
+      listener: function( id, point, event ) {
+        var pen = new Pen( id, point, event );
+        self.addPointer( pen );
+        self.downEvent( pen, event, false );
+      }
+    } );
+
+    // @private {Emitter} - Emits to the PhET-iO data stream.
+    this.penEndedEmitter = new Emitter( {
+      tandem: options.tandem.createTandem( 'penEndedEmitter' ),
+      phetioType: EmitterIO( [ NumberIO, Vector2IO, DOMEventIO ] ),
+      phetioEventType: 'user',
+      phetioDocumentation: 'Emits when a pen is lifted',
+      listener: function( id, point, event ) {
+        var pen = self.findPointerById( id );
+        if ( pen ) {
+          var pointChanged = pen.end( point, event );
+          self.upEvent( pen, event, pointChanged );
+          self.removePointer( pen );
+        }
+      }
+    } );
+
+    // @private {Emitter} - Emits to the PhET-iO data stream.
+    this.penMovedEmitter = new Emitter( {
+      tandem: options.tandem.createTandem( 'penMovedEmitter' ),
+      phetioType: EmitterIO( [ NumberIO, Vector2IO, DOMEventIO ] ),
+      phetioEventType: 'user',
+      phetioDocumentation: 'Emits when a pen is moved',
+      listener: function( id, point, event ) {
+        var pen = self.findPointerById( id );
+        if ( pen ) {
+          pen.move( point, event );
+          self.moveEvent( pen, event );
+        }
+      }
+    } );
+
+    // @private {Emitter} - Emits to the PhET-iO data stream.
+    this.penCanceledEmitter = new Emitter( {
+      tandem: options.tandem.createTandem( 'penCanceledEmitter' ),
+      phetioType: EmitterIO( [ NumberIO, Vector2IO, DOMEventIO ] ),
+      phetioEventType: 'user',
+      phetioDocumentation: 'Emits when a pen is canceled',
+      listener: function( id, point, event ) {
+        var pen = self.findPointerById( id );
+        if ( pen ) {
+          var pointChanged = pen.cancel( point, event );
+          self.cancelEvent( pen, event, pointChanged );
+          self.removePointer( pen );
+        }
+      }
     } );
   }
 
@@ -497,17 +691,7 @@ define( function( require ) {
     mouseDown: function( point, event ) {
       sceneryLog && sceneryLog.Input && sceneryLog.Input( 'mouseDown(' + Input.debugText( point, event ) + ');' );
       sceneryLog && sceneryLog.Input && sceneryLog.push();
-
-      if ( this.phetioEmitter.hasListeners() ) {
-        this.phetioEmitter.emit3( 'mouseDown', {
-          point: { x: point.x, y: point.y },
-          event: Input.serializeDomEvent( event )
-        }, NORMAL_FREQUENCY );
-      }
-      if ( !this.mouse ) { this.initMouse(); }
-      var pointChanged = this.mouse.down( point, event );
-      this.downEvent( this.mouse, event, pointChanged );
-
+      this.mouseDownEmitter.emit2( point, event );
       sceneryLog && sceneryLog.Input && sceneryLog.pop();
     },
 
@@ -524,9 +708,7 @@ define( function( require ) {
     mouseUp: function( point, event ) {
       sceneryLog && sceneryLog.Input && sceneryLog.Input( 'mouseUp(' + Input.debugText( point, event ) + ');' );
       sceneryLog && sceneryLog.Input && sceneryLog.push();
-
       this.mouseUpEmitter.emit2( point, event );
-
       sceneryLog && sceneryLog.Input && sceneryLog.pop();
     },
 
@@ -543,17 +725,7 @@ define( function( require ) {
     mouseMove: function( point, event ) {
       sceneryLog && sceneryLog.Input && sceneryLog.Input( 'mouseMove(' + Input.debugText( point, event ) + ');' );
       sceneryLog && sceneryLog.Input && sceneryLog.push();
-
-      if ( this.phetioEmitter.hasListeners() ) {
-        this.phetioEmitter.emit3( 'mouseMove', {
-          point: point.toStateObject(),
-          event: Input.serializeDomEvent( event )
-        }, HIGH_FREQUENCY );
-      }
-      if ( !this.mouse ) { this.initMouse(); }
-      this.mouse.move( point, event );
-      this.moveEvent( this.mouse, event );
-
+      this.mouseMovedEmitter.emit2( point, event );
       sceneryLog && sceneryLog.Input && sceneryLog.pop();
     },
 
@@ -567,17 +739,7 @@ define( function( require ) {
     mouseOver: function( point, event ) {
       sceneryLog && sceneryLog.Input && sceneryLog.Input( 'mouseOver(' + Input.debugText( point, event ) + ');' );
       sceneryLog && sceneryLog.Input && sceneryLog.push();
-
-      if ( this.phetioEmitter.hasListeners() ) {
-        this.phetioEmitter.emit3( 'mouseOver', {
-          point: point.toStateObject(),
-          event: Input.serializeDomEvent( event )
-        }, NORMAL_FREQUENCY );
-      }
-      if ( !this.mouse ) { this.initMouse(); }
-      this.mouse.over( point, event );
-      // TODO: how to handle mouse-over (and log it)... are we changing the pointer.point without a branch change?
-
+      this.mouseOverEmitter.emit( point, event );
       sceneryLog && sceneryLog.Input && sceneryLog.pop();
     },
 
@@ -591,17 +753,7 @@ define( function( require ) {
     mouseOut: function( point, event ) {
       sceneryLog && sceneryLog.Input && sceneryLog.Input( 'mouseOut(' + Input.debugText( point, event ) + ');' );
       sceneryLog && sceneryLog.Input && sceneryLog.push();
-
-      if ( this.phetioEmitter.hasListeners() ) {
-        this.phetioEmitter.emit3( 'mouseOut', {
-          point: point.toStateObject(),
-          event: Input.serializeDomEvent( event )
-        }, NORMAL_FREQUENCY );
-      }
-      if ( !this.mouse ) { this.initMouse(); }
-      this.mouse.out( point, event );
-      // TODO: how to handle mouse-out (and log it)... are we changing the pointer.point without a branch change?
-
+      this.mouseOutEmitter.emit( point, event );
       sceneryLog && sceneryLog.Input && sceneryLog.pop();
     },
 
@@ -614,22 +766,7 @@ define( function( require ) {
     wheel: function( event ) {
       sceneryLog && sceneryLog.Input && sceneryLog.Input( 'wheel(' + Input.debugText( null, event ) + ');' );
       sceneryLog && sceneryLog.Input && sceneryLog.push();
-
-      if ( this.phetioEmitter.hasListeners() ) {
-        this.phetioEmitter.emit3( 'wheel', {
-          event: Input.serializeDomEvent( event )
-        }, HIGH_FREQUENCY );
-      }
-      if ( !this.mouse ) { this.initMouse(); }
-      this.mouse.wheel( event );
-
-      // don't send mouse-wheel events if we don't yet have a mouse location!
-      // TODO: Can we set the mouse location based on the wheel event?
-      if ( this.mouse.point ) {
-        var trail = this.rootNode.trailUnderPointer( this.mouse ) || new Trail( this.rootNode );
-        this.dispatchEvent( trail, 'wheel', this.mouse, event, true );
-      }
-
+      this.wheelScrolledEmitter.emit( event );
       sceneryLog && sceneryLog.Input && sceneryLog.pop();
     },
 
@@ -647,18 +784,7 @@ define( function( require ) {
     touchStart: function( id, point, event ) {
       sceneryLog && sceneryLog.Input && sceneryLog.Input( 'touchStart(\'' + id + '\',' + Input.debugText( point, event ) + ');' );
       sceneryLog && sceneryLog.Input && sceneryLog.push();
-
-      if ( this.phetioEmitter.hasListeners() ) {
-        this.phetioEmitter.emit3( 'touchStart', {
-          id: id,
-          point: point.toStateObject(),
-          event: Input.serializeDomEvent( event )
-        }, NORMAL_FREQUENCY );
-      }
-      var touch = new Touch( id, point, event );
-      this.addPointer( touch );
-      this.downEvent( touch, event, false );
-
+      this.touchStartedEmitter.emit( id, point, event );
       sceneryLog && sceneryLog.Input && sceneryLog.pop();
     },
 
@@ -676,21 +802,7 @@ define( function( require ) {
     touchEnd: function( id, point, event ) {
       sceneryLog && sceneryLog.Input && sceneryLog.Input( 'touchEnd(\'' + id + '\',' + Input.debugText( point, event ) + ');' );
       sceneryLog && sceneryLog.Input && sceneryLog.push();
-
-      if ( this.phetioEmitter.hasListeners() ) {
-        this.phetioEmitter.emit3( 'touchEnd', {
-          id: id,
-          point: point.toStateObject(),
-          event: Input.serializeDomEvent( event )
-        }, NORMAL_FREQUENCY );
-      }
-      var touch = this.findPointerById( id );
-      if ( touch ) {
-        var pointChanged = touch.end( point, event );
-        this.upEvent( touch, event, pointChanged );
-        this.removePointer( touch );
-      }
-
+      this.touchEndedEmitter.emit( id, point, event );
       sceneryLog && sceneryLog.Input && sceneryLog.pop();
     },
 
@@ -708,20 +820,7 @@ define( function( require ) {
     touchMove: function( id, point, event ) {
       sceneryLog && sceneryLog.Input && sceneryLog.Input( 'touchMove(\'' + id + '\',' + Input.debugText( point, event ) + ');' );
       sceneryLog && sceneryLog.Input && sceneryLog.push();
-
-      if ( this.phetioEmitter.hasListeners() ) {
-        this.phetioEmitter.emit3( 'touchMove', {
-          id: id,
-          point: point.toStateObject(),
-          event: Input.serializeDomEvent( event )
-        }, HIGH_FREQUENCY );
-      }
-      var touch = this.findPointerById( id );
-      if ( touch ) {
-        touch.move( point, event );
-        this.moveEvent( touch, event );
-      }
-
+      this.touchMovedEmitter.emit( id, point, event );
       sceneryLog && sceneryLog.Input && sceneryLog.pop();
     },
 
@@ -739,21 +838,7 @@ define( function( require ) {
     touchCancel: function( id, point, event ) {
       sceneryLog && sceneryLog.Input && sceneryLog.Input( 'touchCancel(\'' + id + '\',' + Input.debugText( point, event ) + ');' );
       sceneryLog && sceneryLog.Input && sceneryLog.push();
-
-      if ( this.phetioEmitter.hasListeners() ) {
-        this.phetioEmitter.emit3( 'touchCancel', {
-          id: id,
-          point: point.toStateObject(),
-          event: Input.serializeDomEvent( event )
-        }, NORMAL_FREQUENCY );
-      }
-      var touch = this.findPointerById( id );
-      if ( touch ) {
-        var pointChanged = touch.cancel( point, event );
-        this.cancelEvent( touch, event, pointChanged );
-        this.removePointer( touch );
-      }
-
+      this.touchCanceledEmitter.emit( id, point, event );
       sceneryLog && sceneryLog.Input && sceneryLog.pop();
     },
 
@@ -771,18 +856,7 @@ define( function( require ) {
     penStart: function( id, point, event ) {
       sceneryLog && sceneryLog.Input && sceneryLog.Input( 'penStart(\'' + id + '\',' + Input.debugText( point, event ) + ');' );
       sceneryLog && sceneryLog.Input && sceneryLog.push();
-
-      if ( this.phetioEmitter.hasListeners() ) {
-        this.phetioEmitter.emit3( 'penStart', {
-          id: id,
-          point: point.toStateObject(),
-          event: Input.serializeDomEvent( event )
-        }, NORMAL_FREQUENCY );
-      }
-      var pen = new Pen( id, point, event );
-      this.addPointer( pen );
-      this.downEvent( pen, event, false );
-
+      this.penStartedEmitter.emit( id, point, event );
       sceneryLog && sceneryLog.Input && sceneryLog.pop();
     },
 
@@ -800,21 +874,7 @@ define( function( require ) {
     penEnd: function( id, point, event ) {
       sceneryLog && sceneryLog.Input && sceneryLog.Input( 'penEnd(\'' + id + '\',' + Input.debugText( point, event ) + ');' );
       sceneryLog && sceneryLog.Input && sceneryLog.push();
-
-      if ( this.phetioEmitter.hasListeners() ) {
-        this.phetioEmitter.emit3( 'penEnd', {
-          id: id,
-          point: point.toStateObject(),
-          event: Input.serializeDomEvent( event )
-        }, NORMAL_FREQUENCY );
-      }
-      var pen = this.findPointerById( id );
-      if ( pen ) {
-        var pointChanged = pen.end( point, event );
-        this.upEvent( pen, event, pointChanged );
-        this.removePointer( pen );
-      }
-
+      this.penEndedEmitter.emit( id, point, event );
       sceneryLog && sceneryLog.Input && sceneryLog.pop();
     },
 
@@ -832,20 +892,7 @@ define( function( require ) {
     penMove: function( id, point, event ) {
       sceneryLog && sceneryLog.Input && sceneryLog.Input( 'penMove(\'' + id + '\',' + Input.debugText( point, event ) + ');' );
       sceneryLog && sceneryLog.Input && sceneryLog.push();
-
-      if ( this.phetioEmitter.hasListeners() ) {
-        this.phetioEmitter.emit3( 'penMove', {
-          id: id,
-          point: point.toStateObject(),
-          event: Input.serializeDomEvent( event )
-        }, HIGH_FREQUENCY );
-      }
-      var pen = this.findPointerById( id );
-      if ( pen ) {
-        pen.move( point, event );
-        this.moveEvent( pen, event );
-      }
-
+      this.penMovedEmitter.emit( id, point, event );
       sceneryLog && sceneryLog.Input && sceneryLog.pop();
     },
 
@@ -863,21 +910,7 @@ define( function( require ) {
     penCancel: function( id, point, event ) {
       sceneryLog && sceneryLog.Input && sceneryLog.Input( 'penCancel(\'' + id + '\',' + Input.debugText( point, event ) + ');' );
       sceneryLog && sceneryLog.Input && sceneryLog.push();
-
-      if ( this.phetioEmitter.hasListeners() ) {
-        this.phetioEmitter.emit3( 'penCancel', {
-          id: id,
-          point: point.toStateObject(),
-          event: Input.serializeDomEvent( event )
-        }, NORMAL_FREQUENCY );
-      }
-      var pen = this.findPointerById( id );
-      if ( pen ) {
-        var pointChanged = pen.cancel( point, event );
-        this.cancelEvent( pen, event, pointChanged );
-        this.removePointer( pen );
-      }
-
+      this.penCanceledEmitter.emit( id, point, event );
       sceneryLog && sceneryLog.Input && sceneryLog.pop();
     },
 
@@ -1409,25 +1442,57 @@ define( function( require ) {
      * Invokes an event by name.
      * @public (phet-io)
      *
-     * @param {string} command - The name of the logical method to call
-     * @param {Object} config - { [point]: {Vector2}, event: {DOMEvent} } - Almost always the event will be synthetic.
+     * @param {Object} event - From the PhET-iO data stream.
      */
-    invokeInputEvent: function( command, config ) {
-      // TODO: A switch command would work better here?
-      if ( command === 'mouseMove' ) { this.mouseMove( Vector2.fromStateObject( config.point ), config.event ); }
-      else if ( command === 'mouseDown' ) { this.mouseDown( Vector2.fromStateObject( config.point ), config.event ); }
-      else if ( command === 'mouseUp' ) { this.mouseUp( Vector2.fromStateObject( config.point ), config.event ); }
-      else if ( command === 'mouseOver' ) { this.mouseOver( Vector2.fromStateObject( config.point ), config.event ); }
-      else if ( command === 'mouseOut' ) { this.mouseOut( Vector2.fromStateObject( config.point ), config.event ); }
-      else if ( command === 'wheel' ) { this.wheel( config.event ); }
-      else if ( command === 'touchStart' ) { this.touchStart( config.id, Vector2.fromStateObject( config.point ), config.event ); }
-      else if ( command === 'touchEnd' ) { this.touchEnd( config.id, Vector2.fromStateObject( config.point ), config.event ); }
-      else if ( command === 'touchMove' ) { this.touchMove( config.id, Vector2.fromStateObject( config.point ), config.event ); }
-      else if ( command === 'touchCancel' ) { this.touchCancel( config.id, Vector2.fromStateObject( config.point ), config.event ); }
-      else if ( command === 'penStart' ) { this.penStart( config.id, Vector2.fromStateObject( config.point ), config.event ); }
-      else if ( command === 'penEnd' ) { this.penEnd( config.id, Vector2.fromStateObject( config.point ), config.event ); }
-      else if ( command === 'penMove' ) { this.penMove( config.id, Vector2.fromStateObject( config.point ), config.event ); }
-      else if ( command === 'penCancel' ) { this.penCancel( config.id, Vector2.fromStateObject( config.point ), config.event ); }
+    invokeControllerInputEvent: function( event ) {
+
+      var args = event.parameters.args;
+
+      if ( event.phetioID === this.mouseMovedEmitter.tandem.phetioID ) {
+        this.mouseMovedEmitter.emit( Vector2.fromStateObject( args[ 0 ] ), args[ 1 ] );
+      }
+      else if ( event.phetioID === this.mouseDownEmitter.tandem.phetioID ) {
+        this.mouseDownEmitter.emit( Vector2.fromStateObject( args[ 0 ] ), args[ 1 ] );
+      }
+      else if ( event.phetioID === this.mouseUpEmitter.tandem.phetioID ) {
+        this.mouseUpEmitter.emit( Vector2.fromStateObject( args[ 0 ] ), args[ 1 ] );
+      }
+      else if ( event.phetioID === this.mouseOverEmitter.tandem.phetioID ) {
+        this.mouseOverEmitter.emit( Vector2.fromStateObject( args[ 0 ] ), args[ 1 ] );
+      }
+      else if ( event.phetioID === this.mouseOutEmitter.tandem.phetioID ) {
+        this.mouseOutEmitter.emit( Vector2.fromStateObject( args[ 0 ] ), args[ 1 ] );
+      }
+      else if ( event.phetioID === this.wheelScrolledEmitter.tandem.phetioID ) {
+        this.wheelScrolledEmitter.emit( args[ 0 ] );
+      }
+      else if ( event.phetioID === this.touchStartedEmitter.tandem.phetioID ) {
+        this.touchStartedEmitter.emit( args[ 0 ], Vector2.fromStateObject( args[ 1 ] ), args[ 2 ] );
+      }
+      else if ( event.phetioID === this.touchEndedEmitter.tandem.phetioID ) {
+        this.touchEndedEmitter.emit( args[ 0 ], Vector2.fromStateObject( args[ 1 ] ), args[ 2 ] );
+      }
+      else if ( event.phetioID === this.touchMovedEmitter.tandem.phetioID ) {
+        this.touchMovedEmitter.emit( args[ 0 ], Vector2.fromStateObject( args[ 1 ] ), args[ 2 ] );
+      }
+      else if ( event.phetioID === this.touchCanceledEmitter.tandem.phetioID ) {
+        this.touchCanceledEmitter.emit( args[ 0 ], Vector2.fromStateObject( args[ 1 ] ), args[ 2 ] );
+      }
+      else if ( event.phetioID === this.penStartedEmitter.tandem.phetioID ) {
+        this.penStartedEmitter.emit( args[ 0 ], Vector2.fromStateObject( args[ 1 ] ), args[ 2 ] );
+      }
+      else if ( event.phetioID === this.penEndedEmitter.tandem.phetioID ) {
+        this.penEndedEmitter.emit( args[ 0 ], Vector2.fromStateObject( args[ 1 ] ), args[ 2 ] );
+      }
+      else if ( event.phetioID === this.penMovedEmitter.tandem.phetioID ) {
+        this.penMovedEmitter.emit( args[ 0 ], Vector2.fromStateObject( args[ 1 ] ), args[ 2 ] );
+      }
+      else if ( event.phetioID === this.penCanceledEmitter.tandem.phetioID ) {
+        this.penCanceledEmitter.emit( args[ 0 ], Vector2.fromStateObject( args[ 1 ] ), args[ 2 ] );
+      }
+      else {
+        throw new Error( 'Input Emitter not found: ' + event.phetioID )
+      }
     }
   }, {
     /**
