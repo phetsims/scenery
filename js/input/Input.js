@@ -212,19 +212,18 @@ define( function( require ) {
     // like https://github.com/phetsims/balloons-and-static-electricity/issues/406.
     this.currentlyFiringEvents = false;
 
+    // @private {Emitter} - Emits to the PhET-iO data stream.
     this.mouseUpEmitter = new Emitter( {
       tandem: options.tandem.createTandem( 'mouseUpEmitter' ),
       phetioType: EmitterIO( [ Vector2IO, DOMEventIO ] ),
-      phetioEventType: 'user'
+      phetioEventType: 'user',
+      listener: function( point, event ) {
+        if ( !self.mouse ) { self.initMouse(); }
+        var pointChanged = self.mouse.up( point, event );
+        self.upEvent( self.mouse, event, pointChanged );
+      }
       // TODO: instance doc and phetioReadOnly??!?
     } );
-
-    this.mouseUpEmitter.addListener( function( point, event ) {
-      if ( !self.mouse ) { self.initMouse(); }
-      var pointChanged = self.mouse.up( point, event );
-      self.upEvent( self.mouse, event, pointChanged );
-    } );
-
   }
 
   scenery.register( 'Input', Input );
