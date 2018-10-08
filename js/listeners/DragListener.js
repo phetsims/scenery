@@ -188,17 +188,16 @@ define( function( require ) {
       phetioDocumentation: 'Emits whenever a drag occurs with an EventIO argument.',
       phetioReadOnly: options.phetioReadOnly,
       phetioEventType: 'user',
-      phetioType: EmitterIO( [ EventIO ] )
-    } );
+      phetioType: EmitterIO( [ { name: 'event', type: EventIO } ] ),
+      listener: function( event ) {
 
-    this._draggedEmitter.addListener( function( event ) {
+        // This is done first, before the drag listener is called (from the prototype drag call)
+        if ( !self._globalPoint.equals( self.pointer.point ) ) {
+          self.reposition( self.pointer.point );
+        }
 
-      // This is done first, before the drag listener is called (from the prototype drag call)
-      if ( !self._globalPoint.equals( self.pointer.point ) ) {
-        self.reposition( self.pointer.point );
+        PressListener.prototype.drag.call( self, event );
       }
-
-      PressListener.prototype.drag.call( self, event );
     } );
   }
 
@@ -293,7 +292,7 @@ define( function( require ) {
       sceneryLog && sceneryLog.InputListener && sceneryLog.InputListener( 'DragListener drag' );
       sceneryLog && sceneryLog.InputListener && sceneryLog.push();
 
-      this._draggedEmitter.emit1( event );
+      this._draggedEmitter.emit( event );
 
       sceneryLog && sceneryLog.InputListener && sceneryLog.pop();
     },

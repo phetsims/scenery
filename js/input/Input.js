@@ -222,18 +222,20 @@ define( function( require ) {
     };
 
     // Only emit events if phetioEmitInputEvents is turned on so we don't spam the data stream unnecessarily
-    this.validatePointersEmitter = new Emitter( window.phet && phet.phetio && phet.phetio.queryParameters.phetioEmitInputEvents ? {
+    this.validatePointersEmitter = new Emitter( {
       tandem: options.tandem.createTandem( 'validatePointersEmitter' ),
       phetioHighFrequency: true,
-      listener: validatePointers
-    } : {
+      phetioInputEvent: true,
       listener: validatePointers
     } );
 
     // @private {Emitter} - Emits to the PhET-iO data stream.  
     this.mouseUpEmitter = new Emitter( {
       tandem: options.tandem.createTandem( 'mouseUpEmitter' ),
-      phetioType: EmitterIO( [ Vector2IO, DOMEventIO ] ),
+      phetioType: EmitterIO( [
+        { name: 'point', type: Vector2IO },
+        { name: 'event', type: DOMEventIO }
+      ] ),
       phetioEventType: 'user',
       phetioDocumentation: 'Emits when a mouse button is released',
       listener: function( point, event ) {
@@ -246,7 +248,10 @@ define( function( require ) {
     // @private {Emitter} - Emits to the PhET-iO data stream.  
     this.mouseDownEmitter = new Emitter( {
       tandem: options.tandem.createTandem( 'mouseDownEmitter' ),
-      phetioType: EmitterIO( [ Vector2IO, DOMEventIO ] ),
+      phetioType: EmitterIO( [
+        { name: 'point', type: Vector2IO },
+        { name: 'event', type: DOMEventIO }
+      ] ),
       phetioEventType: 'user',
       phetioDocumentation: 'Emits when a mouse button is pressed',
       listener: function( point, event ) {
@@ -259,7 +264,10 @@ define( function( require ) {
     // @private {Emitter} - Emits to the PhET-iO data stream.  
     this.mouseMovedEmitter = new Emitter( {
       tandem: options.tandem.createTandem( 'mouseMovedEmitter' ),
-      phetioType: EmitterIO( [ Vector2IO, DOMEventIO ] ),
+      phetioType: EmitterIO( [
+        { name: 'point', type: Vector2IO },
+        { name: 'event', type: DOMEventIO }
+      ] ),
       phetioEventType: 'user',
       phetioDocumentation: 'Emits when the mouse is moved',
       phetioHighFrequency: true,
@@ -273,7 +281,10 @@ define( function( require ) {
     // @private {Emitter} - Emits to the PhET-iO data stream.  
     this.mouseOverEmitter = new Emitter( {
       tandem: options.tandem.createTandem( 'mouseOverEmitter' ),
-      phetioType: EmitterIO( [ Vector2IO, DOMEventIO ] ),
+      phetioType: EmitterIO( [
+        { name: 'point', type: Vector2IO },
+        { name: 'event', type: DOMEventIO }
+      ] ),
       phetioEventType: 'user',
       phetioDocumentation: 'Emits when the mouse is moved over a Node',
       listener: function( point, event ) {
@@ -286,7 +297,10 @@ define( function( require ) {
     // @private {Emitter} - Emits to the PhET-iO data stream.  
     this.mouseOutEmitter = new Emitter( {
       tandem: options.tandem.createTandem( 'mouseOutEmitter' ),
-      phetioType: EmitterIO( [ Vector2IO, DOMEventIO ] ),
+      phetioType: EmitterIO( [
+        { name: 'point', type: Vector2IO },
+        { name: 'event', type: DOMEventIO }
+      ] ),
       phetioEventType: 'user',
       phetioDocumentation: 'Emits when the mouse moves out of the display',
       listener: function( point, event ) {
@@ -299,7 +313,9 @@ define( function( require ) {
     // @private {Emitter} - Emits to the PhET-iO data stream.  
     this.wheelScrolledEmitter = new Emitter( {
       tandem: options.tandem.createTandem( 'wheelScrolledEmitter' ),
-      phetioType: EmitterIO( [ DOMEventIO ] ),
+      phetioType: EmitterIO( [
+        { name: 'event', type: DOMEventIO }
+      ] ),
       phetioEventType: 'user',
       phetioDocumentation: 'Emits when the mouse wheel scrolls',
       phetioHighFrequency: true,
@@ -319,7 +335,11 @@ define( function( require ) {
     // @private {Emitter} - Emits to the PhET-iO data stream.
     this.touchStartedEmitter = new Emitter( {
       tandem: options.tandem.createTandem( 'touchStartedEmitter' ),
-      phetioType: EmitterIO( [ NumberIO, Vector2IO, DOMEventIO ] ),
+      phetioType: EmitterIO( [
+        { name: 'id', type: NumberIO },
+        { name: 'point', type: Vector2IO },
+        { name: 'event', type: DOMEventIO }
+      ] ),
       phetioEventType: 'user',
       phetioDocumentation: 'Emits when a touch begins',
       listener: function( id, point, event ) {
@@ -332,7 +352,11 @@ define( function( require ) {
     // @private {Emitter} - Emits to the PhET-iO data stream.
     this.touchEndedEmitter = new Emitter( {
       tandem: options.tandem.createTandem( 'touchEndedEmitter' ),
-      phetioType: EmitterIO( [ NumberIO, Vector2IO, DOMEventIO ] ),
+      phetioType: EmitterIO( [
+        { name: 'id', type: NumberIO },
+        { name: 'point', type: Vector2IO },
+        { name: 'event', type: DOMEventIO }
+      ] ),
       phetioEventType: 'user',
       phetioDocumentation: 'Emits when a touch ends',
       listener: function( id, point, event ) {
@@ -348,7 +372,11 @@ define( function( require ) {
     // @private {Emitter} - Emits to the PhET-iO data stream.
     this.touchMovedEmitter = new Emitter( {
       tandem: options.tandem.createTandem( 'touchMovedEmitter' ),
-      phetioType: EmitterIO( [ NumberIO, Vector2IO, DOMEventIO ] ),
+      phetioType: EmitterIO( [
+        { name: 'id', type: NumberIO },
+        { name: 'point', type: Vector2IO },
+        { name: 'event', type: DOMEventIO }
+      ] ),
       phetioEventType: 'user',
       phetioDocumentation: 'Emits when a touch moves',
       phetioHighFrequency: true,
@@ -364,7 +392,11 @@ define( function( require ) {
     // @private {Emitter} - Emits to the PhET-iO data stream.
     this.touchCanceledEmitter = new Emitter( {
       tandem: options.tandem.createTandem( 'touchCanceledEmitter' ),
-      phetioType: EmitterIO( [ NumberIO, Vector2IO, DOMEventIO ] ),
+      phetioType: EmitterIO( [
+        { name: 'id', type: NumberIO },
+        { name: 'point', type: Vector2IO },
+        { name: 'event', type: DOMEventIO }
+      ] ),
       phetioEventType: 'user',
       phetioDocumentation: 'Emits when a touch is canceled',
       listener: function( id, point, event ) {
@@ -380,7 +412,11 @@ define( function( require ) {
     // @private {Emitter} - Emits to the PhET-iO data stream.
     this.penStartedEmitter = new Emitter( {
       tandem: options.tandem.createTandem( 'penStartedEmitter' ),
-      phetioType: EmitterIO( [ NumberIO, Vector2IO, DOMEventIO ] ),
+      phetioType: EmitterIO( [
+        { name: 'id', type: NumberIO },
+        { name: 'point', type: Vector2IO },
+        { name: 'event', type: DOMEventIO }
+      ] ),
       phetioEventType: 'user',
       phetioDocumentation: 'Emits when a pen touches the screen',
       listener: function( id, point, event ) {
@@ -393,7 +429,11 @@ define( function( require ) {
     // @private {Emitter} - Emits to the PhET-iO data stream.
     this.penEndedEmitter = new Emitter( {
       tandem: options.tandem.createTandem( 'penEndedEmitter' ),
-      phetioType: EmitterIO( [ NumberIO, Vector2IO, DOMEventIO ] ),
+      phetioType: EmitterIO( [
+        { name: 'id', type: NumberIO },
+        { name: 'point', type: Vector2IO },
+        { name: 'event', type: DOMEventIO }
+      ] ),
       phetioEventType: 'user',
       phetioDocumentation: 'Emits when a pen is lifted',
       listener: function( id, point, event ) {
@@ -409,7 +449,11 @@ define( function( require ) {
     // @private {Emitter} - Emits to the PhET-iO data stream.
     this.penMovedEmitter = new Emitter( {
       tandem: options.tandem.createTandem( 'penMovedEmitter' ),
-      phetioType: EmitterIO( [ NumberIO, Vector2IO, DOMEventIO ] ),
+      phetioType: EmitterIO( [
+        { name: 'id', type: NumberIO },
+        { name: 'point', type: Vector2IO },
+        { name: 'event', type: DOMEventIO }
+      ] ),
       phetioEventType: 'user',
       phetioDocumentation: 'Emits when a pen is moved',
       phetioHighFrequency: true,
@@ -425,7 +469,11 @@ define( function( require ) {
     // @private {Emitter} - Emits to the PhET-iO data stream.
     this.penCanceledEmitter = new Emitter( {
       tandem: options.tandem.createTandem( 'penCanceledEmitter' ),
-      phetioType: EmitterIO( [ NumberIO, Vector2IO, DOMEventIO ] ),
+      phetioType: EmitterIO( [
+        { name: 'id', type: NumberIO },
+        { name: 'point', type: Vector2IO },
+        { name: 'event', type: DOMEventIO }
+      ] ),
       phetioEventType: 'user',
       phetioDocumentation: 'Emits when a pen is canceled',
       listener: function( id, point, event ) {
@@ -702,7 +750,7 @@ define( function( require ) {
     mouseDown: function( point, event ) {
       sceneryLog && sceneryLog.Input && sceneryLog.Input( 'mouseDown(' + Input.debugText( point, event ) + ');' );
       sceneryLog && sceneryLog.Input && sceneryLog.push();
-      this.mouseDownEmitter.emit2( point, event );
+      this.mouseDownEmitter.emit( point, event );
       sceneryLog && sceneryLog.Input && sceneryLog.pop();
     },
 
@@ -719,7 +767,7 @@ define( function( require ) {
     mouseUp: function( point, event ) {
       sceneryLog && sceneryLog.Input && sceneryLog.Input( 'mouseUp(' + Input.debugText( point, event ) + ');' );
       sceneryLog && sceneryLog.Input && sceneryLog.push();
-      this.mouseUpEmitter.emit2( point, event );
+      this.mouseUpEmitter.emit( point, event );
       sceneryLog && sceneryLog.Input && sceneryLog.pop();
     },
 
@@ -736,7 +784,7 @@ define( function( require ) {
     mouseMove: function( point, event ) {
       sceneryLog && sceneryLog.Input && sceneryLog.Input( 'mouseMove(' + Input.debugText( point, event ) + ');' );
       sceneryLog && sceneryLog.Input && sceneryLog.push();
-      this.mouseMovedEmitter.emit2( point, event );
+      this.mouseMovedEmitter.emit( point, event );
       sceneryLog && sceneryLog.Input && sceneryLog.pop();
     },
 
@@ -1457,49 +1505,49 @@ define( function( require ) {
      */
     invokeControllerInputEvent: function( event ) {
 
-      var args = event.parameters && event.parameters.args;
+      var parameters = event.parameters;
 
       if ( event.phetioID === this.mouseMovedEmitter.tandem.phetioID ) {
-        this.mouseMovedEmitter.emit( Vector2.fromStateObject( args[ 0 ] ), args[ 1 ] );
+        this.mouseMovedEmitter.emit( Vector2.fromStateObject( parameters.point ), parameters.event );
       }
       else if ( event.phetioID === this.mouseDownEmitter.tandem.phetioID ) {
-        this.mouseDownEmitter.emit( Vector2.fromStateObject( args[ 0 ] ), args[ 1 ] );
+        this.mouseDownEmitter.emit( Vector2.fromStateObject( parameters.point ), parameters.event );
       }
       else if ( event.phetioID === this.mouseUpEmitter.tandem.phetioID ) {
-        this.mouseUpEmitter.emit( Vector2.fromStateObject( args[ 0 ] ), args[ 1 ] );
+        this.mouseUpEmitter.emit( Vector2.fromStateObject( parameters.point ), parameters.event );
       }
       else if ( event.phetioID === this.mouseOverEmitter.tandem.phetioID ) {
-        this.mouseOverEmitter.emit( Vector2.fromStateObject( args[ 0 ] ), args[ 1 ] );
+        this.mouseOverEmitter.emit( Vector2.fromStateObject( parameters.point ), parameters.event );
       }
       else if ( event.phetioID === this.mouseOutEmitter.tandem.phetioID ) {
-        this.mouseOutEmitter.emit( Vector2.fromStateObject( args[ 0 ] ), args[ 1 ] );
+        this.mouseOutEmitter.emit( Vector2.fromStateObject( parameters.point ), parameters.event );
       }
       else if ( event.phetioID === this.wheelScrolledEmitter.tandem.phetioID ) {
-        this.wheelScrolledEmitter.emit( args[ 0 ] );
+        this.wheelScrolledEmitter.emit( parameters.event );
       }
       else if ( event.phetioID === this.touchStartedEmitter.tandem.phetioID ) {
-        this.touchStartedEmitter.emit( args[ 0 ], Vector2.fromStateObject( args[ 1 ] ), args[ 2 ] );
+        this.touchStartedEmitter.emit( parameters.id, Vector2.fromStateObject( parameters.point ), parameters.event );
       }
       else if ( event.phetioID === this.touchEndedEmitter.tandem.phetioID ) {
-        this.touchEndedEmitter.emit( args[ 0 ], Vector2.fromStateObject( args[ 1 ] ), args[ 2 ] );
+        this.touchEndedEmitter.emit( parameters.id, Vector2.fromStateObject( parameters.point ), parameters.event );
       }
       else if ( event.phetioID === this.touchMovedEmitter.tandem.phetioID ) {
-        this.touchMovedEmitter.emit( args[ 0 ], Vector2.fromStateObject( args[ 1 ] ), args[ 2 ] );
+        this.touchMovedEmitter.emit( parameters.id, Vector2.fromStateObject( parameters.point ), parameters.event );
       }
       else if ( event.phetioID === this.touchCanceledEmitter.tandem.phetioID ) {
-        this.touchCanceledEmitter.emit( args[ 0 ], Vector2.fromStateObject( args[ 1 ] ), args[ 2 ] );
+        this.touchCanceledEmitter.emit( parameters.id, Vector2.fromStateObject( parameters.point ), parameters.event );
       }
       else if ( event.phetioID === this.penStartedEmitter.tandem.phetioID ) {
-        this.penStartedEmitter.emit( args[ 0 ], Vector2.fromStateObject( args[ 1 ] ), args[ 2 ] );
+        this.penStartedEmitter.emit( parameters.id, Vector2.fromStateObject( parameters.point ), parameters.event );
       }
       else if ( event.phetioID === this.penEndedEmitter.tandem.phetioID ) {
-        this.penEndedEmitter.emit( args[ 0 ], Vector2.fromStateObject( args[ 1 ] ), args[ 2 ] );
+        this.penEndedEmitter.emit( parameters.id, Vector2.fromStateObject( parameters.point ), parameters.event );
       }
       else if ( event.phetioID === this.penMovedEmitter.tandem.phetioID ) {
-        this.penMovedEmitter.emit( args[ 0 ], Vector2.fromStateObject( args[ 1 ] ), args[ 2 ] );
+        this.penMovedEmitter.emit( parameters.id, Vector2.fromStateObject( parameters.point ), parameters.event );
       }
       else if ( event.phetioID === this.penCanceledEmitter.tandem.phetioID ) {
-        this.penCanceledEmitter.emit( args[ 0 ], Vector2.fromStateObject( args[ 1 ] ), args[ 2 ] );
+        this.penCanceledEmitter.emit( parameters.id, Vector2.fromStateObject( parameters.point ), parameters.event );
       }
       else if ( event.phetioID === this.validatePointersEmitter.tandem.phetioID ) {
         this.validatePointersEmitter.emit();

@@ -219,7 +219,11 @@ define( function( require ) {
                            'used to convey info about the Event.',
       phetioReadOnly: options.phetioReadOnly,
       phetioEventType: 'user',
-      phetioType: EmitterIO( [ EventIO, VoidIO, VoidIO ] )
+      phetioType: EmitterIO( [
+        { name: 'event', type: EventIO },
+        { name: 'targetNode', type: VoidIO },
+        { name: 'callback', type: VoidIO }
+      ] )
     } );
 
     // The main implementation of "press" handling is implemented as a callback to the emitter, so things are nested
@@ -232,12 +236,12 @@ define( function( require ) {
       phetioDocumentation: 'Emits whenever a release occurs.',
       phetioReadOnly: options.phetioReadOnly,
       phetioEventType: 'user',
-      phetioType: EmitterIO( [ VoidIO ] )
-    } );
+      phetioType: EmitterIO( [ { name: 'callback', type: VoidIO } ] ),
 
-    // The main implementation of "release" handling is implemented as a callback to the emitter, so things are nested
-    // nicely for phet-io.
-    this._releasedEmitter.addListener( this.onRelease.bind( this ) );
+      // The main implementation of "release" handling is implemented as a callback to the emitter, so things are nested
+      // nicely for phet-io.
+      listener: this.onRelease.bind( this )
+    } );
 
     // update isOverProperty (not a DerivedProperty because we need to hook to passed-in properties)
     this.overPointers.lengthProperty.link( this.invalidateOver.bind( this ) );
@@ -344,7 +348,7 @@ define( function( require ) {
       sceneryLog && sceneryLog.InputListener && sceneryLog.InputListener( 'PressListener#' + this._id + ' successful press' );
       sceneryLog && sceneryLog.InputListener && sceneryLog.push();
 
-      this._pressedEmitter.emit3( event, targetNode, callback );
+      this._pressedEmitter.emit( event, targetNode, callback );
 
       sceneryLog && sceneryLog.InputListener && sceneryLog.pop();
 
@@ -366,7 +370,7 @@ define( function( require ) {
       sceneryLog && sceneryLog.InputListener && sceneryLog.InputListener( 'PressListener#' + this._id + ' release' );
       sceneryLog && sceneryLog.InputListener && sceneryLog.push();
 
-      this._releasedEmitter.emit1( callback );
+      this._releasedEmitter.emit( callback );
 
       sceneryLog && sceneryLog.InputListener && sceneryLog.pop();
     },
