@@ -2458,8 +2458,8 @@ define( function( require ) {
      * @param {number|null} maxWidth
      */
     setMaxWidth: function( maxWidth ) {
-      assert && assert( maxWidth === null || typeof maxWidth === 'number',
-        'maxWidth should be null (no constraint) or a number' );
+      assert && assert( maxWidth === null || ( typeof maxWidth === 'number' && maxWidth > 0 ),
+        'maxWidth should be null (no constraint) or a positive number' );
 
       if ( this._maxWidth !== maxWidth ) {
         // update synthetic bounds listener count (to ensure our bounds are validated at the start of updateDisplay)
@@ -2490,8 +2490,8 @@ define( function( require ) {
      * @param {number|null} maxHeight
      */
     setMaxHeight: function( maxHeight ) {
-      assert && assert( maxHeight === null || typeof maxHeight === 'number',
-        'maxHeight should be null (no constraint) or a number' );
+      assert && assert( maxHeight === null || ( typeof maxHeight === 'number' && maxHeight > 0 ),
+        'maxHeight should be null (no constraint) or a positive number' );
 
       if ( this._maxHeight !== maxHeight ) {
         // update synthetic bounds listener count (to ensure our bounds are validated at the start of updateDisplay)
