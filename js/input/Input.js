@@ -222,7 +222,7 @@ define( function( require ) {
     };
 
     // Only emit events if phetioEmitInputEvents is turned on so we don't spam the data stream unnecessarily
-    this.validatePointersEmitter = new Emitter( phet.phetio && phet.phetio.queryParameters.phetioEmitInputEvents ? {
+    this.validatePointersEmitter = new Emitter( window.phet && phet.phetio && phet.phetio.queryParameters.phetioEmitInputEvents ? {
       tandem: options.tandem.createTandem( 'validatePointersEmitter' ),
       phetioHighFrequency: true,
       listener: validatePointers
