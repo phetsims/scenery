@@ -1301,7 +1301,7 @@ define( function( require ) {
      * out/over events, and if flagged a move event.
      *
      * @param {Pointer} pointer
-     * @param {DOMEvent} event
+     * @param {DOMEvent|null} event
      * @param {boolean} sendMove - Whether to send move events
      * @returns {Trail} - The current trail of the pointer
      */
@@ -1352,7 +1352,7 @@ define( function( require ) {
      * - over y (bubbles)
      *
      * @param {Pointer} pointer
-     * @param {DOMEvent} event
+     * @param {DOMEvent|null} event
      * @param {Trail} trail - The "new" trail
      * @param {number} branchIndex - The first index where the old and new trails have a different node. We will notify
      *                               for this node and all "descendant" nodes in the relevant trail.
@@ -1383,7 +1383,7 @@ define( function( require ) {
      * - exit e
      *
      * @param {Pointer} pointer
-     * @param {DOMEvent} event
+     * @param {DOMEvent|null} event
      * @param {Trail} trail - The "old" trail
      * @param {number} branchIndex - The first index where the old and new trails have a different node. We will notify
      *                               for this node and all "descendant" nodes in the relevant trail.
@@ -1409,7 +1409,7 @@ define( function( require ) {
      * @param {Trail} trail
      * @param {string} type
      * @param {Pointer} pointer
-     * @param {DOMEvent} event
+     * @param {DOMEvent|null} event
      * @param {boolean} bubbles - If bubbles is false, the event is only dispatched to the leaf node of the trail.
      */
     dispatchEvent: function( trail, type, pointer, event, bubbles ) {

@@ -27,7 +27,7 @@ define( function( require ) {
    * @param {Trail} trail - The trail to the node picked/hit by this input event.
    * @param {string} type - Type of the event, e.g. 'string'
    * @param {Pointer} pointer - The pointer that triggered this event
-   * @param {DOM Event} domEvent - The original DOM Event that caused this Event to fire.
+   * @param {DOMEvent|null} domEvent - The original DOM Event that caused this Event to fire.
    */
   function Event( trail, type, pointer, domEvent ) {
     assert && assert( trail instanceof Trail, 'Event\'s trail parameter should be a {Trail}' );
@@ -50,7 +50,7 @@ define( function( require ) {
     // @public {Pointer} - The pointer that triggered this event
     this.pointer = pointer;
 
-    // @public {DOM Event} - Raw DOM InputEvent (TouchEvent, PointerEvent, MouseEvent,...)
+    // @public {DOMEvent|null} - Raw DOM InputEvent (TouchEvent, PointerEvent, MouseEvent,...)
     this.domEvent = domEvent;
 
     // @public {Node|null} - whatever node you attached the listener to, or null when firing events on a Pointer
