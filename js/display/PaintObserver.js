@@ -240,6 +240,9 @@ define( function( require ) {
      * @param {Property.<*>} property
      */
     secondaryLazyLinkProperty: function( property ) {
+      sceneryLog && sceneryLog.Paints && sceneryLog.Paints( '[PaintObserver] secondaryLazyLinkProperty ' + property._id );
+      sceneryLog && sceneryLog.Paints && sceneryLog.push();
+
       var index = _.indexOf( this.secondaryListenedProperties, property );
       if ( index >= 0 ) {
         this.secondaryListenedPropertyCounts[ index ]++;
@@ -249,6 +252,8 @@ define( function( require ) {
         this.secondaryListenedPropertyCounts.push( 1 );
         property.lazyLink( this.updateSecondaryListener );
       }
+
+      sceneryLog && sceneryLog.Paints && sceneryLog.pop();
     },
 
     /**
@@ -259,6 +264,9 @@ define( function( require ) {
      * @param {Property.<*>} property
      */
     secondaryUnlinkProperty: function( property ) {
+      sceneryLog && sceneryLog.Paints && sceneryLog.Paints( '[PaintObserver] secondaryUnlinkProperty ' + property._id );
+      sceneryLog && sceneryLog.Paints && sceneryLog.push();
+
       var index = _.indexOf( this.secondaryListenedProperties, property );
       this.secondaryListenedPropertyCounts[ index ]--;
       if ( this.secondaryListenedPropertyCounts[ index ] === 0 ) {
@@ -268,6 +276,8 @@ define( function( require ) {
           property.unlink( this.updateSecondaryListener );
         }
       }
+
+      sceneryLog && sceneryLog.Paints && sceneryLog.pop();
     },
 
     /**
@@ -277,6 +287,9 @@ define( function( require ) {
      * @param {Color} color
      */
     secondaryLazyLinkColor: function( color ) {
+      sceneryLog && sceneryLog.Paints && sceneryLog.Paints( '[PaintObserver] secondaryLazyLinkColor' );
+      sceneryLog && sceneryLog.Paints && sceneryLog.push();
+
       var index = _.indexOf( this.secondaryListenedColors, color );
       if ( index >= 0 ) {
         this.secondaryListenedColorCounts[ index ]++;
@@ -286,6 +299,8 @@ define( function( require ) {
         this.secondaryListenedColorCounts.push( 1 );
         color.changeEmitter.addListener( this.notifyChangeCallback );
       }
+
+      sceneryLog && sceneryLog.Paints && sceneryLog.pop();
     },
 
     /**
@@ -296,13 +311,19 @@ define( function( require ) {
      * @param {Color} color
      */
     secondaryUnlinkColor: function( color ) {
+      sceneryLog && sceneryLog.Paints && sceneryLog.Paints( '[PaintObserver] secondaryUnlinkColor' );
+      sceneryLog && sceneryLog.Paints && sceneryLog.push();
+
       var index = _.indexOf( this.secondaryListenedColors, color );
+      assert && assert( index >= 0 );
       this.secondaryListenedColorCounts[ index ]--;
       if ( this.secondaryListenedColorCounts[ index ] === 0 ) {
         this.secondaryListenedColors.splice( index, 1 );
         this.secondaryListenedColorCounts.splice( index, 1 );
         color.changeEmitter.removeListener( this.notifyChangeCallback );
       }
+
+      sceneryLog && sceneryLog.Paints && sceneryLog.pop();
     }
   } );
 
