@@ -337,7 +337,7 @@ define( function( require ) {
 
     // @private {Emitter} - Emits to the PhET-iO data stream.
     this.touchStartedEmitter = new Emitter( {
-      valueTypes: [ Vector2, window.Event ], // Note this is a DOM event, not a scenery.Event
+      valueTypes: [ 'number', Vector2, window.Event ], // Note this is a DOM event, not a scenery.Event
       tandem: options.tandem.createTandem( 'touchStartedEmitter' ),
       phetioType: EmitterIO( [
         { name: 'id', type: NumberIO },
