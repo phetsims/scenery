@@ -208,7 +208,6 @@ define( function( require ) {
 
     // Declare the Emitters that send scenery input events to the PhET-iO data stream.  Note they use the default value
     // of phetioReadOnly false, in case a client wants to synthesize events.
-    // TODO: Make the press/release events are low frequency and the move events are high frequency.
 
     // @private {Emitter} Emits pointer validation to the input stream for playback
     const validatePointers = function() {
