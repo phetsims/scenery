@@ -18,6 +18,7 @@ define( function( require ) {
   var BooleanProperty = require( 'AXON/BooleanProperty' );
   var Emitter = require( 'AXON/Emitter' );
   var EmitterIO = require( 'AXON/EmitterIO' );
+  var Event = require( 'SCENERY/input/Event' );
   var DerivedProperty = require( 'AXON/DerivedProperty' );
   var inherit = require( 'PHET_CORE/inherit' );
   var Mouse = require( 'SCENERY/input/Mouse' );
@@ -214,6 +215,8 @@ define( function( require ) {
 
     // @private {Emitter} - Emitted on press event
     this._pressedEmitter = new Emitter( {
+      valueTypes: [ Event, Node, 'function' ],
+      areTypesOptional: [ false, true, true ],
       tandem: options.tandem.createTandem( 'pressedEmitter' ),
       phetioDocumentation: 'Emits whenever a press occurs. The first argument when emitting can be ' +
                            'used to convey info about the Event.',
@@ -232,6 +235,8 @@ define( function( require ) {
 
     // @private {Emitter} - Emitted on release event
     this._releasedEmitter = new Emitter( {
+      valueTypes: [ 'function' ],
+      areTypesOptional: [ true ],
       tandem: options.tandem.createTandem( 'releasedEmitter' ),
       phetioDocumentation: 'Emits whenever a release occurs.',
       phetioReadOnly: options.phetioReadOnly,
