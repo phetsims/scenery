@@ -708,9 +708,12 @@ define( function( require ) {
         // Workaround for a bug in IE11 in Fullscreen mode where document.activeElement.blur() errors out with
         // "Invalid Function". A delay seems to be a common workaround for IE11, see
         // https://stackoverflow.com/questions/2600186/focus-doesnt-work-in-ie
+        var self = this;
         if ( platform.ie11 && FullScreen.isFullScreen() ) {
           window.setTimeout( function() {
-            this._primarySibling.blur();
+
+            // make sure that the primary sibling hasn't been removed from the document since the timeout was added
+            self._primarySibling && self._primarySibling.blur();
           }, 0 );
         }
         else {
