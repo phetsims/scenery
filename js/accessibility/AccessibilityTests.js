@@ -1114,7 +1114,7 @@ define( function( require ) {
     assert.ok( testNode.accessibleInstances[ 0 ].peer.primarySibling === document.activeElement, 'browser is focusing testNode' );
 
     testNode.blur();
-    assert.ok( testNode, 'testNode blurred before being replaced' );
+    assert.ok( !!testNode, 'testNode blurred before being replaced' );
 
     // replace testNode with f after bluring testNode, neither should have focus after the replacement
     a.replaceChild( testNode, f );
