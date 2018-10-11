@@ -41,6 +41,14 @@ define( require => {
      */
     toStateObject( domEvent ) {
       return scenery.Input.serializeDomEvent( domEvent );
+    },
+
+    /**
+     * @param {Object} stateObject
+     * @returns {window.Event}
+     */
+    fromStateObject( stateObject ) {
+      return scenery.Input.deserializeDomEvent( stateObject );
     }
   } );
 
