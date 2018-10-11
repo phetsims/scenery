@@ -1520,52 +1520,47 @@ define( function( require ) {
 
       var parameters = event.parameters;
 
-      var domEvent;
-      if ( parameters.event ) {
-        domEvent = Input.deserializeDomEvent( parameters.event );
-      }
-
       if ( event.phetioID === this.mouseMovedEmitter.tandem.phetioID ) {
-        this.mouseMovedEmitter.emit( Vector2.fromStateObject( parameters.point ), domEvent );
+        this.mouseMovedEmitter.emit( Vector2.fromStateObject( parameters.point ), DOMEventIO.fromStateObject( parameters.event ) );
       }
       else if ( event.phetioID === this.mouseDownEmitter.tandem.phetioID ) {
-        this.mouseDownEmitter.emit( Vector2.fromStateObject( parameters.point ), domEvent );
+        this.mouseDownEmitter.emit( Vector2.fromStateObject( parameters.point ), DOMEventIO.fromStateObject( parameters.event ) );
       }
       else if ( event.phetioID === this.mouseUpEmitter.tandem.phetioID ) {
-        this.mouseUpEmitter.emit( Vector2.fromStateObject( parameters.point ), domEvent );
+        this.mouseUpEmitter.emit( Vector2.fromStateObject( parameters.point ), DOMEventIO.fromStateObject( parameters.event ) );
       }
       else if ( event.phetioID === this.mouseOverEmitter.tandem.phetioID ) {
-        this.mouseOverEmitter.emit( Vector2.fromStateObject( parameters.point ), domEvent );
+        this.mouseOverEmitter.emit( Vector2.fromStateObject( parameters.point ), DOMEventIO.fromStateObject( parameters.event ) );
       }
       else if ( event.phetioID === this.mouseOutEmitter.tandem.phetioID ) {
-        this.mouseOutEmitter.emit( Vector2.fromStateObject( parameters.point ), domEvent );
+        this.mouseOutEmitter.emit( Vector2.fromStateObject( parameters.point ), DOMEventIO.fromStateObject( parameters.event ) );
       }
       else if ( event.phetioID === this.wheelScrolledEmitter.tandem.phetioID ) {
-        this.wheelScrolledEmitter.emit( domEvent );
+        this.wheelScrolledEmitter.emit( DOMEventIO.fromStateObject( parameters.event ) );
       }
       else if ( event.phetioID === this.touchStartedEmitter.tandem.phetioID ) {
-        this.touchStartedEmitter.emit( parameters.id, Vector2.fromStateObject( parameters.point ), domEvent );
+        this.touchStartedEmitter.emit( parameters.id, Vector2.fromStateObject( parameters.point ), DOMEventIO.fromStateObject( parameters.event ) );
       }
       else if ( event.phetioID === this.touchEndedEmitter.tandem.phetioID ) {
-        this.touchEndedEmitter.emit( parameters.id, Vector2.fromStateObject( parameters.point ), domEvent );
+        this.touchEndedEmitter.emit( parameters.id, Vector2.fromStateObject( parameters.point ), DOMEventIO.fromStateObject( parameters.event ) );
       }
       else if ( event.phetioID === this.touchMovedEmitter.tandem.phetioID ) {
-        this.touchMovedEmitter.emit( parameters.id, Vector2.fromStateObject( parameters.point ), domEvent );
+        this.touchMovedEmitter.emit( parameters.id, Vector2.fromStateObject( parameters.point ), DOMEventIO.fromStateObject( parameters.event ) );
       }
       else if ( event.phetioID === this.touchCanceledEmitter.tandem.phetioID ) {
-        this.touchCanceledEmitter.emit( parameters.id, Vector2.fromStateObject( parameters.point ), domEvent );
+        this.touchCanceledEmitter.emit( parameters.id, Vector2.fromStateObject( parameters.point ), DOMEventIO.fromStateObject( parameters.event ) );
       }
       else if ( event.phetioID === this.penStartedEmitter.tandem.phetioID ) {
-        this.penStartedEmitter.emit( parameters.id, Vector2.fromStateObject( parameters.point ), domEvent );
+        this.penStartedEmitter.emit( parameters.id, Vector2.fromStateObject( parameters.point ), DOMEventIO.fromStateObject( parameters.event ) );
       }
       else if ( event.phetioID === this.penEndedEmitter.tandem.phetioID ) {
-        this.penEndedEmitter.emit( parameters.id, Vector2.fromStateObject( parameters.point ), domEvent );
+        this.penEndedEmitter.emit( parameters.id, Vector2.fromStateObject( parameters.point ), DOMEventIO.fromStateObject( parameters.event ) );
       }
       else if ( event.phetioID === this.penMovedEmitter.tandem.phetioID ) {
-        this.penMovedEmitter.emit( parameters.id, Vector2.fromStateObject( parameters.point ), domEvent );
+        this.penMovedEmitter.emit( parameters.id, Vector2.fromStateObject( parameters.point ), DOMEventIO.fromStateObject( parameters.event ) );
       }
       else if ( event.phetioID === this.penCanceledEmitter.tandem.phetioID ) {
-        this.penCanceledEmitter.emit( parameters.id, Vector2.fromStateObject( parameters.point ), domEvent );
+        this.penCanceledEmitter.emit( parameters.id, Vector2.fromStateObject( parameters.point ), DOMEventIO.fromStateObject( parameters.event ) );
       }
       else if ( event.phetioID === this.validatePointersEmitter.tandem.phetioID ) {
         this.validatePointersEmitter.emit();
