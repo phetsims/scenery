@@ -36,11 +36,10 @@ define( function( require ) {
     // @private {function} - To be called whenever our secondary fill/stroke value may have changed
     this.updateSecondaryListener = this.updateSecondary.bind( this );
 
+    // @private {Object} - Maps {number} property.id => {number} count (number of times we would be listening to it)
+    this.secondaryPropertyCountsMap = {};
+
     // Tracking needed so we don't add duplicate listeners, see https://github.com/phetsims/axon/issues/129
-    // @private {Array.<Property.<*>>} - Indexed the same as the counts.
-    this.secondaryListenedProperties = [];
-    // @private {Array.<number>}
-    this.secondaryListenedPropertyCounts = [];
     // @private {Array.<Color>} - Indexed the same as the counts.
     this.secondaryListenedColors = [];
     // @private {Array.<number>}
@@ -94,13 +93,19 @@ define( function( require ) {
      *
      * @param {string|Color} newPaint
      * @param {string|Color} oldPaint
+     * @param {Property} property
      */
-    updateSecondary: function( newPaint, oldPaint ) {
+    updateSecondary: function( newPaint, oldPaint, property ) {
       sceneryLog && sceneryLog.Paints && sceneryLog.Paints( '[PaintObserver] secondary update' );
       sceneryLog && sceneryLog.Paints && sceneryLog.push();
 
-      this.detachSecondary( oldPaint );
-      this.attachSecondary( newPaint );
+      var count = this.secondaryPropertyCountsMap[ property.id ];
+      assert && assert( count > 0, 'We should always be removing at least one reference' );
+
+      for ( var i = 0; i < count; i++ ) {
+        this.detachSecondary( oldPaint );
+        this.attachSecondary( newPaint );
+      }
       this.notifyChangeCallback();
 
       sceneryLog && sceneryLog.Paints && sceneryLog.pop();
@@ -240,15 +245,20 @@ define( function( require ) {
      * @param {Property.<*>} property
      */
     secondaryLazyLinkProperty: function( property ) {
-      var index = _.indexOf( this.secondaryListenedProperties, property );
-      if ( index >= 0 ) {
-        this.secondaryListenedPropertyCounts[ index ]++;
+      sceneryLog && sceneryLog.Paints && sceneryLog.Paints( '[PaintObserver] secondaryLazyLinkProperty ' + property._id );
+      sceneryLog && sceneryLog.Paints && sceneryLog.push();
+
+      var id = property.id;
+      var count = this.secondaryPropertyCountsMap[ id ];
+      if ( count ) {
+        this.secondaryPropertyCountsMap[ id ]++;
       }
       else {
-        this.secondaryListenedProperties.push( property );
-        this.secondaryListenedPropertyCounts.push( 1 );
+        this.secondaryPropertyCountsMap[ id ] = 1;
         property.lazyLink( this.updateSecondaryListener );
       }
+
+      sceneryLog && sceneryLog.Paints && sceneryLog.pop();
     },
 
     /**
@@ -259,15 +269,21 @@ define( function( require ) {
      * @param {Property.<*>} property
      */
     secondaryUnlinkProperty: function( property ) {
-      var index = _.indexOf( this.secondaryListenedProperties, property );
-      this.secondaryListenedPropertyCounts[ index ]--;
-      if ( this.secondaryListenedPropertyCounts[ index ] === 0 ) {
-        this.secondaryListenedProperties.splice( index, 1 );
-        this.secondaryListenedPropertyCounts.splice( index, 1 );
+      sceneryLog && sceneryLog.Paints && sceneryLog.Paints( '[PaintObserver] secondaryUnlinkProperty ' + property._id );
+      sceneryLog && sceneryLog.Paints && sceneryLog.push();
+
+      var id = property.id;
+      var count = --this.secondaryPropertyCountsMap[ id ];
+      assert && assert( count >= 0, 'We should have had a reference before' );
+
+      if ( count === 0 ) {
+        delete this.secondaryPropertyCountsMap[ id ];
         if ( !property.isDisposed ) {
           property.unlink( this.updateSecondaryListener );
         }
       }
+
+      sceneryLog && sceneryLog.Paints && sceneryLog.pop();
     },
 
     /**
@@ -277,6 +293,9 @@ define( function( require ) {
      * @param {Color} color
      */
     secondaryLazyLinkColor: function( color ) {
+      sceneryLog && sceneryLog.Paints && sceneryLog.Paints( '[PaintObserver] secondaryLazyLinkColor' );
+      sceneryLog && sceneryLog.Paints && sceneryLog.push();
+
       var index = _.indexOf( this.secondaryListenedColors, color );
       if ( index >= 0 ) {
         this.secondaryListenedColorCounts[ index ]++;
@@ -286,6 +305,8 @@ define( function( require ) {
         this.secondaryListenedColorCounts.push( 1 );
         color.changeEmitter.addListener( this.notifyChangeCallback );
       }
+
+      sceneryLog && sceneryLog.Paints && sceneryLog.pop();
     },
 
     /**
@@ -296,13 +317,19 @@ define( function( require ) {
      * @param {Color} color
      */
     secondaryUnlinkColor: function( color ) {
+      sceneryLog && sceneryLog.Paints && sceneryLog.Paints( '[PaintObserver] secondaryUnlinkColor' );
+      sceneryLog && sceneryLog.Paints && sceneryLog.push();
+
       var index = _.indexOf( this.secondaryListenedColors, color );
+      assert && assert( index >= 0 );
       this.secondaryListenedColorCounts[ index ]--;
       if ( this.secondaryListenedColorCounts[ index ] === 0 ) {
         this.secondaryListenedColors.splice( index, 1 );
         this.secondaryListenedColorCounts.splice( index, 1 );
         color.changeEmitter.removeListener( this.notifyChangeCallback );
       }
+
+      sceneryLog && sceneryLog.Paints && sceneryLog.pop();
     }
   } );
 
