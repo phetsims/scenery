@@ -224,7 +224,7 @@ define( function( require ) {
     this.validatePointersEmitter = new Emitter( {
       tandem: options.tandem.createTandem( 'validatePointersEmitter' ),
       phetioHighFrequency: true,
-      phetioInputEvent: true,
+      phetioPlayback: true,
       listener: validatePointers
     } );
 
