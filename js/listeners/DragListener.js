@@ -182,7 +182,7 @@ define( function( require ) {
     // another startDrag.
     this._lastInterruptedTouchPointer = null;
 
-    // @private {Emitter} - emitted on drag. Used for triggering phet-io events, see https://github.com/phetsims/scenery/issues/842
+    // @private {Emitter} - emitted on drag. Used for triggering phet-io events to the data stream, see https://github.com/phetsims/scenery/issues/842
     this._draggedEmitter = new Emitter( {
       valueTypes: [ Event ],
       tandem: options.tandem.createTandem( 'draggedEmitter' ),
