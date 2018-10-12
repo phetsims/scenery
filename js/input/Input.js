@@ -222,14 +222,15 @@ define( function( require ) {
 
     // Only emit events if phetioEmitPlaybackEvents is turned on so we don't spam the data stream unnecessarily
     this.validatePointersEmitter = new Emitter( {
+      phetioPlayback: true,
       tandem: options.tandem.createTandem( 'validatePointersEmitter' ),
       phetioHighFrequency: true,
-      phetioPlayback: true,
       listener: validatePointers
     } );
 
     // @private {Emitter} - Emits to the PhET-iO data stream.  
     this.mouseUpEmitter = new Emitter( {
+      phetioPlayback: true,
       valueTypes: [ Vector2, window.Event ], // Note this is a DOM event, not a scenery.Event
       tandem: options.tandem.createTandem( 'mouseUpEmitter' ),
       phetioType: EmitterIO( [
@@ -247,6 +248,7 @@ define( function( require ) {
 
     // @private {Emitter} - Emits to the PhET-iO data stream.  
     this.mouseDownEmitter = new Emitter( {
+      phetioPlayback: true,
       valueTypes: [ Vector2, window.Event ], // Note this is a DOM event, not a scenery.Event
       tandem: options.tandem.createTandem( 'mouseDownEmitter' ),
       phetioType: EmitterIO( [
@@ -264,6 +266,7 @@ define( function( require ) {
 
     // @private {Emitter} - Emits to the PhET-iO data stream.  
     this.mouseMovedEmitter = new Emitter( {
+      phetioPlayback: true,
       valueTypes: [ Vector2, window.Event ], // Note this is a DOM event, not a scenery.Event
       tandem: options.tandem.createTandem( 'mouseMovedEmitter' ),
       phetioType: EmitterIO( [
@@ -282,6 +285,7 @@ define( function( require ) {
 
     // @private {Emitter} - Emits to the PhET-iO data stream.  
     this.mouseOverEmitter = new Emitter( {
+      phetioPlayback: true,
       valueTypes: [ Vector2, window.Event ], // Note this is a DOM event, not a scenery.Event
       tandem: options.tandem.createTandem( 'mouseOverEmitter' ),
       phetioType: EmitterIO( [
@@ -299,6 +303,7 @@ define( function( require ) {
 
     // @private {Emitter} - Emits to the PhET-iO data stream.  
     this.mouseOutEmitter = new Emitter( {
+      phetioPlayback: true,
       valueTypes: [ Vector2, window.Event ], // Note this is a DOM event, not a scenery.Event
       tandem: options.tandem.createTandem( 'mouseOutEmitter' ),
       phetioType: EmitterIO( [
@@ -316,6 +321,7 @@ define( function( require ) {
 
     // @private {Emitter} - Emits to the PhET-iO data stream.  
     this.wheelScrolledEmitter = new Emitter( {
+      phetioPlayback: true,
       valueTypes: [ window.Event ], // Note this is a DOM event, not a scenery.Event
       tandem: options.tandem.createTandem( 'wheelScrolledEmitter' ),
       phetioType: EmitterIO( [
@@ -339,6 +345,7 @@ define( function( require ) {
 
     // @private {Emitter} - Emits to the PhET-iO data stream.
     this.touchStartedEmitter = new Emitter( {
+      phetioPlayback: true,
       valueTypes: [ 'number', Vector2, window.Event ], // Note this is a DOM event, not a scenery.Event
       tandem: options.tandem.createTandem( 'touchStartedEmitter' ),
       phetioType: EmitterIO( [
@@ -357,6 +364,7 @@ define( function( require ) {
 
     // @private {Emitter} - Emits to the PhET-iO data stream.
     this.touchEndedEmitter = new Emitter( {
+      phetioPlayback: true,
       valueTypes: [ 'number', Vector2, window.Event ], // Note this is a DOM event, not a scenery.Event
       tandem: options.tandem.createTandem( 'touchEndedEmitter' ),
       phetioType: EmitterIO( [
@@ -378,6 +386,7 @@ define( function( require ) {
 
     // @private {Emitter} - Emits to the PhET-iO data stream.
     this.touchMovedEmitter = new Emitter( {
+      phetioPlayback: true,
       valueTypes: [ 'number', Vector2, window.Event ], // Note this is a DOM event, not a scenery.Event
       tandem: options.tandem.createTandem( 'touchMovedEmitter' ),
       phetioType: EmitterIO( [
@@ -399,6 +408,7 @@ define( function( require ) {
 
     // @private {Emitter} - Emits to the PhET-iO data stream.
     this.touchCanceledEmitter = new Emitter( {
+      phetioPlayback: true,
       valueTypes: [ 'number', Vector2, window.Event ], // Note this is a DOM event, not a scenery.Event
       tandem: options.tandem.createTandem( 'touchCanceledEmitter' ),
       phetioType: EmitterIO( [
@@ -420,6 +430,7 @@ define( function( require ) {
 
     // @private {Emitter} - Emits to the PhET-iO data stream.
     this.penStartedEmitter = new Emitter( {
+      phetioPlayback: true,
       valueTypes: [ 'number', Vector2, window.Event ], // Note this is a DOM event, not a scenery.Event
       tandem: options.tandem.createTandem( 'penStartedEmitter' ),
       phetioType: EmitterIO( [
@@ -438,6 +449,7 @@ define( function( require ) {
 
     // @private {Emitter} - Emits to the PhET-iO data stream.
     this.penEndedEmitter = new Emitter( {
+      phetioPlayback: true,
       valueTypes: [ 'number', Vector2, window.Event ], // Note this is a DOM event, not a scenery.Event
       tandem: options.tandem.createTandem( 'penEndedEmitter' ),
       phetioType: EmitterIO( [
@@ -459,6 +471,7 @@ define( function( require ) {
 
     // @private {Emitter} - Emits to the PhET-iO data stream.
     this.penMovedEmitter = new Emitter( {
+      phetioPlayback: true,
       valueTypes: [ 'number', Vector2, window.Event ], // Note this is a DOM event, not a scenery.Event
       tandem: options.tandem.createTandem( 'penMovedEmitter' ),
       phetioType: EmitterIO( [
@@ -480,6 +493,7 @@ define( function( require ) {
 
     // @private {Emitter} - Emits to the PhET-iO data stream.
     this.penCanceledEmitter = new Emitter( {
+      phetioPlayback: true,
       valueTypes: [ 'number', Vector2, window.Event ], // Note this is a DOM event, not a scenery.Event
       tandem: options.tandem.createTandem( 'penCanceledEmitter' ),
       phetioType: EmitterIO( [
@@ -1507,66 +1521,6 @@ define( function( require ) {
         if ( inputEvent.aborted || inputEvent.handled ) {
           return;
         }
-      }
-    },
-
-    /**
-     * Invokes an event by name.
-     * @public (phet-io)
-     *
-     * @param {Object} event - From the PhET-iO data stream.
-     */
-    invokeControllerInputEvent: function( event ) {
-
-      var parameters = event.parameters;
-
-      if ( event.phetioID === this.mouseMovedEmitter.tandem.phetioID ) {
-        this.mouseMovedEmitter.emit( Vector2.fromStateObject( parameters.point ), DOMEventIO.fromStateObject( parameters.event ) );
-      }
-      else if ( event.phetioID === this.mouseDownEmitter.tandem.phetioID ) {
-        this.mouseDownEmitter.emit( Vector2.fromStateObject( parameters.point ), DOMEventIO.fromStateObject( parameters.event ) );
-      }
-      else if ( event.phetioID === this.mouseUpEmitter.tandem.phetioID ) {
-        this.mouseUpEmitter.emit( Vector2.fromStateObject( parameters.point ), DOMEventIO.fromStateObject( parameters.event ) );
-      }
-      else if ( event.phetioID === this.mouseOverEmitter.tandem.phetioID ) {
-        this.mouseOverEmitter.emit( Vector2.fromStateObject( parameters.point ), DOMEventIO.fromStateObject( parameters.event ) );
-      }
-      else if ( event.phetioID === this.mouseOutEmitter.tandem.phetioID ) {
-        this.mouseOutEmitter.emit( Vector2.fromStateObject( parameters.point ), DOMEventIO.fromStateObject( parameters.event ) );
-      }
-      else if ( event.phetioID === this.wheelScrolledEmitter.tandem.phetioID ) {
-        this.wheelScrolledEmitter.emit( DOMEventIO.fromStateObject( parameters.event ) );
-      }
-      else if ( event.phetioID === this.touchStartedEmitter.tandem.phetioID ) {
-        this.touchStartedEmitter.emit( parameters.id, Vector2.fromStateObject( parameters.point ), DOMEventIO.fromStateObject( parameters.event ) );
-      }
-      else if ( event.phetioID === this.touchEndedEmitter.tandem.phetioID ) {
-        this.touchEndedEmitter.emit( parameters.id, Vector2.fromStateObject( parameters.point ), DOMEventIO.fromStateObject( parameters.event ) );
-      }
-      else if ( event.phetioID === this.touchMovedEmitter.tandem.phetioID ) {
-        this.touchMovedEmitter.emit( parameters.id, Vector2.fromStateObject( parameters.point ), DOMEventIO.fromStateObject( parameters.event ) );
-      }
-      else if ( event.phetioID === this.touchCanceledEmitter.tandem.phetioID ) {
-        this.touchCanceledEmitter.emit( parameters.id, Vector2.fromStateObject( parameters.point ), DOMEventIO.fromStateObject( parameters.event ) );
-      }
-      else if ( event.phetioID === this.penStartedEmitter.tandem.phetioID ) {
-        this.penStartedEmitter.emit( parameters.id, Vector2.fromStateObject( parameters.point ), DOMEventIO.fromStateObject( parameters.event ) );
-      }
-      else if ( event.phetioID === this.penEndedEmitter.tandem.phetioID ) {
-        this.penEndedEmitter.emit( parameters.id, Vector2.fromStateObject( parameters.point ), DOMEventIO.fromStateObject( parameters.event ) );
-      }
-      else if ( event.phetioID === this.penMovedEmitter.tandem.phetioID ) {
-        this.penMovedEmitter.emit( parameters.id, Vector2.fromStateObject( parameters.point ), DOMEventIO.fromStateObject( parameters.event ) );
-      }
-      else if ( event.phetioID === this.penCanceledEmitter.tandem.phetioID ) {
-        this.penCanceledEmitter.emit( parameters.id, Vector2.fromStateObject( parameters.point ), DOMEventIO.fromStateObject( parameters.event ) );
-      }
-      else if ( event.phetioID === this.validatePointersEmitter.tandem.phetioID ) {
-        this.validatePointersEmitter.emit();
-      }
-      else {
-        throw new Error( 'Input Emitter not found: ' + event.phetioID );
       }
     }
   }, {
