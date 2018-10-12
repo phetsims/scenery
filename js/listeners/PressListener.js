@@ -215,8 +215,7 @@ define( function( require ) {
 
     // @private {Emitter} - Emitted on press event
     this._pressedEmitter = new Emitter( {
-      valueTypes: [ Event, Node, 'function' ],
-      areTypesOptional: [ false, true, true ],
+      valueTypes: [ Event, v => v === null || v instanceof Node, v => v === null || typeof v === 'function' ],
       tandem: options.tandem.createTandem( 'pressedEmitter' ),
       phetioDocumentation: 'Emits whenever a press occurs. The first argument when emitting can be ' +
                            'used to convey info about the Event.',
@@ -235,8 +234,7 @@ define( function( require ) {
 
     // @private {Emitter} - Emitted on release event
     this._releasedEmitter = new Emitter( {
-      valueTypes: [ 'function' ],
-      areTypesOptional: [ true ],
+      valueTypes: [ v => v === null || typeof v === 'function' ],
       tandem: options.tandem.createTandem( 'releasedEmitter' ),
       phetioDocumentation: 'Emits whenever a release occurs.',
       phetioReadOnly: options.phetioReadOnly,
@@ -353,7 +351,7 @@ define( function( require ) {
       sceneryLog && sceneryLog.InputListener && sceneryLog.InputListener( 'PressListener#' + this._id + ' successful press' );
       sceneryLog && sceneryLog.InputListener && sceneryLog.push();
 
-      this._pressedEmitter.emit( event, targetNode, callback );
+      this._pressedEmitter.emit( event, targetNode || null, callback || null ); // cannot pass undefined into emit call
 
       sceneryLog && sceneryLog.InputListener && sceneryLog.pop();
 
@@ -375,7 +373,7 @@ define( function( require ) {
       sceneryLog && sceneryLog.InputListener && sceneryLog.InputListener( 'PressListener#' + this._id + ' release' );
       sceneryLog && sceneryLog.InputListener && sceneryLog.push();
 
-      this._releasedEmitter.emit( callback );
+      this._releasedEmitter.emit( callback || null ); // cannot pass undefined to emit call
 
       sceneryLog && sceneryLog.InputListener && sceneryLog.pop();
     },
