@@ -157,6 +157,10 @@ define( function( require ) {
    */
   function isElementFocusable( domElement ) {
 
+    if ( !document.body.contains( domElement ) ) {
+      return false;
+    }
+
     // continue to next element if this one is meant to be hidden
     if ( isElementHidden( domElement ) ) {
       return false;
