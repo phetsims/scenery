@@ -13,6 +13,11 @@ define( function( require ) {
   // modules
   var scenery = require( 'SCENERY/scenery' );
 
+  var KEY_RIGHT_ARROW = 39;
+  var KEY_LEFT_ARROW = 37;
+  var KEY_UP_ARROW = 38;
+  var KEY_DOWN_ARROW = 40;
+
   // constants
   var KeyboardUtil = {
 
@@ -20,10 +25,10 @@ define( function( require ) {
     KEY_SPACE: 32,
     KEY_ENTER: 13,
     KEY_TAB: 9,
-    KEY_RIGHT_ARROW: 39,
-    KEY_LEFT_ARROW: 37,
-    KEY_UP_ARROW: 38,
-    KEY_DOWN_ARROW: 40,
+    KEY_RIGHT_ARROW: KEY_RIGHT_ARROW,
+    KEY_LEFT_ARROW: KEY_LEFT_ARROW,
+    KEY_UP_ARROW: KEY_UP_ARROW,
+    KEY_DOWN_ARROW: KEY_DOWN_ARROW,
     KEY_SHIFT: 16,
     KEY_ESCAPE: 27,
     KEY_DELETE: 46,
@@ -41,6 +46,8 @@ define( function( require ) {
     KEY_N: 78,
     KEY_0: 48,
     KEY_9: 57,
+
+    ARROW_KEYS: [ KEY_RIGHT_ARROW, KEY_LEFT_ARROW, KEY_RIGHT_ARROW, KEY_DOWN_ARROW ],
 
     // returns whether or not the keyCode corresponds to pressing an arrow key
     isArrowKey: function( keyCode ) {

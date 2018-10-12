@@ -54,7 +54,6 @@ define( function( require ) {
   'use strict';
 
   var AccessibilityTree = require( 'SCENERY/accessibility/AccessibilityTree' );
-  var AccessibilityUtil = require( 'SCENERY/accessibility/AccessibilityUtil' );
   var Dimension2 = require( 'DOT/Dimension2' );
   var Emitter = require( 'AXON/Emitter' );
   var escapeHTML = require( 'PHET_CORE/escapeHTML' );
@@ -1100,60 +1099,6 @@ define( function( require ) {
           } );
         }
       } )( this._rootBackbone );
-    },
-
-    /**
-     * A random event creater that sends keyboard events. Based on the idea of fuzzMouse, but to test/spam accessibility
-     * related keyboard navigation and alternate input implementation.
-     *
-     * TODO: NOTE: Right now this is a very experimental implementation. Tread wearily
-     * TODO: @param keyboardPressesPerFocusedItem {number} - basically would be the same as fuzzRate, but handling
-     * TODO:     the keydown events for a focused item
-     */
-    fuzzBoardEvents: function() {
-
-      var nextFocusable = AccessibilityUtil.getRandomFocusable();
-      nextFocusable.focus();
-
-      // TODO: add accessibility util functions to get a random focusable element from the tree
-      var elementWithFocus = document.activeElement;
-
-      // click something
-      triggerDOMEvent( 'click', elementWithFocus );
-
-      // TODO: A while loop of events will make us able to spam a ton of key presses per frame/per focused item,
-      // TODO:   perhaps using a parameter to control the number of events per frame
-      var min = 9;
-      var max = 223;
-      var randomKeyCode = Math.floor( Math.random() * ( max - min ) + min );
-      triggerDOMEvent( 'keydown', elementWithFocus, randomKeyCode );
-
-      // TODO: can we use setTimeout here?
-      setTimeout( function() {
-        triggerDOMEvent( 'keyup', elementWithFocus, randomKeyCode );
-
-      }, 1 ); // TODO: make this time variable?
-
-      /**
-       * Taken from example in http://output.jsbin.com/awenaq/3,
-       * @param event
-       * @param element
-       * @param [keycode]
-       */
-      function triggerDOMEvent( event, element, keyCode ) {
-        var eventObj = document.createEventObject ?
-                       document.createEventObject() : document.createEvent( 'Events' );
-
-        if ( eventObj.initEvent ) {
-          eventObj.initEvent( event, true, true );
-        }
-
-        eventObj.keyCode = keyCode;
-        // eventObj.shiftKey = true; // TODO: we can add modifier keys in here with options?
-        eventObj.which = keyCode;
-
-        element.dispatchEvent ? element.dispatchEvent( eventObj ) : element.fireEvent( 'on' + event, eventObj );
-      }
     },
 
     /**
