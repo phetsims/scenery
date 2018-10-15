@@ -2,7 +2,9 @@
 
 /**
  * A FocusHighlightPath subtype that is based around a Node. The focusHighlight is constructed based on the bounds of
- * the node.
+ * the node. Handles transformations so that when the source node is transformed, the FocusHighlightFromNode will 
+ * updated be as well.
+ * 
  * @author Michael Kauzmann (PhET Interactive Simulations)
  * @author Jesse Greenberg (PhET Interactive Simulations)
  */
@@ -26,7 +28,7 @@ define( function( require ) {
     options = _.extend( {
 
       // {boolean} - if true, highlight will surround local bounds
-      useLocalBounds: false,
+      useLocalBounds: true,
 
       // line width options, one for each highlight, will be calculated based on transform of this path unless provided
       outerLineWidth: null,
@@ -43,6 +45,9 @@ define( function( require ) {
     this.useLocalBounds = options.useLocalBounds; // @private
     this.useGroupDilation = options.useGroupDilation; // @private
     this.dilationCoefficient = options.dilationCoefficient; // @private
+
+    // @private {Node|null}
+    this.sourceNode = node;
 
     FocusHighlightPath.call( this, null, options );
 
@@ -92,6 +97,18 @@ define( function( require ) {
       // Default options can override
       this.lineWidth = this.outerLineWidth || FocusHighlightPath.getOuterLineWidthFromNode( node );
       this.innerHighlightPath.lineWidth = this.innerLineWidth || FocusHighlightPath.getInnerLineWidthFromNode( node );
+    },
+
+    /**
+     * Return the trail to the source node being used for this focus highlight. Assists in observing transforms applied
+     * to the source node so that the FocusHighlightFromNode can update accordingly.
+     *
+     * @public (scenery-internal)
+     * @return {Trail}
+     */
+    getUniqueHighlightTrail: function() {
+      assert && assert( this.sourceNode.instances.length <= 1, 'sourceNode cannot use DAG, must have single trail.' );
+      return this.sourceNode.getUniqueTrail();
     }
   } );
 } );

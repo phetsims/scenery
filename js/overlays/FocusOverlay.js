@@ -138,28 +138,34 @@ define( function( require ) {
     activateHighlight: function( trail ) {
       this.trail = trail;
       this.node = trail.lastNode();
-      this.transformTracker = new TransformTracker( trail, {
-        isStatic: true
-      } );
-      this.transformTracker.addListener( this.transformListener );
+      var focusHighlight = this.node.focusHighlight;
+
+      // we may or may not track this trail depending on whether the focus highlight surrounds the trail's leaf node or
+      // a different node
+      var trailToTrack = trail;
 
       // Invisible mode - no focus highlight; this is only for testing mode, when Nodes rarely have bounds.
-      if ( this.node.focusHighlight === 'invisible' ) {
+      if ( focusHighlight === 'invisible' ) {
         this.mode = 'invisible';
       }
       // Shape mode
-      else if ( this.node.focusHighlight instanceof Shape ) {
+      else if ( focusHighlight instanceof Shape ) {
         this.mode = 'shape';
 
         this.shapeFocusHighlightPath.visible = true;
-        this.shapeFocusHighlightPath.setShape( this.node.focusHighlight );
+        this.shapeFocusHighlightPath.setShape( focusHighlight );
       }
       // Node mode
-      else if ( this.node.focusHighlight instanceof Node ) {
+      else if ( focusHighlight instanceof Node ) {
         this.mode = 'node';
 
+        // if using a focus highlight from another node, we will track that node's transform instead of the focused node
+        if ( focusHighlight instanceof FocusHighlightFromNode ) {
+          trailToTrack = focusHighlight.getUniqueHighlightTrail();
+        }
+
         // store the focus highlight so that it can be removed later
-        this.nodeFocusHighlight = this.node.focusHighlight;
+        this.nodeFocusHighlight = focusHighlight;
 
         // If focusHighlightLayerable, then the focusHighlight is just a node in the scene graph, so set it visible
         if ( this.node.focusHighlightLayerable ) {
@@ -185,6 +191,11 @@ define( function( require ) {
 
       // handle any changes to the focus highlight while the node has focus
       this.node.onStatic( 'focusHighlightChanged', this.focusHighlightListener );
+
+      this.transformTracker = new TransformTracker( trailToTrack, {
+        isStatic: true
+      } );
+      this.transformTracker.addListener( this.transformListener );
 
       // handle group focus highlights
       this.activateGroupHighlights();
