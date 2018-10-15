@@ -1773,7 +1773,7 @@ define( function( require ) {
     // Only instrument if accessibility is enabled
     ( window.phet && phet.chipper && phet.chipper.accessibility ) ? {
 
-      // Make this a static tandem so that it can be added to studio correctly (batched and then flushed when the
+      // Make this a static tandem so that it can be added to PhET-iO Studio correctly (batched and then flushed when the
       // listener is added).
       tandem: Tandem.rootTandem.createTandem( 'display' ).createTandem( 'focusProperty' ),
       phetioType: PropertyIO( NullableIO( FocusIO ) )
