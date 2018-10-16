@@ -172,6 +172,7 @@ define( function( require ) {
           this.nodeFocusHighlight.visible = true;
         }
         else {
+          this.nodeFocusHighlight.visible = true;
 
           // Use the node itself as the highlight
           this.highlightNode.addChild( this.nodeFocusHighlight );

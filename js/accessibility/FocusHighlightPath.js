@@ -60,6 +60,7 @@ define( function( require ) {
       outerLineWidth: null,
       innerLineWidth: null,
 
+      // TODO: this could use nested options
       // remaining paintable options applied to both highlights
       lineDash: [],
       lineCap: LineStyles.DEFAULT_OPTIONS.lineCap,
@@ -100,6 +101,25 @@ define( function( require ) {
   scenery.register( 'FocusHighlightPath', FocusHighlightPath );
 
   return inherit( Path, FocusHighlightPath, {
+
+    /**
+     * Mutating convenience function to mutate both the inner highlight also
+     * @public
+     */
+    mutateWithInnerHighlight: function( options ) {
+      Path.prototype.mutate.call( this, options );
+      this.innerHighlightPath && this.innerHighlightPath.mutate( options );
+    },
+
+    /**
+     * mutate the Path to make the stroke dashed, by using `lineDash`
+     * @public
+     */
+    makeDashed: function() {
+      this.mutateWithInnerHighlight( {
+        lineDash: [ 7, 7 ]
+      } );
+    },
 
     /**
      * Update the shape of the child path (inner highlight) and this path (outer highlight).
