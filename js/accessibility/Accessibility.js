@@ -2442,7 +2442,7 @@ define( function( require ) {
 
         /**
          * Returns whether or not this Node has any accessibleContent defined.
-         * @public (scenery-internal)
+         * @public
          *
          * @returns {boolean}
          */
