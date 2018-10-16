@@ -225,12 +225,12 @@ define( function( require ) {
         { name: 'event', type: EventIO },
         { name: 'targetNode', type: VoidIO },
         { name: 'callback', type: VoidIO }
-      ] )
-    } );
+      ] ),
 
-    // The main implementation of "press" handling is implemented as a callback to the emitter, so things are nested
-    // nicely for phet-io.
-    this._pressedEmitter.addListener( this.onPress.bind( this ) );
+      // The main implementation of "press" handling is implemented as a callback to the emitter, so things are nested
+      // nicely for phet-io.
+      listener: this.onPress.bind( this )
+    } );
 
     // @private {Emitter} - Emitted on release event
     this._releasedEmitter = new Emitter( {
