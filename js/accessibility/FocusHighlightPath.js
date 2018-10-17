@@ -14,6 +14,7 @@ define( function( require ) {
   'use strict';
 
   // modules
+  var Emitter = require( 'AXON/Emitter' );
   var Color = require( 'SCENERY/util/Color' );
   var inherit = require( 'PHET_CORE/inherit' );
   var LineStyles = require( 'KITE/util/LineStyles' );
@@ -73,6 +74,9 @@ define( function( require ) {
     this._innerHighlightColor = options.innerStroke;
     this._outerHighlightColor = options.outerStroke;
 
+    // @public - emitted whenever this highlight changes
+    this.highlightChangedEmitter = new Emitter();
+
     Path.call( this, shape );
 
     this.options = options; // @private TODO: only assign individual options to 'this'.
@@ -109,6 +113,7 @@ define( function( require ) {
     mutateWithInnerHighlight: function( options ) {
       Path.prototype.mutate.call( this, options );
       this.innerHighlightPath && this.innerHighlightPath.mutate( options );
+      this.highlightChangedEmitter.emit();
     },
 
     /**
@@ -130,6 +135,7 @@ define( function( require ) {
     setShape: function( shape ) {
       Path.prototype.setShape.call( this, shape );
       this.innerHighlightPath && this.innerHighlightPath.setShape( shape );
+      this.highlightChangedEmitter.emit();
     },
 
     /**
@@ -143,6 +149,7 @@ define( function( require ) {
       node = node || this; // update based on node passed in or on self.
       this.lineWidth = this.getOuterLineWidth( node );
       this.innerHighlightPath.lineWidth = this.getInnerLineWidth( node );
+      this.highlightChangedEmitter.emit();
     },
 
     /**
@@ -179,6 +186,7 @@ define( function( require ) {
     setInnerHighlightColor: function( color ) {
       this._innerHighlightColor = color;
       this.innerHighlightPath.setStroke( color );
+      this.highlightChangedEmitter.emit();
     },
     set innerHighlightColor( color ) { this.setInnerHighlightColor( color ); },
 
@@ -201,6 +209,7 @@ define( function( require ) {
     setOuterHighlightColor: function( color ) {
       this._outerHighlightColor = color;
       this.setStroke( color );
+      this.highlightChangedEmitter.emit();
     },
     set outerHighlightColor( color ) { this.setOuterHighlightColor( color ); },
 
