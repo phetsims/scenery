@@ -11,7 +11,7 @@ define( require => {
   'use strict';
 
   // modules
-  const ObjectIO = require( 'ifphetio!PHET_IO/types/ObjectIO' );
+  const ObjectIO = require( 'TANDEM/types/ObjectIO' );
   const scenery = require( 'SCENERY/scenery' );
 
   // ifphetio

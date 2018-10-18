@@ -31,7 +31,7 @@ define( function( require ) {
   var timer = require( 'PHET_CORE/timer' );
 
   // ifphetio
-  var VoidIO = require( 'ifphetio!PHET_IO/types/VoidIO' );
+  var VoidIO = require( 'TANDEM/types/VoidIO' );
 
   // global
   var globalID = 0;

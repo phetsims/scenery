@@ -94,7 +94,7 @@ define( function( require ) {
   var Util = require( 'SCENERY/util/Util' );
 
   // ifphetio
-  var NullableIO = require( 'ifphetio!PHET_IO/types/NullableIO' );
+  var NullableIO = require( 'TANDEM/types/NullableIO' );
 
   /**
    * Constructs a Display that will show the rootNode and its subtree in a visual state. Default options provided below

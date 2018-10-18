@@ -17,9 +17,9 @@ define( function( require ) {
 
   // ifphetio
   var assertInstanceOf = require( 'ifphetio!PHET_IO/assertInstanceOf' );
-  var BooleanIO = require( 'ifphetio!PHET_IO/types/BooleanIO' );
-  var NullableIO = require( 'ifphetio!PHET_IO/types/NullableIO' );
-  var ObjectIO = require( 'ifphetio!PHET_IO/types/ObjectIO' );
+  var BooleanIO = require( 'TANDEM/types/BooleanIO' );
+  var NullableIO = require( 'TANDEM/types/NullableIO' );
+  var ObjectIO = require( 'TANDEM/types/ObjectIO' );
   var phetioInherit = require( 'ifphetio!PHET_IO/phetioInherit' );
 
   /**

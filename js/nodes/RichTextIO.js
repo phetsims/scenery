@@ -17,7 +17,7 @@ define( function( require ) {
   // ifphetio
   var assertInstanceOf = require( 'ifphetio!PHET_IO/assertInstanceOf' );
   var phetioInherit = require( 'ifphetio!PHET_IO/phetioInherit' );
-  var StringIO = require( 'ifphetio!PHET_IO/types/StringIO' );
+  var StringIO = require( 'TANDEM/types/StringIO' );
 
   /**
    * IO type for scenery's Text node.

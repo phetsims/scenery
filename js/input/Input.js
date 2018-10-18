@@ -141,7 +141,7 @@ define( function( require ) {
   var Vector2IO = require( 'DOT/Vector2IO' );
 
   // ifphetio
-  var NumberIO = require( 'ifphetio!PHET_IO/types/NumberIO' );
+  var NumberIO = require( 'TANDEM/types/NumberIO' );
 
   // Object literal makes it easy to check for the existence of an attribute (compared to [].indexOf()>=0)
   var domEventPropertiesToSerialize = {
