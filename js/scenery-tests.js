@@ -20,6 +20,7 @@ define( function( require ) {
   require( 'SCENERY/listeners/FireListenerTests' );
   require( 'SCENERY/listeners/PressListenerTests' );
   require( 'SCENERY/listeners/DragListenerTests' );
+  require( 'SCENERY/accessibility/KeyStateTrackerTests' );
   require( 'SCENERY/nodes/NodeTests' );
   require( 'SCENERY/nodes/ShapeTests' );
   require( 'SCENERY/util/FontTests' );
