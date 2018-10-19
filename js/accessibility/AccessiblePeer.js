@@ -407,6 +407,7 @@ define( function( require ) {
      */
     onFocus: function( event ) {
       if ( event.target === this._primarySibling ) {
+
         // NOTE: The "root" peer can't be focused (so it doesn't matter if it doesn't have a node).
         if ( this.accessibleInstance.node.focusable ) {
           scenery.Display.focus = new Focus( this.accessibleInstance.display, this.accessibleInstance.guessVisualTrail() );
