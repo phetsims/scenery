@@ -670,7 +670,7 @@ define( function( require ) {
 
     /**
      * Notifies that the rectangle has changed, and invalidates path information and our cached shape.
-     * @private
+     * @protected
      */
     invalidateRectangle: function() {
       assert && assert( isFinite( this._rectX ), 'A rectangle needs to have a finite x (' + this._rectX + ')' );
