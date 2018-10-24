@@ -1765,6 +1765,13 @@ define( function( require ) {
      * Cleans references that could cause memory leaks (as those things may contain other references).
      */
     clean: function() {
+      // Remove all children (and recursively clean)
+      while ( this._children.length ) {
+        var child = this._children[ this._children.length - 1 ];
+        this.removeChild( child );
+        child.clean();
+      }
+      
       this.removeInputListener( this.buttonListener );
       this.buttonListener = null;
       if ( this.accessibleInputListener ) {
