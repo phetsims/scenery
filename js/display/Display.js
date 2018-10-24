@@ -92,8 +92,6 @@ define( function( require ) {
   var PointerOverlay = require( 'SCENERY/overlays/PointerOverlay' );
   var SceneryStyle = require( 'SCENERY/util/SceneryStyle' );
   var Util = require( 'SCENERY/util/Util' );
-
-  // ifphetio
   var NullableIO = require( 'TANDEM/types/NullableIO' );
 
   /**

@@ -11,12 +11,12 @@ define( function( require ) {
   // modules
   var NodeIO = require( 'SCENERY/nodes/NodeIO' );
   var scenery = require( 'SCENERY/scenery' );
+  var StringIO = require( 'TANDEM/types/StringIO' );
+  var VoidIO = require( 'TANDEM/types/VoidIO' );
 
   // ifphetio
   var assertInstanceOf = require( 'ifphetio!PHET_IO/assertInstanceOf' );
   var phetioInherit = require( 'ifphetio!PHET_IO/phetioInherit' );
-  var StringIO = require( 'TANDEM/types/StringIO' );
-  var VoidIO = require( 'TANDEM/types/VoidIO' );
 
   /**
    * @param {Image} image

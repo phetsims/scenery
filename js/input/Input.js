@@ -139,8 +139,6 @@ define( function( require ) {
   var Trail = require( 'SCENERY/util/Trail' );
   var Vector2 = require( 'DOT/Vector2' );
   var Vector2IO = require( 'DOT/Vector2IO' );
-
-  // ifphetio
   var NumberIO = require( 'TANDEM/types/NumberIO' );
 
   // Object literal makes it easy to check for the existence of an attribute (compared to [].indexOf()>=0)

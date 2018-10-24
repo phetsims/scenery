@@ -14,12 +14,12 @@ define( function( require ) {
   var NumberProperty = require( 'AXON/NumberProperty' );
   var PropertyIO = require( 'AXON/PropertyIO' );
   var scenery = require( 'SCENERY/scenery' );
-
-  // ifphetio
-  var assertInstanceOf = require( 'ifphetio!PHET_IO/assertInstanceOf' );
   var BooleanIO = require( 'TANDEM/types/BooleanIO' );
   var NullableIO = require( 'TANDEM/types/NullableIO' );
   var ObjectIO = require( 'TANDEM/types/ObjectIO' );
+
+  // ifphetio
+  var assertInstanceOf = require( 'ifphetio!PHET_IO/assertInstanceOf' );
   var phetioInherit = require( 'ifphetio!PHET_IO/phetioInherit' );
 
   /**

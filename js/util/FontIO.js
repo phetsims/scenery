@@ -10,10 +10,10 @@ define( function( require ) {
 
   // modules
   var scenery = require( 'SCENERY/scenery' );
+  var ObjectIO = require( 'TANDEM/types/ObjectIO' );
 
   // ifphetio
   var assertInstanceOf = require( 'ifphetio!PHET_IO/assertInstanceOf' );
-  var ObjectIO = require( 'TANDEM/types/ObjectIO' );
   var phetioInherit = require( 'ifphetio!PHET_IO/phetioInherit' );
 
   /**

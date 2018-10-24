@@ -10,11 +10,11 @@ define( function( require ) {
 
   // modules
   const Vector2IO = require( 'DOT/Vector2IO' );
+  const ObjectIO = require( 'TANDEM/types/ObjectIO' );
   const scenery = require( 'SCENERY/scenery' );
 
   // ifphetio
   const assertInstanceOf = require( 'ifphetio!PHET_IO/assertInstanceOf' );
-  const ObjectIO = require( 'TANDEM/types/ObjectIO' );
   const phetioInherit = require( 'ifphetio!PHET_IO/phetioInherit' );
 
   /**

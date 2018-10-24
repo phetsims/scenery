@@ -13,11 +13,11 @@ define( function( require ) {
   var NodeProperty = require( 'SCENERY/util/NodeProperty' );
   var PropertyIO = require( 'AXON/PropertyIO' );
   var scenery = require( 'SCENERY/scenery' );
+  var StringIO = require( 'TANDEM/types/StringIO' );
 
   // ifphetio
   var assertInstanceOf = require( 'ifphetio!PHET_IO/assertInstanceOf' );
   var phetioInherit = require( 'ifphetio!PHET_IO/phetioInherit' );
-  var StringIO = require( 'TANDEM/types/StringIO' );
 
   /**
    * IO type for scenery's Text node.
