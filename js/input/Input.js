@@ -215,7 +215,7 @@ define( function( require ) {
       while ( i-- ) {
         var pointer = self.pointers[ i ];
         if ( pointer.point ) {
-          self.branchChangeEvents( pointer, null, false );
+          self.branchChangeEvents( pointer, pointer.lastDOMEvent, false );
         }
       }
     };

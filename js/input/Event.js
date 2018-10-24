@@ -63,6 +63,11 @@ define( function( require ) {
     // for the mouse if it is the primary (left) mouse button.
     // TODO: don't require check on domEvent (seems sometimes this is passed as null as a hack?)
     this.isPrimary = !( pointer instanceof Mouse ) || !domEvent || domEvent.button === 0;
+
+    // Store the last-used non-null DOM event for future use if required.
+    if ( domEvent ) {
+      pointer.lastDOMEvent = domEvent;
+    }
   }
 
   scenery.register( 'Event', Event );

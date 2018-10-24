@@ -69,6 +69,10 @@ define( function( require ) {
 
     // @private {string|null} - See setCursor() for more information.
     this._cursor = null;
+
+    // @public (scenery-internal) {DOMEvent|null} - Recorded and exposed so that it can be provided to events when there
+    // is no "immediate" DOM event (e.g. when a node moves UNDER a pointer and triggers a touch-snag).
+    this.lastDOMEvent = null;
   }
 
   scenery.register( 'Pointer', Pointer );
