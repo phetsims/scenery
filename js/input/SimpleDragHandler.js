@@ -4,8 +4,8 @@
  * Basic dragging for a node.
  *
  * @author Jonathan Olson <jonathan.olson@colorado.edu>
+ * @deprecated - please use DragListener for new code
  */
-
 define( function( require ) {
   'use strict';
 
