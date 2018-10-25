@@ -14,14 +14,19 @@ define( require => {
   const KeyStateTracker = require( 'SCENERY/accessibility/KeyStateTracker' );
   // const KeyboardFuzzer = require( 'SCENERY/accessibility/KeyboardFuzzer' ); // can we use this in testing?
 
-  QUnit.module( 'KeyStateTracker' );
-
   const tabKeyEvent = { keyCode: 9 };
   const spaceKeyEvent = { keyCode: 32 };
-  // const aKeyEvent = { keyCode: 65 };
-  // const nKeyEvent = { keyCode: 78 };
+
+  const shiftTabKeyEvent = { keyCode: 9, shiftKey: true };
+  const shiftKeyEvent = { keyCode: 16 };
 
   const testTracker = new KeyStateTracker();
+
+  QUnit.module( 'KeyStateTracker', {
+    beforeEach: () => {
+      testTracker.clearState();
+    }
+  } );
 
   QUnit.test( 'basic state tracking of keys', assert => {
 
@@ -29,7 +34,55 @@ define( require => {
     testTracker.keydownUpdate( tabKeyEvent );
     assert.ok( testTracker.isKeyDown( tabKeyEvent.keyCode ), 'tab key should be down in tracker' );
 
+    testTracker.keyupUpdate( tabKeyEvent );
+    assert.ok( !testTracker.isKeyDown( tabKeyEvent.keyCode ), 'tab key should be up in tracker' );
+
     testTracker.keydownUpdate( spaceKeyEvent );
-    assert.ok( testTracker.isKeyInListDown( [ tabKeyEvent.keyCode, spaceKeyEvent.keyCode ] ), 'tab or space are down' );
+    assert.ok( testTracker.isAnyKeyInListDown( [ tabKeyEvent.keyCode, spaceKeyEvent.keyCode ] ), 'tab or space are down' );
+    assert.ok( !testTracker.areKeysDown( [ tabKeyEvent.keyCode, spaceKeyEvent.keyCode ] ), 'tab and space are not down' );
+
+    testTracker.keydownUpdate( tabKeyEvent );
+    assert.ok( testTracker.isAnyKeyInListDown( [ tabKeyEvent.keyCode, spaceKeyEvent.keyCode ] ), 'tab and/or space are down' );
+    assert.ok( testTracker.areKeysDown( [ tabKeyEvent.keyCode, spaceKeyEvent.keyCode ] ), 'tab and space are down' );
+
+    testTracker.keydownUpdate( spaceKeyEvent );
+
+
+  } );
+
+
+  QUnit.test( 'tracking of shift key', assert => {
+
+    // mock sending "keydown" events to the tracker
+    window.assert && assert.throws( () => {
+      testTracker.keydownUpdate( shiftTabKeyEvent );
+
+    }, 'event has shift key down when key state tracker does did not get a shift down key event.' );
+
+
+    testTracker.keydownUpdate( shiftKeyEvent );
+    testTracker.keydownUpdate( shiftTabKeyEvent );
+    assert.ok( testTracker.isKeyDown( tabKeyEvent.keyCode ), 'tab key should be down in tracker' );
+    assert.ok( testTracker.isKeyDown( shiftKeyEvent.keyCode ), 'shift key should be down in tracker' );
+    assert.ok( testTracker.shiftKeyDown, 'shift key should be down in tracker getter' );
+
+    testTracker.keyupUpdate( shiftKeyEvent );
+    testTracker.keyupUpdate( tabKeyEvent );
+
+
+    assert.ok( !testTracker.isKeyDown( shiftKeyEvent.keyCode ), 'shift key should not be down in tracker' );
+    assert.ok( !testTracker.shiftKeyDown, 'shift key should not be down in tracker getter' );
+    assert.ok( !testTracker.isKeyDown( tabKeyEvent.keyCode ), 'tab key should not be down in tracker' );
+
+    assert.ok( !testTracker.keysAreDown(), 'no keys should be down' );
+
+    testTracker.keydownUpdate( tabKeyEvent );
+    testTracker.keyupUpdate( shiftTabKeyEvent );
+    assert.ok( !testTracker.isKeyDown( tabKeyEvent.keyCode ), 'tab key should not be down in tracker' );
+    assert.ok( testTracker.isKeyDown( shiftKeyEvent.keyCode ), 'shift key should have been set to be down in tracker because of tab up' );
+    assert.ok( testTracker.shiftKeyDown, 'shift key should be down in tracker getter' );
+
+    testTracker.keyupUpdate( shiftKeyEvent );
+    testTracker.keyupUpdate( tabKeyEvent );
   } );
 } );

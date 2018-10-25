@@ -3,7 +3,7 @@
 /**
  * A type that will manage the state of the keyboard. Will track which keys are being held down and for how long.
  * Offers convenience methds to determine whether or not specific keys are down like shift or enter.
- * 
+ *
  * @author Michael Kauzmann
  * @author Jesse Greenberg
  * @author Michael Barlow
@@ -16,7 +16,6 @@ define( require => {
   const KeyboardUtil = require( 'SCENERY/accessibility/KeyboardUtil' );
   const timer = require( 'PHET_CORE/timer' );
 
-  // constants
   class KeyStateTracker {
     constructor() {
 
@@ -45,12 +44,14 @@ define( require => {
      * @public
      * @param {DOMEvent} event
      */
-    keydownUpdate ( event ) {
+    keydownUpdate( event ) {
 
       // required to work with Safari and VoiceOver, otherwise arrow keys will move virtual cursor
       if ( KeyboardUtil.isArrowKey( event.keyCode ) ) {
         event.preventDefault();
       }
+
+      assert && assert( !!event.shiftKey === !!this.shiftKeyDown, 'inconsistency between event and keystate.' );
 
       // if the key is already down, don't do anything else (we don't want to create a new keystate object
       // for a key that is already being tracked and down)
@@ -74,7 +75,7 @@ define( require => {
      * @public
      * @param {DOMEvent} event
      */
-    keyupUpdate ( event ) {
+    keyupUpdate( event ) {
 
       // if the shift key is down when we navigate to the object, add it to the keystate because it won't be added until
       // the next keydown event
@@ -92,15 +93,16 @@ define( require => {
         }
       }
 
-      if ( this.isKeyDown[ event.keyCode ] ) {
-        this.keyState[ event.keyCode ] = null;
+      // remove this key data from the state
+      if ( this.isKeyDown( event.keyCode ) ) {
+        delete this.keyState[ event.keyCode ];
       }
     }
 
     /**
      * Returns true if any of the movement keys are down (arrow keys or WASD keys).
      *
-     * @return {boolean}
+     * @returns {boolean}
      * @public
      */
     get movementKeysDown() {
@@ -110,12 +112,12 @@ define( require => {
 
     /**
      * Returns true if a key with the keycode is currently down.
-     * 
+     *
      * @public
-     * @param  {} keyCode
-     * @return {}        ]
+     * @param  {number} keyCode
+     * @returns {boolean}
      */
-    isKeyDown ( keyCode ) {
+    isKeyDown( keyCode ) {
       if ( !this.keyState[ keyCode ] ) {
 
         // key hasn't been pressed once yet
@@ -128,11 +130,11 @@ define( require => {
     /**
      * Returns true if any of the keys in the list are currently down.
      *
-     * @param  {Array.<number>} keys
-     * @return {boolean}
+     * @param  {Array.<number>} keys - array of keycodes
+     * @returns {boolean}
      * @public
      */
-    isKeyInListDown ( keyList ) {
+    isAnyKeyInListDown( keyList ) {
       for ( let i = 0; i < keyList.length; i++ ) {
         if ( this.isKeyDown( keyList[ i ] ) ) {
           return true;
@@ -143,9 +145,33 @@ define( require => {
     }
 
     /**
-     * Returns true if the enter key is currently pressed down.
+     * Returns true if and only if all of the keys in the list are currently down.
      *
-     * @return {boolean}
+     * @param  {Array.<number>} keys - array of keycodes
+     * @returns {boolean}
+     * @public
+     */
+    areKeysDown( keyList ) {
+      let keysDown = true;
+      for ( let i = 0; i < keyList.length; i++ ) {
+        if ( !this.isKeyDown( keyList[ i ] ) ) {
+          return false;
+        }
+      }
+
+      return keysDown;
+    }
+
+    /**
+     * @returns {boolean} if any keys in the key state are currently down
+     * @public
+     */
+    keysAreDown() {
+      return !!Object.keys( this.keyState ).length > 0;
+    }
+
+    /**
+     * @returns {boolean} - true if the enter key is currently pressed down.
      * @public
      */
     get enterKeyDown() {
@@ -153,13 +179,19 @@ define( require => {
     }
 
     /**
-     * Returns true if the keystate indicates that the shift key is currently down.
-     *
-     * @return {boolean}
+     * @returns {boolean} - true if the keystate indicates that the shift key is currently down.
      * @public
      */
     get shiftKeyDown() {
       return this.isKeyDown( KeyboardUtil.KEY_SHIFT );
+    }
+
+    /**
+     * Clear the entire state of the key tracker, basically reinitializing the instance.
+     * @public
+     */
+    clearState() {
+      this.keyState = {};
     }
 
     /**
@@ -172,7 +204,7 @@ define( require => {
     step( dt ) {
 
       // no-op unless a key is down
-      if ( this.keyState.length > 0 ) {
+      if ( this.keysAreDown() ) {
 
         // for each key that is still down, increment the tracked time that has been down
         for ( let i = 0; i < this.keyState.length; i++ ) {
