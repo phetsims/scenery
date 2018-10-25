@@ -12,6 +12,7 @@ define( function( require ) {
   // modules
   var NodeProperty = require( 'SCENERY/util/NodeProperty' );
   var NumberProperty = require( 'AXON/NumberProperty' );
+  var phetioInherit = require( 'TANDEM/phetioInherit' );
   var PropertyIO = require( 'AXON/PropertyIO' );
   var scenery = require( 'SCENERY/scenery' );
   var BooleanIO = require( 'TANDEM/types/BooleanIO' );
@@ -20,7 +21,6 @@ define( function( require ) {
 
   // ifphetio
   var assertInstanceOf = require( 'ifphetio!PHET_IO/assertInstanceOf' );
-  var phetioInherit = require( 'ifphetio!PHET_IO/phetioInherit' );
   var Range = require( 'DOT/Range' );
 
   /**

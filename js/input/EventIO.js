@@ -12,10 +12,10 @@ define( function( require ) {
   const Vector2IO = require( 'DOT/Vector2IO' );
   const ObjectIO = require( 'TANDEM/types/ObjectIO' );
   const scenery = require( 'SCENERY/scenery' );
+  const phetioInherit = require( 'TANDEM/phetioInherit' );
 
   // ifphetio
   const assertInstanceOf = require( 'ifphetio!PHET_IO/assertInstanceOf' );
-  const phetioInherit = require( 'ifphetio!PHET_IO/phetioInherit' );
 
   /**
    * IO type for phet/scenery's Event class.

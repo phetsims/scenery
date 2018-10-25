@@ -13,10 +13,10 @@ define( require => {
   // modules
   const ObjectIO = require( 'TANDEM/types/ObjectIO' );
   const scenery = require( 'SCENERY/scenery' );
+  const phetioInherit = require( 'TANDEM/phetioInherit' );
 
   // ifphetio
   const assertInstanceOf = require( 'ifphetio!PHET_IO/assertInstanceOf' );
-  const phetioInherit = require( 'ifphetio!PHET_IO/phetioInherit' );
 
   /**
    * IO type for phet/sun's DOMEvent class.
