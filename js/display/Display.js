@@ -87,12 +87,12 @@ define( function( require ) {
   var FittedBlockBoundsOverlay = require( 'SCENERY/overlays/FittedBlockBoundsOverlay' );
   var FocusIO = require( 'SCENERY/accessibility/FocusIO' );
   var FocusOverlay = require( 'SCENERY/overlays/FocusOverlay' );
+  var NullableIO = require( 'TANDEM/types/NullableIO' );
   var platform = require( 'PHET_CORE/platform' );
   var PointerAreaOverlay = require( 'SCENERY/overlays/PointerAreaOverlay' );
   var PointerOverlay = require( 'SCENERY/overlays/PointerOverlay' );
   var SceneryStyle = require( 'SCENERY/util/SceneryStyle' );
   var Util = require( 'SCENERY/util/Util' );
-  var NullableIO = require( 'TANDEM/types/NullableIO' );
 
   /**
    * Constructs a Display that will show the rootNode and its subtree in a visual state. Default options provided below

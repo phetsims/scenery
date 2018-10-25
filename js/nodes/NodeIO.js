@@ -10,14 +10,14 @@ define( function( require ) {
   'use strict';
 
   // modules
+  var BooleanIO = require( 'TANDEM/types/BooleanIO' );
   var NodeProperty = require( 'SCENERY/util/NodeProperty' );
+  var NullableIO = require( 'TANDEM/types/NullableIO' );
   var NumberProperty = require( 'AXON/NumberProperty' );
+  var ObjectIO = require( 'TANDEM/types/ObjectIO' );
   var phetioInherit = require( 'TANDEM/phetioInherit' );
   var PropertyIO = require( 'AXON/PropertyIO' );
   var scenery = require( 'SCENERY/scenery' );
-  var BooleanIO = require( 'TANDEM/types/BooleanIO' );
-  var NullableIO = require( 'TANDEM/types/NullableIO' );
-  var ObjectIO = require( 'TANDEM/types/ObjectIO' );
 
   // ifphetio
   var assertInstanceOf = require( 'ifphetio!PHET_IO/assertInstanceOf' );

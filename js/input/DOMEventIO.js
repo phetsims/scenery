@@ -12,8 +12,8 @@ define( require => {
 
   // modules
   const ObjectIO = require( 'TANDEM/types/ObjectIO' );
-  const scenery = require( 'SCENERY/scenery' );
   const phetioInherit = require( 'TANDEM/phetioInherit' );
+  const scenery = require( 'SCENERY/scenery' );
 
   // ifphetio
   const assertInstanceOf = require( 'ifphetio!PHET_IO/assertInstanceOf' );

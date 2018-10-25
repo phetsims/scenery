@@ -15,8 +15,8 @@ define( require => {
   'use strict';
 
   // modules
-  const scenery = require( 'SCENERY/scenery' );
   const KeyboardUtil = require( 'SCENERY/accessibility/KeyboardUtil' );
+  const scenery = require( 'SCENERY/scenery' );
   const timer = require( 'PHET_CORE/timer' );
 
   class KeyStateTracker {

@@ -124,12 +124,13 @@ define( function( require ) {
   var BatchedDOMEvent = require( 'SCENERY/input/BatchedDOMEvent' );
   var BrowserEvents = require( 'SCENERY/input/BrowserEvents' );
   var cleanArray = require( 'PHET_CORE/cleanArray' );
+  var DOMEventIO = require( 'SCENERY/input/DOMEventIO' );
   var Emitter = require( 'AXON/Emitter' );
   var EmitterIO = require( 'AXON/EmitterIO' );
   var Event = require( 'SCENERY/input/Event' );
-  var DOMEventIO = require( 'SCENERY/input/DOMEventIO' );
   var inherit = require( 'PHET_CORE/inherit' );
   var Mouse = require( 'SCENERY/input/Mouse' );
+  var NumberIO = require( 'TANDEM/types/NumberIO' );
   var Pen = require( 'SCENERY/input/Pen' );
   var platform = require( 'PHET_CORE/platform' );
   var Pointer = require( 'SCENERY/input/Pointer' );
@@ -139,7 +140,6 @@ define( function( require ) {
   var Trail = require( 'SCENERY/util/Trail' );
   var Vector2 = require( 'DOT/Vector2' );
   var Vector2IO = require( 'DOT/Vector2IO' );
-  var NumberIO = require( 'TANDEM/types/NumberIO' );
 
   // Object literal makes it easy to check for the existence of an attribute (compared to [].indexOf()>=0)
   var domEventPropertiesToSerialize = {

@@ -9,10 +9,10 @@ define( function( require ) {
   'use strict';
 
   // modules
-  const Vector2IO = require( 'DOT/Vector2IO' );
   const ObjectIO = require( 'TANDEM/types/ObjectIO' );
-  const scenery = require( 'SCENERY/scenery' );
   const phetioInherit = require( 'TANDEM/phetioInherit' );
+  const scenery = require( 'SCENERY/scenery' );
+  const Vector2IO = require( 'DOT/Vector2IO' );
 
   // ifphetio
   const assertInstanceOf = require( 'ifphetio!PHET_IO/assertInstanceOf' );
