@@ -21,6 +21,7 @@ define( function( require ) {
   // ifphetio
   var assertInstanceOf = require( 'ifphetio!PHET_IO/assertInstanceOf' );
   var phetioInherit = require( 'ifphetio!PHET_IO/phetioInherit' );
+  var Range = require( 'DOT/Range' );
 
   /**
    * IO type for phet/scenery's Node
@@ -64,7 +65,7 @@ define( function( require ) {
       phetioState: node.phetioState,
 
       tandem: node.tandem.createTandem( 'opacityProperty' ),
-      range: { min: 0, max: 1 },
+      range: new Range( 0, 1 ),
       phetioDocumentation: 'Opacity of the parent NodeIO, between 0 (invisible) and 1 (fully visible)'
     } );
     opacityProperty.link( function( opacity ) { node.opacity = opacity; } );
