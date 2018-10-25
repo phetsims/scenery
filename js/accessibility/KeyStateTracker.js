@@ -4,6 +4,9 @@
  * A type that will manage the state of the keyboard. Will track which keys are being held down and for how long.
  * Offers convenience methds to determine whether or not specific keys are down like shift or enter.
  *
+ * This runs on phet-core's Timer class which is responsible for stepping this tracker. This is used to determine how
+ * long keys have been pressed.
+ *
  * @author Michael Kauzmann
  * @author Jesse Greenberg
  * @author Michael Barlow
@@ -187,6 +190,17 @@ define( require => {
     }
 
     /**
+     * Will assert if the key isn't currently pressed down
+     * @param {number} keyCode
+     * @returns {number} how long the key has been down
+     * @public
+     */
+    timeDownForKey( keyCode ) {
+      assert && assert( this.isKeyDown( keyCode ), 'cannot get timeDown on a key that is not pressed down' );
+      return this.keyState[ keyCode ].timeDown;
+    }
+
+    /**
      * Clear the entire state of the key tracker, basically reinitializing the instance.
      * @public
      */
@@ -200,16 +214,21 @@ define( require => {
      * In order for the drag handler to work.
      *
      * @private
+     * @param {number} dt - time in seconds that has passed since the last update
      */
     step( dt ) {
 
       // no-op unless a key is down
       if ( this.keysAreDown() ) {
+        let ms = dt * 1000;
 
         // for each key that is still down, increment the tracked time that has been down
-        for ( let i = 0; i < this.keyState.length; i++ ) {
-          if ( this.keyState[ i ].keyDown ) {
-            this.keyState[ i ].timeDown += dt;
+        for ( let i in this.keyState ) {
+          if ( this.keyState.hasOwnProperty( i ) ) {
+            if ( this.keyState[ i ].keyDown ) {
+              this.keyState[ i ].timeDown += ms;
+            }
+
           }
         }
       }
