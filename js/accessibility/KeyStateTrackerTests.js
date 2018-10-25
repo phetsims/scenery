@@ -12,13 +12,14 @@ define( require => {
 
   // modules
   const KeyStateTracker = require( 'SCENERY/accessibility/KeyStateTracker' );
-  // const KeyboardFuzzer = require( 'SCENERY/accessibility/KeyboardFuzzer' ); // can we use this in testing?
+  const KeyboardUtil = require( 'SCENERY/accessibility/KeyboardUtil' );
+  // const KeyboardFuzzer = require( 'SCENERY/accessibility/KeyboardFuzzer' ); // TODO: can we use this in testing? https://github.com/phetsims/scenery/issues/850
 
-  const tabKeyEvent = { keyCode: 9 };
-  const spaceKeyEvent = { keyCode: 32 };
+  const tabKeyEvent = { keyCode: KeyboardUtil.KEY_TAB };
+  const spaceKeyEvent = { keyCode: KeyboardUtil.KEY_SPACE };
 
-  const shiftTabKeyEvent = { keyCode: 9, shiftKey: true };
-  const shiftKeyEvent = { keyCode: 16 };
+  const shiftTabKeyEvent = { keyCode: KeyboardUtil.KEY_TAB, shiftKey: true };
+  const shiftKeyEvent = { keyCode: KeyboardUtil.KEY_SHIFT };
 
   const testTracker = new KeyStateTracker();
 
