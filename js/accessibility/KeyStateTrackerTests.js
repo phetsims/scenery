@@ -115,11 +115,11 @@ define( require => {
 
     await timeout( 100 );
     currentTimeDown = testTracker.timeDownForKey( spaceKeyEvent.keyCode );
-    assert.ok( currentTimeDown >= 99 && currentTimeDown <= 101, 'key pressed for 100ms' );
+    assert.ok( currentTimeDown >= 95 && currentTimeDown <= 105, 'key pressed for 100ms' );
 
     await timeout( 51 );
     currentTimeDown = testTracker.timeDownForKey( spaceKeyEvent.keyCode );
-    assert.ok( currentTimeDown >= 150 && currentTimeDown <= 152, 'key pressed for 51 more ms.' );
+    assert.ok( currentTimeDown >= 146 && currentTimeDown <= 156, 'key pressed for 51 more ms.' );
 
     testTracker.keyupUpdate( spaceKeyEvent.keyCode );
   } );
