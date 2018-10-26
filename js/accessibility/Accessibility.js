@@ -2129,7 +2129,9 @@ define( function( require ) {
           if ( this._accessibleChecked !== checked ) {
             this._accessibleChecked = checked;
 
-            this.setAccessibleAttribute( 'checked', checked );
+            this.setAccessibleAttribute( 'checked', checked, {
+              asProperty: true
+            } );
           }
         },
         set accessibleChecked( checked ) { this.setAccessibleChecked( checked ); },
@@ -2181,6 +2183,9 @@ define( function( require ) {
             // for setting certain attributes (e.g. MathML).
             namespace: null,
 
+            // set the "attribute" as a javascript property on the DOMElement
+            asProperty: false,
+
             elementName: AccessiblePeer.PRIMARY_SIBLING // see AccessiblePeer.getElementName() for valid values, default to the primary sibling
           }, options );
 
@@ -2189,9 +2194,11 @@ define( function( require ) {
           // if the accessible attribute already exists in the list, remove it - no need
           // to remove from the peers, existing attributes will simply be replaced in the DOM
           for ( var i = 0; i < this._accessibleAttributes.length; i++ ) {
-            if ( this._accessibleAttributes[ i ].attribute === attribute &&
-                 this._accessibleAttributes[ i ].options.namespace === options.namespace &&
-                 this._accessibleAttributes[ i ].options.elementName === options.elementName ) {
+            var currentAttribute = this._accessibleAttributes[ i ];
+            if ( currentAttribute.attribute === attribute &&
+                 currentAttribute.options.namespace === options.namespace &&
+                 currentAttribute.options.asProperty === options.asProperty &&
+                 currentAttribute.options.elementName === options.elementName ) {
               this._accessibleAttributes.splice( i, 1 );
             }
           }

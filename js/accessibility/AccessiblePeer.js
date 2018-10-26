@@ -486,6 +486,9 @@ define( function( require ) {
         // for setting certain attributes (e.g. MathML).
         namespace: null,
 
+        // set as a javascript property instead of an attribute on the DOM Element.
+        asProperty: false,
+
         elementName: PRIMARY_SIBLING // see this.getElementName() for valid values, default to the primary sibling
       }, options );
 
@@ -495,7 +498,7 @@ define( function( require ) {
         element.setAttributeNS( options.namespace, attribute, attributeValue );
       }
       // treat it like a property
-      else if ( typeof attributeValue === 'boolean' ) {
+      else if ( options.asProperty ) {
         element[ attribute ] = attributeValue;
       }
       else {
