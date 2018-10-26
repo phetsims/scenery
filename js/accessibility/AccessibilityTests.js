@@ -873,6 +873,13 @@ define( function( require ) {
     a1.addChild( b );
     b.tagName = 'div';
     assert.ok( getPrimarySiblingElementByNode( b ).tabIndex >= 0, 'set tagName after focusable' );
+
+    // test setting attribute as DOM property, should NOT have attribute value pair (DOM uses empty string for empty)
+    a1.setAccessibleAttribute( 'hidden', true, { asProperty: true } );
+    a1Element = getPrimarySiblingElementByNode( a1 );
+    assert.ok( a1Element.hidden, true, 'hidden set as Property' );
+    assert.ok( a1Element.getAttribute( 'hidden' ) === '', 'hidden should not be set as attribute' );
+    
   } );
 
   QUnit.test( 'Accessibility input listeners', function( assert ) {
