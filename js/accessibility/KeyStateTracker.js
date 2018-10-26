@@ -54,7 +54,7 @@ define( require => {
         event.preventDefault();
       }
 
-      assert && assert( !!event.shiftKey === !!this.shiftKeyDown, 'inconsistency between event and keystate.' );
+      assert && assert( !!event.shiftKey === !!this.shiftKeyDown, 'shift key inconsistency between event and keystate.' );
 
       // if the key is already down, don't do anything else (we don't want to create a new keystate object
       // for a key that is already being tracked and down)

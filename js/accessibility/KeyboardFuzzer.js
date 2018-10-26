@@ -11,6 +11,7 @@ define( require => {
 
   // modules
   const AccessibilityUtil = require( 'SCENERY/accessibility/AccessibilityUtil' );
+  const KeyStateTracker = require( 'SCENERY/accessibility/KeyStateTracker' );
   const KeyboardUtil = require( 'SCENERY/accessibility/KeyboardUtil' );
   const Random = require( 'DOT/Random' );
   const scenery = require( 'SCENERY/scenery' );
@@ -19,14 +20,19 @@ define( require => {
   // uppercase matters
   const keyboardTestingSchema = {
     INPUT: [ ...KeyboardUtil.ARROW_KEYS, KeyboardUtil.KEY_PAGE_UP, KeyboardUtil.KEY_PAGE_DOWN,
-      KeyboardUtil.KEY_HOME, KeyboardUtil.KEY_END ],
-    DIV: [ KeyboardUtil.KEY_ESCAPE ],
+      KeyboardUtil.KEY_HOME, KeyboardUtil.KEY_END, KeyboardUtil.KEY_ENTER, KeyboardUtil.KEY_SPACE ],
+    DIV: [ ...KeyboardUtil.ARROW_KEYS ],
     P: [ KeyboardUtil.KEY_ESCAPE ],
     BUTTON: [ KeyboardUtil.KEY_ENTER, KeyboardUtil.KEY_SPACE ]
   };
 
   const NEXT_ELEMENT_THRESHOLD = .10;
-  const DO_KNOWN_KEYS_THRESHOLD = .75;
+
+  const DO_KNOWN_KEYS_THRESHOLD = .60; // for keydown/up
+  const CLICK_EVENT = .10; // TODO because of implementation this is actually 20%. but reads like "half of the time after 60% of the time"
+
+  const KEY_DOWN = 'keydown';
+  const KEY_UP = 'keyup';
 
   var min = 9;
   var max = 223;
@@ -43,10 +49,10 @@ define( require => {
       // @private
       this.display = display;
       this.random = new Random( { seed: seed } );
-
+      this.keyStateTracker = new KeyStateTracker();
       this.keysPressedEachFrame = 10;
 
-      // {HTMLElement}
+      // @private {HTMLElement}
       this.currentElement = null;
     }
 
@@ -66,18 +72,29 @@ define( require => {
     }
 
     /**
+     * @param {HTMLElement} element
+     */
+    triggerClickEvent( element ) {
+      element.click();
+    }
+
+    /**
      * Trigger a keydown/keyup pair. The keyup is triggered with a timeout
      * @param {HTMLElement} element
      * @param {number} keyCode
      */
     triggerKeyDownUpEvents( element, keyCode ) {
-      // TODO: screen readers normally take our keydown events, but may not here, is the descrpency ok?
-      KeyboardFuzzer.triggerDOMEvent( 'keydown', element, keyCode );
 
-      timer.setTimeout( () => {
-        KeyboardFuzzer.triggerDOMEvent( 'keyup', element, keyCode );
+      if ( !this.keyStateTracker.isKeyDown( keyCode ) ) {
 
-      }, 1 ); // TODO: make this time variable?
+        // TODO: screen readers normally take our keydown events, but may not here, is the descrpency ok?
+        this.triggerDOMEvent( KEY_DOWN, element, keyCode );
+
+        timer.setTimeout( () => {
+          this.triggerDOMEvent( KEY_UP, element, keyCode );
+
+        }, 1 ); // TODO: make this time variable?
+      }
     }
 
     /**
@@ -110,10 +127,13 @@ define( require => {
 
         if ( keyboardTestingSchema[ elementWithFocus.tagName ] ) {
 
-          if ( this.random.nextDouble() > DO_KNOWN_KEYS_THRESHOLD ) {
+          if ( this.random.nextDouble() < DO_KNOWN_KEYS_THRESHOLD ) {
             const keyCodes = keyboardTestingSchema[ elementWithFocus.tagName ];
             const keyCode = this.random.sample( keyCodes );
             this.triggerKeyDownUpEvents( elementWithFocus, keyCode );
+          }
+          else if ( this.random.nextDouble() < CLICK_EVENT ) {
+            this.triggerClickEvent( elementWithFocus );
           }
           else {
             this.triggerRandomKeyDownUpEvents( elementWithFocus );
@@ -130,7 +150,7 @@ define( require => {
      * @param {HTMLElement} element
      * @param {number} [keycode]
      */
-    static triggerDOMEvent( event, element, keyCode ) {
+    triggerDOMEvent( event, element, keyCode ) {
       var eventObj = document.createEventObject ?
                      document.createEventObject() : document.createEvent( 'Events' );
 
@@ -141,6 +161,17 @@ define( require => {
       eventObj.keyCode = keyCode;
       // eventObj.shiftKey = true; // TODO: we can add modifier keys in here with options?
       eventObj.which = keyCode;
+
+      if ( this.keyStateTracker.shiftKeyDown ) {
+        eventObj.shiftKey = true;
+      }
+
+      if ( event === KEY_DOWN ) {
+        this.keyStateTracker.keydownUpdate( eventObj );
+      }
+      else if ( event === KEY_UP ) {
+        this.keyStateTracker.keyupUpdate( eventObj );
+      }
 
       element.dispatchEvent ? element.dispatchEvent( eventObj ) : element.fireEvent( 'on' + event, eventObj );
     }
