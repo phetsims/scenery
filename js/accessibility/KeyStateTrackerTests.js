@@ -16,18 +16,13 @@ define( require => {
   const KeyStateTracker = require( 'SCENERY/accessibility/KeyStateTracker' );
   const timer = require( 'PHET_CORE/timer' );
 
+  // mock DOM KeyboardEvents
   const tabKeyEvent = { keyCode: KeyboardUtil.KEY_TAB };
   const spaceKeyEvent = { keyCode: KeyboardUtil.KEY_SPACE };
-
   const shiftTabKeyEvent = { keyCode: KeyboardUtil.KEY_TAB, shiftKey: true };
   const shiftKeyEvent = { keyCode: KeyboardUtil.KEY_SHIFT };
 
   const testTracker = new KeyStateTracker();
-
-  // helper es6 functions from  https://stackoverflow.com/questions/33289726/combination-of-async-function-await-settimeout/33292942
-  function timeout( ms ) {
-    return new Promise( resolve => setTimeout( resolve, ms ) );
-  }
 
   let intervalID = null;
 
@@ -109,18 +104,26 @@ define( require => {
 
   QUnit.test( 'test tracking with time', async assert => {
 
+    var done = assert.async();
+
     testTracker.keydownUpdate( spaceKeyEvent );
     let currentTimeDown = testTracker.timeDownForKey( spaceKeyEvent.keyCode );
     assert.ok( currentTimeDown === 0, 'should be zero, has not been down any time' );
 
-    await timeout( 100 );
-    currentTimeDown = testTracker.timeDownForKey( spaceKeyEvent.keyCode );
-    assert.ok( currentTimeDown >= 95 && currentTimeDown <= 105, 'key pressed for 100ms' );
 
-    await timeout( 51 );
-    currentTimeDown = testTracker.timeDownForKey( spaceKeyEvent.keyCode );
-    assert.ok( currentTimeDown >= 146 && currentTimeDown <= 156, 'key pressed for 51 more ms.' );
+    timer.setTimeout( () => {
+      currentTimeDown = testTracker.timeDownForKey( spaceKeyEvent.keyCode );
 
-    testTracker.keyupUpdate( spaceKeyEvent.keyCode );
+      assert.ok( currentTimeDown >= 95 && currentTimeDown <= 115, 'key pressed for 100ms' );
+
+      timer.setTimeout( () => {
+        currentTimeDown = testTracker.timeDownForKey( spaceKeyEvent.keyCode );
+        assert.ok( currentTimeDown >= 146 && currentTimeDown <= 170, 'key pressed for 51 more ms.' );
+
+        testTracker.keyupUpdate( spaceKeyEvent.keyCode );
+
+        done();
+      }, 51 );
+    }, 100 );
   } );
 } );
