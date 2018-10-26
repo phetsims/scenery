@@ -229,7 +229,6 @@ define( function( require ) {
     // @private {Emitter} - Emits to the PhET-iO data stream.  
     this.mouseUpEmitter = new Emitter( {
       phetioPlayback: true,
-      valueTypes: [ Vector2, window.Event ], // Note this is a DOM event, not a scenery.Event
       tandem: options.tandem.createTandem( 'mouseUpEmitter' ),
       phetioType: EmitterIO( [
         { name: 'point', type: Vector2IO },
@@ -247,7 +246,6 @@ define( function( require ) {
     // @private {Emitter} - Emits to the PhET-iO data stream.  
     this.mouseDownEmitter = new Emitter( {
       phetioPlayback: true,
-      valueTypes: [ Vector2, window.Event ], // Note this is a DOM event, not a scenery.Event
       tandem: options.tandem.createTandem( 'mouseDownEmitter' ),
       phetioType: EmitterIO( [
         { name: 'point', type: Vector2IO },
@@ -265,7 +263,6 @@ define( function( require ) {
     // @private {Emitter} - Emits to the PhET-iO data stream.  
     this.mouseMovedEmitter = new Emitter( {
       phetioPlayback: true,
-      valueTypes: [ Vector2, window.Event ], // Note this is a DOM event, not a scenery.Event
       tandem: options.tandem.createTandem( 'mouseMovedEmitter' ),
       phetioType: EmitterIO( [
         { name: 'point', type: Vector2IO },
@@ -284,7 +281,6 @@ define( function( require ) {
     // @private {Emitter} - Emits to the PhET-iO data stream.  
     this.mouseOverEmitter = new Emitter( {
       phetioPlayback: true,
-      valueTypes: [ Vector2, window.Event ], // Note this is a DOM event, not a scenery.Event
       tandem: options.tandem.createTandem( 'mouseOverEmitter' ),
       phetioType: EmitterIO( [
         { name: 'point', type: Vector2IO },
@@ -302,7 +298,6 @@ define( function( require ) {
     // @private {Emitter} - Emits to the PhET-iO data stream.  
     this.mouseOutEmitter = new Emitter( {
       phetioPlayback: true,
-      valueTypes: [ Vector2, window.Event ], // Note this is a DOM event, not a scenery.Event
       tandem: options.tandem.createTandem( 'mouseOutEmitter' ),
       phetioType: EmitterIO( [
         { name: 'point', type: Vector2IO },
@@ -320,7 +315,6 @@ define( function( require ) {
     // @private {Emitter} - Emits to the PhET-iO data stream.  
     this.wheelScrolledEmitter = new Emitter( {
       phetioPlayback: true,
-      valueTypes: [ window.Event ], // Note this is a DOM event, not a scenery.Event
       tandem: options.tandem.createTandem( 'wheelScrolledEmitter' ),
       phetioType: EmitterIO( [
         { name: 'event', type: DOMEventIO }
@@ -344,7 +338,6 @@ define( function( require ) {
     // @private {Emitter} - Emits to the PhET-iO data stream.
     this.touchStartedEmitter = new Emitter( {
       phetioPlayback: true,
-      valueTypes: [ 'number', Vector2, window.Event ], // Note this is a DOM event, not a scenery.Event
       tandem: options.tandem.createTandem( 'touchStartedEmitter' ),
       phetioType: EmitterIO( [
         { name: 'id', type: NumberIO },
@@ -363,7 +356,6 @@ define( function( require ) {
     // @private {Emitter} - Emits to the PhET-iO data stream.
     this.touchEndedEmitter = new Emitter( {
       phetioPlayback: true,
-      valueTypes: [ 'number', Vector2, window.Event ], // Note this is a DOM event, not a scenery.Event
       tandem: options.tandem.createTandem( 'touchEndedEmitter' ),
       phetioType: EmitterIO( [
         { name: 'id', type: NumberIO },
@@ -385,7 +377,6 @@ define( function( require ) {
     // @private {Emitter} - Emits to the PhET-iO data stream.
     this.touchMovedEmitter = new Emitter( {
       phetioPlayback: true,
-      valueTypes: [ 'number', Vector2, window.Event ], // Note this is a DOM event, not a scenery.Event
       tandem: options.tandem.createTandem( 'touchMovedEmitter' ),
       phetioType: EmitterIO( [
         { name: 'id', type: NumberIO },
@@ -407,7 +398,6 @@ define( function( require ) {
     // @private {Emitter} - Emits to the PhET-iO data stream.
     this.touchCanceledEmitter = new Emitter( {
       phetioPlayback: true,
-      valueTypes: [ 'number', Vector2, window.Event ], // Note this is a DOM event, not a scenery.Event
       tandem: options.tandem.createTandem( 'touchCanceledEmitter' ),
       phetioType: EmitterIO( [
         { name: 'id', type: NumberIO },
@@ -429,7 +419,6 @@ define( function( require ) {
     // @private {Emitter} - Emits to the PhET-iO data stream.
     this.penStartedEmitter = new Emitter( {
       phetioPlayback: true,
-      valueTypes: [ 'number', Vector2, window.Event ], // Note this is a DOM event, not a scenery.Event
       tandem: options.tandem.createTandem( 'penStartedEmitter' ),
       phetioType: EmitterIO( [
         { name: 'id', type: NumberIO },
@@ -448,7 +437,6 @@ define( function( require ) {
     // @private {Emitter} - Emits to the PhET-iO data stream.
     this.penEndedEmitter = new Emitter( {
       phetioPlayback: true,
-      valueTypes: [ 'number', Vector2, window.Event ], // Note this is a DOM event, not a scenery.Event
       tandem: options.tandem.createTandem( 'penEndedEmitter' ),
       phetioType: EmitterIO( [
         { name: 'id', type: NumberIO },
@@ -470,7 +458,6 @@ define( function( require ) {
     // @private {Emitter} - Emits to the PhET-iO data stream.
     this.penMovedEmitter = new Emitter( {
       phetioPlayback: true,
-      valueTypes: [ 'number', Vector2, window.Event ], // Note this is a DOM event, not a scenery.Event
       tandem: options.tandem.createTandem( 'penMovedEmitter' ),
       phetioType: EmitterIO( [
         { name: 'id', type: NumberIO },
@@ -492,7 +479,6 @@ define( function( require ) {
     // @private {Emitter} - Emits to the PhET-iO data stream.
     this.penCanceledEmitter = new Emitter( {
       phetioPlayback: true,
-      valueTypes: [ 'number', Vector2, window.Event ], // Note this is a DOM event, not a scenery.Event
       tandem: options.tandem.createTandem( 'penCanceledEmitter' ),
       phetioType: EmitterIO( [
         { name: 'id', type: NumberIO },

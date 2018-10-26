@@ -32,6 +32,14 @@ define( function( require ) {
     get documentation() { return 'An event, with a point'; },
 
     /**
+     * @override
+     * @public
+     * @param {*} instance
+     * @returns {boolean}
+     */
+    isInstance: function( instance ) { return instance instanceof scenery.Event; },
+
+    /**
      * Encodes a Color into a state object.
      * @param {Event} event
      * @returns {Object}

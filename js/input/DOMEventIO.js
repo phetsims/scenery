@@ -34,6 +34,15 @@ define( require => {
     documentation: 'A DOM Event',
 
     /**
+     * Note this is a DOM event, not a scenery.Event
+     * @override
+     * @public
+     * @param {*} instance
+     * @returns {boolean}
+     */
+    isInstance: function( instance ) { return instance instanceof window.Event; },
+
+    /**
      * Encodes a DOMEvent instance to a state.
      * @param {Event} domEvent
      * @returns {Object} - a state object
