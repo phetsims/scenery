@@ -30,7 +30,7 @@ define( require => {
   const NEXT_ELEMENT_THRESHOLD = .1;
 
   const DO_KNOWN_KEYS_THRESHOLD = .60; // for keydown/up
-  const CLICK_EVENT = .10; // TODO because of implementation this is actually 20%. but reads like "half of the time after 60% of the time"
+  const CLICK_EVENT = .10; // TODO because of implementation this is actually 4%. but reads like "10% of the time after 60% of the time"
 
   const KEY_DOWN = 'keydown';
   const KEY_UP = 'keyup';
