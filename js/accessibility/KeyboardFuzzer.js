@@ -26,7 +26,8 @@ define( require => {
     BUTTON: [ KeyboardUtil.KEY_ENTER, KeyboardUtil.KEY_SPACE ]
   };
 
-  const NEXT_ELEMENT_THRESHOLD = .10;
+  const MAX_MS_KEY_HOLD_DOWN = 200;
+  const NEXT_ELEMENT_THRESHOLD = .1;
 
   const DO_KNOWN_KEYS_THRESHOLD = .60; // for keydown/up
   const CLICK_EVENT = .10; // TODO because of implementation this is actually 20%. but reads like "half of the time after 60% of the time"
@@ -50,13 +51,15 @@ define( require => {
       this.display = display;
       this.random = new Random( { seed: seed } );
       this.keyStateTracker = new KeyStateTracker();
-      this.keysPressedEachFrame = 10;
+      this.keysPressedEachFrame = 100;
+      this.keyupListeners = [];
 
       // @private {HTMLElement}
       this.currentElement = null;
     }
 
     /**
+     * @private
      * Randomly decide if we should focus the next element, or stay focused on the current element
      */
     chooseNextElement() {
@@ -64,14 +67,27 @@ define( require => {
         this.currentElement = document.activeElement;
       }
       else if ( this.random.nextDouble() < NEXT_ELEMENT_THRESHOLD ) {
+
+        // before we change focus to the next item, press "keyup" on all elements we had.
+        this.clearListeners();
         var nextFocusable = AccessibilityUtil.getRandomFocusable();
         nextFocusable.focus();
         this.currentElement = nextFocusable;
       }
-
     }
 
     /**
+     * @private
+     */
+    clearListeners() {
+      this.keyupListeners.forEach( function( listener ) {
+        timer.clearTimeout( listener );
+        listener();
+      } );
+    }
+
+    /**
+     * @private
      * @param {HTMLElement} element
      */
     triggerClickEvent( element ) {
@@ -90,15 +106,16 @@ define( require => {
         // TODO: screen readers normally take our keydown events, but may not here, is the descrpency ok?
         this.triggerDOMEvent( KEY_DOWN, element, keyCode );
 
-        timer.setTimeout( () => {
+        this.keyupListeners.push( timer.setTimeout( () => {
           this.triggerDOMEvent( KEY_UP, element, keyCode );
 
-        }, 1 ); // TODO: make this time variable?
+        }, this.random.nextInt( MAX_MS_KEY_HOLD_DOWN ) ) );
       }
     }
 
     /**
      * Trigger a keydown/keyup pair with a random keyCode
+     * @private
      * @param {HTMLElement} element
      */
     triggerRandomKeyDownUpEvents( element ) {
@@ -113,6 +130,7 @@ define( require => {
      * A random event creater that sends keyboard events. Based on the idea of fuzzMouse, but to test/spam accessibility
      * related keyboard navigation and alternate input implementation.
      *
+     * @public
      * TODO: NOTE: Right now this is a very experimental implementation. Tread wearily
      * TODO: @param keyboardPressesPerFocusedItem {number} - basically would be the same as fuzzRate, but handling
      * TODO:     the keydown events for a focused item
@@ -149,6 +167,7 @@ define( require => {
      * @param {string} event
      * @param {HTMLElement} element
      * @param {number} [keycode]
+     * @private
      */
     triggerDOMEvent( event, element, keyCode ) {
       var eventObj = document.createEventObject ?
