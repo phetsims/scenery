@@ -59,6 +59,7 @@
  * REVIEW:   inputType (setter doesn't call onAccessibleContentChange, can introduce buggy behavior)
  * REVIEW:   ariaLabelledbyAssociations (ok, probably won't override with behaviors?)
  * REVIEW:   ariaDescribedbyAssociations (ok, probably won't override with behaviors?)
+ * REVIEW:   activeDescendantAssociations (ok, probably won't override with behaviors?)
  * REVIEW:   accessibleAttributes (we WANT to override these with behavior, but can't right now) from onAttributeChange
  * REVIEW:   inputValue (doesn't look like behaviors can override)
  * REVIEW:   node.focusHighlight (looks like updates to this are completely broken)

@@ -233,6 +233,7 @@ define( function( require ) {
       // recompute and assign the association attributes that link two elements (like aria-labelledby)
       this.onAriaLabelledbyAssociationChange();
       this.onAriaDescribedbyAssociationChange();
+      this.onActiveDescendantAssociationChange();
 
 
       // add all listeners to the dom element
@@ -256,6 +257,7 @@ define( function( require ) {
 
       this.node.updateOtherNodesAriaLabelledby();
       this.node.updateOtherNodesAriaDescribedby();
+      this.node.updateOtherNodesActiveDescendant();
     },
 
     /**
@@ -360,6 +362,25 @@ define( function( require ) {
 
 
         this.setAssociationAttribute( 'aria-describedby', associationObject );
+      }
+    },
+
+    /**
+     * Recompute the aria-activedescendant attributes for all of the peer's elements
+     * @public
+     */
+    onActiveDescendantAssociationChange: function() {
+      this.removeAttributeFromAllElements( 'aria-activedescendant' );
+
+      for ( var i = 0; i < this.node.activeDescendantAssociations.length; i++ ) {
+        var associationObject = this.node.activeDescendantAssociations[ i ];
+
+        // Assert out if the model list is different than the data held in the associationObject
+        assert && assert( associationObject.otherNode.nodesThatAreActiveDescendantToThisNode.indexOf( this.node ) >= 0,
+          'unexpected otherNode' );
+
+
+        this.setAssociationAttribute( 'aria-activedescendant', associationObject );
       }
     },
 
@@ -552,7 +573,7 @@ define( function( require ) {
      * @param {Object} associationObject - see addAriaLabelledbyAssociation() for schema
      */
     setAssociationAttribute: function( attribute, associationObject ) {
-      assert && assert( attribute === 'aria-labelledby' || attribute === 'aria-describedby',
+      assert && assert( AccessibilityUtil.ASSOCIATION_ATTRIBUTES.indexOf( attribute ) >= 0,
         'unsupported attribute for setting with association object: ' + attribute );
       assert && AccessibilityUtil.validateAssociationObject( associationObject );
 

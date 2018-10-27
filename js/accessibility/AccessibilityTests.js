@@ -455,14 +455,16 @@ define( function( require ) {
   } );
 
   // tests for aria-labelledby and aria-describedby should be the same, since both support the same feature set
-  function testAriaLabelledOrDescribedBy( assert, attribute ) { // eslint-disable-line
+  function testAssociationAttribute( assert, attribute ) { // eslint-disable-line
 
     // use a different setter depending on if testing labelledby or describedby
     var addAssociationFunction = attribute === 'aria-labelledby' ? 'addAriaLabelledbyAssociation' :
-                                 attribute === 'aria-describedby' ? 'addAriaDescribedbyAssociation' : null;
+                                 attribute === 'aria-describedby' ? 'addAriaDescribedbyAssociation' :
+                                 attribute === 'aria-activedescendant' ? 'addActiveDescendantAssociation' :
+                                 null;
 
     if ( !addAssociationFunction ) {
-      throw new Error( 'incorrect attribute name while in testAriaLabelledOrDescribedBy' );
+      throw new Error( 'incorrect attribute name while in testAssociationAttribute' );
     }
 
 
@@ -631,7 +633,7 @@ define( function( require ) {
       otherElementName: AccessiblePeer.LABEL_SIBLING
     } );
 
-    var checkOnYourOwnAriaLabelledByAssociations = function( node ) {
+    var checkOnYourOwnAssociations = function( node ) {
 
       var instance = node._accessibleInstances[ 0 ];
       var nodePrimaryElement = instance.peer.primarySibling;
@@ -662,44 +664,44 @@ define( function( require ) {
 
 
     // Check basic associations within single node
-    checkOnYourOwnAriaLabelledByAssociations( j );
+    checkOnYourOwnAssociations( j );
     testK();
 
     // Moving this node around the scene graph should not change it's aria labelled by associations.
     rootNode.addChild( new Node( { children: [ j ] } ) );
-    checkOnYourOwnAriaLabelledByAssociations( j );
+    checkOnYourOwnAssociations( j );
     testK();
 
     // check remove child
     rootNode.removeChild( j );
-    checkOnYourOwnAriaLabelledByAssociations( j );
+    checkOnYourOwnAssociations( j );
     testK();
 
     // check dispose
     var jParent = new Node( { children: [ j ] } );
     rootNode.children = [];
     rootNode.addChild( jParent );
-    checkOnYourOwnAriaLabelledByAssociations( j );
+    checkOnYourOwnAssociations( j );
     rootNode.addChild( j );
-    checkOnYourOwnAriaLabelledByAssociations( j );
+    checkOnYourOwnAssociations( j );
     rootNode.addChild( k );
-    checkOnYourOwnAriaLabelledByAssociations( j );
+    checkOnYourOwnAssociations( j );
     testK();
     jParent.dispose();
-    checkOnYourOwnAriaLabelledByAssociations( j );
+    checkOnYourOwnAssociations( j );
     testK();
 
     // check removeChild with dag
     var jParent2 = new Node( { children: [ j ] } );
     rootNode.insertChild( 0, jParent2 );
-    checkOnYourOwnAriaLabelledByAssociations( j );
+    checkOnYourOwnAssociations( j );
     testK();
     rootNode.removeChild( jParent2 );
-    checkOnYourOwnAriaLabelledByAssociations( j );
+    checkOnYourOwnAssociations( j );
     testK();
   }
 
-  function testAriaLabelledOrDescribedBySetters( assert, attribute ) { // eslint-disable-line
+  function testAssociationAttributeBySetters( assert, attribute ) { // eslint-disable-line
 
 
     var rootNode = new Node();
@@ -709,11 +711,15 @@ define( function( require ) {
 
     // use a different setter depending on if testing labelledby or describedby
     var associationsArrayName = attribute === 'aria-labelledby' ? 'ariaLabelledbyAssociations' :
-                                attribute === 'aria-describedby' ? 'ariaDescribedbyAssociations' : null;
+                                attribute === 'aria-describedby' ? 'ariaDescribedbyAssociations' :
+                                attribute === 'aria-activedescendant' ? 'activeDescendantAssociations' :
+                                null;
 
     // use a different setter depending on if testing labelledby or describedby
     var associationRemovalFunction = attribute === 'aria-labelledby' ? 'removeAriaLabelledbyAssociation' :
-                                     attribute === 'aria-describedby' ? 'removeAriaDescribedbyAssociation' : null;
+                                     attribute === 'aria-describedby' ? 'removeAriaDescribedbyAssociation' :
+                                     attribute === 'aria-activedescendant' ? 'removeActiveDescendantAssociation' :
+                                     null;
 
 
     var options = {
@@ -775,17 +781,23 @@ define( function( require ) {
     assert.ok( m[ associationsArrayName ].length === 0, 'cleared when disposed' );
   }
 
-  // TODO: comment these back in once aria-labelledby is working again
   QUnit.test( 'aria-labelledby', function( assert ) {
 
-    testAriaLabelledOrDescribedBy( assert, 'aria-labelledby' );
-    testAriaLabelledOrDescribedBySetters( assert, 'aria-labelledby' );
+    testAssociationAttribute( assert, 'aria-labelledby' );
+    testAssociationAttributeBySetters( assert, 'aria-labelledby' );
 
   } );
   QUnit.test( 'aria-describedby', function( assert ) {
 
-    testAriaLabelledOrDescribedBy( assert, 'aria-describedby' );
-    testAriaLabelledOrDescribedBySetters( assert, 'aria-describedby' );
+    testAssociationAttribute( assert, 'aria-describedby' );
+    testAssociationAttributeBySetters( assert, 'aria-describedby' );
+
+  } );
+
+  QUnit.test( 'aria-activedescendant', function( assert ) {
+
+    testAssociationAttribute( assert, 'aria-activedescendant' );
+    testAssociationAttributeBySetters( assert, 'aria-activedescendant' );
 
   } );
 
@@ -879,7 +891,7 @@ define( function( require ) {
     a1Element = getPrimarySiblingElementByNode( a1 );
     assert.ok( a1Element.hidden, true, 'hidden set as Property' );
     assert.ok( a1Element.getAttribute( 'hidden' ) === '', 'hidden should not be set as attribute' );
-    
+
   } );
 
   QUnit.test( 'Accessibility input listeners', function( assert ) {

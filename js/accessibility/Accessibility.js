@@ -227,7 +227,8 @@ define( function( require ) {
     'focusable', // Sets whether or not the node can receive keyboard focus, see setFocusable()
     'accessibleOrder', // Modifies the order of accessible  navigation, see setAccessibleOrder()
     'ariaLabelledbyAssociations', // sets the list of aria-labelledby associations between from this node to others (including itself), see setAriaLabelledbyAssociations
-    'ariaDescribedbyAssociations' // sets the list of aria-describedby associations between from this node to others (including itself), see setAriaDescribedbyAssociations
+    'ariaDescribedbyAssociations', // sets the list of aria-describedby associations between from this node to others (including itself), see setAriaDescribedbyAssociations
+    'activeDescendantAssociations' // sets the list of aria-activedescendant associations between from this node to others (including itself), see setActiveDescendantAssociations
   ];
 
   var Accessibility = {
@@ -353,7 +354,7 @@ define( function( require ) {
           // {Array.<Node>}
           this._nodesThatAreAriaLabelledbyThisNode = [];
 
-          // @private {Array.<Object>} - Keep track of what this Node is aria-descripbedby via "associationObjects"
+          // @private {Array.<Object>} - Keep track of what this Node is aria-describedby via "associationObjects"
           // see addAriaDescribedbyAssociation for why we support more than one association.
           this._ariaDescribedbyAssociations = [];
 
@@ -363,6 +364,17 @@ define( function( require ) {
           // @private
           // {Array.<Node>}
           this._nodesThatAreAriaDescribedbyThisNode = [];
+
+          // @private {Array.<Object>} - Keep track of what this Node is aria-activedescendant via "associationObjects"
+          // see addActiveDescendantAssociation for why we support more than one association.
+          this._activeDescendantAssociations = [];
+
+          // Keep a reference to all nodes that are aria-activedescendant this node, i.e. that have store one of this Node's
+          // peer HTMLElement's id in their peer HTMLElement's aria-activedescendant attribute. This way we can tell other
+          // nodes to update their aria-activedescendant associations when this Node rebuilds its accessible content.
+          // @private
+          // {Array.<Node>}
+          this._nodesThatAreActiveDescendantToThisNode = [];
 
           // @private {boolean|null} - whether or not this node's DOM element has been explicitly set to receive focus from
           // tab navigation. Sets the tabIndex attribute on the node's DOM element. Setting to false will not remove the
@@ -567,6 +579,7 @@ define( function( require ) {
           // Clear out aria association attributes, which hold references to other nodes.
           this.setAriaLabelledbyAssociations( [] );
           this.setAriaDescribedbyAssociations( [] );
+          this.setActiveDescendantAssociations( [] );
 
           this.removeAllAccessibleInputListeners();
         },
@@ -1871,6 +1884,154 @@ define( function( require ) {
         },
         get nodesThatAreAriaDescribedbyThisNode() { return this.getNodesThatAreAriaDescribedbyThisNode(); },
 
+
+
+        /**
+         * @public
+         * @param {Array.<Object>} activeDescendantAssociations - list of associationObjects, see this._activeDescendantAssociations.
+         */
+        setActiveDescendantAssociations: function( activeDescendantAssociations ) {
+          var associationObject;
+          if ( assert ) {
+            assert( Array.isArray( activeDescendantAssociations ) );
+            for ( var j = 0; j < activeDescendantAssociations.length; j++ ) {
+              associationObject = activeDescendantAssociations[ j ];
+              assert && AccessibilityUtil.validateAssociationObject( associationObject );
+            }
+          }
+
+          // if the list isn't the same, TODO: make order in the list not matter
+          if ( !_.isEqual( activeDescendantAssociations, this._activeDescendantAssociations ) ) {
+
+            var beforeOnly = []; // Will hold all nodes that will be removed.
+            var afterOnly = []; // Will hold all nodes that will be "new" children (added)
+            var inBoth = []; // Child nodes that "stay". Will be ordered for the "after" case.
+            var i;
+
+            // get a difference of the desired new list, and the old
+            arrayDifference( activeDescendantAssociations, this._activeDescendantAssociations, afterOnly, beforeOnly, inBoth );
+
+            // remove each current associationObject that isn't in the new list
+            for ( i = 0; i < beforeOnly.length; i++ ) {
+              associationObject = beforeOnly[ i ];
+              this.removeActiveDescendantAssociation( associationObject );
+            }
+
+            assert && assert( this._activeDescendantAssociations.length === inBoth.length,
+              'Removing associations should not have triggered other association changes' );
+
+            // add each association from the new list that hasn't been added yet
+            for ( i = 0; i < afterOnly.length; i++ ) {
+              var activeDescendantAssociation = activeDescendantAssociations[ i ];
+              this.addActiveDescendantAssociation( activeDescendantAssociation );
+            }
+
+            // TODO maybe reorder them, but right now order doesn't seem to matter
+          }
+        },
+        set activeDescendantAssociations( activeDescendantAssociations ) { return this.setActiveDescendantAssociations( activeDescendantAssociations ); },
+
+        /**
+         * @public
+         * @returns {Array.<Object>} - the list of current association objects
+         */
+        getActiveDescendantAssociations: function() {
+          return this._activeDescendantAssociations;
+        },
+        get activeDescendantAssociations() { return this.getActiveDescendantAssociations(); },
+
+        /**
+         * Add an aria-activeDescendant association to this node. The data in the associationObject will be implemented like
+         * "a peer's HTMLElement of this Node (specified with the string constant stored in `thisElementName`) will have an
+         * aria-activeDescendant attribute with a value that includes the `otherNode`'s peer HTMLElement's id (specified with
+         * `otherElementName`)."
+         *
+         * @param {Object} associationObject - with key value pairs like
+         *                               { otherNode: {Node}, otherElementName: {string}, thisElementName: {string } }
+         *                               see AccessiblePeer for valid element names.
+         */
+        addActiveDescendantAssociation: function( associationObject ) {
+          assert && AccessibilityUtil.validateAssociationObject( associationObject );
+
+          // TODO: assert if this associationObject is already in the association objects list! https://github.com/phetsims/scenery/issues/832
+          this._activeDescendantAssociations.push( associationObject ); // Keep track of this association.
+
+          // Flag that this node is is being described by the other node, so that if the other node changes it can tell
+          // this node to restore the association appropriately.
+          associationObject.otherNode._nodesThatAreActiveDescendantToThisNode.push( this );
+
+          // update the accessiblePeers with this aria-activeDescendant association
+          this.updateActiveDescendantAssociationsInPeers();
+        },
+
+        /**
+         * Remove an aria-activeDescendant association object, see addActiveDescendantAssociation for more details
+         * @public
+         */
+        removeActiveDescendantAssociation: function( associationObject ) {
+          assert && assert( _.includes( this._activeDescendantAssociations, associationObject ) );
+
+          // remove the
+          var removedObject = this._activeDescendantAssociations.splice( _.indexOf( this._activeDescendantAssociations, associationObject ), 1 );
+
+          // remove the reference from the other node back to this node because we don't need it anymore
+          removedObject[ 0 ].otherNode.removeNodeThatIsActiveDescendantThisNode( this );
+
+          this.updateActiveDescendantAssociationsInPeers();
+        },
+
+        /**
+         * Remove the reference to the node that is using this Node's ID as an aria-activeDescendant value
+         * @param {Node} node
+         * @public (scenery-internal)
+         */
+        removeNodeThatIsActiveDescendantThisNode: function( node ) {
+          assert && assert( node instanceof scenery.Node );
+          var indexOfNode = _.indexOf( this._nodesThatAreActiveDescendantToThisNode, node );
+          assert && assert( indexOfNode >= 0 );
+          this._nodesThatAreActiveDescendantToThisNode.splice( indexOfNode, 1 );
+
+        },
+
+        /**
+         * Trigger the view update for each AccessiblePeer
+         * @public
+         */
+        updateActiveDescendantAssociationsInPeers: function() {
+          for ( var i = 0; i < this.accessibleInstances.length; i++ ) {
+            var peer = this.accessibleInstances[ i ].peer;
+            peer.onActiveDescendantAssociationChange();
+          }
+        },
+
+        /**
+         * Update the associations for aria-activeDescendant
+         * @public (scenery-internal)
+         */
+        updateOtherNodesActiveDescendant: function() {
+
+          // if any other nodes are aria-activeDescendant this Node, update those associations too. Since this node's
+          // accessible content needs to be recreated, they need to update their aria-activeDescendant associations accordingly.
+          // TODO: only use unique elements of the array (_.unique)
+          for ( var i = 0; i < this._nodesThatAreActiveDescendantToThisNode.length; i++ ) {
+            var otherNode = this._nodesThatAreActiveDescendantToThisNode[ i ];
+            otherNode.updateActiveDescendantAssociationsInPeers();
+          }
+        },
+
+        /**
+         * The list of Nodes that are aria-activeDescendant this node (other node's peer element will have this Node's Peer element's
+         * id in the aria-activeDescendant attribute
+         * @public
+         * @returns {Array.<Node>}
+         */
+        getNodesThatAreActiveDescendantToThisNode: function() {
+          return this._nodesThatAreActiveDescendantToThisNode;
+        },
+        get nodesThatAreActiveDescendantToThisNode() { return this.getNodesThatAreActiveDescendantToThisNode(); },
+
+
+
         /**
          * Sets the accessible focus order for this node. This includes not only focused items, but elements that can be
          * placed in the parallel DOM. If provided, it will override the focus order between children (and
@@ -2508,6 +2669,7 @@ define( function( require ) {
           // to this Node (they are pointing to this Node's IDs). https://github.com/phetsims/scenery/issues/816
           node.updateOtherNodesAriaLabelledby();
           node.updateOtherNodesAriaDescribedby();
+          node.updateOtherNodesActiveDescendant();
 
           sceneryLog && sceneryLog.Accessibility && sceneryLog.pop();
         },
