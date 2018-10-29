@@ -53,7 +53,6 @@ define( require => {
       this.keyStateTracker = new KeyStateTracker();
       this.keysPressedEachFrame = 100;
       this.keyupListeners = [];
-      this.guaranteeNewUpdate = false; // when true, `chooseNextElement` will 100% give a new focused element.
 
       // @private {HTMLElement}
       this.currentElement = null;
@@ -67,14 +66,13 @@ define( require => {
       if ( this.currentElement === null ) {
         this.currentElement = document.activeElement;
       }
-      else if ( this.guaranteeNewUpdate || this.random.nextDouble() < NEXT_ELEMENT_THRESHOLD ) {
+      else if ( this.random.nextDouble() < NEXT_ELEMENT_THRESHOLD ) {
 
-        // before we change focus to the next item, press "keyup" on all elements we had.
+        // before we change focus to the next item, immediately release all keys that were down on the active element
         this.clearListeners();
         var nextFocusable = AccessibilityUtil.getRandomFocusable();
         nextFocusable.focus();
         this.currentElement = nextFocusable;
-        this.guaranteeNewUpdate = false;
       }
     }
 
@@ -141,13 +139,10 @@ define( require => {
 
       this.chooseNextElement();
 
-      var elementWithFocus = document.activeElement;
-
       for ( let i = 0; i < this.keysPressedEachFrame; i++ ) {
-        if ( elementWithFocus !== document.activeElement ) {
-          this.guaranteeNewUpdate = true;
-          break;
-        }
+
+        // get active element, focus might have changed in the last press
+        var elementWithFocus = document.activeElement;
 
         if ( keyboardTestingSchema[ elementWithFocus.tagName ] ) {
 
