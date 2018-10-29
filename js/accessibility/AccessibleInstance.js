@@ -33,6 +33,7 @@ define( function( require ) {
   var AccessiblePeer = require( 'SCENERY/accessibility/AccessiblePeer' );
   var cleanArray = require( 'PHET_CORE/cleanArray' );
   var Events = require( 'AXON/Events' );
+  var FullScreen = require( 'SCENERY/util/FullScreen' );
   var inherit = require( 'PHET_CORE/inherit' );
   var KeyboardUtil = require( 'SCENERY/accessibility/KeyboardUtil' );
   var platform = require( 'PHET_CORE/platform' );
@@ -127,6 +128,18 @@ define( function( require ) {
         this.globalKeyListener = function( event ) {
 
           scenery.Display.userGestureEmitter.emit();
+
+          // If navigating in full screen mode, prevent a bug where focus gets lost if fullscreen mode was initiated
+          // from an iframe by keeping focus in the display. getNext/getPreviousFocusable will return active element
+          // if there are no more elements in that direction. See https://github.com/phetsims/scenery/issues/883
+          if ( FullScreen.isFullScreen() && event.keyCode === KeyboardUtil.KEY_TAB ) {
+            var rootElement = self.display.accessibleDOMElement;
+            var nextElement = event.shiftKey ? AccessibilityUtil.getPreviousFocusable( rootElement ) :
+                                               AccessibilityUtil.getNextFocusable( rootElement );
+            if ( nextElement === event.target ) {
+              event.preventDefault();
+            }
+          }
 
           // if an accessible node was being interacted with a mouse, or had focus when sim is made inactive, this node
           // should receive focus upon resuming keyboard navigation
