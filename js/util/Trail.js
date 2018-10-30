@@ -437,7 +437,15 @@ define( function( require ) {
       return matrix;
     },
 
-    // the first index that is different between this trail and the other trail
+    /**
+     * Returns the first index that is different between this trail and the other trail.
+     * @public
+     *
+     * If the trails are identical, the index should be equal to the trail's length.
+     *
+     * @param {Trail} otherTrail
+     * @returns {number}
+     */
     getBranchIndexTo: function( otherTrail ) {
       assert && assert( this.nodes[ 0 ] === otherTrail.nodes[ 0 ], 'To get a branch index, the trails must have the same root' );
 

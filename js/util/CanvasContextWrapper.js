@@ -24,8 +24,13 @@ define( function( require ) {
    * @param {CanvasRenderingContext2D} context
    */
   function CanvasContextWrapper( canvas, context ) {
+
+    // @public {HTMLCanvasElement}
     this.canvas = canvas;
+
+    // @public {CanvasRenderingContext2D}
     this.context = context;
+    
     this.resetStyles();
   }
 

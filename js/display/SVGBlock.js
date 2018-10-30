@@ -203,41 +203,48 @@ define( function( require ) {
     },
 
     /**
-     * Update the SVGBlock as part of a render step.  Called from Display.updateDisplay => BackboneDrawable.updateDisplay
+     * Updates the DOM appearance of this drawable (whether by preparing/calling draw calls, DOM element updates, etc.)
+     * @public
+     * @override
+     *
+     * @returns {boolean} - Whether the update should continue (if false, further updates in supertype steps should not
+     *                      be done).
      */
     update: function() {
+      // See if we need to actually update things (will bail out if we are not dirty, or if we've been disposed)
+      if ( !FittedBlock.prototype.update.call( this ) ) {
+        return false;
+      }
+
       sceneryLog && sceneryLog.SVGBlock && sceneryLog.SVGBlock( 'update #' + this.id );
 
-      // TODO: Shouldn't calling update on a disposed SVGBlock be an assertion error?
-      if ( this.dirty && !this.disposed ) {
-        this.dirty = false;
+      //OHTWO TODO: call here!
+      // TODO: What does the above TODO mean?
+      while ( this.dirtyGroups.length ) {
+        var group = this.dirtyGroups.pop();
 
-        //OHTWO TODO: call here!
-        // TODO: What does the above TODO mean?
-        while ( this.dirtyGroups.length ) {
-          var group = this.dirtyGroups.pop();
-
-          // if this group has been disposed or moved to another block, don't mess with it
-          if ( group.block === this ) {
-            group.update();
-          }
+        // if this group has been disposed or moved to another block, don't mess with it
+        if ( group.block === this ) {
+          group.update();
         }
-        while ( this.dirtyGradients.length ) {
-          this.dirtyGradients.pop().update();
-        }
-        while ( this.dirtyDrawables.length ) {
-          var drawable = this.dirtyDrawables.pop();
-
-          // if this drawable has been disposed or moved to another block, don't mess with it
-          // TODO: If it was moved to another block, why might it still appear in our list?  Shouldn't that be an assertion check?
-          if ( drawable.parentDrawable === this ) {
-            drawable.update();
-          }
-        }
-
-        // checks will be done in updateFit() to see whether it is needed
-        this.updateFit();
       }
+      while ( this.dirtyGradients.length ) {
+        this.dirtyGradients.pop().update();
+      }
+      while ( this.dirtyDrawables.length ) {
+        var drawable = this.dirtyDrawables.pop();
+
+        // if this drawable has been disposed or moved to another block, don't mess with it
+        // TODO: If it was moved to another block, why might it still appear in our list?  Shouldn't that be an assertion check?
+        if ( drawable.parentDrawable === this ) {
+          drawable.update();
+        }
+      }
+
+      // checks will be done in updateFit() to see whether it is needed
+      this.updateFit();
+
+      return true;
     },
 
     dispose: function() {

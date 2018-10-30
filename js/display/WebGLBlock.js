@@ -143,7 +143,7 @@ define( function( require ) {
         this.canvas = canvas;
         this.canvas.style.pointerEvents = 'none';
 
-        // unique ID so that we can support rasterization with Display.foreignObjectRasterization
+        // @private {number} - unique ID so that we can support rasterization with Display.foreignObjectRasterization
         this.canvasId = this.canvas.id = 'scenery-webgl' + this.id;
 
         this.canvas.addEventListener( 'webglcontextlost', this.contextLostListener, false );
@@ -302,117 +302,128 @@ define( function( require ) {
       throw new Error( 'setSizeFitBounds unimplemented for WebGLBlock' );
     },
 
+    /**
+     * Updates the DOM appearance of this drawable (whether by preparing/calling draw calls, DOM element updates, etc.)
+     * @public
+     * @override
+     *
+     * @returns {boolean} - Whether the update should continue (if false, further updates in supertype steps should not
+     *                      be done).
+     */
     update: function() {
+      // See if we need to actually update things (will bail out if we are not dirty, or if we've been disposed)
+      if ( !FittedBlock.prototype.update.call( this ) ) {
+        return false;
+      }
+
       sceneryLog && sceneryLog.WebGLBlock && sceneryLog.WebGLBlock( 'update #' + this.id );
       sceneryLog && sceneryLog.WebGLBlock && sceneryLog.push();
 
       var gl = this.gl;
 
-      if ( this.dirty && !this.disposed ) {
-        this.dirty = false;
-
-        if ( this.isContextLost && this.display._aggressiveContextRecreation ) {
-          this.delayedRebuildCanvas();
-        }
-
-        // update drawables, so that they have vertex arrays up to date, etc.
-        while ( this.dirtyDrawables.length ) {
-          this.dirtyDrawables.pop().update();
-        }
-
-        // ensure sprite sheet textures are up-to-date
-        var numSpriteSheets = this.spriteSheets.length;
-        for ( var i = 0; i < numSpriteSheets; i++ ) {
-          this.spriteSheets[ i ].updateTexture();
-        }
-
-        // temporary hack for supporting webglScale
-        if ( this.firstDrawable &&
-             this.firstDrawable === this.lastDrawable &&
-             this.firstDrawable.node &&
-             this.firstDrawable.node._hints.webglScale !== null &&
-             this.backingScale !== this.originalBackingScale * this.firstDrawable.node._hints.webglScale ) {
-          this.backingScale = this.originalBackingScale * this.firstDrawable.node._hints.webglScale;
-          this.dirtyFit = true;
-        }
-
-        // udpate the fit BEFORE drawing, since it may change our offset
-        this.updateFit();
-
-        // finalX = 2 * x / display.width - 1
-        // finalY = 1 - 2 * y / display.height
-        // result = matrix * ( x, y, 1 )
-        this.projectionMatrix.rowMajor(
-          2 / this.display.width, 0, -1,
-          0, -2 / this.display.height, 1,
-          0, 0, 1 );
-
-        // if we created the context with preserveDrawingBuffer, we need to clear before rendering
-        if ( this.preserveDrawingBuffer ) {
-          gl.clear( gl.COLOR_BUFFER_BIT );
-        }
-
-        gl.viewport( 0.0, 0.0, this.canvas.width, this.canvas.height );
-
-        // We switch between processors for drawables based on each drawable's webglRenderer property. Each processor
-        // will be activated, will process a certain number of adjacent drawables with that processor's webglRenderer,
-        // and then will be deactivated. This allows us to switch back-and-forth between different shader programs,
-        // and allows us to trigger draw calls for each grouping of drawables in an efficient way.
-        var currentProcessor = null;
-        // How many draw calls have been executed. If no draw calls are executed while updating, it means nothing should
-        // be drawn, and we'll have to manually clear the Canvas if we are not preserving the drawing buffer.
-        var cumulativeDrawCount = 0;
-        // Iterate through all of our drawables (linked list)
-        //OHTWO TODO: PERFORMANCE: create an array for faster drawable iteration (this is probably a hellish memory access pattern)
-        for ( var drawable = this.firstDrawable; drawable !== null; drawable = drawable.nextDrawable ) {
-          // ignore invisible drawables
-          if ( drawable.visible ) {
-            // select our desired processor
-            var desiredProcessor = null;
-            if ( drawable.webglRenderer === Renderer.webglTexturedTriangles ) {
-              desiredProcessor = this.texturedTrianglesProcessor;
-            }
-            else if ( drawable.webglRenderer === Renderer.webglCustom ) {
-              desiredProcessor = this.customProcessor;
-            }
-            else if ( drawable.webglRenderer === Renderer.webglVertexColorPolygons ) {
-              desiredProcessor = this.vertexColorPolygonsProcessor;
-            }
-            assert && assert( desiredProcessor );
-
-            // swap processors if necessary
-            if ( desiredProcessor !== currentProcessor ) {
-              // deactivate any old processors
-              if ( currentProcessor ) {
-                cumulativeDrawCount += currentProcessor.deactivate();
-              }
-              // activate the new processor
-              currentProcessor = desiredProcessor;
-              currentProcessor.activate();
-            }
-
-            // process our current drawable with the current processor
-            currentProcessor.processDrawable( drawable );
-          }
-
-          // exit loop end case
-          if ( drawable === this.lastDrawable ) { break; }
-        }
-        // deactivate any processor that still has drawables that need to be handled
-        if ( currentProcessor ) {
-          cumulativeDrawCount += currentProcessor.deactivate();
-        }
-
-        // If we executed no draw calls AND we aren't preserving the drawing buffer, we'll need to manually clear the
-        // drawing buffer ourself.
-        if ( cumulativeDrawCount === 0 && !this.preserveDrawingBuffer ) {
-          gl.clear( gl.COLOR_BUFFER_BIT );
-        }
-
-        gl.flush();
+      if ( this.isContextLost && this.display._aggressiveContextRecreation ) {
+        this.delayedRebuildCanvas();
       }
 
+      // update drawables, so that they have vertex arrays up to date, etc.
+      while ( this.dirtyDrawables.length ) {
+        this.dirtyDrawables.pop().update();
+      }
+
+      // ensure sprite sheet textures are up-to-date
+      var numSpriteSheets = this.spriteSheets.length;
+      for ( var i = 0; i < numSpriteSheets; i++ ) {
+        this.spriteSheets[ i ].updateTexture();
+      }
+
+      // temporary hack for supporting webglScale
+      if ( this.firstDrawable &&
+           this.firstDrawable === this.lastDrawable &&
+           this.firstDrawable.node &&
+           this.firstDrawable.node._hints.webglScale !== null &&
+           this.backingScale !== this.originalBackingScale * this.firstDrawable.node._hints.webglScale ) {
+        this.backingScale = this.originalBackingScale * this.firstDrawable.node._hints.webglScale;
+        this.dirtyFit = true;
+      }
+
+      // udpate the fit BEFORE drawing, since it may change our offset
+      this.updateFit();
+
+      // finalX = 2 * x / display.width - 1
+      // finalY = 1 - 2 * y / display.height
+      // result = matrix * ( x, y, 1 )
+      this.projectionMatrix.rowMajor(
+        2 / this.display.width, 0, -1,
+        0, -2 / this.display.height, 1,
+        0, 0, 1 );
+
+      // if we created the context with preserveDrawingBuffer, we need to clear before rendering
+      if ( this.preserveDrawingBuffer ) {
+        gl.clear( gl.COLOR_BUFFER_BIT );
+      }
+
+      gl.viewport( 0.0, 0.0, this.canvas.width, this.canvas.height );
+
+      // We switch between processors for drawables based on each drawable's webglRenderer property. Each processor
+      // will be activated, will process a certain number of adjacent drawables with that processor's webglRenderer,
+      // and then will be deactivated. This allows us to switch back-and-forth between different shader programs,
+      // and allows us to trigger draw calls for each grouping of drawables in an efficient way.
+      var currentProcessor = null;
+      // How many draw calls have been executed. If no draw calls are executed while updating, it means nothing should
+      // be drawn, and we'll have to manually clear the Canvas if we are not preserving the drawing buffer.
+      var cumulativeDrawCount = 0;
+      // Iterate through all of our drawables (linked list)
+      //OHTWO TODO: PERFORMANCE: create an array for faster drawable iteration (this is probably a hellish memory access pattern)
+      for ( var drawable = this.firstDrawable; drawable !== null; drawable = drawable.nextDrawable ) {
+        // ignore invisible drawables
+        if ( drawable.visible ) {
+          // select our desired processor
+          var desiredProcessor = null;
+          if ( drawable.webglRenderer === Renderer.webglTexturedTriangles ) {
+            desiredProcessor = this.texturedTrianglesProcessor;
+          }
+          else if ( drawable.webglRenderer === Renderer.webglCustom ) {
+            desiredProcessor = this.customProcessor;
+          }
+          else if ( drawable.webglRenderer === Renderer.webglVertexColorPolygons ) {
+            desiredProcessor = this.vertexColorPolygonsProcessor;
+          }
+          assert && assert( desiredProcessor );
+
+          // swap processors if necessary
+          if ( desiredProcessor !== currentProcessor ) {
+            // deactivate any old processors
+            if ( currentProcessor ) {
+              cumulativeDrawCount += currentProcessor.deactivate();
+            }
+            // activate the new processor
+            currentProcessor = desiredProcessor;
+            currentProcessor.activate();
+          }
+
+          // process our current drawable with the current processor
+          currentProcessor.processDrawable( drawable );
+        }
+
+        // exit loop end case
+        if ( drawable === this.lastDrawable ) { break; }
+      }
+      // deactivate any processor that still has drawables that need to be handled
+      if ( currentProcessor ) {
+        cumulativeDrawCount += currentProcessor.deactivate();
+      }
+
+      // If we executed no draw calls AND we aren't preserving the drawing buffer, we'll need to manually clear the
+      // drawing buffer ourself.
+      if ( cumulativeDrawCount === 0 && !this.preserveDrawingBuffer ) {
+        gl.clear( gl.COLOR_BUFFER_BIT );
+      }
+
+      gl.flush();
+
       sceneryLog && sceneryLog.WebGLBlock && sceneryLog.pop();
+
+      return true;
     },
 
     dispose: function() {

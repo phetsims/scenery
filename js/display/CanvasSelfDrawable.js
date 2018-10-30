@@ -52,10 +52,6 @@ define( function( require ) {
       this.markDirty();
     },
 
-    update: function() {
-      this.dirty = false;
-    },
-
     // @override
     updateSelfVisibility: function() {
       SelfDrawable.prototype.updateSelfVisibility.call( this );

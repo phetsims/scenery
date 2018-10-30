@@ -40,20 +40,31 @@ define( function( require ) {
       return this;
     },
 
+    /**
+     * Updates the DOM appearance of this drawable (whether by preparing/calling draw calls, DOM element updates, etc.)
+     * @public
+     * @override
+     *
+     * @returns {boolean} - Whether the update should continue (if false, further updates in supertype steps should not
+     *                      be done).
+     */
+    update: function() {
+      // See if we need to actually update things (will bail out if we are not dirty, or if we've been disposed)
+      if ( !Block.prototype.update.call( this ) ) {
+        return false;
+      }
+
+      this.domDrawable.update();
+
+      return true;
+    },
+
     dispose: function() {
       this.domDrawable = null;
       this.domElement = null;
 
       // super call
       Block.prototype.dispose.call( this );
-    },
-
-    update: function() {
-      if ( this.dirty && !this.disposed ) {
-        this.dirty = false;
-
-        this.domDrawable.update();
-      }
     },
 
     markDirtyDrawable: function( drawable ) {

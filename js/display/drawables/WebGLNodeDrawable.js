@@ -126,10 +126,6 @@ define( function( require ) {
     // forward call to the WebGLNode
     get shaderAttributes() {
       return this.node.shaderAttributes;
-    },
-
-    update: function() {
-      this.dirty = false;
     }
   } );
 

@@ -121,6 +121,26 @@ define( function( require ) {
       this.removeAllEventListeners();
     },
 
+    /**
+     * Updates the DOM appearance of this drawable (whether by preparing/calling draw calls, DOM element updates, etc.)
+     * @public
+     *
+     * Generally meant to be overridden in subtypes (but should still call this to check if they should update).
+     *
+     * @returns {boolean} - Whether the update should continue (if false, further updates in supertype steps should not
+     *                      be done).
+     */
+    update: function() {
+      var needsFurtherUpdates = false;
+
+      if ( this.dirty && !this.disposed ) {
+        this.dirty = false;
+        needsFurtherUpdates = true;
+      }
+
+      return needsFurtherUpdates;
+    },
+
     setVisible: function( visible ) {
       if ( this._visible !== visible ) {
         this._visible = visible;

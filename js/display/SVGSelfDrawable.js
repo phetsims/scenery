@@ -56,12 +56,23 @@ define( function( require ) {
       return this; // allow chaining
     },
 
-    // @public: called from elsewhere to update the SVG element
+    /**
+     * Updates the DOM appearance of this drawable (whether by preparing/calling draw calls, DOM element updates, etc.)
+     * @public
+     * @override
+     *
+     * @returns {boolean} - Whether the update should continue (if false, further updates in supertype steps should not
+     *                      be done).
+     */
     update: function() {
-      if ( this.dirty ) {
-        this.dirty = false;
-        this.updateSVG();
+      // See if we need to actually update things (will bail out if we are not dirty, or if we've been disposed)
+      if ( !SelfDrawable.prototype.update.call( this ) ) {
+        return false;
       }
+
+      this.updateSVG();
+
+      return true;
     },
 
     // @protected: called to update the visual appearance of our svgElement

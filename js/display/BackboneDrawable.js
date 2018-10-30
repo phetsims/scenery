@@ -240,36 +240,47 @@ define( function( require ) {
       }
     },
 
+    /**
+     * Updates the DOM appearance of this drawable (whether by preparing/calling draw calls, DOM element updates, etc.)
+     * @public
+     * @override
+     *
+     * @returns {boolean} - Whether the update should continue (if false, further updates in supertype steps should not
+     *                      be done).
+     */
     update: function() {
-      if ( this.dirty && !this.disposed ) {
-        this.dirty = false;
-
-        while ( this.dirtyDrawables.length ) {
-          this.dirtyDrawables.pop().update();
-        }
-
-        if ( this.opacityDirty ) {
-          this.opacityDirty = false;
-
-          var filterOpacity = this.willApplyFilters ? this.getFilterOpacity() : 1;
-          this.domElement.style.opacity = ( filterOpacity !== 1 ) ? filterOpacity : '';
-        }
-
-        if ( this.visibilityDirty ) {
-          this.visibilityDirty = false;
-
-          this.domElement.style.display = this.visible ? '' : 'none';
-        }
-
-        if ( this.clipDirty ) {
-          this.clipDirty = false;
-
-          // var clip = this.willApplyFilters ? this.getFilterClip() : '';
-
-          //OHTWO TODO: CSS clip-path/mask support here. see http://www.html5rocks.com/en/tutorials/masking/adobe/
-          // this.domElement.style.clipPath = clip; // yikes! temporary, since we already threw something?
-        }
+      // See if we need to actually update things (will bail out if we are not dirty, or if we've been disposed)
+      if ( !Drawable.prototype.update.call( this ) ) {
+        return false;
       }
+
+      while ( this.dirtyDrawables.length ) {
+        this.dirtyDrawables.pop().update();
+      }
+
+      if ( this.opacityDirty ) {
+        this.opacityDirty = false;
+
+        var filterOpacity = this.willApplyFilters ? this.getFilterOpacity() : 1;
+        this.domElement.style.opacity = ( filterOpacity !== 1 ) ? filterOpacity : '';
+      }
+
+      if ( this.visibilityDirty ) {
+        this.visibilityDirty = false;
+
+        this.domElement.style.display = this.visible ? '' : 'none';
+      }
+
+      if ( this.clipDirty ) {
+        this.clipDirty = false;
+
+        // var clip = this.willApplyFilters ? this.getFilterClip() : '';
+
+        //OHTWO TODO: CSS clip-path/mask support here. see http://www.html5rocks.com/en/tutorials/masking/adobe/
+        // this.domElement.style.clipPath = clip; // yikes! temporary, since we already threw something?
+      }
+
+      return true;
     },
 
     getFilterOpacity: function() {

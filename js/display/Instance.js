@@ -99,10 +99,16 @@ define( function( require ) {
       this.visibilityDirty = true; // entire subtree of visibility will need to be updated
       this.childVisibilityDirty = true; // an ancestor needs its visibility updated
 
-      // Maps Instance.id => branch index (first index where the two trails are different)
-      this.branchIndexMap = {}; // TODO: Can we not recreate an object?
+      // @public {Object} - Maps another instance's `instance.id` {number} => branch index {number} (first index where
+      // the two trails are different). This effectively operates as a cache (since it's more expensive to compute the
+      // value than it is to look up the value).
+      // It is also "bidirectional", such that if we add instance A's branch index to this map, we will also add the
+      // same value to instance A's map (referencing this instance). In order to clean up and prevent leaks, the
+      // instance references are provided in this.branchIndexReferences (on both ends), so that when one instance is
+      // disposed it can remove the references bidirectionally.
+      this.branchIndexMap = {} || this.branchIndexMap;
 
-      // {Array.<Instance>} All instances where we have entries in our map
+      // @public {Array.<Instance>} - All instances where we have entries in our map. See docs for branchIndexMap.
       this.branchIndexReferences = cleanArray( this.branchIndexReferences );
 
       // In the range (-1,0), to help us track insertions and removals of this instance's node to its parent
@@ -1497,12 +1503,12 @@ define( function( require ) {
 
       this.active = false;
 
-      // Release branch index references (see getBranchIndexTo)
+      // Remove the bidirectional branch index reference data from this instance and any referenced instances.
       while ( this.branchIndexReferences.length ) {
-        var branchIndexReference = this.branchIndexReferences.pop(); // {Instance}
-        delete this.branchIndexMap[ branchIndexReference.id ];
-        delete branchIndexReference.branchIndexMap[ this.id ];
-        arrayRemove( branchIndexReference.branchIndexReferences, this );
+        var referenceInstance = this.branchIndexReferences.pop();
+        delete this.branchIndexMap[ referenceInstance.id ];
+        delete referenceInstance.branchIndexMap[ this.id ];
+        arrayRemove( referenceInstance.branchIndexReferences, this );
       }
 
       // order is somewhat important

@@ -61,20 +61,31 @@ define( function( require ) {
       return this.instance.relativeTransform.matrix;
     },
 
-    // called from elsewhere to update the DOM element
+    /**
+     * Updates the DOM appearance of this drawable (whether by preparing/calling draw calls, DOM element updates, etc.)
+     * @public
+     * @override
+     *
+     * @returns {boolean} - Whether the update should continue (if false, further updates in supertype steps should not
+     *                      be done).
+     */
     update: function() {
-      if ( this.dirty ) {
-        this.dirty = false;
-        this.updateDOM();
-
-        if ( this.visibilityDirty ) {
-          this.visibilityDirty = false;
-
-          this.domElement.style.visibility = this.visible ? '' : 'hidden';
-        }
-
-        this.cleanPaintableState && this.cleanPaintableState();
+      // See if we need to actually update things (will bail out if we are not dirty, or if we've been disposed)
+      if ( !SelfDrawable.prototype.update.call( this ) ) {
+        return false;
       }
+
+      this.updateDOM();
+
+      if ( this.visibilityDirty ) {
+        this.visibilityDirty = false;
+
+        this.domElement.style.visibility = this.visible ? '' : 'hidden';
+      }
+
+      this.cleanPaintableState && this.cleanPaintableState();
+
+      return true;
     },
 
     // @protected: called to update the visual appearance of our domElement

@@ -134,81 +134,92 @@ define( function( require ) {
       this.markDirty();
     },
 
+    /**
+     * Updates the DOM appearance of this drawable (whether by preparing/calling draw calls, DOM element updates, etc.)
+     * @public
+     * @override
+     *
+     * @returns {boolean} - Whether the update should continue (if false, further updates in supertype steps should not
+     *                      be done).
+     */
     update: function() {
-      if ( this.dirty ) {
-        this.dirty = false;
-
-        // ensure that we have a reserved sprite (part of the spritesheet)
-        this.reserveSprite();
-
-        if ( this.dirtyImageOpacity || !this.updatedOnce ) {
-          this.vertexArray[ VERTEX_0_OFFSET + VERTEX_A_OFFSET ] = this.node._imageOpacity;
-          this.vertexArray[ VERTEX_1_OFFSET + VERTEX_A_OFFSET ] = this.node._imageOpacity;
-          this.vertexArray[ VERTEX_2_OFFSET + VERTEX_A_OFFSET ] = this.node._imageOpacity;
-          this.vertexArray[ VERTEX_3_OFFSET + VERTEX_A_OFFSET ] = this.node._imageOpacity;
-          this.vertexArray[ VERTEX_4_OFFSET + VERTEX_A_OFFSET ] = this.node._imageOpacity;
-          this.vertexArray[ VERTEX_5_OFFSET + VERTEX_A_OFFSET ] = this.node._imageOpacity;
-        }
-        this.updatedOnce = true;
-
-        // if we don't have a sprite (we don't have a loaded image yet), just bail
-        if ( !this.sprite ) {
-          return;
-        }
-
-        if ( this.uvDirty ) {
-          this.uvDirty = false;
-
-          var uvBounds = this.sprite.uvBounds;
-
-          // TODO: consider reversal of minY and maxY usage here for vertical inverse
-
-          // first triangle UVs
-          this.vertexArray[ VERTEX_0_OFFSET + VERTEX_U_OFFSET ] = uvBounds.minX; // upper left U
-          this.vertexArray[ VERTEX_0_OFFSET + VERTEX_V_OFFSET ] = uvBounds.minY; // upper left V
-          this.vertexArray[ VERTEX_1_OFFSET + VERTEX_U_OFFSET ] = uvBounds.minX; // lower left U
-          this.vertexArray[ VERTEX_1_OFFSET + VERTEX_V_OFFSET ] = uvBounds.maxY; // lower left V
-          this.vertexArray[ VERTEX_2_OFFSET + VERTEX_U_OFFSET ] = uvBounds.maxX; // upper right U
-          this.vertexArray[ VERTEX_2_OFFSET + VERTEX_V_OFFSET ] = uvBounds.minY; // upper right V
-
-          // second triangle UVs
-          this.vertexArray[ VERTEX_3_OFFSET + VERTEX_U_OFFSET ] = uvBounds.maxX; // upper right U
-          this.vertexArray[ VERTEX_3_OFFSET + VERTEX_V_OFFSET ] = uvBounds.minY; // upper right V
-          this.vertexArray[ VERTEX_4_OFFSET + VERTEX_U_OFFSET ] = uvBounds.minX; // lower left U
-          this.vertexArray[ VERTEX_4_OFFSET + VERTEX_V_OFFSET ] = uvBounds.maxY; // lower left V
-          this.vertexArray[ VERTEX_5_OFFSET + VERTEX_U_OFFSET ] = uvBounds.maxX; // lower right U
-          this.vertexArray[ VERTEX_5_OFFSET + VERTEX_V_OFFSET ] = uvBounds.maxY; // lower right V
-        }
-
-        if ( this.xyDirty ) {
-          this.xyDirty = false;
-
-          var width = this.node.getImageWidth();
-          var height = this.node.getImageHeight();
-
-          var transformMatrix = this.instance.relativeTransform.matrix; // with compute need, should always be accurate
-          transformMatrix.multiplyVector2( this.upperLeft.setXY( 0, 0 ) );
-          transformMatrix.multiplyVector2( this.lowerLeft.setXY( 0, height ) );
-          transformMatrix.multiplyVector2( this.upperRight.setXY( width, 0 ) );
-          transformMatrix.multiplyVector2( this.lowerRight.setXY( width, height ) );
-
-          // first triangle XYs
-          this.vertexArray[ VERTEX_0_OFFSET + VERTEX_X_OFFSET ] = this.upperLeft.x;
-          this.vertexArray[ VERTEX_0_OFFSET + VERTEX_Y_OFFSET ] = this.upperLeft.y;
-          this.vertexArray[ VERTEX_1_OFFSET + VERTEX_X_OFFSET ] = this.lowerLeft.x;
-          this.vertexArray[ VERTEX_1_OFFSET + VERTEX_Y_OFFSET ] = this.lowerLeft.y;
-          this.vertexArray[ VERTEX_2_OFFSET + VERTEX_X_OFFSET ] = this.upperRight.x;
-          this.vertexArray[ VERTEX_2_OFFSET + VERTEX_Y_OFFSET ] = this.upperRight.y;
-
-          // second triangle XYs
-          this.vertexArray[ VERTEX_3_OFFSET + VERTEX_X_OFFSET ] = this.upperRight.x;
-          this.vertexArray[ VERTEX_3_OFFSET + VERTEX_Y_OFFSET ] = this.upperRight.y;
-          this.vertexArray[ VERTEX_4_OFFSET + VERTEX_X_OFFSET ] = this.lowerLeft.x;
-          this.vertexArray[ VERTEX_4_OFFSET + VERTEX_Y_OFFSET ] = this.lowerLeft.y;
-          this.vertexArray[ VERTEX_5_OFFSET + VERTEX_X_OFFSET ] = this.lowerRight.x;
-          this.vertexArray[ VERTEX_5_OFFSET + VERTEX_Y_OFFSET ] = this.lowerRight.y;
-        }
+      // See if we need to actually update things (will bail out if we are not dirty, or if we've been disposed)
+      if ( !WebGLSelfDrawable.prototype.update.call( this ) ) {
+        return false;
       }
+
+      // ensure that we have a reserved sprite (part of the spritesheet)
+      this.reserveSprite();
+
+      if ( this.dirtyImageOpacity || !this.updatedOnce ) {
+        this.vertexArray[ VERTEX_0_OFFSET + VERTEX_A_OFFSET ] = this.node._imageOpacity;
+        this.vertexArray[ VERTEX_1_OFFSET + VERTEX_A_OFFSET ] = this.node._imageOpacity;
+        this.vertexArray[ VERTEX_2_OFFSET + VERTEX_A_OFFSET ] = this.node._imageOpacity;
+        this.vertexArray[ VERTEX_3_OFFSET + VERTEX_A_OFFSET ] = this.node._imageOpacity;
+        this.vertexArray[ VERTEX_4_OFFSET + VERTEX_A_OFFSET ] = this.node._imageOpacity;
+        this.vertexArray[ VERTEX_5_OFFSET + VERTEX_A_OFFSET ] = this.node._imageOpacity;
+      }
+      this.updatedOnce = true;
+
+      // if we don't have a sprite (we don't have a loaded image yet), just bail
+      if ( !this.sprite ) {
+        return false;
+      }
+
+      if ( this.uvDirty ) {
+        this.uvDirty = false;
+
+        var uvBounds = this.sprite.uvBounds;
+
+        // TODO: consider reversal of minY and maxY usage here for vertical inverse
+
+        // first triangle UVs
+        this.vertexArray[ VERTEX_0_OFFSET + VERTEX_U_OFFSET ] = uvBounds.minX; // upper left U
+        this.vertexArray[ VERTEX_0_OFFSET + VERTEX_V_OFFSET ] = uvBounds.minY; // upper left V
+        this.vertexArray[ VERTEX_1_OFFSET + VERTEX_U_OFFSET ] = uvBounds.minX; // lower left U
+        this.vertexArray[ VERTEX_1_OFFSET + VERTEX_V_OFFSET ] = uvBounds.maxY; // lower left V
+        this.vertexArray[ VERTEX_2_OFFSET + VERTEX_U_OFFSET ] = uvBounds.maxX; // upper right U
+        this.vertexArray[ VERTEX_2_OFFSET + VERTEX_V_OFFSET ] = uvBounds.minY; // upper right V
+
+        // second triangle UVs
+        this.vertexArray[ VERTEX_3_OFFSET + VERTEX_U_OFFSET ] = uvBounds.maxX; // upper right U
+        this.vertexArray[ VERTEX_3_OFFSET + VERTEX_V_OFFSET ] = uvBounds.minY; // upper right V
+        this.vertexArray[ VERTEX_4_OFFSET + VERTEX_U_OFFSET ] = uvBounds.minX; // lower left U
+        this.vertexArray[ VERTEX_4_OFFSET + VERTEX_V_OFFSET ] = uvBounds.maxY; // lower left V
+        this.vertexArray[ VERTEX_5_OFFSET + VERTEX_U_OFFSET ] = uvBounds.maxX; // lower right U
+        this.vertexArray[ VERTEX_5_OFFSET + VERTEX_V_OFFSET ] = uvBounds.maxY; // lower right V
+      }
+
+      if ( this.xyDirty ) {
+        this.xyDirty = false;
+
+        var width = this.node.getImageWidth();
+        var height = this.node.getImageHeight();
+
+        var transformMatrix = this.instance.relativeTransform.matrix; // with compute need, should always be accurate
+        transformMatrix.multiplyVector2( this.upperLeft.setXY( 0, 0 ) );
+        transformMatrix.multiplyVector2( this.lowerLeft.setXY( 0, height ) );
+        transformMatrix.multiplyVector2( this.upperRight.setXY( width, 0 ) );
+        transformMatrix.multiplyVector2( this.lowerRight.setXY( width, height ) );
+
+        // first triangle XYs
+        this.vertexArray[ VERTEX_0_OFFSET + VERTEX_X_OFFSET ] = this.upperLeft.x;
+        this.vertexArray[ VERTEX_0_OFFSET + VERTEX_Y_OFFSET ] = this.upperLeft.y;
+        this.vertexArray[ VERTEX_1_OFFSET + VERTEX_X_OFFSET ] = this.lowerLeft.x;
+        this.vertexArray[ VERTEX_1_OFFSET + VERTEX_Y_OFFSET ] = this.lowerLeft.y;
+        this.vertexArray[ VERTEX_2_OFFSET + VERTEX_X_OFFSET ] = this.upperRight.x;
+        this.vertexArray[ VERTEX_2_OFFSET + VERTEX_Y_OFFSET ] = this.upperRight.y;
+
+        // second triangle XYs
+        this.vertexArray[ VERTEX_3_OFFSET + VERTEX_X_OFFSET ] = this.upperRight.x;
+        this.vertexArray[ VERTEX_3_OFFSET + VERTEX_Y_OFFSET ] = this.upperRight.y;
+        this.vertexArray[ VERTEX_4_OFFSET + VERTEX_X_OFFSET ] = this.lowerLeft.x;
+        this.vertexArray[ VERTEX_4_OFFSET + VERTEX_Y_OFFSET ] = this.lowerLeft.y;
+        this.vertexArray[ VERTEX_5_OFFSET + VERTEX_X_OFFSET ] = this.lowerRight.x;
+        this.vertexArray[ VERTEX_5_OFFSET + VERTEX_Y_OFFSET ] = this.lowerRight.y;
+      }
+
+      return true;
     },
 
     /**
