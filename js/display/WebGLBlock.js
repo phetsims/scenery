@@ -50,6 +50,7 @@ define( function( require ) {
       // with svg and canvas again.
       this.initializeFittedBlock( display, renderer, transformRootInstance, FittedBlock.FULL_DISPLAY );
 
+      // TODO: Uhh, is this not used?
       this.filterRootInstance = filterRootInstance;
 
       // {boolean} - Whether we pass this flag to the WebGL Context. It will store the contents displayed on the screen,

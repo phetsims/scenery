@@ -27,10 +27,10 @@ define( function( require ) {
    * @constructor
    * @mixes Poolable
    *
-   * @param display
-   * @param renderer
-   * @param transformRootInstance
-   * @param filterRootInstance
+   * @param {Display} display
+   * @param {number} renderer - See Renderer.js for more information
+   * @param {Instance} transformRootInstance
+   * @param {Instance} filterRootInstance
    */
   function CanvasBlock( display, renderer, transformRootInstance, filterRootInstance ) {
     this.initialize( display, renderer, transformRootInstance, filterRootInstance );
@@ -42,6 +42,7 @@ define( function( require ) {
     initialize: function( display, renderer, transformRootInstance, filterRootInstance ) {
       this.initializeFittedBlock( display, renderer, transformRootInstance, FittedBlock.COMMON_ANCESTOR );
 
+      // @private {Instance}
       this.filterRootInstance = filterRootInstance;
 
       this.dirtyDrawables = cleanArray( this.dirtyDrawables );
@@ -103,7 +104,7 @@ define( function( require ) {
       this.opacityDirtyListener = this.markDirty.bind( this );
       this.filterRootNode = this.filterRootInstance.node;
 
-      sceneryLog && sceneryLog.CanvasBlock && sceneryLog.CanvasBlock( 'initialized #' + this.id );
+      sceneryLog && sceneryLog.CanvasBlock && sceneryLog.CanvasBlock( `initialized #${this.id}` );
       // TODO: dirty list of nodes (each should go dirty only once, easier than scanning all?)
 
       return this;
@@ -147,7 +148,7 @@ define( function( require ) {
         return false;
       }
 
-      sceneryLog && sceneryLog.CanvasBlock && sceneryLog.CanvasBlock( 'update #' + this.id );
+      sceneryLog && sceneryLog.CanvasBlock && sceneryLog.CanvasBlock( `update #${this.id}` );
       sceneryLog && sceneryLog.CanvasBlock && sceneryLog.push();
 
       while ( this.dirtyDrawables.length ) {
@@ -175,6 +176,8 @@ define( function( require ) {
         this.walkDown( this.currentDrawable.instance.trail, 0 );
       }
 
+      assert && assert( this.clipCount === 0, 'clipCount should be zero after walking back down' );
+
       sceneryLog && sceneryLog.CanvasBlock && sceneryLog.pop();
 
       return true;
@@ -192,7 +195,8 @@ define( function( require ) {
      */
     applyClip: function( drawable ) {
       this.clipDirty = false;
-      sceneryLog && sceneryLog.CanvasBlock && sceneryLog.CanvasBlock( 'Apply clip ' + drawable.instance.trail.toString() + ' ' + drawable.instance.trail.subtrailTo( node ).toPathString() );
+      sceneryLog && sceneryLog.CanvasBlock && sceneryLog.CanvasBlock( `Apply clip ${drawable.instance.trail.toDebugString()}` );
+      sceneryLog && sceneryLog.CanvasBlock && sceneryLog.push();
 
       var wrapper = this.wrapperStack[ this.wrapperStackIndex ];
       var context = wrapper.context;
@@ -231,6 +235,8 @@ define( function( require ) {
           }
         }
       }
+
+      sceneryLog && sceneryLog.CanvasBlock && sceneryLog.pop();
     },
 
     /**
@@ -247,18 +253,19 @@ define( function( require ) {
         var node = trail.nodes[ i ];
 
         if ( node.hasClipArea() ) {
-          sceneryLog && sceneryLog.CanvasBlock && sceneryLog.CanvasBlock( 'Pop clip ' + trail.subtrailTo( node ).toString() + ' ' + trail.subtrailTo( node ).toPathString() );
+          sceneryLog && sceneryLog.CanvasBlock && sceneryLog.CanvasBlock( `Pop clip ${trail.subtrailTo( node ).toDebugString()}` );
           // Pop clip
           this.clipCount--;
           this.clipDirty = true;
         }
         // We should not apply opacity at or below the filter root
         if ( i > filterRootIndex && node.getOpacity() !== 1 ) {
-          sceneryLog && sceneryLog.CanvasBlock && sceneryLog.CanvasBlock( 'Pop opacity ' + trail.subtrailTo( node ).toString() + ' ' + trail.subtrailTo( node ).toPathString() );
+          sceneryLog && sceneryLog.CanvasBlock && sceneryLog.CanvasBlock( `Pop opacity ${trail.subtrailTo( node ).toDebugString()}` );
           // Pop opacity
           var topWrapper = this.wrapperStack[ this.wrapperStackIndex ];
           var bottomWrapper = this.wrapperStack[ this.wrapperStackIndex - 1 ];
           this.wrapperStackIndex--;
+          this.clipDirty = true;
 
           // Draw the transparent content into the next-level Canvas.
           bottomWrapper.context.setTransform( 1, 0, 0, 1, 0, 0 );
@@ -284,9 +291,10 @@ define( function( require ) {
 
         // We should not apply opacity at or below the filter root
         if ( i > filterRootIndex && node.getOpacity() !== 1 ) {
-          sceneryLog && sceneryLog.CanvasBlock && sceneryLog.CanvasBlock( 'Push opacity ' + trail.subtrailTo( node ).toString() + ' ' + trail.subtrailTo( node ).toPathString() );
+          sceneryLog && sceneryLog.CanvasBlock && sceneryLog.CanvasBlock( `Push opacity ${trail.subtrailTo( node ).toDebugString()}` );
           // Push opacity
           this.wrapperStackIndex++;
+          this.clipDirty = true;
           // If we need to push an entirely new Canvas to the stack
           if ( this.wrapperStackIndex === this.wrapperStack.length ) {
             var newCanvas = document.createElement( 'canvas' );
@@ -305,7 +313,7 @@ define( function( require ) {
         }
 
         if ( node.hasClipArea() ) {
-          sceneryLog && sceneryLog.CanvasBlock && sceneryLog.CanvasBlock( 'Push clip ' + trail.subtrailTo( node ).toString() + ' ' + trail.subtrailTo( node ).toPathString() );
+          sceneryLog && sceneryLog.CanvasBlock && sceneryLog.CanvasBlock( `Push clip ${trail.subtrailTo( node ).toDebugString()}` );
           // Push clip
           this.clipCount++;
           this.clipDirty = true;
@@ -328,6 +336,9 @@ define( function( require ) {
       if ( !drawable.visible ) {
         return;
       }
+
+      sceneryLog && sceneryLog.CanvasBlock && sceneryLog.CanvasBlock( `renderDrawable #${drawable.id} ${drawable.instance.trail.toDebugString()}`  );
+      sceneryLog && sceneryLog.CanvasBlock && sceneryLog.push();
 
       // For opacity/clip, walk up/down as necessary (Can only walk down if we are not the first drawable)
       var branchIndex = this.currentDrawable ? drawable.instance.getBranchIndexTo( this.currentDrawable.instance ) : 0;
@@ -361,10 +372,12 @@ define( function( require ) {
       drawable.paintCanvas( wrapper, drawable.instance.node, drawable.instance.relativeTransform.matrix );
 
       this.currentDrawable = drawable;
+
+      sceneryLog && sceneryLog.CanvasBlock && sceneryLog.pop();
     },
 
     dispose: function() {
-      sceneryLog && sceneryLog.CanvasBlock && sceneryLog.CanvasBlock( 'dispose #' + this.id );
+      sceneryLog && sceneryLog.CanvasBlock && sceneryLog.CanvasBlock( `dispose #${this.id}` );
 
       this.filterRootNode = null;
 
@@ -380,7 +393,7 @@ define( function( require ) {
     },
 
     markDirtyDrawable: function( drawable ) {
-      sceneryLog && sceneryLog.dirty && sceneryLog.dirty( 'markDirtyDrawable on CanvasBlock#' + this.id + ' with ' + drawable.toString() );
+      sceneryLog && sceneryLog.dirty && sceneryLog.dirty( `markDirtyDrawable on CanvasBlock#${this.id} with ${drawable.toString()}` );
 
       assert && assert( drawable );
 
@@ -395,7 +408,7 @@ define( function( require ) {
     },
 
     addDrawable: function( drawable ) {
-      sceneryLog && sceneryLog.CanvasBlock && sceneryLog.CanvasBlock( '#' + this.id + '.addDrawable ' + drawable.toString() );
+      sceneryLog && sceneryLog.CanvasBlock && sceneryLog.CanvasBlock( `#${this.id}.addDrawable ${drawable.toString()}` );
 
       FittedBlock.prototype.addDrawable.call( this, drawable );
 
@@ -417,7 +430,7 @@ define( function( require ) {
     },
 
     removeDrawable: function( drawable ) {
-      sceneryLog && sceneryLog.CanvasBlock && sceneryLog.CanvasBlock( '#' + this.id + '.removeDrawable ' + drawable.toString() );
+      sceneryLog && sceneryLog.CanvasBlock && sceneryLog.CanvasBlock( `#${this.id}.removeDrawable ${drawable.toString()}` );
 
       // Remove opacity listeners (from this node up to the filter root)
       for ( var instance = drawable.instance; instance && instance !== this.filterRootInstance; instance = instance.parent ) {
@@ -436,7 +449,7 @@ define( function( require ) {
     },
 
     onIntervalChange: function( firstDrawable, lastDrawable ) {
-      sceneryLog && sceneryLog.CanvasBlock && sceneryLog.CanvasBlock( '#' + this.id + '.onIntervalChange ' + firstDrawable.toString() + ' to ' + lastDrawable.toString() );
+      sceneryLog && sceneryLog.CanvasBlock && sceneryLog.CanvasBlock( `#${this.id}.onIntervalChange ${firstDrawable.toString()} to ${lastDrawable.toString()}` );
 
       FittedBlock.prototype.onIntervalChange.call( this, firstDrawable, lastDrawable );
 
@@ -447,7 +460,7 @@ define( function( require ) {
     },
 
     onPotentiallyMovedDrawable: function( drawable ) {
-      sceneryLog && sceneryLog.CanvasBlock && sceneryLog.CanvasBlock( '#' + this.id + '.onPotentiallyMovedDrawable ' + drawable.toString() );
+      sceneryLog && sceneryLog.CanvasBlock && sceneryLog.CanvasBlock( `#${this.id}.onPotentiallyMovedDrawable ${drawable.toString()}` );
       sceneryLog && sceneryLog.CanvasBlock && sceneryLog.push();
 
       assert && assert( drawable.parentDrawable === this );
@@ -461,7 +474,7 @@ define( function( require ) {
     },
 
     toString: function() {
-      return 'CanvasBlock#' + this.id + '-' + FittedBlock.fitString[ this.fit ];
+      return `CanvasBlock#${this.id}-${FittedBlock.fitString[ this.fit ]}`;
     }
   } );
 

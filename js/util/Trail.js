@@ -721,6 +721,16 @@ define( function( require ) {
     toPathString: function() {
       var specialNodes = _.filter( this.nodes, function( n ) { return n.constructor.name !== 'Node'; } );
       return _.map( specialNodes, function( n ) { return n.constructor.name; } ).join( '/' );
+    },
+
+    /**
+     * Returns a debugging string ideal for logged output.
+     * @public
+     *
+     * @returns {string}
+     */
+    toDebugString: function() {
+      return this.toString() + ' ' + this.toPathString();
     }
   } );
 
