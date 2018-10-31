@@ -218,7 +218,7 @@ define( function( require ) {
       }
     };
 
-    // Only emit events if phetioEmitPlaybackEvents is turned on so we don't spam the data stream unnecessarily
+    // This is a high frequency event that is necessary for reproducible playbacks
     this.validatePointersEmitter = new Emitter( {
       phetioPlayback: true,
       tandem: options.tandem.createTandem( 'validatePointersEmitter' ),
