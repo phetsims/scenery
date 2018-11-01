@@ -3024,7 +3024,7 @@ define( function( require ) {
      * @returns {Node} - Returns 'this' reference, for chaining
      */
     setVisible: function( visible ) {
-      assert && assert( typeof visible === 'boolean' );
+      assert && assert( typeof visible === 'boolean', 'Node visibility should be a boolean value' );
 
       if ( visible !== this._visible ) {
         this._visible = visible;
