@@ -11,8 +11,8 @@ define( require => {
 
   // modules
   const AccessibilityUtil = require( 'SCENERY/accessibility/AccessibilityUtil' );
-  const KeyStateTracker = require( 'SCENERY/accessibility/KeyStateTracker' );
   const KeyboardUtil = require( 'SCENERY/accessibility/KeyboardUtil' );
+  const KeyStateTracker = require( 'SCENERY/accessibility/KeyStateTracker' );
   const Random = require( 'DOT/Random' );
   const scenery = require( 'SCENERY/scenery' );
   const timer = require( 'PHET_CORE/timer' );
