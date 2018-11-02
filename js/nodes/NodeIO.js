@@ -34,7 +34,7 @@ define( function( require ) {
     ObjectIO.call( this, node, phetioID );
 
     // TODO: This is in-progress work to convert object properties to Axon Properties, see https://github.com/phetsims/phet-io/issues/1326
-    var visibleProperty = new NodeProperty( node, 'visibility', 'visible', {
+    var visibleProperty = new NodeProperty( node, 'visibility', 'visible', _.extend( {
 
       // pick the following values from the parent Node
       phetioReadOnly: node.phetioReadOnly,
@@ -43,9 +43,9 @@ define( function( require ) {
 
       tandem: node.tandem.createTandem( 'visibleProperty' ),
       phetioDocumentation: 'Controls whether the Node will be visible (and interactive), see the NodeIO documentation for more details.'
-    } );
+    }, node.phetioComponentOptions.visibleProperty ) );
 
-    var pickableProperty = new NodeProperty( node, 'pickability', 'pickable', {
+    var pickableProperty = new NodeProperty( node, 'pickability', 'pickable', _.extend( {
 
       // pick the following values from the parent Node
       phetioReadOnly: node.phetioReadOnly,
@@ -54,7 +54,7 @@ define( function( require ) {
       tandem: node.tandem.createTandem( 'pickableProperty' ),
       phetioType: PropertyIO( NullableIO( BooleanIO ) ),
       phetioDocumentation: 'Sets whether the node will be pickable (and hence interactive), see the NodeIO documentation for more details'
-    } );
+    }, node.phetioComponentOptions.pickableProperty ) );
 
     // Adapter for the opacity.  Cannot use NodeProperty at the moment because it doesn't handle numeric types
     // properly--we may address this by moving to a mixin pattern.
