@@ -38,12 +38,6 @@ define( function( require ) {
 
     // @private {Object} - Maps {number} property.id => {number} count (number of times we would be listening to it)
     this.secondaryPropertyCountsMap = {};
-
-    // Tracking needed so we don't add duplicate listeners, see https://github.com/phetsims/axon/issues/129
-    // @private {Array.<Color>} - Indexed the same as the counts.
-    this.secondaryListenedColors = [];
-    // @private {Array.<number>}
-    this.secondaryListenedColorCounts = [];
   }
 
   scenery.register( 'PaintObserver', PaintObserver );
@@ -103,7 +97,6 @@ define( function( require ) {
       assert && assert( count > 0, 'We should always be removing at least one reference' );
 
       for ( var i = 0; i < count; i++ ) {
-        this.detachSecondary( oldPaint );
         this.attachSecondary( newPaint );
       }
       this.notifyChangeCallback();
@@ -134,8 +127,10 @@ define( function( require ) {
         sceneryLog && sceneryLog.Paints && sceneryLog.pop();
       }
       else if ( paint instanceof Color ) {
-        sceneryLog && sceneryLog.Paints && sceneryLog.Paints( '[PaintObserver] add Color listener' );
-        this.secondaryLazyLinkColor( paint );
+        sceneryLog && sceneryLog.Paints && sceneryLog.Paints( '[PaintObserver] Color changed to immutable' );
+
+        // We set the color to be immutable, so we don't need to add a listener
+        paint.setImmutable();
       }
       else if ( paint instanceof Gradient ) {
         sceneryLog && sceneryLog.Paints && sceneryLog.Paints( '[PaintObserver] add Gradient listeners' );
@@ -167,12 +162,7 @@ define( function( require ) {
         sceneryLog && sceneryLog.Paints && sceneryLog.Paints( '[PaintObserver] remove Property listener' );
         sceneryLog && sceneryLog.Paints && sceneryLog.push();
         this.secondaryUnlinkProperty( paint );
-        this.detachSecondary( paint.get() );
         sceneryLog && sceneryLog.Paints && sceneryLog.pop();
-      }
-      else if ( paint instanceof Color ) {
-        sceneryLog && sceneryLog.Paints && sceneryLog.Paints( '[PaintObserver] remove Color listener' );
-        this.secondaryUnlinkColor( paint );
       }
       else if ( paint instanceof Gradient ) {
         sceneryLog && sceneryLog.Paints && sceneryLog.Paints( '[PaintObserver] remove Gradient listeners' );
@@ -197,26 +187,10 @@ define( function( require ) {
       sceneryLog && sceneryLog.Paints && sceneryLog.push();
 
       if ( paint instanceof Color ) {
-        sceneryLog && sceneryLog.Paints && sceneryLog.Paints( '[PaintObserver] add Color listener' );
-        this.secondaryLazyLinkColor( paint );
-      }
+        sceneryLog && sceneryLog.Paints && sceneryLog.Paints( '[PaintObserver] Color set to immutable' );
 
-      sceneryLog && sceneryLog.Paints && sceneryLog.pop();
-    },
-
-    /**
-     * Attempt to detach listeners from the paint's secondary (part within the Property).
-     * @private
-     *
-     * @param {string|Color} paint
-     */
-    detachSecondary: function( paint ) {
-      sceneryLog && sceneryLog.Paints && sceneryLog.Paints( '[PaintObserver] detachSecondary' );
-      sceneryLog && sceneryLog.Paints && sceneryLog.push();
-
-      if ( paint instanceof Color ) {
-        sceneryLog && sceneryLog.Paints && sceneryLog.Paints( '[PaintObserver] remove Color listener' );
-        this.secondaryUnlinkColor( paint );
+        // We set the color to be immutable, so we don't need to add a listener
+        paint.setImmutable();
       }
 
       sceneryLog && sceneryLog.Paints && sceneryLog.pop();
@@ -281,52 +255,6 @@ define( function( require ) {
         if ( !property.isDisposed ) {
           property.unlink( this.updateSecondaryListener );
         }
-      }
-
-      sceneryLog && sceneryLog.Paints && sceneryLog.pop();
-    },
-
-    /**
-     * Adds our secondary listener to the Color (unless there is already one, in which case we record the counts).
-     * @private
-     *
-     * @param {Color} color
-     */
-    secondaryLazyLinkColor: function( color ) {
-      sceneryLog && sceneryLog.Paints && sceneryLog.Paints( '[PaintObserver] secondaryLazyLinkColor' );
-      sceneryLog && sceneryLog.Paints && sceneryLog.push();
-
-      var index = _.indexOf( this.secondaryListenedColors, color );
-      if ( index >= 0 ) {
-        this.secondaryListenedColorCounts[ index ]++;
-      }
-      else {
-        this.secondaryListenedColors.push( color );
-        this.secondaryListenedColorCounts.push( 1 );
-        color.changeEmitter.addListener( this.notifyChangeCallback );
-      }
-
-      sceneryLog && sceneryLog.Paints && sceneryLog.pop();
-    },
-
-    /**
-     * Removes our secondary listener from the Color (unless there were more than 1 time we needed to listen to it,
-     * in which case we reduce the count).
-     * @private
-     *
-     * @param {Color} color
-     */
-    secondaryUnlinkColor: function( color ) {
-      sceneryLog && sceneryLog.Paints && sceneryLog.Paints( '[PaintObserver] secondaryUnlinkColor' );
-      sceneryLog && sceneryLog.Paints && sceneryLog.push();
-
-      var index = _.indexOf( this.secondaryListenedColors, color );
-      assert && assert( index >= 0 );
-      this.secondaryListenedColorCounts[ index ]--;
-      if ( this.secondaryListenedColorCounts[ index ] === 0 ) {
-        this.secondaryListenedColors.splice( index, 1 );
-        this.secondaryListenedColorCounts.splice( index, 1 );
-        color.changeEmitter.removeListener( this.notifyChangeCallback );
       }
 
       sceneryLog && sceneryLog.Paints && sceneryLog.pop();

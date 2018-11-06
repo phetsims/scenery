@@ -10,7 +10,6 @@ define( function( require ) {
 
   // modules
   var Circle = require( 'SCENERY/nodes/Circle' );
-  var Color = require( 'SCENERY/util/Color' );
   var Display = require( 'SCENERY/display/Display' );
   var Image = require( 'SCENERY/nodes/Image' );
   var LinearGradient = require( 'SCENERY/util/LinearGradient' );
@@ -219,21 +218,6 @@ define( function( require ) {
     DEFAULT_THRESHOLD, testedRenderers, true // asynchronous
   );
 
-  multipleRendererTest( 'Color change after display',
-    function( scene, display ) {
-      display.width = 40;
-      display.height = 40;
-      var color = new Color( 'red' );
-      scene.addChild( new Rectangle( 6, 6, 28, 28, {
-        fill: color
-      } ) );
-      display.updateDisplay();
-      color.setRGBA( 0, 0, 0, 1 );
-      display.updateDisplay();
-    }, simpleRectangleDataURL,
-    DEFAULT_THRESHOLD, testedRenderers
-  );
-
   multipleRendererTest( 'Color change from property',
     function( scene, display ) {
       display.width = 40;
@@ -249,40 +233,7 @@ define( function( require ) {
     DEFAULT_THRESHOLD, testedRenderers
   );
 
-  multipleRendererTest( 'Color change from property with color',
-    function( scene, display ) {
-      display.width = 40;
-      display.height = 40;
-      var color = new Color( 'red' );
-      var colorProperty = new Property( color );
-      scene.addChild( new Rectangle( 6, 6, 28, 28, {
-        fill: colorProperty
-      } ) );
-      display.updateDisplay();
-      color.setRGBA( 0, 0, 0, 1 );
-      display.updateDisplay();
-    }, simpleRectangleDataURL,
-    DEFAULT_THRESHOLD, testedRenderers
-  );
-
   /* eslint-enable */
-
-  multipleRendererTest( 'Color change before display',
-    function( scene, display ) {
-      display.width = 40;
-      display.height = 40;
-      var color = new Color( 'red' );
-      var rect = new Rectangle( 6, 6, 28, 28, {
-        fill: '#00ff00'
-      } );
-      scene.addChild( rect );
-      display.updateDisplay();
-      rect.fill = color;
-      color.setRGBA( 0, 0, 0, 1 );
-      display.updateDisplay();
-    }, simpleRectangleDataURL,
-    DEFAULT_THRESHOLD, testedRenderers
-  );
 
   multipleRendererTest( 'Invisible node with rectangles (paths) above and below',
     function( scene, display ) {
