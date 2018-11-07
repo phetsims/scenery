@@ -11,7 +11,6 @@ define( function( require ) {
   // modules
   var Bounds2 = require( 'DOT/Bounds2' );
   var CanvasNode = require( 'SCENERY/nodes/CanvasNode' );
-  var Circle = require( 'SCENERY/nodes/Circle' );
   var Color = require( 'SCENERY/util/Color' );
   var Display = require( 'SCENERY/display/Display' );
   var HStrut = require( 'SCENERY/nodes/HStrut' );
