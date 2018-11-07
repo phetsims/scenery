@@ -58,7 +58,7 @@ define( function( require ) {
 
     // Adapter for the opacity.  Cannot use NodeProperty at the moment because it doesn't handle numeric types
     // properly--we may address this by moving to a mixin pattern.
-    var opacityProperty = new NumberProperty( node.opacity, {
+    var opacityProperty = new NumberProperty( node.opacity, _.extend( {
 
       // pick the following values from the parent Node
       phetioReadOnly: node.phetioReadOnly,
@@ -67,7 +67,7 @@ define( function( require ) {
       tandem: node.tandem.createTandem( 'opacityProperty' ),
       range: new Range( 0, 1 ),
       phetioDocumentation: 'Opacity of the parent NodeIO, between 0 (invisible) and 1 (fully visible)'
-    } );
+    }, node.phetioComponentOptions.opacityProperty ) );
     opacityProperty.link( function( opacity ) { node.opacity = opacity; } );
     node.on( 'opacity', function() { opacityProperty.value = node.opacity; } );
 
