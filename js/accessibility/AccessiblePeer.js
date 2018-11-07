@@ -655,7 +655,7 @@ define( function( require ) {
         arrayRemove( this.topLevelElements, contentElement );
         var indexOfPrimarySibling = this.topLevelElements.indexOf( this._primarySibling );
 
-        // if appending, insert at at end of order
+        // if appending, just insert at at end of the top level elements
         var insertIndex = appendElement ? this.topLevelElements.length : indexOfPrimarySibling;
         this.topLevelElements.splice( insertIndex, 0, contentElement );
       }
