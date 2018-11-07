@@ -282,6 +282,7 @@ define( function( require ) {
       }
 
       // insert the label and description elements in the correct location if they exist
+      // NOTE: Important for arrangeContentElement to be called on the label sibling first for correct order
       this._labelSibling && this.arrangeContentElement( this._labelSibling, options.appendLabel );
       this._descriptionSibling && this.arrangeContentElement( this._descriptionSibling, options.appendDescription );
 
@@ -624,6 +625,10 @@ define( function( require ) {
      * the primarySibling. Its placement will also depend on whether or not this node wants to append this element,
      * see setAppendLabel() and setAppendDescription(). By default, the "content" element will be placed before the
      * primarySibling.
+     *
+     * NOTE: This function assumes it is called on label sibling before description sibling for inserting elements
+     * into the correct order.
+     * 
      * @private
      *
      * @param {HTMLElement} contentElement
@@ -648,10 +653,11 @@ define( function( require ) {
 
         // keep this.topLevelElements in sync
         arrayRemove( this.topLevelElements, contentElement );
+        var indexOfPrimarySibling = this.topLevelElements.indexOf( this._primarySibling );
 
-        var indexOffset = appendElement ? 1 : 0;
-        var indexOfContentElement = this.topLevelElements.indexOf( this._primarySibling ) + indexOffset;
-        this.topLevelElements.splice( indexOfContentElement, 0, contentElement );
+        // if appending, insert at at end of order
+        var insertIndex = appendElement ? this.topLevelElements.length : indexOfPrimarySibling;
+        this.topLevelElements.splice( insertIndex, 0, contentElement );
       }
     },
 

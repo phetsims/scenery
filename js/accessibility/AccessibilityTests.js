@@ -61,16 +61,13 @@ define( function( require ) {
   } );
 
   /**
-   * Get the id of a dom element representing a node in the DOM.  The accessible content must exist and be unique,
-   * there should only be one accessible instance and one dom element for the node.
-   *
-   * NOTE: Be careful about getting references to dom Elements, the reference will be stale each time
-   * the view (AccessiblePeer) is redrawn, which is quite often when setting options.
-   *
+   * Get a unique AccessiblePeer from a node with accessible content. Will error if the node has multiple instances
+   * or if the node hasn't been attached to a display (and therefore has no accessible content).
+   * 
    * @param  {Node} node
-   * @return {string}
+   * @return {AccessiblePeer}
    */
-  function getPrimarySiblingElementByNode( node ) {
+  function getAccessiblePeerByNode( node ) {
     if ( node.accessibleInstances.length === 0 ) {
       throw new Error( 'No accessibleInstances. Was your node added to the scene graph?' );
     }
@@ -82,7 +79,23 @@ define( function( require ) {
       throw new Error( 'accessibleInstance\'s peer should exist.' );
     }
 
-    return document.getElementById( node.accessibleInstances[ 0 ].peer.primarySibling.id );
+    return node.accessibleInstances[ 0 ].peer;
+  }
+
+  /**
+   * Get the id of a dom element representing a node in the DOM.  The accessible content must exist and be unique,
+   * there should only be one accessible instance and one dom element for the node.
+   *
+   * NOTE: Be careful about getting references to dom Elements, the reference will be stale each time
+   * the view (AccessiblePeer) is redrawn, which is quite often when setting options.
+   *
+   * @param  {Node} node
+   * @return {string}
+   */
+  function getPrimarySiblingElementByNode( node ) {
+
+    var uniquePeer = getAccessiblePeerByNode( node );
+    return document.getElementById( uniquePeer.primarySibling.id );
   }
 
 
@@ -1497,6 +1510,42 @@ define( function( require ) {
     assert.ok( containerElement.childNodes[ 0 ].tagName.toUpperCase() === 'H3', 'label sibling first' );
     assert.ok( containerElement.childNodes[ 1 ].tagName.toUpperCase() === DEFAULT_DESCRIPTION_TAG_NAME, 'description sibling second' );
     assert.ok( containerElement.childNodes[ 2 ].tagName.toUpperCase() === 'LI', 'primary sibling last' );
+
+    // test order when using appendLabel/appendDescription without a parent container - order should be primary sibling,
+    // label sibling, description sibling
+    var b = new Node( {
+      tagName: 'input',
+      inputType: 'checkbox',
+      labelTagName: 'label',
+      labelContent: TEST_LABEL,
+      descriptionContent: TEST_DESCRIPTION,
+      appendLabel: true,
+      appendDescription: true
+    } );
+    rootNode.addChild( b );
+
+    var bPeer = getAccessiblePeerByNode( b );
+    var bElement = getPrimarySiblingElementByNode( b );
+    var bElementParent = bElement.parentElement;
+    var indexOfPrimaryElement = Array.prototype.indexOf.call( bElementParent.childNodes, bElement );
+
+    assert.ok( bElementParent.childNodes[ indexOfPrimaryElement ] === bElement, 'b primary sibling first with no container, both appended' );
+    assert.ok( bElementParent.childNodes[ indexOfPrimaryElement + 1 ] === bPeer.labelSibling, 'b label sibling second with no container, both appended' );
+    assert.ok( bElementParent.childNodes[ indexOfPrimaryElement + 2 ] === bPeer.descriptionSibling, 'b description sibling third with no container, both appended' );
+
+    // test order when only description appended and no parent container - order should be label, primary, then 
+    // description
+    b.appendLabel = false; 
+
+    // refresh since operation may have created new Objects
+    bPeer = getAccessiblePeerByNode( b );
+    bElement = getPrimarySiblingElementByNode( b );
+    bElementParent = bElement.parentElement;
+    indexOfPrimaryElement = Array.prototype.indexOf.call( bElementParent.childNodes, bElement );
+
+    assert.ok( bElementParent.childNodes[ indexOfPrimaryElement - 1 ] === bPeer.labelSibling, 'b label sibling first with no container, description appended' );
+    assert.ok( bElementParent.childNodes[ indexOfPrimaryElement ] === bElement, 'b primary sibling second with no container, description appended' );
+    assert.ok( bElementParent.childNodes[ indexOfPrimaryElement + 1 ] === bPeer.descriptionSibling, 'b description sibling third with no container, description appended' );
   } );
 
   QUnit.test( 'containerAriaRole option', function( assert ) {
