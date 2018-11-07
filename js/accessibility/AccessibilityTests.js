@@ -90,7 +90,7 @@ define( function( require ) {
    * the view (AccessiblePeer) is redrawn, which is quite often when setting options.
    *
    * @param  {Node} node
-   * @return {string}
+   * @return {HTMLElement}
    */
   function getPrimarySiblingElementByNode( node ) {
 
