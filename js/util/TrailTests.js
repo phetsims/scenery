@@ -920,40 +920,6 @@ define( function( require ) {
     } );
   } );
 
-  QUnit.test( 'Color listener non-memory-leak-ness', function( assert ) {
-    var scene = new Node();
-    var display = new Display( scene, { width: 20, height: 20 } );
-    display.updateDisplay();
-    var node = new Node();
-    scene.addChild( node );
-
-    var color = new Color( 255, 255, 0 );
-    assert.equal( color.changeEmitter.getListenerCount(), 0, 'Initial colors should have no listeners' );
-
-    var rect = new Rectangle( 0, 0, 50, 50, { fill: color } );
-    node.addChild( rect );
-    assert.equal( color.changeEmitter.getListenerCount(), 0, 'Still no listeners until updateDisplay' );
-
-    display.updateDisplay();
-    assert.equal( color.changeEmitter.getListenerCount(), 1, 'One listener for the rectangle' );
-
-    var circle = new Circle( 40, { fill: color, stroke: color } );
-    node.addChild( circle );
-    display.updateDisplay();
-    assert.equal( color.changeEmitter.getListenerCount(), 3, 'One listener for the rectangle, two for the circle (stroke/fill)' );
-
-    circle.stroke = null;
-    assert.equal( color.changeEmitter.getListenerCount(), 2, 'One listener for the rectangle, one for the circle (fill)' );
-
-    rect.addChild( circle );
-    display.updateDisplay();
-    assert.equal( color.changeEmitter.getListenerCount(), 3, 'One listener for the rectangle, two for the circle (two instances)' );
-
-    node.removeAllChildren();
-    display.updateDisplay();
-    assert.equal( color.changeEmitter.getListenerCount(), 0, 'Nothing else attached' );
-  } );
-
   QUnit.test( 'maxWidth/maxHeight for Node', function( assert ) {
     var rect = new Rectangle( 0, 0, 100, 50, { fill: 'red' } );
     var node = new Node( { children: [ rect ] } );
