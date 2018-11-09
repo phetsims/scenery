@@ -29,6 +29,10 @@ define( function( require ) {
 
   require( 'SCENERY/nodes/Node' );
   // require( 'SCENERY/util/TrailPointer' );
+  
+  // constants
+  var ID_SEPARATOR = '-'; 
+  
 
   function Trail( nodes ) {
     /*
@@ -252,7 +256,7 @@ define( function( require ) {
 
       this.length++;
       // accelerated version of this.updateUniqueId()
-      this.uniqueId = ( this.uniqueId ? node.id + '-' + this.uniqueId : node.id + '' );
+      this.uniqueId = ( this.uniqueId ? node.id + ID_SEPARATOR + this.uniqueId : node.id + '' );
       return this;
     },
 
@@ -283,7 +287,7 @@ define( function( require ) {
 
       this.length++;
       // accelerated version of this.updateUniqueId()
-      this.uniqueId = ( this.uniqueId ? this.uniqueId + '-' + node.id : node.id + '' );
+      this.uniqueId = ( this.uniqueId ? this.uniqueId + ID_SEPARATOR + node.id : node.id + '' );
       return this;
     },
 
@@ -692,7 +696,7 @@ define( function( require ) {
         result += this.nodes[ 0 ]._id;
       }
       for ( var i = 1; i < len; i++ ) {
-        result += '-' + this.nodes[ i ]._id;
+        result += ID_SEPARATOR + this.nodes[ i ]._id;
       }
       this.uniqueId = result;
       // this.uniqueId = _.map( this.nodes, function( node ) { return node.getId(); } ).join( '-' );
@@ -902,6 +906,48 @@ define( function( require ) {
     // }
 
     // return subtrees;
+  };
+
+  /**
+   * Re-create a trail to a root node from an existing Trail id. The rootNode must have the same Id as the first
+   * Node id of uniqueId.
+   * 
+   * @param  {Node} rootNode - the root of the trail being created
+   * @param  {string} uniqueId - integers separated by ID_SEPARATOR, see getUniqueId
+   * @return {Trail}
+   */
+  Trail.fromUniqueId = function( rootNode, uniqueId ) {
+    var trailIds = uniqueId.split( ID_SEPARATOR );
+    var trailIdNumbers = trailIds.map( function( id ) { return parseInt( id, 10 ); } );
+
+    var currentNode = rootNode;
+
+    var rootId = trailIdNumbers.shift();
+    var nodes = [ currentNode ];
+
+    assert && assert( rootId === rootNode.id );
+
+    while( trailIdNumbers.length > 0 ) {
+      var trailId = trailIdNumbers.shift();
+
+      // if accessible order is set, the trail might not match the hierarchy of children - search through nodes
+      // in accessibleOrder first because accessibleOrder is an override for scene graph structure
+      var accessibleOrder = currentNode.accessibleOrder || [];
+      var children = accessibleOrder.concat( currentNode.children );
+      for ( var j = 0; j < children.length; j++ ) {
+        if ( children[ j ].id === trailId ) {
+          var childAlongTrail = children[ j ];
+          nodes.push( childAlongTrail );
+          currentNode = childAlongTrail;
+
+          break;
+        }
+
+        assert && assert( j !== children.length - 1, 'unable to find node from unique Trail id' );
+      }
+    }
+
+    return new Trail( nodes );
   };
 
   return Trail;
