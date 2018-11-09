@@ -57,6 +57,7 @@ define( function( require ) {
 
   // Scratch vectors used to prevent allocations
   var scratchVector2A = new Vector2();
+  var DraggedEmitterIO = EmitterIO( [ { name: 'event', type: EventIO } ] );
 
   /**
    * @constructor
@@ -188,7 +189,7 @@ define( function( require ) {
       phetioDocumentation: 'Emits whenever a drag occurs with an EventIO argument.',
       phetioReadOnly: options.phetioReadOnly,
       phetioEventType: 'user',
-      phetioType: EmitterIO( [ { name: 'event', type: EventIO } ] ),
+      phetioType: DraggedEmitterIO,
       listener: function( event ) {
 
         // This is done first, before the drag listener is called (from the prototype drag call)
