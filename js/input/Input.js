@@ -190,7 +190,7 @@ define( function( require ) {
     // @private {Array.<BatchedDOMEvent}>
     this.batchedEvents = [];
 
-    // @public {Mouse} - Pointer for mouse, only created lazily on first mouse event, so no mouse is allocated on.
+    // @public {Mouse|null} - Pointer for mouse, only created lazily on first mouse event, so no mouse is allocated on.
     // tablets.
     this.mouse = null;
 
