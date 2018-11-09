@@ -34,6 +34,15 @@ define( function( require ) {
   // global
   var globalID = 0;
 
+  // constants - factored out to reduce memory usage, see https://github.com/phetsims/unit-rates/issues/207
+  var PressedEmitterIO = EmitterIO( [
+    { name: 'event', type: EventIO },
+    { name: 'targetNode', type: VoidIO },
+    { name: 'callback', type: VoidIO }
+  ] );
+
+  var ReleasedEmitterIO = EmitterIO( [ { name: 'callback', type: VoidIO } ] );
+
   /**
    * @constructor
    *
@@ -219,11 +228,7 @@ define( function( require ) {
                            'used to convey info about the Event.',
       phetioReadOnly: options.phetioReadOnly,
       phetioEventType: 'user',
-      phetioType: EmitterIO( [
-        { name: 'event', type: EventIO },
-        { name: 'targetNode', type: VoidIO },
-        { name: 'callback', type: VoidIO }
-      ] ),
+      phetioType: PressedEmitterIO,
 
       // The main implementation of "press" handling is implemented as a callback to the emitter, so things are nested
       // nicely for phet-io.
@@ -237,7 +242,7 @@ define( function( require ) {
       phetioDocumentation: 'Emits whenever a release occurs.',
       phetioReadOnly: options.phetioReadOnly,
       phetioEventType: 'user',
-      phetioType: EmitterIO( [ { name: 'callback', type: VoidIO } ] ),
+      phetioType: ReleasedEmitterIO,
 
       // The main implementation of "release" handling is implemented as a callback to the emitter, so things are nested
       // nicely for phet-io.
