@@ -578,9 +578,14 @@ define( function( require ) {
       sceneryLog && sceneryLog.InputListener && sceneryLog.InputListener( 'PressListener#' + this._id + ' pointer up' );
       sceneryLog && sceneryLog.InputListener && sceneryLog.push();
 
-      assert && assert( event.pointer === this.pointer );
+      // Since our callback can get queued up and THEN interrupted before this happens, we'll check to make sure we are
+      // still pressed by the time we get here. If not pressed, then there is nothing to do.
+      // See https://github.com/phetsims/capacitor-lab-basics/issues/251
+      if ( this.isPressed ) {
+        assert && assert( event.pointer === this.pointer );
 
-      this.release();
+        this.release();
+      }
 
       sceneryLog && sceneryLog.InputListener && sceneryLog.pop();
     },
@@ -597,9 +602,14 @@ define( function( require ) {
       sceneryLog && sceneryLog.InputListener && sceneryLog.InputListener( 'PressListener#' + this._id + ' pointer cancel' );
       sceneryLog && sceneryLog.InputListener && sceneryLog.push();
 
-      assert && assert( event.pointer === this.pointer );
+      // Since our callback can get queued up and THEN interrupted before this happens, we'll check to make sure we are
+      // still pressed by the time we get here. If not pressed, then there is nothing to do.
+      // See https://github.com/phetsims/capacitor-lab-basics/issues/251
+      if ( this.isPressed ) {
+        assert && assert( event.pointer === this.pointer );
 
-      this.interrupt(); // will mark as interrupted and release()
+        this.interrupt(); // will mark as interrupted and release()
+      }
 
       sceneryLog && sceneryLog.InputListener && sceneryLog.pop();
     },
@@ -616,9 +626,14 @@ define( function( require ) {
       sceneryLog && sceneryLog.InputListener && sceneryLog.InputListener( 'PressListener#' + this._id + ' pointer move' );
       sceneryLog && sceneryLog.InputListener && sceneryLog.push();
 
-      assert && assert( event.pointer === this.pointer );
+      // Since our callback can get queued up and THEN interrupted before this happens, we'll check to make sure we are
+      // still pressed by the time we get here. If not pressed, then there is nothing to do.
+      // See https://github.com/phetsims/capacitor-lab-basics/issues/251
+      if ( this.isPressed ) {
+        assert && assert( event.pointer === this.pointer );
 
-      this.drag( event );
+        this.drag( event );
+      }
 
       sceneryLog && sceneryLog.InputListener && sceneryLog.pop();
     },
