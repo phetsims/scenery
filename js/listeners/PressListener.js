@@ -43,6 +43,9 @@ define( function( require ) {
 
   var ReleasedEmitterIO = EmitterIO( [ { name: 'callback', type: VoidIO } ] );
 
+  // Factor out to reduce memory footprint, see https://github.com/phetsims/tandem/issues/71
+  const truePredicate = _.constant( true );
+
   /**
    * @constructor
    *
@@ -90,7 +93,7 @@ define( function( require ) {
 
       // {function} - Checks this when trying to start a press. If this function returns false, a press will not be
       // started.
-      canStartPress: _.constant( true ),
+      canStartPress: truePredicate,
 
       // {number} (a11y) - How long something should 'look' pressed after an accessible click input event
       a11yLooksPressedInterval: 100,
