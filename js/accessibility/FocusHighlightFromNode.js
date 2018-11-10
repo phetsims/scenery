@@ -2,9 +2,9 @@
 
 /**
  * A FocusHighlightPath subtype that is based around a Node. The focusHighlight is constructed based on the bounds of
- * the node. Handles transformations so that when the source node is transformed, the FocusHighlightFromNode will 
+ * the node. Handles transformations so that when the source node is transformed, the FocusHighlightFromNode will
  * updated be as well.
- * 
+ *
  * @author Michael Kauzmann (PhET Interactive Simulations)
  * @author Jesse Greenberg (PhET Interactive Simulations)
  */
@@ -21,6 +21,7 @@ define( function( require ) {
    *
    * @param {Node|null} node
    * @param {Object} [options]
+   * @extends FocusHighlightPath
    * @constructor
    */
   function FocusHighlightFromNode( node, options ) {
