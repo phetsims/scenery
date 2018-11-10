@@ -128,6 +128,7 @@ define( function( require ) {
   var Emitter = require( 'AXON/Emitter' );
   var EmitterIO = require( 'AXON/EmitterIO' );
   var Event = require( 'SCENERY/input/Event' );
+  var Features = require( 'SCENERY/util/Features' );
   var inherit = require( 'PHET_CORE/inherit' );
   var Mouse = require( 'SCENERY/input/Mouse' );
   var NumberIO = require( 'TANDEM/types/NumberIO' );
@@ -190,7 +191,7 @@ define( function( require ) {
     // @private {Array.<BatchedDOMEvent}>
     this.batchedEvents = [];
 
-    // @public {Mouse} - Pointer for mouse, only created lazily on first mouse event, so no mouse is allocated on.
+    // @public {Mouse|null} - Pointer for mouse, only created lazily on first mouse event, so no mouse is allocated on.
     // tablets.
     this.mouse = null;
 
@@ -496,6 +497,14 @@ define( function( require ) {
         }
       }
     } );
+
+    if ( this.display._accessible ) {
+      var accessibleEventOptions = Features.passive ? { useCapture: false, passive: false } : false;
+
+      this.display.accessibleDOMElement.addEventListener( 'focusin', function( event ) {
+        self.focusIn( event );
+      }, accessibleEventOptions );
+    }
   }
 
   scenery.register( 'Input', Input );
@@ -737,6 +746,26 @@ define( function( require ) {
         }
       }
       return null;
+    },
+
+    /**
+     * Triggers a logical focus event.
+     * @public (scenery-internal)
+     *
+     * @param {DOMEvent} event
+     */
+    focusIn: function( event ) {
+      sceneryLog && sceneryLog.Input && sceneryLog.Input( 'focusIn(' + Input.debugText( null, event ) + ');' );
+      sceneryLog && sceneryLog.Input && sceneryLog.push();
+
+      var trail = Trail.fromUniqueId( this.rootNode, event.target.getAttribute( 'data-trailId' ) );
+
+      // TODO: a11y pointer! See #888
+      this.dispatchEvent( trail, 'focus', new Pointer( null, false ), event, true );
+
+      // TODO: emit focusIn emitter? Or is it just called focusEmitter? See #888
+      
+      sceneryLog && sceneryLog.Input && sceneryLog.pop();
     },
 
     /**
