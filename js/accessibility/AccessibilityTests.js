@@ -1017,7 +1017,6 @@ define( function( require ) {
     a.focus();
     util.getNextFocusable( rootElement ).focus();
     assert.ok( document.activeElement.id === aElement.id, 'a only element focusable' );
-
   } );
 
   QUnit.test( 'Remove accessibility subtree', function( assert ) {

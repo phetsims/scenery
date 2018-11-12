@@ -2446,7 +2446,7 @@ define( function( require ) {
 
             for ( var i = 0; i < this._accessibleInstances.length; i++ ) {
               var peer = this._accessibleInstances[ i ].peer;
-              peer.setAttributeToElement( 'tabIndex', this.focusable ? 0 : -1 );
+              AccessibilityUtil.overrideFocusWithTabIndex( peer.primarySibling, focusable );
             }
           }
         },
