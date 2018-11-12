@@ -935,7 +935,9 @@ define( function( require ) {
       var accessibleOrder = currentNode.accessibleOrder || [];
       var children = accessibleOrder.concat( currentNode.children );
       for ( var j = 0; j < children.length; j++ ) {
-        if ( children[ j ].id === trailId ) {
+
+        // accessibleOrder supports null entries to fill in with default order
+        if ( children[ j ] !== null && children[ j ].id === trailId ) {
           var childAlongTrail = children[ j ];
           nodes.push( childAlongTrail );
           currentNode = childAlongTrail;
