@@ -172,8 +172,9 @@ define( function( require ) {
       return false;
     }
 
-    // if tabindex is greater than -1, the element is focusable so break
-    return domElement.tabIndex >= 0;
+    // focusable if flagged as such with data attribute - cannot check tabindex because IE11 and Edge assign
+    // tabIndex=0 internally for all HTML elements
+    return domElement.getAttribute( 'data-focusable' ) === 'true';
   }
 
   /**
@@ -472,7 +473,8 @@ define( function( require ) {
                        : document.createElement( tagName );
       var upperCaseTagName = tagName.toUpperCase();
 
-      domElement.tabIndex = focusable ? 0 : -1;
+      // set tab index if we are overriding default browser behavior
+      AccessibilityUtil.overrideFocusWithTabIndex( domElement, focusable );
 
       // Safari requires that certain input elements have dimension, otherwise it will not be keyboard accessible
       if ( _.includes( ELEMENTS_REQUIRE_WIDTH, upperCaseTagName ) ) {
@@ -481,6 +483,36 @@ define( function( require ) {
       }
 
       return domElement;
+    },
+
+    /**
+     * Add a tab index to an element when overriding the default focus behavior for the element. Adding tabindex
+     * to an element can only be done when overriding the default browser behavior because tabindex interferes with
+     * the way JAWS reads through content on Chrome, see https://github.com/phetsims/scenery/issues/893
+     *
+     * If default behavior and focusable align, the tabindex attribute is removed so that can't interfere with a
+     * screen reader.
+     * @public (scenery-internal)
+     * 
+     * @param {HTMLElement} element   
+     * @param {boolean} focusable
+     */
+    overrideFocusWithTabIndex: function( element, focusable ) {
+      var defaultFocusable = AccessibilityUtil.tagIsDefaultFocusable( element.tagName );
+
+      // only add a tabindex when we are overriding the default focusable bahvior of the browser for the tag name
+      // (logical xor)
+      if ( defaultFocusable ? !focusable : focusable ) {
+        element.tabIndex = focusable ? 0 : -1;
+      }
+      else {
+        element.removeAttribute( 'tabindex' );
+      }
+
+      // flag for IE11, so that we can track detect whether the element is focusable, since IE11 adds tabIndex=0 on
+      // ALL HTML elements, even those that are not focusable
+      element.setAttribute( 'data-focusable', focusable );
+
     },
 
     TAGS: {

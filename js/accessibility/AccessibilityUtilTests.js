@@ -13,7 +13,7 @@ define( function( require ) {
 
   QUnit.module( 'AccessibilityUtilTests' );
 
-
+  // tests
   QUnit.test( 'insertElements', function( assert ) {
 
     var div1 = document.createElement( 'div1' );
@@ -42,4 +42,54 @@ define( function( require ) {
     assert.ok( div1.childNodes[5] === div4, 'inserted div4 order of elements');
   } );
 
+  QUnit.test( 'getNextPreviousFocusable', function( assert ) {
+    var parent = AccessibilityUtil.createElement( 'div', false );
+
+    var button = AccessibilityUtil.createElement( 'button', true ); // focusable
+    var div = AccessibilityUtil.createElement( 'div', true ); // focusable
+    var p = AccessibilityUtil.createElement( 'p', false ); // not focusable
+
+    // elements must be in DOM to be focusable
+    document.body.appendChild( parent );
+    parent.appendChild( button );
+    parent.appendChild( div );
+    parent.appendChild( p );
+
+    var firstFocusable = AccessibilityUtil.getNextFocusable( parent );
+    assert.ok( firstFocusable === button, 'first focusable found' );
+    firstFocusable.focus();
+
+    var secondFocusable = AccessibilityUtil.getNextFocusable( parent );
+    assert.ok( secondFocusable === div, 'second focusable found' );
+    secondFocusable.focus();
+
+    // should still return the div because the p isn't focusable
+    var thirdFocusable = AccessibilityUtil.getNextFocusable( parent );
+    assert.ok( thirdFocusable === div, 'no more focusables after div' );
+
+    // remove the DOM nodes so they don't clutter the tests
+    document.body.removeChild( parent );
+  } );
+
+  QUnit.test( 'overrideFocusWithTabIndex', function ( assert ) {
+
+    // tab index should only be set on elements where we are overriding what is being done natively in the browser
+    var defaultButton = AccessibilityUtil.createElement( 'button', true ); // focusable
+    var defaultParagraph = AccessibilityUtil.createElement( 'p', false ); // not focusable
+    var defaultDiv = AccessibilityUtil.createElement( 'div', false ); // not focusable
+
+    // use getAttribute because tabIndex DOM property is always provided by default
+    assert.ok( defaultButton.getAttribute( 'tabindex' ) === null, 'default button has no tab index' );
+    assert.ok( defaultParagraph.getAttribute( 'tabindex' ) === null, 'default paragraph has no tab index' );
+    assert.ok( defaultDiv.getAttribute( 'tabindex' ) === null, 'default div has no tab index' );
+
+    // custom focusability should all have tab indices, even those that are being removed from the document
+    var customButton = AccessibilityUtil.createElement( 'button', false ); // not focusable
+    var customParagraph = AccessibilityUtil.createElement( 'p', true ); // focusable
+    var customDiv = AccessibilityUtil.createElement( 'div', true ); // focusable
+
+    assert.ok( customButton.getAttribute( 'tabindex' ) === '-1', 'custom button removed from focus' );
+    assert.ok( customParagraph.getAttribute( 'tabindex' ) === '0', 'custom paragraph added to focus' );
+    assert.ok( customDiv.getAttribute( 'tabindex' ) === '0', 'custom button removed from focus' );
+  } );
 } );
