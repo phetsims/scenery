@@ -226,6 +226,7 @@ define( function( require ) {
 
   }, {
 
+    // @public
     // @static defaults available for custom highlights
     OUTER_FOCUS_COLOR: OUTER_FOCUS_COLOR,
     INNER_FOCUS_COLOR: INNER_FOCUS_COLOR,
