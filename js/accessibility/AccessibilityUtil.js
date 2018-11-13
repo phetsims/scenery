@@ -115,7 +115,7 @@ define( function( require ) {
   }
 
   /**
-   * Get the next or previous focusable element in the parallel DOM, relative to this Node's primarySibling
+   * Get the next or previous focusable element in the parallel DOM, relative to the parent element passed in and
    * depending on the direction. Useful if you need to set focus dynamically or need to prevent default behavior
    * when focus changes. If no next or previous focusable is found, it returns the currently focused element.
    * This function should not be used directly, use getNextFocusable() or getPreviousFocusable() instead.
@@ -493,8 +493,8 @@ define( function( require ) {
      * If default behavior and focusable align, the tabindex attribute is removed so that can't interfere with a
      * screen reader.
      * @public (scenery-internal)
-     * 
-     * @param {HTMLElement} element   
+     *
+     * @param {HTMLElement} element
      * @param {boolean} focusable
      */
     overrideFocusWithTabIndex: function( element, focusable ) {
