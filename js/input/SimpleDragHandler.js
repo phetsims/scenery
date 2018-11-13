@@ -10,6 +10,10 @@ define( function( require ) {
   'use strict';
 
   // modules
+  var Emitter = require( 'AXON/Emitter' );
+  var EmitterIO = require( 'AXON/EmitterIO' );
+  var Vector2IO = require( 'DOT/Vector2IO' );
+  var VoidIO = require( 'TANDEM/types/VoidIO' );
   var BooleanProperty = require( 'AXON/BooleanProperty' );
   var inherit = require( 'PHET_CORE/inherit' );
   var Mouse = require( 'SCENERY/input/Mouse' );
@@ -89,6 +93,19 @@ define( function( require ) {
 
     // @private {boolean}
     this.disposed = false;
+
+    // @private
+    this.dragStartedEmitter = new Emitter( {
+      tandem: options.tandem.createTandem( 'dragStartedEmitter' ),
+      phetioType: EmitterIO(
+        [ { name: 'point', type: Vector2IO, documentation: 'the position of the drag start in view coordinates' },
+          { name: 'event', type: VoidIO, documentation: 'the scenery pointer Event' } ] ),
+      listener: function( point, event ) {
+        if ( self.options.start ) {
+          self.options.start.call( null, event, self.trail );
+        }
+      }
+    } );
 
     // if an ancestor is transformed, pin our node
     this.transformListener = {
@@ -237,14 +254,7 @@ define( function( require ) {
       // event.domEvent may not exist if this is touch-to-snag
       this.mouseButton = event.pointer instanceof Mouse ? event.domEvent.button : undefined;
 
-      this.phetioStartEvent( 'dragStarted', {
-        x: event.pointer.point.x,
-        y: event.pointer.point.y
-      } );
-      if ( this.options.start ) {
-        this.options.start.call( null, event, this.trail );
-      }
-      this.phetioEndEvent();
+      this.dragStartedEmitter.emit( event.pointer.point, event );
 
       sceneryLog && sceneryLog.InputListener && sceneryLog.pop();
     },
