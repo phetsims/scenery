@@ -19,7 +19,6 @@ define( function( require ) {
   var Mouse = require( 'SCENERY/input/Mouse' );
   var PhetioObject = require( 'TANDEM/PhetioObject' );
   var scenery = require( 'SCENERY/scenery' );
-  var SimpleDragHandlerIO = require( 'SCENERY/input/SimpleDragHandlerIO' );
   var Tandem = require( 'TANDEM/Tandem' );
   var Touch = require( 'SCENERY/input/Touch' );
 
@@ -56,7 +55,6 @@ define( function( require ) {
 
       // phetio
       tandem: Tandem.required,
-      phetioType: SimpleDragHandlerIO,
       phetioState: false,
       phetioEventType: 'user'
 
@@ -140,6 +138,21 @@ define( function( require ) {
           event.currentTarget = self.node; // #66: currentTarget on a pointer is null, so set it to the node we're dragging
           self.options.drag.call( null, event, self.trail ); // new position (old position?) delta
           event.currentTarget = saveCurrentTarget; // be polite to other listeners, restore currentTarget
+        }
+      }
+    } );
+
+    // @private
+    this.dragEndedEmitter = new Emitter( {
+      tandem: options.tandem.createTandem( 'dragEndedEmitter' ),
+      phetioType: EmitterIO(
+        [ { name: 'point', type: Vector2IO, documentation: 'the position of the drag end in view coordinates' },
+          { name: 'event', type: VoidIO, documentation: 'the scenery pointer Event' } ] ),
+      listener: function( point, event ) {
+        if ( self.options.end ) {
+
+          // drag end may be triggered programmatically and hence event and trail may be undefined
+          self.options.end.call( null, event, self.trail );
         }
       }
     } );
@@ -281,15 +294,7 @@ define( function( require ) {
 
       this.isDraggingProperty.set( false );
 
-      this.phetioStartEvent( 'dragEnded' );
-
-      if ( this.options.end ) {
-
-        // drag end may be triggered programmatically and hence event and trail may be undefined
-        this.options.end.call( null, event, this.trail );
-      }
-
-      this.phetioEndEvent();
+      this.dragEndedEmitter.emit( event.pointer.point, event );
 
       // release our reference
       this.pointer = null;
