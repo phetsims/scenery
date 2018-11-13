@@ -30,7 +30,7 @@ define( function( require ) {
 
   phetioInherit( ObjectIO, 'SimpleDragHandlerIO', SimpleDragHandlerIO, {}, {
     documentation: 'Drag listener for objects that can be dragged by the user.',
-    events: [ 'dragged', 'dragEnded' ]
+    events: [ 'dragEnded' ]
   } );
 
   scenery.register( 'SimpleDragHandlerIO', SimpleDragHandlerIO );

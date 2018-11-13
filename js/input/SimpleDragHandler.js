@@ -107,6 +107,43 @@ define( function( require ) {
       }
     } );
 
+    // @private
+    this.draggedEmitter = new Emitter( {
+      phetioHighFrequency: true,
+      tandem: options.tandem.createTandem( 'draggedEmitter' ),
+      phetioType: EmitterIO(
+        [ { name: 'point', type: Vector2IO, documentation: 'the position of the drag in view coordinates' },
+          {
+            name: 'delta',
+            type: Vector2IO,
+            documentation: 'the change from the previous position to the current position'
+          },
+          { name: 'event', type: VoidIO, documentation: 'the scenery pointer Event' } ] ),
+      listener: function( point, delta, event ) {
+
+        // move by the delta between the previous point, using the precomputed transform
+        // prepend the translation on the node, so we can ignore whatever other transform state the node has
+        if ( self.options.translate ) {
+          var translation = self.node.getMatrix().getTranslation();
+          self.options.translate.call( null, {
+            delta: delta,
+            oldPosition: translation,
+            position: translation.plus( delta )
+          } );
+        }
+        self.lastDragPoint = self.pointer.point;
+
+        if ( self.options.drag ) {
+
+          // TODO: add the position in to the listener
+          var saveCurrentTarget = event.currentTarget;
+          event.currentTarget = self.node; // #66: currentTarget on a pointer is null, so set it to the node we're dragging
+          self.options.drag.call( null, event, self.trail ); // new position (old position?) delta
+          event.currentTarget = saveCurrentTarget; // be polite to other listeners, restore currentTarget
+        }
+      }
+    } );
+
     // if an ancestor is transformed, pin our node
     this.transformListener = {
       transform: function( args ) {
@@ -180,39 +217,12 @@ define( function( require ) {
           return;
         }
 
+        var delta = self.transform.inverseDelta2( globalDelta );
+
         sceneryLog && sceneryLog.InputListener && sceneryLog.InputListener( 'SimpleDragHandler (pointer) move for ' + self.trail.toString() );
         sceneryLog && sceneryLog.InputListener && sceneryLog.push();
 
-        var delta = self.transform.inverseDelta2( globalDelta );
-
-        // TODO: Convert to phtioHighFrequency Emitter
-        self.phetioStartEvent( 'dragged', {
-          x: event.pointer.point.x,
-          y: event.pointer.point.y
-        } );
-
-        // move by the delta between the previous point, using the precomputed transform
-        // prepend the translation on the node, so we can ignore whatever other transform state the node has
-        if ( self.options.translate ) {
-          var translation = self.node.getMatrix().getTranslation();
-          self.options.translate.call( null, {
-            delta: delta,
-            oldPosition: translation,
-            position: translation.plus( delta )
-          } );
-        }
-        self.lastDragPoint = self.pointer.point;
-
-        if ( self.options.drag ) {
-
-          // TODO: consider adding in a delta to the listener
-          // TODO: add the position in to the listener
-          var saveCurrentTarget = event.currentTarget;
-          event.currentTarget = self.node; // #66: currentTarget on a pointer is null, so set it to the node we're dragging
-          self.options.drag.call( null, event, self.trail ); // new position (old position?) delta
-          event.currentTarget = saveCurrentTarget; // be polite to other listeners, restore currentTarget
-        }
-        self.phetioEndEvent();
+        self.draggedEmitter.emit( event.pointer.point, delta, event );
 
         sceneryLog && sceneryLog.InputListener && sceneryLog.pop();
       }
