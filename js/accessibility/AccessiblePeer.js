@@ -528,7 +528,6 @@ define( function( require ) {
         // treat it like a property, set in a way that works for elements with a custom namespace (like MathML),
         // see https://github.com/phetsims/scenery/issues/870
         element.setAttribute( attribute, '' );
-        element[ attribute ] = attributeValue;
       }
       else {
         element.setAttribute( attribute, attributeValue );
