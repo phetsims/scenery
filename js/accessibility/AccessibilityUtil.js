@@ -69,6 +69,10 @@ define( function( require ) {
   var ARIA_DESCRIBEDBY = 'aria-describedby';
   var ARIA_ACTIVE_DESCENDANT = 'aria-activedescendant';
 
+  // data attribute to flag whether an element is focusable - cannot check tabindex because IE11 and Edge assign
+  // tabIndex=0 internally for all HTML elements, including those that should not receive focus
+  var DATA_FOCUSABLE = 'data-focusable';
+
   // {Array.<String>} attributes that put an ID of another attribute as the value, see https://github.com/phetsims/scenery/issues/819
   var ASSOCIATION_ATTRIBUTES = [ ARIA_LABELLEDBY, ARIA_DESCRIBEDBY, ARIA_ACTIVE_DESCENDANT ];
 
@@ -172,9 +176,7 @@ define( function( require ) {
       return false;
     }
 
-    // focusable if flagged as such with data attribute - cannot check tabindex because IE11 and Edge assign
-    // tabIndex=0 internally for all HTML elements
-    return domElement.getAttribute( 'data-focusable' ) === 'true';
+    return domElement.getAttribute( DATA_FOCUSABLE ) === 'true';
   }
 
   /**
@@ -508,10 +510,7 @@ define( function( require ) {
         element.removeAttribute( 'tabindex' );
       }
 
-      // flag for IE11, so that we can detect whether the element is focusable, since IE11 adds tabIndex=0 on
-      // ALL HTML elements, even those that are not focusable
-      element.setAttribute( 'data-focusable', focusable );
-
+      element.setAttribute( DATA_FOCUSABLE, focusable );
     },
 
     TAGS: {
