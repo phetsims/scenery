@@ -523,8 +523,11 @@ define( function( require ) {
       if ( options.namespace ) {
         element.setAttributeNS( options.namespace, attribute, attributeValue );
       }
-      // treat it like a property
       else if ( options.asProperty ) {
+
+        // treat it like a property, set in a way that works for elements with a custom namespace (like MathML),
+        // see https://github.com/phetsims/scenery/issues/870
+        element.setAttribute( attribute, '' );
         element[ attribute ] = attributeValue;
       }
       else {
