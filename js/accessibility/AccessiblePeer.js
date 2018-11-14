@@ -515,10 +515,14 @@ define( function( require ) {
         // set as a javascript property instead of an attribute on the DOM Element.
         asProperty: false,
 
-        elementName: PRIMARY_SIBLING // see this.getElementName() for valid values, default to the primary sibling
+        elementName: PRIMARY_SIBLING, // see this.getElementName() for valid values, default to the primary sibling
+
+        // {HTMLElement|null} - element that will directly receive the input rather than looking up by name, if
+        // provided, elementName option will have no effect
+        element: null
       }, options );
 
-      var element = this.getElementByName( options.elementName );
+      var element = options.element || this.getElementByName( options.elementName );
 
       if ( options.namespace ) {
         element.setAttributeNS( options.namespace, attribute, attributeValue );
@@ -544,10 +548,14 @@ define( function( require ) {
         // for setting certain attributes (e.g. MathML).
         namespace: null,
 
-        elementName: PRIMARY_SIBLING // see this.getElementName() for valid values, default to the primary sibling
+        elementName: PRIMARY_SIBLING, // see this.getElementName() for valid values, default to the primary sibling
+
+        // {HTMLElement|null} - element that will directly receive the input rather than looking up by name, if
+        // provided, elementName option will have no effect
+        element: null
       }, options );
 
-      var element = this.getElementByName( options.elementName );
+      var element = options.element || this.getElementByName( options.elementName );
 
       if ( options.namespace ) {
         element.removeAttributeNS( options.namespace, attribute );
@@ -702,10 +710,10 @@ define( function( require ) {
         for ( var i = 0; i < this.topLevelElements.length; i++ ) {
           var element = this.topLevelElements[ i ];
           if ( visible ) {
-            element.removeAttribute( 'hidden' );
+            this.removeAttributeFromElement( 'hidden', { element: element } );
           }
           else {
-            element.setAttribute( 'hidden', '' );
+            this.setAttributeToElement( 'hidden', '', { element: element } );
           }
         }
       }
