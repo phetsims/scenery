@@ -501,15 +501,14 @@ define( function( require ) {
       var defaultFocusable = AccessibilityUtil.tagIsDefaultFocusable( element.tagName );
 
       // only add a tabindex when we are overriding the default focusable bahvior of the browser for the tag name
-      // (logical xor)
-      if ( defaultFocusable ? !focusable : focusable ) {
+      if ( defaultFocusable !== focusable ) {
         element.tabIndex = focusable ? 0 : -1;
       }
       else {
         element.removeAttribute( 'tabindex' );
       }
 
-      // flag for IE11, so that we can track detect whether the element is focusable, since IE11 adds tabIndex=0 on
+      // flag for IE11, so that we can detect whether the element is focusable, since IE11 adds tabIndex=0 on
       // ALL HTML elements, even those that are not focusable
       element.setAttribute( 'data-focusable', focusable );
 
