@@ -524,18 +524,7 @@ define( function( require ) {
         element.setAttributeNS( options.namespace, attribute, attributeValue );
       }
       else if ( options.asProperty ) {
-        assert && assert( typeof attributeValue === 'boolean', 'value for attribute as property must be boolean' );
-        if ( attributeValue ) {
-
-          // treat it like a property, set in a way that works for elements with a custom namespace (like MathML),
-          // see https://github.com/phetsims/scenery/issues/870
-          element.setAttribute( attribute, '' );
-        }
-        else {
-
-          // support false so that setting property attribute false will remove attribute
-          element.removeAttribute( attribute );
-        }
+        element[ attribute ] = attributeValue;
       }
       else {
         element.setAttribute( attribute, attributeValue );
