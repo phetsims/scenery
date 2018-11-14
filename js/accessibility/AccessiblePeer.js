@@ -180,7 +180,7 @@ define( function( require ) {
 
       // assign an id that lets us map the DOM element to a Scenery Trail
       // NOTE: dataset isn't supported by all namespaces (like MathML) so we need to use setAttribute
-      this._primarySibling.setAttribute( 'data-trailId', uniqueId );
+      this.setAttributeToElement( 'data-trailId', uniqueId );
 
       // create the container parent for the dom siblings
       if ( options.containerTagName ) {
@@ -775,7 +775,9 @@ define( function( require ) {
       // REVIEW: Should we check _labelTagName directly? Or use a behavior-like strategy for this?
       // ZEPUMPH: perhaps implemented with https://github.com/phetsims/scenery/issues/867
       if ( this._labelSibling.tagName.toUpperCase() === LABEL_TAG ) {
-        this._labelSibling.setAttribute( 'for', this._primarySibling.id );
+        this.setAttributeToElement( 'for', this._primarySibling.id, {
+          elementName: AccessiblePeer.LABEL_SIBLING
+        } );
       }
     },
 
