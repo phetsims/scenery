@@ -73,6 +73,33 @@ define( function( require ) {
 
   QUnit.test( 'overrideFocusWithTabIndex', function ( assert ) {
 
+    // test function directly
+    var testButton = document.createElement( 'button' );
+    var testListItem = document.createElement( 'li' );
+    var testLink = document.createElement( 'a' );
+    var testSection = document.createElement( 'section' );
+
+    // defaults, should not an tabindex to any elements
+    AccessibilityUtil.overrideFocusWithTabIndex( testButton, true );
+    AccessibilityUtil.overrideFocusWithTabIndex( testLink, true );
+    AccessibilityUtil.overrideFocusWithTabIndex( testListItem, false );
+    AccessibilityUtil.overrideFocusWithTabIndex( testSection, false );
+    assert.ok( testButton.getAttribute( 'tabindex' ) === null, 'testButton focusable by default, shouldn\'t have override' );
+    assert.ok( testLink.getAttribute( 'tabindex' ) === null, 'testLink focusable by default, shouldn\'t have override' );
+    assert.ok( testListItem.getAttribute( 'tabindex' ) === null, 'testListItem not focusable by default, shouldn\'t have override' );
+    assert.ok( testSection.getAttribute( 'tabindex' ) === null, 'testSection not focusable by default, shouldn\'t have override' );
+
+    // override all, should all should have a tabindex
+    AccessibilityUtil.overrideFocusWithTabIndex( testButton, false );
+    AccessibilityUtil.overrideFocusWithTabIndex( testLink, false );
+    AccessibilityUtil.overrideFocusWithTabIndex( testListItem, true );
+    AccessibilityUtil.overrideFocusWithTabIndex( testSection, true );
+    assert.ok( testButton.getAttribute( 'tabindex' ) === '-1', 'testButton focusable by default, should have override' );
+    assert.ok( testLink.getAttribute( 'tabindex' ) === '-1', 'testLink focusable by default, should have override' );
+    assert.ok( testListItem.getAttribute( 'tabindex' ) === '0', 'testListItem not focusable by default, should have override' );
+    assert.ok( testSection.getAttribute( 'tabindex' ) === '0', 'testSection not focusable by default, should have override' );
+
+    // test function in usages with createElement
     // tab index should only be set on elements where we are overriding what is being done natively in the browser
     var defaultButton = AccessibilityUtil.createElement( 'button', true ); // focusable
     var defaultParagraph = AccessibilityUtil.createElement( 'p', false ); // not focusable
