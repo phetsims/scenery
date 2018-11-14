@@ -2290,14 +2290,9 @@ define( function( require ) {
           if ( this._accessibleChecked !== checked ) {
             this._accessibleChecked = checked;
 
-            if ( checked ) {
-              this.setAccessibleAttribute( 'checked', checked, {
-                asProperty: true
-              } );
-            }
-            else {
-              this.removeAccessibleAttribute( 'checked' );
-            }
+            this.setAccessibleAttribute( 'checked', checked, {
+              asProperty: true
+            } );
           }
         },
         set accessibleChecked( checked ) { this.setAccessibleChecked( checked ); },
