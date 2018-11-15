@@ -499,7 +499,6 @@ define( function( require ) {
 
     /**
      * Sets a attribute on one of the peer's HTMLElements.
-     * NOTE: If the attributeValue is a boolean, then it will be set as a javascript property on the HTMLElement rather than an attribute
      * @public (scenery-internal)
      * @param {string} attribute
      * @param {*} attributeValue
