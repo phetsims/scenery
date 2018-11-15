@@ -1495,7 +1495,8 @@ define( function( require ) {
     /**
      * Allows overriding the value of localBounds (and thus changing things like 'bounds' that depend on localBounds).
      * If it's set to a non-null value, that value will always be used for localBounds until this function is called
-     * again. To revert to having Scenery compute the localBounds, set this to null.
+     * again. To revert to having Scenery compute the localBounds, set this to null.  The bounds should not be reduced
+     * smaller than the visible bounds on the screen.
      * @public
      *
      * @param {Bounds2|null} localBounds
