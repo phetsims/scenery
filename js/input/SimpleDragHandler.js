@@ -21,6 +21,7 @@ define( function( require ) {
   var scenery = require( 'SCENERY/scenery' );
   var Tandem = require( 'TANDEM/Tandem' );
   var Touch = require( 'SCENERY/input/Touch' );
+  var Vector2 = require( 'DOT/Vector2' );
 
   /**
    * @param {Object} [options]
@@ -294,7 +295,9 @@ define( function( require ) {
 
       this.isDraggingProperty.set( false );
 
-      this.dragEndedEmitter.emit( event.pointer.point, event );
+      // Signify drag ended.  In the case of programmatically ended drags, signify drag ended at 0,0.
+      // see https://github.com/phetsims/ph-scale-basics/issues/43
+      this.dragEndedEmitter.emit( event ? event.pointer.point : Vector2.ZERO, event );
 
       // release our reference
       this.pointer = null;
