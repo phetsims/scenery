@@ -18,7 +18,6 @@ define( function( require ) {
   var assertInstanceOf = require( 'ifphetio!PHET_IO/assertInstanceOf' );
 
   /**
-   * IO type for phet/sun's Faucet class.
    * @param {Focus} focus - the focus region which has {display,trail}
    * @param {string} phetioID - the unique tandem assigned to the focus
    * @constructor
