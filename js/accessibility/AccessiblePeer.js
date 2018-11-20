@@ -417,12 +417,24 @@ define( function( require ) {
     },
 
     /**
-     * Set the input value on the peer's primary sibling element. Using the value setter seems to be the only way
-     * to have the value be set correctly so we cannot use onAttributeChange for this.
+     * Set the input value on the peer's primary sibling element. The value attribute must be set as a Property to be
+     * registered correctly by an assistive device. If null, the attribute is removed so that we don't clutter the DOM
+     * with value="null" attributes.
+     *
      * @public (scenery-internal)
      */
     onInputValueChange: function() {
-      this.primarySibling.value = this.node.inputValue;
+      assert && assert( this.node.inputValue !== undefined, 'use null to remove input value attribute' );
+
+      if ( this.node.inputValue === null ) {
+        this.removeAttributeFromElement( 'value' );
+      }
+      else {
+
+        // type conversion for DOM spec
+        var valueString = this.node.inputValue + '';
+        this.setAttributeToElement( 'value', valueString, { asProperty: true } );
+      }
     },
 
     /**
