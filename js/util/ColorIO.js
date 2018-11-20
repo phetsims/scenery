@@ -10,6 +10,7 @@ define( function( require ) {
   'use strict';
 
   // modules
+  var Color = require( 'SCENERY/util/Color' );
   var ObjectIO = require( 'TANDEM/types/ObjectIO' );
   var phetioInherit = require( 'TANDEM/phetioInherit' );
   var scenery = require( 'SCENERY/scenery' );
@@ -24,7 +25,7 @@ define( function( require ) {
    * @constructor
    */
   function ColorIO( color, phetioID ) {
-    assert && assertInstanceOf( color, scenery.Color );
+    assert && assertInstanceOf( color, Color );
     ObjectIO.call( this, color, phetioID );
   }
 
@@ -38,7 +39,7 @@ define( function( require ) {
      * @override
      */
     toStateObject: function( color ) {
-      assert && assertInstanceOf( color, scenery.Color );
+      assert && assertInstanceOf( color, Color );
       return color.toStateObject();
     },
 
@@ -50,7 +51,7 @@ define( function( require ) {
      * @override
      */
     fromStateObject: function( stateObject ) {
-      return new scenery.Color( stateObject.r, stateObject.g, stateObject.b, stateObject.a );
+      return new Color( stateObject.r, stateObject.g, stateObject.b, stateObject.a );
     }
   } );
 

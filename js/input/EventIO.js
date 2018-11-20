@@ -13,6 +13,7 @@ define( function( require ) {
   const phetioInherit = require( 'TANDEM/phetioInherit' );
   const scenery = require( 'SCENERY/scenery' );
   const Vector2IO = require( 'DOT/Vector2IO' );
+  const Event = require( 'SCENERY/input/Event' );
 
   // ifphetio
   const assertInstanceOf = require( 'ifphetio!PHET_IO/assertInstanceOf' );
@@ -24,7 +25,7 @@ define( function( require ) {
    * @constructor
    */
   function EventIO( event, phetioID ) {
-    assert && assertInstanceOf( event, scenery.Event );
+    assert && assertInstanceOf( event, Event );
     ObjectIO.call( this, event, phetioID );
   }
 
@@ -37,7 +38,7 @@ define( function( require ) {
      * @param {*} instance
      * @returns {boolean}
      */
-    isInstance: function( instance ) { return instance instanceof scenery.Event; },
+    isInstance: function( instance ) { return instance instanceof Event; },
 
     /**
      * Encodes a Color into a state object.
@@ -46,7 +47,7 @@ define( function( require ) {
      * @override
      */
     toStateObject( event ) {
-      assert && assertInstanceOf( event, scenery.Event );
+      assert && assertInstanceOf( event, Event );
 
       var eventObject = {
         type: event.type,

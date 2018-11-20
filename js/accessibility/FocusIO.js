@@ -10,6 +10,7 @@ define( function( require ) {
   'use strict';
 
   // modules
+  var Focus = require( 'SCENERY/accessibility/Focus' );
   var ObjectIO = require( 'TANDEM/types/ObjectIO' );
   var phetioInherit = require( 'TANDEM/phetioInherit' );
   var scenery = require( 'SCENERY/scenery' );
@@ -23,7 +24,7 @@ define( function( require ) {
    * @constructor
    */
   function FocusIO( focus, phetioID ) {
-    assert && assertInstanceOf( focus, scenery.Focus );
+    assert && assertInstanceOf( focus, Focus );
     ObjectIO.call( this, focus, phetioID );
   }
 
@@ -42,7 +43,7 @@ define( function( require ) {
         return null;
       }
       else {
-        assert && assertInstanceOf( focus, scenery.Focus );
+        assert && assertInstanceOf( focus, Focus );
         var phetioIDIndices = [];
         focus.trail.nodes.forEach( function( node, i ) {
 

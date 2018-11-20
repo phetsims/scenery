@@ -9,6 +9,7 @@ define( function( require ) {
   'use strict';
 
   // modules
+  var Image = require( 'SCENERY/nodes/Image' );
   var NodeIO = require( 'SCENERY/nodes/NodeIO' );
   var phetioInherit = require( 'TANDEM/phetioInherit' );
   var scenery = require( 'SCENERY/scenery' );
@@ -24,7 +25,7 @@ define( function( require ) {
    * @constructor
    */
   function ImageIO( image, phetioID ) {
-    assert && assertInstanceOf( image, scenery.Image );
+    assert && assertInstanceOf( image, Image );
     NodeIO.call( this, image, phetioID );
   }
 
