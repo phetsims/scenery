@@ -758,7 +758,7 @@ define( function( require ) {
       sceneryLog && sceneryLog.Input && sceneryLog.Input( 'focusIn(' + Input.debugText( null, event ) + ');' );
       sceneryLog && sceneryLog.Input && sceneryLog.push();
 
-      var trail = Trail.fromUniqueId( this.rootNode, event.target.getAttribute( 'data-trailId' ) );
+      var trail = Trail.fromUniqueId( this.rootNode, event.target.getAttribute( 'data-trail-id' ) );
 
       // TODO: a11y pointer! See #888
       this.dispatchEvent( trail, 'focus', new Pointer( null, false ), event, true );

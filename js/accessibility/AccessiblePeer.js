@@ -180,7 +180,7 @@ define( function( require ) {
 
       // assign an id that lets us map the DOM element to a Scenery Trail
       // NOTE: dataset isn't supported by all namespaces (like MathML) so we need to use setAttribute
-      this.setAttributeToElement( 'data-trailId', uniqueId );
+      this.setAttributeToElement( 'data-trail-id', uniqueId );
 
       // create the container parent for the dom siblings
       if ( options.containerTagName ) {
