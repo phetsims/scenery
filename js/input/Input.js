@@ -506,8 +506,13 @@ define( function( require ) {
       var accessibleEventOptions = Features.passive ? { useCapture: false, passive: false } : false;
 
       this.display.accessibleDOMElement.addEventListener( 'focusin', function( event ) {
-        if ( !this.a11yPointer ) { self.initA11yPointer(); }
+        if ( !self.a11yPointer ) { self.initA11yPointer(); }
         self.focusIn( event );
+      }, accessibleEventOptions );
+
+      this.display.accessibleDOMElement.addEventListener( 'focusout', function( event ) {
+        if ( !self.a11yPointer ) { self.initA11yPointer(); }
+        self.focusOut( event );
       }, accessibleEventOptions );
     }
   }
@@ -765,8 +770,26 @@ define( function( require ) {
 
       var trail = this.a11yPointer.updateTrail( this.rootNode, event.target.getAttribute( 'data-trail-id' ) );
 
-      // TODO: a11y pointer! See #888
-      this.dispatchEvent( trail, 'focus', this.a11yPointer, event, true );
+      this.dispatchEvent( trail, 'focus', this.a11yPointer, event, false );
+
+      // TODO: emit focusIn emitter? Or is it just called focusEmitter? See #888
+
+      sceneryLog && sceneryLog.Input && sceneryLog.pop();
+    },
+
+    /**
+     * Triggers a logical blur event.
+     * @public (scenery-internal)
+     *
+     * @param {DOMEvent} event
+     */
+    focusOut: function( event ) {
+      sceneryLog && sceneryLog.Input && sceneryLog.Input( 'focusOut(' + Input.debugText( null, event ) + ');' );
+      sceneryLog && sceneryLog.Input && sceneryLog.push();
+
+      assert && assert( this.a11yPointer.trail, 'cannot blur without a trail from pointer' );
+
+      this.dispatchEvent( this.a11yPointer.trail, 'blur', this.a11yPointer, event, false );
 
       // TODO: emit focusIn emitter? Or is it just called focusEmitter? See #888
 

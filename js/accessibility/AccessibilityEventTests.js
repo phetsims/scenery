@@ -26,18 +26,45 @@ define( require => {
 
     var a = new Rectangle( 0, 0, 20, 20, { tagName: 'button' } );
 
-    var gotFocus = false;
+    var aGotFocus = false;
+    var aLostFocus = false;
+    var bGotFocus = false;
 
     rootNode.addChild( a );
 
     a.addInputListener( {
       focus() {
-        gotFocus = true;
+        console.log( 'afocus' );
+
+        aGotFocus = true;
+      },
+      blur() {
+        console.log( 'ablur' );
+
+        aLostFocus = true;
       }
     } );
 
     a.focus();
-    assert.ok( gotFocus, 'a should have been focused' );
+    assert.ok( aGotFocus, 'a should have been focused' );
+    assert.ok( !aLostFocus, 'a should not blur' );
+
+    var b = new Rectangle( 0, 0, 20, 20, { tagName: 'button' } );
+
+    rootNode.addChild( b );
+
+    b.addInputListener( {
+      focus() {
+        console.log( 'bfocus' );
+
+        bGotFocus = true;
+      }
+    } );
+
+    b.focus();
+
+    assert.ok( bGotFocus, 'b should have been focused' );
+    assert.ok( aLostFocus, 'a should have lost focused' );
   } );
 
 } );
