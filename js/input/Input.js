@@ -121,6 +121,7 @@
 define( function( require ) {
   'use strict';
 
+  var A11yPointer = require( 'SCENERY/input/A11yPointer' );
   var BatchedDOMEvent = require( 'SCENERY/input/BatchedDOMEvent' );
   var BrowserEvents = require( 'SCENERY/input/BrowserEvents' );
   var cleanArray = require( 'PHET_CORE/cleanArray' );
@@ -190,6 +191,9 @@ define( function( require ) {
 
     // @private {Array.<BatchedDOMEvent}>
     this.batchedEvents = [];
+
+    // @public {A11yPointer|null} - Pointer for accessibility, only created lazily on first a11y event.
+    this.a11yPointer = null;
 
     // @public {Mouse|null} - Pointer for mouse, only created lazily on first mouse event, so no mouse is allocated on.
     // tablets.
@@ -502,6 +506,7 @@ define( function( require ) {
       var accessibleEventOptions = Features.passive ? { useCapture: false, passive: false } : false;
 
       this.display.accessibleDOMElement.addEventListener( 'focusin', function( event ) {
+        if ( !this.a11yPointer ) { self.initA11yPointer(); }
         self.focusIn( event );
       }, accessibleEventOptions );
     }
@@ -758,13 +763,13 @@ define( function( require ) {
       sceneryLog && sceneryLog.Input && sceneryLog.Input( 'focusIn(' + Input.debugText( null, event ) + ');' );
       sceneryLog && sceneryLog.Input && sceneryLog.push();
 
-      var trail = Trail.fromUniqueId( this.rootNode, event.target.getAttribute( 'data-trailId' ) );
+      var trail = this.a11yPointer.updateTrail( this.rootNode, event.target.getAttribute( 'data-trailId' ) );
 
       // TODO: a11y pointer! See #888
-      this.dispatchEvent( trail, 'focus', new Pointer( null, false ), event, true );
+      this.dispatchEvent( trail, 'focus', this.a11yPointer, event, true );
 
       // TODO: emit focusIn emitter? Or is it just called focusEmitter? See #888
-      
+
       sceneryLog && sceneryLog.Input && sceneryLog.pop();
     },
 
@@ -775,6 +780,15 @@ define( function( require ) {
     initMouse: function() {
       this.mouse = new Mouse();
       this.addPointer( this.mouse );
+    },
+
+    /**
+     * Initializes the accessible pointer object on the first a11y event.
+     * @private
+     */
+    initA11yPointer: function() {
+      this.a11yPointer = new A11yPointer();
+      this.addPointer( this.a11yPointer );
     },
 
     /**
