@@ -787,9 +787,13 @@ define( function( require ) {
       sceneryLog && sceneryLog.Input && sceneryLog.Input( 'focusOut(' + Input.debugText( null, event ) + ');' );
       sceneryLog && sceneryLog.Input && sceneryLog.push();
 
-      assert && assert( this.a11yPointer.trail, 'cannot blur without a trail from pointer' );
+      var trail = this.a11yPointer.trail;
 
-      this.dispatchEvent( this.a11yPointer.trail, 'blur', this.a11yPointer, event, false );
+      if ( !trail ) {
+        trail = this.a11yPointer.updateTrail( this.rootNode, event.target.getAttribute( 'data-trail-id' ) );
+      }
+
+      this.dispatchEvent( trail, 'blur', this.a11yPointer, event, false );
 
       // TODO: emit focusIn emitter? Or is it just called focusEmitter? See #888
 
