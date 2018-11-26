@@ -51,6 +51,7 @@ define( require => {
 
     var b = new Rectangle( 0, 0, 20, 20, { tagName: 'button' } );
 
+    // TODO: what if b was child of a, make sure these events don't bubble!
     rootNode.addChild( b );
 
     b.addInputListener( {
