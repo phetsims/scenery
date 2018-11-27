@@ -118,7 +118,8 @@ define( function( require ) {
       tandem: Tandem.required,
 
       // to support properly passing this to children, see https://github.com/phetsims/tandem/issues/60
-      phetioReadOnly: PhetioObject.DEFAULT_OPTIONS.phetioReadOnly
+      phetioReadOnly: PhetioObject.DEFAULT_OPTIONS.phetioReadOnly,
+      phetioFeatured: PhetioObject.DEFAULT_OPTIONS.phetioFeatured
     }, options );
 
     assert && assert( typeof options.allowTouchSnag === 'boolean', 'allowTouchSnag should be a boolean' );
@@ -184,6 +185,7 @@ define( function( require ) {
 
     // @private {Emitter} - emitted on drag. Used for triggering phet-io events to the data stream, see https://github.com/phetsims/scenery/issues/842
     this._draggedEmitter = new Emitter( {
+      phetioFeatured: options.phetioFeatured,
       tandem: options.tandem.createTandem( 'draggedEmitter' ),
       phetioHighFrequency: true,
       phetioDocumentation: 'Emits whenever a drag occurs with an EventIO argument.',
