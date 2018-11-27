@@ -114,6 +114,12 @@ define( function( require ) {
       gl.texParameteri( gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, this.useMipmaps ? gl.LINEAR_MIPMAP_LINEAR : gl.LINEAR );
       gl.texParameteri( gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, gl.LINEAR );
       gl.pixelStorei( gl.UNPACK_FLIP_Y_WEBGL, false );
+      // NOTE: We switched back to a fully premultiplied setup, and we were running into issues with the default
+      // filtering/interpolation EXPECTING the texture ITSELF to be premultipled to work correctly (particularly with
+      // textures that are larger or smaller on the screen).
+      // See https://github.com/phetsims/energy-skate-park/issues/39, https://github.com/phetsims/scenery/issues/397
+      // and https://stackoverflow.com/questions/39341564/webgl-how-to-correctly-blend-alpha-channel-png
+      gl.pixelStorei( gl.UNPACK_PREMULTIPLY_ALPHA_WEBGL, true ); // work with premultiplied numbers
       gl.texImage2D( gl.TEXTURE_2D, 0, gl.RGBA, gl.RGBA, gl.UNSIGNED_BYTE, this.canvas );
       if ( this.useMipmaps ) {
         gl.hint( gl.GENERATE_MIPMAP_HINT, gl.NICEST );
@@ -139,6 +145,7 @@ define( function( require ) {
         gl.bindTexture( gl.TEXTURE_2D, this.texture );
         gl.texImage2D( gl.TEXTURE_2D, 0, gl.RGBA, gl.RGBA, gl.UNSIGNED_BYTE, this.canvas );
         if ( this.useMipmaps ) {
+          gl.hint( gl.GENERATE_MIPMAP_HINT, gl.NICEST );
           gl.generateMipmap( gl.TEXTURE_2D );
         }
         gl.bindTexture( gl.TEXTURE_2D, null );

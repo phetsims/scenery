@@ -285,6 +285,10 @@ define( function( require ) {
       var contextOptions = {
         antialias: true,
         preserveDrawingBuffer: this.preserveDrawingBuffer
+        // NOTE: we use premultiplied alpha since it should have better performance AND it appears to be the only one
+        // truly compatible with texture filtering/interpolation.
+        // See https://github.com/phetsims/energy-skate-park/issues/39, https://github.com/phetsims/scenery/issues/397
+        // and https://stackoverflow.com/questions/39341564/webgl-how-to-correctly-blend-alpha-channel-png
       };
 
       // we've already committed to using a WebGLBlock, so no use in a try-catch around our context attempt
@@ -650,8 +654,10 @@ define( function( require ) {
         'varying vec4 vColor;',
 
         'void main() {',
-        // '  gl_FragColor = vec4( 0.0, 1.0, 0.0, 1.0 );',
-        '  gl_FragColor = vColor;',
+        // NOTE: Premultiplying alpha here is needed since we're going back to the standard blend functions.
+        // See https://github.com/phetsims/energy-skate-park/issues/39, https://github.com/phetsims/scenery/issues/397
+        // and https://stackoverflow.com/questions/39341564/webgl-how-to-correctly-blend-alpha-channel-png
+        '  gl_FragColor = vec4( vColor.rgb * vColor.a, vColor.a );',
         '}'
       ].join( '\n' ), {
         attributes: [ 'aVertex', 'aColor' ],
@@ -787,7 +793,7 @@ define( function( require ) {
         'void main() {',
         '  vec4 color = texture2D( uTexture, vTextureCoord, -0.7 );', // mipmap LOD bias of -0.7 (for now)
         '  color.a *= vAlpha;',
-        '  gl_FragColor = color;',
+        '  gl_FragColor = color;', // don't premultiply alpha (we are loading the textures as premultiplied already)
         '}'
       ].join( '\n' ), {
         // attributes: [ 'aVertex', 'aTextureCoord' ],

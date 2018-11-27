@@ -47,6 +47,10 @@ define( function( require ) {
    *   Returns either WebGLNode.PAINTED_NOTHING or WebGLNode.PAINTED_SOMETHING.
    * dispose()
    *
+   * NOTE: If any alpha values are non-1, please note that Scenery's canvases uses blending/settings for premultiplied
+   * alpha. This means that if you want a color to look like (r,g,b,a), the value passed to gl_FragColor should be
+   * (r/a,g/a,b/a,a).
+   *
    * @param {Function} painterType - The type (constructor) for the painters that will be used for this node.
    * @param {Object} [options] - WebGLNode-specific options are documented in LINE_OPTION_KEYS above, and can be
    *                             provided along-side options for Node

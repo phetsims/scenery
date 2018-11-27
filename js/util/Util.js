@@ -485,8 +485,14 @@ define( function( require ) {
 
       // Blending similar to http://localhost/phet/git/webgl-blendfunctions/blendfuncseparate.html
       gl.enable( gl.BLEND );
-      gl.blendEquationSeparate( gl.FUNC_ADD, gl.FUNC_ADD );
-      gl.blendFuncSeparate( gl.SRC_ALPHA, gl.ONE_MINUS_SRC_ALPHA, gl.ONE, gl.ONE_MINUS_SRC_ALPHA );
+
+      // NOTE: We switched back to a fully premultiplied setup, so we have the corresponding blend function.
+      // For normal colors (and custom WebGLNode handling), it is necessary to use premultiplied values (multiplying the
+      // RGB values by the alpha value for gl_FragColor). For textured triangles, it is assumed that the texture is
+      // already premultiplied, so the built-in shader does not do the extra premultiplication.
+      // See https://github.com/phetsims/energy-skate-park/issues/39, https://github.com/phetsims/scenery/issues/397
+      // and https://stackoverflow.com/questions/39341564/webgl-how-to-correctly-blend-alpha-channel-png
+      gl.blendFunc( gl.ONE, gl.ONE_MINUS_SRC_ALPHA );
     },
 
     /**

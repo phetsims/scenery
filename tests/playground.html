@@ -143,6 +143,135 @@ an UI and Display made for visual testing and debugging.
         } )
       };
 
+      window.interpTest = function() {
+        var canvas = document.createElement( 'canvas' );
+        var context = canvas.getContext( '2d' )
+        canvas.width = 4;
+        canvas.height = 4;
+        context.fillStyle = 'rgba(255,255,255,1)'
+        context.fillRect( 0, 0, 2, 4 );
+        context.fillStyle = 'rgba(255,0,0,1)'
+        context.fillRect( 0, 0, 1, 4 );
+        context.fillStyle = 'rgba(0,0,255,1)'
+        context.fillRect( 3, 0, 1, 4 );
+        context.fillStyle = 'rgba(0,0,0,0)'
+        context.fillRect( 2, 0, 2, 4 );
+        var im = new scenery.Image( canvas );
+        scene.addChild( im );
+        im.setScaleMagnitude( 100 );
+        im.renderer = 'webgl';
+        toggleUpdates();
+      };
+
+      window.blendTest = function() {
+        display.width = 512;
+        display.height = 512;
+
+        var canvas = document.createElement( 'canvas' );
+        var context = canvas.getContext( '2d' )
+        canvas.width = 4;
+        canvas.height = 4;
+        context.fillStyle = 'rgba(255,255,255,1)'
+        context.fillRect( 0, 0, 2, 4 );
+        context.fillStyle = 'rgba(255,0,0,1)'
+        context.fillRect( 0, 0, 1, 4 );
+        context.fillStyle = 'rgba(0,0,255,1)'
+        context.fillRect( 3, 0, 1, 4 );
+        context.fillStyle = 'rgba(0,0,0,0)'
+        context.fillRect( 2, 0, 2, 4 );
+
+        var canvas2 = document.createElement( 'canvas' );
+        var context2 = canvas2.getContext( '2d' );
+        canvas2.width = 256;
+        canvas2.height = 256;
+        var gradient = context2.createLinearGradient( 0, 0, 168, 0 );
+        gradient.addColorStop( 0.00 / 0.75, 'rgba(0,0,0,1)' );
+        gradient.addColorStop( 0.05 / 0.75, 'rgba(255,0,0,1)' );
+        gradient.addColorStop( 0.10 / 0.75, 'rgba(160,160,160,1)' );
+        gradient.addColorStop( 0.15 / 0.75, 'rgba(160,160,160,0)' );
+        gradient.addColorStop( 0.20 / 0.75, 'rgba(255,255,255,1)' );
+        gradient.addColorStop( 0.25 / 0.75, 'rgba(255,255,255,0)' );
+        gradient.addColorStop( 0.30 / 0.75, 'rgba(255,255,255,1)' );
+        gradient.addColorStop( 0.35 / 0.75, 'rgba(0,0,0,0)' );
+        gradient.addColorStop( 0.40 / 0.75, 'rgba(0,0,0,1)' );
+        gradient.addColorStop( 0.45 / 0.75, 'rgba(255,255,255,0)' );
+        gradient.addColorStop( 0.50 / 0.75, 'rgba(0,0,0,1)' );
+        gradient.addColorStop( 0.55 / 0.75, 'rgba(0,0,0,0)' );
+        gradient.addColorStop( 0.60 / 0.75, 'rgba(0,0,255,1)' );
+        gradient.addColorStop( 0.65 / 0.75, 'rgba(255,255,255,0)' );
+        gradient.addColorStop( 0.70 / 0.75, 'rgba(0,0,255,1)' );
+        gradient.addColorStop( 0.75 / 0.75, 'rgba(0,0,0,0)' );
+        context2.fillStyle = gradient;
+        context2.fillRect( 0, 0, 168, 256 );
+
+        var im = new scenery.Image( canvas );
+        im.setScaleMagnitude( 16, 64 );
+        im.x = 80;
+        var im2 = new scenery.Image( canvas2 );
+        im2.x = 176;
+        var im3 = new scenery.Image( canvas2.toDataURL() );
+        im3.x = 176+168;
+
+        const bars = new scenery.Node( {
+          children: [
+            new scenery.Rectangle( 0, 0, 16, 256, {
+              fill: 'rgba(0,255,0,1)'
+            } ),
+            new scenery.Rectangle( 16, 0, 16, 256, {
+              fill: 'rgba(0,0,0,0)'
+            } ),
+            new scenery.Rectangle( 32, 0, 16, 256, {
+              fill: 'rgba(255,255,255,0)'
+            } ),
+            new scenery.Rectangle( 48, 0, 16, 256, {
+              fill: 'rgba(0,0,0,0.5)'
+            } ),
+            new scenery.Rectangle( 64, 0, 16, 256, {
+              fill: 'rgba(255,255,255,0.5)'
+            } ),
+            im,
+            new scenery.Rectangle( 144, 0, 16, 256, {
+              fill: 'rgba(128,128,128,1)'
+            } ),
+            new scenery.Rectangle( 160, 0, 16, 256, {
+              fill: 'rgba(128,128,128,0.5)'
+            } ),
+            im2,
+            im3
+          ]
+        } );
+
+        const section = new scenery.Node( {
+          children: [
+            new scenery.Rectangle( 0, 0, 512, 256, {
+              fill: new scenery.LinearGradient( 0, 0, 0, 256 )
+                .addColorStop( 0, 'rgba(255,0,0,1)' )
+                .addColorStop( 0.3, 'rgba(255,0,0,0)' )
+                .addColorStop( 0.4, 'rgba(255,255,255,0)' )
+                .addColorStop( 0.6, 'rgba(255,255,0,1)' )
+                .addColorStop( 0.8, 'rgba(0,0,0,1)' )
+                .addColorStop( 1, 'rgba(128,128,128,0.5)' )
+            } ),
+            bars
+          ]
+        } );
+
+        scene.addChild( new scenery.Node( {
+          children: [ section ],
+          renderer: 'svg'
+        } ) );
+
+        const webglNode = new scenery.Node( {
+          y: 512,
+          children: [ section ],
+          renderer: 'webgl'
+        } );
+        webglNode.setScaleMagnitude( 1, -1 );
+        scene.addChild( webglNode );
+
+        toggleUpdates();
+      };
+
       window.focusTest = function() {
         setTimeout( function() {
           toggleUpdates();
