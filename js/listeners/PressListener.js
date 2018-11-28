@@ -102,7 +102,8 @@ define( function( require ) {
       tandem: Tandem.required,
 
       // to support properly passing this to children, see https://github.com/phetsims/tandem/issues/60
-      phetioReadOnly: PhetioObject.DEFAULT_OPTIONS.phetioReadOnly
+      phetioReadOnly: PhetioObject.DEFAULT_OPTIONS.phetioReadOnly,
+      phetioFeatured: PhetioObject.DEFAULT_OPTIONS.phetioFeatured
     }, options );
 
     assert && assert( typeof options.mouseButton === 'number' && options.mouseButton >= 0 && options.mouseButton % 1 === 0,
@@ -230,6 +231,7 @@ define( function( require ) {
       phetioDocumentation: 'Emits whenever a press occurs. The first argument when emitting can be ' +
                            'used to convey info about the Event.',
       phetioReadOnly: options.phetioReadOnly,
+      phetioFeatured: options.phetioFeatured,
       phetioEventType: 'user',
       phetioType: PressedEmitterIO,
 
@@ -244,6 +246,7 @@ define( function( require ) {
       tandem: options.tandem.createTandem( 'releasedEmitter' ),
       phetioDocumentation: 'Emits whenever a release occurs.',
       phetioReadOnly: options.phetioReadOnly,
+      phetioFeatured: options.phetioFeatured,
       phetioEventType: 'user',
       phetioType: ReleasedEmitterIO,
 
