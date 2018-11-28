@@ -184,6 +184,10 @@ define( function( require ) {
 
   // The options for the Accessibility API. In general, most default to null; to clear, set back to null.
   var ACCESSIBILITY_OPTION_KEYS = [
+
+    // Order matters. Having focus before tagName covers the case where you change the tagName and focusability of a
+    // currently focused node. We want the focusability to update correctly.
+    'focusable', // Sets whether or not the node can receive keyboard focus, see setFocusable()
     'tagName', // Sets the tag name for the primary sibling DOM element in the parallel DOM, should be first
 
     /*
@@ -224,7 +228,6 @@ define( function( require ) {
     'focusHighlightLayerable', // Flag to determine if the focus highlight node can be layered in the scene graph, see setFocusHighlightLayerable()
     'groupFocusHighlight', // Sets the outer focus highlight for this node when a descendant has focus, see setGroupFocusHighlight()
     'accessibleVisible', // Sets whether or not the node's DOM element is visible in the parallel DOM, see setAccessibleVisible()
-    'focusable', // Sets whether or not the node can receive keyboard focus, see setFocusable()
     'accessibleOrder', // Modifies the order of accessible  navigation, see setAccessibleOrder()
     'ariaLabelledbyAssociations', // sets the list of aria-labelledby associations between from this node to others (including itself), see setAriaLabelledbyAssociations
     'ariaDescribedbyAssociations', // sets the list of aria-describedby associations between from this node to others (including itself), see setAriaDescribedbyAssociations
@@ -1885,7 +1888,6 @@ define( function( require ) {
         get nodesThatAreAriaDescribedbyThisNode() { return this.getNodesThatAreAriaDescribedbyThisNode(); },
 
 
-
         /**
          * @public
          * @param {Array.<Object>} activeDescendantAssociations - list of associationObjects, see this._activeDescendantAssociations.
@@ -2029,7 +2031,6 @@ define( function( require ) {
           return this._nodesThatAreActiveDescendantToThisNode;
         },
         get nodesThatAreActiveDescendantToThisNode() { return this.getNodesThatAreActiveDescendantToThisNode(); },
-
 
 
         /**
