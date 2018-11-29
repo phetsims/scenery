@@ -164,6 +164,7 @@ define( function( require ) {
    * Convenience function that converts a color spec to a color object if
    * necessary, or simply returns the color object if not.
    * @param {String|Color} colorSpec
+   * @returns {Color}
    */
   Color.toColor = function( colorSpec ) {
     return colorSpec instanceof Color ? colorSpec : new Color( colorSpec );
