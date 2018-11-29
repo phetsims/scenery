@@ -259,7 +259,7 @@ define( function( require ) {
       assert && assert( !this._invalidShapeListenerAttached, 'We do not want to have two listeners attached!' );
 
       // Do not attach shape listeners if we are disposed
-      if ( !this._isDisposed ) {
+      if ( !this.isDisposed ) {
         this._shape.onStatic( 'invalidated', this._invalidShapeListener );
         this._invalidShapeListenerAttached = true;
       }

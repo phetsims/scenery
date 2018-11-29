@@ -959,7 +959,7 @@ define( function( require ) {
     attachImageLoadListener: function() {
       assert && assert( !this._imageLoadListenerAttached, 'Should only be attached to one thing at a time' );
 
-      if ( !this._isDisposed ) {
+      if ( !this.isDisposed ) {
         this._image.addEventListener( 'load', this._imageLoadListener );
         this._imageLoadListenerAttached = true;
       }

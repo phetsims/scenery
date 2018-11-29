@@ -1563,7 +1563,7 @@ define( function( require ) {
 
       for ( var i = trail.getLastInputEnabledIndex(); i >= 0; bubbles ? i-- : i = -1 ) {
         var target = trail.nodes[ i ];
-        if ( target.isDisposed() ) {
+        if ( target.isDisposed ) {
           continue;
         }
 
