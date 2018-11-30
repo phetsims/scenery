@@ -29,19 +29,22 @@ define( function( require ) {
   var scenery = require( 'SCENERY/scenery' );
   var Tandem = require( 'TANDEM/Tandem' );
   var timer = require( 'PHET_CORE/timer' );
+  var TypeDef = require( 'AXON/TypeDef' );
   var VoidIO = require( 'TANDEM/types/VoidIO' );
 
   // global
   var globalID = 0;
 
+  var nullOrFunctionPredicate = TypeDef.getNullOrTypeofPredicate( 'function' )
+
   // constants - factored out to reduce memory usage, see https://github.com/phetsims/unit-rates/issues/207
   var PressedEmitterIO = EmitterIO( [
     { name: 'event', type: EventIO },
-    { name: 'targetNode', type: VoidIO },
-    { name: 'callback', type: VoidIO }
+    { name: 'targetNode', type: VoidIO, predicate: TypeDef.getNullOrInstanceOfPredicate( Node ) },
+    { name: 'callback', type: VoidIO, predicate: nullOrFunctionPredicate }
   ] );
 
-  var ReleasedEmitterIO = EmitterIO( [ { name: 'callback', type: VoidIO } ] );
+  var ReleasedEmitterIO = EmitterIO( [ { name: 'callback', type: VoidIO, predicate: nullOrFunctionPredicate } ] );
 
   // Factor out to reduce memory footprint, see https://github.com/phetsims/tandem/issues/71
   const truePredicate = _.constant( true );
@@ -226,7 +229,6 @@ define( function( require ) {
 
     // @private {Emitter} - Emitted on press event
     this._pressedEmitter = new Emitter( {
-      valueTypes: [ Event, v => v === null || v instanceof Node, v => v === null || typeof v === 'function' ],
       tandem: options.tandem.createTandem( 'pressedEmitter' ),
       phetioDocumentation: 'Emits whenever a press occurs. The first argument when emitting can be ' +
                            'used to convey info about the Event.',
@@ -242,7 +244,6 @@ define( function( require ) {
 
     // @private {Emitter} - Emitted on release event
     this._releasedEmitter = new Emitter( {
-      valueTypes: [ v => v === null || typeof v === 'function' ],
       tandem: options.tandem.createTandem( 'releasedEmitter' ),
       phetioDocumentation: 'Emits whenever a release occurs.',
       phetioReadOnly: options.phetioReadOnly,
@@ -359,7 +360,6 @@ define( function( require ) {
 
       sceneryLog && sceneryLog.InputListener && sceneryLog.InputListener( 'PressListener#' + this._id + ' successful press' );
       sceneryLog && sceneryLog.InputListener && sceneryLog.push();
-
       this._pressedEmitter.emit( event, targetNode || null, callback || null ); // cannot pass undefined into emit call
 
       sceneryLog && sceneryLog.InputListener && sceneryLog.pop();
