@@ -19,7 +19,6 @@ define( function( require ) {
   var DerivedProperty = require( 'AXON/DerivedProperty' );
   var Emitter = require( 'AXON/Emitter' );
   var EmitterIO = require( 'AXON/EmitterIO' );
-  var Event = require( 'SCENERY/input/Event' );
   var EventIO = require( 'SCENERY/input/EventIO' );
   var inherit = require( 'PHET_CORE/inherit' );
   var Mouse = require( 'SCENERY/input/Mouse' );
@@ -35,7 +34,7 @@ define( function( require ) {
   // global
   var globalID = 0;
 
-  var nullOrFunctionPredicate = TypeDef.getNullOrTypeofPredicate( 'function' )
+  var nullOrFunctionPredicate = TypeDef.getNullOrTypeofPredicate( 'function' );
 
   // constants - factored out to reduce memory usage, see https://github.com/phetsims/unit-rates/issues/207
   var PressedEmitterIO = EmitterIO( [
