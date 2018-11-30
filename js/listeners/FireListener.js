@@ -25,6 +25,7 @@ define( function( require ) {
    */
   function FireListener( options ) {
     options = _.extend( {
+
       // {Function} - Called as fire() when the button is fired.
       fire: _.noop,
 
@@ -33,7 +34,7 @@ define( function( require ) {
       fireOnDown: false,
 
       // {Tandem}
-      tandem: Tandem.optional // Call sites typically do not need to call `tandem.createTandem` when creating this.
+      tandem: Tandem.required
     }, options );
 
     assert && assert( typeof options.fire === 'function', 'The fire callback should be a function' );
