@@ -787,12 +787,10 @@ define( function( require ) {
       sceneryLog && sceneryLog.Input && sceneryLog.Input( 'focusOut(' + Input.debugText( null, event ) + ');' );
       sceneryLog && sceneryLog.Input && sceneryLog.push();
 
-      var trail = this.a11yPointer.trail;
-
-      if ( !trail ) {
-        trail = this.a11yPointer.updateTrail( this.rootNode, event.target.getAttribute( 'data-trail-id' ) );
-      }
-
+      // recompute the trail on focusout - since a blur/focusout may have been initiated from a focus/focusin listener,
+      // it is possible that focusout was called twice before calling focusin on the next active element, see
+      // https://github.com/phetsims/scenery/issues/898
+      var trail = this.a11yPointer.updateTrail( this.rootNode, event.target.getAttribute( 'data-trail-id' ) );
       this.dispatchEvent( trail, 'blur', this.a11yPointer, event, false );
 
       // TODO: emit focusIn emitter? Or is it just called focusEmitter? See #888
