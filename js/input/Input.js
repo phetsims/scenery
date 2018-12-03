@@ -791,8 +791,11 @@ define( function( require ) {
       // focus/focusin listener, it is possible that focusout was called more than once before focusin is called on the
       // next active element, see https://github.com/phetsims/scenery/issues/898
       var trail = this.a11yPointer.trail;
-      if ( !trail || event.target.getAttribute( 'data-trail-id' ) !== trail.getUniqueId() ) {
-        trail = this.a11yPointer.updateTrail( this.rootNode, event.target.getAttribute( 'data-trail-id' ) );
+      assert && assert( trail, 'an a11yPointer trail should have been created' );
+
+      if ( assertSlow ) {
+        var newTrail = Trail.fromUniqueId( this.rootNode, event.target.getAttribute( 'data-trail-id' ) );
+        assert( newTrail.equals( this.a11yPointer.trail ), 'focusout target different from focusin target' );
       }
       this.dispatchEvent( trail, 'blur', this.a11yPointer, event, false );
 
@@ -816,6 +819,8 @@ define( function( require ) {
      */
     initA11yPointer: function() {
       this.a11yPointer = new A11yPointer();
+      this.a11yPointer.initializeListeners( this.display );
+
       this.addPointer( this.a11yPointer );
     },
 

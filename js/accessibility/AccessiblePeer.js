@@ -13,7 +13,6 @@ define( function( require ) {
 
   var AccessibilityUtil = require( 'SCENERY/accessibility/AccessibilityUtil' );
   var arrayRemove = require( 'PHET_CORE/arrayRemove' );
-  var Focus = require( 'SCENERY/accessibility/Focus' );
   var FullScreen = require( 'SCENERY/util/FullScreen' );
   var inherit = require( 'PHET_CORE/inherit' );
   var platform = require( 'PHET_CORE/platform' );
@@ -201,15 +200,6 @@ define( function( require ) {
       }
 
       this.orderElements( options );
-
-      // @private {function} - Referenced for disposal
-      this.focusEventListener = this.focusEventListener || this.onFocus.bind( this );
-      this.blurEventListener = this.blurEventListener || this.onBlur.bind( this );
-
-      // Hook up listeners for when our primary element is focused or blurred.
-      this._primarySibling.addEventListener( 'blur', this.blurEventListener );
-      this._primarySibling.addEventListener( 'focus', this.focusEventListener );
-
 
       // set the accessible label now that the element has been recreated again, but not if the tagName
       // has been cleared out
@@ -434,35 +424,6 @@ define( function( require ) {
         // type conversion for DOM spec
         var valueString = this.node.inputValue + '';
         this.setAttributeToElement( 'value', valueString, { asProperty: true } );
-      }
-    },
-
-    /**
-     * Called when our parallel DOM element gets focused.
-     * @private
-     *
-     * @param {DOMEvent} event
-     */
-    onFocus: function( event ) {
-      if ( event.target === this._primarySibling ) {
-
-        // NOTE: The "root" peer can't be focused (so it doesn't matter if it doesn't have a node).
-        if ( this.accessibleInstance.node.focusable ) {
-          scenery.Display.focus = new Focus( this.accessibleInstance.display, this.accessibleInstance.guessVisualTrail() );
-          this.display.pointerFocus = null;
-        }
-      }
-    },
-
-    /**
-     * Called when our parallel DOM element gets blurred (loses focus).
-     * @private
-     *
-     * @param {DOMEvent} event
-     */
-    onBlur: function( event ) {
-      if ( event.target === this._primarySibling ) {
-        scenery.Display.focus = null;
       }
     },
 

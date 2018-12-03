@@ -552,48 +552,6 @@ define( function( require ) {
     },
 
     /**
-     * Since our "Trail" can have discontinuous jumps (due to accessibleOrder), this finds the best actual visual
-     * Trail to use.
-     * @public
-     *
-     * @returns {Trail}
-     */
-    guessVisualTrail: function() {
-      this.trail.reindex();
-
-      // Search for places in the trail where adjacent nodes do NOT have a parent-child relationship, i.e.
-      // !nodes[ n ].hasChild( nodes[ n + 1 ] ).
-      // NOTE: This index points to the parent where this is the case, because the indices in the trail are such that:
-      // trail.nodes[ n ].children[ trail.indices[ n ] ] = trail.nodes[ n + 1 ]
-      var lastBadIndex = this.trail.indices.lastIndexOf( -1 );
-
-      // If we have no bad indices, just return our trail immediately.
-      if ( lastBadIndex < 0 ) {
-        return this.trail;
-      }
-
-      var firstGoodIndex = lastBadIndex + 1;
-      var firstGoodNode = this.trail.nodes[ firstGoodIndex ];
-      var baseTrails = firstGoodNode.getTrailsTo( this.display.rootNode );
-      assert && assert( baseTrails.length > 0 );
-
-      // fail gracefully-ish?
-      if ( baseTrails.length === 0 ) {
-        return this.trail;
-      }
-
-      // Add the rest of the trail back in
-      var trail = baseTrails[ 0 ];
-      for ( var i = firstGoodIndex + 1; i < this.trail.length; i++ ) {
-        trail.addDescendant( this.trail.nodes[ i ] );
-      }
-
-      assert && assert( trail.isValid() );
-
-      return trail;
-    },
-
-    /**
      * For debugging purposes.
      * @public
      *
@@ -648,6 +606,51 @@ define( function( require ) {
       audit( AccessibleInstance.createFakeAccessibleTree( rootNode ), this );
     }
   }, {
+
+    /**
+     * Since a "Trail" on AccessibleInstance can have discontinuous jumps (due to accessibleOrder), this finds the best
+     * actual visual Trail to use, from the trail of an AccessibleInstance to the root of a Display.
+     * @public
+     *
+     * @param {Trail} trail - trail of the AccessibleInstance, which can containe "gaps"
+     * @param {Node} rootNode - root of a Display
+     * @returns {Trail}
+     */
+    guessVisualTrail: function( trail, rootNode ) {
+      trail.reindex();
+
+      // Search for places in the trail where adjacent nodes do NOT have a parent-child relationship, i.e.
+      // !nodes[ n ].hasChild( nodes[ n + 1 ] ).
+      // NOTE: This index points to the parent where this is the case, because the indices in the trail are such that:
+      // trail.nodes[ n ].children[ trail.indices[ n ] ] = trail.nodes[ n + 1 ]
+      var lastBadIndex = trail.indices.lastIndexOf( -1 );
+
+      // If we have no bad indices, just return our trail immediately.
+      if ( lastBadIndex < 0 ) {
+        return trail;
+      }
+
+      var firstGoodIndex = lastBadIndex + 1;
+      var firstGoodNode = trail.nodes[ firstGoodIndex ];
+      var baseTrails = firstGoodNode.getTrailsTo( rootNode );
+      assert && assert( baseTrails.length > 0 );
+
+      // fail gracefully-ish?
+      if ( baseTrails.length === 0 ) {
+        return trail;
+      }
+
+      // Add the rest of the trail back in
+      var baseTrail = baseTrails[ 0 ];
+      for ( var i = firstGoodIndex + 1; i < trail.length; i++ ) {
+        baseTrail.addDescendant( trail.nodes[ i ] );
+      }
+
+      assert && assert( baseTrail.isValid() );
+
+      return baseTrail;
+    },
+
     /**
      * Creates a fake AccessibleInstance-like tree structure (with the equivalent nodes and children structure).
      * For debugging.
