@@ -218,8 +218,8 @@ define( function( require ) {
     };
 
     // @public {Object} - the collection of event listeners that can be added to a Node through
-    // addAccessibleInputListener, typical usage could look like
-    // node.addAccessibleInputListener( pressListener.a11yListener )
+    // addInputListener, typical usage could look like
+    // node.addInputListener( pressListener.a11yListener )
     this.a11yListener = {
       click: this.click.bind( this ),
       focus: this.focus.bind( this ),

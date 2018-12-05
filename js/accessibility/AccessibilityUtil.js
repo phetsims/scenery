@@ -336,38 +336,6 @@ define( function( require ) {
     },
 
     /**
-     * Add DOM event listeners contained in the accessibleInput directly to the DOM elements on each
-     * accessibleInstance.  Never use this directly, use addAccessibleInputListener()
-     * @public
-     *
-     * @param {Object} accessibleInput
-     * @param {HTMLElement} domElement
-     */
-    addDOMEventListeners: function( accessibleInput, domElement ) {
-      for ( var event in accessibleInput ) {
-        if ( accessibleInput.hasOwnProperty( event ) && _.includes( DOM_EVENTS, event ) ) {
-          domElement.addEventListener( event, accessibleInput[ event ] );
-        }
-      }
-    },
-
-    /**
-     * Remove a DOM event listener contained in an accesssibleInput.  Never to be used directly, see
-     * removeAccessibilityInputListener().
-     * @public
-     *
-     * @param {Object} accessibleInput
-     * @param {HTMLElement} domElement
-     */
-    removeDOMEventListeners: function( accessibleInput, domElement ) {
-      for ( var event in accessibleInput ) {
-        if ( accessibleInput.hasOwnProperty( event ) && _.includes( DOM_EVENTS, event ) ) {
-          domElement.removeEventListener( event, accessibleInput[ event ] );
-        }
-      }
-    },
-
-    /**
      * Given a tagName, test if the element will be focuable by default by the browser.
      * Different from isElementFocusable, because this only looks at tags that the browser will automatically put
      * a >=0 tab index on.
@@ -548,7 +516,9 @@ define( function( require ) {
     ASSOCIATION_ATTRIBUTES: ASSOCIATION_ATTRIBUTES,
 
     // valid input types that support the "checked" property/attribute for input elements
-    INPUT_TYPES_THAT_SUPPORT_CHECKED: [ 'RADIO', 'CHECKBOX' ]
+    INPUT_TYPES_THAT_SUPPORT_CHECKED: [ 'RADIO', 'CHECKBOX' ],
+
+    DOM_EVENTS: DOM_EVENTS
   };
 
   scenery.register( 'AccessibilityUtil', AccessibilityUtil );

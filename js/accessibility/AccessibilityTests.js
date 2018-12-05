@@ -63,7 +63,7 @@ define( function( require ) {
   /**
    * Get a unique AccessiblePeer from a node with accessible content. Will error if the node has multiple instances
    * or if the node hasn't been attached to a display (and therefore has no accessible content).
-   * 
+   *
    * @param  {Node} node
    * @return {AccessiblePeer}
    */
@@ -907,52 +907,6 @@ define( function( require ) {
 
   } );
 
-  QUnit.test( 'Accessibility input listeners', function( assert ) {
-
-    // create a node
-    var a1 = new Node( {
-      tagName: 'button'
-    } );
-    var display = new Display( a1 ); // eslint-disable-line
-    document.body.appendChild( display.domElement );
-
-    assert.ok( a1.accessibleInputListeners.length === 0, 'no input accessible listeners on instantiation' );
-    assert.ok( a1.labelContent === null, 'no label on instantiation' );
-
-    // add a listener
-    var listener = { click: function() { a1.labelContent = TEST_LABEL; } };
-    a1.addAccessibleInputListener( listener );
-    assert.ok( a1.accessibleInputListeners.length === 1, 'accessible listener added' );
-
-    // verify added with hasAccessibleInputListener
-    assert.ok( a1.hasAccessibleInputListener( listener ) === true, 'found with hasAccessibleInputListener' );
-
-    // fire the event
-    getPrimarySiblingElementByNode( a1 ).click();
-    assert.ok( a1.labelContent === TEST_LABEL, 'click fired, label set' );
-
-    // remove the listener
-    a1.removeAccessibleInputListener( listener );
-    assert.ok( a1.accessibleInputListeners.length === 0, 'accessible listener removed' );
-
-    // verify removed with hasAccessibleInputListener
-    assert.ok( a1.hasAccessibleInputListener( listener ) === false, 'not found with hasAccessibleInputListener' );
-
-    // make sure event listener was also removed from DOM element
-    // click should not change the label
-    a1.labelContent = TEST_LABEL_2;
-    assert.ok( a1.labelContent === TEST_LABEL_2, 'before click' );
-
-    // setting the label redrew the pdom, so get a reference to the new dom element.
-    getPrimarySiblingElementByNode( a1 ).click();
-    assert.ok( a1.labelContent === TEST_LABEL_2, 'click should not change label' );
-
-    // verify disposal removes accessible input listeners
-    a1.addAccessibleInputListener( listener );
-    a1.dispose();
-    assert.ok( a1.hasAccessibleInputListener( listener ) === false, 'disposal removed accessible input listeners' );
-  } );
-
   QUnit.test( 'Next/Previous focusable', function( assert ) {
     var util = AccessibilityUtil;
 
@@ -1534,7 +1488,7 @@ define( function( require ) {
 
     // test order when only description appended and no parent container - order should be label, primary, then 
     // description
-    b.appendLabel = false; 
+    b.appendLabel = false;
 
     // refresh since operation may have created new Objects
     bPeer = getAccessiblePeerByNode( b );

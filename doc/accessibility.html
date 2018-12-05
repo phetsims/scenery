@@ -172,7 +172,7 @@
     <div class="sublink"><a href="#input">inputType</a></div>
     <div class="sublink"><a href="#input">inputValue</a></div>
     <div class="sublink"><a href="#input">accessibleChecked</a></div>
-    <div class="sublink"><a href="#input">addAccessibleInputListener()</a></div>
+    <div class="sublink"><a href="#input">addInputListener()</a></div>
     <div class="sublink"><a href="#focus">focusable</a></div>
     <div class="sublink"><a href="#focus">accessibleVisible</a></div>
     <div class="sublink"><a href="#focus">focus()</a></div>
@@ -517,11 +517,11 @@
 
     <p>The above example is a Node whose PDOM representation is that of a basic checkbox. In order to give it
       interactive
-      functionality, use <code>Node.addAccessibleInputListener()</code>. The function takes in type
+      functionality, use <code>Node.addInputListener()</code>. The function takes in type
       <code>Object.&lt;string, function&gt;</code> where the key is the name of the DOM Event you want to listen to.
       This
       event is more often than not different than the listener needed for a mouse. Don't forget to remove the listener
-      when the <code>Node</code> is disposed with <code>Node.removeAccessibleInputListener()</code>.
+      when the <code>Node</code> is disposed with <code>Node.removeInputListener()</code>.
     </p>
 
     <h4 id="focus">Focus</h4>

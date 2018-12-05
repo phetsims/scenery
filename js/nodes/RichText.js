@@ -1742,7 +1742,7 @@ define( function( require ) {
             href();
           }
         };
-        this.addAccessibleInputListener( this.accessibleInputListener );
+        this.addInputListener( this.accessibleInputListener );
       }
       // Otherwise our href is a {string}, and we should open a window pointing to it (assuming it's a URL)
       else {
@@ -1775,7 +1775,7 @@ define( function( require ) {
       this.removeInputListener( this.buttonListener );
       this.buttonListener = null;
       if ( this.accessibleInputListener ) {
-        this.removeAccessibleInputListener( this.accessibleInputListener );
+        this.removeInputListener( this.accessibleInputListener );
         this.accessibleInputListener = null;
       }
 

@@ -408,9 +408,6 @@ define( function( require ) {
           // http://www.ssbbartgroup.com/blog/how-windows-screen-readers-work-on-the-web/
           this._accessibleVisible = true;
 
-          // @private {Array.<Function>} - For accessibility input handling {keyboard/click/HTML form}
-          this._accessibleInputListeners = [];
-
           // @public - emits when focus changes. This will trigger with the 'focus' event and the 'blur' event.
           // Listener receives 1 parameter, {boolean} - isFocused. see Display.focus
           this.focusChangedEmitter = new Emitter();
@@ -463,113 +460,6 @@ define( function( require ) {
         /***********************************************************************************************************/
 
         /**
-         * Adds an accessible input listener. The listener's keys should be DOM event names, and the values should be
-         * functions to be called when that event is fired on the DOM element. A list of valid DOM event names can be
-         * found in AccessibilityUtil.js.
-         *
-         * NOTE: Currently this method doesn't support adding listeners that are declared on an object's prototype, only
-         * as an object property, see https://github.com/phetsims/scenery/issues/851 for more information.
-         * @public
-         *
-         * @param {Object} accessibleInput
-         * @returns {Object} - the listener, so it can be easily removed via removeAccessibleInputListener
-         */
-        addAccessibleInputListener: function( accessibleInput ) {
-          var listenerAlreadyAdded = ( _.indexOf( this._accessibleInputListeners, accessibleInput ) > 0 );
-          assert && assert( !listenerAlreadyAdded, 'accessibleInput listener already added' );
-
-          this._accessibleInputListeners.push( accessibleInput );
-
-          // add the listener directly to any AccessiblePeers that are representing this node
-          for ( var i = 0; i < this._accessibleInstances.length; i++ ) {
-            var peer = this._accessibleInstances[ i ].peer;
-            peer.addDOMEventListeners( accessibleInput );
-          }
-
-          return accessibleInput;
-        },
-
-        /**
-         * Removes an input listener that was previously added with addAccessibleInputListener.
-         * @public
-         *
-         * @param {Object} accessibleInput - to be removed
-         * @returns {Node} - Returns 'this' reference, for chaining
-         */
-        removeAccessibleInputListener: function( accessibleInput ) {
-
-          // ensure the listener is in our list, or will be added in invalidation
-          var addedIndex = _.indexOf( this._accessibleInputListeners, accessibleInput );
-          assert && assert( addedIndex > -1, 'accessibleInput listener was not added' );
-
-          this._accessibleInputListeners.splice( addedIndex, 1 );
-
-          // remove the event listeners from any peers
-          for ( var i = 0; i < this._accessibleInstances.length; i++ ) {
-            var peer = this._accessibleInstances[ i ].peer;
-            peer.removeDOMEventListeners( accessibleInput );
-          }
-
-          return this;
-        },
-
-        /**
-         * Returns whether this listener is currently listening to accessible input on this node. More efficient
-         * than directly checking getAccessibleInputListeners, as that includes a defensive copy.
-         * @public
-         *
-         * @param {Object} listener
-         * @return {boolean}
-         */
-        hasAccessibleInputListener: function( listener ) {
-          for ( var i = 0; i < this._accessibleInputListeners.length; i++ ) {
-            if ( this._accessibleInputListeners[ i ] === listener ) {
-              return true;
-            }
-          }
-          return false;
-        },
-
-        /**
-         * Returns a copy of all input listeners related to accessibility.
-         * @public
-         *
-         * @returns {Array.<Object>}
-         */
-        getAccessibleInputListeners: function() {
-          return this._accessibleInputListeners.slice( 0 ); // defensive copy
-        },
-        get accessibleInputListeners() { return this.getAccessibleInputListeners(); },
-
-        /**
-         * Remove all listeners on the node observing accessible input.
-         * @public
-         */
-        removeAllAccessibleInputListeners: function() {
-          while ( this._accessibleInputListeners.length > 0 ) {
-            this.removeAccessibleInputListener( this._accessibleInputListeners[ 0 ] );
-          }
-        },
-
-        /**
-         * Interrupt all accessibility related input listeners that are attached to this Node.
-         * @public
-         *
-         * @returns {Node} - For chaining
-         */
-        interruptAccessibleInput: function() {
-          var listenersCopy = this.accessibleInputListeners;
-
-          for ( var i = 0; i < listenersCopy.length; i++ ) {
-            var listener = listenersCopy[ i ];
-
-            listener.interrupt && listener.interrupt();
-          }
-
-          return this;
-        },
-
-        /**
          * Dispose accessibility by removing all listeners on this node for accessible input. Accessibility is disposed
          * by calling Node.dispose(), so this function is scenery-internal.
          * @public (scenery-internal)
@@ -583,8 +473,6 @@ define( function( require ) {
           this.setAriaLabelledbyAssociations( [] );
           this.setAriaDescribedbyAssociations( [] );
           this.setActiveDescendantAssociations( [] );
-
-          this.removeAllAccessibleInputListeners();
         },
 
         /**
@@ -638,7 +526,7 @@ define( function( require ) {
             var peer = this._accessibleInstances[ 0 ].peer;
             assert && assert( peer, 'must have a peer to blur' );
             peer.blur();
-            this.interruptAccessibleInput(); // interrupt any a11y listeners that attached to this Node
+            this.interruptInput(); // interrupt any listeners that attached to this Node
           }
         },
 

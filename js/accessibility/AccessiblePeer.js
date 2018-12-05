@@ -229,12 +229,6 @@ define( function( require ) {
       this.onAriaDescribedbyAssociationChange();
       this.onActiveDescendantAssociationChange();
 
-
-      // add all listeners to the dom element
-      for ( i = 0; i < this.node.accessibleInputListeners.length; i++ ) {
-        this.addDOMEventListeners( this.node.accessibleInputListeners[ i ] );
-      }
-
       // update all attributes for the peer, should cover aria-label, role, and others
       // REVIEW: Maybe it's unlikely, but I can TOTALLY see our behaviors above wanting to adjust arbitrary attributes.
       // REVIEW: Since this ONLY inspects things directly on the node (not the overridden a11y options above), this is
@@ -449,25 +443,6 @@ define( function( require ) {
       }
 
       assert && assert( false, 'invalid elementName name: ' + elementName );
-    },
-
-    /**
-     * Add DOM Event listeners to the peer's primary sibling.
-     * @public (scenery-internal)
-     *
-     * @param {Object} accessibleInput - see Accessibility.addAccessibleInputListener
-     */
-    addDOMEventListeners: function( accessibleInput ) {
-      AccessibilityUtil.addDOMEventListeners( accessibleInput, this._primarySibling );
-    },
-
-    /**
-     * Remove DOM Event listeners from the peer's primary sibling.
-     * @public (scenery-internal)
-     * @param {Object} accessibleInput - see Accessibility.addAccessibleInputListener
-     */
-    removeDOMEventListeners: function( accessibleInput ) {
-      AccessibilityUtil.removeDOMEventListeners( accessibleInput, this._primarySibling );
     },
 
     /**

@@ -39,10 +39,10 @@ define( require => {
 
     /**
      * Implements keyboard dragging when listener is attached to the Node, public so listener is attached
-     * with addAccessibleInputListener()
+     * with addInputListener()
      *
      * Note that this event is assigned in the constructor, and not to the prototype. As of writing this,
-     * `Node.addAccessibleInputListener` only supports type properties as event listeners, and not the event keys as
+     * `Node.addInputListener` only supports type properties as event listeners, and not the event keys as
      * prototype methods. Please see https://github.com/phetsims/scenery/issues/851 for more information.
      * @public
      * @param {DOMEvent} event
@@ -69,10 +69,10 @@ define( require => {
     }
 
     /**
-     * Behavior for keyboard 'up' DOM event. Public so it can be attached with addAccessibleInputListener()
+     * Behavior for keyboard 'up' DOM event. Public so it can be attached with addInputListener()
      *
      * Note that this event is assigned in the constructor, and not to the prototype. As of writing this,
-     * `Node.addAccessibleInputListener` only supports type properties as event listeners, and not the event keys as
+     * `Node.addInputListener` only supports type properties as event listeners, and not the event keys as
      * prototype methods. Please see https://github.com/phetsims/scenery/issues/851 for more information.
      *
      * @public
