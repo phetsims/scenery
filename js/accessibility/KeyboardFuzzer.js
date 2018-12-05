@@ -210,11 +210,16 @@ define( require => {
         eventObj.shiftKey = true;
       }
 
+      // wrap in an object to mimic a scenery "Event"
+      var mimicEvent = {
+        domEvent: eventObj
+      };
+
       if ( event === KEY_DOWN ) {
-        this.keyStateTracker.keydownUpdate( eventObj );
+        this.keyStateTracker.keydownUpdate( mimicEvent );
       }
       else if ( event === KEY_UP ) {
-        this.keyStateTracker.keyupUpdate( eventObj );
+        this.keyStateTracker.keyupUpdate( mimicEvent );
       }
 
       element.dispatchEvent ? element.dispatchEvent( eventObj ) : element.fireEvent( 'on' + event, eventObj );
