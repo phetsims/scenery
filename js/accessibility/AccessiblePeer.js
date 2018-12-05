@@ -116,7 +116,6 @@ define( function( require ) {
      *
      */
     update: function() {
-      var i;
       var uniqueId = this.accessibleInstance.trail.getUniqueId();
 
       var options = this.node.getBaseOptions();
@@ -586,7 +585,7 @@ define( function( require ) {
      *
      * NOTE: This function assumes it is called on label sibling before description sibling for inserting elements
      * into the correct order.
-     * 
+     *
      * @private
      *
      * @param {HTMLElement} contentElement
