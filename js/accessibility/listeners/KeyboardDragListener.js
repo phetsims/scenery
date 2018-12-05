@@ -2,7 +2,7 @@
 
 /**
  * A general type for keyboard dragging. Objects can be dragged in two dimensions with the arrow keys and with the WASD
- * keys. This can be added to a node through addAccessibleInputListener for accessibility, which is mixed into Nodes with
+ * keys. This can be added to a node through addInputListener for accessibility, which is mixed into Nodes with
  * the Accessibility trait.
  *
  * JavaScript does not natively handle multiple 'keydown' events at once, so we have a custom implementation that
@@ -131,10 +131,10 @@ define( function( require ) {
 
     /**
      * Implements keyboard dragging when listener is attached to the Node, public so listener is attached
-     * with addAccessibleInputListener()
+     * with addInputListener()
      *
      * Note that this event is assigned in the constructor, and not to the prototype. As of writing this,
-     * `Node.addAccessibleInputListener` only supports type properties as event listeners, and not the event keys as
+     * `Node.addInputListener` only supports type properties as event listeners, and not the event keys as
      * prototype methods. Please see https://github.com/phetsims/scenery/issues/851 for more information.
      * @public
      * @param {DOMEvent} event
@@ -182,10 +182,10 @@ define( function( require ) {
     };
 
     /**
-     * Behavior for keyboard 'up' DOM event. Public so it can be attached with addAccessibleInputListener()
+     * Behavior for keyboard 'up' DOM event. Public so it can be attached with addInputListener()
      *
      * Note that this event is assigned in the constructor, and not to the prototype. As of writing this,
-     * `Node.addAccessibleInputListener` only supports type properties as event listeners, and not the event keys as
+     * `Node.addInputListener` only supports type properties as event listeners, and not the event keys as
      * prototype methods. Please see https://github.com/phetsims/scenery/issues/851 for more information.
      *
      * @public
