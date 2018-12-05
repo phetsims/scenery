@@ -217,15 +217,6 @@ define( function( require ) {
       interrupt: this.pointerInterrupt.bind( this )
     };
 
-    // @public {Object} - the collection of event listeners that can be added to a Node through
-    // addInputListener, typical usage could look like
-    // node.addInputListener( pressListener.a11yListener )
-    this.a11yListener = {
-      click: this.click.bind( this ),
-      focus: this.focus.bind( this ),
-      blur: this.blur.bind( this )
-    };
-
     // @private {Emitter} - Emitted on press event
     this._pressedEmitter = new Emitter( {
       tandem: options.tandem.createTandem( 'pressedEmitter' ),
@@ -660,10 +651,9 @@ define( function( require ) {
      * @public - In general not needed to be public, but just used in edge cases to get proper click logic for a11y.
      * @a11y
      *
-     * Handle the click event from DOM for a11y, see PressListener.a11yListener for more information in this usage.
-     * Clicks by setting the over and pressed Properties behind a timeout. When assistive technology is
-     * used, the browser may not receive 'down' or 'up' events on buttons - only a single 'click' event. For a11y we
-     * need to toggle the pressed state from the single 'click' event.
+     * Handle the click event from DOM for a11y. Clicks by setting the over and pressed Properties behind a timeout.
+     * When assistive technology is used, the browser may not receive 'down' or 'up' events on buttons - only a single
+     * 'click' event. For a11y we need to toggle the pressed state from the single 'click' event.
      *
      * This will fire listeners immediately, but adds a delay for the a11yClickingProperty so that you can make a
      * button look pressed from a single DOM click event. For example usage, see sun/ButtonModel.looksPressedProperty.
