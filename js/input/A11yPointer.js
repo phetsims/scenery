@@ -81,6 +81,8 @@ define( require => {
 
       // The trail is set to null on blur, and we can't guarantee that events will always come in order
       // (i.e. setTimeout in KeyboardFuzzer)
+      // This is more inefficient than just asserting out, it would be good to know how often we have to
+      // recalculate this way.
       if ( this.trail === null || this.trail.uniqueId !== trailString ) {
         this.trail = Trail.fromUniqueId( this.display.rootNode, trailString );
       }
