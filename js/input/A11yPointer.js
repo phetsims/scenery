@@ -18,10 +18,21 @@ define( require => {
   var Focus = require( 'SCENERY/accessibility/Focus' );
 
   class A11yPointer extends Pointer {
-    constructor() {
+
+    /**
+     * Pointer type for managing accessibility, in particular the focus in the display
+     * @param {Display} display
+     */
+    constructor( display ) {
       super( null, false );
 
+      // @public
       this.type = 'a11y';
+
+      // @private
+      this.display = display;
+
+      this.initializeListeners();
 
       sceneryLog && sceneryLog.Pointer && sceneryLog.Pointer( 'Created ' + this.toString() );
     }
@@ -29,40 +40,50 @@ define( require => {
     /**
      * Set up listeners, attaching blur and focus listeners to the pointer once this A11yPointer has been attached
      * to a display.
-     * @private (scenery-internal)
-     * 
-     * @param  {Display} display
+     * @private
      */
-    initializeListeners( display ) {
+    initializeListeners() {
       this.addInputListener( {
         focus: () => {
           assert && assert( this.trail, 'trail should have been calculated for the focused node' );
 
           // NOTE: The "root" peer can't be focused (so it doesn't matter if it doesn't have a node).
           if ( this.trail.lastNode().focusable ) {
-            scenery.Display.focus = new Focus( display, AccessibleInstance.guessVisualTrail( this.trail, display.rootNode ) );
-            display.pointerFocus = null;
+            scenery.Display.focus = new Focus( this.display, AccessibleInstance.guessVisualTrail( this.trail, this.display.rootNode ) );
+            this.display.pointerFocus = null;
           }
         },
-        blur: ( event ) => {
+        blur: () => {
           scenery.Display.focus = null;
         }
       } );
     }
 
     /**
-     * @param {Node} rootNode
      * @param {string} trailId
      * @public
      * @returns {Trail} - updated trail
      */
-    updateTrail( rootNode, trailId ) {
+    updateTrail( trailId ) {
       if ( this.trail && this.trail.getUniqueId() === trailId ) {
         return this.trail;
       }
-      var trail = Trail.fromUniqueId( rootNode, trailId );
+      let trail = Trail.fromUniqueId( this.display.rootNode, trailId );
       this.trail = trail;
       return trail;
+    }
+
+    /**
+     * Assert that the given trail matches the one stored by this pointer.
+     * @param {string} trailString
+     */
+    invalidateTrail( trailString ) {
+
+      // The trail is set to null on blur, and we can't guarantee that events will always come in order
+      // (i.e. setTimeout in KeyboardFuzzer)
+      if ( this.trail === null || this.trail.uniqueId !== trailString ) {
+        this.trail = Trail.fromUniqueId( this.display.rootNode, trailString );
+      }
     }
   }
 

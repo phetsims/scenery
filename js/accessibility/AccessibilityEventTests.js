@@ -10,37 +10,37 @@ define( require => {
   'use strict';
 
   // modules
-  var Display = require( 'SCENERY/display/Display' );
-  var Node = require( 'SCENERY/nodes/Node' );
-  var Rectangle = require( 'SCENERY/nodes/Rectangle' );
+  let Display = require( 'SCENERY/display/Display' );
+  let Node = require( 'SCENERY/nodes/Node' );
+  let Rectangle = require( 'SCENERY/nodes/Rectangle' );
+
+  // constants
+  let TEST_LABEL = 'Test Label';
+  let TEST_LABEL_2 = 'Test Label 2';
 
   QUnit.module( 'AccessibilityEvents' );
 
   QUnit.test( 'focusin/focusout', assert => {
 
 
-    var rootNode = new Node( { tagName: 'div' } );
-    var display = new Display( rootNode ); // eslint-disable-line
+    let rootNode = new Node( { tagName: 'div' } );
+    let display = new Display( rootNode ); // eslint-disable-line
     display.initializeEvents();
     document.body.appendChild( display.domElement );
 
-    var a = new Rectangle( 0, 0, 20, 20, { tagName: 'button' } );
+    let a = new Rectangle( 0, 0, 20, 20, { tagName: 'button' } );
 
-    var aGotFocus = false;
-    var aLostFocus = false;
-    var bGotFocus = false;
+    let aGotFocus = false;
+    let aLostFocus = false;
+    let bGotFocus = false;
 
     rootNode.addChild( a );
 
     a.addInputListener( {
       focus() {
-        console.log( 'afocus' );
-
         aGotFocus = true;
       },
       blur() {
-        console.log( 'ablur' );
-
         aLostFocus = true;
       }
     } );
@@ -49,15 +49,13 @@ define( require => {
     assert.ok( aGotFocus, 'a should have been focused' );
     assert.ok( !aLostFocus, 'a should not blur' );
 
-    var b = new Rectangle( 0, 0, 20, 20, { tagName: 'button' } );
+    let b = new Rectangle( 0, 0, 20, 20, { tagName: 'button' } );
 
     // TODO: what if b was child of a, make sure these events don't bubble!
     rootNode.addChild( b );
 
     b.addInputListener( {
       focus() {
-        console.log( 'bfocus' );
-
         bGotFocus = true;
       }
     } );
@@ -195,6 +193,7 @@ define( require => {
     // TODO: Since converting to use Node.inputListeners, we can't assume this anymore
     // assert.ok( a1.hasInputListener( listener ) === false, 'disposal removed accessible input listeners' );
   } );
+
   QUnit.test( 'input', assert => {
 
 
@@ -212,26 +211,21 @@ define( require => {
 
     a.addInputListener( {
       focus() {
-        console.log( 'in focus' );
-
         gotFocus = true;
       },
       input() {
-        console.log( 'in input;' );
         gotInput = true;
       },
       blur() {
-        console.log( 'in blur' );
         gotFocus = false;
       }
     } );
 
-    console.log( 'before focus call' );
     a.accessibleInstances[ 0 ].peer.primarySibling.focus();
-    console.log( 'after focus call' );
     assert.ok( gotFocus && !gotInput, 'focus first' );
+
     a.accessibleInstances[ 0 ].peer.primarySibling.dispatchEvent( new window.Event( 'input', {
-      'bubbles': true
+      'bubbles': true // that is vital to all that scenery events hold near and dear to their hearts.
     } ) );
     console.log( 'after input call' );
 

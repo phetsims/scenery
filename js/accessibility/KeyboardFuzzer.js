@@ -51,7 +51,7 @@ define( require => {
       this.display = display;
       this.random = new Random( { seed: seed } );
       this.keyStateTracker = new KeyStateTracker();
-      this.keysPressedEachFrame = 100;
+      this.keysPressedEachFrame = 1;
       this.keyupListeners = [];
 
       // @private {HTMLElement}

@@ -506,13 +506,66 @@ define( function( require ) {
       var accessibleEventOptions = Features.passive ? { useCapture: false, passive: false } : false;
 
       this.display.accessibleDOMElement.addEventListener( 'focusin', function( event ) {
+        sceneryLog && sceneryLog.InputEvent && sceneryLog.InputEvent( 'Input.focusinFromBrowser' );
+        sceneryLog && sceneryLog.InputEvent && sceneryLog.push();
+
         if ( !self.a11yPointer ) { self.initA11yPointer(); }
         self.focusIn( event );
+        sceneryLog && sceneryLog.InputEvent && sceneryLog.pop();
       }, accessibleEventOptions );
 
       this.display.accessibleDOMElement.addEventListener( 'focusout', function( event ) {
+        sceneryLog && sceneryLog.InputEvent && sceneryLog.InputEvent( 'Input.focusoutFromBrowser' );
+        sceneryLog && sceneryLog.InputEvent && sceneryLog.push();
+
         if ( !self.a11yPointer ) { self.initA11yPointer(); }
         self.focusOut( event );
+        sceneryLog && sceneryLog.InputEvent && sceneryLog.pop();
+      }, accessibleEventOptions );
+
+      this.display.accessibleDOMElement.addEventListener( 'click', function( event ) {
+        sceneryLog && sceneryLog.InputEvent && sceneryLog.InputEvent( 'Input.clickFromBrowser' );
+        sceneryLog && sceneryLog.InputEvent && sceneryLog.push();
+
+        if ( !self.a11yPointer ) { self.initA11yPointer(); }
+        self.click( event );
+        sceneryLog && sceneryLog.InputEvent && sceneryLog.pop();
+      }, accessibleEventOptions );
+
+      this.display.accessibleDOMElement.addEventListener( 'change', function( event ) {
+        sceneryLog && sceneryLog.InputEvent && sceneryLog.InputEvent( 'Input.changeFromBrowser' );
+        sceneryLog && sceneryLog.InputEvent && sceneryLog.push();
+
+        if ( !self.a11yPointer ) { self.initA11yPointer(); }
+        self.change( event );
+        sceneryLog && sceneryLog.InputEvent && sceneryLog.pop();
+      }, accessibleEventOptions );
+
+      this.display.accessibleDOMElement.addEventListener( 'input', function( event ) {
+        sceneryLog && sceneryLog.InputEvent && sceneryLog.InputEvent( 'Input.inputFromBrowser' );
+        sceneryLog && sceneryLog.InputEvent && sceneryLog.push();
+
+        if ( !self.a11yPointer ) { self.initA11yPointer(); }
+        self.input( event );
+        sceneryLog && sceneryLog.InputEvent && sceneryLog.pop();
+      }, accessibleEventOptions );
+
+      this.display.accessibleDOMElement.addEventListener( 'keydown', function( event ) {
+        sceneryLog && sceneryLog.InputEvent && sceneryLog.InputEvent( 'Input.keydownFromBrowser' );
+        sceneryLog && sceneryLog.InputEvent && sceneryLog.push();
+
+        if ( !self.a11yPointer ) { self.initA11yPointer(); }
+        self.keydown( event );
+        sceneryLog && sceneryLog.InputEvent && sceneryLog.pop();
+      }, accessibleEventOptions );
+
+      this.display.accessibleDOMElement.addEventListener( 'keyup', function( event ) {
+        sceneryLog && sceneryLog.InputEvent && sceneryLog.InputEvent( 'Input.keyupFromBrowser' );
+        sceneryLog && sceneryLog.InputEvent && sceneryLog.push();
+
+        if ( !self.a11yPointer ) { self.initA11yPointer(); }
+        self.keyup( event );
+        sceneryLog && sceneryLog.InputEvent && sceneryLog.pop();
       }, accessibleEventOptions );
     }
   }
@@ -768,7 +821,7 @@ define( function( require ) {
       sceneryLog && sceneryLog.Input && sceneryLog.Input( 'focusIn(' + Input.debugText( null, event ) + ');' );
       sceneryLog && sceneryLog.Input && sceneryLog.push();
 
-      var trail = this.a11yPointer.updateTrail( this.rootNode, event.target.getAttribute( 'data-trail-id' ) );
+      var trail = this.a11yPointer.updateTrail( event.target.getAttribute( 'data-trail-id' ) );
 
       this.dispatchEvent( trail, 'focus', this.a11yPointer, event, false );
 
@@ -790,19 +843,114 @@ define( function( require ) {
       // recompute the trail on focusout if necessary - since a blur/focusout may have been initiated from a
       // focus/focusin listener, it is possible that focusout was called more than once before focusin is called on the
       // next active element, see https://github.com/phetsims/scenery/issues/898
-      var trail = this.a11yPointer.trail;
-      assert && assert( trail, 'an a11yPointer trail should have been created' );
+      this.a11yPointer.invalidateTrail( event.target.getAttribute( 'data-trail-id' ) );
 
-      if ( assertSlow ) {
-        var newTrail = Trail.fromUniqueId( this.rootNode, event.target.getAttribute( 'data-trail-id' ) );
-        assert( newTrail.equals( this.a11yPointer.trail ), 'focusout target different from focusin target' );
-      }
-      this.dispatchEvent( trail, 'blur', this.a11yPointer, event, false );
+      this.dispatchEvent( this.a11yPointer.trail, 'blur', this.a11yPointer, event, false );
+
+      // clear the trail to make sure that our assertions aren't testing a stale trail.
+      this.a11yPointer.trail = null;
 
       // TODO: emit focusIn emitter? Or is it just called focusEmitter? See #888
 
       sceneryLog && sceneryLog.Input && sceneryLog.pop();
     },
+
+    /**
+     * Triggers a logical click event.
+     * @public (scenery-internal)
+     *
+     * @param {DOMEvent} event
+     */
+    click: function( event ) {
+      sceneryLog && sceneryLog.Input && sceneryLog.Input( 'click(' + Input.debugText( null, event ) + ');' );
+      sceneryLog && sceneryLog.Input && sceneryLog.push();
+
+      this.a11yPointer.invalidateTrail( event.target.getAttribute( 'data-trail-id' ) );
+
+      this.dispatchEvent( this.a11yPointer.trail, 'click', this.a11yPointer, event, true );
+
+      // TODO: emit focusIn emitter? Or is it just called focusEmitter? See #888
+
+      sceneryLog && sceneryLog.Input && sceneryLog.pop();
+    },
+
+    /**
+     * Triggers a logical change event.
+     * @public (scenery-internal)
+     *
+     * @param {DOMEvent} event
+     */
+    change: function( event ) {
+      sceneryLog && sceneryLog.Input && sceneryLog.Input( 'change(' + Input.debugText( null, event ) + ');' );
+      sceneryLog && sceneryLog.Input && sceneryLog.push();
+
+      this.a11yPointer.invalidateTrail( event.target.getAttribute( 'data-trail-id' ) );
+
+      this.dispatchEvent( this.a11yPointer.trail, 'change', this.a11yPointer, event, true );
+
+      // TODO: emit focusIn emitter? Or is it just called focusEmitter? See #888
+
+      sceneryLog && sceneryLog.Input && sceneryLog.pop();
+    },
+
+    /**
+     * Triggers a logical input event.
+     * @public (scenery-internal)
+     *
+     * @param {DOMEvent} event
+     */
+    input: function( event ) {
+      sceneryLog && sceneryLog.Input && sceneryLog.Input( 'input(' + Input.debugText( null, event ) + ');' );
+      sceneryLog && sceneryLog.Input && sceneryLog.push();
+
+      this.a11yPointer.invalidateTrail( event.target.getAttribute( 'data-trail-id' ) );
+
+      this.dispatchEvent( this.a11yPointer.trail, 'input', this.a11yPointer, event, true );
+
+      // TODO: emit focusIn emitter? Or is it just called focusEmitter? See #888
+
+      sceneryLog && sceneryLog.Input && sceneryLog.pop();
+    },
+
+
+    /**
+     * Triggers a logical keydown event.
+     * @public (scenery-internal)
+     *
+     * @param {DOMEvent} event
+     */
+    keydown: function( event ) {
+      sceneryLog && sceneryLog.Input && sceneryLog.Input( 'keydown(' + Input.debugText( null, event ) + ');' );
+      sceneryLog && sceneryLog.Input && sceneryLog.push();
+
+      this.a11yPointer.invalidateTrail( event.target.getAttribute( 'data-trail-id' ) );
+
+      this.dispatchEvent( this.a11yPointer.trail, 'keydown', this.a11yPointer, event, true );
+
+      // TODO: emit focusIn emitter? Or is it just called focusEmitter? See #888
+
+      sceneryLog && sceneryLog.Input && sceneryLog.pop();
+    },
+
+    /**
+     * Triggers a logical keyup event.
+     * @public (scenery-internal)
+     *
+     * @param {DOMEvent} event
+     */
+    keyup: function( event ) {
+      sceneryLog && sceneryLog.Input && sceneryLog.Input( 'keyup(' + Input.debugText( null, event ) + ');' );
+      sceneryLog && sceneryLog.Input && sceneryLog.push();
+
+      this.a11yPointer.invalidateTrail( event.target.getAttribute( 'data-trail-id' ) );
+
+      this.dispatchEvent( this.a11yPointer.trail, 'keyup', this.a11yPointer, event, true );
+
+      // TODO: emit focusIn emitter? Or is it just called focusEmitter? See #888
+
+      sceneryLog && sceneryLog.Input && sceneryLog.pop();
+    },
+
 
     /**
      * Initializes the Mouse object on the first mouse event (this may never happen on touch devices).
@@ -818,8 +966,7 @@ define( function( require ) {
      * @private
      */
     initA11yPointer: function() {
-      this.a11yPointer = new A11yPointer();
-      this.a11yPointer.initializeListeners( this.display );
+      this.a11yPointer = new A11yPointer( this.display );
 
       this.addPointer( this.a11yPointer );
     },
