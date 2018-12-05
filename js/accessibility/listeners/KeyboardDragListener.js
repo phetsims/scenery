@@ -137,26 +137,29 @@ define( function( require ) {
      * `Node.addInputListener` only supports type properties as event listeners, and not the event keys as
      * prototype methods. Please see https://github.com/phetsims/scenery/issues/851 for more information.
      * @public
-     * @param {DOMEvent} event
+     * @param {Event} event
      */
     this.keydown = function( event ) {
+      var domEvent = event.domEvent;
 
       // required to work with Safari and VoiceOver, otherwise arrow keys will move virtual cursor
-      if ( KeyboardUtil.isArrowKey( event.keyCode ) ) {
-        event.preventDefault();
+      if ( KeyboardUtil.isArrowKey( domEvent.keyCode ) ) {
+        domEvent.preventDefault();
       }
 
       // if the key is already down, don't do anything else (we don't want to create a new keystate object
       // for a key that is already being tracked and down, nor call startDrag every keydown event)
-      if ( self.keyInListDown( [ event.keyCode ] ) ) { return; }
+      if ( self.keyInListDown( [ domEvent.keyCode ] ) ) { return; }
 
       // Prevent a VoiceOver bug where pressing multiple arrow keys at once causes the AT to send the wrong keycodes
       // through the keyup event - as a workaround, we only allow one arrow key to be down at a time. If two are pressed
       // down, we immediately clear the keystate and return
       // see https://github.com/phetsims/balloons-and-static-electricity/issues/384
       if ( platform.safari ) {
-        if ( KeyboardUtil.isArrowKey( event.keyCode ) ) {
-          if ( self.keyInListDown( [ KeyboardUtil.KEY_RIGHT_ARROW, KeyboardUtil.KEY_LEFT_ARROW, KeyboardUtil.KEY_UP_ARROW, KeyboardUtil.KEY_DOWN_ARROW ] ) ) {
+        if ( KeyboardUtil.isArrowKey( domEvent.keyCode ) ) {
+          if ( self.keyInListDown( [
+            KeyboardUtil.KEY_RIGHT_ARROW, KeyboardUtil.KEY_LEFT_ARROW,
+            KeyboardUtil.KEY_UP_ARROW, KeyboardUtil.KEY_DOWN_ARROW ] ) ) {
             self.interrupt();
             return;
           }
@@ -166,13 +169,13 @@ define( function( require ) {
       // update the key state
       self.keyState.push( {
         keyDown: true,
-        keyCode: event.keyCode,
+        keyCode: domEvent.keyCode,
         timeDown: 0 // in ms
       } );
 
       if ( self._start ) {
         if ( self.movementKeysDown ) {
-          self._start( event );
+          self._start( domEvent );
         }
       }
 
@@ -189,15 +192,17 @@ define( function( require ) {
      * prototype methods. Please see https://github.com/phetsims/scenery/issues/851 for more information.
      *
      * @public
-     * @param {DOMEvent} event
+     * @param {Event} event
      */
     this.keyup = function( event ) {
+      var domEvent = event.domEvent;
+
       var moveKeysDown = self.movementKeysDown;
 
       // if the shift key is down when we navigate to the object, add it to the keystate because it won't be added until
       // the next keydown event
-      if ( event.keyCode === KeyboardUtil.KEY_TAB ) {
-        if ( event.shiftKey ) {
+      if ( domEvent.keyCode === KeyboardUtil.KEY_TAB ) {
+        if ( domEvent.shiftKey ) {
 
           // add 'shift' to the keystate until it is released again
           self.keyState.push( {
@@ -209,7 +214,7 @@ define( function( require ) {
       }
 
       for ( var i = 0; i < self.keyState.length; i++ ) {
-        if ( event.keyCode === self.keyState[ i ].keyCode ) {
+        if ( domEvent.keyCode === self.keyState[ i ].keyCode ) {
           self.keyState.splice( i, 1 );
         }
       }
@@ -219,7 +224,7 @@ define( function( require ) {
 
         // if movement keys are no longer down after keyup, call the optional end drag function
         if ( !moveKeysStillDown && moveKeysDown !== moveKeysStillDown ) {
-          self._end( event );
+          self._end( domEvent );
         }
       }
 
