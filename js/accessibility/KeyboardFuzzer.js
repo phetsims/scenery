@@ -67,12 +67,16 @@ define( require => {
         this.currentElement = document.activeElement;
       }
       else if ( this.random.nextDouble() < NEXT_ELEMENT_THRESHOLD ) {
+        sceneryLog && sceneryLog.KeyboardFuzzer && sceneryLog.KeyboardFuzzer( 'choosing new element' );
+        sceneryLog && sceneryLog.KeyboardFuzzer && sceneryLog.push();
 
         // before we change focus to the next item, immediately release all keys that were down on the active element
         this.clearListeners();
         var nextFocusable = AccessibilityUtil.getRandomFocusable();
         nextFocusable.focus();
         this.currentElement = nextFocusable;
+
+        sceneryLog && sceneryLog.KeyboardFuzzer && sceneryLog.pop();
       }
     }
 
@@ -91,7 +95,12 @@ define( require => {
      * @param {HTMLElement} element
      */
     triggerClickEvent( element ) {
+      sceneryLog && sceneryLog.KeyboardFuzzer && sceneryLog.KeyboardFuzzer( 'triggering click' );
+      sceneryLog && sceneryLog.KeyboardFuzzer && sceneryLog.push();
+
       element.click();
+
+      sceneryLog && sceneryLog.KeyboardFuzzer && sceneryLog.pop();
     }
 
     /**
@@ -102,14 +111,19 @@ define( require => {
     triggerKeyDownUpEvents( element, keyCode ) {
 
       if ( !this.keyStateTracker.isKeyDown( keyCode ) ) {
+        sceneryLog && sceneryLog.KeyboardFuzzer && sceneryLog.KeyboardFuzzer( 'trigger keydown/up: ' + keyCode );
+        sceneryLog && sceneryLog.KeyboardFuzzer && sceneryLog.push();
+
 
         // TODO: screen readers normally take our keydown events, but may not here, is the descrpency ok?
         this.triggerDOMEvent( KEY_DOWN, element, keyCode );
 
         this.keyupListeners.push( timer.setTimeout( () => {
-          this.triggerDOMEvent( KEY_UP, element, keyCode );
+            this.triggerDOMEvent( KEY_UP, element, keyCode );
 
         }, this.random.nextInt( MAX_MS_KEY_HOLD_DOWN ) ) );
+
+        sceneryLog && sceneryLog.KeyboardFuzzer && sceneryLog.pop();
       }
     }
 
@@ -122,8 +136,12 @@ define( require => {
 
       var randomKeyCode = Math.floor( this.random.nextDouble() * ( max - min ) + min );
 
+      sceneryLog && sceneryLog.KeyboardFuzzer && sceneryLog.KeyboardFuzzer( 'trigger random keydown/up: ' + randomKeyCode );
+      sceneryLog && sceneryLog.KeyboardFuzzer && sceneryLog.push();
+
       this.triggerKeyDownUpEvents( element, randomKeyCode );
 
+      sceneryLog && sceneryLog.KeyboardFuzzer && sceneryLog.pop();
     }
 
     /**
@@ -140,6 +158,10 @@ define( require => {
       this.chooseNextElement();
 
       for ( let i = 0; i < this.keysPressedEachFrame; i++ ) {
+
+        sceneryLog && sceneryLog.KeyboardFuzzer && sceneryLog.KeyboardFuzzer( 'main loop, i=' + i );
+        sceneryLog && sceneryLog.KeyboardFuzzer && sceneryLog.push();
+
 
         // get active element, focus might have changed in the last press
         var elementWithFocus = document.activeElement;
@@ -160,6 +182,8 @@ define( require => {
         }
         // TODO: What about other types of events, not just keydown/keyup??!?!
         // TODO: what about application role elements
+
+        sceneryLog && sceneryLog.KeyboardFuzzer && sceneryLog.pop();
       }
     }
 

@@ -96,6 +96,7 @@ define( function( require ) {
     AccessibleInstance: { name: 'AccessibleInstance', style: '' },
     AccessibilityTree: { name: 'AccessibilityTree', style: '' },
     AccessibleDisplaysInfo: { name: 'AccessibleDisplaysInfo', style: '' },
+    KeyboardFuzzer: { name: 'KeyboardFuzzer', style: '' },
 
     // Input-related
     InputListener: { name: 'InputListener', style: '' },
@@ -168,12 +169,12 @@ define( function( require ) {
           'Unknown logger: ' + name + ', please use periods (.) to separate different log names' );
 
         window.sceneryLog[ name ] = window.sceneryLog[ name ] || function( ob, styleOverride ) {
-            var data = logProperties[ name ];
+          var data = logProperties[ name ];
 
-            var prefix = data.name ? '[' + data.name + '] ' : '';
-            var padStyle = 'color: #ddd;';
-            scenery.logFunction( '%c' + logPadding + '%c' + prefix + ob, padStyle, styleOverride ? styleOverride : data.style );
-          };
+          var prefix = data.name ? '[' + data.name + '] ' : '';
+          var padStyle = 'color: #ddd;';
+          scenery.logFunction( '%c' + logPadding + '%c' + prefix + ob, padStyle, styleOverride ? styleOverride : data.style );
+        };
       }
     },
 
@@ -578,8 +579,8 @@ define( function( require ) {
       }
       if ( value.type === 'Matrix3' ) {
         return new dot.Matrix3().rowMajor( value.m00, value.m01, value.m02,
-                                           value.m10, value.m11, value.m12,
-                                           value.m20, value.m21, value.m22 );
+          value.m10, value.m11, value.m12,
+          value.m20, value.m21, value.m22 );
       }
       else if ( value.type === 'Bounds2' ) {
         return new dot.Bounds2( value.minX, value.minY, value.maxX, value.maxY );
