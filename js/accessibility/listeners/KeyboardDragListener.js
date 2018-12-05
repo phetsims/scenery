@@ -58,13 +58,13 @@ define( function( require ) {
       // Usually most useful when paired with the locationProperty
       transform: null,
 
-      // {Function|null} - Called as start( event: {DOMEvent} ) when keyboard drag is started
+      // {Function|null} - Called as start( event: {Event} ) when keyboard drag is started
       start: null,
 
       // {Function|null} - Called as drag( viewDelta: {Vector2} ) during drag
       drag: null,
 
-      // {Function|null} - Called as end( event: {DOMEvent}, viewDelta: {Vector2} ) when keyboard drag ends
+      // {Function|null} - Called as end( event: {Event} ) when keyboard drag ends
       end: null, // called at the end of the dragging interaction
 
       // {number} - arrow keys must be pressed this long to begin movement set on interval below
@@ -175,7 +175,7 @@ define( function( require ) {
 
       if ( self._start ) {
         if ( self.movementKeysDown ) {
-          self._start( domEvent );
+          self._start( event );
         }
       }
 
@@ -224,7 +224,7 @@ define( function( require ) {
 
         // if movement keys are no longer down after keyup, call the optional end drag function
         if ( !moveKeysStillDown && moveKeysDown !== moveKeysStillDown ) {
-          self._end( domEvent );
+          self._end( event );
         }
       }
 
