@@ -45,23 +45,25 @@ define( require => {
      * `Node.addInputListener` only supports type properties as event listeners, and not the event keys as
      * prototype methods. Please see https://github.com/phetsims/scenery/issues/851 for more information.
      * @public
-     * @param {DOMEvent} event
+     * @param {Event} event
      */
     keydownUpdate( event ) {
 
+      var domEvent = event.domEvent;
+
       // required to work with Safari and VoiceOver, otherwise arrow keys will move virtual cursor
-      if ( KeyboardUtil.isArrowKey( event.keyCode ) ) {
-        event.preventDefault();
+      if ( KeyboardUtil.isArrowKey( domEvent.keyCode ) ) {
+        domEvent.preventDefault();
       }
 
-      assert && assert( !!event.shiftKey === !!this.shiftKeyDown, 'shift key inconsistency between event and keystate.' );
+      assert && assert( !!domEvent.shiftKey === !!this.shiftKeyDown, 'shift key inconsistency between event and keystate.' );
 
       // if the key is already down, don't do anything else (we don't want to create a new keystate object
       // for a key that is already being tracked and down)
-      if ( !this.isKeyDown( event.keyCode ) ) {
-        this.keyState[ event.keyCode ] = {
+      if ( !this.isKeyDown( domEvent.keyCode ) ) {
+        this.keyState[ domEvent.keyCode ] = {
           keyDown: true,
-          keyCode: event.keyCode,
+          keyCode: domEvent.keyCode,
           timeDown: 0 // in ms
         };
       }
@@ -76,14 +78,15 @@ define( require => {
      * prototype methods. Please see https://github.com/phetsims/scenery/issues/851 for more information.
      *
      * @public
-     * @param {DOMEvent} event
+     * @param {Event} event
      */
     keyupUpdate( event ) {
+      var domEvent = event.domEvent;
 
       // if the shift key is down when we navigate to the object, add it to the keystate because it won't be added until
       // the next keydown event
-      if ( event.keyCode === KeyboardUtil.KEY_TAB ) {
-        if ( event.shiftKey ) {
+      if ( domEvent.keyCode === KeyboardUtil.KEY_TAB ) {
+        if ( domEvent.shiftKey ) {
 
           // add 'shift' to the keystate until it is released again
           if ( !this.isKeyDown( KeyboardUtil.KEY_SHIFT ) ) {
@@ -97,8 +100,8 @@ define( require => {
       }
 
       // remove this key data from the state
-      if ( this.isKeyDown( event.keyCode ) ) {
-        delete this.keyState[ event.keyCode ];
+      if ( this.isKeyDown( domEvent.keyCode ) ) {
+        delete this.keyState[ domEvent.keyCode ];
       }
     }
 

@@ -1737,7 +1737,7 @@ define( function( require ) {
         this.setAccessibleAttribute( 'target', '_self' ); // This is the default (easier than conditionally removing)
         this.accessibleInputListener = {
           click: function( event ) {
-            event.preventDefault();
+            event.domEvent.preventDefault();
 
             href();
           }
