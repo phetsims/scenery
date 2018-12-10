@@ -301,8 +301,7 @@ define( function( require ) {
      * @returns {boolean}
      */
     canPress: function( event ) {
-      // canClick is a subset of canPress (checks a11y state)
-      return this.canClick() &&
+      return !this.isPressed && this._canStartPress() &&
              // Only let presses be started with the correct mouse button.
              ( !( event.pointer instanceof Mouse ) || event.domEvent.button === this._mouseButton ) &&
              // We can't attach to a pointer that is already attached.
@@ -310,7 +309,8 @@ define( function( require ) {
     },
 
     /**
-     * Returns whether this PressListener can be clicked from keyboard input.
+     * Returns whether this PressListener can be clicked from keyboard input. This copies part of canPress, but
+     * we didn't want to use canClick in canPress because canClick could be overridden in subtypes.
      * @public
      *
      * @return {boolean}
