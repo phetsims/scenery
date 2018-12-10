@@ -394,6 +394,12 @@ define( function( require ) {
         this.pointer.removeInputListener( this.dragListener );
       }
       this.isDraggingProperty.dispose();
+
+      // It seemed without disposing these led to a memory leak in Energy Skate Park: Basics
+      this.dragEndedEmitter.dispose();
+      this.draggedEmitter.dispose();
+      this.dragStartedEmitter.dispose();
+
       PhetioObject.prototype.dispose.call( this );
 
       sceneryLog && sceneryLog.InputListener && sceneryLog.pop();
