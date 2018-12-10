@@ -501,6 +501,9 @@ define( function( require ) {
          * @public
          */
         focus: function() {
+
+          // if a sim is running without accessibility enabled, there will be no accessible instances, but focus() might
+          // still be called without accessibility enabled
           if ( this._accessibleInstances.length > 0 ) {
 
             // when accessibility is widely used, this assertion can be added back in
