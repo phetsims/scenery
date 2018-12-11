@@ -186,18 +186,19 @@ define( function( require ) {
       var gl = scratchCanvas.getContext( 'webgl', contextOptions ) || scratchCanvas.getContext( 'experimental-webgl', contextOptions );
       Util.applyWebGLContextDefaults( gl ); // blending, etc.
 
-      var projectionMatrix = new Matrix3().setTo32Bit().rowMajor(
+      var projectionMatrix = new Matrix3().rowMajor(
         2 / width, 0, -1,
         0, -2 / height, 1,
         0, 0, 1 );
-      var modelViewMatrix = new Matrix3().setTo32Bit().set( matrix );
       gl.viewport( 0, 0, width, height );
 
       var PainterType = this.painterType;
       var painter = new PainterType( gl, this );
 
-      painter.paint( modelViewMatrix, projectionMatrix );
+      painter.paint( matrix, projectionMatrix );
       painter.dispose();
+
+      projectionMatrix.freeToPool();
 
       gl.flush();
 

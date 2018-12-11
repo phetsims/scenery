@@ -11,14 +11,10 @@ define( function( require ) {
 
   // modules
   var inherit = require( 'PHET_CORE/inherit' );
-  var Matrix3 = require( 'DOT/Matrix3' );
   var Poolable = require( 'PHET_CORE/Poolable' );
   var Renderer = require( 'SCENERY/display/Renderer' );
   var scenery = require( 'SCENERY/scenery' );
   var WebGLSelfDrawable = require( 'SCENERY/display/WebGLSelfDrawable' );
-
-  // Use a Float32Array-backed matrix, as it's better for usage with WebGL
-  var modelViewMatrix = new Matrix3().setTo32Bit();
 
   /**
    * A generated WebGLSelfDrawable whose purpose will be drawing our WebGLNode. One of these drawables will be created
@@ -83,9 +79,7 @@ define( function( require ) {
       // we have a precompute need
       var matrix = this.instance.relativeTransform.matrix;
 
-      modelViewMatrix.set( matrix );
-
-      var painted = this.painter.paint( modelViewMatrix, this.webGLBlock.projectionMatrix );
+      var painted = this.painter.paint( matrix, this.webGLBlock.projectionMatrix );
 
       assert && assert( painted === scenery.WebGLNode.PAINTED_SOMETHING || painted === scenery.WebGLNode.PAINTED_NOTHING );
       assert && assert( scenery.WebGLNode.PAINTED_NOTHING === 0 && scenery.WebGLNode.PAINTED_SOMETHING === 1,

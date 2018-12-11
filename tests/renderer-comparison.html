@@ -117,6 +117,7 @@
         ],
         function( scenery, kite, dot, phetCore ) {
           var ShaderProgram = require( 'SCENERY/util/ShaderProgram' );
+          var scratchFloatArray = new Float32Array( 9 );
 
           var testCases = [
             {
@@ -348,8 +349,8 @@
 
                     shaderProgram.use();
 
-                    gl.uniformMatrix3fv( shaderProgram.uniformLocations.uModelViewMatrix, false, modelViewMatrix.entries );
-                    gl.uniformMatrix3fv( shaderProgram.uniformLocations.uProjectionMatrix, false, projectionMatrix.entries );
+                    gl.uniformMatrix3fv( shaderProgram.uniformLocations.uModelViewMatrix, false, modelViewMatrix.copyToArray( scratchFloatArray ) );
+                    gl.uniformMatrix3fv( shaderProgram.uniformLocations.uProjectionMatrix, false, projectionMatrix.copyToArray( scratchFloatArray ) );
 
                     gl.bindBuffer( gl.ARRAY_BUFFER, this.vertexBuffer );
                     gl.vertexAttribPointer( shaderProgram.attributeLocations.aPosition, 3, gl.FLOAT, false, 0, 0 );

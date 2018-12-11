@@ -67,11 +67,11 @@ define( function( require ) {
 
       // Projection {Matrix3} that maps from Scenery's global coordinate frame to normalized device coordinates,
       // where x,y are both in the range [-1,1] from one side of the Canvas to the other.
-      this.projectionMatrix = this.projectionMatrix || new Matrix3().setTo32Bit();
+      this.projectionMatrix = this.projectionMatrix || new Matrix3();
 
       // @private {Float32Array} - Column-major 3x3 array specifying our projection matrix for 2D points
       // (homogenized to (x,y,1))
-      this.projectionMatrixArray = this.projectionMatrix.entries;
+      this.projectionMatrixArray = new Float32Array( 9 );
 
       // processor for custom WebGL drawables (e.g. WebGLNode)
       this.customProcessor = this.customProcessor || new WebGLBlock.CustomProcessor();
@@ -361,6 +361,7 @@ define( function( require ) {
         2 / this.display.width, 0, -1,
         0, -2 / this.display.height, 1,
         0, 0, 1 );
+      this.projectionMatrix.copyToArray( this.projectionMatrixArray );
 
       // if we created the context with preserveDrawingBuffer, we need to clear before rendering
       if ( this.preserveDrawingBuffer ) {
