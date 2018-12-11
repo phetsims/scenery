@@ -2322,6 +2322,40 @@ define( function( require ) {
         },
 
         /**
+         * Remove a particular attribute, removing the associated semantic information from the DOM element.
+         *
+         * @param {string} attribute - name of the attribute to remove
+         * @param {Object} [options]
+         * @returns {boolean}
+         * @public
+         */
+        hasAccessibleAttribute: function( attribute, options ) {
+          assert && assert( typeof attribute === 'string' );
+          assert && options && assert( Object.getPrototypeOf( options ) === Object.prototype,
+            'Extra prototype on accessibleAttribute options object is a code smell' );
+
+          options = _.extend( {
+
+            // {string|null} - If non-null, will remove the attribute with the specified namespace. This can be required
+            // for removing certain attributes (e.g. MathML).
+            namespace: null,
+
+            elementName: AccessiblePeer.PRIMARY_SIBLING // see AccessiblePeer.getElementName() for valid values, default to the primary sibling
+          }, options );
+
+          var attributeFound = false;
+          for ( var i = 0; i < this._accessibleAttributes.length; i++ ) {
+            if ( this._accessibleAttributes[ i ].attribute === attribute &&
+                 this._accessibleAttributes[ i ].options.namespace === options.namespace &&
+                 this._accessibleAttributes[ i ].options.elementName === options.elementName ) {
+              attributeFound = true;
+            }
+          }
+          return attributeFound;
+        },
+
+
+        /**
          * Make the DOM element explicitly focusable with a tab index. Native HTML form elements will generally be in
          * the navigation order without explicitly setting focusable.  If these need to be removed from the navigation
          * order, call setFocusable( false ).  Removing an element from the focus order does not hide the element from

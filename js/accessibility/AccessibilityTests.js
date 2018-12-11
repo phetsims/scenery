@@ -890,8 +890,10 @@ define( function( require ) {
     a1.setAccessibleAttribute( 'role', 'switch' );
     assert.ok( a1.getAccessibleAttributes()[ 0 ].attribute === 'role', 'attribute set' );
     assert.ok( a1Element.getAttribute( 'role' ) === 'switch', 'HTML attribute set' );
+    assert.ok( a1.hasAccessibleAttribute( 'role' ), 'should have accessible attribute' );
 
     a1.removeAccessibleAttribute( 'role' );
+    assert.ok( !a1.hasAccessibleAttribute( 'role' ), 'should not have accessible attribute' );
     assert.ok( !a1Element.getAttribute( 'role' ), 'attribute removed' );
 
     var b = new Node( { focusable: true } );
