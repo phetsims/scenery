@@ -5,7 +5,7 @@
  *
  * @author Sam Reid (PhET Interactive Simulations)
  */
-define( function( require ) {
+define( require => {
   'use strict';
 
   // modules
@@ -28,12 +28,23 @@ define( function( require ) {
   require( 'SCENERY/util/TrailTests' );
   require( 'SCENERY/tests/PixelComparisonTests' );
   require( 'SCENERY/tests/MiscellaneousTests' );
+  const scenery = require( 'SCENERY/scenery' );
 
   // add elements to the QUnit fixture for our Scenery-specific tests
   // TODO: is this necessary?
-  var $fixture = $( '#qunit-fixture' );
+  const $fixture = $( '#qunit-fixture' );
   $fixture.append( $( '<div>' ).attr( 'id', 'main' ).attr( 'style', 'position: absolute; left: 0; top: 0; background-color: white; z-index: 1; width: 640px; height: 480px;' ) );
   $fixture.append( $( '<div>' ).attr( 'id', 'secondary' ).attr( 'style', 'position: absolute; left: 0; top: 0; background-color: white; z-index: 0; width: 640px; height: 480px;' ) );
+
+  // schema should be the same as in initializeGlobals
+  const sceneryLogQueryParameter = QueryStringMachine.get( 'sceneryLog', {
+    type: 'array',
+    elementSchema: {
+      type: 'string'
+    },
+    defaultValue: null
+  } );
+  sceneryLogQueryParameter && scenery.enableLogging( sceneryLogQueryParameter );
 
   // Since our tests are loaded asynchronously, we must direct QUnit to begin the tests
   QUnit.start();

@@ -16,7 +16,6 @@ define( function( require ) {
   var Display = require( 'SCENERY/display/Display' );
   var Node = require( 'SCENERY/nodes/Node' );
   var Rectangle = require( 'SCENERY/nodes/Rectangle' );
-  var scenery = require( 'SCENERY/scenery' );
 
   // constants
   var TEST_INNER_CONTENT = 'Test Inner Content Here please^&*. Thanks you so very mucho.';
@@ -41,24 +40,7 @@ define( function( require ) {
   // a focus highlight for testing, since dummy nodes tend to have no bounds
   var TEST_HIGHLIGHT = new Circle( 5 );
 
-  QUnit.module( 'Accessibility', {
-    before: function() {
-      // add scenery logging for a11y in this unit test module, make sure it is turned off at the end of the file.
-      if ( window.location.search.indexOf( 'a11yLog' ) >= 0 ) {
-        scenery.enableLogging( [ 'a11y' ] );
-      }
-
-    },
-    after: function() {
-      // remove the logging that we added at the top
-      if ( window.location.search.indexOf( 'a11yLog' ) >= 0 ) {
-        scenery.disableIndividualLog( 'Accessibility' );
-        scenery.disableIndividualLog( 'AccessibleInstance' );
-        scenery.disableIndividualLog( 'AccessibilityTree' );
-        scenery.disableIndividualLog( 'AccessibleDisplaysInfo' );
-      }
-    }
-  } );
+  QUnit.module( 'Accessibility' );
 
   /**
    * Get a unique AccessiblePeer from a node with accessible content. Will error if the node has multiple instances
