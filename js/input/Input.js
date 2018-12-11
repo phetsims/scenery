@@ -118,33 +118,32 @@
  * @author Sam Reid (PhET Interactive Simulations)
  */
 
-define( function( require ) {
+define( require => {
   'use strict';
 
-  var A11yPointer = require( 'SCENERY/input/A11yPointer' );
-  var BatchedDOMEvent = require( 'SCENERY/input/BatchedDOMEvent' );
-  var BrowserEvents = require( 'SCENERY/input/BrowserEvents' );
-  var cleanArray = require( 'PHET_CORE/cleanArray' );
-  var DOMEventIO = require( 'SCENERY/input/DOMEventIO' );
-  var Emitter = require( 'AXON/Emitter' );
-  var EmitterIO = require( 'AXON/EmitterIO' );
-  var Event = require( 'SCENERY/input/Event' );
-  var Features = require( 'SCENERY/util/Features' );
-  var inherit = require( 'PHET_CORE/inherit' );
-  var Mouse = require( 'SCENERY/input/Mouse' );
-  var NumberIO = require( 'TANDEM/types/NumberIO' );
-  var Pen = require( 'SCENERY/input/Pen' );
-  var platform = require( 'PHET_CORE/platform' );
-  var Pointer = require( 'SCENERY/input/Pointer' );
-  var scenery = require( 'SCENERY/scenery' );
-  var Tandem = require( 'TANDEM/Tandem' );
-  var Touch = require( 'SCENERY/input/Touch' );
-  var Trail = require( 'SCENERY/util/Trail' );
-  var Vector2 = require( 'DOT/Vector2' );
-  var Vector2IO = require( 'DOT/Vector2IO' );
+  const A11yPointer = require( 'SCENERY/input/A11yPointer' );
+  const BatchedDOMEvent = require( 'SCENERY/input/BatchedDOMEvent' );
+  const BrowserEvents = require( 'SCENERY/input/BrowserEvents' );
+  const cleanArray = require( 'PHET_CORE/cleanArray' );
+  const DOMEventIO = require( 'SCENERY/input/DOMEventIO' );
+  const Emitter = require( 'AXON/Emitter' );
+  const EmitterIO = require( 'AXON/EmitterIO' );
+  const Event = require( 'SCENERY/input/Event' );
+  const Features = require( 'SCENERY/util/Features' );
+  const Mouse = require( 'SCENERY/input/Mouse' );
+  const NumberIO = require( 'TANDEM/types/NumberIO' );
+  const Pen = require( 'SCENERY/input/Pen' );
+  const platform = require( 'PHET_CORE/platform' );
+  const Pointer = require( 'SCENERY/input/Pointer' );
+  const scenery = require( 'SCENERY/scenery' );
+  const Tandem = require( 'TANDEM/Tandem' );
+  const Touch = require( 'SCENERY/input/Touch' );
+  const Trail = require( 'SCENERY/util/Trail' );
+  const Vector2 = require( 'DOT/Vector2' );
+  const Vector2IO = require( 'DOT/Vector2IO' );
 
   // Object literal makes it easy to check for the existence of an attribute (compared to [].indexOf()>=0)
-  var domEventPropertiesToSerialize = {
+  const domEventPropertiesToSerialize = {
     button: true, keyCode: true,
     deltaX: true, deltaY: true, deltaZ: true, deltaMode: true, pointerId: true,
     pointerType: true, charCode: true, which: true, clientX: true, clientY: true, changedTouches: true
@@ -164,424 +163,422 @@ define( function( require ) {
    *
    * @param {Object} [options]
    */
-  function Input( display, attachToWindow, batchDOMEvents, assumeFullWindow, passiveEvents, options ) {
-    assert && assert( display instanceof scenery.Display );
-    assert && assert( typeof attachToWindow === 'boolean' );
-    assert && assert( typeof batchDOMEvents === 'boolean' );
-    assert && assert( typeof assumeFullWindow === 'boolean' );
-    var self = this;
+  class Input {
+    constructor( display, attachToWindow, batchDOMEvents, assumeFullWindow, passiveEvents, options ) {
+      assert && assert( display instanceof scenery.Display );
+      assert && assert( typeof attachToWindow === 'boolean' );
+      assert && assert( typeof batchDOMEvents === 'boolean' );
+      assert && assert( typeof assumeFullWindow === 'boolean' );
 
-    options = _.extend( {
-      tandem: Tandem.optional
-    }, options );
+      options = _.extend( {
+        tandem: Tandem.optional
+      }, options );
 
-    // @public {Display}
-    this.display = display;
+      // @public {Display}
+      this.display = display;
 
-    // @public {Node}
-    this.rootNode = display.rootNode;
+      // @public {Node}
+      this.rootNode = display.rootNode;
 
-    // @public {boolean}
-    this.attachToWindow = attachToWindow;
-    this.batchDOMEvents = batchDOMEvents;
-    this.assumeFullWindow = assumeFullWindow;
+      // @public {boolean}
+      this.attachToWindow = attachToWindow;
+      this.batchDOMEvents = batchDOMEvents;
+      this.assumeFullWindow = assumeFullWindow;
 
-    // @public {boolean|null}
-    this.passiveEvents = passiveEvents;
+      // @public {boolean|null}
+      this.passiveEvents = passiveEvents;
 
-    // @private {Array.<BatchedDOMEvent}>
-    this.batchedEvents = [];
+      // @private {Array.<BatchedDOMEvent}>
+      this.batchedEvents = [];
 
-    // @public {A11yPointer|null} - Pointer for accessibility, only created lazily on first a11y event.
-    this.a11yPointer = null;
+      // @public {A11yPointer|null} - Pointer for accessibility, only created lazily on first a11y event.
+      this.a11yPointer = null;
 
-    // @public {Mouse|null} - Pointer for mouse, only created lazily on first mouse event, so no mouse is allocated on.
-    // tablets.
-    this.mouse = null;
+      // @public {Mouse|null} - Pointer for mouse, only created lazily on first mouse event, so no mouse is allocated on.
+      // tablets.
+      this.mouse = null;
 
-    // @public {Array.<Pointer>} - All active pointers.
-    this.pointers = [];
+      // @public {Array.<Pointer>} - All active pointers.
+      this.pointers = [];
 
-    // TODO: replace this with an emitter
-    this.pointerAddedListeners = [];
+      // TODO: replace this with an emitter
+      this.pointerAddedListeners = [];
 
-    // @public {boolean} - Whether we are currently firing events. We need to track this to handle re-entrant cases
-    // like https://github.com/phetsims/balloons-and-static-electricity/issues/406.
-    this.currentlyFiringEvents = false;
+      // @public {boolean} - Whether we are currently firing events. We need to track this to handle re-entrant cases
+      // like https://github.com/phetsims/balloons-and-static-electricity/issues/406.
+      this.currentlyFiringEvents = false;
 
-    // Declare the Emitters that send scenery input events to the PhET-iO data stream.  Note they use the default value
-    // of phetioReadOnly false, in case a client wants to synthesize events.
+      // Declare the Emitters that send scenery input events to the PhET-iO data stream.  Note they use the default value
+      // of phetioReadOnly false, in case a client wants to synthesize events.
 
-    // @private {Emitter} Emits pointer validation to the input stream for playback
-    const validatePointers = function() {
-      var i = self.pointers.length;
-      while ( i-- ) {
-        var pointer = self.pointers[ i ];
-        if ( pointer.point ) {
-          self.branchChangeEvents( pointer, pointer.lastDOMEvent, false );
+      // @private {Emitter} Emits pointer validation to the input stream for playback
+      const validatePointers = () => {
+        let i = this.pointers.length;
+        while ( i-- ) {
+          const pointer = this.pointers[ i ];
+          if ( pointer.point ) {
+            this.branchChangeEvents( pointer, pointer.lastDOMEvent, false );
+          }
         }
-      }
-    };
+      };
 
-    // This is a high frequency event that is necessary for reproducible playbacks
-    this.validatePointersEmitter = new Emitter( {
-      phetioPlayback: true,
-      tandem: options.tandem.createTandem( 'validatePointersEmitter' ),
-      phetioHighFrequency: true,
-      listener: validatePointers
-    } );
+      // This is a high frequency event that is necessary for reproducible playbacks
+      this.validatePointersEmitter = new Emitter( {
+        phetioPlayback: true,
+        tandem: options.tandem.createTandem( 'validatePointersEmitter' ),
+        phetioHighFrequency: true,
+        listener: validatePointers
+      } );
 
-    // @private {Emitter} - Emits to the PhET-iO data stream.  
-    this.mouseUpEmitter = new Emitter( {
-      phetioPlayback: true,
-      tandem: options.tandem.createTandem( 'mouseUpEmitter' ),
-      phetioType: EmitterIO( [
-        { name: 'point', type: Vector2IO },
-        { name: 'event', type: DOMEventIO }
-      ] ),
-      phetioEventType: 'user',
-      phetioDocumentation: 'Emits when a mouse button is released',
-      listener: function( point, event ) {
-        if ( !self.mouse ) { self.initMouse(); }
-        var pointChanged = self.mouse.up( point, event );
-        self.upEvent( self.mouse, event, pointChanged );
-      }
-    } );
-
-    // @private {Emitter} - Emits to the PhET-iO data stream.  
-    this.mouseDownEmitter = new Emitter( {
-      phetioPlayback: true,
-      tandem: options.tandem.createTandem( 'mouseDownEmitter' ),
-      phetioType: EmitterIO( [
-        { name: 'point', type: Vector2IO },
-        { name: 'event', type: DOMEventIO }
-      ] ),
-      phetioEventType: 'user',
-      phetioDocumentation: 'Emits when a mouse button is pressed',
-      listener: function( point, event ) {
-        if ( !self.mouse ) { self.initMouse(); }
-        var pointChanged = self.mouse.down( point, event );
-        self.downEvent( self.mouse, event, pointChanged );
-      }
-    } );
-
-    // @private {Emitter} - Emits to the PhET-iO data stream.  
-    this.mouseMovedEmitter = new Emitter( {
-      phetioPlayback: true,
-      tandem: options.tandem.createTandem( 'mouseMovedEmitter' ),
-      phetioType: EmitterIO( [
-        { name: 'point', type: Vector2IO },
-        { name: 'event', type: DOMEventIO }
-      ] ),
-      phetioEventType: 'user',
-      phetioDocumentation: 'Emits when the mouse is moved',
-      phetioHighFrequency: true,
-      listener: function( point, event ) {
-        if ( !self.mouse ) { self.initMouse(); }
-        self.mouse.move( point, event );
-        self.moveEvent( self.mouse, event );
-      }
-    } );
-
-    // @private {Emitter} - Emits to the PhET-iO data stream.  
-    this.mouseOverEmitter = new Emitter( {
-      phetioPlayback: true,
-      tandem: options.tandem.createTandem( 'mouseOverEmitter' ),
-      phetioType: EmitterIO( [
-        { name: 'point', type: Vector2IO },
-        { name: 'event', type: DOMEventIO }
-      ] ),
-      phetioEventType: 'user',
-      phetioDocumentation: 'Emits when the mouse is moved over a Node',
-      listener: function( point, event ) {
-        if ( !self.mouse ) { self.initMouse(); }
-        self.mouse.over( point, event );
-        // TODO: how to handle mouse-over (and log it)... are we changing the pointer.point without a branch change?
-      }
-    } );
-
-    // @private {Emitter} - Emits to the PhET-iO data stream.  
-    this.mouseOutEmitter = new Emitter( {
-      phetioPlayback: true,
-      tandem: options.tandem.createTandem( 'mouseOutEmitter' ),
-      phetioType: EmitterIO( [
-        { name: 'point', type: Vector2IO },
-        { name: 'event', type: DOMEventIO }
-      ] ),
-      phetioEventType: 'user',
-      phetioDocumentation: 'Emits when the mouse moves out of the display',
-      listener: function( point, event ) {
-        if ( !self.mouse ) { self.initMouse(); }
-        self.mouse.out( point, event );
-        // TODO: how to handle mouse-out (and log it)... are we changing the pointer.point without a branch change?
-      }
-    } );
-
-    // @private {Emitter} - Emits to the PhET-iO data stream.  
-    this.wheelScrolledEmitter = new Emitter( {
-      phetioPlayback: true,
-      tandem: options.tandem.createTandem( 'wheelScrolledEmitter' ),
-      phetioType: EmitterIO( [
-        { name: 'event', type: DOMEventIO }
-      ] ),
-      phetioEventType: 'user',
-      phetioDocumentation: 'Emits when the mouse wheel scrolls',
-      phetioHighFrequency: true,
-      listener: function( event ) {
-        if ( !self.mouse ) { self.initMouse(); }
-        self.mouse.wheel( event );
-
-        // don't send mouse-wheel events if we don't yet have a mouse location!
-        // TODO: Can we set the mouse location based on the wheel event?
-        if ( self.mouse.point ) {
-          var trail = self.rootNode.trailUnderPointer( self.mouse ) || new Trail( self.rootNode );
-          self.dispatchEvent( trail, 'wheel', self.mouse, event, true );
+      // @private {Emitter} - Emits to the PhET-iO data stream.
+      this.mouseUpEmitter = new Emitter( {
+        phetioPlayback: true,
+        tandem: options.tandem.createTandem( 'mouseUpEmitter' ),
+        phetioType: EmitterIO( [
+          { name: 'point', type: Vector2IO },
+          { name: 'event', type: DOMEventIO }
+        ] ),
+        phetioEventType: 'user',
+        phetioDocumentation: 'Emits when a mouse button is released',
+        listener: ( point, event ) => {
+          if ( !this.mouse ) { this.initMouse(); }
+          const pointChanged = this.mouse.up( point, event );
+          this.upEvent( this.mouse, event, pointChanged );
         }
-      }
-    } );
+      } );
 
-    // @private {Emitter} - Emits to the PhET-iO data stream.
-    this.touchStartedEmitter = new Emitter( {
-      phetioPlayback: true,
-      tandem: options.tandem.createTandem( 'touchStartedEmitter' ),
-      phetioType: EmitterIO( [
-        { name: 'id', type: NumberIO },
-        { name: 'point', type: Vector2IO },
-        { name: 'event', type: DOMEventIO }
-      ] ),
-      phetioEventType: 'user',
-      phetioDocumentation: 'Emits when a touch begins',
-      listener: function( id, point, event ) {
-        var touch = new Touch( id, point, event );
-        self.addPointer( touch );
-        self.downEvent( touch, event, false );
-      }
-    } );
-
-    // @private {Emitter} - Emits to the PhET-iO data stream.
-    this.touchEndedEmitter = new Emitter( {
-      phetioPlayback: true,
-      tandem: options.tandem.createTandem( 'touchEndedEmitter' ),
-      phetioType: EmitterIO( [
-        { name: 'id', type: NumberIO },
-        { name: 'point', type: Vector2IO },
-        { name: 'event', type: DOMEventIO }
-      ] ),
-      phetioEventType: 'user',
-      phetioDocumentation: 'Emits when a touch ends',
-      listener: function( id, point, event ) {
-        var touch = self.findPointerById( id );
-        if ( touch ) {
-          var pointChanged = touch.end( point, event );
-          self.upEvent( touch, event, pointChanged );
-          self.removePointer( touch );
+      // @private {Emitter} - Emits to the PhET-iO data stream.
+      this.mouseDownEmitter = new Emitter( {
+        phetioPlayback: true,
+        tandem: options.tandem.createTandem( 'mouseDownEmitter' ),
+        phetioType: EmitterIO( [
+          { name: 'point', type: Vector2IO },
+          { name: 'event', type: DOMEventIO }
+        ] ),
+        phetioEventType: 'user',
+        phetioDocumentation: 'Emits when a mouse button is pressed',
+        listener: ( point, event ) => {
+          if ( !this.mouse ) { this.initMouse(); }
+          const pointChanged = this.mouse.down( point, event );
+          this.downEvent( this.mouse, event, pointChanged );
         }
-      }
-    } );
+      } );
 
-    // @private {Emitter} - Emits to the PhET-iO data stream.
-    this.touchMovedEmitter = new Emitter( {
-      phetioPlayback: true,
-      tandem: options.tandem.createTandem( 'touchMovedEmitter' ),
-      phetioType: EmitterIO( [
-        { name: 'id', type: NumberIO },
-        { name: 'point', type: Vector2IO },
-        { name: 'event', type: DOMEventIO }
-      ] ),
-      phetioEventType: 'user',
-      phetioDocumentation: 'Emits when a touch moves',
-      phetioHighFrequency: true,
-      listener: function( id, point, event ) {
-        var touch = self.findPointerById( id );
-        if ( touch ) {
-          touch.move( point, event );
-          self.moveEvent( touch, event );
+      // @private {Emitter} - Emits to the PhET-iO data stream.
+      this.mouseMovedEmitter = new Emitter( {
+        phetioPlayback: true,
+        tandem: options.tandem.createTandem( 'mouseMovedEmitter' ),
+        phetioType: EmitterIO( [
+          { name: 'point', type: Vector2IO },
+          { name: 'event', type: DOMEventIO }
+        ] ),
+        phetioEventType: 'user',
+        phetioDocumentation: 'Emits when the mouse is moved',
+        phetioHighFrequency: true,
+        listener: ( point, event ) => {
+          if ( !this.mouse ) { this.initMouse(); }
+          this.mouse.move( point, event );
+          this.moveEvent( this.mouse, event );
         }
-      }
-    } );
+      } );
 
-    // @private {Emitter} - Emits to the PhET-iO data stream.
-    this.touchCanceledEmitter = new Emitter( {
-      phetioPlayback: true,
-      tandem: options.tandem.createTandem( 'touchCanceledEmitter' ),
-      phetioType: EmitterIO( [
-        { name: 'id', type: NumberIO },
-        { name: 'point', type: Vector2IO },
-        { name: 'event', type: DOMEventIO }
-      ] ),
-      phetioEventType: 'user',
-      phetioDocumentation: 'Emits when a touch is canceled',
-      listener: function( id, point, event ) {
-        var touch = self.findPointerById( id );
-        if ( touch ) {
-          var pointChanged = touch.cancel( point, event );
-          self.cancelEvent( touch, event, pointChanged );
-          self.removePointer( touch );
+      // @private {Emitter} - Emits to the PhET-iO data stream.
+      this.mouseOverEmitter = new Emitter( {
+        phetioPlayback: true,
+        tandem: options.tandem.createTandem( 'mouseOverEmitter' ),
+        phetioType: EmitterIO( [
+          { name: 'point', type: Vector2IO },
+          { name: 'event', type: DOMEventIO }
+        ] ),
+        phetioEventType: 'user',
+        phetioDocumentation: 'Emits when the mouse is moved over a Node',
+        listener: ( point, event ) => {
+          if ( !this.mouse ) { this.initMouse(); }
+          this.mouse.over( point, event );
+          // TODO: how to handle mouse-over (and log it)... are we changing the pointer.point without a branch change?
         }
-      }
-    } );
+      } );
 
-    // @private {Emitter} - Emits to the PhET-iO data stream.
-    this.penStartedEmitter = new Emitter( {
-      phetioPlayback: true,
-      tandem: options.tandem.createTandem( 'penStartedEmitter' ),
-      phetioType: EmitterIO( [
-        { name: 'id', type: NumberIO },
-        { name: 'point', type: Vector2IO },
-        { name: 'event', type: DOMEventIO }
-      ] ),
-      phetioEventType: 'user',
-      phetioDocumentation: 'Emits when a pen touches the screen',
-      listener: function( id, point, event ) {
-        var pen = new Pen( id, point, event );
-        self.addPointer( pen );
-        self.downEvent( pen, event, false );
-      }
-    } );
-
-    // @private {Emitter} - Emits to the PhET-iO data stream.
-    this.penEndedEmitter = new Emitter( {
-      phetioPlayback: true,
-      tandem: options.tandem.createTandem( 'penEndedEmitter' ),
-      phetioType: EmitterIO( [
-        { name: 'id', type: NumberIO },
-        { name: 'point', type: Vector2IO },
-        { name: 'event', type: DOMEventIO }
-      ] ),
-      phetioEventType: 'user',
-      phetioDocumentation: 'Emits when a pen is lifted',
-      listener: function( id, point, event ) {
-        var pen = self.findPointerById( id );
-        if ( pen ) {
-          var pointChanged = pen.end( point, event );
-          self.upEvent( pen, event, pointChanged );
-          self.removePointer( pen );
+      // @private {Emitter} - Emits to the PhET-iO data stream.
+      this.mouseOutEmitter = new Emitter( {
+        phetioPlayback: true,
+        tandem: options.tandem.createTandem( 'mouseOutEmitter' ),
+        phetioType: EmitterIO( [
+          { name: 'point', type: Vector2IO },
+          { name: 'event', type: DOMEventIO }
+        ] ),
+        phetioEventType: 'user',
+        phetioDocumentation: 'Emits when the mouse moves out of the display',
+        listener: ( point, event ) => {
+          if ( !this.mouse ) { this.initMouse(); }
+          this.mouse.out( point, event );
+          // TODO: how to handle mouse-out (and log it)... are we changing the pointer.point without a branch change?
         }
-      }
-    } );
+      } );
 
-    // @private {Emitter} - Emits to the PhET-iO data stream.
-    this.penMovedEmitter = new Emitter( {
-      phetioPlayback: true,
-      tandem: options.tandem.createTandem( 'penMovedEmitter' ),
-      phetioType: EmitterIO( [
-        { name: 'id', type: NumberIO },
-        { name: 'point', type: Vector2IO },
-        { name: 'event', type: DOMEventIO }
-      ] ),
-      phetioEventType: 'user',
-      phetioDocumentation: 'Emits when a pen is moved',
-      phetioHighFrequency: true,
-      listener: function( id, point, event ) {
-        var pen = self.findPointerById( id );
-        if ( pen ) {
-          pen.move( point, event );
-          self.moveEvent( pen, event );
+      // @private {Emitter} - Emits to the PhET-iO data stream.
+      this.wheelScrolledEmitter = new Emitter( {
+        phetioPlayback: true,
+        tandem: options.tandem.createTandem( 'wheelScrolledEmitter' ),
+        phetioType: EmitterIO( [
+          { name: 'event', type: DOMEventIO }
+        ] ),
+        phetioEventType: 'user',
+        phetioDocumentation: 'Emits when the mouse wheel scrolls',
+        phetioHighFrequency: true,
+        listener: event => {
+          if ( !this.mouse ) { this.initMouse(); }
+          this.mouse.wheel( event );
+
+          // don't send mouse-wheel events if we don't yet have a mouse location!
+          // TODO: Can we set the mouse location based on the wheel event?
+          if ( this.mouse.point ) {
+            const trail = this.rootNode.trailUnderPointer( this.mouse ) || new Trail( this.rootNode );
+            this.dispatchEvent( trail, 'wheel', this.mouse, event, true );
+          }
         }
-      }
-    } );
+      } );
 
-    // @private {Emitter} - Emits to the PhET-iO data stream.
-    this.penCanceledEmitter = new Emitter( {
-      phetioPlayback: true,
-      tandem: options.tandem.createTandem( 'penCanceledEmitter' ),
-      phetioType: EmitterIO( [
-        { name: 'id', type: NumberIO },
-        { name: 'point', type: Vector2IO },
-        { name: 'event', type: DOMEventIO }
-      ] ),
-      phetioEventType: 'user',
-      phetioDocumentation: 'Emits when a pen is canceled',
-      listener: function( id, point, event ) {
-        var pen = self.findPointerById( id );
-        if ( pen ) {
-          var pointChanged = pen.cancel( point, event );
-          self.cancelEvent( pen, event, pointChanged );
-          self.removePointer( pen );
+      // @private {Emitter} - Emits to the PhET-iO data stream.
+      this.touchStartedEmitter = new Emitter( {
+        phetioPlayback: true,
+        tandem: options.tandem.createTandem( 'touchStartedEmitter' ),
+        phetioType: EmitterIO( [
+          { name: 'id', type: NumberIO },
+          { name: 'point', type: Vector2IO },
+          { name: 'event', type: DOMEventIO }
+        ] ),
+        phetioEventType: 'user',
+        phetioDocumentation: 'Emits when a touch begins',
+        listener: ( id, point, event ) => {
+          const touch = new Touch( id, point, event );
+          this.addPointer( touch );
+          this.downEvent( touch, event, false );
         }
+      } );
+
+      // @private {Emitter} - Emits to the PhET-iO data stream.
+      this.touchEndedEmitter = new Emitter( {
+        phetioPlayback: true,
+        tandem: options.tandem.createTandem( 'touchEndedEmitter' ),
+        phetioType: EmitterIO( [
+          { name: 'id', type: NumberIO },
+          { name: 'point', type: Vector2IO },
+          { name: 'event', type: DOMEventIO }
+        ] ),
+        phetioEventType: 'user',
+        phetioDocumentation: 'Emits when a touch ends',
+        listener: ( id, point, event ) => {
+          const touch = this.findPointerById( id );
+          if ( touch ) {
+            const pointChanged = touch.end( point, event );
+            this.upEvent( touch, event, pointChanged );
+            this.removePointer( touch );
+          }
+        }
+      } );
+
+      // @private {Emitter} - Emits to the PhET-iO data stream.
+      this.touchMovedEmitter = new Emitter( {
+        phetioPlayback: true,
+        tandem: options.tandem.createTandem( 'touchMovedEmitter' ),
+        phetioType: EmitterIO( [
+          { name: 'id', type: NumberIO },
+          { name: 'point', type: Vector2IO },
+          { name: 'event', type: DOMEventIO }
+        ] ),
+        phetioEventType: 'user',
+        phetioDocumentation: 'Emits when a touch moves',
+        phetioHighFrequency: true,
+        listener: ( id, point, event ) => {
+          const touch = this.findPointerById( id );
+          if ( touch ) {
+            touch.move( point, event );
+            this.moveEvent( touch, event );
+          }
+        }
+      } );
+
+      // @private {Emitter} - Emits to the PhET-iO data stream.
+      this.touchCanceledEmitter = new Emitter( {
+        phetioPlayback: true,
+        tandem: options.tandem.createTandem( 'touchCanceledEmitter' ),
+        phetioType: EmitterIO( [
+          { name: 'id', type: NumberIO },
+          { name: 'point', type: Vector2IO },
+          { name: 'event', type: DOMEventIO }
+        ] ),
+        phetioEventType: 'user',
+        phetioDocumentation: 'Emits when a touch is canceled',
+        listener: ( id, point, event ) => {
+          const touch = this.findPointerById( id );
+          if ( touch ) {
+            const pointChanged = touch.cancel( point, event );
+            this.cancelEvent( touch, event, pointChanged );
+            this.removePointer( touch );
+          }
+        }
+      } );
+
+      // @private {Emitter} - Emits to the PhET-iO data stream.
+      this.penStartedEmitter = new Emitter( {
+        phetioPlayback: true,
+        tandem: options.tandem.createTandem( 'penStartedEmitter' ),
+        phetioType: EmitterIO( [
+          { name: 'id', type: NumberIO },
+          { name: 'point', type: Vector2IO },
+          { name: 'event', type: DOMEventIO }
+        ] ),
+        phetioEventType: 'user',
+        phetioDocumentation: 'Emits when a pen touches the screen',
+        listener: ( id, point, event ) => {
+          const pen = new Pen( id, point, event );
+          this.addPointer( pen );
+          this.downEvent( pen, event, false );
+        }
+      } );
+
+      // @private {Emitter} - Emits to the PhET-iO data stream.
+      this.penEndedEmitter = new Emitter( {
+        phetioPlayback: true,
+        tandem: options.tandem.createTandem( 'penEndedEmitter' ),
+        phetioType: EmitterIO( [
+          { name: 'id', type: NumberIO },
+          { name: 'point', type: Vector2IO },
+          { name: 'event', type: DOMEventIO }
+        ] ),
+        phetioEventType: 'user',
+        phetioDocumentation: 'Emits when a pen is lifted',
+        listener: ( id, point, event ) => {
+          const pen = this.findPointerById( id );
+          if ( pen ) {
+            const pointChanged = pen.end( point, event );
+            this.upEvent( pen, event, pointChanged );
+            this.removePointer( pen );
+          }
+        }
+      } );
+
+      // @private {Emitter} - Emits to the PhET-iO data stream.
+      this.penMovedEmitter = new Emitter( {
+        phetioPlayback: true,
+        tandem: options.tandem.createTandem( 'penMovedEmitter' ),
+        phetioType: EmitterIO( [
+          { name: 'id', type: NumberIO },
+          { name: 'point', type: Vector2IO },
+          { name: 'event', type: DOMEventIO }
+        ] ),
+        phetioEventType: 'user',
+        phetioDocumentation: 'Emits when a pen is moved',
+        phetioHighFrequency: true,
+        listener: ( id, point, event ) => {
+          const pen = this.findPointerById( id );
+          if ( pen ) {
+            pen.move( point, event );
+            this.moveEvent( pen, event );
+          }
+        }
+      } );
+
+      // @private {Emitter} - Emits to the PhET-iO data stream.
+      this.penCanceledEmitter = new Emitter( {
+        phetioPlayback: true,
+        tandem: options.tandem.createTandem( 'penCanceledEmitter' ),
+        phetioType: EmitterIO( [
+          { name: 'id', type: NumberIO },
+          { name: 'point', type: Vector2IO },
+          { name: 'event', type: DOMEventIO }
+        ] ),
+        phetioEventType: 'user',
+        phetioDocumentation: 'Emits when a pen is canceled',
+        listener: ( id, point, event ) => {
+          const pen = this.findPointerById( id );
+          if ( pen ) {
+            const pointChanged = pen.cancel( point, event );
+            this.cancelEvent( pen, event, pointChanged );
+            this.removePointer( pen );
+          }
+        }
+      } );
+
+      if ( this.display._accessible ) {
+        const accessibleEventOptions = Features.passive ? { useCapture: false, passive: false } : false;
+
+        this.display.accessibleDOMElement.addEventListener( 'focusin', event => {
+          sceneryLog && sceneryLog.InputEvent && sceneryLog.InputEvent( 'Input.focusinFromBrowser' );
+          sceneryLog && sceneryLog.InputEvent && sceneryLog.push();
+
+          if ( !this.a11yPointer ) { this.initA11yPointer(); }
+          this.focusIn( event );
+          sceneryLog && sceneryLog.InputEvent && sceneryLog.pop();
+        }, accessibleEventOptions );
+
+        this.display.accessibleDOMElement.addEventListener( 'focusout', event => {
+          sceneryLog && sceneryLog.InputEvent && sceneryLog.InputEvent( 'Input.focusoutFromBrowser' );
+          sceneryLog && sceneryLog.InputEvent && sceneryLog.push();
+
+          if ( !this.a11yPointer ) { this.initA11yPointer(); }
+          this.focusOut( event );
+          sceneryLog && sceneryLog.InputEvent && sceneryLog.pop();
+        }, accessibleEventOptions );
+
+        this.display.accessibleDOMElement.addEventListener( 'click', event => {
+          sceneryLog && sceneryLog.InputEvent && sceneryLog.InputEvent( 'Input.clickFromBrowser' );
+          sceneryLog && sceneryLog.InputEvent && sceneryLog.push();
+
+          if ( !this.a11yPointer ) { this.initA11yPointer(); }
+          this.click( event );
+          sceneryLog && sceneryLog.InputEvent && sceneryLog.pop();
+        }, accessibleEventOptions );
+
+        this.display.accessibleDOMElement.addEventListener( 'change', event => {
+          sceneryLog && sceneryLog.InputEvent && sceneryLog.InputEvent( 'Input.changeFromBrowser' );
+          sceneryLog && sceneryLog.InputEvent && sceneryLog.push();
+
+          if ( !this.a11yPointer ) { this.initA11yPointer(); }
+          this.change( event );
+          sceneryLog && sceneryLog.InputEvent && sceneryLog.pop();
+        }, accessibleEventOptions );
+
+        this.display.accessibleDOMElement.addEventListener( 'input', event => {
+          sceneryLog && sceneryLog.InputEvent && sceneryLog.InputEvent( 'Input.inputFromBrowser' );
+          sceneryLog && sceneryLog.InputEvent && sceneryLog.push();
+
+          if ( !this.a11yPointer ) { this.initA11yPointer(); }
+          this.input( event );
+          sceneryLog && sceneryLog.InputEvent && sceneryLog.pop();
+        }, accessibleEventOptions );
+
+        this.display.accessibleDOMElement.addEventListener( 'keydown', event => {
+          sceneryLog && sceneryLog.InputEvent && sceneryLog.InputEvent( 'Input.keydownFromBrowser' );
+          sceneryLog && sceneryLog.InputEvent && sceneryLog.push();
+
+          if ( !this.a11yPointer ) { this.initA11yPointer(); }
+          this.keydown( event );
+          sceneryLog && sceneryLog.InputEvent && sceneryLog.pop();
+        }, accessibleEventOptions );
+
+        this.display.accessibleDOMElement.addEventListener( 'keyup', event => {
+          sceneryLog && sceneryLog.InputEvent && sceneryLog.InputEvent( 'Input.keyupFromBrowser' );
+          sceneryLog && sceneryLog.InputEvent && sceneryLog.push();
+
+          if ( !this.a11yPointer ) { this.initA11yPointer(); }
+          this.keyup( event );
+          sceneryLog && sceneryLog.InputEvent && sceneryLog.pop();
+        }, accessibleEventOptions );
       }
-    } );
-
-    if ( this.display._accessible ) {
-      var accessibleEventOptions = Features.passive ? { useCapture: false, passive: false } : false;
-
-      this.display.accessibleDOMElement.addEventListener( 'focusin', function( event ) {
-        sceneryLog && sceneryLog.InputEvent && sceneryLog.InputEvent( 'Input.focusinFromBrowser' );
-        sceneryLog && sceneryLog.InputEvent && sceneryLog.push();
-
-        if ( !self.a11yPointer ) { self.initA11yPointer(); }
-        self.focusIn( event );
-        sceneryLog && sceneryLog.InputEvent && sceneryLog.pop();
-      }, accessibleEventOptions );
-
-      this.display.accessibleDOMElement.addEventListener( 'focusout', function( event ) {
-        sceneryLog && sceneryLog.InputEvent && sceneryLog.InputEvent( 'Input.focusoutFromBrowser' );
-        sceneryLog && sceneryLog.InputEvent && sceneryLog.push();
-
-        if ( !self.a11yPointer ) { self.initA11yPointer(); }
-        self.focusOut( event );
-        sceneryLog && sceneryLog.InputEvent && sceneryLog.pop();
-      }, accessibleEventOptions );
-
-      this.display.accessibleDOMElement.addEventListener( 'click', function( event ) {
-        sceneryLog && sceneryLog.InputEvent && sceneryLog.InputEvent( 'Input.clickFromBrowser' );
-        sceneryLog && sceneryLog.InputEvent && sceneryLog.push();
-
-        if ( !self.a11yPointer ) { self.initA11yPointer(); }
-        self.click( event );
-        sceneryLog && sceneryLog.InputEvent && sceneryLog.pop();
-      }, accessibleEventOptions );
-
-      this.display.accessibleDOMElement.addEventListener( 'change', function( event ) {
-        sceneryLog && sceneryLog.InputEvent && sceneryLog.InputEvent( 'Input.changeFromBrowser' );
-        sceneryLog && sceneryLog.InputEvent && sceneryLog.push();
-
-        if ( !self.a11yPointer ) { self.initA11yPointer(); }
-        self.change( event );
-        sceneryLog && sceneryLog.InputEvent && sceneryLog.pop();
-      }, accessibleEventOptions );
-
-      this.display.accessibleDOMElement.addEventListener( 'input', function( event ) {
-        sceneryLog && sceneryLog.InputEvent && sceneryLog.InputEvent( 'Input.inputFromBrowser' );
-        sceneryLog && sceneryLog.InputEvent && sceneryLog.push();
-
-        if ( !self.a11yPointer ) { self.initA11yPointer(); }
-        self.input( event );
-        sceneryLog && sceneryLog.InputEvent && sceneryLog.pop();
-      }, accessibleEventOptions );
-
-      this.display.accessibleDOMElement.addEventListener( 'keydown', function( event ) {
-        sceneryLog && sceneryLog.InputEvent && sceneryLog.InputEvent( 'Input.keydownFromBrowser' );
-        sceneryLog && sceneryLog.InputEvent && sceneryLog.push();
-
-        if ( !self.a11yPointer ) { self.initA11yPointer(); }
-        self.keydown( event );
-        sceneryLog && sceneryLog.InputEvent && sceneryLog.pop();
-      }, accessibleEventOptions );
-
-      this.display.accessibleDOMElement.addEventListener( 'keyup', function( event ) {
-        sceneryLog && sceneryLog.InputEvent && sceneryLog.InputEvent( 'Input.keyupFromBrowser' );
-        sceneryLog && sceneryLog.InputEvent && sceneryLog.push();
-
-        if ( !self.a11yPointer ) { self.initA11yPointer(); }
-        self.keyup( event );
-        sceneryLog && sceneryLog.InputEvent && sceneryLog.pop();
-      }, accessibleEventOptions );
     }
-  }
 
-  scenery.register( 'Input', Input );
 
-  inherit( Object, Input, {
     /**
      * Interrupts any input actions that are currently taking place (should stop drags, etc.)
      * @public
      */
-    interruptPointers: function() {
-      _.each( this.pointers, function( pointer ) {
+    interruptPointers() {
+      _.each( this.pointers, pointer => {
         pointer.interruptAll();
       } );
-    },
+    }
 
     /**
      * Called to batch a raw DOM event (which may be immediately fired, depending on the settings).
@@ -594,7 +591,7 @@ define( function( require ) {
      *                                     only allow certain operations in the callback for a user gesture (e.g. like
      *                                     a mouseup to open a window).
      */
-    batchEvent: function( domEvent, batchType, callback, triggerImmediate ) {
+    batchEvent( domEvent, batchType, callback, triggerImmediate ) {
       sceneryLog && sceneryLog.InputEvent && sceneryLog.InputEvent( 'Input.batchEvent' );
       sceneryLog && sceneryLog.InputEvent && sceneryLog.push();
 
@@ -617,13 +614,13 @@ define( function( require ) {
       }
 
       sceneryLog && sceneryLog.InputEvent && sceneryLog.pop();
-    },
+    }
 
     /**
      * Fires all of our events that were batched into the batchedEvents array.
      * @public (scenery-internal)
      */
-    fireBatchedEvents: function() {
+    fireBatchedEvents() {
       sceneryLog && sceneryLog.InputEvent && this.currentlyFiringEvents && sceneryLog.InputEvent(
         'REENTRANCE DETECTED' );
       // Don't re-entrantly enter our loop, see https://github.com/phetsims/balloons-and-static-electricity/issues/406
@@ -634,13 +631,13 @@ define( function( require ) {
         this.currentlyFiringEvents = true;
 
         // needs to be done in order
-        var batchedEvents = this.batchedEvents;
+        const batchedEvents = this.batchedEvents;
         // IMPORTANT: We need to check the length of the array at every iteration, as it can change due to re-entrant
         // event handling, see https://github.com/phetsims/balloons-and-static-electricity/issues/406.
         // Events may be appended to this (synchronously) as part of firing initial events, so we want to FULLY run all
         // events before clearing our array.
-        for ( var i = 0; i < batchedEvents.length; i++ ) {
-          var batchedEvent = batchedEvents[ i ];
+        for ( let i = 0; i < batchedEvents.length; i++ ) {
+          const batchedEvent = batchedEvents[ i ];
           batchedEvent.run( this );
           batchedEvent.dispose();
         }
@@ -650,7 +647,7 @@ define( function( require ) {
 
         sceneryLog && sceneryLog.InputEvent && sceneryLog.pop();
       }
-    },
+    }
 
     /**
      * Clears any batched events that we don't want to process.
@@ -660,59 +657,59 @@ define( function( require ) {
      * otherwise it can cause incorrect state in certain types of listeners (e.g. ones that count how many pointers
      * are over them).
      */
-    clearBatchedEvents: function() {
+    clearBatchedEvents() {
       this.batchedEvents.length = 0;
-    },
+    }
 
     /**
      * Checks all pointers to see whether they are still "over" the same nodes (trail). If not, it will fire the usual
      * enter/exit events.
      * @public (scenery-internal)
      */
-    validatePointers: function() {
+    validatePointers() {
       sceneryLog && sceneryLog.Input && sceneryLog.Input( 'validatePointers' );
       sceneryLog && sceneryLog.Input && sceneryLog.push();
       this.validatePointersEmitter.emit();
       sceneryLog && sceneryLog.Input && sceneryLog.pop();
-    },
+    }
 
     /**
      * Removes all non-Mouse pointers from internal tracking.
      * @public (scenery-internal)
      */
-    removeTemporaryPointers: function() {
-      var fakeDomEvent = {
+    removeTemporaryPointers() {
+      const fakeDomEvent = {
         // TODO: Does this break anything
       };
 
-      for ( var i = this.pointers.length - 1; i >= 0; i-- ) {
-        var pointer = this.pointers[ i ];
+      for ( let i = this.pointers.length - 1; i >= 0; i-- ) {
+        const pointer = this.pointers[ i ];
         if ( !( pointer instanceof Mouse ) ) {
           this.pointers.splice( i, 1 );
 
           // Send exit events. As we can't get a DOM event, we'll send a fake object instead.
           //TODO: consider exit() not taking an event?
-          var exitTrail = pointer.trail || new Trail( this.rootNode );
+          const exitTrail = pointer.trail || new Trail( this.rootNode );
           this.exitEvents( pointer, fakeDomEvent, exitTrail, 0, true );
         }
       }
-    },
+    }
 
     /**
      * Hooks up DOM listeners to whatever type of object we are going to listen to.
      * @public (scenery-internal)
      */
-    connectListeners: function() {
+    connectListeners() {
       BrowserEvents.addDisplay( this.display, this.attachToWindow, this.passiveEvents );
-    },
+    }
 
     /**
      * Removes DOM listeners from whatever type of object we were listening to.
      * @public (scenery-internal)
      */
-    disconnectListeners: function() {
+    disconnectListeners() {
       BrowserEvents.removeDisplay( this.display, this.attachToWindow, this.passiveEvents );
-    },
+    }
 
     /**
      * Extract a {Vector2} global coordinate point from an arbitrary DOM event.
@@ -721,10 +718,10 @@ define( function( require ) {
      * @param {DOMEvent} domEvent
      * @returns {Vector2}
      */
-    pointFromEvent: function( domEvent ) {
-      var position = Vector2.createFromPool( domEvent.clientX, domEvent.clientY );
+    pointFromEvent( domEvent ) {
+      const position = Vector2.createFromPool( domEvent.clientX, domEvent.clientY );
       if ( !this.assumeFullWindow ) {
-        var domBounds = this.display.domElement.getBoundingClientRect();
+        const domBounds = this.display.domElement.getBoundingClientRect();
 
         // TODO: consider totally ignoring any with zero width/height, as we aren't attached to the display?
         // For now, don't offset.
@@ -742,7 +739,7 @@ define( function( require ) {
         }
       }
       return position;
-    },
+    }
 
     /**
      * Adds a pointer to our list.
@@ -750,28 +747,28 @@ define( function( require ) {
      *
      * @param {Pointer} pointer
      */
-    addPointer: function( pointer ) {
+    addPointer( pointer ) {
       this.pointers.push( pointer );
 
       // Callback for showing pointer events.  Optimized for performance.
       if ( this.pointerAddedListeners.length ) {
-        for ( var i = 0; i < this.pointerAddedListeners.length; i++ ) {
+        for ( let i = 0; i < this.pointerAddedListeners.length; i++ ) {
           this.pointerAddedListeners[ i ]( pointer );
         }
       }
-    },
+    }
 
     // TODO: Just use an emitter
-    addPointerAddedListener: function( listener ) {
+    addPointerAddedListener( listener ) {
       this.pointerAddedListeners.push( listener );
-    },
+    }
 
-    removePointerAddedListener: function( listener ) {
-      var index = this.pointerAddedListeners.indexOf( listener );
+    removePointerAddedListener( listener ) {
+      const index = this.pointerAddedListeners.indexOf( listener );
       if ( index !== -1 ) {
         this.pointerAddedListeners.splice( index, index + 1 );
       }
-    },
+    }
 
     /**
      * Removes a pointer from our list. If we get future events for it (based on the ID) it will be ignored.
@@ -779,16 +776,16 @@ define( function( require ) {
      *
      * @param {Pointer} pointer
      */
-    removePointer: function( pointer ) {
+    removePointer( pointer ) {
       // sanity check version, will remove all instances
-      for ( var i = this.pointers.length - 1; i >= 0; i-- ) {
+      for ( let i = this.pointers.length - 1; i >= 0; i-- ) {
         if ( this.pointers[ i ] === pointer ) {
           this.pointers.splice( i, 1 );
         }
       }
 
       pointer.dispose();
-    },
+    }
 
     /**
      * Given a pointer's ID (given by the pointer/touch specifications to be unique to a specific pointer/touch),
@@ -800,16 +797,16 @@ define( function( require ) {
      * @param {number} id
      * @returns {Pointer|null}
      */
-    findPointerById: function( id ) {
-      var i = this.pointers.length;
+    findPointerById( id ) {
+      let i = this.pointers.length;
       while ( i-- ) {
-        var pointer = this.pointers[ i ];
+        const pointer = this.pointers[ i ];
         if ( pointer.id === id ) {
           return pointer;
         }
       }
       return null;
-    },
+    }
 
     /**
      * Triggers a logical focus event.
@@ -817,18 +814,18 @@ define( function( require ) {
      *
      * @param {DOMEvent} event
      */
-    focusIn: function( event ) {
+    focusIn( event ) {
       sceneryLog && sceneryLog.Input && sceneryLog.Input( 'focusIn(' + Input.debugText( null, event ) + ');' );
       sceneryLog && sceneryLog.Input && sceneryLog.push();
 
-      var trail = this.a11yPointer.updateTrail( event.target.getAttribute( 'data-trail-id' ) );
+      const trail = this.a11yPointer.updateTrail( event.target.getAttribute( 'data-trail-id' ) );
 
       this.dispatchEvent( trail, 'focus', this.a11yPointer, event, false );
 
       // TODO: emit focusIn emitter? Or is it just called focusEmitter? See #888
 
       sceneryLog && sceneryLog.Input && sceneryLog.pop();
-    },
+    }
 
     /**
      * Triggers a logical blur event.
@@ -836,7 +833,7 @@ define( function( require ) {
      *
      * @param {DOMEvent} event
      */
-    focusOut: function( event ) {
+    focusOut( event ) {
       sceneryLog && sceneryLog.Input && sceneryLog.Input( 'focusOut(' + Input.debugText( null, event ) + ');' );
       sceneryLog && sceneryLog.Input && sceneryLog.push();
 
@@ -853,7 +850,7 @@ define( function( require ) {
       // TODO: emit focusIn emitter? Or is it just called focusEmitter? See #888
 
       sceneryLog && sceneryLog.Input && sceneryLog.pop();
-    },
+    }
 
     /**
      * Triggers a logical click event.
@@ -861,7 +858,7 @@ define( function( require ) {
      *
      * @param {DOMEvent} event
      */
-    click: function( event ) {
+    click( event ) {
       sceneryLog && sceneryLog.Input && sceneryLog.Input( 'click(' + Input.debugText( null, event ) + ');' );
       sceneryLog && sceneryLog.Input && sceneryLog.push();
 
@@ -872,7 +869,7 @@ define( function( require ) {
       // TODO: emit focusIn emitter? Or is it just called focusEmitter? See #888
 
       sceneryLog && sceneryLog.Input && sceneryLog.pop();
-    },
+    }
 
     /**
      * Triggers a logical change event.
@@ -880,7 +877,7 @@ define( function( require ) {
      *
      * @param {DOMEvent} event
      */
-    change: function( event ) {
+    change( event ) {
       sceneryLog && sceneryLog.Input && sceneryLog.Input( 'change(' + Input.debugText( null, event ) + ');' );
       sceneryLog && sceneryLog.Input && sceneryLog.push();
 
@@ -891,7 +888,7 @@ define( function( require ) {
       // TODO: emit focusIn emitter? Or is it just called focusEmitter? See #888
 
       sceneryLog && sceneryLog.Input && sceneryLog.pop();
-    },
+    }
 
     /**
      * Triggers a logical input event.
@@ -899,7 +896,7 @@ define( function( require ) {
      *
      * @param {DOMEvent} event
      */
-    input: function( event ) {
+    input( event ) {
       sceneryLog && sceneryLog.Input && sceneryLog.Input( 'input(' + Input.debugText( null, event ) + ');' );
       sceneryLog && sceneryLog.Input && sceneryLog.push();
 
@@ -910,7 +907,7 @@ define( function( require ) {
       // TODO: emit focusIn emitter? Or is it just called focusEmitter? See #888
 
       sceneryLog && sceneryLog.Input && sceneryLog.pop();
-    },
+    }
 
 
     /**
@@ -919,7 +916,7 @@ define( function( require ) {
      *
      * @param {DOMEvent} event
      */
-    keydown: function( event ) {
+    keydown( event ) {
       sceneryLog && sceneryLog.Input && sceneryLog.Input( 'keydown(' + Input.debugText( null, event ) + ');' );
       sceneryLog && sceneryLog.Input && sceneryLog.push();
 
@@ -930,7 +927,7 @@ define( function( require ) {
       // TODO: emit focusIn emitter? Or is it just called focusEmitter? See #888
 
       sceneryLog && sceneryLog.Input && sceneryLog.pop();
-    },
+    }
 
     /**
      * Triggers a logical keyup event.
@@ -938,7 +935,7 @@ define( function( require ) {
      *
      * @param {DOMEvent} event
      */
-    keyup: function( event ) {
+    keyup( event ) {
       sceneryLog && sceneryLog.Input && sceneryLog.Input( 'keyup(' + Input.debugText( null, event ) + ');' );
       sceneryLog && sceneryLog.Input && sceneryLog.push();
 
@@ -949,27 +946,27 @@ define( function( require ) {
       // TODO: emit focusIn emitter? Or is it just called focusEmitter? See #888
 
       sceneryLog && sceneryLog.Input && sceneryLog.pop();
-    },
+    }
 
 
     /**
      * Initializes the Mouse object on the first mouse event (this may never happen on touch devices).
      * @private
      */
-    initMouse: function() {
+    initMouse() {
       this.mouse = new Mouse();
       this.addPointer( this.mouse );
-    },
+    }
 
     /**
      * Initializes the accessible pointer object on the first a11y event.
      * @private
      */
-    initA11yPointer: function() {
+    initA11yPointer() {
       this.a11yPointer = new A11yPointer( this.display );
 
       this.addPointer( this.a11yPointer );
-    },
+    }
 
     /**
      * Triggers a logical mousedown event.
@@ -981,12 +978,12 @@ define( function( require ) {
      * @param {Vector2} point
      * @param {DOMEvent} event
      */
-    mouseDown: function( point, event ) {
+    mouseDown( point, event ) {
       sceneryLog && sceneryLog.Input && sceneryLog.Input( 'mouseDown(' + Input.debugText( point, event ) + ');' );
       sceneryLog && sceneryLog.Input && sceneryLog.push();
       this.mouseDownEmitter.emit( point, event );
       sceneryLog && sceneryLog.Input && sceneryLog.pop();
-    },
+    }
 
     /**
      * Triggers a logical mouseup event.
@@ -998,12 +995,12 @@ define( function( require ) {
      * @param {Vector2} point
      * @param {DOMEvent} event
      */
-    mouseUp: function( point, event ) {
+    mouseUp( point, event ) {
       sceneryLog && sceneryLog.Input && sceneryLog.Input( 'mouseUp(' + Input.debugText( point, event ) + ');' );
       sceneryLog && sceneryLog.Input && sceneryLog.push();
       this.mouseUpEmitter.emit( point, event );
       sceneryLog && sceneryLog.Input && sceneryLog.pop();
-    },
+    }
 
     /**
      * Triggers a logical mousemove event.
@@ -1015,12 +1012,12 @@ define( function( require ) {
      * @param {Vector2} point
      * @param {DOMEvent} event
      */
-    mouseMove: function( point, event ) {
+    mouseMove( point, event ) {
       sceneryLog && sceneryLog.Input && sceneryLog.Input( 'mouseMove(' + Input.debugText( point, event ) + ');' );
       sceneryLog && sceneryLog.Input && sceneryLog.push();
       this.mouseMovedEmitter.emit( point, event );
       sceneryLog && sceneryLog.Input && sceneryLog.pop();
-    },
+    }
 
     /**
      * Triggers a logical mouseover event (this does NOT correspond to the Scenery event, since this is for the display)
@@ -1029,12 +1026,12 @@ define( function( require ) {
      * @param {Vector2} point
      * @param {DOMEvent} event
      */
-    mouseOver: function( point, event ) {
+    mouseOver( point, event ) {
       sceneryLog && sceneryLog.Input && sceneryLog.Input( 'mouseOver(' + Input.debugText( point, event ) + ');' );
       sceneryLog && sceneryLog.Input && sceneryLog.push();
       this.mouseOverEmitter.emit( point, event );
       sceneryLog && sceneryLog.Input && sceneryLog.pop();
-    },
+    }
 
     /**
      * Triggers a logical mouseout event (this does NOT correspond to the Scenery event, since this is for the display)
@@ -1043,12 +1040,12 @@ define( function( require ) {
      * @param {Vector2} point
      * @param {DOMEvent} event
      */
-    mouseOut: function( point, event ) {
+    mouseOut( point, event ) {
       sceneryLog && sceneryLog.Input && sceneryLog.Input( 'mouseOut(' + Input.debugText( point, event ) + ');' );
       sceneryLog && sceneryLog.Input && sceneryLog.push();
       this.mouseOutEmitter.emit( point, event );
       sceneryLog && sceneryLog.Input && sceneryLog.pop();
-    },
+    }
 
     /**
      * Triggers a logical mouse-wheel/scroll event.
@@ -1056,12 +1053,12 @@ define( function( require ) {
      *
      * @param {DOMEvent} event
      */
-    wheel: function( event ) {
+    wheel( event ) {
       sceneryLog && sceneryLog.Input && sceneryLog.Input( 'wheel(' + Input.debugText( null, event ) + ');' );
       sceneryLog && sceneryLog.Input && sceneryLog.push();
       this.wheelScrolledEmitter.emit( event );
       sceneryLog && sceneryLog.Input && sceneryLog.pop();
-    },
+    }
 
     /**
      * Triggers a logical touchstart event. This is called for each touch point in a 'raw' event.
@@ -1074,12 +1071,12 @@ define( function( require ) {
      * @param {Vector2} point
      * @param {DOMEvent} event
      */
-    touchStart: function( id, point, event ) {
+    touchStart( id, point, event ) {
       sceneryLog && sceneryLog.Input && sceneryLog.Input( 'touchStart(\'' + id + '\',' + Input.debugText( point, event ) + ');' );
       sceneryLog && sceneryLog.Input && sceneryLog.push();
       this.touchStartedEmitter.emit( id, point, event );
       sceneryLog && sceneryLog.Input && sceneryLog.pop();
-    },
+    }
 
     /**
      * Triggers a logical touchend event. This is called for each touch point in a 'raw' event.
@@ -1092,12 +1089,12 @@ define( function( require ) {
      * @param {Vector2} point
      * @param {DOMEvent} event
      */
-    touchEnd: function( id, point, event ) {
+    touchEnd( id, point, event ) {
       sceneryLog && sceneryLog.Input && sceneryLog.Input( 'touchEnd(\'' + id + '\',' + Input.debugText( point, event ) + ');' );
       sceneryLog && sceneryLog.Input && sceneryLog.push();
       this.touchEndedEmitter.emit( id, point, event );
       sceneryLog && sceneryLog.Input && sceneryLog.pop();
-    },
+    }
 
     /**
      * Triggers a logical touchmove event. This is called for each touch point in a 'raw' event.
@@ -1110,12 +1107,12 @@ define( function( require ) {
      * @param {Vector2} point
      * @param {DOMEvent} event
      */
-    touchMove: function( id, point, event ) {
+    touchMove( id, point, event ) {
       sceneryLog && sceneryLog.Input && sceneryLog.Input( 'touchMove(\'' + id + '\',' + Input.debugText( point, event ) + ');' );
       sceneryLog && sceneryLog.Input && sceneryLog.push();
       this.touchMovedEmitter.emit( id, point, event );
       sceneryLog && sceneryLog.Input && sceneryLog.pop();
-    },
+    }
 
     /**
      * Triggers a logical touchcancel event. This is called for each touch point in a 'raw' event.
@@ -1128,12 +1125,12 @@ define( function( require ) {
      * @param {Vector2} point
      * @param {DOMEvent} event
      */
-    touchCancel: function( id, point, event ) {
+    touchCancel( id, point, event ) {
       sceneryLog && sceneryLog.Input && sceneryLog.Input( 'touchCancel(\'' + id + '\',' + Input.debugText( point, event ) + ');' );
       sceneryLog && sceneryLog.Input && sceneryLog.push();
       this.touchCanceledEmitter.emit( id, point, event );
       sceneryLog && sceneryLog.Input && sceneryLog.pop();
-    },
+    }
 
     /**
      * Triggers a logical penstart event (e.g. a stylus). This is called for each pen point in a 'raw' event.
@@ -1146,12 +1143,12 @@ define( function( require ) {
      * @param {Vector2} point
      * @param {DOMEvent} event
      */
-    penStart: function( id, point, event ) {
+    penStart( id, point, event ) {
       sceneryLog && sceneryLog.Input && sceneryLog.Input( 'penStart(\'' + id + '\',' + Input.debugText( point, event ) + ');' );
       sceneryLog && sceneryLog.Input && sceneryLog.push();
       this.penStartedEmitter.emit( id, point, event );
       sceneryLog && sceneryLog.Input && sceneryLog.pop();
-    },
+    }
 
     /**
      * Triggers a logical penend event (e.g. a stylus). This is called for each pen point in a 'raw' event.
@@ -1164,12 +1161,12 @@ define( function( require ) {
      * @param {Vector2} point
      * @param {DOMEvent} event
      */
-    penEnd: function( id, point, event ) {
+    penEnd( id, point, event ) {
       sceneryLog && sceneryLog.Input && sceneryLog.Input( 'penEnd(\'' + id + '\',' + Input.debugText( point, event ) + ');' );
       sceneryLog && sceneryLog.Input && sceneryLog.push();
       this.penEndedEmitter.emit( id, point, event );
       sceneryLog && sceneryLog.Input && sceneryLog.pop();
-    },
+    }
 
     /**
      * Triggers a logical penmove event (e.g. a stylus). This is called for each pen point in a 'raw' event.
@@ -1182,12 +1179,12 @@ define( function( require ) {
      * @param {Vector2} point
      * @param {DOMEvent} event
      */
-    penMove: function( id, point, event ) {
+    penMove( id, point, event ) {
       sceneryLog && sceneryLog.Input && sceneryLog.Input( 'penMove(\'' + id + '\',' + Input.debugText( point, event ) + ');' );
       sceneryLog && sceneryLog.Input && sceneryLog.push();
       this.penMovedEmitter.emit( id, point, event );
       sceneryLog && sceneryLog.Input && sceneryLog.pop();
-    },
+    }
 
     /**
      * Triggers a logical pencancel event (e.g. a stylus). This is called for each pen point in a 'raw' event.
@@ -1200,12 +1197,12 @@ define( function( require ) {
      * @param {Vector2} point
      * @param {DOMEvent} event
      */
-    penCancel: function( id, point, event ) {
+    penCancel( id, point, event ) {
       sceneryLog && sceneryLog.Input && sceneryLog.Input( 'penCancel(\'' + id + '\',' + Input.debugText( point, event ) + ');' );
       sceneryLog && sceneryLog.Input && sceneryLog.push();
       this.penCanceledEmitter.emit( id, point, event );
       sceneryLog && sceneryLog.Input && sceneryLog.pop();
-    },
+    }
 
     /**
      * Handles a pointerdown event, forwarding it to the proper logical event.
@@ -1216,11 +1213,11 @@ define( function( require ) {
      * @param {Vector2} point
      * @param {DOMEvent} event
      */
-    pointerDown: function( id, type, point, event ) {
+    pointerDown( id, type, point, event ) {
       // In IE for pointer down events, we want to make sure than the next interactions off the page are sent to
       // this element (it will bubble). See https://github.com/phetsims/scenery/issues/464 and
       // http://news.qooxdoo.org/mouse-capturing.
-      var target = this.attachToWindow ? document.body : this.display.domElement;
+      const target = this.attachToWindow ? document.body : this.display.domElement;
       if ( target.setPointerCapture && event.pointerId ) {
         target.setPointerCapture( event.pointerId );
       }
@@ -1241,7 +1238,7 @@ define( function( require ) {
             throw new Error( 'Unknown pointer type: ' + type );
           }
       }
-    },
+    }
 
     /**
      * Handles a pointerup event, forwarding it to the proper logical event.
@@ -1252,7 +1249,7 @@ define( function( require ) {
      * @param {Vector2} point
      * @param {DOMEvent} event
      */
-    pointerUp: function( id, type, point, event ) {
+    pointerUp( id, type, point, event ) {
       switch( type ) {
         case 'mouse':
           this.mouseUp( point, event );
@@ -1268,7 +1265,7 @@ define( function( require ) {
             throw new Error( 'Unknown pointer type: ' + type );
           }
       }
-    },
+    }
 
     /**
      * Handles a pointercancel event, forwarding it to the proper logical event.
@@ -1279,7 +1276,7 @@ define( function( require ) {
      * @param {Vector2} point
      * @param {DOMEvent} event
      */
-    pointerCancel: function( id, type, point, event ) {
+    pointerCancel( id, type, point, event ) {
       switch( type ) {
         case 'mouse':
           if ( console && console.log ) {
@@ -1297,7 +1294,7 @@ define( function( require ) {
             console.log( 'Unknown pointer type: ' + type );
           }
       }
-    },
+    }
 
     /**
      * Handles a pointermove event, forwarding it to the proper logical event.
@@ -1308,7 +1305,7 @@ define( function( require ) {
      * @param {Vector2} point
      * @param {DOMEvent} event
      */
-    pointerMove: function( id, type, point, event ) {
+    pointerMove( id, type, point, event ) {
       switch( type ) {
         case 'mouse':
           this.mouseMove( point, event );
@@ -1324,7 +1321,7 @@ define( function( require ) {
             console.log( 'Unknown pointer type: ' + type );
           }
       }
-    },
+    }
 
     /**
      * Handles a pointerover event, forwarding it to the proper logical event.
@@ -1335,10 +1332,10 @@ define( function( require ) {
      * @param {Vector2} point
      * @param {DOMEvent} event
      */
-    pointerOver: function( id, type, point, event ) {
+    pointerOver( id, type, point, event ) {
       // TODO: accumulate mouse/touch info in the object if needed?
       // TODO: do we want to branch change on these types of events?
-    },
+    }
 
     /**
      * Handles a pointerout event, forwarding it to the proper logical event.
@@ -1349,10 +1346,10 @@ define( function( require ) {
      * @param {Vector2} point
      * @param {DOMEvent} event
      */
-    pointerOut: function( id, type, point, event ) {
+    pointerOut( id, type, point, event ) {
       // TODO: accumulate mouse/touch info in the object if needed?
       // TODO: do we want to branch change on these types of events?
-    },
+    }
 
     /**
      * Handles a pointerenter event, forwarding it to the proper logical event.
@@ -1363,10 +1360,10 @@ define( function( require ) {
      * @param {Vector2} point
      * @param {DOMEvent} event
      */
-    pointerEnter: function( id, type, point, event ) {
+    pointerEnter( id, type, point, event ) {
       // TODO: accumulate mouse/touch info in the object if needed?
       // TODO: do we want to branch change on these types of events?
-    },
+    }
 
     /**
      * Handles a pointerleave event, forwarding it to the proper logical event.
@@ -1377,10 +1374,10 @@ define( function( require ) {
      * @param {Vector2} point
      * @param {DOMEvent} event
      */
-    pointerLeave: function( id, type, point, event ) {
+    pointerLeave( id, type, point, event ) {
       // TODO: accumulate mouse/touch info in the object if needed?
       // TODO: do we want to branch change on these types of events?
-    },
+    }
 
     /**
      * Given a pointer reference, hit test it and determine the Trail that the pointer is over.
@@ -1389,9 +1386,9 @@ define( function( require ) {
      * @param {Pointer}
      * @returns {Trail}
      */
-    getPointerTrail: function( pointer ) {
+    getPointerTrail( pointer ) {
       return this.rootNode.trailUnderPointer( pointer ) || new Trail( this.rootNode );
-    },
+    }
 
     /**
      * Called for each logical "up" event, for any pointer type.
@@ -1401,7 +1398,7 @@ define( function( require ) {
      * @param {DOMEvent} event
      * @param {boolean} pointChanged
      */
-    upEvent: function( pointer, event, pointChanged ) {
+    upEvent( pointer, event, pointChanged ) {
       sceneryLog && sceneryLog.Input && sceneryLog.Input( 'upEvent ' + pointer.toString() + ' changed:' + pointChanged );
       sceneryLog && sceneryLog.Input && sceneryLog.push();
 
@@ -1409,7 +1406,7 @@ define( function( require ) {
       assert && assert( typeof pointChanged === 'boolean' );
 
       // We'll use this trail for the entire dispatch of this event.
-      var eventTrail = this.branchChangeEvents( pointer, event, pointChanged );
+      const eventTrail = this.branchChangeEvents( pointer, event, pointChanged );
 
       this.dispatchEvent( eventTrail, 'up', pointer, event, true );
 
@@ -1419,7 +1416,7 @@ define( function( require ) {
       }
 
       sceneryLog && sceneryLog.Input && sceneryLog.pop();
-    },
+    }
 
     /**
      * Called for each logical "down" event, for any pointer type.
@@ -1429,7 +1426,7 @@ define( function( require ) {
      * @param {DOMEvent} event
      * @param {boolean} pointChanged
      */
-    downEvent: function( pointer, event, pointChanged ) {
+    downEvent( pointer, event, pointChanged ) {
       sceneryLog && sceneryLog.Input && sceneryLog.Input( 'downEvent ' + pointer.toString() + ' changed:' + pointChanged );
       sceneryLog && sceneryLog.Input && sceneryLog.push();
 
@@ -1437,24 +1434,24 @@ define( function( require ) {
       assert && assert( typeof pointChanged === 'boolean' );
 
       // We'll use this trail for the entire dispatch of this event.
-      var eventTrail = this.branchChangeEvents( pointer, event, pointChanged );
+      const eventTrail = this.branchChangeEvents( pointer, event, pointChanged );
       this.dispatchEvent( eventTrail, 'down', pointer, event, true );
 
       // a11y
-      var focusableNode = null;
-      var trailAccessible = !eventTrail.rootNode()._rendererSummary.isNotAccessible();
+      let focusableNode = null;
+      const trailAccessible = !eventTrail.rootNode()._rendererSummary.isNotAccessible();
 
       // If any node in the trail has accessible content
       if ( trailAccessible ) {
 
         // an AT might have sent a down event at the location of the PDOM element (outside of the display), if this
         // happened we will not remove focus
-        var inDisplay = this.display.bounds.containsPoint( pointer.point );
+        const inDisplay = this.display.bounds.containsPoint( pointer.point );
         if ( inDisplay ) {
 
           // Starting with the leaf most node, search for the closest accessible ancestor from the node under the
           // pointer.
-          for ( var i = eventTrail.nodes.length - 1; i >= 0; i-- ) {
+          for ( let i = eventTrail.nodes.length - 1; i >= 0; i-- ) {
             if ( eventTrail.nodes[ i ].focusable ) {
               focusableNode = eventTrail.nodes[ i ];
               break;
@@ -1469,7 +1466,7 @@ define( function( require ) {
       }
 
       sceneryLog && sceneryLog.Input && sceneryLog.pop();
-    },
+    }
 
     /**
      * Called for each logical "move" event, for any pointer type.
@@ -1478,7 +1475,7 @@ define( function( require ) {
      * @param {Pointer} pointer
      * @param {DOMEvent} event
      */
-    moveEvent: function( pointer, event ) {
+    moveEvent( pointer, event ) {
       sceneryLog && sceneryLog.Input && sceneryLog.Input( 'moveEvent ' + pointer.toString() );
       sceneryLog && sceneryLog.Input && sceneryLog.push();
 
@@ -1488,7 +1485,7 @@ define( function( require ) {
       this.branchChangeEvents( pointer, event, true );
 
       sceneryLog && sceneryLog.Input && sceneryLog.pop();
-    },
+    }
 
     /**
      * Called for each logical "cancel" event, for any pointer type.
@@ -1498,7 +1495,7 @@ define( function( require ) {
      * @param {DOMEvent} event
      * @param {boolean} pointChanged
      */
-    cancelEvent: function( pointer, event, pointChanged ) {
+    cancelEvent( pointer, event, pointChanged ) {
       sceneryLog && sceneryLog.Input && sceneryLog.Input( 'cancelEvent ' + pointer.toString() + ' changed:' + pointChanged );
       sceneryLog && sceneryLog.Input && sceneryLog.push();
 
@@ -1506,7 +1503,7 @@ define( function( require ) {
       assert && assert( typeof pointChanged === 'boolean' );
 
       // We'll use this trail for the entire dispatch of this event.
-      var eventTrail = this.branchChangeEvents( pointer, event, pointChanged );
+      const eventTrail = this.branchChangeEvents( pointer, event, pointChanged );
 
       this.dispatchEvent( eventTrail, 'cancel', pointer, event, true );
 
@@ -1516,7 +1513,7 @@ define( function( require ) {
       }
 
       sceneryLog && sceneryLog.Input && sceneryLog.pop();
-    },
+    }
 
     /**
      * Dispatches any necessary events that would result from the pointer's trail changing.
@@ -1530,7 +1527,7 @@ define( function( require ) {
      * @param {boolean} sendMove - Whether to send move events
      * @returns {Trail} - The current trail of the pointer
      */
-    branchChangeEvents: function( pointer, event, sendMove ) {
+    branchChangeEvents( pointer, event, sendMove ) {
       sceneryLog && sceneryLog.Input && sceneryLog.Input(
         'branchChangeEvents: ' + pointer.toString() + ' sendMove:' + sendMove );
       sceneryLog && sceneryLog.Input && sceneryLog.push();
@@ -1538,13 +1535,13 @@ define( function( require ) {
       assert && assert( pointer instanceof Pointer );
       assert && assert( typeof sendMove === 'boolean' );
 
-      var trail = this.getPointerTrail( pointer );
-      var oldTrail = pointer.trail || new Trail( this.rootNode ); // TODO: consider a static trail reference
+      const trail = this.getPointerTrail( pointer );
+      const oldTrail = pointer.trail || new Trail( this.rootNode ); // TODO: consider a static trail reference
 
-      var lastNodeChanged = oldTrail.lastNode() !== trail.lastNode();
+      const lastNodeChanged = oldTrail.lastNode() !== trail.lastNode();
 
-      var branchIndex = Trail.branchIndex( trail, oldTrail );
-      var isBranchChange = branchIndex !== trail.length || branchIndex !== oldTrail.length;
+      const branchIndex = Trail.branchIndex( trail, oldTrail );
+      const isBranchChange = branchIndex !== trail.length || branchIndex !== oldTrail.length;
       isBranchChange && sceneryLog && sceneryLog.Input && sceneryLog.Input(
         'changed from ' + oldTrail.toString() + ' to ' + trail.toString() );
 
@@ -1564,7 +1561,7 @@ define( function( require ) {
 
       sceneryLog && sceneryLog.Input && sceneryLog.pop();
       return trail;
-    },
+    }
 
     /**
      * Triggers 'enter' events along a trail change, and an 'over' event on the leaf.
@@ -1583,9 +1580,9 @@ define( function( require ) {
      *                               for this node and all "descendant" nodes in the relevant trail.
      * @param {boolean} lastNodeChanged - If the last node didn't change, we won't sent an over event.
      */
-    enterEvents: function( pointer, event, trail, branchIndex, lastNodeChanged ) {
+    enterEvents( pointer, event, trail, branchIndex, lastNodeChanged ) {
       if ( trail.length > branchIndex ) {
-        for ( var newIndex = trail.length - 1; newIndex >= branchIndex; newIndex-- ) {
+        for ( let newIndex = trail.length - 1; newIndex >= branchIndex; newIndex-- ) {
           // TODO: for performance, we should mutate a trail instead of returning a slice.
           this.dispatchEvent( trail.slice( 0, newIndex + 1 ), 'enter', pointer, event, false );
         }
@@ -1594,7 +1591,7 @@ define( function( require ) {
       if ( lastNodeChanged ) {
         this.dispatchEvent( trail, 'over', pointer, event, true );
       }
-    },
+    }
 
     /**
      * Triggers 'exit' events along a trail change, and an 'out' event on the leaf.
@@ -1614,18 +1611,18 @@ define( function( require ) {
      *                               for this node and all "descendant" nodes in the relevant trail.
      * @param {boolean} lastNodeChanged - If the last node didn't change, we won't sent an out event.
      */
-    exitEvents: function( pointer, event, trail, branchIndex, lastNodeChanged ) {
+    exitEvents( pointer, event, trail, branchIndex, lastNodeChanged ) {
       if ( lastNodeChanged ) {
         this.dispatchEvent( trail, 'out', pointer, event, true );
       }
 
       if ( trail.length > branchIndex ) {
-        for ( var oldIndex = branchIndex; oldIndex < trail.length; oldIndex++ ) {
+        for ( let oldIndex = branchIndex; oldIndex < trail.length; oldIndex++ ) {
           // TODO: for performance, we should mutate a trail instead of returning a slice.
           this.dispatchEvent( trail.slice( 0, oldIndex + 1 ), 'exit', pointer, event, false );
         }
       }
-    },
+    }
 
     /**
      * Dispatch to all nodes in the Trail, optionally bubbling down from the leaf to the root.
@@ -1637,7 +1634,7 @@ define( function( require ) {
      * @param {DOMEvent|null} event
      * @param {boolean} bubbles - If bubbles is false, the event is only dispatched to the leaf node of the trail.
      */
-    dispatchEvent: function( trail, type, pointer, event, bubbles ) {
+    dispatchEvent( trail, type, pointer, event, bubbles ) {
       sceneryLog && sceneryLog.EventDispatch && sceneryLog.EventDispatch(
         type + ' trail:' + trail.toString() + ' pointer:' + pointer.toString() + ' at ' + pointer.point.toString() );
       sceneryLog && sceneryLog.EventDispatch && sceneryLog.push();
@@ -1645,7 +1642,7 @@ define( function( require ) {
       assert && assert( trail, 'Falsy trail for dispatchEvent' );
 
       // NOTE: event is not immutable, as its currentTarget changes
-      var inputEvent = new Event( trail, type, pointer, event );
+      const inputEvent = new Event( trail, type, pointer, event );
 
       // first run through the pointer's listeners to see if one of them will handle the event
       this.dispatchToListeners( pointer, pointer.getListeners(), type, inputEvent );
@@ -1658,7 +1655,7 @@ define( function( require ) {
       this.dispatchToListeners( pointer, this.display.getInputListeners(), type, inputEvent );
 
       sceneryLog && sceneryLog.EventDispatch && sceneryLog.pop();
-    },
+    }
 
     /**
      * Notifies an array of listeners with a specific event.
@@ -1669,15 +1666,15 @@ define( function( require ) {
      * @param {string} type
      * @param {Event} inputEvent
      */
-    dispatchToListeners: function( pointer, listeners, type, inputEvent ) {
+    dispatchToListeners( pointer, listeners, type, inputEvent ) {
       if ( inputEvent.handled ) {
         return;
       }
 
-      var specificType = pointer.type + type; // e.g. mouseup, touchup
+      const specificType = pointer.type + type; // e.g. mouseup, touchup
 
-      for ( var i = 0; i < listeners.length; i++ ) {
-        var listener = listeners[ i ];
+      for ( let i = 0; i < listeners.length; i++ ) {
+        const listener = listeners[ i ];
 
         if ( !inputEvent.aborted && listener[ specificType ] ) {
           sceneryLog && sceneryLog.EventDispatch && sceneryLog.EventDispatch( specificType );
@@ -1697,7 +1694,7 @@ define( function( require ) {
           sceneryLog && sceneryLog.EventDispatch && sceneryLog.pop();
         }
       }
-    },
+    }
 
     /**
      * Dispatch to all nodes in the Trail, optionally bubbling down from the leaf to the root.
@@ -1709,13 +1706,13 @@ define( function( require ) {
      * @param {Event} inputEvent
      * @param {boolean} bubbles - If bubbles is false, the event is only dispatched to the leaf node of the trail.
      */
-    dispatchToTargets: function( trail, type, pointer, inputEvent, bubbles ) {
+    dispatchToTargets( trail, type, pointer, inputEvent, bubbles ) {
       if ( inputEvent.aborted || inputEvent.handled ) {
         return;
       }
 
-      for ( var i = trail.getLastInputEnabledIndex(); i >= 0; bubbles ? i-- : i = -1 ) {
-        var target = trail.nodes[ i ];
+      for ( let i = trail.getLastInputEnabledIndex(); i >= 0; bubbles ? i-- : i = -1 ) {
+        const target = trail.nodes[ i ];
         if ( target.isDisposed ) {
           continue;
         }
@@ -1730,7 +1727,8 @@ define( function( require ) {
         }
       }
     }
-  }, {
+
+
     /**
      * Saves the main information we care about from a DOM `Event` into a JSON-like structure.
      * @public
@@ -1738,19 +1736,19 @@ define( function( require ) {
      * @param {DOMEvent}
      * @returns {Object} - TODO: doc?
      */
-    serializeDomEvent: function serializeDomEvent( domEvent ) {
-      var entries = {};
-      for ( var prop in domEvent ) {
+    static serializeDomEvent( domEvent ) {
+      const entries = {};
+      for ( let prop in domEvent ) {
         if ( domEventPropertiesToSerialize[ prop ] ) {
 
           // stringifying dom event object properties can cause circular references, so we avoid that completely
           if ( prop === 'touches' || prop === 'targetTouches' || prop === 'changedTouches' ) {
-            var arr = [];
-            for ( var i = 0; i < domEvent[ prop ].length; i++ ) {
+            const arr = [];
+            for ( let i = 0; i < domEvent[ prop ].length; i++ ) {
 
               // according to spec (http://www.w3.org/TR/touch-events/), this is not an Array, but a TouchList
-              var touch = domEvent[ prop ].item( i );
-              arr.push( serializeDomEvent( touch ) );
+              const touch = domEvent[ prop ].item( i );
+              arr.push( Input.serializeDomEvent( touch ) );
             }
             entries[ prop ] = arr;
           }
@@ -1760,22 +1758,22 @@ define( function( require ) {
         }
       }
       return entries;
-    },
+    }
 
     /**
      * From a serialized dom event, return a recreated window.Event
      * @param {Object} eventObject
      * @returns {window.Event}
      */
-    deserializeDomEvent: function deserializeDomEvent( eventObject ) {
-      var domEvent = new window.Event( 'inputEvent' );
-      for ( var key in eventObject ) {
+    static deserializeDomEvent( eventObject ) {
+      const domEvent = new window.Event( 'inputEvent' );
+      for ( let key in eventObject ) {
         if ( eventObject.hasOwnProperty( key ) ) {
           domEvent[ key ] = eventObject[ key ];
         }
       }
       return domEvent;
-    },
+    }
 
     /**
      * Convenience function for logging out a point/event combination.
@@ -1784,13 +1782,13 @@ define( function( require ) {
      * @param {Vector2|null} point - Not logged if null
      * @param {DOMEvent} domEvent
      */
-    debugText: function( point, domEvent ) {
-      var result = domEvent.timeStamp + ' ' + domEvent.type;
+    static debugText( point, domEvent ) {
+      let result = domEvent.timeStamp + ' ' + domEvent.type;
       if ( point !== null ) {
         result = point.x + ',' + point.y + ' ' + result;
       }
       return result;
-    },
+    }
 
     /**
      * Maps the current MS pointer types onto the pointer spec.
@@ -1799,7 +1797,7 @@ define( function( require ) {
      * @param {DOMEvent} event
      * @returns {string}
      */
-    msPointerType: function( event ) {
+    static msPointerType( event ) {
       if ( event.pointerType === window.MSPointerEvent.MSPOINTER_TYPE_TOUCH ) {
         return 'touch';
       }
@@ -1813,20 +1811,26 @@ define( function( require ) {
         return event.pointerType; // hope for the best
       }
     }
-  } );
 
-  // @public {Array.<string>} - Basic event listener types that are not pointer-type specific
-  Input.BASIC_EVENT_TYPES = [ 'down', 'up', 'cancel', 'move', 'wheel', 'enter', 'exit', 'over', 'out' ];
+    // @public {Array.<string>} - Basic event listener types that are not pointer-type specific
+    static get BASIC_EVENT_TYPES() {
+      return [ 'down', 'up', 'cancel', 'move', 'wheel', 'enter', 'exit', 'over', 'out' ];
+    }
 
-  // @public {Array.<string>} - Valid prefixes for the basic event types above
-  Input.EVENT_PREFIXES = [ '', 'mouse', 'touch', 'pen' ];
+    // @public {Array.<string>} - Valid prefixes for the basic event types above
+    static get EVENT_PREFIXES() {
+      return [ '', 'mouse', 'touch', 'pen' ];
+    }
 
-  // @public {Array.<string>} - Includes basic and specific types, e.g. both 'up' and 'mouseup'
-  Input.ALL_EVENT_TYPES = Input.EVENT_PREFIXES.map( function( prefix ) {
-    return Input.BASIC_EVENT_TYPES.map( function( eventName ) {
-      return prefix + eventName;
-    } );
-  } );
+    // @public {Array.<string>} - Includes basic and specific types, e.g. both 'up' and 'mouseup'
+    static get ALL_EVENT_TYPES() {
+      return Input.EVENT_PREFIXES.map( prefix => {
+        return Input.BASIC_EVENT_TYPES.map( eventName => {
+          return prefix + eventName;
+        } );
+      } );
+    }
+  }
 
-  return Input;
+  return scenery.register( 'Input', Input );
 } );
