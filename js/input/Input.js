@@ -1095,8 +1095,7 @@ define( require => {
      */
     mouseMove( point, event ) {
       sceneryLog && sceneryLog.Input && sceneryLog.Input( 'mouseMove(' + Input.debugText( point, event ) + ');' );
-      sceneryLog && sceneryLog.Input && sceneryLog.push();      debugger;
-
+      sceneryLog && sceneryLog.Input && sceneryLog.push();
       this.mouseMovedEmitter.emit( point, event );
       sceneryLog && sceneryLog.Input && sceneryLog.pop();
     }
