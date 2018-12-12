@@ -514,8 +514,13 @@ define( require => {
           phetioEventType: 'user',
           phetioDocumentation: 'Emits when the PDOM root gets the focusin DOM event.',
           listener: ( event ) => {
+            sceneryLog && sceneryLog.Input && sceneryLog.Input( 'focusIn(' + Input.debugText( null, event ) + ');' );
+            sceneryLog && sceneryLog.Input && sceneryLog.push();
+
             const trail = this.a11yPointer.updateTrail( event.target.getAttribute( 'data-trail-id' ) );
             this.dispatchEvent( trail, 'focus', this.a11yPointer, event, false );
+
+            sceneryLog && sceneryLog.Input && sceneryLog.pop();
           }
         } );
 
@@ -529,16 +534,19 @@ define( require => {
           phetioEventType: 'user',
           phetioDocumentation: 'Emits when the PDOM root gets the focusout DOM event.',
           listener: ( event ) => {
+            sceneryLog && sceneryLog.Input && sceneryLog.Input( 'focusOut(' + Input.debugText( null, event ) + ');' );
+            sceneryLog && sceneryLog.Input && sceneryLog.push();
 
             // recompute the trail on focusout if necessary - since a blur/focusout may have been initiated from a
             // focus/focusin listener, it is possible that focusout was called more than once before focusin is called on the
             // next active element, see https://github.com/phetsims/scenery/issues/898
             this.a11yPointer.invalidateTrail( event.target.getAttribute( 'data-trail-id' ) );
-
             this.dispatchEvent( this.a11yPointer.trail, 'blur', this.a11yPointer, event, false );
 
             // clear the trail to make sure that our assertions aren't testing a stale trail.
             this.a11yPointer.trail = null;
+
+            sceneryLog && sceneryLog.Input && sceneryLog.pop();
           }
         } );
 
@@ -552,8 +560,13 @@ define( require => {
           phetioEventType: 'user',
           phetioDocumentation: 'Emits when the PDOM root gets the click DOM event.',
           listener: ( event ) => {
+            sceneryLog && sceneryLog.Input && sceneryLog.Input( 'click(' + Input.debugText( null, event ) + ');' );
+            sceneryLog && sceneryLog.Input && sceneryLog.push();
+
             const trail = this.a11yPointer.updateTrail( event.target.getAttribute( 'data-trail-id' ) );
             this.dispatchEvent( trail, 'click', this.a11yPointer, event, true );
+
+            sceneryLog && sceneryLog.Input && sceneryLog.pop();
           }
         } );
 
@@ -567,8 +580,13 @@ define( require => {
           phetioEventType: 'user',
           phetioDocumentation: 'Emits when the PDOM root gets the input DOM event.',
           listener: ( event ) => {
+            sceneryLog && sceneryLog.Input && sceneryLog.Input( 'input(' + Input.debugText( null, event ) + ');' );
+            sceneryLog && sceneryLog.Input && sceneryLog.push();
+
             const trail = this.a11yPointer.updateTrail( event.target.getAttribute( 'data-trail-id' ) );
             this.dispatchEvent( trail, 'input', this.a11yPointer, event, true );
+
+            sceneryLog && sceneryLog.Input && sceneryLog.pop();
           }
         } );
 
@@ -582,8 +600,13 @@ define( require => {
           phetioEventType: 'user',
           phetioDocumentation: 'Emits when the PDOM root gets the change DOM event.',
           listener: ( event ) => {
+            sceneryLog && sceneryLog.Input && sceneryLog.Input( 'change(' + Input.debugText( null, event ) + ');' );
+            sceneryLog && sceneryLog.Input && sceneryLog.push();
+
             const trail = this.a11yPointer.updateTrail( event.target.getAttribute( 'data-trail-id' ) );
             this.dispatchEvent( trail, 'change', this.a11yPointer, event, true );
+
+            sceneryLog && sceneryLog.Input && sceneryLog.pop();
           }
         } );
 
@@ -597,8 +620,13 @@ define( require => {
           phetioEventType: 'user',
           phetioDocumentation: 'Emits when the PDOM root gets the keydown DOM event.',
           listener: ( event ) => {
+            sceneryLog && sceneryLog.Input && sceneryLog.Input( 'keydown(' + Input.debugText( null, event ) + ');' );
+            sceneryLog && sceneryLog.Input && sceneryLog.push();
+
             const trail = this.a11yPointer.updateTrail( event.target.getAttribute( 'data-trail-id' ) );
             this.dispatchEvent( trail, 'keydown', this.a11yPointer, event, true );
+
+            sceneryLog && sceneryLog.Input && sceneryLog.pop();
           }
         } );
 
@@ -612,8 +640,13 @@ define( require => {
           phetioEventType: 'user',
           phetioDocumentation: 'Emits when the PDOM root gets the keyup DOM event.',
           listener: ( event ) => {
+            sceneryLog && sceneryLog.Input && sceneryLog.Input( 'keyup(' + Input.debugText( null, event ) + ');' );
+            sceneryLog && sceneryLog.Input && sceneryLog.push();
+
             const trail = this.a11yPointer.updateTrail( event.target.getAttribute( 'data-trail-id' ) );
             this.dispatchEvent( trail, 'keyup', this.a11yPointer, event, true );
+
+            sceneryLog && sceneryLog.Input && sceneryLog.pop();
           }
         } );
 
@@ -624,7 +657,8 @@ define( require => {
           sceneryLog && sceneryLog.InputEvent && sceneryLog.push();
 
           if ( !this.a11yPointer ) { this.initA11yPointer(); }
-          this.focusIn( event );
+          this.focusInEmitter.emit( event );
+
           sceneryLog && sceneryLog.InputEvent && sceneryLog.pop();
         }, accessibleEventOptions );
 
@@ -633,7 +667,8 @@ define( require => {
           sceneryLog && sceneryLog.InputEvent && sceneryLog.push();
 
           if ( !this.a11yPointer ) { this.initA11yPointer(); }
-          this.focusOut( event );
+          this.focusOutEmitter.emit( event );
+
           sceneryLog && sceneryLog.InputEvent && sceneryLog.pop();
         }, accessibleEventOptions );
 
@@ -642,7 +677,8 @@ define( require => {
           sceneryLog && sceneryLog.InputEvent && sceneryLog.push();
 
           if ( !this.a11yPointer ) { this.initA11yPointer(); }
-          this.click( event );
+          this.clickEmitter.emit( event );
+
           sceneryLog && sceneryLog.InputEvent && sceneryLog.pop();
         }, accessibleEventOptions );
 
@@ -651,7 +687,8 @@ define( require => {
           sceneryLog && sceneryLog.InputEvent && sceneryLog.push();
 
           if ( !this.a11yPointer ) { this.initA11yPointer(); }
-          this.change( event );
+          this.changeEmitter.emit( event );
+
           sceneryLog && sceneryLog.InputEvent && sceneryLog.pop();
         }, accessibleEventOptions );
 
@@ -660,7 +697,8 @@ define( require => {
           sceneryLog && sceneryLog.InputEvent && sceneryLog.push();
 
           if ( !this.a11yPointer ) { this.initA11yPointer(); }
-          this.input( event );
+          this.inputEmitter.emit( event );
+
           sceneryLog && sceneryLog.InputEvent && sceneryLog.pop();
         }, accessibleEventOptions );
 
@@ -669,7 +707,8 @@ define( require => {
           sceneryLog && sceneryLog.InputEvent && sceneryLog.push();
 
           if ( !this.a11yPointer ) { this.initA11yPointer(); }
-          this.keydown( event );
+          this.keydownEmitter.emit( event );
+
           sceneryLog && sceneryLog.InputEvent && sceneryLog.pop();
         }, accessibleEventOptions );
 
@@ -678,7 +717,8 @@ define( require => {
           sceneryLog && sceneryLog.InputEvent && sceneryLog.push();
 
           if ( !this.a11yPointer ) { this.initA11yPointer(); }
-          this.keyup( event );
+          this.keyupEmitter.emit( event );
+
           sceneryLog && sceneryLog.InputEvent && sceneryLog.pop();
         }, accessibleEventOptions );
       }
@@ -922,113 +962,6 @@ define( require => {
       }
       return null;
     }
-
-    /**
-     * Triggers a logical focus event.
-     * @public (scenery-internal)
-     *
-     * @param {DOMEvent} event
-     */
-    focusIn( event ) {
-      sceneryLog && sceneryLog.Input && sceneryLog.Input( 'focusIn(' + Input.debugText( null, event ) + ');' );
-      sceneryLog && sceneryLog.Input && sceneryLog.push();
-
-      this.focusInEmitter.emit( event );
-
-      sceneryLog && sceneryLog.Input && sceneryLog.pop();
-    }
-
-    /**
-     * Triggers a logical blur event.
-     * @public (scenery-internal)
-     *
-     * @param {DOMEvent} event
-     */
-    focusOut( event ) {
-      sceneryLog && sceneryLog.Input && sceneryLog.Input( 'focusOut(' + Input.debugText( null, event ) + ');' );
-      sceneryLog && sceneryLog.Input && sceneryLog.push();
-
-      this.focusOutEmitter.emit( event );
-
-      sceneryLog && sceneryLog.Input && sceneryLog.pop();
-    }
-
-    /**
-     * Triggers a logical click event.
-     * @public (scenery-internal)
-     *
-     * @param {DOMEvent} event
-     */
-    click( event ) {
-      sceneryLog && sceneryLog.Input && sceneryLog.Input( 'click(' + Input.debugText( null, event ) + ');' );
-      sceneryLog && sceneryLog.Input && sceneryLog.push();
-
-      this.clickEmitter.emit( event );
-
-      sceneryLog && sceneryLog.Input && sceneryLog.pop();
-    }
-
-    /**
-     * Triggers a logical change event.
-     * @public (scenery-internal)
-     *
-     * @param {DOMEvent} event
-     */
-    change( event ) {
-      sceneryLog && sceneryLog.Input && sceneryLog.Input( 'change(' + Input.debugText( null, event ) + ');' );
-      sceneryLog && sceneryLog.Input && sceneryLog.push();
-
-      this.changeEmitter.emit( event );
-
-      sceneryLog && sceneryLog.Input && sceneryLog.pop();
-    }
-
-    /**
-     * Triggers a logical input event.
-     * @public (scenery-internal)
-     *
-     * @param {DOMEvent} event
-     */
-    input( event ) {
-      sceneryLog && sceneryLog.Input && sceneryLog.Input( 'input(' + Input.debugText( null, event ) + ');' );
-      sceneryLog && sceneryLog.Input && sceneryLog.push();
-
-      this.inputEmitter.emit( event );
-
-      sceneryLog && sceneryLog.Input && sceneryLog.pop();
-    }
-
-
-    /**
-     * Triggers a logical keydown event.
-     * @public (scenery-internal)
-     *
-     * @param {DOMEvent} event
-     */
-    keydown( event ) {
-      sceneryLog && sceneryLog.Input && sceneryLog.Input( 'keydown(' + Input.debugText( null, event ) + ');' );
-      sceneryLog && sceneryLog.Input && sceneryLog.push();
-
-      this.keydownEmitter.emit( event );
-
-      sceneryLog && sceneryLog.Input && sceneryLog.pop();
-    }
-
-    /**
-     * Triggers a logical keyup event.
-     * @public (scenery-internal)
-     *
-     * @param {DOMEvent} event
-     */
-    keyup( event ) {
-      sceneryLog && sceneryLog.Input && sceneryLog.Input( 'keyup(' + Input.debugText( null, event ) + ');' );
-      sceneryLog && sceneryLog.Input && sceneryLog.push();
-
-      this.keyupEmitter.emit( event );
-
-      sceneryLog && sceneryLog.Input && sceneryLog.pop();
-    }
-
 
     /**
      * Initializes the Mouse object on the first mouse event (this may never happen on touch devices).
@@ -1898,6 +1831,11 @@ define( require => {
       return [ 'down', 'up', 'cancel', 'move', 'wheel', 'enter', 'exit', 'over', 'out' ];
     }
 
+    // @public {Array.<string>} - Valid prefixes for the accessibility event types above
+    static get A11Y_EVENT_TYPES() {
+      return [ 'focus', 'blur', 'click', 'input', 'change', 'keydown', 'keyup' ];
+    }
+
     // @public {Array.<string>} - Valid prefixes for the basic event types above
     static get EVENT_PREFIXES() {
       return [ '', 'mouse', 'touch', 'pen' ];
@@ -1909,7 +1847,7 @@ define( require => {
         return Input.BASIC_EVENT_TYPES.map( eventName => {
           return prefix + eventName;
         } );
-      } );
+      } ).concat( [ Input.A11Y_EVENT_TYPES ] );
     }
   }
 
