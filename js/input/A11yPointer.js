@@ -10,12 +10,12 @@
 define( require => {
   'use strict';
 
-  var AccessibleInstance = require( 'SCENERY/accessibility/AccessibleInstance' );
-  var Pointer = require( 'SCENERY/input/Pointer' ); // inherits from Pointer
-  var scenery = require( 'SCENERY/scenery' );
-  var Trail = require( 'SCENERY/util/Trail' );
-  // var Display = require( 'SCENERY/display/Display' ); // so requireJS doesn't balk about circular dependency
-  var Focus = require( 'SCENERY/accessibility/Focus' );
+  const AccessibleInstance = require( 'SCENERY/accessibility/AccessibleInstance' );
+  const Pointer = require( 'SCENERY/input/Pointer' ); // inherits from Pointer
+  const scenery = require( 'SCENERY/scenery' );
+  const Trail = require( 'SCENERY/util/Trail' );
+  // const Display = require( 'SCENERY/display/Display' ); // so requireJS doesn't balk about circular dependency
+  const Focus = require( 'SCENERY/accessibility/Focus' );
 
   class A11yPointer extends Pointer {
 
