@@ -676,7 +676,7 @@ define( require => {
         } );
 
         // Add a listener to the document body that will capture any keydown for a11y before focus is in this display.
-        document.addEventListener( 'keydown', this.handleDocumentKeydown.bind( this ) );
+        document.body.addEventListener( 'keydown', this.handleDocumentKeydown.bind( this ) );
       }
     }
 
