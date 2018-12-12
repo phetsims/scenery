@@ -20,7 +20,13 @@ define( require => {
 
   QUnit.module( 'AccessibilityEvents' );
 
-  QUnit.test( 'focusin/focusout', assert => {
+  let dispatchEvent = ( domElement, event ) => {
+    domElement.dispatchEvent( new window.Event( event, {
+      'bubbles': true // that is vital to all that scenery events hold near and dear to their hearts.
+    } ) );
+  };
+
+  QUnit.test( 'focusin/focusout (focus/blur)', assert => {
 
 
     let rootNode = new Node( { tagName: 'div' } );
@@ -196,7 +202,6 @@ define( require => {
 
   QUnit.test( 'input', assert => {
 
-
     let rootNode = new Node( { tagName: 'div' } );
     let display = new Display( rootNode ); // eslint-disable-line
     display.initializeEvents();
@@ -224,12 +229,90 @@ define( require => {
     a.accessibleInstances[ 0 ].peer.primarySibling.focus();
     assert.ok( gotFocus && !gotInput, 'focus first' );
 
-    a.accessibleInstances[ 0 ].peer.primarySibling.dispatchEvent( new window.Event( 'input', {
-      'bubbles': true // that is vital to all that scenery events hold near and dear to their hearts.
-    } ) );
-    console.log( 'after input call' );
+    dispatchEvent( a.accessibleInstances[ 0 ].peer.primarySibling, 'input' );
 
     assert.ok( gotInput && gotFocus, 'a should have been an input' );
 
   } );
+
+
+  QUnit.test( 'change', assert => {
+
+
+    let rootNode = new Node( { tagName: 'div' } );
+    let display = new Display( rootNode ); // eslint-disable-line
+    display.initializeEvents();
+    document.body.appendChild( display.domElement );
+
+    let a = new Rectangle( 0, 0, 20, 20, { tagName: 'input', inputType: 'range' } );
+
+    let gotFocus = false;
+    let gotChange = false;
+
+    rootNode.addChild( a );
+
+    a.addInputListener( {
+      focus() {
+        gotFocus = true;
+      },
+      change() {
+        gotChange = true;
+      },
+      blur() {
+        gotFocus = false;
+      }
+    } );
+
+    a.accessibleInstances[ 0 ].peer.primarySibling.focus();
+    assert.ok( gotFocus && !gotChange, 'focus first' );
+
+    dispatchEvent( a.accessibleInstances[ 0 ].peer.primarySibling, 'change' );
+
+    assert.ok( gotChange && gotFocus, 'a should have been an input' );
+  } );
+
+  QUnit.test( 'keydown/keyup', assert => {
+
+
+    let rootNode = new Node( { tagName: 'div' } );
+    let display = new Display( rootNode ); // eslint-disable-line
+    display.initializeEvents();
+    document.body.appendChild( display.domElement );
+
+    let a = new Rectangle( 0, 0, 20, 20, { tagName: 'input', inputType: 'text' } );
+
+    let gotFocus = false;
+    let gotKeydown = false;
+    let gotKeyup = false;
+
+    rootNode.addChild( a );
+
+    a.addInputListener( {
+      focus() {
+        gotFocus = true;
+      },
+      keydown() {
+        gotKeydown = true;
+      },
+      keyup() {
+        gotKeyup = true;
+      },
+      blur() {
+        gotFocus = false;
+      }
+    } );
+
+    a.accessibleInstances[ 0 ].peer.primarySibling.focus();
+    assert.ok( gotFocus && !gotKeydown, 'focus first' );
+
+    dispatchEvent( a.accessibleInstances[ 0 ].peer.primarySibling, 'keydown' );
+
+    assert.ok( gotKeydown && gotFocus, 'a should have had keydown' );
+
+    dispatchEvent( a.accessibleInstances[ 0 ].peer.primarySibling, 'keyup' );
+    assert.ok( gotKeydown && gotKeyup && gotFocus, 'a should have had keyup' );
+
+
+  } );
+
 } );
