@@ -111,7 +111,7 @@ define( require => {
 
     let b = new Rectangle( 0, 0, 20, 20, { tagName: 'button' } );
 
-    a.addInputListener( {
+    b.addInputListener( {
       click() {
         bClickCounter++;
       }
@@ -121,7 +121,9 @@ define( require => {
 
     b.accessibleInstances[ 0 ].peer.primarySibling.focus();
     b.accessibleInstances[ 0 ].peer.primarySibling.click();
-    assert.ok( bClickCounter === 1 && aClickCounter === 2, 'a should have been clicked' );
+    assert.ok( bClickCounter === 1 && aClickCounter === 2, 'a should have been clicked with b' );
+    a.accessibleInstances[ 0 ].peer.primarySibling.click();
+    assert.ok( bClickCounter === 1 && aClickCounter === 3, 'b still should not have been clicked.' );
 
 
     // create a node
@@ -144,6 +146,99 @@ define( require => {
     a1.accessibleInstances[ 0 ].peer.primarySibling.click();
     assert.ok( a1.labelContent === TEST_LABEL, 'click fired, label set' );
 
+    let c = new Rectangle( 0, 0, 20, 20, { tagName: 'button' } );
+    let d = new Rectangle( 0, 0, 20, 20, { tagName: 'button' } );
+    let e = new Rectangle( 0, 0, 20, 20, { tagName: 'button' } );
+
+    let cClickCount = 0;
+    let dClickCount = 0;
+    let eClickCount = 0;
+
+    rootNode.addChild( c );
+    c.addChild( d );
+    d.addChild( e );
+
+    c.addInputListener( {
+      click() {
+        cClickCount++;
+      }
+    } );
+    d.addInputListener( {
+      click() {
+        dClickCount++;
+      }
+    } );
+    e.addInputListener( {
+      click() {
+        eClickCount++;
+      }
+    } );
+
+    e.accessibleInstances[ 0 ].peer.primarySibling.click();
+
+    assert.ok( cClickCount === dClickCount && cClickCount === eClickCount && cClickCount === 1,
+      'click should have bubbled to all parents' );
+
+    d.accessibleInstances[ 0 ].peer.primarySibling.click();
+
+
+    assert.ok( cClickCount === 2 && dClickCount === 2 && eClickCount === 1,
+      'd should not trigger click on e' );
+    c.accessibleInstances[ 0 ].peer.primarySibling.click();
+
+
+    assert.ok( cClickCount === 3 && dClickCount === 2 && eClickCount === 1,
+      'c should not trigger click on d or e' );
+
+    // reset click count
+    cClickCount = 0;
+    dClickCount = 0;
+    eClickCount = 0;
+
+    c.accessibleOrder = [ d, e ];
+
+    e.accessibleInstances[ 0 ].peer.primarySibling.click();
+    assert.ok( cClickCount === 1 && dClickCount === 0 && eClickCount === 1,
+      'accessibleOrder means click should bypass d' );
+
+    c.accessibleInstances[ 0 ].peer.primarySibling.click();
+    assert.ok( cClickCount === 2 && dClickCount === 0 && eClickCount === 1,
+      'click c should not effect e or d.' );
+
+    d.accessibleInstances[ 0 ].peer.primarySibling.click();
+    assert.ok( cClickCount === 3 && dClickCount === 1 && eClickCount === 1,
+      'click d should not effect e.' );
+
+    // reset click count
+    cClickCount = 0;
+    dClickCount = 0;
+    eClickCount = 0;
+
+    let f = new Rectangle( 0, 0, 20, 20, { tagName: 'button' } );
+
+    let fClickCount = 0;
+    f.addInputListener( {
+      click() {
+        fClickCount++;
+      }
+    } );
+    e.addChild( f );
+
+    // so its a chain in the scene graph c->d->e->f
+
+    d.accessibleOrder = [ f ];
+
+    /* accessible instance tree:
+         c
+        / \
+        d  e
+        |
+        f
+    */
+
+    f.accessibleInstances[ 0 ].peer.primarySibling.click();
+    assert.ok( cClickCount === 1 && dClickCount === 1 && eClickCount === 0 && fClickCount === 1,
+      'click d should not effect e.' );
   } );
 
 
