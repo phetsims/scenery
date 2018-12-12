@@ -659,7 +659,7 @@ define( require => {
         // Add a listener to the root accessible DOM element for each event we want to monitor.
         AccessibilityUtil.DOM_EVENTS.map( eventName => {
 
-          let emitterName = eventName + 'Emitter';
+          const emitterName = eventName + 'Emitter';
           assert && assert( this[ emitterName ], `emitter not defined on Input: ${emitterName}` );
 
           // These exist for the lifetime of the display, and need not be disposed.
@@ -1763,7 +1763,7 @@ define( require => {
      */
     static serializeDomEvent( domEvent ) {
       const entries = {};
-      for ( let prop in domEvent ) {
+      for ( const prop in domEvent ) {
         if ( domEventPropertiesToSerialize[ prop ] ) {
 
           // stringifying dom event object properties can cause circular references, so we avoid that completely
@@ -1792,7 +1792,7 @@ define( require => {
      */
     static deserializeDomEvent( eventObject ) {
       const domEvent = new window.Event( 'inputEvent' );
-      for ( let key in eventObject ) {
+      for ( const key in eventObject ) {
         if ( eventObject.hasOwnProperty( key ) ) {
           domEvent[ key ] = eventObject[ key ];
         }

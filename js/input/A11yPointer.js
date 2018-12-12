@@ -68,7 +68,7 @@ define( require => {
       if ( this.trail && this.trail.getUniqueId() === trailId ) {
         return this.trail;
       }
-      let trail = Trail.fromUniqueId( this.display.rootNode, trailId );
+      const trail = Trail.fromUniqueId( this.display.rootNode, trailId );
       this.trail = trail;
       return trail;
     }

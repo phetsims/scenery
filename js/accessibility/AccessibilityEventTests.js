@@ -10,17 +10,17 @@ define( require => {
   'use strict';
 
   // modules
-  let Display = require( 'SCENERY/display/Display' );
-  let Node = require( 'SCENERY/nodes/Node' );
-  let Rectangle = require( 'SCENERY/nodes/Rectangle' );
+  const Display = require( 'SCENERY/display/Display' );
+  const Node = require( 'SCENERY/nodes/Node' );
+  const Rectangle = require( 'SCENERY/nodes/Rectangle' );
 
   // constants
-  let TEST_LABEL = 'Test Label';
-  let TEST_LABEL_2 = 'Test Label 2';
+  const TEST_LABEL = 'Test Label';
+  const TEST_LABEL_2 = 'Test Label 2';
 
   QUnit.module( 'AccessibilityEvents' );
 
-  let dispatchEvent = ( domElement, event ) => {
+  const dispatchEvent = ( domElement, event ) => {
     domElement.dispatchEvent( new window.Event( event, {
       'bubbles': true // that is vital to all that scenery events hold near and dear to their hearts.
     } ) );
@@ -29,12 +29,12 @@ define( require => {
   QUnit.test( 'focusin/focusout (focus/blur)', assert => {
 
 
-    let rootNode = new Node( { tagName: 'div' } );
-    let display = new Display( rootNode ); // eslint-disable-line
+    const rootNode = new Node( { tagName: 'div' } );
+    const display = new Display( rootNode ); // eslint-disable-line
     display.initializeEvents();
     document.body.appendChild( display.domElement );
 
-    let a = new Rectangle( 0, 0, 20, 20, { tagName: 'button' } );
+    const a = new Rectangle( 0, 0, 20, 20, { tagName: 'button' } );
 
     let aGotFocus = false;
     let aLostFocus = false;
@@ -55,7 +55,7 @@ define( require => {
     assert.ok( aGotFocus, 'a should have been focused' );
     assert.ok( !aLostFocus, 'a should not blur' );
 
-    let b = new Rectangle( 0, 0, 20, 20, { tagName: 'button' } );
+    const b = new Rectangle( 0, 0, 20, 20, { tagName: 'button' } );
 
     // TODO: what if b was child of a, make sure these events don't bubble!
     rootNode.addChild( b );
@@ -75,12 +75,12 @@ define( require => {
   QUnit.test( 'click', assert => {
 
 
-    let rootNode = new Node( { tagName: 'div' } );
-    let display = new Display( rootNode ); // eslint-disable-line
+    const rootNode = new Node( { tagName: 'div' } );
+    const display = new Display( rootNode ); // eslint-disable-line
     display.initializeEvents();
     document.body.appendChild( display.domElement );
 
-    let a = new Rectangle( 0, 0, 20, 20, { tagName: 'button' } );
+    const a = new Rectangle( 0, 0, 20, 20, { tagName: 'button' } );
 
     let gotFocus = false;
     let gotClick = false;
@@ -109,7 +109,7 @@ define( require => {
 
     let bClickCounter = 0;
 
-    let b = new Rectangle( 0, 0, 20, 20, { tagName: 'button' } );
+    const b = new Rectangle( 0, 0, 20, 20, { tagName: 'button' } );
 
     b.addInputListener( {
       click() {
@@ -127,7 +127,7 @@ define( require => {
 
 
     // create a node
-    var a1 = new Node( {
+    const a1 = new Node( {
       tagName: 'button'
     } );
     a.addChild( a1 );
@@ -135,7 +135,7 @@ define( require => {
     assert.ok( a1.labelContent === null, 'no label on instantiation' );
 
     // add a listener
-    var listener = { click() { a1.labelContent = TEST_LABEL; } };
+    const listener = { click() { a1.labelContent = TEST_LABEL; } };
     a1.addInputListener( listener );
     assert.ok( a1.inputListeners.length === 1, 'accessible listener added' );
 
@@ -146,9 +146,9 @@ define( require => {
     a1.accessibleInstances[ 0 ].peer.primarySibling.click();
     assert.ok( a1.labelContent === TEST_LABEL, 'click fired, label set' );
 
-    let c = new Rectangle( 0, 0, 20, 20, { tagName: 'button' } );
-    let d = new Rectangle( 0, 0, 20, 20, { tagName: 'button' } );
-    let e = new Rectangle( 0, 0, 20, 20, { tagName: 'button' } );
+    const c = new Rectangle( 0, 0, 20, 20, { tagName: 'button' } );
+    const d = new Rectangle( 0, 0, 20, 20, { tagName: 'button' } );
+    const e = new Rectangle( 0, 0, 20, 20, { tagName: 'button' } );
 
     let cClickCount = 0;
     let dClickCount = 0;
@@ -214,7 +214,7 @@ define( require => {
     dClickCount = 0;
     eClickCount = 0;
 
-    let f = new Rectangle( 0, 0, 20, 20, { tagName: 'button' } );
+    const f = new Rectangle( 0, 0, 20, 20, { tagName: 'button' } );
 
     let fClickCount = 0;
     f.addInputListener( {
@@ -245,11 +245,11 @@ define( require => {
   QUnit.test( 'click extra', assert => {
 
     // create a node
-    var a1 = new Node( {
+    const a1 = new Node( {
       tagName: 'button'
     } );
-    let root = new Node( { tagName: 'div' } );
-    var display = new Display( root ); // eslint-disable-line
+    const root = new Node( { tagName: 'div' } );
+    const display = new Display( root ); // eslint-disable-line
 
     // need to initializeEvents to add input listeners
     display.initializeEvents();
@@ -260,7 +260,7 @@ define( require => {
     assert.ok( a1.labelContent === null, 'no label on instantiation' );
 
     // add a listener
-    var listener = { click: function() { a1.labelContent = TEST_LABEL; } };
+    const listener = { click: function() { a1.labelContent = TEST_LABEL; } };
     a1.addInputListener( listener );
     assert.ok( a1.inputListeners.length === 1, 'accessible listener added' );
 
@@ -297,12 +297,12 @@ define( require => {
 
   QUnit.test( 'input', assert => {
 
-    let rootNode = new Node( { tagName: 'div' } );
-    let display = new Display( rootNode ); // eslint-disable-line
+    const rootNode = new Node( { tagName: 'div' } );
+    const display = new Display( rootNode ); // eslint-disable-line
     display.initializeEvents();
     document.body.appendChild( display.domElement );
 
-    let a = new Rectangle( 0, 0, 20, 20, { tagName: 'input', inputType: 'text' } );
+    const a = new Rectangle( 0, 0, 20, 20, { tagName: 'input', inputType: 'text' } );
 
     let gotFocus = false;
     let gotInput = false;
@@ -334,12 +334,12 @@ define( require => {
   QUnit.test( 'change', assert => {
 
 
-    let rootNode = new Node( { tagName: 'div' } );
-    let display = new Display( rootNode ); // eslint-disable-line
+    const rootNode = new Node( { tagName: 'div' } );
+    const display = new Display( rootNode ); // eslint-disable-line
     display.initializeEvents();
     document.body.appendChild( display.domElement );
 
-    let a = new Rectangle( 0, 0, 20, 20, { tagName: 'input', inputType: 'range' } );
+    const a = new Rectangle( 0, 0, 20, 20, { tagName: 'input', inputType: 'range' } );
 
     let gotFocus = false;
     let gotChange = false;
@@ -369,12 +369,12 @@ define( require => {
   QUnit.test( 'keydown/keyup', assert => {
 
 
-    let rootNode = new Node( { tagName: 'div' } );
-    let display = new Display( rootNode ); // eslint-disable-line
+    const rootNode = new Node( { tagName: 'div' } );
+    const display = new Display( rootNode ); // eslint-disable-line
     display.initializeEvents();
     document.body.appendChild( display.domElement );
 
-    let a = new Rectangle( 0, 0, 20, 20, { tagName: 'input', inputType: 'text' } );
+    const a = new Rectangle( 0, 0, 20, 20, { tagName: 'input', inputType: 'text' } );
 
     let gotFocus = false;
     let gotKeydown = false;
@@ -406,8 +406,6 @@ define( require => {
 
     dispatchEvent( a.accessibleInstances[ 0 ].peer.primarySibling, 'keyup' );
     assert.ok( gotKeydown && gotKeyup && gotFocus, 'a should have had keyup' );
-
-
   } );
 
 } );

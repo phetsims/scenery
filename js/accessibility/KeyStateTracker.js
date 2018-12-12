@@ -28,7 +28,7 @@ define( require => {
       this.keyState = {};
 
       // step the drag listener, must be removed in dispose
-      let stepListener = this.step.bind( this );
+      const stepListener = this.step.bind( this );
       timer.addListener( stepListener );
 
       // @private
@@ -158,7 +158,7 @@ define( require => {
      * @public
      */
     areKeysDown( keyList ) {
-      let keysDown = true;
+      const keysDown = true;
       for ( let i = 0; i < keyList.length; i++ ) {
         if ( !this.isKeyDown( keyList[ i ] ) ) {
           return false;
@@ -223,10 +223,10 @@ define( require => {
 
       // no-op unless a key is down
       if ( this.keysAreDown() ) {
-        let ms = dt * 1000;
+        const ms = dt * 1000;
 
         // for each key that is still down, increment the tracked time that has been down
-        for ( let i in this.keyState ) {
+        for ( const i in this.keyState ) {
           if ( this.keyState.hasOwnProperty( i ) ) {
             if ( this.keyState[ i ].keyDown ) {
               this.keyState[ i ].timeDown += ms;
