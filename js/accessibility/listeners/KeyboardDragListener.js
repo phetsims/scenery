@@ -29,7 +29,6 @@ define( function( require ) {
    * @param {Object} options
    */
   function KeyboardDragListener( options ) {
-    var self = this;
 
     options = _.extend( {
 
@@ -128,117 +127,6 @@ define( function( require ) {
 
     // @private {boolean} - variable to determine when the initial delay is complete
     this.delayComplete = false;
-
-    /**
-     * Implements keyboard dragging when listener is attached to the Node, public so listener is attached
-     * with addInputListener()
-     *
-     * Note that this event is assigned in the constructor, and not to the prototype. As of writing this,
-     * `Node.addInputListener` only supports type properties as event listeners, and not the event keys as
-     * prototype methods. Please see https://github.com/phetsims/scenery/issues/851 for more information.
-     * @public
-     * @param {Event} event
-     */
-    this.keydown = function( event ) {
-      var domEvent = event.domEvent;
-
-      // required to work with Safari and VoiceOver, otherwise arrow keys will move virtual cursor
-      if ( KeyboardUtil.isArrowKey( domEvent.keyCode ) ) {
-        domEvent.preventDefault();
-      }
-
-      // if the key is already down, don't do anything else (we don't want to create a new keystate object
-      // for a key that is already being tracked and down, nor call startDrag every keydown event)
-      if ( self.keyInListDown( [ domEvent.keyCode ] ) ) { return; }
-
-      // Prevent a VoiceOver bug where pressing multiple arrow keys at once causes the AT to send the wrong keycodes
-      // through the keyup event - as a workaround, we only allow one arrow key to be down at a time. If two are pressed
-      // down, we immediately clear the keystate and return
-      // see https://github.com/phetsims/balloons-and-static-electricity/issues/384
-      if ( platform.safari ) {
-        if ( KeyboardUtil.isArrowKey( domEvent.keyCode ) ) {
-          if ( self.keyInListDown( [
-            KeyboardUtil.KEY_RIGHT_ARROW, KeyboardUtil.KEY_LEFT_ARROW,
-            KeyboardUtil.KEY_UP_ARROW, KeyboardUtil.KEY_DOWN_ARROW ] ) ) {
-            self.interrupt();
-            return;
-          }
-        }
-      }
-
-      // update the key state
-      self.keyState.push( {
-        keyDown: true,
-        keyCode: domEvent.keyCode,
-        timeDown: 0 // in ms
-      } );
-
-      if ( self._start ) {
-        if ( self.movementKeysDown ) {
-          self._start( event );
-        }
-      }
-
-      // move object on first down before a delay
-      var positionDelta = self.shiftKeyDown() ? self._shiftDownDelta : self._downDelta;
-      self.updatePosition( positionDelta );
-    };
-
-    /**
-     * Behavior for keyboard 'up' DOM event. Public so it can be attached with addInputListener()
-     *
-     * Note that this event is assigned in the constructor, and not to the prototype. As of writing this,
-     * `Node.addInputListener` only supports type properties as event listeners, and not the event keys as
-     * prototype methods. Please see https://github.com/phetsims/scenery/issues/851 for more information.
-     *
-     * @public
-     * @param {Event} event
-     */
-    this.keyup = function( event ) {
-      var domEvent = event.domEvent;
-
-      var moveKeysDown = self.movementKeysDown;
-
-      // if the shift key is down when we navigate to the object, add it to the keystate because it won't be added until
-      // the next keydown event
-      if ( domEvent.keyCode === KeyboardUtil.KEY_TAB ) {
-        if ( domEvent.shiftKey ) {
-
-          // add 'shift' to the keystate until it is released again
-          self.keyState.push( {
-            keyDown: true,
-            keyCode: KeyboardUtil.KEY_SHIFT,
-            timeDown: 0 // in ms
-          } );
-        }
-      }
-
-      for ( var i = 0; i < self.keyState.length; i++ ) {
-        if ( domEvent.keyCode === self.keyState[ i ].keyCode ) {
-          self.keyState.splice( i, 1 );
-        }
-      }
-
-      var moveKeysStillDown = self.movementKeysDown;
-      if ( self._end ) {
-
-        // if movement keys are no longer down after keyup, call the optional end drag function
-        if ( !moveKeysStillDown && moveKeysDown !== moveKeysStillDown ) {
-          self._end( event );
-        }
-      }
-
-      // if keygroup keys are no longer down, clear the keygroup and reset timer
-      if ( self.keyGroupDown ) {
-        if ( !self.allKeysInListDown( self.keyGroupDown.keys ) ) {
-          self.keyGroupDown = null;
-          self.groupDownTimer = self._hotkeyInterval;
-          self.draggingDisabled = false;
-        }
-      }
-
-      self.resetPressAndHold();
-    };
 
     // step the drag listener, must be removed in dispose
     var stepListener = this.step.bind( this );
@@ -410,6 +298,114 @@ define( function( require ) {
      * @param {number} hotkeyInterval
      */
     set hotkeyInterval( hotkeyInterval ) { this._hotkeyInterval = hotkeyInterval; },
+
+    /**
+     * Implements keyboard dragging when listener is attached to the Node, public so listener is attached
+     * with addInputListener()
+     *
+     * @public
+     * @param {Event} event
+     */
+    keydown: function( event ) {
+      var domEvent = event.domEvent;
+
+      // required to work with Safari and VoiceOver, otherwise arrow keys will move virtual cursor
+      if ( KeyboardUtil.isArrowKey( domEvent.keyCode ) ) {
+        domEvent.preventDefault();
+      }
+
+      // if the key is already down, don't do anything else (we don't want to create a new keystate object
+      // for a key that is already being tracked and down, nor call startDrag every keydown event)
+      if ( this.keyInListDown( [ domEvent.keyCode ] ) ) { return; }
+
+      // Prevent a VoiceOver bug where pressing multiple arrow keys at once causes the AT to send the wrong keycodes
+      // through the keyup event - as a workaround, we only allow one arrow key to be down at a time. If two are pressed
+      // down, we immediately clear the keystate and return
+      // see https://github.com/phetsims/balloons-and-static-electricity/issues/384
+      if ( platform.safari ) {
+        if ( KeyboardUtil.isArrowKey( domEvent.keyCode ) ) {
+          if ( this.keyInListDown( [
+            KeyboardUtil.KEY_RIGHT_ARROW, KeyboardUtil.KEY_LEFT_ARROW,
+            KeyboardUtil.KEY_UP_ARROW, KeyboardUtil.KEY_DOWN_ARROW ] ) ) {
+            this.interrupt();
+            return;
+          }
+        }
+      }
+
+      // update the key state
+      this.keyState.push( {
+        keyDown: true,
+        keyCode: domEvent.keyCode,
+        timeDown: 0 // in ms
+      } );
+
+      if ( this._start ) {
+        if ( this.movementKeysDown ) {
+          this._start( event );
+        }
+      }
+
+      // move object on first down before a delay
+      var positionDelta = this.shiftKeyDown() ? this._shiftDownDelta : this._downDelta;
+      this.updatePosition( positionDelta );
+    },
+
+    /**
+     * Behavior for keyboard 'up' DOM event. Public so it can be attached with addInputListener()
+     *
+     * Note that this event is assigned in the constructor, and not to the prototype. As of writing this,
+     * `Node.addInputListener` only supports type properties as event listeners, and not the event keys as
+     * prototype methods. Please see https://github.com/phetsims/scenery/issues/851 for more information.
+     *
+     * @public
+     * @param {Event} event
+     */
+    keyup: function( event ) {
+      var domEvent = event.domEvent;
+
+      var moveKeysDown = this.movementKeysDown;
+
+      // if the shift key is down when we navigate to the object, add it to the keystate because it won't be added until
+      // the next keydown event
+      if ( domEvent.keyCode === KeyboardUtil.KEY_TAB ) {
+        if ( domEvent.shiftKey ) {
+
+          // add 'shift' to the keystate until it is released again
+          this.keyState.push( {
+            keyDown: true,
+            keyCode: KeyboardUtil.KEY_SHIFT,
+            timeDown: 0 // in ms
+          } );
+        }
+      }
+
+      for ( var i = 0; i < this.keyState.length; i++ ) {
+        if ( domEvent.keyCode === this.keyState[ i ].keyCode ) {
+          this.keyState.splice( i, 1 );
+        }
+      }
+
+      var moveKeysStillDown = this.movementKeysDown;
+      if ( this._end ) {
+
+        // if movement keys are no longer down after keyup, call the optional end drag function
+        if ( !moveKeysStillDown && moveKeysDown !== moveKeysStillDown ) {
+          this._end( event );
+        }
+      }
+
+      // if keygroup keys are no longer down, clear the keygroup and reset timer
+      if ( this.keyGroupDown ) {
+        if ( !this.allKeysInListDown( this.keyGroupDown.keys ) ) {
+          this.keyGroupDown = null;
+          this.groupDownTimer = this._hotkeyInterval;
+          this.draggingDisabled = false;
+        }
+      }
+
+      this.resetPressAndHold();
+    },
 
 
     /**
@@ -736,6 +732,9 @@ define( function( require ) {
       this.resetPressAndHold();
     },
 
+    /**
+     * @public
+     */
     dispose: function() {
       this._disposeKeyboardDragListener();
     }
