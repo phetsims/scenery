@@ -131,6 +131,8 @@ define( require => {
   const EmitterIO = require( 'AXON/EmitterIO' );
   const Event = require( 'SCENERY/input/Event' );
   const Features = require( 'SCENERY/util/Features' );
+  const FullScreen = require( 'SCENERY/util/FullScreen' );
+  const KeyboardUtil = require( 'SCENERY/accessibility/KeyboardUtil' );
   const Mouse = require( 'SCENERY/input/Mouse' );
   const NumberIO = require( 'TANDEM/types/NumberIO' );
   const Pen = require( 'SCENERY/input/Pen' );
@@ -672,6 +674,9 @@ define( require => {
             sceneryLog && sceneryLog.InputEvent && sceneryLog.pop();
           }, accessibleEventOptions );
         } );
+
+        // Add a listener to the document body that will capture any keydown for a11y before focus is in this display.
+        document.addEventListener( 'keydown', this.handleDocumentKeydown.bind( this ) );
       }
     }
 
@@ -1400,7 +1405,6 @@ define( require => {
 
       // We'll use this trail for the entire dispatch of this event.
       const eventTrail = this.branchChangeEvents( pointer, event, pointChanged );
-      this.dispatchEvent( eventTrail, 'down', pointer, event, true );
 
       // a11y
       let focusableNode = null;
@@ -1429,6 +1433,9 @@ define( require => {
 
         }
       }
+
+      // dispatch after handling display focus in case immediate focusout interferes
+      this.dispatchEvent( eventTrail, 'down', pointer, event, true );
 
       sceneryLog && sceneryLog.Input && sceneryLog.pop();
     }
@@ -1693,6 +1700,59 @@ define( require => {
       }
     }
 
+    /**
+     * A listener for the document body that will capture any keydown for a11y before focus is within the root of
+     * the PDOM or handled by scenery. This is mostly useful for platform specific workarounds or signifying to the
+     * Display that user interaction has begun. Otherwise, most a11y listeners should instead go through dispatchEvent.
+     * @private
+     * 
+     * @param  {DOMEvent} event
+     */
+    handleDocumentKeydown( event ) {
+      scenery.Display.userGestureEmitter.emit();
+
+      // If navigating in full screen mode, prevent a bug where focus gets lost if fullscreen mode was initiated
+      // from an iframe by keeping focus in the display. getNext/getPreviousFocusable will return active element
+      // if there are no more elements in that direction. See https://github.com/phetsims/scenery/issues/883
+      if ( FullScreen.isFullScreen() && event.keyCode === KeyboardUtil.KEY_TAB ) {
+        var rootElement = this.display.accessibleDOMElement;
+        var nextElement = event.shiftKey ? AccessibilityUtil.getPreviousFocusable( rootElement ) :
+                                           AccessibilityUtil.getNextFocusable( rootElement );
+        if ( nextElement === event.target ) {
+          event.preventDefault();
+        }
+      }
+
+      // if an accessible node was being interacted with a mouse, or had focus when sim is made inactive, this node
+      // should receive focus upon resuming keyboard navigation
+      if ( this.display.pointerFocus || this.display.activeNode ) {
+        var active = this.display.pointerFocus || this.display.activeNode;
+        var focusable = active.focusable;
+
+        // if there is a single accessible instance, we can restore focus
+        if ( active.getAccessibleInstances().length === 1 ) {
+
+          // if all ancestors of this node are visible, so is the active node
+          var nodeAndAncestorsVisible = true;
+          var activeTrail = active.accessibleInstances[ 0 ].trail;
+          for ( var i = activeTrail.nodes.length - 1; i >= 0; i-- ) {
+            if ( !activeTrail.nodes[ i ].visible ) {
+              nodeAndAncestorsVisible = false;
+              break;
+            }
+          }
+
+          if ( focusable && nodeAndAncestorsVisible ) {
+            if ( event.keyCode === KeyboardUtil.KEY_TAB ) {
+              event.preventDefault();
+              active.focus();
+              this.display.pointerFocus = null;
+              this.display.activeNode = null;
+            }
+          }
+        }
+      }
+    }
 
     /**
      * Saves the main information we care about from a DOM `Event` into a JSON-like structure.
