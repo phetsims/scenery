@@ -59,8 +59,9 @@ define( function( require ) {
   // these elements, not necessary what is legal html.
   var ELEMENTS_WITHOUT_CLOSING_TAG = [ INPUT_TAG ];
 
-  // valid types of DOM events that can be added to a node
-  var DOM_EVENTS = [ 'input', 'change', 'click', 'keydown', 'keyup', 'focus', 'blur' ];
+  // valid DOM events that the display adds listeners to. For a list of scenery events that support a11y features
+  // see Input.A11Y_EVENT_TYPES
+  var DOM_EVENTS = [ 'focusin', 'focusout', 'input', 'change', 'click', 'keydown', 'keyup' ];
 
   // these elements require a minimum width to be visible in Safari, see https://github.com/phetsims/john-travoltage/issues/204
   var ELEMENTS_REQUIRE_WIDTH = [ INPUT_TAG, A_TAG ];

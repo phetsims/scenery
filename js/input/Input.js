@@ -122,6 +122,7 @@ define( require => {
   'use strict';
 
   const A11yPointer = require( 'SCENERY/input/A11yPointer' );
+  const AccessibilityUtil = require( 'SCENERY/accessibility/AccessibilityUtil' );
   const BatchedDOMEvent = require( 'SCENERY/input/BatchedDOMEvent' );
   const BrowserEvents = require( 'SCENERY/input/BrowserEvents' );
   const cleanArray = require( 'PHET_CORE/cleanArray' );
@@ -505,9 +506,9 @@ define( require => {
       if ( this.display._accessible ) {
 
         // @private
-        this.focusInEmitter = new Emitter( {
+        this.focusinEmitter = new Emitter( {
           phetioPlayback: true,
-          tandem: options.tandem.createTandem( 'focusInEmitter' ),
+          tandem: options.tandem.createTandem( 'focusinEmitter' ),
           phetioType: EmitterIO( [
             { name: 'event', type: DOMEventIO }
           ] ),
@@ -525,9 +526,9 @@ define( require => {
         } );
 
         // @private
-        this.focusOutEmitter = new Emitter( {
+        this.focusoutEmitter = new Emitter( {
           phetioPlayback: true,
-          tandem: options.tandem.createTandem( 'focusOutEmitter' ),
+          tandem: options.tandem.createTandem( 'focusoutEmitter' ),
           phetioType: EmitterIO( [
             { name: 'event', type: DOMEventIO }
           ] ),
@@ -650,77 +651,27 @@ define( require => {
           }
         } );
 
+        // same event options for all DOM listeners
         const accessibleEventOptions = Features.passive ? { useCapture: false, passive: false } : false;
 
-        this.display.accessibleDOMElement.addEventListener( 'focusin', event => {
-          sceneryLog && sceneryLog.InputEvent && sceneryLog.InputEvent( 'Input.focusinFromBrowser' );
-          sceneryLog && sceneryLog.InputEvent && sceneryLog.push();
+        // Add a listener to the root accessible DOM element for each event we want to monitor.
+        AccessibilityUtil.DOM_EVENTS.map( eventName => {
 
-          if ( !this.a11yPointer ) { this.initA11yPointer(); }
-          this.focusInEmitter.emit( event );
+          let emitterName = eventName + 'Emitter';
+          assert && assert( this[ emitterName ], `emitter not defined on Input: ${emitterName}` );
 
-          sceneryLog && sceneryLog.InputEvent && sceneryLog.pop();
-        }, accessibleEventOptions );
+          // These exist for the lifetime of the display, and need not be disposed.
+          this.display.accessibleDOMElement.addEventListener( eventName, event => {
+            sceneryLog && sceneryLog.InputEvent && sceneryLog.InputEvent( `Input.${eventName}FromBrowser` );
+            sceneryLog && sceneryLog.InputEvent && sceneryLog.push();
 
-        this.display.accessibleDOMElement.addEventListener( 'focusout', event => {
-          sceneryLog && sceneryLog.InputEvent && sceneryLog.InputEvent( 'Input.focusoutFromBrowser' );
-          sceneryLog && sceneryLog.InputEvent && sceneryLog.push();
+            // Create the a11yPointer lazily
+            if ( !this.a11yPointer ) { this.initA11yPointer(); }
+            this[ emitterName ].emit( event );
 
-          if ( !this.a11yPointer ) { this.initA11yPointer(); }
-          this.focusOutEmitter.emit( event );
-
-          sceneryLog && sceneryLog.InputEvent && sceneryLog.pop();
-        }, accessibleEventOptions );
-
-        this.display.accessibleDOMElement.addEventListener( 'click', event => {
-          sceneryLog && sceneryLog.InputEvent && sceneryLog.InputEvent( 'Input.clickFromBrowser' );
-          sceneryLog && sceneryLog.InputEvent && sceneryLog.push();
-
-          if ( !this.a11yPointer ) { this.initA11yPointer(); }
-          this.clickEmitter.emit( event );
-
-          sceneryLog && sceneryLog.InputEvent && sceneryLog.pop();
-        }, accessibleEventOptions );
-
-        this.display.accessibleDOMElement.addEventListener( 'change', event => {
-          sceneryLog && sceneryLog.InputEvent && sceneryLog.InputEvent( 'Input.changeFromBrowser' );
-          sceneryLog && sceneryLog.InputEvent && sceneryLog.push();
-
-          if ( !this.a11yPointer ) { this.initA11yPointer(); }
-          this.changeEmitter.emit( event );
-
-          sceneryLog && sceneryLog.InputEvent && sceneryLog.pop();
-        }, accessibleEventOptions );
-
-        this.display.accessibleDOMElement.addEventListener( 'input', event => {
-          sceneryLog && sceneryLog.InputEvent && sceneryLog.InputEvent( 'Input.inputFromBrowser' );
-          sceneryLog && sceneryLog.InputEvent && sceneryLog.push();
-
-          if ( !this.a11yPointer ) { this.initA11yPointer(); }
-          this.inputEmitter.emit( event );
-
-          sceneryLog && sceneryLog.InputEvent && sceneryLog.pop();
-        }, accessibleEventOptions );
-
-        this.display.accessibleDOMElement.addEventListener( 'keydown', event => {
-          sceneryLog && sceneryLog.InputEvent && sceneryLog.InputEvent( 'Input.keydownFromBrowser' );
-          sceneryLog && sceneryLog.InputEvent && sceneryLog.push();
-
-          if ( !this.a11yPointer ) { this.initA11yPointer(); }
-          this.keydownEmitter.emit( event );
-
-          sceneryLog && sceneryLog.InputEvent && sceneryLog.pop();
-        }, accessibleEventOptions );
-
-        this.display.accessibleDOMElement.addEventListener( 'keyup', event => {
-          sceneryLog && sceneryLog.InputEvent && sceneryLog.InputEvent( 'Input.keyupFromBrowser' );
-          sceneryLog && sceneryLog.InputEvent && sceneryLog.push();
-
-          if ( !this.a11yPointer ) { this.initA11yPointer(); }
-          this.keyupEmitter.emit( event );
-
-          sceneryLog && sceneryLog.InputEvent && sceneryLog.pop();
-        }, accessibleEventOptions );
+            sceneryLog && sceneryLog.InputEvent && sceneryLog.pop();
+          }, accessibleEventOptions );
+        } );
       }
     }
 
