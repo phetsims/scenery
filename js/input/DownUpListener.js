@@ -14,7 +14,6 @@ define( function( require ) {
   'use strict';
 
   var inherit = require( 'PHET_CORE/inherit' );
-  var KeyboardUtil = require( 'SCENERY/accessibility/KeyboardUtil' );
   var Mouse = require( 'SCENERY/input/Mouse' );
   var PhetioObject = require( 'TANDEM/PhetioObject' );
   var scenery = require( 'SCENERY/scenery' );
@@ -74,20 +73,6 @@ define( function( require ) {
 
         assert && assert( event.pointer === self.pointer );
         self.buttonUp( event );
-
-        sceneryLog && sceneryLog.InputListener && sceneryLog.pop();
-      },
-
-      // When the enter or space key is released, trigger an up event
-      // TODO: Only trigger this if the enter/space key went down for this node
-      keyup: function( event ) {
-        sceneryLog && sceneryLog.InputListener && sceneryLog.InputListener( 'DownUpListener (pointer) keyup for ' + self.downTrail.toString() );
-        sceneryLog && sceneryLog.InputListener && sceneryLog.push();
-
-        var keyCode = event.domEvent.keyCode;
-        if ( keyCode === KeyboardUtil.KEY_ENTER || keyCode === KeyboardUtil.KEY_SPACE ) {
-          self.buttonUp( event );
-        }
 
         sceneryLog && sceneryLog.InputListener && sceneryLog.pop();
       }
@@ -182,19 +167,6 @@ define( function( require ) {
 
         sceneryLog && sceneryLog.InputListener && sceneryLog.pop();
       }
-    },
-
-    // When enter/space pressed for this node, trigger a button down
-    keydown: function( event ) {
-      sceneryLog && sceneryLog.InputListener && sceneryLog.InputListener( 'DownUpListener keydown' );
-      sceneryLog && sceneryLog.InputListener && sceneryLog.push();
-
-      var keyCode = event.domEvent.keyCode;
-      if ( keyCode === KeyboardUtil.KEY_ENTER || keyCode === KeyboardUtil.KEY_SPACE ) {
-        this.buttonDown( event );
-      }
-
-      sceneryLog && sceneryLog.InputListener && sceneryLog.pop();
     }
   } );
 
