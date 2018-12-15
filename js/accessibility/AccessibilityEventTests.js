@@ -28,6 +28,10 @@ define( require => {
 
   QUnit.test( 'focusin/focusout (focus/blur)', assert => {
 
+    // TODO: remove this test, it must be committed to test on CT, see https://github.com/phetsims/phet-io-wrappers/issues/217
+    setTimeout( () => {
+      throw new Error( 'test' );
+    }, 1000 );
 
     const rootNode = new Node( { tagName: 'div' } );
     const display = new Display( rootNode ); // eslint-disable-line
