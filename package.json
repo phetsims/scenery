@@ -24,5 +24,8 @@
       "phetCore": "PHET_CORE/main"
     },
     "finalizeJS": "scenery.Util.polyfillRequestAnimationFrame();"
+  },
+  "eslintConfig": {
+    "extends": "../chipper/eslint/.eslintrc.js"
   }
 }
