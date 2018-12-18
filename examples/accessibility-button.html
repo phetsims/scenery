@@ -1,0 +1,131 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8"/>
+  <meta http-equiv="X-UA-Compatible" content="IE=edge"/>
+  <meta name="viewport"
+        content="width=device-width, height=device-height, initial-scale=1.0, maximum-scale=1.0, user-scalable=no"/>
+  <meta name="apple-mobile-web-app-capable" content="yes">
+
+  <title>Hello World - Scenery Example</title>
+
+  <!-- Before loading other things (that might error), create hooks to report errors/loads for continuous testing -->
+  <script src="../../aqua/js/pageload-connector.js"></script>
+
+  <!-- jQuery and lodash are dependencies -->
+  <script src="../../sherpa/lib/jquery-2.1.0.min.js"></script>
+  <script src="../../sherpa/lib/lodash-4.17.4.min.js"></script>
+
+  <!--For the styling-->
+  <!--TODO: fix styling-->
+  <link rel="stylesheet" href="../../sherpa/lib/bootstrap-2.2.2.css">
+  <link rel="stylesheet" href="../../sherpa/lib/bootstrap-responsive-2.2.2.css">
+  <link rel="stylesheet" href="../../sherpa/lib/syntaxhighlighter-3.0.83/shCore.css">
+  <link rel="stylesheet" href="../../sherpa/lib/syntaxhighlighter-3.0.83/shThemeDefault.css">
+  <link rel="stylesheet" href="../assets/scenery.css">
+
+  <script src="../../sherpa/lib/bootstrap-2.2.2.js"></script>
+  <script src="../../sherpa/lib/syntaxhighlighter-3.0.83/shCore.js"></script>
+  <script src="../../sherpa/lib/syntaxhighlighter-3.0.83/shBrushJScript.js"></script>
+  <script src="../../sherpa/lib/syntaxhighlighter-3.0.83/shBrushXml.js"></script>
+
+
+  <script src="../build/scenery.min.js"></script>
+
+  <style>
+
+    .container {
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+    }
+
+    .exampleScene {
+      margin: 15px auto;
+      border: 1px solid black;
+      position: relative;
+      left: 0;
+      top: 0;
+    }
+  </style>
+</head>
+<body>
+<div class="container">
+
+  <div id="accessibility-scene" class="exampleScene" style="width: 600px; height: 200px;"></div>
+</div>
+<script type="text/javascript">
+  function docExample( id, draw ) {
+    var $container = $( '#' + id );
+    var scene = new scenery.Node();
+    var display = new scenery.Display( scene, {
+      width: $container.width(),
+      height: $container.height()
+    } );
+    display.initializeEvents();
+
+    $container[ 0 ].appendChild( display.domElement );
+    draw( scene, display );
+    display.updateDisplay();
+
+    var pdomHTMLBlock = display.accessibleDOMElement.outerHTML;
+    var formattedPDOM = pdomHTMLBlock.replace( new RegExp( '<[/]?\\w*[ >]', 'g' ), '\n$&' ); // add breaks in the string
+    var $PDOMcode = $( '<pre class="brush: html"></pre>' ).text( formattedPDOM );
+
+    $container.after( $PDOMcode );
+  }
+</script>
+<script type="text/javascript">
+
+
+  scenery.Util.polyfillRequestAnimationFrame();
+
+
+  docExample( 'accessibility-scene', ( scene, display ) => {
+
+    // Add our text
+    const rectangle = new scenery.Path( kite.Shape.roundedRectangleWithRadii( 5, 5, 500, 100, {
+      topLeft: 10,
+      topRight: 10,
+      bottomLeft: 10,
+      bottomRight: 10
+    } ), {
+      stroke: 'black',
+      fill: 'dodgerblue',
+      cursor: 'pointer',
+
+      tagName: 'button',
+      accessibleName: 'Go Sports!'
+    } );
+
+    scene.addChild( rectangle );
+    rectangle.addChild( new scenery.Text( 'Go Sports.', {
+      font: '36px sans-serif',
+      center: rectangle.center
+    } ) );
+
+    rectangle.addInputListener( {
+      down: () => {
+        rectangle.fill = 'cornflowerblue';
+      },
+      up: () => {
+        rectangle.fill = 'dodgerblue';
+      },
+
+      // Add a listener that fires when the button in the PDOM is clicked
+      a11yclick: () => {
+        rectangle.fill = 'cornflowerblue';
+
+        setTimeout( () => {
+          rectangle.fill = 'dodgerblue';
+        }, 100 );
+      }
+    } );
+
+    display.updateOnRequestAnimationFrame();
+  } );
+
+</script>
+</body>
+</html>
