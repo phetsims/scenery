@@ -17,6 +17,9 @@ define( function( require ) {
   var KEY_LEFT_ARROW = 37;
   var KEY_UP_ARROW = 38;
   var KEY_DOWN_ARROW = 40;
+  var KEY_SHIFT = 16;
+  var KEY_CTRL = 17;
+  var KEY_ALT = 18;
 
   // constants
   var KeyboardUtil = {
@@ -29,7 +32,9 @@ define( function( require ) {
     KEY_LEFT_ARROW: KEY_LEFT_ARROW,
     KEY_UP_ARROW: KEY_UP_ARROW,
     KEY_DOWN_ARROW: KEY_DOWN_ARROW,
-    KEY_SHIFT: 16,
+    KEY_SHIFT: KEY_SHIFT,
+    KEY_CTRL: KEY_CTRL,
+    KEY_ALT: KEY_ALT,
     KEY_ESCAPE: 27,
     KEY_DELETE: 46,
     KEY_BACKSPACE: 8,

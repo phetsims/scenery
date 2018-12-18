@@ -55,6 +55,12 @@ define( require => {
         },
         blur: () => {
           scenery.Display.focus = null;
+        },
+        keydown: ( event ) => {
+          scenery.Display.keyStateTracker.keydownUpdate( event );
+        },
+        keyup: ( event ) => {
+          scenery.Display.keyStateTracker.keyupUpdate( event );
         }
       } );
     }

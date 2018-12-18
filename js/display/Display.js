@@ -60,6 +60,7 @@ define( function( require ) {
   var Events = require( 'AXON/Events' );
   var extend = require( 'PHET_CORE/extend' );
   var inherit = require( 'PHET_CORE/inherit' );
+  var KeyStateTracker = require( 'SCENERY/accessibility/KeyStateTracker' );
   var Matrix3 = require( 'DOT/Matrix3' );
   var Property = require( 'AXON/Property' );
   var PropertyIO = require( 'AXON/PropertyIO' );
@@ -321,8 +322,11 @@ define( function( require ) {
     },
     get domElement() { return this.getDOMElement(); },
 
-    // updates the display's DOM element with the current visual state of the attached root node and its descendants
-    updateDisplay: function() {
+    /**
+     * Updates the display's DOM element with the current visual state of the attached root node and its descendants
+     * @param {number} [dt] - in seconds, optional to drive components that require animation
+     */
+    updateDisplay: function( dt ) {
 
       //OHTWO TODO: turn off after most debugging work is done
       if ( window.sceneryDebugPause ) {
@@ -352,6 +356,11 @@ define( function( require ) {
       if ( this._input ) {
         // TODO: Should this be handled elsewhere?
         this._input.validatePointers();
+      }
+
+      // step the KeyStateTracker, updating the state of the keyboard and how long certain keys have been held down
+      if ( this._accessible ) {
+        Display.keyStateTracker.step( dt );
       }
 
       // validate bounds for everywhere that could trigger bounds listeners. we want to flush out any changes, so that we can call validateBounds()
@@ -1784,6 +1793,10 @@ define( function( require ) {
   // See https://github.com/phetsims/scenery/issues/802 and https://github.com/phetsims/vibe/issues/32 for more
   // information.
   Display.userGestureEmitter = new Emitter();
+
+  // @public (read-only) {KeyStateTracker} - A global object that tracks the state of the keyboard for all Displays. Use this
+  // to get information about which keyboard keys are pressed down and for how long.
+  Display.keyStateTracker = new KeyStateTracker();
 
   /**
    * Returns true when NO nodes in the subtree are disposed.
