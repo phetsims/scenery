@@ -31,8 +31,14 @@ define( require => {
     before() {
 
       // step the timer, because utteranceQueue runs on timer
+      let previousTime = Date.now();
       intervalID = setInterval( () => {
-        timer.emit1( 1 / 100 ); // step timer in seconds, every millisecond
+        const currentTime = Date.now();
+        const timeStep = ( currentTime - previousTime ) / 1000; // convert to seconds
+        previousTime = currentTime;
+
+        // step timer
+        timer.emit1( timeStep );
       }, 10 );
 
     },
@@ -104,12 +110,15 @@ define( require => {
 
     const done = assert.async();
 
-    let previousTime = Date.now();
-    const intervalID = window.setInterval( () => {
-      const currentTime = Date.now();
-      testTracker.step( ( currentTime - previousTime ) / 1000 ); // convert to seconds
-      previousTime = currentTime;
-    }, 10 );
+    const intervalListener = ( time ) => {
+      testTracker.step( time );
+    }; 
+    timer.addListener( intervalListener );
+
+    // we will test holding down a key for these lenghts of time in ms
+    const firstPressTime = 500;
+    const secondPressTime = 71;
+    const totalPressTime = firstPressTime + secondPressTime;
 
     testTracker.keydownUpdate( spaceKeyEvent );
     let currentTimeDown = testTracker.timeDownForKey( spaceKeyEvent.domEvent.keyCode );
@@ -117,20 +126,22 @@ define( require => {
 
     timer.setTimeout( () => {
       currentTimeDown = testTracker.timeDownForKey( spaceKeyEvent.domEvent.keyCode );
+      console.log( currentTimeDown );
 
 
-      assert.ok( currentTimeDown >= 480 && currentTimeDown <= 505, 'key pressed for 100ms' );
+      assert.ok( currentTimeDown >= firstPressTime && currentTimeDown <= totalPressTime, 'key pressed for ' + firstPressTime + ' ms' );
 
       timer.setTimeout( () => {
         currentTimeDown = testTracker.timeDownForKey( spaceKeyEvent.domEvent.keyCode );
+        console.log( currentTimeDown );
 
-        assert.ok( currentTimeDown >= 560 && currentTimeDown <= 590, 'key pressed for 51 more ms.' );
+        assert.ok( currentTimeDown >= totalPressTime, 'key pressed for ' + secondPressTime + ' more ms.' );
 
         testTracker.keyupUpdate( spaceKeyEvent );
 
         window.clearInterval( intervalID );
         done();
-      }, 71 );
-    }, 500 );
+      }, secondPressTime );
+    }, firstPressTime );
   } );
 } );
