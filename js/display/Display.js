@@ -60,6 +60,7 @@ define( function( require ) {
   var Events = require( 'AXON/Events' );
   var extend = require( 'PHET_CORE/extend' );
   var inherit = require( 'PHET_CORE/inherit' );
+  var KeyStateTracker = require( 'SCENERY/accessibility/KeyStateTracker' );
   var Matrix3 = require( 'DOT/Matrix3' );
   var Property = require( 'AXON/Property' );
   var PropertyIO = require( 'AXON/PropertyIO' );
@@ -278,7 +279,7 @@ define( function( require ) {
 
       // make the PDOM invisible in the browser - it has some width and is shifted off screen so that AT can read the
       // formatting tags, see https://github.com/phetsims/scenery/issues/730
-      SceneryStyle.addRule( '.accessibility * { position: relative; left: -1000px; top: 0; width: 250px; height: 0; clip: rect(0,0,0,0); pointerEvents: none }' );
+      SceneryStyle.addRule( '.accessibility, .accessibility * { position: relative; left: -1000px; top: 0; width: 250px; height: 0; clip: rect(0,0,0,0); pointerEvents: none }' );
 
       this._focusRootNode = new Node();
       this._focusOverlay = new FocusOverlay( this, this._focusRootNode );
@@ -321,8 +322,11 @@ define( function( require ) {
     },
     get domElement() { return this.getDOMElement(); },
 
-    // updates the display's DOM element with the current visual state of the attached root node and its descendants
-    updateDisplay: function() {
+    /**
+     * Updates the display's DOM element with the current visual state of the attached root node and its descendants
+     * @param {number} [dt] - in seconds, optional to drive components that require animation
+     */
+    updateDisplay: function( dt ) {
 
       //OHTWO TODO: turn off after most debugging work is done
       if ( window.sceneryDebugPause ) {
@@ -352,6 +356,11 @@ define( function( require ) {
       if ( this._input ) {
         // TODO: Should this be handled elsewhere?
         this._input.validatePointers();
+      }
+
+      // step the KeyStateTracker, updating the state of the keyboard and how long certain keys have been held down
+      if ( this._accessible ) {
+        Display.keyStateTracker.step( dt );
       }
 
       // validate bounds for everywhere that could trigger bounds listeners. we want to flush out any changes, so that we can call validateBounds()
@@ -1763,9 +1772,10 @@ define( function( require ) {
     'scenery-grabbing-pointer': [ 'grabbing', '-moz-grabbing', '-webkit-grabbing', 'pointer' ]
   };
 
-  // @public (a11y) {Focus|null} - Display has an axon Property to indicate which component is focused (or null
+  // @public (a11y, read-only) {Focus|null} - Display has an axon Property to indicate which component is focused (or null
   // if no scenery node has focus).  By passing the tandem and phetioValueType, PhET-iO is able to interoperate (save,
-  // restore, control, observe what is currently focused.
+  // restore, control, observe what is currently focused. See Display.focus for setting the Display's focus. Don't set
+  // the value of this Property directly.
   Display.focusProperty = new Property( null,
 
     // Only instrument if accessibility is enabled
@@ -1783,6 +1793,10 @@ define( function( require ) {
   // See https://github.com/phetsims/scenery/issues/802 and https://github.com/phetsims/vibe/issues/32 for more
   // information.
   Display.userGestureEmitter = new Emitter();
+
+  // @public (read-only) {KeyStateTracker} - A global object that tracks the state of the keyboard for all Displays. Use this
+  // to get information about which keyboard keys are pressed down and for how long.
+  Display.keyStateTracker = new KeyStateTracker();
 
   /**
    * Returns true when NO nodes in the subtree are disposed.

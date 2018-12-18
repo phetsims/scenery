@@ -10,7 +10,7 @@ define( require => {
 
   // modules
   require( 'SCENERY/accessibility/AccessibilityTests' );
-  require( 'SCENERY/accessibility/AccessibilityEventTests' );
+  require( 'SCENERY/accessibility/AccessibilityInputTests' );
   require( 'SCENERY/accessibility/AccessibilityUtilTests' );
   require( 'SCENERY/accessibility/FocusTests' );
   require( 'SCENERY/nodes/AlignBoxTests' );

@@ -1,7 +1,7 @@
 // Copyright 2017, University of Colorado Boulder
 
 /**
- * Accessibility tests
+ * Tests related to Accessibility input and events.
  *
  * @author Michael Kauzmann (PhET Interactive Simulations)
  * @author Jesse Greenberg (PhET Interactive Simulations)
@@ -10,6 +10,7 @@ define( require => {
   'use strict';
 
   // modules
+  const KeyboardUtil = require( 'SCENERY/accessibility/KeyboardUtil' );
   const Display = require( 'SCENERY/display/Display' );
   const Node = require( 'SCENERY/nodes/Node' );
   const Rectangle = require( 'SCENERY/nodes/Rectangle' );
@@ -18,7 +19,7 @@ define( require => {
   const TEST_LABEL = 'Test Label';
   const TEST_LABEL_2 = 'Test Label 2';
 
-  QUnit.module( 'AccessibilityEvents' );
+  QUnit.module( 'AccessibilityInput' );
 
   const dispatchEvent = ( domElement, event ) => {
     domElement.dispatchEvent( new window.Event( event, {
@@ -26,8 +27,23 @@ define( require => {
     } ) );
   };
 
-  QUnit.test( 'focusin/focusout (focus/blur)', assert => {
+  // create a fake DOM event and delegate to an HTMLElement
+  // TODO: Can this replace the dispatchEvent function above?
+  const triggerDOMEvent = ( event, element, keyCode ) => {
+    var eventObj = document.createEventObject ?
+                   document.createEventObject() : document.createEvent( 'Events' );
 
+    if ( eventObj.initEvent ) {
+      eventObj.initEvent( event, true, true );
+    }
+
+    eventObj.keyCode = keyCode;
+    eventObj.which = keyCode;
+
+    element.dispatchEvent ? element.dispatchEvent( eventObj ) : element.fireEvent( 'on' + event, eventObj );
+  };
+
+  QUnit.test( 'focusin/focusout (focus/blur)', assert => {
 
     const rootNode = new Node( { tagName: 'div' } );
     const display = new Display( rootNode ); // eslint-disable-line
@@ -406,6 +422,29 @@ define( require => {
 
     dispatchEvent( a.accessibleInstances[ 0 ].peer.primarySibling, 'keyup' );
     assert.ok( gotKeydown && gotKeyup && gotFocus, 'a should have had keyup' );
+  } );
+
+  QUnit.test( 'Global KeyStateTracker tests', assert => {
+
+    const rootNode = new Node( { tagName: 'div' } );
+    const display = new Display( rootNode ); // eslint-disable-line
+    display.initializeEvents();
+    document.body.appendChild( display.domElement );
+
+    const a = new Node( { tagName:'button' } );
+    const b = new Node( { tagName:'button' } );
+    const c = new Node( { tagName:'button' } );
+    const d = new Node( { tagName:'button' } );
+
+    a.addChild( b );
+    b.addChild( c );
+    c.addChild( d );
+    rootNode.addChild( a );
+
+    var dPrimarySibling = d.accessibleInstances[ 0 ].peer.primarySibling;
+    triggerDOMEvent( 'keydown', dPrimarySibling, KeyboardUtil.KEY_RIGHT_ARROW );
+
+    assert.ok( Display.keyStateTracker.isKeyDown( KeyboardUtil.KEY_RIGHT_ARROW ), 'global keyStateTracker should be updated with right arrow key down' );
   } );
 
 } );

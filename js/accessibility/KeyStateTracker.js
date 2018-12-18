@@ -4,9 +4,6 @@
  * A type that will manage the state of the keyboard. Will track which keys are being held down and for how long.
  * Offers convenience methds to determine whether or not specific keys are down like shift or enter.
  *
- * This runs on phet-core's Timer class which is responsible for stepping this tracker. This is used to determine how
- * long keys have been pressed.
- *
  * @author Michael Kauzmann
  * @author Jesse Greenberg
  * @author Michael Barlow
@@ -17,7 +14,6 @@ define( require => {
   // modules
   const KeyboardUtil = require( 'SCENERY/accessibility/KeyboardUtil' );
   const scenery = require( 'SCENERY/scenery' );
-  const timer = require( 'PHET_CORE/timer' );
 
   class KeyStateTracker {
     constructor() {
@@ -26,15 +22,6 @@ define( require => {
       // keys are the keycode. JavaScript doesn't handle multiple key presses, so we track which keys are currently
       // down and update based on state of this collection of objects.
       this.keyState = {};
-
-      // step the drag listener, must be removed in dispose
-      const stepListener = this.step.bind( this );
-      timer.addListener( stepListener );
-
-      // @private
-      this._disposeKeystateTracker = () => {
-        timer.removeListener( stepListener );
-      };
     }
 
     /**
@@ -51,12 +38,39 @@ define( require => {
 
       var domEvent = event.domEvent;
 
-      // required to work with Safari and VoiceOver, otherwise arrow keys will move virtual cursor
-      if ( KeyboardUtil.isArrowKey( domEvent.keyCode ) ) {
-        domEvent.preventDefault();
+      // The dom event might have a modifier key that we weren't able to catch, if that is the case update the keystate.
+      // This is likely to happen when pressing browser key commands like "ctrl + tab" to switch tabs.
+      if ( domEvent.shiftKey && !this.shiftKeyDown ) {
+        this.keyState[ KeyboardUtil.KEY_SHIFT ] = {
+          keyDown: true,
+          keyCode: domEvent.keyCode,
+          timeDown: 0 // in ms
+        };
+      }
+      if ( domEvent.altKey && !this.altKeyDown ) {
+        this.keyState[ KeyboardUtil.KEY_ALT ] = {
+          keyDown: true,
+          keyCode: domEvent.keyCode,
+          timeDown: 0 // in ms
+        };
+      }
+      if ( domEvent.ctrlKey && !this.ctrlKeyDown ) {
+        this.keyState[ KeyboardUtil.KEY_CTRL ] = {
+          keyDown: true,
+          keyCode: domEvent.keyCode,
+          timeDown: 0 // in ms
+        };
       }
 
-      assert && assert( !!domEvent.shiftKey === !!this.shiftKeyDown, 'shift key inconsistency between event and keystate.' );
+      if ( assert && domEvent.keyCode !== KeyboardUtil.KEY_SHIFT ) {
+        assert(  !!domEvent.shiftKey === !!this.shiftKeyDown, 'shift key inconsistency between event and keystate.' );
+      }
+      if ( assert && domEvent.keyCode !== KeyboardUtil.KEY_ALT ) {
+        assert(  !!domEvent.altKey === !!this.altKeyDown, 'alt key inconsistency between event and keystate.' );
+      }
+      if ( assert && domEvent.keyCode !== KeyboardUtil.KEY_CTRL ) {
+        assert(  !!domEvent.ctrlKey === !!this.ctrlKeyDown, 'ctrl key inconsistency between event and keystate.' );
+      }
 
       // if the key is already down, don't do anything else (we don't want to create a new keystate object
       // for a key that is already being tracked and down)
@@ -67,7 +81,6 @@ define( require => {
           timeDown: 0 // in ms
         };
       }
-
     }
 
     /**
@@ -83,26 +96,25 @@ define( require => {
     keyupUpdate( event ) {
       var domEvent = event.domEvent;
 
-      // if the shift key is down when we navigate to the object, add it to the keystate because it won't be added until
-      // the next keydown event
-      if ( domEvent.keyCode === KeyboardUtil.KEY_TAB ) {
-        if ( domEvent.shiftKey ) {
+      if ( assert && domEvent.keyCode !== KeyboardUtil.KEY_TAB ) {
+        assert( this.isKeyDown( domEvent.keyCode ), 'key should be down before it is removed from keystate' );
+      }
 
-          // add 'shift' to the keystate until it is released again
-          if ( !this.isKeyDown( KeyboardUtil.KEY_SHIFT ) ) {
-            this.keyState[ KeyboardUtil.KEY_SHIFT ] = {
-              keyDown: true,
-              keyCode: KeyboardUtil.KEY_SHIFT,
-              timeDown: 0 // in ms
-            };
-          }
-        }
+      // We might have missed release of a modifier key, if that is the case update the keystate.
+      // This is likely to happen when pressing browser key commands like "ctrl + tab" to switch tabs, in this case
+      // the browser never receives keyup events from modifier keys.
+      if ( !domEvent.shiftKey && this.shiftKeyDown ) {
+        delete this.keyState[ KeyboardUtil.KEY_SHIFT ];
+      }
+      if ( !domEvent.altKey && this.altKeyDown ) {
+        delete this.keyState[ KeyboardUtil.KEY_ALT ];
+      }
+      if ( !domEvent.ctrlKey && this.ctrlKeyDown ) {
+        delete this.keyState[ KeyboardUtil.KEY_CTRL ];
       }
 
       // remove this key data from the state
-      if ( this.isKeyDown( domEvent.keyCode ) ) {
-        delete this.keyState[ domEvent.keyCode ];
-      }
+      delete this.keyState[ domEvent.keyCode ];
     }
 
     /**
@@ -190,6 +202,22 @@ define( require => {
      */
     get shiftKeyDown() {
       return this.isKeyDown( KeyboardUtil.KEY_SHIFT );
+    }
+
+    /**
+     * @returns {boolean} - true if the keystate indicates that the alt key is currently down.
+     * @public
+     */
+    get altKeyDown() {
+      return this.isKeyDown( KeyboardUtil.KEY_ALT );
+    }
+
+    /**
+     * @returns {boolean} - true if the keystate indicates that the ctrl key is currently down.
+     * @public
+     */
+    get ctrlKeyDown() {
+      return this.isKeyDown( KeyboardUtil.KEY_CTRL );
     }
 
     /**

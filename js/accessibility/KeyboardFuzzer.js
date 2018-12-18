@@ -206,8 +206,15 @@ define( require => {
       // eventObj.shiftKey = true; // TODO: we can add modifier keys in here with options?
       eventObj.which = keyCode;
 
+      // add any modifier keys to the event
       if ( this.keyStateTracker.shiftKeyDown ) {
         eventObj.shiftKey = true;
+      }
+      if ( this.keyStateTracker.altKeyDown ) {
+        eventObj.altKey = true;
+      }
+      if ( this.keyStateTracker.ctrlKeyDown ) {
+        eventObj.ctrlKey = true;
       }
 
       // wrap in an object to mimic a scenery "Event"

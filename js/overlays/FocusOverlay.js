@@ -388,7 +388,7 @@ define( function( require ) {
      */
     onFocusHighlightChange: function() {
       assert && assert( this.node.focused, 'update should only be necessary if node already has focus' );
-      this.onFocusChange( scenery.Display.focusProperty.get() );
+      this.onFocusChange( scenery.Display.focus );
     },
 
     update: function() {
