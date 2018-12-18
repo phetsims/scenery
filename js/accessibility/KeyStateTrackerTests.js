@@ -69,11 +69,8 @@ define( require => {
   QUnit.test( 'tracking of shift key', assert => {
 
     // mock sending "keydown" events to the tracker
-    window.assert && assert.throws( () => {
-      testTracker.keydownUpdate( shiftTabKeyEvent );
-
-    }, 'event has shift key down when key state tracker does did not get a shift down key event.' );
-
+    testTracker.keydownUpdate( shiftTabKeyEvent );
+    assert.ok( testTracker.shiftKeyDown, 'tab key with shift modifier should produce a keystate with shift key down' );
 
     testTracker.keydownUpdate( shiftKeyEvent );
     testTracker.keydownUpdate( shiftTabKeyEvent );
@@ -94,36 +91,46 @@ define( require => {
     testTracker.keydownUpdate( tabKeyEvent );
     testTracker.keyupUpdate( shiftTabKeyEvent );
     assert.ok( !testTracker.isKeyDown( tabKeyEvent.domEvent.keyCode ), 'tab key should not be down in tracker' );
-    assert.ok( testTracker.isKeyDown( shiftKeyEvent.domEvent.keyCode ), 'shift key should have been set to be down in tracker because of tab up' );
-    assert.ok( testTracker.shiftKeyDown, 'shift key should be down in tracker getter' );
 
-    testTracker.keyupUpdate( shiftKeyEvent );
-    testTracker.keyupUpdate( tabKeyEvent );
+    // This test originally came before a global key state tracker, when changing focus might begin to update a new
+    // key state tracker and we need to make sure the new tracker was initialized with the state of the previous
+    // tracker. With a global tracker, this isn't necessary.
+    assert.ok( !testTracker.isKeyDown( shiftKeyEvent.domEvent.keyCode ), 'shift key should not be down in tracker just because of tab up with shift key code' );
+    assert.ok( !testTracker.shiftKeyDown, 'shift key should not be down in tracker getter' );
   } );
 
 
   QUnit.test( 'test tracking with time', async assert => {
 
-    var done = assert.async();
+    const done = assert.async();
+
+    let previousTime = Date.now();
+    const intervalID = window.setInterval( () => {
+      const currentTime = Date.now();
+      testTracker.step( ( currentTime - previousTime ) / 1000 ); // convert to seconds
+      previousTime = currentTime;
+    }, 10 );
 
     testTracker.keydownUpdate( spaceKeyEvent );
     let currentTimeDown = testTracker.timeDownForKey( spaceKeyEvent.domEvent.keyCode );
     assert.ok( currentTimeDown === 0, 'should be zero, has not been down any time' );
 
-
     timer.setTimeout( () => {
       currentTimeDown = testTracker.timeDownForKey( spaceKeyEvent.domEvent.keyCode );
 
-      assert.ok( currentTimeDown >= 95 && currentTimeDown <= 115, 'key pressed for 100ms' );
+
+      assert.ok( currentTimeDown >= 480 && currentTimeDown <= 505, 'key pressed for 100ms' );
 
       timer.setTimeout( () => {
         currentTimeDown = testTracker.timeDownForKey( spaceKeyEvent.domEvent.keyCode );
-        assert.ok( currentTimeDown >= 146 && currentTimeDown <= 170, 'key pressed for 51 more ms.' );
+
+        assert.ok( currentTimeDown >= 560 && currentTimeDown <= 590, 'key pressed for 51 more ms.' );
 
         testTracker.keyupUpdate( spaceKeyEvent );
 
+        window.clearInterval( intervalID );
         done();
-      }, 51 );
-    }, 100 );
+      }, 71 );
+    }, 500 );
   } );
 } );
