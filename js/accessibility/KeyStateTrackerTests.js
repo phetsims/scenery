@@ -139,7 +139,7 @@ define( require => {
 
         testTracker.keyupUpdate( spaceKeyEvent );
 
-        window.clearInterval( intervalID );
+        timer.clearInterval( intervalListener );
         done();
       }, secondPressTime );
     }, firstPressTime );
