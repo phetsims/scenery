@@ -1359,7 +1359,12 @@ define( function( require ) {
           if ( this._ariaLabel !== ariaLabel ) {
             this._ariaLabel = ariaLabel;
 
-            this.setAccessibleAttribute( 'aria-label', ariaLabel );
+            if ( this._ariaLabel === null ) {
+              this.removeAccessibleAttribute( 'aria-label' );
+            }
+            else {
+              this.setAccessibleAttribute( 'aria-label', ariaLabel );
+            }
           }
         },
         set ariaLabel( ariaLabel ) { this.setAriaLabel( ariaLabel ); },

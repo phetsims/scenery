@@ -1362,6 +1362,13 @@ define( function( require ) {
     var buttonA = a.accessibleInstances[ 0 ].peer.primarySibling;
     assert.ok( buttonA.getAttribute( 'aria-label' ) === TEST_LABEL_2, 'setter on dom element' );
     assert.ok( buttonA.innerHTML === '', 'no inner html with aria-label setter' );
+
+    a.ariaLabel = null;
+
+    buttonA = a.accessibleInstances[ 0 ].peer.primarySibling;
+    assert.ok( !buttonA.hasAttribute( 'aria-label' ), 'setter can clear on dom element' );
+    assert.ok( buttonA.innerHTML === '', 'no inner html with aria-label setter when clearing' );
+    assert.ok( a.ariaLabel === null, 'cleared in Node model.' );
   } );
 
   QUnit.test( 'focusable option', function( assert ) {
