@@ -11,8 +11,8 @@ define( require => {
 
   // modules
   const AccessibilityUtil = require( 'SCENERY/accessibility/AccessibilityUtil' );
+  const Display = require( 'SCENERY/display/Display' );
   const KeyboardUtil = require( 'SCENERY/accessibility/KeyboardUtil' );
-  const KeyStateTracker = require( 'SCENERY/accessibility/KeyStateTracker' );
   const Random = require( 'DOT/Random' );
   const scenery = require( 'SCENERY/scenery' );
   const timer = require( 'PHET_CORE/timer' );
@@ -50,7 +50,6 @@ define( require => {
       // @private
       this.display = display;
       this.random = new Random( { seed: seed } );
-      this.keyStateTracker = new KeyStateTracker();
       this.keysPressedEachFrame = 1;
       this.keyupListeners = [];
 
@@ -110,7 +109,7 @@ define( require => {
      */
     triggerKeyDownUpEvents( element, keyCode ) {
 
-      if ( !this.keyStateTracker.isKeyDown( keyCode ) ) {
+      if ( !Display.keyStateTracker.isKeyDown( keyCode ) ) {
         sceneryLog && sceneryLog.KeyboardFuzzer && sceneryLog.KeyboardFuzzer( 'trigger keydown/up: ' + keyCode );
         sceneryLog && sceneryLog.KeyboardFuzzer && sceneryLog.push();
 
@@ -207,28 +206,16 @@ define( require => {
       eventObj.which = keyCode;
 
       // add any modifier keys to the event
-      if ( this.keyStateTracker.shiftKeyDown ) {
+      if ( Display.keyStateTracker.shiftKeyDown ) {
         eventObj.shiftKey = true;
       }
-      if ( this.keyStateTracker.altKeyDown ) {
+      if ( Display.keyStateTracker.altKeyDown ) {
         eventObj.altKey = true;
       }
-      if ( this.keyStateTracker.ctrlKeyDown ) {
+      if ( Display.keyStateTracker.ctrlKeyDown ) {
         eventObj.ctrlKey = true;
       }
-
-      // wrap in an object to mimic a scenery "Event"
-      var mimicEvent = {
-        domEvent: eventObj
-      };
-
-      if ( event === KEY_DOWN ) {
-        this.keyStateTracker.keydownUpdate( mimicEvent );
-      }
-      else if ( event === KEY_UP ) {
-        this.keyStateTracker.keyupUpdate( mimicEvent );
-      }
-
+      
       element.dispatchEvent ? element.dispatchEvent( eventObj ) : element.fireEvent( 'on' + event, eventObj );
     }
   }
