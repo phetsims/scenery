@@ -481,6 +481,7 @@ define( function( require ) {
         this.node.removeAccessibleInstance( this );
       }
 
+      this.relativeNodes = null;
       this.display = null;
       this.trail = null;
       this.node = null;
