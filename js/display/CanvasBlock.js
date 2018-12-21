@@ -213,8 +213,8 @@ define( function( require ) {
 
         // Inverse of what we'll be applying to the scene, to get back to the root coordinate transform
         scratchMatrix.rowMajor( this.backingScale, 0, this.canvasDrawOffset.x * this.backingScale,
-          0, this.backingScale, this.canvasDrawOffset.y * this.backingScale,
-          0, 0, 1 );
+                                0, this.backingScale, this.canvasDrawOffset.y * this.backingScale,
+                                0, 0, 1 );
         scratchMatrix2.set( this.transformRootInstance.trail.getMatrix() ).invert();
         scratchMatrix2.multiplyMatrix( scratchMatrix ).canvasSetTransform( context );
 
@@ -226,11 +226,11 @@ define( function( require ) {
             context.beginPath();
             node.clipArea.writeToContext( context );
             // TODO: add the ability to show clipping highlights inline?
-            // context.save();
-            // context.strokeStyle = 'red';
-            // context.lineWidth = 2;
-            // context.stroke();
-            // context.restore();
+                // context.save();
+                // context.strokeStyle = 'red';
+                // context.lineWidth = 2;
+                // context.stroke();
+                // context.restore();
             context.clip();
           }
         }
@@ -337,7 +337,7 @@ define( function( require ) {
         return;
       }
 
-      sceneryLog && sceneryLog.CanvasBlock && sceneryLog.CanvasBlock( `renderDrawable #${drawable.id} ${drawable.instance.trail.toDebugString()}` );
+      sceneryLog && sceneryLog.CanvasBlock && sceneryLog.CanvasBlock( `renderDrawable #${drawable.id} ${drawable.instance.trail.toDebugString()}`  );
       sceneryLog && sceneryLog.CanvasBlock && sceneryLog.push();
 
       // For opacity/clip, walk up/down as necessary (Can only walk down if we are not the first drawable)
@@ -440,8 +440,8 @@ define( function( require ) {
         if ( this.filterListenerCountMap[ node.id ] === 0 ) {
           delete this.filterListenerCountMap[ node.id ];
 
-          node.hasStaticListener( 'clip', this.clipDirtyListener ) && node.offStatic( 'clip', this.clipDirtyListener );
-          node.hasStaticListener( 'opacity', this.opacityDirtyListener ) && node.offStatic( 'opacity', this.opacityDirtyListener );
+          node.offStatic( 'clip', this.clipDirtyListener );
+          node.offStatic( 'opacity', this.opacityDirtyListener );
         }
       }
 

@@ -138,8 +138,8 @@ define( function( require ) {
       while ( this.watchedFilterNodes.length ) {
         var node = this.watchedFilterNodes.pop();
 
-        node.hasListener( 'opacity', this.opacityDirtyListener ) && node.offStatic( 'opacity', this.opacityDirtyListener );
-        node.hasListener( 'clip', this.clipDirtyListener ) && node.offStatic( 'clip', this.clipDirtyListener );
+        node.offStatic( 'opacity', this.opacityDirtyListener );
+        node.offStatic( 'clip', this.clipDirtyListener );
       }
 
       this.backboneInstance.offStatic( 'relativeVisibility', this.backboneVisibilityListener );

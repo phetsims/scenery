@@ -323,18 +323,17 @@ define( function( require ) {
 
       assert && assert( this.children.length === 0, 'Should be empty by now' );
 
-      if ( this.willApplyTransforms && this.node.hasStaticListener( 'transform', this.transformDirtyListener ) ) {
+      if ( this.willApplyTransforms ) {
         this.node.offStatic( 'transform', this.transformDirtyListener );
       }
-      this.node.hasStaticListener( 'visibility', this.visibilityDirtyListener ) && this.node.offStatic( 'visibility', this.visibilityDirtyListener );
-
+      this.node.offStatic( 'visibility', this.visibilityDirtyListener );
       if ( this.willApplyFilters ) {
-        this.node.hasStaticListener( 'opacity', this.opacityDirtyListener ) && this.node.offStatic( 'opacity', this.opacityDirtyListener );
+        this.node.offStatic( 'opacity', this.opacityDirtyListener );
       }
       //OHTWO TODO: remove clip workaround
-      this.node.hasStaticListener( 'clip', this.clipDirtyListener ) && this.node.offStatic( 'clip', this.clipDirtyListener );
+      this.node.offStatic( 'clip', this.clipDirtyListener );
 
-      this.node.hasStaticListener( 'childrenChanged', this.orderDirtyListener ) && this.node.offStatic( 'childrenChanged', this.orderDirtyListener );
+      this.node.offStatic( 'childrenChanged', this.orderDirtyListener );
 
       // if our Instance has been disposed, it has already had the reference removed
       if ( this.instance.active ) {

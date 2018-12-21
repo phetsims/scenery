@@ -57,7 +57,7 @@ define( function( require ) {
      * @public
      */
     dispose: function() {
-      this.node.hasStaticListener( this.trigger, this.changeListener ) && this.node.offStatic( this.trigger, this.changeListener );
+      this.node.offStatic( this.trigger, this.changeListener );
       Property.prototype.dispose.call( this );
       this.node = null;
     },

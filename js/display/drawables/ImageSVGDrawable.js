@@ -47,22 +47,22 @@ define( function( require ) {
 
     // if mipmaps are enabled, this listener will be added to when our relative transform changes
     this._mipmapTransformListener = this._mipmapTransformListener || function() {
-      sceneryLog && sceneryLog.ImageSVGDrawable && sceneryLog.ImageSVGDrawable( self.id + ' Transform dirties mipmap' );
-      self.markDirtyMipmap();
-    };
+        sceneryLog && sceneryLog.ImageSVGDrawable && sceneryLog.ImageSVGDrawable( self.id + ' Transform dirties mipmap' );
+        self.markDirtyMipmap();
+      };
 
     this._mipmapListener = this._mipmapListener || function() {
-      // sanity check
-      self.markDirtyMipmap();
+        // sanity check
+        self.markDirtyMipmap();
 
-      // update our mipmap usage status
-      self.updateMipmapStatus( self.node._mipmap );
-    };
+        // update our mipmap usage status
+        self.updateMipmapStatus( self.node._mipmap );
+      };
     this.node.onStatic( 'mipmap', this._mipmapListener );
     this.updateMipmapStatus( instance.node._mipmap );
   }
 
-  scenery.register( 'ImageSVGDrawable', ImageSVGDrawable );
+scenery.register( 'ImageSVGDrawable', ImageSVGDrawable );
 
   inherit( SVGSelfDrawable, ImageSVGDrawable, {
     /**
@@ -176,7 +176,7 @@ define( function( require ) {
 
       // clean up mipmap listeners and compute needs
       this.updateMipmapStatus( false );
-      this.node.hasStaticListener( 'mipmap', this._mipmapListener ) && this.node.offStatic( 'mipmap', this._mipmapListener );
+      this.node.offStatic( 'mipmap', this._mipmapListener );
 
       SVGSelfDrawable.prototype.dispose.call( this );
     }

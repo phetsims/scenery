@@ -308,8 +308,8 @@ define( function( require ) {
      */
     getMargin: function() {
       assert && assert( this._leftMargin === this._rightMargin &&
-      this._leftMargin === this._topMargin &&
-      this._leftMargin === this._bottomMargin,
+                        this._leftMargin === this._topMargin &&
+                        this._leftMargin === this._bottomMargin,
         'Getting margin does not have a unique result if the left and right margins are different' );
       return this._leftMargin;
     },
@@ -550,9 +550,9 @@ define( function( require ) {
       sceneryLog && sceneryLog.AlignBox && sceneryLog.pop();
 
       return new Bounds2( bounds.left - this._leftMargin,
-        bounds.top - this._topMargin,
-        bounds.right + this._rightMargin,
-        bounds.bottom + this._bottomMargin );
+                          bounds.top - this._topMargin,
+                          bounds.right + this._rightMargin,
+                          bounds.bottom + this._bottomMargin );
     },
 
     /**
@@ -638,9 +638,8 @@ define( function( require ) {
      * @public
      */
     dispose: function() {
-
       // Remove our listener
-      this._content.hasListener( 'bounds', this._contentBoundsListener ) && this._content.off( 'bounds', this._contentBoundsListener );
+      this._content.off( 'bounds', this._contentBoundsListener );
 
       // Disconnects from the group
       this.group = null;
