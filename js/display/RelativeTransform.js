@@ -187,7 +187,7 @@ define( function( require ) {
     },
 
     detachNodeListeners: function() {
-      this.node.offStatic( 'transform', this.nodeTransformListener );
+      this.node.hasStaticListener( 'transform', this.nodeTransformListener ) && this.node.offStatic( 'transform', this.nodeTransformListener );
     },
 
     /*---------------------------------------------------------------------------*

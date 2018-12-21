@@ -1450,16 +1450,16 @@ define( function( require ) {
       this.relativeTransform.detachNodeListeners();
 
       if ( !this.isSharedCanvasCachePlaceholder ) {
-        this.node.offStatic( 'childInserted', this.childInsertedListener );
-        this.node.offStatic( 'childRemoved', this.childRemovedListener );
-        this.node.offStatic( 'childrenReordered', this.childrenReorderedListener );
-        this.node.offStatic( 'visibility', this.visibilityListener );
+        this.node.hasStaticListener( 'childInserted', this.childInsertedListener ) && this.node.offStatic( 'childInserted', this.childInsertedListener );
+        this.node.hasStaticListener( 'childRemoved', this.childRemovedListener ) && this.node.offStatic( 'childRemoved', this.childRemovedListener );
+        this.node.hasStaticListener( 'childrenReordered', this.childrenReorderedListener ) && this.node.offStatic( 'childrenReordered', this.childrenReorderedListener );
+        this.node.hasStaticListener( 'visibility', this.visibilityListener ) && this.node.offStatic( 'visibility', this.visibilityListener );
 
-        this.node.offStatic( 'opacity', this.markRenderStateDirtyListener );
-        this.node.offStatic( 'hint', this.markRenderStateDirtyListener );
-        this.node.offStatic( 'clip', this.markRenderStateDirtyListener );
-        this.node.offStatic( 'rendererBitmask', this.markRenderStateDirtyListener );
-        this.node.offStatic( 'rendererSummary', this.markRenderStateDirtyListener );
+        this.node.hasStaticListener( 'opacity', this.markRenderStateDirtyListener ) && this.node.offStatic( 'opacity', this.markRenderStateDirtyListener );
+        this.node.hasStaticListener( 'hint', this.markRenderStateDirtyListener ) && this.node.offStatic( 'hint', this.markRenderStateDirtyListener );
+        this.node.hasStaticListener( 'clip', this.markRenderStateDirtyListener ) && this.node.offStatic( 'clip', this.markRenderStateDirtyListener );
+        this.node.hasStaticListener( 'rendererBitmask', this.markRenderStateDirtyListener ) && this.node.offStatic( 'rendererBitmask', this.markRenderStateDirtyListener );
+        this.node.hasStaticListener( 'rendererSummary', this.markRenderStateDirtyListener ) && this.node.offStatic( 'rendererSummary', this.markRenderStateDirtyListener );
       }
     },
 
