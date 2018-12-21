@@ -5101,7 +5101,11 @@ define( function( require ) {
      */
     off: function offOverride( eventName, listener ) {
       var index = Events.prototype.off.call( this, eventName, listener );
-      assert && assert( index >= 0, 'Node.off was called but no listener was removed' );
+
+      // Throw an error when removing a non-listener (except when the Node has already been disposed)
+      if ( assert && !this.isDisposed ) {
+        assert && assert( index >= 0, 'Node.off was called but no listener was removed' );
+      }
       this.onEventListenerRemoved( eventName, listener );
       return index;
     },
@@ -5116,7 +5120,11 @@ define( function( require ) {
      */
     offStatic: function offStaticOverride( eventName, listener ) {
       var index = Events.prototype.offStatic.call( this, eventName, listener );
-      assert && assert( index >= 0, 'Node.offStatic was called but no listener was removed' );
+
+      // Throw an error when removing a non-listener (except when the Node has already been disposed)
+      if ( assert && !this.isDisposed ) {
+        assert && assert( index >= 0, 'Node.offStatic was called but no listener was removed' );
+      }
       this.onEventListenerRemoved( eventName, listener );
       return index;
     },
