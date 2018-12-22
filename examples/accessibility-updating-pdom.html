@@ -52,7 +52,7 @@
 <body>
     <div class="container">
         <div id="accessibility-scene" class="exampleScene" style="width: 600px; height: 200px;"></div>
-        <div class = "pdom-container"></div>
+        <div id = "pdom-container"></div>
     </div>
 
     <script type="text/javascript">
@@ -71,9 +71,9 @@
 
             var pdomHTMLBlock = display.accessibleDOMElement.outerHTML;
             var formattedPDOM = pdomHTMLBlock.replace(new RegExp('<[/]?\\w*[ >]', 'g'), '\n$&'); // add breaks in the string
-            var $PDOMcode = $('<pre class="brush: html"></pre>').text(formattedPDOM);
+            var $PDOMcode = $('<pre id="pdom" class="brush: html"></pre>').text(formattedPDOM);
 
-            $('#pdom-container').appendChild($PDOMcode);
+            $container.after( $PDOMcode );
         }
     </script>
     <script type="text/javascript">
@@ -127,12 +127,10 @@
                         //Hexagon that changes colors when various buttons are clicked.
                         hexagon.fill = color
                         hexagon.accessibleName = `a ${color} hexagon`
-                        console.log(display.accessibleDOMElement.innerHTML)
                         var pdomHTMLBlock = display.accessibleDOMElement.outerHTML;
                         var formattedPDOM = pdomHTMLBlock.replace(new RegExp('<[/]?\\w*[ >]', 'g'), '\n$&'); // add breaks in the string
-                        var $PDOMcode = $('<pre class="brush: html"></pre>').text(formattedPDOM);
-
-                        $('#' + 'accessibility').html($PDOMcode);
+                        console.log(formattedPDOM)
+                        $('#pdom').text(formattedPDOM)
                     }
                 });
             }
