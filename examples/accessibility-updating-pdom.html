@@ -29,11 +29,11 @@
 
     <style>
         .container {
-            display: grid;
-            grid-template-rows: 1fr 3fr;
-            grid-template-columns: 1fr 1fr;
-            grid-gap: 2%;
+            display: flex;
+            flex-direction: column;
+            min-width: 800px;
         }
+
         .container .title{
             grid-column: span 2;
             text-align: center;
@@ -46,6 +46,34 @@
             left: 0;
             top: 0;
         }
+        .container{
+          width: 70%;
+          margin: auto;
+        }
+
+        .input-and-button{
+          display:flex;
+          justify-content: space-between;
+          align-items: center;
+          width:40%;
+        }
+
+        .input-container{
+          display:flex;
+          justify-content: space-around;
+          align-items: center;
+          flex-direction:column;
+        }
+
+        #color-input{
+          margin:0;
+          padding:0;
+          height:2em;
+        }
+
+        code{
+          font-size:1.2em;
+        }
 
     </style>
 </head>
@@ -56,7 +84,14 @@
           <h2>Scenery Accessibility Examples: Updating the parallel DOM</h2>
           <p>When buttons are clicked, the P-DOM text describing DOM elements is updated to reflect changes to the scene.</p>
         </div>
-        <div id="accessibility-scene" class="exampleScene" style="width: 600px; height: 200px;"></div>
+        <div id="accessibility-scene" class="exampleScene" style="width: 800px; height: 250px;"></div>
+        <div class="input-container">
+          <h4>Please enter the color of button that you'd like to add</h4>
+          <div class="input-and-button">
+            <input type="text" id="color-input"/>
+            <button id="add-color-button" class="btn">Add Color</button>
+          </div>
+        </div>
         <pre id="pdom-pre"></pre>
     </div>
 
@@ -74,87 +109,120 @@
             draw(scene, display);
             display.updateDisplay();
 
+            // update displayed p-dom text
+            function updatePDomDisplay(){
+              var pdomHTMLBlock = display.accessibleDOMElement.outerHTML;
+              var formattedPDOM = pdomHTMLBlock.replace(new RegExp('<[/]?\\w*[ >]', 'g'), '\n$&'); // add breaks in the string
+              var $PDOMcode = $( '<code class="language-html no-whitespace-normalization"></code>' ).text( formattedPDOM );
+
+              $( '#pdom-pre' ).html( $PDOMcode );
+            }
+            updatePDomDisplay()
+        }
+    </script>
+    <script type="text/javascript">
+        scenery.Util.polyfillRequestAnimationFrame();
+
+        docExample('accessibility-scene', (scene, display) => {
+          // add a yellow hexagon to the screen at the beginning
+          let hexagon = new scenery.Path(kite.Shape.regularPolygon(6, 22), {
+              fill: 'yellow',
+              stroke: '#000',
+              x: 400,
+              y: 100,
+              tagName: 'p', // tag name for pdom element
+              accessibleName: `a yellow hexagon` // accessibility description
+          });
+          scene.addChild( hexagon )
+
+          // update displayed p-dom text
+          function updatePDomDisplay(){
             var pdomHTMLBlock = display.accessibleDOMElement.outerHTML;
             var formattedPDOM = pdomHTMLBlock.replace(new RegExp('<[/]?\\w*[ >]', 'g'), '\n$&'); // add breaks in the string
             var $PDOMcode = $( '<code class="language-html no-whitespace-normalization"></code>' ).text( formattedPDOM );
 
             $( '#pdom-pre' ).html( $PDOMcode );
-        }
+          }
 
-    </script>
-    <script type="text/javascript">
-        scenery.Util.polyfillRequestAnimationFrame();
-        docExample('accessibility-scene', (scene, display) => {
-            let hexagon = new scenery.Path(kite.Shape.regularPolygon(6, 22), {
-                fill: 'yellow',
-                stroke: '#000',
-                x: 150,
-                y: 50,
-                tagName: 'p', // tag name for pdom element
-                accessibleName: `a yellow hexagon` // accessibility description
-            });
-            scene.addChild( hexagon )
+          // creates a single button
+          function generateButton(color, x, y) {
 
-            function generateButtons(color, x, y) {
-                self = this
-                // First button -- changes hexagon color and text to tomato
-                const rectangle = new scenery.Path(kite.Shape.roundedRectangleWithRadii(x, y, 100, 100, {
-                    topLeft: 10,
-                    topRight: 10,
-                    bottomLeft: 10,
-                    bottomRight: 10
-                }), {
-                    stroke: 'black',
-                    fill: color,
-                    cursor: 'pointer',
-                    tagName: 'button', // tag name for pdom element
-                    accessibleName: `${color}-colored button` // accessibility description
-                });
-                scene.addChild(rectangle);
+              // creates the button
+              const rectangle = new scenery.Path(kite.Shape.roundedRectangleWithRadii(x, y, 100, 50, {
+                  topLeft: 10,
+                  topRight: 10,
+                  bottomLeft: 10,
+                  bottomRight: 10
+              }), {
+                  stroke: 'black',
+                  fill: color,
+                  cursor: 'pointer',
+                  tagName: 'button', // tag name for pdom element
+                  accessibleName: `${color}-colored button` // accessibility description
+              });
+              scene.addChild(rectangle);
 
-                // Text within the tomato-colored rectangle
-                rectangle.addChild(new scenery.Text(color, {
-                    font: '24px sans-serif',
-                    center: rectangle.center
-                }));
+              // Adds text to the button with the name of the color
+              rectangle.addChild(new scenery.Text(color, {
+                  font: '1.6em sans-serif',
+                  center: rectangle.center
+              }));
 
-                // Input listener makes the hexagon change colors
-                rectangle.addInputListener({
-                    // Add a listener that fires when the button in the PDOM is clicked
-                    up: () => {
-                      hexagon.fill = color // change hexagon color
-                      hexagon.accessibleName = `a ${color} hexagon` // update the pdom text
+              // Input listener makes the hexagon change colors when buttons are clicked
+              rectangle.addInputListener( {
 
-                      // update the displayed pdom text on the screen
-                      var pdomHTMLBlock = display.accessibleDOMElement.outerHTML;
-                      var formattedPDOM = pdomHTMLBlock.replace(new RegExp('<[/]?\\w*[ >]', 'g'), '\n$&'); // add breaks in the string
-                      var $PDOMcode = $( '<code class="language-html no-whitespace-normalization"></code>' ).text( formattedPDOM );
+                  // Listener for pointer clicks
+                  up: () => {
+                    hexagon.fill = color; // change hexagon color
+                    hexagon.accessibleName = `a ${color} hexagon`; // update the pdom text
 
-                      $( '#pdom-pre' ).html( $PDOMcode );
-                    },
+                    // update the displayed pdom text on the screen
+                    updatePDomDisplay()
+                  },
 
-                    // Add a listener that fires when the button in the PDOM is clicked
-                    a11yclick: () => {
-                      hexagon.fill = color // change hexagon color
-                      hexagon.accessibleName = `a ${color} hexagon` // update the pdom text
+                  // Accessible listener that fires when the button in the PDOM is clicked
+                  a11yclick: () => {
+                    hexagon.fill = color // change hexagon color
+                    hexagon.accessibleName = `a ${color} hexagon` // update the pdom text
 
-                      // update the displayed pdom text on the screen
-                      var pdomHTMLBlock = display.accessibleDOMElement.outerHTML;
-                      var formattedPDOM = pdomHTMLBlock.replace(new RegExp('<[/]?\\w*[ >]', 'g'), '\n$&'); // add breaks in the string
-                      var $PDOMcode = $( '<code class="language-html no-whitespace-normalization"></code>' ).text( formattedPDOM );
-
-                      $( '#pdom-pre' ).html( $PDOMcode );
-                    }
-                });
+                    // update the displayed pdom text on the screen
+                    updatePDomDisplay()
+                  }
+              } );
             }
 
-            colorsToGenerate = ['tomato', 'dodgerblue', 'magenta']
-            let xPosition = 5
-            let yPosition = 100
-            colorsToGenerate.forEach(color => {
-                generateButtons(color, xPosition, yPosition)
-                xPosition += 150
+            // generates multiple buttons, appropriately spaced from an array of colors
+            function createButtons(colorList){
+              var xPosition = 800/(colorList.length**2)
+              var yPosition = 180
+              colorList.forEach(color => {
+                  generateButton(color, xPosition, yPosition)
+                  xPosition += 800/(colorList.length)
+              })
+            }
+
+            // create buttons of various colors using the generateButton function above.
+            var colorsToGenerate = ['tomato', 'dodgerblue', 'magenta']
+            createButtons(colorsToGenerate)
+
+            // add click handler to add color button to add a new color button to the scene
+            document.querySelector('#add-color-button').addEventListener( 'click', () => {
+              //remove old scene
+              scene.removeAllChildren()
+              scene.addChild( hexagon )
+
+              //get color from input and add to colorsToGenerate
+              var newColor = document.querySelector('#color-input').value
+              newColor && colorsToGenerate.push(newColor)
+
+              // regenerate the buttons, appropriately spaced
+              createButtons(colorsToGenerate)
+
+              // update the displayed pdom text on the screen
+              updatePDomDisplay()
             })
+
+            //update the animation upon changes
             display.updateOnRequestAnimationFrame();
         });
     </script>
