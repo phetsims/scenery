@@ -19,8 +19,8 @@
     <!--For the styling-->
     <link rel="stylesheet" href="../assets/scenery.css">
     <link rel="stylesheet" href="../../sherpa/lib/prism/prism.css">
-    <link rel="stylesheet" href="../../sherpa/lib/bootstrap-2.2.2.css">
-    <link rel="stylesheet" href="../../sherpa/lib/bootstrap-responsive-2.2.2.css">
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/css/bootstrap.min.css" integrity="sha384-Gn5384xqQ1aoWXA+058RXPxPg6fy4IWvTNh0E263XmFcJlSAwiGgFAW/dAiS6JXm" crossorigin="anonymous">
+
 
     <script src="../../sherpa/lib/bootstrap-2.2.2.js"></script>
     <script src="../../sherpa/lib/prism/prism.js"></script>
@@ -37,6 +37,7 @@
         .container .title{
             grid-column: span 2;
             text-align: center;
+            margin-top: 40px;
         }
 
         .exampleScene {
@@ -89,7 +90,7 @@
           <h4>Please enter the color of button that you'd like to add</h4>
           <div class="input-and-button">
             <input type="text" id="color-input"/>
-            <button id="add-color-button" class="btn">Add Color</button>
+            <button type="button" id="add-color-button" class="btn btn-secondary">Add Color</button>
           </div>
         </div>
         <pre id="pdom-pre"></pre>
@@ -114,7 +115,6 @@
               var pdomHTMLBlock = display.accessibleDOMElement.outerHTML;
               var formattedPDOM = pdomHTMLBlock.replace(new RegExp('<[/]?\\w*[ >]', 'g'), '\n$&'); // add breaks in the string
               var $PDOMcode = $( '<code class="language-html no-whitespace-normalization"></code>' ).text( formattedPDOM );
-
               $( '#pdom-pre' ).html( $PDOMcode );
             }
             updatePDomDisplay()
@@ -164,7 +164,7 @@
 
               // Adds text to the button with the name of the color
               rectangle.addChild(new scenery.Text(color, {
-                  font: '1.6em sans-serif',
+                  font: '1.2em sans-serif',
                   center: rectangle.center
               }));
 
