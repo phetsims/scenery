@@ -29,9 +29,10 @@
 
     <style>
         .container {
-            display: flex;
-            flex-direction: column;
-            min-width: 800px;
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            min-width: 1050px;
+            margin:0;
         }
 
         .container .title{
@@ -46,39 +47,33 @@
           line-height: 1.8em;
         }
         .pdom-container{
-          display: grid;
-          grid-template-columns: 1fr 3fr;
-          border: 1px black solid;
-          margin-top: 20px;
-          padding: 2%;
+          display: flex;
+          flex-direction: column;
+          /* min-width: 600px */
         }
 
 
         .exampleScene {
-            margin: 15px auto;
             position: relative;
             left: 0;
             top: 0;
         }
-        .container{
-          width: 70%;
-          margin: auto;
-        }
 
         .input-and-button{
-          display:flex;
-          justify-content: space-between;
-          align-items: center;
-          width:40%;
+          display:grid;
+          grid-template-columns: 1fr 1fr;
+          grid-gap: 20px;
+          margin-top: 40px;
+        }
+
+        .input-and-button p {
+          grid-column: span 2;
         }
 
         .input-container{
           display:flex;
-          justify-content: space-around;
           align-items: center;
           flex-direction:column;
-          padding-bottom: 40px;
-          border: 1px black solid;
         }
 
         #color-input{
@@ -103,19 +98,19 @@
         </div>
 
         <div class="input-container">
-          <div id="accessibility-scene" class="exampleScene" style="width: 800px; height: 150px;"></div>
-          <h4>Please enter the color of button that you'd like to add</h4>
+          <div id="accessibility-scene" class="exampleScene" style="width: 600px; height: 250px;"></div>
           <div class="input-and-button">
+            <p>Please enter the color of button that you'd like to add</p>
             <input type="text" id="color-input"/>
             <button type="button" id="add-color-button" class="btn btn-secondary">Add Color</button>
           </div>
         </div>
         <div class = "pdom-container">
+          <pre id="pdom-pre"></pre>
           <div class="pdom-title">
             <h3>The Parallel DOM</h3>
             <p>The paralllel DOM is generated from accessibility tags in scenery nodes. Because it is pure HTML, it allows the page to be accessed by screen readers, and gives access to keyboard navigation features. </p>
           </div>
-          <pre id="pdom-pre"></pre>
         </div>
     </div>
 
@@ -152,8 +147,8 @@
           let hexagon = new scenery.Path(kite.Shape.regularPolygon(6, 22), {
               fill: 'yellow',
               stroke: '#000',
-              x: 400,
-              y: 50,
+              x: 300,
+              y: 75,
               tagName: 'p', // tag name for pdom element
               accessibleName: `a yellow hexagon` // accessibility description
           });
@@ -173,7 +168,7 @@
           function generateButton(color, x, y) {
 
               // creates the button
-              const rectangle = new scenery.Path(kite.Shape.roundedRectangleWithRadii(x, y, 100, 50, {
+              const rectangle = new scenery.Path(kite.Shape.roundedRectangleWithRadii(x, y, 70, 40, {
                   topLeft: 10,
                   topRight: 10,
                   bottomLeft: 10,
@@ -218,11 +213,11 @@
 
             // generates multiple buttons, appropriately spaced from an array of colors
             function createButtons(colorList){
-              var xPosition = 800/(colorList.length**2)
-              var yPosition = 100
+              var xPosition = 600/(colorList.length**2)
+              var yPosition = 150
               colorList.forEach(color => {
                   generateButton(color, xPosition, yPosition)
-                  xPosition += 800/(colorList.length)
+                  xPosition += 600/(colorList.length)
               })
               updatePDomDisplay()
             }
