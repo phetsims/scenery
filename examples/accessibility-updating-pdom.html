@@ -7,7 +7,7 @@
     <meta name="viewport" content="width=device-width, height=device-height, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
     <meta name="apple-mobile-web-app-capable" content="yes">
 
-    <title>Hello World - Scenery Example</title>
+    <title>Accessibility: Updating the P-Dom - Scenery Example</title>
 
     <!-- Before loading other things (that might error), create hooks to report errors/loads for continuous testing -->
     <script src="../../aqua/js/pageload-connector.js"></script>
@@ -40,9 +40,22 @@
             margin-top: 40px;
         }
 
+        .pdom-title{
+          text-align: center;
+          padding: 20px 5%;
+          line-height: 1.8em;
+        }
+        .pdom-container{
+          display: grid;
+          grid-template-columns: 1fr 3fr;
+          border: 1px black solid;
+          margin-top: 20px;
+          padding: 2%;
+        }
+
+
         .exampleScene {
             margin: 15px auto;
-            border: 1px solid black;
             position: relative;
             left: 0;
             top: 0;
@@ -64,6 +77,8 @@
           justify-content: space-around;
           align-items: center;
           flex-direction:column;
+          padding-bottom: 40px;
+          border: 1px black solid;
         }
 
         #color-input{
@@ -73,8 +88,9 @@
         }
 
         code{
-          font-size:1.2em;
+          font-size:0.8em;
         }
+
 
     </style>
 </head>
@@ -85,15 +101,22 @@
           <h2>Scenery Accessibility Examples: Updating the parallel DOM</h2>
           <p>When buttons are clicked, the P-DOM text describing DOM elements is updated to reflect changes to the scene.</p>
         </div>
-        <div id="accessibility-scene" class="exampleScene" style="width: 800px; height: 250px;"></div>
+
         <div class="input-container">
+          <div id="accessibility-scene" class="exampleScene" style="width: 800px; height: 150px;"></div>
           <h4>Please enter the color of button that you'd like to add</h4>
           <div class="input-and-button">
             <input type="text" id="color-input"/>
             <button type="button" id="add-color-button" class="btn btn-secondary">Add Color</button>
           </div>
         </div>
-        <pre id="pdom-pre"></pre>
+        <div class = "pdom-container">
+          <div class="pdom-title">
+            <h3>The Parallel DOM</h3>
+            <p>The paralllel DOM is generated from accessibility tags in scenery nodes. Because it is pure HTML, it allows the page to be accessed by screen readers, and gives access to keyboard navigation features. </p>
+          </div>
+          <pre id="pdom-pre"></pre>
+        </div>
     </div>
 
     <script type="text/javascript">
@@ -114,8 +137,9 @@
             function updatePDomDisplay(){
               var pdomHTMLBlock = display.accessibleDOMElement.outerHTML;
               var formattedPDOM = pdomHTMLBlock.replace(new RegExp('<[/]?\\w*[ >]', 'g'), '\n$&'); // add breaks in the string
-              var $PDOMcode = $( '<code class="language-html no-whitespace-normalization"></code>' ).text( formattedPDOM );
+              var $PDOMcode = Prism.highlightElement($( '<code class="language-html no-whitespace-normalization"></code>' ).text( formattedPDOM ));
               $( '#pdom-pre' ).html( $PDOMcode );
+              Prism.highlightAll()
             }
             updatePDomDisplay()
         }
@@ -129,7 +153,7 @@
               fill: 'yellow',
               stroke: '#000',
               x: 400,
-              y: 100,
+              y: 50,
               tagName: 'p', // tag name for pdom element
               accessibleName: `a yellow hexagon` // accessibility description
           });
@@ -139,9 +163,10 @@
           function updatePDomDisplay(){
             var pdomHTMLBlock = display.accessibleDOMElement.outerHTML;
             var formattedPDOM = pdomHTMLBlock.replace(new RegExp('<[/]?\\w*[ >]', 'g'), '\n$&'); // add breaks in the string
-            var $PDOMcode = $( '<code class="language-html no-whitespace-normalization"></code>' ).text( formattedPDOM );
+            var $PDOMcode = ($( '<code class="language-html no-whitespace-normalization"></code>' ).text( formattedPDOM ));
 
             $( '#pdom-pre' ).html( $PDOMcode );
+            Prism.highlightAll()
           }
 
           // creates a single button
@@ -194,11 +219,12 @@
             // generates multiple buttons, appropriately spaced from an array of colors
             function createButtons(colorList){
               var xPosition = 800/(colorList.length**2)
-              var yPosition = 180
+              var yPosition = 100
               colorList.forEach(color => {
                   generateButton(color, xPosition, yPosition)
                   xPosition += 800/(colorList.length)
               })
+              updatePDomDisplay()
             }
 
             // create buttons of various colors using the generateButton function above.
