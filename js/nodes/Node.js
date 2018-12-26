@@ -5142,8 +5142,11 @@ define( function( require ) {
       this.removeAllChildren();
       this.detach();
 
-      Events.prototype.dispose.call( this ); // TODO: don't rely on Events, see https://github.com/phetsims/scenery/issues/490
+      // Tear-down in the reverse order Node was created
       PhetioObject.prototype.dispose.call( this );
+
+      // Remove any listeners that haven't been removed by the preceding dispose logic.
+      Events.prototype.dispose.call( this ); // TODO: don't rely on Events, see https://github.com/phetsims/scenery/issues/490
     },
 
     /**
