@@ -1109,7 +1109,7 @@ define( function( require ) {
          * @param {string|null} label
          */
         setLabelContent: function( label ) {
-          assert && assert( label === null || typeof label === 'string' );
+          assert && assert( label === null || typeof label === 'string', 'label must be null or string' );
 
           // REVIEW: It's also concerning that setting this ends up changing another field (especially when it's set to
           // REVIEW: the same value!). Can't we handle some of this in the with an accessible*Behavior pattern?
@@ -1193,7 +1193,7 @@ define( function( require ) {
          * @param {string|null} descriptionContent
          */
         setDescriptionContent: function( descriptionContent ) {
-          assert && assert( descriptionContent === null || typeof descriptionContent === 'string' );
+          assert && assert( descriptionContent === null || typeof descriptionContent === 'string', 'description must be null or string' );
 
           if ( this._descriptionContent !== descriptionContent ) {
             this._descriptionContent = descriptionContent;
