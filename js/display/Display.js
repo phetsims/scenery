@@ -1783,7 +1783,7 @@ define( function( require ) {
 
       // Make this a static tandem so that it can be added to PhET-iO Studio correctly (batched and then flushed when the
       // listener is added).
-      tandem: Tandem.rootTandem.createTandem( 'display' ).createTandem( 'focusProperty' ),
+      tandem: Tandem.generalTandem.createTandem( 'focusProperty' ),
       phetioType: PropertyIO( NullableIO( FocusIO ) ),
       phetioState: false,
       phetioReadOnly: true
