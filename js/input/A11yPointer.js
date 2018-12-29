@@ -1,6 +1,7 @@
 // Copyright 2018, University of Colorado Boulder
 
 /**
+ * Pointer type for managing accessibility, in particular the focus in the display.
  * Tracks the state of accessible focus.
  *
  * @author Michael Kauzmann (PhET Interactive Simulations)
@@ -20,7 +21,6 @@ define( require => {
   class A11yPointer extends Pointer {
 
     /**
-     * Pointer type for managing accessibility, in particular the focus in the display
      * @param {Display} display
      */
     constructor( display ) {
@@ -84,7 +84,7 @@ define( require => {
      * it is recomputed on focus. But there are times where a11y events can be called out of order with focus/blur
      * and the trail will either be null or stale. This might happen more often when scripting fake browser events
      * with a timeout (like in fuzzBoard).
-     * 
+     *
      * @public (scenery-internal)
      * @param {string} trailString
      */

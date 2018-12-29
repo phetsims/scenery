@@ -70,7 +70,7 @@ define( function( require ) {
 
     /**
      * Convert the serialized instance back to a focus object
-     * @param {Object} stateObject
+     * @param {Object|null} stateObject
      * @returns {Object} with {display,trail}
      * @override
      */

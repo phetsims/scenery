@@ -1772,10 +1772,10 @@ define( function( require ) {
     'scenery-grabbing-pointer': [ 'grabbing', '-moz-grabbing', '-webkit-grabbing', 'pointer' ]
   };
 
-  // @public (a11y, read-only) {Focus|null} - Display has an axon Property to indicate which component is focused (or null
-  // if no scenery node has focus).  By passing the tandem and phetioValueType, PhET-iO is able to interoperate (save,
-  // restore, control, observe what is currently focused. See Display.focus for setting the Display's focus. Don't set
-  // the value of this Property directly.
+  // @public (a11y, read-only, scenery-internal setable) {Property.<Focus|null>} - Display has an axon Property to indicate which
+  // component is focused (or null if no scenery node has focus).  By passing the tandem and phetioValueType,
+  // PhET-iO is able to interoperate (save, restore, control, observe what is currently focused. See Display.focus
+  // for setting the Display's focus. Don't set the value of this Property directly.
   Display.focusProperty = new Property( null,
 
     // Only instrument if accessibility is enabled

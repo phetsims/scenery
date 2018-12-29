@@ -149,8 +149,11 @@ define( require => {
   const domEventPropertiesToSerialize = {
     button: true, keyCode: true,
     deltaX: true, deltaY: true, deltaZ: true, deltaMode: true, pointerId: true,
-    pointerType: true, charCode: true, which: true, clientX: true, clientY: true, changedTouches: true
+    pointerType: true, charCode: true, which: true, clientX: true, clientY: true, changedTouches: true,
+    target: true
   };
+  const TARGET_SUBSTITUTE_KEY = 'targetSubstitute';
+  const TRAIL_ID_ATTRIBUTE_NAME = 'data-trail-id';
 
   /**
    * An input controller for a specific Display.
@@ -507,6 +510,25 @@ define( require => {
       // wire up accessibility listeners on the display's root accessible DOM element.
       if ( this.display._accessible ) {
 
+        /**
+         * {DOMEvent} event
+         * @param event
+         * @returns {string} the trail id added to the element in AccessiblePeer
+         */
+        var getTrailId = function( event ) {
+          assert && assert( event.target );
+
+          // could be serialized event for phet-io playbacks, see Input.serializeDOMEvent()
+          if ( event[ TARGET_SUBSTITUTE_KEY ] ) {
+            assert && assert( event[ TARGET_SUBSTITUTE_KEY ] instanceof Object );
+            return event[ TARGET_SUBSTITUTE_KEY ][ TRAIL_ID_ATTRIBUTE_NAME ];
+          }
+          else {
+            assert && assert( event.target instanceof window.Element );
+            return event.target.getAttribute( TRAIL_ID_ATTRIBUTE_NAME );
+          }
+        };
+
         // @private
         this.focusinEmitter = new Emitter( {
           phetioPlayback: true,
@@ -520,7 +542,8 @@ define( require => {
             sceneryLog && sceneryLog.Input && sceneryLog.Input( 'focusIn(' + Input.debugText( null, event ) + ');' );
             sceneryLog && sceneryLog.Input && sceneryLog.push();
 
-            const trail = this.a11yPointer.updateTrail( event.target.getAttribute( 'data-trail-id' ) );
+            if ( !this.a11yPointer ) { this.initA11yPointer(); }
+            const trail = this.a11yPointer.updateTrail( getTrailId( event ) );
             this.dispatchEvent( trail, 'focus', this.a11yPointer, event, false );
 
             sceneryLog && sceneryLog.Input && sceneryLog.pop();
@@ -540,10 +563,12 @@ define( require => {
             sceneryLog && sceneryLog.Input && sceneryLog.Input( 'focusOut(' + Input.debugText( null, event ) + ');' );
             sceneryLog && sceneryLog.Input && sceneryLog.push();
 
+            if ( !this.a11yPointer ) { this.initA11yPointer(); }
+
             // recompute the trail on focusout if necessary - since a blur/focusout may have been initiated from a
             // focus/focusin listener, it is possible that focusout was called more than once before focusin is called on the
             // next active element, see https://github.com/phetsims/scenery/issues/898
-            this.a11yPointer.invalidateTrail( event.target.getAttribute( 'data-trail-id' ) );
+            this.a11yPointer.invalidateTrail( getTrailId( event ) );
             this.dispatchEvent( this.a11yPointer.trail, 'blur', this.a11yPointer, event, false );
 
             // clear the trail to make sure that our assertions aren't testing a stale trail.
@@ -566,7 +591,8 @@ define( require => {
             sceneryLog && sceneryLog.Input && sceneryLog.Input( 'click(' + Input.debugText( null, event ) + ');' );
             sceneryLog && sceneryLog.Input && sceneryLog.push();
 
-            const trail = this.a11yPointer.updateTrail( event.target.getAttribute( 'data-trail-id' ) );
+            if ( !this.a11yPointer ) { this.initA11yPointer(); }
+            const trail = this.a11yPointer.updateTrail( getTrailId( event ) );
             this.dispatchEvent( trail, 'click', this.a11yPointer, event, true );
 
             sceneryLog && sceneryLog.Input && sceneryLog.pop();
@@ -586,7 +612,8 @@ define( require => {
             sceneryLog && sceneryLog.Input && sceneryLog.Input( 'input(' + Input.debugText( null, event ) + ');' );
             sceneryLog && sceneryLog.Input && sceneryLog.push();
 
-            const trail = this.a11yPointer.updateTrail( event.target.getAttribute( 'data-trail-id' ) );
+            if ( !this.a11yPointer ) { this.initA11yPointer(); }
+            const trail = this.a11yPointer.updateTrail( getTrailId( event ) );
             this.dispatchEvent( trail, 'input', this.a11yPointer, event, true );
 
             sceneryLog && sceneryLog.Input && sceneryLog.pop();
@@ -606,7 +633,8 @@ define( require => {
             sceneryLog && sceneryLog.Input && sceneryLog.Input( 'change(' + Input.debugText( null, event ) + ');' );
             sceneryLog && sceneryLog.Input && sceneryLog.push();
 
-            const trail = this.a11yPointer.updateTrail( event.target.getAttribute( 'data-trail-id' ) );
+            if ( !this.a11yPointer ) { this.initA11yPointer(); }
+            const trail = this.a11yPointer.updateTrail( getTrailId( event ) );
             this.dispatchEvent( trail, 'change', this.a11yPointer, event, true );
 
             sceneryLog && sceneryLog.Input && sceneryLog.pop();
@@ -626,7 +654,8 @@ define( require => {
             sceneryLog && sceneryLog.Input && sceneryLog.Input( 'keydown(' + Input.debugText( null, event ) + ');' );
             sceneryLog && sceneryLog.Input && sceneryLog.push();
 
-            const trail = this.a11yPointer.updateTrail( event.target.getAttribute( 'data-trail-id' ) );
+            if ( !this.a11yPointer ) { this.initA11yPointer(); }
+            const trail = this.a11yPointer.updateTrail( getTrailId( event ) );
             this.dispatchEvent( trail, 'keydown', this.a11yPointer, event, true );
 
             sceneryLog && sceneryLog.Input && sceneryLog.pop();
@@ -646,7 +675,8 @@ define( require => {
             sceneryLog && sceneryLog.Input && sceneryLog.Input( 'keyup(' + Input.debugText( null, event ) + ');' );
             sceneryLog && sceneryLog.Input && sceneryLog.push();
 
-            const trail = this.a11yPointer.updateTrail( event.target.getAttribute( 'data-trail-id' ) );
+            if ( !this.a11yPointer ) { this.initA11yPointer(); }
+            const trail = this.a11yPointer.updateTrail( getTrailId( event ) );
             this.dispatchEvent( trail, 'keyup', this.a11yPointer, event, true );
 
             sceneryLog && sceneryLog.Input && sceneryLog.pop();
@@ -668,7 +698,6 @@ define( require => {
             sceneryLog && sceneryLog.InputEvent && sceneryLog.push();
 
             // Create the a11yPointer lazily
-            if ( !this.a11yPointer ) { this.initA11yPointer(); }
             this[ emitterName ].emit( event );
 
             sceneryLog && sceneryLog.InputEvent && sceneryLog.pop();
@@ -1787,6 +1816,12 @@ define( require => {
             }
             entries[ property ] = touchArray;
           }
+
+          // we don't need much from the target, just the trail ID
+          if ( property === 'target' && domEventProperty !== null ) {
+            entries[ property ] = {};
+            entries[ property ][ TRAIL_ID_ATTRIBUTE_NAME ] = domEventProperty.getAttribute( TRAIL_ID_ATTRIBUTE_NAME );
+          }
           else {
             entries[ property ] = ( ( typeof domEventProperty === 'object' ) && ( domEventProperty !== null ) ? {} : JSON.parse( JSON.stringify( domEventProperty ) ) ); // TODO: is parse/stringify necessary?
           }
@@ -1798,13 +1833,20 @@ define( require => {
     /**
      * From a serialized dom event, return a recreated window.Event
      * @param {Object} eventObject
-     * @returns {window.Event}
+     * @returns {Window.Event}
      */
     static deserializeDomEvent( eventObject ) {
       const domEvent = new window.Event( 'inputEvent' );
       for ( const key in eventObject ) {
         if ( eventObject.hasOwnProperty( key ) ) {
-          domEvent[ key ] = eventObject[ key ];
+
+          // Special case for target since we can't set that read-only property. Instead use a substitute key.
+          if ( key === 'target' ) {
+            domEvent[ TARGET_SUBSTITUTE_KEY ] = eventObject[ key ];
+          }
+          else {
+            domEvent[ key ] = eventObject[ key ];
+          }
         }
       }
       return domEvent;
