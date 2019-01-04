@@ -154,6 +154,11 @@ define( require => {
      */
     fuzzBoardEvents() {
 
+      const a11yPointer = this.display._input.a11yPointer;
+      if ( a11yPointer && !a11yPointer.blockTrustedEvents) {
+        a11yPointer.blockTrustedEvents = true;
+      }
+
       this.chooseNextElement();
 
       for ( let i = 0; i < this.keysPressedEachFrame; i++ ) {

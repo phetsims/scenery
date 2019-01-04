@@ -34,6 +34,11 @@ define( require => {
 
       this.initializeListeners();
 
+      // @public (scenery-internal) - Prevent any "trusted" events from being dispatched to the KeyStateTracker. When
+      // true, only scripted events are passed to the keyStateTracker. Otherwise, the modeled keyboard state when using
+      // fuzzBoard will appear broken as both user and KeyboardFuzzer interact with display.
+      this.blockTrustedEvents = false;
+
       sceneryLog && sceneryLog.Pointer && sceneryLog.Pointer( 'Created ' + this.toString() );
     }
 
@@ -57,9 +62,15 @@ define( require => {
           scenery.Display.focus = null;
         },
         keydown: ( event ) => {
+          if ( this.blockTrustedEvents && event.domEvent.isTrusted ) {
+            return;
+          }
           scenery.Display.keyStateTracker.keydownUpdate( event );
         },
         keyup: ( event ) => {
+          if ( this.blockTrustedEvents && event.domEvent.isTrusted ) {
+            return;
+          }
           scenery.Display.keyStateTracker.keyupUpdate( event );
         }
       } );
