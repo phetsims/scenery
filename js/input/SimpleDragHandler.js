@@ -10,11 +10,10 @@ define( function( require ) {
   'use strict';
 
   // modules
+  var BooleanProperty = require( 'AXON/BooleanProperty' );
   var Emitter = require( 'AXON/Emitter' );
   var EmitterIO = require( 'AXON/EmitterIO' );
-  var Vector2IO = require( 'DOT/Vector2IO' );
-  var VoidIO = require( 'TANDEM/types/VoidIO' );
-  var BooleanProperty = require( 'AXON/BooleanProperty' );
+  var Event = require( 'SCENERY/input/Event' );
   var inherit = require( 'PHET_CORE/inherit' );
   var Mouse = require( 'SCENERY/input/Mouse' );
   var PhetioObject = require( 'TANDEM/PhetioObject' );
@@ -22,6 +21,8 @@ define( function( require ) {
   var Tandem = require( 'TANDEM/Tandem' );
   var Touch = require( 'SCENERY/input/Touch' );
   var Vector2 = require( 'DOT/Vector2' );
+  var Vector2IO = require( 'DOT/Vector2IO' );
+  var VoidIO = require( 'TANDEM/types/VoidIO' );
 
   /**
    * @param {Object} [options]
@@ -96,6 +97,9 @@ define( function( require ) {
     // @private
     this.dragStartedEmitter = new Emitter( {
       tandem: options.tandem.createTandem( 'dragStartedEmitter' ),
+
+      // TODO: use of both of these is redundant, and should get fixed with https://github.com/phetsims/axon/issues/194
+      argumentTypes: [ { valueType: Vector2 }, { isValidValue: function( value ) { return value === null || value instanceof Event; } } ],
       phetioType: EmitterIO(
         [ { name: 'point', type: Vector2IO, documentation: 'the position of the drag start in view coordinates' },
           { name: 'event', type: VoidIO, documentation: 'the scenery pointer Event' } ] ),
@@ -110,6 +114,9 @@ define( function( require ) {
     this.draggedEmitter = new Emitter( {
       phetioHighFrequency: true,
       tandem: options.tandem.createTandem( 'draggedEmitter' ),
+
+      // TODO: use of both of these is redundant, and should get fixed with https://github.com/phetsims/axon/issues/194
+      argumentTypes: [ { valueType: Vector2 }, { valueType: Vector2 }, { isValidValue: function( value ) { return value === null || value instanceof Event; } } ],
       phetioType: EmitterIO(
         [ { name: 'point', type: Vector2IO, documentation: 'the position of the drag in view coordinates' },
           {
@@ -146,6 +153,9 @@ define( function( require ) {
     // @private
     this.dragEndedEmitter = new Emitter( {
       tandem: options.tandem.createTandem( 'dragEndedEmitter' ),
+
+      // TODO: use of both of these is redundant, and should get fixed with https://github.com/phetsims/axon/issues/194
+      argumentTypes: [ { valueType: Vector2 }, { isValidValue: function( value ) { return value === null || value instanceof Event; } } ],
       phetioType: EmitterIO(
         [ { name: 'point', type: Vector2IO, documentation: 'the position of the drag end in view coordinates' },
           { name: 'event', type: VoidIO, documentation: 'the scenery pointer Event' } ] ),
