@@ -36,7 +36,7 @@ define( require => {
      */
     keydownUpdate( event ) {
 
-      var domEvent = event.domEvent;
+      const domEvent = event.domEvent;
 
       // The dom event might have a modifier key that we weren't able to catch, if that is the case update the keystate.
       // This is likely to happen when pressing browser key commands like "ctrl + tab" to switch tabs.
@@ -94,7 +94,7 @@ define( require => {
      * @param {Event} event
      */
     keyupUpdate( event ) {
-      var domEvent = event.domEvent;
+      const domEvent = event.domEvent;
       const keyCode = domEvent.keyCode;
 
 
