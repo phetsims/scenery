@@ -96,6 +96,7 @@ define( require => {
     keyupUpdate( event ) {
       var domEvent = event.domEvent;
 
+      // first tab into the document will not register a keydown event
       if ( assert && domEvent.keyCode !== KeyboardUtil.KEY_TAB ) {
         assert( this.isKeyDown( domEvent.keyCode ), 'key should be down before it is removed from keystate' );
       }
