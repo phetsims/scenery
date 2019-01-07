@@ -95,10 +95,13 @@ define( require => {
      */
     keyupUpdate( event ) {
       var domEvent = event.domEvent;
+      const keyCode = domEvent.keyCode;
+
 
       // first tab into the document will not register a keydown event
-      if ( assert && domEvent.keyCode !== KeyboardUtil.KEY_TAB ) {
-        assert( this.isKeyDown( domEvent.keyCode ), 'key should be down before it is removed from keystate' );
+      // many browsers don't have keydown events for print screen, see https://github.com/phetsims/scenery/issues/918
+      if ( assert && keyCode !== KeyboardUtil.KEY_TAB && keyCode !== KeyboardUtil.KEY_PRINT_SCREEN ) {
+        assert( this.isKeyDown( keyCode ), 'key should be down before it is removed from keystate' );
       }
 
       // We might have missed release of a modifier key, if that is the case update the keystate.
@@ -115,7 +118,7 @@ define( require => {
       }
 
       // remove this key data from the state
-      delete this.keyState[ domEvent.keyCode ];
+      delete this.keyState[ keyCode ];
     }
 
     /**
