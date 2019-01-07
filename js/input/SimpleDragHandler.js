@@ -104,9 +104,33 @@ define( function( require ) {
         [ { name: 'point', type: Vector2IO, documentation: 'the position of the drag start in view coordinates' },
           { name: 'event', type: VoidIO, documentation: 'the scenery pointer Event' } ] ),
       listener: function( point, event ) {
+
+        if ( this.dragging ) { return; }
+
+        sceneryLog && sceneryLog.InputListener && sceneryLog.InputListener( 'SimpleDragHandler startDrag' );
+        sceneryLog && sceneryLog.InputListener && sceneryLog.push();
+
+        // set a flag on the pointer so it won't pick up other nodes
+        event.pointer.dragging = true;
+        event.pointer.cursor = self.options.dragCursor;
+        event.pointer.addInputListener( self.dragListener, self.options.attach );
+
+        // set all of our persistent information
+        self.isDraggingProperty.set( true );
+        self.pointer = event.pointer;
+        self.trail = event.trail.subtrailTo( event.currentTarget, true );
+        self.transform = self.trail.getTransform();
+        self.node = event.currentTarget;
+        self.lastDragPoint = event.pointer.point;
+        self.startTransformMatrix = event.currentTarget.getMatrix().copy();
+        // event.domEvent may not exist for touch-to-snag
+        self.mouseButton = event.pointer instanceof Mouse ? event.domEvent.button : undefined;
+
         if ( self.options.start ) {
           self.options.start.call( null, event, self.trail );
         }
+
+        sceneryLog && sceneryLog.InputListener && sceneryLog.pop();
       }
     } );
 
@@ -116,16 +140,31 @@ define( function( require ) {
       tandem: options.tandem.createTandem( 'draggedEmitter' ),
 
       // TODO: use of both of these is redundant, and should get fixed with https://github.com/phetsims/axon/issues/194
-      argumentTypes: [ { valueType: Vector2 }, { valueType: Vector2 }, { isValidValue: function( value ) { return value === null || value instanceof Event; } } ],
+      argumentTypes: [
+        { valueType: Vector2 },
+        { isValidValue: function( value ) { return value === null || value instanceof Event; } }
+      ],
       phetioType: EmitterIO(
         [ { name: 'point', type: Vector2IO, documentation: 'the position of the drag in view coordinates' },
-          {
-            name: 'delta',
-            type: Vector2IO,
-            documentation: 'the change from the previous position to the current position'
-          },
           { name: 'event', type: VoidIO, documentation: 'the scenery pointer Event' } ] ),
-      listener: function( point, delta, event ) {
+      listener: function( point, event ) {
+
+        if ( !self.dragging || self.disposed ) { return; }
+
+        var globalDelta = self.pointer.point.minus( self.lastDragPoint );
+
+        // ignore move events that have 0-length. Chrome seems to be auto-firing these on Windows,
+        // see https://code.google.com/p/chromium/issues/detail?id=327114
+        if ( globalDelta.magnitudeSquared() === 0 ) {
+          return;
+        }
+
+        var delta = self.transform.inverseDelta2( globalDelta );
+
+        assert && assert( event.pointer === self.pointer, 'Wrong pointer in move' );
+
+        sceneryLog && sceneryLog.InputListener && sceneryLog.InputListener( 'SimpleDragHandler (pointer) move for ' + self.trail.toString() );
+        sceneryLog && sceneryLog.InputListener && sceneryLog.push();
 
         // move by the delta between the previous point, using the precomputed transform
         // prepend the translation on the node, so we can ignore whatever other transform state the node has
@@ -147,6 +186,8 @@ define( function( require ) {
           self.options.drag.call( null, event, self.trail ); // new position (old position?) delta
           event.currentTarget = saveCurrentTarget; // be polite to other listeners, restore currentTarget
         }
+
+        sceneryLog && sceneryLog.InputListener && sceneryLog.pop();
       }
     } );
 
@@ -160,11 +201,28 @@ define( function( require ) {
         [ { name: 'point', type: Vector2IO, documentation: 'the position of the drag end in view coordinates' },
           { name: 'event', type: VoidIO, documentation: 'the scenery pointer Event' } ] ),
       listener: function( point, event ) {
+
+        if ( !self.dragging ) { return; }
+
+        sceneryLog && sceneryLog.InputListener && sceneryLog.InputListener( 'SimpleDragHandler endDrag' );
+        sceneryLog && sceneryLog.InputListener && sceneryLog.push();
+
+        self.pointer.dragging = false;
+        self.pointer.cursor = null;
+        self.pointer.removeInputListener( self.dragListener );
+
+        self.isDraggingProperty.set( false );
+
         if ( self.options.end ) {
 
           // drag end may be triggered programmatically and hence event and trail may be undefined
           self.options.end.call( null, event, self.trail );
         }
+
+        // release our reference
+        self.pointer = null;
+
+        sceneryLog && sceneryLog.InputListener && sceneryLog.pop();
       }
     } );
 
@@ -230,25 +288,7 @@ define( function( require ) {
 
       // mouse/touch move
       move: function( event ) {
-        if ( !self.dragging || self.disposed ) { return; }
-
-        assert && assert( event.pointer === self.pointer, 'Wrong pointer in move' );
-
-        var globalDelta = self.pointer.point.minus( self.lastDragPoint );
-
-        // ignore move events that have 0-length (Chrome seems to be auto-firing these on Windows, see https://code.google.com/p/chromium/issues/detail?id=327114)
-        if ( globalDelta.magnitudeSquared() === 0 ) {
-          return;
-        }
-
-        var delta = self.transform.inverseDelta2( globalDelta );
-
-        sceneryLog && sceneryLog.InputListener && sceneryLog.InputListener( 'SimpleDragHandler (pointer) move for ' + self.trail.toString() );
-        sceneryLog && sceneryLog.InputListener && sceneryLog.push();
-
-        self.draggedEmitter.emit( event.pointer.point, delta, event );
-
-        sceneryLog && sceneryLog.InputListener && sceneryLog.pop();
+        self.draggedEmitter.emit( event.pointer.point, event );
       }
     };
     PhetioObject.call( this, options );
@@ -267,52 +307,14 @@ define( function( require ) {
       assert && assert( 'illegal call to set dragging on SimpleDragHandler' );
     },
     startDrag: function( event ) {
-      if ( this.dragging ) { return; }
-
-      sceneryLog && sceneryLog.InputListener && sceneryLog.InputListener( 'SimpleDragHandler startDrag' );
-      sceneryLog && sceneryLog.InputListener && sceneryLog.push();
-
-      // set a flag on the pointer so it won't pick up other nodes
-      event.pointer.dragging = true;
-      event.pointer.cursor = this.options.dragCursor;
-      event.pointer.addInputListener( this.dragListener, this.options.attach );
-
-      // set all of our persistent information
-      this.isDraggingProperty.set( true );
-      this.pointer = event.pointer;
-      this.trail = event.trail.subtrailTo( event.currentTarget, true );
-      this.transform = this.trail.getTransform();
-      this.node = event.currentTarget;
-      this.lastDragPoint = event.pointer.point;
-      this.startTransformMatrix = event.currentTarget.getMatrix().copy();
-      // event.domEvent may not exist if this is touch-to-snag
-      this.mouseButton = event.pointer instanceof Mouse ? event.domEvent.button : undefined;
-
       this.dragStartedEmitter.emit( event.pointer.point, event );
-
-      sceneryLog && sceneryLog.InputListener && sceneryLog.pop();
     },
 
     endDrag: function( event ) {
-      if ( !this.dragging ) { return; }
-
-      sceneryLog && sceneryLog.InputListener && sceneryLog.InputListener( 'SimpleDragHandler endDrag' );
-      sceneryLog && sceneryLog.InputListener && sceneryLog.push();
-
-      this.pointer.dragging = false;
-      this.pointer.cursor = null;
-      this.pointer.removeInputListener( this.dragListener );
-
-      this.isDraggingProperty.set( false );
 
       // Signify drag ended.  In the case of programmatically ended drags, signify drag ended at 0,0.
       // see https://github.com/phetsims/ph-scale-basics/issues/43
       this.dragEndedEmitter.emit( event ? event.pointer.point : Vector2.ZERO, event );
-
-      // release our reference
-      this.pointer = null;
-
-      sceneryLog && sceneryLog.InputListener && sceneryLog.pop();
     },
 
     // Called when input is interrupted on this listener, see https://github.com/phetsims/scenery/issues/218
