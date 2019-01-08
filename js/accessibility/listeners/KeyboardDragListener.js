@@ -565,7 +565,7 @@ define( function( require ) {
      * Returns true if any of the keys in the list are currently down.
      *
      * @param  {Array.<number>} keys
-     * @return {boolean}
+     * @returns {boolean}
      * @public
      */
     keyInListDown: function( keys ) {
@@ -592,7 +592,7 @@ define( function( require ) {
      * Return true if all keys in the list are currently held down.
      *
      * @param {Array.<number>} keys
-     * @return {boolean}
+     * @returns {boolean}
      * @public
      */
     allKeysInListDown: function( keys ) {
@@ -618,7 +618,7 @@ define( function( require ) {
      * Returns true if the keystate indicates that a key is down that should move the object to the left.
      *
      * @public
-     * @return {boolean}
+     * @returns {boolean}
      */
     leftMovementKeysDown: function() {
       return this.keyInListDown( [ KeyboardUtil.KEY_A, KeyboardUtil.KEY_LEFT_ARROW ] );
@@ -628,7 +628,7 @@ define( function( require ) {
      * Returns true if the keystate indicates that a key is down that should move the object to the right.
      *
      * @public
-     * @return {boolean}
+     * @returns {boolean}
      */
     rightMovementKeysDown: function() {
       return this.keyInListDown( [ KeyboardUtil.KEY_RIGHT_ARROW, KeyboardUtil.KEY_D ] );
@@ -638,7 +638,7 @@ define( function( require ) {
      * Returns true if the keystate indicates that a key is down that should move the object up.
      *
      * @public
-     * @return {boolean}
+     * @returns {boolean}
      */
     upMovementKeysDown: function() {
       return this.keyInListDown( [ KeyboardUtil.KEY_UP_ARROW, KeyboardUtil.KEY_W ] );
@@ -648,7 +648,7 @@ define( function( require ) {
      * Returns true if the keystate indicates that a key is down that should move the upject down.
      *
      * @public
-     * @return {boolean}
+     * @returns {boolean}
      */
     downMovementKeysDown: function() {
       return this.keyInListDown( [ KeyboardUtil.KEY_DOWN_ARROW, KeyboardUtil.KEY_S ] );
@@ -657,7 +657,7 @@ define( function( require ) {
     /**
      * Returns true if any of the movement keys are down (arrow keys or WASD keys).
      *
-     * @return {boolean}
+     * @returns {boolean}
      * @public
      */
     getMovementKeysDown: function() {
@@ -669,7 +669,7 @@ define( function( require ) {
     /**
      * Returns true if the enter key is currently pressed down.
      *
-     * @return {boolean}
+     * @returns {boolean}
      * @public
      */
     enterKeyDown: function() {
@@ -679,7 +679,7 @@ define( function( require ) {
     /**
      * Returns true if the keystate indicates that the shift key is currently down.
      *
-     * @return {boolean}
+     * @returns {boolean}
      * @public
      */
     shiftKeyDown: function() {
@@ -744,7 +744,7 @@ define( function( require ) {
      * Returns true if the keycode corresponds to a key that should move the object to the left.
      *
      * @private
-     * @return {boolean}
+     * @returns {boolean}
      */
     isLeftMovementKey: function( keyCode ) {
       return keyCode === KeyboardUtil.KEY_A || keyCode === KeyboardUtil.KEY_LEFT_ARROW;
@@ -754,7 +754,7 @@ define( function( require ) {
      * Returns true if the keycode corresponds to a key that should move the object to the right.
      *
      * @public
-     * @return {boolean}
+     * @returns {boolean}
      */
     isRightMovementKey: function( keyCode ) {
       return keyCode === KeyboardUtil.KEY_D || keyCode === KeyboardUtil.KEY_RIGHT_ARROW;
@@ -764,7 +764,7 @@ define( function( require ) {
      * Returns true if the keycode corresponds to a key that should move the object up.
      *
      * @public
-     * @return {boolean}
+     * @returns {boolean}
      */
     isUpMovementKey: function( keyCode ) {
       return keyCode === KeyboardUtil.KEY_W || keyCode === KeyboardUtil.KEY_UP_ARROW;
@@ -774,7 +774,7 @@ define( function( require ) {
      * Returns true if the keycode corresponds to a key that should move the object down.
      *
      * @public
-     * @return {boolean}
+     * @returns {boolean}
      */
     isDownMovementKey: function( keyCode ) {
       return keyCode === KeyboardUtil.KEY_S || keyCode === KeyboardUtil.KEY_DOWN_ARROW;
