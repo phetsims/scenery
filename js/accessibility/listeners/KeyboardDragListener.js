@@ -32,30 +32,24 @@ define( function( require ) {
 
     options = _.extend( {
 
-      // {number} - On initial key press, how much the position Property will change in view coordinates
-      downDelta: 10,
+      // {number|null} - While direction key is down, this will be the 1D velocity for movement. The position will
+      // change this much in view coordinates every second.
+      dragVelocity: 600,
 
-      // {number} - On initial key press if shift is held down, amount PositionPropertychanges in view coordinates
-      shiftDownDelta: 5,
-
-      // {number|null} - while direction key is down, this will be the 1D velocity for movement, the position will
-      // change this much in view coordinates every second. If null, will default to downDelta * 60 assuming 60 fps
-      dragVelocity: null,
-
-      // {number|null} - if shift key down while pressing direction key, this will be the 1D delta for movement in view
-      // coordinates every second. If null, will default to shiftDownDelta * 60 assuming 60 fps
-      shiftDragVelocity: null,
+      // {number|null} - If shift key down while pressing direction key, this will be the 1D delta for movement in view
+      // coordinates every second.
+      shiftDragVelocity: 300,
 
       // {Property.<Vector2>|null} - if provided, it will be synchronized with the drag location in the model
-      // frame, applying provided transforms as needed
+      // frame, applying provided transforms as needed. Most useful when used with transform option
       locationProperty: null,
-
-      // {Bounds2|null} - if provided, the model location will be constrained to be inside these bounds
-      dragBounds: null,
 
       // {Transform3|null} - if provided, this will be the conversion between the view and model coordinate frames,
       // Usually most useful when paired with the locationProperty
       transform: null,
+
+      // {Bounds2|null} - if provided, the model location will be constrained to be inside these bounds
+      dragBounds: null,
 
       // {Function|null} - Called as start( event: {Event} ) when keyboard drag is started
       start: null,
@@ -66,13 +60,21 @@ define( function( require ) {
       // {Function|null} - Called as end( event: {Event} ) when keyboard drag ends
       end: null, // called at the end of the dragging interaction
 
-      // {number} - arrow keys must be pressed this long to begin movement set on interval below
+      // {number} - arrow keys must be pressed this long to begin movement set on moveOnHoldInterval, in ms
       moveOnHoldDelay: 0,
 
-      // {number} - time interval at which the object will change position while the arrow key is being held down
+      // {number} - Time interval at which the object will change position while the arrow key is held down, in ms
       moveOnHoldInterval: 0,
 
-      // {number} - time interval at which holding down a hotkey group will trigger an associated listener
+      // {number} - On initial key press, how much the position Property will change in view coordinates, generally
+      // only needed when there is a moveOnHoldDelay or moveOnHoldInterval. In ms.
+      downDelta: 0,
+
+      // {number} - The amount PositionProperty changes in view coordinates, generally only needed when there
+      // is a moveOnHoldDelay or moveOnHoldInterval. In ms.
+      shiftDownDelta: 0,
+
+      // {number} - time interval at which holding down a hotkey group will trigger an associated listener, in ms
       hotkeyInterval: 800
     }, options );
 
@@ -83,8 +85,8 @@ define( function( require ) {
     this._dragBounds = options.dragBounds;
     this._transform = options.transform;
     this._locationProperty = options.locationProperty;
-    this._dragVelocity = options.dragVelocity || options.downDelta * 60; // assuming same delta at 60 fps
-    this._shiftDragVelocity = options.shiftDragVelocity || options.shiftDownDelta * 60; // assuming same delta at 60 fps
+    this._dragVelocity = options.dragVelocity;
+    this._shiftDragVelocity = options.shiftDragVelocity;
     this._downDelta = options.downDelta;
     this._shiftDownDelta = options.shiftDownDelta;
     this._moveOnHoldDelay = options.moveOnHoldDelay;
@@ -121,7 +123,7 @@ define( function( require ) {
     this.canMove = true;
 
     // @private {number} - counters to allow for press-and-hold functionality that enables user to incrementally move
-    // the draggable object or hold the movement key for continuous or stepped movement
+    // the draggable object or hold the movement key for continuous or stepped movement - values in ms
     this.moveOnHoldDelayCounter = 0;
     this.moveOnHoldIntervalCounter = 0;
 
@@ -412,8 +414,9 @@ define( function( require ) {
      * Step function for the drag handler. JavaScript does not natively handle multiple keydown events at once,
      * so we need to track the state of the keyboard in an Object and manage dragging in this function.
      * In order for the drag handler to work.
-     *
      * @private
+     *
+     * @param {number} dt - in seconds
      */
     step: function( dt ) {
 
