@@ -323,7 +323,7 @@ define( function( require ) {
      * we didn't want to use canClick in canPress because canClick could be overridden in subtypes.
      * @public
      *
-     * @return {boolean}
+     * @returns {boolean}
      */
     canClick: function() {
       // If this listener is already involved in pressing something (or our options predicate returns false) we can't

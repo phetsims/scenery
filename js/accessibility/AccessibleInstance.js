@@ -497,7 +497,7 @@ define( function( require ) {
      * For debugging purposes.
      * @public
      *
-     * @return {string}
+     * @returns {string}
      */
     toString: function() {
       return this.id + '#{' + this.trail.toString() + '}';
@@ -599,7 +599,7 @@ define( function( require ) {
      * @private
      *
      * @param {Node} rootNode
-     * @return {Object} - Type FakeAccessibleInstance: { node: {Node}, children: {Array.<FakeAccessibleInstance>} }
+     * @returns {Object} - Type FakeAccessibleInstance: { node: {Node}, children: {Array.<FakeAccessibleInstance>} }
      */
     createFakeAccessibleTree: function( rootNode ) {
       function createFakeTree( node ) {

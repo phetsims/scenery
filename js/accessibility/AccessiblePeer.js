@@ -425,7 +425,7 @@ define( function( require ) {
      * @public (scenery-internal)
      *
      * @param {string} elementName - see AccessibilityUtil for valid associations
-     * @return {HTMLElement}
+     * @returns {HTMLElement}
      */
     getElementByName: function( elementName ) {
       if ( elementName === AccessiblePeer.PRIMARY_SIBLING ) {

@@ -1192,7 +1192,7 @@ define( function( require ) {
         /**
          * Get the inner content, the string that is the innerHTML or innerText for the node's primary sibling element.
          *
-         * @return {string|null}
+         * @returns {string|null}
          * @public
          */
         getInnerContent: function() {
@@ -2214,7 +2214,7 @@ define( function( require ) {
          * Get whether or not the accessible input is 'checked'.
          *
          * @public
-         * @return {boolean}
+         * @returns {boolean}
          */
         getAccessibleChecked: function() {
           return this._accessibleChecked;

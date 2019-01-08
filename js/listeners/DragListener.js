@@ -257,7 +257,7 @@ define( function( require ) {
      * DragListener should not be clicked for a11y, this prevents that listener from being called.
      * See https://github.com/phetsims/scenery/issues/903
      * @public
-     * @return {boolean}
+     * @returns {boolean}
      */
     canClick: function() {
       return false;

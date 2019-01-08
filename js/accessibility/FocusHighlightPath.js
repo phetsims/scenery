@@ -246,7 +246,7 @@ define( function( require ) {
      * @static
      *
      * @param {Node} node
-     * @return {number}
+     * @returns {number}
      */
     getInnerLineWidthFromNode: function( node ) {
       return INNER_LINE_WIDTH_BASE / FocusHighlightPath.getWidthMagnitudeFromTransform( node );
@@ -258,7 +258,7 @@ define( function( require ) {
      * @static
      *
      * @param {Node} node
-     * @return {number}
+     * @returns {number}
      */
     getOuterLineWidthFromNode: function( node ) {
       return OUTER_LINE_WIDTH_BASE / FocusHighlightPath.getWidthMagnitudeFromTransform( node );
@@ -304,7 +304,7 @@ define( function( require ) {
      *
      * @param {Node} node
      *
-     * @return {number}
+     * @returns {number}
      */
     getGroupDilationCoefficient: function( node ) {
       var widthOfFocusHighlight = FocusHighlightPath.getOuterLineWidthFromNode( node );

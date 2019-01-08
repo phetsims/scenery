@@ -1724,7 +1724,7 @@ define( function( require ) {
      * Get the focus for Display. Null if nothing under a Display has focus.
      * @public
      *
-     * @return {Focus|null}
+     * @returns {Focus|null}
      */
     get focus() {
       return this.focusProperty.value;
@@ -1735,7 +1735,7 @@ define( function( require ) {
      * Node has focus.
      *
      * @public
-     * @return {Node|null}
+     * @returns {Node|null}
      */
     getFocusedNode: function() {
       var focusedNode = null;
