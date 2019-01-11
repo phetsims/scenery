@@ -92,7 +92,8 @@ define( function( require ) {
       attach: true,
 
       // {function} - Checks this when trying to start a press. If this function returns false, a press will not be
-      // started.
+      // started. Called as canStartPress( event: {Event|null}, listener: {PressListener} ), since sometimes the
+      // event may not be available.
       canStartPress: truePredicate,
 
       // {number} (a11y) - How long something should 'look' pressed after an accessible click input event
@@ -311,7 +312,7 @@ define( function( require ) {
      * @returns {boolean}
      */
     canPress: function( event ) {
-      return !this.isPressed && this._canStartPress() &&
+      return !this.isPressed && this._canStartPress( event, this ) &&
              // Only let presses be started with the correct mouse button.
              ( !( event.pointer instanceof Mouse ) || event.domEvent.button === this._mouseButton ) &&
              // We can't attach to a pointer that is already attached.
@@ -328,7 +329,7 @@ define( function( require ) {
     canClick: function() {
       // If this listener is already involved in pressing something (or our options predicate returns false) we can't
       // press something.
-      return !this.isPressed && this._canStartPress();
+      return !this.isPressed && this._canStartPress( null, this );
     },
 
     /**
