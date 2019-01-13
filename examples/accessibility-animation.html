@@ -1,0 +1,222 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="utf-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="viewport" content="width=device-width, height=device-height, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+    <meta name="apple-mobile-web-app-capable" content="yes">
+
+    <title>Accessibility: Updating the P-Dom - Scenery Example</title>
+
+    <!-- Before loading other things (that might error), create hooks to report errors/loads for continuous testing -->
+    <script src="../../aqua/js/pageload-connector.js"></script>
+
+    <!-- jQuery and lodash are dependencies -->
+    <script src="../../sherpa/lib/jquery-2.1.0.min.js"></script>
+    <script src="../../sherpa/lib/lodash-4.17.4.min.js"></script>
+
+    <!--For the styling-->
+    <link rel="stylesheet" href="../assets/scenery.css">
+    <link rel="stylesheet" href="../../sherpa/lib/prism/prism.css">
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/css/bootstrap.min.css" integrity="sha384-Gn5384xqQ1aoWXA+058RXPxPg6fy4IWvTNh0E263XmFcJlSAwiGgFAW/dAiS6JXm" crossorigin="anonymous">
+
+
+    <script src="../../sherpa/lib/bootstrap-2.2.2.js"></script>
+    <script src="../../sherpa/lib/prism/prism.js"></script>
+
+    <script src="../build/scenery.min.js"></script>
+
+    <style>
+        .container {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            grid-gap: 1%;
+            min-width: 1050px;
+            margin:0;
+        }
+
+        .container .title {
+            grid-column: span 2;
+            text-align: center;
+            margin-top: 40px;
+        }
+
+        .pdom-container {
+          display: flex;
+          flex-direction: column;
+          width: 100%;
+          padding: 0 2%;
+        }
+
+        .pdom-container #pdom-pre {
+          padding: 20px;
+          min-width: 900px;
+        }
+
+        .exampleScene {
+            position: relative;
+            left: 0;
+            top: 0;
+        }
+
+        .input-and-button {
+          display:grid;
+          grid-template-columns: 1fr 1fr;
+          grid-gap: 20px;
+          margin-top: 40px;
+        }
+
+        .input-and-button p {
+          grid-column: span 2;
+        }
+
+        .input-container {
+          display:flex;
+          align-items: center;
+          flex-direction:column;
+        }
+
+        code {
+          font-size:0.8em;
+        }
+
+        #accessibility-scene{
+          width: 100%;
+          height: 80vh;
+        }
+
+
+    </style>
+</head>
+
+<body>
+
+  <div class="container">
+      <div class="title">
+        <h2>Scenery Accessibility Examples: Animation</h2>
+      </div>
+      <div id="accessibility-scene" class="exampleScene"></div>
+      <div class = "pdom-container">
+        <pre id="pdom-pre"></pre>
+      </div>
+  </div>
+
+  <script>
+
+    // update displayed p-dom text
+    function updatePDomDisplay( display ){
+      var pdomHTMLBlock = display.accessibleDOMElement.outerHTML;
+      var formattedPDOM = pdomHTMLBlock.replace(new RegExp('<[/]?\\w*[ >]', 'g'), '\n$&'); // add breaks in the string
+      var $PDOMcode = ($( '<code class="language-html no-whitespace-normalization"></code>' ).text( formattedPDOM ));
+
+      $( '#pdom-pre' ).html( $PDOMcode );
+      Prism.highlightAll()
+    }
+
+    var width = window.innerWidth
+    var height = window.innerHeight
+
+    window.onload = function() {
+      var scene = new scenery.Node( { renderer: 'webgl' } );
+      var display = new scenery.Display( scene, {
+        container: document.getElementById( 'accessibility-scene' ),
+        backgroundColor: '#eee',
+        width: width/3,
+        height: height * 0.8
+      } );
+
+      display.initializeEvents(); // sets up listeners on the document with preventDefault(), and forwards those events to our scene
+      var node = new scenery.Node( {
+        children: [ new scenery.Path(kite.Shape.regularPolygon(6, 22), {
+            fill: 'yellow',
+            stroke: '#000',
+            x: 50,
+            y: 50,
+            bounds: {minX: 0, minY: 0, maxX: width/2, maxY: height}
+        } ) ],
+        x: 0,
+        y: 0,
+      } )
+      
+      node.xVelocity = 10 * ( Math.random() - 0.5 );
+      node.yVelocity = 10 * ( Math.random() - 0.5 );
+
+      //reverses the direction of the hexagon when the display is clicked
+      display.addInputListener({
+          down: () => {
+            node.children[0].fill="red";
+
+          },
+          up: () => {
+            node.xVelocity = node.xVelocity * -1;
+            node.yVelocity = node.yVelocity * -1;
+            node.children[0].fill="yellow";
+          },
+
+          // Add a listener that fires when the button in the PDOM is clicked
+          a11yclick: () => {
+            node.children[0].fill="red";
+
+            setTimeout( () => {
+              node.xVelocity = node.xVelocity * -1;
+              node.yVelocity = node.yVelocity * -1;
+              node.children[0].fill = "yellow";
+            }, 100 );
+          }
+      })
+
+      scene.addChild( node );
+
+      /*---------------------------------------------------------------------------*
+       * main loop
+       *----------------------------------------------------------------------------*/
+
+      display.updateOnRequestAnimationFrame( function( timeElapsed ) {
+        var children = scene.children;
+
+        for (i = 0; i < scene.children.length; i++) {
+          var quadrantX
+          var quadrantY
+
+          var child = children[0];
+          child.translate( timeElapsed * child.xVelocity, timeElapsed * child.yVelocity, true );
+
+          //updates p-dom description words based on position of the hexagon
+          child.x > display.width/2 ? quadrantX = 'right' : quadrantX = 'left'
+          child.y > display.height/2 ? quadrantY = 'bottom' : quadrantY = 'top'
+
+          //updates the p-dom description
+          child.tagName = 'p'
+          child.accessibleName = `a ${child.color} hexagon in the ${quadrantY} ${quadrantX} quadrant`
+
+          // updates hexagon's speed and ensures it stays on the screen.
+          if (child.x > display.width - 100){
+              child.xVelocity = -50 * Math.random()
+              console.log(`x: ${child.x}`)
+          } else if (child.x < 0 - 30){
+              child.xVelocity = 50 * Math.random()
+              console.log(`x: ${child.x}`)
+          } else{
+              child.xVelocity += 20 * ( Math.random() - 0.5 );
+          }
+          if (child.y > display.height - 100){
+              child.yVelocity = -50 * Math.random()
+              console.log(`y: ${child.y}`)
+          } else if (child.y < 0){
+              child.yVelocity = 50 * Math.random()
+              console.log(`y: ${child.y}`)
+          } else{
+              child.yVelocity += 20 * ( Math.random() - 0.5 );
+          }
+          updatePDomDisplay(display)
+        }
+      } );
+    };
+
+
+  </script>
+
+</body>
+
+</html>
