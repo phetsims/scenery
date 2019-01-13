@@ -569,6 +569,8 @@ define( function( require ) {
          * this Node's accessibleName
          * @public
          *
+         * @experemental - NOTE: use with caution, a11y team reserves the right to change api (though unlikely). Not yet fully implemented, see https://github.com/phetsims/scenery/issues/867
+         *
          * @param {string|null} accessibleName
          */
         setAccessibleName: function( accessibleName ) {
@@ -585,6 +587,8 @@ define( function( require ) {
         /**
          * Get the tag name of the DOM element representing this node for accessibility.
          * @public
+         *
+         * @experemental - NOTE: use with caution, a11y team reserves the right to change api (though unlikely). Not yet fully implemented, see https://github.com/phetsims/scenery/issues/867
          *
          * @returns {string|null}
          */
@@ -614,6 +618,7 @@ define( function( require ) {
          * For more information about setting an Accessible Name on HTML see the scenery docs for accessibility,
          * and see https://developer.paciellogroup.com/blog/2017/04/what-is-an-accessible-name/
          *
+         * @experemental - NOTE: use with caution, a11y team reserves the right to change api (though unlikely). Not yet fully implemented, see https://github.com/phetsims/scenery/issues/867
          * @param {A11yBehaviorFunctionDef} accessibleNameBehavior
          */
         setAccessibleNameBehavior: function( accessibleNameBehavior ) {
@@ -632,6 +637,7 @@ define( function( require ) {
          * Get the help text of the interactive element.
          * @public
          *
+         * @experemental - NOTE: use with caution, a11y team reserves the right to change api (though unlikely). Not yet fully implemented, see https://github.com/phetsims/scenery/issues/867
          * @returns {function}
          */
         getAccessibleNameBehavior: function() {
@@ -645,6 +651,7 @@ define( function( require ) {
          * Nodes are heading nodes. See computeHeadingLevel() for more info
          * @public
          *
+         * @experemental - NOTE: use with caution, a11y team reserves the right to change api (though unlikely). Not yet fully implemented, see https://github.com/phetsims/scenery/issues/867
          * @param {string|null} accessibleHeading
          */
         setAccessibleHeading: function( accessibleHeading ) {
@@ -662,6 +669,7 @@ define( function( require ) {
          * Get the value of this Node's heading. Use null to clear the heading
          * @public
          *
+         * @experemental - NOTE: use with caution, a11y team reserves the right to change api (though unlikely). Not yet fully implemented, see https://github.com/phetsims/scenery/issues/867
          * @returns {string|null}
          */
         getAccessibleHeading: function() {
@@ -675,6 +683,7 @@ define( function( require ) {
          * information.
          * @public
          *
+         * @experemental - NOTE: use with caution, a11y team reserves the right to change api (though unlikely). Not yet fully implemented, see https://github.com/phetsims/scenery/issues/867
          * @param {A11yBehaviorFunctionDef} accessibleHeadingBehavior
          */
         setAccessibleHeadingBehavior: function( accessibleHeadingBehavior ) {
@@ -706,6 +715,7 @@ define( function( require ) {
          * Get the help text of the interactive element.
          * @public
          *
+         * @experemental - NOTE: use with caution, a11y team reserves the right to change api (though unlikely). Not yet fully implemented, see https://github.com/phetsims/scenery/issues/867
          * @returns {function}
          */
         getAccessibleHeadingBehavior: function() {
@@ -718,6 +728,7 @@ define( function( require ) {
          * Get the tag name of the DOM element representing this node for accessibility.
          * @public
          *
+         * @experemental - NOTE: use with caution, a11y team reserves the right to change api (though unlikely). Not yet fully implemented, see https://github.com/phetsims/scenery/issues/867
          * @returns {number|null}
          */
         getHeadingLevel: function() {
@@ -732,6 +743,7 @@ define( function( require ) {
          * is nested under.
          * @private
          *
+         * @experemental - NOTE: use with caution, a11y team reserves the right to change api (though unlikely). Not yet fully implemented, see https://github.com/phetsims/scenery/issues/867
          * @returns {number}
          */
         computeHeadingLevel: function() {
@@ -764,6 +776,7 @@ define( function( require ) {
          * rendered in the PDOM. Null will clear the help text for this Node.
          * @public
          *
+         * @experemental - NOTE: use with caution, a11y team reserves the right to change api (though unlikely). Not yet fully implemented, see https://github.com/phetsims/scenery/issues/867
          * @param {string|null} helpText
          */
         setHelpText: function( helpText ) {
@@ -782,6 +795,7 @@ define( function( require ) {
          * Get the help text of the interactive element.
          * @public
          *
+         * @experemental - NOTE: use with caution, a11y team reserves the right to change api (though unlikely). Not yet fully implemented, see https://github.com/phetsims/scenery/issues/867
          * @returns {string|null}
          */
         getHelpText: function() {
@@ -794,6 +808,7 @@ define( function( require ) {
          * "Help Text".
          * @public
          *
+         * @experemental - NOTE: use with caution, a11y team reserves the right to change api (though unlikely). Not yet fully implemented, see https://github.com/phetsims/scenery/issues/867
          * @param {A11yBehaviorFunctionDef} helpTextBehavior
          */
         setHelpTextBehavior: function( helpTextBehavior ) {
@@ -812,6 +827,7 @@ define( function( require ) {
          * Get the help text of the interactive element.
          * @public
          *
+         * @experemental - NOTE: use with caution, a11y team reserves the right to change api (though unlikely). Not yet fully implemented, see https://github.com/phetsims/scenery/issues/867
          * @returns {function}
          */
         getHelpTextBehavior: function() {
@@ -1109,7 +1125,7 @@ define( function( require ) {
          * @param {string|null} label
          */
         setLabelContent: function( label ) {
-          assert && assert( label === null || typeof label === 'string' );
+          assert && assert( label === null || typeof label === 'string', 'label must be null or string' );
 
           // REVIEW: It's also concerning that setting this ends up changing another field (especially when it's set to
           // REVIEW: the same value!). Can't we handle some of this in the with an accessible*Behavior pattern?
@@ -1176,7 +1192,7 @@ define( function( require ) {
         /**
          * Get the inner content, the string that is the innerHTML or innerText for the node's primary sibling element.
          *
-         * @return {string|null}
+         * @returns {string|null}
          * @public
          */
         getInnerContent: function() {
@@ -1193,7 +1209,7 @@ define( function( require ) {
          * @param {string|null} descriptionContent
          */
         setDescriptionContent: function( descriptionContent ) {
-          assert && assert( descriptionContent === null || typeof descriptionContent === 'string' );
+          assert && assert( descriptionContent === null || typeof descriptionContent === 'string', 'description must be null or string' );
 
           if ( this._descriptionContent !== descriptionContent ) {
             this._descriptionContent = descriptionContent;
@@ -2198,7 +2214,7 @@ define( function( require ) {
          * Get whether or not the accessible input is 'checked'.
          *
          * @public
-         * @return {boolean}
+         * @returns {boolean}
          */
         getAccessibleChecked: function() {
           return this._accessibleChecked;

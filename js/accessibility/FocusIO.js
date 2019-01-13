@@ -61,40 +61,8 @@ define( function( require ) {
         } );
 
         return {
-          focusedPhetioID: focus.trail.lastNode().tandem.phetioID,
-          indices: focus.trail.indices,
-          phetioIDIndices: phetioIDIndices
+          focusedPhetioID: focus.trail.lastNode().tandem.phetioID
         };
-      }
-    },
-
-    /**
-     * Convert the serialized instance back to a focus object
-     * @param {Object} stateObject
-     * @returns {Object} with {display,trail}
-     * @override
-     */
-    fromStateObject: function( stateObject ) {
-
-      if ( stateObject === null ) {
-
-        // support unfocused
-        return null;
-      }
-      else {
-        var indices = stateObject.indices;
-
-        // Follow the path of children based on their indices, starting from the root of the display.
-        // There is always one more node in Trail than indices, representing the root node.
-        var currentNode = phet.joist.sim.display.rootNode;
-        var nodes = [ currentNode ];
-        for ( var i = 0; i < indices.length; i++ ) {
-          var index = indices[ i ];
-          currentNode = currentNode.children[ index ];
-          nodes.push( currentNode );
-        }
-
-        return { display: phet.joist.sim.display, trail: new phet.scenery.Trail( nodes ) };
       }
     },
 

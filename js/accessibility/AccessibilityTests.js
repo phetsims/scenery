@@ -47,7 +47,7 @@ define( function( require ) {
    * or if the node hasn't been attached to a display (and therefore has no accessible content).
    *
    * @param  {Node} node
-   * @return {AccessiblePeer}
+   * @returns {AccessiblePeer}
    */
   function getAccessiblePeerByNode( node ) {
     if ( node.accessibleInstances.length === 0 ) {
@@ -72,7 +72,7 @@ define( function( require ) {
    * the view (AccessiblePeer) is redrawn, which is quite often when setting options.
    *
    * @param  {Node} node
-   * @return {HTMLElement}
+   * @returns {HTMLElement}
    */
   function getPrimarySiblingElementByNode( node ) {
 

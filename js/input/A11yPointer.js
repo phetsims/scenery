@@ -1,6 +1,7 @@
 // Copyright 2018, University of Colorado Boulder
 
 /**
+ * Pointer type for managing accessibility, in particular the focus in the display.
  * Tracks the state of accessible focus.
  *
  * @author Michael Kauzmann (PhET Interactive Simulations)
@@ -20,7 +21,6 @@ define( require => {
   class A11yPointer extends Pointer {
 
     /**
-     * Pointer type for managing accessibility, in particular the focus in the display
      * @param {Display} display
      */
     constructor( display ) {
@@ -33,6 +33,11 @@ define( require => {
       this.display = display;
 
       this.initializeListeners();
+
+      // @public (scenery-internal) - Prevent any "trusted" events from being dispatched to the KeyStateTracker. When
+      // true, only scripted events are passed to the keyStateTracker. Otherwise, the modeled keyboard state when using
+      // fuzzBoard will appear broken as both user and KeyboardFuzzer interact with display.
+      this.blockTrustedEvents = false;
 
       sceneryLog && sceneryLog.Pointer && sceneryLog.Pointer( 'Created ' + this.toString() );
     }
@@ -57,9 +62,15 @@ define( require => {
           scenery.Display.focus = null;
         },
         keydown: ( event ) => {
+          if ( this.blockTrustedEvents && event.domEvent.isTrusted ) {
+            return;
+          }
           scenery.Display.keyStateTracker.keydownUpdate( event );
         },
         keyup: ( event ) => {
+          if ( this.blockTrustedEvents && event.domEvent.isTrusted ) {
+            return;
+          }
           scenery.Display.keyStateTracker.keyupUpdate( event );
         }
       } );
@@ -84,7 +95,7 @@ define( require => {
      * it is recomputed on focus. But there are times where a11y events can be called out of order with focus/blur
      * and the trail will either be null or stale. This might happen more often when scripting fake browser events
      * with a timeout (like in fuzzBoard).
-     * 
+     *
      * @public (scenery-internal)
      * @param {string} trailString
      */

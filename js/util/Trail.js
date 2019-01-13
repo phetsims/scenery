@@ -914,7 +914,7 @@ define( function( require ) {
    * 
    * @param  {Node} rootNode - the root of the trail being created
    * @param  {string} uniqueId - integers separated by ID_SEPARATOR, see getUniqueId
-   * @return {Trail}
+   * @returns {Trail}
    */
   Trail.fromUniqueId = function( rootNode, uniqueId ) {
     var trailIds = uniqueId.split( ID_SEPARATOR );

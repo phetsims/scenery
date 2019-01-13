@@ -149,8 +149,11 @@ define( require => {
   const domEventPropertiesToSerialize = {
     button: true, keyCode: true,
     deltaX: true, deltaY: true, deltaZ: true, deltaMode: true, pointerId: true,
-    pointerType: true, charCode: true, which: true, clientX: true, clientY: true, changedTouches: true
+    pointerType: true, charCode: true, which: true, clientX: true, clientY: true, changedTouches: true,
+    target: true
   };
+  const TARGET_SUBSTITUTE_KEY = 'targetSubstitute';
+  const TRAIL_ID_ATTRIBUTE_NAME = 'data-trail-id';
 
   /**
    * An input controller for a specific Display.
@@ -237,6 +240,9 @@ define( require => {
       this.mouseUpEmitter = new Emitter( {
         phetioPlayback: true,
         tandem: options.tandem.createTandem( 'mouseUpEmitter' ),
+
+        // TODO: use of both of these is redundant, and should get fixed with https://github.com/phetsims/axon/issues/194
+        argumentTypes: [ { valueType: Vector2 }, { valueType: window.Event } ],
         phetioType: EmitterIO( [
           { name: 'point', type: Vector2IO },
           { name: 'event', type: DOMEventIO }
@@ -254,6 +260,9 @@ define( require => {
       this.mouseDownEmitter = new Emitter( {
         phetioPlayback: true,
         tandem: options.tandem.createTandem( 'mouseDownEmitter' ),
+
+        // TODO: use of both of these is redundant, and should get fixed with https://github.com/phetsims/axon/issues/194
+        argumentTypes: [ { valueType: Vector2 }, { valueType: window.Event } ],
         phetioType: EmitterIO( [
           { name: 'point', type: Vector2IO },
           { name: 'event', type: DOMEventIO }
@@ -271,6 +280,9 @@ define( require => {
       this.mouseMovedEmitter = new Emitter( {
         phetioPlayback: true,
         tandem: options.tandem.createTandem( 'mouseMovedEmitter' ),
+
+        // TODO: use of both of these is redundant, and should get fixed with https://github.com/phetsims/axon/issues/194
+        argumentTypes: [ { valueType: Vector2 }, { valueType: window.Event } ],
         phetioType: EmitterIO( [
           { name: 'point', type: Vector2IO },
           { name: 'event', type: DOMEventIO }
@@ -289,6 +301,9 @@ define( require => {
       this.mouseOverEmitter = new Emitter( {
         phetioPlayback: true,
         tandem: options.tandem.createTandem( 'mouseOverEmitter' ),
+
+        // TODO: use of both of these is redundant, and should get fixed with https://github.com/phetsims/axon/issues/194
+        argumentTypes: [ { valueType: Vector2 }, { valueType: window.Event } ],
         phetioType: EmitterIO( [
           { name: 'point', type: Vector2IO },
           { name: 'event', type: DOMEventIO }
@@ -306,6 +321,9 @@ define( require => {
       this.mouseOutEmitter = new Emitter( {
         phetioPlayback: true,
         tandem: options.tandem.createTandem( 'mouseOutEmitter' ),
+
+        // TODO: use of both of these is redundant, and should get fixed with https://github.com/phetsims/axon/issues/194
+        argumentTypes: [ { valueType: Vector2 }, { valueType: window.Event } ],
         phetioType: EmitterIO( [
           { name: 'point', type: Vector2IO },
           { name: 'event', type: DOMEventIO }
@@ -323,6 +341,9 @@ define( require => {
       this.wheelScrolledEmitter = new Emitter( {
         phetioPlayback: true,
         tandem: options.tandem.createTandem( 'wheelScrolledEmitter' ),
+
+        // TODO: use of both of these is redundant, and should get fixed with https://github.com/phetsims/axon/issues/194
+        argumentTypes: [ { valueType: window.Event } ],
         phetioType: EmitterIO( [
           { name: 'event', type: DOMEventIO }
         ] ),
@@ -346,6 +367,9 @@ define( require => {
       this.touchStartedEmitter = new Emitter( {
         phetioPlayback: true,
         tandem: options.tandem.createTandem( 'touchStartedEmitter' ),
+
+        // TODO: use of both of these is redundant, and should get fixed with https://github.com/phetsims/axon/issues/194
+        argumentTypes: [ { valueType: 'number' }, { valueType: Vector2 }, { valueType: window.Event } ],
         phetioType: EmitterIO( [
           { name: 'id', type: NumberIO },
           { name: 'point', type: Vector2IO },
@@ -364,6 +388,9 @@ define( require => {
       this.touchEndedEmitter = new Emitter( {
         phetioPlayback: true,
         tandem: options.tandem.createTandem( 'touchEndedEmitter' ),
+
+        // TODO: use of both of these is redundant, and should get fixed with https://github.com/phetsims/axon/issues/194
+        argumentTypes: [ { valueType: 'number' }, { valueType: Vector2 }, { valueType: window.Event } ],
         phetioType: EmitterIO( [
           { name: 'id', type: NumberIO },
           { name: 'point', type: Vector2IO },
@@ -385,6 +412,9 @@ define( require => {
       this.touchMovedEmitter = new Emitter( {
         phetioPlayback: true,
         tandem: options.tandem.createTandem( 'touchMovedEmitter' ),
+
+        // TODO: use of both of these is redundant, and should get fixed with https://github.com/phetsims/axon/issues/194
+        argumentTypes: [ { valueType: 'number' }, { valueType: Vector2 }, { valueType: window.Event } ],
         phetioType: EmitterIO( [
           { name: 'id', type: NumberIO },
           { name: 'point', type: Vector2IO },
@@ -406,6 +436,9 @@ define( require => {
       this.touchCanceledEmitter = new Emitter( {
         phetioPlayback: true,
         tandem: options.tandem.createTandem( 'touchCanceledEmitter' ),
+
+        // TODO: use of both of these is redundant, and should get fixed with https://github.com/phetsims/axon/issues/194
+        argumentTypes: [ { valueType: 'number' }, { valueType: Vector2 }, { valueType: window.Event } ],
         phetioType: EmitterIO( [
           { name: 'id', type: NumberIO },
           { name: 'point', type: Vector2IO },
@@ -427,6 +460,9 @@ define( require => {
       this.penStartedEmitter = new Emitter( {
         phetioPlayback: true,
         tandem: options.tandem.createTandem( 'penStartedEmitter' ),
+
+        // TODO: use of both of these is redundant, and should get fixed with https://github.com/phetsims/axon/issues/194
+        argumentTypes: [ { valueType: 'number' }, { valueType: Vector2 }, { valueType: window.Event } ],
         phetioType: EmitterIO( [
           { name: 'id', type: NumberIO },
           { name: 'point', type: Vector2IO },
@@ -445,6 +481,9 @@ define( require => {
       this.penEndedEmitter = new Emitter( {
         phetioPlayback: true,
         tandem: options.tandem.createTandem( 'penEndedEmitter' ),
+
+        // TODO: use of both of these is redundant, and should get fixed with https://github.com/phetsims/axon/issues/194
+        argumentTypes: [ { valueType: 'number' }, { valueType: Vector2 }, { valueType: window.Event } ],
         phetioType: EmitterIO( [
           { name: 'id', type: NumberIO },
           { name: 'point', type: Vector2IO },
@@ -466,6 +505,9 @@ define( require => {
       this.penMovedEmitter = new Emitter( {
         phetioPlayback: true,
         tandem: options.tandem.createTandem( 'penMovedEmitter' ),
+
+        // TODO: use of both of these is redundant, and should get fixed with https://github.com/phetsims/axon/issues/194
+        argumentTypes: [ { valueType: 'number' }, { valueType: Vector2 }, { valueType: window.Event } ],
         phetioType: EmitterIO( [
           { name: 'id', type: NumberIO },
           { name: 'point', type: Vector2IO },
@@ -487,6 +529,9 @@ define( require => {
       this.penCanceledEmitter = new Emitter( {
         phetioPlayback: true,
         tandem: options.tandem.createTandem( 'penCanceledEmitter' ),
+
+        // TODO: use of both of these is redundant, and should get fixed with https://github.com/phetsims/axon/issues/194
+        argumentTypes: [ { valueType: 'number' }, { valueType: Vector2 }, { valueType: window.Event } ],
         phetioType: EmitterIO( [
           { name: 'id', type: NumberIO },
           { name: 'point', type: Vector2IO },
@@ -507,10 +552,32 @@ define( require => {
       // wire up accessibility listeners on the display's root accessible DOM element.
       if ( this.display._accessible ) {
 
+        /**
+         * {DOMEvent} event
+         * @param event
+         * @returns {string} the trail id added to the element in AccessiblePeer
+         */
+        var getTrailId = function( event ) {
+          assert && assert( event.target );
+
+          // could be serialized event for phet-io playbacks, see Input.serializeDOMEvent()
+          if ( event[ TARGET_SUBSTITUTE_KEY ] ) {
+            assert && assert( event[ TARGET_SUBSTITUTE_KEY ] instanceof Object );
+            return event[ TARGET_SUBSTITUTE_KEY ][ TRAIL_ID_ATTRIBUTE_NAME ];
+          }
+          else {
+            assert && assert( event.target instanceof window.Element );
+            return event.target.getAttribute( TRAIL_ID_ATTRIBUTE_NAME );
+          }
+        };
+
         // @private
         this.focusinEmitter = new Emitter( {
           phetioPlayback: true,
           tandem: options.tandem.createTandem( 'focusinEmitter' ),
+
+          // TODO: use of both of these is redundant, and should get fixed with https://github.com/phetsims/axon/issues/194
+          argumentTypes: [ { valueType: window.Event } ],
           phetioType: EmitterIO( [
             { name: 'event', type: DOMEventIO }
           ] ),
@@ -520,7 +587,8 @@ define( require => {
             sceneryLog && sceneryLog.Input && sceneryLog.Input( 'focusIn(' + Input.debugText( null, event ) + ');' );
             sceneryLog && sceneryLog.Input && sceneryLog.push();
 
-            const trail = this.a11yPointer.updateTrail( event.target.getAttribute( 'data-trail-id' ) );
+            if ( !this.a11yPointer ) { this.initA11yPointer(); }
+            const trail = this.a11yPointer.updateTrail( getTrailId( event ) );
             this.dispatchEvent( trail, 'focus', this.a11yPointer, event, false );
 
             sceneryLog && sceneryLog.Input && sceneryLog.pop();
@@ -531,6 +599,9 @@ define( require => {
         this.focusoutEmitter = new Emitter( {
           phetioPlayback: true,
           tandem: options.tandem.createTandem( 'focusoutEmitter' ),
+
+          // TODO: use of both of these is redundant, and should get fixed with https://github.com/phetsims/axon/issues/194
+          argumentTypes: [ { valueType: window.Event } ],
           phetioType: EmitterIO( [
             { name: 'event', type: DOMEventIO }
           ] ),
@@ -540,10 +611,12 @@ define( require => {
             sceneryLog && sceneryLog.Input && sceneryLog.Input( 'focusOut(' + Input.debugText( null, event ) + ');' );
             sceneryLog && sceneryLog.Input && sceneryLog.push();
 
+            if ( !this.a11yPointer ) { this.initA11yPointer(); }
+
             // recompute the trail on focusout if necessary - since a blur/focusout may have been initiated from a
             // focus/focusin listener, it is possible that focusout was called more than once before focusin is called on the
             // next active element, see https://github.com/phetsims/scenery/issues/898
-            this.a11yPointer.invalidateTrail( event.target.getAttribute( 'data-trail-id' ) );
+            this.a11yPointer.invalidateTrail( getTrailId( event ) );
             this.dispatchEvent( this.a11yPointer.trail, 'blur', this.a11yPointer, event, false );
 
             // clear the trail to make sure that our assertions aren't testing a stale trail.
@@ -557,6 +630,9 @@ define( require => {
         this.clickEmitter = new Emitter( {
           phetioPlayback: true,
           tandem: options.tandem.createTandem( 'clickEmitter' ),
+
+          // TODO: use of both of these is redundant, and should get fixed with https://github.com/phetsims/axon/issues/194
+          argumentTypes: [ { valueType: window.Event } ],
           phetioType: EmitterIO( [
             { name: 'event', type: DOMEventIO }
           ] ),
@@ -566,7 +642,8 @@ define( require => {
             sceneryLog && sceneryLog.Input && sceneryLog.Input( 'click(' + Input.debugText( null, event ) + ');' );
             sceneryLog && sceneryLog.Input && sceneryLog.push();
 
-            const trail = this.a11yPointer.updateTrail( event.target.getAttribute( 'data-trail-id' ) );
+            if ( !this.a11yPointer ) { this.initA11yPointer(); }
+            const trail = this.a11yPointer.updateTrail( getTrailId( event ) );
             this.dispatchEvent( trail, 'click', this.a11yPointer, event, true );
 
             sceneryLog && sceneryLog.Input && sceneryLog.pop();
@@ -577,6 +654,9 @@ define( require => {
         this.inputEmitter = new Emitter( {
           phetioPlayback: true,
           tandem: options.tandem.createTandem( 'inputEmitter' ),
+
+          // TODO: use of both of these is redundant, and should get fixed with https://github.com/phetsims/axon/issues/194
+          argumentTypes: [ { valueType: window.Event } ],
           phetioType: EmitterIO( [
             { name: 'event', type: DOMEventIO }
           ] ),
@@ -586,7 +666,8 @@ define( require => {
             sceneryLog && sceneryLog.Input && sceneryLog.Input( 'input(' + Input.debugText( null, event ) + ');' );
             sceneryLog && sceneryLog.Input && sceneryLog.push();
 
-            const trail = this.a11yPointer.updateTrail( event.target.getAttribute( 'data-trail-id' ) );
+            if ( !this.a11yPointer ) { this.initA11yPointer(); }
+            const trail = this.a11yPointer.updateTrail( getTrailId( event ) );
             this.dispatchEvent( trail, 'input', this.a11yPointer, event, true );
 
             sceneryLog && sceneryLog.Input && sceneryLog.pop();
@@ -597,6 +678,9 @@ define( require => {
         this.changeEmitter = new Emitter( {
           phetioPlayback: true,
           tandem: options.tandem.createTandem( 'changeEmitter' ),
+
+          // TODO: use of both of these is redundant, and should get fixed with https://github.com/phetsims/axon/issues/194
+          argumentTypes: [ { valueType: window.Event } ],
           phetioType: EmitterIO( [
             { name: 'event', type: DOMEventIO }
           ] ),
@@ -606,7 +690,8 @@ define( require => {
             sceneryLog && sceneryLog.Input && sceneryLog.Input( 'change(' + Input.debugText( null, event ) + ');' );
             sceneryLog && sceneryLog.Input && sceneryLog.push();
 
-            const trail = this.a11yPointer.updateTrail( event.target.getAttribute( 'data-trail-id' ) );
+            if ( !this.a11yPointer ) { this.initA11yPointer(); }
+            const trail = this.a11yPointer.updateTrail( getTrailId( event ) );
             this.dispatchEvent( trail, 'change', this.a11yPointer, event, true );
 
             sceneryLog && sceneryLog.Input && sceneryLog.pop();
@@ -617,6 +702,9 @@ define( require => {
         this.keydownEmitter = new Emitter( {
           phetioPlayback: true,
           tandem: options.tandem.createTandem( 'keydownEmitter' ),
+
+          // TODO: use of both of these is redundant, and should get fixed with https://github.com/phetsims/axon/issues/194
+          argumentTypes: [ { valueType: window.Event } ],
           phetioType: EmitterIO( [
             { name: 'event', type: DOMEventIO }
           ] ),
@@ -626,7 +714,8 @@ define( require => {
             sceneryLog && sceneryLog.Input && sceneryLog.Input( 'keydown(' + Input.debugText( null, event ) + ');' );
             sceneryLog && sceneryLog.Input && sceneryLog.push();
 
-            const trail = this.a11yPointer.updateTrail( event.target.getAttribute( 'data-trail-id' ) );
+            if ( !this.a11yPointer ) { this.initA11yPointer(); }
+            const trail = this.a11yPointer.updateTrail( getTrailId( event ) );
             this.dispatchEvent( trail, 'keydown', this.a11yPointer, event, true );
 
             sceneryLog && sceneryLog.Input && sceneryLog.pop();
@@ -637,6 +726,9 @@ define( require => {
         this.keyupEmitter = new Emitter( {
           phetioPlayback: true,
           tandem: options.tandem.createTandem( 'keyupEmitter' ),
+
+          // TODO: use of both of these is redundant, and should get fixed with https://github.com/phetsims/axon/issues/194
+          argumentTypes: [ { valueType: window.Event } ],
           phetioType: EmitterIO( [
             { name: 'event', type: DOMEventIO }
           ] ),
@@ -646,7 +738,8 @@ define( require => {
             sceneryLog && sceneryLog.Input && sceneryLog.Input( 'keyup(' + Input.debugText( null, event ) + ');' );
             sceneryLog && sceneryLog.Input && sceneryLog.push();
 
-            const trail = this.a11yPointer.updateTrail( event.target.getAttribute( 'data-trail-id' ) );
+            if ( !this.a11yPointer ) { this.initA11yPointer(); }
+            const trail = this.a11yPointer.updateTrail( getTrailId( event ) );
             this.dispatchEvent( trail, 'keyup', this.a11yPointer, event, true );
 
             sceneryLog && sceneryLog.Input && sceneryLog.pop();
@@ -668,7 +761,6 @@ define( require => {
             sceneryLog && sceneryLog.InputEvent && sceneryLog.push();
 
             // Create the a11yPointer lazily
-            if ( !this.a11yPointer ) { this.initA11yPointer(); }
             this[ emitterName ].emit( event );
 
             sceneryLog && sceneryLog.InputEvent && sceneryLog.pop();
@@ -1705,7 +1797,7 @@ define( require => {
      * the PDOM or handled by scenery. This is mostly useful for platform specific workarounds or signifying to the
      * Display that user interaction has begun. Otherwise, most a11y listeners should instead go through dispatchEvent.
      * @private
-     * 
+     *
      * @param  {DOMEvent} event
      */
     handleDocumentKeydown( event ) {
@@ -1717,7 +1809,7 @@ define( require => {
       if ( FullScreen.isFullScreen() && event.keyCode === KeyboardUtil.KEY_TAB ) {
         var rootElement = this.display.accessibleDOMElement;
         var nextElement = event.shiftKey ? AccessibilityUtil.getPreviousFocusable( rootElement ) :
-                                           AccessibilityUtil.getNextFocusable( rootElement );
+                          AccessibilityUtil.getNextFocusable( rootElement );
         if ( nextElement === event.target ) {
           event.preventDefault();
         }
@@ -1758,27 +1850,43 @@ define( require => {
      * Saves the main information we care about from a DOM `Event` into a JSON-like structure.
      * @public
      *
-     * @param {DOMEvent}
-     * @returns {Object} - TODO: doc?
+     * @param {DOMEvent} domEvent
+     * @returns {Object} - see domEventPropertiesToSerialize for list keys that are serialized
      */
     static serializeDomEvent( domEvent ) {
       const entries = {};
-      for ( const prop in domEvent ) {
-        if ( domEventPropertiesToSerialize[ prop ] ) {
+      for ( const property in domEvent ) {
+
+        // we shouldn't check if domEvent.hasOwnProperty because some properties come from supertypes
+        if ( domEventPropertiesToSerialize[ property ] ) {
+
+          const domEventProperty = domEvent[ property ];
 
           // stringifying dom event object properties can cause circular references, so we avoid that completely
-          if ( prop === 'touches' || prop === 'targetTouches' || prop === 'changedTouches' ) {
-            const arr = [];
-            for ( let i = 0; i < domEvent[ prop ].length; i++ ) {
+          if ( property === 'touches' || property === 'targetTouches' || property === 'changedTouches' ) {
 
-              // according to spec (http://www.w3.org/TR/touch-events/), this is not an Array, but a TouchList
-              const touch = domEvent[ prop ].item( i );
-              arr.push( Input.serializeDomEvent( touch ) );
+            const touchArray = [];
+            for ( let i = 0; i < domEventProperty.length; i++ ) {
+
+              // According to spec (http://www.w3.org/TR/touch-events/), this is not an Array, but a TouchList. In practice
+              // the phet-io team found that chrome and safari, along with downstream "playback" phet-io sims, use an Array.
+              // So we need to support both APIs.
+              const touch = ( domEventProperty.item && typeof domEventProperty.item === 'function' ) ?
+                            domEventProperty.item( i ) :
+                            domEventProperty[ i ];
+
+              touchArray.push( Input.serializeDomEvent( touch ) );
             }
-            entries[ prop ] = arr;
+            entries[ property ] = touchArray;
+          }
+
+          // we don't need much from the target, just the trail ID
+          if ( property === 'target' && domEventProperty !== null ) {
+            entries[ property ] = {};
+            entries[ property ][ TRAIL_ID_ATTRIBUTE_NAME ] = domEventProperty.getAttribute( TRAIL_ID_ATTRIBUTE_NAME );
           }
           else {
-            entries[ prop ] = ( ( typeof domEvent[ prop ] === 'object' ) && ( domEvent[ prop ] !== null ) ? {} : JSON.parse( JSON.stringify( domEvent[ prop ] ) ) ); // TODO: is parse/stringify necessary?
+            entries[ property ] = ( ( typeof domEventProperty === 'object' ) && ( domEventProperty !== null ) ? {} : JSON.parse( JSON.stringify( domEventProperty ) ) ); // TODO: is parse/stringify necessary?
           }
         }
       }
@@ -1788,13 +1896,20 @@ define( require => {
     /**
      * From a serialized dom event, return a recreated window.Event
      * @param {Object} eventObject
-     * @returns {window.Event}
+     * @returns {Window.Event}
      */
     static deserializeDomEvent( eventObject ) {
       const domEvent = new window.Event( 'inputEvent' );
       for ( const key in eventObject ) {
         if ( eventObject.hasOwnProperty( key ) ) {
-          domEvent[ key ] = eventObject[ key ];
+
+          // Special case for target since we can't set that read-only property. Instead use a substitute key.
+          if ( key === 'target' ) {
+            domEvent[ TARGET_SUBSTITUTE_KEY ] = eventObject[ key ];
+          }
+          else {
+            domEvent[ key ] = eventObject[ key ];
+          }
         }
       }
       return domEvent;
