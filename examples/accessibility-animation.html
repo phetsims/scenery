@@ -161,10 +161,6 @@
       window.addEventListener('keydown', (e) => {
         if (e.code == "Space") {
           console.log(scene.children)
-          // var numberOfChildren = scene.children.length
-          // for (i = 1; i < numberOfChildren; i++) {
-          //   scene.removeChild(scene.children[i])
-          // }
           scene.removeAllChildren()
           scene.addChild(node)
         }
@@ -173,7 +169,7 @@
       //reverses the direction of the hexagon when the display is clicked
       display.addInputListener({
         down: () => {
-          node.children[0].fill = "red";
+          node.children[0].fill = "orange";
 
         },
         up: () => {
@@ -195,6 +191,7 @@
             newNode.xVelocity = 20 * (Math.random() - 0.5);
             newNode.yVelocity = 20 * (Math.random() - 0.5);
             scene.addChild(newNode)
+            node.children[0].fill = "yellow"
           }
         },
 
@@ -203,6 +200,7 @@
           node.children[0].fill = "red";
 
           setTimeout(() => {
+            //reverse the direction of the hexagon
             node.xVelocity = node.xVelocity * -1;
             node.yVelocity = node.yVelocity * -1;
             node.children[0].fill = "yellow";
