@@ -311,8 +311,9 @@ define( function( require ) {
     keydown: function( event ) {
       var domEvent = event.domEvent;
 
-      // required to work with Safari and VoiceOver, otherwise arrow keys will move virtual cursor
-      if ( KeyboardUtil.isArrowKey( domEvent.keyCode ) ) {
+      // required to work with Safari and VoiceOver, otherwise arrow keys will move virtual cursor, see https://github.com/phetsims/balloons-and-static-electricity/issues/205#issuecomment-263428003
+      // prevent default for WASD too, see https://github.com/phetsims/friction/issues/167
+      if ( KeyboardUtil.isArrowKey( domEvent.keyCode ) || KeyboardUtil.isWASDKey( domEvent.keyCode ) ) {
         domEvent.preventDefault();
       }
 
