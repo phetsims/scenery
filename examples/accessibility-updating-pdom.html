@@ -42,12 +42,12 @@
             margin-top: 40px;
         }
 
-        .pdom-title{
+        .PDOM-title{
           text-align: center;
           padding: 20px 5%;
           line-height: 1.8em;
         }
-        .pdom-container{
+        .PDOM-container{
           display: flex;
           flex-direction: column;
         }
@@ -104,26 +104,29 @@
         <button type="button" id="add-color-button" class="btn btn-secondary">Add Color</button>
       </div>
     </div>
-    <div class="pdom-container">
-      <pre id="pdom-pre"></pre>
+
+    <div class="PDOM-container">
+      <pre id="PDOM-pre"></pre>
     </div>
   </div>
 
   <script type="text/javascript">
+    var scene
+
     function docExample(id, draw) {
       var $container = $('#' + id);
-      var scene = new scenery.Node();
+      scene = new scenery.Node();
       var display = new scenery.Display(scene, {
         width: $container.width(),
-        height: $container.height()
+        height: $container.height(),
       });
-      display.initializeEvents();
-
+      display.initializeEvents()
       $container[0].appendChild(display.domElement);
       draw(scene, display);
       display.updateDisplay();
     }
   </script>
+
   <script type="text/javascript">
     scenery.Util.polyfillRequestAnimationFrame();
 
@@ -134,19 +137,24 @@
         stroke: '#000',
         x: 300,
         y: 75,
-        tagName: 'p', // tag name for pdom element
+        tagName: 'p', // tag name for PDOM element
         accessibleName: `a yellow hexagon` // accessibility description
       });
-      scene.addChild(hexagon)
+      scene.addChild(hexagon);
 
       // update displayed p-dom text
-      var updatePDomDisplay = function updatePDomDisplay() {
-        var pdomHTMLBlock = display.accessibleDOMElement.outerHTML;
-        var formattedPDOM = pdomHTMLBlock.replace(new RegExp('<[/]?\\w*[ >]', 'g'), '\n$&'); // add breaks in the string
+      var updatePDOMDisplay = function updatePDOMDisplay() {
+
+        //format the p-dom code
+        var PDOMHTMLBlock = display.accessibleDOMElement.outerHTML;
+        var formattedPDOM = PDOMHTMLBlock.replace(new RegExp('<[/]?\\w*[ >]', 'g'), '\n$&'); // add breaks in the string
         var $PDOMcode = ($('<code class="language-html no-whitespace-normalization"></code>').text(formattedPDOM));
 
-        $('#pdom-pre').html($PDOMcode);
-        Prism.highlightAll()
+        //add formatted code to the pre element
+        $('#PDOM-pre').html($PDOMcode);
+
+        //apply syntax highlighting
+        Prism.highlightAll();
       }
 
       // creates a single button
@@ -162,7 +170,7 @@
           stroke: 'black',
           fill: color,
           cursor: 'pointer',
-          tagName: 'button', // tag name for pdom element
+          tagName: 'button', // tag name for PDOM element
           accessibleName: `${color}-colored button` // accessibility description
         });
         scene.addChild(rectangle);
@@ -179,25 +187,25 @@
           // Listener for pointer clicks
           up: () => {
             hexagon.fill = color; // change hexagon color
-            hexagon.accessibleName = `a ${color} hexagon`; // update the pdom text
+            hexagon.accessibleName = `a ${color} hexagon`; // update the PDOM text
           },
 
           // Accessible listener that fires when the button in the PDOM is clicked
           a11yclick: () => {
-            hexagon.fill = color // change hexagon color
-            hexagon.accessibleName = `a ${color} hexagon` // update the pdom text
+            hexagon.fill = color; // change hexagon color
+            hexagon.accessibleName = `a ${color} hexagon`; // update the PDOM text
           }
         });
       }
 
       // generates multiple buttons, appropriately spaced from an array of colors
       function createButtons(colorList) {
-        var xPosition = 600 / (colorList.length ** 2)
-        var yPosition = 150
+        var xPosition = 600 / (colorList.length ** 2);
+        var yPosition = 150;
         colorList.forEach(color => {
-          generateButton(color, xPosition, yPosition)
-          xPosition += 600 / (colorList.length)
-        })
+          generateButton(color, xPosition, yPosition);
+          xPosition += 600 / (colorList.length);
+        });
       }
 
       //update the displayed p-dom code snippet when there's a change to the scene.
@@ -206,7 +214,7 @@
         childList: true,
         subtree: true
       };
-      var observer = new MutationObserver(updatePDomDisplay)
+      var observer = new MutationObserver(updatePDOMDisplay)
       observer.observe(document.querySelector('#accessibility-scene'), config)
 
       // create buttons of various colors using the generateButton function above.
@@ -217,16 +225,16 @@
       document.querySelector('#add-color-button').addEventListener('click', () => {
 
         //remove old scene
-        scene.removeAllChildren()
-        scene.addChild(hexagon)
+        scene.removeAllChildren();
+        //redraw the scene
+        scene.addChild(hexagon);
 
-        //get color from input and add to colorsToGenerate
+        //get color from input and add to colorsToGenerate if there aren't too many createButtons
         var newColor = document.querySelector('#color-input').value
         newColor && colorsToGenerate.push(newColor)
 
         // regenerate the buttons, appropriately spaced
         createButtons(colorsToGenerate)
-
       })
 
       //update the animation upon changes
