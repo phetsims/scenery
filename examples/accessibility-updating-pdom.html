@@ -18,12 +18,12 @@
 
   <!--For the styling-->
   <link rel="stylesheet" href="../assets/scenery.css">
-  <link rel="stylesheet" href="../../sherpa/lib/prism/prism.css">
+  <link rel="stylesheet" href="../../sherpa/lib/prism-1.15.0/prism-1.15.0.css">
   <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/css/bootstrap.min.css" integrity="sha384-Gn5384xqQ1aoWXA+058RXPxPg6fy4IWvTNh0E263XmFcJlSAwiGgFAW/dAiS6JXm" crossorigin="anonymous">
 
 
   <script src="../../sherpa/lib/bootstrap-2.2.2.js"></script>
-  <script src="../../sherpa/lib/prism/prism.js"></script>
+  <script src="../../sherpa/lib/prism-1.15.0/prism-1.15.0.min.js"></script>
 
   <script src="../build/scenery.min.js"></script>
 
@@ -181,6 +181,9 @@
           center: rectangle.center
         }));
 
+        //to simplify: handles click events and is already accessible
+        //rectangle.addInputListener(new scenery.PressListener())
+
         // Input listener makes the hexagon change colors when buttons are clicked
         rectangle.addInputListener({
 
@@ -214,27 +217,28 @@
         childList: true,
         subtree: true
       };
-      var observer = new MutationObserver(updatePDOMDisplay)
-      observer.observe(document.querySelector('#accessibility-scene'), config)
+      var observer = new MutationObserver(updatePDOMDisplay);
+      observer.observe(document.querySelector('#accessibility-scene'), config);
 
       // create buttons of various colors using the generateButton function above.
-      var colorsToGenerate = ['tomato', 'dodgerblue', 'magenta']
-      createButtons(colorsToGenerate)
+      var colorsToGenerate = ['tomato', 'dodgerblue', 'magenta'];
+      createButtons(colorsToGenerate);
 
       // add click handler to add color button to add a new color button to the scene
       document.querySelector('#add-color-button').addEventListener('click', () => {
 
         //remove old scene
-        scene.removeAllChildren();
+        scene.removeAllChildren()
+
         //redraw the scene
         scene.addChild(hexagon);
 
         //get color from input and add to colorsToGenerate if there aren't too many createButtons
-        var newColor = document.querySelector('#color-input').value
-        newColor && colorsToGenerate.push(newColor)
+        var newColor = document.querySelector('#color-input').value;
+        newColor && colorsToGenerate.push(newColor);
 
         // regenerate the buttons, appropriately spaced
-        createButtons(colorsToGenerate)
+        createButtons(colorsToGenerate);
       })
 
       //update the animation upon changes

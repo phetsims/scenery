@@ -18,12 +18,12 @@
 
   <!--For the styling-->
   <link rel="stylesheet" href="../assets/scenery.css">
-  <link rel="stylesheet" href="../../sherpa/lib/prism/prism.css">
+  <link rel="stylesheet" href="../../sherpa/lib/prism-1.15.0/prism-1.15.0.css">
   <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/css/bootstrap.min.css" integrity="sha384-Gn5384xqQ1aoWXA+058RXPxPg6fy4IWvTNh0E263XmFcJlSAwiGgFAW/dAiS6JXm" crossorigin="anonymous">
 
   <!--Syntax highlighting-->
   <script src="../../sherpa/lib/bootstrap-2.2.2.js"></script>
-  <script src="../../sherpa/lib/prism/prism.js"></script>
+  <script src="../../sherpa/lib/prism-1.15.0/prism-1.15.0.min.js"></script>
 
   <!--Scenery-->
   <script src="../build/scenery.min.js"></script>
@@ -154,15 +154,14 @@
       });
 
       //set the initial velocity of the hexagon
-      node.xVelocity = 10 * (Math.random() - 0.5);
-      node.yVelocity = 10 * (Math.random() - 0.5);
+      node.xVelocity = 10 * ( Math.random() - 0.5 );
+      node.yVelocity = 10 * ( Math.random() - 0.5 );
 
       // removes all hexagon clones when space bar is pressed
-      window.addEventListener('keydown', (e) => {
-        if (e.code == "Space") {
-          console.log(scene.children)
-          scene.removeAllChildren()
-          scene.addChild(node)
+      window.addEventListener( 'keydown', ( e ) => {
+        if ( e.code == "Space" ) {
+          scene.removeAllChildren();
+          scene.addChild( node );
         }
       })
 
