@@ -417,7 +417,7 @@ define( function( require ) {
      * accessibleOrder).
      *
      * @param {Node} node
-     * @return {Array.<PartialAccessibleTrail>}
+     * @returns {Array.<PartialAccessibleTrail>}
      */
     findAccessibleTrails: function( node ) {
       var trails = [];

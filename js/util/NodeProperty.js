@@ -53,10 +53,11 @@ define( function( require ) {
   return inherit( Property, NodeProperty, {
 
     /**
-     * Unlinks listeners when disposed.
+     * Unlinks listeners when disposed.  Must be called before the corresponding Node is disposed.
      * @public
      */
     dispose: function() {
+      assert && assert( !this.node.isDisposed, 'NodeProperty should be disposed before corresponding Node is disposed' );
       this.node.offStatic( this.trigger, this.changeListener );
       Property.prototype.dispose.call( this );
       this.node = null;

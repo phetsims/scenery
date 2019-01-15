@@ -42,6 +42,7 @@ define( function( require ) {
     KEY_PAGE_DOWN: 34,
     KEY_END: 35,
     KEY_HOME: 36,
+    KEY_PRINT_SCREEN: 44,
     KEY_S: 83,
     KEY_W: 87,
     KEY_A: 65,

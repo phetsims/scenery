@@ -105,7 +105,7 @@ define( function( require ) {
      * to the source node so that the FocusHighlightFromNode can update accordingly.
      *
      * @public (scenery-internal)
-     * @return {Trail}
+     * @returns {Trail}
      */
     getUniqueHighlightTrail: function() {
       assert && assert( this.sourceNode.instances.length <= 1, 'sourceNode cannot use DAG, must have single trail.' );

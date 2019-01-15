@@ -446,7 +446,7 @@ define( function( require ) {
      *
      * @param color
      * @param factor 0 (no change) to 1 (white)
-     * @return lighter (closer to white) version of the original color.
+     * @returns lighter (closer to white) version of the original color.
      */
     colorUtilsBrighter: function( factor ) {
       factor = this.checkFactor( factor );
@@ -471,7 +471,7 @@ define( function( require ) {
      *
      * @param color  the original color
      * @param factor 0 (no change) to 1 (black)
-     * @return darker (closer to black) version of the original color.
+     * @returns darker (closer to black) version of the original color.
      */
     colorUtilsDarker: function( factor ) {
       factor = this.checkFactor( factor );

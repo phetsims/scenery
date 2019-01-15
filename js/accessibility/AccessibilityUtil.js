@@ -159,7 +159,7 @@ define( function( require ) {
    * is only true for elements of the Parallel DOM.
    *
    * @param {HTMLElement} domElement
-   * @return {boolean}
+   * @returns {boolean}
    */
   function isElementFocusable( domElement ) {
 
@@ -184,7 +184,7 @@ define( function( require ) {
    * Trims the white space from the left of the string.
    * Solution from https://stackoverflow.com/questions/1593859/left-trim-in-javascript
    * @param  {string} string
-   * @return {string}
+   * @returns {string}
    */
   function trimLeft( string ) {
 
@@ -237,7 +237,7 @@ define( function( require ) {
      * Return a random focusable element in the document. Particularly useful for fuzz testing.
      * @public
      *
-     * @return {HTMLElement}
+     * @returns {HTMLElement}
      */
     getRandomFocusable: function() {
 
