@@ -11,6 +11,7 @@ define( require => {
   'use strict';
 
   const AccessibleInstance = require( 'SCENERY/accessibility/AccessibleInstance' );
+  const platform = require( 'PHET_CORE/platform' );
   const Pointer = require( 'SCENERY/input/Pointer' ); // inherits from Pointer
   const scenery = require( 'SCENERY/scenery' );
   const Trail = require( 'SCENERY/util/Trail' );
@@ -53,8 +54,25 @@ define( require => {
             this.display.pointerFocus = null;
           }
         },
-        blur: () => {
-          scenery.Display.focus = null;
+        blur: ( event ) => {
+          const activeElement = document.activeElement;
+          const elementInDisplay = this.display.accessibleDOMElement.contains( activeElement );
+
+          // In IE11 there are cases where the browser doesn't trigger a focusin event on document.activeElement
+          // so as a workaround we set the scenery.Display.focus directly to the related target of the focusout event,
+          // which is the element that is about to receive focus. This allows operations in AccessibilityTree to
+          // work correctly even though we still sometimes miss `focus` events.
+          //
+          // TODO: Failing to receive the focusin event is scary, so hopefully this workaround can be removed if a fix
+          // is found in https://github.com/phetsims/scenery/issues/925. Also see
+          // https://github.com/phetsims/friction/issues/168 for the original issue.
+          if ( platform.ie11 && ( event.domEvent.relatedTarget === activeElement ) && ( elementInDisplay ) ) {
+            const newTrail = Trail.fromUniqueId( this.display.rootNode, document.activeElement.getAttribute( 'data-trail-id' ) );
+            scenery.Display.focus = new Focus( this.display, AccessibleInstance.guessVisualTrail( newTrail, this.display.rootNode ) );
+          }
+          else {
+            scenery.Display.focus = null;
+          }
         },
         keydown: ( event ) => {
           scenery.Display.keyStateTracker.keydownUpdate( event );
