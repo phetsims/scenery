@@ -1,4 +1,5 @@
 // Copyright 2013-2016, University of Colorado Boulder
+/* eslint-disable bad-sim-text */
 
 /**
  * Utility functions for scenery that are specifically useful for Accessibility.
@@ -237,9 +238,12 @@ define( function( require ) {
      * Return a random focusable element in the document. Particularly useful for fuzz testing.
      * @public
      *
+     * @parma {Random} [random]
      * @returns {HTMLElement}
      */
-    getRandomFocusable: function() {
+    getRandomFocusable: function( random ) {
+
+      random = random || new Random();
 
       var linearDOM = getLinearDOMElements( document.body );
       var focusableElements = [];
@@ -247,7 +251,7 @@ define( function( require ) {
         isElementFocusable( linearDOM[ i ] ) && focusableElements.push( linearDOM[ i ] );
       }
 
-      return focusableElements[ new Random().nextInt( focusableElements.length ) ];
+      return focusableElements[ random.nextInt( focusableElements.length ) ];
     },
 
     /**
