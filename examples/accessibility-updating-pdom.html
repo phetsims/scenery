@@ -98,11 +98,7 @@
 
     <div class="input-container">
       <div id="accessibility-scene" class="exampleScene" style="width: 600px; height: 250px;"></div>
-      <div class="input-and-button">
-        <p>Please enter the color of button that you'd like to add</p>
-        <input type="text" id="color-input" />
-        <button type="button" id="add-color-button" class="btn btn-secondary">Add Color</button>
-      </div>
+
     </div>
 
     <div class="PDOM-container">
@@ -111,12 +107,12 @@
   </div>
 
   <script type="text/javascript">
-    var scene
+    let scene
 
     function docExample(id, draw) {
-      var $container = $('#' + id);
+      let $container = $('#' + id);
       scene = new scenery.Node();
-      var display = new scenery.Display(scene, {
+      let display = new scenery.Display(scene, {
         width: $container.width(),
         height: $container.height(),
       });
@@ -140,10 +136,74 @@
         tagName: 'p', // tag name for PDOM element
         accessibleName: `a yellow hexagon` // accessibility description
       });
-      scene.addChild(hexagon);
+      let node = new scenery.Node()
+      scene.addChild(node)
+      node.addChild(hexagon);
+
+      let addButton = new scenery.Path(kite.Shape.rectangle(200, 220, 70, 30), {
+        stroke: 'black',
+        fill: 'blue',
+        cursor: 'pointer'
+      });
+
+      let addPressListener = new scenery.PressListener({
+        press: () => {
+
+          //remove old scene
+          node.children.forEach(child => {
+            node.removeChild(child)
+            child.dispose()
+          })
+
+          //redraw the scene
+          node.addChild(hexagon);
+
+          //get color from input and add to colorsToGenerate if there aren't too many createButtons
+          var newColor = `rgb(${Math.floor(Math.random()*255)},${Math.floor(Math.random()*255)},${Math.floor(Math.random()*255)})`;
+          newColor && colorsToGenerate.push(newColor);
+
+          // regenerate the buttons, appropriately spaced
+          createButtons(colorsToGenerate);
+        }
+      })
+      addButton.addChild(new scenery.Text("Add color", {
+        font: '0.8em sans-serif',
+        center: addButton.center
+      }));
+      addButton.addInputListener(addPressListener)
+      scene.addChild(addButton)
+
+      let resetButton = new scenery.Path(kite.Shape.rectangle(340, 220, 70, 30), {
+        stroke: 'black',
+        fill: 'orange',
+        cursor: 'pointer'
+      });
+      let resetPressListener = new scenery.PressListener({
+        press: () => {
+
+          //remove old scene
+          node.children.forEach(child => {
+            node.removeChild(child)
+            child.dispose()
+          })
+
+          //redraw the scene
+          node.addChild(hexagon);
+          colorsToGenerate.splice(3,colorsToGenerate.length - 3)
+
+          // regenerate the buttons, appropriately spaced
+          createButtons(colorsToGenerate);
+        }
+      })
+      resetButton.addChild(new scenery.Text("Reset", {
+        font: '0.8em sans-serif',
+        center: resetButton.center
+      }));
+      resetButton.addInputListener(resetPressListener)
+      scene.addChild(resetButton)
 
       // update displayed p-dom text
-      var updatePDOMDisplay = function updatePDOMDisplay() {
+      const updatePDOMDisplay = function updatePDOMDisplay() {
 
         //format the p-dom code
         var PDOMHTMLBlock = display.accessibleDOMElement.outerHTML;
@@ -173,16 +233,14 @@
           tagName: 'button', // tag name for PDOM element
           accessibleName: `${color}-colored button` // accessibility description
         });
-        scene.addChild(rectangle);
+
 
         // Adds text to the button with the name of the color
         rectangle.addChild(new scenery.Text(color, {
-          font: '1.2em sans-serif',
+          font: '0.8em sans-serif',
           center: rectangle.center
         }));
 
-        //to simplify: handles click events and is already accessible
-        //rectangle.addInputListener(new scenery.PressListener())
 
         // Input listener makes the hexagon change colors when buttons are clicked
         rectangle.addInputListener({
@@ -199,12 +257,14 @@
             hexagon.accessibleName = `a ${color} hexagon`; // update the PDOM text
           }
         });
+
+        node.addChild(rectangle);
       }
 
       // generates multiple buttons, appropriately spaced from an array of colors
       function createButtons(colorList) {
-        var xPosition = 600 / (colorList.length ** 2);
-        var yPosition = 150;
+        let xPosition = 600 / (colorList.length ** 2);
+        const yPosition = 150;
         colorList.forEach(color => {
           generateButton(color, xPosition, yPosition);
           xPosition += 600 / (colorList.length);
@@ -212,34 +272,17 @@
       }
 
       //update the displayed p-dom code snippet when there's a change to the scene.
-      var config = {
+      const config = {
         attributes: true,
         childList: true,
         subtree: true
       };
-      var observer = new MutationObserver(updatePDOMDisplay);
+      let observer = new MutationObserver(updatePDOMDisplay);
       observer.observe(document.querySelector('#accessibility-scene'), config);
 
       // create buttons of various colors using the generateButton function above.
-      var colorsToGenerate = ['tomato', 'dodgerblue', 'magenta'];
+      let colorsToGenerate = ['tomato', 'dodgerblue', 'magenta'];
       createButtons(colorsToGenerate);
-
-      // add click handler to add color button to add a new color button to the scene
-      document.querySelector('#add-color-button').addEventListener('click', () => {
-
-        //remove old scene
-        scene.removeAllChildren()
-
-        //redraw the scene
-        scene.addChild(hexagon);
-
-        //get color from input and add to colorsToGenerate if there aren't too many createButtons
-        var newColor = document.querySelector('#color-input').value;
-        newColor && colorsToGenerate.push(newColor);
-
-        // regenerate the buttons, appropriately spaced
-        createButtons(colorsToGenerate);
-      })
 
       //update the animation upon changes
       display.updateOnRequestAnimationFrame();
