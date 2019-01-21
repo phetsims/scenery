@@ -125,9 +125,8 @@
       });
       scene.addChild(hexagon);
 
-
-      // TO DO: Implement linear gradient on track.
-      //let track = new scenery.LinearGradient(0, 100, 10, 200)
+      // TO DO: Implement rainbow gradient (maybe with an image?)
+      // let track = new scenery.LinearGradient(0, 100, 10, 200)
       // track.addColorStop( 0, '#02ace4' ).addColorStop( 1, '#cfecfc' )
 
       //slider thumb
@@ -142,15 +141,20 @@
       let track = new scenery.Path(kite.Shape.rectangle(increment/2, 215, display.width-increment, 10), {
         fill: 'grey'
       })
+      
       scene.addChild(track)
       scene.addChild(thumb)
 
       // labels for the track
       for (i = 0; i < ticks + 1; i ++){
+
+        //labels
         scene.addChild(new scenery.Text(`${i}`, {
           font: '0.8em sans-serif',
           center: new dot.Vector2( (i+1)*increment + thumb.width/2, 250 )
         }));
+
+        // tick marks
         scene.addChild(new scenery.Path(kite.Shape.rectangle((i+1)*increment + thumb.width/2, 205, 3, 30), {
           fill: 'black'
         }))
@@ -159,6 +163,7 @@
       // listener that moves slider when left or right arrow keys are pressed
       display.addInputListener({
         keydown: (e) => {
+
           // determine whether slider should move left, right, or not at all.
           let direction;
           if (e.domEvent.code == 'ArrowRight') {
@@ -169,16 +174,26 @@
             direction = 0
           };
 
-          // if moving the thumb wouldn't move it offscreen, move right or left
+          // checks to see if thumb moves off the track (and doesn't allow)
           if ((thumb.x + thumb.width/2 + 2*increment >= display.width && direction > 0) || (thumb.x + thumb.width/2 - increment <= 0 && direction < 0)){
             console.log('reached boundary')
           } else {
+
+            // moves the thumb right or left if it will stay on the track
             thumb.x += increment * direction;
             const x = thumb.x
-            const frequency = 180*display.width/Math.PI
-            //const normalization = Math.floor((305/display.width)*2)
-            //const midpoint = Math.floor(display.width/2) - 50
-            hexagon.fill = `rgb(${255*Math.cos(frequency * x)}, ${255 * Math.sin(frequency * x)}, ${x < display.width/4 ? 0 : 255 * Math.sin (frequency * x)})`;
+            const trackWidth = track.width
+
+            // sets frequency to ensures that one rainbow cycle happens over the course of one slider length
+            const frequency = (2*Math.PI)/(display.width)
+
+            // makes the hexagon's color move in rainbow order, moving right to left
+            let r = Math.floor(127.5 * Math.cos(frequency * x)+127.5)
+            let g = Math.floor(-127.5 * Math.cos(frequency * x + trackWidth/4)+127.5)
+            let b = Math.floor(-127.5 * Math.cos(frequency * x)+127.5)
+            hexagon.fill = `rgb(${r}, ${g}, ${b})`;
+
+            //updates attributes that will create the PDOM elements
             hexagon.tagName = 'p'
             hexagon.accessibleName = `A hexagon of color ${hexagon.fill}`
           }
