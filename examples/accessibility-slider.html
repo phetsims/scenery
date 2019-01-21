@@ -108,8 +108,13 @@
     scenery.Util.polyfillRequestAnimationFrame();
 
     docExample('accessibility-scene', (scene, display) => {
-      // add a yellow hexagon to the screen at the beginning
-      let increment = (display.width - 100) / 10
+
+      //number of tick marks on track
+      let ticks = 10
+      //calculates distance slider travels with each button press
+      let increment = (display.width)/(ticks+2)
+
+      // add a red hexagon to the screen at the beginning (since slider will start on the red side)
       let hexagon = new scenery.Path(kite.Shape.regularPolygon(6, 22), {
         fill: `rgb(255, 0, 0)`,
         stroke: '#000',
@@ -125,20 +130,31 @@
       //let track = new scenery.LinearGradient(0, 100, 10, 200)
       // track.addColorStop( 0, '#02ace4' ).addColorStop( 1, '#cfecfc' )
 
-      //slider track
-      let track = new scenery.Path(kite.Shape.rectangle(increment/2, 215, display.width - increment, 10), {
-        fill: 'grey'
-      })
-      scene.addChild(track)
-
       //slider thumb
       let thumb = new scenery.Path(kite.Shape.rectangle(increment, 200, 15, 40), {
-        fill: 'black',
+        fill: 'white',
+        stroke: 'black',
         tagName: 'button',
         accessibleName: 'slider thumb'
       })
 
+      //slider track
+      let track = new scenery.Path(kite.Shape.rectangle(increment/2, 215, display.width-increment, 10), {
+        fill: 'grey'
+      })
+      scene.addChild(track)
       scene.addChild(thumb)
+
+      // labels for the track
+      for (i = 0; i < ticks + 1; i ++){
+        scene.addChild(new scenery.Text(`${i}`, {
+          font: '0.8em sans-serif',
+          center: new dot.Vector2( (i+1)*increment + thumb.width/2, 250 )
+        }));
+        scene.addChild(new scenery.Path(kite.Shape.rectangle((i+1)*increment + thumb.width/2, 205, 3, 30), {
+          fill: 'black'
+        }))
+      }
 
       // listener that moves slider when left or right arrow keys are pressed
       display.addInputListener({
@@ -154,10 +170,15 @@
           };
 
           // if moving the thumb wouldn't move it offscreen, move right or left
-          if ((thumb.x + increment < display.width - 2 * increment && direction > 0) || (thumb.x - increment > -increment && direction < 0)) {
+          if ((thumb.x + thumb.width/2 + 2*increment >= display.width && direction > 0) || (thumb.x + thumb.width/2 - increment <= 0 && direction < 0)){
+            console.log('reached boundary')
+          } else {
             thumb.x += increment * direction;
             const x = thumb.x
-            hexagon.fill = `rgb(${x > 255? 255 - Math.floor(x) % 255 : 255}, ${ x > 255 ? 255 : Math.floor(x) }, ${x > 255 ? Math.floor(x) % 255 : 0})`;
+            const frequency = 180*display.width/Math.PI
+            //const normalization = Math.floor((305/display.width)*2)
+            //const midpoint = Math.floor(display.width/2) - 50
+            hexagon.fill = `rgb(${255*Math.cos(frequency * x)}, ${255 * Math.sin(frequency * x)}, ${x < display.width/4 ? 0 : 255 * Math.sin (frequency * x)})`;
             hexagon.tagName = 'p'
             hexagon.accessibleName = `A hexagon of color ${hexagon.fill}`
           }
