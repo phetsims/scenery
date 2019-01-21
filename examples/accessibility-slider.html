@@ -86,20 +86,21 @@
   </div>
 
   <script type="text/javascript">
-    let scene
+    let scene;
 
     function docExample(id, draw) {
-      let $container = $('#' + id);
+      'use strict';
+      const $container = $('#' + id);
       scene = new scenery.Node();
-      let display = new scenery.Display(scene, {
+      const display = new scenery.Display(scene, {
         width: $container.width(),
         height: $container.height(),
         backgroundColor: '#eee'
       });
-      display.initializeEvents()
+      display.initializeEvents();
       $container[0].appendChild(display.domElement);
       draw(scene, display);
-      display.background
+      display.background;
       display.updateDisplay();
     }
   </script>
@@ -108,20 +109,21 @@
     scenery.Util.polyfillRequestAnimationFrame();
 
     docExample('accessibility-scene', (scene, display) => {
+      'use strict';
 
       //number of tick marks on track
-      let ticks = 10
+      const ticks = 10;
       //calculates distance slider travels with each button press
-      let increment = (display.width)/(ticks+2)
+      const increment = (display.width)/(ticks+2);
 
       // add a red hexagon to the screen at the beginning (since slider will start on the red side)
-      let hexagon = new scenery.Path(kite.Shape.regularPolygon(6, 22), {
-        fill: `rgb(255, 0, 0)`,
+      const hexagon = new scenery.Path(kite.Shape.regularPolygon(6, 22), {
+        fill: 'rgb(255, 0, 0)',
         stroke: '#000',
         x: display.width/2,
         y: 75,
         tagName: 'p', // tag name for PDOM element
-        accessibleName: `a hexagon of color (255, 0, 0)` // accessibility description
+        accessibleName: 'a hexagon of color (255, 0, 0)' // accessibility description
       });
       scene.addChild(hexagon);
 
@@ -130,22 +132,23 @@
       // track.addColorStop( 0, '#02ace4' ).addColorStop( 1, '#cfecfc' )
 
       //slider thumb
-      let thumb = new scenery.Path(kite.Shape.rectangle(increment, 200, 15, 40), {
+      const thumb = new scenery.Path(kite.Shape.rectangle(increment, 200, 15, 40), {
         fill: 'white',
         stroke: 'black',
         tagName: 'button',
         accessibleName: 'slider thumb'
-      })
+      });
 
       //slider track
-      let track = new scenery.Path(kite.Shape.rectangle(increment/2, 215, display.width-increment, 10), {
+      const track = new scenery.Path(kite.Shape.rectangle(increment/2, 215, display.width-increment, 10), {
         fill: 'grey'
-      })
-      
-      scene.addChild(track)
-      scene.addChild(thumb)
+      });
+
+      scene.addChild(track);
+      scene.addChild(thumb);
 
       // labels for the track
+      let i;
       for (i = 0; i < ticks + 1; i ++){
 
         //labels
@@ -157,7 +160,7 @@
         // tick marks
         scene.addChild(new scenery.Path(kite.Shape.rectangle((i+1)*increment + thumb.width/2, 205, 3, 30), {
           fill: 'black'
-        }))
+        }));
       }
 
       // listener that moves slider when left or right arrow keys are pressed
@@ -166,36 +169,35 @@
 
           // determine whether slider should move left, right, or not at all.
           let direction;
-          if (e.domEvent.code == 'ArrowRight') {
-            direction = 1
-          } else if (e.domEvent.code == 'ArrowLeft') {
+          if (e.domEvent.code === 'ArrowRight') {
+            direction = 1;
+          } else if (e.domEvent.code === 'ArrowLeft') {
             direction = -1;
           } else {
-            direction = 0
-          };
+            direction = 0;
+          }
 
           // checks to see if thumb moves off the track (and doesn't allow)
           if ((thumb.x + thumb.width/2 + 2*increment >= display.width && direction > 0) || (thumb.x + thumb.width/2 - increment <= 0 && direction < 0)){
-            console.log('reached boundary')
+            console.log('reached boundary');
           } else {
-
             // moves the thumb right or left if it will stay on the track
             thumb.x += increment * direction;
-            const x = thumb.x
-            const trackWidth = track.width
+            const x = thumb.x;
+            const trackWidth = track.width;
 
             // sets frequency to ensures that one rainbow cycle happens over the course of one slider length
-            const frequency = (2*Math.PI)/(display.width)
+            const frequency = (2*Math.PI)/(display.width);
 
             // makes the hexagon's color move in rainbow order, moving right to left
-            let r = Math.floor(127.5 * Math.cos(frequency * x)+127.5)
-            let g = Math.floor(-127.5 * Math.cos(frequency * x + trackWidth/4)+127.5)
-            let b = Math.floor(-127.5 * Math.cos(frequency * x)+127.5)
+            const r = Math.floor(127.5 * Math.cos(frequency * x)+127.5);
+            const g = Math.floor(-127.5 * Math.cos(frequency * x + trackWidth/4)+127.5);
+            const b = Math.floor(-127.5 * Math.cos(frequency * x)+127.5);
             hexagon.fill = `rgb(${r}, ${g}, ${b})`;
 
             //updates attributes that will create the PDOM elements
-            hexagon.tagName = 'p'
-            hexagon.accessibleName = `A hexagon of color ${hexagon.fill}`
+            hexagon.tagName = 'p';
+            hexagon.accessibleName = `A hexagon of color ${hexagon.fill}`;
           }
         }
       });
@@ -213,7 +215,7 @@
 
         //apply syntax highlighting
         Prism.highlightAll();
-      }
+      };
 
       //update the displayed p-dom code snippet when there's a change to the scene.
       const config = {
@@ -221,12 +223,13 @@
         childList: true,
         subtree: true
       };
-      let observer = new MutationObserver(updatePDOMDisplay);
+      const observer = new MutationObserver(updatePDOMDisplay);
       observer.observe(document.querySelector('#accessibility-scene'), config);
 
       //update the animation upon changes
       display.updateOnRequestAnimationFrame();
     });
+
   </script>
 </body>
 

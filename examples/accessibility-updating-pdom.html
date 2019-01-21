@@ -85,6 +85,7 @@
   </div>
 
   <script type="text/javascript">
+    //docExample creates the display and initalizes the display events.
     let scene
 
     function docExample(id, draw) {
@@ -105,112 +106,90 @@
   <script type="text/javascript">
     scenery.Util.polyfillRequestAnimationFrame();
     docExample('accessibility-scene', (scene, display) => {
-
+      'use strict';
       //creates the initial hexagon
-      let hexagon = new scenery.Path(kite.Shape.regularPolygon(6, 22), {
+      const hexagon = new scenery.Path(kite.Shape.regularPolygon(6, 22), {
         fill: 'yellow',
         stroke: '#000',
-        x: display.width/2,
+        x: display.width / 2,
         y: 75,
         tagName: 'p', // tag name for PDOM element
-        accessibleName: `a yellow hexagon` // accessibility description
+        accessibleName: 'a yellow hexagon' // accessibility description
       });
 
-      //creates the scenery node to which both hexagon and buttons will be added to
-      let node = new scenery.Node();
+      //creates the scenery node to which both hexagon and buttons will be added.
+      const node = new scenery.Node();
       scene.addChild(node);
       node.addChild(hexagon);
 
       //creates the button to add another color
-      let addButton = new scenery.Path(kite.Shape.rectangle(200, 220, 70, 30), {
+      const addButton = new scenery.Path(kite.Shape.roundRect(20, 20, 70, 30, 7, 7), {
         stroke: 'grey',
         fill: 'yellow',
         cursor: 'pointer',
         tagName: 'button', // tag name for PDOM element
         accessibleName: 'add a color button' // accessibility description
       });
+      addButton.addChild(new scenery.Text('Add color', {
+        font: '1em sans-serif',
+        center: addButton.center
+      }));
 
       //listener to make the add button respond to user clicks/touches/a11y clicks
-      let addPressListener = new scenery.PressListener({
+      const addPressListener = new scenery.PressListener({
         press: () => {
           //remove old scene
-          clearScene()
+          clearScene();
           //redraw the scene with the new color randomly generating and added to the scene
           node.addChild(hexagon);
           var newColor = `rgb(${Math.floor(Math.random()*255)},${Math.floor(Math.random()*255)},${Math.floor(Math.random()*255)})`;
           newColor && colorsToGenerate.push(newColor);
           createButtons(colorsToGenerate);
         }
-      })
-      addButton.addChild(new scenery.Text("Add color", {
-        font: '0.8em sans-serif',
-        center: addButton.center
-      }));
-      addButton.addInputListener(addPressListener)
+      });
+      addButton.addInputListener(addPressListener);
 
-      let resetButton = new scenery.Path(kite.Shape.rectangle(340, 220, 70, 30), {
+      // reset button resets the scene to only the first three color buttons
+      const resetButton = new scenery.Path(kite.Shape.roundRect(20, 70, 70, 30, 7, 7), {
         stroke: 'grey',
         fill: 'yellow',
         cursor: 'pointer',
         tagName: 'button',
         accessibleName: 'reset button'
       });
-      let resetPressListener = new scenery.PressListener({
-        press: () => {
-          //remove old scene
-          clearScene()
 
-          //redraw the scene
+      const resetPressListener = new scenery.PressListener({
+        press: () => {
+          //remove old scene and redraw the scene
+          clearScene();
           node.addChild(hexagon);
-          colorsToGenerate.splice(3, colorsToGenerate.length - 3)
+          colorsToGenerate.splice(3, colorsToGenerate.length - 3);
 
           // regenerate the buttons, appropriately spaced
           createButtons(colorsToGenerate);
         }
-      })
-      resetButton.addChild(new scenery.Text("Reset", {
-        font: '0.8em sans-serif',
+      });
+      resetButton.addChild(new scenery.Text('Reset', {
+        font: '1em sans-serif',
         center: resetButton.center
       }));
-      resetButton.addInputListener(resetPressListener)
+      resetButton.addInputListener(resetPressListener);
 
-      const controlPanel = new scenery.VBox({
-        align: 'center',
-        spacing: 10,
-        children: [
-          addButton,
-          resetButton
-        ]
-      })
+      // control panel holds the
+      const controlPanel = new scenery.Path(kite.Shape.roundRect(10, 10, 90, 100, 7, 7), {
+        stroke: 'orange',
+        lineWidth: 3,
+        fill: 'white'
+      });
 
-      scene.addChild(controlPanel)
-
-      // update displayed p-dom text
-      const updatePDOMDisplay = function updatePDOMDisplay() {
-
-        //format the p-dom code
-        var PDOMHTMLBlock = display.accessibleDOMElement.outerHTML;
-        var formattedPDOM = PDOMHTMLBlock.replace(new RegExp('<[/]?\\w*[ >]', 'g'), '\n$&'); // add breaks in the string
-        var $PDOMcode = ($('<code class="language-html no-whitespace-normalization"></code>').text(formattedPDOM));
-
-        //add formatted code to the pre element
-        $('#PDOM-pre').html($PDOMcode);
-
-        //apply syntax highlighting
-        Prism.highlightAll();
-      }
-
-      function clearScene() {
-        node.children.forEach(child => {
-          node.removeChild(child)
-          child.dispose()
-        })
-      }
+      controlPanel.addChild(resetButton);
+      controlPanel.addChild(addButton);
+      scene.addChild(controlPanel);
 
       // creates a single button
       function generateButton(color, x, y) {
         // creates the button as a scenery element
-        const rectangle = new scenery.Path(kite.Shape.roundedRectangleWithRadii(x, y, 70, 40, {
+        const rectangle = new scenery.Path(kite.Shape.roundedRectangleWithRadii(x, y, display.width / (colorsToGenerate.length) - 10, 40, {
           topLeft: 10,
           topRight: 10,
           bottomLeft: 10,
@@ -247,7 +226,7 @@
 
       // generates multiple buttons, appropriately spaced from an array of colors
       function createButtons(colorList) {
-        let xPosition = display.width / (colorList.length ** 2);
+        let xPosition = 10;
         const yPosition = 150;
         colorList.forEach(color => {
           generateButton(color, xPosition, yPosition);
@@ -255,9 +234,30 @@
         });
       }
       // create buttons of various colors using the generateButton function above.
-      let colorsToGenerate = ['tomato', 'dodgerblue', 'magenta'];
+      const colorsToGenerate = ['tomato', 'dodgerblue', 'magenta'];
       createButtons(colorsToGenerate);
 
+      // update displayed p-dom text
+      const updatePDOMDisplay = function updatePDOMDisplay() {
+
+        //format the p-dom code
+        var PDOMHTMLBlock = display.accessibleDOMElement.outerHTML;
+        var formattedPDOM = PDOMHTMLBlock.replace(new RegExp('<[/]?\\w*[ >]', 'g'), '\n$&'); // add breaks in the string
+        var $PDOMcode = ($('<code class="language-html no-whitespace-normalization"></code>').text(formattedPDOM));
+
+        //add formatted code to the pre element
+        $('#PDOM-pre').html($PDOMcode);
+
+        //apply syntax highlighting
+        Prism.highlightAll();
+      };
+
+      function clearScene() {
+        node.children.forEach(child => {
+          node.removeChild(child);
+          child.dispose();
+        });
+      }
 
       //update the displayed p-dom code snippet when there's a change to the scene.
       const config = {
@@ -265,7 +265,7 @@
         childList: true,
         subtree: true
       };
-      let observer = new MutationObserver(updatePDOMDisplay);
+      const observer = new MutationObserver(updatePDOMDisplay);
       observer.observe(document.querySelector('#accessibility-scene'), config);
 
       //update the animation upon changes

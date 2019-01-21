@@ -29,34 +29,35 @@
   <script src='../build/scenery.min.js'></script>
 
   <style>
-  .container{
-    max-width: 100%;
-  }
-  .scene-and-PDOM {
+    .container {
+      max-width: 100%;
+    }
+
+    .scene-and-PDOM {
       display: grid;
       grid-template-columns: 1fr 1fr;
       min-width: 1350px;
-      margin:0;
+      margin: 0;
       padding: 0 1%;
     }
 
-    .container .title{
-        grid-column: span 2;
-        text-align: center;
-        margin-top: 40px;
+    .container .title {
+      grid-column: span 2;
+      text-align: center;
+      margin-top: 40px;
     }
 
     /* formatting for the displayed PDOM code */
-    .PDOM-container{
+    .PDOM-container {
       width: 100%;
     }
 
-    pre{
+    pre {
       width: 800px;
       padding: 20px 10%;
     }
 
-    #accessibility-scene{
+    #accessibility-scene {
       width: 95%;
       margin: 0 2%;
       height: 300px;
@@ -87,6 +88,7 @@
   <script>
     // update displayed p-dom text
     function updatePDOMDisplay(display) {
+      'use strict';
 
       //format PDOM code and add to container
       var PDOMHTMLBlock = display.accessibleDOMElement.outerHTML;
@@ -95,69 +97,78 @@
       $('#PDOM-pre').html($PDOMcode);
 
       //syntax highlighting
-      Prism.highlightAll()
-    };
+      Prism.highlightAll();
+    }
+
+    // removes and disposes of children of a scenery node
+    function clearScene(node) {
+      'use strict';
+      node.children.forEach(child => {
+        node.removeChild(child);
+        child.dispose();
+      });
+    }
 
     window.onload = function() {
-
+      'use strict';
       // create new scenery node
-      var scene = new scenery.Node( {
+      var scene = new scenery.Node({
         renderer: 'webgl'
-      } );
+      });
 
       // create the display
-      var display = new scenery.Display( scene, {
+      var display = new scenery.Display(scene, {
         container: document.getElementById('accessibility-scene'),
         backgroundColor: '#eee',
         width: window.innerWidth / 3,
-        height: window.innerHeight * 0.8,
-      } );
+        height: window.innerHeight * 0.8
+      });
 
       display.initializeEvents(); // sets up listeners on the document with preventDefault(), and forwards those events to our scene
 
-      var node = new scenery.Node ( {
-        children: [ new scenery.Path( kite.Shape.regularPolygon( 6, 22 ), {
-          fill: 'yellow',
-          stroke: '#000',
-          x: 50,
-          y: 50,
-          bounds: {
-            minX: 0,
-            minY: 0,
-            maxX: window.innerWidth / 2,
-            maxY: window.innerHeight
-          }
-        } ) ],
-        x: 0,
-        y: 0,
-        tagName: 'p',
-        accessibleName: 'a yellow hexagon in the top left quadrant'
-      } );
+      function initialScene() {
+        return (new scenery.Node({
+          children: [new scenery.Path(kite.Shape.regularPolygon(6, 22), {
+            fill: 'yellow',
+            stroke: '#000',
+            x: 50,
+            y: 50,
+            bounds: {
+              minX: 0,
+              minY: 0,
+              maxX: window.innerWidth / 2,
+              maxY: window.innerHeight
+            }
+          })],
+          x: 0,
+          y: 0,
+          tagName: 'p',
+          accessibleName: 'a yellow hexagon in the top left quadrant'
+        }));
+      }
+      scene.addChild(initialScene());
 
       //set the initial velocity of the hexagon
-      node.xVelocity = 10 * ( Math.random() - 0.5 );
-      node.yVelocity = 10 * ( Math.random() - 0.5 );
+      scene.children[0].xVelocity = 10 * (Math.random() - 0.5);
+      scene.children[0].yVelocity = 10 * (Math.random() - 0.5);
 
       // removes all hexagon clones when space bar is pressed
-      window.addEventListener( 'keydown', ( e ) => {
-        if ( e.code == 'Space' ) {
-          scene.children.forEach( child => {
-            scene.removeChild(child);
-            //child.dispose();
-          });
-          scene.addChild( node );
+      window.addEventListener('keydown', (e) => {
+        if (e.code === 'Space') {
+          clearScene(scene);
+          scene.addChild(initialScene());
         }
       });
 
       //reverses the direction of the hexagon when the display is clicked
-      display.addInputListener( {
+      display.addInputListener({
         down: () => {
-          node.children[0].fill = 'orange';
+          scene.children[0].fill = 'orange';
         },
         up: () => {
-          if ( scene.children.length < 8 ) {
-            var newNode = new scenery.Node( {
-              children: [ new scenery.Path( kite.Shape.regularPolygon( 6, 22 ), {
+          if (scene.children.length < 8) {
+            var newNode = new scenery.Node({
+              children: [new scenery.Path(kite.Shape.regularPolygon(6, 22), {
                 fill: `rgb( ${ Math.floor( Math.random()*255 ) }, ${ Math.floor( Math.random()*255 ) }, ${ Math.floor( Math.random()*255 ) } )`,
                 stroke: '#000',
                 x: 50,
@@ -168,42 +179,43 @@
                   maxX: window.innerWidth / 2,
                   maxY: window.innerHeight
                 }
-              } ) ]
-            } );
-            newNode.xVelocity = 20 * ( Math.random() - 0.5 );
-            newNode.yVelocity = 20 * ( Math.random() - 0.5 );
-            scene.addChild( newNode );
-            node.children[0].fill = 'yellow';
+              })]
+            });
+            newNode.xVelocity = 20 * (Math.random() - 0.5);
+            newNode.yVelocity = 20 * (Math.random() - 0.5);
+            scene.addChild(newNode);
+            scene.children[0].fill = 'yellow';
           }
         },
 
         // Add a listener that fires when the button in the PDOM is clicked
         a11yclick: () => {
-          node.children[0].fill = 'red';
+          scene.children[0].fill = 'red';
           setTimeout(() => {
             //reverse the direction of the hexagon
-            node.xVelocity = node.xVelocity * -1;
-            node.yVelocity = node.yVelocity * -1;
-            node.children[0].fill = 'yellow';
+            scene.children[0].xVelocity = scene.children[0].xVelocity * -1;
+            scene.children[0].yVelocity = scene.children[0] * -1;
+            scene.children[0].fill = 'yellow';
           }, 100);
         }
       });
 
-      scene.addChild( node );
 
       /*---------------------------------------------------------------------------*
        * main loop
        *----------------------------------------------------------------------------*/
 
-      display.updateOnRequestAnimationFrame( function( timeElapsed ) {
+      display.updateOnRequestAnimationFrame(function(timeElapsed) {
+
         var children = scene.children;
         var quadrantX;
         var quadrantY;
 
         // for each hexagon, update its velocity and accessible description
-        for ( i = 0; i < scene.children.length; i++ ) {
+        let i;
+        for (i = 0; i < scene.children.length; i++) {
           var child = children[i];
-          child.translate( timeElapsed * child.xVelocity, timeElapsed * child.yVelocity, true );
+          child.translate(timeElapsed * child.xVelocity, timeElapsed * child.yVelocity, true);
 
           // updates p-dom description words based on position of the hexagon
           child.x > display.width / 2 ? quadrantX = 'right' : quadrantX = 'left';
@@ -214,23 +226,23 @@
           child.accessibleName = `a hexagon of color ${child.children[0].fillValue} in the ${quadrantY} ${quadrantX} quadrant`;
 
           // updates hexagon's speed and ensures it stays on the screen.
-          if ( child.x > display.width - 100 ) {
+          if (child.x > display.width - 100) {
             child.xVelocity = -50 * Math.random();
-          } else if ( child.x < 50 ) {
+          } else if (child.x < 50) {
             child.xVelocity = 50 * Math.random();
           } else {
-            child.xVelocity += 50 * ( Math.random() - 0.5 );
-          };
-          if ( child.y > display.height - 100 ) {
+            child.xVelocity += 50 * (Math.random() - 0.5);
+          }
+          if (child.y > display.height - 100) {
             child.yVelocity = -50 * Math.random();
-          } else if ( child.y < 50 ) {
+          } else if (child.y < 50) {
             child.yVelocity = 50 * Math.random();
           } else {
-            child.yVelocity += 50 * ( Math.random() - 0.5 );
-          };
-          updatePDOMDisplay( display );
+            child.yVelocity += 50 * (Math.random() - 0.5);
+          }
+          updatePDOMDisplay(display);
         }
-      } );
+      });
     };
   </script>
 
