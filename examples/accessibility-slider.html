@@ -136,7 +136,7 @@
         fill: 'white',
         stroke: 'black',
         tagName: 'button',
-        accessibleName: 'slider thumb'
+        accessibleName: 'Slider thumb at position 0'
       });
 
       //slider track
@@ -198,6 +198,8 @@
             //updates attributes that will create the PDOM elements
             hexagon.tagName = 'p';
             hexagon.accessibleName = `A hexagon of color ${hexagon.fill}`;
+            thumb.tagName = 'button';
+            thumb.accessibleName = `Slider thumb at position ${thumb.x/increment}`;
           }
         }
       });
