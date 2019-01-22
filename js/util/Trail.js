@@ -29,10 +29,9 @@ define( function( require ) {
 
   require( 'SCENERY/nodes/Node' );
   // require( 'SCENERY/util/TrailPointer' );
-  
+
   // constants
-  var ID_SEPARATOR = '-'; 
-  
+  var ID_SEPARATOR = '-';
 
   function Trail( nodes ) {
     /*
@@ -41,7 +40,7 @@ define( function( require ) {
      * Use setImmutable() or setMutable() to signal a specific type of protection, so it cannot be changed later
      */
     if ( assert ) {
-      // only do this if assertions are enabled, otherwise we won't access it at all
+      // @private {boolean|undefined} only do this if assertions are enabled, otherwise we won't access it at all
       this.immutable = undefined;
     }
 
@@ -56,11 +55,17 @@ define( function( require ) {
       return;
     }
 
+    // @public {Array.<Node>} - The main nodes of the trail, in order from root to leaf
     this.nodes = [];
+
+    // @public {number} - Shortcut for the length of nodes.
     this.length = 0;
+
+    // @public {string} - A unique identifier that should only be shared by other trails that are identical to this one.
     this.uniqueId = '';
 
-    // indices[x] stores the index of nodes[x] in nodes[x-1]'s children, e.g. nodes[i].children[ indices[i] ] === nodes[i+1]
+    // @public {Array.<number>} - indices[x] stores the index of nodes[x] in nodes[x-1]'s children, e.g.
+    // nodes[i].children[ indices[i] ] === nodes[i+1]
     this.indices = [];
 
     var self = this;
@@ -411,6 +416,17 @@ define( function( require ) {
       }
 
       return true;
+    },
+
+    /**
+     * Returns whether a given node is contained in the trail.
+     * @public
+     *
+     * @param {Node} node
+     * @returns {boolean}
+     */
+    containsNode: function( node ) {
+      return _.includes( this.nodes, node );
     },
 
     // a transform from our local coordinate frame to the other trail's local coordinate frame
@@ -911,7 +927,7 @@ define( function( require ) {
   /**
    * Re-create a trail to a root node from an existing Trail id. The rootNode must have the same Id as the first
    * Node id of uniqueId.
-   * 
+   *
    * @param  {Node} rootNode - the root of the trail being created
    * @param  {string} uniqueId - integers separated by ID_SEPARATOR, see getUniqueId
    * @returns {Trail}
