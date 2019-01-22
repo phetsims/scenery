@@ -22,6 +22,7 @@ define( function( require ) {
   var Renderer = require( 'SCENERY/display/Renderer' );
   var scenery = require( 'SCENERY/scenery' );
   var SpriteSheet = require( 'SCENERY/util/SpriteSheet' );
+  var Util = require( 'DOT/Util' );
 
   // Need to poly-fill on some browsers
   var log2 = Math.log2 || function( x ) { return Math.log( x ) / Math.LN2; };
@@ -547,7 +548,7 @@ define( function( require ) {
      * - A positive bias will typically decrease the displayed resolution
      *
      * This is done approximately like the following formula:
-     *   mipmapLevel = Math.round( computedMipmapLevel + mipmapBias )
+     *   mipmapLevel = Util.roundSymmetric( computedMipmapLevel + mipmapBias )
      *
      * @param bias
      * @returns {Image} - For chaining
@@ -749,7 +750,7 @@ define( function( require ) {
       }
 
       var level = log2( 1 / scale ); // our approximate level of detail
-      level = Math.round( level + this._mipmapBias - 0.7 ); // convert to an integer level (-0.7 is a good default)
+      level = Util.roundSymmetric( level + this._mipmapBias - 0.7 ); // convert to an integer level (-0.7 is a good default)
 
       if ( level < 0 ) {
         level = 0;
