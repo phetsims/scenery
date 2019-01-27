@@ -61,7 +61,7 @@ define( function( require ) {
       str = str.slice( 0, str.length - 1 );
     }
 
-    return Math.round( parseInt( str, 10 ) * multiplier );
+    return Util.roundSymmetric( parseInt( str, 10 ) * multiplier );
   }
 
   Color.formatParsers = [
@@ -244,9 +244,9 @@ define( function( require ) {
 
     // RGB integral between 0-255, alpha (float) between 0-1
     setRGBA: function( red, green, blue, alpha ) {
-      this.r = Math.round( clamp( red, 0, 255 ) );
-      this.g = Math.round( clamp( green, 0, 255 ) );
-      this.b = Math.round( clamp( blue, 0, 255 ) );
+      this.r = Util.roundSymmetric( clamp( red, 0, 255 ) );
+      this.g = Util.roundSymmetric( clamp( green, 0, 255 ) );
+      this.b = Util.roundSymmetric( clamp( blue, 0, 255 ) );
       this.a = clamp( alpha, 0, 1 );
 
       this.updateColor(); // update the cached value
@@ -406,9 +406,9 @@ define( function( require ) {
       }
       m1 = lightness * 2 - m2;
 
-      this.r = Math.round( Color.hueToRGB( m1, m2, hue + 1 / 3 ) * 255 );
-      this.g = Math.round( Color.hueToRGB( m1, m2, hue ) * 255 );
-      this.b = Math.round( Color.hueToRGB( m1, m2, hue - 1 / 3 ) * 255 );
+      this.r = Util.roundSymmetric( Color.hueToRGB( m1, m2, hue + 1 / 3 ) * 255 );
+      this.g = Util.roundSymmetric( Color.hueToRGB( m1, m2, hue ) * 255 );
+      this.b = Util.roundSymmetric( Color.hueToRGB( m1, m2, hue - 1 / 3 ) * 255 );
       this.a = clamp( alpha, 0, 1 );
 
       this.updateColor(); // update the cached value

@@ -71,7 +71,7 @@ define( require => {
 
         // before we change focus to the next item, immediately release all keys that were down on the active element
         this.clearListeners();
-        var nextFocusable = AccessibilityUtil.getRandomFocusable();
+        var nextFocusable = AccessibilityUtil.getRandomFocusable( this.random );
         nextFocusable.focus();
         this.currentElement = nextFocusable;
 

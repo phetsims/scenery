@@ -6,9 +6,9 @@
  *
  * This is valuable, since:
  * ```
- *   var color = new scenery.Color( 'red' );
- *   var fill = new axon.Property( color );
- *   var paintColorProperty = new scenery.PaintColorProperty( fill );
+ *   const color = new scenery.Color( 'red' );
+ *   const fill = new axon.Property( color );
+ *   const paintColorProperty = new scenery.PaintColorProperty( fill );
  *
  *   // value is converted to a {Color}
  *   paintColorProperty.value; // r: 255, g: 0, b: 0, a: 1
@@ -35,67 +35,65 @@
  * @author Jonathan Olson <jonathan.olson@colorado.edu>
  */
 
-define( function( require ) {
+define( require => {
   'use strict';
 
-  var inherit = require( 'PHET_CORE/inherit' );
-  var PaintDef = require( 'SCENERY/util/PaintDef' );
-  var PaintObserver = require( 'SCENERY/display/PaintObserver' );
-  var Property = require( 'AXON/Property' );
-  var scenery = require( 'SCENERY/scenery' );
+  const PaintDef = require( 'SCENERY/util/PaintDef' );
+  const PaintObserver = require( 'SCENERY/display/PaintObserver' );
+  const Property = require( 'AXON/Property' );
+  const scenery = require( 'SCENERY/scenery' );
 
-  /**
-   * @constructor
-   * @extends {Property.<Color>}
-   *
-   * @param {PaintDef} paint
-   * @param {Object} [options]
-   */
-  function PaintColorProperty( paint, options ) {
-    var initialColor = PaintDef.toColor( paint );
+  class PaintColorProperty extends Property {
 
-    options = _.extend( {
-      // {number} - 0 applies no change. Positive numbers brighten the color up to 1 (white). Negative numbers darken
-      // the color up to -1 (black). See setLuminanceFactor() for more information.
-      luminanceFactor: 0,
+    /**
+     * @extends {Property.<Color>}
+     *
+     * @param {PaintDef} paint
+     * @param {Object} [options]
+     */
+    constructor( paint, options ) {
+      const initialColor = PaintDef.toColor( paint );
 
-      // Property options
-      useDeepEquality: true // We don't need to renotify for equivalent colors
-    }, options );
+      options = _.extend( {
+        // {number} - 0 applies no change. Positive numbers brighten the color up to 1 (white). Negative numbers darken
+        // the color up to -1 (black). See setLuminanceFactor() for more information.
+        luminanceFactor: 0,
 
-    Property.call( this, initialColor, options );
+        // Property options
+        useDeepEquality: true // We don't need to renotify for equivalent colors
+      }, options );
 
-    // @private {PaintDef}
-    this._paint = null;
+      super( initialColor, options );
 
-    // @private {number} - See setLuminanceFactor() for more information.
-    this._luminanceFactor = options.luminanceFactor;
+      // @private {PaintDef}
+      this._paint = null;
 
-    // @private {function} - Our "paint changed" listener, will update the value of this Property.
-    this._changeListener = this.invalidatePaint.bind( this );
+      // @private {number} - See setLuminanceFactor() for more information.
+      this._luminanceFactor = options.luminanceFactor;
 
-    // @private {PaintObserver}
-    this._paintObserver = new PaintObserver( this._changeListener );
+      // @private {function} - Our "paint changed" listener, will update the value of this Property.
+      this._changeListener = this.invalidatePaint.bind( this );
 
-    this.setPaint( paint );
-  }
+      // @private {PaintObserver}
+      this._paintObserver = new PaintObserver( this._changeListener );
 
-  scenery.register( 'PaintColorProperty', PaintColorProperty );
+      this.setPaint( paint );
+    }
 
-  inherit( Property, PaintColorProperty, {
     /**
      * Sets the current paint of the PaintColorProperty.
      * @public
      *
      * @param {PaintDef} paint
      */
-    setPaint: function( paint ) {
+    setPaint( paint ) {
       assert && assert( PaintDef.isPaintDef( paint ) );
 
       this._paint = paint;
       this._paintObserver.setPrimary( paint );
-    },
-    set paint( value ) { this.setPaint( value ); },
+    }
+
+    set paint( value ) { this.setPaint( value ); }
 
     /**
      * Returns the current paint.
@@ -103,10 +101,11 @@ define( function( require ) {
      *
      * @returns {PaintDef}
      */
-    getPaint: function() {
+    getPaint() {
       return this._paint;
-    },
-    get paint() { return this.getPaint(); },
+    }
+
+    get paint() { return this.getPaint(); }
 
     /**
      * Sets the current value used for adjusting the brightness or darkness (luminance) of the color.
@@ -129,7 +128,7 @@ define( function( require ) {
      *
      * @param {number} luminanceFactor
      */
-    setLuminanceFactor: function( luminanceFactor ) {
+    setLuminanceFactor( luminanceFactor ) {
       assert && assert( typeof luminanceFactor === 'number' && luminanceFactor >= -1 && luminanceFactor <= 1 );
 
       if ( this.luminanceFactor !== luminanceFactor ) {
@@ -137,8 +136,9 @@ define( function( require ) {
 
         this.invalidatePaint();
       }
-    },
-    set luminanceFactor( value ) { this.setLuminanceFactor( value ); },
+    }
+
+    set luminanceFactor( value ) { this.setLuminanceFactor( value ); }
 
     /**
      * Returns the current value used for adjusting the brightness or darkness (luminance) of the color.
@@ -148,30 +148,31 @@ define( function( require ) {
      *
      * @returns {number}
      */
-    getLuminanceFactor: function() {
+    getLuminanceFactor() {
       return this._luminanceFactor;
-    },
-    get luminanceFactor() { return this.getLuminanceFactor(); },
+    }
+
+    get luminanceFactor() { return this.getLuminanceFactor(); }
 
     /**
      * Updates the value of this Property.
      * @private
      */
-    invalidatePaint: function() {
+    invalidatePaint() {
       this.value = PaintDef.toColor( this._paint ).colorUtilsBrightness( this._luminanceFactor );
-    },
+    }
 
     /**
      * Releases references.
      * @public
      * @override
      */
-    dispose: function() {
+    dispose() {
       this.paint = null;
 
-      Property.prototype.dispose.call( this );
+      super.dispose();
     }
-  } );
+  }
 
-  return PaintColorProperty;
+  return scenery.register( 'PaintColorProperty', PaintColorProperty );
 } );

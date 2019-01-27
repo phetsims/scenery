@@ -24,9 +24,12 @@ define( function( require ) {
    *
    * @param {number} nodeCount
    * @param {boolean} logToConsole
+   * @param {number} [seed]
    */
-  function AccessibilityFuzzer( nodeCount, logToConsole ) {
+  function AccessibilityFuzzer( nodeCount, logToConsole, seed ) {
     assert && assert( nodeCount >= 2 );
+
+    seed = seed || null;
 
     // @private {number}
     this.nodeCount = nodeCount;
@@ -43,7 +46,7 @@ define( function( require ) {
     this.display = new Display( this.nodes[ 0 ] );
 
     // @private {Random}
-    this.random = new Random(); // TODO: support seeding (fails on Math.seedrandom)
+    this.random = new Random( { seed } );
 
     // @private {Array.<Action>}
     this.actionsTaken = [];

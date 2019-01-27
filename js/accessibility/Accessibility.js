@@ -689,6 +689,7 @@ define( function( require ) {
         setAccessibleHeadingBehavior: function( accessibleHeadingBehavior ) {
           assert && A11yBehaviorFunctionDef.validateA11yBehaviorFunctionDef( accessibleHeadingBehavior );
 
+          //TODO https://github.com/phetsims/scenery/issues/930 address REVIEW comments
           // REVIEW: Note that this doesn't seem to trigger updating the heading levels of siblings correctly:
           // REVIEW: For example, do the following:
           // REVIEW:   var a = new scenery.Node();
@@ -747,6 +748,7 @@ define( function( require ) {
          * @returns {number}
          */
         computeHeadingLevel: function() {
+          //TODO https://github.com/phetsims/scenery/issues/930 address REVIEW comments
           // REVIEW: I'd recommend looking at how node handles this with things. Usually it has an invalidate pattern
           // REVIEW: but in this case, it may be easier to just update the entire subtree whenever an ancestor changes.
 
@@ -1127,6 +1129,7 @@ define( function( require ) {
         setLabelContent: function( label ) {
           assert && assert( label === null || typeof label === 'string', 'label must be null or string' );
 
+          //TODO https://github.com/phetsims/scenery/issues/930 address REVIEW comments
           // REVIEW: It's also concerning that setting this ends up changing another field (especially when it's set to
           // REVIEW: the same value!). Can't we handle some of this in the with an accessible*Behavior pattern?
           // REVIEW: It seems setting and unsetting the labelContent (from null to something to null) makes permanent
@@ -1214,6 +1217,7 @@ define( function( require ) {
           if ( this._descriptionContent !== descriptionContent ) {
             this._descriptionContent = descriptionContent;
 
+            //TODO https://github.com/phetsims/scenery/issues/930 address REVIEW comments
             // REVIEW: See notes in setLabelContent. Setting the descriptionTagName feels wrong,
             // REVIEW: where a behavior would be better.
 
@@ -1423,6 +1427,7 @@ define( function( require ) {
             }
 
             this.trigger( 'focusHighlightChanged' );
+            //TODO https://github.com/phetsims/scenery/issues/930 address REVIEW comments
             // REVIEW: Should it call onAccessibleContentChange()
           }
         },

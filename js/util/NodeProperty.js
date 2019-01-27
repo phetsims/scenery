@@ -9,59 +9,53 @@
  * @author Sam Reid (PhET Interactive Simulations)
  * @author Jonathan Olson (PhET Interactive Simulations)
  */
-define( function( require ) {
+define( require => {
   'use strict';
 
   // modules
-  var inherit = require( 'PHET_CORE/inherit' );
-  var Property = require( 'AXON/Property' );
-  var scenery = require( 'SCENERY/scenery' );
+  const Property = require( 'AXON/Property' );
+  const scenery = require( 'SCENERY/scenery' );
 
-  /**
-   * @param {Node} node
-   * @param {string} trigger - the Node trigger that will cause this NodeProperty to update, such as 'bounds', or 'opacity'
-   * @param {string} attribute - for example 'left' or 'centerBottom' or 'visible' or 'pickable'
-   * @param {Object} [options]
-   */
-  function NodeProperty( node, trigger, attribute, options ) {
-    assert && assert( typeof attribute === 'string', 'wrong type for getLocation' );
-    var self = this;
+  class NodeProperty extends Property {
 
-    // @private {Node}
-    this.node = node;
+    /**
+     * @param {Node} node
+     * @param {string} trigger - the Node trigger that will cause this NodeProperty to update, such as 'bounds', or 'opacity'
+     * @param {string} attribute - for example 'left' or 'centerBottom' or 'visible' or 'pickable'
+     * @param {Object} [options]
+     */
+    constructor( node, trigger, attribute, options ) {
+      assert && assert( typeof attribute === 'string', 'wrong type for getLocation' );
 
-    // @private {string} - for disposal
-    this.trigger = trigger;
+      // Read-only Property that describes a part relative to the bounds of the node.
+      super( node[ attribute ], options );
 
-    // @private {string}
-    this.attribute = attribute;
+      // @private {Node}
+      this.node = node;
 
-    // Read-only Property that describes a part relative to the bounds of the node.
-    Property.call( this, node[ attribute ], options );
+      // @private {string} - for disposal
+      this.trigger = trigger;
 
-    // @private {function} - When the node event is triggered, get the new value and set it to this Property
-    this.changeListener = function() {
-      self.set( node[ attribute ] );
-    };
+      // @private {string}
+      this.attribute = attribute;
 
-    // onStatic (as opposed to 'on') avoids array allocation, but means the listener cannot cause disposal of this node.
-    node.onStatic( trigger, this.changeListener );
-  }
+      // @private {function} - When the node event is triggered, get the new value and set it to this Property
+      this.changeListener = () => this.set( node[ attribute ] );
 
-  scenery.register( 'NodeProperty', NodeProperty );
-
-  return inherit( Property, NodeProperty, {
+      // onStatic (as opposed to 'on') avoids array allocation, but means the listener cannot cause disposal of this node.
+      node.onStatic( trigger, this.changeListener );
+    }
 
     /**
      * Unlinks listeners when disposed.  Must be called before the corresponding Node is disposed.
      * @public
      */
-    dispose: function() {
+    dispose() {
       assert && assert( !this.node.isDisposed, 'NodeProperty should be disposed before corresponding Node is disposed' );
       this.node.offStatic( this.trigger, this.changeListener );
-      Property.prototype.dispose.call( this );
+      super.dispose();
       this.node = null;
-    },
+    }
 
     /**
      * Updates the value of this node, overridden to update the Node value
@@ -69,13 +63,15 @@ define( function( require ) {
      * @param {*} value - the new value this Property will take, which is different than the previous value.
      * @protected - can be overridden.
      */
-    setValueAndNotifyListeners: function( value ) {
+    setValueAndNotifyListeners( value ) {
 
       // Set the node value first, as if it was the first link listener.
       this.node[ this.attribute ] = value;
 
       // Notify the other listeners
-      Property.prototype.setValueAndNotifyListeners.call( this, value );
+      super.setValueAndNotifyListeners( value );
     }
-  } );
+  }
+
+  return scenery.register( 'NodeProperty', NodeProperty );
 } );

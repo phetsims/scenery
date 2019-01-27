@@ -1,4 +1,5 @@
 // Copyright 2013-2016, University of Colorado Boulder
+/* eslint-disable bad-sim-text */
 
 /**
  * Utility functions for scenery that are specifically useful for Accessibility.
@@ -47,13 +48,15 @@ define( function( require ) {
   var INS_TAG = 'INS';
   var SUB_TAG = 'SUB';
   var SUP_TAG = 'SUP';
+  var BR_TAG = 'BR';
 
   // These browser tags are a definition of default focusable elements, converted from Javascript types,
   // see https://stackoverflow.com/questions/1599660/which-html-elements-can-receive-focus
   var DEFAULT_FOCUSABLE_TAGS = [ A_TAG, AREA_TAG, INPUT_TAG, SELECT_TAG, TEXTAREA_TAG, BUTTON_TAG, IFRAME_TAG ];
 
   // collection of tags that are used for formatting text
-  var FORMATTING_TAGS = [ BOLD_TAG, STRONG_TAG, I_TAG, EM_TAG, MARK_TAG, SMALL_TAG, DEL_TAG, INS_TAG, SUB_TAG, SUP_TAG ];
+  var FORMATTING_TAGS = [ BOLD_TAG, STRONG_TAG, I_TAG, EM_TAG, MARK_TAG, SMALL_TAG, DEL_TAG, INS_TAG, SUB_TAG,
+    SUP_TAG, BR_TAG ];
 
   // these elements do not have a closing tag, so they won't support features like innerHTML. This is how PhET treats
   // these elements, not necessary what is legal html.
@@ -237,9 +240,12 @@ define( function( require ) {
      * Return a random focusable element in the document. Particularly useful for fuzz testing.
      * @public
      *
+     * @parma {Random} [random]
      * @returns {HTMLElement}
      */
-    getRandomFocusable: function() {
+    getRandomFocusable: function( random ) {
+
+      random = random || new Random();
 
       var linearDOM = getLinearDOMElements( document.body );
       var focusableElements = [];
@@ -247,7 +253,7 @@ define( function( require ) {
         isElementFocusable( linearDOM[ i ] ) && focusableElements.push( linearDOM[ i ] );
       }
 
-      return focusableElements[ new Random().nextInt( focusableElements.length ) ];
+      return focusableElements[ random.nextInt( focusableElements.length ) ];
     },
 
     /**

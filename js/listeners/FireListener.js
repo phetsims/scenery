@@ -120,6 +120,15 @@ define( function( require ) {
         }
         callback && callback();
       } );
+    },
+
+    /**
+     * @override
+     * @public
+     */
+    dispose: function() {
+      this.firedEmitter.dispose();
+      PressListener.prototype.dispose.call( this );
     }
   } );
 
