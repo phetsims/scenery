@@ -12,78 +12,79 @@
  * @author Jonathan Olson <jonathan.olson@colorado.edu>
  */
 
-define( function( require ) {
+define( require => {
   'use strict';
 
-  var inherit = require( 'PHET_CORE/inherit' );
-  var Mouse = require( 'SCENERY/input/Mouse' );
-  var Pointer = require( 'SCENERY/input/Pointer' );
-  var scenery = require( 'SCENERY/scenery' );
-  var Trail = require( 'SCENERY/util/Trail' );
+  const Mouse = require( 'SCENERY/input/Mouse' );
+  const Pointer = require( 'SCENERY/input/Pointer' );
+  const scenery = require( 'SCENERY/scenery' );
+  const Trail = require( 'SCENERY/util/Trail' );
 
   /**
-   * @constructor
-   *
    * @param {Trail} trail - The trail to the node picked/hit by this input event.
    * @param {string} type - Type of the event, e.g. 'string'
    * @param {Pointer} pointer - The pointer that triggered this event
    * @param {DOMEvent|null} domEvent - The original DOM Event that caused this Event to fire.
    */
-  function Event( trail, type, pointer, domEvent ) {
-    assert && assert( trail instanceof Trail, 'Event\'s trail parameter should be a {Trail}' );
-    assert && assert( typeof type === 'string', 'Event\'s type should be a {string}' );
-    assert && assert( pointer instanceof Pointer, 'Event\'s pointer parameter should be a {Pointer}' );
-    // TODO: add domEvent type assertion -- will browsers support this?
+  class Event {
+    constructor( trail, type, pointer, domEvent ) {
+      assert && assert( trail instanceof Trail, 'Event\'s trail parameter should be a {Trail}' );
+      assert && assert( typeof type === 'string', 'Event\'s type should be a {string}' );
+      assert && assert( pointer instanceof Pointer, 'Event\'s pointer parameter should be a {Pointer}' );
+      // TODO: add domEvent type assertion -- will browsers support this?
 
-    // @public {boolean} - Whether this Event has been 'handled'. If so, it will not bubble further.
-    this.handled = false;
+      // @public (read-only) {boolean} - Whether this Event has been 'handled'. If so, it will not bubble further.
+      this.handled = false;
 
-    // @public {boolean} - Whether this Event has been 'aborted'. If so, no further listeners with it will fire.
-    this.aborted = false;
+      // @public (read-only) {boolean} - Whether this Event has been 'aborted'. If so, no further listeners with it will fire.
+      this.aborted = false;
 
-    // @public {Trail} - Path to the leaf-most node "hit" by the event, ordered list, from root to leaf
-    this.trail = trail;
+      // @public {Trail} - Path to the leaf-most node "hit" by the event, ordered list, from root to leaf
+      this.trail = trail;
 
-    // @public {string} - What event was triggered on the listener, e.g. 'move'
-    this.type = type;
+      // @public {string} - What event was triggered on the listener, e.g. 'move'
+      this.type = type;
 
-    // @public {Pointer} - The pointer that triggered this event
-    this.pointer = pointer;
+      // @public {Pointer} - The pointer that triggered this event
+      this.pointer = pointer;
 
-    // @public {DOMEvent|null} - Raw DOM InputEvent (TouchEvent, PointerEvent, MouseEvent,...)
-    this.domEvent = domEvent;
+      // @public {DOMEvent|null} - Raw DOM InputEvent (TouchEvent, PointerEvent, MouseEvent,...)
+      this.domEvent = domEvent;
 
-    // @public {Node|null} - whatever node you attached the listener to, or null when firing events on a Pointer
-    this.currentTarget = null;
+      // @public {Node|null} - whatever node you attached the listener to, or null when firing events on a Pointer
+      this.currentTarget = null;
 
-    // @public {Node} - Leaf-most node in trail
-    this.target = trail.lastNode();
+      // @public {Node} - Leaf-most node in trail
+      this.target = trail.lastNode();
 
-    // @public {boolean} - Whether this is the 'primary' mode for the pointer. Always true for touches, and will be true
-    // for the mouse if it is the primary (left) mouse button.
-    // TODO: don't require check on domEvent (seems sometimes this is passed as null as a hack?)
-    this.isPrimary = !( pointer instanceof Mouse ) || !domEvent || domEvent.button === 0;
+      // @public {boolean} - Whether this is the 'primary' mode for the pointer. Always true for touches, and will be true
+      // for the mouse if it is the primary (left) mouse button.
+      // TODO: don't require check on domEvent (seems sometimes this is passed as null as a hack?)
+      this.isPrimary = !( pointer instanceof Mouse ) || !domEvent || domEvent.button === 0;
 
-    // Store the last-used non-null DOM event for future use if required.
-    if ( domEvent ) {
-      pointer.lastDOMEvent = domEvent;
+      // Store the last-used non-null DOM event for future use if required.
+      if ( domEvent ) {
+        pointer.lastDOMEvent = domEvent;
+      }
     }
-  }
 
-  scenery.register( 'Event', Event );
-
-  inherit( Object, Event, {
-    // like DOM Event.stopPropagation(), but named differently to indicate it doesn't fire that behavior on the underlying DOM event
-    handle: function() {
+    /**
+     * like DOM Event.stopPropagation(), but named differently to indicate it doesn't fire that behavior on the underlying DOM event
+     * @public
+     */
+    handle() {
       sceneryLog && sceneryLog.InputEvent && sceneryLog.InputEvent( 'handled event' );
       this.handled = true;
-    },
+    }
 
-    // like DOM Event.stopImmediatePropagation(), but named differently to indicate it doesn't fire that behavior on the underlying DOM event
-    abort: function() {
+    /**
+     * like DOM Event.stopImmediatePropagation(), but named differently to indicate it doesn't fire that behavior on the underlying DOM event
+     * @public
+     */
+    abort() {
       sceneryLog && sceneryLog.InputEvent && sceneryLog.InputEvent( 'aborted event' );
       this.aborted = true;
-    },
+    }
 
     /**
      * Returns whether a typical PressListener (that isn't already attached) could start a drag with this event.
@@ -104,12 +105,12 @@ define( function( require ) {
      *
      * @returns {boolean}
      */
-    canStartPress: function() {
+    canStartPress() {
       // If the pointer is already attached (some other press probably), it can't start a press.
       // Additionally, we generally want to ignore non-left mouse buttons.
       return !this.pointer.isAttached() && ( !( this.pointer instanceof Mouse ) || this.domEvent.button === 0 );
     }
-  } );
+  }
 
-  return Event;
+  return scenery.register( 'Event', Event );
 } );
