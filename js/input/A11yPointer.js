@@ -27,9 +27,6 @@ define( require => {
     constructor( display ) {
       super( null, false );
 
-      // @public
-      this.type = 'a11y';
-
       // @private
       this.display = display;
 
@@ -42,6 +39,13 @@ define( require => {
 
       sceneryLog && sceneryLog.Pointer && sceneryLog.Pointer( 'Created ' + this.toString() );
     }
+
+    /**
+     * @public
+     * @override
+     * @returns {string}
+     */
+    get type() { return 'a11y'; }
 
     /**
      * Set up listeners, attaching blur and focus listeners to the pointer once this A11yPointer has been attached
@@ -123,6 +127,13 @@ define( require => {
       }
     }
   }
+
+  /**
+   * @override
+   * @type {string}
+   */
+  A11yPointer.type = 'a11y';
+
 
   return scenery.register( 'A11yPointer', A11yPointer );
 } );

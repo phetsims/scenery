@@ -15,6 +15,13 @@ define( function( require ) {
 
   var Pointer = require( 'SCENERY/input/Pointer' ); // extends Pointer
 
+  /**
+   * @extends Pointer
+   * @param {number} id
+   * @param {Vector2} point
+   * @param {DOMEvent} event
+   * @constructor
+   */
   function Pen( id, point, event ) {
     Pointer.call( this, point, true ); // true: pen pointers always start in the down state
 
@@ -26,6 +33,12 @@ define( function( require ) {
   scenery.register( 'Pen', Pen );
 
   inherit( Pointer, Pen, {
+
+    /**
+     * @public
+     * @override
+     * @type {string}
+     */
     type: 'pen',
 
     move: function( point, event ) {

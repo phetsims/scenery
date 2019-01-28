@@ -15,6 +15,10 @@ define( function( require ) {
   var Pointer = require( 'SCENERY/input/Pointer' ); // inherits from Pointer
   var Vector3 = require( 'DOT/Vector3' );
 
+  /**
+   * @extends Pointer
+   * @constructor
+   */
   function Mouse() {
     Pointer.call( this, null, false );
 
@@ -33,6 +37,12 @@ define( function( require ) {
   scenery.register( 'Mouse', Mouse );
 
   inherit( Pointer, Mouse, {
+
+    /**
+     * @public
+     * @override
+     * @type {string}
+     */
     type: 'mouse',
 
     down: function( point, event ) {
@@ -52,7 +62,7 @@ define( function( require ) {
           this.rightDown = true;
           break;
         default:
-          // no-op until we refactor things, see https://github.com/phetsims/scenery/issues/813
+        // no-op until we refactor things, see https://github.com/phetsims/scenery/issues/813
       }
       return pointChanged;
     },
@@ -74,7 +84,7 @@ define( function( require ) {
           this.rightDown = false;
           break;
         default:
-          // no-op until we refactor things, see https://github.com/phetsims/scenery/issues/813
+        // no-op until we refactor things, see https://github.com/phetsims/scenery/issues/813
       }
       return pointChanged;
     },

@@ -33,13 +33,16 @@ define( function( require ) {
   /**
    * @constructor
    * @protected (scenery-internal)
-   *
+   * @abstract
    * @param {Vector2|null} initialPoint
    * @param {boolean} initialDownState
    */
   function Pointer( initialPoint, initialDownState ) {
     assert && assert( initialPoint === null || initialPoint instanceof Vector2 );
     assert && assert( typeof initialDownState === 'boolean' );
+
+    assert && assert( Object.getPrototypeOf( this ) !== Pointer.prototype, 'Pointer is an abstract class' );
+    assert && assert( typeof this.type === 'string', 'type field should be implemented by subtype' );
 
     // @public {Vector2|null} - The location of the pointer in the global coordinate system. If there has no location
     //                          recorded yet, it may be null.
@@ -78,6 +81,14 @@ define( function( require ) {
   scenery.register( 'Pointer', Pointer );
 
   inherit( Object, Pointer, {
+
+    /**
+     * Each Pointer subtype should implement a "type" field that can be checked against for scenery input.
+     * @abstract
+     * @type {string}
+     */
+    type: null,
+
     /**
      * Sets a cursor that takes precedence over cursor values specified on the pointer's trail.
      * @public

@@ -16,6 +16,13 @@ define( function( require ) {
 
   var Pointer = require( 'SCENERY/input/Pointer' ); // extends Pointer
 
+  /**
+   * @extends Pointer
+   * @param {number} id
+   * @param {Vector2} point
+   * @param {DOMEvent} event
+   * @constructor
+   */
   function Touch( id, point, event ) {
     Pointer.call( this, point, true ); // true: touches always start in the down state
 
@@ -27,6 +34,12 @@ define( function( require ) {
   scenery.register( 'Touch', Touch );
 
   inherit( Pointer, Touch, {
+
+    /**
+     * @public
+     * @override
+     * @type {string}
+     */
     type: 'touch',
 
     move: function( point, event ) {
