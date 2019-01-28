@@ -1,0 +1,238 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="utf-8" />
+  <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+  <meta name="viewport" content="width=device-width, height=device-height, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+  <meta name="apple-mobile-web-app-capable" content="yes">
+
+  <title>Accessibility: Slider</title>
+
+  <!-- Before loading other things (that might error), create hooks to report errors/loads for continuous testing -->
+  <script src="../../aqua/js/pageload-connector.js"></script>
+
+  <!-- jQuery and lodash are dependencies -->
+  <script src="../../sherpa/lib/jquery-2.1.0.min.js"></script>
+  <script src="../../sherpa/lib/lodash-4.17.4.min.js"></script>
+
+  <!--For the styling-->
+  <link rel="stylesheet" href="../assets/scenery.css">
+  <link rel="stylesheet" href="../../sherpa/lib/prism-1.15.0/prism-1.15.0.css">
+  <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/css/bootstrap.min.css" integrity="sha384-Gn5384xqQ1aoWXA+058RXPxPg6fy4IWvTNh0E263XmFcJlSAwiGgFAW/dAiS6JXm" crossorigin="anonymous">
+
+
+  <script src="../../sherpa/lib/bootstrap-2.2.2.js"></script>
+  <script src="../../sherpa/lib/prism-1.15.0/prism-1.15.0.min.js"></script>
+
+  <script src="../build/scenery.min.js"></script>
+
+  <style>
+      .container{
+        max-width: 100%;
+      }
+      .scene-and-PDOM {
+          display: grid;
+          grid-template-columns: 1fr 1fr;
+          min-width: 1350px;
+          margin:0;
+          padding: 0 1%;
+        }
+
+        .container .title{
+            grid-column: span 2;
+            text-align: center;
+            margin-top: 40px;
+        }
+
+        /* formatting for the displayed PDOM code */
+        .PDOM-container{
+          width: 100%;
+        }
+
+        pre{
+          width: 800px;
+          padding: 20px 10%;
+        }
+
+        #accessibility-scene{
+          width: 95%;
+          margin: 0 2%;
+          height: 300px;
+          position: relative;
+          left: 0;
+          top: 0;
+        }
+
+
+    </style>
+</head>
+
+<body>
+  <div class="container">
+    <div class="title">
+      <h2>Scenery Accessibility Examples: Slider</h2>
+      <p>Press tab to select the slider, use the right and left arrow keys to move.</p>
+    </div>
+    <div class="scene-and-PDOM">
+      <div class="input-container">
+        <div id="accessibility-scene" class="exampleScene"></div>
+      </div>
+
+      <div class="PDOM-container">
+        <pre id="PDOM-pre"></pre>
+      </div>
+    </div>
+  </div>
+
+  <script type="text/javascript">
+    let scene;
+
+    function docExample(id, draw) {
+      'use strict';
+      const $container = $('#' + id);
+      scene = new scenery.Node();
+      const display = new scenery.Display(scene, {
+        width: $container.width(),
+        height: $container.height(),
+        backgroundColor: '#eee'
+      });
+      display.initializeEvents();
+      $container[0].appendChild(display.domElement);
+      draw(scene, display);
+      display.background;
+      display.updateDisplay();
+    }
+  </script>
+
+  <script type="text/javascript">
+    scenery.Util.polyfillRequestAnimationFrame();
+
+    docExample('accessibility-scene', (scene, display) => {
+      'use strict';
+
+      //number of tick marks on track
+      const ticks = 10;
+      //calculates distance slider travels with each button press
+      const increment = (display.width)/(ticks+2);
+
+      // add a red hexagon to the screen at the beginning (since slider will start on the red side)
+      const hexagon = new scenery.Path(kite.Shape.regularPolygon(6, 22), {
+        fill: 'rgb(255, 0, 0)',
+        stroke: '#000',
+        x: display.width/2,
+        y: 75,
+        tagName: 'p', // tag name for PDOM element
+        accessibleName: 'a hexagon of color (255, 0, 0)' // accessibility description
+      });
+      scene.addChild(hexagon);
+
+      // TO DO: Implement rainbow gradient (maybe with an image?)
+      // let track = new scenery.LinearGradient(0, 100, 10, 200)
+      // track.addColorStop( 0, '#02ace4' ).addColorStop( 1, '#cfecfc' )
+
+      //slider thumb
+      const thumb = new scenery.Path(kite.Shape.rectangle(increment, 200, 15, 40), {
+        fill: 'white',
+        stroke: 'black',
+        tagName: 'button',
+        accessibleName: 'Slider thumb at position 0'
+      });
+
+      //slider track
+      const track = new scenery.Path(kite.Shape.rectangle(increment/2, 215, display.width-increment, 10), {
+        fill: 'grey'
+      });
+
+      scene.addChild(track);
+      scene.addChild(thumb);
+
+      // labels for the track
+      let i;
+      for (i = 0; i < ticks + 1; i ++){
+
+        //labels
+        scene.addChild(new scenery.Text(`${i}`, {
+          font: '0.8em sans-serif',
+          center: new dot.Vector2( (i+1)*increment + thumb.width/2, 250 )
+        }));
+
+        // tick marks
+        scene.addChild(new scenery.Path(kite.Shape.rectangle((i+1)*increment + thumb.width/2, 205, 3, 30), {
+          fill: 'black'
+        }));
+      }
+
+      // listener that moves slider when left or right arrow keys are pressed
+      display.addInputListener({
+        keydown: (e) => {
+
+          // determine whether slider should move left, right, or not at all.
+          let direction;
+          if (e.domEvent.code === 'ArrowRight') {
+            direction = 1;
+          } else if (e.domEvent.code === 'ArrowLeft') {
+            direction = -1;
+          } else {
+            direction = 0;
+          }
+
+          // checks to see if thumb moves off the track (and doesn't allow)
+          if ((thumb.x + thumb.width/2 + 2*increment >= display.width && direction > 0) || (thumb.x + thumb.width/2 - increment <= 0 && direction < 0)){
+            console.log('reached boundary');
+          } else {
+            // moves the thumb right or left if it will stay on the track
+            thumb.x += increment * direction;
+            const x = thumb.x;
+            const trackWidth = track.width;
+
+            // sets frequency to ensures that one rainbow cycle happens over the course of one slider length
+            const frequency = (2*Math.PI)/(display.width);
+
+            // makes the hexagon's color move in rainbow order, moving right to left
+            const r = Math.floor(127.5 * Math.cos(frequency * x)+127.5);
+            const g = Math.floor(-127.5 * Math.cos(frequency * x + trackWidth/4)+127.5);
+            const b = Math.floor(-127.5 * Math.cos(frequency * x)+127.5);
+            hexagon.fill = `rgb(${r}, ${g}, ${b})`;
+
+            //updates attributes that will create the PDOM elements
+            hexagon.tagName = 'p';
+            hexagon.accessibleName = `A hexagon of color ${hexagon.fill}`;
+            thumb.tagName = 'button';
+            thumb.accessibleName = `Slider thumb at position ${thumb.x/increment}`;
+          }
+        }
+      });
+
+      // update displayed p-dom text
+      const updatePDOMDisplay = function updatePDOMDisplay() {
+
+        //format the p-dom code
+        var PDOMHTMLBlock = display.accessibleDOMElement.outerHTML;
+        var formattedPDOM = PDOMHTMLBlock.replace(new RegExp('<[/]?\\w*[ >]', 'g'), '\n$&'); // add breaks in the string
+        var $PDOMcode = ($('<code class="language-html no-whitespace-normalization"></code>').text(formattedPDOM));
+
+        //add formatted code to the pre element
+        $('#PDOM-pre').html($PDOMcode);
+
+        //apply syntax highlighting
+        Prism.highlightAll();
+      };
+
+      //update the displayed p-dom code snippet when there's a change to the scene.
+      const config = {
+        attributes: true,
+        childList: true,
+        subtree: true
+      };
+      const observer = new MutationObserver(updatePDOMDisplay);
+      observer.observe(document.querySelector('#accessibility-scene'), config);
+
+      //update the animation upon changes
+      display.updateOnRequestAnimationFrame();
+    });
+
+  </script>
+</body>
+
+</html>

@@ -1,0 +1,215 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="utf-8" />
+  <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+  <meta name="viewport" content="width=device-width, height=device-height, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+  <meta name="apple-mobile-web-app-capable" content="yes">
+
+  <title>Accessibility: Event Listeners</title>
+
+  <!-- Before loading other things (that might error), create hooks to report errors/loads for continuous testing -->
+  <script src="../../aqua/js/pageload-connector.js"></script>
+
+  <!-- jQuery and lodash are dependencies -->
+  <script src="../../sherpa/lib/jquery-2.1.0.min.js"></script>
+  <script src="../../sherpa/lib/lodash-4.17.4.min.js"></script>
+
+  <!--For the styling-->
+  <link rel="stylesheet" href="../assets/scenery.css">
+  <link rel="stylesheet" href="../../sherpa/lib/prism-1.15.0/prism-1.15.0.css">
+  <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/css/bootstrap.min.css" integrity="sha384-Gn5384xqQ1aoWXA+058RXPxPg6fy4IWvTNh0E263XmFcJlSAwiGgFAW/dAiS6JXm" crossorigin="anonymous">
+
+
+  <script src="../../sherpa/lib/bootstrap-2.2.2.js"></script>
+  <script src="../../sherpa/lib/prism-1.15.0/prism-1.15.0.min.js"></script>
+
+  <script src="../build/scenery.min.js"></script>
+
+  <style>
+    .container{
+        max-width: 100%;
+      }
+      .scene-and-PDOM {
+          display: grid;
+          grid-template-columns: 1fr 1fr;
+          min-width: 1350px;
+          margin:0;
+          padding: 0 1%;
+        }
+
+        .container .title{
+            grid-column: span 2;
+            text-align: center;
+            margin-top: 40px;
+        }
+
+        /* formatting for the displayed PDOM code */
+        .PDOM-container{
+          width: 100%;
+        }
+
+        pre{
+          width: 800px;
+          padding: 20px 10%;
+        }
+
+        #accessibility-scene{
+          width: 95%;
+          margin: 0 2%;
+          height: 300px;
+          position: relative;
+          left: 0;
+          top: 0;
+        }
+
+
+    </style>
+</head>
+
+<body>
+  <div class="container">
+    <div class="title">
+      <h2>Scenery Accessibility Examples: Listeners</h2>
+    </div>
+    <div class="scene-and-PDOM">
+      <div class="input-container">
+        <div id="accessibility-scene" class="exampleScene"></div>
+      </div>
+
+      <div class="PDOM-container">
+        <pre id="PDOM-pre"></pre>
+      </div>
+    </div>
+  </div>
+
+  <script type="text/javascript">
+    let scene;
+    
+    function docExample( id, draw ) {
+      'use strict';
+      const $container = $( '#' + id );
+      scene = new scenery.Node();
+      const display = new scenery.Display( scene, {
+        width: $container.width(),
+        height: $container.height(),
+        backgroundColor: '#eee'
+      } );
+      display.initializeEvents();
+      $container[0].appendChild( display.domElement );
+      draw( scene, display );
+      display.background;
+      display.updateDisplay();
+    }
+  </script>
+
+  <script type="text/javascript">
+    scenery.Util.polyfillRequestAnimationFrame();
+
+    docExample( 'accessibility-scene', ( scene, display ) => {
+      'use strict';
+
+      const hexagon = new scenery.Path( kite.Shape.regularPolygon( 6, display.height / 3 ), {
+        fill: 'yellow',
+        stroke: '#000',
+        x: display.width / 2,
+        y: display.height / 2,
+        tagName: 'p', // tag name for PDOM element
+        accessibleName: 'a yellow hexagon' // accessibility description
+      } );
+
+      const square = new scenery.Path( kite.Shape.rectangle( 0, 0, 3 * display.height / 4, 3 * display.height / 4 ), {
+        fill: 'black',
+        center: hexagon.center,
+        tagName: 'button',
+        accessibleName: 'a black square'
+      } );
+
+      const circle = new scenery.Path( kite.Shape.circle( display.width / 2, 75, ( display.height / 4 ) ), {
+        fill: 'gold',
+        stroke: 'black',
+        center: hexagon.center,
+        tagName: 'p',
+        accessibleName: 'a yellow circle'
+      } );
+
+      function switchShape( nextShape ) {
+        const startingShape = scene.children[1];
+        startingShape.dispose();
+        scene.addChild( nextShape );
+      }
+
+      scene.addChild( square );
+      scene.addChild( hexagon );
+
+      square.addInputListener({
+
+        //click event listeners
+        down: () => {
+          switchShape( circle );
+        },
+        up: () => {
+          switchShape( hexagon );
+        },
+
+        //accessible click event listeners
+        keydown: ( e ) => {
+          if ( e.domEvent.code === 'Enter' ) {
+            switchShape( circle );
+          }
+        },
+        keyup: ( e ) => {
+          if ( e.domEvent.code === 'Enter' ) {
+            switchShape( hexagon );
+          }
+        },
+
+        //pointer events equivalent to the dom events "mouseenter" and "mouseleave"
+        enter: () => {
+          scene.children[1].fill = 'gold';
+        },
+        exit: () => {
+          scene.children[1].fill = 'yellow';
+        },
+
+        //accessible event listeners triggered when the virtual cursor is focused on or leaves the scene
+        focus: () => {
+          scene.children[1].fill = 'gold';
+        },
+        blur: () => {
+          scene.children[1].fill = 'yellow';
+        }
+      } );
+
+      // update displayed p-dom text
+      const updatePDOMDisplay = function updatePDOMDisplay() {
+
+        //format the p-dom code
+        var PDOMHTMLBlock = display.accessibleDOMElement.outerHTML;
+        var formattedPDOM = PDOMHTMLBlock.replace( new RegExp( '<[/]?\\w*[ >]', 'g' ), '\n$&' ); // add breaks in the string
+        var $PDOMcode = ( $( '<code class="language-html no-whitespace-normalization"></code>' ).text( formattedPDOM ) );
+
+        //add formatted code to the pre element
+        $( '#PDOM-pre' ).html( $PDOMcode );
+
+        //apply syntax highlighting
+        Prism.highlightAll();
+      };
+
+      //update the displayed p-dom code snippet when there's a change to the scene.
+      const config = {
+        attributes: true,
+        childList: true,
+        subtree: true
+      };
+      const observer = new MutationObserver( updatePDOMDisplay );
+      observer.observe( document.querySelector( '#accessibility-scene' ), config );
+
+      //update the animation upon changes
+      display.updateOnRequestAnimationFrame();
+    } );
+  </script>
+</body>
+
+</html>
