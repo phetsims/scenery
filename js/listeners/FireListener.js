@@ -108,12 +108,13 @@ define( function( require ) {
      * needed). If the cancel/interrupt behavior is more preferable (will not fire the button), then call interrupt()
      * on this listener instead.
      *
+     * @param {function} [event] - scenery Event if there was one
      * @param {function} [callback] - called at the end of the release
      */
-    release: function( callback ) {
+    release: function( event, callback ) {
       var self = this;
 
-      PressListener.prototype.release.call( this, function() {
+      PressListener.prototype.release.call( this, event, function() {
         // Notify after the rest of release is called in order to prevent it from triggering interrupt().
         if ( !self._fireOnDown && self.isHoveringProperty.value && !self.interrupted ) {
           self.fire();

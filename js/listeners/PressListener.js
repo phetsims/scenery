@@ -73,8 +73,8 @@ define( function( require ) {
       // (typically from a down event, but can be triggered by other handlers).
       press: _.noop,
 
-      // {function} - Called as release( listener: {PressListener} ) when this listener's node is released
-      // (pointer up/cancel or interrupt when pressed).
+      // {function} - Called as release( event: {Event|null}, listener: {PressListener} ) when this listener's node is released
+      // (pointer up/cancel or interrupt when pressed/after a11y click).
       release: _.noop,
 
       // {function} - Called as drag( event: {Event}, listener: {PressListener} ) when this listener's node is
@@ -152,10 +152,10 @@ define( function( require ) {
     this.overPointers = new ObservableArray();
 
     // @public {Property.<Boolean>} [read-only] - Tracks whether this listener's node is "pressed" or not
-    this.isPressedProperty = new BooleanProperty( false, { reentrant: true } ),
+    this.isPressedProperty = new BooleanProperty( false, { reentrant: true } );
 
-      // @public {Property.<boolean>} ]read-only] - It will be set to true when at least one pointer is over the listener.
-      this.isOverProperty = new BooleanProperty( false );
+    // @public {Property.<boolean>} ]read-only] - It will be set to true when at least one pointer is over the listener.
+    this.isOverProperty = new BooleanProperty( false );
 
     // @public {Property.<boolean>} [read-only] - It will be set to true when either:
     //   1. The listener is pressed and the pointer that is pressing is over the listener.
@@ -248,6 +248,7 @@ define( function( require ) {
 
       // TODO: use of both of these is redundant, and should get fixed with https://github.com/phetsims/axon/issues/194
       argumentTypes: [
+        { isValidValue: v => v instanceof Event || v === null },
         { isValidValue: function( v ) { return v === null || typeof v === 'function'; } }
       ],
       phetioType: ReleasedEmitterIO,
@@ -377,13 +378,14 @@ define( function( require ) {
      * This can be called from the outside to release the press without the pointer having actually fired any 'up'
      * events. If the cancel/interrupt behavior is more preferable, call interrupt() on this listener instead.
      *
+     * @param {function} [event] - scenery Event if there was one. We can't gaurantee an event, in part to support interrupting.
      * @param {function} [callback] - called at the end of the release
      */
-    release: function( callback ) {
+    release: function( event, callback ) {
       sceneryLog && sceneryLog.InputListener && sceneryLog.InputListener( 'PressListener#' + this._id + ' release' );
       sceneryLog && sceneryLog.InputListener && sceneryLog.push();
 
-      this._releasedEmitter.emit( callback || null ); // cannot pass undefined to emit call
+      this._releasedEmitter.emit( event || null, callback || null ); // cannot pass undefined to emit call
 
       sceneryLog && sceneryLog.InputListener && sceneryLog.pop();
     },
@@ -494,9 +496,10 @@ define( function( require ) {
      * Internal code executed as the first step of a release.
      * @private
      *
+     * @param {function} [event] - scenery Event if there was one
      * @param {function} [callback] - called at the end of the release
      */
-    onRelease: function( callback ) {
+    onRelease: function( event, callback ) {
       assert && assert( this.isPressed, 'This listener is not pressed' );
 
       this.pointer.removeInputListener( this._pointerListener );
@@ -511,7 +514,7 @@ define( function( require ) {
       this.isPressedProperty.value = false;
 
       // Notify after the rest of release is called in order to prevent it from triggering interrupt().
-      this._releaseListener( this );
+      this._releaseListener( event, this );
 
       callback && callback();
     },
@@ -588,7 +591,7 @@ define( function( require ) {
       if ( this.isPressed ) {
         assert && assert( event.pointer === this.pointer );
 
-        this.release();
+        this.release( event );
       }
 
       sceneryLog && sceneryLog.InputListener && sceneryLog.pop();
@@ -669,7 +672,7 @@ define( function( require ) {
      * This will fire listeners immediately, but adds a delay for the a11yClickingProperty so that you can make a
      * button look pressed from a single DOM click event. For example usage, see sun/ButtonModel.looksPressedProperty.
      */
-    click: function() {
+    click: function( event ) {
       if ( this.canClick() ) {
 
         this.a11yClickingProperty.value = true;
@@ -678,8 +681,14 @@ define( function( require ) {
         this.isFocusedProperty.value = true;
         this.isPressedProperty.value = true;
 
+        // fire the optional callback
+        this._pressListener( event, this );
+
         // no longer down, don't reset 'over' so button can be styled as long as it has focus
         this.isPressedProperty.value = false;
+
+        // fire the callback from options
+        this._releaseListener( event, this );
 
         // if we are already clicking, remove the previous timeout - this assumes that clearTimeout is a noop if the
         // listener is no longer attached

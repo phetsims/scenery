@@ -15,6 +15,7 @@
 define( require => {
   'use strict';
 
+  const A11yPointer = require( 'SCENERY/input/A11yPointer' );
   const Mouse = require( 'SCENERY/input/Mouse' );
   const Pointer = require( 'SCENERY/input/Pointer' );
   const scenery = require( 'SCENERY/scenery' );
@@ -84,6 +85,16 @@ define( require => {
     abort() {
       sceneryLog && sceneryLog.InputEvent && sceneryLog.InputEvent( 'aborted event' );
       this.aborted = true;
+    }
+
+    /**
+     * Specifies whether or not the Event came from alternative input. See Input.A11Y_EVENT_TYPES for a list of events
+     * a11y related events supported by scenery.
+     * @public
+     * @returns {boolean}
+     */
+    isA11y() {
+      return this.pointer instanceof A11yPointer;
     }
 
     /**
