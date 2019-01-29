@@ -74,6 +74,7 @@ define( function( require ) {
       press: _.noop,
 
       // {function} - Called as release( event: {Event|null}, listener: {PressListener} ) when this listener's node is released
+      // Note that an Event arg cannot be guaranteed from this listener. This is, in part, to support interrupt.
       // (pointer up/cancel or interrupt when pressed/after a11y click).
       release: _.noop,
 
