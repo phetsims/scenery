@@ -36,17 +36,23 @@ define( function( require ) {
    * @abstract
    * @param {Vector2|null} initialPoint
    * @param {boolean} initialDownState
+   * @param {string} type - the type of the pointer; can different for each subtype
    */
-  function Pointer( initialPoint, initialDownState ) {
+  function Pointer( initialPoint, initialDownState, type ) {
     assert && assert( initialPoint === null || initialPoint instanceof Vector2 );
     assert && assert( typeof initialDownState === 'boolean' );
 
+    assert && assert( typeof type === 'string' );
+
     assert && assert( Object.getPrototypeOf( this ) !== Pointer.prototype, 'Pointer is an abstract class' );
-    assert && assert( typeof this.type === 'string', 'type field should be implemented by subtype' );
 
     // @public {Vector2|null} - The location of the pointer in the global coordinate system. If there has no location
     //                          recorded yet, it may be null.
     this.point = initialPoint;
+
+    // @public (read-only) {string}
+    // Each Pointer subtype should implement a "type" field that can be checked against for scenery input.
+    this.type = type;
 
     // @public {Trail|null} - The trail that the pointer is currently over (if it has yet been registered). If the
     //                        pointer has not yet registered a trail, it may be null. If the pointer wasn't over any
@@ -81,13 +87,6 @@ define( function( require ) {
   scenery.register( 'Pointer', Pointer );
 
   inherit( Object, Pointer, {
-
-    /**
-     * Each Pointer subtype should implement a "type" field that can be checked against for scenery input.
-     * @abstract
-     * @type {string}
-     */
-    type: null,
 
     /**
      * Sets a cursor that takes precedence over cursor values specified on the pointer's trail.

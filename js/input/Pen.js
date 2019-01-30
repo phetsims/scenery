@@ -23,7 +23,7 @@ define( function( require ) {
    * @constructor
    */
   function Pen( id, point, event ) {
-    Pointer.call( this, point, true ); // true: pen pointers always start in the down state
+    Pointer.call( this, point, true, 'pen' ); // true: pen pointers always start in the down state
 
     this.id = id;
 
@@ -33,13 +33,6 @@ define( function( require ) {
   scenery.register( 'Pen', Pen );
 
   inherit( Pointer, Pen, {
-
-    /**
-     * @public
-     * @override
-     * @type {string}
-     */
-    type: 'pen',
 
     move: function( point, event ) {
       var pointChanged = this.hasPointChanged( point );

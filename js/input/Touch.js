@@ -24,7 +24,7 @@ define( function( require ) {
    * @constructor
    */
   function Touch( id, point, event ) {
-    Pointer.call( this, point, true ); // true: touches always start in the down state
+    Pointer.call( this, point, true, 'touch' ); // true: touches always start in the down state
 
     this.id = id;
 
@@ -34,13 +34,6 @@ define( function( require ) {
   scenery.register( 'Touch', Touch );
 
   inherit( Pointer, Touch, {
-
-    /**
-     * @public
-     * @override
-     * @type {string}
-     */
-    type: 'touch',
 
     move: function( point, event ) {
       var pointChanged = this.hasPointChanged( point );
