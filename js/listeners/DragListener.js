@@ -191,7 +191,7 @@ define( function( require ) {
       phetioHighFrequency: true,
       phetioDocumentation: 'Emits whenever a drag occurs with an EventIO argument.',
       phetioReadOnly: options.phetioReadOnly,
-      phetioEventType: 'user',
+      phetioEventType: PhetioObject.EventType.USER,
 
       argumentTypes: [ { valueType: Event } ],
       phetioType: DraggedEmitterIO,

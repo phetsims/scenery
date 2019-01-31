@@ -224,7 +224,7 @@ define( function( require ) {
                            'used to convey info about the Event.',
       phetioReadOnly: options.phetioReadOnly,
       phetioFeatured: options.phetioFeatured,
-      phetioEventType: 'user',
+      phetioEventType: PhetioObject.EventType.USER,
 
       // TODO: use of both of these is redundant, and should get fixed with https://github.com/phetsims/axon/issues/194
       argumentTypes: [
@@ -245,7 +245,7 @@ define( function( require ) {
       phetioDocumentation: 'Emits whenever a release occurs.',
       phetioReadOnly: options.phetioReadOnly,
       phetioFeatured: options.phetioFeatured,
-      phetioEventType: 'user',
+      phetioEventType: PhetioObject.EventType.USER,
 
       // TODO: use of both of these is redundant, and should get fixed with https://github.com/phetsims/axon/issues/194
       argumentTypes: [

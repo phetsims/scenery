@@ -136,6 +136,7 @@ define( require => {
   const Mouse = require( 'SCENERY/input/Mouse' );
   const NumberIO = require( 'TANDEM/types/NumberIO' );
   const Pen = require( 'SCENERY/input/Pen' );
+  const PhetioObject = require( 'TANDEM/PhetioObject' );
   const platform = require( 'PHET_CORE/platform' );
   const Pointer = require( 'SCENERY/input/Pointer' );
   const scenery = require( 'SCENERY/scenery' );
@@ -247,7 +248,7 @@ define( require => {
           { name: 'point', type: Vector2IO },
           { name: 'event', type: DOMEventIO }
         ] ),
-        phetioEventType: 'user',
+        phetioEventType: PhetioObject.EventType.USER,
         phetioDocumentation: 'Emits when a mouse button is released',
         listener: ( point, event ) => {
           if ( !this.mouse ) { this.initMouse(); }
@@ -267,7 +268,7 @@ define( require => {
           { name: 'point', type: Vector2IO },
           { name: 'event', type: DOMEventIO }
         ] ),
-        phetioEventType: 'user',
+        phetioEventType: PhetioObject.EventType.USER,
         phetioDocumentation: 'Emits when a mouse button is pressed',
         listener: ( point, event ) => {
           if ( !this.mouse ) { this.initMouse(); }
@@ -287,7 +288,7 @@ define( require => {
           { name: 'point', type: Vector2IO },
           { name: 'event', type: DOMEventIO }
         ] ),
-        phetioEventType: 'user',
+        phetioEventType: PhetioObject.EventType.USER,
         phetioDocumentation: 'Emits when the mouse is moved',
         phetioHighFrequency: true,
         listener: ( point, event ) => {
@@ -308,7 +309,7 @@ define( require => {
           { name: 'point', type: Vector2IO },
           { name: 'event', type: DOMEventIO }
         ] ),
-        phetioEventType: 'user',
+        phetioEventType: PhetioObject.EventType.USER,
         phetioDocumentation: 'Emits when the mouse is moved over a Node',
         listener: ( point, event ) => {
           if ( !this.mouse ) { this.initMouse(); }
@@ -328,7 +329,7 @@ define( require => {
           { name: 'point', type: Vector2IO },
           { name: 'event', type: DOMEventIO }
         ] ),
-        phetioEventType: 'user',
+        phetioEventType: PhetioObject.EventType.USER,
         phetioDocumentation: 'Emits when the mouse moves out of the display',
         listener: ( point, event ) => {
           if ( !this.mouse ) { this.initMouse(); }
@@ -347,7 +348,7 @@ define( require => {
         phetioType: EmitterIO( [
           { name: 'event', type: DOMEventIO }
         ] ),
-        phetioEventType: 'user',
+        phetioEventType: PhetioObject.EventType.USER,
         phetioDocumentation: 'Emits when the mouse wheel scrolls',
         phetioHighFrequency: true,
         listener: event => {
@@ -375,7 +376,7 @@ define( require => {
           { name: 'point', type: Vector2IO },
           { name: 'event', type: DOMEventIO }
         ] ),
-        phetioEventType: 'user',
+        phetioEventType: PhetioObject.EventType.USER,
         phetioDocumentation: 'Emits when a touch begins',
         listener: ( id, point, event ) => {
           const touch = new Touch( id, point, event );
@@ -396,7 +397,7 @@ define( require => {
           { name: 'point', type: Vector2IO },
           { name: 'event', type: DOMEventIO }
         ] ),
-        phetioEventType: 'user',
+        phetioEventType: PhetioObject.EventType.USER,
         phetioDocumentation: 'Emits when a touch ends',
         listener: ( id, point, event ) => {
           const touch = this.findPointerById( id );
@@ -420,7 +421,7 @@ define( require => {
           { name: 'point', type: Vector2IO },
           { name: 'event', type: DOMEventIO }
         ] ),
-        phetioEventType: 'user',
+        phetioEventType: PhetioObject.EventType.USER,
         phetioDocumentation: 'Emits when a touch moves',
         phetioHighFrequency: true,
         listener: ( id, point, event ) => {
@@ -444,7 +445,7 @@ define( require => {
           { name: 'point', type: Vector2IO },
           { name: 'event', type: DOMEventIO }
         ] ),
-        phetioEventType: 'user',
+        phetioEventType: PhetioObject.EventType.USER,
         phetioDocumentation: 'Emits when a touch is canceled',
         listener: ( id, point, event ) => {
           const touch = this.findPointerById( id );
@@ -468,7 +469,7 @@ define( require => {
           { name: 'point', type: Vector2IO },
           { name: 'event', type: DOMEventIO }
         ] ),
-        phetioEventType: 'user',
+        phetioEventType: PhetioObject.EventType.USER,
         phetioDocumentation: 'Emits when a pen touches the screen',
         listener: ( id, point, event ) => {
           const pen = new Pen( id, point, event );
@@ -489,7 +490,7 @@ define( require => {
           { name: 'point', type: Vector2IO },
           { name: 'event', type: DOMEventIO }
         ] ),
-        phetioEventType: 'user',
+        phetioEventType: PhetioObject.EventType.USER,
         phetioDocumentation: 'Emits when a pen is lifted',
         listener: ( id, point, event ) => {
           const pen = this.findPointerById( id );
@@ -513,7 +514,7 @@ define( require => {
           { name: 'point', type: Vector2IO },
           { name: 'event', type: DOMEventIO }
         ] ),
-        phetioEventType: 'user',
+        phetioEventType: PhetioObject.EventType.USER,
         phetioDocumentation: 'Emits when a pen is moved',
         phetioHighFrequency: true,
         listener: ( id, point, event ) => {
@@ -537,7 +538,7 @@ define( require => {
           { name: 'point', type: Vector2IO },
           { name: 'event', type: DOMEventIO }
         ] ),
-        phetioEventType: 'user',
+        phetioEventType: PhetioObject.EventType.USER,
         phetioDocumentation: 'Emits when a pen is canceled',
         listener: ( id, point, event ) => {
           const pen = this.findPointerById( id );
@@ -581,7 +582,7 @@ define( require => {
           phetioType: EmitterIO( [
             { name: 'event', type: DOMEventIO }
           ] ),
-          phetioEventType: 'user',
+          phetioEventType: PhetioObject.EventType.USER,
           phetioDocumentation: 'Emits when the PDOM root gets the focusin DOM event.',
           listener: ( event ) => {
             sceneryLog && sceneryLog.Input && sceneryLog.Input( 'focusIn(' + Input.debugText( null, event ) + ');' );
@@ -605,7 +606,7 @@ define( require => {
           phetioType: EmitterIO( [
             { name: 'event', type: DOMEventIO }
           ] ),
-          phetioEventType: 'user',
+          phetioEventType: PhetioObject.EventType.USER,
           phetioDocumentation: 'Emits when the PDOM root gets the focusout DOM event.',
           listener: ( event ) => {
             sceneryLog && sceneryLog.Input && sceneryLog.Input( 'focusOut(' + Input.debugText( null, event ) + ');' );
@@ -636,7 +637,7 @@ define( require => {
           phetioType: EmitterIO( [
             { name: 'event', type: DOMEventIO }
           ] ),
-          phetioEventType: 'user',
+          phetioEventType: PhetioObject.EventType.USER,
           phetioDocumentation: 'Emits when the PDOM root gets the click DOM event.',
           listener: ( event ) => {
             sceneryLog && sceneryLog.Input && sceneryLog.Input( 'click(' + Input.debugText( null, event ) + ');' );
@@ -660,7 +661,7 @@ define( require => {
           phetioType: EmitterIO( [
             { name: 'event', type: DOMEventIO }
           ] ),
-          phetioEventType: 'user',
+          phetioEventType: PhetioObject.EventType.USER,
           phetioDocumentation: 'Emits when the PDOM root gets the input DOM event.',
           listener: ( event ) => {
             sceneryLog && sceneryLog.Input && sceneryLog.Input( 'input(' + Input.debugText( null, event ) + ');' );
@@ -684,7 +685,7 @@ define( require => {
           phetioType: EmitterIO( [
             { name: 'event', type: DOMEventIO }
           ] ),
-          phetioEventType: 'user',
+          phetioEventType: PhetioObject.EventType.USER,
           phetioDocumentation: 'Emits when the PDOM root gets the change DOM event.',
           listener: ( event ) => {
             sceneryLog && sceneryLog.Input && sceneryLog.Input( 'change(' + Input.debugText( null, event ) + ');' );
@@ -708,7 +709,7 @@ define( require => {
           phetioType: EmitterIO( [
             { name: 'event', type: DOMEventIO }
           ] ),
-          phetioEventType: 'user',
+          phetioEventType: PhetioObject.EventType.USER,
           phetioDocumentation: 'Emits when the PDOM root gets the keydown DOM event.',
           listener: ( event ) => {
             sceneryLog && sceneryLog.Input && sceneryLog.Input( 'keydown(' + Input.debugText( null, event ) + ');' );
@@ -732,7 +733,7 @@ define( require => {
           phetioType: EmitterIO( [
             { name: 'event', type: DOMEventIO }
           ] ),
-          phetioEventType: 'user',
+          phetioEventType: PhetioObject.EventType.USER,
           phetioDocumentation: 'Emits when the PDOM root gets the keyup DOM event.',
           listener: ( event ) => {
             sceneryLog && sceneryLog.Input && sceneryLog.Input( 'keyup(' + Input.debugText( null, event ) + ');' );

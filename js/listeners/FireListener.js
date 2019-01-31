@@ -13,6 +13,7 @@ define( function( require ) {
 
   var Emitter = require( 'AXON/Emitter' );
   var inherit = require( 'PHET_CORE/inherit' );
+  var PhetioObject = require( 'TANDEM/PhetioObject' );
   var PressListener = require( 'SCENERY/listeners/PressListener' );
   var scenery = require( 'SCENERY/scenery' );
   var Tandem = require( 'TANDEM/Tandem' );
@@ -48,7 +49,7 @@ define( function( require ) {
     // @private {Emitter}
     this.firedEmitter = new Emitter( {
       tandem: options.tandem.createTandem( 'firedEmitter' ),
-      phetioEventType: 'user'
+      phetioEventType: PhetioObject.EventType.USER
     } );
     this.firedEmitter.addListener( options.fire );
   }

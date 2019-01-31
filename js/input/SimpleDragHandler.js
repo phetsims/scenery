@@ -58,7 +58,7 @@ define( function( require ) {
       // phetio
       tandem: Tandem.required,
       phetioState: false,
-      phetioEventType: 'user'
+      phetioEventType: PhetioObject.EventType.USER
 
     }, options );
     this.options = options; // @private
