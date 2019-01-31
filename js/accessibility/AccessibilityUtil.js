@@ -17,6 +17,7 @@ define( function( require ) {
   // modules
   var Random = require( 'DOT/Random' );
   var scenery = require( 'SCENERY/scenery' );
+  var SceneryStyle = require( 'SCENERY/util/SceneryStyle' );
 
   // constants
   var NEXT = 'NEXT';
@@ -67,7 +68,7 @@ define( function( require ) {
   var DOM_EVENTS = [ 'focusin', 'focusout', 'input', 'change', 'click', 'keydown', 'keyup' ];
 
   // these elements require a minimum width to be visible in Safari, see https://github.com/phetsims/john-travoltage/issues/204
-  var ELEMENTS_REQUIRE_WIDTH = [ INPUT_TAG, A_TAG ];
+  // var ELEMENTS_REQUIRE_WIDTH = [ INPUT_TAG, A_TAG ];
 
   var ARIA_LABELLEDBY = 'aria-labelledby';
   var ARIA_DESCRIBEDBY = 'aria-describedby';
@@ -79,6 +80,45 @@ define( function( require ) {
 
   // {Array.<String>} attributes that put an ID of another attribute as the value, see https://github.com/phetsims/scenery/issues/819
   var ASSOCIATION_ATTRIBUTES = [ ARIA_LABELLEDBY, ARIA_DESCRIBEDBY, ARIA_ACTIVE_DESCENDANT ];
+
+  // All elements that use AccessibilityUtil.createElement will have this style. Additional notes about attributes that
+  // should not be used:
+  // padding: 0px; - might assist with correct viewport bounds, but prevents <input> from having defined width
+  SceneryStyle.addRule( '.a11yElement ' +
+    '{' +
+      // fixed to the 'relative' styled root element, to be transformed with left/top
+      'position: fixed;' + 
+
+      // default, to the 'relative' root PDOM element - might change with node transform if focusable
+      'top: 0px;' +
+      'left: 0px;' +
+
+      // for CSS transformations of focusable elements, origin at left top
+      'transform-origin: left top 0px;' +
+
+      // helps get accurate bounds with getBoundingClientRect() for transformations
+      'border-width: 0px;' +
+      'margin: 0px;' +
+      'white-space: nowrap;' +
+
+      // CRITICAL - so PDOM elements do not interfere with rest of scenery input
+      'pointer-events: none;' +
+
+      // to remove the default focus highlight around HTML elements
+      'outline: none;' +
+      'box-shadow:none;' +
+      'border-color:transparent;' +
+
+      // So that elements can never be seen visually, can comment this out to "see" transformed elements in the
+      // PDOM. Text and Backgrounds of elements are made transparent where possible. Text is made very small so that
+      // it doesn't extend into the display. Very low opacity on the root takes care of the rest.
+      'font-size: 1px;' + // must be at least 1px to be readable with AT
+      'color: transparent;' +
+      'background-color: transparent;' +
+
+      // 'color: white' + // helpful for seeing text over a black background for debugging
+    '}'
+  );
 
   /**
    * Get all 'element' nodes off the parent element, placing them in an array for easy traversal.  Note that this
@@ -448,18 +488,34 @@ define( function( require ) {
       var domElement = options.namespace
                        ? document.createElementNS( options.namespace, tagName )
                        : document.createElement( tagName );
-      var upperCaseTagName = tagName.toUpperCase();
 
       // set tab index if we are overriding default browser behavior
       AccessibilityUtil.overrideFocusWithTabIndex( domElement, focusable );
 
-      // Safari requires that certain input elements have dimension, otherwise it will not be keyboard accessible
-      if ( _.includes( ELEMENTS_REQUIRE_WIDTH, upperCaseTagName ) ) {
-        domElement.style.width = '1px';
-        domElement.style.height = '1px';
-      }
+      // gives this element styling from SceneryStyle
+      domElement.className = 'a11yElement';
+
+      // // Safari requires that certain input elements have dimension, otherwise it will not be keyboard accessible
+      // var upperCaseTagName = tagName.toUpperCase();
+      // if ( _.includes( ELEMENTS_REQUIRE_WIDTH, upperCaseTagName ) ) {
+      //   domElement.style.width = '1px';
+      //   domElement.style.height = '1px';
+      // }
 
       return domElement;
+    },
+
+    /**
+     * Make an HTML element "invisible" by shifting it way off screen and making it really small. By giving the element
+     * non-zero dimensions, it is still readable by an assistive device.
+     */
+    hideElement: function( element ) {
+
+      // NOTE that this doesn't work on iOS 12, the whole screen shifts when this happens
+      // But removing them makes it work just fine on that device. This seems unnecessary because of the incredibly
+      // low opacity of our other elements
+      // element.style.left = '-9999px';
+      // element.style.top = '-9999px';
     },
 
     /**

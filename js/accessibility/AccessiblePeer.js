@@ -13,15 +13,15 @@ define( function( require ) {
 
   var AccessibilityUtil = require( 'SCENERY/accessibility/AccessibilityUtil' );
   var arrayRemove = require( 'PHET_CORE/arrayRemove' );
+  var Bounds2 = require( 'DOT/Bounds2' );
   var FullScreen = require( 'SCENERY/util/FullScreen' );
   var inherit = require( 'PHET_CORE/inherit' );
+  var Matrix3 = require( 'DOT/Matrix3' );
   var platform = require( 'PHET_CORE/platform' );
   var Poolable = require( 'PHET_CORE/Poolable' );
   var scenery = require( 'SCENERY/scenery' );
   // so RequireJS doesn't complain about circular dependency
   // var Display = require( 'SCENERY/display/Display' );
-
-  var globalId = 1;
 
   // constants
   var PRIMARY_SIBLING = 'PRIMARY_SIBLING';
@@ -30,6 +30,20 @@ define( function( require ) {
   var CONTAINER_PARENT = 'CONTAINER_PARENT';
   var LABEL_TAG = AccessibilityUtil.TAGS.LABEL;
   var INPUT_TAG = AccessibilityUtil.TAGS.INPUT;
+
+  // DOM observers that apply new CSS transformations are triggered when children, or inner content change. Updating
+  // style/positioning of the element will change attributes so we can't observe those changes since it would trigger
+  // the MutationObserver infinitely.
+  var OBSERVER_CONFIG = { attributes: false, childList: true, characterData: true };
+
+  var globalId = 1;
+
+  // mutables instances to avoid creating many in operations that occur frequently
+  var scratchGlobalBounds = new Bounds2( 0, 0, 0, 0 );
+  var scratchSiblingBounds = new Bounds2( 0, 0, 0, 0 );
+  var globalNodeTranslationMatrix = new Matrix3();
+  var globalToClientScaleMatrix = new Matrix3();
+  var nodeScaleMagnitudeMatrix = new Matrix3();
 
   /**
    * @param {AccessibleInstance} accessibleInstance
@@ -57,7 +71,7 @@ define( function( require ) {
      */
     initializeAccessiblePeer: function( accessibleInstance, options ) {
       options = _.extend( {
-        primarySibling: null // {HTMLElement|null} primarySibling - The main DOM element used for this peer
+        primarySibling: null
       }, options );
 
       assert && assert( !this.id || this.disposed, 'If we previously existed, we need to have been disposed' );
@@ -95,16 +109,53 @@ define( function( require ) {
       // See this.orderElements for more info.
       this.topLevelElements = [];
 
+      // @private {boolean} - flag that indicates that this peer has accessible content that changed, and so
+      // the siblings need to be repositioned in the next Display.updateDisplay()
+      this.positionDirty = false;
+
+      // @private {boolean} - indicates that this peer's accessibleInstance has a descendant that is dirty. Used to
+      // quickly find peers with positionDirty when we traverse the tree of AccessibleInstances
+      this.childPositionDirty = false;
+
+      // @private {MutationObserver} - An observer that will call back any time a property of the primary
+      // sibling changes. Used to reposition the sibling elements if the bounding box resizes. No need to loop over
+      // all of the mutations, any single mutation will require updating CSS positioning.
+      // 
+      // NOTE: Ideally, a single MutationObserver could be used to observe changes to all elements in the PDOM. But
+      // MutationObserver makes it impossible to detach observers from a single element. MutationObserver.detach()
+      // will remove listeners on all observed elements, so individual observers must be used on each element.
+      // One alternative could be to put the MutationObserver on the root element and use "subtree: true" in
+      // OBSERVER_CONFIG. This could reduce the number of MutationObservers, but there is no easy way to get the
+      // peer from the mutation target element. If MutationObserver takes a lot of memory, this could be an
+      // optimization that may come with a performance cost.
+      // 
+      // NOTE: ResizeObserver is a superior alternative to MutationObserver for this purpose because
+      // it will only monitor changes we care about and prevent infinite callback loops if size is changed in
+      // the callback function (we get around this now by not observing attribute changes). But it is not yet widely
+      // supported, see https://developer.mozilla.org/en-US/docs/Web/API/ResizeObserver
+      this.mutationObserver = this.mutationObserver || new MutationObserver( this.invalidateCSSPositioning.bind( this ) );
+
+      // @private {function} - must be removed on disposal
+      this.transformListener = this.transformListener || this.invalidateCSSPositioning.bind( this );
+      this.accessibleInstance.transformTracker.addListener( this.transformListener );
+
       // @private {boolean} - Whether we are currently in a "disposed" (in the pool) state, or are available to be
       // interacted with.
       this.disposed = false;
 
       // edge case for root accessibility
-      if ( options.primarySibling ) {
+      if ( this.accessibleInstance.isRootInstance ) {
 
         // @private {HTMLElement} - The main element associated with this peer. If focusable, this is the element that gets
         // the focus. It also will contain any children.
         this._primarySibling = options.primarySibling;
+
+        // root has 'relative' style so descendants can be positioned 'fixed' relative to the root
+        this._primarySibling.style.postition = 'relative';
+
+        // a catch all for things that SceneryStyle in AccessibilityUtil doesn't hide - must be added
+        // to the root, scenery take a massive performance hit if opacity is added to all HTML elements
+        this._primarySibling.style.opacity = '0.0001';
       }
 
       return this;
@@ -112,8 +163,7 @@ define( function( require ) {
 
     /**
      * Update the content of the peer. This must be called after the AccessibePeer is constructed from pool.
-     * @private
-     *
+     * @public (scenery-internal)
      */
     update: function() {
       var uniqueId = this.accessibleInstance.trail.getUniqueId();
@@ -199,6 +249,10 @@ define( function( require ) {
       }
 
       this.orderElements( options );
+
+      // assign listeners (to be removed or disconnected during disposal)
+      this.mutationObserver.disconnect(); // in case update() is called more than once on an instance of AccessiblePeer
+      this.mutationObserver.observe( this._primarySibling, OBSERVER_CONFIG );
 
       // set the accessible label now that the element has been recreated again, but not if the tagName
       // has been cleared out
@@ -662,6 +716,9 @@ define( function( require ) {
             this.setAttributeToElement( 'hidden', '', { element: element } );
           }
         }
+
+        // invalidate CSS transforms because when 'hidden' the content will have no dimensions in the viewport
+        this.invalidateCSSPositioning();
       }
     },
 
@@ -769,6 +826,123 @@ define( function( require ) {
     },
 
     /**
+     * Mark that the siblings of this AccessiblePeer need to be updated in the next Display update. Possibly from a
+     * change of accessible content or node transformation. Does nothing if already marked dirty.
+     *
+     * @private
+     */
+    invalidateCSSPositioning: function() {
+      if ( !this.positionDirty ) {
+        this.positionDirty = true;
+
+        // mark all ancestors of this peer so that we can quickly find this dirty peer when we traverse
+        // the AccessibleInstance tree
+        var parent = this.accessibleInstance.parent;
+        while( parent ) {
+          parent.peer.childPositionDirty = true;
+          parent = parent.parent;
+        }
+      }
+    },
+
+    /**
+     * Update the CSS positioning of the primary and label siblings. Required to support accessibility on mobile
+     * devices. On activation of focusable elements, certain AT will send fake pointer events to the browser at
+     * the center of the client bounding rectangle of the HTML element. By positioning elements over graphical display
+     * objects we can capture those events. A transformation matrix is calculated that will transform the position
+     * and dimension of the HTML element in pixels to the global coordinate frame. The matrix is used to transform
+     * the bounds of the element prior to any other transformation so we can set the element's left, top, width, and
+     * height with CSS attributes.
+     *
+     * For now we are only transforming the primary and label siblings if the primary sibling is focusable. If
+     * focusable, the primary sibling needs to be transformed to receive user input. VoiceOver includes the label bounds
+     * in its calculation for where to send the events, so it needs to be transformed as well. Descriptions are not
+     * considered and do not need to be positioned.
+     *
+     * Initially, we tried to set the CSS transformations on elements directly through the transform attribute. While
+     * this worked for basic input, it did not support other AT features like tapping the screen to focus elements.
+     * With this strategy, the VoiceOver "touch area" was a small box around the top left corner of the element. It was
+     * never clear why this was this case, but forced us to change our strategy to set the left, top, width, and height
+     * attributes instead.
+     *
+     * This function assumes that elements have other style attributes so they can be positioned correctly and don't
+     * interfere with scenery input, see SceneryStyle in AccessibilityUtil.
+     *
+     * Additional notes were taken in https://github.com/phetsims/scenery/issues/852, see that issue for more
+     * information.
+     *
+     * @private
+     */
+    positionElements: function() {
+      assert && assert( this._primarySibling, 'a primary sibling required to receive CSS positioning' );
+      assert && assert( this.positionDirty, 'elements should only be repositioned if dirty' );
+
+      // CSS transformation only needs to be applied if the node is focusable - otherwise the element will be found
+      // by gesture navigation with the virtual cursor. Bounds for non-focusable elements in the ViewPort don't
+      // need to be accurate because the AT doesn't need to send events to them.
+      if ( this.node.focusable ) {
+
+        scratchGlobalBounds.set( this.node.localBounds );
+        if ( scratchGlobalBounds.isFinite() ) {
+
+          scratchGlobalBounds.transform( this.accessibleInstance.transformTracker.getMatrix() );
+          var scaleVector = this.node.getScaleVector(); // could be optimized to create less Vector2 instances
+
+          var clientDimensions = getClientDimensions( this._primarySibling );
+          var clientWidth = clientDimensions.width;
+          var clientHeight = clientDimensions.height;
+
+          if ( clientWidth > 0 && clientHeight > 0 ) {
+            scratchSiblingBounds.setMinMax( 0, 0, clientWidth, clientHeight );
+            scratchSiblingBounds.transform( getCSSMatrix( this._primarySibling, clientWidth, clientHeight, scratchGlobalBounds, scaleVector ) );
+            setClientBounds( this._primarySibling, scratchSiblingBounds );
+          }
+
+          if ( this.labelSibling ) {
+            clientDimensions = getClientDimensions( this._labelSibling );
+            clientWidth = clientDimensions.width;
+            clientHeight = clientDimensions.height;
+
+            if ( clientHeight > 0 && clientWidth > 0 ) {
+              scratchSiblingBounds.setMinMax( 0, 0, clientWidth, clientHeight );
+              scratchSiblingBounds.transform( getCSSMatrix( this.labelSibling, clientWidth, clientHeight, scratchGlobalBounds, scaleVector ) );
+              setClientBounds( this._labelSibling, scratchSiblingBounds );
+            }
+          }
+        }
+      }
+      else {
+
+        // just make sure that the element is off screen
+        AccessibilityUtil.hideElement( this._primarySibling );
+        this._labelSibling && AccessibilityUtil.hideElement( this._labelSibling );
+      }
+
+      this.positionDirty = false;
+    },
+
+    /**
+     * Update positioning of elements in the PDOM. Does a depth first search for all descendants of parentIntsance with
+     * a peer that either has dirty positioning or as a descendant with dirty positioning.
+     * 
+     * @public (scenery-internal)
+     */
+    updateSubtreePositioning: function() {
+      this.childPositionDirty = false;
+
+      if ( this.positionDirty ) {
+        this.positionElements();
+      }
+
+      for ( var i = 0; i < this.accessibleInstance.children.length; i++ ) {
+        var childPeer = this.accessibleInstance.children[ i ].peer;
+        if ( childPeer.positionDirty || childPeer.childPositionDirty ) {
+          this.accessibleInstance.children[ i ].peer.updateSubtreePositioning();
+        }
+      }
+    },
+
+    /**
      * Removes external references from this peer, and places it in the pool.
      * @public (scenery-internal)
      */
@@ -786,6 +960,8 @@ define( function( require ) {
       // remove listeners
       this._primarySibling.removeEventListener( 'blur', this.blurEventListener );
       this._primarySibling.removeEventListener( 'focus', this.focusEventListener );
+      this.accessibleInstance.transformTracker.removeListener( this.transformListener );
+      this.mutationObserver.disconnect();
 
       // zero-out references
       this.accessibleInstance = null;
@@ -813,6 +989,71 @@ define( function( require ) {
   Poolable.mixInto( AccessiblePeer, {
     initalize: AccessiblePeer.prototype.initializeAccessiblePeer
   } );
+
+  //--------------------------------------------------------------------------
+  // Helper functions
+  //--------------------------------------------------------------------------
+  
+  /**
+   * Get a matrix that can be used as the CSS transform for elements in the DOM. This matrix will an HTML element
+   * dimensions in pixels to the global coordinate frame.
+   * 
+   * @param  {HTMLElement} element - the element to receive the CSS transform
+   * @param  {number} clientWidth - width of the element to transform in pixels
+   * @param  {number} clientHeight - height of the element to transform in pixels
+   * @param  {Bounds2} nodeGlobalBounds - Bounds of the AccessiblePeer's node in the global coordinate frame.
+   * @param  {Vector2} scaleVector - the scale magnitude Vector for the Node.
+   * @returns {Matrix3}
+   */
+  function getCSSMatrix( element, clientWidth, clientHeight, nodeGlobalBounds, scaleVector ) {
+
+    // the translation matrix for the node's bounds in its local coordinate frame
+    globalNodeTranslationMatrix.setToTranslation( nodeGlobalBounds.minX, nodeGlobalBounds.minY );
+
+    // scale matrix for "client" HTML element, scale to make the HTML element's DOM bounds match the
+    // local bounds of the node
+    globalToClientScaleMatrix.setToScale( nodeGlobalBounds.width / clientWidth, nodeGlobalBounds.height / clientHeight );
+    nodeScaleMagnitudeMatrix.setToScale( scaleVector.x, scaleVector.y );
+
+    // combine these in a single transformation matrix
+    return globalNodeTranslationMatrix.multiplyMatrix( globalToClientScaleMatrix ).multiplyMatrix( nodeScaleMagnitudeMatrix );
+  }
+
+  /**
+   * Gets an object with the width and height of an HTML element in pixels, prior to any scaling. clientWidth and
+   * clientHeight are zero for elements with inline layout and elements without CSS. For those elements we fall back
+   * to the boundingClientRect, which at that point will describe the dimensions of the element prior to scaling.
+   * 
+   * @param  {HTMLElement} siblingElement
+   * @returns {Object} - Returns an object with two entries, { width: {number}, height: {number} }
+   */
+  function getClientDimensions( siblingElement ) {
+    var clientWidth = siblingElement.clientWidth;
+    var clientHeight = siblingElement.clientHeight;
+
+    if ( clientWidth === 0 && clientHeight === 0 ) {
+      var clientRect = siblingElement.getBoundingClientRect();
+      clientWidth = clientRect.width;
+      clientHeight = clientRect.height;
+    }
+
+    return { width: clientWidth, height: clientHeight };
+  }
+
+  /**
+   * Set the bounds of the sibling element in the view port in pixels, using top, left, width, and height css.
+   * The element must be styled with 'position: fixed', and an ancestor must have position: 'relative', so that
+   * the dimensions of the sibling are relative to the parent.
+   * 
+   * @param {HTMLElement} siblingElement - the element to position
+   * @param {Bounds2} bounds - desired bounds, in pixels
+   */
+  function setClientBounds( siblingElement, bounds ) {
+    siblingElement.style.top = bounds.top + 'px';
+    siblingElement.style.left = bounds.left + 'px';
+    siblingElement.style.width = bounds.width + 'px';
+    siblingElement.style.height = bounds.height + 'px';
+  }
 
   return AccessiblePeer;
 } );

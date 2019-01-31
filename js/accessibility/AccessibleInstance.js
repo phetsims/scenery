@@ -38,6 +38,7 @@ define( function( require ) {
   var platform = require( 'PHET_CORE/platform' );
   var Poolable = require( 'PHET_CORE/Poolable' );
   var scenery = require( 'SCENERY/scenery' );
+  var TransformTracker = require( 'SCENERY/util/TransformTracker' );
 
   var globalId = 1;
 
@@ -112,6 +113,10 @@ define( function( require ) {
 
       // @private {function} - The listeners added to the respective relativeNodes
       this.relativeListeners = [];
+
+      // @public (scenery-internal) {TransformTracker} - Used to quickly compute the global matrix of this instance's node and observe
+      // when it changes. Used by AccessiblePeer to update positioning of sibling elements.
+      this.transformTracker = new TransformTracker( AccessibleInstance.guessVisualTrail( this.trail, this.display.rootNode ) );
 
       if ( this.isRootInstance ) {
         var accessibilityContainer = document.createElement( 'div' );
@@ -475,6 +480,9 @@ define( function( require ) {
       // NOTE: We dispose OUR peer after disposing children, so our peer can be available for our children during
       // disposal.
       this.peer.dispose();
+
+      // dispose after the peer so the peer can remove any listeners from it
+      this.transformTracker.dispose();
 
       // If we are the root accessible instance, we won't actually have a reference to a node.
       if ( this.node ) {

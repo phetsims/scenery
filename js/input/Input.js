@@ -1508,7 +1508,8 @@ define( require => {
         // an AT might have sent a down event at the location of the PDOM element (outside of the display), if this
         // happened we will not remove focus
         const inDisplay = this.display.bounds.containsPoint( pointer.point );
-        if ( inDisplay ) {
+        console.log( event.isTrusted );
+        if ( inDisplay && event.isTrusted ) {
 
           // Starting with the leaf most node, search for the closest accessible ancestor from the node under the
           // pointer.
