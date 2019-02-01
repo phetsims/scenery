@@ -68,7 +68,7 @@ define( require => {
           // TODO: Failing to receive the focusin event is scary, so hopefully this workaround can be removed if a fix
           // TODO: is found in https://github.com/phetsims/scenery/issues/925. Also see
           // https://github.com/phetsims/friction/issues/168 for the original issue.
-          if ( platform.ie11 && ( event.domEvent.relatedTarget === activeElement ) && ( elementInDisplay ) ) {
+          if ( ( platform.ie11 || platform.safari ) && ( event.domEvent.relatedTarget === activeElement ) && ( elementInDisplay ) ) {
             const newTrail = Trail.fromUniqueId( this.display.rootNode, document.activeElement.getAttribute( 'data-trail-id' ) );
             scenery.Display.focus = new Focus( this.display, AccessibleInstance.guessVisualTrail( newTrail, this.display.rootNode ) );
           }
