@@ -15,6 +15,11 @@ define( require => {
   const KeyboardUtil = require( 'SCENERY/accessibility/KeyboardUtil' );
   const scenery = require( 'SCENERY/scenery' );
 
+  // constants
+  // we accept that these keys can be released before a keydown event due to events browser receives when focus enters
+  // document
+  const UP_WHITELIST = [ KeyboardUtil.KEY_SHIFT, KeyboardUtil.KEY_TAB, KeyboardUtil.KEY_PRINT_SCREEN ];
+
   class KeyStateTracker {
     constructor() {
 
@@ -98,9 +103,9 @@ define( require => {
       const keyCode = domEvent.keyCode;
 
 
-      // first tab into the document will not register a keydown event
+      // first tab (or shift tab) into the document will not register a keydown event
       // many browsers don't have keydown events for print screen, see https://github.com/phetsims/scenery/issues/918
-      if ( assert && keyCode !== KeyboardUtil.KEY_TAB && keyCode !== KeyboardUtil.KEY_PRINT_SCREEN ) {
+      if ( assert && !_.includes( UP_WHITELIST, keyCode ) ) {
         assert( this.isKeyDown( keyCode ), 'key should be down before it is removed from keystate' );
       }
 
