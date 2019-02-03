@@ -148,39 +148,13 @@ define( function( require ) {
       var nextElement = linearDOM[ nextIndex ];
       nextIndex += delta;
 
-      if ( isElementFocusable( nextElement ) ) {
+      if ( AccessibilityUtil.isElementFocusable( nextElement ) ) {
         return nextElement;
       }
     }
 
     // if no next focusable is found, return the active DOM element
     return activeElement;
-  }
-
-  /**
-   * Returns true if the element is focusable. Assumes that all focusable  elements have tabIndex >= 0, which
-   * is only true for elements of the Parallel DOM.
-   *
-   * @param {HTMLElement} domElement
-   * @returns {boolean}
-   */
-  function isElementFocusable( domElement ) {
-
-    if ( !document.body.contains( domElement ) ) {
-      return false;
-    }
-
-    // continue to next element if this one is meant to be hidden
-    if ( isElementHidden( domElement ) ) {
-      return false;
-    }
-
-    // if element is for formatting, skipe over it - required since IE gives these tabindex="0"
-    if ( _.includes( FORMATTING_TAGS, domElement.tagName ) ) {
-      return false;
-    }
-
-    return domElement.getAttribute( DATA_FOCUSABLE ) === 'true';
   }
 
   /**
@@ -250,7 +224,7 @@ define( function( require ) {
       var linearDOM = getLinearDOMElements( document.body );
       var focusableElements = [];
       for ( var i = 0; i < linearDOM.length; i++ ) {
-        isElementFocusable( linearDOM[ i ] ) && focusableElements.push( linearDOM[ i ] );
+        AccessibilityUtil.isElementFocusable( linearDOM[ i ] ) && focusableElements.push( linearDOM[ i ] );
       }
 
       return focusableElements[ random.nextInt( focusableElements.length ) ];
@@ -356,6 +330,32 @@ define( function( require ) {
      */
     tagIsDefaultFocusable: function( tagName ) {
       return _.includes( DEFAULT_FOCUSABLE_TAGS, tagName.toUpperCase() );
+    },
+
+    /**
+     * Returns true if the element is focusable. Assumes that all focusable  elements have tabIndex >= 0, which
+     * is only true for elements of the Parallel DOM.
+     *
+     * @param {HTMLElement} domElement
+     * @returns {boolean}
+     */
+    isElementFocusable: function( domElement ) {
+
+      if ( !document.body.contains( domElement ) ) {
+        return false;
+      }
+
+      // continue to next element if this one is meant to be hidden
+      if ( isElementHidden( domElement ) ) {
+        return false;
+      }
+
+      // if element is for formatting, skipe over it - required since IE gives these tabindex="0"
+      if ( _.includes( FORMATTING_TAGS, domElement.tagName ) ) {
+        return false;
+      }
+
+      return domElement.getAttribute( DATA_FOCUSABLE ) === 'true';
     },
 
     /**

@@ -620,8 +620,25 @@ define( require => {
             this.a11yPointer.invalidateTrail( getTrailId( event ) );
             this.dispatchEvent( this.a11yPointer.trail, 'blur', this.a11yPointer, event, false );
 
-            // clear the trail to make sure that our assertions aren't testing a stale trail.
+            // clear the trail to make sure that our assertions aren't testing a stale trail, do this before
+            // focusing event.relatedTarget below so that trail isn't cleared after focus
             this.a11yPointer.trail = null;
+
+            // If there exists an event.relatedTarget, user is moving to the next item with "tab" like navigation and
+            // event.relatedTarget is the element focus is moving to. If the relatedTarget element is removed from the
+            // document then added back in during focusout callbacks (which is done in AccessibilityTree operations),
+            // some browsers (IE11 and Safari) will fail to focus the element. So we manually focus the relatedTarget
+            // so that focus isn't lost. Skipped if focusout callbacks sent focus to an element other than the
+            // relatedTarget, or if callbacks made relatedTarget unfocusable.
+            // 
+            // Focus is set with DOM API to avoid the performance hit of looking up the Node from trail id.
+            if ( event.relatedTarget ) {
+              var focusMovedInCallbacks = this.display.accessibleDOMElement.contains( document.activeElement );
+              var targetFocusable = AccessibilityUtil.isElementFocusable( event.relatedTarget );
+              if ( targetFocusable && !focusMovedInCallbacks ) {
+                event.relatedTarget.focus();
+              }
+            }
 
             sceneryLog && sceneryLog.Input && sceneryLog.pop();
           }
