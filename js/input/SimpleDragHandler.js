@@ -103,7 +103,7 @@ define( function( require ) {
       phetioType: EmitterIO(
         [ { name: 'point', type: Vector2IO, documentation: 'the position of the drag start in view coordinates' },
           { name: 'event', type: VoidIO, documentation: 'the scenery pointer Event' } ] ),
-      listener: function( point, event ) {
+      before: function( point, event ) {
 
         if ( self.dragging ) { return; }
 
@@ -147,7 +147,7 @@ define( function( require ) {
       phetioType: EmitterIO(
         [ { name: 'point', type: Vector2IO, documentation: 'the position of the drag in view coordinates' },
           { name: 'event', type: VoidIO, documentation: 'the scenery pointer Event' } ] ),
-      listener: function( point, event ) {
+      before: function( point, event ) {
 
         if ( !self.dragging || self.disposed ) { return; }
 
@@ -211,7 +211,7 @@ define( function( require ) {
       phetioType: EmitterIO(
         [ { name: 'point', type: Vector2IO, documentation: 'the position of the drag end in view coordinates' },
           { name: 'event', type: VoidIO, documentation: 'the scenery pointer Event' } ] ),
-      listener: function( point, event ) {
+      before: function( point, event ) {
 
         if ( !self.dragging ) { return; }
 

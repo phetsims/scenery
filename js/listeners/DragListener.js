@@ -195,7 +195,7 @@ define( function( require ) {
 
       argumentTypes: [ { valueType: Event } ],
       phetioType: DraggedEmitterIO,
-      listener: function( event ) {
+      before: function( event ) {
 
         // This is done first, before the drag listener is called (from the prototype drag call)
         if ( !self._globalPoint.equals( self.pointer.point ) ) {

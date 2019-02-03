@@ -236,7 +236,7 @@ define( function( require ) {
 
       // The main implementation of "press" handling is implemented as a callback to the emitter, so things are nested
       // nicely for phet-io.
-      listener: this.onPress.bind( this )
+      before: this.onPress.bind( this )
     } );
 
     // @private {Emitter} - Emitted on release event
@@ -256,7 +256,7 @@ define( function( require ) {
 
       // The main implementation of "release" handling is implemented as a callback to the emitter, so things are nested
       // nicely for phet-io.
-      listener: this.onRelease.bind( this )
+      before: this.onRelease.bind( this )
     } );
 
     // update isOverProperty (not a DerivedProperty because we need to hook to passed-in properties)
