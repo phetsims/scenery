@@ -105,7 +105,7 @@ define( function( require ) {
           { name: 'event', type: VoidIO, documentation: 'the scenery pointer Event' } ] ),
       listener: function( point, event ) {
 
-        if ( this.dragging ) { return; }
+        if ( self.dragging ) { return; }
 
         sceneryLog && sceneryLog.InputListener && sceneryLog.InputListener( 'SimpleDragHandler startDrag' );
         sceneryLog && sceneryLog.InputListener && sceneryLog.push();
