@@ -29,8 +29,15 @@ define( require => {
 
   // create a fake DOM event and delegate to an HTMLElement
   // TODO: Can this replace the dispatchEvent function above?
-  const triggerDOMEvent = ( event, element, keyCode ) => {
-    var eventObj = document.createEventObject ?
+  const triggerDOMEvent = ( event, element, keyCode, options ) => {
+
+    options = _.extend( {
+
+      // secondary target for the event, behavior depends on event type
+      relatedTarget: null
+    }, options );
+
+    const eventObj = document.createEventObject ?
                    document.createEventObject() : document.createEvent( 'Events' );
 
     if ( eventObj.initEvent ) {
@@ -39,6 +46,7 @@ define( require => {
 
     eventObj.keyCode = keyCode;
     eventObj.which = keyCode;
+    eventObj.relatedTarget = options.relatedTarget;
 
     element.dispatchEvent ? element.dispatchEvent( eventObj ) : element.fireEvent( 'on' + event, eventObj );
   };
@@ -86,6 +94,57 @@ define( require => {
 
     assert.ok( bGotFocus, 'b should have been focused' );
     assert.ok( aLostFocus, 'a should have lost focused' );
+  } );
+
+  QUnit.test( 'tab focusin/focusout', assert => {
+    const rootNode = new Node( { tagName: 'div' } );
+    const display = new Display( rootNode ); // eslint-disable-line
+    display.initializeEvents();
+    document.body.appendChild( display.domElement );
+
+    const buttonA = new Rectangle( 0, 0, 5, 5, { tagName: 'button' } );
+    const buttonB = new Rectangle( 0, 0, 5, 5, { tagName: 'button' } );
+    const buttonC = new Rectangle( 0, 0, 5, 5, { tagName: 'button' } );
+    rootNode.children = [ buttonA, buttonB, buttonC ];
+
+    const aPrimarySibling = buttonA.accessibleInstances[ 0 ].peer.primarySibling;
+    const bPrimarySibling = buttonB.accessibleInstances[ 0 ].peer.primarySibling;
+
+    // test that a blur listener on a node overides the "tab" like navigation moving focus to the next element
+    buttonA.focus();
+    assert.ok( buttonA.focused, 'butonA has focus initially' );
+
+    const overrideFocusListener = {
+      blur: function( event ) {
+        buttonC.focus();
+      }
+    };
+    buttonA.addInputListener( overrideFocusListener );
+
+    // mimic a "tab" interaction, attempting to move focus to the next element
+    triggerDOMEvent( 'focusout', aPrimarySibling, KeyboardUtil.KEY_TAB, {
+      relatedTarget: bPrimarySibling
+    } );
+
+    // the blur listener on buttonA should override the movement of focus on "tab" like interaction
+    assert.ok( buttonC.focused, 'butonC now has focus' );
+
+    // test that a blur listener can prevent focus from moving to another element after "tab" like navigation
+    buttonA.removeInputListener( overrideFocusListener );
+    buttonA.focus();
+    const makeUnfocusableListener = {
+      blur: function( event ) {
+        buttonB.focusable = false;
+      }
+    };
+    buttonA.addInputListener( makeUnfocusableListener );
+    triggerDOMEvent( 'focusout', aPrimarySibling, KeyboardUtil.KEY_TAB, {
+      relatedTarget: bPrimarySibling
+    } );
+
+    // the blur listener on buttonA should have made the default element unfocusable
+    assert.ok( !buttonB.focused, 'buttonB cannot receive focus due to blur listener on buttonA' );
+
   } );
 
   QUnit.test( 'click', assert => {
@@ -441,7 +500,7 @@ define( require => {
     c.addChild( d );
     rootNode.addChild( a );
 
-    var dPrimarySibling = d.accessibleInstances[ 0 ].peer.primarySibling;
+    const dPrimarySibling = d.accessibleInstances[ 0 ].peer.primarySibling;
     triggerDOMEvent( 'keydown', dPrimarySibling, KeyboardUtil.KEY_RIGHT_ARROW );
 
     assert.ok( Display.keyStateTracker.isKeyDown( KeyboardUtil.KEY_RIGHT_ARROW ), 'global keyStateTracker should be updated with right arrow key down' );
