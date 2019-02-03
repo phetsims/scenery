@@ -398,6 +398,10 @@ define( function( require ) {
     beforeOp: function() {
       // paranoia about initialization order (should be safe)
       focusedNode = scenery.Display && scenery.Display.focusedNode;
+
+      // blur the focused Node so that we get focusout events as elements are moved in the DOM in all browsers, see 
+      // https://github.com/phetsims/scenery/issues/925
+      focusedNode && focusedNode.blur();
     },
 
     /**
