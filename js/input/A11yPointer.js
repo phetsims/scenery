@@ -12,7 +12,6 @@ define( require => {
   'use strict';
 
   const AccessibleInstance = require( 'SCENERY/accessibility/AccessibleInstance' );
-  // const platform = require( 'PHET_CORE/platform' );
   const Pointer = require( 'SCENERY/input/Pointer' ); // inherits from Pointer
   const scenery = require( 'SCENERY/scenery' );
   const Trail = require( 'SCENERY/util/Trail' );
