@@ -553,11 +553,6 @@ define( require => {
       // wire up accessibility listeners on the display's root accessible DOM element.
       if ( this.display._accessible ) {
 
-        // In IE11, the focusin event can be sent twice since we have to restore focus to event.relatedTarget
-        // after calling focusout callbacks. So this flag is set to prevent focusin callbacks from firing twice
-        // when that happens. See https://github.com/phetsims/scenery/issues/925
-        var blockDuplicateCallbacks = false;
-
         /**
          * {DOMEvent} event
          * @param event
@@ -590,8 +585,7 @@ define( require => {
           phetioEventType: PhetioObject.EventType.USER,
           phetioDocumentation: 'Emits when the PDOM root gets the focusin DOM event.',
           before: ( event ) => {
-            if ( blockDuplicateCallbacks ) {
-              blockDuplicateCallbacks = false;
+            if ( this.display.blockFocusCallbacks ) {
               return;
             }
 
@@ -619,6 +613,10 @@ define( require => {
           phetioEventType: PhetioObject.EventType.USER,
           phetioDocumentation: 'Emits when the PDOM root gets the focusout DOM event.',
           before: ( event ) => {
+            if ( this.display.blockFocusCallbacks ) {
+              return;
+            }
+
             sceneryLog && sceneryLog.Input && sceneryLog.Input( 'focusOut(' + Input.debugText( null, event ) + ');' );
             sceneryLog && sceneryLog.Input && sceneryLog.push();
 
@@ -646,10 +644,6 @@ define( require => {
               var focusMovedInCallbacks = this.display.accessibleDOMElement.contains( document.activeElement );
               var targetFocusable = AccessibilityUtil.isElementFocusable( event.relatedTarget );
               if ( targetFocusable && !focusMovedInCallbacks ) {
-                if ( platform.ie ) {
-                  blockDuplicateCallbacks = true;
-                }
-
                 event.relatedTarget.focus();
               }
             }
