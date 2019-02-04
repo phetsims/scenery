@@ -298,9 +298,9 @@ define( function( require ) {
       // navigation
       this.activeNode = null;
 
-      // @public {boolean} (scenery-internal) - During DOM operations where HTML elements are removed and reinserted,
-      // events callbacks related to focus should be blocked as these are internal operations unrelated to application
-      // behavior user input
+      // @public {boolean} (scenery-internal) - During DOM operations where HTML elements are removed from and
+      // reinserted into the PDOM, event callbacks related to focus should be blocked as these are internal operations
+      // unrelated to application behavior user input, see https://github.com/phetsims/scenery/issues/925
       this.blockFocusCallbacks = false;
 
       // @private - the node that currently has focus when we remove an accessible trail, tracked so that we can

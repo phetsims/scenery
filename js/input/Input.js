@@ -590,6 +590,8 @@ define( require => {
           phetioEventType: PhetioObject.EventType.USER,
           phetioDocumentation: 'Emits when the PDOM root gets the focusin DOM event.',
           before: ( event ) => {
+
+            // ignore any focusout callbacks if they are initiated due to implementation details in PDOM manipulation
             if ( this.display.blockFocusCallbacks ) {
               return;
             }
@@ -623,6 +625,8 @@ define( require => {
           phetioEventType: PhetioObject.EventType.USER,
           phetioDocumentation: 'Emits when the PDOM root gets the focusout DOM event.',
           before: ( event ) => {
+
+            // ignore any focusout callbacks if they are initiated due to implementation details in PDOM manipulation
             if ( this.display.blockFocusCallbacks ) {
               return;
             }
