@@ -406,10 +406,6 @@ define( function( require ) {
       for ( var i = 0; i < accessibleTrails.length; i++ ) {
         accessibleTrails[ i ].accessibleInstance.display.blockFocusCallbacks = true;
       }
-
-      // blur the focused Node so that we get consistent focusout events as elements are moved in the DOM in all
-      // browsers, see https://github.com/phetsims/scenery/issues/925
-      focusedNode && focusedNode.blur();
     },
 
     /**
