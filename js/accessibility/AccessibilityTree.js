@@ -401,7 +401,8 @@ define( function( require ) {
 
       // blur the focused Node so that we get focusout events as elements are moved in the DOM in all browsers, see 
       // https://github.com/phetsims/scenery/issues/925
-      focusedNode && focusedNode.blur();
+      // TODO: this line is causing reentry issues, comented out until sorted, see https://github.com/phetsims/scenery/issues/925
+      // focusedNode && focusedNode.blur();
     },
 
     /**
