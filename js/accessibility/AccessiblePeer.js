@@ -775,13 +775,8 @@ define( function( require ) {
     dispose: function() {
       this.disposed = true;
 
-      // remove focus if the disposed peer currently has a focus highlight
-      if ( scenery.Display.focus &&
-           scenery.Display.focus.trail &&
-           scenery.Display.focus.trail.equals( this.trail ) ) {
-
-        scenery.Display.focus = null;
-      }
+      // remove focus if the disposed peer is the active element
+      this.blur();
 
       // remove listeners
       this._primarySibling.removeEventListener( 'blur', this.blurEventListener );
