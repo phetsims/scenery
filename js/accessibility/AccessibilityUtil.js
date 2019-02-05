@@ -506,19 +506,6 @@ define( function( require ) {
     },
 
     /**
-     * Make an HTML element "invisible" by shifting it way off screen and making it really small. By giving the element
-     * non-zero dimensions, it is still readable by an assistive device.
-     */
-    hideElement: function( element ) {
-
-      // NOTE that this doesn't work on iOS 12, the whole screen shifts when this happens
-      // But removing them makes it work just fine on that device. This seems unnecessary because of the incredibly
-      // low opacity of our other elements
-      // element.style.left = '-9999px';
-      // element.style.top = '-9999px';
-    },
-
-    /**
      * Add a tab index to an element when overriding the default focus behavior for the element. Adding tabindex
      * to an element can only be done when overriding the default browser behavior because tabindex interferes with
      * the way JAWS reads through content on Chrome, see https://github.com/phetsims/scenery/issues/893

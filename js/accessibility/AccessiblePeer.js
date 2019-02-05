@@ -911,13 +911,7 @@ define( function( require ) {
           }
         }
       }
-      else {
-
-        // just make sure that the element is off screen
-        AccessibilityUtil.hideElement( this._primarySibling );
-        this._labelSibling && AccessibilityUtil.hideElement( this._labelSibling );
-      }
-
+      
       this.positionDirty = false;
     },
 
