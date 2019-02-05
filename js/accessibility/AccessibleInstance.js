@@ -120,9 +120,6 @@ define( function( require ) {
 
       if ( this.isRootInstance ) {
         var accessibilityContainer = document.createElement( 'div' );
-
-        // give the container a class name so it is hidden in the Display, see accessibility styling in Display.js
-        accessibilityContainer.className = 'accessibility';
         this.peer = AccessiblePeer.createFromPool( this, {
           primarySibling: accessibilityContainer
         } );

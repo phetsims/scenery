@@ -2,7 +2,7 @@
 
 /**
  * An accessible peer controls the appearance of an accessible Node's instance in the parallel DOM. An AccessiblePeer can
- * have up to four HTMLElements displayed in the PDOM, see constructor for details.
+ * have up to four HTMLElements displayed in the PDOM, see ftructor for details.
  *
  * @author Jonathan Olson <jonathan.olson@colorado.edu>
  * @author Jesse Greenberg
@@ -11,6 +11,7 @@
 define( function( require ) {
   'use strict';
 
+  var AccessibleSiblingStyle = require( 'SCENERY/accessibility/AccessibleSiblingStyle' );
   var AccessibilityUtil = require( 'SCENERY/accessibility/AccessibilityUtil' );
   var arrayRemove = require( 'PHET_CORE/arrayRemove' );
   var Bounds2 = require( 'DOT/Bounds2' );
@@ -149,13 +150,7 @@ define( function( require ) {
         // @private {HTMLElement} - The main element associated with this peer. If focusable, this is the element that gets
         // the focus. It also will contain any children.
         this._primarySibling = options.primarySibling;
-
-        // root has 'relative' style so descendants can be positioned 'fixed' relative to the root
-        this._primarySibling.style.postition = 'relative';
-
-        // a catch all for things that SceneryStyle in AccessibilityUtil doesn't hide - must be added
-        // to the root, scenery take a massive performance hit if opacity is added to all HTML elements
-        this._primarySibling.style.opacity = '0.0001';
+        this._primarySibling.className = AccessibleSiblingStyle.ROOT_CLASS_NAME;
       }
 
       return this;
@@ -829,6 +824,9 @@ define( function( require ) {
      * Mark that the siblings of this AccessiblePeer need to be updated in the next Display update. Possibly from a
      * change of accessible content or node transformation. Does nothing if already marked dirty.
      *
+     * TODO: We shouldn't be marking all elements as dirty, just those that are focusable. Setting focusable
+     * should therfore mark dirty.
+     *
      * @private
      */
     invalidateCSSPositioning: function() {
@@ -911,7 +909,7 @@ define( function( require ) {
           }
         }
       }
-      
+
       this.positionDirty = false;
     },
 
